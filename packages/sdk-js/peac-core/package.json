@@ -1,0 +1,22 @@
+{
+  "name": "@peac/protocol",
+  "version": "0.9.0",
+  "main": "bundle/index.js",
+  "exports": {
+    ".": "./bundle/index.js"
+  },
+  "files": [
+    "bundle/"
+  ],
+  "dependencies": {
+    "ethers": "^6.13.1",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nock": "^13.5.4"
+  },
+  "scripts": {
+    "test": "jest"
+  }
+}
