@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-
 const fs = require('fs');
 const yaml = require('js-yaml');
-const { signRequest, getTermsHash } = require('../core/index');
+const { ethers } = require('ethers');
+const { getTermsHash, signRequest } = require('../core');
 
 async function main() {
   const command = process.argv[2];
@@ -12,15 +12,15 @@ async function main() {
 Usage: peac <command>
 
 Commands:
-  generate                  Create a pricing.txt template
-  validate [file]          Validate and hash a pricing.txt file
-  sign <agent_id> <user_id> <key>   Sign an access request (EIP-712)
+  generate                          Create a pricing.txt template
+  validate [file]                  Validate and hash a pricing.txt file
+  sign <agent_id> <user_id> <key>  Sign an access request (EIP-712)
 `);
     process.exit(0);
   }
 
   if (command === 'generate') {
-    const template = \`protocol: peac\nversion: 0.9\ncreated_at: \${Date.now()}\`;
+    const template = `protocol: peac\nversion: 0.9\ncreated_at: ${Date.now()}`;
     fs.writeFileSync('pricing.txt', template);
     console.log('Generated pricing.txt template');
   } else if (command === 'validate') {
