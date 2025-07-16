@@ -38,21 +38,31 @@ describe('PEAC SDK Tests', () => {
     expect(h1).toBe(h2);
   });
 
-  test('EIP-712 valid/invalid sig', async () => {
+  test('EIP-712 valid/invalid sig', () => {
     const privateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+    const agent_id = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+
     const request = {
-      agent_id: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-      user_id: 'test',
+      agent_id,
+      user_id: 'test-user',
       agent_type: 'research',
     };
-    const sig = await signRequest(request, privateKey);
+
+    const sig = signRequest(request, privateKey);
+
     const headers = {
       'X-PEAC-Signature': sig,
-      'X-PEAC-Agent-ID': request.agent_id,
+      'X-PEAC-Agent-ID': agent_id,
     };
-    expect(checkAccess({ agent_type: 'research' }, headers, {}).access).toBe(true);
-    headers['X-PEAC-Signature'] = 'invalid';
-    expect(checkAccess({ agent_type: 'research' }, headers, {}).access).toBe(false);
+
+    const terms = { agent_type: 'research' };
+
+    const resultValid = checkAccess(terms, headers, request);
+    expect(resultValid.access).toBe(true);
+
+    headers['X-PEAC-Signature'] = '0xdeadbeef';
+    const resultInvalid = checkAccess(terms, headers, request);
+    expect(resultInvalid.access).toBe(false);
   });
 
   test('discovery fallbacks', async () => {

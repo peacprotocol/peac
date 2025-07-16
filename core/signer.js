@@ -1,5 +1,5 @@
-const { ethers } = require('ethers');
-const { getTermsHash } = require('./hash');
+const ethSigUtil = require('@metamask/eth-sig-util');
+const { bufferToHex } = require('ethereumjs-util');
 
 // EIP-712 domain and types used for PEAC v0.9
 const domain = {
@@ -18,30 +18,70 @@ const types = {
 };
 
 /**
- * Signs an EIP-712 structured AccessRequest object using a private key.
- * @param {Object} request - The access request (agent_id, user_id, agent_type)
- * @param {string} privateKey - The EVM private key
- * @returns {Promise<string>} - The EIP-712 signature string
+ * Signs an EIP-712 AccessRequest using a private key.
  */
 function signRequest(request, privateKey) {
-  const wallet = new ethers.Wallet(privateKey);
-  return wallet.signTypedData(domain, types, request);
+  const normalizedRequest = {
+    ...request,
+    agent_id: request.agent_id.toLowerCase(),
+  };
+
+  const data = {
+    types: {
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'version', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' },
+      ],
+      ...types,
+    },
+    domain,
+    primaryType: 'AccessRequest',
+    message: normalizedRequest,
+  };
+
+  return ethSigUtil.signTypedData({
+    privateKey: Buffer.from(privateKey.slice(2), 'hex'),
+    data,
+    version: 'V4',
+  });
 }
 
 /**
- * Verifies an EIP-712 signature against a request object.
- * @param {Object} request - The same structured object that was signed
- * @param {string} signature - The signature string to verify
- * @returns {boolean} - True if valid and from matching agent_id
+ * Verifies EIP-712 signature.
  */
 function verifySignature(request, signature) {
   try {
-    const recovered = ethers.utils.verifyTypedData(domain, types, request, signature);
-    return recovered.toLowerCase() === request.agent_id.toLowerCase();
+    const normalizedRequest = {
+      ...request,
+      agent_id: request.agent_id.toLowerCase(),
+    };
+
+    const data = {
+      types: {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        ...types,
+      },
+      domain,
+      primaryType: 'AccessRequest',
+      message: normalizedRequest,
+    };
+
+    const recovered = ethSigUtil.recoverTypedSignature({
+      data,
+      signature,
+      version: 'V4',
+    });
+
+    return recovered.toLowerCase() === normalizedRequest.agent_id;
   } catch (err) {
-    const isJest = typeof process.env.JEST_WORKER_ID !== 'undefined';
-    const isDev = process.env.NODE_ENV !== 'production';
-    if (isDev && !isJest) {
+    if (process.env.NODE_ENV !== 'production') {
       console.warn('Invalid signature:', err.message || err);
     }
     return false;
