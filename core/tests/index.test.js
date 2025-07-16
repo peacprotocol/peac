@@ -1,5 +1,15 @@
 const nock = require('nock');
-const { fetchPricing, checkAccess, handlePayment, handlePaymentReal, signRequest, getTermsHash, validateAttribution, validateTiers } = require('../index');
+
+const const {
+  fetchPricing,
+  checkAccess,
+  handlePayment,
+  handlePaymentReal,
+  signRequest,
+  getTermsHash,
+  validateAttribution,
+  validateTiers
+} = require('../index.js');
 
 describe('PEAC SDK Tests', () => {
   test('expired session denies access', () => {
