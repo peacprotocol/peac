@@ -1,42 +1,61 @@
 const { verifySignature } = require('./signer');
-const parseDuration = require('./parseDuration');
 
-function checkAccess(terms, headers, session = {}) {
+function checkAccess(terms = {}, headers = {}, context = {}) {
   const now = Date.now();
 
-  if (terms.valid_until && new Date(terms.valid_until).getTime() < now) {
+  if (terms.valid_until && Date.parse(terms.valid_until) < now) {
     return { access: false, reason: 'session expired' };
   }
 
   if (terms.expires_in && terms.created_at) {
-    const durationMs = parseDuration(terms.expires_in);
-    if (now > terms.created_at + durationMs) {
+    const created = Number(terms.created_at);
+    const durationMs = parseExpiresIn(terms.expires_in);
+    if (created + durationMs < now) {
       return { access: false, reason: 'session expired' };
     }
   }
 
   if (terms.metadata?.deal_id) {
-    if (headers['X-PEAC-Deal-ID'] !== terms.metadata.deal_id) {
-      return { access: false, reason: 'deal_id mismatch' };
+    const provided = headers['X-PEAC-Deal-ID'];
+    if (provided !== terms.metadata.deal_id) {
+      return { access: false, reason: 'invalid deal_id' };
     }
-  }
-
-  if (terms.agent_type === 'research') {
-    const sig = headers['X-PEAC-Signature'];
-    const agentId = headers['X-PEAC-Agent-ID'];
-    const valid = verifySignature({
-      agent_id: agentId,
-      user_id: 'test-user',
-      agent_type: 'research',
-    }, sig, agentId);
-    if (!valid) return { access: false, reason: 'invalid signature' };
   }
 
   if (terms.agent_type === 'x402') {
     return { access: false, reason: 'payment required' };
   }
 
+  if (terms.agent_type === 'research') {
+    const sig = headers['X-PEAC-Signature'];
+    const agentId = headers['X-PEAC-Agent-ID'];
+    const request = {
+      agent_id: agentId,
+      user_id: 'test',
+      agent_type: 'research',
+    };
+    if (!verifySignature(request, sig)) {
+      return { access: false, reason: 'invalid signature' };
+    }
+  }
+
   return { access: true };
+}
+
+function parseExpiresIn(str) {
+  const match = /^(\d+)([smhd])$/.exec(str);
+  if (!match) return 0;
+  const [_, value, unit] = match;
+  const n = parseInt(value);
+  return (
+    n *
+    {
+      s: 1000,
+      m: 60000,
+      h: 3600000,
+      d: 86400000,
+    }[unit]
+  );
 }
 
 module.exports = { checkAccess };

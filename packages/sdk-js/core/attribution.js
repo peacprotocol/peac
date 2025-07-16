@@ -1,6 +1,9 @@
-function validateAttribution(headers, terms) {
-  if (!terms.attribution_required) return true;
-  return headers['X-PEAC-Attribution-Consent'] === true || headers['X-PEAC-Attribution-Consent'] === 'true';
+function validateAttribution(headers = {}, terms = {}) {
+  const consent = headers['X-PEAC-Attribution-Consent'];
+  if (terms.attribution_required || terms.agent_type === 'research') {
+    return consent === 'true' || consent === true;
+  }
+  return true;
 }
 
 module.exports = { validateAttribution };
