@@ -2,7 +2,22 @@
 
 PEAC — Programmable Economic Access, Attribution & Consent is an open, neutral protocol for consent, compliance, and commerce on the web.
 
+**PEAC (Programmable Economic Access & Consent)** is a protocol for specifying, enforcing, and negotiating access rules between AI agents, crawlers, publishers, and web services. It allows you to define access conditions in a human-readable and machine-enforceable file: `pricing.txt`.
+
 > Pronounced “peak”
+
+## Features
+
+- Define access terms using `pricing.txt` or `.well-known/peac.json`
+- Enforce attribution, signature, tiered pricing, sessions, and payments
+- Compatible with Stripe, x402, EIP-712
+- Local SDK and CLI for validation, signing, and enforcement
+
+## 📁 Examples
+
+- [`examples/pricing.txt`](examples/pricing.txt) – baseline
+- [`examples/full-pricing.txt`](examples/full-pricing.txt) – with sessions, tiers, attribution, expiry
+- [`examples/minimal-pricing.txt`](examples/minimal-pricing.txt) – deny-all default
 
 ## Getting Started
 
@@ -77,7 +92,6 @@ return 402;
 }
 }
 
-
 ## Self-Hosted? Just Drop pricing.txt in Your Blog Root and Go
 
 For individual bloggers or small sites, simply add pricing.txt to your root directory. No additional setup needed for basic enforcement.
@@ -136,12 +150,50 @@ peac/
 └── validate.yml      # CI for schema validation
 ```
 
+## 🧰 SDK Usage (`peac-core`)
+
+You can use PEAC as a programmable access validator and policy enforcer in your server, crawler, or API agent.
+
+```js
+const {
+  fetchPricing,
+  checkAccess,
+  handlePayment,
+  signRequest,
+  getTermsHash,
+  validateAttribution,
+  validateTiers
+} = require('./core');
+
+// 1. Fetch terms from a publisher
+const terms = await fetchPricing('https://example.com');
+
+// 2. Sign an access request using EIP-712
+const privateKey = '0x...';
+const request = {
+  agent_id: '0xYourAddress',
+  user_id: 'bot123',
+  agent_type: 'research'
+};
+const signature = await signRequest(request, privateKey);
+
+// 3. Verify access
+const headers = {
+  'X-PEAC-Agent-ID': request.agent_id,
+  'X-PEAC-Signature': signature,
+  'X-PEAC-Attribution-Consent': true
+};
+const access = checkAccess(terms, headers, { path: '/blog/article' });
+
+console.log(access); // { access: true } or { access: false, reason: '...' }
+```
+
 ## Verification
 
 ```bash
 node -e "require('./peac-core')"
 npm test --prefix peac-core
-
+```
 ## Getting Started
 
 0. **Review Spec**: See spec.md for identity, terms, and flows.
