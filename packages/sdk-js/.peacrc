@@ -1,0 +1,9 @@
+{
+  "method": "",
+  "agent_id": "",
+  "user_id": "",
+  "agent_type": "",
+  "allowHttp": false,
+  "signing_method": "eip-712",
+  "enforce_attribution_log": false
+}
