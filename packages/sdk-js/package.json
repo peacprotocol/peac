@@ -1,20 +1,21 @@
 {
   "name": "@peac/protocol",
   "version": "0.9.0",
-  "description": "PEAC Protocol – Programmable Economic Access, Attribution & Consent",
+  "description": "PEAC Protocol - Programmable Economic Access, Attribution & Consent",
   "main": "core/index.js",
   "exports": {
     ".": "./core/index.js"
   },
   "bin": {
-    "peac": "./cli/peac.js"
+    "peac": "./cli/peac-cli.js"
   },
   "files": [
     "core/",
     "cli/",
+    "schema/",
     "examples/",
-    "spec.md",
-    "pricing.schema.json"
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "test": "jest core/tests/index.test.js"
@@ -27,5 +28,19 @@
     "jest": "^29.7.0",
     "nock": "^13.5.4"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jithinraj/PEAC---v0000000.9"
+  },
+  "keywords": [
+    "peac",
+    "protocol",
+    "web access",
+    "programmable consent",
+    "http 402",
+    "attribution",
+    "machine-readable"
+  ],
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0"
 }
