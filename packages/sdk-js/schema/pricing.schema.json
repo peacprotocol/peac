@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "protocol": { "type": "string", "const": "peac", "$comment": "Must be 'peac'" },
+    "version": { "type": "string", "const": "0.9", "$comment": "Protocol version" },
+    "agent_type": { "type": "string", "$comment": "Agent classification (e.g., research, commercial)" },
+    "agent_rules": { "type": "object", "$comment": "Rules specific to agent types" },
+    "access": { "type": "string", "$comment": "Access level (e.g., free, paid)" },
+    "attribution_required": { "type": "boolean", "$comment": "Require attribution headers" },
+    "session_rules": { "type": "object", "$comment": "Session configuration" },
+    "expires_in": { "type": "string", "$comment": "Session duration (e.g., 1h)" },
+    "valid_until": { "type": "string", "format": "date-time", "$comment": "ISO 8601 expiry date" },
+    "tiers": { "type": "array", "$comment": "Pricing tiers array" },
+    "media_rules": { "type": "object", "$comment": "Media-specific rules" },
+    "metadata": { "type": "object", "$comment": "Additional metadata" },
+    "pricing_proof": { "type": "string", "$comment": "Proof of pricing" },
+    "created_at": { "type": "integer", "$comment": "Timestamp of creation" }
+  },
+  "required": ["protocol", "version"]
+}

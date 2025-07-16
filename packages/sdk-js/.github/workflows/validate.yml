@@ -1,0 +1,28 @@
+name: Validate PEAC Protocol
+
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: core
+
+      - name: Run tests
+        run: npm test
+        working-directory: core
+
+      - name: Install validators
+        run: npm install -g ajv-cli js-yaml
+
+      - name: Validate pricing.txt files
+        run: |
+          mkdir -p /tmp/peac
+          for file in examples/*.txt; do
+            echo "Validating $file..."
+            npx js-yaml "$file" > /tmp/peac/tmp.json
+            npx ajv-cli validate -s schema/pricing.schema.json -d /tmp/peac/tmp.json
