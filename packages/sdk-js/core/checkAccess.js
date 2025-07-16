@@ -1,30 +1,55 @@
-const { validateAttribution } = require('./attribution');
+const { getTermsHash } = require('./hash');
+const { validateAttribution } = require('./validateAttribution');
 const { validateTiers } = require('./tiers');
+const { verifySignature } = require('./signer');
 
-function checkAccess(terms, headers = {}, context = {}) {
-  const now = Date.now();
+function checkAccess(terms, headers = {}, options = {}) {
+  // Expiry enforcement
+  if (terms.expires_in || terms.valid_until) {
+    const now = Date.now();
+    if (terms.valid_until && new Date(terms.valid_until).getTime() < now) {
+      return { access: false, reason: 'terms expired' };
+    }
+    if (terms.expires_in && terms.created_at && now > (terms.created_at + terms.expires_in * 60 * 1000)) {
+      return { access: false, reason: 'terms expired (duration)' };
+    }
+  }
 
-  if (terms.valid_until && new Date(terms.valid_until).getTime() < now)
-    return { access: false, reason: 'session expired' };
+  // Attribution enforcement
+  if (!validateAttribution(headers, terms)) {
+    return { access: false, reason: 'missing attribution' };
+  }
 
-  if (terms.expires_in && terms.created_at && (terms.created_at + parseDuration(terms.expires_in)) < now)
-    return { access: false, reason: 'session expired' };
+  // Signature enforcement (if required)
+  if (terms.require_signature || headers['X-PEAC-Signature']) {
+    const request = {
+      agent_id: headers['X-PEAC-Agent-ID'],
+      user_id: headers['X-PEAC-User-ID'],
+      agent_type: headers['X-PEAC-Agent-Type']
+    };
+    const sig = headers['X-PEAC-Signature'];
+    const valid = verifySignature(request, sig);
+    if (!valid) {
+      return { access: false, reason: 'invalid signature' };
+    }
+  }
 
-  if (!validateAttribution(headers, terms))
-    return { access: false, reason: 'attribution required' };
+  // Metadata enforcement
+  if (terms.metadata?.deal_id && headers['X-PEAC-Deal-ID'] !== terms.metadata.deal_id) {
+    return { access: false, reason: 'deal_id mismatch' };
+  }
 
-  if (!validateTiers(context, terms))
-    return { access: false, reason: 'unauthorized path' };
+  // Agent type enforcement: block x402 unless payment provided
+  if (terms.agent_type === 'x402') {
+    return { access: false, reason: 'payment required' };
+  }
+
+  // Tiers (optional)
+  if (!validateTiers(headers, terms)) {
+    return { access: false, reason: 'tier mismatch' };
+  }
 
   return { access: true };
-}
-
-function parseDuration(str) {
-  const match = str.match(/^([0-9]+)([smhd])$/);
-  if (!match) return 0;
-  const [ , value, unit ] = match;
-  const multiplier = { s: 1, m: 60, h: 3600, d: 86400 }[unit] || 0;
-  return parseInt(value) * multiplier * 1000;
 }
 
 module.exports = { checkAccess };
