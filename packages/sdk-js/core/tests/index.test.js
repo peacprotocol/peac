@@ -1,6 +1,6 @@
 const nock = require('nock');
 
-const const {
+const {
   fetchPricing,
   checkAccess,
   handlePayment,
