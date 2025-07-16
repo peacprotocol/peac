@@ -1,22 +1,24 @@
 {
   "name": "@peac/protocol",
   "version": "0.9.0",
+  "description": "PEAC Protocol – Programmable Economic Access, Attribution & Consent",
   "main": "core/index.js",
-"exports": {
-  ".": "./core/index.js"
-},
-"scripts": {
-  "test": "jest core/tests/index.test.js"
-}
+  "exports": {
+    ".": "./core/index.js"
+  },
+  "bin": {
+    "peac": "./cli/peac.js"
   },
   "files": [
-    "index.js",
-    "signer.js",
-    "tiers.js",
-    "hash.js",
-    "middleware.js",
-    "tests/"
+    "core/",
+    "cli/",
+    "examples/",
+    "spec.md",
+    "pricing.schema.json"
   ],
+  "scripts": {
+    "test": "jest core/tests/index.test.js"
+  },
   "dependencies": {
     "ethers": "^6.13.1",
     "js-yaml": "^4.1.0"
@@ -25,7 +27,5 @@
     "jest": "^29.7.0",
     "nock": "^13.5.4"
   },
-  "scripts": {
-    "test": "jest tests/index.test.js"
-  }
+  "license": "Apache-2.0"
 }
