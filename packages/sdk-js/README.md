@@ -1,10 +1,8 @@
 # PEAC Protocol
 
-PEAC — Programmable Economic Access, Attribution & Consent is an open, neutral protocol for consent, compliance, and commerce on the web.
+> Pronounced “peak protocol”
 
-**PEAC (Programmable Economic Access & Consent)** is a protocol for specifying, enforcing, and negotiating access rules between AI agents, crawlers, publishers, and web services. It allows you to define access conditions in a human-readable and machine-enforceable file: `pricing.txt`.
-
-> Pronounced “peak”
+**PEAC (Programmable Economic Access, Attribution & Consent)** is a protocol for specifying, enforcing, and negotiating access rules between AI agents, crawlers, publishers, and web services. It allows you to define access conditions in a human-readable and machine-enforceable file: `pricing.txt`. PEAC is an open, neutral protocol for consent, compliance, and commerce on the web.
 
 ## Features
 
@@ -128,7 +126,7 @@ peac/
 │   ├── pricing.txt           # Starter template
 │   ├── minimal-pricing.txt   # Deny-by-default baseline
 │   └── full-pricing.txt      # Forward-compatible sample
-├── peac-core/                # SDK (Node.js)
+├── core/                # SDK (Node.js)
 │   ├── index.js              # Client functions
 │   ├── package.json          # Dependencies and scripts
 │   ├── tests/                # Test suite
@@ -150,7 +148,7 @@ peac/
 └── validate.yml      # CI for schema validation
 ```
 
-## 🧰 SDK Usage (`peac-core`)
+## 🧰 SDK Usage (`core`)
 
 You can use PEAC as a programmable access validator and policy enforcer in your server, crawler, or API agent.
 
@@ -191,8 +189,8 @@ console.log(access); // { access: true } or { access: false, reason: '...' }
 ## Verification
 
 ```bash
-node -e "require('./peac-core')"
-npm test --prefix peac-core
+node -e "require('./core')"
+npm test --prefix core
 ```
 ## Getting Started
 
@@ -200,7 +198,7 @@ npm test --prefix peac-core
 1. **Deploy pricing.txt**: Copy an example to your domain root (e.g., https://example.com/pricing.txt). Fallback to .well-known/peac.json supported.
 2. **Integrate**:
    * Publishers: Add to server/CDN (e.g., NGINX, Fastly, Vercel, or any CDN/middleware that supports HTTP headers).
-   * Agents: Use peac-core SDK or HTTP clients with sigs (EIP-712/DID/mTLS).
+   * Agents: Use core SDK or HTTP clients with sigs (EIP-712/DID/mTLS).
    * Validate: Run CI workflow or AJV locally.
 3. **Test**: Simulate with curl (e.g., signed requests); expect HTTP 402 for paid.
 
