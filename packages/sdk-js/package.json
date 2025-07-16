@@ -18,12 +18,14 @@
     "README.md"
   ],
   "scripts": {
-  "prepare": "husky install",
-  "test": "jest core/tests/index.test.js",
-  "lint": "eslint .",
-  "format": "prettier --write ."
+    "prepare": "husky install",
+    "test": "jest core/tests/index.test.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "dependencies": {
+    "@metamask/eth-sig-util": "^8.2.0",
+    "ethereumjs-util": "^7.1.5",
     "ethers": "^6.15.0",
     "js-yaml": "^4.1.0",
     "node-fetch": "^2.6.12"
