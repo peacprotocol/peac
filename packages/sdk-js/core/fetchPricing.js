@@ -1,27 +1,20 @@
+const fetch = require('node-fetch');
 const yaml = require('js-yaml');
 
-async function fetchPricing(url) {
-  const urls = [
-    `${url}/pricing.txt`,
-    `${url}/.well-known/peac.yaml`,
-    `${url}/.well-known/peac.json`
-  ];
-  for (const u of urls) {
-    try {
-      const res = await fetch(u);
-      if (res.status === 200) {
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('json')) {
-          return await res.json();
-        } else {
-          const text = await res.text();
-          return yaml.load(text);
-        }
-      }
-    } catch (e) {
-      continue;
-    }
+async function fetchPricing(origin) {
+  const url = origin.replace(/\/$/, '') + '/.well-known/pricing.txt';
+  const res = await fetch(url);
+  if (res.ok) {
+    const text = await res.text();
+    return yaml.load(text);
   }
+
+  const fallback = origin.replace(/\/$/, '') + '/.well-known/peac.json';
+  const res2 = await fetch(fallback);
+  if (res2.ok && res2.headers.get('content-type')?.includes('application/json')) {
+    return await res2.json();
+  }
+
   return {};
 }
 
