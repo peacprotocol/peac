@@ -43,7 +43,7 @@ This enables reproducible, auditable, and open protocol testing.
 2. **Install the PEAC SDK:**  
    ```bash
    npm install @peac/protocol
-  ```
+   ```
 
 3. **Validate or generate terms using the CLI:**
   ```bash
@@ -95,6 +95,7 @@ const access = checkAccess(terms, headers, { path: '/blog/article' });
 | 2        | /.well-known/peac.yaml       | Fallback             |
 | 3        | /.well-known/peac.json       | Fallback             |
 | 4        | Link header rel="peac-terms" | Redirect if present  |
+```
 
 ## Integration Guidance
 
@@ -146,6 +147,7 @@ module.exports = function peacMiddleware(pricing) {
     next();
   };
 };
+```
 
 ## Compliance & Regulatory Alignment
 
