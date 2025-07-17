@@ -6,9 +6,9 @@ It enables publishers, platforms, AI/data agents, and regulators to specify and 
 PEAC serves as the economic and consent layer for the automated economy, enabling agents, platforms, and creators to negotiate, transact, and attribute value at scale.  
 - Addresses unpriced externalities of AI/web crawling.
 - Enables agent-driven negotiation and value exchange.
-- Supports verifiable, programmable, and compliant access for all stakeholders.
+- Supports verifiable, programmable, and compliant access for all participants.
 
-## Features
+## Capabilities
 
 - Standardized access, consent, and attribution terms via `pricing.txt` or `.well-known/peac.json`
 - Support for tiered pricing, sessions, metadata, dispute mechanisms, and programmable negotiation
@@ -118,7 +118,7 @@ const access = checkAccess(terms, headers, { path: '/blog/article' });
 - Use PEAC to assert consent, pricing, and attribution terms on your data or content endpoints.
 - Audit access and integrate dispute workflows as appropriate for your sector.
 
-PEAC enables seamless, interoperable enforcement for all stakeholders; publishers, AI/data agents, web services, and individuals, without lock-in or barriers to adoption.
+PEAC enables seamless, interoperable enforcement for all participants; publishers, AI/data agents, web services, and individuals, without lock-in or barriers to adoption.
 
 ### Express/Node Middleware Example
 
