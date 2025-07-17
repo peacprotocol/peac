@@ -1,7 +1,7 @@
 ## Protocol Summary and Vision
 
 PEAC is a programmable, open protocol for access, attribution, consent, and economic terms on the web.  
-It enables publishers, platforms, AI/data agents, and regulators to specify and enforce programmable terms—consent, attribution, pricing, and negotiation—via a simple, auditable file: `pricing.txt` or `.well-known/peac.json`.
+It enables publishers, platforms, AI/data agents, and regulators to specify and enforce programmable terms; consent, attribution, pricing, and negotiation via a simple, auditable file: `pricing.txt` or `.well-known/peac.json`.
 
 PEAC serves as the economic and consent layer for the automated economy, enabling agents, platforms, and creators to negotiate, transact, and attribute value at scale.  
 - Addresses unpriced externalities of AI/web crawling.
@@ -19,9 +19,9 @@ PEAC serves as the economic and consent layer for the automated economy, enablin
 
 ## Examples
 
-- [`examples/pricing.txt`](examples/pricing.txt) — minimal, canonical example
-- [`examples/full-pricing.txt`](examples/full-pricing.txt) — sessions, tiers, attribution, expiry
-- [`examples/minimal-pricing.txt`](examples/minimal-pricing.txt) — deny-all default
+- [`examples/pricing.txt`](examples/pricing.txt) - minimal, canonical example
+- [`examples/full-pricing.txt`](examples/full-pricing.txt) - sessions, tiers, attribution, expiry
+- [`examples/minimal-pricing.txt`](examples/minimal-pricing.txt) - deny-all default
 
 > For deployment, place `pricing.txt` at your website root (e.g., `https://yoursite.com/pricing.txt`).  
 > The `examples/` directory contains sample files for development and onboarding.
@@ -118,7 +118,7 @@ const access = checkAccess(terms, headers, { path: '/blog/article' });
 - Use PEAC to assert consent, pricing, and attribution terms on your data or content endpoints.
 - Audit access and integrate dispute workflows as appropriate for your sector.
 
-PEAC enables seamless, interoperable enforcement for all stakeholders—publishers, AI/data agents, web services, and individuals, without lock-in or barriers to adoption.
+PEAC enables seamless, interoperable enforcement for all stakeholders; publishers, AI/data agents, web services, and individuals, without lock-in or barriers to adoption.
 
 ### Express/Node Middleware Example
 
