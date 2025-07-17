@@ -47,7 +47,26 @@ PEAC is infrastructure-neutral and open-source by design: any publisher, platfor
 
 Join to make PEAC the default: Contribute via PRs, discuss in GitHub Discussions, or endorse (e.g., Mozilla, Creative Commons).
 
-## Discovery Fallback Order
+## Security Model & Discovery Fallback
+
+### Security: HTTPS Enforcement for Terms Discovery
+
+PEAC Protocol enforces HTTPS by default for all pricing terms fetches.
+
+- **All fetches for `pricing.txt` or `peac.json` must use HTTPS origins.**
+- Any attempt to fetch terms over HTTP will be **blocked and throw an error**, protecting both publishers and agents from MITM attacks.
+
+**Development/Testing Override:**  
+If you need to allow HTTP (for local/dev only), add a `.peacrc` file in your project root:
+
+```json
+{
+  "allowHttp": true
+}
+This will permit HTTP origins only while this flag is present.
+Never use this flag in production.
+
+### Discovery
 
 | Priority | Location                  | Notes                  |
 |----------|---------------------------|------------------------|
@@ -55,6 +74,7 @@ Join to make PEAC the default: Contribute via PRs, discuss in GitHub Discussions
 | 2        | /.well-known/peac.yaml    | Fallback               |
 | 3        | /.well-known/peac.json    | Fallback               |
 | 4        | Link header rel="peac-terms" | Redirect if present   |
+
 
 ## .peacrc Example
 
@@ -192,6 +212,28 @@ console.log(access); // { access: true } or { access: false, reason: '...' }
 node -e "require('./core')"
 npm test --prefix core
 ```
+
+### Validating Example pricing.txt Files
+
+PEAC Protocol recommends using the built-in CLI to validate YAML-based pricing files:
+
+```bash
+node cli/peac-cli.js validate examples/pricing.txt
+node cli/peac-cli.js validate examples/full-pricing.txt
+```
+
+If you want to validate against the JSON schema using ajv, first convert YAML to JSON:
+
+```bash
+npx js-yaml examples/pricing.txt > examples/pricing.json
+npx ajv-cli validate -s schema/pricing.schema.json -d examples/pricing.json
+```
+
+> **Note:** If you see unknown format "date-time" when using ajv-cli, this is just a warning.
+> The PEAC Protocol CLI is the authoritative validator for all YAML-based pricing files.
+
+The official CLI is preferred for onboarding and day-to-day usage.
+
 ## Getting Started
 
 0. **Review Spec**: See spec.md for identity, terms, and flows.

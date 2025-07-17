@@ -104,7 +104,7 @@ default_access: allow
   });
 
   test('tiers validation', () => {
-    const { validateTiers } = require('../validateTiers');
+    const { validateTiers } = require('../tiers');
     const terms = {
       tiers: [{ allowed_paths: ['/api/test'] }],
     };
@@ -118,4 +118,16 @@ default_access: allow
     expect(result.access).toBe(false);
     expect(result.reason).toBe('payment required');
   });
+
+  test('x402 header triggers payment required', () => {
+    const terms = { agent_type: 'research', attribution_required: true };
+    const headers = { 
+      'X-402-Payment-Required': 'true',
+      'X-PEAC-Attribution-Consent': 'true' // ensure consent is present!
+    };
+    const result = checkAccess(terms, headers, {});
+    expect(result.access).toBe(false);
+    expect(result.reason).toBe('payment required');
+  });
+
 });

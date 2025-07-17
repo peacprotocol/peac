@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const yaml = require('js-yaml');
-const { ethers } = require('ethers');
 const { getTermsHash, signRequest } = require('../core');
 
 async function main() {
@@ -12,9 +11,9 @@ async function main() {
 Usage: peac <command>
 
 Commands:
-  generate                          Create a pricing.txt template
-  validate [file]                  Validate and hash a pricing.txt file
-  sign <agent_id> <user_id> <key>  Sign an access request (EIP-712)
+  generate                           Create a pricing.txt template
+  validate [file]                    Validate and hash a pricing.txt file
+  sign <agent_id> <user_id> <key>    Sign an access request (EIP-712)
 `);
     process.exit(0);
   }
@@ -36,11 +35,20 @@ Commands:
       process.exit(1);
     }
     const request = { agent_id, user_id, agent_type: 'research' };
-    const sig = await signRequest(request, key);
-    console.log('Signature:', sig);
+    try {
+      const sig = await signRequest(request, key);
+      console.log('Signature:', sig);
+    } catch (err) {
+      console.error('Error signing request:', err.message || err);
+      process.exit(2);
+    }
   } else {
     console.log('Unknown command. Use --help for usage.');
   }
 }
 
-main();
+// Top-level error handler
+main().catch(err => {
+  console.error('Unexpected error:', err.message || err);
+  process.exit(99);
+});
