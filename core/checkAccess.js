@@ -9,12 +9,10 @@ const { verifySignature } = require('./signer');
 function getEffectiveTerms(terms, headers, request = {}) {
   // Get agent_type from request, header, or top-level terms
   const reqType =
-    (request && request.agent_type) ||
-    headers['X-PEAC-Agent-Type'] ||
-    terms.agent_type;
+    (request && request.agent_type) || headers['X-PEAC-Agent-Type'] || terms.agent_type;
 
   if (terms.agent_rules && Array.isArray(terms.agent_rules)) {
-    const rule = terms.agent_rules.find(r => r.agent_type === reqType);
+    const rule = terms.agent_rules.find((r) => r.agent_type === reqType);
     if (rule) {
       // Merge rule fields into the base terms (rule wins if duplicate)
       return { ...terms, ...rule };

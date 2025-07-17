@@ -17,7 +17,9 @@ async function fetchPricing(origin) {
   // Enforce HTTPS unless .peacrc allows HTTP
   const allowHttp = getAllowHttpOverride();
   if (!allowHttp && origin.startsWith('http://')) {
-    throw new Error('PEAC fetchPricing: HTTP origins are blocked for security. Use HTTPS, or set "allowHttp": true in .peacrc for dev/testing.');
+    throw new Error(
+      'PEAC fetchPricing: HTTP origins are blocked for security. Use HTTPS, or set "allowHttp": true in .peacrc for dev/testing.'
+    );
   }
 
   // Try YAML first

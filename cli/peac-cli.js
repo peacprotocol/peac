@@ -48,7 +48,7 @@ Commands:
 }
 
 // Top-level error handler
-main().catch(err => {
+main().catch((err) => {
   console.error('Unexpected error:', err.message || err);
   process.exit(99);
 });
