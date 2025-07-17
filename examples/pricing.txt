@@ -1,5 +1,6 @@
 protocol: peac
 version: 0.9
+created_at: 1721414400000 # Example timestamp (update as needed)
 default_access: allow
 agent_rules:
   - agent_type: research
