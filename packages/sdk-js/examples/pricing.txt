@@ -1,6 +1,7 @@
+# Test agent_id for E2E: 0xa0fb98a1d397d13fbe71f31fbc3241c8b01488da
 protocol: peac
 version: 0.9
-created_at: 1721414400000 # Example timestamp (update as needed)
+created_at: 1721414400000
 default_access: allow
 agent_rules:
   - agent_type: research
