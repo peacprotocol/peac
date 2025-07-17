@@ -12,6 +12,7 @@ PEAC ensures legal/ethical alignment for all agents.
 PEAC does not enforce disputes on-chain but enables verifiable logs for resolution.
 
 Suggested practices:
+
 - Agents store pricing_proof + attribution headers.
 - Publishers expose contact email (already supported).
 - Foundation may offer optional arbitration in v1.1+ via public GitHub repo or neutral process.
