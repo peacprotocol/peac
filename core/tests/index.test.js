@@ -39,29 +39,29 @@ describe('PEAC SDK Tests', () => {
   test('EIP-712 valid/invalid sig', () => {
     const { signRequest } = require('../signer');
 
-const privateKey = '0xaabbccddeeff00112233445566778899aabbccddeeff00112233445566778899';
-const agent_id = '0xefc07321d3d6a8fa4961306c7bf555f0723f28c1'; // <- MUST match privateKey!
-const user_id = 'user-123';
-const agent_type = 'crawler';
+    const privateKey = '0xaabbccddeeff00112233445566778899aabbccddeeff00112233445566778899';
+    const agent_id = '0xefc07321d3d6a8fa4961306c7bf555f0723f28c1'; // <- MUST match privateKey!
+    const user_id = 'user-123';
+    const agent_type = 'crawler';
 
-const request = { agent_id, user_id, agent_type };
-const signature = signRequest(request, privateKey);
+    const request = { agent_id, user_id, agent_type };
+    const signature = signRequest(request, privateKey);
 
-const headers = {
-  'X-PEAC-Agent-ID': agent_id,
-  'X-PEAC-User-ID': user_id,
-  'X-PEAC-Agent-Type': agent_type,
-  'X-PEAC-Signature': signature,
-};
+    const headers = {
+      'X-PEAC-Agent-ID': agent_id,
+      'X-PEAC-User-ID': user_id,
+      'X-PEAC-Agent-Type': agent_type,
+      'X-PEAC-Signature': signature,
+    };
 
-const terms = { agent_type };
+    const terms = { agent_type };
 
-const resultValid = checkAccess(terms, headers, request);
-expect(resultValid.access).toBe(true);
+    const resultValid = checkAccess(terms, headers, request);
+    expect(resultValid.access).toBe(true);
 
-headers['X-PEAC-Signature'] = '0xdeadbeef';
-const resultInvalid = checkAccess(terms, headers, request);
-expect(resultInvalid.access).toBe(false);
+    headers['X-PEAC-Signature'] = '0xdeadbeef';
+    const resultInvalid = checkAccess(terms, headers, request);
+    expect(resultInvalid.access).toBe(false);
   });
 
   test('discovery fallbacks', async () => {
@@ -90,12 +90,8 @@ default_access: allow
 
   test('metadata deal_id enforcement', () => {
     const terms = { metadata: { deal_id: 'abc123' } };
-    expect(
-      checkAccess(terms, { 'X-PEAC-Deal-ID': 'abc123' }, {}).access
-    ).toBe(true);
-    expect(
-      checkAccess(terms, { 'X-PEAC-Deal-ID': 'wrong' }, {}).access
-    ).toBe(false);
+    expect(checkAccess(terms, { 'X-PEAC-Deal-ID': 'abc123' }, {}).access).toBe(true);
+    expect(checkAccess(terms, { 'X-PEAC-Deal-ID': 'wrong' }, {}).access).toBe(false);
   });
 
   test('pricing_proof in payment', () => {
@@ -121,13 +117,12 @@ default_access: allow
 
   test('x402 header triggers payment required', () => {
     const terms = { agent_type: 'research', attribution_required: true };
-    const headers = { 
+    const headers = {
       'X-402-Payment-Required': 'true',
-      'X-PEAC-Attribution-Consent': 'true' // ensure consent is present!
+      'X-PEAC-Attribution-Consent': 'true', // ensure consent is present!
     };
     const result = checkAccess(terms, headers, {});
     expect(result.access).toBe(false);
     expect(result.reason).toBe('payment required');
   });
-
 });

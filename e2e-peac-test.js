@@ -35,7 +35,7 @@ const headers = {
   'X-PEAC-User-ID': user_id,
   'X-PEAC-Agent-Type': agent_type,
   'X-PEAC-Signature': signature,
-  'X-PEAC-Attribution-Consent': 'true'
+  'X-PEAC-Attribution-Consent': 'true',
 };
 const check_request = { ...signed_request, path: '/test' };
 

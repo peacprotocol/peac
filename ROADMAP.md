@@ -1,37 +1,43 @@
-```markdown
-# PEAC Protocol Roadmap
+# PEAC Protocol – Roadmap
 
-## v0.9 (Launch)
+PEAC (Programmable Economic Access, Attribution & Consent) is an open protocol for programmable access, consent, and attribution on the web. Our aim is to create a trusted, neutral foundation for dynamic access and automated negotiation—usable by publishers, platforms, AI agents, and individuals.
 
-- Core spec
-- pricing.txt examples
-- Attribution enforcement
-- Basic payments (x402/fiat)
-- SDK (Node.js)
-- Schema + CI validation
+---
 
-## v1.0 (In Progress)
+## v0.9 – Initial Launch
 
-- Full .well-known/ support
-- CLI tool for validation/generation
-- Dynamic pricing per path/agent/content type
-- Attribution verification endpoints
+- Core protocol specification
+- Canonical `pricing.txt` and schema
+- Attribution and consent enforcement
+- Basic agent payment hooks (HTTP 402, Stripe stub)
+- Open source SDK (Node.js)
+- CLI tools and schema validation
+
+---
+
+## v1.0 (Planned)
+
+- Discovery fallback (`.well-known/peac.yaml`/`.json`)
+- Dynamic pricing for paths and agents
+- Negotiation metadata (deal_id, dispute_url, pricing_proof)
+- Attribution verification API endpoints
 - Session tokens for persistent access
-- Metadata-powered negotiation (deal_id, dispute_url)
-- PEAC Compliant badge + validator tools
+- Validator tools for compliance
 
-## v1.1 (Planned)
+---
 
-- Attribution proof formats: VC-JWT, C2PA provenance bundle
-- getTermsHash / logTermsProof audit logging
-- ZK-compliant access logging (research mode)
-- Governance-based dispute workflows (public GitHub arbitration)
-- Metadata unit registry (custom units: per-token, per-table)
+## Beyond v1.0 (In Progress / Research)
 
-## vx.x (Speculative/Future)
+- Tamper-evident audit logs (design phase)
+- Extended attribution and proof formats
+- Integration with additional payment and agent standards
+- Optional privacy features for sensitive logs
+- Reference middleware and CDN/edge patterns
 
-- Bot/agent passports (verifiable identity registries)
-- Incentive marketplace for attribution/reputation
-- Plugin architecture for CMS/CDN/Browser-native support
-- LLM agent middleware for auto-pricing negotiation
-```
+---
+
+*This roadmap is intentionally high-level. PEAC welcomes contributions and technical feedback as we build toward a global standard.*
+
+For collaboration or early feedback, visit [GitHub](https://github.com/peacprotocol/peac) or email protocol@peacprotocol.org.
+
+*Last updated: July 2025*
