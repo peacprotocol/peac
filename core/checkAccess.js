@@ -1,6 +1,6 @@
 const parseDuration = require('./parseDuration');
-const { validateAttribution } = require('./validateAttribution');
-const { validateTiers } = require('./validateTiers');
+const { validateAttribution } = require('./attribution');
+const { validateTiers } = require('./tiers');
 const { verifySignature } = require('./signer');
 
 function checkAccess(terms, headers, request = {}) {
@@ -23,20 +23,24 @@ function checkAccess(terms, headers, request = {}) {
     return { access: false, reason: 'attribution consent missing' };
   }
 
-  // x402 fallback
-  if (terms.agent_type === 'x402') {
+  // x402 fallback — now checks both agent_type and header
+  if (
+    terms.agent_type === 'x402' ||
+    headers['X-402-Payment-Required'] === true ||
+    headers['X-402-Payment-Required'] === 'true'
+  ) {
     return { access: false, reason: 'payment required' };
   }
 
-// EIP-712 Signature
-const sig = headers['X-PEAC-Signature'];
-if (sig) {
-  // Use the full request object (as signed!)
-  const verified = verifySignature(request, sig);
-  if (!verified) {
-    return { access: false, reason: 'signature invalid' };
+  // EIP-712 Signature
+  const sig = headers['X-PEAC-Signature'];
+  if (sig) {
+    // Use the full request object (as signed!)
+    const verified = verifySignature(request, sig);
+    if (!verified) {
+      return { access: false, reason: 'signature invalid' };
+    }
   }
-}
 
   // Metadata deal ID
   if (

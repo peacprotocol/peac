@@ -3,7 +3,7 @@ const { checkAccess } = require('./checkAccess');   // if extracted
 const { handlePayment, handlePaymentReal } = require('./paymentHandlers'); // if extracted
 const { signRequest } = require('./signer');
 const { getTermsHash } = require('./hash');
-const { validateAttribution } = require('./attribution'); // if extracted
+const { validateAttribution } = require('./attribution');  // if extracted
 const { validateTiers } = require('./tiers');
 
 module.exports = {
