@@ -1,7 +1,5 @@
 const ethSigUtil = require('@metamask/eth-sig-util');
-const { bufferToHex } = require('ethereumjs-util');
 
-// EIP-712 domain and types used for PEAC v0.9
 const domain = {
   name: 'PEAC',
   version: '0.9',
@@ -17,13 +15,11 @@ const types = {
   ],
 };
 
-/**
- * Signs an EIP-712 AccessRequest using a private key.
- */
 function signRequest(request, privateKey) {
-  const normalizedRequest = {
-    ...request,
-    agent_id: request.agent_id.toLowerCase(),
+  const normalized = {
+    agent_id: request.agent_id,
+    user_id: request.user_id,
+    agent_type: request.agent_type,
   };
 
   const data = {
@@ -38,24 +34,22 @@ function signRequest(request, privateKey) {
     },
     domain,
     primaryType: 'AccessRequest',
-    message: normalizedRequest,
+    message: normalized,
   };
 
   return ethSigUtil.signTypedData({
-    privateKey: Buffer.from(privateKey.slice(2), 'hex'),
+    privateKey: Buffer.from(privateKey.replace(/^0x/, ''), 'hex'),
     data,
     version: 'V4',
   });
 }
 
-/**
- * Verifies EIP-712 signature.
- */
 function verifySignature(request, signature) {
   try {
-    const normalizedRequest = {
-      ...request,
-      agent_id: request.agent_id.toLowerCase(),
+    const normalized = {
+      agent_id: request.agent_id,
+      user_id: request.user_id,
+      agent_type: request.agent_type,
     };
 
     const data = {
@@ -66,11 +60,20 @@ function verifySignature(request, signature) {
           { name: 'chainId', type: 'uint256' },
           { name: 'verifyingContract', type: 'address' },
         ],
-        ...types,
+        AccessRequest: [
+          { name: 'agent_id', type: 'address' },
+          { name: 'user_id', type: 'string' },
+          { name: 'agent_type', type: 'string' },
+        ],
       },
-      domain,
+      domain: {
+        name: 'PEAC',
+        version: '0.9',
+        chainId: 1,
+        verifyingContract: '0x0000000000000000000000000000000000000000',
+      },
       primaryType: 'AccessRequest',
-      message: normalizedRequest,
+      message: normalized,
     };
 
     const recovered = ethSigUtil.recoverTypedSignature({
@@ -79,11 +82,8 @@ function verifySignature(request, signature) {
       version: 'V4',
     });
 
-    return recovered.toLowerCase() === normalizedRequest.agent_id;
+    return recovered.toLowerCase() === normalized.agent_id.toLowerCase();
   } catch (err) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn('Invalid signature:', err.message || err);
-    }
     return false;
   }
 }
@@ -91,6 +91,4 @@ function verifySignature(request, signature) {
 module.exports = {
   signRequest,
   verifySignature,
-  domain,
-  types,
 };
