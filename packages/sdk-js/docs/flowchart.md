@@ -31,12 +31,15 @@ sequenceDiagram
 ```
 
 ## Alt Text:
+
 Sequence diagram showing agent requesting content, server enforcing pricing and attribution rules, and optional payment loop before access is granted.
 
 ## Long Description:
+
 This is a flowchart showing how the PEAC Protocol operates during a typical web access interaction. The flow starts with an agent (e.g., AI bot) requesting pricing.txt from a server, parsing the file, and signing its request. The server verifies the request’s signature, deal terms, and attribution. If access is free and valid, content is returned. If access requires payment, the server returns a 402 response. The agent then pays the publisher (via x402 or other payment rails), provides payment proof, and retries the request. Upon validation, the server returns content. If the request violates terms or lacks required headers, the server responds with 403 Forbidden. All requests are logged for audit and dispute resolution.
 
-## Node Links Table 
+## Node Links Table
+
 | Node      | Description                                | Relevant Field               |
 | --------- | ------------------------------------------ | ---------------------------- |
 | Agent     | Bot/crawler making access requests         | `agent_type`, `X-PEAC-*`     |
@@ -44,6 +47,7 @@ This is a flowchart showing how the PEAC Protocol operates during a typical web 
 | Publisher | Entity receiving payment, offering content | `contact`, `metadata`        |
 
 ## Narrative Walkthrough
+
 1. Discovery Phase: The agent begins by fetching pricing.txt or .well-known/peac.json to understand the publisher’s access rules.
 
 2. Preparation Phase: The agent validates the schema, signs the request using EIP-712 or another identity scheme, and attaches attribution and deal-related headers.

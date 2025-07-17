@@ -1,69 +1,163 @@
-# PEAC Protocol
+## Protocol Summary and Vision
 
-> Pronounced “peak protocol”
+PEAC is a programmable, open protocol for access, attribution, consent, and economic terms on the web.  
+It enables publishers, platforms, AI/data agents, and regulators to specify and enforce programmable terms—consent, attribution, pricing, and negotiation—via a simple, auditable file: `pricing.txt` or `.well-known/peac.json`.
 
-**PEAC (Programmable Economic Access, Attribution & Consent)** is a protocol for specifying, enforcing, and negotiating access rules between AI agents, crawlers, publishers, and web services. It allows you to define access conditions in a human-readable and machine-enforceable file: `pricing.txt`. PEAC is an open, neutral protocol for consent, compliance, and commerce on the web.
+PEAC serves as the economic and consent layer for the automated economy, enabling agents, platforms, and creators to negotiate, transact, and attribute value at scale.  
+- Addresses unpriced externalities of AI/web crawling.
+- Enables agent-driven negotiation and value exchange.
+- Supports verifiable, programmable, and compliant access for all stakeholders.
 
 ## Features
 
-- Define access terms using `pricing.txt` or `.well-known/peac.json`
-- Enforce attribution, signature, tiered pricing, sessions, and payments
-- Compatible with Stripe, x402, EIP-712
-- Local SDK and CLI for validation, signing, and enforcement
+- Standardized access, consent, and attribution terms via `pricing.txt` or `.well-known/peac.json`
+- Support for tiered pricing, sessions, metadata, dispute mechanisms, and programmable negotiation
+- EIP-712 signature support for verifiable agent identity and consent
+- Compatibility with Stripe, x402, HTTP 402, and other agent payment standards
+- Comprehensive open-source SDK, CLI tooling, and schema validation
+- Designed for compliance with global data, provenance, and AI transparency regulations
 
-## 📁 Examples
+## Examples
 
-- [`examples/pricing.txt`](examples/pricing.txt) – baseline
-- [`examples/full-pricing.txt`](examples/full-pricing.txt) – with sessions, tiers, attribution, expiry
-- [`examples/minimal-pricing.txt`](examples/minimal-pricing.txt) – deny-all default
+- [`examples/pricing.txt`](examples/pricing.txt) — minimal, canonical example
+- [`examples/full-pricing.txt`](examples/full-pricing.txt) — sessions, tiers, attribution, expiry
+- [`examples/minimal-pricing.txt`](examples/minimal-pricing.txt) — deny-all default
 
-## Example pricing.txt
+> For deployment, place `pricing.txt` at your website root (e.g., `https://yoursite.com/pricing.txt`).  
+> The `examples/` directory contains sample files for development and onboarding.
 
-The canonical PEAC Protocol example file lives at:
-- `examples/pricing.txt` (minimal)
-- `examples/full-pricing.txt` (maximal)
+## Canonical Test Agent
 
-> Do **not** use a `pricing.txt` in the root for reference—this path is reserved for CLI or CI usage and is git-ignored by default.
+All official protocol and E2E tests use this public Ethereum account for EIP-712 verification:
 
+- `agent_id`: `0xa0fb98a1d397d13fbe71f31fbc3241c8b01488da`
+- `private_key`: `4f3edf983ac636a65a842ce7c78d9aa706d3b113b37d7b1b6b5ddf49f7f6ed15`
+
+This enables reproducible, auditable, and open protocol testing.
 
 ## Getting Started
 
-1. Add a pricing.txt at your domain root with:
-   protocol: peac
-   version: 0.9
-2. Install the SDK: npm install @peac/protocol
-3. Use in code: const peac = require('@peac/protocol')
+1. **Add a `pricing.txt` file to your web root:**  
+   Copy from `examples/pricing.txt` or `examples/full-pricing.txt`.
 
-## Protocol Summary
+2. **Install the PEAC SDK:**  
+   ```bash
+   npm install @peac/protocol
+  ```
 
-PEAC Protocol defines a standardized, programmable layer for verifiable access to web content; enabling fair terms, attribution, and pricing between publishers and agents (human, AI, bot, or M2M). It introduces a human-readable `pricing.txt` , verifiable agent identity, and HTTP-based enforcement patterns that support differential access and micropayments. Compatible with x402-style enforcement via HTTP 402 status codes.
+3. **Validate or generate terms using the CLI:**
+  ```bash
+  node cli/peac-cli.js generate
+  node cli/peac-cli.js validate examples/pricing.txt
+  ```
 
-* Open by design: Machine-readable terms, consent-based access, attribution conditions, and auditability.
-* Programmable & modular: Supports sessions, units, pricing tiers, signatures, and dispute metadata.
-* Neutral infrastructure: Integrates with any CDN, server, or payment system via HTTP 402 and x402 primitives.
+4. **Integrate in your application or service:**
+```js
+const {
+  fetchPricing,
+  checkAccess,
+  handlePayment,
+  signRequest,
+  getTermsHash
+} = require('./core');
 
-Goal: Sustain the open web with a global standard that is enforceable, interoperable, and fair; without paywalls, scraping wars, or platform lock-in.
+// Fetch terms from a publisher
+const terms = await fetchPricing('https://example.com');
 
-## Why PEAC?
+// Sign an access request using EIP-712
+const privateKey = '0x...';
+const request = {
+  agent_id: '0xYourAddress',
+  user_id: 'bot123',
+  agent_type: 'research',
+  deal_id: 'negotiated-abc123' // for negotiated terms (see metadata.deal_id)
+};
+const signature = await signRequest(request, privateKey);
 
-* Solves Market Failure: Addresses unpriced crawling with flexible pricing/attribution, preventing paywalls or splinternet.
-* Key Differentiators: Simpler than x402 (human-writable terms), more open than proprietary solutions (e.g., Pay-Per-Crawl); enables differential access (free for research, paid for commercial).
-* Adoption Flywheel: Start with publishers (easy pricing.txt), integrate infra (CDNs/APIs), scale to AI firms (legal data moats).
-* Stakeholder Alignment: Publishers gain revenue/attribution; AI gets quality/compliant data; regulators ensure transparency (ties to EU AI Act 2025 provenance); invites W3C/IETF standardization.
-* Governance: Non-profit foundation (inspired by Let's Encrypt) with multi-stakeholder board; fund via grants/0.1% fees to prevent capture.
+// Verify access
+const headers = {
+  'X-PEAC-Agent-ID': request.agent_id,
+  'X-PEAC-User-ID': request.user_id,
+  'X-PEAC-Agent-Type': request.agent_type,
+  'X-PEAC-Deal-ID': request.deal_id, // for negotiated terms
+  'X-PEAC-Signature': signature,
+  'X-PEAC-Attribution-Consent': true
+};
+const access = checkAccess(terms, headers, { path: '/blog/article' });
+```
 
-PEAC is infrastructure-neutral and open-source by design: any publisher, platform, or agent can implement it without reliance on any vendor or payment rail.
+## 5. **Discovery Table**
 
-Join to make PEAC the default: Contribute via PRs, discuss in GitHub Discussions, or endorse (e.g., Mozilla, Creative Commons).
+```markdown
+| Priority | Location                     | Notes                |
+|----------|-----------------------------|----------------------|
+| 1        | /pricing.txt                 | Human-readable YAML  |
+| 2        | /.well-known/peac.yaml       | Fallback             |
+| 3        | /.well-known/peac.json       | Fallback             |
+| 4        | Link header rel="peac-terms" | Redirect if present  |
 
-## Security Model & Discovery Fallback
+## Integration Guidance
 
-### Security: HTTPS Enforcement for Terms Discovery
+**Publishers, Platforms, and API Providers:**  
+- Deploy a `pricing.txt` or `.well-known/peac.json` file at your domain root.
+- Integrate PEAC enforcement into your server, CDN (e.g., NGINX, Fastly, Vercel), or middleware.
+- Configure attribution and consent header checks as needed (see examples in this README).
 
-PEAC Protocol enforces HTTPS by default for all pricing terms fetches.
+**Agents, Crawlers, and AI Companies:**  
+- Integrate the PEAC SDK or use standard HTTP clients with EIP-712 signatures for requests.
+- Parse and respect publisher `pricing.txt` terms, attribution, and payment rules.
+- Implement attribution, consent, and payment headers in all automated access flows.
 
-- **All fetches for `pricing.txt` or `peac.json` must use HTTPS origins.**
-- Any attempt to fetch terms over HTTP will be **blocked and throw an error**, protecting both publishers and agents from MITM attacks.
+**Individual Creators, Blogs, and Small Sites:**  
+- Simply add a `pricing.txt` file to your web root.  
+- No extra infrastructure is required for basic enforcement and attribution.  
+- PEAC is designed for easy self-hosting and plug-and-play adoption.
+
+**IP Owners and Rights Holders:**  
+- Use PEAC to assert consent, pricing, and attribution terms on your data or content endpoints.
+- Audit access and integrate dispute workflows as appropriate for your sector.
+
+PEAC enables seamless, interoperable enforcement for all stakeholders—publishers, AI/data agents, web services, and individuals, without lock-in or barriers to adoption.
+
+### Express/Node Middleware Example
+
+For plug-and-play server integration, use the PEAC middleware in Express/Vercel or any Node server.
+
+```js
+const peacMiddleware = require('./core/middleware');
+const yaml = require('js-yaml');
+const fs = require('fs');
+const pricing = yaml.load(fs.readFileSync('examples/pricing.txt', 'utf8'));
+
+app.use(peacMiddleware(pricing));
+```
+// ...your routes below
+
+```js
+// core/middleware.js
+const { checkAccess } = require('./checkAccess');
+
+module.exports = function peacMiddleware(pricing) {
+  return function (req, res, next) {
+    const result = checkAccess(pricing, req.headers, req);
+    if (!result.access) {
+      return res.status(402).send(`Payment Required via PEAC: ${result.reason}`);
+    }
+    next();
+  };
+};
+
+## Compliance & Regulatory Alignment
+
+PEAC Protocol is designed to support transparency, provenance, and auditability for automated access and consent.
+
+- Audit trails, attribution, and cryptographic proof enable trusted automated data exchange.
+- Interoperable with global regulatory goals (EU AI Act, GDPR, DMCA, and others).
+- Policy makers, compliance teams, and standards bodies are invited to review and extend PEAC for specific regulatory requirements.
+
+See [COMPLIANCE.md](COMPLIANCE.md) for detailed mapping guidance and examples.
+
+## Technical Details
 
 **Development/Testing Override:**  
 If you need to allow HTTP (for local/dev only), add a `.peacrc` file in your project root:
@@ -72,38 +166,31 @@ If you need to allow HTTP (for local/dev only), add a `.peacrc` file in your pro
 {
   "allowHttp": true
 }
-This will permit HTTP origins only while this flag is present.
-Never use this flag in production.
+```
+Do not use this flag in production.
 
 ### Discovery
 
-| Priority | Location                  | Notes                  |
-|----------|---------------------------|------------------------|
-| 1        | /pricing.txt              | Human-readable YAML    |
-| 2        | /.well-known/peac.yaml    | Fallback               |
-| 3        | /.well-known/peac.json    | Fallback               |
-| 4        | Link header rel="peac-terms" | Redirect if present   |
-
+| Priority | Location                     | Notes               |
+| -------- | ---------------------------- | ------------------- |
+| 1        | /pricing.txt                 | Human-readable YAML |
+| 2        | /.well-known/peac.yaml       | Fallback            |
+| 3        | /.well-known/peac.json       | Fallback            |
+| 4        | Link header rel="peac-terms" | Redirect if present |
 
 ## .peacrc Example
 
 `.peacrc` (JSON) for overrides:
 
 {
-"method": "stripe",
-"agent_id": "example-agent",
-"user_id": "example-user",
-"agent_type": "research",
-"allowHttp": false,
-"signing_method": "eip-712",
-"enforce_attribution_log": false
+  "method": "stripe",
+  "agent_id": "example-agent",
+  "user_id": "example-user",
+  "agent_type": "research",
+  "allowHttp": false,
+  "signing_method": "eip-712",
+  "enforce_attribution_log": false
 }
-
-## Stripe Payment Method Behavior
-
-Stub-only for testing: Returns a redirect URL or pricing_proof URI. No real credentials or SDK used.
-
-For real payments, extend handlePayment or use handlePaymentReal as example (with warning: integrate your own payment provider to maintain neutrality).
 
 ## Signature & Session Expiry
 
@@ -113,106 +200,75 @@ For real payments, extend handlePayment or use handlePaymentReal as example (wit
 ## CDN Integration Snippets
 
 Example NGINX configuration for attribution enforcement:
+```nginx
 location / {
-if ($http_x_peac_attribution_consent != "true") {
-return 402;
+  if ($http_x_peac_attribution_consent != "true") {
+    return 402;
+  }
 }
-}
+```
 
-## Self-Hosted? Just Drop pricing.txt in Your Blog Root and Go
+## Interoperability and Payment Flows
 
-For individual bloggers or small sites, simply add pricing.txt to your root directory. No additional setup needed for basic enforcement.
+- [HTTP 402](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/402): HTTP Status Code 402, also known as "Payment Required"
+- [x402 Payments](https://github.com/agentic-x402/x402-protocol): Enables instant stablecoin payments directly over HTTP
+- [Stripe Agent Pay](https://docs.stripe.com/agents/quickstart) & [Agent Toolkit](https://github.com/stripe/agent-toolkit): Agent payment flows for APIs/bots (future support in v1.0)
+- [Stripe Payment Links](https://stripe.com/docs/payment-links): Low-friction way for publishers to monetize content access. Publisher-side payment UX (reference implementation)
+- [ajv-cli](https://github.com/ajv-validator/ajv-cli): Schema validation for JSON/YAML pricing terms
 
-## Related Standards
-
-- x402 (HTTP-based programmable payments): https://x402.dev
-- Stripe Payment Links: https://stripe.com/docs/payment-links
-- YAML Schema Validator: https://ajv.js.org
+> The protocol will track IETF/ISO/industry developments for HTTP 402, agent payments, and data consent to maximize adoption and minimize lock-in.
 
 ## Resources
 
 - Website: https://peacprotocol.org
 - Quickstart: examples/pricing.txt
-- Schema Playground: coming soon
 
 ## Repository Structure
 
 ```bash
-peac/
-├── README.md                 # This file
-├── LICENSE                   # Apache 2.0 License
-├── spec.md                   # Core Protocol Specification (v0.9)
-├── GOVERNANCE.md             # Governance model and contrib policies
-├── COMPLIANCE.md             # Legal mappings and disclaimers
-├── SUPPORT.md                # Endorsements and outreach
-├── ROADMAP.md                # Future development plans
-├── pricing.schema.json       # Full JSON Schema for pricing.txt
-├── CONTRIBUTING.md           # Contribution guidelines
-├── NOTICE                    # OSS attribution notice
-├── USECASES.md               # Use cases examples
-├── examples/                 # Example pricing.txt files
-│   ├── README.md             # Examples overview
-│   ├── pricing.txt           # Starter template
-│   ├── minimal-pricing.txt   # Deny-by-default baseline
-│   └── full-pricing.txt      # Forward-compatible sample
-├── core/                # SDK (Node.js)
-│   ├── index.js              # Client functions
-│   ├── package.json          # Dependencies and scripts
-│   ├── tests/                # Test suite
-│   │   └── index.test.js     # Unit tests
-│   ├── bundle/               # Exported bundle
-│   │   └── index.js          # Main exports
-│   ├── middleware.js         # Middleware for Express/Vercel
-│   └── LICENSE               # Apache 2.0
-├── peac-cli.js               # CLI stub
-├── .peacrc                   # Config template
-├── .well-known/
-│   └── peac.schema.json      # Schema for .well-known access
-├── docs/                     # Documentation files
-│   ├── AGENTS.md             # Agent types and enforcement
-│   ├── units.md              # Custom units documentation
-│   └── flowchart.md          # Flow diagrams
-└── .github/
-└── workflows/
-└── validate.yml      # CI for schema validation
-```
-
-## 🧰 SDK Usage (`core`)
-
-You can use PEAC as a programmable access validator and policy enforcer in your server, crawler, or API agent.
-
-```js
-const {
-  fetchPricing,
-  checkAccess,
-  handlePayment,
-  signRequest,
-  getTermsHash,
-  validateAttribution,
-  validateTiers
-} = require('./core');
-
-// 1. Fetch terms from a publisher
-const terms = await fetchPricing('https://example.com');
-
-// 2. Sign an access request using EIP-712
-const privateKey = '0x...';
-const request = {
-  agent_id: '0xYourAddress',
-  user_id: 'bot123',
-  agent_type: 'research'
-};
-const signature = await signRequest(request, privateKey);
-
-// 3. Verify access
-const headers = {
-  'X-PEAC-Agent-ID': request.agent_id,
-  'X-PEAC-Signature': signature,
-  'X-PEAC-Attribution-Consent': true
-};
-const access = checkAccess(terms, headers, { path: '/blog/article' });
-
-console.log(access); // { access: true } or { access: false, reason: '...' }
+PEAC---v0000000.9/
+├── .github/
+│   └── workflows/
+├── .prettierrc
+├── .prettierignore
+├── .gitignore
+├── cli/
+│   └── peac-cli.js
+├── core/
+│   ├── attribution.js
+│   ├── checkAccess.js
+│   ├── fetchPricing.js
+│   ├── hash.js
+│   ├── index.js
+│   ├── middleware.js
+│   ├── parseDuration.js
+│   ├── paymentHandlers.js
+│   ├── signer.js
+│   ├── tiers.js
+│   ├── tests/
+│   │   └── index.test.js
+├── docs/
+│   ├── AGENTS.md
+│   ├── flowchart.md
+│   └── units.md
+├── examples/
+│   ├── full-pricing.txt
+│   ├── minimal-pricing.txt
+│   ├── pricing.txt
+│   └── README.md
+├── schema/
+│   └── pricing.schema.json
+├── e2e-peac-test.js
+├── README.md
+├── ROADMAP.md
+├── SUPPORT.md
+├── GOVERNANCE.md
+├── COMPLIANCE.md
+├── spec.md
+├── USECASES.md
+├── package.json
+├── package-lock.json
+├── LICENSE.md
 ```
 
 ## Verification
@@ -220,49 +276,32 @@ console.log(access); // { access: true } or { access: false, reason: '...' }
 ```bash
 node -e "require('./core')"
 npm test --prefix core
-```
+````
 
 ### Validating Example pricing.txt Files
 
-PEAC Protocol recommends using the built-in CLI to validate YAML-based pricing files:
+PEAC recommends using the built-in CLI to validate YAML-based pricing files:
 
 ```bash
 node cli/peac-cli.js validate examples/pricing.txt
 node cli/peac-cli.js validate examples/full-pricing.txt
 ```
 
-If you want to validate against the JSON schema using ajv, first convert YAML to JSON:
+To validate against the JSON schema using ajv, first convert YAML to JSON:
 
 ```bash
 npx js-yaml examples/pricing.txt > examples/pricing.json
 npx ajv-cli validate -s schema/pricing.schema.json -d examples/pricing.json
 ```
 
-> **Note:** If you see unknown format "date-time" when using ajv-cli, this is just a warning.
-> The PEAC Protocol CLI is the authoritative validator for all YAML-based pricing files.
-
-The official CLI is preferred for onboarding and day-to-day usage.
-
-## Getting Started
-
-0. **Review Spec**: See spec.md for identity, terms, and flows.
-1. **Deploy pricing.txt**: Copy an example to your domain root (e.g., https://example.com/pricing.txt). Fallback to .well-known/peac.json supported.
-2. **Integrate**:
-   * Publishers: Add to server/CDN (e.g., NGINX, Fastly, Vercel, or any CDN/middleware that supports HTTP headers).
-   * Agents: Use core SDK or HTTP clients with sigs (EIP-712/DID/mTLS).
-   * Validate: Run CI workflow or AJV locally.
-3. **Test**: Simulate with curl (e.g., signed requests); expect HTTP 402 for paid.
-
-Example curl with attribution:
-curl -H "X-PEAC-Attribution-Consent: true" \
-     -H "X-PEAC-Attribution-URL: https://example.com/credit" \
-     https://example.com/content
+> **Note:** If you see unknown format "date-time" when using ajv-cli, this is a warning.
+The PEAC Protocol CLI is the authoritative validator for all YAML-based pricing files.
 
 ## Contributing
 
 See CONTRIBUTING.md.
 
-For collaborations (e.g., infra providers interested in supporting PEAC enforcement), DM on X or email protocol@peacprotocol.org.
+For collaborations (e.g., infra providers interested in supporting PEAC enforcement), email protocol@peacprotocol.org
 
 ## License
 
@@ -270,8 +309,10 @@ Apache 2.0: see LICENSE.
 
 ## Appendix: The Web's Unpriced Engine
 
-Problem: AI crawling creates unpriced externalities, breaking HTTP assumptions of human-scale requests.
+AI crawling creates unpriced externalities, breaking the HTTP assumption of human-scale requests.
 
-Primitives: Verifiable identity (EIP-712/DID/mTLS), machine-readable terms (pricing.txt), auditable accounting (logs).
+**Primitives**: Verifiable identity (EIP-712/DID/mTLS), machine-readable terms (pricing.txt), auditable accounting (logs).
 
-Economics: Differential pricing (premium content higher), usage-based licensing (align costs with value), collective bargaining (cooperatives for rates), quality premiums (fact-checked earns more).
+**Economics**: Differential pricing, usage-based licensing, collective bargaining, quality premiums.
+
+

@@ -13,19 +13,20 @@ protocol: peac
 version: 0.9
 default_access: deny
 agent_rules:
-  - agent_type: research
-    access: free
-    attribution:
-      required: true
-      format: url
-      value: https://example.com/attribution
-    metadata:
-      custom: any_value
-  - agent_type: commercial
-    access: $0.01/page
-    max_requests_per_day: 100000
-    contact: licensing@provider.com
-pricing_proof: https://example.com/terms-hash
+
+- agent_type: research
+  access: free
+  attribution:
+  required: true
+  format: url
+  value: https://example.com/attribution
+  metadata:
+  custom: any_value
+- agent_type: commercial
+  access: $0.01/page
+  max_requests_per_day: 100000
+  contact: licensing@provider.com
+  pricing_proof: https://example.com/terms-hash
 
 ## Security Model
 
@@ -38,6 +39,7 @@ pricing_proof: https://example.com/terms-hash
 ## Fallback Discovery
 
 Fallback order for terms discovery:
+
 1. /pricing.txt (YAML)
 2. /.well-known/peac.yaml
 3. /.well-known/peac.json
@@ -48,6 +50,7 @@ While pricing.txt is the canonical default, PEAC-compliant agents should check .
 ## Header Behavior
 
 Headers used in PEAC:
+
 - X-PEAC-Attribution-Consent: Boolean, required if attribution_required is true.
 - X-PEAC-Attribution-URL: Optional URL for attribution credit.
 - X-PEAC-Signature: EIP-712 signature.
@@ -58,20 +61,20 @@ Headers used in PEAC:
 
 ## Compliance Mapping Table
 
-| Field | Mandatory | Optional | Description |
-|-------|-----------|----------|-------------|
-| protocol | Yes | No | Must be 'peac' |
-| version | Yes | No | Must be '0.9' |
-| attribution_required | No | Yes | Boolean for attribution enforcement |
-| expires_in | No | Yes | Session duration |
-| tiers | No | Yes | Pricing tiers array |
+| Field                | Mandatory | Optional | Description                         |
+| -------------------- | --------- | -------- | ----------------------------------- |
+| protocol             | Yes       | No       | Must be 'peac'                      |
+| version              | Yes       | No       | Must be '0.9'                       |
+| attribution_required | No        | Yes      | Boolean for attribution enforcement |
+| expires_in           | No        | Yes      | Session duration                    |
+| tiers                | No        | Yes      | Pricing tiers array                 |
 
 ## Threats
 
 - MITM: Mandate HTTPS for all interactions.
 - DDoS: Rate-limits in terms (e.g., max_requests_per_day).
 - Spoofing: Signature verification required; deny unsigned requests.
-- Attribution Spoofing: Validate X-PEAC-Attribution-* headers; log failures.
+- Attribution Spoofing: Validate X-PEAC-Attribution-\* headers; log failures.
 - Privacy: Use ZK proofs for logs in future extensions.
 
 ## Extensions
@@ -90,7 +93,7 @@ Metadata fields can be extended with custom keys, e.g., dispute_url in metadata 
 Attribution is a programmable condition for consent-based access, enabling non-monetary compliance.
 
 - Required Fields: required (bool), format (enum: url/text/json), value (string).
-- Enforcement: Servers validate X-PEAC-Attribution-* headers; log cryptographically for provenance.
+- Enforcement: Servers validate X-PEAC-Attribution-\* headers; log cryptographically for provenance.
 - Compliance Mappings: Ties to EU AI Act (provenance), DMCA (credit), W3C Verifiable Credentials (tracking).
 - Example Curl: curl -H "X-PEAC-Attribution-Consent: true" -H "X-PEAC-Attribution-URL: https://example.com/credit" -H "X-PEAC-Deal-ID: abc123" https://example.com/content
 - Future: Table for C2PA/CC-BY/TOS; SDK validateAttribution() for agents.
