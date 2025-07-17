@@ -4,7 +4,10 @@
   "properties": {
     "protocol": { "type": "string", "const": "peac", "$comment": "Must be 'peac'" },
     "version": { "type": "string", "const": "0.9", "$comment": "Protocol version" },
-    "agent_type": { "type": "string", "$comment": "Agent classification (e.g., research, commercial)" },
+    "agent_type": {
+      "type": "string",
+      "$comment": "Agent classification (e.g., research, commercial)"
+    },
     "agent_rules": { "type": "object", "$comment": "Rules specific to agent types" },
     "access": { "type": "string", "$comment": "Access level (e.g., free, paid)" },
     "attribution_required": { "type": "boolean", "$comment": "Require attribution headers" },

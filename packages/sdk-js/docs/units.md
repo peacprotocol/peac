@@ -1,6 +1,5 @@
 # Units for Economic Metering (Standard + Custom)
 
-
 Custom units for metering access:
 
 - **per-byte**: For data, text, or file-size-based pricing.
@@ -16,6 +15,7 @@ These standardized units are enforced via schema validation.
 For advanced use cases (e.g., SaaS, AI, licensing platforms), PEAC supports non-standardized units through the `metadata` field in `agent_rules`. These are **not enforced** by the PEAC schema or SDK but can be agreed upon bilaterally between agents and publishers.
 
 Examples:
+
 - `unit_name: per-token` (e.g., LLM token usage)
 - `unit_name: per-pdf`
 - `unit_name: per-image`
