@@ -17,6 +17,15 @@
 - [`examples/full-pricing.txt`](examples/full-pricing.txt) – with sessions, tiers, attribution, expiry
 - [`examples/minimal-pricing.txt`](examples/minimal-pricing.txt) – deny-all default
 
+## Example pricing.txt
+
+The canonical PEAC Protocol example file lives at:
+- `examples/pricing.txt` (minimal)
+- `examples/full-pricing.txt` (maximal)
+
+> Do **not** use a `pricing.txt` in the root for reference—this path is reserved for CLI or CI usage and is git-ignored by default.
+
+
 ## Getting Started
 
 1. Add a pricing.txt at your domain root with:

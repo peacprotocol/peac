@@ -75,7 +75,7 @@ function verifySignature(request, signature) {
       primaryType: 'AccessRequest',
       message: normalized,
     };
-
+    
     const recovered = ethSigUtil.recoverTypedSignature({
       data,
       signature,
