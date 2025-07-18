@@ -1,5 +1,7 @@
 ## Protocol Summary and Vision
 
+PEAC stands for Programmable Economic Access & Consent.
+
 PEAC is a programmable, open protocol for access, attribution, consent, and economic terms on the web.  
 It enables publishers, platforms, AI/data agents, and regulators to specify and enforce programmable terms; consent, attribution, pricing, and negotiation via a simple, auditable file: `pricing.txt` or `.well-known/peac.json`.
 
