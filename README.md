@@ -1,17 +1,38 @@
+![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+
 ## Protocol Summary and Vision
 
-PEAC stands for Programmable Economic Access & Consent.
+> **PEAC Protocol is an open standard for programmable access, consent, attribution, and automated machine-to-machine payments; built for the agentic, AI-powered web.**
 
-PEAC is a programmable, open protocol for access, attribution, consent, and economic terms on the web.  
-It enables publishers, platforms, AI/data agents, and regulators to specify and enforce programmable terms; consent, attribution, pricing, and negotiation via a simple, auditable file: `pricing.txt` or `.well-known/peac.json`.
+It enables publishers, platforms, AI/data agents, and regulators to specify and enforce economic, consent, and attribution terms via a simple, auditable file: 'pricing.txt' or '.well-known/peac.json'. Payments and advanced enforcement are optional for non-commercial or open access, ensuring win-win for creators and agents.
 
-PEAC serves as the economic and consent layer for the automated economy, enabling agents, platforms, and creators to negotiate, transact, and attribute value at scale.  
-- Addresses unpriced externalities of AI/web crawling.
-- Enables agent-driven negotiation and value exchange.
-- Supports verifiable, programmable, and compliant access for all participants.
+PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent-driven negotiation and value exchange, and supports verifiable, compliant, programmable access for all participants. Publishers gain fair revenue streams, AI/data agents get ethical access, and OSS developers build on open standards.
+
+_**Motivation:** AI crawling challenges web economics, but PEAC builds on HTTP's foundations (like 402) to foster fair, long-term automated ecosystems; transparent and composable for everyone._
+
+## Table of Contents
+1. Protocol Summary & Vision
+2. Capabilities
+3. Who Benefits
+4. Examples
+5. Canonical Test Agent
+6. Getting Started
+7. Discovery
+8. Integration Guidance
+9. Express/Node Middleware Example
+10. Compliance & Regulatory Alignment
+11. Technical Details
+12. Interoperability & Payment Flows
+13. Resources
+14. Repository Structure
+15. Verification
+16. Join the Community
+17. Contributing
+18. License
 
 ## Capabilities
 
+- Payments and advanced enforcement optional for non-commercial/open access
 - Standardized access, consent, and attribution terms via `pricing.txt` or `.well-known/peac.json`
 - Support for tiered pricing, sessions, metadata, dispute mechanisms, and programmable negotiation
 - EIP-712 signature support for verifiable agent identity and consent
@@ -19,10 +40,35 @@ PEAC serves as the economic and consent layer for the automated economy, enablin
 - Comprehensive open-source SDK, CLI tooling, and schema validation
 - Designed for compliance with global data, provenance, and AI transparency regulations
 
+**More Than Payments:** PEAC allows programmable, consent-based, and attribution-enforced access-optional economics, full compliance, and AI-ready by default. See [spec.md](spec.md) and [ROADMAP.md](ROADMAP.md) for extensions.
+
+See [GOVERNANCE.md](GOVERNANCE.md) for community-driven evolution.
+
+## Who Benefits
+
+- **Publishers & Creators:** Monetize or attribute automated access.
+(e.g., fair revenue from AI crawls without barriers)
+
+- **Platforms & CDNs:** Offer compliant terms.
+(e.g., enforceable attribution in data flows)
+
+- **AI/Data Agents:** Discover and negotiate access terms ethically.
+(e.g., verifiable consent to reduce legal risks)
+
+- **OSS & Developers:** Build with trust and compliance baked in.
+(e.g., extensible SDKs for new web/AI apps)
+
+- **Regulators & Compliance Teams:** Audit easily.
+(e.g., cryptographic proofs for transparency)
+
+> PEAC Protocol is not a paywall. It is the open, programmable trust and compliance layer for the agentic web. Like robots.txt, PEAC is file-based and easy to deploy, but it’s enforceable, auditable, and supports programmable economics and compliance.
+
 ## Examples
 
-- [`examples/pricing.txt`](examples/pricing.txt) - minimal, canonical example
-- [`examples/full-pricing.txt`](examples/full-pricing.txt) - sessions, tiers, attribution, expiry
+For publishers: Start with minimal-pricing.txt to enable consent/attribution without payments.
+
+- [`examples/pricing.txt`](examples/pricing.txt) - minimal, canonical example   //consent/attribution only (no payments)
+- [`examples/full-pricing.txt`](examples/full-pricing.txt) - sessions, tiers, attribution, expiry   //advanced pricing/attribution
 - [`examples/minimal-pricing.txt`](examples/minimal-pricing.txt) - deny-all default
 
 > For deployment, place `pricing.txt` at your website root (e.g., `https://yoursite.com/pricing.txt`).  
@@ -36,6 +82,8 @@ All official protocol and E2E tests use this public Ethereum account for EIP-712
 - `private_key`: `4f3edf983ac636a65a842ce7c78d9aa706d3b113b37d7b1b6b5ddf49f7f6ed15`
 
 This enables reproducible, auditable, and open protocol testing.
+
+Note: This is a public, disposable Ethereum account with zero balance (verified Etherscan, July 2025). Use strictly for local/E2E testing; never in production or with real assets.
 
 ## Getting Started
 
@@ -88,11 +136,11 @@ const headers = {
 const access = checkAccess(terms, headers, { path: '/blog/article' });
 ```
 
-## 5. **Discovery Table**
+## Discovery
 
 ```markdown
 | Priority | Location                     | Notes                |
-|----------|-----------------------------|----------------------|
+|----------|------------------------------|----------------------|
 | 1        | /pricing.txt                 | Human-readable YAML  |
 | 2        | /.well-known/peac.yaml       | Fallback             |
 | 3        | /.well-known/peac.json       | Fallback             |
@@ -112,15 +160,18 @@ const access = checkAccess(terms, headers, { path: '/blog/article' });
 - Implement attribution, consent, and payment headers in all automated access flows.
 
 **Individual Creators, Blogs, and Small Sites:**  
-- Simply add a `pricing.txt` file to your web root.  
+- Simply add a `pricing.txt` file to your web root.
 - No extra infrastructure is required for basic enforcement and attribution.  
 - PEAC is designed for easy self-hosting and plug-and-play adoption.
+- Compatible with static hosts (GitHub Pages, Netlify) - no backend required for basic compliance.
 
 **IP Owners and Rights Holders:**  
-- Use PEAC to assert consent, pricing, and attribution terms on your data or content endpoints.
+- Use PEAC Protocol to assert consent, pricing, and attribution terms on your data or content endpoints.
 - Audit access and integrate dispute workflows as appropriate for your sector.
 
-PEAC enables seamless, interoperable enforcement for all participants; publishers, AI/data agents, web services, and individuals, without lock-in or barriers to adoption.
+PEAC Protocol enables seamless, interoperable enforcement for all participants: publishers, AI/data agents, web services, and individuals, without lock-in or barriers to adoption.
+
+> For Python/Go/other SDKs, see [docs/AGENTS.md] (or propose an implementation!)
 
 ### Express/Node Middleware Example
 
@@ -163,54 +214,9 @@ See [COMPLIANCE.md](COMPLIANCE.md) for detailed mapping guidance and examples.
 
 ## Technical Details
 
-**Development/Testing Override:**  
-If you need to allow HTTP (for local/dev only), add a `.peacrc` file in your project root:
-
-```json
-{
-  "allowHttp": true
-}
-```
-Do not use this flag in production.
-
-### Discovery
-
-| Priority | Location                     | Notes               |
-| -------- | ---------------------------- | ------------------- |
-| 1        | /pricing.txt                 | Human-readable YAML |
-| 2        | /.well-known/peac.yaml       | Fallback            |
-| 3        | /.well-known/peac.json       | Fallback            |
-| 4        | Link header rel="peac-terms" | Redirect if present |
-
-## .peacrc Example
-
-`.peacrc` (JSON) for overrides:
-
-{
-  "method": "stripe",
-  "agent_id": "example-agent",
-  "user_id": "example-user",
-  "agent_type": "research",
-  "allowHttp": false,
-  "signing_method": "eip-712",
-  "enforce_attribution_log": false
-}
-
-## Signature & Session Expiry
-
-- Signatures: EIP-712 for verifiable identity.
-- Sessions: Enforce expires_in (duration) or valid_until (ISO 8601); deny access if expired.
-
-## CDN Integration Snippets
-
-Example NGINX configuration for attribution enforcement:
-```nginx
-location / {
-  if ($http_x_peac_attribution_consent != "true") {
-    return 402;
-  }
-}
-```
+- **Development/Testing Override:** Add `.peacrc` (JSON) for local overrides (e.g., "allowHttp": true) - dev only, not production.  
+- **Signatures & Sessions:** EIP-712 for identity; enforce expires_in (duration) or valid_until (ISO 8601).  
+- **Security Note:** Always use secure keys in prod; test agents are for reproducibility only.
 
 ## Interoperability and Payment Flows
 
@@ -226,6 +232,8 @@ location / {
 
 - Website: https://peacprotocol.org
 - Quickstart: examples/pricing.txt
+
+All code, CLI, and examples are copy-paste ready and thoroughly tested, if you spot an issue, file a GitHub issue or pull request!
 
 ## Repository Structure
 
@@ -301,22 +309,22 @@ npx ajv-cli validate -s schema/pricing.schema.json -d examples/pricing.json
 > **Note:** If you see unknown format "date-time" when using ajv-cli, this is a warning.
 The PEAC Protocol CLI is the authoritative validator for all YAML-based pricing files.
 
+## Join the Community
+
+PEAC is an open protocol, your input shapes its future.
+
+We invite developers, publishers, AI builders, regulators, and all participants to review, test, and contribute. Share feedback on GitHub issues, propose extensions via pull requests, or collaborate on integrations (e.g., new language SDKs or compliance mappings).
+
+For questions or partnerships, join discussions on X (@peacprotocol) or email protocol@peacprotocol.org. Let's build the fair automated web together!
+
+Welcome forks, extensions, and diverse contributions to evolve PEAC Protocol collaboratively.
+
 ## Contributing
 
-See CONTRIBUTING.md.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-For collaborations (e.g., infra providers interested in supporting PEAC enforcement), email protocol@peacprotocol.org
+For collaborations (e.g., infra providers interested in supporting PEAC protocol enforcement), email protocol@peacprotocol.org
 
 ## License
 
 Apache 2.0: see LICENSE.
-
-## Appendix: The Web's Unpriced Engine
-
-AI crawling creates unpriced externalities, breaking the HTTP assumption of human-scale requests.
-
-**Primitives**: Verifiable identity (EIP-712/DID/mTLS), machine-readable terms (pricing.txt), auditable accounting (logs).
-
-**Economics**: Differential pricing, usage-based licensing, collective bargaining, quality premiums.
-
-
