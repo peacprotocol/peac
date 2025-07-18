@@ -313,11 +313,11 @@ The PEAC Protocol CLI is the authoritative validator for all YAML-based pricing 
 
 ## Join the Community
 
-PEAC is an open protocol, your input shapes its future.
+PEAC is an open protocol; your input shapes its future.
 
 We invite developers, publishers, AI builders, regulators, and all participants to review, test, and contribute. Share feedback on GitHub issues, propose extensions via pull requests, or collaborate on integrations (e.g., new language SDKs or compliance mappings).
 
-For questions or partnerships, join discussions on X (@peacprotocol) or email protocol@peacprotocol.org. Let's build the fair automated web together!
+For questions or partnerships, join discussions on X (@peacprotocol) or email contact@peacprotocol.org. Let's build the fair automated web together!
 
 Welcome forks, extensions, and diverse contributions to evolve PEAC Protocol collaboratively.
 
@@ -325,7 +325,7 @@ Welcome forks, extensions, and diverse contributions to evolve PEAC Protocol col
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-For collaborations (e.g., infra providers interested in supporting PEAC protocol enforcement), email protocol@peacprotocol.org
+For collaborations (e.g., infra providers interested in supporting PEAC protocol enforcement), email contact@peacprotocol.org.
 
 ## License
 
