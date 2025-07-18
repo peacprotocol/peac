@@ -47,6 +47,6 @@ Propose roadmap additions via GitHub issues/PRs, welcome from devs, AI firms, an
 
 *This roadmap is intentionally high-level. PEAC welcomes contributions and technical feedback as we build toward a global standard.*
 
-For collaboration or early feedback, visit [GitHub](https://github.com/peacprotocol/peac) or email protocol@peacprotocol.org.
+For collaboration or early feedback, visit [GitHub](https://github.com/peacprotocol/peac) or email contact@peacprotocol.org.
 
 *Last updated: July 2025*
