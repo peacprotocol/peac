@@ -1,5 +1,3 @@
-![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
-
 ## Protocol Summary and Vision
 
 > **PEAC Protocol is an open standard for programmable access, consent, attribution, and automated machine-to-machine payments; built for the agentic, AI-powered web.**
@@ -14,21 +12,22 @@ _**Motivation:** AI crawling challenges web economics, but PEAC builds on HTTP's
 1. Protocol Summary & Vision
 2. Capabilities
 3. Who Benefits
-4. Examples
-5. Canonical Test Agent
-6. Getting Started
-7. Discovery
-8. Integration Guidance
-9. Express/Node Middleware Example
-10. Compliance & Regulatory Alignment
-11. Technical Details
-12. Interoperability & Payment Flows
-13. Resources
-14. Repository Structure
-15. Verification
-16. Join the Community
-17. Contributing
-18. License
+4. Use Cases
+5. Examples
+6. Canonical Test Agent
+7. Getting Started
+8. Discovery
+9. Integration Guidance
+10. Express/Node Middleware Example
+11. Compliance & Regulatory Alignment
+12. Technical Details
+13. Interoperability & Payment Flows
+14. Resources
+15. Repository Structure
+16. Verification
+17. Join the Community
+18. Contributing
+19. License
 
 ## Capabilities
 
@@ -62,6 +61,20 @@ See [GOVERNANCE.md](GOVERNANCE.md) for community-driven evolution.
 (e.g., cryptographic proofs for transparency)
 
 > PEAC Protocol is not a paywall. It is the open, programmable trust and compliance layer for the agentic web. Like robots.txt, PEAC is file-based and easy to deploy, but it’s enforceable, auditable, and supports programmable economics and compliance.
+
+## Use Cases
+
+PEAC unlocks programmable models for the automated economy. Examples:
+
+| Scenario | Description |
+|----------|-------------|
+| Research bot crawling open data | Non-commercial bot with consent/attribution. |
+| AI company accessing data | Licensed access, negotiation via PEAC. |
+| Creator enforcing attribution | Require attribution for AI/bots using articles. |
+| Enterprise tiered APIs | Premium APIs with pricing/consent controls. |
+| Big Tech Integration | Scalable APIs for AI agents (e.g., CDN enforcement). |
+
+Propose new use cases via PRs, see [spec.md](spec.md) for extensions.
 
 ## Examples
 
@@ -279,7 +292,6 @@ PEAC---v0000000.9/
 ├── GOVERNANCE.md
 ├── COMPLIANCE.md
 ├── spec.md
-├── USECASES.md
 ├── package.json
 ├── package-lock.json
 ├── LICENSE.md
