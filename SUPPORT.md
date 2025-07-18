@@ -1,5 +1,14 @@
-# PEAC Protocol Endorsements and Outreach
+# PEAC Protocol Support and Outreach
 
-Seek endorsements from Mozilla, Creative Commons, IETF/W3C, and open web advocates. Outreach: protocol@peacprotocol.org or X DMs.
+PEAC welcomes endorsements, reviews, and collaborations from open web advocates like Mozilla, Creative Commons, IETF/W3C, and others to build a fair automated economy.
 
-Join Discussions for ideas; contribute to make PEAC the default consent layer.
+**Why Support PEAC?**
+- Enables ethical AI access for all stakeholders.
+- OSS-friendly: Modular, neutral, with long-term governance.
+
+**How to Get Involved:**
+- Endorse: Share why PEAC aligns with your mission.
+- Review: Audit spec/compliance for feedback.
+- Collaborate: Propose integrations (e.g., AI tools, CDNs).
+
+Mail contact@peacprotocol.org, DM @peacprotocol on X, or reference GOVERNANCE.md. Join to shape the default consent layer—win-win for publishers, AI, devs, and regulators.
