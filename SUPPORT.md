@@ -11,4 +11,4 @@ PEAC welcomes endorsements, reviews, and collaborations from open web advocates 
 - Review: Audit spec/compliance for feedback.
 - Collaborate: Propose integrations (e.g., AI tools, CDNs).
 
-Email contact@peacprotocol.org, DM @peacprotocol on X, or reference GOVERNANCE.md. Join to shape the consent layer, creating a win-win for publishers, AI, developers, and regulators.
+Email contact@peacprotocol.org, DM @peacprotocol on X, or reference GOVERNANCE.md. Join to shape the consent layer, creating a win-win for publishers, AI firms, foundations, developers, and regulators.
