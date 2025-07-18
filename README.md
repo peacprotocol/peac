@@ -171,7 +171,9 @@ const access = checkAccess(terms, headers, { path: '/blog/article' });
 
 PEAC Protocol enables seamless, interoperable enforcement for all participants: publishers, AI/data agents, web services, and individuals, without lock-in or barriers to adoption.
 
+
 > For Python/Go/other SDKs, see [docs/AGENTS.md] (or propose an implementation!)
+
 
 ### Express/Node Middleware Example
 
