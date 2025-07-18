@@ -341,4 +341,4 @@ For collaborations (e.g., infra providers interested in supporting PEAC protocol
 
 ## License
 
-Apache 2.0: see LICENSE.
+Apache 2.0: see [LICENSE](LICENSE).
