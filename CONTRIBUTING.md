@@ -1,6 +1,10 @@
 # Contributing to PEAC Protocol
 
-Fork the repo, work in a dev branch, and submit PRs for review. All changes auditable/traceable.
+Contribute to build the fair automated web. Welcoming devs, AI firms, publishers, and foundations.
+
+PEAC is governed by open, transparent, and auditable contribution practices, welcoming diverse contributors across technical and non-technical domains.
+
+Fork the repo, work in a dev branch, and submit PRs for review. All code, documentation, and protocol changes are tracked and auditable for transparency and trust.
 
 Guidelines:
 
@@ -20,4 +24,8 @@ This allows all contributors and auditors to run and verify protocol tests using
 
 Paths: Spec writer (update spec.md), SDK dev (peac-core), Policy author (examples).
 
-For major collaborations, email protocol@peacprotocol.org.
+Please read and follow [GOVERNANCE.md](GOVERNANCE.md) before submitting.
+
+For major collaborations, email contact@peacprotocol.org.
+
+New contributors: Start with examples or issues. See Join the Community for support.
