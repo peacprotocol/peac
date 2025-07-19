@@ -6,7 +6,7 @@ It enables publishers, platforms, AI/data agents, and regulators to specify and 
 
 PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent-driven negotiation and value exchange, and supports verifiable, compliant, programmable access for all participants. Publishers gain fair revenue streams, AI/data agents get ethical access, and OSS developers build on open standards.
 
-_**Motivation:** AI crawling challenges fair web economics, but PEAC builds on HTTP's foundations (like 402) to foster fair, long-term automated ecosystems; transparent and composable for everyone._
+_**Why:** AI crawling challenges fair web economics, but PEAC builds on HTTP's foundations (like 402) to foster fair, long-term automated ecosystems; transparent and composable for everyone._
 
 ## Table of Contents
 1. Protocol Summary & Vision
