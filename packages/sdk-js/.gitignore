@@ -1,12 +1,7 @@
-*.DS_Store
-**/.DS_Store
-# macOS
-.DS_Store
 node_modules/
-.env
 .DS_Store
-examples/pricing.json
-pricing.txt
+dist/
+*.log
+.env
 .vscode/
 .idea/
-dist/
