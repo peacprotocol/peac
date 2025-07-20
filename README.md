@@ -253,7 +253,7 @@ All code, CLI, and examples are copy-paste ready and thoroughly tested, if you s
 ## Repository Structure
 
 ```bash
-PEAC---v0000000.9/
+PEAC---v0.9/
 ├── .github/
 │   └── workflows/
 ├── .prettierrc
