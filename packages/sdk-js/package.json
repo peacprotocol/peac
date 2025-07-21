@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "prepare": "husky install",
-    "test": "jest core/tests/index.test.js",
+    "test": "jest",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -28,6 +28,7 @@
     "ethereumjs-util": "^7.1.5",
     "ethers": "^6.15.0",
     "js-yaml": "^4.1.0",
+    "libsodium-wrappers": "^0.7.15",
     "node-fetch": "^2.6.12"
   },
   "devDependencies": {
