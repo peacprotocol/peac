@@ -4,10 +4,15 @@ Test for Ed25519 verify (Python)
 Apache 2.0 License
 """
 
+import sys
+import os
 import base64
 from nacl.signing import SigningKey
-from core.ed25519.python.sign import sign
-from core.ed25519.python.verify import verify
+
+# Ensure import works regardless of how test is run
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from sign import sign
+from verify import verify
 
 def test_verify():
     sk = SigningKey.generate()
