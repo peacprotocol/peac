@@ -6,3 +6,6 @@ dist/
 .vscode/
 .idea/
 __pycache__/
+legacy_core*/
+legacy_core_backup/
+tests/
