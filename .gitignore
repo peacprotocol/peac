@@ -5,4 +5,5 @@ dist/
 .env
 .vscode/
 .idea/
-legacy_core_backup/
+__pycache__/
+*.pyc
