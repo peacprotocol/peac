@@ -10,7 +10,7 @@ from core.ed25519.python.sign import sign
 
 def test_sign():
     sk = SigningKey.generate()
-    privkey_b64 = base64.b64encode(sk._seed).decode()   # <-- FIXED
+    privkey_b64 = base64.b64encode(sk._seed).decode()
     message = "test-message"
     nonce = "nonce-123"
     timestamp = 1721548812991

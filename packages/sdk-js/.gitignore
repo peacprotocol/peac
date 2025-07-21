@@ -5,3 +5,4 @@ dist/
 .env
 .vscode/
 .idea/
+__pycache__/
