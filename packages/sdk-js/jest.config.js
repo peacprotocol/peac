@@ -1,5 +1,7 @@
-// jest.config.js
 module.exports = {
   testEnvironment: 'node',
-  testMatch: ['**/core/tests/**/*.test.js'],
+  testMatch: [
+    '**/__tests__/**/*.test.js',
+    '**/core/**/__tests__/**/*.test.js'
+  ],
 };
