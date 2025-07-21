@@ -4,9 +4,14 @@ Test for Ed25519 sign (Python)
 Apache 2.0 License
 """
 
+import sys
+import os
 import base64
 from nacl.signing import SigningKey
-from core.ed25519.python.sign import sign
+
+# Ensure import works regardless of how test is run
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from sign import sign
 
 def test_sign():
     sk = SigningKey.generate()
