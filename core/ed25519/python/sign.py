@@ -1,6 +1,6 @@
 """
 PEAC Protocol v0.9.1
-Ed25519 message signer (Python)
+Ed25519 signer (Python)
 Apache 2.0 License
 """
 

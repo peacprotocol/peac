@@ -12,7 +12,7 @@ from core.ed25519.python.verify import verify
 def test_verify():
     sk = SigningKey.generate()
     pk = sk.verify_key
-    privkey_b64 = base64.b64encode(sk._seed).decode()   # <-- FIXED
+    privkey_b64 = base64.b64encode(sk._seed).decode()
     pubkey_b64 = base64.b64encode(bytes(pk)).decode()
     message = "hello-peac"
     nonce = "abc123"
