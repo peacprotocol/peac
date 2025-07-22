@@ -310,7 +310,7 @@ PEAC is OSS, your contributions shape the protocol.
 
 - Join discussions on X (@peacprotocol) or email contact@peacprotocol.org.
   
-  Forks/extensions welcome!"
+Forks/extensions welcome!
 
 ***Let’s build the fair, programmable web together!***
 
