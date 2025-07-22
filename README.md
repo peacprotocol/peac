@@ -57,8 +57,6 @@ PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent
 
 > **PEAC Protocol is not a paywall** it’s an open, programmable trust, attribution, and compliance layer. Like `robots.txt`, but verifiable and future-proof.
 
----
-
 ## Use Cases
 
 | Scenario | Description |
