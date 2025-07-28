@@ -1,21 +1,17 @@
 [![Node.js CI](https://github.com/peacprotocol/peac/actions/workflows/ci.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/peacprotocol/peac/branch/main/graph/badge.svg)](https://codecov.io/gh/peacprotocol/peac)
 
 ## PEAC Protocol
 
 > **The open protocol for programmable, ethical, and compliant access, consent, attribution, and automated payments on the AI-powered web.**
 
-## Protocol Vision
-
 **PEAC Protocol** is the open, extensible standard for programmable web access, consent, attribution, and machine-to-machine payment; built for the next generation of AI and agentic automation. It lets publishers, platforms, AI/data agents, and regulators express enforceable terms with a simple file: `pricing.txt` or `.well-known/peac.json`. PEAC is auditable, consent-centric, privacy-respecting, and composable by design.
 
 PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent-driven negotiation and value exchange, and supports verifiable, compliant, programmable access for all participants. Publishers gain fair revenue streams, AI/data agents get ethical access, and OSS developers build on open standards.
 
-_**Why:**  As AI crawlers and bots reshape the web and AI crawling challenges fair web economics (e.g., 436M scrapes bypassed blocks in Q1 2025 alone), PEAC delivers a fair, transparent, and programmable economic layer on HTTP's foundations (like 402); removing unpriced externalities and enabling win-win for creators, agents, and users.
+**Why:**  As AI crawlers and bots reshape the web and AI crawling challenges fair web economics (e.g., 436M scrapes bypassed blocks in Q1 2025 alone), PEAC delivers a fair, transparent, and programmable economic layer on HTTP's foundations (like 402); removing unpriced externalities and enabling win-win for creators, agents, and users.
 
 ## Table of Contents
 - [PEAC Protocol](#peac-protocol)
-- [Protocol Vision](#protocol-vision)
 - [Table of Contents](#table-of-contents)
 - [Capabilities](#capabilities)
 - [Who Benefits](#who-benefits)
@@ -29,7 +25,6 @@ _**Why:**  As AI crawlers and bots reshape the web and AI crawling challenges fa
 - [Technical Details](#technical-details)
 - [Interoperability and Payment Flows](#interoperability-and-payment-flows)
 - [Resources](#resources)
-- [Repository Structure](#repository-structure)
 - [Verification \& Validation](#verification--validation)
 - [Join the Community](#join-the-community)
 - [Contributing](#contributing)
@@ -61,8 +56,6 @@ _**Why:**  As AI crawlers and bots reshape the web and AI crawling challenges fa
 - **Regulators & Compliance Teams:** Audit easily with cryptographic proofs, anonymized logs, and GDPR/EU AI Act mapping.
 
 > **PEAC Protocol is not a paywall** it’s an open, programmable trust, attribution, and compliance layer. Like `robots.txt`, but verifiable and future-proof.
-
----
 
 ## Use Cases
 
@@ -284,93 +277,6 @@ PEAC Protocol is designed to support transparency, provenance, and auditability 
 
 All code, CLI, and examples are copy-paste ready and thoroughly tested, if you spot an issue, file a GitHub issue or pull request!
 
-## Repository Structure
-
-```bash
-peac/
-├── .github/
-│   └── workflows/
-│       └── test.yml
-├── .gitignore
-├── LICENSE
-├── README.md
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-├── core/
-│   └── ed25519/
-│       ├── node/
-│       │   ├── sign.js
-│       │   ├── verify.js
-│       │   ├── nonceCache.js
-│       │   └── __tests__/
-│       │       ├── sign.test.js
-│       │       └── verify.test.js
-│       └── python/
-│           ├── sign.py
-│           ├── verify.py
-│           ├── nonce_cache.py
-│           └── tests/
-│               ├── test_sign.py
-│               └── test_verify.py
-├── interop/
-│   ├── http402/
-│   │   ├── handler.js
-│   │   ├── handler.py
-│   │   ├── __tests__/
-│   │   │   ├── http402_handler.test.js
-│   │   │   └── test_handler.py
-│   └── lite_mode/
-│       ├── token.js
-│       ├── token.py
-│       ├── __tests__/
-│           ├── token.test.js
-│           └── test_token.py
-├── privacy/
-│   ├── log_policy.md
-│   ├── node/
-│   │   ├── anonymizer.js
-│   │   └── __tests__/
-│   │       └── anonymizer.test.js
-│   └── python/
-│       ├── anonymizer.py
-│       └── tests/
-│           └── test_anonymizer.py
-├── sdk/
-│   ├── node/
-│   │   ├── index.js
-│   │   └── __tests__/
-│   │       └── sdk.test.js
-│   └── python/
-│       ├── peac_sdk.py
-│       └── test_peac_sdk.py
-├── plugins/
-│   ├── wordpress/
-│   │   ├── peac-plugin.php
-│   │   ├── fingerprint.js
-│   │   └── readme.txt
-│   └── shopify/
-│       ├── peac-proxy.js
-│       ├── proxy.js
-│       ├── readme.txt
-│       └── test_proxy.js
-├── docs/
-│   ├── quickstart.md
-│   ├── migration.md
-│   ├── architecture.md
-│   ├── privacy.md
-│   └── changelog.md
-├── tests/
-│   ├── node/
-│   │   └── test_sign.js
-│   ├── python/
-│   │   └── test_sign.py
-│   └── php/
-│       └── test_plugin.php
-├── .env.example
-├── requirements.txt
-├── package.json
-```
-
 ## Verification & Validation
 
 ```bash
@@ -402,7 +308,7 @@ PEAC is OSS, your contributions shape the protocol.
 
 - Join discussions on X (@peacprotocol) or email contact@peacprotocol.org.
   
-  Forks/extensions welcome!"
+Forks/extensions welcome!
 
 ***Let’s build the fair, programmable web together!***
 
