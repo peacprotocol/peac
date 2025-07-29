@@ -2,6 +2,9 @@
 
 Thank you for your interest in contributing! PEAC Protocol is an open, global standard and welcomes input from all; developers, publishers, AI researchers, and policy experts.
 
+## PEAC 0.9.1.1 onwards:
+Plugins and platform-specific integrations are now maintained in separate repositories.
+
 ## How to Contribute
 
 1. **Fork the repo** and clone locally.
