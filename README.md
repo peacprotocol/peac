@@ -15,6 +15,7 @@ PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent
 - [Table of Contents](#table-of-contents)
 - [Capabilities](#capabilities)
 - [Who Benefits](#who-benefits)
+- [pact.txt - PEAC 0.9.1.1 update and onwards:](#pacttxt---peac-0911-update-and-onwards)
 - [Use Cases](#use-cases)
 - [Examples](#examples)
 - [Canonical Test Agent](#canonical-test-agent)
@@ -56,6 +57,10 @@ PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent
 - **Regulators & Compliance Teams:** Audit easily with cryptographic proofs, anonymized logs, and GDPR/EU AI Act mapping.
 
 > **PEAC Protocol is not a paywall** it’s an open, programmable trust, attribution, and compliance layer. Like `robots.txt`, but verifiable and future-proof.
+
+## pact.txt - PEAC 0.9.1.1 update and onwards:
+
+Legacy platform plugins and integrations have been archived as of v0.9.1.1. Please refer to the /archived folder or releases for old integrations. Details and udpates to be shared soon.
 
 ## Use Cases
 

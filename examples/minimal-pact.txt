@@ -1,0 +1,10 @@
+version: 0.9.1
+protocol: peac
+
+pact:
+  consent:
+    ai_training: conditional
+  economics:
+    pricing: $0.01/gb
+    payment_endpoints:
+      stripe: https://pay.example.com/stripe

@@ -1,7 +1,8 @@
 module.exports = {
   testEnvironment: 'node',
   testMatch: [
-    '**/__tests__/**/*.test.js',
-    '**/core/tests/**/*.test.js'
+    '**/tests/**/*.test.js',
+    '**/sdk/**/*.test.js'
   ],
+  testPathIgnorePatterns: ["/node_modules/", "/archived/"]
 };
