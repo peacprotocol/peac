@@ -1,61 +1,41 @@
 {
-  "name": "@peac/protocol",
-  "version": "0.9.0",
-  "description": "PEAC Protocol - Programmable Economic Access, Attribution & Consent",
-  "main": "core/index.js",
-  "exports": {
-    ".": "./core/index.js"
-  },
+  "name": "@peacprotocol/core",
+  "version": "0.9.1-patch.1",
+  "description": "PEAC Protocol - Universal Digital Pacts for the Automated Economy",
+  "main": "sdk/index.js",
   "bin": {
-    "peac": "./cli/peac-cli.js"
+    "peac": "./cli/peac.js"
   },
-  "files": [
-    "core/",
-    "cli/",
-    "schema/",
-    "examples/",
-    "LICENSE",
-    "README.md"
-  ],
   "scripts": {
-    "prepare": "husky install",
-    "test": "jest",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
     "lint": "eslint .",
-    "format": "prettier --write ."
-  },
-  "dependencies": {
-    "@metamask/eth-sig-util": "^8.2.0",
-    "ethereumjs-util": "^7.1.5",
-    "ethers": "^6.15.0",
-    "js-yaml": "^4.1.0",
-    "libsodium-wrappers": "^0.7.15",
-    "node-fetch": "^2.6.12"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.31.0",
-    "eslint": "^9.31.0",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-prettier": "^5.5.1",
-    "globals": "^16.3.0",
-    "husky": "^9.1.7",
-    "jest": "^29.7.0",
-    "nock": "^13.5.4",
-    "prettier": "^3.6.2",
-    "semver": "^7.7.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jithinraj/PEAC---v0000000.9"
+    "validate": "node cli/peac.js validate examples/pact.txt",
+    "demo:payment": "node examples/payment-demo.js"
   },
   "keywords": [
     "peac",
     "protocol",
-    "web access",
-    "programmable consent",
-    "http 402",
-    "attribution",
-    "machine-readable"
+    "pact",
+    "consent",
+    "payments",
+    "ai",
+    "compliance"
   ],
-  "author": "PEAC Protocol Contributors",
-  "license": "Apache-2.0"
+  "author": "PEAC Protocol Foundation",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "commander": "^11.0.0",
+    "stripe": "^13.0.0",
+    "node-fetch": "^3.3.2",
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "jest": "^29.6.0",
+    "eslint": "^8.50.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
