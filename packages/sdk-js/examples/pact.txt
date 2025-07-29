@@ -1,0 +1,37 @@
+version: 0.9.1
+protocol: peac
+
+metadata:
+  domain: example.com
+  updated: 2025-07-29T00:00:00Z
+  public_key: |
+    -----BEGIN PUBLIC KEY-----
+    MCowBQYDK2VwAyEAGqBmJKHN...
+    -----END PUBLIC KEY-----
+
+pact:
+  consent:
+    ai_training: conditional
+    web_scraping: allowed
+    commercial_use: negotiable
+    
+  economics:
+    pricing: $0.01/gb
+    payment_endpoints:
+      stripe: https://pay.example.com/stripe
+      http402: https://pay.example.com/402
+    
+  attribution:
+    required: true
+    format: "Source: {url}"
+    
+  compliance:
+    gdpr: true
+    ccpa: true
+    ai_act: true
+    
+  dispute:
+    contact: legal@example.com
+    endpoint: https://example.com/dispute
+
+signature: 3f2a1b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a
