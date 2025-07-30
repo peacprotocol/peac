@@ -1,41 +1,58 @@
 /**
  * PEAC Protocol Payment Demo
- * Shows how to parse a pact and process payments
+ * Demonstrates payment processing with multiple providers
+ * @license Apache-2.0
  */
 
-const { Parser, Payments } = require('../sdk');
+const { UniversalParser, Payments } = require('../sdk');
 
-async function demo() {
-  console.log('PEAC Protocol Payment Demo\n');
-  
+async function main() {
   try {
-    // 1. Parse pact from domain
-    const parser = new Parser();
-    const pact = await parser.parse('example.com');
-    console.log('✓ Parsed pact from example.com');
-    console.log(`  Version: ${pact.version}`);
-    console.log(`  Pricing: ${pact.pact.economics.pricing}`);
+    // Parse pact from a domain
+    console.log('Parsing pact from example.com...');
+    const parser = new UniversalParser();
+    const pact = await parser.parseAll('example.com');
     
-    // 2. Initialize payment handler
+    console.log('✓ Pact parsed successfully');
+    console.log(`  Version: ${pact.version}`);
+    console.log(`  Available processors: ${Object.keys(pact.pact?.economics?.payment_processors || {}).join(', ')}`);
+    
+    // Initialize payments
     const payments = new Payments(pact);
     
-    // 3. Process a payment
-    console.log('\nProcessing payment...');
-    const paymentResult = await payments.processPayment({
+    // Example 1: Stripe payment
+    console.log('\n1. Processing Stripe payment...');
+    const stripeResult = await payments.processPayment({
       amount: 10.00,
       currency: 'usd',
       purpose: 'ai_training',
       processor: 'stripe'
     });
+    console.log('✓ Stripe payment initiated');
+    console.log(`  Payment ID: ${stripeResult.payment_id}`);
+    console.log(`  Status: ${stripeResult.status}`);
     
-    console.log('✓ Payment initiated');
-    console.log(`  Payment ID: ${paymentResult.payment_id}`);
-    console.log(`  Amount: $${paymentResult.amount}`);
-    console.log(`  Status: ${paymentResult.status}`);
+    // Example 2: Bridge payment (stablecoin)
+    console.log('\n2. Processing Bridge payment...');
+    const bridgeResult = await payments.processPayment({
+      amount: 50.00,
+      currency: 'usd',
+      purpose: 'api_access',
+      processor: 'bridge'
+    });
+    console.log('✓ Bridge payment initiated');
+    console.log(`  Payment ID: ${bridgeResult.payment_id}`);
+    console.log(`  Destination: USDB`);
     
-    // 4. Create payment link
-    const paymentLink = await payments.createPaymentLink(10.00, 'ai_training');
-    console.log(`\n✓ Payment link: ${paymentLink}`);
+    // Example 3: Create payment link
+    console.log('\n3. Creating payment link...');
+    const paymentLink = await payments.createPaymentLink(
+      100.00,
+      'commercial_use',
+      { processor: 'stripe' }
+    );
+    console.log('✓ Payment link created');
+    console.log(`  Link: ${paymentLink}`);
     
   } catch (error) {
     console.error('Error:', error.message);
@@ -44,7 +61,7 @@ async function demo() {
 
 // Run demo if called directly
 if (require.main === module) {
-  demo();
+  main();
 }
 
-module.exports = demo;
+module.exports = main;
