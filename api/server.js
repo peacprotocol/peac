@@ -59,8 +59,8 @@ app.get('/pact.txt', (req, res) => {
   });
 });
 
-// Error handling
-app.use((err, req, res, next) => {
+// Error handling middleware
+app.use((err, req, res) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
     error: {

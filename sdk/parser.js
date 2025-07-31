@@ -167,32 +167,31 @@ class PEACParser {
   }
 
   parsePactContent(content) {
-  let result;
-  try {
-    result = yaml.load(content);
-    // Defensive: if result is a string, treat as invalid format
-    if (typeof result !== 'object' || result === null) {
-      return { error: "Invalid pact format" };
-    }
-    return result;
-  } catch (yamlError) {
+    let result;
     try {
-      result = JSON.parse(content);
+      result = yaml.load(content);
+      // Defensive: if result is a string, treat as invalid format
       if (typeof result !== 'object' || result === null) {
         return { error: "Invalid pact format" };
       }
       return result;
-    } catch (jsonError) {
-      const partial = this.extractPartialData(content);
-      if (partial && !this.options.strict) {
-        this.warnings.push('Parsed partial data due to format errors');
-        return partial;
+    } catch (yamlError) {
+      try {
+        result = JSON.parse(content);
+        if (typeof result !== 'object' || result === null) {
+          return { error: "Invalid pact format" };
+        }
+        return result;
+      } catch (jsonError) {
+        const partial = this.extractPartialData(content);
+        if (partial && !this.options.strict) {
+          this.warnings.push('Parsed partial data due to format errors');
+          return partial;
+        }
+        return { error: "Invalid pact format" };
       }
-      return { error: "Invalid pact format" };
     }
   }
-}
-
 
   async validatePact(pact) {
     const errors = [];
@@ -317,8 +316,13 @@ class PEACParser {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  // Discover sources helper (was missing)
+  async discoverSources(domain) {
+    return this.pactFiles.map(file => ({ domain, file }));
+  }
+
   // Batch parsing for multiple domains
-  async parseBatch(domains, options = {}) {
+  async parseBatch(domains) {
     const results = await Promise.allSettled(
       domains.map(domain => this.parse(domain))
     );

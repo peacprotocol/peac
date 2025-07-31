@@ -114,6 +114,7 @@ router.get('/audit/:publisherId', async (req, res) => {
   }
 });
 
+const dashboardRouter = router;
 module.exports = { 
   DashboardAPI, 
   router: dashboardRouter 

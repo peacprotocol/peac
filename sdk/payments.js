@@ -80,8 +80,9 @@ class PEACPayments {
         return this.processStripePayment(amount, currency, enrichedMetadata);
       case 'bridge':
         return this.processBridgePayment(amount, currency, enrichedMetadata);
-      case 'paypal':
+      case 'paypal': {
         return this.processPayPalPayment(amount, currency, enrichedMetadata);
+      }
       case 'x402':
         return this.processX402Payment(amount, currency, enrichedMetadata);
       default:
@@ -381,18 +382,29 @@ class PEACPayments {
           currency: intent.currency
         };
         
-      case 'paypal':
-        // Implement PayPal order status check
-        return {
-          processor: 'paypal',
-          payment_id: paymentId,
-          status: 'pending' // Would need actual API call
+      case 'paypal': {
+        const endpoint = this.getProcessorEndpoint('paypal');
+        const paypalData = {
+          amount,
+          currency: currency.toUpperCase(),
+          description: `PEAC Protocol: ${purpose}`,
+          return_url: metadata.return_url || 'https://example.com/success',
+          cancel_url: metadata.cancel_url || 'https://example.com/cancel'
         };
         
-      default:
-        throw new Error(`Status check not implemented for ${processor}`);
-    }
+        // Mock PayPal response
+        return {
+          processor: 'paypal',
+          payment_id: `PAYPAL-${Date.now()}`,
+          status: 'pending',
+          approval_url: `https://www.paypal.com/checkoutnow?token=TEST`,
+          amount,
+          currency
+        };
+      }  
+
   }
+  
 }
 
 module.exports = PEACPayments;

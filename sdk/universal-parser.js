@@ -5,8 +5,6 @@
  */
 
 const yaml = require('js-yaml');
-const https = require('https');
-const { URL } = require('url');
 const NodeCache = require('node-cache');
 const PEACParser = require('./parser');
 

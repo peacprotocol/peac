@@ -12,7 +12,13 @@ class NegotiationEngine {
   }
 
   async negotiate(proposal) {
-    const { use_case, volume, budget, duration, attribution_commitment } = proposal;
+    const { 
+      use_case, 
+      volume, 
+      budget, 
+      duration = '30 days',
+      academic_verification
+    } = proposal;
 
     // Validate use case
     const consent = this.pact.pact?.consent?.[use_case];
@@ -29,7 +35,7 @@ class NegotiationEngine {
     let finalPrice = basePrice;
 
     // Apply templates
-    if (proposal.academic && this.pact.pact?.negotiation?.templates?.academic) {
+    if (academic_verification && this.pact.pact?.negotiation?.templates?.academic) {
       finalPrice *= 0.5; // 50% discount
     }
 
@@ -63,7 +69,7 @@ class NegotiationEngine {
       reason: 'Budget insufficient',
       counter_offer: {
         suggested_budget: finalPrice,
-        suggested_volume: this.calculateVolumeForBudget(budget, use_case),
+        suggested_volume: this.calculateVolumeForBudget(budget),
         contact_human: this.pact.pact?.negotiation?.human_contact || 'sales@example.com'
       }
     };
@@ -78,6 +84,19 @@ class NegotiationEngine {
 
     const volumeGB = this.parseGB(volume);
     return volumeGB * (parseFloat(pricing.per_gb) || 0.01);
+  }
+
+  calculateVolumeForBudget(budget) {
+    const economics = this.pact.pact?.economics;
+    if (!economics) return '0GB';
+
+    const pricing = economics.pricing_models?.usage_based;
+    if (!pricing) return '0GB';
+
+    const pricePerGB = parseFloat(pricing.per_gb) || 0.01;
+    const gb = Math.floor(budget / pricePerGB);
+    
+    return gb >= 1024 ? `${Math.floor(gb / 1024)}TB` : `${gb}GB`;
   }
 
   generatePactId() {
@@ -143,6 +162,7 @@ router.post('/negotiate', async (req, res) => {
   }
 });
 
+const negotiationRouter = router;
 module.exports = { 
   NegotiationEngine, 
   router: negotiationRouter 

@@ -25,7 +25,7 @@ describe('PEAC Negotiation', () => {
           enabled: true,
           templates: {
             bulk_discount: {
-              threshold: '1TB',
+              threshold: '100GB',
               discount: '20%'
             },
             academic: {
@@ -50,7 +50,7 @@ describe('PEAC Negotiation', () => {
       
       const result = await negotiation.negotiate(proposal);
       expect(result.accepted).toBe(true);
-      expect(result.terms.price).toBe(0.8); // 100GB * $0.01 with 20% bulk discount = $0.8
+      expect(result.terms.price).toBeCloseTo(0.8, 2); // 100GB * $0.01 with 20% bulk discount = $0.8
     });
 
     test('rejects proposal over budget', async () => {

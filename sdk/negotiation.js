@@ -1,182 +1,260 @@
 /**
- * PEAC Protocol Negotiation Engine
- * Handles programmatic negotiation between publishers and consumers
+ * PEAC Protocol Negotiation Module
+ * Enables programmatic negotiation for AI agents and publishers
  * @license Apache-2.0
  */
 
-class PEACNegotiation {
-  constructor(pact, options = {}) {
+const crypto = require('crypto');
+
+class Negotiation {
+  constructor(pact) {
     this.pact = pact;
-    this.options = options;
   }
 
   async negotiate(proposal) {
+    if (!this.pact.pact?.negotiation?.enabled && !this.pact.pact?.negotiation?.endpoint) {
+      return this.createManualResponse();
+    }
+
+    // Extract proposal details
     const {
       use_case,
-      volume,
+      volume: volumeStr,
       budget,
       duration = '30 days',
       attribution_commitment = true,
-      framework,
-      metadata = {}
+      academic_verification = false,
+      startup_verification = false
     } = proposal;
 
-    // Validate use case
-    const consent = this.pact.pact?.consent?.[use_case];
-    if (!consent || consent === 'denied') {
-      return this.createRejection('use_case_denied', use_case);
+    // Parse volume
+    const volume = this.parseVolume(volumeStr);
+    if (!volume) {
+      return {
+        accepted: false,
+        reason: 'invalid_volume',
+        message: 'Invalid volume format. Use formats like "100GB", "1TB", "1000 requests"'
+      };
     }
 
-    // Check negotiation availability
-    const negotiationEndpoint = this.pact.pact?.negotiation?.endpoint;
-    const negotiationEnabled = this.pact.pact?.negotiation?.enabled;
-    
-    if (!negotiationEnabled && !negotiationEndpoint) {
-      return this.createRejection('negotiation_not_available');
+    // Check consent
+    const consent = this.pact.pact?.consent?.[use_case];
+    if (!consent || consent === 'denied') {
+      return {
+        accepted: false,
+        reason: 'use_case_denied',
+        message: `Use case "${use_case}" is not allowed`,
+        alternatives: this.getSuggestedUseCases()
+      };
     }
 
     // Calculate base price
-    const basePrice = this.calculatePrice(use_case, volume);
+    const basePrice = this.calculateBasePrice(use_case, volume);
     let finalPrice = basePrice;
-    
-    // Apply templates
-    const templates = this.pact.pact?.negotiation?.templates || {};
-    finalPrice = this.applyTemplates(finalPrice, volume, proposal, templates);
 
-    // Check budget
-    if (finalPrice <= budget) {
-      return this.createAcceptance({
-        use_case,
-        volume,
-        price: finalPrice,
-        duration,
-        attribution_commitment,
-        metadata
+    // Apply discounts
+    const discounts = [];
+    
+    // Academic discount
+    if (academic_verification && this.pact.pact?.negotiation?.templates?.academic) {
+      const academicDiscount = this.parseDiscount(
+        this.pact.pact.negotiation.templates.academic.discount
+      );
+      finalPrice *= (1 - academicDiscount);
+      discounts.push({
+        type: 'academic',
+        discount: `${academicDiscount * 100}%`,
+        verification: 'required'
       });
     }
 
-    // Create counter offer
-    return this.createCounterOffer({
-      use_case,
-      volume,
-      budget,
-      finalPrice,
-      basePrice
-    });
+    // Startup discount
+    if (startup_verification && this.pact.pact?.negotiation?.templates?.startup) {
+      const startupDiscount = this.parseDiscount(
+        this.pact.pact.negotiation.templates.startup.discount
+      );
+      finalPrice *= (1 - startupDiscount);
+      discounts.push({
+        type: 'startup',
+        discount: `${startupDiscount * 100}%`,
+        criteria: this.pact.pact.negotiation.templates.startup.criteria
+      });
+    }
+
+    // Bulk discount
+    const bulkTemplate = this.pact.pact?.negotiation?.templates?.bulk_discount;
+    if (bulkTemplate && this.isEligibleForBulkDiscount(volume, bulkTemplate)) {
+      const bulkDiscount = this.parseDiscount(bulkTemplate.discount);
+      finalPrice *= (1 - bulkDiscount);
+      discounts.push({
+        type: 'bulk',
+        discount: `${bulkDiscount * 100}%`,
+        threshold: bulkTemplate.threshold
+      });
+    }
+
+    // Always round to 2 decimals
+    finalPrice = Math.round(finalPrice * 100) / 100;
+
+    // Check if within budget
+    if (finalPrice <= budget) {
+      return this.createAcceptedResponse({
+        use_case,
+        volume: volumeStr,
+        price: finalPrice,
+        currency: 'USD',
+        duration,
+        discounts,
+        attribution_commitment,
+        payment_processors: this.getAvailableProcessors()
+      });
+    } else {
+      return this.createCounterOffer({
+        use_case,
+        budget,
+        finalPrice,
+        basePrice
+      });
+    }
   }
 
-  calculatePrice(use_case, volume) {
+  calculateBasePrice(use_case, volume) {
     const economics = this.pact.pact?.economics;
     if (!economics) return 0;
 
-    const pricing = economics.pricing_models?.usage_based;
+    const pricing = economics.pricing_models;
     if (!pricing) return 0;
 
-    // Parse volume
-    const { amount, unit } = this.parseVolume(volume);
-    
-    // Calculate based on unit
-    switch (unit) {
-      case 'gb':
-        return amount * (this.parsePrice(pricing.per_gb) || 0.01);
-      case 'tb':
-        return amount * 1024 * (this.parsePrice(pricing.per_gb) || 0.01);
-      case 'requests':
-        return amount * (this.parsePrice(pricing.per_request) || 0.001);
-      case 'minutes':
-        return amount * (this.parsePrice(pricing.per_minute) || 0.10);
-      default:
-        return 0;
-    }
-  }
-
-  applyTemplates(price, volume, proposal, templates) {
-    let finalPrice = price;
-
-    // Bulk discount
-    if (templates.bulk_discount) {
-      const threshold = this.parseVolume(templates.bulk_discount.threshold);
-      const proposalVolume = this.parseVolume(volume);
+    // Usage-based pricing
+    if (pricing.usage_based) {
+      const { amount, unit } = volume;
       
-      if (proposalVolume.amount >= threshold.amount) {
-        const discount = this.parsePercentage(templates.bulk_discount.discount);
-        finalPrice *= (1 - discount);
+      switch (unit) {
+        case 'gb':
+          return amount * this.parsePrice(pricing.usage_based.per_gb || '$0.01');
+        case 'tb':
+          return amount * 1024 * this.parsePrice(pricing.usage_based.per_gb || '$0.01');
+        case 'request':
+          return amount * this.parsePrice(pricing.usage_based.per_request || '$0.001');
+        case 'minute':
+          return amount * this.parsePrice(pricing.usage_based.per_minute || '$0.10');
+        default:
+          return 0;
       }
     }
 
-    // Academic discount
-    if (templates.academic && proposal.academic_verification) {
-      const discount = this.parsePercentage(templates.academic.discount);
-      finalPrice *= (1 - discount);
+    // Flat rate pricing
+    if (pricing.flat_rate) {
+      const monthly = this.parsePrice(pricing.flat_rate.monthly);
+      return monthly || 0;
     }
 
-    // Startup discount
-    if (templates.startup && proposal.startup_verification) {
-      const discount = this.parsePercentage(templates.startup.discount);
-      finalPrice *= (1 - discount);
-    }
-
-    // Framework-specific pricing
-    if (proposal.framework && templates[proposal.framework]) {
-      const frameworkDiscount = this.parsePercentage(templates[proposal.framework].discount);
-      finalPrice *= (1 - frameworkDiscount);
-    }
-
-    // Always return 2 decimal places
-    return Math.max(0, Math.round(finalPrice * 100) / 100);
-    
+    return 0;
   }
 
-  createAcceptance(terms) {
-    const pactId = this.generatePactId();
-    const expires = this.calculateExpiry(terms.duration);
+  parseVolume(volumeStr) {
+    if (!volumeStr || typeof volumeStr !== 'string') return null;
     
-    return {
+    const match = volumeStr.toLowerCase().match(/(\d+(?:\.\d+)?)\s*(gb|tb|mb|requests?|minutes?|hours?)/);
+    if (!match) return null;
+
+    const amount = parseFloat(match[1]);
+    let unit = match[2];
+    
+    // Normalize units
+    if (unit.endsWith('s')) unit = unit.slice(0, -1);
+    if (unit === 'mb') return { amount: amount / 1024, unit: 'gb' };
+    if (unit === 'hour') return { amount: amount * 60, unit: 'minute' };
+    
+    return { amount, unit };
+  }
+
+  parsePrice(priceStr) {
+    if (typeof priceStr === 'number') return priceStr;
+    if (!priceStr || typeof priceStr !== 'string') return 0;
+    
+    const match = priceStr.match(/\$?([\d.]+)/);
+    return match ? parseFloat(match[1]) : 0;
+  }
+
+  parseDiscount(discountStr) {
+    if (!discountStr) return 0;
+    const match = discountStr.match(/([\d.]+)%?/);
+    const value = match ? parseFloat(match[1]) : 0;
+    return value > 1 ? value / 100 : value;
+  }
+
+  isEligibleForBulkDiscount(volume, template) {
+    if (!template.threshold) return false;
+    
+    const threshold = this.parseVolume(template.threshold);
+    if (!threshold || !volume) return false;
+    
+    // Convert to same unit for comparison
+    if (volume.unit === threshold.unit) {
+      return volume.amount >= threshold.amount;
+    }
+    
+    // Convert TB to GB for comparison
+    if (volume.unit === 'gb' && threshold.unit === 'tb') {
+      return volume.amount >= threshold.amount * 1024;
+    }
+    if (volume.unit === 'tb' && threshold.unit === 'gb') {
+      return volume.amount * 1024 >= threshold.amount;
+    }
+    
+    return false;
+  }
+
+  getSuggestedUseCases() {
+    const consent = this.pact.pact?.consent || {};
+    return Object.keys(consent).filter(key => 
+      consent[key] === 'allowed' || 
+      consent[key] === 'conditional' ||
+      (typeof consent[key] === 'object' && consent[key].allowed !== 'denied')
+    );
+  }
+
+  getAvailableProcessors() {
+    const processors = this.pact.pact?.economics?.payment_processors || {};
+    return Object.keys(processors);
+  }
+
+  createAcceptedResponse(params) {
+    const pactId = this.generatePactId();
+    const expires = this.calculateExpiry(params.duration);
+    
+    const response = {
       accepted: true,
       pact_id: pactId,
       terms: {
-        use_case: terms.use_case,
-        volume: terms.volume,
-        price: terms.price,
-        currency: this.pact.pact?.economics?.currency?.[0] || 'USD',
-        duration: terms.duration,
+        use_case: params.use_case,
+        volume: params.volume,
+        price: params.price,
+        currency: params.currency,
+        duration: params.duration,
         expires,
-        payment_link: this.generatePaymentLink(terms.price, terms.use_case),
-        payment_processors: Object.keys(this.pact.pact?.economics?.payment_processors || {}),
-        attribution_required: this.pact.pact?.attribution?.required || false,
-        attribution_format: this.pact.pact?.attribution?.format,
-        compliance: this.getApplicableCompliance(),
-        metadata: terms.metadata
-      },
-      signature: this.generateSignature({ pact_id: pactId, ...terms })
-    };
-  }
-
-  createRejection(reason, details) {
-    const response = {
-      accepted: false,
-      reason,
-      timestamp: new Date().toISOString()
+        payment_processors: params.payment_processors,
+        attribution_required: params.attribution_commitment,
+        attribution_format: this.pact.pact?.attribution?.format
+      }
     };
 
-    switch (reason) {
-      case 'use_case_denied':
-        response.message = `Use case '${details}' is not allowed`;
-        response.allowed_use_cases = this.getAllowedUseCases();
-        break;
-      case 'negotiation_not_available':
-        response.message = 'Negotiation is not available for this pact';
-        response.contact = this.pact.pact?.dispute?.contact;
-        break;
-      default:
-        response.message = 'Negotiation failed';
+    if (params.discounts && params.discounts.length > 0) {
+      response.terms.discounts_applied = params.discounts;
+    }
+
+    // Add payment link if Stripe is available
+    const stripeProcessor = this.pact.pact?.economics?.payment_processors?.stripe;
+    if (stripeProcessor && stripeProcessor.endpoint) {
+      response.terms.payment_link = `${stripeProcessor.endpoint}?amount=${params.price}&pact_id=${pactId}`;
     }
 
     return response;
   }
 
   createCounterOffer(params) {
-    const { use_case, volume, budget, finalPrice, basePrice } = params;
+    const { budget, finalPrice, basePrice } = params;
 
     // Always round to 2 decimals for protocol consistency
     const round2 = x => Math.round(x * 100) / 100;
@@ -186,160 +264,118 @@ class PEACNegotiation {
       reason: 'budget_insufficient',
       counter_offer: {
         suggested_budget: round2(finalPrice),
-        minimum_budget: round2(basePrice * 0.8), // 20% negotiation room
-        suggested_volume: this.calculateVolumeForBudget(budget, use_case),
+        minimum_budget: round2(basePrice * 0.8), // 20% discount max
+        suggested_volume: this.calculateVolumeForBudget(budget),
         available_discounts: this.getAvailableDiscounts(),
-        negotiation_endpoint: this.pact.pact?.negotiation?.endpoint,
-        human_contact: this.pact.pact?.dispute?.contact || this.pact.pact?.negotiation?.human_contact,
-        expires: new Date(Date.now() + 3600000).toISOString() // 1 hour
+        human_contact: this.pact.pact?.negotiation?.human_contact || 
+                      this.pact.pact?.dispute?.contact ||
+                      'sales@example.com'
       }
     };
   }
 
-
-  parseVolume(volume) {
-    const match = volume.toString().match(/^(\d+(?:\.\d+)?)\s*(gb|tb|mb|requests?|minutes?)?$/i);
-    if (!match) return { amount: 0, unit: 'unknown' };
-    
-    return {
-      amount: parseFloat(match[1]),
-      unit: (match[2] || 'gb').toLowerCase().replace(/s$/, '')
-    };
-  }
-
-  parsePrice(price) {
-    if (typeof price === 'number') return price;
-    if (typeof price === 'string') {
-      const match = price.match(/\$?(\d+(?:\.\d+)?)/);
-      return match ? parseFloat(match[1]) : 0;
-    }
-    return 0;
-  }
-
-  parsePercentage(percentage) {
-    if (typeof percentage === 'number') return percentage / 100;
-    if (typeof percentage === 'string') {
-      const match = percentage.match(/(\d+(?:\.\d+)?)%?/);
-      return match ? parseFloat(match[1]) / 100 : 0;
-    }
-    return 0;
-  }
-
-  generatePactId() {
-    return `pact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  generatePaymentLink(amount, purpose) {
-    // This would integrate with actual payment processor
-    const baseUrl = this.pact.pact?.economics?.payment_processors?.stripe?.endpoint || 
-                   'https://pay.example.com';
-    return `${baseUrl}?amount=${amount}&purpose=${encodeURIComponent(purpose)}`;
-  }
-
-  calculateExpiry(duration) {
-    const match = duration.match(/(\d+)\s*(days?|months?|years?)/i);
-    if (!match) return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    
-    const amount = parseInt(match[1]);
-    const unit = match[2].toLowerCase();
-    
-    const expiry = new Date();
-    switch (unit) {
-      case 'day':
-      case 'days':
-        expiry.setDate(expiry.getDate() + amount);
-        break;
-      case 'month':
-      case 'months':
-        expiry.setMonth(expiry.getMonth() + amount);
-        break;
-      case 'year':
-      case 'years':
-        expiry.setFullYear(expiry.getFullYear() + amount);
-        break;
-    }
-    
-    return expiry.toISOString();
-  }
-
-  getAllowedUseCases() {
-    const consent = this.pact.pact?.consent || {};
-    return Object.keys(consent).filter(key => 
-      consent[key] === 'allowed' || consent[key] === 'conditional'
-    );
-  }
-
-  getAvailableDiscounts() {
-    const templates = this.pact.pact?.negotiation?.templates || {};
-    const discounts = [];
-    
-    if (templates.bulk_discount) {
-      discounts.push({
-        type: 'bulk',
-        threshold: templates.bulk_discount.threshold,
-        discount: templates.bulk_discount.discount
-      });
-    }
-    
-    if (templates.academic) {
-      discounts.push({
-        type: 'academic',
-        discount: templates.academic.discount,
-        verification: templates.academic.verification
-      });
-    }
-    
-    if (templates.startup) {
-      discounts.push({
-        type: 'startup',
-        discount: templates.startup.discount,
-        criteria: templates.startup.criteria
-      });
-    }
-    
-    return discounts;
-  }
-
-  calculateVolumeForBudget(budget, use_case) {
+  calculateVolumeForBudget(budget) {
     const economics = this.pact.pact?.economics;
     if (!economics) return '0GB';
 
     const pricing = economics.pricing_models?.usage_based;
     if (!pricing) return '0GB';
 
-    const perGb = this.parsePrice(pricing.per_gb) || 0.01;
-    const gb = Math.floor(budget / perGb);
+    const pricePerGB = this.parsePrice(pricing.per_gb || '$0.01');
+    const gb = Math.floor(budget / pricePerGB);
     
-    return `${gb}GB`;
+    return gb >= 1024 ? `${Math.floor(gb / 1024)}TB` : `${gb}GB`;
   }
 
-  getApplicableCompliance() {
-    const compliance = this.pact.pact?.compliance?.jurisdictions || {};
-    const applicable = {};
+  getAvailableDiscounts() {
+    const templates = this.pact.pact?.negotiation?.templates || {};
+    const discounts = [];
+
+    if (templates.academic) {
+      discounts.push({
+        type: 'academic',
+        discount: templates.academic.discount,
+        requirements: 'Academic email or verification required'
+      });
+    }
+
+    if (templates.startup) {
+      discounts.push({
+        type: 'startup',
+        discount: templates.startup.discount,
+        criteria: templates.startup.criteria || 'Under $10M revenue'
+      });
+    }
+
+    if (templates.bulk_discount) {
+      discounts.push({
+        type: 'bulk',
+        discount: templates.bulk_discount.discount,
+        threshold: templates.bulk_discount.threshold
+      });
+    }
+
+    return discounts;
+  }
+
+  createManualResponse() {
+    return {
+      accepted: false,
+      reason: 'manual_negotiation_required',
+      message: 'Automated negotiation not available',
+      contact: this.pact.pact?.dispute?.contact || 
+               this.pact.pact?.negotiation?.human_contact ||
+               'Contact information not provided'
+    };
+  }
+
+  generatePactId() {
+    return `pact_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+  }
+
+  calculateExpiry(duration) {
+    const now = new Date();
+    const match = duration.match(/(\d+)\s*(days?|months?|years?)/i);
     
-    // Include all true compliance flags
-    for (const [jurisdiction, rules] of Object.entries(compliance)) {
-      const activeRules = {};
-      for (const [rule, value] of Object.entries(rules)) {
-        if (value === true) {
-          activeRules[rule] = value;
-        }
-      }
-      if (Object.keys(activeRules).length > 0) {
-        applicable[jurisdiction] = activeRules;
-      }
+    if (!match) {
+      now.setDate(now.getDate() + 30); // Default 30 days
+      return now.toISOString();
+    }
+
+    const amount = parseInt(match[1]);
+    const unit = match[2].toLowerCase();
+
+    switch (unit) {
+      case 'day':
+      case 'days':
+        now.setDate(now.getDate() + amount);
+        break;
+      case 'month':
+      case 'months':
+        now.setMonth(now.getMonth() + amount);
+        break;
+      case 'year':
+      case 'years':
+        now.setFullYear(now.getFullYear() + amount);
+        break;
+    }
+
+    return now.toISOString();
+  }
+
+  // Apply template-specific logic
+  applyTemplate(template, basePrice) {
+    let price = basePrice;
+    
+    if (template.fixed_price) {
+      price = this.parsePrice(template.fixed_price);
+    } else if (template.discount) {
+      const discount = this.parseDiscount(template.discount);
+      price *= (1 - discount);
     }
     
-    return applicable;
-  }
-
-  generateSignature(data) {
-    // In production, this would use proper cryptographic signing
-    const crypto = require('crypto');
-    const hash = crypto.createHash('sha256');
-    hash.update(JSON.stringify(data));
-    return hash.digest('hex');
+    return Math.round(price * 100) / 100;
   }
 }
 
-module.exports = PEACNegotiation;
+module.exports = Negotiation;
