@@ -10,7 +10,6 @@ const { program } = require('commander');
 const fs = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
-const chalk = require('chalk');
 const { 
   UniversalParser, 
   Crypto, 
@@ -50,7 +49,7 @@ program
       
       if (options.interactive) {
         // Interactive mode would walk through options
-        console.log(chalk.blue('Interactive mode coming soon...'));
+        console.log('Interactive mode coming soon...');
         template = await getTemplate(options.type);
       } else {
         template = await getTemplate(options.type);
@@ -63,14 +62,14 @@ program
       
       await fs.writeFile(options.output, yamlContent);
       
-      console.log(chalk.green(`✓ Created ${options.output}`));
-      console.log(chalk.gray(`  Type: ${options.type}`));
-      console.log(chalk.gray(`  Next steps:`));
-      console.log(chalk.gray(`    1. Edit ${options.output} to customize your terms`));
-      console.log(chalk.gray(`    2. Run 'peac sign ${options.output}' to sign it`));
-      console.log(chalk.gray(`    3. Deploy to your-domain.com/${options.output}`));
+      console.log(`✓ Created ${options.output}`);
+      console.log(`  Type: ${options.type}`);
+      console.log(`  Next steps:`);
+      console.log(`    1. Edit ${options.output} to customize your terms`);
+      console.log(`    2. Run 'peac sign ${options.output}' to sign it`);
+      console.log(`    3. Deploy to your-domain.com/${options.output}`);
     } catch (error) {
-      console.error(chalk.red('Error:'), error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
@@ -88,21 +87,21 @@ program
       const pact = parser.parsePactContent(content);
       await parser.validatePact(pact);
       
-      console.log(chalk.green('✓ Valid pact file'));
+      console.log('✓ Valid pact file');
       
       if (options.verbose) {
-        console.log(chalk.gray('\nDetails:'));
-        console.log(chalk.gray(`  Version: ${pact.version}`));
-        console.log(chalk.gray(`  Protocol: ${pact.protocol}`));
-        console.log(chalk.gray(`  Signed: ${pact.signature ? 'Yes' : 'No'}`));
+        console.log('\nDetails:');
+        console.log(`  Version: ${pact.version}`);
+        console.log(`  Protocol: ${pact.protocol}`);
+        console.log(`  Signed: ${pact.signature ? 'Yes' : 'No'}`);
         
         if (parser.warnings.length > 0) {
-          console.log(chalk.yellow('\nWarnings:'));
-          parser.warnings.forEach(w => console.log(chalk.yellow(`  - ${w}`)));
+          console.log('\nWarnings:');
+          parser.warnings.forEach(w => console.log(` - ${w}`));
         }
       }
     } catch (error) {
-      console.error(chalk.red('✗ Invalid:'), error.message);
+      console.error('✗ Invalid:', error.message);
       process.exit(1);
     }
   });
@@ -130,11 +129,11 @@ program
         try {
           publicKey = await crypto.loadKey(pubKeyPath);
         } catch {
-          console.warn(chalk.yellow('Warning: Could not find public key file'));
+          console.warn('Warning: Could not find public key file');
         }
       } else if (options.generateKey) {
         // Generate new keypair
-        console.log(chalk.yellow('Generating new Ed25519 keypair...'));
+        console.log('Generating new Ed25519 keypair...');
         const keyPair = crypto.generateKeyPair({ passphrase: options.passphrase });
         privateKey = keyPair.privateKey;
         publicKey = keyPair.publicKey;
@@ -147,12 +146,12 @@ program
         await fs.writeFile(privateKeyPath, privateKey);
         await fs.writeFile(publicKeyPath, publicKey);
         
-        console.log(chalk.green(`✓ Generated keypair:`));
-        console.log(chalk.gray(`  Private key: ${privateKeyPath}`));
-        console.log(chalk.gray(`  Public key: ${publicKeyPath}`));
-        console.log(chalk.yellow(`  Keep your private key secure!`));
+        console.log(`✓ Generated keypair:`);
+        console.log(`  Private key: ${privateKeyPath}`);
+        console.log(`  Public key: ${publicKeyPath}`);
+        console.log(`  Keep your private key secure!`);
       } else {
-        console.error(chalk.red('Error: No key provided. Use --key or --generate-key'));
+        console.error('Error: No key provided. Use --key or --generate-key');
         process.exit(1);
       }
       
@@ -172,11 +171,11 @@ program
       });
       await fs.writeFile(file, signedContent);
       
-      console.log(chalk.green(`✓ Signed ${file}`));
-      console.log(chalk.gray(`  Signature: ${signedPact.signature.substring(0, 32)}...`));
-      console.log(chalk.gray(`  Algorithm: ${signedPact.signature_algorithm}`));
+      console.log(`✓ Signed ${file}`);
+      console.log(`  Signature: ${signedPact.signature.substring(0, 32)}...`);
+      console.log(`  Algorithm: ${signedPact.signature_algorithm}`);
     } catch (error) {
-      console.error(chalk.red('Error:'), error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
@@ -195,12 +194,12 @@ program
         strict: false 
       });
       
-      console.log(chalk.blue(`Parsing pact from ${domain}...`));
+      console.log(`Parsing pact from ${domain}...`);
       const pact = await parser.parse(domain);
       
       if (options.verbose && parser.warnings.length > 0) {
-        console.log(chalk.yellow('\nWarnings:'));
-        parser.warnings.forEach(w => console.log(chalk.yellow(`  - ${w}`)));
+        console.log('\nWarnings:');
+        parser.warnings.forEach(w => console.log(` - ${w}`));
       }
       
       const output = options.format === 'json' 
@@ -210,10 +209,10 @@ program
       console.log('\n' + output);
       
       if (pact.confidence !== undefined && pact.confidence < 1) {
-        console.log(chalk.yellow(`\nConfidence: ${(pact.confidence * 100).toFixed(0)}%`));
+        console.log(`\nConfidence: ${(pact.confidence * 100).toFixed(0)}%`);
       }
     } catch (error) {
-      console.error(chalk.red('Error:'), error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
@@ -227,27 +226,27 @@ program
     try {
       const parser = new UniversalParser();
       
-      console.log(chalk.blue(`\nScanning ${domain} for policy files...`));
+      console.log(`\nScanning ${domain} for policy files...`);
       const result = await parser.parseAll(domain);
       
-      console.log(chalk.green('\n✓ Policy scan complete'));
-      console.log(chalk.gray('─'.repeat(50)));
+      console.log('\n✓ Policy scan complete');
+      console.log('─'.repeat(50));
       
       if (result.metadata?.sources) {
-        console.log(chalk.yellow('Sources found:'));
+        console.log('Sources found:');
         result.metadata.sources.forEach(source => {
-          console.log(chalk.gray(`  - ${source.file || source}`));
+          console.log(`  - ${source.file || source}`);
         });
       }
       
-      console.log(chalk.green('\nUnified policy:'));
+      console.log('\nUnified policy:');
       console.log(yaml.dump(result.pact, { lineWidth: -1 }));
       
       if (result.confidence !== undefined) {
-        console.log(chalk.yellow(`\nConfidence: ${(result.confidence * 100).toFixed(0)}%`));
+        console.log(`\nConfidence: ${(result.confidence * 100).toFixed(0)}%`);
       }
     } catch (error) {
-      console.error(chalk.red('Error:'), error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
@@ -274,7 +273,7 @@ program
         }
       };
       
-      console.log(chalk.blue(`Migrating from ${options.format} format...`));
+      console.log(`Migrating from ${options.format} format...`);
       
       switch (options.format) {
         case 'robots':
@@ -300,15 +299,15 @@ program
       
       await fs.writeFile(options.output, yamlContent);
       
-      console.log(chalk.green(`✓ Migrated to ${options.output}`));
-      console.log(chalk.gray(`  Original format: ${options.format}`));
-      console.log(chalk.gray(`  New format: PEAC Protocol v${pact.version}`));
-      console.log(chalk.gray(`\nNext steps:`));
-      console.log(chalk.gray(`  1. Review and enhance ${options.output}`));
-      console.log(chalk.gray(`  2. Add payment processors and compliance info`));
-      console.log(chalk.gray(`  3. Sign with 'peac sign ${options.output}'`));
+      console.log(`✓ Migrated to ${options.output}`);
+      console.log(`  Original format: ${options.format}`);
+      console.log(`  New format: PEAC Protocol v${pact.version}`);
+      console.log(`\nNext steps:`);
+      console.log(`  1. Review and enhance ${options.output}`);
+      console.log(`  2. Add payment processors and compliance info`);
+      console.log(`  3. Sign with 'peac sign ${options.output}'`);
     } catch (error) {
-      console.error(chalk.red('Error:'), error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
@@ -326,7 +325,7 @@ program
   .option('--framework <framework>', 'Agent framework (openai, langchain, crewai)')
   .action(async (domain, options) => {
     try {
-      console.log(chalk.blue(`\nNegotiating with ${domain}...`));
+      console.log(`\nNegotiating with ${domain}...`);
       
       // Parse pact
       const parser = new UniversalParser();
@@ -334,8 +333,8 @@ program
       
       // Check if negotiation is available
       if (!pact.pact?.negotiation?.enabled && !pact.pact?.negotiation?.endpoint) {
-        console.log(chalk.yellow('⚠ Negotiation not available for this publisher'));
-        console.log(chalk.gray(`  Contact: ${pact.pact?.dispute?.contact || 'Not provided'}`));
+        console.log('⚠ Negotiation not available for this publisher');
+        console.log(`  Contact: ${pact.pact?.dispute?.contact || 'Not provided'}`);
         process.exit(1);
       }
       
@@ -351,10 +350,10 @@ program
         framework: options.framework
       };
       
-      console.log(chalk.gray('Proposal:'));
+      console.log('Proposal:');
       Object.entries(proposal).forEach(([key, value]) => {
         if (value !== undefined) {
-          console.log(chalk.gray(`  ${key}: ${value}`));
+          console.log(`  ${key}: ${value}`);
         }
       });
       
@@ -363,45 +362,45 @@ program
       const result = await negotiation.negotiate(proposal);
       
       if (result.accepted) {
-        console.log(chalk.green('\n✓ Negotiation successful!'));
-        console.log(chalk.white('\nAccepted Terms:'));
-        console.log(chalk.gray(`  Pact ID: ${result.pact_id}`));
-        console.log(chalk.gray(`  Price: $${result.terms.price} ${result.terms.currency}`));
-        console.log(chalk.gray(`  Volume: ${result.terms.volume}`));
-        console.log(chalk.gray(`  Duration: ${result.terms.duration}`));
-        console.log(chalk.gray(`  Expires: ${new Date(result.terms.expires).toLocaleDateString()}`));
+        console.log('\n✓ Negotiation successful!');
+        console.log('\nAccepted Terms:');
+        console.log(`  Pact ID: ${result.pact_id}`);
+        console.log(`  Price: $${result.terms.price} ${result.terms.currency}`);
+        console.log(`  Volume: ${result.terms.volume}`);
+        console.log(`  Duration: ${result.terms.duration}`);
+        console.log(`  Expires: ${new Date(result.terms.expires).toLocaleDateString()}`);
         
         if (result.terms.payment_link) {
-          console.log(chalk.gray(`  Payment: ${result.terms.payment_link}`));
+          console.log(`  Payment: ${result.terms.payment_link}`);
         }
         
         if (result.terms.attribution_required) {
-          console.log(chalk.yellow(`  Attribution: Required (${result.terms.attribution_format})`));
+          console.log(`  Attribution: Required (${result.terms.attribution_format})`);
         }
       } else {
-        console.log(chalk.yellow('\n⚠ Negotiation not accepted'));
-        console.log(chalk.white(`Reason: ${result.reason}`));
+        console.log('\n⚠ Negotiation not accepted');
+        console.log(`Reason: ${result.reason}`);
         
         if (result.counter_offer) {
-          console.log(chalk.white('\nCounter Offer:'));
-          console.log(chalk.gray(`  Suggested budget: $${result.counter_offer.suggested_budget}`));
-          console.log(chalk.gray(`  Minimum budget: $${result.counter_offer.minimum_budget}`));
-          console.log(chalk.gray(`  For your budget: ${result.counter_offer.suggested_volume}`));
+          console.log('\nCounter Offer:');
+          console.log(`  Suggested budget: $${result.counter_offer.suggested_budget}`);
+          console.log(`  Minimum budget: $${result.counter_offer.minimum_budget}`);
+          console.log(`  For your budget: ${result.counter_offer.suggested_volume}`);
           
           if (result.counter_offer.available_discounts?.length > 0) {
-            console.log(chalk.gray(`  Available discounts:`));
+            console.log(`  Available discounts:`);
             result.counter_offer.available_discounts.forEach(d => {
-              console.log(chalk.gray(`    - ${d.type}: ${d.discount}`));
+              console.log(`    - ${d.type}: ${d.discount}`);
             });
           }
           
           if (result.counter_offer.human_contact) {
-            console.log(chalk.gray(`  Contact: ${result.counter_offer.human_contact}`));
+            console.log(`  Contact: ${result.counter_offer.human_contact}`);
           }
         }
       }
     } catch (error) {
-      console.error(chalk.red('Error:'), error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
@@ -418,11 +417,11 @@ program
   .action(async (options) => {
     try {
       if (!options.domain || !options.amount) {
-        console.error(chalk.red('Error: --domain and --amount are required'));
+        console.error('Error: --domain and --amount are required');
         process.exit(1);
       }
       
-      console.log(chalk.blue(`\nProcessing payment to ${options.domain}...`));
+      console.log(`\nProcessing payment to ${options.domain}...`);
       
       // Parse pact
       const parser = new UniversalParser();
@@ -439,17 +438,17 @@ program
         processor: options.provider
       });
       
-      console.log(chalk.green('\n✓ Payment initiated'));
-      console.log(chalk.gray(`  Processor: ${result.processor}`));
-      console.log(chalk.gray(`  Payment ID: ${result.payment_id}`));
-      console.log(chalk.gray(`  Amount: $${result.amount} ${result.currency}`));
-      console.log(chalk.gray(`  Status: ${result.status}`));
+      console.log('\n✓ Payment initiated');
+      console.log(`  Processor: ${result.processor}`);
+      console.log(`  Payment ID: ${result.payment_id}`);
+      console.log(`  Amount: $${result.amount} ${result.currency}`);
+      console.log(`  Status: ${result.status}`);
       
       if (result.client_secret) {
-        console.log(chalk.gray(`  Client Secret: ${result.client_secret.substring(0, 20)}...`));
+        console.log(`  Client Secret: ${result.client_secret.substring(0, 20)}...`);
       }
     } catch (error) {
-      console.error(chalk.red('Error:'), error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
