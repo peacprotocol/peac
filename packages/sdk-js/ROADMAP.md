@@ -9,7 +9,7 @@ Roadmap is published for transparency and community input. Items and timelines m
 ## v0.9 – Initial Launch
 
 - Core protocol specification
-- Canonical `pricing.txt` and schema
+- Canonical `peac.txt` and schema
 - Attribution and consent enforcement
 - Basic agent payment hooks (HTTP 402, Stripe stub)
 - Open source SDK (Node.js)

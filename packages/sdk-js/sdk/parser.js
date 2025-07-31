@@ -25,7 +25,7 @@ class PEACParser {
     };
     
     this.cache = new Map();
-    this.pactFiles = ['/pact.txt', '/.well-known/pact'];
+    this.peacFiles = ['/peac.txt', '/.well-known/peac'];
     this.errors = [];
     this.warnings = [];
   }
@@ -41,7 +41,7 @@ class PEACParser {
     }
 
     // Check cache
-    const cacheKey = `pact:${domain}`;
+    const cacheKey = `peac:${domain}`;
     if (this.options.cache && this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey);
       if (cached.expires > Date.now()) {
@@ -50,19 +50,19 @@ class PEACParser {
       this.cache.delete(cacheKey);
     }
 
-    // Try to fetch pact.txt with retries
-    for (const file of this.pactFiles) {
+    // Try to fetch peac.txt with retries
+    for (const file of this.peacFiles) {
       for (let attempt = 0; attempt < this.options.retries; attempt++) {
         try {
           const content = await this.fetchFile(domain, file);
           if (content) {
-            const pact = await this.parsePactContent(content);
+            const peac = await this.parsePeacContent(content);
             
-            // Validate pact
-            await this.validatePact(pact);
+            // Validate peac
+            await this.validatePeac(peac);
             
             // Verify signature if present
-            if (pact.signature && !await this.verifySignature(pact)) {
+            if (peac.signature && !await this.verifySignature(peac)) {
               this.warnings.push('Signature verification failed');
               if (this.options.strict) {
                 throw new Error('Invalid signature');
@@ -70,18 +70,18 @@ class PEACParser {
             }
             
             // Calculate confidence score
-            pact.confidence = this.calculateConfidence();
+            peac.confidence = this.calculateConfidence();
             
             // Cache result
             if (this.options.cache) {
-              const ttl = (pact.cache_ttl || 3600) * 1000;
+              const ttl = (peac.cache_ttl || 3600) * 1000;
               this.cache.set(cacheKey, {
-                data: pact,
+                data: peac,
                 expires: Date.now() + ttl
               });
             }
             
-            return pact;
+            return peac;
           }
         } catch (error) {
           this.errors.push({
@@ -103,14 +103,14 @@ class PEACParser {
       return {
         version: '0.9.2',
         protocol: 'peac',
-        pact: this.getDefaultPact(),
+        peac: this.getDefaultPeac(),
         errors: this.errors,
         warnings: this.warnings,
         confidence: 0
       };
     }
 
-    throw new Error(`No valid pact found for ${domain}: ${this.errors.map(e => e.error).join(', ')}`);
+    throw new Error(`No valid peac found for ${domain}: ${this.errors.map(e => e.error).join(', ')}`);
   }
 
   async fetchFile(domain, path) {
@@ -166,20 +166,20 @@ class PEACParser {
     });
   }
 
-  parsePactContent(content) {
+  parsePeacContent(content) {
     let result;
     try {
       result = yaml.load(content);
       // Defensive: if result is a string, treat as invalid format
       if (typeof result !== 'object' || result === null) {
-        return { error: "Invalid pact format" };
+        return { error: "Invalid peac format" };
       }
       return result;
     } catch (yamlError) {
       try {
         result = JSON.parse(content);
         if (typeof result !== 'object' || result === null) {
-          return { error: "Invalid pact format" };
+          return { error: "Invalid peac format" };
         }
         return result;
       } catch (jsonError) {
@@ -188,35 +188,35 @@ class PEACParser {
           this.warnings.push('Parsed partial data due to format errors');
           return partial;
         }
-        return { error: "Invalid pact format" };
+        return { error: "Invalid peac format" };
       }
     }
   }
 
-  async validatePact(pact) {
+  async validatePeac(peac) {
     const errors = [];
     
     // Required fields
-    if (!pact.version) {
+    if (!peac.version) {
       errors.push('Missing required field: version');
     } else {
       // Version compatibility check
-      const [major, minor] = pact.version.split('.').map(Number);
+      const [major, minor] = peac.version.split('.').map(Number);
       if (major > 0 || minor > 9) {
-        this.warnings.push(`Parser supports up to v0.9.x, found ${pact.version}`);
+        this.warnings.push(`Parser supports up to v0.9.x, found ${peac.version}`);
       }
     }
     
-    if (!pact.protocol || pact.protocol !== 'peac') {
+    if (!peac.protocol || peac.protocol !== 'peac') {
       errors.push('Invalid or missing protocol field');
     }
 
-    if (!pact.pact) {
-      errors.push('Missing pact section');
+    if (!peac.peac) {
+      errors.push('Missing peac section');
     } else {
-      // Validate pact structure
-      if (!pact.pact.consent && !pact.pact.economics) {
-        this.warnings.push('Pact should define consent or economics');
+      // Validate peac structure
+      if (!peac.peac.consent && !peac.peac.economics) {
+        this.warnings.push('Peac should define consent or economics');
       }
     }
 
@@ -228,11 +228,11 @@ class PEACParser {
     }
   }
 
-  async verifySignature(pact) {
+  async verifySignature(peac) {
     try {
-      const publicKey = pact.metadata?.public_key;
-      const signature = Buffer.from(pact.signature, 'hex');
-      const message = this.canonicalize(pact.pact);
+      const publicKey = peac.metadata?.public_key;
+      const signature = Buffer.from(peac.signature, 'hex');
+      const message = this.canonicalize(peac.peac);
       
       if (!publicKey || !signature) {
         return false;
@@ -264,7 +264,7 @@ class PEACParser {
     return Math.max(0, 1 - errorWeight - warningWeight);
   }
 
-  getDefaultPact() {
+  getDefaultPeac() {
     return {
       consent: {
         default: 'contact'
@@ -285,7 +285,7 @@ class PEACParser {
         return {
           version: versionMatch[1],
           protocol: protocolMatch[1],
-          pact: this.getDefaultPact(),
+          peac: this.getDefaultPeac(),
           partial: true
         };
       }
@@ -318,7 +318,7 @@ class PEACParser {
 
   // Discover sources helper (was missing)
   async discoverSources(domain) {
-    return this.pactFiles.map(file => ({ domain, file }));
+    return this.peacFiles.map(file => ({ domain, file }));
   }
 
   // Batch parsing for multiple domains

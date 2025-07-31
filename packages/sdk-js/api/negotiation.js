@@ -7,8 +7,8 @@ const express = require('express');
 const router = express.Router();
 
 class NegotiationEngine {
-  constructor(pact) {
-    this.pact = pact;
+  constructor(peac) {
+    this.peac = peac;
   }
 
   async negotiate(proposal) {
@@ -21,7 +21,7 @@ class NegotiationEngine {
     } = proposal;
 
     // Validate use case
-    const consent = this.pact.pact?.consent?.[use_case];
+    const consent = this.peac.peac?.consent?.[use_case];
     if (!consent || consent === 'denied') {
       return {
         accepted: false,
@@ -35,11 +35,11 @@ class NegotiationEngine {
     let finalPrice = basePrice;
 
     // Apply templates
-    if (academic_verification && this.pact.pact?.negotiation?.templates?.academic) {
+    if (academic_verification && this.peac.peac?.negotiation?.templates?.academic) {
       finalPrice *= 0.5; // 50% discount
     }
 
-    if (volume > this.parseTB(this.pact.pact?.negotiation?.templates?.bulk_discount?.threshold)) {
+    if (volume > this.parseTB(this.peac.peac?.negotiation?.templates?.bulk_discount?.threshold)) {
       finalPrice *= 0.8; // 20% discount
     }
 
@@ -47,7 +47,7 @@ class NegotiationEngine {
     if (finalPrice <= budget) {
       return {
         accepted: true,
-        pact_id: this.generatePactId(),
+        peac_id: this.generatePeacId(),
         terms: {
           use_case,
           volume,
@@ -55,8 +55,8 @@ class NegotiationEngine {
           currency: 'USD',
           duration,
           payment_link: this.generatePaymentLink(finalPrice, use_case),
-          attribution_required: this.pact.pact?.attribution?.required || false,
-          attribution_format: this.pact.pact?.attribution?.format,
+          attribution_required: this.peac.peac?.attribution?.required || false,
+          attribution_format: this.peac.peac?.attribution?.format,
           expires: this.calculateExpiry(duration)
         },
         signature: this.signDeal({use_case, volume, price: finalPrice})
@@ -70,13 +70,13 @@ class NegotiationEngine {
       counter_offer: {
         suggested_budget: finalPrice,
         suggested_volume: this.calculateVolumeForBudget(budget),
-        contact_human: this.pact.pact?.negotiation?.human_contact || 'sales@example.com'
+        contact_human: this.peac.peac?.negotiation?.human_contact || 'sales@example.com'
       }
     };
   }
 
   calculatePrice(use_case, volume) {
-    const economics = this.pact.pact?.economics;
+    const economics = this.peac.peac?.economics;
     if (!economics) return 0;
 
     const pricing = economics.pricing_models?.usage_based;
@@ -87,7 +87,7 @@ class NegotiationEngine {
   }
 
   calculateVolumeForBudget(budget) {
-    const economics = this.pact.pact?.economics;
+    const economics = this.peac.peac?.economics;
     if (!economics) return '0GB';
 
     const pricing = economics.pricing_models?.usage_based;
@@ -99,12 +99,12 @@ class NegotiationEngine {
     return gb >= 1024 ? `${Math.floor(gb / 1024)}TB` : `${gb}GB`;
   }
 
-  generatePactId() {
-    return `pact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  generatePeacId() {
+    return `peac_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   generatePaymentLink(amount, purpose) {
-    const base = this.pact.pact?.economics?.payment_processors?.stripe?.endpoint;
+    const base = this.peac.peac?.economics?.payment_processors?.stripe?.endpoint;
     if (!base) return null;
     
     return `${base}?amount=${amount}&purpose=${encodeURIComponent(purpose)}`;
@@ -133,7 +133,7 @@ class NegotiationEngine {
   }
 
   getSuggestedUseCases() {
-    const consent = this.pact.pact?.consent || {};
+    const consent = this.peac.peac?.consent || {};
     return Object.keys(consent).filter(key => 
       consent[key] === 'allowed' || consent[key] === 'conditional'
     );
@@ -151,9 +151,9 @@ class NegotiationEngine {
 // Express routes
 router.post('/negotiate', async (req, res) => {
   try {
-    // In production, load pact from domain
-    const pact = req.app.locals.pact;
-    const engine = new NegotiationEngine(pact);
+    // In production, load peac from domain
+    const peac = req.app.locals.peac;
+    const engine = new NegotiationEngine(peac);
     
     const result = await engine.negotiate(req.body);
     res.json(result);

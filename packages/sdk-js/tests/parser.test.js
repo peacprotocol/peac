@@ -8,68 +8,68 @@ describe('PEAC Parser', () => {
   });
 
   describe('Basic parsing', () => {
-    test('parses valid YAML pact', async () => {
+    test('parses valid YAML peac', async () => {
       const content = `
 version: 0.9.2
 protocol: peac
-pact:
+peac:
   consent:
     ai_training: conditional
       `;
       
-      const result = parser.parsePactContent(content);
+      const result = parser.parsePeacContent(content);
       expect(result.version).toBe('0.9.2');
       expect(result.protocol).toBe('peac');
-      expect(result.pact.consent.ai_training).toBe('conditional');
+      expect(result.peac.consent.ai_training).toBe('conditional');
     });
 
-    test('parses valid JSON pact', async () => {
+    test('parses valid JSON peac', async () => {
       const content = JSON.stringify({
         version: '0.9.2',
         protocol: 'peac',
-        pact: {
+        peac: {
           consent: {
             ai_training: 'allowed'
           }
         }
       });
       
-      const result = parser.parsePactContent(content);
+      const result = parser.parsePeacContent(content);
       expect(result.version).toBe('0.9.2');
-      expect(result.pact.consent.ai_training).toBe('allowed');
+      expect(result.peac.consent.ai_training).toBe('allowed');
    });
 
    test('handles invalid format gracefully', async () => {
      const content = 'Not valid YAML or JSON';
      
-     const result = parser.parsePactContent(content);
+     const result = parser.parsePeacContent(content);
      expect(result).toHaveProperty('error');
-     expect(result.error).toMatch(/Invalid pact format/);
+     expect(result.error).toMatch(/Invalid peac format/);
    });
  });
 
  describe('Validation', () => {
    test('validates required fields', async () => {
-     const pact = {
+     const peac = {
        protocol: 'peac',
-       pact: {}
+       peac: {}
      };
      
      parser.options.strict = false;
-     await parser.validatePact(pact);
+     await parser.validatePeac(peac);
      expect(parser.errors.length).toBeGreaterThan(0);
      expect(parser.errors[0].error).toContain('Missing required field: version');
    });
 
    test('validates protocol field', async () => {
-     const pact = {
+     const peac = {
        version: '0.9.2',
        protocol: 'wrong',
-       pact: {}
+       peac: {}
      };
      
      parser.options.strict = false;
-     await parser.validatePact(pact);
+     await parser.validatePeac(peac);
      expect(parser.errors.find(e => e.error.includes('Invalid or missing protocol'))).toBeTruthy();
    });
  });
@@ -77,8 +77,8 @@ pact:
  describe('Signature verification', () => {
    test('verifies valid signature', async () => {
      // This would require a proper test signature
-     const pact = {
-       pact: { test: 'data' },
+     const peac = {
+       peac: { test: 'data' },
        signature: 'test-signature',
        metadata: {
          public_key: 'test-public-key'
@@ -86,7 +86,7 @@ pact:
      };
      
      // Mock verification for test
-     const result = await parser.verifySignature(pact);
+     const result = await parser.verifySignature(peac);
      expect(result).toBe(false); // Would be true with real signature
    });
  });

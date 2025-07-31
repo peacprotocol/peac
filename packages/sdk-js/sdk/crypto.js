@@ -40,46 +40,46 @@ class PEACCrypto {
     return crypto.randomBytes(16).toString('hex');
   }
 
-  async signPact(pactData, privateKey, options = {}) {
+  async signPeac(peacData, privateKey, options = {}) {
     try {
       // Prepare data for signing
       const dataToSign = {
-        ...pactData,
+        ...peacData,
         metadata: {
-          ...pactData.metadata,
+          ...peacData.metadata,
           signed_at: new Date().toISOString(),
           key_id: options.keyId || this.generateKeyId()
         }
       };
 
-      // Canonicalize pact section
-      const message = this.canonicalize(dataToSign.pact);
+      // Canonicalize peac section
+      const message = this.canonicalize(dataToSign.peac);
       
       // Sign
       const signature = crypto.sign(null, Buffer.from(message), privateKey);
       
-      // Return signed pact
+      // Return signed peac
       return {
         ...dataToSign,
         signature: signature.toString('hex'),
         signature_algorithm: 'ed25519'
       };
     } catch (error) {
-      throw new Error(`Failed to sign pact: ${error.message}`);
+      throw new Error(`Failed to sign peac: ${error.message}`);
     }
   }
 
-  async verifyPact(pactData, publicKey) {
+  async verifyPeac(peacData, publicKey) {
     try {
-      const { signature, signature_algorithm, ...dataWithoutSig } = pactData;
+      const { signature, signature_algorithm, ...dataWithoutSig } = peacData;
       
       // Check algorithm
       if (signature_algorithm && signature_algorithm !== 'ed25519') {
         throw new Error(`Unsupported signature algorithm: ${signature_algorithm}`);
       }
       
-      // Canonicalize pact section
-      const message = this.canonicalize(dataWithoutSig.pact);
+      // Canonicalize peac section
+      const message = this.canonicalize(dataWithoutSig.peac);
       
       // Verify
       return crypto.verify(

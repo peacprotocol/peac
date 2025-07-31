@@ -66,8 +66,8 @@ tmp/
 temp/
 *.tmp
 
-# Generated pact files for testing
-test-pact.txt
+# Generated peac files for testing
+test-peac.txt
 test-*.txt
 
 # API server data

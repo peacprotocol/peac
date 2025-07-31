@@ -4,7 +4,7 @@
 
 > **The open protocol for programmable, ethical, and compliant access, consent, attribution, and automated payments on the AI-powered web.**
 
-**PEAC Protocol** is the open, extensible standard for programmable web access, consent, attribution, and machine-to-machine payment; built for the next generation of AI and agentic automation. It lets publishers, platforms, AI/data agents, and regulators express enforceable terms with a simple file: `pricing.txt` or `.well-known/peac.json`. PEAC is auditable, consent-centric, privacy-respecting, and composable by design.
+**PEAC Protocol** is the open, extensible standard for programmable web access, consent, attribution, and machine-to-machine payment; built for the next generation of AI and agentic automation. It lets publishers, platforms, AI/data agents, and regulators express enforceable terms with a simple file: `peac.txt` or `.well-known/peac.json`. PEAC is auditable, consent-centric, privacy-respecting, and composable by design.
 
 PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent-driven negotiation and value exchange, and supports verifiable, compliant, programmable access for all participants. Publishers gain fair revenue streams, AI/data agents get ethical access, and OSS developers build on open standards.
 
@@ -15,7 +15,7 @@ PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent
 - [Table of Contents](#table-of-contents)
 - [Capabilities](#capabilities)
 - [Who Benefits](#who-benefits)
-- [pact.txt - PEAC 0.9.1.1 update and onwards:](#pacttxt---peac-0911-update-and-onwards)
+- [peac.txt - PEAC 0.9.1.1 update and onwards:](#peactxt---peac-0911-update-and-onwards)
 - [Use Cases](#use-cases)
 - [Examples](#examples)
 - [Canonical Test Agent](#canonical-test-agent)
@@ -35,7 +35,7 @@ PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent
 ## Capabilities
 
 - Payments and advanced enforcement optional for non-commercial/open access
-- **File-based, programmable access:** `pricing.txt` or `.well-known/peac.json`
+- **File-based, programmable access:** `peac.txt` or `.well-known/peac.json`
 - **Consent & attribution enforcement** (EIP-712/Ed25519)
 - **Tiered pricing, sessions, tokens, and lite mode** (no-crypto onboarding)
 - **Full privacy/anon controls:** hashed agent IDs, do-not-log flags, GDPR support
@@ -58,7 +58,7 @@ PEAC Protocol addresses unpriced externalities of AI/web crawling, enables agent
 
 > **PEAC Protocol is not a paywall** it’s an open, programmable trust, attribution, and compliance layer. Like `robots.txt`, but verifiable and future-proof.
 
-## pact.txt - PEAC 0.9.1.1 update and onwards:
+## peac.txt - PEAC 0.9.1.1 update and onwards:
 
 Legacy platform plugins and integrations have been archived as of v0.9.1.1. Please refer to the /archived folder or releases for old integrations. Details and udpates to be shared soon.
 
@@ -80,13 +80,13 @@ Propose new use cases via PRs, see [spec.md](spec.md) for extensions.
 
 ## Examples
 
-For publishers: Start with minimal-pricing.txt to enable consent/attribution without payments.
+For publishers: Start with minimal-peac.txt to enable consent/attribution without payments.
 
-- [`examples/pricing.txt`](examples/pricing.txt) – minimal, canonical (consent/attribution only)
-- [`examples/full-pricing.txt`](examples/full-pricing.txt) – sessions, tiers, expiry, advanced
-- [`examples/minimal-pricing.txt`](examples/minimal-pricing.txt) – deny-all (strict baseline)
+- [`examples/peac.txt`](examples/peac.txt) – minimal, canonical (consent/attribution only)
+- [`examples/full-peac.txt`](examples/full-peac.txt) – sessions, tiers, expiry, advanced
+- [`examples/minimal-peac.txt`](examples/minimal-peac.txt) – deny-all (strict baseline)
 
-> Deploy `pricing.txt` at your root (`https://yoursite.com/pricing.txt`).
+> Deploy `peac.txt` at your root (`https://yoursite.com/peac.txt`).
 > The `examples/` folder contains all files for development and onboarding.
 
 ## Canonical Test Agent
@@ -100,8 +100,8 @@ _This is public and safe for dev/local/E2E; never use for production or real ass
 
 ## Getting Started
 
-1. **Add a `pricing.txt` file to your web root:**  
-   Copy from `examples/pricing.txt` or `examples/full-pricing.txt`.
+1. **Add a `peac.txt` file to your web root:**  
+   Copy from `examples/peac.txt` or `examples/full-peac.txt`.
 
 2. **Install the PEAC SDK:**  
    ```bash
@@ -115,7 +115,7 @@ _This is public and safe for dev/local/E2E; never use for production or real ass
 3. **Validate/generate terms using the CLI:**
   ```bash
   node cli/peac-cli.js generate
-  node cli/peac-cli.js validate examples/pricing.txt
+  node cli/peac-cli.js validate examples/peac.txt
   ```
 
 4. **Integrate in your service/app:**
@@ -184,7 +184,7 @@ if (!access.access) {
 ```markdown
 | Priority | Location                     | Notes                |
 |----------|------------------------------|----------------------|
-| 1        | /pricing.txt                 | Human-readable, YAML  |
+| 1        | /peac.txt                 | Human-readable, YAML  |
 | 2        | /.well-known/peac.yaml       | Fallback             |
 | 3        | /.well-known/peac.json       | Fallback             |
 | 4        | Link header rel="peac-terms" | Redirect if present  |
@@ -193,18 +193,18 @@ if (!access.access) {
 ## Integration Guidance
 
 **Publishers/Platforms/API Providers:**  
-- Deploy a `pricing.txt` or `.well-known/peac.json` file at your domain root.
+- Deploy a `peac.txt` or `.well-known/peac.json` file at your domain root.
 - Integrate with your server, CDN, or API middleware.
 - Use plugins (WordPress/Shopify) for a plug-and-play solution.
 - Configure attribution and consent header checks as needed (see examples in this README).
 
 **Agents/Crawlers/AI Companies:**  
 - Use PEAC SDK or standard HTTP with EIP-712/Ed25519 headers.
-- Parse and respect publisher `pricing.txt` terms, attribution, and payments.
+- Parse and respect publisher `peac.txt` terms, attribution, and payments.
 - Implement attribution, consent, and payment headers in all automated access flows.
 
 **Creators/Blogs/Non-technical users:**  
-- Just add pricing.txt to your root.
+- Just add peac.txt to your root.
 - No backend or infra changes required for basic compliance.
 
 **Regulators/IP Owners/Rights Holders:**  
@@ -223,7 +223,7 @@ For plug-and-play server integration, use the PEAC middleware in Express/Vercel 
 const peacMiddleware = require('./core/middleware');
 const yaml = require('js-yaml');
 const fs = require('fs');
-const pricing = yaml.load(fs.readFileSync('examples/pricing.txt', 'utf8'));
+const pricing = yaml.load(fs.readFileSync('examples/peac.txt', 'utf8'));
 
 app.use(peacMiddleware(pricing));
 ```
@@ -277,7 +277,7 @@ PEAC Protocol is designed to support transparency, provenance, and auditability 
 ## Resources
 
 - Website: https://peacprotocol.org
-- Quickstart: examples/pricing.txt
+- Quickstart: examples/peac.txt
 - Blog, integrations, SDKs: see /docs and GOVERNANCE.md
 
 All code, CLI, and examples are copy-paste ready and thoroughly tested, if you spot an issue, file a GitHub issue or pull request!
@@ -289,13 +289,13 @@ node -e "require('./core')"
 npm test --prefix core
 ````
 
-**Validating Example pricing.txt Files**
+**Validating Example peac.txt Files**
 
 PEAC recommends using the built-in CLI to validate YAML-based pricing files:
 
 ```bash
-node cli/peac-cli.js validate examples/pricing.txt
-npx js-yaml examples/pricing.txt > examples/pricing.json
+node cli/peac-cli.js validate examples/peac.txt
+npx js-yaml examples/peac.txt > examples/pricing.json
 npx ajv-cli validate -s schema/pricing.schema.json -d examples/pricing.json
 ```
 
