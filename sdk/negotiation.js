@@ -7,12 +7,12 @@
 const crypto = require('crypto');
 
 class Negotiation {
-  constructor(pact) {
-    this.pact = pact;
+  constructor(peac) {
+    this.peac = peac;
   }
 
   async negotiate(proposal) {
-    if (!this.pact.pact?.negotiation?.enabled && !this.pact.pact?.negotiation?.endpoint) {
+    if (!this.peac.peac?.negotiation?.enabled && !this.peac.peac?.negotiation?.endpoint) {
       return this.createManualResponse();
     }
 
@@ -38,7 +38,7 @@ class Negotiation {
     }
 
     // Check consent
-    const consent = this.pact.pact?.consent?.[use_case];
+    const consent = this.peac.peac?.consent?.[use_case];
     if (!consent || consent === 'denied') {
       return {
         accepted: false,
@@ -56,9 +56,9 @@ class Negotiation {
     const discounts = [];
     
     // Academic discount
-    if (academic_verification && this.pact.pact?.negotiation?.templates?.academic) {
+    if (academic_verification && this.peac.peac?.negotiation?.templates?.academic) {
       const academicDiscount = this.parseDiscount(
-        this.pact.pact.negotiation.templates.academic.discount
+        this.peac.peac.negotiation.templates.academic.discount
       );
       finalPrice *= (1 - academicDiscount);
       discounts.push({
@@ -69,20 +69,20 @@ class Negotiation {
     }
 
     // Startup discount
-    if (startup_verification && this.pact.pact?.negotiation?.templates?.startup) {
+    if (startup_verification && this.peac.peac?.negotiation?.templates?.startup) {
       const startupDiscount = this.parseDiscount(
-        this.pact.pact.negotiation.templates.startup.discount
+        this.peac.peac.negotiation.templates.startup.discount
       );
       finalPrice *= (1 - startupDiscount);
       discounts.push({
         type: 'startup',
         discount: `${startupDiscount * 100}%`,
-        criteria: this.pact.pact.negotiation.templates.startup.criteria
+        criteria: this.peac.peac.negotiation.templates.startup.criteria
       });
     }
 
     // Bulk discount
-    const bulkTemplate = this.pact.pact?.negotiation?.templates?.bulk_discount;
+    const bulkTemplate = this.peac.peac?.negotiation?.templates?.bulk_discount;
     if (bulkTemplate && this.isEligibleForBulkDiscount(volume, bulkTemplate)) {
       const bulkDiscount = this.parseDiscount(bulkTemplate.discount);
       finalPrice *= (1 - bulkDiscount);
@@ -119,7 +119,7 @@ class Negotiation {
   }
 
   calculateBasePrice(use_case, volume) {
-    const economics = this.pact.pact?.economics;
+    const economics = this.peac.peac?.economics;
     if (!economics) return 0;
 
     const pricing = economics.pricing_models;
@@ -207,7 +207,7 @@ class Negotiation {
   }
 
   getSuggestedUseCases() {
-    const consent = this.pact.pact?.consent || {};
+    const consent = this.peac.peac?.consent || {};
     return Object.keys(consent).filter(key => 
       consent[key] === 'allowed' || 
       consent[key] === 'conditional' ||
@@ -216,17 +216,17 @@ class Negotiation {
   }
 
   getAvailableProcessors() {
-    const processors = this.pact.pact?.economics?.payment_processors || {};
+    const processors = this.peac.peac?.economics?.payment_processors || {};
     return Object.keys(processors);
   }
 
   createAcceptedResponse(params) {
-    const pactId = this.generatePactId();
+    const peacId = this.generatePeacId();
     const expires = this.calculateExpiry(params.duration);
     
     const response = {
       accepted: true,
-      pact_id: pactId,
+      peac_id: peacId,
       terms: {
         use_case: params.use_case,
         volume: params.volume,
@@ -236,7 +236,7 @@ class Negotiation {
         expires,
         payment_processors: params.payment_processors,
         attribution_required: params.attribution_commitment,
-        attribution_format: this.pact.pact?.attribution?.format
+        attribution_format: this.peac.peac?.attribution?.format
       }
     };
 
@@ -245,9 +245,9 @@ class Negotiation {
     }
 
     // Add payment link if Stripe is available
-    const stripeProcessor = this.pact.pact?.economics?.payment_processors?.stripe;
+    const stripeProcessor = this.peac.peac?.economics?.payment_processors?.stripe;
     if (stripeProcessor && stripeProcessor.endpoint) {
-      response.terms.payment_link = `${stripeProcessor.endpoint}?amount=${params.price}&pact_id=${pactId}`;
+      response.terms.payment_link = `${stripeProcessor.endpoint}?amount=${params.price}&peac_id=${peacId}`;
     }
 
     return response;
@@ -267,15 +267,15 @@ class Negotiation {
         minimum_budget: round2(basePrice * 0.8), // 20% discount max
         suggested_volume: this.calculateVolumeForBudget(budget),
         available_discounts: this.getAvailableDiscounts(),
-        human_contact: this.pact.pact?.negotiation?.human_contact || 
-                      this.pact.pact?.dispute?.contact ||
+        human_contact: this.peac.peac?.negotiation?.human_contact || 
+                      this.peac.peac?.dispute?.contact ||
                       'sales@example.com'
       }
     };
   }
 
   calculateVolumeForBudget(budget) {
-    const economics = this.pact.pact?.economics;
+    const economics = this.peac.peac?.economics;
     if (!economics) return '0GB';
 
     const pricing = economics.pricing_models?.usage_based;
@@ -288,7 +288,7 @@ class Negotiation {
   }
 
   getAvailableDiscounts() {
-    const templates = this.pact.pact?.negotiation?.templates || {};
+    const templates = this.peac.peac?.negotiation?.templates || {};
     const discounts = [];
 
     if (templates.academic) {
@@ -323,14 +323,14 @@ class Negotiation {
       accepted: false,
       reason: 'manual_negotiation_required',
       message: 'Automated negotiation not available',
-      contact: this.pact.pact?.dispute?.contact || 
-               this.pact.pact?.negotiation?.human_contact ||
+      contact: this.peac.peac?.dispute?.contact || 
+               this.peac.peac?.negotiation?.human_contact ||
                'Contact information not provided'
     };
   }
 
-  generatePactId() {
-    return `pact_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+  generatePeacId() {
+    return `peac_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
   }
 
   calculateExpiry(duration) {

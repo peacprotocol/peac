@@ -1,0 +1,410 @@
+version: 0.9.2
+protocol: peac
+
+metadata:
+  domain: publisher.example.com
+  updated: 2025-07-29T00:00:00Z
+  languages: ["en", "es", "zh", "hi", "ar"]
+  public_key: |
+    -----BEGIN PUBLIC KEY-----
+    MCowBQYDK2VwAyEAGqBmJKHN8C7FbsLlv+0XrYpC3g6Iv8F2PvGW3K3fJ+8=
+    -----END PUBLIC KEY-----
+
+peac:
+  # Consent management
+  consent:
+    default: contact
+    
+    ai_training:
+      allowed: conditional
+      conditions:
+        - payment_required: true
+        - attribution_required: true
+        - purpose_limitation: ["research", "commercial", "education"]
+      negotiate: https://api.example.com/negotiate/ai-training
+      
+    web_scraping:
+      allowed: true
+      rate_limit: "100 requests per hour"
+      
+    commercial_use:
+      allowed: negotiable
+      contact: licensing@example.com
+      
+  # Economic terms
+  economics:
+    currency: ["USD", "EUR", "GBP", "JPY", "BTC", "ETH", "USDB", "PYUSD"]
+    
+    pricing_models:
+      flat_rate:
+        daily: $100
+        weekly: $500
+        monthly: $1000
+        annual: $10000
+        
+      usage_based:
+        per_gb: $0.01
+        per_tb: $10.00
+        per_request: $0.001
+        per_minute: $0.10
+        per_token: $0.00001
+        
+      dynamic:
+        endpoint: https://api.example.com/pricing/dynamic
+        cache_ttl: 3600
+        
+      tiered:
+        - volume: "0-100GB"
+          price: $0.02/gb
+        - volume: "100GB-1TB"
+          price: $0.01/gb
+        - volume: "1TB+"
+          price: $0.005/gb
+          
+    payment_processors:
+      stripe:
+        endpoint: https://pay.example.com/stripe
+        public_key: pk_live_51234567890
+        agent_pay: true
+        webhook: https://api.example.com/webhooks/stripe
+        
+      bridge:
+        endpoint: https://api.bridge.xyz/orchestration/send
+        public_key: bridge_pk_live_123
+        wallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f06789"
+        supported_chains: ["ethereum", "base", "solana"]
+        
+      paypal:
+        endpoint: https://api.example.com/paypal
+        merchant_id: "ABCD1234"
+        stablecoin: PYUSD
+        
+      x402:
+        endpoint: https://pay.example.com/x402
+        network: ethereum
+        contract: "0x1234567890abcdef"
+        
+      crypto:
+        bitcoin: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+        ethereum: "0x742d35Cc6634C0532925a3b844Bc9e7595f06789"
+        usdc: "0x742d35Cc6634C0532925a3b844Bc9e7595f06789"
+        
+  # Programmatic negotiation
+  negotiation:
+    enabled: true
+    endpoint: https://api.example.com/negotiate
+    protocols: ["peac-negotiate/v1", "http-negotiate", "openai-agents", "langchain"]
+    real_time: true
+    
+    templates:
+      bulk_discount:
+        threshold: "1TB"
+        discount: "20%"
+        
+      academic:
+        verification: required
+        discount: "50%"
+        valid_domains: [".edu", ".ac.uk", ".edu.cn"]
+        
+      startup:
+        criteria: "under_$10M_revenue"
+        discount: "30%"
+        verification_endpoint: https://api.example.com/verify/startup
+        
+      nonprofit:
+        discount: "75%"
+        verification: "501c3 or equivalent"
+        
+      developer:
+        criteria: "open_source_project"
+        discount: "100%"
+        rate_limit: "1000 requests/day"
+        
+    human_escalation: sales@example.com
+    
+  # Attribution requirements
+  attribution:
+    required: true
+    chain_depth: unlimited
+    type: "merkle"
+    format: "{source} via {aggregator} [{timestamp}]"
+    verification_endpoint: https://api.example.com/verify/attribution
+    blockchain_anchor: true
+    ipfs_hash: "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco"
+    
+    aggregator_fees:
+      enabled: true
+      percentage: "0.1%"
+      minimum: "$0.001"
+      
+  # Multi-jurisdictional compliance
+  compliance:
+    certifications: ["SOC2", "ISO27001", "HIPAA"]
+    
+    jurisdictions:
+      us:
+        ccpa: true
+        coppa: true
+        state_specific:
+          ca: { sb_1001: true }
+          va: { cdpa: true }
+          co: { cpa: true }
+          ct: { ctdpa: true }
+          ut: { ucpa: true }
+          
+      eu:
+        gdpr: true
+        ai_act: true
+        dsa: true
+        dma: true
+        data_retention: "P90D"
+        dpo_contact: dpo@example.eu
+        representatives:
+          de: "vertreter@example.de"
+          fr: "representant@example.fr"
+          
+      uk:
+        uk_gdpr: true
+        data_retention: "P180D"
+        ico_registration: "Z1234567"
+        
+      china:
+        pipl: true
+        data_localization: true
+        filing_number: "京ICP备12345678号"
+        
+      india:
+        dpdpa: true
+        data_principal_rights: true
+        grievance_officer: "grievance@example.in"
+        
+      brazil:
+        lgpd: true
+        data_protection_officer: "dpo@example.com.br"
+        
+      canada:
+        pipeda: true
+        provincial:
+          qc: { law_25: true }
+          bc: { pipa: true }
+          ab: { pipa: true }
+          
+      australia:
+        privacy_act: true
+        app_compliance: true
+        
+      japan:
+        appi: true
+        ppc_filing: "第12345号"
+        
+      singapore:
+        pdpa: true
+        data_portability: true
+        
+  # Dispute resolution
+  dispute:
+    contact: legal@example.com
+    endpoint: https://api.example.com/dispute
+    response_time: "48 hours"
+    escalation_path:
+      - level: automated
+        endpoint: https://api.example.com/dispute/auto
+      - level: human
+        contact: disputes@example.com
+      - level: arbitration
+        provider: "JAMS"
+        rules: "JAMS Streamlined Arbitration Rules"
+    arbitration: binding
+    jurisdiction: "Delaware, USA"
+    governing_law: "Delaware State Law"
+    
+  # Audit and monitoring
+  audit:
+    endpoint: https://api.example.com/audit
+    real_time: true
+    retention: "P365D"
+    format: "JSON-LD"
+    webhooks:
+      - url: https://api.example.com/webhooks/audit
+        events: ["access_granted", "access_denied", "payment_completed"]
+        retry: 3
+        timeout: 30
+    blockchain_anchor:
+      enabled: true
+      chain: ethereum
+      contract: "0xABC123..."
+      frequency: "hourly"
+    export:
+      formats: ["csv", "json", "parquet"]
+      endpoint: https://api.example.com/audit/export
+      
+  # Rate limiting
+  rate_limits:
+    default: "1000 requests per hour"
+    by_use_case:
+      ai_training: "100 requests per hour"
+      api_access: "10000 requests per hour"
+      web_scraping: "60 requests per minute"
+    by_tier:
+      free: "10 requests per hour"
+      basic: "1000 requests per hour"
+      premium: "10000 requests per hour"
+      enterprise: unlimited
+    burst:
+      enabled: true
+      multiplier: 2
+      duration: "PT1M"
+      
+  # Discovery mechanisms
+  discovery:
+    sitemap: /sitemap-usage.xml
+    catalog: /api/catalog
+    documentation: /docs/api
+    openapi: /openapi.json
+    graphql: /graphql
+    
+    # Mobile app discovery
+    mobile:
+      ios:
+        scheme: "peacprotocol://policy"
+        universal_link: "https://example.com/.well-known/apple-app-site-association"
+      android:
+        scheme: "content://com.example.peac/policy"
+        app_links: "https://example.com/.well-known/assetlinks.json"
+        
+    # IoT discovery
+    iot:
+      mqtt:
+        topic: "device/+/peac"
+        broker: "mqtt://broker.example.com"
+      coap:
+        resource: "/.well-known/peac"
+      mdns:
+        service: "_peac._tcp"
+        
+    # Protocol-specific
+    matrix: "https://matrix.example.com/_matrix/peac/policy"
+    dat: "dat://example.com/peac.txt"
+    ipfs: "ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco"
+    
+  # Geographic-specific policies
+  geographic_policies:
+    default: global
+    detection_method: "geoip"
+    
+    overrides:
+      eu:
+        file: /peac-eu.txt
+        countries: ["DE", "FR", "IT", "ES", "NL", "BE", "PL", "SE", "DK", "FI"]
+      china:
+        file: /peac-cn.txt
+        redirect: true
+      usa:
+        file: /peac-us.txt
+        states:
+          ca: /peac-us-ca.txt
+          ny: /peac-us-ny.txt
+      russia:
+        blocked: true
+        message: "Service not available in your region"
+        
+  # Advanced extensions
+  extensions:
+    # AI-specific controls
+    ai_control:
+      enabled: true
+      model_restrictions:
+        - model: "gpt-4"
+          allowed: true
+          conditions: ["attribution", "payment"]
+        - model: "claude-3"
+          allowed: true
+          conditions: ["attribution"]
+        - model: "*"
+          allowed: conditional
+          
+    # Zero-knowledge proofs
+    zk_proofs:
+      enabled: true
+      endpoint: https://api.example.com/zk
+      circuits: ["attribution", "payment", "usage"]
+      prover: "groth16"
+      
+    # Multi-party computation
+    mpc:
+      enabled: true
+      parties: 3
+      threshold: 2
+      endpoint: https://api.example.com/mpc
+      
+    # Federated learning
+    federated_learning:
+      allowed: conditional
+      aggregator: https://fl.example.com
+      min_participants: 100
+      differential_privacy:
+        epsilon: 1.0
+        delta: 1e-5
+        
+    # Content integrity
+    content_integrity:
+      hash_algorithm: "sha3-256"
+      merkle_tree: true
+      timestamp_authority: "https://timestamp.example.com"
+      
+    # Supported frameworks
+    frameworks:
+      langchain:
+        enabled: true
+        version: ">=0.1.0"
+      crewai:
+        enabled: true
+        templates: ["research", "analysis", "content"]
+      autogen:
+        enabled: true
+      semantic_kernel:
+        enabled: true
+        
+    # API versioning
+    api_versions:
+      supported: ["v1", "v2-beta"]
+      deprecated: ["v0"]
+      sunset_dates:
+        v0: "2025-12-31"
+        
+    # Experimental features
+    experimental:
+      quantum_resistant_signatures: true
+      homomorphic_encryption: false
+      neural_compression: true
+      semantic_search: true
+      
+  # Internationalization
+  i18n:
+    default_language: en
+    
+    translations:
+      es:
+        consent_message: "Se requiere consentimiento para el uso de IA"
+        payment_message: "Pago requerido: $0.01/GB"
+        contact: "contacto@example.es"
+        
+      zh:
+        consent_message: "AI使用需要许可"
+        payment_message: "需要付费：$0.01/GB"
+        contact: "contact@example.cn"
+        
+      hi:
+        consent_message: "AI उपयोग के लिए सहमति आवश्यक"
+        payment_message: "भुगतान आवश्यक: $0.01/GB"
+        contact: "contact@example.in"
+        
+      ar:
+        consent_message: "يتطلب موافقة لاستخدام الذكاء الاصطناعي"
+        payment_message: "الدفع مطلوب: $0.01/GB"
+        contact: "contact@example.ae"
+        direction: rtl
+
+# Cryptographic signature
+signature: a3f5c8d2e1b9a7f6c4d3e2a1b8c9d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c
+signature_algorithm: ed25519

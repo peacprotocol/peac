@@ -50,11 +50,11 @@ app.get('/health', (req, res) => {
 app.use('/api/negotiate', negotiationRouter);
 app.use('/api/dashboard', dashboardRouter);
 
-// Serve pact.txt if exists
-app.get('/pact.txt', (req, res) => {
-  res.sendFile(path.join(__dirname, '../pact.txt'), (err) => {
+// Serve peac.txt if exists
+app.get('/peac.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, '../peac.txt'), (err) => {
     if (err) {
-      res.status(404).send('No pact.txt found');
+      res.status(404).send('No peac.txt found');
     }
   });
 });

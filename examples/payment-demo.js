@@ -8,17 +8,17 @@ const { UniversalParser, Payments } = require('../sdk');
 
 async function main() {
   try {
-    // Parse pact from a domain
-    console.log('Parsing pact from example.com...');
+    // Parse peac from a domain
+    console.log('Parsing peac from example.com...');
     const parser = new UniversalParser();
-    const pact = await parser.parseAll('example.com');
+    const peac = await parser.parseAll('example.com');
     
-    console.log('✓ Pact parsed successfully');
-    console.log(`  Version: ${pact.version}`);
-    console.log(`  Available processors: ${Object.keys(pact.pact?.economics?.payment_processors || {}).join(', ')}`);
+    console.log('✓ peac parsed successfully');
+    console.log(`  Version: ${peac.version}`);
+    console.log(`  Available processors: ${Object.keys(peac.peac?.economics?.payment_processors || {}).join(', ')}`);
     
     // Initialize payments
-    const payments = new Payments(pact);
+    const payments = new Payments(peac);
     
     // Example 1: Stripe payment
     console.log('\n1. Processing Stripe payment...');

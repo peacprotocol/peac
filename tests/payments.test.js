@@ -2,13 +2,13 @@ const { Payments } = require('../sdk');
 
 describe('PEAC Payments', () => {
   let payments;
-  let mockPact;
+  let mockPeac;
 
   beforeEach(() => {
-    mockPact = {
+    mockPeac = {
       version: '0.9.2',
       protocol: 'peac',
-      pact: {
+      peac: {
         consent: {
           ai_training: {
             allowed: 'conditional',
@@ -34,7 +34,7 @@ describe('PEAC Payments', () => {
       }
     };
     
-    payments = new Payments(mockPact);
+    payments = new Payments(mockPeac);
   });
 
   describe('Payment validation', () => {
@@ -44,7 +44,7 @@ describe('PEAC Payments', () => {
     });
 
     test('rejects denied purposes', () => {
-      mockPact.pact.consent.ai_training = 'denied';
+      mockPeac.peac.consent.ai_training = 'denied';
       const validation = payments.validatePaymentTerms('ai_training', 10);
       expect(validation.valid).toBe(false);
       expect(validation.reason).toContain('denied');
@@ -88,7 +88,7 @@ describe('PEAC Payments', () => {
   describe('Payment metadata', () => {
     test('enriches metadata correctly', async () => {
       payments.processStripePayment = jest.fn().mockImplementation((amount, currency, metadata) => {
-        expect(metadata.pact_version).toBe('0.9.2');
+        expect(metadata.peac_version).toBe('0.9.2');
         expect(metadata.purpose).toBe('ai_training');
         expect(metadata.timestamp).toBeDefined();
         return { processor: 'stripe', payment_id: 'test' };
