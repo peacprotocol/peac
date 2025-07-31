@@ -369,42 +369,35 @@ class PEACPayments {
   // Get payment status
   async getPaymentStatus(paymentId, processor) {
     switch (processor) {
-      case 'stripe':
-        if (!this.processors.stripe) {
-          throw new Error('Stripe not configured');
-        }
-        const intent = await this.processors.stripe.paymentIntents.retrieve(paymentId);
-        return {
-          processor: 'stripe',
-          payment_id: intent.id,
-          status: intent.status,
-          amount: intent.amount / 100,
-          currency: intent.currency
-        };
+  case 'stripe': {
+    if (!this.processors.stripe) {
+      throw new Error('Stripe not configured');
+    }
+    const intent = await this.processors.stripe.paymentIntents.retrieve(paymentId);
+    return {
+      processor: 'stripe',
+      payment_id: intent.id,
+      status: intent.status,
+      amount: intent.amount / 100,
+      currency: intent.currency
+    };
+  }
         
-      case 'paypal': {
-        const endpoint = this.getProcessorEndpoint('paypal');
-        const paypalData = {
-          amount,
-          currency: currency.toUpperCase(),
-          description: `PEAC Protocol: ${purpose}`,
-          return_url: metadata.return_url || 'https://example.com/success',
-          cancel_url: metadata.cancel_url || 'https://example.com/cancel'
-        };
         
-        // Mock PayPal response
+            case 'paypal': {
         return {
           processor: 'paypal',
           payment_id: `PAYPAL-${Date.now()}`,
           status: 'pending',
-          approval_url: `https://www.paypal.com/checkoutnow?token=TEST`,
-          amount,
-          currency
+          approval_url: `https://www.paypal.com/checkoutnow?token=TEST`
         };
-      }  
-
-  }
+      }
   
+
+      default:
+        throw new Error(`Unsupported processor: ${processor}`);
+    }
+  }
 }
 
 module.exports = PEACPayments;
