@@ -8,8 +8,8 @@ const stripe = require('stripe');
 const fetch = require('node-fetch');
 
 class PEACPayments {
-  constructor(pact, options = {}) {
-    this.pact = pact;
+  constructor(peac, options = {}) {
+    this.peac = peac;
     this.options = options;
     
     // Initialize payment processors
@@ -58,19 +58,19 @@ class PEACPayments {
       metadata = {} 
     } = request;
 
-    // Validate against pact terms
+    // Validate against peac terms
     const validation = this.validatePaymentTerms(purpose, amount);
     if (!validation.valid) {
       throw new Error(`Payment validation failed: ${validation.reason}`);
     }
 
-    // Add pact metadata
+    // Add peac metadata
     const enrichedMetadata = {
       ...metadata,
-      pact_id: this.pact.id || 'unknown',
-      pact_version: this.pact.version,
+      peac_id: this.peac.id || 'unknown',
+      peac_version: this.peac.version,
       purpose,
-      domain: this.pact.metadata?.domain,
+      domain: this.peac.metadata?.domain,
       timestamp: new Date().toISOString()
     };
 
@@ -106,7 +106,7 @@ class PEACPayments {
       });
 
       // Check for Agent Pay support
-      const agentPayEnabled = this.pact.pact?.economics?.payment_processors?.stripe?.agent_pay;
+      const agentPayEnabled = this.peac.peac?.economics?.payment_processors?.stripe?.agent_pay;
       
       return {
         processor: 'stripe',
@@ -129,7 +129,7 @@ class PEACPayments {
       throw new Error('Bridge not configured');
     }
 
-    const endpoint = this.pact.pact?.economics?.payment_processors?.bridge?.endpoint || 
+    const endpoint = this.peac.peac?.economics?.payment_processors?.bridge?.endpoint || 
                     `${bridge.endpoint}/v0/payments`;
 
     try {
@@ -147,7 +147,7 @@ class PEACPayments {
           destination_currency: 'USDB', // Bridge stablecoin
           destination: {
             type: 'wallet',
-            address: this.pact.pact?.economics?.payment_processors?.bridge?.wallet
+            address: this.peac.peac?.economics?.payment_processors?.bridge?.wallet
           },
           metadata
         })
@@ -208,7 +208,7 @@ class PEACPayments {
               currency_code: currency.toUpperCase(),
               value: amount.toFixed(2)
             },
-            custom_id: metadata.pact_id,
+            custom_id: metadata.peac_id,
             description: `PEAC Protocol Payment - ${metadata.purpose}`
           }],
           application_context: {
@@ -236,7 +236,7 @@ class PEACPayments {
 
   async processX402Payment(amount, currency, metadata) {
     const x402 = this.processors.x402;
-    const endpoint = this.pact.pact?.economics?.payment_processors?.x402 || x402.endpoint;
+    const endpoint = this.peac.peac?.economics?.payment_processors?.x402 || x402.endpoint;
 
     try {
       // X402 HTTP Payment Protocol
@@ -251,7 +251,7 @@ class PEACPayments {
         body: JSON.stringify({
           amount: amount.toString(),
           currency,
-          recipient: this.pact.metadata?.payment_address,
+          recipient: this.peac.metadata?.payment_address,
           metadata
         })
       });
@@ -277,8 +277,8 @@ class PEACPayments {
   }
 
   validatePaymentTerms(purpose, amount) {
-    const economics = this.pact.pact?.economics;
-    const consent = this.pact.pact?.consent;
+    const economics = this.peac.peac?.economics;
+    const consent = this.peac.peac?.consent;
 
     // Check if purpose is allowed
     if (consent && consent[purpose] === 'denied') {
@@ -333,9 +333,9 @@ class PEACPayments {
           currency: options.currency || 'usd',
           product_data: {
             name: `PEAC Protocol - ${purpose}`,
-            description: `Payment for ${purpose} as per pact.txt`,
+            description: `Payment for ${purpose} as per peac.txt`,
             metadata: {
-              pact_id: this.pact.id,
+              peac_id: this.peac.id,
               purpose
             }
           },
@@ -347,9 +347,9 @@ class PEACPayments {
       success_url: options.success_url || `${this.options.base_url}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: options.cancel_url || `${this.options.base_url}/cancel`,
       metadata: {
-        pact_id: this.pact.id,
+        peac_id: this.peac.id,
         purpose,
-        domain: this.pact.metadata?.domain
+        domain: this.peac.metadata?.domain
       }
     });
 
@@ -359,7 +359,7 @@ class PEACPayments {
   async createPayPalPaymentLink(amount, purpose, options) {
     const result = await this.processPayPalPayment(amount, options.currency || 'usd', {
       purpose,
-      pact_id: this.pact.id
+      peac_id: this.peac.id
     });
     
     const approveLink = result.links.find(link => link.rel === 'approve');

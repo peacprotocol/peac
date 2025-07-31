@@ -8,16 +8,16 @@ const { UniversalParser, Negotiation } = require('../sdk');
 
 async function main() {
   try {
-    // Parse pact
-    console.log('Parsing pact from publisher.example.com...');
+    // Parse peac
+    console.log('Parsing peac from publisher.example.com...');
     const parser = new UniversalParser();
-    const pact = await parser.parseAll('publisher.example.com');
+    const peac = await parser.parseAll('publisher.example.com');
     
-    console.log('✓ Pact parsed successfully');
-    console.log(`  Negotiation enabled: ${pact.pact?.negotiation?.enabled || false}`);
+    console.log('✓ peac parsed successfully');
+    console.log(`  Negotiation enabled: ${peac.peac?.negotiation?.enabled || false}`);
     
     // Initialize negotiation
-    const negotiation = new Negotiation(pact);
+    const negotiation = new Negotiation(peac);
     
     // Example 1: Standard negotiation
     console.log('\n1. Standard AI training negotiation...');

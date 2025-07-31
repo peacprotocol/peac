@@ -2,13 +2,13 @@ const { Negotiation } = require('../sdk');
 
 describe('PEAC Negotiation', () => {
   let negotiation;
-  let mockPact;
+  let mockPeac;
 
   beforeEach(() => {
-    mockPact = {
+    mockPeac = {
       version: '0.9.2',
       protocol: 'peac',
-      pact: {
+      peac: {
         consent: {
           ai_training: {
             allowed: 'conditional'
@@ -36,7 +36,7 @@ describe('PEAC Negotiation', () => {
       }
     };
     
-    negotiation = new Negotiation(mockPact);
+    negotiation = new Negotiation(mockPeac);
   });
 
   describe('Basic negotiation', () => {
@@ -73,7 +73,7 @@ describe('PEAC Negotiation', () => {
         budget: 100
       };
       
-      mockPact.pact.consent.web_scraping = 'denied';
+      mockPeac.peac.consent.web_scraping = 'denied';
       const result = await negotiation.negotiate(proposal);
       expect(result.accepted).toBe(false);
       expect(result.reason).toBe('use_case_denied');
