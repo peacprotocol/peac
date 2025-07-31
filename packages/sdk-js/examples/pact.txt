@@ -1,4 +1,4 @@
-version: 0.9.1
+version: 0.9.2
 protocol: peac
 
 metadata:
@@ -6,32 +6,52 @@ metadata:
   updated: 2025-07-29T00:00:00Z
   public_key: |
     -----BEGIN PUBLIC KEY-----
-    MCowBQYDK2VwAyEAGqBmJKHN...
+    MCowBQYDK2VwAyEAGqBmJKHN8C7FbsLlv+0XrYpC3g6Iv8F2PvGW3K3fJ+8=
     -----END PUBLIC KEY-----
 
 pact:
   consent:
-    ai_training: conditional
-    web_scraping: allowed
-    commercial_use: negotiable
-    
+    default: contact
+    ai_training:
+      allowed: conditional
+      conditions:
+        - payment_required: true
+        - attribution_required: true
+    web_scraping:
+      allowed: true
+    commercial_use:
+      allowed: negotiable
+      
   economics:
-    pricing: $0.01/gb
-    payment_endpoints:
-      stripe: https://pay.example.com/stripe
-      http402: https://pay.example.com/402
-    
+    pricing_models:
+      usage_based:
+        per_gb: $0.01
+        per_request: $0.001
+    payment_processors:
+      stripe:
+        endpoint: https://pay.example.com/stripe
+        agent_pay: true
+      bridge:
+        endpoint: https://api.bridge.xyz/orchestration/send
+      x402: https://pay.example.com/x402
+      
   attribution:
     required: true
     format: "Source: {url}"
+    chain_depth: 3
     
   compliance:
-    gdpr: true
-    ccpa: true
-    ai_act: true
-    
+    jurisdictions:
+      us:
+        ccpa: true
+      eu:
+        gdpr: true
+        ai_act: true
+        
   dispute:
     contact: legal@example.com
-    endpoint: https://example.com/dispute
+    
+  audit:
+    endpoint: https://api.example.com/audit
 
-signature: 3f2a1b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a
+signature: 3f2a1b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c
