@@ -20,8 +20,8 @@ class UniversalParser extends PEACParser {
     });
     
     this.parsers = {
-      '/pact.txt': this.parsePact.bind(this),
-      '/.well-known/pact': this.parsePact.bind(this),
+      '/peac.txt': this.parsePeac.bind(this),
+      '/.well-known/peac': this.parsePeac.bind(this),
       '/robots.txt': this.parseRobots.bind(this),
       '/llms.txt': this.parseLLMs.bind(this),
       '/ai.txt': this.parseAI.bind(this),
@@ -34,12 +34,12 @@ class UniversalParser extends PEACParser {
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    // Try pact.txt first (authoritative)
+    // Try peac.txt first (authoritative)
     try {
-      const pact = await super.parse(domain);
-      if (pact && !pact.partial) {
-        this.cache.set(cacheKey, pact);
-        return pact;
+      const peac = await super.parse(domain);
+      if (peac && !peac.partial) {
+        this.cache.set(cacheKey, peac);
+        return peac;
       }
     } catch (e) {
       // Continue to legacy formats
@@ -48,17 +48,17 @@ class UniversalParser extends PEACParser {
     // Parallel fetch all formats
     const results = await this.fetchAllFormats(domain);
     
-    // If we found a pact file, use it
-    const pactResult = results.find(r => r && (r.file === '/pact.txt' || r.file === '/.well-known/pact'));
-    if (pactResult) {
-      const pact = await this.parsePact(pactResult.content);
-      this.cache.set(cacheKey, pact);
-      return pact;
+    // If we found a peac file, use it
+    const peacResult = results.find(r => r && (r.file === '/peac.txt' || r.file === '/.well-known/peac'));
+    if (peacResult) {
+      const peac = await this.parsePeac(peacResult.content);
+      this.cache.set(cacheKey, peac);
+      return peac;
     }
 
     // Otherwise merge legacy formats
     const merged = await this.mergeLegacyFormats(results);
-    if (Object.keys(merged.pact).length > 0) {
+    if (Object.keys(merged.peac).length > 0) {
       this.cache.set(cacheKey, merged);
       return merged;
     }
@@ -91,7 +91,7 @@ class UniversalParser extends PEACParser {
         generated_at: new Date().toISOString(),
         generator: 'universal-parser'
       },
-      pact: {
+      peac: {
         consent: {},
         economics: {},
         attribution: {},
@@ -111,7 +111,7 @@ class UniversalParser extends PEACParser {
             file: result.file,
             parsed_at: new Date().toISOString()
           });
-          this.deepMerge(merged.pact, parsed);
+          this.deepMerge(merged.peac, parsed);
         }
       } catch (e) {
         this.warnings.push(`Failed to parse ${result.file}: ${e.message}`);
@@ -124,8 +124,8 @@ class UniversalParser extends PEACParser {
     return merged;
   }
 
-  parsePact(content) {
-    return super.parsePactContent(content);
+  parsePeac(content) {
+    return super.parsePeacContent(content);
   }
 
   parseRobots(content) {

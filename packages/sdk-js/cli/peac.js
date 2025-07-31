@@ -25,10 +25,10 @@ program
   .version(version)
   .addHelpText('after', `
 Examples:
-  $ peac init                     Create a new pact.txt file
-  $ peac validate pact.txt        Validate a pact file
-  $ peac sign pact.txt           Sign a pact file
-  $ peac parse example.com       Parse pact from a domain
+  $ peac init                     Create a new peac.txt file
+  $ peac validate peac.txt        Validate a peac file
+  $ peac sign peac.txt           Sign a peac file
+  $ peac parse example.com       Parse peac from a domain
   $ peac scan example.com        Scan all policy files
   $ peac migrate robots.txt      Migrate from legacy format
   $ peac negotiate example.com   Negotiate terms with a publisher
@@ -39,9 +39,9 @@ For more information, visit https://peacprotocol.org/docs`);
 // Init command
 program
   .command('init')
-  .description('Initialize a new pact.txt file')
-  .option('-t, --type <type>', 'Type of pact (minimal, standard, full)', 'standard')
-  .option('-o, --output <file>', 'Output file', 'pact.txt')
+  .description('Initialize a new peac.txt file')
+  .option('-t, --type <type>', 'Type of peac (minimal, standard, full)', 'standard')
+  .option('-o, --output <file>', 'Output file', 'peac.txt')
   .option('-i, --interactive', 'Interactive mode')
   .action(async (options) => {
     try {
@@ -77,23 +77,23 @@ program
 // Validate command
 program
   .command('validate <file>')
-  .description('Validate a pact file')
+  .description('Validate a peac file')
   .option('-s, --strict', 'Strict validation')
   .option('-v, --verbose', 'Verbose output')
   .action(async (file, options) => {
     try {
       const content = await fs.readFile(file, 'utf8');
       const parser = new UniversalParser({ strict: options.strict });
-      const pact = parser.parsePactContent(content);
-      await parser.validatePact(pact);
+      const peac = parser.parsePeacContent(content);
+      await parser.validatePeac(peac);
       
-      console.log('✓ Valid pact file');
+      console.log('✓ Valid peac file');
       
       if (options.verbose) {
         console.log('\nDetails:');
-        console.log(`  Version: ${pact.version}`);
-        console.log(`  Protocol: ${pact.protocol}`);
-        console.log(`  Signed: ${pact.signature ? 'Yes' : 'No'}`);
+        console.log(`  Version: ${peac.version}`);
+        console.log(`  Protocol: ${peac.protocol}`);
+        console.log(`  Signed: ${peac.signature ? 'Yes' : 'No'}`);
         
         if (parser.warnings.length > 0) {
           console.log('\nWarnings:');
@@ -109,14 +109,14 @@ program
 // Sign command
 program
   .command('sign <file>')
-  .description('Sign a pact file with Ed25519')
+  .description('Sign a peac file with Ed25519')
   .option('-k, --key <keyfile>', 'Private key file')
   .option('-p, --passphrase <passphrase>', 'Key passphrase')
   .option('-g, --generate-key', 'Generate new keypair if needed')
   .action(async (file, options) => {
     try {
       const content = await fs.readFile(file, 'utf8');
-      const pact = yaml.load(content);
+      const peac = yaml.load(content);
       const crypto = new Crypto();
       
       let privateKey;
@@ -157,23 +157,23 @@ program
       
       // Add public key to metadata
       if (publicKey) {
-        pact.metadata = pact.metadata || {};
-        pact.metadata.public_key = publicKey;
+        peac.metadata = peac.metadata || {};
+        peac.metadata.public_key = publicKey;
       }
       
-      // Sign the pact
-      const signedPact = await crypto.signPact(pact, privateKey);
+      // Sign the peac
+      const signedPeac = await crypto.signPeac(peac, privateKey);
       
-      // Save signed pact
-      const signedContent = yaml.dump(signedPact, {
+      // Save signed peac
+      const signedContent = yaml.dump(signedPeac, {
         lineWidth: -1,
         noRefs: true
       });
       await fs.writeFile(file, signedContent);
       
       console.log(`✓ Signed ${file}`);
-      console.log(`  Signature: ${signedPact.signature.substring(0, 32)}...`);
-      console.log(`  Algorithm: ${signedPact.signature_algorithm}`);
+      console.log(`  Signature: ${signedPeac.signature.substring(0, 32)}...`);
+      console.log(`  Algorithm: ${signedPeac.signature_algorithm}`);
     } catch (error) {
       console.error('Error:', error.message);
       process.exit(1);
@@ -183,7 +183,7 @@ program
 // Parse command
 program
   .command('parse <domain>')
-  .description('Parse pact from a domain')
+  .description('Parse peac from a domain')
   .option('-f, --format <format>', 'Output format (json, yaml)', 'yaml')
   .option('-c, --no-cache', 'Disable caching')
   .option('-v, --verbose', 'Verbose output')
@@ -194,8 +194,8 @@ program
         strict: false 
       });
       
-      console.log(`Parsing pact from ${domain}...`);
-      const pact = await parser.parse(domain);
+      console.log(`Parsing peac from ${domain}...`);
+      const peac = await parser.parse(domain);
       
       if (options.verbose && parser.warnings.length > 0) {
         console.log('\nWarnings:');
@@ -203,13 +203,13 @@ program
       }
       
       const output = options.format === 'json' 
-        ? JSON.stringify(pact, null, 2)
-        : yaml.dump(pact);
+        ? JSON.stringify(peac, null, 2)
+        : yaml.dump(peac);
         
       console.log('\n' + output);
       
-      if (pact.confidence !== undefined && pact.confidence < 1) {
-        console.log(`\nConfidence: ${(pact.confidence * 100).toFixed(0)}%`);
+      if (peac.confidence !== undefined && peac.confidence < 1) {
+        console.log(`\nConfidence: ${(peac.confidence * 100).toFixed(0)}%`);
       }
     } catch (error) {
       console.error('Error:', error.message);
@@ -240,7 +240,7 @@ program
       }
       
       console.log('\nUnified policy:');
-      console.log(yaml.dump(result.pact, { lineWidth: -1 }));
+      console.log(yaml.dump(result.peac, { lineWidth: -1 }));
       
       if (result.confidence !== undefined) {
         console.log(`\nConfidence: ${(result.confidence * 100).toFixed(0)}%`);
@@ -254,15 +254,15 @@ program
 // Migrate command
 program
   .command('migrate <file>')
-  .description('Migrate from legacy format to pact.txt')
+  .description('Migrate from legacy format to peac.txt')
   .option('-f, --format <format>', 'Source format (robots, llms, ai, usage)', 'robots')
-  .option('-o, --output <file>', 'Output file', 'pact.txt')
+  .option('-o, --output <file>', 'Output file', 'peac.txt')
   .action(async (file, options) => {
     try {
       const content = await fs.readFile(file, 'utf8');
       const parser = new UniversalParser();
       
-      let pact;
+      let peac;
       const basePolicy = {
         version: '0.9.2',
         protocol: 'peac',
@@ -277,22 +277,22 @@ program
       
       switch (options.format) {
         case 'robots':
-          pact = { ...basePolicy, pact: parser.parseRobots(content) };
+          peac = { ...basePolicy, peac: parser.parseRobots(content) };
           break;
         case 'llms':
-          pact = { ...basePolicy, pact: parser.parseLLMs(content) };
+          peac = { ...basePolicy, peac: parser.parseLLMs(content) };
           break;
         case 'ai':
-          pact = { ...basePolicy, pact: parser.parseAI(content) };
+          peac = { ...basePolicy, peac: parser.parseAI(content) };
           break;
         case 'usage':
-          pact = { ...basePolicy, pact: parser.parseUsage(content) };
+          peac = { ...basePolicy, peac: parser.parseUsage(content) };
           break;
         default:
           throw new Error(`Unknown format: ${options.format}`);
       }
       
-      const yamlContent = yaml.dump(pact, {
+      const yamlContent = yaml.dump(peac, {
         lineWidth: -1,
         noRefs: true
       });
@@ -301,7 +301,7 @@ program
       
       console.log(`✓ Migrated to ${options.output}`);
       console.log(`  Original format: ${options.format}`);
-      console.log(`  New format: PEAC Protocol v${pact.version}`);
+      console.log(`  New format: PEAC Protocol v${peac.version}`);
       console.log(`\nNext steps:`);
       console.log(`  1. Review and enhance ${options.output}`);
       console.log(`  2. Add payment processors and compliance info`);
@@ -327,14 +327,14 @@ program
     try {
       console.log(`\nNegotiating with ${domain}...`);
       
-      // Parse pact
+      // Parse peac
       const parser = new UniversalParser();
-      const pact = await parser.parseAll(domain);
+      const peac = await parser.parseAll(domain);
       
       // Check if negotiation is available
-      if (!pact.pact?.negotiation?.enabled && !pact.pact?.negotiation?.endpoint) {
+      if (!peac.peac?.negotiation?.enabled && !peac.peac?.negotiation?.endpoint) {
         console.log('⚠ Negotiation not available for this publisher');
-        console.log(`  Contact: ${pact.pact?.dispute?.contact || 'Not provided'}`);
+        console.log(`  Contact: ${peac.peac?.dispute?.contact || 'Not provided'}`);
         process.exit(1);
       }
       
@@ -358,13 +358,13 @@ program
       });
       
       // Negotiate
-      const negotiation = new Negotiation(pact);
+      const negotiation = new Negotiation(peac);
       const result = await negotiation.negotiate(proposal);
       
       if (result.accepted) {
         console.log('\n✓ Negotiation successful!');
         console.log('\nAccepted Terms:');
-        console.log(`  Pact ID: ${result.pact_id}`);
+        console.log(`  Peac ID: ${result.peac_id}`);
         console.log(`  Price: $${result.terms.price} ${result.terms.currency}`);
         console.log(`  Volume: ${result.terms.volume}`);
         console.log(`  Duration: ${result.terms.duration}`);
@@ -423,12 +423,12 @@ program
       
       console.log(`\nProcessing payment to ${options.domain}...`);
       
-      // Parse pact
+      // Parse peac
       const parser = new UniversalParser();
-      const pact = await parser.parseAll(options.domain);
+      const peac = await parser.parseAll(options.domain);
       
       // Initialize payments
-      const payments = new Payments(pact);
+      const payments = new Payments(peac);
       
       // Process payment
       const result = await payments.processPayment({
@@ -459,7 +459,7 @@ async function getTemplate(type) {
     minimal: {
       version: '0.9.2',
       protocol: 'peac',
-      pact: {
+      peac: {
         consent: {
           ai_training: 'conditional'
         },
@@ -478,7 +478,7 @@ async function getTemplate(type) {
         domain: 'example.com',
         updated: new Date().toISOString()
       },
-      pact: {
+      peac: {
         consent: {
           default: 'contact',
           ai_training: {
@@ -533,7 +533,7 @@ async function getTemplate(type) {
         updated: new Date().toISOString(),
         languages: ['en', 'es', 'zh']
       },
-      pact: {
+      peac: {
         consent: {
           default: 'contact',
           ai_training: {
@@ -655,18 +655,18 @@ async function getTemplate(type) {
           endpoints: '/api/catalog',
           mobile: {
             ios: 'peacprotocol://policy',
-            android: 'content://com.example/pact'
+            android: 'content://com.example/peac'
           },
           iot: {
-            mqtt: 'device/+/pact',
-            coap: '/.well-known/pact'
+            mqtt: 'device/+/peac',
+            coap: '/.well-known/peac'
           }
         },
         geographic_policies: {
           default: 'us',
           overrides: {
-            eu: '/pact-eu.txt',
-            cn: '/pact-cn.txt'
+            eu: '/peac-eu.txt',
+            cn: '/peac-cn.txt'
           }
         },
         extensions: {

@@ -24,15 +24,15 @@ module.exports = {
     return parser.parseAll(domain);
   },
   
-  async createPact(data) {
+  async createPeac(data) {
     const crypto = new PEACCrypto();
-    return crypto.signPact(data);
+    return crypto.signPeac(data);
   },
   
   async negotiate(domain, proposal) {
     const parser = new UniversalParser();
-    const pact = await parser.parseAll(domain);
-    const negotiation = new PEACNegotiation(pact);
+    const peac = await parser.parseAll(domain);
+    const negotiation = new PEACNegotiation(peac);
     return negotiation.negotiate(proposal);
   },
   

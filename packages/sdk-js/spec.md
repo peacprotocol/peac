@@ -5,7 +5,7 @@ PEAC (Programmable Economic Access, Attribution & Consent) Protocol is a standar
 ## Core
 
 - Identity: Verifiable via EIP-712 signatures, DIDs, or mTLS.
-- Terms: Defined in pricing.txt (YAML/JSON format) at domain root, with fallback to .well-known/peac.json.
+- Terms: Defined in peac.txt (YAML/JSON format) at domain root, with fallback to .well-known/peac.json.
 - Flows: Agent fetches terms → signs request → server checks access/attribution/payment → responds (200/402/403). Use X-PEAC-Signature for signed requests.
 
 Example terms:
@@ -40,12 +40,12 @@ agent_rules:
 
 Fallback order for terms discovery:
 
-1. /pricing.txt (YAML)
+1. /peac.txt (YAML)
 2. /.well-known/peac.yaml
 3. /.well-known/peac.json
 4. Link header rel="peac-terms"
 
-While pricing.txt is the canonical default, PEAC-compliant agents should check .well-known/peac.yaml or JSON where possible.
+While peac.txt is the canonical default, PEAC-compliant agents should check .well-known/peac.yaml or JSON where possible.
 
 ## Header Behavior
 
