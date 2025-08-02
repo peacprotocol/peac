@@ -1,52 +1,41 @@
-# PEAC Protocol – Roadmap
+# PEAC Protocol Roadmap
 
-PEAC (Programmable Economic Access, Attribution & Consent) is an open protocol for programmable access, consent, and attribution on the web. Our aim is to create a trusted, neutral foundation for dynamic access and automated negotiation; usable by publishers, platforms, AI agents, and individuals.
+## Overview
 
-Roadmap is published for transparency and community input. Items and timelines may change as the ecosystem evolves. Building on web foundations like HTTP 402, PEAC evolves collaboratively for the automated economy.
+This document outlines the development priorities for PEAC Protocol. As an open source project, these timelines are aspirational and subject to community input and contribution availability.
 
----
+## Current Status (v0.9.2)
 
-## v0.9 – Initial Launch
+PEAC Protocol has established its core specification and basic SDK implementation. The focus is now on real-world validation and ecosystem development.
 
-- Core protocol specification
-- Canonical `peac.txt` and schema
-- Attribution and consent enforcement
-- Basic agent payment hooks (HTTP 402, Stripe stub)
-- Open source SDK (Node.js)
-- CLI tools and schema validation
-- Validator tools for compliance
+## Near Term Priorities
 
----
+### Developer Experience
+- Comprehensive documentation and tutorials
+- Integration examples for common frameworks
+- Testing tools and validators
 
-## v1.0 (Planned)
+### Feature Development
+- Enhanced attribution tracking
+- Compliance reporting tools
 
-- Discovery fallback (`.well-known/peac.yaml`/`.json`)
-- Dynamic pricing for paths and agents
-- Negotiation metadata (deal_id, dispute_url, pricing_proof)
-- Attribution verification API endpoints
-- Session tokens for persistent access
+### Dev Support
+- Developer tools and libraries
+- Integration plugins for popular CMS platforms
+- Reference implementations
 
----
+### Performance and Scale
+- Optimization for high-traffic scenarios
+- Caching strategies
+- CDN integration patterns
 
-## Beyond v1.0 (In Progress / Research)
+### Governance
+- Regulatory compliance tools
+- Multi-stakeholder governance
 
-- Tamper-evident audit logs (design phase)
-- Extended attribution and proof formats
-- Integration with additional payment and agent standards
-- Optional privacy features for sensitive logs
-- Reference middleware and CDN/edge patterns
+## Contributing to the Roadmap
 
-## Community Milestones
-
-- Q3 2025: Call for extensions (e.g., privacy features via PRs).
-- Ongoing: Integrate feedback from OSS/big tech (reference GOVERNANCE.md).
-
-Propose roadmap additions via GitHub issues/PRs, welcome from devs, AI firms, and foundations.
-
----
-
-*This roadmap is intentionally high-level. PEAC welcomes contributions and technical feedback as we build toward a global standard.*
-
-For collaboration or early feedback, visit [GitHub](https://github.com/peacprotocol/peac) or email contact@peacprotocol.org.
-
-*Last updated: July 2025*
+We welcome community input on priorities and timeline. Please:
+- Open issues for feature requests
+- Join community discussions
+- Submit pull requests for improvements

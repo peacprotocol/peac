@@ -1,66 +1,125 @@
 # Contributing to PEAC Protocol
 
-Thank you for your interest in contributing! PEAC Protocol is an open, global standard and welcomes input from all; developers, publishers, AI researchers, and policy experts.
+Thank you for your interest in contributing to PEAC Protocol. This guide provides information on how to contribute effectively.
 
-## PEAC 0.9.1.1 onwards:
-Plugins and platform-specific integrations are now maintained in separate repositories.
+## Code of Conduct
+
+Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md). We strive to maintain a welcoming and inclusive community.
 
 ## How to Contribute
 
-1. **Fork the repo** and clone locally.
-2. **Branch from `main`** for docs or bugfixes. For code/features, use an epic branch (`dev-*`).
-3. **Write code/tests/docs** following project structure and style.
-4. **Run all tests** (`npm test` or `pytest`).
-5. **Open a Pull Request** (PR) with clear summary and related issue reference.
-6. **Engage in Review**—address feedback, squash commits, and ensure clean history.
-7. **Sign the DCO** (if required).
+### Reporting Issues
 
-## Guidelines
+Before creating an issue:
+1. Check existing issues to avoid duplicates
+2. Verify the issue with the latest version
+3. Gather relevant information
 
-- **Follow code style:** Prettier, ESLint, and black (for Python).
-- **Write and update tests:** All new features/bugfixes need test coverage.
-- **Document changes:** Update the relevant `.md` files, code comments, and changelog.
-- **Respect privacy:** No personal or confidential data in code or issues.
-- **Be inclusive and constructive:** See our [Code of Conduct](CODE_OF_CONDUCT.md).
+When reporting:
+- Use a clear, descriptive title
+- Provide steps to reproduce
+- Include error messages and logs
+- Specify your environment (OS, Node.js version)
 
-## Development Commands
+### Suggesting Features
+
+Feature suggestions should include:
+- Problem description
+- Proposed solution
+- Alternative approaches considered
+- Potential impact on existing users
+
+### Code Contributions
+
+#### Getting Started
+
+1. Fork the repository
+2. Clone your fork:
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/peac.git
+   cd peac
+   ```
+3. Create a feature branch:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+#### Development Process
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Make your changes following the coding standards
+
+3. Add or update tests as needed
+
+4. Run tests:
+   ```bash
+   npm test
+   ```
+
+5. Run linter:
+   ```bash
+   npm run lint
+   ```
+
+#### Commit Messages
+
+Follow conventional commit format:
+```
+type(scope): brief description
+
+Longer explanation if needed
+
+Fixes #123
+```
+
+Types: feat, fix, docs, style, refactor, test, chore
+
+#### Submitting Pull Requests
+
+1. Push to your fork
+2. Create a pull request with:
+   - Clear title and description
+   - Reference to related issues
+   - Description of testing performed
+
+3. Address review feedback promptly
+
+### Documentation Contributions
+
+Documentation improvements are highly valued:
+- Fix typos and clarify explanations
+- Add examples and use cases
+- Improve getting started guides
+- Ensure technical accuracy
+
+## Development Setup
 
 ```bash
-npm install         # Install Node dependencies
-npm test            # Run Node tests
-pytest              # Run Python tests
+# Clone repository
+git clone https://github.com/peacprotocol/peac.git
+cd peac
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run linter
+npm run lint
 ```
-For Python SDK: cd core/sdk/python and use pytest.
 
-## Feature/PR Naming
+## Testing
 
-- Branches: dev-<feature> (e.g., dev-ed25519, dev-http402)
+- Write tests for new functionality
+- Ensure existing tests pass
+- Aim for clear, maintainable test code
 
-- Commits: feat:, fix:, test:, docs:, chore: prefixes
+## Questions?
 
-## Issue & PR Labels
-
-- Use labels: bug, enhancement, good first issue, security, discussion, epic
-
-## Security
-See SECURITY.md (if present) or email security@peacprotocol.org for urgent issues.
-
-***PEAC Protocol Test Agent for EIP-712***
-
-All EIP-712 protocol integration tests use this public Ethereum test vector:
-
-- agent_id: `0xa0fb98a1d397d13fbe71f31fbc3241c8b01488da`
-- private_key: `4f3edf983ac636a65a842ce7c78d9aa706d3b113b37d7b1b6b5ddf49f7f6ed15`
-
-This allows all contributors and auditors to run and verify protocol tests using reproducible, non-secret keys.
-
-Paths: Spec writer (update spec.md), SDK dev (peac-core), Policy author (examples).
-
-## Join the Community
-- GitHub Issues: https://github.com/peacprotocol/peac/issues
-- X / Twitter: @peacprotocol
-- peacprotocol.org
-
-We value all contributions; let’s build the fair, programmable web together!
-
-New contributors: Start with examples or issues. See Join the Community for support.
+- Open an issue for questions
+- Email: contact@peacprotocol.org
