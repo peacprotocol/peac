@@ -141,7 +141,7 @@ PEAC Protocol is in active development with early adopters testing integrations.
 
 ## Contributing
 
-PEAC Protocol is an open source project. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to participate.
+PEAC Protocol is an open source project. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to participate. Join the open working group here: https://peacprotocol.org/wg
 
 ## License
 
