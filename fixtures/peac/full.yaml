@@ -1,0 +1,18 @@
+version: "0.9.2"
+id: "550e8400-e29b-41d4-a716-446655440001"
+created: "2024-01-01T00:00:00Z"
+terms:
+  ai_training:
+    allowed: true
+    price_per_gb: 0.001
+  api_access:
+    allowed: true
+    rate_limit: 1000
+  web_scraping:
+    allowed: false
+payment:
+  processor: "stripe"
+  currency: "USD"
+attribution:
+  required: true
+  format: "Source: {url}"

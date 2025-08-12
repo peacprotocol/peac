@@ -1,0 +1,9 @@
+{
+  "name": "@peacprotocol/templates",
+  "version": "0.9.4",
+  "description": "PEAC Protocol Templates",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo 'Tests will be added'"
+  }
+}
