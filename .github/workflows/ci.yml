@@ -23,6 +23,7 @@ jobs:
             packages/*/package.json
 
       - name: Install deps
+<<<<<<< HEAD
         run: npm install
 
 <<<<<<< HEAD
@@ -48,6 +49,12 @@ jobs:
           echo "==> Format & lint"
           npx prettier --check . || { echo "ERROR: Formatting issues found"; exit 1; }
 >>>>>>> 6682e8ac (ci: inline protocol checks; remove reference to local scripts)
+=======
+        run: npm ci
+
+      - name: Format check
+        run: npx prettier --check .
+>>>>>>> 736c0def (ci: make CI independent of lockfiles; add build/test; inline protocol checks)
 
       - name: Build all workspaces
         run: npm run build --workspaces
@@ -70,6 +77,7 @@ jobs:
             exit 1
           fi
 
+<<<<<<< HEAD
           echo "==> Forbid legacy header name outside middleware"
           if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js' \
             | grep -v 'middleware/headers.ts'; then
@@ -88,5 +96,10 @@ jobs:
           if git grep -nE "setHeader\\(['\"][Xx]-peac-(version|protocol-version)['\"]" -- packages/server \
             | grep -v "middleware/headers\\.ts"; then
             echo "ERROR: Protocol headers set outside middleware"
+=======
+          echo "==> Forbid legacy header name"
+          if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js'; then
+            echo "ERROR: Found legacy header name x-peac-version in server/src"
+>>>>>>> 736c0def (ci: make CI independent of lockfiles; add build/test; inline protocol checks)
             exit 1
           fi
