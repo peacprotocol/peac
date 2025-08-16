@@ -82,6 +82,9 @@ jobs:
           fi
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d71da982 (ci: allowlist middleware for legacy-header grep; add targeted header-set guards)
           echo "==> Forbid legacy header name outside middleware"
           if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js' \
             | grep -v 'middleware/headers.ts'; then
@@ -100,10 +103,13 @@ jobs:
           if git grep -nE "setHeader\\(['\"][Xx]-peac-(version|protocol-version)['\"]" -- packages/server \
             | grep -v "middleware/headers\\.ts"; then
             echo "ERROR: Protocol headers set outside middleware"
+<<<<<<< HEAD
 =======
           echo "==> Forbid legacy header name"
           if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js'; then
             echo "ERROR: Found legacy header name x-peac-version in server/src"
 >>>>>>> 736c0def (ci: make CI independent of lockfiles; add build/test; inline protocol checks)
+=======
+>>>>>>> d71da982 (ci: allowlist middleware for legacy-header grep; add targeted header-set guards)
             exit 1
           fi
