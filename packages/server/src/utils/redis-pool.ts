@@ -1,33 +1,42 @@
-import Redis from "ioredis";
-import { config } from "../config";
+// packages/server/src/utils/redis-pool.ts
+import IORedis, { Redis as RedisClient } from 'ioredis';
 
-let _redis: Redis | null = null;
+const USE_MOCK =
+  process.env.CI === 'true' ||
+  process.env.NODE_ENV === 'test' ||
+  !process.env.REDIS_URL;
 
-export function getRedis(): Redis {
-  if (_redis) return _redis;
-
-  _redis = new Redis(config.redis.url, {
-    maxRetriesPerRequest: 3,
-    lazyConnect: true,
-  });
-
-  // Handle connection events (only if not mocked)
-  if (typeof _redis.on === "function") {
-    _redis.on("error", () => {
-      // Redis connection errors are handled by ioredis internally
-    });
-
-    _redis.on("connect", () => {
-      // Redis connected successfully
-    });
-  }
-
-  return _redis;
+let RedisCtor: any = IORedis;
+if (USE_MOCK) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const mod = require('ioredis-mock');
+  RedisCtor = mod.default || mod;
 }
 
-export async function closeRedis(): Promise<void> {
-  if (_redis) {
-    await _redis.quit();
-    _redis = null;
+let _client: RedisClient | null = null;
+
+export function getRedis(): RedisClient {
+  if (_client) return _client;
+
+  if (USE_MOCK) {
+    _client = new RedisCtor() as unknown as RedisClient; // in-memory mock
+  } else {
+    _client = new RedisCtor(process.env.REDIS_URL as string, {
+      maxRetriesPerRequest: 1,
+      lazyConnect: false,
+      enableReadyCheck: true,
+    }) as unknown as RedisClient;
+  }
+  return _client;
+}
+
+export async function disconnectRedis(): Promise<void> {
+  if (_client) {
+    try {
+      await (_client as any).quit?.();
+    } catch {
+      /* noop */
+    }
+    _client = null;
   }
 }

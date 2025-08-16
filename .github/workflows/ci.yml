@@ -23,7 +23,7 @@ jobs:
             packages/*/package.json
 
       - name: Install deps
-        run: npm ci
+        run: npm install
 
       - name: Format check
         run: npx prettier --check .
