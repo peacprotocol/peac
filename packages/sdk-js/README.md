@@ -11,6 +11,7 @@ PEAC (Programmable Economic Access, Attribution & Consent) Protocol is an open s
 ## What is PEAC Protocol?
 
 PEAC Protocol provides a standardized framework for:
+
 - Programmable access control and consent management
 - Automated micropayments for content usage
 - Verifiable attribution chains
@@ -47,16 +48,16 @@ npx peac validate peac.txt
 
 ## Core Features
 
-| Feature | Description |
-|---------|-------------|
-| **Simple Integration** | Add one file to your domain root |
-| **Flexible Policies** | Define access rules for different use cases |
-| **Payment Rails** | Integrate with Stripe, PayPal, Stablecoins, Cryptocurrencies |
-| **Attribution Tracking** | Cryptographic proof of content usage |
-| **Programmatic Negotiation** | Enable agents to discover and comply with terms |
-| **Broad Support** | Tools for publishers, developers, agents, and compliance needs |
-| **Compliance Ready** | Templates for GDPR, CCPA, EU AI Act |
-| **Extensible** | Modular design supports custom requirements |
+| Feature                      | Description                                                    |
+| ---------------------------- | -------------------------------------------------------------- |
+| **Simple Integration**       | Add one file to your domain root                               |
+| **Flexible Policies**        | Define access rules for different use cases                    |
+| **Payment Rails**            | Integrate with Stripe, PayPal, Stablecoins, Cryptocurrencies   |
+| **Attribution Tracking**     | Cryptographic proof of content usage                           |
+| **Programmatic Negotiation** | Enable agents to discover and comply with terms                |
+| **Broad Support**            | Tools for publishers, developers, agents, and compliance needs |
+| **Compliance Ready**         | Templates for GDPR, CCPA, EU AI Act                            |
+| **Extensible**               | Modular design supports custom requirements                    |
 
 ## Basic peac.txt Example
 
@@ -69,17 +70,17 @@ policy:
   consent:
     ai_training: conditional
     web_scraping: allowed
-    
+
   economics:
     pricing_models:
       ai_training:
         per_gb: 0.01
         currency: USD
-        
+
   attribution:
     required: true
     format: "Source: {url}"
-    
+
   compliance:
     jurisdictions:
       eu:
@@ -92,13 +93,13 @@ policy:
 ### For Publishers
 
 ```javascript
-const { Parser } = require('@peacprotocol/core');
+const { Parser } = require("@peacprotocol/core");
 
 // Parse and enforce policies
-const policy = await Parser.parse('example.com');
+const policy = await Parser.parse("example.com");
 
 // Validate agent access
-if (policy.requiresPayment('ai_training')) {
+if (policy.requiresPayment("ai_training")) {
   // Handle payment flow
 }
 ```
@@ -106,12 +107,12 @@ if (policy.requiresPayment('ai_training')) {
 ### For AI Agents
 
 ```javascript
-const { PEACClient } = require('@peacprotocol/core');
+const { PEACClient } = require("@peacprotocol/core");
 
 const client = new PEACClient();
-const access = await client.requestAccess('publisher.com', {
-  purpose: 'ai_training',
-  volume: '10GB'
+const access = await client.requestAccess("publisher.com", {
+  purpose: "ai_training",
+  volume: "10GB",
 });
 
 if (access.granted) {
@@ -121,11 +122,11 @@ if (access.granted) {
 
 ## Use Cases
 
-| Scenario | Description |
-|----------|-------------|
-| Open Research Bot | Non-commercial bot with consent/attribution, no payment |
-| Attribution Enforcement | Require visible credit for content used in AI or bots |
-| AI Data Licensing | Licensed access with tiered terms and basic negotiation |
+| Scenario                | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| Open Research Bot       | Non-commercial bot with consent/attribution, no payment |
+| Attribution Enforcement | Require visible credit for content used in AI or bots   |
+| AI Data Licensing       | Licensed access with tiered terms and basic negotiation |
 
 ## Adoption Status
 

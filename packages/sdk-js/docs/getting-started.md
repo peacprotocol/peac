@@ -5,6 +5,7 @@ This guide will help you implement PEAC Protocol for your website or application
 ## Overview
 
 PEAC Protocol enables you to:
+
 - Control how automated systems access your content
 - Set payment requirements for different use cases
 - Require attribution for content usage
@@ -29,13 +30,13 @@ policy:
   consent:
     default: allowed
     ai_training: conditional
-    
+
   economics:
     pricing_models:
       ai_training:
         per_gb: 0.01
         currency: USD
-        
+
   attribution:
     required: true
     format: "Content from {url}"
@@ -57,8 +58,8 @@ policy:
 
 ```yaml
 consent:
-  default: allowed      # or 'denied' or 'contact'
-  ai_training: denied   # Block AI training
+  default: allowed # or 'denied' or 'contact'
+  ai_training: denied # Block AI training
   web_scraping: allowed # Allow general scraping
   api_access: conditional # Require conditions
 ```
@@ -103,6 +104,7 @@ npx peac validate peac.txt
 ### Manual Validation
 
 Ensure your file:
+
 - Is valid YAML or JSON
 - Contains required fields (version, protocol, policy)
 - Uses correct field names and types
@@ -116,6 +118,7 @@ https://yourdomain.com/peac.txt
 ```
 
 The file should be:
+
 - Publicly accessible
 - Served with `Content-Type: text/plain` or `application/yaml`
 - Available over HTTPS
@@ -131,9 +134,9 @@ curl https://yourdomain.com/peac.txt
 ### Parse Your Policy
 
 ```javascript
-const { Parser } = require('@peacprotocol/core');
+const { Parser } = require("@peacprotocol/core");
 
-const policy = await Parser.parse('yourdomain.com');
+const policy = await Parser.parse("yourdomain.com");
 console.log(policy);
 ```
 

@@ -4,11 +4,11 @@
  */
 
 export type UsageCategory =
-  | 'training'
-  | 'inference'
-  | 'analytics'
-  | 'display'
-  | 'cache';
+  | "training"
+  | "inference"
+  | "analytics"
+  | "display"
+  | "cache";
 
 export interface Terms {
   /** Minor currency units as a decimal-free string (e.g., "2500" for $25.00). */
@@ -22,10 +22,10 @@ export interface Terms {
 }
 
 export interface Offer {
-  id: string;        // offer id (uuid)
-  resource: string;  // URL or policy key
+  id: string; // offer id (uuid)
+  resource: string; // URL or policy key
   terms: Terms;
   meta?: Record<string, unknown>;
 }
 
-export type Outcome = 'agreed' | 'rejected' | 'countered' | 'expired';
+export type Outcome = "agreed" | "rejected" | "countered" | "expired";

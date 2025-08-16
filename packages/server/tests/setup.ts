@@ -47,6 +47,6 @@ mwIDAQAB
 jest.setTimeout(10000);
 
 // Fail fast on unhandled promise rejections (good hygiene).
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
   throw err;
 });

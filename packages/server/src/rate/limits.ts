@@ -1,4 +1,4 @@
-import { getRedis } from '../utils/redis-pool';
+import { getRedis } from "../utils/redis-pool";
 
 // Lua token bucket: KEYS[1]=key ARGV[1]=capacity ARGV[2]=refillPerSec ARGV[3]=ttlSec ARGV[4]=nowSec
 const SCRIPT = `
@@ -33,11 +33,24 @@ else
 end
 `;
 
-export async function checkRateLimit(resource: string, id: string, capacity = 50, refillPerSec = 5): Promise<boolean> {
+export async function checkRateLimit(
+  resource: string,
+  id: string,
+  capacity = 50,
+  refillPerSec = 5,
+): Promise<boolean> {
   const redis = getRedis();
   const key = `rate:${resource}:${id}`;
   const now = Math.floor(Date.now() / 1000);
   const ttl = 60;
-  const res = await redis.eval(SCRIPT, 1, key, capacity, refillPerSec, ttl, now);
-  return res === 1 || res === '1';
+  const res = await redis.eval(
+    SCRIPT,
+    1,
+    key,
+    capacity,
+    refillPerSec,
+    ttl,
+    now,
+  );
+  return res === 1 || res === "1";
 }

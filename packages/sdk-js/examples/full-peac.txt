@@ -171,7 +171,7 @@ peac:
       china:
         pipl: true
         data_localization: true
-        filing_number: "京ICP备12345678号"
+        filing_number: " ICP 12345678 "
         
       india:
         dpdpa: true
@@ -195,7 +195,7 @@ peac:
         
       japan:
         appi: true
-        ppc_filing: "第12345号"
+        ppc_filing: " 12345 "
         
       singapore:
         pdpa: true
@@ -390,18 +390,18 @@ peac:
         contact: "contacto@example.es"
         
       zh:
-        consent_message: "AI使用需要许可"
-        payment_message: "需要付费：$0.01/GB"
+        consent_message: "AI      "
+        payment_message: "     $0.01/GB"
         contact: "contact@example.cn"
         
       hi:
-        consent_message: "AI उपयोग के लिए सहमति आवश्यक"
-        payment_message: "भुगतान आवश्यक: $0.01/GB"
+        consent_message: "AI                          "
+        payment_message: "             : $0.01/GB"
         contact: "contact@example.in"
         
       ar:
-        consent_message: "يتطلب موافقة لاستخدام الذكاء الاصطناعي"
-        payment_message: "الدفع مطلوب: $0.01/GB"
+        consent_message: "                                      "
+        payment_message: "           : $0.01/GB"
         contact: "contact@example.ae"
         direction: rtl
 

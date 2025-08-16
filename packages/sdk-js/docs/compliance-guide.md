@@ -13,16 +13,19 @@ This guide provides general information only. It is not legal advice. Consult qu
 PEAC Protocol includes fields relevant to various regulations:
 
 ### EU AI Act
+
 - Transparency requirements for AI systems
 - Attribution and audit trails
 - Consent mechanisms
 
 ### GDPR (General Data Protection Regulation)
+
 - Consent management
 - Purpose limitation
 - Data minimization
 
 ### CCPA (California Consumer Privacy Act)
+
 - Opt-out mechanisms
 - Transparency requirements
 
@@ -52,7 +55,7 @@ policy:
     ai_training: denied
     analytics: allowed
     academic_research: allowed
-    
+
   compliance:
     jurisdictions:
       eu:
@@ -68,30 +71,34 @@ policy:
     required: true
     format: "AI training data from {url}"
     verification_endpoint: /verify-usage
-    
+
   compliance:
     audit_log: true
-    retention_period: P1Y  # 1 year
+    retention_period: P1Y # 1 year
 ```
 
 ## Best Practices
 
 ### 1. Clear Purpose Definition
+
 - Specify allowed use cases explicitly
 - Use standard terminology where possible
 - Avoid ambiguous terms
 
 ### 2. Audit Trail
+
 - Log access requests
 - Maintain attribution records
 - Enable verification endpoints
 
 ### 3. Regular Updates
+
 - Review policies periodically
 - Update for new regulations
 - Document policy changes
 
 ### 4. Transparency
+
 - Make policies easily discoverable
 - Use clear, plain language
 - Provide contact information
@@ -99,18 +106,19 @@ policy:
 ## Common Patterns
 
 ### News Publisher (EU)
+
 ```yaml
 policy:
   consent:
     ai_training: conditional
     web_indexing: allowed
-    
+
   economics:
     pricing_models:
       ai_training:
         per_article: 0.10
         currency: EUR
-        
+
   compliance:
     jurisdictions:
       eu:
@@ -120,12 +128,13 @@ policy:
 ```
 
 ### Healthcare Data (US)
+
 ```yaml
 policy:
   consent:
     default: denied
     healthcare_research: conditional
-    
+
   compliance:
     jurisdictions:
       us:

@@ -1,12 +1,13 @@
 {
   "name": "@peacprotocol/core",
-  "version": "0.9.2",
+  "version": "0.9.5",
   "description": "PEAC Protocol - Universal Digital Pacts for the Automated Economy",
   "main": "sdk/index.js",
   "bin": {
     "peac": "./cli/peac.js"
   },
   "scripts": {
+    "build": "echo 'Build will be added'",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:integration": "jest --testPathPattern=integration",

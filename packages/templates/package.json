@@ -1,9 +1,11 @@
 {
   "name": "@peacprotocol/templates",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "PEAC Protocol Templates",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'Build will be added'",
     "test": "echo 'Tests will be added'"
-  }
+  },
+  "license": "Apache-2.0"
 }

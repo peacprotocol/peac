@@ -1,3 +1,7 @@
+node_modules/
+dist/
+coverage/
 .DS_Store
-*/.DS_Store
-**/.DS_Store
+.vscode/
+.idea/
+scripts/
