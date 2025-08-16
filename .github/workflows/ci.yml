@@ -49,8 +49,23 @@ jobs:
             exit 1
           fi
 
-          echo "==> Forbid legacy header name"
-          if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js'; then
-            echo "ERROR: Found legacy header name x-peac-version in server/src"
+          echo "==> Forbid legacy header name outside middleware"
+          if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js' \
+            | grep -v 'middleware/headers.ts'; then
+            echo "ERROR: Found legacy header name x-peac-version outside middleware"
+            exit 1
+          fi
+
+          echo "==> Ensure legacy header is never SET anywhere"
+          if git grep -nE "setHeader\\(['\"]x-peac-version['\"]" -- packages/server \
+            | grep -v "middleware/headers\\.ts"; then
+            echo "ERROR: Attempt to set legacy header x-peac-version found"
+            exit 1
+          fi
+
+          echo "==> Ensure protocol headers are only set in middleware"
+          if git grep -nE "setHeader\\(['\"][Xx]-peac-(version|protocol-version)['\"]" -- packages/server \
+            | grep -v "middleware/headers\\.ts"; then
+            echo "ERROR: Protocol headers set outside middleware"
             exit 1
           fi
