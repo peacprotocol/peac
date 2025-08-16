@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/server",
-  "version": "0.9.3",
+  "version": "0.9.5",
   "description": "PEAC Protocol - Enterprise Automated Economy Infrastructure",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -33,7 +33,7 @@
     "helmet": "^7.1.0",
     "ioredis": "^5.5.0",
     "ipaddr.js": "^2.1.0",
-    "jose": "^5.2.0",
+    "jose": "^5.10.0",
     "pino": "^8.17.0",
     "prom-client": "^15.1.0",
     "uuid": "^9.0.1",

@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/cli",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "PEAC Protocol CLI",
   "main": "dist/index.js",
   "bin": {
@@ -15,5 +15,6 @@
   },
   "devDependencies": {
     "typescript": "^5.2.0"
-  }
+  },
+  "license": "Apache-2.0"
 }

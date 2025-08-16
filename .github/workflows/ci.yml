@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+jobs:
+  verify-build-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Verify protocol v0.9.5 policy
+        run: |
+          bash scripts/verify-v095.sh
+
+      - name: Build all workspaces
+        run: npm run build --workspaces
+
+      - name: Test all workspaces
+        run: npm run test --workspaces
+
+      - name: Enforce author identity for commits in PR
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE="origin/${{ github.base_ref }}"
+          HEAD="HEAD"
+          echo "Checking commits from ${BASE}..${HEAD}"
+          # Fail if any commit author does not match the required identity
+          BAD=$(git log --no-merges --format='%H %an <%ae>' "${BASE}..${HEAD}" | \
+            awk '$2!="jithinraj" || $3!="<jjitinraj@gmail.com>" {print}')
+          if [ -n "$BAD" ]; then
+            echo "ERROR: Non-compliant commit authors detected:"
+            echo "$BAD"
+            exit 1
+          fi
+          # Fail if there are merge commits
+          if git rev-list --merges "${BASE}..${HEAD}" | grep . >/dev/null; then
+            echo "ERROR: Merge commits detected in PR. Rebase or squash required."
+            exit 1
+          fi
+
+      # Optional: fail the PR if legacy versions appear anywhere
+      - name: No legacy versions in tree
+        run: |
+          if git grep -nE '0\.9\.3|0\.9\.4' -- ':!node_modules'; then
+            echo "ERROR: Legacy version literals found."
+            exit 1
+          fi
+
+      # Optional: fail if protocol headers set outside middleware
+      - name: Protocol header only in middleware
+        run: |
+          HITS=$(git grep -nE "set(Header)?\\(['\"]x-peac-.*version" packages | grep -v "src/middleware/headers\\.ts" || true)
+          if [ -n "$HITS" ]; then
+            echo "ERROR: Protocol header set outside middleware:"
+            echo "$HITS"
+            exit 1
+          fi
