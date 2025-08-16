@@ -1,6 +1,7 @@
 # @peacprotocol/server (v0.9.3)
 
 Optional reference server for the PEAC Protocol.
+
 - Identity verification (JWK/JWKS, DPoP)
 - Session mint/verify (JWT)
 - Payments via X402 provider (+ Stripe bridge)
@@ -10,6 +11,7 @@ Optional reference server for the PEAC Protocol.
 This server **does not** replace the JavaScript SDK or `peac.txt`. It complements `@peacprotocol/core` when policies require verification, sessions, or payments.
 
 ## Quickstart
+
 ```bash
 npm install
 npm run build
@@ -30,3 +32,4 @@ PEAC_REDIS_URL (for rate limiting)
 PEAC_LOG_LEVEL (info|debug|warn|error)
 
 License: Apache-2.0
+```

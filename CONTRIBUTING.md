@@ -11,11 +11,13 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md). We strive to m
 ### Reporting Issues
 
 Before creating an issue:
+
 1. Check existing issues to avoid duplicates
 2. Verify the issue with the latest version
 3. Gather relevant information
 
 When reporting:
+
 - Use a clear, descriptive title
 - Provide steps to reproduce
 - Include error messages and logs
@@ -24,6 +26,7 @@ When reporting:
 ### Suggesting Features
 
 Feature suggestions should include:
+
 - Problem description
 - Proposed solution
 - Alternative approaches considered
@@ -47,6 +50,7 @@ Feature suggestions should include:
 #### Development Process
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -56,6 +60,7 @@ Feature suggestions should include:
 3. Add or update tests as needed
 
 4. Run tests:
+
    ```bash
    npm test
    ```
@@ -68,6 +73,7 @@ Feature suggestions should include:
 #### Commit Messages
 
 Follow conventional commit format:
+
 ```
 type(scope): brief description
 
@@ -91,6 +97,7 @@ Types: feat, fix, docs, style, refactor, test, chore
 ### Documentation Contributions
 
 Documentation improvements are highly valued:
+
 - Fix typos and clarify explanations
 - Add examples and use cases
 - Improve getting started guides

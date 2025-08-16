@@ -3,25 +3,21 @@
   "env": { "node": true, "es2022": true },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   "parserOptions": {
     "ecmaVersion": 2022,
     "sourceType": "module"
   },
-  "ignorePatterns": [
-    "dist/",
-    "coverage/",
-    "node_modules/"
-  ],
+  "ignorePatterns": ["dist/", "coverage/", "node_modules/"],
   "rules": {
     "no-console": ["error", { "allow": ["warn", "error"] }],
     "no-debugger": "error",
     "no-warning-comments": [
       "error",
-      { "terms": ["todo", "fixme", "xxx", "hack", "wip"], "location": "anywhere" }
+      {
+        "terms": ["todo", "fixme", "xxx", "hack", "wip"],
+        "location": "anywhere"
+      }
     ],
     "@typescript-eslint/no-unused-vars": [
       "error",

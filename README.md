@@ -2,7 +2,7 @@
 
 [![Node.js CI](https://github.com/peacprotocol/peac/actions/workflows/ci.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-0.9.2-green.svg)](https://github.com/peacprotocol/peac/releases)
+[![Version](https://img.shields.io/badge/version-0.9.5-green.svg)](https://github.com/peacprotocol/peac/releases)
 
 ## A Universal Policy Layer for the Automated Economy
 
@@ -11,6 +11,7 @@ PEAC (Programmable Economic Access, Attribution & Consent) Protocol is an open s
 ## What is PEAC Protocol?
 
 PEAC Protocol provides a standardized framework for:
+
 - Programmable access control and consent management
 - Automated micropayments for content usage
 - Verifiable attribution chains
@@ -47,16 +48,16 @@ npx peac validate peac.txt
 
 ## Core Features
 
-| Feature | Description |
-|---------|-------------|
-| **Simple Integration** | Add one file to your domain root |
-| **Flexible Policies** | Define access rules for different use cases |
-| **Payment Rails** | Integrate with Stripe, PayPal, Stablecoins, Cryptocurrencies |
-| **Attribution Tracking** | Cryptographic proof of content usage |
-| **Programmatic Negotiation** | Enable agents to discover and comply with terms |
-| **Broad Support** | Tools for publishers, developers, agents, and compliance needs |
-| **Compliance Ready** | Templates for GDPR, CCPA, EU AI Act |
-| **Extensible** | Modular design supports custom requirements |
+| Feature                      | Description                                                    |
+| ---------------------------- | -------------------------------------------------------------- |
+| **Simple Integration**       | Add one file to your domain root                               |
+| **Flexible Policies**        | Define access rules for different use cases                    |
+| **Payment Rails**            | Integrate with Stripe, PayPal, Stablecoins, Cryptocurrencies   |
+| **Attribution Tracking**     | Cryptographic proof of content usage                           |
+| **Programmatic Negotiation** | Enable agents to discover and comply with terms                |
+| **Broad Support**            | Tools for publishers, developers, agents, and compliance needs |
+| **Compliance Ready**         | Templates for GDPR, CCPA, EU AI Act                            |
+| **Extensible**               | Modular design supports custom requirements                    |
 
 ## Basic peac.txt Example
 
@@ -69,17 +70,17 @@ policy:
   consent:
     ai_training: conditional
     web_scraping: allowed
-    
+
   economics:
     pricing_models:
       ai_training:
         per_gb: 0.01
         currency: USD
-        
+
   attribution:
     required: true
     format: "Source: {url}"
-    
+
   compliance:
     jurisdictions:
       eu:
@@ -92,13 +93,13 @@ policy:
 ### For Publishers
 
 ```javascript
-const { Parser } = require('@peacprotocol/core');
+const { Parser } = require("@peacprotocol/core");
 
 // Parse and enforce policies
-const policy = await Parser.parse('example.com');
+const policy = await Parser.parse("example.com");
 
 // Validate agent access
-if (policy.requiresPayment('ai_training')) {
+if (policy.requiresPayment("ai_training")) {
   // Handle payment flow
 }
 ```
@@ -106,12 +107,12 @@ if (policy.requiresPayment('ai_training')) {
 ### For AI Agents
 
 ```javascript
-const { PEACClient } = require('@peacprotocol/core');
+const { PEACClient } = require("@peacprotocol/core");
 
 const client = new PEACClient();
-const access = await client.requestAccess('publisher.com', {
-  purpose: 'ai_training',
-  volume: '10GB'
+const access = await client.requestAccess("publisher.com", {
+  purpose: "ai_training",
+  volume: "10GB",
 });
 
 if (access.granted) {
@@ -121,11 +122,11 @@ if (access.granted) {
 
 ## Use Cases
 
-| Scenario | Description |
-|----------|-------------|
-| Open Research Bot | Non-commercial bot with consent/attribution, no payment |
-| Attribution Enforcement | Require visible credit for content used in AI or bots |
-| AI Data Licensing | Licensed access with tiered terms and basic negotiation |
+| Scenario                | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| Open Research Bot       | Non-commercial bot with consent/attribution, no payment |
+| Attribution Enforcement | Require visible credit for content used in AI or bots   |
+| AI Data Licensing       | Licensed access with tiered terms and basic negotiation |
 
 ## Adoption Status
 
@@ -153,45 +154,35 @@ PEAC Protocol is licensed under the Apache License 2.0. See [LICENSE](LICENSE) f
 - Email: contact@peacprotocol.org
 - Community: Join discussions on GitHub
 
+## Protocol Compliance
 
-# Transitional v0.9.4 
+This implementation enforces strict version 0.9.5 policy:
 
-## PEAC Protocol Monorepo: 0.9.4
+- ONLY accepts protocol version 0.9.5
+- Versions 0.9.3 and 0.9.4 return 426 Upgrade Required
+- RFC7807 compliant error responses
+- Structured logging for all protocol interactions
 
-> Programmable Economic Access & Consent Protocol
+### Server Implementation
 
-## Structure
+The server component provides:
 
-This monorepo contains all PEAC Protocol packages:
+- Version negotiation middleware
+- Payment processing integration
+- Cryptographic verification
+- Compliance automation
 
-- `packages/sdk-js` - JavaScript/TypeScript SDK
-- `packages/server` - Enterprise server implementation
-- `packages/schema` - JSON Schema definitions (single source of truth)
-- `packages/cli` - Command-line interface
-- `packages/templates` - Policy templates
+### Protocol Verification
 
-## Version
-
-Current version: v0.9.4 (transitional monorepo release)
-
-## Development
+Run quality checks before commits:
 
 ```bash
-npm install
-npm run build
-npm test
+scripts/verify-v095.sh
 ```
 
-### Coming in v0.9.5
-- Full CLI implementation
-- Shared schema usage
-- Complete documentation update
-- CI/CD workflows
+Checks include:
 
-## History
-This monorepo preserves complete git history from:
-
-- peacprotocol/peac (SDK) - 122 commits
-- peacprotocol/peac-server - 1 commit
-
-All version tags are preserved (v0.9.0 through v0.9.3).
+- Version policy enforcement
+- Protocol header compliance
+- Code hygiene standards
+- Documentation standards
