@@ -9,6 +9,7 @@ PEAC Protocol takes security seriously. If you discover a security vulnerability
 Email: security@peacprotocol.org
 
 Please include:
+
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact
@@ -25,6 +26,7 @@ Please include:
 ### Policy File Security
 
 PEAC policy files (peac.txt) are public by design. Do not include:
+
 - Private keys or secrets
 - Personally identifiable information
 - Internal system details
@@ -38,6 +40,7 @@ PEAC policy files (peac.txt) are public by design. Do not include:
 ### Parser Security
 
 When implementing PEAC parsers:
+
 - Validate all input against the schema
 - Set reasonable size limits
 - Handle malformed content gracefully
@@ -46,6 +49,7 @@ When implementing PEAC parsers:
 ### Signature Verification
 
 If using signed policies:
+
 - Verify signatures before trusting content
 - Use established cryptographic libraries
 - Rotate keys periodically
@@ -82,6 +86,7 @@ If using signed policies:
 ## Security Updates
 
 Security updates will be announced via:
+
 - GitHub security advisories
 - Project mailing list (when established)
 - CHANGELOG.md notes

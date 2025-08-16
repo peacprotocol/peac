@@ -4,8 +4,8 @@
  * @license Apache-2.0
  */
 
-const crypto = require('crypto');
-const fs = require('fs').promises;
+const crypto = require("crypto");
+const fs = require("fs").promises;
 
 class PEACCrypto {
   constructor(options = {}) {
@@ -14,30 +14,30 @@ class PEACCrypto {
   }
 
   generateKeyPair(options = {}) {
-    const keyPair = crypto.generateKeyPairSync('ed25519', {
+    const keyPair = crypto.generateKeyPairSync("ed25519", {
       publicKeyEncoding: {
-        type: 'spki',
-        format: 'pem'
+        type: "spki",
+        format: "pem",
       },
       privateKeyEncoding: {
-        type: 'pkcs8',
-        format: 'pem',
-        cipher: options.passphrase ? 'aes-256-cbc' : undefined,
-        passphrase: options.passphrase
-      }
+        type: "pkcs8",
+        format: "pem",
+        cipher: options.passphrase ? "aes-256-cbc" : undefined,
+        passphrase: options.passphrase,
+      },
     });
 
     // Add metadata
     return {
       ...keyPair,
       generated: new Date().toISOString(),
-      algorithm: 'ed25519',
-      keyId: this.generateKeyId()
+      algorithm: "ed25519",
+      keyId: this.generateKeyId(),
     };
   }
 
   generateKeyId() {
-    return crypto.randomBytes(16).toString('hex');
+    return crypto.randomBytes(16).toString("hex");
   }
 
   async signPeac(peacData, privateKey, options = {}) {
@@ -48,21 +48,21 @@ class PEACCrypto {
         metadata: {
           ...peacData.metadata,
           signed_at: new Date().toISOString(),
-          key_id: options.keyId || this.generateKeyId()
-        }
+          key_id: options.keyId || this.generateKeyId(),
+        },
       };
 
       // Canonicalize peac section
       const message = this.canonicalize(dataToSign.peac);
-      
+
       // Sign
       const signature = crypto.sign(null, Buffer.from(message), privateKey);
-      
+
       // Return signed peac
       return {
         ...dataToSign,
-        signature: signature.toString('hex'),
-        signature_algorithm: 'ed25519'
+        signature: signature.toString("hex"),
+        signature_algorithm: "ed25519",
       };
     } catch (error) {
       throw new Error(`Failed to sign peac: ${error.message}`);
@@ -72,21 +72,23 @@ class PEACCrypto {
   async verifyPeac(peacData, publicKey) {
     try {
       const { signature, signature_algorithm, ...dataWithoutSig } = peacData;
-      
+
       // Check algorithm
-      if (signature_algorithm && signature_algorithm !== 'ed25519') {
-        throw new Error(`Unsupported signature algorithm: ${signature_algorithm}`);
+      if (signature_algorithm && signature_algorithm !== "ed25519") {
+        throw new Error(
+          `Unsupported signature algorithm: ${signature_algorithm}`,
+        );
       }
-      
+
       // Canonicalize peac section
       const message = this.canonicalize(dataWithoutSig.peac);
-      
+
       // Verify
       return crypto.verify(
         null,
         Buffer.from(message),
         publicKey,
-        Buffer.from(signature, 'hex')
+        Buffer.from(signature, "hex"),
       );
     } catch (error) {
       return false;
@@ -99,21 +101,21 @@ class PEACCrypto {
   }
 
   sortObject(obj) {
-    if (obj === null || typeof obj !== 'object') {
+    if (obj === null || typeof obj !== "object") {
       return obj;
     }
-    
+
     if (Array.isArray(obj)) {
-      return obj.map(item => this.sortObject(item));
+      return obj.map((item) => this.sortObject(item));
     }
-    
+
     const sorted = {};
     const keys = Object.keys(obj).sort();
-    
+
     for (const key of keys) {
       sorted[key] = this.sortObject(obj[key]);
     }
-    
+
     return sorted;
   }
 
@@ -121,40 +123,40 @@ class PEACCrypto {
   async rotateKeys(currentPrivateKey, options = {}) {
     // Generate new key pair
     const newKeyPair = this.generateKeyPair(options);
-    
+
     // Create rotation record
     const rotation = {
       old_key_id: options.currentKeyId,
       new_key_id: newKeyPair.keyId,
       rotated_at: new Date().toISOString(),
-      algorithm: 'ed25519'
+      algorithm: "ed25519",
     };
-    
+
     // Sign rotation with old key
     const rotationSignature = crypto.sign(
       null,
       Buffer.from(JSON.stringify(rotation)),
-      currentPrivateKey
+      currentPrivateKey,
     );
-    
-    rotation.signature = rotationSignature.toString('hex');
-    
+
+    rotation.signature = rotationSignature.toString("hex");
+
     return {
       keyPair: newKeyPair,
-      rotation
+      rotation,
     };
   }
 
   // Load key from file with caching
   async loadKey(keyPath, passphrase) {
-    const cacheKey = `${keyPath}:${passphrase || 'no-pass'}`;
-    
+    const cacheKey = `${keyPath}:${passphrase || "no-pass"}`;
+
     if (this.keyCache.has(cacheKey)) {
       return this.keyCache.get(cacheKey);
     }
-    
+
     try {
-      const keyData = await fs.readFile(keyPath, 'utf8');
+      const keyData = await fs.readFile(keyPath, "utf8");
       this.keyCache.set(cacheKey, keyData);
       return keyData;
     } catch (error) {
@@ -165,9 +167,9 @@ class PEACCrypto {
   // Generate a challenge for mutual authentication
   generateChallenge() {
     return {
-      challenge: crypto.randomBytes(32).toString('hex'),
+      challenge: crypto.randomBytes(32).toString("hex"),
       timestamp: new Date().toISOString(),
-      expires: new Date(Date.now() + 300000).toISOString() // 5 minutes
+      expires: new Date(Date.now() + 300000).toISOString(), // 5 minutes
     };
   }
 
@@ -177,14 +179,14 @@ class PEACCrypto {
     if (new Date(challenge.expires) < new Date()) {
       return false;
     }
-    
+
     try {
       const message = `${challenge.challenge}:${challenge.timestamp}`;
       return crypto.verify(
         null,
         Buffer.from(message),
         publicKey,
-        Buffer.from(response, 'hex')
+        Buffer.from(response, "hex"),
       );
     } catch {
       return false;

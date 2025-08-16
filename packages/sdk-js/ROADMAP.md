@@ -11,31 +11,37 @@ PEAC Protocol has established its core specification and basic SDK implementatio
 ## Near Term Priorities
 
 ### Developer Experience
+
 - Comprehensive documentation and tutorials
 - Integration examples for common frameworks
 - Testing tools and validators
 
 ### Feature Development
+
 - Enhanced attribution tracking
 - Compliance reporting tools
 
 ### Dev Support
+
 - Developer tools and libraries
 - Integration plugins for popular CMS platforms
 - Reference implementations
 
 ### Performance and Scale
+
 - Optimization for high-traffic scenarios
 - Caching strategies
 - CDN integration patterns
 
 ### Governance
+
 - Regulatory compliance tools
 - Multi-stakeholder governance
 
 ## Contributing to the Roadmap
 
 We welcome community input on priorities and timeline. Please:
+
 - Open issues for feature requests
 - Join community discussions
 - Submit pull requests for improvements

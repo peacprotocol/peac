@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+jobs:
+  verify-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          # Avoid lockfile requirement – cache on package.json files
+          cache: "npm"
+          cache-dependency-path: |
+            package.json
+            packages/*/package.json
+
+      - name: Install deps
+        run: npm install
+
+      - name: Format check
+        run: npx prettier --check .
+
+      - name: Build all workspaces
+        run: npm run build --workspaces
+
+      - name: Test all workspaces
+        run: npm run test --workspaces
+
+      - name: Verify protocol v0.9.5 policy
+        run: |
+          echo "==> Version sanity (root)"
+          ROOT_VER=$(node -e "console.log(require('./package.json').version||'')")
+          if [ "$ROOT_VER" != "0.9.5" ]; then
+            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.5'"
+            exit 1
+          fi
+
+          echo "==> Forbidden literals scan (server/src)"
+          if grep -R -nE '0\.9\.3|0\.9\.4' packages/server/src --include='*.ts' --include='*.js'; then
+            echo "ERROR: Found forbidden version literals in server/src"
+            exit 1
+          fi
+
+          echo "==> Forbid legacy header name outside middleware"
+          if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js' \
+            | grep -v 'middleware/headers.ts'; then
+            echo "ERROR: Found legacy header name x-peac-version outside middleware"
+            exit 1
+          fi
+
+          echo "==> Ensure legacy header is never SET anywhere"
+          if git grep -nE "setHeader\\(['\"]x-peac-version['\"]" -- packages/server \
+            | grep -v "middleware/headers\\.ts"; then
+            echo "ERROR: Attempt to set legacy header x-peac-version found"
+            exit 1
+          fi
+
+          echo "==> Ensure protocol headers are only set in middleware"
+          if git grep -nE "setHeader\\(['\"][Xx]-peac-(version|protocol-version)['\"]" -- packages/server \
+            | grep -v "middleware/headers\\.ts"; then
+            echo "ERROR: Protocol headers set outside middleware"
+            exit 1
+          fi

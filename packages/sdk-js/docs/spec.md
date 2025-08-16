@@ -7,6 +7,7 @@ PEAC (Programmable Economic Access, Attribution & Consent) Protocol defines a st
 ## 1. Introduction
 
 PEAC Protocol enables content owners to specify programmatic policies for:
+
 - Access control and consent management
 - Economic terms and payment requirements
 - Attribution and provenance tracking
@@ -19,11 +20,13 @@ The protocol uses a simple text file (peac.txt) placed at the domain root, follo
 ### 2.1 Policy File
 
 The canonical policy file is `peac.txt`, located at the domain root:
+
 ```
 https://example.com/peac.txt
 ```
 
 Alternative locations in order of precedence:
+
 1. `/peac.txt` (primary)
 2. `/.well-known/peac` (fallback)
 3. `/.well-known/peac.json` (JSON format)
@@ -51,7 +54,7 @@ protocol: peac
 metadata:
   domain: example.com
   updated: 2025-08-02T00:00:00Z
-  
+
 policy:
   consent:
     default: contact
@@ -60,7 +63,7 @@ policy:
       conditions:
         - payment_required: true
         - attribution_required: true
-        
+
   economics:
     pricing_models:
       ai_training:
@@ -69,12 +72,12 @@ policy:
     payment_processors:
       - type: stripe
         endpoint: https://pay.example.com/stripe
-        
+
   attribution:
     required: true
     format: "Source: {url}"
     verification_endpoint: /verify-attribution
-    
+
   compliance:
     jurisdictions:
       eu:
@@ -88,17 +91,18 @@ policy:
 
 ### 3.1 Required Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| version | string | Protocol version (semantic versioning) |
-| protocol | string | Must be "peac" |
-| policy | object | Policy definitions |
+| Field    | Type   | Description                            |
+| -------- | ------ | -------------------------------------- |
+| version  | string | Protocol version (semantic versioning) |
+| protocol | string | Must be "peac"                         |
+| policy   | object | Policy definitions                     |
 
 ### 3.2 Policy Object
 
 The policy object contains subsections defining different aspects of access control.
 
 #### Consent Section
+
 Defines access permissions for different use cases.
 
 ```yaml
@@ -110,19 +114,20 @@ consent:
 ```
 
 #### Economics Section
+
 Specifies pricing and payment requirements.
 
 ```yaml
 economics:
   pricing_models:
-    <model_name>:
-      <pricing_parameters>
+    <model_name>: <pricing_parameters>
   payment_processors:
     - type: <processor_name>
       endpoint: <url>
 ```
 
 #### Attribution Section
+
 Defines attribution requirements and formats.
 
 ```yaml
@@ -133,6 +138,7 @@ attribution:
 ```
 
 #### Compliance Section
+
 Declares regulatory compliance status.
 
 ```yaml
@@ -177,6 +183,7 @@ X-PEAC-Attribution-Required: <true|false>
 ### 5.1 Signature Methods
 
 PEAC supports multiple signature algorithms:
+
 - Ed25519 (recommended)
 - ECDSA with secp256k1
 - RSA-2048 (legacy support)
@@ -195,6 +202,7 @@ signature:
 ## 6. Discovery Mechanisms
 
 Agents MUST attempt discovery in this order:
+
 1. Direct file access (`/peac.txt`)
 2. Well-known location (`/.well-known/peac`)
 3. HTTP Link header
@@ -209,21 +217,25 @@ Agents MUST attempt discovery in this order:
 ## 8. Security Considerations
 
 ### 8.1 Transport Security
+
 - HTTPS MUST be used in production environments
 - HTTP is permitted only for local development
 
 ### 8.2 Input Validation
+
 - Parsers MUST validate against the schema
 - Unknown fields SHOULD be preserved but ignored
 - Malformed policies MUST be rejected
 
 ### 8.3 Privacy
+
 - Policies SHOULD NOT contain personally identifiable information
 - Agent identifiers SHOULD be pseudonymous
 
 ## 9. Extensibility
 
 ### 9.1 Custom Fields
+
 Implementations MAY add custom fields under the `x-` prefix:
 
 ```yaml
@@ -232,6 +244,7 @@ policy:
 ```
 
 ### 9.2 Version Compatibility
+
 - Parsers MUST accept policies from the same major version
 - Minor version differences SHOULD NOT break compatibility
 

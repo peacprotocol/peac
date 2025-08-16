@@ -27,8 +27,8 @@
         "ai_training": {
           "type": "object",
           "properties": {
-            "allowed": {"type": "boolean"},
-            "price_per_gb": {"type": "number", "minimum": 0}
+            "allowed": { "type": "boolean" },
+            "price_per_gb": { "type": "number", "minimum": 0 }
           }
         }
       }
