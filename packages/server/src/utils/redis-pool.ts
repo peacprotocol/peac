@@ -1,15 +1,27 @@
 // packages/server/src/utils/redis-pool.ts
+<<<<<<< HEAD
 import IORedis, { Redis as RedisClient } from "ioredis";
 
 const USE_MOCK =
   process.env.CI === "true" ||
   process.env.NODE_ENV === "test" ||
+=======
+import IORedis, { Redis as RedisClient } from 'ioredis';
+
+const USE_MOCK =
+  process.env.CI === 'true' ||
+  process.env.NODE_ENV === 'test' ||
+>>>>>>> eac06f2e (test(ci): use in-memory Redis mock in tests; stabilize server unit tests)
   !process.env.REDIS_URL;
 
 let RedisCtor: any = IORedis;
 if (USE_MOCK) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
+<<<<<<< HEAD
   const mod = require("ioredis-mock");
+=======
+  const mod = require('ioredis-mock');
+>>>>>>> eac06f2e (test(ci): use in-memory Redis mock in tests; stabilize server unit tests)
   RedisCtor = mod.default || mod;
 }
 

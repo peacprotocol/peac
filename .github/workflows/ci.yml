@@ -24,6 +24,7 @@ jobs:
 
       - name: Install deps
 <<<<<<< HEAD
+<<<<<<< HEAD
         run: npm install
 
 <<<<<<< HEAD
@@ -51,6 +52,9 @@ jobs:
 >>>>>>> 6682e8ac (ci: inline protocol checks; remove reference to local scripts)
 =======
         run: npm ci
+=======
+        run: npm install
+>>>>>>> eac06f2e (test(ci): use in-memory Redis mock in tests; stabilize server unit tests)
 
       - name: Format check
         run: npx prettier --check .
