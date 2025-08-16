@@ -16,6 +16,7 @@ PEAC Protocol is currently in early development under the stewardship of its fou
 ### Maintainers
 
 Project maintainers are responsible for:
+
 - Reviewing and merging pull requests
 - Releasing new versions
 - Guiding technical direction
@@ -26,6 +27,7 @@ Current maintainers are listed in the MAINTAINERS file.
 ### Contributors
 
 Anyone can contribute by:
+
 - Submitting pull requests
 - Reporting issues
 - Improving documentation
@@ -34,11 +36,13 @@ Anyone can contribute by:
 ## Decision Making
 
 Currently, decisions are made through:
+
 1. GitHub issue discussions
 2. Pull request reviews
 3. Maintainer consensus
 
 For major changes:
+
 - Proposals should be documented in issues
 - Allow time for community feedback
 - Document decisions and rationale
@@ -46,12 +50,14 @@ For major changes:
 ## Future Governance
 
 As PEAC Protocol matures, we plan to:
+
 1. Establish a technical steering committee
 2. Create working groups for specific areas
 3. Implement a formal RFC process
 4. Consider foundation or consortium structure
 
 The transition to formal governance will be driven by:
+
 - Community growth
 - Adoption milestones
 - Stakeholder needs
@@ -59,6 +65,7 @@ The transition to formal governance will be driven by:
 ## Contributing to Governance
 
 We welcome input on governance evolution:
+
 - Propose governance improvements via GitHub issues
 - Share examples from other successful projects
 - Participate in governance discussions
