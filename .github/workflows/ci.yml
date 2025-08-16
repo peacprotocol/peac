@@ -23,42 +23,10 @@ jobs:
             packages/*/package.json
 
       - name: Install deps
-<<<<<<< HEAD
-<<<<<<< HEAD
         run: npm install
-
-<<<<<<< HEAD
-      - name: Format check
-        run: npx prettier --check .
-=======
-      - name: Verify protocol v0.9.5 policy
-        run: |
-          # Inline protocol checks - no local scripts
-          echo "==> Version sanity (root)"
-          ROOT_VER=$(node -e "console.log(require('./package.json').version || '')")
-          if [ "$ROOT_VER" != "0.9.5" ]; then
-            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.5'"
-            exit 1
-          fi
-          
-          echo "==> Forbidden literals scan (server/src)"
-          if grep -r "0\.9\.3\|0\.9\.4" packages/server/src --include="*.ts" --include="*.js"; then
-            echo "ERROR: Found forbidden version literals in server/src"
-            exit 1
-          fi
-          
-          echo "==> Format & lint"
-          npx prettier --check . || { echo "ERROR: Formatting issues found"; exit 1; }
->>>>>>> 6682e8ac (ci: inline protocol checks; remove reference to local scripts)
-=======
-        run: npm ci
-=======
-        run: npm install
->>>>>>> eac06f2e (test(ci): use in-memory Redis mock in tests; stabilize server unit tests)
 
       - name: Format check
         run: npx prettier --check .
->>>>>>> 736c0def (ci: make CI independent of lockfiles; add build/test; inline protocol checks)
 
       - name: Build all workspaces
         run: npm run build --workspaces
@@ -81,10 +49,6 @@ jobs:
             exit 1
           fi
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> d71da982 (ci: allowlist middleware for legacy-header grep; add targeted header-set guards)
           echo "==> Forbid legacy header name outside middleware"
           if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js' \
             | grep -v 'middleware/headers.ts'; then
@@ -103,13 +67,5 @@ jobs:
           if git grep -nE "setHeader\\(['\"][Xx]-peac-(version|protocol-version)['\"]" -- packages/server \
             | grep -v "middleware/headers\\.ts"; then
             echo "ERROR: Protocol headers set outside middleware"
-<<<<<<< HEAD
-=======
-          echo "==> Forbid legacy header name"
-          if grep -R -n "x-peac-version" packages/server/src --include='*.ts' --include='*.js'; then
-            echo "ERROR: Found legacy header name x-peac-version in server/src"
->>>>>>> 736c0def (ci: make CI independent of lockfiles; add build/test; inline protocol checks)
-=======
->>>>>>> d71da982 (ci: allowlist middleware for legacy-header grep; add targeted header-set guards)
             exit 1
           fi
