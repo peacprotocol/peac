@@ -5,7 +5,8 @@
 [](docs/conformance.md)
 [![Tests](https://img.shields.io/badge/tests-0.9.5_passing-brightgreen.svg)](docs/conformance.md)
 
-**PEAC: Programmable Environment for Agent Coordination** (pronounced "peace")  
+**PEAC: Programmable Environment for Agent Coordination** (pronounced "peace")
+
 An open specification for machine-readable policies and agent coordination on the web.
 
 PEAC defines a discoverable policy file (`/.well-known/peac.txt`, fallback `/peac.txt`) and HTTP headers (`x-peac-*`) that enable:
@@ -48,22 +49,20 @@ PEAC provides a neutral infrastructure layer that any system can adopt. Enabling
 
 ---
 
-## Why PEAC
+## Ecosystem roles & value
 
-| Stakeholder                    | Value                                                                  |
-| ------------------------------ | ---------------------------------------------------------------------- |
-| Publishers and sites           | One file to declare terms, quotas, attribution, and consent.           |
-| AI agents and libraries        | Discover, negotiate, settle with adapters, and fetch with receipts.    |
-| Clouds, CDNs, and edge         | Enforce policy at the perimeter. Provide adapters as managed features. |
-| Enterprises and APIs           | Purpose scoping, quotas, retention windows, and auditability.          |
-| OSS developers and foundations | Stable core with clear extension points and a PEIP process.            |
-| Major platforms                | Bridges to in-house protocols and standards engagement paths.          |
-| Regulators and compliance      | Machine-readable policies with signed receipts for oversight.          |
-| Individuals and small sites    | Simple deployment and predictable behavior with privacy defaults.      |
-| Researchers and academics      | Testbed for agent coordination, datasets for evaluation and study.     |
-| Ethical AI and safety groups   | Provenance and receipts that support transparency and oversight.       |
-
----
+| Role                          | Value                                                                                               |
+| ----------------------------- | --------------------------------------------------------------------------------------------------- |
+| Publishers / Sites            | One file to declare terms, quotas, attribution, and consent; predictable enforcement with receipts. |
+| Agent developers & libraries  | Discover policies, negotiate/settle via adapters, and fetch with verifiable receipts.               |
+| Clouds / CDNs / Edge          | Enforce policy at the perimeter and offer managed adapters.                                         |
+| Enterprises / APIs            | Purpose scoping, quotas, retention windows, and auditability.                                       |
+| OSS maintainers & foundations | Minimal core with clear extension points; propose changes via PEIPs.                                |
+| Platforms                     | Bridges to existing protocols and standards engagement paths.                                       |
+| Regulators & compliance       | Machine-readable policies plus signed receipts for oversight.                                       |
+| Individual site owners        | Simple deployment with privacy-respecting defaults.                                                 |
+| Researchers & academics       | Testbed for agent coordination; datasets for evaluation and study.                                  |
+| Ethics & safety communities   | Provenance and receipts that support transparency and oversight.                                    |
 
 ## Requirements
 
