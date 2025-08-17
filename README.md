@@ -2,14 +2,20 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-0.9.5-orange.svg)](https://github.com/peacprotocol/peac/releases)
-[[Conformance](https://img.shields.io/badge/conformance-L0-L4-green.svg)](docs/conformance.md)
+[](docs/conformance.md)
 [![Tests](https://img.shields.io/badge/tests-0.9.5_passing-brightgreen.svg)](docs/conformance.md)
 
-> **PEAC: Programmable Environment for Agent Coordination** (pronounced 'peace')  
-> An open specification for machine-readable policies and agent coordination on the web. PEAC defines a discoverable policy file (`/.well-known/peac.txt`, fallback `/peac.txt`) and HTTP headers (`x-peac-*`) that **enable access control, privacy and consent management, attribution requirements, and verifiable receipts with adapters for negotiation, settlement, and compliance support across diverse systems.**
->
-> Designed as neutral infrastructure; implement what you need, bridge what exists, extend via adapters and PEIPs.
+**PEAC: Programmable Environment for Agent Coordination** (pronounced "peace")  
+An open specification for machine-readable policies and agent coordination on the web.
 
+PEAC defines a discoverable policy file (`/.well-known/peac.txt`, fallback `/peac.txt`) and HTTP headers (`x-peac-*`) that enable:
+
+- access control,
+- privacy and consent management,
+- attribution requirements, and
+- verifiable receipts with adapters for negotiation, settlement, and compliance across diverse systems.
+
+Designed as neutral infrastructure: implement what you need, bridge what exists, and extend via adapters and PEIPs.
 We build this collaboratively. Contribute adapters, propose PEIPs, and help shape the specification.
 
 **Quick links:**  
