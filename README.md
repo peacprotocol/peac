@@ -2,7 +2,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-0.9.5-orange.svg)](https://github.com/peacprotocol/peac/releases)
-[![Conformance](https://img.shields.io/badge/conformance-L0-L4-green.svg)](docs/conformance.md)
+[[Conformance](https://img.shields.io/badge/conformance-L0-L4-green.svg)](docs/conformance.md)
 [![Tests](https://img.shields.io/badge/tests-0.9.5_passing-brightgreen.svg)](docs/conformance.md)
 
 > **PEAC: Programmable Environment for Agent Coordination** (pronounced 'peace')  
