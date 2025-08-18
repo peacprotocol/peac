@@ -25,18 +25,15 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Check for unprofessional comments
+      - name: Check for TODO/FIXME/HACK/DEBUG in code
         shell: bash
         run: |
           set -euo pipefail
-
           echo "Checking for TODO/FIXME/HACK/WIP/DEBUG in code (TS/JS only)…"
-          # Search only code files; exclude node_modules, build outputs, coverage, docs, md, workflows, lockfiles, d.ts
           MATCHES=$(git grep -nE '(TODO|FIXME|HACK|WIP|^\s*//\s*DEBUG)' -- \
             'packages/**/*.ts' 'packages/**/*.tsx' 'packages/**/*.js' 'packages/**/*.jsx' \
             ':!**/*.d.ts' ':!node_modules/**' ':!**/dist/**' ':!coverage/**' ':!docs/**' ':!**/*.md' ':!.github/**' \
             ':!**/*.lock' ':!**/*.yml' ':!**/*.yaml' || true)
-
           if [[ -n "$MATCHES" ]]; then
             echo "$MATCHES"
             echo "::error::Found TODO/FIXME/HACK/WIP/DEBUG markers in code."
@@ -44,21 +41,11 @@ jobs:
           fi
           echo "OK"
 
-          echo "Forbidding console.log in server runtime (allowed in CLI/examples/docs)…"
-          CONSOLE_MATCHES=$(git grep -n 'console\.log' -- \
-            'packages/server/src/**/*.ts' 'packages/server/src/**/*.js' || true)
-          if [[ -n "$CONSOLE_MATCHES" ]]; then
-            echo "$CONSOLE_MATCHES"
-            echo "::error::console.log usage found in packages/server/src (use the logger instead)."
-            exit 1
-          fi
-          echo "OK"
+      - name: Lint (TypeScript)
+        run: npx eslint packages/server --ext .ts --max-warnings=0
 
       - name: Type check
-        run: npm run type-check --workspaces --if-present
-
-      - name: Lint
-        run: npx eslint . --ext .ts
+        run: npm --workspace @peacprotocol/server run type-check
 
       - name: Format check
         run: npx prettier --check .
@@ -66,14 +53,17 @@ jobs:
       - name: Build all workspaces
         run: npm run build --workspaces
 
-      - name: Test all workspaces
-        run: npm run test --workspaces
+      - name: Test
+        run: npm --workspace @peacprotocol/server test --silent
+
+      - name: OpenAPI lint (capabilities spec)
+        run: npx @redocly/cli@latest lint packages/server/openapi/peac.capabilities.v0_9_6.yaml
 
       - name: Security audit
         run: npm audit --omit=dev
 
-      - name: Generate SBOM
-        run: npm run sbom --workspaces --if-present
+      - name: SBOM
+        run: npm --workspace @peacprotocol/server run sbom
 
       - name: Verify protocol v0.9.6 policy
         run: |

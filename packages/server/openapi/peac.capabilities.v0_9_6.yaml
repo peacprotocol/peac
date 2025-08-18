@@ -3,6 +3,17 @@ info:
   title: PEAC Protocol API
   version: 0.9.6
   description: Programmable Environment for Agent Coordination
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: https://api.peacprotocol.org
+    description: Production server
+  - url: http://localhost:3000
+    description: Development server
+
+security: []
 
 paths:
   /.well-known/peac-capabilities:

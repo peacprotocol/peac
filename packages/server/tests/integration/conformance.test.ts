@@ -5,7 +5,6 @@ import { standardRateLimiter, strictRateLimiter } from "../../src/middleware/enh
 import { paymentGuards } from "../../src/payments/guards";
 import { idempotencyMiddleware } from "../../src/middleware/idempotency";
 import { requestTracing } from "../../src/http/middleware/request-tracing";
-import { readFileSync, existsSync } from "fs";
 
 describe("PEAC v0.9.6 Conformance Tests", () => {
   let app: Application;
