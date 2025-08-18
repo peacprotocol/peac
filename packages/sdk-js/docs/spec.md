@@ -75,7 +75,7 @@ policy:
 
   attribution:
     required: true
-    format: "Source: {url}"
+    format: 'Source: {url}'
     verification_endpoint: /verify-attribution
 
   compliance:

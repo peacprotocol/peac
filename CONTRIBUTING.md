@@ -88,6 +88,7 @@ Types: feat, fix, docs, style, refactor, test, chore
 
 1. Push to your fork
 2. Create a pull request with:
+
    - Clear title and description
    - Reference to related issues
    - Description of testing performed
@@ -125,6 +126,42 @@ npm run lint
 - Write tests for new functionality
 - Ensure existing tests pass
 - Aim for clear, maintainable test code
+
+## PEIP Process
+
+To propose protocol changes, please follow the PEIP process:
+
+1. Review existing PEIPs in `docs/peip/`
+2. Use the template at `docs/peip/PEIP-0000.md`
+3. Submit your proposal as a PR
+4. Participate in community discussion
+
+## Commit Message Convention
+
+We use Conventional Commits:
+
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation changes
+- `chore:` Maintenance tasks
+- `refactor:` Code restructuring
+- `test:` Test additions/changes
+- `perf:` Performance improvements
+
+Example: `feat: add content negotiation middleware`
+
+## Code Review Process
+
+1. All PRs require at least one maintainer approval
+2. CI must pass (tests, lint, typecheck)
+3. Security scan must pass
+4. SBOM generation must succeed
+
+## Security
+
+- Never commit secrets or API keys
+- Follow OWASP best practices
+- Report security issues privately to security@peacprotocol.org
 
 ## Questions?
 

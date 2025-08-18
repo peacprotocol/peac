@@ -1,23 +1,23 @@
-import { isAddress, getAddress } from "ethers";
+import { isAddress, getAddress } from 'ethers';
 
 /**
  * Property Rights (Preview) schema
  */
 export type ERC20Claim = {
-  standard: "erc20";
+  standard: 'erc20';
   contract: string; // checksum EVM address
   chainId: number; // positive integer
 };
 
 export type ERC721Claim = {
-  standard: "erc721";
+  standard: 'erc721';
   contract: string; // checksum EVM address
   chainId: number; // positive integer
   tokenId: string; // uint string
 };
 
 export type ERC1155Claim = {
-  standard: "erc1155";
+  standard: 'erc1155';
   contract: string; // checksum EVM address
   chainId: number; // positive integer
   tokenId: string; // uint string
@@ -31,11 +31,11 @@ export type PropertyClaims = {
 };
 
 function isUintString(s: unknown): s is string {
-  return typeof s === "string" && /^[0-9]+$/.test(s);
+  return typeof s === 'string' && /^[0-9]+$/.test(s);
 }
 
 function isPositiveInt(n: unknown): n is number {
-  return typeof n === "number" && Number.isInteger(n) && n > 0;
+  return typeof n === 'number' && Number.isInteger(n) && n > 0;
 }
 
 /**
@@ -47,41 +47,35 @@ function isPositiveInt(n: unknown): n is number {
  */
 export function validatePropertyClaims(input: unknown): PropertyClaims {
   try {
-    if (input == null || typeof input !== "object")
-      throw new Error("property_invalid");
+    if (input == null || typeof input !== 'object') throw new Error('property_invalid');
     const obj = input as Record<string, unknown>;
     const out: PropertyClaims = {};
 
     if (obj.assets !== undefined) {
-      if (!Array.isArray(obj.assets)) throw new Error("property_invalid");
+      if (!Array.isArray(obj.assets)) throw new Error('property_invalid');
       out.assets = obj.assets.map((raw) => {
-        if (!raw || typeof raw !== "object")
-          throw new Error("property_invalid");
+        if (!raw || typeof raw !== 'object') throw new Error('property_invalid');
         const a = raw as Record<string, unknown>;
         const standard = a.standard;
-        if (
-          standard !== "erc20" &&
-          standard !== "erc721" &&
-          standard !== "erc1155"
-        )
-          throw new Error("property_invalid");
+        if (standard !== 'erc20' && standard !== 'erc721' && standard !== 'erc1155')
+          throw new Error('property_invalid');
 
         const contract = a.contract;
         const chainId = a.chainId;
 
-        if (typeof contract !== "string" || !isAddress(contract))
-          throw new Error("property_invalid");
-        if (!isPositiveInt(chainId)) throw new Error("property_invalid");
+        if (typeof contract !== 'string' || !isAddress(contract))
+          throw new Error('property_invalid');
+        if (!isPositiveInt(chainId)) throw new Error('property_invalid');
 
         const checksum = getAddress(contract);
 
-        if (standard === "erc20") {
+        if (standard === 'erc20') {
           return { standard, contract: checksum, chainId } as ERC20Claim;
         }
 
         const tokenId = a.tokenId;
-        if (!isUintString(tokenId)) throw new Error("property_invalid");
-        if (standard === "erc721") {
+        if (!isUintString(tokenId)) throw new Error('property_invalid');
+        if (standard === 'erc721') {
           return {
             standard,
             contract: checksum,
@@ -100,28 +94,23 @@ export function validatePropertyClaims(input: unknown): PropertyClaims {
     }
 
     if (obj.rights !== undefined) {
-      if (
-        !Array.isArray(obj.rights) ||
-        obj.rights.some((r) => typeof r !== "string")
-      )
-        throw new Error("property_invalid");
+      if (!Array.isArray(obj.rights) || obj.rights.some((r) => typeof r !== 'string'))
+        throw new Error('property_invalid');
       out.rights = obj.rights.slice() as string[];
     }
 
     if (obj.terms_uri !== undefined) {
-      if (typeof obj.terms_uri !== "string")
-        throw new Error("property_invalid");
+      if (typeof obj.terms_uri !== 'string') throw new Error('property_invalid');
       out.terms_uri = obj.terms_uri;
     }
 
     if (obj.claims_uri !== undefined) {
-      if (typeof obj.claims_uri !== "string")
-        throw new Error("property_invalid");
+      if (typeof obj.claims_uri !== 'string') throw new Error('property_invalid');
       out.claims_uri = obj.claims_uri;
     }
 
     return out;
   } catch {
-    throw new Error("property_invalid");
+    throw new Error('property_invalid');
   }
 }

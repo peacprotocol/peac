@@ -1,45 +1,57 @@
 /* istanbul ignore file */
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
-import { getRedis } from "../utils/redis-pool";
-import { getMetricsRegistry } from "../metrics";
-import { createRoutes } from "./routes";
-import { config } from "../config";
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import { getRedis } from '../utils/redis-pool';
+import { getMetricsRegistry } from '../metrics';
+import { createRoutes } from './routes';
+import { config } from '../config';
 
 export async function createServer() {
   const app = express();
 
+  // Disable X-Powered-By header
+  app.disable('x-powered-by');
+
+  // Set trust proxy for accurate IP detection
+  app.set('trust proxy', true);
+
   app.use(helmet());
+
+  // Remove X-XSS-Protection header completely (deprecated and potentially harmful)
+  app.use((_req, res, next) => {
+    res.removeHeader('X-XSS-Protection');
+    next();
+  });
   app.use(cors({ origin: config.gates.corsOrigins }));
-  app.use(express.json());
+  app.use(express.json({ limit: '1mb' }));
 
   if (config.gates.healthEnabled) {
-    app.get("/healthz", async (_req, res) => {
+    app.get('/healthz', async (_req, res) => {
       const health: {
-        status: "ok" | "degraded";
+        status: 'ok' | 'degraded';
         version: string;
         components: Record<string, string>;
-      } = { status: "ok", version: "0.9.5", components: {} };
+      } = { status: 'ok', version: '0.9.6', components: {} };
       try {
         const redis = getRedis();
         await redis.ping();
-        health.components.redis = "up";
+        health.components.redis = 'up';
       } catch {
-        health.components.redis = "down";
-        health.status = "degraded";
+        health.components.redis = 'down';
+        health.status = 'degraded';
       }
-      res.status(health.status === "ok" ? 200 : 503).json(health);
+      res.status(health.status === 'ok' ? 200 : 503).json(health);
     });
   }
 
-  app.get("/metrics", async (_req, res) => {
+  app.get('/metrics', async (_req, res) => {
     if (!config.gates.metricsEnabled) return void res.status(404).end();
     const reg = getMetricsRegistry();
-    res.setHeader("Content-Type", reg.contentType);
+    res.setHeader('Content-Type', reg.contentType);
     res.send(await reg.metrics());
   });
 
-  app.use("/", createRoutes());
+  app.use('/', createRoutes());
   return app;
 }

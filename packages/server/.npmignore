@@ -1,0 +1,37 @@
+# Source files
+src/
+tests/
+scripts/
+tools/
+
+# Config files
+.eslintrc*
+.prettierrc*
+.editorconfig
+jest.config.*
+tsconfig.*
+
+# Build artifacts
+coverage/
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# Dev files  
+*.test.ts
+*.spec.ts
+*.test.js
+*.spec.js
+
+# Documentation source
+docs/
+
+# CI/CD
+.github/
+.circleci/
+
+# Misc
+sbom.json
+*.map
+.env*
+*.log*

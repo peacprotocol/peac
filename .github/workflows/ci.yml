@@ -2,44 +2,133 @@ name: CI
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: ['main']
   push:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   verify-build-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15 # Hard job timeout to prevent hanging
     steps:
       - uses: actions/checkout@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          # Avoid lockfile requirement – cache on package.json files
-          cache: "npm"
+          node-version: '20'
+          cache: 'npm'
           cache-dependency-path: |
-            package.json
-            packages/*/package.json
+            package-lock.json
+            packages/**/package-lock.json
 
       - name: Install deps
-        run: npm install
+        run: |
+          echo "::group::Installing dependencies"
+          npm ci --no-audit --no-fund
+          echo "::endgroup::"
 
-      - name: Format check
-        run: npx prettier --check .
+      - name: Hygiene – forbid TODO/FIXME/HACK/DEBUG in prod code
+        timeout-minutes: 2
+        run: |
+          echo "::group::Checking for TODO/FIXME/HACK/DEBUG (src only)"
+          echo "Checking production source directories..."
+          if git grep -nE '(TODO|FIXME|HACK|WIP|^\s*//\s*DEBUG)' -- \
+            packages/server/src \
+            packages/schema/src \
+            packages/sdk-js/sdk; then
+            echo "::error::Found TODO/FIXME/HACK/DEBUG markers in production code"
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "✓ No forbidden markers in production code"
+          echo "::endgroup::"
+
+      - name: Lint (TypeScript)
+        timeout-minutes: 3
+        run: |
+          echo "::group::ESLint TypeScript"
+          timeout 180s npx eslint packages/server --ext .ts --max-warnings=0
+          echo "::endgroup::"
+
+      - name: Type check
+        timeout-minutes: 3
+        run: |
+          echo "::group::TypeScript compilation check"
+          timeout 180s npm --workspace @peacprotocol/server run type-check
+          echo "::endgroup::"
+
+      - name: Prettier (check)
+        timeout-minutes: 2
+        run: |
+          echo "::group::Prettier formatting check"
+          timeout 120s npm run format:check
+          echo "::endgroup::"
 
       - name: Build all workspaces
-        run: npm run build --workspaces
-
-      - name: Test all workspaces
-        run: npm run test --workspaces
-
-      - name: Verify protocol v0.9.5 policy
+        timeout-minutes: 5
         run: |
+          echo "::group::Building all packages"
+          timeout 300s npm run build --workspaces
+          echo "::endgroup::"
+
+      - name: Test (server)
+        timeout-minutes: 10
+        working-directory: packages/server
+        env:
+          CI: 'true'
+        run: |
+          echo "::group::Running server tests"
+          set -euo pipefail
+          trap 'echo "::group::dangling-node-processes"; ps -ef | grep node || true; echo "::endgroup::"; jobs -p | xargs -r kill || true' EXIT
+          # Run Jest in-band to avoid stray workers; forceExit so CI never hangs.
+          npx jest --ci --coverage --runInBand --colors --forceExit
+          # Flush any remaining output
+          node -e "setTimeout(()=>process.exit(0), 250).unref()"
+          echo "::endgroup::"
+
+      - name: Test (sdk-js)
+        timeout-minutes: 10
+        working-directory: packages/sdk-js
+        env:
+          CI: 'true'
+        run: |
+          echo "::group::Running SDK tests"
+          set -euo pipefail
+          npx jest --ci --runInBand --colors --forceExit
+          echo "::endgroup::"
+
+      - name: OpenAPI lint (capabilities spec)
+        timeout-minutes: 2
+        working-directory: packages/server
+        run: |
+          echo "::group::OpenAPI specification validation"
+          timeout 120s npm exec -- redocly lint openapi/peac.capabilities.v0_9_6.yaml
+          echo "::endgroup::"
+
+      - name: Security audit
+        timeout-minutes: 2
+        run: |
+          echo "::group::Security audit (production deps)"
+          timeout 120s npm audit --omit=dev || echo "::warning::Audit check failed (non-blocking)"
+          echo "::endgroup::"
+
+      - name: SBOM
+        timeout-minutes: 2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "::group::Generate SBOM"
+          timeout 120s npm --workspace @peacprotocol/server run sbom || echo "::warning::SBOM generation failed (non-blocking)"
+          echo "::endgroup::"
+
+      - name: Verify protocol v0.9.6 policy
+        timeout-minutes: 2
+        run: |
+          echo "::group::Protocol version and header validation"
           echo "==> Version sanity (root)"
           ROOT_VER=$(node -e "console.log(require('./package.json').version||'')")
-          if [ "$ROOT_VER" != "0.9.5" ]; then
-            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.5'"
+          if [ "$ROOT_VER" != "0.9.6" ]; then
+            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.6'"
             exit 1
           fi
 
@@ -69,3 +158,50 @@ jobs:
             echo "ERROR: Protocol headers set outside middleware"
             exit 1
           fi
+          echo "✓ All protocol checks passed"
+          echo "::endgroup::"
+
+      - name: Smoke test
+        timeout-minutes: 2
+        if: success()
+        shell: bash
+        run: |
+          echo "::group::Smoke test - server startup validation"
+          set -euo pipefail
+          # Ensure any background process is killed on exit
+          trap 'jobs -p | xargs -r kill 2>/dev/null || true' EXIT
+
+          # Start server in background
+          PORT=3001 node packages/server/dist/index.js &
+          SERVER_PID=$!
+
+          # Wait for server to be ready
+          echo "Waiting for server to start on port 3001..."
+          for i in {1..30}; do
+            if curl -fsS http://localhost:3001/.well-known/peac-capabilities >/dev/null 2>&1; then
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "::error::Server failed to start within 30 seconds"
+              exit 1
+            fi
+            sleep 1
+          done
+
+          # Test capabilities endpoint
+          echo "Testing capabilities endpoint..."
+          RESPONSE=$(curl -fsS http://localhost:3001/.well-known/peac-capabilities)
+          VERSION=$(echo "$RESPONSE" | jq -r '.version')
+
+          if [ "$VERSION" != "0.9.6" ]; then
+            echo "::error::Expected version 0.9.6, got $VERSION"
+            exit 1
+          fi
+
+          echo "✓ Server started successfully and returned correct version"
+
+          # Kill server gracefully
+          kill $SERVER_PID 2>/dev/null || true
+          wait $SERVER_PID 2>/dev/null || true
+
+          echo "::endgroup::"

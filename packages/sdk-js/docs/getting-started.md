@@ -39,7 +39,7 @@ policy:
 
   attribution:
     required: true
-    format: "Content from {url}"
+    format: 'Content from {url}'
 ```
 
 ### Understanding the Structure
@@ -85,7 +85,7 @@ economics:
 ```yaml
 attribution:
   required: true
-  format: "Source: {url} by {author}"
+  format: 'Source: {url} by {author}'
   verification_endpoint: https://yourdomain.com/verify
 ```
 
@@ -134,9 +134,9 @@ curl https://yourdomain.com/peac.txt
 ### Parse Your Policy
 
 ```javascript
-const { Parser } = require("@peacprotocol/core");
+const { Parser } = require('@peacprotocol/core');
 
-const policy = await Parser.parse("yourdomain.com");
+const policy = await Parser.parse('yourdomain.com');
 console.log(policy);
 ```
 
@@ -150,7 +150,7 @@ policy:
     default: allowed
   attribution:
     required: true
-    format: "Via {url}"
+    format: 'Via {url}'
 ```
 
 ### Paid AI Training Access
@@ -175,7 +175,7 @@ policy:
     academic_research: allowed
   attribution:
     required: true
-    format: "Research data from {url}"
+    format: 'Research data from {url}'
 ```
 
 ## Next Steps
