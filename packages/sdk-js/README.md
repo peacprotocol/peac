@@ -79,7 +79,7 @@ policy:
 
   attribution:
     required: true
-    format: "Source: {url}"
+    format: 'Source: {url}'
 
   compliance:
     jurisdictions:
@@ -93,13 +93,13 @@ policy:
 ### For Publishers
 
 ```javascript
-const { Parser } = require("@peacprotocol/core");
+const { Parser } = require('@peacprotocol/core');
 
 // Parse and enforce policies
-const policy = await Parser.parse("example.com");
+const policy = await Parser.parse('example.com');
 
 // Validate agent access
-if (policy.requiresPayment("ai_training")) {
+if (policy.requiresPayment('ai_training')) {
   // Handle payment flow
 }
 ```
@@ -107,12 +107,12 @@ if (policy.requiresPayment("ai_training")) {
 ### For AI Agents
 
 ```javascript
-const { PEACClient } = require("@peacprotocol/core");
+const { PEACClient } = require('@peacprotocol/core');
 
 const client = new PEACClient();
-const access = await client.requestAccess("publisher.com", {
-  purpose: "ai_training",
-  volume: "10GB",
+const access = await client.requestAccess('publisher.com', {
+  purpose: 'ai_training',
+  volume: '10GB',
 });
 
 if (access.granted) {

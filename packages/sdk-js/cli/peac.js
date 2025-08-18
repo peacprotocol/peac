@@ -6,27 +6,19 @@
  * @license Apache-2.0
  */
 
-const { program } = require("commander");
-const fs = require("fs").promises;
-const path = require("path");
-const yaml = require("js-yaml");
-const {
-  UniversalParser,
-  Crypto,
-  Payments,
-  Negotiation,
-  version,
-} = require("../sdk");
+const { program } = require('commander');
+const fs = require('fs').promises;
+const path = require('path');
+const yaml = require('js-yaml');
+const { UniversalParser, Crypto, Payments, Negotiation, version } = require('../sdk');
 
 // Configure CLI
 program
-  .name("peac")
-  .description(
-    "PEAC Protocol CLI - Manage digital pacts for the automated economy",
-  )
+  .name('peac')
+  .description('PEAC Protocol CLI - Manage digital pacts for the automated economy')
   .version(version)
   .addHelpText(
-    "after",
+    'after',
     `
 Examples:
   $ peac init                     Create a new peac.txt file
@@ -43,22 +35,18 @@ For more information, visit https://peacprotocol.org/docs`,
 
 // Init command
 program
-  .command("init")
-  .description("Initialize a new peac.txt file")
-  .option(
-    "-t, --type <type>",
-    "Type of peac (minimal, standard, full)",
-    "standard",
-  )
-  .option("-o, --output <file>", "Output file", "peac.txt")
-  .option("-i, --interactive", "Interactive mode")
+  .command('init')
+  .description('Initialize a new peac.txt file')
+  .option('-t, --type <type>', 'Type of peac (minimal, standard, full)', 'standard')
+  .option('-o, --output <file>', 'Output file', 'peac.txt')
+  .option('-i, --interactive', 'Interactive mode')
   .action(async (options) => {
     try {
       let template;
 
       if (options.interactive) {
         // Interactive mode would walk through options
-        console.log("Interactive mode coming soon...");
+        console.log('Interactive mode coming soon...');
         template = await getTemplate(options.type);
       } else {
         template = await getTemplate(options.type);
@@ -78,53 +66,53 @@ program
       console.log(`    2. Run 'peac sign ${options.output}' to sign it`);
       console.log(`    3. Deploy to your-domain.com/${options.output}`);
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
 
 // Validate command
 program
-  .command("validate <file>")
-  .description("Validate a peac file")
-  .option("-s, --strict", "Strict validation")
-  .option("-v, --verbose", "Verbose output")
+  .command('validate <file>')
+  .description('Validate a peac file')
+  .option('-s, --strict', 'Strict validation')
+  .option('-v, --verbose', 'Verbose output')
   .action(async (file, options) => {
     try {
-      const content = await fs.readFile(file, "utf8");
+      const content = await fs.readFile(file, 'utf8');
       const parser = new UniversalParser({ strict: options.strict });
       const peac = parser.parsePeacContent(content);
       await parser.validatePeac(peac);
 
-      console.log("✓ Valid peac file");
+      console.log('✓ Valid peac file');
 
       if (options.verbose) {
-        console.log("\nDetails:");
+        console.log('\nDetails:');
         console.log(`  Version: ${peac.version}`);
         console.log(`  Protocol: ${peac.protocol}`);
-        console.log(`  Signed: ${peac.signature ? "Yes" : "No"}`);
+        console.log(`  Signed: ${peac.signature ? 'Yes' : 'No'}`);
 
         if (parser.warnings.length > 0) {
-          console.log("\nWarnings:");
+          console.log('\nWarnings:');
           parser.warnings.forEach((w) => console.log(` - ${w}`));
         }
       }
     } catch (error) {
-      console.error("✗ Invalid:", error.message);
+      console.error('✗ Invalid:', error.message);
       process.exit(1);
     }
   });
 
 // Sign command
 program
-  .command("sign <file>")
-  .description("Sign a peac file with Ed25519")
-  .option("-k, --key <keyfile>", "Private key file")
-  .option("-p, --passphrase <passphrase>", "Key passphrase")
-  .option("-g, --generate-key", "Generate new keypair if needed")
+  .command('sign <file>')
+  .description('Sign a peac file with Ed25519')
+  .option('-k, --key <keyfile>', 'Private key file')
+  .option('-p, --passphrase <passphrase>', 'Key passphrase')
+  .option('-g, --generate-key', 'Generate new keypair if needed')
   .action(async (file, options) => {
     try {
-      const content = await fs.readFile(file, "utf8");
+      const content = await fs.readFile(file, 'utf8');
       const peac = yaml.load(content);
       const crypto = new Crypto();
 
@@ -134,15 +122,15 @@ program
       if (options.key) {
         privateKey = await crypto.loadKey(options.key, options.passphrase);
         // Try to load corresponding public key
-        const pubKeyPath = options.key.replace(/\.(pem|key)$/, ".pub");
+        const pubKeyPath = options.key.replace(/\.(pem|key)$/, '.pub');
         try {
           publicKey = await crypto.loadKey(pubKeyPath);
         } catch {
-          console.warn("Warning: Could not find public key file");
+          console.warn('Warning: Could not find public key file');
         }
       } else if (options.generateKey) {
         // Generate new keypair
-        console.log("Generating new Ed25519 keypair...");
+        console.log('Generating new Ed25519 keypair...');
         const keyPair = crypto.generateKeyPair({
           passphrase: options.passphrase,
         });
@@ -162,7 +150,7 @@ program
         console.log(`  Public key: ${publicKeyPath}`);
         console.log(`  Keep your private key secure!`);
       } else {
-        console.error("Error: No key provided. Use --key or --generate-key");
+        console.error('Error: No key provided. Use --key or --generate-key');
         process.exit(1);
       }
 
@@ -186,18 +174,18 @@ program
       console.log(`  Signature: ${signedPeac.signature.substring(0, 32)}...`);
       console.log(`  Algorithm: ${signedPeac.signature_algorithm}`);
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
 
 // Parse command
 program
-  .command("parse <domain>")
-  .description("Parse peac from a domain")
-  .option("-f, --format <format>", "Output format (json, yaml)", "yaml")
-  .option("-c, --no-cache", "Disable caching")
-  .option("-v, --verbose", "Verbose output")
+  .command('parse <domain>')
+  .description('Parse peac from a domain')
+  .option('-f, --format <format>', 'Output format (json, yaml)', 'yaml')
+  .option('-c, --no-cache', 'Disable caching')
+  .option('-v, --verbose', 'Verbose output')
   .action(async (domain, options) => {
     try {
       const parser = new UniversalParser({
@@ -209,31 +197,28 @@ program
       const peac = await parser.parse(domain);
 
       if (options.verbose && parser.warnings.length > 0) {
-        console.log("\nWarnings:");
+        console.log('\nWarnings:');
         parser.warnings.forEach((w) => console.log(` - ${w}`));
       }
 
-      const output =
-        options.format === "json"
-          ? JSON.stringify(peac, null, 2)
-          : yaml.dump(peac);
+      const output = options.format === 'json' ? JSON.stringify(peac, null, 2) : yaml.dump(peac);
 
-      console.log("\n" + output);
+      console.log('\n' + output);
 
       if (peac.confidence !== undefined && peac.confidence < 1) {
         console.log(`\nConfidence: ${(peac.confidence * 100).toFixed(0)}%`);
       }
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
 
 // Scan command
 program
-  .command("scan <domain>")
-  .description("Scan domain for all policy files")
-  .option("-d, --detailed", "Show detailed results")
+  .command('scan <domain>')
+  .description('Scan domain for all policy files')
+  .option('-d, --detailed', 'Show detailed results')
   .action(async (domain) => {
     try {
       const parser = new UniversalParser();
@@ -241,47 +226,43 @@ program
       console.log(`\nScanning ${domain} for policy files...`);
       const result = await parser.parseAll(domain);
 
-      console.log("\n✓ Policy scan complete");
-      console.log("─".repeat(50));
+      console.log('\n✓ Policy scan complete');
+      console.log('─'.repeat(50));
 
       if (result.metadata?.sources) {
-        console.log("Sources found:");
+        console.log('Sources found:');
         result.metadata.sources.forEach((source) => {
           console.log(`  - ${source.file || source}`);
         });
       }
 
-      console.log("\nUnified policy:");
+      console.log('\nUnified policy:');
       console.log(yaml.dump(result.peac, { lineWidth: -1 }));
 
       if (result.confidence !== undefined) {
         console.log(`\nConfidence: ${(result.confidence * 100).toFixed(0)}%`);
       }
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
 
 // Migrate command
 program
-  .command("migrate <file>")
-  .description("Migrate from legacy format to peac.txt")
-  .option(
-    "-f, --format <format>",
-    "Source format (robots, llms, ai, usage)",
-    "robots",
-  )
-  .option("-o, --output <file>", "Output file", "peac.txt")
+  .command('migrate <file>')
+  .description('Migrate from legacy format to peac.txt')
+  .option('-f, --format <format>', 'Source format (robots, llms, ai, usage)', 'robots')
+  .option('-o, --output <file>', 'Output file', 'peac.txt')
   .action(async (file, options) => {
     try {
-      const content = await fs.readFile(file, "utf8");
+      const content = await fs.readFile(file, 'utf8');
       const parser = new UniversalParser();
 
       let peac;
       const basePolicy = {
-        version: "0.9.2",
-        protocol: "peac",
+        version: '0.9.2',
+        protocol: 'peac',
         metadata: {
           migrated_from: options.format,
           migrated_at: new Date().toISOString(),
@@ -292,16 +273,16 @@ program
       console.log(`Migrating from ${options.format} format...`);
 
       switch (options.format) {
-        case "robots":
+        case 'robots':
           peac = { ...basePolicy, peac: parser.parseRobots(content) };
           break;
-        case "llms":
+        case 'llms':
           peac = { ...basePolicy, peac: parser.parseLLMs(content) };
           break;
-        case "ai":
+        case 'ai':
           peac = { ...basePolicy, peac: parser.parseAI(content) };
           break;
-        case "usage":
+        case 'usage':
           peac = { ...basePolicy, peac: parser.parseUsage(content) };
           break;
         default:
@@ -323,33 +304,22 @@ program
       console.log(`  2. Add payment processors and compliance info`);
       console.log(`  3. Sign with 'peac sign ${options.output}'`);
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
 
 // Negotiate command
 program
-  .command("negotiate <domain>")
-  .description("Negotiate terms with a publisher")
-  .option(
-    "-u, --use-case <use>",
-    "Use case (ai_training, api_access, web_scraping)",
-    "ai_training",
-  )
-  .option("-v, --volume <volume>", "Data volume (e.g., 100GB, 1TB)", "100GB")
-  .option("-b, --budget <budget>", "Budget in USD", "1000")
-  .option(
-    "-d, --duration <duration>",
-    "Duration (e.g., 30 days, 1 year)",
-    "30 days",
-  )
-  .option("-a, --academic", "Request academic discount")
-  .option("-s, --startup", "Request startup discount")
-  .option(
-    "--framework <framework>",
-    "Agent framework (openai, langchain, crewai)",
-  )
+  .command('negotiate <domain>')
+  .description('Negotiate terms with a publisher')
+  .option('-u, --use-case <use>', 'Use case (ai_training, api_access, web_scraping)', 'ai_training')
+  .option('-v, --volume <volume>', 'Data volume (e.g., 100GB, 1TB)', '100GB')
+  .option('-b, --budget <budget>', 'Budget in USD', '1000')
+  .option('-d, --duration <duration>', 'Duration (e.g., 30 days, 1 year)', '30 days')
+  .option('-a, --academic', 'Request academic discount')
+  .option('-s, --startup', 'Request startup discount')
+  .option('--framework <framework>', 'Agent framework (openai, langchain, crewai)')
   .action(async (domain, options) => {
     try {
       console.log(`\nNegotiating with ${domain}...`);
@@ -359,14 +329,9 @@ program
       const peac = await parser.parseAll(domain);
 
       // Check if negotiation is available
-      if (
-        !peac.peac?.negotiation?.enabled &&
-        !peac.peac?.negotiation?.endpoint
-      ) {
-        console.log("⚠ Negotiation not available for this publisher");
-        console.log(
-          `  Contact: ${peac.peac?.dispute?.contact || "Not provided"}`,
-        );
+      if (!peac.peac?.negotiation?.enabled && !peac.peac?.negotiation?.endpoint) {
+        console.log('⚠ Negotiation not available for this publisher');
+        console.log(`  Contact: ${peac.peac?.dispute?.contact || 'Not provided'}`);
         process.exit(1);
       }
 
@@ -382,7 +347,7 @@ program
         framework: options.framework,
       };
 
-      console.log("Proposal:");
+      console.log('Proposal:');
       Object.entries(proposal).forEach(([key, value]) => {
         if (value !== undefined) {
           console.log(`  ${key}: ${value}`);
@@ -394,40 +359,30 @@ program
       const result = await negotiation.negotiate(proposal);
 
       if (result.accepted) {
-        console.log("\n✓ Negotiation successful!");
-        console.log("\nAccepted Terms:");
+        console.log('\n✓ Negotiation successful!');
+        console.log('\nAccepted Terms:');
         console.log(`  Peac ID: ${result.peac_id}`);
         console.log(`  Price: $${result.terms.price} ${result.terms.currency}`);
         console.log(`  Volume: ${result.terms.volume}`);
         console.log(`  Duration: ${result.terms.duration}`);
-        console.log(
-          `  Expires: ${new Date(result.terms.expires).toLocaleDateString()}`,
-        );
+        console.log(`  Expires: ${new Date(result.terms.expires).toLocaleDateString()}`);
 
         if (result.terms.payment_link) {
           console.log(`  Payment: ${result.terms.payment_link}`);
         }
 
         if (result.terms.attribution_required) {
-          console.log(
-            `  Attribution: Required (${result.terms.attribution_format})`,
-          );
+          console.log(`  Attribution: Required (${result.terms.attribution_format})`);
         }
       } else {
-        console.log("\n⚠ Negotiation not accepted");
+        console.log('\n⚠ Negotiation not accepted');
         console.log(`Reason: ${result.reason}`);
 
         if (result.counter_offer) {
-          console.log("\nCounter Offer:");
-          console.log(
-            `  Suggested budget: $${result.counter_offer.suggested_budget}`,
-          );
-          console.log(
-            `  Minimum budget: $${result.counter_offer.minimum_budget}`,
-          );
-          console.log(
-            `  For your budget: ${result.counter_offer.suggested_volume}`,
-          );
+          console.log('\nCounter Offer:');
+          console.log(`  Suggested budget: $${result.counter_offer.suggested_budget}`);
+          console.log(`  Minimum budget: $${result.counter_offer.minimum_budget}`);
+          console.log(`  For your budget: ${result.counter_offer.suggested_volume}`);
 
           if (result.counter_offer.available_discounts?.length > 0) {
             console.log(`  Available discounts:`);
@@ -442,28 +397,24 @@ program
         }
       }
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
 
 // Pay command
 program
-  .command("pay")
-  .description("Process a payment")
-  .option("-d, --domain <domain>", "Domain to pay")
-  .option(
-    "-p, --provider <provider>",
-    "Payment provider (stripe, bridge, paypal, x402)",
-    "stripe",
-  )
-  .option("-a, --amount <amount>", "Amount to pay")
-  .option("-u, --use-case <use>", "Purpose of payment", "ai_training")
-  .option("-c, --currency <currency>", "Currency", "usd")
+  .command('pay')
+  .description('Process a payment')
+  .option('-d, --domain <domain>', 'Domain to pay')
+  .option('-p, --provider <provider>', 'Payment provider (stripe, bridge, paypal, x402)', 'stripe')
+  .option('-a, --amount <amount>', 'Amount to pay')
+  .option('-u, --use-case <use>', 'Purpose of payment', 'ai_training')
+  .option('-c, --currency <currency>', 'Currency', 'usd')
   .action(async (options) => {
     try {
       if (!options.domain || !options.amount) {
-        console.error("Error: --domain and --amount are required");
+        console.error('Error: --domain and --amount are required');
         process.exit(1);
       }
 
@@ -484,19 +435,17 @@ program
         processor: options.provider,
       });
 
-      console.log("\n✓ Payment initiated");
+      console.log('\n✓ Payment initiated');
       console.log(`  Processor: ${result.processor}`);
       console.log(`  Payment ID: ${result.payment_id}`);
       console.log(`  Amount: $${result.amount} ${result.currency}`);
       console.log(`  Status: ${result.status}`);
 
       if (result.client_secret) {
-        console.log(
-          `  Client Secret: ${result.client_secret.substring(0, 20)}...`,
-        );
+        console.log(`  Client Secret: ${result.client_secret.substring(0, 20)}...`);
       }
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
       process.exit(1);
     }
   });
@@ -505,14 +454,14 @@ program
 async function getTemplate(type) {
   const templates = {
     minimal: {
-      version: "0.9.2",
-      protocol: "peac",
+      version: '0.9.2',
+      protocol: 'peac',
       peac: {
         consent: {
-          ai_training: "conditional",
+          ai_training: 'conditional',
         },
         economics: {
-          pricing: "$0.01/gb",
+          pricing: '$0.01/gb',
         },
         attribution: {
           required: true,
@@ -520,45 +469,42 @@ async function getTemplate(type) {
       },
     },
     standard: {
-      version: "0.9.2",
-      protocol: "peac",
+      version: '0.9.2',
+      protocol: 'peac',
       metadata: {
-        domain: "example.com",
+        domain: 'example.com',
         updated: new Date().toISOString(),
       },
       peac: {
         consent: {
-          default: "contact",
+          default: 'contact',
           ai_training: {
-            allowed: "conditional",
-            conditions: [
-              { payment_required: true },
-              { attribution_required: true },
-            ],
+            allowed: 'conditional',
+            conditions: [{ payment_required: true }, { attribution_required: true }],
           },
           web_scraping: {
             allowed: true,
           },
           commercial_use: {
-            allowed: "negotiable",
+            allowed: 'negotiable',
           },
         },
         economics: {
           pricing_models: {
             usage_based: {
-              per_gb: "$0.01",
-              per_request: "$0.001",
+              per_gb: '$0.01',
+              per_request: '$0.001',
             },
           },
           payment_processors: {
             stripe: {
-              endpoint: "https://pay.example.com/stripe",
+              endpoint: 'https://pay.example.com/stripe',
             },
           },
         },
         attribution: {
           required: true,
-          format: "Source: {url}",
+          format: 'Source: {url}',
         },
         compliance: {
           jurisdictions: {
@@ -574,88 +520,88 @@ async function getTemplate(type) {
       },
     },
     full: {
-      version: "0.9.2",
-      protocol: "peac",
+      version: '0.9.2',
+      protocol: 'peac',
       metadata: {
-        domain: "example.com",
+        domain: 'example.com',
         updated: new Date().toISOString(),
-        languages: ["en", "es", "zh"],
+        languages: ['en', 'es', 'zh'],
       },
       peac: {
         consent: {
-          default: "contact",
+          default: 'contact',
           ai_training: {
-            allowed: "conditional",
+            allowed: 'conditional',
             conditions: [
               { payment_required: true },
               { attribution_required: true },
-              { purpose_limitation: ["research", "commercial"] },
+              { purpose_limitation: ['research', 'commercial'] },
             ],
-            negotiate: "https://api.example.com/negotiate/ai-training",
+            negotiate: 'https://api.example.com/negotiate/ai-training',
           },
           web_scraping: {
             allowed: true,
-            rate_limit: "100/hour",
+            rate_limit: '100/hour',
           },
           commercial_use: {
-            allowed: "negotiable",
-            contact: "licensing@example.com",
+            allowed: 'negotiable',
+            contact: 'licensing@example.com',
           },
         },
         economics: {
-          currency: ["USD", "EUR", "USDB"],
+          currency: ['USD', 'EUR', 'USDB'],
           pricing_models: {
             flat_rate: {
-              monthly: "$1000",
-              annual: "$10000",
+              monthly: '$1000',
+              annual: '$10000',
             },
             usage_based: {
-              per_gb: "$0.01",
-              per_request: "$0.001",
-              per_minute: "$0.10",
+              per_gb: '$0.01',
+              per_request: '$0.001',
+              per_minute: '$0.10',
             },
             dynamic: {
-              endpoint: "/pricing/dynamic",
+              endpoint: '/pricing/dynamic',
               cache_ttl: 3600,
             },
           },
           payment_processors: {
             stripe: {
-              endpoint: "https://pay.example.com/stripe",
-              public_key: "pk_live_example",
+              endpoint: 'https://pay.example.com/stripe',
+              public_key: 'pk_live_example',
               agent_pay: true,
             },
             bridge: {
-              endpoint: "https://api.bridge.xyz/orchestration/send",
-              public_key: "bridge_pk_example",
+              endpoint: 'https://api.bridge.xyz/orchestration/send',
+              public_key: 'bridge_pk_example',
             },
             paypal: {
-              endpoint: "https://api.example.com/paypal",
-              stablecoin: "PYUSD",
+              endpoint: 'https://api.example.com/paypal',
+              stablecoin: 'PYUSD',
             },
-            x402: "https://pay.example.com/x402",
+            x402: 'https://pay.example.com/x402',
           },
         },
         negotiation: {
           enabled: true,
-          endpoint: "https://api.example.com/negotiate",
-          protocols: ["peac-negotiate/v1"],
+          endpoint: 'https://api.example.com/negotiate',
+          protocols: ['peac-negotiate/v1'],
           templates: {
             bulk_discount: {
-              threshold: "1TB",
-              discount: "20%",
+              threshold: '1TB',
+              discount: '20%',
             },
             academic: {
-              verification: "required",
-              discount: "50%",
+              verification: 'required',
+              discount: '50%',
             },
           },
         },
         attribution: {
           required: true,
-          chain_depth: "unlimited",
-          format: "{source} via {aggregator}",
-          verification_endpoint: "https://api.example.com/verify/attribution",
+          chain_depth: 'unlimited',
+          format: '{source} via {aggregator}',
+          verification_endpoint: 'https://api.example.com/verify/attribution',
           blockchain_anchor: true,
         },
         compliance: {
@@ -670,8 +616,8 @@ async function getTemplate(type) {
             eu: {
               gdpr: true,
               ai_act: true,
-              data_retention: "P90D",
-              dpo_contact: "dpo@example.eu",
+              data_retention: 'P90D',
+              dpo_contact: 'dpo@example.eu',
             },
             china: {
               pipl: true,
@@ -680,47 +626,47 @@ async function getTemplate(type) {
           },
         },
         dispute: {
-          contact: "legal@example.com",
-          endpoint: "https://api.example.com/dispute",
-          arbitration: "binding",
-          jurisdiction: "Delaware, USA",
+          contact: 'legal@example.com',
+          endpoint: 'https://api.example.com/dispute',
+          arbitration: 'binding',
+          jurisdiction: 'Delaware, USA',
         },
         audit: {
-          endpoint: "https://api.example.com/audit",
+          endpoint: 'https://api.example.com/audit',
           real_time: true,
-          retention: "P365D",
-          webhooks: "https://api.example.com/webhooks",
+          retention: 'P365D',
+          webhooks: 'https://api.example.com/webhooks',
         },
         rate_limits: {
-          default: "1000/hour",
+          default: '1000/hour',
           by_use_case: {
-            ai_training: "100/hour",
-            api_access: "10000/hour",
+            ai_training: '100/hour',
+            api_access: '10000/hour',
           },
         },
         discovery: {
-          sitemap: "/sitemap-usage.xml",
-          endpoints: "/api/catalog",
+          sitemap: '/sitemap-usage.xml',
+          endpoints: '/api/catalog',
           mobile: {
-            ios: "peacprotocol://policy",
-            android: "content://com.example/peac",
+            ios: 'peacprotocol://policy',
+            android: 'content://com.example/peac',
           },
           iot: {
-            mqtt: "device/+/peac",
-            coap: "/.well-known/peac",
+            mqtt: 'device/+/peac',
+            coap: '/.well-known/peac',
           },
         },
         geographic_policies: {
-          default: "us",
+          default: 'us',
           overrides: {
-            eu: "/peac-eu.txt",
-            cn: "/peac-cn.txt",
+            eu: '/peac-eu.txt',
+            cn: '/peac-cn.txt',
           },
         },
         extensions: {
           ai_control: true,
-          zk_proofs: "https://api.example.com/zk",
-          ipfs_hash: "QmExample...",
+          zk_proofs: 'https://api.example.com/zk',
+          ipfs_hash: 'QmExample...',
           langchain: true,
           crewai: true,
         },

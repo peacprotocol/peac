@@ -1,7 +1,7 @@
-import { randomUUID } from "crypto";
-import { EventEnvelope } from "./types";
-import { logger } from "../../logging";
-import { metrics } from "../../metrics";
+import { randomUUID } from 'crypto';
+import { EventEnvelope } from './types';
+import { logger } from '../../logging';
+import { metrics } from '../../metrics';
 
 export class EventEmitter {
   private correlationId?: string;
@@ -16,11 +16,11 @@ export class EventEmitter {
     options?: {
       causationId?: string;
       metadata?: Record<string, unknown>;
-    }
+    },
   ): Promise<void> {
     const event: EventEnvelope<T> = {
       id: randomUUID(),
-      version: "0.9.6",
+      version: '0.9.6',
       type,
       timestamp: new Date().toISOString(),
       causation_id: options?.causationId,
@@ -30,7 +30,7 @@ export class EventEmitter {
     };
 
     // For PR-1, just log the event
-    logger.info({ event }, "Protocol event emitted");
+    logger.info({ event }, 'Protocol event emitted');
     metrics.protocolEvents.inc({ type });
 
     // In future PRs, wire to event bus/storage

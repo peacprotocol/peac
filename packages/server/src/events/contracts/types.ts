@@ -1,6 +1,6 @@
 export interface EventEnvelope<T = unknown> {
   id: string;
-  version: "0.9.6";
+  version: '0.9.6';
   type: string;
   timestamp: string;
   causation_id?: string;

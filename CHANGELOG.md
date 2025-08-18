@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.6] - 2024-12-18
 
 ### Added
+
 - Deterministic ETags with conditional requests (304 support)
 - RFC 7807 Problem Details for all error responses
 - RFC 9331 RateLimit headers with delta seconds
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SBOM generation for supply chain transparency
 
 ### Changed
+
 - CSP default-src now 'none' for API-first security
 - Permissions-Policy uses explicit deny list
 - X-XSS-Protection disabled (deprecated header)
@@ -27,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RateLimit-Reset uses delta seconds instead of epoch timestamp
 
 ### Security
+
 - Production safety rail preventing rate limit bypass
 - Sensitive header redaction in logs (idempotency keys)
 - Trust proxy configuration for accurate IP detection
@@ -36,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.5] - 2024-12-01
 
 ### Added
+
 - Initial PEAC Protocol implementation
 - Basic capabilities endpoint
 - Payment scaffolding

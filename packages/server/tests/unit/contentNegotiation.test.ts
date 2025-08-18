@@ -1,63 +1,57 @@
-import { contentNegotiation } from "../../src/http/middleware/content-negotiation";
-import { Request } from "express";
+import { contentNegotiation } from '../../src/http/middleware/content-negotiation';
+import { Request } from 'express';
 
-describe("Content Negotiation", () => {
-  describe("parseMediaType", () => {
-    it("should parse vendor media types correctly", () => {
+describe('Content Negotiation', () => {
+  describe('parseMediaType', () => {
+    it('should parse vendor media types correctly', () => {
       const mt = contentNegotiation.parseMediaType(
-        "application/vnd.peac.capabilities+json;version=0.9.6"
+        'application/vnd.peac.capabilities+json;version=0.9.6',
       );
       expect(mt).toEqual({
-        type: "application",
-        subtype: "capabilities",
-        vendor: "peac",
-        version: "0.9.6",
-        parameters: { version: "0.9.6" },
+        type: 'application',
+        subtype: 'capabilities',
+        vendor: 'peac',
+        version: '0.9.6',
+        parameters: { version: '0.9.6' },
         quality: 1.0,
       });
     });
 
-    it("should parse quality values", () => {
-      const mt = contentNegotiation.parseMediaType(
-        "application/json;q=0.8"
-      );
+    it('should parse quality values', () => {
+      const mt = contentNegotiation.parseMediaType('application/json;q=0.8');
       expect(mt?.quality).toBe(0.8);
     });
   });
 
-  describe("negotiate", () => {
-    it("should match exact media types", () => {
+  describe('negotiate', () => {
+    it('should match exact media types', () => {
       const req = {
         get: (name: string) =>
-          name === "Accept"
-            ? "application/vnd.peac.capabilities+json;version=0.9.6"
-            : undefined,
+          name === 'Accept' ? 'application/vnd.peac.capabilities+json;version=0.9.6' : undefined,
       } as Request;
 
       const result = contentNegotiation.negotiate(req, [
-        "application/vnd.peac.capabilities+json;version=0.9.6",
+        'application/vnd.peac.capabilities+json;version=0.9.6',
       ]);
 
-      expect(result).toBe("application/vnd.peac.capabilities+json;version=0.9.6");
+      expect(result).toBe('application/vnd.peac.capabilities+json;version=0.9.6');
     });
 
-    it("should handle wildcards", () => {
+    it('should handle wildcards', () => {
       const req = {
-        get: (name: string) => (name === "Accept" ? "*/*" : undefined),
+        get: (name: string) => (name === 'Accept' ? '*/*' : undefined),
       } as Request;
 
-      const result = contentNegotiation.negotiate(req, ["application/json"]);
-      expect(result).toBe("application/json");
+      const result = contentNegotiation.negotiate(req, ['application/json']);
+      expect(result).toBe('application/json');
     });
 
-    it("should return null for no match", () => {
+    it('should return null for no match', () => {
       const req = {
-        get: (name: string) => (name === "Accept" ? "text/plain" : undefined),
+        get: (name: string) => (name === 'Accept' ? 'text/plain' : undefined),
       } as Request;
 
-      const result = contentNegotiation.negotiate(req, [
-        "application/json",
-      ]);
+      const result = contentNegotiation.negotiate(req, ['application/json']);
       expect(result).toBeNull();
     });
   });

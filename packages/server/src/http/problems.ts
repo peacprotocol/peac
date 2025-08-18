@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Response } from 'express';
 
 export interface ProblemDetails {
   type?: string;
@@ -12,95 +12,91 @@ export interface ProblemDetails {
 export class ProblemDetailsHandler {
   private readonly problemMap: Map<string, ProblemDetails> = new Map([
     [
-      "validation_error",
+      'validation_error',
       {
-        type: "https://peacprotocol.org/problems/validation-error",
-        title: "Validation Error",
+        type: 'https://peacprotocol.org/problems/validation-error',
+        title: 'Validation Error',
         status: 400,
       },
     ],
     [
-      "authentication_required",
+      'authentication_required',
       {
-        type: "https://peacprotocol.org/problems/authentication-required",
-        title: "Authentication Required",
+        type: 'https://peacprotocol.org/problems/authentication-required',
+        title: 'Authentication Required',
         status: 401,
       },
     ],
     [
-      "insufficient_permissions",
+      'insufficient_permissions',
       {
-        type: "https://peacprotocol.org/problems/insufficient-permissions",
-        title: "Insufficient Permissions",
+        type: 'https://peacprotocol.org/problems/insufficient-permissions',
+        title: 'Insufficient Permissions',
         status: 403,
       },
     ],
     [
-      "resource_not_found",
+      'resource_not_found',
       {
-        type: "https://peacprotocol.org/problems/resource-not-found",
-        title: "Resource Not Found",
+        type: 'https://peacprotocol.org/problems/resource-not-found',
+        title: 'Resource Not Found',
         status: 404,
       },
     ],
     [
-      "not_acceptable",
+      'not_acceptable',
       {
-        type: "https://peacprotocol.org/problems/not-acceptable",
-        title: "Not Acceptable",
+        type: 'https://peacprotocol.org/problems/not-acceptable',
+        title: 'Not Acceptable',
         status: 406,
       },
     ],
     [
-      "unsupported_media_type",
+      'unsupported_media_type',
       {
-        type: "https://peacprotocol.org/problems/unsupported-media-type",
-        title: "Unsupported Media Type",
+        type: 'https://peacprotocol.org/problems/unsupported-media-type',
+        title: 'Unsupported Media Type',
         status: 415,
       },
     ],
     [
-      "rate_limit_exceeded",
+      'rate_limit_exceeded',
       {
-        type: "https://peacprotocol.org/problems/rate-limit-exceeded",
-        title: "Rate Limit Exceeded",
+        type: 'https://peacprotocol.org/problems/rate-limit-exceeded',
+        title: 'Rate Limit Exceeded',
         status: 429,
       },
     ],
     [
-      "internal_error",
+      'internal_error',
       {
-        type: "https://peacprotocol.org/problems/internal-error",
-        title: "Internal Server Error",
+        type: 'https://peacprotocol.org/problems/internal-error',
+        title: 'Internal Server Error',
         status: 500,
       },
     ],
     [
-      "not_implemented",
+      'not_implemented',
       {
-        type: "https://peacprotocol.org/problems/not-implemented",
-        title: "Not Implemented",
+        type: 'https://peacprotocol.org/problems/not-implemented',
+        title: 'Not Implemented',
         status: 501,
       },
     ],
     [
-      "payment_provider_unavailable",
+      'payment_provider_unavailable',
       {
-        type: "https://peacprotocol.org/problems/payment-provider-unavailable",
-        title: "Payment Provider Unavailable",
+        type: 'https://peacprotocol.org/problems/payment-provider-unavailable',
+        title: 'Payment Provider Unavailable',
         status: 503,
       },
     ],
   ]);
 
-  send(
-    res: Response,
-    problemType: string,
-    extensions?: Record<string, unknown>
-  ): void {
+  send(res: Response, problemType: string, extensions?: Record<string, unknown>): void {
     const problem = this.problemMap.get(problemType) || {
-      type: "about:blank",
-      title: "Unknown Error",
+      type: 'about:blank',
+      title: 'Unknown Error',
       status: 500,
     };
 
@@ -110,7 +106,7 @@ export class ProblemDetailsHandler {
     };
 
     // Add trace_id from X-Request-Id if available
-    const requestId = res.get("X-Request-Id");
+    const requestId = res.get('X-Request-Id');
     if (requestId) {
       response.trace_id = requestId;
     }
@@ -121,16 +117,16 @@ export class ProblemDetailsHandler {
     }
 
     // Add retry hints for specific problems
-    if (problemType === "rate_limit_exceeded" && extensions?.retry_after) {
-      res.set("Retry-After", String(extensions.retry_after));
+    if (problemType === 'rate_limit_exceeded' && extensions?.retry_after) {
+      res.set('Retry-After', String(extensions.retry_after));
     }
 
-    if (problemType === "authentication_required") {
-      res.set("WWW-Authenticate", 'DPoP realm="PEAC"');
+    if (problemType === 'authentication_required') {
+      res.set('WWW-Authenticate', 'DPoP realm="PEAC"');
     }
 
     // Set proper Content-Type for RFC 7807
-    res.set("Content-Type", "application/problem+json");
+    res.set('Content-Type', 'application/problem+json');
     res.status(response.status).json(response);
   }
 
@@ -138,10 +134,10 @@ export class ProblemDetailsHandler {
     status: number,
     title: string,
     detail?: string,
-    extensions?: Record<string, unknown>
+    extensions?: Record<string, unknown>,
   ): ProblemDetails {
     return {
-      type: "about:blank",
+      type: 'about:blank',
       title,
       status,
       detail,

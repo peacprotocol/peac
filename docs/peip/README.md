@@ -30,6 +30,7 @@ PEIPs are the primary mechanism for proposing new features, collecting community
 ## PEIP Editors
 
 Current editors:
+
 - (To be designated)
 
 ## Active PEIPs

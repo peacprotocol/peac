@@ -1,23 +1,27 @@
-import { Request, Response } from "express";
-import { createHash } from "crypto";
-import stringify from "json-stable-stringify";
-import { contentNegotiation } from "../middleware/content-negotiation";
-import { logger } from "../../logging";
-import { metrics } from "../../metrics";
-import { problemDetails } from "../problems";
+import { Request, Response } from 'express';
+import { createHash } from 'crypto';
+import stringify from 'json-stable-stringify';
+import { contentNegotiation } from '../middleware/content-negotiation';
+import { logger } from '../../logging';
+import { metrics } from '../../metrics';
+import { problemDetails } from '../problems';
 
-const CAPABILITIES_VERSION = "0.9.6";
-const CAPABILITIES_MEDIA_TYPE = "application/vnd.peac.capabilities+json";
+const CAPABILITIES_VERSION = '0.9.6';
+const CAPABILITIES_MEDIA_TYPE = 'application/vnd.peac.capabilities+json';
 
 // Fixed last modified for stable caching
-const CAPABILITIES_LAST_MODIFIED = new Date("2024-12-01T00:00:00Z").toUTCString();
+const CAPABILITIES_LAST_MODIFIED = new Date('2024-12-01T00:00:00Z').toUTCString();
 
 // Memoized capabilities, ETag, and JSON string computed at startup
 let MEMOIZED_CAPABILITIES: PEACCapabilities | null = null;
 let MEMOIZED_ETAG: string | null = null;
 let MEMOIZED_JSON: string | null = null;
 
-function ensureCapabilitiesMemoized(): { capabilities: PEACCapabilities; etag: string; json: string } {
+function ensureCapabilitiesMemoized(): {
+  capabilities: PEACCapabilities;
+  etag: string;
+  json: string;
+} {
   if (!MEMOIZED_CAPABILITIES || !MEMOIZED_ETAG || !MEMOIZED_JSON) {
     MEMOIZED_CAPABILITIES = buildCapabilities();
     MEMOIZED_ETAG = generateCapabilitiesETag(MEMOIZED_CAPABILITIES);
@@ -34,7 +38,7 @@ export function _invalidateCapabilitiesCache(): void {
 
 export interface PEACCapabilities {
   version: string;
-  conformance_level: "L0" | "L1" | "L2" | "L3" | "L4";
+  conformance_level: 'L0' | 'L1' | 'L2' | 'L3' | 'L4';
   protocols: {
     bridges: string[];
     native_a2a?: {
@@ -49,7 +53,7 @@ export interface PEACCapabilities {
   };
   features: {
     receipts: {
-      signed: "required" | "optional";
+      signed: 'required' | 'optional';
       jwks?: string;
     };
     proofs?: {
@@ -80,32 +84,32 @@ export interface PEACCapabilities {
 function buildCapabilities(): PEACCapabilities {
   return {
     version: CAPABILITIES_VERSION,
-    conformance_level: "L1",
+    conformance_level: 'L1',
     protocols: {
-      bridges: ["mcp", "a2a", "openai", "langchain"],
+      bridges: ['mcp', 'a2a', 'openai', 'langchain'],
       native_a2a: {
         handshake: true,
-        orchestration: ["sequential"],
+        orchestration: ['sequential'],
       },
     },
     payments: {
-      rails: ["credits", "x402:ethereum", "stripe:fiat"],
+      rails: ['credits', 'x402:ethereum', 'stripe:fiat'],
       status: {
-        credits: "live",
-        "x402:ethereum": "simulation (prod-ready)",
-        "stripe:fiat": "simulation (prod-ready)",
+        credits: 'live',
+        'x402:ethereum': 'simulation (prod-ready)',
+        'stripe:fiat': 'simulation (prod-ready)',
       },
       message:
-        "Three payment options available day one. Credits for testnet; x402/Stripe ready for production with configuration.",
+        'Three payment options available day one. Credits for testnet; x402/Stripe ready for production with configuration.',
     },
     features: {
       receipts: {
-        signed: "required",
-        jwks: "/.well-known/jwks.json",
+        signed: 'required',
+        jwks: '/.well-known/jwks.json',
       },
       proofs: {
-        zk: "hook",
-        tee: "hook",
+        zk: 'hook',
+        tee: 'hook',
       },
       eco: {
         enabled: true,
@@ -123,25 +127,22 @@ function buildCapabilities(): PEACCapabilities {
       },
     },
     links: {
-      docs: "https://peacprotocol.org/docs/v0.9.6",
-      peip: "https://peacprotocol.org/peip",
+      docs: 'https://peacprotocol.org/docs/v0.9.6',
+      peip: 'https://peacprotocol.org/peip',
     },
   };
 }
 
 function generateCapabilitiesETag(capabilities: PEACCapabilities): string {
-  const canonical = stringify(capabilities) || "{}";
-  const hash = createHash("sha256").update(canonical, "utf8").digest("base64");
+  const canonical = stringify(capabilities) || '{}';
+  const hash = createHash('sha256').update(canonical, 'utf8').digest('base64');
   return `W/"${hash}"`; // Weak ETag, spec-correct
 }
 
-export async function handleCapabilities(
-  req: Request,
-  res: Response
-): Promise<void> {
+export async function handleCapabilities(req: Request, res: Response): Promise<void> {
   const timer = metrics.httpRequestDuration.startTimer({
-    method: "GET",
-    route: "/.well-known/peac-capabilities",
+    method: 'GET',
+    route: '/.well-known/peac-capabilities',
   });
 
   try {
@@ -149,23 +150,20 @@ export async function handleCapabilities(
     const { etag: capabilitiesETag, json: capabilitiesJSON } = ensureCapabilitiesMemoized();
 
     // Handle conditional requests first (before any heavy work)
-    const clientETag = req.headers["if-none-match"];
-    const clientLastModified = req.headers["if-modified-since"];
-    
-    if (
-      clientETag === capabilitiesETag ||
-      clientLastModified === CAPABILITIES_LAST_MODIFIED
-    ) {
+    const clientETag = req.headers['if-none-match'];
+    const clientLastModified = req.headers['if-modified-since'];
+
+    if (clientETag === capabilitiesETag || clientLastModified === CAPABILITIES_LAST_MODIFIED) {
       timer({ status: 304 });
       logger.debug(
         { clientETag, capabilitiesETag, clientLastModified },
-        "Capabilities served from cache (304)"
+        'Capabilities served from cache (304)',
       );
       res.set({
-        "ETag": capabilitiesETag,
-        "Last-Modified": CAPABILITIES_LAST_MODIFIED,
-        "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
-        "Vary": "Accept, Accept-Encoding",
+        ETag: capabilitiesETag,
+        'Last-Modified': CAPABILITIES_LAST_MODIFIED,
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+        Vary: 'Accept, Accept-Encoding',
       });
       res.status(304).end();
       return;
@@ -174,40 +172,35 @@ export async function handleCapabilities(
     // Check content negotiation
     const acceptable = contentNegotiation.negotiate(req, [
       `${CAPABILITIES_MEDIA_TYPE};version=${CAPABILITIES_VERSION}`,
-      "application/json", // Fallback for compatibility
+      'application/json', // Fallback for compatibility
     ]);
 
     if (!acceptable) {
       timer({ status: 406 });
-      return problemDetails.send(res, "not_acceptable", {
-        detail: "The requested media type is not supported",
-        supported: [
-          `${CAPABILITIES_MEDIA_TYPE};version=${CAPABILITIES_VERSION}`,
-        ],
+      return problemDetails.send(res, 'not_acceptable', {
+        detail: 'The requested media type is not supported',
+        supported: [`${CAPABILITIES_MEDIA_TYPE};version=${CAPABILITIES_VERSION}`],
       });
     }
 
     // Set appropriate headers
     res.set({
-      "Content-Type": acceptable,
-      "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
-      "ETag": capabilitiesETag,
-      "Last-Modified": CAPABILITIES_LAST_MODIFIED,
-      "Vary": "Accept, Accept-Encoding",
+      'Content-Type': acceptable,
+      'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+      ETag: capabilitiesETag,
+      'Last-Modified': CAPABILITIES_LAST_MODIFIED,
+      Vary: 'Accept, Accept-Encoding',
     });
 
     timer({ status: 200 });
     res.status(200).send(capabilitiesJSON);
 
-    logger.info(
-      { version: CAPABILITIES_VERSION },
-      "Capabilities served successfully"
-    );
+    logger.info({ version: CAPABILITIES_VERSION }, 'Capabilities served successfully');
   } catch (error) {
     timer({ status: 500 });
-    logger.error({ error }, "Failed to serve capabilities");
-    problemDetails.send(res, "internal_error", {
-      detail: "An unexpected error occurred",
+    logger.error({ error }, 'Failed to serve capabilities');
+    problemDetails.send(res, 'internal_error', {
+      detail: 'An unexpected error occurred',
     });
   }
 }

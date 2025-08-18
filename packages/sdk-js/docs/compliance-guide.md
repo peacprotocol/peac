@@ -69,7 +69,7 @@ policy:
 policy:
   attribution:
     required: true
-    format: "AI training data from {url}"
+    format: 'AI training data from {url}'
     verification_endpoint: /verify-usage
 
   compliance:

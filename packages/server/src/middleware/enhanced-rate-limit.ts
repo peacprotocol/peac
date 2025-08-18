@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import { metrics } from "../metrics";
-import { problemDetails } from "../http/problems";
-import { logger } from "../logging";
+import { Request, Response, NextFunction } from 'express';
+import { metrics } from '../metrics';
+import { problemDetails } from '../http/problems';
+import { logger } from '../logging';
 
 interface RateLimitConfig {
   windowMs: number;
@@ -71,18 +71,18 @@ export class EnhancedRateLimiter {
   middleware() {
     return (req: Request, res: Response, next: NextFunction) => {
       // Production safety: prevent rate limit bypass in production
-      if (process.env.NODE_ENV === "production" && process.env.PEAC_RATELIMIT_DISABLED === "true") {
-        throw new Error("PEAC_RATELIMIT_DISABLED must not be true in production");
+      if (process.env.NODE_ENV === 'production' && process.env.PEAC_RATELIMIT_DISABLED === 'true') {
+        throw new Error('PEAC_RATELIMIT_DISABLED must not be true in production');
       }
-      
+
       // Skip rate limiting if disabled via environment (test/dev only)
-      if (process.env.PEAC_RATELIMIT_DISABLED === "true") {
+      if (process.env.PEAC_RATELIMIT_DISABLED === 'true') {
         const resetDelta = 3600; // seconds until reset
         res.set({
-          "RateLimit-Limit": "999999",
-          "RateLimit-Remaining": "999999", 
-          "RateLimit-Reset": String(resetDelta),
-          "RateLimit-Policy": "999999;w=3600",
+          'RateLimit-Limit': '999999',
+          'RateLimit-Remaining': '999999',
+          'RateLimit-Reset': String(resetDelta),
+          'RateLimit-Policy': '999999;w=3600',
         });
         return next();
       }
@@ -95,7 +95,7 @@ export class EnhancedRateLimiter {
       if (!bucket) {
         bucket = new TokenBucket(
           this.config.maxRequests,
-          this.config.maxRequests * (60000 / this.config.windowMs)
+          this.config.maxRequests * (60000 / this.config.windowMs),
         );
         this.buckets.set(key, bucket);
       }
@@ -107,10 +107,10 @@ export class EnhancedRateLimiter {
       const windowSeconds = Math.ceil(this.config.windowMs / 1000);
 
       res.set({
-        "RateLimit-Limit": limit.toString(),
-        "RateLimit-Remaining": remaining.toString(), 
-        "RateLimit-Reset": resetTime.toString(),
-        "RateLimit-Policy": `${limit};w=${windowSeconds}`,
+        'RateLimit-Limit': limit.toString(),
+        'RateLimit-Remaining': remaining.toString(),
+        'RateLimit-Reset': resetTime.toString(),
+        'RateLimit-Policy': `${limit};w=${windowSeconds}`,
       });
 
       if (bucket.consume()) {
@@ -119,12 +119,12 @@ export class EnhancedRateLimiter {
       } else {
         const retryAfter = bucket.getRetryAfter();
         metrics.rateLimitExceeded.inc({ key });
-        logger.warn({ key, retryAfter, remaining, resetTime }, "Rate limit exceeded");
+        logger.warn({ key, retryAfter, remaining, resetTime }, 'Rate limit exceeded');
 
         // Add Retry-After header for exceeded requests
-        res.set("Retry-After", Math.ceil(retryAfter).toString());
+        res.set('Retry-After', Math.ceil(retryAfter).toString());
 
-        problemDetails.send(res, "rate_limit_exceeded", {
+        problemDetails.send(res, 'rate_limit_exceeded', {
           detail: `Rate limit exceeded. Please retry after ${Math.ceil(retryAfter)} seconds`,
           retry_after: Math.ceil(retryAfter),
         });
@@ -133,7 +133,7 @@ export class EnhancedRateLimiter {
   }
 
   private getDefaultKey(req: Request): string {
-    return req.ip || "unknown";
+    return req.ip || 'unknown';
   }
 
   private cleanup(): void {
@@ -152,15 +152,15 @@ export class EnhancedRateLimiter {
 }
 
 // Test-friendly rate limiting configuration
-const isTestEnvironment = process.env.NODE_ENV === "test";
-const rateLimitDisabled = process.env.PEAC_RATELIMIT_DISABLED === "true";
+const isTestEnvironment = process.env.NODE_ENV === 'test';
+const rateLimitDisabled = process.env.PEAC_RATELIMIT_DISABLED === 'true';
 
 export const standardRateLimiter = new EnhancedRateLimiter({
   windowMs: 60000, // 1 minute
-  maxRequests: rateLimitDisabled ? 999999 : (isTestEnvironment ? 1000 : 60),
+  maxRequests: rateLimitDisabled ? 999999 : isTestEnvironment ? 1000 : 60,
 });
 
 export const strictRateLimiter = new EnhancedRateLimiter({
   windowMs: 60000,
-  maxRequests: rateLimitDisabled ? 999999 : (isTestEnvironment ? 500 : 10),
+  maxRequests: rateLimitDisabled ? 999999 : isTestEnvironment ? 500 : 10,
 });

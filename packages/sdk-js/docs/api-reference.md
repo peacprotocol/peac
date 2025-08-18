@@ -25,9 +25,9 @@ Parses PEAC policy files from URLs or local filesystem.
 Fetches and parses a PEAC policy from a URL.
 
 ```javascript
-const { Parser } = require("@peacprotocol/core");
+const { Parser } = require('@peacprotocol/core');
 
-const policy = await Parser.parse("https://example.com/peac.txt");
+const policy = await Parser.parse('https://example.com/peac.txt');
 console.log(policy.version); // "0.9.2"
 ```
 
@@ -36,7 +36,7 @@ console.log(policy.version); // "0.9.2"
 Parses a local PEAC policy file.
 
 ```javascript
-const policy = await Parser.parseFile("./peac.txt");
+const policy = await Parser.parseFile('./peac.txt');
 ```
 
 ### Validator
@@ -50,7 +50,7 @@ Validates policy objects against the PEAC schema.
 Validates a parsed policy object.
 
 ```javascript
-const { Validator } = require("@peacprotocol/core");
+const { Validator } = require('@peacprotocol/core');
 
 const result = Validator.validate(policy);
 if (!result.valid) {
@@ -79,7 +79,7 @@ Represents a parsed PEAC policy.
 Checks if a use case requires payment.
 
 ```javascript
-if (policy.requiresPayment("ai_training")) {
+if (policy.requiresPayment('ai_training')) {
   // Handle payment requirement
 }
 ```
@@ -89,7 +89,7 @@ if (policy.requiresPayment("ai_training")) {
 Gets attribution requirements for a use case.
 
 ```javascript
-const attribution = policy.getAttribution("ai_training");
+const attribution = policy.getAttribution('ai_training');
 if (attribution.required) {
   console.log(attribution.format);
 }
@@ -106,13 +106,13 @@ Client for interacting with PEAC-enabled services.
 Requests access to a resource.
 
 ```javascript
-const { PEACClient } = require("@peacprotocol/core");
+const { PEACClient } = require('@peacprotocol/core');
 
 const client = new PEACClient();
-const response = await client.requestAccess("example.com", {
-  purpose: "ai_training",
-  volume: "10GB",
-  agentId: "my-agent-001",
+const response = await client.requestAccess('example.com', {
+  purpose: 'ai_training',
+  volume: '10GB',
+  agentId: 'my-agent-001',
 });
 
 if (response.granted) {
@@ -181,10 +181,10 @@ Common error types:
 
 ```javascript
 try {
-  const policy = await Parser.parse("example.com");
+  const policy = await Parser.parse('example.com');
 } catch (error) {
   if (error instanceof ParseError) {
-    console.error("Invalid policy format:", error.message);
+    console.error('Invalid policy format:', error.message);
   }
 }
 ```
@@ -204,26 +204,26 @@ The SDK can be configured via environment variables:
 ### Basic Usage
 
 ```javascript
-const { Parser, PEACClient } = require("@peacprotocol/core");
+const { Parser, PEACClient } = require('@peacprotocol/core');
 
 async function accessContent() {
   // Parse publisher policy
-  const policy = await Parser.parse("publisher.com");
+  const policy = await Parser.parse('publisher.com');
 
   // Check requirements
-  if (policy.requiresPayment("ai_training")) {
-    console.log("Payment required");
+  if (policy.requiresPayment('ai_training')) {
+    console.log('Payment required');
   }
 
   // Request access
   const client = new PEACClient();
-  const access = await client.requestAccess("publisher.com", {
-    purpose: "ai_training",
-    agentId: "my-bot-001",
+  const access = await client.requestAccess('publisher.com', {
+    purpose: 'ai_training',
+    agentId: 'my-bot-001',
   });
 
   if (access.granted) {
-    console.log("Access granted");
+    console.log('Access granted');
   }
 }
 ```
@@ -233,17 +233,17 @@ async function accessContent() {
 ```javascript
 async function safeAccess() {
   try {
-    const policy = await Parser.parse("example.com");
+    const policy = await Parser.parse('example.com');
     const result = Validator.validate(policy);
 
     if (!result.valid) {
-      console.error("Invalid policy:", result.errors);
+      console.error('Invalid policy:', result.errors);
       return;
     }
 
     // Proceed with valid policy
   } catch (error) {
-    console.error("Failed to parse policy:", error);
+    console.error('Failed to parse policy:', error);
   }
 }
 ```

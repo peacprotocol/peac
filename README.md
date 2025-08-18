@@ -152,11 +152,11 @@ More examples are in `docs/examples.md` including free tier, metered, and resear
 ### Publisher or API enforcement
 
 ```javascript
-import { Parser } from "@peacprotocol/core";
+import { Parser } from '@peacprotocol/core';
 
-const policy = await Parser.parse("https://example.com");
+const policy = await Parser.parse('https://example.com');
 
-if (policy.requiresPayment("ai_training")) {
+if (policy.requiresPayment('ai_training')) {
   // Offer negotiation and settlement via the configured adapter
 }
 ```
@@ -164,18 +164,18 @@ if (policy.requiresPayment("ai_training")) {
 ### Agent access
 
 ```javascript
-import { PEACClient } from "@peacprotocol/core";
+import { PEACClient } from '@peacprotocol/core';
 
 const client = new PEACClient();
-const access = await client.requestAccess("https://publisher.com", {
-  purpose: "ai_training",
-  volume: "10GB",
-  adapter: "mcp",
+const access = await client.requestAccess('https://publisher.com', {
+  purpose: 'ai_training',
+  volume: '10GB',
+  adapter: 'mcp',
 });
 
 if (access.granted) {
-  const resp = await fetch("https://publisher.com/data", {
-    headers: { "x-peac-receipt": access.receipt.id },
+  const resp = await fetch('https://publisher.com/data', {
+    headers: { 'x-peac-receipt': access.receipt.id },
   });
 }
 ```
@@ -272,18 +272,15 @@ Adapters connect PEAC to payment rails, agent protocols, provenance systems, and
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
-    if (
-      url.pathname === "/.well-known/peac.txt" ||
-      url.pathname === "/peac.txt"
-    ) {
+    if (url.pathname === '/.well-known/peac.txt' || url.pathname === '/peac.txt') {
       return new Response(env.PEAC_TXT, {
         headers: {
-          "content-type": "text/plain; charset=utf-8",
-          "cache-control": "public, max-age=600",
+          'content-type': 'text/plain; charset=utf-8',
+          'cache-control': 'public, max-age=600',
         },
       });
     }
-    return new Response("Not found", { status: 404 });
+    return new Response('Not found', { status: 404 });
   },
 };
 ```

@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { metrics } from "../../metrics";
+import { Request, Response, NextFunction } from 'express';
+import { metrics } from '../../metrics';
 
 export interface MediaType {
   type: string;
@@ -19,10 +19,10 @@ export class ContentNegotiator {
 
   parseMediaType(mediaType: string): MediaType | null {
     // Handle wildcards first
-    if (mediaType.trim() === "*/*") {
+    if (mediaType.trim() === '*/*') {
       return {
-        type: "*",
-        subtype: "*",
+        type: '*',
+        subtype: '*',
         parameters: {},
         quality: 1.0,
       };
@@ -41,13 +41,13 @@ export class ContentNegotiator {
     let quality = 1.0;
 
     if (params) {
-      const pairs = params.split(";").map((p) => p.trim());
+      const pairs = params.split(';').map((p) => p.trim());
       for (const pair of pairs) {
-        const [key, value] = pair.split("=").map((s) => s.trim());
-        if (key === "q") {
+        const [key, value] = pair.split('=').map((s) => s.trim());
+        if (key === 'q') {
           quality = parseFloat(value) || 1.0;
         } else {
-          parameters[key.toLowerCase()] = value?.replace(/^"|"$/g, "") || "";
+          parameters[key.toLowerCase()] = value?.replace(/^"|"$/g, '') || '';
         }
       }
     }
@@ -63,9 +63,9 @@ export class ContentNegotiator {
   }
 
   negotiate(req: Request, supported: string[]): string | null {
-    const acceptHeader = req.get("Accept") || "*/*";
+    const acceptHeader = req.get('Accept') || '*/*';
     const acceptTypes = acceptHeader
-      .split(",")
+      .split(',')
       .map((s) => this.parseMediaType(s))
       .filter((mt): mt is MediaType => mt !== null)
       .sort((a, b) => b.quality - a.quality);
@@ -83,8 +83,8 @@ export class ContentNegotiator {
     }
 
     // In loose mode, accept application/json as fallback
-    if (!this.strict && acceptTypes.some((mt) => mt.subtype === "json")) {
-      const jsonType = supportedTypes.find((st) => st.subtype === "json");
+    if (!this.strict && acceptTypes.some((mt) => mt.subtype === 'json')) {
+      const jsonType = supportedTypes.find((st) => st.subtype === 'json');
       if (jsonType) {
         return this.formatMediaType(jsonType);
       }
@@ -95,7 +95,7 @@ export class ContentNegotiator {
 
   matches(acceptable: MediaType, supported: MediaType): boolean {
     // Wildcard matching
-    if (acceptable.type === "*" || acceptable.subtype === "*") {
+    if (acceptable.type === '*' || acceptable.subtype === '*') {
       return true;
     }
 
@@ -115,11 +115,7 @@ export class ContentNegotiator {
     }
 
     // Version matching (if strict mode)
-    if (
-      this.strict &&
-      acceptable.version &&
-      acceptable.version !== supported.version
-    ) {
+    if (this.strict && acceptable.version && acceptable.version !== supported.version) {
       return false;
     }
 
@@ -132,7 +128,7 @@ export class ContentNegotiator {
       result += `vnd.${mt.vendor}.`;
     }
     result += mt.subtype;
-    
+
     // Add +json suffix if not present for vendor types
     if (mt.vendor && !mt.subtype.includes('+')) {
       result += '+json';
@@ -151,14 +147,14 @@ export class ContentNegotiator {
 
       const acceptable = this.negotiate(req, supported);
       if (!acceptable) {
-        timer({ outcome: "rejected" });
+        timer({ outcome: 'rejected' });
         metrics.contentNegotiationRejections.inc({
           path: req.path,
         });
 
         return res.status(406).json({
-          type: "about:blank",
-          title: "Not Acceptable",
+          type: 'about:blank',
+          title: 'Not Acceptable',
           status: 406,
           detail: `None of the requested media types are supported`,
           supported,
@@ -166,27 +162,27 @@ export class ContentNegotiator {
       }
 
       // Check Content-Type for POST/PUT/PATCH
-      if (["POST", "PUT", "PATCH"].includes(req.method)) {
-        const contentType = req.get("Content-Type");
+      if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+        const contentType = req.get('Content-Type');
         if (!contentType) {
-          timer({ outcome: "missing_content_type" });
+          timer({ outcome: 'missing_content_type' });
           return res.status(415).json({
-            type: "about:blank",
-            title: "Unsupported Media Type",
+            type: 'about:blank',
+            title: 'Unsupported Media Type',
             status: 415,
-            detail: "Content-Type header is required",
+            detail: 'Content-Type header is required',
             supported,
           });
         }
 
         const parsed = this.parseMediaType(contentType);
         if (!parsed) {
-          timer({ outcome: "invalid_content_type" });
+          timer({ outcome: 'invalid_content_type' });
           return res.status(415).json({
-            type: "about:blank",
-            title: "Unsupported Media Type",
+            type: 'about:blank',
+            title: 'Unsupported Media Type',
             status: 415,
-            detail: "Invalid Content-Type header",
+            detail: 'Invalid Content-Type header',
             supported,
           });
         }
@@ -197,10 +193,10 @@ export class ContentNegotiator {
         });
 
         if (!isSupported) {
-          timer({ outcome: "unsupported_content_type" });
+          timer({ outcome: 'unsupported_content_type' });
           return res.status(415).json({
-            type: "about:blank",
-            title: "Unsupported Media Type",
+            type: 'about:blank',
+            title: 'Unsupported Media Type',
             status: 415,
             detail: `Content-Type '${contentType}' is not supported`,
             supported,
@@ -208,7 +204,7 @@ export class ContentNegotiator {
         }
       }
 
-      timer({ outcome: "accepted" });
+      timer({ outcome: 'accepted' });
       res.locals.negotiatedType = acceptable;
       return next();
     };

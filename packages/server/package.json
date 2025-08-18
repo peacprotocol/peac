@@ -10,13 +10,19 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=18.18"
   },
   "sideEffects": false,
   "repository": "github:peacprotocol/peac",
-  "files": ["dist/", "README.md", "LICENSE"],
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "jest --coverage --detectOpenHandles",
@@ -77,6 +83,18 @@
   },
   "license": "Apache-2.0",
   "homepage": "https://peacprotocol.org",
-  "bugs": { "url": "https://github.com/peacprotocol/peac/issues" },
-  "keywords": ["peac", "payments", "idempotency", "jwks", "rfc7807", "ratelimit", "capabilities", "dpop", "w3c-trace-context"]
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "keywords": [
+    "peac",
+    "payments",
+    "idempotency",
+    "jwks",
+    "rfc7807",
+    "ratelimit",
+    "capabilities",
+    "dpop",
+    "w3c-trace-context"
+  ]
 }

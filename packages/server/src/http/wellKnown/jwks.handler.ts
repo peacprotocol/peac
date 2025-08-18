@@ -1,10 +1,19 @@
-import { Request, Response } from "express";
-import { readFileSync, existsSync, renameSync, chmodSync, openSync, writeSync, fsyncSync, closeSync } from "fs";
-import { generateKeyPairSync, createPublicKey } from "crypto";
-import { randomUUID } from "crypto";
-import { logger } from "../../logging";
-import { metrics } from "../../metrics";
-import { problemDetails } from "../problems";
+import { Request, Response } from 'express';
+import {
+  readFileSync,
+  existsSync,
+  renameSync,
+  chmodSync,
+  openSync,
+  writeSync,
+  fsyncSync,
+  closeSync,
+} from 'fs';
+import { generateKeyPairSync, createPublicKey } from 'crypto';
+import { randomUUID } from 'crypto';
+import { logger } from '../../logging';
+import { metrics } from '../../metrics';
+import { problemDetails } from '../problems';
 
 interface JWK {
   kty: string;
@@ -47,25 +56,25 @@ class JWKSManager {
         this.primaryKid = data.primaryKid;
         this.secondaryKid = data.secondaryKid;
         this.lastModified = data.lastModified || this.lastModified;
-        logger.info({ keysCount: this.keys.size }, "JWKS loaded from file");
+        logger.info({ keysCount: this.keys.size }, 'JWKS loaded from file');
       } catch (error) {
-        logger.error({ error, path: this.keysPath }, "Failed to load JWKS from file");
+        logger.error({ error, path: this.keysPath }, 'Failed to load JWKS from file');
         this.generateEphemeralKey();
       }
     } else {
       // Dev: ephemeral keys with warning
       if (process.env.NODE_ENV === 'production') {
-        logger.warn("Production mode without PEAC_JWKS_PATH - using ephemeral keys");
+        logger.warn('Production mode without PEAC_JWKS_PATH - using ephemeral keys');
       }
       this.generateEphemeralKey();
     }
   }
 
   private generateEphemeralKey(): void {
-    const { privateKey, publicKey } = generateKeyPairSync("ec", { 
-      namedCurve: "P-256" 
+    const { privateKey, publicKey } = generateKeyPairSync('ec', {
+      namedCurve: 'P-256',
     });
-    
+
     const kid = randomUUID();
     const keyPair: KeyPair = {
       kid,
@@ -79,21 +88,21 @@ class JWKSManager {
     this.lastModified = new Date().toUTCString();
 
     if (process.env.NODE_ENV !== 'production') {
-      logger.warn({ kid }, "Generated ephemeral JWKS key - will not survive restart");
+      logger.warn({ kid }, 'Generated ephemeral JWKS key - will not survive restart');
     }
   }
 
   private pemToJWK(publicKeyPem: string, kid: string): JWK {
     const publicKey = createPublicKey(publicKeyPem);
     const jwk = publicKey.export({ format: 'jwk' }) as any;
-    
+
     return {
       kty: jwk.kty,
       crv: jwk.crv,
-      alg: "ES256",
+      alg: 'ES256',
       kid,
-      use: "sig",
-      key_ops: ["verify"],
+      use: 'sig',
+      key_ops: ['verify'],
       x: jwk.x,
       y: jwk.y,
     };
@@ -109,38 +118,42 @@ class JWKSManager {
         secondaryKid: this.secondaryKid,
         lastModified: this.lastModified,
       };
-      
+
       // Atomic write with fsync: write to temp file, sync, then rename
       const tempPath = `${this.keysPath}.tmp`;
       const jsonData = JSON.stringify(data, null, 2);
-      
-      const fd = openSync(tempPath, "w", 0o600);
-      writeSync(fd, Buffer.from(jsonData, "utf8"));
+
+      const fd = openSync(tempPath, 'w', 0o600);
+      writeSync(fd, Buffer.from(jsonData, 'utf8'));
       fsyncSync(fd);
       closeSync(fd);
-      
+
       renameSync(tempPath, this.keysPath);
-      
+
       // Ensure proper permissions on final file
       chmodSync(this.keysPath, 0o600);
-      
-      logger.info({ path: this.keysPath }, "JWKS persisted atomically to file");
+
+      logger.info({ path: this.keysPath }, 'JWKS persisted atomically to file');
     } catch (error) {
-      logger.error({ error, path: this.keysPath }, "Failed to persist JWKS");
+      logger.error({ error, path: this.keysPath }, 'Failed to persist JWKS');
     }
   }
 
   getJWKS(): { keys: JWK[] } {
     const keys: JWK[] = [];
-    
+
     // Add primary key
     if (this.primaryKid && this.keys.has(this.primaryKid)) {
       const keyPair = this.keys.get(this.primaryKid)!;
       keys.push(this.pemToJWK(keyPair.publicKey, keyPair.kid));
     }
-    
+
     // Add secondary key if different
-    if (this.secondaryKid && this.secondaryKid !== this.primaryKid && this.keys.has(this.secondaryKid)) {
+    if (
+      this.secondaryKid &&
+      this.secondaryKid !== this.primaryKid &&
+      this.keys.has(this.secondaryKid)
+    ) {
       const keyPair = this.keys.get(this.secondaryKid)!;
       keys.push(this.pemToJWK(keyPair.publicKey, keyPair.kid));
     }
@@ -149,18 +162,18 @@ class JWKSManager {
   }
 
   rotateKey(): string {
-    const { privateKey, publicKey } = generateKeyPairSync("ec", { 
-      namedCurve: "P-256" 
+    const { privateKey, publicKey } = generateKeyPairSync('ec', {
+      namedCurve: 'P-256',
     });
-    
+
     const kid = randomUUID();
-    
+
     // Check for kid collision (should be extremely rare)
     if (this.keys.has(kid)) {
-      logger.warn({ kid }, "JWKS kid collision detected - regenerating");
+      logger.warn({ kid }, 'JWKS kid collision detected - regenerating');
       return this.rotateKey(); // Recursive retry
     }
-    
+
     const keyPair: KeyPair = {
       kid,
       privateKey: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
@@ -175,8 +188,8 @@ class JWKSManager {
     this.lastModified = new Date().toUTCString();
 
     this.persist();
-    logger.info({ newKid: kid, oldKid: this.secondaryKid }, "JWKS key rotated");
-    
+    logger.info({ newKid: kid, oldKid: this.secondaryKid }, 'JWKS key rotated');
+
     return kid;
   }
 
@@ -194,17 +207,19 @@ const jwksManager = new JWKSManager();
 
 export async function handleJWKS(req: Request, res: Response): Promise<void> {
   const timer = metrics.httpRequestDuration.startTimer({
-    method: "GET",
-    route: "/.well-known/jwks.json",
+    method: 'GET',
+    route: '/.well-known/jwks.json',
   });
 
   try {
     const etag = jwksManager.getETag();
     const lastModified = jwksManager.getLastModified();
-    
+
     // Handle conditional requests
-    if (req.headers["if-none-match"] === etag || 
-        req.headers["if-modified-since"] === lastModified) {
+    if (
+      req.headers['if-none-match'] === etag ||
+      req.headers['if-modified-since'] === lastModified
+    ) {
       timer({ status: 304 });
       res.status(304).end();
       return;
@@ -213,21 +228,21 @@ export async function handleJWKS(req: Request, res: Response): Promise<void> {
     const jwks = jwksManager.getJWKS();
 
     res.set({
-      "Content-Type": "application/jwk-set+json",
-      "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
-      "ETag": etag,
-      "Last-Modified": lastModified,
+      'Content-Type': 'application/jwk-set+json',
+      'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+      ETag: etag,
+      'Last-Modified': lastModified,
     });
 
     timer({ status: 200 });
     res.status(200).json(jwks);
 
-    logger.info({ keyCount: jwks.keys.length }, "JWKS served successfully");
+    logger.info({ keyCount: jwks.keys.length }, 'JWKS served successfully');
   } catch (error) {
     timer({ status: 500 });
-    logger.error({ error }, "Failed to serve JWKS");
-    problemDetails.send(res, "internal_error", {
-      detail: "Failed to retrieve JWKS",
+    logger.error({ error }, 'Failed to serve JWKS');
+    problemDetails.send(res, 'internal_error', {
+      detail: 'Failed to retrieve JWKS',
     });
   }
 }

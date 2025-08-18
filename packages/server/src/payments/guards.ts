@@ -1,8 +1,8 @@
-import { logger } from "../logging";
-import { metrics } from "../metrics";
+import { logger } from '../logging';
+import { metrics } from '../metrics';
 
-export type PaymentMode = "test" | "staging" | "live";
-export type PaymentEnvironment = "test" | "live";
+export type PaymentMode = 'test' | 'staging' | 'live';
+export type PaymentEnvironment = 'test' | 'live';
 
 export interface PaymentGuardConfig {
   mode: PaymentMode;
@@ -33,17 +33,17 @@ export class PaymentGuards {
   }
 
   private loadConfig(): PaymentGuardConfig {
-    const mode = (process.env.PEAC_PAYMENTS_MODE || "test") as PaymentMode;
-    
+    const mode = (process.env.PEAC_PAYMENTS_MODE || 'test') as PaymentMode;
+
     return {
       mode,
       x402: {
-        enabled: process.env.PEAC_X402_ENABLED === "true",
+        enabled: process.env.PEAC_X402_ENABLED === 'true',
         rpcUrl: process.env.PEAC_X402_RPC_URL,
         privateKey: process.env.PEAC_X402_PRIVATE_KEY,
       },
       stripe: {
-        enabled: process.env.PEAC_STRIPE_ENABLED === "true",
+        enabled: process.env.PEAC_STRIPE_ENABLED === 'true',
         secretKey: process.env.STRIPE_SECRET_KEY,
         publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
       },
@@ -54,36 +54,33 @@ export class PaymentGuards {
   }
 
   private validateConfig(): void {
-    logger.info({ mode: this.config.mode }, "Validating payment configuration");
+    logger.info({ mode: this.config.mode }, 'Validating payment configuration');
 
-    if (this.config.mode === "live") {
+    if (this.config.mode === 'live') {
       const missingSecrets: string[] = [];
 
       if (this.config.x402.enabled) {
-        if (!this.config.x402.rpcUrl) missingSecrets.push("PEAC_X402_RPC_URL");
-        if (!this.config.x402.privateKey) missingSecrets.push("PEAC_X402_PRIVATE_KEY");
+        if (!this.config.x402.rpcUrl) missingSecrets.push('PEAC_X402_RPC_URL');
+        if (!this.config.x402.privateKey) missingSecrets.push('PEAC_X402_PRIVATE_KEY');
       }
 
       if (this.config.stripe.enabled) {
-        if (!this.config.stripe.secretKey) missingSecrets.push("STRIPE_SECRET_KEY");
-        if (!this.config.stripe.publishableKey) missingSecrets.push("STRIPE_PUBLISHABLE_KEY");
+        if (!this.config.stripe.secretKey) missingSecrets.push('STRIPE_SECRET_KEY');
+        if (!this.config.stripe.publishableKey) missingSecrets.push('STRIPE_PUBLISHABLE_KEY');
       }
 
       if (missingSecrets.length > 0) {
-        const error = `Live payment mode requires secrets: ${missingSecrets.join(", ")}`;
+        const error = `Live payment mode requires secrets: ${missingSecrets.join(', ')}`;
         logger.fatal({ missingSecrets, mode: this.config.mode }, error);
         throw new Error(error);
       }
 
       this.healthy = true;
-      logger.info("Live payment mode validated successfully");
+      logger.info('Live payment mode validated successfully');
     } else {
       // Test/staging mode - disable payments but continue
       this.healthy = false;
-      logger.warn(
-        { mode: this.config.mode },
-        "Payment processing disabled in non-live mode"
-      );
+      logger.warn({ mode: this.config.mode }, 'Payment processing disabled in non-live mode');
     }
   }
 
@@ -96,11 +93,11 @@ export class PaymentGuards {
   }
 
   getEnvironment(): PaymentEnvironment {
-    return this.config.mode === "live" ? "live" : "test";
+    return this.config.mode === 'live' ? 'live' : 'test';
   }
 
   canProcessPayments(): boolean {
-    return this.config.mode === "live" && this.healthy;
+    return this.config.mode === 'live' && this.healthy;
   }
 
   validatePaymentAttempt(provider: string, amount: number): void {
@@ -115,14 +112,14 @@ export class PaymentGuards {
             mode: this.config.mode,
             healthy: this.healthy,
           },
-          "Payment attempt blocked - not in live mode or unhealthy"
+          'Payment attempt blocked - not in live mode or unhealthy',
         );
         this.lastWarning = now;
       }
 
       metrics.paymentAttempt.inc({
         provider,
-        outcome: "blocked_non_live",
+        outcome: 'blocked_non_live',
       });
 
       throw new Error(`Payment processing disabled in ${this.config.mode} mode`);
@@ -139,14 +136,14 @@ export class PaymentGuards {
       environment: this.getEnvironment(),
       healthy: this.healthy,
       providers: {
-        credits: { enabled: this.config.credits.enabled, status: "live" },
+        credits: { enabled: this.config.credits.enabled, status: 'live' },
         x402: {
           enabled: this.config.x402.enabled,
-          status: this.config.mode === "live" ? "live" : "simulation",
+          status: this.config.mode === 'live' ? 'live' : 'simulation',
         },
         stripe: {
           enabled: this.config.stripe.enabled,
-          status: this.config.mode === "live" ? "live" : "simulation",
+          status: this.config.mode === 'live' ? 'live' : 'simulation',
         },
       },
     };

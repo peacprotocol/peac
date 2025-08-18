@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: ['main']
   push:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   verify-build-test:
@@ -15,9 +15,9 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           # Avoid lockfile requirement – cache on package.json files
-          cache: "npm"
+          cache: 'npm'
           cache-dependency-path: |
             package.json
             packages/*/package.json
@@ -47,8 +47,8 @@ jobs:
       - name: Type check
         run: npm --workspace @peacprotocol/server run type-check
 
-      - name: Format check
-        run: npx prettier --check .
+      - name: Prettier (check)
+        run: npm run format:check
 
       - name: Build all workspaces
         run: npm run build --workspaces

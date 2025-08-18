@@ -3,7 +3,7 @@
  * Analytics and monitoring for publishers
  */
 
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
 class DashboardAPI {
@@ -11,7 +11,7 @@ class DashboardAPI {
     this.db = db; // In production, use real database
   }
 
-  async getAnalytics(publisherId, timeframe = "30d") {
+  async getAnalytics(publisherId, timeframe = '30d') {
     // Mock data for demo
     return {
       publisher: publisherId,
@@ -19,7 +19,7 @@ class DashboardAPI {
       metrics: {
         revenue: {
           total: 15420.5,
-          currency: "USD",
+          currency: 'USD',
           by_use_case: {
             ai_training: 12300.0,
             api_access: 2120.5,
@@ -45,21 +45,21 @@ class DashboardAPI {
           attribution_compliance: 0.98,
         },
         trends: {
-          revenue_growth: "+23%",
-          volume_growth: "+15%",
+          revenue_growth: '+23%',
+          volume_growth: '+15%',
           new_consumers: 5,
         },
       },
       top_consumers: [
-        { name: "OpenAI", revenue: 8000, volume_gb: 800 },
-        { name: "Anthropic", revenue: 4000, volume_gb: 400 },
-        { name: "Google", revenue: 2420.5, volume_gb: 242 },
+        { name: 'OpenAI', revenue: 8000, volume_gb: 800 },
+        { name: 'Anthropic', revenue: 4000, volume_gb: 400 },
+        { name: 'Google', revenue: 2420.5, volume_gb: 242 },
       ],
       recent_transactions: [
         {
-          id: "tx_123",
-          consumer: "OpenAI",
-          use_case: "ai_training",
+          id: 'tx_123',
+          consumer: 'OpenAI',
+          use_case: 'ai_training',
           amount: 100.0,
           timestamp: new Date(Date.now() - 3600000).toISOString(),
         },
@@ -73,11 +73,11 @@ class DashboardAPI {
       entries: [
         {
           timestamp: new Date().toISOString(),
-          event: "consent_granted",
-          consumer: "OpenAI",
-          use_case: "ai_training",
-          ip: "192.168.1.1",
-          signature: "abc123...",
+          event: 'consent_granted',
+          consumer: 'OpenAI',
+          use_case: 'ai_training',
+          ip: '192.168.1.1',
+          signature: 'abc123...',
         },
       ],
       total: 1542,
@@ -88,20 +88,17 @@ class DashboardAPI {
 }
 
 // Express routes
-router.get("/analytics/:publisherId", async (req, res) => {
+router.get('/analytics/:publisherId', async (req, res) => {
   try {
     const api = new DashboardAPI(req.app.locals.db);
-    const data = await api.getAnalytics(
-      req.params.publisherId,
-      req.query.timeframe,
-    );
+    const data = await api.getAnalytics(req.params.publisherId, req.query.timeframe);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.get("/audit/:publisherId", async (req, res) => {
+router.get('/audit/:publisherId', async (req, res) => {
   try {
     const api = new DashboardAPI(req.app.locals.db);
     const data = await api.getAuditLog(req.params.publisherId, req.query);

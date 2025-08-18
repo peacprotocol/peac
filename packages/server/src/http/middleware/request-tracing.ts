@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from "express";
-import { randomUUID } from "crypto";
-import { logger } from "../../logging";
+import { Request, Response, NextFunction } from 'express';
+import { randomUUID } from 'crypto';
+import { logger } from '../../logging';
 
 // Extend Express Request type to include tracing properties
-declare module "express-serve-static-core" {
+declare module 'express-serve-static-core' {
   interface Request {
     requestId?: string;
     traceParent?: string;
@@ -28,10 +28,10 @@ export class RequestTracingMiddleware {
 
   private loadConfig(): RequestTracingConfig {
     return {
-      enabled: process.env.PEAC_REQUEST_TRACING_ENABLED !== "false",
-      headerName: "X-Request-Id",
-      traceParentHeader: "traceparent",
-      generateSpanId: process.env.PEAC_GENERATE_SPAN_ID === "true",
+      enabled: process.env.PEAC_REQUEST_TRACING_ENABLED !== 'false',
+      headerName: 'X-Request-Id',
+      traceParentHeader: 'traceparent',
+      generateSpanId: process.env.PEAC_GENERATE_SPAN_ID === 'true',
     };
   }
 
@@ -43,8 +43,8 @@ export class RequestTracingMiddleware {
   } | null {
     // W3C Trace Context format: version-traceId-parentId-flags
     // Example: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
-    const parts = traceParent.split("-");
-    
+    const parts = traceParent.split('-');
+
     if (parts.length !== 4) {
       return null;
     }
@@ -66,15 +66,18 @@ export class RequestTracingMiddleware {
 
   private generateSpanId(): string {
     // Generate 8-byte span ID as hex string
-    return randomUUID().replace(/-/g, "").substring(0, 16);
+    return randomUUID().replace(/-/g, '').substring(0, 16);
   }
 
-  private createChildTraceParent(parentTrace: {
-    version: string;
-    traceId: string;
-    parentId: string;
-    flags: string;
-  }, newSpanId: string): string {
+  private createChildTraceParent(
+    parentTrace: {
+      version: string;
+      traceId: string;
+      parentId: string;
+      flags: string;
+    },
+    newSpanId: string,
+  ): string {
     return `${parentTrace.version}-${parentTrace.traceId}-${newSpanId}-${parentTrace.flags}`;
   }
 
@@ -93,29 +96,29 @@ export class RequestTracingMiddleware {
 
       // Handle traceparent and tracestate if present
       const incomingTraceParent = req.get(this.config.traceParentHeader);
-      const incomingTraceState = req.get("tracestate");
-      
+      const incomingTraceState = req.get('tracestate');
+
       if (incomingTraceParent) {
         const parsedTrace = this.parseTraceParent(incomingTraceParent);
-        
+
         if (parsedTrace) {
           req.traceParent = incomingTraceParent;
           req.traceState = incomingTraceState;
-          
+
           // Generate new span ID if configured
           if (this.config.generateSpanId) {
             const spanId = this.generateSpanId();
             req.spanId = spanId;
-            
+
             // Create child traceparent
             const childTraceParent = this.createChildTraceParent(parsedTrace, spanId);
             res.set(this.config.traceParentHeader, childTraceParent);
-            
+
             // Echo tracestate if present
             if (incomingTraceState) {
-              res.set("tracestate", incomingTraceState);
+              res.set('tracestate', incomingTraceState);
             }
-            
+
             logger.info(
               {
                 requestId,
@@ -126,15 +129,15 @@ export class RequestTracingMiddleware {
                 method: req.method,
                 path: req.path,
               },
-              "Request tracing - generated child span"
+              'Request tracing - generated child span',
             );
           } else {
             // Just echo the traceparent and tracestate
             res.set(this.config.traceParentHeader, incomingTraceParent);
             if (incomingTraceState) {
-              res.set("tracestate", incomingTraceState);
+              res.set('tracestate', incomingTraceState);
             }
-            
+
             logger.info(
               {
                 requestId,
@@ -143,7 +146,7 @@ export class RequestTracingMiddleware {
                 method: req.method,
                 path: req.path,
               },
-              "Request tracing - echoed traceparent and tracestate"
+              'Request tracing - echoed traceparent and tracestate',
             );
           }
         } else {
@@ -154,7 +157,7 @@ export class RequestTracingMiddleware {
               method: req.method,
               path: req.path,
             },
-            "Invalid traceparent header format"
+            'Invalid traceparent header format',
           );
         }
       } else {
@@ -164,10 +167,10 @@ export class RequestTracingMiddleware {
             requestId,
             method: req.method,
             path: req.path,
-            userAgent: req.get("User-Agent"),
+            userAgent: req.get('User-Agent'),
             ip: req.ip,
           },
-          "Request tracing - new request"
+          'Request tracing - new request',
         );
       }
 

@@ -3,12 +3,7 @@
  * Normalized four-term schema (price, duration, usage, attribution_required).
  */
 
-export type UsageCategory =
-  | "training"
-  | "inference"
-  | "analytics"
-  | "display"
-  | "cache";
+export type UsageCategory = 'training' | 'inference' | 'analytics' | 'display' | 'cache';
 
 export interface Terms {
   /** Minor currency units as a decimal-free string (e.g., "2500" for $25.00). */
@@ -28,4 +23,4 @@ export interface Offer {
   meta?: Record<string, unknown>;
 }
 
-export type Outcome = "agreed" | "rejected" | "countered" | "expired";
+export type Outcome = 'agreed' | 'rejected' | 'countered' | 'expired';

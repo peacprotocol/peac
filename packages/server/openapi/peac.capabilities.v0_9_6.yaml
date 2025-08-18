@@ -9,9 +9,12 @@ info:
 
 servers:
   - url: https://api.peacprotocol.org
-    description: Production server
-  - url: http://localhost:3000
-    description: Development server
+    description: Production API
+    x-preferred: true
+  - url: https://staging.peacprotocol.org
+    description: Staging API
+  - url: https://dev.peacprotocol.org
+    description: Dev API
 
 security: []
 
@@ -30,21 +33,21 @@ paths:
             type: string
             default: application/vnd.peac.capabilities+json;version=0.9.6
       responses:
-        "200":
+        '200':
           description: Capabilities retrieved successfully
           content:
             application/vnd.peac.capabilities+json;version=0.9.6:
               schema:
-                $ref: "#/components/schemas/Capabilities"
+                $ref: '#/components/schemas/Capabilities'
             application/json:
               schema:
-                $ref: "#/components/schemas/Capabilities"
-        "406":
+                $ref: '#/components/schemas/Capabilities'
+        '406':
           description: Not Acceptable
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetails"
+                $ref: '#/components/schemas/ProblemDetails'
 
 components:
   schemas:
@@ -59,7 +62,7 @@ components:
       properties:
         version:
           type: string
-          example: "0.9.6"
+          example: '0.9.6'
         conformance_level:
           type: string
           enum: [L0, L1, L2, L3, L4]
@@ -70,7 +73,7 @@ components:
               type: array
               items:
                 type: string
-              example: ["mcp", "a2a", "openai", "langchain"]
+              example: ['mcp', 'a2a', 'openai', 'langchain']
             native_a2a:
               type: object
               properties:

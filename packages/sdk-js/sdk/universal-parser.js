@@ -4,9 +4,9 @@
  * @license Apache-2.0
  */
 
-const yaml = require("js-yaml");
-const NodeCache = require("node-cache");
-const PEACParser = require("./parser");
+const yaml = require('js-yaml');
+const NodeCache = require('node-cache');
+const PEACParser = require('./parser');
 
 class UniversalParser extends PEACParser {
   constructor(options = {}) {
@@ -20,12 +20,12 @@ class UniversalParser extends PEACParser {
     });
 
     this.parsers = {
-      "/peac.txt": this.parsePeac.bind(this),
-      "/.well-known/peac": this.parsePeac.bind(this),
-      "/robots.txt": this.parseRobots.bind(this),
-      "/llms.txt": this.parseLLMs.bind(this),
-      "/ai.txt": this.parseAI.bind(this),
-      "/usage.txt": this.parseUsage.bind(this),
+      '/peac.txt': this.parsePeac.bind(this),
+      '/.well-known/peac': this.parsePeac.bind(this),
+      '/robots.txt': this.parseRobots.bind(this),
+      '/llms.txt': this.parseLLMs.bind(this),
+      '/ai.txt': this.parseAI.bind(this),
+      '/usage.txt': this.parseUsage.bind(this),
     };
   }
 
@@ -50,7 +50,7 @@ class UniversalParser extends PEACParser {
 
     // If we found a peac file, use it
     const peacResult = results.find(
-      (r) => r && (r.file === "/peac.txt" || r.file === "/.well-known/peac"),
+      (r) => r && (r.file === '/peac.txt' || r.file === '/.well-known/peac'),
     );
     if (peacResult) {
       const peac = await this.parsePeac(peacResult.content);
@@ -79,19 +79,17 @@ class UniversalParser extends PEACParser {
     });
 
     const results = await Promise.allSettled(fetches);
-    return results
-      .filter((r) => r.status === "fulfilled" && r.value)
-      .map((r) => r.value);
+    return results.filter((r) => r.status === 'fulfilled' && r.value).map((r) => r.value);
   }
 
   async mergeLegacyFormats(results) {
     const merged = {
-      version: "0.9.2",
-      protocol: "peac",
+      version: '0.9.2',
+      protocol: 'peac',
       metadata: {
         sources: [],
         generated_at: new Date().toISOString(),
-        generator: "universal-parser",
+        generator: 'universal-parser',
       },
       peac: {
         consent: {},
@@ -133,45 +131,45 @@ class UniversalParser extends PEACParser {
   parseRobots(content) {
     const rules = {
       consent: {
-        web_scraping: "allowed",
+        web_scraping: 'allowed',
       },
     };
 
-    const lines = content.split("\n");
-    let currentAgent = "*";
+    const lines = content.split('\n');
+    let currentAgent = '*';
 
     for (const line of lines) {
       const trimmed = line.trim();
 
       // User-agent
-      if (trimmed.toLowerCase().startsWith("user-agent:")) {
+      if (trimmed.toLowerCase().startsWith('user-agent:')) {
         currentAgent = trimmed.substring(11).trim();
         continue;
       }
 
       // Disallow
-      if (trimmed.toLowerCase().startsWith("disallow:")) {
+      if (trimmed.toLowerCase().startsWith('disallow:')) {
         const path = trimmed.substring(9).trim();
-        if (path === "/" && currentAgent === "*") {
-          rules.consent.web_scraping = "denied";
+        if (path === '/' && currentAgent === '*') {
+          rules.consent.web_scraping = 'denied';
         }
       }
 
       // PEAC extensions
-      if (trimmed.startsWith("X-PEAC-")) {
-        const [key, ...valueParts] = trimmed.split(":");
-        const value = valueParts.join(":").trim();
+      if (trimmed.startsWith('X-PEAC-')) {
+        const [key, ...valueParts] = trimmed.split(':');
+        const value = valueParts.join(':').trim();
 
         switch (key) {
-          case "X-PEAC-Price":
+          case 'X-PEAC-Price':
             rules.economics = { pricing: value };
             break;
-          case "X-PEAC-Attribution":
+          case 'X-PEAC-Attribution':
             rules.attribution = {
-              required: value.toLowerCase() === "required",
+              required: value.toLowerCase() === 'required',
             };
             break;
-          case "X-PEAC-Consent":
+          case 'X-PEAC-Consent':
             rules.consent.ai_training = value.toLowerCase();
             break;
         }
@@ -184,29 +182,26 @@ class UniversalParser extends PEACParser {
   parseLLMs(content) {
     const rules = {
       consent: {
-        ai_training: "conditional",
+        ai_training: 'conditional',
       },
     };
 
-    const lines = content.split("\n");
+    const lines = content.split('\n');
 
     for (const line of lines) {
       const trimmed = line.trim().toLowerCase();
 
-      if (trimmed.includes("crawl: no") || trimmed.includes("scrape: no")) {
-        rules.consent.ai_training = "denied";
-      } else if (
-        trimmed.includes("crawl: yes") ||
-        trimmed.includes("scrape: yes")
-      ) {
-        rules.consent.ai_training = "allowed";
+      if (trimmed.includes('crawl: no') || trimmed.includes('scrape: no')) {
+        rules.consent.ai_training = 'denied';
+      } else if (trimmed.includes('crawl: yes') || trimmed.includes('scrape: yes')) {
+        rules.consent.ai_training = 'allowed';
       }
 
-      if (trimmed.includes("attribution:")) {
+      if (trimmed.includes('attribution:')) {
         rules.attribution = { required: true };
       }
 
-      if (trimmed.includes("price:") || trimmed.includes("payment:")) {
+      if (trimmed.includes('price:') || trimmed.includes('payment:')) {
         const priceMatch = line.match(/\$?[\d.]+/);
         if (priceMatch) {
           rules.economics = { pricing: priceMatch[0] };
@@ -221,14 +216,14 @@ class UniversalParser extends PEACParser {
     // Similar to llms.txt but with different keywords
     const rules = {
       consent: {
-        ai_training: "conditional",
+        ai_training: 'conditional',
       },
     };
 
-    if (content.toLowerCase().includes("disallow")) {
-      rules.consent.ai_training = "denied";
-    } else if (content.toLowerCase().includes("allow")) {
-      rules.consent.ai_training = "allowed";
+    if (content.toLowerCase().includes('disallow')) {
+      rules.consent.ai_training = 'denied';
+    } else if (content.toLowerCase().includes('allow')) {
+      rules.consent.ai_training = 'allowed';
     }
 
     return rules;
@@ -252,7 +247,7 @@ class UniversalParser extends PEACParser {
     };
 
     if (usage.ai_agents) {
-      normalized.consent.ai_training = usage.ai_agents.allowed || "conditional";
+      normalized.consent.ai_training = usage.ai_agents.allowed || 'conditional';
       if (usage.ai_agents.price) {
         normalized.economics.pricing = usage.ai_agents.price;
       }
@@ -263,20 +258,12 @@ class UniversalParser extends PEACParser {
 
   deepMerge(target, source) {
     for (const key in source) {
-      if (
-        source[key] &&
-        typeof source[key] === "object" &&
-        !Array.isArray(source[key])
-      ) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
         target[key] = target[key] || {};
         this.deepMerge(target[key], source[key]);
       } else if (source[key] !== undefined) {
         // Prefer non-default values
-        if (
-          !target[key] ||
-          target[key] === "contact" ||
-          target[key] === "conditional"
-        ) {
+        if (!target[key] || target[key] === 'contact' || target[key] === 'conditional') {
           target[key] = source[key];
         }
       }

@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
-import { metrics } from "../metrics";
-import { logger } from "../logging";
+import { Request, Response } from 'express';
+import { metrics } from '../metrics';
+import { logger } from '../logging';
 
 export async function handleLiveness(_req: Request, res: Response): Promise<void> {
   res.status(200).json({
-    status: "ok",
+    status: 'ok',
     timestamp: new Date().toISOString(),
   });
 }
@@ -21,13 +21,13 @@ export async function handleReadiness(_req: Request, res: Response): Promise<voi
   const status = allHealthy ? 200 : 503;
 
   res.status(status).json({
-    status: allHealthy ? "ready" : "not_ready",
+    status: allHealthy ? 'ready' : 'not_ready',
     checks,
     timestamp: new Date().toISOString(),
   });
 
   if (!allHealthy) {
-    logger.warn({ checks }, "Readiness check failed");
+    logger.warn({ checks }, 'Readiness check failed');
     metrics.readinessCheckFailures.inc();
   }
 }
