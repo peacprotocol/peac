@@ -27,8 +27,20 @@ jobs:
 
       - name: Code hygiene check
         run: |
-          echo "Checking for unprofessional comments..."
-          git grep -nE "(TODO|FIXME|HACK|WIP|console\\.log|^\\s*//\\s*DEBUG)" -- ':!node_modules' ':!dist' ':!coverage' && exit 1 || true
+          echo "Checking for TODO/FIXME/HACK/DEBUG (excluding docs/generated)..."
+          if git grep -nE '(TODO|FIXME|HACK|WIP|^\s*//\s*DEBUG)' -- \
+              ':!node_modules' ':!dist' ':!coverage' ':!**/*.md' ':!docs/**' ; then
+            echo "::error::Found TODO/FIXME/HACK/DEBUG markers"
+            exit 1
+          fi
+          echo "OK"
+
+          echo "Forbidding console.log in server runtime (allowed in CLI/examples/docs)..."
+          if git grep -n 'console\.log' -- packages/server/src ; then
+            echo "::error::console.log usage found in packages/server/src"
+            exit 1
+          fi
+          echo "OK"
 
       - name: Type check
         run: npm run type-check --workspaces --if-present
