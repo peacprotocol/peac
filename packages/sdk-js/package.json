@@ -44,7 +44,7 @@
     "js-yaml": "^4.1.0",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.7.0",
-    "stripe": "^13.0.0"
+    "stripe": "^18.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
