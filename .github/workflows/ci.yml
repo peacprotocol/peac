@@ -76,7 +76,7 @@ jobs:
         timeout-minutes: 10
         working-directory: packages/server
         env:
-          CI: "true"
+          CI: 'true'
         run: |
           echo "::group::Running server tests"
           set -euo pipefail
@@ -91,7 +91,7 @@ jobs:
         timeout-minutes: 10
         working-directory: packages/sdk-js
         env:
-          CI: "true"
+          CI: 'true'
         run: |
           echo "::group::Running SDK tests"
           set -euo pipefail
