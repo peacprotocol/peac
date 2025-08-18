@@ -6,7 +6,7 @@ const USE_MOCK =
   process.env.NODE_ENV === "test" ||
   !process.env.REDIS_URL;
 
-let RedisCtor: any = IORedis;
+let RedisCtor: typeof IORedis = IORedis;
 if (USE_MOCK) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mod = require("ioredis-mock");
@@ -33,7 +33,7 @@ export function getRedis(): RedisClient {
 export async function disconnectRedis(): Promise<void> {
   if (_client) {
     try {
-      await (_client as any).quit?.();
+      await (_client as RedisClient & { quit?: () => Promise<void> }).quit?.();
     } catch {
       /* noop */
     }

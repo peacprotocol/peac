@@ -23,7 +23,18 @@ jobs:
             packages/*/package.json
 
       - name: Install deps
-        run: npm install
+        run: npm ci
+
+      - name: Code hygiene check
+        run: |
+          echo "Checking for unprofessional comments..."
+          git grep -nE "(TODO|FIXME|HACK|WIP|console\\.log|^\\s*//\\s*DEBUG)" -- ':!node_modules' ':!dist' ':!coverage' && exit 1 || true
+
+      - name: Type check
+        run: npm run type-check --workspaces --if-present
+
+      - name: Lint
+        run: npx eslint . --ext .ts
 
       - name: Format check
         run: npx prettier --check .
@@ -34,12 +45,18 @@ jobs:
       - name: Test all workspaces
         run: npm run test --workspaces
 
-      - name: Verify protocol v0.9.5 policy
+      - name: Security audit
+        run: npm audit --omit=dev
+
+      - name: Generate SBOM
+        run: npm run sbom --workspaces --if-present
+
+      - name: Verify protocol v0.9.6 policy
         run: |
           echo "==> Version sanity (root)"
           ROOT_VER=$(node -e "console.log(require('./package.json').version||'')")
-          if [ "$ROOT_VER" != "0.9.5" ]; then
-            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.5'"
+          if [ "$ROOT_VER" != "0.9.6" ]; then
+            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.6'"
             exit 1
           fi
 

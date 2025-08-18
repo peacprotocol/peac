@@ -20,13 +20,30 @@ process.on("uncaughtException", (error: Error) => {
 });
 
 async function main() {
-  logger.info("Starting PEAC Protocol v0.9.5");
+  logger.info("Starting PEAC Protocol v0.9.6");
 
-  const server = await createServer();
+  const app = await createServer();
   const port = config.http.port;
 
-  server.listen(port, () => {
+  const server = app.listen(port, () => {
     logger.info({ port }, "Server started");
+  });
+
+  // Graceful shutdown
+  process.on("SIGTERM", () => {
+    logger.info("SIGTERM received, closing server gracefully");
+    server.close(() => {
+      logger.info("Server closed");
+      process.exit(0);
+    });
+  });
+
+  process.on("SIGINT", () => {
+    logger.info("SIGINT received, closing server gracefully");
+    server.close(() => {
+      logger.info("Server closed");
+      process.exit(0);
+    });
   });
 }
 

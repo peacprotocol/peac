@@ -10,9 +10,21 @@ import { config } from "../config";
 export async function createServer() {
   const app = express();
 
+  // Disable X-Powered-By header
+  app.disable('x-powered-by');
+  
+  // Set trust proxy for accurate IP detection
+  app.set('trust proxy', true);
+
   app.use(helmet());
+  
+  // Remove X-XSS-Protection header completely (deprecated and potentially harmful)
+  app.use((_req, res, next) => { 
+    res.removeHeader("X-XSS-Protection"); 
+    next(); 
+  });
   app.use(cors({ origin: config.gates.corsOrigins }));
-  app.use(express.json());
+  app.use(express.json({ limit: '1mb' }));
 
   if (config.gates.healthEnabled) {
     app.get("/healthz", async (_req, res) => {
@@ -20,7 +32,7 @@ export async function createServer() {
         status: "ok" | "degraded";
         version: string;
         components: Record<string, string>;
-      } = { status: "ok", version: "0.9.5", components: {} };
+      } = { status: "ok", version: "0.9.6", components: {} };
       try {
         const redis = getRedis();
         await redis.ping();

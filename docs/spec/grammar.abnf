@@ -1,0 +1,74 @@
+; PEAC Protocol Grammar v0.9.6
+; RFC 5234 ABNF
+
+; Core Protocol Messages
+peac-message = negotiation-request / negotiation-response / receipt
+
+; Negotiation Request
+negotiation-request = request-line CRLF
+                     headers CRLF
+                     [ message-body ]
+
+request-line = method SP request-target SP protocol-version
+method = "REQUEST" / "OFFER" / "COUNTER" / "ACCEPT" / "FINALIZE"
+request-target = path [ "?" query ]
+protocol-version = "PEAC/0.9.6"
+
+; Headers
+headers = *( header-field CRLF )
+header-field = field-name ":" OWS field-value OWS
+field-name = token
+field-value = *( field-content / obs-fold )
+field-content = field-vchar [ 1*( SP / HTAB ) field-vchar ]
+field-vchar = VCHAR / obs-text
+
+; PEAC-specific headers
+peac-header = "x-peac-" header-suffix
+header-suffix = 1*( ALPHA / DIGIT / "-" )
+
+; Required headers
+required-headers = protocol-version-header /
+                  content-type-header /
+                  dpop-header
+
+protocol-version-header = "x-peac-protocol-version:" OWS version-number
+version-number = 1*DIGIT "." 1*DIGIT "." 1*DIGIT
+
+content-type-header = "Content-Type:" OWS media-type
+media-type = type "/" subtype *( ";" parameter )
+type = token
+subtype = token
+parameter = attribute "=" value
+
+dpop-header = "DPoP:" OWS dpop-proof
+dpop-proof = 1*( ALPHA / DIGIT / "-" / "_" / "." )
+
+; Message Body
+message-body = *OCTET
+
+; Receipt
+receipt = receipt-headers CRLF receipt-body
+receipt-headers = required-headers signature-header
+signature-header = "x-peac-signature:" OWS signature-value
+signature-value = base64url
+
+; Tokens
+token = 1*tchar
+tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+      / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+      / DIGIT / ALPHA
+
+base64url = 1*( ALPHA / DIGIT / "-" / "_" )
+
+; Whitespace
+OWS = *( SP / HTAB )
+CRLF = CR LF
+SP = %x20
+HTAB = %x09
+CR = %x0D
+LF = %x0A
+
+; Character classes
+ALPHA = %x41-5A / %x61-7A   ; A-Z / a-z
+DIGIT = %x30-39             ; 0-9
+VCHAR = %x21-7E             ; visible (printing) characters

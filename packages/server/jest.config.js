@@ -1,5 +1,5 @@
 /** @type {import('jest').Config} */
-module.exports = {
+export default {
   preset: "ts-jest",
   testEnvironment: "node",
 
@@ -12,7 +12,6 @@ module.exports = {
       "ts-jest",
       {
         tsconfig: "<rootDir>/tsconfig.json",
-        isolatedModules: true,
         diagnostics: true,
       },
     ],
