@@ -25,19 +25,31 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Code hygiene check
+      - name: Check for unprofessional comments
+        shell: bash
         run: |
-          echo "Checking for TODO/FIXME/HACK/DEBUG (excluding docs/generated)..."
-          if git grep -nE '(TODO|FIXME|HACK|WIP|^\s*//\s*DEBUG)' -- \
-              ':!node_modules' ':!dist' ':!coverage' ':!**/*.md' ':!docs/**' ; then
-            echo "::error::Found TODO/FIXME/HACK/DEBUG markers"
+          set -euo pipefail
+
+          echo "Checking for TODO/FIXME/HACK/WIP/DEBUG in code (TS/JS only)…"
+          # Search only code files; exclude node_modules, build outputs, coverage, docs, md, workflows, lockfiles, d.ts
+          MATCHES=$(git grep -nE '(TODO|FIXME|HACK|WIP|^\s*//\s*DEBUG)' -- \
+            'packages/**/*.ts' 'packages/**/*.tsx' 'packages/**/*.js' 'packages/**/*.jsx' \
+            ':!**/*.d.ts' ':!node_modules/**' ':!**/dist/**' ':!coverage/**' ':!docs/**' ':!**/*.md' ':!.github/**' \
+            ':!**/*.lock' ':!**/*.yml' ':!**/*.yaml' || true)
+
+          if [[ -n "$MATCHES" ]]; then
+            echo "$MATCHES"
+            echo "::error::Found TODO/FIXME/HACK/WIP/DEBUG markers in code."
             exit 1
           fi
           echo "OK"
 
-          echo "Forbidding console.log in server runtime (allowed in CLI/examples/docs)..."
-          if git grep -n 'console\.log' -- packages/server/src ; then
-            echo "::error::console.log usage found in packages/server/src"
+          echo "Forbidding console.log in server runtime (allowed in CLI/examples/docs)…"
+          CONSOLE_MATCHES=$(git grep -n 'console\.log' -- \
+            'packages/server/src/**/*.ts' 'packages/server/src/**/*.js' || true)
+          if [[ -n "$CONSOLE_MATCHES" ]]; then
+            echo "$CONSOLE_MATCHES"
+            echo "::error::console.log usage found in packages/server/src (use the logger instead)."
             exit 1
           fi
           echo "OK"
