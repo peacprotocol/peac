@@ -4,8 +4,8 @@
  * @license Apache-2.0
  */
 
-const stripe = require("stripe");
-const fetch = require("node-fetch");
+const stripe = require('stripe');
+const fetch = require('node-fetch');
 
 class PEACPayments {
   constructor(peac, options = {}) {
@@ -31,7 +31,7 @@ class PEACPayments {
   initBridge() {
     return {
       apiKey: process.env.BRIDGE_API_KEY,
-      endpoint: "https://api.bridge.xyz",
+      endpoint: 'https://api.bridge.xyz',
     };
   }
 
@@ -39,24 +39,18 @@ class PEACPayments {
     return {
       clientId: process.env.PAYPAL_CLIENT_ID,
       secret: process.env.PAYPAL_SECRET,
-      endpoint: process.env.PAYPAL_API_URL || "https://api.paypal.com",
+      endpoint: process.env.PAYPAL_API_URL || 'https://api.paypal.com',
     };
   }
 
   initX402() {
     return {
-      endpoint: process.env.X402_ENDPOINT || "https://x402.api",
+      endpoint: process.env.X402_ENDPOINT || 'https://x402.api',
     };
   }
 
   async processPayment(request) {
-    const {
-      amount,
-      currency = "usd",
-      purpose,
-      processor,
-      metadata = {},
-    } = request;
+    const { amount, currency = 'usd', purpose, processor, metadata = {} } = request;
 
     // Validate against peac terms
     const validation = this.validatePaymentTerms(purpose, amount);
@@ -67,7 +61,7 @@ class PEACPayments {
     // Add peac metadata
     const enrichedMetadata = {
       ...metadata,
-      peac_id: this.peac.id || "unknown",
+      peac_id: this.peac.id || 'unknown',
       peac_version: this.peac.version,
       purpose,
       domain: this.peac.metadata?.domain,
@@ -76,14 +70,14 @@ class PEACPayments {
 
     // Route to processor
     switch (processor) {
-      case "stripe":
+      case 'stripe':
         return this.processStripePayment(amount, currency, enrichedMetadata);
-      case "bridge":
+      case 'bridge':
         return this.processBridgePayment(amount, currency, enrichedMetadata);
-      case "paypal": {
+      case 'paypal': {
         return this.processPayPalPayment(amount, currency, enrichedMetadata);
       }
-      case "x402":
+      case 'x402':
         return this.processX402Payment(amount, currency, enrichedMetadata);
       default:
         throw new Error(`Unsupported payment processor: ${processor}`);
@@ -92,7 +86,7 @@ class PEACPayments {
 
   async processStripePayment(amount, currency, metadata) {
     if (!this.processors.stripe) {
-      throw new Error("Stripe not configured");
+      throw new Error('Stripe not configured');
     }
 
     try {
@@ -106,11 +100,10 @@ class PEACPayments {
       });
 
       // Check for Agent Pay support
-      const agentPayEnabled =
-        this.peac.peac?.economics?.payment_processors?.stripe?.agent_pay;
+      const agentPayEnabled = this.peac.peac?.economics?.payment_processors?.stripe?.agent_pay;
 
       return {
-        processor: "stripe",
+        processor: 'stripe',
         payment_id: paymentIntent.id,
         client_secret: paymentIntent.client_secret,
         amount,
@@ -127,7 +120,7 @@ class PEACPayments {
   async processBridgePayment(amount, currency, metadata) {
     const bridge = this.processors.bridge;
     if (!bridge.apiKey) {
-      throw new Error("Bridge not configured");
+      throw new Error('Bridge not configured');
     }
 
     const endpoint =
@@ -136,21 +129,20 @@ class PEACPayments {
 
     try {
       const response = await fetch(endpoint, {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${bridge.apiKey}`,
-          "Content-Type": "application/json",
-          "Idempotency-Key": `peac-${Date.now()}-${Math.random()}`,
-          Accept: "application/json",
+          'Content-Type': 'application/json',
+          'Idempotency-Key': `peac-${Date.now()}-${Math.random()}`,
+          Accept: 'application/json',
         },
         body: JSON.stringify({
           amount: Math.round(amount * 100), // Bridge uses cents
           source_currency: currency.toUpperCase(),
-          destination_currency: "USDB", // Bridge stablecoin
+          destination_currency: 'USDB', // Bridge stablecoin
           destination: {
-            type: "wallet",
-            address:
-              this.peac.peac?.economics?.payment_processors?.bridge?.wallet,
+            type: 'wallet',
+            address: this.peac.peac?.economics?.payment_processors?.bridge?.wallet,
           },
           metadata,
         }),
@@ -158,18 +150,18 @@ class PEACPayments {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Bridge payment failed");
+        throw new Error(error.message || 'Bridge payment failed');
       }
 
       const result = await response.json();
 
       return {
-        processor: "bridge",
+        processor: 'bridge',
         payment_id: result.id,
         status: result.status,
         amount,
         currency,
-        destination_currency: "USDB",
+        destination_currency: 'USDB',
         exchange_rate: result.exchange_rate,
         metadata,
       };
@@ -181,57 +173,52 @@ class PEACPayments {
   async processPayPalPayment(amount, currency, metadata) {
     const paypal = this.processors.paypal;
     if (!paypal.clientId) {
-      throw new Error("PayPal not configured");
+      throw new Error('PayPal not configured');
     }
 
     try {
       // Get access token
       const authResponse = await fetch(`${paypal.endpoint}/v1/oauth2/token`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          Authorization: `Basic ${Buffer.from(`${paypal.clientId}:${paypal.secret}`).toString("base64")}`,
-          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${Buffer.from(`${paypal.clientId}:${paypal.secret}`).toString('base64')}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: "grant_type=client_credentials",
+        body: 'grant_type=client_credentials',
       });
 
       const { access_token } = await authResponse.json();
 
       // Create payment
-      const paymentResponse = await fetch(
-        `${paypal.endpoint}/v2/checkout/orders`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            intent: "CAPTURE",
-            purchase_units: [
-              {
-                amount: {
-                  currency_code: currency.toUpperCase(),
-                  value: amount.toFixed(2),
-                },
-                custom_id: metadata.peac_id,
-                description: `PEAC Protocol Payment - ${metadata.purpose}`,
-              },
-            ],
-            application_context: {
-              return_url:
-                this.options.success_url || "https://example.com/success",
-              cancel_url:
-                this.options.cancel_url || "https://example.com/cancel",
-            },
-          }),
+      const paymentResponse = await fetch(`${paypal.endpoint}/v2/checkout/orders`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({
+          intent: 'CAPTURE',
+          purchase_units: [
+            {
+              amount: {
+                currency_code: currency.toUpperCase(),
+                value: amount.toFixed(2),
+              },
+              custom_id: metadata.peac_id,
+              description: `PEAC Protocol Payment - ${metadata.purpose}`,
+            },
+          ],
+          application_context: {
+            return_url: this.options.success_url || 'https://example.com/success',
+            cancel_url: this.options.cancel_url || 'https://example.com/cancel',
+          },
+        }),
+      });
 
       const order = await paymentResponse.json();
 
       return {
-        processor: "paypal",
+        processor: 'paypal',
         payment_id: order.id,
         status: order.status,
         amount,
@@ -246,18 +233,17 @@ class PEACPayments {
 
   async processX402Payment(amount, currency, metadata) {
     const x402 = this.processors.x402;
-    const endpoint =
-      this.peac.peac?.economics?.payment_processors?.x402 || x402.endpoint;
+    const endpoint = this.peac.peac?.economics?.payment_processors?.x402 || x402.endpoint;
 
     try {
       // X402 HTTP Payment Protocol
       const response = await fetch(endpoint, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "X-Payment-Version": "1.0",
-          "X-Payment-Network": "ethereum",
-          "X-Payment-Currency": currency.toUpperCase(),
+          'Content-Type': 'application/json',
+          'X-Payment-Version': '1.0',
+          'X-Payment-Network': 'ethereum',
+          'X-Payment-Currency': currency.toUpperCase(),
         },
         body: JSON.stringify({
           amount: amount.toString(),
@@ -274,12 +260,12 @@ class PEACPayments {
       const result = await response.json();
 
       return {
-        processor: "x402",
+        processor: 'x402',
         payment_id: result.transaction_id || `x402_${Date.now()}`,
-        status: result.status || "pending",
+        status: result.status || 'pending',
         amount,
         currency,
-        network: result.network || "ethereum",
+        network: result.network || 'ethereum',
         metadata,
       };
     } catch (error) {
@@ -292,7 +278,7 @@ class PEACPayments {
     const consent = this.peac.peac?.consent;
 
     // Check if purpose is allowed
-    if (consent && consent[purpose] === "denied") {
+    if (consent && consent[purpose] === 'denied') {
       return { valid: false, reason: `Purpose '${purpose}' is denied` };
     }
 
@@ -302,7 +288,7 @@ class PEACPayments {
       const paymentRequired = conditions.find((c) => c.payment_required);
 
       if (paymentRequired && amount <= 0) {
-        return { valid: false, reason: "Payment required for this purpose" };
+        return { valid: false, reason: 'Payment required for this purpose' };
       }
     }
 
@@ -323,12 +309,12 @@ class PEACPayments {
   }
 
   async createPaymentLink(amount, purpose, options = {}) {
-    const processor = options.processor || "stripe";
+    const processor = options.processor || 'stripe';
 
     switch (processor) {
-      case "stripe":
+      case 'stripe':
         return this.createStripePaymentLink(amount, purpose, options);
-      case "paypal":
+      case 'paypal':
         return this.createPayPalPaymentLink(amount, purpose, options);
       default:
         throw new Error(`Payment links not supported for ${processor}`);
@@ -337,15 +323,15 @@ class PEACPayments {
 
   async createStripePaymentLink(amount, purpose, options) {
     if (!this.processors.stripe) {
-      throw new Error("Stripe not configured");
+      throw new Error('Stripe not configured');
     }
 
     const session = await this.processors.stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+      payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
-            currency: options.currency || "usd",
+            currency: options.currency || 'usd',
             product_data: {
               name: `PEAC Protocol - ${purpose}`,
               description: `Payment for ${purpose} as per peac.txt`,
@@ -359,10 +345,9 @@ class PEACPayments {
           quantity: 1,
         },
       ],
-      mode: "payment",
+      mode: 'payment',
       success_url:
-        options.success_url ||
-        `${this.options.base_url}/success?session_id={CHECKOUT_SESSION_ID}`,
+        options.success_url || `${this.options.base_url}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: options.cancel_url || `${this.options.base_url}/cancel`,
       metadata: {
         peac_id: this.peac.id,
@@ -375,30 +360,25 @@ class PEACPayments {
   }
 
   async createPayPalPaymentLink(amount, purpose, options) {
-    const result = await this.processPayPalPayment(
-      amount,
-      options.currency || "usd",
-      {
-        purpose,
-        peac_id: this.peac.id,
-      },
-    );
+    const result = await this.processPayPalPayment(amount, options.currency || 'usd', {
+      purpose,
+      peac_id: this.peac.id,
+    });
 
-    const approveLink = result.links.find((link) => link.rel === "approve");
+    const approveLink = result.links.find((link) => link.rel === 'approve');
     return approveLink?.href;
   }
 
   // Get payment status
   async getPaymentStatus(paymentId, processor) {
     switch (processor) {
-      case "stripe": {
+      case 'stripe': {
         if (!this.processors.stripe) {
-          throw new Error("Stripe not configured");
+          throw new Error('Stripe not configured');
         }
-        const intent =
-          await this.processors.stripe.paymentIntents.retrieve(paymentId);
+        const intent = await this.processors.stripe.paymentIntents.retrieve(paymentId);
         return {
-          processor: "stripe",
+          processor: 'stripe',
           payment_id: intent.id,
           status: intent.status,
           amount: intent.amount / 100,
@@ -406,11 +386,11 @@ class PEACPayments {
         };
       }
 
-      case "paypal": {
+      case 'paypal': {
         return {
-          processor: "paypal",
+          processor: 'paypal',
           payment_id: `PAYPAL-${Date.now()}`,
-          status: "pending",
+          status: 'pending',
           approval_url: `https://www.paypal.com/checkoutnow?token=TEST`,
         };
       }

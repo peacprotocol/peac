@@ -1,0 +1,22 @@
+# CODEOWNERS for PEAC Protocol
+# These owners will be requested for review when someone opens a pull request
+
+# Global owners
+* @peacprotocol/core
+
+# Server package
+/packages/server/ @peacprotocol/platform
+
+# Security-sensitive files
+/packages/server/src/middleware/idempotency.ts @peacprotocol/security
+/packages/server/src/http/wellKnown/jwks.handler.ts @peacprotocol/security
+/packages/server/src/http/middleware/security-headers.ts @peacprotocol/security
+/packages/server/src/middleware/enhanced-rate-limit.ts @peacprotocol/security
+
+# Payment-related
+/packages/server/src/payments/ @peacprotocol/payments
+/packages/server/src/x402/ @peacprotocol/payments
+
+# Documentation
+*.md @peacprotocol/docs
+/docs/ @peacprotocol/docs

@@ -1,0 +1,16 @@
+{
+  "peips": [
+    {
+      "id": "0000",
+      "title": "Template",
+      "status": "Template",
+      "type": "Process",
+      "created": "2024-01-01",
+      "authors": ["PEAC Contributors"]
+    }
+  ],
+  "metadata": {
+    "version": "0.9.6",
+    "last_updated": "2024-01-01"
+  }
+}

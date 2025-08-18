@@ -4,8 +4,8 @@
  * Not imported by the HTTP runtime in v0.9.5.
  */
 
-import { normalizeTerms, step, type Context } from "./state-machine";
-import type { Offer, Terms } from "./types";
+import { normalizeTerms, step, type Context } from './state-machine';
+import type { Offer, Terms } from './types';
 
 type Histogram = {
   observe: (labels: Record<string, string>, value: number) => void;
@@ -13,11 +13,9 @@ type Histogram = {
 let hist: Histogram | undefined;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { metrics } = require("../metrics");
+  const { metrics } = require('../metrics');
   hist = (
-    metrics &&
-    "negotiationLatency" in metrics &&
-    typeof metrics.negotiationLatency === "object"
+    metrics && 'negotiationLatency' in metrics && typeof metrics.negotiationLatency === 'object'
       ? metrics.negotiationLatency
       : undefined
   ) as Histogram | undefined;
@@ -41,7 +39,7 @@ export class NegotiationEngine {
     resource: string,
     initial: Offer,
     counters: Offer[],
-  ): { final: Offer | null; outcome: "agreed" | "rejected" | "expired" } {
+  ): { final: Offer | null; outcome: 'agreed' | 'rejected' | 'expired' } {
     const started = Date.now();
     const ctx: Context = {
       resource,
@@ -51,25 +49,25 @@ export class NegotiationEngine {
     };
 
     const init = { ...initial, terms: normalizeTerms(initial.terms) };
-    step("INIT", ctx, { type: "MAKE_OFFER", offer: init });
+    step('INIT', ctx, { type: 'MAKE_OFFER', offer: init });
 
     let last = init;
     for (const c of counters) {
       const next = { ...c, terms: normalizeTerms(c.terms) };
-      step("OFFERED", ctx, { type: "COUNTER", offer: next });
+      step('OFFERED', ctx, { type: 'COUNTER', offer: next });
       last = next;
       if (ctx.rounds >= ctx.maxRounds) break;
     }
 
     if (ctx.rounds <= ctx.maxRounds && last) {
       const ms = Date.now() - started;
-      hist?.observe({ resource, outcome: "agreed" }, ms / 1000);
-      return { final: last, outcome: "agreed" };
+      hist?.observe({ resource, outcome: 'agreed' }, ms / 1000);
+      return { final: last, outcome: 'agreed' };
     }
 
     const ms = Date.now() - started;
-    hist?.observe({ resource, outcome: "expired" }, ms / 1000);
-    return { final: null, outcome: "expired" };
+    hist?.observe({ resource, outcome: 'expired' }, ms / 1000);
+    return { final: null, outcome: 'expired' };
   }
 
   /** Normalizes terms to the canonical format. */

@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/monorepo",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "private": true,
   "description": "PEAC Protocol - Programmable Economic Access & Consent",
   "workspaces": [
@@ -11,6 +11,8 @@
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
     "typecheck": "npm run typecheck --workspaces",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "validate:schema": "npm run validate -w @peacprotocol/schema",
     "test:contract": "npm run test:contract -w @peacprotocol/sdk-js",
     "test:integration": "npm run test:integration --workspaces",
@@ -18,11 +20,12 @@
     "build-and-test": "npm run build && npm test"
   },
   "devDependencies": {
+    "@redocly/cli": "^2.0.5",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.50.0",
-    "prettier": "^3.0.0",
+    "prettier": "^3.3.3",
     "typescript": "^5.2.0"
   },
   "engines": {

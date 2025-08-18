@@ -4,10 +4,10 @@
  * @license Apache-2.0
  */
 
-const yaml = require("js-yaml");
-const https = require("https");
-const { URL } = require("url");
-const crypto = require("crypto");
+const yaml = require('js-yaml');
+const https = require('https');
+const { URL } = require('url');
+const crypto = require('crypto');
 
 const MAX_FILE_SIZE = 512 * 1024; // 512KB
 const TIMEOUT = 10000; // 10 seconds
@@ -25,7 +25,7 @@ class PEACParser {
     };
 
     this.cache = new Map();
-    this.peacFiles = ["/peac.txt", "/.well-known/peac"];
+    this.peacFiles = ['/peac.txt', '/.well-known/peac'];
     this.errors = [];
     this.warnings = [];
   }
@@ -63,9 +63,9 @@ class PEACParser {
 
             // Verify signature if present
             if (peac.signature && !(await this.verifySignature(peac))) {
-              this.warnings.push("Signature verification failed");
+              this.warnings.push('Signature verification failed');
               if (this.options.strict) {
-                throw new Error("Invalid signature");
+                throw new Error('Invalid signature');
               }
             }
 
@@ -85,7 +85,7 @@ class PEACParser {
           }
         } catch (error) {
           this.errors.push({
-            type: "fetch_error",
+            type: 'fetch_error',
             file,
             attempt: attempt + 1,
             error: error.message,
@@ -101,8 +101,8 @@ class PEACParser {
     // Return partial result with errors if not strict
     if (!this.options.strict && this.errors.length > 0) {
       return {
-        version: "0.9.2",
-        protocol: "peac",
+        version: '0.9.2',
+        protocol: 'peac',
         peac: this.getDefaultPeac(),
         errors: this.errors,
         warnings: this.warnings,
@@ -111,7 +111,7 @@ class PEACParser {
     }
 
     throw new Error(
-      `No valid peac found for ${domain}: ${this.errors.map((e) => e.error).join(", ")}`,
+      `No valid peac found for ${domain}: ${this.errors.map((e) => e.error).join(', ')}`,
     );
   }
 
@@ -124,20 +124,14 @@ class PEACParser {
         {
           timeout: this.options.timeout,
           headers: {
-            "User-Agent": "PEAC-Protocol/0.9.2",
-            Accept: "text/plain, application/yaml, application/json",
+            'User-Agent': 'PEAC-Protocol/0.9.2',
+            Accept: 'text/plain, application/yaml, application/json',
           },
         },
         (res) => {
           // Handle redirects
-          if (
-            res.statusCode >= 300 &&
-            res.statusCode < 400 &&
-            res.headers.location
-          ) {
-            this.warnings.push(
-              `Redirect from ${url} to ${res.headers.location}`,
-            );
+          if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+            this.warnings.push(`Redirect from ${url} to ${res.headers.location}`);
             // Follow redirect (simplified, production should handle better)
             return resolve(null);
           }
@@ -146,34 +140,34 @@ class PEACParser {
             return resolve(null);
           }
 
-          let data = "";
+          let data = '';
           let size = 0;
 
-          res.on("data", (chunk) => {
+          res.on('data', (chunk) => {
             size += chunk.length;
             if (size > MAX_FILE_SIZE) {
               res.destroy();
-              return reject(new Error("File too large"));
+              return reject(new Error('File too large'));
             }
             data += chunk;
           });
 
-          res.on("end", () => {
+          res.on('end', () => {
             if (!this.isValidUtf8(data)) {
-              return reject(new Error("Invalid UTF-8"));
+              return reject(new Error('Invalid UTF-8'));
             }
             resolve(data);
           });
         },
       );
 
-      request.on("error", (error) => {
+      request.on('error', (error) => {
         reject(error);
       });
 
-      request.on("timeout", () => {
+      request.on('timeout', () => {
         request.destroy();
-        reject(new Error("Request timeout"));
+        reject(new Error('Request timeout'));
       });
     });
   }
@@ -183,24 +177,24 @@ class PEACParser {
     try {
       result = yaml.load(content);
       // Defensive: if result is a string, treat as invalid format
-      if (typeof result !== "object" || result === null) {
-        return { error: "Invalid peac format" };
+      if (typeof result !== 'object' || result === null) {
+        return { error: 'Invalid peac format' };
       }
       return result;
     } catch (yamlError) {
       try {
         result = JSON.parse(content);
-        if (typeof result !== "object" || result === null) {
-          return { error: "Invalid peac format" };
+        if (typeof result !== 'object' || result === null) {
+          return { error: 'Invalid peac format' };
         }
         return result;
       } catch (jsonError) {
         const partial = this.extractPartialData(content);
         if (partial && !this.options.strict) {
-          this.warnings.push("Parsed partial data due to format errors");
+          this.warnings.push('Parsed partial data due to format errors');
           return partial;
         }
-        return { error: "Invalid peac format" };
+        return { error: 'Invalid peac format' };
       }
     }
   }
@@ -210,44 +204,40 @@ class PEACParser {
 
     // Required fields
     if (!peac.version) {
-      errors.push("Missing required field: version");
+      errors.push('Missing required field: version');
     } else {
       // Version compatibility check
-      const [major, minor] = peac.version.split(".").map(Number);
+      const [major, minor] = peac.version.split('.').map(Number);
       if (major > 0 || minor > 9) {
-        this.warnings.push(
-          `Parser supports up to v0.9.x, found ${peac.version}`,
-        );
+        this.warnings.push(`Parser supports up to v0.9.x, found ${peac.version}`);
       }
     }
 
-    if (!peac.protocol || peac.protocol !== "peac") {
-      errors.push("Invalid or missing protocol field");
+    if (!peac.protocol || peac.protocol !== 'peac') {
+      errors.push('Invalid or missing protocol field');
     }
 
     if (!peac.peac) {
-      errors.push("Missing peac section");
+      errors.push('Missing peac section');
     } else {
       // Validate peac structure
       if (!peac.peac.consent && !peac.peac.economics) {
-        this.warnings.push("Peac should define consent or economics");
+        this.warnings.push('Peac should define consent or economics');
       }
     }
 
     if (errors.length > 0) {
       if (this.options.strict) {
-        throw new Error(`Validation failed: ${errors.join(", ")}`);
+        throw new Error(`Validation failed: ${errors.join(', ')}`);
       }
-      this.errors.push(
-        ...errors.map((e) => ({ type: "validation", error: e })),
-      );
+      this.errors.push(...errors.map((e) => ({ type: 'validation', error: e })));
     }
   }
 
   async verifySignature(peac) {
     try {
       const publicKey = peac.metadata?.public_key;
-      const signature = Buffer.from(peac.signature, "hex");
+      const signature = Buffer.from(peac.signature, 'hex');
       const message = this.canonicalize(peac.peac);
 
       if (!publicKey || !signature) {
@@ -257,7 +247,7 @@ class PEACParser {
       return crypto.verify(null, Buffer.from(message), publicKey, signature);
     } catch (error) {
       this.errors.push({
-        type: "signature_verification",
+        type: 'signature_verification',
         error: error.message,
       });
       return false;
@@ -278,10 +268,10 @@ class PEACParser {
   getDefaultPeac() {
     return {
       consent: {
-        default: "contact",
+        default: 'contact',
       },
       economics: {
-        pricing: "contact",
+        pricing: 'contact',
       },
     };
   }
@@ -309,7 +299,7 @@ class PEACParser {
   isValidDomain(domain) {
     try {
       const url = new URL(`https://${domain}`);
-      return url.hostname === domain && !domain.includes("/");
+      return url.hostname === domain && !domain.includes('/');
     } catch {
       return false;
     }
@@ -317,7 +307,7 @@ class PEACParser {
 
   isValidUtf8(str) {
     try {
-      return str === Buffer.from(str, "utf8").toString("utf8");
+      return str === Buffer.from(str, 'utf8').toString('utf8');
     } catch {
       return false;
     }
@@ -334,15 +324,13 @@ class PEACParser {
 
   // Batch parsing for multiple domains
   async parseBatch(domains) {
-    const results = await Promise.allSettled(
-      domains.map((domain) => this.parse(domain)),
-    );
+    const results = await Promise.allSettled(domains.map((domain) => this.parse(domain)));
 
     return results.map((result, index) => ({
       domain: domains[index],
       status: result.status,
-      data: result.status === "fulfilled" ? result.value : null,
-      error: result.status === "rejected" ? result.reason.message : null,
+      data: result.status === 'fulfilled' ? result.value : null,
+      error: result.status === 'rejected' ? result.reason.message : null,
     }));
   }
 }

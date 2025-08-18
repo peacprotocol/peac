@@ -1,15 +1,13 @@
 // packages/server/src/utils/redis-pool.ts
-import IORedis, { Redis as RedisClient } from "ioredis";
+import IORedis, { Redis as RedisClient } from 'ioredis';
 
 const USE_MOCK =
-  process.env.CI === "true" ||
-  process.env.NODE_ENV === "test" ||
-  !process.env.REDIS_URL;
+  process.env.CI === 'true' || process.env.NODE_ENV === 'test' || !process.env.REDIS_URL;
 
-let RedisCtor: any = IORedis;
+let RedisCtor: typeof IORedis = IORedis;
 if (USE_MOCK) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mod = require("ioredis-mock");
+  const mod = require('ioredis-mock');
   RedisCtor = mod.default || mod;
 }
 
@@ -33,7 +31,7 @@ export function getRedis(): RedisClient {
 export async function disconnectRedis(): Promise<void> {
   if (_client) {
     try {
-      await (_client as any).quit?.();
+      await (_client as RedisClient & { quit?: () => Promise<void> }).quit?.();
     } catch {
       /* noop */
     }

@@ -1,23 +1,23 @@
-const { Negotiation } = require("../sdk");
+const { Negotiation } = require('../sdk');
 
-describe("PEAC Negotiation", () => {
+describe('PEAC Negotiation', () => {
   let negotiation;
   let mockPeac;
 
   beforeEach(() => {
     mockPeac = {
-      version: "0.9.2",
-      protocol: "peac",
+      version: '0.9.2',
+      protocol: 'peac',
       peac: {
         consent: {
           ai_training: {
-            allowed: "conditional",
+            allowed: 'conditional',
           },
         },
         economics: {
           pricing_models: {
             usage_based: {
-              per_gb: "$0.01",
+              per_gb: '$0.01',
             },
           },
         },
@@ -25,11 +25,11 @@ describe("PEAC Negotiation", () => {
           enabled: true,
           templates: {
             bulk_discount: {
-              threshold: "100GB",
-              discount: "20%",
+              threshold: '100GB',
+              discount: '20%',
             },
             academic: {
-              discount: "50%",
+              discount: '50%',
             },
           },
         },
@@ -39,11 +39,11 @@ describe("PEAC Negotiation", () => {
     negotiation = new Negotiation(mockPeac);
   });
 
-  describe("Basic negotiation", () => {
-    test("accepts valid proposal within budget", async () => {
+  describe('Basic negotiation', () => {
+    test('accepts valid proposal within budget', async () => {
       const proposal = {
-        use_case: "ai_training",
-        volume: "100GB",
+        use_case: 'ai_training',
+        volume: '100GB',
         budget: 10,
         attribution_commitment: true,
       };
@@ -53,10 +53,10 @@ describe("PEAC Negotiation", () => {
       expect(result.terms.price).toBeCloseTo(0.8, 2); // 100GB * $0.01 with 20% bulk discount = $0.8
     });
 
-    test("rejects proposal over budget", async () => {
+    test('rejects proposal over budget', async () => {
       const proposal = {
-        use_case: "ai_training",
-        volume: "1TB",
+        use_case: 'ai_training',
+        volume: '1TB',
         budget: 5,
       };
 
@@ -66,25 +66,25 @@ describe("PEAC Negotiation", () => {
       expect(result.counter_offer.suggested_budget).toBeGreaterThan(5);
     });
 
-    test("rejects denied use cases", async () => {
+    test('rejects denied use cases', async () => {
       const proposal = {
-        use_case: "web_scraping",
-        volume: "100GB",
+        use_case: 'web_scraping',
+        volume: '100GB',
         budget: 100,
       };
 
-      mockPeac.peac.consent.web_scraping = "denied";
+      mockPeac.peac.consent.web_scraping = 'denied';
       const result = await negotiation.negotiate(proposal);
       expect(result.accepted).toBe(false);
-      expect(result.reason).toBe("use_case_denied");
+      expect(result.reason).toBe('use_case_denied');
     });
   });
 
-  describe("Discount templates", () => {
-    test("applies bulk discount correctly", async () => {
+  describe('Discount templates', () => {
+    test('applies bulk discount correctly', async () => {
       const proposal = {
-        use_case: "ai_training",
-        volume: "2TB",
+        use_case: 'ai_training',
+        volume: '2TB',
         budget: 50,
       };
 
@@ -95,10 +95,10 @@ describe("PEAC Negotiation", () => {
       expect(result.terms.price).toBeCloseTo(16.384, 2);
     });
 
-    test("applies academic discount", async () => {
+    test('applies academic discount', async () => {
       const proposal = {
-        use_case: "ai_training",
-        volume: "100GB",
+        use_case: 'ai_training',
+        volume: '100GB',
         budget: 10,
         academic_verification: true,
       };
@@ -108,10 +108,10 @@ describe("PEAC Negotiation", () => {
       expect(result.terms.price).toBe(0.4); // $1 * 0.8 (bulk) * 0.5 (academic) = $0.4
     });
 
-    test("combines multiple discounts", async () => {
+    test('combines multiple discounts', async () => {
       const proposal = {
-        use_case: "ai_training",
-        volume: "2TB",
+        use_case: 'ai_training',
+        volume: '2TB',
         budget: 50,
         academic_verification: true,
       };
@@ -125,29 +125,29 @@ describe("PEAC Negotiation", () => {
     });
   });
 
-  describe("Volume parsing", () => {
-    test("parses different volume formats", () => {
-      expect(negotiation.parseVolume("100GB")).toEqual({
+  describe('Volume parsing', () => {
+    test('parses different volume formats', () => {
+      expect(negotiation.parseVolume('100GB')).toEqual({
         amount: 100,
-        unit: "gb",
+        unit: 'gb',
       });
-      expect(negotiation.parseVolume("1TB")).toEqual({ amount: 1, unit: "tb" });
-      expect(negotiation.parseVolume("1000 requests")).toEqual({
+      expect(negotiation.parseVolume('1TB')).toEqual({ amount: 1, unit: 'tb' });
+      expect(negotiation.parseVolume('1000 requests')).toEqual({
         amount: 1000,
-        unit: "request",
+        unit: 'request',
       });
-      expect(negotiation.parseVolume("60 minutes")).toEqual({
+      expect(negotiation.parseVolume('60 minutes')).toEqual({
         amount: 60,
-        unit: "minute",
+        unit: 'minute',
       });
     });
   });
 
-  describe("Counter offers", () => {
-    test("creates reasonable counter offers", async () => {
+  describe('Counter offers', () => {
+    test('creates reasonable counter offers', async () => {
       const proposal = {
-        use_case: "ai_training",
-        volume: "1TB",
+        use_case: 'ai_training',
+        volume: '1TB',
         budget: 5,
       };
 
