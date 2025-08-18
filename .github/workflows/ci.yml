@@ -72,19 +72,38 @@ jobs:
           timeout 300s npm run build --workspaces
           echo "::endgroup::"
 
-      - name: Test
-        timeout-minutes: 5
+      - name: Test (server)
+        timeout-minutes: 10
+        working-directory: packages/server
+        env:
+          CI: "true"
         run: |
-          echo "::group::Running tests"
-          timeout 300s npm --workspace @peacprotocol/server test --silent
+          echo "::group::Running server tests"
+          set -euo pipefail
+          trap 'echo "::group::dangling-node-processes"; ps -ef | grep node || true; echo "::endgroup::"; jobs -p | xargs -r kill || true' EXIT
+          # Run Jest in-band to avoid stray workers; forceExit so CI never hangs.
+          npx jest --ci --coverage --runInBand --colors --forceExit
+          # Flush any remaining output
+          node -e "setTimeout(()=>process.exit(0), 250).unref()"
+          echo "::endgroup::"
+
+      - name: Test (sdk-js)
+        timeout-minutes: 10
+        working-directory: packages/sdk-js
+        env:
+          CI: "true"
+        run: |
+          echo "::group::Running SDK tests"
+          set -euo pipefail
+          npx jest --ci --runInBand --colors --forceExit
           echo "::endgroup::"
 
       - name: OpenAPI lint (capabilities spec)
         timeout-minutes: 2
+        working-directory: packages/server
         run: |
           echo "::group::OpenAPI specification validation"
-          # Use workspace-installed version to guarantee no network fetch
-          timeout 120s npm --workspace @peacprotocol/server exec -- redocly lint packages/server/openapi/peac.capabilities.v0_9_6.yaml
+          timeout 120s npm exec -- redocly lint openapi/peac.capabilities.v0_9_6.yaml
           echo "::endgroup::"
 
       - name: Security audit
