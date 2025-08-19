@@ -1,5 +1,5 @@
 /**
- * PEAC Protocol SDK v0.9.2
+ * PEAC Protocol SDK v0.9.6
  * Universal Digital Pacts for the Automated Economy
  * @license Apache-2.0
  */
@@ -9,6 +9,7 @@ const UniversalParser = require('./universal-parser');
 const PEACPayments = require('./payments');
 const PEACCrypto = require('./crypto');
 const PEACNegotiation = require('./negotiation');
+const PEACClient = require('./client');
 
 module.exports = {
   // Classes
@@ -17,6 +18,7 @@ module.exports = {
   Payments: PEACPayments,
   Crypto: PEACCrypto,
   Negotiation: PEACNegotiation,
+  Client: PEACClient,
 
   // Convenience methods
   async parse(domain, options = {}) {
@@ -36,7 +38,12 @@ module.exports = {
     return negotiation.negotiate(proposal);
   },
 
+  // Factory method for client
+  createClient(options = {}) {
+    return new PEACClient(options);
+  },
+
   // Metadata
-  version: '0.9.2',
-  schema: 'https://peacprotocol.org/schema/v0.9.2',
+  version: '0.9.6',
+  schema: 'https://peacprotocol.org/schema/v0.9.6',
 };

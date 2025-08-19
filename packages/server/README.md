@@ -1,12 +1,12 @@
-# @peacprotocol/server (v0.9.3)
+# @peacprotocol/server (v0.9.6)
 
-Optional reference server for the PEAC Protocol.
+Reference server for the PEAC Protocol with strict versioning.
 
-- Identity verification (JWK/JWKS, DPoP)
-- Session mint/verify (JWT)
-- Payments via X402 provider (+ Stripe bridge)
-- GDPR export, rate limiting, metrics
-- Emits X-PEAC-Version: 0.9.3
+- Strict protocol versioning: X-PEAC-Protocol: 0.9.6 required on writes
+- Negotiations + Payments with idempotency & RFC compliance
+- Webhook HMAC verification (exempt from protocol header requirement)
+- Prometheus metrics, health checks, resilience patterns
+- Privacy/SLO features (disabled by default via env flags)
 
 This server **does not** replace the JavaScript SDK or `peac.txt`. It complements `@peacprotocol/core` when policies require verification, sessions, or payments.
 

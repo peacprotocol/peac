@@ -11,16 +11,48 @@ import { greaseHandler } from '../ext/grease';
 import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
 import { securityHeaders as newSecurityHeaders } from './middleware/security-headers';
 import { requestTracing } from './middleware/request-tracing';
-import { idempotencyMiddleware } from '../middleware/idempotency';
+import { createEnhancedIdempotencyMiddleware } from '../middleware/enhanced-idempotency';
+import { globalContentNegotiation } from './middleware/global-content-negotiation';
+import { tracingMiddleware } from '../telemetry/tracing';
+import { createNegotiationRouter } from '../negotiation/http';
+import { createPaymentRouter } from '../payments/http';
+import { createWebhookRouter } from '../webhooks/router';
+import { createSLORouter } from '../slo/http';
+import { createPrivacyRouter } from '../privacy/http';
+import { prometheus } from '../metrics/prom';
 
-export function createRoutes() {
+export function createRoutes(sloManager?: any, dataProtection?: any) {
   const router = Router();
+
+  // Create enhanced idempotency middleware
+  const enhancedIdempotency = createEnhancedIdempotencyMiddleware();
 
   // Apply global middleware (order matters)
   router.use(requestTracing.middleware());
+  router.use(tracingMiddleware()); // Add distributed tracing
   router.use(newSecurityHeaders.middleware());
+  router.use(globalContentNegotiation);
+  router.use(standardRateLimiter.middleware());
   router.use(greaseHandler.middleware());
-  router.use(idempotencyMiddleware.middleware());
+  router.use(enhancedIdempotency.middleware());
+
+  // Middleware to track HTTP requests in metrics
+  router.use((req, res, next) => {
+    // Track inflight requests
+    prometheus.incrementGauge('inflight_requests', {}, 1);
+
+    res.on('finish', () => {
+      // Track completed requests
+      prometheus.incrementGauge('inflight_requests', {}, -1);
+      prometheus.incrementCounter('http_requests_total', {
+        route: req.route?.path || req.path,
+        method: req.method,
+        status: res.statusCode.toString(),
+      });
+    });
+
+    next();
+  });
 
   // Health endpoints (no rate limiting)
   router.get('/health/live', handleLiveness);
@@ -38,6 +70,21 @@ export function createRoutes() {
   // Existing endpoints
   router.post('/verify', rateLimitMiddleware('verify'), handleVerify);
   router.post('/pay', rateLimitMiddleware('pay'), handlePayment);
+
+  // New API endpoints
+  router.use('/', createNegotiationRouter());
+  router.use('/', createPaymentRouter());
+  router.use('/', createWebhookRouter());
+
+  // SLO monitoring endpoints (conditional)
+  if (sloManager) {
+    router.use('/slo', createSLORouter(sloManager));
+  }
+
+  // Privacy and data protection endpoints (conditional)
+  if (dataProtection) {
+    router.use('/privacy', createPrivacyRouter(dataProtection));
+  }
 
   return router;
 }

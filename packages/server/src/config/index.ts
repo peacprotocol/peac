@@ -43,7 +43,16 @@ export const config = {
   gates: {
     metricsEnabled: bool(process.env.METRICS_ENABLED, false),
     healthEnabled: bool(process.env.HEALTH_ENABLED, true),
+    privacyEnabled: bool(process.env.PEAC_PRIVACY_ENABLED, false),
+    sloEnabled: bool(process.env.PEAC_SLO_ENABLED, false),
     corsOrigins: arr(process.env.CORS_ORIGINS, ['http://localhost:3000']),
+  },
+
+  peac: {
+    metricsEnabled: bool(process.env.PEAC_METRICS_ENABLED, false),
+    storeBackend: (process.env.PEAC_STORE_BACKEND as 'memory' | 'redis') || 'memory',
+    webhookSecret: process.env.PEAC_WEBHOOK_SECRET || '',
+    x402Mode: (process.env.PEAC_X402_MODE as 'simulate' | 'off') || 'simulate',
   },
 
   network: {

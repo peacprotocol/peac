@@ -1,11 +1,15 @@
 import { Request, Response } from 'express';
 import { metrics } from '../metrics';
 import { logger } from '../logging';
+import { getTracingStats } from '../telemetry/tracing';
 
 export async function handleLiveness(_req: Request, res: Response): Promise<void> {
+  const tracingStats = getTracingStats();
+
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
+    tracing: tracingStats,
   });
 }
 

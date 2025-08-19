@@ -35,6 +35,13 @@ paths:
       responses:
         '200':
           description: Capabilities retrieved successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
           content:
             application/vnd.peac.capabilities+json;version=0.9.6:
               schema:
@@ -48,6 +55,612 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
+
+  /negotiations:
+    post:
+      summary: Start a new negotiation
+      operationId: createNegotiation
+      tags:
+        - Negotiations
+      parameters:
+        - $ref: '#/components/parameters/PeacProtocolHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNegotiationRequest'
+            examples:
+              basic_negotiation:
+                summary: Basic negotiation example
+                value:
+                  terms:
+                    amount: 1000
+                    currency: 'USD'
+                    duration: '1 hour'
+                  context:
+                    purpose: 'API development assistance'
+                    client_version: '1.0.0'
+                  proposed_by: 'client-service-123'
+      responses:
+        '201':
+          description: Negotiation created successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            Location:
+              schema:
+                type: string
+                format: uri
+            Idempotency-Key:
+              $ref: '#/components/headers/Idempotency-Key'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Negotiation'
+        '400':
+          description: Protocol version error or validation error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                protocol_version_required:
+                  summary: Missing protocol version header
+                  value:
+                    type: https://peacprotocol.org/problems/protocol-version-required
+                    title: Protocol Version Required
+                    status: 400
+                    detail: Missing required X-PEAC-Protocol header for write operations
+                    expected_version: '0.9.6'
+                    min_version: '0.9.6'
+                    provided_version: null
+                    required_header: X-PEAC-Protocol
+                protocol_version_unsupported:
+                  summary: Unsupported protocol version
+                  value:
+                    type: https://peacprotocol.org/problems/protocol-version-unsupported
+                    title: Protocol Version Unsupported
+                    status: 400
+                    detail: "Protocol version '0.9.5' is not supported. Expected '0.9.6'."
+                    expected_version: '0.9.6'
+                    min_version: '0.9.6'
+                    provided_version: '0.9.5'
+                    required_header: X-PEAC-Protocol
+                validation_error:
+                  summary: Request validation failed
+                  value:
+                    type: https://peacprotocol.org/problems/validation-error
+                    title: Validation Error
+                    status: 400
+                    detail: Invalid request parameters
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    get:
+      summary: List negotiations
+      operationId: listNegotiations
+      tags:
+        - Negotiations
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Number of items to return
+        - name: state
+          in: query
+          schema:
+            type: string
+            enum: [proposed, accepted, rejected]
+          description: Filter by negotiation state
+      responses:
+        '200':
+          description: Negotiations retrieved successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            Vary:
+              schema:
+                type: string
+                example: 'Accept, Accept-Encoding'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NegotiationList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /negotiations/{id}:
+    get:
+      summary: Get negotiation by ID
+      operationId: getNegotiation
+      tags:
+        - Negotiations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Negotiation retrieved successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Negotiation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /negotiations/{id}/accept:
+    post:
+      summary: Accept a negotiation
+      operationId: acceptNegotiation
+      tags:
+        - Negotiations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PeacProtocolHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptNegotiationRequest'
+      responses:
+        '200':
+          description: Negotiation accepted successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Negotiation'
+        '400':
+          description: Protocol version error or validation error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                protocol_version_required:
+                  summary: Missing protocol version header
+                  value:
+                    type: https://peacprotocol.org/problems/protocol-version-required
+                    title: Protocol Version Required
+                    status: 400
+                    detail: Missing required X-PEAC-Protocol header for write operations
+                    expected_version: '0.9.6'
+                    min_version: '0.9.6'
+                    provided_version: null
+                    required_header: X-PEAC-Protocol
+                protocol_version_unsupported:
+                  summary: Unsupported protocol version
+                  value:
+                    type: https://peacprotocol.org/problems/protocol-version-unsupported
+                    title: Protocol Version Unsupported
+                    status: 400
+                    detail: "Protocol version '0.9.5' is not supported. Expected '0.9.6'."
+                    expected_version: '0.9.6'
+                    min_version: '0.9.6'
+                    provided_version: '0.9.5'
+                    required_header: X-PEAC-Protocol
+                validation_error:
+                  summary: Request validation failed
+                  value:
+                    type: https://peacprotocol.org/problems/validation-error
+                    title: Validation Error
+                    status: 400
+                    detail: Invalid request parameters
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Invalid negotiation state
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: https://peacprotocol.org/problems/invalid-negotiation-state
+                title: Invalid Negotiation State
+                status: 409
+                detail: Negotiation cannot be accepted in current state
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /negotiations/{id}/reject:
+    post:
+      summary: Reject a negotiation
+      operationId: rejectNegotiation
+      tags:
+        - Negotiations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PeacProtocolHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectNegotiationRequest'
+      responses:
+        '200':
+          description: Negotiation rejected successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Negotiation'
+        '400':
+          description: Protocol version error or validation error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                protocol_version_required:
+                  summary: Missing protocol version header
+                  value:
+                    type: https://peacprotocol.org/problems/protocol-version-required
+                    title: Protocol Version Required
+                    status: 400
+                    detail: Missing required X-PEAC-Protocol header for write operations
+                    expected_version: '0.9.6'
+                    min_version: '0.9.6'
+                    provided_version: null
+                    required_header: X-PEAC-Protocol
+                protocol_version_unsupported:
+                  summary: Unsupported protocol version
+                  value:
+                    type: https://peacprotocol.org/problems/protocol-version-unsupported
+                    title: Protocol Version Unsupported
+                    status: 400
+                    detail: "Protocol version '0.9.5' is not supported. Expected '0.9.6'."
+                    expected_version: '0.9.6'
+                    min_version: '0.9.6'
+                    provided_version: '0.9.5'
+                    required_header: X-PEAC-Protocol
+                validation_error:
+                  summary: Request validation failed
+                  value:
+                    type: https://peacprotocol.org/problems/validation-error
+                    title: Validation Error
+                    status: 400
+                    detail: Invalid request parameters
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Invalid negotiation state
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: https://peacprotocol.org/problems/invalid-negotiation-state
+                title: Invalid Negotiation State
+                status: 409
+                detail: Negotiation cannot be rejected in current state
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /payments:
+    post:
+      summary: Create a payment
+      operationId: createPayment
+      tags:
+        - Payments
+      parameters:
+        - $ref: '#/components/parameters/PeacProtocolHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+            examples:
+              credits_payment:
+                summary: Credits payment example
+                value:
+                  rail: 'credits'
+                  amount: 100
+                  currency: 'USD'
+                  metadata:
+                    purpose: 'API usage charges'
+                    billing_period: '2024-12'
+              x402_payment:
+                summary: HTTP 402 payment example
+                value:
+                  rail: 'x402'
+                  amount: 50
+                  currency: 'USD'
+                  metadata:
+                    chain: 'ethereum'
+                    gas_limit: '21000'
+      responses:
+        '201':
+          description: Payment created successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            Location:
+              schema:
+                type: string
+                format: uri
+            Idempotency-Key:
+              $ref: '#/components/headers/Idempotency-Key'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          description: Protocol version error or validation error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                protocol_version_required:
+                  summary: Missing protocol version header
+                  value:
+                    type: https://peacprotocol.org/problems/protocol-version-required
+                    title: Protocol Version Required
+                    status: 400
+                    detail: Missing required X-PEAC-Protocol header for write operations
+                    expected_version: '0.9.6'
+                    min_version: '0.9.6'
+                    provided_version: null
+                    required_header: X-PEAC-Protocol
+                protocol_version_unsupported:
+                  summary: Unsupported protocol version
+                  value:
+                    type: https://peacprotocol.org/problems/protocol-version-unsupported
+                    title: Protocol Version Unsupported
+                    status: 400
+                    detail: "Protocol version '0.9.5' is not supported. Expected '0.9.6'."
+                    expected_version: '0.9.6'
+                    min_version: '0.9.6'
+                    provided_version: '0.9.5'
+                    required_header: X-PEAC-Protocol
+                validation_error:
+                  summary: Request validation failed
+                  value:
+                    type: https://peacprotocol.org/problems/validation-error
+                    title: Validation Error
+                    status: 400
+                    detail: Invalid request parameters
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    get:
+      summary: List payments
+      operationId: listPayments
+      tags:
+        - Payments
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Number of items to return
+      responses:
+        '200':
+          description: Payments retrieved successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            Vary:
+              schema:
+                type: string
+                example: 'Accept, Accept-Encoding'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /payments/{id}:
+    get:
+      summary: Get payment by ID
+      operationId: getPayment
+      tags:
+        - Payments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Payment retrieved successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /webhooks/peac:
+    post:
+      summary: Receive webhook
+      operationId: receiveWebhook
+      tags:
+        - Webhooks
+      parameters:
+        - name: Peac-Signature
+          in: header
+          required: true
+          description: 'HMAC signature header: Peac-Signature: t=<unix>, s=<hex_hmac_sha256>'
+          schema:
+            type: string
+            example: 't=1640995200,s=a2114d57b48eac2b0c9ca9c...'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPayload'
+      responses:
+        '204':
+          description: Webhook processed successfully
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          description: Invalid webhook signature
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: https://peacprotocol.org/problems/webhook-authentication-failed
+                title: Webhook Authentication Failed
+                status: 401
+                detail: Invalid HMAC signature in Peac-Signature header
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /livez:
+    get:
+      summary: Liveness check
+      operationId: getLiveness
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /readyz:
+    get:
+      summary: Readiness check
+      operationId: getReadiness
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /metrics:
+    get:
+      summary: Get Prometheus metrics
+      operationId: getMetrics
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Metrics not enabled
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: https://peacprotocol.org/problems/metrics-disabled
+                title: Metrics Disabled
+                status: 404
+                detail: Metrics endpoint is not enabled
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: https://peacprotocol.org/problems/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: Failed to generate metrics
 
 components:
   schemas:
@@ -108,6 +721,225 @@ components:
         links:
           type: object
 
+    Negotiation:
+      type: object
+      required:
+        - id
+        - state
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        state:
+          type: string
+          enum: [proposed, accepted, rejected]
+        terms:
+          type: object
+          additionalProperties: true
+        context:
+          type: object
+          additionalProperties: true
+        reason:
+          type: string
+          description: Rejection reason (only when state is rejected)
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        proposed_by:
+          type: string
+        decided_by:
+          type: string
+
+    CreateNegotiationRequest:
+      type: object
+      properties:
+        terms:
+          type: object
+          additionalProperties: true
+        context:
+          type: object
+          additionalProperties: true
+        proposed_by:
+          type: string
+
+    AcceptNegotiationRequest:
+      type: object
+      properties:
+        decided_by:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    RejectNegotiationRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+        decided_by:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    NegotiationList:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Negotiation'
+        next_cursor:
+          type: string
+          description: Cursor for next page (if available)
+
+    Payment:
+      type: object
+      required:
+        - id
+        - rail
+        - amount
+        - currency
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        rail:
+          type: string
+          enum: [credits, x402]
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          example: USD
+        status:
+          type: string
+          enum: [pending, requires_action, succeeded, failed]
+        metadata:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        external_id:
+          type: string
+        failure_reason:
+          type: string
+
+    CreatePaymentRequest:
+      type: object
+      required:
+        - rail
+        - amount
+        - currency
+      properties:
+        rail:
+          type: string
+          enum: [credits, x402]
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          example: USD
+        metadata:
+          type: object
+          additionalProperties: true
+
+    PaymentList:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+        next_cursor:
+          type: string
+          description: Cursor for next page (if available)
+        has_more:
+          type: boolean
+          description: Whether there are more items available
+
+    WebhookPayload:
+      type: object
+      required:
+        - type
+        - id
+        - object
+        - data
+        - created
+      properties:
+        type:
+          type: string
+          enum: [payment.succeeded, payment.failed, negotiation.updated]
+        id:
+          type: string
+        object:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+        created:
+          type: integer
+          description: Unix timestamp
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - checks
+        - timestamp
+        - uptime_seconds
+      properties:
+        status:
+          type: string
+          enum: [pass, fail]
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheck'
+        timestamp:
+          type: string
+          format: date-time
+        uptime_seconds:
+          type: integer
+
+    HealthCheck:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [pass, fail]
+        details:
+          type: object
+          additionalProperties: true
+        duration_ms:
+          type: number
+
     ProblemDetails:
       type: object
       required:
@@ -126,3 +958,114 @@ components:
         instance:
           type: string
           format: uri
+        trace_id:
+          type: string
+      additionalProperties: true
+
+  headers:
+    X-Request-Id:
+      schema:
+        type: string
+        format: uuid
+      description: Unique request identifier
+
+    Idempotency-Key:
+      schema:
+        type: string
+      description: Idempotency key for replay protection
+
+    RateLimit-Limit:
+      schema:
+        type: integer
+      description: Rate limit ceiling for the request
+
+    RateLimit-Remaining:
+      schema:
+        type: integer
+      description: Number of requests remaining in current window
+
+    RateLimit-Reset:
+      schema:
+        type: integer
+      description: Delta seconds until rate limit resets
+
+  parameters:
+    PeacProtocolHeader:
+      name: X-PEAC-Protocol
+      in: header
+      required: true
+      description: PEAC Protocol version for strict versioning enforcement
+      schema:
+        type: string
+        pattern: '^0\.9\.6(\.\d+)?$'
+      example: '0.9.6'
+
+  responses:
+    ValidationError:
+      description: Validation Error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: https://peacprotocol.org/problems/validation-error
+            title: Validation Error
+            status: 400
+            detail: Invalid request parameters
+
+    NotAcceptable:
+      description: Not Acceptable
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: https://peacprotocol.org/problems/not-acceptable
+            title: Not Acceptable
+            status: 406
+            detail: Cannot produce response in requested content type
+
+    RateLimitExceeded:
+      description: Rate Limit Exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+        RateLimit-Reset:
+          $ref: '#/components/headers/RateLimit-Reset'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: https://peacprotocol.org/problems/rate-limit-exceeded
+            title: Rate Limit Exceeded
+            status: 429
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: https://peacprotocol.org/problems/resource-not-found
+            title: Resource Not Found
+            status: 404
+
+    TooManyRequests:
+      description: Too Many Requests
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: https://peacprotocol.org/problems/rate-limit-exceeded
+            title: Rate Limit Exceeded
+            status: 429

@@ -1,0 +1,236 @@
+# PEAC Protocol v0.9.6 Prometheus Alert Rules
+# Generated: 2025-01-19
+# Enterprise-grade SLO-based alerting configuration
+
+groups:
+  - name: peac-slo-alerts
+    rules:
+      # Fast burn rate alerts (critical)
+      - alert: PEACApiAvailabilityFastBurn
+        expr: |
+          (
+            1 - (
+              rate(http_requests_total{code!~"5.."}[1h]) /
+              rate(http_requests_total[1h])
+            )
+          ) > (14.4 * (1 - 0.999))
+        for: 2m
+        labels:
+          severity: critical
+          service: peac-api
+          slo: availability
+          burn_rate: fast
+        annotations:
+          summary: 'PEAC API availability SLO fast burn detected'
+          description: 'The PEAC API availability SLO is consuming error budget 14.4x faster than sustainable rate'
+          runbook_url: 'https://runbooks.peac.dev/slo/availability-fast-burn'
+
+      - alert: PEACPaymentSuccessFastBurn
+        expr: |
+          (
+            1 - (
+              rate(payments_succeeded_total[1h]) /
+              rate(payments_initiated_total[1h])
+            )
+          ) > (14.4 * (1 - 0.995))
+        for: 2m
+        labels:
+          severity: critical
+          service: peac-payments
+          slo: payment_success
+          burn_rate: fast
+        annotations:
+          summary: 'Payment success rate SLO fast burn detected'
+          description: 'Payment success rate is dropping below SLO threshold'
+          runbook_url: 'https://runbooks.peac.dev/slo/payment-success-fast-burn'
+
+      # Latency threshold alerts
+      - alert: PEACApiLatencyThreshold
+        expr: histogram_quantile(0.95, rate(http_request_duration_ms_bucket[5m])) > 500
+        for: 5m
+        labels:
+          severity: warning
+          service: peac-api
+          slo: latency_p95
+        annotations:
+          summary: 'PEAC API latency SLO threshold exceeded'
+          description: 'P95 latency is {{ $value }}ms, above 500ms SLO threshold'
+          runbook_url: 'https://runbooks.peac.dev/slo/latency-threshold'
+
+      # Error budget depletion alerts
+      - alert: PEACApiErrorBudgetLow
+        expr: |
+          (
+            1 - (
+              avg_over_time(
+                (rate(http_requests_total{code!~"5.."}[5m]) / rate(http_requests_total[5m]))[30d:5m]
+              )
+            )
+          ) / (1 - 0.999) > 0.75
+        for: 5m
+        labels:
+          severity: warning
+          service: peac-api
+          slo: availability
+          budget: low
+        annotations:
+          summary: 'PEAC API error budget is 75% depleted'
+          description: 'Only 25% of monthly error budget remains for availability SLO'
+          runbook_url: 'https://runbooks.peac.dev/slo/error-budget-low'
+
+      # Circuit breaker health
+      - alert: PEACCircuitBreakerOpen
+        expr: avg(circuit_breaker_state) > 0.1
+        for: 1m
+        labels:
+          severity: warning
+          service: peac-api
+          component: circuit-breaker
+        annotations:
+          summary: 'Circuit breakers are in degraded state'
+          description: '{{ $value | humanizePercentage }} of circuit breakers are open or half-open'
+          runbook_url: 'https://runbooks.peac.dev/circuit-breaker-open'
+
+      # Webhook delivery alerts
+      - alert: PEACWebhookDeliveryFailure
+        expr: |
+          (
+            rate(webhook_delivery_success_total[15m]) /
+            rate(webhook_delivery_attempts_total[15m])
+          ) < 0.99
+        for: 5m
+        labels:
+          severity: warning
+          service: peac-webhooks
+          slo: delivery_success
+        annotations:
+          summary: 'Webhook delivery success rate below SLO'
+          description: 'Webhook delivery success rate is {{ $value | humanizePercentage }}, below 99% SLO'
+          runbook_url: 'https://runbooks.peac.dev/webhook-delivery-failure'
+
+      # Infrastructure alerts
+      - alert: PEACHighErrorRate
+        expr: rate(http_requests_total{code=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          service: peac-api
+          type: error_rate
+        annotations:
+          summary: 'High error rate detected'
+          description: 'Error rate is {{ $value }} errors/sec, indicating potential service degradation'
+          runbook_url: 'https://runbooks.peac.dev/high-error-rate'
+
+      # Resource utilization
+      - alert: PEACHighMemoryUsage
+        expr: process_resident_memory_bytes / (1024*1024*1024) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          service: peac-api
+          resource: memory
+        annotations:
+          summary: 'High memory usage detected'
+          description: 'Memory usage is {{ $value | humanize }}GB'
+          runbook_url: 'https://runbooks.peac.dev/high-memory-usage'
+
+  - name: peac-business-slos
+    rules:
+      # Business-critical payment SLOs
+      - alert: PEACPaymentLatencyHigh
+        expr: histogram_quantile(0.95, rate(payment_duration_ms_bucket[5m])) > 2000
+        for: 3m
+        labels:
+          severity: warning
+          service: peac-payments
+          slo: payment_latency
+        annotations:
+          summary: 'Payment processing latency SLO threshold exceeded'
+          description: 'P95 payment processing latency is {{ $value }}ms, above 2s SLO threshold'
+          runbook_url: 'https://runbooks.peac.dev/payment-latency-high'
+
+      # Negotiation acceptance rate
+      - alert: PEACNegotiationAcceptanceRateLow
+        expr: |
+          (
+            rate(negotiations_accepted_total[1h]) /
+            rate(negotiations_created_total[1h])
+          ) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: peac-negotiations
+          business_metric: acceptance_rate
+        annotations:
+          summary: 'Negotiation acceptance rate is low'
+          description: 'Only {{ $value | humanizePercentage }} of negotiations are being accepted'
+          runbook_url: 'https://runbooks.peac.dev/negotiation-acceptance-low'
+
+  - name: peac-security-slos
+    rules:
+      # Webhook verification failures
+      - alert: PEACWebhookVerificationFailures
+        expr: rate(webhook_verification_failed_total[5m]) > 0.01
+        for: 2m
+        labels:
+          severity: warning
+          service: peac-webhooks
+          security: verification
+        annotations:
+          summary: 'High rate of webhook verification failures'
+          description: '{{ $value }} webhook verification failures per second detected'
+          runbook_url: 'https://runbooks.peac.dev/webhook-verification-failures'
+
+      # Idempotency conflicts
+      - alert: PEACIdempotencyConflicts
+        expr: rate(idempotency_conflicts_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: peac-api
+          feature: idempotency
+        annotations:
+          summary: 'High rate of idempotency conflicts'
+          description: '{{ $value }} idempotency conflicts per second detected'
+          runbook_url: 'https://runbooks.peac.dev/idempotency-conflicts'
+
+  - name: peac-operational-slos
+    rules:
+      # Graceful shutdown alerts
+      - alert: PEACGracefulShutdownTimeout
+        expr: increase(shutdown_forced_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: peac-api
+          operation: shutdown
+        annotations:
+          summary: 'Forced shutdown detected'
+          description: '{{ $value }} forced shutdowns in the last 5 minutes'
+          runbook_url: 'https://runbooks.peac.dev/forced-shutdown'
+
+      # Tracing system health
+      - alert: PEACTracingSystemDegraded
+        expr: rate(trace_generation_errors_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          service: peac-api
+          component: tracing
+        annotations:
+          summary: 'Tracing system is degraded'
+          description: '{{ $value }} trace generation errors per second'
+          runbook_url: 'https://runbooks.peac.dev/tracing-degraded'
+
+      # Pagination performance
+      - alert: PEACPaginationSlowQueries
+        expr: histogram_quantile(0.95, rate(pagination_duration_ms_bucket[5m])) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: peac-api
+          feature: pagination
+        annotations:
+          summary: 'Slow pagination queries detected'
+          description: 'P95 pagination query time is {{ $value }}ms, above 1s threshold'
+          runbook_url: 'https://runbooks.peac.dev/pagination-slow'

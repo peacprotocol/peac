@@ -87,11 +87,12 @@ export class RequestTracingMiddleware {
         return next();
       }
 
-      // Always generate a unique request ID
-      const requestId = randomUUID();
+      // Use provided X-Request-Id or generate a unique one
+      const incomingRequestId = req.get(this.config.headerName);
+      const requestId = incomingRequestId || randomUUID();
       req.requestId = requestId;
 
-      // Set X-Request-Id header in response
+      // Always echo X-Request-Id header in response
       res.set(this.config.headerName, requestId);
 
       // Handle traceparent and tracestate if present

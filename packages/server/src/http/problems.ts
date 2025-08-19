@@ -20,6 +20,22 @@ export class ProblemDetailsHandler {
       },
     ],
     [
+      'protocol_version_required',
+      {
+        type: 'https://peacprotocol.org/problems/protocol-version-required',
+        title: 'Protocol Version Required',
+        status: 400,
+      },
+    ],
+    [
+      'protocol_version_unsupported',
+      {
+        type: 'https://peacprotocol.org/problems/protocol-version-unsupported',
+        title: 'Protocol Version Unsupported',
+        status: 400,
+      },
+    ],
+    [
       'authentication_required',
       {
         type: 'https://peacprotocol.org/problems/authentication-required',
@@ -91,7 +107,27 @@ export class ProblemDetailsHandler {
         status: 503,
       },
     ],
+    [
+      'webhook_authentication_failed',
+      {
+        type: 'https://peacprotocol.org/problems/webhook-authentication-failed',
+        title: 'Webhook Authentication Failed',
+        status: 401,
+      },
+    ],
+    [
+      'idempotency_conflict',
+      {
+        type: 'https://peacprotocol.org/problems/idempotency-conflict',
+        title: 'Idempotency Key Conflict',
+        status: 409,
+      },
+    ],
   ]);
+
+  addProblemType(key: string, problem: ProblemDetails): void {
+    this.problemMap.set(key, problem);
+  }
 
   send(res: Response, problemType: string, extensions?: Record<string, unknown>): void {
     const problem = this.problemMap.get(problemType) || {
@@ -119,6 +155,10 @@ export class ProblemDetailsHandler {
     // Add retry hints for specific problems
     if (problemType === 'rate_limit_exceeded' && extensions?.retry_after) {
       res.set('Retry-After', String(extensions.retry_after));
+    }
+
+    if (problemType === 'idempotency_conflict' && extensions?.retryAfter) {
+      res.set('Retry-After', String(extensions.retryAfter));
     }
 
     if (problemType === 'authentication_required') {

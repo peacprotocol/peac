@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * PEAC Protocol CLI v0.9.2
+ * PEAC Protocol CLI v0.9.6
  * Command-line interface for PEAC Protocol operations
  * @license Apache-2.0
  */
@@ -10,7 +10,7 @@ const { program } = require('commander');
 const fs = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
-const { UniversalParser, Crypto, Payments, Negotiation, version } = require('../sdk');
+const { UniversalParser, Crypto, Client, version } = require('../sdk');
 
 // Configure CLI
 program
@@ -27,8 +27,12 @@ Examples:
   $ peac parse example.com       Parse peac from a domain
   $ peac scan example.com        Scan all policy files
   $ peac migrate robots.txt      Migrate from legacy format
-  $ peac negotiate example.com   Negotiate terms with a publisher
-  $ peac pay --provider stripe   Process a payment
+  $ peac negotiate:create example.com Start new negotiation with a publisher
+  $ peac accept <id>             Accept a negotiation
+  $ peac reject <id> "reason"    Reject a negotiation
+  $ peac pay:create --rail credits Create a payment
+  $ peac status <id>             Check payment/negotiation status
+  $ peac payments:list           List payments with pagination
 
 For more information, visit https://peacprotocol.org/docs`,
   );
@@ -261,7 +265,7 @@ program
 
       let peac;
       const basePolicy = {
-        version: '0.9.2',
+        version: '0.9.6',
         protocol: 'peac',
         metadata: {
           migrated_from: options.format,
@@ -309,143 +313,387 @@ program
     }
   });
 
-// Negotiate command
+// New v0.9.6 API commands
+
+// Accept negotiation command
 program
-  .command('negotiate <domain>')
-  .description('Negotiate terms with a publisher')
-  .option('-u, --use-case <use>', 'Use case (ai_training, api_access, web_scraping)', 'ai_training')
-  .option('-v, --volume <volume>', 'Data volume (e.g., 100GB, 1TB)', '100GB')
-  .option('-b, --budget <budget>', 'Budget in USD', '1000')
-  .option('-d, --duration <duration>', 'Duration (e.g., 30 days, 1 year)', '30 days')
-  .option('-a, --academic', 'Request academic discount')
-  .option('-s, --startup', 'Request startup discount')
-  .option('--framework <framework>', 'Agent framework (openai, langchain, crewai)')
-  .action(async (domain, options) => {
+  .command('accept <negotiation-id>')
+  .description('Accept a negotiation')
+  .option('--server <url>', 'PEAC server URL', 'http://localhost:3000')
+  .option('--decided-by <who>', 'Who is accepting the negotiation')
+  .action(async (negotiationId, options) => {
     try {
-      console.log(`\nNegotiating with ${domain}...`);
+      const client = new Client({ baseUrl: options.server });
 
-      // Parse peac
-      const parser = new UniversalParser();
-      const peac = await parser.parseAll(domain);
+      console.log(`Accepting negotiation ${negotiationId}...`);
 
-      // Check if negotiation is available
-      if (!peac.peac?.negotiation?.enabled && !peac.peac?.negotiation?.endpoint) {
-        console.log('⚠ Negotiation not available for this publisher');
-        console.log(`  Contact: ${peac.peac?.dispute?.contact || 'Not provided'}`);
-        process.exit(1);
-      }
-
-      // Prepare proposal
-      const proposal = {
-        use_case: options.useCase,
-        volume: options.volume,
-        budget: parseFloat(options.budget),
-        duration: options.duration,
-        attribution_commitment: true,
-        academic_verification: options.academic || undefined,
-        startup_verification: options.startup || undefined,
-        framework: options.framework,
-      };
-
-      console.log('Proposal:');
-      Object.entries(proposal).forEach(([key, value]) => {
-        if (value !== undefined) {
-          console.log(`  ${key}: ${value}`);
-        }
+      const response = await client.acceptNegotiation(negotiationId, {
+        decided_by: options.decidedBy,
       });
 
-      // Negotiate
-      const negotiation = new Negotiation(peac);
-      const result = await negotiation.negotiate(proposal);
+      console.log('✓ Negotiation accepted successfully');
+      console.log(`  ID: ${response.data.id}`);
+      console.log(`  State: ${response.data.state}`);
+      console.log(`  Updated: ${response.data.updated_at}`);
 
-      if (result.accepted) {
-        console.log('\n✓ Negotiation successful!');
-        console.log('\nAccepted Terms:');
-        console.log(`  Peac ID: ${result.peac_id}`);
-        console.log(`  Price: $${result.terms.price} ${result.terms.currency}`);
-        console.log(`  Volume: ${result.terms.volume}`);
-        console.log(`  Duration: ${result.terms.duration}`);
-        console.log(`  Expires: ${new Date(result.terms.expires).toLocaleDateString()}`);
-
-        if (result.terms.payment_link) {
-          console.log(`  Payment: ${result.terms.payment_link}`);
-        }
-
-        if (result.terms.attribution_required) {
-          console.log(`  Attribution: Required (${result.terms.attribution_format})`);
-        }
-      } else {
-        console.log('\n⚠ Negotiation not accepted');
-        console.log(`Reason: ${result.reason}`);
-
-        if (result.counter_offer) {
-          console.log('\nCounter Offer:');
-          console.log(`  Suggested budget: $${result.counter_offer.suggested_budget}`);
-          console.log(`  Minimum budget: $${result.counter_offer.minimum_budget}`);
-          console.log(`  For your budget: ${result.counter_offer.suggested_volume}`);
-
-          if (result.counter_offer.available_discounts?.length > 0) {
-            console.log(`  Available discounts:`);
-            result.counter_offer.available_discounts.forEach((d) => {
-              console.log(`    - ${d.type}: ${d.discount}`);
-            });
-          }
-
-          if (result.counter_offer.human_contact) {
-            console.log(`  Contact: ${result.counter_offer.human_contact}`);
-          }
-        }
+      if (response.data.decided_by) {
+        console.log(`  Decided by: ${response.data.decided_by}`);
       }
     } catch (error) {
       console.error('Error:', error.message);
+      if (error.response) {
+        console.error('Details:', error.response.detail);
+      }
       process.exit(1);
     }
   });
 
-// Pay command
+// Reject negotiation command
 program
-  .command('pay')
-  .description('Process a payment')
-  .option('-d, --domain <domain>', 'Domain to pay')
-  .option('-p, --provider <provider>', 'Payment provider (stripe, bridge, paypal, x402)', 'stripe')
-  .option('-a, --amount <amount>', 'Amount to pay')
-  .option('-u, --use-case <use>', 'Purpose of payment', 'ai_training')
-  .option('-c, --currency <currency>', 'Currency', 'usd')
-  .action(async (options) => {
+  .command('reject <negotiation-id> <reason>')
+  .description('Reject a negotiation with a reason')
+  .option('--server <url>', 'PEAC server URL', 'http://localhost:3000')
+  .option('--decided-by <who>', 'Who is rejecting the negotiation')
+  .action(async (negotiationId, reason, options) => {
     try {
-      if (!options.domain || !options.amount) {
-        console.error('Error: --domain and --amount are required');
-        process.exit(1);
-      }
+      const client = new Client({ baseUrl: options.server });
 
-      console.log(`\nProcessing payment to ${options.domain}...`);
+      console.log(`Rejecting negotiation ${negotiationId}...`);
 
-      // Parse peac
-      const parser = new UniversalParser();
-      const peac = await parser.parseAll(options.domain);
-
-      // Initialize payments
-      const payments = new Payments(peac);
-
-      // Process payment
-      const result = await payments.processPayment({
-        amount: parseFloat(options.amount),
-        currency: options.currency,
-        purpose: options.useCase,
-        processor: options.provider,
+      const response = await client.rejectNegotiation(negotiationId, reason, {
+        decided_by: options.decidedBy,
       });
 
-      console.log('\n✓ Payment initiated');
-      console.log(`  Processor: ${result.processor}`);
-      console.log(`  Payment ID: ${result.payment_id}`);
-      console.log(`  Amount: $${result.amount} ${result.currency}`);
-      console.log(`  Status: ${result.status}`);
+      console.log('✓ Negotiation rejected successfully');
+      console.log(`  ID: ${response.data.id}`);
+      console.log(`  State: ${response.data.state}`);
+      console.log(`  Reason: ${response.data.reason}`);
+      console.log(`  Updated: ${response.data.updated_at}`);
 
-      if (result.client_secret) {
-        console.log(`  Client Secret: ${result.client_secret.substring(0, 20)}...`);
+      if (response.data.decided_by) {
+        console.log(`  Decided by: ${response.data.decided_by}`);
       }
     } catch (error) {
       console.error('Error:', error.message);
+      if (error.response) {
+        console.error('Details:', error.response.detail);
+      }
+      process.exit(1);
+    }
+  });
+
+// Status command (works for both payments and negotiations)
+program
+  .command('status <id>')
+  .description('Check status of a payment or negotiation')
+  .option('--server <url>', 'PEAC server URL', 'http://localhost:3000')
+  .option('--type <type>', 'Resource type (payment, negotiation)', 'auto')
+  .action(async (id, options) => {
+    try {
+      const client = new Client({ baseUrl: options.server });
+
+      console.log(`Checking status of ${id}...`);
+
+      let response;
+      let resourceType = options.type;
+
+      if (resourceType === 'auto') {
+        // Try to determine type by checking both endpoints
+        try {
+          response = await client.getPayment(id);
+          resourceType = 'payment';
+        } catch (paymentError) {
+          try {
+            response = await client.getNegotiation(id);
+            resourceType = 'negotiation';
+          } catch (negotiationError) {
+            throw new Error(`Resource ${id} not found as payment or negotiation`);
+          }
+        }
+      } else if (resourceType === 'payment') {
+        response = await client.getPayment(id);
+      } else if (resourceType === 'negotiation') {
+        response = await client.getNegotiation(id);
+      } else {
+        throw new Error('Invalid type. Use: payment, negotiation, or auto');
+      }
+
+      const data = response.data;
+
+      console.log(`\n✓ ${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)} Status`);
+      console.log('─'.repeat(40));
+      console.log(`  ID: ${data.id}`);
+
+      if (resourceType === 'payment') {
+        console.log(`  Rail: ${data.rail}`);
+        console.log(`  Amount: ${data.amount} ${data.currency}`);
+        console.log(`  Status: ${data.status}`);
+        if (data.external_id) console.log(`  External ID: ${data.external_id}`);
+        if (data.failure_reason) console.log(`  Failure Reason: ${data.failure_reason}`);
+      } else {
+        console.log(`  State: ${data.state}`);
+        if (data.terms) console.log(`  Terms: ${JSON.stringify(data.terms, null, 2)}`);
+        if (data.reason) console.log(`  Reason: ${data.reason}`);
+        if (data.proposed_by) console.log(`  Proposed by: ${data.proposed_by}`);
+        if (data.decided_by) console.log(`  Decided by: ${data.decided_by}`);
+      }
+
+      console.log(`  Created: ${new Date(data.created_at).toLocaleString()}`);
+      console.log(`  Updated: ${new Date(data.updated_at).toLocaleString()}`);
+
+      if (data.metadata) {
+        console.log(`  Metadata: ${JSON.stringify(data.metadata, null, 2)}`);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      if (error.response) {
+        console.error('Details:', error.response.detail);
+      }
+      process.exit(1);
+    }
+  });
+
+// List payments command
+program
+  .command('payments:list')
+  .description('List payments with pagination')
+  .option('--server <url>', 'PEAC server URL', 'http://localhost:3000')
+  .option('--limit <limit>', 'Number of items per page', '20')
+  .option('--cursor <cursor>', 'Pagination cursor')
+  .option('--all', 'Fetch all payments (paginate automatically)')
+  .action(async (options) => {
+    try {
+      const client = new Client({ baseUrl: options.server });
+      const limit = parseInt(options.limit);
+
+      if (options.all) {
+        console.log('Fetching all payments...\n');
+        let count = 0;
+
+        for await (const payment of client.paginatePayments({ limit })) {
+          count++;
+          console.log(`${count}. ${payment.id}`);
+          console.log(`   Rail: ${payment.rail}, Amount: ${payment.amount} ${payment.currency}`);
+          console.log(
+            `   Status: ${payment.status}, Created: ${new Date(payment.created_at).toLocaleDateString()}`,
+          );
+          console.log('');
+        }
+
+        console.log(`Total payments: ${count}`);
+      } else {
+        console.log('Fetching payments...\n');
+
+        const response = await client.listPayments({
+          limit,
+          cursor: options.cursor,
+        });
+
+        const payments = response.data.items;
+
+        if (payments.length === 0) {
+          console.log('No payments found.');
+          return;
+        }
+
+        payments.forEach((payment, index) => {
+          console.log(`${index + 1}. ${payment.id}`);
+          console.log(`   Rail: ${payment.rail}, Amount: ${payment.amount} ${payment.currency}`);
+          console.log(
+            `   Status: ${payment.status}, Created: ${new Date(payment.created_at).toLocaleDateString()}`,
+          );
+          console.log('');
+        });
+
+        console.log(`Showing ${payments.length} payments`);
+
+        if (response.data.next_cursor) {
+          console.log(`Next page: --cursor ${response.data.next_cursor}`);
+        }
+
+        if (response.data.has_more) {
+          console.log('More payments available. Use --all to fetch all.');
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      if (error.response) {
+        console.error('Details:', error.response.detail);
+      }
+      process.exit(1);
+    }
+  });
+
+// Updated negotiate command to use new API
+program
+  .command('negotiate:create <domain>')
+  .description('Create a new negotiation with a publisher')
+  .option('--server <url>', 'PEAC server URL', 'http://localhost:3000')
+  .option('--terms <terms>', 'Terms as JSON string')
+  .option('--context <context>', 'Context as JSON string')
+  .option('--proposed-by <who>', 'Who is proposing the negotiation')
+  .action(async (domain, options) => {
+    try {
+      const client = new Client({ baseUrl: options.server });
+
+      console.log(`Creating negotiation with ${domain}...`);
+
+      const negotiationData = {
+        proposed_by: options.proposedBy,
+      };
+
+      if (options.terms) {
+        try {
+          negotiationData.terms = JSON.parse(options.terms);
+        } catch (error) {
+          throw new Error('Invalid terms JSON format');
+        }
+      }
+
+      if (options.context) {
+        try {
+          negotiationData.context = JSON.parse(options.context);
+        } catch (error) {
+          throw new Error('Invalid context JSON format');
+        }
+      }
+
+      const response = await client.createNegotiation(negotiationData, {
+        idempotencyKey: client.generateIdempotencyKey(),
+      });
+
+      console.log('✓ Negotiation created successfully');
+      console.log(`  ID: ${response.data.id}`);
+      console.log(`  State: ${response.data.state}`);
+      console.log(`  Created: ${response.data.created_at}`);
+
+      if (response.data.terms) {
+        console.log(`  Terms: ${JSON.stringify(response.data.terms, null, 2)}`);
+      }
+
+      if (response.data.context) {
+        console.log(`  Context: ${JSON.stringify(response.data.context, null, 2)}`);
+      }
+
+      console.log(`\nNext steps:`);
+      console.log(`  - Use 'peac status ${response.data.id}' to check progress`);
+      console.log(`  - The other party can accept with 'peac accept ${response.data.id}'`);
+      console.log(`  - Or reject with 'peac reject ${response.data.id} "reason"'`);
+    } catch (error) {
+      console.error('Error:', error.message);
+      if (error.response) {
+        console.error('Details:', error.response.detail);
+      }
+      process.exit(1);
+    }
+  });
+
+// Updated pay command to use new API
+program
+  .command('pay:create')
+  .description('Create a payment using the new API')
+  .option('--server <url>', 'PEAC server URL', 'http://localhost:3000')
+  .option('--rail <rail>', 'Payment rail (credits, x402)', 'credits')
+  .option('--amount <amount>', 'Amount to pay', '10')
+  .option('--currency <currency>', 'Currency code', 'USD')
+  .option('--metadata <metadata>', 'Metadata as JSON string')
+  .action(async (options) => {
+    try {
+      const client = new Client({ baseUrl: options.server });
+
+      console.log(`Creating ${options.rail} payment...`);
+
+      const paymentData = {
+        rail: options.rail,
+        amount: parseFloat(options.amount),
+        currency: options.currency,
+      };
+
+      if (options.metadata) {
+        try {
+          paymentData.metadata = JSON.parse(options.metadata);
+        } catch (error) {
+          throw new Error('Invalid metadata JSON format');
+        }
+      }
+
+      const response = await client.createPayment(paymentData, {
+        idempotencyKey: client.generateIdempotencyKey(),
+      });
+
+      console.log('✓ Payment created successfully');
+      console.log(`  ID: ${response.data.id}`);
+      console.log(`  Rail: ${response.data.rail}`);
+      console.log(`  Amount: ${response.data.amount} ${response.data.currency}`);
+      console.log(`  Status: ${response.data.status}`);
+      console.log(`  Created: ${response.data.created_at}`);
+
+      if (response.data.external_id) {
+        console.log(`  External ID: ${response.data.external_id}`);
+      }
+
+      console.log(`\nNext steps:`);
+      console.log(`  - Use 'peac status ${response.data.id}' to check payment status`);
+
+      if (response.data.status === 'requires_action') {
+        console.log(`  - Payment requires additional action to complete`);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      if (error.response) {
+        console.error('Details:', error.response.detail);
+      }
+      process.exit(1);
+    }
+  });
+
+// Health check commands
+program
+  .command('health')
+  .description('Check server health')
+  .option('--server <url>', 'PEAC server URL', 'http://localhost:3000')
+  .option('--check <type>', 'Health check type (liveness, readiness)', 'readiness')
+  .action(async (options) => {
+    try {
+      const client = new Client({ baseUrl: options.server });
+
+      console.log(`Checking ${options.check}...`);
+
+      let response;
+      if (options.check === 'liveness') {
+        response = await client.getLiveness();
+      } else {
+        response = await client.getReadiness();
+      }
+
+      const health = response.data;
+
+      console.log(`\n${options.check === 'liveness' ? 'Liveness' : 'Readiness'} Check Results`);
+      console.log('─'.repeat(40));
+      console.log(`  Overall Status: ${health.status}`);
+      console.log(`  Timestamp: ${health.timestamp}`);
+      console.log(`  Uptime: ${health.uptime_seconds}s`);
+
+      if (health.checks && health.checks.length > 0) {
+        console.log('\n  Component Checks:');
+        health.checks.forEach((check) => {
+          const icon = check.status === 'pass' ? '✓' : '✗';
+          console.log(`    ${icon} ${check.name}: ${check.status}`);
+
+          if (check.duration_ms !== undefined) {
+            console.log(`      Duration: ${check.duration_ms}ms`);
+          }
+
+          if (check.details && Object.keys(check.details).length > 0) {
+            console.log(`      Details: ${JSON.stringify(check.details, null, 6)}`);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      if (error.response) {
+        console.error('Details:', error.response.detail);
+      }
       process.exit(1);
     }
   });

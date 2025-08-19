@@ -5,8 +5,7 @@ import { contentNegotiation } from '../middleware/content-negotiation';
 import { logger } from '../../logging';
 import { metrics } from '../../metrics';
 import { problemDetails } from '../problems';
-
-const CAPABILITIES_VERSION = '0.9.6';
+import { getVersionInfo } from '../../version';
 const CAPABILITIES_MEDIA_TYPE = 'application/vnd.peac.capabilities+json';
 
 // Fixed last modified for stable caching
@@ -38,6 +37,8 @@ export function _invalidateCapabilitiesCache(): void {
 
 export interface PEACCapabilities {
   version: string;
+  protocol_version: string;
+  min_protocol_version: string;
   conformance_level: 'L0' | 'L1' | 'L2' | 'L3' | 'L4';
   protocols: {
     bridges: string[];
@@ -82,8 +83,12 @@ export interface PEACCapabilities {
 }
 
 function buildCapabilities(): PEACCapabilities {
+  const versionInfo = getVersionInfo();
+
   return {
-    version: CAPABILITIES_VERSION,
+    version: versionInfo.version,
+    protocol_version: versionInfo.protocol_version,
+    min_protocol_version: versionInfo.min_protocol_version,
     conformance_level: 'L1',
     protocols: {
       bridges: ['mcp', 'a2a', 'openai', 'langchain'],
@@ -170,8 +175,9 @@ export async function handleCapabilities(req: Request, res: Response): Promise<v
     }
 
     // Check content negotiation
+    const versionInfo = getVersionInfo();
     const acceptable = contentNegotiation.negotiate(req, [
-      `${CAPABILITIES_MEDIA_TYPE};version=${CAPABILITIES_VERSION}`,
+      `${CAPABILITIES_MEDIA_TYPE};version=${versionInfo.version}`,
       'application/json', // Fallback for compatibility
     ]);
 
@@ -179,7 +185,7 @@ export async function handleCapabilities(req: Request, res: Response): Promise<v
       timer({ status: 406 });
       return problemDetails.send(res, 'not_acceptable', {
         detail: 'The requested media type is not supported',
-        supported: [`${CAPABILITIES_MEDIA_TYPE};version=${CAPABILITIES_VERSION}`],
+        supported: [`${CAPABILITIES_MEDIA_TYPE};version=${versionInfo.version}`],
       });
     }
 
@@ -195,7 +201,7 @@ export async function handleCapabilities(req: Request, res: Response): Promise<v
     timer({ status: 200 });
     res.status(200).send(capabilitiesJSON);
 
-    logger.info({ version: CAPABILITIES_VERSION }, 'Capabilities served successfully');
+    logger.info({ version: versionInfo.version }, 'Capabilities served successfully');
   } catch (error) {
     timer({ status: 500 });
     logger.error({ error }, 'Failed to serve capabilities');
