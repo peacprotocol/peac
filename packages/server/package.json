@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/server",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "PEAC Protocol - Enterprise Automated Economy Infrastructure",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
