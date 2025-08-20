@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { getRedis } from '../utils/redis-pool';
@@ -24,7 +24,39 @@ export async function createServer() {
     next();
   });
   app.use(cors({ origin: config.gates.corsOrigins }));
+
+  // Raw body middleware for webhook verification  
+  app.use(
+    '/webhooks/peac',
+    express.raw({ type: ['application/json', 'application/*+json'], limit: '1mb' }),
+    (req, _res, next) => {
+      // Store the raw buffer as string for signature verification
+      (req as Request & { rawBody?: string }).rawBody = req.body.toString('utf8');
+      try {
+        // Parse JSON for route handlers but keep rawBody for verification
+        req.body = JSON.parse((req as Request & { rawBody?: string }).rawBody || '');
+      } catch {
+        // Invalid JSON will be handled by validation middleware  
+      }
+      next();
+    },
+  );
+
   app.use(express.json({ limit: '1mb' }));
+  
+  // JSON parsing error handler - must be after express.json()
+  app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof SyntaxError && 'body' in err && (err as unknown as { type: string }).type === 'entity.parse.failed') {
+      res.setHeader('Content-Type', 'application/problem+json');
+      return res.status(400).json({
+        type: 'https://peacprotocol.org/problems/validation-error',
+        title: 'Validation Error',
+        status: 400,
+        detail: 'Invalid JSON in request body'
+      });
+    }
+    return next(err);
+  });
 
   if (config.gates.healthEnabled) {
     app.get('/healthz', async (_req, res) => {
