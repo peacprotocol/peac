@@ -162,7 +162,7 @@ export async function handleCapabilities(req: Request, res: Response): Promise<v
       res.set({
         ETag: capabilitiesETag,
         'Last-Modified': CAPABILITIES_LAST_MODIFIED,
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+        'Cache-Control': 'no-cache',
         Vary: 'Accept, Accept-Encoding',
       });
       res.status(304).end();
