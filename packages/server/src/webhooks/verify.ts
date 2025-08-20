@@ -108,7 +108,14 @@ export function verifyWebhookSignature(
   }
 
   // Verify signature using new canonical format
-  const computedSig = createWebhookSignature(secret, timestamp, rawBody, options);
+  const computedSigFull = createWebhookSignature(secret, timestamp, rawBody, options);
+  const computedParsed = parseWebhookSignature(computedSigFull);
+  
+  if (!computedParsed) {
+    return { valid: false, reason: 'signature_computation_error' };
+  }
+
+  const computedSig = computedParsed.signature;
 
   if (computedSig.length !== expectedSig.length) {
     return { valid: false, reason: 'signature_mismatch' };

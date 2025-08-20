@@ -4,6 +4,10 @@
  * Tests successful webhook processing with valid HMAC signatures.
  */
 
+// Set webhook secret BEFORE importing modules that use it
+const webhookSecret = 'test-webhook-secret-key';
+process.env.PEAC_WEBHOOK_SECRET = webhookSecret;
+
 import request from 'supertest';
 import { createServer } from '../../src/http/server';
 import { Application } from 'express';
@@ -11,11 +15,8 @@ import { createWebhookSignature } from '../../src/webhooks/verify';
 
 describe('Webhooks Success Path - Valid HMAC → 204', () => {
   let app: Application;
-  const webhookSecret = 'test-webhook-secret-key';
 
   beforeAll(async () => {
-    // Set webhook secret for testing
-    process.env.PEAC_WEBHOOK_SECRET = webhookSecret;
     app = await createServer();
   });
 
