@@ -13,11 +13,13 @@ export interface IdempotencyConfig {
 
 export class IdempotencyMiddleware {
   private cache: Map<string, { response: any; timestamp: number }> = new Map();
-  private cleanupInterval: NodeJS.Timeout;
+  private cleanupInterval?: NodeJS.Timeout;
 
   constructor(private config: IdempotencyConfig) {
-    // Cleanup expired entries every 5 minutes
-    this.cleanupInterval = setInterval(() => this.cleanup(), 300000);
+    // Cleanup expired entries every 5 minutes (skip in test environment)
+    if (process.env.NODE_ENV !== 'test') {
+      this.cleanupInterval = setInterval(() => this.cleanup(), 300000);
+    }
   }
 
   middleware() {
@@ -130,7 +132,7 @@ export class IdempotencyMiddleware {
 
   private isPaymentOperation(req: Request): boolean {
     // Detect payment-related operations
-    const paymentPaths = ['/pay', '/payment', '/negotiate', '/finalize'];
+    const paymentPaths = ['/pay', '/payment', '/negotiate', '/finalize', '/peac/payments/charges'];
     return paymentPaths.some((path) => req.path.includes(path));
   }
 
@@ -161,6 +163,12 @@ export class IdempotencyMiddleware {
       cacheSize: this.cache.size,
       enabled: this.config.enabled,
     };
+  }
+
+  dispose() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval as any);
+    }
   }
 }
 

@@ -44,6 +44,14 @@ export class ProblemDetailsHandler {
       },
     ],
     [
+      'not_found',
+      {
+        type: 'https://peacprotocol.org/problems/not-found',
+        title: 'Not Found',
+        status: 404,
+      },
+    ],
+    [
       'not_acceptable',
       {
         type: 'https://peacprotocol.org/problems/not-acceptable',
@@ -57,6 +65,46 @@ export class ProblemDetailsHandler {
         type: 'https://peacprotocol.org/problems/unsupported-media-type',
         title: 'Unsupported Media Type',
         status: 415,
+      },
+    ],
+    [
+      'protocol_version_required',
+      {
+        type: 'https://peacprotocol.org/problems/protocol-version-required',
+        title: 'Upgrade Required',
+        status: 426,
+      },
+    ],
+    [
+      'protocol_version_unsupported',
+      {
+        type: 'https://peacprotocol.org/problems/protocol-version-unsupported', 
+        title: 'Upgrade Required',
+        status: 426,
+      },
+    ],
+    [
+      'invalid_reference',
+      {
+        type: 'https://peacprotocol.org/problems/invalid-reference',
+        title: 'Unprocessable Entity',
+        status: 422,
+      },
+    ],
+    [
+      'webhook_signature_invalid',
+      {
+        type: 'https://peacprotocol.org/problems/webhook-signature-invalid',
+        title: 'Bad Request',
+        status: 400,
+      },
+    ],
+    [
+      'agreement_mismatch',
+      {
+        type: 'https://peacprotocol.org/problems/agreement-mismatch',
+        title: 'Conflict',
+        status: 409,
       },
     ],
     [

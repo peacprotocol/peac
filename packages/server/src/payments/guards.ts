@@ -85,6 +85,10 @@ export class PaymentGuards {
   }
 
   isHealthy(): boolean {
+    // Mock provider is always healthy
+    if (process.env.PAYMENT_PROVIDER === 'mock') {
+      return true;
+    }
     return this.healthy;
   }
 
@@ -97,6 +101,10 @@ export class PaymentGuards {
   }
 
   canProcessPayments(): boolean {
+    // Allow mock provider in test mode
+    if (process.env.PAYMENT_PROVIDER === 'mock') {
+      return true;
+    }
     return this.config.mode === 'live' && this.healthy;
   }
 
