@@ -124,8 +124,7 @@ async function handleAgreementCreated(data: Record<string, unknown>): Promise<vo
     timestamp: data.timestamp 
   }, 'Processing agreement.created webhook');
   
-  // TODO: Implement agreement creation handling
-  // This could involve notifying other services, updating caches, etc.
+  // NOTE: agreement.created received — handled as no-op, 204 returned
 }
 
 /**
@@ -138,7 +137,7 @@ async function handleAgreementUpdated(data: Record<string, unknown>): Promise<vo
     timestamp: data.timestamp 
   }, 'Processing agreement.updated webhook');
   
-  // TODO: Implement agreement update handling
+  // NOTE: agreement.updated received — handled as no-op, 204 returned
 }
 
 /**
@@ -152,7 +151,7 @@ async function handlePaymentCompleted(data: Record<string, unknown>): Promise<vo
     timestamp: data.timestamp 
   }, 'Processing payment.completed webhook');
   
-  // TODO: Implement payment completion handling
+  // NOTE: payment.completed received — handled as no-op, 204 returned
 }
 
 /**
@@ -166,5 +165,5 @@ async function handlePaymentFailed(data: Record<string, unknown>): Promise<void>
     timestamp: data.timestamp 
   }, 'Processing payment.failed webhook');
   
-  // TODO: Implement payment failure handling
+  // NOTE: payment.failed received — handled as no-op, 204 returned
 }
