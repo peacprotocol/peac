@@ -69,6 +69,8 @@ export async function createServer() {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function problemErrorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
+  // Touch unused params to satisfy TS noUnusedParameters without changing behavior.
+  void req; void _next;
   if (res.headersSent) return; // let Express default handler print
   const status =
     typeof err?.status === 'number'
