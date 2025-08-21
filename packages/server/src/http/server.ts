@@ -1,7 +1,9 @@
 /* istanbul ignore file */
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import { problemDetails } from './problems';
 import { getRedis } from '../utils/redis-pool';
 import { getMetricsRegistry } from '../metrics';
 import { createRoutes } from './routes';
@@ -53,5 +55,43 @@ export async function createServer() {
   });
 
   app.use('/', createRoutes());
+  
+  // Global error handler - must be last
+  app.use(problemErrorHandler);
+  
   return app;
+}
+
+/**
+ * Global Problem+JSON error handler.
+ * Ensures validation/protocol errors surface with correct status instead of generic 500.
+ * Keep as the LAST middleware.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function problemErrorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
+  if (res.headersSent) return; // let Express default handler print
+  const status =
+    typeof err?.status === 'number'
+      ? err.status
+      : typeof err?.statusCode === 'number'
+      ? err.statusCode
+      : 500;
+  // Best-effort code mapping; use explicit code if present
+  const explicit = typeof err?.code === 'string' ? err.code : undefined;
+  const code =
+    explicit ??
+    (status === 422
+      ? 'validation_error'
+      : status === 409
+      ? 'conflict'
+      : status === 404
+      ? 'not_found'
+      : status === 426
+      ? 'upgrade_required'
+      : 'internal_error');
+
+  problemDetails.send(res, code as any, {
+    status,
+    detail: err?.message || 'Unexpected error',
+  });
 }

@@ -153,6 +153,13 @@ export class EnhancedRateLimiter {
       clearInterval(this.cleanupInterval as any);
     }
   }
+
+  /**
+   * Back-compat: some tests call destroy(); alias to dispose().
+   */
+  destroy(): void {
+    this.dispose();
+  }
 }
 
 // Test-friendly rate limiting configuration
