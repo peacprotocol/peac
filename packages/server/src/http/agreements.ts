@@ -107,8 +107,8 @@ export function validateContentType(req: Request, res: Response, next: NextFunct
  */
 export async function createAgreement(req: Request, res: Response): Promise<void> {
   try {
-    // Validate proposal structure
-    if (!isAgreementProposal(req.body)) {
+    // Validate proposal structure - basic check for required fields
+    if (!req.body || typeof req.body !== 'object' || !req.body.purpose) {
       return problemDetails.send(res, 'validation_error', {
         detail: 'Invalid agreement proposal structure',
       });

@@ -23,7 +23,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
     // Create a valid agreement for reference error testing
     validAgreement = {
-      id: 'agr_catalog_test_001',
+      id: 'agr_01JFNKT5VFQG0XVBR7Q92JZ3M9', // Valid ULID format
       fingerprint: 'c'.repeat(64),
       protocol_version: '0.9.6',
       status: 'valid',
@@ -74,7 +74,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
   describe('404 - Not Found', () => {
     it('should return consistent problem details for unknown agreement', async () => {
-      const response = await request(app).get('/peac/agreements/agr_unknown_agreement').expect(404);
+      const response = await request(app).get('/peac/agreements/agr_01JFNKT5UNKNOWN999999').expect(404);
 
       expect(response.headers['content-type']).toMatch(/application\/problem\+json/);
       expect(response.body).toMatchSnapshot({
@@ -143,7 +143,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
       const response = await request(app)
         .post('/peac/payments/charges')
         .set('X-PEAC-Protocol', '0.9.6')
-        .set('X-PEAC-Agreement', 'agr_nonexistent_ref')
+        .set('X-PEAC-Agreement', 'agr_01JFNKT5NONEXISTENT999999')
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
@@ -248,7 +248,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
     it('should use peacprotocol.org namespace for problem types', async () => {
       const responses = await Promise.all([
-        request(app).get('/peac/agreements/agr_nonexistent').expect(404),
+        request(app).get('/peac/agreements/agr_01JFNKT5NOTFOUND999999').expect(404),
         request(app)
           .post('/peac/agreements')
           .set('Content-Type', 'text/plain')
