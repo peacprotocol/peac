@@ -47,7 +47,6 @@
     "prepublishOnly": "npm run build && npm run test:coverage && npm run sbom"
   },
   "dependencies": {
-    "@peacprotocol/schema": "workspace:*",
     "bullmq": "^5.1.0",
     "cors": "^2.8.5",
     "ethers": "^6.15.0",

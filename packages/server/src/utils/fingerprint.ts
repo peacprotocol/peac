@@ -5,7 +5,7 @@
  * Excludes volatile fields and ensures reproducible fingerprints.
  */
 
-import { createHash } from 'crypto';
+import { createHash, timingSafeEqual } from 'crypto';
 import { AgreementProposal } from '@peacprotocol/schema';
 
 /**
@@ -93,5 +93,5 @@ export function compareFingerprints(fp1: string, fp2: string): boolean {
   }
   
   // Use timing-safe comparison for security
-  return createHash('sha256').update(fp1).digest('hex') === createHash('sha256').update(fp2).digest('hex');
+  return timingSafeEqual(Buffer.from(fp1, 'hex'), Buffer.from(fp2, 'hex'));
 }
