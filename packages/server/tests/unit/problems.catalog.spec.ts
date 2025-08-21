@@ -74,7 +74,9 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
   describe('404 - Not Found', () => {
     it('should return consistent problem details for unknown agreement', async () => {
-      const response = await request(app).get('/peac/agreements/agr_01JFNKT5UNKNOWN999999').expect(404);
+      const response = await request(app)
+        .get('/peac/agreements/agr_01JFNKT5UNKNOWN999999')
+        .expect(404);
 
       expect(response.headers['content-type']).toMatch(/application\/problem\+json/);
       expect(response.body).toMatchSnapshot({
