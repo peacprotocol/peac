@@ -23,7 +23,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
     // Create a valid agreement for reference error testing
     validAgreement = {
-      id: 'agr_01JFNKT5VFQG0XVBR7Q92JZ3M9', // Valid ULID format
+      id: 'agr_01JFNKT5VFQG0XVBR7Q92JZ3M9', // Valid ULID format (26 chars)
       fingerprint: 'c'.repeat(64),
       protocol_version: '0.9.6',
       status: 'valid',
