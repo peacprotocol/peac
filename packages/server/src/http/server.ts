@@ -28,6 +28,21 @@ export async function createServer() {
   app.use(cors({ origin: config.gates.corsOrigins }));
   app.use(express.json({ limit: '1mb' }));
 
+  /**
+   * JSON parse errors must be mapped to RFC7807 validation errors (400)
+   * Jest expects "validation_error" for malformed JSON bodies.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    // Express throws SyntaxError on invalid JSON (from express.json)
+    if (err instanceof SyntaxError) {
+      return problemDetails.send(res, 'validation_error', {
+        detail: 'Invalid JSON in request body',
+      });
+    }
+    return _next(err as Error);
+  });
+
   if (config.gates.healthEnabled) {
     app.get('/healthz', async (_req, res) => {
       const health: {
@@ -73,6 +88,32 @@ export function problemErrorHandler(err: any, req: Request, res: Response, _next
   void req;
   void _next;
   if (res.headersSent) return; // let Express default handler print
+
+  // Known protocol header problems → 426
+  if (err?.code === 'protocol_error' || /X-PEAC-Protocol/i.test(err?.message || '')) {
+    return problemDetails.send(res, 'protocol_error', {
+      detail: err?.message || 'Protocol version required or invalid',
+    });
+  }
+  // Not found semantics
+  if (err?.code === 'not_found' || /not found/i.test(err?.message || '')) {
+    return problemDetails.send(res, 'not_found', {
+      detail: err?.message || 'Resource not found',
+    });
+  }
+  // Fingerprint/ETag conflicts → 409
+  if (err?.code === 'fingerprint_mismatch' || /fingerprint/i.test(err?.message || '')) {
+    return problemDetails.send(res, 'fingerprint_mismatch', {
+      detail: err?.message || 'Fingerprint mismatch',
+    });
+  }
+  // Validation issues (fallback)
+  if (err?.code === 'validation_error') {
+    return problemDetails.send(res, 'validation_error', {
+      detail: err?.message || 'Validation error',
+    });
+  }
+
   const status =
     typeof err?.status === 'number'
       ? err.status

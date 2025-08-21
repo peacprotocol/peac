@@ -88,3 +88,14 @@ export function compareFingerprints(fp1: string, fp2: string): boolean {
   // Use timing-safe comparison for security
   return timingSafeEqual(Buffer.from(fp1, 'hex'), Buffer.from(fp2, 'hex'));
 }
+
+/**
+ * Assert that fingerprints match, throwing error with proper code if not
+ */
+export function assertFingerprintMatch(expected: string, actual: string): void {
+  if (!timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(actual, 'hex'))) {
+    const err = new Error('Fingerprint mismatch') as Error & { code: string };
+    err.code = 'fingerprint_mismatch';
+    throw err;
+  }
+}

@@ -29,11 +29,9 @@ export function validateProtocolVersion(req: Request, res: Response, next: NextF
   const protocolHeader = req.get('X-PEAC-Protocol');
 
   if (!protocolHeader) {
-    return problemDetails.send(res, 'protocol_version_required', {
-      detail: 'X-PEAC-Protocol header is required',
-      required_header: 'X-PEAC-Protocol',
-      supported: ['0.9.6'],
-    });
+    const err: any = new Error('Missing X-PEAC-Protocol header');
+    err.code = 'protocol_error';
+    return next(err);
   }
 
   if (protocolHeader !== '0.9.6') {
