@@ -115,7 +115,7 @@ export class PaymentGuards {
   validatePaymentAttempt(provider: string, amount: number): void {
     // Use the same logic as canProcessPayments for consistency
     let canProcess = false;
-    
+
     if (process.env.PEAC_ENFORCE_NON_LIVE_BLOCK === '1') {
       canProcess = this.config.mode === 'live' && this.healthy;
     } else if (process.env.NODE_ENV === 'test' && process.env.PAYMENT_PROVIDER === 'mock') {
@@ -123,7 +123,7 @@ export class PaymentGuards {
     } else {
       canProcess = this.config.mode === 'live' && this.healthy;
     }
-    
+
     if (!canProcess) {
       // Throttled warning to avoid log spam
       const now = Date.now();
