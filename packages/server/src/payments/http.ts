@@ -5,13 +5,20 @@
  * All payment operations must reference a valid agreement.
  */
 
-import type { Request, Response } from 'express';
-import { PaymentChargeRequest, PaymentReceipt, extractAgreementId, isAgreementValid } from '@peacprotocol/schema';
+import type { Request, Response, NextFunction } from 'express';
+import { PaymentChargeRequest, PaymentReceipt, extractAgreementId, isAgreementValid, Agreement } from '@peacprotocol/schema';
 import { problemDetails } from '../http/problems';
 import { logger } from '../logging';
 import { metrics } from '../metrics';
 import { paymentGuards } from './guards';
 import { agreementStore } from '../agreements/store';
+
+/**
+ * Request with attached agreement from middleware
+ */
+interface AgreementRequest extends Request {
+  agreement?: Agreement;
+}
 
 /**
  * Type definition for payment providers
@@ -48,7 +55,7 @@ async function loadProvider(): Promise<{
 /**
  * Validate agreement binding middleware
  */
-export function validateAgreementBinding(req: Request, res: Response, next: Function): void {
+export function validateAgreementBinding(req: Request, res: Response, next: NextFunction): void {
   const agreementHeader = req.get('X-PEAC-Agreement');
   
   if (!agreementHeader) {
@@ -108,7 +115,7 @@ export function validateAgreementBinding(req: Request, res: Response, next: Func
   }
   
   // Attach agreement to request for handler use
-  (req as any).agreement = agreement;
+  (req as AgreementRequest).agreement = agreement;
   next();
 }
 
@@ -119,7 +126,7 @@ export function validateAgreementBinding(req: Request, res: Response, next: Func
 export async function handlePaymentCharge(req: Request, res: Response): Promise<void> {
   try {
     // Extract agreement from middleware
-    const agreement = (req as any).agreement;
+    const agreement = (req as AgreementRequest).agreement;
     if (!agreement) {
       return problemDetails.send(res, 'internal_error', {
         detail: 'Agreement validation middleware failed'
@@ -153,7 +160,7 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
 
     // Generate payment receipt
     const receipt: PaymentReceipt = {
-      id: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Better ID generation needed
+      id: `pay_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`, // Better ID generation needed
       amount: paymentRequest.amount,
       currency: paymentRequest.currency || 'USD',
       agreement_id: agreement.id,
@@ -186,7 +193,7 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
     
     logger.error({ 
       error: message,
-      agreementId: (req as any).agreement?.id,
+      agreementId: (req as AgreementRequest).agreement?.id,
       amount: req.body?.amount 
     }, 'Payment processing failed');
     

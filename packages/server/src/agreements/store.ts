@@ -5,7 +5,7 @@
  * In production, this should be replaced with a persistent storage implementation.
  */
 
-import { Agreement, isAgreementValid } from '@peacprotocol/schema';
+import { Agreement, isAgreementValid, AgreementInvalidReason } from '@peacprotocol/schema';
 import { logger } from '../logging';
 
 /**
@@ -71,7 +71,7 @@ class AgreementStore {
   /**
    * Update agreement status
    */
-  updateStatus(id: string, status: 'valid' | 'invalid', reason?: string): boolean {
+  updateStatus(id: string, status: 'valid' | 'invalid', reason?: AgreementInvalidReason): boolean {
     const agreement = this.agreements.get(id);
     if (!agreement) {
       return false;
@@ -79,7 +79,7 @@ class AgreementStore {
 
     agreement.status = status;
     if (reason) {
-      agreement.reason = reason as any;
+      agreement.reason = reason;
     }
 
     logger.info({ agreementId: id, status, reason }, 'Agreement status updated');

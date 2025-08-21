@@ -39,17 +39,18 @@ export function computeAgreementFingerprint(proposal: AgreementProposal): string
 /**
  * Remove volatile/mutable fields from object for fingerprinting
  */
-function removeVolatileFields(obj: any): any {
+function removeVolatileFields(obj: unknown): unknown {
   if (obj === null || typeof obj !== 'object') {
     return obj;
   }
   
   if (Array.isArray(obj)) {
-    return obj.map(removeVolatileFields);
+    return (obj as unknown[]).map(removeVolatileFields);
   }
   
-  const cleaned: any = {};
-  for (const [key, value] of Object.entries(obj)) {
+  const source = obj as Record<string, unknown>;
+  const cleaned: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(source)) {
     if (!EXCLUDED_FIELDS.has(key)) {
       cleaned[key] = removeVolatileFields(value);
     }
@@ -61,16 +62,17 @@ function removeVolatileFields(obj: any): any {
 /**
  * Convert object to canonical JSON string with sorted keys
  */
-function canonicalJSON(obj: any): string {
+function canonicalJSON(obj: unknown): string {
   if (obj === null) return 'null';
   if (typeof obj !== 'object') return JSON.stringify(obj);
   
   if (Array.isArray(obj)) {
-    return '[' + obj.map(canonicalJSON).join(',') + ']';
+    return '[' + (obj as unknown[]).map(canonicalJSON).join(',') + ']';
   }
   
-  const keys = Object.keys(obj).sort();
-  const pairs = keys.map(key => `"${key}":${canonicalJSON(obj[key])}`);
+  const source = obj as Record<string, unknown>;
+  const keys = Object.keys(source).sort();
+  const pairs = keys.map(key => `"${key}":${canonicalJSON(source[key])}`);
   return '{' + pairs.join(',') + '}';
 }
 
@@ -91,9 +93,5 @@ export function compareFingerprints(fp1: string, fp2: string): boolean {
   }
   
   // Use timing-safe comparison for security
-  const crypto = require('crypto');
-  return crypto.timingSafeEqual(
-    Buffer.from(fp1, 'hex'),
-    Buffer.from(fp2, 'hex')
-  );
+  return createHash('sha256').update(fp1).digest('hex') === createHash('sha256').update(fp2).digest('hex');
 }
