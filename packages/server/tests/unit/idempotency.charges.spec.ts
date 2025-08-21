@@ -1,6 +1,6 @@
 /**
  * Idempotency Tests for Payment Charges
- * 
+ *
  * Tests idempotent behavior of POST /peac/payments/charges with Idempotency-Key header.
  */
 
@@ -21,7 +21,7 @@ describe('Payment Charges Idempotency', () => {
 
   beforeEach(() => {
     agreementStore.clear();
-    
+
     // Create a valid agreement for testing
     validAgreement = {
       id: 'agr_idempotency_test',
@@ -34,17 +34,17 @@ describe('Payment Charges Idempotency', () => {
         consent: { required: true, mechanism: 'api' },
         attribution: { required: false },
         pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-        terms: { text: 'Test terms' }
-      }
+        terms: { text: 'Test terms' },
+      },
     };
-    
+
     agreementStore.set(validAgreement.id, validAgreement);
   });
 
   describe('Idempotency-Key Header Support', () => {
     it('should accept custom Idempotency-Key header', async () => {
       const customKey = 'custom-idempotency-key-12345';
-      
+
       const response = await request(app)
         .post('/peac/payments/charges')
         .set('X-PEAC-Protocol', '0.9.6')
@@ -53,7 +53,7 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(200);
 
@@ -63,7 +63,7 @@ describe('Payment Charges Idempotency', () => {
         id: expect.any(String),
         amount: '2500',
         currency: 'USD',
-        agreement_id: validAgreement.id
+        agreement_id: validAgreement.id,
       });
     });
 
@@ -75,18 +75,20 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(200);
 
-      expect(response.headers['idempotency-key']).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+      expect(response.headers['idempotency-key']).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+      );
     });
   });
 
   describe('Idempotent Replay Behavior', () => {
     it('should return same response for duplicate idempotency key within TTL', async () => {
       const idempotencyKey = 'replay-test-key-001';
-      
+
       // First request
       const response1 = await request(app)
         .post('/peac/payments/charges')
@@ -97,13 +99,13 @@ describe('Payment Charges Idempotency', () => {
         .send({
           amount: '2500',
           currency: 'USD',
-          metadata: { order_id: 'order_001' }
+          metadata: { order_id: 'order_001' },
         })
         .expect(200);
 
       expect(response1.headers['idempotency-key']).toBe(idempotencyKey);
       expect(response1.headers['x-idempotent-replay']).toBeUndefined();
-      
+
       // Second request with same key
       const response2 = await request(app)
         .post('/peac/payments/charges')
@@ -114,14 +116,14 @@ describe('Payment Charges Idempotency', () => {
         .send({
           amount: '3000', // Different amount - should be ignored
           currency: 'EUR', // Different currency - should be ignored
-          metadata: { order_id: 'order_002' } // Different metadata - should be ignored
+          metadata: { order_id: 'order_002' }, // Different metadata - should be ignored
         })
         .expect(200);
 
       expect(response2.headers['idempotency-key']).toBe(idempotencyKey);
       expect(response2.headers['x-idempotent-replay']).toBe('true');
       expect(response2.headers['age']).toBeDefined();
-      
+
       // Response should be identical to first request
       expect(response2.body).toEqual(response1.body);
       expect(response2.body.amount).toBe('2500'); // Original amount, not 3000
@@ -131,7 +133,7 @@ describe('Payment Charges Idempotency', () => {
 
     it('should handle sequential requests with same idempotency key', async () => {
       const idempotencyKey = 'sequential-test-key';
-      
+
       // First request
       const response1 = await request(app)
         .post('/peac/payments/charges')
@@ -141,12 +143,12 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '1500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(200);
 
       // Short delay to ensure first request completes
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Second request with same key
       const response2 = await request(app)
@@ -157,19 +159,19 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '1500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(200);
 
       // First should be original
       expect(response1.headers['idempotency-key']).toBe(idempotencyKey);
       expect(response1.headers['x-idempotent-replay']).toBeUndefined();
-      
+
       // Second should be replay
       expect(response2.headers['idempotency-key']).toBe(idempotencyKey);
       expect(response2.headers['x-idempotent-replay']).toBe('true');
       expect(response2.headers['age']).toBeDefined();
-      
+
       // Both should have identical response bodies
       expect(response1.body).toEqual(response2.body);
     });
@@ -178,7 +180,7 @@ describe('Payment Charges Idempotency', () => {
   describe('Error Scenarios', () => {
     it('should validate idempotency key length', async () => {
       const longKey = 'a'.repeat(300); // Exceeds max length
-      
+
       const response = await request(app)
         .post('/peac/payments/charges')
         .set('X-PEAC-Protocol', '0.9.6')
@@ -187,20 +189,20 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(400);
 
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/validation-error',
         status: 400,
-        detail: expect.stringContaining('Idempotency key too long')
+        detail: expect.stringContaining('Idempotency key too long'),
       });
     });
 
     it('should not cache error responses', async () => {
       const idempotencyKey = 'error-test-key';
-      
+
       // First request with invalid agreement (will fail)
       const response1 = await request(app)
         .post('/peac/payments/charges')
@@ -210,13 +212,13 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(422);
 
       expect(response1.headers['idempotency-key']).toBe(idempotencyKey);
       expect(response1.headers['x-idempotent-replay']).toBeUndefined();
-      
+
       // Second request with same key but valid agreement (should process normally)
       const response2 = await request(app)
         .post('/peac/payments/charges')
@@ -226,7 +228,7 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(200);
 
@@ -238,7 +240,7 @@ describe('Payment Charges Idempotency', () => {
   describe('Scope Isolation', () => {
     it('should isolate idempotency keys by method and path', async () => {
       const idempotencyKey = 'scope-test-key';
-      
+
       // POST to payments
       const response1 = await request(app)
         .post('/peac/payments/charges')
@@ -248,7 +250,7 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(200);
 
@@ -263,14 +265,14 @@ describe('Payment Charges Idempotency', () => {
           consent: { required: true, mechanism: 'api' },
           attribution: { required: false },
           pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-          terms: { text: 'Test terms' }
+          terms: { text: 'Test terms' },
         })
         .expect(201);
 
       // Both should be original requests (not replays) due to different scopes
       expect(response1.headers['x-idempotent-replay']).toBeUndefined();
       expect(response2.headers['x-idempotent-replay']).toBeUndefined();
-      
+
       // Responses should be completely different
       expect(response1.body.id).not.toBe(response2.body.id);
     });
@@ -279,7 +281,7 @@ describe('Payment Charges Idempotency', () => {
   describe('Integration with Agreement Binding', () => {
     it('should maintain idempotency across different agreement headers', async () => {
       const idempotencyKey = 'agreement-test-key';
-      
+
       // First request with one agreement
       const response1 = await request(app)
         .post('/peac/payments/charges')
@@ -289,7 +291,7 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(200);
 
@@ -297,7 +299,7 @@ describe('Payment Charges Idempotency', () => {
       const secondAgreement: Agreement = {
         ...validAgreement,
         id: 'agr_second_agreement',
-        fingerprint: 'e'.repeat(64)
+        fingerprint: 'e'.repeat(64),
       };
       agreementStore.set(secondAgreement.id, secondAgreement);
 
@@ -310,7 +312,7 @@ describe('Payment Charges Idempotency', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '3000',
-          currency: 'EUR'
+          currency: 'EUR',
         })
         .expect(200);
 

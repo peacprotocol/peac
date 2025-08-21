@@ -1,6 +1,6 @@
 /**
  * Agreement Store Service for PEAC Protocol v0.9.6
- * 
+ *
  * Centralized agreement storage and retrieval service.
  * In production, this should be replaced with a persistent storage implementation.
  */
@@ -19,7 +19,10 @@ class AgreementStore {
    */
   set(id: string, agreement: Agreement): void {
     this.agreements.set(id, agreement);
-    logger.debug({ agreementId: id, fingerprint: agreement.fingerprint.substring(0, 8) }, 'Agreement stored');
+    logger.debug(
+      { agreementId: id, fingerprint: agreement.fingerprint.substring(0, 8) },
+      'Agreement stored',
+    );
   }
 
   /**
@@ -58,14 +61,14 @@ class AgreementStore {
    * Get agreements by status
    */
   getByStatus(status: 'valid' | 'invalid'): Agreement[] {
-    return Array.from(this.agreements.values()).filter(agreement => agreement.status === status);
+    return Array.from(this.agreements.values()).filter((agreement) => agreement.status === status);
   }
 
   /**
    * Get valid agreements only (status + expiration check)
    */
   getValidAgreements(): Agreement[] {
-    return Array.from(this.agreements.values()).filter(agreement => isAgreementValid(agreement));
+    return Array.from(this.agreements.values()).filter((agreement) => isAgreementValid(agreement));
   }
 
   /**
@@ -93,9 +96,9 @@ class AgreementStore {
     const all = Array.from(this.agreements.values());
     return {
       total: all.length,
-      valid: all.filter(a => a.status === 'valid').length,
-      invalid: all.filter(a => a.status === 'invalid').length,
-      active_valid: all.filter(a => isAgreementValid(a)).length
+      valid: all.filter((a) => a.status === 'valid').length,
+      invalid: all.filter((a) => a.status === 'invalid').length,
+      active_valid: all.filter((a) => isAgreementValid(a)).length,
     };
   }
 

@@ -1,6 +1,6 @@
 /**
  * Health Endpoint Tests
- * 
+ *
  * Tests for liveness and readiness health check endpoints.
  */
 
@@ -17,9 +17,7 @@ describe('Health Endpoints', () => {
 
   describe('Liveness Endpoint', () => {
     it('should return 200 OK for liveness check', async () => {
-      const response = await request(app)
-        .get('/health/live')
-        .expect(200);
+      const response = await request(app).get('/health/live').expect(200);
 
       expect(response.body).toEqual({ status: 'ok', timestamp: expect.any(String) });
       expect(response.headers['content-type']).toMatch(/application\/json/);
@@ -28,14 +26,12 @@ describe('Health Endpoints', () => {
 
   describe('Readiness Endpoint', () => {
     it('should return 200 OK for readiness check', async () => {
-      const response = await request(app)
-        .get('/health/ready')
-        .expect(200);
+      const response = await request(app).get('/health/ready').expect(200);
 
-      expect(response.body).toEqual({ 
-        status: 'ready', 
+      expect(response.body).toEqual({
+        status: 'ready',
         timestamp: expect.any(String),
-        checks: expect.any(Object)
+        checks: expect.any(Object),
       });
       expect(response.headers['content-type']).toMatch(/application\/json/);
     });

@@ -1,6 +1,6 @@
 /**
  * Agreement Store Tests
- * 
+ *
  * Comprehensive tests for the in-memory agreement store service.
  */
 
@@ -19,8 +19,8 @@ describe('Agreement Store', () => {
       consent: { required: true, mechanism: 'api' },
       attribution: { required: false },
       pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-      terms: { text: 'Test terms' }
-    }
+      terms: { text: 'Test terms' },
+    },
   });
 
   const createInvalidAgreement = (): Agreement => ({
@@ -35,8 +35,8 @@ describe('Agreement Store', () => {
       consent: { required: true, mechanism: 'api' },
       attribution: { required: false },
       pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-      terms: { text: 'Test terms' }
-    }
+      terms: { text: 'Test terms' },
+    },
   });
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe('Agreement Store', () => {
     it('should store and retrieve agreements', () => {
       const mockAgreement = createMockAgreement();
       agreementStore.set(mockAgreement.id, mockAgreement);
-      
+
       const retrieved = agreementStore.get(mockAgreement.id);
       expect(retrieved).toEqual(mockAgreement);
     });
@@ -60,7 +60,7 @@ describe('Agreement Store', () => {
     it('should check if agreement exists', () => {
       const mockAgreement = createMockAgreement();
       agreementStore.set(mockAgreement.id, mockAgreement);
-      
+
       expect(agreementStore.has(mockAgreement.id)).toBe(true);
       expect(agreementStore.has('nonexistent')).toBe(false);
     });
@@ -68,11 +68,11 @@ describe('Agreement Store', () => {
     it('should delete agreements', () => {
       const mockAgreement = createMockAgreement();
       agreementStore.set(mockAgreement.id, mockAgreement);
-      
+
       const deleted = agreementStore.delete(mockAgreement.id);
       expect(deleted).toBe(true);
       expect(agreementStore.has(mockAgreement.id)).toBe(false);
-      
+
       const deletedAgain = agreementStore.delete(mockAgreement.id);
       expect(deletedAgain).toBe(false);
     });
@@ -80,12 +80,12 @@ describe('Agreement Store', () => {
     it('should clear all agreements', () => {
       const mockAgreement = createMockAgreement();
       const invalidAgreement = createInvalidAgreement();
-      
+
       agreementStore.set(mockAgreement.id, mockAgreement);
       agreementStore.set(invalidAgreement.id, invalidAgreement);
-      
+
       agreementStore.clear();
-      
+
       expect(agreementStore.get(mockAgreement.id)).toBeUndefined();
       expect(agreementStore.get(invalidAgreement.id)).toBeUndefined();
     });
@@ -95,12 +95,12 @@ describe('Agreement Store', () => {
     it('should get all agreements', () => {
       const mockAgreement = createMockAgreement();
       const invalidAgreement = createInvalidAgreement();
-      
+
       agreementStore.set(mockAgreement.id, mockAgreement);
       agreementStore.set(invalidAgreement.id, invalidAgreement);
-      
+
       const all = agreementStore.getAll();
-      
+
       expect(all).toHaveLength(2);
       expect(all).toContainEqual(mockAgreement);
       expect(all).toContainEqual(invalidAgreement);
@@ -109,16 +109,16 @@ describe('Agreement Store', () => {
     it('should filter agreements by status', () => {
       const mockAgreement = createMockAgreement();
       const invalidAgreement = createInvalidAgreement();
-      
+
       agreementStore.set(mockAgreement.id, mockAgreement);
       agreementStore.set(invalidAgreement.id, invalidAgreement);
-      
+
       const valid = agreementStore.getByStatus('valid');
       const invalid = agreementStore.getByStatus('invalid');
-      
+
       expect(valid).toHaveLength(1);
       expect(valid[0]).toEqual(mockAgreement);
-      
+
       expect(invalid).toHaveLength(1);
       expect(invalid[0]).toEqual(invalidAgreement);
     });
@@ -126,12 +126,12 @@ describe('Agreement Store', () => {
     it('should get valid agreements only', () => {
       const mockAgreement = createMockAgreement();
       const invalidAgreement = createInvalidAgreement();
-      
+
       agreementStore.set(mockAgreement.id, mockAgreement);
       agreementStore.set(invalidAgreement.id, invalidAgreement);
-      
+
       const valid = agreementStore.getValidAgreements();
-      
+
       expect(valid).toHaveLength(1);
       expect(valid[0]).toEqual(mockAgreement);
     });
@@ -141,11 +141,11 @@ describe('Agreement Store', () => {
     it('should update agreement status', () => {
       const mockAgreement = createMockAgreement();
       agreementStore.set(mockAgreement.id, mockAgreement);
-      
+
       const updated = agreementStore.updateStatus(mockAgreement.id, 'invalid', 'revoked');
-      
+
       expect(updated).toBe(true);
-      
+
       const agreement = agreementStore.get(mockAgreement.id);
       expect(agreement!.status).toBe('invalid');
       expect(agreement!.reason).toBe('revoked');
@@ -159,11 +159,11 @@ describe('Agreement Store', () => {
     it('should update status without reason', () => {
       const mockAgreement = createMockAgreement();
       agreementStore.set(mockAgreement.id, mockAgreement);
-      
+
       const updated = agreementStore.updateStatus(mockAgreement.id, 'invalid');
-      
+
       expect(updated).toBe(true);
-      
+
       const agreement = agreementStore.get(mockAgreement.id);
       expect(agreement!.status).toBe('invalid');
     });
@@ -172,29 +172,29 @@ describe('Agreement Store', () => {
   describe('Statistics', () => {
     it('should return stats for empty store', () => {
       const stats = agreementStore.getStats();
-      
+
       expect(stats).toEqual({
         total: 0,
         valid: 0,
         invalid: 0,
-        active_valid: 0
+        active_valid: 0,
       });
     });
 
     it('should return accurate statistics', () => {
       const mockAgreement = createMockAgreement();
       const invalidAgreement = createInvalidAgreement();
-      
+
       agreementStore.set(mockAgreement.id, mockAgreement);
       agreementStore.set(invalidAgreement.id, invalidAgreement);
-      
+
       const stats = agreementStore.getStats();
-      
+
       expect(stats).toEqual({
         total: 2,
         valid: 1,
         invalid: 1,
-        active_valid: 1
+        active_valid: 1,
       });
     });
   });

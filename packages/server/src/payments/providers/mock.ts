@@ -1,6 +1,6 @@
 /**
  * Mock Payment Provider for Testing
- * 
+ *
  * Provides deterministic payment receipts for test environments.
  * Always returns successful payments with predictable IDs.
  */
@@ -22,16 +22,16 @@ export class MockPaymentProvider {
   async processPayment(body: unknown): Promise<string> {
     // Cast to expected format
     const request = body as MockPaymentRequest;
-    
+
     // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 10));
-    
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
     // Return deterministic session token
     const sessionToken = `mock_session_${Date.now()}_${request.agreement_id.slice(-8)}`;
-    
+
     return sessionToken;
   }
-  
+
   /**
    * Generate a deterministic payment ID for consistent testing
    */

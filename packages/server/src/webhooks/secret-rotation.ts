@@ -1,6 +1,6 @@
 /**
  * Webhook Secret Rotation System (Simplified Implementation)
- * 
+ *
  * Provides webhook secret management with rotation capabilities.
  * This is a basic implementation - extend for production use.
  */
@@ -13,7 +13,7 @@ import { logger } from '../logging';
  */
 export interface RotationConfig {
   rotationInterval: number; // milliseconds
-  gracePeriod: number; // milliseconds  
+  gracePeriod: number; // milliseconds
   maxSecrets: number;
 }
 
@@ -118,7 +118,11 @@ export class WebhookSecretManager extends EventEmitter {
   /**
    * Verify signature against current and previous secrets
    */
-  verifySignature(_signature: string, _timestamp: string, _body: string): {
+  verifySignature(
+    _signature: string,
+    _timestamp: string,
+    _body: string,
+  ): {
     valid: boolean;
     secretId?: string;
     version?: number;
@@ -132,7 +136,7 @@ export class WebhookSecretManager extends EventEmitter {
         version: this.currentSecret.version,
       };
     }
-    
+
     return {
       valid: false,
       reason: 'no_active_secret',
@@ -153,7 +157,7 @@ export class WebhookSecretManager extends EventEmitter {
       };
 
       await this.store.save(newSecret);
-      
+
       // Deactivate old secret
       if (this.currentSecret) {
         this.currentSecret.active = false;
@@ -170,11 +174,13 @@ export class WebhookSecretManager extends EventEmitter {
         version: newSecret.version,
       } as RotationEvent);
 
-      logger.info({ 
-        secretId: newSecret.id, 
-        version: newSecret.version 
-      }, 'Webhook secret rotated');
-
+      logger.info(
+        {
+          secretId: newSecret.id,
+          version: newSecret.version,
+        },
+        'Webhook secret rotated',
+      );
     } catch (error) {
       logger.error({ error }, 'Failed to rotate webhook secret');
       throw error;

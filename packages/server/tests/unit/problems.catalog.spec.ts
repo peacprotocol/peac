@@ -1,6 +1,6 @@
 /**
  * Problem Catalog Tests - RFC 7807 Error Response Snapshots
- * 
+ *
  * Golden tests to ensure consistent Problem+JSON formatting across all error types.
  */
 
@@ -20,7 +20,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
   beforeEach(() => {
     agreementStore.clear();
-    
+
     // Create a valid agreement for reference error testing
     validAgreement = {
       id: 'agr_catalog_test_001',
@@ -33,10 +33,10 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
         consent: { required: true, mechanism: 'api' },
         attribution: { required: false },
         pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-        terms: { text: 'Test terms' }
-      }
+        terms: { text: 'Test terms' },
+      },
     };
-    
+
     agreementStore.set(validAgreement.id, validAgreement);
   });
 
@@ -67,21 +67,19 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        trace_id: expect.any(String)
+        trace_id: expect.any(String),
       });
     });
   });
 
   describe('404 - Not Found', () => {
     it('should return consistent problem details for unknown agreement', async () => {
-      const response = await request(app)
-        .get('/peac/agreements/agr_unknown_agreement')
-        .expect(404);
+      const response = await request(app).get('/peac/agreements/agr_unknown_agreement').expect(404);
 
       expect(response.headers['content-type']).toMatch(/application\/problem\+json/);
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        trace_id: expect.any(String)
+        trace_id: expect.any(String),
       });
     });
   });
@@ -96,13 +94,13 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(409);
 
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        trace_id: expect.any(String)
+        trace_id: expect.any(String),
       });
     });
   });
@@ -118,7 +116,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        trace_id: expect.any(String)
+        trace_id: expect.any(String),
       });
     });
   });
@@ -131,13 +129,13 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(422);
 
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        trace_id: expect.any(String)
+        trace_id: expect.any(String),
       });
     });
 
@@ -149,13 +147,13 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(422);
 
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        trace_id: expect.any(String)
+        trace_id: expect.any(String),
       });
     });
   });
@@ -170,13 +168,13 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
           consent: { required: true, mechanism: 'api' },
           attribution: { required: false },
           pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-          terms: { text: 'Test terms' }
+          terms: { text: 'Test terms' },
         })
         .expect(426);
 
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        trace_id: expect.any(String)
+        trace_id: expect.any(String),
       });
     });
 
@@ -190,13 +188,13 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
           consent: { required: true, mechanism: 'api' },
           attribution: { required: false },
           pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-          terms: { text: 'Test terms' }
+          terms: { text: 'Test terms' },
         })
         .expect(426);
 
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        trace_id: expect.any(String)
+        trace_id: expect.any(String),
       });
     });
   });
@@ -205,7 +203,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     it('should return consistent problem details for internal errors', async () => {
       // Force an internal error by using an invalid provider that will fail
       process.env.PAYMENT_PROVIDER = 'invalid_provider';
-      
+
       const response = await request(app)
         .post('/peac/payments/charges')
         .set('X-PEAC-Protocol', '0.9.6')
@@ -213,15 +211,15 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(500);
 
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
-        error: expect.any(String) // Error messages may vary
+        error: expect.any(String), // Error messages may vary
       });
-      
+
       // Reset to mock provider
       process.env.PAYMENT_PROVIDER = 'mock';
     });
@@ -240,7 +238,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
         type: expect.stringMatching(/^https:\/\/peacprotocol\.org\/problems\//),
         title: expect.any(String),
         status: expect.any(Number),
-        detail: expect.any(String)
+        detail: expect.any(String),
       });
 
       // Verify content-type header
@@ -250,11 +248,15 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     it('should use peacprotocol.org namespace for problem types', async () => {
       const responses = await Promise.all([
         request(app).get('/peac/agreements/agr_nonexistent').expect(404),
-        request(app).post('/peac/agreements').set('Content-Type', 'text/plain').send('test').expect(426), // Protocol check happens first
-        request(app).post('/peac/agreements').expect(426)
+        request(app)
+          .post('/peac/agreements')
+          .set('Content-Type', 'text/plain')
+          .send('test')
+          .expect(426), // Protocol check happens first
+        request(app).post('/peac/agreements').expect(426),
       ]);
 
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.body.type).toMatch(/^https:\/\/peacprotocol\.org\/problems\//);
       });
     });

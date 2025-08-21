@@ -17,22 +17,22 @@ describe('Agreement Creation - POST /peac/agreements', () => {
     purpose: 'AI training on web content',
     consent: {
       required: true,
-      mechanism: 'api-acknowledgment'
+      mechanism: 'api-acknowledgment',
     },
     attribution: {
       required: true,
-      text: 'Content provided by Example Corp'
+      text: 'Content provided by Example Corp',
     },
     pricing_policy: {
       price: '2500',
       currency: 'USD',
       duration: 86400,
-      usage: 'training' as const
+      usage: 'training' as const,
     },
     terms: {
       text: 'Standard AI training license',
-      version: '1.0'
-    }
+      version: '1.0',
+    },
   };
 
   describe('Happy Path', () => {
@@ -46,10 +46,10 @@ describe('Agreement Creation - POST /peac/agreements', () => {
 
       expect(response.headers).toHaveProperty('location');
       expect(response.headers.location).toMatch(/^\/peac\/agreements\/agr_/);
-      
+
       expect(response.headers).toHaveProperty('etag');
       expect(response.headers.etag).toMatch(/^W\/"[a-f0-9]{64}"$/);
-      
+
       expect(response.headers['cache-control']).toBe('no-store');
 
       expect(response.body).toMatchObject({
@@ -58,7 +58,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
         protocol_version: '0.9.6',
         status: 'valid',
         created_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
-        proposal: validProposal
+        proposal: validProposal,
       });
     });
   });
@@ -76,7 +76,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
         type: 'https://peacprotocol.org/problems/protocol-version-required',
         title: 'Upgrade Required',
         status: 426,
-        supported: ['0.9.6']
+        supported: ['0.9.6'],
       });
     });
 
@@ -94,7 +94,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
         title: 'Upgrade Required',
         status: 426,
         provided_version: '0.8.0',
-        supported: ['0.9.6']
+        supported: ['0.9.6'],
       });
     });
   });
@@ -112,7 +112,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/unsupported-media-type',
         title: 'Unsupported Media Type',
-        status: 415
+        status: 415,
       });
     });
   });
@@ -129,7 +129,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
       expect(response.headers['content-type']).toMatch(/application\/problem\+json/);
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/validation-error',
-        status: 400
+        status: 400,
       });
     });
 
@@ -145,7 +145,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/validation-error',
         status: 400,
-        detail: 'Invalid JSON in request body'
+        detail: 'Invalid JSON in request body',
       });
     });
   });

@@ -11,7 +11,7 @@ export class TTLReplayCache {
   has(id: string): boolean {
     this.sweep();
     const t = this.map.get(id);
-    return !!t && (Date.now() - t) < this.ttlMs;
+    return !!t && Date.now() - t < this.ttlMs;
   }
 
   add(id: string): void {

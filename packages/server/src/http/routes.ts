@@ -11,18 +11,18 @@ import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
 import { securityHeaders as newSecurityHeaders } from './middleware/security-headers';
 import { requestTracing } from './middleware/request-tracing';
 import { idempotencyMiddleware } from '../middleware/idempotency';
-import { 
-  createAgreement, 
-  getAgreement, 
+import {
+  createAgreement,
+  getAgreement,
   handleNegotiateAlias,
   validateProtocolVersion,
   validateProtocolVersionWithDeprecation,
-  validateContentType 
+  validateContentType,
 } from './agreements';
-import { 
+import {
   handlePaymentCharge,
   handleLegacyPayment,
-  validateAgreementBinding 
+  validateAgreementBinding,
 } from '../payments/http';
 import { createWebhookRouter } from '../webhooks/router';
 
@@ -49,33 +49,33 @@ export function createRoutes() {
   router.get('/.well-known/jwks.json', standardRateLimiter.middleware(), handleJWKS);
 
   // Agreement-first API endpoints (v0.9.6)
-  router.post('/peac/agreements', 
+  router.post(
+    '/peac/agreements',
     validateProtocolVersion,
     validateContentType,
     standardRateLimiter.middleware(),
-    createAgreement
+    createAgreement,
   );
-  
-  router.get('/peac/agreements/:id',
-    standardRateLimiter.middleware(), 
-    getAgreement
-  );
-  
+
+  router.get('/peac/agreements/:id', standardRateLimiter.middleware(), getAgreement);
+
   // Deprecated negotiation alias (backward compatibility)
-  router.post('/peac/negotiate',
+  router.post(
+    '/peac/negotiate',
     validateProtocolVersionWithDeprecation,
-    validateContentType, 
+    validateContentType,
     standardRateLimiter.middleware(),
-    handleNegotiateAlias
+    handleNegotiateAlias,
   );
 
   // Agreement-bound payment endpoints (v0.9.6)
-  router.post('/peac/payments/charges',
+  router.post(
+    '/peac/payments/charges',
     validateProtocolVersion,
     validateContentType,
     validateAgreementBinding,
     standardRateLimiter.middleware(),
-    handlePaymentCharge
+    handlePaymentCharge,
   );
 
   // Webhook endpoints (no protocol version required)

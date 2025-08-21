@@ -1,6 +1,6 @@
 /**
  * Webhooks Success Path Tests - Valid HMAC → 204
- * 
+ *
  * Tests successful webhook processing with valid HMAC signatures.
  */
 
@@ -33,14 +33,14 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
         data: {
           purpose: 'Webhook test agreement',
           status: 'valid',
-          fingerprint: 'abc123def456'
-        }
+          fingerprint: 'abc123def456',
+        },
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       const response = await request(app)
@@ -67,14 +67,14 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
         timestamp: timestamp,
         data: {
           processor: 'stripe',
-          status: 'succeeded'
-        }
+          status: 'succeeded',
+        },
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       const response = await request(app)
@@ -98,14 +98,14 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
         timestamp: timestamp,
         data: {
           processor: 'stripe',
-          error_code: 'card_declined'
-        }
+          error_code: 'card_declined',
+        },
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       const response = await request(app)
@@ -129,14 +129,14 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
         data: {
           old_status: 'valid',
           new_status: 'expired',
-          reason: 'time_expired'
-        }
+          reason: 'time_expired',
+        },
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)
@@ -155,14 +155,14 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
         resource_id: 'res_unknown_001',
         timestamp: timestamp,
         data: {
-          custom_field: 'custom_value'
-        }
+          custom_field: 'custom_value',
+        },
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)
@@ -181,13 +181,13 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
       const payload = {
         type: 'agreement.created',
         agreement_id: 'agr_test_no_delivery_id',
-        timestamp: timestamp
+        timestamp: timestamp,
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       // Test without Peac-Delivery-Id header
@@ -204,13 +204,13 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
       const payload = {
         type: 'payment.completed',
         payment_id: 'pay_custom_headers',
-        timestamp: timestamp
+        timestamp: timestamp,
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)
@@ -230,13 +230,13 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
       const timestamp = Math.floor(Date.now() / 1000).toString();
       const payload = {
         type: 'agreement.created',
-        timestamp: timestamp
+        timestamp: timestamp,
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)
@@ -264,21 +264,21 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
               customer_id: 'cust_67890',
               custom_fields: {
                 campaign: 'summer_2024',
-                source: 'webhook_test'
-              }
-            }
+                source: 'webhook_test',
+              },
+            },
           },
           agreement: {
             purpose: 'AI model training',
-            expires_at: '2024-12-31T23:59:59Z'
-          }
-        }
+            expires_at: '2024-12-31T23:59:59Z',
+          },
+        },
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)
@@ -300,15 +300,15 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
           purpose: 'AI training for 中文内容 and العربية text processing 🤖',
           metadata: {
             description: 'Testing Unicode: café, naïve, résumé, 北京, العالم',
-            emoji: '💡🔬📊'
-          }
-        }
+            emoji: '💡🔬📊',
+          },
+        },
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)
@@ -329,13 +329,13 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
         type: 'payment.completed',
         payment_id: null, // This might cause processing issues
         timestamp: timestamp,
-        data: {}
+        data: {},
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       // The webhook should still return 204 because the signature is valid
@@ -354,13 +354,13 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
       const timestamp = Math.floor(Date.now() / 1000).toString();
       const payload = {
         type: 'agreement.created',
-        timestamp: timestamp
+        timestamp: timestamp,
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)
@@ -377,13 +377,13 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
       const timestamp = Math.floor(Date.now() / 1000).toString();
       const payload = {
         type: 'agreement.created',
-        timestamp: timestamp
+        timestamp: timestamp,
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)
@@ -399,13 +399,13 @@ describe('Webhooks Success Path - Valid HMAC → 204', () => {
       const timestamp = (Math.floor(Date.now() / 1000) - 120).toString();
       const payload = {
         type: 'payment.completed',
-        timestamp: timestamp
+        timestamp: timestamp,
       };
 
       const raw = JSON.stringify(payload);
       const signature = createWebhookSignature(webhookSecret, timestamp, raw, {
         method: 'POST',
-        path: '/webhooks/peac'
+        path: '/webhooks/peac',
       });
 
       await request(app)

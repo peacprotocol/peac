@@ -1,12 +1,18 @@
 /**
  * Agreement-Bound Payment Handlers for PEAC Protocol v0.9.6
- * 
+ *
  * Implements payment processing with mandatory agreement binding via X-PEAC-Agreement header.
  * All payment operations must reference a valid agreement.
  */
 
 import type { Request, Response, NextFunction } from 'express';
-import { PaymentChargeRequest, PaymentReceipt, extractAgreementId, isAgreementValid, Agreement } from '@peacprotocol/schema';
+import {
+  PaymentChargeRequest,
+  PaymentReceipt,
+  extractAgreementId,
+  isAgreementValid,
+  Agreement,
+} from '@peacprotocol/schema';
 import { problemDetails } from '../http/problems';
 import { logger } from '../logging';
 import { metrics } from '../metrics';
@@ -57,52 +63,52 @@ async function loadProvider(): Promise<{
  */
 export function validateAgreementBinding(req: Request, res: Response, next: NextFunction): void {
   const agreementHeader = req.get('X-PEAC-Agreement');
-  
+
   if (!agreementHeader) {
     return problemDetails.send(res, 'invalid_reference', {
       detail: 'X-PEAC-Agreement header is required for payment operations',
-      required_header: 'X-PEAC-Agreement'
+      required_header: 'X-PEAC-Agreement',
     });
   }
-  
+
   const agreementId = extractAgreementId(agreementHeader);
   if (!agreementId) {
     return problemDetails.send(res, 'invalid_reference', {
       detail: 'Invalid agreement ID format in X-PEAC-Agreement header',
       provided: agreementHeader,
-      expected_format: 'agr_<ulid>'
+      expected_format: 'agr_<ulid>',
     });
   }
-  
+
   // Find agreement using shared store
   const agreement = agreementStore.get(agreementId);
   if (!agreement) {
     return problemDetails.send(res, 'invalid_reference', {
       detail: `Agreement ${agreementId} not found`,
-      agreement_id: agreementId
+      agreement_id: agreementId,
     });
   }
-  
-  // Check agreement.status === 'valid' 
+
+  // Check agreement.status === 'valid'
   if (agreement.status !== 'valid') {
     return problemDetails.send(res, 'invalid_reference', {
       detail: `Agreement ${agreementId} is not valid`,
       agreement_id: agreementId,
       agreement_status: agreement.status,
-      reason: agreement.reason
+      reason: agreement.reason,
     });
   }
-  
+
   // Validate agreement expiration
   if (!isAgreementValid(agreement)) {
     return problemDetails.send(res, 'invalid_reference', {
       detail: `Agreement ${agreementId} has expired`,
       agreement_id: agreementId,
       agreement_status: agreement.status,
-      expires_at: agreement.expires_at
+      expires_at: agreement.expires_at,
     });
   }
-  
+
   // Optional fingerprint verification
   const expectedFingerprint = req.get('X-PEAC-Fingerprint');
   if (expectedFingerprint && expectedFingerprint !== agreement.fingerprint) {
@@ -110,10 +116,10 @@ export function validateAgreementBinding(req: Request, res: Response, next: Next
       detail: `Agreement fingerprint mismatch`,
       agreement_id: agreementId,
       expected_fingerprint: expectedFingerprint,
-      actual_fingerprint: agreement.fingerprint
+      actual_fingerprint: agreement.fingerprint,
     });
   }
-  
+
   // Attach agreement to request for handler use
   (req as AgreementRequest).agreement = agreement;
   next();
@@ -129,25 +135,25 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
     const agreement = (req as AgreementRequest).agreement;
     if (!agreement) {
       return problemDetails.send(res, 'internal_error', {
-        detail: 'Agreement validation middleware failed'
+        detail: 'Agreement validation middleware failed',
       });
     }
-    
+
     // Validate payment request structure
     const paymentRequest = req.body as PaymentChargeRequest;
     if (!paymentRequest.amount || typeof paymentRequest.amount !== 'string') {
       return problemDetails.send(res, 'validation_error', {
-        detail: 'Invalid payment amount'
+        detail: 'Invalid payment amount',
       });
     }
-    
+
     // Load and validate payment provider
     const { name, Provider } = await loadProvider();
-    
+
     // Validate payment attempt with guards
     const amount = parseInt(paymentRequest.amount, 10);
     paymentGuards.validatePaymentAttempt(name, amount);
-    
+
     metrics.paymentAttempt.inc({ provider: name, outcome: 'attempt' });
 
     // Process payment through provider
@@ -155,7 +161,7 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
     const session = await provider.processPayment({
       ...paymentRequest,
       agreement_id: agreement.id,
-      agreement_fingerprint: agreement.fingerprint
+      agreement_fingerprint: agreement.fingerprint,
     });
 
     // Generate payment receipt
@@ -170,33 +176,38 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
       metadata: {
         provider: name,
         session,
-        ...paymentRequest.metadata
-      }
+        ...paymentRequest.metadata,
+      },
     };
 
-    logger.info({ 
-      paymentId: receipt.id,
-      agreementId: agreement.id,
-      amount: paymentRequest.amount,
-      provider: name 
-    }, 'Payment processed successfully');
+    logger.info(
+      {
+        paymentId: receipt.id,
+        agreementId: agreement.id,
+        amount: paymentRequest.amount,
+        provider: name,
+      },
+      'Payment processed successfully',
+    );
 
     res.setHeader('Authorization', `Bearer ${session}`);
     res.status(200).json(receipt);
 
     metrics.paymentAttempt.inc({ provider: name, outcome: 'success' });
-    
   } catch (err) {
     const message = err instanceof Error ? err.message : 'payment_failed';
     const defaultProvider = process.env.NODE_ENV === 'test' ? 'mock' : 'x402';
     const label = (process.env.PAYMENT_PROVIDER || defaultProvider).toLowerCase();
-    
-    logger.error({ 
-      error: message,
-      agreementId: (req as AgreementRequest).agreement?.id,
-      amount: req.body?.amount 
-    }, 'Payment processing failed');
-    
+
+    logger.error(
+      {
+        error: message,
+        agreementId: (req as AgreementRequest).agreement?.id,
+        amount: req.body?.amount,
+      },
+      'Payment processing failed',
+    );
+
     metrics.paymentAttempt.inc({
       provider: label as 'x402' | 'stripe' | 'mock',
       outcome: 'failure',
@@ -204,7 +215,7 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
 
     return problemDetails.send(res, 'internal_error', {
       detail: 'Payment processing failed',
-      error: message
+      error: message,
     });
   }
 }
@@ -216,23 +227,29 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
 export async function handleLegacyPayment(req: Request, res: Response): Promise<void> {
   // Check if agreement header is present (new behavior)
   const agreementHeader = req.get('X-PEAC-Agreement');
-  
+
   if (agreementHeader) {
-    logger.info({ 
-      path: req.path,
-      agreementId: agreementHeader 
-    }, 'Legacy payment endpoint used with agreement binding');
-    
+    logger.info(
+      {
+        path: req.path,
+        agreementId: agreementHeader,
+      },
+      'Legacy payment endpoint used with agreement binding',
+    );
+
     // Validate agreement and forward to new handler
     return validateAgreementBinding(req, res, () => handlePaymentCharge(req, res));
   }
-  
+
   // Original legacy behavior (no agreement binding)
-  logger.warn({ 
-    path: req.path,
-    userAgent: req.get('User-Agent') 
-  }, 'Legacy payment endpoint used without agreement binding');
-  
+  logger.warn(
+    {
+      path: req.path,
+      userAgent: req.get('User-Agent'),
+    },
+    'Legacy payment endpoint used without agreement binding',
+  );
+
   try {
     const { name, Provider } = await loadProvider();
     metrics.paymentAttempt.inc({ provider: name, outcome: 'attempt' });
@@ -248,7 +265,7 @@ export async function handleLegacyPayment(req: Request, res: Response): Promise<
     const message = err instanceof Error ? err.message : 'payment_failed';
     const defaultProvider = process.env.NODE_ENV === 'test' ? 'mock' : 'x402';
     const label = (process.env.PAYMENT_PROVIDER || defaultProvider).toLowerCase();
-    
+
     metrics.paymentAttempt.inc({
       provider: label as 'x402' | 'stripe' | 'mock',
       outcome: 'failure',
@@ -256,7 +273,7 @@ export async function handleLegacyPayment(req: Request, res: Response): Promise<
 
     return problemDetails.send(res, 'internal_error', {
       detail: 'Payment processing failed',
-      error: message
+      error: message,
     });
   }
 }
@@ -267,6 +284,6 @@ export async function handleLegacyPayment(req: Request, res: Response): Promise<
 export function getPaymentStats() {
   return {
     guards: paymentGuards.getStatus(),
-    processing_enabled: paymentGuards.canProcessPayments()
+    processing_enabled: paymentGuards.canProcessPayments(),
   };
 }

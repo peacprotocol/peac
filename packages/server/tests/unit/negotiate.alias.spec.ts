@@ -1,6 +1,6 @@
 /**
  * Negotiate Alias Tests - POST /peac/negotiate (deprecated)
- * 
+ *
  * Tests deprecation headers for the backwards compatibility alias.
  */
 
@@ -22,7 +22,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
         consent: { required: true, mechanism: 'api' },
         attribution: { required: false },
         pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-        terms: { text: 'Test terms' }
+        terms: { text: 'Test terms' },
       };
 
       const response = await request(app)
@@ -42,7 +42,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
         id: expect.stringMatching(/^agr_/),
         fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
         protocol_version: '0.9.6',
-        status: 'valid'
+        status: 'valid',
       });
 
       expect(response.headers).toHaveProperty('location');
@@ -65,7 +65,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
       expect(response.headers['content-type']).toMatch(/application\/problem\+json/);
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/validation-error',
-        status: 400
+        status: 400,
       });
     });
 
@@ -78,7 +78,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
           consent: { required: true },
           attribution: { required: false },
           pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-          terms: { text: 'Test' }
+          terms: { text: 'Test' },
         })
         .expect(426);
 
@@ -89,7 +89,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
 
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/protocol-version-required',
-        status: 426
+        status: 426,
       });
     });
 
@@ -108,7 +108,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
 
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/unsupported-media-type',
-        status: 415
+        status: 415,
       });
     });
   });

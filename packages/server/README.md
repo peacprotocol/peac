@@ -7,7 +7,7 @@ This reference server implements the modern PEAC Protocol with agreement-bound p
 ## Key Features
 
 - **Agreement-first Architecture**: Create agreements first, bind payments second
-- **RFC Compliance**: RFC 7807 Problem+JSON, RFC 9110 HTTP semantics  
+- **RFC Compliance**: RFC 7807 Problem+JSON, RFC 9110 HTTP semantics
 - **Secure Webhooks**: HMAC verification with replay protection
 - **Payment Integration**: Mock provider + X402/Stripe support
 - **Enterprise Ready**: Rate limiting, metrics, GDPR export, idempotency
@@ -85,28 +85,29 @@ sequenceDiagram
 ```
 
 **Code Migration:**
+
 ```javascript
 // Before
 const agreement = await client.negotiate(proposal);
 const payment = await client.pay(amount);
 
-// After  
+// After
 const agreement = await client.createAgreement(proposal);
-const payment = await client.pay(amount, {agreementId: agreement.id});
+const payment = await client.pay(amount, { agreementId: agreement.id });
 ```
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/peac/agreements` | Create agreement from proposal |
-| `GET` | `/peac/agreements/{id}` | Retrieve agreement with ETag caching |
-| `POST` | `/peac/payments/charges` | Process agreement-bound payment |
-| `POST` | `/peac/negotiate` | 🚫 Deprecated (use `/peac/agreements`) |
-| `POST` | `/webhooks/peac` | Verify inbound webhooks |
-| `GET` | `/.well-known/peac-capabilities` | Server capabilities |
-| `GET` | `/healthz` | Health check |
-| `GET` | `/metrics` | Prometheus metrics |
+| Method | Endpoint                         | Description                            |
+| ------ | -------------------------------- | -------------------------------------- |
+| `POST` | `/peac/agreements`               | Create agreement from proposal         |
+| `GET`  | `/peac/agreements/{id}`          | Retrieve agreement with ETag caching   |
+| `POST` | `/peac/payments/charges`         | Process agreement-bound payment        |
+| `POST` | `/peac/negotiate`                | 🚫 Deprecated (use `/peac/agreements`) |
+| `POST` | `/webhooks/peac`                 | Verify inbound webhooks                |
+| `GET`  | `/.well-known/peac-capabilities` | Server capabilities                    |
+| `GET`  | `/healthz`                       | Health check                           |
+| `GET`  | `/metrics`                       | Prometheus metrics                     |
 
 ## Configuration
 
@@ -117,13 +118,13 @@ const payment = await client.pay(amount, {agreementId: agreement.id});
 PEAC_PORT=3000                    # Server port
 PEAC_LOG_LEVEL=info              # Logging level
 
-# Infrastructure  
+# Infrastructure
 PEAC_REDIS_URL=redis://localhost # Rate limiting & caching
 PEAC_WEBHOOK_SECRET=your-secret  # Webhook HMAC verification
 
 # Payments
 PAYMENT_PROVIDER=mock            # mock|x402|stripe (use mock for testing)
-X402_RPC_URL=...                # X402 provider RPC URL  
+X402_RPC_URL=...                # X402 provider RPC URL
 STRIPE_SECRET_KEY=...           # Stripe integration
 ```
 
@@ -144,7 +145,7 @@ docker run -p 3000:3000 \
 # Run all tests
 npm test
 
-# Test with coverage  
+# Test with coverage
 npm test -- --coverage
 
 # Integration tests only
@@ -157,7 +158,7 @@ npm run type-check
 ## RFC Compliance & Standards
 
 - **RFC 7807**: Problem Details for HTTP APIs (all error responses)
-- **RFC 9110**: HTTP Semantics (ETags, caching, conditional requests)  
+- **RFC 9110**: HTTP Semantics (ETags, caching, conditional requests)
 - **RFC 9331**: ULID specification (agreement IDs: `agr_...`)
 - **Idempotency**: Idempotency-Key header support with TTL-based replay protection
 - **Webhooks**: HMAC-SHA256 verification with canonical request signing

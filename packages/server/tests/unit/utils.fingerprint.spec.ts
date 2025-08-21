@@ -1,10 +1,14 @@
 /**
  * Fingerprint Utility Tests
- * 
+ *
  * Tests for deterministic agreement fingerprinting.
  */
 
-import { computeAgreementFingerprint, isValidFingerprint, compareFingerprints } from '../../src/utils/fingerprint';
+import {
+  computeAgreementFingerprint,
+  isValidFingerprint,
+  compareFingerprints,
+} from '../../src/utils/fingerprint';
 
 describe('Fingerprint Utilities', () => {
   const sampleProposal = {
@@ -12,29 +16,29 @@ describe('Fingerprint Utilities', () => {
     consent: { required: true, mechanism: 'api' },
     attribution: { required: false },
     pricing_policy: { price: '1000', duration: 3600, usage: 'inference' as const },
-    terms: { text: 'Test terms' }
+    terms: { text: 'Test terms' },
   };
 
   describe('computeAgreementFingerprint', () => {
     it('should generate a 64-character hex fingerprint', () => {
       const fingerprint = computeAgreementFingerprint(sampleProposal);
-      
+
       expect(fingerprint).toMatch(/^[a-f0-9]{64}$/);
     });
 
     it('should be deterministic - same input produces same output', () => {
       const fingerprint1 = computeAgreementFingerprint(sampleProposal);
       const fingerprint2 = computeAgreementFingerprint(sampleProposal);
-      
+
       expect(fingerprint1).toBe(fingerprint2);
     });
 
     it('should produce different fingerprints for different inputs', () => {
       const proposal2 = { ...sampleProposal, purpose: 'Different purpose' };
-      
+
       const fingerprint1 = computeAgreementFingerprint(sampleProposal);
       const fingerprint2 = computeAgreementFingerprint(proposal2);
-      
+
       expect(fingerprint1).not.toBe(fingerprint2);
     });
 
@@ -43,12 +47,12 @@ describe('Fingerprint Utilities', () => {
         ...sampleProposal,
         status: 'valid',
         created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-02T00:00:00Z'
+        updated_at: '2024-01-02T00:00:00Z',
       };
-      
+
       const fingerprint1 = computeAgreementFingerprint(sampleProposal);
       const fingerprint2 = computeAgreementFingerprint(proposalWithVolatile as any);
-      
+
       expect(fingerprint1).toBe(fingerprint2);
     });
   });

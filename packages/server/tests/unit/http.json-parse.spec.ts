@@ -1,6 +1,6 @@
 /**
  * JSON Parse Error Tests
- * 
+ *
  * Tests handling of malformed JSON in request bodies.
  */
 
@@ -28,7 +28,7 @@ describe('JSON Parse Errors', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/validation-error',
         status: 400,
-        detail: 'Invalid JSON in request body'
+        detail: 'Invalid JSON in request body',
       });
     });
 
@@ -45,7 +45,7 @@ describe('JSON Parse Errors', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/validation-error',
         status: 400,
-        detail: 'Invalid JSON in request body'
+        detail: 'Invalid JSON in request body',
       });
     });
 
@@ -61,7 +61,7 @@ describe('JSON Parse Errors', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/validation-error',
         status: 400,
-        detail: 'Invalid JSON in request body'
+        detail: 'Invalid JSON in request body',
       });
     });
   });

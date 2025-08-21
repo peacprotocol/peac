@@ -1,6 +1,6 @@
 /**
  * Webhook Router for PEAC Protocol v0.9.6
- * 
+ *
  * Handles incoming webhook requests with HMAC verification and replay protection.
  */
 
@@ -20,7 +20,7 @@ export function createWebhookRouter(): Router {
     // Ensure we have raw body for signature verification
     if (!req.body || typeof req.body !== 'object') {
       return problemDetails.send(res, 'validation_error', {
-        detail: 'Webhook body must be valid JSON'
+        detail: 'Webhook body must be valid JSON',
       });
     }
     next();
@@ -30,34 +30,36 @@ export function createWebhookRouter(): Router {
    * POST /peac (mounted at /webhooks, so full path is /webhooks/peac)
    * Main webhook endpoint with full verification
    */
-  router.post('/peac', 
-    webhookVerifier.middleware(),
-    async (req: Request, res: Response) => {
-      try {
-        logger.info({ 
+  router.post('/peac', webhookVerifier.middleware(), async (req: Request, res: Response) => {
+    try {
+      logger.info(
+        {
           webhookType: req.body?.type || 'unknown',
           deliveryId: req.get('Peac-Delivery-Id'),
-          timestamp: req.body?.timestamp 
-        }, 'Webhook received and verified');
+          timestamp: req.body?.timestamp,
+        },
+        'Webhook received and verified',
+      );
 
-        // Process webhook payload
-        await processWebhookPayload(req.body);
+      // Process webhook payload
+      await processWebhookPayload(req.body);
 
-        // Return 204 No Content for successful webhook processing
-        res.status(204).end();
-
-      } catch (error) {
-        logger.error({ 
+      // Return 204 No Content for successful webhook processing
+      res.status(204).end();
+    } catch (error) {
+      logger.error(
+        {
           error: error instanceof Error ? error.message : 'unknown',
-          webhookType: req.body?.type 
-        }, 'Webhook processing failed');
+          webhookType: req.body?.type,
+        },
+        'Webhook processing failed',
+      );
 
-        return problemDetails.send(res, 'internal_error', {
-          detail: 'Webhook processing failed'
-        });
-      }
+      return problemDetails.send(res, 'internal_error', {
+        detail: 'Webhook processing failed',
+      });
     }
-  );
+  });
 
   /**
    * GET /webhooks/stats
@@ -70,7 +72,7 @@ export function createWebhookRouter(): Router {
     } catch (error) {
       logger.error({ error }, 'Failed to get webhook stats');
       return problemDetails.send(res, 'internal_error', {
-        detail: 'Failed to retrieve webhook statistics'
+        detail: 'Failed to retrieve webhook statistics',
       });
     }
   });
@@ -95,19 +97,19 @@ async function processWebhookPayload(payload: unknown): Promise<void> {
     case 'agreement.created':
       await handleAgreementCreated(webhookData);
       break;
-    
+
     case 'agreement.updated':
       await handleAgreementUpdated(webhookData);
       break;
-      
+
     case 'payment.completed':
       await handlePaymentCompleted(webhookData);
       break;
-      
+
     case 'payment.failed':
       await handlePaymentFailed(webhookData);
       break;
-      
+
     default:
       logger.warn({ type }, 'Unknown webhook type received');
       // Don't throw error for unknown types - just log and continue
@@ -119,11 +121,14 @@ async function processWebhookPayload(payload: unknown): Promise<void> {
  * Handle agreement creation webhook
  */
 async function handleAgreementCreated(data: Record<string, unknown>): Promise<void> {
-  logger.info({ 
-    agreementId: data.agreement_id,
-    timestamp: data.timestamp 
-  }, 'Processing agreement.created webhook');
-  
+  logger.info(
+    {
+      agreementId: data.agreement_id,
+      timestamp: data.timestamp,
+    },
+    'Processing agreement.created webhook',
+  );
+
   // NOTE: agreement.created received — handled as no-op, 204 returned
 }
 
@@ -131,12 +136,15 @@ async function handleAgreementCreated(data: Record<string, unknown>): Promise<vo
  * Handle agreement update webhook
  */
 async function handleAgreementUpdated(data: Record<string, unknown>): Promise<void> {
-  logger.info({ 
-    agreementId: data.agreement_id,
-    changes: data.changes,
-    timestamp: data.timestamp 
-  }, 'Processing agreement.updated webhook');
-  
+  logger.info(
+    {
+      agreementId: data.agreement_id,
+      changes: data.changes,
+      timestamp: data.timestamp,
+    },
+    'Processing agreement.updated webhook',
+  );
+
   // NOTE: agreement.updated received — handled as no-op, 204 returned
 }
 
@@ -144,13 +152,16 @@ async function handleAgreementUpdated(data: Record<string, unknown>): Promise<vo
  * Handle payment completion webhook
  */
 async function handlePaymentCompleted(data: Record<string, unknown>): Promise<void> {
-  logger.info({ 
-    paymentId: data.payment_id,
-    agreementId: data.agreement_id,
-    amount: data.amount,
-    timestamp: data.timestamp 
-  }, 'Processing payment.completed webhook');
-  
+  logger.info(
+    {
+      paymentId: data.payment_id,
+      agreementId: data.agreement_id,
+      amount: data.amount,
+      timestamp: data.timestamp,
+    },
+    'Processing payment.completed webhook',
+  );
+
   // NOTE: payment.completed received — handled as no-op, 204 returned
 }
 
@@ -158,12 +169,15 @@ async function handlePaymentCompleted(data: Record<string, unknown>): Promise<vo
  * Handle payment failure webhook
  */
 async function handlePaymentFailed(data: Record<string, unknown>): Promise<void> {
-  logger.warn({ 
-    paymentId: data.payment_id,
-    agreementId: data.agreement_id,
-    reason: data.reason,
-    timestamp: data.timestamp 
-  }, 'Processing payment.failed webhook');
-  
+  logger.warn(
+    {
+      paymentId: data.payment_id,
+      agreementId: data.agreement_id,
+      reason: data.reason,
+      timestamp: data.timestamp,
+    },
+    'Processing payment.failed webhook',
+  );
+
   // NOTE: payment.failed received — handled as no-op, 204 returned
 }

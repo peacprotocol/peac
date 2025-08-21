@@ -11,7 +11,7 @@ export type AgreementStatus = 'valid' | 'invalid';
 /**
  * Reasons why an agreement might be invalid
  */
-export type AgreementInvalidReason = 
+export type AgreementInvalidReason =
   | 'expired'
   | 'revoked'
   | 'malformed'
@@ -85,7 +85,7 @@ export function isAgreementProposal(obj: unknown): obj is AgreementProposal {
 export function isAgreementValid(agreement: Agreement): boolean {
   if (agreement.status !== 'valid') return false;
   if (!agreement.expires_at) return true;
-  
+
   const now = new Date();
   const expiresAt = new Date(agreement.expires_at);
   return expiresAt > now;
@@ -96,7 +96,7 @@ export function isAgreementValid(agreement: Agreement): boolean {
  */
 export function extractAgreementId(headerValue: string): string | null {
   if (!headerValue) return null;
-  
+
   // Handle "agr_<ulid>" format
   const match = headerValue.match(/^agr_[0-9A-Z]{26}$/i);
   return match ? headerValue : null;

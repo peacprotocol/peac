@@ -110,7 +110,7 @@ export function verifyWebhookSignature(
   // Verify signature using new canonical format
   const computedSigFull = createWebhookSignature(secret, timestamp, rawBody, options);
   const computedParsed = parseWebhookSignature(computedSigFull);
-  
+
   if (!computedParsed) {
     return { valid: false, reason: 'signature_computation_error' };
   }
@@ -360,10 +360,7 @@ export class WebhookVerifier {
           // Check for delivery ID idempotency
           const deliveryId = req.get('Peac-Delivery-Id');
           if (deliveryId && replayCache.has(deliveryId)) {
-            logger.warn(
-              { deliveryId, path: req.path },
-              'Duplicate webhook delivery detected',
-            );
+            logger.warn({ deliveryId, path: req.path }, 'Duplicate webhook delivery detected');
             prometheus.incrementCounter('webhook_verification_total', {
               result: 'invalid',
               reason: 'duplicate_delivery',
@@ -427,10 +424,7 @@ export class WebhookVerifier {
           // Check for delivery ID idempotency
           const deliveryId = req.get('Peac-Delivery-Id');
           if (deliveryId && replayCache.has(deliveryId)) {
-            logger.warn(
-              { deliveryId, path: req.path },
-              'Duplicate webhook delivery detected',
-            );
+            logger.warn({ deliveryId, path: req.path }, 'Duplicate webhook delivery detected');
             prometheus.incrementCounter('webhook_verification_total', {
               result: 'invalid',
               reason: 'duplicate_delivery',

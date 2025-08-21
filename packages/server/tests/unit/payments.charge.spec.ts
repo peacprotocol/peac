@@ -1,6 +1,6 @@
 /**
  * Payment Charge Tests - POST /peac/payments/charges
- * 
+ *
  * Tests agreement-bound payment processing with comprehensive validation.
  */
 
@@ -19,7 +19,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     // Use mock provider for testing (deterministic responses)
     originalPaymentProvider = process.env.PAYMENT_PROVIDER;
     process.env.PAYMENT_PROVIDER = 'mock';
-    
+
     app = await createServer();
   });
 
@@ -34,7 +34,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
 
   beforeEach(() => {
     agreementStore.clear();
-    
+
     // Create a valid agreement for testing
     validAgreement = {
       id: 'agr_test_payment_123',
@@ -47,10 +47,10 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         consent: { required: true, mechanism: 'api' },
         attribution: { required: false },
         pricing_policy: { price: '1000', duration: 3600, usage: 'inference' },
-        terms: { text: 'Test terms' }
-      }
+        terms: { text: 'Test terms' },
+      },
     };
-    
+
     agreementStore.set(validAgreement.id, validAgreement);
   });
 
@@ -63,12 +63,12 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(200);
       expect(response.headers['content-type']).toMatch(/application\/json/);
       expect(response.headers['authorization']).toMatch(/^Bearer mock_session_/);
-      
+
       // Validate payment receipt structure
       expect(response.body).toMatchObject({
         id: expect.stringMatching(/^pay_/),
@@ -80,17 +80,17 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         created_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
         metadata: {
           provider: 'mock',
-          session: expect.stringMatching(/^mock_session_/)
-        }
+          session: expect.stringMatching(/^mock_session_/),
+        },
       });
     });
 
     it('should process payment with metadata passthrough', async () => {
-      const customMetadata = { 
+      const customMetadata = {
         user_id: 'user123',
-        order_id: 'order456'
+        order_id: 'order456',
       };
-      
+
       const response = await request(app)
         .post('/peac/payments/charges')
         .set('X-PEAC-Protocol', '0.9.6')
@@ -99,14 +99,14 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         .send({
           amount: '1000',
           currency: 'EUR',
-          metadata: customMetadata
+          metadata: customMetadata,
         })
         .expect(200);
 
       expect(response.body.metadata).toMatchObject({
         provider: 'mock',
         session: expect.stringMatching(/^mock_session_/),
-        ...customMetadata
+        ...customMetadata,
       });
     });
   });
@@ -119,7 +119,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(422);
 
@@ -127,7 +127,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/invalid-reference',
         status: 422,
-        detail: expect.stringContaining('X-PEAC-Agreement header is required')
+        detail: expect.stringContaining('X-PEAC-Agreement header is required'),
       });
     });
 
@@ -139,7 +139,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(422);
 
@@ -147,7 +147,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/invalid-reference',
         status: 422,
-        detail: expect.stringContaining('Agreement agr_nonexistent not found')
+        detail: expect.stringContaining('Agreement agr_nonexistent not found'),
       });
     });
 
@@ -156,7 +156,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         ...validAgreement,
         id: 'agr_invalid_status',
         status: 'invalid',
-        reason: 'revoked'
+        reason: 'revoked',
       };
       agreementStore.set(invalidAgreement.id, invalidAgreement);
 
@@ -167,7 +167,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(422);
 
@@ -175,7 +175,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/invalid-reference',
         status: 422,
-        detail: expect.stringContaining('Agreement agr_invalid_status is not valid')
+        detail: expect.stringContaining('Agreement agr_invalid_status is not valid'),
       });
     });
 
@@ -188,7 +188,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(409);
 
@@ -196,7 +196,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/agreement-mismatch',
         status: 409,
-        detail: 'Agreement fingerprint mismatch'
+        detail: 'Agreement fingerprint mismatch',
       });
     });
   });
@@ -209,7 +209,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(426);
 
@@ -217,7 +217,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/protocol-version-required',
         status: 426,
-        supported: ['0.9.6']
+        supported: ['0.9.6'],
       });
     });
 
@@ -229,7 +229,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
-          currency: 'USD'
+          currency: 'USD',
         })
         .expect(426);
 
@@ -238,7 +238,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         type: 'https://peacprotocol.org/problems/protocol-version-unsupported',
         status: 426,
         provided_version: '0.8.0',
-        supported: ['0.9.6']
+        supported: ['0.9.6'],
       });
     });
   });
@@ -256,7 +256,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.headers['content-type']).toMatch(/application\/problem\+json/);
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/unsupported-media-type',
-        status: 415
+        status: 415,
       });
     });
   });

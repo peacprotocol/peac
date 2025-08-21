@@ -1,6 +1,6 @@
 /**
  * Prometheus Metrics for Webhook Operations
- * 
+ *
  * Provides webhook-specific metrics collection and reporting.
  */
 
@@ -32,13 +32,13 @@ export const prometheus = {
       webhookVerificationTotal.inc(labels);
     }
   },
-  
+
   setGauge: (name: string, labels: Record<string, string>, value: number) => {
     if (name === 'webhook_verification_duration_ms') {
       webhookVerificationDuration.set(labels, value);
     }
   },
-  
+
   getStats: () => ({
     webhook_verifications: webhookVerificationTotal,
     webhook_duration: webhookVerificationDuration,
