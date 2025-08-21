@@ -218,6 +218,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
       expect(response.body).toMatchSnapshot({
         instance: expect.any(String),
         error: expect.any(String), // Error messages may vary
+        trace_id: expect.any(String), // Trace IDs are always dynamic
       });
 
       // Reset to mock provider
