@@ -121,7 +121,7 @@ exports[`RFC 7807 Problem Catalog Snapshots 500 - Internal Server Error should r
   "instance": Any<String>,
   "status": 500,
   "title": "Internal Server Error",
-  "trace_id": "18da40aa-b9be-42c7-bd07-39180f55c4e9",
+  "trace_id": "e97ff54e-830c-477d-9aee-0927c498fb50",
   "type": "https://peacprotocol.org/problems/internal-error",
 }
 `;
