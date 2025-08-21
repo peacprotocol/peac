@@ -55,10 +55,10 @@ export async function createServer() {
   });
 
   app.use('/', createRoutes());
-  
+
   // Global error handler - must be last
   app.use(problemErrorHandler);
-  
+
   return app;
 }
 
@@ -70,14 +70,15 @@ export async function createServer() {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function problemErrorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
   // Touch unused params to satisfy TS noUnusedParameters without changing behavior.
-  void req; void _next;
+  void req;
+  void _next;
   if (res.headersSent) return; // let Express default handler print
   const status =
     typeof err?.status === 'number'
       ? err.status
       : typeof err?.statusCode === 'number'
-      ? err.statusCode
-      : 500;
+        ? err.statusCode
+        : 500;
   // Best-effort code mapping; use explicit code if present
   const explicit = typeof err?.code === 'string' ? err.code : undefined;
   const code =
@@ -85,12 +86,12 @@ export function problemErrorHandler(err: any, req: Request, res: Response, _next
     (status === 422
       ? 'validation_error'
       : status === 409
-      ? 'conflict'
-      : status === 404
-      ? 'not_found'
-      : status === 426
-      ? 'upgrade_required'
-      : 'internal_error');
+        ? 'conflict'
+        : status === 404
+          ? 'not_found'
+          : status === 426
+            ? 'upgrade_required'
+            : 'internal_error');
 
   problemDetails.send(res, code as any, {
     status,

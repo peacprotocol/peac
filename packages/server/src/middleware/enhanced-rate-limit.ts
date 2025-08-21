@@ -171,7 +171,21 @@ export const standardRateLimiter = new EnhancedRateLimiter({
   maxRequests: rateLimitDisabled ? 999999 : isTestEnvironment ? 1000 : 60,
 });
 
+// Provide a safe destroy method for tests
+if (typeof (standardRateLimiter as any).destroy !== 'function') {
+  (standardRateLimiter as any).destroy = () => {
+    standardRateLimiter.dispose();
+  };
+}
+
 export const strictRateLimiter = new EnhancedRateLimiter({
   windowMs: 60000,
   maxRequests: rateLimitDisabled ? 999999 : isTestEnvironment ? 500 : 10,
 });
+
+// Provide a safe destroy method for tests
+if (typeof (strictRateLimiter as any).destroy !== 'function') {
+  (strictRateLimiter as any).destroy = () => {
+    strictRateLimiter.dispose();
+  };
+}

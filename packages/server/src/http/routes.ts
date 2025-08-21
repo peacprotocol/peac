@@ -24,7 +24,7 @@ import {
   handleLegacyPayment,
   validateAgreementBinding,
 } from '../payments/http';
-import { createWebhookRouter } from '../webhooks/router';
+import webhookRouter from '../webhooks/router';
 
 export function createRoutes() {
   const router = Router();
@@ -79,7 +79,7 @@ export function createRoutes() {
   );
 
   // Webhook endpoints (no protocol version required)
-  router.use('/webhooks', createWebhookRouter());
+  router.use('/webhooks', webhookRouter);
 
   // Existing endpoints (legacy behavior maintained)
   router.post('/verify', rateLimitMiddleware('verify'), handleVerify);

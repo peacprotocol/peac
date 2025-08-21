@@ -6,12 +6,59 @@ import { WebhookSecretManager, MemorySecretStore, rotationConfigs } from './secr
 import { prometheus } from '../metrics/prom';
 import { TTLReplayCache } from '../utils/ttl-replay-cache';
 
-// Extend Express Request type to include rawBody property
-declare module 'express-serve-static-core' {
-  interface Request {
-    rawBody?: string;
+/**
+ * Parse 'Peac-Signature' header of the form: "t=<ts>,s=<hex>"
+ * Falls back to Peac-Timestamp header if 't=' not present.
+ */
+export function parsePeacSignature(
+  sigHeader?: string | null,
+  tsHeader?: string | null,
+): { t: string; s: string } {
+  const result: { t: string; s: string } = { t: '', s: '' };
+  if (sigHeader) {
+    for (const part of sigHeader.split(',')) {
+      const [k, v] = part.split('=').map((s) => s.trim());
+      if (k === 't' && v) result.t = v;
+      if (k === 's' && v) result.s = v;
+    }
   }
+  if (!result.t && tsHeader) result.t = tsHeader.trim();
+  return result;
 }
+
+/**
+ * Canonical string the HMAC signs: "<METHOD>\n<PATH>\n<TIMESTAMP>\n<BODY>"
+ * PATH should not include query string.
+ */
+export function canonicalString(method: string, path: string, t: string, rawBody: Buffer): Buffer {
+  const head = `${method.toUpperCase()}\n${path}\n${t}\n`;
+  // Concatenate without re-encoding the body
+  return Buffer.concat([Buffer.from(head, 'utf8'), rawBody ?? Buffer.from('', 'utf8')]);
+}
+
+/**
+ * Verify webhook request. Throws on failure; returns timestamp on success.
+ */
+export function verifyWebhookRequest(req: Request, secret: string): string {
+  const rawBody: Buffer | undefined = req.rawBody;
+  if (!rawBody || !Buffer.isBuffer(rawBody)) {
+    throw new Error('Missing raw body for webhook verification');
+  }
+  const sigHeader = req.get('Peac-Signature');
+  const tsHeader = req.get('Peac-Timestamp');
+  const { t, s } = parsePeacSignature(sigHeader, tsHeader);
+  if (!t || !s) throw new Error('Missing signature parameters');
+  const pathOnly = (req.originalUrl || req.url || '').split('?')[0] || '/peac/webhooks';
+  const data = canonicalString(req.method, pathOnly, t, rawBody);
+  const expected = createHmac('sha256', secret).update(data).digest('hex');
+  const a = Buffer.from(expected, 'hex');
+  const b = Buffer.from(s, 'hex');
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    throw new Error('Invalid webhook signature');
+  }
+  return t;
+}
+
 
 export interface WebhookConfig {
   secret: string;
@@ -340,7 +387,7 @@ export class WebhookVerifier {
         verification = this.secretManager.verifySignature(
           parsed.signature,
           parsed.timestamp,
-          rawBody,
+          rawBody.toString('utf8'),
         );
 
         if (verification.valid) {
@@ -403,7 +450,7 @@ export class WebhookVerifier {
         const staticVerification = verifyWebhookSignature(
           this.config.secret,
           signature,
-          rawBody,
+          rawBody.toString('utf8'),
           this.config.toleranceSeconds,
           verificationOptions,
         );

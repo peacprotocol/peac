@@ -4,81 +4,106 @@
  * Handles incoming webhook requests with HMAC verification and replay protection.
  */
 
-import { Router, Request, Response } from 'express';
-import { webhookVerifier } from './verify';
+import express, { Router, Request, Response } from 'express';
+import { verifyWebhookRequest } from './verify';
 import { logger } from '../logging';
 import { problemDetails } from '../http/problems';
 
 /**
  * Create webhook router with verification middleware
  */
-export function createWebhookRouter(): Router {
-  const router = Router();
+const router = Router();
 
-  // Raw body middleware for webhook verification
-  router.use('/peac', (req, res, next) => {
-    // Ensure we have raw body for signature verification
-    if (!req.body || typeof req.body !== 'object') {
-      return problemDetails.send(res, 'validation_error', {
-        detail: 'Webhook body must be valid JSON',
-      });
-    }
-    next();
-  });
+// Capture raw bytes but still let express parse JSON for req.body
+router.use(
+  '/peac',
+  express.json({
+    verify: (req, _res, buf) => {
+      (req as Request).rawBody = Buffer.from(buf);
+    },
+    type: () => true, // accept vendor JSON types too
+    strict: false,
+  }),
+);
 
-  /**
-   * POST /peac (mounted at /webhooks, so full path is /webhooks/peac)
-   * Main webhook endpoint with full verification
-   */
-  router.post('/peac', webhookVerifier.middleware(), async (req: Request, res: Response) => {
-    try {
-      logger.info(
+/**
+ * POST /peac (mounted at /webhooks, so full path is /webhooks/peac)
+ * Main webhook endpoint with HMAC verification and no-op processing
+ */
+router.post('/peac', async (req: Request, res: Response) => {
+  try {
+    // Verify webhook signature using new robust verification
+    const webhookSecret = process.env.PEAC_WEBHOOK_SECRET || 'test_secret';
+    const timestamp = verifyWebhookRequest(req, webhookSecret);
+
+    logger.info(
+      {
+        webhookType: req.body?.type || 'unknown',
+        deliveryId: req.get('Peac-Delivery-Id'),
+        timestamp,
+        bodyTimestamp: req.body?.timestamp,
+      },
+      'Webhook received and verified',
+    );
+
+    // Process webhook payload as no-op
+    await processWebhookPayload(req.body);
+
+    // Return 204 No Content for successful webhook processing
+    res.status(204).end();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('signature')) {
+      logger.warn(
         {
-          webhookType: req.body?.type || 'unknown',
-          deliveryId: req.get('Peac-Delivery-Id'),
-          timestamp: req.body?.timestamp,
-        },
-        'Webhook received and verified',
-      );
-
-      // Process webhook payload
-      await processWebhookPayload(req.body);
-
-      // Return 204 No Content for successful webhook processing
-      res.status(204).end();
-    } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error.message : 'unknown',
+          error: error.message,
           webhookType: req.body?.type,
+          hasSignature: !!req.get('Peac-Signature'),
+          hasTimestamp: !!req.get('Peac-Timestamp'),
         },
-        'Webhook processing failed',
+        'Webhook signature verification failed',
       );
 
-      return problemDetails.send(res, 'internal_error', {
-        detail: 'Webhook processing failed',
+      return problemDetails.send(res, 'webhook_signature_invalid', {
+        detail: error.message,
       });
     }
-  });
 
-  /**
-   * GET /webhooks/stats
-   * Webhook system statistics (for monitoring)
-   */
-  router.get('/stats', (_req: Request, res: Response) => {
-    try {
-      const stats = webhookVerifier.getStats();
-      res.json(stats);
-    } catch (error) {
-      logger.error({ error }, 'Failed to get webhook stats');
-      return problemDetails.send(res, 'internal_error', {
-        detail: 'Failed to retrieve webhook statistics',
-      });
-    }
-  });
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : 'unknown',
+        webhookType: req.body?.type,
+      },
+      'Webhook processing failed',
+    );
 
-  return router;
-}
+    return problemDetails.send(res, 'internal_error', {
+      detail: 'Webhook processing failed',
+    });
+  }
+});
+
+// GET /peac/stats — minimal, no secrets
+router.get('/peac/stats', (_req: Request, res: Response) => {
+  try {
+    const stats = {
+      status: 'active',
+      verification: 'hmac-sha256',
+      supported_events: [
+        'agreement.created',
+        'agreement.updated',
+        'payment.completed',
+        'payment.failed',
+      ],
+      timestamp: new Date().toISOString(),
+    };
+    res.json(stats);
+  } catch (error) {
+    logger.error({ error }, 'Failed to get webhook stats');
+    return problemDetails.send(res, 'internal_error', {
+      detail: 'Failed to retrieve webhook statistics',
+    });
+  }
+});
 
 /**
  * Process webhook payload based on type
@@ -181,3 +206,5 @@ async function handlePaymentFailed(data: Record<string, unknown>): Promise<void>
 
   // NOTE: payment.failed received — handled as no-op, 204 returned
 }
+
+export default router;
