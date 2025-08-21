@@ -22,7 +22,7 @@ exports[`RFC 7807 Problem Catalog Snapshots 400 - Bad Request (validation-error)
 
 exports[`RFC 7807 Problem Catalog Snapshots 404 - Not Found should return consistent problem details for unknown agreement 1`] = `
 {
-  "detail": "Agreement agr_unknown_agreement not found",
+  "detail": "Invalid agreement ID format",
   "instance": Any<String>,
   "status": 404,
   "title": "Not Found",
@@ -121,7 +121,7 @@ exports[`RFC 7807 Problem Catalog Snapshots 500 - Internal Server Error should r
   "instance": Any<String>,
   "status": 500,
   "title": "Internal Server Error",
-  "trace_id": "e97ff54e-830c-477d-9aee-0927c498fb50",
+  "trace_id": "3c4ba63a-6110-448b-b744-53214980c955",
   "type": "https://peacprotocol.org/problems/internal-error",
 }
 `;

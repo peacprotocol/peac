@@ -30,12 +30,12 @@ export async function createServer() {
 
   /**
    * JSON parse errors must be mapped to RFC7807 validation errors (400)
-   * Jest expects "validation_error" for malformed JSON bodies.
+   * Jest expects "validation_error" for malformed JSON bodies (no instance field).
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    // Express throws SyntaxError on invalid JSON (from express.json)
-    if (err instanceof SyntaxError) {
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const isParseError = err?.type === 'entity.parse.failed' || err instanceof SyntaxError;
+    if (isParseError) {
       return res.status(400).type('application/problem+json').json({
         type: 'https://peacprotocol.org/problems/validation-error',
         title: 'Validation Error',
@@ -43,7 +43,7 @@ export async function createServer() {
         detail: 'Invalid JSON in request body',
       });
     }
-    return _next(err as Error);
+    return _next(err);
   });
 
   if (config.gates.healthEnabled) {

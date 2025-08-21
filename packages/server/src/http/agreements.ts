@@ -165,58 +165,31 @@ export async function createAgreement(req: Request, res: Response): Promise<void
  * Retrieve agreement with ETag and caching support
  */
 export async function getAgreement(req: Request, res: Response): Promise<void> {
-  try {
-    const { id } = req.params;
+  const id = req.params.id;
 
-    // Validate agreement ID format
-    if (!id || !id.startsWith('agr_')) {
-      return problemDetails.send(res, 'not_found', {
-        detail: 'Invalid agreement ID format',
-      });
-    }
-
-    // Find agreement
-    const agreement = agreementStore.get(id);
-    if (!agreement) {
-      return problemDetails.send(res, 'not_found', {
-        detail: `Agreement ${id} not found`,
-      });
-    }
-
-    const etag = `W/"${agreement.fingerprint}"`;
-    const clientETag = req.get('If-None-Match');
-
-    // Handle conditional request (304 Not Modified)
-    if (clientETag === etag) {
-      res
-        .status(304)
-        .set({
-          ETag: etag,
-          'Cache-Control': 'no-cache',
-          Vary: 'Accept, Accept-Encoding',
-        })
-        .end();
-      return;
-    }
-
-    // Return 200 with agreement and caching headers
-    res
-      .set({
-        ETag: etag,
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
-        Vary: 'Accept, Accept-Encoding',
-      })
-      .json(agreement);
-  } catch (error) {
-    logger.error(
-      { error: error instanceof Error ? error.message : 'unknown' },
-      'Agreement retrieval failed',
-    );
-
-    return problemDetails.send(res, 'internal_error', {
-      detail: 'Failed to retrieve agreement',
-    });
+  // Validate agreement ID format
+  if (!id || !/^agr_[A-Za-z0-9]+$/.test(id)) {
+    return problemDetails.send(res, 'not_found', { detail: 'Invalid agreement ID format' });
   }
+
+  // Find agreement
+  const agreement = agreementStore.get(id);
+  if (!agreement) {
+    return problemDetails.send(res, 'not_found', { detail: `Agreement ${id} not found` });
+  }
+
+  // ETag/If-None-Match handling
+  const etag = `W/"${agreement.fingerprint}"`;
+  res.setHeader('ETag', etag);
+  res.setHeader('Vary', 'Accept, Accept-Encoding');
+  const inm = req.header('If-None-Match');
+  if (inm && inm === etag) {
+    res.setHeader('Cache-Control', 'no-cache');
+    res.status(304).end();
+    return;
+  }
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
+  res.status(200).json(agreement);
 }
 
 /**
