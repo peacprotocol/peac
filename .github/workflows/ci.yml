@@ -72,19 +72,38 @@ jobs:
           timeout 300s npm run build --workspaces
           echo "::endgroup::"
 
-      - name: Test (server)
+      - name: Run server tests
         timeout-minutes: 10
         working-directory: packages/server
         env:
           CI: 'true'
         run: |
           echo "::group::Running server tests"
-          set -euo pipefail
-          trap 'echo "::group::dangling-node-processes"; ps -ef | grep node || true; echo "::endgroup::"; jobs -p | xargs -r kill || true' EXIT
-          # Run Jest in-band to avoid stray workers; forceExit so CI never hangs.
-          npx jest --ci --coverage --runInBand --colors --forceExit
-          # Flush any remaining output
-          node -e "setTimeout(()=>process.exit(0), 250).unref()"
+          NODE_ENV=test PAYMENT_PROVIDER=mock PEAC_WEBHOOK_SECRET=test_secret \
+            npm test -- --coverage --runInBand --detectOpenHandles
+          echo "::endgroup::"
+
+      - name: Check for dangling Node processes
+        shell: bash
+        run: |
+          echo "::group::Dangling Node check"
+          # List any remaining node processes; ignore none found (pgrep exit 1)
+          REMAINING="$(pgrep -af node || true)"
+          if [ -z "$REMAINING" ]; then
+            echo "No lingering node processes."
+            echo "::endgroup::"
+            exit 0
+          fi
+          # Filter out known benign wrappers if any ever appear; adjust as needed
+          echo "$REMAINING" | grep -Ev 'pgrep|grep' || true
+          COUNT=$(echo "$REMAINING" | grep -Ev 'pgrep|grep' | wc -l | tr -d ' ')
+          if [ "$COUNT" -gt 0 ]; then
+            echo "::error::Found dangling Node processes:"
+            echo "$REMAINING" | grep -Ev 'pgrep|grep' || true
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "No lingering node processes."
           echo "::endgroup::"
 
       - name: Enforce coverage threshold
