@@ -59,7 +59,6 @@ export function verifyWebhookRequest(req: Request, secret: string): string {
   return t;
 }
 
-
 export interface WebhookConfig {
   secret: string;
   toleranceSeconds: number;
