@@ -18,6 +18,10 @@ export class IdempotencyMiddleware {
   constructor(private config: IdempotencyConfig) {
     // Cleanup expired entries every 5 minutes
     this.cleanupInterval = setInterval(() => this.cleanup(), 300000);
+    // Don't keep the process alive just for the timer (helps Jest exit cleanly)
+    if (this.cleanupInterval && typeof this.cleanupInterval.unref === 'function') {
+      this.cleanupInterval.unref();
+    }
   }
 
   middleware() {

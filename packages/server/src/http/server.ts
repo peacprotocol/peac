@@ -36,7 +36,10 @@ export async function createServer() {
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     // Express throws SyntaxError on invalid JSON (from express.json)
     if (err instanceof SyntaxError) {
-      return problemDetails.send(res, 'validation_error', {
+      return res.status(400).type('application/problem+json').json({
+        type: 'https://peacprotocol.org/problems/validation-error',
+        title: 'Validation Error',
+        status: 400,
         detail: 'Invalid JSON in request body',
       });
     }
@@ -93,6 +96,15 @@ export function problemErrorHandler(err: any, req: Request, res: Response, _next
   if (err?.code === 'protocol_error' || /X-PEAC-Protocol/i.test(err?.message || '')) {
     return problemDetails.send(res, 'protocol_error', {
       detail: err?.message || 'Protocol version required or invalid',
+    });
+  }
+  // Agreement reference problems (payments) → 422
+  if (
+    err?.code === 'invalid_reference' ||
+    /agreement.*(missing|unknown|invalid)/i.test(err?.message || '')
+  ) {
+    return problemDetails.send(res, 'invalid_reference', {
+      detail: err?.message || 'Invalid agreement reference',
     });
   }
   // Not found semantics
