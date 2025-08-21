@@ -37,7 +37,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
 
     // Create a valid agreement for testing
     validAgreement = {
-      id: 'agr_01JFNKT5PAYMENT123456789',
+      id: 'agr_01JFNKT5PAYMENT12345678ABC', // Exactly 26 chars after agr_
       fingerprint: 'a'.repeat(64),
       protocol_version: '0.9.6',
       status: 'valid',
@@ -135,7 +135,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       const response = await request(app)
         .post('/peac/payments/charges')
         .set('X-PEAC-Protocol', '0.9.6')
-        .set('X-PEAC-Agreement', 'agr_01JFNKT5NONEXISTENT9999')
+        .set('X-PEAC-Agreement', 'agr_01JFNKT5NONEXISTENT9999ABC')
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
@@ -147,14 +147,14 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/invalid-reference',
         status: 422,
-        detail: expect.stringContaining('Agreement agr_01JFNKT5NONEXISTENT9999 not found'),
+        detail: expect.stringContaining('Agreement agr_01JFNKT5NONEXISTENT9999ABC not found'),
       });
     });
 
     it('should return 422 when agreement status is not valid', async () => {
       const invalidAgreement: Agreement = {
         ...validAgreement,
-        id: 'agr_01JFNKT5INVALID56789012',
+        id: 'agr_01JFNKT5INVALID567890123CD',
         status: 'invalid',
         reason: 'revoked',
       };
@@ -175,7 +175,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/invalid-reference',
         status: 422,
-        detail: expect.stringContaining('Agreement agr_01JFNKT5INVALID56789012 is not valid'),
+        detail: expect.stringContaining('Agreement agr_01JFNKT5INVALID567890123CD is not valid'),
       });
     });
 

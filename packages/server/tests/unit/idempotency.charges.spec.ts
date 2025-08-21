@@ -24,7 +24,7 @@ describe('Payment Charges Idempotency', () => {
 
     // Create a valid agreement for testing
     validAgreement = {
-      id: 'agr_idempotency_test',
+      id: 'agr_01JFNKT5IDEMPOTENCY123456D',
       fingerprint: 'f'.repeat(64),
       protocol_version: '0.9.6',
       status: 'valid',

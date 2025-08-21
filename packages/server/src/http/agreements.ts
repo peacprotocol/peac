@@ -7,7 +7,7 @@
 
 import type { Request, Response, NextFunction } from 'express';
 import { ulid } from 'ulidx';
-import { AgreementProposal, Agreement, isAgreementProposal } from '@peacprotocol/schema';
+import { AgreementProposal, Agreement } from '@peacprotocol/schema';
 import { problemDetails } from './problems';
 import { logger } from '../logging';
 import { agreementStore } from '../agreements/store';
@@ -107,8 +107,15 @@ export function validateContentType(req: Request, res: Response, next: NextFunct
  */
 export async function createAgreement(req: Request, res: Response): Promise<void> {
   try {
-    // Validate proposal structure - basic check for required fields
-    if (!req.body || typeof req.body !== 'object' || !req.body.purpose) {
+    // Validate proposal structure - check for required fields
+    if (
+      !req.body ||
+      typeof req.body !== 'object' ||
+      !req.body.purpose ||
+      !req.body.consent ||
+      !req.body.pricing_policy ||
+      !req.body.terms
+    ) {
       return problemDetails.send(res, 'validation_error', {
         detail: 'Invalid agreement proposal structure',
       });
