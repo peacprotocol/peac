@@ -85,8 +85,13 @@ export class PaymentGuards {
   }
 
   isHealthy(): boolean {
-    // Mock provider is always healthy
-    if (process.env.PAYMENT_PROVIDER === 'mock') {
+    // In unit tests with mock provider, consider it healthy
+    // But only if explicitly set to 'mock' (not undefined or empty)
+    if (
+      process.env.NODE_ENV === 'test' &&
+      process.env.PAYMENT_PROVIDER &&
+      process.env.PAYMENT_PROVIDER === 'mock'
+    ) {
       return true;
     }
     return this.healthy;
@@ -102,7 +107,12 @@ export class PaymentGuards {
 
   canProcessPayments(): boolean {
     // In unit tests with mock provider, allow payments for testing
-    if (process.env.NODE_ENV === 'test' && process.env.PAYMENT_PROVIDER === 'mock') {
+    // But only if explicitly set to 'mock' (not undefined or empty)
+    if (
+      process.env.NODE_ENV === 'test' &&
+      process.env.PAYMENT_PROVIDER &&
+      process.env.PAYMENT_PROVIDER === 'mock'
+    ) {
       return true;
     }
     // For all other cases (including conformance tests), use strict live-mode checking
