@@ -51,6 +51,14 @@ jobs:
           timeout 180s npx eslint packages/server --ext .ts --max-warnings=0
           echo "::endgroup::"
 
+      - name: Build schema package (required for type-check)
+        timeout-minutes: 2
+        working-directory: packages/schema
+        run: |
+          echo "::group::Building schema package"
+          timeout 120s npm run build
+          echo "::endgroup::"
+
       - name: Type check
         timeout-minutes: 3
         run: |
