@@ -17,12 +17,11 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
-    "isolatedModules": true,
-    "baseUrl": ".",
-    "paths": {
-      "@peacprotocol/schema": ["../schema/dist"]
-    }
+    "isolatedModules": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "exclude": ["node_modules", "dist", "tests"],
+  "references": [
+    { "path": "../schema" }
+  ]
 }
