@@ -149,7 +149,7 @@ jobs:
         timeout-minutes: 2
         run: |
           echo "::group::OpenAPI v0.9.6 authoritative specification validation"
-          timeout 120s npx @stoplight/spectral-cli lint --ruleset spectral:oas openapi/openapi.yaml || echo "::warning::OpenAPI spec lint failed (non-blocking)"
+          timeout 120s npx @stoplight/spectral-cli lint --ruleset=spectral:oas openapi/openapi.yaml || echo "::warning::OpenAPI spec lint failed (non-blocking)"
           echo "::endgroup::"
 
       - name: Security audit

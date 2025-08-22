@@ -20,7 +20,7 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@peacprotocol/schema": ["../schema/src/index.ts"]
+      "@peacprotocol/schema": ["../schema/dist"]
     }
   },
   "include": ["src/**/*"],
