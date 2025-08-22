@@ -16,7 +16,13 @@ describe('Payment Charges Idempotency', () => {
 
   beforeAll(async () => {
     process.env.PAYMENT_PROVIDER = 'mock';
+    process.env.PEAC_UNIT_TEST_BYPASS = 'true';
     app = await createServer();
+  });
+
+  afterAll(() => {
+    delete process.env.PAYMENT_PROVIDER;
+    delete process.env.PEAC_UNIT_TEST_BYPASS;
   });
 
   beforeEach(() => {

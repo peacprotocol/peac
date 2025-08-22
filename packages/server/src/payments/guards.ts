@@ -78,7 +78,7 @@ export class PaymentGuards {
       this.healthy = true;
       logger.info('Live payment mode validated successfully');
     } else {
-      // Test/staging mode - disable payments but continue
+      // Test/staging mode - always disable payments
       this.healthy = false;
       logger.warn({ mode: this.config.mode }, 'Payment processing disabled in non-live mode');
     }
@@ -102,11 +102,11 @@ export class PaymentGuards {
   }
 
   validatePaymentAttempt(provider: string, amount: number): void {
-    // Allow mock provider to bypass guards in unit tests
-    // This is needed so unit tests can test payment processing
-    // while conformance tests still verify that non-live mode blocks payments
-    if (provider === 'mock' && process.env.NODE_ENV === 'test') {
-      return; // Allow mock payments in test environment
+    // Special bypass for unit tests that need to test payment flow
+    // This allows unit tests to test payment processing mechanics
+    // while conformance tests verify payment blocking in non-live mode
+    if (provider === 'mock' && process.env.PEAC_UNIT_TEST_BYPASS === 'true') {
+      return; // Allow mock payments in specific unit tests
     }
 
     // Use the same logic as canProcessPayments for consistency

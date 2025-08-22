@@ -18,6 +18,11 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     app = await createServer();
   });
 
+  afterAll(() => {
+    delete process.env.PAYMENT_PROVIDER;
+    delete process.env.PEAC_UNIT_TEST_BYPASS;
+  });
+
   beforeEach(() => {
     agreementStore.clear();
 
@@ -225,6 +230,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
       // Reset to mock provider
       process.env.PAYMENT_PROVIDER = 'mock';
+      process.env.PEAC_UNIT_TEST_BYPASS = 'true';
     });
   });
 

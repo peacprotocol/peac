@@ -19,6 +19,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     // Use mock provider for testing (deterministic responses)
     originalPaymentProvider = process.env.PAYMENT_PROVIDER;
     process.env.PAYMENT_PROVIDER = 'mock';
+    process.env.PEAC_UNIT_TEST_BYPASS = 'true';
 
     app = await createServer();
   });
@@ -30,6 +31,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     } else {
       delete process.env.PAYMENT_PROVIDER;
     }
+    delete process.env.PEAC_UNIT_TEST_BYPASS;
   });
 
   beforeEach(() => {
