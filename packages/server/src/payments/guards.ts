@@ -101,28 +101,17 @@ export class PaymentGuards {
   }
 
   canProcessPayments(): boolean {
-    // If conformance test enforcement is enabled, always block non-live
-    if (process.env.PEAC_ENFORCE_NON_LIVE_BLOCK === '1') {
-      return this.config.mode === 'live' && this.healthy;
-    }
-    // In tests, let mock provider run (idempotency & payments specs depend on it)
+    // In unit tests with mock provider, allow payments for testing
     if (process.env.NODE_ENV === 'test' && process.env.PAYMENT_PROVIDER === 'mock') {
       return true;
     }
+    // For all other cases (including conformance tests), use strict live-mode checking
     return this.config.mode === 'live' && this.healthy;
   }
 
   validatePaymentAttempt(provider: string, amount: number): void {
     // Use the same logic as canProcessPayments for consistency
-    let canProcess = false;
-
-    if (process.env.PEAC_ENFORCE_NON_LIVE_BLOCK === '1') {
-      canProcess = this.config.mode === 'live' && this.healthy;
-    } else if (process.env.NODE_ENV === 'test' && process.env.PAYMENT_PROVIDER === 'mock') {
-      canProcess = true;
-    } else {
-      canProcess = this.config.mode === 'live' && this.healthy;
-    }
+    const canProcess = this.canProcessPayments();
 
     if (!canProcess) {
       // Throttled warning to avoid log spam
