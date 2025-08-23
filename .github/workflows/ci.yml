@@ -96,18 +96,24 @@ jobs:
         run: |
           echo "::group::Dangling Node check"
           # List any remaining node processes; ignore none found (pgrep exit 1)
-          REMAINING="$(pgrep -af node || true)"
+          # Use word boundary to match actual node processes, not kernel threads
+          REMAINING="$(pgrep -af '\bnode\b' || true)"
           if [ -z "$REMAINING" ]; then
             echo "No lingering node processes."
             echo "::endgroup::"
             exit 0
           fi
-          # Filter out known benign wrappers if any ever appear; adjust as needed
-          echo "$REMAINING" | grep -Ev 'pgrep|grep' || true
-          COUNT=$(echo "$REMAINING" | grep -Ev 'pgrep|grep' | wc -l | tr -d ' ')
+          # Filter out kernel threads (in brackets) and grep commands
+          FILTERED="$(echo "$REMAINING" | grep -Ev '^\s*[0-9]+\s+\[.*\]|pgrep|grep' || true)"
+          if [ -z "$FILTERED" ]; then
+            echo "No lingering node processes (only kernel threads found)."
+            echo "::endgroup::"
+            exit 0
+          fi
+          COUNT=$(echo "$FILTERED" | wc -l | tr -d ' ')
           if [ "$COUNT" -gt 0 ]; then
             echo "::error::Found dangling Node processes:"
-            echo "$REMAINING" | grep -Ev 'pgrep|grep' || true
+            echo "$FILTERED"
             echo "::endgroup::"
             exit 1
           fi
@@ -181,8 +187,8 @@ jobs:
           echo "::group::Protocol version and header validation"
           echo "==> Version sanity (root)"
           ROOT_VER=$(node -e "console.log(require('./package.json').version||'')")
-          if [ "$ROOT_VER" != "0.9.6" ]; then
-            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.6'"
+          if [ "$ROOT_VER" != "0.9.7" ]; then
+            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.7'"
             exit 1
           fi
 
