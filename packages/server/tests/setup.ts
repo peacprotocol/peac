@@ -57,8 +57,10 @@ afterAll(async () => {
   const { disconnectRedis } = await import('../src/utils/redis-pool');
   await disconnectRedis();
 
-  // Clean up rate limiters  
-  const { standardRateLimiter, strictRateLimiter } = await import('../src/middleware/enhanced-rate-limit');
+  // Clean up rate limiters
+  const { standardRateLimiter, strictRateLimiter } = await import(
+    '../src/middleware/enhanced-rate-limit'
+  );
   standardRateLimiter.destroy();
   strictRateLimiter.destroy();
 
