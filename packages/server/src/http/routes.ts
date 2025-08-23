@@ -1,7 +1,6 @@
 /* istanbul ignore file */
 import { Router } from 'express';
 import { handleVerify } from './verify';
-import { handlePayment } from './payment';
 import { rateLimitMiddleware } from '../middleware/rateLimit';
 import { handleWellKnown } from './wellKnown';
 import { handleCapabilities } from './wellKnown/capabilities.handler';
@@ -12,6 +11,20 @@ import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
 import { securityHeaders as newSecurityHeaders } from './middleware/security-headers';
 import { requestTracing } from './middleware/request-tracing';
 import { idempotencyMiddleware } from '../middleware/idempotency';
+import {
+  createAgreement,
+  getAgreement,
+  handleNegotiateAlias,
+  validateProtocolVersion,
+  validateProtocolVersionWithDeprecation,
+  validateContentType,
+} from './agreements';
+import {
+  handlePaymentCharge,
+  handleLegacyPayment,
+  validateAgreementBinding,
+} from '../payments/http';
+import webhookRouter from '../webhooks/router';
 
 export function createRoutes() {
   const router = Router();
@@ -35,9 +48,42 @@ export function createRoutes() {
   );
   router.get('/.well-known/jwks.json', standardRateLimiter.middleware(), handleJWKS);
 
-  // Existing endpoints
+  // Agreement-first API endpoints (v0.9.6)
+  router.post(
+    '/peac/agreements',
+    validateProtocolVersion,
+    validateContentType,
+    standardRateLimiter.middleware(),
+    createAgreement,
+  );
+
+  router.get('/peac/agreements/:id', standardRateLimiter.middleware(), getAgreement);
+
+  // Deprecated negotiation alias (backward compatibility)
+  router.post(
+    '/peac/negotiate',
+    validateProtocolVersionWithDeprecation,
+    validateContentType,
+    standardRateLimiter.middleware(),
+    handleNegotiateAlias,
+  );
+
+  // Agreement-bound payment endpoints (v0.9.6)
+  router.post(
+    '/peac/payments/charges',
+    validateProtocolVersion,
+    validateContentType,
+    validateAgreementBinding,
+    standardRateLimiter.middleware(),
+    handlePaymentCharge,
+  );
+
+  // Webhook endpoints (no protocol version required)
+  router.use('/webhooks', webhookRouter);
+
+  // Existing endpoints (legacy behavior maintained)
   router.post('/verify', rateLimitMiddleware('verify'), handleVerify);
-  router.post('/pay', rateLimitMiddleware('pay'), handlePayment);
+  router.post('/pay', rateLimitMiddleware('pay'), handleLegacyPayment);
 
   return router;
 }

@@ -36,6 +36,14 @@ export class ProblemDetailsHandler {
       },
     ],
     [
+      'not_found',
+      {
+        type: 'https://peacprotocol.org/problems/not-found',
+        title: 'Not Found',
+        status: 404,
+      },
+    ],
+    [
       'resource_not_found',
       {
         type: 'https://peacprotocol.org/problems/resource-not-found',
@@ -60,11 +68,67 @@ export class ProblemDetailsHandler {
       },
     ],
     [
+      'invalid_reference',
+      {
+        type: 'https://peacprotocol.org/problems/invalid-reference',
+        title: 'Unprocessable Entity',
+        status: 422,
+      },
+    ],
+    [
+      'protocol_error',
+      {
+        type: 'https://peacprotocol.org/problems/protocol-error',
+        title: 'Upgrade Required',
+        status: 426,
+      },
+    ],
+    [
+      'protocol_version_required',
+      {
+        type: 'https://peacprotocol.org/problems/protocol-version-required',
+        title: 'Upgrade Required',
+        status: 426,
+      },
+    ],
+    [
+      'protocol_version_unsupported',
+      {
+        type: 'https://peacprotocol.org/problems/protocol-version-unsupported',
+        title: 'Upgrade Required',
+        status: 426,
+      },
+    ],
+    [
       'rate_limit_exceeded',
       {
         type: 'https://peacprotocol.org/problems/rate-limit-exceeded',
         title: 'Rate Limit Exceeded',
         status: 429,
+      },
+    ],
+    [
+      'fingerprint_mismatch',
+      {
+        type: 'https://peacprotocol.org/problems/fingerprint-mismatch',
+        title: 'Conflict',
+        status: 409,
+      },
+    ],
+    [
+      'agreement_mismatch',
+      {
+        type: 'https://peacprotocol.org/problems/agreement-mismatch',
+        title: 'Conflict',
+        status: 409,
+      },
+    ],
+    [
+      'webhook_signature_invalid',
+      {
+        type: 'https://peacprotocol.org/problems/webhook-signature-invalid',
+        title: 'Unauthorized',
+        status: 401,
       },
     ],
     [

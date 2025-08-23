@@ -61,11 +61,13 @@ class TokenBucket {
 
 export class EnhancedRateLimiter {
   private buckets: Map<string, TokenBucket> = new Map();
-  private cleanupInterval: NodeJS.Timeout;
+  private cleanupInterval?: NodeJS.Timeout;
 
   constructor(private config: RateLimitConfig) {
-    // Cleanup old buckets every minute
-    this.cleanupInterval = setInterval(() => this.cleanup(), 60000);
+    // Cleanup old buckets every minute (skip in test environment)
+    if (process.env.NODE_ENV !== 'test') {
+      this.cleanupInterval = setInterval(() => this.cleanup(), 60000);
+    }
   }
 
   middleware() {
@@ -146,8 +148,17 @@ export class EnhancedRateLimiter {
     }
   }
 
+  dispose(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval as any);
+    }
+  }
+
+  /**
+   * Back-compat: some tests call destroy(); alias to dispose().
+   */
   destroy(): void {
-    clearInterval(this.cleanupInterval);
+    this.dispose();
   }
 }
 
@@ -160,7 +171,21 @@ export const standardRateLimiter = new EnhancedRateLimiter({
   maxRequests: rateLimitDisabled ? 999999 : isTestEnvironment ? 1000 : 60,
 });
 
+// Provide a safe destroy method for tests
+if (typeof (standardRateLimiter as any).destroy !== 'function') {
+  (standardRateLimiter as any).destroy = () => {
+    standardRateLimiter.dispose();
+  };
+}
+
 export const strictRateLimiter = new EnhancedRateLimiter({
   windowMs: 60000,
   maxRequests: rateLimitDisabled ? 999999 : isTestEnvironment ? 500 : 10,
 });
+
+// Provide a safe destroy method for tests
+if (typeof (strictRateLimiter as any).destroy !== 'function') {
+  (strictRateLimiter as any).destroy = () => {
+    strictRateLimiter.dispose();
+  };
+}

@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/monorepo",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "private": true,
   "description": "PEAC Protocol - Programmable Economic Access & Consent",
   "workspaces": [

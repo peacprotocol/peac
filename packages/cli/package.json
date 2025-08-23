@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/cli",
-  "version": "0.9.5",
+  "version": "0.9.7",
   "description": "PEAC Protocol CLI",
   "main": "dist/index.js",
   "bin": {

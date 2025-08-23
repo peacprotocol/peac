@@ -1,0 +1,551 @@
+openapi: 3.0.3
+info:
+  title: PEAC Protocol API
+  version: 0.9.6
+  x-release: 0.9.7
+  description: Agreement-first API for PEAC Protocol v0.9.6 with payment binding and secure webhooks
+servers:
+  - url: https://{host}
+    variables:
+      host:
+        default: api.example.com
+
+paths:
+  /peac/agreements:
+    post:
+      summary: Create Agreement
+      description: Create a new agreement from a proposal with deterministic fingerprinting
+      operationId: createAgreement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgreementProposal'
+            example:
+              purpose: 'AI model training on customer content'
+              consent:
+                required: true
+                mechanism: 'api-acknowledgment'
+                metadata:
+                  explicit_opt_in: true
+              attribution:
+                required: false
+                text: 'Powered by CustomerName AI'
+                placement: 'footer'
+              pricing_policy:
+                price: '2500'
+                currency: 'USD'
+                duration: 86400
+                usage: 'training'
+              terms:
+                text: 'Training data will be processed according to our AI training policy'
+                url: 'https://example.com/ai-training-terms'
+                version: 'v1.2'
+              metadata:
+                customer_tier: 'enterprise'
+                data_classification: 'public'
+      parameters:
+        - $ref: '#/components/parameters/XPEACProtocol'
+      responses:
+        '201':
+          description: Agreement created successfully
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URI of the created agreement
+            ETag:
+              schema:
+                type: string
+              description: Weak ETag of fingerprint (W/"...")
+            Cache-Control:
+              schema:
+                type: string
+              description: 'no-store'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '426':
+          $ref: '#/components/responses/ProtocolUpgradeRequired'
+
+  /peac/agreements/{id}:
+    get:
+      summary: Get Agreement
+      description: Retrieve agreement with ETag support and caching semantics
+      operationId: getAgreement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^agr_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: Agreement ID with agr_ prefix
+        - name: If-None-Match
+          in: header
+          schema:
+            type: string
+          description: ETag for conditional requests
+      responses:
+        '200':
+          description: Agreement found
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: Weak ETag of agreement fingerprint
+            Cache-Control:
+              schema:
+                type: string
+              description: 'public, max-age=300, stale-while-revalidate=60'
+            Vary:
+              schema:
+                type: string
+              description: 'Accept, Accept-Encoding'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '304':
+          description: Not Modified
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: Weak ETag of agreement fingerprint
+            Cache-Control:
+              schema:
+                type: string
+              description: 'no-cache'
+            Vary:
+              schema:
+                type: string
+              description: 'Accept, Accept-Encoding'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /peac/payments/charges:
+    post:
+      summary: Create charge (agreement-bound)
+      description: Process payment with mandatory agreement binding
+      operationId: createCharge
+      parameters:
+        - $ref: '#/components/parameters/XPEACProtocol'
+        - $ref: '#/components/parameters/XPEACAgreement'
+        - $ref: '#/components/parameters/XPEACFingerprint'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentChargeRequest'
+            example:
+              amount: '2500'
+              currency: 'USD'
+              metadata:
+                order_id: 'order_12345'
+                customer_id: 'cust_67890'
+                description: 'AI model training agreement charge'
+      responses:
+        '200':
+          description: Payment receipt (or idempotent replay)
+          headers:
+            X-Idempotent-Replay:
+              schema:
+                type: string
+                enum: ['true']
+              description: Present when response is from idempotency cache
+              required: false
+            Age:
+              schema:
+                type: integer
+              description: Age of cached response in seconds (when X-Idempotent-Replay is true)
+              required: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentReceipt'
+              example:
+                id: 'pay_01H8DEF123GHI456JKL789MNO0'
+                amount: '2500'
+                currency: 'USD'
+                agreement_id: 'agr_01H8ABC123DEF456GHI789JKL0'
+                agreement_fingerprint: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'
+                status: 'completed'
+                created_at: '2024-01-15T10:30:00Z'
+                metadata:
+                  order_id: 'order_12345'
+                  customer_id: 'cust_67890'
+                  processor: 'mock'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/InvalidReference'
+        '409':
+          $ref: '#/components/responses/AgreementMismatch'
+        '426':
+          $ref: '#/components/responses/ProtocolUpgradeRequired'
+
+  /peac/negotiate:
+    post:
+      deprecated: true
+      summary: (Deprecated) Create Agreement (alias)
+      description: Backwards compatibility alias for /peac/agreements with deprecation headers
+      operationId: negotiateDeprecated
+      parameters:
+        - $ref: '#/components/parameters/XPEACProtocol'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgreementProposal'
+      responses:
+        '201':
+          description: Created (Deprecated endpoint)
+          headers:
+            Deprecation:
+              schema:
+                type: string
+              example: 'true'
+            Sunset:
+              schema:
+                type: string
+              example: 'Wed, 30 Oct 2025 23:59:59 GMT'
+            Link:
+              schema:
+                type: string
+              example: '</peac/agreements>; rel="successor-version"'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '426':
+          $ref: '#/components/responses/ProtocolUpgradeRequired'
+
+  /webhooks/peac:
+    post:
+      summary: Verify inbound webhooks
+      description: HMAC verification with replay protection and timestamp validation
+      operationId: verifyWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Webhook payload (varies by webhook type)
+      responses:
+        '204':
+          description: Webhook verified successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+components:
+  parameters:
+    XPEACProtocol:
+      name: X-PEAC-Protocol
+      in: header
+      required: true
+      schema:
+        type: string
+        enum: ['0.9.6']
+      description: PEAC Protocol version
+      example: '0.9.6'
+    XPEACAgreement:
+      name: X-PEAC-Agreement
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: '^agr_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Agreement ID for payment binding
+      example: 'agr_01H8...'
+    XPEACFingerprint:
+      name: X-PEAC-Fingerprint
+      in: header
+      required: false
+      schema:
+        type: string
+        pattern: '^[a-f0-9]{64}$'
+      description: Expected agreement fingerprint for verification
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        pattern: '^[a-zA-Z0-9_-]{1,255}$'
+      description: Idempotency key for payment operations (prevents duplicate charges)
+      example: 'pay_2024_order_12345_abc'
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: 'https://peacprotocol.org/problems/not-found'
+            title: 'Not Found'
+            status: 404
+            detail: 'Agreement agr_example not found'
+    UnsupportedMediaType:
+      description: Unsupported Media Type
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: 'https://peacprotocol.org/problems/unsupported-media-type'
+            title: 'Unsupported Media Type'
+            status: 415
+    ProtocolUpgradeRequired:
+      description: Protocol upgrade required
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: 'https://peacprotocol.org/problems/protocol-version-required'
+            title: 'Upgrade Required'
+            status: 426
+            supported: ['0.9.6']
+    InvalidReference:
+      description: Invalid agreement reference
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: 'https://peacprotocol.org/problems/invalid-reference'
+            title: 'Unprocessable Entity'
+            status: 422
+            detail: 'Agreement agr_example not found'
+    AgreementMismatch:
+      description: Agreement fingerprint mismatch
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: 'https://peacprotocol.org/problems/agreement-mismatch'
+            title: 'Conflict'
+            status: 409
+            detail: 'Agreement fingerprint mismatch'
+    ValidationError:
+      description: Validation error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: 'https://peacprotocol.org/problems/validation-error'
+            title: 'Bad Request'
+            status: 400
+            detail: 'Invalid JSON in request body'
+
+  schemas:
+    AgreementProposal:
+      type: object
+      description: Agreement proposal for creation
+      properties:
+        purpose:
+          type: string
+          description: Human-readable purpose description
+          example: 'AI training on web content'
+        consent:
+          type: object
+          properties:
+            required:
+              type: boolean
+              description: Whether explicit consent is required
+            mechanism:
+              type: string
+              description: Consent mechanism (e.g., "api-acknowledgment")
+            metadata:
+              type: object
+              additionalProperties: true
+          required: [required]
+        attribution:
+          type: object
+          properties:
+            required:
+              type: boolean
+              description: Whether attribution is required
+            text:
+              type: string
+              description: Attribution text if required
+            placement:
+              type: string
+              description: Attribution placement requirements
+          required: [required]
+        pricing_policy:
+          type: object
+          properties:
+            price:
+              type: string
+              description: Minor currency units as decimal-free string
+              example: '2500'
+            currency:
+              type: string
+              description: Currency code (ISO 4217)
+              default: 'USD'
+            duration:
+              type: integer
+              description: Duration in seconds
+              example: 86400
+            usage:
+              type: string
+              enum: [training, inference, analytics, display, cache]
+              description: Usage category
+          required: [price, duration, usage]
+        terms:
+          type: object
+          properties:
+            text:
+              type: string
+              description: Terms text or reference
+            url:
+              type: string
+              format: uri
+              description: Terms URL for external reference
+            version:
+              type: string
+              description: Version of terms
+          required: [text]
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional metadata (extensible)
+      required: [purpose, consent, attribution, pricing_policy, terms]
+
+    Agreement:
+      type: object
+      description: Created agreement resource
+      properties:
+        id:
+          type: string
+          pattern: '^agr_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: Agreement ID with agr_ prefix (ULID)
+          example: 'agr_01H8ABC123DEF456GHI789JKL0'
+        fingerprint:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          description: SHA256 fingerprint of canonical proposal
+          example: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'
+        protocol_version:
+          type: string
+          enum: ['0.9.6']
+          description: Protocol version used
+        status:
+          type: string
+          enum: [valid, invalid]
+          description: Agreement status
+        reason:
+          type: string
+          enum: [expired, revoked, suspended, malformed]
+          description: Reason if status is invalid
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp (ISO 8601)
+        expires_at:
+          type: string
+          format: date-time
+          description: Expiration timestamp (ISO 8601) if applicable
+        proposal:
+          $ref: '#/components/schemas/AgreementProposal'
+          description: Snapshot of original proposal
+      required: [id, fingerprint, protocol_version, status, created_at, proposal]
+
+    PaymentChargeRequest:
+      type: object
+      description: Payment charge request
+      properties:
+        amount:
+          type: string
+          description: Amount in minor currency units
+          example: '2500'
+        currency:
+          type: string
+          description: Currency code (ISO 4217)
+          default: 'USD'
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Payment metadata
+      required: [amount]
+
+    PaymentReceipt:
+      type: object
+      description: Payment processing receipt
+      properties:
+        id:
+          type: string
+          description: Payment receipt ID
+          example: 'pay_1234567890'
+        amount:
+          type: string
+          description: Amount charged
+        currency:
+          type: string
+          description: Currency used
+        agreement_id:
+          type: string
+          description: Associated agreement ID
+        agreement_fingerprint:
+          type: string
+          description: Agreement fingerprint at time of payment
+        status:
+          type: string
+          enum: [completed, pending, failed]
+          description: Payment status
+        created_at:
+          type: string
+          format: date-time
+          description: Payment timestamp
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Payment metadata including provider details
+      required: [id, amount, currency, agreement_id, agreement_fingerprint, status, created_at]
+
+    Problem:
+      type: object
+      description: RFC 7807 Problem Details for HTTP APIs
+      properties:
+        type:
+          type: string
+          format: uri
+          description: Problem type URI
+          example: 'https://peacprotocol.org/problems/not-found'
+        title:
+          type: string
+          description: Human-readable problem title
+        status:
+          type: integer
+          description: HTTP status code
+        detail:
+          type: string
+          description: Human-readable problem details
+        instance:
+          type: string
+          format: uri
+          description: URI reference to this specific problem occurrence
+      required: [type, title, status]
+      additionalProperties: true

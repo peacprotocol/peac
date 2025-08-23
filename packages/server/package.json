@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/server",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "PEAC Protocol - Enterprise Automated Economy Infrastructure",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -60,6 +60,7 @@
     "json-stable-stringify": "^1.3.0",
     "pino": "^8.17.0",
     "prom-client": "^15.1.0",
+    "ulidx": "^2.4.1",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },

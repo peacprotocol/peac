@@ -1,5 +1,5 @@
 /**
- * Jest setup for PEAC v0.9.3
+ * Jest setup for PEAC v0.9.7
  * Keep this minimal and repo-safe (no secrets, no I/O).
  */
 
@@ -49,4 +49,22 @@ jest.setTimeout(10000);
 // Fail fast on unhandled promise rejections (good hygiene).
 process.on('unhandledRejection', (err) => {
   throw err;
+});
+
+// Global teardown to prevent hanging processes
+afterAll(async () => {
+  // Clean up Redis connections
+  const { disconnectRedis } = await import('../src/utils/redis-pool');
+  await disconnectRedis();
+
+  // Clean up rate limiters
+  const { standardRateLimiter, strictRateLimiter } = await import(
+    '../src/middleware/enhanced-rate-limit'
+  );
+  standardRateLimiter.destroy();
+  strictRateLimiter.destroy();
+
+  // Clean up idempotency middleware
+  const { idempotencyMiddleware } = await import('../src/middleware/idempotency');
+  idempotencyMiddleware.destroy();
 });
