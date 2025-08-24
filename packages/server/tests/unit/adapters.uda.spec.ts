@@ -93,6 +93,13 @@ describe('UDAAdapter', () => {
     });
   });
 
+  const createMockToken = (payload) => {
+    const header = { typ: 'JWT', alg: 'RS256' };
+    const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
+    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    return `${encodedHeader}.${encodedPayload}.mock-signature`;
+  };
+
   describe('verify', () => {
     const validTokenPayload = {
       iss: 'https://demo.peac.dev/auth',
@@ -108,13 +115,6 @@ describe('UDAAdapter', () => {
           scopes: ['read', 'write'],
         },
       ],
-    };
-
-    const createMockToken = (payload) => {
-      const header = { typ: 'JWT', alg: 'RS256' };
-      const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
-      const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
-      return `${encodedHeader}.${encodedPayload}.mock-signature`;
     };
 
     it('should handle invalid token format', async () => {
