@@ -190,7 +190,10 @@ export class JWKSManager {
     return jose.jwtVerify(token, keySet, opts);
   }
 
-  async verifyJws(compactDetached: string, payloadBytes: Uint8Array): Promise<jose.CompactVerifyResult> {
+  async verifyJws(
+    compactDetached: string,
+    payloadBytes: Uint8Array,
+  ): Promise<jose.CompactVerifyResult> {
     const [hdr, , sig] = compactDetached.split('..');
     const full = `${hdr}.${jose.base64url.encode(payloadBytes)}.${sig}`;
     const { jwks } = await this.getPublicJWKS();
@@ -242,7 +245,10 @@ export class JWKSManager {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async handleJWKSRequest(req: { headers: Record<string, string | string[] | undefined> }, res: any): Promise<void> {
+  async handleJWKSRequest(
+    req: { headers: Record<string, string | string[] | undefined> },
+    res: any,
+  ): Promise<void> {
     const { jwks, etag } = await this.getPublicJWKS();
 
     res.set({
