@@ -15,13 +15,14 @@ export function versionNegotiation(supportedVersions: string[]) {
 
     if (!supportedVersions.includes(versionString)) {
       return res
-        .status(406)
+        .status(426)
         .set('Content-Type', 'application/problem+json')
         .json({
-          type: 'https://docs.peacprotocol.org/problems/peac_protocol_version_mismatch',
-          title: 'Protocol version not supported',
-          status: 406,
+          type: 'https://peacprotocol.org/problems/protocol-version-unsupported',
+          title: 'Upgrade Required',
+          status: 426,
           detail: `Version ${versionString} is not supported`,
+          instance: req.url,
           trace_id: req.trace_id || crypto.randomBytes(16).toString('hex'),
           'x-peac-advice': `Supported versions: ${supportedVersions.join(', ')}`,
           supported_versions: supportedVersions,

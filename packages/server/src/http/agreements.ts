@@ -32,15 +32,15 @@ export function validateProtocolVersion(req: Request, res: Response, next: NextF
     return problemDetails.send(res, 'protocol_version_required', {
       detail: 'X-PEAC-Protocol header is required',
       required_header: 'X-PEAC-Protocol',
-      supported: ['0.9.6'],
+      supported: ['0.9.8'],
     });
   }
 
-  if (protocolHeader !== '0.9.6') {
+  if (protocolHeader !== '0.9.8') {
     return problemDetails.send(res, 'protocol_version_unsupported', {
       detail: `Protocol version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
-      supported: ['0.9.6'],
+      supported: ['0.9.8'],
     });
   }
 
@@ -69,15 +69,15 @@ export function validateProtocolVersionWithDeprecation(
     return problemDetails.send(res, 'protocol_version_required', {
       detail: 'X-PEAC-Protocol header is required',
       required_header: 'X-PEAC-Protocol',
-      supported: ['0.9.6'],
+      supported: ['0.9.8'],
     });
   }
 
-  if (protocolHeader !== '0.9.6') {
+  if (protocolHeader !== '0.9.8') {
     return problemDetails.send(res, 'protocol_version_unsupported', {
       detail: `Protocol version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
-      supported: ['0.9.6'],
+      supported: ['0.9.8'],
     });
   }
 

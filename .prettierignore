@@ -10,3 +10,5 @@ coverage/
 sbom.json
 package-lock.json
 docs/generated/
+v0.9.6 code gen instructions & scope/
+.claude/

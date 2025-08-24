@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/cli",
-  "version": "0.9.7",
+  "version": "0.9.7.1",
   "description": "PEAC Protocol CLI",
   "main": "dist/index.js",
   "bin": {
@@ -11,7 +11,7 @@
     "test": "echo 'Tests will be added'"
   },
   "dependencies": {
-    "@peacprotocol/schema": "^0.9.4"
+    "@peacprotocol/schema": "file:../schema"
   },
   "devDependencies": {
     "typescript": "^5.2.0"

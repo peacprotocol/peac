@@ -26,47 +26,42 @@ export function createHealthRouter(config: HealthCheckConfig): Router {
   });
 
   router.get('/health/readiness', async (_req, res) => {
-    const checks: Record<string, boolean> = {};
-    let allHealthy = true;
-
-    try {
-      checks.database = await config.database.ping();
-    } catch (err) {
-      logger.error({ err }, 'Database health check failed');
-      checks.database = false;
-      allHealthy = false;
-    }
+    const checks = {
+      redis: false,
+      database: false,
+      jwks: false,
+    };
 
     try {
       await config.redis.ping();
       checks.redis = true;
-    } catch (err) {
-      logger.error({ err }, 'Redis health check failed');
-      checks.redis = false;
-      allHealthy = false;
+    } catch (error) {
+      logger.error({ error }, 'Redis health check failed');
     }
 
     try {
-      const jwks = config.jwksManager.getJWKS();
+      await config.database.ping();
+      checks.database = true;
+    } catch (error) {
+      logger.error({ error }, 'Database health check failed');
+    }
+
+    try {
+      const { jwks } = await config.jwksManager.getPublicJWKS();
       checks.jwks = jwks.keys.length > 0;
-      if (!checks.jwks) allHealthy = false;
-    } catch (err) {
-      logger.error({ err }, 'JWKS health check failed');
-      checks.jwks = false;
-      allHealthy = false;
+    } catch (error) {
+      logger.error({ error }, 'JWKS health check failed');
     }
 
-    const status = allHealthy ? 200 : 503;
+    const allHealthy = Object.values(checks).every(Boolean);
+    const status = allHealthy ? 'ok' : 'degraded';
 
-    res.status(status).json({
-      status: allHealthy ? 'ready' : 'not_ready',
-      checks,
+    res.status(allHealthy ? 200 : 503).json({
+      status,
       timestamp: new Date().toISOString(),
+      checks,
+      version: '0.9.8',
     });
-
-    if (!allHealthy) {
-      logger.warn({ checks }, 'Readiness check failed');
-    }
   });
 
   return router;

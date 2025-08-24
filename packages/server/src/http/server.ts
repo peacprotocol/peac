@@ -34,6 +34,7 @@ export async function createServer() {
     keyStorePath: process.env.JWKS_PATH || './keys',
     rotationIntervalDays: 30,
     preferredAlgorithm: 'ES256',
+    retireGracePeriodDays: 7,
   });
   await jwksManager.initialize();
 

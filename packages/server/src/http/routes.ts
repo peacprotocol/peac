@@ -4,7 +4,6 @@ import { handleVerify } from './verify';
 import { rateLimitMiddleware } from '../middleware/rateLimit';
 import { handleWellKnown } from './wellKnown';
 import { handleCapabilities } from './wellKnown/capabilities.handler';
-import { handleJWKS } from './wellKnown/jwks.handler';
 import { handleLiveness, handleReadiness } from '../health/handlers';
 import { greaseHandler } from '../ext/grease';
 import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
@@ -46,7 +45,6 @@ export function createRoutes() {
     standardRateLimiter.middleware(),
     handleCapabilities,
   );
-  router.get('/.well-known/jwks.json', standardRateLimiter.middleware(), handleJWKS);
 
   // Agreement-first API endpoints (v0.9.6)
   router.post(
