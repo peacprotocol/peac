@@ -120,7 +120,9 @@ export class PEACError extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static handler(
     err: Error & { status?: number; code?: string },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     req: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     res: any,
     _next: () => void,
   ) {

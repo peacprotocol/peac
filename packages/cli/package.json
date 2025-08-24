@@ -11,7 +11,7 @@
     "test": "echo 'Tests will be added'"
   },
   "dependencies": {
-    "@peacprotocol/schema": "^0.9.4"
+    "@peacprotocol/schema": "file:../schema"
   },
   "devDependencies": {
     "typescript": "^5.2.0"
