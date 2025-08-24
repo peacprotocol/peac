@@ -8,7 +8,7 @@ describe('AttestationAdapter', () => {
     mockRedis = {
       get: jest.fn(),
       setex: jest.fn(),
-      del: jest.fn()
+      del: jest.fn(),
     };
     adapter = new AttestationAdapterImpl({ redis: mockRedis });
   });
@@ -20,16 +20,16 @@ describe('AttestationAdapter', () => {
 
     it('should register custom vendors from config', () => {
       const customVendors = {
-        'CustomVendor': {
+        CustomVendor: {
           jwks_uri: 'https://custom.vendor/keys',
           trusted: true,
-          rate_limit_multiplier: 5
-        }
+          rate_limit_multiplier: 5,
+        },
       };
 
       const customAdapter = new AttestationAdapterImpl({
         redis: mockRedis,
-        vendors: customVendors
+        vendors: customVendors,
       });
 
       expect(customAdapter.name()).toBe('attestation');
@@ -45,13 +45,13 @@ describe('AttestationAdapter', () => {
   describe('discoveryFragment', () => {
     it('should return discovery fragment with trusted vendors', () => {
       const fragment = adapter.discoveryFragment();
-      
+
       expect(fragment).toHaveProperty('endpoints');
       expect(fragment.endpoints).toHaveProperty('attestation');
       expect(fragment).toHaveProperty('auth_hints');
       expect(fragment.auth_hints).toHaveProperty('agent_attestation');
       expect(fragment.auth_hints.agent_attestation).toHaveProperty('trusted_vendors');
-      
+
       const trustedVendors = fragment.auth_hints.agent_attestation.trusted_vendors;
       expect(trustedVendors).toContain('Anthropic');
       expect(trustedVendors).toContain('OpenAI');
@@ -63,72 +63,76 @@ describe('AttestationAdapter', () => {
       const customAdapter = new AttestationAdapterImpl({
         redis: mockRedis,
         vendors: {
-          'TrustedCustom': {
+          TrustedCustom: {
             trusted: true,
-            rate_limit_multiplier: 5
+            rate_limit_multiplier: 5,
           },
-          'UntrustedCustom': {
+          UntrustedCustom: {
             trusted: false,
-            rate_limit_multiplier: 1
-          }
-        }
+            rate_limit_multiplier: 1,
+          },
+        },
       });
 
       const fragment = customAdapter.discoveryFragment();
       const trustedVendors = fragment.auth_hints.agent_attestation.trusted_vendors;
-      
+
       expect(trustedVendors).toContain('TrustedCustom');
       expect(trustedVendors).not.toContain('UntrustedCustom');
     });
   });
 
   describe('verify', () => {
-    const validToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBbnRocm9waWMiLCJhdWQiOiJ0ZXN0LWF1ZGllbmNlIiwiZXhwIjoxOTAwMDAwMDAwLCJpYXQiOjE2MDAwMDAwMDAsImp0aSI6InRlc3QtanRpIiwicGVhY19hZ2VudF92ZW5kb3IiOiJBbnRocm9waWMiLCJwZWFjX2FnZW50X25hbWUiOiJDbGF1ZGUiLCJwZWFjX2FnZW50X3ZlcnNpb24iOiIzLjAiLCJwZWFjX3J1bnRpbWVfdHlwZSI6ImJyb3dzZXIiLCJwZWFjX3J1bnRpbWVfcGxhdGZvcm0iOiJ3ZWIifQ.signature';
+    const validToken =
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBbnRocm9waWMiLCJhdWQiOiJ0ZXN0LWF1ZGllbmNlIiwiZXhwIjoxOTAwMDAwMDAwLCJpYXQiOjE2MDAwMDAwMDAsImp0aSI6InRlc3QtanRpIiwicGVhY19hZ2VudF92ZW5kb3IiOiJBbnRocm9waWMiLCJwZWFjX2FnZW50X25hbWUiOiJDbGF1ZGUiLCJwZWFjX2FnZW50X3ZlcnNpb24iOiIzLjAiLCJwZWFjX3J1bnRpbWVfdHlwZSI6ImJyb3dzZXIiLCJwZWFjX3J1bnRpbWVfcGxhdGZvcm0iOiJ3ZWIifQ.signature';
 
     it('should handle invalid token format', async () => {
       const result = await adapter.verify('invalid-token', 'test-audience');
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toBeDefined();
     });
 
     it('should handle malformed JWT', async () => {
       const result = await adapter.verify('not.a.jwt', 'test-audience');
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toBeDefined();
     });
 
     it('should handle token with missing required fields', async () => {
-      const incompleteToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBbnRocm9waWMifQ.signature';
-      
+      const incompleteToken =
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBbnRocm9waWMifQ.signature';
+
       const result = await adapter.verify(incompleteToken, 'test-audience');
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toBeDefined();
     });
 
     it('should handle audience mismatch', async () => {
       const result = await adapter.verify(validToken, 'wrong-audience');
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toContain('audience');
     });
 
     it('should handle expired token', async () => {
-      const expiredToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBbnRocm9waWMiLCJhdWQiOiJ0ZXN0LWF1ZGllbmNlIiwiZXhwIjoxNTAwMDAwMDAwLCJpYXQiOjE0MDAwMDAwMDAsImp0aSI6InRlc3QtanRpIiwicGVhY19hZ2VudF92ZW5kb3IiOiJBbnRocm9waWMiLCJwZWFjX2FnZW50X25hbWUiOiJDbGF1ZGUiLCJwZWFjX2FnZW50X3ZlcnNpb24iOiIzLjAiLCJwZWFjX3J1bnRpbWVfdHlwZSI6ImJyb3dzZXIiLCJwZWFjX3J1bnRpbWVfcGxhdGZvcm0iOiJ3ZWIifQ.signature';
-      
+      const expiredToken =
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBbnRocm9waWMiLCJhdWQiOiJ0ZXN0LWF1ZGllbmNlIiwiZXhwIjoxNTAwMDAwMDAwLCJpYXQiOjE0MDAwMDAwMDAsImp0aSI6InRlc3QtanRpIiwicGVhY19hZ2VudF92ZW5kb3IiOiJBbnRocm9waWMiLCJwZWFjX2FnZW50X25hbWUiOiJDbGF1ZGUiLCJwZWFjX2FnZW50X3ZlcnNpb24iOiIzLjAiLCJwZWFjX3J1bnRpbWVfdHlwZSI6ImJyb3dzZXIiLCJwZWFjX3J1bnRpbWVfcGxhdGZvcm0iOiJ3ZWIifQ.signature';
+
       const result = await adapter.verify(expiredToken, 'test-audience');
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toContain('expired');
     });
 
     it('should handle unknown vendor', async () => {
-      const unknownVendorToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJVbmtub3duVmVuZG9yIiwiYXVkIjoidGVzdC1hdWRpZW5jZSIsImV4cCI6MTkwMDAwMDAwMCwiaWF0IjoxNjAwMDAwMDAwLCJqdGkiOiJ0ZXN0LWp0aSIsInBlYWNfYWdlbnRfdmVuZG9yIjoiVW5rbm93blZlbmRvciIsInBlYWNfYWdlbnRfbmFtZSI6IlRlc3QiLCJwZWFjX2FnZW50X3ZlcnNpb24iOiIxLjAiLCJwZWFjX3J1bnRpbWVfdHlwZSI6ImJyb3dzZXIiLCJwZWFjX3J1bnRpbWVfcGxhdGZvcm0iOiJ3ZWIifQ.signature';
-      
+      const unknownVendorToken =
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJVbmtub3duVmVuZG9yIiwiYXVkIjoidGVzdC1hdWRpZW5jZSIsImV4cCI6MTkwMDAwMDAwMCwiaWF0IjoxNjAwMDAwMDAwLCJqdGkiOiJ0ZXN0LWp0aSIsInBlYWNfYWdlbnRfdmVuZG9yIjoiVW5rbm93blZlbmRvciIsInBlYWNfYWdlbnRfbmFtZSI6IlRlc3QiLCJwZWFjX2FnZW50X3ZlcnNpb24iOiIxLjAiLCJwZWFjX3J1bnRpbWVfdHlwZSI6ImJyb3dzZXIiLCJwZWFjX3J1bnRpbWVfcGxhdGZvcm0iOiJ3ZWIifQ.signature';
+
       const result = await adapter.verify(unknownVendorToken, 'test-audience');
-      
+
       expect(result.valid).toBe(false);
       expect(result.vendor).toBe('UnknownVendor');
       expect(result.trusted).toBe(false);
@@ -140,7 +144,7 @@ describe('AttestationAdapter', () => {
         valid: true,
         agent_id: 'cached-agent',
         vendor: 'Anthropic',
-        trusted: true
+        trusted: true,
       };
 
       mockRedis.get.mockResolvedValue(JSON.stringify(cachedResult));
@@ -164,7 +168,7 @@ describe('AttestationAdapter', () => {
   describe('registerVendor', () => {
     it('should register vendor with configuration', () => {
       const customAdapter = new AttestationAdapterImpl({ redis: mockRedis });
-      
+
       // This is tested indirectly through the constructor and discoveryFragment
       const fragment = customAdapter.discoveryFragment();
       expect(fragment.auth_hints.agent_attestation.trusted_vendors).toContain('Anthropic');
@@ -178,7 +182,7 @@ describe('AttestationAdapter', () => {
         'not-jwt-at-all',
         'only.two.parts',
         'invalid.base64!.encoding',
-        'eyJhbGciOiJub25lIn0..invalid'
+        'eyJhbGciOiJub25lIn0..invalid',
       ];
 
       for (const token of testCases) {
@@ -189,10 +193,11 @@ describe('AttestationAdapter', () => {
     });
 
     it('should handle missing required PEAC fields', async () => {
-      const tokenWithoutPeacFields = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBbnRocm9waWMiLCJhdWQiOiJ0ZXN0LWF1ZGllbmNlIiwiZXhwIjoxOTAwMDAwMDAwLCJpYXQiOjE2MDAwMDAwMDAsImp0aSI6InRlc3QtanRpIn0.signature';
-      
+      const tokenWithoutPeacFields =
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBbnRocm9waWMiLCJhdWQiOiJ0ZXN0LWF1ZGllbmNlIiwiZXhwIjoxOTAwMDAwMDAwLCJpYXQiOjE2MDAwMDAwMDAsImp0aSI6InRlc3QtanRpIn0.signature';
+
       const result = await adapter.verify(tokenWithoutPeacFields, 'test-audience');
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toBeDefined();
     });
