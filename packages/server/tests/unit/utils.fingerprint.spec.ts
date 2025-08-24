@@ -8,6 +8,7 @@ import {
   computeAgreementFingerprint,
   isValidFingerprint,
   compareFingerprints,
+  assertFingerprintMatch,
 } from '../../src/utils/fingerprint';
 
 describe('Fingerprint Utilities', () => {
@@ -94,6 +95,25 @@ describe('Fingerprint Utilities', () => {
     it('should return false for invalid fingerprints', () => {
       expect(compareFingerprints('invalid', validFingerprint1)).toBe(false);
       expect(compareFingerprints(validFingerprint1, 'invalid')).toBe(false);
+    });
+  });
+
+  describe('assertFingerprintMatch', () => {
+    const validFingerprint1 = 'a'.repeat(64);
+    const validFingerprint2 = 'b'.repeat(64);
+
+    it('should not throw for identical fingerprints', () => {
+      expect(() => assertFingerprintMatch(validFingerprint1, validFingerprint1)).not.toThrow();
+    });
+
+    it('should throw error with code for non-matching fingerprints', () => {
+      expect(() => assertFingerprintMatch(validFingerprint1, validFingerprint2)).toThrow('Fingerprint mismatch');
+
+      try {
+        assertFingerprintMatch(validFingerprint1, validFingerprint2);
+      } catch (err) {
+        expect(err.code).toBe('fingerprint_mismatch');
+      }
     });
   });
 });

@@ -30,6 +30,10 @@ export default {
     '<rootDir>/src/negotiation/',
     '<rootDir>/src/security/dpop/',
     '<rootDir>/src/agents/',
+    '<rootDir>/src/http/payment.ts',
+    '<rootDir>/src/http/gdpr-export.ts',
+    '<rootDir>/src/health/endpoints.ts',
+    '<rootDir>/src/events/contracts/emitter.ts',
   ],
   coverageThreshold: {
     global: { statements: 52, branches: 46, functions: 52, lines: 53 },
