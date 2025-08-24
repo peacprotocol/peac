@@ -4,7 +4,7 @@ describe('PEACError', () => {
   describe('constructor', () => {
     it('should create error with all parameters', () => {
       const error = new PEACError('test_error', 'Test message', 400, 'Detailed description');
-      
+
       expect(error.type).toBe('test_error');
       expect(error.message).toBe('Test message');
       expect(error.status).toBe(400);
@@ -15,28 +15,28 @@ describe('PEACError', () => {
 
     it('should create error with default status 500', () => {
       const error = new PEACError('test_error', 'Test message');
-      
+
       expect(error.status).toBe(500);
       expect(error.detail).toBe('Test message');
     });
 
     it('should create error with custom status and no detail', () => {
       const error = new PEACError('test_error', 'Test message', 404);
-      
+
       expect(error.status).toBe(404);
       expect(error.detail).toBe('Test message');
     });
 
     it('should use detail when provided even with custom status', () => {
       const error = new PEACError('test_error', 'Test message', 403, 'Custom detail');
-      
+
       expect(error.detail).toBe('Custom detail');
     });
 
     it('should generate unique trace IDs', () => {
       const error1 = new PEACError('test_error', 'Message 1');
       const error2 = new PEACError('test_error', 'Message 2');
-      
+
       expect(error1.trace_id).not.toBe(error2.trace_id);
       expect(error1.trace_id).toMatch(/^[a-f0-9]{32}$/);
       expect(error2.trace_id).toMatch(/^[a-f0-9]{32}$/);
@@ -63,8 +63,13 @@ describe('PEACError', () => {
     });
 
     it('should handle PEACError instances correctly', () => {
-      const peacError = new PEACError('validation_error', 'Invalid input', 400, 'Field is required');
-      
+      const peacError = new PEACError(
+        'validation_error',
+        'Invalid input',
+        400,
+        'Field is required',
+      );
+
       PEACError.handler(peacError, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
@@ -81,7 +86,7 @@ describe('PEACError', () => {
 
     it('should handle PEACError with default status', () => {
       const peacError = new PEACError('server_error', 'Something went wrong');
-      
+
       PEACError.handler(peacError, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
@@ -97,12 +102,12 @@ describe('PEACError', () => {
 
     it('should handle standard Error instances', () => {
       const standardError = new Error('Standard error message');
-      
+
       PEACError.handler(standardError, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.set).toHaveBeenCalledWith('Content-Type', 'application/problem+json');
-      
+
       const jsonCall = mockRes.json.mock.calls[0][0];
       expect(jsonCall.type).toBe('https://docs.peacprotocol.org/problems/internal_server_error');
       expect(jsonCall.title).toBe('Internal Server Error');
@@ -114,12 +119,12 @@ describe('PEACError', () => {
 
     it('should handle non-Error objects', () => {
       const nonError = 'String error';
-      
+
       PEACError.handler(nonError, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.set).toHaveBeenCalledWith('Content-Type', 'application/problem+json');
-      
+
       const jsonCall = mockRes.json.mock.calls[0][0];
       expect(jsonCall.type).toBe('https://docs.peacprotocol.org/problems/internal_server_error');
       expect(jsonCall.title).toBe('Internal Server Error');
@@ -130,7 +135,7 @@ describe('PEACError', () => {
     it('should generate different trace IDs for different standard errors', () => {
       const error1 = new Error('Error 1');
       const error2 = new Error('Error 2');
-      
+
       PEACError.handler(error1, mockReq, mockRes, mockNext);
       PEACError.handler(error2, mockReq, mockRes, mockNext);
 
@@ -141,26 +146,26 @@ describe('PEACError', () => {
     it('should work with different request URLs', () => {
       const peacError = new PEACError('test_error', 'Test message', 404);
       mockReq.originalUrl = '/different/path';
-      
+
       PEACError.handler(peacError, mockReq, mockRes, mockNext);
 
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           instance: '/different/path',
-        })
+        }),
       );
     });
 
     it('should handle missing originalUrl', () => {
       const peacError = new PEACError('test_error', 'Test message', 404);
       mockReq.originalUrl = undefined;
-      
+
       PEACError.handler(peacError, mockReq, mockRes, mockNext);
 
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           instance: undefined,
-        })
+        }),
       );
     });
   });
