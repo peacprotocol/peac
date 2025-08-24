@@ -107,7 +107,9 @@ describe('Fingerprint Utilities', () => {
     });
 
     it('should throw error with code for non-matching fingerprints', () => {
-      expect(() => assertFingerprintMatch(validFingerprint1, validFingerprint2)).toThrow('Fingerprint mismatch');
+      expect(() => assertFingerprintMatch(validFingerprint1, validFingerprint2)).toThrow(
+        'Fingerprint mismatch',
+      );
 
       try {
         assertFingerprintMatch(validFingerprint1, validFingerprint2);

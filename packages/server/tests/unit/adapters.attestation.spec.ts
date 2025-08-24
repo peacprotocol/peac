@@ -1,21 +1,19 @@
 import { AttestationAdapterImpl, AttestationProblemType } from '../../src/adapters/attestation';
-import { PEACError } from '../../src/errors/problem-json';
-import { Redis } from 'ioredis';
 
 describe('AttestationAdapter', () => {
   let adapter;
   let mockRedis;
   // Create tokens with future expiration to avoid expiration errors
   const now = Math.floor(Date.now() / 1000);
-  
+
   // Helper function to create valid tokens
   const createToken = (payload) => {
     return `eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.${Buffer.from(
       JSON.stringify({
         exp: now + 1800, // 30 minutes from now
         iat: now,
-        ...payload
-      })
+        ...payload,
+      }),
     ).toString('base64url')}.signature`;
   };
 
@@ -105,7 +103,7 @@ describe('AttestationAdapter', () => {
     peac_agent_name: 'Claude',
     peac_agent_version: '3.0',
     peac_runtime_type: 'browser',
-    peac_runtime_platform: 'web'
+    peac_runtime_platform: 'web',
   });
 
   describe('verify', () => {
@@ -125,7 +123,7 @@ describe('AttestationAdapter', () => {
 
     it('should handle token with missing required fields', async () => {
       const incompleteToken = createToken({
-        iss: 'Anthropic'
+        iss: 'Anthropic',
         // Missing other required fields
       });
 
@@ -157,7 +155,7 @@ describe('AttestationAdapter', () => {
         peac_agent_name: 'Claude',
         peac_agent_version: '3.0',
         peac_runtime_type: 'browser',
-        peac_runtime_platform: 'web'
+        peac_runtime_platform: 'web',
       });
 
       try {
@@ -178,7 +176,7 @@ describe('AttestationAdapter', () => {
         peac_agent_name: 'Test',
         peac_agent_version: '1.0',
         peac_runtime_type: 'browser',
-        peac_runtime_platform: 'web'
+        peac_runtime_platform: 'web',
       });
 
       const result = await adapter.verify(unknownVendorToken, 'test-audience');
@@ -232,7 +230,7 @@ describe('AttestationAdapter', () => {
       const tokenWithoutPeacFields = createToken({
         iss: 'Anthropic',
         aud: 'test-audience',
-        jti: 'test-jti'
+        jti: 'test-jti',
         // Missing PEAC fields
       });
 
@@ -253,10 +251,10 @@ describe('AttestationAdapter', () => {
     it('should return cached results', async () => {
       // Create an adapter with a mock cache that returns a valid result
       const adapterWithCache = new AttestationAdapterImpl({ redis: mockRedis });
-      
+
       // First call will fail and cache the result
       await adapterWithCache.verify(validToken, 'test-audience');
-      
+
       // Subsequent calls should use the same result
       const result2 = await adapterWithCache.verify(validToken, 'test-audience');
       expect(result2.valid).toBe(false); // Still fails due to no proper signature
@@ -271,15 +269,15 @@ describe('AttestationAdapter', () => {
     });
 
     it('should handle self-signed tokens', async () => {
-      const selfSignedAdapter = new AttestationAdapterImpl({ 
+      const selfSignedAdapter = new AttestationAdapterImpl({
         redis: mockRedis,
         vendors: {
-          'TestVendor': {
+          TestVendor: {
             self_signed: true,
             trusted: true,
-            rate_limit_multiplier: 1
-          }
-        }
+            rate_limit_multiplier: 1,
+          },
+        },
       });
 
       const tokenWithPublicKey = createToken({
@@ -291,9 +289,9 @@ describe('AttestationAdapter', () => {
         peac_agent_version: '1.0',
         peac_runtime_type: 'browser',
         peac_runtime_platform: 'web',
-        peac_public_key: { kty: 'RSA', n: 'test', e: 'AQAB' }
+        peac_public_key: { kty: 'RSA', n: 'test', e: 'AQAB' },
       });
-      
+
       const result = await selfSignedAdapter.verify(tokenWithPublicKey, 'test-audience');
       expect(result.valid).toBe(false); // Will fail due to invalid signature, but should test the self-signed path
     });
@@ -302,12 +300,12 @@ describe('AttestationAdapter', () => {
       const noVerifyAdapter = new AttestationAdapterImpl({
         redis: mockRedis,
         vendors: {
-          'NoVerifyVendor': {
+          NoVerifyVendor: {
             trusted: false,
-            rate_limit_multiplier: 1
+            rate_limit_multiplier: 1,
             // No jwks_uri or self_signed
-          }
-        }
+          },
+        },
       });
 
       const token = createToken({
@@ -318,9 +316,9 @@ describe('AttestationAdapter', () => {
         peac_agent_name: 'Test',
         peac_agent_version: '1.0',
         peac_runtime_type: 'browser',
-        peac_runtime_platform: 'web'
+        peac_runtime_platform: 'web',
       });
-      
+
       const result = await noVerifyAdapter.verify(token, 'test-audience');
       expect(result.valid).toBe(false);
       expect(result.error).toContain('No verification method available');
@@ -338,9 +336,9 @@ describe('AttestationAdapter', () => {
         peac_agent_version: '1.0',
         peac_runtime_type: 'browser',
         peac_runtime_platform: 'web',
-        peac_revocation_check: 'https://revoke.example.com'
+        peac_revocation_check: 'https://revoke.example.com',
       });
-      
+
       const result = await adapter.verify(tokenWithRevocation, 'test-audience');
       expect(result.valid).toBe(false); // Will fail due to signature verification
     });
@@ -351,12 +349,12 @@ describe('AttestationAdapter', () => {
       const jwksAdapter = new AttestationAdapterImpl({
         redis: mockRedis,
         vendors: {
-          'JWKSVendor': {
+          JWKSVendor: {
             jwks_uri: 'https://example.com/jwks.json',
             trusted: true,
-            rate_limit_multiplier: 1
-          }
-        }
+            rate_limit_multiplier: 1,
+          },
+        },
       });
 
       const jwksToken = createToken({
@@ -367,9 +365,9 @@ describe('AttestationAdapter', () => {
         peac_agent_name: 'Test',
         peac_agent_version: '1.0',
         peac_runtime_type: 'browser',
-        peac_runtime_platform: 'web'
+        peac_runtime_platform: 'web',
       });
-      
+
       const result = await jwksAdapter.verify(jwksToken, 'test-audience');
       expect(result.valid).toBe(false); // Will fail due to JWKS fetch error in test environment
     });
@@ -386,9 +384,9 @@ describe('AttestationAdapter', () => {
         peac_agent_version: '1.0',
         peac_runtime_type: 'browser',
         peac_runtime_platform: 'web',
-        peac_public_key: { kty: 'RSA', n: 'test', e: 'AQAB' }
+        peac_public_key: { kty: 'RSA', n: 'test', e: 'AQAB' },
       });
-      
+
       const result = await adapter.verify(tokenWithPubKey, 'test-audience');
       expect(result.valid).toBe(false); // Will fail due to signature, but should test the public key thumbprint path
     });
@@ -404,11 +402,11 @@ describe('AttestationAdapter', () => {
       const testToken = validToken;
 
       // First call will cache the result
-      const result1 = await adapter.verify(testToken, 'test-audience');
-      
+      await adapter.verify(testToken, 'test-audience');
+
       // Create a new adapter instance that manually injects a cached result
       const adapterWithCache = new AttestationAdapterImpl({ redis: mockRedis });
-      
+
       // Manually inject a cached result to test the cache hit path
       const cachedResult = {
         valid: true,
@@ -417,17 +415,17 @@ describe('AttestationAdapter', () => {
         trusted: true,
         rate_limit_multiplier: 5,
         runtime_type: 'browser',
-        expires_at: new Date(Date.now() + 3600000)
+        expires_at: new Date(Date.now() + 3600000),
       };
-      
+
       // Access private cache to inject result (for testing cache hit path)
       const cacheKey = `${testToken}:test-audience`;
       adapterWithCache.verificationCache = new Map();
       adapterWithCache.verificationCache.set(cacheKey, {
         result: cachedResult,
-        expires: Date.now() + 3600000
+        expires: Date.now() + 3600000,
       });
-      
+
       // This call should hit the cache (line 127)
       const cachedResult2 = await adapterWithCache.verify(testToken, 'test-audience');
       expect(cachedResult2.valid).toBe(true);
@@ -445,7 +443,7 @@ describe('AttestationAdapter', () => {
         peac_agent_name: 'Claude',
         peac_agent_version: '3.0',
         peac_runtime_type: 'browser',
-        peac_runtime_platform: 'web'
+        peac_runtime_platform: 'web',
       });
 
       const result = await adapter.verify(exactlyOneHourToken, 'test-audience');
@@ -456,14 +454,17 @@ describe('AttestationAdapter', () => {
       // Mock successful fetch for JWKS
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          keys: [{
-            kty: 'RSA',
-            n: 'test-n',
-            e: 'AQAB',
-            kid: 'test-kid'
-          }]
-        })
+        json: () =>
+          Promise.resolve({
+            keys: [
+              {
+                kty: 'RSA',
+                n: 'test-n',
+                e: 'AQAB',
+                kid: 'test-kid',
+              },
+            ],
+          }),
       });
 
       const testToken = createToken({
@@ -474,24 +475,26 @@ describe('AttestationAdapter', () => {
         peac_agent_name: 'Claude',
         peac_agent_version: '3.0',
         peac_runtime_type: 'browser',
-        peac_runtime_platform: 'web'
+        peac_runtime_platform: 'web',
       });
-      
+
       const result = await adapter.verify(testToken, 'test-audience');
       expect(result.valid).toBe(false); // Will still fail due to signature but tests JWKS fetch path
-      
+
       // Should have called fetch for JWKS
-      expect(global.fetch).toHaveBeenCalledWith('https://anthropic.com/.well-known/agent-keys.json');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://anthropic.com/.well-known/agent-keys.json',
+      );
     });
 
     it('should handle JWKS fetch failure gracefully', async () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
-        statusText: 'Not Found'
+        statusText: 'Not Found',
       });
 
       const testToken = validToken;
-      
+
       const result = await adapter.verify(testToken, 'test-audience');
       expect(result.valid).toBe(false);
       expect(result.error).toContain('Failed to fetch JWKS');
@@ -506,7 +509,7 @@ describe('AttestationAdapter', () => {
         peac_agent_name: 'Claude',
         peac_agent_version: '3.0',
         peac_runtime_type: 'browser',
-        peac_runtime_platform: 'web'
+        peac_runtime_platform: 'web',
       });
 
       const result = await adapter.verify(arrayAudToken, 'test-audience');
@@ -524,7 +527,7 @@ describe('AttestationAdapter', () => {
         peac_agent_name: 'Claude',
         peac_agent_version: '3.0',
         peac_runtime_type: 'browser',
-        peac_runtime_platform: 'web'
+        peac_runtime_platform: 'web',
       });
 
       const result = await adapter.verify(longTTLToken, 'test-audience');
@@ -533,28 +536,31 @@ describe('AttestationAdapter', () => {
     });
 
     it('should handle JWKS caching', async () => {
-      global.fetch = jest.fn()
+      global.fetch = jest
+        .fn()
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({
-            keys: [{ kty: 'RSA', n: 'test', e: 'AQAB' }]
-          })
+          json: () =>
+            Promise.resolve({
+              keys: [{ kty: 'RSA', n: 'test', e: 'AQAB' }],
+            }),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({
-            keys: [{ kty: 'RSA', n: 'test2', e: 'AQAB' }]
-          })
+          json: () =>
+            Promise.resolve({
+              keys: [{ kty: 'RSA', n: 'test2', e: 'AQAB' }],
+            }),
         });
 
       const testToken = validToken;
-      
+
       // First call should fetch JWKS
       await adapter.verify(testToken, 'test-audience');
-      
+
       // Second call should use cached JWKS (within 5 minute cache window)
       await adapter.verify(testToken, 'test-audience');
-      
+
       // Should only call fetch once due to caching
       expect(global.fetch).toHaveBeenCalledTimes(1);
     });

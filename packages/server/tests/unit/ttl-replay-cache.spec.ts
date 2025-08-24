@@ -234,7 +234,7 @@ describe('TTLReplayCache', () => {
       cache.add('item1');
       expect(cache.getStats().size).toBe(1); // Item gets added since map is empty
       expect(cache.has('item1')).toBe(true);
-      
+
       cache.add('item2'); // This should remove item1 and add item2
       expect(cache.getStats().size).toBe(1);
       expect(cache.has('item1')).toBe(false);
