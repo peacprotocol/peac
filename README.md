@@ -8,10 +8,10 @@
 
 PEAC is a minimal, open spec for machine-readable policy and agent coordination on the web:
 
-* **Discovery** via `/.well-known/peac.txt`
-* **HTTP semantics** via `x-peac-*` headers and RFC7807 errors
-* **Verifiable receipts** (JWS) with **adapters** for negotiation, settlement, and compliance
-* **Trust rails** for agents: UDA, DPoP, and Agent Attestation
+- **Discovery** via `/.well-known/peac.txt`
+- **HTTP semantics** via `x-peac-*` headers and RFC7807 errors
+- **Verifiable receipts** (JWS) with **adapters** for negotiation, settlement, and compliance
+- **Trust rails** for agents: UDA, DPoP, and Agent Attestation
 
 Designed as neutral infrastructure: implement what you need, bridge what exists, and extend via adapters and PEIPs.
 We build this collaboratively. Contribute adapters, propose PEIPs, and help shape the specification.
@@ -36,13 +36,13 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 
 ## At a glance
 
-* **Discovery:** `/.well-known/peac.txt` (fallback `/peac.txt`)
-* **Wire version:** `0.9.11` (set header `X-PEAC-Protocol: 0.9.11`; emit lowercase on wire if you prefer)
-* **Headers:** lowercase `x-peac-*`; parsers MUST treat header names case-insensitively
-* **Media:** `application/peac+json` (content), `application/problem+json` (errors), `application/jwk-set+json` (JWKS)
-* **Receipts:** detached JWS (`typ: application/peac-receipt+jws`) using JCS
-* **Trust:** UDA (JWT with `typ: "JWT"`), DPoP proofs bound to `cnf.jkt`, optional agent attestation header
-* **Conformance:** Levels L0–L4; see [docs/conformance.md](docs/conformance.md)
+- **Discovery:** `/.well-known/peac.txt` (fallback `/peac.txt`)
+- **Wire version:** `0.9.11` (set header `X-PEAC-Protocol: 0.9.11`; emit lowercase on wire if you prefer)
+- **Headers:** lowercase `x-peac-*`; parsers MUST treat header names case-insensitively
+- **Media:** `application/peac+json` (content), `application/problem+json` (errors), `application/jwk-set+json` (JWKS)
+- **Receipts:** detached JWS (`typ: application/peac-receipt+jws`) using JCS
+- **Trust:** UDA (JWT with `typ: "JWT"`), DPoP proofs bound to `cnf.jkt`, optional agent attestation header
+- **Conformance:** Levels L0–L4; see [docs/conformance.md](docs/conformance.md)
 
 ---
 
@@ -93,10 +93,10 @@ Common pitfalls: invalid schema returns `application/problem+json` 400.
 
 ## Core surfaces
 
-* **Discovery**: `/.well-known/peac.txt` (fallback `/peac.txt`)
-* **Headers**: `x-peac-protocol`, `x-peac-receipt`, `x-peac-agent-attestation`, etc.
-* **Errors**: RFC7807 Problem+JSON with stable catalog
-* **Caching**: strong `ETag`, sensible `Cache-Control` for `peac.txt` and well-known endpoints
+- **Discovery**: `/.well-known/peac.txt` (fallback `/peac.txt`)
+- **Headers**: `x-peac-protocol`, `x-peac-receipt`, `x-peac-agent-attestation`, etc.
+- **Errors**: RFC7807 Problem+JSON with stable catalog
+- **Caching**: strong `ETag`, sensible `Cache-Control` for `peac.txt` and well-known endpoints
 
 ---
 
@@ -109,8 +109,8 @@ Common pitfalls: invalid schema returns `application/problem+json` 400.
 | Attribution and provenance | Required attribution formats and verify-only provenance chains via adapters.                                                              |
 | Negotiation and settlement | Programmatic terms, adapters for payment rails (**x402**, Stripe), and DPoP-bound receipts.                                               |
 | Agent trust rails          | UDA (OAuth Device Flow), DPoP proof-of-possession, agent attestation verification for autonomous coordination.                            |
-| Receipts v2                | Detached JWS with `typ: "application/peac-receipt+jws"`; JCS canonicalization for verifiable settlements.                                |
-| JWKS management            | 30-day key rotation, 7-day grace periods, `application/jwk-set+json` with ETag caching.                                                  |
+| Receipts v2                | Detached JWS with `typ: "application/peac-receipt+jws"`; JCS canonicalization for verifiable settlements.                                 |
+| JWKS management            | 30-day key rotation, 7-day grace periods, `application/jwk-set+json` with ETag caching.                                                   |
 | Adapters and interop       | Bridges for MCP, A2A, payment rails such as **x402** and Stripe, Chainlink, peaq, and any payment provider via adapter. Extend via PEIPs. |
 | HTTP semantics             | Lowercase `x-peac-*` on wire, Problem+JSON, and idempotency guidance.                                                                     |
 | Conformance and tooling    | L0–L4 levels, CLI validation and fixtures, and ACID-style tests.                                                                          |
@@ -148,22 +148,22 @@ More examples: [docs/examples.md](docs/examples.md)
 
 ## Agent trust rails
 
-* **UDA (User-Delegated Access)**
+- **UDA (User-Delegated Access)**
   Issued via OAuth Device Flow; JWT with `typ: "JWT"`. Bind to agent key (`cnf.jkt`) where required.
 
-* **DPoP**
+- **DPoP**
   Required on protected endpoints; per-request proof; replay protection recommended (e.g., Redis).
 
-* **Agent Attestation**
+- **Agent Attestation**
   Optional header `x-peac-agent-attestation`; verifiable provenance of the agent runtime and policy.
 
 ---
 
 ## Receipts (detached JWS)
 
-* Media type `typ: "application/peac-receipt+jws"`
-* JCS canonicalization of payload before signing
-* Verification via detached JWS (no payload bloat in transit)
+- Media type `typ: "application/peac-receipt+jws"`
+- JCS canonicalization of payload before signing
+- Verification via detached JWS (no payload bloat in transit)
 
 ---
 
@@ -402,31 +402,31 @@ See [SECURITY.md](SECURITY.md) and [docs/security.md](docs/security.md).
 
 ## Documentation
 
-* [Getting Started](docs/getting-started.md)
-* [Protocol Specification](spec.md)
-* [API Reference](docs/api-reference.md)
-* [Compliance Guide](docs/compliance-guide.md)
-* [Engineering Guide](docs/engineering-guide.md)
-* [Conformance](docs/conformance.md)
-* [Interop Matrix](docs/interop.md)
-* [Templates](docs/templates.md)
-* [Receipt Schema](docs/receipt.md)
-* [HTTP Semantics](docs/http.md)
-* [UDA](docs/uda.md)
-* [Agent Attestation](docs/attestation.md)
-* [Security](docs/security.md)
-* [Problem Catalog](docs/problems.md)
-* [PEIPs](docs/peips.md)
-* [Roadmap](docs/roadmap.md)
-* [Vision](docs/vision.md)
+- [Getting Started](docs/getting-started.md)
+- [Protocol Specification](spec.md)
+- [API Reference](docs/api-reference.md)
+- [Compliance Guide](docs/compliance-guide.md)
+- [Engineering Guide](docs/engineering-guide.md)
+- [Conformance](docs/conformance.md)
+- [Interop Matrix](docs/interop.md)
+- [Templates](docs/templates.md)
+- [Receipt Schema](docs/receipt.md)
+- [HTTP Semantics](docs/http.md)
+- [UDA](docs/uda.md)
+- [Agent Attestation](docs/attestation.md)
+- [Security](docs/security.md)
+- [Problem Catalog](docs/problems.md)
+- [PEIPs](docs/peips.md)
+- [Roadmap](docs/roadmap.md)
+- [Vision](docs/vision.md)
 
 ---
 
 ## Community & contributing
 
-* Working Group: open participation; see the WG page
-* Discussions: GitHub Discussions for proposals and Q&A
-* Contributing: see [CONTRIBUTING.md](CONTRIBUTING.md)
-* Contact: [contact@peacprotocol.org](mailto:contact@peacprotocol.org)
+- Working Group: open participation; see the WG page
+- Discussions: GitHub Discussions for proposals and Q&A
+- Contributing: see [CONTRIBUTING.md](CONTRIBUTING.md)
+- Contact: [contact@peacprotocol.org](mailto:contact@peacprotocol.org)
 
 **License:** Apache 2.0 (see [LICENSE](LICENSE))
