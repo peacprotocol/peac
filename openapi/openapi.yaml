@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: PEAC Protocol API
-  version: 0.9.6
-  x-release: 0.9.7
+  version: 0.9.8
+  x-release: 0.9.8
   description: Agreement-first API for PEAC Protocol v0.9.6 with payment binding and secure webhooks
 servers:
   - url: https://{host}
