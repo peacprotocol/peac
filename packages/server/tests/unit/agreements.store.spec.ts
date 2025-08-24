@@ -11,7 +11,7 @@ describe('Agreement Store', () => {
   const createMockAgreement = (): Agreement => ({
     id: 'agr_test123',
     fingerprint: '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-    protocol_version: '0.9.6',
+    protocol_version: '0.9.8',
     status: 'valid',
     created_at: '2024-01-01T00:00:00Z',
     proposal: {
@@ -26,7 +26,7 @@ describe('Agreement Store', () => {
   const createInvalidAgreement = (): Agreement => ({
     id: 'agr_invalid123',
     fingerprint: 'abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab',
-    protocol_version: '0.9.6',
+    protocol_version: '0.9.8',
     status: 'invalid',
     reason: 'expired',
     created_at: '2024-01-01T00:00:00Z',

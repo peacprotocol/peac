@@ -6,7 +6,7 @@ import { logger } from '../../logging';
 import { metrics } from '../../metrics';
 import { problemDetails } from '../problems';
 
-const CAPABILITIES_VERSION = '0.9.6';
+const CAPABILITIES_VERSION = '0.9.8';
 const CAPABILITIES_MEDIA_TYPE = 'application/vnd.peac.capabilities+json';
 
 // Fixed last modified for stable caching
@@ -127,7 +127,7 @@ function buildCapabilities(): PEACCapabilities {
       },
     },
     links: {
-      docs: 'https://peacprotocol.org/docs/v0.9.6',
+      docs: 'https://peacprotocol.org/docs/v0.9.8',
       peip: 'https://peacprotocol.org/peip',
     },
   };

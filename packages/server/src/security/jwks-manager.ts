@@ -27,6 +27,13 @@ interface KeyEntry {
   metadata: KeyMetadata;
 }
 
+export interface JWKSManagerConfig {
+  keyStorePath?: string;
+  rotationIntervalDays?: number;
+  preferredAlgorithm?: 'ES256' | 'RS256';
+  retireGracePeriodDays?: number;
+}
+
 export class JWKSManager {
   private keys: Map<string, KeyEntry> = new Map();
   private publicJWKSCache: { jwks: jose.JSONWebKeySet; etag: string; generated: number } | null =
@@ -112,6 +119,31 @@ export class JWKSManager {
     await this.updatePublicJWKS();
   }
 
+  async signJwt(payload: jose.JWTPayload, kid?: string): Promise<string> {
+    if (!kid) {
+      kid = this.getLatestKid();
+    }
+
+    const entry = this.keys.get(kid);
+    if (!entry) {
+      throw new Error(`Key not found: ${kid}`);
+    }
+
+    if (entry.metadata.status === 'retired') {
+      throw new Error(`Key is retired: ${kid}`);
+    }
+
+    const jwt = await new jose.SignJWT(payload)
+      .setProtectedHeader({
+        alg: entry.metadata.algorithm,
+        kid,
+        typ: 'JWT',
+      })
+      .sign(entry.privateKey);
+
+    return jwt;
+  }
+
   async sign(payload: jose.JWTPayload, kid?: string): Promise<string> {
     if (!kid) {
       kid = this.getLatestActiveKid();
@@ -130,7 +162,7 @@ export class JWKSManager {
       .setProtectedHeader({
         alg: entry.metadata.algorithm,
         kid,
-        typ: 'vnd.peac.receipt',
+        typ: 'JWT',
       })
       .sign(entry.privateKey);
 
@@ -150,6 +182,23 @@ export class JWKSManager {
 
   getLatestKid(): string {
     return this.getLatestActiveKid();
+  }
+
+  async verifyJwt(token: string, opts?: jose.JWTVerifyOptions): Promise<jose.JWTVerifyResult> {
+    const { jwks } = await this.getPublicJWKS();
+    const keySet = jose.createLocalJWKSet(jwks);
+    return jose.jwtVerify(token, keySet, opts);
+  }
+
+  async verifyJws(
+    compactDetached: string,
+    payloadBytes: Uint8Array,
+  ): Promise<jose.CompactVerifyResult> {
+    const [hdr, , sig] = compactDetached.split('..');
+    const full = `${hdr}.${jose.base64url.encode(payloadBytes)}.${sig}`;
+    const { jwks } = await this.getPublicJWKS();
+    const keySet = jose.createLocalJWKSet(jwks);
+    return jose.compactVerify(full, keySet);
   }
 
   async verify(jws: string, detachedPayload?: Uint8Array): Promise<jose.JWTVerifyResult> {
@@ -195,8 +244,14 @@ export class JWKSManager {
     return { jwks, etag };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async handleJWKSRequest(req: { headers: Record<string, string> }, res: any): Promise<void> {
+  async handleJWKSRequest(
+    req: { headers: Record<string, string | string[] | undefined> },
+    res: {
+      set(headers: Record<string, string>): void;
+      status(code: number): { end(): void };
+      json(data: unknown): void;
+    },
+  ): Promise<void> {
     const { jwks, etag } = await this.getPublicJWKS();
 
     res.set({
@@ -207,7 +262,8 @@ export class JWKSManager {
       'Referrer-Policy': 'no-referrer',
     });
 
-    if (req.headers['if-none-match'] === etag) {
+    const ifNoneMatch = req.headers['if-none-match'];
+    if (typeof ifNoneMatch === 'string' && ifNoneMatch === etag) {
       return res.status(304).end();
     }
 

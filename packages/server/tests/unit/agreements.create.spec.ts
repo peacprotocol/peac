@@ -39,7 +39,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
     it('should create agreement with 201 and proper headers', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send(validProposal)
         .expect(201);
@@ -55,7 +55,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
       expect(response.body).toMatchObject({
         id: expect.stringMatching(/^agr_/),
         fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
-        protocol_version: '0.9.6',
+        protocol_version: '0.9.8',
         status: 'valid',
         created_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
         proposal: validProposal,
@@ -76,7 +76,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
         type: 'https://peacprotocol.org/problems/protocol-version-required',
         title: 'Upgrade Required',
         status: 426,
-        supported: ['0.9.6'],
+        supported: ['0.9.8'],
       });
     });
 
@@ -94,7 +94,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
         title: 'Upgrade Required',
         status: 426,
         provided_version: '0.8.0',
-        supported: ['0.9.6'],
+        supported: ['0.9.8'],
       });
     });
   });
@@ -103,7 +103,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
     it('should return 415 when Content-Type is wrong', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'text/plain')
         .send(JSON.stringify(validProposal))
         .expect(415);
@@ -121,7 +121,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
     it('should return 400 for invalid proposal structure', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send({ invalid: 'proposal' })
         .expect(400);
@@ -136,7 +136,7 @@ describe('Agreement Creation - POST /peac/agreements', () => {
     it('should return 400 for malformed JSON', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send('{ invalid json }')
         .expect(400);

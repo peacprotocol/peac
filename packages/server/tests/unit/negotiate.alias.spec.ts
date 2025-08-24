@@ -27,7 +27,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
 
       const response = await request(app)
         .post('/peac/negotiate')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send(validProposal)
         .expect(201);
@@ -41,7 +41,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
       expect(response.body).toMatchObject({
         id: expect.stringMatching(/^agr_/),
         fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
-        protocol_version: '0.9.6',
+        protocol_version: '0.9.8',
         status: 'valid',
       });
 
@@ -52,7 +52,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
     it('should return same validation errors as agreements endpoint', async () => {
       const response = await request(app)
         .post('/peac/negotiate')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send({ invalid: 'proposal' })
         .expect(400);
@@ -96,7 +96,7 @@ describe('Negotiate Alias - POST /peac/negotiate (deprecated)', () => {
     it('should include deprecation headers on unsupported media type errors', async () => {
       const response = await request(app)
         .post('/peac/negotiate')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'text/plain')
         .send('invalid content type')
         .expect(415);

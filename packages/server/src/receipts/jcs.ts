@@ -76,15 +76,11 @@ export class ReceiptService {
         throw new Error('Failed to canonicalize payload');
       }
 
-      // Reconstruct full JWS from detached
-      const [header, , signature] = jws.split('..');
-      const payloadBase64 = jose.base64url.encode(Buffer.from(canonical));
-      const fullJWS = `${header}.${payloadBase64}.${signature}`;
-
-      // Verify
-      await this.jwksManager.verify(fullJWS);
+      // Verify using detached JWS method
+      await this.jwksManager.verifyJws(jws, Buffer.from(canonical));
 
       // Check typ header
+      const [header] = jws.split('..');
       const decodedHeader = JSON.parse(Buffer.from(header, 'base64url').toString());
 
       if (decodedHeader.typ !== 'application/peac-receipt+jws') {

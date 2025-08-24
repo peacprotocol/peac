@@ -30,7 +30,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     validAgreement = {
       id: 'agr_01JFNKT5VFQG0XVBR7Q92JZ3M9', // Valid ULID format (26 chars)
       fingerprint: 'c'.repeat(64),
-      protocol_version: '0.9.6',
+      protocol_version: '0.9.8',
       status: 'valid',
       created_at: new Date().toISOString(),
       proposal: {
@@ -49,7 +49,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     it('should return consistent problem details for malformed JSON', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send('{"invalid": json}')
         .expect(400);
@@ -62,7 +62,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     it('should return consistent problem details for missing required fields', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send({
           purpose: 'Test',
@@ -95,7 +95,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     it('should return consistent problem details for fingerprint mismatch', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('X-PEAC-Fingerprint', 'd'.repeat(64)) // Wrong fingerprint
         .set('Content-Type', 'application/json')
@@ -116,7 +116,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     it('should return consistent problem details for wrong content type', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'text/plain')
         .send('{"purpose": "test"}')
         .expect(415);
@@ -132,7 +132,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     it('should return consistent problem details for missing agreement header', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
@@ -149,7 +149,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
     it('should return consistent problem details for unknown agreement reference', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', 'agr_01JFNKT5NONEXISTENT999999')
         .set('Content-Type', 'application/json')
         .send({
@@ -213,7 +213,7 @@ describe('RFC 7807 Problem Catalog Snapshots', () => {
 
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Content-Type', 'application/json')
         .send({

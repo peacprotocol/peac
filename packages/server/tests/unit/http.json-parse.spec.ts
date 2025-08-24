@@ -19,7 +19,7 @@ describe('JSON Parse Errors', () => {
     it('should return 400 validation_error for invalid JSON to agreements', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send('{ invalid json }') // Malformed JSON
         .expect(400);
@@ -35,7 +35,7 @@ describe('JSON Parse Errors', () => {
     it('should return 400 for malformed JSON to payments', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', 'agr_test123')
         .set('Content-Type', 'application/json')
         .send('{ "amount": invalid }') // Malformed JSON
@@ -52,7 +52,7 @@ describe('JSON Parse Errors', () => {
     it('should return 400 for completely invalid JSON', async () => {
       const response = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Content-Type', 'application/json')
         .send('not json at all') // Not JSON
         .expect(400);

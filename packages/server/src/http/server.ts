@@ -3,14 +3,44 @@ import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import fetch from 'cross-fetch';
 import { problemDetails } from './problems';
 import { getRedis } from '../utils/redis-pool';
 import { getMetricsRegistry } from '../metrics';
 import { createRoutes } from './routes';
 import { config } from '../config';
+import { JWKSManager } from '../security/jwks-manager';
+import { AdapterRegistry } from '../adapters/registry';
+import { UDAAdapterImpl } from '../adapters/uda';
+import { AttestationAdapterImpl } from '../adapters/attestation';
+import { createDeviceFlowRouter } from '../oauth/device-flow';
+import { createDiscoveryRouter } from '../discovery/v1';
+import { versionNegotiation } from '../middleware/version-negotiation';
+import { PEACError } from '../errors/problem-json';
+import { requestTracing } from './middleware/request-tracing';
+import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
+
+// Ensure global fetch is available
+if (!(globalThis as any).fetch) {
+  (globalThis as any).fetch = fetch;
+}
 
 export async function createServer() {
   const app = express();
+
+  // Initialize v0.9.8 components
+  const redis = getRedis();
+  const jwksManager = new JWKSManager({
+    keyStorePath: process.env.JWKS_PATH || './keys',
+    rotationIntervalDays: 30,
+    preferredAlgorithm: 'ES256',
+    retireGracePeriodDays: 7,
+  });
+  await jwksManager.initialize();
+
+  const adapterRegistry = new AdapterRegistry();
+  await adapterRegistry.register(new UDAAdapterImpl({ redis }));
+  await adapterRegistry.register(new AttestationAdapterImpl({ redis }));
 
   // Disable X-Powered-By header
   app.disable('x-powered-by');
@@ -18,7 +48,33 @@ export async function createServer() {
   // Set trust proxy for accurate IP detection
   app.set('trust proxy', true);
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'none'"],
+          styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'", 'https:', 'data:'],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'none'"],
+          childSrc: ["'none'"],
+          frameAncestors: ["'self'"],
+          formAction: ["'self'"],
+          baseUri: ["'self'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+    }),
+  );
+
+  // Add request tracing middleware
+  app.use(requestTracing.middleware());
+
+  // Add rate limiting middleware with RFC 9331 headers
+  app.use(standardRateLimiter.middleware());
 
   // Remove X-XSS-Protection header completely (deprecated and potentially harmful)
   app.use((_req, res, next) => {
@@ -27,6 +83,9 @@ export async function createServer() {
   });
   app.use(cors({ origin: config.gates.corsOrigins }));
   app.use(express.json({ limit: '1mb' }));
+
+  // v0.9.8 Version negotiation middleware
+  app.use(versionNegotiation(['0.9.8']));
 
   /**
    * JSON parse errors must be mapped to RFC7807 validation errors (400)
@@ -52,7 +111,7 @@ export async function createServer() {
         status: 'ok' | 'degraded';
         version: string;
         components: Record<string, string>;
-      } = { status: 'ok', version: '0.9.6', components: {} };
+      } = { status: 'ok', version: '0.9.8', components: {} };
       try {
         const redis = getRedis();
         await redis.ping();
@@ -72,9 +131,25 @@ export async function createServer() {
     res.send(await reg.metrics());
   });
 
+  // v0.9.8 JWKS endpoint
+  app.get('/.well-known/jwks.json', (req, res) => jwksManager.handleJWKSRequest(req, res));
+
+  // v0.9.8 Discovery endpoints
+  app.use(
+    createDiscoveryRouter(adapterRegistry, {
+      base_url: process.env.PEAC_BASE_URL || 'https://demo.peac.dev',
+      version: '0.9.8',
+      x_release: '0.9.8',
+    }),
+  );
+
+  // v0.9.8 OAuth device flow endpoints
+  app.use('/oauth', createDeviceFlowRouter(redis, jwksManager));
+
   app.use('/', createRoutes());
 
-  // Global error handler - must be last
+  // Global error handlers - must be last
+  app.use(PEACError.handler);
   app.use(problemErrorHandler);
 
   return app;

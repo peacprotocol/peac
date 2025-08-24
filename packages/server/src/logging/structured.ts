@@ -28,7 +28,7 @@ export const logger = pino({
       pid: bindings.pid,
       hostname: bindings.hostname,
       service: 'peac-protocol',
-      version: process.env.npm_package_version || '0.9.7.1',
+      version: process.env.npm_package_version || '0.9.8',
       environment: process.env.NODE_ENV || 'development',
     }),
 
