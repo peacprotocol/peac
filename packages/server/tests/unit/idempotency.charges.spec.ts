@@ -32,7 +32,7 @@ describe('Payment Charges Idempotency', () => {
     validAgreement = {
       id: 'agr_01JFNKT5IDEMPOTENCY123456D',
       fingerprint: 'f'.repeat(64),
-      protocol_version: '0.9.6',
+      protocol_version: '0.9.8',
       status: 'valid',
       created_at: new Date().toISOString(),
       proposal: {
@@ -53,7 +53,7 @@ describe('Payment Charges Idempotency', () => {
 
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', customKey)
         .set('Content-Type', 'application/json')
@@ -76,7 +76,7 @@ describe('Payment Charges Idempotency', () => {
     it('should auto-generate Idempotency-Key if not provided', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Content-Type', 'application/json')
         .send({
@@ -98,7 +98,7 @@ describe('Payment Charges Idempotency', () => {
       // First request
       const response1 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
@@ -115,7 +115,7 @@ describe('Payment Charges Idempotency', () => {
       // Second request with same key
       const response2 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
@@ -143,7 +143,7 @@ describe('Payment Charges Idempotency', () => {
       // First request
       const response1 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
@@ -159,7 +159,7 @@ describe('Payment Charges Idempotency', () => {
       // Second request with same key
       const response2 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
@@ -189,7 +189,7 @@ describe('Payment Charges Idempotency', () => {
 
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', longKey)
         .set('Content-Type', 'application/json')
@@ -212,7 +212,7 @@ describe('Payment Charges Idempotency', () => {
       // First request with invalid agreement (will fail)
       const response1 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', 'agr_nonexistent')
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
@@ -228,7 +228,7 @@ describe('Payment Charges Idempotency', () => {
       // Second request with same key but valid agreement (should process normally)
       const response2 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
@@ -250,7 +250,7 @@ describe('Payment Charges Idempotency', () => {
       // POST to payments
       const response1 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
@@ -263,7 +263,7 @@ describe('Payment Charges Idempotency', () => {
       // POST to agreements with same key (different path)
       const response2 = await request(app)
         .post('/peac/agreements')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
         .send({
@@ -291,7 +291,7 @@ describe('Payment Charges Idempotency', () => {
       // First request with one agreement
       const response1 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')
@@ -312,7 +312,7 @@ describe('Payment Charges Idempotency', () => {
       // Second request with different agreement but same idempotency key
       const response2 = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.6')
+        .set('X-PEAC-Protocol', '0.9.8')
         .set('X-PEAC-Agreement', secondAgreement.id)
         .set('Idempotency-Key', idempotencyKey)
         .set('Content-Type', 'application/json')

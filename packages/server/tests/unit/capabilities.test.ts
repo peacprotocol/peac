@@ -21,13 +21,13 @@ describe('Capabilities Endpoint', () => {
     it('should return capabilities with correct content type', async () => {
       const res = await request(app)
         .get('/.well-known/peac-capabilities')
-        .set('Accept', 'application/vnd.peac.capabilities+json;version=0.9.6');
+        .set('Accept', 'application/vnd.peac.capabilities+json;version=0.9.8');
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(
         /application\/vnd\.peac\.capabilities\+json.*version=0\.9\.6/,
       );
-      expect(res.body).toHaveProperty('version', '0.9.6');
+      expect(res.body).toHaveProperty('version', '0.9.8');
       expect(res.body).toHaveProperty('conformance_level');
       expect(res.body.protocols.bridges).toContain('mcp');
       expect(res.body.protocols.bridges).toContain('a2a');
@@ -53,7 +53,7 @@ describe('Capabilities Endpoint', () => {
         .set('Accept', 'application/json');
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('version', '0.9.6');
+      expect(res.body).toHaveProperty('version', '0.9.8');
     });
   });
 });

@@ -20,7 +20,7 @@ process.on('uncaughtException', (error: Error) => {
 });
 
 async function main() {
-  logger.info('Starting PEAC Protocol v0.9.6');
+  logger.info('Starting PEAC Protocol v0.9.8');
 
   const app = await createServer();
   const port = config.http.port;

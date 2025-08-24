@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/server",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "description": "PEAC Protocol - Enterprise Automated Economy Infrastructure",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -49,6 +49,7 @@
   "dependencies": {
     "bullmq": "^5.1.0",
     "cors": "^2.8.5",
+    "cross-fetch": "^4.0.0",
     "ethers": "^6.15.0",
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",

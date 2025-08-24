@@ -4,17 +4,17 @@ import * as crypto from 'crypto';
 /**
  * Wire-level headers + version negotiation (strict, pre-1.0).
  * Policy:
- * - Echo x-peac-protocol-version: 0.9.5 on all responses.
- * - Accept ONLY 0.9.5.
+ * - Echo x-peac-protocol-version: 0.9.8 on all responses.
+ * - Accept ONLY 0.9.8.
  * - Legacy header name x-peac-version is NOT supported (return 426).
  * - For unsupported/invalid versions, return 426 with RFC7807 payload
- *   and include x-peac-protocol-version-supported: 0.9.5.
+ *   and include x-peac-protocol-version-supported: 0.9.8.
  * - Staging canary: error-log if any X-PEAC-* header is emitted with uppercase chars.
  */
 
-const ECHO = '0.9.5';
-const SUPPORTED = ['0.9.5'];
-const MIN_SUPPORTED_PATCH = 5;
+const ECHO = '0.9.8';
+const SUPPORTED = ['0.9.8'];
+const MIN_SUPPORTED_PATCH = 8;
 
 // ---- utils --------------------------------------------------------------------
 
@@ -99,7 +99,7 @@ export function versionNegotiationMiddleware(req: Request, res: Response, next: 
           code: 'legacy-header-unsupported',
           message: 'Header x-peac-version is not supported',
           header: 'x-peac-version',
-          recommendation: 'Send x-peac-protocol-version: 0.9.5',
+          recommendation: 'Send x-peac-protocol-version: 0.9.8',
         }),
       );
     } catch {
@@ -142,7 +142,7 @@ export function versionNegotiationMiddleware(req: Request, res: Response, next: 
   const [, maj, min, patStr] = m;
   const patch = Number(patStr);
 
-  // Accept exactly 0.9.5; normalize to ECHO (0.9.5)
+  // Accept exactly 0.9.8; normalize to ECHO (0.9.8)
   if (maj === '0' && min === '9' && patch === MIN_SUPPORTED_PATCH) {
     res.setHeader('x-peac-protocol-version', ECHO);
     return next();

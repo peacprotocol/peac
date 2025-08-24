@@ -92,7 +92,7 @@ exports[`RFC 7807 Problem Catalog Snapshots 426 - Upgrade Required (protocol-ver
   "required_header": "X-PEAC-Protocol",
   "status": 426,
   "supported": [
-    "0.9.6",
+    "0.9.8",
   ],
   "title": "Upgrade Required",
   "trace_id": Any<String>,
@@ -107,7 +107,7 @@ exports[`RFC 7807 Problem Catalog Snapshots 426 - Upgrade Required (protocol-ver
   "provided_version": "0.8.0",
   "status": 426,
   "supported": [
-    "0.9.6",
+    "0.9.8",
   ],
   "title": "Upgrade Required",
   "trace_id": Any<String>,
