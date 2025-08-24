@@ -3,7 +3,20 @@ info:
   title: PEAC Protocol API
   version: 0.9.8
   x-release: 0.9.8
-  description: Agreement-first API for PEAC Protocol v0.9.6 with payment binding and secure webhooks
+  description: Agreement-first API for PEAC Protocol v0.9.8 with payment binding and secure webhooks
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  contact:
+    name: PEAC Protocol Team
+    url: https://github.com/peacprotocol/peac
+tags:
+  - name: agreements
+    description: Agreement management operations
+  - name: payments
+    description: Payment processing operations
+  - name: webhooks
+    description: Webhook verification operations
 servers:
   - url: https://{host}
     variables:
@@ -16,6 +29,10 @@ paths:
       summary: Create Agreement
       description: Create a new agreement from a proposal with deterministic fingerprinting
       operationId: createAgreement
+      tags:
+        - agreements
+      security:
+        - PEACProtocol: []
       requestBody:
         required: true
         content:
@@ -79,6 +96,9 @@ paths:
       summary: Get Agreement
       description: Retrieve agreement with ETag support and caching semantics
       operationId: getAgreement
+      tags:
+        - agreements
+      security: []
       parameters:
         - name: id
           in: path
@@ -135,6 +155,11 @@ paths:
       summary: Create charge (agreement-bound)
       description: Process payment with mandatory agreement binding
       operationId: createCharge
+      tags:
+        - payments
+      security:
+        - PEACProtocol: []
+        - PEACAgreement: []
       parameters:
         - $ref: '#/components/parameters/XPEACProtocol'
         - $ref: '#/components/parameters/XPEACAgreement'
@@ -199,6 +224,10 @@ paths:
       summary: (Deprecated) Create Agreement (alias)
       description: Backwards compatibility alias for /peac/agreements with deprecation headers
       operationId: negotiateDeprecated
+      tags:
+        - agreements
+      security:
+        - PEACProtocol: []
       parameters:
         - $ref: '#/components/parameters/XPEACProtocol'
       requestBody:
@@ -239,6 +268,10 @@ paths:
       summary: Verify inbound webhooks
       description: HMAC verification with replay protection and timestamp validation
       operationId: verifyWebhook
+      tags:
+        - webhooks
+      security:
+        - PEACSignature: []
       requestBody:
         required: true
         content:
@@ -262,9 +295,9 @@ components:
       required: true
       schema:
         type: string
-        enum: ['0.9.6']
+        enum: ['0.9.8']
       description: PEAC Protocol version
-      example: '0.9.6'
+      example: '0.9.8'
     XPEACAgreement:
       name: X-PEAC-Agreement
       in: header
@@ -273,7 +306,7 @@ components:
         type: string
         pattern: '^agr_[0-9A-HJKMNP-TV-Z]{26}$'
       description: Agreement ID for payment binding
-      example: 'agr_01H8...'
+      example: 'agr_01HXE8GN9JKMNPQRSTVWXYZ234'
     XPEACFingerprint:
       name: X-PEAC-Fingerprint
       in: header
@@ -324,7 +357,7 @@ components:
             type: 'https://peacprotocol.org/problems/protocol-version-required'
             title: 'Upgrade Required'
             status: 426
-            supported: ['0.9.6']
+            supported: ['0.9.8']
     InvalidReference:
       description: Invalid agreement reference
       content:
@@ -442,7 +475,7 @@ components:
           type: string
           pattern: '^agr_[0-9A-HJKMNP-TV-Z]{26}$'
           description: Agreement ID with agr_ prefix (ULID)
-          example: 'agr_01H8ABC123DEF456GHI789JKL0'
+          example: 'agr_01HXE8GN9JKMNPQRSTVWXYZ234'
         fingerprint:
           type: string
           pattern: '^[a-f0-9]{64}$'
@@ -450,7 +483,7 @@ components:
           example: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'
         protocol_version:
           type: string
-          enum: ['0.9.6']
+          enum: ['0.9.8']
           description: Protocol version used
         status:
           type: string
@@ -469,7 +502,8 @@ components:
           format: date-time
           description: Expiration timestamp (ISO 8601) if applicable
         proposal:
-          $ref: '#/components/schemas/AgreementProposal'
+          allOf:
+            - $ref: '#/components/schemas/AgreementProposal'
           description: Snapshot of original proposal
       required: [id, fingerprint, protocol_version, status, created_at, proposal]
 
@@ -549,3 +583,20 @@ components:
           description: URI reference to this specific problem occurrence
       required: [type, title, status]
       additionalProperties: true
+
+  securitySchemes:
+    PEACProtocol:
+      type: apiKey
+      in: header
+      name: X-PEAC-Protocol
+      description: PEAC Protocol version header
+    PEACAgreement:
+      type: apiKey
+      in: header
+      name: X-PEAC-Agreement
+      description: Agreement ID for payment binding
+    PEACSignature:
+      type: apiKey
+      in: header
+      name: Peac-Signature
+      description: HMAC signature for webhook verification
