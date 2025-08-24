@@ -130,7 +130,7 @@ export async function createAgreement(req: Request, res: Response): Promise<void
     const agreement: Agreement = {
       id: agreementId,
       fingerprint,
-      protocol_version: '0.9.6',
+      protocol_version: '0.9.8',
       status: 'valid',
       created_at: now,
       proposal,

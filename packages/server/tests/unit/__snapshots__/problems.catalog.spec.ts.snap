@@ -104,8 +104,9 @@ exports[`RFC 7807 Problem Catalog Snapshots 426 - Upgrade Required (protocol-ver
 {
   "detail": "Version 0.8.0 is not supported",
   "instance": Any<String>,
+  "provided_version": "0.8.0",
   "status": 426,
-  "supported_versions": [
+  "supported": [
     "0.9.8",
   ],
   "title": "Upgrade Required",

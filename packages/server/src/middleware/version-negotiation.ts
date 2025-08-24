@@ -25,7 +25,8 @@ export function versionNegotiation(supportedVersions: string[]) {
           instance: req.url,
           trace_id: req.trace_id || crypto.randomBytes(16).toString('hex'),
           'x-peac-advice': `Supported versions: ${supportedVersions.join(', ')}`,
-          supported_versions: supportedVersions,
+          provided_version: versionString,
+          supported: supportedVersions,
         });
     }
 
