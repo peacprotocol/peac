@@ -244,10 +244,13 @@ export class JWKSManager {
     return { jwks, etag };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async handleJWKSRequest(
     req: { headers: Record<string, string | string[] | undefined> },
-    res: any,
+    res: {
+      set(headers: Record<string, string>): void;
+      status(code: number): { end(): void };
+      json(data: unknown): void;
+    },
   ): Promise<void> {
     const { jwks, etag } = await this.getPublicJWKS();
 
