@@ -64,7 +64,7 @@
     "prom-client": "^15.1.0",
     "ulidx": "^2.4.1",
     "uuid": "^9.0.1",
-    "zod": "^3.22.4"
+    "zod": "^4.1.1"
   },
   "devDependencies": {
     "@cyclonedx/cyclonedx-npm": "^1.19.0",
