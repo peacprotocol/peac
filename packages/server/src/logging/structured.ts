@@ -1,5 +1,6 @@
 import pino from 'pino';
 import { randomBytes } from 'crypto';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 
 const REDACT_PATHS = [
   'req.headers.authorization',
@@ -28,7 +29,7 @@ export const logger = pino({
       pid: bindings.pid,
       hostname: bindings.hostname,
       service: 'peac-protocol',
-      version: process.env.npm_package_version || '0.9.8',
+      version: process.env.npm_package_version || WIRE_VERSION,
       environment: process.env.NODE_ENV || 'development',
     }),
 

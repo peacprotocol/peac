@@ -37,7 +37,7 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 ## At a glance
 
 - **Discovery:** `/.well-known/peac.txt` (fallback `/peac.txt`)
-- **Wire version:** `0.9.11` (set header `X-PEAC-Protocol: 0.9.11`; emit lowercase on wire if you prefer)
+- **Wire version:** `0.9.8` (set header `x-peac-protocol: 0.9.8`)
 - **Headers:** lowercase `x-peac-*`; parsers MUST treat header names case-insensitively
 - **Media:** `application/peac+json` (content), `application/problem+json` (errors), `application/jwk-set+json` (JWKS)
 - **Receipts:** detached JWS (`typ: application/peac-receipt+jws`) using JCS
@@ -76,7 +76,7 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 pnpm add -g @peacprotocol/cli @peacprotocol/core
 
 npx peac init                 # scaffold peac.txt with defaults
-npx peac validate peac.txt    # Expected: Valid PEAC 0.9.11 policy
+npx peac validate peac.txt    # Expected: Valid PEAC 0.9.8 policy
 
 # Preferred path
 #   /.well-known/peac.txt
@@ -117,7 +117,7 @@ Common pitfalls: invalid schema returns `application/problem+json` 400.
 
 ---
 
-## Minimal `peac.txt` (0.9.11 wire)
+## Minimal `peac.txt` (docs train 0.9.11, wire 0.9.8)
 
 ```txt
 # /.well-known/peac.txt
@@ -171,14 +171,14 @@ More examples: [docs/examples.md](docs/examples.md)
 
 Adapters bridge PEAC to payment rails, agent protocols, provenance, and chains. Lifecycle: simulation → staging → production.
 
-| Adapter    | Status (0.9.11) | Notes                          |
-| ---------- | --------------- | ------------------------------ |
-| **MCP**    | Beta            | Agent protocol adapter         |
-| **A2A**    | Beta            | Agent-to-Agent negotiation     |
-| **x402**   | Stable          | Payment rail                   |
-| **Stripe** | Stable          | Payment rail                   |
-| Chainlink  | Preview         | Oracle/provenance integrations |
-| peaq       | Preview         | DePIN/IoT sharing + receipts   |
+| Adapter    | Status (0.9.11 docs) | Notes                          |
+| ---------- | -------------------- | ------------------------------ |
+| **MCP**    | Beta                 | Agent protocol adapter         |
+| **A2A**    | Beta                 | Agent-to-Agent negotiation     |
+| **x402**   | Stable               | Payment rail                   |
+| **Stripe** | Stable               | Payment rail                   |
+| Chainlink  | Preview              | Oracle/provenance integrations |
+| peaq       | Preview              | DePIN/IoT sharing + receipts   |
 
 Details & examples: [docs/interop.md](docs/interop.md) · Propose new adapters via [PEIPs](docs/peips.md)
 
@@ -220,6 +220,38 @@ if (access.granted) {
 ---
 
 ## HTTP semantics & samples
+
+**Example API request with curl:**
+
+```bash
+curl -X POST https://demo.peac.dev/peac/agreements \
+  -H "x-peac-protocol: 0.9.8" \
+  -H "content-type: application/json" \
+  -H "x-api-key: your-key" \
+  -d '{
+    "capabilities": ["read", "summarize"],
+    "max_charge": "5.00",
+    "currency": "USD"
+  }'
+```
+
+**JavaScript example:**
+
+```javascript
+const response = await fetch('https://demo.peac.dev/peac/agreements', {
+  method: 'POST',
+  headers: {
+    'x-peac-protocol': '0.9.8',
+    'content-type': 'application/json',
+    'x-api-key': apiKey,
+  },
+  body: JSON.stringify({
+    capabilities: ['read', 'summarize'],
+    max_charge: '5.00',
+    currency: 'USD',
+  }),
+});
+```
 
 **400 Bad Request** (validation error)
 

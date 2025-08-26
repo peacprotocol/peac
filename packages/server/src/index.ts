@@ -2,6 +2,7 @@
 import 'express-async-errors';
 import { createServer } from './http/server';
 import { logger } from './logging';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 import { config } from './config';
 
 // Global error handlers
@@ -20,7 +21,7 @@ process.on('uncaughtException', (error: Error) => {
 });
 
 async function main() {
-  logger.info('Starting PEAC Protocol v0.9.8');
+  logger.info(`Starting PEAC Protocol v${WIRE_VERSION}`);
 
   const app = await createServer();
   const port = config.http.port;

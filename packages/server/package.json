@@ -47,6 +47,7 @@
     "prepublishOnly": "npm run build && npm run test:coverage && npm run sbom"
   },
   "dependencies": {
+    "@peacprotocol/schema": "file:../schema",
     "bullmq": "^5.1.0",
     "canonicalize": "^2.0.0",
     "cors": "^2.8.5",
@@ -72,11 +73,11 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.11",
-    "chokidar": "^3.6.0",
     "@types/node": "^20.11.0",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "chokidar": "^3.6.0",
     "eslint": "^8.57.1",
     "ioredis-mock": "^8.9.0",
     "jest": "^29.7.0",

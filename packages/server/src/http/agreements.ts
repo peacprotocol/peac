@@ -8,6 +8,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { ulid } from 'ulidx';
 import { AgreementProposal, Agreement } from '@peacprotocol/schema';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 import { problemDetails } from './problems';
 import { logger } from '../logging';
 import { agreementStore } from '../agreements/store';
@@ -32,15 +33,16 @@ export function validateProtocolVersion(req: Request, res: Response, next: NextF
     return problemDetails.send(res, 'protocol_version_required', {
       detail: 'X-PEAC-Protocol header is required',
       required_header: 'X-PEAC-Protocol',
-      supported: ['0.9.8'],
+      supported: [WIRE_VERSION],
     });
   }
 
-  if (protocolHeader !== '0.9.8') {
+  if (protocolHeader !== WIRE_VERSION) {
     return problemDetails.send(res, 'protocol_version_unsupported', {
-      detail: `Protocol version ${protocolHeader} is not supported`,
+      detail: `Version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
-      supported: ['0.9.8'],
+      supported: [WIRE_VERSION],
+      'x-peac-advice': `Supported versions: ${WIRE_VERSION}`,
     });
   }
 
@@ -69,15 +71,16 @@ export function validateProtocolVersionWithDeprecation(
     return problemDetails.send(res, 'protocol_version_required', {
       detail: 'X-PEAC-Protocol header is required',
       required_header: 'X-PEAC-Protocol',
-      supported: ['0.9.8'],
+      supported: [WIRE_VERSION],
     });
   }
 
-  if (protocolHeader !== '0.9.8') {
+  if (protocolHeader !== WIRE_VERSION) {
     return problemDetails.send(res, 'protocol_version_unsupported', {
-      detail: `Protocol version ${protocolHeader} is not supported`,
+      detail: `Version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
-      supported: ['0.9.8'],
+      supported: [WIRE_VERSION],
+      'x-peac-advice': `Supported versions: ${WIRE_VERSION}`,
     });
   }
 
@@ -130,7 +133,7 @@ export async function createAgreement(req: Request, res: Response): Promise<void
     const agreement: Agreement = {
       id: agreementId,
       fingerprint,
-      protocol_version: '0.9.8',
+      protocol_version: WIRE_VERSION,
       status: 'valid',
       created_at: now,
       proposal,

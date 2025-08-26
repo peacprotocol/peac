@@ -15,10 +15,11 @@ import { UDAAdapterImpl } from '../adapters/uda';
 import { AttestationAdapterImpl } from '../adapters/attestation';
 import { createDeviceFlowRouter } from '../oauth/device-flow';
 import { createDiscoveryRouter } from '../discovery/v1';
-import { versionNegotiation } from '../middleware/version-negotiation';
+import { versionNegotiationMiddleware } from '../middleware/headers';
 import { PEACError } from '../errors/problem-json';
 import { requestTracing } from './middleware/request-tracing';
 import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 
 // Ensure global fetch is available
 if (!(globalThis as any).fetch) {
@@ -85,7 +86,7 @@ export async function createServer() {
   app.use(express.json({ limit: '1mb' }));
 
   // v0.9.8 Version negotiation middleware
-  app.use(versionNegotiation(['0.9.8']));
+  app.use(versionNegotiationMiddleware);
 
   /**
    * JSON parse errors must be mapped to RFC7807 validation errors (400)
@@ -111,7 +112,7 @@ export async function createServer() {
         status: 'ok' | 'degraded';
         version: string;
         components: Record<string, string>;
-      } = { status: 'ok', version: '0.9.8', components: {} };
+      } = { status: 'ok', version: WIRE_VERSION, components: {} };
       try {
         const redis = getRedis();
         await redis.ping();
@@ -138,8 +139,8 @@ export async function createServer() {
   app.use(
     createDiscoveryRouter(adapterRegistry, {
       base_url: process.env.PEAC_BASE_URL || 'https://demo.peac.dev',
-      version: '0.9.8',
-      x_release: '0.9.8',
+      version: WIRE_VERSION,
+      x_release: WIRE_VERSION,
     }),
   );
 

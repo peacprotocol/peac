@@ -263,7 +263,13 @@ export class JWKSManager {
     });
 
     const ifNoneMatch = req.headers['if-none-match'];
-    if (typeof ifNoneMatch === 'string' && ifNoneMatch === etag) {
+    const values = Array.isArray(ifNoneMatch)
+      ? ifNoneMatch
+      : typeof ifNoneMatch === 'string'
+        ? ifNoneMatch.split(',').map((s) => s.trim())
+        : [];
+
+    if (values.includes(etag)) {
       return res.status(304).end();
     }
 

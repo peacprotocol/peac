@@ -5,8 +5,9 @@ import { contentNegotiation } from '../middleware/content-negotiation';
 import { logger } from '../../logging';
 import { metrics } from '../../metrics';
 import { problemDetails } from '../problems';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 
-const CAPABILITIES_VERSION = '0.9.8';
+const CAPABILITIES_VERSION = WIRE_VERSION;
 const CAPABILITIES_MEDIA_TYPE = 'application/vnd.peac.capabilities+json';
 
 // Fixed last modified for stable caching
