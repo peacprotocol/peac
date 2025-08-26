@@ -8,6 +8,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { ulid } from 'ulidx';
 import { AgreementProposal, Agreement } from '@peacprotocol/schema';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 import { problemDetails } from './problems';
 import { logger } from '../logging';
 import { agreementStore } from '../agreements/store';
@@ -26,21 +27,21 @@ function generateAgreementId(): string {
  * Middleware to validate protocol version header on write endpoints
  */
 export function validateProtocolVersion(req: Request, res: Response, next: NextFunction): void {
-  const protocolHeader = req.get('X-PEAC-Protocol');
+  const protocolHeader = req.get('x-peac-protocol');
 
   if (!protocolHeader) {
     return problemDetails.send(res, 'protocol_version_required', {
-      detail: 'X-PEAC-Protocol header is required',
-      required_header: 'X-PEAC-Protocol',
-      supported: ['0.9.8'],
+      detail: 'x-peac-protocol header is required',
+      required_header: 'x-peac-protocol',
+      supported: [WIRE_VERSION],
     });
   }
 
-  if (protocolHeader !== '0.9.8') {
+  if (protocolHeader !== WIRE_VERSION) {
     return problemDetails.send(res, 'protocol_version_unsupported', {
       detail: `Protocol version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
-      supported: ['0.9.8'],
+      supported: [WIRE_VERSION],
     });
   }
 

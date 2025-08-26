@@ -1,3 +1,4 @@
-// PEAC Protocol v0.9.5 Schema definitions
-export const PEAC_VERSION = '0.9.5';
-export const SCHEMA_VERSION = '0.9.5';
+import { WIRE_VERSION } from './version';
+
+export const PEAC_VERSION = WIRE_VERSION;
+export const SCHEMA_VERSION = WIRE_VERSION;

@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import * as crypto from 'crypto';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 
 /**
  * Wire-level headers + version negotiation (strict, pre-1.0).
@@ -12,20 +13,11 @@ import * as crypto from 'crypto';
  * - Staging canary: error-log if any X-PEAC-* header is emitted with uppercase chars.
  */
 
-const ECHO = '0.9.8';
-const SUPPORTED = ['0.9.8'];
+const ECHO = WIRE_VERSION;
+const SUPPORTED = [WIRE_VERSION];
 const MIN_SUPPORTED_PATCH = 8;
 
 // ---- utils --------------------------------------------------------------------
-
-function pickFirst(h: undefined | string | string[]): string | undefined {
-  if (Array.isArray(h)) return h[0];
-  if (typeof h === 'string') {
-    const i = h.indexOf(',');
-    return (i === -1 ? h : h.slice(0, i)).trim();
-  }
-  return undefined;
-}
 
 function cryptoHex(n: number): string {
   return crypto.randomBytes(n).toString('hex');
@@ -76,7 +68,7 @@ export function headerMiddleware(_req: Request, res: Response, next: NextFunctio
   };
 
   // Always echo the current protocol version on successful responses.
-  res.setHeader('x-peac-protocol-version', ECHO);
+  res.setHeader('x-peac-protocol', ECHO);
 
   next();
 }
@@ -84,8 +76,8 @@ export function headerMiddleware(_req: Request, res: Response, next: NextFunctio
 // ---- version negotiation middleware ------------------------------------------
 
 export function versionNegotiationMiddleware(req: Request, res: Response, next: NextFunction) {
-  const currentHdr = pickFirst((req.headers as any)['x-peac-protocol-version']);
-  const legacyHdr = pickFirst((req.headers as any)['x-peac-version']);
+  const currentHdr = req.get('x-peac-protocol') as string | undefined;
+  const legacyHdr = req.get('x-peac-version') as string | undefined;
 
   // Count every time a caller sends *any* version header.
   if (currentHdr || legacyHdr) legacyCounters.total += 1;
@@ -144,7 +136,7 @@ export function versionNegotiationMiddleware(req: Request, res: Response, next: 
 
   // Accept exactly 0.9.8; normalize to ECHO (0.9.8)
   if (maj === '0' && min === '9' && patch === MIN_SUPPORTED_PATCH) {
-    res.setHeader('x-peac-protocol-version', ECHO);
+    res.setHeader('x-peac-protocol', ECHO);
     return next();
   }
 

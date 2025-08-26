@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 import pino from 'pino';
 import { AdapterRegistry } from '../adapters/registry';
 import { deepMerge } from '../utils/deep-merge';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 
 const logger = pino({ name: 'discovery' });
 
@@ -39,8 +40,8 @@ export class DiscoveryService {
 
     const base = {
       protocol: 'PEAC',
-      version: this.config.version,
-      'x-release': this.config.x_release,
+      version: WIRE_VERSION,
+      'x-release': WIRE_VERSION,
 
       endpoints: {
         agreements: {
@@ -129,14 +130,26 @@ export class DiscoveryService {
       },
 
       version_negotiation: {
-        request_header: 'X-PEAC-Protocol',
-        current: this.config.x_release,
-        supported: [this.config.x_release],
+        request_header: 'x-peac-protocol',
+        current: WIRE_VERSION,
+        supported: [WIRE_VERSION],
       },
     };
 
     const adapterFragments = this.adapterRegistry.composeDiscovery();
-    const document = deepMerge(base, adapterFragments);
+    let document = deepMerge(base, adapterFragments);
+    
+    if (process.env.PEAC_MCP_ENABLED === 'true') {
+      document = deepMerge(document, {
+        adapters: {
+          mcp: {
+            enabled: true,
+            tools: ['peac.negotiate', 'peac.pay', 'peac.verify'],
+            endpoint: process.env.MCP_ENDPOINT
+          }
+        }
+      });
+    }
 
     const content = JSON.stringify(document);
     const etag = `"${crypto.createHash('sha256').update(content).digest('hex')}"`;

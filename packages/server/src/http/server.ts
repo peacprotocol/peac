@@ -15,7 +15,7 @@ import { UDAAdapterImpl } from '../adapters/uda';
 import { AttestationAdapterImpl } from '../adapters/attestation';
 import { createDeviceFlowRouter } from '../oauth/device-flow';
 import { createDiscoveryRouter } from '../discovery/v1';
-import { versionNegotiation } from '../middleware/version-negotiation';
+import { versionNegotiationMiddleware } from '../middleware/headers';
 import { PEACError } from '../errors/problem-json';
 import { requestTracing } from './middleware/request-tracing';
 import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
@@ -85,7 +85,7 @@ export async function createServer() {
   app.use(express.json({ limit: '1mb' }));
 
   // v0.9.8 Version negotiation middleware
-  app.use(versionNegotiation(['0.9.8']));
+  app.use(versionNegotiationMiddleware);
 
   /**
    * JSON parse errors must be mapped to RFC7807 validation errors (400)

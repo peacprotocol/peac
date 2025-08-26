@@ -5,8 +5,8 @@ info:
   x-release: 0.9.8
   description: Agreement-first API for PEAC Protocol v0.9.8 with payment binding and secure webhooks
   license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
   contact:
     name: PEAC Protocol Team
     url: https://github.com/peacprotocol/peac
