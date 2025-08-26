@@ -172,13 +172,13 @@ More examples: [docs/examples.md](docs/examples.md)
 Adapters bridge PEAC to payment rails, agent protocols, provenance, and chains. Lifecycle: simulation → staging → production.
 
 | Adapter    | Status (0.9.11 docs) | Notes                          |
-| ---------- | --------------- | ------------------------------ |
-| **MCP**    | Beta            | Agent protocol adapter         |
-| **A2A**    | Beta            | Agent-to-Agent negotiation     |
-| **x402**   | Stable          | Payment rail                   |
-| **Stripe** | Stable          | Payment rail                   |
-| Chainlink  | Preview         | Oracle/provenance integrations |
-| peaq       | Preview         | DePIN/IoT sharing + receipts   |
+| ---------- | -------------------- | ------------------------------ |
+| **MCP**    | Beta                 | Agent protocol adapter         |
+| **A2A**    | Beta                 | Agent-to-Agent negotiation     |
+| **x402**   | Stable               | Payment rail                   |
+| **Stripe** | Stable               | Payment rail                   |
+| Chainlink  | Preview              | Oracle/provenance integrations |
+| peaq       | Preview              | DePIN/IoT sharing + receipts   |
 
 Details & examples: [docs/interop.md](docs/interop.md) · Propose new adapters via [PEIPs](docs/peips.md)
 
@@ -243,14 +243,14 @@ const response = await fetch('https://demo.peac.dev/peac/agreements', {
   headers: {
     'x-peac-protocol': '0.9.8',
     'content-type': 'application/json',
-    'x-api-key': apiKey
+    'x-api-key': apiKey,
   },
   body: JSON.stringify({
     capabilities: ['read', 'summarize'],
     max_charge: '5.00',
-    currency: 'USD'
-  })
-})
+    currency: 'USD',
+  }),
+});
 ```
 
 **400 Bad Request** (validation error)
