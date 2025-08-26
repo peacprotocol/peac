@@ -27,21 +27,22 @@ function generateAgreementId(): string {
  * Middleware to validate protocol version header on write endpoints
  */
 export function validateProtocolVersion(req: Request, res: Response, next: NextFunction): void {
-  const protocolHeader = req.get('x-peac-protocol');
+  const protocolHeader = req.get('X-PEAC-Protocol');
 
   if (!protocolHeader) {
     return problemDetails.send(res, 'protocol_version_required', {
-      detail: 'x-peac-protocol header is required',
-      required_header: 'x-peac-protocol',
+      detail: 'X-PEAC-Protocol header is required',
+      required_header: 'X-PEAC-Protocol',
       supported: [WIRE_VERSION],
     });
   }
 
   if (protocolHeader !== WIRE_VERSION) {
     return problemDetails.send(res, 'protocol_version_unsupported', {
-      detail: `Protocol version ${protocolHeader} is not supported`,
+      detail: `Version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
       supported: [WIRE_VERSION],
+      'x-peac-advice': `Supported versions: ${WIRE_VERSION}`,
     });
   }
 
@@ -70,15 +71,16 @@ export function validateProtocolVersionWithDeprecation(
     return problemDetails.send(res, 'protocol_version_required', {
       detail: 'X-PEAC-Protocol header is required',
       required_header: 'X-PEAC-Protocol',
-      supported: ['0.9.8'],
+      supported: [WIRE_VERSION],
     });
   }
 
-  if (protocolHeader !== '0.9.8') {
+  if (protocolHeader !== WIRE_VERSION) {
     return problemDetails.send(res, 'protocol_version_unsupported', {
-      detail: `Protocol version ${protocolHeader} is not supported`,
+      detail: `Version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
-      supported: ['0.9.8'],
+      supported: [WIRE_VERSION],
+      'x-peac-advice': `Supported versions: ${WIRE_VERSION}`,
     });
   }
 
@@ -131,7 +133,7 @@ export async function createAgreement(req: Request, res: Response): Promise<void
     const agreement: Agreement = {
       id: agreementId,
       fingerprint,
-      protocol_version: '0.9.8',
+      protocol_version: WIRE_VERSION,
       status: 'valid',
       created_at: now,
       proposal,

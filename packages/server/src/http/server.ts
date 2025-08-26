@@ -19,6 +19,7 @@ import { versionNegotiationMiddleware } from '../middleware/headers';
 import { PEACError } from '../errors/problem-json';
 import { requestTracing } from './middleware/request-tracing';
 import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 
 // Ensure global fetch is available
 if (!(globalThis as any).fetch) {
@@ -111,7 +112,7 @@ export async function createServer() {
         status: 'ok' | 'degraded';
         version: string;
         components: Record<string, string>;
-      } = { status: 'ok', version: '0.9.8', components: {} };
+      } = { status: 'ok', version: WIRE_VERSION, components: {} };
       try {
         const redis = getRedis();
         await redis.ping();
@@ -138,8 +139,8 @@ export async function createServer() {
   app.use(
     createDiscoveryRouter(adapterRegistry, {
       base_url: process.env.PEAC_BASE_URL || 'https://demo.peac.dev',
-      version: '0.9.8',
-      x_release: '0.9.8',
+      version: WIRE_VERSION,
+      x_release: WIRE_VERSION,
     }),
   );
 

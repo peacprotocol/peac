@@ -117,7 +117,7 @@ Common pitfalls: invalid schema returns `application/problem+json` 400.
 
 ---
 
-## Minimal `peac.txt` (0.9.11 wire)
+## Minimal `peac.txt` (docs train 0.9.11, wire 0.9.8)
 
 ```txt
 # /.well-known/peac.txt
@@ -171,7 +171,7 @@ More examples: [docs/examples.md](docs/examples.md)
 
 Adapters bridge PEAC to payment rails, agent protocols, provenance, and chains. Lifecycle: simulation → staging → production.
 
-| Adapter    | Status (0.9.11) | Notes                          |
+| Adapter    | Status (0.9.11 docs) | Notes                          |
 | ---------- | --------------- | ------------------------------ |
 | **MCP**    | Beta            | Agent protocol adapter         |
 | **A2A**    | Beta            | Agent-to-Agent negotiation     |

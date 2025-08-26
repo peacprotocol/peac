@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Redis } from 'ioredis';
 import pino from 'pino';
 import { JWKSManager } from '../security/jwks-manager';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 
 const logger = pino({ name: 'health' });
 
@@ -21,7 +22,7 @@ export function createHealthRouter(config: HealthCheckConfig): Router {
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
-      version: '0.9.8',
+      version: WIRE_VERSION,
     });
   });
 
@@ -60,7 +61,7 @@ export function createHealthRouter(config: HealthCheckConfig): Router {
       status,
       timestamp: new Date().toISOString(),
       checks,
-      version: '0.9.8',
+      version: WIRE_VERSION,
     });
   });
 

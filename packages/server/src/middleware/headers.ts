@@ -68,7 +68,7 @@ export function headerMiddleware(_req: Request, res: Response, next: NextFunctio
   };
 
   // Always echo the current protocol version on successful responses.
-  res.setHeader('x-peac-protocol', ECHO);
+  res.setHeader('x-peac-protocol-version', ECHO);
 
   next();
 }
@@ -76,7 +76,7 @@ export function headerMiddleware(_req: Request, res: Response, next: NextFunctio
 // ---- version negotiation middleware ------------------------------------------
 
 export function versionNegotiationMiddleware(req: Request, res: Response, next: NextFunction) {
-  const currentHdr = req.get('x-peac-protocol') as string | undefined;
+  const currentHdr = req.get('x-peac-protocol-version') as string | undefined;
   const legacyHdr = req.get('x-peac-version') as string | undefined;
 
   // Count every time a caller sends *any* version header.
@@ -136,7 +136,7 @@ export function versionNegotiationMiddleware(req: Request, res: Response, next: 
 
   // Accept exactly 0.9.8; normalize to ECHO (0.9.8)
   if (maj === '0' && min === '9' && patch === MIN_SUPPORTED_PATCH) {
-    res.setHeader('x-peac-protocol', ECHO);
+    res.setHeader('x-peac-protocol-version', ECHO);
     return next();
   }
 
