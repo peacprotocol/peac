@@ -17,8 +17,7 @@ export function handleWellKnown(_req: Request, res: Response): void {
       standards: ['erc20', 'erc721', 'erc1155'],
       claim_schema: 'urn:peac:claims:0.1',
       registry: null,
-      notes:
-        `Property rights are accepted as signed claims and counted (preview), not enforced in ${WIRE_VERSION}.`,
+      notes: `Property rights are accepted as signed claims and counted (preview), not enforced in ${WIRE_VERSION}.`,
     },
   });
 }

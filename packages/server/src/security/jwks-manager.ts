@@ -266,9 +266,9 @@ export class JWKSManager {
     const values = Array.isArray(ifNoneMatch)
       ? ifNoneMatch
       : typeof ifNoneMatch === 'string'
-        ? ifNoneMatch.split(',').map(s => s.trim())
+        ? ifNoneMatch.split(',').map((s) => s.trim())
         : [];
-    
+
     if (values.includes(etag)) {
       return res.status(304).end();
     }

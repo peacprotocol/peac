@@ -138,16 +138,16 @@ export class DiscoveryService {
 
     const adapterFragments = this.adapterRegistry.composeDiscovery();
     let document = deepMerge(base, adapterFragments);
-    
+
     if (process.env.PEAC_MCP_ENABLED === 'true') {
       document = deepMerge(document, {
         adapters: {
           mcp: {
             enabled: true,
             tools: ['peac.negotiate', 'peac.pay', 'peac.verify'],
-            endpoint: process.env.MCP_ENDPOINT
-          }
-        }
+            endpoint: process.env.MCP_ENDPOINT,
+          },
+        },
       });
     }
 
