@@ -2,6 +2,7 @@ import request from 'supertest';
 import { createServer } from '../../src/http/server';
 import { Application } from 'express';
 import { standardRateLimiter, strictRateLimiter } from '../../src/middleware/enhanced-rate-limit';
+import { tieredRateLimiter } from '../../src/middleware/tiered-rate-limit';
 import { paymentGuards } from '../../src/payments/guards';
 import { idempotencyMiddleware } from '../../src/middleware/idempotency';
 import { requestTracing } from '../../src/http/middleware/request-tracing';
@@ -10,12 +11,16 @@ describe('PEAC v0.9.8 Conformance Tests', () => {
   let app: Application;
 
   beforeAll(async () => {
+    // Disable rate limiting for conformance tests
+    process.env.PEAC_RATELIMIT_DISABLED = 'true';
     app = await createServer();
   });
 
   afterAll(() => {
+    delete process.env.PEAC_RATELIMIT_DISABLED;
     standardRateLimiter.destroy();
     strictRateLimiter.destroy();
+    tieredRateLimiter.dispose();
     idempotencyMiddleware.destroy();
   });
 

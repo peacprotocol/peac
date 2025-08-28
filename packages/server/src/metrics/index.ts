@@ -84,13 +84,19 @@ export const metrics = {
   rateLimitAllowed: new Counter({
     name: 'peac_rate_limit_allowed_total',
     help: 'Total requests allowed by rate limiter',
-    labelNames: ['key'] as const,
+    labelNames: ['tier'] as const,
     registers: [register],
   }),
   rateLimitExceeded: new Counter({
     name: 'peac_rate_limit_exceeded_total',
     help: 'Total requests rejected by rate limiter',
-    labelNames: ['key'] as const,
+    labelNames: ['tier'] as const,
+    registers: [register],
+  }),
+  webBotAuthHints: new Counter({
+    name: 'peac_web_bot_auth_hints_total',
+    help: 'Total Web Bot Auth hints detected',
+    labelNames: ['tier'] as const,
     registers: [register],
   }),
   readinessCheckFailures: new Counter({

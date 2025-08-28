@@ -1,9 +1,9 @@
 /* istanbul ignore file */
 import { Router } from 'express';
 import { handleVerify } from './verify';
-import { rateLimitMiddleware } from '../middleware/rateLimit';
 import { handleWellKnown } from './wellKnown';
 import { handleCapabilities } from './wellKnown/capabilities.handler';
+import { handlePolicy } from './wellKnown/policy.handler';
 import { handleLiveness, handleReadiness } from '../health/handlers';
 import { greaseHandler } from '../ext/grease';
 import { standardRateLimiter } from '../middleware/enhanced-rate-limit';
@@ -40,6 +40,10 @@ export function createRoutes() {
 
   // Well-known endpoints
   router.get('/.well-known/peac.json', handleWellKnown);
+  router.get('/.well-known/peac', handlePolicy);
+  router.get('/.well-known/peac.txt', (_req, res) => {
+    res.redirect(302, '/.well-known/peac');
+  });
   router.get(
     '/.well-known/peac-capabilities',
     standardRateLimiter.middleware(),
@@ -47,22 +51,15 @@ export function createRoutes() {
   );
 
   // Agreement-first API endpoints (v0.9.6)
-  router.post(
-    '/peac/agreements',
-    validateProtocolVersion,
-    validateContentType,
-    standardRateLimiter.middleware(),
-    createAgreement,
-  );
+  router.post('/peac/agreements', validateProtocolVersion, validateContentType, createAgreement);
 
-  router.get('/peac/agreements/:id', standardRateLimiter.middleware(), getAgreement);
+  router.get('/peac/agreements/:id', getAgreement);
 
   // Deprecated negotiation alias (backward compatibility)
   router.post(
     '/peac/negotiate',
     validateProtocolVersionWithDeprecation,
     validateContentType,
-    standardRateLimiter.middleware(),
     handleNegotiateAlias,
   );
 
@@ -72,7 +69,6 @@ export function createRoutes() {
     validateProtocolVersion,
     validateContentType,
     validateAgreementBinding,
-    standardRateLimiter.middleware(),
     handlePaymentCharge,
   );
 
@@ -80,8 +76,8 @@ export function createRoutes() {
   router.use('/webhooks', webhookRouter);
 
   // Existing endpoints (legacy behavior maintained)
-  router.post('/verify', rateLimitMiddleware('verify'), handleVerify);
-  router.post('/pay', rateLimitMiddleware('pay'), handleLegacyPayment);
+  router.post('/verify', handleVerify);
+  router.post('/pay', handleLegacyPayment);
 
   return router;
 }
