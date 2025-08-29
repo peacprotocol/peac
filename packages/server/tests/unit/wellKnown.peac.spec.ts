@@ -78,7 +78,9 @@ describe('/.well-known/peac policy endpoint', () => {
 
     expect(response.headers['location']).toBe('/.well-known/peac');
     expect(response.headers['link']).toBe('</.well-known/peac>; rel="canonical peac-policy"');
-    expect(response.headers['cache-control']).toBe('public, max-age=300, stale-while-revalidate=86400');
+    expect(response.headers['cache-control']).toBe(
+      'public, max-age=300, stale-while-revalidate=86400',
+    );
     expect(response.headers['content-length']).toBe('0');
     expect(response.text).toBe('');
   });

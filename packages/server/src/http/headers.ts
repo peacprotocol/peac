@@ -26,14 +26,14 @@ export function readAttribution(
   headers: Record<string, string | string[] | undefined>,
 ): string | null {
   const attribution = headers[PEAC_HEADERS.ATTRIBUTION];
-  
+
   if (Array.isArray(attribution)) {
     return attribution[0] || null;
   }
   if (attribution) {
     return attribution;
   }
-  
+
   return null;
 }
 

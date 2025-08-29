@@ -48,11 +48,11 @@ export function createRoutes() {
     } catch {
       // Metric optional in test environment
     }
-    
+
     res.status(308);
     res.set({
-      'Location': '/.well-known/peac',
-      'Link': '</.well-known/peac>; rel="canonical peac-policy"',
+      Location: '/.well-known/peac',
+      Link: '</.well-known/peac>; rel="canonical peac-policy"',
       'Cache-Control': 'public, max-age=300, stale-while-revalidate=86400',
       'Content-Length': '0',
     });

@@ -174,9 +174,10 @@ class VerifiedRateLimiter {
           logger.warn({ key, tier, remaining, retryAfter }, 'Rate limit exceeded');
 
           problemDetails.send(res, 'rate_limit_exceeded', {
-            detail: tier === 'anonymous' 
-              ? 'Send Peac-Attribution header to receive higher limits'
-              : 'Rate limit exceeded for current tier',
+            detail:
+              tier === 'anonymous'
+                ? 'Send Peac-Attribution header to receive higher limits'
+                : 'Rate limit exceeded for current tier',
           });
         }
       } catch (error) {

@@ -32,7 +32,8 @@ export interface ReceiptOptions {
 
 export function createReceipt(options: ReceiptOptions): Promise<string> {
   const methodInitial = getMethodInitial(options.method);
-  const pathHash = crypto.createHash('sha256')
+  const pathHash = crypto
+    .createHash('sha256')
     .update(options.path, 'utf8')
     .digest('hex')
     .substring(0, 40);
@@ -63,10 +64,7 @@ export function createReceipt(options: ReceiptOptions): Promise<string> {
     .sign(options.privateKey);
 }
 
-export async function verifyReceipt(
-  jws: string,
-  publicKey: Uint8Array
-): Promise<ReceiptClaims> {
+export async function verifyReceipt(jws: string, publicKey: Uint8Array): Promise<ReceiptClaims> {
   const { payload } = await jwtVerify(jws, publicKey, {
     typ: 'application/peac-receipt',
   });
@@ -76,22 +74,27 @@ export async function verifyReceipt(
 
 export function policyHash(policy: Record<string, unknown>): string {
   const canonical = JSON.stringify(policy, Object.keys(policy).sort());
-  return crypto.createHash('sha256')
-    .update(canonical, 'utf8')
-    .digest('hex')
-    .substring(0, 40);
+  return crypto.createHash('sha256').update(canonical, 'utf8').digest('hex').substring(0, 40);
 }
 
 function getMethodInitial(method: string): 'G' | 'P' | 'H' | 'D' | 'O' | 'T' | 'C' {
   switch (method.toUpperCase()) {
-    case 'GET': return 'G';
-    case 'POST': return 'P';
-    case 'HEAD': return 'H';
-    case 'DELETE': return 'D';
-    case 'OPTIONS': return 'O';
-    case 'TRACE': return 'T';
-    case 'CONNECT': return 'C';
-    default: return 'P';
+    case 'GET':
+      return 'G';
+    case 'POST':
+      return 'P';
+    case 'HEAD':
+      return 'H';
+    case 'DELETE':
+      return 'D';
+    case 'OPTIONS':
+      return 'O';
+    case 'TRACE':
+      return 'T';
+    case 'CONNECT':
+      return 'C';
+    default:
+      return 'P';
   }
 }
 
@@ -104,7 +107,7 @@ export function decodeReceiptFromHeader(headerValue: string): string | null {
   if (!headerValue.startsWith(':') || !headerValue.endsWith(':')) {
     return null;
   }
-  
+
   const base64url = headerValue.slice(1, -1);
   try {
     return Buffer.from(base64url, 'base64url').toString('utf8');

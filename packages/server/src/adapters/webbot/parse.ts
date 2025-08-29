@@ -7,7 +7,7 @@ export interface WebBotAuthHeaders {
 }
 
 export function parseWebBotAuthHeaders(
-  headers: Record<string, string | string[] | undefined>
+  headers: Record<string, string | string[] | undefined>,
 ): WebBotAuthHeaders {
   const signature = headers[WEB_BOT_AUTH_HEADERS.SIGNATURE];
   const signatureInput = headers[WEB_BOT_AUTH_HEADERS.SIGNATURE_INPUT];
@@ -16,9 +16,9 @@ export function parseWebBotAuthHeaders(
   return {
     signature: Array.isArray(signature) ? signature[0] : signature,
     signatureInput: Array.isArray(signatureInput) ? signatureInput[0] : signatureInput,
-    signatureAgent: Array.isArray(signatureAgent) 
+    signatureAgent: Array.isArray(signatureAgent)
       ? parseStructuredField(signatureAgent[0] || '') || undefined
-      : signatureAgent 
+      : signatureAgent
         ? parseStructuredField(signatureAgent) || undefined
         : undefined,
   };
@@ -34,10 +34,10 @@ export interface WebBotAuthHint {
 }
 
 export function detectWebBotAuthHint(
-  headers: Record<string, string | string[] | undefined>
+  headers: Record<string, string | string[] | undefined>,
 ): WebBotAuthHint {
   const parsed = parseWebBotAuthHeaders(headers);
-  
+
   return {
     hasSignature: !!(parsed.signature && parsed.signatureInput),
     signatureAgent: parsed.signatureAgent,

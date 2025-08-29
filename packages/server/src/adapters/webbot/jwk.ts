@@ -12,7 +12,7 @@ export function thumbprintEd25519(jwk: Ed25519JWK): string {
     kty: jwk.kty,
     x: jwk.x,
   });
-  
+
   const hash = crypto.createHash('sha256').update(canonical, 'utf8').digest();
   return hash.toString('base64url');
 }
