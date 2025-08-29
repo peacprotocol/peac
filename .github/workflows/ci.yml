@@ -253,8 +253,8 @@ jobs:
           RESPONSE=$(curl -fsS http://localhost:3001/.well-known/peac-capabilities)
           VERSION=$(echo "$RESPONSE" | jq -r '.version')
 
-          if [ "$VERSION" != "0.9.8" ]; then
-            echo "::error::Expected version 0.9.8, got $VERSION"
+          if [ "$VERSION" != "0.9.10" ]; then
+            echo "::error::Expected version 0.9.10, got $VERSION"
             exit 1
           fi
 
