@@ -1,4 +1,4 @@
-import { generateKeyPair, exportJWKS, SiteKey } from '../../src/core/keys';
+import { generateKeyPair, exportJWKS } from '../../src/core/keys';
 
 describe('Site Keys', () => {
   describe('generateKeyPair', () => {
