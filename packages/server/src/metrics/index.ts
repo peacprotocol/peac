@@ -105,6 +105,11 @@ export const metrics = {
     buckets: [0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 1, 2],
     registers: [register],
   }),
+  peacTxtSeen: new Counter({
+    name: 'peac_txt_seen_total',
+    help: 'Count of peac.txt alias endpoint requests',
+    registers: [register],
+  }),
   readinessCheckFailures: new Counter({
     name: 'peac_readiness_check_failures_total',
     help: 'Total readiness check failures',

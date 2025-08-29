@@ -51,15 +51,18 @@ describe('Breaking Changes v0.9.9', () => {
     });
   });
 
-  describe('Endpoint Removal', () => {
-    it('should return 410 Gone for /.well-known/peac.txt', async () => {
-      const response = await request(app).get('/.well-known/peac.txt').expect(410);
+  describe('Canonical Endpoint', () => {
+    it('should redirect /.well-known/peac.txt to canonical endpoint', async () => {
+      const response = await request(app).get('/.well-known/peac.txt').expect(308);
 
-      expect(response.text).toContain("Use '/.well-known/peac'");
-      expect(response.text).toContain('migration guide');
+      expect(response.headers['location']).toBe('/.well-known/peac');
+      expect(response.headers['link']).toBe('</.well-known/peac>; rel="canonical peac-policy"');
+      expect(response.headers['cache-control']).toBe('public, max-age=300, stale-while-revalidate=86400');
+      expect(response.headers['content-length']).toBe('0');
+      expect(response.text).toBe('');
     });
 
-    it('should still serve /.well-known/peac normally', async () => {
+    it('should serve canonical /.well-known/peac normally', async () => {
       const response = await request(app).get('/.well-known/peac').expect(200);
 
       expect(response.headers['content-type']).toBe('text/plain; charset=utf-8');

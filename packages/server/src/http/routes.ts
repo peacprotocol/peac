@@ -42,7 +42,20 @@ export function createRoutes() {
   router.get('/.well-known/peac.json', handleWellKnown);
   router.get('/.well-known/peac', handlePolicy);
   router.get('/.well-known/peac.txt', (_req, res) => {
-    res.status(410).send("Use '/.well-known/peac' (YAML). See documentation for migration guide.");
+    try {
+      metrics.peacTxtSeen?.inc();
+    } catch {
+      // Metric optional in test environment
+    }
+    
+    res.status(308);
+    res.set({
+      'Location': '/.well-known/peac',
+      'Link': '</.well-known/peac>; rel="canonical peac-policy"',
+      'Cache-Control': 'public, max-age=300, stale-while-revalidate=86400',
+      'Content-Length': '0',
+    });
+    res.end();
   });
   router.get(
     '/.well-known/peac-capabilities',
