@@ -1,6 +1,5 @@
-import { verifyWebBotAuth, VerifyFailure } from '../../src/adapters/webbot/verify';
+import { verifyWebBotAuth } from '../../src/adapters/webbot/verify';
 import { validateSignatureAgentUrl } from '../../src/adapters/webbot/directory';
-import { Request } from 'express';
 
 describe('Web Bot Auth Verification', () => {
   describe('validateSignatureAgentUrl', () => {
