@@ -73,10 +73,13 @@ describe('/.well-known/peac policy endpoint', () => {
     expect(response.headers['access-control-allow-methods']).toBe('GET, HEAD, OPTIONS');
   });
 
-  it('should return 410 Gone for /.well-known/peac.txt (breaking change)', async () => {
-    const response = await request(app).get('/.well-known/peac.txt').expect(410);
+  it('should redirect /.well-known/peac.txt to canonical endpoint', async () => {
+    const response = await request(app).get('/.well-known/peac.txt').expect(308);
 
-    expect(response.text).toContain("Use '/.well-known/peac'");
-    expect(response.text).toContain('migration guide');
+    expect(response.headers['location']).toBe('/.well-known/peac');
+    expect(response.headers['link']).toBe('</.well-known/peac>; rel="canonical peac-policy"');
+    expect(response.headers['cache-control']).toBe('public, max-age=300, stale-while-revalidate=86400');
+    expect(response.headers['content-length']).toBe('0');
+    expect(response.text).toBe('');
   });
 });

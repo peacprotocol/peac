@@ -24,6 +24,7 @@ import {
   validateAgreementBinding,
 } from '../payments/http';
 import webhookRouter from '../webhooks/router';
+import { metrics } from '../metrics';
 
 export function createRoutes() {
   const router = Router();
