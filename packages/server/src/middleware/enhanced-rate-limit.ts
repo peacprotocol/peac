@@ -116,11 +116,11 @@ export class EnhancedRateLimiter {
       });
 
       if (bucket.consume()) {
-        metrics.rateLimitAllowed.inc({ key });
+        metrics.rateLimitAllowed.inc({ tier: key });
         next();
       } else {
         const retryAfter = bucket.getRetryAfter();
-        metrics.rateLimitExceeded.inc({ key });
+        metrics.rateLimitExceeded.inc({ tier: key });
         logger.warn({ key, retryAfter, remaining, resetTime }, 'Rate limit exceeded');
 
         // Add Retry-After header for exceeded requests
