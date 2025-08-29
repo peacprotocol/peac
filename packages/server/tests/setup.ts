@@ -10,6 +10,7 @@
 // Required for testing payment flows
 process.env.PEAC_UNIT_TEST_BYPASS = 'true';
 process.env.PAYMENT_PROVIDER = 'mock';
+process.env.PEAC_PAYMENTS_MODE = 'live';
 
 process.env.SESSION_PRIVATE_KEY_PEM = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDLW29LzIfnW3wC

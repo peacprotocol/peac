@@ -91,7 +91,7 @@ export function versionNegotiationMiddleware(req: Request, res: Response, next: 
           code: 'legacy-header-unsupported',
           message: 'Header x-peac-version is not supported',
           header: 'x-peac-version',
-          recommendation: 'Send x-peac-protocol-version: 0.9.8',
+          recommendation: `Send x-peac-protocol-version: ${WIRE_VERSION}`,
         }),
       );
     } catch {

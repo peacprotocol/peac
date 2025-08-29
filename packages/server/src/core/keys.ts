@@ -1,6 +1,11 @@
 import * as crypto from 'crypto';
 import type { JWK } from 'jose';
 
+interface JsonWebKey {
+  x?: string;
+  d?: string;
+}
+
 export interface SiteKey {
   kid: string;
   created: number;

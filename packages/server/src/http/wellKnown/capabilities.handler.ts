@@ -128,7 +128,7 @@ function buildCapabilities(): PEACCapabilities {
       },
     },
     links: {
-      docs: 'https://peacprotocol.org/docs/v0.9.8',
+      docs: 'https://peacprotocol.org/docs/v0.9.10',
       peip: 'https://peacprotocol.org/peip',
     },
   };

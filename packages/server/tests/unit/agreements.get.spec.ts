@@ -24,7 +24,7 @@ describe('Agreement Retrieval - GET /peac/agreements/{id}', () => {
 
     const createResponse = await request(app)
       .post('/peac/agreements')
-      .set('X-PEAC-Protocol', '0.9.8')
+      .set('X-PEAC-Protocol', '0.9.10')
       .set('Content-Type', 'application/json')
       .send(proposal);
 
