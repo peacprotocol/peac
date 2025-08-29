@@ -115,6 +115,19 @@ export const metrics = {
     help: 'Total readiness check failures',
     registers: [register],
   }),
+  batchVerifyLatency: new Histogram({
+    name: 'peac_batch_verify_duration_seconds',
+    help: 'Duration of batch verify operations',
+    labelNames: ['method'] as const,
+    buckets: [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0],
+    registers: [register],
+  }),
+  batchVerifyAttempts: new Counter({
+    name: 'peac_batch_verify_attempts_total',
+    help: 'Total batch verify attempts',
+    labelNames: ['method', 'count'] as const,
+    registers: [register],
+  }),
 };
 
 export function getMetricsRegistry() {

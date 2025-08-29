@@ -1,6 +1,7 @@
-import { SignJWT, jwtVerify, JWTPayload } from 'jose';
+import { SignJWT, jwtVerify, JWTPayload, importJWK } from 'jose';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
+import { SiteKey, siteKeyToJWK } from './keys';
 
 export type Tier = 'anonymous' | 'attributed' | 'verified';
 
@@ -16,6 +17,7 @@ export interface ReceiptClaims {
   };
   ph: string;
   attr?: string;
+  wba?: string;
 }
 
 export interface ReceiptOptions {
@@ -26,11 +28,11 @@ export interface ReceiptOptions {
   path: string;
   policyHash: string;
   attribution?: string;
-  privateKey: Uint8Array;
-  keyId?: string;
+  verifiedThumbprint?: string;
+  key: SiteKey;
 }
 
-export function createReceipt(options: ReceiptOptions): Promise<string> {
+export async function createReceipt(options: ReceiptOptions): Promise<string> {
   const methodInitial = getMethodInitial(options.method);
   const pathHash = crypto
     .createHash('sha256')
@@ -55,21 +57,103 @@ export function createReceipt(options: ReceiptOptions): Promise<string> {
     claims.attr = options.attribution;
   }
 
+  if (options.verifiedThumbprint) {
+    claims.wba = options.verifiedThumbprint;
+  }
+
+  if (!options.key.privateKey) {
+    throw new Error('Private key required for signing');
+  }
+
+  const privateKeyJwk = {
+    kty: 'OKP',
+    crv: 'Ed25519',
+    d: Buffer.from(options.key.privateKey).toString('base64url'),
+    x: Buffer.from(options.key.publicKey).toString('base64url'),
+  };
+
+  const privateKey = await importJWK(privateKeyJwk, 'EdDSA');
+
   return new SignJWT(claims as unknown as JWTPayload)
     .setProtectedHeader({
       alg: 'EdDSA',
       typ: 'application/peac-receipt',
-      ...(options.keyId && { kid: options.keyId }),
+      kid: options.key.kid,
     })
-    .sign(options.privateKey);
+    .sign(privateKey);
 }
 
-export async function verifyReceipt(jws: string, publicKey: Uint8Array): Promise<ReceiptClaims> {
-  const { payload } = await jwtVerify(jws, publicKey, {
-    typ: 'application/peac-receipt',
-  });
+export async function verifyReceipt(
+  jws: string,
+  keys: SiteKey[],
+): Promise<
+  { ok: true; claims: ReceiptClaims; kid: string; alg: 'EdDSA' } | { ok: false; error: string }
+> {
+  try {
+    // Parse header to get kid
+    const [headerB64] = jws.split('.');
+    if (!headerB64) {
+      return { ok: false, error: 'invalid_format' };
+    }
 
-  return payload as unknown as ReceiptClaims;
+    const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString());
+
+    if (header.alg !== 'EdDSA') {
+      return { ok: false, error: 'alg_unsupported' };
+    }
+
+    if (!header.kid) {
+      return { ok: false, error: 'kid_missing' };
+    }
+
+    // Find matching key
+    const key = keys.find((k) => k.kid === header.kid);
+    if (!key) {
+      return { ok: false, error: 'kid_unknown' };
+    }
+
+    // Create public key for verification
+    const publicKeyJwk = siteKeyToJWK(key);
+    const publicKey = await importJWK(publicKeyJwk, 'EdDSA');
+
+    // Verify JWT
+    const { payload } = await jwtVerify(jws, publicKey, {
+      typ: 'application/peac-receipt',
+    });
+
+    // Additional claim validation
+    const claims = payload as unknown as ReceiptClaims;
+    const now = Math.floor(Date.now() / 1000);
+
+    if (claims.iat > now + 60) {
+      return { ok: false, error: 'nbf_violation' };
+    }
+
+    // Check expiry (receipts valid for 30 days)
+    if (claims.iat < now - 30 * 24 * 3600) {
+      return { ok: false, error: 'expired' };
+    }
+
+    return {
+      ok: true,
+      claims,
+      kid: header.kid,
+      alg: 'EdDSA',
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message.includes('signature')) {
+        return { ok: false, error: 'signature_invalid' };
+      }
+      if (error.message.includes('expired')) {
+        return { ok: false, error: 'expired' };
+      }
+      if (error.message.includes('audience')) {
+        return { ok: false, error: 'aud_mismatch' };
+      }
+    }
+    return { ok: false, error: 'invalid_format' };
+  }
 }
 
 export function policyHash(policy: Record<string, unknown>): string {

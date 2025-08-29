@@ -60,6 +60,20 @@ export const idempotencyStores = new Counter({
   labelNames: ['path'],
 });
 
+// Batch verify metrics
+export const batchVerifyLatency = new Histogram({
+  name: 'peac_batch_verify_duration_seconds',
+  help: 'Duration of batch verify operations',
+  labelNames: ['method'],
+  buckets: [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0],
+});
+
+export const batchVerifyAttempts = new Counter({
+  name: 'peac_batch_verify_attempts_total',
+  help: 'Total batch verify attempts',
+  labelNames: ['method', 'count'],
+});
+
 // Register all metrics
 register.registerMetric(contentNegotiationDuration);
 register.registerMetric(contentNegotiationRejections);
@@ -70,3 +84,5 @@ register.registerMetric(rateLimitExceeded);
 register.registerMetric(readinessCheckFailures);
 register.registerMetric(idempotencyHits);
 register.registerMetric(idempotencyStores);
+register.registerMetric(batchVerifyLatency);
+register.registerMetric(batchVerifyAttempts);

@@ -5,6 +5,7 @@ import pino from 'pino';
 import { Request, Response, NextFunction } from 'express';
 import { PEACError } from '../errors/problem-json';
 import { dpopReplaysBlocked } from '../metrics/prometheus';
+import { WIRE_VERSION } from '@peacprotocol/schema';
 
 const logger = pino({ name: 'dpop' });
 
@@ -200,7 +201,7 @@ export function requireDPoP(redis: Redis) {
         verified: true,
       };
 
-      res.set('X-PEAC-Protocol', req.protocolVersion || '0.9.8');
+      res.set('X-PEAC-Protocol', req.protocolVersion || WIRE_VERSION);
 
       next();
     } catch (error) {

@@ -7,7 +7,7 @@ import { paymentGuards } from '../../src/payments/guards';
 import { idempotencyMiddleware } from '../../src/middleware/idempotency';
 import { requestTracing } from '../../src/http/middleware/request-tracing';
 
-describe('PEAC v0.9.8 Conformance Tests', () => {
+describe('PEAC v0.9.10 Conformance Tests', () => {
   let app: Application;
 
   beforeAll(async () => {
@@ -255,11 +255,11 @@ describe('PEAC v0.9.8 Conformance Tests', () => {
     it('should handle vendor media types correctly', async () => {
       const res = await request(app)
         .get('/.well-known/peac-capabilities')
-        .set('Accept', 'application/vnd.peac.capabilities+json;version=0.9.8');
+        .set('Accept', 'application/vnd.peac.capabilities+json;version=0.9.10');
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(
-        /application\/vnd\.peac\.capabilities\+json.*version=0\.9\.8/,
+        /application\/vnd\.peac\.capabilities\+json.*version=0\.9\.10/,
       );
     });
 

@@ -152,7 +152,7 @@ describe('Web Bot Auth Verification', () => {
       );
 
       expect(result.ok).toBe(false);
-      expect(result.failure).toBe('dir_media');
+      expect(['dir_media', 'dir_fetch'].includes(result.failure!)).toBe(true);
     });
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/server",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "PEAC Protocol: Programmable Environment for Agent Coordination",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
