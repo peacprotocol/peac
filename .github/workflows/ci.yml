@@ -187,8 +187,8 @@ jobs:
           echo "::group::Protocol version and header validation"
           echo "==> Version sanity (root)"
           ROOT_VER=$(node -e "console.log(require('./package.json').version||'')")
-          if [ "$ROOT_VER" != "0.9.8" ]; then
-            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.8'"
+          if [ "$ROOT_VER" != "0.9.10" ]; then
+            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.10'"
             exit 1
           fi
 
