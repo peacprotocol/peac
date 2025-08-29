@@ -1,12 +1,16 @@
 import { Request } from 'express';
 import { parseWebBotAuthHeaders, hasRequiredWebBotAuthHeaders } from './parse';
-import { fetchAndVerifyDirectory, validateSignatureAgentUrl } from './directory';
+import { fetchAndVerifyDir, validateSignatureAgentUrl } from './directory';
+import { directoryCache } from './cache';
+import { verifySignature } from './signature';
+import { telemetry } from '../../telemetry/log';
 import { logger } from '../../logging';
 import { metrics } from '../../metrics';
 
 export type VerifyFailure =
   | 'no_headers'
   | 'bad_signature_agent'
+  | 'dir_negative_cache'
   | 'dir_fetch'
   | 'dir_media'
   | 'dir_sig_invalid'
@@ -20,7 +24,7 @@ export type VerifyFailure =
 export interface VerifyResult {
   ok: boolean;
   tierHint?: 'verified';
-  keyid?: string;
+  thumb?: string;
   failure?: VerifyFailure;
   agentOrigin?: string;
 }
@@ -30,62 +34,19 @@ export interface VerifyOptions {
   now?: () => number;
   skewSec?: number;
   dirTtlSec?: number;
+  timeoutMs?: number;
 }
 
 const DEFAULT_VERIFY_OPTIONS = {
   fetchFn: fetch,
   now: () => Date.now(),
   skewSec: 120,
-  dirTtlSec: 600,
+  dirTtlSec: 86400,
+  timeoutMs: 2000,
 };
-
-const rateLimitWindows = new Map<string, { count: number; resetAt: number }>();
-const circuitBreakers = new Map<string, { openUntil: number; failures: number }>();
 
 let currentInflight = 0;
 const MAX_INFLIGHT = 128;
-
-function isRateLimited(origin: string, now: number): boolean {
-  const window = rateLimitWindows.get(origin);
-  if (!window || now > window.resetAt) {
-    rateLimitWindows.set(origin, { count: 1, resetAt: now + 60000 });
-    return false;
-  }
-
-  if (window.count >= 5) {
-    return true;
-  }
-
-  window.count++;
-  return false;
-}
-
-function isCircuitBreakerOpen(origin: string, now: number): boolean {
-  const breaker = circuitBreakers.get(origin);
-  if (!breaker) return false;
-
-  return now < breaker.openUntil;
-}
-
-function recordFailure(origin: string, now: number): void {
-  const breaker = circuitBreakers.get(origin) || { openUntil: 0, failures: 0 };
-  breaker.failures++;
-
-  if (breaker.failures >= 5) {
-    breaker.openUntil = now + 60000; // Open for 60s
-    breaker.failures = 0;
-  }
-
-  circuitBreakers.set(origin, breaker);
-}
-
-function recordSuccess(origin: string): void {
-  const breaker = circuitBreakers.get(origin);
-  if (breaker) {
-    breaker.failures = 0;
-    breaker.openUntil = 0;
-  }
-}
 
 export async function verifyWebBotAuth(
   req: Request,
@@ -106,6 +67,8 @@ export async function verifyWebBotAuth(
   }
 
   const signatureAgent = headers.signatureAgent!;
+  const signature = headers.signature!;
+  const signatureInput = headers.signatureInput!;
 
   if (!validateSignatureAgentUrl(signatureAgent)) {
     metrics.webBotAuthVerifyAttempts?.inc({ result: 'invalid_url' });
@@ -114,64 +77,131 @@ export async function verifyWebBotAuth(
 
   const origin = new URL(signatureAgent).origin;
 
-  if (isRateLimited(origin, now)) {
-    metrics.webBotAuthVerifyAttempts?.inc({ result: 'rate_limited' });
-    return { ok: false, failure: 'verifier_busy' };
-  }
-
-  if (isCircuitBreakerOpen(origin, now)) {
-    metrics.webBotAuthVerifyAttempts?.inc({ result: 'circuit_open' });
-    return { ok: false, failure: 'verifier_busy' };
-  }
-
   currentInflight++;
   const startTime = Date.now();
 
   try {
-    const directory = await fetchAndVerifyDirectory(signatureAgent, {
-      fetchFn: opts.fetchFn,
-      now: opts.now,
-      ttlSec: opts.dirTtlSec,
-      skewSec: opts.skewSec,
-    });
+    // Try to get cached directory first
+    let directory = directoryCache.get(origin);
 
-    recordSuccess(origin);
+    if (!directory) {
+      // Check negative cache
+      const negativeUntil = directoryCache.getNegative(origin);
+      if (negativeUntil && negativeUntil > now) {
+        metrics.webBotAuthVerifyAttempts?.inc({ result: 'negative_cached' });
+        return { ok: false, failure: 'dir_negative_cache' };
+      }
 
+      // Fetch and verify directory
+      try {
+        const result = await fetchAndVerifyDir(origin, {
+          fetchFn: opts.fetchFn,
+          now: opts.now,
+          ttlCapSec: opts.dirTtlSec,
+          timeoutMs: opts.timeoutMs,
+        });
+        directory = result.record;
+      } catch (error) {
+        let failure: VerifyFailure = 'dir_fetch';
+        if (error instanceof Error) {
+          if (error.message.includes('dir_media')) {
+            failure = 'dir_media';
+          } else if (error.message.includes('dir_sig_invalid')) {
+            failure = 'dir_sig_invalid';
+          } else if (error.message.includes('dir_negative_cache')) {
+            failure = 'dir_negative_cache';
+          }
+        }
+
+        const latency = Date.now() - startTime;
+        metrics.webBotAuthVerifyLatency?.observe(latency);
+        metrics.webBotAuthVerifyAttempts?.inc({ result: 'dir_failure', reason: failure });
+
+        logger.warn(
+          {
+            agentOrigin: origin,
+            error: error instanceof Error ? error.message : String(error),
+            failure,
+            latency,
+          },
+          'Directory fetch failed',
+        );
+
+        return { ok: false, failure };
+      }
+    }
+
+    // Verify request signature using directory keys
+    for (const keyEntry of directory.keys) {
+      const verifyResult = await verifySignature(
+        signature,
+        signatureInput,
+        req,
+        keyEntry.jwk as unknown as Record<string, unknown>,
+        now,
+        opts.skewSec,
+      );
+
+      if (verifyResult.ok && verifyResult.keyid === keyEntry.thumbprint) {
+        const latency = Date.now() - startTime;
+        metrics.webBotAuthVerifyLatency?.observe(latency);
+        metrics.webBotAuthVerifyAttempts?.inc({ result: 'success' });
+
+        logger.info(
+          {
+            agentOrigin: origin,
+            thumbprint: keyEntry.thumbprint,
+            latency,
+          },
+          'Web Bot Auth request verified',
+        );
+
+        telemetry.logWBAVerify(req, {
+          ok: true,
+          thumb: keyEntry.thumbprint,
+          dur_ms: latency,
+        });
+
+        return {
+          ok: true,
+          tierHint: 'verified',
+          thumb: keyEntry.thumbprint,
+          agentOrigin: origin,
+        };
+      }
+    }
+
+    // No matching key found
     const latency = Date.now() - startTime;
     metrics.webBotAuthVerifyLatency?.observe(latency);
-    metrics.webBotAuthVerifyAttempts?.inc({ result: 'success' });
+    metrics.webBotAuthVerifyAttempts?.inc({ result: 'no_matching_key' });
 
-    logger.info(
+    logger.warn(
       {
         agentOrigin: origin,
         keyCount: directory.keys.length,
         latency,
       },
-      'Web Bot Auth directory verified',
+      'No matching key for request signature',
     );
 
-    return {
-      ok: true,
-      tierHint: 'verified',
-      keyid: directory.keys[0]?.kid,
-      agentOrigin: origin,
-    };
+    return { ok: false, failure: 'no_matching_key' };
   } catch (error) {
-    recordFailure(origin, now);
-
     const latency = Date.now() - startTime;
     metrics.webBotAuthVerifyLatency?.observe(latency);
 
-    let failure: VerifyFailure = 'dir_fetch';
+    let failure: VerifyFailure = 'req_sig_invalid';
     if (error instanceof Error) {
-      if (error.message.includes('Invalid content type')) {
-        failure = 'dir_media';
-      } else if (error.message.includes('signature')) {
-        failure = 'dir_sig_invalid';
+      if (error.message.includes('stale')) {
+        failure = 'stale';
+      } else if (error.message.includes('future')) {
+        failure = 'future';
+      } else if (error.message.includes('component_missing')) {
+        failure = 'component_missing';
       }
     }
 
-    metrics.webBotAuthVerifyAttempts?.inc({ result: 'failure', reason: failure });
+    metrics.webBotAuthVerifyAttempts?.inc({ result: 'req_failure', reason: failure });
 
     logger.warn(
       {
@@ -180,7 +210,7 @@ export async function verifyWebBotAuth(
         failure,
         latency,
       },
-      'Web Bot Auth verification failed',
+      'Request signature verification failed',
     );
 
     return { ok: false, failure };
@@ -190,5 +220,5 @@ export async function verifyWebBotAuth(
 }
 
 export function clearDirectoryCache(): void {
-  // Function exposed for testing - clears internal cache
+  directoryCache.clear();
 }
