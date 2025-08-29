@@ -45,7 +45,7 @@ describe('Directory Cache', () => {
 
     it('should handle negative cache', () => {
       const until = Date.now() + 300000; // 5 minutes from now
-      
+
       directoryCache.setNegative('https://failing.com', until);
       const negativeUntil = directoryCache.getNegative('https://failing.com');
 
@@ -54,7 +54,7 @@ describe('Directory Cache', () => {
 
     it('should clean up expired negative cache', () => {
       const until = Date.now() - 1000; // 1 second ago
-      
+
       directoryCache.setNegative('https://failing.com', until);
       const negativeUntil = directoryCache.getNegative('https://failing.com');
 
