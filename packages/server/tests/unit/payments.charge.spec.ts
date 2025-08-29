@@ -68,7 +68,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
           currency: 'USD',
         })
         .expect(200);
-      
+
       expect(response.headers['content-type']).toMatch(/application\/json/);
       expect(response.headers['authorization']).toMatch(/^Bearer mock_session_/);
 
