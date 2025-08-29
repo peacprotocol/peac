@@ -4,6 +4,13 @@
  */
 
 // Set up test environment variables
+
+// Enable payment processing in unit tests
+// This bypasses the payment guard that blocks payments in non-live mode
+// Required for testing payment flows
+process.env.PEAC_UNIT_TEST_BYPASS = 'true';
+process.env.PAYMENT_PROVIDER = 'mock';
+
 process.env.SESSION_PRIVATE_KEY_PEM = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDLW29LzIfnW3wC
 DzCy3gc8XEt7Og92UNQ5oTARG2sb0pWHrLINwsCEr/UrcpNfMOfPdjcF08v41ux4
