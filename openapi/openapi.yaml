@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
   title: PEAC Protocol API
-  version: 0.9.8.3
-  x-release: 0.9.8.3
-  description: Agreement-first API for PEAC Protocol v0.9.8.3 with tiered rate limits and policy discovery
+  version: 0.9.10
+  x-release: 0.9.10-beta
+  description: Agent-Ready Web API for PEAC Protocol v0.9.10-beta with signed directory caching, key rotation, batch verification, and structured telemetry
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
@@ -17,6 +17,8 @@ tags:
     description: Payment processing operations
   - name: webhooks
     description: Webhook verification operations
+  - name: verification
+    description: Receipt verification operations
 servers:
   - url: https://{host}
     variables:
@@ -386,6 +388,116 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+  /.well-known/peac/verify:
+    post:
+      summary: Batch Verify Receipts
+      description: Verify multiple PEAC receipts in a single request (max 100 items)
+      operationId: batchVerifyPost
+      tags:
+        - verification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                jws:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 100
+                  description: Array of JWS receipt tokens to verify
+              required:
+                - jws
+      responses:
+        '200':
+          description: Verification results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - type: object
+                      properties:
+                        ok:
+                          type: boolean
+                          enum: [true]
+                        claims:
+                          type: object
+                        kid:
+                          type: string
+                        alg:
+                          type: string
+                          enum: [EdDSA]
+                    - type: object
+                      properties:
+                        ok:
+                          type: boolean
+                          enum: [false]
+                        error:
+                          type: string
+        '413':
+          description: Payload too large or too many items
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      summary: Verify Single Receipt
+      description: Verify a single PEAC receipt via query parameter (max 25 items)
+      operationId: batchVerifyGet
+      tags:
+        - verification
+      security: []
+      parameters:
+        - name: jws
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 25
+          style: form
+          explode: true
+          description: JWS receipt token(s) to verify
+      responses:
+        '200':
+          description: Verification results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - type: object
+                      properties:
+                        ok:
+                          type: boolean
+                          enum: [true]
+                        claims:
+                          type: object
+                        kid:
+                          type: string
+                        alg:
+                          type: string
+                          enum: [EdDSA]
+                    - type: object
+                      properties:
+                        ok:
+                          type: boolean
+                          enum: [false]
+                        error:
+                          type: string
+        '413':
+          description: Too many items for GET request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 
 components:
   parameters:
@@ -395,9 +507,9 @@ components:
       required: true
       schema:
         type: string
-        enum: ['0.9.8.3']
+        enum: ['0.9.10']
       description: PEAC Protocol version
-      example: '0.9.8.3'
+      example: '0.9.10'
     XPEACAgreement:
       name: X-PEAC-Agreement
       in: header

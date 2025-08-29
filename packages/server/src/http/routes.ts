@@ -25,6 +25,10 @@ import {
 } from '../payments/http';
 import webhookRouter from '../webhooks/router';
 import { metrics } from '../metrics';
+import { keyStore, exportJWKS } from '../core/keys';
+import { handleBatchVerifyPost, handleBatchVerifyGet } from './verify-endpoint';
+import { receiptStore } from '../core/receipt-store';
+import crypto from 'crypto';
 
 export function createRoutes() {
   const router = Router();
@@ -63,6 +67,73 @@ export function createRoutes() {
     standardRateLimiter.middleware(),
     handleCapabilities,
   );
+
+  // JWKS endpoint for receipt verification
+  router.get('/.well-known/peac/jwks.json', async (_req, res) => {
+    try {
+      const keys = await keyStore.getAllPublic();
+      const jwks = exportJWKS(keys);
+
+      res.set({
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=86400',
+        ETag: `"${crypto.createHash('sha256').update(JSON.stringify(jwks)).digest('hex').substring(0, 16)}"`,
+      });
+
+      res.json(jwks);
+    } catch (error) {
+      res.status(500).json({
+        type: 'https://peac.dev/problems/internal-error',
+        title: 'Internal Server Error',
+        status: 500,
+      });
+    }
+  });
+
+  // Batch verify endpoints
+  router.post('/.well-known/peac/verify', standardRateLimiter.middleware(), handleBatchVerifyPost);
+  router.get('/.well-known/peac/verify', standardRateLimiter.middleware(), handleBatchVerifyGet);
+
+  // Receipt hosting endpoint
+  router.get('/.well-known/peac/receipts/:jti', async (req, res) => {
+    try {
+      const { jti } = req.params;
+
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(jti)) {
+        res.status(400).json({
+          type: 'https://peac.dev/problems/invalid-jti',
+          title: 'Invalid JTI',
+          status: 400,
+          detail: 'JTI must be a valid UUID',
+        });
+        return;
+      }
+
+      const jws = await receiptStore.get(jti);
+      if (!jws) {
+        res.status(404).json({
+          type: 'https://peac.dev/problems/receipt-not-found',
+          title: 'Receipt Not Found',
+          status: 404,
+          detail: `Receipt with JTI ${jti} not found or expired`,
+        });
+        return;
+      }
+
+      res.set({
+        'Content-Type': 'application/jose',
+        'Cache-Control': 'public, max-age=86400, immutable',
+      });
+
+      res.send(jws);
+    } catch (error) {
+      res.status(500).json({
+        type: 'https://peac.dev/problems/internal-error',
+        title: 'Internal Server Error',
+        status: 500,
+      });
+    }
+  });
 
   // Agreement-first API endpoints (v0.9.6)
   router.post('/peac/agreements', validateProtocolVersion, validateContentType, createAgreement);

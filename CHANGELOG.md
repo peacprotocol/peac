@@ -5,6 +5,34 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.10-beta] - 2025-01-29
+
+### Added
+
+- **Signed Agent-Directory Caching**: TOFU pinning with key rotation support and comprehensive SSRF protection
+- **Receipt Key Rotation**: JWS `kid` header support for seamless key rotation without downtime
+- **Batch Verify API**: High-performance batch verification (POST ≤100 items, GET ≤25 items)
+- **Hardened Rate Limiting**: Per-tier token bucket rate limiting with RFC 9457 RateLimit headers
+- **Structured Telemetry**: Privacy-safe event logging with correlation IDs and PII protection
+
+### Security
+
+- DNS resolution checks to prevent SSRF attacks on private/internal networks
+- Ed25519 signature verification for agent directory authentication
+- Singleflight pattern to prevent directory fetch stampedes
+- Token bucket rate limiting with accurate time-based refill
+- Certificate chain validation for directory fetching
+- Private IP address blocking (RFC 1918, CGNAT, link-local, loopback)
+- Timeout controls and response size limits for all external requests
+
+### Changed
+
+- Protocol version updated to 0.9.10 (X-PEAC-Protocol header)
+- Package versions updated to 0.9.10 across all packages
+- Web Bot Auth verification now uses cached directory system
+- Receipt verification supports multiple keys with `kid` matching
+- Rate limiting now properly enforces RFC 9457 compliant headers
+
 ## [0.9.6] - 2024-12-18
 
 ### Added
