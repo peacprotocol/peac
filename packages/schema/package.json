@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/schema",
-  "version": "0.9.8.3",
+  "version": "0.9.9",
   "description": "PEAC Protocol JSON Schema - Single Source of Truth",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

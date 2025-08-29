@@ -1,27 +1,28 @@
-import { readAttribution, detectWebBotAuthHint } from '../../src/http/headers';
+import { readAttribution } from '../../src/http/headers';
+import { detectWebBotAuthHint } from '../../src/adapters/webbot/parse';
 
 describe('Headers utilities', () => {
   describe('readAttribution', () => {
-    it('should read canonical x-peac-attribution header', () => {
-      const headers = { 'x-peac-attribution': 'TestAgent (https://example.com) [test]' };
-      expect(readAttribution(headers)).toBe('TestAgent (https://example.com) [test]');
-    });
-
-    it('should read peac-attribution alias header', () => {
+    it('should read canonical peac-attribution header', () => {
       const headers = { 'peac-attribution': 'TestAgent (https://example.com) [test]' };
       expect(readAttribution(headers)).toBe('TestAgent (https://example.com) [test]');
     });
 
-    it('should prefer canonical header over alias', () => {
+    it('should ignore x-peac-attribution (breaking change)', () => {
+      const headers = { 'x-peac-attribution': 'TestAgent (https://example.com) [test]' };
+      expect(readAttribution(headers)).toBeNull();
+    });
+
+    it('should use only peac-attribution (x-peac-attribution ignored)', () => {
       const headers = {
-        'x-peac-attribution': 'CanonicalAgent (https://canonical.com) [test]',
-        'peac-attribution': 'AliasAgent (https://alias.com) [test]',
+        'x-peac-attribution': 'OldAgent (https://old.com) [test]',
+        'peac-attribution': 'NewAgent (https://new.com) [test]',
       };
-      expect(readAttribution(headers)).toBe('CanonicalAgent (https://canonical.com) [test]');
+      expect(readAttribution(headers)).toBe('NewAgent (https://new.com) [test]');
     });
 
     it('should handle array headers', () => {
-      const headers = { 'x-peac-attribution': ['First', 'Second'] };
+      const headers = { 'peac-attribution': ['First', 'Second'] };
       expect(readAttribution(headers)).toBe('First');
     });
 
@@ -41,7 +42,7 @@ describe('Headers utilities', () => {
 
       const result = detectWebBotAuthHint(headers);
       expect(result.hasSignature).toBe(true);
-      expect(result.signatureAgent).toBe('"TestBot/1.0"');
+      expect(result.signatureAgent).toBe('TestBot/1.0');
     });
 
     it('should return false when signature headers missing', () => {
@@ -49,7 +50,7 @@ describe('Headers utilities', () => {
 
       const result = detectWebBotAuthHint(headers);
       expect(result.hasSignature).toBe(false);
-      expect(result.signatureAgent).toBe('"TestBot/1.0"');
+      expect(result.signatureAgent).toBe('TestBot/1.0');
     });
 
     it('should handle array signature-agent header', () => {
@@ -61,7 +62,7 @@ describe('Headers utilities', () => {
 
       const result = detectWebBotAuthHint(headers);
       expect(result.hasSignature).toBe(true);
-      expect(result.signatureAgent).toBe('"TestBot/1.0"');
+      expect(result.signatureAgent).toBe('TestBot/1.0');
     });
 
     it('should return false when no headers present', () => {

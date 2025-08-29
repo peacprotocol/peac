@@ -26,6 +26,7 @@ interface PEACPolicy {
   rate_limits: {
     anonymous_rpm: number;
     attributed_rpm: number;
+    verified_rpm: number;
   };
   receipts: string;
   paths: Array<{
@@ -72,6 +73,7 @@ function buildPolicy(): PEACPolicy {
     rate_limits: {
       anonymous_rpm: 60,
       attributed_rpm: 600,
+      verified_rpm: 6000,
     },
     receipts: 'optional',
     paths: [
@@ -102,6 +104,7 @@ attribution:
 rate_limits:
   anonymous_rpm: ${policy.rate_limits.anonymous_rpm}
   attributed_rpm: ${policy.rate_limits.attributed_rpm}
+  verified_rpm: ${policy.rate_limits.verified_rpm}
 
 receipts: ${policy.receipts}
 

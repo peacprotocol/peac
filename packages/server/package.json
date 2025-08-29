@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/server",
-  "version": "0.9.8.3",
+  "version": "0.9.9",
   "description": "PEAC Protocol: Programmable Environment for Agent Coordination",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@peacprotocol/schema": "file:../schema",
+    "@types/uuid": "^10.0.0",
     "bullmq": "^5.1.0",
     "canonicalize": "^2.0.0",
     "cors": "^2.8.5",
@@ -63,6 +64,7 @@
     "json-stable-stringify": "^1.3.0",
     "pino": "^8.17.0",
     "prom-client": "^15.1.0",
+    "tldts": "^7.0.12",
     "ulidx": "^2.4.1",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"

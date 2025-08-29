@@ -42,7 +42,7 @@ export function createRoutes() {
   router.get('/.well-known/peac.json', handleWellKnown);
   router.get('/.well-known/peac', handlePolicy);
   router.get('/.well-known/peac.txt', (_req, res) => {
-    res.redirect(302, '/.well-known/peac');
+    res.status(410).send("Use '/.well-known/peac' (YAML). See documentation for migration guide.");
   });
   router.get(
     '/.well-known/peac-capabilities',

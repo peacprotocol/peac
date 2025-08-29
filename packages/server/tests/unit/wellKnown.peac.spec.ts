@@ -18,12 +18,13 @@ describe('/.well-known/peac policy endpoint', () => {
     const response = await request(app).get('/.well-known/peac').expect(200);
 
     expect(response.headers['content-type']).toBe('text/plain; charset=utf-8');
-    expect(response.text).toContain('version: 0.9.8.3');
+    expect(response.text).toContain('version: 0.9.9');
     expect(response.text).toContain('default: allow');
     expect(response.text).toContain('attribution:');
     expect(response.text).toContain('rate_limits:');
     expect(response.text).toContain('anonymous_rpm: 60');
     expect(response.text).toContain('attributed_rpm: 600');
+    expect(response.text).toContain('verified_rpm: 6000');
   });
 
   it('should serve JSON policy when Accept: application/json', async () => {
@@ -35,7 +36,7 @@ describe('/.well-known/peac policy endpoint', () => {
     expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.body).toEqual(
       expect.objectContaining({
-        version: '0.9.8.3',
+        version: '0.9.9',
         default: 'allow',
         attribution: expect.objectContaining({
           required: false,
@@ -49,6 +50,7 @@ describe('/.well-known/peac policy endpoint', () => {
         rate_limits: expect.objectContaining({
           anonymous_rpm: 60,
           attributed_rpm: 600,
+          verified_rpm: 6000,
         }),
       }),
     );
@@ -71,9 +73,10 @@ describe('/.well-known/peac policy endpoint', () => {
     expect(response.headers['access-control-allow-methods']).toBe('GET, HEAD, OPTIONS');
   });
 
-  it('should redirect /.well-known/peac.txt to /.well-known/peac', async () => {
-    const response = await request(app).get('/.well-known/peac.txt').expect(302);
+  it('should return 410 Gone for /.well-known/peac.txt (breaking change)', async () => {
+    const response = await request(app).get('/.well-known/peac.txt').expect(410);
 
-    expect(response.headers.location).toBe('/.well-known/peac');
+    expect(response.text).toContain("Use '/.well-known/peac'");
+    expect(response.text).toContain('migration guide');
   });
 });

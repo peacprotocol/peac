@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/core",
-  "version": "0.9.8.3",
+  "version": "0.9.9",
   "description": "PEAC Protocol - Universal Digital Pacts for the Automated Economy (Agreement-First API)",
   "main": "sdk/index.js",
   "bin": {

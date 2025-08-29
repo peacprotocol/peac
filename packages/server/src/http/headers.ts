@@ -1,8 +1,7 @@
 export const PEAC_HEADERS = {
-  PROTOCOL_VERSION: 'x-peac-protocol-version',
-  ATTRIBUTION: 'x-peac-attribution',
-  TIER: 'x-peac-tier',
-  AGENT_ATTESTATION: 'x-peac-agent-attestation',
+  TIER: 'peac-tier',
+  ATTRIBUTION: 'peac-attribution',
+  RECEIPT: 'peac-receipt',
 } as const;
 
 export const RATE_LIMIT_HEADERS = {
@@ -17,41 +16,30 @@ export const STANDARD_HEADERS = {
   CACHE_CONTROL: 'cache-control',
 } as const;
 
+export const WEB_BOT_AUTH_HEADERS = {
+  SIGNATURE: 'signature',
+  SIGNATURE_INPUT: 'signature-input',
+  SIGNATURE_AGENT: 'signature-agent',
+} as const;
+
 export function readAttribution(
   headers: Record<string, string | string[] | undefined>,
 ): string | null {
-  const canonical = headers[PEAC_HEADERS.ATTRIBUTION];
-  const alias = headers['peac-attribution'];
-
-  if (Array.isArray(canonical)) {
-    return canonical[0] || null;
+  const attribution = headers[PEAC_HEADERS.ATTRIBUTION];
+  
+  if (Array.isArray(attribution)) {
+    return attribution[0] || null;
   }
-  if (canonical) {
-    return canonical;
+  if (attribution) {
+    return attribution;
   }
-
-  if (Array.isArray(alias)) {
-    return alias[0] || null;
-  }
-  if (alias) {
-    return alias;
-  }
-
+  
   return null;
 }
 
-export function detectWebBotAuthHint(headers: Record<string, string | string[] | undefined>): {
-  hasSignature: boolean;
-  signatureAgent?: string;
-} {
-  const signature = headers.signature;
-  const signatureInput = headers['signature-input'];
-  const signatureAgent = headers['signature-agent'];
-
-  const hasSignature = !!(signature && signatureInput);
-
-  return {
-    hasSignature,
-    signatureAgent: Array.isArray(signatureAgent) ? signatureAgent[0] : signatureAgent,
-  };
+export function parseStructuredField(value: string): string | null {
+  if (value.startsWith('"') && value.endsWith('"')) {
+    return value.slice(1, -1);
+  }
+  return value;
 }

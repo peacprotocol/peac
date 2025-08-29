@@ -93,10 +93,16 @@ export const metrics = {
     labelNames: ['tier'] as const,
     registers: [register],
   }),
-  webBotAuthHints: new Counter({
-    name: 'peac_web_bot_auth_hints_total',
-    help: 'Total Web Bot Auth hints detected',
-    labelNames: ['tier'] as const,
+  webBotAuthVerifyAttempts: new Counter({
+    name: 'peac_web_bot_auth_verify_attempts_total',
+    help: 'Total Web Bot Auth verification attempts',
+    labelNames: ['result', 'reason'] as const,
+    registers: [register],
+  }),
+  webBotAuthVerifyLatency: new Histogram({
+    name: 'peac_web_bot_auth_verify_latency_seconds',
+    help: 'Web Bot Auth verification latency',
+    buckets: [0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 1, 2],
     registers: [register],
   }),
   readinessCheckFailures: new Counter({

@@ -19,45 +19,46 @@ describe('Tiered Rate Limiting', () => {
   it('should return anonymous tier without attribution header', async () => {
     const response = await request(app).get('/.well-known/peac').expect(200);
 
-    expect(response.headers['x-peac-tier']).toBe('anonymous');
+    expect(response.headers['peac-tier']).toBe('anonymous');
     expect(response.headers['ratelimit-limit']).toBe('60');
     expect(response.headers['ratelimit-remaining']).toBeDefined();
     expect(response.headers['ratelimit-reset']).toBe('60');
     expect(response.headers.link).toBe('</.well-known/peac>; rel="peac-policy"');
   });
 
-  it('should return attributed tier with x-peac-attribution header', async () => {
+  it('should ignore x-peac-attribution header (breaking change)', async () => {
     const response = await request(app)
       .get('/.well-known/peac')
       .set('x-peac-attribution', 'TestAgent (https://example.com) [testing]')
       .expect(200);
 
-    expect(response.headers['x-peac-tier']).toBe('attributed');
-    expect(response.headers['ratelimit-limit']).toBe('600');
+    expect(response.headers['peac-tier']).toBe('anonymous');
+    expect(response.headers['ratelimit-limit']).toBe('60');
     expect(response.headers['ratelimit-remaining']).toBeDefined();
     expect(response.headers['ratelimit-reset']).toBe('60');
     expect(response.headers.link).toBe('</.well-known/peac>; rel="peac-policy"');
-    expect(response.headers['cache-control']).toContain('max-age=3600');
+    // No cache control for anonymous tier
+    expect(response.headers['cache-control']).not.toContain('max-age=3600');
   });
 
-  it('should accept peac-attribution alias header', async () => {
+  it('should accept Peac-Attribution header', async () => {
     const response = await request(app)
       .get('/.well-known/peac')
-      .set('peac-attribution', 'TestAgent (https://example.com) [testing]')
+      .set('Peac-Attribution', 'TestAgent (https://example.com) [testing]')
       .expect(200);
 
-    expect(response.headers['x-peac-tier']).toBe('attributed');
+    expect(response.headers['peac-tier']).toBe('attributed');
     expect(response.headers['ratelimit-limit']).toBe('600');
   });
 
-  it('should prefer canonical header over alias', async () => {
+  it('should use Peac-Attribution over x-peac-attribution', async () => {
     const response = await request(app)
       .get('/.well-known/peac')
-      .set('x-peac-attribution', 'CanonicalAgent (https://canonical.com) [test]')
-      .set('peac-attribution', 'AliasAgent (https://alias.com) [test]')
+      .set('x-peac-attribution', 'OldAgent (https://old.com) [test]')
+      .set('Peac-Attribution', 'NewAgent (https://new.com) [test]')
       .expect(200);
 
-    expect(response.headers['x-peac-tier']).toBe('attributed');
+    expect(response.headers['peac-tier']).toBe('attributed');
   });
 
   it('should detect Web Bot Auth hints without changing behavior', async () => {
@@ -69,7 +70,7 @@ describe('Tiered Rate Limiting', () => {
       .expect(200);
 
     // Behavior should remain anonymous tier (no attribution)
-    expect(response.headers['x-peac-tier']).toBe('anonymous');
+    expect(response.headers['peac-tier']).toBe('anonymous');
     expect(response.headers['ratelimit-limit']).toBe('60');
   });
 
@@ -92,7 +93,7 @@ describe('Tiered Rate Limiting', () => {
           type: 'https://peacprotocol.org/problems/rate-limit-exceeded',
           title: 'Rate Limit Exceeded',
           status: 429,
-          detail: 'Send x-peac-attribution to receive higher limits',
+          detail: 'Send Peac-Attribution header to receive higher limits',
         }),
       );
       expect(rateLimited.headers['retry-after']).toBeDefined();
