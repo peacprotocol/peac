@@ -24,6 +24,7 @@ import {
   validateAgreementBinding,
 } from '../payments/http';
 import webhookRouter from '../webhooks/router';
+import { metrics } from '../metrics';
 
 export function createRoutes() {
   const router = Router();
@@ -42,7 +43,20 @@ export function createRoutes() {
   router.get('/.well-known/peac.json', handleWellKnown);
   router.get('/.well-known/peac', handlePolicy);
   router.get('/.well-known/peac.txt', (_req, res) => {
-    res.redirect(302, '/.well-known/peac');
+    try {
+      metrics.peacTxtSeen?.inc();
+    } catch {
+      // Metric optional in test environment
+    }
+
+    res.status(308);
+    res.set({
+      Location: '/.well-known/peac',
+      Link: '</.well-known/peac>; rel="canonical peac-policy"',
+      'Cache-Control': 'public, max-age=300, stale-while-revalidate=86400',
+      'Content-Length': '0',
+    });
+    res.end();
   });
   router.get(
     '/.well-known/peac-capabilities',

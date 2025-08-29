@@ -18,7 +18,7 @@ import { createDiscoveryRouter } from '../discovery/v1';
 import { versionNegotiationMiddleware } from '../middleware/headers';
 import { PEACError } from '../errors/problem-json';
 import { requestTracing } from './middleware/request-tracing';
-import { tieredRateLimiter } from '../middleware/tiered-rate-limit';
+import { verifiedRateLimiter } from '../middleware/verified-rate-limit';
 import { WIRE_VERSION } from '@peacprotocol/schema';
 
 // Ensure global fetch is available
@@ -75,7 +75,7 @@ export async function createServer() {
   app.use(requestTracing.middleware());
 
   // Add tiered rate limiting middleware with RFC 9331 headers
-  app.use(tieredRateLimiter.middleware());
+  app.use(verifiedRateLimiter.middleware());
 
   // Remove X-XSS-Protection header completely (deprecated and potentially harmful)
   app.use((_req, res, next) => {

@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import {
   readAttribution,
-  detectWebBotAuthHint,
   PEAC_HEADERS,
   RATE_LIMIT_HEADERS,
   STANDARD_HEADERS,
@@ -31,7 +30,7 @@ class TieredRateLimiter {
     return req.ip || 'unknown';
   }
 
-  private getTier(req: Request): { tier: 'anonymous' | 'attributed'; limit: number } {
+  private getTier(req: Request): { tier: 'anonymous' | 'attributed' | 'verified'; limit: number } {
     const attribution = readAttribution(req.headers);
 
     if (attribution) {
@@ -136,18 +135,7 @@ class TieredRateLimiter {
         };
       }
 
-      // Log Web Bot Auth hints for observability (no behavior change)
-      const webBotHint = detectWebBotAuthHint(req.headers);
-      if (webBotHint.hasSignature) {
-        logger.debug(
-          {
-            signatureAgent: webBotHint.signatureAgent,
-            tier,
-          },
-          'Web Bot Auth headers detected',
-        );
-        metrics.webBotAuthHints?.inc({ tier });
-      }
+      // Note: Web Bot Auth verification moved to verified-rate-limit middleware
 
       if (bucket.tokens >= 1) {
         bucket.tokens -= 1;
