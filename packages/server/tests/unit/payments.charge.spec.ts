@@ -41,7 +41,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     validAgreement = {
       id: 'agr_01JFNKT5PAYMENT12345678ABC', // Exactly 26 chars after agr_
       fingerprint: 'a'.repeat(64),
-      protocol_version: '0.9.10',
+      protocol_version: '0.9.11',
       status: 'valid',
       created_at: new Date().toISOString(),
       proposal: {
@@ -60,7 +60,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     it('should successfully process payment with mock provider', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.10')
+        .set('X-PEAC-Protocol', '0.9.11')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Content-Type', 'application/json')
         .send({
@@ -96,7 +96,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
 
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.10')
+        .set('X-PEAC-Protocol', '0.9.11')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Content-Type', 'application/json')
         .send({
@@ -118,7 +118,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     it('should return 422 when X-PEAC-Agreement is missing', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.10')
+        .set('X-PEAC-Protocol', '0.9.11')
         .set('Content-Type', 'application/json')
         .send({
           amount: '2500',
@@ -137,7 +137,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     it('should return 422 for unknown agreement ID', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.10')
+        .set('X-PEAC-Protocol', '0.9.11')
         .set('X-PEAC-Agreement', 'agr_01JFNKT5NONEXISTENT9999ABC')
         .set('Content-Type', 'application/json')
         .send({
@@ -165,7 +165,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
 
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.10')
+        .set('X-PEAC-Protocol', '0.9.11')
         .set('X-PEAC-Agreement', invalidAgreement.id)
         .set('Content-Type', 'application/json')
         .send({
@@ -185,7 +185,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     it('should return 409 on fingerprint mismatch when X-PEAC-Fingerprint present', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.10')
+        .set('X-PEAC-Protocol', '0.9.11')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('X-PEAC-Fingerprint', 'b'.repeat(64)) // Wrong fingerprint
         .set('Content-Type', 'application/json')
@@ -220,7 +220,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
       expect(response.body).toMatchObject({
         type: 'https://peacprotocol.org/problems/protocol-version-required',
         status: 426,
-        supported: ['0.9.10'],
+        supported: ['0.9.11'],
       });
     });
 
@@ -241,7 +241,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
         type: 'https://peacprotocol.org/problems/protocol-version-unsupported',
         status: 426,
         provided_version: '0.8.0',
-        supported: ['0.9.10'],
+        supported: ['0.9.11'],
       });
     });
   });
@@ -250,7 +250,7 @@ describe('Payment Charges - POST /peac/payments/charges', () => {
     it('should return 415 when Content-Type is wrong', async () => {
       const response = await request(app)
         .post('/peac/payments/charges')
-        .set('X-PEAC-Protocol', '0.9.10')
+        .set('X-PEAC-Protocol', '0.9.11')
         .set('X-PEAC-Agreement', validAgreement.id)
         .set('Content-Type', 'text/plain')
         .send('{"amount": "2500"}')

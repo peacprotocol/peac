@@ -5,14 +5,14 @@ describe('Content Negotiation', () => {
   describe('parseMediaType', () => {
     it('should parse vendor media types correctly', () => {
       const mt = contentNegotiation.parseMediaType(
-        'application/vnd.peac.capabilities+json;version=0.9.10',
+        'application/vnd.peac.capabilities+json;version=0.9.11',
       );
       expect(mt).toEqual({
         type: 'application',
         subtype: 'capabilities',
         vendor: 'peac',
-        version: '0.9.10',
-        parameters: { version: '0.9.10' },
+        version: '0.9.11',
+        parameters: { version: '0.9.11' },
         quality: 1.0,
       });
     });
@@ -27,14 +27,14 @@ describe('Content Negotiation', () => {
     it('should match exact media types', () => {
       const req = {
         get: (name: string) =>
-          name === 'Accept' ? 'application/vnd.peac.capabilities+json;version=0.9.10' : undefined,
+          name === 'Accept' ? 'application/vnd.peac.capabilities+json;version=0.9.11' : undefined,
       } as Request;
 
       const result = contentNegotiation.negotiate(req, [
-        'application/vnd.peac.capabilities+json;version=0.9.10',
+        'application/vnd.peac.capabilities+json;version=0.9.11',
       ]);
 
-      expect(result).toBe('application/vnd.peac.capabilities+json;version=0.9.10');
+      expect(result).toBe('application/vnd.peac.capabilities+json;version=0.9.11');
     });
 
     it('should handle wildcards', () => {
