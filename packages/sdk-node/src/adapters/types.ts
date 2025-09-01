@@ -12,7 +12,7 @@ export interface Adapter {
 
 export interface WebBotAuthContext {
   signatureAgentURL: string;
-  privateKey: CryptoKey | Uint8Array;
+  privateKey: Uint8Array;
   method: string;
   authority: string;
 }

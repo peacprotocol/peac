@@ -79,9 +79,9 @@ export function validateAttributionFormat(attribution: string, format: string): 
 
 export function buildWebBotAuthHeaders(
   signatureAgentURL: string,
-  method: string,
-  authority: string,
-  signer: (data: Uint8Array) => Promise<Uint8Array>,
+  _method: string,
+  _authority: string,
+  _signer: (data: Uint8Array) => Promise<Uint8Array>,
 ): Promise<Record<string, string>> {
   // This is a placeholder - actual implementation would be in the WBA adapter
   // The adapter would:

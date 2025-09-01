@@ -17,4 +17,4 @@ cli.register(DirGetCommand);
 cli.register(PolicyLintCommand);
 cli.register(ReceiptShowCommand);
 
-cli.runExit();
+cli.runExit(process.argv.slice(2));

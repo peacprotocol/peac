@@ -1,6 +1,6 @@
 import { Command, Option } from 'clipanion';
 import { readFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
+// Path utilities not needed for this command
 import chalk from 'chalk';
 import * as ed25519 from '@noble/ed25519';
 

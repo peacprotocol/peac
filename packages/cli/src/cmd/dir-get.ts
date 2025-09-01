@@ -1,10 +1,9 @@
 import { Command, Option } from 'clipanion';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { resolve, join, dirname } from 'path';
+import { join } from 'path';
 import { homedir } from 'os';
 import chalk from 'chalk';
 import { request } from 'undici';
-import * as ed25519 from '@noble/ed25519';
 
 interface CacheEntry {
   url: string;

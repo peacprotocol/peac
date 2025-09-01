@@ -12,17 +12,18 @@ interface LintResult {
   column?: number;
 }
 
-interface SarifResult {
-  ruleId: string;
-  level: string;
-  message: { text: string };
-  locations: Array<{
-    physicalLocation: {
-      artifactLocation: { uri: string };
-      region: { startLine: number; startColumn: number };
-    };
-  }>;
-}
+// Future use: SARIF result format for structured output
+// interface SarifResult {
+//   ruleId: string;
+//   level: string;
+//   message: { text: string };
+//   locations: Array<{
+//     physicalLocation: {
+//       artifactLocation: { uri: string };
+//       region: { startLine: number; startColumn: number };
+//     };
+//   }>;
+// }
 
 export class PolicyLintCommand extends Command {
   static paths = [['policy', 'lint']];
@@ -147,7 +148,7 @@ export class PolicyLintCommand extends Command {
     }
   }
 
-  private lintPolicy(policy: any, uri: string): LintResult[] {
+  private lintPolicy(policy: any, _uri: string): LintResult[] {
     const results: LintResult[] = [];
 
     // Required fields

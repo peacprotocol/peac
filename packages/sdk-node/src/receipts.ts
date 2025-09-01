@@ -153,7 +153,7 @@ export async function verifyReceipt(
     const dataBytes = Buffer.from(signatureData, 'utf8');
 
     // Extract signature
-    const signatureBytes = Buffer.from(parts[2], 'base64url');
+    const signatureBytes = Buffer.from(parts[2] || '', 'base64url');
 
     // Verify Ed25519 signature
     const isValid = await ed25519.verify(signatureBytes, dataBytes, publicKeyBytes);
@@ -163,7 +163,7 @@ export async function verifyReceipt(
     }
 
     // Parse and validate claims
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    const payload = JSON.parse(Buffer.from(parts[1] || '', 'base64url').toString('utf8'));
 
     // Basic claim validation
     const now = Math.floor(Date.now() / 1000);

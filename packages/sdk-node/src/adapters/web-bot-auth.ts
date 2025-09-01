@@ -16,10 +16,8 @@ export class WebBotAuthAdapter implements Adapter {
 
     if (context.privateKey instanceof Uint8Array) {
       signer = new Ed25519Signer(context.privateKey);
-    } else if (context.privateKey instanceof CryptoKey) {
-      signer = new CryptoKeySigner(context.privateKey);
     } else {
-      throw new Error('Invalid private key format');
+      throw new Error('Unsupported private key format');
     }
 
     return {
@@ -52,24 +50,7 @@ class Ed25519Signer implements Signer {
   }
 }
 
-class CryptoKeySigner implements Signer {
-  constructor(private cryptoKey: CryptoKey) {
-    if (cryptoKey.algorithm.name !== 'Ed25519') {
-      throw new Error('CryptoKey must be Ed25519');
-    }
-  }
-
-  async sign(data: Uint8Array): Promise<Uint8Array> {
-    const signature = await crypto.subtle.sign('Ed25519', this.cryptoKey, data);
-    return new Uint8Array(signature);
-  }
-
-  async getPublicKey(): Promise<Uint8Array> {
-    // Extract public key from the CryptoKey
-    const exported = await crypto.subtle.exportKey('raw', this.cryptoKey);
-    return new Uint8Array(exported);
-  }
-}
+// CryptoKey support removed - use Uint8Array format instead
 
 // Built-in WBA adapter instance
 export const webBotAuthAdapter = new WebBotAuthAdapter();
