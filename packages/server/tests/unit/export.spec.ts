@@ -117,7 +117,7 @@ describe('Export Endpoint', () => {
   describe('authentication', () => {
     it('should require authentication', async () => {
       // Mock authentication to fail
-      const mockAuth = jest.fn().mockResolvedValue({
+      const _mockAuth = jest.fn().mockResolvedValue({
         ok: false,
         reason: 'missing_auth'
       });
@@ -137,7 +137,7 @@ describe('Export Endpoint', () => {
         'signature-input': 'sig=("@method" "@path");created=1234567890'
       };
 
-      const mockAuth = jest.fn().mockResolvedValue({
+      const _mockAuth = jest.fn().mockResolvedValue({
         ok: true,
         method: 'signature',
         thumbprint: 'test-thumb'
@@ -179,7 +179,7 @@ describe('Export Endpoint', () => {
     it('should handle CSV format', async () => {
       mockReq.query = { fmt: 'csv' };
       
-      const mockAuth = jest.fn().mockResolvedValue({
+      const _mockAuth = jest.fn().mockResolvedValue({
         ok: true,
         method: 'token'
       });
@@ -213,7 +213,7 @@ describe('Export Endpoint', () => {
   describe('error handling', () => {
     it('should handle streaming errors gracefully', async () => {
       // Mock streaming error
-      const error = new Error('Stream error');
+      const _error = new Error('Stream error');
 
       // Would test error handling during streaming
       expect(true).toBe(true); // Placeholder
