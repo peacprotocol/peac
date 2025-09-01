@@ -6,7 +6,7 @@ describe('Headers Module', () => {
       const headers = {
         'peac-attribution': 'Test Bot (https://example.com)',
         'peac-agreement': 'agr_01ARZ3NDEKTSV4RRFFQ69G5FAV',
-        'peac-receipt-kid': 'key_123'
+        'peac-receipt-kid': 'key_123',
       };
 
       const result = parseHeaders(headers);
@@ -14,14 +14,14 @@ describe('Headers Module', () => {
       expect(result).toEqual({
         attribution: 'Test Bot (https://example.com)',
         agreement: 'agr_01ARZ3NDEKTSV4RRFFQ69G5FAV',
-        receiptKid: 'key_123'
+        receiptKid: 'key_123',
       });
     });
 
     it('should handle case-insensitive headers', () => {
       const headers = {
         'PEAC-Attribution': 'Test Bot (https://example.com)',
-        'Peac-Agreement': 'agr_01ARZ3NDEKTSV4RRFFQ69G5FAV'
+        'Peac-Agreement': 'agr_01ARZ3NDEKTSV4RRFFQ69G5FAV',
       };
 
       const result = parseHeaders(headers);
@@ -32,7 +32,7 @@ describe('Headers Module', () => {
 
     it('should handle missing headers gracefully', () => {
       const headers = {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
       };
 
       const result = parseHeaders(headers);
@@ -43,14 +43,14 @@ describe('Headers Module', () => {
     it('should ignore non-PEAC headers', () => {
       const headers = {
         'peac-attribution': 'Test Bot (https://example.com)',
-        'authorization': 'Bearer token123',
-        'user-agent': 'Test/1.0'
+        authorization: 'Bearer token123',
+        'user-agent': 'Test/1.0',
       };
 
       const result = parseHeaders(headers);
 
       expect(result).toEqual({
-        attribution: 'Test Bot (https://example.com)'
+        attribution: 'Test Bot (https://example.com)',
       });
       expect(result).not.toHaveProperty('authorization');
       expect(result).not.toHaveProperty('userAgent');
@@ -62,7 +62,7 @@ describe('Headers Module', () => {
       const options = {
         attribution: 'Test Bot (https://example.com)',
         agreement: 'agr_01ARZ3NDEKTSV4RRFFQ69G5FAV',
-        receiptKid: 'key_123'
+        receiptKid: 'key_123',
       };
 
       const result = createHeaders(options);
@@ -70,7 +70,7 @@ describe('Headers Module', () => {
       expect(result).toEqual({
         'peac-attribution': 'Test Bot (https://example.com)',
         'peac-agreement': 'agr_01ARZ3NDEKTSV4RRFFQ69G5FAV',
-        'peac-receipt-kid': 'key_123'
+        'peac-receipt-kid': 'key_123',
       });
     });
 
@@ -78,13 +78,13 @@ describe('Headers Module', () => {
       const options = {
         attribution: 'Test Bot (https://example.com)',
         agreement: undefined,
-        receiptKid: null
+        receiptKid: null,
       };
 
       const result = createHeaders(options);
 
       expect(result).toEqual({
-        'peac-attribution': 'Test Bot (https://example.com)'
+        'peac-attribution': 'Test Bot (https://example.com)',
       });
       expect(result).not.toHaveProperty('peac-agreement');
       expect(result).not.toHaveProperty('peac-receipt-kid');
@@ -105,10 +105,10 @@ describe('Headers Module', () => {
         'Test Bot (https://example.com)',
         'My Agent (https://test.example.com) [v1.0.0]',
         'Bot_Name (https://site.com)',
-        'Agent-v2 (https://example.org) [beta]'
+        'Agent-v2 (https://example.org) [beta]',
       ];
 
-      validAttributions.forEach(attribution => {
+      validAttributions.forEach((attribution) => {
         expect(validateAttributionFormat(attribution, standardPattern)).toBe(true);
       });
     });
@@ -119,23 +119,18 @@ describe('Headers Module', () => {
         'Bot (http://example.com)', // Non-HTTPS URL
         'Bot https://example.com', // Missing parentheses
         'Bot (https://example.com) extra', // Extra content after
-        'Bot (https://example.com) [version] extra' // Extra content after version
+        'Bot (https://example.com) [version] extra', // Extra content after version
       ];
 
-      invalidAttributions.forEach(attribution => {
+      invalidAttributions.forEach((attribution) => {
         expect(validateAttributionFormat(attribution, standardPattern)).toBe(false);
       });
     });
 
     it('should handle invalid regex patterns', () => {
-      const invalidPatterns = [
-        '[invalid',
-        '*',
-        '(?invalid',
-        '\\\\'
-      ];
+      const invalidPatterns = ['[invalid', '*', '(?invalid', '\\\\'];
 
-      invalidPatterns.forEach(pattern => {
+      invalidPatterns.forEach((pattern) => {
         expect(validateAttributionFormat('Test (https://example.com)', pattern)).toBe(false);
       });
     });

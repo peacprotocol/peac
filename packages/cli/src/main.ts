@@ -9,7 +9,7 @@ import { ReceiptShowCommand } from './cmd/receipt-show.js';
 const cli = new Cli({
   binaryLabel: 'PEAC Protocol CLI',
   binaryName: 'peac',
-  binaryVersion: '0.9.11'
+  binaryVersion: '0.9.11',
 });
 
 cli.register(VerifyReceiptCommand);

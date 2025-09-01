@@ -7,24 +7,16 @@ module.exports = {
     'ts-jest': {
       useESM: true,
       tsconfig: {
-        module: 'esnext'
-      }
-    }
+        module: 'esnext',
+      },
+    },
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(undici|yaml)/)'
-  ],
+  transformIgnorePatterns: ['node_modules/(?!(undici|yaml)/)'],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  testMatch: [
-    '<rootDir>/tests/**/*.test.ts'
-  ],
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/**/index.ts'
-  ],
+  testMatch: ['<rootDir>/tests/**/*.test.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/index.ts'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
@@ -32,8 +24,8 @@ module.exports = {
       statements: 80,
       branches: 75,
       functions: 80,
-      lines: 80
-    }
+      lines: 80,
+    },
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
 };

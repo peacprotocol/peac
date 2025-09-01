@@ -6,7 +6,7 @@ export function registerAdapter(adapter: Adapter): void {
   if (adapters.has(adapter.kind)) {
     throw new Error(`Adapter for '${adapter.kind}' is already registered`);
   }
-  
+
   adapters.set(adapter.kind, adapter);
 }
 

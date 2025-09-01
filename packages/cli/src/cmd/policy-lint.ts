@@ -26,7 +26,7 @@ interface SarifResult {
 
 export class PolicyLintCommand extends Command {
   static paths = [['policy', 'lint']];
-  
+
   static usage = Command.Usage({
     description: 'Validate PEAC policy schema and semantics',
     details: 'Lint policy file or URL for schema compliance and semantic correctness',
@@ -34,8 +34,8 @@ export class PolicyLintCommand extends Command {
       ['Lint local file', 'peac policy lint policy.yaml'],
       ['Lint remote policy', 'peac policy lint https://example.com/.well-known/peac'],
       ['SARIF output', 'peac policy lint policy.yaml --format sarif'],
-      ['JSON output', 'peac policy lint policy.yaml --format json']
-    ]
+      ['JSON output', 'peac policy lint policy.yaml --format json'],
+    ],
   });
 
   input = Option.String({ required: true });
@@ -54,11 +54,11 @@ export class PolicyLintCommand extends Command {
             method: 'GET',
             headers: {
               'user-agent': 'peac-cli/0.9.11',
-              'accept': 'application/peac+yaml, application/peac+json, text/plain'
+              accept: 'application/peac+yaml, application/peac+json, text/plain',
             },
             throwOnError: true,
             bodyTimeout: 10000,
-            headersTimeout: 10000
+            headersTimeout: 10000,
           });
 
           const chunks: Buffer[] = [];
@@ -66,7 +66,6 @@ export class PolicyLintCommand extends Command {
             chunks.push(chunk);
           }
           policyText = Buffer.concat(chunks).toString('utf-8');
-
         } catch (error) {
           this.outputError('network_error', `Failed to fetch policy: ${error}`, inputUri);
           return 3;
@@ -102,22 +101,28 @@ export class PolicyLintCommand extends Command {
 
       // Lint policy
       const results = this.lintPolicy(policy, inputUri);
-      
+
       // Output results
-      const errors = results.filter(r => r.level === 'error');
-      const warnings = results.filter(r => r.level === 'warning');
+      const errors = results.filter((r) => r.level === 'error');
+      const warnings = results.filter((r) => r.level === 'warning');
 
       if (this.format === 'sarif') {
         this.outputSarif(results, inputUri);
       } else if (this.format === 'json') {
-        this.context.stdout.write(JSON.stringify({
-          uri: inputUri,
-          results,
-          summary: {
-            errors: errors.length,
-            warnings: warnings.length
-          }
-        }, null, 2) + '\n');
+        this.context.stdout.write(
+          JSON.stringify(
+            {
+              uri: inputUri,
+              results,
+              summary: {
+                errors: errors.length,
+                warnings: warnings.length,
+              },
+            },
+            null,
+            2,
+          ) + '\n',
+        );
       } else {
         // Text format
         if (errors.length === 0 && warnings.length === 0) {
@@ -130,13 +135,12 @@ export class PolicyLintCommand extends Command {
               this.context.stdout.write(`  at ${result.path}\n`);
             }
           }
-          
+
           this.context.stdout.write(`\n${errors.length} errors, ${warnings.length} warnings\n`);
         }
       }
 
       return errors.length > 0 ? 1 : 0;
-
     } catch (error) {
       this.outputError('internal_error', `Internal error: ${error}`, this.input);
       return 3;
@@ -151,7 +155,7 @@ export class PolicyLintCommand extends Command {
       results.push({
         level: 'error',
         message: 'Policy must be an object',
-        path: '$'
+        path: '$',
       });
       return results;
     }
@@ -160,13 +164,13 @@ export class PolicyLintCommand extends Command {
       results.push({
         level: 'error',
         message: 'Missing required field: version',
-        path: '$.version'
+        path: '$.version',
       });
     } else if (typeof policy.version !== 'string') {
       results.push({
         level: 'error',
         message: 'Version must be a string',
-        path: '$.version'
+        path: '$.version',
       });
     }
 
@@ -174,27 +178,27 @@ export class PolicyLintCommand extends Command {
       results.push({
         level: 'error',
         message: 'Missing required field: site',
-        path: '$.site'
+        path: '$.site',
       });
     } else if (typeof policy.site !== 'object') {
       results.push({
         level: 'error',
         message: 'Site must be an object',
-        path: '$.site'
+        path: '$.site',
       });
     } else {
       if (!policy.site.name) {
         results.push({
           level: 'error',
           message: 'Missing required field: site.name',
-          path: '$.site.name'
+          path: '$.site.name',
         });
       }
       if (!policy.site.domain) {
         results.push({
           level: 'error',
           message: 'Missing required field: site.domain',
-          path: '$.site.domain'
+          path: '$.site.domain',
         });
       }
     }
@@ -207,7 +211,7 @@ export class PolicyLintCommand extends Command {
         results.push({
           level: 'error',
           message: `Invalid attribution format regex: ${error}`,
-          path: '$.attribution.format'
+          path: '$.attribution.format',
         });
       }
     }
@@ -219,7 +223,7 @@ export class PolicyLintCommand extends Command {
         results.push({
           level: 'error',
           message: 'retention_days must be an integer between 1 and 365',
-          path: '$.privacy.retention_days'
+          path: '$.privacy.retention_days',
         });
       }
     }
@@ -231,7 +235,7 @@ export class PolicyLintCommand extends Command {
         results.push({
           level: 'error',
           message: 'max_rows must be an integer between 1 and 1,000,000',
-          path: '$.exports.max_rows'
+          path: '$.exports.max_rows',
         });
       }
     }
@@ -240,7 +244,7 @@ export class PolicyLintCommand extends Command {
       results.push({
         level: 'error',
         message: 'exports.auth must be "signature" or "token"',
-        path: '$.exports.auth'
+        path: '$.exports.auth',
       });
     }
 
@@ -251,7 +255,7 @@ export class PolicyLintCommand extends Command {
         results.push({
           level: 'error',
           message: 'logging.sink must be "stdout" or https URL',
-          path: '$.logging.sink'
+          path: '$.logging.sink',
         });
       }
     }
@@ -263,7 +267,7 @@ export class PolicyLintCommand extends Command {
           results.push({
             level: 'error',
             message: 'Heavy paths must be strings',
-            path: `$.heavy_paths[${index}]`
+            path: `$.heavy_paths[${index}]`,
           });
           continue;
         }
@@ -273,7 +277,7 @@ export class PolicyLintCommand extends Command {
           results.push({
             level: 'error',
             message: 'Heavy path pattern too long (>200 chars)',
-            path: `$.heavy_paths[${index}]`
+            path: `$.heavy_paths[${index}]`,
           });
         }
 
@@ -282,7 +286,7 @@ export class PolicyLintCommand extends Command {
           results.push({
             level: 'warning',
             message: 'Nested ** patterns may be inefficient',
-            path: `$.heavy_paths[${index}]`
+            path: `$.heavy_paths[${index}]`,
           });
         }
       }
@@ -296,7 +300,7 @@ export class PolicyLintCommand extends Command {
           results.push({
             level: 'error',
             message: `rate_limits.${tier} must be a non-negative integer`,
-            path: `$.rate_limits.${tier}`
+            path: `$.rate_limits.${tier}`,
           });
         }
       }
@@ -307,20 +311,29 @@ export class PolicyLintCommand extends Command {
 
   private outputError(code: string, message: string, uri: string): void {
     if (this.format === 'json') {
-      this.context.stdout.write(JSON.stringify({
-        uri,
-        results: [{
-          level: 'error',
-          message,
-          code
-        }],
-        summary: { errors: 1, warnings: 0 }
-      }) + '\n');
+      this.context.stdout.write(
+        JSON.stringify({
+          uri,
+          results: [
+            {
+              level: 'error',
+              message,
+              code,
+            },
+          ],
+          summary: { errors: 1, warnings: 0 },
+        }) + '\n',
+      );
     } else if (this.format === 'sarif') {
-      this.outputSarif([{
-        level: 'error',
-        message
-      }], uri);
+      this.outputSarif(
+        [
+          {
+            level: 'error',
+            message,
+          },
+        ],
+        uri,
+      );
     } else {
       this.context.stderr.write(chalk.red(`error: ${message}\n`));
     }
@@ -330,32 +343,38 @@ export class PolicyLintCommand extends Command {
     const sarif = {
       version: '2.1.0',
       $schema: 'https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json',
-      runs: [{
-        tool: {
-          driver: {
-            name: 'peac-policy-lint',
-            version: '0.9.11',
-            informationUri: 'https://peacprotocol.org'
-          }
+      runs: [
+        {
+          tool: {
+            driver: {
+              name: 'peac-policy-lint',
+              version: '0.9.11',
+              informationUri: 'https://peacprotocol.org',
+            },
+          },
+          artifacts: [
+            {
+              location: { uri },
+            },
+          ],
+          results: results.map((result) => ({
+            ruleId: result.path?.replace(/[$.\[\]]/g, '_') || 'general',
+            level: result.level === 'error' ? 'error' : 'warning',
+            message: { text: result.message },
+            locations: [
+              {
+                physicalLocation: {
+                  artifactLocation: { uri },
+                  region: {
+                    startLine: result.line || 1,
+                    startColumn: result.column || 1,
+                  },
+                },
+              },
+            ],
+          })),
         },
-        artifacts: [{
-          location: { uri }
-        }],
-        results: results.map(result => ({
-          ruleId: result.path?.replace(/[$.\[\]]/g, '_') || 'general',
-          level: result.level === 'error' ? 'error' : 'warning',
-          message: { text: result.message },
-          locations: [{
-            physicalLocation: {
-              artifactLocation: { uri },
-              region: {
-                startLine: result.line || 1,
-                startColumn: result.column || 1
-              }
-            }
-          }]
-        }))
-      }]
+      ],
     };
 
     this.context.stdout.write(JSON.stringify(sarif, null, 2) + '\n');

@@ -1,4 +1,10 @@
-export { registerAdapter, getAdapter, listAdapters, unregisterAdapter, clearAdapters } from './registry.js';
+export {
+  registerAdapter,
+  getAdapter,
+  listAdapters,
+  unregisterAdapter,
+  clearAdapters,
+} from './registry.js';
 export { webBotAuthAdapter, WebBotAuthAdapter } from './web-bot-auth.js';
 export type { Adapter, WebBotAuthContext, MCPContext, A2AContext, NandaContext } from './types.js';
 

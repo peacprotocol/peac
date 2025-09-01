@@ -18,11 +18,12 @@ describe('VerifyReceiptCommand', () => {
 
   describe('execute', () => {
     it('should verify valid receipt', async () => {
-      const validReceipt = 'eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCtqd3MiLCJraWQiOiJrZXlfMTIzIn0.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE2OTQwODMyMDAsImV4cCI6MTY5NDA4Njg0MCwicGF0aCI6Ii9hcGkvdGVzdCIsIm1ldGhvZCI6IkdFVCIsInN0YXR1cyI6MjAwfQ.mockSignature';
+      const validReceipt =
+        'eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCtqd3MiLCJraWQiOiJrZXlfMTIzIn0.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE2OTQwODMyMDAsImV4cCI6MTY5NDA4Njg0MCwicGF0aCI6Ii9hcGkvdGVzdCIsIm1ldGhvZCI6IkdFVCIsInN0YXR1cyI6MjAwfQ.mockSignature';
       const jwk = {
         kty: 'OKP',
         crv: 'Ed25519',
-        x: 'mock-key-value'
+        x: 'mock-key-value',
       };
 
       command.receipt = validReceipt;
@@ -35,20 +36,24 @@ describe('VerifyReceiptCommand', () => {
           iss: 'https://example.com',
           path: '/api/test',
           method: 'GET',
-          status: 200
-        }
+          status: 200,
+        },
       });
 
       // Replace the actual implementation
-      jest.doMock('@peacprotocol/sdk-node', () => ({
-        verifyReceipt: mockVerifyReceipt
-      }), { virtual: true });
+      jest.doMock(
+        '@peacprotocol/sdk-node',
+        () => ({
+          verifyReceipt: mockVerifyReceipt,
+        }),
+        { virtual: true },
+      );
 
       const exitCode = await command.execute();
 
       expect(exitCode).toBe(0);
       expect(mockLog).toHaveBeenCalledWith(
-        expect.stringContaining('✓ Receipt verified successfully')
+        expect.stringContaining('✓ Receipt verified successfully'),
       );
     });
 
@@ -57,7 +62,7 @@ describe('VerifyReceiptCommand', () => {
       const jwk = {
         kty: 'OKP',
         crv: 'Ed25519',
-        x: 'mock-key-value'
+        x: 'mock-key-value',
       };
 
       command.receipt = invalidReceipt;
@@ -65,18 +70,22 @@ describe('VerifyReceiptCommand', () => {
 
       const mockVerifyReceipt = jest.fn().mockResolvedValue({
         valid: false,
-        reason: 'malformed'
+        reason: 'malformed',
       });
 
-      jest.doMock('@peacprotocol/sdk-node', () => ({
-        verifyReceipt: mockVerifyReceipt
-      }), { virtual: true });
+      jest.doMock(
+        '@peacprotocol/sdk-node',
+        () => ({
+          verifyReceipt: mockVerifyReceipt,
+        }),
+        { virtual: true },
+      );
 
       const exitCode = await command.execute();
 
       expect(exitCode).toBe(1);
       expect(mockError).toHaveBeenCalledWith(
-        expect.stringContaining('✗ Receipt verification failed: malformed')
+        expect.stringContaining('✗ Receipt verification failed: malformed'),
       );
     });
 
@@ -87,9 +96,7 @@ describe('VerifyReceiptCommand', () => {
       const exitCode = await command.execute();
 
       expect(exitCode).toBe(2);
-      expect(mockError).toHaveBeenCalledWith(
-        expect.stringContaining('Receipt is required')
-      );
+      expect(mockError).toHaveBeenCalledWith(expect.stringContaining('Receipt is required'));
     });
 
     it('should handle invalid JWK format', async () => {
@@ -99,28 +106,28 @@ describe('VerifyReceiptCommand', () => {
       const exitCode = await command.execute();
 
       expect(exitCode).toBe(2);
-      expect(mockError).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid JWK format')
-      );
+      expect(mockError).toHaveBeenCalledWith(expect.stringContaining('Invalid JWK format'));
     });
 
     it('should handle verification errors', async () => {
       command.receipt = 'some.receipt.here';
       command.jwk = '{"kty":"OKP","crv":"Ed25519","x":"mock"}';
 
-      const mockVerifyReceipt = jest.fn().mockRejectedValue(
-        new Error('Network error')
-      );
+      const mockVerifyReceipt = jest.fn().mockRejectedValue(new Error('Network error'));
 
-      jest.doMock('@peacprotocol/sdk-node', () => ({
-        verifyReceipt: mockVerifyReceipt
-      }), { virtual: true });
+      jest.doMock(
+        '@peacprotocol/sdk-node',
+        () => ({
+          verifyReceipt: mockVerifyReceipt,
+        }),
+        { virtual: true },
+      );
 
       const exitCode = await command.execute();
 
       expect(exitCode).toBe(3);
       expect(mockError).toHaveBeenCalledWith(
-        expect.stringContaining('Error during verification: Network error')
+        expect.stringContaining('Error during verification: Network error'),
       );
     });
 
@@ -134,7 +141,7 @@ describe('VerifyReceiptCommand', () => {
         method: 'POST',
         status: 201,
         iat: 1694083200,
-        exp: 1694086840
+        exp: 1694086840,
       };
 
       command.receipt = receipt;
@@ -142,30 +149,26 @@ describe('VerifyReceiptCommand', () => {
 
       const mockVerifyReceipt = jest.fn().mockResolvedValue({
         valid: true,
-        payload: mockPayload
+        payload: mockPayload,
       });
 
-      jest.doMock('@peacprotocol/sdk-node', () => ({
-        verifyReceipt: mockVerifyReceipt
-      }), { virtual: true });
+      jest.doMock(
+        '@peacprotocol/sdk-node',
+        () => ({
+          verifyReceipt: mockVerifyReceipt,
+        }),
+        { virtual: true },
+      );
 
       await command.execute();
 
       expect(mockLog).toHaveBeenCalledWith(
-        expect.stringContaining('✓ Receipt verified successfully')
+        expect.stringContaining('✓ Receipt verified successfully'),
       );
-      expect(mockLog).toHaveBeenCalledWith(
-        expect.stringContaining('Issuer: https://issuer.com')
-      );
-      expect(mockLog).toHaveBeenCalledWith(
-        expect.stringContaining('Path: /api/resource')
-      );
-      expect(mockLog).toHaveBeenCalledWith(
-        expect.stringContaining('Method: POST')
-      );
-      expect(mockLog).toHaveBeenCalledWith(
-        expect.stringContaining('Status: 201')
-      );
+      expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Issuer: https://issuer.com'));
+      expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Path: /api/resource'));
+      expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Method: POST'));
+      expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Status: 201'));
     });
   });
 });

@@ -16,14 +16,21 @@ interface CacheEntry {
 
 export class DirGetCommand extends Command {
   static paths = [['dir', 'get']];
-  
+
   static usage = Command.Usage({
     description: 'Fetch and validate signed agent directory',
-    details: 'Fetch agent directory from Signature-Agent-URL, validate signature, and cache with ETag support',
+    details:
+      'Fetch agent directory from Signature-Agent-URL, validate signature, and cache with ETag support',
     examples: [
-      ['Fetch directory', 'peac dir get https://agent.example.com/.well-known/http-message-signatures-directory'],
-      ['Use custom cache', 'peac dir get https://agent.example.com/.well-known/http-message-signatures-directory --cache ~/.peac/cache']
-    ]
+      [
+        'Fetch directory',
+        'peac dir get https://agent.example.com/.well-known/http-message-signatures-directory',
+      ],
+      [
+        'Use custom cache',
+        'peac dir get https://agent.example.com/.well-known/http-message-signatures-directory --cache ~/.peac/cache',
+      ],
+    ],
   });
 
   url = Option.String({ required: true });
@@ -66,7 +73,7 @@ export class DirGetCommand extends Command {
       }
 
       const cacheFile = this.getCacheFile(this.url);
-      
+
       // Check cache
       let cached: CacheEntry | undefined;
       if (existsSync(cacheFile)) {
@@ -80,7 +87,7 @@ export class DirGetCommand extends Command {
       // Prepare headers
       const headers: Record<string, string> = {
         'user-agent': 'peac-cli/0.9.11',
-        'accept': 'application/json'
+        accept: 'application/json',
       };
 
       if (cached?.etag) {
@@ -96,9 +103,9 @@ export class DirGetCommand extends Command {
           method: 'GET',
           headers,
           throwOnError: false,
-          maxRedirections: 0,  // No redirects for agent directories
+          maxRedirections: 0, // No redirects for agent directories
           bodyTimeout: 2000,
-          headersTimeout: 2000
+          headersTimeout: 2000,
         });
 
         // Handle 304 Not Modified
@@ -113,7 +120,7 @@ export class DirGetCommand extends Command {
           return 3;
         }
 
-        const contentType = response.headers['content-type'] as string || '';
+        const contentType = (response.headers['content-type'] as string) || '';
         if (!contentType.includes('application/json')) {
           this.context.stderr.write(chalk.red(`Invalid content type: ${contentType}\n`));
           return 3;
@@ -156,13 +163,13 @@ export class DirGetCommand extends Command {
         // Cache the directory
         const etag = response.headers['etag'] as string;
         const lastModified = response.headers['last-modified'] as string;
-        
+
         const cacheEntry: CacheEntry = {
           url: this.url,
           etag,
           lastModified,
           directory,
-          cachedAt: new Date().toISOString()
+          cachedAt: new Date().toISOString(),
         };
 
         writeFileSync(cacheFile, JSON.stringify(cacheEntry, null, 2));
@@ -171,7 +178,6 @@ export class DirGetCommand extends Command {
         this.displayDirectory(directory);
 
         return 0;
-
       } catch (error) {
         // If we have cached data and network fails, use cached
         if (cached) {
@@ -183,7 +189,6 @@ export class DirGetCommand extends Command {
         this.context.stderr.write(chalk.red(`Network error: ${error}\n`));
         return 3;
       }
-
     } catch (error) {
       this.context.stderr.write(chalk.red(`Error: ${error}\n`));
       return 3;
@@ -192,7 +197,7 @@ export class DirGetCommand extends Command {
 
   private displayDirectory(directory: any): void {
     this.context.stdout.write(`\nKeys: ${directory.keys.length}\n`);
-    
+
     for (const [index, keyEntry] of directory.keys.entries()) {
       this.context.stdout.write(`\n[${index + 1}]\n`);
       this.context.stdout.write(`  Thumbprint: ${keyEntry.thumbprint}\n`);
@@ -202,7 +207,7 @@ export class DirGetCommand extends Command {
         this.context.stdout.write(`  Kid: ${keyEntry.jwk.kid}\n`);
       }
     }
-    
+
     if (directory.updated) {
       this.context.stdout.write(`\nUpdated: ${directory.updated}\n`);
     }

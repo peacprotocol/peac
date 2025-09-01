@@ -58,8 +58,10 @@ class CSVTransform extends Transform {
       chunk.tier,
       chunk.policy_hash,
       chunk.attribution || '',
-      chunk.receipt_id || ''
-    ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',');
+      chunk.receipt_id || '',
+    ]
+      .map((field) => `"${String(field).replace(/"/g, '""')}"`)
+      .join(',');
 
     this.push(row + '\n');
     callback();
@@ -68,7 +70,7 @@ class CSVTransform extends Transform {
 
 export async function exportHandler(req: Request, res: Response): Promise<void> {
   const startTime = Date.now();
-  
+
   try {
     // Parse query parameters
     const query: ExportQuery = {
@@ -76,19 +78,19 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
       to: req.query.to as string | undefined,
       fmt: (req.query.fmt as 'ndjson' | 'csv') || 'ndjson',
       type: (req.query.type as 'receipts' | 'attribution') || 'receipts',
-      cursor: req.query.cursor as string | undefined
+      cursor: req.query.cursor as string | undefined,
     };
 
     // Validate parameters
     if (query.fmt && !['ndjson', 'csv'].includes(query.fmt)) {
       return problemDetails.send(res, 'invalid_request', {
-        detail: 'fmt must be ndjson or csv'
+        detail: 'fmt must be ndjson or csv',
       });
     }
 
     if (query.type && !['receipts', 'attribution'].includes(query.type)) {
       return problemDetails.send(res, 'invalid_request', {
-        detail: 'type must be receipts or attribution'
+        detail: 'type must be receipts or attribution',
       });
     }
 
@@ -96,24 +98,27 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
     const authResult = await authenticateExportRequest(req);
     if (!authResult.ok) {
       metrics.exportAttempts?.inc({ result: 'auth_failed', reason: authResult.reason });
-      
+
       if (authResult.reason === 'missing_auth') {
         return problemDetails.send(res, 'unauthorized', {
-          detail: 'Export requires HTTP Message Signatures or Bearer token authentication'
+          detail: 'Export requires HTTP Message Signatures or Bearer token authentication',
         });
       }
-      
+
       return problemDetails.send(res, 'forbidden', {
-        detail: `Authentication failed: ${authResult.reason}`
+        detail: `Authentication failed: ${authResult.reason}`,
       });
     }
 
-    logger.info({
-      authMethod: authResult.method,
-      keyThumbprint: authResult.thumbprint,
-      exportType: query.type,
-      format: query.fmt
-    }, 'Export request authenticated');
+    logger.info(
+      {
+        authMethod: authResult.method,
+        keyThumbprint: authResult.thumbprint,
+        exportType: query.type,
+        format: query.fmt,
+      },
+      'Export request authenticated',
+    );
 
     // Parse date range
     const fromDate = query.from ? new Date(query.from) : new Date(Date.now() - 24 * 60 * 60 * 1000); // Default: 24h ago
@@ -121,7 +126,7 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
 
     if (fromDate >= toDate) {
       return problemDetails.send(res, 'invalid_request', {
-        detail: 'from date must be before to date'
+        detail: 'from date must be before to date',
       });
     }
 
@@ -129,18 +134,18 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
     const maxRangeMs = 30 * 24 * 60 * 60 * 1000;
     if (toDate.getTime() - fromDate.getTime() > maxRangeMs) {
       return problemDetails.send(res, 'invalid_request', {
-        detail: 'Date range cannot exceed 30 days'
+        detail: 'Date range cannot exceed 30 days',
       });
     }
 
     // Set response headers
     const isCompressed = req.headers['accept-encoding']?.includes('gzip');
     const contentType = query.fmt === 'csv' ? 'text/csv' : 'application/x-ndjson';
-    
+
     res.set({
       'content-type': contentType,
       'cache-control': 'no-store',
-      'x-content-type-options': 'nosniff'
+      'x-content-type-options': 'nosniff',
     });
 
     if (isCompressed) {
@@ -164,10 +169,10 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
     let nextCursor: string | undefined;
 
     try {
-      // This is a mock implementation - in real implementation, 
+      // This is a mock implementation - in real implementation,
       // this would stream from a database cursor
       const mockData = await getMockExportData(query, fromDate, toDate, maxRows);
-      
+
       for (const row of mockData.rows) {
         if (rowCount >= maxRows) {
           nextCursor = mockData.nextCursor;
@@ -179,7 +184,7 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
 
         // Backpressure handling
         if (!transformer.write(row)) {
-          await new Promise(resolve => transformer.once('drain', resolve));
+          await new Promise((resolve) => transformer.once('drain', resolve));
         }
       }
 
@@ -191,33 +196,38 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
       transformer.end();
 
       const duration = Date.now() - startTime;
-      
+
       metrics.exportAttempts?.inc({ result: 'success', format: query.fmt });
       metrics.exportRowsStreamed?.inc({ format: query.fmt }, rowCount);
       metrics.exportDuration?.observe({ format: query.fmt }, duration);
 
-      logger.info({
-        exportType: query.type,
-        format: query.fmt,
-        rowCount,
-        duration,
-        compressed: isCompressed,
-        hasMore: !!nextCursor
-      }, 'Export completed successfully');
+      logger.info(
+        {
+          exportType: query.type,
+          format: query.fmt,
+          rowCount,
+          duration,
+          compressed: isCompressed,
+          hasMore: !!nextCursor,
+        },
+        'Export completed successfully',
+      );
 
       telemetry.logExportStream(req, {
         type: query.type!,
         format: query.fmt!,
         rows: rowCount,
-        dur_ms: duration
+        dur_ms: duration,
       });
-
     } catch (streamError) {
-      logger.error({
-        error: streamError instanceof Error ? streamError.message : String(streamError),
-        exportType: query.type,
-        format: query.fmt
-      }, 'Export streaming failed');
+      logger.error(
+        {
+          error: streamError instanceof Error ? streamError.message : String(streamError),
+          exportType: query.type,
+          format: query.fmt,
+        },
+        'Export streaming failed',
+      );
 
       // If headers already sent, can't send problem details
       if (res.headersSent) {
@@ -226,16 +236,18 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
         problemDetails.send(res, 'internal_error');
       }
     }
-
   } catch (error) {
     const duration = Date.now() - startTime;
-    
+
     metrics.exportAttempts?.inc({ result: 'error' });
-    
-    logger.error({
-      error: error instanceof Error ? error.message : String(error),
-      duration
-    }, 'Export request failed');
+
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        duration,
+      },
+      'Export request failed',
+    );
 
     if (!res.headersSent) {
       problemDetails.send(res, 'internal_error');
@@ -259,11 +271,11 @@ async function authenticateExportRequest(req: Request): Promise<AuthResult> {
       // Validate certificate subject against allowlist
       const allowedCNs = process.env.PEAC_EXPORT_MTLS_ALLOWED?.split(',') || [];
       const cn = cert.subject.CN;
-      
+
       if (allowedCNs.length > 0 && !allowedCNs.includes(cn)) {
         return { ok: false, reason: 'mtls_cn_not_allowed' };
       }
-      
+
       return { ok: true, method: 'mtls', thumbprint: cert.fingerprint };
     }
   }
@@ -278,9 +290,9 @@ async function authenticateExportRequest(req: Request): Promise<AuthResult> {
         jwk: {
           kty: 'OKP',
           crv: 'Ed25519',
-          x: 'mock-public-key-bytes' // This would be the actual site public key
+          x: 'mock-public-key-bytes', // This would be the actual site public key
         },
-        thumbprint: 'mock-thumbprint'
+        thumbprint: 'mock-thumbprint',
       };
 
       const verifyResult = await verifySignature(
@@ -289,19 +301,18 @@ async function authenticateExportRequest(req: Request): Promise<AuthResult> {
         req,
         mockSiteKey.jwk,
         Date.now(),
-        120 // 2 minute skew
+        120, // 2 minute skew
       );
 
       if (verifyResult.ok) {
-        return { 
-          ok: true, 
-          method: 'signature', 
-          thumbprint: mockSiteKey.thumbprint 
+        return {
+          ok: true,
+          method: 'signature',
+          thumbprint: mockSiteKey.thumbprint,
         };
       }
 
       return { ok: false, reason: 'signature_invalid' };
-
     } catch (error) {
       return { ok: false, reason: 'signature_error' };
     }
@@ -311,17 +322,14 @@ async function authenticateExportRequest(req: Request): Promise<AuthResult> {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.slice(7);
-    
+
     // Validate token against configured value
     const expectedToken = process.env.PEAC_EXPORT_TOKEN;
     if (!expectedToken) {
       return { ok: false, reason: 'token_not_configured' };
     }
 
-    if (crypto.timingSafeEqual(
-      Buffer.from(token, 'utf8'),
-      Buffer.from(expectedToken, 'utf8')
-    )) {
+    if (crypto.timingSafeEqual(Buffer.from(token, 'utf8'), Buffer.from(expectedToken, 'utf8'))) {
       return { ok: true, method: 'token' };
     }
 
@@ -332,32 +340,36 @@ async function authenticateExportRequest(req: Request): Promise<AuthResult> {
 }
 
 async function getMockExportData(
-  query: ExportQuery, 
-  fromDate: Date, 
-  toDate: Date, 
-  maxRows: number
+  query: ExportQuery,
+  fromDate: Date,
+  toDate: Date,
+  maxRows: number,
 ): Promise<{ rows: ExportRow[]; nextCursor?: string }> {
   // Mock implementation - real version would stream from database
   const rows: ExportRow[] = [];
-  
+
   // Generate some mock data
   const startTime = fromDate.getTime();
   const endTime = toDate.getTime();
   const interval = (endTime - startTime) / Math.min(maxRows, 1000);
-  
+
   for (let i = 0; i < Math.min(maxRows, 1000); i++) {
-    const timestamp = new Date(startTime + (i * interval));
-    
+    const timestamp = new Date(startTime + i * interval);
+
     rows.push({
       timestamp: timestamp.toISOString(),
-      path_hash: crypto.createHash('sha256').update(`/api/path-${i}`).digest('hex').substring(0, 40),
+      path_hash: crypto
+        .createHash('sha256')
+        .update(`/api/path-${i}`)
+        .digest('hex')
+        .substring(0, 40),
       method: ['GET', 'POST', 'PUT', 'DELETE'][i % 4]!,
       tier: ['anonymous', 'attributed', 'verified'][i % 3] as any,
       policy_hash: crypto.createHash('sha256').update('policy').digest('hex').substring(0, 40),
       attribution: i % 3 === 1 ? `Agent ${i} (https://agent.example.com)` : undefined,
-      receipt_id: query.type === 'receipts' ? crypto.randomUUID() : undefined
+      receipt_id: query.type === 'receipts' ? crypto.randomUUID() : undefined,
     });
   }
-  
+
   return { rows };
 }

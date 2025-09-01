@@ -13,7 +13,7 @@ export class WebBotAuthAdapter implements Adapter {
 
     // Create signer from context
     let signer: Signer;
-    
+
     if (context.privateKey instanceof Uint8Array) {
       signer = new Ed25519Signer(context.privateKey);
     } else if (context.privateKey instanceof CryptoKey) {
@@ -25,7 +25,7 @@ export class WebBotAuthAdapter implements Adapter {
     return {
       kind: 'web-bot-auth',
       signatureAgentURL: context.signatureAgentURL,
-      signer
+      signer,
     };
   }
 

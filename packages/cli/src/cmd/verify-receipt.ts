@@ -13,15 +13,16 @@ interface JsonWebKey {
 
 export class VerifyReceiptCommand extends Command {
   static paths = [['verify', 'receipt']];
-  
+
   static usage = Command.Usage({
     description: 'Verify a PEAC receipt signature',
-    details: 'Verify JWS receipt using provided keys. Exit codes: 0=success, 1=verify fail, 2=invalid input, 3=IO error',
+    details:
+      'Verify JWS receipt using provided keys. Exit codes: 0=success, 1=verify fail, 2=invalid input, 3=IO error',
     examples: [
       ['Verify receipt from file', 'peac verify receipt receipt.jws --keys jwks.json'],
       ['Verify inline receipt', 'peac verify receipt "eyJ0eXAi..." --keys jwks.json'],
-      ['JSON output', 'peac verify receipt receipt.jws --keys jwks.json --out json']
-    ]
+      ['JSON output', 'peac verify receipt receipt.jws --keys jwks.json --out json'],
+    ],
   });
 
   receipt = Option.String({ required: true });
@@ -47,7 +48,9 @@ export class VerifyReceiptCommand extends Command {
       const parts = jws.split('.');
       if (parts.length !== 3) {
         if (this.out === 'json') {
-          this.context.stdout.write(JSON.stringify({ ok: false, error: 'invalid_jws_format' }) + '\n');
+          this.context.stdout.write(
+            JSON.stringify({ ok: false, error: 'invalid_jws_format' }) + '\n',
+          );
         } else {
           this.context.stderr.write(chalk.red('Invalid JWS format\n'));
         }
@@ -71,7 +74,9 @@ export class VerifyReceiptCommand extends Command {
       // Check algorithm
       if (header.alg !== 'EdDSA') {
         if (this.out === 'json') {
-          this.context.stdout.write(JSON.stringify({ ok: false, error: 'unsupported_algorithm' }) + '\n');
+          this.context.stdout.write(
+            JSON.stringify({ ok: false, error: 'unsupported_algorithm' }) + '\n',
+          );
         } else {
           this.context.stderr.write(chalk.red(`Unsupported algorithm: ${header.alg}\n`));
         }
@@ -82,7 +87,9 @@ export class VerifyReceiptCommand extends Command {
       if (this.keys) {
         if (!existsSync(this.keys)) {
           if (this.out === 'json') {
-            this.context.stdout.write(JSON.stringify({ ok: false, error: 'keys_file_not_found' }) + '\n');
+            this.context.stdout.write(
+              JSON.stringify({ ok: false, error: 'keys_file_not_found' }) + '\n',
+            );
           } else {
             this.context.stderr.write(chalk.red('Keys file not found\n'));
           }
@@ -95,7 +102,9 @@ export class VerifyReceiptCommand extends Command {
           jwks = JSON.parse(keysData);
         } catch (error) {
           if (this.out === 'json') {
-            this.context.stdout.write(JSON.stringify({ ok: false, error: 'invalid_keys_file' }) + '\n');
+            this.context.stdout.write(
+              JSON.stringify({ ok: false, error: 'invalid_keys_file' }) + '\n',
+            );
           } else {
             this.context.stderr.write(chalk.red('Invalid keys file\n'));
           }
@@ -112,7 +121,7 @@ export class VerifyReceiptCommand extends Command {
         }
 
         // Find key
-        const key = jwks.keys.find(k => k.kid === header.kid);
+        const key = jwks.keys.find((k) => k.kid === header.kid);
         if (!key) {
           if (this.out === 'json') {
             this.context.stdout.write(JSON.stringify({ ok: false, error: 'key_not_found' }) + '\n');
@@ -124,7 +133,9 @@ export class VerifyReceiptCommand extends Command {
 
         if (key.kty !== 'OKP' || key.crv !== 'Ed25519' || !key.x) {
           if (this.out === 'json') {
-            this.context.stdout.write(JSON.stringify({ ok: false, error: 'invalid_key_type' }) + '\n');
+            this.context.stdout.write(
+              JSON.stringify({ ok: false, error: 'invalid_key_type' }) + '\n',
+            );
           } else {
             this.context.stderr.write(chalk.red('Invalid key type (must be Ed25519)\n'));
           }
@@ -136,12 +147,14 @@ export class VerifyReceiptCommand extends Command {
           const publicKeyBytes = Buffer.from(key.x, 'base64url');
           const signatureData = Buffer.from(`${parts[0]}.${parts[1]}`, 'utf-8');
           const signatureBytes = Buffer.from(parts[2]!, 'base64url');
-          
+
           const isValid = await ed25519.verify(signatureBytes, signatureData, publicKeyBytes);
-          
+
           if (!isValid) {
             if (this.out === 'json') {
-              this.context.stdout.write(JSON.stringify({ ok: false, error: 'signature_invalid' }) + '\n');
+              this.context.stdout.write(
+                JSON.stringify({ ok: false, error: 'signature_invalid' }) + '\n',
+              );
             } else {
               this.context.stderr.write(chalk.red('Signature verification failed\n'));
             }
@@ -151,11 +164,13 @@ export class VerifyReceiptCommand extends Command {
           // Parse claims for additional validation
           const payload = JSON.parse(Buffer.from(parts[1]!, 'base64url').toString('utf-8'));
           const now = Math.floor(Date.now() / 1000);
-          
+
           // Check if issued in future
           if (payload.iat && payload.iat > now + 60) {
             if (this.out === 'json') {
-              this.context.stdout.write(JSON.stringify({ ok: false, error: 'issued_in_future' }) + '\n');
+              this.context.stdout.write(
+                JSON.stringify({ ok: false, error: 'issued_in_future' }) + '\n',
+              );
             } else {
               this.context.stderr.write(chalk.red('Receipt issued in future\n'));
             }
@@ -173,20 +188,23 @@ export class VerifyReceiptCommand extends Command {
           }
 
           if (this.out === 'json') {
-            this.context.stdout.write(JSON.stringify({ 
-              ok: true, 
-              kid: header.kid, 
-              claims: payload 
-            }) + '\n');
+            this.context.stdout.write(
+              JSON.stringify({
+                ok: true,
+                kid: header.kid,
+                claims: payload,
+              }) + '\n',
+            );
           } else {
             this.context.stdout.write(chalk.green('✓ Receipt signature valid\n'));
             this.context.stdout.write(`Kid: ${header.kid}\n`);
             this.context.stdout.write(`Issued: ${new Date(payload.iat * 1000).toISOString()}\n`);
           }
-
         } catch (error) {
           if (this.out === 'json') {
-            this.context.stdout.write(JSON.stringify({ ok: false, error: 'verification_error' }) + '\n');
+            this.context.stdout.write(
+              JSON.stringify({ ok: false, error: 'verification_error' }) + '\n',
+            );
           } else {
             this.context.stderr.write(chalk.red(`Verification error: ${error}\n`));
           }
@@ -195,14 +213,16 @@ export class VerifyReceiptCommand extends Command {
       } else {
         // No verification, just parse and show structure
         const payload = JSON.parse(Buffer.from(parts[1]!, 'base64url').toString('utf-8'));
-        
+
         if (this.out === 'json') {
-          this.context.stdout.write(JSON.stringify({ 
-            ok: true, 
-            verified: false,
-            kid: header.kid,
-            claims: payload 
-          }) + '\n');
+          this.context.stdout.write(
+            JSON.stringify({
+              ok: true,
+              verified: false,
+              kid: header.kid,
+              claims: payload,
+            }) + '\n',
+          );
         } else {
           this.context.stdout.write(chalk.yellow('⚠ No keys provided - signature not verified\n'));
           this.context.stdout.write(`Kid: ${header.kid || 'missing'}\n`);
@@ -213,7 +233,6 @@ export class VerifyReceiptCommand extends Command {
       }
 
       return 0;
-
     } catch (error) {
       if (this.out === 'json') {
         this.context.stdout.write(JSON.stringify({ ok: false, error: String(error) }) + '\n');

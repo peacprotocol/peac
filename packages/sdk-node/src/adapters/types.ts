@@ -2,11 +2,11 @@ import { Policy, IdentityHint } from '../types.js';
 
 export interface Adapter {
   readonly kind: 'web-bot-auth' | 'mcp' | 'a2a' | 'nanda';
-  
+
   prepareIdentity(policy: Policy, context: any): Promise<IdentityHint>;
-  
+
   normalizeReceipt?(claims: any): any;
-  
+
   validatePolicy?(policy: Policy): void;
 }
 

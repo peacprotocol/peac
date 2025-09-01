@@ -172,14 +172,14 @@ export interface Policy {
 export function isPolicyValid(obj: unknown): obj is Policy {
   if (!obj || typeof obj !== 'object') return false;
   const policy = obj as Record<string, unknown>;
-  
+
   // Required fields
   if (typeof policy.version !== 'string') return false;
   if (!policy.site || typeof policy.site !== 'object') return false;
-  
+
   const site = policy.site as Record<string, unknown>;
   if (typeof site.name !== 'string' || typeof site.domain !== 'string') return false;
-  
+
   return true;
 }
 
