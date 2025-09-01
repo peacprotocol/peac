@@ -4,6 +4,8 @@ export {
   buildRequestHeaders,
   validateAttributionFormat,
   buildWebBotAuthHeaders,
+  parseHeaders,
+  createHeaders,
 } from './headers.js';
 export { captureReceipt, verifyReceipt, encodeReceiptForHeader } from './receipts.js';
 export {
@@ -27,7 +29,7 @@ export type {
 } from './types.js';
 
 export type { FetchPolicyOptions } from './policy.js';
-export type { BuildHeadersOptions } from './headers.js';
+export type { BuildHeadersOptions, ParsedHeaders, CreateHeadersOptions } from './headers.js';
 export type { CaptureReceiptOptions } from './receipts.js';
 export type { RetryOptions } from './ratelimit.js';
 

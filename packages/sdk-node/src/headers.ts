@@ -6,6 +6,24 @@ export interface BuildHeadersOptions {
   strict?: boolean;
 }
 
+export interface ParsedHeaders {
+  attribution?: string;
+  agreement?: string;
+  receiptKid?: string;
+  signature?: string;
+  signatureInput?: string;
+  signatureAgent?: string;
+}
+
+export interface CreateHeadersOptions {
+  attribution?: string;
+  agreement?: string;
+  receiptKid?: string;
+  signature?: string;
+  signatureInput?: string;
+  signatureAgent?: string;
+}
+
 const DEFAULT_OPTIONS: Required<Omit<BuildHeadersOptions, 'attribution' | 'identity'>> = {
   strict: true,
 };
@@ -69,12 +87,84 @@ export function buildRequestHeaders(policy: Policy, options: BuildHeadersOptions
 }
 
 export function validateAttributionFormat(attribution: string, format: string): boolean {
+  if (!attribution || !format) {
+    return false;
+  }
+  
   try {
     const regex = new RegExp(format);
     return regex.test(attribution);
   } catch {
     return false;
   }
+}
+
+/**
+ * Parse PEAC headers from a request/response object
+ */
+export function parseHeaders(headers: Record<string, string | undefined>): ParsedHeaders {
+  const result: ParsedHeaders = {};
+
+  // Normalize header names to lowercase for case-insensitive lookup
+  const normalizedHeaders = Object.entries(headers).reduce(
+    (acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key.toLowerCase()] = value;
+      }
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
+
+  // Parse PEAC-specific headers
+  if (normalizedHeaders['peac-attribution']) {
+    result.attribution = normalizedHeaders['peac-attribution'];
+  }
+  if (normalizedHeaders['peac-agreement']) {
+    result.agreement = normalizedHeaders['peac-agreement'];
+  }
+  if (normalizedHeaders['peac-receipt-kid']) {
+    result.receiptKid = normalizedHeaders['peac-receipt-kid'];
+  }
+  if (normalizedHeaders['signature']) {
+    result.signature = normalizedHeaders['signature'];
+  }
+  if (normalizedHeaders['signature-input']) {
+    result.signatureInput = normalizedHeaders['signature-input'];
+  }
+  if (normalizedHeaders['signature-agent']) {
+    result.signatureAgent = normalizedHeaders['signature-agent'];
+  }
+
+  return result;
+}
+
+/**
+ * Create PEAC headers object from options
+ */
+export function createHeaders(options: CreateHeadersOptions): Record<string, string> {
+  const headers: Record<string, string> = {};
+
+  if (options.attribution) {
+    headers['peac-attribution'] = options.attribution;
+  }
+  if (options.agreement) {
+    headers['peac-agreement'] = options.agreement;
+  }
+  if (options.receiptKid) {
+    headers['peac-receipt-kid'] = options.receiptKid;
+  }
+  if (options.signature) {
+    headers['signature'] = options.signature;
+  }
+  if (options.signatureInput) {
+    headers['signature-input'] = options.signatureInput;
+  }
+  if (options.signatureAgent) {
+    headers['signature-agent'] = options.signatureAgent;
+  }
+
+  return headers;
 }
 
 export function buildWebBotAuthHeaders(

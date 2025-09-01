@@ -1,10 +1,13 @@
 import { jest } from '@jest/globals';
 import { fetchPolicy, clearPolicyCache } from '../src/policy.js';
-import { request } from 'undici';
 import * as yaml from 'yaml';
 
 // Mock undici
-const mockRequest = request as jest.MockedFunction<typeof request>;
+jest.mock('undici', () => ({
+  request: jest.fn(),
+}));
+
+const { request: mockRequest } = jest.requireMock('undici');
 
 describe('Policy Module', () => {
   beforeEach(() => {
@@ -78,7 +81,7 @@ describe('Policy Module', () => {
     });
 
     it('should handle 304 Not Modified', async () => {
-      // First request
+      // First request with shorter cache TTL
       mockRequest.mockResolvedValueOnce({
         statusCode: 200,
         headers: {
@@ -92,9 +95,11 @@ describe('Policy Module', () => {
         },
       } as any);
 
-      await fetchPolicy('https://test.example.com/.well-known/peac');
+      await fetchPolicy('https://test.example.com/.well-known/peac', { cacheTtlSec: 1 });
 
-      // Second request returns 304
+      // Wait for cache to expire and mock 304 response
+      await new Promise(resolve => setTimeout(resolve, 1100));
+      
       mockRequest.mockResolvedValueOnce({
         statusCode: 304,
         headers: {},
@@ -103,13 +108,16 @@ describe('Policy Module', () => {
         },
       } as any);
 
-      const result = await fetchPolicy('https://test.example.com/.well-known/peac');
+      const result = await fetchPolicy('https://test.example.com/.well-known/peac', { cacheTtlSec: 1 });
 
       expect(result).toEqual(validPolicy);
       expect(mockRequest).toHaveBeenCalledTimes(2);
     });
 
     it('should validate policy schema', async () => {
+      // Clear cache for this test
+      clearPolicyCache();
+      
       const invalidPolicy = { version: '0.9.11' }; // Missing required fields
 
       mockRequest.mockResolvedValue({
@@ -122,7 +130,7 @@ describe('Policy Module', () => {
         },
       } as any);
 
-      await expect(fetchPolicy('https://test.example.com/.well-known/peac')).rejects.toThrow(
+      await expect(fetchPolicy('https://invalid.example.com/.well-known/peac')).rejects.toThrow(
         'Policy must have a site object',
       );
     });

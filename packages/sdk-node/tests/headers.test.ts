@@ -98,7 +98,7 @@ describe('Headers Module', () => {
   });
 
   describe('validateAttributionFormat', () => {
-    const standardPattern = '^[A-Za-z0-9 ._-]+ \\\\(https://[^\\\\)]+\\\\)( \\\\[[^\\\\]]+\\\\])?$';
+    const standardPattern = '^[A-Za-z0-9 ._-]+ \\(https://[^)]+\\)( \\[[^\\]]+\\])?$';
 
     it('should validate correct attribution format', () => {
       const validAttributions = [
