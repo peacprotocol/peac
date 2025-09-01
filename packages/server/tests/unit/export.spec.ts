@@ -17,7 +17,7 @@ describe('Export Endpoint', () => {
       query: {},
       headers: {},
       method: 'GET',
-      url: '/export'
+      url: '/export',
     };
 
     mockRes = {
@@ -26,7 +26,7 @@ describe('Export Endpoint', () => {
       set: mockSet,
       pipe: jest.fn(),
       headersSent: false,
-      destroy: jest.fn()
+      destroy: jest.fn(),
     };
   });
 
@@ -35,21 +35,25 @@ describe('Export Endpoint', () => {
       const mockAuth = jest.fn().mockResolvedValue({
         ok: true,
         method: 'token',
-        thumbprint: 'test-thumb'
+        thumbprint: 'test-thumb',
       });
 
       // Mock the authentication function
-      jest.doMock('../../src/http/export.js', () => ({
-        ...jest.requireActual('../../src/http/export.js'),
-        authenticateExportRequest: mockAuth
-      }), { virtual: true });
+      jest.doMock(
+        '../../src/http/export.js',
+        () => ({
+          ...jest.requireActual('../../src/http/export.js'),
+          authenticateExportRequest: mockAuth,
+        }),
+        { virtual: true },
+      );
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
       expect(mockSet).toHaveBeenCalledWith(
         expect.objectContaining({
-          'content-type': 'application/x-ndjson'
-        })
+          'content-type': 'application/x-ndjson',
+        }),
       );
     });
 
@@ -60,8 +64,8 @@ describe('Export Endpoint', () => {
 
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
-          detail: 'fmt must be ndjson or csv'
-        })
+          detail: 'fmt must be ndjson or csv',
+        }),
       );
     });
 
@@ -72,8 +76,8 @@ describe('Export Endpoint', () => {
 
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
-          detail: 'type must be receipts or attribution'
-        })
+          detail: 'type must be receipts or attribution',
+        }),
       );
     });
 
@@ -83,15 +87,15 @@ describe('Export Endpoint', () => {
 
       mockReq.query = {
         from: future.toISOString(),
-        to: now.toISOString()
+        to: now.toISOString(),
       };
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
-          detail: 'from date must be before to date'
-        })
+          detail: 'from date must be before to date',
+        }),
       );
     });
 
@@ -101,15 +105,15 @@ describe('Export Endpoint', () => {
 
       mockReq.query = {
         from: pastMonth.toISOString(),
-        to: now.toISOString()
+        to: now.toISOString(),
       };
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
-          detail: 'Date range cannot exceed 30 days'
-        })
+          detail: 'Date range cannot exceed 30 days',
+        }),
       );
     });
   });
@@ -119,28 +123,28 @@ describe('Export Endpoint', () => {
       // Mock authentication to fail
       const _mockAuth = jest.fn().mockResolvedValue({
         ok: false,
-        reason: 'missing_auth'
+        reason: 'missing_auth',
       });
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
-          detail: 'Export requires HTTP Message Signatures or Bearer token authentication'
-        })
+          detail: 'Export requires HTTP Message Signatures or Bearer token authentication',
+        }),
       );
     });
 
     it('should handle signature authentication', async () => {
       mockReq.headers = {
-        'signature': 'keyId="test",signature="sig"',
-        'signature-input': 'sig=("@method" "@path");created=1234567890'
+        signature: 'keyId="test",signature="sig"',
+        'signature-input': 'sig=("@method" "@path");created=1234567890',
       };
 
       const _mockAuth = jest.fn().mockResolvedValue({
         ok: true,
         method: 'signature',
-        thumbprint: 'test-thumb'
+        thumbprint: 'test-thumb',
       });
 
       // Would need to mock the full handler properly
@@ -149,9 +153,9 @@ describe('Export Endpoint', () => {
 
     it('should handle bearer token authentication', async () => {
       process.env.PEAC_EXPORT_TOKEN = 'test-token';
-      
+
       mockReq.headers = {
-        'authorization': 'Bearer test-token'
+        authorization: 'Bearer test-token',
       };
 
       // Would verify token authentication works
@@ -165,8 +169,8 @@ describe('Export Endpoint', () => {
         authorized: true,
         getPeerCertificate: () => ({
           subject: { CN: 'client.example.com' },
-          fingerprint: 'cert-fingerprint'
-        })
+          fingerprint: 'cert-fingerprint',
+        }),
       };
 
       (mockReq as any).client = mockTlsSocket;
@@ -178,10 +182,10 @@ describe('Export Endpoint', () => {
   describe('streaming', () => {
     it('should handle CSV format', async () => {
       mockReq.query = { fmt: 'csv' };
-      
+
       const _mockAuth = jest.fn().mockResolvedValue({
         ok: true,
-        method: 'token'
+        method: 'token',
       });
 
       // Would test CSV streaming
@@ -190,14 +194,14 @@ describe('Export Endpoint', () => {
 
     it('should handle NDJSON format', async () => {
       mockReq.query = { fmt: 'ndjson' };
-      
+
       // Would test NDJSON streaming
       expect(true).toBe(true); // Placeholder
     });
 
     it('should handle gzip compression', async () => {
       mockReq.headers = {
-        'accept-encoding': 'gzip, deflate'
+        'accept-encoding': 'gzip, deflate',
       };
 
       // Would test compression
