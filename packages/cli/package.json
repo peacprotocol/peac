@@ -1,20 +1,66 @@
 {
   "name": "@peacprotocol/cli",
-  "version": "0.9.10",
-  "description": "PEAC Protocol CLI",
-  "main": "dist/index.js",
+  "version": "0.9.11",
+  "description": "PEAC Protocol CLI - Offline verification and policy tools",
   "bin": {
-    "peac": "./dist/index.js"
+    "peac": "./dist/main.js"
   },
+  "main": "dist/main.js",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "repository": "github:peacprotocol/peac",
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "echo 'Build will be added'",
-    "test": "echo 'Tests will be added'"
+    "build": "tsc && chmod +x dist/main.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "type-check": "tsc --noEmit",
+    "dev": "tsx src/main.ts",
+    "prepublishOnly": "npm run build && npm run test"
   },
+  "keywords": [
+    "peac",
+    "protocol", 
+    "cli",
+    "verification",
+    "policy",
+    "receipts",
+    "offline"
+  ],
+  "author": "PEAC Protocol Foundation",
+  "license": "Apache-2.0",
   "dependencies": {
-    "@peacprotocol/schema": "file:../schema"
+    "@noble/ed25519": "^2.1.0",
+    "@peacprotocol/schema": "file:../schema",
+    "clipanion": "^4.0.0-rc.3",
+    "undici": "^6.6.2",
+    "yaml": "^2.3.4",
+    "chalk": "^5.3.0"
   },
   "devDependencies": {
-    "typescript": "^5.2.0"
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
   },
-  "license": "Apache-2.0"
+  "homepage": "https://peacprotocol.org",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  }
 }

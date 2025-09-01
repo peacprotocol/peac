@@ -40,6 +40,13 @@ export interface ErrorEvent {
   code: string;
 }
 
+export interface ExportStreamEvent {
+  type: string;
+  format: string;
+  rows: number;
+  dur_ms: number;
+}
+
 class TelemetryLogger {
   private correlationStore = new WeakMap<object, string>();
 
@@ -91,6 +98,15 @@ class TelemetryLogger {
     this.logEvent('error', req, {
       where: event.where,
       code: event.code,
+    });
+  }
+
+  logExportStream(req: object, event: ExportStreamEvent): void {
+    this.logEvent('export_stream', req, {
+      type: event.type,
+      format: event.format,
+      rows: event.rows,
+      dur_ms: event.dur_ms,
     });
   }
 

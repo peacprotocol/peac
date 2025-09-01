@@ -128,6 +128,25 @@ export const metrics = {
     labelNames: ['method', 'count'] as const,
     registers: [register],
   }),
+  exportAttempts: new Counter({
+    name: 'peac_export_attempts_total',
+    help: 'Total export attempts',
+    labelNames: ['result', 'reason', 'format'] as const,
+    registers: [register],
+  }),
+  exportRowsStreamed: new Counter({
+    name: 'peac_export_rows_streamed_total',
+    help: 'Total rows streamed in exports',
+    labelNames: ['format'] as const,
+    registers: [register],
+  }),
+  exportDuration: new Histogram({
+    name: 'peac_export_duration_seconds',
+    help: 'Export request duration',
+    labelNames: ['format'] as const,
+    buckets: [1, 5, 10, 30, 60, 180, 300],
+    registers: [register],
+  }),
 };
 
 export function getMetricsRegistry() {
