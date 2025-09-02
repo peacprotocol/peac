@@ -23,7 +23,8 @@ describe('Receipts Module', () => {
     const mockSignature = Buffer.from(new Uint8Array(64).fill(42)).toString('base64url');
     // Use current timestamp to avoid expiration
     const validReceipt =
-      'eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCIsImtpZCI6ImtleV8xMjMifQ.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NTY3NjU4MzYsInBhdGgiOiIvYXBpL3Rlc3QiLCJtZXRob2QiOiJHRVQiLCJzdGF0dXMiOjIwMH0.' + mockSignature;
+      'eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCIsImtpZCI6ImtleV8xMjMifQ.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NTY3NjU4MzYsInBhdGgiOiIvYXBpL3Rlc3QiLCJtZXRob2QiOiJHRVQiLCJzdGF0dXMiOjIwMH0.' +
+      mockSignature;
 
     it('should verify valid receipt', async () => {
       mockVerify.mockResolvedValue(true);
@@ -84,7 +85,8 @@ describe('Receipts Module', () => {
 
       // Receipt with very old timestamp (over 30 days ago)
       const expiredReceipt =
-        'eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCIsImtpZCI6ImtleV8xMjMifQ.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE2OTQwODMyMDAsInBhdGgiOiIvYXBpL3Rlc3QiLCJtZXRob2QiOiJHRVQiLCJzdGF0dXMiOjIwMH0.' + mockSignature;
+        'eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCIsImtpZCI6ImtleV8xMjMifQ.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE2OTQwODMyMDAsInBhdGgiOiIvYXBpL3Rlc3QiLCJtZXRob2QiOiJHRVQiLCJzdGF0dXMiOjIwMH0.' +
+        mockSignature;
 
       const jwk = {
         kty: 'OKP',
@@ -103,7 +105,9 @@ describe('Receipts Module', () => {
       mockVerify.mockResolvedValue(true);
 
       // Receipt missing kid in header
-      const incompleteReceipt = 'eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3MjU0ODcyMDAsInBhdGgiOiIvYXBpL3Rlc3QiLCJtZXRob2QiOiJHRVQiLCJzdGF0dXMiOjIwMH0.' + mockSignature;
+      const incompleteReceipt =
+        'eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3MjU0ODcyMDAsInBhdGgiOiIvYXBpL3Rlc3QiLCJtZXRob2QiOiJHRVQiLCJzdGF0dXMiOjIwMH0.' +
+        mockSignature;
 
       const jwk = {
         kty: 'OKP',
@@ -151,7 +155,8 @@ describe('Receipts Module', () => {
 
       // Receipt with wrong type header
       const wrongTypeReceipt =
-        'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6ImtleV8xMjMifQ.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3MjU0ODcyMDAsInBhdGgiOiIvYXBpL3Rlc3QiLCJtZXRob2QiOiJHRVQiLCJzdGF0dXMiOjIwMH0.' + mockSignature;
+        'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6ImtleV8xMjMifQ.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3MjU0ODcyMDAsInBhdGgiOiIvYXBpL3Rlc3QiLCJtZXRob2QiOiJHRVQiLCJzdGF0dXMiOjIwMH0.' +
+        mockSignature;
 
       const jwk = {
         kty: 'OKP',

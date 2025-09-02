@@ -90,7 +90,7 @@ export function validateAttributionFormat(attribution: string, format: string): 
   if (!attribution || !format) {
     return false;
   }
-  
+
   try {
     const regex = new RegExp(format);
     return regex.test(attribution);
