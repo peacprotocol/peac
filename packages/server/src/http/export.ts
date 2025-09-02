@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { Transform } from 'stream';
 import { createGzip } from 'zlib';
-import { verifySignature } from '../adapters/webbot/signature.js';
-import { parseWebBotAuthHeaders } from '../adapters/webbot/parse.js';
-import { problemDetails } from './problems.js';
-import { logger } from '../logging/index.js';
-import { metrics } from '../metrics/index.js';
-import { telemetry } from '../telemetry/log.js';
+import { verifySignature } from '../adapters/webbot/signature';
+import { parseWebBotAuthHeaders } from '../adapters/webbot/parse';
+import { problemDetails } from './problems';
+import { logger } from '../logging/index';
+import { metrics } from '../metrics/index';
+import { telemetry } from '../telemetry/log';
 import crypto from 'crypto';
 
 interface ExportQuery {
