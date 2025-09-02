@@ -1,0 +1,99 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "peac"
+version = "0.9.11"
+description = "Official Python SDK for PEAC Protocol"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    {name = "PEAC Protocol Foundation"}
+]
+maintainers = [
+    {name = "PEAC Protocol Foundation"}
+]
+keywords = ["peac", "protocol", "sdk", "web-bot-auth", "receipts", "policy", "rate-limiting"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11", 
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
+requires-python = ">=3.10"
+dependencies = [
+    "httpx[http2]>=0.26.0",
+    "pydantic>=2.5.0",
+    "PyYAML>=6.0.1",
+    "cryptography>=41.0.0",
+    "anyio>=4.2.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "hypothesis>=6.92.0",
+    "mypy>=1.8.0",
+    "ruff>=0.1.9",
+    "black>=23.12.0"
+]
+
+[project.urls]
+Homepage = "https://peacprotocol.org"
+Documentation = "https://docs.peacprotocol.org"
+Repository = "https://github.com/peacprotocol/peac"
+Issues = "https://github.com/peacprotocol/peac/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["peac"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+select = ["E", "F", "W", "I", "N", "UP", "YTT", "BLE", "B", "A", "COM", "C4", "DTZ", "EM", "ISC", "ICN", "G", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "TCH", "ARG", "PTH", "PGH", "PL", "TRY", "FLY", "NPY", "PERF", "RUF"]
+ignore = ["COM812", "ISC001"]
+
+[tool.ruff.per-file-ignores]
+"tests/**/*.py" = ["S101", "PLR2004"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--strict-markers --cov=peac --cov-report=term-missing --cov-report=html --cov-report=xml"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests"
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["peac"]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:"
+]

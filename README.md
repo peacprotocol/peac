@@ -30,7 +30,7 @@ We build this collaboratively. Contribute adapters, propose PEIPs, and help shap
 
 ## Why Now?
 
-Autonomous clients need predictable, auditable policy and trust rails. With well-known URIs, Problem+JSON, DPoP, and modern JOSE, the web finally has the pieces to coordinate access, consent, attribution and settlement. PEAC stitches these together—minimally—so anyone can adopt them.
+Autonomous clients need predictable, auditable policy and trust rails. With well-known URIs, Problem+JSON, DPoP, and modern JOSE, the web finally has the pieces to coordinate access, consent, attribution and settlement. PEAC stitches these together-minimally-so anyone can adopt them.
 
 ---
 
@@ -42,7 +42,7 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 - **Media:** `application/peac+json` (content), `application/problem+json` (errors), `application/jwk-set+json` (JWKS)
 - **Receipts:** detached JWS (`typ: application/peac-receipt+jws`) using JCS
 - **Trust:** UDA (JWT with `typ: "JWT"`), DPoP proofs bound to `cnf.jkt`, optional agent attestation header
-- **Conformance:** Levels L0–L4; see [docs/conformance.md](docs/conformance.md)
+- **Conformance:** Levels L0-L4; see [docs/conformance.md](docs/conformance.md)
 
 ---
 
@@ -113,7 +113,7 @@ Common pitfalls: invalid schema returns `application/problem+json` 400.
 | JWKS management            | 30-day key rotation, 7-day grace periods, `application/jwk-set+json` with ETag caching.                                                   |
 | Adapters and interop       | Bridges for MCP, A2A, payment rails such as **x402** and Stripe, Chainlink, peaq, and any payment provider via adapter. Extend via PEIPs. |
 | HTTP semantics             | Lowercase `x-peac-*` on wire, Problem+JSON, and idempotency guidance.                                                                     |
-| Conformance and tooling    | L0–L4 levels, CLI validation and fixtures, and ACID-style tests.                                                                          |
+| Conformance and tooling    | L0-L4 levels, CLI validation and fixtures, and ACID-style tests.                                                                          |
 
 ---
 

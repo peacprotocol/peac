@@ -18,7 +18,7 @@ describe('/.well-known/peac policy endpoint', () => {
     const response = await request(app).get('/.well-known/peac').expect(200);
 
     expect(response.headers['content-type']).toBe('text/plain; charset=utf-8');
-    expect(response.text).toContain('version: 0.9.10');
+    expect(response.text).toContain('version: 0.9.11');
     expect(response.text).toContain('default: allow');
     expect(response.text).toContain('attribution:');
     expect(response.text).toContain('rate_limits:');
@@ -36,7 +36,7 @@ describe('/.well-known/peac policy endpoint', () => {
     expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.body).toEqual(
       expect.objectContaining({
-        version: '0.9.10',
+        version: '0.9.11',
         default: 'allow',
         attribution: expect.objectContaining({
           required: false,

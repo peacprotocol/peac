@@ -68,7 +68,7 @@ describe('Breaking Changes v0.9.9', () => {
       const response = await request(app).get('/.well-known/peac').expect(200);
 
       expect(response.headers['content-type']).toBe('text/plain; charset=utf-8');
-      expect(response.text).toContain('version: 0.9.10');
+      expect(response.text).toContain('version: 0.9.11');
       expect(response.text).toContain('verified_rpm: 6000');
     });
   });
@@ -80,7 +80,7 @@ describe('Breaking Changes v0.9.9', () => {
         .set('Accept', 'application/json')
         .expect(200);
 
-      expect(response.body.version).toBe('0.9.10');
+      expect(response.body.version).toBe('0.9.11');
       expect(response.body.rate_limits).toEqual({
         anonymous_rpm: 60,
         attributed_rpm: 600,

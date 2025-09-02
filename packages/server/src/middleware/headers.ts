@@ -15,7 +15,7 @@ import { WIRE_VERSION } from '@peacprotocol/schema';
 
 const ECHO = WIRE_VERSION;
 const SUPPORTED = [WIRE_VERSION];
-const MIN_SUPPORTED_PATCH = 10;
+const MIN_SUPPORTED_PATCH = 11;
 
 // ---- utils --------------------------------------------------------------------
 

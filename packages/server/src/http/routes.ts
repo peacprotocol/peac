@@ -28,6 +28,7 @@ import { metrics } from '../metrics';
 import { keyStore, exportJWKS } from '../core/keys';
 import { handleBatchVerifyPost, handleBatchVerifyGet } from './verify-endpoint';
 import { receiptStore } from '../core/receipt-store';
+import { exportHandler } from './export';
 import crypto from 'crypto';
 
 export function createRoutes() {
@@ -93,6 +94,9 @@ export function createRoutes() {
   // Batch verify endpoints
   router.post('/.well-known/peac/verify', standardRateLimiter.middleware(), handleBatchVerifyPost);
   router.get('/.well-known/peac/verify', standardRateLimiter.middleware(), handleBatchVerifyGet);
+
+  // Export endpoint (authenticated)
+  router.get('/.well-known/peac/export', exportHandler);
 
   // Receipt hosting endpoint
   router.get('/.well-known/peac/receipts/:jti', async (req, res) => {

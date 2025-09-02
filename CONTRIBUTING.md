@@ -88,7 +88,6 @@ Types: feat, fix, docs, style, refactor, test, chore
 
 1. Push to your fork
 2. Create a pull request with:
-
    - Clear title and description
    - Reference to related issues
    - Description of testing performed
