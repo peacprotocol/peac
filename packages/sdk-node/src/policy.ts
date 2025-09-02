@@ -130,51 +130,59 @@ function validatePolicy(policy: unknown): asserts policy is Policy {
     throw new Error('Policy must be an object');
   }
 
-  if (!policy.version || typeof policy.version !== 'string') {
+  const policyObj = policy as Record<string, unknown>;
+
+  if (!policyObj['version'] || typeof policyObj['version'] !== 'string') {
     throw new Error('Policy must have a version string');
   }
 
-  if (!policy.site || typeof policy.site !== 'object') {
+  if (!policyObj['site'] || typeof policyObj['site'] !== 'object') {
     throw new Error('Policy must have a site object');
   }
 
-  if (!policy.site.name || typeof policy.site.name !== 'string') {
+  const siteObj = policyObj['site'] as Record<string, unknown>;
+
+  if (!siteObj['name'] || typeof siteObj['name'] !== 'string') {
     throw new Error('Policy site must have a name');
   }
 
-  if (!policy.site.domain || typeof policy.site.domain !== 'string') {
+  if (!siteObj['domain'] || typeof siteObj['domain'] !== 'string') {
     throw new Error('Policy site must have a domain');
   }
 
   // Validate attribution format regex if present
-  if (policy.attribution?.format) {
+  const attribution = policyObj['attribution'] as Record<string, unknown> | undefined;
+  if (attribution && attribution['format']) {
     try {
-      new RegExp(policy.attribution.format);
+      new RegExp(attribution['format'] as string);
     } catch {
       throw new Error('Invalid attribution format regex');
     }
   }
 
   // Validate retention_days if present
-  if (policy.privacy?.retention_days !== undefined) {
-    const days = policy.privacy.retention_days;
-    if (!Number.isInteger(days) || days < 1 || days > 365) {
+  const privacy = policyObj['privacy'] as Record<string, unknown> | undefined;
+  if (privacy && privacy['retention_days'] !== undefined) {
+    const days = privacy['retention_days'];
+    if (typeof days !== 'number' || !Number.isInteger(days) || days < 1 || days > 365) {
       throw new Error('retention_days must be between 1 and 365');
     }
   }
 
   // Validate max_rows if present
-  if (policy.exports?.max_rows !== undefined) {
-    const rows = policy.exports.max_rows;
-    if (!Number.isInteger(rows) || rows < 1 || rows > 1000000) {
+  const exports = policyObj['exports'] as Record<string, unknown> | undefined;
+  if (exports && exports['max_rows'] !== undefined) {
+    const rows = exports['max_rows'];
+    if (typeof rows !== 'number' || !Number.isInteger(rows) || rows < 1 || rows > 1000000) {
       throw new Error('max_rows must be between 1 and 1,000,000');
     }
   }
 
   // Validate logging sink if present
-  if (policy.logging?.sink) {
-    const sink = policy.logging.sink;
-    if (sink !== 'stdout' && !sink.startsWith('https://')) {
+  const logging = policyObj['logging'] as Record<string, unknown> | undefined;
+  if (logging && logging['sink']) {
+    const sink = logging['sink'];
+    if (typeof sink !== 'string' || (sink !== 'stdout' && !sink.startsWith('https://'))) {
       throw new Error('logging sink must be "stdout" or https URL');
     }
   }
