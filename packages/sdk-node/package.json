@@ -50,7 +50,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsx scripts/build.ts",
+    "build": "rm -rf dist && tsc",
     "test": "jest --coverage --forceExit",
     "test:watch": "jest --watch",
     "lint": "eslint 'src/**/*.ts'",
