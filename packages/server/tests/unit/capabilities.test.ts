@@ -25,7 +25,7 @@ describe('Capabilities Endpoint', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(
-        /application\/vnd\.peac\.capabilities\+json.*version=0\.9\.10/,
+        /application\/vnd\.peac\.capabilities\+json.*version=0\.9\.11/,
       );
       expect(res.body).toHaveProperty('version', '0.9.11');
       expect(res.body).toHaveProperty('protocol', 'PEAC');
