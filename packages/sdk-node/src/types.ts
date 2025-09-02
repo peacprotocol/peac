@@ -64,7 +64,7 @@ export interface ReceiptResult {
   ok: boolean;
   jws?: string;
   ref?: string;
-  claims?: any;
+  claims?: unknown;
   error?: string;
 }
 

@@ -359,7 +359,7 @@ export class PolicyLintCommand extends Command {
             },
           ],
           results: results.map((result) => ({
-            ruleId: result.path?.replace(/[$.\[\]]/g, '_') || 'general',
+            ruleId: result.path?.replace(/[$.[\]]/g, '_') || 'general',
             level: result.level === 'error' ? 'error' : 'warning',
             message: { text: result.message },
             locations: [

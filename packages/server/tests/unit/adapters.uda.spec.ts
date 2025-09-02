@@ -10,24 +10,25 @@ describe('UDAAdapter', () => {
       get: jest.fn(),
       del: jest.fn(),
     };
-    
+
     // Mock fetch to prevent network calls in tests
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        keys: [
-          {
-            kty: 'RSA',
-            use: 'sig',
-            kid: 'test-key-id',
-            alg: 'RS256',
-            n: 'mock-rsa-n-value',
-            e: 'AQAB',
-          }
-        ]
-      })
+      json: () =>
+        Promise.resolve({
+          keys: [
+            {
+              kty: 'RSA',
+              use: 'sig',
+              kid: 'test-key-id',
+              alg: 'RS256',
+              n: 'mock-rsa-n-value',
+              e: 'AQAB',
+            },
+          ],
+        }),
     });
-    
+
     adapter = new UDAAdapterImpl({ redis: mockRedis });
   });
 

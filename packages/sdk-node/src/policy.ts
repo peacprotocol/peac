@@ -125,7 +125,7 @@ export async function fetchPolicy(url: string, options: FetchPolicyOptions = {})
   }
 }
 
-function validatePolicy(policy: any): asserts policy is Policy {
+function validatePolicy(policy: unknown): asserts policy is Policy {
   if (!policy || typeof policy !== 'object') {
     throw new Error('Policy must be an object');
   }

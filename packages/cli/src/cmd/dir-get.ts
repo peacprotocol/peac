@@ -40,7 +40,7 @@ export class DirGetCommand extends Command {
   }
 
   private getCacheFile(url: string): string {
-    const hash = Buffer.from(url).toString('base64url').replace(/[\/=]/g, '_');
+    const hash = Buffer.from(url).toString('base64url').replace(/[/=]/g, '_');
     return join(this.getCacheDir(), `${hash}.json`);
   }
 
