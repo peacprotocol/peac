@@ -1,6 +1,36 @@
 import { Request, Response } from 'express';
 import { exportHandler } from '../../src/http/export';
 
+// Mock dependencies
+jest.mock('../../src/adapters/webbot/signature', () => ({
+  verifySignature: jest.fn().mockResolvedValue({ valid: false, reason: 'missing_auth' }),
+}));
+
+jest.mock('../../src/adapters/webbot/parse', () => ({
+  parseWebBotAuthHeaders: jest.fn().mockReturnValue(null),
+}));
+
+jest.mock('../../src/logging/index', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
+jest.mock('../../src/metrics/index', () => ({
+  metrics: {
+    exportAttempts: { inc: jest.fn() },
+    exportRowsStreamed: { inc: jest.fn() },
+    exportDuration: { observe: jest.fn() },
+  },
+}));
+
+jest.mock('../../src/telemetry/log', () => ({
+  telemetry: {
+    logExportStream: jest.fn(),
+  },
+}));
+
 describe('Export Endpoint', () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
