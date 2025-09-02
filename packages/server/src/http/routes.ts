@@ -28,7 +28,7 @@ import { metrics } from '../metrics';
 import { keyStore, exportJWKS } from '../core/keys';
 import { handleBatchVerifyPost, handleBatchVerifyGet } from './verify-endpoint';
 import { receiptStore } from '../core/receipt-store';
-import { exportHandler } from './export.js';
+import { exportHandler } from './export';
 import crypto from 'crypto';
 
 export function createRoutes() {
