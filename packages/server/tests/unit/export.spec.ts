@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { exportHandler } from '../../src/http/export.js';
+import { exportHandler } from '../../src/http/export';
 
 describe('Export Endpoint', () => {
   let mockReq: Partial<Request>;
@@ -24,6 +24,8 @@ describe('Export Endpoint', () => {
       status: mockStatus,
       send: mockSend,
       set: mockSet,
+      get: jest.fn(),
+      json: jest.fn(),
       pipe: jest.fn(),
       headersSent: false,
       destroy: jest.fn(),
@@ -40,9 +42,9 @@ describe('Export Endpoint', () => {
 
       // Mock the authentication function
       jest.doMock(
-        '../../src/http/export.js',
+        '../../src/http/export',
         () => ({
-          ...jest.requireActual('../../src/http/export.js'),
+          ...jest.requireActual('../../src/http/export'),
           authenticateExportRequest: mockAuth,
         }),
         { virtual: true },
@@ -50,11 +52,7 @@ describe('Export Endpoint', () => {
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
-      expect(mockSet).toHaveBeenCalledWith(
-        expect.objectContaining({
-          'content-type': 'application/x-ndjson',
-        }),
-      );
+      expect(mockSet).toHaveBeenCalledWith('Content-Type', 'application/problem+json');
     });
 
     it('should validate fmt parameter', async () => {
@@ -62,7 +60,8 @@ describe('Export Endpoint', () => {
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
-      expect(mockSend).toHaveBeenCalledWith(
+      expect(mockStatus).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: 'fmt must be ndjson or csv',
         }),
@@ -74,7 +73,8 @@ describe('Export Endpoint', () => {
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
-      expect(mockSend).toHaveBeenCalledWith(
+      expect(mockStatus).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: 'type must be receipts or attribution',
         }),
@@ -92,7 +92,8 @@ describe('Export Endpoint', () => {
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
-      expect(mockSend).toHaveBeenCalledWith(
+      expect(mockStatus).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: 'from date must be before to date',
         }),
@@ -110,7 +111,8 @@ describe('Export Endpoint', () => {
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
-      expect(mockSend).toHaveBeenCalledWith(
+      expect(mockStatus).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: 'Date range cannot exceed 30 days',
         }),
@@ -128,7 +130,8 @@ describe('Export Endpoint', () => {
 
       await exportHandler(mockReq as Request, mockRes as Response);
 
-      expect(mockSend).toHaveBeenCalledWith(
+      expect(mockStatus).toHaveBeenCalledWith(401);
+      expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: 'Export requires HTTP Message Signatures or Bearer token authentication',
         }),

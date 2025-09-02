@@ -259,7 +259,7 @@ describe('PEAC v0.9.11 Conformance Tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(
-        /application\/vnd\.peac\.capabilities\+json.*version=0\.9\.10/,
+        /application\/vnd\.peac\.capabilities\+json.*version=0\.9\.11/,
       );
     });
 
