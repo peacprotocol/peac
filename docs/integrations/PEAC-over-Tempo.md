@@ -1,7 +1,7 @@
 # PEAC over Tempo: Adapter Sketch (v0.9.12 • Dev Phase)
 
 **Date (IST):** 05 Sep 2025, 18:00
-**Status:** Tempo Adapter — **Preview (Stubbed Verification)** (stable on-wire; pluggable internals)
+**Status:** Tempo Adapter - **Preview (Stubbed Verification)** (stable on-wire; pluggable internals)
 **Scope:** Add a **Tempo** payment adapter to PEAC's 402 flow, without changing any wire contracts.
 
 ## Objectives
