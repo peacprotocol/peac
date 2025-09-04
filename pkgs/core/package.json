@@ -1,0 +1,35 @@
+{
+  "name": "@peac/core",
+  "version": "0.9.12",
+  "description": "PEAC Protocol v0.9.12 - Ultra-lean JWS signing and verification",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./sign": "./dist/sign.js",
+    "./verify": "./dist/verify.js",
+    "./types": "./dist/types.js",
+    "./validators": "./dist/validators.js"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test",
+    "test:perf": "node tests/perf.test.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "jose": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.2.0"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

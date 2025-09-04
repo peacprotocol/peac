@@ -7,3 +7,13 @@ coverage/
 scripts/
 .env
 .env.*
+
+# Package build artifacts
+*/dist/
+*/node_modules/
+**/package-lock.json
+
+# Development files
+*.log
+*.tmp
+.cache/

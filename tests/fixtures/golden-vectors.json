@@ -1,0 +1,141 @@
+{
+  "description": "PEAC v0.9.12 Golden Vectors - Reference test cases",
+  "version": "0.9.12",
+  "vectors": [
+    {
+      "name": "minimal-receipt",
+      "description": "Minimal valid receipt with required fields only",
+      "receipt": {
+        "subject": { "uri": "https://example.com/resource" },
+        "aipref": {
+          "status": "not_found",
+          "checked_at": "2025-09-16T18:00:00Z",
+          "reason": "No .well-known/aipref.json found"
+        },
+        "enforcement": { "method": "none" },
+        "issued_at": "2025-09-16T18:00:00Z",
+        "kid": "test-key-001"
+      },
+      "private_key": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "d": "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A",
+        "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+      },
+      "public_key": {
+        "kty": "OKP",
+        "crv": "Ed25519", 
+        "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+      }
+    },
+    {
+      "name": "paid-receipt", 
+      "description": "Receipt with payment (x402 rail)",
+      "receipt": {
+        "subject": { 
+          "uri": "https://example.com/protected",
+          "hash": { "alg": "SHA-256", "val": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+        },
+        "aipref": {
+          "status": "active",
+          "checked_at": "2025-09-16T18:00:00Z",
+          "snapshot": { "train-ai": false, "crawl": true },
+          "digest": { "alg": "JCS-SHA256", "val": "a1b2c3d4e5f6" }
+        },
+        "enforcement": { "method": "http-402", "status": "fulfilled" },
+        "payment": {
+          "rail": "x402",
+          "amount": { "value": "0.001", "currency": "USD" },
+          "status": "completed",
+          "evidence": { "provider_ids": ["txn_123abc"] }
+        },
+        "issued_at": "2025-09-16T18:00:00Z",
+        "kid": "test-key-001"
+      }
+    },
+    {
+      "name": "tempo-receipt",
+      "description": "Receipt with Tempo payment rail (adapter preview)",
+      "receipt": {
+        "subject": { 
+          "uri": "https://example.com/tempo-resource",
+          "hash": { "alg": "SHA-256", "val": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+        },
+        "aipref": {
+          "status": "active",
+          "checked_at": "2025-09-04T18:00:00Z",
+          "snapshot": { "train-ai": false, "crawl": true },
+          "digest": { "alg": "JCS-SHA256", "val": "tempo123" }
+        },
+        "enforcement": { "method": "http-402", "status": "fulfilled" },
+        "payment": {
+          "rail": "tempo",
+          "amount": { "value": "2.50", "currency": "USD" },
+          "status": "settled",
+          "evidence": { 
+            "provider_ids": [
+              "tempo:tx:0xabc123def456",
+              "tempo:chain:tempo-testnet",
+              "tempo:memo:base64url..."
+            ]
+          }
+        },
+        "issued_at": "2025-09-04T18:00:00Z",
+        "kid": "test-key-001",
+        "ext": {
+          "tempo": { 
+            "block": 12345, 
+            "network": "tempo-testnet",
+            "memo_digest": "sha256:abc123"
+          }
+        }
+      }
+    },
+    {
+      "name": "extended-receipt",
+      "description": "Receipt with extension fields (namespaced)",
+      "receipt": {
+        "subject": { "uri": "https://example.com/data" },
+        "aipref": {
+          "status": "active", 
+          "checked_at": "2025-09-16T18:00:00Z",
+          "snapshot": { "commercial": true },
+          "digest": { "alg": "JCS-SHA256", "val": "xyz789" }
+        },
+        "enforcement": { "method": "none" },
+        "issued_at": "2025-09-16T18:00:00Z",
+        "kid": "test-key-001",
+        "ext": {
+          "c2pa": { "manifest_url": "https://c2pa.example/manifest.json" },
+          "attr": [{ "uri": "https://source.example", "role": "creator" }],
+          "consent": { "version": "1.0", "grants": ["research"] }
+        }
+      }
+    }
+  ],
+  "test_cases": [
+    {
+      "name": "invalid-missing-aipref",
+      "description": "Should fail - missing required aipref field",
+      "receipt": {
+        "subject": { "uri": "https://example.com" },
+        "enforcement": { "method": "none" },
+        "issued_at": "2025-09-16T18:00:00Z",
+        "kid": "test-key-001"
+      },
+      "expected": "validation_error"
+    },
+    {
+      "name": "invalid-payment-required",
+      "description": "Should fail - http-402 without payment",
+      "receipt": {
+        "subject": { "uri": "https://example.com" },
+        "aipref": { "status": "not_found", "checked_at": "2025-09-16T18:00:00Z", "reason": "not found" },
+        "enforcement": { "method": "http-402" },
+        "issued_at": "2025-09-16T18:00:00Z",
+        "kid": "test-key-001"
+      },
+      "expected": "validation_error"
+    }
+  ]
+}
