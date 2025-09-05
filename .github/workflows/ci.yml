@@ -85,7 +85,7 @@ jobs:
           fi
           echo "::endgroup::"
 
-      - name: Type check - Ultra-lean packages  
+      - name: Type check - Ultra-lean packages
         timeout-minutes: 5
         run: |
           echo "::group::TypeScript compilation check (pkgs)"

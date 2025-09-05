@@ -2,7 +2,7 @@ name: peac 0.9.12 CI
 
 on:
   push:
-    branches: [ main, 'release/*' ]
+    branches: [main, 'release/*']
     paths:
       - 'pkgs/**'
       - 'docs/**'
@@ -11,7 +11,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
   pull_request:
-    branches: [ main, 'release/*' ]
+    branches: [main, 'release/*']
     paths:
       - 'pkgs/**'
       - 'docs/**'
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -39,7 +39,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             pkgs/**/package-lock.json
-            
+
       - name: Install dependencies
         run: |
           echo "::group::Installing dependencies"
@@ -141,7 +141,7 @@ jobs:
           if git grep -rE 'x-peac-' -- pkgs/ 2>/dev/null | grep -v 'test\|spec' | head -3; then
             echo "::warning::Found x-peac-* references (should migrate to PEAC-Receipt)"
           fi
-          
+
           echo "==> Ensure PEAC-Receipt header usage"  
           if git grep -r "peac-receipt\|PEAC-Receipt" -- pkgs/ 2>/dev/null | head -3; then
             echo "✓ Found PEAC-Receipt header usage"
@@ -172,13 +172,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js 22 (canary)
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
-          
+
       - run: |
           echo "::group::Node 22 canary build"
           npm ci --no-audit --no-fund
