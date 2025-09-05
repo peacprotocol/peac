@@ -1,24 +1,34 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: PEAC Protocol API
-  version: 0.9.10
-  x-release: 0.9.10-beta
-  description: Agent-Ready Web API for PEAC Protocol v0.9.10-beta with signed directory caching, key rotation, batch verification, and structured telemetry
+  title: PEAC Protocol API v0.9.12
+  version: 0.9.12
+  description: |
+    PEAC Protocol v0.9.12 Standards Alignment API
+    
+    Multi-rail HTTP 402 payment system with AIPREF policy integration,
+    Ed25519 JWS receipts, and RFC 9457 Problem Details error responses.
+    
+    **Breaking Changes from v0.9.11:**
+    - PEAC-Receipt header (x-peac-* headers removed)
+    - RFC 9457 Problem Details for all errors
+    - Enhanced crypto validation (EdDSA-only)
+    - AIPREF snapshot integration
+    
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
   contact:
     name: PEAC Protocol Team
     url: https://github.com/peacprotocol/peac
+
 tags:
-  - name: agreements
-    description: Agreement management operations
-  - name: payments
-    description: Payment processing operations
-  - name: webhooks
-    description: Webhook verification operations
+  - name: discovery
+    description: Discovery endpoints (.well-known)
   - name: verification
     description: Receipt verification operations
+  - name: protected
+    description: Protected resources requiring payment
+
 servers:
   - url: https://{host}
     variables:
@@ -26,859 +36,441 @@ servers:
         default: api.example.com
 
 paths:
-  /.well-known/peac:
+  /.well-known/peac.txt:
     get:
-      summary: Get PEAC Policy
-      description: Returns the site policy for PEAC Protocol usage, rate limits, and requirements
-      operationId: getPolicy
-      security: []
+      tags: [discovery]
+      summary: PEAC Discovery Configuration
+      description: |
+        Returns PEAC configuration in standardized format (≤20 lines).
+        Includes payment rails, AIPREF URL, verification endpoint.
+      operationId: getPeacTxt
       responses:
         '200':
-          description: Policy information
+          description: PEAC configuration
           headers:
-            x-peac-tier:
-              description: Rate limiting tier (anonymous or attributed)
-              schema:
-                type: string
-                enum: [anonymous, attributed]
-            ratelimit-limit:
-              description: Request limit for current tier
-              schema:
-                type: integer
-            ratelimit-remaining:
-              description: Remaining requests in current window
-              schema:
-                type: integer
-            ratelimit-reset:
-              description: Time until rate limit resets (seconds)
-              schema:
-                type: integer
-            Link:
-              description: Link to policy resource
-              schema:
-                type: string
-                example: '</.well-known/peac>; rel="peac-policy"'
+            Cache-Control:
+              schema: { type: string }
+              example: "public, max-age=3600"
+            ETag:
+              schema: { type: string }
+              example: '"v0.9.12-2025-09"'
           content:
-            text/plain; charset=utf-8:
+            text/plain:
               schema:
                 type: string
                 example: |
-                  version: 0.9.8.3
-                  default: allow
-
-                  identity:
-                    web_bot_auth:
-                      accepted: true
-
-                  attribution:
-                    required: false
-                    format: "AgentName (https://url) [purpose]"
-                    benefits:
-                      rate_multiplier: 10
-                      cache_ttl: 3600
-                      priority: true
-
-                  rate_limits:
-                    anonymous_rpm: 60
-                    attributed_rpm: 600
-
-                  receipts: optional
-
-                  paths:
-                    - match: "/admin/**"
-                      rule: deny
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PEACPolicy'
-        '429':
-          description: Rate limit exceeded
-          headers:
-            Retry-After:
-              description: Seconds to wait before retrying
-              schema:
-                type: integer
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-
-  /.well-known/peac.txt:
-    get:
-      summary: Redirect to Policy (Legacy)
-      description: Redirects to /.well-known/peac for backward compatibility
-      operationId: getPolicyLegacy
-      security: []
-      responses:
-        '200':
-          description: Successful redirect (should never be seen)
-        '302':
-          description: Redirect to /.well-known/peac
-          headers:
-            Location:
-              description: Redirect target
-              schema:
-                type: string
-                example: '/.well-known/peac'
-        '404':
-          description: Not Found
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-
-  /peac/agreements:
-    post:
-      summary: Create Agreement
-      description: Create a new agreement from a proposal with deterministic fingerprinting
-      operationId: createAgreement
-      tags:
-        - agreements
-      security:
-        - PEACProtocol: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AgreementProposal'
-            example:
-              purpose: 'AI model training on customer content'
-              consent:
-                required: true
-                mechanism: 'api-acknowledgment'
-                metadata:
-                  explicit_opt_in: true
-              attribution:
-                required: false
-                text: 'Powered by CustomerName AI'
-                placement: 'footer'
-              pricing_policy:
-                price: '2500'
-                currency: 'USD'
-                duration: 86400
-                usage: 'training'
-              terms:
-                text: 'Training data will be processed according to our AI training policy'
-                url: 'https://example.com/ai-training-terms'
-                version: 'v1.2'
-              metadata:
-                customer_tier: 'enterprise'
-                data_classification: 'public'
-      parameters:
-        - $ref: '#/components/parameters/XPEACProtocol'
-      responses:
-        '201':
-          description: Agreement created successfully
-          headers:
-            Location:
-              schema:
-                type: string
-              description: URI of the created agreement
-            ETag:
-              schema:
-                type: string
-              description: Weak ETag of fingerprint (W/"...")
-            Cache-Control:
-              schema:
-                type: string
-              description: 'no-store'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Agreement'
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
-        '426':
-          $ref: '#/components/responses/ProtocolUpgradeRequired'
-
-  /peac/agreements/{id}:
-    get:
-      summary: Get Agreement
-      description: Retrieve agreement with ETag support and caching semantics
-      operationId: getAgreement
-      tags:
-        - agreements
-      security: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^agr_[0-9A-HJKMNP-TV-Z]{26}$'
-          description: Agreement ID with agr_ prefix
-        - name: If-None-Match
-          in: header
-          schema:
-            type: string
-          description: ETag for conditional requests
-      responses:
-        '200':
-          description: Agreement found
-          headers:
-            ETag:
-              schema:
-                type: string
-              description: Weak ETag of agreement fingerprint
-            Cache-Control:
-              schema:
-                type: string
-              description: 'public, max-age=300, stale-while-revalidate=60'
-            Vary:
-              schema:
-                type: string
-              description: 'Accept, Accept-Encoding'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Agreement'
-        '304':
-          description: Not Modified
-          headers:
-            ETag:
-              schema:
-                type: string
-              description: Weak ETag of agreement fingerprint
-            Cache-Control:
-              schema:
-                type: string
-              description: 'no-cache'
-            Vary:
-              schema:
-                type: string
-              description: 'Accept, Accept-Encoding'
+                  version: 0.9.12
+                  preferences: https://example.com/.well-known/aipref.json
+                  access_control: http-402
+                  payments: ["x402", "l402"]
+                  provenance: c2pa
+                  receipts: required
+                  verify: https://example.com/peac/verify
+                  public_keys:
+                    - kid: "site-2025-09" alg: "EdDSA" key: "MCowBQYDK2VwAyEAGb9..."
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /peac/payments/charges:
-    post:
-      summary: Create charge (agreement-bound)
-      description: Process payment with mandatory agreement binding
-      operationId: createCharge
-      tags:
-        - payments
-      security:
-        - PEACProtocol: []
-        - PEACAgreement: []
-      parameters:
-        - $ref: '#/components/parameters/XPEACProtocol'
-        - $ref: '#/components/parameters/XPEACAgreement'
-        - $ref: '#/components/parameters/XPEACFingerprint'
-        - $ref: '#/components/parameters/IdempotencyKey'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaymentChargeRequest'
-            example:
-              amount: '2500'
-              currency: 'USD'
-              metadata:
-                order_id: 'order_12345'
-                customer_id: 'cust_67890'
-                description: 'AI model training agreement charge'
+  /.well-known/aipref.json:
+    get:
+      tags: [discovery]
+      summary: AIPREF Policy Configuration
+      description: AI preference policy in AIPREF format
+      operationId: getAipref
       responses:
         '200':
-          description: Payment receipt (or idempotent replay)
-          headers:
-            X-Idempotent-Replay:
-              schema:
-                type: string
-                enum: ['true']
-              description: Present when response is from idempotency cache
-              required: false
-            Age:
-              schema:
-                type: integer
-              description: Age of cached response in seconds (when X-Idempotent-Replay is true)
-              required: false
+          description: AIPREF policy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentReceipt'
+                $ref: '#/components/schemas/AiprefPolicy'
               example:
-                id: 'pay_01H8DEF123GHI456JKL789MNO0'
-                amount: '2500'
-                currency: 'USD'
-                agreement_id: 'agr_01H8ABC123DEF456GHI789JKL0'
-                agreement_fingerprint: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'
-                status: 'completed'
-                created_at: '2024-01-15T10:30:00Z'
-                metadata:
-                  order_id: 'order_12345'
-                  customer_id: 'cust_67890'
-                  processor: 'mock'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
-        '422':
-          $ref: '#/components/responses/InvalidReference'
-        '409':
-          $ref: '#/components/responses/AgreementMismatch'
-        '426':
-          $ref: '#/components/responses/ProtocolUpgradeRequired'
+                version: "0.1"
+                train-ai: false
+                crawl: true
+                commercial: false
+                rate-limit:
+                  requests: 100
+                  window: "1m"
+        '404':
+          $ref: '#/components/responses/NotFound'
 
-  /peac/negotiate:
+  /peac/verify:
     post:
-      deprecated: true
-      summary: (Deprecated) Create Agreement (alias)
-      description: Backwards compatibility alias for /peac/agreements with deprecation headers
-      operationId: negotiateDeprecated
-      tags:
-        - agreements
-      security:
-        - PEACProtocol: []
-      parameters:
-        - $ref: '#/components/parameters/XPEACProtocol'
+      tags: [verification]
+      summary: Verify PEAC Receipt
+      description: |
+        Verifies a PEAC receipt (compact JWS format) and returns validation results.
+        Checks signature, schema compliance, AIPREF policy, and payment evidence.
+      operationId: verifyReceipt
       requestBody:
         required: true
         content:
-          application/json:
+          application/jose:
             schema:
-              $ref: '#/components/schemas/AgreementProposal'
-      responses:
-        '201':
-          description: Created (Deprecated endpoint)
-          headers:
-            Deprecation:
-              schema:
-                type: string
-              example: 'true'
-            Sunset:
-              schema:
-                type: string
-              example: 'Wed, 30 Oct 2025 23:59:59 GMT'
-            Link:
-              schema:
-                type: string
-              example: '</peac/agreements>; rel="successor-version"'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Agreement'
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
-        '426':
-          $ref: '#/components/responses/ProtocolUpgradeRequired'
-
-  /webhooks/peac:
-    post:
-      summary: Verify inbound webhooks
-      description: HMAC verification with replay protection and timestamp validation
-      operationId: verifyWebhook
-      tags:
-        - webhooks
-      security:
-        - PEACSignature: []
-      requestBody:
-        required: true
-        content:
+              type: string
+              description: Compact JWS of the PEAC receipt
+              example: "eyJhbGciOiJFZERTQSIsImtpZCI6InNpdGUtMjAyNS0wOSJ9.eyJzdWJqZWN0Ijp7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vcmVzb3VyY2UifSwiYWlwcmVmIjp7InN0YXR1cyI6ImFjdGl2ZSIsImNoZWNrZWRfYXQiOiIyMDI1LTA5LTA1VDEyOjAwOjAwWiIsInNuYXBzaG90Ijp7InRyYWluLWFpIjpmYWxzZSwiY3Jhd2wiOnRydWV9LCJkaWdlc3QiOnsiYWxnIjoiSkNTLVNIQTI1NiIsInZhbCI6ImFiYzEyMyJ9fSwiZW5mb3JjZW1lbnQiOnsibWV0aG9kIjoibm9uZSJ9LCJpc3N1ZWRfYXQiOiIyMDI1LTA5LTA1VDEyOjAwOjAwWiIsImtpZCI6InNpdGUtMjAyNS0wOSJ9.signature"
           application/json:
             schema:
               type: object
-              description: Webhook payload (varies by webhook type)
-      responses:
-        '204':
-          description: Webhook verified successfully
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
-  /.well-known/peac/verify:
-    post:
-      summary: Batch Verify Receipts
-      description: Verify multiple PEAC receipts in a single request (max 100 items)
-      operationId: batchVerifyPost
-      tags:
-        - verification
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
+              required: [jws]
               properties:
                 jws:
-                  type: array
-                  items:
+                  type: string
+                  description: Compact JWS of the PEAC receipt
+      responses:
+        '200':
+          description: Receipt is valid
+          headers:
+            PEAC-Receipt:
+              description: Echo of the validated receipt
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, receipt, verified_at]
+                properties:
+                  status:
                     type: string
-                  maxItems: 100
-                  description: Array of JWS receipt tokens to verify
-              required:
-                - jws
-      responses:
-        '200':
-          description: Verification results
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - type: object
-                      properties:
-                        ok:
-                          type: boolean
-                          enum: [true]
-                        claims:
-                          type: object
-                        kid:
-                          type: string
-                        alg:
-                          type: string
-                          enum: [EdDSA]
-                    - type: object
-                      properties:
-                        ok:
-                          type: boolean
-                          enum: [false]
-                        error:
-                          type: string
-        '413':
-          description: Payload too large or too many items
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
+                    enum: [valid]
+                  receipt:
+                    $ref: '#/components/schemas/Receipt'
+                  verified_at:
+                    type: string
+                    format: date-time
+                  kid:
+                    type: string
+              example:
+                status: "valid"
+                receipt:
+                  subject:
+                    uri: "https://example.com/resource"
+                  aipref:
+                    status: "active"
+                    checked_at: "2025-09-05T12:00:00Z"
+                    snapshot:
+                      train-ai: false
+                      crawl: true
+                    digest:
+                      alg: "JCS-SHA256"
+                      val: "abc123"
+                  enforcement:
+                    method: "none"
+                  issued_at: "2025-09-05T12:00:00Z"
+                  kid: "site-2025-09"
+                verified_at: "2025-09-05T12:00:30Z"
+                kid: "site-2025-09"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/InvalidProof'
+        '422':
+          $ref: '#/components/responses/PolicyFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /api/resource:
     get:
-      summary: Verify Single Receipt
-      description: Verify a single PEAC receipt via query parameter (max 25 items)
-      operationId: batchVerifyGet
-      tags:
-        - verification
-      security: []
+      tags: [protected]
+      summary: Access Protected Resource
+      description: |
+        Example protected resource that requires payment via HTTP 402.
+        Demonstrates complete payment negotiation and receipt validation flow.
+      operationId: getProtectedResource
       parameters:
-        - name: jws
-          in: query
-          required: true
-          schema:
-            type: array
-            items:
-              type: string
-            maxItems: 25
-          style: form
-          explode: true
-          description: JWS receipt token(s) to verify
+        - name: PEAC-Receipt
+          in: header
+          required: false
+          description: PEAC receipt for paid access
+          schema: { type: string }
+        - name: Accept-Payments
+          in: header
+          required: false
+          description: Preferred payment rails with quality factors
+          schema: { type: string }
+          example: "x402;q=1.0, l402;q=0.8"
       responses:
         '200':
-          description: Verification results
+          description: Protected content served
+          headers:
+            PEAC-Receipt:
+              description: Echo of validated receipt
+              schema: { type: string }
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  oneOf:
-                    - type: object
-                      properties:
-                        ok:
-                          type: boolean
-                          enum: [true]
-                        claims:
-                          type: object
-                        kid:
-                          type: string
-                        alg:
-                          type: string
-                          enum: [EdDSA]
-                    - type: object
-                      properties:
-                        ok:
-                          type: boolean
-                          enum: [false]
-                        error:
-                          type: string
-        '413':
-          description: Too many items for GET request
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
+                type: object
+                properties:
+                  data: { type: string }
+                  served_at: { type: string, format: date-time }
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '401':
+          $ref: '#/components/responses/InvalidProof'
 
 components:
-  parameters:
-    XPEACProtocol:
-      name: X-PEAC-Protocol
-      in: header
-      required: true
-      schema:
-        type: string
-        enum: ['0.9.10']
-      description: PEAC Protocol version
-      example: '0.9.10'
-    XPEACAgreement:
-      name: X-PEAC-Agreement
-      in: header
-      required: true
-      schema:
-        type: string
-        pattern: '^agr_[0-9A-HJKMNP-TV-Z]{26}$'
-      description: Agreement ID for payment binding
-      example: 'agr_01HXE8GN9JKMNPQRSTVWXYZ234'
-    XPEACFingerprint:
-      name: X-PEAC-Fingerprint
-      in: header
-      required: false
-      schema:
-        type: string
-        pattern: '^[a-f0-9]{64}$'
-      description: Expected agreement fingerprint for verification
-    IdempotencyKey:
-      name: Idempotency-Key
-      in: header
-      required: false
-      schema:
-        type: string
-        pattern: '^[a-zA-Z0-9_-]{1,255}$'
-      description: Idempotency key for payment operations (prevents duplicate charges)
-      example: 'pay_2024_order_12345_abc'
-
   responses:
-    NotFound:
-      description: Resource not found
+    BadRequest:
+      description: Bad Request - Schema validation failed
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: 'https://peacprotocol.org/problems/not-found'
-            title: 'Not Found'
-            status: 404
-            detail: 'Agreement agr_example not found'
-    UnsupportedMediaType:
-      description: Unsupported Media Type
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-          example:
-            type: 'https://peacprotocol.org/problems/unsupported-media-type'
-            title: 'Unsupported Media Type'
-            status: 415
-    ProtocolUpgradeRequired:
-      description: Protocol upgrade required
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-          example:
-            type: 'https://peacprotocol.org/problems/protocol-version-required'
-            title: 'Upgrade Required'
-            status: 426
-            supported: ['0.9.8']
-    InvalidReference:
-      description: Invalid agreement reference
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-          example:
-            type: 'https://peacprotocol.org/problems/invalid-reference'
-            title: 'Unprocessable Entity'
-            status: 422
-            detail: 'Agreement agr_example not found'
-    AgreementMismatch:
-      description: Agreement fingerprint mismatch
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-          example:
-            type: 'https://peacprotocol.org/problems/agreement-mismatch'
-            title: 'Conflict'
-            status: 409
-            detail: 'Agreement fingerprint mismatch'
-    ValidationError:
-      description: Validation error
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-          example:
-            type: 'https://peacprotocol.org/problems/validation-error'
-            title: 'Bad Request'
+            type: "https://peac.dev/errors/schema-validation-failed"
+            title: "Receipt Schema Validation Failed"
             status: 400
-            detail: 'Invalid JSON in request body'
+            detail: "Missing required field: aipref.status"
+            instance: "/peac/verify"
+            errors:
+              - field: "aipref.status"
+                code: "required"
+                message: "Field is required"
+
+    InvalidProof:
+      description: Unauthorized - Invalid signature or unknown key
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://peac.dev/errors/invalid-proof"
+            title: "Receipt Signature Verification Failed"
+            status: 401
+            detail: "EdDSA signature verification failed for kid: site-2025-09"
+            instance: "/peac/verify"
+            kid: "site-2025-09"
+            algorithm: "EdDSA"
+
+    PaymentRequired:
+      description: Payment Required - HTTP 402 with payment challenges
+      headers:
+        WWW-Authenticate:
+          schema: { type: string }
+          example: 'x402 challenge="x402:pay:0x123@1:2.50:USD", l402 challenge="l402:invoice:lnbc..."'
+      content:
+        application/problem+json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ProblemDetails'
+              - type: object
+                properties:
+                  accept-payment:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentChallenge'
+          example:
+            type: "https://www.rfc-editor.org/rfc/rfc9110.html#status.402"
+            title: "Payment Required"
+            status: 402
+            detail: "Access to this resource requires payment"
+            instance: "/api/resource"
+            accept-payment:
+              - rail: "x402"
+                challenge: "x402:pay:0x123...abc@1:2.50:USD"
+                estimate: { value: "2.50", currency: "USD" }
+              - rail: "l402"
+                challenge: "l402:invoice:lnbc2500n1..."
+                estimate: { value: "2.50", currency: "USD" }
+
+    PolicyFailed:
+      description: Unprocessable Entity - AIPREF policy precondition failed
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://peac.dev/errors/policy-precondition-failed"
+            title: "AIPREF Policy Precondition Not Met"
+            status: 422
+            detail: "Resource requires train-ai=false but policy allows train-ai=true"
+            instance: "/api/resource"
+            policy_mismatch:
+              required: { "train-ai": false }
+              provided: { "train-ai": true }
+
+    RateLimited:
+      description: Too Many Requests - Rate limit exceeded
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://peac.dev/errors/rate-limited"
+            title: "Rate Limit Exceeded"
+            status: 429
+            detail: "Exceeded 100 requests per minute limit"
+            instance: "/peac/verify"
+            retry_after: 30
+            limit:
+              requests: 100
+              window: "1m"
+              remaining: 0
+              reset_at: "2025-09-05T12:01:00Z"
+
+    ServiceUnavailable:
+      description: Service Unavailable - Payment rail unavailable
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://peac.dev/errors/rail-unavailable"
+            title: "Payment Rail Temporarily Unavailable"
+            status: 503
+            detail: "Tempo payment rail is currently unavailable"
+            instance: "/api/resource"
+            rail: "tempo"
+            alternative_rails: ["x402", "l402"]
+            retry_after: 60
+
+    NotFound:
+      description: Not Found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
 
   schemas:
-    PEACPolicy:
+    ProblemDetails:
       type: object
-      description: PEAC Protocol site policy
-      properties:
-        version:
-          type: string
-          description: Protocol version
-          example: '0.9.8.3'
-        default:
-          type: string
-          description: Default access policy
-          enum: [allow, deny]
-          example: 'allow'
-        identity:
-          type: object
-          properties:
-            web_bot_auth:
-              type: object
-              properties:
-                accepted:
-                  type: boolean
-                  description: Whether Web Bot Auth headers are accepted
-        attribution:
-          type: object
-          properties:
-            required:
-              type: boolean
-              description: Whether attribution is required
-            format:
-              type: string
-              description: Expected attribution format
-              example: 'AgentName (https://url) [purpose]'
-            benefits:
-              type: object
-              properties:
-                rate_multiplier:
-                  type: integer
-                  description: Rate limit multiplier for attributed requests
-                cache_ttl:
-                  type: integer
-                  description: Cache TTL for attributed requests (seconds)
-                priority:
-                  type: boolean
-                  description: Whether attributed requests get priority
-        rate_limits:
-          type: object
-          properties:
-            anonymous_rpm:
-              type: integer
-              description: Rate limit for anonymous requests (per minute)
-            attributed_rpm:
-              type: integer
-              description: Rate limit for attributed requests (per minute)
-        receipts:
-          type: string
-          description: Receipt requirement level
-          enum: [required, optional, disabled]
-        paths:
-          type: array
-          description: Path-specific access rules
-          items:
-            type: object
-            properties:
-              match:
-                type: string
-                description: Path pattern to match
-              rule:
-                type: string
-                enum: [allow, deny]
-
-    AgreementProposal:
-      type: object
-      description: Agreement proposal for creation
-      properties:
-        purpose:
-          type: string
-          description: Human-readable purpose description
-          example: 'AI training on web content'
-        consent:
-          type: object
-          properties:
-            required:
-              type: boolean
-              description: Whether explicit consent is required
-            mechanism:
-              type: string
-              description: Consent mechanism (e.g., "api-acknowledgment")
-            metadata:
-              type: object
-              additionalProperties: true
-          required: [required]
-        attribution:
-          type: object
-          properties:
-            required:
-              type: boolean
-              description: Whether attribution is required
-            text:
-              type: string
-              description: Attribution text if required
-            placement:
-              type: string
-              description: Attribution placement requirements
-          required: [required]
-        pricing_policy:
-          type: object
-          properties:
-            price:
-              type: string
-              description: Minor currency units as decimal-free string
-              example: '2500'
-            currency:
-              type: string
-              description: Currency code (ISO 4217)
-              default: 'USD'
-            duration:
-              type: integer
-              description: Duration in seconds
-              example: 86400
-            usage:
-              type: string
-              enum: [training, inference, analytics, display, cache]
-              description: Usage category
-          required: [price, duration, usage]
-        terms:
-          type: object
-          properties:
-            text:
-              type: string
-              description: Terms text or reference
-            url:
-              type: string
-              format: uri
-              description: Terms URL for external reference
-            version:
-              type: string
-              description: Version of terms
-          required: [text]
-        metadata:
-          type: object
-          additionalProperties: true
-          description: Additional metadata (extensible)
-      required: [purpose, consent, attribution, pricing_policy, terms]
-
-    Agreement:
-      type: object
-      description: Created agreement resource
-      properties:
-        id:
-          type: string
-          pattern: '^agr_[0-9A-HJKMNP-TV-Z]{26}$'
-          description: Agreement ID with agr_ prefix (ULID)
-          example: 'agr_01HXE8GN9JKMNPQRSTVWXYZ234'
-        fingerprint:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
-          description: SHA256 fingerprint of canonical proposal
-          example: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'
-        protocol_version:
-          type: string
-          enum: ['0.9.8']
-          description: Protocol version used
-        status:
-          type: string
-          enum: [valid, invalid]
-          description: Agreement status
-        reason:
-          type: string
-          enum: [expired, revoked, suspended, malformed]
-          description: Reason if status is invalid
-        created_at:
-          type: string
-          format: date-time
-          description: Creation timestamp (ISO 8601)
-        expires_at:
-          type: string
-          format: date-time
-          description: Expiration timestamp (ISO 8601) if applicable
-        proposal:
-          allOf:
-            - $ref: '#/components/schemas/AgreementProposal'
-          description: Snapshot of original proposal
-      required: [id, fingerprint, protocol_version, status, created_at, proposal]
-
-    PaymentChargeRequest:
-      type: object
-      description: Payment charge request
-      properties:
-        amount:
-          type: string
-          description: Amount in minor currency units
-          example: '2500'
-        currency:
-          type: string
-          description: Currency code (ISO 4217)
-          default: 'USD'
-        metadata:
-          type: object
-          additionalProperties: true
-          description: Payment metadata
-      required: [amount]
-
-    PaymentReceipt:
-      type: object
-      description: Payment processing receipt
-      properties:
-        id:
-          type: string
-          description: Payment receipt ID
-          example: 'pay_1234567890'
-        amount:
-          type: string
-          description: Amount charged
-        currency:
-          type: string
-          description: Currency used
-        agreement_id:
-          type: string
-          description: Associated agreement ID
-        agreement_fingerprint:
-          type: string
-          description: Agreement fingerprint at time of payment
-        status:
-          type: string
-          enum: [completed, pending, failed]
-          description: Payment status
-        created_at:
-          type: string
-          format: date-time
-          description: Payment timestamp
-        metadata:
-          type: object
-          additionalProperties: true
-          description: Payment metadata including provider details
-      required: [id, amount, currency, agreement_id, agreement_fingerprint, status, created_at]
-
-    Problem:
-      type: object
-      description: RFC 7807 Problem Details for HTTP APIs
+      description: RFC 9457 Problem Details for HTTP APIs
+      required: [type, title, status]
       properties:
         type:
           type: string
           format: uri
-          description: Problem type URI
-          example: 'https://peacprotocol.org/problems/not-found'
+          description: Problem type identifier
         title:
           type: string
-          description: Human-readable problem title
+          description: Short human-readable summary
         status:
           type: integer
           description: HTTP status code
         detail:
           type: string
-          description: Human-readable problem details
+          description: Human-readable explanation
         instance:
           type: string
-          format: uri
-          description: URI reference to this specific problem occurrence
-      required: [type, title, status]
-      additionalProperties: true
+          description: URI reference that identifies the specific occurrence
 
-  securitySchemes:
-    PEACProtocol:
-      type: apiKey
-      in: header
-      name: X-PEAC-Protocol
-      description: PEAC Protocol version header
-    PEACAgreement:
-      type: apiKey
-      in: header
-      name: X-PEAC-Agreement
-      description: Agreement ID for payment binding
-    PEACSignature:
-      type: apiKey
-      in: header
-      name: Peac-Signature
-      description: HMAC signature for webhook verification
+    Receipt:
+      type: object
+      description: PEAC Protocol receipt (Core Receipt v1)
+      required: [subject, aipref, enforcement, issued_at, kid]
+      properties:
+        subject:
+          type: object
+          required: [uri]
+          properties:
+            uri:
+              type: string
+              format: uri
+              description: Resource URI
+            hash:
+              type: object
+              properties:
+                alg: { type: string, example: "SHA-256" }
+                val: { type: string }
+        aipref:
+          type: object
+          required: [status, checked_at]
+          properties:
+            status:
+              type: string
+              enum: [active, not_found, error, not_applicable]
+            checked_at:
+              type: string
+              format: date-time
+            snapshot:
+              type: object
+              additionalProperties: true
+              description: AIPREF policy snapshot
+            digest:
+              type: object
+              properties:
+                alg: { const: "JCS-SHA256" }
+                val: { type: string }
+            reason:
+              type: string
+              description: Error reason if status != active
+        enforcement:
+          type: object
+          required: [method]
+          properties:
+            method:
+              type: string
+              enum: [http-402, none]
+            status:
+              type: string
+              enum: [required, fulfilled]
+        payment:
+          type: object
+          description: Required if enforcement.method == http-402
+          properties:
+            rail:
+              type: string
+              enum: [x402, l402, tempo, stripe]
+            status:
+              type: string
+              enum: [pending, settled, failed]
+            amount:
+              type: object
+              properties:
+                value: { type: string }
+                currency: { type: string }
+            evidence:
+              type: object
+              properties:
+                provider_ids:
+                  type: array
+                  items: { type: string }
+                proof: { type: string }
+        issued_at:
+          type: string
+          format: date-time
+          description: Receipt issuance timestamp (UTC)
+        kid:
+          type: string
+          description: Key identifier for signature verification
+        ext:
+          type: object
+          additionalProperties: true
+          description: Extension fields
+
+    PaymentChallenge:
+      type: object
+      required: [rail, challenge, estimate]
+      properties:
+        rail:
+          type: string
+          enum: [x402, l402, tempo, stripe]
+        challenge:
+          type: string
+          description: Rail-specific payment challenge
+        estimate:
+          type: object
+          properties:
+            value: { type: string }
+            currency: { type: string }
+
+    AiprefPolicy:
+      type: object
+      description: AIPREF policy configuration
+      properties:
+        version: { type: string }
+        train-ai: { type: boolean }
+        crawl: { type: boolean }
+        commercial: { type: boolean }
+        rate-limit:
+          type: object
+          properties:
+            requests: { type: integer }
+            window: { type: string }
