@@ -1,0 +1,33 @@
+; PEAC Discovery Format v0.9.12 ABNF
+; RFC 5234 Core ABNF + RFC 7405 case-sensitive
+; MUST be ≤20 lines when formatted
+
+peac-txt = version preferences access payments provenance receipts verify keys
+
+version     = "version:" SP version-str CRLF
+version-str = "0.9.12"
+
+preferences = "preferences:" SP URI CRLF
+access      = "access_control:" SP ("none" / "http-402") CRLF
+payments    = "payments:" SP "[" rail-list "]" CRLF
+rail-list   = rail *("," SP rail)
+rail        = DQUOTE ("x402" / "tempo" / "l402" / "stripe") DQUOTE
+
+provenance  = "provenance:" SP ("none" / "c2pa") CRLF
+receipts    = "receipts:" SP ("optional" / "required") CRLF
+verify      = "verify:" SP URI CRLF
+
+keys        = "public_keys:" CRLF 1*key-entry
+key-entry   = SP "-" SP "kid:" SP kid-val SP "alg:" SP alg-val SP "key:" SP key-val CRLF
+kid-val     = DQUOTE 1*64(ALPHA / DIGIT / "-" / "_") DQUOTE
+alg-val     = DQUOTE "EdDSA" DQUOTE
+key-val     = DQUOTE base64url DQUOTE
+
+; Helpers (from RFC 5234)
+SP          = %x20
+CRLF        = %x0D.0A
+ALPHA       = %x41-5A / %x61-7A
+DIGIT       = %x30-39
+DQUOTE      = %x22
+URI         = 1*unreserved  ; simplified
+base64url   = 1*(ALPHA / DIGIT / "-" / "_")

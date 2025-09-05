@@ -6,12 +6,33 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./sign": "./dist/sign.js",
-    "./verify": "./dist/verify.js",
-    "./types": "./dist/types.js",
-    "./validators": "./dist/validators.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./sign": {
+      "types": "./dist/sign.d.ts",
+      "import": "./dist/sign.js"
+    },
+    "./verify": {
+      "types": "./dist/verify.d.ts",
+      "import": "./dist/verify.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    },
+    "./validators": {
+      "types": "./dist/validators.d.ts",
+      "import": "./dist/validators.js"
+    }
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsc",
@@ -29,6 +50,19 @@
     "typescript": "^5.2.0"
   },
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "pkgs/core"
+  },
+  "keywords": [
+    "peac",
+    "ed25519",
+    "jws",
+    "jose",
+    "receipts",
+    "cryptography"
+  ],
   "engines": {
     "node": ">=20.0.0"
   }
