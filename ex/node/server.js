@@ -42,7 +42,7 @@ public_keys:
   return c.text(peactxt, {
     headers: {
       'Cache-Control': 'public, max-age=3600',
-      'ETag': '"v0.9.12-2025-09"',
+      ETag: '"v0.9.12-2025-09"',
     },
   });
 });
@@ -52,11 +52,11 @@ app.get('/.well-known/aipref.json', (c) => {
   const aipref = {
     version: '0.1',
     'train-ai': false,
-    'crawl': true,
-    'commercial': false,
+    crawl: true,
+    commercial: false,
     'rate-limit': { requests: 100, window: '1m' },
   };
-  
+
   return c.json(aipref, {
     headers: {
       'Cache-Control': 'public, max-age=3600',
@@ -68,7 +68,7 @@ app.get('/.well-known/aipref.json', (c) => {
 app.post('/peac/issue', async (c) => {
   try {
     const { subject, payment } = await c.req.json();
-    
+
     // Create receipt
     const receipt = {
       subject: { uri: subject },
@@ -77,8 +77,8 @@ app.post('/peac/issue', async (c) => {
         checked_at: new Date().toISOString(),
         snapshot: {
           'train-ai': false,
-          'crawl': true,
-          'commercial': false,
+          crawl: true,
+          commercial: false,
         },
         digest: {
           alg: 'JCS-SHA256',
@@ -92,13 +92,13 @@ app.post('/peac/issue', async (c) => {
       issued_at: new Date().toISOString(),
       kid: 'site-2025-09',
     };
-    
+
     // Sign receipt
     const jws = await sign(receipt, {
       privateKey: KEYS['site-2025-09'],
       kid: 'site-2025-09',
     });
-    
+
     return c.json({ receipt: jws });
   } catch (error) {
     return c.json(
@@ -108,7 +108,7 @@ app.post('/peac/issue', async (c) => {
         status: 500,
         detail: error.message,
       },
-      500
+      500,
     );
   }
 });
@@ -118,7 +118,7 @@ app.post('/peac/verify', async (c) => {
   // Rate limiting
   const clientId = c.req.header('x-forwarded-for') || 'unknown';
   const attempts = rateLimiter.get(clientId) || 0;
-  
+
   if (attempts > 100) {
     return c.json(
       {
@@ -128,17 +128,17 @@ app.post('/peac/verify', async (c) => {
         detail: 'Exceeded 100 requests per minute',
         retry_after: 60,
       },
-      429
+      429,
     );
   }
-  
+
   rateLimiter.set(clientId, attempts + 1);
   setTimeout(() => rateLimiter.delete(clientId), 60000);
-  
+
   try {
     const receipt = await c.req.text();
     const result = await verify(receipt, KEYS);
-    
+
     return c.json({
       valid: true,
       receipt: result.obj,
@@ -153,7 +153,7 @@ app.post('/peac/verify', async (c) => {
         status: 401,
         detail: error.message,
       },
-      401
+      401,
     );
   }
 });
@@ -161,15 +161,15 @@ app.post('/peac/verify', async (c) => {
 // Protected API with 402 flow
 app.get('/api/content/:id', async (c) => {
   const receiptHeader = c.req.header('PEAC-Receipt');
-  
+
   if (!receiptHeader) {
     // Check Accept-Payments preference
     const acceptPayments = c.req.header('Accept-Payments');
     const preferredRail = parseAcceptPayments(acceptPayments);
-    
+
     // Build challenges based on preference
     const challenges = buildChallenges(preferredRail);
-    
+
     return c.json(
       {
         type: 'https://www.rfc-editor.org/rfc/rfc9110.html#status.402',
@@ -182,37 +182,37 @@ app.get('/api/content/:id', async (c) => {
       402,
       {
         'WWW-Authenticate': challenges
-          .map(ch => `${ch.rail} challenge="${ch.challenge}"`)
+          .map((ch) => `${ch.rail} challenge="${ch.challenge}"`)
           .join(', '),
-      }
+      },
     );
   }
-  
+
   // Verify receipt
   try {
     const result = await verify(receiptHeader, KEYS);
     const receipt = result.obj;
-    
+
     // Validate AIPREF
     if (receipt.aipref?.status !== 'active') {
       throw new Error('AIPREF policy not active');
     }
-    
+
     // Validate payment if required
     if (receipt.enforcement?.method === 'http-402') {
       if (!receipt.payment || !receipt.payment.evidence) {
         throw new Error('Payment evidence required');
       }
-      
+
       // Verify payment with appropriate adapter
       const adapter = getPaymentAdapter(receipt.payment.rail);
       const valid = await adapter.verify(receipt.payment.evidence);
-      
+
       if (!valid) {
         throw new Error('Payment verification failed');
       }
     }
-    
+
     // Serve content
     return c.json({
       id: c.req.param('id'),
@@ -227,7 +227,7 @@ app.get('/api/content/:id', async (c) => {
         status: 401,
         detail: error.message,
       },
-      401
+      401,
     );
   }
 });
@@ -235,12 +235,12 @@ app.get('/api/content/:id', async (c) => {
 // Helper: Parse Accept-Payments header
 function parseAcceptPayments(header) {
   if (!header) return 'x402'; // Default
-  
-  const parts = header.split(',').map(p => {
+
+  const parts = header.split(',').map((p) => {
     const [rail, q] = p.trim().split(';q=');
     return { rail, q: parseFloat(q || '1.0') };
   });
-  
+
   parts.sort((a, b) => b.q - a.q);
   return parts[0]?.rail || 'x402';
 }
@@ -259,12 +259,12 @@ function buildChallenges(preferredRail) {
       estimate: { value: '2.50', currency: 'USD' },
     },
   ];
-  
+
   // Put preferred rail first
   if (preferredRail === 'l402') {
     challenges.reverse();
   }
-  
+
   // Add Tempo in development mode
   if (process.env.NODE_ENV === 'development') {
     challenges.push({
@@ -273,7 +273,7 @@ function buildChallenges(preferredRail) {
       estimate: { value: '2.50', currency: 'USD' },
     });
   }
-  
+
   return challenges;
 }
 
@@ -281,17 +281,17 @@ function buildChallenges(preferredRail) {
 const paymentAdapters = {
   x402: {
     async verify(evidence) {
-      return evidence.provider_ids?.some(id => id.startsWith('x402:'));
+      return evidence.provider_ids?.some((id) => id.startsWith('x402:'));
     },
   },
   l402: {
     async verify(evidence) {
-      return evidence.provider_ids?.some(id => id.startsWith('l402:'));
+      return evidence.provider_ids?.some((id) => id.startsWith('l402:'));
     },
   },
   tempo: {
     async verify(evidence) {
-      return evidence.provider_ids?.some(id => id.startsWith('tempo:'));
+      return evidence.provider_ids?.some((id) => id.startsWith('tempo:'));
     },
   },
 };

@@ -104,6 +104,7 @@ exports[`RFC 7807 Problem Catalog Snapshots 426 - Upgrade Required (protocol-ver
 {
   "detail": "Version 0.8.0 is not supported",
   "instance": Any<String>,
+  "peac-advice": "Supported versions: 0.9.11",
   "provided_version": "0.8.0",
   "status": 426,
   "supported": [
@@ -112,7 +113,6 @@ exports[`RFC 7807 Problem Catalog Snapshots 426 - Upgrade Required (protocol-ver
   "title": "Upgrade Required",
   "trace_id": Any<String>,
   "type": "https://peacprotocol.org/problems/protocol-version-unsupported",
-  "x-peac-advice": "Supported versions: 0.9.11",
 }
 `;
 

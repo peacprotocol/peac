@@ -348,9 +348,7 @@
     },
     {
       "ref": "@peac/core@0.9.12|@types/node@20.19.13",
-      "dependsOn": [
-        "@peac/core@0.9.12|undici-types@6.21.0"
-      ]
+      "dependsOn": ["@peac/core@0.9.12|undici-types@6.21.0"]
     },
     {
       "ref": "@peac/core@0.9.12|jose@5.10.0"

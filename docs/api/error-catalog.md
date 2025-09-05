@@ -184,18 +184,18 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ## Error Code Mapping
 
-| Error Type | HTTP Status | Type URI |
-|------------|------------|----------|
-| Schema Validation | 400 | https://peac.dev/errors/schema-validation-failed |
-| Invalid Signature | 401 | https://peac.dev/errors/invalid-proof |
-| Unknown KID | 401 | https://peac.dev/errors/unknown-kid |
-| Payment Required | 402 | https://www.rfc-editor.org/rfc/rfc9110.html#status.402 |
-| Policy Failed | 422 | https://peac.dev/errors/policy-precondition-failed |
-| Rate Limited | 429 | https://peac.dev/errors/rate-limited |
-| Crypto Failed | 500 | https://peac.dev/errors/crypto-operation-failed |
-| Provider Error | 502 | https://peac.dev/errors/upstream-provider-error |
-| Rail Unavailable | 503 | https://peac.dev/errors/rail-unavailable |
-| Timeout | 504 | https://peac.dev/errors/discovery-timeout |
+| Error Type        | HTTP Status | Type URI                                               |
+| ----------------- | ----------- | ------------------------------------------------------ |
+| Schema Validation | 400         | https://peac.dev/errors/schema-validation-failed       |
+| Invalid Signature | 401         | https://peac.dev/errors/invalid-proof                  |
+| Unknown KID       | 401         | https://peac.dev/errors/unknown-kid                    |
+| Payment Required  | 402         | https://www.rfc-editor.org/rfc/rfc9110.html#status.402 |
+| Policy Failed     | 422         | https://peac.dev/errors/policy-precondition-failed     |
+| Rate Limited      | 429         | https://peac.dev/errors/rate-limited                   |
+| Crypto Failed     | 500         | https://peac.dev/errors/crypto-operation-failed        |
+| Provider Error    | 502         | https://peac.dev/errors/upstream-provider-error        |
+| Rail Unavailable  | 503         | https://peac.dev/errors/rail-unavailable               |
+| Timeout           | 504         | https://peac.dev/errors/discovery-timeout              |
 
 ## Client Error Handling
 
@@ -205,27 +205,27 @@ try {
   const result = await fetch('/peac/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/jose' },
-    body: receipt
+    body: receipt,
   });
-  
+
   if (!result.ok) {
     const problem = await result.json();
-    
+
     switch (problem.type) {
       case 'https://peac.dev/errors/rate-limited':
         // Wait and retry after problem.retry_after seconds
         await sleep(problem.retry_after * 1000);
         return retry();
-        
+
       case 'https://peac.dev/errors/rail-unavailable':
         // Try alternative rail
         return tryAlternativeRail(problem.alternative_rails[0]);
-        
+
       case 'https://peac.dev/errors/unknown-kid':
         // Refresh keys and retry
         await refreshKeys();
         return retry();
-        
+
       default:
         throw new Error(`${problem.title}: ${problem.detail}`);
     }

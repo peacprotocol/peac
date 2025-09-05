@@ -130,7 +130,7 @@ export class DiscoveryService {
       },
 
       version_negotiation: {
-        request_header: 'x-peac-protocol',
+        request_header: 'peac-version',
         current: WIRE_VERSION,
         supported: [WIRE_VERSION],
       },

@@ -42,7 +42,7 @@ export function validateProtocolVersion(req: Request, res: Response, next: NextF
       detail: `Version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
       supported: [WIRE_VERSION],
-      'x-peac-advice': `Supported versions: ${WIRE_VERSION}`,
+      'peac-advice': `Supported versions: ${WIRE_VERSION}`,
     });
   }
 
@@ -80,7 +80,7 @@ export function validateProtocolVersionWithDeprecation(
       detail: `Version ${protocolHeader} is not supported`,
       provided_version: protocolHeader,
       supported: [WIRE_VERSION],
-      'x-peac-advice': `Supported versions: ${WIRE_VERSION}`,
+      'peac-advice': `Supported versions: ${WIRE_VERSION}`,
     });
   }
 

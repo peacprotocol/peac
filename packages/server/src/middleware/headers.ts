@@ -3,19 +3,16 @@ import * as crypto from 'crypto';
 import { WIRE_VERSION } from '@peacprotocol/schema';
 
 /**
- * Wire-level headers + version negotiation (strict, pre-1.0).
+ * Wire-level headers + version negotiation (v0.9.12+).
  * Policy:
- * - Echo x-peac-protocol-version: 0.9.8 on all responses.
- * - Accept ONLY 0.9.8.
- * - Legacy header name x-peac-version is NOT supported (return 426).
- * - For unsupported/invalid versions, return 426 with RFC7807 payload
- *   and include x-peac-protocol-version-supported: 0.9.8.
- * - Staging canary: error-log if any X-PEAC-* header is emitted with uppercase chars.
+ * - Use PEAC-Receipt header as primary (RFC compliance)
+ * - NO x-peac-* headers supported (breaking change in v0.9.12)
+ * - Version negotiation via standard Accept/Content-Type patterns
+ * - RFC 7807 Problem Details for all errors
  */
 
 const ECHO = WIRE_VERSION;
 const SUPPORTED = [WIRE_VERSION];
-const MIN_SUPPORTED_PATCH = 11;
 
 // ---- utils --------------------------------------------------------------------
 
@@ -54,21 +51,20 @@ export function getLegacyHeaderMetrics() {
 export function headerMiddleware(_req: Request, res: Response, next: NextFunction) {
   const origSetHeader = res.setHeader.bind(res);
 
-  // Lower-case enforcement for X-PEAC-* + staging canary.
+  // v0.9.12: No x-peac-* headers allowed - use PEAC-Receipt standard
   (res as any).setHeader = (name: string, value: any) => {
     const lower = name.toLowerCase();
 
+    // Block any x-peac-* headers (breaking change in v0.9.12)
     if (lower.startsWith('x-peac-')) {
-      if (process.env.NODE_ENV === 'staging' && /[A-Z]/.test(name)) {
-        console.error(`CANARY: Uppercase header emission detected: ${name}`);
-      }
-      return origSetHeader(lower, value);
+      console.error(`v0.9.12 BREAKING: x-peac-* headers not supported: ${name}`);
+      return; // Silently drop
     }
     return origSetHeader(name, value);
   };
 
-  // Always echo the current protocol version on successful responses.
-  res.setHeader('x-peac-protocol-version', ECHO);
+  // v0.9.12: Use standard HTTP headers instead of x-peac-*
+  res.setHeader('peac-version', ECHO);
 
   next();
 }
@@ -76,22 +72,24 @@ export function headerMiddleware(_req: Request, res: Response, next: NextFunctio
 // ---- version negotiation middleware ------------------------------------------
 
 export function versionNegotiationMiddleware(req: Request, res: Response, next: NextFunction) {
-  const currentHdr = req.get('x-peac-protocol-version') as string | undefined;
-  const legacyHdr = req.get('x-peac-version') as string | undefined;
+  // v0.9.12: Check for proper PEAC headers, reject x-peac-*
+  const legacyProtocol = req.get('x-peac-protocol-version') as string | undefined;
+  const legacyVersion = req.get('x-peac-version') as string | undefined;
+  const peacVersion = req.get('peac-version') as string | undefined;
 
-  // Count every time a caller sends *any* version header.
-  if (currentHdr || legacyHdr) legacyCounters.total += 1;
+  // Count legacy usage for metrics
+  if (legacyProtocol || legacyVersion) legacyCounters.total += 1;
 
-  // Legacy header name is not supported at all (pre-1.0: no backward compat)
-  if (legacyHdr) {
+  // v0.9.12 BREAKING: No x-peac-* headers supported
+  if (legacyProtocol || legacyVersion) {
     try {
       console.warn(
         JSON.stringify({
           level: 'warn',
-          code: 'legacy-header-unsupported',
-          message: 'Header x-peac-version is not supported',
-          header: 'x-peac-version',
-          recommendation: `Send x-peac-protocol-version: ${WIRE_VERSION}`,
+          code: 'legacy-header-unsupported-v0912',
+          message: 'x-peac-* headers removed in v0.9.12',
+          header: legacyProtocol ? 'x-peac-protocol-version' : 'x-peac-version',
+          recommendation: `Use peac-version: ${WIRE_VERSION}`,
         }),
       );
     } catch {
@@ -99,32 +97,32 @@ export function versionNegotiationMiddleware(req: Request, res: Response, next: 
     }
     legacyCounters.hits += 1;
 
-    res.setHeader('x-peac-protocol-version-supported', SUPPORTED.join(','));
+    res.setHeader('peac-version-supported', SUPPORTED.join(','));
     res.setHeader('content-type', 'application/problem+json');
     const body = {
       type: 'https://peacprotocol.org/problems/unsupported-version',
       title: 'Upgrade Required',
       status: 426,
-      detail: 'Legacy header x-peac-version is not supported',
+      detail: 'x-peac-* headers removed in v0.9.12. Use peac-version header.',
       instance: ensureTrace(req, res),
     };
     res.status(426).end(JSON.stringify(body));
     return;
   }
 
-  // No requested version -> proceed; echo header already set by headerMiddleware.
-  if (!currentHdr) return next();
+  // No version header -> proceed with default
+  if (!peacVersion) return next();
 
-  // Strict parse 0.9.x
-  const m = String(currentHdr).match(/^(\d+)\.(\d+)\.(\d+)$/);
+  // Strict parse 0.9.x (now checking peac-version instead)
+  const m = String(peacVersion).match(/^(\d+)\.(\d+)\.(\d+)$/);
   if (!m) {
-    res.setHeader('x-peac-protocol-version-supported', SUPPORTED.join(','));
+    res.setHeader('peac-version-supported', SUPPORTED.join(','));
     res.setHeader('content-type', 'application/problem+json');
     const body = {
       type: 'https://peacprotocol.org/problems/unsupported-version',
       title: 'Upgrade Required',
       status: 426,
-      detail: `Requested version ${currentHdr} is not supported`,
+      detail: `Requested version ${peacVersion} is not supported`,
       instance: ensureTrace(req, res),
     };
     res.status(426).end(JSON.stringify(body));
@@ -134,20 +132,20 @@ export function versionNegotiationMiddleware(req: Request, res: Response, next: 
   const [, maj, min, patStr] = m;
   const patch = Number(patStr);
 
-  // Accept exactly 0.9.8; normalize to ECHO (0.9.8)
-  if (maj === '0' && min === '9' && patch === MIN_SUPPORTED_PATCH) {
-    res.setHeader('x-peac-protocol-version', ECHO);
+  // Accept exactly 0.9.12 (updated for current version)
+  if (maj === '0' && min === '9' && patch >= 12) {
+    res.setHeader('peac-version', ECHO);
     return next();
   }
 
   // Unsupported -> 426 problem details
-  res.setHeader('x-peac-protocol-version-supported', SUPPORTED.join(','));
+  res.setHeader('peac-version-supported', SUPPORTED.join(','));
   res.setHeader('content-type', 'application/problem+json');
   const body = {
     type: 'https://peacprotocol.org/problems/unsupported-version',
     title: 'Upgrade Required',
     status: 426,
-    detail: `Requested version ${currentHdr} is not supported`,
+    detail: `Requested version ${peacVersion} is not supported`,
     instance: ensureTrace(req, res),
   };
   res.status(426).end(JSON.stringify(body));

@@ -14,7 +14,7 @@ export class RateLimiter {
   constructor(
     private readonly capacity: number = 100,
     private readonly refillRate: number = 100, // tokens per minute
-    private readonly windowMs: number = 60000 // 1 minute
+    private readonly windowMs: number = 60000, // 1 minute
   ) {}
 
   consume(key: string, tokens: number = 1): boolean {
@@ -90,7 +90,7 @@ export class SSRFProtection {
 
       // Check hostname against deny list
       const hostname = parsed.hostname;
-      if (this.DENY_LIST.some(pattern => pattern.test(hostname))) {
+      if (this.DENY_LIST.some((pattern) => pattern.test(hostname))) {
         return false;
       }
 
@@ -108,7 +108,7 @@ export class SSRFProtection {
   static sanitizeHeaders(headers: Record<string, string>): Record<string, string> {
     const safe: Record<string, string> = {};
     const allowed = ['content-type', 'accept', 'user-agent', 'cache-control'];
-    
+
     for (const [key, value] of Object.entries(headers)) {
       const lower = key.toLowerCase();
       if (allowed.includes(lower)) {
@@ -116,7 +116,7 @@ export class SSRFProtection {
         safe[lower] = value.substring(0, 1024);
       }
     }
-    
+
     return safe;
   }
 }
@@ -182,14 +182,18 @@ export function constantTimeCompare(a: string, b: string): boolean {
 
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
-  
+
   return timingSafeEqual(bufA, bufB);
 }
 
 /**
  * Secure hash comparison
  */
-export function secureHashCompare(data: string, expectedHash: string, algorithm = 'sha256'): boolean {
+export function secureHashCompare(
+  data: string,
+  expectedHash: string,
+  algorithm = 'sha256',
+): boolean {
   const hash = createHash(algorithm).update(data).digest('hex');
   return constantTimeCompare(hash, expectedHash);
 }
@@ -202,11 +206,11 @@ export class DiscoveryConfig {
   static readonly CACHE_TTL_MS = 3600000; // 1 hour
   static readonly MAX_REDIRECTS = 3;
   static readonly ETAG_CACHE_SIZE = 1000;
-  
+
   static getTimeout(): number {
     return this.TIMEOUT_MS;
   }
-  
+
   static getCacheTTL(hasETag: boolean): number {
     // Shorter TTL if no ETag (can't validate freshness)
     return hasETag ? this.CACHE_TTL_MS : this.CACHE_TTL_MS / 4;
@@ -218,28 +222,28 @@ export class DiscoveryConfig {
  */
 export interface SecurityMiddleware {
   rateLimiter: RateLimiter;
-  
+
   checkRateLimit(key: string): {
     allowed: boolean;
     remaining: number;
     resetAt: Date;
   };
-  
+
   validateRequest(req: {
     url: string;
     headers: Record<string, string | string[]>;
     body?: string | Buffer;
   }): void;
-  
+
   validateDiscoveryURL(url: string): void;
 }
 
 export function createSecurityMiddleware(): SecurityMiddleware {
   const rateLimiter = new RateLimiter();
-  
+
   return {
     rateLimiter,
-    
+
     checkRateLimit(key: string) {
       const allowed = rateLimiter.consume(key);
       return {
@@ -248,7 +252,7 @@ export function createSecurityMiddleware(): SecurityMiddleware {
         resetAt: rateLimiter.getResetTime(key),
       };
     },
-    
+
     validateRequest(req) {
       RequestValidator.validateURL(req.url);
       RequestValidator.validateHeaders(req.headers);
@@ -256,7 +260,7 @@ export function createSecurityMiddleware(): SecurityMiddleware {
         RequestValidator.validateBody(req.body);
       }
     },
-    
+
     validateDiscoveryURL(url: string) {
       if (!SSRFProtection.isAllowedURL(url)) {
         throw new Error(`URL not allowed: ${url}`);

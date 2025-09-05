@@ -6,7 +6,7 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    
+
     // Discovery endpoint
     if (url.pathname === '/.well-known/peac.txt') {
       return new Response(PEAC_TXT, {
@@ -16,13 +16,13 @@ export default {
         },
       });
     }
-    
+
     // Verify endpoint
     if (url.pathname === '/peac/verify' && request.method === 'POST') {
       try {
         const receipt = await request.text();
         const result = await verifyReceipt(receipt, KEYS);
-        
+
         return new Response(JSON.stringify({ valid: true, receipt: result }), {
           headers: { 'Content-Type': 'application/json' },
         });
@@ -37,16 +37,16 @@ export default {
           {
             status: 401,
             headers: { 'Content-Type': 'application/problem+json' },
-          }
+          },
         );
       }
     }
-    
+
     // Protected resource requiring payment
     if (url.pathname.startsWith('/api/')) {
       // Check for receipt header
       const receiptHeader = request.headers.get('PEAC-Receipt');
-      
+
       if (!receiptHeader) {
         // Return 402 Payment Required with challenges
         return new Response(
@@ -74,24 +74,24 @@ export default {
               'Content-Type': 'application/problem+json',
               'WWW-Authenticate': 'PEAC realm="api", rails="x402,l402"',
             },
-          }
+          },
         );
       }
-      
+
       // Verify the receipt
       try {
         const receipt = await verifyReceipt(receiptHeader, KEYS);
-        
+
         // Check AIPREF compliance
         if (receipt.aipref?.status !== 'active') {
           throw new Error('AIPREF policy not active');
         }
-        
+
         // Check payment if required
         if (receipt.enforcement?.method === 'http-402' && !receipt.payment) {
           throw new Error('Payment evidence required');
         }
-        
+
         // Serve protected content
         return new Response(JSON.stringify({ data: 'Protected content' }), {
           headers: {
@@ -110,11 +110,11 @@ export default {
           {
             status: 401,
             headers: { 'Content-Type': 'application/problem+json' },
-          }
+          },
         );
       }
     }
-    
+
     // Default 404
     return new Response('Not Found', { status: 404 });
   },
@@ -125,26 +125,26 @@ async function verifyReceipt(jws, keys) {
   // Parse JWS header
   const [headerB64, payloadB64, signature] = jws.split('.');
   const header = JSON.parse(atob(headerB64));
-  
+
   // Validate algorithm
   if (header.alg !== 'EdDSA') {
     throw new Error(`Invalid algorithm: ${header.alg}`);
   }
-  
+
   // Check kid
   if (!header.kid || !keys[header.kid]) {
     throw new Error(`Unknown kid: ${header.kid}`);
   }
-  
+
   // In production, use proper crypto verification
   // For demo, just parse and return payload
   const payload = JSON.parse(atob(payloadB64));
-  
+
   // Basic schema validation
   if (!payload.subject?.uri || !payload.aipref || !payload.issued_at || !payload.kid) {
     throw new Error('Invalid receipt schema');
   }
-  
+
   return payload;
 }
 

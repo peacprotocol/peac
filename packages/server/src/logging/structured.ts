@@ -6,7 +6,7 @@ const REDACT_PATHS = [
   'req.headers.authorization',
   'req.headers.dpop',
   'req.headers["x-api-key"]',
-  'req.headers["x-peac-agent-attestation"]',
+  'req.headers["peac-agent-attestation"]',
   'req.body.password',
   'req.body.secret',
   'req.body.private_key',

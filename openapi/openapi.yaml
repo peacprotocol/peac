@@ -4,16 +4,16 @@ info:
   version: 0.9.12
   description: |
     PEAC Protocol v0.9.12 Standards Alignment API
-    
+
     Multi-rail HTTP 402 payment system with AIPREF policy integration,
     Ed25519 JWS receipts, and RFC 9457 Problem Details error responses.
-    
+
     **Breaking Changes from v0.9.11:**
     - PEAC-Receipt header (x-peac-* headers removed)
     - RFC 9457 Problem Details for all errors
     - Enhanced crypto validation (EdDSA-only)
     - AIPREF snapshot integration
-    
+
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
@@ -35,6 +35,9 @@ servers:
       host:
         default: api.example.com
 
+security:
+  - PeacReceipt: []
+
 paths:
   /.well-known/peac.txt:
     get:
@@ -44,13 +47,14 @@ paths:
         Returns PEAC configuration in standardized format (≤20 lines).
         Includes payment rails, AIPREF URL, verification endpoint.
       operationId: getPeacTxt
+      security: [] # Public endpoint
       responses:
         '200':
           description: PEAC configuration
           headers:
             Cache-Control:
               schema: { type: string }
-              example: "public, max-age=3600"
+              example: 'public, max-age=3600'
             ETag:
               schema: { type: string }
               example: '"v0.9.12-2025-09"'
@@ -77,6 +81,7 @@ paths:
       summary: AIPREF Policy Configuration
       description: AI preference policy in AIPREF format
       operationId: getAipref
+      security: [] # Public endpoint
       responses:
         '200':
           description: AIPREF policy
@@ -85,13 +90,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/AiprefPolicy'
               example:
-                version: "0.1"
+                version: '0.1'
                 train-ai: false
                 crawl: true
                 commercial: false
                 rate-limit:
                   requests: 100
-                  window: "1m"
+                  window: '1m'
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -103,6 +108,7 @@ paths:
         Verifies a PEAC receipt (compact JWS format) and returns validation results.
         Checks signature, schema compliance, AIPREF policy, and payment evidence.
       operationId: verifyReceipt
+      security: [] # Public verification endpoint
       requestBody:
         required: true
         content:
@@ -110,7 +116,7 @@ paths:
             schema:
               type: string
               description: Compact JWS of the PEAC receipt
-              example: "eyJhbGciOiJFZERTQSIsImtpZCI6InNpdGUtMjAyNS0wOSJ9.eyJzdWJqZWN0Ijp7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vcmVzb3VyY2UifSwiYWlwcmVmIjp7InN0YXR1cyI6ImFjdGl2ZSIsImNoZWNrZWRfYXQiOiIyMDI1LTA5LTA1VDEyOjAwOjAwWiIsInNuYXBzaG90Ijp7InRyYWluLWFpIjpmYWxzZSwiY3Jhd2wiOnRydWV9LCJkaWdlc3QiOnsiYWxnIjoiSkNTLVNIQTI1NiIsInZhbCI6ImFiYzEyMyJ9fSwiZW5mb3JjZW1lbnQiOnsibWV0aG9kIjoibm9uZSJ9LCJpc3N1ZWRfYXQiOiIyMDI1LTA5LTA1VDEyOjAwOjAwWiIsImtpZCI6InNpdGUtMjAyNS0wOSJ9.signature"
+              example: 'eyJhbGciOiJFZERTQSIsImtpZCI6InNpdGUtMjAyNS0wOSJ9.eyJzdWJqZWN0Ijp7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vcmVzb3VyY2UifSwiYWlwcmVmIjp7InN0YXR1cyI6ImFjdGl2ZSIsImNoZWNrZWRfYXQiOiIyMDI1LTA5LTA1VDEyOjAwOjAwWiIsInNuYXBzaG90Ijp7InRyYWluLWFpIjpmYWxzZSwiY3Jhd2wiOnRydWV9LCJkaWdlc3QiOnsiYWxnIjoiSkNTLVNIQTI1NiIsInZhbCI6ImFiYzEyMyJ9fSwiZW5mb3JjZW1lbnQiOnsibWV0aG9kIjoibm9uZSJ9LCJpc3N1ZWRfYXQiOiIyMDI1LTA5LTA1VDEyOjAwOjAwWiIsImtpZCI6InNpdGUtMjAyNS0wOSJ9.signature'
           application/json:
             schema:
               type: object
@@ -143,25 +149,25 @@ paths:
                   kid:
                     type: string
               example:
-                status: "valid"
+                status: 'valid'
                 receipt:
                   subject:
-                    uri: "https://example.com/resource"
+                    uri: 'https://example.com/resource'
                   aipref:
-                    status: "active"
-                    checked_at: "2025-09-05T12:00:00Z"
+                    status: 'active'
+                    checked_at: '2025-09-05T12:00:00Z'
                     snapshot:
                       train-ai: false
                       crawl: true
                     digest:
-                      alg: "JCS-SHA256"
-                      val: "abc123"
+                      alg: 'JCS-SHA256'
+                      val: 'abc123'
                   enforcement:
-                    method: "none"
-                  issued_at: "2025-09-05T12:00:00Z"
-                  kid: "site-2025-09"
-                verified_at: "2025-09-05T12:00:30Z"
-                kid: "site-2025-09"
+                    method: 'none'
+                  issued_at: '2025-09-05T12:00:00Z'
+                  kid: 'site-2025-09'
+                verified_at: '2025-09-05T12:00:30Z'
+                kid: 'site-2025-09'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -181,18 +187,15 @@ paths:
         Example protected resource that requires payment via HTTP 402.
         Demonstrates complete payment negotiation and receipt validation flow.
       operationId: getProtectedResource
+      security:
+        - PeacReceipt: []
       parameters:
-        - name: PEAC-Receipt
-          in: header
-          required: false
-          description: PEAC receipt for paid access
-          schema: { type: string }
         - name: Accept-Payments
           in: header
           required: false
           description: Preferred payment rails with quality factors
           schema: { type: string }
-          example: "x402;q=1.0, l402;q=0.8"
+          example: 'x402;q=1.0, l402;q=0.8'
       responses:
         '200':
           description: Protected content served
@@ -221,15 +224,15 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: "https://peac.dev/errors/schema-validation-failed"
-            title: "Receipt Schema Validation Failed"
+            type: 'https://peac.dev/errors/schema-validation-failed'
+            title: 'Receipt Schema Validation Failed'
             status: 400
-            detail: "Missing required field: aipref.status"
-            instance: "/peac/verify"
+            detail: 'Missing required field: aipref.status'
+            instance: '/peac/verify'
             errors:
-              - field: "aipref.status"
-                code: "required"
-                message: "Field is required"
+              - field: 'aipref.status'
+                code: 'required'
+                message: 'Field is required'
 
     InvalidProof:
       description: Unauthorized - Invalid signature or unknown key
@@ -238,13 +241,13 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: "https://peac.dev/errors/invalid-proof"
-            title: "Receipt Signature Verification Failed"
+            type: 'https://peac.dev/errors/invalid-proof'
+            title: 'Receipt Signature Verification Failed'
             status: 401
-            detail: "EdDSA signature verification failed for kid: site-2025-09"
-            instance: "/peac/verify"
-            kid: "site-2025-09"
-            algorithm: "EdDSA"
+            detail: 'EdDSA signature verification failed for kid: site-2025-09'
+            instance: '/peac/verify'
+            kid: 'site-2025-09'
+            algorithm: 'EdDSA'
 
     PaymentRequired:
       description: Payment Required - HTTP 402 with payment challenges
@@ -264,18 +267,18 @@ components:
                     items:
                       $ref: '#/components/schemas/PaymentChallenge'
           example:
-            type: "https://www.rfc-editor.org/rfc/rfc9110.html#status.402"
-            title: "Payment Required"
+            type: 'https://www.rfc-editor.org/rfc/rfc9110.html#status.402'
+            title: 'Payment Required'
             status: 402
-            detail: "Access to this resource requires payment"
-            instance: "/api/resource"
+            detail: 'Access to this resource requires payment'
+            instance: '/api/resource'
             accept-payment:
-              - rail: "x402"
-                challenge: "x402:pay:0x123...abc@1:2.50:USD"
-                estimate: { value: "2.50", currency: "USD" }
-              - rail: "l402"
-                challenge: "l402:invoice:lnbc2500n1..."
-                estimate: { value: "2.50", currency: "USD" }
+              - rail: 'x402'
+                challenge: 'x402:pay:0x123...abc@1:2.50:USD'
+                estimate: { value: '2.50', currency: 'USD' }
+              - rail: 'l402'
+                challenge: 'l402:invoice:lnbc2500n1...'
+                estimate: { value: '2.50', currency: 'USD' }
 
     PolicyFailed:
       description: Unprocessable Entity - AIPREF policy precondition failed
@@ -284,14 +287,14 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: "https://peac.dev/errors/policy-precondition-failed"
-            title: "AIPREF Policy Precondition Not Met"
+            type: 'https://peac.dev/errors/policy-precondition-failed'
+            title: 'AIPREF Policy Precondition Not Met'
             status: 422
-            detail: "Resource requires train-ai=false but policy allows train-ai=true"
-            instance: "/api/resource"
+            detail: 'Resource requires train-ai=false but policy allows train-ai=true'
+            instance: '/api/resource'
             policy_mismatch:
-              required: { "train-ai": false }
-              provided: { "train-ai": true }
+              required: { 'train-ai': false }
+              provided: { 'train-ai': true }
 
     RateLimited:
       description: Too Many Requests - Rate limit exceeded
@@ -303,17 +306,17 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: "https://peac.dev/errors/rate-limited"
-            title: "Rate Limit Exceeded"
+            type: 'https://peac.dev/errors/rate-limited'
+            title: 'Rate Limit Exceeded'
             status: 429
-            detail: "Exceeded 100 requests per minute limit"
-            instance: "/peac/verify"
+            detail: 'Exceeded 100 requests per minute limit'
+            instance: '/peac/verify'
             retry_after: 30
             limit:
               requests: 100
-              window: "1m"
+              window: '1m'
               remaining: 0
-              reset_at: "2025-09-05T12:01:00Z"
+              reset_at: '2025-09-05T12:01:00Z'
 
     ServiceUnavailable:
       description: Service Unavailable - Payment rail unavailable
@@ -322,13 +325,13 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: "https://peac.dev/errors/rail-unavailable"
-            title: "Payment Rail Temporarily Unavailable"
+            type: 'https://peac.dev/errors/rail-unavailable'
+            title: 'Payment Rail Temporarily Unavailable'
             status: 503
-            detail: "Tempo payment rail is currently unavailable"
-            instance: "/api/resource"
-            rail: "tempo"
-            alternative_rails: ["x402", "l402"]
+            detail: 'Tempo payment rail is currently unavailable'
+            instance: '/api/resource'
+            rail: 'tempo'
+            alternative_rails: ['x402', 'l402']
             retry_after: 60
 
     NotFound:
@@ -343,6 +346,7 @@ components:
       type: object
       description: RFC 9457 Problem Details for HTTP APIs
       required: [type, title, status]
+      additionalProperties: true # Allow extension fields per RFC 9457
       properties:
         type:
           type: string
@@ -377,7 +381,7 @@ components:
             hash:
               type: object
               properties:
-                alg: { type: string, example: "SHA-256" }
+                alg: { type: string, example: 'SHA-256' }
                 val: { type: string }
         aipref:
           type: object
@@ -396,7 +400,7 @@ components:
             digest:
               type: object
               properties:
-                alg: { const: "JCS-SHA256" }
+                alg: { const: 'JCS-SHA256' }
                 val: { type: string }
             reason:
               type: string
@@ -474,3 +478,12 @@ components:
           properties:
             requests: { type: integer }
             window: { type: string }
+
+  securitySchemes:
+    PeacReceipt:
+      type: apiKey
+      in: header
+      name: PEAC-Receipt
+      description: |
+        PEAC Protocol receipt in compact JWS format.
+        Contains cryptographic proof of payment and policy compliance.

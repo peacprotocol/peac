@@ -84,11 +84,12 @@ PERF_ADAPTER=tempo npm run perf:validate
 Each payment adapter has a p95 latency budget:
 
 - **x402 adapter**: ≤1ms verification overhead
-- **tempo adapter**: ≤1ms verification overhead  
+- **tempo adapter**: ≤1ms verification overhead
 - **l402 adapter**: ≤2ms (Lightning preimage verification)
 - **stripe adapter**: ≤5ms (webhook signature validation)
 
 Total receipt verification should not exceed:
+
 - **Cold path**: 10ms (includes key loading, first verification)
 - **Warm path**: 5ms (cached keys, subsequent verifications)
 
