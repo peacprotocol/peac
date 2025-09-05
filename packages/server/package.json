@@ -66,7 +66,7 @@
     "prom-client": "^15.1.0",
     "tldts": "^7.0.12",
     "ulidx": "^2.4.1",
-    "uuid": "^9.0.1",
+    "uuid": "^11.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
