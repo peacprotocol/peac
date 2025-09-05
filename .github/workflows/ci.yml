@@ -38,7 +38,7 @@ jobs:
             packages/server/src \
             packages/schema/src \
             packages/sdk-js/sdk \
-            pkgs/*/src 2>/dev/null || true; then
+            pkgs/*/src 2>/dev/null; then
             echo "::error::Found TODO/FIXME/HACK/DEBUG markers in production code"
             echo "::endgroup::"
             exit 1
