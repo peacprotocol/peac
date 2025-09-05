@@ -93,6 +93,15 @@ Total receipt verification should not exceed:
 - **Cold path**: 10ms (includes key loading, first verification)
 - **Warm path**: 5ms (cached keys, subsequent verifications)
 
+## Important Notes
+
+⚠️ **Mock Implementation**: These results use simplified mock functions that simulate JWS operations without actual Ed25519 cryptography. Real-world performance will be lower due to:
+
+- Actual Ed25519 signature generation/verification
+- JWK key import/export operations
+- JSON canonicalization overhead
+- Network I/O for remote operations
+
 ## Production Expectations
 
 For production deployments with real cryptographic operations:

@@ -60,7 +60,6 @@ ga-check:
 	@echo ""
 	@echo "=================================="
 	@echo "✅ Ready for v0.9.12 GA!"
-
 # Release process
 release:
 	node tooling/release.mjs
