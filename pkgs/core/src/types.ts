@@ -8,12 +8,12 @@ export type KeySet = Record<Kid, { kty: 'OKP'; crv: 'Ed25519'; x: string }>;
 
 // Core Receipt v1 (ADR-002 compliant)
 export interface Rec {
-  subject: { 
-    uri?: string; 
-    hash?: { alg: string; val: string } 
+  subject: {
+    uri?: string;
+    hash?: { alg: string; val: string };
   };
-  agent?: { 
-    id?: string 
+  agent?: {
+    id?: string;
   };
   // ADR-002: AIPREF object ALWAYS present
   aipref: {

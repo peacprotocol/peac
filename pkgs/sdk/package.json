@@ -24,7 +24,13 @@
   "devDependencies": {
     "typescript": "^5.0.0"
   },
-  "keywords": ["peac", "sdk", "client", "verify", "discover"],
+  "keywords": [
+    "peac",
+    "sdk",
+    "client",
+    "verify",
+    "discover"
+  ],
   "license": "MIT",
   "repository": "https://github.com/peac-protocol/peac",
   "sideEffects": false

@@ -24,7 +24,12 @@
   "devDependencies": {
     "typescript": "^5.0.0"
   },
-  "keywords": ["peac", "aipref", "robots", "preferences"],
+  "keywords": [
+    "peac",
+    "aipref",
+    "robots",
+    "preferences"
+  ],
   "license": "MIT",
   "repository": "https://github.com/peac-protocol/peac",
   "sideEffects": false

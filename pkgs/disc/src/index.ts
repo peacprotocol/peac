@@ -4,12 +4,7 @@
  */
 
 export { parse, emit, validate } from './parser.js';
-export type { 
-  PeacDiscovery, 
-  PublicKeyInfo, 
-  ParseResult, 
-  ValidationOptions 
-} from './types.js';
+export type { PeacDiscovery, PublicKeyInfo, ParseResult, ValidationOptions } from './types.js';
 
 // Constants
 export const MAX_LINES = 20;
@@ -20,23 +15,23 @@ export async function discover(origin: string): Promise<import('./types.js').Par
   try {
     const url = new URL(WELL_KNOWN_PATH, origin);
     const response = await fetch(url.toString(), {
-      headers: { 'User-Agent': 'PEAC/0.9.12 (+https://peac.dev)' }
+      headers: { 'User-Agent': 'PEAC/0.9.12 (+https://peac.dev)' },
     });
-    
+
     if (!response.ok) {
       return {
         valid: false,
-        errors: [`HTTP ${response.status}: ${response.statusText}`]
+        errors: [`HTTP ${response.status}: ${response.statusText}`],
       };
     }
-    
+
     const content = await response.text();
     const { parse } = await import('./parser.js');
     return parse(content);
   } catch (error) {
     return {
       valid: false,
-      errors: [`Discovery failed: ${error instanceof Error ? error.message : String(error)}`]
+      errors: [`Discovery failed: ${error instanceof Error ? error.message : String(error)}`],
     };
   }
 }

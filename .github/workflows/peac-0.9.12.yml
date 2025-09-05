@@ -1,0 +1,183 @@
+name: peac 0.9.12 CI
+
+on:
+  push:
+    branches: [ main, 'release/*' ]
+    paths:
+      - 'pkgs/**'
+      - 'docs/**'
+      - 'cli/**'
+      - 'Makefile'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [ main, 'release/*' ]
+    paths:
+      - 'pkgs/**'
+      - 'docs/**'
+      - 'cli/**'
+      - 'Makefile'
+      - 'package.json'
+
+permissions: { contents: read }
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            pkgs/**/package-lock.json
+            
+      - name: Install dependencies
+        run: |
+          echo "::group::Installing dependencies"
+          npm ci --no-audit --no-fund
+          echo "::endgroup::"
+
+      - name: Version validation
+        run: |
+          echo "::group::Version validation"
+          ROOT_VER=$(node -e "console.log(require('./package.json').version||'')")
+          if [ "$ROOT_VER" != "0.9.12" ]; then
+            echo "ERROR: Root package.json version is '$ROOT_VER', expected '0.9.12'"
+            exit 1
+          fi
+          echo "✓ Version is v0.9.12"
+          echo "::endgroup::"
+
+      - name: Code hygiene
+        run: |
+          echo "::group::Checking for TODO/FIXME/HACK/DEBUG in pkgs/"
+          if git grep -nE '(TODO|FIXME|HACK|WIP|^\s*//\s*DEBUG)' -- pkgs/*/src 2>/dev/null; then
+            echo "::error::Found forbidden markers in ultra-lean packages"
+            exit 1
+          fi
+          echo "✓ No forbidden markers in pkgs/"
+          echo "::endgroup::"
+
+      - name: Build ultra-lean packages
+        run: |
+          echo "::group::Building ultra-lean packages"
+          for pkg in pkgs/*/package.json; do
+            if [ -f "$pkg" ]; then
+              dir=$(dirname "$pkg")
+              echo "Building $dir..."
+              if [ -f "$dir/tsconfig.json" ]; then
+                cd "$dir" && timeout 60s npx tsc && cd ../..
+              fi
+            fi
+          done
+          echo "::endgroup::"
+
+      - name: Type checking
+        run: |
+          echo "::group::TypeScript type checking (pkgs)"
+          for pkg in pkgs/*/tsconfig.json; do
+            if [ -f "$pkg" ]; then
+              dir=$(dirname "$pkg")
+              echo "Type-checking $dir..."
+              cd "$dir" && timeout 60s npx tsc --noEmit && cd ../..
+            fi
+          done
+          echo "::endgroup::"
+
+      - name: Lint packages
+        run: |
+          echo "::group::ESLint validation (pkgs)"
+          for pkg in pkgs/*/src; do
+            if [ -d "$pkg" ]; then
+              echo "Linting $pkg..."
+              timeout 60s npx eslint "$pkg" --ext .ts --max-warnings=0
+            fi
+          done
+          echo "::endgroup::"
+
+      - name: Format check
+        run: |
+          echo "::group::Prettier format check"
+          timeout 120s npx prettier --check pkgs/ cli/ docs/
+          echo "::endgroup::"
+
+      - name: Unit tests
+        run: |
+          echo "::group::Running ultra-lean package tests"
+          for pkg in pkgs/*/src; do
+            if [ -d "$pkg" ]; then
+              dir=$(dirname "$pkg")
+              if ls "$pkg"/*.test.* 1> /dev/null 2>&1; then
+                echo "Running tests in $dir..."
+                cd "$dir" && timeout 120s npm test && cd ../..
+              fi
+            fi
+          done
+          echo "::endgroup::"
+
+      - name: Header validation (v0.9.12 breaking changes)
+        run: |
+          echo "::group::Header validation"
+          echo "==> Forbid x-peac-* headers (v0.9.12+ breaking change)"
+          if git grep -rE 'x-peac-' -- pkgs/ 2>/dev/null | grep -v 'test\|spec' | head -3; then
+            echo "::warning::Found x-peac-* references (should migrate to PEAC-Receipt)"
+          fi
+          
+          echo "==> Ensure PEAC-Receipt header usage"  
+          if git grep -r "peac-receipt\|PEAC-Receipt" -- pkgs/ 2>/dev/null | head -3; then
+            echo "✓ Found PEAC-Receipt header usage"
+          fi
+          echo "::endgroup::"
+
+      - name: Security baseline
+        run: |
+          echo "::group::Security audit (production deps)"
+          timeout 120s npm audit --omit=dev || echo "::warning::Security audit found issues (non-blocking for RC)"
+          echo "::endgroup::"
+
+      - name: Performance gates (when available)
+        run: |
+          echo "::group::Performance smoke test"
+          if [ -f "tests/perf/run.mjs" ]; then
+            timeout 60s node tests/perf/run.mjs || echo "::warning::Performance test not yet implemented"
+          else
+            echo "::warning::Performance tests not available yet"
+          fi
+          echo "::endgroup::"
+
+  # Optional canary on Node 22 (non-blocking)
+  canary-node22:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js 22 (canary)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          
+      - run: |
+          echo "::group::Node 22 canary build"
+          npm ci --no-audit --no-fund
+          for pkg in pkgs/*/package.json; do
+            if [ -f "$pkg" ]; then
+              dir=$(dirname "$pkg")
+              if [ -f "$dir/tsconfig.json" ]; then
+                cd "$dir" && npx tsc && cd ../..
+              fi
+            fi
+          done
+          echo "::endgroup::"

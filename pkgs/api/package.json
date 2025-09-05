@@ -24,7 +24,13 @@
   "devDependencies": {
     "typescript": "^5.0.0"
   },
-  "keywords": ["peac", "verify", "api", "rfc9457", "problem-details"],
+  "keywords": [
+    "peac",
+    "verify",
+    "api",
+    "rfc9457",
+    "problem-details"
+  ],
   "license": "MIT",
   "repository": "https://github.com/peac-protocol/peac",
   "sideEffects": false
