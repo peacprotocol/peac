@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../logging';
 
-// GREASE reserved headers and fields to ignore
+// v0.9.12: GREASE reserved headers (no x-peac-* support)
 const GREASE_HEADERS = new Set([
-  'x-peac-reserved-1',
-  'x-peac-reserved-2',
-  'x-peac-reserved-3',
-  'x-peac-grease-test',
+  'peac-reserved-1',
+  'peac-reserved-2',
+  'peac-reserved-3',
+  'peac-grease-test',
 ]);
 
 const GREASE_FIELDS = new Set(['_reserved_1', '_reserved_2', '_grease_test', '_extension_probe']);
@@ -17,16 +17,20 @@ export class GreaseHandler {
    */
   middleware() {
     return (req: Request, _res: Response, next: NextFunction) => {
-      // Extract and log any x-peac-* headers
+      // v0.9.12: Extract peac-* headers (no x-peac-* support)
       const peacHeaders: Record<string, string> = {};
       for (const [key, value] of Object.entries(req.headers)) {
-        if (key.toLowerCase().startsWith('x-peac-')) {
+        if (key.toLowerCase().startsWith('peac-')) {
           const normalizedKey = key.toLowerCase();
           if (!GREASE_HEADERS.has(normalizedKey)) {
             peacHeaders[normalizedKey] = String(value);
           } else {
             logger.debug({ header: key, value }, 'Ignoring GREASE header');
           }
+        }
+        // Block and warn about legacy x-peac-* headers
+        if (key.toLowerCase().startsWith('x-peac-')) {
+          logger.warn({ header: key }, 'v0.9.12: x-peac-* headers no longer supported');
         }
       }
 

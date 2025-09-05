@@ -22,7 +22,7 @@ async function loadProvider(): Promise<{
 }
 
 export async function handlePayment(req: Request, res: Response): Promise<void> {
-  // Do not set any x-peac-* header here; middleware will echo 0.9.5.
+  // v0.9.12: Headers handled by middleware (uses peac-version)
   try {
     const { name, Provider } = await loadProvider();
     metrics.paymentAttempt.inc({ provider: name, outcome: 'attempt' });

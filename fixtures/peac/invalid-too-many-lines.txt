@@ -1,0 +1,22 @@
+version: 0.9.12
+preferences: https://example.com/.well-known/aipref.json
+access_control: http-402
+payments: ["x402", "l402", "stripe", "tempo"]
+provenance: c2pa
+receipts: required
+verify: https://example.com/peac/verify
+cache_control: max-age=3600
+extra_field_1: value1
+extra_field_2: value2
+extra_field_3: value3
+extra_field_4: value4
+extra_field_5: value5
+extra_field_6: value6
+extra_field_7: value7
+extra_field_8: value8
+public_keys:
+  - kid: "key1" alg: "EdDSA" key: "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE"
+  - kid: "key2" alg: "EdDSA" key: "MCowBQYDK2VwAyEAJrQLj5P_89iXES9kc78gvSZ158-o3OuZlJNtaRJpD9I"
+  - kid: "key3" alg: "EdDSA" key: "MCowBQYDK2VwAyEALKJqPti8pfbFPXOfQ0_FYmJNwZ8waBXUvSN4xZhZMKw"
+  - kid: "key4" alg: "EdDSA" key: "MCowBQYDK2VwAyEAPEP0LlEjdXJLDfrPe5c0hNFrF7WMRm2qN7ETN9gKPBs"
+  - kid: "key5" alg: "EdDSA" key: "MCowBQYDK2VwAyEAh8pkqISEb-k9YjbZ2KW1K7ntzOwJTgsNJmGKOXG0QGk"

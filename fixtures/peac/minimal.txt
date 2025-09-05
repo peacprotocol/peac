@@ -1,0 +1,9 @@
+version: 0.9.12
+preferences: https://example.com/.well-known/aipref.json
+access_control: none
+payments: ["x402"]
+provenance: none
+receipts: optional
+verify: https://example.com/peac/verify
+public_keys:
+  - kid: "site-2025-09" alg: "EdDSA" key: "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE"

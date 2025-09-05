@@ -150,7 +150,7 @@ class TieredRateLimiter {
         logger.warn({ key, tier, remaining, retryAfter }, 'Rate limit exceeded');
 
         problemDetails.send(res, 'rate_limit_exceeded', {
-          detail: 'Send x-peac-attribution to receive higher limits',
+          detail: 'Send peac-attribution header to receive higher limits',
         });
       }
     };

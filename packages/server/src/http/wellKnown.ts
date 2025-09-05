@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import { WIRE_VERSION } from '@peacprotocol/schema';
 
 export function handleWellKnown(_req: Request, res: Response): void {
-  // Version header is handled centrally by middleware (x-peac-protocol-version: 0.9.8)
+  // v0.9.12: Version header handled by middleware (peac-version)
   res.set('content-type', 'application/json');
   res.status(200).json({
     peac_version: WIRE_VERSION,

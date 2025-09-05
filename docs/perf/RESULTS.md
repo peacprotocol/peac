@@ -57,6 +57,42 @@ node ./tests/perf/run.mjs
 ✅ All performance gates passed!
 ```
 
+## Reproducibility Guide
+
+To reproduce these benchmarks on your system:
+
+```bash
+# 1. Install dependencies
+npm ci --workspace=@peac/core
+
+# 2. Build the packages
+npm run build --workspace=@peac/core
+
+# 3. Run the benchmark suite
+npm run perf:validate
+
+# 4. For detailed results with percentiles
+PERF_VERBOSE=1 npm run perf:validate
+
+# 5. For specific adapter benchmarks
+PERF_ADAPTER=x402 npm run perf:validate
+PERF_ADAPTER=tempo npm run perf:validate
+```
+
+## Per-Adapter CPU Budget
+
+Each payment adapter has a p95 latency budget:
+
+- **x402 adapter**: ≤1ms verification overhead
+- **tempo adapter**: ≤1ms verification overhead
+- **l402 adapter**: ≤2ms (Lightning preimage verification)
+- **stripe adapter**: ≤5ms (webhook signature validation)
+
+Total receipt verification should not exceed:
+
+- **Cold path**: 10ms (includes key loading, first verification)
+- **Warm path**: 5ms (cached keys, subsequent verifications)
+
 ## Important Notes
 
 ⚠️ **Mock Implementation**: These results use simplified mock functions that simulate JWS operations without actual Ed25519 cryptography. Real-world performance will be lower due to:

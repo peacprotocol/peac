@@ -37,7 +37,7 @@ function fullUrl(req: Request): string {
 }
 
 export async function handleVerify(req: Request, res: Response): Promise<void> {
-  // Version header is handled centrally by middleware (x-peac-protocol-version: 0.9.5)
+  // v0.9.12: Version header handled by middleware (peac-version)
 
   const hasAttribution = attributionOutcome(req);
 
