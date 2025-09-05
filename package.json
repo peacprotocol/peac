@@ -1,35 +1,40 @@
 {
   "name": "@peacprotocol/monorepo",
-  "version": "0.9.11",
+  "version": "0.9.12",
   "private": true,
-  "description": "PEAC Protocol - Programmable Economic Access & Consent",
+  "description": "PEAC Protocol v0.9.12 - Universal proof layer for AI interactions",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
+    "test:coverage": "npm run test:coverage --workspaces",
     "lint": "npm run lint --workspaces",
     "typecheck": "npm run typecheck --workspaces",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "validate:schema": "npm run validate -w @peacprotocol/schema",
-    "test:contract": "npm run test:contract -w @peacprotocol/sdk-js",
-    "test:integration": "npm run test:integration --workspaces",
+    "perf:validate": "node scripts/perf-validate.js",
+    "security:scan": "npm audit --omit=dev && npm run owasp:scan",
+    "owasp:scan": "npm run security:owasp --workspaces",
+    "sbom:generate": "npm sbom --sbom-format cyclonedx",
+    "validate:all": "npm run validate:abnf && npm run test && npm run perf:validate && npm run security:scan",
+    "validate:abnf": "npm run validate -w @peac/abnf",
     "clean": "npm run clean --workspaces",
-    "build-and-test": "npm run build && npm test"
+    "ci:gates": "npm run validate:all && npm run test:coverage"
   },
   "devDependencies": {
-    "@redocly/cli": "^2.0.5",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.50.0",
+    "jest": "^29.0.0",
     "prettier": "^3.3.3",
     "typescript": "^5.2.0"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
   "license": "Apache-2.0"

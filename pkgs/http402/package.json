@@ -1,0 +1,38 @@
+{
+  "name": "@peac/402",
+  "version": "0.9.12",
+  "description": "Generic HTTP 402 adapter with x402-first negotiation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test src/*.test.js",
+    "lint": "eslint src/",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "peac",
+    "http-402",
+    "payment",
+    "x402",
+    "l402",
+    "stripe"
+  ],
+  "license": "MIT",
+  "repository": "https://github.com/peac-protocol/peac",
+  "sideEffects": false
+}
