@@ -27,12 +27,17 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        cache: 'pnpm'
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
     
     - name: Install dependencies
       run: |
         echo "::group::Installing dependencies"
-        npm ci --no-audit --no-fund
+        pnpm install --no-frozen-lockfile
         echo "::endgroup::"
     
     - name: Version alignment check (v0.9.12.1)
@@ -97,28 +102,28 @@ jobs:
       timeout-minutes: 8
       run: |
         echo "::group::Building all packages"
-        npm run build --workspaces
+        pnpm run build --workspaces
         echo "::endgroup::"
     
     - name: Lint all packages
       timeout-minutes: 5
       run: |
         echo "::group::ESLint all packages"
-        npm run lint --workspaces
+        pnpm run lint --workspaces
         echo "::endgroup::"
     
     - name: TypeScript compilation check
       timeout-minutes: 5
       run: |
         echo "::group::TypeScript compilation"
-        npm run typecheck --workspaces
+        pnpm run typecheck --workspaces
         echo "::endgroup::"
     
     - name: Format check
       timeout-minutes: 3
       run: |
         echo "::group::Prettier format check"
-        npm run format:check
+        pnpm run format:check
         echo "::endgroup::"
 
   # Phase 2: Comprehensive Testing
@@ -135,13 +140,18 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        cache: 'pnpm'
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
     
     - name: Install dependencies
-      run: npm ci --no-audit --no-fund
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
-      run: npm run build --workspaces
+      run: pnpm run build --workspaces
     
     - name: Run all tests
       env:
@@ -150,7 +160,7 @@ jobs:
         PEAC_WEBHOOK_SECRET: test_secret
       run: |
         echo "::group::Running all tests"
-        npm run test --workspaces
+        pnpm run test --workspaces
         echo "::endgroup::"
 
   test-crawler:
@@ -166,18 +176,23 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        cache: 'pnpm'
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
     
     - name: Install dependencies
-      run: npm ci --no-audit --no-fund
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
-      run: npm run build --workspaces
+      run: pnpm run build --workspaces
     
     - name: Run crawler tests with coverage
       run: |
         echo "::group::Crawler tests with coverage"
-        npm run test:crawler -- --coverage
+        pnpm run test:crawler -- --coverage
         echo "::endgroup::"
         
     - name: Upload crawler coverage
@@ -230,13 +245,18 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        cache: 'pnpm'
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
     
     - name: Install dependencies
-      run: npm ci --no-audit --no-fund
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
-      run: npm run build --workspaces
+      run: pnpm run build --workspaces
     
     - name: Test MCP server integration
       timeout-minutes: 2
@@ -292,20 +312,25 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        cache: 'pnpm'
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
     
     - name: Install dependencies
-      run: npm ci --no-audit --no-fund
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
-      run: npm run build --workspaces
+      run: pnpm run build --workspaces
     
     - name: Core performance validation
       timeout-minutes: 5
       run: |
         echo "::group::Core performance validation"
         if [ -f "tests/performance/performance-test.ts" ]; then
-          npm run perf:validate
+          pnpm run perf:validate
         else
           echo "⚠️ Performance test not found, skipping"
         fi
@@ -336,22 +361,27 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        cache: 'pnpm'
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
     
     - name: Install dependencies
-      run: npm ci --no-audit --no-fund
+      run: pnpm install --no-frozen-lockfile
     
-    - name: npm audit (high/critical only)
+    - name: pnpm audit (high/critical only)
       run: |
         echo "::group::Security audit"
-        npm audit --omit=dev --audit-level=high || echo "::warning::Security audit found issues (non-blocking in CI)"
+        pnpm audit --omit=dev --audit-level=high || echo "::warning::Security audit found issues (non-blocking in CI)"
         echo "::endgroup::"
     
     - name: SBOM generation
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: |
         echo "::group::Generate SBOM"
-        npm run sbom:generate || echo "::warning::SBOM generation failed (non-blocking)"
+        pnpm run sbom:generate || echo "::warning::SBOM generation failed (non-blocking)"
         echo "::endgroup::"
 
   # Final Gate: Production Readiness
@@ -369,18 +399,23 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        cache: 'pnpm'
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
     
     - name: Install dependencies
-      run: npm ci --no-audit --no-fund
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
-      run: npm run build --workspaces
+      run: pnpm run build --workspaces
     
     - name: Full CI gates validation
       run: |
         echo "::group::Full CI gates"
-        npm run ci:gates || echo "::warning::Some CI gates failed (non-blocking)"
+        pnpm run ci:gates || echo "::warning::Some CI gates failed (non-blocking)"
         echo "::endgroup::"
     
     - name: Feature completeness check
