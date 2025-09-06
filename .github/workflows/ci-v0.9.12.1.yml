@@ -37,7 +37,7 @@ jobs:
     - name: Install dependencies
       run: |
         echo "::group::Installing dependencies"
-        pnpm install --no-frozen-lockfile --network-timeout 300000
+        pnpm install
         echo "::endgroup::"
     
     - name: Version alignment check (v0.9.12.1)
@@ -102,21 +102,21 @@ jobs:
       timeout-minutes: 8
       run: |
         echo "::group::Building all packages"
-        pnpm run build --workspaces
+        pnpm run build
         echo "::endgroup::"
     
     - name: Lint all packages
       timeout-minutes: 5
       run: |
         echo "::group::ESLint all packages"
-        pnpm run lint --workspaces
+        pnpm run lint
         echo "::endgroup::"
     
     - name: TypeScript compilation check
       timeout-minutes: 5
       run: |
         echo "::group::TypeScript compilation"
-        pnpm run typecheck --workspaces
+        pnpm run typecheck
         echo "::endgroup::"
     
     - name: Format check
@@ -148,10 +148,10 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install --no-frozen-lockfile
+      run: pnpm install
     
     - name: Build packages
-      run: pnpm run build --workspaces
+      run: pnpm run build
     
     - name: Run all tests
       env:
@@ -160,7 +160,7 @@ jobs:
         PEAC_WEBHOOK_SECRET: test_secret
       run: |
         echo "::group::Running all tests"
-        pnpm run test --workspaces
+        pnpm run test
         echo "::endgroup::"
 
   test-crawler:
@@ -184,10 +184,10 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install --no-frozen-lockfile
+      run: pnpm install
     
     - name: Build packages
-      run: pnpm run build --workspaces
+      run: pnpm run build
     
     - name: Run crawler tests with coverage
       run: |
@@ -253,10 +253,10 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install --no-frozen-lockfile
+      run: pnpm install
     
     - name: Build packages
-      run: pnpm run build --workspaces
+      run: pnpm run build
     
     - name: Test MCP server integration
       timeout-minutes: 2
@@ -320,10 +320,10 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install --no-frozen-lockfile
+      run: pnpm install
     
     - name: Build packages
-      run: pnpm run build --workspaces
+      run: pnpm run build
     
     - name: Core performance validation
       timeout-minutes: 5
@@ -369,12 +369,12 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install --no-frozen-lockfile
+      run: pnpm install
     
     - name: pnpm audit (high/critical only)
       run: |
         echo "::group::Security audit"
-        pnpm audit --omit=dev --audit-level=high || echo "::warning::Security audit found issues (non-blocking in CI)"
+        pnpm audit --audit-level=high || echo "::warning::Security audit found issues (non-blocking in CI)"
         echo "::endgroup::"
     
     - name: SBOM generation
@@ -407,10 +407,10 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install --no-frozen-lockfile
+      run: pnpm install
     
     - name: Build packages
-      run: pnpm run build --workspaces
+      run: pnpm run build
     
     - name: Full CI gates validation
       run: |
