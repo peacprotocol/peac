@@ -23,21 +23,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
+    
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
     
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.0.0
-    
     - name: Install dependencies
       run: |
         echo "::group::Installing dependencies"
-        pnpm install --no-frozen-lockfile
+        pnpm install --no-frozen-lockfile --network-timeout 300000
         echo "::endgroup::"
     
     - name: Version alignment check (v0.9.12.1)
@@ -136,16 +136,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
-    
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.0.0
     
     - name: Install dependencies
       run: pnpm install --no-frozen-lockfile
@@ -172,16 +172,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
-    
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.0.0
     
     - name: Install dependencies
       run: pnpm install --no-frozen-lockfile
@@ -241,16 +241,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
-    
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.0.0
     
     - name: Install dependencies
       run: pnpm install --no-frozen-lockfile
@@ -308,16 +308,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
-    
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.0.0
     
     - name: Install dependencies
       run: pnpm install --no-frozen-lockfile
@@ -357,16 +357,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
-    
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.0.0
     
     - name: Install dependencies
       run: pnpm install --no-frozen-lockfile
@@ -395,16 +395,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.0.0
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
-    
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.0.0
     
     - name: Install dependencies
       run: pnpm install --no-frozen-lockfile
