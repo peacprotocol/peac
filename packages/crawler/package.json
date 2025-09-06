@@ -1,6 +1,6 @@
 {
   "name": "@peac/crawler",
-  "version": "0.9.12-dev.1",
+  "version": "0.9.12.1",
   "description": "PEAC Protocol crawler control with vendor-neutral providers",
   "type": "module",
   "main": "dist/index.js",
