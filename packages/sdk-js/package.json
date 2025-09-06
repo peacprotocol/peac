@@ -1,67 +1,31 @@
 {
-  "name": "@peacprotocol/core",
-  "version": "0.9.11",
-  "description": "PEAC Protocol - Universal Digital Pacts for the Automated Economy (Agreement-First API)",
-  "main": "sdk/index.js",
-  "bin": {
-    "peac": "./cli/peac.js"
+  "name": "@peac/sdk",
+  "version": "0.9.12",
+  "description": "PEAC client SDK with discover/verify functions",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
-  "scripts": {
-    "build": "echo 'Build will be added'",
-    "test": "jest --coverage",
-    "test:watch": "jest --watch",
-    "test:integration": "jest --testPathPattern=integration",
-    "lint": "eslint . --ext .js",
-    "lint:fix": "eslint . --ext .js --fix",
-    "validate": "node cli/peac.js validate examples/peac.txt",
-    "validate:all": "for f in examples/*.txt; do node cli/peac.js validate $f; done",
-    "demo:payment": "node examples/payment-demo.js",
-    "demo:negotiation": "node examples/negotiation-demo.js",
-    "serve:api": "node api/server.js",
-    "security:audit": "npm audit --production",
-    "build:docs": "jsdoc -c jsdoc.json"
-  },
-  "keywords": [
-    "peac",
-    "protocol",
-    "peac",
-    "consent",
-    "payments",
-    "ai",
-    "compliance",
-    "negotiation",
-    "attribution",
-    "provenance",
-    "audit"
+  "files": [
+    "dist/"
   ],
-  "author": "PEAC Protocol Foundation",
-  "license": "Apache-2.0",
-  "dependencies": {
-    "ajv": "^8.12.0",
-    "chalk": "^5.3.0",
-    "commander": "^11.0.0",
-    "express": "^4.18.2",
-    "js-yaml": "^4.1.0",
-    "node-cache": "^5.1.2",
-    "node-fetch": "^2.7.0",
-    "stripe": "^13.0.0"
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test src/*.test.js",
+    "lint": "eslint src/",
+    "type-check": "tsc --noEmit"
   },
+  "dependencies": {},
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "eslint": "^8.50.0",
-    "jest": "^29.7.0",
-    "jsdoc": "^4.0.2",
-    "supertest": "^6.3.3"
+    "typescript": "^5.0.0"
   },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git"
-  },
-  "bugs": {
-    "url": "https://github.com/peacprotocol/peac/issues"
-  },
-  "homepage": "https://peacprotocol.org"
+  "keywords": ["peac", "sdk", "client", "verify", "discover"],
+  "license": "MIT",
+  "repository": "https://github.com/peac-protocol/peac",
+  "sideEffects": false
 }

@@ -1,0 +1,25 @@
+{
+  "forbidden": [
+    {
+      "name": "no-app-imports-in-packages",
+      "severity": "error",
+      "comment": "Packages should not import from apps",
+      "from": { "path": "^packages/" },
+      "to": { "path": "^apps/" }
+    },
+    {
+      "name": "no-circular",
+      "severity": "error",
+      "comment": "No circular dependencies allowed",
+      "from": { "path": ".*" },
+      "to": { "circular": true }
+    },
+    {
+      "name": "no-legacy-imports",
+      "severity": "error", 
+      "comment": "No imports from legacy pkgs/ directory",
+      "from": { "path": ".*" },
+      "to": { "path": "^pkgs/" }
+    }
+  ]
+}

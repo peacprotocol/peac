@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "paths": {
+      "@peac/core": ["./packages/core/src"],
+      "@peac/crawler": ["./packages/crawler/src"],
+      "@peac/receipts": ["./packages/receipts/src"],
+      "@peac/aipref": ["./packages/aipref/src"],
+      "@peac/pay402": ["./packages/pay402/src"],
+      "@peac/discovery": ["./packages/discovery/src"],
+      "@peac/sdk-js": ["./packages/sdk-js/src"],
+      "@peac/adapter-mcp": ["./packages/adapters/mcp/src"],
+      "@peac/adapter-openai": ["./packages/adapters/openai/src"],
+      "@peac/adapter-langchain": ["./packages/adapters/langchain/src"],
+      "@peac/app-api": ["./apps/api/src"],
+      "@peac/app-worker": ["./apps/worker/src"],
+      "@peac/app-demo": ["./apps/demo/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build", "lib", "coverage"]
+}

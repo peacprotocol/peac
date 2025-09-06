@@ -1,0 +1,56 @@
+{
+  "name": "@peac/app-api",
+  "version": "0.9.12-dev.1",
+  "description": "PEAC Protocol API server with OpenAPI 3.1, RFC 9457 Problem Details, and content negotiation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "private": true,
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "perf": "node scripts/perf-test.js"
+  },
+  "dependencies": {
+    "@peac/core": "workspace:*",
+    "@peac/receipts": "workspace:*",
+    "@peac/crawler": "workspace:*",
+    "@peac/pay402": "workspace:*",
+    "hono": "^4.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "tsx": "^4.0.0",
+    "tsup": "^8.0.0"
+  },
+  "keywords": ["peac", "api", "openapi", "rfc9457", "problem-details", "hono"],
+  "author": "PEAC Protocol",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

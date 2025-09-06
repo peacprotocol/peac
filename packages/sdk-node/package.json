@@ -72,10 +72,10 @@
   "author": "PEAC Protocol Foundation",
   "license": "Apache-2.0",
   "dependencies": {
-    "@noble/ed25519": "^2.1.0",
+    "@noble/ed25519": "^2.3.0",
     "@peacprotocol/schema": "file:../schema",
-    "undici": "^6.6.2",
-    "yaml": "^2.3.4"
+    "undici": "^6.21.3",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
