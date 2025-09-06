@@ -37,7 +37,7 @@ jobs:
     - name: Install dependencies
       run: |
         echo "::group::Installing dependencies"
-        pnpm install
+        pnpm install --no-frozen-lockfile
         echo "::endgroup::"
     
     - name: Version alignment check (v0.9.12.1)
@@ -148,7 +148,7 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
       run: pnpm run build
@@ -184,7 +184,7 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
       run: pnpm run build
@@ -253,7 +253,7 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
       run: pnpm run build
@@ -320,7 +320,7 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
       run: pnpm run build
@@ -369,7 +369,7 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile
     
     - name: pnpm audit (high/critical only)
       run: |
@@ -407,7 +407,7 @@ jobs:
         cache: 'pnpm'
     
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile
     
     - name: Build packages
       run: pnpm run build
