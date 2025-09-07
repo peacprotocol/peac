@@ -8,7 +8,10 @@
     ".": "./functions.json"
   },
   "files": [
-    "functions.json"
+    "functions.json",
+    "package.json",
+    "README.md", 
+    "LICENSE"
   ],
   "keywords": ["peac", "openai", "functions", "receipts", "adapter"],
   "license": "Apache-2.0"

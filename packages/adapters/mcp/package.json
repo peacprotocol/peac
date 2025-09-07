@@ -26,9 +26,11 @@
     "tsup": "^8.0.0"
   },
   "files": [
-    "dist"
-  ],
-  "engines": {
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],  "engines": {
     "node": ">=18.0.0"
   },
   "keywords": ["peac", "mcp", "model-context-protocol", "receipts", "adapter"],

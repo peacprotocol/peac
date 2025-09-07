@@ -13,9 +13,11 @@
   },
   "sideEffects": false,
   "files": [
-    "dist/**/*"
-  ],
-  "publishConfig": {
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],  "publishConfig": {
     "access": "public",
     "tag": "dev"
   },

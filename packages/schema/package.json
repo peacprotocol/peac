@@ -6,9 +6,10 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "schemas"
-  ],
-  "scripts": {
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],  "scripts": {
     "build": "rm -rf dist tsconfig.tsbuildinfo && tsc --build",
     "validate": "echo 'Validation will be added'",
     "test": "echo 'Tests will be added'"

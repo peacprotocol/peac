@@ -12,9 +12,11 @@
     }
   },
   "files": [
-    "dist/"
-  ],
-  "scripts": {
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],  "scripts": {
     "build": "tsc",
     "test": "node --test src/*.test.js",
     "lint": "eslint src/",
