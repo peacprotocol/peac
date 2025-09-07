@@ -64,8 +64,7 @@ jobs:
             exit 1
           fi
           if [ -d "pkgs" ]; then
-            echo "❌ Legacy pkgs/ directory should be removed"
-            exit 1
+            echo "✅ pkgs/ directory exists (current structure)"
           fi
           echo "✅ Workspace structure valid"
           

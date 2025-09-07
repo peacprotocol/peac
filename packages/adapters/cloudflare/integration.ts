@@ -4,7 +4,7 @@
  */
 
 import { createHash, createHmac } from 'crypto';
-import { CLOUDFLARE_CONFIG, FEATURES } from '../../pkgs/core/src/config.js';
+import { CLOUDFLARE_CONFIG, FEATURES } from '@peac/core';
 
 export interface CloudflareEvent {
   type: 'crawl_payment' | 'pricing_update' | 'crawler_verification';
@@ -98,7 +98,7 @@ export class CloudflareAdapter {
       console.error('Cloudflare webhook processing failed:', error);
       return this.handleFallback('webhook processing', { 
         success: false, 
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   }
@@ -312,7 +312,7 @@ export class CloudflareAdapter {
       return response;
     } catch (error) {
       clearTimeout(timeoutId);
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error(`Request timeout after ${this.config.timeout_ms}ms`);
       }
       throw error;
