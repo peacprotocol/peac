@@ -160,7 +160,7 @@ export async function buildRegistryFromOptions(options: BuildRegistryOptions): P
   }
   
   // Graceful shutdown
-  const shutdown = async (): Promise<void> {
+  const shutdown = async () => {
     console.log('🛑 Shutting down crawler registry...');
     
     try {
