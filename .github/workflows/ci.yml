@@ -132,6 +132,128 @@ jobs:
           echo "🔍 TypeScript compilation check..."
           ${{ env.PKG_MANAGER }} run typecheck
 
+      - name: TypeScript strict validation
+        run: |
+          echo "🔍 TypeScript strict mode validation..."
+          # Check that base tsconfig doesn't have Node types
+          if grep -q '"types".*"node"' tsconfig.base.json; then
+            echo "❌ Node types found in base tsconfig - should be in individual packages only"
+            exit 1
+          fi
+          echo "✅ Base tsconfig properly configured"
+
+      - name: Error handling patterns
+        run: |
+          echo "🔍 Error handling pattern validation..."
+          # Check for proper error handling (no .message on unknown)
+          if grep -r "catch.*error.*error\.message" packages/ apps/ --include="*.ts" 2>/dev/null; then
+            echo "❌ Found unsafe error.message usage - use 'error instanceof Error' checks"
+            exit 1
+          fi
+          # Check for NodeJS namespace usage
+          if grep -r "NodeJS\." packages/ apps/ --include="*.ts" 2>/dev/null; then
+            echo "❌ Found NodeJS namespace usage - use ReturnType<typeof setTimeout> instead"
+            exit 1
+          fi
+          # Check for implicit any types (keyof any pattern)
+          if grep -r "keyof any" packages/ apps/ --include="*.ts" 2>/dev/null; then
+            echo "❌ Found 'keyof any' usage - use proper type guards instead"
+            exit 1
+          fi
+          echo "✅ Error handling patterns look good"
+
+      - name: SemVer validation
+        run: |
+          echo "🔍 SemVer validation..."
+          # Check that all package versions are valid SemVer
+          node -e '
+            const fs=require("fs"),path=require("path");
+            const semver=/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$/;
+            let invalid=[];
+            function walk(dir){
+              if(!fs.existsSync(dir)) return;
+              for(const d of fs.readdirSync(dir,{withFileTypes:true})){
+                if(d.isDirectory()){
+                  const p=path.join(dir,d.name);
+                  const pj=path.join(p,"package.json");
+                  if(fs.existsSync(pj)){
+                    const j=JSON.parse(fs.readFileSync(pj,"utf8"));
+                    if(j.version && !semver.test(j.version)){
+                      invalid.push(`${j.name}: ${j.version}`);
+                    }
+                  }
+                  walk(p);
+                }
+              }
+            }
+            walk("packages");
+            walk("apps");
+            if(invalid.length){
+              console.error("❌ Invalid SemVer versions found:");
+              console.error(invalid.join("\n"));
+              process.exit(1);
+            }
+            console.log("✅ All package versions are valid SemVer");
+          '
+
+      - name: Workspace dependencies check
+        run: |
+          echo "🔍 Workspace dependencies validation..."
+          # Check that all @peac/* deps are workspace:*
+          node -e '
+            const fs=require("fs"),path=require("path");
+            let invalid=[];
+            function walk(dir){
+              if(!fs.existsSync(dir)) return;
+              for(const d of fs.readdirSync(dir,{withFileTypes:true})){
+                if(d.isDirectory()){
+                  const p=path.join(dir,d.name);
+                  const pj=path.join(p,"package.json");
+                  if(fs.existsSync(pj)){
+                    const j=JSON.parse(fs.readFileSync(pj,"utf8"));
+                    for(const field of ["dependencies","devDependencies","peerDependencies"]){
+                      const deps=j[field]; if(!deps) continue;
+                      for(const [k,v] of Object.entries(deps)){
+                        if(k.startsWith("@peac/") && v!=="workspace:*"){
+                          invalid.push(`${j.name} -> ${k}@${v}`);
+                        }
+                      }
+                    }
+                  }
+                  walk(p);
+                }
+              }
+            }
+            walk("packages");
+            walk("apps");
+            if(invalid.length){
+              console.error("❌ Non-workspace @peac/* dependencies found:");
+              console.error(invalid.join("\n"));
+              process.exit(1);
+            }
+            console.log("✅ All @peac/* dependencies are workspace:*");
+          '
+
+      - name: Lockfile validation
+        run: |
+          echo "🔍 Lockfile validation..."
+          # Check that no package-lock.json exists
+          if find . -name "package-lock.json" -not -path "./node_modules/*" | grep -q .; then
+            echo "❌ package-lock.json files found - use pnpm only"
+            exit 1
+          fi
+          echo "✅ No npm lockfiles found"
+
+      - name: Workspace integrity check
+        run: |
+          echo "🔍 Workspace integrity validation..."
+          # Check that all workspace:* dependencies resolve
+          if ! ${{ env.PKG_MANAGER }} list --depth=0 >/dev/null 2>&1; then
+            echo "❌ Workspace dependencies don't resolve properly"
+            exit 1
+          fi
+          echo "✅ Workspace dependencies resolve correctly"
+
       - name: Dependency boundaries
         run: |
           echo "🔍 Dependency boundary validation..."
