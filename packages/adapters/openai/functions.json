@@ -1,0 +1,272 @@
+{
+  "functions": [
+    {
+      "name": "issue_peac_receipt",
+      "description": "Issue a PEAC receipt for content access (receipt@1.1)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI of the content being accessed"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": ["train-ai", "train-genai", "search", "evaluation", "other"],
+            "description": "Purpose of content access"
+          },
+          "crawler_type": {
+            "type": "string",
+            "enum": ["bot", "agent", "hybrid", "browser", "migrating", "test", "unknown"],
+            "description": "Type of crawler/client (defaults to 'agent' for OpenAI functions)"
+          },
+          "options": {
+            "type": "object",
+            "description": "Additional receipt options",
+            "properties": {
+              "aipref": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["allowed", "denied", "conditional", "not_found", "error"]
+                  },
+                  "snapshot": { "type": "string" },
+                  "digest": { "type": "string" },
+                  "source": { "type": "string", "format": "uri" }
+                }
+              },
+              "enforcement": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": ["none", "http-402", "subscription", "license"]
+                  },
+                  "provider": {
+                    "type": "string",
+                    "enum": ["cdn", "origin", "gateway"]
+                  }
+                }
+              },
+              "payment": {
+                "type": "object",
+                "properties": {
+                  "rail": {
+                    "type": "string",
+                    "enum": ["stripe", "l402", "x402"]
+                  },
+                  "amount": { "type": "number", "minimum": 0 },
+                  "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+                },
+                "required": ["rail", "amount", "currency"]
+              },
+              "acquisition": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": ["purchase", "subscription", "license", "public_domain", "fair_use", "consent"]
+                  },
+                  "source": { "type": "string", "format": "uri" },
+                  "license": { "type": "string", "format": "uri" }
+                },
+                "required": ["method", "source"]
+              },
+              "legal": {
+                "type": "object",
+                "properties": {
+                  "basis": {
+                    "type": "string",
+                    "enum": ["fair_use", "license", "public_domain", "consent", "legitimate_interest"]
+                  },
+                  "jurisdiction": { "type": "string", "pattern": "^[A-Z]{2}(-[A-Z]{2})?$" },
+                  "reference": { "type": "string", "format": "uri" }
+                }
+              }
+            }
+          }
+        },
+        "required": ["subject", "purpose"]
+      }
+    },
+    {
+      "name": "verify_peac_receipt",
+      "description": "Verify a PEAC receipt signature and contents",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "jws": {
+            "type": "string",
+            "description": "The JWS-encoded receipt to verify"
+          },
+          "keys": {
+            "type": "object",
+            "description": "Public keys for verification (optional, uses default if not provided)",
+            "patternProperties": {
+              "^[a-zA-Z0-9_-]+$": {
+                "type": "object",
+                "properties": {
+                  "kty": { "type": "string", "enum": ["OKP"] },
+                  "crv": { "type": "string", "enum": ["Ed25519"] },
+                  "x": { "type": "string" }
+                },
+                "required": ["kty", "crv", "x"]
+              }
+            }
+          }
+        },
+        "required": ["jws"]
+      }
+    },
+    {
+      "name": "bulk_verify_receipts",
+      "description": "Verify multiple receipts in bulk for efficiency",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "receipts": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Array of JWS-encoded receipts to verify"
+          },
+          "keys": {
+            "type": "object",
+            "description": "Public keys for verification (optional)",
+            "patternProperties": {
+              "^[a-zA-Z0-9_-]+$": {
+                "type": "object",
+                "properties": {
+                  "kty": { "type": "string", "enum": ["OKP"] },
+                  "crv": { "type": "string", "enum": ["Ed25519"] },
+                  "x": { "type": "string" }
+                },
+                "required": ["kty", "crv", "x"]
+              }
+            }
+          }
+        },
+        "required": ["receipts"]
+      }
+    },
+    {
+      "name": "issue_purge_receipt",
+      "description": "Issue a purge receipt for content deletion (purge@1.0)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI of the content being purged"
+          },
+          "corpus": {
+            "type": "string",
+            "description": "Identifier of the corpus containing the content"
+          },
+          "erasure_basis": {
+            "type": "string",
+            "enum": ["gdpr", "ccpa", "contractual", "other"],
+            "description": "Legal basis for content erasure"
+          },
+          "evidence": {
+            "type": "object",
+            "description": "Evidence of purge completion"
+          }
+        },
+        "required": ["subject", "corpus"]
+      }
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "issue_peac_receipt",
+        "description": "Issue a PEAC receipt for content access with cryptographic attestation",
+        "parameters": {
+          "$ref": "#/functions/0/parameters"
+        }
+      }
+    },
+    {
+      "type": "function", 
+      "function": {
+        "name": "verify_peac_receipt",
+        "description": "Verify the authenticity and integrity of a PEAC receipt",
+        "parameters": {
+          "$ref": "#/functions/1/parameters"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "bulk_verify_receipts", 
+        "description": "Efficiently verify multiple PEAC receipts in a single operation",
+        "parameters": {
+          "$ref": "#/functions/2/parameters"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "issue_purge_receipt",
+        "description": "Issue a cryptographic purge receipt for content deletion compliance",
+        "parameters": {
+          "$ref": "#/functions/3/parameters"
+        }
+      }
+    }
+  ],
+  "examples": [
+    {
+      "name": "Basic Receipt Issuance",
+      "function_call": "issue_peac_receipt",
+      "arguments": {
+        "subject": "https://example.com/article/123",
+        "purpose": "train-ai",
+        "options": {
+          "aipref": {
+            "status": "allowed"
+          },
+          "acquisition": {
+            "method": "license",
+            "source": "https://example.com/license"
+          }
+        }
+      }
+    },
+    {
+      "name": "Paid Content Access",
+      "function_call": "issue_peac_receipt",
+      "arguments": {
+        "subject": "https://news.com/premium/article/456",
+        "purpose": "search",
+        "options": {
+          "enforcement": {
+            "method": "http-402"
+          },
+          "payment": {
+            "rail": "stripe",
+            "amount": 0.05,
+            "currency": "USD"
+          },
+          "acquisition": {
+            "method": "purchase",
+            "source": "https://news.com/purchase/456"
+          }
+        }
+      }
+    },
+    {
+      "name": "Receipt Verification",
+      "function_call": "verify_peac_receipt",
+      "arguments": {
+        "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6InRlc3Qta2V5LTAwMSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCtqd3MifQ..."
+      }
+    }
+  ]
+}
