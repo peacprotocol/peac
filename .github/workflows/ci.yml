@@ -34,15 +34,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: false
           
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
           pnpm config set registry https://registry.npmjs.org/
-          pnpm install --no-frozen-lockfile || {
+          if pnpm install --no-frozen-lockfile; then
+            echo "PKG_MANAGER=pnpm" >> $GITHUB_ENV
+          else
             echo "pnpm failed, trying npm fallback..."
-            npm ci --no-audit --no-fund || npm install --no-package-lock
-          }
+            if npm ci --no-audit --no-fund || npm install --no-package-lock; then
+              echo "PKG_MANAGER=npm" >> $GITHUB_ENV
+            else
+              echo "Both pnpm and npm failed"
+              exit 1
+            fi
+          fi
         
       - name: Version validation
         id: version
@@ -93,35 +101,43 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: false
           
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
           pnpm config set registry https://registry.npmjs.org/
-          pnpm install --no-frozen-lockfile || {
+          if pnpm install --no-frozen-lockfile; then
+            echo "PKG_MANAGER=pnpm" >> $GITHUB_ENV
+          else
             echo "pnpm failed, trying npm fallback..."
-            npm ci --no-audit --no-fund || npm install --no-package-lock
-          }
+            if npm ci --no-audit --no-fund || npm install --no-package-lock; then
+              echo "PKG_MANAGER=npm" >> $GITHUB_ENV
+            else
+              echo "Both pnpm and npm failed"
+              exit 1
+            fi
+          fi
         
       - name: Lint
         run: |
           echo "🔍 ESLint validation..."
-          pnpm run lint
+          ${{ env.PKG_MANAGER }} run lint
           
       - name: Format check
         run: |
           echo "🔍 Prettier format check..."
-          pnpm run format:check
+          ${{ env.PKG_MANAGER }} run format:check
           
       - name: TypeScript check
         run: |
           echo "🔍 TypeScript compilation check..."
-          pnpm run typecheck
+          ${{ env.PKG_MANAGER }} run typecheck
           
       - name: Dependency boundaries
         run: |
           echo "🔍 Dependency boundary validation..."
-          pnpm run dep-cruiser
+          ${{ env.PKG_MANAGER }} run dep-cruiser
 
   # Phase 3: Build
   build:
@@ -140,20 +156,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: false
           
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
           pnpm config set registry https://registry.npmjs.org/
-          pnpm install --no-frozen-lockfile || {
+          if pnpm install --no-frozen-lockfile; then
+            echo "PKG_MANAGER=pnpm" >> $GITHUB_ENV
+          else
             echo "pnpm failed, trying npm fallback..."
-            npm ci --no-audit --no-fund || npm install --no-package-lock
-          }
+            if npm ci --no-audit --no-fund || npm install --no-package-lock; then
+              echo "PKG_MANAGER=npm" >> $GITHUB_ENV
+            else
+              echo "Both pnpm and npm failed"
+              exit 1
+            fi
+          fi
         
       - name: Build all packages
         run: |
           echo "🔨 Building all packages..."
-          pnpm run build
+          ${{ env.PKG_MANAGER }} run build
           
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -186,10 +210,17 @@ jobs:
         run: |
           # Configure registry and try pnpm first
           pnpm config set registry https://registry.npmjs.org/
-          pnpm install --no-frozen-lockfile || {
+          if pnpm install --no-frozen-lockfile; then
+            echo "PKG_MANAGER=pnpm" >> $GITHUB_ENV
+          else
             echo "pnpm failed, trying npm fallback..."
-            npm ci --no-audit --no-fund || npm install --no-package-lock
-          }
+            if npm ci --no-audit --no-fund || npm install --no-package-lock; then
+              echo "PKG_MANAGER=npm" >> $GITHUB_ENV
+            else
+              echo "Both pnpm and npm failed"
+              exit 1
+            fi
+          fi
         
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -199,7 +230,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           echo "🧪 Running test suite with coverage..."
-          pnpm run test:coverage
+          ${{ env.PKG_MANAGER }} run test:coverage
           
       - name: Coverage validation
         run: |
@@ -224,15 +255,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: false
           
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
           pnpm config set registry https://registry.npmjs.org/
-          pnpm install --no-frozen-lockfile || {
+          if pnpm install --no-frozen-lockfile; then
+            echo "PKG_MANAGER=pnpm" >> $GITHUB_ENV
+          else
             echo "pnpm failed, trying npm fallback..."
-            npm ci --no-audit --no-fund || npm install --no-package-lock
-          }
+            if npm ci --no-audit --no-fund || npm install --no-package-lock; then
+              echo "PKG_MANAGER=npm" >> $GITHUB_ENV
+            else
+              echo "Both pnpm and npm failed"
+              exit 1
+            fi
+          fi
         
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -242,12 +281,12 @@ jobs:
       - name: Conformance testing
         run: |
           echo "🔍 Running conformance tests..."
-          pnpm run conformance
+          ${{ env.PKG_MANAGER }} run conformance
           
       - name: Performance validation
         run: |
           echo "🚀 Running performance validation..."  
-          pnpm run perf
+          ${{ env.PKG_MANAGER }} run perf
           
       - name: Schema validation
         run: |
@@ -281,26 +320,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: false
           
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
           pnpm config set registry https://registry.npmjs.org/
-          pnpm install --no-frozen-lockfile || {
+          if pnpm install --no-frozen-lockfile; then
+            echo "PKG_MANAGER=pnpm" >> $GITHUB_ENV
+          else
             echo "pnpm failed, trying npm fallback..."
-            npm ci --no-audit --no-fund || npm install --no-package-lock
-          }
+            if npm ci --no-audit --no-fund || npm install --no-package-lock; then
+              echo "PKG_MANAGER=npm" >> $GITHUB_ENV
+            else
+              echo "Both pnpm and npm failed"
+              exit 1
+            fi
+          fi
         
       - name: Security audit
         run: |
           echo "🔒 Security audit..."
-          pnpm audit --audit-level=high || echo "::warning::Security audit found issues (non-blocking in CI)"
+          ${{ env.PKG_MANAGER }} audit --audit-level=high || echo "::warning::Security audit found issues (non-blocking in CI)"
           
       - name: Generate SBOM
         if: github.ref == 'refs/heads/main'
         run: |
           echo "📋 Generating SBOM..."
-          pnpm run sbom || echo "::warning::SBOM generation failed (non-blocking)"
+          ${{ env.PKG_MANAGER }} run sbom || echo "::warning::SBOM generation failed (non-blocking)"
 
   # Phase 7: Production Readiness (main branch only)
   production-readiness:
