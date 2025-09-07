@@ -16,7 +16,16 @@ export interface Receipt {
   subject: {
     uri: string;
     content_hash?: string;
-    rights_class?: 'book' | 'lyrics' | 'article' | 'image' | 'audio' | 'video' | 'dataset' | 'software' | 'other';
+    rights_class?:
+      | 'book'
+      | 'lyrics'
+      | 'article'
+      | 'image'
+      | 'audio'
+      | 'video'
+      | 'dataset'
+      | 'software'
+      | 'other';
     sku?: string;
   };
   aipref: {
@@ -58,7 +67,14 @@ export interface Receipt {
     license?: string;
   };
   consent?: {
-    basis?: 'consent' | 'contract' | 'legal_obligation' | 'legitimate_interest' | 'public_task' | 'vital_interest' | 'not_applicable';
+    basis?:
+      | 'consent'
+      | 'contract'
+      | 'legal_obligation'
+      | 'legitimate_interest'
+      | 'public_task'
+      | 'vital_interest'
+      | 'not_applicable';
     retention?: string;
   };
   provenance?: {

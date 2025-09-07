@@ -79,7 +79,7 @@ export interface CrawlerControlProvider {
   name: string;
   priority?: number;
   capabilities: Set<Capability>;
-  
+
   verify?(req: VerifyRequest): Promise<VerificationResult>;
   calculatePrice?(usage: UsageMetrics): Promise<PricingResult>;
   shouldBlock?(info: { ip: string; userAgent: string }): Promise<BlockDecision>;
@@ -122,7 +122,7 @@ export enum VerificationLevel {
   NONE = 0,
   CACHED = 1,
   LOCAL = 2,
-  FULL = 3
+  FULL = 3,
 }
 
 export interface RegistryStats {

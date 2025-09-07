@@ -12,18 +12,6 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
-    "./validators": {
-      "types": "./dist/validators.d.ts",
-      "import": "./dist/validators.js",
-      "require": "./dist/validators.cjs",
-      "default": "./dist/validators.js"
-    },
-    "./cbor": {
-      "types": "./dist/cbor.d.ts",
-      "import": "./dist/cbor.js",
-      "require": "./dist/cbor.cjs",
-      "default": "./dist/cbor.js"
-    },
     "./package.json": "./package.json"
   },
   "sideEffects": false,
@@ -35,8 +23,7 @@
     "tag": "dev"
   },
   "scripts": {
-    "build": "tsup && npm run build:validators",
-    "build:validators": "node scripts/build-validators.js",
+    "build": "tsup",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",

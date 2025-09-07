@@ -40,8 +40,8 @@ export class RateLimiter {
   }
 
   async checkLimit(
-    key: string, 
-    crawler_type: CrawlerType, 
+    key: string,
+    crawler_type: CrawlerType,
     trust_score: number = 0.5
   ): Promise<RateLimitResult> {
     const bucket_config = this.getBucketConfig(crawler_type, trust_score);
@@ -55,23 +55,23 @@ export class RateLimiter {
   }
 
   async consumeToken(
-    key: string, 
-    crawler_type: CrawlerType, 
+    key: string,
+    crawler_type: CrawlerType,
     trust_score: number = 0.5
   ): Promise<RateLimitResult> {
     const result = await this.checkLimit(key, crawler_type, trust_score);
-    
+
     if (result.allowed && result.remaining > 0) {
       // Actually consume a token
       const bucket_config = this.getBucketConfig(crawler_type, trust_score);
       const bucket_key = `rate_limit:${key}`;
-      
+
       if (this.redis && FEATURES.REDIS_RATELIMIT) {
         await this.consumeTokenRedis(bucket_key, bucket_config);
       } else {
         this.consumeTokenMemory(bucket_key, bucket_config);
       }
-      
+
       result.remaining = Math.max(0, result.remaining - 1);
     }
 
@@ -82,7 +82,7 @@ export class RateLimiter {
     const headers: RateLimitHeaders = {
       'RateLimit-Limit': result.limit.toString(),
       'RateLimit-Remaining': result.remaining.toString(),
-      'RateLimit-Reset': Math.ceil((result.reset_time - Date.now()) / 1000).toString()
+      'RateLimit-Reset': Math.ceil((result.reset_time - Date.now()) / 1000).toString(),
     };
 
     if (!result.allowed && result.retry_after) {
@@ -97,22 +97,18 @@ export class RateLimiter {
 
     // Determine base rate limits by crawler type
     if (crawler_type === 'agent') {
-      base_config = trust_score >= 0.8 
-        ? this.config.agent.realtime 
-        : this.config.agent.default;
+      base_config = trust_score >= 0.8 ? this.config.agent.realtime : this.config.agent.default;
     } else {
-      base_config = trust_score >= 0.8 
-        ? this.config.bot.paid 
-        : this.config.bot.default;
+      base_config = trust_score >= 0.8 ? this.config.bot.paid : this.config.bot.default;
     }
 
     // Apply trust score multiplier
     const trust_multiplier = Math.max(0.1, trust_score);
-    
+
     return {
       capacity: base_config.burst,
       refill_rate: base_config.rps * trust_multiplier,
-      window_size: this.parseWindowSize(base_config.window)
+      window_size: this.parseWindowSize(base_config.window),
     };
   }
 
@@ -127,7 +123,7 @@ export class RateLimiter {
         refill_rate: config.refill_rate,
         last_refill: now,
         window_start: now,
-        window_size: config.window_size * 1000 // Convert to ms
+        window_size: config.window_size * 1000, // Convert to ms
       };
       this.store.set(key, bucket);
     }
@@ -135,7 +131,7 @@ export class RateLimiter {
     // Refill tokens based on elapsed time
     const elapsed = (now - bucket.last_refill) / 1000; // Convert to seconds
     const tokens_to_add = Math.floor(elapsed * bucket.refill_rate);
-    
+
     if (tokens_to_add > 0) {
       bucket.tokens = Math.min(bucket.capacity, bucket.tokens + tokens_to_add);
       bucket.last_refill = now;
@@ -156,7 +152,7 @@ export class RateLimiter {
       limit: bucket.capacity,
       remaining: bucket.tokens,
       reset_time,
-      retry_after
+      retry_after,
     };
   }
 
@@ -234,9 +230,8 @@ export class RateLimiter {
         limit,
         remaining,
         reset_time,
-        retry_after
+        retry_after,
       };
-
     } catch (error) {
       console.error('Redis rate limiting error, falling back to memory:', error);
       return this.checkLimitMemory(key, config);
@@ -273,10 +268,14 @@ export class RateLimiter {
     const unit = match[2];
 
     switch (unit) {
-      case 's': return value;
-      case 'm': return value * 60;
-      case 'h': return value * 3600;
-      default: return 60;
+      case 's':
+        return value;
+      case 'm':
+        return value * 60;
+      case 'h':
+        return value * 3600;
+      default:
+        return 60;
     }
   }
 
@@ -285,7 +284,7 @@ export class RateLimiter {
       // In production, properly initialize Redis client
       // For now, just log that Redis would be initialized
       console.log('Redis rate limiting would be initialized with URL:', process.env.REDIS_URL);
-      
+
       // Example Redis initialization (commented out for now):
       // const Redis = require('ioredis');
       // this.redis = new Redis(process.env.REDIS_URL);
@@ -302,7 +301,7 @@ export class RateLimiter {
   // Cleanup method for memory store
   cleanup(): void {
     const now = Date.now();
-    const cutoff = now - (24 * 60 * 60 * 1000); // 24 hours
+    const cutoff = now - 24 * 60 * 60 * 1000; // 24 hours
 
     for (const [key, bucket] of this.store.entries()) {
       if (bucket.last_refill < cutoff) {

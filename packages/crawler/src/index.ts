@@ -32,11 +32,14 @@ export interface BuildRegistryOptions {
     baseURL?: string;
     priority?: number;
   };
-  quotas?: Record<string, {
-    requestsPerMinute?: number;
-    requestsPerHour?: number;
-    maxMonthlyCostUSD?: number;
-  }>;
+  quotas?: Record<
+    string,
+    {
+      requestsPerMinute?: number;
+      requestsPerHour?: number;
+      maxMonthlyCostUSD?: number;
+    }
+  >;
 }
 
 /**
@@ -52,22 +55,27 @@ export async function buildRegistry(env = process.env): Promise<RegistryHandle> 
     enableHealthMonitor: env.ENABLE_CRAWLER_HEALTH === 'true',
     healthCheckInterval: Number(env.CRAWLER_HEALTH_INTERVAL_MS || 30_000),
     quotas: env.CRAWLER_QUOTAS ? JSON.parse(env.CRAWLER_QUOTAS) : undefined,
-    cloudflare: env.ENABLE_CF === 'true' ? {
-      enabled: true,
-      apiToken: env.CF_API_TOKEN!,
-      zoneId: env.CF_ZONE_ID!,
-      baseURL: env.CF_API_BASE || 'https://api.cloudflare.com',
-      priority: Number(env.CF_PROVIDER_PRIORITY || 50)
-    } : { enabled: false, apiToken: '', zoneId: '' }
+    cloudflare:
+      env.ENABLE_CF === 'true'
+        ? {
+            enabled: true,
+            apiToken: env.CF_API_TOKEN!,
+            zoneId: env.CF_ZONE_ID!,
+            baseURL: env.CF_API_BASE || 'https://api.cloudflare.com',
+            priority: Number(env.CF_PROVIDER_PRIORITY || 50),
+          }
+        : { enabled: false, apiToken: '', zoneId: '' },
   };
-  
+
   return buildRegistryFromOptions(options);
 }
 
 /**
  * Build crawler control registry from explicit options
  */
-export async function buildRegistryFromOptions(options: BuildRegistryOptions): Promise<RegistryHandle> {
+export async function buildRegistryFromOptions(
+  options: BuildRegistryOptions
+): Promise<RegistryHandle> {
   const registry = new CrawlerControlRegistry({
     strategy: options.strategy || 'weighted',
     mode: options.mode || 'parallel',
@@ -75,21 +83,21 @@ export async function buildRegistryFromOptions(options: BuildRegistryOptions): P
     fallbackPolicy: options.fallbackPolicy || 'allow',
     perProviderTimeoutMs: options.providerTimeout || 500,
     dynamicWeightOnUnhealthy: 0, // Disable unhealthy providers
-    quotas: options.quotas
+    quotas: options.quotas,
   });
-  
+
   const cleanupFunctions: Array<() => Promise<void> | void> = [];
-  
+
   // Always register local provider (zero-config)
   const localProvider = new LocalProvider({
     uaAllow: /bot|gpt|claude|bing|google|perplexity|crawler|spider|scraper/i,
     maxRpsThreshold: 10,
-    rdnsRequired: false
+    rdnsRequired: false,
   });
-  
+
   registry.register(localProvider, options.weights?.local || 1.0);
   crawlerMetrics.verifyRequests('local'); // Initialize metrics
-  
+
   // Cloudflare provider with safe initialization
   if (options.cloudflare?.enabled) {
     try {
@@ -98,21 +106,21 @@ export async function buildRegistryFromOptions(options: BuildRegistryOptions): P
         zoneId: options.cloudflare.zoneId,
         baseURL: options.cloudflare.baseURL || 'https://api.cloudflare.com',
         timeoutMs: options.providerTimeout || 500,
-        retries: 2
+        retries: 2,
       });
-      
+
       const cfProvider = new CloudflareProvider(cfClient, {
-        priority: options.cloudflare.priority || 50
+        priority: options.cloudflare.priority || 50,
       });
-      
+
       // Health probe before registration
       console.log('Probing Cloudflare API connectivity...');
       const healthResult = await cfProvider.healthCheck();
-      
+
       if (healthResult.healthy) {
         console.log(`✅ Cloudflare provider initialized (${healthResult.latency_ms}ms)`);
         registry.register(
-          cfProvider, 
+          cfProvider,
           options.weights?.cloudflare || 1.0,
           options.quotas?.cloudflare
         );
@@ -128,7 +136,7 @@ export async function buildRegistryFromOptions(options: BuildRegistryOptions): P
       // Continue without Cloudflare - graceful degradation
     }
   }
-  
+
   // Health monitor (optional)
   let healthMonitor: RegistryHealthMonitor | undefined;
   if (options.enableHealthMonitor) {
@@ -137,7 +145,7 @@ export async function buildRegistryFromOptions(options: BuildRegistryOptions): P
       (name, healthy, latency) => {
         registry.updateHealth(name, healthy);
         crawlerMetrics.providerHealthy(name, healthy);
-        
+
         if (healthy) {
           console.log(`✅ Provider ${name} healthy (${latency}ms)`);
         } else {
@@ -148,58 +156,58 @@ export async function buildRegistryFromOptions(options: BuildRegistryOptions): P
         intervalMs: options.healthCheckInterval || 30_000,
         timeoutMs: (options.providerTimeout || 500) * 2,
         unhealthyThreshold: 3,
-        healthyThreshold: 2
+        healthyThreshold: 2,
       }
     );
-    
+
     healthMonitor.start();
     cleanupFunctions.push(() => {
       healthMonitor?.stop();
       return Promise.resolve();
     });
   }
-  
+
   // Graceful shutdown
   const shutdown = async () => {
     console.log('🛑 Shutting down crawler registry...');
-    
+
     try {
       // Stop health monitoring first
       if (healthMonitor) {
         healthMonitor.stop();
       }
-      
+
       // Close all providers
       for (const cleanup of cleanupFunctions) {
         await cleanup();
       }
-      
+
       // Close registry
       await registry.close();
-      
+
       console.log('✅ Crawler registry shutdown complete');
     } catch (error) {
       console.error('❌ Error during crawler registry shutdown:', error);
       throw error;
     }
   };
-  
+
   // Hook process signals for graceful shutdown
   if (typeof process !== 'undefined') {
     const signals = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
     const signalHandler = () => {
       shutdown().catch(console.error);
     };
-    
-    signals.forEach(signal => {
+
+    signals.forEach((signal) => {
       process.once(signal, signalHandler);
     });
   }
-  
+
   return {
     registry,
     healthMonitor,
-    shutdown
+    shutdown,
   };
 }
 
@@ -211,7 +219,7 @@ export {
   CloudflareProvider,
   CFClient,
   VerificationLevel,
-  crawlerMetrics
+  crawlerMetrics,
 } from './registry.js';
 
 export * from './types.js';

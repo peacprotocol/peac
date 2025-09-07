@@ -37,15 +37,15 @@ export function verifyCloudflareWebhook(
     algorithm: 'sha256',
     encoding: 'hex',
     ...options,
-    secret
+    secret,
   };
-  
+
   try {
     const expectedSignature = crypto
       .createHmac(opts.algorithm, opts.secret)
       .update(body, 'utf8')
       .digest(opts.encoding);
-    
+
     // Use timing-safe comparison to prevent timing attacks
     return crypto.timingSafeEqual(
       Buffer.from(signature, opts.encoding),
@@ -70,38 +70,33 @@ export function verifyWebhookWithTimestamp(
     encoding: 'hex',
     timestampTolerance: 300, // 5 minutes default
     ...options,
-    secret
+    secret,
   };
-  
+
   // Check timestamp if tolerance is specified
   if (opts.timestampTolerance && opts.timestampTolerance > 0) {
     const now = Math.floor(Date.now() / 1000);
     const age = now - payload.timestamp;
-    
+
     if (age > opts.timestampTolerance) {
       return {
         valid: false,
         reason: 'timestamp_expired',
-        timestamp: payload.timestamp
+        timestamp: payload.timestamp,
       };
     }
   }
-  
+
   // Create signed payload (timestamp + body)
   const signedPayload = `${payload.timestamp}.${payload.body}`;
-  
+
   // Verify signature
-  const signatureValid = verifyCloudflareWebhook(
-    signedPayload,
-    payload.signature,
-    secret,
-    opts
-  );
-  
+  const signatureValid = verifyCloudflareWebhook(signedPayload, payload.signature, secret, opts);
+
   return {
     valid: signatureValid,
     reason: signatureValid ? undefined : 'invalid_signature',
-    timestamp: payload.timestamp
+    timestamp: payload.timestamp,
   };
 }
 
@@ -114,15 +109,15 @@ export function parseWebhookHeaders(headers: Record<string, string>): {
 } {
   // Cloudflare typically sends signature in X-Signature header
   const signature = headers['x-signature'] || headers['X-Signature'];
-  
+
   // Timestamp might be in X-Timestamp or extracted from signature header
   let timestamp: number | undefined;
-  
+
   const timestampHeader = headers['x-timestamp'] || headers['X-Timestamp'];
   if (timestampHeader) {
     timestamp = parseInt(timestampHeader, 10);
   }
-  
+
   // Some webhook implementations include timestamp in the signature header
   // Format: "t=1234567890,v1=signature_here"
   if (!timestamp && signature?.includes('t=')) {
@@ -131,7 +126,7 @@ export function parseWebhookHeaders(headers: Record<string, string>): {
       timestamp = parseInt(timestampMatch[1], 10);
     }
   }
-  
+
   return { signature, timestamp };
 }
 
@@ -148,17 +143,17 @@ export function generateWebhookSignature(
     algorithm: 'sha256',
     encoding: 'hex',
     ...options,
-    secret
+    secret,
   };
-  
+
   const ts = timestamp ?? Math.floor(Date.now() / 1000);
   const signedPayload = `${ts}.${body}`;
-  
+
   const signature = crypto
     .createHmac(opts.algorithm, opts.secret)
     .update(signedPayload, 'utf8')
     .digest(opts.encoding);
-  
+
   return { signature, timestamp: ts };
 }
 
@@ -172,49 +167,45 @@ export function createWebhookVerifier(
   return (req: any, res: any, next: any) => {
     try {
       const { signature, timestamp } = parseWebhookHeaders(req.headers);
-      
+
       if (!signature) {
         return res.status(400).json({
           error: 'Missing webhook signature',
-          code: 'WEBHOOK_SIGNATURE_MISSING'
+          code: 'WEBHOOK_SIGNATURE_MISSING',
         });
       }
-      
+
       const body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
-      
+
       let result: WebhookVerificationResult;
-      
+
       if (timestamp) {
-        result = verifyWebhookWithTimestamp(
-          { body, signature, timestamp },
-          secret,
-          options
-        );
+        result = verifyWebhookWithTimestamp({ body, signature, timestamp }, secret, options);
       } else {
         const valid = verifyCloudflareWebhook(body, signature, secret, options);
         result = { valid, reason: valid ? undefined : 'invalid_signature' };
       }
-      
+
       if (!result.valid) {
         return res.status(401).json({
           error: 'Webhook verification failed',
           code: 'WEBHOOK_VERIFICATION_FAILED',
-          reason: result.reason
+          reason: result.reason,
         });
       }
-      
+
       // Add verification info to request
       req.webhook = {
         verified: true,
-        timestamp: result.timestamp
+        timestamp: result.timestamp,
       };
-      
+
       next();
     } catch (error) {
       return res.status(500).json({
         error: 'Webhook verification error',
         code: 'WEBHOOK_VERIFICATION_ERROR',
-        message: error.message
+        message: error.message,
       });
     }
   };

@@ -81,7 +81,11 @@ export class ReceiptBuilder {
   /**
    * Set AIPREF information
    */
-  aipref(status: 'ok' | 'not_found' | 'error' | 'not_applicable', snapshot?: string, digest?: string): this {
+  aipref(
+    status: 'ok' | 'not_found' | 'error' | 'not_applicable',
+    snapshot?: string,
+    digest?: string
+  ): this {
     this.options.aipref = { status, snapshot, digest };
     return this;
   }
@@ -97,7 +101,12 @@ export class ReceiptBuilder {
   /**
    * Set payment information (required for http-402)
    */
-  payment(rail: string, amount: number, currency: string, evidence: { provider_ids: string[]; proof?: string }): this {
+  payment(
+    rail: string,
+    amount: number,
+    currency: string,
+    evidence: { provider_ids: string[]; proof?: string }
+  ): this {
     this.options.payment = { rail, amount, currency, evidence };
     return this;
   }
@@ -105,7 +114,12 @@ export class ReceiptBuilder {
   /**
    * Set request context
    */
-  requestContext(request_id: string, timestamp: string, session_id?: string, correlation_id?: string): this {
+  requestContext(
+    request_id: string,
+    timestamp: string,
+    session_id?: string,
+    correlation_id?: string
+  ): this {
     this.options.request_context = { request_id, timestamp, session_id, correlation_id };
     return this;
   }
@@ -113,7 +127,9 @@ export class ReceiptBuilder {
   /**
    * Set crawler type
    */
-  crawlerType(type: 'bot' | 'agent' | 'hybrid' | 'browser' | 'migrating' | 'test' | 'unknown'): this {
+  crawlerType(
+    type: 'bot' | 'agent' | 'hybrid' | 'browser' | 'migrating' | 'test' | 'unknown'
+  ): this {
     this.options.crawler_type = type;
     return this;
   }
@@ -167,11 +183,11 @@ export class ReceiptBuilder {
       issued_at: new Date().toISOString(),
       kid: this.options.kid,
       signature_media_type: 'application/peac-receipt+jws',
-      ...this.options.payment && { payment: this.options.payment },
-      ...this.options.provenance && { provenance: this.options.provenance },
-      ...this.options.consent && { consent: this.options.consent },
-      ...this.options.verification && { verification: this.options.verification },
-      ...this.options.security && { security: this.options.security },
+      ...(this.options.payment && { payment: this.options.payment }),
+      ...(this.options.provenance && { provenance: this.options.provenance }),
+      ...(this.options.consent && { consent: this.options.consent }),
+      ...(this.options.verification && { verification: this.options.verification }),
+      ...(this.options.security && { security: this.options.security }),
     };
 
     return receipt;

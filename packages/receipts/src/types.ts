@@ -38,7 +38,7 @@ export interface Receipt {
   consent?: {
     basis?: string;
   };
-  
+
   // Enhanced v1.1 fields
   verification?: {
     crawler_result?: CrawlerVerificationResult;
@@ -50,7 +50,7 @@ export interface Receipt {
     key_rotation_epoch?: number;
     audit_trail?: AuditEntry[];
   };
-  
+
   // Required context fields
   request_context: {
     request_id: string;
@@ -58,7 +58,7 @@ export interface Receipt {
     correlation_id?: string;
     timestamp: string; // ISO 8601 date-time
   };
-  
+
   crawler_type: 'bot' | 'agent' | 'hybrid' | 'browser' | 'migrating' | 'test' | 'unknown';
   issued_at: string; // ISO 8601
   kid: string;

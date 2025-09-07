@@ -4,10 +4,10 @@
  */
 
 export interface BreakerOptions {
-  timeout: number;           // Operation timeout in ms
-  errorThreshold: number;    // Consecutive failures to open
-  resetMs: number;          // Time in open state before trying half-open
-  successThreshold: number;  // Successes in half-open to close
+  timeout: number; // Operation timeout in ms
+  errorThreshold: number; // Consecutive failures to open
+  resetMs: number; // Time in open state before trying half-open
+  successThreshold: number; // Successes in half-open to close
 }
 
 export type BreakerState = 'closed' | 'open' | 'half-open';
@@ -26,28 +26,28 @@ export class CircuitBreaker {
   private halfOpenSuccesses = 0;
   private nextAttempt = 0;
   private lastStateChange = Date.now();
-  
+
   constructor(
     private readonly opts: BreakerOptions = {
       timeout: 1000,
       errorThreshold: 5,
       resetMs: 30_000,
-      successThreshold: 2
+      successThreshold: 2,
     },
     private onStateChange?: (state: BreakerState, stats: BreakerStats) => void
   ) {}
-  
+
   private setState(newState: BreakerState): void {
     if (newState !== this.state) {
       this.state = newState;
       this.lastStateChange = Date.now();
-      
+
       if (this.onStateChange) {
         this.onStateChange(newState, this.getStats());
       }
     }
   }
-  
+
   /**
    * Pre-emptively open the breaker (e.g., from health checks)
    */
@@ -56,7 +56,7 @@ export class CircuitBreaker {
     this.nextAttempt = Date.now() + this.opts.resetMs;
     this.setState('open');
   }
-  
+
   /**
    * Force the breaker closed (e.g., manual override)
    */
@@ -65,13 +65,13 @@ export class CircuitBreaker {
     this.halfOpenSuccesses = 0;
     this.setState('closed');
   }
-  
+
   /**
    * Execute function through circuit breaker
    */
   async fire<T>(fn: () => Promise<T>): Promise<T> {
     const now = Date.now();
-    
+
     // Check if we should transition from open to half-open
     if (this.state === 'open') {
       if (now >= this.nextAttempt) {
@@ -81,15 +81,15 @@ export class CircuitBreaker {
         throw new Error('circuit_open');
       }
     }
-    
+
     // Set up timeout race
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('circuit_timeout')), this.opts.timeout);
     });
-    
+
     try {
       const result = await Promise.race([fn(), timeoutPromise]);
-      
+
       // Handle success based on current state
       if (this.state === 'half-open') {
         this.halfOpenSuccesses++;
@@ -101,11 +101,11 @@ export class CircuitBreaker {
         // Reset failure count on successful closed-state operation
         this.failures = 0;
       }
-      
+
       return result;
     } catch (error) {
       this.failures++;
-      
+
       // Transition to open if we've hit the error threshold
       if (this.failures >= this.opts.errorThreshold) {
         this.nextAttempt = Date.now() + this.opts.resetMs;
@@ -115,11 +115,11 @@ export class CircuitBreaker {
         this.nextAttempt = Date.now() + this.opts.resetMs;
         this.setState('open');
       }
-      
+
       throw error;
     }
   }
-  
+
   /**
    * Get current breaker statistics
    */
@@ -129,10 +129,10 @@ export class CircuitBreaker {
       failures: this.failures,
       successes: this.halfOpenSuccesses,
       nextAttempt: this.state === 'open' ? this.nextAttempt : undefined,
-      lastStateChange: this.lastStateChange
+      lastStateChange: this.lastStateChange,
     };
   }
-  
+
   /**
    * Check if the breaker allows requests
    */
@@ -147,7 +147,7 @@ export class CircuitBreaker {
     }
     return false;
   }
-  
+
   /**
    * Get current state
    */

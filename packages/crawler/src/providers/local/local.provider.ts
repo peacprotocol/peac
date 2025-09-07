@@ -3,13 +3,13 @@
  * Basic crawler verification using DNS reverse lookup and user agent patterns
  */
 
-import { 
-  CrawlerControlProvider, 
-  VerifyRequest, 
-  VerificationResult, 
+import {
+  CrawlerControlProvider,
+  VerifyRequest,
+  VerificationResult,
   HealthCheckResult,
   UsageMetrics,
-  PricingResult
+  PricingResult,
 } from '../../types.js';
 
 export interface LocalProviderConfig {
@@ -23,19 +23,19 @@ export class LocalProvider implements CrawlerControlProvider {
   name = 'local';
   priority = 100;
   capabilities = new Set(['verify', 'price']);
-  
+
   constructor(private config: LocalProviderConfig = {}) {
     // Default user agent patterns for known crawlers
     this.config.uaAllow ??= /bot|gpt|claude|bing|google|perplexity|crawler|spider|scraper/i;
     this.config.maxRpsThreshold ??= 10;
     this.config.rdnsRequired ??= false;
   }
-  
+
   async verify(req: VerifyRequest): Promise<VerificationResult> {
     const start = Date.now();
     const indicators: string[] = [];
     let confidence = 0.6; // Base confidence
-    
+
     // RDNS verification
     if (req.rdns) {
       if (req.rdns.match === false) {
@@ -49,7 +49,7 @@ export class LocalProvider implements CrawlerControlProvider {
       indicators.push('rdns_missing');
       confidence -= 0.1;
     }
-    
+
     // Rate compliance check
     if (req.rate) {
       if (req.rate.currentRps > req.rate.policyRps) {
@@ -63,7 +63,7 @@ export class LocalProvider implements CrawlerControlProvider {
         confidence += 0.1;
       }
     }
-    
+
     // User agent validation
     if (this.config.uaAllow) {
       if (!this.config.uaAllow.test(req.userAgent)) {
@@ -74,7 +74,7 @@ export class LocalProvider implements CrawlerControlProvider {
         confidence += 0.1;
       }
     }
-    
+
     // IP validation (if configured)
     if (this.config.ipAllowRanges?.length) {
       const ipAllowed = this.isIpInRanges(req.ip, this.config.ipAllowRanges);
@@ -86,16 +86,16 @@ export class LocalProvider implements CrawlerControlProvider {
         confidence += 0.1;
       }
     }
-    
+
     // User agent anomaly detection
     if (this.isUserAgentSuspicious(req.userAgent)) {
       indicators.push('ua_suspicious');
       confidence -= 0.2;
     }
-    
+
     // Normalize confidence
     confidence = Math.max(0, Math.min(1, confidence));
-    
+
     // Determine result based on confidence
     let result: VerificationResult['result'];
     if (confidence >= 0.8) {
@@ -105,7 +105,7 @@ export class LocalProvider implements CrawlerControlProvider {
     } else {
       result = 'unverified';
     }
-    
+
     return {
       provider: this.name,
       result,
@@ -115,11 +115,11 @@ export class LocalProvider implements CrawlerControlProvider {
       evidence: {
         rdns_check: !!req.rdns,
         rate_check: !!req.rate,
-        ua_pattern_match: this.config.uaAllow?.test(req.userAgent) ?? null
-      }
+        ua_pattern_match: this.config.uaAllow?.test(req.userAgent) ?? null,
+      },
     };
   }
-  
+
   async calculatePrice(usage: UsageMetrics): Promise<PricingResult> {
     // Local verification is essentially free
     return {
@@ -127,10 +127,10 @@ export class LocalProvider implements CrawlerControlProvider {
       model: 'per_request',
       rate: 0,
       currency: 'USD',
-      ttl_s: 3600
+      ttl_s: 3600,
     };
   }
-  
+
   async healthCheck(): Promise<HealthCheckResult> {
     // Local provider is always healthy
     return {
@@ -140,27 +140,32 @@ export class LocalProvider implements CrawlerControlProvider {
         config: {
           ua_allow_pattern: this.config.uaAllow?.source,
           rdns_required: this.config.rdnsRequired,
-          max_rps_threshold: this.config.maxRpsThreshold
-        }
-      }
+          max_rps_threshold: this.config.maxRpsThreshold,
+        },
+      },
     };
   }
-  
+
   private isIpInRanges(ip: string, ranges: string[]): boolean {
     // Simple implementation - in production, use a proper CIDR library
-    return ranges.some(range => {
+    return ranges.some((range) => {
       if (range.includes('/')) {
         // CIDR notation - simplified check
         const [network, bits] = range.split('/');
         // This is a placeholder - implement proper CIDR matching
-        return ip.startsWith(network.split('.').slice(0, Math.floor(parseInt(bits) / 8)).join('.'));
+        return ip.startsWith(
+          network
+            .split('.')
+            .slice(0, Math.floor(parseInt(bits) / 8))
+            .join('.')
+        );
       } else {
         // Exact match
         return ip === range;
       }
     });
   }
-  
+
   private isUserAgentSuspicious(userAgent: string): boolean {
     const suspiciousPatterns = [
       /python-requests/i,
@@ -168,11 +173,11 @@ export class LocalProvider implements CrawlerControlProvider {
       /wget/i,
       /libwww/i,
       /httpclient/i,
-      /^$/,  // Empty user agent
-      /^.{1,5}$/,  // Very short user agents
-      /script|bot.*script|automated/i
+      /^$/, // Empty user agent
+      /^.{1,5}$/, // Very short user agents
+      /script|bot.*script|automated/i,
     ];
-    
-    return suspiciousPatterns.some(pattern => pattern.test(userAgent));
+
+    return suspiciousPatterns.some((pattern) => pattern.test(userAgent));
   }
 }

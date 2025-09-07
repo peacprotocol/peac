@@ -9,23 +9,49 @@ import { FEATURES } from './config.js';
 // Import profile maps
 const RECEIPT_MAP = {
   field_map: {
-    "version": 1, "protocol_version": 2, "wire_version": 3, "subject": 4,
-    "subject.uri": 41, "subject.content_hash": 42, "subject.rights_class": 43, "subject.sku": 44,
-    "aipref": 5, "aipref.status": 51, "aipref.snapshot": 52, "aipref.digest": 53, "aipref.source": 54,
-    "purpose": 6, "enforcement": 7, "enforcement.method": 71, "enforcement.provider": 72,
-    "payment": 8, "payment.rail": 81, "payment.amount": 82, "payment.currency": 83,
-    "acquisition": 9, "acquisition.method": 91, "acquisition.source": 92,
-    "crawler_type": 15, "verification": 16, "verification.trust_score": 165,
-    "request_context": 18, "request_context.request_id": 181, "request_context.timestamp": 184,
-    "issued_at": 19, "expires_at": 20, "kid": 21, "nonce": 22, "signature_media_type": 23
+    version: 1,
+    protocol_version: 2,
+    wire_version: 3,
+    subject: 4,
+    'subject.uri': 41,
+    'subject.content_hash': 42,
+    'subject.rights_class': 43,
+    'subject.sku': 44,
+    aipref: 5,
+    'aipref.status': 51,
+    'aipref.snapshot': 52,
+    'aipref.digest': 53,
+    'aipref.source': 54,
+    purpose: 6,
+    enforcement: 7,
+    'enforcement.method': 71,
+    'enforcement.provider': 72,
+    payment: 8,
+    'payment.rail': 81,
+    'payment.amount': 82,
+    'payment.currency': 83,
+    acquisition: 9,
+    'acquisition.method': 91,
+    'acquisition.source': 92,
+    crawler_type: 15,
+    verification: 16,
+    'verification.trust_score': 165,
+    request_context: 18,
+    'request_context.request_id': 181,
+    'request_context.timestamp': 184,
+    issued_at: 19,
+    expires_at: 20,
+    kid: 21,
+    nonce: 22,
+    signature_media_type: 23,
   },
   enum_map: {
-    "purpose": { "train-ai": 1, "train-genai": 2, "search": 3, "evaluation": 4, "other": 5 },
-    "crawler_type": { "bot": 1, "agent": 2, "hybrid": 3, "browser": 4, "migrating": 5, "test": 6, "unknown": 7 },
-    "aipref.status": { "allowed": 1, "denied": 2, "conditional": 3, "not_found": 4, "error": 5 },
-    "enforcement.method": { "none": 1, "http-402": 2, "subscription": 3, "license": 4 },
-    "payment.rail": { "stripe": 1, "l402": 2, "x402": 3 }
-  }
+    purpose: { 'train-ai': 1, 'train-genai': 2, search: 3, evaluation: 4, other: 5 },
+    crawler_type: { bot: 1, agent: 2, hybrid: 3, browser: 4, migrating: 5, test: 6, unknown: 7 },
+    'aipref.status': { allowed: 1, denied: 2, conditional: 3, not_found: 4, error: 5 },
+    'enforcement.method': { none: 1, 'http-402': 2, subscription: 3, license: 4 },
+    'payment.rail': { stripe: 1, l402: 2, x402: 3 },
+  },
 };
 
 export interface CompactProfile {
@@ -38,7 +64,7 @@ export interface CompactProfile {
 export class CborCompactCodec {
   private encoder: TextEncoder = new TextEncoder();
   private decoder: TextDecoder = new TextDecoder();
-  
+
   // Reverse maps for decoding
   private fieldMapReverse: Record<number, string>;
   private enumMapsReverse: Record<string, Record<number, string>>;
@@ -49,15 +75,21 @@ export class CborCompactCodec {
     }
 
     // Build reverse lookup maps
-    this.fieldMapReverse = Object.entries(RECEIPT_MAP.field_map)
-      .reduce((acc, [key, val]) => ({ ...acc, [val]: key }), {});
+    this.fieldMapReverse = Object.entries(RECEIPT_MAP.field_map).reduce(
+      (acc, [key, val]) => ({ ...acc, [val]: key }),
+      {}
+    );
 
-    this.enumMapsReverse = Object.entries(RECEIPT_MAP.enum_map)
-      .reduce((acc, [enumName, enumMap]) => ({
+    this.enumMapsReverse = Object.entries(RECEIPT_MAP.enum_map).reduce(
+      (acc, [enumName, enumMap]) => ({
         ...acc,
-        [enumName]: Object.entries(enumMap as Record<string, number>)
-          .reduce((enumAcc, [key, val]) => ({ ...enumAcc, [val]: key }), {})
-      }), {});
+        [enumName]: Object.entries(enumMap as Record<string, number>).reduce(
+          (enumAcc, [key, val]) => ({ ...enumAcc, [val]: key }),
+          {}
+        ),
+      }),
+      {}
+    );
   }
 
   encodeReceipt(receipt: Receipt): { data: Uint8Array; profile: CompactProfile } {
@@ -69,10 +101,11 @@ export class CborCompactCodec {
       data: cborData,
       profile: {
         profile_uri: 'https://peacprotocol.org/profiles/receipt-compact/1.1',
-        media_type: 'application/cbor; profile="https://peacprotocol.org/profiles/receipt-compact/1.1"',
+        media_type:
+          'application/cbor; profile="https://peacprotocol.org/profiles/receipt-compact/1.1"',
         size_bytes: cborData.length,
-        compression_ratio: Math.round((1 - cborData.length / jsonSize) * 100) / 100
-      }
+        compression_ratio: Math.round((1 - cborData.length / jsonSize) * 100) / 100,
+      },
     };
   }
 
@@ -121,9 +154,18 @@ export class CborCompactCodec {
 
     if (receipt.enforcement) {
       const enforcementCompact: Record<number, any> = {};
-      this.setCompactField(enforcementCompact, 'enforcement.method', receipt.enforcement.method, 'enforcement.method');
+      this.setCompactField(
+        enforcementCompact,
+        'enforcement.method',
+        receipt.enforcement.method,
+        'enforcement.method'
+      );
       if (receipt.enforcement.provider) {
-        this.setCompactField(enforcementCompact, 'enforcement.provider', receipt.enforcement.provider);
+        this.setCompactField(
+          enforcementCompact,
+          'enforcement.provider',
+          receipt.enforcement.provider
+        );
       }
       compact[RECEIPT_MAP.field_map.enforcement] = enforcementCompact;
     }
@@ -139,8 +181,11 @@ export class CborCompactCodec {
     if (receipt.verification) {
       const verificationCompact: Record<number, any> = {};
       if (receipt.verification.trust_score !== undefined) {
-        this.setCompactField(verificationCompact, 'verification.trust_score', 
-          Math.round(receipt.verification.trust_score * 1000) / 1000); // 3 decimal precision
+        this.setCompactField(
+          verificationCompact,
+          'verification.trust_score',
+          Math.round(receipt.verification.trust_score * 1000) / 1000
+        ); // 3 decimal precision
       }
       if (Object.keys(verificationCompact).length > 0) {
         compact[RECEIPT_MAP.field_map.verification] = verificationCompact;
@@ -150,11 +195,18 @@ export class CborCompactCodec {
     if (receipt.request_context) {
       const contextCompact: Record<number, any> = {};
       if (receipt.request_context.request_id) {
-        this.setCompactField(contextCompact, 'request_context.request_id', receipt.request_context.request_id);
+        this.setCompactField(
+          contextCompact,
+          'request_context.request_id',
+          receipt.request_context.request_id
+        );
       }
       if (receipt.request_context.timestamp) {
-        this.setCompactField(contextCompact, 'request_context.timestamp', 
-          this.encodeTimestamp(receipt.request_context.timestamp));
+        this.setCompactField(
+          contextCompact,
+          'request_context.timestamp',
+          this.encodeTimestamp(receipt.request_context.timestamp)
+        );
       }
       if (Object.keys(contextCompact).length > 0) {
         compact[RECEIPT_MAP.field_map.request_context] = contextCompact;
@@ -190,7 +242,10 @@ export class CborCompactCodec {
     if (receipt.expires_at && typeof receipt.expires_at === 'number') {
       receipt.expires_at = new Date(receipt.expires_at).toISOString();
     }
-    if (receipt.request_context?.timestamp && typeof receipt.request_context.timestamp === 'number') {
+    if (
+      receipt.request_context?.timestamp &&
+      typeof receipt.request_context.timestamp === 'number'
+    ) {
       receipt.request_context.timestamp = new Date(receipt.request_context.timestamp).toISOString();
     }
 
@@ -205,7 +260,8 @@ export class CborCompactCodec {
       receipt.aipref.status = this.enumMapsReverse['aipref.status'][receipt.aipref.status];
     }
     if (typeof receipt.enforcement?.method === 'number') {
-      receipt.enforcement.method = this.enumMapsReverse['enforcement.method'][receipt.enforcement.method];
+      receipt.enforcement.method =
+        this.enumMapsReverse['enforcement.method'][receipt.enforcement.method];
     }
     if (typeof receipt.payment?.rail === 'number') {
       receipt.payment.rail = this.enumMapsReverse['payment.rail'][receipt.payment.rail];
@@ -214,13 +270,19 @@ export class CborCompactCodec {
     return receipt as Receipt;
   }
 
-  private setCompactField(compact: Record<number, any>, fieldPath: string, value: any, enumName?: string): void {
+  private setCompactField(
+    compact: Record<number, any>,
+    fieldPath: string,
+    value: any,
+    enumName?: string
+  ): void {
     const fieldId = RECEIPT_MAP.field_map[fieldPath as keyof typeof RECEIPT_MAP.field_map];
     if (!fieldId) return;
 
     // Apply enum encoding if specified
     if (enumName && value && RECEIPT_MAP.enum_map[enumName as keyof typeof RECEIPT_MAP.enum_map]) {
-      const enumValue = RECEIPT_MAP.enum_map[enumName as keyof typeof RECEIPT_MAP.enum_map][value as keyof any];
+      const enumValue =
+        RECEIPT_MAP.enum_map[enumName as keyof typeof RECEIPT_MAP.enum_map][value as keyof any];
       compact[fieldId] = enumValue !== undefined ? enumValue : value;
     } else {
       compact[fieldId] = value;
