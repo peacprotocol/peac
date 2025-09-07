@@ -5,10 +5,8 @@
  */
 
 import * as readline from 'node:readline';
-import { signReceipt, signPurgeReceipt } from '@peac/core/sign.js';
-import { verifyReceipt, verifyBulk } from '@peac/core/verify.js';
-import { Receipt, PurgeReceipt, SignOpts, KeySet } from '@peac/core/types.js';
-import { VERSION_CONFIG, FEATURES } from '@peac/core/config.js';
+import { signReceipt, signPurgeReceipt, verifyReceipt, verifyBulk, VERSION_CONFIG } from '@peac/core';
+import type { Receipt, PurgeReceipt, SignOpts, KeySet } from '@peac/core';
 
 type JsonRpcRequest = {
   jsonrpc: '2.0';
@@ -57,7 +55,7 @@ class PeacMcpServer {
         const request: JsonRpcRequest = JSON.parse(line);
         await this.handleRequest(request);
       } catch (error) {
-        this.sendError(null, -32700, 'Parse error', { error: error.message });
+        this.sendError(null, -32700, 'Parse error', { error: String(error) });
       }
     });
 
