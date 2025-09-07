@@ -120,7 +120,7 @@ export interface KeyInfo {
 
 export class KeyManager {
   private keys = new Map<string, KeyInfo>();
-  private rotation_timer?: NodeJS.Timeout;
+  private rotation_timer?: ReturnType<typeof setTimeout>;
 
   constructor(
     private config = SECURITY_CONFIG.key_rotation,
@@ -132,10 +132,11 @@ export class KeyManager {
   }
 
   async addKey(kid: string, info: Omit<KeyInfo, 'kid'>): Promise<void> {
-    this.keys.set(kid, { kid, ...info });
+    const keyInfo = { kid, ...info };
+    this.keys.set(kid, keyInfo);
 
     if (this.key_store) {
-      await this.key_store.store(kid, info);
+      await this.key_store.store(kid, keyInfo);
     }
   }
 
@@ -143,13 +144,14 @@ export class KeyManager {
     let info = this.keys.get(kid);
 
     if (!info && this.key_store) {
-      info = await this.key_store.retrieve(kid);
-      if (info) {
-        this.keys.set(kid, info);
+      const retrievedInfo = await this.key_store.retrieve(kid);
+      if (retrievedInfo) {
+        this.keys.set(kid, retrievedInfo);
+        info = retrievedInfo;
       }
     }
 
-    return info || null;
+    return info ?? null;
   }
 
   async getActiveKeys(): Promise<KeyInfo[]> {

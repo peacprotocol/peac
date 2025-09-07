@@ -19,9 +19,9 @@ export const VERSION_CONFIG = {
   SUPPORTED_PROTOCOLS: new Set(['0.9.12.1']),
   ACCEPT_COMPAT: process.env.PEAC_ACCEPT_COMPAT === '1',
   COMPAT_PROTOCOLS: new Set<string>([]), // Fill when needed
-  REQUIRED_WIRE_RECEIPT: '1.1',
-  REQUIRED_WIRE_PURGE: '1.0',
-  REQUIRED_WIRE_DISCOVERY: '1.1',
+  REQUIRED_WIRE_RECEIPT: '1.1' as const,
+  REQUIRED_WIRE_PURGE: '1.0' as const,
+  REQUIRED_WIRE_DISCOVERY: '1.1' as const,
 };
 
 export const TRUST_CONFIG = {
