@@ -1,0 +1,11 @@
+version: 0.9.12
+preferences: https://cdn.newssite.com/.well-known/aipref.json
+access_control: http-402
+payments: ["x402", "l402"]
+provenance: c2pa
+receipts: required
+verify: https://api.newssite.com/peac/v1/verify
+public_keys:
+  - kid: "news-2025-09-15" alg: "EdDSA" key: "MCowBQYDK2VwAyEALKJqPti8pfbFPXOfQ0_FYmJNwZ8waBXUvSN4xZhZMKw"
+  - kid: "news-2025-08-15" alg: "EdDSA" key: "MCowBQYDK2VwAyEAPEP0LlEjdXJLDfrPe5c0hNFrF7WMRm2qN7ETN9gKPBs"
+  - kid: "news-2025-07-15" alg: "EdDSA" key: "MCowBQYDK2VwAyEAh8pkqISEb-k9YjbZ2KW1K7ntzOwJTgsNJmGKOXG0QGk"

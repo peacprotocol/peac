@@ -1,12 +1,14 @@
-node_modules/
-**/dist/
-**/coverage/
-**/.turbo/
-**/.next/
-**/build/
-**/*.min.js
-**/*.min.css
-**/*.map
-sbom.json
+# builds & bundles
+**/dist/**
+**/coverage/**
+**/.turbo/**
+**/.cache/**
+
+# generated metadata
+**/sbom*.json
+**/*.bom.json
+**/*.lock
 package-lock.json
-docs/generated/
+
+# test artifacts
+**/__snapshots__/**

@@ -1,0 +1,10 @@
+version: 0.9.12
+preferences: https://publisher.example/.well-known/aipref.json
+access_control: http-402
+payments: ["x402", "l402", "stripe"]
+provenance: c2pa
+receipts: required
+verify: https://publisher.example/api/peac/verify
+public_keys:
+  - kid: "prod-2025-09" alg: "EdDSA" key: "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE"
+  - kid: "prod-2025-08" alg: "EdDSA" key: "MCowBQYDK2VwAyEAJrQLj5P_89iXES9kc78gvSZ158-o3OuZlJNtaRJpD9I"
