@@ -7,6 +7,10 @@
   "exports": {
     ".": "./functions.json"
   },
+  "scripts": {
+    "build": "echo 'No build needed for JSON package'",
+    "typecheck": "echo 'No TypeScript in JSON package'"
+  },
   "files": [
     "functions.json",
     "package.json",

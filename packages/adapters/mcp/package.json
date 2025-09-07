@@ -15,6 +15,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "typecheck": "tsc --noEmit",
     "dev": "node dist/server.js",
     "start": "node dist/server.js"
   },

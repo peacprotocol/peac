@@ -7,6 +7,10 @@
   "exports": {
     ".": "./tool.py"
   },
+  "scripts": {
+    "build": "echo 'No build needed for Python package'",
+    "typecheck": "echo 'No TypeScript in Python package'"
+  },
   "files": [
     "tool.py",
     "package.json",
