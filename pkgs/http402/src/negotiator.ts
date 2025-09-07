@@ -78,7 +78,7 @@ export class PaymentNegotiator {
   async verify(
     rail: PaymentRail,
     challenge: string,
-    evidence: string,
+    evidence: string
   ): Promise<import('./types.js').PaymentEvidence | null> {
     const adapter = this.adapters.get(rail);
     if (!adapter) {
@@ -116,7 +116,7 @@ export class X402MockAdapter implements PaymentAdapter {
 
   async verify(
     challenge: string,
-    evidence: string,
+    evidence: string
   ): Promise<import('./types.js').PaymentEvidence | null> {
     if (!evidence.startsWith('x402_proof_')) return null;
 
@@ -146,7 +146,7 @@ export class L402MockAdapter implements PaymentAdapter {
 
   async verify(
     challenge: string,
-    evidence: string,
+    evidence: string
   ): Promise<import('./types.js').PaymentEvidence | null> {
     if (!evidence.includes('lsat_preimage_')) return null;
 
@@ -175,7 +175,7 @@ export class TempoMockAdapter implements PaymentAdapter {
 
   async verify(
     challenge: string,
-    evidence: string,
+    evidence: string
   ): Promise<import('./types.js').PaymentEvidence | null> {
     if (!evidence.includes('tempo:tx:') || evidence.length < 32) return null;
 
@@ -184,7 +184,7 @@ export class TempoMockAdapter implements PaymentAdapter {
       (part) =>
         part.startsWith('tempo:tx:') ||
         part.startsWith('tempo:chain:') ||
-        part.startsWith('tempo:memo:'),
+        part.startsWith('tempo:memo:')
     );
 
     return {
@@ -213,7 +213,7 @@ export class StripeMockAdapter implements PaymentAdapter {
 
   async verify(
     challenge: string,
-    evidence: string,
+    evidence: string
   ): Promise<import('./types.js').PaymentEvidence | null> {
     if (!evidence.startsWith('pi_') || !evidence.includes('succeeded')) return null;
 

@@ -14,7 +14,7 @@ export class RateLimiter {
   constructor(
     private readonly capacity: number = 100,
     private readonly refillRate: number = 100, // tokens per minute
-    private readonly windowMs: number = 60000, // 1 minute
+    private readonly windowMs: number = 60000 // 1 minute
   ) {}
 
   consume(key: string, tokens: number = 1): boolean {
@@ -192,7 +192,7 @@ export function constantTimeCompare(a: string, b: string): boolean {
 export function secureHashCompare(
   data: string,
   expectedHash: string,
-  algorithm = 'sha256',
+  algorithm = 'sha256'
 ): boolean {
   const hash = createHash(algorithm).update(data).digest('hex');
   return constantTimeCompare(hash, expectedHash);

@@ -62,13 +62,14 @@ node ./tests/perf/run.mjs
 ⚠️ **Mock Implementation**: These results use simplified mock functions that simulate JWS operations without actual Ed25519 cryptography. Real-world performance will be lower due to:
 
 - Actual Ed25519 signature generation/verification
-- JWK key import/export operations  
+- JWK key import/export operations
 - JSON canonicalization overhead
 - Network I/O for remote operations
 
 ## Production Expectations
 
 For production deployments with real cryptographic operations:
+
 - **Sign p95**: 2-8ms (depending on hardware/keys)
 - **Verify p95**: 1-4ms (public key operations faster)
 - **Throughput**: 1,000-10,000 rps (based on CPU cores)

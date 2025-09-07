@@ -37,7 +37,7 @@ export default {
           {
             status: 401,
             headers: { 'Content-Type': 'application/problem+json' },
-          },
+          }
         );
       }
     }
@@ -74,7 +74,7 @@ export default {
               'Content-Type': 'application/problem+json',
               'WWW-Authenticate': 'PEAC realm="api", rails="x402,l402"',
             },
-          },
+          }
         );
       }
 
@@ -110,7 +110,7 @@ export default {
           {
             status: 401,
             headers: { 'Content-Type': 'application/problem+json' },
-          },
+          }
         );
       }
     }

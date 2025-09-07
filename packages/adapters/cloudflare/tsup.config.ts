@@ -6,5 +6,5 @@ export default defineConfig({
   dts: false, // Temporarily disabled due to workspace resolution
   clean: true,
   target: 'esnext',
-  external: ['@peac/core']
+  external: ['@peac/core'],
 });

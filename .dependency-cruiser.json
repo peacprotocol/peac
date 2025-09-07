@@ -16,7 +16,7 @@
     },
     {
       "name": "no-legacy-imports",
-      "severity": "error", 
+      "severity": "error",
       "comment": "No imports from legacy pkgs/ directory",
       "from": { "path": ".*" },
       "to": { "path": "^pkgs/" }

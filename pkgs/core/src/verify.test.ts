@@ -34,7 +34,7 @@ describe('verify - crypto guardrails', () => {
     it('should reject non-EdDSA algorithm', async () => {
       // Manually craft a JWS with wrong algorithm
       const badHeader = Buffer.from(JSON.stringify({ alg: 'HS256', kid: 'test-key-001' })).toString(
-        'base64url',
+        'base64url'
       );
       const payload = Buffer.from(JSON.stringify(validReceipt)).toString('base64url');
       const badJWS = `${badHeader}.${payload}.fake_signature`;
@@ -52,7 +52,7 @@ describe('verify - crypto guardrails', () => {
 
     it('should reject unknown kid', async () => {
       const badHeader = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'unknown-key' })).toString(
-        'base64url',
+        'base64url'
       );
       const payload = Buffer.from(JSON.stringify(validReceipt)).toString('base64url');
       const badJWS = `${badHeader}.${payload}.fake_signature`;
@@ -63,7 +63,7 @@ describe('verify - crypto guardrails', () => {
     it('should reject algorithm swap attacks', async () => {
       // Try to swap EdDSA for RS256
       const badHeader = Buffer.from(
-        JSON.stringify({ alg: 'RS256', kid: 'test-key-001', typ: 'JWT' }),
+        JSON.stringify({ alg: 'RS256', kid: 'test-key-001', typ: 'JWT' })
       ).toString('base64url');
       const payload = Buffer.from(JSON.stringify(validReceipt)).toString('base64url');
       const badJWS = `${badHeader}.${payload}.fake_signature`;
@@ -74,7 +74,7 @@ describe('verify - crypto guardrails', () => {
     it('should reject kid mismatch between header and payload', async () => {
       const badReceipt = { ...validReceipt, kid: 'different-key' };
       const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'test-key-001' })).toString(
-        'base64url',
+        'base64url'
       );
       const payload = Buffer.from(JSON.stringify(badReceipt)).toString('base64url');
       const badJWS = `${header}.${payload}.fake_signature`;
@@ -112,7 +112,7 @@ describe('verify - crypto guardrails', () => {
       // Simulate receipt signed with new key
       const newReceipt = { ...validReceipt, kid: 'new-key-2025' };
       const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'new-key-2025' })).toString(
-        'base64url',
+        'base64url'
       );
       const payload = Buffer.from(JSON.stringify(newReceipt)).toString('base64url');
       const jws = `${header}.${payload}.signature`;

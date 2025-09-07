@@ -71,7 +71,7 @@ peac:
       parser.options.strict = false;
       await parser.validatePeac(peac);
       expect(
-        parser.errors.find((e) => e.error.includes('Invalid or missing protocol')),
+        parser.errors.find((e) => e.error.includes('Invalid or missing protocol'))
       ).toBeTruthy();
     });
   });

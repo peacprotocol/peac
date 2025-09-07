@@ -16,7 +16,8 @@
     "package.json",
     "README.md",
     "LICENSE"
-  ],  "scripts": {
+  ],
+  "scripts": {
     "build": "tsc",
     "test": "node --test src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
@@ -26,7 +27,12 @@
   "devDependencies": {
     "typescript": "^5.0.0"
   },
-  "keywords": ["peac", "discovery", "well-known", "abnf"],
+  "keywords": [
+    "peac",
+    "discovery",
+    "well-known",
+    "abnf"
+  ],
   "license": "MIT",
   "repository": "https://github.com/peac-protocol/peac",
   "sideEffects": false

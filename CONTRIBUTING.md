@@ -9,10 +9,12 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 ## Development Setup
 
 ### Prerequisites
+
 - Node.js 22+ with pnpm 9+
 - Git with proper configuration
 
 ### Local Development
+
 ```bash
 git clone https://github.com/peacprotocol/peac.git
 cd peac
@@ -22,11 +24,12 @@ pnpm test
 ```
 
 ### Workspace Structure
+
 ```
 peac/
 ├── apps/                  # Deployable applications
 │   ├── api/              # @peac/app-api
-│   ├── worker/           # @peac/app-worker  
+│   ├── worker/           # @peac/app-worker
 │   └── demo/             # @peac/app-demo
 ├── packages/             # Publishable libraries
 │   ├── core/            # @peac/core
@@ -48,12 +51,14 @@ peac/
 ## Development Standards
 
 ### Code Quality
+
 - TypeScript strict mode required
 - ESLint + Prettier formatting enforced
 - Test coverage ≥50% maintained
 - Performance budgets respected
 
 ### Commit Convention
+
 ```
 feat(scope): add new feature
 fix(scope): resolve bug
@@ -64,6 +69,7 @@ perf(scope): optimize performance
 ```
 
 ### Testing Requirements
+
 - Unit tests for all business logic
 - Integration tests for API endpoints
 - Performance tests for critical paths
@@ -72,12 +78,14 @@ perf(scope): optimize performance
 ## Architecture Guidelines
 
 ### Dependency Boundaries
+
 - Apps can depend on packages
 - Packages cannot depend on apps
 - No circular dependencies allowed
 - External dependencies require approval
 
 ### Performance Requirements
+
 - Receipt signing: p95 ≤ 3ms
 - Receipt verification: p95 ≤ 1ms
 - Crawler operations: ≤ 35ms
@@ -108,11 +116,13 @@ All phases must pass before merge.
 ## Release Process
 
 The project follows semantic versioning with development releases:
+
 - `0.9.12-dev.1` for development
 - `0.9.12` for stable releases
 - Breaking changes documented
 
 ### Branch Strategy
+
 - Create release branches: `release/vX.X.X`
 - Feature branches: `feature/description`
 - Never push releases directly to main

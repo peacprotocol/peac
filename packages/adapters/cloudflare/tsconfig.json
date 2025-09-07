@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json", 
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
     "baseUrl": ".",
@@ -8,9 +8,7 @@
     "declarationMap": true,
     "noEmit": false
   },
-  "references": [
-    { "path": "../../core" }
-  ],
+  "references": [{ "path": "../../core" }],
   "include": ["*.ts"],
   "exclude": ["dist", "node_modules"]
 }

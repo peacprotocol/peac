@@ -20,7 +20,8 @@
     "package.json",
     "README.md",
     "LICENSE"
-  ],  "publishConfig": {
+  ],
+  "publishConfig": {
     "access": "public",
     "tag": "dev"
   },

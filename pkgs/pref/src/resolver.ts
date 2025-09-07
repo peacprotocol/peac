@@ -198,7 +198,7 @@ export class PrefResolver {
   }
 
   private async computeDigest(
-    snapshot: AIPrefSnapshot,
+    snapshot: AIPrefSnapshot
   ): Promise<{ alg: 'JCS-SHA256'; val: string }> {
     // Simple canonicalization for digest
     const canonical = JSON.stringify(snapshot, Object.keys(snapshot).sort());

@@ -1,11 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "group:monorepos",
-    "group:recommended",
-    ":dependencyDashboard"
-  ],
+  "extends": ["config:recommended", "group:monorepos", "group:recommended", ":dependencyDashboard"],
   "schedule": ["before 6am on monday"],
   "semanticCommits": "enabled",
   "commitMessagePrefix": "chore(deps): ",
@@ -26,11 +21,7 @@
     },
     {
       "matchDepTypes": ["dependencies"],
-      "matchPackageNames": [
-        "jose",
-        "zod",
-        "lru-cache"
-      ],
+      "matchPackageNames": ["jose", "zod", "lru-cache"],
       "groupName": "core dependencies",
       "reviewers": ["@peacprotocol/core-team"],
       "schedule": ["before 6am on monday"]

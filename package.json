@@ -10,7 +10,7 @@
     "test:coverage": "turbo run test:coverage",
     "test:crawler": "pnpm -w run test --filter @peac/crawler",
     "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck", 
+    "typecheck": "turbo run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "conformance": "turbo run conformance",

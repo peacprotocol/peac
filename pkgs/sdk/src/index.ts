@@ -17,7 +17,7 @@ export type {
 // Convenience functions for single-use operations
 export async function discover(
   origin: string,
-  options?: import('./types.js').DiscoverOptions,
+  options?: import('./types.js').DiscoverOptions
 ): Promise<import('./types.js').DiscoveryResult> {
   const { PeacClient } = await import('./client.js');
   const client = new PeacClient();
@@ -27,7 +27,7 @@ export async function discover(
 export async function verifyLocal(
   receipt: string,
   keys: Record<string, any>,
-  options?: import('./types.js').VerifyLocalOptions,
+  options?: import('./types.js').VerifyLocalOptions
 ): Promise<import('./types.js').VerificationResult> {
   const { PeacClient } = await import('./client.js');
   const client = new PeacClient({ defaultKeys: keys });
@@ -37,7 +37,7 @@ export async function verifyLocal(
 export async function verifyRemote(
   receipt: string,
   endpoint?: string,
-  options?: import('./types.js').VerifyRemoteOptions,
+  options?: import('./types.js').VerifyRemoteOptions
 ): Promise<import('./types.js').VerificationResult> {
   const { PeacClient } = await import('./client.js');
   const client = new PeacClient();
@@ -47,7 +47,7 @@ export async function verifyRemote(
 export async function verify(
   receipt: string,
   keysOrOptions?: Record<string, any> | import('./types.js').VerifyLocalOptions,
-  options?: import('./types.js').VerifyRemoteOptions,
+  options?: import('./types.js').VerifyRemoteOptions
 ): Promise<import('./types.js').VerificationResult> {
   const { PeacClient } = await import('./client.js');
   const client = new PeacClient();

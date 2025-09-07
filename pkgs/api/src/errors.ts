@@ -12,7 +12,7 @@ export class ProblemError extends Error {
     public title: string,
     public detail?: string,
     public instance?: string,
-    public extensions?: Record<string, unknown>,
+    public extensions?: Record<string, unknown>
   ) {
     super(title);
     this.name = 'ProblemError';
@@ -87,7 +87,7 @@ export function createProblemDetails(ctx: ErrorContext, instance?: string): Veri
 
 export function handleVerifyError(
   error: unknown,
-  instance?: string,
+  instance?: string
 ): { status: HttpStatus; body: VerifyErrorDetails } {
   let ctx: ErrorContext;
 
@@ -133,7 +133,7 @@ export function handleVerifyError(
 // Convenience function for validation errors
 export function validationError(
   details: string[],
-  instance?: string,
+  instance?: string
 ): { status: HttpStatus; body: VerifyErrorDetails } {
   const ctx: ErrorContext = {
     code: 'schema-validation-failed',

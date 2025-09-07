@@ -67,15 +67,15 @@ test('adapter capabilities - x402 supports USD/USDC', () => {
 
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '1', currency: 'USD' } }),
-    true,
+    true
   );
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '1', currency: 'USDC' } }),
-    true,
+    true
   );
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '1', currency: 'BTC' } }),
-    false,
+    false
   );
 });
 
@@ -84,15 +84,15 @@ test('adapter capabilities - L402 supports BTC/free', () => {
 
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '0', currency: 'USD' } }),
-    true,
+    true
   );
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '1', currency: 'BTC' } }),
-    true,
+    true
   );
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '1', currency: 'USD' } }),
-    false,
+    false
   );
 });
 
@@ -101,15 +101,15 @@ test('adapter capabilities - Tempo supports USD/USDC', () => {
 
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '1', currency: 'USD' } }),
-    true,
+    true
   );
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '1', currency: 'USDC' } }),
-    true,
+    true
   );
   assert.strictEqual(
     adapter.supports({ acceptedRails: [], amount: { value: '1', currency: 'BTC' } }),
-    false,
+    false
   );
 });
 
@@ -120,7 +120,7 @@ test('rail parity - Tempo verification works like x402', async () => {
   const evidence = await negotiator.verify(
     'tempo',
     'challenge_123',
-    'tempo:tx:0xabc123,tempo:chain:tempo-testnet',
+    'tempo:tx:0xabc123,tempo:chain:tempo-testnet'
   );
   assert.strictEqual(evidence.rail, 'tempo');
   assert(evidence.provider_ids.includes('tempo:tx:0xabc123'));

@@ -7,7 +7,7 @@ export default defineConfig({
   clean: true,
   target: 'node18',
   banner: {
-    js: '#!/usr/bin/env node'
+    js: '#!/usr/bin/env node',
   },
-  external: ['@peac/core']
+  external: ['@peac/core'],
 });

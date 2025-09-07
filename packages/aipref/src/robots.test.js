@@ -14,7 +14,7 @@ Disallow: /private/
 User-agent: GPTBot
 Disallow: /
   `.trim();
-  
+
   const rules = parseRobots(content);
   assert.strictEqual(rules.length, 2);
   assert.strictEqual(rules[0].userAgent, '*');
@@ -28,10 +28,10 @@ test('robotsToAIPref - GPTBot disallow converts to no-train', () => {
   const rules = [
     {
       userAgent: 'GPTBot',
-      directives: [{ field: 'disallow', value: '/' }]
-    }
+      directives: [{ field: 'disallow', value: '/' }],
+    },
   ];
-  
+
   const snapshot = robotsToAIPref(rules);
   assert.strictEqual(snapshot.crawl, false);
   assert.strictEqual(snapshot['train-ai'], false);
@@ -41,10 +41,10 @@ test('robotsToAIPref - wildcard allow converts to crawl-ok', () => {
   const rules = [
     {
       userAgent: '*',
-      directives: [{ field: 'allow', value: '/' }]
-    }
+      directives: [{ field: 'allow', value: '/' }],
+    },
   ];
-  
+
   const snapshot = robotsToAIPref(rules);
   assert.strictEqual(snapshot.crawl, true);
 });
@@ -53,10 +53,10 @@ test('robotsToAIPref - no AI agents returns null', () => {
   const rules = [
     {
       userAgent: 'Googlebot',
-      directives: [{ field: 'disallow', value: '/admin/' }]
-    }
+      directives: [{ field: 'disallow', value: '/admin/' }],
+    },
   ];
-  
+
   const snapshot = robotsToAIPref(rules);
   assert.strictEqual(snapshot, null);
 });

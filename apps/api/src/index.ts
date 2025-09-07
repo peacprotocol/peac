@@ -3,15 +3,25 @@
  * Framework-agnostic verify endpoint implementations
  */
 
-export { VerifyApiHandler, createExpressHandler, createHonoHandler, createGenericHandler } from './handler.js';
-export { ProblemError, createProblemDetails, handleVerifyError, validationError } from './errors.js';
-export type { 
+export {
+  VerifyApiHandler,
+  createExpressHandler,
+  createHonoHandler,
+  createGenericHandler,
+} from './handler.js';
+export {
+  ProblemError,
+  createProblemDetails,
+  handleVerifyError,
+  validationError,
+} from './errors.js';
+export type {
   ProblemDetails,
   VerifyRequest,
   VerifyResponse,
   VerifyErrorDetails,
   ErrorContext,
-  HttpStatus
+  HttpStatus,
 } from './types.js';
 
 // RFC 9457 Problem Details media type
@@ -25,5 +35,5 @@ export const PROBLEM_TYPES = {
   UNKNOWN_KEY: 'https://peac.dev/problems/unknown-key-id',
   SCHEMA_VALIDATION: 'https://peac.dev/problems/schema-validation-failed',
   EXPIRED_RECEIPT: 'https://peac.dev/problems/expired-receipt',
-  PROCESSING_ERROR: 'https://peac.dev/problems/processing-error'
+  PROCESSING_ERROR: 'https://peac.dev/problems/processing-error',
 } as const;

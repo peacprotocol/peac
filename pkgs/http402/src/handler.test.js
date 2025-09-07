@@ -11,7 +11,7 @@ test('create402Response - generates RFC 9457 compliant response', async () => {
   const response = await create402Response(
     { value: '0.001', currency: 'USD' },
     'x402, stripe',
-    '/api/resource/123',
+    '/api/resource/123'
   );
 
   assert.strictEqual(response.status, 402);

@@ -17,7 +17,8 @@
     "package.json",
     "README.md",
     "LICENSE"
-  ],  "publishConfig": {
+  ],
+  "publishConfig": {
     "access": "public",
     "tag": "dev"
   },
@@ -45,7 +46,14 @@
     "ts-jest": "^29.0.0",
     "tsup": "^8.0.0"
   },
-  "keywords": ["peac", "http-402", "payment", "x402", "l402", "stripe"],
+  "keywords": [
+    "peac",
+    "http-402",
+    "payment",
+    "x402",
+    "l402",
+    "stripe"
+  ],
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
   "engines": {

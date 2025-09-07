@@ -2,7 +2,7 @@ name: PEAC Protocol CI/CD Pipeline
 
 on:
   push:
-    branches: [main, "release/*"]
+    branches: [main, 'release/*']
   pull_request:
     branches: [main]
 
@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "20.x"
-  PNPM_VERSION: "8.0.0"
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '8.0.0'
 
 jobs:
   # Phase 1: Setup and Validation
@@ -20,21 +20,21 @@ jobs:
     name: Setup & Validation
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     outputs:
       version: ${{ steps.version.outputs.version }}
-      
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          
+
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
@@ -50,15 +50,15 @@ jobs:
               exit 1
             fi
           fi
-        
+
       - name: Version validation
         id: version
         run: |
           VERSION=$(node -pe "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Version: $VERSION"
-          
-      - name: Workspace structure validation  
+
+      - name: Workspace structure validation
         run: |
           echo "🔍 Validating workspace structure..."
           if [ ! -d "packages" ]; then
@@ -73,7 +73,7 @@ jobs:
             echo "✅ pkgs/ directory exists (current structure)"
           fi
           echo "✅ Workspace structure valid"
-          
+
       - name: Legacy import check
         run: |
           echo "🔍 Checking for legacy imports..."
@@ -83,24 +83,24 @@ jobs:
           fi
           echo "✅ No legacy imports found"
 
-  # Phase 2: Code Quality  
+  # Phase 2: Code Quality
   quality:
     name: Code Quality
     runs-on: ubuntu-latest
     needs: setup
     timeout-minutes: 10
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          
+
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
@@ -116,22 +116,22 @@ jobs:
               exit 1
             fi
           fi
-        
+
       - name: Lint
         run: |
           echo "🔍 ESLint validation..."
           ${{ env.PKG_MANAGER }} run lint
-          
+
       - name: Format check
         run: |
           echo "🔍 Prettier format check..."
           ${{ env.PKG_MANAGER }} run format:check
-          
+
       - name: TypeScript check
         run: |
           echo "🔍 TypeScript compilation check..."
           ${{ env.PKG_MANAGER }} run typecheck
-          
+
       - name: Dependency boundaries
         run: |
           echo "🔍 Dependency boundary validation..."
@@ -143,18 +143,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: [setup, quality]
     timeout-minutes: 10
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          
+
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
@@ -170,12 +170,12 @@ jobs:
               exit 1
             fi
           fi
-        
+
       - name: Build all packages
         run: |
           echo "🔨 Building all packages..."
           ${{ env.PKG_MANAGER }} run build
-          
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -191,18 +191,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 15
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-          
-      - name: Setup Node.js  
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          
+
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
@@ -218,17 +218,17 @@ jobs:
               exit 1
             fi
           fi
-        
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          
+
       - name: Run tests with coverage
         run: |
           echo "🧪 Running test suite with coverage..."
           ${{ env.PKG_MANAGER }} run test:coverage
-          
+
       - name: Coverage validation
         run: |
           echo "🔍 Validating coverage thresholds..."
@@ -241,18 +241,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 10
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          
+
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
@@ -268,22 +268,22 @@ jobs:
               exit 1
             fi
           fi
-        
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          
+
       - name: Conformance testing
         run: |
           echo "🔍 Running conformance tests..."
           ${{ env.PKG_MANAGER }} run conformance
-          
+
       - name: Performance validation
         run: |
           echo "🚀 Running performance validation..."  
           ${{ env.PKG_MANAGER }} run perf
-          
+
       - name: Schema validation
         run: |
           echo "🔍 Validating JSON schemas..."
@@ -305,18 +305,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     timeout-minutes: 10
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          
+
       - name: Install dependencies
         run: |
           # Configure registry and try pnpm first
@@ -332,12 +332,12 @@ jobs:
               exit 1
             fi
           fi
-        
+
       - name: Security audit
         run: |
           echo "🔒 Security audit..."
           ${{ env.PKG_MANAGER }} audit --audit-level=high || echo "::warning::Security audit found issues (non-blocking in CI)"
-          
+
       - name: Generate SBOM
         if: github.ref == 'refs/heads/main'
         run: |
@@ -351,10 +351,10 @@ jobs:
     needs: [test, validation, security]
     if: github.ref == 'refs/heads/main'
     timeout-minutes: 5
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Production readiness validation
         run: |
           echo "🚀 PEAC Protocol v${{ needs.setup.outputs.version }} - Production Readiness Validation"

@@ -30,7 +30,7 @@ Examples:
   $ peac negotiate example.com   Negotiate terms with a publisher
   $ peac pay --provider stripe   Process a payment
 
-For more information, visit https://peacprotocol.org/docs`,
+For more information, visit https://peacprotocol.org/docs`
   );
 
 // Init command

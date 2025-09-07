@@ -67,7 +67,14 @@
                 "properties": {
                   "method": {
                     "type": "string",
-                    "enum": ["purchase", "subscription", "license", "public_domain", "fair_use", "consent"]
+                    "enum": [
+                      "purchase",
+                      "subscription",
+                      "license",
+                      "public_domain",
+                      "fair_use",
+                      "consent"
+                    ]
                   },
                   "source": { "type": "string", "format": "uri" },
                   "license": { "type": "string", "format": "uri" }
@@ -79,7 +86,13 @@
                 "properties": {
                   "basis": {
                     "type": "string",
-                    "enum": ["fair_use", "license", "public_domain", "consent", "legitimate_interest"]
+                    "enum": [
+                      "fair_use",
+                      "license",
+                      "public_domain",
+                      "consent",
+                      "legitimate_interest"
+                    ]
                   },
                   "jurisdiction": { "type": "string", "pattern": "^[A-Z]{2}(-[A-Z]{2})?$" },
                   "reference": { "type": "string", "format": "uri" }
@@ -191,7 +204,7 @@
       }
     },
     {
-      "type": "function", 
+      "type": "function",
       "function": {
         "name": "verify_peac_receipt",
         "description": "Verify the authenticity and integrity of a PEAC receipt",
@@ -203,7 +216,7 @@
     {
       "type": "function",
       "function": {
-        "name": "bulk_verify_receipts", 
+        "name": "bulk_verify_receipts",
         "description": "Efficiently verify multiple PEAC receipts in a single operation",
         "parameters": {
           "$ref": "#/functions/2/parameters"

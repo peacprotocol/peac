@@ -21,18 +21,18 @@ export default {
       p99: 1, // ms
     },
   },
-  
+
   // Global thresholds
   global: {
     errorRate: 0.01, // 1% max error rate
     availability: 0.99, // 99% availability SLO
     memoryMB: 100, // Peak RSS
   },
-  
+
   // Crawler-specific SLOs
   crawler: {
     verifyP95: 35, // ms with Cloudflare
     localFallbackP95: 20, // ms local-only
-    cacheHitRate: 0.70, // 70% minimum hit rate
-  }
+    cacheHitRate: 0.7, // 70% minimum hit rate
+  },
 };

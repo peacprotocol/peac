@@ -71,7 +71,7 @@ export class PeacClient {
 
   async verifyLocal(
     receipt: string,
-    options: VerifyLocalOptions = {},
+    options: VerifyLocalOptions = {}
   ): Promise<VerificationResult> {
     try {
       const moduleName = '@peac/core';
@@ -138,7 +138,7 @@ export class PeacClient {
   async verifyRemote(
     receipt: string,
     endpoint?: string,
-    options: VerifyRemoteOptions = {},
+    options: VerifyRemoteOptions = {}
   ): Promise<VerificationResult> {
     let verifyUrl = endpoint || options.endpoint;
 
@@ -165,7 +165,7 @@ export class PeacClient {
       if (!verifyUrl) {
         throw this.createClientError(
           'NO_VERIFY_ENDPOINT',
-          'No verify endpoint provided or discoverable',
+          'No verify endpoint provided or discoverable'
         );
       }
     }
@@ -179,7 +179,7 @@ export class PeacClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(
         () => controller.abort(),
-        options.timeout || this.config.timeout,
+        options.timeout || this.config.timeout
       );
 
       const response = await fetch(verifyUrl, {
@@ -199,7 +199,7 @@ export class PeacClient {
         throw this.createClientError(
           'REMOTE_VERIFY_FAILED',
           `HTTP ${response.status}`,
-          errorBody.detail ? [errorBody.detail] : undefined,
+          errorBody.detail ? [errorBody.detail] : undefined
         );
       }
 
@@ -226,7 +226,7 @@ export class PeacClient {
   // Convenience method that tries local first, then remote
   async verify(
     receipt: string,
-    options: VerifyLocalOptions & VerifyRemoteOptions = {},
+    options: VerifyLocalOptions & VerifyRemoteOptions = {}
   ): Promise<VerificationResult> {
     const keys = options.keys || this.config.defaultKeys;
 
@@ -238,7 +238,7 @@ export class PeacClient {
         // Fall through to remote verification
         console.debug(
           'Local verification failed, trying remote:',
-          error instanceof Error ? error.message : String(error),
+          error instanceof Error ? error.message : String(error)
         );
       }
     }

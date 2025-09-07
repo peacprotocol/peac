@@ -16,7 +16,7 @@ export type {
 // Convenience function for single-use resolution
 export async function resolveAIPref(
   uri: string,
-  headers?: Record<string, string>,
+  headers?: Record<string, string>
 ): Promise<import('./types.js').AIPrefPolicy> {
   const { PrefResolver } = await import('./resolver.js');
   const resolver = new PrefResolver();

@@ -129,7 +129,7 @@ class NegotiationEngine {
   getSuggestedUseCases() {
     const consent = this.peac.peac?.consent || {};
     return Object.keys(consent).filter(
-      (key) => consent[key] === 'allowed' || consent[key] === 'conditional',
+      (key) => consent[key] === 'allowed' || consent[key] === 'conditional'
     );
   }
 

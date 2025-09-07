@@ -7,7 +7,7 @@
   "required": [
     "version",
     "protocol_version",
-    "wire_version", 
+    "wire_version",
     "action",
     "subject",
     "corpus",
@@ -29,7 +29,7 @@
     },
     "wire_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+$", 
+      "pattern": "^\\d+\\.\\d+$",
       "description": "Wire format version"
     },
     "action": {
@@ -113,7 +113,7 @@
           "description": "Session identifier"
         },
         "correlation_id": {
-          "type": "string", 
+          "type": "string",
           "description": "Correlation identifier for tracing"
         },
         "timestamp": {

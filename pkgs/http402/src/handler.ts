@@ -78,7 +78,7 @@ export class Http402Handler {
 
   async verifyPayment(
     paymentHeader: string,
-    originalChallenge?: string,
+    originalChallenge?: string
   ): Promise<import('./types.js').PaymentEvidence | null> {
     const parsed = this.parsePaymentHeader(paymentHeader);
     if (!parsed) return null;
@@ -92,7 +92,7 @@ export class Http402Handler {
 export async function create402Response(
   amount: { value: string; currency: string },
   acceptPayments?: string,
-  instance?: string,
+  instance?: string
 ): Promise<Http402Response> {
   const negotiator = new PaymentNegotiator();
 

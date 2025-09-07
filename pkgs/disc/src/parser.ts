@@ -63,7 +63,7 @@ export function parse(content: string, options: ValidationOptions = {}): ParseRe
           }
         } catch (error) {
           errors.push(
-            `Line ${index + 1}: ${error instanceof Error ? error.message : String(error)}`,
+            `Line ${index + 1}: ${error instanceof Error ? error.message : String(error)}`
           );
         }
         break;

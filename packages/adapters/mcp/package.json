@@ -30,9 +30,16 @@
     "package.json",
     "README.md",
     "LICENSE"
-  ],  "engines": {
+  ],
+  "engines": {
     "node": ">=18.0.0"
   },
-  "keywords": ["peac", "mcp", "model-context-protocol", "receipts", "adapter"],
+  "keywords": [
+    "peac",
+    "mcp",
+    "model-context-protocol",
+    "receipts",
+    "adapter"
+  ],
   "license": "Apache-2.0"
 }

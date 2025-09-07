@@ -24,17 +24,20 @@
       },
       "public_key": {
         "kty": "OKP",
-        "crv": "Ed25519", 
+        "crv": "Ed25519",
         "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
       }
     },
     {
-      "name": "paid-receipt", 
+      "name": "paid-receipt",
       "description": "Receipt with payment (x402 rail)",
       "receipt": {
-        "subject": { 
+        "subject": {
           "uri": "https://example.com/protected",
-          "hash": { "alg": "SHA-256", "val": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+          "hash": {
+            "alg": "SHA-256",
+            "val": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
         },
         "aipref": {
           "status": "active",
@@ -57,9 +60,12 @@
       "name": "tempo-receipt",
       "description": "Receipt with Tempo payment rail (adapter preview)",
       "receipt": {
-        "subject": { 
+        "subject": {
           "uri": "https://example.com/tempo-resource",
-          "hash": { "alg": "SHA-256", "val": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+          "hash": {
+            "alg": "SHA-256",
+            "val": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
         },
         "aipref": {
           "status": "active",
@@ -72,7 +78,7 @@
           "rail": "tempo",
           "amount": { "value": "2.50", "currency": "USD" },
           "status": "settled",
-          "evidence": { 
+          "evidence": {
             "provider_ids": [
               "tempo:tx:0xabc123def456",
               "tempo:chain:tempo-testnet",
@@ -83,8 +89,8 @@
         "issued_at": "2025-09-04T18:00:00Z",
         "kid": "test-key-001",
         "ext": {
-          "tempo": { 
-            "block": 12345, 
+          "tempo": {
+            "block": 12345,
             "network": "tempo-testnet",
             "memo_digest": "sha256:abc123"
           }
@@ -97,7 +103,7 @@
       "receipt": {
         "subject": { "uri": "https://example.com/data" },
         "aipref": {
-          "status": "active", 
+          "status": "active",
           "checked_at": "2025-09-16T18:00:00Z",
           "snapshot": { "commercial": true },
           "digest": { "alg": "JCS-SHA256", "val": "xyz789" }
@@ -130,7 +136,11 @@
       "description": "Should fail - http-402 without payment",
       "receipt": {
         "subject": { "uri": "https://example.com" },
-        "aipref": { "status": "not_found", "checked_at": "2025-09-16T18:00:00Z", "reason": "not found" },
+        "aipref": {
+          "status": "not_found",
+          "checked_at": "2025-09-16T18:00:00Z",
+          "reason": "not found"
+        },
         "enforcement": { "method": "http-402" },
         "issued_at": "2025-09-16T18:00:00Z",
         "kid": "test-key-001"

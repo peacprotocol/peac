@@ -107,7 +107,7 @@ test('PeacClient - verifyRemote auto-discovers endpoint', async () => {
   });
 
   const mockReceipt = Buffer.from(
-    JSON.stringify({ subject: { uri: 'https://example.com/test' } }),
+    JSON.stringify({ subject: { uri: 'https://example.com/test' } })
   ).toString('base64url');
   const result = await client.verifyRemote(`header.${mockReceipt}.signature`);
 

@@ -53,7 +53,7 @@ async function main() {
     });
 
     console.log(
-      result2.accepted ? '✓ Academic discount applied!' : '✗ Academic discount not available',
+      result2.accepted ? '✓ Academic discount applied!' : '✗ Academic discount not available'
     );
 
     // Example 3: Bulk negotiation

@@ -4,8 +4,8 @@
 
 Currently supported versions for security updates:
 
-| Version | Supported          |
-| ------- | ------------------ |
+| Version  | Supported          |
+| -------- | ------------------ |
 | 0.9.12.x | :white_check_mark: |
 | 0.9.11.x | :x:                |
 | < 0.9.11 | :x:                |
@@ -28,18 +28,21 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 ## Security Measures
 
 ### Cryptographic Security
+
 - EdDSA (Ed25519) signatures only
 - JWS Compact Serialization
 - Key rotation every 30 days
 - Hardware security module support
 
 ### Input Validation
+
 - Strict JSON schema validation
 - SSRF protection on all external calls
 - Rate limiting with token buckets
 - Request size limits enforced
 
 ### Operational Security
+
 - No secrets in code or commits
 - Environment-based configuration
 - Audit logging for security events
@@ -60,19 +63,23 @@ Before submitting code:
 ## Known Security Considerations
 
 ### SSRF Protection
+
 All crawler and verification endpoints implement SSRF guards:
+
 - Private IP range blocking
 - DNS rebinding protection
 - Redirect limit enforcement
 - Timeout controls
 
 ### DoS Prevention
+
 - Token bucket rate limiting
 - Request size limits
 - Computation timeouts
 - Circuit breakers for external services
 
 ### Data Privacy
+
 - No PII in logs
 - Structured telemetry with privacy controls
 - GDPR-compliant data handling
@@ -81,6 +88,7 @@ All crawler and verification endpoints implement SSRF guards:
 ## Compliance
 
 The PEAC Protocol aims to comply with:
+
 - OWASP API Security Top 10
 - NIST Cybersecurity Framework
 - EU GDPR requirements

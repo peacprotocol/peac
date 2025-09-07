@@ -47,7 +47,14 @@
     "tsx": "^4.0.0",
     "tsup": "^8.0.0"
   },
-  "keywords": ["peac", "api", "openapi", "rfc9457", "problem-details", "hono"],
+  "keywords": [
+    "peac",
+    "api",
+    "openapi",
+    "rfc9457",
+    "problem-details",
+    "hono"
+  ],
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
   "engines": {

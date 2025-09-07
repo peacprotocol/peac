@@ -43,9 +43,9 @@ export class CloudflareAdapter {
     state: 'closed',
     failures: 0,
     last_failure: 0,
-    next_attempt: 0
+    next_attempt: 0,
   };
-  
+
   private pricingCache: CloudflarePricing | null = null;
   private pricingCacheExpiry: number = 0;
 
@@ -56,8 +56,8 @@ export class CloudflareAdapter {
   }
 
   async handleWebhook(
-    body: string, 
-    signature: string, 
+    body: string,
+    signature: string,
     idempotencyKey?: string
   ): Promise<{ success: boolean; receipt_updates?: any[] }> {
     if (!this.config.enabled) {
@@ -86,19 +86,18 @@ export class CloudflareAdapter {
 
       // Process event based on type
       const result = await this.processEvent(event);
-      
+
       // Mark as processed
       if (idempotencyKey) {
         this.markProcessed(idempotencyKey);
       }
 
       return result;
-
     } catch (error) {
       console.error('Cloudflare webhook processing failed:', error);
-      return this.handleFallback('webhook processing', { 
-        success: false, 
-        error: error instanceof Error ? error.message : String(error)
+      return this.handleFallback('webhook processing', {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -124,9 +123,9 @@ export class CloudflareAdapter {
         `https://api.cloudflare.com/client/v4/zones/${this.config.auth.zone_id}/ai_crawl_control/pricing`,
         {
           headers: {
-            'Authorization': `Bearer ${this.config.auth.api_token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${this.config.auth.api_token}`,
+            'Content-Type': 'application/json',
+          },
         }
       );
 
@@ -142,19 +141,18 @@ export class CloudflareAdapter {
         zone_settings: {
           crawl_allowed: data.result?.crawl_allowed !== false,
           require_payment: data.result?.require_payment === true,
-          rate_limit_rpm: data.result?.rate_limit_rpm || 60
-        }
+          rate_limit_rpm: data.result?.rate_limit_rpm || 60,
+        },
       };
 
       // Update cache
       this.pricingCache = pricing;
-      this.pricingCacheExpiry = Date.now() + (this.config.cache_ttl * 1000);
+      this.pricingCacheExpiry = Date.now() + this.config.cache_ttl * 1000;
 
       // Reset circuit breaker on success
       this.resetCircuit();
 
       return pricing;
-
     } catch (error) {
       this.recordFailure();
       console.error('Failed to fetch Cloudflare pricing:', error);
@@ -162,7 +160,10 @@ export class CloudflareAdapter {
     }
   }
 
-  async verifyCrawler(ip: string, userAgent: string): Promise<{
+  async verifyCrawler(
+    ip: string,
+    userAgent: string
+  ): Promise<{
     verified: boolean;
     source: 'cloudflare' | 'fallback';
     details?: any;
@@ -177,14 +178,14 @@ export class CloudflareAdapter {
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.config.auth.api_token}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${this.config.auth.api_token}`,
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             ip,
             user_agent: userAgent,
-            request_timestamp: new Date().toISOString()
-          })
+            request_timestamp: new Date().toISOString(),
+          }),
         }
       );
 
@@ -201,10 +202,9 @@ export class CloudflareAdapter {
         details: {
           score: data.result?.score,
           classification: data.result?.classification,
-          reasons: data.result?.reasons || []
-        }
+          reasons: data.result?.reasons || [],
+        },
       };
-
     } catch (error) {
       this.recordFailure();
       console.error('Cloudflare crawler verification failed:', error);
@@ -212,7 +212,9 @@ export class CloudflareAdapter {
     }
   }
 
-  private async processEvent(event: CloudflareEvent): Promise<{ success: boolean; receipt_updates?: any[] }> {
+  private async processEvent(
+    event: CloudflareEvent
+  ): Promise<{ success: boolean; receipt_updates?: any[] }> {
     switch (event.type) {
       case 'crawl_payment':
         return this.processCrawlPayment(event.data);
@@ -229,7 +231,9 @@ export class CloudflareAdapter {
     }
   }
 
-  private async processCrawlPayment(data: any): Promise<{ success: boolean; receipt_updates?: any[] }> {
+  private async processCrawlPayment(
+    data: any
+  ): Promise<{ success: boolean; receipt_updates?: any[] }> {
     // Map Cloudflare event to receipt payment evidence
     const receiptUpdate = {
       payment: {
@@ -238,14 +242,14 @@ export class CloudflareAdapter {
         currency: 'USD',
         evidence: {
           provider_ids: [`cf-${data.receipt_id || 'unknown'}`],
-          proof: this.createPaymentProof(data)
-        }
+          proof: this.createPaymentProof(data),
+        },
       },
       crawler_type: this.mapCrawlerType(data.crawler_name),
       request_context: {
         correlation_id: data.receipt_id,
-        timestamp: data.timestamp || new Date().toISOString()
-      }
+        timestamp: data.timestamp || new Date().toISOString(),
+      },
     };
 
     return { success: true, receipt_updates: [receiptUpdate] };
@@ -256,7 +260,7 @@ export class CloudflareAdapter {
     console.log('Cloudflare crawler verification:', {
       ip: data.ip,
       user_agent: data.user_agent?.substring(0, 50),
-      verified: true // Cloudflare pre-verified
+      verified: true, // Cloudflare pre-verified
     });
 
     return { success: true };
@@ -264,7 +268,7 @@ export class CloudflareAdapter {
 
   private canMakeRequest(): boolean {
     const now = Date.now();
-    
+
     if (this.circuit.state === 'open') {
       if (now >= this.circuit.next_attempt) {
         this.circuit.state = 'half-open';
@@ -272,7 +276,7 @@ export class CloudflareAdapter {
       }
       return false;
     }
-    
+
     return true; // closed or half-open
   }
 
@@ -295,7 +299,7 @@ export class CloudflareAdapter {
       state: 'closed',
       failures: 0,
       last_failure: 0,
-      next_attempt: 0
+      next_attempt: 0,
     };
   }
 
@@ -306,7 +310,7 @@ export class CloudflareAdapter {
     try {
       const response = await fetch(url, {
         ...options,
-        signal: controller.signal
+        signal: controller.signal,
       });
       clearTimeout(timeoutId);
       return response;
@@ -320,8 +324,10 @@ export class CloudflareAdapter {
   }
 
   private handleFallback<T>(operation: string, fallbackValue: T): T {
-    console.log(`Cloudflare ${operation} failed, using fallback mode: ${this.config.fallback_mode}`);
-    
+    console.log(
+      `Cloudflare ${operation} failed, using fallback mode: ${this.config.fallback_mode}`
+    );
+
     switch (this.config.fallback_mode) {
       case 'allow':
         // Allow operation to proceed
@@ -342,29 +348,28 @@ export class CloudflareAdapter {
       zone_settings: {
         crawl_allowed: true,
         require_payment: false, // Safe default
-        rate_limit_rpm: 60
-      }
+        rate_limit_rpm: 60,
+      },
     };
   }
 
   private computeWebhookSignature(body: string): string {
-    return createHmac('sha256', this.config.auth.api_token)
-      .update(body)
-      .digest('hex');
+    return createHmac('sha256', this.config.auth.api_token).update(body).digest('hex');
   }
 
   private verifySignature(received: string, expected: string): boolean {
     // Constant-time comparison to prevent timing attacks
     const receivedBuffer = Buffer.from(received, 'hex');
     const expectedBuffer = Buffer.from(expected, 'hex');
-    
+
     if (receivedBuffer.length !== expectedBuffer.length) {
       return false;
     }
-    
-    return createHash('sha256').update(receivedBuffer).digest().equals(
-      createHash('sha256').update(expectedBuffer).digest()
-    );
+
+    return createHash('sha256')
+      .update(receivedBuffer)
+      .digest()
+      .equals(createHash('sha256').update(expectedBuffer).digest());
   }
 
   private calculatePayment(bytes: number): number {
@@ -375,17 +380,19 @@ export class CloudflareAdapter {
 
   private createPaymentProof(data: any): string {
     return createHash('sha256')
-      .update(JSON.stringify({
-        bytes: data.bytes_crawled,
-        timestamp: data.timestamp,
-        receipt_id: data.receipt_id
-      }))
+      .update(
+        JSON.stringify({
+          bytes: data.bytes_crawled,
+          timestamp: data.timestamp,
+          receipt_id: data.receipt_id,
+        })
+      )
       .digest('hex');
   }
 
   private mapCrawlerType(crawlerName?: string): 'bot' | 'agent' | 'unknown' {
     if (!crawlerName) return 'unknown';
-    
+
     const name = crawlerName.toLowerCase();
     if (name.includes('bot') || name.includes('spider') || name.includes('crawler')) {
       return 'bot';

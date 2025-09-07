@@ -6,7 +6,7 @@
   "type": "object",
   "required": [
     "version",
-    "protocol_version", 
+    "protocol_version",
     "wire_version",
     "subject",
     "aipref",
@@ -30,7 +30,7 @@
       "description": "Protocol version (SemVer format)"
     },
     "wire_version": {
-      "type": "string", 
+      "type": "string",
       "pattern": "^\\d+\\.\\d+$",
       "description": "Wire format version"
     },
@@ -50,7 +50,17 @@
         },
         "rights_class": {
           "type": "string",
-          "enum": ["book", "lyrics", "article", "image", "audio", "video", "dataset", "software", "other"],
+          "enum": [
+            "book",
+            "lyrics",
+            "article",
+            "image",
+            "audio",
+            "video",
+            "dataset",
+            "software",
+            "other"
+          ],
           "description": "Classification of content rights"
         },
         "sku": {
@@ -136,7 +146,7 @@
           "properties": {
             "provider_ids": {
               "type": "array",
-              "items": {"type": "string"},
+              "items": { "type": "string" },
               "description": "Payment provider transaction IDs"
             },
             "proof": {
@@ -179,7 +189,7 @@
       "additionalProperties": false,
       "properties": {
         "basis": {
-          "type": "string", 
+          "type": "string",
           "enum": ["fair_use", "license", "public_domain", "consent", "legitimate_interest"],
           "description": "Legal basis for access"
         },
@@ -204,7 +214,7 @@
           "description": "Whether attribution is required"
         },
         "format_applied": {
-          "type": "boolean", 
+          "type": "boolean",
           "description": "Whether attribution format was applied"
         },
         "url": {
@@ -224,7 +234,15 @@
       "properties": {
         "basis": {
           "type": "string",
-          "enum": ["consent", "contract", "legal_obligation", "legitimate_interest", "public_task", "vital_interest", "not_applicable"],
+          "enum": [
+            "consent",
+            "contract",
+            "legal_obligation",
+            "legitimate_interest",
+            "public_task",
+            "vital_interest",
+            "not_applicable"
+          ],
           "description": "GDPR consent basis"
         },
         "retention": {
@@ -288,7 +306,7 @@
         },
         "stealth_indicators": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": { "type": "string" },
           "description": "List of detected stealth indicators"
         },
         "trust_score": {
@@ -313,7 +331,7 @@
         },
         "witnesses": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": { "type": "string" },
           "description": "Cryptographic witnesses"
         },
         "anchor": {
@@ -331,7 +349,7 @@
           "description": "Unique request identifier"
         },
         "session_id": {
-          "type": "string", 
+          "type": "string",
           "description": "Session identifier"
         },
         "correlation_id": {
@@ -375,7 +393,7 @@
         "properties": {
           "enforcement": {
             "properties": {
-              "method": {"const": "http-402"}
+              "method": { "const": "http-402" }
             },
             "required": ["method"]
           }

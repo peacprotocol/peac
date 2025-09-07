@@ -17,7 +17,7 @@ export class VerifyApiHandler {
 
   async handle(
     request: VerifyRequest,
-    instance?: string,
+    instance?: string
   ): Promise<{ status: HttpStatus; body: VerifyResponse | any }> {
     try {
       // Validate request format

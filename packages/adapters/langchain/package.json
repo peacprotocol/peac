@@ -13,6 +13,13 @@
     "README.md",
     "LICENSE"
   ],
-  "keywords": ["peac", "langchain", "tools", "python", "receipts", "adapter"],
+  "keywords": [
+    "peac",
+    "langchain",
+    "tools",
+    "python",
+    "receipts",
+    "adapter"
+  ],
   "license": "Apache-2.0"
 }

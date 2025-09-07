@@ -154,7 +154,7 @@ describe('PEAC Negotiation', () => {
       const result = await negotiation.negotiate(proposal);
       expect(result.counter_offer.suggested_budget).toBeGreaterThan(5);
       expect(result.counter_offer.minimum_budget).toBeLessThanOrEqual(
-        result.counter_offer.suggested_budget,
+        result.counter_offer.suggested_budget
       ); // Allow equality due to possible rounding in negotiation algorithm
       expect(result.counter_offer.suggested_volume).toBeDefined();
     });

@@ -5,7 +5,13 @@
  */
 
 import * as readline from 'node:readline';
-import { signReceipt, signPurgeReceipt, verifyReceipt, verifyBulk, VERSION_CONFIG } from '@peac/core';
+import {
+  signReceipt,
+  signPurgeReceipt,
+  verifyReceipt,
+  verifyBulk,
+  VERSION_CONFIG,
+} from '@peac/core';
 import type { Receipt, PurgeReceipt, SignOpts, KeySet } from '@peac/core';
 
 type JsonRpcRequest = {
@@ -42,7 +48,7 @@ class PeacMcpServer {
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      terminal: false
+      terminal: false,
     });
 
     this.setupEventHandlers();
@@ -73,12 +79,12 @@ class PeacMcpServer {
     this.sendNotification('initialize', {
       protocolVersion: '2024-11-05',
       capabilities: {
-        tools: {}
+        tools: {},
       },
       serverInfo: {
         name: 'peac-receipts',
-        version: VERSION_CONFIG.CURRENT_PROTOCOL
-      }
+        version: VERSION_CONFIG.CURRENT_PROTOCOL,
+      },
     });
 
     // Advertise available tools
@@ -91,12 +97,18 @@ class PeacMcpServer {
             type: 'object',
             properties: {
               subject: { type: 'string', format: 'uri' },
-              purpose: { type: 'string', enum: ['train-ai', 'train-genai', 'search', 'evaluation', 'other'] },
-              crawler_type: { type: 'string', enum: ['bot', 'agent', 'hybrid', 'browser', 'migrating', 'test', 'unknown'] },
-              options: { type: 'object' }
+              purpose: {
+                type: 'string',
+                enum: ['train-ai', 'train-genai', 'search', 'evaluation', 'other'],
+              },
+              crawler_type: {
+                type: 'string',
+                enum: ['bot', 'agent', 'hybrid', 'browser', 'migrating', 'test', 'unknown'],
+              },
+              options: { type: 'object' },
             },
-            required: ['subject', 'purpose']
-          }
+            required: ['subject', 'purpose'],
+          },
         },
         {
           name: 'receipt_verify',
@@ -105,10 +117,10 @@ class PeacMcpServer {
             type: 'object',
             properties: {
               jws: { type: 'string' },
-              keys: { type: 'object' }
+              keys: { type: 'object' },
             },
-            required: ['jws']
-          }
+            required: ['jws'],
+          },
         },
         {
           name: 'receipts_bulk_verify',
@@ -117,10 +129,10 @@ class PeacMcpServer {
             type: 'object',
             properties: {
               ndjson: { type: 'string' },
-              keys: { type: 'object' }
+              keys: { type: 'object' },
             },
-            required: ['ndjson']
-          }
+            required: ['ndjson'],
+          },
         },
         {
           name: 'purge_issue',
@@ -130,12 +142,12 @@ class PeacMcpServer {
             properties: {
               subject: { type: 'string', format: 'uri' },
               corpus: { type: 'string' },
-              erasure_basis: { type: 'string', enum: ['gdpr', 'ccpa', 'contractual', 'other'] }
+              erasure_basis: { type: 'string', enum: ['gdpr', 'ccpa', 'contractual', 'other'] },
             },
-            required: ['subject', 'corpus']
-          }
-        }
-      ]
+            required: ['subject', 'corpus'],
+          },
+        },
+      ],
     });
   }
 
@@ -216,22 +228,22 @@ class PeacMcpServer {
         wire_version: VERSION_CONFIG.REQUIRED_WIRE_RECEIPT,
         subject: {
           uri: subject,
-          ...options?.subject
+          ...options?.subject,
         },
         aipref: {
           status: options?.aipref?.status || 'not_found',
-          ...options?.aipref
+          ...options?.aipref,
         },
         purpose,
         enforcement: {
           method: options?.enforcement?.method || 'none',
-          ...options?.enforcement
+          ...options?.enforcement,
         },
         crawler_type: crawler_type || 'agent', // Default for MCP context
         issued_at: new Date().toISOString(),
         kid: this.currentKid,
         signature_media_type: 'application/peac-receipt+jws',
-        ...options?.additional
+        ...options?.additional,
       };
 
       // Apply payment requirement invariant
@@ -241,7 +253,7 @@ class PeacMcpServer {
 
       const signOpts: SignOpts = {
         kid: this.currentKid,
-        privateKey: this.privateKey
+        privateKey: this.privateKey,
       };
 
       const jws = await signReceipt(receipt, signOpts);
@@ -249,12 +261,13 @@ class PeacMcpServer {
       this.sendResponse(request.id, {
         receipt,
         jws,
-        content: [{
-          type: 'text',
-          text: `PEAC receipt issued for ${subject}`
-        }]
+        content: [
+          {
+            type: 'text',
+            text: `PEAC receipt issued for ${subject}`,
+          },
+        ],
       });
-
     } catch (error) {
       this.sendError(request.id, -32000, 'Receipt signing failed', { error: error.message });
     }
@@ -281,20 +294,23 @@ class PeacMcpServer {
         valid: true,
         receipt: result.receipt,
         header: result.hdr,
-        content: [{
-          type: 'text',
-          text: `Receipt verified successfully. Subject: ${result.receipt.subject.uri}, Purpose: ${result.receipt.purpose}`
-        }]
+        content: [
+          {
+            type: 'text',
+            text: `Receipt verified successfully. Subject: ${result.receipt.subject.uri}, Purpose: ${result.receipt.purpose}`,
+          },
+        ],
       });
-
     } catch (error) {
       this.sendResponse(request.id, {
         valid: false,
         error: error.message,
-        content: [{
-          type: 'text',
-          text: `Receipt verification failed: ${error.message}`
-        }]
+        content: [
+          {
+            type: 'text',
+            text: `Receipt verification failed: ${error.message}`,
+          },
+        ],
       });
     }
   }
@@ -315,7 +331,7 @@ class PeacMcpServer {
 
     try {
       const lines = ndjson.trim().split('\n');
-      const jwsArray = lines.map(line => {
+      const jwsArray = lines.map((line) => {
         try {
           const obj = JSON.parse(line);
           return obj.jws || line; // Support both wrapped and raw JWS
@@ -325,19 +341,20 @@ class PeacMcpServer {
       });
 
       const results = await verifyBulk(jwsArray, keyset);
-      const validCount = results.filter(r => r.valid).length;
+      const validCount = results.filter((r) => r.valid).length;
 
       this.sendResponse(request.id, {
         total: results.length,
         valid: validCount,
         invalid: results.length - validCount,
         results,
-        content: [{
-          type: 'text',
-          text: `Bulk verification complete: ${validCount}/${results.length} receipts valid`
-        }]
+        content: [
+          {
+            type: 'text',
+            text: `Bulk verification complete: ${validCount}/${results.length} receipts valid`,
+          },
+        ],
       });
-
     } catch (error) {
       this.sendError(request.id, -32000, 'Bulk verification failed', { error: error.message });
     }
@@ -363,20 +380,20 @@ class PeacMcpServer {
         wire_version: VERSION_CONFIG.REQUIRED_WIRE_PURGE,
         action: 'purge',
         subject: {
-          uri: subject
+          uri: subject,
         },
         corpus: {
-          id: corpus
+          id: corpus,
         },
         erasure_basis,
         performed_at: new Date().toISOString(),
         kid: this.currentKid,
-        signature_media_type: 'application/peac-purge+jws'
+        signature_media_type: 'application/peac-purge+jws',
       };
 
       const signOpts: SignOpts = {
         kid: this.currentKid,
-        privateKey: this.privateKey
+        privateKey: this.privateKey,
       };
 
       const jws = await signPurgeReceipt(purgeReceipt, signOpts);
@@ -384,12 +401,13 @@ class PeacMcpServer {
       this.sendResponse(request.id, {
         purge_receipt: purgeReceipt,
         jws,
-        content: [{
-          type: 'text',
-          text: `Purge receipt issued for ${subject} from corpus ${corpus}`
-        }]
+        content: [
+          {
+            type: 'text',
+            text: `Purge receipt issued for ${subject} from corpus ${corpus}`,
+          },
+        ],
       });
-
     } catch (error) {
       this.sendError(request.id, -32000, 'Purge receipt signing failed', { error: error.message });
     }
@@ -399,7 +417,7 @@ class PeacMcpServer {
     const response: JsonRpcResponse = {
       jsonrpc: '2.0',
       id,
-      result
+      result,
     };
     this.write(response);
   }
@@ -408,7 +426,7 @@ class PeacMcpServer {
     const response: JsonRpcResponse = {
       jsonrpc: '2.0',
       id,
-      error: { code, message, data }
+      error: { code, message, data },
     };
     this.write(response);
   }
@@ -417,7 +435,7 @@ class PeacMcpServer {
     const notification: JsonRpcNotification = {
       jsonrpc: '2.0',
       method,
-      params
+      params,
     };
     this.write(notification);
   }

@@ -16,7 +16,7 @@ async function main() {
     console.log('✓ peac parsed successfully');
     console.log(`  Version: ${peac.version}`);
     console.log(
-      `  Available processors: ${Object.keys(peac.peac?.economics?.payment_processors || {}).join(', ')}`,
+      `  Available processors: ${Object.keys(peac.peac?.economics?.payment_processors || {}).join(', ')}`
     );
 
     // Initialize payments

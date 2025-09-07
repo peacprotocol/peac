@@ -18,7 +18,7 @@ test('ProblemError - creates RFC 9457 compliant structure', () => {
     'Test Problem',
     'This is a test problem',
     '/test/instance',
-    { 'custom-field': 'value' },
+    { 'custom-field': 'value' }
   );
 
   const problemDetails = error.toProblemDetails();
@@ -105,7 +105,7 @@ test('handleVerifyError - handles ProblemError instances', () => {
     403,
     'https://peac.dev/problems/forbidden',
     'Forbidden',
-    'Access denied',
+    'Access denied'
   );
 
   const result = handleVerifyError(problemError);

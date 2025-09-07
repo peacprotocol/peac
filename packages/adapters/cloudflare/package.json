@@ -1,5 +1,5 @@
 {
-  "name": "@peac/adapter-cloudflare", 
+  "name": "@peac/adapter-cloudflare",
   "version": "0.9.12-dev.1",
   "description": "PEAC Cloudflare Worker integration adapter",
   "main": "dist/integration.js",
@@ -25,9 +25,17 @@
     "package.json",
     "README.md",
     "LICENSE"
-  ],  "engines": {
+  ],
+  "engines": {
     "node": ">=18.0.0"
   },
-  "keywords": ["peac", "cloudflare", "worker", "edge", "receipts", "adapter"],
+  "keywords": [
+    "peac",
+    "cloudflare",
+    "worker",
+    "edge",
+    "receipts",
+    "adapter"
+  ],
   "license": "Apache-2.0"
 }

@@ -7,7 +7,6 @@ settings:
 catalogs: {}
 
 importers:
-
   .:
     devDependencies:
       '@changesets/cli':
@@ -45,63 +44,95 @@ importers:
         version: 5.2.0
 
 packages:
-
   '@changesets/cli@2.27.0':
-    resolution: {integrity: sha512-vvjOJXaKuPK5ETe1isfpe7vLZzaZLJvmzyz9k5dZKBEwHhHGKlBPTURzCH1NHgPaZIJNpZ69W2aUZNGRNFmw==}
-    engines: {node: '>=16.0.0'}
+    resolution:
+      {
+        integrity: sha512-vvjOJXaKuPK5ETe1isfpe7vLZzaZLJvmzyz9k5dZKBEwHhHGKlBPTURzCH1NHgPaZIJNpZ69W2aUZNGRNFmw==,
+      }
+    engines: { node: '>=16.0.0' }
     hasBin: true
 
   '@types/node@20.0.0':
-    resolution: {integrity: sha512-zmjc8cdx3lXM4DUHX7vLNdkJMcXiIr4wPwSeFahj6Q44B3pGwE+hZGTmRCMHb7h1gk6VCi9ixhsNQ6FDnLFJvDQ==}
+    resolution:
+      {
+        integrity: sha512-zmjc8cdx3lXM4DUHX7vLNdkJMcXiIr4wPwSeFahj6Q44B3pGwE+hZGTmRCMHb7h1gk6VCi9ixhsNQ6FDnLFJvDQ==,
+      }
 
   '@typescript-eslint/eslint-plugin@6.0.0':
-    resolution: {integrity: sha512-gsJOdLRSqJmW+kq9YZxn0QV/G4FpWV6GDEh0zz/BPDaKzVCNRbGAJqKNBFiQJWNdx4Y5sVRYgfX5QyXuQ2wkEg==}
-    engines: {node: ^16.0.0 || >=18.0.0}
+    resolution:
+      {
+        integrity: sha512-gsJOdLRSqJmW+kq9YZxn0QV/G4FpWV6GDEh0zz/BPDaKzVCNRbGAJqKNBFiQJWNdx4Y5sVRYgfX5QyXuQ2wkEg==,
+      }
+    engines: { node: ^16.0.0 || >=18.0.0 }
     peerDependencies:
       '@typescript-eslint/parser': ^6.0.0 || ^6.0.0-alpha
       eslint: ^7.0.0 || ^8.0.0
       typescript: '*'
 
   '@typescript-eslint/parser@6.0.0':
-    resolution: {integrity: sha512-SY9fX9yz7jBPASHGSBCZGhJJjALCHV4O0LkfMFiQcT9L1GwQ6W7+l6U+o2d4KKSrXFfUlmPwJb7bKTF8cEPKHwQ==}
-    engines: {node: ^16.0.0 || >=18.0.0}
+    resolution:
+      {
+        integrity: sha512-SY9fX9yz7jBPASHGSBCZGhJJjALCHV4O0LkfMFiQcT9L1GwQ6W7+l6U+o2d4KKSrXFfUlmPwJb7bKTF8cEPKHwQ==,
+      }
+    engines: { node: ^16.0.0 || >=18.0.0 }
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0
       typescript: '*'
 
   'dependency-cruiser@16.0.0':
-    resolution: {integrity: sha512-3yGNQLTY8Qg4pKjP6PQmyxPqZj6K3RhTTT8TJ0MuLkH6HCXQDYqVMJ7n8r7NXVl7JV9YSCdPTsKc/KNJRHjUKwA==}
-    engines: {node: '>=18'}
+    resolution:
+      {
+        integrity: sha512-3yGNQLTY8Qg4pKjP6PQmyxPqZj6K3RhTTT8TJ0MuLkH6HCXQDYqVMJ7n8r7NXVl7JV9YSCdPTsKc/KNJRHjUKwA==,
+      }
+    engines: { node: '>=18' }
     hasBin: true
 
   'eslint@8.50.0':
-    resolution: {integrity: sha512-FqYRqE3P4LmQ14oHvyGKsGkPMy8pMVqRW1M6Pm2SySVxBgGvn3WJQxFVzTLKWzQjjgvj3FU+t8YfzJ8MQ7TTTQ==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    resolution:
+      {
+        integrity: sha512-FqYRqE3P4LmQ14oHvyGKsGkPMy8pMVqRW1M6Pm2SySVxBgGvn3WJQxFVzTLKWzQjjgvj3FU+t8YfzJ8MQ7TTTQ==,
+      }
+    engines: { node: ^12.22.0 || ^14.17.0 || >=16.0.0 }
     hasBin: true
 
   'jest@29.0.0':
-    resolution: {integrity: sha512-2VeCHVV7g2Yb7JG5HqG1mZ8PdfEjJhF/bZGEfBCj2LqiU/VKVdSrx3jzKF8L6PRNH+v/3e8LPt6VJ+v4Hc9q1OA==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+    resolution:
+      {
+        integrity: sha512-2VeCHVV7g2Yb7JG5HqG1mZ8PdfEjJhF/bZGEfBCj2LqiU/VKVdSrx3jzKF8L6PRNH+v/3e8LPt6VJ+v4Hc9q1OA==,
+      }
+    engines: { node: ^14.15.0 || ^16.10.0 || >=18.0.0 }
     hasBin: true
 
   'prettier@3.3.3':
-    resolution: {integrity: sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==}
-    engines: {node: '>=14'}
+    resolution:
+      {
+        integrity: sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==,
+      }
+    engines: { node: '>=14' }
     hasBin: true
 
   'tsup@8.0.0':
-    resolution: {integrity: sha512-QZGqBG3x4BqCUjJpNGVnLFWiYhMoGhJRZIwPvCWsOpLLSM7oKEbHdYJShxnlpUq6Kq5GwvM/L6RcpGD/Tw1DzQ==}
-    engines: {node: '>=18'}
+    resolution:
+      {
+        integrity: sha512-QZGqBG3x4BqCUjJpNGVnLFWiYhMoGhJRZIwPvCWsOpLLSM7oKEbHdYJShxnlpUq6Kq5GwvM/L6RcpGD/Tw1DzQ==,
+      }
+    engines: { node: '>=18' }
     hasBin: true
     peerDependencies:
       typescript: '>=4.5.0'
 
   'turbo@1.13.0':
-    resolution: {integrity: sha512-s1nAGYzJUDJ21SbIWLZjPYBaNKTyBKp8J+p/qE/5A7Xb5g9oAmR2LFSQ6kJx+t4pBdSZtdOQJ4ufTHhj8ZLlVg==}
-    engines: {node: '>=18'}
+    resolution:
+      {
+        integrity: sha512-s1nAGYzJUDJ21SbIWLZjPYBaNKTyBKp8J+p/qE/5A7Xb5g9oAmR2LFSQ6kJx+t4pBdSZtdOQJ4ufTHhj8ZLlVg==,
+      }
+    engines: { node: '>=18' }
     hasBin: true
 
   'typescript@5.2.0':
-    resolution: {integrity: sha512-5FhQlh0+f5TvQePCv2aKu6Jgc+RqEhYHDY/S3K44+cTGHK+6+cQ7tGG0L1gFl6v2PzPXQGQqg1gCJMGPKo7ZrQ==}
-    engines: {node: '>=14.17'}
+    resolution:
+      {
+        integrity: sha512-5FhQlh0+f5TvQePCv2aKu6Jgc+RqEhYHDY/S3K44+cTGHK+6+cQ7tGG0L1gFl6v2PzPXQGQqg1gCJMGPKo7ZrQ==,
+      }
+    engines: { node: '>=14.17' }
     hasBin: true

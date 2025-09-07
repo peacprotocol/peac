@@ -7,9 +7,7 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@peac/app-*"
-  ],
+  "ignore": ["@peac/app-*"],
   "snapshot": {
     "useCalculatedVersion": true,
     "prereleaseTemplate": "snapshot-{commit}"

@@ -82,7 +82,7 @@ describe('PEAC Payments', () => {
         payments.processPayment({
           amount: 10,
           processor: 'unsupported',
-        }),
+        })
       ).rejects.toThrow('Unsupported payment processor');
     });
   });

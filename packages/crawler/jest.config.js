@@ -7,18 +7,15 @@ export default {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
-    '^.+\\.ts$': ['ts-jest', {
-      useESM: true,
-    }],
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
-  testMatch: [
-    '<rootDir>/test/**/*.test.ts'
-  ],
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/**/*.test.ts'
-  ],
+  testMatch: ['<rootDir>/test/**/*.test.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
@@ -26,9 +23,9 @@ export default {
       statements: 80,
       branches: 75,
       functions: 80,
-      lines: 80
-    }
+      lines: 80,
+    },
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
-  testTimeout: 10000
+  testTimeout: 10000,
 };

@@ -4,7 +4,15 @@
   "title": "PEAC Discovery v1.1",
   "description": "PEAC Protocol discovery document with bot/agent policies and crawler verification (wire format discovery@1.1)",
   "type": "object",
-  "required": ["version", "preferences", "access_control", "payments", "receipts", "verify", "public_keys"],
+  "required": [
+    "version",
+    "preferences",
+    "access_control",
+    "payments",
+    "receipts",
+    "verify",
+    "public_keys"
+  ],
   "additionalProperties": false,
   "properties": {
     "version": {
@@ -134,7 +142,7 @@
                   "description": "Prohibit long-term storage"
                 },
                 "user_attribution": {
-                  "type": "boolean", 
+                  "type": "boolean",
                   "default": true,
                   "description": "Require user attribution in responses"
                 },
@@ -171,12 +179,12 @@
               },
               "ip_ranges": {
                 "type": "array",
-                "items": {"type": "string"},
+                "items": { "type": "string" },
                 "description": "Known IP ranges (CIDR notation)"
               },
               "user_agents": {
-                "type": "array", 
-                "items": {"type": "string"},
+                "type": "array",
+                "items": { "type": "string" },
                 "description": "Known User-Agent patterns"
               },
               "verification_url": {
@@ -186,7 +194,7 @@
               },
               "rdns_suffixes": {
                 "type": "array",
-                "items": {"type": "string"},
+                "items": { "type": "string" },
                 "description": "Allowed reverse DNS suffixes"
               }
             }

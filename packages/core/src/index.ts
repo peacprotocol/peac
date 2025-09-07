@@ -10,4 +10,13 @@ export { vReceipt, vAIPref } from './validators.js';
 export { VERSION_CONFIG, FEATURES, CLOUDFLARE_CONFIG } from './config.js';
 
 // Types
-export type { Rec, Pref, Kid, KeySet, SignOpts, VerifyResult, Receipt, PurgeReceipt } from './types.js';
+export type {
+  Rec,
+  Pref,
+  Kid,
+  KeySet,
+  SignOpts,
+  VerifyResult,
+  Receipt,
+  PurgeReceipt,
+} from './types.js';

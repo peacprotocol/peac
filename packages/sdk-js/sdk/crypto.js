@@ -129,7 +129,7 @@ class PEACCrypto {
     const rotationSignature = crypto.sign(
       null,
       Buffer.from(JSON.stringify(rotation)),
-      currentPrivateKey,
+      currentPrivateKey
     );
 
     rotation.signature = rotationSignature.toString('hex');
