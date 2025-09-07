@@ -66,7 +66,7 @@ export function createRoutes() {
   router.get(
     '/.well-known/peac-capabilities',
     standardRateLimiter.middleware(),
-    handleCapabilities,
+    handleCapabilities
   );
 
   // JWKS endpoint for receipt verification
@@ -149,7 +149,7 @@ export function createRoutes() {
     '/peac/negotiate',
     validateProtocolVersionWithDeprecation,
     validateContentType,
-    handleNegotiateAlias,
+    handleNegotiateAlias
   );
 
   // Agreement-bound payment endpoints (v0.9.6)
@@ -158,7 +158,7 @@ export function createRoutes() {
     validateProtocolVersion,
     validateContentType,
     validateAgreementBinding,
-    handlePaymentCharge,
+    handlePaymentCharge
   );
 
   // Webhook endpoints (no protocol version required)

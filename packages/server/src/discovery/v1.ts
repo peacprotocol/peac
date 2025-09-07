@@ -22,7 +22,7 @@ export class DiscoveryService {
       base_url: string;
       version: string;
       x_release: string;
-    },
+    }
   ) {}
 
   async getCapabilities(): Promise<{ document: Record<string, unknown>; etag: string }> {
@@ -168,7 +168,7 @@ export class DiscoveryService {
 
 export function createDiscoveryRouter(
   adapterRegistry: AdapterRegistry,
-  config: { base_url: string; version: string; x_release: string },
+  config: { base_url: string; version: string; x_release: string }
 ): Router {
   const router = Router();
   const service = new DiscoveryService(adapterRegistry, config);

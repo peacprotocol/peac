@@ -158,7 +158,7 @@ export async function handleCapabilities(req: Request, res: Response): Promise<v
       timer({ status: 304 });
       logger.debug(
         { clientETag, capabilitiesETag, clientLastModified },
-        'Capabilities served from cache (304)',
+        'Capabilities served from cache (304)'
       );
       res.set({
         ETag: capabilitiesETag,

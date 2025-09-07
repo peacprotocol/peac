@@ -54,7 +54,7 @@ export function createTokenBucketRateLimit() {
         req,
         tier,
         verifiedThumbprint,
-        attribution,
+        attribution
       );
 
       // Set rate limit headers
@@ -96,7 +96,7 @@ export function createTokenBucketRateLimit() {
             remaining: rateLimitResult.remaining,
             retryAfter: rateLimitResult.retryAfterSec,
           },
-          'Rate limit exceeded',
+          'Rate limit exceeded'
         );
 
         problemDetails.send(res, 'rate_limit_exceeded', {
@@ -109,7 +109,7 @@ export function createTokenBucketRateLimit() {
         {
           error: error instanceof Error ? error.message : String(error),
         },
-        'Rate limit middleware error',
+        'Rate limit middleware error'
       );
 
       telemetry.logError(req, {

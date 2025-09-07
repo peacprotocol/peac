@@ -85,7 +85,7 @@ export async function createReceipt(options: ReceiptOptions): Promise<string> {
 
 export async function verifyReceipt(
   jws: string,
-  keys: SiteKey[],
+  keys: SiteKey[]
 ): Promise<
   { ok: true; claims: ReceiptClaims; kid: string; alg: 'EdDSA' } | { ok: false; error: string }
 > {

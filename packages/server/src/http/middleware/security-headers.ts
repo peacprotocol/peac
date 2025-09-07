@@ -170,7 +170,7 @@ export class SecurityHeadersMiddleware {
             cspReportOnly: this.config.csp.reportOnly,
             tlsDetected: this.isTLSRequest(req),
           },
-          'Applied security headers',
+          'Applied security headers'
         );
       }
 

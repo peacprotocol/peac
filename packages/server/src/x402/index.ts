@@ -91,7 +91,7 @@ function withTimeout<T>(p: Promise<T>, ms: number, tag: string): Promise<T> {
       (e) => {
         clearTimeout(t);
         reject(e);
-      },
+      }
     );
   });
 }
@@ -143,7 +143,7 @@ export class X402Provider {
       domain(verifyingContract),
       { ...PaymentTypes },
       message,
-      signature,
+      signature
     );
 
     if (!recovered || typeof recovered !== 'string') {
@@ -240,7 +240,7 @@ export class X402Provider {
       agentJwk, // typed as JWK | undefined
       resource,
       purpose ? [purpose] : [],
-      ttl,
+      ttl
     );
 
     metrics.paymentAttempt.inc({ provider: 'x402', outcome: 'success' });

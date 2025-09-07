@@ -117,7 +117,7 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
         exportType: query.type,
         format: query.fmt,
       },
-      'Export request authenticated',
+      'Export request authenticated'
     );
 
     // Parse date range
@@ -210,7 +210,7 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
           compressed: isCompressed,
           hasMore: !!nextCursor,
         },
-        'Export completed successfully',
+        'Export completed successfully'
       );
 
       telemetry.logExportStream(req, {
@@ -226,7 +226,7 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
           exportType: query.type,
           format: query.fmt,
         },
-        'Export streaming failed',
+        'Export streaming failed'
       );
 
       // If headers already sent, can't send problem details
@@ -246,7 +246,7 @@ export async function exportHandler(req: Request, res: Response): Promise<void> 
         error: error instanceof Error ? error.message : String(error),
         duration,
       },
-      'Export request failed',
+      'Export request failed'
     );
 
     if (!res.headersSent) {
@@ -301,7 +301,7 @@ async function authenticateExportRequest(req: Request): Promise<AuthResult> {
         req,
         mockSiteKey.jwk,
         Date.now(),
-        120, // 2 minute skew
+        120 // 2 minute skew
       );
 
       if (verifyResult.ok) {
@@ -343,7 +343,7 @@ async function getMockExportData(
   query: ExportQuery,
   fromDate: Date,
   toDate: Date,
-  maxRows: number,
+  maxRows: number
 ): Promise<{ rows: ExportRow[]; nextCursor?: string }> {
   // Mock implementation - real version would stream from database
   const rows: ExportRow[] = [];

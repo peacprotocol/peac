@@ -89,7 +89,7 @@ export async function handleBatchVerifyPost(req: Request, res: Response): Promis
             error: result.error,
           };
         }
-      }),
+      })
     );
 
     const latency = Date.now() - startTime;
@@ -105,7 +105,7 @@ export async function handleBatchVerifyPost(req: Request, res: Response): Promis
         successCount: results.filter((r) => r.ok).length,
         latency,
       },
-      'Batch verify completed',
+      'Batch verify completed'
     );
 
     res.json(results);
@@ -118,7 +118,7 @@ export async function handleBatchVerifyPost(req: Request, res: Response): Promis
         error: error instanceof Error ? error.message : String(error),
         latency,
       },
-      'Batch verify failed',
+      'Batch verify failed'
     );
 
     res.status(500).json({
@@ -179,7 +179,7 @@ export async function handleBatchVerifyGet(req: Request, res: Response): Promise
             error: result.error,
           };
         }
-      }),
+      })
     );
 
     const latency = Date.now() - startTime;
@@ -195,7 +195,7 @@ export async function handleBatchVerifyGet(req: Request, res: Response): Promise
         successCount: results.filter((r) => r.ok).length,
         latency,
       },
-      'Batch verify completed (GET)',
+      'Batch verify completed (GET)'
     );
 
     res.json(results);
@@ -208,7 +208,7 @@ export async function handleBatchVerifyGet(req: Request, res: Response): Promise
         error: error instanceof Error ? error.message : String(error),
         latency,
       },
-      'Batch verify failed (GET)',
+      'Batch verify failed (GET)'
     );
 
     res.status(500).json({

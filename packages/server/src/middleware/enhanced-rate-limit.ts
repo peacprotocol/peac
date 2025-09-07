@@ -97,7 +97,7 @@ export class EnhancedRateLimiter {
       if (!bucket) {
         bucket = new TokenBucket(
           this.config.maxRequests,
-          this.config.maxRequests * (60000 / this.config.windowMs),
+          this.config.maxRequests * (60000 / this.config.windowMs)
         );
         this.buckets.set(key, bucket);
       }

@@ -135,7 +135,7 @@ export class AttestationAdapterImpl implements AttestationAdapter {
           agent: decoded.peac_agent_name,
           version: decoded.peac_agent_version,
         },
-        'Verifying agent attestation',
+        'Verifying agent attestation'
       );
 
       const audiences = Array.isArray(decoded.aud) ? decoded.aud : [decoded.aud];
@@ -145,13 +145,13 @@ export class AttestationAdapterImpl implements AttestationAdapter {
             expected: expectedAudience,
             actual: decoded.aud,
           },
-          'Audience mismatch',
+          'Audience mismatch'
         );
 
         throw new PEACError(
           AttestationProblemType.ATTESTATION_AUDIENCE_MISMATCH,
           `Audience mismatch: expected ${expectedAudience}`,
-          403,
+          403
         );
       }
 
@@ -161,7 +161,7 @@ export class AttestationAdapterImpl implements AttestationAdapter {
         throw new PEACError(
           AttestationProblemType.ATTESTATION_EXPIRED,
           'Attestation has expired',
-          403,
+          403
         );
       }
 
@@ -197,13 +197,13 @@ export class AttestationAdapterImpl implements AttestationAdapter {
       if (attestation.peac_revocation_check) {
         const revoked = await this.checkRevocation(
           attestation.peac_revocation_check,
-          attestation.jti,
+          attestation.jti
         );
         if (revoked) {
           throw new PEACError(
             AttestationProblemType.ATTESTATION_REVOKED,
             'Attestation has been revoked',
-            403,
+            403
           );
         }
       }
@@ -212,7 +212,7 @@ export class AttestationAdapterImpl implements AttestationAdapter {
       if (attestation.peac_public_key) {
         publicKeyThumbprint = await jose.calculateJwkThumbprint(
           attestation.peac_public_key,
-          'sha256',
+          'sha256'
         );
       }
 
@@ -239,7 +239,7 @@ export class AttestationAdapterImpl implements AttestationAdapter {
           agent_id: result.agent_id,
           trusted: result.trusted,
         },
-        'Attestation verification successful',
+        'Attestation verification successful'
       );
 
       return result;

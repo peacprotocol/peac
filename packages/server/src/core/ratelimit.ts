@@ -54,7 +54,7 @@ class TokenBucketRateLimiter {
     req: Request,
     tier: Tier,
     verifiedThumbprint?: string,
-    attribution?: string,
+    attribution?: string
   ): RateLimitResult {
     const now = Date.now();
     const limit = this.getLimitForTier(tier);
@@ -121,7 +121,7 @@ class TokenBucketRateLimiter {
     req: Request,
     tier: Tier,
     verifiedThumbprint?: string,
-    attribution?: string,
+    attribution?: string
   ): string {
     const keying = (this.config.keying as string) === 'ip_ua' ? 'ip' : this.config.keying;
 

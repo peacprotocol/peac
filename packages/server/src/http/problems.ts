@@ -198,7 +198,7 @@ export class ProblemDetailsHandler {
     status: number,
     title: string,
     detail?: string,
-    extensions?: Record<string, unknown>,
+    extensions?: Record<string, unknown>
   ): ProblemDetails {
     return {
       type: 'about:blank',

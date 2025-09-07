@@ -67,7 +67,7 @@ export class ReceiptService {
 
   async verifyReceipt(
     jws: string,
-    payload: PEACReceipt,
+    payload: PEACReceipt
   ): Promise<{ valid: boolean; error?: string }> {
     try {
       // Canonicalize payload

@@ -21,7 +21,7 @@ class AgreementStore {
     this.agreements.set(id, agreement);
     logger.debug(
       { agreementId: id, fingerprint: agreement.fingerprint.substring(0, 8) },
-      'Agreement stored',
+      'Agreement stored'
     );
   }
 

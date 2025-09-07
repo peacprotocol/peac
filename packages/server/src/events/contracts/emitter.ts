@@ -16,7 +16,7 @@ export class EventEmitter {
     options?: {
       causationId?: string;
       metadata?: Record<string, unknown>;
-    },
+    }
   ): Promise<void> {
     const event: EventEnvelope<T> = {
       id: randomUUID(),

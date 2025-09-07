@@ -23,7 +23,7 @@ export const WEB_BOT_AUTH_HEADERS = {
 } as const;
 
 export function readAttribution(
-  headers: Record<string, string | string[] | undefined>,
+  headers: Record<string, string | string[] | undefined>
 ): string | null {
   const attribution = headers[PEAC_HEADERS.ATTRIBUTION];
 

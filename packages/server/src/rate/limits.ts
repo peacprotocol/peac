@@ -37,7 +37,7 @@ export async function checkRateLimit(
   resource: string,
   id: string,
   capacity = 50,
-  refillPerSec = 5,
+  refillPerSec = 5
 ): Promise<boolean> {
   const redis = getRedis();
   const key = `rate:${resource}:${id}`;

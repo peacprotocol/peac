@@ -111,7 +111,7 @@ export class JWKSManager {
 
         setTimeout(
           () => this.retireKey(kid),
-          this.config.retireGracePeriodDays * 24 * 60 * 60 * 1000,
+          this.config.retireGracePeriodDays * 24 * 60 * 60 * 1000
         );
       }
     }
@@ -192,7 +192,7 @@ export class JWKSManager {
 
   async verifyJws(
     compactDetached: string,
-    payloadBytes: Uint8Array,
+    payloadBytes: Uint8Array
   ): Promise<jose.CompactVerifyResult> {
     const [hdr, , sig] = compactDetached.split('..');
     const full = `${hdr}.${jose.base64url.encode(payloadBytes)}.${sig}`;
@@ -250,7 +250,7 @@ export class JWKSManager {
       set(headers: Record<string, string>): void;
       status(code: number): { end(): void };
       json(data: unknown): void;
-    },
+    }
   ): Promise<void> {
     const { jwks, etag } = await this.getPublicJWKS();
 
@@ -306,7 +306,7 @@ export class JWKSManager {
           this.keys.delete(kid);
           logger.info({ kid }, 'Key deleted');
         },
-        this.config.retireGracePeriodDays * 24 * 60 * 60 * 1000,
+        this.config.retireGracePeriodDays * 24 * 60 * 60 * 1000
       );
     }
   }
@@ -315,7 +315,7 @@ export class JWKSManager {
     kid: string,
     privateKey: jose.KeyLike,
     publicKey: jose.KeyLike,
-    metadata: KeyMetadata,
+    metadata: KeyMetadata
   ): Promise<void> {
     this.keys.set(kid, { privateKey, publicKey, metadata });
 
@@ -332,7 +332,7 @@ export class JWKSManager {
         };
         await fs.writeFile(
           `${this.config.keyStorePath}/${kid}.json`,
-          JSON.stringify(data, null, 2),
+          JSON.stringify(data, null, 2)
         );
       }
     }
@@ -347,7 +347,7 @@ export class JWKSManager {
         for (const file of files) {
           if (file.endsWith('.json')) {
             const data = JSON.parse(
-              await fs.readFile(`${this.config.keyStorePath}/${file}`, 'utf-8'),
+              await fs.readFile(`${this.config.keyStorePath}/${file}`, 'utf-8')
             );
             if (data.privateKey && data.publicKey) {
               const privateKey = (await jose.importJWK(data.privateKey)) as jose.KeyLike;

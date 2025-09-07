@@ -100,7 +100,7 @@ export function requestLogger() {
           res,
           duration_ms: res.responseTime,
         },
-        'Request completed',
+        'Request completed'
       );
 
       return originalSend.call(this, data);

@@ -39,7 +39,7 @@ export const logger = pino({
 export function correlationMiddleware(
   req: Request & { id?: string },
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const ridHeader = req.headers['x-request-id'];
   const requestId = Array.isArray(ridHeader) ? ridHeader[0] : ridHeader || randomUUID();

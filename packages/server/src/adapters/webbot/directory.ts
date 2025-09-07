@@ -40,7 +40,7 @@ const DIRECTORY_PATH = '/.well-known/http-message-signatures-directory';
 
 export async function fetchAndVerifyDir(
   origin: string,
-  opts: DirectoryFetchOptions = {},
+  opts: DirectoryFetchOptions = {}
 ): Promise<{ record: DirRecord; notModified?: boolean }> {
   const options = { ...DEFAULT_OPTIONS, ...opts };
 
@@ -135,7 +135,7 @@ async function validateAndResolveUrl(url: string, options: DirectoryFetchOptions
 
 async function fetchDirectoryInternal(
   url: string,
-  options: DirectoryFetchOptions,
+  options: DirectoryFetchOptions
 ): Promise<{ record: DirRecord; notModified?: boolean }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
@@ -194,7 +194,7 @@ async function fetchDirectoryInternal(
 async function handleDirectoryResponse(
   response: Response,
   origin: string,
-  options: DirectoryFetchOptions,
+  options: DirectoryFetchOptions
 ): Promise<{ record: DirRecord; notModified?: boolean }> {
   const now = options.now!();
 
@@ -271,7 +271,7 @@ async function handleDirectoryResponse(
       key,
       response,
       body,
-      options,
+      options
     );
 
     if (signatureValid) {
@@ -292,7 +292,7 @@ async function handleDirectoryResponse(
     if (!hasThumbprintOverlap(cached.pinnedThumbs, newThumbs)) {
       logger.warn(
         { origin, oldThumbs: [...cached.pinnedThumbs], newThumbs: [...newThumbs] },
-        'dir_keyset_jump',
+        'dir_keyset_jump'
       );
       throw new Error('dir_keyset_jump');
     }
@@ -300,7 +300,7 @@ async function handleDirectoryResponse(
 
   // Calculate expiry
   const expiresAt = Math.min(
-    now + options.ttlCapSec! * 1000,
+    now + options.ttlCapSec! * 1000
     // Could also extract from signature expires if present
   );
 
@@ -324,7 +324,7 @@ async function handleDirectoryResponse(
       keyCount: verifiedKeys.length,
       thumbprints: [...newThumbs],
     },
-    'dir_fetch',
+    'dir_fetch'
   );
 
   return { record, notModified: false };
@@ -336,7 +336,7 @@ async function verifyDirectorySignature(
   key: JWK,
   response: Response,
   _body: string,
-  options: DirectoryFetchOptions,
+  options: DirectoryFetchOptions
 ): Promise<boolean> {
   try {
     // Parse signature input
@@ -349,7 +349,7 @@ async function verifyDirectorySignature(
 
     // Check keyid matches thumbprint
     const thumbprint = thumbprintEd25519(
-      key as unknown as { kty: 'OKP'; crv: 'Ed25519'; x: string },
+      key as unknown as { kty: 'OKP'; crv: 'Ed25519'; x: string }
     );
     if (dirSig.keyid !== thumbprint) {
       return false;
@@ -521,7 +521,7 @@ export const fetchAndVerifyDirectory = fetchAndVerifyDir;
 
 export function validateSignatureAgentUrl(
   url: string,
-  options: DirectoryFetchOptions = {},
+  options: DirectoryFetchOptions = {}
 ): boolean {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 

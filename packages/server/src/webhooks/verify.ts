@@ -12,7 +12,7 @@ import { TTLReplayCache } from '../utils/ttl-replay-cache';
  */
 export function parsePeacSignature(
   sigHeader?: string | null,
-  tsHeader?: string | null,
+  tsHeader?: string | null
 ): { t: string; s: string } {
   const result: { t: string; s: string } = { t: '', s: '' };
   if (sigHeader) {
@@ -79,7 +79,7 @@ export function createWebhookSignature(
     host?: string;
     path?: string;
     requireHostInSignature?: boolean;
-  },
+  }
 ): string {
   const method = options?.method || 'POST';
   const path = options?.path || '/webhooks/peac';
@@ -100,7 +100,7 @@ export function createWebhookSignature(
 }
 
 export function parseWebhookSignature(
-  signature: string,
+  signature: string
 ): { timestamp: string; signature: string } | null {
   try {
     const parts = signature.split(',');
@@ -131,7 +131,7 @@ export function verifyWebhookSignature(
     host?: string;
     path?: string;
     requireHostInSignature?: boolean;
-  },
+  }
 ): { valid: boolean; reason?: string } {
   const parsed = parseWebhookSignature(signature);
   if (!parsed) {
@@ -210,7 +210,7 @@ export class WebhookVerifier {
           configName,
           availableConfigs: Object.keys(rotationConfigs),
         },
-        'Unknown rotation config, using development defaults',
+        'Unknown rotation config, using development defaults'
       );
       rotationConfig = rotationConfigs.development;
     }
@@ -231,7 +231,7 @@ export class WebhookVerifier {
           version: event.version,
           metadata: event.metadata,
         },
-        'Webhook secret rotation event',
+        'Webhook secret rotation event'
       );
     });
 
@@ -242,7 +242,7 @@ export class WebhookVerifier {
           {
             error: error.message,
           },
-          'Failed to create initial webhook secret',
+          'Failed to create initial webhook secret'
         );
       });
     }
@@ -252,7 +252,7 @@ export class WebhookVerifier {
         rotationConfig: configName,
         rotationEnabled: true,
       },
-      'Webhook secret rotation initialized',
+      'Webhook secret rotation initialized'
     );
   }
 
@@ -265,7 +265,7 @@ export class WebhookVerifier {
       if (contentEncoding) {
         logger.warn(
           { path: req.path, contentEncoding },
-          'Rejecting webhook with Content-Encoding header',
+          'Rejecting webhook with Content-Encoding header'
         );
         prometheus.incrementCounter('webhook_verification_total', {
           result: 'invalid',
@@ -386,7 +386,7 @@ export class WebhookVerifier {
         verification = this.secretManager.verifySignature(
           parsed.signature,
           parsed.timestamp,
-          rawBody.toString('utf8'),
+          rawBody.toString('utf8')
         );
 
         if (verification.valid) {
@@ -429,7 +429,7 @@ export class WebhookVerifier {
               duration,
               deliveryId,
             },
-            'Webhook signature verified with rotated secret',
+            'Webhook signature verified with rotated secret'
           );
 
           return next();
@@ -451,7 +451,7 @@ export class WebhookVerifier {
           signature,
           rawBody.toString('utf8'),
           this.config.toleranceSeconds,
-          verificationOptions,
+          verificationOptions
         );
 
         if (staticVerification.valid) {
@@ -492,7 +492,7 @@ export class WebhookVerifier {
               duration,
               deliveryId,
             },
-            'Webhook signature verified with static secret',
+            'Webhook signature verified with static secret'
           );
 
           return next();
@@ -511,7 +511,7 @@ export class WebhookVerifier {
           hasRotation,
           hasStaticSecret,
         },
-        'Webhook signature verification failed',
+        'Webhook signature verification failed'
       );
 
       prometheus.incrementCounter('webhook_verification_total', {

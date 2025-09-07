@@ -160,7 +160,7 @@ export async function handleGDPRExport(req: Request, res: Response): Promise<voi
         exportId: manifest.exportId,
         recordCount: records.length,
       },
-      'GDPR export completed',
+      'GDPR export completed'
     );
 
     // Return NDJSON

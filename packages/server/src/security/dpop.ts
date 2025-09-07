@@ -64,7 +64,7 @@ export class DPoPVerifier {
     method: string,
     url: string,
     accessToken?: string,
-    udaKeyThumbprint?: string,
+    udaKeyThumbprint?: string
   ): Promise<{ valid: boolean; jwk?: jose.JWK; error?: string }> {
     try {
       const header = jose.decodeProtectedHeader(dpopHeader);
@@ -125,13 +125,13 @@ export class DPoPVerifier {
               expected: udaKeyThumbprint,
               actual: dpopThumbprint,
             },
-            'DPoP key binding mismatch',
+            'DPoP key binding mismatch'
           );
 
           throw new PEACError(
             DPoPProblemType.DPOP_BINDING_MISMATCH,
             'DPoP key does not match UDA key binding',
-            403,
+            403
           );
         }
       }
@@ -162,7 +162,7 @@ export function requireDPoP(redis: Redis) {
 
     if (!dpopHeader) {
       return next(
-        new PEACError(DPoPProblemType.DPOP_MISSING, 'DPoP proof required for this endpoint', 401),
+        new PEACError(DPoPProblemType.DPOP_MISSING, 'DPoP proof required for this endpoint', 401)
       );
     }
 
@@ -185,14 +185,14 @@ export function requireDPoP(redis: Redis) {
         req.method,
         url,
         accessToken,
-        udaKeyThumbprint,
+        udaKeyThumbprint
       );
 
       if (!result.valid) {
         throw new PEACError(
           DPoPProblemType.DPOP_INVALID,
           result.error || 'Invalid DPoP proof',
-          403,
+          403
         );
       }
 

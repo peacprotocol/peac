@@ -123,7 +123,7 @@ export class PaymentGuards {
             mode: this.config.mode,
             healthy: this.healthy,
           },
-          'Payment attempt blocked - not in live mode or unhealthy',
+          'Payment attempt blocked - not in live mode or unhealthy'
         );
         this.lastWarning = now;
       }

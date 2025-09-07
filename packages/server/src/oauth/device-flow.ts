@@ -33,7 +33,7 @@ export class DeviceFlowService {
       user_code_length?: number;
       expiry_seconds?: number;
       poll_interval?: number;
-    },
+    }
   ) {
     this.config = {
       device_code_length: 32,
@@ -64,7 +64,7 @@ export class DeviceFlowService {
         client_id: params.client_id,
         user_code,
       },
-      'Initiating device flow',
+      'Initiating device flow'
     );
 
     const flow: PendingFlow = {
@@ -84,7 +84,7 @@ export class DeviceFlowService {
     await this.redis.setex(
       `device:${device_code}`,
       this.config.expiry_seconds!,
-      JSON.stringify(flow),
+      JSON.stringify(flow)
     );
 
     await this.redis.setex(`user_code:${user_code}`, this.config.expiry_seconds!, device_code);
@@ -102,7 +102,7 @@ export class DeviceFlowService {
   async approveFlow(
     user_code: string,
     user: { id: string },
-    entitlements: Record<string, unknown>[],
+    entitlements: Record<string, unknown>[]
   ): Promise<void> {
     const device_code = await this.redis.get(`user_code:${user_code}`);
     if (!device_code) {
@@ -134,12 +134,12 @@ export class DeviceFlowService {
         user_code,
         user_id: user.id,
       },
-      'Device flow approved',
+      'Device flow approved'
     );
   }
 
   async pollToken(
-    device_code: string,
+    device_code: string
   ): Promise<
     | { access_token: string; token_type: 'DPoP'; expires_in: number }
     | { error: string; error_description?: string }
@@ -206,7 +206,7 @@ export class DeviceFlowService {
         user_id: flow.user_id,
         client_id: flow.client_id,
       },
-      'UDA token issued',
+      'UDA token issued'
     );
 
     return {

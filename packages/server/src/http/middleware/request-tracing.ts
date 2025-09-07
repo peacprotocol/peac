@@ -76,7 +76,7 @@ export class RequestTracingMiddleware {
       parentId: string;
       flags: string;
     },
-    newSpanId: string,
+    newSpanId: string
   ): string {
     return `${parentTrace.version}-${parentTrace.traceId}-${newSpanId}-${parentTrace.flags}`;
   }
@@ -129,7 +129,7 @@ export class RequestTracingMiddleware {
                 method: req.method,
                 path: req.path,
               },
-              'Request tracing - generated child span',
+              'Request tracing - generated child span'
             );
           } else {
             // Just echo the traceparent and tracestate
@@ -146,7 +146,7 @@ export class RequestTracingMiddleware {
                 method: req.method,
                 path: req.path,
               },
-              'Request tracing - echoed traceparent and tracestate',
+              'Request tracing - echoed traceparent and tracestate'
             );
           }
         } else {
@@ -157,7 +157,7 @@ export class RequestTracingMiddleware {
               method: req.method,
               path: req.path,
             },
-            'Invalid traceparent header format',
+            'Invalid traceparent header format'
           );
         }
       } else {
@@ -170,7 +170,7 @@ export class RequestTracingMiddleware {
             userAgent: req.get('User-Agent'),
             ip: req.ip,
           },
-          'Request tracing - new request',
+          'Request tracing - new request'
         );
       }
 

@@ -9,7 +9,7 @@ export interface UDAAdapter extends Adapter {
   verify(
     token: string,
     expectedAudience: string,
-    agentKey?: import('jose').KeyLike,
+    agentKey?: import('jose').KeyLike
   ): Promise<UDAVerificationResult>;
 }
 

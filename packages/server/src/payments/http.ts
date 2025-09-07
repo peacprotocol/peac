@@ -187,7 +187,7 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
         amount: paymentRequest.amount,
         provider: name,
       },
-      'Payment processed successfully',
+      'Payment processed successfully'
     );
 
     res.setHeader('Authorization', `Bearer ${session}`);
@@ -205,7 +205,7 @@ export async function handlePaymentCharge(req: Request, res: Response): Promise<
         agreementId: (req as AgreementRequest).agreement?.id,
         amount: req.body?.amount,
       },
-      'Payment processing failed',
+      'Payment processing failed'
     );
 
     metrics.paymentAttempt.inc({
@@ -234,7 +234,7 @@ export async function handleLegacyPayment(req: Request, res: Response): Promise<
         path: req.path,
         agreementId: agreementHeader,
       },
-      'Legacy payment endpoint used with agreement binding',
+      'Legacy payment endpoint used with agreement binding'
     );
 
     // Validate agreement and forward to new handler
@@ -247,7 +247,7 @@ export async function handleLegacyPayment(req: Request, res: Response): Promise<
       path: req.path,
       userAgent: req.get('User-Agent'),
     },
-    'Legacy payment endpoint used without agreement binding',
+    'Legacy payment endpoint used without agreement binding'
   );
 
   try {

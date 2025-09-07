@@ -38,7 +38,7 @@ export class NegotiationEngine {
   run(
     resource: string,
     initial: Offer,
-    counters: Offer[],
+    counters: Offer[]
   ): { final: Offer | null; outcome: 'agreed' | 'rejected' | 'expired' } {
     const started = Date.now();
     const ctx: Context = {

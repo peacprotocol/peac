@@ -100,7 +100,7 @@ export async function verifySignature(
   req: Request,
   key: Record<string, unknown>,
   now: number,
-  skewSec: number = 120,
+  skewSec: number = 120
 ): Promise<{ ok: boolean; keyid?: string; reason?: string }> {
   try {
     if (!isValidEd25519JWK(key)) {

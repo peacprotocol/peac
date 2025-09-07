@@ -121,7 +121,7 @@ export class WebhookSecretManager extends EventEmitter {
   verifySignature(
     _signature: string,
     _timestamp: string,
-    _body: string,
+    _body: string
   ): {
     valid: boolean;
     secretId?: string;
@@ -179,7 +179,7 @@ export class WebhookSecretManager extends EventEmitter {
           secretId: newSecret.id,
           version: newSecret.version,
         },
-        'Webhook secret rotated',
+        'Webhook secret rotated'
       );
     } catch (error) {
       logger.error({ error }, 'Failed to rotate webhook secret');

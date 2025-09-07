@@ -56,7 +56,7 @@ export function validateProtocolVersion(req: Request, res: Response, next: NextF
 export function validateProtocolVersionWithDeprecation(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): void {
   // Set deprecation headers for all responses from this endpoint
   res.set({
@@ -148,7 +148,7 @@ export async function createAgreement(req: Request, res: Response): Promise<void
         fingerprint: fingerprint.substring(0, 8),
         purpose: proposal.purpose,
       },
-      'Agreement created',
+      'Agreement created'
     );
 
     // Return 201 with proper headers
@@ -161,7 +161,7 @@ export async function createAgreement(req: Request, res: Response): Promise<void
   } catch (error) {
     logger.error(
       { error: error instanceof Error ? error.message : 'unknown' },
-      'Agreement creation failed',
+      'Agreement creation failed'
     );
 
     return problemDetails.send(res, 'internal_error', {
@@ -213,7 +213,7 @@ export async function handleNegotiateAlias(req: Request, res: Response): Promise
       userAgent: req.get('User-Agent'),
       ip: req.ip,
     },
-    'Deprecated /peac/negotiate endpoint used',
+    'Deprecated /peac/negotiate endpoint used'
   );
 
   // Forward to createAgreement handler

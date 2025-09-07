@@ -124,7 +124,7 @@ export class IdempotencyMiddleware {
             userAgent: req.get('User-Agent'),
             ip: req.ip,
           },
-          'Payment operation audit log',
+          'Payment operation audit log'
         );
       }
 

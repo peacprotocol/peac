@@ -68,7 +68,7 @@ export async function createServer() {
           upgradeInsecureRequests: [],
         },
       },
-    }),
+    })
   );
 
   // Add request tracing middleware
@@ -141,7 +141,7 @@ export async function createServer() {
       base_url: process.env.PEAC_BASE_URL || 'https://demo.peac.dev',
       version: WIRE_VERSION,
       x_release: WIRE_VERSION,
-    }),
+    })
   );
 
   // v0.9.8 OAuth device flow endpoints

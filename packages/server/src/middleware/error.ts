@@ -33,7 +33,7 @@ export function errorHandler(
   err: Error & { statusCode?: number },
   _req: Request,
   res: Response,
-  _next: NextFunction,
+  _next: NextFunction
 ) {
   const status = err.statusCode || 500;
   const originalMessage = err.message || 'internal_error';

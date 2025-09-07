@@ -108,7 +108,7 @@ export class UDAAdapterImpl implements UDAAdapter {
   async verify(
     token: string,
     expectedAudience: string,
-    agentKey?: jose.KeyLike,
+    agentKey?: jose.KeyLike
   ): Promise<UDAVerificationResult> {
     try {
       const claims = jose.decodeJwt(token) as UDAProof;
@@ -119,7 +119,7 @@ export class UDAAdapterImpl implements UDAAdapter {
           sub: claims.sub,
           jti: claims.jti,
         },
-        'Verifying UDA token',
+        'Verifying UDA token'
       );
 
       const issuer = this.trustedIssuers.get(claims.iss);
@@ -128,7 +128,7 @@ export class UDAAdapterImpl implements UDAAdapter {
         throw new PEACError(
           UDAProblemType.UDA_UNTRUSTED_ISSUER,
           `Issuer ${claims.iss} is not in the trusted list`,
-          403,
+          403
         );
       }
 
@@ -174,13 +174,13 @@ export class UDAAdapterImpl implements UDAAdapter {
               expected: proof.cnf.jkt,
               actual: thumbprint,
             },
-            'Key binding mismatch',
+            'Key binding mismatch'
           );
 
           throw new PEACError(
             UDAProblemType.UDA_KEY_BINDING_FAILED,
             'Agent key does not match UDA key binding',
-            403,
+            403
           );
         }
 
@@ -192,7 +192,7 @@ export class UDAAdapterImpl implements UDAAdapter {
           sub: proof.sub,
           agent: proof.peac_agent?.id,
         },
-        'UDA verification successful',
+        'UDA verification successful'
       );
 
       return {

@@ -7,7 +7,7 @@ export interface WebBotAuthHeaders {
 }
 
 export function parseWebBotAuthHeaders(
-  headers: Record<string, string | string[] | undefined>,
+  headers: Record<string, string | string[] | undefined>
 ): WebBotAuthHeaders {
   const signature = headers[WEB_BOT_AUTH_HEADERS.SIGNATURE];
   const signatureInput = headers[WEB_BOT_AUTH_HEADERS.SIGNATURE_INPUT];
@@ -34,7 +34,7 @@ export interface WebBotAuthHint {
 }
 
 export function detectWebBotAuthHint(
-  headers: Record<string, string | string[] | undefined>,
+  headers: Record<string, string | string[] | undefined>
 ): WebBotAuthHint {
   const parsed = parseWebBotAuthHeaders(headers);
 

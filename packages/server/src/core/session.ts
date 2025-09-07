@@ -44,7 +44,7 @@ export async function mintSession(
   agentJwk?: JWK,
   resource?: string,
   scope: string[] = [],
-  ttlSec = 3600,
+  ttlSec = 3600
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const sessionId = `${sub}:${now}:${Math.random().toString(36).substring(2)}`;

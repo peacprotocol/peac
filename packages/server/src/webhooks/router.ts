@@ -23,7 +23,7 @@ router.use(
     },
     type: () => true, // accept vendor JSON types too
     strict: false,
-  }),
+  })
 );
 
 /**
@@ -46,7 +46,7 @@ router.post('/peac', async (req: Request, res: Response) => {
         timestamp,
         bodyTimestamp: req.body?.timestamp,
       },
-      'Webhook received and verified',
+      'Webhook received and verified'
     );
 
     // In our tests, processing may throw — swallow non-critical errors and still 204
@@ -59,7 +59,7 @@ router.post('/peac', async (req: Request, res: Response) => {
           error: processingError instanceof Error ? processingError.message : 'unknown',
           webhookType: req.body?.type,
         },
-        'Webhook payload processing failed (continuing with 204)',
+        'Webhook payload processing failed (continuing with 204)'
       );
     }
 
@@ -76,7 +76,7 @@ router.post('/peac', async (req: Request, res: Response) => {
           hasSignature: !!req.get('Peac-Signature'),
           hasTimestamp: !!req.get('Peac-Timestamp'),
         },
-        'Webhook signature verification failed',
+        'Webhook signature verification failed'
       );
 
       return problemDetails.send(res, 'webhook_signature_invalid', {
@@ -89,7 +89,7 @@ router.post('/peac', async (req: Request, res: Response) => {
         error: msg,
         webhookType: req.body?.type,
       },
-      'Webhook processing failed',
+      'Webhook processing failed'
     );
 
     return problemDetails.send(res, 'internal_error', { detail: msg });
@@ -165,7 +165,7 @@ async function handleAgreementCreated(data: Record<string, unknown>): Promise<vo
       agreementId: data.agreement_id,
       timestamp: data.timestamp,
     },
-    'Processing agreement.created webhook',
+    'Processing agreement.created webhook'
   );
 
   // NOTE: agreement.created received — handled as no-op, 204 returned
@@ -181,7 +181,7 @@ async function handleAgreementUpdated(data: Record<string, unknown>): Promise<vo
       changes: data.changes,
       timestamp: data.timestamp,
     },
-    'Processing agreement.updated webhook',
+    'Processing agreement.updated webhook'
   );
 
   // NOTE: agreement.updated received — handled as no-op, 204 returned
@@ -198,7 +198,7 @@ async function handlePaymentCompleted(data: Record<string, unknown>): Promise<vo
       amount: data.amount,
       timestamp: data.timestamp,
     },
-    'Processing payment.completed webhook',
+    'Processing payment.completed webhook'
   );
 
   // NOTE: payment.completed received — handled as no-op, 204 returned
@@ -215,7 +215,7 @@ async function handlePaymentFailed(data: Record<string, unknown>): Promise<void>
       reason: data.reason,
       timestamp: data.timestamp,
     },
-    'Processing payment.failed webhook',
+    'Processing payment.failed webhook'
   );
 
   // NOTE: payment.failed received — handled as no-op, 204 returned

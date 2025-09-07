@@ -50,7 +50,7 @@ const MAX_INFLIGHT = 128;
 
 export async function verifyWebBotAuth(
   req: Request,
-  options: VerifyOptions = {},
+  options: VerifyOptions = {}
 ): Promise<VerifyResult> {
   const opts = { ...DEFAULT_VERIFY_OPTIONS, ...options };
   const now = opts.now();
@@ -124,7 +124,7 @@ export async function verifyWebBotAuth(
             failure,
             latency,
           },
-          'Directory fetch failed',
+          'Directory fetch failed'
         );
 
         return { ok: false, failure };
@@ -139,7 +139,7 @@ export async function verifyWebBotAuth(
         req,
         keyEntry.jwk as unknown as Record<string, unknown>,
         now,
-        opts.skewSec,
+        opts.skewSec
       );
 
       if (verifyResult.ok && verifyResult.keyid === keyEntry.thumbprint) {
@@ -153,7 +153,7 @@ export async function verifyWebBotAuth(
             thumbprint: keyEntry.thumbprint,
             latency,
           },
-          'Web Bot Auth request verified',
+          'Web Bot Auth request verified'
         );
 
         telemetry.logWBAVerify(req, {
@@ -182,7 +182,7 @@ export async function verifyWebBotAuth(
         keyCount: directory.keys.length,
         latency,
       },
-      'No matching key for request signature',
+      'No matching key for request signature'
     );
 
     return { ok: false, failure: 'no_matching_key' };
@@ -210,7 +210,7 @@ export async function verifyWebBotAuth(
         failure,
         latency,
       },
-      'Request signature verification failed',
+      'Request signature verification failed'
     );
 
     return { ok: false, failure };
