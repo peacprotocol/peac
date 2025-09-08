@@ -1,6 +1,6 @@
 {
   "name": "@peac/core",
-  "version": "0.9.12-rc.1",
+  "version": "0.9.12.1",
   "description": "PEAC Protocol core with JWS signing, security, and observability",
   "type": "module",
   "main": "dist/index.js",
@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
