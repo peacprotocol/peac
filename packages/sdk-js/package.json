@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsc",
     "postbuild": "node scripts/prepare-tests.mjs",
-    "pretest": "pnpm -w build && pnpm build",
+    "pretest": "pnpm build",
     "test": "node --test dist/*.test.js",
     "test:smoke": "node --test --test-name-pattern='(verifyRemote|falls back|clearCache)' dist/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
