@@ -93,7 +93,7 @@ export async function verifyRDNS(
     let reverse_ips: string[] = [];
     try {
       const addresses = await dns.lookup(forward_hostname, { all: true });
-      reverse_ips = addresses.map((addr) => addr.address);
+      reverse_ips = addresses.map((addr: { address: string }) => addr.address);
     } catch {
       indicators.push('a_lookup_fail');
     }

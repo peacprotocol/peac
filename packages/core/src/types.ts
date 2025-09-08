@@ -7,6 +7,7 @@ import { CrawlerType } from './config.js';
 
 export type Kid = string;
 export type KeySet = Record<Kid, { kty: 'OKP'; crv: 'Ed25519'; x: string; d?: string }>;
+export type VerifyKeySet = Record<Kid, { kty: 'OKP'; crv: 'Ed25519'; x: string }>;
 
 // Core Receipt v1.1 (wire format receipt@1.1)
 export interface Receipt {

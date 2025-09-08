@@ -53,7 +53,7 @@ export async function verifyReceipt(jws: string, keys: KeySet): Promise<VerifyRe
             type: 'timestamp_invalid',
             severity: 'medium',
             details: {
-              error: error.message,
+              error: error instanceof Error ? error.message : String(error),
               kid: receipt.kid,
             },
           });
@@ -140,7 +140,9 @@ async function verifyDocument(
     payload = result.payload;
     protectedHeader = result.protectedHeader;
   } catch (error) {
-    throw new Error(`JWS verification failed: ${error.message}`);
+    throw new Error(
+      `JWS verification failed: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 
   // Validate protocol and wire versions
@@ -215,7 +217,7 @@ function enforceReceiptInvariants(receipt: Receipt): void {
         throw new Error('Receipt invariant violation: expires_at must be after issued_at');
       }
     } catch (e) {
-      if (e.message.includes('invariant violation')) throw e;
+      if (e instanceof Error && e.message.includes('invariant violation')) throw e;
       throw new Error('Receipt invariant violation: expires_at must be valid ISO-8601 timestamp');
     }
   }
@@ -237,7 +239,7 @@ export async function verifyBulk(
         const result = await verifyReceipt(jws, keys);
         return { valid: true, receipt: result.receipt };
       } catch (error) {
-        return { valid: false, error: error.message };
+        return { valid: false, error: error instanceof Error ? error.message : String(error) };
       }
     })
   );

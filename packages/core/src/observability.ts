@@ -300,7 +300,7 @@ export class AdminEndpoints {
     } catch (error) {
       return {
         success: false,
-        message: `Key rotation failed: ${error.message}`,
+        message: `Key rotation failed: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }

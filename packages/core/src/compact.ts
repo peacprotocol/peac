@@ -281,8 +281,11 @@ export class CborCompactCodec {
 
     // Apply enum encoding if specified
     if (enumName && value && RECEIPT_MAP.enum_map[enumName as keyof typeof RECEIPT_MAP.enum_map]) {
+      const enumMap = RECEIPT_MAP.enum_map[enumName as keyof typeof RECEIPT_MAP.enum_map];
       const enumValue =
-        RECEIPT_MAP.enum_map[enumName as keyof typeof RECEIPT_MAP.enum_map][value as keyof any];
+        typeof value === 'string' && value in enumMap
+          ? enumMap[value as keyof typeof enumMap]
+          : value;
       compact[fieldId] = enumValue !== undefined ? enumValue : value;
     } else {
       compact[fieldId] = value;
