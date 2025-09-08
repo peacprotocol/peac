@@ -1,0 +1,28 @@
+{
+  "name": "@peac/adapter-openai",
+  "version": "0.9.12-dev.1",
+  "description": "PEAC OpenAI Functions format adapter",
+  "main": "functions.json",
+  "type": "module",
+  "exports": {
+    ".": "./functions.json"
+  },
+  "scripts": {
+    "build": "echo 'No build needed for JSON package'",
+    "typecheck": "echo 'No TypeScript in JSON package'"
+  },
+  "files": [
+    "functions.json",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "peac",
+    "openai",
+    "functions",
+    "receipts",
+    "adapter"
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,42 @@
+{
+  "name": "@peac/adapter-cloudflare",
+  "version": "0.9.12-dev.1",
+  "description": "PEAC Cloudflare Worker integration adapter",
+  "main": "dist/integration.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/integration.d.ts",
+      "import": "./dist/integration.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsup": "^8.0.0"
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "peac",
+    "cloudflare",
+    "worker",
+    "edge",
+    "receipts",
+    "adapter"
+  ],
+  "license": "Apache-2.0"
+}

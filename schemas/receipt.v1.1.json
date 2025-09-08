@@ -1,0 +1,413 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/receipt/1.1",
+  "title": "PEAC Receipt v1.1",
+  "description": "PEAC Protocol receipt with verification, trust scoring, and enhanced metadata (wire format receipt@1.1)",
+  "type": "object",
+  "required": [
+    "version",
+    "protocol_version",
+    "wire_version",
+    "subject",
+    "aipref",
+    "purpose",
+    "enforcement",
+    "crawler_type",
+    "issued_at",
+    "kid",
+    "signature_media_type"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.1",
+      "description": "Receipt schema version"
+    },
+    "protocol_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "Protocol version (SemVer format)"
+    },
+    "wire_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Wire format version"
+    },
+    "subject": {
+      "type": "object",
+      "required": ["uri"],
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Content URI being accessed"
+        },
+        "content_hash": {
+          "type": "string",
+          "description": "Content hash for integrity verification"
+        },
+        "rights_class": {
+          "type": "string",
+          "enum": [
+            "book",
+            "lyrics",
+            "article",
+            "image",
+            "audio",
+            "video",
+            "dataset",
+            "software",
+            "other"
+          ],
+          "description": "Classification of content rights"
+        },
+        "sku": {
+          "type": "string",
+          "description": "Stock keeping unit or product identifier"
+        }
+      }
+    },
+    "aipref": {
+      "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
+      "description": "AI preferences resolution status and snapshot",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["allowed", "denied", "conditional", "not_found", "error"],
+          "description": "AIPREF resolution status"
+        },
+        "snapshot": {
+          "type": "string",
+          "description": "JCS-canonicalized snapshot of preferences"
+        },
+        "digest": {
+          "type": "string",
+          "description": "Digest of preferences snapshot"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri",
+          "description": "Source URI of preferences"
+        }
+      }
+    },
+    "purpose": {
+      "type": "string",
+      "enum": ["train-ai", "train-genai", "search", "evaluation", "other"],
+      "description": "Purpose of content access"
+    },
+    "enforcement": {
+      "type": "object",
+      "required": ["method"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["none", "http-402", "subscription", "license"],
+          "description": "Enforcement method applied"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["cdn", "origin", "gateway"],
+          "description": "Enforcement provider type"
+        },
+        "challenge": {
+          "type": "object",
+          "description": "Challenge details for enforcement"
+        }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rail": {
+          "type": "string",
+          "enum": ["stripe", "l402", "x402"],
+          "description": "Payment rail used"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Payment amount"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code"
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider_ids": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Payment provider transaction IDs"
+            },
+            "proof": {
+              "type": "string",
+              "description": "Cryptographic payment proof"
+            }
+          }
+        }
+      }
+    },
+    "acquisition": {
+      "type": "object",
+      "required": ["method", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["purchase", "subscription", "license", "public_domain", "fair_use", "consent"],
+          "description": "Method of content acquisition"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri",
+          "description": "Source of acquisition rights"
+        },
+        "license": {
+          "type": "string",
+          "format": "uri",
+          "description": "License terms URI"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Acquisition timestamp"
+        }
+      }
+    },
+    "legal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "type": "string",
+          "enum": ["fair_use", "license", "public_domain", "consent", "legitimate_interest"],
+          "description": "Legal basis for access"
+        },
+        "jurisdiction": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}(-[A-Z]{2})?$",
+          "description": "Legal jurisdiction (ISO 3166)"
+        },
+        "reference": {
+          "type": "string",
+          "format": "uri",
+          "description": "Legal reference or citation"
+        }
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "description": "Whether attribution is required"
+        },
+        "format_applied": {
+          "type": "boolean",
+          "description": "Whether attribution format was applied"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Attribution URL"
+        },
+        "license": {
+          "type": "string",
+          "description": "License requiring attribution"
+        }
+      }
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "type": "string",
+          "enum": [
+            "consent",
+            "contract",
+            "legal_obligation",
+            "legitimate_interest",
+            "public_task",
+            "vital_interest",
+            "not_applicable"
+          ],
+          "description": "GDPR consent basis"
+        },
+        "retention": {
+          "type": "string",
+          "description": "Data retention policy"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "c2pa": {
+          "type": "string",
+          "format": "uri",
+          "description": "C2PA provenance manifest URI"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Bytes processed"
+        },
+        "tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Tokens processed"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Processing duration in milliseconds"
+        }
+      }
+    },
+    "crawler_type": {
+      "type": "string",
+      "enum": ["bot", "agent", "hybrid", "browser", "migrating", "test", "unknown"],
+      "description": "Type of crawler/client making the request"
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ip_verified": {
+          "type": "boolean",
+          "description": "Whether IP was verified against known ranges"
+        },
+        "rdns_match": {
+          "type": "boolean",
+          "description": "Whether reverse DNS lookup matched"
+        },
+        "user_agent_consistent": {
+          "type": "boolean",
+          "description": "Whether User-Agent is consistent with known patterns"
+        },
+        "stealth_indicators": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of detected stealth indicators"
+        },
+        "trust_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Computed trust score (0=untrusted, 1=fully trusted)"
+        }
+      }
+    },
+    "audit_chain": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "previous_receipt": {
+          "type": "string",
+          "description": "Reference to previous receipt in chain"
+        },
+        "merkle_root": {
+          "type": "string",
+          "description": "Merkle tree root for batch verification"
+        },
+        "witnesses": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Cryptographic witnesses"
+        },
+        "anchor": {
+          "type": "string",
+          "description": "Blockchain or timestamping anchor"
+        }
+      }
+    },
+    "request_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "description": "Unique request identifier"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Session identifier"
+        },
+        "correlation_id": {
+          "type": "string",
+          "description": "Correlation identifier for tracing"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Request timestamp (server time)"
+        }
+      }
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Receipt issuance timestamp"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Receipt expiration timestamp"
+    },
+    "kid": {
+      "type": "string",
+      "description": "Key identifier for signature verification"
+    },
+    "nonce": {
+      "type": "string",
+      "description": "Unique nonce for replay protection"
+    },
+    "signature_media_type": {
+      "type": "string",
+      "const": "application/peac-receipt+jws",
+      "description": "JWS signature media type"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "enforcement": {
+            "properties": {
+              "method": { "const": "http-402" }
+            },
+            "required": ["method"]
+          }
+        },
+        "required": ["enforcement"]
+      },
+      "then": {
+        "required": ["payment"],
+        "properties": {
+          "payment": {
+            "required": ["rail", "amount", "currency"]
+          }
+        }
+      }
+    }
+  ]
+}

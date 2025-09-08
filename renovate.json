@@ -1,0 +1,49 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "group:monorepos", "group:recommended", ":dependencyDashboard"],
+  "schedule": ["before 6am on monday"],
+  "semanticCommits": "enabled",
+  "commitMessagePrefix": "chore(deps): ",
+  "labels": ["dependencies"],
+  "reviewersFromCodeOwners": true,
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchPackageNames": [
+        "@types/**",
+        "typescript",
+        "eslint",
+        "prettier",
+        "@typescript-eslint/**"
+      ],
+      "groupName": "dev tooling",
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "matchPackageNames": ["jose", "zod", "lru-cache"],
+      "groupName": "core dependencies",
+      "reviewers": ["@peacprotocol/core-team"],
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "matchPackageNames": ["node"],
+      "allowedVersions": ">=20.0.0",
+      "groupName": "node engine",
+      "reviewers": ["@peacprotocol/core-team"]
+    },
+    {
+      "matchDepTypes": ["engines"],
+      "enabled": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "labels": ["security", "vulnerability"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  }
+}

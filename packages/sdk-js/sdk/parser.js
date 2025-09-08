@@ -111,7 +111,7 @@ class PEACParser {
     }
 
     throw new Error(
-      `No valid peac found for ${domain}: ${this.errors.map((e) => e.error).join(', ')}`,
+      `No valid peac found for ${domain}: ${this.errors.map((e) => e.error).join(', ')}`
     );
   }
 
@@ -158,7 +158,7 @@ class PEACParser {
             }
             resolve(data);
           });
-        },
+        }
       );
 
       request.on('error', (error) => {

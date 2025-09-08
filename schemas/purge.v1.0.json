@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/purge/1.0",
+  "title": "PEAC Purge Receipt v1.0",
+  "description": "PEAC Protocol purge receipt for content deletion attestation (wire format purge@1.0)",
+  "type": "object",
+  "required": [
+    "version",
+    "protocol_version",
+    "wire_version",
+    "action",
+    "subject",
+    "corpus",
+    "performed_at",
+    "kid",
+    "signature_media_type"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Purge receipt schema version"
+    },
+    "protocol_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "Protocol version (SemVer format)"
+    },
+    "wire_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Wire format version"
+    },
+    "action": {
+      "type": "string",
+      "const": "purge",
+      "description": "Action performed (always 'purge')"
+    },
+    "subject": {
+      "type": "object",
+      "required": ["uri"],
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI of content being purged"
+        },
+        "rights_class": {
+          "type": "string",
+          "description": "Classification of content rights"
+        },
+        "content_hash": {
+          "type": "string",
+          "description": "Content hash for verification"
+        }
+      }
+    },
+    "corpus": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Corpus identifier containing the content"
+        },
+        "version": {
+          "type": "string",
+          "description": "Corpus version"
+        },
+        "hash": {
+          "type": "string",
+          "description": "Corpus hash for integrity"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Size of corpus in bytes"
+        }
+      }
+    },
+    "erasure_basis": {
+      "type": "string",
+      "enum": ["gdpr", "ccpa", "contractual", "other"],
+      "description": "Legal basis for content erasure"
+    },
+    "performed_by": {
+      "type": "string",
+      "description": "Entity that performed the purge"
+    },
+    "performed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when purge was performed"
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Evidence of purge completion",
+      "additionalProperties": true
+    },
+    "request_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "description": "Unique request identifier"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Session identifier"
+        },
+        "correlation_id": {
+          "type": "string",
+          "description": "Correlation identifier for tracing"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Request timestamp (server time)"
+        }
+      }
+    },
+    "kid": {
+      "type": "string",
+      "description": "Key identifier for signature verification"
+    },
+    "nonce": {
+      "type": "string",
+      "description": "Unique nonce for replay protection"
+    },
+    "signature_media_type": {
+      "type": "string",
+      "const": "application/peac-purge+jws",
+      "description": "JWS signature media type for purge receipts"
+    }
+  }
+}

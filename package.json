@@ -1,41 +1,48 @@
 {
   "name": "@peacprotocol/monorepo",
-  "version": "0.9.12",
+  "version": "0.9.12.1",
   "private": true,
-  "description": "PEAC Protocol v0.9.12 - Universal proof layer for AI interactions",
+  "description": "PEAC Protocol v0.9.12.1 - Universal proof layer with enterprise standards and neutral crawler control",
+  "packageManager": "pnpm@8.0.0",
   "workspaces": [
+    "apps/*",
     "packages/*",
-    "examples/*"
+    "packages/adapters/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces",
-    "test:coverage": "npm run test:coverage --workspaces",
-    "lint": "npm run lint --workspaces",
-    "typecheck": "npm run typecheck --workspaces",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:crawler": "pnpm -w run test --filter @peac/crawler",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "perf:validate": "node scripts/perf-validate.js",
-    "security:scan": "npm audit --omit=dev && npm run owasp:scan",
-    "owasp:scan": "npm run security:owasp --workspaces",
-    "sbom:generate": "npm sbom --sbom-format cyclonedx",
-    "validate:all": "npm run validate:abnf && npm run test && npm run perf:validate && npm run security:scan",
-    "validate:abnf": "npm run validate -w @peac/abnf",
-    "clean": "npm run clean --workspaces",
-    "ci:gates": "npm run validate:all && npm run test:coverage"
+    "conformance": "turbo run conformance",
+    "perf": "turbo run perf",
+    "sbom": "turbo run sbom",
+    "release": "turbo run release",
+    "clean": "turbo run clean",
+    "dev": "pnpm -w run dev --filter @peac/app-api",
+    "start": "pnpm -w run start --filter @peac/app-api",
+    "dep-cruiser": "npx depcruise packages/ --validate .dependency-cruiser.json"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.0",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "dependency-cruiser": "^16.0.0",
     "eslint": "^8.50.0",
     "jest": "^29.0.0",
     "prettier": "^3.3.3",
+    "tsup": "^8.0.0",
+    "turbo": "^1.13.0",
     "typescript": "^5.2.0"
   },
   "engines": {
     "node": ">=20.0.0",
-    "npm": ">=9.0.0"
+    "pnpm": ">=8.0.0"
   },
   "license": "Apache-2.0"
 }

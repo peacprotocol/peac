@@ -1,19 +1,34 @@
+# package managers
 node_modules/
+pnpm-debug.log
+package-lock.json
+yarn.lock
+
+# builds & caches
 dist/
+*.tsbuildinfo
 coverage/
-.DS_Store
-.vscode/
-.idea/
-scripts/
-.env
-.env.*
-
-# Package build artifacts
-*/dist/
-*/node_modules/
-**/package-lock.json
-
-# Development files
-*.log
-*.tmp
+.turbo/
+.next/
+.vite/
 .cache/
+
+# env & secrets
+.env
+.env.*.local
+.npmrc
+*.pem
+*.key
+*.pfx
+cosign.key
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# generated artifacts
+**/openapi/generated/**
+sbom-*.json
+provenance-*.intoto.jsonl

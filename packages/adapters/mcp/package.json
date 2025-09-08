@@ -1,0 +1,46 @@
+{
+  "name": "@peac/adapter-mcp",
+  "version": "0.9.12-dev.1",
+  "description": "PEAC MCP (Model Context Protocol) stdio server adapter",
+  "main": "dist/server.js",
+  "bin": {
+    "peac-mcp": "dist/server.js"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "dev": "node dist/server.js",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@peac/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsup": "^8.0.0"
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "peac",
+    "mcp",
+    "model-context-protocol",
+    "receipts",
+    "adapter"
+  ],
+  "license": "Apache-2.0"
+}

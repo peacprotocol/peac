@@ -1,0 +1,67 @@
+{
+  "name": "@peac/receipts",
+  "version": "0.9.12.1",
+  "description": "PEAC Protocol receipt builders, parsers, and validators with CBOR support",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "dev"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "cbor": "^9.0.0",
+    "@peac/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "tsup": "^8.0.0"
+  },
+  "keywords": [
+    "peac",
+    "receipts",
+    "validation",
+    "cbor",
+    "json-schema"
+  ],
+  "author": "PEAC Protocol",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
