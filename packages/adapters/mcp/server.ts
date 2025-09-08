@@ -61,7 +61,8 @@ class PeacMcpServer {
         const request: JsonRpcRequest = JSON.parse(line);
         await this.handleRequest(request);
       } catch (error) {
-        this.sendError(null, -32700, 'Parse error', { error: String(error) });
+        const errMsg = error instanceof Error ? error.message : String(error);
+        this.sendError(null, -32700, 'Parse error', { error: errMsg });
       }
     });
 
@@ -182,7 +183,8 @@ class PeacMcpServer {
           this.sendError(request.id, -32601, 'Method not found');
       }
     } catch (error) {
-      this.sendError(request.id, -32000, 'Internal error', { error: error.message });
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.sendError(request.id, -32000, 'Internal error', { error: errMsg });
     }
   }
 
@@ -269,7 +271,8 @@ class PeacMcpServer {
         ],
       });
     } catch (error) {
-      this.sendError(request.id, -32000, 'Receipt signing failed', { error: error.message });
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.sendError(request.id, -32000, 'Receipt signing failed', { error: errMsg });
     }
   }
 
@@ -302,13 +305,14 @@ class PeacMcpServer {
         ],
       });
     } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
       this.sendResponse(request.id, {
         valid: false,
-        error: error.message,
+        error: errMsg,
         content: [
           {
             type: 'text',
-            text: `Receipt verification failed: ${error.message}`,
+            text: `Receipt verification failed: ${errMsg}`,
           },
         ],
       });
@@ -341,7 +345,7 @@ class PeacMcpServer {
       });
 
       const results = await verifyBulk(jwsArray, keyset);
-      const validCount = results.filter((r) => r.valid).length;
+      const validCount = results.filter((r: any) => r.valid).length;
 
       this.sendResponse(request.id, {
         total: results.length,
@@ -356,7 +360,8 @@ class PeacMcpServer {
         ],
       });
     } catch (error) {
-      this.sendError(request.id, -32000, 'Bulk verification failed', { error: error.message });
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.sendError(request.id, -32000, 'Bulk verification failed', { error: errMsg });
     }
   }
 
@@ -409,7 +414,8 @@ class PeacMcpServer {
         ],
       });
     } catch (error) {
-      this.sendError(request.id, -32000, 'Purge receipt signing failed', { error: error.message });
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.sendError(request.id, -32000, 'Purge receipt signing failed', { error: errMsg });
     }
   }
 
@@ -465,7 +471,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const privateKey = JSON.parse(process.env.PEAC_PRIVATE_KEY);
       server.setSigningKey(process.env.PEAC_KID, privateKey);
     } catch (error) {
-      console.error('Failed to load private key from environment:', error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      console.error('Failed to load private key from environment:', errMsg);
       process.exit(1);
     }
   }
@@ -475,7 +482,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const keys = JSON.parse(process.env.PEAC_PUBLIC_KEYS);
       server.setKeys(keys);
     } catch (error) {
-      console.error('Failed to load public keys from environment:', error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      console.error('Failed to load public keys from environment:', errMsg);
     }
   }
 
