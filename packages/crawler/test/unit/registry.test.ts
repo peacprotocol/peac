@@ -173,7 +173,7 @@ describe('CrawlerControlRegistry', () => {
     });
 
     it.skip('should implement ALL strategy', async () => {
-      // TODO(peacprotocol/peac#100): revisit aggregation thresholds; un-skip in 0.9.13
+      // TODO(peacprotocol/peac#150): revisit aggregation thresholds; un-skip in 0.9.13
       const allRegistry = new CrawlerControlRegistry({
         strategy: 'all',
         mode: 'parallel',
@@ -218,7 +218,7 @@ describe('CrawlerControlRegistry', () => {
     });
 
     it.skip('should implement WEIGHTED strategy', async () => {
-      // TODO(peacprotocol/peac#101): revisit weighted calculation precision; un-skip in 0.9.13
+      // TODO(peacprotocol/peac#151): revisit weighted calculation precision; un-skip in 0.9.13
       const result = await registry.verify(mockRequest);
 
       // Weighted average: (0.6 * 0.9) + (0.4 * 0.3) = 0.54 + 0.12 = 0.66
@@ -270,7 +270,7 @@ describe('CrawlerControlRegistry', () => {
     });
 
     it.skip('should continue to next provider in failover if first fails', async () => {
-      // TODO(peacprotocol/peac#102): revisit failover provider count expectations; un-skip in 0.9.13
+      // TODO(peacprotocol/peac#152): revisit failover provider count expectations; un-skip in 0.9.13
       const failoverRegistry = new CrawlerControlRegistry({
         strategy: 'weighted',
         mode: 'failover',
