@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/discovery/1.1",
+  "title": "PEAC Discovery v1.1",
+  "description": "PEAC Protocol discovery document with bot/agent policies and crawler verification (wire format discovery@1.1)",
+  "type": "object",
+  "required": [
+    "version",
+    "preferences",
+    "access_control",
+    "payments",
+    "receipts",
+    "verify",
+    "public_keys"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.1",
+      "description": "Discovery schema version"
+    },
+    "preferences": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI to AIPREF preferences document"
+    },
+    "access_control": {
+      "type": "string",
+      "enum": ["http-402", "none"],
+      "description": "Primary access control method"
+    },
+    "payments": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["stripe", "l402", "x402"]
+      },
+      "description": "Supported payment rails"
+    },
+    "provenance": {
+      "type": "string",
+      "enum": ["c2pa", "none"],
+      "description": "Provenance tracking method"
+    },
+    "receipts": {
+      "type": "string",
+      "enum": ["required", "optional"],
+      "description": "Receipt requirement policy"
+    },
+    "verify": {
+      "type": "string",
+      "format": "uri",
+      "description": "Receipt verification endpoint URI"
+    },
+    "public_keys": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kid", "alg", "key"],
+        "additionalProperties": false,
+        "properties": {
+          "kid": {
+            "type": "string",
+            "description": "Key identifier"
+          },
+          "alg": {
+            "type": "string",
+            "enum": ["EdDSA"],
+            "description": "Signature algorithm"
+          },
+          "key": {
+            "type": "string",
+            "description": "Public key material (base64url encoded)"
+          }
+        }
+      }
+    },
+    "access_modes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bot": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "policy": {
+              "type": "string",
+              "enum": ["block", "allow", "paid", "challenge"],
+              "description": "Bot access policy"
+            },
+            "pricing": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "enum": ["per_gb", "per_request", "per_token", "flat_rate"],
+                  "description": "Pricing model"
+                },
+                "rate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Rate per unit"
+                },
+                "currency": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{3,4}$",
+                  "description": "Currency code"
+                }
+              }
+            },
+            "rate_limit": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Requests per minute limit"
+            },
+            "require_license": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether bot requires explicit license"
+            }
+          }
+        },
+        "agent": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "policy": {
+              "type": "string",
+              "enum": ["allow_realtime", "block", "paid"],
+              "description": "Agent access policy"
+            },
+            "constraints": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "no_storage": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Prohibit long-term storage"
+                },
+                "user_attribution": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Require user attribution in responses"
+                },
+                "session_timeout": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Maximum session duration in seconds"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "crawler_verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "require_rdns": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require reverse DNS verification"
+        },
+        "known_crawlers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Crawler name identifier"
+              },
+              "ip_ranges": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Known IP ranges (CIDR notation)"
+              },
+              "user_agents": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Known User-Agent patterns"
+              },
+              "verification_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "Official verification endpoint"
+              },
+              "rdns_suffixes": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Allowed reverse DNS suffixes"
+              }
+            }
+          }
+        },
+        "stealth_detection": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable stealth crawler detection"
+            },
+            "block_suspicious": {
+              "type": "boolean",
+              "default": false,
+              "description": "Block suspicious requests"
+            },
+            "challenge_unknown": {
+              "type": "boolean",
+              "default": true,
+              "description": "Challenge unverified crawlers"
+            }
+          }
+        }
+      }
+    },
+    "compatibility_bridges": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "robots_txt": {
+          "type": "boolean",
+          "default": false,
+          "description": "Generate legacy robots.txt compatibility"
+        },
+        "ai_robots_txt": {
+          "type": "boolean",
+          "default": false,
+          "description": "Generate AI-specific robots.txt"
+        },
+        "cloudflare_compatible": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Cloudflare AI Crawl Control compatibility"
+        },
+        "perplexity_compatible": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Perplexity crawler compatibility"
+        }
+      }
+    },
+    "rate_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default_rpm": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Default requests per minute"
+        },
+        "burst_allowance": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Burst request allowance"
+        },
+        "window_size": {
+          "type": "string",
+          "pattern": "^\\d+[smh]$",
+          "description": "Rate limit window (e.g., '60s', '10m', '1h')"
+        }
+      }
+    }
+  }
+}

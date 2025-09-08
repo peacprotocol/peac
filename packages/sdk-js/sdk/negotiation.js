@@ -58,7 +58,7 @@ class Negotiation {
     // Academic discount
     if (academic_verification && this.peac.peac?.negotiation?.templates?.academic) {
       const academicDiscount = this.parseDiscount(
-        this.peac.peac.negotiation.templates.academic.discount,
+        this.peac.peac.negotiation.templates.academic.discount
       );
       finalPrice *= 1 - academicDiscount;
       discounts.push({
@@ -71,7 +71,7 @@ class Negotiation {
     // Startup discount
     if (startup_verification && this.peac.peac?.negotiation?.templates?.startup) {
       const startupDiscount = this.parseDiscount(
-        this.peac.peac.negotiation.templates.startup.discount,
+        this.peac.peac.negotiation.templates.startup.discount
       );
       finalPrice *= 1 - startupDiscount;
       discounts.push({
@@ -214,7 +214,7 @@ class Negotiation {
       (key) =>
         consent[key] === 'allowed' ||
         consent[key] === 'conditional' ||
-        (typeof consent[key] === 'object' && consent[key].allowed !== 'denied'),
+        (typeof consent[key] === 'object' && consent[key].allowed !== 'denied')
     );
   }
 

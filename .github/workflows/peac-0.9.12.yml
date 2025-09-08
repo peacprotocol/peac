@@ -2,7 +2,8 @@ name: peac 0.9.12 CI
 
 on:
   push:
-    branches: [main, 'release/*']
+    branches: [main, 'feature/**']
+    branches-ignore: ['release/*'] # handled by ci-lite.yml
     paths:
       - 'pkgs/**'
       - 'docs/**'
@@ -11,7 +12,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
   pull_request:
-    branches: [main, 'release/*']
+    branches: [main]
     paths:
       - 'pkgs/**'
       - 'docs/**'
@@ -31,19 +32,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+          run_install: false
+
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            pkgs/**/package-lock.json
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: |
           echo "::group::Installing dependencies"
-          npm ci --no-audit --no-fund
+          pnpm install --frozen-lockfile
           echo "::endgroup::"
 
       - name: Version validation
@@ -96,7 +100,7 @@ jobs:
       - name: Install ESLint dependencies
         run: |
           echo "::group::Installing ESLint TypeScript dependencies"
-          npm install --save-dev @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint
+          pnpm add -D @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint
           echo "::endgroup::"
 
       - name: Lint packages
@@ -173,15 +177,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+          run_install: false
+
       - name: Setup Node.js 22 (canary)
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: 'pnpm'
 
       - run: |
           echo "::group::Node 22 canary build"
-          npm ci --no-audit --no-fund
+          pnpm install --frozen-lockfile
           for pkg in pkgs/*/package.json; do
             if [ -f "$pkg" ]; then
               dir=$(dirname "$pkg")

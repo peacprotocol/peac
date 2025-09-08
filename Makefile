@@ -1,84 +1,82 @@
-# PEAC v0.9.12 Ultra-Lean Development
-# Single-entry tasks (dev, test, perf, sbom, release)
+# PEAC Protocol Makefile
+# Single-entry tasks for the modern monorepo
 
-.PHONY: dev test perf bundle sbom release clean validate gates
+.PHONY: help install dev build test lint typecheck clean conformance perf sbom release dep-check
 
-# Primary development workflow
-dev:
-	pnpm -w -r build
-	pnpm -w -r test --filter ./pkgs/*
-
-# Performance validation (enforced gates)  
-perf:
-	node tests/perf/run.mjs
-	@echo "✅ Performance gates: sign p95<10ms, verify p95<5ms, throughput≥1000rps"
-
-# Bundle size validation
-bundle:
-	node tooling/bundle-check.mjs
-	@echo "✅ Bundle size gates: each package <50KB"
-
-# Security baseline 
-security:
-	npm audit --omit=dev
-	node tooling/owasp-check.mjs
-	@echo "✅ Security gates: OWASP baseline clean"
-
-# SBOM generation
-sbom:
-	node tooling/sbom.mjs
-	@echo "✅ SBOM generated with SLSA-style provenance"
-
-# Pre-release validation (all gates)
-validate: dev perf bundle security sbom
-	@echo "✅ All v0.9.12 gates passed - ready for release"
-
-# CI gates (strict)
-gates: validate
-	node tooling/precompile-validators.mjs 2>/dev/null || true
-	@echo "✅ CI gates passed - deployment ready"
-
-# GA readiness check
-ga-check:
-	@echo "🎯 v0.9.12 GA Readiness Checklist"
-	@echo "=================================="
-	@echo "Running all validation gates..."
-	@make --no-print-directory perf
-	@make --no-print-directory security
-	@make --no-print-directory bundle
+help: ## Show this help message
+	@echo "PEAC Protocol v0.9.12-dev - Enterprise Monorepo"
 	@echo ""
-	@echo "Checking discovery ABNF..."
-	@for file in fixtures/peac/*.txt; do \
-		lines=$$(wc -l < "$$file" 2>/dev/null || echo 0); \
-		name=$$(basename "$$file"); \
-		if [ $$lines -le 20 ]; then \
-			echo "  ✅ $$name: $$lines lines"; \
-		else \
-			echo "  ❌ $$name: $$lines lines (>20!)"; \
-		fi \
-	done
-	@echo ""
-	@echo "=================================="
-	@echo "✅ Ready for v0.9.12 GA!"
-# Release process
-release:
-	node tooling/release.mjs
+	@echo "Available commands:"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-# Cleanup
-clean:
-	pnpm -w -r clean
-	rm -rf dist coverage *.tsbuildinfo
+install: ## Install all dependencies
+	@echo "📦 Installing dependencies..."
+	pnpm install
 
-# Help
-help:
-	@echo "PEAC v0.9.12 Ultra-Lean Development"
-	@echo ""
-	@echo "Primary targets:"
-	@echo "  dev      - Build and test all packages"
-	@echo "  perf     - Performance validation (sign<10ms, verify<5ms)"  
-	@echo "  bundle   - Bundle size check (<50KB per package)"
-	@echo "  security - OWASP baseline scan"
-	@echo "  validate - All gates (dev+perf+bundle+security+sbom)"
-	@echo "  gates    - CI gates (strict validation)"
-	@echo "  release  - Release process"
-	@echo "  clean    - Remove build artifacts"
+dev: ## Start development server
+	@echo "🚀 Starting development server..."
+	pnpm run dev
+
+build: ## Build all packages
+	@echo "🔨 Building all packages..."
+	pnpm run build
+
+test: ## Run all tests
+	@echo "🧪 Running all tests..."
+	pnpm run test
+
+test-coverage: ## Run tests with coverage
+	@echo "🧪 Running tests with coverage..."
+	pnpm run test:coverage
+
+lint: ## Run ESLint on all packages
+	@echo "🔍 Linting code..."
+	pnpm run lint
+
+typecheck: ## Run TypeScript type checking
+	@echo "🔍 Type checking..."
+	pnpm run typecheck
+
+format: ## Format code with Prettier
+	@echo "🎨 Formatting code..."
+	pnpm run format
+
+format-check: ## Check code formatting
+	@echo "🎨 Checking code format..."
+	pnpm run format:check
+
+dep-check: ## Check dependency boundaries
+	@echo "🔍 Checking dependency boundaries..."
+	pnpm run dep-cruiser
+
+conformance: ## Run conformance tests
+	@echo "🔍 Running conformance tests..."
+	pnpm run conformance
+
+perf: ## Run performance validation
+	@echo "🚀 Running performance validation..."
+	pnpm run perf
+
+sbom: ## Generate SBOM
+	@echo "📋 Generating SBOM..."
+	pnpm run sbom
+
+clean: ## Clean all build artifacts
+	@echo "🧹 Cleaning build artifacts..."
+	pnpm run clean
+
+release: ## Run full release pipeline
+	@echo "🚀 Running full release pipeline..."
+	pnpm run release
+
+# Quality gates
+quality-gates: lint typecheck format-check dep-check ## Run all quality gates
+
+# Full validation pipeline (local equivalent of CI)
+ci-local: quality-gates build test conformance perf ## Run full CI pipeline locally
+
+# Production readiness check
+prod-ready: ci-local sbom ## Full production readiness validation
+
+# Development workflow
+dev-setup: install build ## Set up development environment

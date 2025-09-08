@@ -1,0 +1,38 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "format:check": {
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    },
+    "typecheck": {
+      "outputs": []
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", "lib/**", "*.tsbuildinfo"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
+    },
+    "conformance": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
+    "perf": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
+    "sbom": {
+      "dependsOn": ["build"],
+      "outputs": ["*.sbom.json"]
+    },
+    "release": {
+      "dependsOn": ["lint", "typecheck", "build", "test", "conformance", "perf", "sbom"],
+      "outputs": []
+    }
+  }
+}

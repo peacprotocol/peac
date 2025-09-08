@@ -50,7 +50,7 @@ class UniversalParser extends PEACParser {
 
     // If we found a peac file, use it
     const peacResult = results.find(
-      (r) => r && (r.file === '/peac.txt' || r.file === '/.well-known/peac'),
+      (r) => r && (r.file === '/peac.txt' || r.file === '/.well-known/peac')
     );
     if (peacResult) {
       const peac = await this.parsePeac(peacResult.content);

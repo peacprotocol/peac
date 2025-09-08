@@ -108,7 +108,7 @@ app.post('/peac/issue', async (c) => {
         status: 500,
         detail: error.message,
       },
-      500,
+      500
     );
   }
 });
@@ -128,7 +128,7 @@ app.post('/peac/verify', async (c) => {
         detail: 'Exceeded 100 requests per minute',
         retry_after: 60,
       },
-      429,
+      429
     );
   }
 
@@ -153,7 +153,7 @@ app.post('/peac/verify', async (c) => {
         status: 401,
         detail: error.message,
       },
-      401,
+      401
     );
   }
 });
@@ -184,7 +184,7 @@ app.get('/api/content/:id', async (c) => {
         'WWW-Authenticate': challenges
           .map((ch) => `${ch.rail} challenge="${ch.challenge}"`)
           .join(', '),
-      },
+      }
     );
   }
 
@@ -227,7 +227,7 @@ app.get('/api/content/:id', async (c) => {
         status: 401,
         detail: error.message,
       },
-      401,
+      401
     );
   }
 });
