@@ -2,15 +2,15 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-0.9.12.1--stable-green.svg)](https://github.com/peacprotocol/peac/releases)
-[![Tests](https://github.com/peacprotocol/peac/workflows/CI-Lite/badge.svg)](https://github.com/peacprotocol/peac/actions)
-[![Security](https://github.com/peacprotocol/peac/workflows/CodeQL/badge.svg)](https://github.com/peacprotocol/peac/security/code-scanning)
+[![CI-Lite](https://github.com/peacprotocol/peac/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/ci-lite.yml)
+[![CodeQL](https://github.com/peacprotocol/peac/actions/workflows/codeql.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/codeql.yml)
 
 **PEAC: Programmable Environment for Agent Coordination** (pronounced "peace")
 
 PEAC is a minimal, open spec for machine-readable policy and agent coordination on the web:
 
 - **Discovery** via `/.well-known/peac.txt`
-- **HTTP semantics** via `PEAC-Receipt` headers and RFC9457 Problem Details
+- **HTTP semantics** via `PEAC-Receipt` headers and HTTP Problem Details (RFC 7807)
 - **Verifiable receipts** (JWS) with **adapters** for negotiation, settlement, and compliance
 - **Trust rails** for agents: UDA, DPoP, and Agent Attestation
 
@@ -88,7 +88,9 @@ curl -I https://your-domain/.well-known/peac.txt  # check ETag + Cache-Control
 ```
 
 Tips: emit `PEAC-Receipt`, `peac-version`; be case-insensitive on read. Start in simulation via `PEAC_MODE=simulation`.
-Common pitfalls: invalid schema returns RFC9457 Problem Details 400.
+Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
+
+**Back-compat note:** Server MUST accept both canonical (`PEAC-Receipt`, `peac-version`) and legacy (`x-peac-*`) headers. Clients SHOULD send canonical, MAY accept legacy. Deprecation window: v0.9.14.
 
 ---
 
@@ -96,7 +98,7 @@ Common pitfalls: invalid schema returns RFC9457 Problem Details 400.
 
 - **Discovery**: `/.well-known/peac.txt` (fallback `/peac.txt`)
 - **Headers**: `peac-version`, `PEAC-Receipt`, `peac-agent-attestation`, etc.
-- **Errors**: RFC9457 Problem Details with stable catalog
+- **Errors**: HTTP Problem Details (RFC 7807) with stable catalog
 - **Caching**: strong `ETag`, sensible `Cache-Control` for `peac.txt` and well-known endpoints
 
 ---
@@ -178,7 +180,7 @@ Adapters bridge PEAC to payment rails, agent protocols, provenance, and chains. 
 | **A2A**    | Beta               | Agent-to-Agent negotiation     |
 | **x402**   | Stable             | Payment rail                   |
 | **Stripe** | Stable             | Payment rail                   |
-| **L402**   | Stable             | Lightning Network payments     |
+| **L402**   | Preview            | Lightning Network payments (GA in 0.9.13) |
 | Chainlink  | Preview            | Oracle/provenance integrations |
 | peaq       | Preview            | DePIN/IoT sharing + receipts   |
 
@@ -367,7 +369,7 @@ More templates are in `docs/templates.md`.
 
 ## Troubleshooting
 
-- 400 RFC9457 Problem Details. Validate `peac.txt` or the negotiation body.
+- 400 HTTP Problem Details (RFC 7807). Validate `peac.txt` or the negotiation body.
 - Missing receipt. Ensure the adapter completed settlement. On success the server can return `PEAC-Receipt` and a receipt body.
 - Header mismatch. Emit `PEAC-Receipt`, `peac-version`. Intermediaries may alter casing.
 - Negotiation fails. Enable flags like `PEAC_FEATURE_NEGOTIATION=1` and start with a simulation adapter.

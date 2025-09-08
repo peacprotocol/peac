@@ -19,8 +19,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "postbuild": "cp src/*.test.js dist/ && sed -i '' 's|\\.\\./dist/|\\./|g' dist/*.test.js",
-    "pretest": "pnpm build",
+    "postbuild": "node scripts/prepare-tests.mjs",
+    "pretest": "pnpm -w build && pnpm build",
     "test": "node --test dist/*.test.js",
     "test:smoke": "node --test --test-name-pattern='(verifyRemote|falls back|clearCache)' dist/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
