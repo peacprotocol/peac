@@ -3,13 +3,13 @@
  * Tests for provider aggregation, modes, and strategies
  */
 
-import { CrawlerControlRegistry } from '../../src/registry.js';
+import { CrawlerControlRegistry } from '../../src/registry';
 import {
   CrawlerControlProvider,
   VerifyRequest,
   VerificationResult,
   VerificationLevel,
-} from '../../src/types.js';
+} from '../../src/types';
 
 // Mock provider for testing
 class MockProvider implements CrawlerControlProvider {

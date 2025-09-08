@@ -3,8 +3,8 @@
  * End-to-end tests with real components
  */
 
-import { buildRegistryFromOptions, RegistryHandle } from '../../src/index.js';
-import { VerificationLevel } from '../../src/types.js';
+import { buildRegistryFromOptions, RegistryHandle } from '../../src/index';
+import { VerificationLevel } from '../../src/types';
 
 describe('Registry Integration Tests', () => {
   let registryHandle: RegistryHandle;
