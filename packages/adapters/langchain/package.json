@@ -9,7 +9,9 @@
   },
   "scripts": {
     "build": "echo 'No build needed for Python package'",
-    "typecheck": "echo 'No TypeScript in Python package'"
+    "typecheck": "echo 'No TypeScript in Python package'",
+    "lint": "echo \"Lint configured for workspace\"",
+    "test": "echo \"No tests yet\""
   },
   "files": [
     "tool.py",

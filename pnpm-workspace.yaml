@@ -1,12 +1,12 @@
 packages:
-  - "packages/*"
-  - "packages/adapters/*"
-  - "apps/*"
-  - "schemas"
-  - "profiles"
-  - "examples"
-  - "docs"
-  - "tests"
-  - "tooling"
-  - "infra"
+  - 'packages/*'
+  - 'packages/adapters/*'
+  - 'apps/*'
+  - 'schemas'
+  - 'profiles'
+  - 'examples'
+  - 'docs'
+  - 'tests'
+  - 'tooling'
+  - 'infra'
 neverBuiltDependencies: []

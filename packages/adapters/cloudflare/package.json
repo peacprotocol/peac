@@ -12,7 +12,9 @@
   },
   "scripts": {
     "build": "tsup",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"Lint configured for workspace\"",
+    "test": "echo \"No tests yet\""
   },
   "dependencies": {
     "@peac/core": "workspace:*"
