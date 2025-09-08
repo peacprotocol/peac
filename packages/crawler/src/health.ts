@@ -33,7 +33,7 @@ export interface HealthMonitorStats {
 }
 
 export class RegistryHealthMonitor {
-  private intervalId?: NodeJS.Timeout;
+  private intervalId?: ReturnType<typeof setInterval>;
   private status = new Map<string, ProviderHealthStatus>();
   private totalChecks = 0;
   private isRunning = false;

@@ -20,6 +20,7 @@
   "scripts": {
     "build": "tsc",
     "test": "node --test src/*.test.js",
+    "test:smoke": "node --test --test-name-pattern='(remote|falls|clear)' src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
     "typecheck": "tsc --noEmit"
   },
