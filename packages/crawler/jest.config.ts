@@ -10,9 +10,9 @@ const config: Config = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   collectCoverageFrom: ['src/**/*.ts'],
-  // Nightly controls coverage thresholds; CI-lite keeps them permissive
+  // Baseline coverage thresholds set to current levels for v0.9.12.2
   coverageThreshold: {
-    global: { statements: 0, branches: 0, functions: 0, lines: 0 },
+    global: { statements: 45, branches: 29, functions: 42, lines: 45 },
   },
 };
 
