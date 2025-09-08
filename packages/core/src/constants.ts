@@ -4,12 +4,12 @@
 
 export const PEAC_WIRE_VERSION = '0.9.12.1';
 
-export const CANONICAL_HEADERS = { 
-  receipt: 'PEAC-Receipt', 
-  version: 'peac-version' 
+export const CANONICAL_HEADERS = {
+  receipt: 'PEAC-Receipt',
+  version: 'peac-version',
 };
 
-export const LEGACY_HEADERS = { 
-  receipt: 'x-peac-receipt', 
-  version: 'x-peac-protocol' 
+export const LEGACY_HEADERS = {
+  receipt: 'x-peac-receipt',
+  version: 'x-peac-protocol',
 };

@@ -105,18 +105,18 @@ Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 
 ## Core Features
 
-| Feature                    | Description                                                                                                                               |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Policy and entitlements    | File-based rules for free, paid, conditional, or prohibited access with quotas.                                                           |
-| Consent and privacy        | Opt-in or opt-out signals, retention windows, links to policies.                                                                          |
-| Attribution and provenance | Required attribution formats and verify-only provenance chains via adapters.                                                              |
-| Negotiation and settlement | Programmatic terms, adapters for payment rails (**x402**, **L402**, Stripe), and DPoP-bound receipts.                                    |
-| Agent trust rails          | UDA (OAuth Device Flow), DPoP proof-of-possession, agent attestation verification for autonomous coordination.                            |
-| Receipts v2                | Detached JWS with `typ: "application/peac-receipt+jws"`; JCS canonicalization for verifiable settlements.                                 |
-| JWKS management            | 30-day key rotation, 7-day grace periods, `application/jwk-set+json` with ETag caching.                                                   |
+| Feature                    | Description                                                                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Policy and entitlements    | File-based rules for free, paid, conditional, or prohibited access with quotas.                                                                      |
+| Consent and privacy        | Opt-in or opt-out signals, retention windows, links to policies.                                                                                     |
+| Attribution and provenance | Required attribution formats and verify-only provenance chains via adapters.                                                                         |
+| Negotiation and settlement | Programmatic terms, adapters for payment rails (**x402**, **L402**, Stripe), and DPoP-bound receipts.                                                |
+| Agent trust rails          | UDA (OAuth Device Flow), DPoP proof-of-possession, agent attestation verification for autonomous coordination.                                       |
+| Receipts v2                | Detached JWS with `typ: "application/peac-receipt+jws"`; JCS canonicalization for verifiable settlements.                                            |
+| JWKS management            | 30-day key rotation, 7-day grace periods, `application/jwk-set+json` with ETag caching.                                                              |
 | Adapters and interop       | Bridges for MCP, A2A, payment rails such as **x402**, **L402**, and Stripe, Chainlink, peaq, and any payment provider via adapter. Extend via PEIPs. |
-| HTTP semantics             | `PEAC-Receipt`, `peac-version` headers, RFC9457 Problem Details, and idempotency guidance.                                                |
-| Conformance and tooling    | L0-L4 levels, CLI validation and fixtures, and ACID-style tests.                                                                          |
+| HTTP semantics             | `PEAC-Receipt`, `peac-version` headers, RFC9457 Problem Details, and idempotency guidance.                                                           |
+| Conformance and tooling    | L0-L4 levels, CLI validation and fixtures, and ACID-style tests.                                                                                     |
 
 ---
 
@@ -174,15 +174,15 @@ More examples: [docs/examples.md](docs/examples.md)
 
 Adapters bridge PEAC to payment rails, agent protocols, provenance, and chains. Lifecycle: simulation → staging → production.
 
-| Adapter    | Status (0.9.12.1) | Notes                          |
-| ---------- | ------------------ | ------------------------------ |
-| **MCP**    | Stable             | Agent protocol adapter         |
-| **A2A**    | Beta               | Agent-to-Agent negotiation     |
-| **x402**   | Stable             | Payment rail                   |
-| **Stripe** | Stable             | Payment rail                   |
-| **L402**   | Preview            | Lightning Network payments (GA in 0.9.13) |
-| Chainlink  | Preview            | Oracle/provenance integrations |
-| peaq       | Preview            | DePIN/IoT sharing + receipts   |
+| Adapter    | Status (0.9.12.1) | Notes                                     |
+| ---------- | ----------------- | ----------------------------------------- |
+| **MCP**    | Stable            | Agent protocol adapter                    |
+| **A2A**    | Beta              | Agent-to-Agent negotiation                |
+| **x402**   | Stable            | Payment rail                              |
+| **Stripe** | Stable            | Payment rail                              |
+| **L402**   | Preview           | Lightning Network payments (GA in 0.9.13) |
+| Chainlink  | Preview           | Oracle/provenance integrations            |
+| peaq       | Preview           | DePIN/IoT sharing + receipts              |
 
 Details & examples: [docs/interop.md](docs/interop.md) · Propose new adapters via [PEIPs](docs/peips.md)
 

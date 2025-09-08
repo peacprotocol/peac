@@ -7,7 +7,7 @@ const root = new URL('..', import.meta.url);
 const srcDir = path.join(fileURLToPath(root), 'src');
 const distDir = path.join(fileURLToPath(root), 'dist');
 
-const files = (await fs.readdir(srcDir)).filter(f => f.endsWith('.test.js'));
+const files = (await fs.readdir(srcDir)).filter((f) => f.endsWith('.test.js'));
 await fs.mkdir(distDir, { recursive: true });
 for (const f of files) {
   const inPath = path.join(srcDir, f);
