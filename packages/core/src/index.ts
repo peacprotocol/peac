@@ -8,6 +8,7 @@ export { sign, signReceipt, signPurgeReceipt } from './sign.js';
 export { verify, verifyReceipt, verifyBulk } from './verify.js';
 export { vReceipt, vAIPref } from './validators.js';
 export { VERSION_CONFIG, FEATURES, CLOUDFLARE_CONFIG } from './config.js';
+export { PEAC_WIRE_VERSION, CANONICAL_HEADERS, LEGACY_HEADERS } from './constants.js';
 
 // Types
 export type {
