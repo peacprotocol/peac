@@ -2,7 +2,8 @@ name: PEAC Protocol CI/CD Pipeline
 
 on:
   push:
-    branches: [main, 'release/*']
+    branches: [main, 'feature/**']
+    branches-ignore: ['release/*'] # handled by ci-lite.yml
   pull_request:
     branches: [main]
 

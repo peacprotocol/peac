@@ -2,7 +2,8 @@ name: peac 0.9.12 CI
 
 on:
   push:
-    branches: [main, 'release/*']
+    branches: [main, 'feature/**']
+    branches-ignore: ['release/*'] # handled by ci-lite.yml
     paths:
       - 'pkgs/**'
       - 'docs/**'
@@ -11,7 +12,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
   pull_request:
-    branches: [main, 'release/*']
+    branches: [main]
     paths:
       - 'pkgs/**'
       - 'docs/**'
