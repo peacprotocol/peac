@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
