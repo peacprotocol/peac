@@ -1,15 +1,16 @@
 # PEAC Protocol
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-0.9.10--beta-orange.svg)](https://github.com/peacprotocol/peac/releases)
-[![Tests](https://img.shields.io/badge/tests-0.9.10--beta_passing-brightgreen.svg)](docs/conformance.md)
+[![Status](https://img.shields.io/badge/status-0.9.12.1--stable-green.svg)](https://github.com/peacprotocol/peac/releases)
+[![Tests](https://github.com/peacprotocol/peac/workflows/CI-Lite/badge.svg)](https://github.com/peacprotocol/peac/actions)
+[![Security](https://github.com/peacprotocol/peac/workflows/CodeQL/badge.svg)](https://github.com/peacprotocol/peac/security/code-scanning)
 
 **PEAC: Programmable Environment for Agent Coordination** (pronounced "peace")
 
 PEAC is a minimal, open spec for machine-readable policy and agent coordination on the web:
 
 - **Discovery** via `/.well-known/peac.txt`
-- **HTTP semantics** via `x-peac-*` headers and RFC7807 errors
+- **HTTP semantics** via `PEAC-Receipt` headers and RFC9457 Problem Details
 - **Verifiable receipts** (JWS) with **adapters** for negotiation, settlement, and compliance
 - **Trust rails** for agents: UDA, DPoP, and Agent Attestation
 
@@ -37,8 +38,8 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 ## At a glance
 
 - **Discovery:** `/.well-known/peac.txt` (fallback `/peac.txt`)
-- **Wire version:** `0.9.8` (set header `x-peac-protocol: 0.9.8`)
-- **Headers:** lowercase `x-peac-*`; parsers MUST treat header names case-insensitively
+- **Wire version:** `0.9.12.1` (set header `peac-version: 0.9.12.1`)
+- **Headers:** `PEAC-Receipt`, `peac-version`; parsers MUST treat header names case-insensitively
 - **Media:** `application/peac+json` (content), `application/problem+json` (errors), `application/jwk-set+json` (JWKS)
 - **Receipts:** detached JWS (`typ: application/peac-receipt+jws`) using JCS
 - **Trust:** UDA (JWT with `typ: "JWT"`), DPoP proofs bound to `cnf.jkt`, optional agent attestation header
@@ -86,16 +87,16 @@ npx peac validate peac.txt    # Expected: Valid PEAC 0.9.8 policy
 curl -I https://your-domain/.well-known/peac.txt  # check ETag + Cache-Control
 ```
 
-Tips: emit lowercase `x-peac-*`; be case-insensitive on read. Start in simulation via `PEAC_MODE=simulation`.
-Common pitfalls: invalid schema returns `application/problem+json` 400.
+Tips: emit `PEAC-Receipt`, `peac-version`; be case-insensitive on read. Start in simulation via `PEAC_MODE=simulation`.
+Common pitfalls: invalid schema returns RFC9457 Problem Details 400.
 
 ---
 
 ## Core surfaces
 
 - **Discovery**: `/.well-known/peac.txt` (fallback `/peac.txt`)
-- **Headers**: `x-peac-protocol`, `x-peac-receipt`, `x-peac-agent-attestation`, etc.
-- **Errors**: RFC7807 Problem+JSON with stable catalog
+- **Headers**: `peac-version`, `PEAC-Receipt`, `peac-agent-attestation`, etc.
+- **Errors**: RFC9457 Problem Details with stable catalog
 - **Caching**: strong `ETag`, sensible `Cache-Control` for `peac.txt` and well-known endpoints
 
 ---
@@ -107,26 +108,26 @@ Common pitfalls: invalid schema returns `application/problem+json` 400.
 | Policy and entitlements    | File-based rules for free, paid, conditional, or prohibited access with quotas.                                                           |
 | Consent and privacy        | Opt-in or opt-out signals, retention windows, links to policies.                                                                          |
 | Attribution and provenance | Required attribution formats and verify-only provenance chains via adapters.                                                              |
-| Negotiation and settlement | Programmatic terms, adapters for payment rails (**x402**, Stripe), and DPoP-bound receipts.                                               |
+| Negotiation and settlement | Programmatic terms, adapters for payment rails (**x402**, **L402**, Stripe), and DPoP-bound receipts.                                    |
 | Agent trust rails          | UDA (OAuth Device Flow), DPoP proof-of-possession, agent attestation verification for autonomous coordination.                            |
 | Receipts v2                | Detached JWS with `typ: "application/peac-receipt+jws"`; JCS canonicalization for verifiable settlements.                                 |
 | JWKS management            | 30-day key rotation, 7-day grace periods, `application/jwk-set+json` with ETag caching.                                                   |
-| Adapters and interop       | Bridges for MCP, A2A, payment rails such as **x402** and Stripe, Chainlink, peaq, and any payment provider via adapter. Extend via PEIPs. |
-| HTTP semantics             | Lowercase `x-peac-*` on wire, Problem+JSON, and idempotency guidance.                                                                     |
+| Adapters and interop       | Bridges for MCP, A2A, payment rails such as **x402**, **L402**, and Stripe, Chainlink, peaq, and any payment provider via adapter. Extend via PEIPs. |
+| HTTP semantics             | `PEAC-Receipt`, `peac-version` headers, RFC9457 Problem Details, and idempotency guidance.                                                |
 | Conformance and tooling    | L0-L4 levels, CLI validation and fixtures, and ACID-style tests.                                                                          |
 
 ---
 
-## Minimal `peac.txt` (docs train 0.9.11, wire 0.9.8)
+## Minimal `peac.txt` (docs train 0.9.12.1, wire 0.9.12.1)
 
 ```txt
 # /.well-known/peac.txt
-version: 0.9.11
+version: 0.9.12.1
 usage: conditional
 
 price: $0.001/request
 currency: USD
-payment_methods: [x402, stripe]   # any payment rail via adapter
+payment_methods: [x402, l402, stripe]   # any payment rail via adapter
 
 attribution: required
 attribution_format: "Source: {url}"
@@ -155,7 +156,7 @@ More examples: [docs/examples.md](docs/examples.md)
   Required on protected endpoints; per-request proof; replay protection recommended (e.g., Redis).
 
 - **Agent Attestation**
-  Optional header `x-peac-agent-attestation`; verifiable provenance of the agent runtime and policy.
+  Optional header `peac-agent-attestation`; verifiable provenance of the agent runtime and policy.
 
 ---
 
@@ -171,14 +172,15 @@ More examples: [docs/examples.md](docs/examples.md)
 
 Adapters bridge PEAC to payment rails, agent protocols, provenance, and chains. Lifecycle: simulation → staging → production.
 
-| Adapter    | Status (0.9.11 docs) | Notes                          |
-| ---------- | -------------------- | ------------------------------ |
-| **MCP**    | Beta                 | Agent protocol adapter         |
-| **A2A**    | Beta                 | Agent-to-Agent negotiation     |
-| **x402**   | Stable               | Payment rail                   |
-| **Stripe** | Stable               | Payment rail                   |
-| Chainlink  | Preview              | Oracle/provenance integrations |
-| peaq       | Preview              | DePIN/IoT sharing + receipts   |
+| Adapter    | Status (0.9.12.1) | Notes                          |
+| ---------- | ------------------ | ------------------------------ |
+| **MCP**    | Stable             | Agent protocol adapter         |
+| **A2A**    | Beta               | Agent-to-Agent negotiation     |
+| **x402**   | Stable             | Payment rail                   |
+| **Stripe** | Stable             | Payment rail                   |
+| **L402**   | Stable             | Lightning Network payments     |
+| Chainlink  | Preview            | Oracle/provenance integrations |
+| peaq       | Preview            | DePIN/IoT sharing + receipts   |
 
 Details & examples: [docs/interop.md](docs/interop.md) · Propose new adapters via [PEIPs](docs/peips.md)
 
@@ -212,7 +214,7 @@ const access = await client.requestAccess('https://publisher.com', {
 
 if (access.granted) {
   const resp = await fetch('https://publisher.com/data', {
-    headers: { 'x-peac-receipt': access.receipt.id },
+    headers: { 'PEAC-Receipt': access.receipt.id },
   });
 }
 ```
@@ -225,7 +227,7 @@ if (access.granted) {
 
 ```bash
 curl -X POST https://demo.peac.dev/peac/agreements \
-  -H "x-peac-protocol: 0.9.8" \
+  -H "peac-version: 0.9.12.1" \
   -H "content-type: application/json" \
   -H "x-api-key: your-key" \
   -d '{
@@ -241,7 +243,7 @@ curl -X POST https://demo.peac.dev/peac/agreements \
 const response = await fetch('https://demo.peac.dev/peac/agreements', {
   method: 'POST',
   headers: {
-    'x-peac-protocol': '0.9.8',
+    'peac-version': '0.9.12.1',
     'content-type': 'application/json',
     'x-api-key': apiKey,
   },
@@ -365,9 +367,9 @@ More templates are in `docs/templates.md`.
 
 ## Troubleshooting
 
-- 400 Problem+JSON. Validate `peac.txt` or the negotiation body.
-- Missing receipt. Ensure the adapter completed settlement. On success the server can return `x-peac-receipt` and a receipt body.
-- Header mismatch. Emit lowercase `x-peac-*`. Intermediaries may alter casing.
+- 400 RFC9457 Problem Details. Validate `peac.txt` or the negotiation body.
+- Missing receipt. Ensure the adapter completed settlement. On success the server can return `PEAC-Receipt` and a receipt body.
+- Header mismatch. Emit `PEAC-Receipt`, `peac-version`. Intermediaries may alter casing.
 - Negotiation fails. Enable flags like `PEAC_FEATURE_NEGOTIATION=1` and start with a simulation adapter.
 
 ---
@@ -399,7 +401,7 @@ Access:       Agent ----> Publisher (with receipt header)
 
 ## Versioning and Compatibility
 
-- Current train: `version: 0.9.8` in `peac.txt`.
+- Current train: `version: 0.9.12.1` in `peac.txt`.
 - New behavior is behind feature flags or marked experimental until stable.
 
 ---
