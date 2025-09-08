@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: ['src/index.ts'],
   format: ['cjs', 'esm'],
-  dts: false, // Temporarily disable declaration generation
+  dts: false, // TS refs issue with workspace packages
   sourcemap: true,
   clean: true,
   splitting: false,
