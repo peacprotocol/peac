@@ -41,12 +41,12 @@ jobs:
           PAYMENT_PROVIDER: mock
           PEAC_WEBHOOK_SECRET: test_secret
         run: |
-          echo "🧪 Running complete test suite with coverage..."
+          echo "Running complete test suite with coverage..."
           pnpm -w test
 
       - name: Crawler system tests with coverage
         run: |
-          echo "🕷️ Running crawler tests with coverage..."
+          echo "Running crawler tests with coverage..."
           pnpm --filter @peac/crawler test --coverage
 
       - name: Upload coverage reports
@@ -61,17 +61,17 @@ jobs:
 
       - name: Performance validation
         run: |
-          echo "⚡ Running performance validation..."
+          echo "Running performance validation..."
           # Add performance tests here when available
-          echo "🎯 Performance SLO targets:"
-          echo "  • Sign p95 ≤ 3ms"
-          echo "  • Verify p95 ≤ 1ms" 
-          echo "  • Crawler verification ≤ 35ms"
+          echo "Performance SLO targets:"
+          echo "  - Sign p95 <= 3ms"
+          echo "  - Verify p95 <= 1ms" 
+          echo "  - Crawler verification <= 35ms"
 
       - name: Integration tests
         timeout-minutes: 10
         run: |
-          echo "🔗 Running integration tests..."
+          echo "Running integration tests..."
 
           # MCP server integration
           echo '{"method": "initialize", "jsonrpc": "2.0", "id": 1, "params": {"protocolVersion": "1.0.0", "capabilities": {}}}' | \
@@ -81,7 +81,7 @@ jobs:
           node -e "
             const funcs = require('./adapters/openai/functions.json');
             if (funcs.functions.length < 4) throw new Error('Missing OpenAI functions');
-            console.log('✅ OpenAI functions validated:', funcs.functions.length);
+            console.log('OpenAI functions validated:', funcs.functions.length);
           "
 
           # Enhanced schemas validation
@@ -94,7 +94,7 @@ jobs:
             if (!receipt.properties.security) throw new Error('Missing security in receipt schema');
             if (!discovery.properties.crawler_control) throw new Error('Missing crawler_control in discovery schema');
             
-            console.log('✅ All enhanced schemas validated');
+            console.log('All enhanced schemas validated');
           "
 
   nightly-summary:
@@ -106,15 +106,15 @@ jobs:
     steps:
       - name: Results Summary
         run: |
-          echo "🌙 Nightly test suite completed"
+          echo "Nightly test suite completed"
           echo ""
           if [ "${{ needs.full-test-suite.result }}" == "success" ]; then
-            echo "✅ All tests passed - system healthy"
+            echo "All tests passed - system healthy"
           else
-            echo "❌ Some tests failed - needs investigation"
+            echo "Some tests failed - needs investigation"
             echo "Check logs above for details"
           fi
           echo ""
-          echo "📊 Coverage reports uploaded to Codecov"
-          echo "🎯 Performance validation completed"
-          echo "🔗 Integration tests executed"
+          echo "Coverage reports uploaded to Codecov"
+          echo "Performance validation completed"
+          echo "Integration tests executed"
