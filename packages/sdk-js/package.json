@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "pretest": "pnpm build",
+    "pretest": "pnpm -w build && pnpm build",
     "test": "node --test src/*.test.js",
     "test:smoke": "node --test --test-name-pattern='(verifyRemote|falls back|clearCache)' src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
@@ -27,6 +27,8 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@peac/core": "workspace:^0.9.12.1",
+    "@peac/disc": "workspace:^0.9.12.1",
     "typescript": "^5.0.0"
   },
   "keywords": [

@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "lru-cache": "^10.0.0",
-    "@peac/core": "workspace:*"
+    "@peac/core": "workspace:^0.9.12.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

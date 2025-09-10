@@ -28,10 +28,10 @@
     "perf": "node scripts/perf-test.js"
   },
   "dependencies": {
-    "@peac/core": "workspace:*",
-    "@peac/receipts": "workspace:*",
-    "@peac/crawler": "workspace:*",
-    "@peac/pay402": "workspace:*",
+    "@peac/core": "workspace:^0.9.12.1",
+    "@peac/receipts": "workspace:^0.9.12.1",
+    "@peac/crawler": "workspace:^0.9.12.1",
+    "@peac/pay402": "workspace:^0.9.12.1",
     "hono": "^4.0.0",
     "zod": "^3.22.0"
   },
