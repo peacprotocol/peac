@@ -36,27 +36,27 @@ jobs:
 
       - name: Format check
         run: |
-          echo "🔍 Prettier format check..."
+          echo "Prettier format check..."
           pnpm -w format:check
 
       - name: Lint
         run: |
-          echo "🔍 ESLint validation..."
+          echo "ESLint validation..."
           pnpm -w lint
 
       - name: TypeScript check
         run: |
-          echo "🔍 TypeScript compilation check..."
+          echo "TypeScript compilation check..."
           pnpm -w typecheck
 
       - name: Build all packages
         run: |
-          echo "🔨 Building all packages..."
+          echo "Building all packages..."
           pnpm -w build
 
       - name: Smoke tests
         run: |
-          echo "💨 Running smoke tests for critical packages..."
+          echo "Running smoke tests for critical packages..."
           # SDK smoke tests (only working tests)
           pnpm --filter @peac/sdk test:smoke || echo "::warning::SDK smoke tests had issues"
 
@@ -75,14 +75,14 @@ jobs:
     steps:
       - name: Summary
         run: |
-          echo "🚀 CI Lite completed for PR/push validation"
+          echo "CI Lite completed for PR/push validation"
           echo ""
-          echo "✅ Quality gates enforced:"
-          echo "  • Code formatting (Prettier)"
-          echo "  • Code quality (ESLint)" 
-          echo "  • Type safety (TypeScript)"
-          echo "  • Build compilation"
-          echo "  • Critical smoke tests"
+          echo "Quality gates enforced:"
+          echo "  - Code formatting (Prettier)"
+          echo "  - Code quality (ESLint)" 
+          echo "  - Type safety (TypeScript)"
+          echo "  - Build compilation"
+          echo "  - Critical smoke tests"
           echo ""
-          echo "🌙 Full test suite runs in nightly workflow"
-          echo "📦 Ready for merge when all checks pass"
+          echo "Full test suite runs in nightly workflow"
+          echo "Ready for merge when all checks pass"

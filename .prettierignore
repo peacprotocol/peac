@@ -9,6 +9,8 @@
 **/*.bom.json
 **/*.lock
 package-lock.json
+.pnpm-store
+pnpm-lock.yaml
 
 # test artifacts
 **/__snapshots__/**
