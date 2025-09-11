@@ -66,6 +66,11 @@ jobs:
           # Discovery tests (should be stable)  
           pnpm --filter @peac/disc test || echo "::warning::Discovery tests had issues"
 
+      - name: Leak check (crawler)
+        run: |
+          echo "Checking for open handles in crawler tests..."
+          pnpm --filter @peac/crawler exec jest --config jest.config.ts --detectOpenHandles --runInBand || echo "::warning::Crawler has open handles - investigate async cleanup"
+
   ci-lite-summary:
     name: CI Lite Summary
     runs-on: ubuntu-latest
