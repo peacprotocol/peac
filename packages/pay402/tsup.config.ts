@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/handler.ts', 'src/negotiator.ts'],
   format: ['cjs', 'esm'],
   dts: false, // Temporarily disable declaration generation
   sourcemap: true,
