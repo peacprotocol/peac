@@ -68,32 +68,34 @@ jobs:
           echo "  - Verify p95 <= 1ms" 
           echo "  - Crawler verification <= 35ms"
 
-      - name: Integration tests
-        timeout-minutes: 10
+      - name: Integration checks
         run: |
+          set -euo pipefail
+
           echo "Running integration tests..."
 
-          # MCP server integration (use tsx to run .ts directly)
-          echo '{"method": "initialize", "jsonrpc": "2.0", "id": 1, "params": {"protocolVersion": "1.0.0", "capabilities": {}}}' | \
+          # MCP server integration (TS entrypoint → run via tsx)
+          echo '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"peac-receipts","version":"0.9.12.1"}}}' | \
             timeout 5s pnpm -w exec tsx packages/adapters/mcp/server.ts || echo "MCP test completed"
 
-          # OpenAI functions validation (correct path)
+          # OpenAI functions file exists & has tools
           node -e "
             const funcs = require('./packages/adapters/openai/functions.json');
-            if (funcs.functions.length < 4) throw new Error('Missing OpenAI functions');
+            if (!funcs.functions || funcs.functions.length < 4) throw new Error('Missing OpenAI functions');
             console.log('OpenAI functions validated:', funcs.functions.length);
           "
 
-          # Enhanced schemas validation
+          # Enhanced schema spot-checks (match actual property names)
           node -e "
-            const receipt = require('./schemas/receipt.v1.1.json');
+            const receipt   = require('./schemas/receipt.v1.1.json');
             const discovery = require('./schemas/discovery.v1.1.json');
-            const purge = require('./schemas/purge.v1.0.json');
-            
-            if (!receipt.properties.verification) throw new Error('Missing verification in receipt schema');
-            if (!receipt.properties.security) throw new Error('Missing security in receipt schema');
-            if (!discovery.properties.crawler_control) throw new Error('Missing crawler_control in discovery schema');
-            
+            const purge     = require('./schemas/purge.v1.0.json');
+
+            const has = (o,p) => p.split('.').reduce((x,k)=>x && k in x ? x[k] : undefined, o) !== undefined;
+
+            if (!has(receipt,   'properties.verification'))       throw new Error('Missing verification in receipt schema');
+            if (!has(receipt,   'properties.audit_chain'))         throw new Error('Missing audit_chain in receipt schema');
+            if (!has(discovery, 'properties.crawler_verification'))throw new Error('Missing crawler_verification in discovery schema');
             console.log('All enhanced schemas validated');
           "
 
