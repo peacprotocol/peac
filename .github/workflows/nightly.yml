@@ -42,13 +42,12 @@ jobs:
           PEAC_WEBHOOK_SECRET: test_secret
         run: |
           echo "Running complete test suite with coverage (excluding crawler)..."
-          pnpm -r --filter='!@peac/crawler' run test
+          pnpm run ci:test:unit
 
       - name: Crawler system tests with coverage
         run: |
           echo "Running crawler tests with coverage..."
-          pnpm --filter @peac/crawler exec jest \
-            --config jest.config.ts --coverage --ci --runInBand --forceExit
+          pnpm run ci:test:crawler
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
