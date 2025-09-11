@@ -7,6 +7,11 @@ import { CircuitBreaker, BreakerState } from '../../src/circuitBreaker';
 
 describe('CircuitBreaker', () => {
   let breaker: CircuitBreaker;
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.clearAllTimers();
+  });
   let stateChanges: BreakerState[] = [];
 
   beforeEach(() => {
@@ -123,13 +128,16 @@ describe('CircuitBreaker', () => {
     });
 
     it('should transition to half-open after reset time', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: false });
       const mockFn = jest.fn().mockResolvedValue('success');
 
-      // Wait for reset time
-      await new Promise((resolve) => setTimeout(resolve, 250));
-
+      // Advance past the reset window deterministically
+      const resetMs = 200;
+      await jest.advanceTimersByTimeAsync(resetMs + 10);
+      
       // Next call should transition to half-open
       await breaker.fire(mockFn);
+      await Promise.resolve(); // flush microtasks
 
       expect(breaker.getState()).toBe('closed'); // Should close immediately on success
       expect(stateChanges).toContain('half-open');

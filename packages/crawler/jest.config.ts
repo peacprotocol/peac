@@ -6,6 +6,11 @@ const config: Config = {
   roots: ['<rootDir>/test'],
   moduleFileExtensions: ['ts', 'js', 'json'],
   transform: { '^.+\\.ts$': 'ts-jest' },
+  setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
+  clearMocks: true,
+  restoreMocks: true,
+  resetMocks: true,
+  testTimeout: 15000,
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },

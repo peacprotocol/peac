@@ -5,14 +5,29 @@
 
 import { buildRegistryFromOptions, RegistryHandle } from '../../src/index';
 import { VerificationLevel } from '../../src/types';
+import { LocalProvider } from '../../src/providers/local/local.provider';
 
 describe('Registry Integration Tests', () => {
   let registryHandle: RegistryHandle;
+
+  beforeEach(() => {
+    jest.spyOn(LocalProvider.prototype, 'verify').mockResolvedValue({
+      result: 'trusted',
+      confidence: 0.95,
+      indicators: ['test_mock'],
+      latencyMs: 10
+    });
+  });
 
   afterEach(async () => {
     if (registryHandle) {
       await registryHandle.shutdown();
     }
+    jest.restoreAllMocks();
+    jest.clearAllTimers();
+    process.removeAllListeners('SIGINT');
+    process.removeAllListeners('SIGTERM');
+    process.removeAllListeners('SIGUSR2');
   });
 
   describe('zero-config setup', () => {

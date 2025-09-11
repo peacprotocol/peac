@@ -297,7 +297,7 @@ describe('CrawlerControlRegistry', () => {
   });
 
   describe('health impact on weights', () => {
-    it('should reduce weight for unhealthy providers', async () => {
+    it('skips calling weight-0 (unhealthy) providers', async () => {
       const unhealthyRegistry = new CrawlerControlRegistry({
         strategy: 'weighted',
         mode: 'parallel',
@@ -325,7 +325,7 @@ describe('CrawlerControlRegistry', () => {
       // Should only use healthy provider
       expect(result.aggregated.confidence).toBe(0.9);
       expect(provider1.getCallCount()).toBe(1);
-      expect(provider2.getCallCount()).toBe(1); // Still called, but weight is 0
+      expect(provider2.getCallCount()).toBe(0); // Skipped because weight is 0
 
       await unhealthyRegistry.close();
     });

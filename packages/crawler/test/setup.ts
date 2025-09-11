@@ -23,7 +23,8 @@ expect.extend({
 // Global test timeout
 jest.setTimeout(10000);
 
-// Mock console.error for cleaner test output
+// Mock console logs for cleaner test output
+jest.spyOn(console, 'log').mockImplementation(() => {});
 const originalError = console.error;
 beforeEach(() => {
   console.error = jest.fn();
