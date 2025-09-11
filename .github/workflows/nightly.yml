@@ -73,13 +73,13 @@ jobs:
         run: |
           echo "Running integration tests..."
 
-          # MCP server integration
+          # MCP server integration (use tsx to run .ts directly)
           echo '{"method": "initialize", "jsonrpc": "2.0", "id": 1, "params": {"protocolVersion": "1.0.0", "capabilities": {}}}' | \
-            timeout 5s node adapters/mcp/server.ts || echo "MCP test completed"
+            timeout 5s pnpm -w exec tsx packages/adapters/mcp/server.ts || echo "MCP test completed"
 
-          # OpenAI functions validation
+          # OpenAI functions validation (correct path)
           node -e "
-            const funcs = require('./adapters/openai/functions.json');
+            const funcs = require('./packages/adapters/openai/functions.json');
             if (funcs.functions.length < 4) throw new Error('Missing OpenAI functions');
             console.log('OpenAI functions validated:', funcs.functions.length);
           "
