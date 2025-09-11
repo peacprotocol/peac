@@ -35,20 +35,19 @@ jobs:
       - name: Build all packages
         run: pnpm -w build
 
-      - name: Run complete test suite
+      - name: Run complete test suite (excluding crawler)
         env:
           NODE_ENV: test
           PAYMENT_PROVIDER: mock
           PEAC_WEBHOOK_SECRET: test_secret
         run: |
           echo "Running complete test suite with coverage (excluding crawler)..."
-          pnpm -w test --filter=!@peac/crawler
+          pnpm -w -r --filter=!@peac/crawler run test
 
       - name: Crawler system tests with coverage
         run: |
           echo "Running crawler tests with coverage..."
-          pnpm --filter @peac/crawler exec jest \
-            --config jest.config.ts --coverage --ci --runInBand --forceExit
+          pnpm --filter @peac/crawler run test:ci
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
