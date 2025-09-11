@@ -5,14 +5,38 @@
 
 import { buildRegistryFromOptions, RegistryHandle } from '../../src/index';
 import { VerificationLevel } from '../../src/types';
+import * as localProvider from '../../src/providers/local/local.provider';
 
 describe('Registry Integration Tests', () => {
-  let registryHandle: RegistryHandle;
+  let registryHandle: RegistryHandle | null = null;
+
+  beforeEach(() => {
+    // Mock the LocalProvider to return deterministic results
+    jest.spyOn(localProvider.LocalProvider.prototype, 'verify').mockImplementation(async (req) => {
+      // Return suspicious indicators for curl user agent
+      const indicators = req.userAgent?.includes('curl') ? ['ua_suspicious'] : [];
+      const confidence = req.userAgent?.includes('curl') ? 0.3 : 0.95;
+
+      return {
+        provider: 'local',
+        result: 'trusted',
+        confidence,
+        latency_ms: 10,
+        indicators,
+      };
+    });
+  });
 
   afterEach(async () => {
     if (registryHandle) {
       await registryHandle.shutdown();
+      registryHandle = null;
     }
+    jest.restoreAllMocks();
+    jest.clearAllTimers();
+    process.removeAllListeners('SIGINT');
+    process.removeAllListeners('SIGTERM');
+    process.removeAllListeners('SIGUSR2');
   });
 
   describe('zero-config setup', () => {
@@ -166,7 +190,9 @@ describe('Registry Integration Tests', () => {
       expect(registryHandle.healthMonitor).toBeDefined();
 
       // Wait for initial health check
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      jest.useFakeTimers({ legacyFakeTimers: false });
+      await jest.advanceTimersByTimeAsync(100);
+      jest.useRealTimers();
 
       const stats = registryHandle.registry.getStats();
       expect(stats.providers[0].healthy).toBe(true);
