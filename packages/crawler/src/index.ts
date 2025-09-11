@@ -167,11 +167,23 @@ export async function buildRegistryFromOptions(
     });
   }
 
-  // Graceful shutdown
+  // Graceful shutdown (idempotent)
+  let isShuttingDown = false;
+  let detachSignals: (() => void) | undefined;
+
   const shutdown = async () => {
+    if (isShuttingDown) {
+      return; // Already shutting down or shut down
+    }
+    isShuttingDown = true;
+
     console.log('🛑 Shutting down crawler registry...');
 
     try {
+      // Remove only our signal handlers
+      detachSignals?.();
+      detachSignals = undefined;
+
       // Stop health monitoring first
       if (healthMonitor) {
         healthMonitor.stop();
@@ -194,14 +206,21 @@ export async function buildRegistryFromOptions(
 
   // Hook process signals for graceful shutdown
   if (typeof process !== 'undefined') {
-    const signals = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
     const signalHandler = () => {
       shutdown().catch(console.error);
     };
 
+    const signals = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
     signals.forEach((signal) => {
       process.once(signal, signalHandler);
     });
+
+    // Create detach function that removes only our handlers
+    detachSignals = () => {
+      signals.forEach((signal) => {
+        process.off(signal, signalHandler);
+      });
+    };
   }
 
   return {

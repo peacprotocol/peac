@@ -47,7 +47,8 @@ jobs:
       - name: Crawler system tests with coverage
         run: |
           echo "Running crawler tests with coverage..."
-          pnpm --filter @peac/crawler test --coverage
+          pnpm --filter @peac/crawler exec jest \
+            --config jest.config.ts --coverage --ci --runInBand --forceExit
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
