@@ -14,6 +14,7 @@ const config: Config = {
     '!src/providers/cloudflare/**', // integration-only adapter
   ],
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
+  globalTeardown: '<rootDir>/test/teardown.ts',
   clearMocks: true,
   restoreMocks: true,
   resetMocks: true,
