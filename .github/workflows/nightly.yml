@@ -41,8 +41,8 @@ jobs:
           PAYMENT_PROVIDER: mock
           PEAC_WEBHOOK_SECRET: test_secret
         run: |
-          echo "Running complete test suite with coverage..."
-          pnpm -w test
+          echo "Running complete test suite with coverage (excluding crawler)..."
+          pnpm -w test --filter=!@peac/crawler
 
       - name: Crawler system tests with coverage
         run: |
