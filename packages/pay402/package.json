@@ -25,9 +25,9 @@
   "scripts": {
     "build": "tsup",
     "pretest": "pnpm build",
-    "test": "node --test src/**/*.test.js",
-    "test:coverage": "node --test --experimental-test-coverage src/**/*.test.js",
-    "test:watch": "node --test --watch src/**/*.test.js",
+    "test": "node --test src/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage src/*.test.js",
+    "test:watch": "node --test --watch src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
     "typecheck": "tsc --noEmit",
     "dev": "tsup --watch",
