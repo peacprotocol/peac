@@ -23,14 +23,17 @@ expect.extend({
 // Global test timeout
 jest.setTimeout(10000);
 
-// Mock console.error for cleaner test output
+// Mock console for cleaner test output
 const originalError = console.error;
+const originalLog = console.log;
 beforeEach(() => {
   console.error = jest.fn();
+  console.log = jest.fn();
 });
 
 afterEach(() => {
   console.error = originalError;
+  console.log = originalLog;
 });
 
 // Add global type for custom matcher
