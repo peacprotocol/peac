@@ -84,6 +84,7 @@ export class RegistryHealthMonitor {
         console.error('Health check failed:', error);
       });
     }, this.options.intervalMs);
+    (this.intervalId as any)?.unref?.();
   }
 
   stop(): void {
