@@ -120,7 +120,7 @@ export interface KeyInfo {
 
 export class KeyManager {
   private keys = new Map<string, KeyInfo>();
-  private rotation_timer?: ReturnType<typeof setTimeout>;
+  private rotation_timer?: ReturnType<typeof setInterval>;
 
   constructor(
     private config = SECURITY_CONFIG.key_rotation,
@@ -241,6 +241,7 @@ export class KeyManager {
         console.error('Automatic key rotation failed:', error);
       }
     }, check_interval);
+    (this.rotation_timer as any)?.unref?.();
   }
 
   cleanup(): void {
@@ -434,13 +435,16 @@ export const securityAuditor = new SecurityAuditor();
 // Cleanup scheduler
 if (typeof setInterval !== 'undefined') {
   // Cleanup nonces every 15 minutes
-  setInterval(() => securityContext.nonce_store.cleanup(), 15 * 60 * 1000);
+  const _nonceIv = setInterval(() => securityContext.nonce_store.cleanup(), 15 * 60 * 1000);
 
   // Cleanup rate limit entries every hour
-  setInterval(
+  const _rlIv = setInterval(
     () => {
       // Rate limiter cleanup would go here if needed
     },
     60 * 60 * 1000
   );
+
+  (_nonceIv as any)?.unref?.();
+  (_rlIv as any)?.unref?.();
 }

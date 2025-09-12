@@ -315,5 +315,6 @@ export const rateLimiter = new RateLimiter();
 
 // Schedule periodic cleanup for memory store
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => rateLimiter.cleanup(), 60 * 60 * 1000); // Every hour
+  const _cleanupIv = setInterval(() => rateLimiter.cleanup(), 60 * 60 * 1000); // Every hour
+  (_cleanupIv as any)?.unref?.();
 }
