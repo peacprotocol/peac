@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 3 * * *' # 3 AM UTC daily
   workflow_dispatch: # Allow manual trigger
+  push:
+    tags:
+      - 'v*' # Trigger on version tags
 
 env:
   NODE_VERSION: '20.x'
