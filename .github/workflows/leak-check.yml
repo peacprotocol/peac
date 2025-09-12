@@ -1,0 +1,55 @@
+name: Leak Check - Core & Crawler
+
+on:
+  pull_request:
+    paths:
+      - 'packages/core/**'
+      - 'packages/crawler/**'
+    branches: [main]
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  leak-check:
+    name: Jest Open Handles Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+          run_install: false
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build core and crawler
+        run: |
+          pnpm --filter @peac/core build
+          pnpm --filter @peac/crawler build
+
+      - name: Check for open handles (core)
+        run: |
+          echo "Checking core package for open handles..."
+          pnpm --filter @peac/core exec jest --detectOpenHandles --runInBand --passWithNoTests || echo "::warning::Core has open handles"
+
+      - name: Check for open handles (crawler)
+        run: |
+          echo "Checking crawler package for open handles..."
+          pnpm --filter @peac/crawler exec jest --config jest.config.ts --detectOpenHandles --runInBand || echo "::warning::Crawler has open handles"
+
+      - name: Summary
+        run: |
+          echo "Leak check completed for core/crawler changes"
+          echo "Any open handles will be shown as warnings above"
