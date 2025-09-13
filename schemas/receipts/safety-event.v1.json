@@ -1,11 +1,23 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://peacprotocol.org/schemas/receipts/safety-event.v1.json",
   "title": "PEAC Safety Event Receipt",
   "description": "Receipt for safety events with non-PII counters and AIPREF shim snapshot",
   "type": "object",
   "additionalProperties": false,
-  "required": ["@type", "iss", "sub", "aud", "iat", "exp", "rid", "policy_hash", "safety_event"],
+  "required": [
+    "@type",
+    "iss",
+    "sub",
+    "aud",
+    "iat",
+    "exp",
+    "rid",
+    "policy_hash",
+    "safety_event",
+    "prefs_url",
+    "prefs_hash"
+  ],
   "properties": {
     "@type": {
       "type": "string",
@@ -132,12 +144,12 @@
     "prefs_url": {
       "type": "string",
       "format": "uri",
-      "description": "AIPREF preferences URL (optional but validated when present)"
+      "description": "AIPREF preferences URL (required for v0.9.12+ AIPREF shim compliance)"
     },
     "prefs_hash": {
       "type": "string",
       "pattern": "^[a-f0-9]{64}$",
-      "description": "SHA-256 hash of AIPREF preferences snapshot (optional but validated when present)"
+      "description": "SHA-256 hash of AIPREF preferences snapshot (required for v0.9.12+ AIPREF shim compliance)"
     },
     "purpose": {
       "type": "string",

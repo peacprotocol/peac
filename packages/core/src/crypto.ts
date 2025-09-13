@@ -89,6 +89,7 @@ export async function signDetached(
       alg: 'EdDSA',
       b64: false,
       crit: ['b64'],
+      typ: 'application/peac-receipt+jws',
       kid,
     })
     .sign(privateKey);
