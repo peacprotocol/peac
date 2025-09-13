@@ -61,6 +61,14 @@ function generateRotatingKid(): string {
 }
 
 /**
+ * Validate kid format: YYYY-MM-DD/nn
+ */
+export function validateKidFormat(kid: string): boolean {
+  const kidRegex = /^\d{4}-\d{2}-\d{2}\/\d{2}$/;
+  return kidRegex.test(kid);
+}
+
+/**
  * Create detached JWS signature per RFC 7797
  * b64: false, crit: ["b64"], alg: EdDSA
  */
@@ -69,6 +77,10 @@ export async function signDetached(
   privateKey: KeyLike,
   kid: string
 ): Promise<DetachedJWS> {
+  if (!validateKidFormat(kid)) {
+    throw new Error(`Invalid kid format: ${kid}. Expected format: YYYY-MM-DD/nn`);
+  }
+
   const payloadBytes = typeof payload === 'string' ? new TextEncoder().encode(payload) : payload;
 
   // Use FlattenedSign for detached payload (RFC 7797)
@@ -122,6 +134,10 @@ export async function verifyDetached(
  * Convert public key to JWKS format
  */
 export async function publicKeyToJWKS(publicKey: KeyLike, kid: string): Promise<JWKSKey> {
+  if (!validateKidFormat(kid)) {
+    throw new Error(`Invalid kid format: ${kid}. Expected format: YYYY-MM-DD/nn`);
+  }
+
   const spki = await exportSPKI(publicKey);
 
   // Extract x coordinate from Ed25519 public key
