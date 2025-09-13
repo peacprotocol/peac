@@ -3,145 +3,246 @@
   "$id": "https://peacprotocol.org/schemas/peip-saf/us-ca-sb243.v1.json",
   "title": "PEIP-SAF California SB-243 Overlay",
   "description": "California SB-243 compliance overlay with periodic disclosure default PT3H and OSP reporting",
-  "allOf": [
-    {
-      "$ref": "https://peacprotocol.org/schemas/peip-saf/core.v1.json"
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile",
+    "version",
+    "disclosure_cadence",
+    "crisis_referral",
+    "minors_gate",
+    "intent_keys",
+    "jurisdiction",
+    "sb243_compliance",
+    "osp_report_url"
+  ],
+  "properties": {
+    "profile": {
+      "type": "string",
+      "const": "peip-saf/us-ca-sb243"
     },
-    {
+    "version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "disclosure_cadence": {
       "type": "object",
+      "required": ["enabled", "interval"],
       "additionalProperties": false,
-      "required": [
-        "profile",
-        "version",
-        "disclosure_cadence",
-        "crisis_referral",
-        "minors_gate",
-        "intent_keys",
-        "jurisdiction",
-        "sb243_compliance",
-        "osp_report_url"
-      ],
       "properties": {
-        "profile": {
+        "enabled": {
+          "const": true
+        },
+        "interval": {
           "type": "string",
-          "const": "peip-saf/us-ca-sb243"
+          "const": "PT3H",
+          "description": "Default 3-hour disclosure interval per SB-243"
         },
-        "version": {
+        "grace_period": {
           "type": "string",
-          "const": "v1"
+          "pattern": "^PT[0-9]+[HMS]$",
+          "description": "Optional grace period for disclosure"
+        }
+      }
+    },
+    "crisis_referral": {
+      "type": "object",
+      "description": "Crisis intervention and referral requirements",
+      "additionalProperties": false,
+      "required": ["enabled", "keywords"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether crisis referral is active"
         },
-        "disclosure_cadence": {
-          "type": "object",
-          "required": ["enabled", "interval"],
-          "properties": {
-            "enabled": {
-              "const": true
-            },
-            "interval": {
-              "type": "string",
-              "const": "PT3H",
-              "description": "Default 3-hour disclosure interval per SB-243"
-            }
-          }
+        "keywords": {
+          "type": "array",
+          "description": "Keywords that trigger crisis referral",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
         },
-        "jurisdiction": {
-          "type": "string",
-          "const": "US-CA",
-          "description": "California jurisdiction identifier"
-        },
-        "sb243_compliance": {
-          "type": "object",
-          "description": "California SB-243 specific compliance requirements",
-          "additionalProperties": false,
-          "required": ["enabled", "designated_contact", "reporting_mechanism"],
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "const": true,
-              "description": "SB-243 compliance is mandatory"
-            },
-            "designated_contact": {
-              "type": "object",
-              "description": "Designated contact for safety concerns",
-              "additionalProperties": false,
-              "required": ["name", "email"],
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "minLength": 1,
-                  "description": "Contact person name"
-                },
-                "email": {
-                  "type": "string",
-                  "format": "email",
-                  "description": "Contact email address"
-                },
-                "phone": {
-                  "type": "string",
-                  "description": "Contact phone number"
-                }
-              }
-            },
-            "reporting_mechanism": {
-              "type": "object",
-              "description": "Safety incident reporting mechanism",
-              "additionalProperties": false,
-              "required": ["available", "anonymous_option"],
-              "properties": {
-                "available": {
-                  "type": "boolean",
-                  "const": true,
-                  "description": "Reporting mechanism must be available"
-                },
-                "anonymous_option": {
-                  "type": "boolean",
-                  "description": "Whether anonymous reporting is supported"
-                },
-                "response_timeframe": {
-                  "type": "string",
-                  "pattern": "^PT[0-9]+[HMS]$",
-                  "description": "Maximum response time for reports"
-                }
-              }
-            }
-          }
-        },
-        "osp_report_url": {
+        "referral_url": {
           "type": "string",
           "format": "uri",
-          "description": "URL for Online Safety Provider (OSP) reporting endpoint"
+          "description": "URL for crisis resources"
         },
-        "transparency_report": {
-          "type": "object",
-          "description": "Transparency reporting requirements",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "description": "Whether transparency reporting is enabled"
-            },
-            "frequency": {
+        "contact_info": {
+          "type": "string",
+          "description": "Emergency contact information"
+        }
+      }
+    },
+    "minors_gate": {
+      "type": "object",
+      "description": "Age verification and minor protection",
+      "additionalProperties": false,
+      "required": ["enabled", "min_age"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether minor protection is active"
+        },
+        "min_age": {
+          "type": "integer",
+          "minimum": 13,
+          "maximum": 18,
+          "description": "Minimum age for service access"
+        },
+        "parental_consent": {
+          "type": "boolean",
+          "description": "Whether parental consent is required for minors"
+        },
+        "age_verification_method": {
+          "type": "string",
+          "enum": ["self_attestation", "credit_card", "id_verification", "third_party"],
+          "description": "Method used for age verification"
+        }
+      }
+    },
+    "intent_keys": {
+      "type": "array",
+      "description": "Safety intent classification keys",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "description", "severity"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z_]+$",
+            "description": "Intent key identifier"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable intent description"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Safety severity level"
+          },
+          "keywords": {
+            "type": "array",
+            "description": "Keywords associated with this intent",
+            "items": {
               "type": "string",
-              "enum": ["quarterly", "biannually", "annually"],
-              "description": "Transparency report publication frequency"
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "jurisdiction": {
+      "type": "string",
+      "const": "US-CA",
+      "description": "California jurisdiction identifier"
+    },
+    "sb243_compliance": {
+      "type": "object",
+      "description": "California SB-243 specific compliance requirements",
+      "additionalProperties": false,
+      "required": ["enabled", "designated_contact", "reporting_mechanism"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "const": true,
+          "description": "SB-243 compliance is mandatory"
+        },
+        "designated_contact": {
+          "type": "object",
+          "description": "Designated contact for safety concerns",
+          "additionalProperties": false,
+          "required": ["name", "email"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Contact person name"
             },
-            "metrics_included": {
-              "type": "array",
-              "description": "Metrics included in transparency reports",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "total_reports",
-                  "action_taken",
-                  "response_time",
-                  "policy_violations",
-                  "appeals_processed"
-                ]
-              }
+            "email": {
+              "type": "string",
+              "format": "email",
+              "description": "Contact email address"
+            },
+            "phone": {
+              "type": "string",
+              "description": "Contact phone number"
+            }
+          }
+        },
+        "reporting_mechanism": {
+          "type": "object",
+          "description": "Safety incident reporting mechanism",
+          "additionalProperties": false,
+          "required": ["available", "anonymous_option"],
+          "properties": {
+            "available": {
+              "type": "boolean",
+              "const": true,
+              "description": "Reporting mechanism must be available"
+            },
+            "anonymous_option": {
+              "type": "boolean",
+              "description": "Whether anonymous reporting is supported"
+            },
+            "response_timeframe": {
+              "type": "string",
+              "pattern": "^PT[0-9]+[HMS]$",
+              "description": "Maximum response time for reports"
             }
           }
         }
       }
+    },
+    "osp_report_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for Online Safety Provider (OSP) reporting endpoint"
+    },
+    "transparency_report": {
+      "type": "object",
+      "description": "Transparency reporting requirements",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether transparency reporting is enabled"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": ["quarterly", "biannually", "annually"],
+          "description": "Transparency report publication frequency"
+        },
+        "metrics_included": {
+          "type": "array",
+          "description": "Metrics included in transparency reports",
+          "items": {
+            "type": "string",
+            "enum": [
+              "total_reports",
+              "action_taken",
+              "response_time",
+              "policy_violations",
+              "appeals_processed"
+            ]
+          }
+        }
+      }
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this policy becomes effective"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this policy expires"
     }
-  ]
+  }
 }
