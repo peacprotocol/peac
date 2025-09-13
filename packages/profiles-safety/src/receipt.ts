@@ -3,11 +3,12 @@
  */
 
 import { signDetached, uuidv7, canonicalPolicyHash } from '@peac/core';
+import type { KeyLike } from 'jose';
 import type { SafetyEvent, SafetyEventReceipt } from './types.js';
 import { validateSafetyEvent } from './validate-event.js';
 
 export interface ReceiptSigner {
-  privateKey: import('jose').KeyLike;
+  privateKey: KeyLike;
   kid: string;
 }
 
@@ -97,10 +98,7 @@ export async function issueSafetyReceipt(
 /**
  * Create receipt signer from key pair
  */
-export function createReceiptSigner(
-  privateKey: import('jose').KeyLike,
-  kid: string
-): ReceiptSigner {
+export function createReceiptSigner(privateKey: KeyLike, kid: string): ReceiptSigner {
   return {
     privateKey,
     kid,
