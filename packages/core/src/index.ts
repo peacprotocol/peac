@@ -16,6 +16,7 @@ export {
   importPublicKey,
 } from './crypto.js';
 export type { KeyPair, JWKSKey, DetachedJWS } from './crypto.js';
+export type { KeyLike } from 'jose';
 export { InMemoryNonceCache, isReplayAttack, preventReplay, isValidNonce } from './replay.js';
 export type { NonceCache, NonceEntry } from './replay.js';
 export { uuidv7, isUUIDv7, extractTimestamp } from './ids/uuidv7.js';
