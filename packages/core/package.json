@@ -17,6 +17,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "src",
     "package.json",
     "README.md",
     "LICENSE"
@@ -27,12 +28,13 @@
   },
   "scripts": {
     "build": "tsup",
+    "build:types": "tsc -p tsconfig.build.json",
     "build:dts": "tsc --declaration --emitDeclarationOnly --outDir dist",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "dev": "tsup --watch",
     "clean": "rm -rf dist coverage"
   },

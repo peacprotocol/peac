@@ -7,12 +7,15 @@
     "lint": {
       "outputs": []
     },
+    "build:types": {
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map", "dist/.tsbuildinfo"]
+    },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build:types"],
       "outputs": []
     },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build:types"],
       "outputs": ["dist/**", "build/**", "lib/**", "*.tsbuildinfo"]
     },
     "test": {

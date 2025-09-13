@@ -44,6 +44,11 @@ jobs:
           echo "ESLint validation..."
           pnpm -w lint
 
+      - name: Build types (composite)
+        run: |
+          echo "Building TypeScript declarations..."
+          pnpm -w turbo run build:types
+
       - name: TypeScript check
         run: |
           echo "TypeScript compilation check..."
