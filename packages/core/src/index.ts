@@ -14,6 +14,7 @@ export {
   generateJWKS,
   importPrivateKey,
   importPublicKey,
+  validateKidFormat,
 } from './crypto.js';
 export type { KeyPair, JWKSKey, DetachedJWS } from './crypto.js';
 export type { KeyLike } from 'jose';
