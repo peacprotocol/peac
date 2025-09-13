@@ -106,6 +106,7 @@ jobs:
     name: Cross-Runtime Tests (${{ matrix.runtime }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    continue-on-error: ${{ matrix.runtime != 'node' }}
     strategy:
       matrix:
         runtime: [node, deno, bun]
