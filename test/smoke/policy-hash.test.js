@@ -74,3 +74,47 @@ test('Policy hash different - different inputs produce different hashes', () => 
 
   assert.notStrictEqual(hash1, hash2, 'Different inputs must produce different hashes');
 });
+
+test('Policy hash query parameter order preservation', () => {
+  // Query param order must be preserved (no reordering)
+  const input1 = { resource: 'https://example.com/test?a=1&b=2' };
+  const input2 = { resource: 'https://example.com/test?b=2&a=1' };
+
+  const hash1 = canonicalPolicyHash(input1);
+  const hash2 = canonicalPolicyHash(input2);
+
+  // Different order should produce different hashes
+  assert.notStrictEqual(hash1, hash2, 'Query parameter order must affect hash');
+
+  // Same input twice should be identical
+  const hash1_repeat = canonicalPolicyHash(input1);
+  assert.strictEqual(hash1, hash1_repeat, 'Same query order must produce same hash');
+});
+
+test('Policy hash plus character in query params', () => {
+  // Plus character in query should remain literal (not become space)
+  const inputWithPlus = { resource: 'https://example.com/test?q=hello+world' };
+  const inputWithSpace = { resource: 'https://example.com/test?q=hello world' };
+  const inputWithEncodedSpace = { resource: 'https://example.com/test?q=hello%20world' };
+
+  const hashPlus = canonicalPolicyHash(inputWithPlus);
+  const hashSpace = canonicalPolicyHash(inputWithSpace);
+  const hashEncoded = canonicalPolicyHash(inputWithEncodedSpace);
+
+  // Plus should be different from space (URL normalization keeps plus as plus)
+  assert.notStrictEqual(hashPlus, hashSpace, 'Plus and space should produce different hashes');
+
+  // Space and %20 are equivalent after URL normalization
+  assert.strictEqual(
+    hashSpace,
+    hashEncoded,
+    'Space and encoded space should be equivalent after normalization'
+  );
+
+  // But plus should be different from both
+  assert.notStrictEqual(
+    hashPlus,
+    hashEncoded,
+    'Plus and encoded space should produce different hashes'
+  );
+});

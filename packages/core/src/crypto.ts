@@ -78,6 +78,7 @@ export async function signDetached(
       b64: false,
       crit: ['b64'],
       kid,
+      typ: 'application/peac-receipt+jws',
     })
     .sign(privateKey);
 

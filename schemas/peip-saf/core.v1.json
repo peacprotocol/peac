@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://peacprotocol.org/schemas/peip-saf/core.v1.json",
   "title": "PEIP-SAF Core Safety Profile",
   "description": "Baseline safety policy configuration with disclosure cadence, crisis referral, minors gate, and intent keys",

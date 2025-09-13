@@ -2,32 +2,21 @@
  * PEIP-SAF policy validation
  */
 
-import Ajv from 'ajv';
+import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import type { SafetyPolicy, OverlayId } from './types.js';
 
 // Schema cache
-let ajvInstance: Ajv | null = null;
+let ajvInstance: Ajv2020 | null = null;
 
-function getAjv(): Ajv {
+function getAjv(): Ajv2020 {
   if (!ajvInstance) {
-    ajvInstance = new Ajv({
-      strict: false, // Disable strict mode for external schema refs
+    ajvInstance = new Ajv2020({
+      strict: true, // Re-enable strict mode for Draft 2020-12
       allErrors: true,
       loadSchema: loadSchemaFromId,
     });
     addFormats(ajvInstance);
-
-    // Add draft-07 meta schema
-    ajvInstance.addMetaSchema(
-      {
-        $schema: 'https://json-schema.org/draft-07/schema#',
-        $id: 'https://json-schema.org/draft-07/schema#',
-        title: 'Core schema meta-schema',
-        type: 'object',
-      },
-      'https://json-schema.org/draft-07/schema#'
-    );
   }
   return ajvInstance;
 }

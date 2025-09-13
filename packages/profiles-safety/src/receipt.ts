@@ -7,16 +7,16 @@ import type { SafetyEvent, SafetyEventReceipt } from './types.js';
 import { validateSafetyEvent } from './validate-event.js';
 
 export interface ReceiptSigner {
-  privateKey: CryptoKey;
+  privateKey: import('jose').KeyLike;
   kid: string;
 }
 
 export interface IssueReceiptOptions {
   signer: ReceiptSigner;
+  prefsUrl: string; // Required per v0.9.12.4 AIPREF shim requirement
+  prefsHash: string; // Required per v0.9.12.4 AIPREF shim requirement
   traceId?: string;
   purpose?: string;
-  prefsUrl?: string;
-  prefsHash?: string;
   payment?: SafetyEventReceipt['payment'];
   compliance?: SafetyEventReceipt['compliance'];
 }
@@ -66,18 +66,16 @@ export async function issueSafetyReceipt(
     safety_event: event,
   };
 
+  // Add required AIPREF fields
+  receipt.prefs_url = options.prefsUrl;
+  receipt.prefs_hash = options.prefsHash;
+
   // Add optional fields
   if (options.traceId) {
     receipt.trace_id = options.traceId;
   }
   if (options.purpose) {
     receipt.purpose = options.purpose;
-  }
-  if (options.prefsUrl) {
-    receipt.prefs_url = options.prefsUrl;
-  }
-  if (options.prefsHash) {
-    receipt.prefs_hash = options.prefsHash;
   }
   if (options.payment) {
     receipt.payment = options.payment;
@@ -99,7 +97,10 @@ export async function issueSafetyReceipt(
 /**
  * Create receipt signer from key pair
  */
-export function createReceiptSigner(privateKey: CryptoKey, kid: string): ReceiptSigner {
+export function createReceiptSigner(
+  privateKey: import('jose').KeyLike,
+  kid: string
+): ReceiptSigner {
   return {
     privateKey,
     kid,
