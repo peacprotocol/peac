@@ -1,6 +1,6 @@
 {
   "name": "@peac/profiles-safety",
-  "version": "0.9.12.1",
+  "version": "0.9.13",
   "description": "PEAC safety profiles (experimental) - PEIP-SAF validation and receipt generation",
   "type": "module",
   "main": "dist/index.js",

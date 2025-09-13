@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/monorepo",
-  "version": "0.9.12.1",
+  "version": "0.9.13",
   "private": true,
   "description": "PEAC Protocol v0.9.12.1 - Universal proof layer with enterprise standards and neutral crawler control",
   "packageManager": "pnpm@8.15.0",

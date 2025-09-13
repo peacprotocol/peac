@@ -1,6 +1,6 @@
 {
   "name": "@peac/receipts",
-  "version": "0.9.12.1",
+  "version": "0.9.13",
   "description": "PEAC Protocol receipt builders, parsers, and validators with CBOR support",
   "type": "module",
   "main": "dist/index.js",

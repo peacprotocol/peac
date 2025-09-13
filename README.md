@@ -1,7 +1,7 @@
 # PEAC Protocol
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-0.9.12.1--stable-green.svg)](https://github.com/peacprotocol/peac/releases)
+[![Status](https://img.shields.io/badge/status-0.9.13--stable-green.svg)](https://github.com/peacprotocol/peac/releases)
 [![CI-Lite](https://github.com/peacprotocol/peac/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/ci-lite.yml)
 [![CodeQL](https://github.com/peacprotocol/peac/actions/workflows/codeql.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/codeql.yml)
 
@@ -38,7 +38,7 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 ## At a glance
 
 - **Discovery:** `/.well-known/peac.txt` (fallback `/peac.txt`)
-- **Wire version:** `0.9.12.1` (set header `peac-version: 0.9.12.1`)
+- **Wire version:** `0.9.13` (set header `peac-version: 0.9.13`)
 - **Headers:** `PEAC-Receipt`, `peac-version`; parsers MUST treat header names case-insensitively
 - **Media:** `application/peac+json` (content), `application/problem+json` (errors), `application/jwk-set+json` (JWKS)
 - **Receipts:** detached JWS (`typ: application/peac-receipt+jws`) using JCS
@@ -105,6 +105,7 @@ Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 
 | Feature                    | Description                                                                                                                                          |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Receipt engine             | Complete `enforce()` orchestration: discover → evaluate → settle → prove workflow with x402-first payment rails.                                     |
 | Policy and entitlements    | File-based rules for free, paid, conditional, or prohibited access with quotas.                                                                      |
 | Consent and privacy        | Opt-in or opt-out signals, retention windows, links to policies.                                                                                     |
 | Attribution and provenance | Required attribution formats and verify-only provenance chains via adapters.                                                                         |
@@ -118,11 +119,11 @@ Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 
 ---
 
-## Minimal `peac.txt` (docs train 0.9.12.1, wire 0.9.12.1)
+## Minimal `peac.txt` (docs train 0.9.13, wire 0.9.13)
 
 ```txt
 # /.well-known/peac.txt
-version: 0.9.12.1
+version: 0.9.13
 usage: conditional
 
 price: $0.001/request
@@ -172,15 +173,15 @@ More examples: [docs/examples.md](docs/examples.md)
 
 Adapters bridge PEAC to payment rails, agent protocols, provenance, and chains. Lifecycle: simulation → staging → production.
 
-| Adapter    | Status (0.9.12.1) | Notes                                     |
-| ---------- | ----------------- | ----------------------------------------- |
-| **MCP**    | Stable            | Agent protocol adapter                    |
-| **A2A**    | Beta              | Agent-to-Agent negotiation                |
-| **x402**   | Stable            | Payment rail                              |
-| **Stripe** | Stable            | Payment rail                              |
-| **L402**   | Preview           | Lightning Network payments (GA in 0.9.13) |
-| Chainlink  | Preview           | Oracle/provenance integrations            |
-| peaq       | Preview           | DePIN/IoT sharing + receipts              |
+| Adapter    | Status (0.9.13) | Notes                          |
+| ---------- | --------------- | ------------------------------ |
+| **MCP**    | Stable          | Agent protocol adapter         |
+| **A2A**    | Beta            | Agent-to-Agent negotiation     |
+| **x402**   | Stable          | Payment rail                   |
+| **Stripe** | Stable          | Payment rail                   |
+| **L402**   | Stable          | Lightning Network payments     |
+| Chainlink  | Preview         | Oracle/provenance integrations |
+| peaq       | Preview         | DePIN/IoT sharing + receipts   |
 
 Details & examples: [docs/interop.md](docs/interop.md) · Propose new adapters via [PEIPs](docs/peips.md)
 
@@ -227,7 +228,7 @@ if (access.granted) {
 
 ```bash
 curl -X POST https://demo.peac.dev/peac/agreements \
-  -H "peac-version: 0.9.12.1" \
+  -H "peac-version: 0.9.13" \
   -H "content-type: application/json" \
   -H "x-api-key: your-key" \
   -d '{
@@ -243,7 +244,7 @@ curl -X POST https://demo.peac.dev/peac/agreements \
 const response = await fetch('https://demo.peac.dev/peac/agreements', {
   method: 'POST',
   headers: {
-    'peac-version': '0.9.12.1',
+    'peac-version': '0.9.13',
     'content-type': 'application/json',
     'x-api-key': apiKey,
   },
@@ -401,7 +402,7 @@ Access:       Agent ----> Publisher (with receipt header)
 
 ## Versioning and Compatibility
 
-- Current train: `version: 0.9.12.1` in `peac.txt`.
+- Current train: `version: 0.9.13` in `peac.txt`.
 - New behavior is behind feature flags or marked experimental until stable.
 
 ---

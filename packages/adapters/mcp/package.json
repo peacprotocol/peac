@@ -1,6 +1,6 @@
 {
   "name": "@peac/adapter-mcp",
-  "version": "0.9.12.1",
+  "version": "0.9.13",
   "description": "PEAC MCP (Model Context Protocol) stdio server adapter",
   "main": "dist/server.js",
   "bin": {
