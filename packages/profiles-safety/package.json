@@ -1,0 +1,58 @@
+{
+  "name": "@peac/profiles-safety",
+  "version": "0.9.12.1",
+  "description": "PEAC safety profiles (experimental) - PEIP-SAF validation and receipt generation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "package.json",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "experimental"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "node --test src/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage src/*.test.js",
+    "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@peac/core": "workspace:^0.9.12.1",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.2.0",
+    "tsup": "^8.0.0"
+  },
+  "keywords": [
+    "peac",
+    "safety",
+    "peip-saf",
+    "profiles",
+    "experimental"
+  ],
+  "author": "PEAC Protocol",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
