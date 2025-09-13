@@ -27,14 +27,27 @@ async function loadSchemaFromId(uri: string): Promise<object> {
   const fs = await import('fs');
   const path = await import('path');
 
+  // Find the repository root by looking for package.json
+  let schemaBaseDir = process.cwd();
+  while (schemaBaseDir !== path.dirname(schemaBaseDir)) {
+    if (fs.existsSync(path.join(schemaBaseDir, 'package.json'))) {
+      const packageJsonPath = path.join(schemaBaseDir, 'package.json');
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      if (packageJson.name === '@peacprotocol/monorepo') {
+        break; // Found repository root
+      }
+    }
+    schemaBaseDir = path.dirname(schemaBaseDir);
+  }
+
   if (uri === 'https://peacprotocol.org/schemas/peip-saf/core.v1.json') {
-    const schemaPath = path.resolve('./schemas/peip-saf/core.v1.json');
+    const schemaPath = path.join(schemaBaseDir, 'schemas/peip-saf/core.v1.json');
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
     return JSON.parse(schemaContent);
   }
 
   if (uri === 'https://peacprotocol.org/schemas/peip-saf/us-ca-sb243.v1.json') {
-    const schemaPath = path.resolve('./schemas/peip-saf/us-ca-sb243.v1.json');
+    const schemaPath = path.join(schemaBaseDir, 'schemas/peip-saf/us-ca-sb243.v1.json');
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
     return JSON.parse(schemaContent);
   }
