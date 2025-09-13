@@ -31,7 +31,7 @@ We build this collaboratively. Contribute adapters, propose PEIPs, and help shap
 
 ## Why Now?
 
-Autonomous clients need predictable, auditable policy and trust rails. With well-known URIs, Problem+JSON, DPoP, and modern JOSE, the web finally has the pieces to coordinate access, consent, attribution and settlement. PEAC stitches these together-minimally-so anyone can adopt them.
+Autonomous clients need predictable, auditable policy and trust rails. With well-known URIs, Problem+JSON, DPoP, and modern JOSE, the web finally has the pieces to coordinate access, consent, attribution and settlement. PEAC stitches these together minimally so anyone can adopt them.
 
 ---
 
