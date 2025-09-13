@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/peip-saf/core.v1.json",
+  "title": "PEIP-SAF Core Safety Profile",
+  "description": "Baseline safety policy configuration with disclosure cadence, crisis referral, minors gate, and intent keys",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile",
+    "version",
+    "disclosure_cadence",
+    "crisis_referral",
+    "minors_gate",
+    "intent_keys"
+  ],
+  "properties": {
+    "profile": {
+      "type": "string",
+      "const": "peip-saf/core",
+      "description": "Profile identifier"
+    },
+    "version": {
+      "type": "string",
+      "const": "v1",
+      "description": "Schema version"
+    },
+    "disclosure_cadence": {
+      "type": "object",
+      "description": "Periodic disclosure requirements",
+      "additionalProperties": false,
+      "required": ["enabled", "interval"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether periodic disclosure is required"
+        },
+        "interval": {
+          "type": "string",
+          "pattern": "^PT[0-9]+[HMS]$",
+          "description": "ISO 8601 duration for disclosure interval"
+        },
+        "grace_period": {
+          "type": "string",
+          "pattern": "^PT[0-9]+[HMS]$",
+          "description": "Optional grace period for disclosure"
+        }
+      }
+    },
+    "crisis_referral": {
+      "type": "object",
+      "description": "Crisis intervention and referral requirements",
+      "additionalProperties": false,
+      "required": ["enabled", "keywords"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether crisis referral is active"
+        },
+        "keywords": {
+          "type": "array",
+          "description": "Keywords that trigger crisis referral",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "referral_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for crisis resources"
+        },
+        "contact_info": {
+          "type": "string",
+          "description": "Emergency contact information"
+        }
+      }
+    },
+    "minors_gate": {
+      "type": "object",
+      "description": "Age verification and minor protection",
+      "additionalProperties": false,
+      "required": ["enabled", "min_age"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether minor protection is active"
+        },
+        "min_age": {
+          "type": "integer",
+          "minimum": 13,
+          "maximum": 18,
+          "description": "Minimum age for service access"
+        },
+        "parental_consent": {
+          "type": "boolean",
+          "description": "Whether parental consent is required for minors"
+        },
+        "age_verification_method": {
+          "type": "string",
+          "enum": ["self_attestation", "credit_card", "id_verification", "third_party"],
+          "description": "Method used for age verification"
+        }
+      }
+    },
+    "intent_keys": {
+      "type": "array",
+      "description": "Safety intent classification keys",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "description", "severity"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z_]+$",
+            "description": "Intent key identifier"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable intent description"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Safety severity level"
+          },
+          "keywords": {
+            "type": "array",
+            "description": "Keywords associated with this intent",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this policy becomes effective"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this policy expires"
+    }
+  }
+}

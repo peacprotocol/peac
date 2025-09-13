@@ -90,8 +90,6 @@ curl -I https://your-domain/.well-known/peac.txt  # check ETag + Cache-Control
 Tips: emit `PEAC-Receipt`, `peac-version`; be case-insensitive on read. Start in simulation via `PEAC_MODE=simulation`.
 Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 
-**Back-compat note:** Server MUST accept both canonical (`PEAC-Receipt`, `peac-version`) and legacy (`x-peac-*`) headers. Clients SHOULD send canonical, MAY accept legacy. Deprecation window: v0.9.14.
-
 ---
 
 ## Core surfaces

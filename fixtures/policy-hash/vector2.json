@@ -1,0 +1,25 @@
+{
+  "name": "Complex policy with dot-segments and percent-encoding",
+  "description": "Tests dot-segment resolution and unreserved character decoding",
+  "input": {
+    "resource": "https://api.example.com/v1/../v2/./users/%7Euser%2Dname/profile/",
+    "purpose": "content_moderation",
+    "policy": {
+      "allowed_intents": ["safety_check", "compliance_review"],
+      "restrictions": {
+        "age_gate": true,
+        "consent_required": false
+      },
+      "safety_profile": "peip-saf/core"
+    },
+    "effective_date": "2025-09-13T00:00:00Z"
+  },
+  "expected_hash": "KSPTRj2I2Rn0jHfGC8V1f4ejpCivcZgfASjo9lxWvzQ",
+  "notes": [
+    "/v1/../v2/. -> /v2 (dot-segments resolved)",
+    "%7E -> ~ (unreserved tilde decoded)",
+    "%2D -> - (unreserved hyphen decoded)",
+    "Trailing slash preserved",
+    "Complex nested object canonicalization"
+  ]
+}
