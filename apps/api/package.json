@@ -33,7 +33,7 @@
     "@peac/receipts": "workspace:^0.9.12.1",
     "@peac/crawler": "workspace:^0.9.12.1",
     "@peac/pay402": "workspace:^0.9.12.1",
-    "hono": "^4.0.0",
+    "hono": "^4.9.7",
     "zod": "^3.22.0"
   },
   "devDependencies": {
