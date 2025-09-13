@@ -12,30 +12,42 @@ let ajvInstance: Ajv | null = null;
 function getAjv(): Ajv {
   if (!ajvInstance) {
     ajvInstance = new Ajv({
-      strict: true,
+      strict: false, // Disable strict mode for external schema refs
       allErrors: true,
       loadSchema: loadSchemaFromId,
     });
     addFormats(ajvInstance);
+
+    // Add draft-07 meta schema
+    ajvInstance.addMetaSchema(
+      {
+        $schema: 'https://json-schema.org/draft-07/schema#',
+        $id: 'https://json-schema.org/draft-07/schema#',
+        title: 'Core schema meta-schema',
+        type: 'object',
+      },
+      'https://json-schema.org/draft-07/schema#'
+    );
   }
   return ajvInstance;
 }
 
 async function loadSchemaFromId(uri: string): Promise<object> {
   // In real implementation, this would fetch from URLs
-  // For now, load from local schemas
+  // For now, load from local schemas using fs
+  const fs = await import('fs');
+  const path = await import('path');
+
   if (uri === 'https://peacprotocol.org/schemas/peip-saf/core.v1.json') {
-    const coreSchema = await import('../../../schemas/peip-saf/core.v1.json', {
-      with: { type: 'json' },
-    });
-    return coreSchema.default;
+    const schemaPath = path.resolve('./schemas/peip-saf/core.v1.json');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    return JSON.parse(schemaContent);
   }
 
   if (uri === 'https://peacprotocol.org/schemas/peip-saf/us-ca-sb243.v1.json') {
-    const sb243Schema = await import('../../../schemas/peip-saf/us-ca-sb243.v1.json', {
-      with: { type: 'json' },
-    });
-    return sb243Schema.default;
+    const schemaPath = path.resolve('./schemas/peip-saf/us-ca-sb243.v1.json');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    return JSON.parse(schemaContent);
   }
 
   throw new Error(`Unknown schema URI: ${uri}`);

@@ -26,7 +26,8 @@
     "tag": "dev"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && npm run build:dts",
+    "build:dts": "tsc --project tsconfig.dts.json",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
