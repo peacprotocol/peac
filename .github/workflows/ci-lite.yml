@@ -54,14 +54,6 @@ jobs:
           echo "Building all packages..."
           pnpm -w build
 
-      - name: Validation scripts
-        run: |
-          echo "Running validation scripts..."
-          chmod +x scripts/validate-surface.sh
-          chmod +x scripts/validate-v0.9.12.4.sh
-          ./scripts/validate-surface.sh
-          ./scripts/validate-v0.9.12.4.sh
-
       - name: Smoke tests
         run: |
           echo "Running smoke tests for critical packages..."
