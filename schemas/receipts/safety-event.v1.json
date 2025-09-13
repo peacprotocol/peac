@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://peacprotocol.org/schemas/receipts/safety-event.v1.json",
+  "title": "PEAC Safety Event Receipt",
+  "description": "Receipt for safety events with non-PII counters and AIPREF shim snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["@type", "iss", "sub", "aud", "iat", "exp", "rid", "policy_hash", "safety_event"],
+  "properties": {
+    "@type": {
+      "type": "string",
+      "const": "PEACReceipt/SafetyEvent",
+      "description": "Receipt type identifier"
+    },
+    "iss": {
+      "type": "string",
+      "format": "uri",
+      "description": "Issuer URL"
+    },
+    "sub": {
+      "type": "string",
+      "format": "uri",
+      "description": "Subject (resource URL)"
+    },
+    "aud": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical resource URL"
+    },
+    "iat": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Issued at (Unix timestamp)"
+    },
+    "exp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Expires (MUST be <= iat + 300s)"
+    },
+    "rid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Receipt ID (MUST be UUIDv7)"
+    },
+    "policy_hash": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "description": "Deterministic hash (JCS -> SHA-256 -> base64url)"
+    },
+    "safety_event": {
+      "type": "object",
+      "description": "Safety event data with non-PII counters only",
+      "additionalProperties": false,
+      "required": ["event_type", "timestamp", "counters"],
+      "properties": {
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "disclosure",
+            "crisis_referral",
+            "minor_protection",
+            "intent_classification",
+            "policy_violation",
+            "safety_action"
+          ],
+          "description": "Type of safety event"
+        },
+        "timestamp": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Event timestamp (Unix timestamp)"
+        },
+        "counters": {
+          "type": "object",
+          "description": "Non-PII aggregated counters",
+          "additionalProperties": false,
+          "properties": {
+            "total_events": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of similar events"
+            },
+            "severity_counts": {
+              "type": "object",
+              "description": "Count by severity level",
+              "additionalProperties": false,
+              "properties": {
+                "low": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "medium": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "high": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "critical": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "time_window": {
+              "type": "string",
+              "pattern": "^PT[0-9]+[HMS]$",
+              "description": "Time window for counter aggregation"
+            }
+          }
+        },
+        "intent_key": {
+          "type": "string",
+          "pattern": "^[a-z_]+$",
+          "description": "Safety intent key that triggered this event"
+        },
+        "action_taken": {
+          "type": "string",
+          "enum": [
+            "none",
+            "warning_displayed",
+            "content_filtered",
+            "access_restricted",
+            "escalated",
+            "reported"
+          ],
+          "description": "Action taken in response to event"
+        }
+      }
+    },
+    "prefs_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "AIPREF preferences URL (optional but validated when present)"
+    },
+    "prefs_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of AIPREF preferences snapshot (optional but validated when present)"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "Purpose of access if policy constrains usage"
+    },
+    "payment": {
+      "type": "object",
+      "description": "Payment details if settlement occurred",
+      "additionalProperties": false,
+      "properties": {
+        "rail": {
+          "type": "string",
+          "enum": ["x402", "l402", "stripe", "tempo"],
+          "description": "Payment rail used"
+        },
+        "reference": {
+          "type": "string",
+          "description": "Payment reference or transaction ID"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Payment amount"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code"
+        },
+        "settled_at": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Settlement timestamp"
+        },
+        "idempotency": {
+          "type": "string",
+          "description": "Idempotency key for payment"
+        }
+      }
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "W3C trace ID (when PEAC_INCLUDE_TRACE_IN_RECEIPT=true)"
+    },
+    "compliance": {
+      "type": "object",
+      "description": "GDPR/CCPA/AI Act metadata",
+      "additionalProperties": false,
+      "properties": {
+        "gdpr_applicable": {
+          "type": "boolean",
+          "description": "Whether GDPR applies to this event"
+        },
+        "ccpa_applicable": {
+          "type": "boolean",
+          "description": "Whether CCPA applies to this event"
+        },
+        "ai_act_applicable": {
+          "type": "boolean",
+          "description": "Whether EU AI Act applies to this event"
+        },
+        "jurisdiction": {
+          "type": "string",
+          "description": "Legal jurisdiction"
+        }
+      }
+    }
+  }
+}
