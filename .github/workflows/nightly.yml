@@ -129,8 +129,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages
-        run: pnpm -w build
+      - name: Build @peac/core
+        run: pnpm --filter @peac/core build
 
       - name: Setup Deno
         if: matrix.runtime == 'deno'
@@ -148,30 +148,32 @@ jobs:
         run: |
           echo "Testing @peac/core crypto functions with ${{ matrix.runtime }}..."
 
+          export CORE_PATH="${{ github.workspace }}/packages/core/dist/index.js"
+
           if [ "${{ matrix.runtime }}" == "node" ]; then
-            node -e "
-              import('@peac/core').then(async ({ signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat }) => {
-                console.log('Testing with Node.js...');
-                const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
-                console.log('✅ Key generation works');
+            node --input-type=module -e "
+              const m = await import('file://${CORE_PATH}');
+              const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
+              console.log('Testing with Node.js...');
+              const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
+              console.log('✅ Key generation works');
 
-                if (!validateKidFormat(kid)) throw new Error('Generated kid invalid format');
-                console.log('✅ Kid validation works');
+              if (!validateKidFormat(kid)) throw new Error('Generated kid invalid format');
+              console.log('✅ Kid validation works');
 
-                const payload = 'test payload';
-                const jws = await signDetached(payload, privateKey, kid);
-                console.log('✅ Signing works');
+              const payload = 'test payload';
+              const jws = await signDetached(payload, privateKey, kid);
+              console.log('✅ Signing works');
 
-                const verified = await verifyDetached(payload, jws, publicKey);
-                if (!verified) throw new Error('Verification failed');
-                console.log('✅ Verification works');
-                console.log('✅ Node.js runtime validation complete');
-              });
+              const verified = await verifyDetached(payload, jws, publicKey);
+              if (!verified) throw new Error('Verification failed');
+              console.log('✅ Verification works');
+              console.log('✅ Node.js runtime validation complete');
             "
           elif [ "${{ matrix.runtime }}" == "deno" ]; then
-            # Test with Deno's npm: specifier for built packages
             deno eval "
-              import { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } from 'npm:@peac/core';
+              const m = await import('file://${CORE_PATH}');
+              const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
               console.log('Testing with Deno...');
               const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
               console.log('✅ Key generation works');
@@ -187,10 +189,11 @@ jobs:
               if (!verified) throw new Error('Verification failed');
               console.log('✅ Verification works');
               console.log('✅ Deno runtime validation complete');
-            " || echo "::warning::Deno test failed - may need npm registry setup"
+            "
           elif [ "${{ matrix.runtime }}" == "bun" ]; then
             bun -e "
-              import { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } from '@peac/core';
+              const m = await import('file://${process.env.CORE_PATH}');
+              const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
               console.log('Testing with Bun...');
               const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
               console.log('✅ Key generation works');
@@ -206,7 +209,7 @@ jobs:
               if (!verified) throw new Error('Verification failed');
               console.log('✅ Verification works');
               console.log('✅ Bun runtime validation complete');
-            " || echo "::warning::Bun test failed - may need workspace resolution"
+            "
           fi
 
   nightly-summary:
