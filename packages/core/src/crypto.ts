@@ -98,12 +98,13 @@ export async function verifyDetached(
   try {
     const payloadBytes = typeof payload === 'string' ? new TextEncoder().encode(payload) : payload;
 
-    // Verify flattened JWS with detached payload
+    // For b64=false detached JWS verification, we need to reconstruct the JWS
+    // with the raw payload (not base64url encoded) as the payload field
     await flattenedVerify(
       {
         protected: detachedJws.protected,
         signature: detachedJws.signature,
-        payload: '', // Empty string required by jose library
+        payload: new TextDecoder().decode(payloadBytes), // Raw payload for b64=false
       },
       publicKey,
       {

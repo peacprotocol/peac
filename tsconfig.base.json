@@ -23,6 +23,7 @@
       "@peac/pay402": ["./packages/pay402/src"],
       "@peac/discovery": ["./packages/discovery/src"],
       "@peac/sdk-js": ["./packages/sdk-js/src"],
+      "@peac/profiles-safety": ["./packages/profiles-safety/src"],
       "@peac/adapter-mcp": ["./packages/adapters/mcp"],
       "@peac/adapter-openai": ["./packages/adapters/openai"],
       "@peac/adapter-langchain": ["./packages/adapters/langchain"],

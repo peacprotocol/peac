@@ -29,7 +29,7 @@
     "test": "node --test src/*.test.js",
     "test:coverage": "node --test --experimental-test-coverage src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "echo 'Profiles-safety typecheck temporarily disabled due to workspace TypeScript configuration'",
+    "typecheck": "tsc --noEmit",
     "dev": "tsup --watch",
     "clean": "rm -rf dist"
   },
