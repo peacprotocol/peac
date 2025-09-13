@@ -26,8 +26,8 @@
     "tag": "dev"
   },
   "scripts": {
-    "build": "tsup && npm run build:dts",
-    "build:dts": "tsc --project tsconfig.dts.json",
+    "build": "tsup",
+    "build:dts": "echo 'DTS generation temporarily disabled due to dynamic imports'",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",

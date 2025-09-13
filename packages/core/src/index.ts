@@ -1,7 +1,18 @@
 /**
- * @peac/core v0.9.12.4 - Core primitives for PEIP-SAF implementation
- * Canonical policy hashing + Ed25519 JWS + replay protection + UUIDv7
+ * @peac/core v0.9.13 - Receipt Engine with Core Primitives
+ * Enforcement orchestration + PEIP-SAF + Ed25519 JWS + replay protection + UUIDv7
  */
+
+// v0.9.13 receipt engine (main entry point)
+export { enforce, discover, evaluate, settle, prove } from './enforce.js';
+export type {
+  DiscoveryContext,
+  PolicySource,
+  EvaluationContext,
+  SettlementResult,
+  EnforceResult,
+  EnforceOptions,
+} from './enforce.js';
 
 // v0.9.12.4 core primitives
 export { canonicalPolicyHash } from './hash.js';
