@@ -9,6 +9,10 @@ export default defineConfig({
   splitting: false,
   treeshake: true,
   minify: false,
-  target: 'es2022',
-  external: ['node:*'],
+  target: 'esnext',
+  platform: 'neutral',
+  external: ['node:crypto', 'jose'],
+  esbuildOptions(options) {
+    options.conditions = ['node'];
+  },
 });

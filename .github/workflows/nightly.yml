@@ -192,7 +192,7 @@ jobs:
             "
           elif [ "${{ matrix.runtime }}" == "bun" ]; then
             bun -e "
-              const m = await import('file://${process.env.CORE_PATH}');
+              const m = await import('file://' + process.env.CORE_PATH);
               const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
               console.log('Testing with Bun...');
               const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
