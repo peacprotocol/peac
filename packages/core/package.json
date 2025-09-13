@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "build:dts": "echo 'DTS generation temporarily disabled due to dynamic imports'",
+    "build:dts": "tsc --declaration --emitDeclarationOnly --outDir dist",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",

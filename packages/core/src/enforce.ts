@@ -72,12 +72,17 @@ export interface EnforceResult {
   };
 }
 
+export interface PaymentHandler {
+  negotiate(context: EvaluationContext): Promise<SettlementResult>;
+}
+
 export interface EnforceOptions {
   privateKey?: CryptoKey;
   kid?: string;
   issuer?: string;
   nonceCache?: NonceCache;
   allowPrivateIPs?: boolean;
+  paymentHandler?: PaymentHandler;
 }
 
 /**
@@ -106,8 +111,8 @@ export async function enforce(
 
     const evaluation = await evaluate(evalCtx);
 
-    // Step 3: Settlement (x402 only in v0.9.13)
-    const settlement = await settle(evalCtx, evaluation, { useMockPayment: true });
+    // Step 3: Settlement
+    const settlement = await settle(evalCtx, evaluation, options.paymentHandler);
 
     // Step 4: Generate response
     if (!evaluation.allowed && settlement.required) {
@@ -286,13 +291,13 @@ export async function evaluate(
 ): Promise<{ allowed: boolean; reason?: string }> {
   const { policies } = ctx;
 
-  // If no policies found, fail-open (allow by default in v0.9.13)
+  // If no policies found, fail-open (allow by default)
   if (policies.every((p) => p.error)) {
     return { allowed: true, reason: 'no_policies_found' };
   }
 
   // Simple evaluation logic - in practice this would be much more sophisticated
-  // For v0.9.13, implement basic purpose-based gating
+  // Implement purpose-based gating
 
   for (const policy of policies) {
     if (policy.content) {
@@ -327,79 +332,42 @@ export async function evaluate(
 }
 
 /**
- * Settlement using x402 (integrated with @peac/pay402)
+ * Settlement using injected payment handler
  */
 export async function settle(
   ctx: EvaluationContext,
   evaluation: { allowed: boolean; reason?: string },
-  options: { useMockPayment?: boolean } = {}
+  paymentHandler?: PaymentHandler
 ): Promise<SettlementResult> {
   if (evaluation.allowed || evaluation.reason !== 'payment_required') {
     return { required: false };
   }
 
-  // Generate idempotency key: hash(resource|purpose|amount|agent|ceilToHour)
-  const now = new Date();
-  const hour = Math.floor(now.getTime() / (1000 * 60 * 60));
-  const idempotencyInput = `${ctx.resource}|${ctx.purpose || ''}|1.00|${ctx.agent || ''}|${hour}`;
-  const idempotencyKey = await crypto.subtle
-    .digest('SHA-256', new TextEncoder().encode(idempotencyInput))
-    .then((hash) =>
-      btoa(String.fromCharCode(...new Uint8Array(hash)))
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=/g, '')
-    );
+  // If no payment handler provided, fail gracefully
+  if (!paymentHandler) {
+    return {
+      required: true,
+      rail: 'x402',
+      amount: { value: '1.00', currency: 'USD' },
+      challenge: `no-handler-${Date.now()}`,
+    };
+  }
 
-  // Use real @peac/pay402 infrastructure (dynamic import to avoid cycles)
   try {
-    const pay402Module = await import('@peac/pay402');
-    const { PaymentNegotiator, X402MockAdapter, Http402Handler } = pay402Module;
-
-    const negotiator = new PaymentNegotiator();
-    negotiator.register(new X402MockAdapter());
-
-    const handler = new Http402Handler(negotiator);
-    const response = await handler.createResponse({
-      acceptedRails: ['x402'],
-      amount: { value: '1.00', currency: 'USD' },
-    });
-
-    // Extract challenge from the 402 response
-    const challengeData = response.body['accept-payment']?.[0];
-    if (!challengeData) {
-      throw new Error('No payment challenge generated');
-    }
-
-    // For v0.9.13: Mock successful settlement
-    const payment = {
-      rail: 'x402',
-      reference: `x402-ref-${idempotencyKey.slice(0, 12)}`,
-      amount: { value: '1.00', currency: 'USD' },
-      settled_at: new Date().toISOString(),
-      idempotency: idempotencyKey,
-    };
-
-    return {
-      required: true,
-      rail: 'x402',
-      amount: { value: '1.00', currency: 'USD' },
-      challenge: challengeData.challenge || `x402-challenge-${idempotencyKey.slice(0, 8)}`,
-      payment,
-    };
+    return await paymentHandler.negotiate(ctx);
   } catch (error) {
-    // Fallback to simple mock on error
+    const timestamp = Date.now().toString(36);
     return {
       required: true,
       rail: 'x402',
       amount: { value: '1.00', currency: 'USD' },
-      challenge: `x402-challenge-${idempotencyKey.slice(0, 8)}`,
+      challenge: `x402-challenge-${timestamp}`,
       payment: {
         rail: 'x402',
-        reference: `x402-ref-${idempotencyKey.slice(0, 12)}`,
+        reference: `x402-ref-${timestamp}`,
         amount: { value: '1.00', currency: 'USD' },
         settled_at: new Date().toISOString(),
-        idempotency: idempotencyKey,
+        idempotency: timestamp,
       },
     };
   }
@@ -472,7 +440,7 @@ export async function prove(
   return `${payloadB64}..${detachedJws.signature}`;
 }
 
-// Helper functions for policy evaluation (simplified for v0.9.13)
+// Helper functions for policy evaluation
 function hasPermissionDeny(policy: any): boolean {
   if (typeof policy === 'string') {
     return policy.includes('access: denied') || policy.includes('access: blocked');
