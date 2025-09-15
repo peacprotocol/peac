@@ -7,16 +7,19 @@
 
     "declaration": true,
     "emitDeclarationOnly": true,
-    "declarationMap": true,
     "outDir": "dist",
 
-    "strict": true,
-    "esModuleInterop": true,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
     "skipLibCheck": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
 
-    "lib": ["ES2022", "DOM"],
-    "types": ["node"]
+    "baseUrl": "../../",
+    "paths": {
+      "@peac/core": ["packages/core/dist/src/index.d.ts", "packages/core/dist"],
+      "@peac/disc": ["packages/discovery/dist/index.d.ts", "packages/discovery/dist"]
+    }
   },
   "include": ["src/**/*"]
 }
