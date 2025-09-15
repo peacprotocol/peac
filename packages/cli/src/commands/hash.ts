@@ -4,7 +4,6 @@
  */
 
 import { readFile } from 'fs/promises';
-import { canonicalPolicyHash } from '@peac/core';
 import type { CLIOptions, CommandResult, HashResult } from '../types.js';
 import { handleError, timing } from '../utils.js';
 
@@ -17,7 +16,8 @@ export class HashCommand {
       const policyContent = await readFile(policyPath, 'utf-8');
       const policy = JSON.parse(policyContent);
 
-      // Compute canonical hash
+      // Compute canonical hash using dynamic import
+      const { canonicalPolicyHash } = await import('@peac/core');
       const digest = await canonicalPolicyHash(policy);
 
       const result: HashResult = {
@@ -53,7 +53,8 @@ export class HashCommand {
       const policyContent = Buffer.concat(chunks).toString('utf-8');
       const policy = JSON.parse(policyContent);
 
-      // Compute canonical hash
+      // Compute canonical hash using dynamic import
+      const { canonicalPolicyHash } = await import('@peac/core');
       const digest = await canonicalPolicyHash(policy);
 
       const result: HashResult = {

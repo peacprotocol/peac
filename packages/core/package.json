@@ -4,10 +4,10 @@
   "description": "PEAC Protocol core with JWS signing, security, and observability",
   "type": "module",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/src/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
@@ -28,7 +28,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "build:types": "tsc -b",
+    "build:types": "tsc -p tsconfig.types.json",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",

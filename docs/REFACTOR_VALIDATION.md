@@ -31,7 +31,7 @@ peac/
 │   ├── receipts/                 # @peac/receipts (builders, parsers, validators)
 │   ├── aipref/                   # @peac/aipref (AIPREF resolver)
 │   ├── pay402/                   # @peac/pay402 (402/paywall rails)
-│   ├── discovery/                # @peac/discovery (peac.txt emit/parse)
+│   ├── discovery/                # @peac/disc (peac.txt emit/parse)
 │   ├── sdk-js/                   # @peac/sdk-js (client helpers)
 │   └── adapters/                 # Agent integration adapters
 │       ├── mcp/                  # @peac/adapter-mcp
@@ -60,15 +60,15 @@ peac/
 
 ### Package Architecture ✅
 
-| Package       | Status      | New Name          | Purpose                                       |
-| ------------- | ----------- | ----------------- | --------------------------------------------- |
-| **Core**      | ✅ MIGRATED | `@peac/core`      | JWS(EdDSA) + security + observability         |
-| **Crawler**   | ✅ MIGRATED | `@peac/crawler`   | Neutral crawler control with circuit breakers |
-| **Receipts**  | ✅ CREATED  | `@peac/receipts`  | Builders, parsers, AJV validators, CBOR       |
-| **AIPREF**    | ✅ MIGRATED | `@peac/aipref`    | AIPREF resolver (snapshot/digest)             |
-| **Pay402**    | ✅ MIGRATED | `@peac/pay402`    | 402/paywall rails (Stripe/L402/etc.)          |
-| **Discovery** | ✅ MIGRATED | `@peac/discovery` | peac.txt emit/parse, robots bridge            |
-| **SDK-JS**    | ✅ MIGRATED | `@peac/sdk-js`    | discover(), verify\*, client helpers          |
+| Package       | Status      | New Name         | Purpose                                       |
+| ------------- | ----------- | ---------------- | --------------------------------------------- |
+| **Core**      | ✅ MIGRATED | `@peac/core`     | JWS(EdDSA) + security + observability         |
+| **Crawler**   | ✅ MIGRATED | `@peac/crawler`  | Neutral crawler control with circuit breakers |
+| **Receipts**  | ✅ CREATED  | `@peac/receipts` | Builders, parsers, AJV validators, CBOR       |
+| **AIPREF**    | ✅ MIGRATED | `@peac/aipref`   | AIPREF resolver (snapshot/digest)             |
+| **Pay402**    | ✅ MIGRATED | `@peac/pay402`   | 402/paywall rails (Stripe/L402/etc.)          |
+| **Discovery** | ✅ MIGRATED | `@peac/disc`     | peac.txt emit/parse, robots bridge            |
+| **SDK-JS**    | ✅ MIGRATED | `@peac/sdk-js`   | discover(), verify\*, client helpers          |
 
 ### Agent Adapters ✅
 

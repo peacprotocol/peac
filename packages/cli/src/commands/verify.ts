@@ -1,10 +1,9 @@
 /**
  * peac verify <receipt.jws> --resource <url> command
- * Receipt verification using existing core functions
+ * Receipt verification via API bridge
  */
 
 import { readFile } from 'fs/promises';
-import { verify, verifyDetached, canonicalPolicyHash } from '@peac/core';
 import type { CLIOptions, CommandResult, VerifyResult } from '../types.js';
 import { handleError, timing } from '../utils.js';
 
@@ -21,31 +20,28 @@ export class VerifyCommand {
       const receiptContent = await readFile(receiptPath, 'utf-8');
       const receiptJws = receiptContent.trim();
 
-      // Use the existing verify function from @peac/core
-      const verifyResult = await verify(receiptJws, {
-        resource: options.resource,
+      const base = process.env.PEAC_BRIDGE_URL?.trim() || 'http://127.0.0.1:3000';
+      const url = new URL('/verify', base).toString();
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ receipt: receiptJws, resource: options.resource }),
       });
 
+      const body = await res.json().catch(() => ({}));
+      const ok = res.ok && body?.valid === true;
+
       const result: VerifyResult = {
-        valid: verifyResult.valid,
-        receipt: verifyResult.claims
-          ? {
-              header: this.extractHeader(receiptJws),
-              payload: verifyResult.claims,
-            }
-          : undefined,
+        valid: ok,
+        receipt: body?.claims ? { header: undefined, payload: body.claims } : undefined,
+        resource: options.resource,
+        policy_hash: body?.policyHash,
+        reconstructed: body?.reconstructed,
       };
 
-      if (options.resource) {
-        result.resource = options.resource;
-
-        if (verifyResult.claims?.policy_hash) {
-          result.policy_hash = verifyResult.claims.policy_hash;
-        }
-      }
-
-      if (!verifyResult.valid) {
-        result.error = 'Receipt verification failed';
+      if (!ok) {
+        result.error = body?.detail || body?.title || 'Receipt verification failed';
       }
 
       return {
@@ -58,24 +54,6 @@ export class VerifyCommand {
         ...handleError(error as Error),
         timing: timer.end(),
       };
-    }
-  }
-
-  private extractHeader(jws: string): any {
-    try {
-      const parts = jws.split('.');
-      if (parts.length === 3) {
-        // Standard JWS format
-        return JSON.parse(Buffer.from(parts[0], 'base64url').toString());
-      } else if (parts.length === 1 && jws.includes('..')) {
-        // Detached format (payload..signature)
-        const [payload, , signature] = jws.split('..');
-        // For detached format, we don't have the protected header easily accessible
-        return { typ: 'application/peac-receipt+jws', alg: 'EdDSA' };
-      }
-      return {};
-    } catch {
-      return {};
     }
   }
 }

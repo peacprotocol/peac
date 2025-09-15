@@ -3,6 +3,7 @@
  * POST /verify {receipt, resource} → {valid, claims, policyHash, reconstructed, inputs, timing}
  */
 
+import { promises as dns } from 'node:dns';
 import { verify, canonicalPolicyHash } from '@peac/core';
 import { discover } from '@peac/disc';
 import type { HttpStatus } from './types.js';
@@ -143,7 +144,7 @@ export class VerifierV13 {
     const startTime = Date.now();
 
     // Apply SSRF guards
-    if (!this.isAllowedUrl(resource, options)) {
+    if (!(await this.isAllowedUrl(resource, options))) {
       throw new Error('URL not allowed by security policy');
     }
 
@@ -187,13 +188,33 @@ export class VerifierV13 {
     try {
       checkTimeLimit();
       const cached = this.getCachedResult(resource);
+
       let aiprefResult;
       let etag = null;
 
-      if (cached && cached.etag) {
-        // Use cached result if available
-        aiprefResult = cached.data;
-        etag = cached.etag;
+      if (cached) {
+        // Use cached result and send If-None-Match if ETag available
+        const headers = cached.etag ? { 'If-None-Match': cached.etag } : undefined;
+        try {
+          aiprefResult = await this.fetchWithLimits(resource, {
+            method: 'HEAD',
+            timeout: 150,
+            headers,
+          });
+          if (aiprefResult.status === 304) {
+            // Not modified, use cached data
+            aiprefResult = cached.data;
+            etag = cached.etag;
+          } else {
+            // Updated, store new result
+            etag = aiprefResult.headers.get('etag');
+            this.setCachedResult(resource, aiprefResult, etag);
+          }
+        } catch {
+          // Fallback to cached data on fetch error
+          aiprefResult = cached.data;
+          etag = cached.etag;
+        }
       } else {
         aiprefResult = await this.fetchWithLimits(resource, {
           method: 'HEAD',
@@ -203,7 +224,6 @@ export class VerifierV13 {
         this.setCachedResult(resource, aiprefResult, etag);
       }
 
-      const contentUsage = aiprefResult.headers?.get('content-usage');
       inputs.push({
         type: 'aipref',
         url: resource,
@@ -222,12 +242,32 @@ export class VerifierV13 {
       checkTimeLimit();
       const htmlCacheKey = `${resource}:html`;
       const cached = this.getCachedResult(htmlCacheKey);
+
       let htmlResponse;
       let etag = null;
 
-      if (cached && cached.etag) {
-        htmlResponse = cached.data;
-        etag = cached.etag;
+      if (cached) {
+        // Use cached result and send If-None-Match if ETag available
+        const headers = cached.etag ? { 'If-None-Match': cached.etag } : undefined;
+        try {
+          htmlResponse = await this.fetchWithLimits(resource, {
+            timeout: 150,
+            headers,
+          });
+          if (htmlResponse.status === 304) {
+            // Not modified, use cached data
+            htmlResponse = cached.data;
+            etag = cached.etag;
+          } else {
+            // Updated, store new result
+            etag = htmlResponse.headers.get('etag');
+            this.setCachedResult(htmlCacheKey, htmlResponse, etag);
+          }
+        } catch {
+          // Fallback to cached data on fetch error
+          htmlResponse = cached.data;
+          etag = cached.etag;
+        }
       } else {
         htmlResponse = await this.fetchWithLimits(resource, {
           timeout: 150,
@@ -300,22 +340,19 @@ export class VerifierV13 {
 
   private getCachedResult(key: string) {
     const cached = this.cache.get(key);
-    if (cached && Date.now() < cached.expires) {
-      return cached;
-    }
-    if (cached) {
+    if (!cached) return null;
+    if (Date.now() >= cached.expires) {
       this.cache.delete(key);
+      return null;
     }
-    return null;
+    return cached; // { data, etag, expires }
   }
 
   private setCachedResult(key: string, data: any, etag: string | null) {
-    const expires = Date.now() + 5 * 60 * 1000; // 5-minute TTL
-    const cacheKey = etag ? `${key}:${etag}` : key;
-    this.cache.set(cacheKey, { data, etag: etag || undefined, expires });
+    this.cache.set(key, { data, etag: etag || undefined, expires: Date.now() + 5 * 60 * 1000 });
   }
 
-  private isAllowedUrl(url: string, options: VerifierOptions): boolean {
+  private async isAllowedUrl(url: string, options: VerifierOptions): Promise<boolean> {
     try {
       const parsed = new URL(url);
 
@@ -332,41 +369,52 @@ export class VerifierV13 {
         }
       }
 
-      // Block private/link-local IP ranges unless explicitly allowed
-      if (!options.allowPrivateNet && this.isPrivateOrLinkLocal(parsed.hostname)) {
-        return false;
+      // Resolve and block private/link-local after DNS
+      if (!options.allowPrivateNet) {
+        try {
+          const addrs = await dns.lookup(parsed.hostname, { all: true });
+          for (const addr of addrs) {
+            if (await this.isIpPrivate(addr.address)) {
+              return false;
+            }
+          }
+        } catch {
+          // DNS resolution failed
+          return false;
+        }
       }
 
-      // Forbid file:, data:, ftp:, gopher: protocols
       return true;
     } catch {
       return false;
     }
   }
 
-  private isPrivateOrLinkLocal(hostname: string): boolean {
-    // Check for IPv4 private/link-local ranges
+  private async isIpPrivate(addr: string): Promise<boolean> {
+    // IPv4 private ranges
     const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-    const ipv4Match = hostname.match(ipv4Regex);
+    const ipv4Match = addr.match(ipv4Regex);
 
     if (ipv4Match) {
       const [, a, b, c, d] = ipv4Match.map(Number);
 
+      // Loopback: 127.0.0.0/8
+      if (a === 127) return true;
       // Private ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
       if (a === 10) return true;
       if (a === 172 && b >= 16 && b <= 31) return true;
       if (a === 192 && b === 168) return true;
-
       // Link-local: 169.254.0.0/16
       if (a === 169 && b === 254) return true;
 
-      // Loopback: 127.0.0.0/8
-      if (a === 127) return true;
+      return false;
     }
 
-    // Check for IPv6 private/link-local ranges
-    if (hostname.includes(':')) {
-      const lower = hostname.toLowerCase();
+    // IPv6 ranges
+    if (addr.includes(':')) {
+      const lower = addr.toLowerCase();
+      // Loopback: ::1
+      if (lower === '::1' || lower === '0:0:0:0:0:0:0:1') return true;
       // ULA: fc00::/7
       if (lower.startsWith('fc') || lower.startsWith('fd')) return true;
       // Link-local: fe80::/10
@@ -377,8 +425,6 @@ export class VerifierV13 {
         lower.startsWith('feb')
       )
         return true;
-      // Loopback: ::1
-      if (lower === '::1' || lower === '0:0:0:0:0:0:0:1') return true;
     }
 
     return false;
@@ -386,81 +432,103 @@ export class VerifierV13 {
 
   private async fetchWithLimits(
     url: string,
-    options: { method?: string; timeout?: number; maxRedirects?: number } = {}
+    options: {
+      method?: string;
+      timeout?: number;
+      maxRedirects?: number;
+      headers?: Record<string, string>;
+    } = {}
   ) {
-    const controller = new AbortController();
-    const timeout = Math.min(options.timeout || 150, 150); // Per-fetch ≤ 150ms
-    const maxSize = 256 * 1024; // Max body 256 KiB
-    const maxRedirects = Math.min(options.maxRedirects || 3, 3); // ≤3 redirects
+    const perFetch = Math.min(options.timeout || 150, 150);
+    const maxSize = 256 * 1024; // 256 KiB
+    const maxRedirects = Math.min(options.maxRedirects || 3, 3);
 
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    let current = url;
+    let redirects = 0;
 
-    try {
-      // Apply SSRF guards
-      if (!this.isAllowedUrl(url, {})) {
-        throw new Error('URL not allowed by security policy');
+    for (;;) {
+      // Validate current URL with DNS resolution
+      if (!(await this.isAllowedUrl(current, {}))) {
+        throw new Error('URL not allowed');
       }
 
-      let currentUrl = url;
-      let redirectCount = 0;
-      let response: Response;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), perFetch);
 
-      do {
-        response = await fetch(currentUrl, {
+      try {
+        const response = await fetch(current, {
           method: options.method || 'GET',
+          redirect: 'manual',
           signal: controller.signal,
-          redirect: 'manual', // Handle redirects manually for security
           headers: {
             'User-Agent': 'PEAC-Verifier/0.9.13.1',
             Accept: 'text/html,application/json,text/plain,*/*;q=0.8',
             'Cache-Control': 'no-cache',
+            ...options.headers,
           },
         });
 
-        // Handle redirects with security validation
+        clearTimeout(timeoutId);
+
+        // Handle 3xx redirects with same-scheme validation and DNS re-check
         if (response.status >= 300 && response.status < 400) {
           const location = response.headers.get('location');
-          if (!location) {
-            throw new Error('Redirect without location header');
-          }
+          if (!location) throw new Error('Redirect without Location');
 
-          // Resolve relative redirects
-          const redirectUrl = new URL(location, currentUrl).toString();
+          const next = new URL(location, current).toString();
+          const fromScheme = new URL(current).protocol;
+          const toScheme = new URL(next).protocol;
+          if (fromScheme !== toScheme) throw new Error('Cross-scheme redirect blocked');
 
-          // Validate redirect URL against security policy
-          if (!this.isAllowedUrl(redirectUrl, {})) {
-            throw new Error('Redirect URL not allowed by security policy');
-          }
-
-          // Ensure same-scheme redirects only
-          const currentScheme = new URL(currentUrl).protocol;
-          const redirectScheme = new URL(redirectUrl).protocol;
-          if (currentScheme !== redirectScheme) {
-            throw new Error('Cross-scheme redirects not allowed');
-          }
-
-          currentUrl = redirectUrl;
-          redirectCount++;
-
-          if (redirectCount > maxRedirects) {
-            throw new Error(`Too many redirects (max ${maxRedirects})`);
-          }
-        } else {
-          break; // Not a redirect, proceed with response
+          if (++redirects > maxRedirects) throw new Error('Too many redirects');
+          current = next;
+          continue;
         }
-      } while (redirectCount <= maxRedirects);
 
-      // Validate response size
-      const contentLength = response.headers.get('content-length');
-      if (contentLength && parseInt(contentLength) > maxSize) {
-        throw new Error(`Response too large (max ${maxSize} bytes)`);
+        // Enforce size limit even without Content-Length by streaming
+        if (response.body) {
+          const reader = response.body.getReader();
+          const chunks: Uint8Array[] = [];
+          let totalRead = 0;
+
+          try {
+            for (;;) {
+              const { value, done } = await reader.read();
+              if (done) break;
+
+              if (value) {
+                totalRead += value.byteLength;
+                if (totalRead > maxSize) {
+                  throw new Error('Response too large');
+                }
+                chunks.push(value);
+              }
+            }
+
+            // Reconstruct the response with the buffered body
+            const totalLength = chunks.reduce((acc, chunk) => acc + chunk.byteLength, 0);
+            const body = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const chunk of chunks) {
+              body.set(chunk, offset);
+              offset += chunk.byteLength;
+            }
+
+            return new Response(body, {
+              status: response.status,
+              statusText: response.statusText,
+              headers: response.headers,
+            });
+          } finally {
+            reader.releaseLock();
+          }
+        }
+
+        return response;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
       }
-
-      clearTimeout(timeoutId);
-      return response;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      throw error;
     }
   }
 }

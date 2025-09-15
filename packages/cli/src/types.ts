@@ -44,6 +44,10 @@ export interface VerifyResult {
     payload: any;
   };
   policy_hash?: string;
+  reconstructed?: {
+    hash?: string;
+    matches?: boolean;
+  };
   resource?: string;
   error?: string;
 }

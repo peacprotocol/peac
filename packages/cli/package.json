@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsup && chmod +x bin/peac.js",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build:types": "tsc -p tsconfig.types.json",
     "dev": "tsx src/cli.ts",
     "pretest": "pnpm build",
     "test": "node --test src/*.test.js",
