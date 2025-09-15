@@ -20,11 +20,12 @@
   ],
   "scripts": {
     "build": "tsup && chmod +x bin/peac.js",
+    "build:types": "tsc -b",
     "dev": "tsx src/cli.ts",
     "pretest": "pnpm build",
     "test": "node --test src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b --pretty false",
     "clean": "rm -rf dist"
   },
   "dependencies": {

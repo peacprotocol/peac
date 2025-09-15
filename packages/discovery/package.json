@@ -19,6 +19,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "build:types": "tsc -b",
     "test": "node --test src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
     "typecheck": "tsc --noEmit"

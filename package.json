@@ -12,7 +12,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "turbo run build",
-    "build:types": "tsc -b",
+    "build:types": "turbo run build:types",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "test:crawler": "pnpm -w run test --filter @peac/crawler",
