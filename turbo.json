@@ -8,6 +8,7 @@
       "outputs": []
     },
     "build:types": {
+      "dependsOn": ["^build:types"],
       "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map", "dist/.tsbuildinfo"]
     },
     "typecheck": {
