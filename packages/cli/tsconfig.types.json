@@ -4,22 +4,15 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-
+    "strict": true,
+    "skipLibCheck": true,
     "declaration": true,
     "emitDeclarationOnly": true,
+    "declarationMap": true,
     "outDir": "dist",
-
     "lib": ["ES2022", "DOM"],
-    "types": ["node"],
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-
-    "baseUrl": "../../",
-    "paths": {
-      "@peac/core": ["packages/core/dist/src/index.d.ts", "packages/core/dist"],
-      "@peac/disc": ["packages/discovery/dist/index.d.ts", "packages/discovery/dist"]
-    }
+    "types": ["node"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [{ "path": "../core" }, { "path": "../discovery" }]
 }

@@ -18,8 +18,9 @@ test('CLI discover - happy path', async (t) => {
     // Should exit with 0 and contain a valid URL whose host is example.com
     const match = output.match(/https?:\/\/[^\s"'<>]+/);
     assert(match, 'expected a URL in CLI output');
-    const host = new URL(match[0]).hostname.replace(/^www\./, '');
-    assert.strictEqual(host, 'example.com');
+    const url = new URL(match[0]);
+    assert.strictEqual(url.protocol, 'https:');
+    assert(url.hostname === 'example.com' || url.hostname === 'www.example.com');
   } catch (error) {
     // Network issues are acceptable in CI, check exit code patterns
     if (error.status === 1) {
