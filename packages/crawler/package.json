@@ -47,7 +47,7 @@
     "perf": "node --loader ts-node/esm test/performance/perf.ts"
   },
   "dependencies": {
-    "lru-cache": "^10.0.0",
+    "lru-cache": "^11.2.1",
     "@peac/core": "workspace:^0.9.12.1"
   },
   "devDependencies": {
