@@ -8,18 +8,15 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationMap": true,
+    "outDir": "dist",
 
-    "stripInternal": true,
-    "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
 
     "lib": ["ES2022", "DOM"],
-    "types": ["node"],
-
-    "baseUrl": "../../",
-    "outDir": "dist"
+    "types": ["node"]
   },
   "include": ["src/**/*"]
 }
