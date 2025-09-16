@@ -10,6 +10,7 @@ export function peacHeaders(extra: Record<string, string> = {}, sensitive = fals
     'peac-version': WIRE_VERSION,
     'X-Content-Type-Options': 'nosniff',
     'Cross-Origin-Resource-Policy': 'same-origin',
+    'Referrer-Policy': 'no-referrer',
     ...extra,
   };
 
