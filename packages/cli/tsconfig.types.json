@@ -1,13 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "composite": true,
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationMap": true,
     "outDir": "dist",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
     "strict": true,
     "skipLibCheck": true,
     "lib": ["ES2022", "DOM"],
