@@ -6,6 +6,7 @@
     "emitDeclarationOnly": true,
     "declarationMap": true,
     "outDir": "dist",
+
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ES2022",
@@ -13,7 +14,10 @@
     "skipLibCheck": true,
     "lib": ["ES2022", "DOM"],
     "types": ["node"],
-    "noEmit": false
+
+    "noEmit": false,
+
+    "paths": {}
   },
   "include": ["src/**/*"],
   "references": [{ "path": "../core" }, { "path": "../discovery" }]
