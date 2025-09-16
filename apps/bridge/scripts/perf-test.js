@@ -33,6 +33,7 @@ class PerformanceValidator {
     const cliPath = join(__dirname, '../../../packages/cli/bin/peac.js');
     this.bridgeProcess = spawn('node', [cliPath, 'bridge', 'start', '--port', BRIDGE_PORT], {
       stdio: 'pipe',
+      env: { ...process.env, PEAC_ENABLE_METRICS: '1' },
     });
 
     // Wait for bridge to start

@@ -20,6 +20,7 @@ import { verifyRoute } from './routes/verify.js';
 import { healthRoute } from './routes/health.js';
 import { readinessRoute } from './routes/readiness.js';
 import { metricsRoute } from './routes/metrics.js';
+import { peacHeaders } from './util/http.js';
 
 const DEFAULT_PORT = 31415;
 const METRICS_PORT = 31416;
@@ -63,13 +64,12 @@ export function createBridgeApp() {
   app.post('/enforce', enforceRoute);
   app.post('/verify', verifyRoute);
   app.get('/health', healthRoute);
-  // HEAD /health (Hono handles HEAD automatically for GET routes)
+  // app.head('/health', healthRoute); // Explicit HEAD support - removed due to Hono compatibility
   app.get('/ready', readinessRoute);
 
   // Bridge info endpoint
   app.get('/', (c) => {
-    c.header('Content-Type', 'application/peac+json');
-    return c.json({
+    const body = JSON.stringify({
       name: '@peac/app-bridge',
       version: '0.9.13.2',
       wire_version: '0.9.13',
@@ -80,30 +80,32 @@ export function createBridgeApp() {
         '/enforce': 'POST - Core orchestration (discover → evaluate → settle → prove)',
         '/verify': 'POST - Receipt verification and policy validation',
       },
-      ports: {
-        http: 31415,
-        metrics: 31416,
-      },
-      performance_targets: {
-        enforce_p95_ms: 5,
-        verify_p95_ms: 5,
-        cpu_idle_at_100rps: '< 5%',
-      },
+      ports: { http: 31415, metrics: 31416 },
+      performance_targets: { enforce_p95_ms: 5, verify_p95_ms: 5, cpu_idle_at_100rps: '< 5%' },
     });
+    return c.newResponse(
+      body,
+      200,
+      peacHeaders({ 'Content-Type': 'application/peac+json', 'X-Request-ID': c.get('requestId') })
+    );
   });
 
   // 404 handler
   app.notFound((c) => {
-    c.header('Content-Type', 'application/problem+json');
-    return c.json(
-      {
-        type: 'https://peacprotocol.org/problems/not-found',
-        status: 404,
-        title: 'Not Found',
-        detail: `Endpoint ${c.req.path} not found on bridge`,
-        instance: c.req.url,
-      },
-      404
+    const body = JSON.stringify({
+      type: 'https://peacprotocol.org/problems/not-found',
+      status: 404,
+      title: 'Not Found',
+      detail: `Endpoint ${c.req.path} not found on bridge`,
+      instance: c.req.url,
+    });
+    return c.newResponse(
+      body,
+      404,
+      peacHeaders({
+        'Content-Type': 'application/problem+json',
+        'X-Request-ID': c.get('requestId'),
+      })
     );
   });
 
@@ -114,12 +116,12 @@ export async function startBridge(options: { port?: number } = {}) {
   const port = process.env.PEAC_BRIDGE_PORT
     ? parseInt(process.env.PEAC_BRIDGE_PORT)
     : options.port || DEFAULT_PORT;
-  const host = process.env.PEAC_BRIDGE_HOST || '127.0.0.1'; // LOOPBACK ONLY
+  const host = '127.0.0.1'; // hard lock to loopback (dev-sidecar by design)
 
   const app = createBridgeApp();
 
-  console.log(`🌉 PEAC Bridge v0.9.13.2 starting...`);
-  console.log(`🔗 HTTP: http://${host}:${port}`);
+  console.log(`PEAC Bridge v0.9.13.2 starting...`);
+  console.log(`HTTP: http://${host}:${port}`);
 
   // Start main server
   const server = serve({
@@ -139,19 +141,19 @@ export async function startBridge(options: { port?: number } = {}) {
       hostname: host,
     });
 
-    console.log(`📊 Metrics: http://${host}:${METRICS_PORT}/metrics`);
+    console.log(`Metrics: http://${host}:${METRICS_PORT}/metrics`);
   }
 
-  console.log(`✅ Bridge ready - Wire version: 0.9.13`);
+  console.log(`Bridge ready - Wire version: 0.9.13`);
 
   // Graceful shutdown
   process.on('SIGTERM', () => {
-    console.log('🛑 SIGTERM received, shutting down gracefully...');
+    console.log('SIGTERM received, shutting down gracefully...');
     process.exit(0);
   });
 
   process.on('SIGINT', () => {
-    console.log('🛑 SIGINT received, shutting down gracefully...');
+    console.log('SIGINT received, shutting down gracefully...');
     process.exit(0);
   });
 
@@ -161,7 +163,7 @@ export async function startBridge(options: { port?: number } = {}) {
 // CLI entry point
 if (import.meta.url === `file://${process.argv[1]}`) {
   startBridge().catch((error) => {
-    console.error('❌ Failed to start bridge:', error);
+    console.error('Failed to start bridge:', error);
     process.exit(1);
   });
 }

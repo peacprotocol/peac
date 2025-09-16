@@ -6,6 +6,37 @@ import { Command } from 'commander';
 import { readFileSync, unlinkSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { spawn } from 'child_process';
+
+// Windows-safe process termination
+async function killProcess(pid: number, signal?: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (process.platform === 'win32') {
+      // Use taskkill on Windows
+      const force = signal === 'SIGKILL' ? '/F' : '';
+      const taskkill = spawn('taskkill', ['/PID', pid.toString(), force].filter(Boolean));
+
+      taskkill.on('exit', (code) => {
+        if (code === 0 || code === 128) {
+          // 128 = process not found
+          resolve();
+        } else {
+          reject(new Error(`taskkill failed with code ${code}`));
+        }
+      });
+
+      taskkill.on('error', reject);
+    } else {
+      // Use standard signals on Unix-like systems
+      try {
+        process.kill(pid, signal || 'SIGTERM');
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    }
+  });
+}
 
 export function stopCommand() {
   return new Command('stop').description('Stop the PEAC Bridge').action(async () => {
@@ -47,7 +78,7 @@ export function stopCommand() {
 
       try {
         // Try graceful shutdown first (SIGTERM)
-        process.kill(pid, 'SIGTERM');
+        await killProcess(pid, 'SIGTERM');
 
         // Wait a moment for graceful shutdown
         await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -57,7 +88,7 @@ export function stopCommand() {
           process.kill(pid, 0);
           // Still running, force kill
           console.log('⚡ Force stopping bridge process...');
-          process.kill(pid, 'SIGKILL');
+          await killProcess(pid, 'SIGKILL');
         } catch (error: any) {
           if (error.code === 'ESRCH') {
             // Process stopped gracefully

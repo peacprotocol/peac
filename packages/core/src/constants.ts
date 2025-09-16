@@ -8,8 +8,3 @@ export const CANONICAL_HEADERS = {
   receipt: 'PEAC-Receipt',
   version: 'peac-version',
 };
-
-export const LEGACY_HEADERS = {
-  receipt: 'x-peac-receipt',
-  version: 'x-peac-protocol',
-};

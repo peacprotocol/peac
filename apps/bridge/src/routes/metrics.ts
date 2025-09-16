@@ -62,14 +62,14 @@ peac_enforce_requests_total ${enforceCount}
 peac_verify_requests_total ${verifyCount}
 
 # HELP peac_enforce_latency_seconds Enforce request latency in seconds
-# TYPE peac_enforce_latency_seconds histogram
+# TYPE peac_enforce_latency_seconds summary
 peac_enforce_latency_seconds_sum ${enforceLatencySum}
 peac_enforce_latency_seconds_count ${enforceCount}
 peac_enforce_latency_seconds{quantile="0.95"} ${enforceP95}
 peac_enforce_latency_seconds{quantile="0.99"} ${enforceP99}
 
 # HELP peac_verify_latency_seconds Verify request latency in seconds
-# TYPE peac_verify_latency_seconds histogram
+# TYPE peac_verify_latency_seconds summary
 peac_verify_latency_seconds_sum ${verifyLatencySum}
 peac_verify_latency_seconds_count ${verifyCount}
 peac_verify_latency_seconds{quantile="0.95"} ${verifyP95}
@@ -91,6 +91,9 @@ peac_bridge_cpu_seconds_total{mode="system"} ${cpuUsage.system / 1000000}
 peac_bridge_uptime_seconds ${process.uptime()}
 `;
 
-  c.header('Content-Type', 'text/plain; version=0.0.4');
-  return c.text(metrics);
+  const ct = 'text/plain; version=0.0.4; charset=utf-8';
+  return c.newResponse(metrics, 200, {
+    ...peacHeaders(),
+    'Content-Type': ct,
+  });
 }

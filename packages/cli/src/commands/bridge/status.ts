@@ -63,6 +63,11 @@ export function statusCommand() {
                   if (response.ok) {
                     status.health = await response.json();
                     status.health.status = 'healthy';
+                    // Capture peac-version header if present
+                    const peacVersion = response.headers.get('peac-version');
+                    if (peacVersion) {
+                      status.health.peac_version = peacVersion;
+                    }
                   } else {
                     status.health = {
                       status: 'unhealthy',
@@ -146,6 +151,9 @@ export function statusCommand() {
         console.log('🔍 Health: Unknown (no URL configured)');
       } else if (status.health.status === 'healthy') {
         console.log('✅ Health: Healthy');
+        if (status.health.peac_version) {
+          console.log(`   Wire version: ${status.health.peac_version}`);
+        }
         if (status.health.response_time_ms) {
           console.log(`   Response time: ${status.health.response_time_ms.toFixed(2)}ms`);
         }

@@ -61,27 +61,13 @@ export async function enforceRoute(c: Context) {
     // Call core enforce function
     const result = await enforce(resource, enrichedContext, bridgeOptions);
 
-    // Ensure AIPREF is present in receipts (dev-phase requirement)
-    if (result.receipt && result.decision) {
-      // Check if AIPREF was included in policy discovery
-      const hasAipref = result.decision.policies?.some((p) => p.type === 'aipref');
-      if (!hasAipref) {
-        // Inject AIPREF status - this should ideally be done in core enforce()
-        const receiptParts = result.receipt.split('..');
-        if (receiptParts.length === 2) {
-          try {
-            const claims = JSON.parse(Buffer.from(receiptParts[0], 'base64url').toString());
-            if (!claims.aipref) {
-              claims.aipref = { status: 'not_applicable' };
-              const newPayload = Buffer.from(JSON.stringify(claims)).toString('base64url');
-              result.receipt = `${newPayload}..${receiptParts[1]}`;
-            }
-          } catch (error) {
-            console.warn('Failed to inject AIPREF into receipt:', error);
-          }
-        }
-      }
-    }
+    // AIPREF shim (dev-phase): never mutate the JWS receipt.
+    // If core did not include AIPREF, expose best-effort AIPREF as side info in success body.
+    const aiprefSidecar =
+      (result as any).claims?.aipref ??
+      (result.decision?.policies?.some((p: any) => p.type === 'aipref')
+        ? undefined
+        : { status: 'not_applicable' });
 
     // Performance logging
     const elapsed = performance.now() - startTime;
@@ -95,19 +81,21 @@ export async function enforceRoute(c: Context) {
         allowed: true,
         decision: 'allow',
         receipt: result.receipt,
-        policy_hash: result.decision?.policies?.[0]?.content
-          ? `SHA256:${Buffer.from(JSON.stringify(result.decision.policies[0].content)).toString('base64').slice(0, 16)}`
-          : undefined,
+        policy_hash: (result as any).policy_hash, // rely on core; do not fabricate
+        aipref: aiprefSidecar,
       });
 
       return c.newResponse(
         responseBody,
         200,
-        peacHeaders({
-          'Content-Type': 'application/peac+json',
-          'PEAC-Receipt': result.receipt || '',
-          'X-Request-ID': c.get('requestId'),
-        })
+        peacHeaders(
+          {
+            'Content-Type': 'application/peac+json',
+            'PEAC-Receipt': result.receipt || '',
+            'X-Request-ID': c.get('requestId'),
+          },
+          true
+        ) // Mark as sensitive - contains receipt
       );
     }
 
@@ -152,14 +140,19 @@ export async function enforceRoute(c: Context) {
     }
 
     const denialBody = JSON.stringify(problem);
-    return c.newResponse(
-      denialBody,
-      problem.status as any,
-      peacHeaders({
-        'Content-Type': 'application/problem+json',
-        'X-Request-ID': c.get('requestId'),
-      })
-    );
+
+    // Build headers with Retry-After for 402 responses
+    const extraHeaders: Record<string, string> = {
+      'Content-Type': 'application/problem+json',
+      'X-Request-ID': c.get('requestId'),
+    };
+
+    const ra = (problem.extensions as any).payment?.retry_after;
+    if (isPaymentRequired && Number.isFinite(ra)) {
+      extraHeaders['Retry-After'] = String(ra);
+    }
+
+    return c.newResponse(denialBody, problem.status as any, peacHeaders(extraHeaders));
   } catch (error) {
     const elapsed = performance.now() - startTime;
     console.error(`Enforce error after ${elapsed.toFixed(2)}ms:`, error);

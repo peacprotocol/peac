@@ -36,23 +36,21 @@ export function startCommand() {
       const bridgePaths = [
         // Local development (monorepo)
         join(process.cwd(), 'apps/bridge/dist/server.js'),
-        // Global installation
-        join(process.cwd(), 'node_modules/@peac/app-bridge/dist/server.js'),
-        // Try using npx
-        '@peac/app-bridge',
-      ];
+        // Try to resolve installed module path
+        (() => {
+          try {
+            return require.resolve('@peac/app-bridge/dist/server.js');
+          } catch {
+            return null;
+          }
+        })(),
+      ].filter(Boolean) as string[];
 
       for (const path of bridgePaths) {
         try {
-          if (path.endsWith('.js')) {
-            accessSync(path);
-            bridgePath = path;
-            break;
-          } else {
-            // For @peac/app-bridge, we'll use npx
-            bridgePath = path;
-            break;
-          }
+          accessSync(path);
+          bridgePath = path;
+          break;
         } catch {
           continue;
         }
@@ -66,7 +64,7 @@ export function startCommand() {
 
       if (options.foreground) {
         // Run in foreground
-        const args = bridgePath === '@peac/app-bridge' ? ['npx', bridgePath] : ['node', bridgePath];
+        const args = ['node', bridgePath];
         const bridge = spawn(args[0], args.slice(1), {
           stdio: 'inherit',
           env,
@@ -90,7 +88,7 @@ export function startCommand() {
         const out = openSync(logFile, 'a');
         const err = openSync(logFile, 'a');
 
-        const args = bridgePath === '@peac/app-bridge' ? ['npx', bridgePath] : ['node', bridgePath];
+        const args = ['node', bridgePath];
         const bridge = spawn(args[0], args.slice(1), {
           detached: true,
           stdio: ['ignore', out, err],

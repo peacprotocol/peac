@@ -94,10 +94,13 @@ export async function verifyRoute(c: Context) {
     return c.newResponse(
       responseBody,
       200,
-      peacHeaders({
-        'Content-Type': 'application/peac+json',
-        'X-Request-ID': c.get('requestId'),
-      })
+      peacHeaders(
+        {
+          'Content-Type': 'application/peac+json',
+          'X-Request-ID': c.get('requestId'),
+        },
+        true
+      ) // Mark as sensitive - contains receipt verification data
     );
   } catch (error) {
     const elapsed = performance.now() - startTime;
