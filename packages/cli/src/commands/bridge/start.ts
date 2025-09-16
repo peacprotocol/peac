@@ -32,36 +32,29 @@ export function startCommand() {
       // Use discovery system to find bridge executable
       let bridgePath = null;
 
-      // Try to import discovery from bridge app
-      try {
-        const discoveryModule = await import('../../../apps/bridge/dist/discovery.js');
-        const bridge = await discoveryModule.discovery.discoverBridge();
-        bridgePath = bridge?.path;
-      } catch {
-        // Fallback to manual discovery if bridge discovery module not available
-        const bridgePaths = [
-          // Local development (monorepo)
-          join(process.cwd(), 'apps/bridge/dist/server.js'),
-          // Global installation
-          join(process.cwd(), 'node_modules/@peac/app-bridge/dist/server.js'),
-          // Try using npx
-          '@peac/app-bridge',
-        ];
+      // Find bridge executable using manual discovery
+      const bridgePaths = [
+        // Local development (monorepo)
+        join(process.cwd(), 'apps/bridge/dist/server.js'),
+        // Global installation
+        join(process.cwd(), 'node_modules/@peac/app-bridge/dist/server.js'),
+        // Try using npx
+        '@peac/app-bridge',
+      ];
 
-        for (const path of bridgePaths) {
-          try {
-            if (path.endsWith('.js')) {
-              accessSync(path);
-              bridgePath = path;
-              break;
-            } else {
-              // For @peac/app-bridge, we'll use npx
-              bridgePath = path;
-              break;
-            }
-          } catch {
-            continue;
+      for (const path of bridgePaths) {
+        try {
+          if (path.endsWith('.js')) {
+            accessSync(path);
+            bridgePath = path;
+            break;
+          } else {
+            // For @peac/app-bridge, we'll use npx
+            bridgePath = path;
+            break;
           }
+        } catch {
+          continue;
         }
       }
 
@@ -149,7 +142,10 @@ export function startCommand() {
               console.warn(`⚠️  Bridge responding but not healthy (HTTP ${response.status})`);
             }
           } catch (error) {
-            console.warn(`⚠️  Bridge may not be responding yet:`, error.message);
+            console.warn(
+              `⚠️  Bridge may not be responding yet:`,
+              error instanceof Error ? error.message : String(error)
+            );
             console.log(`   Check logs: ${logFile}`);
           }
         }, 2000);

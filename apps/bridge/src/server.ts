@@ -6,6 +6,13 @@
  */
 
 import { Hono } from 'hono';
+import type { Context } from 'hono';
+
+// Define context variables for type safety
+interface Variables {
+  requestId: string;
+  traceparent?: string;
+}
 import { serve } from '@hono/node-server';
 import { randomUUID } from 'crypto';
 import { enforceRoute } from './routes/enforce.js';
@@ -18,7 +25,7 @@ const DEFAULT_PORT = 31415;
 const METRICS_PORT = 31416;
 
 export function createBridgeApp() {
-  const app = new Hono();
+  const app = new Hono<{ Variables: Variables }>();
 
   // Generate request ID for correlation
   app.use('*', async (c, next) => {
@@ -103,7 +110,7 @@ export function createBridgeApp() {
   return app;
 }
 
-export async function startBridge(options = {}) {
+export async function startBridge(options: { port?: number } = {}) {
   const port = process.env.PEAC_BRIDGE_PORT
     ? parseInt(process.env.PEAC_BRIDGE_PORT)
     : options.port || DEFAULT_PORT;

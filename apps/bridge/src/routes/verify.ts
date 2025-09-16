@@ -38,15 +38,16 @@ export async function verifyRoute(c: Context) {
 
     // Use VerifierV13 class from apps/api for consistency
     // Dynamic import to avoid circular dependencies
-    let verifier;
+    let verifier: any;
     try {
-      const { VerifierV13 } = await import('../../api/src/verifier.js');
+      // @ts-ignore - Dynamic import with fallback strategy
+      const { VerifierV13 } = await import('../../api/dist/verifier.js');
       verifier = new VerifierV13();
     } catch (importError) {
       // Fallback to basic verification if API verifier not available
       console.warn('VerifierV13 not available, using basic verification');
       verifier = {
-        async verify(receipt, options) {
+        async verify(receipt: any, options: any) {
           // Basic receipt validation
           const parts = receipt.split('..');
           if (parts.length !== 2) {

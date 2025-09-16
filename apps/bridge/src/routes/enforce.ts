@@ -128,31 +128,33 @@ export async function enforceRoute(c: Context) {
 
     // Normalized payment object for 402
     if (isPaymentRequired) {
-      problem.extensions.payment = {
-        rail: result.decision?.settlement?.rail || 'x402',
-        amount: result.decision?.settlement?.amount?.value || '5.00',
-        currency: result.decision?.settlement?.amount?.currency || 'USD',
-        provider_ids: result.decision?.settlement?.provider_ids || [],
-        evidence: result.decision?.settlement?.evidence || {},
-        retry_after: result.decision?.settlement?.retry_after || 60,
+      const settlement = result.decision?.settlement || {};
+      (problem.extensions as any).payment = {
+        rail: (settlement as any).rail || 'x402',
+        amount: (settlement as any).amount?.value || '5.00',
+        currency: (settlement as any).amount?.currency || 'USD',
+        provider_ids: (settlement as any).provider_ids || [],
+        evidence: (settlement as any).evidence || {},
+        retry_after: (settlement as any).retry_after || 60,
       };
     }
 
     // Add policy metadata
-    if (result.problem?.['required-purpose']) {
-      problem.extensions.required_purpose = result.problem['required-purpose'];
+    const problemData = result.problem as any;
+    if (problemData?.['required-purpose']) {
+      (problem.extensions as any).required_purpose = problemData['required-purpose'];
     }
-    if (result.problem?.['min-tier']) {
-      problem.extensions.min_tier = result.problem['min-tier'];
+    if (problemData?.['min-tier']) {
+      (problem.extensions as any).min_tier = problemData['min-tier'];
     }
-    if (result.problem?.['policy-sources']) {
-      problem.extensions.policy_sources = result.problem['policy-sources'];
+    if (problemData?.['policy-sources']) {
+      (problem.extensions as any).policy_sources = problemData['policy-sources'];
     }
 
     const denialBody = JSON.stringify(problem);
     return c.newResponse(
       denialBody,
-      problem.status,
+      problem.status as any,
       peacHeaders({
         'Content-Type': 'application/problem+json',
         'X-Request-ID': c.get('requestId'),

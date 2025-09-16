@@ -19,7 +19,7 @@
     "bin/**/*"
   ],
   "scripts": {
-    "build": "tsup && chmod +x bin/bridge.js",
+    "build": "tsup",
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
     "pretest": "pnpm build",

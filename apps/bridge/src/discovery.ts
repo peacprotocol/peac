@@ -149,7 +149,7 @@ export class AdapterDiscovery {
             timeout: this.timeout,
           });
 
-          proc.on('exit', (code) => {
+          proc.on('exit', (code: number | null) => {
             clearTimeout(timeoutId);
             // npm list returns 0 if package is found, 1 if not found
             resolve(code === 0);
