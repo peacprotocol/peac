@@ -83,3 +83,80 @@ test('SSRF protection - allow localhost HTTP', async () => {
   assert.strictEqual(result.status, 400);
   assert(result.body.detail.includes('receipt'));
 });
+
+test('SSRF protection - reject IPv6 ULA and link-local', async () => {
+  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const verifier = new VerifierV13();
+
+  const ipv6URLs = [
+    'http://[fc00::1]/', // ULA fc00::/7
+    'http://[fe80::1]/', // Link-local fe80::/10
+  ];
+
+  for (const url of ipv6URLs) {
+    const request = {
+      receipt: 'dummy.receipt.jws',
+      resource: url,
+    };
+
+    const result = await verifier.verify(request);
+    assert.strictEqual(result.status, 500, `Should reject ${url}`);
+    assert(result.body.detail.includes('URL not allowed'));
+  }
+});
+
+test('SSRF protection - reject non-loopback HTTP', async () => {
+  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const verifier = new VerifierV13();
+
+  const request = {
+    receipt: 'dummy.receipt.jws',
+    resource: 'http://example.com/', // Non-loopback HTTP should be rejected
+  };
+
+  const result = await verifier.verify(request);
+  assert.strictEqual(result.status, 500);
+  assert(result.body.detail.includes('URL not allowed'));
+});
+
+test('SSRF protection - enforce redirect limits', async () => {
+  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const verifier = new VerifierV13();
+
+  const request = {
+    receipt: 'dummy.receipt.jws',
+    resource: 'https://httpbin.org/redirect/4', // >3 redirects should be rejected
+  };
+
+  const result = await verifier.verify(request, { maxRedirects: 3 });
+  assert.strictEqual(result.status, 500);
+  assert(result.body.detail.includes('redirect') || result.body.detail.includes('limit'));
+});
+
+test('SSRF protection - enforce size limits', async () => {
+  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const verifier = new VerifierV13();
+
+  const request = {
+    receipt: 'dummy.receipt.jws',
+    resource: 'https://httpbin.org/bytes/300000', // >256 KiB should be rejected
+  };
+
+  const result = await verifier.verify(request, { maxInputSize: 256 * 1024 });
+  assert.strictEqual(result.status, 500);
+  assert(result.body.detail.includes('size') || result.body.detail.includes('limit'));
+});
+
+test('SSRF protection - enforce timeout limits', async () => {
+  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const verifier = new VerifierV13();
+
+  const request = {
+    receipt: 'dummy.receipt.jws',
+    resource: 'https://httpbin.org/delay/1', // 1s delay should exceed 250ms budget
+  };
+
+  const result = await verifier.verify(request, { timeout: 250 });
+  assert.strictEqual(result.status, 500);
+  assert(result.body.detail.includes('timeout') || result.body.detail.includes('limit'));
+});
