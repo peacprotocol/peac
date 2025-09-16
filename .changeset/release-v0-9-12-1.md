@@ -4,7 +4,7 @@
 '@peac/receipts': minor
 '@peac/aipref': minor
 '@peac/pay402': minor
-'@peac/discovery': minor
+'@peac/disc': minor
 '@peac/sdk-js': minor
 '@peac/adapter-mcp': minor
 '@peac/adapter-openai': minor

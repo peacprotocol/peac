@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "composite": true,
     "strict": true,
     "target": "ES2022",
@@ -21,7 +22,7 @@
       "@peac/receipts": ["./packages/receipts/src"],
       "@peac/aipref": ["./packages/aipref/src"],
       "@peac/pay402": ["./packages/pay402/src"],
-      "@peac/discovery": ["./packages/discovery/src"],
+      "@peac/disc": ["./packages/discovery/src"],
       "@peac/sdk-js": ["./packages/sdk-js/src"],
       "@peac/profiles-safety": ["./packages/profiles-safety/src"],
       "@peac/adapter-mcp": ["./packages/adapters/mcp"],

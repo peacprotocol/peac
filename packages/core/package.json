@@ -28,7 +28,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "build:types": "tsc -b",
+    "build:types": "tsc -p tsconfig.types.json",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",

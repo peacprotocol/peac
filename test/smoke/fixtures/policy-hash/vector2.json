@@ -1,0 +1,4 @@
+{
+  "resource": "https://api.example.com:443/v1/data/../users?sort=name&filter=active",
+  "expectedHash": "b1X9mQ7zJKNQ8pL3vY5eF2RaT9cH6D8wS4uM1jX0Zgh"
+}

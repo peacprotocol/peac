@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": true,
+    "outDir": "dist",
+
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "strict": true,
+    "skipLibCheck": true,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+
+    "noEmit": false,
+
+    "paths": {
+      "@peac/core": ["../core/dist/index.d.ts"],
+      "@peac/disc": ["../discovery/dist/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "references": [{ "path": "../core" }, { "path": "../discovery" }]
+}

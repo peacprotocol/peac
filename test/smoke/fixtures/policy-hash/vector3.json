@@ -1,0 +1,4 @@
+{
+  "resource": "https://test.example.com:443/api/v2/test%20path?param1=value+1&param2=value%202",
+  "expectedHash": "k7J5mF9wH2qR8vL1nG4dX3ZaP6tY0sE7jM2cI8bN5uA"
+}
