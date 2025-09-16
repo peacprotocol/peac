@@ -4,6 +4,7 @@
  */
 
 import { Context } from 'hono';
+import { peacHeaders } from '../util/http.js';
 
 // Simple in-memory metrics (production would use proper Prometheus client)
 let enforceCount = 0;
