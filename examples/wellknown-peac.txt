@@ -1,0 +1,21 @@
+# PEAC Protocol Discovery v0.9.13
+# Example /.well-known/peac.txt file (≤20 lines)
+
+preferences: https://example.com/.well-known/aipref.txt
+access_control: http-402
+payments: [l402, x402, stripe]
+provenance: c2pa
+receipts: required
+verify: https://api.example.com/peac/verify
+
+# Public keys for receipt verification
+public_keys:
+  - kid: "2025-09-17/01"
+    alg: EdDSA
+    key: MCowBQYDK2VwAyEAGqBWFw+WPKCYmVnkgLJiUzIhNMkTrCmg8wQNLV6DCCU=
+  - kid: "2025-09-01/01"
+    alg: EdDSA
+    key: MCowBQYDK2VwAyEAPreviousKeyForRotation123456789ABCDEF=
+
+# Optional contact
+contact: peac-admin@example.com
