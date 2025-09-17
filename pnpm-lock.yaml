@@ -135,9 +135,6 @@ importers:
       '@peac/receipts':
         specifier: workspace:^0.9.12.1
         version: link:../../packages/receipts
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
       hono:
         specifier: ^4.9.7
         version: 4.9.7
