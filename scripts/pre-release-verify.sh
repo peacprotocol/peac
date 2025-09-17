@@ -5,7 +5,10 @@ set -euo pipefail
 # Run this before tagging any release to ensure wire protocol compliance
 # Usage: ./scripts/pre-release-verify.sh
 
-echo "🔍 PEAC Pre-Release Verification - v0.9.13.2"
+WIRE_VERSION="${WIRE_VERSION:-0.9.13}"
+IMPLEMENTATION_VERSION="${IMPLEMENTATION_VERSION:-0.9.13.2}"
+
+echo "🔍 PEAC Pre-Release Verification - v${IMPLEMENTATION_VERSION}"
 echo "============================================"
 
 # Colors for output
@@ -59,13 +62,13 @@ echo "-----------------------------------"
 # 1. Headers & media types
 echo -e "\n1️⃣ Testing wire version headers..."
 for endpoint in /health /ready; do
-    curl -sI 127.0.0.1:31415$endpoint | grep -qi 'peac-version: 0.9.13'
-    check_result "GET $endpoint has peac-version: 0.9.13"
+    curl -sI 127.0.0.1:31415$endpoint | grep -qi "peac-version: ${WIRE_VERSION}"
+    check_result "GET $endpoint has peac-version: ${WIRE_VERSION}"
 done
 
 # 2. HEAD /health support
-curl -sI -X HEAD 127.0.0.1:31415/health | grep -qi 'peac-version: 0.9.13'
-check_result "HEAD /health has peac-version: 0.9.13"
+curl -sI -X HEAD 127.0.0.1:31415/health | grep -qi "peac-version: ${WIRE_VERSION}"
+check_result "HEAD /health has peac-version: ${WIRE_VERSION}"
 
 # 3. Enforce allow path
 echo -e "\n2️⃣ Testing enforce allow path..."
@@ -99,7 +102,7 @@ METRICS_HEADERS=$(curl -sD - 127.0.0.1:31416/metrics -o /dev/null)
 echo "$METRICS_HEADERS" | grep -qi '^content-type: text/plain; version=0.0.4; charset=utf-8'
 check_result "Metrics has correct content-type"
 
-echo "$METRICS_HEADERS" | grep -qi '^peac-version: 0.9.13'
+echo "$METRICS_HEADERS" | grep -qi "^peac-version: ${WIRE_VERSION}"
 check_result "Metrics has peac-version header"
 
 echo "$METRICS_HEADERS" | grep -qi '^cache-control: no-cache'
@@ -137,13 +140,13 @@ check_result "All 7 enforce smoke tests passing"
 echo -e "\n======================================"
 if [ $FAILURES -eq 0 ]; then
     echo -e "${GREEN}✅ ALL CHECKS PASSED!${NC}"
-    echo -e "Ready to tag and release v0.9.13.2"
+    echo -e "Ready to tag and release v${IMPLEMENTATION_VERSION}"
     echo -e "\nNext steps:"
     echo "1. Commit all changes"
-    echo "2. Push to remote: git push origin release/v0.9.13.2"
+    echo "2. Push to remote: git push origin release/v${IMPLEMENTATION_VERSION}"
     echo "3. Create PR and merge to main"
-    echo "4. Tag release: git tag -a v0.9.13.2 -m \"PEAC Bridge v0.9.13.2\""
-    echo "5. Push tag: git push origin v0.9.13.2"
+    echo "4. Tag release: git tag -a v${IMPLEMENTATION_VERSION} -m \"PEAC Bridge v${IMPLEMENTATION_VERSION}\""
+    echo "5. Push tag: git push origin v${IMPLEMENTATION_VERSION}"
 else
     echo -e "${RED}❌ FAILED: $FAILURES checks did not pass${NC}"
     echo -e "Please fix the issues above before releasing"

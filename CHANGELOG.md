@@ -5,6 +5,45 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.13.2] - 2025-09-17
+
+Intent: Zero-friction local enforcement/verification via a loopback sidecar.
+
+### Added
+
+- **apps/bridge/** Hono server on 127.0.0.1:31415 with /enforce, /verify, /health, /ready; /metrics on :31416
+- Wire headers: peac-version: 0.9.13 on all endpoints
+- Media types: success application/peac+json, errors application/problem+json (RFC 7807 with canonical https://peacprotocol.org/problems/<slug>)
+- PEAC-Receipt header on allow; sensitive responses send Cache-Control: no-store, no-cache, must-revalidate, private
+- 402 responses mirror payment timing via Retry-After and normalized payment{} extension
+- Prometheus metrics with Content-Type: text/plain; version=0.0.4; charset=utf-8, peac-version header, and Cache-Control: no-cache
+- Explicit HEAD /health for monitors
+- CLI: peac bridge install|start|stop|status with Windows-safe stop, PID tracking, logs, and require.resolve() discovery
+- Readiness checks include core_loaded and api_verifier_loaded
+
+### Changed
+
+- Verify returns proper 4xx/5xx with Problem+JSON on errors (no 200-on-error)
+- Lock loopback host to 127.0.0.1 (no 0.0.0.0 override)
+- Consolidated security headers (nosniff, CORP same-origin) via centralized helper
+
+### Removed
+
+- All legacy X-PEAC-\* headers; emojis/em-dashes in logs; dead discovery code paths
+
+### Security
+
+- Loopback-only binding; SSRF protections preserved; strict cache controls
+
+### Performance
+
+- Local /enforce p95 < 5 ms; CPU idle < 5% @ 100 rps baseline
+- Cold start comfortably < 30 ms
+
+### Compatibility
+
+- Wire protocol 0.9.13; additive, non-breaking. Embedded enforcement remains fallback
+
 ## [0.9.10-beta] - 2025-01-29
 
 ### Added
