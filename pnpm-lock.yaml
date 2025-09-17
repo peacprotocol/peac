@@ -118,6 +118,43 @@ importers:
         specifier: ^5.0.0
         version: 5.9.2
 
+  apps/bridge:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^1.8.2
+        version: 1.19.2(hono@4.9.7)
+      '@peac/core':
+        specifier: workspace:^0.9.12.1
+        version: link:../../packages/core
+      '@peac/disc':
+        specifier: workspace:^0.9.12.1
+        version: link:../../packages/discovery
+      '@peac/pay402':
+        specifier: workspace:^0.9.12.1
+        version: link:../../packages/pay402
+      '@peac/receipts':
+        specifier: workspace:^0.9.12.1
+        version: link:../../packages/receipts
+      hono:
+        specifier: ^4.9.7
+        version: 4.9.7
+      zod:
+        specifier: ^3.22.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.13
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.0(tsx@4.20.5)(typescript@5.9.2)
+      tsx:
+        specifier: ^4.0.0
+        version: 4.20.5
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.2
+
   packages/adapters/cloudflare:
     dependencies:
       '@peac/core':

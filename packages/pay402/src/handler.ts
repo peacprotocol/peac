@@ -20,6 +20,7 @@ export class Http402Handler {
       'Content-Type': 'application/problem+json',
       'WWW-Authenticate': this.buildWwwAuthenticate(challenges),
       'Accept-Payment': challenges.map((c) => `${c.rail} ${c.challenge}`).join(', '),
+      'Retry-After': '300', // Suggest retry after 5 minutes
     };
 
     // Add pricing headers for transparency

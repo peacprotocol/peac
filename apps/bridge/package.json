@@ -1,17 +1,16 @@
 {
-  "name": "@peac/cli",
+  "name": "@peac/app-bridge",
   "version": "0.9.13.2",
-  "description": "PEAC Protocol CLI tools for discovery, hashing, and verification",
+  "description": "PEAC Protocol Bridge - Local development sidecar",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/server.js",
+  "private": true,
   "bin": {
-    "peac": "./bin/peac.js"
+    "peac-bridge": "./bin/bridge.js"
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/server.js"
     }
   },
   "files": [
@@ -19,11 +18,13 @@
     "bin/**/*"
   ],
   "scripts": {
-    "build": "tsup && chmod +x bin/peac.js",
-    "build:types": "tsc -b tsconfig.types.json",
-    "dev": "tsx src/cli.ts",
+    "build": "tsup",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
     "pretest": "pnpm build",
     "test": "node --test src/*.test.js",
+    "test:perf": "node scripts/perf-test.js",
+    "perf": "npm run test:perf",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
@@ -31,8 +32,11 @@
   "dependencies": {
     "@peac/core": "workspace:^0.9.12.1",
     "@peac/disc": "workspace:^0.9.12.1",
-    "commander": "^11.0.0",
-    "chalk": "^5.3.0"
+    "@peac/receipts": "workspace:^0.9.12.1",
+    "@peac/pay402": "workspace:^0.9.12.1",
+    "hono": "^4.9.7",
+    "@hono/node-server": "^1.8.2",
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -42,14 +46,14 @@
   },
   "keywords": [
     "peac",
-    "cli",
-    "discovery",
-    "verification",
-    "hash"
+    "bridge",
+    "sidecar",
+    "adapter",
+    "local-development"
   ],
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.18.0"
   }
 }

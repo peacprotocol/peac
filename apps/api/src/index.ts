@@ -60,14 +60,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   // Start server
   const port = parseInt(process.env.PORT || '3000');
-  console.log(`🚀 PEAC Verify API v0.9.13.1 starting on port ${port}`);
+  console.log(`PEAC Verify API v0.9.13.1 starting on port ${port}`);
 
   serve({
     fetch: app.fetch,
     port,
   });
 
-  console.log(`✅ Server running at http://localhost:${port}`);
-  console.log(`📋 Health check: http://localhost:${port}/health`);
-  console.log(`🔍 Verify endpoint: POST http://localhost:${port}/verify`);
+  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Health check: http://localhost:${port}/health`);
+  console.log(`Verify endpoint: POST http://localhost:${port}/verify`);
 }

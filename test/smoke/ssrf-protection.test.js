@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 
 test('SSRF protection - reject file: URLs', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const request = {
@@ -18,7 +18,7 @@ test('SSRF protection - reject file: URLs', async () => {
 });
 
 test('SSRF protection - reject data: URLs', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const request = {
@@ -32,7 +32,7 @@ test('SSRF protection - reject data: URLs', async () => {
 });
 
 test('SSRF protection - reject private IP addresses', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const privateIPs = [
@@ -55,7 +55,7 @@ test('SSRF protection - reject private IP addresses', async () => {
 });
 
 test('SSRF protection - allow HTTPS URLs', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const request = {
@@ -70,7 +70,7 @@ test('SSRF protection - allow HTTPS URLs', async () => {
 });
 
 test('SSRF protection - allow localhost HTTP', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const request = {
@@ -85,7 +85,7 @@ test('SSRF protection - allow localhost HTTP', async () => {
 });
 
 test('SSRF protection - reject IPv6 ULA and link-local', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const ipv6URLs = [
@@ -106,7 +106,7 @@ test('SSRF protection - reject IPv6 ULA and link-local', async () => {
 });
 
 test('SSRF protection - reject non-loopback HTTP', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const request = {
@@ -120,7 +120,7 @@ test('SSRF protection - reject non-loopback HTTP', async () => {
 });
 
 test('SSRF protection - enforce redirect limits', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const request = {
@@ -134,7 +134,7 @@ test('SSRF protection - enforce redirect limits', async () => {
 });
 
 test('SSRF protection - enforce size limits', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const request = {
@@ -148,7 +148,7 @@ test('SSRF protection - enforce size limits', async () => {
 });
 
 test('SSRF protection - enforce timeout limits', async () => {
-  const { VerifierV13 } = await import('../../apps/api/src/verifier.js');
+  const { VerifierV13 } = await import('../../apps/api/dist/verifier.js');
   const verifier = new VerifierV13();
 
   const request = {

@@ -8,6 +8,7 @@ import { Command } from 'commander';
 import { DiscoverCommand } from './commands/discover.js';
 import { HashCommand } from './commands/hash.js';
 import { VerifyCommand } from './commands/verify.js';
+import { bridgeCommand } from './commands/bridge/index.js';
 import { formatOutput, createExitHandler } from './utils.js';
 
 const program = new Command();
@@ -79,6 +80,9 @@ program
     console.log(formatOutput(result, globalOptions.json));
     exit(result.success ? 0 : 1);
   });
+
+// peac bridge {install|start|stop|status}
+program.addCommand(bridgeCommand());
 
 // Handle unknown commands
 program.on('command:*', () => {
