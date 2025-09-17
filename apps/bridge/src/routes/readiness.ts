@@ -26,7 +26,7 @@ async function checkSignerCache() {
 
 async function checkApiVerifier() {
   try {
-    await import('../../api/dist/verifier.js');
+    await import('@peac/app-api');
     return true;
   } catch {
     return false;

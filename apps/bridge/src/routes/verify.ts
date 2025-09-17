@@ -41,7 +41,7 @@ export async function verifyRoute(c: Context) {
     // Dynamic import to avoid circular dependencies
     let verifier: any;
     try {
-      const { VerifierV13 } = await import('../../api/dist/verifier.js');
+      const { VerifierV13 } = await import('@peac/app-api');
       verifier = new VerifierV13();
     } catch (importError) {
       console.warn('bridge: VerifierV13 not available (using fallback verifier)');
