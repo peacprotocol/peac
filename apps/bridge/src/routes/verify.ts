@@ -5,6 +5,7 @@
 
 import { Context } from 'hono';
 import { peacHeaders } from '../util/http.js';
+import { recordVerify } from './metrics.js';
 
 export async function verifyRoute(c: Context) {
   const startTime = performance.now();
@@ -40,12 +41,10 @@ export async function verifyRoute(c: Context) {
     // Dynamic import to avoid circular dependencies
     let verifier: any;
     try {
-      // @ts-ignore - Dynamic import with fallback strategy
       const { VerifierV13 } = await import('../../api/dist/verifier.js');
       verifier = new VerifierV13();
     } catch (importError) {
-      // Fallback to basic verification if API verifier not available
-      console.warn('VerifierV13 not available, using basic verification');
+      console.warn('bridge: VerifierV13 not available (using fallback verifier)');
       verifier = {
         async verify(receipt: any, options: any) {
           // Basic receipt validation
@@ -91,7 +90,7 @@ export async function verifyRoute(c: Context) {
       },
     });
 
-    return c.newResponse(
+    const res = c.newResponse(
       responseBody,
       200,
       peacHeaders(
@@ -102,27 +101,32 @@ export async function verifyRoute(c: Context) {
         true
       ) // Mark as sensitive - contains receipt verification data
     );
+    recordVerify(performance.now() - startTime);
+    return res;
   } catch (error) {
     const elapsed = performance.now() - startTime;
     console.error(`Verify error after ${elapsed.toFixed(2)}ms:`, error);
 
-    // Return as peac+json (not problem+json) for consistency
-    const errorBody = JSON.stringify({
-      valid: false,
-      reason: 'Verification failed due to internal error',
-      details: {
+    const problem = {
+      type: 'https://peacprotocol.org/problems/internal-error',
+      title: 'Internal Server Error',
+      status: 500,
+      detail: 'Verification failed due to internal error',
+      instance: `/verify/${c.get('requestId')}`,
+      extensions: {
         error_type: error instanceof Error ? error.constructor.name : 'UnknownError',
         duration_ms: elapsed,
       },
-    });
-
-    return c.newResponse(
-      errorBody,
-      200,
+    };
+    const res = c.newResponse(
+      JSON.stringify(problem),
+      500,
       peacHeaders({
-        'Content-Type': 'application/peac+json',
+        'Content-Type': 'application/problem+json',
         'X-Request-ID': c.get('requestId'),
       })
     );
+    recordVerify(performance.now() - startTime);
+    return res;
   }
 }

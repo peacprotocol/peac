@@ -64,7 +64,14 @@ export function createBridgeApp() {
   app.post('/enforce', enforceRoute);
   app.post('/verify', verifyRoute);
   app.get('/health', healthRoute);
-  // app.head('/health', healthRoute); // Explicit HEAD support - removed due to Hono compatibility
+  // Explicit HEAD for health (some monitors depend on it)
+  app.on('HEAD', '/health', (c) =>
+    c.newResponse(
+      '',
+      200,
+      peacHeaders({ 'Content-Type': 'application/peac+json', 'X-Request-ID': c.get('requestId') })
+    )
+  );
   app.get('/ready', readinessRoute);
 
   // Bridge info endpoint

@@ -10,6 +10,7 @@
 import { Context } from 'hono';
 import { enforce } from '@peac/core';
 import { peacHeaders } from '../util/http.js';
+import { recordEnforce } from './metrics.js';
 
 const PROBLEM_BASE = 'https://peacprotocol.org/problems/';
 
@@ -85,7 +86,7 @@ export async function enforceRoute(c: Context) {
         aipref: aiprefSidecar,
       });
 
-      return c.newResponse(
+      const res = c.newResponse(
         responseBody,
         200,
         peacHeaders(
@@ -97,6 +98,8 @@ export async function enforceRoute(c: Context) {
           true
         ) // Mark as sensitive - contains receipt
       );
+      recordEnforce('allow', performance.now() - startTime);
+      return res;
     }
 
     // Problem+JSON for deny/pay responses
@@ -139,20 +142,15 @@ export async function enforceRoute(c: Context) {
       (problem.extensions as any).policy_sources = problemData['policy-sources'];
     }
 
-    const denialBody = JSON.stringify(problem);
-
-    // Build headers with Retry-After for 402 responses
-    const extraHeaders: Record<string, string> = {
+    const retryAfter = isPaymentRequired && (problem.extensions as any)?.payment?.retry_after;
+    const headers = peacHeaders({
       'Content-Type': 'application/problem+json',
       'X-Request-ID': c.get('requestId'),
-    };
-
-    const ra = (problem.extensions as any).payment?.retry_after;
-    if (isPaymentRequired && Number.isFinite(ra)) {
-      extraHeaders['Retry-After'] = String(ra);
-    }
-
-    return c.newResponse(denialBody, problem.status as any, peacHeaders(extraHeaders));
+      ...(Number.isFinite(retryAfter) ? { 'Retry-After': String(retryAfter) } : {}),
+    });
+    const res = c.newResponse(JSON.stringify(problem), problem.status as any, headers);
+    recordEnforce(isPaymentRequired ? 'pay' : 'deny', performance.now() - startTime);
+    return res;
   } catch (error) {
     const elapsed = performance.now() - startTime;
     console.error(`Enforce error after ${elapsed.toFixed(2)}ms:`, error);

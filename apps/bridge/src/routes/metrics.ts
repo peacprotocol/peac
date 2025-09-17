@@ -96,5 +96,6 @@ peac_bridge_uptime_seconds ${process.uptime()}
   return c.newResponse(metrics, 200, {
     ...peacHeaders(),
     'Content-Type': ct,
+    'Cache-Control': 'no-cache',
   });
 }

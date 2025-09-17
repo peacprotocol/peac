@@ -29,30 +29,17 @@ export function startCommand() {
         PEAC_MODE: options.mode,
       };
 
-      // Use discovery system to find bridge executable
+      // Prefer resolved module path (works for workspace install)
       let bridgePath = null;
-
-      // Find bridge executable using manual discovery
-      const bridgePaths = [
-        // Local development (monorepo)
-        join(process.cwd(), 'apps/bridge/dist/server.js'),
-        // Try to resolve installed module path
-        (() => {
-          try {
-            return require.resolve('@peac/app-bridge/dist/server.js');
-          } catch {
-            return null;
-          }
-        })(),
-      ].filter(Boolean) as string[];
-
-      for (const path of bridgePaths) {
+      try {
+        bridgePath = require.resolve('@peac/app-bridge/dist/server.js', { paths: [process.cwd()] });
+      } catch {
         try {
-          accessSync(path);
-          bridgePath = path;
-          break;
+          const localPath = join(process.cwd(), 'apps/bridge/dist/server.js');
+          accessSync(localPath);
+          bridgePath = localPath;
         } catch {
-          continue;
+          bridgePath = null;
         }
       }
 
