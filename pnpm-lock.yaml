@@ -446,6 +446,8 @@ importers:
 
   packages/templates: {}
 
+  tests: {}
+
 packages:
 
   /@babel/code-frame@7.27.1:
