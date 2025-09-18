@@ -40,7 +40,7 @@
   "dependencies": {
     "jose": "^5.2.0",
     "lru-cache": "^10.0.0",
-    "zod": "^3.22.0"
+    "zod": "^4.1.9"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
