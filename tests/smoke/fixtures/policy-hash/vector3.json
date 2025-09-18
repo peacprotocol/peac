@@ -1,0 +1,31 @@
+{
+  "name": "Edge case with reserved characters and array ordering",
+  "description": "Tests that reserved percent-encodings are preserved and arrays maintain order",
+  "input": {
+    "resources": [
+      "https://example.com/path?query=value%20with%20spaces&other=param",
+      "http://localhost:80/test/../final",
+      "https://sub.domain.com/api/v1"
+    ],
+    "purposes": ["training", "inference", "evaluation"],
+    "configuration": {
+      "z_last_key": "should be last alphabetically",
+      "a_first_key": "should be first alphabetically",
+      "middle_key": {
+        "nested_z": "nested last",
+        "nested_a": "nested first"
+      }
+    },
+    "numbers": [3.14159, 42, -1, 0],
+    "booleans": [true, false, true]
+  },
+  "expected_hash": "BnoEmgCFRCnbFu6EeoB_GnRfpXev9aH_vnzLhrTnWnU",
+  "notes": [
+    "Reserved %20 (space) preserved in query params",
+    "http://localhost:80 -> http://localhost (default port removed)",
+    "Array order preserved (resources, purposes, numbers, booleans)",
+    "Object keys sorted alphabetically at each level",
+    "Numeric precision preserved",
+    "Boolean values canonical (true/false)"
+  ]
+}
