@@ -1,6 +1,14 @@
 /**
  * Normative policy hash implementation per v0.9.12.4
  * RFC 8785 JCS + URL normalization rules
+ *
+ * Canonicalization rules:
+ * - Scheme/host: lowercase
+ * - Ports: drop default (80 for HTTP, 443 for HTTPS)
+ * - Paths: resolve dot-segments, percent-encode
+ * - Query: preserve original order, normalize encoding
+ * - Fragments: drop entirely
+ * - JSON: JCS recursive key sorting
  */
 
 import { createHash } from 'node:crypto';
