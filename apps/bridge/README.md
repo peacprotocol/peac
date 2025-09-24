@@ -54,7 +54,6 @@ peac bridge stop
 curl -i http://127.0.0.1:31415/health
 
 HTTP/1.1 200 OK
-peac-version: 0.9.13
 Content-Type: application/peac+json
 X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 
@@ -64,7 +63,6 @@ X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 curl -I http://127.0.0.1:31415/health
 
 HTTP/1.1 200 OK
-peac-version: 0.9.13
 Content-Type: application/peac+json
 ```
 
@@ -74,7 +72,6 @@ Content-Type: application/peac+json
 curl -i http://127.0.0.1:31415/ready
 
 HTTP/1.1 200 OK
-peac-version: 0.9.13
 Content-Type: application/peac+json
 
 {
@@ -98,7 +95,6 @@ curl -i http://127.0.0.1:31415/enforce \
 
 # Success Response (200 OK)
 HTTP/1.1 200 OK
-peac-version: 0.9.13
 Content-Type: application/peac+json
 PEAC-Receipt: eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjUtMDktMTcvMDEiLCJ0eXAiOiJhcHBsaWNhdGlvbi9wZWFjLXJlY2VpcHQrand3cyJ9..signature
 Cache-Control: no-store, no-cache, must-revalidate, private
@@ -108,7 +104,6 @@ X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 
 # Payment Required Response (402)
 HTTP/1.1 402 Payment Required
-peac-version: 0.9.13
 Content-Type: application/problem+json
 Retry-After: 60
 X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
@@ -135,7 +130,6 @@ curl -i http://127.0.0.1:31415/verify \
 
 # Success Response (200 OK)
 HTTP/1.1 200 OK
-peac-version: 0.9.13
 Content-Type: application/peac+json
 Cache-Control: no-store, no-cache, must-revalidate, private
 
@@ -152,7 +146,6 @@ Cache-Control: no-store, no-cache, must-revalidate, private
 
 # Invalid Receipt Response (400)
 HTTP/1.1 400 Bad Request
-peac-version: 0.9.13
 Content-Type: application/problem+json
 
 {
@@ -170,7 +163,6 @@ curl -i http://127.0.0.1:31416/metrics
 
 HTTP/1.1 200 OK
 Content-Type: text/plain; version=0.0.4; charset=utf-8
-peac-version: 0.9.13
 Cache-Control: no-cache
 
 # HELP peac_enforce_requests_total Total number of enforce requests
@@ -197,7 +189,7 @@ peac_http_request_duration_seconds_bucket{le="0.01",path="/enforce"} 42
 All responses include the wire protocol version:
 
 ```
-peac-version: 0.9.13
+
 ```
 
 ### Cache Control for Sensitive Endpoints

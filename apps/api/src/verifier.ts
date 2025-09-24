@@ -4,9 +4,17 @@
  */
 
 import { promises as dns } from 'node:dns';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import { verify, canonicalPolicyHash } from '@peac/core';
 import { discover } from '@peac/disc';
 import type { HttpStatus } from './types.js';
+import receiptSchema from '../../../schemas/receipt-0.9.json' with { type: 'json' };
+
+// Initialize AJV with receipt schema
+const ajv = new (Ajv as any)({ strict: true, allErrors: true });
+(addFormats as any)(ajv);
+const validateReceipt = ajv.compile(receiptSchema);
 
 export interface V13VerifyRequest {
   receipt: string;
@@ -78,6 +86,57 @@ export class VerifierV13 {
             title: 'Invalid Request',
             status: 400,
             detail: 'receipt field is required and must be a string',
+            timing: buildTiming(),
+            meta: buildMeta(),
+          },
+        };
+      }
+
+      // Decode and validate receipt payload against schema first
+      let payload;
+      try {
+        const [payloadB64, ,] = request.receipt.split('..');
+        if (!payloadB64) {
+          return {
+            status: 400,
+            body: {
+              type: 'https://peacprotocol.org/problems/invalid-jws-format',
+              title: 'Invalid JWS Format',
+              status: 400,
+              detail: 'Invalid JWS compact serialization format',
+              timing: buildTiming(),
+              meta: buildMeta(),
+            },
+          };
+        }
+        payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+      } catch {
+        return {
+          status: 400,
+          body: {
+            type: 'https://peacprotocol.org/problems/invalid-jws-format',
+            title: 'Invalid JWS Format',
+            status: 400,
+            detail: 'Failed to decode JWS payload',
+            timing: buildTiming(),
+            meta: buildMeta(),
+          },
+        };
+      }
+
+      // Validate payload against schema
+      if (!validateReceipt(payload)) {
+        return {
+          status: 400,
+          body: {
+            type: 'https://peacprotocol.org/problems/schema-validation-failed',
+            title: 'Schema Validation Failed',
+            status: 400,
+            detail: 'Receipt payload does not match required schema',
+            'validation-failures': validateReceipt.errors?.map(
+              (e: any) =>
+                `${e.instancePath || 'receipt'}${e.instancePath ? '.' : ''}${e.keyword}: ${e.message}`
+            ) || ['Schema validation failed'],
             timing: buildTiming(),
             meta: buildMeta(),
           },

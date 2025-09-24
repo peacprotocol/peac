@@ -38,6 +38,8 @@ export function createBridgeApp() {
   app.use('*', async (c, next) => {
     await next();
     // Version lives in JWS 'typ' claim only
+    const aiprefUrl = new URL('/.well-known/aipref.json', c.req.url).toString();
+    c.header('Link', `<${aiprefUrl}>; rel="aipref"`);
     c.header('Access-Control-Expose-Headers', 'PEAC-Receipt, Link');
     c.header('X-Request-ID', c.get('requestId'));
   });

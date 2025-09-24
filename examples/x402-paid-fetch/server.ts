@@ -25,6 +25,8 @@ const testPrivateKey = new Uint8Array(32).fill(0x42);
 const testKid = 'test-key-2025';
 
 app.use('*', (c, next) => {
+  const aiprefUrl = new URL('/.well-known/aipref.json', c.req.url).toString();
+  c.header('Link', `<${aiprefUrl}>; rel="aipref"`);
   c.header('Access-Control-Allow-Origin', '*');
   c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   c.header('Access-Control-Allow-Headers', 'Content-Type, X-PAYMENT');

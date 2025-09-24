@@ -166,7 +166,7 @@ export async function fetchRobots(uri: string, timeout = 5000): Promise<string |
 
     const response = await fetch(robotsUrl.toString(), {
       signal: controller.signal,
-      headers: { 'User-Agent': 'PEAC/0.9.12 (+https://peac.dev)' },
+      headers: { 'User-Agent': 'PEAC/0.9.12 (+https://peacprotocol.org)' },
     });
 
     clearTimeout(timeoutId);

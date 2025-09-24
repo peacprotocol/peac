@@ -1,13 +1,10 @@
 /**
  * HTTP utility functions for consistent header handling
- * Ensures peac-version and other standard headers on all responses
+ * Version info lives in JWS typ claim only
  */
-
-export const WIRE_VERSION = '0.9.13';
 
 export function peacHeaders(extra: Record<string, string> = {}, sensitive = false) {
   const base: Record<string, string> = {
-    'peac-version': WIRE_VERSION,
     'X-Content-Type-Options': 'nosniff',
     'Cross-Origin-Resource-Policy': 'same-origin',
     'Referrer-Policy': 'no-referrer',
