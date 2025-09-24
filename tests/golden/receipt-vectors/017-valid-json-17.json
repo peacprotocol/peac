@@ -1,0 +1,35 @@
+{
+  "id": 17,
+  "name": "valid-json-17",
+  "valid": true,
+  "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2V5LWdvbGRlbiJ9.eyJleHAiOjE3NTg3NDcwNDgsImlhdCI6MTc1ODc0NjU3OCwiaXNzIjoiaHR0cHM6Ly90ZXN0LnBlYWNwcm90b2NvbC5vcmciLCJqdGkiOiIwMDAwMDAxMS0wMDExLTcwMTEtYTAxMS0wMDAwMDAwMDAwMTEiLCJwb2xpY3kiOnsiYWlwcmVmIjp7Imhhc2giOiJzaGEyNTY6bGFfd3BpVjNmYUp3b2dPdXVla1RLc2ZaYVpEVGhKWTZtb0hJTm90NC1ZayIsImhyZWYiOiJodHRwczovL3Rlc3QucGVhY3Byb3RvY29sLm9yZy9wb2xpY3kuanNvbiJ9LCJtZXJnZWRfaGFzaCI6InNoYTI1NjpDRUpSV3MwMXlhTVZibFpVeTBQYkFHSTNXdkhFVjdEUVhnMExXZVViUG1VIn0sInJlc291cmNlIjp7Imhhc2giOiJzaGEyNTY6UE51TlRDSE1FVkRwTXZaQlFCWFFpcE5ORXRUVjVnRzZHdjBHWkxqUWsxbyIsIm1ldGhvZCI6IkdFVCIsInVybCI6Imh0dHBzOi8vdGVzdC5wZWFjcHJvdG9jb2wub3JnL3Jlc291cmNlLzE3In0sInN1YiI6InVybjpyZXNvdXJjZTpzaGEyNTY6UE51TlRDSE1FVkRwTXZaQlFCWFFpcE5ORXRUVjVnRzZHdjBHWkxqUWsxbyIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ.E3b20ByyiTdmMM35UFWytpa2eXqlUZkI8_JjU5DOZ3OLNVmpYCdlHMaYCqotm4DuLrMGIx7vj88rl-FH7TflUw",
+  "payload": {
+    "typ": "peac.receipt/0.9",
+    "iss": "https://test.peacprotocol.org",
+    "sub": "urn:resource:sha256:PNuNTCHMEVDpMvZBQBXQipNNEtTV5gG6Gv0GZLjQk1o",
+    "iat": 1758746578,
+    "exp": 1758747048,
+    "jti": "00000011-0011-7011-a011-000000000011",
+    "policy": {
+      "aipref": {
+        "href": "https://test.peacprotocol.org/policy.json",
+        "hash": "sha256:la_wpiV3faJwogOuuekTKsfZaZDThJY6moHINot4-Yk"
+      },
+      "merged_hash": "sha256:CEJRWs01yaMVblZUy0PbAGI3WvHEV7DQXg0LWeUbPmU"
+    },
+    "resource": {
+      "url": "https://test.peacprotocol.org/resource/17",
+      "method": "GET",
+      "hash": "sha256:PNuNTCHMEVDpMvZBQBXQipNNEtTV5gG6Gv0GZLjQk1o"
+    }
+  },
+  "body": {
+    "test": 17,
+    "data": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "expected": {
+    "verified": true,
+    "typ": "peac.receipt/0.9",
+    "resource_hash": "PNuNTCHMEVDpMvZBQBXQipNNEtTV5gG6Gv0GZLjQk1o"
+  }
+}

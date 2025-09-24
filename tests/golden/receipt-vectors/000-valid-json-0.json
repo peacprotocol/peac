@@ -1,0 +1,35 @@
+{
+  "id": 0,
+  "name": "valid-json-0",
+  "valid": true,
+  "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2V5LWdvbGRlbiJ9.eyJleHAiOjE3NTg3NDcwNDgsImlhdCI6MTc1ODc0Njc0OCwiaXNzIjoiaHR0cHM6Ly90ZXN0LnBlYWNwcm90b2NvbC5vcmciLCJqdGkiOiIwMDAwMDAwMC0wMDAwLTcwMDAtYTAwMC0wMDAwMDAwMDAwMDAiLCJwb2xpY3kiOnsiYWlwcmVmIjp7Imhhc2giOiJzaGEyNTY6WVpGcHpyLUt1X1p6M2hNR1hURnk2NWNfanA2WFhZcW10a0dQa1ppdWFQMCIsImhyZWYiOiJodHRwczovL3Rlc3QucGVhY3Byb3RvY29sLm9yZy9wb2xpY3kuanNvbiJ9LCJtZXJnZWRfaGFzaCI6InNoYTI1NjpDd1hYRkNkV0FKUEk1UHhScmJGUThvRkZxUVFEeUpvLThDOHF5c0RGZ0FvIn0sInJlc291cmNlIjp7Imhhc2giOiJzaGEyNTY6bHFtNldRSXowb0NFQVNuT0hOblJla1NVLVhfbi05b25Ib18zWnZDYlViUSIsIm1ldGhvZCI6IkdFVCIsInVybCI6Imh0dHBzOi8vdGVzdC5wZWFjcHJvdG9jb2wub3JnL3Jlc291cmNlLzAifSwic3ViIjoidXJuOnJlc291cmNlOnNoYTI1NjpscW02V1FJejBvQ0VBU25PSE5uUmVrU1UtWF9uLTlvbkhvXzNadkNiVWJRIiwidHlwIjoicGVhYy5yZWNlaXB0LzAuOSJ9.BwcnMOlFT_rB48ew_7PL2M-chXorJXZCGDaOiTm7CyJ42LfC0dfZfHcBMLXF7CfdDeFKvLJzhT8u0uBQbwbuLg",
+  "payload": {
+    "typ": "peac.receipt/0.9",
+    "iss": "https://test.peacprotocol.org",
+    "sub": "urn:resource:sha256:lqm6WQIz0oCEASnOHNnRekSU-X_n-9onHo_3ZvCbUbQ",
+    "iat": 1758746748,
+    "exp": 1758747048,
+    "jti": "00000000-0000-7000-a000-000000000000",
+    "policy": {
+      "aipref": {
+        "href": "https://test.peacprotocol.org/policy.json",
+        "hash": "sha256:YZFpzr-Ku_Zz3hMGXTFy65c_jp6XXYqmtkGPkZiuaP0"
+      },
+      "merged_hash": "sha256:CwXXFCdWAJPI5PxRrbFQ8oFFqQQDyJo-8C8qysDFgAo"
+    },
+    "resource": {
+      "url": "https://test.peacprotocol.org/resource/0",
+      "method": "GET",
+      "hash": "sha256:lqm6WQIz0oCEASnOHNnRekSU-X_n-9onHo_3ZvCbUbQ"
+    }
+  },
+  "body": {
+    "test": 0,
+    "data": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "expected": {
+    "verified": true,
+    "typ": "peac.receipt/0.9",
+    "resource_hash": "lqm6WQIz0oCEASnOHNnRekSU-X_n-9onHo_3ZvCbUbQ"
+  }
+}

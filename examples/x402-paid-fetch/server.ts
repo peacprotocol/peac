@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: Apache-2.0
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
+import { createHash } from 'node:crypto';
 import { Problems } from '@peac/core/problems';
 import { createReceipt, signReceipt } from '@peac/receipts/serialize';
 import { validatePaymentHeader } from '@peac/core/limits';
@@ -12,12 +12,12 @@ const mockFacilitator = {
   verify: async (paymentHeader: string) => ({
     isValid: true,
     payer: '0x1234567890123456789012345678901234567890',
-    ts: new Date().toISOString()
+    ts: new Date().toISOString(),
   }),
   settle: async () => ({
     txHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-    networkId: 'base-mainnet'
-  })
+    networkId: 'base-mainnet',
+  }),
 };
 
 // Test keys (DO NOT use in production)
@@ -47,7 +47,7 @@ app.get('/paid-content', async (c) => {
       const problem = Problems.paymentRequired('x402', 'base-mainnet', '1000000');
       return c.json(problem, 402, {
         'Content-Type': 'application/problem+json',
-        'Retry-After': '0'
+        'Retry-After': '0',
       });
     }
 
@@ -56,7 +56,7 @@ app.get('/paid-content', async (c) => {
     if (!verification.isValid) {
       const problem = Problems.invalidReceipt('Payment verification failed');
       return c.json(problem, 400, {
-        'Content-Type': 'application/problem+json'
+        'Content-Type': 'application/problem+json',
       });
     }
 
@@ -67,29 +67,29 @@ app.get('/paid-content', async (c) => {
     const content = {
       message: 'This is premium content!',
       access_tier: 'premium',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Create receipt
     const receipt = createReceipt({
       iss: 'https://demo.x402-server.com',
       resource_url: 'https://demo.x402-server.com/paid-content',
-      resource_hash: 'placeholder-hash-for-demo',
+      resource_hash: createHash('sha256').update(JSON.stringify(content)).digest('base64url'),
       policy_href: 'https://demo.x402-server.com/.well-known/aipref.json',
-      policy_hash: 'placeholder-policy-hash',
-      merged_policy_hash: 'placeholder-merged-hash',
+      policy_hash: createHash('sha256').update('{"payment_required":true}').digest('base64url'),
+      merged_policy_hash: createHash('sha256').update('{"merged":true}').digest('base64url'),
       method: 'GET',
       payment: {
         scheme: 'x402',
         network: 'base-mainnet',
         evidence: {
-          header_b64url: Buffer.from(paymentHeader).toString('base64url')
+          header_b64url: Buffer.from(paymentHeader).toString('base64url'),
         },
         facilitator: {
           verify: verification,
-          settle: settlement
-        }
-      }
+          settle: settlement,
+        },
+      },
     });
 
     // Sign receipt
@@ -98,13 +98,12 @@ app.get('/paid-content', async (c) => {
     return c.json(content, 200, {
       'Content-Type': 'application/json',
       'PEAC-Receipt': receiptJWS,
-      'Cache-Control': 'private, no-store'
+      'Cache-Control': 'private, no-store',
     });
-
   } catch (error: any) {
     const problem = Problems.invalidReceipt(error.message);
     return c.json(problem, 400, {
-      'Content-Type': 'application/problem+json'
+      'Content-Type': 'application/problem+json',
     });
   }
 });
@@ -118,9 +117,9 @@ app.get('/.well-known/aipref.json', (c) => {
         payment_required: true,
         schemes: ['x402'],
         amount: '1000000',
-        currency: 'wei'
-      }
-    }
+        currency: 'wei',
+      },
+    },
   });
 });
 
@@ -133,5 +132,5 @@ console.log('Then: curl -H "X-PAYMENT: {test_payment}" http://localhost:8080/pai
 
 serve({
   fetch: app.fetch,
-  port: 8080
+  port: 8080,
 });

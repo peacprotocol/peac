@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 import { writeFileSync, mkdirSync } from 'fs';
 import { createHash, randomBytes } from 'crypto';
 import { canonicalize } from 'json-canonicalize';
@@ -54,12 +53,14 @@ async function generateVectors() {
 
   // Write JWKS for verification
   const jwks = {
-    keys: [{
-      kty: 'OKP',
-      crv: 'Ed25519',
-      kid: TEST_KID,
-      x: Buffer.from(TEST_PRIVATE_KEY).toString('base64url') // Mock public key
-    }]
+    keys: [
+      {
+        kty: 'OKP',
+        crv: 'Ed25519',
+        kid: TEST_KID,
+        x: Buffer.from(TEST_PRIVATE_KEY).toString('base64url'), // Mock public key
+      },
+    ],
   };
   writeFileSync(`${OUTPUT_DIR}/jwks.json`, JSON.stringify(jwks, null, 2));
 
@@ -75,21 +76,21 @@ function generateValidJsonVector(id, variant) {
     typ: 'peac.receipt/0.9',
     iss: 'https://test.peacprotocol.org',
     sub: `urn:resource:sha256:${Buffer.from(bodyHash).toString('base64url')}`,
-    iat: now - (variant * 10), // Vary timestamps
+    iat: now - variant * 10, // Vary timestamps
     exp: now + 300,
     jti: generateMockUUIDv7(variant),
     policy: {
       aipref: {
         href: 'https://test.peacprotocol.org/policy.json',
-        hash: 'sha256:' + Buffer.from(randomBytes(32)).toString('base64url')
+        hash: 'sha256:' + Buffer.from(randomBytes(32)).toString('base64url'),
       },
-      merged_hash: 'sha256:' + Buffer.from(randomBytes(32)).toString('base64url')
+      merged_hash: 'sha256:' + Buffer.from(randomBytes(32)).toString('base64url'),
     },
     resource: {
       url: `https://test.peacprotocol.org/resource/${variant}`,
       method: 'GET',
-      hash: `sha256:${Buffer.from(bodyHash).toString('base64url')}`
-    }
+      hash: `sha256:${Buffer.from(bodyHash).toString('base64url')}`,
+    },
   };
 
   const jws = createMockJWS(payload, TEST_KID);
@@ -104,16 +105,13 @@ function generateValidJsonVector(id, variant) {
     expected: {
       verified: true,
       typ: 'peac.receipt/0.9',
-      resource_hash: Buffer.from(bodyHash).toString('base64url')
-    }
+      resource_hash: Buffer.from(bodyHash).toString('base64url'),
+    },
   };
 }
 
 function generateValidBinaryVector(id, variant) {
-  const binaryData = Buffer.concat([
-    Buffer.from('BINARY'),
-    randomBytes(variant * 10 + 50)
-  ]);
+  const binaryData = Buffer.concat([Buffer.from('BINARY'), randomBytes(variant * 10 + 50)]);
   const bodyHash = createHash('sha256').update(binaryData).digest();
 
   const payload = {
@@ -125,13 +123,13 @@ function generateValidBinaryVector(id, variant) {
     jti: generateMockUUIDv7(variant + 1000),
     policy: {
       aipref: { href: 'https://binary.test.com/policy.json', hash: 'sha256:test' },
-      merged_hash: 'sha256:merged'
+      merged_hash: 'sha256:merged',
     },
     resource: {
       url: `https://binary.test.com/file${variant}.bin`,
       method: 'GET',
-      hash: `sha256:${Buffer.from(bodyHash).toString('base64url')}`
-    }
+      hash: `sha256:${Buffer.from(bodyHash).toString('base64url')}`,
+    },
   };
 
   return {
@@ -142,7 +140,7 @@ function generateValidBinaryVector(id, variant) {
     payload,
     body: binaryData.toString('base64'),
     bodyType: 'binary',
-    expected: { verified: true }
+    expected: { verified: true },
   };
 }
 
@@ -152,7 +150,7 @@ function generateInvalidSigVector(id, variant) {
     iss: 'https://test.com',
     sub: 'urn:resource:sha256:invalid',
     iat: Math.floor(Date.now() / 1000),
-    jti: generateMockUUIDv7(variant + 2000)
+    jti: generateMockUUIDv7(variant + 2000),
   };
 
   // Create JWS with corrupted signature
@@ -166,7 +164,7 @@ function generateInvalidSigVector(id, variant) {
     valid: false,
     jws: `${header}.${payloadPart}.${corruptedSig}`,
     payload,
-    expected: { error: 'invalid-signature' }
+    expected: { error: 'invalid-signature' },
   };
 }
 
@@ -180,8 +178,11 @@ function generateExpiredVector(id, variant) {
     iat: pastTime,
     exp: pastTime + 60, // Expired
     jti: generateMockUUIDv7(variant + 3000),
-    policy: { aipref: { href: 'https://test.com/policy.json', hash: 'sha256:test' }, merged_hash: 'sha256:merged' },
-    resource: { url: 'https://test.com/expired', method: 'GET', hash: 'sha256:test' }
+    policy: {
+      aipref: { href: 'https://test.com/policy.json', hash: 'sha256:test' },
+      merged_hash: 'sha256:merged',
+    },
+    resource: { url: 'https://test.com/expired', method: 'GET', hash: 'sha256:test' },
   };
 
   return {
@@ -190,7 +191,7 @@ function generateExpiredVector(id, variant) {
     valid: false,
     jws: createMockJWS(payload, TEST_KID),
     payload,
-    expected: { error: 'expired-receipt' }
+    expected: { error: 'expired-receipt' },
   };
 }
 
@@ -200,7 +201,7 @@ function generateMalformedVector(id, variant) {
     'header.only',
     '..empty.parts',
     'invalid!!!base64.payload.signature',
-    'header.payload' // Missing signature
+    'header.payload', // Missing signature
   ];
 
   return {
@@ -208,7 +209,7 @@ function generateMalformedVector(id, variant) {
     name: `malformed-${variant}`,
     valid: false,
     jws: malformedJWS[variant % malformedJWS.length] || 'invalid',
-    expected: { error: 'invalid-jws-format' }
+    expected: { error: 'invalid-jws-format' },
   };
 }
 
@@ -218,7 +219,7 @@ function generateEdgeCaseVector(id, variant) {
     () => ({ typ: 'wrong.type/0.9', iss: 'https://test.com' }),
     () => ({ typ: 'peac.receipt/0.9', jti: 'not-uuidv7' }),
     () => ({ typ: 'peac.receipt/0.9', iat: 'not-number' }),
-    () => ({ typ: 'peac.receipt/0.9', resource: { hash: 'no-sha256-prefix' } })
+    () => ({ typ: 'peac.receipt/0.9', resource: { hash: 'no-sha256-prefix' } }),
   ];
 
   const caseGen = cases[variant % cases.length];
@@ -228,7 +229,7 @@ function generateEdgeCaseVector(id, variant) {
     sub: 'urn:resource:sha256:edge',
     iat: Math.floor(Date.now() / 1000),
     jti: generateMockUUIDv7(variant + 4000),
-    ...caseGen()
+    ...caseGen(),
   };
 
   return {
@@ -237,7 +238,7 @@ function generateEdgeCaseVector(id, variant) {
     valid: false,
     jws: createMockJWS(payload, TEST_KID),
     payload,
-    expected: { error: 'schema-validation-failed' }
+    expected: { error: 'schema-validation-failed' },
   };
 }
 

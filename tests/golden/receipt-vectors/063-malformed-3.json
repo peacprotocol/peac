@@ -1,0 +1,9 @@
+{
+  "id": 63,
+  "name": "malformed-3",
+  "valid": false,
+  "jws": "invalid!!!base64.payload.signature",
+  "expected": {
+    "error": "invalid-jws-format"
+  }
+}

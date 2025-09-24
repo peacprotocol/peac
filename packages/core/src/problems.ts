@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 export const PROBLEM_BASE_URI = 'https://peacprotocol.org/problems/';
 
 export type ProblemType =
@@ -30,8 +28,8 @@ export class ProblemFactory {
         requirements: {
           scheme: ctx.scheme,
           ...(ctx.network && { network: ctx.network }),
-          ...(ctx.amount && { amount: ctx.amount })
-        }
+          ...(ctx.amount && { amount: ctx.amount }),
+        },
       }),
 
       'policy-not-found': (ctx: { url: string; searched: string[] }) => ({
@@ -39,7 +37,7 @@ export class ProblemFactory {
         title: 'Policy Not Found',
         status: 404,
         detail: `No policy found for ${ctx.url}`,
-        searched_locations: ctx.searched
+        searched_locations: ctx.searched,
       }),
 
       'replay-detected': (ctx: { jti: string; first_seen: number }) => ({
@@ -48,7 +46,7 @@ export class ProblemFactory {
         status: 409,
         detail: `Receipt ${ctx.jti} was already used`,
         first_seen: ctx.first_seen,
-        jti: ctx.jti
+        jti: ctx.jti,
       }),
 
       'policy-denied': (ctx: { reason: string; policy_url?: string }) => ({
@@ -56,7 +54,7 @@ export class ProblemFactory {
         title: 'Policy Denied',
         status: 403,
         detail: `Access denied: ${ctx.reason}`,
-        ...(ctx.policy_url && { policy_url: ctx.policy_url })
+        ...(ctx.policy_url && { policy_url: ctx.policy_url }),
       }),
 
       'invalid-receipt': (ctx: { error: string; field?: string }) => ({
@@ -64,7 +62,7 @@ export class ProblemFactory {
         title: 'Invalid Receipt',
         status: 400,
         detail: `Receipt validation failed: ${ctx.error}`,
-        ...(ctx.field && { invalid_field: ctx.field })
+        ...(ctx.field && { invalid_field: ctx.field }),
       }),
 
       'rate-limited': (ctx: { retry_after: number; limit: number }) => ({
@@ -72,8 +70,8 @@ export class ProblemFactory {
         title: 'Rate Limited',
         status: 429,
         detail: `Rate limit exceeded. Limit: ${ctx.limit} requests`,
-        'retry-after': ctx.retry_after
-      })
+        'retry-after': ctx.retry_after,
+      }),
     };
 
     const factory = catalog[type];
@@ -91,9 +89,11 @@ export class ProblemFactory {
   }
 
   static isValidProblem(obj: any): obj is Problem {
-    return obj?.type?.startsWith(PROBLEM_BASE_URI) &&
-           typeof obj.title === 'string' &&
-           typeof obj.status === 'number';
+    return (
+      obj?.type?.startsWith(PROBLEM_BASE_URI) &&
+      typeof obj.title === 'string' &&
+      typeof obj.status === 'number'
+    );
   }
 }
 
@@ -114,5 +114,5 @@ export const Problems = {
     ProblemFactory.create('invalid-receipt', { error, field, traceId }),
 
   rateLimited: (retryAfter: number, limit: number, traceId?: string) =>
-    ProblemFactory.create('rate-limited', { retry_after: retryAfter, limit, traceId })
+    ProblemFactory.create('rate-limited', { retry_after: retryAfter, limit, traceId }),
 };

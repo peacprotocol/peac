@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert';
 import { spawn } from 'node:child_process';
@@ -10,11 +9,11 @@ describe('PEAC Contract Tests', () => {
   before(async () => {
     // Start test server
     serverProc = spawn('node', ['examples/x402-paid-fetch/server.ts'], {
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
 
     // Wait for server to start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   after(async () => {
@@ -36,11 +35,11 @@ describe('PEAC Contract Tests', () => {
     const mockPayment = JSON.stringify({
       payer: '0x123',
       amount: '1000000',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     const response2 = await fetch(`${SERVER_URL}/paid-content`, {
-      headers: { 'X-PAYMENT': mockPayment }
+      headers: { 'X-PAYMENT': mockPayment },
     });
 
     assert.strictEqual(response2.status, 200);
@@ -55,13 +54,13 @@ describe('PEAC Contract Tests', () => {
 
     // First use - should succeed
     const response1 = await fetch(`${SERVER_URL}/paid-content`, {
-      headers: { 'X-PAYMENT': payment }
+      headers: { 'X-PAYMENT': payment },
     });
     assert.strictEqual(response1.status, 200);
 
     // Replay - should be rejected (demo doesn't implement this, but structure is here)
     const response2 = await fetch(`${SERVER_URL}/paid-content`, {
-      headers: { 'X-PAYMENT': payment }
+      headers: { 'X-PAYMENT': payment },
     });
     // Note: Current demo doesn't implement replay detection
     // assert.strictEqual(response2.status, 409);
@@ -69,7 +68,7 @@ describe('PEAC Contract Tests', () => {
 
   test('Malformed payment rejection', async () => {
     const response = await fetch(`${SERVER_URL}/paid-content`, {
-      headers: { 'X-PAYMENT': 'not-json' }
+      headers: { 'X-PAYMENT': 'not-json' },
     });
 
     // Should handle gracefully
@@ -122,7 +121,7 @@ describe('Chaos Engineering', () => {
     const start = Date.now();
     try {
       await fetch('http://invalid-host:9999/test', {
-        signal: AbortSignal.timeout(1000)
+        signal: AbortSignal.timeout(1000),
       });
     } catch (error) {
       const duration = Date.now() - start;

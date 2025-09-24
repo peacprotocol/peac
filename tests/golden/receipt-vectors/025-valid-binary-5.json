@@ -1,0 +1,31 @@
+{
+  "id": 25,
+  "name": "valid-binary-5",
+  "valid": true,
+  "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2V5LWdvbGRlbiJ9.eyJleHAiOjE3NTg3NDcwNDgsImlhdCI6MTc1ODc0Njc0OCwiaXNzIjoiaHR0cHM6Ly9iaW5hcnkudGVzdC5jb20iLCJqdGkiOiIwMDAwMDNlZC0wM2VkLTczZWQtYTNlZC0wMDAwMDAwMDAzZWQiLCJwb2xpY3kiOnsiYWlwcmVmIjp7Imhhc2giOiJzaGEyNTY6dGVzdCIsImhyZWYiOiJodHRwczovL2JpbmFyeS50ZXN0LmNvbS9wb2xpY3kuanNvbiJ9LCJtZXJnZWRfaGFzaCI6InNoYTI1NjptZXJnZWQifSwicmVzb3VyY2UiOnsiaGFzaCI6InNoYTI1NjpCdExYYW02d1FyOG9DTVFhZ1RNZjh6MXFSM0pfVXdGLVJNV1pQM0lHZzhnIiwibWV0aG9kIjoiR0VUIiwidXJsIjoiaHR0cHM6Ly9iaW5hcnkudGVzdC5jb20vZmlsZTUuYmluIn0sInN1YiI6InVybjpyZXNvdXJjZTpzaGEyNTY6QnRMWGFtNndRcjhvQ01RYWdUTWY4ejFxUjNKX1V3Ri1STVdaUDNJR2c4ZyIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ.qE4fi1PtCEAtbbxmMatd6-thyTHrOBUpeAkl1zBp0iuMwi3zmoI2BqqVp9RaBTW8ZCLCFElJ_PPxC1h-XLXJRQ",
+  "payload": {
+    "typ": "peac.receipt/0.9",
+    "iss": "https://binary.test.com",
+    "sub": "urn:resource:sha256:BtLXam6wQr8oCMQagTMf8z1qR3J_UwF-RMWZP3IGg8g",
+    "iat": 1758746748,
+    "exp": 1758747048,
+    "jti": "000003ed-03ed-73ed-a3ed-0000000003ed",
+    "policy": {
+      "aipref": {
+        "href": "https://binary.test.com/policy.json",
+        "hash": "sha256:test"
+      },
+      "merged_hash": "sha256:merged"
+    },
+    "resource": {
+      "url": "https://binary.test.com/file5.bin",
+      "method": "GET",
+      "hash": "sha256:BtLXam6wQr8oCMQagTMf8z1qR3J_UwF-RMWZP3IGg8g"
+    }
+  },
+  "body": "QklOQVJZ7F/YyMLKlhPmUStORVT/pdUCxk3jQf+7zUsThz1dFZdxNa/xPhAoMfbZjUthsJZ0yjlWoS4h/MZnQ47L2VPaTsGQHC3cjT+sWcb7TlKw06P/IFBWBmRIxwnTDyLX1UuRMgwukA==",
+  "bodyType": "binary",
+  "expected": {
+    "verified": true
+  }
+}

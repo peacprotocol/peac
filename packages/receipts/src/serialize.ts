@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 import { createHash } from 'node:crypto';
 import { canonicalize } from 'json-canonicalize';
 import { signDetached } from '@peac/core/crypto';
@@ -6,10 +5,8 @@ import { uuidv7 } from '@peac/core/ids/uuidv7';
 import type { PEACReceipt } from './types.js';
 
 export const b64u = {
-  encode: (buf: Uint8Array): string =>
-    Buffer.from(buf).toString('base64url'),
-  decode: (str: string): Uint8Array =>
-    new Uint8Array(Buffer.from(str, 'base64url'))
+  encode: (buf: Uint8Array): string => Buffer.from(buf).toString('base64url'),
+  decode: (str: string): Uint8Array => new Uint8Array(Buffer.from(str, 'base64url')),
 };
 
 export const sha256b64u = (bytes: Uint8Array): string =>
@@ -41,7 +38,7 @@ export function createReceipt(params: {
     : `sha256:${params.resource_hash}`;
 
   return {
-    typ: "peac.receipt/0.9",
+    typ: 'peac.receipt/0.9',
     iss: params.iss,
     sub: `urn:resource:${resourceHash}`,
     aud: normalizeUrl(params.resource_url),
@@ -54,22 +51,22 @@ export function createReceipt(params: {
         href: params.policy_href,
         hash: params.policy_hash.startsWith('sha256:')
           ? params.policy_hash
-          : `sha256:${params.policy_hash}`
+          : `sha256:${params.policy_hash}`,
       },
       merged_hash: params.merged_policy_hash.startsWith('sha256:')
         ? params.merged_policy_hash
-        : `sha256:${params.merged_policy_hash}`
+        : `sha256:${params.merged_policy_hash}`,
     },
 
     resource: {
       url: normalizeUrl(params.resource_url),
       method: params.method || 'GET',
-      hash: resourceHash
+      hash: resourceHash,
     },
 
     ...(params.payment && { payment: params.payment }),
     ...(params.purpose && { purpose: params.purpose }),
-    ...(params.trace_id && { trace_id: params.trace_id })
+    ...(params.trace_id && { trace_id: params.trace_id }),
   };
 }
 
@@ -82,8 +79,10 @@ export function normalizeUrl(url: string): string {
     parsed.hostname = parsed.hostname.toLowerCase();
 
     // Remove default ports
-    if ((parsed.protocol === 'https:' && parsed.port === '443') ||
-        (parsed.protocol === 'http:' && parsed.port === '80')) {
+    if (
+      (parsed.protocol === 'https:' && parsed.port === '443') ||
+      (parsed.protocol === 'http:' && parsed.port === '80')
+    ) {
       parsed.port = '';
     }
 
@@ -102,7 +101,7 @@ export async function signReceipt(
     throw new Error('Invalid UUIDv7 in jti field');
   }
 
-  if (receipt.typ !== "peac.receipt/0.9") {
+  if (receipt.typ !== 'peac.receipt/0.9') {
     throw new Error('Invalid receipt type');
   }
 

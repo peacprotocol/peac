@@ -1,14 +1,16 @@
-// SPDX-License-Identifier: Apache-2.0
-
 // Security limits for headers and bodies
 export const LIMITS = {
-  MAX_RECEIPT_HEADER: 12 * 1024,    // 12KB
-  MAX_PAYMENT_HEADER: 4 * 1024,     // 4KB
+  MAX_RECEIPT_HEADER: 12 * 1024, // 12KB
+  MAX_PAYMENT_HEADER: 4 * 1024, // 4KB
   MAX_RESPONSE_BODY: 10 * 1024 * 1024, // 10MB
-  CLOCK_SKEW_SECONDS: 120,          // ±2 minutes
+  CLOCK_SKEW_SECONDS: 120, // ±2 minutes
 } as const;
 
-export function validateHeaderSize(headerValue: string | null, maxSize: number, headerName: string): void {
+export function validateHeaderSize(
+  headerValue: string | null,
+  maxSize: number,
+  headerName: string
+): void {
   if (!headerValue) return;
 
   const size = Buffer.byteLength(headerValue, 'utf8');

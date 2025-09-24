@@ -38,7 +38,7 @@ export function createBridgeApp() {
   app.use('*', async (c, next) => {
     await next();
     // Version lives in JWS typ claim only
-        c.header('Access-Control-Expose-Headers', 'PEAC-Receipt');
+    c.header('Access-Control-Expose-Headers', 'PEAC-Receipt');
     c.header('X-Request-ID', c.get('requestId'));
   });
 

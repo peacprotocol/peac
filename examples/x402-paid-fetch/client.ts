@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * x402 Demo Client - 402→pay→200→verify flow
  */
@@ -35,13 +33,13 @@ async function demonstrateX402Flow() {
       payer: '0x1234567890123456789012345678901234567890',
       amount: problem.requirements?.amount || '1000000',
       network: problem.requirements?.network || 'base-mainnet',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     const response2 = await fetch(serverUrl, {
       headers: {
-        'X-PAYMENT': mockPayment
-      }
+        'X-PAYMENT': mockPayment,
+      },
     });
 
     if (response2.status === 200) {
@@ -54,9 +52,7 @@ async function demonstrateX402Flow() {
 
         // Decode JWS payload (without verification for demo)
         const [header, payload, signature] = receipt.split('.');
-        const decodedPayload = JSON.parse(
-          Buffer.from(payload, 'base64url').toString()
-        );
+        const decodedPayload = JSON.parse(Buffer.from(payload, 'base64url').toString());
 
         console.log('📄 Receipt payload:');
         console.log('  - Type:', decodedPayload.typ);
@@ -70,13 +66,11 @@ async function demonstrateX402Flow() {
       const content = await response2.json();
       console.log('\n📝 Received content:');
       console.log(JSON.stringify(content, null, 2));
-
     } else {
       console.log('❌ Unexpected status:', response2.status);
       const errorBody = await response2.text();
       console.log('Error:', errorBody);
     }
-
   } else {
     console.log('❌ Expected 402, got:', response1.status);
     const body = await response1.text();

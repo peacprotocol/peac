@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-import { Problems } from '@peac/core/problems';
-
 interface PEACResponse {
   response: Response;
   receipt?: string;
@@ -15,36 +12,20 @@ interface FetchOptions extends RequestInit {
 class CircuitBreaker {
   private failures = 0;
   private lastFailTime = 0;
-  private readonly threshold = 5;
-  private readonly timeout = 30000; // 30s
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.isOpen()) {
+    if (this.failures >= 5 && Date.now() - this.lastFailTime < 30000) {
       throw new Error('Circuit breaker open');
     }
-
     try {
       const result = await fn();
-      this.onSuccess();
+      this.failures = 0;
       return result;
     } catch (error) {
-      this.onFailure();
+      this.failures++;
+      this.lastFailTime = Date.now();
       throw error;
     }
-  }
-
-  private isOpen(): boolean {
-    return this.failures >= this.threshold &&
-           Date.now() - this.lastFailTime < this.timeout;
-  }
-
-  private onSuccess(): void {
-    this.failures = 0;
-  }
-
-  private onFailure(): void {
-    this.failures++;
-    this.lastFailTime = Date.now();
   }
 }
 
@@ -57,19 +38,16 @@ export async function peacFetch(
   const maxRetries = init?.maxRetries ?? 3;
   const bridgeUrl = init?.bridgeUrl ?? 'http://127.0.0.1:31415';
 
-  let attempt = 0;
-
-  while (attempt <= maxRetries) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      // Pre-enforce via bridge
       const enforceResult = await breaker.execute(() =>
         fetch(`${bridgeUrl}/enforce`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             resource: typeof input === 'string' ? input : input.toString(),
-            purpose: 'ai-training'
-          })
+            purpose: 'ai-training',
+          }),
         })
       );
 
@@ -77,16 +55,9 @@ export async function peacFetch(
         const problem = await enforceResult.json();
         throw new PEACPaymentRequired(problem);
       }
+      if (!enforceResult.ok) throw new Error('Enforcement failed');
 
-      if (!enforceResult.ok) {
-        const problem = await enforceResult.json();
-        throw new Error(problem.detail || 'Enforcement failed');
-      }
-
-      // Make actual request
       const response = await fetch(input, init);
-
-      // Extract receipt
       const receipt = response.headers.get('PEAC-Receipt');
       let verified = false;
 
@@ -95,35 +66,24 @@ export async function peacFetch(
           const verifyResult = await fetch(`${bridgeUrl}/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ receipt })
+            body: JSON.stringify({ receipt }),
           });
-
           if (verifyResult.ok) {
             const result = await verifyResult.json();
             verified = result.valid === true;
           }
         } catch {
-          // Verification failed, but don't block
+          // Verification failed, continue
         }
       }
 
       return { response, receipt: receipt || undefined, verified };
-
     } catch (error: any) {
-      if (error instanceof PEACPaymentRequired) {
-        throw error; // Don't retry payment errors
-      }
-
-      if (attempt >= maxRetries) {
-        throw error;
-      }
-
-      // Exponential backoff for transient errors
-      await new Promise(r => setTimeout(r, 100 * Math.pow(2, attempt)));
-      attempt++;
+      if (error instanceof PEACPaymentRequired) throw error;
+      if (attempt >= maxRetries) throw error;
+      await new Promise((r) => setTimeout(r, 100 * Math.pow(2, attempt)));
     }
   }
-
   throw new Error('Max retries exceeded');
 }
 

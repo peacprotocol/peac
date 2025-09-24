@@ -1,0 +1,9 @@
+{
+  "id": 69,
+  "name": "malformed-9",
+  "valid": false,
+  "jws": "header.payload",
+  "expected": {
+    "error": "invalid-jws-format"
+  }
+}

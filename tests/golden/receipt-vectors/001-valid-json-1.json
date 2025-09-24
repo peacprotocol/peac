@@ -1,0 +1,35 @@
+{
+  "id": 1,
+  "name": "valid-json-1",
+  "valid": true,
+  "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2V5LWdvbGRlbiJ9.eyJleHAiOjE3NTg3NDcwNDgsImlhdCI6MTc1ODc0NjczOCwiaXNzIjoiaHR0cHM6Ly90ZXN0LnBlYWNwcm90b2NvbC5vcmciLCJqdGkiOiIwMDAwMDAwMS0wMDAxLTcwMDEtYTAwMS0wMDAwMDAwMDAwMDEiLCJwb2xpY3kiOnsiYWlwcmVmIjp7Imhhc2giOiJzaGEyNTY6emtfdjcwTDVxclplOE41V2hBakstVHA3SWV2T1VZYVN3dXJPczdycTkwayIsImhyZWYiOiJodHRwczovL3Rlc3QucGVhY3Byb3RvY29sLm9yZy9wb2xpY3kuanNvbiJ9LCJtZXJnZWRfaGFzaCI6InNoYTI1NjpRb1EyZ2dMbkpXNGN3eGJyWDA2SDNXdXhtX1RUcFNlbHUzYm82Z0h0WFFvIn0sInJlc291cmNlIjp7Imhhc2giOiJzaGEyNTY6OGpvTmFNWF95bG9nNnNxUWxXVFA5Q3RfVGhub0xBZy00bmpUcnlTcmxpWSIsIm1ldGhvZCI6IkdFVCIsInVybCI6Imh0dHBzOi8vdGVzdC5wZWFjcHJvdG9jb2wub3JnL3Jlc291cmNlLzEifSwic3ViIjoidXJuOnJlc291cmNlOnNoYTI1Njo4am9OYU1YX3lsb2c2c3FRbFdUUDlDdF9UaG5vTEFnLTRualRyeVNybGlZIiwidHlwIjoicGVhYy5yZWNlaXB0LzAuOSJ9.093YcRaPIkYcDNTIUNmSXKSgYZsNBBKikjXxdH47qcD_45OZJk-9Fps29dj-oseuWG8wE_VwdITCCc0jTfSdSg",
+  "payload": {
+    "typ": "peac.receipt/0.9",
+    "iss": "https://test.peacprotocol.org",
+    "sub": "urn:resource:sha256:8joNaMX_ylog6sqQlWTP9Ct_ThnoLAg-4njTrySrliY",
+    "iat": 1758746738,
+    "exp": 1758747048,
+    "jti": "00000001-0001-7001-a001-000000000001",
+    "policy": {
+      "aipref": {
+        "href": "https://test.peacprotocol.org/policy.json",
+        "hash": "sha256:zk_v70L5qrZe8N5WhAjK-Tp7IevOUYaSwurOs7rq90k"
+      },
+      "merged_hash": "sha256:QoQ2ggLnJW4cwxbrX06H3Wuxm_TTpSelu3bo6gHtXQo"
+    },
+    "resource": {
+      "url": "https://test.peacprotocol.org/resource/1",
+      "method": "GET",
+      "hash": "sha256:8joNaMX_ylog6sqQlWTP9Ct_ThnoLAg-4njTrySrliY"
+    }
+  },
+  "body": {
+    "test": 1,
+    "data": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "expected": {
+    "verified": true,
+    "typ": "peac.receipt/0.9",
+    "resource_hash": "8joNaMX_ylog6sqQlWTP9Ct_ThnoLAg-4njTrySrliY"
+  }
+}

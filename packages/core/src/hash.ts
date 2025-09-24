@@ -105,7 +105,7 @@ function normalizeUrlsInObject(obj: any): void {
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       if (typeof obj[i] === 'string' && isUrl(obj[i])) {
-        obj[i] = canonicalizeUrl(obj[i]);
+        obj[i] = normalizeResourceUrl(obj[i]);
       } else if (typeof obj[i] === 'object') {
         normalizeUrlsInObject(obj[i]);
       }
@@ -113,7 +113,7 @@ function normalizeUrlsInObject(obj: any): void {
   } else {
     for (const [key, value] of Object.entries(obj)) {
       if (typeof value === 'string' && isUrl(value)) {
-        obj[key] = canonicalizeUrl(value);
+        obj[key] = normalizeResourceUrl(value);
       } else if (typeof value === 'object') {
         normalizeUrlsInObject(value);
       }

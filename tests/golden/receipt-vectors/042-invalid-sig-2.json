@@ -1,0 +1,16 @@
+{
+  "id": 42,
+  "name": "invalid-sig-2",
+  "valid": false,
+  "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2V5LWdvbGRlbiJ9.eyJpYXQiOjE3NTg3NDY3NDgsImlzcyI6Imh0dHBzOi8vdGVzdC5jb20iLCJqdGkiOiIwMDAwMDdkMi0wN2QyLTc3ZDItYTdkMi0wMDAwMDAwMDA3ZDIiLCJzdWIiOiJ1cm46cmVzb3VyY2U6c2hhMjU2OmludmFsaWQiLCJ0eXAiOiJwZWFjLnJlY2VpcHQvMC45In0.rUTmtm7uhIud6to6Qx2oETzGQWSkT9Zk6WapoOJhnxC3HHShPbspahfllXxPS6Ol2SRSZGjMNQgEFiQ7vXXXXX",
+  "payload": {
+    "typ": "peac.receipt/0.9",
+    "iss": "https://test.com",
+    "sub": "urn:resource:sha256:invalid",
+    "iat": 1758746748,
+    "jti": "000007d2-07d2-77d2-a7d2-0000000007d2"
+  },
+  "expected": {
+    "error": "invalid-signature"
+  }
+}
