@@ -74,7 +74,7 @@ export class VerifierV13 {
         return {
           status: 400,
           body: {
-            type: 'https://peac.dev/problems/invalid-request',
+            type: 'https://peacprotocol.org/problems/invalid-request',
             title: 'Invalid Request',
             status: 400,
             detail: 'receipt field is required and must be a string',
@@ -123,7 +123,7 @@ export class VerifierV13 {
       return {
         status: 500,
         body: {
-          type: 'https://peac.dev/problems/processing-error',
+          type: 'https://peacprotocol.org/problems/processing-error',
           title: 'Processing Error',
           status: 500,
           detail: error instanceof Error ? error.message : 'Unknown error',

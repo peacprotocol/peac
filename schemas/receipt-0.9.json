@@ -1,0 +1,185 @@
+{
+  "$id": "https://peacprotocol.org/schemas/receipt-0.9.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PEAC Receipt v0.9.14",
+  "description": "Compact JWS envelope for PEAC receipts",
+  "type": "object",
+  "required": ["typ", "iss", "sub", "iat", "jti", "policy", "resource"],
+  "properties": {
+    "typ": {
+      "const": "peac.receipt/0.9",
+      "description": "Receipt type identifier"
+    },
+    "iss": {
+      "type": "string",
+      "format": "uri",
+      "description": "Issuer URL or DID"
+    },
+    "sub": {
+      "type": "string",
+      "pattern": "^urn:resource:sha256:[A-Za-z0-9_-]+$",
+      "description": "Subject as URN with resource hash"
+    },
+    "aud": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical resource URL (normalized)"
+    },
+    "iat": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Issued at (Unix timestamp)"
+    },
+    "exp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Expires at (Unix timestamp)"
+    },
+    "jti": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "UUIDv7 for replay protection"
+    },
+    "policy": {
+      "type": "object",
+      "required": ["aipref", "merged_hash"],
+      "properties": {
+        "aipref": {
+          "type": "object",
+          "required": ["href", "hash"],
+          "properties": {
+            "href": {
+              "type": "string",
+              "format": "uri",
+              "description": "Policy URL"
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^sha256:[A-Za-z0-9_-]+$",
+              "description": "SHA-256 hash of policy (base64url)"
+            }
+          }
+        },
+        "merged_hash": {
+          "type": "string",
+          "pattern": "^sha256:[A-Za-z0-9_-]+$",
+          "description": "SHA-256 hash of merged policy view"
+        }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "required": ["url", "method", "hash"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Normalized resource URL"
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP method"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[A-Za-z0-9_-]+$",
+          "description": "SHA-256 hash of resource content"
+        }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "required": ["scheme", "evidence", "facilitator"],
+      "properties": {
+        "scheme": {
+          "enum": ["x402"],
+          "description": "Payment scheme (x402 only for v0.9.14)"
+        },
+        "network": {
+          "type": "string",
+          "description": "Payment network identifier"
+        },
+        "evidence": {
+          "type": "object",
+          "required": ["header_b64url"],
+          "properties": {
+            "header_b64url": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "description": "Base64url encoded X-PAYMENT header"
+            }
+          }
+        },
+        "facilitator": {
+          "type": "object",
+          "required": ["verify"],
+          "properties": {
+            "verify": {
+              "type": "object",
+              "required": ["isValid"],
+              "properties": {
+                "isValid": {
+                  "type": "boolean",
+                  "description": "Payment verification result"
+                },
+                "payer": {
+                  "type": "string",
+                  "description": "Payer identifier"
+                },
+                "ts": {
+                  "type": "string",
+                  "description": "Verification timestamp"
+                }
+              }
+            },
+            "settle": {
+              "type": "object",
+              "properties": {
+                "txHash": {
+                  "type": "string",
+                  "description": "Transaction hash"
+                },
+                "networkId": {
+                  "type": "string",
+                  "description": "Network identifier"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "c2pa": {
+          "type": "object",
+          "required": ["claim_hash"],
+          "properties": {
+            "claim_hash": {
+              "type": "string",
+              "description": "C2PA claim hash"
+            }
+          }
+        }
+      }
+    },
+    "purpose": {
+      "type": "string",
+      "description": "Usage purpose if policy constrains"
+    },
+    "amount": {
+      "type": "string",
+      "description": "Payment amount"
+    },
+    "currency": {
+      "type": "string",
+      "description": "Payment currency"
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "W3C trace ID"
+    }
+  },
+  "additionalProperties": true
+}
