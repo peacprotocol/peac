@@ -5,10 +5,10 @@
  * RFC 7807 Problem Details for 402/403 responses
  */
 
-import { canonicalPolicyHash } from './hash.js';
+import { canonicalPolicyHash, sha256b64u, normalizeResourceUrl } from './hash.js';
 import { NonceCache, isValidNonce, preventReplay } from './replay.js';
 import { signDetached, generateEdDSAKeyPair } from './crypto.js';
-import { uuidv7 } from './ids/uuidv7.js';
+import { uuidv7 } from './ids/uuidv7.js';\nimport { Problems } from './problems.js';\n\n// Security limits\nconst MAX_RECEIPT_HEADER_SIZE = 12 * 1024; // 12KB\nconst MAX_PAYMENT_HEADER_SIZE = 4 * 1024;  // 4KB\nconst MAX_RESPONSE_BODY_SIZE = 10 * 1024 * 1024; // 10MB
 
 // SSRF and security guards
 const HTTPS_ONLY_REGEX = /^https:\/\//;

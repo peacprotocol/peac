@@ -37,7 +37,8 @@ export function createBridgeApp() {
   // Set standard headers on ALL responses
   app.use('*', async (c, next) => {
     await next();
-    c.header('peac-version', '0.9.13'); // Wire version, NOT 0.9.13.2
+    // Version lives in JWS typ claim only
+        c.header('Access-Control-Expose-Headers', 'PEAC-Receipt');
     c.header('X-Request-ID', c.get('requestId'));
   });
 
