@@ -44,14 +44,13 @@ jobs:
         run: pnpm run typecheck
 
       - name: Lint
-        run: pnpm eslint . --max-warnings 0 || echo "Lint warnings present"
+        run: pnpm eslint . --max-warnings 0
 
-      - name: Schema validation
-        run: |
-          npx ajv compile -s schemas/receipt-0.9.json || echo "Schema validation skipped"
+      - name: Schema validation (compile)
+        run: npx ajv compile -s schemas/receipt-0.9.json
 
       - name: Unit tests
-        run: pnpm test || echo "Tests completed"
+        run: pnpm test
 
       - name: Contract tests
         timeout-minutes: 2
@@ -98,71 +97,26 @@ jobs:
 
       - name: Documentation check
         run: |
+          MISSING=0
           for doc in README.md docs/problems.md CHANGELOG.md; do
-            [ -f "$doc" ] || echo "Missing: $doc"
+            if [ ! -f "$doc" ]; then echo "❌ Missing: $doc"; MISSING=1; fi
           done
+          [ $MISSING -eq 0 ]
 
       - name: Performance benchmarks (verify p95, throughput)
-        run: |
-          node -e '
-            const { performance } = require("node:perf_hooks");
-            const fs = require("node:fs");
-            const path = require("node:path");
-
-            const files = fs.readdirSync("tests/golden/receipt-vectors")
-              .filter(f => f.endsWith(".json") && f !== "jwks.json")
-              .map(f => path.join("tests/golden/receipt-vectors", f));
-
-            if (files.length < 100) {
-              console.error(`Need ≥100 vectors, have ${files.length}`);
-              process.exit(1);
-            }
-
-            const times = [];
-            let ok = 0;
-
-            for (const f of files) {
-              try {
-                const v = JSON.parse(fs.readFileSync(f, "utf8"));
-                const t0 = performance.now();
-
-                // Simple verification simulation
-                const hasValidStructure = v.jws && typeof v.jws === "string" && v.jws.includes(".");
-
-                const t1 = performance.now();
-                times.push(t1 - t0);
-                if (hasValidStructure) ok++;
-              } catch (e) {
-                times.push(1); // Failed parse gets 1ms penalty
-              }
-            }
-
-            times.sort((a,b)=>a-b);
-            const p95 = times[Math.floor(times.length * 0.95)];
-            const throughput = Math.floor(ok / (times.reduce((a,b)=>a+b,0)/1000));
-
-            const fails = [];
-            if (p95 >= 5) fails.push(`verify p95 ${p95.toFixed(2)}ms ≥ 5ms`);
-            if (throughput < 1000) fails.push(`throughput ${throughput} < 1000 rps`);
-
-            if (fails.length) {
-              console.error("Perf violations:\\n- " + fails.join("\\n- "));
-              process.exit(1);
-            }
-
-            console.log(`verify p95=${p95.toFixed(2)}ms, throughput=${throughput}/s, ok=${ok}/${files.length}`);
-          '
+        run: npx tsx scripts/bench-verify.ts
 
       - name: Validate vectors against schema
         run: |
-          # Count vectors and validate with AJV
+          set -euo pipefail
           VECTOR_COUNT=$(ls tests/golden/receipt-vectors/*.json | grep -v jwks.json | wc -l)
           if [ $VECTOR_COUNT -lt 100 ]; then
             echo "❌ Need ≥100 vectors, got $VECTOR_COUNT"
             exit 1
           fi
-
-          npx ajv validate -s schemas/receipt-0.9.json -d "tests/golden/receipt-vectors/*.json" --exclude="**/jwks.json" || echo "Schema validation completed"
+          npx ajv validate -s schemas/receipt-0.9.json \
+            -d "tests/golden/receipt-vectors/*.json" \
+            --exclude="**/jwks.json"
 
   release-ready:
     needs: quality-gates
@@ -181,6 +135,6 @@ jobs:
           echo "✅ Adapter size limits enforced"
           echo "✅ Security baseline clean"
           echo "✅ Documentation present"
-          echo "✅ Performance targets simulated"
+          echo "✅ Performance targets enforced"
           echo ""
           echo "🎯 Ready for production deployment"
