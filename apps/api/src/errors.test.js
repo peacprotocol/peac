@@ -14,7 +14,7 @@ import {
 test('ProblemError - creates RFC 9457 compliant structure', () => {
   const error = new ProblemError(
     400,
-    'https://peac.dev/problems/test',
+    'https://peacprotocol.org/problems/test',
     'Test Problem',
     'This is a test problem',
     '/test/instance',
@@ -23,7 +23,7 @@ test('ProblemError - creates RFC 9457 compliant structure', () => {
 
   const problemDetails = error.toProblemDetails();
 
-  assert.strictEqual(problemDetails.type, 'https://peac.dev/problems/test');
+  assert.strictEqual(problemDetails.type, 'https://peacprotocol.org/problems/test');
   assert.strictEqual(problemDetails.title, 'Test Problem');
   assert.strictEqual(problemDetails.status, 400);
   assert.strictEqual(problemDetails.detail, 'This is a test problem');
@@ -40,7 +40,7 @@ test('createProblemDetails - maps error codes correctly', () => {
 
   const problem = createProblemDetails(ctx, '/api/verify');
 
-  assert.strictEqual(problem.type, 'https://peac.dev/problems/invalid-jws-format');
+  assert.strictEqual(problem.type, 'https://peacprotocol.org/problems/invalid-jws-format');
   assert.strictEqual(problem.title, 'Invalid JWS Format');
   assert.strictEqual(problem.status, 400);
   assert.strictEqual(problem.instance, '/api/verify');
@@ -56,7 +56,7 @@ test('createProblemDetails - handles unknown error codes', () => {
 
   const problem = createProblemDetails(ctx);
 
-  assert.strictEqual(problem.type, 'https://peac.dev/problems/unknown-error');
+  assert.strictEqual(problem.type, 'https://peacprotocol.org/problems/unknown-error');
   assert.strictEqual(problem.title, 'Processing Error'); // Falls back to processing-error
   assert.strictEqual(problem.status, 500);
 });
@@ -67,7 +67,7 @@ test('handleVerifyError - maps signature errors', () => {
   const result = handleVerifyError(error, '/api/verify');
 
   assert.strictEqual(result.status, 422);
-  assert.strictEqual(result.body.type, 'https://peac.dev/problems/invalid-signature');
+  assert.strictEqual(result.body.type, 'https://peacprotocol.org/problems/invalid-signature');
   assert.strictEqual(result.body.title, 'Invalid Signature');
 });
 
@@ -77,7 +77,7 @@ test('handleVerifyError - maps JWS format errors', () => {
   const result = handleVerifyError(error);
 
   assert.strictEqual(result.status, 400);
-  assert.strictEqual(result.body.type, 'https://peac.dev/problems/invalid-jws-format');
+  assert.strictEqual(result.body.type, 'https://peacprotocol.org/problems/invalid-jws-format');
 });
 
 test('handleVerifyError - maps unknown key errors', () => {
@@ -86,7 +86,7 @@ test('handleVerifyError - maps unknown key errors', () => {
   const result = handleVerifyError(error);
 
   assert.strictEqual(result.status, 422);
-  assert.strictEqual(result.body.type, 'https://peac.dev/problems/unknown-key-id');
+  assert.strictEqual(result.body.type, 'https://peacprotocol.org/problems/unknown-key-id');
 });
 
 test('validationError - creates structured validation response', () => {
@@ -95,7 +95,10 @@ test('validationError - creates structured validation response', () => {
   const result = validationError(details, '/test');
 
   assert.strictEqual(result.status, 422);
-  assert.strictEqual(result.body.type, 'https://peac.dev/problems/schema-validation-failed');
+  assert.strictEqual(
+    result.body.type,
+    'https://peacprotocol.org/problems/schema-validation-failed'
+  );
   assert.deepStrictEqual(result.body['validation-failures'], details);
   assert.strictEqual(result.body.instance, '/test');
 });
@@ -103,7 +106,7 @@ test('validationError - creates structured validation response', () => {
 test('handleVerifyError - handles ProblemError instances', () => {
   const problemError = new ProblemError(
     403,
-    'https://peac.dev/problems/forbidden',
+    'https://peacprotocol.org/problems/forbidden',
     'Forbidden',
     'Access denied'
   );
@@ -111,6 +114,6 @@ test('handleVerifyError - handles ProblemError instances', () => {
   const result = handleVerifyError(problemError);
 
   assert.strictEqual(result.status, 403);
-  assert.strictEqual(result.body.type, 'https://peac.dev/problems/forbidden');
+  assert.strictEqual(result.body.type, 'https://peacprotocol.org/problems/forbidden');
   assert.strictEqual(result.body.title, 'Forbidden');
 });
