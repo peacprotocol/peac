@@ -13,7 +13,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 
 - **apps/bridge/** Hono server on 127.0.0.1:31415 with /enforce, /verify, /health, /ready; /metrics on :31416
 - Wire headers: PEAC-Receipt and Link discovery headers on all endpoints
-- Media types: success application/peac+json, errors application/problem+json (RFC 7807 with canonical https://peacprotocol.org/problems/<slug>)
+- Media types: success application/peac+json, errors application/problem+json (RFC 9457 with canonical https://peacprotocol.org/problems/<slug>)
 - PEAC-Receipt header on allow; sensitive responses send Cache-Control: no-store, no-cache, must-revalidate, private
 - 402 responses mirror payment timing via Retry-After and normalized payment{} extension
 - Prometheus metrics with Content-Type: text/plain; version=0.0.4; charset=utf-8, discovery headers, and Cache-Control: no-cache
@@ -77,7 +77,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 ### Added
 
 - Deterministic ETags with conditional requests (304 support)
-- RFC 7807 Problem Details for all error responses
+- RFC 9457 Problem Details for all error responses
 - RFC 9331 RateLimit headers with delta seconds
 - Atomic JWKS persistence with fsync and 0600 permissions
 - Idempotency middleware with scoped keys and LRU eviction

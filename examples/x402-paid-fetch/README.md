@@ -43,7 +43,7 @@ npx tsx client.ts
 🧾 Receipt received: eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6...
 
 📄 Receipt payload:
-  - Type: peac.receipt/0.9
+  - Type: application/peac-receipt+jws
   - Issuer: https://demo.x402-server.com
   - Subject: urn:resource:sha256:placeholder-hash-for-demo
   - Payment scheme: x402

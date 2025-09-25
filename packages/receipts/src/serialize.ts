@@ -38,7 +38,7 @@ export function createReceipt(params: {
     : `sha256:${params.resource_hash}`;
 
   return {
-    typ: 'peac.receipt/0.9',
+    typ: 'application/peac-receipt+jws',
     iss: params.iss,
     sub: `urn:resource:${resourceHash}`,
     aud: normalizeUrl(params.resource_url),
@@ -101,7 +101,7 @@ export async function signReceipt(
     throw new Error('Invalid UUIDv7 in jti field');
   }
 
-  if (receipt.typ !== 'peac.receipt/0.9') {
+  if (receipt.typ !== 'application/peac-receipt+jws') {
     throw new Error('Invalid receipt type');
   }
 

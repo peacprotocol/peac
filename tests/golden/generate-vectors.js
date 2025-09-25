@@ -73,7 +73,7 @@ function generateValidJsonVector(id, variant) {
   const bodyHash = createHash('sha256').update(canonicalize(body)).digest();
 
   const payload = {
-    typ: 'peac.receipt/0.9',
+    typ: 'application/peac-receipt+jws',
     iss: 'https://test.peacprotocol.org',
     sub: `urn:resource:sha256:${Buffer.from(bodyHash).toString('base64url')}`,
     iat: now - variant * 10, // Vary timestamps
@@ -104,7 +104,7 @@ function generateValidJsonVector(id, variant) {
     body,
     expected: {
       verified: true,
-      typ: 'peac.receipt/0.9',
+      typ: 'application/peac-receipt+jws',
       resource_hash: Buffer.from(bodyHash).toString('base64url'),
     },
   };
@@ -115,7 +115,7 @@ function generateValidBinaryVector(id, variant) {
   const bodyHash = createHash('sha256').update(binaryData).digest();
 
   const payload = {
-    typ: 'peac.receipt/0.9',
+    typ: 'application/peac-receipt+jws',
     iss: 'https://binary.test.com',
     sub: `urn:resource:sha256:${Buffer.from(bodyHash).toString('base64url')}`,
     iat: Math.floor(Date.now() / 1000),
@@ -146,7 +146,7 @@ function generateValidBinaryVector(id, variant) {
 
 function generateInvalidSigVector(id, variant) {
   const payload = {
-    typ: 'peac.receipt/0.9',
+    typ: 'application/peac-receipt+jws',
     iss: 'https://test.com',
     sub: 'urn:resource:sha256:invalid',
     iat: Math.floor(Date.now() / 1000),
@@ -172,7 +172,7 @@ function generateExpiredVector(id, variant) {
   const pastTime = Math.floor(Date.now() / 1000) - 3600; // 1 hour ago
 
   const payload = {
-    typ: 'peac.receipt/0.9',
+    typ: 'application/peac-receipt+jws',
     iss: 'https://expired.test.com',
     sub: 'urn:resource:sha256:expired',
     iat: pastTime,
@@ -217,14 +217,14 @@ function generateEdgeCaseVector(id, variant) {
   // Various edge cases
   const cases = [
     () => ({ typ: 'wrong.type/0.9', iss: 'https://test.com' }),
-    () => ({ typ: 'peac.receipt/0.9', jti: 'not-uuidv7' }),
-    () => ({ typ: 'peac.receipt/0.9', iat: 'not-number' }),
-    () => ({ typ: 'peac.receipt/0.9', resource: { hash: 'no-sha256-prefix' } }),
+    () => ({ typ: 'application/peac-receipt+jws', jti: 'not-uuidv7' }),
+    () => ({ typ: 'application/peac-receipt+jws', iat: 'not-number' }),
+    () => ({ typ: 'application/peac-receipt+jws', resource: { hash: 'no-sha256-prefix' } }),
   ];
 
   const caseGen = cases[variant % cases.length];
   const payload = {
-    typ: 'peac.receipt/0.9',
+    typ: 'application/peac-receipt+jws',
     iss: 'https://edge.test.com',
     sub: 'urn:resource:sha256:edge',
     iat: Math.floor(Date.now() / 1000),

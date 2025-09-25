@@ -1,8 +1,8 @@
 # Error Response Registry
 
-## RFC 7807 Problem Details
+## RFC 9457 Problem Details
 
-PEAC Protocol uses RFC 7807 Problem Details for structured error responses. All error responses use the `application/problem+json` media type.
+PEAC Protocol uses RFC 9457 Problem Details for structured error responses. All error responses use the `application/problem+json` media type.
 
 ## Problem Type Registry
 

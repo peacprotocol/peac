@@ -10,7 +10,7 @@
 PEAC is a minimal, open spec for machine-readable policy and agent coordination on the web:
 
 - **Discovery** via `/.well-known/peac.txt`
-- **HTTP semantics** via `PEAC-Receipt` headers and HTTP Problem Details (RFC 7807)
+- **HTTP semantics** via `PEAC-Receipt` headers and HTTP Problem Details (RFC 9457)
 - **Verifiable receipts** (JWS) with **adapters** for negotiation, settlement, and compliance
 - **Trust rails** for agents: UDA, DPoP, and Agent Attestation
 
@@ -88,7 +88,7 @@ curl -I https://your-domain/.well-known/peac.txt  # check ETag + Cache-Control
 ```
 
 Tips: emit `PEAC-Receipt`, `Link`; be case-insensitive on read. Start in simulation via `PEAC_MODE=simulation`.
-Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
+Common pitfalls: invalid schema returns HTTP Problem Details (RFC 9457) 400.
 
 ---
 
@@ -227,7 +227,7 @@ if (access.granted) {
 **Example API request with curl:**
 
 ```bash
-curl -X POST https://demo.peac.dev/peac/agreements \
+curl -X POST https://demo.peacprotocol.org/peac/agreements \
   -H "content-type: application/json" \
   -H "x-api-key: your-key" \
   -d '{
@@ -240,7 +240,7 @@ curl -X POST https://demo.peac.dev/peac/agreements \
 **JavaScript example:**
 
 ```javascript
-const response = await fetch('https://demo.peac.dev/peac/agreements', {
+const response = await fetch('https://demo.peacprotocol.org/peac/agreements', {
   method: 'POST',
   headers: {
     'content-type': 'application/json',
@@ -366,7 +366,7 @@ More templates are in `docs/templates.md`.
 
 ## Troubleshooting
 
-- 400 HTTP Problem Details (RFC 7807). Validate `peac.txt` or the negotiation body.
+- 400 HTTP Problem Details (RFC 9457). Validate `peac.txt` or the negotiation body.
 - Missing receipt. Ensure the adapter completed settlement. On success the server can return `PEAC-Receipt` and a receipt body.
 - Header mismatch. Emit `PEAC-Receipt`, `Link`. Intermediaries may alter casing.
 - Negotiation fails. Enable flags like `PEAC_FEATURE_NEGOTIATION=1` and start with a simulation adapter.
@@ -426,7 +426,7 @@ See [SECURITY.md](SECURITY.md) and [docs/security.md](docs/security.md).
 ## References
 
 - RFC 9110 HTTP Semantics
-- RFC 7807 Problem Details for HTTP APIs
+- RFC 9457 Problem Details for HTTP APIs
 - RFC 9449 Demonstrating Proof of Possession at the Application Layer
 - RFC 2119 and RFC 8174 requirement keywords
 - robots.txt and related conventions

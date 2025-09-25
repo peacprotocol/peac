@@ -121,6 +121,6 @@ The verifier includes SSRF protection by default:
 ## Next Steps
 
 - Read [Policy Hash Algorithm](policy-hash.md) for canonicalization details
-- See [Error Handling](errors.md) for RFC 7807 Problem Details
+- See [Error Handling](errors.md) for RFC 9457 Problem Details
 - Review [Receipt Claims](receipts.md) for complete schema
 - Check [Examples](examples.md) for production deployment patterns

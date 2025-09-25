@@ -2,7 +2,7 @@
  * @peac/core/enforce - Receipt Engine Orchestrator
  *
  * Core orchestration: discover → evaluate → settle → prove
- * RFC 7807 Problem Details for 402/403 responses
+ * RFC 9457 Problem Details for 402/403 responses
  */
 
 import { canonicalPolicyHash, sha256b64u, normalizeResourceUrl } from './hash.js';

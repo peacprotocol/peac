@@ -24,7 +24,7 @@ Link: </.well-known/aipref.json>; rel="aipref", </agent-permissions.json>; rel="
 
 ### Error Responses
 
-Errors use RFC 7807 Problem Details with `application/problem+json`:
+Errors use RFC 9457 Problem Details with `application/problem+json`:
 
 ```http
 HTTP/1.1 400 Bad Request

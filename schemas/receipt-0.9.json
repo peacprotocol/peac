@@ -7,7 +7,7 @@
   "required": ["typ", "iss", "sub", "iat", "jti", "policy", "resource"],
   "properties": {
     "typ": {
-      "const": "peac.receipt/0.9",
+      "const": "application/peac-receipt+jws",
       "description": "Receipt type identifier"
     },
     "iss": {
