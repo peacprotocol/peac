@@ -10,5 +10,5 @@ export default defineConfig({
   treeshake: true,
   minify: false,
   target: 'es2022',
-  external: ['node:*', '@peac/core', '@peac/disc'],
+  external: ['node:*', '@peac/core', '@peac/discovery'],
 });

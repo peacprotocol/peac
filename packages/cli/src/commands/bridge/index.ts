@@ -3,10 +3,10 @@
  */
 
 import { Command } from 'commander';
-import { installCommand } from './install.js';
-import { startCommand } from './start.js';
-import { stopCommand } from './stop.js';
-import { statusCommand } from './status.js';
+import { installCommand } from './install';
+import { startCommand } from './start';
+import { stopCommand } from './stop';
+import { statusCommand } from './status';
 
 export function bridgeCommand() {
   const bridge = new Command('bridge').description(

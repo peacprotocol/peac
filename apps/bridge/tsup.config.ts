@@ -8,5 +8,5 @@ export default defineConfig({
   clean: true,
   splitting: false,
   sourcemap: true,
-  external: ['@peac/core', '@peac/disc', '@peac/receipts', '@peac/pay402'],
+  external: ['@peac/core', '@peac/discovery', '@peac/receipts', '@peac/pay402'],
 });

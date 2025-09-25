@@ -3,7 +3,7 @@
  * Memory and Redis backends with graceful degradation
  */
 
-import { RATE_LIMIT_CONFIG, FEATURES, CrawlerType } from './config.js';
+import { RATE_LIMIT_CONFIG, FEATURES, CrawlerType } from './config';
 
 export interface RateLimitResult {
   allowed: boolean;

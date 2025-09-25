@@ -1,9 +1,9 @@
 /**
- * @peac/disc/parser - peac.txt parser with ≤20 lines enforcement
+ * @peac/discovery/parser - peac.txt parser with ≤20 lines enforcement
  * ABNF-compliant discovery document parsing
  */
 
-import type { PeacDiscovery, ParseResult, PublicKeyInfo, ValidationOptions } from './types.js';
+import type { PeacDiscovery, ParseResult, PublicKeyInfo, ValidationOptions } from './types';
 
 const MAX_LINES = 20;
 const FIELD_PATTERNS = {
@@ -127,7 +127,7 @@ export function emit(data: PeacDiscovery): string {
   }
 
   if (data.payments && data.payments.length > 0) {
-    const paymentsStr = data.payments.map((p) => `"${p}"`).join(', ');
+    const paymentsStr = data.payments.map((p: string) => `"${p}"`).join(', ');
     lines.push(`payments: [${paymentsStr}]`);
   }
 
@@ -144,7 +144,7 @@ export function emit(data: PeacDiscovery): string {
   }
 
   if (data.public_keys && data.public_keys.length > 0) {
-    const keysStr = data.public_keys.map((k) => `"${k.kid}:${k.alg}:${k.key}"`).join(', ');
+    const keysStr = data.public_keys.map((k: any) => `"${k.kid}:${k.alg}:${k.key}"`).join(', ');
     lines.push(`public_keys: [${keysStr}]`);
   }
 

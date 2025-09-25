@@ -1,4 +1,4 @@
-import { Receipt, ValidationResult } from './types.js';
+import { Receipt, ValidationResult } from './types';
 
 /**
  * Validates that conditional fields are present based on enforcement method

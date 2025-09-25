@@ -8,8 +8,8 @@
     "rootDir": "src",
     "noEmit": false,
     "emitDeclarationOnly": false,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "target": "ES2022",
     "strict": true,
     "skipLibCheck": true

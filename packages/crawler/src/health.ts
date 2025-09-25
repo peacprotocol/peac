@@ -3,8 +3,8 @@
  * Proactive health monitoring to complement reactive circuit breakers
  */
 
-import { CrawlerControlProvider, HealthCheckResult } from './types.js';
-import { CircuitBreaker } from './circuitBreaker.js';
+import { CrawlerControlProvider, HealthCheckResult } from './types';
+import { CircuitBreaker } from './circuitBreaker';
 
 export interface HealthMonitorOptions {
   intervalMs: number;

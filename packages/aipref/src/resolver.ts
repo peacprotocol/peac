@@ -3,8 +3,8 @@
  * Priority: request headers > AIPREF JSON > peac.txt > robots.txt > defaults
  */
 
-import { fetchRobots, parseRobots, robotsToAIPref } from './robots.js';
-import type { AIPrefPolicy, AIPrefSnapshot, ResolveContext, PrefSource } from './types.js';
+import { fetchRobots, parseRobots, robotsToAIPref } from './robots';
+import type { AIPrefPolicy, AIPrefSnapshot, ResolveContext, PrefSource } from './types';
 
 export class PrefResolver {
   private sources: PrefSource[] = [];

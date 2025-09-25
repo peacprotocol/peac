@@ -32,6 +32,8 @@
     "dev": "pnpm -w run dev --filter @peac/app-api",
     "start": "pnpm -w run start --filter @peac/app-api",
     "dep-cruiser": "npx depcruise packages/ --validate .dependency-cruiser.json",
+    "schema:check": "node scripts/ajv-compile-2020.mjs schemas/receipts/safety-event.v1.json",
+    "schema:check:all": "node scripts/ajv-compile-2020.mjs --all",
     "prepare": "husky install"
   },
   "lint-staged": {
@@ -40,13 +42,17 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
     "@types/node": "^20.19.13",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "ajv": "^8.12.0",
     "ajv-cli": "^5.0.0",
     "ajv-formats": "^2.1.1",
     "dependency-cruiser": "^16.0.0",
     "eslint": "^8.50.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^3.10.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-promise": "^7.2.1",
     "husky": "^8.0.0",
     "jest": "^29.0.0",
     "lint-staged": "^15.0.0",
@@ -57,7 +63,7 @@
     "typescript": "^5.2.0"
   },
   "engines": {
-    "node": ">=18 <23",
+    "node": ">=20 <21",
     "pnpm": ">=8.0.0"
   },
   "license": "Apache-2.0",

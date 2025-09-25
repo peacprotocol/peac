@@ -1,17 +1,17 @@
 /**
- * @peac/disc - PEAC discovery with ≤20 lines enforcement
+ * @peac/discovery - PEAC discovery with ≤20 lines enforcement
  * ABNF-compliant .well-known/peac.txt parser and generator
  */
 
-export { parse, emit, validate } from './parser.js';
-export type { PeacDiscovery, PublicKeyInfo, ParseResult, ValidationOptions } from './types.js';
+export { parse, emit, validate } from './parser';
+export type { PeacDiscovery, PublicKeyInfo, ParseResult, ValidationOptions } from './types';
 
 // Constants
 export const MAX_LINES = 20;
 export const WELL_KNOWN_PATH = '/.well-known/peac.txt';
 
 // Convenience function for fetching and parsing discovery documents
-export async function discover(origin: string): Promise<import('./types.js').ParseResult> {
+export async function discover(origin: string): Promise<import('./types').ParseResult> {
   try {
     const url = new URL(WELL_KNOWN_PATH, origin);
     const response = await fetch(url.toString(), {
@@ -26,7 +26,7 @@ export async function discover(origin: string): Promise<import('./types.js').Par
     }
 
     const content = await response.text();
-    const { parse } = await import('./parser.js');
+    const { parse } = await import('./parser');
     return parse(content);
   } catch (error) {
     return {

@@ -1,5 +1,5 @@
 {
-  "name": "@peac/disc",
+  "name": "@peac/discovery",
   "version": "0.9.12.1",
   "description": "PEAC discovery with ≤20 lines enforcement",
   "type": "module",
@@ -18,15 +18,17 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
-    "build:types": "tsc -b",
-    "test": "node --test src/*.test.js",
-    "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
+    "build": "tsup",
+    "build:types": "tsc -p tsconfig.types.json",
+    "prepublishOnly": "pnpm run build && pnpm run build:types",
+    "pretest": "pnpm -w turbo run build --filter=@peac/discovery",
+    "test": "tsx --test src/**/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
   },
   "keywords": [
     "peac",

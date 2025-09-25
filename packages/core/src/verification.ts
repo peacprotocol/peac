@@ -4,8 +4,8 @@
  */
 
 import { promises as dns } from 'dns';
-import { FEATURES, TRUST_CONFIG } from './config.js';
-import { VerificationResult, TrustScoreParams, Discovery } from './types.js';
+import { FEATURES, TRUST_CONFIG } from './config';
+import { VerificationResult, TrustScoreParams, Discovery } from './types';
 
 export interface RDNSResult {
   forward_hostname?: string; // PTR(ip) -> hostname

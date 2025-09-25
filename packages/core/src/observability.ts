@@ -3,9 +3,9 @@
  * Metrics collection, health checks, and administrative operations
  */
 
-import { FEATURES, SLO_TARGETS, SECURITY_CONFIG } from './config.js';
-import { securityAuditor, SecurityEvent } from './security.js';
-import { rateLimiter } from './rate-limit.js';
+import { FEATURES, SLO_TARGETS, SECURITY_CONFIG } from './config';
+import { securityAuditor, SecurityEvent } from './security';
+import { rateLimiter } from './rate-limit';
 
 export interface PerfMetrics {
   sign_p95_ms: number;

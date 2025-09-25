@@ -14,7 +14,7 @@ import {
   flattenedVerify,
   type KeyLike,
 } from 'jose';
-import { uuidv7 } from './ids/uuidv7.js';
+import { uuidv7 } from './ids/uuidv7';
 
 export interface KeyPair {
   privateKey: KeyLike;

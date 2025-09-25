@@ -3,8 +3,8 @@
  * High-performance binary serialization with 60-70% size reduction
  */
 
-import { Receipt, PurgeReceipt } from './types.js';
-import { FEATURES } from './config.js';
+import { Receipt, PurgeReceipt } from './types';
+import { FEATURES } from './config';
 
 // Import profile maps
 const RECEIPT_MAP = {

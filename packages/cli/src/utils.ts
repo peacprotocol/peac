@@ -3,7 +3,7 @@
  */
 
 import chalk from 'chalk';
-import type { CommandResult } from './types.js';
+import type { CommandResult } from './types';
 
 export function formatOutput(result: CommandResult, json = false): string {
   if (json) {

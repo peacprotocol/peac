@@ -4,7 +4,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'import', 'promise'],
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:import/recommended',
     'plugin:import/typescript',
     'plugin:promise/recommended',
@@ -22,8 +22,9 @@ module.exports = {
   },
   settings: {
     'import/resolver': {
+      node: true,
       typescript: {
-        project: ['./tsconfig.json', './packages/*/tsconfig.json']
+        project: ['./tsconfig.json', './packages/*/tsconfig.json', './apps/*/tsconfig.json']
       }
     },
   },
@@ -35,12 +36,32 @@ module.exports = {
     'import/no-unresolved': 'error',
     'import/extensions': ['error', 'ignorePackages', { ts:'never', tsx:'never', js:'always', mjs:'always' }],
   },
-  ignorePatterns: ['dist/**', 'coverage/**', 'bench-results.json', 'tests/golden/**'],
+  ignorePatterns: [
+    'dist/**',
+    'coverage/**',
+    'bench-results.json',
+    'tests/golden/**',
+    'tests/performance/**',
+    'test/smoke/**',
+    'tests/contract/**',
+  ],
   overrides: [
     {
-      files: ['**/*.ts', '**/*.tsx'],
+      files: ['**/*.test.js', '**/*.spec.js', 'test/**/*.js', 'tests/**/*.js'],
+      rules: {
+        'import/no-unresolved': 'off',
+        'import/extensions': 'off',
+        '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/no-var-requires': 'off',
+        'no-undef': 'off',
+        'no-useless-escape': 'off',
+      }
+    },
+    {
+      // Type-aware lint only where tsconfig includes them
+      files: ['packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx', 'apps/*/src/**/*.ts', 'apps/*/src/**/*.tsx'],
       parserOptions: {
-        project: ['./tsconfig.json', './packages/*/tsconfig.json']
+        project: ['./tsconfig.json', './packages/*/tsconfig.json', './apps/*/tsconfig.json']
       }
     }
   ],

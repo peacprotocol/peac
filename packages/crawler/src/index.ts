@@ -3,13 +3,13 @@
  * Zero-config local provider with optional Cloudflare integration
  */
 
-import { CrawlerControlRegistry } from './registry.js';
-import { RegistryHealthMonitor } from './health.js';
-import { LocalProvider } from './providers/local/local.provider.js';
-import { CloudflareProvider } from './providers/cloudflare/cf.provider.js';
-import { CFClient } from './providers/cloudflare/cf.client.js';
-import { crawlerMetrics } from './observability.js';
-import { RegistryOptions, VerificationLevel } from './types.js';
+import { CrawlerControlRegistry } from './registry';
+import { RegistryHealthMonitor } from './health';
+import { LocalProvider } from './providers/local/local.provider';
+import { CloudflareProvider } from './providers/cloudflare/cf.provider';
+import { CFClient } from './providers/cloudflare/cf.client';
+import { crawlerMetrics } from './observability';
+import { RegistryOptions, VerificationLevel } from './types';
 
 export interface RegistryHandle {
   registry: CrawlerControlRegistry;
@@ -239,16 +239,16 @@ export {
   CFClient,
   VerificationLevel,
   crawlerMetrics,
-} from './registry.js';
+} from './registry';
 
-export * from './types.js';
-export * from './cache.js';
-export * from './circuitBreaker.js';
-export * from './health.js';
-export * from './observability.js';
+export * from './types';
+export * from './cache';
+export * from './circuitBreaker';
+export * from './health';
+export * from './observability';
 
 // Webhook utilities
-export * from './providers/cloudflare/cf.webhook.js';
+export * from './providers/cloudflare/cf.webhook';
 
 // Default export for convenience
 export default buildRegistry;

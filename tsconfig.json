@@ -13,6 +13,7 @@
     { "path": "./packages/profiles-safety" },
     { "path": "./packages/schema" },
     { "path": "./packages/cli" },
+    { "path": "./packages/sdk-js" },
     { "path": "./packages/adapters/cloudflare" },
     { "path": "./packages/adapters/mcp" },
     { "path": "./apps/api" },

@@ -4,11 +4,11 @@
  */
 
 import { jwtVerify, importJWK } from 'jose';
-import { Receipt, PurgeReceipt, KeySet, VerifyResult } from './types.js';
-import { assertProtocolVersions, assertCrawlerType, validateNonce } from './validation.js';
-import { FEATURES } from './config.js';
-import { validateReceiptSecurity, securityContext, securityAuditor } from './security.js';
-import { metricsCollector } from './observability.js';
+import { Receipt, PurgeReceipt, KeySet, VerifyResult } from './types';
+import { assertProtocolVersions, assertCrawlerType, validateNonce } from './validation';
+import { FEATURES } from './config';
+import { validateReceiptSecurity, securityContext, securityAuditor } from './security';
+import { metricsCollector } from './observability';
 
 // Global nonce store for replay protection (in production, use Redis with TTL)
 const nonceStore = new Set<string>();

@@ -7,7 +7,7 @@ import { promises as dns } from 'node:dns';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { verify, canonicalPolicyHash } from '@peac/core';
-import { discover } from '@peac/disc';
+import { discover } from '@peac/discovery';
 import type { HttpStatus } from './types.js';
 import receiptSchema from '../../../schemas/receipt-0.9.json' with { type: 'json' };
 

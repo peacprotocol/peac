@@ -15,9 +15,9 @@ import {
   ProviderQuota,
   Aggregation,
   Mode,
-} from './types.js';
-import { CircuitBreaker, BreakerState } from './circuitBreaker.js';
-import { VerificationCache } from './cache.js';
+} from './types';
+import { CircuitBreaker, BreakerState } from './circuitBreaker';
+import { VerificationCache } from './cache';
 
 interface ProviderEntry {
   provider: CrawlerControlProvider;

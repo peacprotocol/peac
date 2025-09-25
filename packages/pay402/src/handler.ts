@@ -3,8 +3,8 @@
  * RFC 9110 compliant with RFC 9457 Problem Details
  */
 
-import { PaymentNegotiator } from './negotiator.js';
-import type { NegotiationContext, Http402Response } from './types.js';
+import { PaymentNegotiator } from './negotiator';
+import type { NegotiationContext, Http402Response } from './types';
 
 export class Http402Handler {
   constructor(private negotiator: PaymentNegotiator) {}
@@ -41,7 +41,7 @@ export class Http402Handler {
     };
   }
 
-  private buildWwwAuthenticate(challenges: import('./types.js').PaymentChallenge[]): string {
+  private buildWwwAuthenticate(challenges: import('./types').PaymentChallenge[]): string {
     // Primary challenge gets the main WWW-Authenticate header
     const primary = challenges[0];
     let auth = `Bearer realm="${primary.rail}"`;
@@ -80,11 +80,11 @@ export class Http402Handler {
   async verifyPayment(
     paymentHeader: string,
     originalChallenge?: string
-  ): Promise<import('./types.js').PaymentEvidence | null> {
+  ): Promise<import('./types').PaymentEvidence | null> {
     const parsed = this.parsePaymentHeader(paymentHeader);
     if (!parsed) return null;
 
-    const rail = parsed.rail as import('./types.js').PaymentRail;
+    const rail = parsed.rail as import('./types').PaymentRail;
     return this.negotiator.verify(rail, originalChallenge || '', parsed.evidence);
   }
 }

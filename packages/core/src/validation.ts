@@ -3,8 +3,8 @@
  * Strict version negotiation with graceful compatibility modes
  */
 
-import { VERSION_CONFIG, isCompatibleProtocol, isValidCrawlerType } from './config.js';
-import { ProblemDetails } from './types.js';
+import { VERSION_CONFIG, isCompatibleProtocol, isValidCrawlerType } from './config';
+import { ProblemDetails } from './types';
 
 export function assertProtocolVersions(
   obj: { protocol_version?: string; wire_version?: string },

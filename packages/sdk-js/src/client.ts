@@ -11,7 +11,7 @@ import type {
   DiscoveryResult,
   VerificationResult,
   ClientError,
-} from './types.js';
+} from './types';
 
 export class PeacClient {
   private config: Required<ClientConfig>;
@@ -36,10 +36,10 @@ export class PeacClient {
 
     try {
       // Safe dynamic import using template literals to avoid Function constructor
-      const moduleName = '@peac/disc';
+      const moduleName = '@peac/discovery';
       const discModule = await import(/* webpackIgnore: true */ moduleName).catch(() => null);
       if (!discModule) {
-        throw new Error('@peac/disc module not available');
+        throw new Error('@peac/discovery module not available');
       }
 
       const result = await Promise.race([

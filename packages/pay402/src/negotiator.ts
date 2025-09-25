@@ -2,7 +2,7 @@
  * @peac/402/negotiator - Payment rail negotiation
  */
 
-import type { PaymentRail, PaymentAdapter, NegotiationContext, PaymentChallenge } from './types.js';
+import type { PaymentRail, PaymentAdapter, NegotiationContext, PaymentChallenge } from './types';
 
 export class PaymentNegotiator {
   private adapters: Map<PaymentRail, PaymentAdapter> = new Map();
@@ -78,7 +78,7 @@ export class PaymentNegotiator {
     rail: PaymentRail,
     challenge: string,
     evidence: string
-  ): Promise<import('./types.js').PaymentEvidence | null> {
+  ): Promise<import('./types').PaymentEvidence | null> {
     const adapter = this.adapters.get(rail);
     if (!adapter) {
       throw new Error(`Unknown payment rail: ${rail}`);
@@ -116,7 +116,7 @@ export class X402MockAdapter implements PaymentAdapter {
   async verify(
     challenge: string,
     evidence: string
-  ): Promise<import('./types.js').PaymentEvidence | null> {
+  ): Promise<import('./types').PaymentEvidence | null> {
     if (!evidence.startsWith('x402_proof_')) return null;
 
     return {
@@ -146,7 +146,7 @@ export class L402MockAdapter implements PaymentAdapter {
   async verify(
     challenge: string,
     evidence: string
-  ): Promise<import('./types.js').PaymentEvidence | null> {
+  ): Promise<import('./types').PaymentEvidence | null> {
     if (!evidence.includes('lsat_preimage_')) return null;
 
     return {
@@ -175,7 +175,7 @@ export class TempoMockAdapter implements PaymentAdapter {
   async verify(
     challenge: string,
     evidence: string
-  ): Promise<import('./types.js').PaymentEvidence | null> {
+  ): Promise<import('./types').PaymentEvidence | null> {
     if (!evidence.includes('tempo:tx:') || evidence.length < 32) return null;
 
     const evidenceParts = evidence.split(',').map((s) => s.trim());
@@ -213,7 +213,7 @@ export class StripeMockAdapter implements PaymentAdapter {
   async verify(
     challenge: string,
     evidence: string
-  ): Promise<import('./types.js').PaymentEvidence | null> {
+  ): Promise<import('./types').PaymentEvidence | null> {
     if (!evidence.startsWith('pi_') || !evidence.includes('succeeded')) return null;
 
     return {

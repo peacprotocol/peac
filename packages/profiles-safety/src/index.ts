@@ -4,20 +4,20 @@
  */
 
 // Core validation functions
-export { validateSafetyPolicy, validateOverlayCompliance } from './validate.js';
-export type { ValidationOptions, ValidationResult } from './validate.js';
+export { validateSafetyPolicy, validateOverlayCompliance } from './validate';
+export type { ValidationOptions, ValidationResult } from './validate';
 
 // Receipt generation
-export { issueSafetyReceipt, createReceiptSigner, validateReceiptStructure } from './receipt.js';
-export type { ReceiptSigner, IssueReceiptOptions, IssuedReceipt } from './receipt.js';
+export { issueSafetyReceipt, createReceiptSigner, validateReceiptStructure } from './receipt';
+export type { ReceiptSigner, IssueReceiptOptions, IssuedReceipt } from './receipt';
 
 // Event validation
 export {
   validateSafetyEvent,
   validateEventTypeRequirements,
   validateCounterCompliance,
-} from './validate-event.js';
-export type { EventValidationResult } from './validate-event.js';
+} from './validate-event';
+export type { EventValidationResult } from './validate-event';
 
 // Types
 export type {
@@ -28,7 +28,7 @@ export type {
   SafetyPolicy,
   SafetyPolicyCore,
   SafetyPolicySB243,
-} from './types.js';
+} from './types';
 
 // Package metadata
 export const PACKAGE_VERSION = '0.9.12.1';

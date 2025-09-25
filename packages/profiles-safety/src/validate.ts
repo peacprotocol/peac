@@ -4,7 +4,7 @@
 
 import Ajv from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import type { SafetyPolicy, OverlayId } from './types.js';
+import type { SafetyPolicy, OverlayId } from './types';
 
 // Schema cache
 let ajvInstance: Ajv | null = null;

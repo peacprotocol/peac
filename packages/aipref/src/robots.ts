@@ -3,7 +3,7 @@
  * Extracts AI-relevant directives from robots.txt
  */
 
-import type { AIPrefSnapshot, RobotsRule } from './types.js';
+import type { AIPrefSnapshot, RobotsRule } from './types';
 
 // SSRF protection: Check if hostname/IP is in private network range
 function isPrivateNetwork(hostname: string): boolean {
