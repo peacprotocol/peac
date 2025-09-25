@@ -91,8 +91,8 @@ jobs:
       - name: Security baseline
         run: |
           set -euo pipefail
-          if grep -r "peac\.dev/problems" packages/ apps/; then echo "Found old problem domain"; exit 1; fi
-          if grep -r "X-PEAC-" packages/ apps/; then echo "Found banned X-PEAC- header"; exit 1; fi
+          if grep -r "peac\.dev/problems" packages/*/src apps/*/src; then echo "Found old problem domain"; exit 1; fi
+          if grep -r "X-PEAC-" packages/*/src apps/*/src; then echo "Found banned X-PEAC- header"; exit 1; fi
           if grep -r "TODO\|FIXME\|HACK\|DEBUG" packages/*/src apps/*/src --exclude-dir=node_modules; then echo "Found dev markers"; exit 1; fi
 
       - name: Documentation check

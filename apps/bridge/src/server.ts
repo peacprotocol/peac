@@ -39,7 +39,8 @@ export function createBridgeApp() {
     await next();
     // Version lives in JWS 'typ' claim only
     const aiprefUrl = new URL('/.well-known/aipref.json', c.req.url).toString();
-    c.header('Link', `<${aiprefUrl}>; rel="aipref"`);
+    const agentPermUrl = new URL('/agent-permissions.json', c.req.url).toString();
+    c.header('Link', `<${aiprefUrl}>; rel="aipref", <${agentPermUrl}>; rel="agent-permissions"`);
     c.header('Access-Control-Expose-Headers', 'PEAC-Receipt, Link');
     c.header('X-Request-ID', c.get('requestId'));
   });

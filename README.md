@@ -96,7 +96,7 @@ Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 
 - **Discovery**: `/.well-known/peac.txt` (fallback `/peac.txt`)
 - **Headers**: `peac-version`, `PEAC-Receipt`, `peac-agent-attestation`, etc.
-- **Errors**: HTTP Problem Details (RFC 7807) with stable catalog
+- **Errors**: HTTP Problem Details (RFC 9457) with canonical base URI `https://peacprotocol.org/problems/`
 - **Caching**: strong `ETag`, sensible `Cache-Control` for `peac.txt` and well-known endpoints
 
 ---
@@ -450,7 +450,7 @@ See [SECURITY.md](SECURITY.md) and [docs/security.md](docs/security.md).
 - [UDA](docs/uda.md)
 - [Agent Attestation](docs/attestation.md)
 - [Security](docs/security.md)
-- [Problem Catalog](docs/problems.md)
+- [Problem Catalog](docs/problems.md) - [Canonical Registry](https://peacprotocol.org/problems/)
 - [PEIPs](docs/peips.md)
 - [Roadmap](docs/roadmap.md)
 - [Vision](docs/vision.md)
