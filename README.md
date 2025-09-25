@@ -1,5 +1,7 @@
 # PEAC Protocol
 
+> Baseline: Node 20 LTS · pnpm 8+
+
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-0.9.13--stable-green.svg)](https://github.com/peacprotocol/peac/releases)
 [![CI-Lite](https://github.com/peacprotocol/peac/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/ci-lite.yml)
