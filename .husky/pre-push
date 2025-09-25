@@ -1,11 +1,22 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Use local prettierignore for pre-push validation
-if [ -f .prettierignore.local ]; then
-  pnpm exec prettier --check . --ignore-path .prettierignore.local
-else
-  pnpm run format:check
-fi
+# Quality gates for world-class push readiness
+echo "🔍 Running pre-push quality gates..."
 
-pnpm run lint && pnpm run typecheck
+# Check no dist files are tracked
+pnpm run ci:check-no-dist
+
+# Lint with zero warnings
+pnpm -w eslint . --max-warnings 0
+
+# Format check
+pnpm -w format:check
+
+# Schema validation
+pnpm -w run schema:check
+
+# TypeScript check
+pnpm -w turbo run typecheck
+
+echo "✅ All quality gates passed - push approved"
