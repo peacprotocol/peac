@@ -104,7 +104,7 @@ X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 
 # Payment Required Response (402)
 HTTP/1.1 402 Payment Required
-Content-Type: application/problem+json
+Content-Type: application/problem+json; charset=utf-8
 Retry-After: 60
 X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 
@@ -146,7 +146,7 @@ Cache-Control: no-store, no-cache, must-revalidate, private
 
 # Invalid Receipt Response (400)
 HTTP/1.1 400 Bad Request
-Content-Type: application/problem+json
+Content-Type: application/problem+json; charset=utf-8
 
 {
   "type": "https://peacprotocol.org/problems/invalid-receipt",

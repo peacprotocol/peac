@@ -95,7 +95,7 @@ Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 ## Core surfaces
 
 - **Discovery**: `/.well-known/peac.txt` (fallback `/peac.txt`)
-- **Headers**: `PEAC-Receipt`, `Link`, `peac-agent-attestation`, etc.
+- **Headers**: `PEAC-Receipt` (available to browsers via `Access-Control-Expose-Headers`)
 - **Errors**: HTTP Problem Details (RFC 9457) with canonical base URI `https://peacprotocol.org/problems/`
 - **Caching**: strong `ETag`, sensible `Cache-Control` for `peac.txt` and well-known endpoints
 

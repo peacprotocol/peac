@@ -53,6 +53,7 @@ export function createBridgeApp() {
       c.header('Access-Control-Allow-Origin', 'http://localhost:3000');
       c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, HEAD');
       c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, PEAC-Receipt');
+      c.header('Access-Control-Expose-Headers', 'PEAC-Receipt, Link');
       c.header('Vary', 'Origin');
       await next();
     });

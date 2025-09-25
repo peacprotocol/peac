@@ -103,7 +103,6 @@ export async function enforceRoute(c: Context) {
     }
 
     // Problem+JSON for deny/pay responses
-    c.header('Content-Type', 'application/problem+json');
 
     const status = result.problem?.status || 403;
     const isPaymentRequired = status === 402 || result.decision?.evaluation === 'payment_required';
@@ -144,7 +143,7 @@ export async function enforceRoute(c: Context) {
 
     const retryAfter = isPaymentRequired && (problem.extensions as any)?.payment?.retry_after;
     const headers = peacHeaders({
-      'Content-Type': 'application/problem+json',
+      'Content-Type': 'application/problem+json; charset=utf-8',
       'X-Request-ID': c.get('requestId'),
       ...(Number.isFinite(retryAfter) ? { 'Retry-After': String(retryAfter) } : {}),
     });
@@ -170,7 +169,7 @@ export async function enforceRoute(c: Context) {
       errorBody,
       500,
       peacHeaders({
-        'Content-Type': 'application/problem+json',
+        'Content-Type': 'application/problem+json; charset=utf-8',
         'X-Request-ID': c.get('requestId'),
       })
     );

@@ -122,7 +122,7 @@ export async function verifyRoute(c: Context) {
       JSON.stringify(problem),
       500,
       peacHeaders({
-        'Content-Type': 'application/problem+json',
+        'Content-Type': 'application/problem+json; charset=utf-8',
         'X-Request-ID': c.get('requestId'),
       })
     );

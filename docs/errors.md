@@ -10,13 +10,13 @@ PEAC Protocol uses RFC 7807 Problem Details for structured error responses. All 
 
 #### `/usage-forbidden`
 
-**Type:** `https://peac.dev/problems/usage-forbidden`
+**Type:** `https://peacprotocol.org/problems/usage-forbidden`
 **Status:** 403 Forbidden
 **Description:** Resource usage is not permitted under current policy
 
 ```json
 {
-  "type": "https://peac.dev/problems/usage-forbidden",
+  "type": "https://peacprotocol.org/problems/usage-forbidden",
   "title": "Usage Forbidden",
   "status": 403,
   "detail": "Current policy does not permit training use of this resource",
@@ -32,13 +32,13 @@ PEAC Protocol uses RFC 7807 Problem Details for structured error responses. All 
 
 #### `/payment-required`
 
-**Type:** `https://peac.dev/problems/payment-required`
+**Type:** `https://peacprotocol.org/problems/payment-required`
 **Status:** 402 Payment Required
 **Description:** Payment is required to access this resource
 
 ```json
 {
-  "type": "https://peac.dev/problems/payment-required",
+  "type": "https://peacprotocol.org/problems/payment-required",
   "title": "Payment Required",
   "status": 402,
   "detail": "Resource access requires payment of $0.01 USD",
@@ -55,13 +55,13 @@ PEAC Protocol uses RFC 7807 Problem Details for structured error responses. All 
 
 #### `/invalid-receipt`
 
-**Type:** `https://peac.dev/problems/invalid-receipt`
+**Type:** `https://peacprotocol.org/problems/invalid-receipt`
 **Status:** 422 Unprocessable Entity
 **Description:** Receipt format or signature is invalid
 
 ```json
 {
-  "type": "https://peac.dev/problems/invalid-receipt",
+  "type": "https://peacprotocol.org/problems/invalid-receipt",
   "title": "Invalid Receipt",
   "status": 422,
   "detail": "Receipt signature verification failed",
@@ -73,13 +73,13 @@ PEAC Protocol uses RFC 7807 Problem Details for structured error responses. All 
 
 #### `/rate-limited`
 
-**Type:** `https://peac.dev/problems/rate-limited`
+**Type:** `https://peacprotocol.org/problems/rate-limited`
 **Status:** 429 Too Many Requests
 **Description:** Request rate limit exceeded
 
 ```json
 {
-  "type": "https://peac.dev/problems/rate-limited",
+  "type": "https://peacprotocol.org/problems/rate-limited",
   "title": "Rate Limited",
   "status": 429,
   "detail": "Rate limit exceeded: 100 requests per minute",
@@ -93,13 +93,13 @@ PEAC Protocol uses RFC 7807 Problem Details for structured error responses. All 
 
 #### `/policy-conflict`
 
-**Type:** `https://peac.dev/problems/policy-conflict`
+**Type:** `https://peacprotocol.org/problems/policy-conflict`
 **Status:** 409 Conflict
 **Description:** Multiple policies provide conflicting requirements
 
 ```json
 {
-  "type": "https://peac.dev/problems/policy-conflict",
+  "type": "https://peacprotocol.org/problems/policy-conflict",
   "title": "Policy Conflict",
   "status": 409,
   "detail": "AIPREF and agent-permissions provide conflicting access rules",
@@ -122,13 +122,13 @@ PEAC Protocol uses RFC 7807 Problem Details for structured error responses. All 
 
 #### `/processing-error`
 
-**Type:** `https://peac.dev/problems/processing-error`
+**Type:** `https://peacprotocol.org/problems/processing-error`
 **Status:** 500 Internal Server Error
 **Description:** Server encountered an unexpected error
 
 ```json
 {
-  "type": "https://peac.dev/problems/processing-error",
+  "type": "https://peacprotocol.org/problems/processing-error",
   "title": "Processing Error",
   "status": 500,
   "detail": "Failed to fetch policy from remote source",
@@ -140,13 +140,13 @@ PEAC Protocol uses RFC 7807 Problem Details for structured error responses. All 
 
 #### `/invalid-request`
 
-**Type:** `https://peac.dev/problems/invalid-request`
+**Type:** `https://peacprotocol.org/problems/invalid-request`
 **Status:** 400 Bad Request
 **Description:** Request format is invalid
 
 ```json
 {
-  "type": "https://peac.dev/problems/invalid-request",
+  "type": "https://peacprotocol.org/problems/invalid-request",
   "title": "Invalid Request",
   "status": 400,
   "detail": "Request body must contain 'receipt' field",
