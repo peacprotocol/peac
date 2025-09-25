@@ -2,10 +2,11 @@
 
 ## Wire Protocol Version 0.9.13
 
-All PEAC protocol implementations MUST include the wire version header:
+All PEAC protocol implementations MUST include discovery and receipt headers:
 
 ```
-peac-version: 0.9.13
+PEAC-Receipt: <receipt-jws>
+Link: </.well-known/aipref.json>; rel="aipref", </agent-permissions.json>; rel="agent-permissions"
 ```
 
 ## Content Types and Media Types
@@ -17,7 +18,8 @@ Successful PEAC operations return `application/peac+json`:
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/peac+json
-peac-version: 0.9.13
+PEAC-Receipt: eyJ0eXAiOiJKV1MiLCJhbGciOiJFZERTQSIsImtpZCI6InRlc3Qta2V5In0..signature
+Link: </.well-known/aipref.json>; rel="aipref", </agent-permissions.json>; rel="agent-permissions"
 ```
 
 ### Error Responses
@@ -26,8 +28,8 @@ Errors use RFC 7807 Problem Details with `application/problem+json`:
 
 ```http
 HTTP/1.1 400 Bad Request
-Content-Type: application/problem+json
-peac-version: 0.9.13
+Content-Type: application/problem+json; charset=utf-8
+Link: </.well-known/aipref.json>; rel="aipref", </agent-permissions.json>; rel="agent-permissions"
 
 {
   "type": "https://peacprotocol.org/problems/invalid-receipt",

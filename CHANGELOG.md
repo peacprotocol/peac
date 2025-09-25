@@ -12,11 +12,11 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 ### Added
 
 - **apps/bridge/** Hono server on 127.0.0.1:31415 with /enforce, /verify, /health, /ready; /metrics on :31416
-- Wire headers: peac-version: 0.9.13 on all endpoints
+- Wire headers: PEAC-Receipt and Link discovery headers on all endpoints
 - Media types: success application/peac+json, errors application/problem+json (RFC 7807 with canonical https://peacprotocol.org/problems/<slug>)
 - PEAC-Receipt header on allow; sensitive responses send Cache-Control: no-store, no-cache, must-revalidate, private
 - 402 responses mirror payment timing via Retry-After and normalized payment{} extension
-- Prometheus metrics with Content-Type: text/plain; version=0.0.4; charset=utf-8, peac-version header, and Cache-Control: no-cache
+- Prometheus metrics with Content-Type: text/plain; version=0.0.4; charset=utf-8, discovery headers, and Cache-Control: no-cache
 - Explicit HEAD /health for monitors
 - CLI: peac bridge install|start|stop|status with Windows-safe stop, PID tracking, logs, and require.resolve() discovery
 - Readiness checks include core_loaded and api_verifier_loaded

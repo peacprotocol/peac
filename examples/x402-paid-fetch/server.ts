@@ -32,6 +32,7 @@ app.use('*', (c, next) => {
   c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   c.header('Access-Control-Allow-Headers', 'Content-Type, X-PAYMENT');
   c.header('Access-Control-Expose-Headers', 'PEAC-Receipt, Link');
+  c.header('Vary', 'Origin');
   return next();
 });
 
