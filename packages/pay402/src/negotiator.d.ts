@@ -1,7 +1,7 @@
 /**
  * @peac/402/negotiator - Payment rail negotiation
  */
-import type { PaymentRail, PaymentAdapter, NegotiationContext, PaymentChallenge } from './types';
+import type { PaymentRail, PaymentAdapter, NegotiationContext, PaymentChallenge } from './types.js';
 export declare class PaymentNegotiator {
   private adapters;
   private defaultOrder;
@@ -15,7 +15,7 @@ export declare class PaymentNegotiator {
     rail: PaymentRail,
     challenge: string,
     evidence: string
-  ): Promise<import('./types').PaymentEvidence | null>;
+  ): Promise<import('./types.js').PaymentEvidence | null>;
   getAvailableRails(): PaymentRail[];
   private isValidRail;
 }
@@ -23,24 +23,24 @@ export declare class X402MockAdapter implements PaymentAdapter {
   rail: PaymentRail;
   supports(ctx: NegotiationContext): boolean;
   challenge(ctx: NegotiationContext): Promise<PaymentChallenge>;
-  verify(challenge: string, evidence: string): Promise<import('./types').PaymentEvidence | null>;
+  verify(challenge: string, evidence: string): Promise<import('./types.js').PaymentEvidence | null>;
 }
 export declare class L402MockAdapter implements PaymentAdapter {
   rail: PaymentRail;
   supports(ctx: NegotiationContext): boolean;
   challenge(ctx: NegotiationContext): Promise<PaymentChallenge>;
-  verify(challenge: string, evidence: string): Promise<import('./types').PaymentEvidence | null>;
+  verify(challenge: string, evidence: string): Promise<import('./types.js').PaymentEvidence | null>;
 }
 export declare class TempoMockAdapter implements PaymentAdapter {
   rail: PaymentRail;
   supports(ctx: NegotiationContext): boolean;
   challenge(ctx: NegotiationContext): Promise<PaymentChallenge>;
-  verify(challenge: string, evidence: string): Promise<import('./types').PaymentEvidence | null>;
+  verify(challenge: string, evidence: string): Promise<import('./types.js').PaymentEvidence | null>;
 }
 export declare class StripeMockAdapter implements PaymentAdapter {
   rail: PaymentRail;
   supports(ctx: NegotiationContext): boolean;
   challenge(ctx: NegotiationContext): Promise<PaymentChallenge>;
-  verify(challenge: string, evidence: string): Promise<import('./types').PaymentEvidence | null>;
+  verify(challenge: string, evidence: string): Promise<import('./types.js').PaymentEvidence | null>;
 }
 //# sourceMappingURL=negotiator.d.ts.map

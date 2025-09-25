@@ -3,8 +3,8 @@
  * Tests for verification cache with TTL and in-flight deduplication
  */
 
-import { VerificationCache } from '../../src/cache';
-import { VerifyRequest, VerificationResult } from '../../src/types';
+import { VerificationCache } from '../../src/cache.js';
+import { VerifyRequest, VerificationResult } from '../../src/types.js';
 
 describe('VerificationCache', () => {
   let cache: VerificationCache;

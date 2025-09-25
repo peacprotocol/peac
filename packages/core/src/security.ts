@@ -3,8 +3,8 @@
  * Nonce management, JTI tracking, and automated key lifecycle
  */
 
-import { SECURITY_CONFIG, FEATURES } from './config';
-import { Receipt, PurgeReceipt, VerifyKeySet } from './types';
+import { SECURITY_CONFIG, FEATURES } from './config.js';
+import { Receipt, PurgeReceipt, VerifyKeySet } from './types.js';
 
 export interface SecurityContext {
   nonce_store: NonceStore;

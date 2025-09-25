@@ -4,8 +4,8 @@
 
 import { signDetached, uuidv7, canonicalPolicyHash } from '@peac/core';
 import type { KeyLike } from '@peac/core';
-import type { SafetyEvent, SafetyEventReceipt } from './types';
-import { validateSafetyEvent } from './validate-event';
+import type { SafetyEvent, SafetyEventReceipt } from './types.js';
+import { validateSafetyEvent } from './validate-event.js';
 
 export interface ReceiptSigner {
   privateKey: KeyLike;

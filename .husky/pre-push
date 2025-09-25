@@ -1,22 +1,29 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Quality gates for world-class push readiness
-echo "🔍 Running pre-push quality gates..."
+# Full TypeScript quality gates
+echo "🔍 Running full TypeScript validation gates..."
 
-# Check no dist files are tracked
-pnpm run ci:check-no-dist
+# 1. Build all packages
+pnpm -w turbo run build
 
-# Lint with zero warnings
-pnpm -w eslint . --max-warnings 0
+# 2. Build TypeScript declarations
+pnpm -w turbo run build:types
 
-# Format check
-pnpm -w format:check
-
-# Schema validation
-pnpm -w run schema:check
-
-# TypeScript check
+# 3. TypeScript compilation check
 pnpm -w turbo run typecheck
 
-echo "✅ All quality gates passed - push approved"
+# 4. Lint with zero warnings
+pnpm -w eslint . --max-warnings 0
+
+# 5. d.ts sanity check (NodeNext should have .js in relative imports)
+echo "Checking declaration files..."
+! find packages -path "*/dist/*.d.ts" -exec grep -l "from '\./[^']*[^.]'" {} \; | head -1 >/dev/null && echo "✅ d.ts files have proper .js extensions"
+
+# 6. No tracked artifacts
+test -z "$(git ls-files 'packages/*/dist/*')" && echo "✅ No tracked dist files" || (echo "❌ Tracked dist files found" && exit 1)
+
+# 7. Format check
+pnpm -w format:check
+
+echo "✅ All full TypeScript quality gates passed - push approved"

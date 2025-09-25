@@ -5,11 +5,11 @@
  */
 
 import { Command } from 'commander';
-import { DiscoverCommand } from './commands/discover';
-import { HashCommand } from './commands/hash';
-import { VerifyCommand } from './commands/verify';
-import { bridgeCommand } from './commands/bridge/index';
-import { formatOutput, createExitHandler } from './utils';
+import { DiscoverCommand } from './commands/discover.js';
+import { HashCommand } from './commands/hash.js';
+import { VerifyCommand } from './commands/verify.js';
+import { bridgeCommand } from './commands/bridge/index.js';
+import { formatOutput, createExitHandler } from './utils.js';
 
 const program = new Command();
 const exit = createExitHandler();

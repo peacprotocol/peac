@@ -2,8 +2,8 @@
  * @peac/402/handler - Generic HTTP 402 response generator
  * RFC 9110 compliant with RFC 9457 Problem Details
  */
-import { PaymentNegotiator } from './negotiator';
-import type { NegotiationContext, Http402Response } from './types';
+import { PaymentNegotiator } from './negotiator.js';
+import type { NegotiationContext, Http402Response } from './types.js';
 export declare class Http402Handler {
   private negotiator;
   constructor(negotiator: PaymentNegotiator);
@@ -16,7 +16,7 @@ export declare class Http402Handler {
   verifyPayment(
     paymentHeader: string,
     originalChallenge?: string
-  ): Promise<import('./types').PaymentEvidence | null>;
+  ): Promise<import('./types.js').PaymentEvidence | null>;
 }
 export declare function create402Response(
   amount: {

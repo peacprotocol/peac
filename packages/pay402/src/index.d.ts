@@ -8,8 +8,8 @@ export {
   TempoMockAdapter,
   L402MockAdapter,
   StripeMockAdapter,
-} from './negotiator';
-export { Http402Handler, create402Response } from './handler';
+} from './negotiator.js';
+export { Http402Handler, create402Response } from './handler.js';
 export type {
   PaymentRail,
   PaymentChallenge,
@@ -18,9 +18,9 @@ export type {
   PaymentAdapter,
   NegotiationContext,
   Http402Response,
-} from './types';
-export declare const DEFAULT_RAILS: import('./types').PaymentRail[];
-export declare const DEV_RAILS: import('./types').PaymentRail[];
+} from './types.js';
+export declare const DEFAULT_RAILS: import('./types.js').PaymentRail[];
+export declare const DEV_RAILS: import('./types.js').PaymentRail[];
 export declare const RAILS: {
   readonly X402: 'x402';
   readonly TEMPO: 'tempo';

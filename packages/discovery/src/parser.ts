@@ -3,7 +3,7 @@
  * ABNF-compliant discovery document parsing
  */
 
-import type { PeacDiscovery, ParseResult, PublicKeyInfo, ValidationOptions } from './types';
+import type { PeacDiscovery, ParseResult, PublicKeyInfo, ValidationOptions } from './types.js';
 
 const MAX_LINES = 20;
 const FIELD_PATTERNS = {

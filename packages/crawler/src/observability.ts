@@ -14,8 +14,8 @@ import {
   VerificationResult,
   VerificationResponse,
   ProviderHealthStatus,
-} from './types';
-import { BreakerState } from './circuitBreaker';
+} from './types.js';
+import { BreakerState } from './circuitBreaker.js';
 
 export interface CrawlerMetrics {
   verifyRequests(provider: string): void;

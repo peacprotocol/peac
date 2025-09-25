@@ -4,7 +4,7 @@
  */
 
 import { LRUCache } from 'lru-cache';
-import { VerifyRequest, VerificationResult } from './types';
+import { VerifyRequest, VerificationResult } from './types.js';
 
 export interface CacheStats {
   size: number;

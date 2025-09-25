@@ -34,7 +34,7 @@ module.exports = {
     'no-empty': ['error', { 'allowEmptyCatch': true }],
     'promise/param-names': 'error',
     'import/no-unresolved': 'error',
-    'import/extensions': ['error', 'ignorePackages', { ts:'never', tsx:'never', js:'always', mjs:'always' }],
+    'import/extensions': ['error', 'ignorePackages', { ts:'always', tsx:'always', js:'always', mjs:'always' }],
   },
   ignorePatterns: [
     'dist/**',

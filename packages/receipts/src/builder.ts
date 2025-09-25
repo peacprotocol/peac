@@ -1,4 +1,4 @@
-import { Receipt } from './types';
+import { Receipt } from './types.js';
 
 export interface ReceiptBuilderOptions {
   protocol_version: string;

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { canonicalize } from 'json-canonicalize';
 import { signDetached } from '@peac/core/crypto';
 import { uuidv7 } from '@peac/core/ids/uuidv7';
-import type { PEACReceipt } from './types';
+import type { PEACReceipt } from './types.js';
 
 export const b64u = {
   encode: (buf: Uint8Array): string => Buffer.from(buf).toString('base64url'),

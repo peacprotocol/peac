@@ -4,7 +4,7 @@
  */
 
 // v0.9.13 receipt engine (main entry point)
-export { enforce, discover, evaluate, settle, prove } from './enforce';
+export { enforce, discover, evaluate, settle, prove } from './enforce.js';
 export type {
   DiscoveryContext,
   PolicySource,
@@ -12,11 +12,11 @@ export type {
   SettlementResult,
   EnforceResult,
   EnforceOptions,
-} from './enforce';
+} from './enforce.js';
 
 // v0.9.12.4 core primitives
-export { canonicalPolicyHash } from './hash';
-export type { PolicyInputs } from './hash';
+export { canonicalPolicyHash } from './hash.js';
+export type { PolicyInputs } from './hash.js';
 export {
   generateEdDSAKeyPair,
   signDetached,
@@ -26,12 +26,12 @@ export {
   importPrivateKey,
   importPublicKey,
   validateKidFormat,
-} from './crypto';
-export type { KeyPair, JWKSKey, DetachedJWS } from './crypto';
+} from './crypto.js';
+export type { KeyPair, JWKSKey, DetachedJWS } from './crypto.js';
 export type { KeyLike } from 'jose';
-export { InMemoryNonceCache, isReplayAttack, preventReplay, isValidNonce } from './replay';
-export type { NonceCache, NonceEntry } from './replay';
-export { uuidv7, isUUIDv7, extractTimestamp } from './ids/uuidv7';
+export { InMemoryNonceCache, isReplayAttack, preventReplay, isValidNonce } from './replay.js';
+export type { NonceCache, NonceEntry } from './replay.js';
+export { uuidv7, isUUIDv7, extractTimestamp } from './ids/uuidv7.js';
 
 // Simple verification wrapper for v0.9.13
 export async function verify(
@@ -59,7 +59,7 @@ export async function verify(
 
     // Check replay if nonce cache provided
     if (options.nonceCache && payload.rid) {
-      const { isReplayAttack } = await import('./replay');
+      const { isReplayAttack } = await import('./replay.js');
       if (isReplayAttack(payload.rid, options.nonceCache)) {
         return { valid: false };
       }

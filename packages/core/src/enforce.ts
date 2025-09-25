@@ -5,11 +5,11 @@
  * RFC 9457 Problem Details for 402/403 responses
  */
 
-import { canonicalPolicyHash, sha256b64u, normalizeResourceUrl } from './hash';
-import { NonceCache, isValidNonce, preventReplay } from './replay';
-import { signDetached, generateEdDSAKeyPair } from './crypto';
-import { uuidv7 } from './ids/uuidv7';
-import { Problems } from './problems';
+import { canonicalPolicyHash, sha256b64u, normalizeResourceUrl } from './hash.js';
+import { NonceCache, isValidNonce, preventReplay } from './replay.js';
+import { signDetached, generateEdDSAKeyPair } from './crypto.js';
+import { uuidv7 } from './ids/uuidv7.js';
+import { Problems } from './problems.js';
 
 // Security limits
 const MAX_RECEIPT_HEADER_SIZE = 12 * 1024; // 12KB

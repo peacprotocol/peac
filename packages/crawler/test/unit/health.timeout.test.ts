@@ -3,9 +3,9 @@
  * Tests for timeout handling to increase branch coverage
  */
 
-import { RegistryHealthMonitor } from '../../src/health';
-import { CircuitBreaker } from '../../src/circuitBreaker';
-import type { CrawlerControlProvider } from '../../src/types';
+import { RegistryHealthMonitor } from '../../src/health.js';
+import { CircuitBreaker } from '../../src/circuitBreaker.js';
+import type { CrawlerControlProvider } from '../../src/types.js';
 
 class HangingProvider implements CrawlerControlProvider {
   name = 'hanging';

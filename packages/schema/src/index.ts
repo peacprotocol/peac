@@ -1,3 +1,3 @@
-export * from './schemas';
-export * from './types';
-export { WIRE_VERSION, DOCS_TRAIN, POLICY_VERSION } from './version';
+export * from './schemas.js';
+export * from './types.js';
+export { WIRE_VERSION, DOCS_TRAIN, POLICY_VERSION } from './version.js';

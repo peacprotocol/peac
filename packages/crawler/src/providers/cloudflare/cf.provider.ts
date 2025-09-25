@@ -13,7 +13,7 @@ import {
   BlockDecision,
   ChallengeResponse,
 } from '../../types.js';
-import { CFClient, CFClientOptions } from './cf.client';
+import { CFClient, CFClientOptions } from './cf.client.js';
 
 export interface CloudflareProviderOptions {
   priority?: number;

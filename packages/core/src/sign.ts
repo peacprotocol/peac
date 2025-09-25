@@ -5,10 +5,10 @@
  */
 
 import { SignJWT, importJWK } from 'jose';
-import { Receipt, PurgeReceipt, SignOpts } from './types';
-import { VERSION_CONFIG } from './config';
-import { assertProtocolVersions, assertCrawlerType } from './validation';
-import { timed, metricsCollector } from './observability';
+import { Receipt, PurgeReceipt, SignOpts } from './types.js';
+import { VERSION_CONFIG } from './config.js';
+import { assertProtocolVersions, assertCrawlerType } from './validation.js';
+import { timed, metricsCollector } from './observability.js';
 
 export async function signReceipt(receipt: Receipt, opts: SignOpts): Promise<string> {
   const start = performance.now();

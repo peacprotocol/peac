@@ -9,5 +9,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   dts: false, // Use tsc for declarations
-  external: [], // No external deps in this package
+  external: Object.keys(require('./package.json').dependencies || {}),
 });

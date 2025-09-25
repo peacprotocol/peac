@@ -3,9 +3,9 @@
  * Tests for RegistryHealthMonitor utility functions
  */
 
-import { RegistryHealthMonitor } from '../../src/health';
-import { CircuitBreaker } from '../../src/circuitBreaker';
-import { CrawlerControlProvider } from '../../src/types';
+import { RegistryHealthMonitor } from '../../src/health.js';
+import { CircuitBreaker } from '../../src/circuitBreaker.js';
+import { CrawlerControlProvider } from '../../src/types.js';
 
 // Mock provider for testing
 class MockProvider implements CrawlerControlProvider {

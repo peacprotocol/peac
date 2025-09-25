@@ -4,7 +4,7 @@
 
 import Ajv from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import type { SafetyEvent } from './types';
+import type { SafetyEvent } from './types.js';
 
 let ajvInstance: Ajv | null = null;
 

@@ -11,7 +11,7 @@ import type {
   DiscoveryResult,
   VerificationResult,
   ClientError,
-} from './types';
+} from './types.js';
 
 export class PeacClient {
   private config: Required<ClientConfig>;

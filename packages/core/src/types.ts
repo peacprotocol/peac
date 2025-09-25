@@ -3,7 +3,7 @@
  * receipt@1.1, purge@1.0, discovery@1.1 compatibility
  */
 
-import { CrawlerType } from './config';
+import { CrawlerType } from './config.js';
 
 export type Kid = string;
 export type KeySet = Record<Kid, { kty: 'OKP'; crv: 'Ed25519'; x: string; d?: string }>;

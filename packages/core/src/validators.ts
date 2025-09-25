@@ -4,7 +4,7 @@
  * Ultra-fast validation (no runtime Ajv)
  */
 
-import type { Rec } from './types';
+import type { Rec } from './types.js';
 
 export function vReceipt(obj: unknown): asserts obj is Rec {
   if (!obj || typeof obj !== 'object') {
