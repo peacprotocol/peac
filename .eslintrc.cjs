@@ -61,7 +61,7 @@ module.exports = {
       // Type-aware lint only where tsconfig includes them
       files: ['packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx', 'apps/*/src/**/*.ts', 'apps/*/src/**/*.tsx'],
       parserOptions: {
-        project: ['./tsconfig.json', './packages/*/tsconfig.json', './apps/*/tsconfig.json']
+        project: ['./tsconfig.eslint.json']
       }
     }
   ],

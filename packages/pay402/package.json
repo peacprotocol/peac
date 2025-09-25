@@ -24,6 +24,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "build:types": "tsc -p tsconfig.types.json",
     "pretest": "pnpm build",
     "test": "node --test src/*.test.js",
     "test:coverage": "node --test --experimental-test-coverage src/*.test.js",

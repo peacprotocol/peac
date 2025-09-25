@@ -32,8 +32,8 @@
     "dev": "pnpm -w run dev --filter @peac/app-api",
     "start": "pnpm -w run start --filter @peac/app-api",
     "dep-cruiser": "npx depcruise packages/ --validate .dependency-cruiser.json",
-    "schema:check": "echo 'Schema validation will use existing package scripts'",
-    "schema:check:all": "echo 'Schema validation will use existing package scripts'",
+    "schema:check": "node scripts/ajv-compile-2020.mjs schemas/receipts/safety-event.v1.json",
+    "schema:check:all": "node scripts/ajv-compile-2020.mjs --all",
     "prepare": "husky install"
   },
   "lint-staged": {

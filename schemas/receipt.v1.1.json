@@ -392,6 +392,7 @@
       "if": {
         "properties": {
           "enforcement": {
+            "type": "object",
             "properties": {
               "method": { "const": "http-402" }
             },
@@ -404,7 +405,13 @@
         "required": ["payment"],
         "properties": {
           "payment": {
-            "required": ["rail", "amount", "currency"]
+            "type": "object",
+            "required": ["rail", "amount", "currency"],
+            "properties": {
+              "rail": { "type": "string" },
+              "amount": { "type": "number" },
+              "currency": { "type": "string" }
+            }
           }
         }
       }

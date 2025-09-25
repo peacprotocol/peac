@@ -1,6 +1,6 @@
 {
   "$id": "https://peacprotocol.org/schemas/receipt-0.9.json",
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PEAC Receipt v0.9.14",
   "description": "Compact JWS envelope for PEAC receipts",
   "type": "object",
