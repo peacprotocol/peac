@@ -1,5 +1,5 @@
 /**
- * @peac/disc/parser - Test peac.txt parsing with ≤20 lines enforcement
+ * @peac/discovery/parser - Test peac.txt parsing with ≤20 lines enforcement
  */
 
 import { test } from 'node:test';

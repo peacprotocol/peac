@@ -17,13 +17,20 @@ export interface PolicyInputs {
   [key: string]: unknown;
 }
 
-// helper: base64url without padding
-function b64url(buf: Uint8Array): string {
-  return Buffer.from(buf)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+// v0.9.14: base64url without padding (RFC 7515)
+export function b64url(buf: Uint8Array): string {
+  return Buffer.from(buf).toString('base64url');
+}
+
+// v0.9.14: sha256 with tagged base64url format
+export function sha256b64u(bytes: Uint8Array): string {
+  return `sha256:${b64url(createHash('sha256').update(bytes).digest())}`;
+}
+
+// v0.9.14: JCS + SHA256 for objects
+export function jcsSha256(obj: any): string {
+  const canonical = jcs(obj);
+  return sha256b64u(Buffer.from(canonical, 'utf8'));
 }
 
 // helper: stable percent-encoding with upper-case hex
@@ -34,8 +41,8 @@ function pctEncodeRFC3986(s: string): string {
   );
 }
 
-// URL canonicalization (scheme/host lowercased, default port removed, query sorted)
-function canonicalizeUrl(input: string): string {
+// v0.9.14: URL normalization with privacy considerations
+export function normalizeResourceUrl(input: string): string {
   const u = new URL(input);
   u.protocol = u.protocol.toLowerCase();
   u.hostname = u.hostname.toLowerCase();
@@ -98,7 +105,7 @@ function normalizeUrlsInObject(obj: any): void {
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       if (typeof obj[i] === 'string' && isUrl(obj[i])) {
-        obj[i] = canonicalizeUrl(obj[i]);
+        obj[i] = normalizeResourceUrl(obj[i]);
       } else if (typeof obj[i] === 'object') {
         normalizeUrlsInObject(obj[i]);
       }
@@ -106,7 +113,7 @@ function normalizeUrlsInObject(obj: any): void {
   } else {
     for (const [key, value] of Object.entries(obj)) {
       if (typeof value === 'string' && isUrl(value)) {
-        obj[key] = canonicalizeUrl(value);
+        obj[key] = normalizeResourceUrl(value);
       } else if (typeof value === 'object') {
         normalizeUrlsInObject(value);
       }

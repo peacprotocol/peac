@@ -1,4 +1,4 @@
-const { Payments } = require('../sdk');
+import { Payments } from '../sdk';
 
 describe('PEAC Payments', () => {
   let payments;

@@ -1,4 +1,4 @@
-const { Parser, UniversalParser } = require('../sdk');
+import { Parser, UniversalParser } from '../sdk';
 
 describe('PEAC Parser', () => {
   let parser;

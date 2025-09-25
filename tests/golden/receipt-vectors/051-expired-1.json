@@ -1,0 +1,29 @@
+{
+  "id": 51,
+  "name": "expired-1",
+  "valid": false,
+  "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2V5LWdvbGRlbiJ9.eyJleHAiOjE3NTg3NDMyMDgsImlhdCI6MTc1ODc0MzE0OCwiaXNzIjoiaHR0cHM6Ly9leHBpcmVkLnRlc3QuY29tIiwianRpIjoiMDAwMDBiYjktMGJiOS03YmI5LWFiYjktMDAwMDAwMDAwYmI5IiwicG9saWN5Ijp7ImFpcHJlZiI6eyJoYXNoIjoic2hhMjU2OnRlc3QiLCJocmVmIjoiaHR0cHM6Ly90ZXN0LmNvbS9wb2xpY3kuanNvbiJ9LCJtZXJnZWRfaGFzaCI6InNoYTI1NjptZXJnZWQifSwicmVzb3VyY2UiOnsiaGFzaCI6InNoYTI1Njp0ZXN0IiwibWV0aG9kIjoiR0VUIiwidXJsIjoiaHR0cHM6Ly90ZXN0LmNvbS9leHBpcmVkIn0sInN1YiI6InVybjpyZXNvdXJjZTpzaGEyNTY6ZXhwaXJlZCIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ.FRVfd88Mec45uE1YetQtGkGt8GIy4xfWNqlhn7qBmQfg5fwr-Njp9T1Y0FGir5AE8GYzUiAa7cT4ZKnWOz1L4g",
+  "payload": {
+    "typ": "peac.receipt/0.9",
+    "iss": "https://expired.test.com",
+    "sub": "urn:resource:sha256:expired",
+    "iat": 1758743148,
+    "exp": 1758743208,
+    "jti": "00000bb9-0bb9-7bb9-abb9-000000000bb9",
+    "policy": {
+      "aipref": {
+        "href": "https://test.com/policy.json",
+        "hash": "sha256:test"
+      },
+      "merged_hash": "sha256:merged"
+    },
+    "resource": {
+      "url": "https://test.com/expired",
+      "method": "GET",
+      "hash": "sha256:test"
+    }
+  },
+  "expected": {
+    "error": "expired-receipt"
+  }
+}

@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@peac/core": "workspace:^0.9.12.1",
-    "@peac/disc": "workspace:^0.9.12.1",
+    "@peac/discovery": "workspace:^0.9.12.1",
     "@peac/receipts": "workspace:^0.9.12.1",
     "@peac/crawler": "workspace:^0.9.12.1",
     "@peac/pay402": "workspace:^0.9.12.1",

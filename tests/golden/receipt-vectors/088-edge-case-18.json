@@ -1,0 +1,16 @@
+{
+  "id": 88,
+  "name": "edge-case-18",
+  "valid": false,
+  "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2V5LWdvbGRlbiJ9.eyJpYXQiOiJub3QtbnVtYmVyIiwiaXNzIjoiaHR0cHM6Ly9lZGdlLnRlc3QuY29tIiwianRpIjoiMDAwMDBmYjItMGZiMi03ZmIyLWFmYjItMDAwMDAwMDAwZmIyIiwic3ViIjoidXJuOnJlc291cmNlOnNoYTI1NjplZGdlIiwidHlwIjoicGVhYy5yZWNlaXB0LzAuOSJ9.PfCEzg79rRira53LRkHCpkXxuUy9a94Iycp6-ooXrKLxC_9MNWL_x1NUOChHyismETFu6GUTrxODdgvQYBJ6oQ",
+  "payload": {
+    "typ": "peac.receipt/0.9",
+    "iss": "https://edge.test.com",
+    "sub": "urn:resource:sha256:edge",
+    "iat": "not-number",
+    "jti": "00000fb2-0fb2-7fb2-afb2-000000000fb2"
+  },
+  "expected": {
+    "error": "schema-validation-failed"
+  }
+}

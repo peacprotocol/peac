@@ -7,5 +7,5 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   target: 'node18',
-  external: ['@peac/core', '@peac/disc'],
+  external: ['@peac/core', '@peac/discovery'],
 });

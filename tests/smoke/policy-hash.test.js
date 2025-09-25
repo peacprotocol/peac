@@ -74,3 +74,16 @@ test('Policy hash different - different inputs produce different hashes', () => 
 
   assert.notStrictEqual(hash1, hash2, 'Different inputs must produce different hashes');
 });
+
+test('Policy hash format validation', () => {
+  const input = { resource: 'https://example.com', purpose: 'test' };
+  const hash = canonicalPolicyHash(input);
+
+  // Should be base64url without padding
+  assert(!/[+\/=]/.test(hash), 'Should use base64url encoding (no +/= chars)');
+  assert(hash.length > 0, 'Should have valid hash content');
+
+  // Should be deterministic
+  const hash2 = canonicalPolicyHash(input);
+  assert.strictEqual(hash, hash2, 'Hash should be deterministic');
+});

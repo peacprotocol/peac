@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist tsconfig.tsbuildinfo && tsc --build",
+    "build:types": "tsc -p tsconfig.types.json",
     "typecheck": "tsc --noEmit",
     "validate": "echo 'Validation will be added'",
     "test": "echo 'Tests will be added'"

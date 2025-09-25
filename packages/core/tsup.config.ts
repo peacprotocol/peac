@@ -1,19 +1,13 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'], // Use single entry point for proper TypeScript project references
-  format: ['cjs', 'esm'],
-  dts: false, // Use separate build:types script for TypeScript declarations
-  outDir: 'dist', // Align with tsconfig.json outDir
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  dts: false, // Use tsc for declarations
   sourcemap: true,
   clean: true,
   splitting: false,
-  treeshake: true,
-  minify: false,
-  target: 'esnext',
-  platform: 'neutral',
-  external: ['node:crypto', 'jose'],
-  esbuildOptions(options) {
-    options.conditions = ['node'];
-  },
+  target: 'node20',
+  platform: 'node',
+  external: Object.keys(require('./package.json').dependencies || {}),
 });

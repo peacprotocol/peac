@@ -6,5 +6,4 @@ export const PEAC_WIRE_VERSION = '0.9.12.1';
 
 export const CANONICAL_HEADERS = {
   receipt: 'PEAC-Receipt',
-  version: 'peac-version',
 };

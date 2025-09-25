@@ -3,9 +3,9 @@
  * End-to-end tests with real components
  */
 
-import { buildRegistryFromOptions, RegistryHandle } from '../../src/index';
-import { VerificationLevel } from '../../src/types';
-import * as localProvider from '../../src/providers/local/local.provider';
+import { buildRegistryFromOptions, RegistryHandle } from '../../src/index.js';
+import { VerificationLevel } from '../../src/types.js';
+import * as localProvider from '../../src/providers/local/local.provider.js';
 
 describe('Registry Integration Tests', () => {
   let registryHandle: RegistryHandle | null = null;

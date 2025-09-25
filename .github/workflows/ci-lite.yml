@@ -39,6 +39,16 @@ jobs:
           echo "Prettier format check..."
           pnpm -w format:check
 
+      - name: Check for banned headers
+        run: |
+          echo "Checking for banned peac-version references..."
+          if grep -r "peac-version" --include="*.ts" --include="*.js" --include="*.md" --exclude-dir=node_modules . 2>/dev/null; then
+            echo "❌ Found banned peac-version header references!"
+            echo "Use PEAC-Receipt and Link headers instead"
+            exit 1
+          fi
+          echo "✅ No banned header references found"
+
       - name: Lint
         run: |
           echo "ESLint validation..."

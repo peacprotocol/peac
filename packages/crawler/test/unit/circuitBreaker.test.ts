@@ -3,7 +3,7 @@
  * Tests for closed/open/half-open states with thresholds
  */
 
-import { CircuitBreaker, BreakerState } from '../../src/circuitBreaker';
+import { CircuitBreaker, BreakerState } from '../../src/circuitBreaker.js';
 
 describe('CircuitBreaker', () => {
   let breaker: CircuitBreaker;

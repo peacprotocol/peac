@@ -31,7 +31,7 @@ export class ProblemError extends Error {
 }
 
 export function createProblemDetails(ctx: ErrorContext, instance?: string): VerifyErrorDetails {
-  const baseUrl = 'https://peac.dev/problems';
+  const baseUrl = 'https://peacprotocol.org/problems';
 
   const problems: Record<string, { status: number; title: string; detail: string }> = {
     'invalid-jws-format': {

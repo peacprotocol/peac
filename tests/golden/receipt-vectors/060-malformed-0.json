@@ -1,0 +1,9 @@
+{
+  "id": 60,
+  "name": "malformed-0",
+  "valid": false,
+  "jws": "not.a.jws",
+  "expected": {
+    "error": "invalid-jws-format"
+  }
+}

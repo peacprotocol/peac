@@ -1,4 +1,4 @@
-const { Negotiation } = require('../sdk');
+import { Negotiation } from '../sdk';
 
 describe('PEAC Negotiation', () => {
   let negotiation;

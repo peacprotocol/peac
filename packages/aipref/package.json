@@ -21,7 +21,8 @@
     "build": "tsc",
     "test": "node --test src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:types": "tsc -p tsconfig.types.json"
   },
   "dependencies": {},
   "devDependencies": {

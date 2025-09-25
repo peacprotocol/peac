@@ -23,7 +23,7 @@ test('PeacClient - discover caches results', async () => {
   // Mock the dynamic import
   const originalImport = global.import;
   global.import = async (module) => {
-    if (module === '@peac/disc') {
+    if (module === '@peac/discovery') {
       return { discover: () => mockDiscoverResult };
     }
     return originalImport?.(module);

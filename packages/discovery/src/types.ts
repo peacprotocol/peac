@@ -1,5 +1,5 @@
 /**
- * @peac/disc/types - Discovery types for .well-known/peac.txt
+ * @peac/discovery/types - Discovery types for .well-known/peac.txt
  */
 
 export interface PeacDiscovery {

@@ -21,6 +21,8 @@ import { healthRoute } from './routes/health.js';
 import { readinessRoute } from './routes/readiness.js';
 import { metricsRoute } from './routes/metrics.js';
 import { peacHeaders } from './util/http.js';
+import { rateLimiter } from '@peac/core/src/rate-limit.js';
+import { Problems } from '@peac/core/src/problems.js';
 
 const DEFAULT_PORT = 31415;
 const METRICS_PORT = 31416;
@@ -34,22 +36,59 @@ export function createBridgeApp() {
     await next();
   });
 
-  // Set standard headers on ALL responses
+  // CORS and standard headers on ALL responses
+  const ALLOW_ORIGINS = (process.env.ALLOW_ORIGINS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const pickOrigin = (origin?: string) => {
+    if (!origin) return ALLOW_ORIGINS[0] ?? '';
+    return ALLOW_ORIGINS.includes(origin) ? origin : (ALLOW_ORIGINS[0] ?? '');
+  };
+
   app.use('*', async (c, next) => {
     await next();
-    c.header('peac-version', '0.9.13'); // Wire version, NOT 0.9.13.2
+    const aiprefUrl = new URL('/.well-known/aipref.json', c.req.url).toString();
+    const agentPermUrl = new URL('/agent-permissions.json', c.req.url).toString();
+    const origin = pickOrigin(c.req.header('Origin'));
+    if (origin) c.header('Access-Control-Allow-Origin', origin);
+    c.header('Vary', 'Origin');
+    c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-PAYMENT');
+    c.header('Access-Control-Expose-Headers', 'PEAC-Receipt, Link');
+    c.header('Link', `<${aiprefUrl}>; rel="aipref", <${agentPermUrl}>; rel="agent-permissions"`);
     c.header('X-Request-ID', c.get('requestId'));
   });
 
-  // NO CORS for production (loopback only)
-  if (process.env.PEAC_MODE === 'dev') {
-    app.use('*', async (c, next) => {
-      c.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-      c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, HEAD');
-      c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, PEAC-Receipt');
-      await next();
-    });
-  }
+  // Rate limiting middleware
+  app.use('*', async (c, next) => {
+    const clientIP =
+      c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || 'unknown';
+    const result = await rateLimiter.checkLimit(clientIP, 'agent');
+
+    if (!result.allowed) {
+      const headers = rateLimiter.createHeaders(result);
+      const problem = Problems.rateLimited(
+        result.retry_after || 60,
+        result.limit,
+        c.get('requestId')
+      );
+
+      return c.newResponse(
+        JSON.stringify(problem),
+        429,
+        peacHeaders({
+          'Content-Type': 'application/problem+json; charset=utf-8',
+          'X-Request-ID': c.get('requestId'),
+          'Retry-After': headers['Retry-After'] || '60',
+          'RateLimit-Limit': headers['RateLimit-Limit'],
+          'RateLimit-Remaining': headers['RateLimit-Remaining'],
+          'RateLimit-Reset': headers['RateLimit-Reset'],
+        })
+      );
+    }
+
+    await next();
+  });
 
   // Request tracking for traces
   app.use('*', async (c, next) => {
@@ -97,6 +136,19 @@ export function createBridgeApp() {
     );
   });
 
+  // OPTIONS handler for CORS preflight
+  app.options('*', (c) => {
+    const origin = pickOrigin(c.req.header('Origin'));
+    if (origin) c.header('Access-Control-Allow-Origin', origin);
+    c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, HEAD');
+    c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-PAYMENT');
+    c.header('Access-Control-Expose-Headers', 'PEAC-Receipt, Link');
+    c.header('Access-Control-Allow-Credentials', 'true');
+    c.header('Access-Control-Max-Age', '600');
+    c.header('Vary', 'Origin');
+    return c.newResponse('', 204);
+  });
+
   // 404 handler
   app.notFound((c) => {
     const body = JSON.stringify({
@@ -110,7 +162,7 @@ export function createBridgeApp() {
       body,
       404,
       peacHeaders({
-        'Content-Type': 'application/problem+json',
+        'Content-Type': 'application/problem+json; charset=utf-8',
         'X-Request-ID': c.get('requestId'),
       })
     );

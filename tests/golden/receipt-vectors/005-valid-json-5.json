@@ -1,0 +1,35 @@
+{
+  "id": 5,
+  "name": "valid-json-5",
+  "valid": true,
+  "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2V5LWdvbGRlbiJ9.eyJleHAiOjE3NTg3NDcwNDgsImlhdCI6MTc1ODc0NjY5OCwiaXNzIjoiaHR0cHM6Ly90ZXN0LnBlYWNwcm90b2NvbC5vcmciLCJqdGkiOiIwMDAwMDAwNS0wMDA1LTcwMDUtYTAwNS0wMDAwMDAwMDAwMDUiLCJwb2xpY3kiOnsiYWlwcmVmIjp7Imhhc2giOiJzaGEyNTY6bVV5bHlJdjU2c0NxZG1MUnd4cnNyWkVBVFg0aEoyRkpicEJMOHRJbW1CayIsImhyZWYiOiJodHRwczovL3Rlc3QucGVhY3Byb3RvY29sLm9yZy9wb2xpY3kuanNvbiJ9LCJtZXJnZWRfaGFzaCI6InNoYTI1NjpZZEpycmg0emxfcHdFNkZkMTY4WUVoQ3R3RUpfZkNqNzRodHBpUWZEZTM4In0sInJlc291cmNlIjp7Imhhc2giOiJzaGEyNTY6X05uUTVIMmx2SGFQMnNpQjVWM1BKMlBLTUF5c3lGYUlrMnBpd1FhaHZVYyIsIm1ldGhvZCI6IkdFVCIsInVybCI6Imh0dHBzOi8vdGVzdC5wZWFjcHJvdG9jb2wub3JnL3Jlc291cmNlLzUifSwic3ViIjoidXJuOnJlc291cmNlOnNoYTI1NjpfTm5RNUgybHZIYVAyc2lCNVYzUEoyUEtNQXlzeUZhSWsycGl3UWFodlVjIiwidHlwIjoicGVhYy5yZWNlaXB0LzAuOSJ9.MHioH47ftoB2RihTjL8WxOzFD21InaoR51JpZnXZcHVm6Kx_24LcCgtK8y8V7r0dWsafjr1TBa8MJ9V97aKflw",
+  "payload": {
+    "typ": "peac.receipt/0.9",
+    "iss": "https://test.peacprotocol.org",
+    "sub": "urn:resource:sha256:_NnQ5H2lvHaP2siB5V3PJ2PKMAysyFaIk2piwQahvUc",
+    "iat": 1758746698,
+    "exp": 1758747048,
+    "jti": "00000005-0005-7005-a005-000000000005",
+    "policy": {
+      "aipref": {
+        "href": "https://test.peacprotocol.org/policy.json",
+        "hash": "sha256:mUylyIv56sCqdmLRwxrsrZEATX4hJ2FJbpBL8tImmBk"
+      },
+      "merged_hash": "sha256:YdJrrh4zl_pwE6Fd168YEhCtwEJ_fCj74htpiQfDe38"
+    },
+    "resource": {
+      "url": "https://test.peacprotocol.org/resource/5",
+      "method": "GET",
+      "hash": "sha256:_NnQ5H2lvHaP2siB5V3PJ2PKMAysyFaIk2piwQahvUc"
+    }
+  },
+  "body": {
+    "test": 5,
+    "data": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "expected": {
+    "verified": true,
+    "typ": "peac.receipt/0.9",
+    "resource_hash": "_NnQ5H2lvHaP2siB5V3PJ2PKMAysyFaIk2piwQahvUc"
+  }
+}

@@ -39,13 +39,13 @@ export const PROBLEM_MEDIA_TYPE = 'application/problem+json';
 
 // Common PEAC problem type URIs
 export const PROBLEM_TYPES = {
-  INVALID_JWS: 'https://peac.dev/problems/invalid-jws-format',
-  MISSING_RECEIPT: 'https://peac.dev/problems/missing-receipt',
-  INVALID_SIGNATURE: 'https://peac.dev/problems/invalid-signature',
-  UNKNOWN_KEY: 'https://peac.dev/problems/unknown-key-id',
-  SCHEMA_VALIDATION: 'https://peac.dev/problems/schema-validation-failed',
-  EXPIRED_RECEIPT: 'https://peac.dev/problems/expired-receipt',
-  PROCESSING_ERROR: 'https://peac.dev/problems/processing-error',
+  INVALID_JWS: 'https://peacprotocol.org/problems/invalid-jws-format',
+  MISSING_RECEIPT: 'https://peacprotocol.org/problems/missing-receipt',
+  INVALID_SIGNATURE: 'https://peacprotocol.org/problems/invalid-signature',
+  UNKNOWN_KEY: 'https://peacprotocol.org/problems/unknown-key-id',
+  SCHEMA_VALIDATION: 'https://peacprotocol.org/problems/schema-validation-failed',
+  EXPIRED_RECEIPT: 'https://peacprotocol.org/problems/expired-receipt',
+  PROCESSING_ERROR: 'https://peacprotocol.org/problems/processing-error',
 } as const;
 
 // HTTP Server (when run as application)

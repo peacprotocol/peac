@@ -1,5 +1,5 @@
 /**
- * @peac/disc - PEAC discovery with ≤20 lines enforcement
+ * @peac/discovery - PEAC discovery with ≤20 lines enforcement
  * ABNF-compliant .well-known/peac.txt parser and generator
  */
 
@@ -15,7 +15,7 @@ export async function discover(origin: string): Promise<import('./types.js').Par
   try {
     const url = new URL(WELL_KNOWN_PATH, origin);
     const response = await fetch(url.toString(), {
-      headers: { 'User-Agent': 'PEAC/0.9.12 (+https://peac.dev)' },
+      headers: { 'User-Agent': 'PEAC/0.9.12 (+https://peacprotocol.org)' },
     });
 
     if (!response.ok) {

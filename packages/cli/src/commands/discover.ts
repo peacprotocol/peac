@@ -1,9 +1,9 @@
 /**
  * peac discover <url> command
- * Thin wrapper around @peac/disc for discovery
+ * Thin wrapper around @peac/discovery for discovery
  */
 
-import { discover } from '@peac/disc';
+import { discover } from '@peac/discovery';
 import type { CLIOptions, CommandResult } from '../types.js';
 import { handleError, timing } from '../utils.js';
 
@@ -21,7 +21,7 @@ export class DiscoverCommand {
 
       // Assert peac.txt ≤ 20 lines if present
       if (discoveryResult?.data) {
-        // The discover function from @peac/disc returns a ParseResult
+        // The discover function from @peac/discovery returns a ParseResult
         // We'll just validate line count if needed at the API level
       }
 
