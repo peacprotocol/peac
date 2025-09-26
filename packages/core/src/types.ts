@@ -1,6 +1,6 @@
 /**
- * @peac/core v0.9.12.1 - Enhanced types with verification and wire versioning
- * receipt@1.1, purge@1.0, discovery@1.1 compatibility
+ * @peac/core v0.9.14 - Enhanced types with v0.9.14 wire format
+ * Single Receipt type with typ: "peac.receipt/0.9", iat field, payment.scheme
  */
 
 import { CrawlerType } from './config.js';
@@ -9,11 +9,11 @@ export type Kid = string;
 export type KeySet = Record<Kid, { kty: 'OKP'; crv: 'Ed25519'; x: string; d?: string }>;
 export type VerifyKeySet = Record<Kid, { kty: 'OKP'; crv: 'Ed25519'; x: string }>;
 
-// Core Receipt v1.1 (wire format receipt@1.1)
+// Core Receipt v0.9.14 (wire format peac.receipt/0.9)
 export interface Receipt {
-  version: '1.1';
+  version: '0.9.14';
   protocol_version: string;
-  wire_version: '1.1';
+  wire_version: '0.9';
   subject: {
     uri: string;
     content_hash?: string;
@@ -42,7 +42,7 @@ export interface Receipt {
     challenge?: Record<string, unknown>;
   };
   payment?: {
-    rail: 'stripe' | 'l402' | 'x402';
+    scheme: 'stripe' | 'l402' | 'x402';
     amount: number;
     currency: string;
     evidence?: {
@@ -106,11 +106,10 @@ export interface Receipt {
     correlation_id?: string;
     timestamp?: string;
   };
-  issued_at: string;
-  expires_at?: string;
+  iat: number;
+  exp?: number;
   kid: string;
   nonce?: string;
-  signature_media_type: 'application/peac-receipt+jws';
 }
 
 // Purge Receipt v1.0 (wire format purge@1.0)

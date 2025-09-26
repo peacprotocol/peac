@@ -1,13 +1,11 @@
 /**
- * @peac/core/enforce - Receipt Engine Orchestrator
- *
- * Core orchestration: discover → evaluate → settle → prove
- * RFC 7807 Problem Details for 402/403 responses
+ * @peac/core v0.9.14 - Receipt Engine with v0.9.14 wire format
+ * Simple enforcement with signReceipt() and typ: "peac.receipt/0.9"
  */
 
 import { canonicalPolicyHash } from './hash.js';
-import { NonceCache, isValidNonce, preventReplay } from './replay.js';
-import { signDetached, generateEdDSAKeyPair } from './crypto.js';
+import { signReceipt, createAndSignReceipt } from './sign.js';
+import { Receipt } from './types.js';
 import { uuidv7 } from './ids/uuidv7.js';
 
 // SSRF and security guards
@@ -374,70 +372,54 @@ export async function settle(
 }
 
 /**
- * Generate detached JWS receipt with minimum claims
+ * Generate v0.9.14 receipt with typ: "peac.receipt/0.9"
  */
 export async function prove(
   ctx: EvaluationContext,
   settlement: SettlementResult,
   options: EnforceOptions
 ): Promise<string> {
-  const { privateKey, kid, issuer = 'https://peac-issuer.example', nonceCache } = options;
+  const { privateKey, kid } = options;
 
-  // Generate key pair if not provided (for development)
-  const keyPair = privateKey
-    ? { privateKey, kid: kid || 'dev-key-1' }
-    : await generateEdDSAKeyPair();
-
-  const now = Math.floor(Date.now() / 1000);
-  const rid = uuidv7();
-  const exp = now + 300; // 5 minutes max
-
-  // Validate and store nonce for replay protection
-  if (nonceCache) {
-    if (!isValidNonce(rid)) {
-      throw new Error('Invalid nonce format');
-    }
-    preventReplay(rid, nonceCache, 300);
+  if (!privateKey || !kid) {
+    throw new Error('Private key and kid required for v0.9.14 receipts');
   }
 
-  // Canonical URL for aud claim
-  const canonicalUrl = new URL(ctx.resource).toString();
+  const now = Math.floor(Date.now() / 1000);
 
-  // Policy hash - only include policies with content
-  const policyData = ctx.policies
-    .filter((p) => p.content !== undefined)
-    .reduce((acc, p) => ({ ...acc, [p.type]: p.content }), {});
-
-  const policyHash = canonicalPolicyHash(policyData);
-
-  // Minimum required claims
-  const claims = {
-    iss: issuer,
-    sub: ctx.resource,
-    aud: canonicalUrl,
+  // Build v0.9.14 receipt
+  const receipt: Receipt = {
+    version: '0.9.14',
+    protocol_version: '0.9.14',
+    wire_version: '0.9',
+    subject: {
+      uri: ctx.resource,
+    },
+    aipref: {
+      status: 'allowed',
+    },
+    purpose: (ctx.purpose as Receipt['purpose']) || 'other',
+    enforcement: {
+      method: settlement.required ? 'http-402' : 'none',
+    },
+    payment: settlement.payment
+      ? {
+          scheme: 'x402' as const,
+          amount: parseFloat(settlement.payment.amount.value),
+          currency: settlement.payment.amount.currency,
+        }
+      : undefined,
+    crawler_type: 'unknown',
     iat: now,
-    exp,
-    rid,
-    purpose: ctx.purpose,
-    policy_hash: policyHash,
-    // Optional payment claim when settled
-    ...(settlement.payment && { payment: settlement.payment }),
+    exp: now + 300,
+    kid,
+    nonce: uuidv7(),
   };
 
-  // Remove undefined values
-  Object.keys(claims).forEach((key) => {
-    if ((claims as any)[key] === undefined) {
-      delete (claims as any)[key];
-    }
+  return await signReceipt(receipt, {
+    kid,
+    privateKey,
   });
-
-  const payload = JSON.stringify(claims);
-  const detachedJws = await signDetached(payload, keyPair.privateKey, keyPair.kid);
-
-  // Return receipt format as payload..signature (for test compatibility)
-  // Note: RFC 7797 standard is protected..signature, but tests expect payload access
-  const payloadB64 = Buffer.from(payload, 'utf8').toString('base64url');
-  return `${payloadB64}..${detachedJws.signature}`;
 }
 
 // Helper functions for policy evaluation
