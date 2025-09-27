@@ -14,10 +14,10 @@ async function loadCore() {
     return await import('@peac/core');
   } catch {}
 
-  // 2) Workspace dist (after build)
+  // 2) Workspace package root (Node resolves via package.json "exports")
   try {
-    const url = new URL('../packages/core/dist/index.js', import.meta.url);
-    return await import(url.href);
+    const pkgRoot = new URL('../packages/core/', import.meta.url);
+    return await import(pkgRoot.href);
   } catch {}
 
   // 3) TS source (no build needed; tsx compiles it)
