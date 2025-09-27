@@ -3,7 +3,7 @@
  * Single PEAC-Receipt header, iat field, payment.scheme
  */
 
-import { SignJWT, importJWK, type JWTPayload } from 'jose';
+import { SignJWT, importJWK } from 'jose';
 import { Receipt, KeySet, Kid, SigningOptions } from './types.js';
 import { uuidv7 } from './ids/uuidv7.js';
 

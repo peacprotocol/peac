@@ -85,21 +85,44 @@ export class VerifierV13 {
         };
       }
 
-      // Fail closed if no keys are configured - production must provide proper keys
-      const keys = process.env.PEAC_VERIFY_KEYS ? JSON.parse(process.env.PEAC_VERIFY_KEYS) : {};
+      // Parse verification keys with fail-closed logic
+      function parseKeyset(env = process.env.PEAC_VERIFY_KEYS): VerifyKeySet {
+        if (!env) return {};
+        try {
+          const ks = JSON.parse(env);
+          return ks && typeof ks === 'object' ? (ks as VerifyKeySet) : {};
+        } catch {
+          return {}; // invalid JSON
+        }
+      }
+
+      const keys = parseKeyset();
+      if (!keys || Object.keys(keys).length === 0) {
+        return {
+          status: 422,
+          body: {
+            type: 'https://peacprotocol.org/problems/misconfigured-verifier',
+            title: 'Missing Verification Keys',
+            status: 422,
+            detail: 'PEAC_VERIFY_KEYS is not set or invalid.',
+            timing: buildTiming(),
+            meta: buildMeta(),
+          },
+        };
+      }
 
       // Verify receipt signature using v0.9.14 core function
       let payload;
       try {
         ({ payload } = await verifyReceipt(request.receipt, keys));
-      } catch (e) {
+      } catch {
         return {
           status: 422,
           body: {
             type: 'https://peacprotocol.org/problems/invalid-signature',
             title: 'Invalid Signature',
             status: 422,
-            detail: 'Unknown kid or bad signature',
+            detail: 'Unknown kid or bad signature.',
             timing: buildTiming(),
             meta: buildMeta(),
           },
