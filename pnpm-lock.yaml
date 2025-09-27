@@ -285,8 +285,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(ajv@8.17.1)
       cbor:
-        specifier: ^9.0.0
-        version: 9.0.2
+        specifier: ^10.0.11
+        version: 10.0.11
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -2235,9 +2235,9 @@ packages:
     resolution: {integrity: sha512-QGUGitqsc8ARjLdgAfxETDhRbJ0REsP6O3I96TAth/mVjh2cYzN2u+3AzPP3aVSm2FehEItaJw1xd+IGBXWeSw==}
     dev: true
 
-  /cbor@9.0.2:
-    resolution: {integrity: sha512-JPypkxsB10s9QOWwa6zwPzqE1Md3vqpPc+cai4sAecuCsRyAtAl/pMyhPlMbT/xtPnm2dznJZYRLui57qiRhaQ==}
-    engines: {node: '>=16'}
+  /cbor@10.0.11:
+    resolution: {integrity: sha512-vIwORDd/WyB8Nc23o2zNN5RrtFGlR6Fca61TtjkUXueI3Jf2DOZDl1zsshvBntZ3wZHBM9ztjnkXSmzQDaq3WA==}
+    engines: {node: '>=20'}
     dependencies:
       nofilter: 3.1.0
     dev: false
