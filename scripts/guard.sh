@@ -39,9 +39,10 @@ else
   echo "OK"
 fi
 
-echo "== field regressions =="
+echo "== field regressions (typos) =="
+# Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
 LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md)'
-if git grep -nE '\bissued_at\b|payment\.rail|peacreceiept|peacreceiepts' -- ':!node_modules' ':!archive/**' \
+if git grep -nE '\bissued_at\b|payment\.rail|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
 else
@@ -74,6 +75,13 @@ fi
 echo "== forbid empty smoke tests =="
 if grep -RIl "Zero-BC v0.9.14: Test disabled" test/ tests/ 2>/dev/null | grep .; then
   echo "FAIL: Found disabled smoke tests - archive them properly"
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== forbid imports from archive =="
+if git grep -nE "from ['\"]/.*archive/|require\(['\"]/.*archive/" -- ':!node_modules' | grep .; then
   bad=1
 else
   echo "OK"
