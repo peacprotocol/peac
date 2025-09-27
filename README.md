@@ -277,7 +277,7 @@ const response = await fetch('https://peacprotocol.org/agreements', {
   "amount": "5.00",
   "currency": "USD",
   "method": "x402",
-  "issued_at": "2025-08-16T00:00:00Z",
+  "iat": 1723766400,
   "expires_at": "2025-08-17T00:00:00Z"
 }
 ```

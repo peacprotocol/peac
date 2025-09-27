@@ -9,7 +9,7 @@ import { VerifyApiHandler } from '../dist/handler.js';
 // Mock verify function
 const mockVerifySuccess = async (jws, keys) => ({
   hdr: { alg: 'EdDSA', kid: 'test-key' },
-  obj: { subject: { uri: 'https://example.com' }, issued_at: '2025-09-04T12:00:00Z' },
+  obj: { subject: { uri: 'https://example.com' }, iat: 1725537600 },
 });
 
 const mockVerifyFailure = async (jws, keys) => {

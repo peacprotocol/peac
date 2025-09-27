@@ -9,7 +9,7 @@ The PEAC Protocol SDK (`@peacprotocol/core`) provides programmatic access to PEA
 ## Installation
 
 ```bash
-npm install @peacprotocol/core
+pnpm add @peacprotocol/core
 ```
 
 ## Core Classes

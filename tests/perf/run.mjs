@@ -51,7 +51,7 @@ async function benchmarkSign() {
       digest: { alg: 'JCS-SHA256', val: 'abc123' },
     },
     enforcement: { method: 'none' },
-    issued_at: new Date().toISOString(),
+    iat: Math.floor(Date.now() / 1000),
     kid: 'test',
   };
 

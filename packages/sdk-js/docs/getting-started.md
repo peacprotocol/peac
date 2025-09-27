@@ -95,7 +95,7 @@ attribution:
 
 ```bash
 # Install PEAC CLI
-npm install -g @peacprotocol/core
+pnpm add -g @peacprotocol/core
 
 # Validate your file
 npx peac validate peac.txt

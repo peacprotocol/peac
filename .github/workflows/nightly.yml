@@ -78,29 +78,41 @@ jobs:
           echo "Running integration tests..."
 
           # MCP server integration (TS entrypoint → run via tsx)
-          echo '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"peac-receipts","version":"0.9.12.1"}}}' | \
-            timeout 5s pnpm -w exec tsx packages/adapters/mcp/server.ts || echo "MCP test completed"
+          if [ -f "packages/adapters/mcp/server.ts" ]; then
+            echo '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"peac-receipts","version":"0.9.12.1"}}}' | \
+              timeout 5s pnpm -w exec tsx packages/adapters/mcp/server.ts || echo "MCP test completed"
+          else
+            echo "MCP adapter archived in v0.9.14 - skipping MCP integration test"
+          fi
 
           # OpenAI functions file exists & has tools
-          node -e "
-            const funcs = require('./packages/adapters/openai/functions.json');
-            if (!funcs.functions || funcs.functions.length < 4) throw new Error('Missing OpenAI functions');
-            console.log('OpenAI functions validated:', funcs.functions.length);
-          "
+          if [ -f "packages/adapters/openai/functions.json" ]; then
+            node -e "
+              const funcs = require('./packages/adapters/openai/functions.json');
+              if (!funcs.functions || funcs.functions.length < 4) throw new Error('Missing OpenAI functions');
+              console.log('OpenAI functions validated:', funcs.functions.length);
+            "
+          else
+            echo "OpenAI adapter archived in v0.9.14 - skipping OpenAI functions validation"
+          fi
 
           # Enhanced schema spot-checks (match actual property names)
-          node -e "
-            const receipt   = require('./schemas/receipt.v1.1.json');
-            const discovery = require('./schemas/discovery.v1.1.json');
-            const purge     = require('./schemas/purge.v1.0.json');
+          if [ -f "schemas/receipt.v1.1.json" ] && [ -f "schemas/discovery.v1.1.json" ] && [ -f "schemas/purge.v1.0.json" ]; then
+            node -e "
+              const receipt   = require('./schemas/receipt.v1.1.json');
+              const discovery = require('./schemas/discovery.v1.1.json');
+              const purge     = require('./schemas/purge.v1.0.json');
 
-            const has = (o,p) => p.split('.').reduce((x,k)=>x && k in x ? x[k] : undefined, o) !== undefined;
+              const has = (o,p) => p.split('.').reduce((x,k)=>x && k in x ? x[k] : undefined, o) !== undefined;
 
-            if (!has(receipt,   'properties.verification'))       throw new Error('Missing verification in receipt schema');
-            if (!has(receipt,   'properties.audit_chain'))         throw new Error('Missing audit_chain in receipt schema');
-            // Note: crawler_verification check removed - crawler archived in v0.9.14
-            console.log('All enhanced schemas validated');
-          "
+              if (!has(receipt,   'properties.verification'))       throw new Error('Missing verification in receipt schema');
+              if (!has(receipt,   'properties.audit_chain'))         throw new Error('Missing audit_chain in receipt schema');
+              // Note: crawler_verification check removed - crawler archived in v0.9.14
+              console.log('All enhanced schemas validated');
+            "
+          else
+            echo "Legacy schemas archived in v0.9.14 - skipping schema validation (using core types in packages/receipts/src/types.ts)"
+          fi
 
   cross-runtime-matrix:
     name: Cross-Runtime Tests (${{ matrix.runtime }})

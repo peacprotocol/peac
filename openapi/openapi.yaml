@@ -164,7 +164,7 @@ paths:
                       val: 'abc123'
                   enforcement:
                     method: 'none'
-                  issued_at: '2025-09-05T12:00:00Z'
+                  iat: 1725537600
                   kid: 'site-2025-09'
                 verified_at: '2025-09-05T12:00:30Z'
                 kid: 'site-2025-09'
@@ -368,7 +368,7 @@ components:
     Receipt:
       type: object
       description: PEAC Protocol receipt (Core Receipt v1)
-      required: [subject, aipref, enforcement, issued_at, kid]
+      required: [subject, aipref, enforcement, iat, kid]
       properties:
         subject:
           type: object
@@ -437,10 +437,9 @@ components:
                   type: array
                   items: { type: string }
                 proof: { type: string }
-        issued_at:
-          type: string
-          format: date-time
-          description: Receipt issuance timestamp (UTC)
+        iat:
+          type: integer
+          description: Receipt issuance timestamp (Unix seconds)
         kid:
           type: string
           description: Key identifier for signature verification

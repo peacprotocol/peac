@@ -141,7 +141,7 @@ async function verifyReceipt(jws, keys) {
   const payload = JSON.parse(atob(payloadB64));
 
   // Basic schema validation
-  if (!payload.subject?.uri || !payload.aipref || !payload.issued_at || !payload.kid) {
+  if (!payload.subject?.uri || !payload.aipref || !payload.iat || !payload.kid) {
     throw new Error('Invalid receipt schema');
   }
 

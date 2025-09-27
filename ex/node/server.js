@@ -89,7 +89,7 @@ app.post('/peac/issue', async (c) => {
         method: payment ? 'http-402' : 'none',
       },
       payment: payment || undefined,
-      issued_at: new Date().toISOString(),
+      iat: Math.floor(Date.now() / 1000),
       kid: 'site-2025-09',
     };
 
@@ -142,7 +142,7 @@ app.post('/peac/verify', async (c) => {
     return c.json({
       valid: true,
       receipt: result.obj,
-      issued_at: result.obj.issued_at,
+      iat: result.obj.iat,
       kid: result.obj.kid,
     });
   } catch (error) {

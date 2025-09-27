@@ -34,7 +34,7 @@ As automated systems increasingly interact with web content, the need for progra
 
 ```bash
 # Install PEAC CLI
-npm install -g @peacprotocol/core
+pnpm add -g @peacprotocol/core
 
 # Create your peac.txt
 npx peac init
