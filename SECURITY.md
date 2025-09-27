@@ -57,7 +57,7 @@ Before submitting code:
 - [ ] External URLs validated against SSRF
 - [ ] Rate limiting considered
 - [ ] Error messages don't leak sensitive info
-- [ ] Dependencies audited (`npm audit`)
+- [ ] Dependencies audited (`pnpm audit`)
 - [ ] Security tests written for new features
 
 ## Known Security Considerations

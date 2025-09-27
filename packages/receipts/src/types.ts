@@ -1,68 +1,49 @@
 /**
- * Enhanced Receipt Schema v1.1 with verification and security fields
+ * PEAC Receipt v0.9.14 format - aligned with @peac/core types
  */
 export interface Receipt {
-  // Core fields
-  protocol_version: string; // Pattern: ^\d+\.\d+\.\d+(\.\d+)?
-  wire_version: string; // Pattern: ^\d+\.\d+
+  // Core metadata
+  version: string; // v0.9.14
+  protocol_version: string; // v0.9.14
+  wire_version: string; // v0.9
+
+  // Subject/resource
   subject: {
-    uri: string; // Changed from 'id' to 'uri' for clarity
-    hash?: string; // SHA-256 of content
+    uri: string;
   };
-  agent: {
-    ua?: string;
-    attestation?: object;
-  };
+  sub?: string; // computed URN
+
+  // AI preferences
   aipref: {
-    status: 'ok' | 'not_found' | 'error' | 'not_applicable';
-    snapshot?: string; // Inline preferences
-    digest?: string; // SHA-256 of preferences
+    status: 'allowed' | 'denied' | 'restricted' | 'unknown';
   };
+
+  // Core purpose
+  purpose: 'train-ai' | 'inference' | 'content-creation' | 'analysis' | 'other';
+
+  // Enforcement
   enforcement: {
     method: 'none' | 'http-402';
-    provider?: 'cdn' | 'origin' | 'gateway';
   };
+
+  // Payment (required if method is http-402)
   payment?: {
-    // Required if method == 'http-402'
-    rail: string;
+    scheme: string; // v0.9.14: renamed from 'rail'
     amount: number;
     currency: string;
-    evidence: {
-      provider_ids: string[];
-      proof?: string;
-    };
-  };
-  provenance?: {
-    c2pa?: string;
-  };
-  consent?: {
-    basis?: string;
   };
 
-  // Enhanced v1.1 fields
-  verification?: {
-    crawler_result?: CrawlerVerificationResult;
-    trust_score?: number;
-    risk_factors?: string[];
-  };
-  security?: {
-    replay_token?: string;
-    key_rotation_epoch?: number;
-    audit_trail?: AuditEntry[];
-  };
-
-  // Required context fields
-  request_context: {
-    request_id: string;
-    session_id?: string;
-    correlation_id?: string;
-    timestamp: string; // ISO 8601 date-time
-  };
-
-  crawler_type: 'bot' | 'agent' | 'hybrid' | 'browser' | 'migrating' | 'test' | 'unknown';
-  issued_at: string; // ISO 8601
+  // JOSE standard fields
+  iat: number; // v0.9.14: Unix timestamp (replaces prior timestamp field)
+  exp?: number;
   kid: string;
-  signature_media_type: 'application/peac-receipt+jws';
+  nonce?: string;
+
+  // Policy tracking
+  policy_hash?: string;
+
+  // Crawler classification
+  crawler_type: 'bot' | 'agent' | 'hybrid' | 'browser' | 'migrating' | 'test' | 'unknown';
 }
 
 export interface CrawlerVerificationResult {

@@ -7,6 +7,11 @@ export interface ClientConfig {
   timeout?: number;
   userAgent?: string;
   retries?: number;
+  inject?: {
+    core?: { verifyReceipt: Function };
+    disc?: { discover: Function };
+    pref?: { resolveAIPref: Function };
+  };
 }
 
 export interface DiscoverOptions {

@@ -24,18 +24,19 @@
     "pretest": "pnpm build",
     "test": "node --test src/*.test.js",
     "test:perf": "node scripts/perf-test.js",
-    "perf": "npm run test:perf",
+    "perf": "pnpm run test:perf",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@peac/core": "workspace:^0.9.12.1",
-    "@peac/disc": "workspace:^0.9.12.1",
-    "@peac/receipts": "workspace:^0.9.12.1",
-    "@peac/pay402": "workspace:^0.9.12.1",
+    "@peac/core": "workspace:^0.9.14",
+    "@peac/disc": "workspace:^0.9.14",
+    "@peac/receipts": "workspace:^0.9.14",
+    "@peac/pay402": "workspace:^0.9.14",
     "hono": "^4.9.7",
     "@hono/node-server": "^1.8.2",
+    "jose": "^5.0.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {

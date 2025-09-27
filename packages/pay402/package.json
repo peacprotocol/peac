@@ -1,6 +1,6 @@
 {
   "name": "@peac/pay402",
-  "version": "0.9.12.1",
+  "version": "0.9.14",
   "description": "Generic HTTP 402 adapter with multi-rail payment negotiation",
   "type": "module",
   "main": "dist/index.js",
@@ -34,7 +34,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@peac/core": "workspace:^0.9.12.1"
+    "@peac/core": "workspace:^0.9.14"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

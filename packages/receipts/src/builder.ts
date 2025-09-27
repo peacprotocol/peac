@@ -1,58 +1,30 @@
 import { Receipt } from './types.js';
+import { WIRE } from '@peac/core';
 
 export interface ReceiptBuilderOptions {
+  version: string;
   protocol_version: string;
   wire_version: string;
   subject: {
     uri: string;
-    hash?: string;
   };
-  agent?: {
-    ua?: string;
-    attestation?: object;
-  };
+  sub?: string;
   aipref: {
-    status: 'ok' | 'not_found' | 'error' | 'not_applicable';
-    snapshot?: string;
-    digest?: string;
+    status: 'allowed' | 'denied' | 'restricted' | 'unknown';
   };
+  purpose: 'train-ai' | 'inference' | 'content-creation' | 'analysis' | 'other';
   enforcement: {
     method: 'none' | 'http-402';
-    provider?: 'cdn' | 'origin' | 'gateway';
   };
   payment?: {
-    rail: string;
+    scheme: string;
     amount: number;
     currency: string;
-    evidence: {
-      provider_ids: string[];
-      proof?: string;
-    };
-  };
-  provenance?: {
-    c2pa?: string;
-  };
-  consent?: {
-    basis?: string;
-  };
-  verification?: {
-    crawler_result?: any;
-    trust_score?: number;
-    risk_factors?: string[];
-  };
-  security?: {
-    replay_token?: string;
-    key_rotation_epoch?: number;
-    audit_trail?: any[];
-  };
-  request_context: {
-    request_id: string;
-    session_id?: string;
-    correlation_id?: string;
-    timestamp: string;
   };
   crawler_type: 'bot' | 'agent' | 'hybrid' | 'browser' | 'migrating' | 'test' | 'unknown';
   kid: string;
+  policy_hash?: string;
+  nonce?: string;
 }
 
 /**
@@ -64,15 +36,16 @@ export class ReceiptBuilder {
   /**
    * Set subject information
    */
-  subject(uri: string, hash?: string): this {
-    this.options.subject = { uri, hash };
+  subject(uri: string): this {
+    this.options.subject = { uri };
     return this;
   }
 
   /**
    * Set protocol versions
    */
-  versions(protocol_version: string, wire_version: string): this {
+  versions(version: string, protocol_version: string, wire_version: string): this {
+    this.options.version = version;
     this.options.protocol_version = protocol_version;
     this.options.wire_version = wire_version;
     return this;
@@ -81,46 +54,33 @@ export class ReceiptBuilder {
   /**
    * Set AIPREF information
    */
-  aipref(
-    status: 'ok' | 'not_found' | 'error' | 'not_applicable',
-    snapshot?: string,
-    digest?: string
-  ): this {
-    this.options.aipref = { status, snapshot, digest };
+  aipref(status: 'allowed' | 'denied' | 'restricted' | 'unknown'): this {
+    this.options.aipref = { status };
+    return this;
+  }
+
+  /**
+   * Set purpose
+   */
+  purpose(purpose: 'train-ai' | 'inference' | 'content-creation' | 'analysis' | 'other'): this {
+    this.options.purpose = purpose;
     return this;
   }
 
   /**
    * Set enforcement method
    */
-  enforcement(method: 'none' | 'http-402', provider?: 'cdn' | 'origin' | 'gateway'): this {
-    this.options.enforcement = { method, provider };
+  enforcement(method: 'none' | 'http-402'): this {
+    this.options.enforcement = { method };
     return this;
   }
 
   /**
    * Set payment information (required for http-402)
+   * Accepts legacy 'rail' parameter mapped to 'scheme'
    */
-  payment(
-    rail: string,
-    amount: number,
-    currency: string,
-    evidence: { provider_ids: string[]; proof?: string }
-  ): this {
-    this.options.payment = { rail, amount, currency, evidence };
-    return this;
-  }
-
-  /**
-   * Set request context
-   */
-  requestContext(
-    request_id: string,
-    timestamp: string,
-    session_id?: string,
-    correlation_id?: string
-  ): this {
-    this.options.request_context = { request_id, timestamp, session_id, correlation_id };
+  payment(schemeOrRail: string, amount: number, currency: string): this {
+    this.options.payment = { scheme: schemeOrRail, amount, currency };
     return this;
   }
 
@@ -143,13 +103,31 @@ export class ReceiptBuilder {
   }
 
   /**
+   * Set policy hash
+   */
+  policyHash(hash: string): this {
+    this.options.policy_hash = hash;
+    return this;
+  }
+
+  /**
+   * Set nonce
+   */
+  nonce(nonce: string): this {
+    this.options.nonce = nonce;
+    return this;
+  }
+
+  /**
    * Build the receipt
    */
   build(): Receipt {
+    const version = this.options.version ?? '0.9.14';
+    const wire = this.options.wire_version ?? WIRE;
     if (!this.options.protocol_version) {
       throw new Error('protocol_version is required');
     }
-    if (!this.options.wire_version) {
+    if (!wire) {
       throw new Error('wire_version is required');
     }
     if (!this.options.subject) {
@@ -158,11 +136,11 @@ export class ReceiptBuilder {
     if (!this.options.aipref) {
       throw new Error('aipref is required');
     }
+    if (!this.options.purpose) {
+      throw new Error('purpose is required');
+    }
     if (!this.options.enforcement) {
       throw new Error('enforcement is required');
-    }
-    if (!this.options.request_context) {
-      throw new Error('request_context is required');
     }
     if (!this.options.crawler_type) {
       throw new Error('crawler_type is required');
@@ -172,22 +150,20 @@ export class ReceiptBuilder {
     }
 
     const receipt: Receipt = {
+      version,
       protocol_version: this.options.protocol_version,
-      wire_version: this.options.wire_version,
+      wire_version: wire,
       subject: this.options.subject,
-      agent: this.options.agent || {},
       aipref: this.options.aipref,
+      purpose: this.options.purpose,
       enforcement: this.options.enforcement,
-      request_context: this.options.request_context,
       crawler_type: this.options.crawler_type,
-      issued_at: new Date().toISOString(),
+      iat: Math.floor(Date.now() / 1000),
       kid: this.options.kid,
-      signature_media_type: 'application/peac-receipt+jws',
+      ...(this.options.sub && { sub: this.options.sub }),
       ...(this.options.payment && { payment: this.options.payment }),
-      ...(this.options.provenance && { provenance: this.options.provenance }),
-      ...(this.options.consent && { consent: this.options.consent }),
-      ...(this.options.verification && { verification: this.options.verification }),
-      ...(this.options.security && { security: this.options.security }),
+      ...(this.options.policy_hash && { policy_hash: this.options.policy_hash }),
+      ...(this.options.nonce && { nonce: this.options.nonce }),
     };
 
     return receipt;

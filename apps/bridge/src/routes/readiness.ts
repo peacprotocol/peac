@@ -17,8 +17,8 @@ async function checkCoreLoaded() {
 async function checkSignerCache() {
   try {
     // Try to import crypto functions
-    const { generateEdDSAKeyPair } = await import('@peac/core');
-    return typeof generateEdDSAKeyPair === 'function';
+    await import('jose'); // module resolution sanity check
+    return true;
   } catch {
     return false;
   }

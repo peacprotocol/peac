@@ -117,7 +117,7 @@ Headers are **adapter-local** and may be removed once official fields exist.
     "checked_at": "2025-09-05T12:30:00Z",
     "snapshot": { "ai_train": false, "ai_crawl": true, "sources": [{ "type": "peac.txt" }] }
   },
-  "issued_at": "2025-09-05T12:30:00Z",
+  "iat": 1725543000,
   "kid": "2025-09-k1"
   /* "ext": { "tempo": { "block": 12345, "tx": "0xabc...", "memo_digest": "sha256:..." } } */
 }

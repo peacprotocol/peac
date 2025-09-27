@@ -1,6 +1,6 @@
 {
   "name": "@peac/app-api",
-  "version": "0.9.12.1",
+  "version": "0.9.14",
   "description": "PEAC Protocol API server with OpenAPI 3.1, RFC 9457 Problem Details, and content negotiation",
   "type": "module",
   "main": "dist/index.js",
@@ -29,11 +29,10 @@
     "perf": "node scripts/perf-test.js"
   },
   "dependencies": {
-    "@peac/core": "workspace:^0.9.12.1",
-    "@peac/disc": "workspace:^0.9.12.1",
-    "@peac/receipts": "workspace:^0.9.12.1",
-    "@peac/crawler": "workspace:^0.9.12.1",
-    "@peac/pay402": "workspace:^0.9.12.1",
+    "@peac/core": "workspace:^0.9.14",
+    "@peac/disc": "workspace:^0.9.14",
+    "@peac/receipts": "workspace:^0.9.14",
+    "@peac/pay402": "workspace:^0.9.14",
     "hono": "^4.9.7",
     "@hono/node-server": "^1.8.2",
     "zod": "^3.22.0"

@@ -13,16 +13,19 @@ import type {
   ClientError,
 } from './types.js';
 
+type PeacClientConfig = Required<Omit<ClientConfig, 'inject'>> & Pick<ClientConfig, 'inject'>;
+
 export class PeacClient {
-  private config: Required<ClientConfig>;
+  private config: PeacClientConfig;
   private discoveryCache = new Map<string, { result: DiscoveryResult; expires: number }>();
 
   constructor(config: ClientConfig = {}) {
     this.config = {
       defaultKeys: config.defaultKeys || {},
       timeout: config.timeout || 10000,
-      userAgent: config.userAgent || 'PEAC SDK/0.9.12',
+      userAgent: config.userAgent || 'PEAC SDK/0.9.14',
       retries: config.retries || 2,
+      inject: config.inject,
     };
   }
 
@@ -37,7 +40,9 @@ export class PeacClient {
     try {
       // Safe dynamic import using template literals to avoid Function constructor
       const moduleName = '@peac/disc';
-      const discModule = await import(/* webpackIgnore: true */ moduleName).catch(() => null);
+      const discModule =
+        this.config.inject?.disc ??
+        (await import(/* webpackIgnore: true */ moduleName).catch(() => null));
       if (!discModule) {
         throw new Error('@peac/disc module not available');
       }
@@ -75,7 +80,9 @@ export class PeacClient {
   ): Promise<VerificationResult> {
     try {
       const moduleName = '@peac/core';
-      const coreModule = await import(/* webpackIgnore: true */ moduleName).catch(() => null);
+      const coreModule =
+        this.config.inject?.core ??
+        (await import(/* webpackIgnore: true */ moduleName).catch(() => null));
       if (!coreModule) {
         throw new Error('@peac/core module not available');
       }
@@ -86,15 +93,17 @@ export class PeacClient {
         throw this.createClientError('NO_KEYS', 'No keys provided for local verification');
       }
 
-      const result = await coreModule.verify(receipt, keys);
+      const result = await coreModule.verifyReceipt(receipt, keys);
 
       let aiprefStatus: 'valid' | 'invalid' | 'not_checked' = 'not_checked';
-      if (options.validateAIPref && result.obj.subject?.uri) {
+      if (options.validateAIPref && result.payload.subject?.uri) {
         try {
           const moduleName = '@peac/pref';
-          const prefModule = await import(/* webpackIgnore: true */ moduleName).catch(() => null);
+          const prefModule =
+            this.config.inject?.pref ??
+            (await import(/* webpackIgnore: true */ moduleName).catch(() => null));
           if (prefModule) {
-            const aiprefResult = await prefModule.resolveAIPref(result.obj.subject.uri);
+            const aiprefResult = await prefModule.resolveAIPref(result.payload.subject.uri);
             aiprefStatus = aiprefResult.status === 'active' ? 'valid' : 'invalid';
           }
         } catch {
@@ -105,19 +114,24 @@ export class PeacClient {
       return {
         valid: true,
         receipt: {
-          header: result.hdr,
-          payload: result.obj,
+          header: result.header,
+          payload: result.payload,
         },
         verification: {
           signature: 'valid',
           schema: 'valid',
           aipref: aiprefStatus,
           timestamp: new Date().toISOString(),
-          key_id: result.hdr.kid,
+          key_id: result.header.kid,
         },
         remote: false,
       };
     } catch (error) {
+      // Re-throw client errors without wrapping them
+      if (error instanceof Error && error.name === 'PeacClientError') {
+        throw error;
+      }
+
       if (error instanceof Error && error.message?.includes('signature')) {
         return {
           valid: false,

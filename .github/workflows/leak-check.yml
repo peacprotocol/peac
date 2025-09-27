@@ -1,10 +1,9 @@
-name: Leak Check - Core & Crawler
+name: Leak Check - Core Only
 
 on:
   pull_request:
     paths:
       - 'packages/core/**'
-      - 'packages/crawler/**'
     branches: [main]
 
 env:
@@ -34,22 +33,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build core and crawler
+      - name: Build core
         run: |
           pnpm --filter @peac/core build
-          pnpm --filter @peac/crawler build
 
       - name: Check for open handles (core)
         run: |
           echo "Checking core package for open handles..."
           pnpm --filter @peac/core exec jest --detectOpenHandles --runInBand --passWithNoTests || echo "::warning::Core has open handles"
 
-      - name: Check for open handles (crawler)
-        run: |
-          echo "Checking crawler package for open handles..."
-          pnpm --filter @peac/crawler exec jest --config jest.config.ts --detectOpenHandles --runInBand || echo "::warning::Crawler has open handles"
-
       - name: Summary
         run: |
-          echo "Leak check completed for core/crawler changes"
+          echo "Leak check completed for core changes"
+          echo "Note: Crawler archived in v0.9.14 zero-BC release"
           echo "Any open handles will be shown as warnings above"

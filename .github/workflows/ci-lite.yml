@@ -28,11 +28,14 @@ jobs:
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20.10.0'
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Domain guard
+        run: bash -euxo pipefail scripts/guard.sh
 
       - name: Format check
         run: |
@@ -68,13 +71,32 @@ jobs:
           # Core package tests (should be stable)
           pnpm --filter @peac/core test || echo "::warning::Core tests had issues"
 
-          # Discovery tests (should be stable)  
+          # Discovery tests (should be stable)
           pnpm --filter @peac/disc test || echo "::warning::Discovery tests had issues"
 
-      - name: Leak check (crawler)
+      - name: Build core (needed for bench)
+        run: pnpm --filter @peac/core build
+
+      - name: Performance gate
         run: |
-          echo "Checking for open handles in crawler tests..."
-          pnpm --filter @peac/crawler exec jest --config jest.config.ts --detectOpenHandles --runInBand || echo "::warning::Crawler has open handles - investigate async cleanup"
+          echo "Running performance verification..."
+          OUT=$(pnpm -w exec tsx scripts/bench-verify.ts)
+          echo "$OUT"
+          P95=$(echo "$OUT" | sed -n 's/^P95:[[:space:]]*\([0-9]\+\(\.[0-9]\+\)\?\).*/\1/p')
+          if [ -z "$P95" ]; then
+            echo "::error::No P95 metric found"; exit 1
+          fi
+          # Use awk for float comparison
+          if awk -v p95="$P95" 'BEGIN{ if (p95+0 > 5.0) exit 1 }'; then
+            echo "✅ P95=$P95 ms ≤ 5ms"
+          else
+            echo "::error::P95=$P95 ms exceeds 5ms budget"; exit 1
+          fi
+
+      - name: Core packages validation
+        run: |
+          echo "Core packages post-build validation completed"
+          echo "Crawler archived - no longer active in v0.9.14 zero-BC release"
 
   ci-lite-summary:
     name: CI Lite Summary

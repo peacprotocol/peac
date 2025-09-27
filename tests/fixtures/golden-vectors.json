@@ -13,7 +13,7 @@
           "reason": "No .well-known/aipref.json found"
         },
         "enforcement": { "method": "none" },
-        "issued_at": "2025-09-16T18:00:00Z",
+        "iat": 1726509600,
         "kid": "test-key-001"
       },
       "private_key": {
@@ -52,7 +52,7 @@
           "status": "completed",
           "evidence": { "provider_ids": ["txn_123abc"] }
         },
-        "issued_at": "2025-09-16T18:00:00Z",
+        "iat": 1726509600,
         "kid": "test-key-001"
       }
     },
@@ -86,7 +86,7 @@
             ]
           }
         },
-        "issued_at": "2025-09-04T18:00:00Z",
+        "iat": 1725472800,
         "kid": "test-key-001",
         "ext": {
           "tempo": {
@@ -109,7 +109,7 @@
           "digest": { "alg": "JCS-SHA256", "val": "xyz789" }
         },
         "enforcement": { "method": "none" },
-        "issued_at": "2025-09-16T18:00:00Z",
+        "iat": 1726509600,
         "kid": "test-key-001",
         "ext": {
           "c2pa": { "manifest_url": "https://c2pa.example/manifest.json" },
@@ -126,7 +126,7 @@
       "receipt": {
         "subject": { "uri": "https://example.com" },
         "enforcement": { "method": "none" },
-        "issued_at": "2025-09-16T18:00:00Z",
+        "iat": 1726509600,
         "kid": "test-key-001"
       },
       "expected": "validation_error"
@@ -142,7 +142,7 @@
           "reason": "not found"
         },
         "enforcement": { "method": "http-402" },
-        "issued_at": "2025-09-16T18:00:00Z",
+        "iat": 1726509600,
         "kid": "test-key-001"
       },
       "expected": "validation_error"

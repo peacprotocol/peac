@@ -1,6 +1,7 @@
 {
   "name": "@peac/crawler",
   "version": "0.9.12.1",
+  "private": true,
   "description": "PEAC Protocol crawler control with vendor-neutral providers",
   "type": "module",
   "main": "dist/index.js",
@@ -41,7 +42,7 @@
     "test:smoke": "jest --config jest.config.ts --selectProjects . --testPathPattern='(unit|smoke)'",
     "test:watch": "jest --config jest.config.ts --watch",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "echo 'Crawler typecheck temporarily disabled due to cross-package TypeScript issues'",
+    "typecheck": "echo 'Crawler typecheck temporarily disabled - has TypeScript compatibility issues'",
     "dev": "tsup --watch",
     "clean": "rm -rf dist",
     "perf": "node --loader ts-node/esm test/performance/perf.ts"

@@ -9,8 +9,18 @@ import { PeacClient } from '../dist/client.js';
 // Mock modules by providing them as globals (simplified for testing)
 const mockDiscoverResult = { valid: true, data: { verify: 'https://api.example.com/peac/verify' } };
 const mockVerifyResult = {
-  hdr: { alg: 'EdDSA', kid: 'test-key' },
-  obj: { subject: { uri: 'https://example.com' }, issued_at: '2025-09-04T12:00:00Z' },
+  header: { alg: 'EdDSA', typ: 'peac.receipt/0.9', kid: 'test-key' },
+  payload: {
+    wire_version: '0.9',
+    iat: Math.floor(Date.now() / 1000),
+    kid: 'test-key',
+    subject: { uri: 'https://example.com' },
+    aipref: { status: 'allowed' },
+    purpose: 'train-ai',
+    enforcement: { method: 'none' },
+    crawler_type: 'test',
+  },
+  signature: 'test-signature',
 };
 
 // Mock imports (would normally use a proper mocking framework)
@@ -18,16 +28,11 @@ global.mockDiscover = () => mockDiscoverResult;
 global.mockVerify = () => mockVerifyResult;
 
 test('PeacClient - discover caches results', async () => {
-  const client = new PeacClient();
-
-  // Mock the dynamic import
-  const originalImport = global.import;
-  global.import = async (module) => {
-    if (module === '@peac/disc') {
-      return { discover: () => mockDiscoverResult };
-    }
-    return originalImport?.(module);
-  };
+  const client = new PeacClient({
+    inject: {
+      disc: { discover: async () => mockDiscoverResult },
+    },
+  });
 
   const result1 = await client.discover('https://example.com');
   const result2 = await client.discover('https://example.com');
@@ -52,25 +57,35 @@ test('PeacClient - verifyLocal requires keys', async () => {
 
 test('PeacClient - verifyLocal with keys succeeds', async () => {
   const keys = { 'test-key': { kty: 'OKP', crv: 'Ed25519', x: 'test' } };
-  const client = new PeacClient({ defaultKeys: keys });
+  const client = new PeacClient({
+    defaultKeys: keys,
+    inject: {
+      core: { verifyReceipt: async () => mockVerifyResult },
+      pref: { resolveAIPref: async () => ({ status: 'active' }) },
+    },
+  });
 
-  // Mock the dynamic import
-  global.import = async (module) => {
-    if (module === '@peac/core') {
-      return {
-        verify: () => mockVerifyResult,
-        vReceipt: () => {},
-      };
-    }
-    if (module === '@peac/pref') {
-      return {
-        resolveAIPref: () => ({ status: 'active' }),
-      };
-    }
-    return {};
-  };
+  // Create a test receipt with proper v0.9.14 format
+  const testReceipt = [
+    Buffer.from(
+      JSON.stringify({ alg: 'EdDSA', typ: 'peac.receipt/0.9', kid: 'test-key' })
+    ).toString('base64url'),
+    Buffer.from(
+      JSON.stringify({
+        wire_version: '0.9',
+        iat: Math.floor(Date.now() / 1000),
+        kid: 'test-key',
+        subject: { uri: 'https://example.com' },
+        aipref: { status: 'allowed' },
+        purpose: 'train-ai',
+        enforcement: { method: 'none' },
+        crawler_type: 'test',
+      })
+    ).toString('base64url'),
+    'test-signature',
+  ].join('.');
 
-  const result = await client.verifyLocal('eyJhbGciOiJFZERTQSJ9.eyJ0ZXN0IjoidHJ1ZSJ9.signature', {
+  const result = await client.verifyLocal(testReceipt, {
     validateAIPref: true,
   });
 

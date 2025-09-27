@@ -1,120 +1,76 @@
 /**
- * @peac/core v0.9.12.1 - Enhanced JWS signing with wire versioning
- * EdDSA with JCS canonicalization, proper media type, version validation
- * Target: <3ms p95
+ * @peac/core v0.9.14 - JWS signing with typ: "peac.receipt/0.9"
+ * Single PEAC-Receipt header, iat field, payment.scheme
  */
 
 import { SignJWT, importJWK } from 'jose';
-import { Receipt, PurgeReceipt, SignOpts } from './types.js';
-import { VERSION_CONFIG } from './config.js';
-import { assertProtocolVersions, assertCrawlerType } from './validation.js';
-import { timed, metricsCollector } from './observability.js';
+import { Receipt, KeySet, Kid, SigningOptions } from './types.js';
+import { uuidv7 } from './ids/uuidv7.js';
 
-export async function signReceipt(receipt: Receipt, opts: SignOpts): Promise<string> {
-  const start = performance.now();
-
-  try {
-    metricsCollector.incrementCounter('receipts_issued');
-
-    // Validate versions and required fields
-    assertProtocolVersions(receipt, 'receipt');
-    assertCrawlerType(receipt.crawler_type);
-
-    // Kid consistency check
-    if (receipt.kid !== opts.kid) {
-      throw new Error(`Receipt kid mismatch: ${receipt.kid} !== ${opts.kid}`);
-    }
-
-    // Ensure protocol and wire versions are set correctly
-    const enhancedReceipt: Receipt = {
-      ...receipt,
-      protocol_version: VERSION_CONFIG.CURRENT_PROTOCOL,
-      wire_version: VERSION_CONFIG.REQUIRED_WIRE_RECEIPT,
-      signature_media_type: 'application/peac-receipt+jws',
-    };
-
-    // Add request context if not present
-    if (!enhancedReceipt.request_context?.request_id) {
-      enhancedReceipt.request_context = {
-        ...enhancedReceipt.request_context,
-        request_id: generateRequestId(),
-        timestamp: new Date().toISOString(),
-      };
-    }
-
-    const result = await signDocument(enhancedReceipt, opts, 'application/peac-receipt+jws');
-
-    const duration = performance.now() - start;
-    metricsCollector.recordTiming('sign', duration);
-
-    return result;
-  } catch (error) {
-    metricsCollector.incrementCounter('sign_errors');
-    throw error;
-  }
+export interface SignOptions {
+  kid: Kid;
+  privateKey: { kty: 'OKP'; crv: 'Ed25519'; d: string; x?: string };
 }
 
-export async function signPurgeReceipt(purge: PurgeReceipt, opts: SignOpts): Promise<string> {
-  // Validate versions
-  assertProtocolVersions(purge, 'purge');
+export async function signReceipt(receipt: Receipt, options: SignOptions): Promise<string> {
+  const { kid, privateKey } = options;
 
-  // Kid consistency check
-  if (purge.kid !== opts.kid) {
-    throw new Error(`Purge receipt kid mismatch: ${purge.kid} !== ${opts.kid}`);
-  }
+  // Import private key
+  const key = await importJWK(privateKey, 'EdDSA');
 
-  const enhancedPurge: PurgeReceipt = {
-    ...purge,
-    protocol_version: VERSION_CONFIG.CURRENT_PROTOCOL,
-    wire_version: VERSION_CONFIG.REQUIRED_WIRE_PURGE,
-    signature_media_type: 'application/peac-purge+jws',
-  };
-
-  if (!enhancedPurge.request_context?.request_id) {
-    enhancedPurge.request_context = {
-      ...enhancedPurge.request_context,
-      request_id: generateRequestId(),
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  return await signDocument(enhancedPurge, opts, 'application/peac-purge+jws');
-}
-
-async function signDocument(
-  document: Receipt | PurgeReceipt,
-  opts: SignOpts,
-  mediaType: string
-): Promise<string> {
-  // Import Ed25519 private key (cached for performance)
-  const privateKey = await importJWK(opts.privateKey, 'EdDSA');
-
-  // Create detached JWS with proper media type
-  const jws = await new SignJWT(document as any)
+  // Create JWT with v0.9.14 format
+  const jwt = new SignJWT(receipt)
     .setProtectedHeader({
       alg: 'EdDSA',
-      kid: opts.kid,
-      typ: mediaType,
+      typ: 'peac.receipt/0.9',
+      kid,
     })
-    .setIssuedAt()
-    .sign(privateKey);
+    .setIssuedAt(receipt.iat)
+    .setJti(uuidv7());
 
-  return jws;
+  if (receipt.exp) {
+    jwt.setExpirationTime(receipt.exp);
+  }
+
+  return await jwt.sign(key);
 }
 
-// Legacy compatibility wrapper (deprecated)
-export async function sign(receipt: Receipt, opts: SignOpts): Promise<string> {
-  return await signReceipt(receipt, opts);
+export interface SignReceiptOptions {
+  subject: string;
+  aipref: Receipt['aipref'];
+  purpose: Receipt['purpose'];
+  enforcement: Receipt['enforcement'];
+  payment?: Receipt['payment'];
+  kid: Kid;
+  privateKey: { kty: 'OKP'; crv: 'Ed25519'; d: string; x?: string };
+  crawler_type?: Receipt['crawler_type'];
+  expires_in?: number;
+  nonce?: string;
 }
 
-function generateRequestId(): string {
-  // Generate UUIDv7 (timestamp-based) for better traceability
-  const timestamp = Date.now();
-  const randomBytes = crypto.getRandomValues(new Uint8Array(10));
+export async function createAndSignReceipt(options: SignReceiptOptions): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
 
-  // Simple UUIDv7-like format: timestamp (12 chars) + random (16 chars)
-  const timestampHex = timestamp.toString(16).padStart(12, '0');
-  const randomHex = Array.from(randomBytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  const receipt: Receipt = {
+    version: '0.9.14',
+    protocol_version: '0.9.14',
+    wire_version: '0.9',
+    subject: {
+      uri: options.subject,
+    },
+    aipref: options.aipref,
+    purpose: options.purpose,
+    enforcement: options.enforcement,
+    payment: options.payment,
+    crawler_type: options.crawler_type || 'unknown',
+    iat: now,
+    exp: options.expires_in ? now + options.expires_in : undefined,
+    kid: options.kid,
+    nonce: options.nonce,
+  };
 
-  return `${timestampHex.slice(0, 8)}-${timestampHex.slice(8)}-7${randomHex.slice(0, 3)}-${randomHex.slice(3, 7)}-${randomHex.slice(7)}`;
+  return await signReceipt(receipt, {
+    kid: options.kid,
+    privateKey: options.privateKey,
+  });
 }

@@ -40,7 +40,7 @@ pids/
 *.seed
 *.pid.lock
 
-# Optional npm cache
+# Optional pnpm cache
 .npm
 
 # Optional eslint cache
@@ -49,7 +49,7 @@ pids/
 # Optional REPL history
 .node_repl_history
 
-# Output of 'npm pack'
+# Output of 'pnpm pack'
 *.tgz
 
 # Yarn Integrity file

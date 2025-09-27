@@ -43,7 +43,7 @@ npm audit @peac/core --audit-level=high
 
 ```bash
 # Install and verify core functionality
-npm install @peac/core
+pnpm add @peac/core
 node -e "
 import { sign, verify } from '@peac/core';
 console.log('✅ @peac/core imports successfully');

@@ -4,9 +4,11 @@
  */
 
 import { promises as dns } from 'node:dns';
-import { verify, canonicalPolicyHash } from '@peac/core';
+import { verifyReceipt, canonicalPolicyHash } from '@peac/core';
+import type { VerifyKeySet } from '@peac/core';
 import { discover } from '@peac/disc';
 import type { HttpStatus } from './types.js';
+import { PROBLEM_TYPES } from './index.js';
 
 export interface V13VerifyRequest {
   receipt: string;
@@ -74,7 +76,7 @@ export class VerifierV13 {
         return {
           status: 400,
           body: {
-            type: 'https://peac.dev/problems/invalid-request',
+            type: PROBLEM_TYPES.INVALID_REQUEST,
             title: 'Invalid Request',
             status: 400,
             detail: 'receipt field is required and must be a string',
@@ -84,20 +86,76 @@ export class VerifierV13 {
         };
       }
 
-      // Verify receipt signature using existing core function
-      const verifyResult = await verify(request.receipt, {
-        resource: request.resource,
-      });
+      // Parse verification keys with fail-closed logic
+      function parseKeyset(env = process.env.PEAC_VERIFY_KEYS): VerifyKeySet {
+        if (!env) return {};
+        try {
+          const ks = JSON.parse(env);
+          return ks && typeof ks === 'object' ? (ks as VerifyKeySet) : {};
+        } catch {
+          return {}; // invalid JSON
+        }
+      }
+
+      const keys = parseKeyset();
+      if (!keys || Object.keys(keys).length === 0) {
+        return {
+          status: 422,
+          body: {
+            type: PROBLEM_TYPES.MISCONFIGURED_VERIFIER,
+            title: 'Missing Verification Keys',
+            status: 422,
+            detail: 'PEAC_VERIFY_KEYS is not set or invalid.',
+            timing: buildTiming(),
+            meta: buildMeta(),
+          },
+        };
+      }
+
+      // Verify receipt signature using v0.9.14 core function
+      let payload;
+      try {
+        ({ payload } = await verifyReceipt(request.receipt, keys));
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+
+        // Map specific error types to problem types
+        if (errorMsg.includes('Expired receipt')) {
+          return {
+            status: 422,
+            body: {
+              type: PROBLEM_TYPES.EXPIRED_RECEIPT,
+              title: 'Expired Receipt',
+              status: 422,
+              detail: errorMsg,
+              timing: buildTiming(),
+              meta: buildMeta(),
+            },
+          };
+        }
+
+        return {
+          status: 422,
+          body: {
+            type: PROBLEM_TYPES.INVALID_SIGNATURE,
+            title: 'Invalid Signature',
+            status: 422,
+            detail: errorMsg,
+            timing: buildTiming(),
+            meta: buildMeta(),
+          },
+        };
+      }
 
       const response: V13VerifyResponse = {
-        valid: verifyResult.valid,
-        claims: verifyResult.claims,
+        valid: true, // reaching here means verification passed
+        claims: payload,
         timing: buildTiming(),
         meta: buildMeta(),
       };
 
       // If resource is provided, discover policies and recompute hash
-      if (request.resource && verifyResult.valid) {
+      if (request.resource) {
         try {
           const fetchStart = Date.now();
           await this.addPolicyValidation(request.resource, response, options);
@@ -123,7 +181,7 @@ export class VerifierV13 {
       return {
         status: 500,
         body: {
-          type: 'https://peac.dev/problems/processing-error',
+          type: PROBLEM_TYPES.PROCESSING_ERROR,
           title: 'Processing Error',
           status: 500,
           detail: error instanceof Error ? error.message : 'Unknown error',

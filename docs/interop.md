@@ -1,11 +1,27 @@
 # PEAC Protocol Interoperability Guide
 
-## Wire Protocol Version 0.9.13
+## Wire Protocol Version 0.9.14
 
-All PEAC protocol implementations MUST include the wire version header:
+PEAC v0.9.14 introduces simplified wire format with single header:
 
+### JWS Header Format
+
+All receipts use `typ: "peac.receipt/0.9"` in JWS header:
+
+```json
+{
+  "alg": "EdDSA",
+  "typ": "peac.receipt/0.9",
+  "kid": "key-id"
+}
 ```
-peac-version: 0.9.13
+
+### Single Header
+
+Only `PEAC-Receipt` header is used (no more `peac-version`):
+
+```http
+PEAC-Receipt: eyJhbGciOiJFZERTQSI...
 ```
 
 ## Content Types and Media Types
@@ -17,7 +33,7 @@ Successful PEAC operations return `application/peac+json`:
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/peac+json
-peac-version: 0.9.13
+PEAC-Receipt: eyJhbGciOiJFZERTQSI...
 ```
 
 ### Error Responses
@@ -27,7 +43,6 @@ Errors use RFC 7807 Problem Details with `application/problem+json`:
 ```http
 HTTP/1.1 400 Bad Request
 Content-Type: application/problem+json
-peac-version: 0.9.13
 
 {
   "type": "https://peacprotocol.org/problems/invalid-receipt",
@@ -52,13 +67,14 @@ AIPREF presence is REQUIRED (core or sidecar):
 - Core: Snapshot effective preferences at enforcement time
 - Sidecar: Reference to AIPREF service
 
-## Primary Header
+## v0.9.14 Receipt Format
 
-`PEAC-Receipt` is the canonical header for receipts:
+Receipts use these key fields:
 
-```http
-PEAC-Receipt: eyJhbGciOiJFZERTQSI...
-```
+- `iat`: Issued at time (Unix seconds)
+- `payment.scheme`: Payment method ('stripe', 'l402', 'x402')
+- `wire_version`: '0.9'
+- `version`: '0.9.14'
 
 ## Cache Controls
 

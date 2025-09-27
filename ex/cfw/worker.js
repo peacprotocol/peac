@@ -29,7 +29,7 @@ export default {
       } catch (error) {
         return new Response(
           JSON.stringify({
-            type: 'https://peac.dev/errors/invalid-proof',
+            type: 'https://peacprotocol.org/problems/invalid-proof',
             title: 'Receipt Verification Failed',
             status: 401,
             detail: error.message,
@@ -102,7 +102,7 @@ export default {
       } catch (error) {
         return new Response(
           JSON.stringify({
-            type: 'https://peac.dev/errors/invalid-proof',
+            type: 'https://peacprotocol.org/problems/invalid-proof',
             title: 'Invalid Receipt',
             status: 401,
             detail: error.message,
@@ -141,7 +141,7 @@ async function verifyReceipt(jws, keys) {
   const payload = JSON.parse(atob(payloadB64));
 
   // Basic schema validation
-  if (!payload.subject?.uri || !payload.aipref || !payload.issued_at || !payload.kid) {
+  if (!payload.subject?.uri || !payload.aipref || !payload.iat || !payload.kid) {
     throw new Error('Invalid receipt schema');
   }
 

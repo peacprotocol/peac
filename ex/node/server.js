@@ -89,7 +89,7 @@ app.post('/peac/issue', async (c) => {
         method: payment ? 'http-402' : 'none',
       },
       payment: payment || undefined,
-      issued_at: new Date().toISOString(),
+      iat: Math.floor(Date.now() / 1000),
       kid: 'site-2025-09',
     };
 
@@ -103,7 +103,7 @@ app.post('/peac/issue', async (c) => {
   } catch (error) {
     return c.json(
       {
-        type: 'https://peac.dev/errors/signing-failed',
+        type: 'https://peacprotocol.org/problems/signing-failed',
         title: 'Receipt Signing Failed',
         status: 500,
         detail: error.message,
@@ -122,7 +122,7 @@ app.post('/peac/verify', async (c) => {
   if (attempts > 100) {
     return c.json(
       {
-        type: 'https://peac.dev/errors/rate-limited',
+        type: 'https://peacprotocol.org/problems/rate-limited',
         title: 'Rate Limit Exceeded',
         status: 429,
         detail: 'Exceeded 100 requests per minute',
@@ -142,13 +142,13 @@ app.post('/peac/verify', async (c) => {
     return c.json({
       valid: true,
       receipt: result.obj,
-      issued_at: result.obj.issued_at,
+      iat: result.obj.iat,
       kid: result.obj.kid,
     });
   } catch (error) {
     return c.json(
       {
-        type: 'https://peac.dev/errors/invalid-proof',
+        type: 'https://peacprotocol.org/problems/invalid-proof',
         title: 'Receipt Verification Failed',
         status: 401,
         detail: error.message,
@@ -222,7 +222,7 @@ app.get('/api/content/:id', async (c) => {
   } catch (error) {
     return c.json(
       {
-        type: 'https://peac.dev/errors/invalid-receipt',
+        type: 'https://peacprotocol.org/problems/invalid-receipt',
         title: 'Invalid Receipt',
         status: 401,
         detail: error.message,

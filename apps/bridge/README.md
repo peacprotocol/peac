@@ -14,7 +14,7 @@ pnpm install
 pnpm build
 
 # Or install globally (when published)
-npm install -g @peac/cli
+pnpm add -g @peac/cli
 ```
 
 ## Usage

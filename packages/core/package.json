@@ -1,8 +1,13 @@
 {
   "name": "@peac/core",
-  "version": "0.9.12.1",
+  "version": "0.9.14",
   "description": "PEAC Protocol core with JWS signing, security, and observability",
   "type": "module",
+  "homepage": "https://peacprotocol.org",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "repository": "https://github.com/peacprotocol/peac",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -17,7 +22,6 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "src",
     "package.json",
     "README.md",
     "LICENSE"
@@ -27,8 +31,9 @@
     "tag": "dev"
   },
   "scripts": {
-    "build": "tsup",
+    "build:js": "tsup",
     "build:types": "tsc -p tsconfig.types.json",
+    "build": "pnpm run build:js && pnpm run build:types",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",

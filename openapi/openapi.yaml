@@ -164,7 +164,7 @@ paths:
                       val: 'abc123'
                   enforcement:
                     method: 'none'
-                  issued_at: '2025-09-05T12:00:00Z'
+                  iat: 1725537600
                   kid: 'site-2025-09'
                 verified_at: '2025-09-05T12:00:30Z'
                 kid: 'site-2025-09'
@@ -224,7 +224,7 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: 'https://peac.dev/errors/schema-validation-failed'
+            type: 'https://peacprotocol.org/problems/schema-validation-failed'
             title: 'Receipt Schema Validation Failed'
             status: 400
             detail: 'Missing required field: aipref.status'
@@ -241,7 +241,7 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: 'https://peac.dev/errors/invalid-proof'
+            type: 'https://peacprotocol.org/problems/invalid-proof'
             title: 'Receipt Signature Verification Failed'
             status: 401
             detail: 'EdDSA signature verification failed for kid: site-2025-09'
@@ -287,7 +287,7 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: 'https://peac.dev/errors/policy-precondition-failed'
+            type: 'https://peacprotocol.org/problems/policy-precondition-failed'
             title: 'AIPREF Policy Precondition Not Met'
             status: 422
             detail: 'Resource requires train-ai=false but policy allows train-ai=true'
@@ -306,7 +306,7 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: 'https://peac.dev/errors/rate-limited'
+            type: 'https://peacprotocol.org/problems/rate-limited'
             title: 'Rate Limit Exceeded'
             status: 429
             detail: 'Exceeded 100 requests per minute limit'
@@ -325,7 +325,7 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
           example:
-            type: 'https://peac.dev/errors/rail-unavailable'
+            type: 'https://peacprotocol.org/problems/rail-unavailable'
             title: 'Payment Rail Temporarily Unavailable'
             status: 503
             detail: 'Tempo payment rail is currently unavailable'
@@ -368,7 +368,7 @@ components:
     Receipt:
       type: object
       description: PEAC Protocol receipt (Core Receipt v1)
-      required: [subject, aipref, enforcement, issued_at, kid]
+      required: [subject, aipref, enforcement, iat, kid]
       properties:
         subject:
           type: object
@@ -437,10 +437,9 @@ components:
                   type: array
                   items: { type: string }
                 proof: { type: string }
-        issued_at:
-          type: string
-          format: date-time
-          description: Receipt issuance timestamp (UTC)
+        iat:
+          type: integer
+          description: Receipt issuance timestamp (Unix seconds)
         kid:
           type: string
           description: Key identifier for signature verification

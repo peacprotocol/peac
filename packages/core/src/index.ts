@@ -1,9 +1,13 @@
 /**
- * @peac/core v0.9.13 - Receipt Engine with Core Primitives
- * Enforcement orchestration + PEIP-SAF + Ed25519 JWS + replay protection + UUIDv7
+ * @peac/core v0.9.14 - Receipt Engine with v0.9.14 wire format
+ * typ: "peac.receipt/0.9", iat field, payment.scheme
  */
 
-// v0.9.13 receipt engine (main entry point)
+// v0.9.14 core functions
+export { signReceipt, createAndSignReceipt } from './sign.js';
+export type { SignOptions, SignReceiptOptions } from './sign.js';
+export { verifyReceipt } from './verify.js';
+export type { VerifyResult } from './verify.js';
 export { enforce, discover, evaluate, settle, prove } from './enforce.js';
 export type {
   DiscoveryContext,
@@ -14,61 +18,12 @@ export type {
   EnforceOptions,
 } from './enforce.js';
 
-// v0.9.12.4 core primitives
+// Core types and utilities
+export type { Receipt, Kid, KeySet, VerifyKeySet } from './types.js';
 export { canonicalPolicyHash } from './hash.js';
 export type { PolicyInputs } from './hash.js';
-export {
-  generateEdDSAKeyPair,
-  signDetached,
-  verifyDetached,
-  publicKeyToJWKS,
-  generateJWKS,
-  importPrivateKey,
-  importPublicKey,
-  validateKidFormat,
-} from './crypto.js';
-export type { KeyPair, JWKSKey, DetachedJWS } from './crypto.js';
-export type { KeyLike } from 'jose';
-export { InMemoryNonceCache, isReplayAttack, preventReplay, isValidNonce } from './replay.js';
-export type { NonceCache, NonceEntry } from './replay.js';
 export { uuidv7, isUUIDv7, extractTimestamp } from './ids/uuidv7.js';
+export { WIRE, PEAC_CANONICAL_ORIGIN, PROBLEM_BASE, WELL_KNOWN_PATHS } from './constants.js';
 
-// Simple verification wrapper for v0.9.13
-export async function verify(
-  receipt: string,
-  options: { resource?: string; nonceCache?: any } = {}
-): Promise<{ valid: boolean; claims?: any }> {
-  try {
-    // Parse the detached JWS format (payload..signature)
-    const [payloadB64, , signature] = receipt.split('..');
-    if (!payloadB64 || !signature) {
-      return { valid: false };
-    }
-
-    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
-
-    // Check expiry
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
-      return { valid: false };
-    }
-
-    // Check resource match if provided
-    if (options.resource && payload.aud !== options.resource) {
-      return { valid: false };
-    }
-
-    // Check replay if nonce cache provided
-    if (options.nonceCache && payload.rid) {
-      const { isReplayAttack } = await import('./replay.js');
-      if (isReplayAttack(payload.rid, options.nonceCache)) {
-        return { valid: false };
-      }
-    }
-
-    // For v0.9.13, we trust the signature format
-    // Full verification would require key fetching
-    return { valid: true, claims: payload };
-  } catch {
-    return { valid: false };
-  }
-}
+// Crypto utilities (for cross-runtime testing)
+export { generateEdDSAKeyPair, signDetached, verifyDetached, validateKidFormat } from './crypto.js';

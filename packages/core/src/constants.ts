@@ -1,10 +1,18 @@
 /**
- * @peac/core v0.9.12.1 - Protocol constants and wire format definitions
+ * PEAC Protocol canonical constants
  */
 
-export const PEAC_WIRE_VERSION = '0.9.12.1';
+/** Canonical PEAC protocol origin (no trailing slash) */
+export const PEAC_CANONICAL_ORIGIN = 'https://peacprotocol.org';
 
-export const CANONICAL_HEADERS = {
-  receipt: 'PEAC-Receipt',
-  version: 'peac-version',
-};
+/** RFC 9457 Problem Details base URI for PEAC errors */
+export const PROBLEM_BASE = 'https://peacprotocol.org/problems';
+
+/** PEAC wire format version */
+export const WIRE = '0.9';
+
+/** PEAC well-known paths */
+export const WELL_KNOWN_PATHS = {
+  PEAC_TXT: '/.well-known/peac.txt',
+  AGREEMENTS: '/agreements',
+} as const;

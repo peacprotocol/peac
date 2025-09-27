@@ -4,6 +4,9 @@
  */
 
 import type { AIPrefSnapshot, RobotsRule } from './types.js';
+import pkg from '../package.json' with { type: 'json' };
+
+const UA = `PEAC/${pkg.version} (+https://peacprotocol.org)`;
 
 // SSRF protection: Check if hostname/IP is in private network range
 function isPrivateNetwork(hostname: string): boolean {
@@ -166,7 +169,7 @@ export async function fetchRobots(uri: string, timeout = 5000): Promise<string |
 
     const response = await fetch(robotsUrl.toString(), {
       signal: controller.signal,
-      headers: { 'User-Agent': 'PEAC/0.9.12 (+https://peac.dev)' },
+      headers: { 'User-Agent': UA },
     });
 
     clearTimeout(timeoutId);

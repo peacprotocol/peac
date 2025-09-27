@@ -5,8 +5,8 @@ set -euo pipefail
 # Run this before tagging any release to ensure wire protocol compliance
 # Usage: ./scripts/pre-release-verify.sh
 
-WIRE_VERSION="${WIRE_VERSION:-0.9.13}"
-IMPLEMENTATION_VERSION="${IMPLEMENTATION_VERSION:-0.9.13.2}"
+WIRE_VERSION="${WIRE_VERSION:-0.9}"
+IMPLEMENTATION_VERSION="${IMPLEMENTATION_VERSION:-0.9.14}"
 
 echo "🔍 PEAC Pre-Release Verification - v${IMPLEMENTATION_VERSION}"
 echo "============================================"

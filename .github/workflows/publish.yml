@@ -1,0 +1,52 @@
+# .github/workflows/publish.yml
+name: Publish (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install deps
+        run: pnpm -w install --frozen-lockfile
+
+      - name: Build & test
+        run: pnpm -w build && pnpm -w test
+
+      - name: Configure npm auth
+        run: |
+          echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc
+          pnpm config set publish-branch "main|master|release/.*"
+
+      - name: Publish selected packages
+        run: |
+          pnpm -r \
+            --filter @peac/core \
+            --filter @peac/receipts \
+            --filter @peac/pref \
+            --filter @peac/disc \
+            --filter @peac/pay402 \
+            --filter @peac/sdk \
+            publish --access public --no-git-checks
+
+      - name: Verify versions
+        run: |
+          pnpm view @peac/core version
+          pnpm view @peac/sdk version
