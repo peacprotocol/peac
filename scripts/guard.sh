@@ -71,4 +71,12 @@ else
   echo "OK"
 fi
 
+echo "== forbid empty smoke tests =="
+if grep -RIl "Zero-BC v0.9.14: Test disabled" test/ tests/ 2>/dev/null | grep .; then
+  echo "FAIL: Found disabled smoke tests - archive them properly"
+  bad=1
+else
+  echo "OK"
+fi
+
 exit $bad

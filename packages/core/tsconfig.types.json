@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationMap": true,
     "outDir": "dist",
-    "moduleResolution": "Bundler",
-    "module": "ESNext",
-    "target": "ES2022",
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "strict": true,
     "noEmit": false,
+
     "composite": false
   },
   "include": ["src/**/*"],

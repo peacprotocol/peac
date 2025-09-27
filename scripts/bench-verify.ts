@@ -12,6 +12,13 @@ const ITERATIONS = 1000;
 const WARMUP_ITERATIONS = 50;
 
 async function benchmark() {
+  // Ensure P95 is always printed even on early exit
+  process.on('uncaughtException', (err) => {
+    console.error('Error:', err.message);
+    console.log('P95: 999'); // Failure sentinel
+    process.exit(1);
+  });
+
   console.log('🔧 Setting up test data...');
 
   // Generate test key pair
@@ -106,7 +113,11 @@ async function benchmark() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  benchmark().catch(console.error);
+  benchmark().catch((err) => {
+    console.error(err);
+    console.log('P95: 999'); // Failure sentinel
+    process.exit(1);
+  });
 }
 
 export { benchmark };

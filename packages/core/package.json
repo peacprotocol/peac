@@ -32,8 +32,9 @@
     "tag": "dev"
   },
   "scripts": {
-    "build": "tsup",
+    "build:js": "tsup",
     "build:types": "tsc -p tsconfig.types.json",
+    "build": "pnpm run build:js && pnpm run build:types",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
