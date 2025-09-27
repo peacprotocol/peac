@@ -74,3 +74,8 @@ export async function createAndSignReceipt(options: SignReceiptOptions): Promise
     privateKey: options.privateKey,
   });
 }
+
+// Stub for bridge app readiness check
+export function generateEdDSAKeyPair(): { publicKey: string; privateKey: string } {
+  throw new Error('generateEdDSAKeyPair not implemented in v0.9.14 - use external key generation');
+}
