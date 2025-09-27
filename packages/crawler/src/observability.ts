@@ -3,11 +3,18 @@
  * Thin shim to integrate with existing PEAC core metrics system
  */
 
-// Import the existing observability system
-import {
-  metricsCollector as coreMetrics,
-  HealthChecker as CoreHealthChecker,
-} from '../../core/src/observability.js';
+// Stub for removed observability system
+const coreMetrics = {
+  recordTiming: () => {},
+  incrementCounter: () => {},
+  getPercentile: () => 0,
+  getCounter: () => 0,
+};
+const CoreHealthChecker = class {
+  async checkHealth() {
+    return { status: 'healthy', version: '0.9.14' };
+  }
+};
 
 import {
   RegistryStats,

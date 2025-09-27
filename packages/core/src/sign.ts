@@ -3,7 +3,7 @@
  * Single PEAC-Receipt header, iat field, payment.scheme
  */
 
-import { SignJWT, importJWK } from 'jose';
+import { SignJWT, importJWK, type JWTPayload } from 'jose';
 import { Receipt, KeySet, Kid, SigningOptions } from './types.js';
 import { uuidv7 } from './ids/uuidv7.js';
 
@@ -19,7 +19,7 @@ export async function signReceipt(receipt: Receipt, options: SignOptions): Promi
   const key = await importJWK(privateKey, 'EdDSA');
 
   // Create JWT with v0.9.14 format
-  const jwt = new SignJWT(receipt as any)
+  const jwt = new SignJWT(receipt as JWTPayload)
     .setProtectedHeader({
       alg: 'EdDSA',
       typ: 'peac.receipt/0.9',

@@ -5,7 +5,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { enforce, InMemoryNonceCache } from '../../packages/core/dist/index.js';
+import { enforce } from '@peac/core';
 
 // Mock HTTP server responses for testing
 const mockPolicies = {

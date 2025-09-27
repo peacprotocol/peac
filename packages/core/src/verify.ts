@@ -50,13 +50,30 @@ export async function verifyReceipt(jws: string, keys: KeySet): Promise<VerifyRe
   });
 
   // Validate receipt structure
-  validateReceiptStructure(payload as unknown as Receipt);
+  if (!isReceipt(payload)) {
+    throw new Error('Invalid receipt payload structure');
+  }
 
   return {
     header: protectedHeader as VerifyResult['header'],
-    payload: payload as unknown as Receipt,
+    payload,
     signature: parts[2],
   };
+}
+
+function isReceipt(x: unknown): x is Receipt {
+  if (!x || typeof x !== 'object') return false;
+  const r = x as Record<string, unknown>;
+  return (
+    r.version === '0.9.14' &&
+    r.wire_version === '0.9' &&
+    typeof r.iat === 'number' &&
+    typeof r.kid === 'string' &&
+    !!r.subject &&
+    typeof (r.subject as any).uri === 'string' &&
+    !!r.aipref &&
+    typeof (r.aipref as any).status === 'string'
+  );
 }
 
 function validateReceiptStructure(receipt: Receipt): void {

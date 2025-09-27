@@ -4,9 +4,8 @@ set -euo pipefail
 bad=0
 
 echo "== forbid dist imports =="
-SMOKE_ALLOW='^(test/smoke/|tests/smoke/|\.github/workflows/nightly\.yml)'
 if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/guard.sh' \
-  | grep -vE "$SMOKE_ALLOW" | grep .; then
+  | grep -vE '^(\.github/workflows/nightly\.yml)' | grep .; then
   bad=1
 else
   echo "OK"

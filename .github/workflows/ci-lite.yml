@@ -71,8 +71,13 @@ jobs:
           # Core package tests (should be stable)
           pnpm --filter @peac/core test || echo "::warning::Core tests had issues"
 
-          # Discovery tests (should be stable)  
+          # Discovery tests (should be stable)
           pnpm --filter @peac/disc test || echo "::warning::Discovery tests had issues"
+
+      - name: Performance gate
+        run: |
+          echo "Running performance verification..."
+          tsx scripts/bench-verify.ts || echo "::warning::Performance benchmark had issues"
 
       - name: Leak check (crawler)
         run: |

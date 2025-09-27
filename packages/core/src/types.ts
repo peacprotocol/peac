@@ -3,6 +3,8 @@
  * Single Receipt type with typ: "peac.receipt/0.9", iat field, payment.scheme
  */
 
+import type { JWTPayload } from 'jose';
+
 export type Kid = string;
 export type CrawlerType = 'bot' | 'agent' | 'hybrid' | 'unknown';
 
@@ -27,7 +29,7 @@ export type VerifyKeySet = Record<
 >;
 
 // Core Receipt v0.9.14 (wire format peac.receipt/0.9)
-export interface Receipt {
+export interface Receipt extends JWTPayload {
   version: '0.9.14';
   protocol_version: string;
   wire_version: '0.9';
