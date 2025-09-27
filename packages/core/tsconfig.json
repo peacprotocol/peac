@@ -1,16 +1,15 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "declaration": true,
-    "declarationMap": true,
+    "emitDeclarationOnly": false,
     "outDir": "dist",
-    "noEmit": false,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
     "target": "ES2022",
-    "strict": true,
-    "skipLibCheck": true
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "strict": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
 }

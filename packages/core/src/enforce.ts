@@ -75,10 +75,11 @@ export interface PaymentHandler {
 }
 
 export interface EnforceOptions {
-  privateKey?: CryptoKey;
+  privateKey?: { kty: 'OKP'; crv: 'Ed25519'; d: string; x?: string; alg?: 'EdDSA'; kid?: string };
   kid?: string;
   issuer?: string;
-  nonceCache?: NonceCache;
+  // v0.9.14: replay protection moved out; keep for back-compat only
+  nonceCache?: unknown;
   allowPrivateIPs?: boolean;
   paymentHandler?: PaymentHandler;
 }

@@ -50,11 +50,11 @@ export async function verifyReceipt(jws: string, keys: KeySet): Promise<VerifyRe
   });
 
   // Validate receipt structure
-  validateReceiptStructure(payload as Receipt);
+  validateReceiptStructure(payload as unknown as Receipt);
 
   return {
     header: protectedHeader as VerifyResult['header'],
-    payload: payload as Receipt,
+    payload: payload as unknown as Receipt,
     signature: parts[2],
   };
 }
@@ -110,30 +110,4 @@ function validateReceiptStructure(receipt: Receipt): void {
   if (receipt.exp && receipt.exp <= receipt.iat) {
     throw new Error('exp must be after iat');
   }
-}
-
-/**
- * @deprecated Use verifyReceipt() instead
- */
-export async function verify(jws: string, keys: KeySet): Promise<VerifyResult> {
-  return await verifyReceipt(jws, keys);
-}
-
-/**
- * @deprecated Bulk verification - use verifyReceipt() in a loop
- */
-export async function verifyBulk(
-  jwsArray: string[],
-  keys: KeySet
-): Promise<Array<{ valid: boolean; error?: string; receipt?: Receipt }>> {
-  return Promise.all(
-    jwsArray.map(async (jws) => {
-      try {
-        const result = await verifyReceipt(jws, keys);
-        return { valid: true, receipt: result.payload };
-      } catch (error) {
-        return { valid: false, error: error instanceof Error ? error.message : String(error) };
-      }
-    })
-  );
 }

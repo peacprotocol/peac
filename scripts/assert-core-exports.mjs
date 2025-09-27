@@ -28,9 +28,6 @@ async function main() {
     'uuidv7',
     'isUUIDv7',
     'extractTimestamp',
-    // Deprecated but needed for compatibility
-    'verify',
-    'verifyBulk',
   ];
 
   const requiredTypes = [

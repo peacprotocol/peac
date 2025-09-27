@@ -3,11 +3,28 @@
  * Single Receipt type with typ: "peac.receipt/0.9", iat field, payment.scheme
  */
 
-import { CrawlerType } from './config.js';
-
 export type Kid = string;
+export type CrawlerType = 'bot' | 'agent' | 'hybrid' | 'unknown';
+
+export type Ed25519PrivateJwk = {
+  kty: 'OKP';
+  crv: 'Ed25519';
+  d: string;
+  x?: string;
+  alg?: 'EdDSA';
+  kid?: string;
+};
+
+export interface SigningOptions {
+  kid: string;
+  privateKey: Ed25519PrivateJwk;
+}
+
 export type KeySet = Record<Kid, { kty: 'OKP'; crv: 'Ed25519'; x: string; d?: string }>;
-export type VerifyKeySet = Record<Kid, { kty: 'OKP'; crv: 'Ed25519'; x: string }>;
+export type VerifyKeySet = Record<
+  string,
+  { kty: 'OKP'; crv: 'Ed25519'; x: string; alg?: 'EdDSA'; kid?: string }
+>;
 
 // Core Receipt v0.9.14 (wire format peac.receipt/0.9)
 export interface Receipt {
