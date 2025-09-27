@@ -25,13 +25,14 @@ async function loadCore() {
   return await import(srcUrl.href);
 }
 
-const core = await loadCore();
-const { verifyReceipt, createAndSignReceipt } = core;
-
 const ITERATIONS = 300;
 const WARMUP_ITERATIONS = 30;
 
 async function benchmark() {
+  // Load core module first
+  const core = await loadCore();
+  const { verifyReceipt, createAndSignReceipt } = core;
+
   // 30s watchdog to ensure P95 is always printed
   const kill = setTimeout(() => {
     console.log('P95: 999'); // Timeout sentinel
