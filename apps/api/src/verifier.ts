@@ -8,6 +8,7 @@ import { verifyReceipt, canonicalPolicyHash } from '@peac/core';
 import type { VerifyKeySet } from '@peac/core';
 import { discover } from '@peac/disc';
 import type { HttpStatus } from './types.js';
+import { PROBLEM_TYPES } from './index.js';
 
 export interface V13VerifyRequest {
   receipt: string;
@@ -75,7 +76,7 @@ export class VerifierV13 {
         return {
           status: 400,
           body: {
-            type: 'https://peacprotocol.org/problems/invalid-request',
+            type: PROBLEM_TYPES.INVALID_REQUEST,
             title: 'Invalid Request',
             status: 400,
             detail: 'receipt field is required and must be a string',
@@ -101,7 +102,7 @@ export class VerifierV13 {
         return {
           status: 422,
           body: {
-            type: 'https://peacprotocol.org/problems/misconfigured-verifier',
+            type: PROBLEM_TYPES.MISCONFIGURED_VERIFIER,
             title: 'Missing Verification Keys',
             status: 422,
             detail: 'PEAC_VERIFY_KEYS is not set or invalid.',
@@ -115,14 +116,31 @@ export class VerifierV13 {
       let payload;
       try {
         ({ payload } = await verifyReceipt(request.receipt, keys));
-      } catch {
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+
+        // Map specific error types to problem types
+        if (errorMsg.includes('Expired receipt')) {
+          return {
+            status: 422,
+            body: {
+              type: PROBLEM_TYPES.EXPIRED_RECEIPT,
+              title: 'Expired Receipt',
+              status: 422,
+              detail: errorMsg,
+              timing: buildTiming(),
+              meta: buildMeta(),
+            },
+          };
+        }
+
         return {
           status: 422,
           body: {
-            type: 'https://peacprotocol.org/problems/invalid-signature',
+            type: PROBLEM_TYPES.INVALID_SIGNATURE,
             title: 'Invalid Signature',
             status: 422,
-            detail: 'Unknown kid or bad signature.',
+            detail: errorMsg,
             timing: buildTiming(),
             meta: buildMeta(),
           },
@@ -163,7 +181,7 @@ export class VerifierV13 {
       return {
         status: 500,
         body: {
-          type: 'https://peacprotocol.org/problems/processing-error',
+          type: PROBLEM_TYPES.PROCESSING_ERROR,
           title: 'Processing Error',
           status: 500,
           detail: error instanceof Error ? error.message : 'Unknown error',

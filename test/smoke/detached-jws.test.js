@@ -18,7 +18,7 @@ test('receipt sign/verify round-trip', async () => {
     aipref: { status: 'active' },
   };
 
-  const { jws } = await signReceipt(receipt, {
+  const jws = await signReceipt(receipt, {
     kid: 'k1',
     privateKey: { kty: 'OKP', crv: 'Ed25519', d: jwkPriv.d, x: jwkPriv.x },
   });

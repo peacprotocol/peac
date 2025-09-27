@@ -5,17 +5,20 @@
 
 export { parse, emit, validate } from './parser.js';
 export type { PeacDiscovery, PublicKeyInfo, ParseResult, ValidationOptions } from './types.js';
+import pkg from '../package.json' with { type: 'json' };
 
 // Constants
 export const MAX_LINES = 20;
 export const WELL_KNOWN_PATH = '/.well-known/peac.txt';
+
+const UA = `PEAC/${pkg.version} (+https://peacprotocol.org)`;
 
 // Convenience function for fetching and parsing discovery documents
 export async function discover(origin: string): Promise<import('./types.js').ParseResult> {
   try {
     const url = new URL(WELL_KNOWN_PATH, origin);
     const response = await fetch(url.toString(), {
-      headers: { 'User-Agent': 'PEAC/0.9.12 (+https://peacprotocol.org)' },
+      headers: { 'User-Agent': UA },
     });
 
     if (!response.ok) {

@@ -14,6 +14,29 @@ export function validateConditionalFields(receipt: Receipt): ValidationResult {
         message: 'Payment is required when enforcement.method is "http-402"',
         value: undefined,
       });
+    } else {
+      // Validate payment fields
+      if (!receipt.payment.scheme) {
+        errors.push({
+          path: 'payment.scheme',
+          message: 'payment.scheme is required when enforcement.method is "http-402"',
+          value: receipt.payment.scheme,
+        });
+      }
+      if (!receipt.payment.amount) {
+        errors.push({
+          path: 'payment.amount',
+          message: 'payment.amount is required when enforcement.method is "http-402"',
+          value: receipt.payment.amount,
+        });
+      }
+      if (!receipt.payment.currency) {
+        errors.push({
+          path: 'payment.currency',
+          message: 'payment.currency is required when enforcement.method is "http-402"',
+          value: receipt.payment.currency,
+        });
+      }
     }
   }
 
@@ -23,6 +46,15 @@ export function validateConditionalFields(receipt: Receipt): ValidationResult {
       path: 'aipref',
       message: 'AIPREF object is required',
       value: undefined,
+    });
+  }
+
+  // Validate iat is a number (Unix timestamp)
+  if (typeof receipt.iat !== 'number' || receipt.iat <= 0) {
+    errors.push({
+      path: 'iat',
+      message: 'iat must be a positive Unix timestamp',
+      value: receipt.iat,
     });
   }
 

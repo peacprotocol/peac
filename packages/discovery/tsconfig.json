@@ -12,7 +12,8 @@
     "moduleResolution": "NodeNext",
     "target": "ES2022",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"]
 }

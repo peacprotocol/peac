@@ -74,19 +74,24 @@ jobs:
           # Discovery tests (should be stable)
           pnpm --filter @peac/disc test || echo "::warning::Discovery tests had issues"
 
+      - name: Build core (needed for bench)
+        run: pnpm --filter @peac/core build
+
       - name: Performance gate
         run: |
           echo "Running performance verification..."
           OUT=$(npx tsx scripts/bench-verify.ts)
           echo "$OUT"
-          P95=$(echo "$OUT" | sed -n 's/^P95:[[:space:]]*\([0-9]\+\).*/\1/p')
+          P95=$(echo "$OUT" | sed -n 's/^P95:[[:space:]]*\([0-9]\+\(\.[0-9]\+\)\?\).*/\1/p')
           if [ -z "$P95" ]; then
             echo "::error::No P95 metric found"; exit 1
           fi
-          if [ "$P95" -gt 5 ]; then
+          # Use awk for float comparison
+          if awk -v p95="$P95" 'BEGIN{ if (p95+0 > 5.0) exit 1 }'; then
+            echo "✅ P95=$P95 ms ≤ 5ms"
+          else
             echo "::error::P95=$P95 ms exceeds 5ms budget"; exit 1
           fi
-          echo "✅ P95=$P95 ms"
 
       - name: Core packages validation
         run: |

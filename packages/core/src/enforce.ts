@@ -388,6 +388,13 @@ export async function prove(
 
   const now = Math.floor(Date.now() / 1000);
 
+  // Compute stable policy hash from policy contents only
+  const materialized = ctx.policies
+    .filter((p) => p.content !== undefined)
+    .map((p) => ({ type: p.type, content: p.content }))
+    .sort((a, b) => (a.type < b.type ? -1 : a.type > b.type ? 1 : 0)); // stable order
+  const policy_hash = await canonicalPolicyHash(materialized);
+
   // Build v0.9.14 receipt
   const receipt: Receipt = {
     version: '0.9.14',
@@ -415,6 +422,7 @@ export async function prove(
     exp: now + 300,
     kid,
     nonce: uuidv7(),
+    policy_hash,
   };
 
   return await signReceipt(receipt, {

@@ -103,7 +103,7 @@ app.post('/peac/issue', async (c) => {
   } catch (error) {
     return c.json(
       {
-        type: 'https://peacprotocol.org/errors/signing-failed',
+        type: 'https://peacprotocol.org/problems/signing-failed',
         title: 'Receipt Signing Failed',
         status: 500,
         detail: error.message,
@@ -122,7 +122,7 @@ app.post('/peac/verify', async (c) => {
   if (attempts > 100) {
     return c.json(
       {
-        type: 'https://peacprotocol.org/errors/rate-limited',
+        type: 'https://peacprotocol.org/problems/rate-limited',
         title: 'Rate Limit Exceeded',
         status: 429,
         detail: 'Exceeded 100 requests per minute',
@@ -148,7 +148,7 @@ app.post('/peac/verify', async (c) => {
   } catch (error) {
     return c.json(
       {
-        type: 'https://peacprotocol.org/errors/invalid-proof',
+        type: 'https://peacprotocol.org/problems/invalid-proof',
         title: 'Receipt Verification Failed',
         status: 401,
         detail: error.message,
@@ -222,7 +222,7 @@ app.get('/api/content/:id', async (c) => {
   } catch (error) {
     return c.json(
       {
-        type: 'https://peacprotocol.org/errors/invalid-receipt',
+        type: 'https://peacprotocol.org/problems/invalid-receipt',
         title: 'Invalid Receipt',
         status: 401,
         detail: error.message,

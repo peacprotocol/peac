@@ -23,3 +23,4 @@ export type { Receipt, Kid, KeySet, VerifyKeySet } from './types.js';
 export { canonicalPolicyHash } from './hash.js';
 export type { PolicyInputs } from './hash.js';
 export { uuidv7, isUUIDv7, extractTimestamp } from './ids/uuidv7.js';
+export { WIRE, PEAC_CANONICAL_ORIGIN, PROBLEM_BASE, WELL_KNOWN_PATHS } from './constants.js';
