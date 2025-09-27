@@ -17,12 +17,12 @@ async function loadCore() {
   // 2) Workspace package root (Node resolves via package.json "exports")
   try {
     const pkgRoot = new URL('../packages/core/', import.meta.url);
-    console.log('📦 Loading @peac/core from workspace package root');
+    console.log('Loading @peac/core from workspace package root');
     return await import(pkgRoot.href);
   } catch {}
 
   // 3) TS source (no build needed; tsx compiles it)
-  console.log('🔧 Fallback: Loading @peac/core from TypeScript source');
+  console.log('Fallback: Loading @peac/core from TypeScript source');
   const srcUrl = new URL('../packages/core/src/index.ts', import.meta.url);
   return await import(srcUrl.href);
 }
@@ -49,7 +49,7 @@ async function benchmark() {
     process.exit(1);
   });
 
-  console.log('🔧 Setting up test data...');
+  console.log('Setting up test data...');
 
   // Generate test key pair
   const { privateKey, publicKey } = await generateKeyPair('EdDSA');
@@ -79,14 +79,14 @@ async function benchmark() {
     [keyId]: jwkPub,
   };
 
-  console.log('🔥 Warming up...');
+  console.log('Warming up...');
 
   // Warmup
   for (let i = 0; i < WARMUP_ITERATIONS; i++) {
     await verifyReceipt(testReceipt, verifyKeys);
   }
 
-  console.log(`📊 Running ${ITERATIONS} verification operations...`);
+  console.log(`Running ${ITERATIONS} verification operations...`);
 
   const timings: number[] = [];
 
@@ -125,14 +125,14 @@ async function benchmark() {
     passes_target: p95 < targetP95,
   };
 
-  console.log('\n📈 Performance Results:');
+  console.log('\nPerformance Results:');
   console.log(`   Min: ${min.toFixed(3)}ms`);
   console.log(`   Max: ${max.toFixed(3)}ms`);
   console.log(`   Avg: ${avg.toFixed(3)}ms`);
   console.log(`   P50: ${p50.toFixed(3)}ms`);
   console.log(`   P95: ${p95.toFixed(3)}ms (target: <${targetP95}ms)`);
   console.log(`   P99: ${p99.toFixed(3)}ms`);
-  console.log(`\n🎯 Target: ${results.passes_target ? '✅ PASS' : '❌ FAIL'}`);
+  console.log(`\nTarget: ${results.passes_target ? 'PASS' : 'FAIL'}`);
 
   // Output exact P95 for CI parsing
   console.log(`P95: ${p95.toFixed(2)}`);
@@ -142,7 +142,7 @@ async function benchmark() {
 
   // Write results to file
   writeFileSync('perf-results.json', JSON.stringify(results, null, 2));
-  console.log('\n💾 Results saved to perf-results.json');
+  console.log('\nResults saved to perf-results.json');
 
   return results;
 }
