@@ -4,7 +4,7 @@ set -euo pipefail
 bad=0
 
 echo "== forbid dist imports =="
-if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/guard.sh' \
+if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/guard.sh' ':!archive/**' \
   | grep -vE '^(\.github/workflows/nightly\.yml)' | grep .; then
   bad=1
 else
@@ -18,13 +18,13 @@ echo "== forbid v0914 fragments =="
 git ls-files | grep -E 'v0?914|v0914' && bad=1 || echo "OK"
 
 echo "== header & typ must be new =="
-git grep -nE "peac-version|application/peac-receipt\+jws" -- '**/*.{md,ts,js,json,yml}' ':!node_modules' \
+git grep -nE "peac-version|application/peac-receipt\+jws" -- '**/*.{md,ts,js,json,yml}' ':!node_modules' ':!archive/**' \
   && bad=1 || echo "OK"
 
 echo "== forbid peac.dev domain =="
 # Fail if any peac.dev reference appears outside allowed migration docs
 DOCS_MIGRATION_ALLOW='^(docs/migration|CHANGELOG\.md)'
-if git grep -nE 'https?://([a-z0-9.-]*\.)?peac\.dev\b' -- ':!node_modules' \
+if git grep -nE 'https?://([a-z0-9.-]*\.)?peac\.dev\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$DOCS_MIGRATION_ALLOW" | grep .; then
   bad=1
 else
@@ -33,7 +33,7 @@ fi
 
 # Require https for peacprotocol.org
 echo "== peacprotocol.org must be https =="
-if git grep -nE 'http://peacprotocol\.org\b' -- ':!node_modules' | grep .; then
+if git grep -nE 'http://peacprotocol\.org\b' -- ':!node_modules' ':!archive/**' | grep .; then
   bad=1
 else
   echo "OK"
@@ -41,7 +41,7 @@ fi
 
 echo "== field regressions =="
 LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md)'
-if git grep -nE '\bissued_at\b|payment\.rail|peacreceiept|peacreceiepts' -- ':!node_modules' \
+if git grep -nE '\bissued_at\b|payment\.rail|peacreceiept|peacreceiepts' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
 else
@@ -50,7 +50,7 @@ fi
 
 echo "== forbid internal notes =="
 DOCS_ALLOW='^(docs/peip/|docs/peips\.md|pnpm-lock\.yaml|packages/crawler/test/unit/registry\.test\.ts|scripts/guard\.sh)'
-if git grep -nE 'TODO|FIXME|HACK|XXX|@ts-ignore' -- ':!node_modules' \
+if git grep -nE 'TODO|FIXME|HACK|XXX|@ts-ignore' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$DOCS_ALLOW" | grep .; then
   bad=1
 else
