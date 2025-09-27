@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "typecheck": "echo 'MCP adapter typecheck temporarily disabled due to workspace TypeScript declaration issues'",
+    "typecheck": "echo 'MCP adapter typecheck temporarily disabled - uses legacy v0.9.12 API'",
     "dev": "node dist/server.js",
     "start": "node dist/server.js",
     "lint": "echo \"Lint configured for workspace\"",
