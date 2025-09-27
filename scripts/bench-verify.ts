@@ -8,8 +8,8 @@ import { writeFileSync } from 'node:fs';
 import { verifyReceipt, createAndSignReceipt } from '@peac/core';
 import { generateKeyPair, exportJWK } from 'jose';
 
-const ITERATIONS = 1000;
-const WARMUP_ITERATIONS = 50;
+const ITERATIONS = 300;
+const WARMUP_ITERATIONS = 30;
 
 async function benchmark() {
   // Ensure P95 is always printed even on early exit
