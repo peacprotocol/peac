@@ -22,7 +22,6 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "src",
     "package.json",
     "README.md",
     "LICENSE"

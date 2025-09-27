@@ -94,4 +94,18 @@ else
   echo "OK"
 fi
 
+echo "== forbid npm invocations =="
+if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep .; then
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== forbid foreign lockfiles =="
+if [ -f package-lock.json ] || [ -f yarn.lock ]; then
+  echo "FAIL: found non-pnpm lockfile"; bad=1
+else
+  echo "OK"
+fi
+
 exit $bad
