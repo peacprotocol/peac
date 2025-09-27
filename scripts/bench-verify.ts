@@ -17,10 +17,12 @@ async function loadCore() {
   // 2) Workspace package root (Node resolves via package.json "exports")
   try {
     const pkgRoot = new URL('../packages/core/', import.meta.url);
+    console.log('📦 Loading @peac/core from workspace package root');
     return await import(pkgRoot.href);
   } catch {}
 
   // 3) TS source (no build needed; tsx compiles it)
+  console.log('🔧 Fallback: Loading @peac/core from TypeScript source');
   const srcUrl = new URL('../packages/core/src/index.ts', import.meta.url);
   return await import(srcUrl.href);
 }
@@ -105,6 +107,8 @@ async function benchmark() {
   const p95 = timings[Math.floor(timings.length * 0.95)];
   const p99 = timings[Math.floor(timings.length * 0.99)];
 
+  const targetP95 = parseFloat(process.env.P95_MAX || '5.0');
+
   const results = {
     timestamp: new Date().toISOString(),
     version: '0.9.14',
@@ -117,8 +121,8 @@ async function benchmark() {
       p95: Number(p95.toFixed(3)),
       p99: Number(p99.toFixed(3)),
     },
-    target_p95_ms: 5.0,
-    passes_target: p95 < 5.0,
+    target_p95_ms: targetP95,
+    passes_target: p95 < targetP95,
   };
 
   console.log('\n📈 Performance Results:');
@@ -126,7 +130,7 @@ async function benchmark() {
   console.log(`   Max: ${max.toFixed(3)}ms`);
   console.log(`   Avg: ${avg.toFixed(3)}ms`);
   console.log(`   P50: ${p50.toFixed(3)}ms`);
-  console.log(`   P95: ${p95.toFixed(3)}ms (target: <5ms)`);
+  console.log(`   P95: ${p95.toFixed(3)}ms (target: <${targetP95}ms)`);
   console.log(`   P99: ${p99.toFixed(3)}ms`);
   console.log(`\n🎯 Target: ${results.passes_target ? '✅ PASS' : '❌ FAIL'}`);
 
