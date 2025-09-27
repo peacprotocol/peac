@@ -19,7 +19,7 @@ export async function signReceipt(receipt: Receipt, options: SignOptions): Promi
   const key = await importJWK(privateKey, 'EdDSA');
 
   // Create JWT with v0.9.14 format
-  const jwt = new SignJWT(receipt as JWTPayload)
+  const jwt = new SignJWT(receipt)
     .setProtectedHeader({
       alg: 'EdDSA',
       typ: 'peac.receipt/0.9',

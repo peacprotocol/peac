@@ -12,9 +12,16 @@ const ITERATIONS = 300;
 const WARMUP_ITERATIONS = 30;
 
 async function benchmark() {
+  // 30s watchdog to ensure P95 is always printed
+  const kill = setTimeout(() => {
+    console.log('P95: 999'); // Timeout sentinel
+    process.exit(1);
+  }, 30_000);
+
   // Ensure P95 is always printed even on early exit
   process.on('uncaughtException', (err) => {
     console.error('Error:', err.message);
+    clearTimeout(kill);
     console.log('P95: 999'); // Failure sentinel
     process.exit(1);
   });
@@ -104,6 +111,9 @@ async function benchmark() {
 
   // Output exact P95 for CI parsing
   console.log(`P95: ${p95.toFixed(0)}`);
+
+  // Clear watchdog
+  clearTimeout(kill);
 
   // Write results to file
   writeFileSync('perf-results.json', JSON.stringify(results, null, 2));

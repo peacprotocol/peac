@@ -85,12 +85,26 @@ export class VerifierV13 {
         };
       }
 
-      // For zero-BC approach, assume default keyring for verification
-      // Production deployments should provide proper keys
-      const defaultKeys: VerifyKeySet = {};
+      // Fail closed if no keys are configured - production must provide proper keys
+      const keys = process.env.PEAC_VERIFY_KEYS ? JSON.parse(process.env.PEAC_VERIFY_KEYS) : {};
 
       // Verify receipt signature using v0.9.14 core function
-      const { payload } = await verifyReceipt(request.receipt, defaultKeys);
+      let payload;
+      try {
+        ({ payload } = await verifyReceipt(request.receipt, keys));
+      } catch (e) {
+        return {
+          status: 422,
+          body: {
+            type: 'https://peacprotocol.org/problems/invalid-signature',
+            title: 'Invalid Signature',
+            status: 422,
+            detail: 'Unknown kid or bad signature',
+            timing: buildTiming(),
+            meta: buildMeta(),
+          },
+        };
+      }
 
       const response: V13VerifyResponse = {
         valid: true, // reaching here means verification passed

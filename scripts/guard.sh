@@ -87,4 +87,11 @@ else
   echo "OK"
 fi
 
+echo "== forbid relative imports to dist =="
+if git grep -nE "\.\./\.\./packages/.*/dist/" -- ':!node_modules' ':!archive/**' | grep .; then
+  bad=1
+else
+  echo "OK"
+fi
+
 exit $bad
