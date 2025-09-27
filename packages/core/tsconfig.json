@@ -9,7 +9,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "strict": true,
-    "composite": true
+    "composite": false
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]

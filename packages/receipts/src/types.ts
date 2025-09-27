@@ -62,7 +62,7 @@ export interface Receipt {
   crawler_type: 'bot' | 'agent' | 'hybrid' | 'browser' | 'migrating' | 'test' | 'unknown';
   issued_at: string; // ISO 8601
   kid: string;
-  signature_media_type: 'application/peac-receipt+jws';
+  signature_media_type: 'peac.receipt/0.9';
 }
 
 export interface CrawlerVerificationResult {

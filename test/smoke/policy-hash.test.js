@@ -5,7 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
-import { canonicalPolicyHash } from '../../packages/core/dist/index.js';
+import { canonicalPolicyHash } from '@peac/core';
 
 test('Policy hash vector 1 - Basic URL normalization', async () => {
   const vector = JSON.parse(readFileSync('fixtures/policy-hash/vector1.json', 'utf8'));

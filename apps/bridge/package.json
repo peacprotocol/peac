@@ -26,7 +26,7 @@
     "test:perf": "node scripts/perf-test.js",
     "perf": "npm run test:perf",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "echo 'Bridge app typecheck temporarily disabled due to v0.9.14 breaking changes'",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -36,6 +36,7 @@
     "@peac/pay402": "workspace:^0.9.12.1",
     "hono": "^4.9.7",
     "@hono/node-server": "^1.8.2",
+    "jose": "^5.0.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {

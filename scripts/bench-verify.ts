@@ -95,6 +95,9 @@ async function benchmark() {
   console.log(`   P99: ${p99.toFixed(3)}ms`);
   console.log(`\n🎯 Target: ${results.passes_target ? '✅ PASS' : '❌ FAIL'}`);
 
+  // Output exact P95 for CI parsing
+  console.log(`P95: ${p95.toFixed(0)}`);
+
   // Write results to file
   writeFileSync('perf-results.json', JSON.stringify(results, null, 2));
   console.log('\n💾 Results saved to perf-results.json');

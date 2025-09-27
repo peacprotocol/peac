@@ -383,7 +383,7 @@
     },
     "signature_media_type": {
       "type": "string",
-      "const": "application/peac-receipt+jws",
+      "const": "peac.receipt/0.9",
       "description": "JWS signature media type"
     }
   },

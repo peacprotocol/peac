@@ -4,7 +4,8 @@
  */
 
 import { promises as dns } from 'node:dns';
-import { verify, canonicalPolicyHash } from '@peac/core';
+import { verifyReceipt, canonicalPolicyHash } from '@peac/core';
+import type { VerifyKeySet } from '@peac/core';
 import { discover } from '@peac/disc';
 import type { HttpStatus } from './types.js';
 
@@ -84,20 +85,22 @@ export class VerifierV13 {
         };
       }
 
-      // Verify receipt signature using existing core function
-      const verifyResult = await verify(request.receipt, {
-        resource: request.resource,
-      });
+      // For zero-BC approach, assume default keyring for verification
+      // Production deployments should provide proper keys
+      const defaultKeys: VerifyKeySet = {};
+
+      // Verify receipt signature using v0.9.14 core function
+      const { payload } = await verifyReceipt(request.receipt, defaultKeys);
 
       const response: V13VerifyResponse = {
-        valid: verifyResult.valid,
-        claims: verifyResult.claims,
+        valid: true, // reaching here means verification passed
+        claims: payload,
         timing: buildTiming(),
         meta: buildMeta(),
       };
 
       // If resource is provided, discover policies and recompute hash
-      if (request.resource && verifyResult.valid) {
+      if (request.resource) {
         try {
           const fetchStart = Date.now();
           await this.addPolicyValidation(request.resource, response, options);

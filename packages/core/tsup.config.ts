@@ -3,7 +3,9 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: ['src/index.ts'], // Use single entry point for proper TypeScript project references
   format: ['cjs', 'esm'],
-  dts: true,
+  dts: {
+    tsconfig: './tsconfig.types.json',
+  },
   outDir: 'dist', // Align with tsconfig.json outDir
   sourcemap: true,
   clean: true,

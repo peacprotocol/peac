@@ -182,7 +182,7 @@ export class ReceiptBuilder {
       crawler_type: this.options.crawler_type,
       issued_at: new Date().toISOString(),
       kid: this.options.kid,
-      signature_media_type: 'application/peac-receipt+jws',
+      signature_media_type: 'peac.receipt/0.9',
       ...(this.options.payment && { payment: this.options.payment }),
       ...(this.options.provenance && { provenance: this.options.provenance }),
       ...(this.options.consent && { consent: this.options.consent }),

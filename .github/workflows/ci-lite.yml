@@ -77,7 +77,16 @@ jobs:
       - name: Performance gate
         run: |
           echo "Running performance verification..."
-          tsx scripts/bench-verify.ts || echo "::warning::Performance benchmark had issues"
+          OUT=$(node scripts/bench-verify.ts)
+          echo "$OUT"
+          P95=$(echo "$OUT" | sed -n 's/^P95:[[:space:]]*\([0-9]\+\).*/\1/p')
+          if [ -z "$P95" ]; then
+            echo "::error::No P95 metric found"; exit 1
+          fi
+          if [ "$P95" -gt 5 ]; then
+            echo "::error::P95=$P95 ms exceeds 5ms budget"; exit 1
+          fi
+          echo "✅ P95=$P95 ms"
 
       - name: Leak check (crawler)
         run: |

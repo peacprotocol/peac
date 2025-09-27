@@ -244,7 +244,7 @@ class PeacMcpServer {
         crawler_type: crawler_type || 'agent', // Default for MCP context
         issued_at: new Date().toISOString(),
         kid: this.currentKid,
-        signature_media_type: 'application/peac-receipt+jws',
+        signature_media_type: 'peac.receipt/0.9',
         ...options?.additional,
       };
 

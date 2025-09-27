@@ -24,7 +24,7 @@
     "test:coverage": "node --test --experimental-test-coverage src/*.test.js",
     "test:watch": "node --test --watch src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "echo 'API app typecheck temporarily disabled due to v0.9.14 breaking changes'",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "perf": "node scripts/perf-test.js"
   },

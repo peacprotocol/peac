@@ -57,4 +57,18 @@ else
   echo "OK"
 fi
 
+echo "== forbid disabled typechecks =="
+if git grep -nE '"typecheck":\s*"echo .*temporarily disabled' -- 'apps/**/package.json' 'packages/**/package.json' | grep .; then
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== forbid legacy media type =="
+if git grep -n 'application/peac-receipt+jws' -- ':!node_modules' ':!scripts/guard.sh' | grep -vE '^archive/'; then
+  bad=1
+else
+  echo "OK"
+fi
+
 exit $bad

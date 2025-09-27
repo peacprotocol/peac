@@ -138,6 +138,9 @@ importers:
       hono:
         specifier: ^4.9.7
         version: 4.9.7
+      jose:
+        specifier: ^5.0.0
+        version: 5.10.0
       zod:
         specifier: ^3.22.0
         version: 3.25.76
