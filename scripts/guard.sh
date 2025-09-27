@@ -50,7 +50,7 @@ else
 fi
 
 echo "== forbid internal notes =="
-DOCS_ALLOW='^(docs/peip/|docs/peips\.md|pnpm-lock\.yaml|packages/crawler/test/unit/registry\.test\.ts|scripts/guard\.sh)'
+DOCS_ALLOW='^(docs/peip/|docs/peips\.md|pnpm-lock\.yaml|scripts/guard\.sh)'
 if git grep -nE 'TODO|FIXME|HACK|XXX|@ts-ignore' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$DOCS_ALLOW" | grep .; then
   bad=1

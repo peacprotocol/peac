@@ -1,6 +1,7 @@
 {
   "name": "@peac/adapter-cloudflare",
   "version": "0.9.12.1",
+  "private": true,
   "description": "PEAC Cloudflare Worker integration adapter",
   "main": "dist/integration.js",
   "type": "module",
