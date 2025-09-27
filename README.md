@@ -33,7 +33,7 @@ The key words **MUST**, **SHOULD**, and **MAY** are to be interpreted as in RFC 
 
 - **Receipts**
   - The JWS protected header **MUST** contain `typ: "peac.receipt/0.9"`.
-  - The payload **MUST** include `iat` as Unix seconds. The legacy `issued_at` field **MUST NOT** be present.
+  - The payload **MUST** include `iat` as Unix seconds. The legacy timestamp field (previously called "issued at") **MUST NOT** be present.
   - If payments are used, `payment.scheme` **MUST** be **x402**.
 - **HTTP**
   - Servers that issue receipts **MUST** send a single **PEAC-Receipt** header.
@@ -83,7 +83,7 @@ console.log('verified subject URI:', receipt.payload?.subject?.uri);
 ### Wire compliance (0.9.14 delta)
 
 - JWS protected header `typ: "peac.receipt/0.9"`
-- `iat` (Unix seconds) replaces `issued_at`
+- `iat` (Unix seconds) replaces the previous "issued at" field
 - Single **PEAC-Receipt** header
 - `payment.scheme` **x402**
 
