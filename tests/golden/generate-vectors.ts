@@ -5,7 +5,7 @@
 
 import { writeFileSync } from 'node:fs';
 import { createAndSignReceipt, verifyReceipt, canonicalPolicyHash } from '@peac/core';
-import { generateJWKS } from '@peac/core/crypto';
+import { generateKeyPair, exportJWK } from 'jose';
 
 interface TestVector {
   name: string;
@@ -23,16 +23,20 @@ async function generateVectors() {
   const vectors: TestVector[] = [];
 
   // Generate deterministic key pairs for testing
-  const jwks = await generateJWKS();
-  const keyId = Object.keys(jwks)[0];
-  const keyPair = jwks[keyId];
+  const { privateKey, publicKey } = await generateKeyPair('EdDSA');
+  const jwkPriv = await exportJWK(privateKey);
+  const jwkPub = await exportJWK(publicKey);
+
+  jwkPriv.alg = 'EdDSA';
+  jwkPriv.kid = 'test-1';
+  jwkPub.alg = 'EdDSA';
+  jwkPub.kid = 'test-1';
+
+  const keyId = 'test-1';
+  const keyPair = jwkPriv;
 
   const verifyKeys = {
-    [keyId]: {
-      kty: keyPair.kty,
-      crv: keyPair.crv,
-      x: keyPair.x,
-    },
+    [keyId]: jwkPub,
   };
 
   // Vector 1: Basic valid receipt

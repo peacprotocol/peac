@@ -6,7 +6,7 @@
 // v0.9.14 core functions
 export { signReceipt, createAndSignReceipt } from './sign.js';
 export type { SignOptions, SignReceiptOptions } from './sign.js';
-export { verifyReceipt } from './verify.js';
+export { verifyReceipt, verify, verifyBulk } from './verify.js';
 export type { VerifyResult } from './verify.js';
 export { enforce, discover, evaluate, settle, prove } from './enforce.js';
 export type {

@@ -6,7 +6,7 @@
 import { performance } from 'node:perf_hooks';
 import { writeFileSync } from 'node:fs';
 import { verifyReceipt, createAndSignReceipt } from '@peac/core';
-import { generateJWKS } from '@peac/core/crypto';
+import { generateKeyPair, exportJWK } from 'jose';
 
 const ITERATIONS = 1000;
 const WARMUP_ITERATIONS = 50;
@@ -15,9 +15,17 @@ async function benchmark() {
   console.log('🔧 Setting up test data...');
 
   // Generate test key pair
-  const jwks = await generateJWKS();
-  const keyId = Object.keys(jwks)[0];
-  const keyPair = jwks[keyId];
+  const { privateKey, publicKey } = await generateKeyPair('EdDSA');
+  const jwkPriv = await exportJWK(privateKey);
+  const jwkPub = await exportJWK(publicKey);
+
+  jwkPriv.alg = 'EdDSA';
+  jwkPriv.kid = 'bench-1';
+  jwkPub.alg = 'EdDSA';
+  jwkPub.kid = 'bench-1';
+
+  const keyId = 'bench-1';
+  const keyPair = jwkPriv;
 
   // Create test receipt
   const testReceipt = await createAndSignReceipt({
@@ -31,11 +39,7 @@ async function benchmark() {
 
   // Prepare verification keys (public only)
   const verifyKeys = {
-    [keyId]: {
-      kty: keyPair.kty,
-      crv: keyPair.crv,
-      x: keyPair.x,
-    },
+    [keyId]: jwkPub,
   };
 
   console.log('🔥 Warming up...');
