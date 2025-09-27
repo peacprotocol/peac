@@ -24,7 +24,7 @@
     "pretest": "pnpm build",
     "test": "node --test src/*.test.js",
     "test:perf": "node scripts/perf-test.js",
-    "perf": "npm run test:perf",
+    "perf": "pnpm run test:perf",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"

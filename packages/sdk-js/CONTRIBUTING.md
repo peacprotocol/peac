@@ -52,7 +52,7 @@ Feature suggestions should include:
 1. Install dependencies:
 
    ```bash
-   npm install
+   ppnpm install
    ```
 
 2. Make your changes following the coding standards
@@ -62,12 +62,12 @@ Feature suggestions should include:
 4. Run tests:
 
    ```bash
-   npm test
+   ppnpm test
    ```
 
 5. Run linter:
    ```bash
-   npm run lint
+   ppnpm run lint
    ```
 
 #### Commit Messages
@@ -111,13 +111,13 @@ git clone https://github.com/peacprotocol/peac.git
 cd peac
 
 # Install dependencies
-npm install
+pnpm install
 
 # Run tests
-npm test
+pnpm test
 
 # Run linter
-npm run lint
+pnpm run lint
 ```
 
 ## Testing

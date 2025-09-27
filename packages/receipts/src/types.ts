@@ -34,7 +34,7 @@ export interface Receipt {
   };
 
   // JOSE standard fields
-  iat: number; // v0.9.14: Unix timestamp, renamed from 'issued_at'
+  iat: number; // v0.9.14: Unix timestamp (replaces prior timestamp field)
   exp?: number;
   kid: string;
   nonce?: string;
