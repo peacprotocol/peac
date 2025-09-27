@@ -81,8 +81,8 @@ importers:
         specifier: ^4.9.7
         version: 4.9.7
       zod:
-        specifier: ^3.22.0
-        version: 3.25.76
+        specifier: ^4.1.11
+        version: 4.1.11
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -139,8 +139,8 @@ importers:
         specifier: ^5.0.0
         version: 5.10.0
       zod:
-        specifier: ^3.22.0
-        version: 3.25.76
+        specifier: ^4.1.11
+        version: 4.1.11
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -202,8 +202,8 @@ importers:
         specifier: ^10.0.0
         version: 10.4.3
       zod:
-        specifier: ^3.22.0
-        version: 3.25.76
+        specifier: ^4.1.11
+        version: 4.1.11
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -5120,6 +5120,6 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  /zod@4.1.11:
+    resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
     dev: false
