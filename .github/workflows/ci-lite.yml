@@ -80,7 +80,7 @@ jobs:
       - name: Performance gate
         run: |
           echo "Running performance verification..."
-          OUT=$(npx tsx scripts/bench-verify.ts)
+          OUT=$(pnpm -w exec tsx scripts/bench-verify.ts)
           echo "$OUT"
           P95=$(echo "$OUT" | sed -n 's/^P95:[[:space:]]*\([0-9]\+\(\.[0-9]\+\)\?\).*/\1/p')
           if [ -z "$P95" ]; then

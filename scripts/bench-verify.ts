@@ -5,8 +5,28 @@
 
 import { performance } from 'node:perf_hooks';
 import { writeFileSync } from 'node:fs';
-import { verifyReceipt, createAndSignReceipt } from '@peac/core';
 import { generateKeyPair, exportJWK } from 'jose';
+
+// Robust monorepo-safe module loading
+async function loadCore() {
+  // 1) Normal resolution (if root has dep / after publish)
+  try {
+    return await import('@peac/core');
+  } catch {}
+
+  // 2) Workspace dist (after build)
+  try {
+    const url = new URL('../packages/core/dist/index.js', import.meta.url);
+    return await import(url.href);
+  } catch {}
+
+  // 3) TS source (no build needed; tsx compiles it)
+  const srcUrl = new URL('../packages/core/src/index.ts', import.meta.url);
+  return await import(srcUrl.href);
+}
+
+const core = await loadCore();
+const { verifyReceipt, createAndSignReceipt } = core;
 
 const ITERATIONS = 300;
 const WARMUP_ITERATIONS = 30;
