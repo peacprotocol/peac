@@ -8,7 +8,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/{error-code}",
+  "type": "https://peacprotocol.org/errors/{error-code}",
   "title": "Human-readable error summary",
   "status": 400,
   "detail": "Specific error details for this instance",
@@ -23,7 +23,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/schema-validation-failed",
+  "type": "https://peacprotocol.org/errors/schema-validation-failed",
   "title": "Receipt Schema Validation Failed",
   "status": 400,
   "detail": "Missing required field: aipref.status",
@@ -42,7 +42,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/invalid-proof",
+  "type": "https://peacprotocol.org/errors/invalid-proof",
   "title": "Receipt Signature Verification Failed",
   "status": 401,
   "detail": "EdDSA signature verification failed for kid: site-2025-09",
@@ -56,7 +56,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/unknown-kid",
+  "type": "https://peacprotocol.org/errors/unknown-kid",
   "title": "Unknown Key Identifier",
   "status": 401,
   "detail": "No public key found for kid: old-key-2023",
@@ -94,7 +94,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/policy-precondition-failed",
+  "type": "https://peacprotocol.org/errors/policy-precondition-failed",
   "title": "AIPREF Policy Precondition Not Met",
   "status": 422,
   "detail": "Resource requires train-ai=false but policy allows train-ai=true",
@@ -110,7 +110,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/rate-limited",
+  "type": "https://peacprotocol.org/errors/rate-limited",
   "title": "Rate Limit Exceeded",
   "status": 429,
   "detail": "Exceeded 100 requests per minute limit",
@@ -129,7 +129,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/crypto-operation-failed",
+  "type": "https://peacprotocol.org/errors/crypto-operation-failed",
   "title": "Cryptographic Operation Failed",
   "status": 500,
   "detail": "Failed to import Ed25519 public key",
@@ -142,7 +142,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/upstream-provider-error",
+  "type": "https://peacprotocol.org/errors/upstream-provider-error",
   "title": "Payment Provider Unavailable",
   "status": 502,
   "detail": "Failed to verify payment with x402 provider",
@@ -156,7 +156,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/rail-unavailable",
+  "type": "https://peacprotocol.org/errors/rail-unavailable",
   "title": "Payment Rail Temporarily Unavailable",
   "status": 503,
   "detail": "Tempo payment rail is currently unavailable",
@@ -171,7 +171,7 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ```json
 {
-  "type": "https://peac.dev/errors/discovery-timeout",
+  "type": "https://peacprotocol.org/errors/discovery-timeout",
   "title": "Discovery Operation Timed Out",
   "status": 504,
   "detail": "Failed to fetch .well-known/peac.txt within 5 seconds",
@@ -184,18 +184,18 @@ All PEAC API errors follow [RFC 9457 Problem Details for HTTP APIs](https://www.
 
 ## Error Code Mapping
 
-| Error Type        | HTTP Status | Type URI                                               |
-| ----------------- | ----------- | ------------------------------------------------------ |
-| Schema Validation | 400         | https://peac.dev/errors/schema-validation-failed       |
-| Invalid Signature | 401         | https://peac.dev/errors/invalid-proof                  |
-| Unknown KID       | 401         | https://peac.dev/errors/unknown-kid                    |
-| Payment Required  | 402         | https://www.rfc-editor.org/rfc/rfc9110.html#status.402 |
-| Policy Failed     | 422         | https://peac.dev/errors/policy-precondition-failed     |
-| Rate Limited      | 429         | https://peac.dev/errors/rate-limited                   |
-| Crypto Failed     | 500         | https://peac.dev/errors/crypto-operation-failed        |
-| Provider Error    | 502         | https://peac.dev/errors/upstream-provider-error        |
-| Rail Unavailable  | 503         | https://peac.dev/errors/rail-unavailable               |
-| Timeout           | 504         | https://peac.dev/errors/discovery-timeout              |
+| Error Type        | HTTP Status | Type URI                                                   |
+| ----------------- | ----------- | ---------------------------------------------------------- |
+| Schema Validation | 400         | https://peacprotocol.org/errors/schema-validation-failed   |
+| Invalid Signature | 401         | https://peacprotocol.org/errors/invalid-proof              |
+| Unknown KID       | 401         | https://peacprotocol.org/errors/unknown-kid                |
+| Payment Required  | 402         | https://www.rfc-editor.org/rfc/rfc9110.html#status.402     |
+| Policy Failed     | 422         | https://peacprotocol.org/errors/policy-precondition-failed |
+| Rate Limited      | 429         | https://peacprotocol.org/errors/rate-limited               |
+| Crypto Failed     | 500         | https://peacprotocol.org/errors/crypto-operation-failed    |
+| Provider Error    | 502         | https://peacprotocol.org/errors/upstream-provider-error    |
+| Rail Unavailable  | 503         | https://peacprotocol.org/errors/rail-unavailable           |
+| Timeout           | 504         | https://peacprotocol.org/errors/discovery-timeout          |
 
 ## Client Error Handling
 
@@ -212,16 +212,16 @@ try {
     const problem = await result.json();
 
     switch (problem.type) {
-      case 'https://peac.dev/errors/rate-limited':
+      case 'https://peacprotocol.org/errors/rate-limited':
         // Wait and retry after problem.retry_after seconds
         await sleep(problem.retry_after * 1000);
         return retry();
 
-      case 'https://peac.dev/errors/rail-unavailable':
+      case 'https://peacprotocol.org/errors/rail-unavailable':
         // Try alternative rail
         return tryAlternativeRail(problem.alternative_rails[0]);
 
-      case 'https://peac.dev/errors/unknown-kid':
+      case 'https://peacprotocol.org/errors/unknown-kid':
         // Refresh keys and retry
         await refreshKeys();
         return retry();

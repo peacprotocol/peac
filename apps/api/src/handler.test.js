@@ -52,7 +52,7 @@ test('VerifyApiHandler - signature verification failure', async () => {
   const result = await handler.handle(request);
 
   assert.strictEqual(result.status, 422);
-  assert.strictEqual(result.body.type, 'https://peac.dev/problems/invalid-signature');
+  assert.strictEqual(result.body.type, 'https://peacprotocol.org/problems/invalid-signature');
   assert.strictEqual(result.body.title, 'Invalid Signature');
   assert.strictEqual(result.body['peac-error-code'], 'invalid-signature');
 });
@@ -68,7 +68,10 @@ test('VerifyApiHandler - missing receipt validation', async () => {
   const result = await handler.handle(request);
 
   assert.strictEqual(result.status, 422);
-  assert.strictEqual(result.body.type, 'https://peac.dev/problems/schema-validation-failed');
+  assert.strictEqual(
+    result.body.type,
+    'https://peacprotocol.org/problems/schema-validation-failed'
+  );
   assert.strictEqual(result.body['validation-failures'][0], 'receipt field is required');
 });
 

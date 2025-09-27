@@ -3,6 +3,11 @@
   "version": "0.9.14",
   "description": "PEAC Protocol core with JWS signing, security, and observability",
   "type": "module",
+  "homepage": "https://peacprotocol.org",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "repository": "https://github.com/peacprotocol/peac",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {

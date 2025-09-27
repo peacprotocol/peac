@@ -24,6 +24,25 @@ echo "== header & typ must be new =="
 git grep -nE "peac-version|application/peac-receipt\+jws" -- '**/*.{md,ts,js,json,yml}' ':!node_modules' \
   && bad=1 || echo "OK"
 
+echo "== forbid peac.dev domain =="
+# Fail if any peac.dev reference appears outside allowed migration docs
+DOCS_MIGRATION_ALLOW='^(docs/migration|CHANGELOG\.md)'
+if git grep -nE 'https?://([a-z0-9.-]*\.)?peac\.dev\b' -- ':!node_modules' \
+  | grep -vE "$DOCS_MIGRATION_ALLOW" \
+  | grep -vE "$IGNORE" | grep .; then
+  bad=1
+else
+  echo "OK"
+fi
+
+# Require https for peacprotocol.org
+echo "== peacprotocol.org must be https =="
+if git grep -nE 'http://peacprotocol\.org\b' -- ':!node_modules' | grep .; then
+  bad=1
+else
+  echo "OK"
+fi
+
 echo "== field regressions =="
 # Ignore legacy files that still use old field names and docs that explain the change
 LEGACY_FIELD_FILES='^(ex/|packages/core/src/(compact|validators)\.ts|profiles/|scripts/guard\.sh|CHANGELOG\.md)'

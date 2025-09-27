@@ -227,7 +227,7 @@ if (access.granted) {
 **Example API request with curl:**
 
 ```bash
-curl -X POST https://demo.peac.dev/peac/agreements \
+curl -X POST https://demo.peacprotocol.org/peac/agreements \
   -H "content-type: application/json" \
   -H "x-api-key: your-key" \
   -d '{
@@ -240,7 +240,7 @@ curl -X POST https://demo.peac.dev/peac/agreements \
 **JavaScript example:**
 
 ```javascript
-const response = await fetch('https://demo.peac.dev/peac/agreements', {
+const response = await fetch('https://demo.peacprotocol.org/peac/agreements', {
   method: 'POST',
   headers: {
     'content-type': 'application/json',

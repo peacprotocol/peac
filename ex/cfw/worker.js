@@ -29,7 +29,7 @@ export default {
       } catch (error) {
         return new Response(
           JSON.stringify({
-            type: 'https://peac.dev/errors/invalid-proof',
+            type: 'https://peacprotocol.org/errors/invalid-proof',
             title: 'Receipt Verification Failed',
             status: 401,
             detail: error.message,
@@ -102,7 +102,7 @@ export default {
       } catch (error) {
         return new Response(
           JSON.stringify({
-            type: 'https://peac.dev/errors/invalid-proof',
+            type: 'https://peacprotocol.org/errors/invalid-proof',
             title: 'Invalid Receipt',
             status: 401,
             detail: error.message,
