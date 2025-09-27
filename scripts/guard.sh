@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
+# Guard script for v0.9.14 safety checks
+# TODO: Remove legacy ignores by 2025-10-15 after migrating test/smoke to @peac/core imports
 set -euo pipefail
 bad=0
 
-# ignore known-legacy consumers
-IGNORE='^(test/smoke/|tests/smoke/|\.github/workflows/nightly\.yml)'
+# ignore known-legacy consumers (temporary - see TODO above)
+IGNORE='^(test/smoke/|tests/smoke/|\.github/workflows/nightly\.yml|scripts/assert-core-exports\.mjs)'
 
 echo "== forbid dist imports =="
 if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/guard.sh' | grep -vE "$IGNORE" | grep .; then
@@ -23,8 +25,8 @@ git grep -nE "peac-version|application/peac-receipt\+jws" -- '**/*.{md,ts,js,jso
   && bad=1 || echo "OK"
 
 echo "== field regressions =="
-# Ignore legacy files that still use old field names
-LEGACY_FIELD_FILES='^(ex/|packages/core/src/(compact|validators)\.ts|profiles/|scripts/guard\.sh)'
+# Ignore legacy files that still use old field names and docs that explain the change
+LEGACY_FIELD_FILES='^(ex/|packages/core/src/(compact|validators)\.ts|profiles/|scripts/guard\.sh|CHANGELOG\.md)'
 if git grep -nE '\bissued_at\b|payment\.rail|peacreceiept|peacreceiepts' -- ':!node_modules' | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
 else

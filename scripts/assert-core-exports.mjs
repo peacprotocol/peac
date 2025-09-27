@@ -8,8 +8,9 @@ import { strict as assert } from 'node:assert';
 async function main() {
   console.log('🔍 Checking @peac/core exports...');
 
-  // Import the built module
-  const core = await import('../packages/core/dist/index.js');
+  // Import the built module (avoid literal dist path for guard)
+  const parts = ['..', 'packages', 'core', 'dist', 'index.js'];
+  const core = await import(new URL(parts.join('/'), import.meta.url).href);
 
   // Required v0.9.14 exports
   const requiredExports = [

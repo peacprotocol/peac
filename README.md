@@ -1,7 +1,7 @@
 # PEAC Protocol
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-0.9.13--stable-green.svg)](https://github.com/peacprotocol/peac/releases)
+[![Status](https://img.shields.io/badge/status-0.9.14--stable-green.svg)](https://github.com/peacprotocol/peac/releases)
 [![CI-Lite](https://github.com/peacprotocol/peac/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/ci-lite.yml)
 [![CodeQL](https://github.com/peacprotocol/peac/actions/workflows/codeql.yml/badge.svg)](https://github.com/peacprotocol/peac/actions/workflows/codeql.yml)
 
@@ -38,10 +38,10 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 ## At a glance
 
 - **Discovery:** `/.well-known/peac.txt` (fallback `/peac.txt`)
-- **Wire version:** `0.9.13` (set header `peac-version: 0.9.13`)
-- **Headers:** `PEAC-Receipt`, `peac-version`; parsers MUST treat header names case-insensitively
+- **Wire version:** `0.9.14` (JWS header `typ: "peac.receipt/0.9"`)
+- **Headers:** Single `PEAC-Receipt` header; parsers MUST treat header names case-insensitively
 - **Media:** `application/peac+json` (content), `application/problem+json` (errors), `application/jwk-set+json` (JWKS)
-- **Receipts:** detached JWS (`typ: application/peac-receipt+jws`) using JCS
+- **Receipts:** JWS with `typ: "peac.receipt/0.9"`, `iat` field (Unix seconds), `payment.scheme`
 - **Trust:** UDA (JWT with `typ: "JWT"`), DPoP proofs bound to `cnf.jkt`, optional agent attestation header
 - **Conformance:** Levels L0-L4; see [docs/conformance.md](docs/conformance.md)
 
@@ -87,7 +87,7 @@ npx peac validate peac.txt    # Expected: Valid PEAC 0.9.13 policy
 curl -I https://your-domain/.well-known/peac.txt  # check ETag + Cache-Control
 ```
 
-Tips: emit `PEAC-Receipt`, `peac-version`; be case-insensitive on read. Start in simulation via `PEAC_MODE=simulation`.
+Tips: emit `PEAC-Receipt` header; be case-insensitive on read. Start in simulation via `PEAC_MODE=simulation`.
 Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 
 ---
@@ -95,7 +95,7 @@ Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 ## Core surfaces
 
 - **Discovery**: `/.well-known/peac.txt` (fallback `/peac.txt`)
-- **Headers**: `peac-version`, `PEAC-Receipt`, `peac-agent-attestation`, etc.
+- **Headers**: `PEAC-Receipt`, `peac-agent-attestation`, etc.
 - **Errors**: HTTP Problem Details (RFC 7807) with stable catalog
 - **Caching**: strong `ETag`, sensible `Cache-Control` for `peac.txt` and well-known endpoints
 
@@ -111,10 +111,10 @@ Common pitfalls: invalid schema returns HTTP Problem Details (RFC 7807) 400.
 | Attribution and provenance | Required attribution formats and verify-only provenance chains via adapters.                                                                         |
 | Negotiation and settlement | Programmatic terms, adapters for payment rails (**x402**, **L402**, Stripe), and DPoP-bound receipts.                                                |
 | Agent trust rails          | UDA (OAuth Device Flow), DPoP proof-of-possession, agent attestation verification for autonomous coordination.                                       |
-| Receipts v2                | Detached JWS with `typ: "application/peac-receipt+jws"`; JCS canonicalization for verifiable settlements.                                            |
+| Receipts v2                | JWS with `typ: "peac.receipt/0.9"`; JCS canonicalization for verifiable settlements.                                                                 |
 | JWKS management            | 30-day key rotation, 7-day grace periods, `application/jwk-set+json` with ETag caching.                                                              |
 | Adapters and interop       | Bridges for MCP, A2A, payment rails such as **x402**, **L402**, and Stripe, Chainlink, peaq, and any payment provider via adapter. Extend via PEIPs. |
-| HTTP semantics             | `PEAC-Receipt`, `peac-version` headers, RFC9457 Problem Details, and idempotency guidance.                                                           |
+| HTTP semantics             | `PEAC-Receipt` header, RFC9457 Problem Details, and idempotency guidance.                                                                            |
 | Conformance and tooling    | L0-L4 levels, CLI validation and fixtures, and ACID-style tests.                                                                                     |
 
 ---
@@ -163,7 +163,7 @@ More examples: [docs/examples.md](docs/examples.md)
 
 ## Receipts (detached JWS)
 
-- Media type `typ: "application/peac-receipt+jws"`
+- Media type `typ: "peac.receipt/0.9"`
 - JCS canonicalization of payload before signing
 - Verification via detached JWS (no payload bloat in transit)
 
@@ -228,7 +228,6 @@ if (access.granted) {
 
 ```bash
 curl -X POST https://demo.peac.dev/peac/agreements \
-  -H "peac-version: 0.9.13" \
   -H "content-type: application/json" \
   -H "x-api-key: your-key" \
   -d '{
@@ -244,7 +243,6 @@ curl -X POST https://demo.peac.dev/peac/agreements \
 const response = await fetch('https://demo.peac.dev/peac/agreements', {
   method: 'POST',
   headers: {
-    'peac-version': '0.9.13',
     'content-type': 'application/json',
     'x-api-key': apiKey,
   },
@@ -370,7 +368,7 @@ More templates are in `docs/templates.md`.
 
 - 400 HTTP Problem Details (RFC 7807). Validate `peac.txt` or the negotiation body.
 - Missing receipt. Ensure the adapter completed settlement. On success the server can return `PEAC-Receipt` and a receipt body.
-- Header mismatch. Emit `PEAC-Receipt`, `peac-version`. Intermediaries may alter casing.
+- Header mismatch. Emit `PEAC-Receipt`. Intermediaries may alter casing.
 - Negotiation fails. Enable flags like `PEAC_FEATURE_NEGOTIATION=1` and start with a simulation adapter.
 
 ---

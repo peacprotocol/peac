@@ -5,6 +5,29 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.14] - 2025-09-27
+
+### Changed
+
+- **Wire format v0.9.14**: Simplified JWS header with `typ: "peac.receipt/0.9"`
+- **Single header**: Only `PEAC-Receipt` header (removed `peac-version` header)
+- **Receipt fields**: Use `iat` (Unix seconds) instead of `issued_at`, `payment.scheme` instead of `payment.rail`
+- **Core exports**: New `signReceipt()`, `verifyReceipt()` functions with v0.9.14 format
+- **Performance**: Sub-1ms p95 verification target with benchmark script
+
+### Added
+
+- `packages/core/src/b64.ts`: Base64url utilities
+- `scripts/bench-verify.ts`: Performance benchmark with p95 metrics
+- `tests/golden/generate-vectors.ts`: 120+ test vectors generator
+- `scripts/assert-core-exports.mjs`: Build output validation
+- `scripts/guard.sh`: Safety checks for dist imports and field regressions
+
+### Deprecated
+
+- `verify()`: Use `verifyReceipt()` instead
+- `verifyBulk()`: Use `verifyReceipt()` in a loop
+
 ## [0.9.13.2] - 2025-09-17
 
 Intent: Zero-friction local enforcement/verification via a loopback sidecar.
