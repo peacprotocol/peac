@@ -56,18 +56,19 @@ async function main() {
   // canonicalize_json
   console.log('## canonicalize_json');
   const tsCanon = bench('TS canonicalize_json', () => ts.canonicalize_json(obj));
-  const wasmCanon = await benchAsync('WASM canonicalize_json', () =>
-    wasm.canonicalizeJson(obj)
-  );
+  const wasmCanon = await benchAsync('WASM canonicalize_json', () => wasm.canonicalizeJson(obj));
   const canonSpeedup = (tsCanon.perOp / wasmCanon.perOp).toFixed(2);
-  console.log(
-    `${tsCanon.label.padEnd(28)} ${tsCanon.perOp.toFixed(6)} ms/op`
-  );
+  console.log(`${tsCanon.label.padEnd(28)} ${tsCanon.perOp.toFixed(6)} ms/op`);
   console.log(
     `${wasmCanon.label.padEnd(28)} ${wasmCanon.perOp.toFixed(6)} ms/op (${canonSpeedup}× faster)`
   );
   console.log('');
-  results.push({ op: 'canonicalize_json', ts: tsCanon.perOp, wasm: wasmCanon.perOp, speedup: canonSpeedup });
+  results.push({
+    op: 'canonicalize_json',
+    ts: tsCanon.perOp,
+    wasm: wasmCanon.perOp,
+    speedup: canonSpeedup,
+  });
 
   // normalize_url
   console.log('## normalize_url');
@@ -88,14 +89,17 @@ async function main() {
     wasm.normalizeSelector(selector)
   );
   const selectorSpeedup = (tsSelector.perOp / wasmSelector.perOp).toFixed(2);
-  console.log(
-    `${tsSelector.label.padEnd(28)} ${tsSelector.perOp.toFixed(6)} ms/op`
-  );
+  console.log(`${tsSelector.label.padEnd(28)} ${tsSelector.perOp.toFixed(6)} ms/op`);
   console.log(
     `${wasmSelector.label.padEnd(28)} ${wasmSelector.perOp.toFixed(6)} ms/op (${selectorSpeedup}× faster)`
   );
   console.log('');
-  results.push({ op: 'normalize_selector', ts: tsSelector.perOp, wasm: wasmSelector.perOp, speedup: selectorSpeedup });
+  results.push({
+    op: 'normalize_selector',
+    ts: tsSelector.perOp,
+    wasm: wasmSelector.perOp,
+    speedup: selectorSpeedup,
+  });
 
   // jcs_sha256
   console.log('## jcs_sha256');
