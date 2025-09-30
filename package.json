@@ -2,6 +2,7 @@
   "name": "@peacprotocol/monorepo",
   "version": "0.9.14",
   "private": true,
+  "type": "module",
   "description": "PEAC Protocol v0.9.14 - Zero-BC wire format with typ: peac.receipt/0.9 and domain policy",
   "packageManager": "pnpm@8.15.0",
   "workspaces": [
@@ -11,6 +12,7 @@
   ],
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "guard:nowasm": "node tools/guards/ensure-no-wasm.js",
     "build": "turbo run build",
     "build:types": "turbo run build:types",
     "test": "turbo run test",

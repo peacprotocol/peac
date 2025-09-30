@@ -5,6 +5,27 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.15] - Unreleased
+
+### Performance
+
+- **TypeScript baseline retained**: Benchmarks confirmed TypeScript is faster than initial WASM implementation for micro-operations (0.001-0.002ms range)
+- WASM exploration archived for future batch API (v0.9.16+)
+- String marshalling overhead (JS↔WASM) exceeds computational gains for sub-millisecond operations
+- V8 JIT optimization sufficient for current workload sizes
+
+### Added
+
+- `benchmarks/wasm-vs-ts/`: Performance comparison infrastructure
+- `tools/guards/ensure-no-wasm.js`: CI guard to prevent WASM imports in core until v0.9.16+
+- `tests/goldens/`: Cross-runtime determinism tests (JCS, URL normalization)
+- `archive/wasm-exploration-v0.9.15/`: WASM modules archived for future reference
+
+### Changed
+
+- `package.json`: Added `"type": "module"` to eliminate module warnings
+- `package.json`: Added `guard:nowasm` script for CI enforcement
+
 ## [0.9.14] - 2025-09-27
 
 ### Changed
