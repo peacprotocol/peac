@@ -1,8 +1,6 @@
 /**
- * Normative policy hash implementation per v0.9.14+
+ * Normative policy hash implementation per v0.9.12.4
  * RFC 8785 JCS + URL normalization rules
- *
- * v0.9.15: Uses WASM for deterministic cross-runtime hashing
  *
  * Canonicalization rules:
  * - Scheme/host: lowercase
@@ -13,7 +11,7 @@
  * - JSON: JCS recursive key sorting
  */
 
-import { jcsSha256, normalizeUrl as wasmNormalizeUrl } from '../../core/src/wasm.js';
+import { createHash } from 'node:crypto';
 
 export interface PolicyInputs {
   [key: string]: unknown;
@@ -80,38 +78,37 @@ function jcs(value: any): string {
 /**
  * Canonicalize policy inputs using RFC 8785 JCS + URL normalization
  * Returns deterministic hash for policy comparison
- *
- * v0.9.15: Uses WASM for cross-runtime determinism
  */
-export async function canonicalPolicyHash(input: any): Promise<string> {
+export function canonicalPolicyHash(input: any): string {
   // clone to avoid mutating caller
   const obj = JSON.parse(JSON.stringify(input));
 
   // normalize all URLs in the object recursively
-  await normalizeUrlsInObject(obj);
+  normalizeUrlsInObject(obj);
 
-  // Use WASM JCS + SHA-256 for deterministic hashing
-  return await jcsSha256(obj);
+  const canonical = jcs(obj);
+  const digest = createHash('sha256').update(canonical, 'utf8').digest();
+  return b64url(digest);
 }
 
-// recursively normalize URLs in any object structure (uses WASM)
-async function normalizeUrlsInObject(obj: any): Promise<void> {
+// recursively normalize URLs in any object structure
+function normalizeUrlsInObject(obj: any): void {
   if (!obj || typeof obj !== 'object') return;
 
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       if (typeof obj[i] === 'string' && isUrl(obj[i])) {
-        obj[i] = await wasmNormalizeUrl(obj[i]);
+        obj[i] = canonicalizeUrl(obj[i]);
       } else if (typeof obj[i] === 'object') {
-        await normalizeUrlsInObject(obj[i]);
+        normalizeUrlsInObject(obj[i]);
       }
     }
   } else {
     for (const [key, value] of Object.entries(obj)) {
       if (typeof value === 'string' && isUrl(value)) {
-        obj[key] = await wasmNormalizeUrl(value);
+        obj[key] = canonicalizeUrl(value);
       } else if (typeof value === 'object') {
-        await normalizeUrlsInObject(value);
+        normalizeUrlsInObject(value);
       }
     }
   }
