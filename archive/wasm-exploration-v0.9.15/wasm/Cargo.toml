@@ -3,8 +3,11 @@ name = "peac-wasm"
 version = "0.9.15"
 edition = "2021"
 authors = ["PEAC Protocol Contributors"]
-description = "WASM modules for deterministic PEAC core operations"
+description = "WASM modules for deterministic PEAC core operations (archived - benchmarks showed TypeScript faster for micro-operations)"
 license = "Apache-2.0"
+repository = "https://github.com/peac-protocol/peac"
+keywords = ["wasm", "cryptography", "deterministic", "peac", "archived"]
+categories = ["wasm", "cryptography"]
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = ["-O3", "--enable-bulk-memory"]

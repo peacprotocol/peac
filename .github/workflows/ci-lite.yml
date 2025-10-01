@@ -37,6 +37,9 @@ jobs:
       - name: Domain guard
         run: bash -euxo pipefail scripts/guard.sh
 
+      - name: No WASM guard
+        run: node tools/guards/ensure-no-wasm.js
+
       - name: Format check
         run: |
           echo "Prettier format check..."

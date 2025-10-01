@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: No WASM guard
+        run: node tools/guards/ensure-no-wasm.js
+
       - name: Build all packages
         run: pnpm -w build
 
