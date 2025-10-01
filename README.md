@@ -134,10 +134,38 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 
 ## Requirements
 
-- Node 18 or newer.
+- Node 18.18 or newer.
+- PNPM 9.0+ (use Corepack for automatic version management)
 - Any HTTP server or platform that can serve a static file.
 - Production deployments SHOULD serve over HTTPS and set `Cache-Control` and `ETag` for `peac.txt`.
 - Optional: TypeScript types are provided by packages under `@peac/*`.
+
+---
+
+## Development (monorepo)
+
+This repository uses **PNPM exclusively** for deterministic installs and workspace management.
+
+**Setup:**
+
+```bash
+# Enable Corepack (ships with Node.js 18.18+)
+corepack enable
+corepack prepare pnpm@9.10.0 --activate
+
+# Clone and install
+git clone https://github.com/peacprotocol/peac.git
+cd peac
+pnpm install
+pnpm -w build
+```
+
+**Why PNPM?**
+
+- Deterministic lockfile for reproducible builds
+- Faster installs with content-addressable storage
+- Strict workspace linking prevents version drift
+- Consistent across local dev and CI
 
 ---
 
@@ -146,8 +174,8 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 ```bash
 pnpm add -g @peac/cli
 
-npx peac init                 # scaffold peac.txt with defaults
-npx peac validate peac.txt    # Expected: Valid PEAC 0.9.14 policy
+pnpm dlx peac init                 # scaffold peac.txt with defaults
+pnpm dlx peac validate peac.txt    # Expected: Valid PEAC 0.9.14 policy
 
 # Preferred path
 #   /.well-known/peac.txt

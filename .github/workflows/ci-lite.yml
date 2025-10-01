@@ -22,7 +22,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8.15.0
+          version: 9.10.0
           run_install: false
 
       - name: Setup Node.js 20
@@ -30,6 +30,17 @@ jobs:
         with:
           node-version: '20.10.0'
           cache: 'pnpm'
+
+      - name: Verify package manager
+        run: node tools/guards/ensure-pnpm.js
+
+      - name: Fail on foreign lockfiles
+        run: |
+          if [ -f package-lock.json ] || [ -f yarn.lock ]; then
+            echo "Foreign lockfile detected"
+            ls -la package-lock.json yarn.lock 2>/dev/null || true
+            exit 1
+          fi
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -3,15 +3,16 @@
   "version": "0.9.14",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@9.10.0",
   "description": "PEAC Protocol v0.9.14 - Zero-BC wire format with typ: peac.receipt/0.9 and domain policy",
-  "packageManager": "pnpm@8.15.0",
   "workspaces": [
     "apps/*",
     "packages/*",
     "packages/adapters/*"
   ],
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
+    "preinstall": "node tools/guards/ensure-pnpm.js",
+    "guard:package-manager": "node tools/guards/ensure-pnpm.js",
     "guard:nowasm": "node tools/guards/ensure-no-wasm.js",
     "build": "turbo run build",
     "build:types": "turbo run build:types",
@@ -33,7 +34,7 @@
     "clean": "turbo run clean",
     "dev": "pnpm -w run dev --filter @peac/app-api",
     "start": "pnpm -w run start --filter @peac/app-api",
-    "dep-cruiser": "npx depcruise packages/ --validate .dependency-cruiser.json",
+    "dep-cruiser": "pnpm dlx depcruise packages/ --validate .dependency-cruiser.json",
     "prepare": "husky install"
   },
   "lint-staged": {
@@ -60,8 +61,8 @@
     "typescript": "^5.2.0"
   },
   "engines": {
-    "node": ">=18 <23",
-    "pnpm": ">=8.0.0"
+    "node": ">=18.18.0 <23",
+    "pnpm": ">=9.0.0"
   },
   "license": "Apache-2.0"
 }
