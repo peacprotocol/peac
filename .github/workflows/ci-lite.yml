@@ -88,6 +88,16 @@ jobs:
           # Discovery tests (should be stable)
           pnpm --filter @peac/disc test || echo "::warning::Discovery tests had issues"
 
+      - name: Universal parser tests
+        run: |
+          echo "Running universal parser determinism and precedence tests..."
+          pnpm --filter @peac/parsers-universal test || echo "::error::Universal parser tests failed"
+
+      - name: SSRF protection tests
+        run: |
+          echo "Running SSRF protection unit tests..."
+          pnpm --filter @peac/safe-fetch test || echo "::error::SSRF tests failed"
+
       - name: Build core (needed for bench)
         run: pnpm --filter @peac/core build
 
@@ -125,10 +135,12 @@ jobs:
           echo ""
           echo "Quality gates enforced:"
           echo "  - Code formatting (Prettier)"
-          echo "  - Code quality (ESLint)" 
+          echo "  - Code quality (ESLint)"
           echo "  - Type safety (TypeScript)"
           echo "  - Build compilation"
           echo "  - Critical smoke tests"
+          echo "  - Universal parser (determinism + precedence)"
+          echo "  - SSRF protection unit tests"
           echo ""
           echo "Full test suite runs in nightly workflow"
           echo "Ready for merge when all checks pass"
