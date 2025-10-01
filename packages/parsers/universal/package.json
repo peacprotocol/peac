@@ -1,0 +1,29 @@
+{
+  "name": "@peac/parsers-universal",
+  "version": "0.9.15",
+  "description": "Universal policy parser with P0 format support",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'Tests pending'",
+    "lint": "echo 'Lint configured for workspace'"
+  },
+  "dependencies": {
+    "@peac/pref": "workspace:*",
+    "@peac/disc": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.13",
+    "typescript": "^5.7.3"
+  },
+  "license": "Apache-2.0"
+}
