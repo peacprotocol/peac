@@ -61,7 +61,7 @@
     "typescript": "^5.2.0"
   },
   "engines": {
-    "node": ">=18.18.0 <23",
+    "node": ">=20.9.0 <23",
     "pnpm": ">=9.0.0"
   },
   "license": "Apache-2.0"

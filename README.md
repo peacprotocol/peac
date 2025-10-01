@@ -134,7 +134,7 @@ Autonomous clients need predictable, auditable policy and trust rails. With well
 
 ## Requirements
 
-- Node 18.18 or newer.
+- Node 20.9 or newer (Node 18 dropped as of v0.9.15)
 - PNPM 9.0+ (use Corepack for automatic version management)
 - Any HTTP server or platform that can serve a static file.
 - Production deployments SHOULD serve over HTTPS and set `Cache-Control` and `ETag` for `peac.txt`.
@@ -149,7 +149,7 @@ This repository uses **PNPM exclusively** for deterministic installs and workspa
 **Setup:**
 
 ```bash
-# Enable Corepack (ships with Node.js 18.18+)
+# Enable Corepack (ships with Node.js 20.9+)
 corepack enable
 corepack prepare pnpm@9.10.0 --activate
 
