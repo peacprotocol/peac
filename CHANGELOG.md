@@ -7,14 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.15] - Unreleased
 
-### Performance
-
-- **TypeScript baseline retained**: Benchmarks confirmed TypeScript is faster than initial WASM implementation for micro-operations (0.001-0.002ms range)
-- WASM exploration archived for future batch API (v0.9.16+)
-- String marshalling overhead (JS↔WASM) exceeds computational gains for sub-millisecond operations
-- V8 JIT optimization sufficient for current workload sizes
-
 ### Added
+
+**Universal Parser (Phase 2)**
+
+- `@peac/parsers-universal`: Priority-based parser orchestration with deny-safe merging
+- P0 format support: agent-permissions (P100), AIPREF (P80), ai.txt (P60), peac.txt (P50), robots.txt (P40), ACP (P10)
+- `@peac/safe-fetch`: Centralized SSRF protection with CIDR blocking (IPv4/IPv6)
+- `@peac/core`: New `discoverPolicy()` and `discoverAndEnforce()` functions
+- Comprehensive test coverage: determinism (100 iterations) and precedence validation
+- ADR-0004: Universal parser precedence and deny-safe merge rules
+- Bridge readiness: `universal_parser_loaded` check
+
+**Build Guardrails**
+
+- `tools/guards/ensure-pnpm.js`: Hard guard for PNPM-only enforcement
+- CI verification: package manager validation and foreign lockfile detection
+- `.npmrc`: Strict settings (engine-strict, auto-install-peers, strict-peer-dependencies)
+- `.gitignore`: Block Yarn PnP artifacts (.pnp, .pnp.js, .pnp.cjs, .pnp.loader.mjs)
+- `pnpm-workspace.yaml`: Nested package patterns for new packages
+
+**Golden Tests and Benchmarks**
 
 - `benchmarks/wasm-vs-ts/`: Performance comparison infrastructure
 - `tools/guards/ensure-no-wasm.js`: CI guard to prevent WASM imports in core until v0.9.16+
@@ -23,8 +36,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `package.json`: Added `packageManager: "pnpm@9.10.0"` and engines guard
+- `package.json`: Preinstall hook enforces PNPM-only usage
 - `package.json`: Added `"type": "module"` to eliminate module warnings
-- `package.json`: Added `guard:nowasm` script for CI enforcement
+- README: Development section with Corepack setup instructions
+- docs/getting-started.md: Replaced npx with pnpm dlx
+- CI workflows: PNPM 9.10.0 with verification and foreign lockfile checks
+
+### Performance
+
+- **TypeScript baseline retained**: Benchmarks confirmed TypeScript is faster than initial WASM implementation for micro-operations (0.001-0.002ms range)
+- WASM exploration archived for future batch API (v0.9.16+)
+- String marshalling overhead (JS↔WASM) exceeds computational gains for sub-millisecond operations
+- V8 JIT optimization sufficient for current workload sizes
+
+### Security
+
+- SSRF protection: Blocks file:, data:, ftp:, gopher:, javascript: schemes
+- IPv4 CIDR blocking: 127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16, 0.0.0.0/8
+- IPv6 CIDR blocking: ::1, fc00::/7, fe80::/10
+- Deny-safe policy merging ensures no unintended permission escalation
 
 ## [0.9.14] - 2025-09-27
 
