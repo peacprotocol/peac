@@ -5,7 +5,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { isBlockedUrl, SSRFError } from './index.js';
+import { isBlockedUrl, SSRFError, getSSRFBlockCount, resetSSRFBlockCount } from './index.js';
 
 test('blocks file: scheme', () => {
   const result = isBlockedUrl('file:///etc/passwd');
@@ -83,10 +83,99 @@ test('allows public http URL', () => {
   assert.strictEqual(result.blocked, false);
 });
 
+test('blocks CGNAT range 100.64.0.0/10', () => {
+  const result = isBlockedUrl('http://100.64.1.1/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv4/);
+});
+
+test('blocks TEST-NET-1 192.0.2.0/24', () => {
+  const result = isBlockedUrl('http://192.0.2.1/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv4/);
+});
+
+test('blocks TEST-NET-2 198.51.100.0/24', () => {
+  const result = isBlockedUrl('http://198.51.100.1/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv4/);
+});
+
+test('blocks TEST-NET-3 203.0.113.0/24', () => {
+  const result = isBlockedUrl('http://203.0.113.1/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv4/);
+});
+
+test('blocks benchmarking range 198.18.0.0/15', () => {
+  const result = isBlockedUrl('http://198.18.1.1/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv4/);
+});
+
+test('blocks multicast 224.0.0.0/4', () => {
+  const result = isBlockedUrl('http://224.1.1.1/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv4/);
+});
+
+test('blocks reserved 240.0.0.0/4', () => {
+  const result = isBlockedUrl('http://240.1.1.1/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv4/);
+});
+
+test('blocks IPv6 unspecified ::', () => {
+  const result = isBlockedUrl('http://[::]/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:hostname|blocked:private-ipv6/);
+});
+
+test('blocks IPv6 v4-mapped ::ffff:192.0.2.1', () => {
+  const result = isBlockedUrl('http://[::ffff:192.0.2.1]/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv6/);
+});
+
+test('blocks IPv6 documentation 2001:db8::', () => {
+  const result = isBlockedUrl('http://[2001:db8::1]/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv6/);
+});
+
+test('blocks IPv6 multicast ff00::/8', () => {
+  const result = isBlockedUrl('http://[ff02::1]/test');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:private-ipv6/);
+});
+
+test('blocks mailto: scheme', () => {
+  const result = isBlockedUrl('mailto:test@example.com');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:scheme:mailto:/);
+});
+
+test('blocks ws: scheme', () => {
+  const result = isBlockedUrl('ws://example.com/socket');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:scheme:ws:/);
+});
+
+test('blocks ssh: scheme', () => {
+  const result = isBlockedUrl('ssh://user@host');
+  assert.strictEqual(result.blocked, true);
+  assert.match(result.reason, /blocked:scheme:ssh:/);
+});
+
 test('SSRFError has correct structure', () => {
   const error = new SSRFError('test message', 'test-code');
   assert.strictEqual(error.name, 'SSRFError');
   assert.strictEqual(error.message, 'test message');
   assert.strictEqual(error.code, 'test-code');
   assert.ok(error instanceof Error);
+});
+
+test('SSRF block counter increments', () => {
+  resetSSRFBlockCount();
+  assert.strictEqual(getSSRFBlockCount(), 0);
 });

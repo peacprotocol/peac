@@ -3,15 +3,46 @@
  * SSRF-safe fetch wrapper with CIDR blocking, DNS validation, and timeout controls
  */
 
-const BLOCKED_SCHEMES = new Set(['file:', 'data:', 'ftp:', 'gopher:', 'javascript:']);
+let ssrfBlockCount = 0;
+
+export function getSSRFBlockCount(): number {
+  return ssrfBlockCount;
+}
+
+export function resetSSRFBlockCount(): void {
+  ssrfBlockCount = 0;
+}
+
+const BLOCKED_SCHEMES = new Set([
+  'file:',
+  'data:',
+  'ftp:',
+  'gopher:',
+  'javascript:',
+  'mailto:',
+  'chrome:',
+  'about:',
+  'ws:',
+  'wss:',
+  'ssh:',
+  'tel:',
+]);
 
 const PRIVATE_IPV4_RANGES = [
-  { start: '127.0.0.0', end: '127.255.255.255' }, // Loopback
-  { start: '10.0.0.0', end: '10.255.255.255' }, // RFC1918
-  { start: '172.16.0.0', end: '172.31.255.255' }, // RFC1918
-  { start: '192.168.0.0', end: '192.168.255.255' }, // RFC1918
-  { start: '169.254.0.0', end: '169.254.255.255' }, // Link-local
-  { start: '0.0.0.0', end: '0.255.255.255' }, // Current network
+  { start: '0.0.0.0', end: '0.255.255.255' }, // Current network (RFC 1122)
+  { start: '10.0.0.0', end: '10.255.255.255' }, // Private (RFC 1918)
+  { start: '100.64.0.0', end: '100.127.255.255' }, // CGNAT (RFC 6598)
+  { start: '127.0.0.0', end: '127.255.255.255' }, // Loopback (RFC 1122)
+  { start: '169.254.0.0', end: '169.254.255.255' }, // Link-local (RFC 3927)
+  { start: '172.16.0.0', end: '172.31.255.255' }, // Private (RFC 1918)
+  { start: '192.0.0.0', end: '192.0.0.255' }, // IETF Protocol Assignments (RFC 6890)
+  { start: '192.0.2.0', end: '192.0.2.255' }, // TEST-NET-1 (RFC 5737)
+  { start: '192.168.0.0', end: '192.168.255.255' }, // Private (RFC 1918)
+  { start: '198.18.0.0', end: '198.19.255.255' }, // Benchmarking (RFC 2544)
+  { start: '198.51.100.0', end: '198.51.100.255' }, // TEST-NET-2 (RFC 5737)
+  { start: '203.0.113.0', end: '203.0.113.255' }, // TEST-NET-3 (RFC 5737)
+  { start: '224.0.0.0', end: '239.255.255.255' }, // Multicast (RFC 5771)
+  { start: '240.0.0.0', end: '255.255.255.255' }, // Reserved (RFC 1112)
 ];
 
 const BLOCKED_HOSTNAMES = new Set([
@@ -59,8 +90,14 @@ function isPrivateIPv4(ip: string): boolean {
 
 function isPrivateIPv6(ip: string): boolean {
   const lower = ip.toLowerCase();
+
+  // Loopback and unspecified
   if (lower === '::1' || lower === '::') return true;
+
+  // Unique local addresses (fc00::/7)
   if (lower.startsWith('fc') || lower.startsWith('fd')) return true;
+
+  // Link-local (fe80::/10)
   if (
     lower.startsWith('fe8') ||
     lower.startsWith('fe9') ||
@@ -69,6 +106,16 @@ function isPrivateIPv6(ip: string): boolean {
   ) {
     return true;
   }
+
+  // IPv4-mapped IPv6 (::ffff:0:0/96)
+  if (lower.startsWith('::ffff:')) return true;
+
+  // Documentation prefix (2001:db8::/32)
+  if (lower.startsWith('2001:db8') || lower.startsWith('2001:0db8')) return true;
+
+  // Multicast (ff00::/8)
+  if (lower.startsWith('ff')) return true;
+
   return false;
 }
 
@@ -120,6 +167,7 @@ export async function safeFetch(
   while (redirectCount <= maxRedirects) {
     const blockCheck = isBlockedUrl(currentUrl);
     if (blockCheck.blocked) {
+      ssrfBlockCount++;
       throw new SSRFError(`SSRF protection: ${blockCheck.reason}`, blockCheck.reason || 'blocked');
     }
 
