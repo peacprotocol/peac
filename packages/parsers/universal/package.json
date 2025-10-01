@@ -12,9 +12,9 @@
     }
   },
   "scripts": {
-    "build": "echo 'Build temporarily disabled - work in progress'",
-    "typecheck": "echo 'Typecheck temporarily disabled - work in progress'",
-    "test": "echo 'Tests pending'",
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/**/*.test.js",
     "lint": "echo 'Lint configured for workspace'"
   },
   "dependencies": {

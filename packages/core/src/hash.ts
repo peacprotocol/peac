@@ -76,6 +76,13 @@ function jcs(value: any): string {
 }
 
 /**
+ * Export JCS canonicalization for external use
+ */
+export function canonicalizeJson(value: any): string {
+  return jcs(value);
+}
+
+/**
  * Canonicalize policy inputs using RFC 8785 JCS + URL normalization
  * Returns deterministic hash for policy comparison
  */
