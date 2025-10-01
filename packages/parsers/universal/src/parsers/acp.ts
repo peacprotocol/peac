@@ -4,6 +4,7 @@
  */
 
 import type { Parser, PartialPolicy } from '../types.js';
+import { safeFetch } from '@peac/safe-fetch';
 
 interface ACPDocument {
   version?: string;
@@ -17,12 +18,11 @@ interface ACPDocument {
 async function fetchACP(url: URL): Promise<string | null> {
   try {
     const acpUrl = new URL('/.well-known/acp.json', url.origin);
-    const response = await fetch(acpUrl.toString(), {
+    const response = await safeFetch(acpUrl.toString(), {
+      timeoutMs: 3000,
       headers: {
-        'User-Agent': 'PEAC/0.9.15 (+https://peacprotocol.org)',
         Accept: 'application/json',
       },
-      signal: AbortSignal.timeout(3000),
     });
     if (!response.ok) return null;
     return await response.text();

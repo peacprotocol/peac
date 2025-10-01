@@ -5,13 +5,13 @@
 
 import type { Parser, PartialPolicy } from '../types.js';
 import { parse as parsePeacTxt } from '@peac/disc';
+import { safeFetch } from '@peac/safe-fetch';
 
 async function fetchPeacTxt(url: URL): Promise<string | null> {
   try {
     const peacUrl = new URL('/.well-known/peac.txt', url.origin);
-    const response = await fetch(peacUrl.toString(), {
-      headers: { 'User-Agent': 'PEAC/0.9.15 (+https://peacprotocol.org)' },
-      signal: AbortSignal.timeout(3000),
+    const response = await safeFetch(peacUrl.toString(), {
+      timeoutMs: 3000,
     });
     if (!response.ok) return null;
     return await response.text();

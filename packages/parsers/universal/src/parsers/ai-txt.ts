@@ -4,13 +4,13 @@
  */
 
 import type { Parser, PartialPolicy } from '../types.js';
+import { safeFetch } from '@peac/safe-fetch';
 
 async function fetchAiTxt(url: URL): Promise<string | null> {
   try {
     const aiUrl = new URL('/ai.txt', url.origin);
-    const response = await fetch(aiUrl.toString(), {
-      headers: { 'User-Agent': 'PEAC/0.9.15 (+https://peacprotocol.org)' },
-      signal: AbortSignal.timeout(3000),
+    const response = await safeFetch(aiUrl.toString(), {
+      timeoutMs: 3000,
     });
     if (!response.ok) return null;
     return await response.text();

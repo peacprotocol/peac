@@ -4,6 +4,7 @@
  */
 
 import type { Parser, PartialPolicy } from '../types.js';
+import { safeFetch } from '@peac/safe-fetch';
 
 interface AgentPermissions {
   agents?: Array<{
@@ -19,12 +20,11 @@ interface AgentPermissions {
 async function fetchAgentPermissions(url: URL): Promise<string | null> {
   try {
     const permUrl = new URL('/.well-known/agent-permissions.json', url.origin);
-    const response = await fetch(permUrl.toString(), {
+    const response = await safeFetch(permUrl.toString(), {
+      timeoutMs: 3000,
       headers: {
-        'User-Agent': 'PEAC/0.9.15 (+https://peacprotocol.org)',
         Accept: 'application/json',
       },
-      signal: AbortSignal.timeout(3000),
     });
     if (!response.ok) return null;
     return await response.text();
