@@ -32,6 +32,16 @@ Formats execute in descending priority order:
 - Agent-specific rules override global rules
 - Newer AI-targeted formats supersede legacy crawler standards
 
+**Why Deny > Allow > Pay**:
+
+Deny-safe merging ensures security-conservative policy enforcement. This design:
+
+1. **Honors explicit opt-outs** from any source, preventing unintended consent
+2. **Prevents permission escalation** when lower-priority formats allow but higher deny
+3. **Respects origin intent** when multiple signals conflict
+4. **Fails safe** by defaulting to allow only when no denies exist
+5. **Enables pay-for-access** (future) as fallback when all sources deny but origin offers payment option
+
 ### 2. Deny-Safe Merge Rules
 
 When merging policies from multiple sources:

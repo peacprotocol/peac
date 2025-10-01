@@ -76,9 +76,44 @@ The parser executes formats in priority order (highest first). Policies are merg
 
 All parsers use `@peac/safe-fetch` with comprehensive SSRF blocking:
 
-- **Blocked schemes**: `file:`, `data:`, `ftp:`, `gopher:`, `javascript:`
-- **Blocked IPv4 ranges**: 127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16
-- **Blocked IPv6 ranges**: ::1, fc00::/7, fe80::/10
+- **Blocked schemes**: `file:`, `data:`, `ftp:`, `gopher:`, `javascript:`, `mailto:`, `chrome:`, `about:`, `ws:`, `wss:`, `ssh:`, `tel:`
+- **Blocked IPv4 ranges**: 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10 (CGNAT), 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.0.2.0/24, 192.168.0.0/16, 198.18.0.0/15, 198.51.100.0/24, 203.0.113.0/24, 224.0.0.0/4 (multicast), 240.0.0.0/4 (reserved)
+- **Blocked IPv6 ranges**: ::1, ::, ::ffff:0:0/96 (v4-mapped), fc00::/7 (ULA), fe80::/10 (link-local), 2001:db8::/32 (docs), ff00::/8 (multicast)
+
+## Edge Runtime Behavior
+
+### Cloudflare Workers
+
+- **DNS Resolution**: CF Workers resolve DNS before fetch; SSRF protection relies on hostname/IP checks
+- **Egress**: Outbound requests subject to CF egress rules; may block certain IPs regardless of safe-fetch
+- **Timeout**: Default 30s CPU time limit; set `PEAC_DISCOVERY_TIMEOUT_MS` to 3000 for safety
+
+### Vercel Edge Functions
+
+- **DNS Rebinding**: Edge runtime resolves DNS per request; hostname checks may miss time-of-check-time-of-use attacks
+- **Fetch Sandboxing**: Vercel Edge restricts `file:` and other local schemes at runtime level
+- **Concurrency**: Edge functions handle concurrent parser execution efficiently; no special handling needed
+
+### Bun
+
+- **Native fetch**: Bun uses native HTTP implementation; SSRF checks apply before request
+- **DNS caching**: Bun caches DNS lookups; safe-fetch re-validates on each call
+- **Performance**: Typically 2-3x faster than Node.js for parallel parser execution
+
+### Deno
+
+- **Permissions**: Deno requires `--allow-net` flag for network access
+- **Fetch API**: Standards-compliant; SSRF checks integrate seamlessly
+- **Security**: Deno's permission model provides additional SSRF defense layer
+
+### Recommendation
+
+For production edge deployments:
+
+1. Use `PEAC_DISCOVERY_TIMEOUT_MS=3000` to prevent runaway requests
+2. Set `PEAC_DISCOVERY_MAX_REDIRECTS=3` to limit redirect chains
+3. Monitor SSRF block count via `getSSRFBlockCount()` from `@peac/safe-fetch`
+4. Test cross-runtime with golden determinism suite: `tests/determinism/parsers.golden.test.js`
 
 ## Environment Variables
 
