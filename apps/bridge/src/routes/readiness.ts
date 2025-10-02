@@ -33,6 +33,15 @@ async function checkApiVerifier() {
   }
 }
 
+async function checkUniversalParserLoaded() {
+  try {
+    const { discoverPolicy } = await import('@peac/core');
+    return typeof discoverPolicy === 'function';
+  } catch {
+    return false;
+  }
+}
+
 export async function readinessRoute(c: Context) {
   const startTime = performance.now();
 
@@ -42,6 +51,7 @@ export async function readinessRoute(c: Context) {
       core_loaded: await checkCoreLoaded(),
       signer_cache: await checkSignerCache(),
       api_verifier_loaded: await checkApiVerifier(),
+      universal_parser_loaded: await checkUniversalParserLoaded(),
       memory_available: process.memoryUsage().heapUsed < 500 * 1024 * 1024, // < 500MB
       uptime_sufficient: process.uptime() > 1, // At least 1 second uptime
     };

@@ -3,6 +3,10 @@ node_modules/
 pnpm-debug.log
 package-lock.json
 yarn.lock
+.pnp
+.pnp.js
+.pnp.cjs
+.pnp.loader.mjs
 
 # builds & caches
 dist/

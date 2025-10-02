@@ -1,5 +1,7 @@
 packages:
   - 'packages/*'
+  - 'packages/*/*'
+  - 'packages/*/*/*'
   - 'packages/adapters/*'
   - 'apps/*'
   - 'schemas'
@@ -9,4 +11,5 @@ packages:
   - 'tests'
   - 'tooling'
   - 'infra'
+  - 'tools/*'
   - '!archive/**'

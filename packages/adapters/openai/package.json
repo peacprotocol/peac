@@ -1,6 +1,6 @@
 {
   "name": "@peac/adapter-openai",
-  "version": "0.9.12.1",
+  "version": "0.9.14",
   "description": "PEAC OpenAI Functions format adapter",
   "main": "functions.json",
   "type": "module",

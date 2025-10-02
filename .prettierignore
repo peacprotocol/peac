@@ -12,5 +12,8 @@ package-lock.json
 .pnpm-store
 pnpm-lock.yaml
 
+# IDE and local config
+.claude
+
 # test artifacts
 **/__snapshots__/**

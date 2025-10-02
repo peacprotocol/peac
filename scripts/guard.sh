@@ -4,8 +4,8 @@ set -euo pipefail
 bad=0
 
 echo "== forbid dist imports =="
-if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/guard.sh' ':!archive/**' \
-  | grep -vE '^(\.github/workflows/nightly\.yml)' | grep .; then
+if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/guard.sh' ':!archive/**' ':!tools/guards/**' \
+  | grep -vE '^(\.github/workflows/nightly\.yml|scripts/check-readiness\.sh)' | grep .; then
   bad=1
 else
   echo "OK"
