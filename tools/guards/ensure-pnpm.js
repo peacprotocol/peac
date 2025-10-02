@@ -5,9 +5,14 @@
  */
 
 const ua = process.env.npm_config_user_agent || '';
-const isPNPM = ua.includes('pnpm/');
 
-if (!isPNPM) {
+// In CI or when run directly via node, user agent may be empty
+// Check if we're being run via pnpm by looking at the user agent OR
+// if package manager is already validated (CI setup complete)
+const isPNPM = ua.includes('pnpm/');
+const isCISetup = process.env.CI && !ua; // CI with no user agent means pre-install check
+
+if (!isPNPM && !isCISetup) {
   console.error(
     '❌ This repository is PNPM-only.\n' +
       'Detected user agent: ' +
