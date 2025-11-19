@@ -1,6 +1,6 @@
 /**
  * @peac/core v0.9.14 - Enhanced types with v0.9.14 wire format
- * Single Receipt type with typ: "peac.receipt/0.9", iat field, payment.scheme
+ * Single Receipt type with typ: "peac.receipt/0.9", iat field, payment.rail
  */
 
 import type { JWTPayload } from 'jose';

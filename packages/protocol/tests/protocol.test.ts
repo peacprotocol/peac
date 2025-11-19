@@ -18,8 +18,11 @@ describe("PEAC Protocol", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_123456",
+        asset: "USD",
+        env: "test",
+        evidence: { session_id: "cs_123456" },
         privateKey,
         kid: "2025-01-15T10:30:00Z",
       });
@@ -45,7 +48,7 @@ describe("PEAC Protocol", () => {
       );
 
       // Payment should match
-      expect(decoded.payload.payment.scheme).toBe("stripe");
+      expect(decoded.payload.payment.rail).toBe("stripe");
       expect(decoded.payload.payment.reference).toBe("cs_123456");
       expect(decoded.payload.payment.amount).toBe(9999);
       expect(decoded.payload.payment.currency).toBe("USD");
@@ -59,8 +62,11 @@ describe("PEAC Protocol", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_123456",
+        asset: "USD",
+        env: "test",
+        evidence: { session_id: "cs_123456" },
         subject: "https://app.example.com/api/resource/123",
         privateKey,
         kid: "2025-01-15T10:30:00Z",
@@ -82,8 +88,11 @@ describe("PEAC Protocol", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_123456",
+        asset: "USD",
+        env: "test",
+        evidence: { session_id: "cs_123456" },
         exp,
         privateKey,
         kid: "2025-01-15T10:30:00Z",
@@ -103,8 +112,11 @@ describe("PEAC Protocol", () => {
           aud: "https://app.example.com",
           amt: 9999,
           cur: "USD",
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_123456",
+          asset: "USD",
+          env: "test",
+          evidence: { session_id: "cs_123456" },
           privateKey,
           kid: "2025-01-15T10:30:00Z",
         })
@@ -120,8 +132,11 @@ describe("PEAC Protocol", () => {
           aud: "http://app.example.com", // HTTP not allowed
           amt: 9999,
           cur: "USD",
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_123456",
+          asset: "USD",
+          env: "test",
+          evidence: { session_id: "cs_123456" },
           privateKey,
           kid: "2025-01-15T10:30:00Z",
         })
@@ -137,8 +152,11 @@ describe("PEAC Protocol", () => {
           aud: "https://app.example.com",
           amt: 9999,
           cur: "usd", // Must be uppercase
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_123456",
+          asset: "USD",
+          env: "test",
+          evidence: { session_id: "cs_123456" },
           privateKey,
           kid: "2025-01-15T10:30:00Z",
         })
@@ -154,8 +172,11 @@ describe("PEAC Protocol", () => {
           aud: "https://app.example.com",
           amt: -100, // Negative not allowed
           cur: "USD",
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_123456",
+          asset: "USD",
+          env: "test",
+          evidence: { session_id: "cs_123456" },
           privateKey,
           kid: "2025-01-15T10:30:00Z",
         })
@@ -171,8 +192,11 @@ describe("PEAC Protocol", () => {
           aud: "https://app.example.com",
           amt: 99.99, // Must be integer
           cur: "USD",
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_123456",
+          asset: "USD",
+          env: "test",
+          evidence: { session_id: "cs_123456" },
           privateKey,
           kid: "2025-01-15T10:30:00Z",
         })
@@ -187,8 +211,11 @@ describe("PEAC Protocol", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_123456",
+        asset: "USD",
+        env: "test",
+        evidence: { session_id: "cs_123456" },
         privateKey,
         kid: "2025-01-15T10:30:00Z",
       });
@@ -198,8 +225,11 @@ describe("PEAC Protocol", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_123456",
+        asset: "USD",
+        env: "test",
+        evidence: { session_id: "cs_123456" },
         privateKey,
         kid: "2025-01-15T10:30:00Z",
       });

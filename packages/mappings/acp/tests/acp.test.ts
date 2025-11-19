@@ -33,7 +33,7 @@ describe("ACP integration", () => {
       expect(receiptInput.subject_uri).toBe("https://api.example.com/resources/456");
       expect(receiptInput.amt).toBe(9999);
       expect(receiptInput.cur).toBe("USD");
-      expect(receiptInput.payment.scheme).toBe("stripe");
+      expect(receiptInput.payment.rail).toBe("stripe");
       expect(receiptInput.payment.reference).toBe("cs_test_123");
       expect(receiptInput.payment.amount).toBe(9999);
       expect(receiptInput.payment.currency).toBe("USD");
@@ -61,7 +61,7 @@ describe("ACP integration", () => {
       expect(receiptInput.subject_uri).toBe("https://api.example.com/resource");
       expect(receiptInput.amt).toBe(1000);
       expect(receiptInput.cur).toBe("EUR");
-      expect(receiptInput.payment.scheme).toBe("x402");
+      expect(receiptInput.payment.rail).toBe("x402");
       expect(receiptInput.payment.reference).toBe("inv_123");
     });
 
@@ -132,10 +132,12 @@ describe("ACP integration", () => {
         aud: "https://api.example.com",
         amt: receiptInput.amt,
         cur: receiptInput.cur,
-        scheme: receiptInput.payment.scheme,
+        rail: receiptInput.payment.rail,
         reference: receiptInput.payment.reference,
+        asset: receiptInput.payment.asset,
+        env: receiptInput.payment.env,
+        evidence: receiptInput.payment.evidence,
         subject: receiptInput.subject_uri,
-        metadata: receiptInput.payment.metadata,
         privateKey,
         kid: "2025-01-26T12:00:00Z",
       });
@@ -177,10 +179,12 @@ describe("ACP integration", () => {
         aud: "https://api.example.com",
         amt: receiptInput.amt,
         cur: receiptInput.cur,
-        scheme: receiptInput.payment.scheme,
+        rail: receiptInput.payment.rail,
         reference: receiptInput.payment.reference,
+        asset: receiptInput.payment.asset,
+        env: receiptInput.payment.env,
+        evidence: receiptInput.payment.evidence,
         subject: receiptInput.subject_uri,
-        metadata: receiptInput.payment.metadata,
         privateKey,
         kid: "2025-01-26T12:00:00Z",
       });

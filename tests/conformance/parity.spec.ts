@@ -1,6 +1,6 @@
 /**
  * Rail parity conformance tests
- * CRITICAL: Stripe == x402, differing only in scheme and reference
+ * CRITICAL: Stripe == x402, differing only in rail and reference
  *
  * This test enforces multi-rail neutrality - receipts must be byte-identical
  * across payment rails except for rail-specific identifiers.
@@ -15,7 +15,7 @@ import { fromInvoice } from "../../packages/rails/x402/src/index";
 import type { PEACReceiptClaims } from "../../packages/schema/src/types";
 
 describe("Rail Parity Conformance", () => {
-  it("Stripe == x402 (only scheme + reference differ)", async () => {
+  it("Stripe == x402 (only rail + reference differ)", async () => {
     // Common test parameters
     const AMOUNT = 9999;
     const CURRENCY = "USD";
@@ -39,8 +39,11 @@ describe("Rail Parity Conformance", () => {
       aud: AUD,
       amt: AMOUNT,
       cur: CURRENCY,
-      scheme: stripePayment.scheme,
+      rail: stripePayment.rail,
       reference: stripePayment.reference,
+      asset: stripePayment.asset,
+      env: stripePayment.env,
+      evidence: stripePayment.evidence,
       subject: SUBJECT,
       privateKey,
       kid,
@@ -58,8 +61,11 @@ describe("Rail Parity Conformance", () => {
       aud: AUD,
       amt: AMOUNT,
       cur: CURRENCY,
-      scheme: x402Payment.scheme,
+      rail: x402Payment.rail,
       reference: x402Payment.reference,
+      asset: x402Payment.asset,
+      env: x402Payment.env,
+      evidence: x402Payment.evidence,
       subject: SUBJECT,
       privateKey,
       kid,
@@ -81,9 +87,9 @@ describe("Rail Parity Conformance", () => {
     expect(stripeDecoded.payload.cur).toBe(x402Decoded.payload.cur);
     expect(stripeDecoded.payload.subject).toEqual(x402Decoded.payload.subject);
 
-    // 3. Payment block: ONLY scheme and reference should differ
-    expect(stripeDecoded.payload.payment.scheme).toBe("stripe");
-    expect(x402Decoded.payload.payment.scheme).toBe("x402");
+    // 3. Payment block: ONLY rail and reference should differ
+    expect(stripeDecoded.payload.payment.rail).toBe("stripe");
+    expect(x402Decoded.payload.payment.rail).toBe("x402");
 
     expect(stripeDecoded.payload.payment.reference).toBe("cs_test_stripe_123");
     expect(x402Decoded.payload.payment.reference).toBe("inv_x402_123");
@@ -111,7 +117,7 @@ describe("Rail Parity Conformance", () => {
       iat: 0, // Exclude timestamp
       payment: {
         ...stripeDecoded.payload.payment,
-        scheme: "NORMALIZED", // Exclude rail-specific scheme
+        rail: "NORMALIZED", // Exclude rail-specific identifier
         reference: "NORMALIZED", // Exclude rail-specific reference
         metadata: undefined, // Exclude rail-specific metadata
       },
@@ -123,7 +129,7 @@ describe("Rail Parity Conformance", () => {
       iat: 0,
       payment: {
         ...x402Decoded.payload.payment,
-        scheme: "NORMALIZED",
+        rail: "NORMALIZED",
         reference: "NORMALIZED",
         metadata: undefined,
       },
@@ -132,7 +138,7 @@ describe("Rail Parity Conformance", () => {
     // After normalization, they MUST be byte-identical
     expect(stripeNormalized).toEqual(x402Normalized);
 
-    console.log("✅ PARITY CHECK PASSED: Stripe == x402 (only scheme/reference differ)");
+    console.log("✅ PARITY CHECK PASSED: Stripe == x402 (only rail/reference differ)");
   });
 
   it("Parity check fails if amounts differ", async () => {
@@ -151,8 +157,11 @@ describe("Rail Parity Conformance", () => {
       aud: "https://app.example.com",
       amt: 9999,
       cur: "USD",
-      scheme: stripePayment.scheme,
+      rail: stripePayment.rail,
       reference: stripePayment.reference,
+      asset: stripePayment.asset,
+      env: stripePayment.env,
+      evidence: stripePayment.evidence,
       privateKey,
       kid,
     });
@@ -169,8 +178,11 @@ describe("Rail Parity Conformance", () => {
       aud: "https://app.example.com",
       amt: 8888, // Different!
       cur: "USD",
-      scheme: x402Payment.scheme,
+      rail: x402Payment.rail,
       reference: x402Payment.reference,
+      asset: x402Payment.asset,
+      env: x402Payment.env,
+      evidence: x402Payment.evidence,
       privateKey,
       kid,
     });
@@ -211,8 +223,11 @@ describe("Rail Parity Conformance", () => {
       aud: "https://app.example.com",
       amt: 1000,
       cur: "EUR",
-      scheme: stripePayment.scheme,
+      rail: stripePayment.rail,
       reference: stripePayment.reference,
+      asset: stripePayment.asset,
+      env: stripePayment.env,
+      evidence: stripePayment.evidence,
       privateKey,
       kid,
     });
@@ -222,8 +237,11 @@ describe("Rail Parity Conformance", () => {
       aud: "https://app.example.com",
       amt: 1000,
       cur: "EUR",
-      scheme: x402Payment.scheme,
+      rail: x402Payment.rail,
       reference: x402Payment.reference,
+      asset: x402Payment.asset,
+      env: x402Payment.env,
+      evidence: x402Payment.evidence,
       privateKey,
       kid,
     });

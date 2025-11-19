@@ -75,7 +75,7 @@ async function generateVectors() {
 
   vectors.push({
     name: 'paid_receipt',
-    description: 'Receipt with x402 payment using payment.scheme',
+    description: 'Receipt with x402 payment using payment.rail',
     receipt: JSON.parse(Buffer.from(paidReceipt.split('.')[1], 'base64url').toString()),
     signed_receipt: paidReceipt,
     verification_keys: verifyKeys,
