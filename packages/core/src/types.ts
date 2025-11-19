@@ -61,7 +61,7 @@ export interface Receipt extends JWTPayload {
     challenge?: Record<string, unknown>;
   };
   payment?: {
-    scheme: 'stripe' | 'l402' | 'x402';
+    rail: 'x402' | 'Stripe' | 'l402';
     amount: number;
     currency: string;
     evidence?: {
