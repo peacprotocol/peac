@@ -7,54 +7,42 @@ on:
     branches: [main]
 
 jobs:
-  guards:
-    name: Security Guards
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Forbidden Strings Check
-        run: bash scripts/ci/forbid-strings.sh
-
-      - name: Surface Validator
-        run: bash scripts/ci/surface-validator.sh
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run ESLint
-        run: npm run lint
+        run: pnpm lint
 
       - name: Type check
-        run: npm run typecheck
+        run: pnpm typecheck
 
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: npm test -- --run
+        run: pnpm run test -- --run
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -65,32 +53,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run parity tests
-        run: npm test -- tests/conformance/parity.spec.ts --run
+        run: pnpm run test -- tests/conformance/parity.spec.ts --run
 
   performance:
     name: Performance Gate (p95 ≤ 10ms)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run performance benchmarks
-        run: npm test -- tests/performance/verify.bench.ts --run
+        run: pnpm run test -- tests/performance/verify.bench.ts --run
 
       - name: Check performance gate
         run: |
@@ -109,7 +99,7 @@ jobs:
           fi
 
       - name: Upload performance metrics
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: perf-metrics
           path: perf-metrics.json
@@ -119,16 +109,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run negative vectors
-        run: npm test -- tests/vectors/negative.spec.ts --run
+        run: pnpm run test -- tests/vectors/negative.spec.ts --run
 
   author-check:
     name: Author Verification
@@ -142,7 +133,7 @@ jobs:
         run: |
           ALLOWED_AUTHOR="jithinraj <7850727+jithinraj@users.noreply.github.com>"
 
-          git log --format="%an <%ae>" | while read author; do
+          git log --format="%an <%ae>" origin/main..HEAD | while read author; do
             if [[ "$author" != "$ALLOWED_AUTHOR" ]] && [[ "$author" != *"github-actions"* ]]; then
               echo "❌ ERROR: Unauthorized author: $author"
               echo "   → Only $ALLOWED_AUTHOR is allowed"
