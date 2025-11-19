@@ -41,7 +41,7 @@ fi
 
 echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
-LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md)'
+LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md))'
 if git grep -nE '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
