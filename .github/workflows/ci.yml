@@ -131,15 +131,30 @@ jobs:
 
       - name: Verify author
         run: |
-          ALLOWED_AUTHOR="jithinraj <7850727+jithinraj@users.noreply.github.com>"
+          ALLOWED_AUTHORS=(
+            "jithinraj <7850727+jithinraj@users.noreply.github.com>"
+            "Jithin Raj <7850727+jithinraj@users.noreply.github.com>"
+          )
 
-          git log --format="%an <%ae>" origin/main..HEAD | while read author; do
-            if [[ "$author" != "$ALLOWED_AUTHOR" ]] && [[ "$author" != *"github-actions"* ]]; then
+          BASE_REF="${GITHUB_BASE_REF:-main}"
+
+          git log --format="%an <%ae>" origin/$BASE_REF..HEAD | while read author; do
+            ok=0
+            for allowed in "${ALLOWED_AUTHORS[@]}"; do
+              if [[ "$author" == "$allowed" ]] || [[ "$author" == *"github-actions"* ]]; then
+                ok=1
+                break
+              fi
+            done
+            if [[ $ok -ne 1 ]]; then
               echo "❌ ERROR: Unauthorized author: $author"
-              echo "   → Only $ALLOWED_AUTHOR is allowed"
+              echo "   → Allowed authors:"
+              printf '      - %s\n' "${ALLOWED_AUTHORS[@]}"
               exit 1
             fi
           done
+
+          echo "✅ Author verification passed"
 
       - name: Check for Co-Authored-By
         run: |
