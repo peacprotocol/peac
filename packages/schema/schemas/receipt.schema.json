@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://peac.dev/schemas/receipt/0.9",
+  "title": "PEAC Receipt Claims",
+  "description": "JSON Schema for PEAC protocol receipt claims (JWS payload)",
+  "type": "object",
+  "required": ["iss", "aud", "iat", "rid", "amt", "cur", "payment"],
+  "additionalProperties": false,
+  "properties": {
+    "iss": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "description": "Issuer URL (must be https://)"
+    },
+    "aud": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "description": "Audience / resource URL (must be https://)"
+    },
+    "iat": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Issued at timestamp (Unix seconds)"
+    },
+    "exp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Expiry timestamp (Unix seconds, optional)"
+    },
+    "rid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Receipt ID (UUIDv7)"
+    },
+    "amt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Amount in smallest currency unit (cents, paise, etc.)"
+    },
+    "cur": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 currency code (uppercase, e.g., USD, EUR, INR)"
+    },
+    "payment": {
+      "type": "object",
+      "required": ["scheme", "reference", "amount", "currency"],
+      "additionalProperties": false,
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Payment rail identifier (e.g., stripe, x402, razorpay)"
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Rail-specific payment ID"
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Amount in smallest currency unit"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code (uppercase)"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": "Idempotency key for deduplication"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Rail-specific metadata (non-normative)"
+        }
+      },
+      "description": "Normalized payment details - MUST be identical across all rails except scheme, reference, and metadata"
+    },
+    "subject": {
+      "type": "object",
+      "required": ["uri"],
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "URI of the resource being paid for"
+        }
+      },
+      "description": "Subject of the receipt (what was paid for)"
+    },
+    "ext": {
+      "type": "object",
+      "properties": {
+        "aipref_snapshot": {
+          "type": "object",
+          "required": ["url", "hash"],
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://",
+              "description": "URL of the AIPREF document"
+            },
+            "hash": {
+              "type": "string",
+              "minLength": 8,
+              "description": "JCS+SHA-256 hash of the AIPREF document"
+            }
+          },
+          "description": "AIPREF snapshot at time of issuance"
+        }
+      },
+      "description": "Extension fields (additive-only growth path, PEIP-defined)"
+    }
+  }
+}

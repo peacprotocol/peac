@@ -1,34 +1,76 @@
-# package managers
+# Dependencies
 node_modules/
-pnpm-debug.log
-package-lock.json
-yarn.lock
+vendor/
+.pnp
+.pnp.js
 
-# builds & caches
+# Build outputs
 dist/
-*.tsbuildinfo
-coverage/
-.turbo/
+build/
+out/
+*.d.ts.map
+*.js.map
 .next/
-.vite/
+.nuxt/
 .cache/
 
-# env & secrets
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+
+# Environment
 .env
-.env.*.local
-.npmrc
-*.pem
+.env.*
+!.env.example
 *.key
+*.pem
+*.p12
 *.pfx
-cosign.key
 
-# OS/editor
-.DS_Store
-Thumbs.db
-.idea/
+# IDEs & Editors
 .vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
 
-# generated artifacts
-**/openapi/generated/**
-sbom-*.json
-provenance-*.intoto.jsonl
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+.*.sw[a-z]
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Local development
+.local/
+.turbo/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated files
+*.generated.*
+
+# Backup files
+*.bak
+*.backup

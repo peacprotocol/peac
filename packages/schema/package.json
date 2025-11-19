@@ -1,32 +1,30 @@
 {
-  "name": "@peacprotocol/schema",
-  "version": "0.9.12.1",
-  "description": "PEAC Protocol JSON Schema - Single Source of Truth",
+  "name": "@peac/schema",
+  "version": "0.9.15",
+  "description": "PEAC Protocol JSON schemas, OpenAPI specs, and TypeScript types",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist",
-    "package.json",
-    "README.md",
-    "LICENSE"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/schema"
+  },
+  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "license": "MIT",
   "scripts": {
-    "build": "rm -rf dist tsconfig.tsbuildinfo && tsc --build",
-    "typecheck": "tsc --noEmit",
-    "validate": "echo 'Validation will be added'",
-    "test": "echo 'Tests will be added'"
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
-    "ajv": "^8.12.0",
-    "ajv-formats": "^2.1.1"
+    "@peac/control": "workspace:*",
+    "@peac/kernel": "workspace:*",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/jest": "^29.0.0",
-    "@typescript-eslint/eslint-plugin": "6",
-    "@typescript-eslint/parser": "6",
-    "eslint": "8",
-    "jest": "^29.0.0",
-    "typescript": "^5.2.0"
-  },
-  "license": "Apache-2.0"
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
 }

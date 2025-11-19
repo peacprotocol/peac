@@ -1,0 +1,28 @@
+{
+  "name": "@peac/rails-x402",
+  "version": "0.9.15",
+  "description": "x402 payment rail adapter for PEAC protocol",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/rails/x402"
+  },
+  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}

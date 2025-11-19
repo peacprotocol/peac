@@ -1,64 +1,46 @@
 {
-  "name": "@peacprotocol/monorepo",
-  "version": "0.9.14",
+  "name": "@peac/monorepo",
+  "version": "0.9.15",
   "private": true,
-  "description": "PEAC Protocol v0.9.14 - Zero-BC wire format with typ: peac.receipt/0.9 and domain policy",
-  "packageManager": "pnpm@8.15.0",
+  "description": "PEAC Protocol - Cryptographic receipts for agentic commerce",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git"
+  },
+  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "license": "MIT",
   "workspaces": [
-    "apps/*",
     "packages/*",
-    "packages/adapters/*"
+    "packages/rails/*",
+    "packages/mappings/*",
+    "apps/*"
   ],
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
     "build": "turbo run build",
-    "build:types": "turbo run build:types",
-    "test": "turbo run test",
-    "test:coverage": "turbo run test:coverage",
-    "test:crawler": "pnpm -w run test --filter @peac/crawler",
-    "ci:test:unit": "pnpm -r --filter='!@peac/crawler' run test:ci",
-    "ci:test:crawler": "pnpm --filter @peac/crawler exec jest --config jest.config.ts --coverage --ci --runInBand --forceExit",
-    "ci:nightly": "pnpm -w build && pnpm run ci:test:unit && pnpm run ci:test:crawler",
-    "ci:doctor": "pnpm -w format:check && pnpm -w typecheck && pnpm run ci:nightly",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "conformance": "turbo run conformance",
-    "perf": "turbo run perf",
-    "sbom": "turbo run sbom",
-    "release": "turbo run release",
-    "clean": "turbo run clean",
-    "dev": "pnpm -w run dev --filter @peac/app-api",
-    "start": "pnpm -w run start --filter @peac/app-api",
-    "dep-cruiser": "npx depcruise packages/ --validate .dependency-cruiser.json",
-    "prepare": "husky install"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,md,yml,yaml}": "prettier --write"
+    "dev": "turbo run dev",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "ci:guards": "bash scripts/ci/forbid-strings.sh",
+    "ci:surface": "bash scripts/ci/surface-validator.sh",
+    "ci:all": "pnpm run ci:guards && pnpm run ci:surface && pnpm run lint && pnpm run typecheck && pnpm test"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
-    "@types/node": "^20.19.13",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "ajv": "^8.12.0",
-    "ajv-cli": "^5.0.0",
-    "ajv-formats": "^2.1.1",
-    "dependency-cruiser": "^16.0.0",
-    "eslint": "^8.50.0",
-    "husky": "^8.0.0",
-    "jest": "^29.0.0",
-    "lint-staged": "^15.0.0",
-    "prettier": "^3.3.3",
-    "tsup": "^8.0.0",
-    "tsx": "^4.0.0",
-    "turbo": "^1.13.0",
-    "typescript": "^5.2.0"
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "turbo": "^1.11.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
   },
   "engines": {
-    "node": ">=18 <23",
+    "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "license": "Apache-2.0"
+  "packageManager": "pnpm@8.15.0"
 }

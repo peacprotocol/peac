@@ -1,0 +1,30 @@
+{
+  "name": "@peac/protocol",
+  "version": "0.9.15",
+  "description": "PEAC protocol implementation - receipt issuance and verification",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/protocol"
+  },
+  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@peac/schema": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "uuidv7": "^0.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}

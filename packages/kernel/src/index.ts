@@ -1,0 +1,48 @@
+/**
+ * PEAC Kernel
+ * Normative constants, errors, and registries for the PEAC protocol
+ *
+ * @packageDocumentation
+ */
+
+// Export types
+export type {
+  ErrorDefinition,
+  PaymentRailEntry,
+  ControlEngineEntry,
+  TransportMethodEntry,
+  AgentProtocolEntry,
+} from "./types.js";
+
+// Export constants
+export {
+  WIRE_TYPE,
+  ALGORITHMS,
+  HEADERS,
+  DISCOVERY,
+  JWKS,
+  RECEIPT,
+  LIMITS,
+  CONSTANTS,
+} from "./constants.js";
+
+// Export errors
+export {
+  ERROR_CODES,
+  ERRORS,
+  getError,
+  isRetriable,
+} from "./errors.js";
+
+// Export registries
+export {
+  PAYMENT_RAILS,
+  CONTROL_ENGINES,
+  TRANSPORT_METHODS,
+  AGENT_PROTOCOLS,
+  REGISTRIES,
+  findPaymentRail,
+  findControlEngine,
+  findTransportMethod,
+  findAgentProtocol,
+} from "./registries.js";

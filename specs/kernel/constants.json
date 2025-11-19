@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "0.9.15",
+  "description": "PEAC protocol constants - normative source of truth",
+  "wire_format": {
+    "type": "peac.receipt/0.9",
+    "frozen_until": "v1.0.0",
+    "description": "JWT type header value for PEAC receipts"
+  },
+  "algorithms": {
+    "supported": ["EdDSA"],
+    "default": "EdDSA",
+    "description": "Cryptographic signature algorithms"
+  },
+  "headers": {
+    "receipt": "PEAC-Receipt",
+    "dpop": "DPoP",
+    "description": "HTTP header names for PEAC protocol"
+  },
+  "discovery": {
+    "manifest_path": "/.well-known/peac.txt",
+    "manifest_version": "peac/0.9",
+    "cache_ttl_seconds": 3600,
+    "description": "Discovery manifest location and settings"
+  },
+  "jwks": {
+    "rotation_days": 90,
+    "overlap_days": 7,
+    "emergency_revocation_hours": 24,
+    "description": "JWKS rotation and revocation settings"
+  },
+  "receipt": {
+    "min_receipt_id_length": 16,
+    "max_receipt_id_length": 64,
+    "default_ttl_seconds": 86400,
+    "description": "Receipt validation constants"
+  },
+  "limits": {
+    "max_amount_cents": 999999999999,
+    "min_amount_cents": 1,
+    "description": "Payment amount validation limits"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@peac/consent",
+  "version": "0.9.15",
+  "description": "PEAC consent pillar (placeholder for v0.9.18+)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}

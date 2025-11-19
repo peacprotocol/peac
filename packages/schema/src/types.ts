@@ -1,196 +1,176 @@
 /**
- * PEAC Protocol v0.9.11 Types
- * Core type definitions for the PEAC Protocol
+ * PEAC Protocol TypeScript types
  */
 
-/**
- * Agreement status values
- */
-export type AgreementStatus = 'valid' | 'invalid';
+import { PEAC_WIRE_TYP, PEAC_ALG } from './constants';
+import type { ControlBlock } from './control';
+import type { PaymentEvidence, PaymentRailId } from './evidence';
 
 /**
- * Reasons why an agreement might be invalid
+ * Subject of the receipt (what was paid for)
  */
-export type AgreementInvalidReason =
-  | 'expired'
-  | 'revoked'
-  | 'malformed'
-  | 'unauthorized'
-  | 'duplicate';
-
-/**
- * Agreement proposal structure
- */
-export interface AgreementProposal {
-  id: string;
-  fingerprint: string;
-  status: AgreementStatus;
-  expires_at?: string;
-  created_at: string;
-  updated_at?: string;
-  reason?: AgreementInvalidReason;
-  purpose?: string;
-  metadata?: Record<string, unknown>;
+export interface Subject {
+  /** URI of the resource being paid for */
+  uri: string;
 }
 
 /**
- * Agreement structure (validated proposal)
+ * AIPREF snapshot (if applicable)
  */
-export interface Agreement extends AgreementProposal {
-  status: AgreementStatus;
-  reason?: AgreementInvalidReason;
-  protocol_version?: string;
-  proposal?: AgreementProposal;
+export interface AIPREFSnapshot {
+  /** URL of the AIPREF document */
+  url: string;
+
+  /** JCS+SHA-256 hash of the AIPREF document */
+  hash: string;
 }
 
 /**
- * Payment charge request
+ * Extension fields (additive-only growth path)
  */
-export interface PaymentChargeRequest {
-  amount: string;
-  currency?: string;
-  metadata?: Record<string, unknown>;
+export interface ReceiptExtensions {
+  /** AIPREF snapshot at time of issuance */
+  aipref_snapshot?: AIPREFSnapshot;
+
+  /** Control block for mandate management (CAL) */
+  control?: ControlBlock;
+
+  /** Additional extensions (PEIP-defined) */
+  [key: string]: unknown;
 }
 
 /**
- * Payment receipt
+ * JWS Header for PEAC receipts
  */
-export interface PaymentReceipt {
-  id: string;
-  amount: string;
-  currency: string;
-  agreement_id: string;
-  agreement_fingerprint: string;
-  created_at: string;
-  status: 'pending' | 'completed' | 'failed';
-  metadata?: Record<string, unknown>;
+export interface PEACReceiptHeader {
+  /** Wire format version - FROZEN at 0.9 until GA */
+  typ: typeof PEAC_WIRE_TYP;
+
+  /** Signature algorithm - Ed25519 */
+  alg: typeof PEAC_ALG;
+
+  /** Key ID (ISO 8601 timestamp) */
+  kid: string;
 }
 
 /**
- * Check if an object is an agreement proposal
+ * PEAC Receipt Claims (JWS payload)
  */
-export function isAgreementProposal(obj: unknown): obj is AgreementProposal {
-  if (!obj || typeof obj !== 'object') return false;
-  const proposal = obj as Record<string, unknown>;
-  return (
-    typeof proposal.id === 'string' &&
-    typeof proposal.fingerprint === 'string' &&
-    (proposal.status === 'valid' || proposal.status === 'invalid')
-  );
+export interface PEACReceiptClaims {
+  /** Issuer URL (https://) */
+  iss: string;
+
+  /** Audience / resource URL */
+  aud: string;
+
+  /** Issued at (Unix timestamp seconds) */
+  iat: number;
+
+  /** Expiry (Unix timestamp seconds, optional) */
+  exp?: number;
+
+  /** Receipt ID (UUIDv7) */
+  rid: string;
+
+  /** Amount (smallest currency unit) */
+  amt: number;
+
+  /** Currency (ISO 4217 uppercase) */
+  cur: string;
+
+  /** Normalized payment details */
+  payment: PaymentEvidence;
+
+  /** Subject (what was paid for) */
+  subject?: Subject;
+
+  /** Extensions (additive-only) */
+  ext?: ReceiptExtensions;
 }
 
 /**
- * Check if an agreement is valid (status and expiration)
+ * Complete PEAC Receipt (header + claims)
  */
-export function isAgreementValid(agreement: Agreement): boolean {
-  if (agreement.status !== 'valid') return false;
-  if (!agreement.expires_at) return true;
-
-  const now = new Date();
-  const expiresAt = new Date(agreement.expires_at);
-  return expiresAt > now;
+export interface PEACReceipt {
+  header: PEACReceiptHeader;
+  claims: PEACReceiptClaims;
 }
 
 /**
- * Extract agreement ID from header value
+ * Verify request body
  */
-export function extractAgreementId(headerValue: string): string | null {
-  if (!headerValue) return null;
-
-  // Handle "agr_<ulid>" format
-  const match = headerValue.match(/^agr_[0-9A-Z]{26}$/i);
-  return match ? headerValue : null;
+export interface VerifyRequest {
+  /** JWS compact serialization */
+  receipt_jws: string;
 }
 
 /**
- * PEAC Policy v0.9.11 Types
+ * Verify response (success)
  */
+export interface VerifyResponseSuccess {
+  /** Verification succeeded */
+  ok: true;
 
-export interface PolicySite {
-  name: string;
-  domain: string;
-  contact?: string;
-}
+  /** JWS header (decoded) */
+  header: PEACReceiptHeader;
 
-export interface PolicyAttribution {
-  format?: string;
-  required?: boolean;
-}
+  /** Claims (decoded and validated) */
+  claims: PEACReceiptClaims;
 
-export interface PolicyPrivacy {
-  retention_days?: number;
-}
-
-export interface PolicyLogging {
-  sink?: string;
-}
-
-export interface PolicyExports {
-  enabled?: boolean;
-  auth?: 'signature' | 'token';
-  max_rows?: number;
-}
-
-export interface PolicyRateLimits {
-  anonymous?: number;
-  attributed?: number;
-  verified?: number;
-}
-
-export interface PolicyReceipts {
-  mode?: 'disabled' | 'optional' | 'required';
-  hosted?: boolean;
-}
-
-export interface PolicyWebBotAuth {
-  accepted?: boolean;
-}
-
-export interface PolicyIdentity {
-  web_bot_auth?: PolicyWebBotAuth;
+  /** Performance metrics */
+  perf?: {
+    verify_ms: number;
+    jwks_fetch_ms?: number;
+  };
 }
 
 /**
- * PEAC Policy structure for v0.9.11
+ * Verify response (failure)
  */
-export interface Policy {
+export interface VerifyResponseFailure {
+  /** Verification failed */
+  ok: false;
+
+  /** Error reason */
+  reason: string;
+
+  /** Error details */
+  details?: string;
+}
+
+/**
+ * Verify response (union)
+ */
+export type VerifyResponse = VerifyResponseSuccess | VerifyResponseFailure;
+
+/**
+ * Discovery manifest (peac.txt parsed)
+ */
+export interface PEACDiscovery {
+  /** PEAC protocol version */
   version: string;
-  site: PolicySite;
-  attribution?: PolicyAttribution;
-  privacy?: PolicyPrivacy;
-  logging?: PolicyLogging;
-  exports?: PolicyExports;
-  heavy_paths?: string[];
-  rate_limits?: PolicyRateLimits;
-  receipts?: PolicyReceipts;
-  identity?: PolicyIdentity;
-}
 
-/**
- * Check if an object is a valid policy
- */
-export function isPolicyValid(obj: unknown): obj is Policy {
-  if (!obj || typeof obj !== 'object') return false;
-  const policy = obj as Record<string, unknown>;
+  /** Issuer URL */
+  issuer: string;
 
-  // Required fields
-  if (typeof policy.version !== 'string') return false;
-  if (!policy.site || typeof policy.site !== 'object') return false;
+  /** Verify endpoint URL */
+  verify: string;
 
-  const site = policy.site as Record<string, unknown>;
-  if (typeof site.name !== 'string' || typeof site.domain !== 'string') return false;
+  /** JWKS URL */
+  jwks: string;
 
-  return true;
-}
+  /** Supported payment rails */
+  payments: Array<{
+    rail: string;
+    info?: string;
+  }>;
 
-/**
- * Validate policy attribution format regex
- */
-export function validateAttributionFormat(format: string): boolean {
-  try {
-    new RegExp(format);
-    return true;
-  } catch {
-    return false;
-  }
+  /** AIPREF URL (optional) */
+  aipref?: string;
+
+  /** SLO endpoint (optional) */
+  slos?: string;
+
+  /** Security contact (optional) */
+  security?: string;
 }

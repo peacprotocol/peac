@@ -1,0 +1,11 @@
+{
+  "description": "Structurally valid envelope with invalid JWS signature",
+  "jws_compact": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ.eyJhdXRoIjp7ImlzcyI6Imh0dHBzOi8vYXBpLmV4YW1wbGUubmV0IiwiYXVkIjoiaHR0cHM6Ly9jbGllbnQuZXhhbXBsZS5uZXQiLCJzdWIiOiJhZ2VudDpkZW1vLWFnZW50LTEiLCJpYXQiOjE3MzcxNDAyMDAsImV4cCI6MTczNzE0MzgwMCwicmlkIjoiMDFIUVpLNlk3Sk04QzNOUVBKWUY4UkJXSFQiLCJwb2xpY3lfaGFzaCI6ImFiYzEyMyIsInBvbGljeV91cmkiOiJodHRwczovL2FwaS5leGFtcGxlLm5ldC8ud2VsbC1rbm93bi9haXByZWYuanNvbiIsImNvbnRyb2wiOnsiY2hhaW4iOlt7ImVuZ2luZSI6ImFjY2Vzcy1wb2xpY3ktc2VydmljZSIsInJlc3VsdCI6ImFsbG93In1dLCJkZWNpc2lvbiI6ImFsbG93IiwiY29tYmluYXRvciI6ImFueV9jYW5fdmV0byJ9fSwiZXZpZGVuY2UiOnt9LCJtZXRhIjp7fX0.INVALID_SIGNATURE_BASE64URL_DATA_THAT_WILL_FAIL_VERIFICATION",
+  "expected_error": {
+    "code": "E_INVALID_SIGNATURE",
+    "category": "security",
+    "severity": "error",
+    "retryable": false,
+    "remediation": "JWS signature verification failed"
+  }
+}

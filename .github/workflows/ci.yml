@@ -1,0 +1,177 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feat/*]
+  pull_request:
+    branches: [main]
+
+jobs:
+  guards:
+    name: Security Guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Forbidden Strings Check
+        run: bash scripts/ci/forbid-strings.sh
+
+      - name: Surface Validator
+        run: bash scripts/ci/surface-validator.sh
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --run
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        if: always()
+
+  parity:
+    name: Rail Parity (CRITICAL)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run parity tests
+        run: npm test -- tests/conformance/parity.spec.ts --run
+
+  performance:
+    name: Performance Gate (p95 ≤ 10ms)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run performance benchmarks
+        run: npm test -- tests/performance/verify.bench.ts --run
+
+      - name: Check performance gate
+        run: |
+          if [ -f perf-metrics.json ]; then
+            p95=$(jq -r '.p95_ms' perf-metrics.json)
+            echo "Verify p95: ${p95}ms"
+            if (( $(echo "$p95 > 10" | bc -l) )); then
+              echo "❌ PERFORMANCE GATE FAILED: p95 ${p95}ms > 10ms"
+              exit 1
+            else
+              echo "✅ PERFORMANCE GATE PASSED: p95 ${p95}ms ≤ 10ms"
+            fi
+          else
+            echo "❌ ERROR: perf-metrics.json not found"
+            exit 1
+          fi
+
+      - name: Upload performance metrics
+        uses: actions/upload-artifact@v3
+        with:
+          name: perf-metrics
+          path: perf-metrics.json
+
+  negative-vectors:
+    name: Negative Test Vectors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run negative vectors
+        run: npm test -- tests/vectors/negative.spec.ts --run
+
+  author-check:
+    name: Author Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify author
+        run: |
+          ALLOWED_AUTHOR="jithinraj <7850727+jithinraj@users.noreply.github.com>"
+
+          git log --format="%an <%ae>" | while read author; do
+            if [[ "$author" != "$ALLOWED_AUTHOR" ]] && [[ "$author" != *"github-actions"* ]]; then
+              echo "❌ ERROR: Unauthorized author: $author"
+              echo "   → Only $ALLOWED_AUTHOR is allowed"
+              exit 1
+            fi
+          done
+
+      - name: Check for Co-Authored-By
+        run: |
+          if git log --format=%B | grep -i "Co-Authored-By:"; then
+            echo "❌ ERROR: Found Co-Authored-By trailer"
+            echo "   → Single author commits only"
+            exit 1
+          fi
+
+  conventional-commits:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        run: |
+          git log --format=%s origin/main..HEAD | while read msg; do
+            if ! echo "$msg" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"; then
+              echo "❌ ERROR: Invalid commit message: $msg"
+              echo "   → Use conventional commits format"
+              exit 1
+            fi
+          done

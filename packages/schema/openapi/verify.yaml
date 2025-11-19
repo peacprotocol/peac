@@ -1,0 +1,448 @@
+openapi: 3.1.0
+info:
+  title: PEAC Protocol Verification API
+  version: 0.9.15
+  description: |
+    Public endpoint for verifying PEAC cryptographic receipts.
+    Wire format frozen at peac.receipt/0.9 with v1.0-equivalent semantics.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: PEAC Protocol
+    url: https://peac.dev
+servers:
+  - url: https://api.example.com
+    description: Example PEAC issuer
+
+paths:
+  /verify:
+    post:
+      operationId: verifyReceipt
+      summary: Verify a PEAC receipt
+      description: |
+        Verifies the cryptographic signature and claims of a PEAC receipt.
+
+        **Security features:**
+        - Rate limiting: 100 req/s per IP, 1000 req/s global
+        - Circuit breaker for JWKS fetch (5 failures → 60s open)
+        - Response caching: 5min valid, 1min invalid
+        - CPU budget: ≤50ms per request
+
+        **DoS mitigation:**
+        - SSRF-safe JWKS fetching
+        - JWS size limits (≤16KB)
+        - Signature verification timeout
+      tags:
+        - Verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+            examples:
+              valid_stripe_receipt:
+                summary: Valid Stripe receipt
+                value:
+                  receipt_jws: "eyJ0eXAiOiJwZWFjLnJlY2VpcHQvMC45IiwiYWxnIjoiRWREU0EiLCJraWQiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXBwLmV4YW1wbGUuY29tIiwiaWF0IjoxNzM2OTM0NjAwLCJyaWQiOiIwMTkzYzRkMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDAiLCJhbXQiOjk5OTksImN1ciI6IlVTRCIsInBheW1lbnQiOnsic2NoZW1lIjoic3RyaXBlIiwicmVmZXJlbmNlIjoiY3NfMTIzNDU2Iiwi YW1vdW50Ijo5OTk5LCJjdXJyZW5jeSI6IlVTRCJ9fQ.signature"
+      responses:
+        '200':
+          description: Verification result (success or failure)
+          headers:
+            Cache-Control:
+              description: Caching directive
+              schema:
+                type: string
+                example: "public, max-age=300"
+            Vary:
+              description: Vary header for cache invalidation
+              schema:
+                type: string
+                example: "PEAC-Receipt"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/VerifyResponseSuccess'
+                  - $ref: '#/components/schemas/VerifyResponseFailure'
+              examples:
+                success:
+                  summary: Successful verification
+                  value:
+                    ok: true
+                    header:
+                      typ: "peac.receipt/0.9"
+                      alg: "EdDSA"
+                      kid: "2025-01-15T10:30:00Z"
+                    claims:
+                      iss: "https://api.example.com"
+                      aud: "https://app.example.com"
+                      iat: 1736934600
+                      rid: "0193c4d0-0000-7000-8000-000000000000"
+                      amt: 9999
+                      cur: "USD"
+                      payment:
+                        scheme: "stripe"
+                        reference: "cs_123456"
+                        amount: 9999
+                        currency: "USD"
+                    perf:
+                      verify_ms: 8.2
+                      jwks_fetch_ms: 45.1
+                failure_invalid_signature:
+                  summary: Invalid signature
+                  value:
+                    ok: false
+                    reason: "invalid_signature"
+                    details: "Ed25519 signature verification failed"
+                failure_expired:
+                  summary: Expired receipt
+                  value:
+                    ok: false
+                    reason: "expired"
+                    details: "Receipt expired at 2025-01-15T12:00:00Z"
+        '400':
+          description: Bad request (malformed input)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                malformed_jws:
+                  summary: Malformed JWS
+                  value:
+                    type: "https://peac.dev/errors/malformed-jws"
+                    title: "Malformed JWS"
+                    status: 400
+                    detail: "JWS does not have three dot-separated parts"
+                    instance: "/verify"
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              schema:
+                type: integer
+                example: 60
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                rate_limit:
+                  summary: Rate limit exceeded
+                  value:
+                    type: "https://peac.dev/errors/rate-limit"
+                    title: "Rate Limit Exceeded"
+                    status: 429
+                    detail: "IP-based rate limit: 100 requests per second"
+                    instance: "/verify"
+        '503':
+          description: Service unavailable (circuit breaker open)
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              schema:
+                type: integer
+                example: 60
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                circuit_breaker:
+                  summary: Circuit breaker open
+                  value:
+                    type: "https://peac.dev/errors/circuit-breaker"
+                    title: "Service Unavailable"
+                    status: 503
+                    detail: "JWKS fetch circuit breaker is open (5 consecutive failures)"
+                    instance: "/verify"
+
+  /.well-known/peac.txt:
+    get:
+      operationId: getDiscovery
+      summary: Get PEAC discovery manifest
+      description: |
+        Returns the PEAC discovery manifest in YAML format (≤20 lines).
+
+        **Format:** YAML only (no JSON mirror)
+        **Size limit:** 2000 bytes
+        **Cache:** public, max-age=3600
+      tags:
+        - Discovery
+      responses:
+        '200':
+          description: PEAC discovery manifest
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: "public, max-age=3600"
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |
+                version: peac/0.9
+                issuer: https://api.example.com
+                verify: https://api.example.com/verify
+                jwks: https://keys.peac.dev/jwks.json
+                payments:
+                  - scheme: stripe
+                    info: https://docs.example.com/payments/stripe
+                  - scheme: x402
+                    info: https://docs.example.com/payments/x402
+                aipref: https://api.example.com/.well-known/aipref.json
+                slos: https://api.example.com/slo
+                security: security@example.com
+
+components:
+  schemas:
+    VerifyRequest:
+      type: object
+      required:
+        - receipt_jws
+      additionalProperties: false
+      properties:
+        receipt_jws:
+          type: string
+          minLength: 16
+          maxLength: 16384
+          description: JWS compact serialization of the PEAC receipt
+          example: "eyJ0eXAiOiJwZWFjLnJlY2VpcHQvMC45IiwiYWxnIjoiRWREU0EiLCJraWQiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9..."
+
+    VerifyResponseSuccess:
+      type: object
+      required:
+        - ok
+        - header
+        - claims
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          const: true
+          description: Verification succeeded
+        header:
+          $ref: '#/components/schemas/JWSHeader'
+        claims:
+          $ref: '#/components/schemas/ReceiptClaims'
+        perf:
+          type: object
+          properties:
+            verify_ms:
+              type: number
+              description: Time spent verifying signature (milliseconds)
+            jwks_fetch_ms:
+              type: number
+              description: Time spent fetching JWKS (milliseconds, if not cached)
+
+    VerifyResponseFailure:
+      type: object
+      required:
+        - ok
+        - reason
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          const: false
+          description: Verification failed
+        reason:
+          type: string
+          enum:
+            - invalid_signature
+            - expired
+            - invalid_claims
+            - unknown_issuer
+            - jwks_fetch_failed
+            - malformed_jws
+          description: Machine-readable failure reason
+        details:
+          type: string
+          description: Human-readable error details
+
+    JWSHeader:
+      type: object
+      required:
+        - typ
+        - alg
+        - kid
+      additionalProperties: false
+      properties:
+        typ:
+          type: string
+          const: "peac.receipt/0.9"
+          description: Wire format version (frozen at 0.9 until GA)
+        alg:
+          type: string
+          const: "EdDSA"
+          description: Signature algorithm (Ed25519)
+        kid:
+          type: string
+          minLength: 8
+          description: Key ID (ISO 8601 timestamp)
+          example: "2025-01-15T10:30:00Z"
+
+    ReceiptClaims:
+      type: object
+      required:
+        - iss
+        - aud
+        - iat
+        - rid
+        - amt
+        - cur
+        - payment
+      additionalProperties: false
+      properties:
+        iss:
+          type: string
+          format: uri
+          pattern: "^https://"
+          description: Issuer URL (must be https://)
+          example: "https://api.example.com"
+        aud:
+          type: string
+          format: uri
+          pattern: "^https://"
+          description: Audience / resource URL
+          example: "https://app.example.com"
+        iat:
+          type: integer
+          minimum: 0
+          description: Issued at timestamp (Unix seconds)
+          example: 1736934600
+        exp:
+          type: integer
+          minimum: 0
+          description: Expiry timestamp (Unix seconds, optional)
+        rid:
+          type: string
+          pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          description: Receipt ID (UUIDv7)
+          example: "0193c4d0-0000-7000-8000-000000000000"
+        amt:
+          type: integer
+          minimum: 0
+          description: Amount in smallest currency unit
+          example: 9999
+        cur:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          description: ISO 4217 currency code (uppercase)
+          example: "USD"
+        payment:
+          $ref: '#/components/schemas/NormalizedPayment'
+        subject:
+          $ref: '#/components/schemas/Subject'
+        ext:
+          $ref: '#/components/schemas/Extensions'
+
+    NormalizedPayment:
+      type: object
+      required:
+        - scheme
+        - reference
+        - amount
+        - currency
+      additionalProperties: false
+      properties:
+        scheme:
+          type: string
+          minLength: 1
+          description: Payment rail identifier
+          example: "stripe"
+        reference:
+          type: string
+          minLength: 1
+          description: Rail-specific payment ID
+          example: "cs_123456"
+        amount:
+          type: integer
+          minimum: 0
+          description: Amount in smallest currency unit
+          example: 9999
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          description: ISO 4217 currency code
+          example: "USD"
+        idempotency_key:
+          type: string
+          description: Idempotency key for deduplication
+        metadata:
+          type: object
+          description: Rail-specific metadata (non-normative)
+
+    Subject:
+      type: object
+      required:
+        - uri
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          format: uri
+          pattern: "^https://"
+          description: URI of the resource being paid for
+          example: "https://app.example.com/api/resource/123"
+
+    Extensions:
+      type: object
+      properties:
+        aipref_snapshot:
+          $ref: '#/components/schemas/AIPREFSnapshot'
+      description: Extension fields (additive-only, PEIP-defined)
+
+    AIPREFSnapshot:
+      type: object
+      required:
+        - url
+        - hash
+      additionalProperties: false
+      properties:
+        url:
+          type: string
+          format: uri
+          pattern: "^https://"
+          description: URL of the AIPREF document
+          example: "https://api.example.com/.well-known/aipref.json"
+        hash:
+          type: string
+          minLength: 8
+          description: JCS+SHA-256 hash of the AIPREF document
+          example: "a1b2c3d4e5f67890"
+
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference identifying the problem type (RFC 9457)
+          example: "https://peac.dev/errors/rate-limit"
+        title:
+          type: string
+          description: Short, human-readable summary
+          example: "Rate Limit Exceeded"
+        status:
+          type: integer
+          description: HTTP status code
+          example: 429
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence
+          example: "IP-based rate limit: 100 requests per second"
+        instance:
+          type: string
+          format: uri
+          description: URI reference identifying the specific occurrence
+          example: "/verify"
+      description: RFC 9457 Problem Details for HTTP APIs

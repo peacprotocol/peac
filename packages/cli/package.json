@@ -1,55 +1,34 @@
 {
   "name": "@peac/cli",
-  "version": "0.9.13.2",
-  "description": "PEAC Protocol CLI tools for discovery, hashing, and verification",
-  "type": "module",
+  "version": "0.9.15",
+  "description": "PEAC protocol command-line tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "peac": "./bin/peac.js"
+    "peac": "./dist/index.js"
   },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/cli"
   },
-  "files": [
-    "dist/**/*",
-    "bin/**/*"
-  ],
+  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "license": "Apache-2.0",
   "scripts": {
-    "build": "tsup && chmod +x bin/peac.js",
-    "build:types": "tsc -b tsconfig.types.json",
-    "dev": "tsx src/cli.ts",
-    "pretest": "pnpm build",
-    "test": "node --test src/*.test.js",
-    "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@peac/core": "workspace:^0.9.14",
-    "@peac/disc": "workspace:^0.9.14",
-    "commander": "^11.0.0",
-    "chalk": "^5.3.0"
+    "@peac/schema": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "commander": "^11.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "tsx": "^4.0.0",
-    "tsup": "^8.0.0"
-  },
-  "keywords": [
-    "peac",
-    "cli",
-    "discovery",
-    "verification",
-    "hash"
-  ],
-  "author": "PEAC Protocol",
-  "license": "Apache-2.0",
-  "engines": {
-    "node": ">=18.0.0"
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
   }
 }

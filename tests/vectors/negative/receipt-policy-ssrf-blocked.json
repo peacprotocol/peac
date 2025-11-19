@@ -1,0 +1,23 @@
+{
+  "auth": {
+    "iss": "https://malicious.example.com",
+    "aud": "https://victim.example.net",
+    "sub": "agent:attacker-probing-1",
+    "iat": 1737140000,
+    "rid": "01HQZK5X9KL3M0NQPJRW8VFYZ1",
+    "policy_hash": "fake-hash-triggering-fetch-attempt",
+    "policy_uri": "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
+    "control": {
+      "chain": [
+        {
+          "engine": "fake-engine",
+          "result": "allow"
+        }
+      ],
+      "decision": "allow",
+      "combinator": "any_can_veto"
+    }
+  },
+  "evidence": {},
+  "meta": {}
+}
