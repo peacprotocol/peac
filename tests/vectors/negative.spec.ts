@@ -22,7 +22,7 @@ describe("Negative Test Vectors", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_test",
         privateKey,
         kid: "2025-01-26T12:00:00Z",
@@ -51,7 +51,7 @@ describe("Negative Test Vectors", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_test",
         privateKey,
         kid: "2025-01-26T12:00:00Z",
@@ -78,7 +78,7 @@ describe("Negative Test Vectors", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_test",
         privateKey,
         kid: "2025-01-26T12:00:00Z",
@@ -108,7 +108,7 @@ describe("Negative Test Vectors", () => {
         aud: "https://legitimate.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_test",
         privateKey,
         kid: "2025-01-26T12:00:00Z",
@@ -136,7 +136,7 @@ describe("Negative Test Vectors", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_test",
         privateKey,
         kid: "2025-01-26T12:00:00Z",
@@ -146,7 +146,7 @@ describe("Negative Test Vectors", () => {
       const { payload } = decode<PEACReceiptClaims>(validJWS);
       const tamperedPayload = {
         ...payload,
-        payment: { ...payload.payment, scheme: "x402" }, // Changed!
+        payment: { ...payload.payment, rail: "x402" }, // Changed!
       };
 
       const parts = validJWS.split(".");
@@ -179,7 +179,7 @@ describe("Negative Test Vectors", () => {
         amt: 9999,
         cur: "USD",
         payment: {
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_test",
           amount: 9999,
           currency: "USD",
@@ -213,7 +213,7 @@ describe("Negative Test Vectors", () => {
         amt: 9999,
         cur: "USD",
         payment: {
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_test",
           amount: 9999,
           currency: "USD",
@@ -264,7 +264,7 @@ describe("Negative Test Vectors", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_test",
         exp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
         privateKey,
@@ -290,7 +290,7 @@ describe("Negative Test Vectors", () => {
           aud: "https://app.example.com",
           amt: -9999, // Negative!
           cur: "USD",
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_test",
           privateKey,
           kid: "2025-01-26T12:00:00Z",
@@ -309,7 +309,7 @@ describe("Negative Test Vectors", () => {
           aud: "https://app.example.com",
           amt: 9999,
           cur: "usd", // Lowercase!
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_test",
           privateKey,
           kid: "2025-01-26T12:00:00Z",
@@ -328,7 +328,7 @@ describe("Negative Test Vectors", () => {
           aud: "https://app.example.com",
           amt: 9999,
           cur: "USD",
-          scheme: "stripe",
+          rail: "stripe",
           reference: "cs_test",
           privateKey,
           kid: "2025-01-26T12:00:00Z",
@@ -349,7 +349,7 @@ describe("Negative Test Vectors", () => {
         aud: "https://app.example.com",
         amt: 9999,
         cur: "USD",
-        scheme: "stripe",
+        rail: "stripe",
         reference: "cs_test",
         privateKey: privKey1,
         kid: "2025-01-26T12:00:00Z",

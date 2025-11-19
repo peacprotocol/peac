@@ -30,11 +30,11 @@ security: security@example.com
     expect(discovery.jwks).toBe("https://keys.peacprotocol.org/jwks.json");
     expect(discovery.payments).toHaveLength(2);
     expect(discovery.payments[0]).toEqual({
-      scheme: "stripe",
+      rail: "stripe",
       info: "https://docs.example.com/payments/stripe",
     });
     expect(discovery.payments[1]).toEqual({
-      scheme: "x402",
+      rail: "x402",
       info: "https://docs.example.com/payments/x402",
     });
     expect(discovery.aipref).toBe("https://api.example.com/.well-known/aipref.json");
@@ -148,7 +148,7 @@ payments:
     const discovery = parseDiscovery(manifest);
 
     expect(discovery.payments).toHaveLength(2);
-    expect(discovery.payments[0]).toEqual({ scheme: "stripe" });
-    expect(discovery.payments[1]).toEqual({ scheme: "x402" });
+    expect(discovery.payments[0]).toEqual({ rail: "stripe" });
+    expect(discovery.payments[1]).toEqual({ rail: "x402" });
   });
 });

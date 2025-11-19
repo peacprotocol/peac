@@ -2,28 +2,37 @@
   "name": "@peac/kernel",
   "version": "0.9.15",
   "description": "PEAC protocol kernel - normative constants, errors, and registries",
-  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./constants": {
       "types": "./dist/constants.d.ts",
+      "import": "./dist/constants.js",
+      "require": "./dist/constants.js",
       "default": "./dist/constants.js"
     },
     "./errors": {
       "types": "./dist/errors.d.ts",
+      "import": "./dist/errors.js",
+      "require": "./dist/errors.js",
       "default": "./dist/errors.js"
     },
     "./registries": {
       "types": "./dist/registries.d.ts",
+      "import": "./dist/registries.js",
+      "require": "./dist/registries.js",
       "default": "./dist/registries.js"
     },
     "./types": {
       "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.js",
       "default": "./dist/types.js"
     }
   },

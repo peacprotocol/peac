@@ -24,6 +24,9 @@
     "@peac/schema": "workspace:*",
     "@peac/protocol": "workspace:*",
     "@peac/crypto": "workspace:*",
+    "@peac/core": "workspace:*",
+    "@peac/disc": "workspace:*",
+    "chalk": "^4.1.2",
     "commander": "^11.0.0"
   },
   "devDependencies": {
