@@ -119,6 +119,9 @@ describe("Rail Parity Conformance", () => {
         ...stripeDecoded.payload.payment,
         rail: "NORMALIZED", // Exclude rail-specific identifier
         reference: "NORMALIZED", // Exclude rail-specific reference
+        asset: undefined, // Exclude rail-specific asset
+        env: undefined, // Exclude rail-specific environment
+        evidence: undefined, // Exclude rail-specific evidence
         metadata: undefined, // Exclude rail-specific metadata
       },
     };
@@ -131,6 +134,9 @@ describe("Rail Parity Conformance", () => {
         ...x402Decoded.payload.payment,
         rail: "NORMALIZED",
         reference: "NORMALIZED",
+        asset: undefined,
+        env: undefined,
+        evidence: undefined,
         metadata: undefined,
       },
     };

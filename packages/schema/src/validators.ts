@@ -9,11 +9,13 @@ const iso4217 = z.string().regex(/^[A-Z]{3}$/);
 const uuidv7 = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
 
 export const NormalizedPayment = z.object({
-  scheme: z.string().min(1),
+  rail: z.string().min(1),
   reference: z.string().min(1),
   amount: z.number().int().nonnegative(),
   currency: iso4217,
-  idempotency_key: z.string().optional(),
+  asset: z.string().optional(),
+  env: z.string().optional(),
+  evidence: z.record(z.unknown()).optional(),
   metadata: z.record(z.unknown()).optional(),
 }).strict();
 
