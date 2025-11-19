@@ -188,7 +188,7 @@ paths:
                 version: peac/0.9
                 issuer: https://api.example.com
                 verify: https://api.example.com/verify
-                jwks: https://keys.peac.dev/jwks.json
+                jwks: https://keys.peacprotocol.org/jwks.json
                 payments:
                   - scheme: stripe
                     info: https://docs.example.com/payments/stripe

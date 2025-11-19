@@ -172,7 +172,7 @@ app.get("/.well-known/peac.txt", (c) => {
   const manifest = `version: peac/0.9
 issuer: https://api.example.com
 verify: https://api.example.com/verify
-jwks: https://keys.peac.dev/jwks.json
+jwks: https://keys.peacprotocol.org/jwks.json
 payments:
   - rail: payment_rail_1
   - rail: payment_rail_2`;

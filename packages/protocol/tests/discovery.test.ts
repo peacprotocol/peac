@@ -11,7 +11,7 @@ describe("Discovery parsing", () => {
 version: peac/0.9
 issuer: https://api.example.com
 verify: https://api.example.com/verify
-jwks: https://keys.peac.dev/jwks.json
+jwks: https://keys.peacprotocol.org/jwks.json
 payments:
   - scheme: stripe
     info: https://docs.example.com/payments/stripe
@@ -27,7 +27,7 @@ security: security@example.com
     expect(discovery.version).toBe("peac/0.9");
     expect(discovery.issuer).toBe("https://api.example.com");
     expect(discovery.verify).toBe("https://api.example.com/verify");
-    expect(discovery.jwks).toBe("https://keys.peac.dev/jwks.json");
+    expect(discovery.jwks).toBe("https://keys.peacprotocol.org/jwks.json");
     expect(discovery.payments).toHaveLength(2);
     expect(discovery.payments[0]).toEqual({
       scheme: "stripe",
@@ -47,7 +47,7 @@ security: security@example.com
 version: peac/0.9
 issuer: https://api.example.com
 verify: https://api.example.com/verify
-jwks: https://keys.peac.dev/jwks.json
+jwks: https://keys.peacprotocol.org/jwks.json
     `.trim();
 
     const discovery = parseDiscovery(manifest);
@@ -55,7 +55,7 @@ jwks: https://keys.peac.dev/jwks.json
     expect(discovery.version).toBe("peac/0.9");
     expect(discovery.issuer).toBe("https://api.example.com");
     expect(discovery.verify).toBe("https://api.example.com/verify");
-    expect(discovery.jwks).toBe("https://keys.peac.dev/jwks.json");
+    expect(discovery.jwks).toBe("https://keys.peacprotocol.org/jwks.json");
     expect(discovery.payments).toEqual([]);
   });
 
@@ -68,7 +68,7 @@ version: peac/0.9
 issuer: https://api.example.com
 
 verify: https://api.example.com/verify
-jwks: https://keys.peac.dev/jwks.json
+jwks: https://keys.peacprotocol.org/jwks.json
     `.trim();
 
     const discovery = parseDiscovery(manifest);
@@ -98,7 +98,7 @@ jwks: https://keys.peac.dev/jwks.json
     const manifest = `
 issuer: https://api.example.com
 verify: https://api.example.com/verify
-jwks: https://keys.peac.dev/jwks.json
+jwks: https://keys.peacprotocol.org/jwks.json
     `.trim();
 
     expect(() => parseDiscovery(manifest)).toThrow("Missing required field: version");
@@ -108,7 +108,7 @@ jwks: https://keys.peac.dev/jwks.json
     const manifest = `
 version: peac/0.9
 verify: https://api.example.com/verify
-jwks: https://keys.peac.dev/jwks.json
+jwks: https://keys.peacprotocol.org/jwks.json
     `.trim();
 
     expect(() => parseDiscovery(manifest)).toThrow("Missing required field: issuer");
@@ -118,7 +118,7 @@ jwks: https://keys.peac.dev/jwks.json
     const manifest = `
 version: peac/0.9
 issuer: https://api.example.com
-jwks: https://keys.peac.dev/jwks.json
+jwks: https://keys.peacprotocol.org/jwks.json
     `.trim();
 
     expect(() => parseDiscovery(manifest)).toThrow("Missing required field: verify");
@@ -139,7 +139,7 @@ verify: https://api.example.com/verify
 version: peac/0.9
 issuer: https://api.example.com
 verify: https://api.example.com/verify
-jwks: https://keys.peac.dev/jwks.json
+jwks: https://keys.peacprotocol.org/jwks.json
 payments:
   - scheme: stripe
   - scheme: x402

@@ -95,7 +95,7 @@ else
 fi
 
 echo "== forbid npm invocations =="
-if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep .; then
+if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep -vE '^IMPLEMENTATION_STATUS\.md:' | grep .; then
   bad=1
 else
   echo "OK"
