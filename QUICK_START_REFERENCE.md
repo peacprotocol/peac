@@ -538,23 +538,23 @@ describe("issueReceipt", () => {
 
 ```bash
 # Build all packages
-npm run build
+pnpm build
 
 # Run tests
-npm test
+pnpm test
 
 # Run performance benchmarks
-npm run bench
+pnpm bench
 
 # Run parity tests
-npm run test:parity
+ppnpm test:parity
 
 # Run negative vectors
-npm run test:vectors
+ppnpm test:vectors
 
 # Lint and format
-npm run lint
-npm run format
+pnpm lint
+pnpm format
 
 # Generate receipt
 peac issue --iss https://example.com --aud https://api.example.com/resource

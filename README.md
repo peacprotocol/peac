@@ -75,7 +75,7 @@ For normative specifications, see `docs/SPEC_INDEX.md`.
 pnpm add @peac/protocol @peac/crypto @peac/schema
 
 # or npm
-npm install @peac/protocol @peac/crypto @peac/schema
+pnpm add @peac/protocol @peac/crypto @peac/schema
 ```
 
 ### Verify a receipt

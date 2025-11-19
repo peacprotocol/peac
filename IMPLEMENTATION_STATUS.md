@@ -312,6 +312,6 @@ e5e5332 feat(crypto): add Ed25519 JWS signing/verification and JCS canonicalizat
 
 ```bash
 npm install
-npm run build
-npm test
+pnpm build
+pnpm test
 ```

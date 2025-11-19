@@ -15,4 +15,4 @@
 
 export const PRIVACY_VERSION = "0.9.15";
 
-// TODO: Implement privacy pillar functionality
+// Privacy pillar implementation planned for v0.9.18+

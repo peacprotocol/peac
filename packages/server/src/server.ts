@@ -55,7 +55,7 @@ app.post("/verify", async (c) => {
     if (!parsed.success) {
       return c.json(
         {
-          type: "https://peac.dev/errors/invalid-request",
+          type: "https://peacprotocol.org/errors/invalid-request",
           title: "Invalid Request",
           status: 400,
           detail: "Request body validation failed",
@@ -74,7 +74,7 @@ app.post("/verify", async (c) => {
     if (receipt_jws.length > 16384) {
       return c.json(
         {
-          type: "https://peac.dev/errors/jws-too-large",
+          type: "https://peacprotocol.org/errors/jws-too-large",
           title: "JWS Too Large",
           status: 400,
           detail: "JWS must be ≤16KB",
@@ -110,7 +110,7 @@ app.post("/verify", async (c) => {
       if (err instanceof Error && err.message.includes("Circuit breaker is open")) {
         return c.json(
           {
-            type: "https://peac.dev/errors/circuit-breaker",
+            type: "https://peacprotocol.org/errors/circuit-breaker",
             title: "Service Unavailable",
             status: 503,
             detail: err.message,
@@ -151,7 +151,7 @@ app.post("/verify", async (c) => {
   } catch (err) {
     return c.json(
       {
-        type: "https://peac.dev/errors/internal-error",
+        type: "https://peacprotocol.org/errors/internal-error",
         title: "Internal Server Error",
         status: 500,
         detail: err instanceof Error ? err.message : "Unknown error",

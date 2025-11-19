@@ -15,4 +15,4 @@
 
 export const PROVENANCE_VERSION = "0.9.15";
 
-// TODO: Implement provenance pillar functionality
+// Provenance pillar implementation planned for v1.0+
