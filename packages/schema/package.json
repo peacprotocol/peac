@@ -18,7 +18,6 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@peac/control": "workspace:*",
     "@peac/kernel": "workspace:*",
     "zod": "^3.22.4"
   },

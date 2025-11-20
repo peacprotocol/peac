@@ -29,7 +29,7 @@ export class VerifyCommand {
         body: JSON.stringify({ receipt: receiptJws, resource: options.resource }),
       });
 
-      const body = await res.json().catch(() => ({})) as {
+      const body = (await res.json().catch(() => ({}))) as {
         valid?: boolean;
         claims?: any;
         policyHash?: string;

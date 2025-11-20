@@ -180,7 +180,10 @@ export function statusCommand() {
           });
 
           if (response.ok) {
-            const readiness = await response.json() as { ok?: boolean; checks?: Record<string, boolean> };
+            const readiness = (await response.json()) as {
+              ok?: boolean;
+              checks?: Record<string, boolean>;
+            };
             console.log('');
             console.log('🎯 Readiness:', readiness.ok ? '✅ Ready' : '❌ Not Ready');
             if (readiness.checks) {

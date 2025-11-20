@@ -21,6 +21,8 @@
     "test:coverage": "vitest --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --write --ignore-path .gitignore",
+    "format:check": "prettier \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --check --ignore-path .gitignore",
     "typecheck": "tsc --noEmit",
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -34,6 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
+    "prettier": "^3.1.0",
     "turbo": "^1.11.0",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0"

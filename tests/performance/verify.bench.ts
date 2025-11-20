@@ -9,11 +9,11 @@
  * - Edge (future): p95 ≤5ms
  */
 
-import { describe, it, expect } from "vitest";
-import { issue } from "../../packages/protocol/src/issue";
-import { verify as jwsVerify, generateKeypair } from "../../packages/crypto/src/jws";
-import * as fs from "fs";
-import * as path from "path";
+import { describe, it, expect } from 'vitest';
+import { issue } from '../../packages/protocol/src/issue';
+import { verify as jwsVerify, generateKeypair } from '../../packages/crypto/src/jws';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface PerfMetrics {
   min_ms: number;
@@ -50,35 +50,35 @@ function calculateMetrics(timings: number[]): PerfMetrics {
   };
 }
 
-describe("Performance Benchmarks", () => {
-  it("verify p95 MUST be ≤ 10ms (CI GATE)", async () => {
-    console.log("\n🚀 Starting verification performance benchmark...\n");
+describe('Performance Benchmarks', () => {
+  it('verify p95 MUST be ≤ 10ms (CI GATE)', async () => {
+    console.log('\n🚀 Starting verification performance benchmark...\n');
 
     // Generate test keypair
     const { privateKey, publicKey } = await generateKeypair();
-    const kid = "2025-01-26T12:00:00Z";
+    const kid = '2025-01-26T12:00:00Z';
 
     // Generate test receipt
     const testJWS = await issue({
-      iss: "https://api.example.com",
-      aud: "https://app.example.com",
+      iss: 'https://api.example.com',
+      aud: 'https://app.example.com',
       amt: 9999,
-      cur: "USD",
-      scheme: "stripe",
-      reference: "cs_test_benchmark",
-      subject: "https://app.example.com/api/resource/123",
+      cur: 'USD',
+      rail: 'stripe',
+      reference: 'cs_test_benchmark',
+      subject: 'https://app.example.com/api/resource/123',
       privateKey,
       kid,
     });
 
     // Warmup (10 iterations)
-    console.log("⏱️  Warmup: 10 iterations...");
+    console.log('⏱️  Warmup: 10 iterations...');
     for (let i = 0; i < 10; i++) {
       await jwsVerify(testJWS, publicKey);
     }
 
     // Benchmark (1000 iterations)
-    console.log("📊 Benchmark: 1000 iterations...\n");
+    console.log('📊 Benchmark: 1000 iterations...\n');
     const timings: number[] = [];
 
     for (let i = 0; i < 1000; i++) {
@@ -94,7 +94,7 @@ describe("Performance Benchmarks", () => {
     const metrics = calculateMetrics(timings);
 
     // Display results
-    console.log("📈 Performance Metrics:");
+    console.log('📈 Performance Metrics:');
     console.log(`   Min:  ${metrics.min_ms.toFixed(2)}ms`);
     console.log(`   Max:  ${metrics.max_ms.toFixed(2)}ms`);
     console.log(`   Mean: ${metrics.mean_ms.toFixed(2)}ms`);
@@ -104,7 +104,7 @@ describe("Performance Benchmarks", () => {
     console.log(`   Iterations: ${metrics.iterations}\n`);
 
     // Write metrics to JSON for CI
-    const metricsPath = path.join(process.cwd(), "perf-metrics.json");
+    const metricsPath = path.join(process.cwd(), 'perf-metrics.json');
     fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2));
     console.log(`💾 Metrics saved to: ${metricsPath}\n`);
 
@@ -126,21 +126,21 @@ describe("Performance Benchmarks", () => {
     }
   });
 
-  it("issue p95 SHOULD be ≤ 50ms", async () => {
-    console.log("\n🚀 Starting issuance performance benchmark...\n");
+  it('issue p95 SHOULD be ≤ 50ms', async () => {
+    console.log('\n🚀 Starting issuance performance benchmark...\n');
 
     const { privateKey } = await generateKeypair();
-    const kid = "2025-01-26T12:00:00Z";
+    const kid = '2025-01-26T12:00:00Z';
 
     // Warmup
-    console.log("⏱️  Warmup: 10 iterations...");
+    console.log('⏱️  Warmup: 10 iterations...');
     for (let i = 0; i < 10; i++) {
       await issue({
-        iss: "https://api.example.com",
-        aud: "https://app.example.com",
+        iss: 'https://api.example.com',
+        aud: 'https://app.example.com',
         amt: 9999,
-        cur: "USD",
-        scheme: "stripe",
+        cur: 'USD',
+        rail: 'stripe',
         reference: `cs_warmup_${i}`,
         privateKey,
         kid,
@@ -148,17 +148,17 @@ describe("Performance Benchmarks", () => {
     }
 
     // Benchmark
-    console.log("📊 Benchmark: 1000 iterations...\n");
+    console.log('📊 Benchmark: 1000 iterations...\n');
     const timings: number[] = [];
 
     for (let i = 0; i < 1000; i++) {
       const start = performance.now();
       await issue({
-        iss: "https://api.example.com",
-        aud: "https://app.example.com",
+        iss: 'https://api.example.com',
+        aud: 'https://app.example.com',
         amt: 9999,
-        cur: "USD",
-        scheme: "stripe",
+        cur: 'USD',
+        rail: 'stripe',
         reference: `cs_test_${i}`,
         privateKey,
         kid,
@@ -169,7 +169,7 @@ describe("Performance Benchmarks", () => {
 
     const metrics = calculateMetrics(timings);
 
-    console.log("📈 Issuance Performance:");
+    console.log('📈 Issuance Performance:');
     console.log(`   Min:  ${metrics.min_ms.toFixed(2)}ms`);
     console.log(`   Mean: ${metrics.mean_ms.toFixed(2)}ms`);
     console.log(`   p50:  ${metrics.p50_ms.toFixed(2)}ms`);
@@ -184,23 +184,23 @@ describe("Performance Benchmarks", () => {
     }
   });
 
-  it("JCS canonicalization p95 SHOULD be ≤ 1ms", async () => {
-    console.log("\n🚀 Starting JCS canonicalization benchmark...\n");
+  it('JCS canonicalization p95 SHOULD be ≤ 1ms', async () => {
+    console.log('\n🚀 Starting JCS canonicalization benchmark...\n');
 
-    const { canonicalize } = await import("../../packages/crypto/src/jcs");
+    const { canonicalize } = await import('../../packages/crypto/src/jcs');
 
     const testObject = {
-      iss: "https://api.example.com",
-      aud: "https://app.example.com",
+      iss: 'https://api.example.com',
+      aud: 'https://app.example.com',
       iat: 1737892800,
-      rid: "0193c4d0-0000-7000-8000-000000000000",
+      rid: '0193c4d0-0000-7000-8000-000000000000',
       amt: 9999,
-      cur: "USD",
+      cur: 'USD',
       payment: {
-        scheme: "stripe",
-        reference: "cs_test",
+        rail: 'stripe',
+        reference: 'cs_test',
         amount: 9999,
-        currency: "USD",
+        currency: 'USD',
       },
     };
 
@@ -220,7 +220,7 @@ describe("Performance Benchmarks", () => {
 
     const metrics = calculateMetrics(timings);
 
-    console.log("📈 JCS Canonicalization Performance:");
+    console.log('📈 JCS Canonicalization Performance:');
     console.log(`   Min:  ${metrics.min_ms.toFixed(3)}ms`);
     console.log(`   Mean: ${metrics.mean_ms.toFixed(3)}ms`);
     console.log(`   p50:  ${metrics.p50_ms.toFixed(3)}ms`);
