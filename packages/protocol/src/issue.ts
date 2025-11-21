@@ -3,9 +3,9 @@
  * Validates input, generates UUIDv7 rid, and signs with Ed25519
  */
 
-import { uuidv7 } from "uuidv7";
-import { sign } from "@peac/crypto";
-import { PEACReceiptClaims, ReceiptClaims } from "@peac/schema";
+import { uuidv7 } from 'uuidv7';
+import { sign } from '@peac/crypto';
+import { PEACReceiptClaims, ReceiptClaims } from '@peac/schema';
 
 /**
  * Options for issuing a receipt
@@ -29,11 +29,11 @@ export interface IssueOptions {
   /** Rail-specific payment reference */
   reference: string;
 
-  /** Asset transferred (e.g., "USD", "USDC", "BTC") */
-  asset: string;
+  /** Asset transferred (e.g., "USD", "USDC", "BTC") - defaults to currency if not provided */
+  asset?: string;
 
-  /** Environment ("live" or "test") */
-  env: "live" | "test";
+  /** Environment ("live" or "test") - defaults to "test" */
+  env?: 'live' | 'test';
 
   /** Network/rail identifier (optional, SHOULD for crypto) */
   network?: string;
@@ -41,8 +41,8 @@ export interface IssueOptions {
   /** Facilitator reference (optional) */
   facilitator_ref?: string;
 
-  /** Rail-specific evidence (opaque) */
-  evidence: unknown;
+  /** Rail-specific evidence (opaque) - defaults to empty object if not provided */
+  evidence?: unknown;
 
   /** Idempotency key (optional) */
   idempotency_key?: string;
@@ -54,7 +54,7 @@ export interface IssueOptions {
   subject?: string;
 
   /** Extensions (optional) */
-  ext?: PEACReceiptClaims["ext"];
+  ext?: PEACReceiptClaims['ext'];
 
   /** Expiry timestamp (Unix seconds, optional) */
   exp?: number;
@@ -74,30 +74,30 @@ export interface IssueOptions {
  */
 export async function issue(options: IssueOptions): Promise<string> {
   // Validate URLs
-  if (!options.iss.startsWith("https://")) {
-    throw new Error("Issuer URL must start with https://");
+  if (!options.iss.startsWith('https://')) {
+    throw new Error('Issuer URL must start with https://');
   }
-  if (!options.aud.startsWith("https://")) {
-    throw new Error("Audience URL must start with https://");
+  if (!options.aud.startsWith('https://')) {
+    throw new Error('Audience URL must start with https://');
   }
-  if (options.subject && !options.subject.startsWith("https://")) {
-    throw new Error("Subject URI must start with https://");
+  if (options.subject && !options.subject.startsWith('https://')) {
+    throw new Error('Subject URI must start with https://');
   }
 
   // Validate currency code
   if (!/^[A-Z]{3}$/.test(options.cur)) {
-    throw new Error("Currency must be ISO 4217 uppercase (e.g., USD)");
+    throw new Error('Currency must be ISO 4217 uppercase (e.g., USD)');
   }
 
   // Validate amount
   if (!Number.isInteger(options.amt) || options.amt < 0) {
-    throw new Error("Amount must be a non-negative integer");
+    throw new Error('Amount must be a non-negative integer');
   }
 
   // Validate expiry (if provided)
   if (options.exp !== undefined) {
     if (!Number.isInteger(options.exp) || options.exp < 0) {
-      throw new Error("Expiry must be a non-negative integer");
+      throw new Error('Expiry must be a non-negative integer');
     }
   }
 
@@ -120,9 +120,9 @@ export async function issue(options: IssueOptions): Promise<string> {
       reference: options.reference,
       amount: options.amt,
       currency: options.cur,
-      asset: options.asset,
-      env: options.env,
-      evidence: options.evidence,
+      asset: options.asset ?? options.cur, // Default asset to currency for backward compatibility
+      env: options.env ?? 'test', // Default to test environment for backward compatibility
+      evidence: options.evidence ?? {}, // Default to empty object for backward compatibility
       ...(options.network && { network: options.network }),
       ...(options.facilitator_ref && { facilitator_ref: options.facilitator_ref }),
       ...(options.idempotency_key && { idempotency_key: options.idempotency_key }),
