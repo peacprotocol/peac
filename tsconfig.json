@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
+    "module": "commonjs",
     "lib": ["ES2022"],
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
@@ -24,6 +24,8 @@
     "scripts/**",
     "test/**",
     "tests/**",
-    "apps/**"
+    "apps/**",
+    "packages/aipref/**",
+    "packages/discovery/**"
   ]
 }
