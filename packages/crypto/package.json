@@ -2,6 +2,7 @@
   "name": "@peac/crypto",
   "version": "0.9.15",
   "description": "Ed25519 JWS signing and verification for PEAC protocol",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {

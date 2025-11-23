@@ -2,6 +2,7 @@
   "name": "@peac/cli",
   "version": "0.9.15",
   "description": "PEAC protocol command-line tools",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {

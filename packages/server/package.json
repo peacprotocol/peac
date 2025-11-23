@@ -2,6 +2,7 @@
   "name": "@peac/server",
   "version": "0.9.15",
   "description": "PEAC verification server with DoS protection and rate limiting",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
