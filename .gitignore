@@ -10,6 +10,7 @@ build/
 out/
 *.d.ts.map
 *.js.map
+*.tsbuildinfo
 .next/
 .nuxt/
 .cache/
