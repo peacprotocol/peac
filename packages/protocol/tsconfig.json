@@ -7,5 +7,9 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests"],
-  "references": [{ "path": "../schema" }, { "path": "../crypto" }]
+  "references": [
+    { "path": "../kernel" },
+    { "path": "../schema" },
+    { "path": "../crypto" }
+  ]
 }
