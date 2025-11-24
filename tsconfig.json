@@ -10,22 +10,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": false,
-    "resolveJsonModule": true
+    "composite": false
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/*.config.ts",
-    "archive/**",
-    "examples/**",
-    "scripts/**",
-    "test/**",
-    "tests/**",
-    "apps/**",
-    "packages/aipref/**",
-    "packages/discovery/**"
-  ]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

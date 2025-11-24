@@ -1,11 +1,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "ESNext",
     "outDir": "./dist",
     "rootDir": "./src"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../schema" }, { "path": "../crypto" }, { "path": "../protocol" }]
+  "references": [
+    { "path": "../schema" },
+    { "path": "../crypto" },
+    { "path": "../protocol" }
+  ]
 }

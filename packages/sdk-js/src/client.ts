@@ -209,7 +209,7 @@ export class PeacClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorBody = (await response.json().catch(() => ({}))) as { detail?: string };
+        const errorBody = await response.json().catch(() => ({}));
         throw this.createClientError(
           'REMOTE_VERIFY_FAILED',
           `HTTP ${response.status}`,
@@ -217,17 +217,15 @@ export class PeacClient {
         );
       }
 
-      const result = (await response.json()) as VerificationResult;
+      const result = await response.json();
 
       return {
         valid: result.valid,
         receipt: result.receipt,
-        verification: result.verification
-          ? {
-              ...result.verification,
-              aipref: 'not_checked', // Remote verification doesn't include AIPREF by default
-            }
-          : undefined,
+        verification: {
+          ...result.verification,
+          aipref: 'not_checked', // Remote verification doesn't include AIPREF by default
+        },
         remote: true,
       };
     } catch (error) {
