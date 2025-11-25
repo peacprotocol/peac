@@ -29,6 +29,7 @@ The `specs/kernel/` directory contains the **normative source of truth** for all
 - **Amount limits:** Min/max payment amounts
 
 **Usage:**
+
 - TypeScript implementation: `packages/kernel/src/constants.ts`
 - Codegen: `scripts/codegen/generate-constants.ts` (v0.9.16+)
 
@@ -39,6 +40,7 @@ The `specs/kernel/` directory contains the **normative source of truth** for all
 **Normative error codes** for PEAC protocol failures:
 
 Each error includes:
+
 - `code`: Error identifier (e.g., `E_INVALID_SIGNATURE`)
 - `http_status`: HTTP status code for REST APIs
 - `title`: Human-readable title
@@ -47,12 +49,14 @@ Each error includes:
 - `category`: Error classification (verification, validation, infrastructure, control)
 
 **Categories:**
+
 - **verification:** Signature or key verification failures
 - **validation:** Receipt format/claim validation errors
 - **infrastructure:** JWKS fetch, rate limiting, circuit breaker
 - **control:** Control engine decisions (deny, review)
 
 **Usage:**
+
 - TypeScript implementation: `packages/kernel/src/errors.ts`
 - RFC 9457 Problem Details: `packages/protocol/src/errors.ts`
 
@@ -63,26 +67,31 @@ Each error includes:
 **Normative registries** for extensible protocol components:
 
 #### Payment Rails
+
 - Identifiers for payment settlement layers (x402, l402, card-network, upi)
 - Categories: agentic-payment, card, account-to-account
 - Reference URLs to specifications
 
 #### Control Engines
+
 - Identifiers for governance/authorization engines
 - Categories: limits, fraud, mandate
 - Examples: spend-control-service, risk-engine, mandate-service
 
 #### Transport Methods
+
 - Transport-layer bindings (DPoP, HTTP Signature, none)
 - Categories: proof-of-possession, message-signature
 - Reference: RFC 9449 (DPoP), RFC 9421 (HTTP Signature)
 
 #### Agent Protocols
+
 - Agentic protocol integrations (MCP, ACP, AP2, TAP)
 - Categories: tool-protocol, commerce-protocol, agent-protocol, card-protocol
 - Reference URLs to protocol specifications
 
 **Usage:**
+
 - TypeScript implementation: `packages/kernel/src/registries.ts`
 - Validation: Registry IDs are opaque strings at wire level
 - Extension: New entries can be added in v0.9.x releases
@@ -139,8 +148,8 @@ import { WIRE_TYPE, ALGORITHMS, HEADERS } from '@peac/kernel';
 
 // Issue a receipt
 const header = {
-  typ: WIRE_TYPE,           // "peac.receipt/0.9"
-  alg: ALGORITHMS.default,  // "EdDSA"
+  typ: WIRE_TYPE, // "peac.receipt/0.9"
+  alg: ALGORITHMS.default, // "EdDSA"
 };
 
 // Add receipt to HTTP response
@@ -157,7 +166,7 @@ return {
   type: `https://peacprotocol.org/errors/${ERRORS.E_INVALID_SIGNATURE.code}`,
   title: ERRORS.E_INVALID_SIGNATURE.title,
   status: ERRORS.E_INVALID_SIGNATURE.http_status,
-  detail: "Signature verification failed for kid=2024-11-18T00:00:00Z",
+  detail: 'Signature verification failed for kid=2024-11-18T00:00:00Z',
 };
 ```
 
@@ -167,13 +176,13 @@ return {
 import { REGISTRIES } from '@peac/kernel';
 
 // Validate payment rail
-const railInfo = REGISTRIES.payment_rails.find(r => r.id === paymentRail);
+const railInfo = REGISTRIES.payment_rails.find((r) => r.id === paymentRail);
 if (!railInfo) {
   throw new Error(`Unknown payment rail: ${paymentRail}`);
 }
 
 // Check if control engine is recognized
-const engineInfo = REGISTRIES.control_engines.find(e => e.id === engineId);
+const engineInfo = REGISTRIES.control_engines.find((e) => e.id === engineId);
 ```
 
 ---
@@ -197,12 +206,14 @@ const engineInfo = REGISTRIES.control_engines.find(e => e.id === engineId);
 **Script:** `scripts/codegen/generate-kernel.ts`
 
 **Workflow:**
+
 1. Update `specs/kernel/*.json` (normative source)
 2. Run `pnpm codegen:kernel`
 3. TypeScript files auto-generated in `packages/kernel/src/`
 4. CI verifies TypeScript matches JSON (parity gate)
 
 **Benefits:**
+
 - Single source of truth
 - No manual drift between specs and code
 - CI enforcement via `scripts/ci/gates.ts`

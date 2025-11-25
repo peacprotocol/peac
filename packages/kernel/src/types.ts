@@ -12,7 +12,7 @@ export interface ErrorDefinition {
   title: string;
   description: string;
   retriable: boolean;
-  category: "verification" | "validation" | "infrastructure" | "control";
+  category: 'verification' | 'validation' | 'infrastructure' | 'control';
 }
 
 /**

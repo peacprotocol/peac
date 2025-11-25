@@ -6,4 +6,4 @@
  */
 
 // gRPC transport implementation will be added in future releases
-export const GRPC_TRANSPORT_VERSION = "0.9.15-placeholder" as const;
+export const GRPC_TRANSPORT_VERSION = '0.9.15-placeholder' as const;

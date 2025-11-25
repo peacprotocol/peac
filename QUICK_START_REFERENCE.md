@@ -1,4 +1,5 @@
 # PEAC Protocol - Quick Start Reference
+
 ## Code Generation & Engineering Guide
 
 **Date:** 2025-11-18 IST
@@ -19,6 +20,7 @@ v1.0 (EARNED after IETF + multi-implementation + production validation)
 ```
 
 **Key Rules:**
+
 - Wire format: `peac.receipt/0.9` throughout development
 - Breaking changes ALLOWED during v0.9.x
 - v1.0 flip happens when EARNED (no date commitment)
@@ -29,6 +31,7 @@ v1.0 (EARNED after IETF + multi-implementation + production validation)
 ## ✅ Week 0 Complete (9 Packages, ~4,100 LOC)
 
 ### Core Packages
+
 1. **@peac/schema** - Types, validators, constants
    - ✅ NormalizedPayment interface
    - ✅ PEACReceiptClaims interface
@@ -50,15 +53,18 @@ v1.0 (EARNED after IETF + multi-implementation + production validation)
    - ❌ **MISSING:** peac rotate-keys
 
 ### Payment Rails
+
 6. **@peac/rails-x402** - Lightning/x402 adapter ✅
 7. **@peac/rails-stripe** - Stripe adapter ✅
 8. ❌ **@peac/rails-razorpay** - Directory exists, needs implementation
 
 ### Protocol Mappings
+
 9. **@peac/mappings-mcp** - Model Context Protocol ✅
 10. **@peac/mappings-acp** - Agentic Commerce Protocol ✅
 
 ### Test Infrastructure
+
 11. **tests/vectors/negative.spec.ts** - 14 attack scenarios ✅
 12. **tests/performance/verify.bench.ts** - Performance gates ✅
 13. **tests/conformance/parity.spec.ts** - Rail parity (x402 == Stripe) ✅
@@ -68,10 +74,12 @@ v1.0 (EARNED after IETF + multi-implementation + production validation)
 ## 🔜 v0.9.15 Remaining Work (CAL + Security)
 
 ### 1. Control Abstraction Layer (CAL) - ~500 LOC
+
 **Priority:** HIGHEST
 **Time:** 4-5 days
 
 **Tasks:**
+
 - [ ] Create `packages/control-core/` package
   - `src/interfaces.ts` - CAL engine-agnostic interfaces
   - `src/types.ts` - control{} block TypeScript types
@@ -79,25 +87,26 @@ v1.0 (EARNED after IETF + multi-implementation + production validation)
   - `src/test-helpers.ts` - CAL test utilities
 
 - [ ] Update `packages/schema/src/types.ts`:
+
   ```typescript
   export interface ControlBlock {
-    engine: "locus" | "ap2" | "tap" | string;
+    engine: 'locus' | 'ap2' | 'tap' | string;
     policy_id: string;
-    result: "approved" | "denied" | "conditional";
+    result: 'approved' | 'denied' | 'conditional';
     limits_snapshot?: Record<string, unknown>;
     reason?: string;
     evidence?: Record<string, unknown>;
   }
 
   export interface ExtendedPayment extends NormalizedPayment {
-    facilitator?: string;  // NEW
-    evidence?: Record<string, unknown>;  // NEW
+    facilitator?: string; // NEW
+    evidence?: Record<string, unknown>; // NEW
   }
 
   export interface PEACReceiptClaims {
     // ... existing fields ...
-    control?: ControlBlock;  // NEW
-    payment?: ExtendedPayment;  // UPDATED
+    control?: ControlBlock; // NEW
+    payment?: ExtendedPayment; // UPDATED
   }
   ```
 
@@ -105,6 +114,7 @@ v1.0 (EARNED after IETF + multi-implementation + production validation)
 - [ ] Add control receipt tests
 
 **Files to Create:**
+
 ```
 packages/control-core/
 ├── src/
@@ -119,10 +129,12 @@ packages/control-core/
 ---
 
 ### 2. DPoP L3/L4 Implementation - ~300 LOC
+
 **Priority:** HIGH
 **Time:** 3-4 days
 
 **Tasks:**
+
 - [ ] Create `packages/protocol/src/dpop.ts`:
   - RFC 9449 proof verification
   - Nonce anti-replay checks
@@ -134,6 +146,7 @@ packages/control-core/
 - [ ] Add DPoP negative test vectors
 
 **Implementation:**
+
 ```typescript
 export interface DPoPProof {
   jti: string;
@@ -155,10 +168,12 @@ export async function verifyDPoP(
 ---
 
 ### 3. JWKS Rotation - ~200 LOC
+
 **Priority:** MEDIUM
 **Time:** 2-3 days
 
 **Tasks:**
+
 - [ ] Create `packages/infrastructure/src/jwks-rotation.ts`:
   - 90-day rotation schedule
   - 7-day overlap window
@@ -168,6 +183,7 @@ export async function verifyDPoP(
 - [ ] Document rotation procedures
 
 **Files to Create:**
+
 ```
 packages/infrastructure/
 ├── src/
@@ -181,10 +197,12 @@ packages/infrastructure/
 ---
 
 ### 4. SSRF Protection - ~150 LOC
+
 **Priority:** HIGH (Security)
 **Time:** 1-2 days
 
 **Tasks:**
+
 - [ ] Create `packages/protocol/src/ssrf-guard.ts`:
   - Block private IP ranges (10.0.0.0/8, 192.168.0.0/16, 127.0.0.1)
   - Block metadata URLs (169.254.169.254)
@@ -197,10 +215,12 @@ packages/infrastructure/
 ---
 
 ### 5. Discovery + AIPREF Invariants - ~150 LOC
+
 **Priority:** HIGH
 **Time:** 2-3 days
 
 **Tasks:**
+
 - [ ] Update `packages/protocol/src/discovery.ts`:
   - Enforce `/.well-known/peac.txt` ≤20 lines limit
   - Make AIPREF snapshot MANDATORY when present
@@ -213,7 +233,7 @@ packages/infrastructure/
     aipref?: {
       url: string;
       retrieved_at: number;
-      hash: string;  // sha256-...
+      hash: string; // sha256-...
     };
   }
   ```
@@ -221,10 +241,12 @@ packages/infrastructure/
 ---
 
 ### 6. Payment Field Rule - ~100 LOC
+
 **Priority:** HIGH
 **Time:** 1 day
 
 **Tasks:**
+
 - [ ] Implement rule: `payment` is **REQUIRED** when `enforcement.method=='http-402'`
 - [ ] Otherwise, `payment` present only if payment adapter was used
 - [ ] Add validation tests
@@ -233,10 +255,12 @@ packages/infrastructure/
 ---
 
 ### 7. Session Logout (/slo) - ~100 LOC
+
 **Priority:** MEDIUM
 **Time:** 1-2 days
 
 **Tasks:**
+
 - [ ] Create `packages/server/src/slo.ts`:
   - POST /slo endpoint
   - Redis blacklist implementation
@@ -248,10 +272,12 @@ packages/infrastructure/
 ---
 
 ### 8. Documentation Updates - ~0 LOC
+
 **Priority:** MEDIUM
 **Time:** 2-3 days
 
 **Tasks:**
+
 - [ ] Update materplan/STATUS.md with CAL and security hardening status
 - [ ] Create JWKS rotation guide
 - [ ] Document DPoP L3/L4 requirements
@@ -264,6 +290,7 @@ packages/infrastructure/
 ## 📐 Wire Format (v0.9.15+)
 
 ### JWS Header
+
 ```json
 {
   "typ": "peac.receipt/0.9",
@@ -273,6 +300,7 @@ packages/infrastructure/
 ```
 
 ### Payload (Claims) - WITH CAL
+
 ```json
 {
   "rid": "rcpt_01JBXX...",
@@ -382,14 +410,14 @@ packages/infrastructure/
 
 ## 🎯 Six Pillars Status
 
-| Pillar | v0.9.14-v0.9.21 Scope | Post-v1.0 Scope |
-|--------|----------------------|-----------------|
-| **1. COMMERCE** | ✅ Multi-rail (x402, Stripe, Razorpay), HTTP 402, receipts | Revenue analytics |
-| **2. ACCESS** | ✅ Discovery, AIPREF, policy, CAL, DPoP L3/L4 | Advanced AAA |
-| **3. COMPLIANCE** | ⏸️ Basic receipts & audit | v1.1: EU AI Act, SOC2, HIPAA exports |
-| **4. CONSENT** | ⏸️ Basic policy signals | v1.1: GDPR revocation automation |
-| **5. ATTRIBUTION** | ⏸️ Basic provenance | v1.2: C2PA, royalty splits |
-| **6. INTELLIGENCE** | ⏸️ Basic pricing | v1.2: Price discovery, fraud detection |
+| Pillar              | v0.9.14-v0.9.21 Scope                                      | Post-v1.0 Scope                        |
+| ------------------- | ---------------------------------------------------------- | -------------------------------------- |
+| **1. COMMERCE**     | ✅ Multi-rail (x402, Stripe, Razorpay), HTTP 402, receipts | Revenue analytics                      |
+| **2. ACCESS**       | ✅ Discovery, AIPREF, policy, CAL, DPoP L3/L4              | Advanced AAA                           |
+| **3. COMPLIANCE**   | ⏸️ Basic receipts & audit                                  | v1.1: EU AI Act, SOC2, HIPAA exports   |
+| **4. CONSENT**      | ⏸️ Basic policy signals                                    | v1.1: GDPR revocation automation       |
+| **5. ATTRIBUTION**  | ⏸️ Basic provenance                                        | v1.2: C2PA, royalty splits             |
+| **6. INTELLIGENCE** | ⏸️ Basic pricing                                           | v1.2: Price discovery, fraud detection |
 
 **Focus for v0.9.15-v0.9.21:** COMMERCE + ACCESS only. Others deferred to post-v1.0.
 
@@ -436,6 +464,7 @@ peac/
 ## 🚦 CI/CD Gates (ENFORCED)
 
 ### Performance Gates
+
 - ✅ **Verify p95 ≤ 5ms** (maintained through v0.9.21)
 - ✅ **Sign p95 < 10ms**
 - ✅ **Throughput ≥1k rps baseline**
@@ -443,12 +472,14 @@ peac/
 - Zero memory leaks
 
 ### Conformance Gates
+
 - ✅ **Rail parity:** x402 == Stripe (byte-identical core claims)
 - ✅ **14 negative test vectors** (attack scenarios)
 - 🔜 Protocol mapping parity (MCP, ACP, AP2, TAP)
 - OWASP baseline clean
 
 ### Security Gates
+
 - 🔜 No HIGH/CRITICAL vulnerabilities (Semgrep, CodeQL)
 - 🔜 Dependency audit clean
 - 🔜 SSRF protection verified
@@ -459,12 +490,14 @@ peac/
 ## 🎨 Code Style Guidelines
 
 ### Naming Conventions
+
 - **Packages:** `@peac/package-name` (kebab-case)
 - **Types:** `PascalCase` (e.g., `PEACReceiptClaims`)
 - **Functions:** `camelCase` (e.g., `issueReceipt()`)
 - **Constants:** `SCREAMING_SNAKE_CASE` (e.g., `PEAC_WIRE_TYP`)
 
 ### File Structure
+
 ```typescript
 /**
  * Package purpose (1-2 sentences)
@@ -483,6 +516,7 @@ export function baz() { ... }
 ```
 
 ### Error Handling
+
 ```typescript
 // Use typed errors
 export class PEACError extends Error {
@@ -492,19 +526,19 @@ export class PEACError extends Error {
     public details?: unknown
   ) {
     super(message);
-    this.name = "PEACError";
+    this.name = 'PEACError';
   }
 }
 
 // Throw with context
-throw new PEACError(
-  "Invalid payment scheme",
-  "INVALID_PAYMENT_SCHEME",
-  { scheme, expected: ["stripe", "x402", "razorpay"] }
-);
+throw new PEACError('Invalid payment scheme', 'INVALID_PAYMENT_SCHEME', {
+  scheme,
+  expected: ['stripe', 'x402', 'razorpay'],
+});
 ```
 
 ### Testing
+
 ```typescript
 import { describe, it, expect } from "vitest";
 
@@ -574,16 +608,13 @@ peac rotate-keys
 ## 🎯 Next Steps (v0.9.15)
 
 **Week 1-2 Priority:**
+
 1. 🔜 **CAL Integration** (control-core package, schema updates)
 2. 🔜 **DPoP L3/L4** (dpop.ts, negative vectors)
 3. 🔜 **SSRF Protection** (ssrf-guard.ts)
 4. 🔜 **AIPREF Enforcement** (mandatory when present, ≤20 lines)
 
-**Week 2-3:**
-5. 🔜 **JWKS Rotation** (infrastructure package)
-6. 🔜 **Session Logout** (/slo endpoint)
-7. 🔜 **Payment Field Rule** (validation logic)
-8. 🔜 **Documentation** (STATUS.md, guides)
+**Week 2-3:** 5. 🔜 **JWKS Rotation** (infrastructure package) 6. 🔜 **Session Logout** (/slo endpoint) 7. 🔜 **Payment Field Rule** (validation logic) 8. 🔜 **Documentation** (STATUS.md, guides)
 
 **Target:** v0.9.15 complete in 3-4.5 weeks (~1,700 LOC)
 

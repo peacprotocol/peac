@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 
-import { HEADERS } from "@peac/kernel";
+import { HEADERS } from '@peac/kernel';
 
 /**
  * HTTP header utilities
@@ -17,7 +17,7 @@ export { HEADERS };
  */
 export function extractReceiptHeader(headers: Record<string, string | undefined>): string | null {
   const receipt = headers[HEADERS.receipt] ?? headers[HEADERS.receipt.toLowerCase()];
-  return receipt && typeof receipt === "string" ? receipt : null;
+  return receipt && typeof receipt === 'string' ? receipt : null;
 }
 
 /**

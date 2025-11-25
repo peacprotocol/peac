@@ -14,10 +14,10 @@
  * Constraint type identifiers
  */
 export type ConstraintType =
-  | "temporal"   // Time-based restrictions
-  | "usage"      // Usage count restrictions
-  | "budget"     // Budget/amount restrictions
-  | "combined";  // Multiple restrictions
+  | 'temporal' // Time-based restrictions
+  | 'usage' // Usage count restrictions
+  | 'budget' // Budget/amount restrictions
+  | 'combined'; // Multiple restrictions
 
 /**
  * Temporal constraint - time-based access control
@@ -29,7 +29,7 @@ export type ConstraintType =
  */
 export interface TemporalConstraint {
   /** Constraint type */
-  type: "temporal";
+  type: 'temporal';
 
   /** Access granted from (Unix timestamp seconds) */
   valid_from?: number;
@@ -51,7 +51,7 @@ export interface TemporalConstraint {
  */
 export interface UsageConstraint {
   /** Constraint type */
-  type: "usage";
+  type: 'usage';
 
   /** Maximum number of uses allowed */
   max_uses: number;
@@ -73,7 +73,7 @@ export interface UsageConstraint {
  */
 export interface BudgetConstraint {
   /** Constraint type */
-  type: "budget";
+  type: 'budget';
 
   /** Maximum amount allowed (smallest currency unit) */
   max_amount: number;
@@ -96,16 +96,16 @@ export interface BudgetConstraint {
  */
 export interface CombinedConstraint {
   /** Constraint type */
-  type: "combined";
+  type: 'combined';
 
   /** Temporal restrictions */
-  temporal?: Omit<TemporalConstraint, "type">;
+  temporal?: Omit<TemporalConstraint, 'type'>;
 
   /** Usage restrictions */
-  usage?: Omit<UsageConstraint, "type">;
+  usage?: Omit<UsageConstraint, 'type'>;
 
   /** Budget restrictions */
-  budget?: Omit<BudgetConstraint, "type">;
+  budget?: Omit<BudgetConstraint, 'type'>;
 }
 
 /**

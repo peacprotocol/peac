@@ -3,7 +3,12 @@
  */
 
 // Re-export core control types from schema
-export type { ControlBlock, ControlStep, ControlDecision, ControlValidationResult } from '@peac/schema';
+export type {
+  ControlBlock,
+  ControlStep,
+  ControlDecision,
+  ControlValidationResult,
+} from '@peac/schema';
 
 // Import and re-export constraint types
 import type {

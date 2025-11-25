@@ -6,4 +6,4 @@
  */
 
 // WebSocket transport implementation will be added in future releases
-export const WS_TRANSPORT_VERSION = "0.9.15-placeholder" as const;
+export const WS_TRANSPORT_VERSION = '0.9.15-placeholder' as const;

@@ -44,7 +44,7 @@ export function attachReceipt(
  * @returns PEAC receipt JWS or null if not present
  */
 export function extractReceipt(response: MCPToolResponseWithReceipt): string | null {
-  if (typeof response.peac_receipt === "string" && response.peac_receipt.length > 0) {
+  if (typeof response.peac_receipt === 'string' && response.peac_receipt.length > 0) {
     return response.peac_receipt;
   }
   return null;

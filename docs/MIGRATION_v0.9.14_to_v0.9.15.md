@@ -3,6 +3,7 @@
 ## 1. Overview
 
 v0.9.15 introduces:
+
 - **2-layer envelope** (`auth`, `evidence`, `meta`) replacing flat JWT claims
 - **Composable control chain** with multi-party governance (`any_can_veto`)
 - **Structured error model** with registry-based error codes
@@ -20,6 +21,7 @@ This is a **breaking change** for any v0.9.14 consumers.
 ### 2.1 Old (flat) → New (envelope)
 
 **Before (v0.9.14)**:
+
 ```json
 {
   "iss": "https://api.example.net",
@@ -44,6 +46,7 @@ This is a **breaking change** for any v0.9.14 consumers.
 ```
 
 **After (v0.9.15)**:
+
 ```json
 {
   "auth": {
@@ -97,25 +100,25 @@ This is a **breaking change** for any v0.9.14 consumers.
 
 ### 2.2 Mapping table
 
-| v0.9.14 field | v0.9.15 field | Notes |
-|---------------|---------------|-------|
-| `iss` | `auth.iss` | Standard JWT issuer claim |
-| `aud` | `auth.aud` | Standard JWT audience claim |
-| `sub` | `auth.sub` | Standard JWT subject claim |
-| `iat` | `auth.iat` | Standard JWT issued-at claim |
-| `exp` | `auth.exp` | Standard JWT expiration claim |
-| `rid` | `auth.rid` | Receipt ID (ULID) |
-| `payment` | `evidence.payment` | Moved to evidence block |
-| `payment.scheme` | `evidence.payment.scheme` | Now opaque string (vendor-neutral) |
-| `ext.control` | `auth.control` | Promoted to normative field |
-| `ext.control.engine` | `auth.control.chain[0].engine` | Now part of chain |
-| `ext.control.decision` | `auth.control.decision` | Separated from chain |
-| (new) | `auth.policy_hash` | **NEW**: Policy binding |
-| (new) | `auth.policy_uri` | **NEW**: Policy location |
-| (new) | `auth.control.combinator` | **NEW**: Chain combinator (v0.9: only `any_can_veto`) |
-| (new) | `evidence.payment.asset` | **NEW**: Required asset identifier |
-| (new) | `evidence.payment.env` | **NEW**: Required environment (live/test) |
-| (new) | `meta` | **NEW**: Non-normative metadata block |
+| v0.9.14 field          | v0.9.15 field                  | Notes                                                 |
+| ---------------------- | ------------------------------ | ----------------------------------------------------- |
+| `iss`                  | `auth.iss`                     | Standard JWT issuer claim                             |
+| `aud`                  | `auth.aud`                     | Standard JWT audience claim                           |
+| `sub`                  | `auth.sub`                     | Standard JWT subject claim                            |
+| `iat`                  | `auth.iat`                     | Standard JWT issued-at claim                          |
+| `exp`                  | `auth.exp`                     | Standard JWT expiration claim                         |
+| `rid`                  | `auth.rid`                     | Receipt ID (ULID)                                     |
+| `payment`              | `evidence.payment`             | Moved to evidence block                               |
+| `payment.scheme`       | `evidence.payment.scheme`      | Now opaque string (vendor-neutral)                    |
+| `ext.control`          | `auth.control`                 | Promoted to normative field                           |
+| `ext.control.engine`   | `auth.control.chain[0].engine` | Now part of chain                                     |
+| `ext.control.decision` | `auth.control.decision`        | Separated from chain                                  |
+| (new)                  | `auth.policy_hash`             | **NEW**: Policy binding                               |
+| (new)                  | `auth.policy_uri`              | **NEW**: Policy location                              |
+| (new)                  | `auth.control.combinator`      | **NEW**: Chain combinator (v0.9: only `any_can_veto`) |
+| (new)                  | `evidence.payment.asset`       | **NEW**: Required asset identifier                    |
+| (new)                  | `evidence.payment.env`         | **NEW**: Required environment (live/test)             |
+| (new)                  | `meta`                         | **NEW**: Non-normative metadata block                 |
 
 ---
 
@@ -124,6 +127,7 @@ This is a **breaking change** for any v0.9.14 consumers.
 ### 3.1 Old control (single engine)
 
 **v0.9.14**:
+
 ```json
 {
   "ext": {
@@ -143,6 +147,7 @@ This is a **breaking change** for any v0.9.14 consumers.
 ### 3.2 New control (composable chain)
 
 **v0.9.15**:
+
 ```json
 {
   "auth": {
@@ -183,26 +188,31 @@ This is a **breaking change** for any v0.9.14 consumers.
 ### 4.1 New required fields
 
 v0.9.15 requires:
+
 - **`asset`**: The actual asset being transferred (e.g., "USD", "USDC", "BTC")
 - **`env`**: Environment indicator (`"live"` or `"test"`)
 
 Optional but recommended:
+
 - **`network`**: For crypto payments (e.g., "lightning", "ethereum", "polygon")
 - **`facilitator_ref`**: For multi-party payment flows
 
 ### 4.2 Vendor-neutral scheme
 
 **v0.9.14** had hardcoded union:
+
 ```typescript
-type PaymentScheme = "stripe" | "razorpay" | "x402";
+type PaymentScheme = 'stripe' | 'razorpay' | 'x402';
 ```
 
 **v0.9.15** uses opaque string:
+
 ```typescript
 type PaymentScheme = string;
 ```
 
 **Migration**:
+
 - Use generic scheme names: `stripe` → `card-network`, `razorpay` → `upi`
 - Store vendor-specific details in `payment.evidence` object
 - Consult [docs/specs/registries.json](specs/registries.json) for recommended scheme identifiers
@@ -214,6 +224,7 @@ type PaymentScheme = string;
 ### 5.1 Old errors (free-form)
 
 **v0.9.14**:
+
 ```json
 {
   "error": "Invalid payment",
@@ -224,6 +235,7 @@ type PaymentScheme = string;
 ### 5.2 New errors (structured)
 
 **v0.9.15**:
+
 ```json
 {
   "code": "E_INVALID_PAYMENT",
@@ -245,6 +257,7 @@ type PaymentScheme = string;
 All error codes are documented in [docs/specs/ERRORS.md](specs/ERRORS.md).
 
 **New error codes**:
+
 - `E_CONTROL_REQUIRED`: Payment present but no control block
 - `E_INVALID_CONTROL_CHAIN`: Control chain is invalid or inconsistent
 - `E_INVALID_PAYMENT`: Payment evidence is malformed
@@ -312,6 +325,7 @@ All error codes are documented in [docs/specs/ERRORS.md](specs/ERRORS.md).
 ### 6.3 Cross-language Impact
 
 All non-TypeScript implementations should:
+
 1. **Migrate directly to v0.9.15 envelope** (no v0.9.14 compat layer)
 2. **Use JSON Schema as source of truth**: [docs/specs/PEAC-RECEIPT-SCHEMA-v0.9.json](specs/PEAC-RECEIPT-SCHEMA-v0.9.json)
 3. **Implement JCS canonicalization**: RFC 8785
@@ -322,16 +336,16 @@ All non-TypeScript implementations should:
 
 ## 7. Breaking Changes Summary
 
-| Area | v0.9.14 | v0.9.15 | Breaking? |
-|------|---------|---------|-----------|
-| Envelope structure | Flat JWT claims | 3-layer (auth/evidence/meta) | **YES** |
-| Control | Single engine | Composable chain | **YES** |
-| Payment scheme | Hardcoded union | Opaque string | **YES** |
-| Payment fields | No asset/env | Requires asset/env | **YES** |
-| Error model | Free-form | Structured `PEACError` | **YES** |
-| Policy binding | None | Required `policy_hash`/`policy_uri` | **YES** |
-| Control requirement | Optional | Required when payment present | **YES** |
-| Signing | JWS over flat claims | JWS over envelope | **YES** |
+| Area                | v0.9.14              | v0.9.15                             | Breaking? |
+| ------------------- | -------------------- | ----------------------------------- | --------- |
+| Envelope structure  | Flat JWT claims      | 3-layer (auth/evidence/meta)        | **YES**   |
+| Control             | Single engine        | Composable chain                    | **YES**   |
+| Payment scheme      | Hardcoded union      | Opaque string                       | **YES**   |
+| Payment fields      | No asset/env         | Requires asset/env                  | **YES**   |
+| Error model         | Free-form            | Structured `PEACError`              | **YES**   |
+| Policy binding      | None                 | Required `policy_hash`/`policy_uri` | **YES**   |
+| Control requirement | Optional             | Required when payment present       | **YES**   |
+| Signing             | JWS over flat claims | JWS over envelope                   | **YES**   |
 
 ---
 
@@ -347,6 +361,7 @@ All non-TypeScript implementations should:
 ## 9. Support
 
 For migration questions or issues:
+
 - File issue: https://github.com/peacprotocol/peac/issues
 - Consult docs: [docs/SPEC_INDEX.md](SPEC_INDEX.md)
 - Review test vectors: [docs/specs/TEST_VECTORS.md](specs/TEST_VECTORS.md)

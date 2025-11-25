@@ -7,19 +7,11 @@
  */
 
 // Adapter Interface (vendor-neutral, normative)
-export type {
-  ControlEngineAdapter,
-  ControlEvaluationContext,
-} from './adapter';
+export type { ControlEngineAdapter, ControlEvaluationContext } from './adapter';
 export { ControlEngineRegistry } from './adapter';
 
 // Core control types (re-exported from schema)
-export type {
-  ControlBlock,
-  ControlStep,
-  ControlDecision,
-  ControlValidationResult,
-} from './types';
+export type { ControlBlock, ControlStep, ControlDecision, ControlValidationResult } from './types';
 
 // Generic constraint types (informational helpers)
 export type {

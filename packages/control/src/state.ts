@@ -9,10 +9,7 @@ import type { ControlState, Constraint } from './types';
 /**
  * Create initial control state
  */
-export function createControlState(
-  receiptId: string,
-  constraint: Constraint
-): ControlState {
+export function createControlState(receiptId: string, constraint: Constraint): ControlState {
   return {
     receipt_id: receiptId,
     constraint,
@@ -25,10 +22,7 @@ export function createControlState(
 /**
  * Update state after usage
  */
-export function updateStateAfterUse(
-  state: ControlState,
-  amount?: number
-): ControlState {
+export function updateStateAfterUse(state: ControlState, amount?: number): ControlState {
   const currentTime = Math.floor(Date.now() / 1000);
   const usageCount = (state.usage_count ?? 0) + 1;
   const spentAmount = (state.spent_amount ?? 0) + (amount ?? 0);
@@ -134,11 +128,12 @@ export function getStateSummary(state: ControlState): string {
   }
 
   if (state.spent_amount !== undefined && state.spent_amount > 0) {
-    const currency = state.constraint.type === 'budget'
-      ? state.constraint.currency
-      : state.constraint.type === 'combined' && state.constraint.budget
-        ? state.constraint.budget.currency
-        : 'units';
+    const currency =
+      state.constraint.type === 'budget'
+        ? state.constraint.currency
+        : state.constraint.type === 'combined' && state.constraint.budget
+          ? state.constraint.budget.currency
+          : 'units';
     parts.push(`spent: ${state.spent_amount} ${currency}`);
   }
 

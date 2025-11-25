@@ -8,7 +8,7 @@
 /**
  * Control decision type
  */
-export type ControlDecision = "allow" | "deny" | "review";
+export type ControlDecision = 'allow' | 'deny' | 'review';
 
 /**
  * Composable control block - multi-party governance
@@ -32,7 +32,7 @@ export interface ControlBlock {
   decision: ControlDecision;
 
   /** Combinator logic (v0.9: only "any_can_veto") */
-  combinator?: "any_can_veto";
+  combinator?: 'any_can_veto';
 }
 
 /**

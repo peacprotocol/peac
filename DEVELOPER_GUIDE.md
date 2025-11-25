@@ -12,6 +12,7 @@
 ## 🚀 START HERE
 
 **If you're picking up this project at any stage**, read this document first. It consolidates:
+
 - Current state and version
 - Architecture overview
 - Version-wise scope
@@ -80,24 +81,28 @@ packages/
 ### Core Principles
 
 #### 1. Vendor Neutrality (CRITICAL)
+
 - **Core packages** (schema, protocol, control, crypto): Use opaque strings, NO vendor names
-- **Adapter packages** (rails-*, engines-*): Vendor-specific implementations
+- **Adapter packages** (rails-_, engines-_): Vendor-specific implementations
 - **Registry**: `docs/specs/registries.json` (informational, not normative)
 - **Verification**: `grep -r "stripe\|razorpay\|locus" packages/{schema,protocol,control,crypto}/src` MUST return ZERO matches
 
 #### 2. Wire Format Stability
+
 - `peac.receipt/0.9` frozen until v1.0 GA
 - Breaking changes to wire format NOT allowed during v0.9.x
 - Additive changes via `ext` field allowed
 - API can break during v0.9.x (with migration guide)
 
 #### 3. Type System
+
 - **Opaque strings**: `PaymentRailId = string`, `AgentProtocolId = string`
 - **Envelope structure**: `PEACEnvelope` = { auth, evidence?, meta? }
 - **Core types** in `@peac/schema`
 - **Vendor-specific** in adapter packages
 
 #### 4. Naming Conventions
+
 - **Packages**: `@peac/{name}` (NO -core suffix)
 - **Types**: PascalCase, descriptive (e.g., `PaymentRailId` not `PaymentScheme`)
 - **Functions**: camelCase, verb-first (e.g., `enforceConstraint`)
@@ -109,9 +114,11 @@ packages/
 ## 📋 VERSION-WISE SCOPE
 
 ### v0.9.15 ✅ CODE COMPLETE
+
 **Focus**: Naming + Vendor Neutrality + Envelope Alignment
 
 **What's Included**:
+
 - Package rename: `@peac/control-core` → `@peac/control`
 - Payment terminology: `scheme` → `rail`, `PaymentScheme` → `PaymentRailId`
 - Constraint types: `Mandate` → `Constraint` (15 types, 6 functions, 5 validators)
@@ -126,9 +133,11 @@ packages/
 **Docs**: [docs/notes/v0.9.15_NAMING_AND_NEUTRALITY_SUMMARY.md](docs/notes/v0.9.15_NAMING_AND_NEUTRALITY_SUMMARY.md)
 
 ### v0.9.16 📋 NEXT
+
 **Focus**: CAL + Security Hardening
 
 **What's Planned**:
+
 1. Control Abstraction Layer (CAL) - Full implementation
 2. DPoP L3 Implementation (RFC 9449)
 3. JWKS Rotation (90-day schedule)
@@ -144,6 +153,7 @@ packages/
 **Docs**: [COMPLETE_ROADMAP_ANALYSIS.md](COMPLETE_ROADMAP_ANALYSIS.md) section "v0.9.16"
 
 ### v0.9.17 - v0.9.21
+
 See [COMPLETE_ROADMAP_ANALYSIS.md](COMPLETE_ROADMAP_ANALYSIS.md) for complete roadmap
 
 ---
@@ -173,6 +183,7 @@ echo "✅ All builds should pass"
 ### Before Starting Work
 
 1. **Check current version**:
+
    ```bash
    git status
    git log --oneline -5
@@ -193,6 +204,7 @@ echo "✅ All builds should pass"
 ### Development Workflow
 
 1. **Create/switch to feature branch** (optional for local work):
+
    ```bash
    git checkout -b feat/{feature-name}
    ```
@@ -204,6 +216,7 @@ echo "✅ All builds should pass"
    - Write tests for new features
 
 3. **Build incrementally**:
+
    ```bash
    # Build package you're working on
    pnpm --filter @peac/schema build
@@ -225,6 +238,7 @@ echo "✅ All builds should pass"
 **BEFORE COMMITTING**, run ALL these checks:
 
 ### 1. Build Verification
+
 ```bash
 # All packages MUST build successfully
 pnpm --filter @peac/schema build
@@ -236,6 +250,7 @@ pnpm --filter @peac/crypto build
 ```
 
 ### 2. Vendor Neutrality Check
+
 ```bash
 # Core packages MUST have ZERO vendor names
 grep -r "stripe\|razorpay\|locus" packages/{schema,protocol,control,crypto}/src
@@ -244,6 +259,7 @@ grep -r "stripe\|razorpay\|locus" packages/{schema,protocol,control,crypto}/src
 ```
 
 ### 3. Package Name Check
+
 ```bash
 # NO references to old package names
 grep -r "@peac/control-core" packages/*/package.json
@@ -252,6 +268,7 @@ grep -r "@peac/control-core" packages/*/package.json
 ```
 
 ### 4. Type Check
+
 ```bash
 # TypeScript MUST pass strict mode
 cd packages/schema && npx tsc --noEmit
@@ -263,6 +280,7 @@ cd packages/crypto && npx tsc --noEmit
 ```
 
 ### 5. Test Check (when available)
+
 ```bash
 # Tests MUST pass
 pnpm test
@@ -271,6 +289,7 @@ pnpm test
 ```
 
 ### 6. Documentation Check
+
 - [ ] Updated relevant docs in `docs/`
 - [ ] Created migration guide (if breaking changes)
 - [ ] Updated COMPLETE_ROADMAP_ANALYSIS.md (if scope changed)
@@ -291,6 +310,7 @@ pnpm test
 ```
 
 **Types**:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `refactor`: Code restructuring (no functional change)
@@ -303,6 +323,7 @@ pnpm test
 **Scope**: Package name (schema, control, protocol, crypto) or `v{version}` for releases
 
 **Examples**:
+
 ```bash
 # Feature
 feat(schema): add PEACEnvelope types matching JSON Schema
@@ -319,6 +340,7 @@ fix(protocol): resolve cyclic dependency with schema package
 ### Breaking Changes
 
 **If introducing breaking changes**:
+
 1. Add `BREAKING CHANGE:` in commit footer
 2. Document in `BREAKING CHANGES:` section of commit message
 3. Create migration guide in `docs/notes/v{version}_MIGRATION.md`
@@ -329,6 +351,7 @@ fix(protocol): resolve cyclic dependency with schema package
 ### Release Commits
 
 **For version releases** (like v0.9.15):
+
 ```bash
 refactor(v0.9.15): <one-line summary>
 
@@ -367,42 +390,47 @@ See [docs/NEXT_STEPS_v0.9.15_TO_v1.0.md](docs/NEXT_STEPS_v0.9.15_TO_v1.0.md) for
 When generating code for PEAC protocol:
 
 #### 1. Know the Current State
+
 - **Wire format**: `peac.receipt/0.9` (frozen)
 - **Package version**: Check package.json (currently 0.9.15)
 - **Architecture**: Vendor-neutral core, vendor-specific adapters
 
 #### 2. Follow Type System
+
 ```typescript
 // ✅ CORRECT - Opaque strings in core
 export type PaymentRailId = string;
 export type AgentProtocolId = string;
 
 // ❌ WRONG - Vendor unions in core
-export type PaymentRailId = "stripe" | "razorpay" | "x402" | string;
+export type PaymentRailId = 'stripe' | 'razorpay' | 'x402' | string;
 ```
 
 #### 3. Follow Naming Conventions
+
 ```typescript
 // ✅ CORRECT
 export interface PaymentEvidence {
-  rail: PaymentRailId;  // snake_case for wire format
+  rail: PaymentRailId; // snake_case for wire format
   reference: string;
   // ...
 }
 
 // ❌ WRONG
 export interface PaymentEvidence {
-  scheme: string;  // Old terminology
+  scheme: string; // Old terminology
   // ...
 }
 ```
 
 #### 4. Package Placement
+
 - **Core logic**: `packages/{schema,protocol,control,crypto}`
 - **Vendor-specific**: `packages/rails-{vendor}` or `packages/engines-{vendor}`
 - **Protocol mappings**: `packages/mappings-{protocol}`
 
 #### 5. Import Patterns
+
 ```typescript
 // ✅ CORRECT - Import from schema for types
 import type { PEACEnvelope, PaymentEvidence } from '@peac/schema';
@@ -413,6 +441,7 @@ import type { Mandate } from '@peac/control-core';
 ```
 
 #### 6. Must Check Before Generating
+
 - [ ] Check [PEAC_NORMATIVE_DECISIONS_LOG.md](docs/PEAC_NORMATIVE_DECISIONS_LOG.md) for existing decisions
 - [ ] Check [COMPLETE_ROADMAP_ANALYSIS.md](COMPLETE_ROADMAP_ANALYSIS.md) for version scope
 - [ ] Follow [docs/CODING_STANDARDS_PROTOCOL.md](docs/CODING_STANDARDS_PROTOCOL.md)
@@ -519,8 +548,10 @@ import type { Mandate } from '@peac/control-core';
 1. Check [PEAC_NORMATIVE_DECISIONS_LOG.md](docs/PEAC_NORMATIVE_DECISIONS_LOG.md) first
 2. Research context and alternatives
 3. Document using decision template:
+
    ```markdown
    ### DEC-YYYYMMDD-NNN: Decision Title
+
    **Date**: YYYY-MM-DD
    **Status**: ACCEPTED
    **Context**: Why needed?
@@ -530,6 +561,7 @@ import type { Mandate } from '@peac/control-core';
    **Alternatives Considered**: Other options?
    **Related**: Links
    ```
+
 4. Add to decision log
 5. Reference in code/docs
 
@@ -549,16 +581,19 @@ import type { Mandate } from '@peac/control-core';
 ### Build Errors
 
 **TypeScript cache issues**:
+
 ```bash
 cd packages/{package} && rm -f *.tsbuildinfo && pnpm build
 ```
 
 **Cyclic dependency warnings**:
+
 - Check imports between schema and control
 - Schema should not import from control for types
 - Control can import from schema for core types
 
 **Missing declarations**:
+
 ```bash
 # Rebuild dependencies first
 pnpm --filter @peac/schema clean
@@ -567,16 +602,20 @@ pnpm --filter @peac/control build
 ```
 
 ### "Should I add vendor X to core types?"
+
 **No.** Use opaque strings in core. Add vendor-specific code to adapters.
 
 ### "Can I break the API?"
+
 **During v0.9.x**: Yes, with migration guide and deprecated aliases
 **After v1.0**: No, only with major version bump
 
 ### "Where do I add protocol mapping for X?"
+
 In `packages/mappings-{protocol}/` (e.g., mappings-mcp, mappings-acp)
 
 ### "Can I change the wire format?"
+
 **No** during v0.9.x. Only at v1.0 GA. Use `ext` field for additive changes.
 
 ---
@@ -668,16 +707,19 @@ git tag -a v0.9.X -m "Description"
 ## 📞 GETTING HELP
 
 ### Decision-Making
+
 1. Check [PEAC_NORMATIVE_DECISIONS_LOG.md](docs/PEAC_NORMATIVE_DECISIONS_LOG.md) first
 2. Review [ARCHITECTURE_VENDOR_NEUTRALITY.md](docs/ARCHITECTURE_VENDOR_NEUTRALITY.md)
 3. Document your decision with rationale
 
 ### Technical Issues
+
 1. Check troubleshooting section above
 2. Review [CODING_STANDARDS_PROTOCOL.md](docs/CODING_STANDARDS_PROTOCOL.md)
 3. Check relevant spec in `docs/specs/`
 
 ### Scope Questions
+
 1. Check [COMPLETE_ROADMAP_ANALYSIS.md](COMPLETE_ROADMAP_ANALYSIS.md)
 2. Review version-specific scope docs in `docs/`
 3. Check [NEXT_STEPS_v0.9.15_TO_v1.0.md](docs/NEXT_STEPS_v0.9.15_TO_v1.0.md)

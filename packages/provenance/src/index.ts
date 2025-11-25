@@ -13,6 +13,6 @@
  * Status: Scaffold for v1.0+
  */
 
-export const PROVENANCE_VERSION = "0.9.15";
+export const PROVENANCE_VERSION = '0.9.15';
 
 // Provenance pillar implementation planned for v1.0+

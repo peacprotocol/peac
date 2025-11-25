@@ -16,12 +16,14 @@ PEAC uses `typ` claim in JWS header to indicate wire format version:
 - **v1.0** (future): `typ: "peac.receipt/1.0"`
 
 **v0.9 series** (v0.9.15 → v0.9.21):
+
 - Wire format frozen at `peac.receipt/0.9`
 - Additive changes only (new fields, new error codes)
 - No breaking structural changes
 - Flip to v1.0 when protocol is "earned" (proven in production)
 
 **v1.0**:
+
 - Wire format becomes `peac.receipt/1.0`
 - Stable, production-ready
 - Candidate for IETF RFC submission
@@ -43,6 +45,7 @@ The following fields are present in the schema but have **no normative semantics
 **Current status**: RESERVED
 
 **Schema**:
+
 ```json
 {
   "evidence": {
@@ -57,12 +60,14 @@ The following fields are present in the schema but have **no normative semantics
 **Warning**: Do NOT rely on `payments[]` for correctness in v0.9.x. Only `evidence.payment` (singular) is normative.
 
 **Planned semantics** (v0.9.16+):
+
 - Split payment across multiple rails (e.g., 70% card, 30% crypto)
 - Control chain applies to **aggregate amount**, not per-payment
 - All payments MUST succeed atomically, or transaction fails
 - Each payment has separate `evidence` block with rail-specific details
 
 **Open questions**:
+
 - How to handle partial failures?
 - Should each payment have its own control step?
 - How to represent facilitator coordination across rails?
@@ -74,6 +79,7 @@ The following fields are present in the schema but have **no normative semantics
 **Current status**: RESERVED
 
 **Fields**:
+
 - `auth.parent_rid`: Parent receipt ID (for hierarchical relationships)
 - `auth.supersedes_rid`: Superseded receipt ID (for replacements/refunds)
 - `auth.delegation_chain`: Array of receipt IDs for delegation chains
@@ -81,6 +87,7 @@ The following fields are present in the schema but have **no normative semantics
 **Planned semantics** (v0.9.17+):
 
 #### Use case: Subscription → Usage
+
 ```json
 {
   "auth": {
@@ -92,6 +99,7 @@ The following fields are present in the schema but have **no normative semantics
 ```
 
 #### Use case: Refund
+
 ```json
 {
   "auth": {
@@ -103,6 +111,7 @@ The following fields are present in the schema but have **no normative semantics
 ```
 
 #### Use case: Delegation
+
 ```json
 {
   "auth": {
@@ -114,6 +123,7 @@ The following fields are present in the schema but have **no normative semantics
 ```
 
 **Validation rules** (future):
+
 - Verifiers SHOULD validate chains by fetching parent receipts
 - Chains MUST NOT form loops (detect via BFS/DFS)
 - Chains MUST have finite depth (recommend max 10 hops)
@@ -128,6 +138,7 @@ The following fields are present in the schema but have **no normative semantics
 **Current**: Only `any_can_veto` supported
 
 **Planned**:
+
 - `all_must_allow`: All steps must result in "allow" (unanimous)
 - `majority`: >50% of steps must allow
 - `weighted`: Steps have weights, weighted majority required
@@ -142,6 +153,7 @@ The following fields are present in the schema but have **no normative semantics
 **Current status**: Policy structure is informational only
 
 **Planned**: Normative policy schema defining:
+
 - Policy format and required fields
 - Control engine configuration
 - Payment rail restrictions
@@ -149,6 +161,7 @@ The following fields are present in the schema but have **no normative semantics
 - Compliance/attribution requirements
 
 **Example skeleton**:
+
 ```json
 {
   "version": "peac.policy/1.0",
@@ -174,21 +187,24 @@ The following fields are present in the schema but have **no normative semantics
 **Current**: EdDSA (Ed25519) only
 
 **Planned**: Add PQC algorithm support for future-proofing:
+
 - **Dilithium** (NIST standard, lattice-based)
 - **SPHINCS+** (hash-based, conservative)
 - **Falcon** (lattice-based, compact signatures)
 
 **Migration path**:
+
 - v0.9.x: EdDSA only
 - v1.0: Add PQC as optional `alg` values
 - v2.0: Potentially deprecate non-PQC algorithms (long-term)
 
 **Alg identifiers**:
+
 ```json
 {
-  "alg": "EdDSA",           // Current
-  "alg": "DILITHIUM3",      // Future PQC
-  "alg": "SPHINCS+-SHA256"  // Future PQC
+  "alg": "EdDSA", // Current
+  "alg": "DILITHIUM3", // Future PQC
+  "alg": "SPHINCS+-SHA256" // Future PQC
 }
 ```
 
@@ -199,6 +215,7 @@ The following fields are present in the schema but have **no normative semantics
 **Current**: `AttestationEvidence` defined but rarely used
 
 **Planned enhancements**:
+
 - Add attestation formats to registries (tpm2.0, sgx, nitro, etc.)
 - Define verification procedures for common formats
 - Integrate with control engines (e.g., "only allow calls from attested agents")
@@ -210,6 +227,7 @@ The following fields are present in the schema but have **no normative semantics
 **Problem**: Receipts can be large (5-10KB with full chains)
 
 **Solutions**:
+
 - **JWS compression**: gzip or brotli compress payload before base64url
 - **Selective disclosure**: Redact non-essential fields
 - **Receipt references**: Store full receipt externally, include hash/URI only
@@ -221,6 +239,7 @@ The following fields are present in the schema but have **no normative semantics
 ### 4.1 Adapter Packages
 
 As ecosystem grows, expect:
+
 - `@peac/rails-core`: Shared rail adapter interface (v0.9.16)
 - `@peac/rails-ach`: ACH payment rail
 - `@peac/rails-wire`: Wire transfer rail
@@ -231,6 +250,7 @@ As ecosystem grows, expect:
 ### 4.2 Language Implementations
 
 Target: Official implementations in multiple languages:
+
 - **TypeScript** (reference)
 - **Go** (v0.9.16)
 - **Rust** (v0.9.17)
@@ -245,12 +265,14 @@ All implementations MUST pass same test vectors.
 ### 5.1 IETF Process
 
 Potential path:
+
 1. **v0.9.x**: Iterate, stabilize, gather feedback
 2. **v1.0**: Production-ready, stable wire format
 3. **Internet-Draft**: Submit to IETF (OAuth WG or new WG)
 4. **RFC**: Standardize as RFC if adopted
 
 **Advantages of RFC**:
+
 - Vendor-neutral governance
 - IANA registries for rails/engines
 - Broader adoption (standards bodies, regulators)
@@ -258,6 +280,7 @@ Potential path:
 ### 5.2 W3C / Web Standards
 
 Potential W3C activities:
+
 - Browser API for PEAC receipt storage/verification
 - Integration with Web Payments API
 - Agentic Web standardization (PEAC as receipt layer)
@@ -269,6 +292,7 @@ Potential W3C activities:
 ### 6.1 Forward Compatibility
 
 **v0.9.x implementations** reading future receipts:
+
 - MUST ignore unknown fields
 - MUST validate known fields per spec version
 - MAY warn about unrecognized `typ` versions
@@ -276,6 +300,7 @@ Potential W3C activities:
 ### 6.2 Backward Compatibility
 
 **Future implementations** reading v0.9.x receipts:
+
 - MUST support `typ: "peac.receipt/0.9"`
 - MUST validate per v0.9 semantics
 - MAY apply stricter validation if safe
@@ -287,6 +312,7 @@ Potential W3C activities:
 ### 7.1 Fields
 
 Deprecated fields will:
+
 1. Be marked deprecated in schema (annotation)
 2. Remain functional for at least 2 minor versions
 3. Be removed in next major version
@@ -314,6 +340,7 @@ Error codes are stable. New codes may be added; old codes will NOT be removed.
 ## 9. Contributing to Evolution
 
 To propose new features:
+
 1. Open GitHub issue with use case and motivation
 2. Provide example receipts demonstrating feature
 3. Discuss compatibility and migration path

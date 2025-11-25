@@ -7,11 +7,8 @@
  * Encode bytes to base64url string (no padding)
  */
 export function base64urlEncode(bytes: Uint8Array): string {
-  const base64 = Buffer.from(bytes).toString("base64");
-  return base64
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=/g, "");
+  const base64 = Buffer.from(bytes).toString('base64');
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 /**
@@ -22,13 +19,13 @@ export function base64urlDecode(str: string): Uint8Array {
   let padded = str;
   const mod = str.length % 4;
   if (mod > 0) {
-    padded += "=".repeat(4 - mod);
+    padded += '='.repeat(4 - mod);
   }
 
   // Convert base64url to base64
-  const base64 = padded.replace(/-/g, "+").replace(/_/g, "/");
+  const base64 = padded.replace(/-/g, '+').replace(/_/g, '/');
 
-  return new Uint8Array(Buffer.from(base64, "base64"));
+  return new Uint8Array(Buffer.from(base64, 'base64'));
 }
 
 /**

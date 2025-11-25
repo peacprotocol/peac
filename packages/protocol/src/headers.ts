@@ -2,7 +2,7 @@
  * HTTP header utilities for PEAC receipts
  */
 
-import { PEAC_RECEIPT_HEADER } from "@peac/schema";
+import { PEAC_RECEIPT_HEADER } from '@peac/schema';
 
 /**
  * Set PEAC-Receipt header on a response
@@ -30,14 +30,14 @@ export function getReceiptHeader(headers: Headers): string | null {
  * @param headers - Response headers
  */
 export function setVaryHeader(headers: Headers): void {
-  const existing = headers.get("Vary");
+  const existing = headers.get('Vary');
   if (existing) {
     // Append to existing Vary header
-    const varies = existing.split(",").map((v) => v.trim());
+    const varies = existing.split(',').map((v) => v.trim());
     if (!varies.includes(PEAC_RECEIPT_HEADER)) {
-      headers.set("Vary", `${existing}, ${PEAC_RECEIPT_HEADER}`);
+      headers.set('Vary', `${existing}, ${PEAC_RECEIPT_HEADER}`);
     }
   } else {
-    headers.set("Vary", PEAC_RECEIPT_HEADER);
+    headers.set('Vary', PEAC_RECEIPT_HEADER);
   }
 }

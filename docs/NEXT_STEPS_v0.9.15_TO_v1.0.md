@@ -9,6 +9,7 @@
 ## IMMEDIATE NEXT STEPS (v0.9.15 Commit & Release)
 
 ### 1. Code Review & Verification ✅
+
 - [x] All builds passing
 - [x] Vendor neutrality verified
 - [x] Documentation complete
@@ -53,9 +54,11 @@ git tag -n9 v0.9.15
 ## NEXT RELEASE: v0.9.16 (CAL + Security Hardening)
 
 ### Scope
+
 See [COMPLETE_ROADMAP_ANALYSIS.md](../COMPLETE_ROADMAP_ANALYSIS.md) section "v0.9.16: Control Abstraction Layer + Security Hardening"
 
 **Key Features**:
+
 1. Control Abstraction Layer (CAL) - Full implementation
 2. DPoP L3 Implementation (RFC 9449)
 3. JWKS Rotation (90-day schedule)
@@ -72,6 +75,7 @@ See [COMPLETE_ROADMAP_ANALYSIS.md](../COMPLETE_ROADMAP_ANALYSIS.md) section "v0.
 ### Key Files to Create/Modify
 
 **New Files**:
+
 - `packages/protocol/src/dpop.ts` - DPoP implementation
 - `packages/infrastructure/src/jwks-rotation.ts` - Key rotation
 - `packages/protocol/src/ssrf-guard.ts` - SSRF protection
@@ -80,6 +84,7 @@ See [COMPLETE_ROADMAP_ANALYSIS.md](../COMPLETE_ROADMAP_ANALYSIS.md) section "v0.
 - `docs/guides/DPOP_INTEGRATION.md` - DPoP guide
 
 **Modify**:
+
 - `packages/schema/src/control.ts` - Expand control{} block
 - `packages/schema/src/evidence.ts` - Add AIPREF fields
 - `packages/control/src/adapter.ts` - Enhance CAL interfaces
@@ -94,18 +99,21 @@ See [COMPLETE_ROADMAP_ANALYSIS.md](../COMPLETE_ROADMAP_ANALYSIS.md) section "v0.
 ### 1. Coding Standards
 
 **Follow**:
+
 - [docs/CODING_STANDARDS_PROTOCOL.md](CODING_STANDARDS_PROTOCOL.md) - Protocol-specific standards
 - [docs/ARCHITECTURE_VENDOR_NEUTRALITY.md](ARCHITECTURE_VENDOR_NEUTRALITY.md) - Vendor neutrality principles
 - TypeScript strict mode (already enabled)
 - No hardcoded vendor names in core packages
 
 **Naming Conventions**:
+
 - Packages: `@peac/{name}` (no -core suffix)
 - Types: PascalCase, descriptive (e.g., `PaymentRailId` not `PaymentScheme`)
 - Functions: camelCase, verb-first (e.g., `enforceConstraint`)
 - Constants: SCREAMING_SNAKE_CASE (e.g., `PEAC_WIRE_TYP`)
 
 **Vendor Neutrality**:
+
 - Core packages: Use opaque strings (`PaymentRailId = string`)
 - Adapters: Vendor-specific code goes in `@peac/rails-*`, `@peac/engines-*`
 - Registry: Add vendors to `docs/specs/registries.json` (informational)
@@ -114,6 +122,7 @@ See [COMPLETE_ROADMAP_ANALYSIS.md](../COMPLETE_ROADMAP_ANALYSIS.md) section "v0.
 ### 2. Decision Making
 
 **Before making architectural decisions**:
+
 1. Check [PEAC_NORMATIVE_DECISIONS_LOG.md](PEAC_NORMATIVE_DECISIONS_LOG.md) for existing decisions
 2. Evaluate alternatives
 3. Document decision with:
@@ -125,8 +134,10 @@ See [COMPLETE_ROADMAP_ANALYSIS.md](../COMPLETE_ROADMAP_ANALYSIS.md) section "v0.
 4. Add to decision log with unique ID (DEC-YYYYMMDD-NNN)
 
 **Example decision format**:
+
 ```markdown
 ### DEC-20250120-001: Example Decision Title
+
 **Date**: 2025-01-20
 **Status**: ACCEPTED
 **Context**: Why was this decision needed?
@@ -140,18 +151,21 @@ See [COMPLETE_ROADMAP_ANALYSIS.md](../COMPLETE_ROADMAP_ANALYSIS.md) section "v0.
 ### 3. Breaking Changes
 
 **When to break**:
+
 - During v0.9.x (we're in development, breaking changes allowed)
 - Document in CHANGELOG and migration guide
 - Provide deprecated aliases when possible
 - 2-release migration window minimum (v0.9.x → v0.9.x+2)
 
 **When NOT to break**:
+
 - Wire format `peac.receipt/0.9` (frozen until v1.0)
 - After v1.0 (only non-breaking or major version bump)
 
 ### 4. Testing Requirements
 
 **Before committing**:
+
 ```bash
 # All builds must pass
 pnpm --filter @peac/schema build
@@ -172,6 +186,7 @@ grep -r "@peac/control-core" packages/*/package.json
 ```
 
 **For new features**:
+
 - Add unit tests
 - Add integration tests (if applicable)
 - Add negative test vectors (for security features)
@@ -180,6 +195,7 @@ grep -r "@peac/control-core" packages/*/package.json
 ### 5. Documentation Requirements
 
 **For each release**:
+
 - Update [COMPLETE_ROADMAP_ANALYSIS.md](../COMPLETE_ROADMAP_ANALYSIS.md) with completion status
 - Create release summary in `docs/notes/v{version}_SUMMARY.md`
 - Update `docs/PEAC_v{version}_ACTUAL_SCOPE.md` if scope changed
@@ -187,6 +203,7 @@ grep -r "@peac/control-core" packages/*/package.json
 - Update relevant specs in `docs/specs/`
 
 **For new features**:
+
 - Add to `docs/guides/` if user-facing
 - Add examples to `examples/`
 - Update relevant JSON Schema files
@@ -269,12 +286,14 @@ grep -r "@peac/control-core" packages/*/package.json
 When generating code for future releases:
 
 ### 1. Know the Wire Format
+
 - **Current**: `peac.receipt/0.9` (frozen)
 - **Future**: `peac.receipt/1.0` (only at GA after IETF + multi-impl)
 - **Breaking changes allowed** during v0.9.x
 - **No breaking changes** after v1.0 (except major version bump)
 
 ### 2. Know the Package Structure
+
 ```
 packages/
 ├── schema/         # Types, validators, JSON Schema
@@ -289,6 +308,7 @@ packages/
 ```
 
 ### 3. Know the Type System
+
 - **Core types** in `@peac/schema`:
   - `PEACEnvelope` (auth, evidence, meta)
   - `PaymentEvidence` (rail, reference, amount, currency, asset, env, evidence)
@@ -298,12 +318,14 @@ packages/
 - **No vendor unions** in core packages
 
 ### 4. Know the Conventions
+
 - **Header name**: `PEAC-Receipt` (not X-PEAC-Receipt)
 - **Package naming**: `@peac/{name}` (no -core suffix)
 - **Field naming**: `rail` not `scheme`, `constraint` not `mandate`
 - **Vendor neutrality**: Core = neutral, Adapters = vendor-specific
 
 ### 5. Know the Rules
+
 - **TypeScript strict mode**: Always enabled
 - **Vendor names**: ONLY in adapters, registry, examples
 - **Deprecated aliases**: 2-release migration window
@@ -352,30 +374,36 @@ packages/
 ## VERSION MILESTONES
 
 ### v0.9.15 ✅ CODE COMPLETE
+
 - Naming cleanup
 - Vendor neutrality
 - Envelope alignment
 
 ### v0.9.16 (NEXT)
+
 - CAL full implementation
 - Security hardening (DPoP, JWKS rotation, SSRF)
 - Protocol envelope refactor
 
 ### v0.9.17
+
 - Remove deprecated aliases from v0.9.15
 - Protocol refinements
 - Additional security features
 
 ### v0.9.18-v0.9.20
+
 - See COMPLETE_ROADMAP_ANALYSIS.md
 
 ### v0.9.21 (RFC-READY)
+
 - Feature freeze
 - IETF Draft-02
 - Multi-implementation testing
 - Security audit
 
 ### v1.0 (EARNED)
+
 - IETF process complete
 - Multi-implementation consensus
 - Production battle-tested
@@ -387,25 +415,32 @@ packages/
 ## QUESTIONS & TROUBLESHOOTING
 
 ### "Should I add vendor X to core types?"
+
 **No.** Use opaque strings in core. Add to adapters and registry only.
 
 ### "Can I break the API in v0.9.x?"
+
 **Yes**, with:
+
 - Migration guide
 - Deprecated aliases if possible
 - Documentation in decision log
 - 2-release migration window
 
 ### "Should I create a -core package?"
+
 **No.** Remove -core suffix. Use `@peac/{name}` pattern.
 
 ### "Where do protocol mappings go?"
+
 **In** `packages/mappings-{protocol}/` (e.g., mappings-mcp, mappings-acp)
 
 ### "Can I change the wire format?"
+
 **No** during v0.9.x. Only at v1.0 GA (after IETF + multi-impl).
 
 ### "How do I verify vendor neutrality?"
+
 ```bash
 grep -r "stripe\|razorpay\|locus" packages/{schema,protocol,control,crypto}/src
 # Should return NO matches
@@ -416,6 +451,7 @@ grep -r "stripe\|razorpay\|locus" packages/{schema,protocol,control,crypto}/src
 ## USEFUL COMMANDS
 
 ### Build All Packages
+
 ```bash
 pnpm --filter @peac/schema build
 pnpm --filter @peac/control build
@@ -424,22 +460,26 @@ pnpm --filter @peac/crypto build
 ```
 
 ### Run Tests
+
 ```bash
 pnpm --filter @peac/schema test
 pnpm --filter @peac/control test
 ```
 
 ### Vendor Neutrality Check
+
 ```bash
 grep -r "stripe\|razorpay\|locus" packages/{schema,protocol,control,crypto}/src
 ```
 
 ### Package Name Check
+
 ```bash
 grep -r "@peac/control-core" packages/*/package.json
 ```
 
 ### Clean Rebuild
+
 ```bash
 cd packages/schema && rm -f *.tsbuildinfo && pnpm build
 cd ../control && rm -f *.tsbuildinfo && pnpm build

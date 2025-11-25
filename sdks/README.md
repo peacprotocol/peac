@@ -16,6 +16,7 @@ All SDKs are placeholders in v0.9.15. Implementation begins in v0.9.17+.
 ## Architecture
 
 SDKs provide high-level client interfaces built on top of `packages/protocol`:
+
 - Receipt issuance and verification
 - Discovery manifest parsing
 - JWKS caching and rotation

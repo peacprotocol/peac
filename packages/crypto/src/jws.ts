@@ -3,9 +3,14 @@
  * Implements peac.receipt/0.9 wire format
  */
 
-import * as ed25519 from "@noble/ed25519";
-import { PEAC_WIRE_TYP, PEAC_ALG } from "@peac/schema";
-import { base64urlEncode, base64urlDecode, base64urlEncodeString, base64urlDecodeString } from "./base64url";
+import * as ed25519 from '@noble/ed25519';
+import { PEAC_WIRE_TYP, PEAC_ALG } from '@peac/schema';
+import {
+  base64urlEncode,
+  base64urlDecode,
+  base64urlEncodeString,
+  base64urlDecodeString,
+} from './base64url';
 
 /**
  * JWS header for PEAC receipts
@@ -33,13 +38,9 @@ export interface VerifyResult<T = unknown> {
  * @param kid - Key ID (ISO 8601 timestamp)
  * @returns JWS compact serialization (header.payload.signature)
  */
-export async function sign(
-  payload: unknown,
-  privateKey: Uint8Array,
-  kid: string
-): Promise<string> {
+export async function sign(payload: unknown, privateKey: Uint8Array, kid: string): Promise<string> {
   if (privateKey.length !== 32) {
-    throw new Error("Ed25519 private key must be 32 bytes");
+    throw new Error('Ed25519 private key must be 32 bytes');
   }
 
   // Create header
@@ -79,13 +80,13 @@ export async function verify<T = unknown>(
   publicKey: Uint8Array
 ): Promise<VerifyResult<T>> {
   if (publicKey.length !== 32) {
-    throw new Error("Ed25519 public key must be 32 bytes");
+    throw new Error('Ed25519 public key must be 32 bytes');
   }
 
   // Split JWS
-  const parts = jws.split(".");
+  const parts = jws.split('.');
   if (parts.length !== 3) {
-    throw new Error("Invalid JWS: must have three dot-separated parts");
+    throw new Error('Invalid JWS: must have three dot-separated parts');
   }
 
   const [headerB64, payloadB64, signatureB64] = parts;
@@ -129,9 +130,9 @@ export async function verify<T = unknown>(
  * @returns Decoded header and payload (unverified)
  */
 export function decode<T = unknown>(jws: string): { header: JWSHeader; payload: T } {
-  const parts = jws.split(".");
+  const parts = jws.split('.');
   if (parts.length !== 3) {
-    throw new Error("Invalid JWS: must have three dot-separated parts");
+    throw new Error('Invalid JWS: must have three dot-separated parts');
   }
 
   const [headerB64, payloadB64] = parts;
@@ -150,7 +151,10 @@ export function decode<T = unknown>(jws: string): { header: JWSHeader; payload: 
  *
  * @returns Private key (32 bytes) and public key (32 bytes)
  */
-export async function generateKeypair(): Promise<{ privateKey: Uint8Array; publicKey: Uint8Array }> {
+export async function generateKeypair(): Promise<{
+  privateKey: Uint8Array;
+  publicKey: Uint8Array;
+}> {
   const privateKey = ed25519.utils.randomPrivateKey();
   const publicKey = await ed25519.getPublicKeyAsync(privateKey);
 

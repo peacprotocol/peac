@@ -9,6 +9,7 @@
 ## 1. Overview
 
 This guide provides practical guidance for implementing PEAC v0.9 in any programming language. It complements the normative specifications:
+
 - JSON Schema (structure)
 - PROTOCOL-BEHAVIOR.md (semantics)
 - TEST_VECTORS.md (conformance tests)
@@ -20,17 +21,20 @@ This guide provides practical guidance for implementing PEAC v0.9 in any program
 PEAC uses JSON Canonicalization Scheme (RFC 8785) for deterministic signing.
 
 **Why JCS?**
+
 - Ensures identical signatures across implementations
 - Required for `policy_hash` computation
 - Standard for cryptographic signing of JSON
 
 **Requirements**:
+
 - Unicode normalization
 - Lexicographic key ordering
 - No whitespace
 - Minimal number encoding
 
 **Reference implementations**:
+
 - **JavaScript**: `canonicalize` npm package
 - **Go**: `github.com/cyberphone/json-canonicalization/go/src/webpki.org/jsoncanonicalizer`
 - **Rust**: `jcs` crate
@@ -41,10 +45,12 @@ PEAC uses JSON Canonicalization Scheme (RFC 8785) for deterministic signing.
 ## 3. JSON Schema to Language Types
 
 ### TypeScript
+
 - Use `json-schema-to-typescript` for type generation
 - Schema is source of truth; generated types may need manual refinement
 
 ### Go
+
 ```go
 // Example struct mapping from JSON Schema
 
@@ -69,6 +75,7 @@ type AuthContext struct {
 ```
 
 ### Rust
+
 ```rust
 // Example with serde
 
@@ -83,6 +90,7 @@ struct PEACEnvelope {
 ```
 
 ### Python
+
 ```python
 # Example with dataclasses
 
@@ -101,6 +109,7 @@ class PEACEnvelope:
 ## 4. Error Model Mapping
 
 ### Go
+
 ```go
 type PEACError struct {
     Code        string      `json:"code"`
@@ -119,6 +128,7 @@ func (e *PEACError) Error() string {
 ```
 
 ### Rust
+
 ```rust
 #[derive(Debug, Serialize, Deserialize)]
 struct PEACError {
@@ -150,6 +160,7 @@ impl std::fmt::Display for PEACError {
 ### Minimal Interface
 
 **TypeScript** (reference):
+
 ```typescript
 interface ControlEngineAdapter {
   readonly engineId: string;
@@ -162,11 +173,12 @@ interface ControlEvaluationContext {
   method: string;
   amount?: number;
   currency?: string;
-  policy: unknown;  // Fetched from policy_uri
+  policy: unknown; // Fetched from policy_uri
 }
 ```
 
 **Go**:
+
 ```go
 type ControlEngineAdapter interface {
     EngineID() string
@@ -176,6 +188,7 @@ type ControlEngineAdapter interface {
 ```
 
 **Rust**:
+
 ```rust
 #[async_trait]
 trait ControlEngineAdapter {
@@ -194,6 +207,7 @@ trait ControlEngineAdapter {
 ### Suggested Interface
 
 **TypeScript**:
+
 ```typescript
 interface PaymentRailAdapter {
   readonly railId: string;
@@ -203,6 +217,7 @@ interface PaymentRailAdapter {
 ```
 
 **Go**:
+
 ```go
 type PaymentRailAdapter interface {
     RailID() string
@@ -216,16 +231,19 @@ type PaymentRailAdapter interface {
 ## 7. Crypto Implementation
 
 ### EdDSA (Ed25519) Signing
+
 - Use RFC 8032 compliant libraries
 - PEAC uses `alg: "EdDSA"` in JWS header
 
 **Libraries**:
+
 - **JavaScript**: `@noble/ed25519` or `tweetnacl`
 - **Go**: `crypto/ed25519` (stdlib)
 - **Rust**: `ed25519-dalek`
 - **Python**: `cryptography` or `PyNaCl`
 
 ### JWS Compact Serialization
+
 Format: `{base64url(header)}.{base64url(payload)}.{base64url(signature)}`
 
 ---
@@ -233,11 +251,13 @@ Format: `{base64url(header)}.{base64url(payload)}.{base64url(signature)}`
 ## 8. Test Vector Validation
 
 All implementations MUST:
+
 1. Parse all golden vectors successfully
 2. Reject all negative vectors with correct error codes
 3. Pass HTTP-context vectors if implementing full verifier
 
 **Example test structure**:
+
 ```
 tests/
 ├── golden_tests.rs      # Load and validate golden/*.json
@@ -250,6 +270,7 @@ tests/
 ## 9. Performance Targets
 
 From PROTOCOL-BEHAVIOR.md:
+
 - Signature verification: p95 ≤ 10ms (local, no network)
 - Envelope validation: p95 ≤ 5ms (schema + control chain)
 - Policy fetch + verification: p95 ≤ 500ms (with caching)
@@ -259,18 +280,22 @@ From PROTOCOL-BEHAVIOR.md:
 ## 10. Common Pitfalls
 
 ### Pitfall 1: Not enforcing control requirements
+
 **Problem**: Allowing receipts with payment but no control
 **Solution**: Implement check from PROTOCOL-BEHAVIOR.md Section 3
 
 ### Pitfall 2: Incomplete SSRF protection
+
 **Problem**: Only blocking 169.254.169.254, missing other metadata IPs
 **Solution**: Implement full IP blocklist from PROTOCOL-BEHAVIOR.md Section 6
 
 ### Pitfall 3: Timestamp milliseconds vs seconds
+
 **Problem**: Using JavaScript `Date.now()` (milliseconds) for `iat`/`exp`
 **Solution**: Use seconds: `Math.floor(Date.now() / 1000)`
 
 ### Pitfall 4: Missing JCS canonicalization
+
 **Problem**: Computing policy_hash without JCS
 **Solution**: Always canonicalize before hashing
 
@@ -288,6 +313,7 @@ From PROTOCOL-BEHAVIOR.md:
 ## 12. Contributing
 
 To propose additions to this guide:
+
 1. Open GitHub issue with suggested content
 2. Provide example code in target language
 3. Reference relevant section of normative spec

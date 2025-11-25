@@ -5,6 +5,7 @@
 ## Coming Soon
 
 Comprehensive API documentation including:
+
 - Receipt issuance and verification endpoints
 - Discovery manifest format
 - JWKS endpoint specification

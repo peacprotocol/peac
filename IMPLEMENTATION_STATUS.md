@@ -15,6 +15,7 @@
 **Tests:** N/A (type definitions and schemas)
 
 **Contents:**
+
 - ✅ TypeScript type definitions (`PEACReceiptClaims`, `NormalizedPayment`, etc.)
 - ✅ Zod validators for runtime validation
 - ✅ JSON Schema for receipt claims (RFC compliance)
@@ -24,6 +25,7 @@
 - ✅ All SPDX headers removed (repo-level Apache-2.0 only)
 
 **Key Files:**
+
 - `src/types.ts` - TypeScript interfaces
 - `src/validators.ts` - Zod schemas
 - `src/constants.ts` - Frozen wire format constants
@@ -39,6 +41,7 @@
 **Test Coverage:** Comprehensive (JWS, JCS, base64url)
 
 **Contents:**
+
 - ✅ Ed25519 JWS signing and verification (RFC 8032)
 - ✅ JSON Canonicalization Scheme (RFC 8785)
 - ✅ Base64url encoding/decoding (RFC 4648 §5)
@@ -46,6 +49,7 @@
 - ✅ Full test suite with golden vectors
 
 **Key Files:**
+
 - `src/jws.ts` - JWS compact serialization
 - `src/jcs.ts` - RFC 8785 canonicalization
 - `src/base64url.ts` - Base64url helpers
@@ -54,6 +58,7 @@
 - `tests/base64url.test.ts` - Encoding tests
 
 **Test Cases:**
+
 - ✅ Valid signature verification
 - ✅ Invalid signature detection
 - ✅ Tampered payload detection
@@ -69,6 +74,7 @@
 **Test Coverage:** Comprehensive (issue, verify, discovery)
 
 **Contents:**
+
 - ✅ `issue()` function with UUIDv7 receipt ID generation
 - ✅ `verify()` function with JWKS fetching and caching
 - ✅ SSRF-safe JWKS fetching (https:// only)
@@ -78,6 +84,7 @@
 - ✅ Full input validation (URLs, currency, amounts)
 
 **Key Files:**
+
 - `src/issue.ts` - Receipt issuance
 - `src/verify.ts` - Receipt verification with JWKS
 - `src/discovery.ts` - Discovery manifest parsing
@@ -86,6 +93,7 @@
 - `tests/discovery.test.ts` - Discovery parsing tests
 
 **Test Cases:**
+
 - ✅ UUIDv7 generation
 - ✅ HTTPS-only enforcement
 - ✅ Currency code validation (ISO 4217)
@@ -101,6 +109,7 @@
 **Test Coverage:** N/A (integration testing recommended)
 
 **Contents:**
+
 - ✅ POST `/verify` endpoint with RFC 9457 Problem Details
 - ✅ Rate limiting (100 req/s per IP, 1000 req/s global)
 - ✅ Circuit breaker for JWKS (5 failures → 60s open)
@@ -113,12 +122,14 @@
 - ✅ Built with Hono (Cloudflare Workers compatible)
 
 **Key Files:**
+
 - `src/server.ts` - Main Hono application
 - `src/rate-limiter.ts` - Sliding window rate limiter
 - `src/circuit-breaker.ts` - Circuit breaker implementation
 - `src/cli.ts` - Server entry point
 
 **Security Features:**
+
 - ✅ Per-IP rate limiting
 - ✅ Global rate limiting
 - ✅ JWS size limit (16KB)
@@ -135,6 +146,7 @@
 **Test Coverage:** Manual testing recommended
 
 **Contents:**
+
 - ✅ `peac verify <jws>` - Verify receipt with signature validation
 - ✅ `peac validate-discovery <path|url>` - Validate discovery manifest
 - ✅ `peac decode <jws>` - Decode receipt without verification
@@ -144,9 +156,11 @@
 - ✅ Built with Commander.js
 
 **Key Files:**
+
 - `src/index.ts` - CLI implementation
 
 **Commands:**
+
 ```bash
 peac verify <jws>                    # Verify receipt
 peac validate-discovery <path|url>   # Validate discovery
@@ -157,14 +171,14 @@ peac decode <jws> [--json]           # Decode receipt
 
 ## 📊 Implementation Metrics
 
-| Package | Files | Lines | Tests | Status |
-|---------|-------|-------|-------|--------|
-| @peac/schema | 6 | ~600 | N/A | ✅ Complete |
-| @peac/crypto | 7 | ~350 | 3 suites | ✅ Complete |
-| @peac/protocol | 8 | ~520 | 2 suites | ✅ Complete |
-| @peac/server | 6 | ~480 | N/A | ✅ Complete |
-| @peac/cli | 2 | ~230 | N/A | ✅ Complete |
-| **Total** | **29** | **~2,180** | **5 suites** | **✅** |
+| Package        | Files  | Lines      | Tests        | Status      |
+| -------------- | ------ | ---------- | ------------ | ----------- |
+| @peac/schema   | 6      | ~600       | N/A          | ✅ Complete |
+| @peac/crypto   | 7      | ~350       | 3 suites     | ✅ Complete |
+| @peac/protocol | 8      | ~520       | 2 suites     | ✅ Complete |
+| @peac/server   | 6      | ~480       | N/A          | ✅ Complete |
+| @peac/cli      | 2      | ~230       | N/A          | ✅ Complete |
+| **Total**      | **29** | **~2,180** | **5 suites** | **✅**      |
 
 ---
 
@@ -300,6 +314,7 @@ e5e5332 feat(crypto): add Ed25519 JWS signing/verification and JCS canonicalizat
 - ✅ Apache-2.0 licensed
 
 **Ready for:**
+
 - Integration testing
 - Payment rail adapters (Stripe, x402)
 - Protocol mappings (MCP, ACP)

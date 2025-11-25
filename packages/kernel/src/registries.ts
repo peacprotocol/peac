@@ -11,7 +11,7 @@ import type {
   ControlEngineEntry,
   TransportMethodEntry,
   AgentProtocolEntry,
-} from "./types.js";
+} from './types.js';
 
 /**
  * Payment Rails Registry
@@ -19,32 +19,32 @@ import type {
  */
 export const PAYMENT_RAILS: readonly PaymentRailEntry[] = [
   {
-    id: "x402",
-    category: "agentic-payment",
-    description: "HTTP 402-based paid call receipts",
-    reference: "https://www.x402.org/",
-    status: "informational",
+    id: 'x402',
+    category: 'agentic-payment',
+    description: 'HTTP 402-based paid call receipts',
+    reference: 'https://www.x402.org/',
+    status: 'informational',
   },
   {
-    id: "l402",
-    category: "agentic-payment",
-    description: "Lightning HTTP 402 Protocol (LSAT-based)",
-    reference: "https://docs.lightning.engineering/the-lightning-network/l402",
-    status: "informational",
+    id: 'l402',
+    category: 'agentic-payment',
+    description: 'Lightning HTTP 402 Protocol (LSAT-based)',
+    reference: 'https://docs.lightning.engineering/the-lightning-network/l402',
+    status: 'informational',
   },
   {
-    id: "card-network",
-    category: "card",
-    description: "Generic card network authorizations/clearing",
+    id: 'card-network',
+    category: 'card',
+    description: 'Generic card network authorizations/clearing',
     reference: null,
-    status: "informational",
+    status: 'informational',
   },
   {
-    id: "upi",
-    category: "account-to-account",
-    description: "Unified Payments Interface",
-    reference: "https://www.npci.org.in/",
-    status: "informational",
+    id: 'upi',
+    category: 'account-to-account',
+    description: 'Unified Payments Interface',
+    reference: 'https://www.npci.org.in/',
+    status: 'informational',
   },
 ] as const;
 
@@ -54,25 +54,25 @@ export const PAYMENT_RAILS: readonly PaymentRailEntry[] = [
  */
 export const CONTROL_ENGINES: readonly ControlEngineEntry[] = [
   {
-    id: "spend-control-service",
-    category: "limits",
-    description: "Generic spend control decisions (per-tx, daily, monthly limits)",
+    id: 'spend-control-service',
+    category: 'limits',
+    description: 'Generic spend control decisions (per-tx, daily, monthly limits)',
     reference: null,
-    status: "informational",
+    status: 'informational',
   },
   {
-    id: "risk-engine",
-    category: "fraud",
-    description: "Generic risk/fraud scoring engine",
+    id: 'risk-engine',
+    category: 'fraud',
+    description: 'Generic risk/fraud scoring engine',
     reference: null,
-    status: "informational",
+    status: 'informational',
   },
   {
-    id: "mandate-service",
-    category: "mandate",
-    description: "Generic enterprise mandate/approval chain evaluator",
+    id: 'mandate-service',
+    category: 'mandate',
+    description: 'Generic enterprise mandate/approval chain evaluator',
     reference: null,
-    status: "informational",
+    status: 'informational',
   },
 ] as const;
 
@@ -82,25 +82,25 @@ export const CONTROL_ENGINES: readonly ControlEngineEntry[] = [
  */
 export const TRANSPORT_METHODS: readonly TransportMethodEntry[] = [
   {
-    id: "dpop",
-    category: "proof-of-possession",
-    description: "Demonstrating Proof-of-Possession at the Application Layer",
-    reference: "https://www.rfc-editor.org/rfc/rfc9449",
-    status: "informational",
+    id: 'dpop',
+    category: 'proof-of-possession',
+    description: 'Demonstrating Proof-of-Possession at the Application Layer',
+    reference: 'https://www.rfc-editor.org/rfc/rfc9449',
+    status: 'informational',
   },
   {
-    id: "http-signature",
-    category: "message-signature",
-    description: "HTTP Message Signatures",
-    reference: "https://www.rfc-editor.org/rfc/rfc9421",
-    status: "informational",
+    id: 'http-signature',
+    category: 'message-signature',
+    description: 'HTTP Message Signatures',
+    reference: 'https://www.rfc-editor.org/rfc/rfc9421',
+    status: 'informational',
   },
   {
-    id: "none",
-    category: "none",
-    description: "No transport binding",
+    id: 'none',
+    category: 'none',
+    description: 'No transport binding',
     reference: null,
-    status: "informational",
+    status: 'informational',
   },
 ] as const;
 
@@ -110,32 +110,32 @@ export const TRANSPORT_METHODS: readonly TransportMethodEntry[] = [
  */
 export const AGENT_PROTOCOLS: readonly AgentProtocolEntry[] = [
   {
-    id: "mcp",
-    category: "tool-protocol",
-    description: "Model Context Protocol (Anthropic)",
-    reference: "https://modelcontextprotocol.io/",
-    status: "informational",
+    id: 'mcp',
+    category: 'tool-protocol',
+    description: 'Model Context Protocol (Anthropic)',
+    reference: 'https://modelcontextprotocol.io/',
+    status: 'informational',
   },
   {
-    id: "acp",
-    category: "commerce-protocol",
-    description: "Agentic Commerce Protocol",
+    id: 'acp',
+    category: 'commerce-protocol',
+    description: 'Agentic Commerce Protocol',
     reference: null,
-    status: "informational",
+    status: 'informational',
   },
   {
-    id: "ap2",
-    category: "agent-protocol",
-    description: "Google Agent Protocol v2",
+    id: 'ap2',
+    category: 'agent-protocol',
+    description: 'Google Agent Protocol v2',
     reference: null,
-    status: "informational",
+    status: 'informational',
   },
   {
-    id: "tap",
-    category: "card-protocol",
-    description: "Token Authentication Protocol (Visa TAP)",
-    reference: "https://developer.visa.com/",
-    status: "informational",
+    id: 'tap',
+    category: 'card-protocol',
+    description: 'Token Authentication Protocol (Visa TAP)',
+    reference: 'https://developer.visa.com/',
+    status: 'informational',
   },
 ] as const;
 

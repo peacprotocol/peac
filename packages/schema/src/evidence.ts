@@ -64,7 +64,7 @@ export interface PaymentEvidence {
    * - "live": Production/real money
    * - "test": Sandbox/test mode
    */
-  env: "live" | "test";
+  env: 'live' | 'test';
 
   /**
    * Network/rail identifier (OPTIONAL, SHOULD for crypto)

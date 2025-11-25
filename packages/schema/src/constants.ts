@@ -5,12 +5,7 @@
  * (normative source: specs/kernel/constants.json)
  */
 
-import {
-  WIRE_TYPE,
-  ALGORITHMS,
-  HEADERS,
-  DISCOVERY,
-} from "@peac/kernel";
+import { WIRE_TYPE, ALGORITHMS, HEADERS, DISCOVERY } from '@peac/kernel';
 
 /**
  * Wire format version - FROZEN at 0.9 with v1.0-equivalent semantics

@@ -2,8 +2,8 @@
  * Receipt verification with JWKS fetching and caching
  */
 
-import { verify as jwsVerify, decode } from "@peac/crypto";
-import { PEACReceiptClaims, ReceiptClaims } from "@peac/schema";
+import { verify as jwsVerify, decode } from '@peac/crypto';
+import { PEACReceiptClaims, ReceiptClaims } from '@peac/schema';
 
 /**
  * JWKS key entry
@@ -69,8 +69,8 @@ export interface VerifyFailure {
  */
 async function fetchJWKS(issuerUrl: string): Promise<JWKS> {
   // SSRF protection: only allow https://
-  if (!issuerUrl.startsWith("https://")) {
-    throw new Error("Issuer URL must be https://");
+  if (!issuerUrl.startsWith('https://')) {
+    throw new Error('Issuer URL must be https://');
   }
 
   // Construct JWKS URL from discovery
@@ -78,7 +78,7 @@ async function fetchJWKS(issuerUrl: string): Promise<JWKS> {
 
   try {
     const discoveryResp = await fetch(discoveryUrl, {
-      headers: { Accept: "text/plain" },
+      headers: { Accept: 'text/plain' },
       // Timeout after 5 seconds
       signal: AbortSignal.timeout(5000),
     });
@@ -90,21 +90,21 @@ async function fetchJWKS(issuerUrl: string): Promise<JWKS> {
     const discoveryText = await discoveryResp.text();
 
     // Parse YAML-like discovery (simple key: value parsing)
-    const jwksLine = discoveryText.split("\n").find((line) => line.startsWith("jwks:"));
+    const jwksLine = discoveryText.split('\n').find((line) => line.startsWith('jwks:'));
     if (!jwksLine) {
-      throw new Error("No jwks field in discovery");
+      throw new Error('No jwks field in discovery');
     }
 
-    const jwksUrl = jwksLine.replace("jwks:", "").trim();
+    const jwksUrl = jwksLine.replace('jwks:', '').trim();
 
     // SSRF protection: verify JWKS URL is also https://
-    if (!jwksUrl.startsWith("https://")) {
-      throw new Error("JWKS URL must be https://");
+    if (!jwksUrl.startsWith('https://')) {
+      throw new Error('JWKS URL must be https://');
     }
 
     // Fetch JWKS
     const jwksResp = await fetch(jwksUrl, {
-      headers: { Accept: "application/json" },
+      headers: { Accept: 'application/json' },
       signal: AbortSignal.timeout(5000),
     });
 
@@ -148,14 +148,14 @@ async function getJWKS(issuerUrl: string): Promise<{ jwks: JWKS; fromCache: bool
  * Convert JWK x coordinate to Ed25519 public key
  */
 function jwkToPublicKey(jwk: JWK): Uint8Array {
-  if (jwk.kty !== "OKP" || jwk.crv !== "Ed25519") {
-    throw new Error("Only Ed25519 keys (OKP/Ed25519) are supported");
+  if (jwk.kty !== 'OKP' || jwk.crv !== 'Ed25519') {
+    throw new Error('Only Ed25519 keys (OKP/Ed25519) are supported');
   }
 
   // Decode base64url x coordinate
-  const xBytes = Buffer.from(jwk.x, "base64url");
+  const xBytes = Buffer.from(jwk.x, 'base64url');
   if (xBytes.length !== 32) {
-    throw new Error("Ed25519 public key must be 32 bytes");
+    throw new Error('Ed25519 public key must be 32 bytes');
   }
 
   return new Uint8Array(xBytes);
@@ -167,9 +167,7 @@ function jwkToPublicKey(jwk: JWK): Uint8Array {
  * @param receiptJws - JWS compact serialization
  * @returns Verification result or failure
  */
-export async function verifyReceipt(
-  receiptJws: string
-): Promise<VerifyResult | VerifyFailure> {
+export async function verifyReceipt(receiptJws: string): Promise<VerifyResult | VerifyFailure> {
   const startTime = performance.now();
   let jwksFetchTime: number | undefined;
 
@@ -184,7 +182,7 @@ export async function verifyReceipt(
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
       return {
         ok: false,
-        reason: "expired",
+        reason: 'expired',
         details: `Receipt expired at ${new Date(payload.exp * 1000).toISOString()}`,
       };
     }
@@ -201,7 +199,7 @@ export async function verifyReceipt(
     if (!jwk) {
       return {
         ok: false,
-        reason: "unknown_key",
+        reason: 'unknown_key',
         details: `No key found with kid=${header.kid}`,
       };
     }
@@ -215,8 +213,8 @@ export async function verifyReceipt(
     if (!result.valid) {
       return {
         ok: false,
-        reason: "invalid_signature",
-        details: "Ed25519 signature verification failed",
+        reason: 'invalid_signature',
+        details: 'Ed25519 signature verification failed',
       };
     }
 
@@ -233,7 +231,7 @@ export async function verifyReceipt(
   } catch (err) {
     return {
       ok: false,
-      reason: "verification_error",
+      reason: 'verification_error',
       details: err instanceof Error ? err.message : String(err),
     };
   }

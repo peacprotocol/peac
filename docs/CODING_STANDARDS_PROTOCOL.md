@@ -13,11 +13,13 @@ This document defines coding standards for PEAC Protocol core packages and speci
 - **Examples** (`examples/`, `apps/`): May use vendor-specific implementations
 
 **Violations**:
+
 - ❌ `type PaymentScheme = "stripe" | "razorpay" | "x402"`
 - ❌ `interface LocusMandate { ... }`
 - ❌ Hardcoded references to Stripe, Razorpay, Locus, Google, Visa, etc. in core
 
 **Correct**:
+
 - ✅ `type PaymentScheme = string` (opaque, extensible)
 - ✅ `interface BudgetConstraint { ... }` (generic primitive)
 - ✅ Non-normative registry in `docs/specs/registries.json`
@@ -60,18 +62,23 @@ Use standard JWT claim names (RFC 7519):
 Use `snake_case` for JSON-visible fields:
 
 **Top-level**:
+
 - `auth`, `evidence`, `meta`
 
 **Auth context**:
+
 - `policy_hash`, `policy_uri`, `parent_rid`, `supersedes_rid`, `delegation_chain`
 
 **Control**:
+
 - `chain`, `decision`, `combinator`, `limits_snapshot`, `policy_id`, `evidence_ref`
 
 **Evidence**:
+
 - `payment`, `payments`, `attestation`, `facilitator_ref`
 
 **Meta**:
+
 - `privacy_budget`, `k_anonymity`
 
 **Rationale**: Web standards prefer snake_case for JSON. TypeScript/Go/Rust use camelCase/snake_case internally but serialize to snake_case.
@@ -98,24 +105,28 @@ function validate_control_chain(chain: ControlStep[]): ControlValidationResult {
 ### 3.1 Core Packages
 
 **`@peac/schema`**:
+
 - Types + JSON Schema only
 - Zero dependencies (except dev dependencies)
 - Exports: envelope, control, evidence, errors, validators
 - **NO** vendor-specific names
 
 **`@peac/protocol`**:
+
 - Logic: issue, verify, validate
 - Depends on: `@peac/schema`, `@peac/crypto`
 - Exports: issuer, verifier, validator functions
 - **NO** vendor-specific logic
 
 **`@peac/control`**:
+
 - Generic control interfaces
 - Re-exports core types from `@peac/schema`
 - Provides generic primitives (temporal, usage, budget constraints)
 - **NO** vendor-specific engines
 
 **`@peac/crypto`**:
+
 - JWS signing/verification (EdDSA, RFC 8032)
 - JCS canonicalization (RFC 8785)
 - Key management (Ed25519, JWKS)
@@ -124,21 +135,25 @@ function validate_control_chain(chain: ControlStep[]): ControlValidationResult {
 ### 3.2 Adapter Packages
 
 **`@peac/rails-core`** (when introduced):
+
 - Generic `PaymentRailAdapter` interface
 - Common rail logic (amount validation, currency conversion)
 - **NO** vendor-specific implementations
 
 **`@peac/rails-x402`**:
+
 - x402 protocol adapter
 - Depends on: `@peac/rails-core`, `@peac/schema`
 - May reference x402-specific fields
 
 **`@peac/rails-stripe`**:
+
 - Stripe payment adapter
 - Depends on: `@peac/rails-core`, `@peac/schema`, `stripe` SDK
 - May reference Stripe-specific APIs
 
 **`@peac/mappings-mcp`**, **`@peac/mappings-acp`**, etc.:
+
 - Protocol mapping adapters (MCP, ACP, TAP, AP2)
 - Depends on: `@peac/schema`, `@peac/control`
 - May reference protocol-specific fields
@@ -146,11 +161,13 @@ function validate_control_chain(chain: ControlStep[]): ControlValidationResult {
 ### 3.3 Examples and Apps
 
 **`examples/control-engines/`**:
+
 - Reference implementations of control engines
 - May use vendor names in subdirectories (`examples/control-engines/locus/`)
 - Not published to npm
 
 **`apps/`**:
+
 - Demo applications
 - May use any vendor-specific code
 - Not published to npm
@@ -167,17 +184,11 @@ All protocol-surface errors MUST use `PEACError`:
 import { createPEACError, ERROR_CODES } from '@peac/schema';
 
 // Good
-throw createPEACError(
-  ERROR_CODES.E_CONTROL_REQUIRED,
-  'validation',
-  'error',
-  false,
-  {
-    http_status: 400,
-    pointer: '/auth/control',
-    remediation: 'Add control{} block when payment{} is present',
-  }
-);
+throw createPEACError(ERROR_CODES.E_CONTROL_REQUIRED, 'validation', 'error', false, {
+  http_status: 400,
+  pointer: '/auth/control',
+  remediation: 'Add control{} block when payment{} is present',
+});
 
 // Bad
 throw new Error('Control required');
@@ -186,6 +197,7 @@ throw new Error('Control required');
 ### 4.2 Error Registry
 
 Each new error code MUST:
+
 1. Be added to `packages/schema/src/errors.ts` ERROR_CODES constant
 2. Be documented in `docs/specs/ERRORS.md` registry table
 3. Have at least one negative test vector demonstrating it
@@ -217,6 +229,7 @@ Use `details` field for implementation-specific context:
 ### 5.1 Test Vectors
 
 All new protocol features MUST:
+
 1. Add at least **one golden vector** (valid case)
 2. Add at least **one negative vector** per new validation rule
 3. Update `docs/specs/TEST_VECTORS.md` with descriptions
@@ -253,12 +266,14 @@ CI MUST fail if performance regresses by >20%.
 Structural refactors are **encouraged now** (pre-adoption) over v2.0 later.
 
 **Refactor immediately if**:
+
 - Vendor names leak into core packages
 - Protocol semantics are ambiguous
 - Cross-language compatibility is broken
 - Performance is unacceptable
 
 **Defer if**:
+
 - Changes are purely cosmetic
 - No clear correctness/performance win
 - High risk of introducing bugs
@@ -338,6 +353,7 @@ Breaking changes MUST include:
 - **Subject**: Imperative mood, no period, max 72 chars
 
 Examples:
+
 ```
 feat(schema): add composable control chain with any_can_veto
 fix(protocol): validate policy_hash against fetched policy
@@ -397,6 +413,7 @@ Design for internet-grade scale:
 ### 10.1 SSRF Protection
 
 All URL fetches (JWKS, policy) MUST:
+
 - Block private IPs (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 127.0.0.0/8)
 - Block metadata IPs (169.254.0.0/16, fd00::/8)
 - Block loopback (localhost, ::1)
@@ -406,6 +423,7 @@ All URL fetches (JWKS, policy) MUST:
 ### 10.2 DPoP Verification
 
 DPoP proofs MUST:
+
 - Validate `jkt` matches public key hash
 - Validate `iat` is within acceptable window (±60s)
 - Validate `htm` and `htu` match request method and URL
@@ -455,6 +473,7 @@ For any design questions, document them in:
 - Wait for explicit human confirmation before implementing
 
 **Examples of questions requiring approval**:
+
 - Should we use `jti` or `rid` for receipt ID?
 - Should mandate types be generic primitives or vendor-specific?
 - When should we introduce `rails-core` package?

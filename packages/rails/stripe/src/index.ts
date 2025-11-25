@@ -3,7 +3,7 @@
  * Normalizes Stripe webhooks/checkout sessions to PEAC PaymentEvidence
  */
 
-import { PaymentEvidence } from "@peac/schema";
+import { PaymentEvidence } from '@peac/schema';
 
 /**
  * Stripe Checkout Session (simplified)
@@ -41,16 +41,19 @@ export interface StripeWebhookEvent {
 /**
  * Normalize Stripe Checkout Session to PEAC PaymentEvidence
  */
-export function fromCheckoutSession(session: StripeCheckoutSession, env: "live" | "test" = "live"): PaymentEvidence {
+export function fromCheckoutSession(
+  session: StripeCheckoutSession,
+  env: 'live' | 'test' = 'live'
+): PaymentEvidence {
   // Validate required fields
   if (!session.id) {
-    throw new Error("Stripe checkout session missing id");
+    throw new Error('Stripe checkout session missing id');
   }
-  if (typeof session.amount_total !== "number" || session.amount_total < 0) {
-    throw new Error("Stripe checkout session invalid amount_total");
+  if (typeof session.amount_total !== 'number' || session.amount_total < 0) {
+    throw new Error('Stripe checkout session invalid amount_total');
   }
   if (!session.currency || !/^[a-z]{3}$/.test(session.currency)) {
-    throw new Error("Stripe checkout session invalid currency (must be lowercase ISO 4217)");
+    throw new Error('Stripe checkout session invalid currency (must be lowercase ISO 4217)');
   }
 
   // Build evidence object with Stripe-specific data
@@ -72,7 +75,7 @@ export function fromCheckoutSession(session: StripeCheckoutSession, env: "live" 
   }
 
   return {
-    rail: "stripe",
+    rail: 'stripe',
     reference: session.id,
     amount: session.amount_total,
     currency: session.currency.toUpperCase(), // PEAC requires uppercase
@@ -85,16 +88,19 @@ export function fromCheckoutSession(session: StripeCheckoutSession, env: "live" 
 /**
  * Normalize Stripe Payment Intent to PEAC PaymentEvidence
  */
-export function fromPaymentIntent(intent: StripePaymentIntent, env: "live" | "test" = "live"): PaymentEvidence {
+export function fromPaymentIntent(
+  intent: StripePaymentIntent,
+  env: 'live' | 'test' = 'live'
+): PaymentEvidence {
   // Validate required fields
   if (!intent.id) {
-    throw new Error("Stripe payment intent missing id");
+    throw new Error('Stripe payment intent missing id');
   }
-  if (typeof intent.amount !== "number" || intent.amount < 0) {
-    throw new Error("Stripe payment intent invalid amount");
+  if (typeof intent.amount !== 'number' || intent.amount < 0) {
+    throw new Error('Stripe payment intent invalid amount');
   }
   if (!intent.currency || !/^[a-z]{3}$/.test(intent.currency)) {
-    throw new Error("Stripe payment intent invalid currency (must be lowercase ISO 4217)");
+    throw new Error('Stripe payment intent invalid currency (must be lowercase ISO 4217)');
   }
 
   // Build evidence object with Stripe-specific data
@@ -112,7 +118,7 @@ export function fromPaymentIntent(intent: StripePaymentIntent, env: "live" | "te
   }
 
   return {
-    rail: "stripe",
+    rail: 'stripe',
     reference: intent.id,
     amount: intent.amount,
     currency: intent.currency.toUpperCase(), // PEAC requires uppercase
@@ -129,14 +135,17 @@ export function fromPaymentIntent(intent: StripePaymentIntent, env: "live" | "te
  * - checkout.session.completed
  * - payment_intent.succeeded
  */
-export function fromWebhookEvent(event: StripeWebhookEvent, env: "live" | "test" = "live"): PaymentEvidence {
+export function fromWebhookEvent(
+  event: StripeWebhookEvent,
+  env: 'live' | 'test' = 'live'
+): PaymentEvidence {
   const obj = event.data.object;
 
   // Determine object type by presence of fields
-  if ("amount_total" in obj) {
+  if ('amount_total' in obj) {
     // Checkout session
     return fromCheckoutSession(obj as StripeCheckoutSession, env);
-  } else if ("amount" in obj) {
+  } else if ('amount' in obj) {
     // Payment intent
     return fromPaymentIntent(obj as StripePaymentIntent, env);
   }

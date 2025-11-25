@@ -45,7 +45,7 @@ paths:
               valid_stripe_receipt:
                 summary: Valid Stripe receipt
                 value:
-                  receipt_jws: "eyJ0eXAiOiJwZWFjLnJlY2VpcHQvMC45IiwiYWxnIjoiRWREU0EiLCJraWQiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXBwLmV4YW1wbGUuY29tIiwiaWF0IjoxNzM2OTM0NjAwLCJyaWQiOiIwMTkzYzRkMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDAiLCJhbXQiOjk5OTksImN1ciI6IlVTRCIsInBheW1lbnQiOnsic2NoZW1lIjoic3RyaXBlIiwicmVmZXJlbmNlIjoiY3NfMTIzNDU2Iiwi YW1vdW50Ijo5OTk5LCJjdXJyZW5jeSI6IlVTRCJ9fQ.signature"
+                  receipt_jws: 'eyJ0eXAiOiJwZWFjLnJlY2VpcHQvMC45IiwiYWxnIjoiRWREU0EiLCJraWQiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXBwLmV4YW1wbGUuY29tIiwiaWF0IjoxNzM2OTM0NjAwLCJyaWQiOiIwMTkzYzRkMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDAiLCJhbXQiOjk5OTksImN1ciI6IlVTRCIsInBheW1lbnQiOnsic2NoZW1lIjoic3RyaXBlIiwicmVmZXJlbmNlIjoiY3NfMTIzNDU2Iiwi YW1vdW50Ijo5OTk5LCJjdXJyZW5jeSI6IlVTRCJ9fQ.signature'
       responses:
         '200':
           description: Verification result (success or failure)
@@ -54,12 +54,12 @@ paths:
               description: Caching directive
               schema:
                 type: string
-                example: "public, max-age=300"
+                example: 'public, max-age=300'
             Vary:
               description: Vary header for cache invalidation
               schema:
                 type: string
-                example: "PEAC-Receipt"
+                example: 'PEAC-Receipt'
           content:
             application/json:
               schema:
@@ -72,21 +72,21 @@ paths:
                   value:
                     ok: true
                     header:
-                      typ: "peac.receipt/0.9"
-                      alg: "EdDSA"
-                      kid: "2025-01-15T10:30:00Z"
+                      typ: 'peac.receipt/0.9'
+                      alg: 'EdDSA'
+                      kid: '2025-01-15T10:30:00Z'
                     claims:
-                      iss: "https://api.example.com"
-                      aud: "https://app.example.com"
+                      iss: 'https://api.example.com'
+                      aud: 'https://app.example.com'
                       iat: 1736934600
-                      rid: "0193c4d0-0000-7000-8000-000000000000"
+                      rid: '0193c4d0-0000-7000-8000-000000000000'
                       amt: 9999
-                      cur: "USD"
+                      cur: 'USD'
                       payment:
-                        scheme: "stripe"
-                        reference: "cs_123456"
+                        scheme: 'stripe'
+                        reference: 'cs_123456'
                         amount: 9999
-                        currency: "USD"
+                        currency: 'USD'
                     perf:
                       verify_ms: 8.2
                       jwks_fetch_ms: 45.1
@@ -94,14 +94,14 @@ paths:
                   summary: Invalid signature
                   value:
                     ok: false
-                    reason: "invalid_signature"
-                    details: "Ed25519 signature verification failed"
+                    reason: 'invalid_signature'
+                    details: 'Ed25519 signature verification failed'
                 failure_expired:
                   summary: Expired receipt
                   value:
                     ok: false
-                    reason: "expired"
-                    details: "Receipt expired at 2025-01-15T12:00:00Z"
+                    reason: 'expired'
+                    details: 'Receipt expired at 2025-01-15T12:00:00Z'
         '400':
           description: Bad request (malformed input)
           content:
@@ -112,11 +112,11 @@ paths:
                 malformed_jws:
                   summary: Malformed JWS
                   value:
-                    type: "https://peacprotocol.org/errors/malformed-jws"
-                    title: "Malformed JWS"
+                    type: 'https://peacprotocol.org/errors/malformed-jws'
+                    title: 'Malformed JWS'
                     status: 400
-                    detail: "JWS does not have three dot-separated parts"
-                    instance: "/verify"
+                    detail: 'JWS does not have three dot-separated parts'
+                    instance: '/verify'
         '429':
           description: Rate limit exceeded
           headers:
@@ -133,11 +133,11 @@ paths:
                 rate_limit:
                   summary: Rate limit exceeded
                   value:
-                    type: "https://peacprotocol.org/errors/rate-limit"
-                    title: "Rate Limit Exceeded"
+                    type: 'https://peacprotocol.org/errors/rate-limit'
+                    title: 'Rate Limit Exceeded'
                     status: 429
-                    detail: "IP-based rate limit: 100 requests per second"
-                    instance: "/verify"
+                    detail: 'IP-based rate limit: 100 requests per second'
+                    instance: '/verify'
         '503':
           description: Service unavailable (circuit breaker open)
           headers:
@@ -154,11 +154,11 @@ paths:
                 circuit_breaker:
                   summary: Circuit breaker open
                   value:
-                    type: "https://peacprotocol.org/errors/circuit-breaker"
-                    title: "Service Unavailable"
+                    type: 'https://peacprotocol.org/errors/circuit-breaker'
+                    title: 'Service Unavailable'
                     status: 503
-                    detail: "JWKS fetch circuit breaker is open (5 consecutive failures)"
-                    instance: "/verify"
+                    detail: 'JWKS fetch circuit breaker is open (5 consecutive failures)'
+                    instance: '/verify'
 
   /.well-known/peac.txt:
     get:
@@ -179,7 +179,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                example: "public, max-age=3600"
+                example: 'public, max-age=3600'
           content:
             text/plain:
               schema:
@@ -211,7 +211,7 @@ components:
           minLength: 16
           maxLength: 16384
           description: JWS compact serialization of the PEAC receipt
-          example: "eyJ0eXAiOiJwZWFjLnJlY2VpcHQvMC45IiwiYWxnIjoiRWREU0EiLCJraWQiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9..."
+          example: 'eyJ0eXAiOiJwZWFjLnJlY2VpcHQvMC45IiwiYWxnIjoiRWREU0EiLCJraWQiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9...'
 
     VerifyResponseSuccess:
       type: object
@@ -274,17 +274,17 @@ components:
       properties:
         typ:
           type: string
-          const: "peac.receipt/0.9"
+          const: 'peac.receipt/0.9'
           description: Wire format version (frozen at 0.9 until GA)
         alg:
           type: string
-          const: "EdDSA"
+          const: 'EdDSA'
           description: Signature algorithm (Ed25519)
         kid:
           type: string
           minLength: 8
           description: Key ID (ISO 8601 timestamp)
-          example: "2025-01-15T10:30:00Z"
+          example: '2025-01-15T10:30:00Z'
 
     ReceiptClaims:
       type: object
@@ -301,15 +301,15 @@ components:
         iss:
           type: string
           format: uri
-          pattern: "^https://"
+          pattern: '^https://'
           description: Issuer URL (must be https://)
-          example: "https://api.example.com"
+          example: 'https://api.example.com'
         aud:
           type: string
           format: uri
-          pattern: "^https://"
+          pattern: '^https://'
           description: Audience / resource URL
-          example: "https://app.example.com"
+          example: 'https://app.example.com'
         iat:
           type: integer
           minimum: 0
@@ -321,9 +321,9 @@ components:
           description: Expiry timestamp (Unix seconds, optional)
         rid:
           type: string
-          pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
           description: Receipt ID (UUIDv7)
-          example: "0193c4d0-0000-7000-8000-000000000000"
+          example: '0193c4d0-0000-7000-8000-000000000000'
         amt:
           type: integer
           minimum: 0
@@ -331,9 +331,9 @@ components:
           example: 9999
         cur:
           type: string
-          pattern: "^[A-Z]{3}$"
+          pattern: '^[A-Z]{3}$'
           description: ISO 4217 currency code (uppercase)
-          example: "USD"
+          example: 'USD'
         payment:
           $ref: '#/components/schemas/NormalizedPayment'
         subject:
@@ -354,12 +354,12 @@ components:
           type: string
           minLength: 1
           description: Payment rail identifier
-          example: "stripe"
+          example: 'stripe'
         reference:
           type: string
           minLength: 1
           description: Rail-specific payment ID
-          example: "cs_123456"
+          example: 'cs_123456'
         amount:
           type: integer
           minimum: 0
@@ -367,9 +367,9 @@ components:
           example: 9999
         currency:
           type: string
-          pattern: "^[A-Z]{3}$"
+          pattern: '^[A-Z]{3}$'
           description: ISO 4217 currency code
-          example: "USD"
+          example: 'USD'
         idempotency_key:
           type: string
           description: Idempotency key for deduplication
@@ -386,9 +386,9 @@ components:
         uri:
           type: string
           format: uri
-          pattern: "^https://"
+          pattern: '^https://'
           description: URI of the resource being paid for
-          example: "https://app.example.com/api/resource/123"
+          example: 'https://app.example.com/api/resource/123'
 
     Extensions:
       type: object
@@ -407,14 +407,14 @@ components:
         url:
           type: string
           format: uri
-          pattern: "^https://"
+          pattern: '^https://'
           description: URL of the AIPREF document
-          example: "https://api.example.com/.well-known/aipref.json"
+          example: 'https://api.example.com/.well-known/aipref.json'
         hash:
           type: string
           minLength: 8
           description: JCS+SHA-256 hash of the AIPREF document
-          example: "a1b2c3d4e5f67890"
+          example: 'a1b2c3d4e5f67890'
 
     ProblemDetails:
       type: object
@@ -427,11 +427,11 @@ components:
           type: string
           format: uri
           description: URI reference identifying the problem type (RFC 9457)
-          example: "https://peacprotocol.org/errors/rate-limit"
+          example: 'https://peacprotocol.org/errors/rate-limit'
         title:
           type: string
           description: Short, human-readable summary
-          example: "Rate Limit Exceeded"
+          example: 'Rate Limit Exceeded'
         status:
           type: integer
           description: HTTP status code
@@ -439,10 +439,10 @@ components:
         detail:
           type: string
           description: Human-readable explanation specific to this occurrence
-          example: "IP-based rate limit: 100 requests per second"
+          example: 'IP-based rate limit: 100 requests per second'
         instance:
           type: string
           format: uri
           description: URI reference identifying the specific occurrence
-          example: "/verify"
+          example: '/verify'
       description: RFC 9457 Problem Details for HTTP APIs

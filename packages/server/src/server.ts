@@ -6,11 +6,11 @@
  * - Response caching
  */
 
-import { Hono } from "hono";
-import { verifyReceipt } from "@peac/protocol";
-import { VerifyRequestSchema } from "@peac/schema";
-import { rateLimiter } from "./rate-limiter";
-import { jwksCircuitBreaker } from "./circuit-breaker";
+import { Hono } from 'hono';
+import { verifyReceipt } from '@peac/protocol';
+import { VerifyRequestSchema } from '@peac/schema';
+import { rateLimiter } from './rate-limiter';
+import { jwksCircuitBreaker } from './circuit-breaker';
 
 const app = new Hono();
 
@@ -18,10 +18,7 @@ const app = new Hono();
  * Response cache
  * Maps receipt JWS hash to { response, expiresAt }
  */
-const responseCache = new Map<
-  string,
-  { response: unknown; expiresAt: number; valid: boolean }
->();
+const responseCache = new Map<string, { response: unknown; expiresAt: number; valid: boolean }>();
 
 /**
  * Cache TTLs
@@ -38,12 +35,12 @@ function hashJws(jws: string): string {
 }
 
 // Apply rate limiting globally
-app.use("*", rateLimiter());
+app.use('*', rateLimiter());
 
 /**
  * POST /verify - Verify a PEAC receipt
  */
-app.post("/verify", async (c) => {
+app.post('/verify', async (c) => {
   const startTime = performance.now();
 
   try {
@@ -55,15 +52,15 @@ app.post("/verify", async (c) => {
     if (!parsed.success) {
       return c.json(
         {
-          type: "https://peacprotocol.org/errors/invalid-request",
-          title: "Invalid Request",
+          type: 'https://peacprotocol.org/errors/invalid-request',
+          title: 'Invalid Request',
           status: 400,
-          detail: "Request body validation failed",
-          instance: "/verify",
+          detail: 'Request body validation failed',
+          instance: '/verify',
         },
         400,
         {
-          "Content-Type": "application/problem+json",
+          'Content-Type': 'application/problem+json',
         }
       );
     }
@@ -74,15 +71,15 @@ app.post("/verify", async (c) => {
     if (receipt_jws.length > 16384) {
       return c.json(
         {
-          type: "https://peacprotocol.org/errors/jws-too-large",
-          title: "JWS Too Large",
+          type: 'https://peacprotocol.org/errors/jws-too-large',
+          title: 'JWS Too Large',
           status: 400,
-          detail: "JWS must be ≤16KB",
-          instance: "/verify",
+          detail: 'JWS must be ≤16KB',
+          instance: '/verify',
         },
         400,
         {
-          "Content-Type": "application/problem+json",
+          'Content-Type': 'application/problem+json',
         }
       );
     }
@@ -94,9 +91,9 @@ app.post("/verify", async (c) => {
 
     if (cached && cached.expiresAt > now) {
       // Set cache headers
-      c.header("Cache-Control", `public, max-age=${Math.floor((cached.expiresAt - now) / 1000)}`);
-      c.header("Vary", "PEAC-Receipt");
-      c.header("X-Cache", "HIT");
+      c.header('Cache-Control', `public, max-age=${Math.floor((cached.expiresAt - now) / 1000)}`);
+      c.header('Vary', 'PEAC-Receipt');
+      c.header('X-Cache', 'HIT');
 
       return c.json(cached.response, 200);
     }
@@ -107,19 +104,19 @@ app.post("/verify", async (c) => {
       result = await jwksCircuitBreaker.execute(() => verifyReceipt(receipt_jws));
     } catch (err) {
       // Circuit breaker open
-      if (err instanceof Error && err.message.includes("Circuit breaker is open")) {
+      if (err instanceof Error && err.message.includes('Circuit breaker is open')) {
         return c.json(
           {
-            type: "https://peacprotocol.org/errors/circuit-breaker",
-            title: "Service Unavailable",
+            type: 'https://peacprotocol.org/errors/circuit-breaker',
+            title: 'Service Unavailable',
             status: 503,
             detail: err.message,
-            instance: "/verify",
+            instance: '/verify',
           },
           503,
           {
-            "Content-Type": "application/problem+json",
-            "Retry-After": "60",
+            'Content-Type': 'application/problem+json',
+            'Retry-After': '60',
           }
         );
       }
@@ -137,9 +134,9 @@ app.post("/verify", async (c) => {
     });
 
     // Set cache headers
-    c.header("Cache-Control", `public, max-age=${Math.floor(cacheTtl / 1000)}`);
-    c.header("Vary", "PEAC-Receipt");
-    c.header("X-Cache", "MISS");
+    c.header('Cache-Control', `public, max-age=${Math.floor(cacheTtl / 1000)}`);
+    c.header('Vary', 'PEAC-Receipt');
+    c.header('X-Cache', 'MISS');
 
     // Check CPU budget (≤50ms)
     const elapsed = performance.now() - startTime;
@@ -151,15 +148,15 @@ app.post("/verify", async (c) => {
   } catch (err) {
     return c.json(
       {
-        type: "https://peacprotocol.org/errors/internal-error",
-        title: "Internal Server Error",
+        type: 'https://peacprotocol.org/errors/internal-error',
+        title: 'Internal Server Error',
         status: 500,
-        detail: err instanceof Error ? err.message : "Unknown error",
-        instance: "/verify",
+        detail: err instanceof Error ? err.message : 'Unknown error',
+        instance: '/verify',
       },
       500,
       {
-        "Content-Type": "application/problem+json",
+        'Content-Type': 'application/problem+json',
       }
     );
   }
@@ -168,7 +165,7 @@ app.post("/verify", async (c) => {
 /**
  * GET /.well-known/peac.txt - Discovery manifest
  */
-app.get("/.well-known/peac.txt", (c) => {
+app.get('/.well-known/peac.txt', (c) => {
   const manifest = `version: peac/0.9
 issuer: https://api.example.com
 verify: https://api.example.com/verify
@@ -177,8 +174,8 @@ payments:
   - rail: payment_rail_1
   - rail: payment_rail_2`;
 
-  c.header("Cache-Control", "public, max-age=3600");
-  c.header("Content-Type", "text/plain; charset=utf-8");
+  c.header('Cache-Control', 'public, max-age=3600');
+  c.header('Content-Type', 'text/plain; charset=utf-8');
 
   return c.text(manifest);
 });
@@ -186,7 +183,7 @@ payments:
 /**
  * GET /slo - Service Level Objectives metrics
  */
-app.get("/slo", (c) => {
+app.get('/slo', (c) => {
   const cbState = jwksCircuitBreaker.getState();
 
   return c.json({
@@ -205,8 +202,8 @@ app.get("/slo", (c) => {
 /**
  * GET /health - Health check
  */
-app.get("/health", (c) => {
-  return c.json({ status: "ok" });
+app.get('/health', (c) => {
+  return c.json({ status: 'ok' });
 });
 
 export { app };

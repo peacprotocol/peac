@@ -5,6 +5,7 @@
 ## Coming Soon
 
 User guides and tutorials including:
+
 - Getting started with PEAC
 - JWKS key rotation best practices
 - DPoP L3/L4 implementation guide

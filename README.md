@@ -18,17 +18,20 @@ PEAC is implemented and stewarded by contributors from [Originary](https://www.o
 PEAC does not replace existing protocols. It is the **receipts and verification layer** that works alongside:
 
 **Payment and HTTP 402 rails (examples):**
+
 - [x402 (Coinbase)](https://github.com/coinbase/x402) – HTTP 402 "Payment Required" for agentic interactions
 - Stripe, Razorpay, and other payment processors (via rail adapters)
 - Lightning Network and other cryptocurrency rails (planned)
 
 **Agent protocols (examples):**
+
 - [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) – Tool context for language models
 - [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) – Agent-driven commerce flows
 - [AP2 (Google)](https://github.com/google-agentic-commerce/AP2) – Google's agentic commerce profile
 - [A2A Project](https://github.com/a2aproject/A2A) – Agent-to-agent coordination
 
 **Web policy surfaces:**
+
 - AIPREF-style AI preference files and well-known endpoints
 - robots.txt, ai.txt, llm.txt and similar policy files
 
@@ -41,23 +44,27 @@ Names above are illustrative examples for interoperability. PEAC is vendor-neutr
 ## At a glance
 
 **Receipts and wire format:**
+
 - Receipt type: `typ: "peac.receipt/0.9"` (frozen across v0.9.x)
 - Envelope structure: `PEACEnvelope` with auth, evidence, and metadata blocks
 - Signature: Ed25519 JWS (RFC 8032)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
 
 **HTTP and 402 integration:**
+
 - Single `PEAC-Receipt` response header (no X- prefix)
 - HTTP 402 Payment Required support
 - Errors via `application/problem+json` (RFC 9457)
 - DPoP proof-of-possession binding (RFC 9449, planned v0.9.16)
 
 **Rails and mappings:**
+
 - Payment rails: x402, Stripe, Razorpay (via `@peac/rails-*`)
 - Agent protocols: MCP, ACP, A2A mappings (via `@peac/mappings-*`)
 - Transport abstraction: HTTP, gRPC, WebSocket (via `@peac/transport-*`)
 
 **Policy surfaces:**
+
 - Primary: `/.well-known/peac.txt` (machine-readable policy file)
 - Compatibility: AIPREF, robots.txt, ai.txt, llm.txt
 - Note: PEAC receipts work without peac.txt for API-only or internal deployments
@@ -81,49 +88,49 @@ pnpm add @peac/protocol @peac/crypto @peac/schema
 ### Verify a receipt
 
 ```typescript
-import { verifyReceipt } from "@peac/protocol";
+import { verifyReceipt } from '@peac/protocol';
 
 const result = await verifyReceipt(receiptJWS);
 
 if (result.ok) {
-  console.log("Receipt verified");
-  console.log("Issuer:", result.claims.iss);
-  console.log("Amount:", result.claims.amt, result.claims.cur);
-  console.log("Rail:", result.claims.payment?.rail);
-  console.log("Asset:", result.claims.payment?.asset);
+  console.log('Receipt verified');
+  console.log('Issuer:', result.claims.iss);
+  console.log('Amount:', result.claims.amt, result.claims.cur);
+  console.log('Rail:', result.claims.payment?.rail);
+  console.log('Asset:', result.claims.payment?.asset);
 } else {
-  console.error("Verification failed:", result.error);
+  console.error('Verification failed:', result.error);
 }
 ```
 
 ### Issue a receipt
 
 ```typescript
-import { issue } from "@peac/protocol";
-import { generateKeypair } from "@peac/crypto";
+import { issue } from '@peac/protocol';
+import { generateKeypair } from '@peac/crypto';
 
 const { privateKey } = await generateKeypair();
 
 const jws = await issue({
-  iss: "https://api.example.com",
-  aud: "https://app.example.com",
-  amt: 1000,  // Amount in smallest currency unit (cents)
-  cur: "USD",
-  rail: "x402",
-  reference: "inv_123",
-  asset: "USD",
-  env: "live",
+  iss: 'https://api.example.com',
+  aud: 'https://app.example.com',
+  amt: 1000, // Amount in smallest currency unit (cents)
+  cur: 'USD',
+  rail: 'x402',
+  reference: 'inv_123',
+  asset: 'USD',
+  env: 'live',
   evidence: {
-    invoice_id: "inv_123",
-    payment_ref: "pay_456",
+    invoice_id: 'inv_123',
+    payment_ref: 'pay_456',
   },
-  subject: "https://app.example.com/resource/123",
+  subject: 'https://app.example.com/resource/123',
 
   privateKey,
   kid: new Date().toISOString(),
 });
 
-console.log("PEAC-Receipt:", jws);
+console.log('PEAC-Receipt:', jws);
 ```
 
 ### CLI
@@ -158,17 +165,18 @@ This exposes `/verify` endpoint for receipt verification with rate limiting and 
 
 PEAC is designed for scenarios where verifiable proof of payment and policy compliance is essential:
 
-| Use case | How PEAC helps |
-|----------|----------------|
-| **HTTP 402 micropayments** | x402 and other rails settle funds; PEAC receipts prove settlement happened and can be verified offline |
-| **Agent-to-API interactions** | Every API call carries a signed receipt proving payment, consent, and policy compliance |
-| **AI data licensing** | Training/commercial terms in policy; receipts prove compliant use and payment for audit |
-| **Agentic marketplaces** | Agents exchange value and receipts across heterogeneous rails (x402, cards, L2s, etc.) |
-| **Regulatory compliance** | Signed receipts with policy evidence form auditable trails for investigations |
-| **Rate limiting and quotas** | Receipts tie usage to identity and payment, enabling verifiable quota enforcement |
-| **Multi-rail settlement** | Same receipt format works across x402, Stripe, Lightning, and future rails |
+| Use case                      | How PEAC helps                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **HTTP 402 micropayments**    | x402 and other rails settle funds; PEAC receipts prove settlement happened and can be verified offline |
+| **Agent-to-API interactions** | Every API call carries a signed receipt proving payment, consent, and policy compliance                |
+| **AI data licensing**         | Training/commercial terms in policy; receipts prove compliant use and payment for audit                |
+| **Agentic marketplaces**      | Agents exchange value and receipts across heterogeneous rails (x402, cards, L2s, etc.)                 |
+| **Regulatory compliance**     | Signed receipts with policy evidence form auditable trails for investigations                          |
+| **Rate limiting and quotas**  | Receipts tie usage to identity and payment, enabling verifiable quota enforcement                      |
+| **Multi-rail settlement**     | Same receipt format works across x402, Stripe, Lightning, and future rails                             |
 
 For all these cases:
+
 - **Receipts** are the source of truth (cryptographically signed, portable, offline-verifiable)
 - **Policy surfaces** (like peac.txt) declare what those receipts must prove
 - **Rails** (x402, Stripe, etc.) handle actual settlement
@@ -181,6 +189,7 @@ For all these cases:
 PEAC can be used purely as a receipts protocol, but for web-facing services, `/.well-known/peac.txt` is the **recommended policy surface** for publishing machine-readable terms.
 
 **Location:**
+
 - Primary: `https://your-domain/.well-known/peac.txt`
 - Fallback: `https://your-domain/peac.txt`
 
@@ -198,7 +207,7 @@ usage: open
 
 purposes: [indexing, research, documentation]
 attribution: optional
-attribution_format: "Source: PEAC Protocol ({url})"
+attribution_format: 'Source: PEAC Protocol ({url})'
 
 receipts: optional
 rate_limit: unlimited
@@ -229,6 +238,7 @@ negotiate: https://api.example.com/negotiate
 ```
 
 **Protocol flow:**
+
 1. Agent fetches `/.well-known/peac.txt`
 2. Checks if purpose and volume comply with published policy
 3. If payment required, settles via rail (x402, Stripe, etc.)
@@ -284,11 +294,13 @@ peac/
 ```
 
 **Core (normative):**
+
 - `specs/kernel/*.json` - Constants, errors, registries
 - `docs/specs/PEAC-RECEIPT-SCHEMA-v0.9.json` - Receipt envelope schema
 - `docs/specs/PROTOCOL-BEHAVIOR.md` - Issue, verify, discovery rules
 
 **Policy surfaces (recommended, non-normative):**
+
 - `docs/specs/PEAC-TXT.md` - peac.txt specification (v0.9.16)
 - AIPREF / ai.txt / llm.txt compatibility notes
 
@@ -297,16 +309,19 @@ peac/
 ## Packages
 
 **Core:**
+
 - `@peac/kernel` - Zero-dependency constants and registries
 - `@peac/schema` - TypeScript types, Zod validators, JSON Schema
 - `@peac/crypto` - Ed25519 JWS signing and verification
 - `@peac/protocol` - High-level issue() and verify() functions
 
 **Runtime:**
+
 - `@peac/server` - HTTP verification server with 402 support
 - `@peac/cli` - Command-line tools for receipts and policy
 
 **Rails and mappings:**
+
 - `@peac/rails-x402` - x402 payment rail adapter
 - `@peac/rails-stripe` - Stripe payment rail adapter
 - `@peac/mappings-mcp` - Model Context Protocol integration
@@ -314,6 +329,7 @@ peac/
 - `@peac/mappings-a2a` - Agent-to-agent protocol (planned)
 
 **Pillars (planned v0.9.16+):**
+
 - `@peac/control` - Constraint types and enforcement
 - `@peac/access` - Access control and policy evaluation
 - `@peac/consent` - Consent lifecycle management
@@ -328,21 +344,25 @@ peac/
 ## Architecture principles
 
 **Layered:**
+
 - Crypto primitives isolated from protocol logic
 - Protocol logic isolated from rails, mappings, and transports
 - Policy surfaces built on top, not baked into core
 
 **Vendor neutral:**
+
 - No hard-coded lists of specific rails or agent protocols
 - All vendors share the same `PaymentEvidence` shape
 - Extensions via adapters and PEIPs
 
 **Spec-first:**
+
 - Normative JSON specs drive all implementations
 - TypeScript is one of multiple independent implementations
 - SDKs for Go, Rust, Python follow same specs
 
 **Defense in depth:**
+
 - SSRF protection and strict URL validation (v0.9.16)
 - DPoP proof-of-possession for tokens (v0.9.16)
 - JWKS rotation and emergency revocation plans
@@ -353,15 +373,18 @@ peac/
 ## Versioning and conformance
 
 **Wire format:**
+
 - `peac.receipt/0.9` frozen throughout v0.9.x series
 - Libraries may evolve APIs but must emit/accept 0.9 receipts
 
 **HTTP semantics:**
+
 - `PEAC-Receipt` is the canonical header (no X- prefix)
 - RFC 9457 Problem Details for errors
 - HTTP 402 Payment Required for missing or invalid payment
 
 **Conformance levels** (documented in `docs/specs/`):
+
 - L0: Parse peac.txt discovery manifests
 - L1: HTTP semantics and Problem Details
 - L2: Policy enforcement (purposes, quotas, retention)
@@ -375,6 +398,7 @@ Test vectors live in `tests/vectors/` and `docs/specs/TEST_VECTORS.md`.
 ## Development
 
 **Prerequisites:**
+
 - Node.js 18+
 - pnpm ≥ 8 (for workspace management)
 

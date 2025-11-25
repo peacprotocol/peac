@@ -3,7 +3,7 @@
  * Maps ACP checkout events to PEAC receipts
  */
 
-import type { PaymentEvidence } from "@peac/schema";
+import type { PaymentEvidence } from '@peac/schema';
 
 /**
  * ACP Checkout Success Event
@@ -38,22 +38,22 @@ export interface PEACReceiptInput {
 export function fromACPCheckoutSuccess(event: ACPCheckoutSuccess): PEACReceiptInput {
   // Validate ACP event
   if (!event.checkout_id) {
-    throw new Error("ACP checkout event missing checkout_id");
+    throw new Error('ACP checkout event missing checkout_id');
   }
-  if (!event.resource_uri || !event.resource_uri.startsWith("https://")) {
-    throw new Error("ACP checkout event missing or invalid resource_uri (must be https://)");
+  if (!event.resource_uri || !event.resource_uri.startsWith('https://')) {
+    throw new Error('ACP checkout event missing or invalid resource_uri (must be https://)');
   }
-  if (typeof event.total_amount !== "number" || event.total_amount < 0) {
-    throw new Error("ACP checkout event invalid total_amount");
+  if (typeof event.total_amount !== 'number' || event.total_amount < 0) {
+    throw new Error('ACP checkout event invalid total_amount');
   }
   if (!event.currency || !/^[A-Z]{3}$/.test(event.currency)) {
-    throw new Error("ACP checkout event invalid currency (must be uppercase ISO 4217)");
+    throw new Error('ACP checkout event invalid currency (must be uppercase ISO 4217)');
   }
   if (!event.payment_rail) {
-    throw new Error("ACP checkout event missing payment_rail");
+    throw new Error('ACP checkout event missing payment_rail');
   }
   if (!event.payment_reference) {
-    throw new Error("ACP checkout event missing payment_reference");
+    throw new Error('ACP checkout event missing payment_reference');
   }
 
   // Build payment evidence from ACP event
@@ -76,7 +76,7 @@ export function fromACPCheckoutSuccess(event: ACPCheckoutSuccess): PEACReceiptIn
     amount: event.total_amount,
     currency: event.currency,
     asset: event.currency, // For ACP, asset is typically same as currency
-    env: "live", // Default to live; ACP events should indicate if test
+    env: 'live', // Default to live; ACP events should indicate if test
     evidence,
   };
 
@@ -111,10 +111,8 @@ export function attachReceiptToACPResponse<T extends Record<string, unknown>>(
  * @param response - ACP response object
  * @returns PEAC receipt JWS or null if not present
  */
-export function extractReceiptFromACPResponse(
-  response: Record<string, unknown>
-): string | null {
-  if (typeof response.peac_receipt === "string") {
+export function extractReceiptFromACPResponse(response: Record<string, unknown>): string | null {
+  if (typeof response.peac_receipt === 'string') {
     return response.peac_receipt;
   }
   return null;

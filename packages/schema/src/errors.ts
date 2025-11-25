@@ -9,17 +9,17 @@
  * Error category - broad classification of error type
  */
 export type ErrorCategory =
-  | "validation"     // Schema/structure validation failures
-  | "security"       // Security violations (SSRF, signature, etc.)
-  | "network"        // Network/transport failures
-  | "authorization"  // Authorization/control failures
-  | "rate_limit"     // Rate limiting
-  | "internal";      // Internal server errors
+  | 'validation' // Schema/structure validation failures
+  | 'security' // Security violations (SSRF, signature, etc.)
+  | 'network' // Network/transport failures
+  | 'authorization' // Authorization/control failures
+  | 'rate_limit' // Rate limiting
+  | 'internal'; // Internal server errors
 
 /**
  * Error severity
  */
-export type ErrorSeverity = "error" | "warning";
+export type ErrorSeverity = 'error' | 'warning';
 
 /**
  * Structured PEAC error
@@ -119,36 +119,36 @@ export interface PEACError {
  */
 export const ERROR_CODES = {
   // Validation errors (400)
-  E_CONTROL_REQUIRED: "E_CONTROL_REQUIRED",
-  E_INVALID_ENVELOPE: "E_INVALID_ENVELOPE",
-  E_INVALID_CONTROL_CHAIN: "E_INVALID_CONTROL_CHAIN",
-  E_INVALID_PAYMENT: "E_INVALID_PAYMENT",
-  E_INVALID_POLICY_HASH: "E_INVALID_POLICY_HASH",
-  E_EXPIRED_RECEIPT: "E_EXPIRED_RECEIPT",
+  E_CONTROL_REQUIRED: 'E_CONTROL_REQUIRED',
+  E_INVALID_ENVELOPE: 'E_INVALID_ENVELOPE',
+  E_INVALID_CONTROL_CHAIN: 'E_INVALID_CONTROL_CHAIN',
+  E_INVALID_PAYMENT: 'E_INVALID_PAYMENT',
+  E_INVALID_POLICY_HASH: 'E_INVALID_POLICY_HASH',
+  E_EXPIRED_RECEIPT: 'E_EXPIRED_RECEIPT',
 
   // Security errors (401/403)
-  E_INVALID_SIGNATURE: "E_INVALID_SIGNATURE",
-  E_SSRF_BLOCKED: "E_SSRF_BLOCKED",
-  E_DPOP_REPLAY: "E_DPOP_REPLAY",
-  E_DPOP_INVALID: "E_DPOP_INVALID",
-  E_CONTROL_DENIED: "E_CONTROL_DENIED",
+  E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
+  E_SSRF_BLOCKED: 'E_SSRF_BLOCKED',
+  E_DPOP_REPLAY: 'E_DPOP_REPLAY',
+  E_DPOP_INVALID: 'E_DPOP_INVALID',
+  E_CONTROL_DENIED: 'E_CONTROL_DENIED',
 
   // Network errors (502/503)
-  E_JWKS_FETCH_FAILED: "E_JWKS_FETCH_FAILED",
-  E_POLICY_FETCH_FAILED: "E_POLICY_FETCH_FAILED",
-  E_NETWORK_ERROR: "E_NETWORK_ERROR",
+  E_JWKS_FETCH_FAILED: 'E_JWKS_FETCH_FAILED',
+  E_POLICY_FETCH_FAILED: 'E_POLICY_FETCH_FAILED',
+  E_NETWORK_ERROR: 'E_NETWORK_ERROR',
 
   // Rate limit errors (429)
-  E_RATE_LIMIT: "E_RATE_LIMIT",
+  E_RATE_LIMIT: 'E_RATE_LIMIT',
 
   // Internal errors (500)
-  E_INTERNAL_ERROR: "E_INTERNAL_ERROR",
+  E_INTERNAL_ERROR: 'E_INTERNAL_ERROR',
 } as const;
 
 /**
  * Error code type
  */
-export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
 
 /**
  * Helper to create a structured error

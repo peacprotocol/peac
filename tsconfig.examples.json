@@ -3,8 +3,5 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": [
-    "examples/**/*",
-    "docs/examples/**/*"
-  ]
+  "include": ["examples/**/*", "docs/examples/**/*"]
 }

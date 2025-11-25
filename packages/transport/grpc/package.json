@@ -9,7 +9,11 @@
     "build": "tsc",
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
-  "keywords": ["peac", "transport", "grpc"],
+  "keywords": [
+    "peac",
+    "transport",
+    "grpc"
+  ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "devDependencies": {

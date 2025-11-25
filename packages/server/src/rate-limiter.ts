@@ -4,7 +4,7 @@
  * - Global limit: 1000 req/s
  */
 
-import type { Context, Next } from "hono";
+import type { Context, Next } from 'hono';
 
 interface RateLimitConfig {
   perIpLimit: number; // Requests per second per IP
@@ -98,25 +98,25 @@ export function rateLimiter() {
   return async (c: Context, next: Next) => {
     // Get client IP (handle proxy headers)
     const ip =
-      c.req.header("x-forwarded-for")?.split(",")[0].trim() ||
-      c.req.header("x-real-ip") ||
-      "unknown";
+      c.req.header('x-forwarded-for')?.split(',')[0].trim() ||
+      c.req.header('x-real-ip') ||
+      'unknown';
 
     const result = limiter.isAllowed(ip);
 
     if (!result.allowed) {
-      c.header("Retry-After", String(result.retryAfter || 60));
+      c.header('Retry-After', String(result.retryAfter || 60));
       return c.json(
         {
-          type: "https://peacprotocol.org/errors/rate-limit",
-          title: "Rate Limit Exceeded",
+          type: 'https://peacprotocol.org/errors/rate-limit',
+          title: 'Rate Limit Exceeded',
           status: 429,
           detail: `Rate limit exceeded. IP limit: ${DEFAULT_CONFIG.perIpLimit} req/s, Global limit: ${DEFAULT_CONFIG.globalLimit} req/s`,
           instance: c.req.path,
         },
         429,
         {
-          "Content-Type": "application/problem+json",
+          'Content-Type': 'application/problem+json',
         }
       );
     }

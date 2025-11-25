@@ -10,7 +10,12 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["peac", "transport", "http", "dpop"],
+  "keywords": [
+    "peac",
+    "transport",
+    "http",
+    "dpop"
+  ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "dependencies": {

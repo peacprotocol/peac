@@ -99,6 +99,7 @@ x402 is a specific HTTP 402 pattern for paid calls, primarily using stablecoins.
 ```
 
 **Key points**:
+
 - `enforcement.method`: "http-402" (how access was gated)
 - `payment.rail`: "x402" (payment protocol)
 - `payment.network`: "base-mainnet" (settlement layer)
@@ -148,6 +149,7 @@ L402 (Lightning 402) uses Lightning Network + Macaroons for paid access.
 ```
 
 **Key points**:
+
 - `payment.rail`: "l402" (distinct from x402)
 - `payment.network`: "lightning"
 - `payment.asset`: "BTC"
@@ -168,6 +170,7 @@ X-Payment-Invoice: x402:base-usdc:0x...
 ```
 
 Maps to PEAC:
+
 ```json
 {
   "auth": {
@@ -216,6 +219,7 @@ See PROTOCOL-BEHAVIOR.md Section 7 for full DPoP verification.
 PEAC is NOT limited to HTTP 402. Other enforcement methods:
 
 ### 7.1 AP2 (Agentic Protocol 2)
+
 ```json
 {
   "auth": {
@@ -231,6 +235,7 @@ PEAC is NOT limited to HTTP 402. Other enforcement methods:
 ```
 
 ### 7.2 TAP (Token Authentication Protocol)
+
 ```json
 {
   "auth": {
@@ -250,6 +255,7 @@ PEAC is NOT limited to HTTP 402. Other enforcement methods:
 ## 8. Examples
 
 See test vectors:
+
 - `receipt-http402-x402-single-control.json` - HTTP 402 + x402 + Base USDC
 - `receipt-payment-single-control.json` - Payment without HTTP 402 enforcement
 - `receipt-minimal-no-payment.json` - No payment, no 402 (free tier)

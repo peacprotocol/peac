@@ -27,6 +27,7 @@ This document defines the normative behavioral semantics for PEAC receipts. It M
 ### 2.1 Control Block Structure
 
 A `ControlBlock` consists of:
+
 - `chain`: Array of `ControlStep` (MUST be non-empty)
 - `decision`: Final decision ("allow", "deny", or "review")
 - `combinator`: Chain combinator logic (defaults to "any_can_veto")
@@ -177,6 +178,7 @@ IF ControlRequirementCheck(envelope) == true:
 ### 3.3 Optional Control
 
 Control MAY be present even when not required, for example:
+
 - Free-tier access policies
 - Rate limiting without payment
 - Audit trails for non-monetary operations
@@ -267,6 +269,7 @@ RETURN policy_hash
 ```
 
 **Requirements**:
+
 - JCS canonicalization MUST follow RFC 8785 exactly
 - SHA-256 MUST produce 256-bit (32-byte) digest
 - base64url encoding MUST use URL-safe alphabet without padding
@@ -330,6 +333,7 @@ All URL fetches (policy_uri, JWKS URIs, etc.) MUST implement SSRF protection to 
 ### 6.1 Scheme Validation
 
 **REQUIRED**:
+
 - MUST accept: `https://`
 - MAY accept: `http://` ONLY for localhost/127.0.0.1 in development/test environments
 - MUST reject: `file://`, `ftp://`, `gopher://`, `data://`, and all other schemes
@@ -339,20 +343,24 @@ All URL fetches (policy_uri, JWKS URIs, etc.) MUST implement SSRF protection to 
 Verifiers MUST block requests to:
 
 **Private IPv4 ranges**:
+
 - 10.0.0.0/8
 - 172.16.0.0/12
 - 192.168.0.0/16
 - 127.0.0.0/8 (loopback, except localhost in dev)
 
 **Link-local**:
+
 - 169.254.0.0/16 (IPv4)
 - fe80::/10 (IPv6)
 
 **Metadata endpoints**:
+
 - 169.254.169.254 (AWS, GCP, Azure metadata)
 - fd00::/8 (IPv6 unique local)
 
 **Private IPv6**:
+
 - fc00::/7 (unique local addresses)
 - ::1 (loopback)
 
@@ -447,6 +455,7 @@ When `auth.binding.method == "dpop"`, verifiers MUST validate the DPoP proof of 
 DPoP proof is a JWT sent in the `DPoP` HTTP header:
 
 **Required claims**:
+
 - `typ`: MUST be `"dpop+jwt"`
 - `alg`: Signing algorithm (e.g., `ES256`, `EdDSA`)
 - `jwk`: Public key (JWK format)
@@ -555,16 +564,19 @@ Output: boolean or PEACError
 ### 7.3 Nonce Replay Protection
 
 **L3 (Single-Node)**:
+
 - Maintain in-memory cache of used nonces
 - Use LRU eviction or TTL-based expiration (60 seconds)
 - Suitable for single-instance verifiers
 
 **L4 (Distributed)**:
+
 - Use distributed cache (Redis, Memcached) with TTL
 - Partition by verifier cluster or shard by nonce hash
 - Suitable for horizontally-scaled verifiers
 
 **Nonce format**:
+
 - Server generates: Random 128-bit value, base64url-encoded
 - Issued via: `WWW-Authenticate: DPoP error="use_dpop_nonce", error_description="..."`
 - TTL: 60 seconds
@@ -578,11 +590,13 @@ Output: boolean or PEACError
 The `sub` claim MUST identify an **agent, client, or service account**, NOT a human user.
 
 **Requirements**:
+
 - `sub` MUST identify automated agents, service accounts, or applications
 - `sub` SHOULD NOT contain human personally identifiable information (PII)
 - `sub` SHOULD use stable, pseudonymous identifiers
 
 **Examples**:
+
 - ✅ COMPLIANT: `"agent:gpt4-researcher-v1"`
 - ✅ COMPLIANT: `"service:payment-processor-prod-us-west"`
 - ✅ COMPLIANT: `"client:mobile-app-installation-abc123"`
@@ -591,6 +605,7 @@ The `sub` claim MUST identify an **agent, client, or service account**, NOT a hu
 - ❌ NON-COMPLIANT: `"patient:SSN-123-45-6789"` (government ID)
 
 **Rationale**:
+
 - PEAC receipts are designed for agent-to-agent interactions in automated systems
 - Receipts may be logged, archived, shared for audit, or transmitted across organizational boundaries
 - Avoiding PII simplifies compliance with GDPR, CCPA, HIPAA, and similar regulations
@@ -600,6 +615,7 @@ The `sub` claim MUST identify an **agent, client, or service account**, NOT a hu
 Implementers SHOULD avoid including personal data anywhere in PEAC receipts.
 
 **If personal data is necessary** (strongly discouraged):
+
 - Use `meta.redactions` to mark fields that can be redacted
 - Use `meta.privacy_budget.k_anonymity` for aggregation hints
 - Document data handling in implementation-specific privacy policies
@@ -610,11 +626,13 @@ Implementers SHOULD avoid including personal data anywhere in PEAC receipts.
 Vendor-specific or implementation-specific data MUST NOT appear in normative top-level fields.
 
 **Allowed locations**:
+
 - `evidence.payment.evidence` - Payment rail-specific details
 - `evidence.extra` - Protocol-specific evidence
 - `meta.debug` - Non-normative debugging information
 
 **Prohibited locations**:
+
 - Top-level fields in `auth`, `evidence`, `meta`
 - Top-level fields in `evidence.payment` (use nested `evidence` instead)
 - Error codes or error messages (vendor details go in `error.details`)

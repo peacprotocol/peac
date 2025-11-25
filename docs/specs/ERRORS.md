@@ -5,48 +5,48 @@ Normative error codes for PEAC Protocol v0.9.
 ## Format
 
 | Code | Category | Severity | Retryable | HTTP | Description | Remediation |
-|------|----------|----------|-----------|------|-------------|-------------|
+| ---- | -------- | -------- | --------- | ---- | ----------- | ----------- |
 
 ## Validation Errors (400)
 
-| Code | Category | Severity | Retryable | HTTP | Description | Remediation |
-|------|----------|----------|-----------|------|-------------|-------------|
-| `E_CONTROL_REQUIRED` | validation | error | false | 400 | Control block required when payment present or enforcement.method==http-402 | Add control{} block to auth context |
-| `E_INVALID_ENVELOPE` | validation | error | false | 400 | Receipt envelope structure is invalid | Ensure envelope has auth, evidence, and meta blocks |
-| `E_INVALID_CONTROL_CHAIN` | validation | error | false | 400 | Control chain is invalid or inconsistent | Ensure chain is non-empty and decision matches chain results |
-| `E_INVALID_PAYMENT` | validation | error | false | 400 | Payment evidence is malformed or incomplete | Verify payment has required fields (scheme, reference, amount, currency, asset, env) |
-| `E_INVALID_POLICY_HASH` | validation | error | false | 400 | Policy hash does not match policy content | Recompute policy_hash as base64url(sha256(JCS(policy))) |
-| `E_EXPIRED_RECEIPT` | validation | error | false | 401 | Receipt exp claim is in the past | Use a current receipt |
+| Code                      | Category   | Severity | Retryable | HTTP | Description                                                                 | Remediation                                                                          |
+| ------------------------- | ---------- | -------- | --------- | ---- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `E_CONTROL_REQUIRED`      | validation | error    | false     | 400  | Control block required when payment present or enforcement.method==http-402 | Add control{} block to auth context                                                  |
+| `E_INVALID_ENVELOPE`      | validation | error    | false     | 400  | Receipt envelope structure is invalid                                       | Ensure envelope has auth, evidence, and meta blocks                                  |
+| `E_INVALID_CONTROL_CHAIN` | validation | error    | false     | 400  | Control chain is invalid or inconsistent                                    | Ensure chain is non-empty and decision matches chain results                         |
+| `E_INVALID_PAYMENT`       | validation | error    | false     | 400  | Payment evidence is malformed or incomplete                                 | Verify payment has required fields (scheme, reference, amount, currency, asset, env) |
+| `E_INVALID_POLICY_HASH`   | validation | error    | false     | 400  | Policy hash does not match policy content                                   | Recompute policy_hash as base64url(sha256(JCS(policy)))                              |
+| `E_EXPIRED_RECEIPT`       | validation | error    | false     | 401  | Receipt exp claim is in the past                                            | Use a current receipt                                                                |
 
 ## Security Errors (401/403)
 
-| Code | Category | Severity | Retryable | HTTP | Description | Remediation |
-|------|----------|----------|-----------|------|-------------|-------------|
-| `E_INVALID_SIGNATURE` | security | error | false | 401 | JWS signature verification failed | Ensure receipt is signed with correct private key and alg=EdDSA |
-| `E_SSRF_BLOCKED` | security | error | false | 403 | SSRF protection blocked request to private/metadata IP | Use only public HTTPS URLs for JWKS/policy endpoints |
-| `E_DPOP_REPLAY` | security | error | false | 403 | DPoP nonce has already been used | Generate a fresh DPoP proof with new nonce |
-| `E_DPOP_INVALID` | security | error | false | 403 | DPoP proof is invalid or malformed | Ensure DPoP JWT has correct claims (jkt, iat, htm, htu) |
-| `E_CONTROL_DENIED` | authorization | error | false | 403 | Control decision was deny | Check control chain for denial reason |
+| Code                  | Category      | Severity | Retryable | HTTP | Description                                            | Remediation                                                     |
+| --------------------- | ------------- | -------- | --------- | ---- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| `E_INVALID_SIGNATURE` | security      | error    | false     | 401  | JWS signature verification failed                      | Ensure receipt is signed with correct private key and alg=EdDSA |
+| `E_SSRF_BLOCKED`      | security      | error    | false     | 403  | SSRF protection blocked request to private/metadata IP | Use only public HTTPS URLs for JWKS/policy endpoints            |
+| `E_DPOP_REPLAY`       | security      | error    | false     | 403  | DPoP nonce has already been used                       | Generate a fresh DPoP proof with new nonce                      |
+| `E_DPOP_INVALID`      | security      | error    | false     | 403  | DPoP proof is invalid or malformed                     | Ensure DPoP JWT has correct claims (jkt, iat, htm, htu)         |
+| `E_CONTROL_DENIED`    | authorization | error    | false     | 403  | Control decision was deny                              | Check control chain for denial reason                           |
 
 ## Network Errors (502/503)
 
-| Code | Category | Severity | Retryable | HTTP | Description | Remediation |
-|------|----------|----------|-----------|------|-------------|-------------|
-| `E_JWKS_FETCH_FAILED` | network | error | true | 502 | Failed to fetch JWKS from issuer | Retry after delay; check JWKS URL is accessible |
-| `E_POLICY_FETCH_FAILED` | network | error | true | 502 | Failed to fetch policy from policy_uri | Retry after delay; check policy URI is accessible |
-| `E_NETWORK_ERROR` | network | error | true | 502 | Generic network/transport failure | Retry after delay |
+| Code                    | Category | Severity | Retryable | HTTP | Description                            | Remediation                                       |
+| ----------------------- | -------- | -------- | --------- | ---- | -------------------------------------- | ------------------------------------------------- |
+| `E_JWKS_FETCH_FAILED`   | network  | error    | true      | 502  | Failed to fetch JWKS from issuer       | Retry after delay; check JWKS URL is accessible   |
+| `E_POLICY_FETCH_FAILED` | network  | error    | true      | 502  | Failed to fetch policy from policy_uri | Retry after delay; check policy URI is accessible |
+| `E_NETWORK_ERROR`       | network  | error    | true      | 502  | Generic network/transport failure      | Retry after delay                                 |
 
 ## Rate Limit Errors (429)
 
-| Code | Category | Severity | Retryable | HTTP | Description | Remediation |
-|------|----------|----------|-----------|------|-------------|-------------|
-| `E_RATE_LIMIT` | rate_limit | error | true | 429 | Rate limit exceeded | Retry after Retry-After header value |
+| Code           | Category   | Severity | Retryable | HTTP | Description         | Remediation                          |
+| -------------- | ---------- | -------- | --------- | ---- | ------------------- | ------------------------------------ |
+| `E_RATE_LIMIT` | rate_limit | error    | true      | 429  | Rate limit exceeded | Retry after Retry-After header value |
 
 ## Internal Errors (500)
 
-| Code | Category | Severity | Retryable | HTTP | Description | Remediation |
-|------|----------|----------|-----------|------|-------------|-------------|
-| `E_INTERNAL_ERROR` | internal | error | false | 500 | Internal server error | Contact issuer support |
+| Code               | Category | Severity | Retryable | HTTP | Description           | Remediation            |
+| ------------------ | -------- | -------- | --------- | ---- | --------------------- | ---------------------- |
+| `E_INTERNAL_ERROR` | internal | error    | false     | 500  | Internal server error | Contact issuer support |
 
 ## Error Response Format
 

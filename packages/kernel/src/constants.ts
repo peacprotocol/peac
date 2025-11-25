@@ -10,30 +10,30 @@
  * Wire format type for PEAC receipts
  * Frozen at peac.receipt/0.9 until v1.0.0
  */
-export const WIRE_TYPE = "peac.receipt/0.9" as const;
+export const WIRE_TYPE = 'peac.receipt/0.9' as const;
 
 /**
  * Supported cryptographic algorithms
  */
 export const ALGORITHMS = {
-  supported: ["EdDSA"] as const,
-  default: "EdDSA" as const,
+  supported: ['EdDSA'] as const,
+  default: 'EdDSA' as const,
 } as const;
 
 /**
  * HTTP header names for PEAC protocol
  */
 export const HEADERS = {
-  receipt: "PEAC-Receipt" as const,
-  dpop: "DPoP" as const,
+  receipt: 'PEAC-Receipt' as const,
+  dpop: 'DPoP' as const,
 } as const;
 
 /**
  * Discovery manifest settings
  */
 export const DISCOVERY = {
-  manifestPath: "/.well-known/peac.txt" as const,
-  manifestVersion: "peac/0.9" as const,
+  manifestPath: '/.well-known/peac.txt' as const,
+  manifestVersion: 'peac/0.9' as const,
   cacheTtlSeconds: 3600,
 } as const;
 

@@ -1,4 +1,5 @@
 # PEAC Protocol - Repository Architecture
+
 ## Current State + Roadmap (v0.9.15 → v0.9.21)
 
 **Date:** 2025-11-18 IST
@@ -373,18 +374,21 @@ peac/                                    # Monorepo root
 ## 📊 Package Statistics
 
 ### Week 0 (✅ COMPLETE)
+
 - **Total Packages:** 9
 - **Lines of Code:** ~4,100
 - **Files:** 36
 - **Test Suites:** 10
 
 ### v0.9.15 Target (🔜 NEXT)
+
 - **New Packages:** +2 (control, infrastructure enhancements)
 - **New LOC:** ~1,700
 - **New Files:** ~25
 - **Duration:** 3-4.5 weeks
 
 ### v0.9.21 Target (📋 FUTURE)
+
 - **Total Packages:** 25+
 - **Total LOC:** ~14,500
 - **Total Files:** 200+
@@ -421,6 +425,7 @@ peac/                                    # Monorepo root
 ## 🚦 CI/CD Pipeline
 
 ### Gates (All Releases)
+
 ```yaml
 Performance:
   - Verify p95 ≤ 5ms ✅
@@ -471,21 +476,26 @@ v1.1-v1.2 (Post-v1.0)     32+ packages  ~20,000 LOC (advanced pillars)
 ## 🎨 Code Organization Principles
 
 ### 1. **Layered Architecture**
+
 - Layer 1 (Crypto) → Layer 2 (Rails + CAL) → Layer 3 (Protocol) → Layer 4 (TAL) → Layer 5 (Mappings) → Layer 6 (Distribution) → Layer 7 (Apps)
 
 ### 2. **Zero-Dependency Kernel**
+
 - `@peac/kernel` has ZERO dependencies
 - All other packages depend on kernel for constants/types
 
 ### 3. **Rail Neutrality**
+
 - All payment rails produce byte-identical `NormalizedPayment` (except scheme, reference, metadata)
 - Parity tests enforce neutrality (x402 == Stripe == Razorpay)
 
 ### 4. **Protocol Mapping Consistency**
+
 - All protocol mappings (MCP, ACP, AP2, TAP) produce byte-identical core claims
 - Golden vectors validate consistency
 
 ### 5. **Transport Agnostic**
+
 - Core protocol works with HTTP, gRPC, WebSocket
 - Transport Abstraction Layer (TAL) handles transport-specific details
 
@@ -494,6 +504,7 @@ v1.1-v1.2 (Post-v1.0)     32+ packages  ~20,000 LOC (advanced pillars)
 ## 🔐 Security Architecture
 
 ### Defense in Depth
+
 1. **Input Validation** (schema package with Zod)
 2. **SSRF Protection** (protocol package, v0.9.15)
 3. **DPoP L3/L4** (protocol package, v0.9.15)
@@ -503,6 +514,7 @@ v1.1-v1.2 (Post-v1.0)     32+ packages  ~20,000 LOC (advanced pillars)
 7. **JWKS Rotation** (infrastructure package, v0.9.15)
 
 ### Attack Surface Minimization
+
 - ✅ No X-PEAC aliases (single header: PEAC-Receipt)
 - ✅ HTTPS-only (except localhost)
 - 🔜 Private IP blocking
@@ -514,18 +526,21 @@ v1.1-v1.2 (Post-v1.0)     32+ packages  ~20,000 LOC (advanced pillars)
 ## 📋 Next Actions
 
 ### Week 1 (Starting Now)
+
 1. 🔜 Create `packages/control` package
 2. 🔜 Add control{} types to `packages/schema`
 3. 🔜 Implement DPoP L3/L4 in `packages/protocol`
 4. 🔜 Add SSRF protection in `packages/protocol`
 
 ### Week 2
+
 5. 🔜 Implement JWKS rotation in `packages/infrastructure`
 6. 🔜 Add /slo endpoint in `packages/server`
 7. 🔜 Enforce payment field rule
 8. 🔜 Update documentation
 
 ### Week 3-4
+
 9. 🔜 Integration testing
 10. 🔜 Performance optimization
 11. 🔜 Documentation polish

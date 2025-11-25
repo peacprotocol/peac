@@ -5,9 +5,9 @@
  */
 
 enum CircuitState {
-  CLOSED = "CLOSED", // Normal operation
-  OPEN = "OPEN", // Blocking requests
-  HALF_OPEN = "HALF_OPEN", // Testing recovery
+  CLOSED = 'CLOSED', // Normal operation
+  OPEN = 'OPEN', // Blocking requests
+  HALF_OPEN = 'HALF_OPEN', // Testing recovery
 }
 
 interface CircuitBreakerConfig {

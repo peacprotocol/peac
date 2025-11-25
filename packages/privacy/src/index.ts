@@ -13,6 +13,6 @@
  * Status: Scaffold for v0.9.16+
  */
 
-export const PRIVACY_VERSION = "0.9.15";
+export const PRIVACY_VERSION = '0.9.15';
 
 // Privacy pillar implementation planned for v0.9.18+
