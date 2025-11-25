@@ -28,7 +28,7 @@ export interface Receipt {
 
   // Payment (required if method is http-402)
   payment?: {
-    scheme: string; // v0.9.14: renamed from 'rail'
+    rail: string; // v0.9.15: renamed from 'scheme' in v0.9.14
     amount: number;
     currency: string;
   };

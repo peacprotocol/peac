@@ -1,6 +1,6 @@
 /**
  * @peac/core v0.9.14 - Receipt Engine with v0.9.14 wire format
- * typ: "peac.receipt/0.9", iat field, payment.scheme
+ * typ: "peac.receipt/0.9", iat field, payment.rail
  */
 
 // v0.9.14 core functions

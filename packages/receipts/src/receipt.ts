@@ -16,11 +16,11 @@ export function validateConditionalFields(receipt: Receipt): ValidationResult {
       });
     } else {
       // Validate payment fields
-      if (!receipt.payment.scheme) {
+      if (!receipt.payment.rail) {
         errors.push({
-          path: 'payment.scheme',
-          message: 'payment.scheme is required when enforcement.method is "http-402"',
-          value: receipt.payment.scheme,
+          path: 'payment.rail',
+          message: 'payment.rail is required when enforcement.method is "http-402"',
+          value: receipt.payment.rail,
         });
       }
       if (!receipt.payment.amount) {

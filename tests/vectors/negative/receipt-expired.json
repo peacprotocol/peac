@@ -1,0 +1,24 @@
+{
+  "auth": {
+    "iss": "https://api.example.net",
+    "aud": "https://client.example.net",
+    "sub": "agent:demo-agent-3",
+    "iat": 1609459200,
+    "exp": 1609459260,
+    "rid": "01ER9QF7QK6VE1H34MGTYX0N9M",
+    "policy_hash": "2r0_3_s9TRl1d3XlTkpGjk6hH1NjuLhVpHVD3I6KuFQ",
+    "policy_uri": "https://api.example.net/.well-known/aipref.json",
+    "control": {
+      "chain": [
+        {
+          "engine": "access-policy-service",
+          "result": "allow"
+        }
+      ],
+      "decision": "allow",
+      "combinator": "any_can_veto"
+    }
+  },
+  "evidence": {},
+  "meta": {}
+}

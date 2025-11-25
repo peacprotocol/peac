@@ -412,7 +412,7 @@ export async function prove(
     },
     payment: settlement.payment
       ? {
-          scheme: 'x402' as const,
+          rail: 'x402' as const,
           amount: parseFloat(settlement.payment.amount.value),
           currency: settlement.payment.amount.currency,
         }

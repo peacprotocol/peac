@@ -1,0 +1,72 @@
+{
+  "auth": {
+    "iss": "https://platform.example.org",
+    "aud": "https://service.example.org/api",
+    "sub": "agent:procurement-agent-v1",
+    "iat": 1737139400,
+    "exp": 1737143000,
+    "rid": "01HQZK4QZ5X4C4Y0V3T41Q9H6A",
+    "policy_hash": "GhQx9KjZPzSkp7auuCPLJpG5kA2sAPY8NSVP6LzqJGc",
+    "policy_uri": "https://platform.example.org/.well-known/policy.json",
+    "control": {
+      "chain": [
+        {
+          "engine": "mandate-service",
+          "version": "1.1.0",
+          "policy_id": "enterprise-mandate-2025",
+          "result": "allow",
+          "reason": "Agent authorized under enterprise mandate"
+        },
+        {
+          "engine": "risk-engine",
+          "version": "3.0.0",
+          "policy_id": "fraud-low-latency",
+          "result": "allow",
+          "reason": "Risk score 0.01 < threshold 0.10"
+        },
+        {
+          "engine": "spend-control-service",
+          "version": "1.0.0",
+          "policy_id": "monthly-budget-1000-usd",
+          "result": "deny",
+          "reason": "Requested amount exceeds remaining monthly budget",
+          "limits_snapshot": {
+            "monthly_max": { "amount": 100000, "currency": "USD" },
+            "monthly_current": { "amount": 98000, "currency": "USD" },
+            "requested": { "amount": 3000, "currency": "USD" }
+          }
+        }
+      ],
+      "decision": "deny",
+      "combinator": "any_can_veto"
+    },
+    "ctx": {
+      "resource": "https://service.example.org/api/subscribe",
+      "method": "POST",
+      "tenant_id": "org_enterprise_999"
+    }
+  },
+  "evidence": {
+    "payment": {
+      "rail": "card-network",
+      "reference": "card-network-auth-xyz-123",
+      "amount": 3000,
+      "currency": "USD",
+      "asset": "USD",
+      "env": "live",
+      "facilitator_ref": "acquirer-01",
+      "evidence": {
+        "auth_result": "soft-approved",
+        "auth_code": "123456",
+        "network_reference": "net-ref-abc-999"
+      }
+    }
+  },
+  "meta": {
+    "redactions": [],
+    "privacy_budget": {},
+    "debug": {
+      "trace_id": "tr_payment_multi_control_veto"
+    }
+  }
+}

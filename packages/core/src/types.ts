@@ -1,6 +1,6 @@
 /**
  * @peac/core v0.9.14 - Enhanced types with v0.9.14 wire format
- * Single Receipt type with typ: "peac.receipt/0.9", iat field, payment.scheme
+ * Single Receipt type with typ: "peac.receipt/0.9", iat field, payment.rail
  */
 
 import type { JWTPayload } from 'jose';
@@ -61,7 +61,7 @@ export interface Receipt extends JWTPayload {
     challenge?: Record<string, unknown>;
   };
   payment?: {
-    scheme: 'stripe' | 'l402' | 'x402';
+    rail: 'x402' | 'Stripe' | 'l402';
     amount: number;
     currency: string;
     evidence?: {

@@ -1,0 +1,50 @@
+{
+  "description": "DPoP proof with reused nonce - tests nonce replay protection",
+  "http_request": {
+    "method": "POST",
+    "uri": "https://api.example.net/v1/action",
+    "headers": {
+      "DPoP": "eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoibGRMQ3U1WWNGYkc3UVlCMW5abWFrY1NLRkVZUzNwTUhLX0I0T1NYMW9UIiwieSI6IjdRLWU1NU9ub25nM2FVNUJqdUdGREllTmpGVk5xN1FPbk5nMWVWaklpTlkifX0.eyJqdGkiOiJub25jZS0xMjMtcmVwbGF5ZWQiLCJodG0iOiJQT1NUIiwiaHR1IjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5uZXQvdjEvYWN0aW9uIiwiaWF0IjoxNzM3MTQwMTAwLCJqa3QiOiIwWmNPQ09SWk5ZeS1EV3BxcTMwalpZSkdIVE4wZDJIZ2xCVjN1aWd1QTRJIN0.c2lnbmF0dXJlLWhlcmU"
+    }
+  },
+  "receipt": {
+    "auth": {
+      "iss": "https://api.example.net",
+      "aud": "https://client.example.net",
+      "sub": "agent:demo-agent-1",
+      "iat": 1737140100,
+      "exp": 1737143700,
+      "rid": "01HQZK6A1ZN4D5PQKRX9VFMW2T",
+      "policy_hash": "xyz789hash",
+      "policy_uri": "https://api.example.net/.well-known/aipref.json",
+      "control": {
+        "chain": [
+          {
+            "engine": "access-policy-service",
+            "result": "allow"
+          }
+        ],
+        "decision": "allow",
+        "combinator": "any_can_veto"
+      },
+      "binding": {
+        "transport": "http",
+        "method": "dpop",
+        "evidence": {
+          "jkt": "0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I",
+          "nonce": "nonce-123-replayed"
+        }
+      }
+    },
+    "evidence": {},
+    "meta": {}
+  },
+  "expected_error": {
+    "code": "E_DPOP_REPLAY",
+    "category": "security",
+    "severity": "error",
+    "retryable": false,
+    "remediation": "DPoP nonce has already been used"
+  },
+  "test_notes": "Validator must track 'nonce-123-replayed' as used. Second request with same nonce must fail with E_DPOP_REPLAY."
+}

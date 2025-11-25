@@ -1,0 +1,76 @@
+{
+  "auth": {
+    "iss": "https://api.example.net",
+    "aud": "https://agent.example.net",
+    "sub": "agent:gpt4-researcher-v1",
+    "iat": 1737139700,
+    "exp": 1737143300,
+    "rid": "01HQZK5G2JH8B1KQXW9S7VFNP2",
+    "policy_hash": "Dw3QpR6zK9mN8vLx4YtC1fHj7UoP5aB2gE6kS9iM0wX",
+    "policy_uri": "https://api.example.net/.well-known/aipref.json",
+    "enforcement": {
+      "method": "http-402",
+      "details": {
+        "status": 402,
+        "www_authenticate": "Bearer realm=\"api.example.net\", scope=\"read write\""
+      }
+    },
+    "control": {
+      "chain": [
+        {
+          "engine": "spend-control-service",
+          "version": "1.0.0",
+          "policy_id": "per-call-max-5-usd",
+          "result": "allow",
+          "reason": "Requested 2.50 USD <= 5.00 USD per-call limit",
+          "limits_snapshot": {
+            "per_txn_max": { "amount": 500, "currency": "USD" },
+            "per_day_max": { "amount": 10000, "currency": "USD" },
+            "per_day_current": { "amount": 250, "currency": "USD" }
+          }
+        }
+      ],
+      "decision": "allow",
+      "combinator": "any_can_veto"
+    },
+    "ctx": {
+      "resource": "https://api.example.net/v1/research",
+      "method": "POST"
+    },
+    "binding": {
+      "transport": "http",
+      "method": "dpop",
+      "evidence": {
+        "jkt": "0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I",
+        "nonce": "dpop-nonce-http402-001"
+      }
+    }
+  },
+  "evidence": {
+    "payment": {
+      "rail": "x402",
+      "reference": "x402:base-usdc:0xabc123def456789abcdef0123456789abcdef012",
+      "amount": 250,
+      "currency": "USD",
+      "asset": "USDC",
+      "env": "live",
+      "network": "base-mainnet",
+      "facilitator_ref": "gateway-xyz-001",
+      "evidence": {
+        "invoice_id": "inv_x402_abc123",
+        "tx_hash": "0xabc123def456789abcdef0123456789abcdef0123456789abcdef0123456789",
+        "block_number": 12345678,
+        "settled_at": 1737139710,
+        "gas_used": 21000,
+        "chain_id": 8453
+      }
+    }
+  },
+  "meta": {
+    "redactions": [],
+    "privacy_budget": {},
+    "debug": {
+      "trace_id": "tr_http402_x402_flow_001"
+    }
+  }
+}

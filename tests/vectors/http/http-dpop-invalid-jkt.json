@@ -1,0 +1,50 @@
+{
+  "description": "DPoP proof with mismatched jkt (key thumbprint) - tests jkt validation",
+  "http_request": {
+    "method": "POST",
+    "uri": "https://api.example.net/v1/resource",
+    "headers": {
+      "DPoP": "eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoibGRMQ3U1WWNGYkc3UVlCMW5abWFrY1NLRkVZUzNwTUhLX0I0T1NYMW9UIiwieSI6IjdRLWU1NU9ub25nM2FVNUIianVHRkRJZU5qRlZOcTdRT25OZzFlVmpJaU5ZIn19.eyJqdGkiOiJub25jZS00NTYtdmFsaWQiLCJodG0iOiJQT1NUIiwiaHR1IjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5uZXQvdjEvcmVzb3VyY2UiLCJpYXQiOjE3MzcxNDAyMDAsImprdCI6IklOVkFMSURfVEhVTUJQUklOVF9USEFUX0RPRVNfTk9UX01BVENIX0pXSyJ9.c2lnbmF0dXJlLWhlcmU"
+    }
+  },
+  "receipt": {
+    "auth": {
+      "iss": "https://api.example.net",
+      "aud": "https://client.example.net",
+      "sub": "agent:demo-agent-2",
+      "iat": 1737140200,
+      "exp": 1737143800,
+      "rid": "01HQZK6B2AP5E6QRLSY0WGNX3U",
+      "policy_hash": "abc456hash",
+      "policy_uri": "https://api.example.net/.well-known/aipref.json",
+      "control": {
+        "chain": [
+          {
+            "engine": "access-policy-service",
+            "result": "allow"
+          }
+        ],
+        "decision": "allow",
+        "combinator": "any_can_veto"
+      },
+      "binding": {
+        "transport": "http",
+        "method": "dpop",
+        "evidence": {
+          "jkt": "INVALID_THUMBPRINT_THAT_DOES_NOT_MATCH_JWK",
+          "nonce": "nonce-456-valid"
+        }
+      }
+    },
+    "evidence": {},
+    "meta": {}
+  },
+  "expected_error": {
+    "code": "E_DPOP_INVALID",
+    "category": "security",
+    "severity": "error",
+    "retryable": false,
+    "remediation": "DPoP jkt does not match public key thumbprint"
+  },
+  "test_notes": "Validator must compute jkt from JWK in DPoP header and compare with jkt claim. Mismatch must fail."
+}

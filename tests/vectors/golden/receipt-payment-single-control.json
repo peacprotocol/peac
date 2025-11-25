@@ -1,0 +1,69 @@
+{
+  "auth": {
+    "iss": "https://api.example.net",
+    "aud": "https://client.example.net/agents/demo-agent",
+    "sub": "agent:demo-agent-1",
+    "iat": 1737139300,
+    "exp": 1737142900,
+    "rid": "01HQZK4A0YY9M54XW8S6Q7FH4C",
+    "policy_hash": "K0yJdOQmO3xStD6e5P_MEUYtXNc8O7yq5x4fZO35c88",
+    "policy_uri": "https://api.example.net/.well-known/aipref.json",
+    "control": {
+      "chain": [
+        {
+          "engine": "spend-control-service",
+          "version": "1.0.0",
+          "policy_id": "per-call-max-10-usd",
+          "result": "allow",
+          "reason": "Requested 3.00 USD <= 10.00 USD per-call limit",
+          "limits_snapshot": {
+            "per_txn_max": { "amount": 1000, "currency": "USD" },
+            "per_day_max": { "amount": 5000, "currency": "USD" },
+            "per_day_current": { "amount": 300, "currency": "USD" }
+          }
+        }
+      ],
+      "decision": "allow",
+      "combinator": "any_can_veto"
+    },
+    "ctx": {
+      "resource": "https://api.example.net/v1/completions",
+      "method": "POST",
+      "tenant_id": "org_demo_001"
+    },
+    "binding": {
+      "transport": "http",
+      "method": "dpop",
+      "evidence": {
+        "jkt": "0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I",
+        "nonce": "dpop-nonce-123"
+      }
+    }
+  },
+  "evidence": {
+    "payment": {
+      "rail": "x402",
+      "reference": "x402:lnbc300u1p3demo123",
+      "amount": 300,
+      "currency": "USD",
+      "asset": "BTC",
+      "env": "live",
+      "network": "lightning",
+      "facilitator_ref": "payment-gateway-01",
+      "evidence": {
+        "invoice": "lnbc300u1p3demo123",
+        "preimage": "a1b2c3d4e5f6...",
+        "settled_at": 1737139310
+      }
+    }
+  },
+  "meta": {
+    "redactions": [],
+    "privacy_budget": {
+      "k_anonymity": 5
+    },
+    "debug": {
+      "trace_id": "tr_payment_single_control"
+    }
+  }
+}

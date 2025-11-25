@@ -1,0 +1,24 @@
+{
+  "auth": {
+    "iss": "https://platform.example.org",
+    "aud": "https://service.example.org/api",
+    "sub": "agent:demo-agent-2",
+    "iat": 1737139600,
+    "rid": "01HQZK50DJHB0SFKFJ9GV3P9WX",
+    "policy_hash": "2pHdh0yyg5jVneLpoHul-cyANkam67GvTqUBfctwHTo",
+    "policy_uri": "https://platform.example.org/.well-known/policy.json",
+    "control": {
+      "chain": [
+        {
+          "engine": "risk-engine",
+          "result": "deny",
+          "reason": "Risk score 0.95 > threshold 0.10"
+        }
+      ],
+      "decision": "allow",
+      "combinator": "any_can_veto"
+    }
+  },
+  "evidence": {},
+  "meta": {}
+}

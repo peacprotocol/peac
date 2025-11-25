@@ -1,6 +1,6 @@
 /**
  * @peac/core v0.9.14 - JWS signing with typ: "peac.receipt/0.9"
- * Single PEAC-Receipt header, iat field, payment.scheme
+ * Single PEAC-Receipt header, iat field, payment.rail
  */
 
 import { SignJWT, importJWK } from 'jose';

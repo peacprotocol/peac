@@ -17,7 +17,7 @@ export interface ReceiptBuilderOptions {
     method: 'none' | 'http-402';
   };
   payment?: {
-    scheme: string;
+    rail: string;
     amount: number;
     currency: string;
   };
@@ -77,10 +77,9 @@ export class ReceiptBuilder {
 
   /**
    * Set payment information (required for http-402)
-   * Accepts legacy 'rail' parameter mapped to 'scheme'
    */
-  payment(schemeOrRail: string, amount: number, currency: string): this {
-    this.options.payment = { scheme: schemeOrRail, amount, currency };
+  payment(rail: string, amount: number, currency: string): this {
+    this.options.payment = { rail, amount, currency };
     return this;
   }
 

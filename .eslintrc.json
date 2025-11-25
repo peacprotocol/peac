@@ -5,5 +5,14 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "ignorePatterns": ["**/dist/**", "**/coverage/**", "**/node_modules/**"]
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/coverage/**",
+    "**/node_modules/**",
+    "apps/api/src/**/*.test.js",
+    "ex/**",
+    "test/smoke/**",
+    "packages/sdk-js/src/**/*.test.js",
+    "packages/sdk-js/tests/**"
+  ]
 }

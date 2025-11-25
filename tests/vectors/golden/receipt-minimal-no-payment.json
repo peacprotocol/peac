@@ -1,0 +1,42 @@
+{
+  "auth": {
+    "iss": "https://api.example.net",
+    "aud": "https://client.example.net/app",
+    "sub": "agent:demo-agent-1",
+    "iat": 1737139200,
+    "exp": 1737142800,
+    "rid": "01HQZK3V7G4M2NQXPJYF8RBWHT",
+    "policy_hash": "mP9Jf1Yuk84Ow1BY1o3x-6RjIAHx4A3v2gY2w2i8aM4",
+    "policy_uri": "https://api.example.net/.well-known/aipref.json",
+    "control": {
+      "chain": [
+        {
+          "engine": "access-policy-service",
+          "version": "1.0.0",
+          "policy_id": "free-tier-access",
+          "result": "allow",
+          "reason": "Free tier non-monetary resource"
+        }
+      ],
+      "decision": "allow",
+      "combinator": "any_can_veto"
+    },
+    "ctx": {
+      "resource": "https://api.example.net/v1/models/demo-model",
+      "method": "POST"
+    }
+  },
+  "evidence": {
+    "extra": {
+      "rate_limit_bucket": "free-tier",
+      "approx_cost_cents": 0
+    }
+  },
+  "meta": {
+    "redactions": [],
+    "privacy_budget": {},
+    "debug": {
+      "trace_id": "tr_minimal_001"
+    }
+  }
+}

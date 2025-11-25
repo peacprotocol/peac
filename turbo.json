@@ -16,7 +16,7 @@
       "outputs": []
     },
     "build": {
-      "dependsOn": ["^build:types"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", "lib/**", "*.tsbuildinfo"]
     },
     "test": {

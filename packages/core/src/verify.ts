@@ -77,8 +77,8 @@ export async function verifyReceipt(jws: string, keys: KeySet): Promise<VerifyRe
 
   // Validate payment requirements if http-402
   if (payload.enforcement?.method === 'http-402') {
-    if (!payload.payment?.scheme || !payload.payment?.amount || !payload.payment?.currency) {
-      throw new Error('HTTP-402 enforcement requires payment.scheme, amount, and currency');
+    if (!payload.payment?.rail || !payload.payment?.amount || !payload.payment?.currency) {
+      throw new Error('HTTP-402 enforcement requires payment.rail, amount, and currency');
     }
   }
 
