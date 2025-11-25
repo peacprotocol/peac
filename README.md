@@ -59,7 +59,7 @@ Names above are illustrative examples for interoperability. PEAC is vendor-neutr
 
 **Rails and mappings:**
 
-- Payment rails: x402, Stripe, Razorpay (via `@peac/rails-*`)
+- Payment rails: x402, Stripe, Razorpay (planned) (via `@peac/rails-*`)
 - Agent protocols: MCP, ACP, A2A mappings (via `@peac/mappings-*`)
 - Transport abstraction: HTTP, gRPC, WebSocket (via `@peac/transport-*`)
 
@@ -82,7 +82,7 @@ For normative specifications, see `docs/SPEC_INDEX.md`.
 pnpm add @peac/protocol @peac/crypto @peac/schema
 
 # or npm
-pnpm add @peac/protocol @peac/crypto @peac/schema
+npm install @peac/protocol @peac/crypto @peac/schema
 ```
 
 ### Verify a receipt
@@ -272,7 +272,7 @@ peac/
 │  ├─ rails/             # Payment rail adapters
 │  │  ├─ x402/
 │  │  ├─ stripe/
-│  │  └─ razorpay/
+│  │  └─ razorpay/       # planned
 │  ├─ mappings/          # Agent protocol mappings
 │  │  ├─ mcp/
 │  │  ├─ acp/
@@ -301,7 +301,7 @@ peac/
 
 **Policy surfaces (recommended, non-normative):**
 
-- `docs/specs/PEAC-TXT.md` - peac.txt specification (v0.9.16)
+- `docs/specs/PEAC-TXT.md` - peac.txt specification (planned)
 - AIPREF / ai.txt / llm.txt compatibility notes
 
 ---
@@ -328,7 +328,7 @@ peac/
 - `@peac/mappings-acp` - Agentic Commerce Protocol integration
 - `@peac/mappings-a2a` - Agent-to-agent protocol (planned)
 
-**Pillars (planned v0.9.16+):**
+**Pillars:**
 
 - `@peac/control` - Constraint types and enforcement
 - `@peac/access` - Access control and policy evaluation

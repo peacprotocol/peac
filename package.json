@@ -8,7 +8,7 @@
     "url": "https://github.com/peacprotocol/peac.git"
   },
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "workspaces": [
     "packages/*",
     "packages/rails/*",

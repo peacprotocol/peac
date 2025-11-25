@@ -1,6 +1,6 @@
 {
   "name": "@peacprotocol/templates",
-  "version": "0.9.12.1",
+  "version": "0.9.15",
   "description": "PEAC Protocol Templates",
   "main": "index.js",
   "scripts": {
