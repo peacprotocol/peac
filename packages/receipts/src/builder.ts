@@ -1,5 +1,5 @@
 import { Receipt } from './types.js';
-import { WIRE } from '@peac/core';
+import { WIRE_VERSION } from '@peac/kernel';
 
 export interface ReceiptBuilderOptions {
   version: string;
@@ -122,7 +122,7 @@ export class ReceiptBuilder {
    */
   build(): Receipt {
     const version = this.options.version ?? '0.9.14';
-    const wire = this.options.wire_version ?? WIRE;
+    const wire = this.options.wire_version ?? WIRE_VERSION;
     if (!this.options.protocol_version) {
       throw new Error('protocol_version is required');
     }

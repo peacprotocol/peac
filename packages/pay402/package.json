@@ -33,9 +33,7 @@
     "dev": "tsup --watch",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "@peac/core": "workspace:^0.9.14"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

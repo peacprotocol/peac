@@ -28,7 +28,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@peac/core": "workspace:^0.9.14",
     "@peac/disc": "workspace:^0.9.14",
     "typescript": "^5.0.0"
   },

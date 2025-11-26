@@ -39,7 +39,7 @@
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "cbor": "^9.0.0",
-    "@peac/core": "workspace:^0.9.14"
+    "@peac/kernel": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -1,7 +1,7 @@
 {
   "name": "@peac/core",
   "version": "0.9.15",
-  "description": "PEAC Protocol core with JWS signing, security, and observability",
+  "description": "DEPRECATED - Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead",
   "type": "module",
   "homepage": "https://peacprotocol.org",
   "bugs": {
@@ -43,6 +43,7 @@
     "clean": "rm -rf dist coverage"
   },
   "dependencies": {
+    "@peac/kernel": "workspace:*",
     "jose": "^5.2.0",
     "lru-cache": "^10.0.0",
     "zod": "^3.22.0"
