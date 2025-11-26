@@ -5,6 +5,45 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.15] - 2025-11-26
+
+### Changed
+
+- **Kernel-first architecture**: Published packages now import from granular kernel packages instead of monolithic `@peac/core`
+- **Package structure**: `@peac/protocol`, `@peac/crypto`, `@peac/cli`, `@peac/server`, `@peac/mappings-acp` now import from `@peac/kernel` and `@peac/schema`
+- **TypeScript config split**: Separate `tsconfig.core.json` (published packages, blocking) and `tsconfig.legacy.json` (all code, advisory)
+- **CI improvements**: Split typecheck jobs, `pnpm/action-setup@v4`, advisory performance checks
+
+### Added
+
+- `docs/ARCHITECTURE.md`: Kernel-first dependency DAG documentation
+- `docs/CI_BEHAVIOR.md`: CI workflow and advisory vs blocking semantics
+- `docs/CANONICAL_DOCS_INDEX.md`: Central index for all normative documentation
+- `.github/ISSUE_TEMPLATE/`: Bug report and feature request templates
+- `.github/pull_request_template.md`: PR checklist template
+
+### Deprecated
+
+- `@peac/core`: Deprecated in favor of granular packages (`@peac/kernel`, `@peac/schema`, `@peac/crypto`, `@peac/protocol`)
+- Import from specific packages:
+  - `@peac/kernel` - Receipt types, builder, nonce cache
+  - `@peac/schema` - Zod schemas, validation
+  - `@peac/crypto` - Signing, verification, key management
+  - `@peac/protocol` - High-level enforce/verify APIs
+
+### Migration
+
+To migrate from `@peac/core`:
+
+```typescript
+// Before (deprecated)
+import { enforce, verify, Receipt } from '@peac/core';
+
+// After (v0.9.15+)
+import { enforce, verify } from '@peac/protocol';
+import type { Receipt } from '@peac/kernel';
+```
+
 ## [0.9.14] - 2025-09-27
 
 ### Changed
