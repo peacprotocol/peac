@@ -4,9 +4,9 @@
  */
 
 import type { AIPrefSnapshot, RobotsRule } from './types.js';
-import pkg from '../package.json' with { type: 'json' };
 
-const UA = `PEAC/${pkg.version} (+https://peacprotocol.org)`;
+const VERSION = '0.9.15';
+const UA = `PEAC/${VERSION} (+https://peacprotocol.org)`;
 
 // SSRF protection: Check if hostname/IP is in private network range
 function isPrivateNetwork(hostname: string): boolean {
