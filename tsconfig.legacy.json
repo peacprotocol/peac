@@ -16,7 +16,6 @@
   "include": [
     "packages/**/*.ts",
     "apps/**/*.ts",
-    "archive/**/*.ts",
     "examples/**/*.ts",
     "scripts/**/*.ts",
     "tests/**/*.ts"
@@ -25,6 +24,7 @@
     "node_modules",
     "dist",
     "**/dist/**",
-    "**/node_modules/**"
+    "**/node_modules/**",
+    "archive/**"
   ]
 }

@@ -7,8 +7,22 @@
  * Core orchestration: discover → evaluate → settle → prove
  * Payment rails: x402 (primary), mock settlement for v0.9.13
  * Caching: Allow (300s), Deny (60s), always Vary: PEAC-Receipt
+ *
+ * @deprecated This example uses @peac/core which is deprecated. See v0.9.15+ examples.
  */
 
+// Cloudflare Worker runtime types (not available in Node.js)
+interface CloudflareCache {
+  match(request: Request | string): Promise<Response | undefined>;
+  put(request: Request | string, response: Response): Promise<void>;
+}
+declare const caches: { default: CloudflareCache };
+interface ExecutionContext {
+  waitUntil(promise: Promise<unknown>): void;
+  passThroughOnException(): void;
+}
+
+// @ts-expect-error Legacy import - @peac/core is deprecated, use @peac/protocol
 import { enforce, InMemoryNonceCache, verify } from '@peac/core';
 
 export interface Env {
