@@ -398,13 +398,13 @@ import { ReceiptSchema, validateReceipt } from '@peac/schema';
 
 ### 10.3 Package responsibilities
 
-| Package | Purpose |
-|---------|---------|
-| `@peac/kernel` | Core types, receipt builder, nonce cache |
-| `@peac/schema` | Zod schemas, validation utilities |
-| `@peac/crypto` | Signing, verification, key management |
-| `@peac/protocol` | High-level enforce/verify APIs |
-| `@peac/control` | Control abstraction layer (mandates) |
+| Package          | Purpose                                  |
+| ---------------- | ---------------------------------------- |
+| `@peac/kernel`   | Core types, receipt builder, nonce cache |
+| `@peac/schema`   | Zod schemas, validation utilities        |
+| `@peac/crypto`   | Signing, verification, key management    |
+| `@peac/protocol` | High-level enforce/verify APIs           |
+| `@peac/control`  | Control abstraction layer (mandates)     |
 
 ### 10.4 Migration checklist
 

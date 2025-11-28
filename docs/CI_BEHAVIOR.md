@@ -19,10 +19,10 @@ CI runs on GitHub Actions for all pushes to `main` and `feat/*` branches, and fo
 
 **Purpose:** Enforce repository-wide security and consistency rules.
 
-| Check | Description | Blocking |
-|-------|-------------|----------|
-| Forbidden Strings | Prevents secrets, vendor lock-in patterns, and prohibited terms | Yes |
-| Surface Validator | Validates well-known surfaces and policy files | Yes |
+| Check             | Description                                                     | Blocking |
+| ----------------- | --------------------------------------------------------------- | -------- |
+| Forbidden Strings | Prevents secrets, vendor lock-in patterns, and prohibited terms | Yes      |
+| Surface Validator | Validates well-known surfaces and policy files                  | Yes      |
 
 **Script:** `scripts/ci/forbid-strings.sh`, `scripts/ci/surface-validator.sh`
 
@@ -30,11 +30,12 @@ CI runs on GitHub Actions for all pushes to `main` and `feat/*` branches, and fo
 
 **Purpose:** Enforce code style and quality.
 
-| Check | Description | Blocking |
-|-------|-------------|----------|
-| ESLint | Code style and quality rules | Yes |
+| Check  | Description                  | Blocking |
+| ------ | ---------------------------- | -------- |
+| ESLint | Code style and quality rules | Yes      |
 
 **Commands:**
+
 ```bash
 pnpm run lint
 ```
@@ -43,13 +44,14 @@ pnpm run lint
 
 **Purpose:** Type checking across the monorepo.
 
-| Check | Description | Blocking |
-|-------|-------------|----------|
+| Check      | Description                      | Blocking      |
+| ---------- | -------------------------------- | ------------- |
 | TypeScript | Type checking via `tsc --noEmit` | No (advisory) |
 
 **Note:** TypeScript errors in `archive/`, `examples/`, `scripts/`, and `tests/` are tracked but do not block merges. Published packages (`packages/*`) must be error-free.
 
 **Commands:**
+
 ```bash
 pnpm run typecheck
 ```
@@ -58,12 +60,13 @@ pnpm run typecheck
 
 **Purpose:** Run unit and integration tests.
 
-| Check | Description | Blocking |
-|-------|-------------|----------|
-| Vitest | All test suites | Yes |
+| Check    | Description         | Blocking      |
+| -------- | ------------------- | ------------- |
+| Vitest   | All test suites     | Yes           |
 | Coverage | Uploaded to Codecov | No (advisory) |
 
 **Commands:**
+
 ```bash
 pnpm test -- --run
 ```
@@ -73,11 +76,13 @@ pnpm test -- --run
 **Purpose:** Ensure all payment rails produce structurally identical receipts.
 
 This is a **critical** gate. Rail adapters must produce receipts that:
+
 - Have identical envelope structure
 - Differ only in rail-specific `evidence` field
 - Pass cross-rail verification
 
 **Commands:**
+
 ```bash
 pnpm test -- tests/conformance/parity.spec.ts --run
 ```
@@ -86,13 +91,14 @@ pnpm test -- tests/conformance/parity.spec.ts --run
 
 **Purpose:** Enforce verification latency budget.
 
-| Metric | Threshold | Blocking |
-|--------|-----------|----------|
-| p95 verify latency | ≤ 10ms | No (advisory) |
+| Metric             | Threshold | Blocking      |
+| ------------------ | --------- | ------------- |
+| p95 verify latency | ≤ 10ms    | No (advisory) |
 
 **Note:** Performance gate is advisory during 0.9.x development phase to track regressions without blocking development velocity.
 
 **Commands:**
+
 ```bash
 pnpm test -- tests/performance/verify.bench.ts --run
 ```
@@ -102,6 +108,7 @@ pnpm test -- tests/performance/verify.bench.ts --run
 **Purpose:** Ensure malformed inputs are correctly rejected.
 
 Tests cover:
+
 - Invalid signatures
 - Expired receipts
 - Malformed JWS
@@ -109,6 +116,7 @@ Tests cover:
 - Missing required fields
 
 **Commands:**
+
 ```bash
 pnpm test -- tests/vectors/negative.spec.ts --run
 ```
@@ -117,12 +125,13 @@ pnpm test -- tests/vectors/negative.spec.ts --run
 
 ## Advisory vs Blocking
 
-| Status | Meaning |
-|--------|---------|
-| **Blocking** | PR cannot merge if check fails |
+| Status       | Meaning                                 |
+| ------------ | --------------------------------------- |
+| **Blocking** | PR cannot merge if check fails          |
 | **Advisory** | Failure logged but does not block merge |
 
 Current advisory checks:
+
 - TypeScript (tracking legacy debt in archive/examples/scripts/tests)
 - Performance gate (tracking regressions)
 - Coverage upload
@@ -161,6 +170,7 @@ Performance benchmarks output to `perf-metrics.json`:
 ```
 
 **Budgets:**
+
 - p95 ≤ 10ms (advisory)
 - p99 ≤ 50ms (advisory)
 
@@ -168,13 +178,13 @@ Performance benchmarks output to `perf-metrics.json`:
 
 ## Test Categories
 
-| Category | Location | Purpose |
-|----------|----------|---------|
-| Unit | `packages/*/tests/` | Package-level unit tests |
-| Conformance | `tests/conformance/` | Cross-package behavior tests |
+| Category    | Location             | Purpose                           |
+| ----------- | -------------------- | --------------------------------- |
+| Unit        | `packages/*/tests/`  | Package-level unit tests          |
+| Conformance | `tests/conformance/` | Cross-package behavior tests      |
 | Performance | `tests/performance/` | Latency and throughput benchmarks |
-| Vectors | `tests/vectors/` | Golden and negative test cases |
-| E2E | `tests/e2e/` | End-to-end integration tests |
+| Vectors     | `tests/vectors/`     | Golden and negative test cases    |
+| E2E         | `tests/e2e/`         | End-to-end integration tests      |
 
 ---
 
@@ -201,12 +211,14 @@ TypeScript errors in published packages (`packages/*` excluding `archive/`) must
 ### Forbidden Strings
 
 The guard script checks for:
+
 - API keys and secrets
 - Hardcoded vendor names in core packages
 - Prohibited URL patterns
 - Debug code that shouldn't be committed
 
 To see what's blocked:
+
 ```bash
 bash scripts/ci/forbid-strings.sh
 ```

@@ -9,12 +9,12 @@ This document defines which documentation files are the canonical, up-to-date re
 
 ## Definitions
 
-| Status | Meaning |
-|--------|---------|
-| **Normative** | Defines behavior implementations MUST follow |
-| **Authoritative** | Single source of truth for a topic |
-| **Reference** | Supporting material, not primary source |
-| **Planning** | Strategy/roadmap docs in separate planning workspace |
+| Status            | Meaning                                              |
+| ----------------- | ---------------------------------------------------- |
+| **Normative**     | Defines behavior implementations MUST follow         |
+| **Authoritative** | Single source of truth for a topic                   |
+| **Reference**     | Supporting material, not primary source              |
+| **Planning**      | Strategy/roadmap docs in separate planning workspace |
 
 ---
 
@@ -22,33 +22,33 @@ This document defines which documentation files are the canonical, up-to-date re
 
 ### Normative Specifications
 
-| Document | Status | Purpose |
-|----------|--------|---------|
-| [SPEC_INDEX.md](SPEC_INDEX.md) | **Normative** | Entry point for implementers |
-| [specs/PEAC-RECEIPT-SCHEMA-v0.9.json](specs/PEAC-RECEIPT-SCHEMA-v0.9.json) | **Normative** | Wire format JSON Schema |
-| [specs/PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md) | **Normative** | Issue, verify, discovery flows |
-| [specs/ERRORS.md](specs/ERRORS.md) | **Normative** | Error codes and HTTP mappings |
-| [specs/REGISTRIES.md](specs/REGISTRIES.md) | **Normative** | Payment rails, agent protocols |
-| [specs/PEAC-HTTP402-PROFILE.md](specs/PEAC-HTTP402-PROFILE.md) | **Normative** | HTTP 402 integration |
-| [specs/EVOLUTION.md](specs/EVOLUTION.md) | **Normative** | Wire format versioning |
-| [specs/TEST_VECTORS.md](specs/TEST_VECTORS.md) | **Normative** | Conformance test cases |
-| `specs/kernel/*.json` | **Normative** | Machine-readable constants |
+| Document                                                                   | Status        | Purpose                        |
+| -------------------------------------------------------------------------- | ------------- | ------------------------------ |
+| [SPEC_INDEX.md](SPEC_INDEX.md)                                             | **Normative** | Entry point for implementers   |
+| [specs/PEAC-RECEIPT-SCHEMA-v0.9.json](specs/PEAC-RECEIPT-SCHEMA-v0.9.json) | **Normative** | Wire format JSON Schema        |
+| [specs/PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md)                   | **Normative** | Issue, verify, discovery flows |
+| [specs/ERRORS.md](specs/ERRORS.md)                                         | **Normative** | Error codes and HTTP mappings  |
+| [specs/REGISTRIES.md](specs/REGISTRIES.md)                                 | **Normative** | Payment rails, agent protocols |
+| [specs/PEAC-HTTP402-PROFILE.md](specs/PEAC-HTTP402-PROFILE.md)             | **Normative** | HTTP 402 integration           |
+| [specs/EVOLUTION.md](specs/EVOLUTION.md)                                   | **Normative** | Wire format versioning         |
+| [specs/TEST_VECTORS.md](specs/TEST_VECTORS.md)                             | **Normative** | Conformance test cases         |
+| `specs/kernel/*.json`                                                      | **Normative** | Machine-readable constants     |
 
 ### Architecture & Process
 
-| Document | Status | Purpose |
-|----------|--------|---------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | **Authoritative** | Kernel-first DAG, layering |
-| [CI_BEHAVIOR.md](CI_BEHAVIOR.md) | **Authoritative** | CI pipeline behavior |
-| [CODING_STANDARDS_PROTOCOL.md](CODING_STANDARDS_PROTOCOL.md) | Authoritative | Development guidelines |
+| Document                                                     | Status            | Purpose                    |
+| ------------------------------------------------------------ | ----------------- | -------------------------- |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                           | **Authoritative** | Kernel-first DAG, layering |
+| [CI_BEHAVIOR.md](CI_BEHAVIOR.md)                             | **Authoritative** | CI pipeline behavior       |
+| [CODING_STANDARDS_PROTOCOL.md](CODING_STANDARDS_PROTOCOL.md) | Authoritative     | Development guidelines     |
 
 ### Release & Migration
 
-| Document | Status | Purpose |
-|----------|--------|---------|
-| [PEAC_v0.9.15_ACTUAL_SCOPE.md](PEAC_v0.9.15_ACTUAL_SCOPE.md) | Authoritative | What shipped in v0.9.15 |
-| [MIGRATION_v0.9.14_to_v0.9.15.md](MIGRATION_v0.9.14_to_v0.9.15.md) | Authoritative | Migration guide |
-| [NEXT_STEPS_v0.9.15_TO_v1.0.md](NEXT_STEPS_v0.9.15_TO_v1.0.md) | Authoritative | Future development guide |
+| Document                                                           | Status            | Purpose                     |
+| ------------------------------------------------------------------ | ----------------- | --------------------------- |
+| [PEAC_v0.9.15_ACTUAL_SCOPE.md](PEAC_v0.9.15_ACTUAL_SCOPE.md)       | Authoritative     | What shipped in v0.9.15     |
+| [MIGRATION_v0.9.14_to_v0.9.15.md](MIGRATION_v0.9.14_to_v0.9.15.md) | Authoritative     | Migration guide             |
+| [NEXT_STEPS_v0.9.15_TO_v1.0.md](NEXT_STEPS_v0.9.15_TO_v1.0.md)     | Authoritative     | Future development guide    |
 | [PEAC_NORMATIVE_DECISIONS_LOG.md](PEAC_NORMATIVE_DECISIONS_LOG.md) | **Authoritative** | All architectural decisions |
 
 ---
@@ -57,11 +57,11 @@ This document defines which documentation files are the canonical, up-to-date re
 
 These values NEVER change until v1.0:
 
-| Value | Definition | Location |
-|-------|------------|----------|
-| `typ: "peac.receipt/0.9"` | Wire format type | ARCHITECTURE.md, specs/ |
-| `alg: "EdDSA"` | Signature algorithm | specs/kernel/constants.json |
-| `PEAC-Receipt` | HTTP header name | specs/kernel/constants.json |
+| Value                     | Definition          | Location                    |
+| ------------------------- | ------------------- | --------------------------- |
+| `typ: "peac.receipt/0.9"` | Wire format type    | ARCHITECTURE.md, specs/     |
+| `alg: "EdDSA"`            | Signature algorithm | specs/kernel/constants.json |
+| `PEAC-Receipt`            | HTTP header name    | specs/kernel/constants.json |
 
 ---
 
@@ -99,11 +99,11 @@ These are reference materials for project leadership and do not affect implement
 
 ## Summary
 
-| Category | Canonical Doc |
-|----------|---------------|
-| Specs | SPEC_INDEX.md → specs/* |
-| Architecture | ARCHITECTURE.md |
-| CI | CI_BEHAVIOR.md |
-| Decisions | PEAC_NORMATIVE_DECISIONS_LOG.md |
-| Migration | MIGRATION_v0.9.14_to_v0.9.15.md |
-| Scope | PEAC_v0.9.15_ACTUAL_SCOPE.md |
+| Category     | Canonical Doc                   |
+| ------------ | ------------------------------- |
+| Specs        | SPEC_INDEX.md → specs/\*        |
+| Architecture | ARCHITECTURE.md                 |
+| CI           | CI_BEHAVIOR.md                  |
+| Decisions    | PEAC_NORMATIVE_DECISIONS_LOG.md |
+| Migration    | MIGRATION_v0.9.14_to_v0.9.15.md |
+| Scope        | PEAC_v0.9.15_ACTUAL_SCOPE.md    |

@@ -25,19 +25,19 @@ Before creating a release:
 
 The following packages are published to npm:
 
-| Package | Description |
-|---------|-------------|
-| `@peac/kernel` | Core receipt types, builder, nonce cache |
-| `@peac/schema` | Zod schemas, validation utilities |
-| `@peac/crypto` | Signing, verification, key management |
-| `@peac/protocol` | High-level enforce/verify APIs |
-| `@peac/control` | Control abstraction layer (mandates) |
-| `@peac/cli` | Command-line interface |
-| `@peac/server` | HTTP server implementation |
-| `@peac/rails-x402` | x402 payment rail adapter |
-| `@peac/rails-stripe` | Stripe payment rail adapter |
-| `@peac/mappings-acp` | Agent Communication Protocol mapping |
-| `@peac/mappings-mcp` | Model Context Protocol mapping |
+| Package              | Description                              |
+| -------------------- | ---------------------------------------- |
+| `@peac/kernel`       | Core receipt types, builder, nonce cache |
+| `@peac/schema`       | Zod schemas, validation utilities        |
+| `@peac/crypto`       | Signing, verification, key management    |
+| `@peac/protocol`     | High-level enforce/verify APIs           |
+| `@peac/control`      | Control abstraction layer (mandates)     |
+| `@peac/cli`          | Command-line interface                   |
+| `@peac/server`       | HTTP server implementation               |
+| `@peac/rails-x402`   | x402 payment rail adapter                |
+| `@peac/rails-stripe` | Stripe payment rail adapter              |
+| `@peac/mappings-acp` | Agent Communication Protocol mapping     |
+| `@peac/mappings-mcp` | Model Context Protocol mapping           |
 
 ## Release Steps
 
@@ -64,6 +64,7 @@ pnpm ci:all
 ```
 
 This runs:
+
 - `ci:guards` - Forbid-strings safety checks
 - `ci:surface` - Surface area validation
 - `lint` - ESLint checks
@@ -109,6 +110,7 @@ PEAC Protocol follows [Semantic Versioning](https://semver.org/):
 ### Wire Protocol Compatibility
 
 The wire format version in receipts (`typ: "peac.receipt/0.9"`) is independent of package versions:
+
 - Wire format changes require explicit version bump in the `typ` header
 - Multiple package versions may share the same wire format version
 
@@ -122,6 +124,7 @@ When deprecating packages or APIs:
 4. Maintain deprecated APIs for at least one minor version
 
 Example deprecation (from 0.9.15):
+
 ```typescript
 // Before (deprecated)
 import { enforce, verify } from '@peac/core';

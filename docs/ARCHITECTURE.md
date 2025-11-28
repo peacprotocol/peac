@@ -152,46 +152,46 @@ peac/
 
 ### Core (Normative)
 
-| Package | Layer | Description |
-|---------|-------|-------------|
-| `@peac/kernel` | 0 | Zero-dependency constants from specs/kernel |
-| `@peac/schema` | 1 | TypeScript types, Zod validators, JSON Schema |
-| `@peac/crypto` | 2 | Ed25519 JWS signing and verification |
-| `@peac/protocol` | 3 | High-level issue() and verify() functions |
-| `@peac/control` | 3 | Constraint types and enforcement |
+| Package          | Layer | Description                                   |
+| ---------------- | ----- | --------------------------------------------- |
+| `@peac/kernel`   | 0     | Zero-dependency constants from specs/kernel   |
+| `@peac/schema`   | 1     | TypeScript types, Zod validators, JSON Schema |
+| `@peac/crypto`   | 2     | Ed25519 JWS signing and verification          |
+| `@peac/protocol` | 3     | High-level issue() and verify() functions     |
+| `@peac/control`  | 3     | Constraint types and enforcement              |
 
 ### Runtime
 
-| Package | Layer | Description |
-|---------|-------|-------------|
-| `@peac/server` | 5 | HTTP verification server with 402 support |
-| `@peac/cli` | 5 | Command-line tools for receipts and policy |
+| Package        | Layer | Description                                |
+| -------------- | ----- | ------------------------------------------ |
+| `@peac/server` | 5     | HTTP verification server with 402 support  |
+| `@peac/cli`    | 5     | Command-line tools for receipts and policy |
 
 ### Rails (Payment Adapters)
 
-| Package | Layer | Description |
-|---------|-------|-------------|
-| `@peac/rails-x402` | 4 | x402 payment rail adapter |
-| `@peac/rails-stripe` | 4 | Stripe payment rail adapter |
+| Package              | Layer | Description                 |
+| -------------------- | ----- | --------------------------- |
+| `@peac/rails-x402`   | 4     | x402 payment rail adapter   |
+| `@peac/rails-stripe` | 4     | Stripe payment rail adapter |
 
 ### Mappings (Agent Protocol Adapters)
 
-| Package | Layer | Description |
-|---------|-------|-------------|
-| `@peac/mappings-mcp` | 4 | Model Context Protocol integration |
-| `@peac/mappings-acp` | 4 | Agentic Commerce Protocol integration |
+| Package              | Layer | Description                           |
+| -------------------- | ----- | ------------------------------------- |
+| `@peac/mappings-mcp` | 4     | Model Context Protocol integration    |
+| `@peac/mappings-acp` | 4     | Agentic Commerce Protocol integration |
 
 ### Pillars
 
-| Package | Layer | Description |
-|---------|-------|-------------|
-| `@peac/access` | 6 | Access control and policy evaluation |
-| `@peac/attribution` | 6 | Attribution and revenue sharing |
-| `@peac/compliance` | 6 | Regulatory compliance helpers |
-| `@peac/consent` | 6 | Consent lifecycle management |
-| `@peac/intelligence` | 6 | Analytics and insights |
-| `@peac/privacy` | 6 | Privacy budgeting and data protection |
-| `@peac/provenance` | 6 | Content provenance and C2PA integration |
+| Package              | Layer | Description                             |
+| -------------------- | ----- | --------------------------------------- |
+| `@peac/access`       | 6     | Access control and policy evaluation    |
+| `@peac/attribution`  | 6     | Attribution and revenue sharing         |
+| `@peac/compliance`   | 6     | Regulatory compliance helpers           |
+| `@peac/consent`      | 6     | Consent lifecycle management            |
+| `@peac/intelligence` | 6     | Analytics and insights                  |
+| `@peac/privacy`      | 6     | Privacy budgeting and data protection   |
+| `@peac/provenance`   | 6     | Content provenance and C2PA integration |
 
 ---
 
@@ -202,33 +202,33 @@ The PEAC receipt envelope follows this structure:
 ```typescript
 interface PEACEnvelope {
   // Header (JWS protected header)
-  typ: "peac.receipt/0.9";
-  alg: "EdDSA";
+  typ: 'peac.receipt/0.9';
+  alg: 'EdDSA';
   kid: string;
 
   // Claims (JWS payload)
-  iss: string;           // Issuer URL
-  aud: string;           // Audience URL
-  iat: number;           // Issued at (Unix timestamp)
-  exp?: number;          // Expiration (Unix timestamp)
-  jti: string;           // Unique receipt ID
+  iss: string; // Issuer URL
+  aud: string; // Audience URL
+  iat: number; // Issued at (Unix timestamp)
+  exp?: number; // Expiration (Unix timestamp)
+  jti: string; // Unique receipt ID
 
   // Payment evidence
-  amt: number;           // Amount in smallest unit
-  cur: string;           // ISO 4217 currency code
+  amt: number; // Amount in smallest unit
+  cur: string; // ISO 4217 currency code
   payment: PaymentEvidence;
 
   // Optional
-  sub?: string;          // Subject (resource URL)
-  scope?: string[];      // Granted scopes
+  sub?: string; // Subject (resource URL)
+  scope?: string[]; // Granted scopes
 }
 
 interface PaymentEvidence {
-  rail: string;          // Payment rail ID (x402, stripe, etc.)
-  asset: string;         // Asset transferred
-  env: "live" | "test";  // Environment
-  reference: string;     // Payment reference
-  evidence: unknown;     // Rail-specific proof
+  rail: string; // Payment rail ID (x402, stripe, etc.)
+  asset: string; // Asset transferred
+  env: 'live' | 'test'; // Environment
+  reference: string; // Payment reference
+  evidence: unknown; // Rail-specific proof
 }
 ```
 
@@ -262,13 +262,13 @@ interface PaymentEvidence {
 
 ## Conformance Levels
 
-| Level | Capability |
-|-------|------------|
-| L0 | Parse peac.txt discovery manifests |
-| L1 | HTTP semantics and Problem Details |
-| L2 | Policy enforcement (purposes, quotas, retention) |
-| L3 | Negotiation, payment, and receipts |
-| L4 | Provenance, attestation, and audit trails |
+| Level | Capability                                       |
+| ----- | ------------------------------------------------ |
+| L0    | Parse peac.txt discovery manifests               |
+| L1    | HTTP semantics and Problem Details               |
+| L2    | Policy enforcement (purposes, quotas, retention) |
+| L3    | Negotiation, payment, and receipts               |
+| L4    | Provenance, attestation, and audit trails        |
 
 ---
 
@@ -284,7 +284,7 @@ interface PaymentEvidence {
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 0.9.15 | 2025-11-18 | Kernel-first architecture, vendor neutrality |
-| 0.9.14 | - | Initial wire format freeze |
+| Version | Date       | Changes                                      |
+| ------- | ---------- | -------------------------------------------- |
+| 0.9.15  | 2025-11-18 | Kernel-first architecture, vendor neutrality |
+| 0.9.14  | -          | Initial wire format freeze                   |

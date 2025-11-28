@@ -25,7 +25,7 @@ assignees: ''
 - [ ] @peac/rails-stripe
 - [ ] @peac/mappings-mcp
 - [ ] @peac/mappings-acp
-- [ ] Other: ___
+- [ ] Other: \_\_\_
 
 ## To Reproduce
 
