@@ -195,7 +195,7 @@ describe('MCP integration', () => {
         'eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkiLCJraWQiOiIyMDI1LTAxLTI2VDEyOjAwOjAwWiJ9.eyJpc3MiOiJodHRwczovL21lcmNoYW50LmV4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3Mzc4OTI4MDAsInJpZCI6IjAxOTNjNGQwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwMDAwMCIsImFtdCI6MTUwLCJjdXIiOiJVU0QiLCJwYXltZW50Ijp7InNjaGVtZSI6InN0cmlwZSIsInJlZmVyZW5jZSI6ImNzX3Rlc3RfZ29sZGVuIiwiYW1vdW50IjoxNTAsImN1cnJlbmN5IjoiVVNEIn19.signature',
         {
           cost_usd: 0.015,
-          model: 'gpt-4',
+          model: 'example-model',
           execution_time_ms: 1200,
         }
       );

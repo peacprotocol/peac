@@ -2,7 +2,7 @@
   "auth": {
     "iss": "https://api.example.net",
     "aud": "https://agent.example.net",
-    "sub": "agent:gpt4-researcher-v1",
+    "sub": "agent:example-researcher-v1",
     "iat": 1737139700,
     "exp": 1737143300,
     "rid": "01HQZK5G2JH8B1KQXW9S7VFNP2",
