@@ -1,21 +1,26 @@
 /**
  * @peac/core v0.9.14 - Verification performance benchmark
  * Measures p95 latency for verifyReceipt() with proper @peac/core imports
+ *
+ * @deprecated This benchmark uses @peac/core which is deprecated. See v0.9.15+ benchmarks.
  */
 
 import { performance } from 'node:perf_hooks';
 import { writeFileSync } from 'node:fs';
+// @ts-expect-error jose types not installed in root devDependencies
 import { generateKeyPair, exportJWK } from 'jose';
 
 // Robust monorepo-safe module loading
 async function loadCore() {
   // 1) Normal resolution (if root has dep / after publish)
   try {
+    // @ts-expect-error @peac/core is deprecated, use @peac/protocol
     return await import('@peac/core');
   } catch {}
 
   // 2) Workspace package root (Node resolves via package.json "exports")
   try {
+    // @ts-expect-error import.meta requires ESM module setting
     const pkgRoot = new URL('../packages/core/', import.meta.url);
     console.log('Loading @peac/core from workspace package root');
     return await import(pkgRoot.href);
@@ -23,6 +28,7 @@ async function loadCore() {
 
   // 3) TS source (no build needed; tsx compiles it)
   console.log('Fallback: Loading @peac/core from TypeScript source');
+  // @ts-expect-error import.meta requires ESM module setting
   const srcUrl = new URL('../packages/core/src/index.ts', import.meta.url);
   return await import(srcUrl.href);
 }
@@ -147,6 +153,7 @@ async function benchmark() {
   return results;
 }
 
+// @ts-expect-error import.meta requires ESM module setting
 if (import.meta.url === `file://${process.argv[1]}`) {
   benchmark().catch((err) => {
     console.error(err);

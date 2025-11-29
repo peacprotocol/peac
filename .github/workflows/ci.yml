@@ -53,11 +53,10 @@ jobs:
       - name: Run ESLint
         run: pnpm run lint
 
-  # Advisory typecheck: tracks type errors but doesn't block PRs
-  # Root tsconfig.json currently includes examples/scripts/legacy code with ~30 pre-existing errors
-  # Will become blocking after chore/ts-hygiene PR refactors TS surfaces
+  # Blocking typecheck for published packages and apps
+  # tsconfig.core.json includes only packages/** and apps/** (excluding archive)
   typecheck-core:
-    name: Typecheck (Core)
+    name: Typecheck (Core - Blocking)
     needs: setup
     runs-on: ubuntu-latest
     steps:
@@ -76,11 +75,36 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: TypeScript compilation check (advisory)
-        continue-on-error: true
+      - name: TypeScript compilation check (core packages)
+        run: pnpm run typecheck:core
+
+  # Advisory typecheck for legacy code (archive, examples, scripts, tests)
+  # Tracks debt but doesn't block PRs
+  typecheck-legacy:
+    name: Typecheck (Legacy - Advisory)
+    needs: setup
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript compilation check (legacy - advisory)
         run: |
-          echo "TypeScript compilation check (advisory - tracking legacy/archive/examples debt)..."
-          pnpm run typecheck:core
+          echo "TypeScript compilation check (advisory - tracking archive/examples/scripts/tests debt)..."
+          pnpm run typecheck:legacy || true
 
   build:
     name: Build

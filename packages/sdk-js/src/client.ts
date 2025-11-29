@@ -209,23 +209,38 @@ export class PeacClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({}));
+        const errorBody = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+        const detail = typeof errorBody.detail === 'string' ? errorBody.detail : undefined;
         throw this.createClientError(
           'REMOTE_VERIFY_FAILED',
           `HTTP ${response.status}`,
-          errorBody.detail ? [errorBody.detail] : undefined
+          detail ? [detail] : undefined
         );
       }
 
-      const result = await response.json();
+      const result = (await response.json()) as {
+        valid: boolean;
+        receipt?: {
+          header: Record<string, unknown>;
+          payload: Record<string, unknown>;
+        };
+        verification?: {
+          signature: 'valid' | 'invalid';
+          schema: 'valid' | 'invalid';
+          timestamp: string;
+          key_id?: string;
+        };
+      };
 
       return {
         valid: result.valid,
         receipt: result.receipt,
-        verification: {
-          ...result.verification,
-          aipref: 'not_checked', // Remote verification doesn't include AIPREF by default
-        },
+        verification: result.verification
+          ? {
+              ...result.verification,
+              aipref: 'not_checked' as const,
+            }
+          : undefined,
         remote: true,
       };
     } catch (error) {

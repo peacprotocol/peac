@@ -16,9 +16,9 @@ export class HashCommand {
       const policyContent = await readFile(policyPath, 'utf-8');
       const policy = JSON.parse(policyContent);
 
-      // Compute canonical hash using dynamic import
-      const { canonicalPolicyHash } = await import('@peac/core');
-      const digest = await canonicalPolicyHash(policy);
+      // Compute canonical hash using @peac/crypto
+      const { jcsHash } = await import('@peac/crypto');
+      const digest = await jcsHash(policy);
 
       const result: HashResult = {
         algorithm: 'SHA-256',
@@ -53,9 +53,9 @@ export class HashCommand {
       const policyContent = Buffer.concat(chunks).toString('utf-8');
       const policy = JSON.parse(policyContent);
 
-      // Compute canonical hash using dynamic import
-      const { canonicalPolicyHash } = await import('@peac/core');
-      const digest = await canonicalPolicyHash(policy);
+      // Compute canonical hash using @peac/crypto
+      const { jcsHash } = await import('@peac/crypto');
+      const digest = await jcsHash(policy);
 
       const result: HashResult = {
         algorithm: 'SHA-256',

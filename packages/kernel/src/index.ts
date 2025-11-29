@@ -17,6 +17,7 @@ export type {
 // Export constants
 export {
   WIRE_TYPE,
+  WIRE_VERSION,
   ALGORITHMS,
   HEADERS,
   DISCOVERY,

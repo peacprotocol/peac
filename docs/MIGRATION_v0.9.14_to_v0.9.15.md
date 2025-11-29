@@ -368,6 +368,54 @@ For migration questions or issues:
 
 ---
 
-## 10. Version History
+## 10. Package Migration (@peac/core Deprecation)
 
+Starting with v0.9.15, the monolithic `@peac/core` package is deprecated in favor of granular kernel-first packages.
+
+### 10.1 Old imports (deprecated)
+
+```typescript
+// v0.9.14 and earlier
+import { enforce, verify, Receipt, signReceipt, verifyReceipt } from '@peac/core';
+```
+
+### 10.2 New imports (v0.9.15+)
+
+```typescript
+// High-level API
+import { enforce, verify } from '@peac/protocol';
+
+// Receipt types and builder
+import type { Receipt, ReceiptPayload } from '@peac/kernel';
+import { ReceiptBuilder, InMemoryNonceCache } from '@peac/kernel';
+
+// Low-level crypto
+import { signReceipt, verifyReceipt, generateKeyPair } from '@peac/crypto';
+
+// Schema validation
+import { ReceiptSchema, validateReceipt } from '@peac/schema';
+```
+
+### 10.3 Package responsibilities
+
+| Package          | Purpose                                  |
+| ---------------- | ---------------------------------------- |
+| `@peac/kernel`   | Core types, receipt builder, nonce cache |
+| `@peac/schema`   | Zod schemas, validation utilities        |
+| `@peac/crypto`   | Signing, verification, key management    |
+| `@peac/protocol` | High-level enforce/verify APIs           |
+| `@peac/control`  | Control abstraction layer (mandates)     |
+
+### 10.4 Migration checklist
+
+- [ ] Replace `@peac/core` imports with specific packages
+- [ ] Update `package.json` dependencies
+- [ ] Test that all imports resolve correctly
+- [ ] Remove `@peac/core` from dependencies
+
+---
+
+## 11. Version History
+
+- **2025-11-26**: Added package migration section for @peac/core deprecation
 - **2025-01-18**: Initial migration guide for v0.9.15

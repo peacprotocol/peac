@@ -13,6 +13,12 @@
 export const WIRE_TYPE = 'peac.receipt/0.9' as const;
 
 /**
+ * Wire format version (extracted from WIRE_TYPE)
+ * Use this for wire_version fields in receipts
+ */
+export const WIRE_VERSION = '0.9' as const;
+
+/**
  * Supported cryptographic algorithms
  */
 export const ALGORITHMS = {
@@ -68,6 +74,7 @@ export const LIMITS = {
  */
 export const CONSTANTS = {
   WIRE_TYPE,
+  WIRE_VERSION,
   ALGORITHMS,
   HEADERS,
   DISCOVERY,

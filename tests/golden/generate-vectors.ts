@@ -1,10 +1,14 @@
 /**
  * @peac/core v0.9.14 - Golden test vector generator
  * Generates 120+ deterministic test vectors with proper @peac/core imports
+ *
+ * @deprecated This generator uses @peac/core which is deprecated.
  */
 
 import { writeFileSync } from 'node:fs';
+// @ts-expect-error @peac/core is deprecated, use @peac/protocol
 import { createAndSignReceipt, verifyReceipt, canonicalPolicyHash } from '@peac/core';
+// @ts-expect-error jose types not installed in root devDependencies
 import { generateKeyPair, exportJWK } from 'jose';
 
 interface TestVector {
@@ -270,6 +274,7 @@ async function generateVectors() {
   return vectors;
 }
 
+// @ts-expect-error import.meta requires ESM module setting
 if (import.meta.url === `file://${process.argv[1]}`) {
   generateVectors().catch(console.error);
 }

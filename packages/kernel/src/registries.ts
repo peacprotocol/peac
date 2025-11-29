@@ -112,7 +112,7 @@ export const AGENT_PROTOCOLS: readonly AgentProtocolEntry[] = [
   {
     id: 'mcp',
     category: 'tool-protocol',
-    description: 'Model Context Protocol (Anthropic)',
+    description: 'Model Context Protocol (MCP)',
     reference: 'https://modelcontextprotocol.io/',
     status: 'informational',
   },

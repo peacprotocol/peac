@@ -4,11 +4,11 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  enforceTemporalMandate,
-  enforceUsageMandate,
-  enforceBudgetMandate,
-  enforceCombinedMandate,
-  enforceMandate,
+  enforceTemporalConstraint as enforceTemporalMandate,
+  enforceUsageConstraint as enforceUsageMandate,
+  enforceBudgetConstraint as enforceBudgetMandate,
+  enforceCombinedConstraint as enforceCombinedMandate,
+  enforceConstraint as enforceMandate,
 } from '../src/enforcement';
 import type { TemporalMandate, UsageMandate, BudgetMandate, CombinedMandate } from '../src/types';
 
@@ -84,7 +84,7 @@ describe('enforceUsageMandate', () => {
 
     const state = {
       receipt_id: '123e4567-e89b-12d3-a456-426614174000',
-      control: { mandate },
+      constraint: mandate,
       usage_count: 3,
     };
 

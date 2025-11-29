@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "composite": false,
+    "noEmit": true
+  },
+  "include": [
+    "packages/kernel/src/**/*.ts",
+    "packages/schema/src/**/*.ts",
+    "packages/crypto/src/**/*.ts",
+    "packages/protocol/src/**/*.ts",
+    "packages/control/src/**/*.ts",
+    "packages/receipts/src/**/*.ts",
+    "packages/discovery/src/**/*.ts",
+    "packages/server/src/**/*.ts",
+    "packages/cli/src/**/*.ts",
+    "packages/core/src/**/*.ts",
+    "packages/rails/**/src/**/*.ts",
+    "packages/mappings/**/src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/dist/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "archive/**",
+    "packages/**/node_modules/**"
+  ]
+}
