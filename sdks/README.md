@@ -23,4 +23,4 @@ SDKs provide high-level client interfaces built on top of `packages/protocol`:
 - Transport bindings (HTTP, gRPC, WebSocket)
 - Error handling with retry logic
 
-See [REPOSITORY_ARCHITECTURE.md](../REPOSITORY_ARCHITECTURE.md) for full architecture.
+See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for full architecture.

@@ -19,14 +19,6 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 
 - **[Test Vectors](specs/TEST_VECTORS.md)** - Golden vectors and negative test cases
 
-## Evolution
-
-- **[Evolution Guide](specs/EVOLUTION.md)** - Wire format versioning and migration path to v1.0
-
-## Implementation Guides
-
-- **[Implementation Guide](specs/IMPLEMENTATION_GUIDE.md)** - Step-by-step integration guide
-
 ## Related Documentation
 
 - [API Reference](api/) - Endpoint documentation (v0.9.16+)
@@ -37,5 +29,3 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 ## Versioning
 
 Current wire format: `peac.receipt/0.9`
-
-See [EVOLUTION.md](specs/EVOLUTION.md) for migration timeline to `peac.receipt/1.0`.

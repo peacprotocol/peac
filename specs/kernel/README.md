@@ -231,4 +231,3 @@ This directory is **NORMATIVE** as of v0.9.15.
 ---
 
 **Maintained by:** PEAC Protocol Working Group
-**Governance:** See `docs/PEAC_NORMATIVE_DECISIONS_LOG.md` for architectural decisions

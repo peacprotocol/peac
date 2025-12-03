@@ -13,4 +13,4 @@ User guides and tutorials including:
 - Control engine integration
 - Transport layer configuration
 
-See [REPOSITORY_ARCHITECTURE.md](../../REPOSITORY_ARCHITECTURE.md) for roadmap details.
+See [ARCHITECTURE.md](../ARCHITECTURE.md) for architecture details.

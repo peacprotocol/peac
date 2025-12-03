@@ -33,4 +33,4 @@ Surfaces provide turnkey solutions for specific platforms:
 - Best-practice examples
 - Production-ready templates
 
-See [REPOSITORY_ARCHITECTURE.md](../REPOSITORY_ARCHITECTURE.md) for full architecture.
+See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for full architecture.

@@ -12,4 +12,4 @@ High-level architecture documentation for PEAC Protocol, including wire format d
 - Six-pillar architecture (Access, Attribution, Compliance, Consent, Intelligence, Infrastructure)
 - Vendor neutrality principles
 
-See [REPOSITORY_ARCHITECTURE.md](../../REPOSITORY_ARCHITECTURE.md) for current implementation roadmap.
+See [ARCHITECTURE.md](../ARCHITECTURE.md) for current implementation.
