@@ -5,15 +5,15 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.9.15-blue.svg)](https://github.com/peacprotocol/peac)
 
-PEAC is an open protocol for **verifiable receipts in agentic commerce**.
+PEAC is an open protocol for **verifiable receipts in the agentic web**: AI agents, crawlers, and applications calling APIs and accessing content.
 
-Receipts prove who paid whom, for what, using which rail, under which terms. This repository contains the reference TypeScript implementation (kernel, crypto, protocol, rails, mappings, server, CLI) for the v0.9.x series.
+It makes "who paid whom, for what, using which rail, under which terms" cryptographically provable across payment rails and agent protocols. This repository contains the reference TypeScript implementation (kernel, crypto, protocol, rails, mappings, server, CLI) for the v0.9.x series.
 
 **Who is this for?**
 
-- API providers who want verifiable HTTP 402 billing and payment receipts
-- Agent and platform builders who need interoperable receipts across payment rails
-- Compliance and infrastructure teams who need audit-grade payment evidence
+- API providers who want verifiable HTTP 402 billing and receipts
+- AI and agent platform builders who need interoperable receipts across payment rails
+- Compliance and infrastructure teams who need audit-grade evidence for AI and API traffic
 
 PEAC is stewarded by contributors from [Originary](https://www.originary.xyz) and the broader community. See [https://peacprotocol.org](https://peacprotocol.org) for protocol documentation.
 
@@ -21,7 +21,7 @@ PEAC is stewarded by contributors from [Originary](https://www.originary.xyz) an
 
 ## Ecosystem fit
 
-PEAC does not replace existing protocols. It is the **receipts and verification layer** that works alongside:
+PEAC does not replace existing protocols. It is the **receipts and verification layer** that works alongside them - for plain APIs, human-driven applications, and agentic workflows alike.
 
 **Payment rails (v0.9.15 status):**
 
@@ -258,31 +258,56 @@ For the complete peac.txt specification, see `docs/specs/PEAC-TXT.md` (planned v
 
 ## Repository layout
 
-Kernel-first monorepo organized as layers:
+Kernel-first monorepo:
 
 ```text
 peac/
-├─ specs/kernel/         # Normative JSON: constants, errors, registries
-├─ docs/specs/           # Receipt schema, protocol behavior, test vectors
+├─ specs/
+│  └─ kernel/              # Normative JSON: constants, errors, registries
+├─ docs/
+│  ├─ specs/               # Receipt schema, protocol behavior, test vectors
+│  ├─ api/                 # API reference (scaffolded)
+│  └─ guides/              # Integration guides (scaffolded)
 ├─ packages/
-│  ├─ kernel/            # Layer 0: Zero-dependency constants
-│  ├─ schema/            # Layer 1: Types, Zod validators
-│  ├─ crypto/            # Layer 2: Ed25519 JWS, JCS, base64url
-│  ├─ protocol/          # Layer 3: issue(), verify(), discovery
-│  ├─ control/           # Layer 3: Constraint types and enforcement
-│  ├─ rails/x402/        # Layer 4: x402 payment rail
-│  ├─ rails/stripe/      # Layer 4: Stripe payment rail
-│  ├─ mappings/mcp/      # Layer 4: MCP integration
-│  ├─ mappings/acp/      # Layer 4: ACP integration
-│  ├─ transport/{http,grpc,ws}/  # Layer 4: Transport bindings
-│  ├─ server/            # Layer 5: HTTP verification server
-│  ├─ cli/               # Layer 5: Command-line tools
-│  └─ {access,consent,compliance,attribution,privacy,provenance,intelligence}/
-│                        # Layer 6: Pillar packages (early scaffolding)
-├─ sdks/                 # Future language SDKs (scaffolding, v0.9.17+)
-├─ surfaces/             # Future platform integrations (scaffolding, v0.9.17+)
-└─ archive/              # Legacy pre-v0.9.15 materials (historical)
+│  ├─ kernel/              # Zero-dependency constants from specs/kernel
+│  ├─ schema/              # Types, Zod validators, JSON Schema
+│  ├─ crypto/              # Ed25519 JWS, JCS, base64url
+│  ├─ protocol/            # issue(), verify(), discovery
+│  ├─ server/              # HTTP verification server
+│  ├─ cli/                 # Command-line tools
+│  ├─ rails/
+│  │  ├─ x402/             # HTTP 402 / x402 payment rail
+│  │  └─ stripe/           # Stripe payment rail
+│  ├─ mappings/
+│  │  ├─ mcp/              # Model Context Protocol mapping
+│  │  └─ acp/              # Agentic Commerce Protocol mapping
+│  ├─ transport/
+│  │  ├─ http/             # HTTP transport binding (scaffolding)
+│  │  ├─ grpc/             # gRPC transport binding (scaffolding)
+│  │  └─ ws/               # WebSocket transport binding (scaffolding)
+│  ├─ control/             # Constraint types and enforcement (CAL)
+│  ├─ access/              # Access control and policy evaluation
+│  ├─ consent/             # Consent lifecycle management
+│  ├─ compliance/          # Regulatory compliance helpers
+│  ├─ attribution/         # Attribution and revenue sharing
+│  ├─ privacy/             # Privacy budgeting and data protection
+│  ├─ provenance/          # Content provenance and C2PA integration
+│  ├─ intelligence/        # Analytics and insights
+│  └─ receipts/            # Receipt helpers, schema, codecs
+├─ sdks/                   # Language SDKs (TS, Python, Go, Rust; scaffolding)
+├─ surfaces/               # Platform integrations (WordPress, Vercel, etc.; scaffolding)
+└─ archive/                # Legacy pre-v0.9.15 materials (historical)
 ```
+
+**Layer map:**
+
+- Layer 0: `@peac/kernel`
+- Layer 1: `@peac/schema`
+- Layer 2: `@peac/crypto`
+- Layer 3: `@peac/protocol`, `@peac/control`
+- Layer 4: `@peac/rails-*`, `@peac/mappings-*`, `@peac/transport-*`
+- Layer 5: `@peac/server`, `@peac/cli`
+- Layer 6 (scaffolding): `@peac/access`, `@peac/consent`, `@peac/compliance`, `@peac/attribution`, `@peac/privacy`, `@peac/provenance`, `@peac/intelligence`
 
 **Core (normative):**
 
@@ -292,7 +317,7 @@ peac/
 
 **Scaffolding (not yet stable):**
 
-- `sdks/` and `surfaces/` are placeholders for future language SDKs and platform integrations (v0.9.17+). They are not stable or published yet.
+- `sdks/` and `surfaces/` are placeholders for future language SDKs and platform integrations. They are not stable or published yet.
 - Layer 6 pillar packages (`@peac/access`, `@peac/consent`, etc.) are early scaffolding; APIs may change.
 
 ---
@@ -348,6 +373,24 @@ peac/
 
 ---
 
+## Seven pillars
+
+PEAC addresses seven protocol capabilities for AI and API infrastructure:
+
+| Pillar          | Package                | Description                                      |
+| --------------- | ---------------------- | ------------------------------------------------ |
+| **Access**      | `@peac/access`         | Access control and policy evaluation             |
+| **Attribution** | `@peac/attribution`    | Attribution and revenue-share hooks              |
+| **Consent**     | `@peac/consent`        | Consent lifecycle types and helpers              |
+| **Commerce**    | `@peac/rails-*`        | Payment rails (x402, Stripe) and receipt issuance |
+| **Compliance**  | `@peac/compliance`     | Regulatory and audit helpers                     |
+| **Privacy**     | `@peac/privacy`        | Privacy budgeting and retention policy hooks     |
+| **Provenance**  | `@peac/provenance`     | Content provenance and C2PA integration          |
+
+These are optional higher-layer helpers built on top of the core receipt/kernel stack. The stable, production-ready surface for v0.9.15 is the kernel / schema / crypto / protocol / rails / server / cli stack. PEAC remains vendor-neutral; pillar packages provide building blocks, not a hosted service.
+
+---
+
 ## Architecture principles
 
 **Layered:**
@@ -390,11 +433,7 @@ peac/
 - Core packages (kernel, schema, crypto, protocol) are stable for v0.9.15
 - Pillar packages (access, consent, etc.) are early scaffolding; APIs may change
 
-**Roadmap:**
-
-- **v0.9.15** – Kernel-first architecture, vendor neutrality, core rails/mappings (current)
-- **v0.9.16** – Security hardening: DPoP (RFC 9449), SSRF protection, JWKS rotation, A2A mapping
-- **v0.9.17+** – Language SDKs, platform surfaces (WordPress, Vercel, LangChain)
+For forward-looking details, see the docs in `docs/` and the CHANGELOG.
 
 **HTTP semantics:**
 
