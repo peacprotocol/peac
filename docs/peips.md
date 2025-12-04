@@ -1,31 +1,16 @@
 # PEIPs (PEAC Improvement Proposals)
 
-Use PEIPs to propose changes, adapters, or extensions to PEAC.
+PEIPs are the mechanism for proposing changes, extensions, or new features to the PEAC Protocol.
 
-- Start with the template in `docs/peips/PEIP-TEMPLATE.md`.
-- Discuss proposals in GitHub Discussions; open a PR when ready.
-  EOF
+## Documentation
 
-# docs/peips/PEIP-TEMPLATE.md
+- [PEIP Process](peip/README.md) - Workflow and submission guidelines
+- [PEIP Template](peip/PEIP-0000.md) - Template for new proposals
+- [PEIP Registry](peip/index.json) - Index of all PEIPs
 
-cat > docs/peips/PEIP-TEMPLATE.md <<'EOF'
+## Quick Start
 
-# PEIP-XXX: Title
-
-Status: Draft
-Author: <you>
-Created: <date>
-
-## Abstract
-
-## Motivation
-
-## Specification
-
-## Rationale
-
-## Backwards Compatibility
-
-## Security Considerations
-
-## Reference Implementation (optional)
+1. Fork the repository
+2. Copy `docs/peip/PEIP-0000.md` to `docs/peip/PEIP-XXXX.md`
+3. Fill in all sections
+4. Submit a PR titled "PEIP-XXXX: Your Title"
