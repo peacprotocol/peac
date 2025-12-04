@@ -11,7 +11,7 @@
     "**/node_modules/**",
     "apps/api/src/**/*.test.js",
     "ex/**",
-    "test/smoke/**",
+    "archive/**",
     "packages/sdk-js/src/**/*.test.js",
     "packages/sdk-js/tests/**"
   ]
