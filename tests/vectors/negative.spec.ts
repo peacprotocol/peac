@@ -278,9 +278,7 @@ describe('Negative Test Vectors', () => {
       const { payload } = decode<PEACReceiptClaims>(expiredJWS);
       expect(payload.exp).toBeLessThan(Math.floor(Date.now() / 1000));
 
-      console.log(
-        'NEGATIVE VECTOR: Expired receipt created (would be rejected by verifyReceipt)'
-      );
+      console.log('NEGATIVE VECTOR: Expired receipt created (would be rejected by verifyReceipt)');
     });
   });
 

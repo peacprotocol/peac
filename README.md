@@ -377,15 +377,15 @@ peac/
 
 PEAC addresses seven protocol capabilities for AI and API infrastructure:
 
-| Pillar          | Package                | Description                                      |
-| --------------- | ---------------------- | ------------------------------------------------ |
-| **Access**      | `@peac/access`         | Access control and policy evaluation             |
-| **Attribution** | `@peac/attribution`    | Attribution and revenue-share hooks              |
-| **Consent**     | `@peac/consent`        | Consent lifecycle types and helpers              |
-| **Commerce**    | `@peac/rails-*`        | Payment rails (x402, Stripe) and receipt issuance |
-| **Compliance**  | `@peac/compliance`     | Regulatory and audit helpers                     |
-| **Privacy**     | `@peac/privacy`        | Privacy budgeting and retention policy hooks     |
-| **Provenance**  | `@peac/provenance`     | Content provenance and C2PA integration          |
+| Pillar          | Package             | Description                                       |
+| --------------- | ------------------- | ------------------------------------------------- |
+| **Access**      | `@peac/access`      | Access control and policy evaluation              |
+| **Attribution** | `@peac/attribution` | Attribution and revenue-share hooks               |
+| **Consent**     | `@peac/consent`     | Consent lifecycle types and helpers               |
+| **Commerce**    | `@peac/rails-*`     | Payment rails (x402, Stripe) and receipt issuance |
+| **Compliance**  | `@peac/compliance`  | Regulatory and audit helpers                      |
+| **Privacy**     | `@peac/privacy`     | Privacy budgeting and retention policy hooks      |
+| **Provenance**  | `@peac/provenance`  | Content provenance and C2PA integration           |
 
 These are optional higher-layer helpers built on top of the core receipt/kernel stack. The stable, production-ready surface for v0.9.15 is the kernel / schema / crypto / protocol / rails / server / cli stack. PEAC remains vendor-neutral; pillar packages provide building blocks, not a hosted service.
 
