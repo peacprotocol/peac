@@ -44,6 +44,15 @@ Legacy tests and fixtures from duplicate `test/` directory (excluded from CI):
 - `smoke/ssrf-protection.test.js` - SSRF protection tests
 - `smoke/fixtures-legacy/` - Early policy-hash test vectors (simpler format)
 
+### examples/
+
+Legacy example implementations:
+
+- `ex/cfw/worker.js` - Cloudflare Worker example (JS)
+- `ex/node/server.js` - Node.js server example (JS)
+- `edge/cloudflare-worker.ts` - Edge runtime example (TS)
+- `wellknown-peac.txt` - v0.9.13 peac.txt discovery file example
+
 ## Current Documentation
 
 For current PEAC Protocol documentation, see:
