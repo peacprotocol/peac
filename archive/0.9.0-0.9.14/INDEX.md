@@ -75,6 +75,16 @@ Legacy test fixtures:
 
 - `peac/` - v0.9.12 peac.txt discovery file examples (minimal, full, production, invalid)
 
+### packages/
+
+Legacy package stubs (v0.9.11-v0.9.12 era):
+
+- `adapters/langchain/` - LangChain adapter stub (tool.py)
+- `adapters/openai/` - OpenAI adapter stub (functions.json)
+- `sdk-python/pyproject.toml` - Python SDK stub (v0.9.11, no implementation)
+
+**Note:** `packages/templates/` was removed (empty placeholder with no content).
+
 ### Root configs
 
 - `.spectral.yaml` - OpenAPI linting config (for archived openapi.yaml)
