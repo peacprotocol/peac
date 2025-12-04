@@ -306,6 +306,20 @@ peac/
 
 ---
 
+## Documentation
+
+| Document                                                       | Purpose                                |
+| -------------------------------------------------------------- | -------------------------------------- |
+| [`docs/CANONICAL_DOCS_INDEX.md`](docs/CANONICAL_DOCS_INDEX.md) | Master index of all documentation      |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)                 | Kernel-first architecture and design   |
+| [`docs/SPEC_INDEX.md`](docs/SPEC_INDEX.md)                     | Normative specifications index         |
+| [`docs/engineering-guide.md`](docs/engineering-guide.md)       | Development patterns and practices     |
+| [`docs/CI_BEHAVIOR.md`](docs/CI_BEHAVIOR.md)                   | CI pipeline and gate behavior          |
+| [`RELEASE.md`](RELEASE.md)                                     | Release policy and versioning strategy |
+| [`RELEASING.md`](RELEASING.md)                                 | Release checklist and commands         |
+
+---
+
 ## Packages
 
 **Core:**
