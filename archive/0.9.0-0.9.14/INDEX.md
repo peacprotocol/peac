@@ -24,6 +24,7 @@ This directory contains documentation and materials from PEAC Protocol versions
 - `perf/` - v0.9.12 performance benchmarks
 - `interop.md` - v0.9.14 wire protocol interoperability guide
 - `problems.md` - Early RFC 7807 problem-details examples
+- `peips-malformed.md` - Malformed PEIP doc (heredoc artifact)
 
 ### docs/onboarding/
 
@@ -32,6 +33,16 @@ Early getting-started materials based on peac.txt policy files (v0.9.5 era):
 - `getting-started.md` - v0.9.5 getting started guide
 - `conformance.md` - v0.9.5 conformance levels
 - `templates.md` - peac.txt deployment templates (Cloudflare, NGINX, GitHub Action)
+
+### tests/
+
+Legacy tests and fixtures from duplicate `test/` directory (excluded from CI):
+
+- `smoke/cli-commands.test.js` - CLI command tests (lint issues)
+- `smoke/detached-jws.test.js` - Detached JWS tests
+- `smoke/enforce.test.js` - Enforcement tests (lint issues)
+- `smoke/ssrf-protection.test.js` - SSRF protection tests
+- `smoke/fixtures-legacy/` - Early policy-hash test vectors (simpler format)
 
 ### examples/
 
