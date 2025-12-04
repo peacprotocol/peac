@@ -100,6 +100,13 @@ Legacy wire format profiles (v0.9.12–v0.9.14, pre-kernel):
 
 - `receipt.compact.v1.1.json` - CBOR compact receipt profile with field mapping
 
+### docs/spec/
+
+Legacy ABNF grammars (pre-kernel protocol definitions):
+
+- `grammar.abnf` - v0.9.6 protocol message grammar (negotiation, receipts)
+- `peac.txt.abnf` - v0.9.12 peac.txt discovery format grammar
+
 ### Root configs
 
 - `.spectral.yaml` - OpenAPI linting config (for archived openapi.yaml)
