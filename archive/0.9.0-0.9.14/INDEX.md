@@ -33,6 +33,16 @@ Early getting-started materials based on peac.txt policy files (v0.9.5 era):
 - `conformance.md` - v0.9.5 conformance levels
 - `templates.md` - peac.txt deployment templates (Cloudflare, NGINX, GitHub Action)
 
+### sdk-js/
+
+Legacy v0.9.2 SDK documentation (peac.txt era):
+
+- `README-v0.9.2.md` - Original SDK README with peac.txt approach
+- `docs/api-reference.md` - v0.9.2 API reference
+- `docs/compliance-guide.md` - Compliance guide
+- `docs/getting-started.md` - Getting started with peac.txt
+- `docs/spec.md` - Original specification
+
 ## Current Documentation
 
 For current PEAC Protocol documentation, see:
