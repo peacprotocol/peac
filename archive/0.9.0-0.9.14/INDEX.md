@@ -24,6 +24,7 @@ This directory contains documentation and materials from PEAC Protocol versions
 - `perf/` - v0.9.12 performance benchmarks
 - `interop.md` - v0.9.14 wire protocol interoperability guide
 - `problems.md` - Early RFC 7807 problem-details examples
+- `peips-malformed.md` - Malformed PEIP doc (heredoc artifact)
 
 ### docs/onboarding/
 
