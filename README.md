@@ -434,7 +434,7 @@ See `SECURITY.md` and `docs/specs/PROTOCOL-BEHAVIOR.md` for security considerati
 
 Contributions are welcome. For substantial changes, please open an issue first to discuss the approach.
 
-See `docs/CODING_STANDARDS_PROTOCOL.md` for coding guidelines and `docs/SPEC_INDEX.md` for normative specifications.
+See `docs/SPEC_INDEX.md` for normative specifications and `docs/CI_BEHAVIOR.md` for CI guidelines.
 
 ---
 

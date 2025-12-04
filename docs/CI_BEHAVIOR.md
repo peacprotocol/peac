@@ -237,5 +237,4 @@ bash scripts/ci/forbid-strings.sh
 ## Related Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Package structure and dependencies
-- [CODING_STANDARDS_PROTOCOL.md](CODING_STANDARDS_PROTOCOL.md) - Development guidelines
 - [specs/TEST_VECTORS.md](specs/TEST_VECTORS.md) - Test vector format

@@ -278,7 +278,7 @@ interface PaymentEvidence {
 - [specs/PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md) - Issuance and verification flows
 - [specs/ERRORS.md](specs/ERRORS.md) - Error codes and HTTP mappings
 - [specs/REGISTRIES.md](specs/REGISTRIES.md) - Payment rails and control engines
-- [CODING_STANDARDS_PROTOCOL.md](CODING_STANDARDS_PROTOCOL.md) - Development guidelines
+- [CI_BEHAVIOR.md](CI_BEHAVIOR.md) - CI pipeline behavior
 
 ---
 
