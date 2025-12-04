@@ -597,12 +597,12 @@ The `sub` claim MUST identify an **agent, client, or service account**, NOT a hu
 
 **Examples**:
 
-- ✅ COMPLIANT: `"agent:example-researcher-v1"`
-- ✅ COMPLIANT: `"service:payment-processor-prod-us-west"`
-- ✅ COMPLIANT: `"client:mobile-app-installation-abc123"`
-- ❌ NON-COMPLIANT: `"user:john.doe@example.com"` (human email)
-- ❌ NON-COMPLIANT: `"customer:+1-555-1234"` (phone number)
-- ❌ NON-COMPLIANT: `"patient:SSN-123-45-6789"` (government ID)
+- COMPLIANT: `"agent:example-researcher-v1"`
+- COMPLIANT: `"service:payment-processor-prod-us-west"`
+- COMPLIANT: `"client:mobile-app-installation-abc123"`
+- NON-COMPLIANT: `"user:john.doe@example.com"` (human email)
+- NON-COMPLIANT: `"customer:+1-555-1234"` (phone number)
+- NON-COMPLIANT: `"patient:SSN-123-45-6789"` (government ID)
 
 **Rationale**:
 

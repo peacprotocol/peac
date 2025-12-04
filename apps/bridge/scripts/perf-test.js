@@ -28,7 +28,7 @@ class PerformanceValidator {
   }
 
   async startBridge() {
-    console.log('🚀 Starting bridge for performance testing...');
+    console.log('Starting bridge for performance testing...');
 
     const cliPath = join(__dirname, '../../../packages/cli/bin/peac.js');
     this.bridgeProcess = spawn('node', [cliPath, 'bridge', 'start', '--port', BRIDGE_PORT], {
@@ -45,7 +45,7 @@ class PerformanceValidator {
       if (!response.ok) {
         throw new Error(`Bridge health check failed: ${response.status}`);
       }
-      console.log('✅ Bridge started successfully');
+      console.log('Bridge started successfully');
     } catch (error) {
       throw new Error(`Failed to start bridge: ${error.message}`);
     }
@@ -53,7 +53,7 @@ class PerformanceValidator {
 
   async stopBridge() {
     if (this.bridgeProcess) {
-      console.log('🛑 Stopping bridge...');
+      console.log('Stopping bridge...');
       this.bridgeProcess.kill('SIGTERM');
 
       // Wait for graceful shutdown
@@ -71,7 +71,7 @@ class PerformanceValidator {
   }
 
   async measureEndpoint(name, url, options = {}) {
-    console.log(`📊 Testing ${name} endpoint...`);
+    console.log(`Testing ${name} endpoint...`);
 
     const timings = [];
 
@@ -198,7 +198,7 @@ class PerformanceValidator {
   }
 
   reportResults(stats) {
-    console.log('\n📈 Performance Test Results');
+    console.log('\nPerformance Test Results');
     console.log('================================');
 
     let allPassed = true;
@@ -215,16 +215,16 @@ class PerformanceValidator {
       console.log(`  P95:      ${stat.p95.toFixed(2)} ms (target: <${TARGET_P95_MS}ms)`);
       console.log(`  P99:      ${stat.p99.toFixed(2)} ms`);
       console.log(`  Max:      ${stat.max.toFixed(2)} ms`);
-      console.log(`  Status:   ${passed ? '✅ PASS' : '❌ FAIL'}`);
+      console.log(`  Status:   ${passed ? 'PASS' : 'FAIL'}`);
     });
 
     console.log('\n================================');
     if (allPassed) {
-      console.log('🎉 All performance targets met!');
-      console.log(`✅ All endpoints p95 < ${TARGET_P95_MS}ms`);
+      console.log('All performance targets met!');
+      console.log(`All endpoints p95 < ${TARGET_P95_MS}ms`);
       process.exit(0);
     } else {
-      console.log('❌ Performance targets not met');
+      console.log('Performance targets not met');
       console.log(`Some endpoints exceeded p95 target of ${TARGET_P95_MS}ms`);
       process.exit(1);
     }
@@ -236,7 +236,7 @@ if (require.main === module) {
   const validator = new PerformanceValidator();
 
   validator.runTests().catch((error) => {
-    console.error('❌ Performance test failed:', error);
+    console.error('Performance test failed:', error);
     validator.stopBridge().finally(() => {
       process.exit(1);
     });
@@ -244,7 +244,7 @@ if (require.main === module) {
 
   // Handle cleanup on exit
   process.on('SIGINT', () => {
-    console.log('\n🛑 Cleaning up...');
+    console.log('\nCleaning up...');
     validator.stopBridge().finally(() => {
       process.exit(130);
     });

@@ -102,7 +102,7 @@ async function measurePerformance(
 }
 
 async function runPerformanceTests(): Promise<PerformanceReport> {
-  console.log('🚀 Starting PEAC v0.9.12.1 Performance Validation');
+  console.log('Starting PEAC v0.9.12.1 Performance Validation');
   console.log(
     `Target SLOs: sign p95≤${SLO_TARGETS.sign_p95_ms}ms, verify p95≤${SLO_TARGETS.verify_p95_ms}ms`
   );
@@ -119,7 +119,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
 
   try {
     // Test 1: Sign operation performance
-    console.log('\n📝 Testing sign operation...');
+    console.log('\nTesting sign operation...');
     const signResult = await measurePerformance(
       'sign',
       async () => {
@@ -134,7 +134,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
 
     results.push(signResult);
     console.log(
-      `   Sign p95: ${signResult.p95_ms}ms (target: ≤${SLO_TARGETS.sign_p95_ms}ms) ${signResult.meets_slo ? '✅' : '❌'}`
+      `   Sign p95: ${signResult.p95_ms}ms (target: ≤${SLO_TARGETS.sign_p95_ms}ms) ${signResult.meets_slo ? '[OK]' : '[FAIL]'}`
     );
 
     if (!signResult.meets_slo) {
@@ -142,7 +142,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
     }
 
     // Test 2: Verify operation performance
-    console.log('\n🔍 Testing verify operation...');
+    console.log('\nTesting verify operation...');
     const signedReceipt = await signReceipt(testReceipt, {
       kid: keyPair.kid,
       privateKey: keyPair.privateKey,
@@ -161,7 +161,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
 
     results.push(verifyResult);
     console.log(
-      `   Verify p95: ${verifyResult.p95_ms}ms (target: ≤${SLO_TARGETS.verify_p95_ms}ms) ${verifyResult.meets_slo ? '✅' : '❌'}`
+      `   Verify p95: ${verifyResult.p95_ms}ms (target: ≤${SLO_TARGETS.verify_p95_ms}ms) ${verifyResult.meets_slo ? '[OK]' : '[FAIL]'}`
     );
 
     if (!verifyResult.meets_slo) {
@@ -171,7 +171,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
     }
 
     // Test 3: Memory efficiency
-    console.log('\n💾 Testing memory efficiency...');
+    console.log('\nTesting memory efficiency...');
     const memoryTest = await measurePerformance(
       'memory_test',
       async () => {
@@ -235,7 +235,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
     console.log(`   Bulk verify (10x): ${bulkResult.p95_ms}ms`);
   } catch (error) {
     failures.push(`Performance test error: ${(error as Error).message}`);
-    console.error('❌ Performance test failed:', error);
+    console.error('[FAIL] Performance test failed:', error);
   }
 
   // Generate report
@@ -266,17 +266,17 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
 
   for (const result of results) {
     console.log(
-      `${result.operation.toUpperCase()}: p95=${result.p95_ms}ms, throughput=${result.throughput_ops_per_sec}ops/s ${result.meets_slo ? '✅' : '❌'}`
+      `${result.operation.toUpperCase()}: p95=${result.p95_ms}ms, throughput=${result.throughput_ops_per_sec}ops/s ${result.meets_slo ? '[OK]' : '[FAIL]'}`
     );
   }
 
   console.log(
     '\n' +
       (overall_status === 'PASS'
-        ? '✅ ALL SLOS MET'
+        ? '[OK] ALL SLOS MET'
         : overall_status === 'FAIL'
-          ? '❌ SLO VIOLATIONS DETECTED'
-          : '⚠️  PERFORMANCE WARNINGS')
+          ? '[FAIL] SLO VIOLATIONS DETECTED'
+          : '[WARN]  PERFORMANCE WARNINGS')
   );
 
   if (failures.length > 0) {
@@ -297,7 +297,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
 
 // Stress test function
 export async function runStressTest(duration_seconds = 60): Promise<void> {
-  console.log(`\n🔥 Running ${duration_seconds}s stress test...`);
+  console.log(`\nRunning ${duration_seconds}s stress test...`);
 
   const keyPair = await generateTestKey();
   const testReceipt = createTestReceipt();

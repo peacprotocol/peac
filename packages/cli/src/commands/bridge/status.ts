@@ -101,16 +101,16 @@ export function statusCommand() {
       }
 
       // Human-readable output
-      console.log('🌉 PEAC Bridge Status');
+      console.log('PEAC Bridge Status');
       console.log('');
 
       if (!status.configured) {
-        console.log('📋 Configuration: ❌ Not configured');
+        console.log('Configuration: Not configured');
         console.log('   Run "peac bridge install" to initialize');
         return;
       }
 
-      console.log('📋 Configuration: ✅ Found');
+      console.log('Configuration: Found');
       if (status.config?.url) {
         console.log(`   URL: ${status.config.url}`);
       }
@@ -124,7 +124,7 @@ export function statusCommand() {
       console.log('');
 
       if (!status.running) {
-        console.log('🔴 Process: Not running');
+        console.log('Process: Not running');
         if (status.process?.status === 'not_found') {
           console.log('   (Stale PID file - process not found)');
         }
@@ -132,7 +132,7 @@ export function statusCommand() {
         return;
       }
 
-      console.log('🟢 Process: Running');
+      console.log('Process: Running');
       console.log(`   PID: ${status.process.pid}`);
       if (status.process.uptime !== null) {
         const uptime = status.process.uptime;
@@ -148,9 +148,9 @@ export function statusCommand() {
       console.log('');
 
       if (!status.health) {
-        console.log('🔍 Health: Unknown (no URL configured)');
+        console.log('Health: Unknown (no URL configured)');
       } else if (status.health.status === 'healthy') {
-        console.log('✅ Health: Healthy');
+        console.log('Health: Healthy');
         if (status.health.peac_version) {
           console.log(`   Wire version: ${status.health.peac_version}`);
         }
@@ -161,10 +161,10 @@ export function statusCommand() {
           console.log(`   Memory usage: ${status.health.memory_mb.toFixed(1)} MB`);
         }
       } else if (status.health.status === 'unhealthy') {
-        console.log('❌ Health: Unhealthy');
+        console.log('Health: Unhealthy');
         console.log(`   HTTP ${status.health.code}: ${status.health.statusText}`);
       } else if (status.health.status === 'unreachable') {
-        console.log('⚠️  Health: Unreachable');
+        console.log('Health: Unreachable');
         console.log(`   Error: ${status.health.error}`);
         console.log('   Bridge may be starting up or misconfigured');
       }
@@ -185,10 +185,10 @@ export function statusCommand() {
               checks?: Record<string, boolean>;
             };
             console.log('');
-            console.log('🎯 Readiness:', readiness.ok ? '✅ Ready' : '❌ Not Ready');
+            console.log('Readiness:', readiness.ok ? 'Ready' : 'Not Ready');
             if (readiness.checks) {
               Object.entries(readiness.checks).forEach(([check, result]) => {
-                console.log(`   ${check}: ${result ? '✅' : '❌'}`);
+                console.log(`   ${check}: ${result ? 'OK' : 'FAIL'}`);
               });
             }
           }

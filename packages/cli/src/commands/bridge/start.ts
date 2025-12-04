@@ -44,7 +44,7 @@ export function startCommand() {
       }
 
       if (!bridgePath) {
-        console.error('❌ Bridge executable not found');
+        console.error('Bridge executable not found');
         console.error('   Run "pnpm build" in monorepo or install @peac/app-bridge');
         process.exit(1);
       }
@@ -57,11 +57,11 @@ export function startCommand() {
           env,
         });
 
-        console.log(`🌉 Starting PEAC Bridge on port ${options.port}`);
-        console.log('🔗 Press Ctrl+C to stop');
+        console.log(`Starting PEAC Bridge on port ${options.port}`);
+        console.log('Press Ctrl+C to stop');
 
         bridge.on('error', (err) => {
-          console.error('❌ Failed to start bridge:', err);
+          console.error('Failed to start bridge:', err);
           process.exit(1);
         });
 
@@ -87,8 +87,8 @@ export function startCommand() {
         // Write PID file
         writeFileSync(pidFile, bridge.pid?.toString() || '');
 
-        console.log(`🌉 Bridge started on port ${options.port} (PID: ${bridge.pid})`);
-        console.log(`📋 Logs: ${logFile}`);
+        console.log(`Bridge started on port ${options.port} (PID: ${bridge.pid})`);
+        console.log(`Logs: ${logFile}`);
 
         // Write/update config
         const configFile = join(peacDir, 'bridge.json');
@@ -122,13 +122,13 @@ export function startCommand() {
           try {
             const response = await fetch(`http://127.0.0.1:${options.port}/health`);
             if (response.ok) {
-              console.log(`✅ Bridge is healthy and responding`);
+              console.log(`Bridge is healthy and responding`);
             } else {
-              console.warn(`⚠️  Bridge responding but not healthy (HTTP ${response.status})`);
+              console.warn(`Bridge responding but not healthy (HTTP ${response.status})`);
             }
           } catch (error) {
             console.warn(
-              `⚠️  Bridge may not be responding yet:`,
+              `Bridge may not be responding yet:`,
               error instanceof Error ? error.message : String(error)
             );
             console.log(`   Check logs: ${logFile}`);

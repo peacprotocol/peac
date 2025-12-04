@@ -37,10 +37,10 @@ function formatDiscoveryResult(data: any): string {
   for (const source of data.sources) {
     const status =
       source.status === 'found'
-        ? chalk.green('✓')
+        ? chalk.green('[found]')
         : source.status === 'not_found'
-          ? chalk.yellow('○')
-          : chalk.red('✗');
+          ? chalk.yellow('[not found]')
+          : chalk.red('[error]');
 
     lines.push(`${status} ${source.type}: ${source.url}`);
     if (source.etag) {
@@ -62,7 +62,7 @@ function formatHashResult(data: any): string {
 
 function formatVerifyResult(data: any): string {
   if (data.valid) {
-    const lines = [chalk.green('✓ Receipt verified successfully'), ''];
+    const lines = [chalk.green('Receipt verified successfully'), ''];
 
     if (data.policy_hash) {
       lines.push(`Policy hash: ${data.policy_hash}`);
@@ -74,7 +74,7 @@ function formatVerifyResult(data: any): string {
 
     return lines.join('\\n');
   } else {
-    return chalk.red(`✗ Verification failed: ${data.error || 'Unknown error'}`);
+    return chalk.red(`Verification failed: ${data.error || 'Unknown error'}`);
   }
 }
 

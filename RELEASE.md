@@ -46,7 +46,7 @@ npm audit @peac/core --audit-level=high
 pnpm add @peac/core
 node -e "
 import { sign, verify } from '@peac/core';
-console.log('✅ @peac/core imports successfully');
+console.log('@peac/core imports successfully');
 "
 
 # Test basic operations
@@ -88,7 +88,7 @@ If issues are discovered post-release:
 ### v0.9.12.1 - Clean Architecture & Protocol v1.1 Ready
 
 **Released**: 2025-09-07  
-**Status**: Production Ready ✅
+**Status**: Production Ready
 
 **Key Features**:
 

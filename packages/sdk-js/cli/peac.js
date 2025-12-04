@@ -59,7 +59,7 @@ program
 
       await fs.writeFile(options.output, yamlContent);
 
-      console.log(`✓ Created ${options.output}`);
+      console.log(`[OK] Created ${options.output}`);
       console.log(`  Type: ${options.type}`);
       console.log(`  Next steps:`);
       console.log(`    1. Edit ${options.output} to customize your terms`);
@@ -84,7 +84,7 @@ program
       const peac = parser.parsePeacContent(content);
       await parser.validatePeac(peac);
 
-      console.log('✓ Valid peac file');
+      console.log('[OK] Valid peac file');
 
       if (options.verbose) {
         console.log('\nDetails:');
@@ -98,7 +98,7 @@ program
         }
       }
     } catch (error) {
-      console.error('✗ Invalid:', error.message);
+      console.error('[FAIL] Invalid:', error.message);
       process.exit(1);
     }
   });
@@ -145,7 +145,7 @@ program
         await fs.writeFile(privateKeyPath, privateKey);
         await fs.writeFile(publicKeyPath, publicKey);
 
-        console.log(`✓ Generated keypair:`);
+        console.log(`[OK] Generated keypair:`);
         console.log(`  Private key: ${privateKeyPath}`);
         console.log(`  Public key: ${publicKeyPath}`);
         console.log(`  Keep your private key secure!`);
@@ -170,7 +170,7 @@ program
       });
       await fs.writeFile(file, signedContent);
 
-      console.log(`✓ Signed ${file}`);
+      console.log(`[OK] Signed ${file}`);
       console.log(`  Signature: ${signedPeac.signature.substring(0, 32)}...`);
       console.log(`  Algorithm: ${signedPeac.signature_algorithm}`);
     } catch (error) {
@@ -226,7 +226,7 @@ program
       console.log(`\nScanning ${domain} for policy files...`);
       const result = await parser.parseAll(domain);
 
-      console.log('\n✓ Policy scan complete');
+      console.log('\n[OK] Policy scan complete');
       console.log('─'.repeat(50));
 
       if (result.metadata?.sources) {
@@ -296,7 +296,7 @@ program
 
       await fs.writeFile(options.output, yamlContent);
 
-      console.log(`✓ Migrated to ${options.output}`);
+      console.log(`[OK] Migrated to ${options.output}`);
       console.log(`  Original format: ${options.format}`);
       console.log(`  New format: PEAC Protocol v${peac.version}`);
       console.log(`\nNext steps:`);
@@ -359,7 +359,7 @@ program
       const result = await negotiation.negotiate(proposal);
 
       if (result.accepted) {
-        console.log('\n✓ Negotiation successful!');
+        console.log('\n[OK] Negotiation successful!');
         console.log('\nAccepted Terms:');
         console.log(`  Peac ID: ${result.peac_id}`);
         console.log(`  Price: $${result.terms.price} ${result.terms.currency}`);
@@ -435,7 +435,7 @@ program
         processor: options.provider,
       });
 
-      console.log('\n✓ Payment initiated');
+      console.log('\n[OK] Payment initiated');
       console.log(`  Processor: ${result.processor}`);
       console.log(`  Payment ID: ${result.payment_id}`);
       console.log(`  Amount: $${result.amount} ${result.currency}`);

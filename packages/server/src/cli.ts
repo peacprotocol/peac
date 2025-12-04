@@ -8,8 +8,8 @@ import { app } from './server';
 
 const port = Number(process.env.PORT) || 3000;
 
-console.log(`🚀 PEAC verification server starting on port ${port}`);
-console.log(`📍 Endpoints:`);
+console.log(`PEAC verification server starting on port ${port}`);
+console.log(`Endpoints:`);
 console.log(`   POST http://localhost:${port}/verify`);
 console.log(`   GET  http://localhost:${port}/.well-known/peac.txt`);
 console.log(`   GET  http://localhost:${port}/slo`);

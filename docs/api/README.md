@@ -1,6 +1,6 @@
 # PEAC API Reference
 
-**Status:** 📋 Planned for v0.9.16
+**Status:** Planned for v0.9.16
 
 ## Coming Soon
 

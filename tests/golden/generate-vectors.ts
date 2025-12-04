@@ -22,7 +22,7 @@ interface TestVector {
 }
 
 async function generateVectors() {
-  console.log('🔧 Generating v0.9.14 test vectors...');
+  console.log('Generating v0.9.14 test vectors...');
 
   const vectors: TestVector[] = [];
 
@@ -198,7 +198,7 @@ async function generateVectors() {
   }
 
   // Generate bulk vectors for performance testing
-  console.log('🔄 Generating bulk test vectors...');
+  console.log('Generating bulk test vectors...');
   for (let i = 0; i < 50; i++) {
     const receipt = await createAndSignReceipt({
       subject: `https://example.com/bulk-resource-${i}`,
@@ -236,10 +236,10 @@ async function generateVectors() {
     expected_valid: true,
   });
 
-  console.log(`✅ Generated ${vectors.length} test vectors`);
+  console.log(`Generated ${vectors.length} test vectors`);
 
   // Verify all valid vectors
-  console.log('🔍 Verifying all vectors...');
+  console.log('Verifying all vectors...');
   let validCount = 0;
   let errorCount = 0;
 
@@ -249,15 +249,15 @@ async function generateVectors() {
         await verifyReceipt(vector.signed_receipt, vector.verification_keys);
         validCount++;
       } catch (error) {
-        console.error(`❌ Vector ${vector.name} failed verification:`, error);
+        console.error(`Vector ${vector.name} failed verification:`, error);
         errorCount++;
       }
     }
   }
 
-  console.log(`✅ Verified ${validCount} vectors successfully`);
+  console.log(`Verified ${validCount} vectors successfully`);
   if (errorCount > 0) {
-    console.log(`❌ ${errorCount} vectors failed verification`);
+    console.log(`${errorCount} vectors failed verification`);
   }
 
   // Save vectors
@@ -269,7 +269,7 @@ async function generateVectors() {
   };
 
   writeFileSync('tests/golden/vectors.json', JSON.stringify(output, null, 2));
-  console.log('💾 Vectors saved to tests/golden/vectors.json');
+  console.log('Vectors saved to tests/golden/vectors.json');
 
   return vectors;
 }

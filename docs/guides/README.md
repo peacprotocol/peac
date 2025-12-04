@@ -1,6 +1,6 @@
 # PEAC User Guides
 
-**Status:** 📋 Planned for v0.9.16
+**Status:** Planned for v0.9.16
 
 ## Coming Soon
 
