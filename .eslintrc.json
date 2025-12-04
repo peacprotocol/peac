@@ -10,7 +10,6 @@
     "**/coverage/**",
     "**/node_modules/**",
     "apps/api/src/**/*.test.js",
-    "ex/**",
     "archive/**",
     "packages/sdk-js/src/**/*.test.js",
     "packages/sdk-js/tests/**"
