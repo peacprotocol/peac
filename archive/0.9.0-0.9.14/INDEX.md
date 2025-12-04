@@ -55,13 +55,32 @@ Legacy example implementations:
 
 ### sdk-js/
 
-Legacy v0.9.2 SDK documentation (peac.txt era):
+Legacy v0.9.2 SDK (peac.txt era, pre-kernel):
+
+#### sdk-js/docs/
 
 - `README-v0.9.2.md` - Original SDK README with peac.txt approach
 - `docs/api-reference.md` - v0.9.2 API reference
 - `docs/compliance-guide.md` - Compliance guide
 - `docs/getting-started.md` - Getting started with peac.txt
 - `docs/spec.md` - Original specification
+
+#### sdk-js/sdk/
+
+Legacy CommonJS implementation with X-PEAC-\* file format parsing:
+
+- `index.js` - v0.9.2 SDK entry point (exports Parser, UniversalParser, etc.)
+- `parser.js` - peac.txt file parser
+- `universal-parser.js` - Multi-format parser (robots.txt, llms.txt, ai.txt) with X-PEAC-\* extensions
+- `crypto.js` - Legacy crypto utilities
+- `negotiation.js` - Policy negotiation logic
+- `payments.js` - Payment handling
+
+**Note:** The X-PEAC-\* parsing in universal-parser.js was for robots.txt file format extensions (e.g., `X-PEAC-Price`, `X-PEAC-Attribution`), not HTTP wire protocol headers. The modern protocol uses `PEAC-Receipt` header (see `specs/kernel/constants.json`).
+
+#### sdk-js/tests/
+
+- `parser.test.js` - Tests for legacy sdk/ parsers (requires `../sdk`)
 
 ### openapi/
 
