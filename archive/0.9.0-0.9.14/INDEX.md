@@ -22,6 +22,16 @@ This directory contains documentation and materials from PEAC Protocol versions
 - `migration/v0.9.14.md` - Migration guide v0.9.13→v0.9.14
 - `issues/` - Historical issue tracking (v0.9.13.3-next)
 - `perf/` - v0.9.12 performance benchmarks
+- `interop.md` - v0.9.14 wire protocol interoperability guide
+- `problems.md` - Early RFC 7807 problem-details examples
+
+### docs/onboarding/
+
+Early getting-started materials based on peac.txt policy files (v0.9.5 era):
+
+- `getting-started.md` - v0.9.5 getting started guide
+- `conformance.md` - v0.9.5 conformance levels
+- `templates.md` - peac.txt deployment templates (Cloudflare, NGINX, GitHub Action)
 
 ## Current Documentation
 
