@@ -33,11 +33,11 @@ peac/
 │   └── demo/             # @peac/app-demo
 ├── packages/             # Publishable libraries
 │   ├── core/            # @peac/core
-│   ├── crawler/         # @peac/crawler
 │   ├── receipts/        # @peac/receipts
-│   └── adapters/        # Agent integrations
-├── schemas/             # JSON schemas
-└── profiles/           # Wire format profiles
+│   └── ...              # See packages/ for full list
+├── specs/kernel/         # Normative kernel definitions
+├── docs/                 # Protocol documentation
+└── archive/              # Legacy pre-v0.9.15 materials
 ```
 
 ## Contribution Workflow

@@ -85,6 +85,21 @@ Legacy package stubs (v0.9.11-v0.9.12 era):
 
 **Note:** `packages/templates/` was removed (empty placeholder with no content).
 
+### schemas/
+
+Legacy JSON schemas (v0.9.12–v0.9.14, pre-kernel design):
+
+- `purge.v1.0.json` - Purge receipt schema for content deletion attestations (GDPR/CCPA)
+- `peip-saf/core.v1.json` - PEIP Safety core schema (disclosure cadence, crisis referral, minors gate)
+- `peip-saf/us-ca-sb243.v1.json` - Safety schema targeting CA SB-243 compliance
+- `receipts/safety-event.v1.json` - Safety event receipt schema
+
+### profiles/
+
+Legacy wire format profiles (v0.9.12–v0.9.14, pre-kernel):
+
+- `receipt.compact.v1.1.json` - CBOR compact receipt profile with field mapping
+
 ### Root configs
 
 - `.spectral.yaml` - OpenAPI linting config (for archived openapi.yaml)
