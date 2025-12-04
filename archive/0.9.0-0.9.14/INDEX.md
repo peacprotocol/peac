@@ -33,6 +33,15 @@ Early getting-started materials based on peac.txt policy files (v0.9.5 era):
 - `conformance.md` - v0.9.5 conformance levels
 - `templates.md` - peac.txt deployment templates (Cloudflare, NGINX, GitHub Action)
 
+### examples/
+
+Legacy example implementations:
+
+- `ex/cfw/worker.js` - Cloudflare Worker example (JS)
+- `ex/node/server.js` - Node.js server example (JS)
+- `edge/cloudflare-worker.ts` - Edge runtime example (TS)
+- `wellknown-peac.txt` - v0.9.13 peac.txt discovery file example
+
 ## Current Documentation
 
 For current PEAC Protocol documentation, see:
