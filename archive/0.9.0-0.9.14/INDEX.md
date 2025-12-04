@@ -34,6 +34,16 @@ Early getting-started materials based on peac.txt policy files (v0.9.5 era):
 - `conformance.md` - v0.9.5 conformance levels
 - `templates.md` - peac.txt deployment templates (Cloudflare, NGINX, GitHub Action)
 
+### tests/
+
+Legacy tests and fixtures from duplicate `test/` directory (excluded from CI):
+
+- `smoke/cli-commands.test.js` - CLI command tests (lint issues)
+- `smoke/detached-jws.test.js` - Detached JWS tests
+- `smoke/enforce.test.js` - Enforcement tests (lint issues)
+- `smoke/ssrf-protection.test.js` - SSRF protection tests
+- `smoke/fixtures-legacy/` - Early policy-hash test vectors (simpler format)
+
 ## Current Documentation
 
 For current PEAC Protocol documentation, see:
