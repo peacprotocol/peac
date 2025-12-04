@@ -31,12 +31,12 @@ program
         jws = fs.readFileSync(jwsInput, 'utf-8').trim();
       }
 
-      console.log('🔍 Verifying PEAC receipt...\n');
+      console.log('Verifying PEAC receipt...\n');
 
       // First, decode to show receipt info
       const { header, payload } = decode<PEACReceiptClaims>(jws);
 
-      console.log('📄 Receipt Information:');
+      console.log('Receipt Information:');
       console.log(`   Receipt ID: ${payload.rid}`);
       console.log(`   Issuer:     ${payload.iss}`);
       console.log(`   Audience:   ${payload.aud}`);
@@ -49,11 +49,11 @@ program
       console.log();
 
       // Verify signature
-      console.log('🔐 Verifying signature...');
+      console.log('Verifying signature...');
       const result = await verifyReceipt(jws);
 
       if (result.ok) {
-        console.log('✅ Signature valid!');
+        console.log('Signature valid!');
         if (result.perf) {
           console.log(`   Verification time: ${result.perf.verify_ms.toFixed(2)}ms`);
           if (result.perf.jwks_fetch_ms) {
@@ -62,14 +62,14 @@ program
         }
         process.exit(0);
       } else {
-        console.log(`❌ Verification failed: ${result.reason}`);
+        console.log(`Verification failed: ${result.reason}`);
         if (result.details) {
           console.log(`   Details: ${result.details}`);
         }
         process.exit(1);
       }
     } catch (err) {
-      console.error('❌ Error:', err instanceof Error ? err.message : String(err));
+      console.error('Error:', err instanceof Error ? err.message : String(err));
       process.exit(1);
     }
   });
@@ -83,12 +83,12 @@ program
   .argument('<input>', 'Path to peac.txt file or issuer URL')
   .action(async (input: string) => {
     try {
-      console.log('🔍 Validating discovery manifest...\n');
+      console.log('Validating discovery manifest...\n');
 
       let discovery;
       if (input.startsWith('http://') || input.startsWith('https://')) {
         // Fetch from URL
-        console.log(`📡 Fetching from ${input}...`);
+        console.log(`Fetching from ${input}...`);
         discovery = await fetchDiscovery(input);
       } else {
         // Read from file
@@ -96,9 +96,9 @@ program
         discovery = parseDiscovery(text);
       }
 
-      console.log('✅ Discovery manifest is valid!\n');
+      console.log('Discovery manifest is valid!\n');
 
-      console.log('📄 Discovery Information:');
+      console.log('Discovery Information:');
       console.log(`   Version:  ${discovery.version}`);
       console.log(`   Issuer:   ${discovery.issuer}`);
       console.log(`   Verify:   ${discovery.verify}`);
@@ -122,7 +122,7 @@ program
 
       process.exit(0);
     } catch (err) {
-      console.error('❌ Error:', err instanceof Error ? err.message : String(err));
+      console.error('Error:', err instanceof Error ? err.message : String(err));
       process.exit(1);
     }
   });
@@ -148,7 +148,7 @@ program
       if (options.json) {
         console.log(JSON.stringify({ header, payload }, null, 2));
       } else {
-        console.log('📄 PEAC Receipt (Decoded, Not Verified)\n');
+        console.log('PEAC Receipt (Decoded, Not Verified)\n');
 
         console.log('Header:');
         console.log(`   typ: ${header.typ}`);
@@ -189,7 +189,7 @@ program
 
       process.exit(0);
     } catch (err) {
-      console.error('❌ Error:', err instanceof Error ? err.message : String(err));
+      console.error('Error:', err instanceof Error ? err.message : String(err));
       process.exit(1);
     }
   });

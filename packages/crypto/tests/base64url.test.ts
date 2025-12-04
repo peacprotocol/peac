@@ -75,7 +75,7 @@ describe('Base64url encoding', () => {
     const tests = [
       'hello',
       'Hello, World!',
-      'emoji: 🎉🚀✨',
+      'symbols: @#$%^&*()',
       'multi-byte: 你好世界',
       '{"typ":"peac.receipt/0.9"}',
     ];

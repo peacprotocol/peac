@@ -21,7 +21,7 @@ export function installCommand() {
 
     writeFileSync(join(peacDir, 'bridge.json'), JSON.stringify(config, null, 2));
 
-    console.log('✅ Initialized ~/.peac/bridge.json');
+    console.log('Initialized ~/.peac/bridge.json');
     console.log(`   Wire version: ${config.wire_version}`);
     console.log(`   Bridge URL: ${config.url}`);
   });

@@ -30,7 +30,7 @@ This release delivers a comprehensive repository refactor to a clean single-root
 - Zero-config setup with sensible defaults
 - Performance SLOs: ≤35ms verification with Cloudflare enabled
 
-**📋 Enhanced JSON Schemas**
+**Enhanced JSON Schemas**
 
 - receipt@1.1, discovery@1.1, purge@1.0 with verification/security fields
 - CBOR compact profiles for 60-70% size reduction
@@ -43,7 +43,7 @@ This release delivers a comprehensive repository refactor to a clean single-root
 - LangChain tools integration
 - Cloudflare Worker edge deployment ready
 
-**⚡ Performance & Standards**
+**Performance & Standards**
 
 - Sign p95≤3ms, verify p95≤1ms performance targets
 - RFC compliance with proper error handling

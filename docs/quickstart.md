@@ -112,11 +112,11 @@ pnpm build
 
 The verifier includes SSRF protection by default:
 
-- ✅ **HTTPS only** (http allowed only for localhost/127.0.0.1)
-- ✅ **Private IP blocking** (unless `PEAC_ALLOW_PRIVATE_NET=true`)
-- ✅ **Size limits** (≤256 KiB per source)
-- ✅ **Timeout limits** (≤150ms per fetch, ≤250ms total)
-- ✅ **Redirect limits** (≤3 same-scheme redirects)
+- **HTTPS only** (http allowed only for localhost/127.0.0.1)
+- **Private IP blocking** (unless `PEAC_ALLOW_PRIVATE_NET=true`)
+- **Size limits** (max 256 KiB per source)
+- **Timeout limits** (max 150ms per fetch, 250ms total)
+- **Redirect limits** (max 3 same-scheme redirects)
 
 ## Next Steps
 

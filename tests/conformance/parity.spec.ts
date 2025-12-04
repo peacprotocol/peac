@@ -144,7 +144,7 @@ describe('Rail Parity Conformance', () => {
     // After normalization, they MUST be byte-identical
     expect(stripeNormalized).toEqual(x402Normalized);
 
-    console.log('✅ PARITY CHECK PASSED: Stripe == x402 (only rail/reference differ)');
+    console.log('PARITY CHECK PASSED: Stripe == x402 (only rail/reference differ)');
   });
 
   it('Parity check fails if amounts differ', async () => {

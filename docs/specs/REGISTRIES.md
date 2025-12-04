@@ -103,8 +103,8 @@ To propose a new rail:
 
 Engine IDs MUST be vendor-neutral:
 
-- ✅ `spend-control-service` (generic)
-- ❌ `locus-engine` (vendor-specific)
+- GOOD: `spend-control-service` (generic)
+- BAD: `locus-engine` (vendor-specific)
 
 Vendor-specific details go in:
 

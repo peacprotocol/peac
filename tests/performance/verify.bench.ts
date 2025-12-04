@@ -52,7 +52,7 @@ function calculateMetrics(timings: number[]): PerfMetrics {
 
 describe('Performance Benchmarks', () => {
   it('verify p95 MUST be ≤ 10ms (CI GATE)', async () => {
-    console.log('\n🚀 Starting verification performance benchmark...\n');
+    console.log('\nStarting verification performance benchmark...\n');
 
     // Generate test keypair
     const { privateKey, publicKey } = await generateKeypair();
@@ -106,28 +106,28 @@ describe('Performance Benchmarks', () => {
     // Write metrics to JSON for CI
     const metricsPath = path.join(process.cwd(), 'perf-metrics.json');
     fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2));
-    console.log(`💾 Metrics saved to: ${metricsPath}\n`);
+    console.log(`Metrics saved to: ${metricsPath}\n`);
 
     // CRITICAL CI GATE: p95 MUST be ≤ 10ms
     if (metrics.p95_ms > 10) {
-      console.error(`❌ PERFORMANCE GATE FAILED: p95 (${metrics.p95_ms.toFixed(2)}ms) > 10ms`);
+      console.error(`[FAIL] PERFORMANCE GATE FAILED: p95 (${metrics.p95_ms.toFixed(2)}ms) > 10ms`);
       expect(metrics.p95_ms).toBeLessThanOrEqual(10);
     } else {
-      console.log(`✅ PERFORMANCE GATE PASSED: p95 (${metrics.p95_ms.toFixed(2)}ms) ≤ 10ms`);
+      console.log(`[OK] PERFORMANCE GATE PASSED: p95 (${metrics.p95_ms.toFixed(2)}ms) ≤ 10ms`);
     }
 
     // Aspirational targets (warnings, not failures)
     if (metrics.p50_ms > 5) {
-      console.warn(`⚠️  p50 (${metrics.p50_ms.toFixed(2)}ms) > 5ms (aspirational target)`);
+      console.warn(`[WARN]  p50 (${metrics.p50_ms.toFixed(2)}ms) > 5ms (aspirational target)`);
     }
 
     if (metrics.p99_ms > 20) {
-      console.warn(`⚠️  p99 (${metrics.p99_ms.toFixed(2)}ms) > 20ms (aspirational target)`);
+      console.warn(`[WARN]  p99 (${metrics.p99_ms.toFixed(2)}ms) > 20ms (aspirational target)`);
     }
   });
 
   it('issue p95 SHOULD be ≤ 50ms', async () => {
-    console.log('\n🚀 Starting issuance performance benchmark...\n');
+    console.log('\nStarting issuance performance benchmark...\n');
 
     const { privateKey } = await generateKeypair();
     const kid = '2025-01-26T12:00:00Z';
@@ -178,14 +178,14 @@ describe('Performance Benchmarks', () => {
 
     // Soft target (warning, not failure)
     if (metrics.p95_ms > 50) {
-      console.warn(`⚠️  Issue p95 (${metrics.p95_ms.toFixed(2)}ms) > 50ms (target)`);
+      console.warn(`[WARN]  Issue p95 (${metrics.p95_ms.toFixed(2)}ms) > 50ms (target)`);
     } else {
-      console.log(`✅ Issue p95 (${metrics.p95_ms.toFixed(2)}ms) ≤ 50ms`);
+      console.log(`[OK] Issue p95 (${metrics.p95_ms.toFixed(2)}ms) ≤ 50ms`);
     }
   });
 
   it('JCS canonicalization p95 SHOULD be ≤ 1ms', async () => {
-    console.log('\n🚀 Starting JCS canonicalization benchmark...\n');
+    console.log('\nStarting JCS canonicalization benchmark...\n');
 
     const { canonicalize } = await import('../../packages/crypto/src/jcs');
 
@@ -228,9 +228,9 @@ describe('Performance Benchmarks', () => {
     console.log(`   p99:  ${metrics.p99_ms.toFixed(3)}ms\n`);
 
     if (metrics.p95_ms > 1) {
-      console.warn(`⚠️  JCS p95 (${metrics.p95_ms.toFixed(3)}ms) > 1ms (target)`);
+      console.warn(`[WARN]  JCS p95 (${metrics.p95_ms.toFixed(3)}ms) > 1ms (target)`);
     } else {
-      console.log(`✅ JCS p95 (${metrics.p95_ms.toFixed(3)}ms) ≤ 1ms`);
+      console.log(`[OK] JCS p95 (${metrics.p95_ms.toFixed(3)}ms) ≤ 1ms`);
     }
   });
 });

@@ -40,7 +40,7 @@ describe('Negative Test Vectors', () => {
 
       expect(result.valid).toBe(false);
 
-      console.log('✅ NEGATIVE VECTOR: Tampered signature correctly rejected');
+      console.log('NEGATIVE VECTOR: Tampered signature correctly rejected');
     });
 
     it('MUST reject receipt with completely invalid signature', async () => {
@@ -64,7 +64,7 @@ describe('Negative Test Vectors', () => {
       // Should throw during verification
       await expect(jwsVerify(invalidJWS, publicKey)).rejects.toThrow();
 
-      console.log('✅ NEGATIVE VECTOR: Invalid signature correctly rejected');
+      console.log('NEGATIVE VECTOR: Invalid signature correctly rejected');
     });
   });
 
@@ -97,7 +97,7 @@ describe('Negative Test Vectors', () => {
       const result = await jwsVerify(tamperedJWS, publicKey);
       expect(result.valid).toBe(false);
 
-      console.log('✅ NEGATIVE VECTOR: Modified amount correctly rejected');
+      console.log('NEGATIVE VECTOR: Modified amount correctly rejected');
     });
 
     it('MUST reject receipt with modified recipient (aud)', async () => {
@@ -125,7 +125,7 @@ describe('Negative Test Vectors', () => {
       const result = await jwsVerify(tamperedJWS, publicKey);
       expect(result.valid).toBe(false);
 
-      console.log('✅ NEGATIVE VECTOR: Modified audience correctly rejected');
+      console.log('NEGATIVE VECTOR: Modified audience correctly rejected');
     });
 
     it('MUST reject receipt with modified payment scheme', async () => {
@@ -156,7 +156,7 @@ describe('Negative Test Vectors', () => {
       const result = await jwsVerify(tamperedJWS, publicKey);
       expect(result.valid).toBe(false);
 
-      console.log('✅ NEGATIVE VECTOR: Modified payment scheme correctly rejected');
+      console.log('NEGATIVE VECTOR: Modified payment scheme correctly rejected');
     });
   });
 
@@ -193,7 +193,7 @@ describe('Negative Test Vectors', () => {
       // Verification should reject due to wrong typ
       await expect(jwsVerify(jws, publicKey)).rejects.toThrow('Invalid typ');
 
-      console.log('✅ NEGATIVE VECTOR: Wrong typ correctly rejected');
+      console.log('NEGATIVE VECTOR: Wrong typ correctly rejected');
     });
 
     it('MUST reject receipt with wrong alg', async () => {
@@ -226,7 +226,7 @@ describe('Negative Test Vectors', () => {
 
       await expect(jwsVerify(jws, publicKey)).rejects.toThrow('Invalid alg');
 
-      console.log('✅ NEGATIVE VECTOR: Wrong alg correctly rejected');
+      console.log('NEGATIVE VECTOR: Wrong alg correctly rejected');
     });
   });
 
@@ -241,7 +241,7 @@ describe('Negative Test Vectors', () => {
         'must have three dot-separated parts'
       );
 
-      console.log('✅ NEGATIVE VECTOR: Malformed JWS (2 parts) correctly rejected');
+      console.log('NEGATIVE VECTOR: Malformed JWS (2 parts) correctly rejected');
     });
 
     it('MUST reject JWS with invalid base64url encoding', async () => {
@@ -252,7 +252,7 @@ describe('Negative Test Vectors', () => {
 
       await expect(jwsVerify(malformedJWS, publicKey)).rejects.toThrow();
 
-      console.log('✅ NEGATIVE VECTOR: Invalid base64url correctly rejected');
+      console.log('NEGATIVE VECTOR: Invalid base64url correctly rejected');
     });
   });
 
@@ -278,9 +278,7 @@ describe('Negative Test Vectors', () => {
       const { payload } = decode<PEACReceiptClaims>(expiredJWS);
       expect(payload.exp).toBeLessThan(Math.floor(Date.now() / 1000));
 
-      console.log(
-        '✅ NEGATIVE VECTOR: Expired receipt created (would be rejected by verifyReceipt)'
-      );
+      console.log('NEGATIVE VECTOR: Expired receipt created (would be rejected by verifyReceipt)');
     });
   });
 
@@ -301,7 +299,7 @@ describe('Negative Test Vectors', () => {
         })
       ).rejects.toThrow('Amount must be a non-negative integer');
 
-      console.log('✅ NEGATIVE VECTOR: Negative amount correctly rejected');
+      console.log('NEGATIVE VECTOR: Negative amount correctly rejected');
     });
 
     it('MUST reject receipt with invalid currency code', async () => {
@@ -320,7 +318,7 @@ describe('Negative Test Vectors', () => {
         })
       ).rejects.toThrow('Currency must be ISO 4217 uppercase');
 
-      console.log('✅ NEGATIVE VECTOR: Invalid currency code correctly rejected');
+      console.log('NEGATIVE VECTOR: Invalid currency code correctly rejected');
     });
 
     it('MUST reject receipt with non-HTTPS issuer', async () => {
@@ -339,7 +337,7 @@ describe('Negative Test Vectors', () => {
         })
       ).rejects.toThrow('Issuer URL must start with https://');
 
-      console.log('✅ NEGATIVE VECTOR: Non-HTTPS issuer correctly rejected');
+      console.log('NEGATIVE VECTOR: Non-HTTPS issuer correctly rejected');
     });
   });
 
@@ -364,7 +362,7 @@ describe('Negative Test Vectors', () => {
 
       expect(result.valid).toBe(false);
 
-      console.log('✅ NEGATIVE VECTOR: Wrong public key correctly rejected');
+      console.log('NEGATIVE VECTOR: Wrong public key correctly rejected');
     });
   });
 });

@@ -13,7 +13,7 @@ async function main() {
     const parser = new UniversalParser();
     const peac = await parser.parseAll('example.com');
 
-    console.log('✓ peac parsed successfully');
+    console.log('[OK] peac parsed successfully');
     console.log(`  Version: ${peac.version}`);
     console.log(
       `  Available processors: ${Object.keys(peac.peac?.economics?.payment_processors || {}).join(', ')}`
@@ -30,7 +30,7 @@ async function main() {
       purpose: 'ai_training',
       processor: 'stripe',
     });
-    console.log('✓ Stripe payment initiated');
+    console.log('[OK] Stripe payment initiated');
     console.log(`  Payment ID: ${stripeResult.payment_id}`);
     console.log(`  Status: ${stripeResult.status}`);
 
@@ -42,7 +42,7 @@ async function main() {
       purpose: 'api_access',
       processor: 'bridge',
     });
-    console.log('✓ Bridge payment initiated');
+    console.log('[OK] Bridge payment initiated');
     console.log(`  Payment ID: ${bridgeResult.payment_id}`);
     console.log(`  Destination: USDB`);
 
@@ -51,7 +51,7 @@ async function main() {
     const paymentLink = await payments.createPaymentLink(100.0, 'commercial_use', {
       processor: 'stripe',
     });
-    console.log('✓ Payment link created');
+    console.log('[OK] Payment link created');
     console.log(`  Link: ${paymentLink}`);
   } catch (error) {
     console.error('Error:', error.message);

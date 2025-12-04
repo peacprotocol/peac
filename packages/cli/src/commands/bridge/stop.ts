@@ -46,7 +46,7 @@ export function stopCommand() {
 
     // Check if PID file exists
     if (!existsSync(pidFile)) {
-      console.log('🌉 Bridge is not running (no PID file found)');
+      console.log('Bridge is not running (no PID file found)');
       return;
     }
 
@@ -56,7 +56,7 @@ export function stopCommand() {
       const pid = parseInt(pidStr, 10);
 
       if (isNaN(pid)) {
-        console.error('❌ Invalid PID in bridge.pid file');
+        console.error('Invalid PID in bridge.pid file');
         unlinkSync(pidFile);
         return;
       }
@@ -66,7 +66,7 @@ export function stopCommand() {
         process.kill(pid, 0); // Signal 0 checks if process exists
       } catch (error: any) {
         if (error.code === 'ESRCH') {
-          console.log('🌉 Bridge process not found (cleaning up stale PID file)');
+          console.log('Bridge process not found (cleaning up stale PID file)');
           unlinkSync(pidFile);
           return;
         }
@@ -74,7 +74,7 @@ export function stopCommand() {
       }
 
       // Stop the bridge process
-      console.log(`🛑 Stopping PEAC Bridge (PID: ${pid})`);
+      console.log(`Stopping PEAC Bridge (PID: ${pid})`);
 
       try {
         // Try graceful shutdown first (SIGTERM)
@@ -87,19 +87,19 @@ export function stopCommand() {
         try {
           process.kill(pid, 0);
           // Still running, force kill
-          console.log('⚡ Force stopping bridge process...');
+          console.log('Force stopping bridge process...');
           await killProcess(pid, 'SIGKILL');
         } catch (error: any) {
           if (error.code === 'ESRCH') {
             // Process stopped gracefully
-            console.log('✅ Bridge stopped successfully');
+            console.log('Bridge stopped successfully');
           }
         }
       } catch (error: any) {
         if (error.code === 'ESRCH') {
-          console.log('✅ Bridge stopped successfully');
+          console.log('Bridge stopped successfully');
         } else {
-          console.error('❌ Failed to stop bridge:', error.message);
+          console.error('Failed to stop bridge:', error.message);
           return;
         }
       }
@@ -119,11 +119,11 @@ export function stopCommand() {
           writeFileSync(configFile, JSON.stringify(config, null, 2));
         } catch (error) {
           // Config update failed, but bridge was stopped
-          console.warn('⚠️  Failed to update config file, but bridge was stopped');
+          console.warn('Failed to update config file, but bridge was stopped');
         }
       }
     } catch (error: any) {
-      console.error('❌ Failed to stop bridge:', error.message);
+      console.error('Failed to stop bridge:', error.message);
 
       // Clean up potentially stale PID file
       if (existsSync(pidFile)) {
