@@ -63,6 +63,18 @@ Legacy v0.9.2 SDK documentation (peac.txt era):
 - `docs/getting-started.md` - Getting started with peac.txt
 - `docs/spec.md` - Original specification
 
+### openapi/
+
+v0.9.12 OpenAPI specification (peac.txt discovery era):
+
+- `openapi.yaml` - v0.9.12 API spec with peac.txt endpoints
+
+### fixtures/
+
+Legacy test fixtures:
+
+- `peac/` - v0.9.12 peac.txt discovery file examples (minimal, full, production, invalid)
+
 ### packages/
 
 Legacy package stubs (v0.9.11-v0.9.12 era):
@@ -72,6 +84,10 @@ Legacy package stubs (v0.9.11-v0.9.12 era):
 - `sdk-python/pyproject.toml` - Python SDK stub (v0.9.11, no implementation)
 
 **Note:** `packages/templates/` was removed (empty placeholder with no content).
+
+### Root configs
+
+- `.spectral.yaml` - OpenAPI linting config (for archived openapi.yaml)
 
 ## Current Documentation
 
