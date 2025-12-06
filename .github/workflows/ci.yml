@@ -11,9 +11,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup:
-    name: Setup
+  ci:
+    name: Build, Lint, Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,127 +32,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-  lint:
-    name: Lint
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Format check
+        run: pnpm format:check
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Lint
+        run: pnpm lint
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
+      - name: Domain guard
+        run: bash -euxo pipefail scripts/guard.sh
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: TypeScript check (core packages)
+        run: pnpm typecheck:core
 
-      - name: Run ESLint
-        run: pnpm run lint
-
-  # Blocking typecheck for published packages and apps
-  # tsconfig.core.json includes only packages/** and apps/** (excluding archive)
-  typecheck-core:
-    name: Typecheck (Core - Blocking)
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: TypeScript compilation check (core packages)
-        run: pnpm run typecheck:core
-
-  # Advisory typecheck for legacy code (archive, examples, scripts, tests)
-  # Tracks debt but doesn't block PRs
-  typecheck-legacy:
-    name: Typecheck (Legacy - Advisory)
-    needs: setup
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: TypeScript compilation check (legacy - advisory)
-        run: |
-          echo "TypeScript compilation check (advisory - tracking archive/examples/scripts/tests debt)..."
-          pnpm run typecheck:legacy || true
-
-  build:
-    name: Build
-    needs: [lint]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: TypeScript check (legacy - advisory)
+        continue-on-error: true
+        run: pnpm typecheck:legacy || true
 
       - name: Build all packages
-        run: pnpm run build
+        run: pnpm build
 
-  test-core:
-    name: Test (Core)
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Core tests
+        run: pnpm test:core
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Conformance tests
+        run: pnpm exec vitest run tests/conformance/parity.spec.ts
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run core package tests
-        run: pnpm run test:core
-
-      - name: Run conformance tests
-        run: npx vitest run tests/conformance/parity.spec.ts
+      - name: Performance gate
+        run: |
+          OUT=$(pnpm exec tsx scripts/bench-verify.ts)
+          echo "$OUT"
+          P95=$(echo "$OUT" | sed -n 's/^P95:[[:space:]]*\([0-9]\+\(\.[0-9]\+\)\?\).*/\1/p')
+          if [ -z "$P95" ]; then
+            echo "::error::No P95 metric found"; exit 1
+          fi
+          if awk -v p95="$P95" 'BEGIN{ if (p95+0 > 5.0) exit 1 }'; then
+            echo "[OK] P95=$P95 ms <= 5ms"
+          else
+            echo "::error::P95=$P95 ms exceeds 5ms budget"; exit 1
+          fi
