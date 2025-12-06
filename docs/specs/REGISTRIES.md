@@ -169,15 +169,13 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 8. IANA-Style Future
+## 8. Registry Governance
 
-If PEAC becomes an IETF RFC, registries could become IANA registries:
+This file and `registries.json` serve as the authoritative registries for the PEAC ecosystem:
 
-- Centralized, authoritative registry
-- Standardized submission process
-- Long-term stability guarantees
-
-Until then, this file and `registries.json` serve as de facto registries.
+- Centralized, maintained by the PEAC project
+- Standardized submission process via GitHub
+- Long-term stability through versioning
 
 ---
 

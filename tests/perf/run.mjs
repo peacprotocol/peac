@@ -39,7 +39,7 @@ function percentile(arr, p) {
 }
 
 async function benchmarkSign() {
-  console.log(`🔥 Benchmarking sign() - ${GATES.iterations} iterations...`);
+  console.log(`Benchmarking sign() - ${GATES.iterations} iterations...`);
   const times = [];
 
   const payload = {
@@ -71,16 +71,16 @@ async function benchmarkSign() {
   console.log(`  Sign p99: ${p99.toFixed(2)}ms`);
 
   if (p95 > GATES.signP95) {
-    console.error(`❌ Sign p95 gate failed: ${p95.toFixed(2)}ms > ${GATES.signP95}ms`);
+    console.error(`[FAIL] Sign p95 gate failed: ${p95.toFixed(2)}ms > ${GATES.signP95}ms`);
     return false;
   }
 
-  console.log(`✅ Sign performance gate passed`);
+  console.log(`[OK] Sign performance gate passed`);
   return true;
 }
 
 async function benchmarkVerify() {
-  console.log(`🔍 Benchmarking verify() - ${GATES.iterations} iterations...`);
+  console.log(`Benchmarking verify() - ${GATES.iterations} iterations...`);
   const times = [];
 
   const jws = 'eyJhbGciOiJFZERTQSIsImtpZCI6InRlc3QifQ.eyJ0ZXN0IjoidHJ1ZSJ9.signature';
@@ -101,16 +101,16 @@ async function benchmarkVerify() {
   console.log(`  Verify p99: ${p99.toFixed(2)}ms`);
 
   if (p95 > GATES.verifyP95) {
-    console.error(`❌ Verify p95 gate failed: ${p95.toFixed(2)}ms > ${GATES.verifyP95}ms`);
+    console.error(`[FAIL] Verify p95 gate failed: ${p95.toFixed(2)}ms > ${GATES.verifyP95}ms`);
     return false;
   }
 
-  console.log(`✅ Verify performance gate passed`);
+  console.log(`[OK] Verify performance gate passed`);
   return true;
 }
 
 async function benchmarkThroughput() {
-  console.log(`⚡ Benchmarking throughput - 10 second test...`);
+  console.log(`Benchmarking throughput - 10 second test...`);
 
   const duration = 10000; // 10 seconds
   const start = performance.now();
@@ -129,16 +129,16 @@ async function benchmarkThroughput() {
   console.log(`  Throughput: ${rps.toFixed(0)} rps (gate: ≥${GATES.throughput} rps)`);
 
   if (rps < GATES.throughput) {
-    console.error(`❌ Throughput gate failed: ${rps.toFixed(0)} rps < ${GATES.throughput} rps`);
+    console.error(`[FAIL] Throughput gate failed: ${rps.toFixed(0)} rps < ${GATES.throughput} rps`);
     return false;
   }
 
-  console.log(`✅ Throughput gate passed`);
+  console.log(`[OK] Throughput gate passed`);
   return true;
 }
 
 async function main() {
-  console.log('🚀 PEAC v0.9.12 Performance Validation');
+  console.log('PEAC v0.9.12 Performance Validation');
   console.log('=====================================');
 
   const results = await Promise.all([benchmarkSign(), benchmarkVerify(), benchmarkThroughput()]);
@@ -147,15 +147,15 @@ async function main() {
 
   console.log('=====================================');
   if (allPassed) {
-    console.log('✅ All performance gates passed!');
+    console.log('[OK] All performance gates passed!');
     process.exit(0);
   } else {
-    console.log('❌ Performance gates failed');
+    console.log('[FAIL] Performance gates failed');
     process.exit(1);
   }
 }
 
 main().catch((err) => {
-  console.error('❌ Performance test error:', err);
+  console.error('[FAIL] Performance test error:', err);
   process.exit(1);
 });

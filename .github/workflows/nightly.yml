@@ -13,7 +13,7 @@ env:
 
 jobs:
   full-test-suite:
-    name: Complete Test Coverage
+    name: Complete Test Suite
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -38,38 +38,26 @@ jobs:
       - name: Build all packages
         run: pnpm -w build
 
-      - name: Run complete test suite
+      - name: Run core test suite
         env:
           NODE_ENV: test
           PAYMENT_PROVIDER: mock
           PEAC_WEBHOOK_SECRET: test_secret
         run: |
-          echo "Running complete test suite with coverage..."
-          pnpm run ci:test:unit
+          echo "Running core test suite..."
+          pnpm run test:core
 
       - name: Core packages validation
         run: |
-          echo "Core packages test coverage completed"
-          echo "Crawler archived in v0.9.14 zero-BC release"
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        if: always()
-        with:
-          files: |
-            ./packages/*/coverage/lcov.info
-            ./apps/*/coverage/lcov.info
-          flags: nightly
-          name: nightly-coverage
+          echo "Core packages test completed"
+          echo "v0.9.15 kernel-first architecture"
 
       - name: Performance validation
         run: |
           echo "Running performance validation..."
-          # Add performance tests here when available
           echo "Performance SLO targets:"
           echo "  - Sign p95 <= 3ms"
-          echo "  - Verify p95 <= 1ms" 
-          echo "  - Crawler verification <= 35ms"
+          echo "  - Verify p95 <= 1ms"
 
       - name: Integration checks
         run: |
@@ -77,15 +65,15 @@ jobs:
 
           echo "Running integration tests..."
 
-          # MCP server integration (TS entrypoint → run via tsx)
+          # MCP server integration (TS entrypoint - run via tsx)
           if [ -f "packages/adapters/mcp/server.ts" ]; then
-            echo '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"peac-receipts","version":"0.9.12.1"}}}' | \
+            echo '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"peac-receipts","version":"0.9.15"}}}' | \
               timeout 5s pnpm -w exec tsx packages/adapters/mcp/server.ts || echo "MCP test completed"
           else
-            echo "MCP adapter archived in v0.9.14 - skipping MCP integration test"
+            echo "MCP adapter not present - skipping MCP integration test"
           fi
 
-          # OpenAI functions file exists & has tools
+          # OpenAI functions file exists and has tools
           if [ -f "packages/adapters/openai/functions.json" ]; then
             node -e "
               const funcs = require('./packages/adapters/openai/functions.json');
@@ -93,10 +81,10 @@ jobs:
               console.log('OpenAI functions validated:', funcs.functions.length);
             "
           else
-            echo "OpenAI adapter archived in v0.9.14 - skipping OpenAI functions validation"
+            echo "OpenAI adapter not present - skipping OpenAI functions validation"
           fi
 
-          # Enhanced schema spot-checks (match actual property names)
+          # Schema validation (if schemas exist)
           if [ -f "schemas/receipt.v1.1.json" ] && [ -f "schemas/discovery.v1.1.json" ] && [ -f "schemas/purge.v1.0.json" ]; then
             node -e "
               const receipt   = require('./schemas/receipt.v1.1.json');
@@ -107,22 +95,17 @@ jobs:
 
               if (!has(receipt,   'properties.verification'))       throw new Error('Missing verification in receipt schema');
               if (!has(receipt,   'properties.audit_chain'))         throw new Error('Missing audit_chain in receipt schema');
-              // Note: crawler_verification check removed - crawler archived in v0.9.14
               console.log('All enhanced schemas validated');
             "
           else
-            echo "Legacy schemas archived in v0.9.14 - skipping schema validation (using core types in packages/receipts/src/types.ts)"
+            echo "Schemas not present - using core types in packages/"
           fi
 
-  cross-runtime-matrix:
-    name: Cross-Runtime Tests (${{ matrix.runtime }})
+  # Node-only runtime validation (Deno/Bun removed - not target runtimes for v0.9.x)
+  node-runtime-validation:
+    name: Node Runtime Validation
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    continue-on-error: ${{ matrix.runtime != 'node' }}
-    strategy:
-      matrix:
-        runtime: [node, deno, bun]
-      fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
@@ -142,93 +125,37 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build @peac/core
-        run: pnpm --filter @peac/core build
+      - name: Build all packages
+        run: pnpm -w build
 
-      - name: Setup Deno
-        if: matrix.runtime == 'deno'
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-
-      - name: Setup Bun
-        if: matrix.runtime == 'bun'
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: Test core crypto functions (${{ matrix.runtime }})
+      - name: Test core crypto functions
         run: |
-          echo "Testing @peac/core crypto functions with ${{ matrix.runtime }}..."
+          echo "Testing @peac/core crypto functions with Node.js..."
 
-          export CORE_PATH="${{ github.workspace }}/packages/core/dist/index.js"
+          node --input-type=module -e "
+            const m = await import('./packages/core/dist/index.js');
+            const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
+            console.log('Testing with Node.js 20...');
+            const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
+            console.log('[OK] Key generation works');
 
-          if [ "${{ matrix.runtime }}" == "node" ]; then
-            node --input-type=module -e "
-              const m = await import('file://${CORE_PATH}');
-              const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
-              console.log('Testing with Node.js...');
-              const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
-              console.log('✅ Key generation works');
+            if (!validateKidFormat(kid)) throw new Error('Generated kid invalid format');
+            console.log('[OK] Kid validation works');
 
-              if (!validateKidFormat(kid)) throw new Error('Generated kid invalid format');
-              console.log('✅ Kid validation works');
+            const payload = 'test payload';
+            const jws = await signDetached(payload, privateKey, kid);
+            console.log('[OK] Signing works');
 
-              const payload = 'test payload';
-              const jws = await signDetached(payload, privateKey, kid);
-              console.log('✅ Signing works');
-
-              const verified = await verifyDetached(payload, jws, publicKey);
-              if (!verified) throw new Error('Verification failed');
-              console.log('✅ Verification works');
-              console.log('✅ Node.js runtime validation complete');
-            "
-          elif [ "${{ matrix.runtime }}" == "deno" ]; then
-            deno eval "
-              const m = await import('file://${CORE_PATH}');
-              const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
-              console.log('Testing with Deno...');
-              const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
-              console.log('✅ Key generation works');
-
-              if (!validateKidFormat(kid)) throw new Error('Generated kid invalid format');
-              console.log('✅ Kid validation works');
-
-              const payload = 'test payload';
-              const jws = await signDetached(payload, privateKey, kid);
-              console.log('✅ Signing works');
-
-              const verified = await verifyDetached(payload, jws, publicKey);
-              if (!verified) throw new Error('Verification failed');
-              console.log('✅ Verification works');
-              console.log('✅ Deno runtime validation complete');
-            "
-          elif [ "${{ matrix.runtime }}" == "bun" ]; then
-            bun -e "
-              const m = await import('file://' + process.env.CORE_PATH);
-              const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
-              console.log('Testing with Bun...');
-              const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
-              console.log('✅ Key generation works');
-
-              if (!validateKidFormat(kid)) throw new Error('Generated kid invalid format');
-              console.log('✅ Kid validation works');
-
-              const payload = 'test payload';
-              const jws = await signDetached(payload, privateKey, kid);
-              console.log('✅ Signing works');
-
-              const verified = await verifyDetached(payload, jws, publicKey);
-              if (!verified) throw new Error('Verification failed');
-              console.log('✅ Verification works');
-              console.log('✅ Bun runtime validation complete');
-            "
-          fi
+            const verified = await verifyDetached(payload, jws, publicKey);
+            if (!verified) throw new Error('Verification failed');
+            console.log('[OK] Verification works');
+            console.log('[OK] Node.js runtime validation complete');
+          "
 
   nightly-summary:
     name: Nightly Summary
     runs-on: ubuntu-latest
-    needs: [full-test-suite, cross-runtime-matrix]
+    needs: [full-test-suite, node-runtime-validation]
     if: always()
 
     steps:
@@ -236,13 +163,13 @@ jobs:
         run: |
           echo "Nightly test suite completed"
           echo ""
-          if [ "${{ needs.full-test-suite.result }}" == "success" ]; then
-            echo "All tests passed - system healthy"
+          if [ "${{ needs.full-test-suite.result }}" == "success" ] && [ "${{ needs.node-runtime-validation.result }}" == "success" ]; then
+            echo "[OK] All tests passed - system healthy"
           else
-            echo "Some tests failed - needs investigation"
+            echo "[WARN] Some tests failed - needs investigation"
             echo "Check logs above for details"
           fi
           echo ""
-          echo "Coverage reports uploaded to Codecov"
+          echo "Node.js 20 runtime validation completed"
           echo "Performance validation completed"
           echo "Integration tests executed"

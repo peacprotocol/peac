@@ -330,7 +330,7 @@ program
 
       // Check if negotiation is available
       if (!peac.peac?.negotiation?.enabled && !peac.peac?.negotiation?.endpoint) {
-        console.log('⚠ Negotiation not available for this publisher');
+        console.log('[WARN] Negotiation not available for this publisher');
         console.log(`  Contact: ${peac.peac?.dispute?.contact || 'Not provided'}`);
         process.exit(1);
       }
@@ -375,7 +375,7 @@ program
           console.log(`  Attribution: Required (${result.terms.attribution_format})`);
         }
       } else {
-        console.log('\n⚠ Negotiation not accepted');
+        console.log('\n[WARN] Negotiation not accepted');
         console.log(`Reason: ${result.reason}`);
 
         if (result.counter_offer) {

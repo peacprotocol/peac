@@ -226,7 +226,6 @@ This directory is **NORMATIVE** as of v0.9.15.
 
 - Implementations MUST conform to values defined in these JSON files
 - Deviations are considered protocol violations
-- Future IETF Internet-Draft will reference these specs
 
 ---
 

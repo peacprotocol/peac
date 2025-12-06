@@ -200,7 +200,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
     }
 
     // Test 4: Bulk verify performance (if enabled)
-    console.log('\n📦 Testing bulk verification...');
+    console.log('\nTesting bulk verification...');
     const receipts: string[] = [];
     for (let i = 0; i < 100; i++) {
       receipts.push(
@@ -261,7 +261,7 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
 
   // Print summary
   console.log('\n' + '='.repeat(60));
-  console.log('📊 PERFORMANCE VALIDATION SUMMARY');
+  console.log('PERFORMANCE VALIDATION SUMMARY');
   console.log('='.repeat(60));
 
   for (const result of results) {
@@ -280,11 +280,11 @@ async function runPerformanceTests(): Promise<PerformanceReport> {
   );
 
   if (failures.length > 0) {
-    console.log('\n🚨 Issues:');
+    console.log('\nIssues:');
     failures.forEach((failure) => console.log(`   • ${failure}`));
   }
 
-  console.log('\n📈 Detailed Metrics:');
+  console.log('\nDetailed Metrics:');
   console.log(`   Current sign p95: ${metricsCollector.getPercentile('sign', 95).toFixed(3)}ms`);
   console.log(
     `   Current verify p95: ${metricsCollector.getPercentile('verify', 95).toFixed(3)}ms`
@@ -334,7 +334,7 @@ export async function runStressTest(duration_seconds = 60): Promise<void> {
   const total_time = (Date.now() - start_time) / 1000;
   const ops_per_sec = operations / total_time;
 
-  console.log(`\n📊 Stress Test Results:`);
+  console.log(`\nStress Test Results:`);
   console.log(`   Duration: ${total_time.toFixed(1)}s`);
   console.log(`   Operations: ${operations}`);
   console.log(`   Errors: ${errors}`);
