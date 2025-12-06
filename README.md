@@ -173,16 +173,16 @@ This exposes `/verify` endpoint for receipt verification with rate limiting and 
 
 PEAC is designed for scenarios where verifiable proof of payment, access, and policy compliance is essential:
 
-| Use case | How PEAC helps |
-| --- | --- |
-| HTTP 402 micropayments | HTTP 402 and related rails settle funds. PEAC receipts prove settlement and can be verified offline. |
-| Agent to API or tool interactions | Every API or tool call carries a signed receipt that proves who called what, under which policy, with which payment evidence. |
-| Priced private and private datasets | Private objects or datasets stay behind gateways. Receipts capture which object, window, or plan was paid for without exposing raw content. |
-| AI data licensing and training access | Policy surfaces describe terms for indexing and training. Receipts prove that access and payment followed those terms. |
-| Agentic marketplaces and hubs | Agents, tools, and services exchange value and receipts across heterogeneous rails such as x402, cards, or tokens while sharing a single receipt format. |
-| Regulatory and audit trails | Signed receipts with policy and payment evidence form an auditable trail for internal and external investigations. |
-| Rate limiting, quotas, and usage caps | Receipts tie usage to identity and payment, which enables verifiable quota enforcement and replay detection. |
-| Policy aware negotiation | Policies and receipts capture the terms that were accepted at the time of payment so agents and services can negotiate once and reuse the proof across calls. |
+| Use case                              | How PEAC helps                                                                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP 402 micropayments                | HTTP 402 and related rails settle funds. PEAC receipts prove settlement and can be verified offline.                                                          |
+| Agent to API or tool interactions     | Every API or tool call carries a signed receipt that proves who called what, under which policy, with which payment evidence.                                 |
+| Priced private and private datasets   | Private objects or datasets stay behind gateways. Receipts capture which object, window, or plan was paid for without exposing raw content.                   |
+| AI data licensing and training access | Policy surfaces describe terms for indexing and training. Receipts prove that access and payment followed those terms.                                        |
+| Agentic marketplaces and hubs         | Agents, tools, and services exchange value and receipts across heterogeneous rails such as x402, cards, or tokens while sharing a single receipt format.      |
+| Regulatory and audit trails           | Signed receipts with policy and payment evidence form an auditable trail for internal and external investigations.                                            |
+| Rate limiting, quotas, and usage caps | Receipts tie usage to identity and payment, which enables verifiable quota enforcement and replay detection.                                                  |
+| Policy aware negotiation              | Policies and receipts capture the terms that were accepted at the time of payment so agents and services can negotiate once and reuse the proof across calls. |
 
 For all of these cases:
 
