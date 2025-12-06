@@ -85,31 +85,30 @@ If issues are discovered post-release:
 
 ## Current Release
 
-### v0.9.12.1 - Clean Architecture & Protocol v1.1 Ready
+### v0.9.15 - Kernel-First Architecture
 
-**Released**: 2025-09-07  
 **Status**: Production Ready
 
 **Key Features**:
 
-- Clean single-root monorepo architecture
-- Enhanced JSON schemas (receipt@1.1, discovery@1.1, purge@1.0)
-- Neutral crawler control system
-- Agent adapter ecosystem (MCP, OpenAI, LangChain)
-- Performance SLOs: sign p95≤3ms, verify p95≤1ms
+- Kernel-first monorepo with layered package architecture
+- Core packages: kernel, schema, crypto, protocol
+- Payment rails: x402, Stripe adapters
+- Agent mappings: MCP, ACP integrations
+- Performance SLOs: sign p95 <=3ms, verify p95 <=1ms
 
 **Security**:
 
 - Zero known vulnerabilities
-- Full SLSA provenance
 - NPM package signing enabled
-- Comprehensive SBOM generation
 
-**Verification**:
+---
 
-- GitHub Release: [Link to be updated]
-- CI Build: [Link to be updated]
-- SBOM Artifacts: [Link to be updated]
+## Previous Releases
+
+### v0.9.12.1 (archived)
+
+Early crawler-oriented features and pre-kernel-refactor layout. This release is superseded by the v0.9.15 kernel-first architecture.
 
 ---
 

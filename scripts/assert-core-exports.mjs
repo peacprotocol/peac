@@ -6,7 +6,7 @@
 import { strict as assert } from 'node:assert';
 
 async function main() {
-  console.log('🔍 Checking @peac/core exports...');
+  console.log('Checking @peac/core exports...');
 
   // Import the built module (avoid literal dist path for guard)
   const parts = ['..', 'packages', 'core', 'dist', 'index.js'];
@@ -50,17 +50,17 @@ async function main() {
   // Check functions
   for (const name of requiredExports) {
     assert(typeof core[name] === 'function', `Missing export: ${name}`);
-    console.log(`  ✓ ${name}`);
+    console.log(`  [OK] ${name}`);
   }
 
   // Check that types are exported (they won't be in the runtime, but build will fail if missing)
-  console.log('\n📋 Type exports (build-time check):');
+  console.log('\nType exports (build-time check):');
   for (const type of requiredTypes) {
-    console.log(`  ✓ ${type} (type)`);
+    console.log(`  [OK] ${type} (type)`);
   }
 
   // Test basic functionality
-  console.log('\n🧪 Testing basic functionality...');
+  console.log('\nTesting basic functionality...');
 
   // Test signReceipt and verifyReceipt
   try {
@@ -79,26 +79,26 @@ async function main() {
     });
 
     assert(typeof receipt === 'string', 'signReceipt should return a string');
-    console.log('  ✓ createAndSignReceipt works');
+    console.log('  [OK] createAndSignReceipt works');
 
     // Test canonicalPolicyHash
     const hash = core.canonicalPolicyHash({ test: 'data' });
     assert(typeof hash === 'string', 'canonicalPolicyHash should return a string');
-    console.log('  ✓ canonicalPolicyHash works');
+    console.log('  [OK] canonicalPolicyHash works');
 
     // Test uuidv7
     const uuid = core.uuidv7();
     assert(core.isUUIDv7(uuid), 'uuidv7 should generate valid UUIDv7');
-    console.log('  ✓ uuidv7 works');
+    console.log('  [OK] uuidv7 works');
 
-    console.log('\n✅ All @peac/core exports verified!');
+    console.log('\n[OK] All @peac/core exports verified!');
   } catch (error) {
-    console.error('\n❌ Functionality test failed:', error);
+    console.error('\n[FAIL] Functionality test failed:', error);
     process.exit(1);
   }
 }
 
 main().catch((error) => {
-  console.error('❌ Failed:', error);
+  console.error('[FAIL] Failed:', error);
   process.exit(1);
 });

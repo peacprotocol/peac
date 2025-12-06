@@ -55,6 +55,6 @@
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=20.0.0"
   }
 }
