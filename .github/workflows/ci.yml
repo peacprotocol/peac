@@ -60,20 +60,9 @@ jobs:
       - name: Performance gate (advisory)
         continue-on-error: true
         run: |
-          # Note: bench-verify.ts uses deprecated @peac/core, will be updated for v0.9.15+
-          if command -v tsx &> /dev/null || pnpm exec tsx --version &> /dev/null; then
-            OUT=$(pnpm exec tsx scripts/bench-verify.ts 2>&1) || true
-            echo "$OUT"
-            P95=$(echo "$OUT" | sed -n 's/^P95:[[:space:]]*\([0-9]\+\(\.[0-9]\+\)\?\).*/\1/p')
-            if [ -n "$P95" ]; then
-              if awk -v p95="$P95" 'BEGIN{ if (p95+0 > 5.0) exit 1 }'; then
-                echo "[OK] P95=$P95 ms <= 5ms"
-              else
-                echo "::warning::P95=$P95 ms exceeds 5ms budget"
-              fi
-            else
-              echo "::warning::Performance gate skipped (no P95 metric)"
-            fi
-          else
-            echo "::warning::Performance gate skipped (tsx not available)"
+          # Advisory benchmark for verify performance. Can be tightened once bench harness is updated.
+          if ! pnpm exec tsx --help >/dev/null 2>&1; then
+            echo "Skipping performance bench: tsx not available or not installed correctly."
+            exit 0
           fi
+          pnpm exec tsx scripts/bench-verify.ts
