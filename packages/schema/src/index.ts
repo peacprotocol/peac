@@ -7,6 +7,7 @@
 export * from './envelope';
 export * from './control';
 export * from './evidence';
+export * from './subject';
 export * from './errors';
 
 // Legacy types (for backward compatibility in tests)
@@ -31,6 +32,10 @@ export {
   // Payment evidence validators (v0.9.16+)
   PaymentSplitSchema,
   PaymentEvidenceSchema,
+  // Subject profile validators (v0.9.16+)
+  SubjectTypeSchema,
+  SubjectProfileSchema,
+  SubjectProfileSnapshotSchema,
 } from './validators';
 
 // Envelope types (v0.9.15+ normative structure)
