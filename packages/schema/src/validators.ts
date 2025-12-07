@@ -144,3 +144,52 @@ export const ControlBlockSchema = z
       message: 'Control block decision must be consistent with chain results',
     }
   );
+
+// -----------------------------------------------------------------------------
+// Payment Evidence Validators (v0.9.16+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Payment split schema
+ *
+ * Invariants:
+ * - party is required (non-empty string)
+ * - amount if present must be >= 0
+ * - share if present must be in [0,1]
+ * - At least one of amount or share must be specified
+ */
+export const PaymentSplitSchema = z
+  .object({
+    party: z.string().min(1),
+    amount: z.number().int().nonnegative().optional(),
+    currency: iso4217.optional(),
+    share: z.number().min(0).max(1).optional(),
+    rail: z.string().min(1).optional(),
+    account_ref: z.string().min(1).optional(),
+    metadata: z.record(z.unknown()).optional(),
+  })
+  .strict()
+  .refine((data) => data.amount !== undefined || data.share !== undefined, {
+    message: 'At least one of amount or share must be specified',
+  });
+
+/**
+ * Payment evidence schema
+ *
+ * Full schema for PaymentEvidence including aggregator/splits support.
+ */
+export const PaymentEvidenceSchema = z
+  .object({
+    rail: z.string().min(1),
+    reference: z.string().min(1),
+    amount: z.number().int().nonnegative(),
+    currency: iso4217,
+    asset: z.string().min(1),
+    env: z.enum(['live', 'test']),
+    network: z.string().min(1).optional(),
+    facilitator_ref: z.string().min(1).optional(),
+    evidence: z.unknown(),
+    aggregator: z.string().min(1).optional(),
+    splits: z.array(PaymentSplitSchema).optional(),
+  })
+  .strict();
