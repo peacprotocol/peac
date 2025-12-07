@@ -2,7 +2,7 @@
 
 **Status**: NORMATIVE
 
-**Version**: 0.9.15
+**Version**: 0.9.16
 
 **Wire Format**: `peac.receipt/0.9`
 
@@ -637,6 +637,41 @@ Vendor-specific or implementation-specific data MUST NOT appear in normative top
 - Top-level fields in `evidence.payment` (use nested `evidence` instead)
 - Error codes or error messages (vendor details go in `error.details`)
 
+### 8.4 Subject Profile Privacy (v0.9.16+)
+
+`SubjectProfile` and `SubjectProfileSnapshot` are OPTIONAL catalogue structures for identifying actors (human, org, or agent) in PEAC interactions.
+
+**Design Philosophy**:
+
+`SubjectProfile` is intentionally minimal. It provides an identity hook, NOT a comprehensive identity record. Detailed identity attributes belong in external identity providers (IdPs), directories, or IAM systems.
+
+**Requirements**:
+
+- `id` MUST be a stable, unique identifier but SHOULD NOT contain PII directly
+- `type` classifies the subject (human, org, agent) for policy purposes
+- `labels` if present SHOULD NOT contain PII; use abstract tags like `["premium", "verified"]`
+- `metadata` SHOULD NOT store sensitive PII; prefer opaque references to external systems
+
+**Privacy Guidance**:
+
+1. **Use opaque identifiers**: Prefer `"user:abc123"` over `"user:john.doe@example.com"`
+
+2. **Delegate to external IdPs**: Store detailed identity attributes in your IdP/directory system and reference them by opaque ID in PEAC profiles
+
+3. **Minimize captured_at granularity**: `SubjectProfileSnapshot.captured_at` records when the profile was observed; log only what is needed for audit
+
+4. **Avoid metadata bloat**: The `metadata` field is for application-specific attributes, not PII storage; if you must store identity claims, encrypt or hash them
+
+**Examples**:
+
+- COMPLIANT: `{ "id": "agent:crawler-v2", "type": "agent", "labels": ["indexer"] }`
+- COMPLIANT: `{ "id": "org:acme-12345", "type": "org" }`
+- NON-COMPLIANT: `{ "id": "user:john.doe@example.com", "type": "human", "metadata": { "ssn": "123-45-6789" } }`
+
+**Rationale**:
+
+Subject profiles may appear in receipts that are logged, archived, or shared across organizational boundaries. Keeping profiles minimal and PII-free simplifies regulatory compliance (GDPR, CCPA, HIPAA) and reduces data breach impact.
+
 ---
 
 ## 9. Invariant Enforcement
@@ -684,4 +719,8 @@ An implementation is **conformant with PEAC v0.9** if it:
 
 ## 12. Version History
 
+- **v0.9.16 (2025-12-07)**: Control Abstraction Layer (CAL) semantics, PaymentEvidence extensions, Subject Profile Catalogue
+  - CAL: `ControlPurpose` (crawl, index, train, inference), `ControlLicensingMode` (subscription, pay_per_crawl, pay_per_inference), any_can_veto combinator lattice
+  - PaymentEvidence: `aggregator` field for marketplace/platform identifiers, `splits[]` array for multi-party payment allocation with invariants (party required, amount or share required)
+  - Subject Profile: `SubjectProfile` and `SubjectProfileSnapshot` optional catalogues for actor identity (human, org, agent); Section 8.4 privacy guidance
 - **v0.9.15 (2025-01-18)**: Initial normative behavior specification with control chain, SSRF protection, DPoP verification, and privacy constraints
