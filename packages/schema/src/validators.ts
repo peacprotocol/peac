@@ -35,9 +35,12 @@ export const AIPREFSnapshot = z
   })
   .strict();
 
+// Note: Extensions uses a forward reference pattern since ControlBlockSchema
+// is defined after this. We use catchall for now and validate control separately.
 export const Extensions = z
   .object({
     aipref_snapshot: AIPREFSnapshot.optional(),
+    // control block validated via ControlBlockSchema when present
   })
   .catchall(z.unknown());
 
@@ -69,3 +72,75 @@ export const VerifyRequest = z
     receipt_jws: z.string().min(16),
   })
   .strict();
+
+// -----------------------------------------------------------------------------
+// Control Abstraction Layer (CAL) Validators (v0.9.16+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Control purpose - what the access is for
+ */
+export const ControlPurposeSchema = z.enum(['crawl', 'index', 'train', 'inference']);
+
+/**
+ * Control licensing mode - how access is licensed
+ */
+export const ControlLicensingModeSchema = z.enum([
+  'subscription',
+  'pay_per_crawl',
+  'pay_per_inference',
+]);
+
+/**
+ * Control decision type
+ */
+export const ControlDecisionSchema = z.enum(['allow', 'deny', 'review']);
+
+/**
+ * Single control step in governance chain
+ */
+export const ControlStepSchema = z.object({
+  engine: z.string().min(1),
+  version: z.string().optional(),
+  policy_id: z.string().optional(),
+  result: ControlDecisionSchema,
+  reason: z.string().optional(),
+  purpose: ControlPurposeSchema.optional(),
+  licensing_mode: ControlLicensingModeSchema.optional(),
+  scope: z.union([z.string(), z.array(z.string())]).optional(),
+  limits_snapshot: z.unknown().optional(),
+  evidence_ref: z.string().optional(),
+});
+
+/**
+ * Composable control block - multi-party governance
+ */
+export const ControlBlockSchema = z
+  .object({
+    chain: z.array(ControlStepSchema).min(1),
+    decision: ControlDecisionSchema,
+    combinator: z.literal('any_can_veto').optional(),
+  })
+  .refine(
+    (data) => {
+      // Validate decision consistency with chain
+      const hasAnyDeny = data.chain.some((step) => step.result === 'deny');
+      const allAllow = data.chain.every((step) => step.result === 'allow');
+      const hasReview = data.chain.some((step) => step.result === 'review');
+
+      if (hasAnyDeny && data.decision !== 'deny') {
+        return false;
+      }
+      if (allAllow && data.decision !== 'allow') {
+        return false;
+      }
+      // If has review but no deny, decision can be review or allow
+      if (hasReview && !hasAnyDeny && data.decision === 'deny') {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'Control block decision must be consistent with chain results',
+    }
+  );

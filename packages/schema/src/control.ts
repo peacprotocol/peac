@@ -11,6 +11,32 @@
 export type ControlDecision = 'allow' | 'deny' | 'review';
 
 /**
+ * Control purpose - what the access is for
+ *
+ * Used to map RSL, Content Signals, and other policy dialects
+ * to a normalized purpose for receipts.
+ *
+ * Well-known purposes:
+ * - "crawl": Web crawling/scraping
+ * - "index": Search engine indexing
+ * - "train": AI/ML model training
+ * - "inference": AI/ML inference/generation
+ */
+export type ControlPurpose = 'crawl' | 'index' | 'train' | 'inference';
+
+/**
+ * Control licensing mode - how access is licensed
+ *
+ * Used to capture the commercial arrangement for access.
+ *
+ * Well-known modes:
+ * - "subscription": Access via active subscription
+ * - "pay_per_crawl": Per-crawl payment
+ * - "pay_per_inference": Per-inference payment
+ */
+export type ControlLicensingMode = 'subscription' | 'pay_per_crawl' | 'pay_per_inference';
+
+/**
  * Composable control block - multi-party governance
  *
  * Structure:
@@ -72,6 +98,33 @@ export interface ControlStep {
 
   /** Human-readable reason for decision */
   reason?: string;
+
+  /**
+   * Purpose of this access (v0.9.16+)
+   *
+   * Normalized from RSL, Content Signals, ai.txt, etc.
+   * Used to capture what the access is for.
+   */
+  purpose?: ControlPurpose;
+
+  /**
+   * Licensing mode for this access (v0.9.16+)
+   *
+   * Captures the commercial arrangement.
+   */
+  licensing_mode?: ControlLicensingMode;
+
+  /**
+   * Scope of this control step (v0.9.16+)
+   *
+   * URI pattern(s) or resource identifier(s) this step applies to.
+   * Can be a single scope or multiple scopes.
+   *
+   * Examples:
+   * - "https://example.com/api/*"
+   * - ["https://example.com/docs/*", "https://example.com/blog/*"]
+   */
+  scope?: string | string[];
 
   /**
    * Limits snapshot at time of decision

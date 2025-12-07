@@ -22,6 +22,12 @@ export {
   Subject as SubjectSchema,
   AIPREFSnapshot as AIPREFSnapshotSchema,
   VerifyRequest as VerifyRequestSchema,
+  // CAL validators (v0.9.16+)
+  ControlPurposeSchema,
+  ControlLicensingModeSchema,
+  ControlDecisionSchema,
+  ControlStepSchema,
+  ControlBlockSchema,
 } from './validators';
 
 // Envelope types (v0.9.15+ normative structure)

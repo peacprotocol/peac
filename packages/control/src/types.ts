@@ -8,6 +8,9 @@ export type {
   ControlStep,
   ControlDecision,
   ControlValidationResult,
+  // CAL semantic types (v0.9.16+)
+  ControlPurpose,
+  ControlLicensingMode,
 } from '@peac/schema';
 
 // Import and re-export constraint types

@@ -11,7 +11,15 @@ export type { ControlEngineAdapter, ControlEvaluationContext } from './adapter';
 export { ControlEngineRegistry } from './adapter';
 
 // Core control types (re-exported from schema)
-export type { ControlBlock, ControlStep, ControlDecision, ControlValidationResult } from './types';
+export type {
+  ControlBlock,
+  ControlStep,
+  ControlDecision,
+  ControlValidationResult,
+  // CAL semantic types (v0.9.16+)
+  ControlPurpose,
+  ControlLicensingMode,
+} from './types';
 
 // Generic constraint types (informational helpers)
 export type {
@@ -45,6 +53,12 @@ export {
   ConstraintSchema,
   ControlBlockSchema,
   ControlStateSchema,
+  // CAL semantic validators (v0.9.16+)
+  ControlPurposeSchema,
+  ControlLicensingModeSchema,
+  ControlDecisionSchema,
+  ControlStepSchema,
+  ChainControlBlockSchema,
 } from './validators';
 
 // Deprecated validator aliases (will be removed in v0.9.17)
