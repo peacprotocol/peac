@@ -3,7 +3,7 @@
 **Policy • Economics • Attribution • Compliance**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.15-blue.svg)](https://github.com/peacprotocol/peac)
+[![Version](https://img.shields.io/badge/version-0.9.16-blue.svg)](https://github.com/peacprotocol/peac)
 
 PEAC is an open protocol for verifiable receipts and policy aware access across digital interactions between agents, APIs, crawlers, and web applications.
 
@@ -24,7 +24,7 @@ PEAC is stewarded by contributors from [Originary](https://www.originary.xyz) an
 
 PEAC does not replace existing protocols. It is the receipts and verification layer that works alongside them for plain APIs, human driven applications, and agentic workflows.
 
-**Payment rails (v0.9.15 status):**
+**Payment rails (v0.9.16 status):**
 
 - [x402](https://github.com/coinbase/x402) HTTP 402 payment flows for agentic interactions. Adapter implemented in `@peac/rails-x402`.
 - Card payments via Stripe API. Adapter implemented in `@peac/rails-stripe`.
@@ -32,7 +32,7 @@ PEAC does not replace existing protocols. It is the receipts and verification la
 
 The protocol is designed to work with generic HTTP 402 services, paywalls, routers, and data stores. Receipts do not depend on any single provider.
 
-**Agent protocols (v0.9.15 status):**
+**Agent protocols (v0.9.16 status):**
 
 - [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) Tool context for language models. Mapping implemented.
 - [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) Agent driven commerce. Mapping implemented.
@@ -65,7 +65,7 @@ _Names above are illustrative examples for interoperability. PEAC is vendor neut
 - Errors via `application/problem+json` (RFC 9457)
 - DPoP proof-of-possession binding (RFC 9449)
 
-**Rails and mappings (v0.9.15):**
+**Rails and mappings (v0.9.16):**
 
 - Payment rails: x402, Stripe (via `@peac/rails-*`)
 - Agent protocols: MCP, ACP (via `@peac/mappings-*`)
@@ -213,7 +213,7 @@ peac.txt is an optional, web-facing policy surface. The core of the protocol is 
 
 ```yaml
 # /.well-known/peac.txt
-version: 0.9.15
+version: 0.9.16
 usage: open
 
 purposes: [indexing, research, documentation]
@@ -230,7 +230,7 @@ repository: https://github.com/peacprotocol/peac
 **Example: Conditional API access**
 
 ```yaml
-version: 0.9.15
+version: 0.9.16
 usage: conditional
 
 purposes: [research, commercial]
@@ -357,24 +357,24 @@ peac/
 
 ## Packages
 
-**Core (stable, v0.9.15):**
+**Core (stable, v0.9.16):**
 
 - `@peac/kernel` - Zero-dependency constants and registries
 - `@peac/schema` - TypeScript types, Zod validators, JSON Schema
 - `@peac/crypto` - Ed25519 JWS signing and verification
 - `@peac/protocol` - High-level issue() and verify() functions
 
-**Runtime (stable, v0.9.15):**
+**Runtime (stable, v0.9.16):**
 
 - `@peac/server` - HTTP verification server with 402 support
 - `@peac/cli` - Command-line tools for receipts and policy
 
-**Rails (stable, v0.9.15):**
+**Rails (stable, v0.9.16):**
 
 - `@peac/rails-x402` - x402 payment rail adapter
 - `@peac/rails-stripe` - Stripe payment rail adapter
 
-**Mappings (stable, v0.9.15):**
+**Mappings (stable, v0.9.16):**
 
 - `@peac/mappings-mcp` - Model Context Protocol integration
 - `@peac/mappings-acp` - Agentic Commerce Protocol integration
@@ -407,7 +407,7 @@ PEAC addresses seven protocol capabilities for AI and API infrastructure:
 | **Privacy**     | `@peac/privacy`     | Privacy budgeting and retention policy hooks      |
 | **Provenance**  | `@peac/provenance`  | Content provenance and C2PA integration           |
 
-These are optional higher-layer helpers built on top of the core receipt/kernel stack. The stable, production-ready surface for v0.9.15 is the kernel / schema / crypto / protocol / rails / server / cli stack. PEAC remains vendor-neutral; pillar packages provide building blocks, not a hosted service.
+These are optional higher-layer helpers built on top of the core receipt/kernel stack. The stable, production-ready surface for v0.9.16 is the kernel / schema / crypto / protocol / rails / server / cli stack. PEAC remains vendor-neutral; pillar packages provide building blocks, not a hosted service.
 
 ---
 
@@ -450,7 +450,7 @@ These are optional higher-layer helpers built on top of the core receipt/kernel 
 **Library surface:**
 
 - TypeScript APIs are pre-1.0 and may have breaking changes between minor releases
-- Core packages (kernel, schema, crypto, protocol) are stable for v0.9.15
+- Core packages (kernel, schema, crypto, protocol) are stable for v0.9.16
 - Pillar packages (access, consent, etc.) are early scaffolding; APIs may change
 
 For forward-looking details, see the docs in `docs/` and the CHANGELOG.
