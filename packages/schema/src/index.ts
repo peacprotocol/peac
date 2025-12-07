@@ -28,6 +28,9 @@ export {
   ControlDecisionSchema,
   ControlStepSchema,
   ControlBlockSchema,
+  // Payment evidence validators (v0.9.16+)
+  PaymentSplitSchema,
+  PaymentEvidenceSchema,
 } from './validators';
 
 // Envelope types (v0.9.15+ normative structure)

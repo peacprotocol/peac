@@ -24,6 +24,82 @@ export type PaymentRailId = string;
 export type PaymentScheme = PaymentRailId;
 
 /**
+ * Payment split - allocation of payment to a party
+ *
+ * Used for marketplace/aggregator scenarios where a single payment
+ * is split among multiple parties (platform, merchant, affiliates, etc.)
+ *
+ * Invariants:
+ * - `party` is REQUIRED (identifies the recipient)
+ * - `amount` if present MUST be >= 0
+ * - `share` if present MUST be in [0,1]
+ * - At least one of `amount` or `share` MUST be specified
+ *
+ * Note: The sum of splits is NOT enforced to equal the total payment amount.
+ * This is by design - partial splits, fees, and platform-specific allocation
+ * logic are all valid use cases.
+ */
+export interface PaymentSplit {
+  /**
+   * Party identifier (REQUIRED)
+   *
+   * Identifies the recipient of this split. Examples:
+   * - "merchant" - Primary merchant
+   * - "platform" - Platform fee
+   * - "affiliate:partner_123" - Affiliate/referral
+   * - "tax" - Tax authority
+   */
+  party: string;
+
+  /**
+   * Absolute amount in smallest currency unit (OPTIONAL)
+   *
+   * Must be >= 0 if specified.
+   * Examples: 1000 (for $10.00 in USD), 50000 (for 500.00 INR)
+   */
+  amount?: number;
+
+  /**
+   * ISO 4217 currency code (OPTIONAL)
+   *
+   * Uppercase 3-letter code. Defaults to parent payment's currency if omitted.
+   */
+  currency?: string;
+
+  /**
+   * Fractional share of the total (OPTIONAL)
+   *
+   * Must be in [0,1] if specified.
+   * Examples: 0.8 (80%), 0.15 (15%), 0.05 (5%)
+   */
+  share?: number;
+
+  /**
+   * Payment rail for this split (OPTIONAL)
+   *
+   * If different from parent payment's rail.
+   */
+  rail?: PaymentRailId;
+
+  /**
+   * Account reference for the recipient (OPTIONAL)
+   *
+   * Examples:
+   * - "acct_merchant_abc" - Merchant account
+   * - "upi:merchant@bank" - UPI VPA
+   * - "wallet_xyz" - Wallet ID
+   */
+  account_ref?: string;
+
+  /**
+   * Additional metadata (OPTIONAL)
+   *
+   * Rail-specific or application-specific data.
+   */
+  metadata?: Record<string, unknown>;
+}
+
+/**
  * Payment evidence - rail-agnostic normalized payment
  *
  * All payment rails MUST produce this normalized structure.
@@ -123,6 +199,28 @@ export interface PaymentEvidence {
    * Future: May become discriminated union in v1.0.
    */
   evidence: unknown;
+
+  /**
+   * Aggregator/marketplace identifier (OPTIONAL)
+   *
+   * Identifies the platform or aggregator processing this payment
+   * on behalf of sub-merchants. Examples:
+   * - "marketplace_abc" - Marketplace ID
+   * - "platform:uber" - Platform identifier
+   * - "aggregator_xyz" - Payment aggregator
+   */
+  aggregator?: string;
+
+  /**
+   * Payment splits (OPTIONAL)
+   *
+   * Allocation of payment among multiple parties.
+   * Used for marketplace scenarios, affiliate payouts,
+   * platform fees, tax withholding, etc.
+   *
+   * Note: Sum of splits is NOT required to equal total amount.
+   */
+  splits?: PaymentSplit[];
 }
 
 /**
