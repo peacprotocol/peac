@@ -193,3 +193,46 @@ export const PaymentEvidenceSchema = z
     splits: z.array(PaymentSplitSchema).optional(),
   })
   .strict();
+
+// -----------------------------------------------------------------------------
+// Subject Profile Validators (v0.9.16+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Subject type schema
+ */
+export const SubjectTypeSchema = z.enum(['human', 'org', 'agent']);
+
+/**
+ * Subject profile schema
+ *
+ * Invariants:
+ * - id is required (non-empty string)
+ * - type is required (human, org, or agent)
+ * - labels if present must be non-empty strings
+ */
+export const SubjectProfileSchema = z
+  .object({
+    id: z.string().min(1),
+    type: SubjectTypeSchema,
+    labels: z.array(z.string().min(1)).optional(),
+    metadata: z.record(z.unknown()).optional(),
+  })
+  .strict();
+
+/**
+ * Subject profile snapshot schema
+ *
+ * Invariants:
+ * - subject is required (valid SubjectProfile)
+ * - captured_at is required (non-empty string)
+ *   MUST be RFC 3339 / ISO 8601 UTC; format not enforced in schema for v0.9.16
+ */
+export const SubjectProfileSnapshotSchema = z
+  .object({
+    subject: SubjectProfileSchema,
+    captured_at: z.string().min(1),
+    source: z.string().min(1).optional(),
+    version: z.string().min(1).optional(),
+  })
+  .strict();
