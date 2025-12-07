@@ -639,7 +639,7 @@ Vendor-specific or implementation-specific data MUST NOT appear in normative top
 
 ### 8.4 Subject Profile Privacy (v0.9.16+)
 
-`SubjectProfile` and `SubjectProfileSnapshot` are OPTIONAL catalogue structures for identifying actors (human, org, or agent) in PEAC interactions.
+`SubjectProfile` and `SubjectProfileSnapshot` are OPTIONAL catalogue structures for identifying actors (human, org, or agent) in PEAC interactions. Implementations MAY omit subject profiles entirely for anonymous access, purely technical subjects, or when identity context is not relevant to policy evaluation.
 
 **Design Philosophy**:
 
@@ -671,6 +671,10 @@ Vendor-specific or implementation-specific data MUST NOT appear in normative top
 **Rationale**:
 
 Subject profiles may appear in receipts that are logged, archived, or shared across organizational boundaries. Keeping profiles minimal and PII-free simplifies regulatory compliance (GDPR, CCPA, HIPAA) and reduces data breach impact.
+
+**Compliance Documentation**:
+
+Implementations MUST document their retention and minimization policies for `SubjectProfileSnapshot` logs as part of their own compliance program. This documentation SHOULD specify retention periods, access controls, and deletion procedures.
 
 ---
 
