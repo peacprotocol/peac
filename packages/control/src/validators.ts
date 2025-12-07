@@ -169,3 +169,20 @@ export const ControlStateSchema = z.object({
   last_use: z.number().int().positive().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
+
+// -----------------------------------------------------------------------------
+// CAL Semantic Validators (v0.9.16+)
+// Re-exported from @peac/schema for convenience
+// -----------------------------------------------------------------------------
+
+export {
+  ControlPurposeSchema,
+  ControlLicensingModeSchema,
+  ControlDecisionSchema,
+  ControlStepSchema,
+  // Note: ControlBlockSchema from @peac/schema validates chain-based governance blocks
+  // (chain/decision/combinator), while the ControlBlockSchema above validates
+  // constraint-based blocks (mandate/scope/metadata). We export the chain-based
+  // one with a distinct name to avoid confusion.
+  ControlBlockSchema as ChainControlBlockSchema,
+} from '@peac/schema';
