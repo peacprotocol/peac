@@ -49,7 +49,7 @@ export const CAIP2_REGISTRY: Record<string, { label: string; env: 'mainnet' | 't
   'solana:mainnet': { label: 'Solana', env: 'mainnet' },
   'solana:devnet': { label: 'Solana Devnet', env: 'testnet' },
   // Lightning (v1 default)
-  'lightning': { label: 'Lightning', env: 'mainnet' },
+  lightning: { label: 'Lightning', env: 'mainnet' },
 };
 
 /**
