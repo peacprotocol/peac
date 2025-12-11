@@ -32,6 +32,7 @@ export {
   // Payment evidence validators (v0.9.16+)
   PaymentSplitSchema,
   PaymentEvidenceSchema,
+  PaymentRoutingSchema,
   // Subject profile validators (v0.9.16+)
   SubjectTypeSchema,
   SubjectProfileSchema,
