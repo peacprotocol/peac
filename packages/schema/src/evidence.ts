@@ -221,6 +221,24 @@ export interface PaymentEvidence {
    * Note: Sum of splits is NOT required to equal total amount.
    */
   splits?: PaymentSplit[];
+
+  /**
+   * Payment routing mode (OPTIONAL, rail-agnostic)
+   *
+   * Describes how the payment is routed between payer, aggregator, and merchant.
+   * This is a generic hint - specific rails populate it from their native formats.
+   *
+   * Values:
+   * - "direct": Direct payment to merchant (no intermediary)
+   * - "callback": Routed via callback URL / payment service
+   * - "role": Role-based routing (e.g., "publisher", "platform")
+   *
+   * Examples of producers:
+   * - x402 v2 `payTo.mode` -> routing
+   * - Stripe Connect `destination` -> routing = 'direct' or 'callback'
+   * - UPI `pa` (payee address) -> routing = 'direct'
+   */
+  routing?: 'direct' | 'callback' | 'role';
 }
 
 /**

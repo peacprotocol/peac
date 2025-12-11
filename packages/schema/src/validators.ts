@@ -174,6 +174,24 @@ export const PaymentSplitSchema = z
   });
 
 /**
+ * Payment routing mode schema (rail-agnostic)
+ *
+ * Describes how the payment is routed between payer, aggregator, and merchant.
+ * This is a generic hint - specific rails populate it from their native formats.
+ *
+ * Values:
+ * - "direct": Direct payment to merchant (no intermediary)
+ * - "callback": Routed via callback URL / payment service
+ * - "role": Role-based routing (e.g., "publisher", "platform")
+ *
+ * Examples of producers:
+ * - x402 v2 `payTo.mode` -> routing
+ * - Stripe Connect `destination` -> routing = 'direct' or 'callback'
+ * - UPI `pa` (payee address) -> routing = 'direct'
+ */
+export const PaymentRoutingSchema = z.enum(['direct', 'callback', 'role']);
+
+/**
  * Payment evidence schema
  *
  * Full schema for PaymentEvidence including aggregator/splits support.
@@ -191,6 +209,7 @@ export const PaymentEvidenceSchema = z
     evidence: z.unknown(),
     aggregator: z.string().min(1).optional(),
     splits: z.array(PaymentSplitSchema).optional(),
+    routing: PaymentRoutingSchema.optional(),
   })
   .strict();
 
