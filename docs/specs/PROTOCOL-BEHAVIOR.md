@@ -131,6 +131,55 @@ When `combinator == "any_can_veto"`:
 
 **Rationale**: This provides multi-party governance where any control engine can veto a transaction, similar to multi-sig or unanimous approval patterns.
 
+### 2.4 Control Purpose (v0.9.16+)
+
+`ControlPurpose` captures what the access is for. It maps external policy dialects (RSL, Content Signals, ai.txt) to a normalized purpose for receipts.
+
+**Well-known purposes**:
+
+| Purpose     | Description                                             |
+| ----------- | ------------------------------------------------------- |
+| `crawl`     | Web crawling/scraping                                   |
+| `index`     | Search engine indexing                                  |
+| `train`     | AI/ML model training                                    |
+| `inference` | AI/ML inference/generation                              |
+| `ai_input`  | RAG/grounding (using content as input to AI) [v0.9.17+] |
+| `ai_search` | AI-powered search [v0.9.17+]                            |
+| `search`    | Traditional search indexing [v0.9.17+]                  |
+
+### 2.5 RSL to CAL Mapping (v0.9.17+)
+
+RSL (Robots Specification Layer) usage tokens can be mapped to PEAC `ControlPurpose` values using the `@peac/mappings-rsl` package.
+
+**Mapping Table**:
+
+| RSL Token   | CAL ControlPurpose                   | Notes                        |
+| ----------- | ------------------------------------ | ---------------------------- |
+| `ai-train`  | `['train']`                          | AI/ML model training         |
+| `ai-input`  | `['ai_input']`                       | RAG/grounding                |
+| `ai-search` | `['ai_search']`                      | AI-powered search            |
+| `search`    | `['search']`                         | Traditional search indexing  |
+| `ai-all`    | `['train', 'ai_input', 'ai_search']` | Expands to multiple purposes |
+
+**Semantics**:
+
+- Mapping is **many-to-many**: RSL `ai-all` expands to multiple purposes
+- Unknown RSL tokens SHOULD log a warning but MUST NOT cause validation failure
+- Reverse mapping is **partial**: CAL purposes without RSL equivalents (`crawl`, `index`, `inference`) return `null`
+
+**Example**:
+
+```
+Input: ["ai-train", "ai-input"]
+Output: { purposes: ["train", "ai_input"], unknownTokens: [] }
+
+Input: ["ai-all"]
+Output: { purposes: ["train", "ai_input", "ai_search"], unknownTokens: [] }
+
+Input: ["ai-train", "future-token"]
+Output: { purposes: ["train"], unknownTokens: ["future-token"] }
+```
+
 ---
 
 ## 3. Control Requirements
@@ -723,6 +772,11 @@ An implementation is **conformant with PEAC v0.9** if it:
 
 ## 12. Version History
 
+- **v0.9.17 (WIP)**: RSL 1.0 Alignment
+  - Extended `ControlPurpose` with RSL usage tokens: `ai_input`, `ai_search`, `search`
+  - Added `@peac/mappings-rsl` package for RSL to CAL mapping
+  - RSL `ai-train` maps to existing `train`, `ai-all` expands to `['train', 'ai_input', 'ai_search']`
+  - Lenient handling: unknown RSL tokens log warning but do not cause validation failure
 - **v0.9.16 (2025-12-07)**: Control Abstraction Layer (CAL) semantics, PaymentEvidence extensions, Subject Profile Catalogue
   - CAL: `ControlPurpose` (crawl, index, train, inference), `ControlLicensingMode` (subscription, pay_per_crawl, pay_per_inference), any_can_veto combinator lattice
   - PaymentEvidence: `aggregator` field for marketplace/platform identifiers, `splits[]` array for multi-party payment allocation with invariants (party required, amount or share required)
