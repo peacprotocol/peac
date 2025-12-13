@@ -79,8 +79,18 @@ export const VerifyRequest = z
 
 /**
  * Control purpose - what the access is for
+ *
+ * v0.9.17+: Added ai_input, ai_search, search for RSL alignment
  */
-export const ControlPurposeSchema = z.enum(['crawl', 'index', 'train', 'inference']);
+export const ControlPurposeSchema = z.enum([
+  'crawl',
+  'index',
+  'train',
+  'inference',
+  'ai_input',
+  'ai_search',
+  'search',
+]);
 
 /**
  * Control licensing mode - how access is licensed
