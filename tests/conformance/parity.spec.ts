@@ -34,7 +34,7 @@ describe('Rail Parity Conformance', () => {
       currency: 'usd', // Stripe uses lowercase
     });
 
-    const stripeReceiptJWS = await issue({
+    const stripeResult = await issue({
       iss: ISS,
       aud: AUD,
       amt: AMOUNT,
@@ -56,7 +56,7 @@ describe('Rail Parity Conformance', () => {
       currency: CURRENCY, // x402 uses uppercase
     });
 
-    const x402ReceiptJWS = await issue({
+    const x402Result = await issue({
       iss: ISS,
       aud: AUD,
       amt: AMOUNT,
@@ -72,8 +72,8 @@ describe('Rail Parity Conformance', () => {
     });
 
     // Decode both receipts
-    const stripeDecoded = decode<PEACReceiptClaims>(stripeReceiptJWS);
-    const x402Decoded = decode<PEACReceiptClaims>(x402ReceiptJWS);
+    const stripeDecoded = decode<PEACReceiptClaims>(stripeResult.jws);
+    const x402Decoded = decode<PEACReceiptClaims>(x402Result.jws);
 
     // --- PARITY ASSERTIONS ---
 
@@ -158,7 +158,7 @@ describe('Rail Parity Conformance', () => {
       currency: 'usd',
     });
 
-    const stripeJWS = await issue({
+    const stripeResult = await issue({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 9999,
@@ -179,7 +179,7 @@ describe('Rail Parity Conformance', () => {
       currency: 'USD',
     });
 
-    const x402JWS = await issue({
+    const x402Result = await issue({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 8888, // Different!
@@ -193,8 +193,8 @@ describe('Rail Parity Conformance', () => {
       kid,
     });
 
-    const stripeDecoded = decode<PEACReceiptClaims>(stripeJWS);
-    const x402Decoded = decode<PEACReceiptClaims>(x402JWS);
+    const stripeDecoded = decode<PEACReceiptClaims>(stripeResult.jws);
+    const x402Decoded = decode<PEACReceiptClaims>(x402Result.jws);
 
     // Amounts should NOT match
     expect(stripeDecoded.payload.amt).not.toBe(x402Decoded.payload.amt);
@@ -224,7 +224,7 @@ describe('Rail Parity Conformance', () => {
     expect(x402Payment.currency).toBe('EUR');
 
     // Issue receipts
-    const stripeJWS = await issue({
+    const stripeResult = await issue({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 1000,
@@ -238,7 +238,7 @@ describe('Rail Parity Conformance', () => {
       kid,
     });
 
-    const x402JWS = await issue({
+    const x402Result = await issue({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 1000,
@@ -252,8 +252,8 @@ describe('Rail Parity Conformance', () => {
       kid,
     });
 
-    const stripeDecoded = decode<PEACReceiptClaims>(stripeJWS);
-    const x402Decoded = decode<PEACReceiptClaims>(x402JWS);
+    const stripeDecoded = decode<PEACReceiptClaims>(stripeResult.jws);
+    const x402Decoded = decode<PEACReceiptClaims>(x402Result.jws);
 
     // Currencies MUST be identical (both uppercase)
     expect(stripeDecoded.payload.cur).toBe('EUR');

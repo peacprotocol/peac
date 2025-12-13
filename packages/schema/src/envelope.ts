@@ -7,6 +7,7 @@
 
 import type { ControlBlock } from './control';
 import type { PaymentEvidence, AttestationEvidence } from './evidence';
+import type { SubjectProfileSnapshot } from './subject';
 
 /**
  * Authentication and Authorization Context
@@ -24,6 +25,8 @@ export interface AuthContext {
   enforcement?: EnforcementContext;
   binding?: TransportBinding;
   ctx?: ContextMetadata;
+  /** Subject profile snapshot for policy evaluation (v0.9.17+) */
+  subject_snapshot?: SubjectProfileSnapshot;
 }
 
 export interface EnforcementContext {

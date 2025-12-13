@@ -127,7 +127,7 @@ describe('ACP integration', () => {
       const { privateKey } = await generateKeypair();
 
       // Issue PEAC receipt
-      const receiptJWS = await issue({
+      const result = await issue({
         iss: 'https://merchant.example.com',
         aud: 'https://api.example.com',
         amt: receiptInput.amt,
@@ -143,12 +143,12 @@ describe('ACP integration', () => {
       });
 
       // Verify it's a valid JWS
-      expect(receiptJWS.split('.')).toHaveLength(3);
+      expect(result.jws.split('.')).toHaveLength(3);
 
       // Log golden vector
-      console.log('\n=== GOLDEN VECTOR A (ACP → PEAC, Stripe) ===');
+      console.log('\n=== GOLDEN VECTOR A (ACP -> PEAC, Stripe) ===');
       console.log('ACP Event:', JSON.stringify(acpEvent, null, 2));
-      console.log('PEAC Receipt JWS:', receiptJWS);
+      console.log('PEAC Receipt JWS:', result.jws);
       console.log('===========================================\n');
     });
 
@@ -174,7 +174,7 @@ describe('ACP integration', () => {
       const { privateKey } = await generateKeypair();
 
       // Issue PEAC receipt
-      const receiptJWS = await issue({
+      const result = await issue({
         iss: 'https://merchant.example.com',
         aud: 'https://api.example.com',
         amt: receiptInput.amt,
@@ -190,12 +190,12 @@ describe('ACP integration', () => {
       });
 
       // Verify it's a valid JWS
-      expect(receiptJWS.split('.')).toHaveLength(3);
+      expect(result.jws.split('.')).toHaveLength(3);
 
       // Log golden vector
-      console.log('\n=== GOLDEN VECTOR B (ACP → PEAC, x402) ===');
+      console.log('\n=== GOLDEN VECTOR B (ACP -> PEAC, x402) ===');
       console.log('ACP Event:', JSON.stringify(acpEvent, null, 2));
-      console.log('PEAC Receipt JWS:', receiptJWS);
+      console.log('PEAC Receipt JWS:', result.jws);
       console.log('=========================================\n');
     });
   });
