@@ -5,6 +5,40 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.17] - Unreleased
+
+### Added
+
+- **x402 v2 Adapter**: Full x402 v2 compatibility with v1 fallback (`X402Dialect = 'v1' | 'v2' | 'auto'`)
+- **RSL 1.0 Alignment**: Extended `ControlPurpose` with RSL tokens (`ai_input`, `ai_search`, `search`), new `@peac/mappings-rsl` package
+- **Subject Binding**: Optional `subject_snapshot` on `AuthContext` (envelope-level) for identity context at issuance
+- **issueJws()**: Convenience wrapper returning just the JWS string for header-centric flows
+
+### Changed
+
+- **BREAKING**: `issue()` now returns `IssueResult { jws, subject_snapshot? }` instead of `string`
+- `verify()` accepts `string | VerifyOptions` for backwards compatibility
+- PROTOCOL-BEHAVIOR extended with Section 2.4-2.5 (RSL mapping) and Section 8.5 (Subject Binding)
+
+### Migration
+
+To migrate from v0.9.16:
+
+```typescript
+// Before (v0.9.16)
+const jws = await issue(opts);
+response.setHeader('PEAC-Receipt', jws);
+
+// After (v0.9.17) - Option 1: Use issueJws() for simple flows
+const jws = await issueJws(opts);
+response.setHeader('PEAC-Receipt', jws);
+
+// After (v0.9.17) - Option 2: Use issue() for access to validated snapshot
+const result = await issue(opts);
+response.setHeader('PEAC-Receipt', result.jws);
+// result.subject_snapshot available if provided in opts
+```
+
 ## [0.9.16] - 2025-12-07
 
 ### Added
