@@ -167,3 +167,17 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
     ...(validatedSnapshot && { subject_snapshot: validatedSnapshot }),
   };
 }
+
+/**
+ * Issue a PEAC receipt and return just the JWS string
+ *
+ * Convenience wrapper for common header-centric flows where only the JWS is needed.
+ * For access to validated subject_snapshot, use issue() instead.
+ *
+ * @param options - Receipt options
+ * @returns JWS compact serialization
+ */
+export async function issueJws(options: IssueOptions): Promise<string> {
+  const result = await issue(options);
+  return result.jws;
+}
