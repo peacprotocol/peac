@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Subject Binding**: Optional `subject_snapshot` on `AuthContext` (envelope-level) for identity context at issuance
 - **issueJws()**: Convenience wrapper returning just the JWS string for header-centric flows
 - **Policy Kit v0.1**: New `@peac/policy-kit` package for deterministic CAL policy evaluation (YAML/JSON policy files, first-match-wins rules, subject/purpose/licensing matching)
+- **CLI Policy Commands**: `peac policy validate`, `peac policy explain`, `peac policy example` for policy file operations
 
 ### Changed
 

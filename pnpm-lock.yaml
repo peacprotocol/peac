@@ -157,6 +157,9 @@ importers:
       '@peac/disc':
         specifier: workspace:*
         version: link:../discovery
+      '@peac/policy-kit':
+        specifier: workspace:*
+        version: link:../policy-kit
       '@peac/protocol':
         specifier: workspace:*
         version: link:../protocol

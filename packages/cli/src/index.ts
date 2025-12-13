@@ -10,6 +10,7 @@ import { parseDiscovery, fetchDiscovery } from '@peac/protocol';
 import { decode } from '@peac/crypto';
 import { PEACReceiptClaims } from '@peac/schema';
 import * as fs from 'fs';
+import { policy } from './commands/policy';
 
 const program = new Command();
 
@@ -193,5 +194,8 @@ program
       process.exit(1);
     }
   });
+
+// Policy commands (v0.9.17+)
+program.addCommand(policy);
 
 program.parse();
