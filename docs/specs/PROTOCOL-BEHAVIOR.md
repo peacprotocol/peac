@@ -725,6 +725,57 @@ Subject profiles may appear in receipts that are logged, archived, or shared acr
 
 Implementations MUST document their retention and minimization policies for `SubjectProfileSnapshot` logs as part of their own compliance program. This documentation SHOULD specify retention periods, access controls, and deletion procedures.
 
+### 8.5 Subject Binding in Receipts (v0.9.17+)
+
+`SubjectProfileSnapshot` MAY be included in PEAC envelopes to capture identity context at the point of receipt issuance. This enables policy evaluation and audit trails without modifying the signed JWS payload.
+
+**Placement**:
+
+`subject_snapshot` is placed at `auth.subject_snapshot` in the `PEACEnvelope` structure:
+
+```typescript
+interface AuthContext {
+  iss: string;
+  aud: string;
+  sub: string;
+  iat: number;
+  exp?: number;
+  rid: string;
+  policy_hash: string;
+  policy_uri: string;
+  // ... other auth fields ...
+  subject_snapshot?: SubjectProfileSnapshot; // v0.9.17+
+}
+```
+
+**Rationale for auth-level placement**:
+
+- Consistent with envelope structure (`{ auth, evidence?, meta? }`)
+- Auth-related fields stay in the auth block
+- Avoids top-level key sprawl
+- Not inside JWS claims (keeps cryptographic surface small)
+
+**Validation Behavior**:
+
+1. If `subject_snapshot` is ABSENT:
+   - Behave exactly as before
+   - No validation failure
+   - Receipt issuance and verification proceed normally
+
+2. If `subject_snapshot` is PRESENT:
+   - Schema validation: Validate against `SubjectProfileSnapshotSchema`
+   - Privacy check (advisory): Log warning if `id` looks like PII (email/phone)
+   - No external lookups: Do not fetch from IdP or directory
+   - Pass-through: Include in envelope, return in verify response
+
+**Security Note**:
+
+`subject_snapshot` is envelope metadata outside JWS claims. It is NOT automatically tamper-evident. The existing `auth.sub` (opaque ID) provides the cryptographic binding if needed. If strong binding is required in the future, options include adding a `subject_snapshot_hash` field to JWS claims or including in an envelope-level binding mechanism.
+
+**Wire Format**:
+
+Wire format `peac.receipt/0.9` is unchanged. `subject_snapshot` is envelope-level metadata, not part of the signed JWS payload.
+
 ---
 
 ## 9. Invariant Enforcement
@@ -772,11 +823,13 @@ An implementation is **conformant with PEAC v0.9** if it:
 
 ## 12. Version History
 
-- **v0.9.17 (WIP)**: RSL 1.0 Alignment
+- **v0.9.17 (WIP)**: RSL 1.0 Alignment + Subject Binding
   - Extended `ControlPurpose` with RSL usage tokens: `ai_input`, `ai_search`, `search`
   - Added `@peac/mappings-rsl` package for RSL to CAL mapping
   - RSL `ai-train` maps to existing `train`, `ai-all` expands to `['train', 'ai_input', 'ai_search']`
   - Lenient handling: unknown RSL tokens log warning but do not cause validation failure
+  - Subject Binding: Optional `subject_snapshot` on `auth` block for identity context at issuance
+  - Section 8.5 documents placement, validation behavior, and security considerations
 - **v0.9.16 (2025-12-07)**: Control Abstraction Layer (CAL) semantics, PaymentEvidence extensions, Subject Profile Catalogue
   - CAL: `ControlPurpose` (crawl, index, train, inference), `ControlLicensingMode` (subscription, pay_per_crawl, pay_per_inference), any_can_veto combinator lattice
   - PaymentEvidence: `aggregator` field for marketplace/platform identifiers, `splits[]` array for multi-party payment allocation with invariants (party required, amount or share required)

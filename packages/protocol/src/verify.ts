@@ -3,7 +3,12 @@
  */
 
 import { verify as jwsVerify, decode } from '@peac/crypto';
-import { PEACReceiptClaims, ReceiptClaims } from '@peac/schema';
+import {
+  PEACReceiptClaims,
+  ReceiptClaims,
+  SubjectProfileSnapshot,
+  validateSubjectSnapshot,
+} from '@peac/schema';
 
 /**
  * JWKS key entry
@@ -42,6 +47,9 @@ export interface VerifyResult {
 
   /** Receipt claims */
   claims: PEACReceiptClaims;
+
+  /** Subject profile snapshot (v0.9.17+, if provided) */
+  subject_snapshot?: SubjectProfileSnapshot;
 
   /** Performance metrics */
   perf?: {
@@ -162,12 +170,29 @@ function jwkToPublicKey(jwk: JWK): Uint8Array {
 }
 
 /**
+ * Options for verifying a receipt
+ */
+export interface VerifyOptions {
+  /** JWS compact serialization */
+  receiptJws: string;
+
+  /** Subject profile snapshot (v0.9.17+, optional envelope metadata) */
+  subject_snapshot?: SubjectProfileSnapshot;
+}
+
+/**
  * Verify a PEAC receipt JWS
  *
- * @param receiptJws - JWS compact serialization
+ * @param optionsOrJws - Verify options or JWS compact serialization (for backwards compatibility)
  * @returns Verification result or failure
  */
-export async function verifyReceipt(receiptJws: string): Promise<VerifyResult | VerifyFailure> {
+export async function verifyReceipt(
+  optionsOrJws: string | VerifyOptions
+): Promise<VerifyResult | VerifyFailure> {
+  // Support both old (string) and new (options) signatures for backwards compatibility
+  const receiptJws = typeof optionsOrJws === 'string' ? optionsOrJws : optionsOrJws.receiptJws;
+  const inputSnapshot =
+    typeof optionsOrJws === 'string' ? undefined : optionsOrJws.subject_snapshot;
   const startTime = performance.now();
   let jwksFetchTime: number | undefined;
 
@@ -218,11 +243,16 @@ export async function verifyReceipt(receiptJws: string): Promise<VerifyResult | 
       };
     }
 
+    // Validate subject_snapshot if provided (v0.9.17+)
+    // This validates schema and logs advisory PII warning if applicable
+    const validatedSnapshot = validateSubjectSnapshot(inputSnapshot);
+
     const verifyTime = performance.now() - startTime;
 
     return {
       ok: true,
       claims: payload,
+      ...(validatedSnapshot && { subject_snapshot: validatedSnapshot }),
       perf: {
         verify_ms: verifyTime,
         ...(jwksFetchTime && { jwks_fetch_ms: jwksFetchTime }),

@@ -13,7 +13,7 @@ describe('PEAC Protocol', () => {
     it('should issue a valid receipt with UUIDv7 rid', async () => {
       const { privateKey } = await generateKeypair();
 
-      const jws = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -26,6 +26,10 @@ describe('PEAC Protocol', () => {
         privateKey,
         kid: '2025-01-15T10:30:00Z',
       });
+
+      // Result should have jws property
+      expect(result.jws).toBeDefined();
+      const jws = result.jws;
 
       // JWS should have three parts
       expect(jws.split('.')).toHaveLength(3);
@@ -57,7 +61,7 @@ describe('PEAC Protocol', () => {
     it('should include subject if provided', async () => {
       const { privateKey } = await generateKeypair();
 
-      const jws = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -72,7 +76,7 @@ describe('PEAC Protocol', () => {
         kid: '2025-01-15T10:30:00Z',
       });
 
-      const decoded = decode<PEACReceiptClaims>(jws);
+      const decoded = decode<PEACReceiptClaims>(result.jws);
 
       expect(decoded.payload.subject).toEqual({
         uri: 'https://app.example.com/api/resource/123',
@@ -83,7 +87,7 @@ describe('PEAC Protocol', () => {
       const { privateKey } = await generateKeypair();
       const exp = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
 
-      const jws = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -98,7 +102,7 @@ describe('PEAC Protocol', () => {
         kid: '2025-01-15T10:30:00Z',
       });
 
-      const decoded = decode<PEACReceiptClaims>(jws);
+      const decoded = decode<PEACReceiptClaims>(result.jws);
 
       expect(decoded.payload.exp).toBe(exp);
     });
@@ -206,7 +210,7 @@ describe('PEAC Protocol', () => {
     it('should generate unique UUIDv7 for each receipt', async () => {
       const { privateKey } = await generateKeypair();
 
-      const jws1 = await issue({
+      const result1 = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -220,7 +224,7 @@ describe('PEAC Protocol', () => {
         kid: '2025-01-15T10:30:00Z',
       });
 
-      const jws2 = await issue({
+      const result2 = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -234,8 +238,8 @@ describe('PEAC Protocol', () => {
         kid: '2025-01-15T10:30:00Z',
       });
 
-      const decoded1 = decode<PEACReceiptClaims>(jws1);
-      const decoded2 = decode<PEACReceiptClaims>(jws2);
+      const decoded1 = decode<PEACReceiptClaims>(result1.jws);
+      const decoded2 = decode<PEACReceiptClaims>(result2.jws);
 
       // RIDs should be different
       expect(decoded1.payload.rid).not.toBe(decoded2.payload.rid);

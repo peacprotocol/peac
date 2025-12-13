@@ -17,7 +17,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey } = await generateKeypair();
 
       // Issue valid receipt
-      const validJWS = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -27,6 +27,7 @@ describe('Negative Test Vectors', () => {
         privateKey,
         kid: '2025-01-26T12:00:00Z',
       });
+      const validJWS = result.jws;
 
       // Tamper with signature (flip one bit)
       const parts = validJWS.split('.');
@@ -46,7 +47,7 @@ describe('Negative Test Vectors', () => {
     it('MUST reject receipt with completely invalid signature', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const validJWS = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -56,6 +57,7 @@ describe('Negative Test Vectors', () => {
         privateKey,
         kid: '2025-01-26T12:00:00Z',
       });
+      const validJWS = result.jws;
 
       // Replace signature with garbage
       const parts = validJWS.split('.');
@@ -73,7 +75,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey, publicKey } = await generateKeypair();
 
       // Issue receipt for 9999
-      const validJWS = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -83,6 +85,7 @@ describe('Negative Test Vectors', () => {
         privateKey,
         kid: '2025-01-26T12:00:00Z',
       });
+      const validJWS = result.jws;
 
       // Decode and modify amount
       const { payload } = decode<PEACReceiptClaims>(validJWS);
@@ -103,7 +106,7 @@ describe('Negative Test Vectors', () => {
     it('MUST reject receipt with modified recipient (aud)', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const validJWS = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://legitimate.example.com',
         amt: 9999,
@@ -113,6 +116,7 @@ describe('Negative Test Vectors', () => {
         privateKey,
         kid: '2025-01-26T12:00:00Z',
       });
+      const validJWS = result.jws;
 
       // Tamper with audience
       const { payload } = decode<PEACReceiptClaims>(validJWS);
@@ -131,7 +135,7 @@ describe('Negative Test Vectors', () => {
     it('MUST reject receipt with modified payment scheme', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const validJWS = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -141,8 +145,9 @@ describe('Negative Test Vectors', () => {
         privateKey,
         kid: '2025-01-26T12:00:00Z',
       });
+      const validJWS = result.jws;
 
-      // Tamper with payment scheme (Stripe → x402)
+      // Tamper with payment scheme (Stripe -> x402)
       const { payload } = decode<PEACReceiptClaims>(validJWS);
       const tamperedPayload = {
         ...payload,
@@ -261,7 +266,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey } = await generateKeypair();
 
       // Issue receipt that expired 1 hour ago
-      const expiredJWS = await issue({
+      const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -272,6 +277,7 @@ describe('Negative Test Vectors', () => {
         privateKey,
         kid: '2025-01-26T12:00:00Z',
       });
+      const expiredJWS = result.jws;
 
       // Note: verifyReceipt would check expiry, but it requires JWKS fetch
       // For now, we just verify the JWS was created with exp in the past
@@ -346,7 +352,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey: privKey1 } = await generateKeypair();
       const { publicKey: pubKey2 } = await generateKeypair(); // Different keypair!
 
-      const jws = await issue({
+      const issueResult = await issue({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -358,7 +364,7 @@ describe('Negative Test Vectors', () => {
       });
 
       // Verify with wrong public key
-      const result = await jwsVerify(jws, pubKey2);
+      const result = await jwsVerify(issueResult.jws, pubKey2);
 
       expect(result.valid).toBe(false);
 

@@ -265,3 +265,55 @@ export const SubjectProfileSnapshotSchema = z
     version: z.string().min(1).optional(),
   })
   .strict();
+
+// -----------------------------------------------------------------------------
+// Subject Snapshot Validation Helper (v0.9.17+)
+// -----------------------------------------------------------------------------
+
+// Module-level set for PII warning deduplication
+const warnedSubjectIds = new Set<string>();
+
+/**
+ * Heuristic check if a subject ID looks like PII (email/phone)
+ */
+function looksLikePII(id: string): boolean {
+  // Email pattern
+  if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) {
+    return true;
+  }
+  // Phone pattern (starts with + followed by digits)
+  if (/^\+?\d{10,15}$/.test(id.replace(/[\s\-()]/g, ''))) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Validate a subject snapshot (if present)
+ *
+ * - Returns validated snapshot or null if absent
+ * - Throws ZodError for malformed data
+ * - Logs advisory warning if id looks like PII (deduplicated)
+ */
+export function validateSubjectSnapshot(
+  snapshot: unknown
+): z.infer<typeof SubjectProfileSnapshotSchema> | null {
+  if (snapshot === undefined || snapshot === null) {
+    return null;
+  }
+
+  // Validate against schema (throws on malformed data)
+  const validated = SubjectProfileSnapshotSchema.parse(snapshot);
+
+  // Advisory PII warning (deduplicated)
+  const subjectId = validated.subject.id;
+  if (looksLikePII(subjectId) && !warnedSubjectIds.has(subjectId)) {
+    warnedSubjectIds.add(subjectId);
+    console.warn(
+      `[peac:subject] Advisory: subject.id "${subjectId}" looks like PII. ` +
+        'Prefer opaque identifiers (e.g., "user:abc123").'
+    );
+  }
+
+  return validated;
+}

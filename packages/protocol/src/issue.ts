@@ -5,7 +5,12 @@
 
 import { uuidv7 } from 'uuidv7';
 import { sign } from '@peac/crypto';
-import { PEACReceiptClaims, ReceiptClaims } from '@peac/schema';
+import {
+  PEACReceiptClaims,
+  ReceiptClaims,
+  SubjectProfileSnapshot,
+  validateSubjectSnapshot,
+} from '@peac/schema';
 
 /**
  * Options for issuing a receipt
@@ -59,6 +64,9 @@ export interface IssueOptions {
   /** Expiry timestamp (Unix seconds, optional) */
   exp?: number;
 
+  /** Subject profile snapshot for envelope (v0.9.17+, optional) */
+  subject_snapshot?: SubjectProfileSnapshot;
+
   /** Ed25519 private key (32 bytes) */
   privateKey: Uint8Array;
 
@@ -67,12 +75,23 @@ export interface IssueOptions {
 }
 
 /**
+ * Result of issuing a receipt
+ */
+export interface IssueResult {
+  /** JWS compact serialization */
+  jws: string;
+
+  /** Validated subject snapshot (if provided) */
+  subject_snapshot?: SubjectProfileSnapshot;
+}
+
+/**
  * Issue a PEAC receipt
  *
  * @param options - Receipt options
- * @returns JWS compact serialization
+ * @returns Issue result with JWS and optional subject_snapshot
  */
-export async function issue(options: IssueOptions): Promise<string> {
+export async function issue(options: IssueOptions): Promise<IssueResult> {
   // Validate URLs
   if (!options.iss.startsWith('https://')) {
     throw new Error('Issuer URL must start with https://');
@@ -136,8 +155,15 @@ export async function issue(options: IssueOptions): Promise<string> {
   // Validate claims with Zod
   ReceiptClaims.parse(claims);
 
+  // Validate subject_snapshot if provided (v0.9.17+)
+  // This validates schema and logs advisory PII warning if applicable
+  const validatedSnapshot = validateSubjectSnapshot(options.subject_snapshot);
+
   // Sign with Ed25519
   const jws = await sign(claims, options.privateKey, options.kid);
 
-  return jws;
+  return {
+    jws,
+    ...(validatedSnapshot && { subject_snapshot: validatedSnapshot }),
+  };
 }

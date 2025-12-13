@@ -37,6 +37,8 @@ export {
   SubjectTypeSchema,
   SubjectProfileSchema,
   SubjectProfileSnapshotSchema,
+  // Subject snapshot validation helper (v0.9.17+)
+  validateSubjectSnapshot,
 } from './validators';
 
 // Envelope types (v0.9.15+ normative structure)
