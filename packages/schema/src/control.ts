@@ -88,7 +88,7 @@ export interface ControlStep {
    *
    * Well-known engines:
    * - "spend-control-service" - Spend control mandate engine
-   * - "visa-tap" - Visa Token Authentication Protocol
+   * - "visa-tap" - Visa Trusted Agent Protocol
    * - "google-ap2" - Google Agent Protocol v2
    * - "risk-engine" - Risk scoring
    * - "merchant-policy" - Merchant-specific policy
