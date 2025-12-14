@@ -234,7 +234,7 @@ PEAC is NOT limited to HTTP 402. Other enforcement methods:
 }
 ```
 
-### 7.2 TAP (Token Authentication Protocol)
+### 7.2 TAP (Trusted Agent Protocol)
 
 ```json
 {

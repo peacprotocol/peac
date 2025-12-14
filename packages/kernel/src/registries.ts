@@ -133,7 +133,7 @@ export const AGENT_PROTOCOLS: readonly AgentProtocolEntry[] = [
   {
     id: 'tap',
     category: 'card-protocol',
-    description: 'Token Authentication Protocol (Visa TAP)',
+    description: 'Trusted Agent Protocol (Visa TAP)',
     reference: 'https://developer.visa.com/',
     status: 'informational',
   },
