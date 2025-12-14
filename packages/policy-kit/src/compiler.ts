@@ -17,7 +17,11 @@ import { PolicyDocument, ControlPurpose, POLICY_VERSION } from './types';
 
 /**
  * Default PEAC protocol version for generated peac.txt
- * Matches the wire format version from @peac/kernel
+ *
+ * Uses major.minor format (e.g., "0.9") by default. Pass a full version
+ * (e.g., "0.9.17") via peacVersion option if needed.
+ *
+ * This matches the wire format version from @peac/kernel.
  */
 export const PEAC_PROTOCOL_VERSION = '0.9' as const;
 
@@ -31,11 +35,19 @@ export interface CompileOptions {
   contact?: string;
   /** Include comments in output */
   includeComments?: boolean;
-  /** PEAC protocol version for peac.txt (default: 0.9) */
+  /**
+   * PEAC protocol version for peac.txt (default: 0.9)
+   * Use major.minor (0.9) or full version (0.9.17) as needed.
+   */
   peacVersion?: string;
   /** Attribution requirement: required, optional, or none */
   attribution?: 'required' | 'optional' | 'none';
-  /** Rate limit string (e.g., "100/hour") */
+  /**
+   * Receipts requirement: required, optional, or omit (don't include field)
+   * Default: 'required' for conditional usage, 'optional' for open usage
+   */
+  receipts?: 'required' | 'optional' | 'omit';
+  /** Rate limit string (e.g., "100/hour", "unlimited") */
   rateLimit?: string;
   /** Negotiate endpoint URL */
   negotiateUrl?: string;
@@ -99,15 +111,23 @@ export function compilePeacTxt(policy: PolicyDocument, options: CompileOptions =
     lines.push(`attribution: ${options.attribution}`);
   }
 
-  // Conditional access fields
-  if (usage === 'conditional') {
-    lines.push('receipts: required');
-    if (options.rateLimit) {
-      lines.push(`rate_limit: ${options.rateLimit}`);
-    }
-    if (options.negotiateUrl) {
-      lines.push(`negotiate: ${options.negotiateUrl}`);
-    }
+  // Receipts: configurable, with sensible defaults based on usage
+  // - conditional: defaults to 'required' (explicit receipt needed)
+  // - open: defaults to 'optional' (receipt accepted but not required)
+  const receiptsDefault = usage === 'conditional' ? 'required' : 'optional';
+  const receiptsValue = options.receipts ?? receiptsDefault;
+  if (receiptsValue !== 'omit') {
+    lines.push(`receipts: ${receiptsValue}`);
+  }
+
+  // Rate limit (applies to both open and conditional)
+  if (options.rateLimit) {
+    lines.push(`rate_limit: ${options.rateLimit}`);
+  }
+
+  // Negotiate endpoint (typically for conditional access)
+  if (options.negotiateUrl) {
+    lines.push(`negotiate: ${options.negotiateUrl}`);
   }
 
   // Contact if provided

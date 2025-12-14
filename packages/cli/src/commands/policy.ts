@@ -170,10 +170,13 @@ policy
   .argument('<file>', 'Path to policy file')
   .option('-o, --out <dir>', 'Output directory', 'dist')
   .option('--well-known', 'Output peac.txt to .well-known/ subdirectory')
+  .option('--dry-run', 'Show what would be generated without writing files')
+  .option('--peac-version <version>', 'PEAC protocol version (default: 0.9)')
   .option('--site-url <url>', 'Site URL for peac.txt')
   .option('--contact <email>', 'Contact email for policy questions')
   .option('--attribution <mode>', 'Attribution requirement (required, optional, none)')
-  .option('--rate-limit <limit>', 'Rate limit string (e.g., "100/hour")')
+  .option('--receipts <mode>', 'Receipts requirement (required, optional, omit)')
+  .option('--rate-limit <limit>', 'Rate limit string (e.g., "100/hour", "unlimited")')
   .option('--negotiate <url>', 'Negotiate endpoint URL')
   .option('--no-comments', 'Omit comments from generated files')
   .action(
@@ -182,9 +185,12 @@ policy
       options: {
         out: string;
         wellKnown?: boolean;
+        dryRun?: boolean;
+        peacVersion?: string;
         siteUrl?: string;
         contact?: string;
         attribution?: 'required' | 'optional' | 'none';
+        receipts?: 'required' | 'optional' | 'omit';
         rateLimit?: string;
         negotiate?: string;
         comments?: boolean;
@@ -194,51 +200,70 @@ policy
         console.log(`Loading policy: ${file}\n`);
         const policyDoc = loadPolicy(file);
 
-        // Create output directory if needed
-        const outDir = options.out;
-        if (!fs.existsSync(outDir)) {
-          fs.mkdirSync(outDir, { recursive: true });
-        }
-
         const compileOptions = {
+          peacVersion: options.peacVersion,
           siteUrl: options.siteUrl,
           contact: options.contact,
           attribution: options.attribution,
+          receipts: options.receipts,
           rateLimit: options.rateLimit,
           negotiateUrl: options.negotiate,
           includeComments: options.comments !== false,
         };
 
-        // Generate peac.txt (optionally in .well-known/)
-        const peacTxt = compilePeacTxt(policyDoc, compileOptions);
+        // Determine output paths
+        const outDir = options.out;
         let peacTxtPath: string;
+        if (options.wellKnown) {
+          peacTxtPath = path.join(outDir, '.well-known', 'peac.txt');
+        } else {
+          peacTxtPath = path.join(outDir, 'peac.txt');
+        }
+        const robotsPath = path.join(outDir, 'robots-ai-snippet.txt');
+        const aiprefPath = path.join(outDir, 'aipref-headers.json');
+        const mdPath = path.join(outDir, 'ai-policy.md');
+
+        // Generate content
+        const peacTxt = compilePeacTxt(policyDoc, compileOptions);
+        const robotsTxt = compileRobotsSnippet(policyDoc, compileOptions);
+        const aiprefTemplates = compileAiprefTemplates(policyDoc, compileOptions);
+        const markdown = renderPolicyMarkdown(policyDoc, compileOptions);
+
+        if (options.dryRun) {
+          // Dry run: show what would be generated
+          console.log('Dry run - files that would be generated:\n');
+          console.log(`--- ${peacTxtPath} ---`);
+          console.log(peacTxt);
+          console.log(`--- ${robotsPath} ---`);
+          console.log(robotsTxt);
+          console.log(`--- ${aiprefPath} ---`);
+          console.log(JSON.stringify(aiprefTemplates, null, 2));
+          console.log(`\n--- ${mdPath} ---`);
+          console.log(markdown);
+          process.exit(0);
+        }
+
+        // Create output directories
+        if (!fs.existsSync(outDir)) {
+          fs.mkdirSync(outDir, { recursive: true });
+        }
         if (options.wellKnown) {
           const wellKnownDir = path.join(outDir, '.well-known');
           if (!fs.existsSync(wellKnownDir)) {
             fs.mkdirSync(wellKnownDir, { recursive: true });
           }
-          peacTxtPath = path.join(wellKnownDir, 'peac.txt');
-        } else {
-          peacTxtPath = path.join(outDir, 'peac.txt');
         }
+
+        // Write files
         fs.writeFileSync(peacTxtPath, peacTxt, 'utf-8');
         console.log(`Generated: ${peacTxtPath}`);
 
-        // Generate robots.txt snippet
-        const robotsTxt = compileRobotsSnippet(policyDoc, compileOptions);
-        const robotsPath = path.join(outDir, 'robots-ai-snippet.txt');
         fs.writeFileSync(robotsPath, robotsTxt, 'utf-8');
         console.log(`Generated: ${robotsPath}`);
 
-        // Generate AIPREF templates
-        const aiprefTemplates = compileAiprefTemplates(policyDoc, compileOptions);
-        const aiprefPath = path.join(outDir, 'aipref-headers.json');
         fs.writeFileSync(aiprefPath, JSON.stringify(aiprefTemplates, null, 2), 'utf-8');
         console.log(`Generated: ${aiprefPath}`);
 
-        // Generate ai-policy.md
-        const markdown = renderPolicyMarkdown(policyDoc, compileOptions);
-        const mdPath = path.join(outDir, 'ai-policy.md');
         fs.writeFileSync(mdPath, markdown, 'utf-8');
         console.log(`Generated: ${mdPath}`);
 

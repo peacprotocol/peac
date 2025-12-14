@@ -13,8 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **RSL 1.0 Alignment**: Extended `ControlPurpose` with RSL tokens (`ai_input`, `ai_search`, `search`), new `@peac/mappings-rsl` package
 - **Subject Binding**: Optional `subject_snapshot` on `AuthContext` (envelope-level) for identity context at issuance
 - **issueJws()**: Convenience wrapper returning just the JWS string for header-centric flows
-- **Policy Kit v0.1**: New `@peac/policy-kit` package for deterministic CAL policy evaluation (YAML/JSON policy files, first-match-wins rules, subject/purpose/licensing matching)
-- **CLI Policy Commands**: `peac policy validate`, `peac policy explain`, `peac policy example` for policy file operations
+- **Policy Kit v0.1**: New `@peac/policy-kit` package for deterministic CAL policy evaluation
+  - YAML/JSON policy format with first-match-wins rule semantics
+  - Subject matching by type, labels, and ID patterns
+  - Purpose and licensing mode matching
+  - Compile to deployment artifacts: `peac.txt`, `robots-ai-snippet.txt`, `aipref-headers.json`, `ai-policy.md`
+  - Configurable receipts (`required` | `optional` | `omit`) with sensible defaults
+- **CLI Policy Commands**: `peac policy init`, `peac policy validate`, `peac policy explain`, `peac policy generate`
+  - `peac policy generate --dry-run` for safe preview without writing files
+  - `peac policy generate --well-known` to output peac.txt to `.well-known/` subdirectory
 
 ### Changed
 

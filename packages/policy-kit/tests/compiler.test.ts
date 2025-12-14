@@ -65,6 +65,29 @@ const allowPolicy: PolicyDocument = {
   rules: [],
 };
 
+// Test fixture: policy with RSL purposes (v0.9.17+)
+const rslPurposePolicy: PolicyDocument = {
+  version: POLICY_VERSION,
+  defaults: { decision: 'deny' },
+  rules: [
+    {
+      name: 'allow-ai-search',
+      purpose: 'ai_search',
+      decision: 'allow',
+    },
+    {
+      name: 'allow-ai-input',
+      purpose: 'ai_input',
+      decision: 'allow',
+    },
+    {
+      name: 'deny-train',
+      purpose: ['train', 'search'],
+      decision: 'deny',
+    },
+  ],
+};
+
 describe('compilePeacTxt', () => {
   it('should compile minimal policy with canonical schema', () => {
     const output = compilePeacTxt(minimalPolicy, { includeComments: false });
@@ -79,7 +102,9 @@ describe('compilePeacTxt', () => {
 
     expect(output).toContain(`version: ${PEAC_PROTOCOL_VERSION}`);
     expect(output).toContain('usage: open');
+    // Open usage defaults to optional receipts (not required)
     expect(output).not.toContain('receipts: required');
+    expect(output).toContain('receipts: optional');
   });
 
   it('should compile comprehensive policy with all fields', () => {
@@ -139,6 +164,33 @@ describe('compilePeacTxt', () => {
     expect(output1).toBe(output2);
   });
 
+  it('should allow overriding receipts to omit', () => {
+    const output = compilePeacTxt(minimalPolicy, { includeComments: false, receipts: 'omit' });
+
+    expect(output).not.toContain('receipts:');
+  });
+
+  it('should allow overriding receipts to optional for conditional', () => {
+    const output = compilePeacTxt(minimalPolicy, { includeComments: false, receipts: 'optional' });
+
+    expect(output).toContain('receipts: optional');
+    expect(output).not.toContain('receipts: required');
+  });
+
+  it('should allow overriding receipts to required for open', () => {
+    const output = compilePeacTxt(allowPolicy, { includeComments: false, receipts: 'required' });
+
+    expect(output).toContain('receipts: required');
+    expect(output).not.toContain('receipts: optional');
+  });
+
+  it('should correctly extract RSL purposes (ai_input, ai_search, search)', () => {
+    const output = compilePeacTxt(rslPurposePolicy, { includeComments: false });
+
+    // RSL purposes should be extracted and sorted alphabetically
+    expect(output).toContain('purposes: [ai_input, ai_search, search, train]');
+  });
+
   it('golden: minimal deny policy peac.txt (no comments)', () => {
     const output = compilePeacTxt(minimalPolicy, { includeComments: false });
 
@@ -157,8 +209,14 @@ describe('compilePeacTxt', () => {
   it('golden: minimal allow policy peac.txt (no comments)', () => {
     const output = compilePeacTxt(allowPolicy, { includeComments: false });
 
-    // Golden output - open usage, no receipts required
-    const expected = [`version: ${PEAC_PROTOCOL_VERSION}`, 'usage: open', '', ''].join('\n');
+    // Golden output - open usage with optional receipts (default for open)
+    const expected = [
+      `version: ${PEAC_PROTOCOL_VERSION}`,
+      'usage: open',
+      '',
+      'receipts: optional',
+      '',
+    ].join('\n');
 
     expect(output).toBe(expected);
   });
