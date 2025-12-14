@@ -63,7 +63,7 @@ export function compilePeacTxt(policy: PolicyDocument, options: CompileOptions =
     lines.push('#');
     lines.push('# This file declares AI access policy for this site.');
     lines.push('# Rules are conditional - see peac-policy.yaml for full details.');
-    lines.push('# See: https://peac.dev/spec/discovery');
+    lines.push('# See: https://peacprotocol.org/spec/discovery');
     lines.push('');
   }
 
@@ -302,7 +302,7 @@ export function renderPolicyMarkdown(policy: PolicyDocument, options: CompileOpt
   lines.push('---');
   lines.push('');
   lines.push(
-    '*This policy is enforced via the PEAC Protocol. See [peac.dev](https://peac.dev) for more information.*'
+    '*This policy is enforced via the PEAC Protocol. See [peacprotocol.org](https://peacprotocol.org) for more information.*'
   );
   lines.push('');
 

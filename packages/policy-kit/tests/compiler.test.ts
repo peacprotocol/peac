@@ -85,7 +85,7 @@ describe('compilePeacTxt', () => {
     const output = compilePeacTxt(minimalPolicy, { includeComments: true });
 
     expect(output).toContain('# PEAC Policy Discovery File');
-    expect(output).toContain('# See: https://peac.dev/spec/discovery');
+    expect(output).toContain('# See: https://peacprotocol.org/spec/discovery');
   });
 
   it('should include rule summary in comments', () => {
@@ -292,7 +292,7 @@ describe('renderPolicyMarkdown', () => {
     const output = renderPolicyMarkdown(comprehensivePolicy);
 
     expect(output).toContain('PEAC Protocol');
-    expect(output).toContain('peac.dev');
+    expect(output).toContain('peacprotocol.org');
   });
 });
 
