@@ -277,6 +277,8 @@ Libraries in this repo are structured so that you do not need to hand parse ever
 
 ### Policy Kit (v0.9.17+)
 
+> **Start here:** [docs/policy-kit/quickstart.md](docs/policy-kit/quickstart.md)
+
 The `@peac/policy-kit` package provides a file-based policy format for authoring policies once and compiling them to multiple deployment surfaces.
 
 **Install:**

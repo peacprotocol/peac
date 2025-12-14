@@ -47,6 +47,15 @@ peac/
 3. **Development**: Follow coding standards and test coverage requirements
 4. **Testing**: Ensure all tests pass and coverage is maintained
 5. **Pull Request**: Submit PR with clear description
+6. **Merge**: Maintainers merge PRs manually on GitHub (see below)
+
+### Git Safety Rules
+
+- **Never merge PRs from terminal** - Do not use `gh pr merge`, `git merge`, or any CLI merge command
+- PRs are **always merged manually on GitHub** web interface by maintainers
+- Contributors: create branch, commit, push, open PR via `gh pr create`
+- Tags are created **only after** PR is merged and confirmed on GitHub
+- Never force push to any branch, especially `main`
 
 ## Development Standards
 

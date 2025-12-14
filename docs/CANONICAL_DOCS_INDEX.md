@@ -1,6 +1,6 @@
 # PEAC Protocol - Canonical Documentation Index
 
-**Version:** 0.9.15
+**Version:** 0.9.17
 **Status:** Authoritative
 
 This document defines which documentation files are the canonical, up-to-date references for the PEAC Protocol.
@@ -38,6 +38,14 @@ This document defines which documentation files are the canonical, up-to-date re
 | ---------------------------------- | ----------------- | -------------------------- |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | **Authoritative** | Kernel-first DAG, layering |
 | [CI_BEHAVIOR.md](CI_BEHAVIOR.md)   | **Authoritative** | CI pipeline behavior       |
+| [QA.md](QA.md)                     | **Reference**     | Manual QA checklist        |
+| [deps-policy.md](deps-policy.md)   | **Reference**     | Dependency update policy   |
+
+### Policy Kit
+
+| Document                                             | Status            | Purpose                    |
+| ---------------------------------------------------- | ----------------- | -------------------------- |
+| [policy-kit/quickstart.md](policy-kit/quickstart.md) | **Authoritative** | Policy Kit getting started |
 
 ---
 
