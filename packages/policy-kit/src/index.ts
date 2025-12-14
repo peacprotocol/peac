@@ -75,6 +75,7 @@ export {
 
 // Compiler (artifact generation)
 export {
+  PEAC_PROTOCOL_VERSION,
   compilePeacTxt,
   compileRobotsSnippet,
   compileAiprefTemplates,

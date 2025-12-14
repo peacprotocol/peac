@@ -169,16 +169,24 @@ policy
   .description('Generate deployment artifacts from a policy file')
   .argument('<file>', 'Path to policy file')
   .option('-o, --out <dir>', 'Output directory', 'dist')
+  .option('--well-known', 'Output peac.txt to .well-known/ subdirectory')
   .option('--site-url <url>', 'Site URL for peac.txt')
   .option('--contact <email>', 'Contact email for policy questions')
+  .option('--attribution <mode>', 'Attribution requirement (required, optional, none)')
+  .option('--rate-limit <limit>', 'Rate limit string (e.g., "100/hour")')
+  .option('--negotiate <url>', 'Negotiate endpoint URL')
   .option('--no-comments', 'Omit comments from generated files')
   .action(
     (
       file: string,
       options: {
         out: string;
+        wellKnown?: boolean;
         siteUrl?: string;
         contact?: string;
+        attribution?: 'required' | 'optional' | 'none';
+        rateLimit?: string;
+        negotiate?: string;
         comments?: boolean;
       }
     ) => {
@@ -195,12 +203,24 @@ policy
         const compileOptions = {
           siteUrl: options.siteUrl,
           contact: options.contact,
+          attribution: options.attribution,
+          rateLimit: options.rateLimit,
+          negotiateUrl: options.negotiate,
           includeComments: options.comments !== false,
         };
 
-        // Generate peac.txt
+        // Generate peac.txt (optionally in .well-known/)
         const peacTxt = compilePeacTxt(policyDoc, compileOptions);
-        const peacTxtPath = path.join(outDir, 'peac.txt');
+        let peacTxtPath: string;
+        if (options.wellKnown) {
+          const wellKnownDir = path.join(outDir, '.well-known');
+          if (!fs.existsSync(wellKnownDir)) {
+            fs.mkdirSync(wellKnownDir, { recursive: true });
+          }
+          peacTxtPath = path.join(wellKnownDir, 'peac.txt');
+        } else {
+          peacTxtPath = path.join(outDir, 'peac.txt');
+        }
         fs.writeFileSync(peacTxtPath, peacTxt, 'utf-8');
         console.log(`Generated: ${peacTxtPath}`);
 
@@ -224,7 +244,11 @@ policy
 
         console.log('');
         console.log('Deployment instructions:');
-        console.log(`  1. Copy ${peacTxtPath} to /.well-known/peac.txt`);
+        if (options.wellKnown) {
+          console.log(`  1. Deploy ${peacTxtPath} to serve at /.well-known/peac.txt`);
+        } else {
+          console.log(`  1. Copy ${peacTxtPath} to /.well-known/peac.txt`);
+        }
         console.log(`  2. Append ${robotsPath} to your robots.txt`);
         console.log(`  3. Add headers from ${aiprefPath} to your server config`);
         console.log(`  4. Publish ${mdPath} for human reference`);

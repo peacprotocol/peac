@@ -2,18 +2,24 @@
  * PEAC Policy Kit Compiler
  *
  * Compiles policy documents to deployment artifacts:
- * - peac.txt (PEAC discovery file)
+ * - peac.txt (PEAC discovery file - canonical schema)
  * - robots.txt snippet for AI crawlers
- * - AIPREF header templates (labeled as compatibility output)
+ * - AIPREF header templates (compatibility output)
  * - Human-readable markdown summary
  *
- * All outputs are deterministic (stable ordering).
- * No contradictory allow/deny lists - shows default + conditional rules.
+ * All outputs are deterministic (stable ordering where semantically safe).
+ * Rule order is preserved where it affects semantics (first-match-wins).
  *
  * @packageDocumentation
  */
 
-import { PolicyDocument, ControlPurpose, ControlDecision, POLICY_VERSION } from './types';
+import { PolicyDocument, ControlPurpose, POLICY_VERSION } from './types';
+
+/**
+ * Default PEAC protocol version for generated peac.txt
+ * Matches the wire format version from @peac/kernel
+ */
+export const PEAC_PROTOCOL_VERSION = '0.9' as const;
 
 /**
  * Options for compilation
@@ -25,6 +31,14 @@ export interface CompileOptions {
   contact?: string;
   /** Include comments in output */
   includeComments?: boolean;
+  /** PEAC protocol version for peac.txt (default: 0.9) */
+  peacVersion?: string;
+  /** Attribution requirement: required, optional, or none */
+  attribution?: 'required' | 'optional' | 'none';
+  /** Rate limit string (e.g., "100/hour") */
+  rateLimit?: string;
+  /** Negotiate endpoint URL */
+  negotiateUrl?: string;
 }
 
 /**
@@ -40,39 +54,60 @@ export interface AiprefTemplate {
 }
 
 /**
- * Compile policy to peac.txt format
+ * Compile policy to peac.txt format (canonical schema)
  *
  * Generates a PEAC discovery file that can be served at:
- * - /.well-known/peac.txt
- * - /peac.txt
+ * - /.well-known/peac.txt (primary)
+ * - /peac.txt (fallback)
  *
- * Output format shows default posture + conditional rules.
- * Does NOT collapse conditional rules into contradictory allow/deny lists.
+ * Output uses canonical PEAC schema with `version` and `usage` fields.
+ * Rule order is preserved in comments (first-match-wins semantics).
  *
  * @param policy - Policy document
  * @param options - Compilation options
- * @returns peac.txt content
+ * @returns peac.txt content (YAML format)
  */
 export function compilePeacTxt(policy: PolicyDocument, options: CompileOptions = {}): string {
   const lines: string[] = [];
-  const { includeComments = true } = options;
+  const { includeComments = true, peacVersion = PEAC_PROTOCOL_VERSION } = options;
 
   if (includeComments) {
     lines.push('# PEAC Policy Discovery File');
     lines.push(`# Generated from: ${policy.name || 'peac-policy.yaml'}`);
     lines.push('#');
-    lines.push('# This file declares AI access policy for this site.');
-    lines.push('# Rules are conditional - see peac-policy.yaml for full details.');
-    lines.push('# See: https://peacprotocol.org/spec/discovery');
+    lines.push('# Serve at: /.well-known/peac.txt');
+    lines.push('# See: https://peacprotocol.org');
     lines.push('');
   }
 
-  // Policy version
-  lines.push(`policy-version: ${POLICY_VERSION}`);
+  // PEAC protocol version (canonical field)
+  lines.push(`version: ${peacVersion}`);
 
-  // Site URL if provided
-  if (options.siteUrl) {
-    lines.push(`site: ${options.siteUrl}`);
+  // Usage: open (allow default) or conditional (deny/review default)
+  const usage = policy.defaults.decision === 'allow' ? 'open' : 'conditional';
+  lines.push(`usage: ${usage}`);
+  lines.push('');
+
+  // List purposes covered by rules (sorted for determinism - safe because informational)
+  const purposes = extractPurposes(policy);
+  if (purposes.length > 0) {
+    lines.push(`purposes: [${purposes.join(', ')}]`);
+  }
+
+  // Attribution if specified
+  if (options.attribution && options.attribution !== 'none') {
+    lines.push(`attribution: ${options.attribution}`);
+  }
+
+  // Conditional access fields
+  if (usage === 'conditional') {
+    lines.push('receipts: required');
+    if (options.rateLimit) {
+      lines.push(`rate_limit: ${options.rateLimit}`);
+    }
+    if (options.negotiateUrl) {
+      lines.push(`negotiate: ${options.negotiateUrl}`);
+    }
   }
 
   // Contact if provided
@@ -80,25 +115,12 @@ export function compilePeacTxt(policy: PolicyDocument, options: CompileOptions =
     lines.push(`contact: ${options.contact}`);
   }
 
-  // Default decision (the unconditional fallback)
-  lines.push(`default: ${policy.defaults.decision}`);
-
-  // Rule count - indicates conditional rules exist
-  lines.push(`rules: ${policy.rules.length}`);
-
-  // List purposes covered by rules (informational, not authoritative)
-  const purposes = extractPurposes(policy);
-  if (purposes.length > 0) {
-    lines.push(`purposes: ${purposes.join(', ')}`);
-  }
-
-  // Show rule summary (name + decision only, conditions require full policy file)
+  // Show rule summary in comments (preserve author order - semantically significant)
   if (policy.rules.length > 0 && includeComments) {
     lines.push('');
-    lines.push('# Rule summary (conditional - see source policy for details):');
-    // Sort rules by name for determinism
-    const sortedRules = [...policy.rules].sort((a, b) => a.name.localeCompare(b.name));
-    for (const rule of sortedRules) {
+    lines.push('# Policy rules (first-match-wins, author order preserved):');
+    lines.push(`# Source: ${policy.name || 'peac-policy.yaml'} (${policy.rules.length} rules)`);
+    for (const rule of policy.rules) {
       lines.push(`#   ${rule.name}: ${rule.decision}`);
     }
   }
@@ -169,23 +191,26 @@ export function compileRobotsSnippet(policy: PolicyDocument, options: CompileOpt
  * Compile policy to AIPREF header templates
  *
  * Generates header values for HTTP responses.
- * LABELED AS COMPATIBILITY OUTPUT - these are not normative PEAC headers.
+ * These are COMPATIBILITY templates, not normative PEAC headers.
+ * The authoritative policy is always peac.txt.
  *
  * @param policy - Policy document
- * @param _options - Compilation options
+ * @param options - Compilation options
  * @returns Array of header templates
  */
 export function compileAiprefTemplates(
   policy: PolicyDocument,
-  _options: CompileOptions = {}
+  options: CompileOptions = {}
 ): AiprefTemplate[] {
   const templates: AiprefTemplate[] = [];
+  const { peacVersion = PEAC_PROTOCOL_VERSION } = options;
+  const usage = policy.defaults.decision === 'allow' ? 'open' : 'conditional';
 
-  // PEAC-Policy header (normative)
+  // PEAC-Policy header (debug/compatibility - see peac.txt for authoritative policy)
   templates.push({
     header: 'PEAC-Policy',
-    value: `version=${POLICY_VERSION}; default=${policy.defaults.decision}; rules=${policy.rules.length}`,
-    description: 'PEAC policy summary - indicates policy exists, see peac.txt for details',
+    value: `version=${peacVersion}; usage=${usage}; rules=${policy.rules.length}`,
+    description: 'Debug/compatibility header - see peac.txt for authoritative policy',
   });
 
   // X-Robots-Tag for AI (compatibility, widely supported)
@@ -199,10 +224,10 @@ export function compileAiprefTemplates(
 
   // Note about AIPREF-style headers
   templates.push({
-    header: '# AIPREF Compatibility Note',
-    value: 'See peac.txt for authoritative policy',
+    header: '# Compatibility Note',
+    value: 'See /.well-known/peac.txt for authoritative policy',
     description:
-      'AIPREF-style X-AI-* headers are not generated to avoid contradictions with conditional rules',
+      'These headers are for compatibility only. AIPREF-style X-AI-* headers are not generated to avoid contradictions with conditional rules.',
   });
 
   return templates;
@@ -254,12 +279,13 @@ export function renderPolicyMarkdown(policy: PolicyDocument, options: CompileOpt
   lines.push('3. If no rule matches, the default decision applies');
   lines.push('');
 
-  // Rules (sorted by name for determinism)
+  // Rules (preserve author order - first-match-wins semantics are order-dependent)
   if (policy.rules.length > 0) {
     lines.push('## Rules');
     lines.push('');
-    const sortedRules = [...policy.rules].sort((a, b) => a.name.localeCompare(b.name));
-    for (const rule of sortedRules) {
+    lines.push('> Rules are evaluated in order. The first matching rule wins.');
+    lines.push('');
+    for (const rule of policy.rules) {
       lines.push(`### ${rule.name}`);
       lines.push('');
       lines.push(`- **Decision:** ${rule.decision}`);

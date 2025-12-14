@@ -3,6 +3,7 @@
  *
  * Golden tests for compile/export APIs.
  * Tests ensure deterministic, stable output across runs.
+ * Rule order is preserved (first-match-wins semantics).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,6 +14,7 @@ import {
   renderPolicyMarkdown,
   PolicyDocument,
   POLICY_VERSION,
+  PEAC_PROTOCOL_VERSION,
 } from '../src';
 
 // Test fixture: minimal policy
@@ -56,44 +58,70 @@ const comprehensivePolicy: PolicyDocument = {
   ],
 };
 
+// Test fixture: allow-by-default policy
+const allowPolicy: PolicyDocument = {
+  version: POLICY_VERSION,
+  defaults: { decision: 'allow' },
+  rules: [],
+};
+
 describe('compilePeacTxt', () => {
-  it('should compile minimal policy', () => {
+  it('should compile minimal policy with canonical schema', () => {
     const output = compilePeacTxt(minimalPolicy, { includeComments: false });
 
-    expect(output).toContain(`policy-version: ${POLICY_VERSION}`);
-    expect(output).toContain('default: deny');
-    expect(output).toContain('rules: 0');
+    expect(output).toContain(`version: ${PEAC_PROTOCOL_VERSION}`);
+    expect(output).toContain('usage: conditional');
+    expect(output).toContain('receipts: required');
+  });
+
+  it('should compile allow-default policy as usage: open', () => {
+    const output = compilePeacTxt(allowPolicy, { includeComments: false });
+
+    expect(output).toContain(`version: ${PEAC_PROTOCOL_VERSION}`);
+    expect(output).toContain('usage: open');
+    expect(output).not.toContain('receipts: required');
   });
 
   it('should compile comprehensive policy with all fields', () => {
     const output = compilePeacTxt(comprehensivePolicy, {
-      siteUrl: 'https://example.com',
       contact: 'policy@example.com',
+      attribution: 'required',
+      rateLimit: '100/hour',
+      negotiateUrl: 'https://api.example.com/negotiate',
       includeComments: false,
     });
 
-    expect(output).toContain(`policy-version: ${POLICY_VERSION}`);
-    expect(output).toContain('site: https://example.com');
+    expect(output).toContain(`version: ${PEAC_PROTOCOL_VERSION}`);
+    expect(output).toContain('usage: conditional');
     expect(output).toContain('contact: policy@example.com');
-    expect(output).toContain('default: deny');
-    expect(output).toContain('rules: 3');
-    // Purposes should be sorted alphabetically
-    expect(output).toContain('purposes: crawl, inference, train');
+    expect(output).toContain('attribution: required');
+    expect(output).toContain('receipts: required');
+    expect(output).toContain('rate_limit: 100/hour');
+    expect(output).toContain('negotiate: https://api.example.com/negotiate');
+    // Purposes should be sorted alphabetically (informational, safe to sort)
+    expect(output).toContain('purposes: [crawl, inference, train]');
   });
 
   it('should include comments when requested', () => {
     const output = compilePeacTxt(minimalPolicy, { includeComments: true });
 
     expect(output).toContain('# PEAC Policy Discovery File');
-    expect(output).toContain('# See: https://peacprotocol.org/spec/discovery');
+    expect(output).toContain('# Serve at: /.well-known/peac.txt');
+    expect(output).toContain('# See: https://peacprotocol.org');
   });
 
-  it('should include rule summary in comments', () => {
+  it('should preserve rule order in comments (first-match-wins)', () => {
     const output = compilePeacTxt(comprehensivePolicy, { includeComments: true });
 
-    expect(output).toContain('# Rule summary (conditional - see source policy for details):');
-    expect(output).toContain('#   allow-subscribed-crawl: allow');
-    expect(output).toContain('#   deny-agents-train: deny');
+    expect(output).toContain('# Policy rules (first-match-wins, author order preserved):');
+    // Rules should appear in author order, NOT alphabetical
+    const ruleLines = output
+      .split('\n')
+      .filter((line) => line.startsWith('#   ') && line.includes(': '));
+
+    expect(ruleLines[0]).toContain('allow-subscribed-crawl: allow');
+    expect(ruleLines[1]).toContain('allow-verified-train: allow');
+    expect(ruleLines[2]).toContain('deny-agents-train: deny');
   });
 
   it('should NOT output contradictory allow/deny lists', () => {
@@ -111,23 +139,26 @@ describe('compilePeacTxt', () => {
     expect(output1).toBe(output2);
   });
 
-  it('golden: comprehensive policy peac.txt (no comments)', () => {
-    const output = compilePeacTxt(comprehensivePolicy, {
-      siteUrl: 'https://example.com',
-      contact: 'policy@example.com',
-      includeComments: false,
-    });
+  it('golden: minimal deny policy peac.txt (no comments)', () => {
+    const output = compilePeacTxt(minimalPolicy, { includeComments: false });
 
-    // Golden output - no contradictory allow/deny, just default + rules
+    // Golden output - canonical schema format
     const expected = [
-      `policy-version: ${POLICY_VERSION}`,
-      'site: https://example.com',
-      'contact: policy@example.com',
-      'default: deny',
-      'rules: 3',
-      'purposes: crawl, inference, train',
+      `version: ${PEAC_PROTOCOL_VERSION}`,
+      'usage: conditional',
+      '',
+      'receipts: required',
       '',
     ].join('\n');
+
+    expect(output).toBe(expected);
+  });
+
+  it('golden: minimal allow policy peac.txt (no comments)', () => {
+    const output = compilePeacTxt(allowPolicy, { includeComments: false });
+
+    // Golden output - open usage, no receipts required
+    const expected = [`version: ${PEAC_PROTOCOL_VERSION}`, 'usage: open', '', ''].join('\n');
 
     expect(output).toBe(expected);
   });
@@ -144,11 +175,6 @@ describe('compileRobotsSnippet', () => {
   });
 
   it('should compile allow-by-default policy', () => {
-    const allowPolicy: PolicyDocument = {
-      version: POLICY_VERSION,
-      defaults: { decision: 'allow' },
-      rules: [],
-    };
     const output = compileRobotsSnippet(allowPolicy, { includeComments: false });
 
     expect(output).toContain('User-agent: GPTBot');
@@ -191,9 +217,16 @@ describe('compileAiprefTemplates', () => {
     // Should always have PEAC-Policy header
     const peacPolicy = templates.find((t) => t.header === 'PEAC-Policy');
     expect(peacPolicy).toBeDefined();
-    expect(peacPolicy?.value).toContain(`version=${POLICY_VERSION}`);
-    expect(peacPolicy?.value).toContain('default=deny');
+    expect(peacPolicy?.value).toContain(`version=${PEAC_PROTOCOL_VERSION}`);
+    expect(peacPolicy?.value).toContain('usage=conditional');
     expect(peacPolicy?.value).toContain('rules=0');
+  });
+
+  it('should use usage=open for allow-default policy', () => {
+    const templates = compileAiprefTemplates(allowPolicy);
+
+    const peacPolicy = templates.find((t) => t.header === 'PEAC-Policy');
+    expect(peacPolicy?.value).toContain('usage=open');
   });
 
   it('should include X-Robots-Tag for deny-default policy', () => {
@@ -205,23 +238,26 @@ describe('compileAiprefTemplates', () => {
   });
 
   it('should NOT include X-Robots-Tag for allow-default policy', () => {
-    const allowPolicy: PolicyDocument = {
-      version: POLICY_VERSION,
-      defaults: { decision: 'allow' },
-      rules: [],
-    };
     const templates = compileAiprefTemplates(allowPolicy);
 
     const robotsTag = templates.find((t) => t.header === 'X-Robots-Tag');
     expect(robotsTag).toBeUndefined();
   });
 
-  it('should include compatibility note about conditional rules', () => {
+  it('should include compatibility note', () => {
     const templates = compileAiprefTemplates(comprehensivePolicy);
 
-    const note = templates.find((t) => t.header === '# AIPREF Compatibility Note');
+    const note = templates.find((t) => t.header === '# Compatibility Note');
     expect(note).toBeDefined();
-    expect(note?.description).toContain('avoid contradictions');
+    expect(note?.description).toContain('compatibility only');
+  });
+
+  it('should label headers as debug/compatibility, not normative', () => {
+    const templates = compileAiprefTemplates(minimalPolicy);
+
+    const peacPolicy = templates.find((t) => t.header === 'PEAC-Policy');
+    expect(peacPolicy?.description).toContain('Debug/compatibility');
+    expect(peacPolicy?.description).not.toContain('normative');
   });
 
   it('should produce deterministic output', () => {
@@ -265,6 +301,24 @@ describe('renderPolicyMarkdown', () => {
     expect(output).toContain('### deny-agents-train');
   });
 
+  it('should preserve rule order (first-match-wins semantics)', () => {
+    const output = renderPolicyMarkdown(comprehensivePolicy);
+
+    // Rules should appear in author order, NOT alphabetical
+    const ruleMatches = output.match(/### [\w-]+/g);
+    expect(ruleMatches).toEqual([
+      '### allow-subscribed-crawl',
+      '### allow-verified-train',
+      '### deny-agents-train',
+    ]);
+  });
+
+  it('should include blockquote about rule order', () => {
+    const output = renderPolicyMarkdown(comprehensivePolicy);
+
+    expect(output).toContain('> Rules are evaluated in order');
+  });
+
   it('should include contact when provided', () => {
     const output = renderPolicyMarkdown(comprehensivePolicy, {
       contact: 'policy@example.com',
@@ -273,19 +327,11 @@ describe('renderPolicyMarkdown', () => {
     expect(output).toContain('policy@example.com');
   });
 
-  it('should produce deterministic output (rules sorted alphabetically)', () => {
+  it('should produce deterministic output', () => {
     const output1 = renderPolicyMarkdown(comprehensivePolicy);
     const output2 = renderPolicyMarkdown(comprehensivePolicy);
 
     expect(output1).toBe(output2);
-
-    // Rules should be sorted alphabetically by name
-    const ruleOrder = output1.match(/### (\w+-\w+-\w+)/g);
-    expect(ruleOrder).toEqual([
-      '### allow-subscribed-crawl',
-      '### allow-verified-train',
-      '### deny-agents-train',
-    ]);
   });
 
   it('should include PEAC protocol reference', () => {
