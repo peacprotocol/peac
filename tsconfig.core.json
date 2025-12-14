@@ -16,6 +16,7 @@
     "packages/discovery/src/**/*.ts",
     "packages/server/src/**/*.ts",
     "packages/cli/src/**/*.ts",
+    "packages/policy-kit/src/**/*.ts",
     "packages/core/src/**/*.ts",
     "packages/rails/**/src/**/*.ts",
     "packages/mappings/**/src/**/*.ts"

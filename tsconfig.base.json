@@ -33,6 +33,8 @@
       "@peac/rails-stripe": ["./packages/rails/stripe/src"],
       "@peac/rails-x402": ["./packages/rails/x402/src"],
       "@peac/mappings-acp": ["./packages/mappings/acp/src"],
+      "@peac/mappings-rsl": ["./packages/mappings/rsl/src"],
+      "@peac/policy-kit": ["./packages/policy-kit/src"],
       "@peac/transport-http": ["./packages/transport/http/src"]
     }
   },

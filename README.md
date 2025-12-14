@@ -155,6 +155,12 @@ peac decode receipt.jws
 
 # Validate discovery manifest
 peac validate-discovery https://api.example.com
+
+# Policy commands (v0.9.17+)
+peac policy init                           # Create new peac-policy.yaml
+peac policy validate peac-policy.yaml      # Validate policy syntax
+peac policy explain peac-policy.yaml       # Debug rule matching
+peac policy generate peac-policy.yaml      # Compile to deployment artifacts
 ```
 
 ### Run verification server
@@ -269,9 +275,109 @@ PEAC is designed to sit alongside existing policy mechanisms rather than replace
 
 Libraries in this repo are structured so that you do not need to hand parse every policy file type separately. You can give agents and gateways one consistent picture of what is allowed, what must be paid, and what evidence is expected on every call.
 
-### Policy Kit
+### Policy Kit (v0.9.17+)
 
-A `@peac/policy-kit` package is planned as a simple way to author policy once and emit multiple surfaces such as peac.txt, robots snippets, and AIPREF style manifests. It will not be required to use the protocol, but it will be the recommended way to keep policy consistent across sources.
+The `@peac/policy-kit` package provides a file-based policy format for authoring policies once and compiling them to multiple deployment surfaces.
+
+**Install:**
+
+```bash
+pnpm add @peac/policy-kit
+# or use CLI: pnpm add -g @peac/cli
+```
+
+**Create a policy file:**
+
+```yaml
+# peac-policy.yaml
+version: peac-policy/0.1
+name: My API Policy
+
+defaults:
+  decision: deny
+  reason: Requires subscription or verified access
+
+rules:
+  - name: allow-subscribed-crawl
+    subject:
+      type: human
+      labels: [subscribed]
+    purpose: crawl
+    licensing_mode: subscription
+    decision: allow
+
+  - name: allow-verified-train
+    subject:
+      type: org
+      labels: [verified]
+    purpose: [train, inference]
+    decision: allow
+
+  - name: deny-agents-train
+    subject:
+      type: agent
+    purpose: train
+    decision: deny
+    reason: Agents cannot train on this content
+```
+
+**Generate deployment artifacts:**
+
+```bash
+# Validate policy syntax
+peac policy validate peac-policy.yaml
+
+# Generate artifacts (peac.txt, robots snippet, AIPREF headers, markdown)
+peac policy generate peac-policy.yaml --out dist --well-known
+
+# Preview without writing files
+peac policy generate peac-policy.yaml --dry-run
+
+# Explain which rule applies for a given context
+peac policy explain peac-policy.yaml --type agent --purpose train
+```
+
+**Generated artifacts:**
+
+| File                    | Description                                               |
+| ----------------------- | --------------------------------------------------------- |
+| `.well-known/peac.txt`  | PEAC discovery file with usage, purposes, receipts config |
+| `robots-ai-snippet.txt` | AI crawler directives for robots.txt                      |
+| `aipref-headers.json`   | Compatibility header templates                            |
+| `ai-policy.md`          | Human-readable policy documentation                       |
+
+**Programmatic usage:**
+
+```typescript
+import { loadPolicy, evaluate, compilePeacTxt } from '@peac/policy-kit';
+
+// Load and validate policy
+const policy = loadPolicy('peac-policy.yaml');
+
+// Evaluate access decision
+const result = evaluate(policy, {
+  subject: { type: 'agent', labels: ['verified'] },
+  purpose: 'inference',
+  licensing_mode: 'subscription',
+});
+
+console.log(result.decision); // 'allow' | 'deny' | 'review'
+console.log(result.matched_rule); // 'allow-verified-train'
+
+// Compile to peac.txt
+const peacTxt = compilePeacTxt(policy, {
+  contact: 'policy@example.com',
+  receipts: 'required',
+  rateLimit: '100/hour',
+});
+```
+
+**Key features:**
+
+- First-match-wins rule semantics (like firewall rules)
+- CAL purposes: `crawl`, `index`, `train`, `inference`, `ai_input`, `ai_search`, `search`
+- Deterministic, auditable, side-effect free evaluation
+- No scripting or dynamic code
 
 ---
 
@@ -299,7 +405,9 @@ peac/
 │  │  └─ stripe/           # Stripe payment rail
 │  ├─ mappings/
 │  │  ├─ mcp/              # Model Context Protocol mapping
-│  │  └─ acp/              # Agentic Commerce Protocol mapping
+│  │  ├─ acp/              # Agentic Commerce Protocol mapping
+│  │  └─ rsl/              # RSL usage token mapping (v0.9.17)
+│  ├─ policy-kit/            # Policy authoring and artifact generation (v0.9.17)
 │  ├─ transport/
 │  │  ├─ http/             # HTTP transport binding (scaffolding)
 │  │  ├─ grpc/             # gRPC transport binding (scaffolding)
@@ -379,6 +487,11 @@ peac/
 - `@peac/mappings-mcp` - Model Context Protocol integration
 - `@peac/mappings-acp` - Agentic Commerce Protocol integration
 
+**Policy (stable, v0.9.17):**
+
+- `@peac/policy-kit` - Policy authoring, evaluation, and artifact generation
+- `@peac/mappings-rsl` - RSL (Robots Standard Language) mapping to CAL purposes
+
 **Pillars (early scaffolding, APIs may change):**
 
 - `@peac/control` - Constraint types and enforcement
@@ -389,7 +502,6 @@ peac/
 - `@peac/privacy` - Privacy budgeting and data protection
 - `@peac/provenance` - Content provenance and C2PA integration
 - `@peac/intelligence` - Analytics and insights
-- `@peac/policy-kit` - Policy authoring helpers for peac.txt and related signals
 
 ---
 
