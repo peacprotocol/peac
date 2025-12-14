@@ -72,3 +72,13 @@ export {
   requiresReview,
   evaluateBatch,
 } from './evaluate';
+
+// Compiler (artifact generation)
+export {
+  compilePeacTxt,
+  compileRobotsSnippet,
+  compileAiprefTemplates,
+  renderPolicyMarkdown,
+  type CompileOptions,
+  type AiprefTemplate,
+} from './compiler';

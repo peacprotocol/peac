@@ -1,7 +1,11 @@
 /**
  * PEAC Policy CLI Commands
  *
- * Commands for validating and explaining policy files.
+ * Commands for managing policy files:
+ * - init: Create a new policy file
+ * - validate: Validate policy syntax and schema
+ * - explain: Debug rule matching
+ * - generate: Compile policy to deployment artifacts
  */
 
 import { Command } from 'commander';
@@ -16,6 +20,10 @@ import {
   createExamplePolicy,
   serializePolicyYaml,
   serializePolicyJson,
+  compilePeacTxt,
+  compileRobotsSnippet,
+  compileAiprefTemplates,
+  renderPolicyMarkdown,
   PolicyLoadError,
   PolicyValidationError,
   POLICY_VERSION,
@@ -26,6 +34,49 @@ import {
 } from '@peac/policy-kit';
 
 const policy = new Command('policy').description('Policy file operations');
+
+/**
+ * peac policy init
+ *
+ * Create a new peac-policy.yaml file in the current directory.
+ */
+policy
+  .command('init')
+  .description('Create a new PEAC policy file')
+  .option('-f, --format <format>', 'Output format (yaml or json)', 'yaml')
+  .option('-o, --output <file>', 'Output file path', 'peac-policy.yaml')
+  .option('--force', 'Overwrite existing file')
+  .action((options: { format?: string; output?: string; force?: boolean }) => {
+    try {
+      const format = options.format?.toLowerCase() || 'yaml';
+      const outputPath =
+        options.output || (format === 'json' ? 'peac-policy.json' : 'peac-policy.yaml');
+
+      // Check if file exists and --force not set
+      if (fs.existsSync(outputPath) && !options.force) {
+        console.error(`Error: File already exists: ${outputPath}`);
+        console.error('Use --force to overwrite.');
+        process.exit(1);
+      }
+
+      const example = createExamplePolicy();
+      const content =
+        format === 'json' ? serializePolicyJson(example) : serializePolicyYaml(example);
+
+      fs.writeFileSync(outputPath, content, 'utf-8');
+      console.log(`Created policy file: ${outputPath}`);
+      console.log('');
+      console.log('Next steps:');
+      console.log('  1. Edit the policy file to define your access rules');
+      console.log('  2. Validate with: peac policy validate ' + outputPath);
+      console.log('  3. Generate artifacts with: peac policy generate ' + outputPath);
+
+      process.exit(0);
+    } catch (err) {
+      console.error('Error:', err instanceof Error ? err.message : String(err));
+      process.exit(1);
+    }
+  });
 
 /**
  * peac policy validate <file>
@@ -74,9 +125,7 @@ policy
             }
           }
           if (rule.purpose) {
-            const purposes = Array.isArray(rule.purpose)
-              ? rule.purpose.join('|')
-              : rule.purpose;
+            const purposes = Array.isArray(rule.purpose) ? rule.purpose.join('|') : rule.purpose;
             console.log(`       purpose: ${purposes}`);
           }
           if (rule.licensing_mode) {
@@ -107,7 +156,96 @@ policy
   });
 
 /**
+ * peac policy generate <file>
+ *
+ * Generate deployment artifacts from a policy file:
+ * - peac.txt (PEAC discovery file)
+ * - robots.txt snippet
+ * - AIPREF header templates
+ * - ai-policy.md (human-readable summary)
+ */
+policy
+  .command('generate')
+  .description('Generate deployment artifacts from a policy file')
+  .argument('<file>', 'Path to policy file')
+  .option('-o, --out <dir>', 'Output directory', 'dist')
+  .option('--site-url <url>', 'Site URL for peac.txt')
+  .option('--contact <email>', 'Contact email for policy questions')
+  .option('--no-comments', 'Omit comments from generated files')
+  .action(
+    (
+      file: string,
+      options: {
+        out: string;
+        siteUrl?: string;
+        contact?: string;
+        comments?: boolean;
+      }
+    ) => {
+      try {
+        console.log(`Loading policy: ${file}\n`);
+        const policyDoc = loadPolicy(file);
+
+        // Create output directory if needed
+        const outDir = options.out;
+        if (!fs.existsSync(outDir)) {
+          fs.mkdirSync(outDir, { recursive: true });
+        }
+
+        const compileOptions = {
+          siteUrl: options.siteUrl,
+          contact: options.contact,
+          includeComments: options.comments !== false,
+        };
+
+        // Generate peac.txt
+        const peacTxt = compilePeacTxt(policyDoc, compileOptions);
+        const peacTxtPath = path.join(outDir, 'peac.txt');
+        fs.writeFileSync(peacTxtPath, peacTxt, 'utf-8');
+        console.log(`Generated: ${peacTxtPath}`);
+
+        // Generate robots.txt snippet
+        const robotsTxt = compileRobotsSnippet(policyDoc, compileOptions);
+        const robotsPath = path.join(outDir, 'robots-ai-snippet.txt');
+        fs.writeFileSync(robotsPath, robotsTxt, 'utf-8');
+        console.log(`Generated: ${robotsPath}`);
+
+        // Generate AIPREF templates
+        const aiprefTemplates = compileAiprefTemplates(policyDoc, compileOptions);
+        const aiprefPath = path.join(outDir, 'aipref-headers.json');
+        fs.writeFileSync(aiprefPath, JSON.stringify(aiprefTemplates, null, 2), 'utf-8');
+        console.log(`Generated: ${aiprefPath}`);
+
+        // Generate ai-policy.md
+        const markdown = renderPolicyMarkdown(policyDoc, compileOptions);
+        const mdPath = path.join(outDir, 'ai-policy.md');
+        fs.writeFileSync(mdPath, markdown, 'utf-8');
+        console.log(`Generated: ${mdPath}`);
+
+        console.log('');
+        console.log('Deployment instructions:');
+        console.log(`  1. Copy ${peacTxtPath} to /.well-known/peac.txt`);
+        console.log(`  2. Append ${robotsPath} to your robots.txt`);
+        console.log(`  3. Add headers from ${aiprefPath} to your server config`);
+        console.log(`  4. Publish ${mdPath} for human reference`);
+
+        process.exit(0);
+      } catch (err) {
+        if (err instanceof PolicyLoadError) {
+          console.error(`Failed to load policy: ${err.message}`);
+          process.exit(1);
+        } else {
+          console.error('Error:', err instanceof Error ? err.message : String(err));
+          process.exit(1);
+        }
+      }
+    }
+  );
+
+/**
  * peac policy explain <file>
+ *
+ * Debug tool: explain which rule would apply for a given context.
  */
 policy
   .command('explain')
@@ -116,8 +254,14 @@ policy
   .option('-t, --type <type>', 'Subject type (human, org, agent)')
   .option('-l, --labels <labels>', 'Subject labels (comma-separated)')
   .option('-i, --id <id>', 'Subject ID')
-  .option('-p, --purpose <purpose>', 'Access purpose (crawl, index, train, inference, ai_input, ai_search, search)')
-  .option('-m, --licensing-mode <mode>', 'Licensing mode (subscription, pay_per_crawl, pay_per_inference)')
+  .option(
+    '-p, --purpose <purpose>',
+    'Access purpose (crawl, index, train, inference, ai_input, ai_search, search)'
+  )
+  .option(
+    '-m, --licensing-mode <mode>',
+    'Licensing mode (subscription, pay_per_crawl, pay_per_inference)'
+  )
   .option('--all-matches', 'Show all matching rules, not just the first')
   .action(
     (
@@ -207,34 +351,5 @@ policy
       }
     }
   );
-
-/**
- * peac policy example
- */
-policy
-  .command('example')
-  .description('Generate an example policy file')
-  .option('-f, --format <format>', 'Output format (yaml or json)', 'yaml')
-  .option('-o, --output <file>', 'Output file path (default: stdout)')
-  .action((options: { format?: string; output?: string }) => {
-    try {
-      const example = createExamplePolicy();
-      const format = options.format?.toLowerCase() || 'yaml';
-      const content =
-        format === 'json' ? serializePolicyJson(example) : serializePolicyYaml(example);
-
-      if (options.output) {
-        fs.writeFileSync(options.output, content, 'utf-8');
-        console.log(`Example policy written to: ${options.output}`);
-      } else {
-        console.log(content);
-      }
-
-      process.exit(0);
-    } catch (err) {
-      console.error('Error:', err instanceof Error ? err.message : String(err));
-      process.exit(1);
-    }
-  });
 
 export { policy };
