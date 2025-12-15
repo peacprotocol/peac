@@ -30,7 +30,7 @@ You may also use the Marks in documentation, blog posts, talks, benchmarks, and 
 
 ### Open-source package/repo naming (permitted)
 
-You may use "peac" in OSS package or repository names *when it is clearly descriptive* and does not imply official status.
+You may use "peac" in OSS package or repository names _when it is clearly descriptive_ and does not imply official status.
 
 Good examples:
 
@@ -89,7 +89,7 @@ We do not want to block community projects, but we do want to prevent confusing 
 
 ### Allowed (generally)
 
-- Domains/handles that clearly identify *your* brand first and PEAC second, e.g.:
+- Domains/handles that clearly identify _your_ brand first and PEAC second, e.g.:
   - `acme-peac-tools.example`
   - `peac-tools-by-acme.example`
 - Community projects that are clearly unofficial and include a disclaimer (Section 6)
