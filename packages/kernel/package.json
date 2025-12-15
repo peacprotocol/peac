@@ -51,6 +51,22 @@
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/kernel"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "typescript": "^5.6.2"
   }

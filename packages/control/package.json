@@ -10,7 +10,14 @@
     "directory": "packages/control"
   },
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
-  "license": "MIT",
+  "license": "Apache-2.0",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",

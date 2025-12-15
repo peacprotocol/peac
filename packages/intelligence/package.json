@@ -1,6 +1,7 @@
 {
   "name": "@peac/intelligence",
   "version": "0.9.17",
+  "private": true,
   "description": "PEAC intelligence pillar (placeholder for v0.9.18+)",
   "type": "module",
   "main": "./dist/index.js",

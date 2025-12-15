@@ -7,7 +7,11 @@
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
-  "repository": "https://github.com/peacprotocol/peac",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/core"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
