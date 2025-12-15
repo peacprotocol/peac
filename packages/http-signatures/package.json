@@ -26,8 +26,8 @@
     "ed25519",
     "peac"
   ],
-  "author": "PEAC Protocol contributors",
-  "license": "MIT",
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
@@ -38,8 +38,7 @@
     "directory": "packages/http-signatures"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "devDependencies": {
     "typescript": "^5.3.0",

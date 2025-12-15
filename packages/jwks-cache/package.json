@@ -27,8 +27,8 @@
     "edge",
     "peac"
   ],
-  "author": "PEAC Protocol contributors",
-  "license": "MIT",
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
@@ -39,8 +39,7 @@
     "directory": "packages/jwks-cache"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "dependencies": {
     "@peac/http-signatures": "workspace:*"
