@@ -1,0 +1,47 @@
+{
+  "name": "@peac/http-signatures",
+  "version": "0.9.17",
+  "description": "RFC 9421 HTTP Message Signatures parsing and verification",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "http",
+    "signatures",
+    "rfc9421",
+    "ed25519",
+    "peac"
+  ],
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://peacprotocol.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "packages/http-signatures"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  }
+}

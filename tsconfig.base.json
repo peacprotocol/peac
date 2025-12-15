@@ -35,7 +35,10 @@
       "@peac/mappings-acp": ["./packages/mappings/acp/src"],
       "@peac/mappings-rsl": ["./packages/mappings/rsl/src"],
       "@peac/policy-kit": ["./packages/policy-kit/src"],
-      "@peac/transport-http": ["./packages/transport/http/src"]
+      "@peac/transport-http": ["./packages/transport/http/src"],
+      "@peac/http-signatures": ["./packages/http-signatures/src"],
+      "@peac/jwks-cache": ["./packages/jwks-cache/src"],
+      "@peac/mappings-tap": ["./packages/mappings/tap/src"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "lib", "coverage"]

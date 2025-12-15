@@ -1,0 +1,51 @@
+{
+  "name": "@peac/jwks-cache",
+  "version": "0.9.17",
+  "description": "Edge-safe JWKS fetch and cache with SSRF protection",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "jwks",
+    "cache",
+    "ed25519",
+    "ssrf",
+    "edge",
+    "peac"
+  ],
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://peacprotocol.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "packages/jwks-cache"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@peac/http-signatures": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  }
+}
