@@ -1,6 +1,7 @@
 {
   "name": "@peac/consent",
   "version": "0.9.17",
+  "private": true,
   "description": "PEAC consent pillar (placeholder for v0.9.18+)",
   "type": "module",
   "main": "./dist/index.js",

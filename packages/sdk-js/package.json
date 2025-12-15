@@ -38,7 +38,18 @@
     "verify",
     "discover"
   ],
-  "license": "MIT",
-  "repository": "https://github.com/peac-protocol/peac",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/sdk-js"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "sideEffects": false
 }

@@ -10,7 +10,18 @@
     "directory": "packages/schema"
   },
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
-  "license": "MIT",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",

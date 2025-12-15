@@ -61,6 +61,15 @@
   ],
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/receipts"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
   "engines": {
     "node": ">=20.0.0"
   }
