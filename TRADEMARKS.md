@@ -6,7 +6,7 @@ PEAC Protocol is an open-source project. The **PEAC Protocol** name, **PEAC** na
 
 **Project stewardship:** Poem, Inc.
 **Maintainer contact:** Jithin Raj
-**Trademark contact:** <trademarks@peacprotocol.org>
+**Trademark contact:** <contact@peacprotocol.org>
 
 These guidelines do **not** restrict your rights to use PEAC Protocol code under the Apache-2.0 license. They only cover trademark usage.
 
@@ -111,7 +111,7 @@ If you are a community project, plugin, or integration, add this to your README/
 
 Questions or permission requests: <contact@peacprotocol.org>
 
-If you believe a use of the Marks is confusing or misleading, please email <trademarks@peacprotocol.org> with links and a brief description.
+If you believe a use of the Marks is confusing or misleading, please email <contact@peacprotocol.org> with links and a brief description.
 
 ## 8. Updates
 
