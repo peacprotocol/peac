@@ -13,9 +13,7 @@ describe('validateUrl', () => {
   });
 
   it('allows HTTP localhost when enabled', () => {
-    expect(() =>
-      validateUrl('http://localhost:3000/jwks', { allowLocalhost: true })
-    ).not.toThrow();
+    expect(() => validateUrl('http://localhost:3000/jwks', { allowLocalhost: true })).not.toThrow();
   });
 
   it('rejects localhost by default', () => {

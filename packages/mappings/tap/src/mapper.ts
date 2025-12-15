@@ -4,11 +4,7 @@
  * Maps Visa Trusted Agent Protocol proofs to PEAC control.chain[].
  */
 
-import {
-  verifySignature,
-  parseSignature,
-  type SignatureRequest,
-} from '@peac/http-signatures';
+import { verifySignature, parseSignature, type SignatureRequest } from '@peac/http-signatures';
 import type {
   TapRequest,
   TapKeyResolver,
@@ -19,11 +15,7 @@ import type {
 } from './types.js';
 import { TAP_CONSTANTS } from './types.js';
 import { ErrorCodes, TapError } from './errors.js';
-import {
-  validateTapTimeConstraints,
-  validateTapAlgorithm,
-  validateTapTag,
-} from './validator.js';
+import { validateTapTimeConstraints, validateTapAlgorithm, validateTapTag } from './validator.js';
 import { getHeader } from './helpers.js';
 
 /**

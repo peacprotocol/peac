@@ -66,10 +66,7 @@ export async function verifySignature(
     const valid = await verifier(signatureBaseBytes, parsed.signatureBytes);
 
     if (!valid) {
-      throw new HttpSignatureError(
-        ErrorCodes.SIGNATURE_INVALID,
-        'Signature verification failed'
-      );
+      throw new HttpSignatureError(ErrorCodes.SIGNATURE_INVALID, 'Signature verification failed');
     }
 
     return {
@@ -154,11 +151,10 @@ export function isCreatedInFuture(
 export async function isEd25519WebCryptoSupported(): Promise<boolean> {
   try {
     // Try to generate a key pair to test support
-    const keyPair = await globalThis.crypto.subtle.generateKey(
-      'Ed25519',
-      false,
-      ['sign', 'verify']
-    );
+    const keyPair = await globalThis.crypto.subtle.generateKey('Ed25519', false, [
+      'sign',
+      'verify',
+    ]);
     return keyPair !== null;
   } catch {
     return false;
@@ -183,12 +179,7 @@ export function createWebCryptoVerifier(key: unknown): SignatureVerifier {
     // Use type from the actual WebCrypto API to avoid DOM type dependency
     type VerifyKey = Parameters<typeof globalThis.crypto.subtle.verify>[1];
 
-    return globalThis.crypto.subtle.verify(
-      'Ed25519',
-      key as VerifyKey,
-      sigBuffer,
-      dataBuffer
-    );
+    return globalThis.crypto.subtle.verify('Ed25519', key as VerifyKey, sigBuffer, dataBuffer);
   };
 }
 

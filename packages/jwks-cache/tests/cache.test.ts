@@ -71,9 +71,7 @@ describe('InMemoryCache', () => {
 
 describe('buildCacheKey', () => {
   it('builds key from origin and kid', () => {
-    expect(buildCacheKey('https://example.com', 'key1')).toBe(
-      'https://example.com:key1'
-    );
+    expect(buildCacheKey('https://example.com', 'key1')).toBe('https://example.com:key1');
   });
 });
 

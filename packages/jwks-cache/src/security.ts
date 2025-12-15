@@ -34,19 +34,13 @@ export function validateUrl(
     if (parsed.protocol === 'http:' && options.allowLocalhost && isLocalhostHost(parsed.hostname)) {
       // Allow http://localhost in dev mode
     } else {
-      throw new JwksError(
-        ErrorCodes.SSRF_BLOCKED,
-        `HTTPS required, got ${parsed.protocol}`
-      );
+      throw new JwksError(ErrorCodes.SSRF_BLOCKED, `HTTPS required, got ${parsed.protocol}`);
     }
   }
 
   // Block localhost variants (unless explicitly allowed)
   if (isLocalhostHost(parsed.hostname) && !options.allowLocalhost) {
-    throw new JwksError(
-      ErrorCodes.SSRF_BLOCKED,
-      `Localhost blocked: ${parsed.hostname}`
-    );
+    throw new JwksError(ErrorCodes.SSRF_BLOCKED, `Localhost blocked: ${parsed.hostname}`);
   }
 
   // Block literal IP addresses in URL
@@ -59,10 +53,7 @@ export function validateUrl(
 
   // Check enterprise allowlist if provided
   if (options.isAllowedHost && !options.isAllowedHost(parsed.hostname)) {
-    throw new JwksError(
-      ErrorCodes.SSRF_BLOCKED,
-      `Host not in allowlist: ${parsed.hostname}`
-    );
+    throw new JwksError(ErrorCodes.SSRF_BLOCKED, `Host not in allowlist: ${parsed.hostname}`);
   }
 }
 

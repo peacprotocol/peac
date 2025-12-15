@@ -19,16 +19,10 @@ import { ErrorCodes, TapError } from './errors.js';
  * @param now - Current Unix timestamp
  * @throws TapError if validation fails
  */
-export function validateTapTimeConstraints(
-  params: ParsedSignatureParams,
-  now: number
-): void {
+export function validateTapTimeConstraints(params: ParsedSignatureParams, now: number): void {
   // Validate expires is present for TAP
   if (params.expires === undefined) {
-    throw new TapError(
-      ErrorCodes.TAP_TIME_INVALID,
-      'TAP signatures must have expires parameter'
-    );
+    throw new TapError(ErrorCodes.TAP_TIME_INVALID, 'TAP signatures must have expires parameter');
   }
 
   // Validate window size (8 minutes max)

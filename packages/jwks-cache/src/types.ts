@@ -106,7 +106,4 @@ export interface ResolvedKey {
  * Key resolver function type for TAP integration.
  * Returns a SignatureVerifier or null if key not found.
  */
-export type JwksKeyResolver = (
-  issuer: string,
-  keyid: string
-) => Promise<SignatureVerifier | null>;
+export type JwksKeyResolver = (issuer: string, keyid: string) => Promise<SignatureVerifier | null>;

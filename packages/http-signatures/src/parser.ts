@@ -16,9 +16,7 @@ import { ErrorCodes, HttpSignatureError } from './errors.js';
  * @param headerValue - Raw Signature-Input header value
  * @returns Map of label to parsed parameters
  */
-export function parseSignatureInput(
-  headerValue: string
-): Map<string, ParsedSignatureParams> {
+export function parseSignatureInput(headerValue: string): Map<string, ParsedSignatureParams> {
   const results = new Map<string, ParsedSignatureParams>();
 
   // Split by comma for multiple signatures (outer dictionary members)
@@ -90,10 +88,7 @@ export function parseSignature(
   }
 
   if (!signature) {
-    throw new HttpSignatureError(
-      ErrorCodes.SIGNATURE_MISSING,
-      'Missing Signature header'
-    );
+    throw new HttpSignatureError(ErrorCodes.SIGNATURE_MISSING, 'Missing Signature header');
   }
 
   const inputMap = parseSignatureInput(signatureInput);
@@ -109,10 +104,7 @@ export function parseSignature(
   // Use specified label or first available
   const targetLabel = label ?? inputMap.keys().next().value;
   if (!targetLabel) {
-    throw new HttpSignatureError(
-      ErrorCodes.SIGNATURE_INPUT_MALFORMED,
-      'No signature label found'
-    );
+    throw new HttpSignatureError(ErrorCodes.SIGNATURE_INPUT_MALFORMED, 'No signature label found');
   }
 
   const params = inputMap.get(targetLabel);
@@ -313,10 +305,7 @@ function base64ToBytes(base64: string): Uint8Array {
   const normalized = base64.replace(/-/g, '+').replace(/_/g, '/');
 
   // Add padding if needed
-  const padded = normalized.padEnd(
-    normalized.length + ((4 - (normalized.length % 4)) % 4),
-    '='
-  );
+  const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
 
   const binary = atob(padded);
   const bytes = new Uint8Array(binary.length);

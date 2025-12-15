@@ -8,8 +8,5 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests"],
-  "references": [
-    { "path": "../../http-signatures" },
-    { "path": "../../jwks-cache" }
-  ]
+  "references": [{ "path": "../../http-signatures" }, { "path": "../../jwks-cache" }]
 }

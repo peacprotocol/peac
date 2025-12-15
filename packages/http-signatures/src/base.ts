@@ -49,10 +49,7 @@ function getComponentValue(request: SignatureRequest, component: string): string
 /**
  * Get derived component value.
  */
-function getDerivedComponentValue(
-  request: SignatureRequest,
-  component: string
-): string {
+function getDerivedComponentValue(request: SignatureRequest, component: string): string {
   switch (component) {
     case '@method':
       return request.method.toUpperCase();

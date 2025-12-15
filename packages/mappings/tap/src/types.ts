@@ -47,10 +47,7 @@ export interface TapRequest {
  * Key resolver for TAP verification.
  * Given issuer and keyid, returns SignatureVerifier or null.
  */
-export type TapKeyResolver = (
-  issuer: string,
-  keyid: string
-) => Promise<SignatureVerifier | null>;
+export type TapKeyResolver = (issuer: string, keyid: string) => Promise<SignatureVerifier | null>;
 
 /**
  * TAP verification options.

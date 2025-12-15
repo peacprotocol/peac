@@ -9,10 +9,7 @@
  * Ed25519 signature verifier function (runtime-neutral).
  * Takes raw data and signature bytes, returns verification result.
  */
-export type SignatureVerifier = (
-  data: Uint8Array,
-  signature: Uint8Array
-) => Promise<boolean>;
+export type SignatureVerifier = (data: Uint8Array, signature: Uint8Array) => Promise<boolean>;
 
 /**
  * Key resolver function type (runtime-neutral).

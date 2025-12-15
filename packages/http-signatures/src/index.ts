@@ -17,11 +17,7 @@ export type {
 } from './types.js';
 
 // Parser
-export {
-  parseSignatureInput,
-  parseSignatureHeader,
-  parseSignature,
-} from './parser.js';
+export { parseSignatureInput, parseSignatureHeader, parseSignature } from './parser.js';
 
 // Signature base
 export { buildSignatureBase, signatureBaseToBytes } from './base.js';

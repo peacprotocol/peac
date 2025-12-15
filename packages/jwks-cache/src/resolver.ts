@@ -148,10 +148,7 @@ export async function resolveKey(
       // Parse response
       const text = await result.text();
       if (text.length > options.maxResponseBytes) {
-        throw new JwksError(
-          ErrorCodes.JWKS_TOO_LARGE,
-          `Response too large: ${text.length} bytes`
-        );
+        throw new JwksError(ErrorCodes.JWKS_TOO_LARGE, `Response too large: ${text.length} bytes`);
       }
 
       let data: unknown;
@@ -178,9 +175,7 @@ export async function resolveKey(
       }
 
       // Calculate TTL
-      const cacheControlMaxAge = parseCacheControlMaxAge(
-        result.headers.get('cache-control')
-      );
+      const cacheControlMaxAge = parseCacheControlMaxAge(result.headers.get('cache-control'));
       const ttl = calculateTtl(
         cacheControlMaxAge,
         options.defaultTtlSeconds,
@@ -225,10 +220,7 @@ export async function resolveKey(
 /**
  * Fetch with timeout.
  */
-async function fetchWithTimeout(
-  url: string,
-  timeoutMs: number
-): Promise<Response> {
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -256,10 +248,7 @@ async function fetchWithTimeout(
     if (error instanceof JwksError) {
       throw error;
     }
-    throw new JwksError(
-      ErrorCodes.JWKS_FETCH_FAILED,
-      `Fetch failed: ${(error as Error).message}`
-    );
+    throw new JwksError(ErrorCodes.JWKS_FETCH_FAILED, `Fetch failed: ${(error as Error).message}`);
   } finally {
     clearTimeout(timeout);
   }
@@ -379,11 +368,6 @@ export async function createJwkVerifier(jwk: JWK): Promise<SignatureVerifier> {
     // Use type from the actual WebCrypto API to avoid DOM type dependency
     type VerifyKey = Parameters<typeof globalThis.crypto.subtle.verify>[1];
 
-    return globalThis.crypto.subtle.verify(
-      'Ed25519',
-      key as VerifyKey,
-      sigBuffer,
-      dataBuffer
-    );
+    return globalThis.crypto.subtle.verify('Ed25519', key as VerifyKey, sigBuffer, dataBuffer);
   };
 }

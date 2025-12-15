@@ -5,26 +5,18 @@ import type { SignatureRequest, KeyResolver } from '../src/types.js';
 
 describe('isExpired', () => {
   it('returns false when no expires', () => {
-    expect(
-      isExpired({ keyid: '', alg: '', created: 100, coveredComponents: [] }, 200)
-    ).toBe(false);
+    expect(isExpired({ keyid: '', alg: '', created: 100, coveredComponents: [] }, 200)).toBe(false);
   });
 
   it('returns false when not expired', () => {
     expect(
-      isExpired(
-        { keyid: '', alg: '', created: 100, expires: 300, coveredComponents: [] },
-        200
-      )
+      isExpired({ keyid: '', alg: '', created: 100, expires: 300, coveredComponents: [] }, 200)
     ).toBe(false);
   });
 
   it('returns true when expired', () => {
     expect(
-      isExpired(
-        { keyid: '', alg: '', created: 100, expires: 150, coveredComponents: [] },
-        200
-      )
+      isExpired({ keyid: '', alg: '', created: 100, expires: 150, coveredComponents: [] }, 200)
     ).toBe(true);
   });
 });
@@ -32,31 +24,19 @@ describe('isExpired', () => {
 describe('isCreatedInFuture', () => {
   it('returns false when created is in past', () => {
     expect(
-      isCreatedInFuture(
-        { keyid: '', alg: '', created: 100, coveredComponents: [] },
-        200,
-        60
-      )
+      isCreatedInFuture({ keyid: '', alg: '', created: 100, coveredComponents: [] }, 200, 60)
     ).toBe(false);
   });
 
   it('returns false when within skew tolerance', () => {
     expect(
-      isCreatedInFuture(
-        { keyid: '', alg: '', created: 250, coveredComponents: [] },
-        200,
-        60
-      )
+      isCreatedInFuture({ keyid: '', alg: '', created: 250, coveredComponents: [] }, 200, 60)
     ).toBe(false);
   });
 
   it('returns true when beyond skew tolerance', () => {
     expect(
-      isCreatedInFuture(
-        { keyid: '', alg: '', created: 300, coveredComponents: [] },
-        200,
-        60
-      )
+      isCreatedInFuture({ keyid: '', alg: '', created: 300, coveredComponents: [] }, 200, 60)
     ).toBe(true);
   });
 });
@@ -67,7 +47,7 @@ describe('verifySignature', () => {
     url: 'https://example.com/api/resource',
     headers: {
       'signature-input': 'sig1=("@method");created=1618884473;keyid="test-key";alg="ed25519"',
-      'signature': 'sig1=:dGVzdA==:',
+      signature: 'sig1=:dGVzdA==:',
     },
   };
 
@@ -76,7 +56,7 @@ describe('verifySignature', () => {
       ...mockRequest,
       headers: {
         'signature-input': 'sig1=("@method");created=1618884473;keyid="test-key";alg="rsa-sha256"',
-        'signature': 'sig1=:dGVzdA==:',
+        signature: 'sig1=:dGVzdA==:',
       },
     };
 
@@ -91,8 +71,9 @@ describe('verifySignature', () => {
     const request: SignatureRequest = {
       ...mockRequest,
       headers: {
-        'signature-input': 'sig1=("@method");created=100;expires=150;keyid="test-key";alg="ed25519"',
-        'signature': 'sig1=:dGVzdA==:',
+        'signature-input':
+          'sig1=("@method");created=100;expires=150;keyid="test-key";alg="ed25519"',
+        signature: 'sig1=:dGVzdA==:',
       },
     };
 
@@ -108,7 +89,7 @@ describe('verifySignature', () => {
       ...mockRequest,
       headers: {
         'signature-input': 'sig1=("@method");created=500;keyid="test-key";alg="ed25519"',
-        'signature': 'sig1=:dGVzdA==:',
+        signature: 'sig1=:dGVzdA==:',
       },
     };
 

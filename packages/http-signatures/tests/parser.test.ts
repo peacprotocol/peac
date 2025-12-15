@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  parseSignatureInput,
-  parseSignatureHeader,
-  parseSignature,
-} from '../src/parser.js';
+import { parseSignatureInput, parseSignatureHeader, parseSignature } from '../src/parser.js';
 import { HttpSignatureError, ErrorCodes } from '../src/errors.js';
 
 describe('parseSignatureInput', () => {
@@ -22,7 +18,8 @@ describe('parseSignatureInput', () => {
   });
 
   it('parses signature input with optional parameters', () => {
-    const input = 'sig1=("@method");created=1618884473;expires=1618884533;nonce="abc123";keyid="key1";alg="ed25519";tag="agent-browser-auth"';
+    const input =
+      'sig1=("@method");created=1618884473;expires=1618884533;nonce="abc123";keyid="key1";alg="ed25519";tag="agent-browser-auth"';
     const result = parseSignatureInput(input);
 
     const params = result.get('sig1')!;
@@ -32,7 +29,8 @@ describe('parseSignatureInput', () => {
   });
 
   it('parses multiple signatures', () => {
-    const input = 'sig1=("@method");created=1;keyid="k1";alg="ed25519", sig2=("@path");created=2;keyid="k2";alg="ed25519"';
+    const input =
+      'sig1=("@method");created=1;keyid="k1";alg="ed25519", sig2=("@path");created=2;keyid="k2";alg="ed25519"';
     const result = parseSignatureInput(input);
 
     expect(result.size).toBe(2);

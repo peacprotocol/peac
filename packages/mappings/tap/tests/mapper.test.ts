@@ -7,12 +7,10 @@ describe('verifyTapProof', () => {
   const now = 1618884473;
 
   // Mock request with valid TAP headers
-  const createMockRequest = (
-    overrides: Partial<Record<string, string>> = {}
-  ): TapRequest => {
+  const createMockRequest = (overrides: Partial<Record<string, string>> = {}): TapRequest => {
     const headers: Record<string, string> = {
       'signature-input': `sig1=("@method" "@path");created=${now - 60};expires=${now + 360};keyid="test-key";alg="ed25519";tag="agent-browser-auth"`,
-      'signature': 'sig1=:dGVzdA==:',
+      signature: 'sig1=:dGVzdA==:',
       ...overrides,
     };
     return {
@@ -124,7 +122,10 @@ describe('verifyTapProof', () => {
 
   it('works with headersToRecord from Map', async () => {
     const headersMap = new Map([
-      ['signature-input', `sig1=("@method");created=${now - 60};expires=${now + 360};keyid="test-key";alg="ed25519";tag="agent-browser-auth"`],
+      [
+        'signature-input',
+        `sig1=("@method");created=${now - 60};expires=${now + 360};keyid="test-key";alg="ed25519";tag="agent-browser-auth"`,
+      ],
       ['signature', 'sig1=:dGVzdA==:'],
     ]);
 
