@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "module": "ESNext"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests"],
+  "references": [
+    { "path": "../../http-signatures" },
+    { "path": "../../jwks-cache" }
+  ]
+}
