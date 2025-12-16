@@ -1,0 +1,35 @@
+# PEAC Receipt Verification Worker
+# https://peacprotocol.org
+
+name = "peac-verifier"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables (set via wrangler secret or dashboard)
+# ISSUER_ALLOWLIST = "https://issuer1.example.com,https://issuer2.example.com"
+# BYPASS_PATHS = "/.well-known/*,/health"
+
+# KV Namespace for best-effort replay protection
+# WARNING: KV is eventually consistent, NOT atomic. Use Durable Objects for strong guarantees.
+# [[kv_namespaces]]
+# binding = "REPLAY_KV"
+# id = "<your-kv-namespace-id>"
+
+# Durable Objects for strong replay protection (recommended for enterprise)
+# [[durable_objects.bindings]]
+# name = "REPLAY_DO"
+# class_name = "ReplayDurableObject"
+
+# D1 Database for replay protection (alternative to DO)
+# [[d1_databases]]
+# binding = "REPLAY_D1"
+# database_name = "peac-replay"
+# database_id = "<your-d1-database-id>"
+
+[build]
+command = ""
+
+[dev]
+port = 8787
+local_protocol = "http"

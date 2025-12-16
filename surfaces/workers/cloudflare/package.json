@@ -1,0 +1,45 @@
+{
+  "name": "@peac/worker-cloudflare",
+  "version": "0.9.18",
+  "description": "PEAC receipt verification worker for Cloudflare Workers",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "peac",
+    "tap",
+    "receipts",
+    "verification"
+  ],
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://peacprotocol.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "surfaces/workers/cloudflare"
+  },
+  "dependencies": {
+    "@peac/http-signatures": "workspace:*",
+    "@peac/jwks-cache": "workspace:*",
+    "@peac/mappings-tap": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241205.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0",
+    "wrangler": "^3.93.0"
+  }
+}
