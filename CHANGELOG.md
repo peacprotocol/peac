@@ -5,6 +5,23 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **RSL 1.0 Token Vocabulary**: Corrected RSL token mapping to match RSL 1.0 specification
+  - RSL uses `ai-index`, not `ai-search` (was a mistaken assumption in v0.9.17)
+  - Added `ai_index` ControlPurpose (RSL 1.0 canonical)
+  - Added `all` RSL token support (expands to all purposes)
+  - **BREAKING**: Removed `ai_search` ControlPurpose (use `ai_index` or `ai_input` instead)
+
+### Migration (ai_search removal)
+
+If you used `ai_search`:
+
+- For **AI search summaries / RAG grounding**: use `ai_input` (RSL: `ai-input`)
+- For **AI indexing / embedding index creation**: use `ai_index` (RSL: `ai-index`)
+
 ## [0.9.17] - 2025-12-14
 
 ### Added

@@ -22,8 +22,13 @@ export type ControlDecision = 'allow' | 'deny' | 'review';
  * - "train": AI/ML model training
  * - "inference": AI/ML inference/generation
  * - "ai_input": RAG/grounding (using content as input to AI) [v0.9.17+, RSL alignment]
- * - "ai_search": AI-powered search [v0.9.17+, RSL alignment]
+ * - "ai_index": AI-powered search/indexing [v0.9.18+, RSL 1.0 alignment]
  * - "search": Traditional search indexing [v0.9.17+, RSL alignment]
+ *
+ * Note: RSL 1.0 uses "ai-index" (not "ai-search"). PEAC maps RSL "ai-index" to
+ * "ai_index". Previous versions used "ai_search" which has been removed.
+ *
+ * @see https://rslstandard.org/rsl for RSL 1.0 specification
  */
 export type ControlPurpose =
   | 'crawl'
@@ -31,7 +36,7 @@ export type ControlPurpose =
   | 'train'
   | 'inference'
   | 'ai_input'
-  | 'ai_search'
+  | 'ai_index'
   | 'search';
 
 /**

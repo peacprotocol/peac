@@ -14,27 +14,39 @@ import type { RslUsageToken, RslMappingResult, RslRule } from './types';
 export type { RslUsageToken, RslMappingResult, RslRule } from './types';
 
 /**
- * Mapping from RSL usage tokens to PEAC ControlPurpose values
+ * Mapping from RSL 1.0 usage tokens to PEAC ControlPurpose values
  *
- * Rules:
+ * RSL 1.0 tokens (canonical):
+ * - all       -> ['train', 'ai_input', 'ai_index', 'search'] (all purposes)
+ * - ai-all    -> ['train', 'ai_input', 'ai_index'] (all AI purposes)
  * - ai-train  -> ['train']
  * - ai-input  -> ['ai_input']
- * - ai-search -> ['ai_search']
+ * - ai-index  -> ['ai_index']
  * - search    -> ['search']
- * - ai-all    -> ['train', 'ai_input', 'ai_search']
+ *
+ * @see https://rslstandard.org/rsl for RSL 1.0 specification
  */
 const RSL_TO_CAL_MAP: Record<RslUsageToken, ControlPurpose[]> = {
+  all: ['train', 'ai_input', 'ai_index', 'search'],
+  'ai-all': ['train', 'ai_input', 'ai_index'],
   'ai-train': ['train'],
   'ai-input': ['ai_input'],
-  'ai-search': ['ai_search'],
+  'ai-index': ['ai_index'],
   search: ['search'],
-  'ai-all': ['train', 'ai_input', 'ai_search'],
 };
 
 /**
- * Known RSL usage tokens
+ * Known RSL 1.0 usage tokens
+ * @see https://rslstandard.org/rsl for canonical token list
  */
-const KNOWN_RSL_TOKENS = new Set<string>(['ai-train', 'ai-input', 'ai-search', 'search', 'ai-all']);
+const KNOWN_RSL_TOKENS = new Set<string>([
+  'all',
+  'ai-all',
+  'ai-train',
+  'ai-input',
+  'ai-index',
+  'search',
+]);
 
 /**
  * Set of unknown tokens we've already warned about (dedupe in-process)
@@ -80,9 +92,9 @@ export function isValidRslToken(token: string): token is RslUsageToken {
  *
  * @example
  * ```ts
- * // ai-all expands to multiple purposes
+ * // ai-all expands to multiple AI purposes
  * const result = rslUsageTokensToControlPurposes(['ai-all']);
- * // result.purposes = ['train', 'ai_input', 'ai_search']
+ * // result.purposes = ['train', 'ai_input', 'ai_index']
  * ```
  *
  * @example
@@ -163,8 +175,8 @@ export function controlPurposeToRslToken(purpose: ControlPurpose): RslUsageToken
       return 'ai-train';
     case 'ai_input':
       return 'ai-input';
-    case 'ai_search':
-      return 'ai-search';
+    case 'ai_index':
+      return 'ai-index';
     case 'search':
       return 'search';
     // No RSL equivalent for these
@@ -178,12 +190,13 @@ export function controlPurposeToRslToken(purpose: ControlPurpose): RslUsageToken
 }
 
 /**
- * Get all known RSL usage tokens
+ * Get all known RSL 1.0 usage tokens
  *
- * @returns Array of all known RSL usage tokens
+ * @returns Array of all known RSL 1.0 usage tokens
+ * @see https://rslstandard.org/rsl for canonical token list
  */
 export function getKnownRslTokens(): RslUsageToken[] {
-  return ['ai-train', 'ai-input', 'ai-search', 'search', 'ai-all'];
+  return ['all', 'ai-all', 'ai-train', 'ai-input', 'ai-index', 'search'];
 }
 
 /**

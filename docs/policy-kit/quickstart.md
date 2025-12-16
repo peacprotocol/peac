@@ -178,11 +178,11 @@ peac policy explain peac-policy.yaml --subject-type human --purpose inference
 
 ### Common Validation Errors
 
-| Error                 | Cause                          | Fix                                                                            |
-| --------------------- | ------------------------------ | ------------------------------------------------------------------------------ |
-| `Invalid version`     | Missing or wrong version field | Use `version: "peac-policy/0.1"`                                               |
-| `Unknown purpose`     | Typo in purpose name           | Use: `crawl`, `index`, `train`, `inference`, `ai_input`, `ai_search`, `search` |
-| `Duplicate rule name` | Two rules with same name       | Use unique names for each rule                                                 |
+| Error                 | Cause                          | Fix                                                                           |
+| --------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `Invalid version`     | Missing or wrong version field | Use `version: "peac-policy/0.1"`                                              |
+| `Unknown purpose`     | Typo in purpose name           | Use: `crawl`, `index`, `train`, `inference`, `ai_input`, `ai_index`, `search` |
+| `Duplicate rule name` | Two rules with same name       | Use unique names for each rule                                                |
 
 ### What `--dry-run` Shows
 
