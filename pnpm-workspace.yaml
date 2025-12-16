@@ -5,3 +5,4 @@ packages:
   - 'packages/transport/*'
   - 'apps/*'
   - 'surfaces/workers/*'
+  - 'surfaces/nextjs/*'
