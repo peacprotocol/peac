@@ -18,6 +18,7 @@ describe('createProblemDetails', () => {
     expect(problem.type).toBe('https://peacprotocol.org/problems/receipt_missing');
     expect(problem.title).toBe('Payment Required');
     expect(problem.status).toBe(402);
+    expect(problem.code).toBe('E_RECEIPT_MISSING');
     expect(problem.detail).toBeUndefined();
     expect(problem.instance).toBeUndefined();
   });
@@ -32,6 +33,7 @@ describe('createProblemDetails', () => {
     expect(problem.type).toBe('https://peacprotocol.org/problems/tap_signature_invalid');
     expect(problem.title).toBe('Invalid Signature');
     expect(problem.status).toBe(401);
+    expect(problem.code).toBe('E_TAP_SIGNATURE_INVALID');
     expect(problem.detail).toBe('Signature verification failed');
     expect(problem.instance).toBe('https://api.example.com/resource');
   });
@@ -42,6 +44,26 @@ describe('createProblemDetails', () => {
     expect(createProblemDetails(ErrorCodes.TAP_WINDOW_TOO_LARGE).status).toBe(400);
     expect(createProblemDetails(ErrorCodes.ISSUER_NOT_ALLOWED).status).toBe(403);
     expect(createProblemDetails(ErrorCodes.INTERNAL_ERROR).status).toBe(500);
+  });
+
+  it('should sanitize sensitive data in detail', () => {
+    const problem = createProblemDetails(
+      ErrorCodes.TAP_SIGNATURE_INVALID,
+      'Failed to verify sig1=:dGVzdHNpZ25hdHVyZQ==:'
+    );
+
+    expect(problem.detail).toBe('Failed to verify sig1:[REDACTED]:');
+    expect(problem.detail).not.toContain('dGVzdHNpZ25hdHVyZQ==');
+  });
+
+  it('should sanitize PEM keys in detail', () => {
+    const problem = createProblemDetails(
+      ErrorCodes.INTERNAL_ERROR,
+      'Key error: -----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...\n-----END PRIVATE KEY-----'
+    );
+
+    expect(problem.detail).toBe('Key error: [REDACTED KEY]');
+    expect(problem.detail).not.toContain('MIIEvgIBADANBg');
   });
 });
 
@@ -55,6 +77,7 @@ describe('createErrorResponse', () => {
 
     const body = (await response.json()) as ProblemDetails;
     expect(body.type).toBe('https://peacprotocol.org/problems/tap_signature_invalid');
+    expect(body.code).toBe('E_TAP_SIGNATURE_INVALID');
     expect(body.detail).toBe('Invalid signature');
   });
 });
@@ -70,6 +93,7 @@ describe('createChallengeResponse', () => {
     const body = (await response.json()) as ProblemDetails;
     expect(body.type).toBe('https://peacprotocol.org/problems/receipt_missing');
     expect(body.title).toBe('Payment Required');
+    expect(body.code).toBe('E_RECEIPT_MISSING');
     expect(body.instance).toBe('https://api.example.com/resource');
   });
 });

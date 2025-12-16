@@ -5,9 +5,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseConfig, matchesBypassPath, isIssuerAllowed } from '../src/config.js';
-import { createProblemDetails, createErrorResponse } from '../src/errors.js';
+import { parseConfig, matchesBypassPath } from '../src/config.js';
+import { createErrorResponse, ErrorCodes } from '../src/errors.js';
 import { NoOpReplayStore } from '../src/replay-store.js';
+import type { ReplayContext } from '../src/types.js';
 
 describe('benchmark: config parsing', () => {
   it('should parse config in under 1ms', () => {
@@ -70,7 +71,7 @@ describe('benchmark: error response creation', () => {
 
     for (let i = 0; i < iterations; i++) {
       createErrorResponse(
-        'tap_signature_invalid',
+        ErrorCodes.TAP_SIGNATURE_INVALID,
         'Signature verification failed',
         'https://api.example.com/resource'
       );
@@ -92,7 +93,13 @@ describe('benchmark: replay store', () => {
     const start = performance.now();
 
     for (let i = 0; i < iterations; i++) {
-      await store.seen(`nonce-${i}`, 480);
+      const ctx: ReplayContext = {
+        issuer: 'https://issuer.example.com',
+        keyid: 'https://issuer.example.com/.well-known/jwks.json#key-1',
+        nonce: `nonce-${i}`,
+        ttlSeconds: 480,
+      };
+      await store.seen(ctx);
     }
 
     const elapsed = performance.now() - start;

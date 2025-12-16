@@ -21,7 +21,7 @@ import {
   TAP_CONSTANTS,
   type TapRequest,
 } from '@peac/mappings-tap';
-import type { Env, VerificationResult, ReplayStore } from './types.js';
+import type { Env, VerificationResult, ReplayStore, ReplayContext } from './types.js';
 import { parseConfig, matchesBypassPath, isIssuerAllowed } from './config.js';
 import { createReplayStore } from './replay-store.js';
 import { createErrorResponse, createChallengeResponse, ErrorCodes } from './errors.js';
@@ -31,6 +31,7 @@ export type {
   Env,
   WorkerConfig,
   ReplayStore,
+  ReplayContext,
   VerificationResult,
   ProblemDetails,
 } from './types.js';
@@ -55,13 +56,29 @@ function hasTapHeaders(headers: Record<string, string>): boolean {
 }
 
 /**
+ * Extract issuer origin from keyid.
+ *
+ * TAP keyid is typically a JWKS URI like "https://issuer.example.com/.well-known/jwks.json#key-1"
+ */
+function extractIssuerFromKeyid(keyid: string): string {
+  try {
+    const url = new URL(keyid);
+    return url.origin;
+  } catch {
+    // If keyid is not a URL, use it as-is
+    return keyid;
+  }
+}
+
+/**
  * Verify TAP proof from request.
  */
 async function verifyTap(
   request: Request,
   keyResolver: JwksKeyResolver,
   replayStore: ReplayStore | null,
-  allowUnknownTags: boolean
+  allowUnknownTags: boolean,
+  warnNoReplayStore: () => void
 ): Promise<VerificationResult> {
   // Convert Headers to Record for runtime neutrality
   const headers = headersToRecord(request.headers);
@@ -100,19 +117,29 @@ async function verifyTap(
   }
 
   // Check nonce replay if replay store is configured
-  if (replayStore && result.controlEntry?.evidence.nonce) {
-    const isReplay = await replayStore.seen(
-      result.controlEntry.evidence.nonce,
-      TAP_CONSTANTS.MAX_WINDOW_SECONDS
-    );
-
-    if (isReplay) {
-      return {
-        valid: false,
-        isTap: true,
-        errorCode: ErrorCodes.TAP_NONCE_REPLAY,
-        errorMessage: 'Nonce replay detected',
+  const evidence = result.controlEntry?.evidence;
+  if (evidence?.nonce && evidence?.keyid) {
+    if (replayStore) {
+      const replayCtx: ReplayContext = {
+        issuer: extractIssuerFromKeyid(evidence.keyid),
+        keyid: evidence.keyid,
+        nonce: evidence.nonce,
+        ttlSeconds: TAP_CONSTANTS.MAX_WINDOW_SECONDS,
       };
+
+      const isReplay = await replayStore.seen(replayCtx);
+
+      if (isReplay) {
+        return {
+          valid: false,
+          isTap: true,
+          errorCode: ErrorCodes.TAP_NONCE_REPLAY,
+          errorMessage: 'Nonce replay detected',
+        };
+      }
+    } else {
+      // Warn that replay protection is not configured
+      warnNoReplayStore();
     }
   }
 
@@ -175,8 +202,24 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   // Create replay store
   const replayStore = createReplayStore(env);
 
+  // Track if we should warn about missing replay store
+  let noReplayStoreWarning = false;
+  const warnNoReplayStore = () => {
+    noReplayStoreWarning = true;
+    console.warn(
+      '[PEAC] WARNING: No replay store configured. Replay attacks are possible. ' +
+        'Configure REPLAY_DO, REPLAY_D1, or REPLAY_KV for production deployments.'
+    );
+  };
+
   // Verify TAP
-  const result = await verifyTap(request, keyResolver, replayStore, config.allowUnknownTags);
+  const result = await verifyTap(
+    request,
+    keyResolver,
+    replayStore,
+    config.allowUnknownTags,
+    warnNoReplayStore
+  );
 
   // Non-TAP requests pass through
   if (!result.isTap) {
@@ -212,6 +255,11 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 
   if (result.controlEntry?.evidence.tag) {
     headers.set('X-PEAC-TAP-Tag', result.controlEntry.evidence.tag);
+  }
+
+  // Warn in response header if replay protection is not configured
+  if (noReplayStoreWarning) {
+    headers.set('X-PEAC-Warning', 'replay-protection-disabled');
   }
 
   return new Response(response.body, {

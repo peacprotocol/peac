@@ -7,9 +7,10 @@ PEAC receipt verification worker for Cloudflare Workers.
 - **TAP Verification**: Verify Visa Trusted Agent Protocol signatures at the edge
 - **PEAC Receipt Verification**: Validate PEAC receipts (JWS)
 - **Replay Protection**: Pluggable nonce deduplication (DO/D1/KV)
-- **RFC 9457 Errors**: Structured problem+json error responses
+- **RFC 9457 Errors**: Structured problem+json error responses with stable `code` extension
 - **Issuer Allowlist**: Restrict which issuers are accepted
 - **Path Bypass**: Skip verification for specific paths
+- **Security-First**: Hashed storage keys, sanitized error messages
 
 ## Quick Start
 
@@ -32,6 +33,7 @@ PEAC receipt verification worker for Cloudflare Workers.
 3. **Set environment variables:**
 
    ```bash
+   # REQUIRED for production: Set issuer allowlist
    wrangler secret put ISSUER_ALLOWLIST
    # Enter: https://issuer1.example.com,https://issuer2.example.com
    ```
@@ -46,25 +48,48 @@ PEAC receipt verification worker for Cloudflare Workers.
 
 ### Environment Variables
 
-| Variable             | Description                                        | Default       |
-| -------------------- | -------------------------------------------------- | ------------- |
-| `ISSUER_ALLOWLIST`   | Comma-separated list of allowed issuer origins     | (open access) |
-| `BYPASS_PATHS`       | Comma-separated path patterns to skip verification | (none)        |
-| `ALLOW_UNKNOWN_TAGS` | Allow unknown TAP tags (fail-open)                 | `false`       |
+| Variable             | Description                                        | Default                | Security Note                    |
+| -------------------- | -------------------------------------------------- | ---------------------- | -------------------------------- |
+| `ISSUER_ALLOWLIST`   | Comma-separated list of allowed issuer origins     | (open access - UNSAFE) | **Required for production**      |
+| `BYPASS_PATHS`       | Comma-separated path patterns to skip verification | (none)                 | Only for health/public endpoints |
+| `ALLOW_UNKNOWN_TAGS` | Allow unknown TAP tags (fail-open)                 | `false`                | Keep `false` for security        |
 
-### Replay Protection
+### Security Best Practices
+
+1. **Always set `ISSUER_ALLOWLIST` in production** - An empty allowlist means open access, which is unsafe for production deployments.
+
+2. **Use `BYPASS_PATHS` sparingly** - Only bypass verification for truly public endpoints like `/health`, `/.well-known/*`, or public API documentation.
+
+3. **Keep `ALLOW_UNKNOWN_TAGS=false`** - The default fail-closed behavior rejects unknown TAP tags. Only set to `true` if you explicitly accept forward-compatibility risks.
+
+4. **Configure replay protection** - Without a replay store, the worker logs a warning and adds `X-PEAC-Warning: replay-protection-disabled` to responses.
+
+### Bypass Path Patterns
+
+Path matching is **first-match** on pathname only (query strings excluded):
+
+- Exact: `/health` matches only `/health`
+- Wildcard: `/api/public/*` matches `/api/public/foo` but not `/api/public/foo/bar`
+- Glob: `*.json` matches `/data.json`
+
+## Replay Protection
 
 Choose the right backend for your security requirements:
 
-| Backend             | Consistency | Recommendation                       |
-| ------------------- | ----------- | ------------------------------------ |
-| **Durable Objects** | Strong      | Enterprise (true atomicity)          |
-| **D1**              | Strong      | Acceptable (slightly higher latency) |
-| **KV**              | Eventual    | Best-effort only (NOT atomic)        |
+| Backend             | Consistency | Atomicity        | Recommendation                       |
+| ------------------- | ----------- | ---------------- | ------------------------------------ |
+| **Durable Objects** | Strong      | Atomic check-set | Enterprise (true atomicity)          |
+| **D1**              | Strong      | Atomic via SQL   | Good (slightly higher latency)       |
+| **KV**              | Eventual    | NOT atomic       | Best-effort only (may allow replays) |
+| **None**            | N/A         | N/A              | Development only (logs warning)      |
 
-**WARNING:** Cloudflare KV is eventually consistent. Do NOT rely on it for strong replay protection. For enterprise-grade security, use Durable Objects or D1.
+**CRITICAL:** Cloudflare KV is eventually consistent and does NOT provide atomic check-and-set operations. Under concurrent load, the same nonce may be accepted multiple times. For enterprise-grade security, use Durable Objects or D1.
 
-#### Setting Up Durable Objects
+### Storage Key Security
+
+All replay keys are stored as SHA-256 hashes of `issuer|keyid|nonce` to prevent correlation of raw identifiers in storage. Raw nonces are never stored.
+
+### Setting Up Durable Objects (Recommended)
 
 1. Add to `wrangler.toml`:
 
@@ -78,9 +103,9 @@ Choose the right backend for your security requirements:
    new_classes = ["ReplayDurableObject"]
    ```
 
-2. Export the DO class in your worker.
+2. Export the DO class in your worker entry point.
 
-#### Setting Up D1
+### Setting Up D1
 
 1. Create database:
 
@@ -91,12 +116,12 @@ Choose the right backend for your security requirements:
 2. Create schema:
 
    ```sql
-   CREATE TABLE IF NOT EXISTS nonces (
-     nonce TEXT PRIMARY KEY,
+   CREATE TABLE IF NOT EXISTS replay_keys (
+     key_hash TEXT PRIMARY KEY,
      seen_at INTEGER NOT NULL,
      expires_at INTEGER NOT NULL
    );
-   CREATE INDEX IF NOT EXISTS idx_nonces_expires ON nonces(expires_at);
+   CREATE INDEX IF NOT EXISTS idx_replay_expires ON replay_keys(expires_at);
    ```
 
 3. Add to `wrangler.toml`:
@@ -108,7 +133,9 @@ Choose the right backend for your security requirements:
    database_id = "<your-d1-database-id>"
    ```
 
-#### Setting Up KV (Best-Effort)
+### Setting Up KV (Best-Effort Only)
+
+**WARNING:** KV is NOT recommended for production replay protection due to eventual consistency.
 
 1. Create namespace:
 
@@ -126,7 +153,7 @@ Choose the right backend for your security requirements:
 
 ## Error Responses
 
-All errors are returned as RFC 9457 Problem Details:
+All errors are returned as RFC 9457 Problem Details with a stable `code` extension:
 
 ```json
 {
@@ -134,36 +161,86 @@ All errors are returned as RFC 9457 Problem Details:
   "title": "Invalid Signature",
   "status": 401,
   "detail": "Signature verification failed",
-  "instance": "https://api.example.com/resource"
+  "instance": "https://api.example.com/resource",
+  "code": "E_TAP_SIGNATURE_INVALID"
 }
 ```
 
 ### Error Codes
 
-| Code                    | Status | Description                         |
-| ----------------------- | ------ | ----------------------------------- |
-| `receipt_missing`       | 402    | No PEAC receipt provided            |
-| `tap_signature_missing` | 401    | No TAP signature headers            |
-| `tap_signature_invalid` | 401    | Signature verification failed       |
-| `tap_time_invalid`      | 401    | Signature outside valid time window |
-| `tap_window_too_large`  | 400    | Signature window exceeds 8 minutes  |
-| `tap_tag_unknown`       | 400    | Unknown TAP tag (fail-closed)       |
-| `tap_nonce_replay`      | 401    | Nonce replay detected               |
-| `issuer_not_allowed`    | 403    | Issuer not in allowlist             |
+| Code                      | Status | Description                         |
+| ------------------------- | ------ | ----------------------------------- |
+| `E_RECEIPT_MISSING`       | 402    | No PEAC receipt provided            |
+| `E_TAP_SIGNATURE_MISSING` | 401    | No TAP signature headers            |
+| `E_TAP_SIGNATURE_INVALID` | 401    | Signature verification failed       |
+| `E_TAP_TIME_INVALID`      | 401    | Signature outside valid time window |
+| `E_TAP_WINDOW_TOO_LARGE`  | 400    | Signature window exceeds 8 minutes  |
+| `E_TAP_TAG_UNKNOWN`       | 400    | Unknown TAP tag (fail-closed)       |
+| `E_TAP_NONCE_REPLAY`      | 401    | Nonce replay detected               |
+| `E_ISSUER_NOT_ALLOWED`    | 403    | Issuer not in allowlist             |
+
+### Security: Error Sanitization
+
+Error details are automatically sanitized to prevent leaking sensitive information:
+
+- Signature values are redacted (`sig1:[REDACTED]:`)
+- PEM keys are redacted (`[REDACTED KEY]`)
+- Internal paths are not exposed
 
 ## Response Headers
 
 Successful verification adds these headers:
 
-| Header            | Description                          |
-| ----------------- | ------------------------------------ |
-| `X-PEAC-Verified` | `true` if verification succeeded     |
-| `X-PEAC-Engine`   | `tap` for TAP verification           |
-| `X-PEAC-TAP-Tag`  | TAP tag (e.g., `agent-browser-auth`) |
+| Header            | Description                              |
+| ----------------- | ---------------------------------------- |
+| `X-PEAC-Verified` | `true` if verification succeeded         |
+| `X-PEAC-Engine`   | `tap` for TAP verification               |
+| `X-PEAC-TAP-Tag`  | TAP tag (e.g., `agent-browser-auth`)     |
+| `X-PEAC-Warning`  | `replay-protection-disabled` if no store |
+
+## Example Requests
+
+### Successful TAP Verification
+
+```bash
+curl -i https://your-worker.example.com/api/resource \
+  -H "Signature-Input: sig1=(\"@method\" \"@path\");created=1702684800;expires=1702685280;keyid=\"https://issuer.example.com/.well-known/jwks.json#key-1\";alg=\"ed25519\";tag=\"agent-browser-auth\";nonce=\"abc123\"" \
+  -H "Signature: sig1=:BASE64_SIGNATURE:"
+```
+
+Expected response headers on success:
+
+```http
+X-PEAC-Verified: true
+X-PEAC-Engine: tap
+X-PEAC-TAP-Tag: agent-browser-auth
+```
+
+### Missing Receipt (402 Challenge)
+
+```bash
+curl -i https://your-worker.example.com/api/resource
+```
+
+Response:
+
+```http
+HTTP/1.1 402 Payment Required
+Content-Type: application/problem+json
+WWW-Authenticate: PEAC realm="peac-verifier"
+
+{
+  "type": "https://peacprotocol.org/problems/receipt_missing",
+  "title": "Payment Required",
+  "status": 402,
+  "code": "E_RECEIPT_MISSING",
+  "detail": "A valid PEAC receipt is required to access this resource."
+}
+```
 
 ## SSRF Protection Limitations
 
-The JWKS fetching in this worker implements realistic edge-safe hardening:
+The JWKS fetching implements realistic edge-safe hardening:
 
 **What IS protected:**
 
@@ -173,12 +250,12 @@ The JWKS fetching in this worker implements realistic edge-safe hardening:
 - Metadata IPs blocked (169.254.169.254)
 - No redirect following
 
-**What is NOT protected:**
+**What is NOT protected (edge runtime limitations):**
 
 - DNS rebinding attacks (no pre-connect DNS API in Workers)
 - Private IP resolution via DNS (cannot inspect resolved IP)
 
-For high-security deployments, use an explicit issuer allowlist.
+**Recommendation:** For high-security deployments, always use an explicit issuer allowlist via `ISSUER_ALLOWLIST`.
 
 ## Development
 
@@ -192,6 +269,15 @@ pnpm test
 # Type check
 pnpm typecheck
 ```
+
+## Performance
+
+Designed for sub-5ms p95 verification latency on edge runtimes (excludes cold JWKS fetch). Bundle size is optimized for fast cold starts.
+
+- Bundle: ~63 KiB (uncompressed), ~15 KiB (gzipped)
+- Config parsing: < 0.01ms
+- Path matching: < 0.01ms per path
+- Error response creation: < 0.01ms
 
 ## License
 

@@ -2,34 +2,42 @@
  * @peac/worker-cloudflare - RFC 9457 Problem Details errors
  *
  * Structured error responses for PEAC verification failures.
+ *
+ * SECURITY: Error details MUST NOT contain sensitive data such as:
+ * - Raw Signature or Signature-Input header values
+ * - Private key material
+ * - Internal paths or configuration
  */
 
 import type { ProblemDetails } from './types.js';
 
 /**
- * Error codes for worker verification failures.
+ * Stable error codes for worker verification failures.
+ *
+ * These codes are included in the `code` extension field for programmatic handling.
+ * Format: E_<CATEGORY>_<ERROR>
  */
 export const ErrorCodes = {
   // Receipt errors
-  RECEIPT_MISSING: 'receipt_missing',
-  RECEIPT_INVALID: 'receipt_invalid',
-  RECEIPT_EXPIRED: 'receipt_expired',
+  RECEIPT_MISSING: 'E_RECEIPT_MISSING',
+  RECEIPT_INVALID: 'E_RECEIPT_INVALID',
+  RECEIPT_EXPIRED: 'E_RECEIPT_EXPIRED',
 
   // TAP errors
-  TAP_SIGNATURE_MISSING: 'tap_signature_missing',
-  TAP_SIGNATURE_INVALID: 'tap_signature_invalid',
-  TAP_TIME_INVALID: 'tap_time_invalid',
-  TAP_WINDOW_TOO_LARGE: 'tap_window_too_large',
-  TAP_TAG_UNKNOWN: 'tap_tag_unknown',
-  TAP_ALGORITHM_INVALID: 'tap_algorithm_invalid',
-  TAP_KEY_NOT_FOUND: 'tap_key_not_found',
-  TAP_NONCE_REPLAY: 'tap_nonce_replay',
+  TAP_SIGNATURE_MISSING: 'E_TAP_SIGNATURE_MISSING',
+  TAP_SIGNATURE_INVALID: 'E_TAP_SIGNATURE_INVALID',
+  TAP_TIME_INVALID: 'E_TAP_TIME_INVALID',
+  TAP_WINDOW_TOO_LARGE: 'E_TAP_WINDOW_TOO_LARGE',
+  TAP_TAG_UNKNOWN: 'E_TAP_TAG_UNKNOWN',
+  TAP_ALGORITHM_INVALID: 'E_TAP_ALGORITHM_INVALID',
+  TAP_KEY_NOT_FOUND: 'E_TAP_KEY_NOT_FOUND',
+  TAP_NONCE_REPLAY: 'E_TAP_NONCE_REPLAY',
 
   // Issuer errors
-  ISSUER_NOT_ALLOWED: 'issuer_not_allowed',
+  ISSUER_NOT_ALLOWED: 'E_ISSUER_NOT_ALLOWED',
 
   // Internal errors
-  INTERNAL_ERROR: 'internal_error',
+  INTERNAL_ERROR: 'E_INTERNAL_ERROR',
 } as const;
 
 export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
@@ -37,7 +45,7 @@ export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
 /**
  * HTTP status codes for error types.
  */
-export const ErrorHttpStatus: Record<ErrorCode, number> = {
+const ErrorHttpStatus: Record<ErrorCode, number> = {
   [ErrorCodes.RECEIPT_MISSING]: 402,
   [ErrorCodes.RECEIPT_INVALID]: 401,
   [ErrorCodes.RECEIPT_EXPIRED]: 401,
@@ -84,19 +92,43 @@ const ErrorTitles: Record<ErrorCode, string> = {
 const PROBLEM_TYPE_BASE = 'https://peacprotocol.org/problems';
 
 /**
+ * Sanitize error detail to prevent leaking sensitive information.
+ *
+ * Removes or redacts:
+ * - Signature header values
+ * - Key material
+ * - Internal paths
+ */
+function sanitizeDetail(detail: string | undefined): string | undefined {
+  if (!detail) return undefined;
+
+  // Redact anything that looks like a signature or key
+  return detail
+    .replace(/sig1=:[A-Za-z0-9+/=]+:/g, 'sig1:[REDACTED]:')
+    .replace(/signature[:\s]*[A-Za-z0-9+/=]{20,}/gi, 'signature:[REDACTED]')
+    .replace(/-----BEGIN[^-]+-----[\s\S]*?-----END[^-]+-----/g, '[REDACTED KEY]');
+}
+
+/**
  * Create RFC 9457 Problem Details object.
+ *
+ * Includes stable `code` extension for programmatic error handling.
  */
 export function createProblemDetails(
   code: ErrorCode,
   detail?: string,
   instance?: string
 ): ProblemDetails {
+  // Map code to URL-safe slug for type URI
+  const typeSlug = code.toLowerCase().replace(/^e_/, '');
+
   return {
-    type: `${PROBLEM_TYPE_BASE}/${code}`,
+    type: `${PROBLEM_TYPE_BASE}/${typeSlug}`,
     title: ErrorTitles[code],
     status: ErrorHttpStatus[code],
-    detail,
+    detail: sanitizeDetail(detail),
     instance,
+    code, // Stable error code extension
   };
 }
 

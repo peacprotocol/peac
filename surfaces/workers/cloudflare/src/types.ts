@@ -44,22 +44,44 @@ export interface WorkerConfig {
 }
 
 /**
+ * Context for replay detection.
+ *
+ * Used to create a hashed key that prevents correlation
+ * while still detecting replays per issuer/key/nonce tuple.
+ */
+export interface ReplayContext {
+  /** Issuer origin (e.g., "https://issuer.example.com") */
+  issuer: string;
+
+  /** Key ID from the signature */
+  keyid: string;
+
+  /** Nonce value from the signature */
+  nonce: string;
+
+  /** TTL in seconds (480 for TAP 8-min window) */
+  ttlSeconds: number;
+}
+
+/**
  * Replay store interface for nonce deduplication.
  *
+ * Keys are stored as SHA-256 hashes of `issuer|keyid|nonce` to prevent
+ * correlation of raw identifiers in storage.
+ *
  * Implementations:
- * - Durable Objects: Strong consistency (recommended for enterprise)
- * - D1: Strong consistency (slightly higher latency)
- * - KV: Eventual consistency (best-effort only, NOT atomic)
+ * - Durable Objects: Strong consistency, atomic check-and-set (enterprise)
+ * - D1: Strong consistency, atomic via SQLite transactions
+ * - KV: Eventual consistency, best-effort only (NOT atomic, may allow replays)
  */
 export interface ReplayStore {
   /**
    * Check if nonce has been seen. If not, mark it as seen.
    *
-   * @param nonce - The nonce to check
-   * @param ttlSeconds - TTL for the nonce entry (480 for TAP 8-min window)
+   * @param ctx - Replay context with issuer, keyid, nonce, and TTL
    * @returns true if replay detected (nonce already seen), false if new
    */
-  seen(nonce: string, ttlSeconds: number): Promise<boolean>;
+  seen(ctx: ReplayContext): Promise<boolean>;
 }
 
 /**
@@ -84,6 +106,8 @@ export interface VerificationResult {
 
 /**
  * RFC 9457 Problem Details response.
+ *
+ * Includes PEAC-specific `code` extension for stable error identification.
  */
 export interface ProblemDetails {
   /** Problem type URI */
@@ -95,9 +119,12 @@ export interface ProblemDetails {
   /** HTTP status code */
   status: number;
 
-  /** Human-readable explanation */
+  /** Human-readable explanation (MUST NOT contain sensitive data) */
   detail?: string;
 
   /** URI reference for the specific occurrence */
   instance?: string;
+
+  /** PEAC extension: stable error code (e.g., "E_TAP_SIGNATURE_INVALID") */
+  code?: string;
 }

@@ -1,6 +1,7 @@
 {
   "name": "@peac/worker-cloudflare",
   "version": "0.9.18",
+  "private": true,
   "description": "PEAC receipt verification worker for Cloudflare Workers",
   "type": "module",
   "main": "./src/index.ts",
