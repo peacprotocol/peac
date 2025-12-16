@@ -71,15 +71,32 @@ function extractIssuerFromKeyid(keyid: string): string {
 }
 
 /**
- * Verify TAP proof from request.
+ * Options for TAP verification.
  */
-async function verifyTap(
-  request: Request,
-  keyResolver: JwksKeyResolver,
-  replayStore: ReplayStore | null,
-  allowUnknownTags: boolean,
-  warnNoReplayStore: () => void
-): Promise<VerificationResult> {
+interface VerifyTapOptions {
+  keyResolver: JwksKeyResolver;
+  replayStore: ReplayStore | null;
+  unsafeAllowUnknownTags: boolean;
+  unsafeAllowNoReplay: boolean;
+  warnNoReplayStore: () => void;
+}
+
+/**
+ * Verify TAP proof from request.
+ *
+ * Security: Fail-closed by default.
+ * - Unknown tags are rejected unless unsafeAllowUnknownTags=true
+ * - Nonces require replay protection unless unsafeAllowNoReplay=true
+ */
+async function verifyTap(request: Request, options: VerifyTapOptions): Promise<VerificationResult> {
+  const {
+    keyResolver,
+    replayStore,
+    unsafeAllowUnknownTags,
+    unsafeAllowNoReplay,
+    warnNoReplayStore,
+  } = options;
+
   // Convert Headers to Record for runtime neutrality
   const headers = headersToRecord(request.headers);
 
@@ -104,7 +121,7 @@ async function verifyTap(
   // Verify TAP proof
   const result = await verifyTapProof(tapRequest, {
     keyResolver,
-    allowUnknownTags,
+    allowUnknownTags: unsafeAllowUnknownTags,
   });
 
   if (!result.valid) {
@@ -116,7 +133,7 @@ async function verifyTap(
     };
   }
 
-  // Check nonce replay if replay store is configured
+  // Check nonce replay protection
   const evidence = result.controlEntry?.evidence;
   if (evidence?.nonce && evidence?.keyid) {
     if (replayStore) {
@@ -137,8 +154,19 @@ async function verifyTap(
           errorMessage: 'Nonce replay detected',
         };
       }
+    } else if (!unsafeAllowNoReplay) {
+      // Fail-closed: reject requests with nonces but no replay store
+      // unless UNSAFE_ALLOW_NO_REPLAY=true
+      return {
+        valid: false,
+        isTap: true,
+        errorCode: ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED,
+        errorMessage:
+          'Replay protection required but not configured. ' +
+          'Set UNSAFE_ALLOW_NO_REPLAY=true to bypass (UNSAFE for production).',
+      };
     } else {
-      // Warn that replay protection is not configured
+      // Warn that replay protection is not configured (unsafe mode)
       warnNoReplayStore();
     }
   }
@@ -173,21 +201,42 @@ function mapTapErrorCode(tapErrorCode: string | undefined): string {
 
 /**
  * Main worker handler.
+ *
+ * Security: Fail-closed by default.
+ * - ISSUER_ALLOWLIST is required unless UNSAFE_ALLOW_ANY_ISSUER=true
+ * - Unknown TAP tags are rejected unless UNSAFE_ALLOW_UNKNOWN_TAGS=true
+ * - Replay protection is required unless UNSAFE_ALLOW_NO_REPLAY=true
  */
 async function handleRequest(request: Request, env: Env): Promise<Response> {
   const config = parseConfig(env);
   const url = new URL(request.url);
 
-  // Check bypass paths
+  // Check bypass paths first (before any config validation)
   if (matchesBypassPath(url.pathname, config.bypassPaths)) {
     return fetch(request);
   }
 
-  // Create JWKS resolver with issuer allowlist
+  // SECURITY: Fail-closed on ISSUER_ALLOWLIST
+  // If no allowlist is configured and UNSAFE_ALLOW_ANY_ISSUER is not set,
+  // return a 500 configuration error
+  if (config.issuerAllowlist.length === 0 && !config.unsafeAllowAnyIssuer) {
+    console.error(
+      '[PEAC] FATAL: ISSUER_ALLOWLIST is required. ' +
+        'Set ISSUER_ALLOWLIST to a comma-separated list of allowed issuer origins, ' +
+        'or set UNSAFE_ALLOW_ANY_ISSUER=true for development (NOT recommended for production).'
+    );
+    return createErrorResponse(
+      ErrorCodes.CONFIG_ISSUER_ALLOWLIST_REQUIRED,
+      'Worker misconfigured: ISSUER_ALLOWLIST is required. ' +
+        'Set UNSAFE_ALLOW_ANY_ISSUER=true to bypass (UNSAFE for production).'
+    );
+  }
+
+  // Create JWKS resolver with issuer allowlist (or allow all if UNSAFE mode)
   const keyResolver = createResolver({
     isAllowedHost: (host) => {
-      if (config.issuerAllowlist.length === 0) {
-        return true; // Open access if no allowlist
+      if (config.unsafeAllowAnyIssuer) {
+        return true; // UNSAFE: Open access
       }
       return config.issuerAllowlist.some((allowed) => {
         try {
@@ -202,24 +251,24 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   // Create replay store
   const replayStore = createReplayStore(env);
 
-  // Track if we should warn about missing replay store
+  // Track if we should warn about missing replay store (only in UNSAFE mode)
   let noReplayStoreWarning = false;
   const warnNoReplayStore = () => {
     noReplayStoreWarning = true;
     console.warn(
-      '[PEAC] WARNING: No replay store configured. Replay attacks are possible. ' +
-        'Configure REPLAY_DO, REPLAY_D1, or REPLAY_KV for production deployments.'
+      '[PEAC] WARNING: No replay store configured with UNSAFE_ALLOW_NO_REPLAY=true. ' +
+        'Replay attacks are possible. This is UNSAFE for production.'
     );
   };
 
   // Verify TAP
-  const result = await verifyTap(
-    request,
+  const result = await verifyTap(request, {
     keyResolver,
     replayStore,
-    config.allowUnknownTags,
-    warnNoReplayStore
-  );
+    unsafeAllowUnknownTags: config.unsafeAllowUnknownTags,
+    unsafeAllowNoReplay: config.unsafeAllowNoReplay,
+    warnNoReplayStore,
+  });
 
   // Non-TAP requests pass through
   if (!result.isTap) {
@@ -234,7 +283,8 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   }
 
   // TAP verification succeeded - check issuer allowlist
-  if (result.controlEntry?.evidence.keyid) {
+  // (Skip if UNSAFE_ALLOW_ANY_ISSUER is set)
+  if (result.controlEntry?.evidence.keyid && !config.unsafeAllowAnyIssuer) {
     const keyid = result.controlEntry.evidence.keyid;
     if (!isIssuerAllowed(keyid, config.issuerAllowlist)) {
       return createErrorResponse(
@@ -257,7 +307,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
     headers.set('X-PEAC-TAP-Tag', result.controlEntry.evidence.tag);
   }
 
-  // Warn in response header if replay protection is not configured
+  // Warn in response header if replay protection is not configured (UNSAFE mode only)
   if (noReplayStoreWarning) {
     headers.set('X-PEAC-Warning', 'replay-protection-disabled');
   }

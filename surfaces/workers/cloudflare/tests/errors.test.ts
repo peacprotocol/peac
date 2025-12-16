@@ -39,11 +39,50 @@ describe('createProblemDetails', () => {
   });
 
   it('should map error codes to correct HTTP status', () => {
+    // 402 - Payment Required (reserved for payment flows)
     expect(createProblemDetails(ErrorCodes.RECEIPT_MISSING).status).toBe(402);
+    expect(createProblemDetails(ErrorCodes.RECEIPT_INVALID).status).toBe(402);
+    expect(createProblemDetails(ErrorCodes.RECEIPT_EXPIRED).status).toBe(402);
+
+    // 401 - Authentication errors
     expect(createProblemDetails(ErrorCodes.TAP_SIGNATURE_INVALID).status).toBe(401);
+    expect(createProblemDetails(ErrorCodes.TAP_SIGNATURE_MISSING).status).toBe(401);
+    expect(createProblemDetails(ErrorCodes.TAP_TIME_INVALID).status).toBe(401);
+    expect(createProblemDetails(ErrorCodes.TAP_KEY_NOT_FOUND).status).toBe(401);
+    expect(createProblemDetails(ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED).status).toBe(401);
+
+    // 400 - Client errors
     expect(createProblemDetails(ErrorCodes.TAP_WINDOW_TOO_LARGE).status).toBe(400);
+    expect(createProblemDetails(ErrorCodes.TAP_TAG_UNKNOWN).status).toBe(400);
+    expect(createProblemDetails(ErrorCodes.TAP_ALGORITHM_INVALID).status).toBe(400);
+
+    // 403 - Forbidden
     expect(createProblemDetails(ErrorCodes.ISSUER_NOT_ALLOWED).status).toBe(403);
+
+    // 409 - Conflict (replay detected)
+    expect(createProblemDetails(ErrorCodes.TAP_NONCE_REPLAY).status).toBe(409);
+
+    // 500 - Server errors
+    expect(createProblemDetails(ErrorCodes.CONFIG_ISSUER_ALLOWLIST_REQUIRED).status).toBe(500);
     expect(createProblemDetails(ErrorCodes.INTERNAL_ERROR).status).toBe(500);
+  });
+
+  it('should create config error for missing issuer allowlist', () => {
+    const problem = createProblemDetails(ErrorCodes.CONFIG_ISSUER_ALLOWLIST_REQUIRED);
+
+    expect(problem.type).toBe('https://peacprotocol.org/problems/config_issuer_allowlist_required');
+    expect(problem.title).toBe('Configuration Error');
+    expect(problem.status).toBe(500);
+    expect(problem.code).toBe('E_CONFIG_ISSUER_ALLOWLIST_REQUIRED');
+  });
+
+  it('should create replay protection required error', () => {
+    const problem = createProblemDetails(ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED);
+
+    expect(problem.type).toBe('https://peacprotocol.org/problems/tap_replay_protection_required');
+    expect(problem.title).toBe('Replay Protection Required');
+    expect(problem.status).toBe(401);
+    expect(problem.code).toBe('E_TAP_REPLAY_PROTECTION_REQUIRED');
   });
 
   it('should sanitize sensitive data in detail', () => {

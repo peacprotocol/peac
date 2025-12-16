@@ -7,13 +7,16 @@ import { parseConfig, matchesBypassPath, isIssuerAllowed } from '../src/config.j
 import type { Env } from '../src/types.js';
 
 describe('parseConfig', () => {
-  it('should parse empty environment', () => {
+  it('should parse empty environment with fail-closed defaults', () => {
     const env: Env = {};
     const config = parseConfig(env);
 
     expect(config.issuerAllowlist).toEqual([]);
     expect(config.bypassPaths).toEqual([]);
-    expect(config.allowUnknownTags).toBe(false);
+    // All UNSAFE_* flags default to false (fail-closed)
+    expect(config.unsafeAllowAnyIssuer).toBe(false);
+    expect(config.unsafeAllowUnknownTags).toBe(false);
+    expect(config.unsafeAllowNoReplay).toBe(false);
   });
 
   it('should parse issuer allowlist', () => {
@@ -37,21 +40,26 @@ describe('parseConfig', () => {
     expect(config.bypassPaths).toEqual(['/.well-known/*', '/health', '/api/public/*']);
   });
 
-  it('should parse allowUnknownTags as true', () => {
-    const env: Env = {
-      ALLOW_UNKNOWN_TAGS: 'true',
-    };
-    const config = parseConfig(env);
-
-    expect(config.allowUnknownTags).toBe(true);
+  it('should parse UNSAFE_ALLOW_ANY_ISSUER', () => {
+    expect(parseConfig({ UNSAFE_ALLOW_ANY_ISSUER: 'true' }).unsafeAllowAnyIssuer).toBe(true);
+    expect(parseConfig({ UNSAFE_ALLOW_ANY_ISSUER: '1' }).unsafeAllowAnyIssuer).toBe(true);
+    expect(parseConfig({ UNSAFE_ALLOW_ANY_ISSUER: 'false' }).unsafeAllowAnyIssuer).toBe(false);
+    expect(parseConfig({}).unsafeAllowAnyIssuer).toBe(false);
   });
 
-  it('should parse allowUnknownTags variations', () => {
-    expect(parseConfig({ ALLOW_UNKNOWN_TAGS: '1' }).allowUnknownTags).toBe(true);
-    expect(parseConfig({ ALLOW_UNKNOWN_TAGS: 'yes' }).allowUnknownTags).toBe(true);
-    expect(parseConfig({ ALLOW_UNKNOWN_TAGS: 'TRUE' }).allowUnknownTags).toBe(true);
-    expect(parseConfig({ ALLOW_UNKNOWN_TAGS: 'false' }).allowUnknownTags).toBe(false);
-    expect(parseConfig({ ALLOW_UNKNOWN_TAGS: 'no' }).allowUnknownTags).toBe(false);
+  it('should parse UNSAFE_ALLOW_UNKNOWN_TAGS', () => {
+    expect(parseConfig({ UNSAFE_ALLOW_UNKNOWN_TAGS: 'true' }).unsafeAllowUnknownTags).toBe(true);
+    expect(parseConfig({ UNSAFE_ALLOW_UNKNOWN_TAGS: '1' }).unsafeAllowUnknownTags).toBe(true);
+    expect(parseConfig({ UNSAFE_ALLOW_UNKNOWN_TAGS: 'yes' }).unsafeAllowUnknownTags).toBe(true);
+    expect(parseConfig({ UNSAFE_ALLOW_UNKNOWN_TAGS: 'false' }).unsafeAllowUnknownTags).toBe(false);
+    expect(parseConfig({}).unsafeAllowUnknownTags).toBe(false);
+  });
+
+  it('should parse UNSAFE_ALLOW_NO_REPLAY', () => {
+    expect(parseConfig({ UNSAFE_ALLOW_NO_REPLAY: 'true' }).unsafeAllowNoReplay).toBe(true);
+    expect(parseConfig({ UNSAFE_ALLOW_NO_REPLAY: '1' }).unsafeAllowNoReplay).toBe(true);
+    expect(parseConfig({ UNSAFE_ALLOW_NO_REPLAY: 'false' }).unsafeAllowNoReplay).toBe(false);
+    expect(parseConfig({}).unsafeAllowNoReplay).toBe(false);
   });
 });
 
@@ -81,8 +89,9 @@ describe('matchesBypassPath', () => {
 });
 
 describe('isIssuerAllowed', () => {
-  it('should allow any issuer when allowlist is empty', () => {
-    expect(isIssuerAllowed('https://any.example.com', [])).toBe(true);
+  it('should return false when allowlist is empty (fail-closed)', () => {
+    // Empty allowlist = fail-closed (handler should check UNSAFE_ALLOW_ANY_ISSUER separately)
+    expect(isIssuerAllowed('https://any.example.com', [])).toBe(false);
   });
 
   it('should check issuer against allowlist', () => {

@@ -2,18 +2,27 @@
  * @peac/worker-cloudflare - Configuration utilities
  *
  * Parse environment variables into typed configuration.
+ *
+ * Security defaults (fail-closed):
+ * - ISSUER_ALLOWLIST is REQUIRED (unless UNSAFE_ALLOW_ANY_ISSUER=true)
+ * - Unknown TAP tags are REJECTED (unless UNSAFE_ALLOW_UNKNOWN_TAGS=true)
+ * - Replay protection is REQUIRED when nonce present (unless UNSAFE_ALLOW_NO_REPLAY=true)
  */
 
 import type { Env, WorkerConfig } from './types.js';
 
 /**
  * Parse worker configuration from environment.
+ *
+ * Security: All unsafe flags default to false (fail-closed).
  */
 export function parseConfig(env: Env): WorkerConfig {
   return {
     issuerAllowlist: parseCommaSeparated(env.ISSUER_ALLOWLIST),
     bypassPaths: parseCommaSeparated(env.BYPASS_PATHS),
-    allowUnknownTags: parseBool(env.ALLOW_UNKNOWN_TAGS, false),
+    unsafeAllowAnyIssuer: parseBool(env.UNSAFE_ALLOW_ANY_ISSUER, false),
+    unsafeAllowUnknownTags: parseBool(env.UNSAFE_ALLOW_UNKNOWN_TAGS, false),
+    unsafeAllowNoReplay: parseBool(env.UNSAFE_ALLOW_NO_REPLAY, false),
   };
 }
 
@@ -82,11 +91,15 @@ function matchGlob(path: string, pattern: string): boolean {
 /**
  * Check if issuer is in allowlist.
  *
- * Returns true if allowlist is empty (open access).
+ * NOTE: This function does NOT handle the empty allowlist case.
+ * The handler must check for empty allowlist separately and either:
+ * - Return 500 config error (fail-closed, default)
+ * - Allow any issuer (UNSAFE_ALLOW_ANY_ISSUER=true)
  */
 export function isIssuerAllowed(issuer: string, allowlist: string[]): boolean {
+  // Empty allowlist should be handled by caller before reaching here
   if (allowlist.length === 0) {
-    return true; // Open access if no allowlist configured
+    return false;
   }
 
   // Normalize issuer to origin

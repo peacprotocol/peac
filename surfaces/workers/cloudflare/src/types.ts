@@ -8,16 +8,27 @@ import type { TapControlEntry } from '@peac/mappings-tap';
 
 /**
  * Worker environment bindings.
+ *
+ * Security defaults:
+ * - ISSUER_ALLOWLIST is REQUIRED (fail-closed unless UNSAFE_ALLOW_ANY_ISSUER=true)
+ * - Unknown TAP tags are REJECTED (unless UNSAFE_ALLOW_UNKNOWN_TAGS=true)
+ * - Replay protection is REQUIRED when nonce present (unless UNSAFE_ALLOW_NO_REPLAY=true)
  */
 export interface Env {
-  /** Comma-separated list of allowed issuers */
+  /** Comma-separated list of allowed issuers (REQUIRED for production) */
   ISSUER_ALLOWLIST?: string;
 
   /** Comma-separated list of bypass paths (glob patterns) */
   BYPASS_PATHS?: string;
 
-  /** Allow unknown TAP tags (default: false - fail-closed) */
-  ALLOW_UNKNOWN_TAGS?: string;
+  /** UNSAFE: Allow any issuer when ISSUER_ALLOWLIST is empty (default: false) */
+  UNSAFE_ALLOW_ANY_ISSUER?: string;
+
+  /** UNSAFE: Allow unknown TAP tags (default: false - fail-closed) */
+  UNSAFE_ALLOW_UNKNOWN_TAGS?: string;
+
+  /** UNSAFE: Allow requests without replay protection (default: false) */
+  UNSAFE_ALLOW_NO_REPLAY?: string;
 
   /** KV namespace for best-effort replay protection */
   REPLAY_KV?: KVNamespace;
@@ -31,6 +42,8 @@ export interface Env {
 
 /**
  * Worker configuration derived from environment.
+ *
+ * Security: All UNSAFE_* flags default to false (fail-closed).
  */
 export interface WorkerConfig {
   /** Allowed issuer origins */
@@ -39,8 +52,14 @@ export interface WorkerConfig {
   /** Bypass path patterns */
   bypassPaths: string[];
 
-  /** Allow unknown TAP tags */
-  allowUnknownTags: boolean;
+  /** UNSAFE: Allow any issuer when allowlist is empty (default: false) */
+  unsafeAllowAnyIssuer: boolean;
+
+  /** UNSAFE: Allow unknown TAP tags (default: false - fail-closed) */
+  unsafeAllowUnknownTags: boolean;
+
+  /** UNSAFE: Allow requests without replay protection (default: false) */
+  unsafeAllowNoReplay: boolean;
 }
 
 /**

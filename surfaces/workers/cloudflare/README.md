@@ -48,21 +48,59 @@ PEAC receipt verification worker for Cloudflare Workers.
 
 ### Environment Variables
 
-| Variable             | Description                                        | Default                | Security Note                    |
-| -------------------- | -------------------------------------------------- | ---------------------- | -------------------------------- |
-| `ISSUER_ALLOWLIST`   | Comma-separated list of allowed issuer origins     | (open access - UNSAFE) | **Required for production**      |
-| `BYPASS_PATHS`       | Comma-separated path patterns to skip verification | (none)                 | Only for health/public endpoints |
-| `ALLOW_UNKNOWN_TAGS` | Allow unknown TAP tags (fail-open)                 | `false`                | Keep `false` for security        |
+**Security-Critical (Required for Production):**
+
+| Variable           | Description                                    | Default | Notes                      |
+| ------------------ | ---------------------------------------------- | ------- | -------------------------- |
+| `ISSUER_ALLOWLIST` | Comma-separated list of allowed issuer origins | (none)  | **REQUIRED** or 500 error  |
+| `REPLAY_DO`        | Durable Object for strong replay protection    | (none)  | Recommended for production |
+| `REPLAY_D1`        | D1 database for replay protection              | (none)  | Good alternative to DO     |
+| `REPLAY_KV`        | KV namespace for best-effort replay protection | (none)  | NOT recommended (eventual) |
+
+**Path Configuration:**
+
+| Variable       | Description                                        | Default |
+| -------------- | -------------------------------------------------- | ------- |
+| `BYPASS_PATHS` | Comma-separated path patterns to skip verification | (none)  |
+
+**UNSAFE Escape Hatches (Development Only):**
+
+| Variable                    | Description                                           | Default | Security Note                       |
+| --------------------------- | ----------------------------------------------------- | ------- | ----------------------------------- |
+| `UNSAFE_ALLOW_ANY_ISSUER`   | Skip ISSUER_ALLOWLIST requirement                     | `false` | **UNSAFE** - allows any issuer      |
+| `UNSAFE_ALLOW_UNKNOWN_TAGS` | Accept unknown TAP tags (fail-open)                   | `false` | **UNSAFE** - may accept future tags |
+| `UNSAFE_ALLOW_NO_REPLAY`    | Skip replay protection requirement when nonce present | `false` | **UNSAFE** - allows replay attacks  |
+
+### Security Defaults (Fail-Closed)
+
+The worker is secure by default. Without explicit configuration:
+
+1. **ISSUER_ALLOWLIST is REQUIRED** - Returns 500 `E_CONFIG_ISSUER_ALLOWLIST_REQUIRED` if empty
+2. **Unknown TAP tags are REJECTED** - Returns 400 `E_TAP_TAG_UNKNOWN`
+3. **Replay protection is REQUIRED** - Returns 401 `E_TAP_REPLAY_PROTECTION_REQUIRED` if nonce present but no store
+
+### Development Mode
+
+For local development only, you can bypass security checks:
+
+```bash
+# wrangler.toml or wrangler dev --var
+UNSAFE_ALLOW_ANY_ISSUER=true
+UNSAFE_ALLOW_UNKNOWN_TAGS=true
+UNSAFE_ALLOW_NO_REPLAY=true
+```
+
+**WARNING:** Never use UNSAFE\_\* variables in production. They bypass critical security controls.
 
 ### Security Best Practices
 
-1. **Always set `ISSUER_ALLOWLIST` in production** - An empty allowlist means open access, which is unsafe for production deployments.
+1. **Always set `ISSUER_ALLOWLIST` in production** - List only trusted issuer origins.
 
-2. **Use `BYPASS_PATHS` sparingly** - Only bypass verification for truly public endpoints like `/health`, `/.well-known/*`, or public API documentation.
+2. **Configure replay protection** - Use Durable Objects (recommended) or D1 for strong guarantees. KV is best-effort only.
 
-3. **Keep `ALLOW_UNKNOWN_TAGS=false`** - The default fail-closed behavior rejects unknown TAP tags. Only set to `true` if you explicitly accept forward-compatibility risks.
+3. **Use `BYPASS_PATHS` sparingly** - Only bypass verification for truly public endpoints like `/health`, `/.well-known/*`, or public API documentation.
 
-4. **Configure replay protection** - Without a replay store, the worker logs a warning and adds `X-PEAC-Warning: replay-protection-disabled` to responses.
+4. **Never use UNSAFE\_\* in production** - These are development escape hatches only.
 
 ### Bypass Path Patterns
 
@@ -168,16 +206,23 @@ All errors are returned as RFC 9457 Problem Details with a stable `code` extensi
 
 ### Error Codes
 
-| Code                      | Status | Description                         |
-| ------------------------- | ------ | ----------------------------------- |
-| `E_RECEIPT_MISSING`       | 402    | No PEAC receipt provided            |
-| `E_TAP_SIGNATURE_MISSING` | 401    | No TAP signature headers            |
-| `E_TAP_SIGNATURE_INVALID` | 401    | Signature verification failed       |
-| `E_TAP_TIME_INVALID`      | 401    | Signature outside valid time window |
-| `E_TAP_WINDOW_TOO_LARGE`  | 400    | Signature window exceeds 8 minutes  |
-| `E_TAP_TAG_UNKNOWN`       | 400    | Unknown TAP tag (fail-closed)       |
-| `E_TAP_NONCE_REPLAY`      | 401    | Nonce replay detected               |
-| `E_ISSUER_NOT_ALLOWED`    | 403    | Issuer not in allowlist             |
+| Code                                 | Status | Description                           |
+| ------------------------------------ | ------ | ------------------------------------- |
+| `E_RECEIPT_MISSING`                  | 402    | No PEAC receipt provided              |
+| `E_RECEIPT_INVALID`                  | 402    | Invalid receipt format                |
+| `E_RECEIPT_EXPIRED`                  | 402    | Receipt has expired                   |
+| `E_TAP_SIGNATURE_MISSING`            | 401    | No TAP signature headers              |
+| `E_TAP_SIGNATURE_INVALID`            | 401    | Signature verification failed         |
+| `E_TAP_TIME_INVALID`                 | 401    | Signature outside valid time window   |
+| `E_TAP_KEY_NOT_FOUND`                | 401    | Public key not found at JWKS endpoint |
+| `E_TAP_REPLAY_PROTECTION_REQUIRED`   | 401    | Nonce present but no replay store     |
+| `E_TAP_WINDOW_TOO_LARGE`             | 400    | Signature window exceeds 8 minutes    |
+| `E_TAP_TAG_UNKNOWN`                  | 400    | Unknown TAP tag (fail-closed)         |
+| `E_TAP_ALGORITHM_INVALID`            | 400    | Unsupported signature algorithm       |
+| `E_ISSUER_NOT_ALLOWED`               | 403    | Issuer not in allowlist               |
+| `E_TAP_NONCE_REPLAY`                 | 409    | Nonce replay detected (conflict)      |
+| `E_CONFIG_ISSUER_ALLOWLIST_REQUIRED` | 500    | ISSUER_ALLOWLIST not configured       |
+| `E_INTERNAL_ERROR`                   | 500    | Internal server error                 |
 
 ### Security: Error Sanitization
 

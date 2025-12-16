@@ -16,7 +16,7 @@ describe('benchmark: config parsing', () => {
       ISSUER_ALLOWLIST:
         'https://issuer1.example.com,https://issuer2.example.com,https://issuer3.example.com',
       BYPASS_PATHS: '/health,/metrics,/api/v1/public/*',
-      ALLOW_UNKNOWN_TAGS: 'false',
+      UNSAFE_ALLOW_UNKNOWN_TAGS: 'false',
     };
 
     const iterations = 1000;

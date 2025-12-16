@@ -18,12 +18,12 @@ import type { ProblemDetails } from './types.js';
  * Format: E_<CATEGORY>_<ERROR>
  */
 export const ErrorCodes = {
-  // Receipt errors
+  // Receipt errors (402 - Payment Required)
   RECEIPT_MISSING: 'E_RECEIPT_MISSING',
   RECEIPT_INVALID: 'E_RECEIPT_INVALID',
   RECEIPT_EXPIRED: 'E_RECEIPT_EXPIRED',
 
-  // TAP errors
+  // TAP errors (401 - Authentication)
   TAP_SIGNATURE_MISSING: 'E_TAP_SIGNATURE_MISSING',
   TAP_SIGNATURE_INVALID: 'E_TAP_SIGNATURE_INVALID',
   TAP_TIME_INVALID: 'E_TAP_TIME_INVALID',
@@ -31,12 +31,20 @@ export const ErrorCodes = {
   TAP_TAG_UNKNOWN: 'E_TAP_TAG_UNKNOWN',
   TAP_ALGORITHM_INVALID: 'E_TAP_ALGORITHM_INVALID',
   TAP_KEY_NOT_FOUND: 'E_TAP_KEY_NOT_FOUND',
+
+  // Replay error (409 - Conflict)
   TAP_NONCE_REPLAY: 'E_TAP_NONCE_REPLAY',
 
-  // Issuer errors
+  // Replay protection required (401 - requires config change)
+  TAP_REPLAY_PROTECTION_REQUIRED: 'E_TAP_REPLAY_PROTECTION_REQUIRED',
+
+  // Issuer errors (403 - Forbidden)
   ISSUER_NOT_ALLOWED: 'E_ISSUER_NOT_ALLOWED',
 
-  // Internal errors
+  // Configuration errors (500 - Server misconfiguration)
+  CONFIG_ISSUER_ALLOWLIST_REQUIRED: 'E_CONFIG_ISSUER_ALLOWLIST_REQUIRED',
+
+  // Internal errors (500)
   INTERNAL_ERROR: 'E_INTERNAL_ERROR',
 } as const;
 
@@ -44,23 +52,41 @@ export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
 
 /**
  * HTTP status codes for error types.
+ *
+ * Status code semantics:
+ * - 400: Client error (malformed request, invalid parameters)
+ * - 401: Authentication required (missing/invalid credentials)
+ * - 402: Payment Required (reserved for PEAC receipt payment flows)
+ * - 403: Forbidden (authenticated but not authorized)
+ * - 409: Conflict (replay detection - request conflicts with previous state)
+ * - 500: Server error (configuration, internal failure)
  */
 const ErrorHttpStatus: Record<ErrorCode, number> = {
+  // 402 - Payment Required (reserved for payment flows)
   [ErrorCodes.RECEIPT_MISSING]: 402,
-  [ErrorCodes.RECEIPT_INVALID]: 401,
-  [ErrorCodes.RECEIPT_EXPIRED]: 401,
+  [ErrorCodes.RECEIPT_INVALID]: 402,
+  [ErrorCodes.RECEIPT_EXPIRED]: 402,
 
+  // 401 - Authentication errors
   [ErrorCodes.TAP_SIGNATURE_MISSING]: 401,
   [ErrorCodes.TAP_SIGNATURE_INVALID]: 401,
   [ErrorCodes.TAP_TIME_INVALID]: 401,
+  [ErrorCodes.TAP_KEY_NOT_FOUND]: 401,
+  [ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED]: 401,
+
+  // 400 - Client errors (malformed)
   [ErrorCodes.TAP_WINDOW_TOO_LARGE]: 400,
   [ErrorCodes.TAP_TAG_UNKNOWN]: 400,
   [ErrorCodes.TAP_ALGORITHM_INVALID]: 400,
-  [ErrorCodes.TAP_KEY_NOT_FOUND]: 401,
-  [ErrorCodes.TAP_NONCE_REPLAY]: 401,
 
+  // 403 - Forbidden (issuer not in allowlist)
   [ErrorCodes.ISSUER_NOT_ALLOWED]: 403,
 
+  // 409 - Conflict (replay detected)
+  [ErrorCodes.TAP_NONCE_REPLAY]: 409,
+
+  // 500 - Server errors
+  [ErrorCodes.CONFIG_ISSUER_ALLOWLIST_REQUIRED]: 500,
   [ErrorCodes.INTERNAL_ERROR]: 500,
 };
 
@@ -80,9 +106,11 @@ const ErrorTitles: Record<ErrorCode, string> = {
   [ErrorCodes.TAP_ALGORITHM_INVALID]: 'Invalid Algorithm',
   [ErrorCodes.TAP_KEY_NOT_FOUND]: 'Key Not Found',
   [ErrorCodes.TAP_NONCE_REPLAY]: 'Nonce Replay Detected',
+  [ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED]: 'Replay Protection Required',
 
   [ErrorCodes.ISSUER_NOT_ALLOWED]: 'Issuer Not Allowed',
 
+  [ErrorCodes.CONFIG_ISSUER_ALLOWLIST_REQUIRED]: 'Configuration Error',
   [ErrorCodes.INTERNAL_ERROR]: 'Internal Server Error',
 };
 
