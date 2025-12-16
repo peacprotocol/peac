@@ -71,8 +71,8 @@ const rslPurposePolicy: PolicyDocument = {
   defaults: { decision: 'deny' },
   rules: [
     {
-      name: 'allow-ai-search',
-      purpose: 'ai_search',
+      name: 'allow-ai-index',
+      purpose: 'ai_index',
       decision: 'allow',
     },
     {
@@ -184,11 +184,11 @@ describe('compilePeacTxt', () => {
     expect(output).not.toContain('receipts: optional');
   });
 
-  it('should correctly extract RSL purposes (ai_input, ai_search, search)', () => {
+  it('should correctly extract RSL purposes (ai_input, ai_index, search)', () => {
     const output = compilePeacTxt(rslPurposePolicy, { includeComments: false });
 
     // RSL purposes should be extracted and sorted alphabetically
-    expect(output).toContain('purposes: [ai_input, ai_search, search, train]');
+    expect(output).toContain('purposes: [ai_index, ai_input, search, train]');
   });
 
   it('golden: minimal deny policy peac.txt (no comments)', () => {

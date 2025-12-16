@@ -16,12 +16,13 @@ import {
 
 describe('RSL mapping', () => {
   describe('isValidRslToken', () => {
-    it('should return true for known RSL tokens', () => {
+    it('should return true for known RSL 1.0 tokens', () => {
+      expect(isValidRslToken('all')).toBe(true);
+      expect(isValidRslToken('ai-all')).toBe(true);
       expect(isValidRslToken('ai-train')).toBe(true);
       expect(isValidRslToken('ai-input')).toBe(true);
-      expect(isValidRslToken('ai-search')).toBe(true);
+      expect(isValidRslToken('ai-index')).toBe(true);
       expect(isValidRslToken('search')).toBe(true);
-      expect(isValidRslToken('ai-all')).toBe(true);
     });
 
     it('should return false for unknown tokens', () => {
@@ -30,17 +31,28 @@ describe('RSL mapping', () => {
       expect(isValidRslToken('')).toBe(false);
       expect(isValidRslToken('AI-TRAIN')).toBe(false); // case-sensitive
     });
+
+    it('should return false for ai-search (not an RSL 1.0 token)', () => {
+      // RSL 1.0 uses ai-index, not ai-search
+      expect(isValidRslToken('ai-search')).toBe(false);
+    });
   });
 
   describe('getKnownRslTokens', () => {
-    it('should return all known RSL tokens', () => {
+    it('should return all known RSL 1.0 tokens', () => {
       const tokens = getKnownRslTokens();
+      expect(tokens).toContain('all');
+      expect(tokens).toContain('ai-all');
       expect(tokens).toContain('ai-train');
       expect(tokens).toContain('ai-input');
-      expect(tokens).toContain('ai-search');
+      expect(tokens).toContain('ai-index');
       expect(tokens).toContain('search');
-      expect(tokens).toContain('ai-all');
-      expect(tokens).toHaveLength(5);
+      expect(tokens).toHaveLength(6);
+    });
+
+    it('should NOT contain ai-search (not an RSL 1.0 token)', () => {
+      const tokens = getKnownRslTokens();
+      expect(tokens).not.toContain('ai-search');
     });
   });
 
@@ -55,9 +67,9 @@ describe('RSL mapping', () => {
       expect(purposes).toEqual(['ai_input']);
     });
 
-    it('should map ai-search to ai_search', () => {
-      const purposes = rslTokenToControlPurposes('ai-search');
-      expect(purposes).toEqual(['ai_search']);
+    it('should map ai-index to ai_index', () => {
+      const purposes = rslTokenToControlPurposes('ai-index');
+      expect(purposes).toEqual(['ai_index']);
     });
 
     it('should map search to search', () => {
@@ -65,9 +77,14 @@ describe('RSL mapping', () => {
       expect(purposes).toEqual(['search']);
     });
 
-    it('should expand ai-all to train, ai_input, ai_search', () => {
+    it('should expand ai-all to train, ai_input, ai_index', () => {
       const purposes = rslTokenToControlPurposes('ai-all');
-      expect(purposes).toEqual(['train', 'ai_input', 'ai_search']);
+      expect(purposes).toEqual(['train', 'ai_input', 'ai_index']);
+    });
+
+    it('should expand all to train, ai_input, ai_index, search', () => {
+      const purposes = rslTokenToControlPurposes('all');
+      expect(purposes).toEqual(['train', 'ai_input', 'ai_index', 'search']);
     });
 
     it('should return empty array for unknown token', () => {
@@ -111,7 +128,7 @@ describe('RSL mapping', () => {
       const result = rslUsageTokensToControlPurposes(['ai-all', 'ai-train']);
       expect(result.purposes).toContain('train');
       expect(result.purposes).toContain('ai_input');
-      expect(result.purposes).toContain('ai_search');
+      expect(result.purposes).toContain('ai_index');
       expect(result.purposes).toHaveLength(3);
     });
 
@@ -137,8 +154,8 @@ describe('RSL mapping', () => {
       expect(controlPurposeToRslToken('ai_input')).toBe('ai-input');
     });
 
-    it('should map ai_search back to ai-search', () => {
-      expect(controlPurposeToRslToken('ai_search')).toBe('ai-search');
+    it('should map ai_index back to ai-index', () => {
+      expect(controlPurposeToRslToken('ai_index')).toBe('ai-index');
     });
 
     it('should map search back to search', () => {
@@ -187,7 +204,7 @@ describe('RSL mapping', () => {
      * Verifies that standard RSL usage tokens map correctly
      * to PEAC ControlPurpose values.
      */
-    describe('Golden Vector A: Basic RSL to CAL mapping', () => {
+    describe('Golden Vector A: Basic RSL 1.0 to CAL mapping', () => {
       const vectors: Array<{
         name: string;
         input: string[];
@@ -204,9 +221,9 @@ describe('RSL mapping', () => {
           expectedPurposes: ['ai_input'],
         },
         {
-          name: 'ai-search only',
-          input: ['ai-search'],
-          expectedPurposes: ['ai_search'],
+          name: 'ai-index only (AI-powered search)',
+          input: ['ai-index'],
+          expectedPurposes: ['ai_index'],
         },
         {
           name: 'search only (traditional)',
@@ -214,9 +231,14 @@ describe('RSL mapping', () => {
           expectedPurposes: ['search'],
         },
         {
-          name: 'ai-all expands to multiple',
+          name: 'ai-all expands to AI purposes',
           input: ['ai-all'],
-          expectedPurposes: ['train', 'ai_input', 'ai_search'],
+          expectedPurposes: ['train', 'ai_input', 'ai_index'],
+        },
+        {
+          name: 'all expands to all purposes',
+          input: ['all'],
+          expectedPurposes: ['train', 'ai_input', 'ai_index', 'search'],
         },
         {
           name: 'combination: ai-train + ai-input',
@@ -224,14 +246,14 @@ describe('RSL mapping', () => {
           expectedPurposes: ['train', 'ai_input'],
         },
         {
-          name: 'combination: search + ai-search',
-          input: ['search', 'ai-search'],
-          expectedPurposes: ['search', 'ai_search'],
+          name: 'combination: search + ai-index',
+          input: ['search', 'ai-index'],
+          expectedPurposes: ['search', 'ai_index'],
         },
         {
-          name: 'all tokens',
-          input: ['ai-train', 'ai-input', 'ai-search', 'search'],
-          expectedPurposes: ['train', 'ai_input', 'ai_search', 'search'],
+          name: 'all individual tokens',
+          input: ['ai-train', 'ai-input', 'ai-index', 'search'],
+          expectedPurposes: ['train', 'ai_input', 'ai_index', 'search'],
         },
       ];
 
@@ -305,7 +327,7 @@ describe('RSL mapping', () => {
       const roundTripVectors = [
         { purpose: 'train', rslToken: 'ai-train' },
         { purpose: 'ai_input', rslToken: 'ai-input' },
-        { purpose: 'ai_search', rslToken: 'ai-search' },
+        { purpose: 'ai_index', rslToken: 'ai-index' },
         { purpose: 'search', rslToken: 'search' },
       ] as const;
 
@@ -328,6 +350,57 @@ describe('RSL mapping', () => {
           );
         });
       }
+    });
+
+    /**
+     * GOLDEN VECTOR D: RSL 1.0 Token Vocabulary Parity
+     *
+     * Ensures our RSL token vocabulary exactly matches RSL 1.0 specification.
+     * @see https://rslstandard.org/rsl for canonical RSL 1.0 specification
+     *
+     * RSL 1.0 canonical tokens: all, ai-all, ai-train, ai-input, ai-index, search
+     * NOT in RSL 1.0: ai-search (this was a misunderstanding in earlier versions)
+     */
+    describe('Golden Vector D: RSL 1.0 Token Vocabulary Parity', () => {
+      const RSL_1_0_CANONICAL_TOKENS = [
+        'all',
+        'ai-all',
+        'ai-train',
+        'ai-input',
+        'ai-index',
+        'search',
+      ];
+
+      it('should have exactly the RSL 1.0 canonical token set', () => {
+        const tokens = getKnownRslTokens();
+        expect(tokens.sort()).toEqual(RSL_1_0_CANONICAL_TOKENS.sort());
+      });
+
+      it('should NOT include ai-search (not in RSL 1.0)', () => {
+        const tokens = getKnownRslTokens();
+        expect(tokens).not.toContain('ai-search');
+        expect(isValidRslToken('ai-search')).toBe(false);
+      });
+
+      it('should validate all RSL 1.0 tokens', () => {
+        for (const token of RSL_1_0_CANONICAL_TOKENS) {
+          expect(isValidRslToken(token)).toBe(true);
+        }
+      });
+
+      it('should reject common non-RSL tokens', () => {
+        const nonRslTokens = [
+          'ai-search', // Common mistake - RSL uses ai-index
+          'crawl', // PEAC-only, no RSL equivalent
+          'index', // PEAC-only, no RSL equivalent
+          'inference', // PEAC-only, no RSL equivalent
+          'train', // Must use ai-train in RSL
+        ];
+
+        for (const token of nonRslTokens) {
+          expect(isValidRslToken(token)).toBe(false);
+        }
+      });
     });
   });
 });

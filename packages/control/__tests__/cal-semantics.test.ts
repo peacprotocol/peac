@@ -21,9 +21,9 @@ describe('ControlPurposeSchema', () => {
     expect(ControlPurposeSchema.parse('inference')).toBe('inference');
   });
 
-  it('should accept RSL-aligned purposes (v0.9.17+)', () => {
+  it('should accept RSL-aligned purposes (v0.9.17+, v0.9.18+)', () => {
     expect(ControlPurposeSchema.parse('ai_input')).toBe('ai_input');
-    expect(ControlPurposeSchema.parse('ai_search')).toBe('ai_search');
+    expect(ControlPurposeSchema.parse('ai_index')).toBe('ai_index');
     expect(ControlPurposeSchema.parse('search')).toBe('search');
   });
 

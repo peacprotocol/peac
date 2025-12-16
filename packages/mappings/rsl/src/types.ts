@@ -11,16 +11,18 @@
 /**
  * RSL usage token type
  *
- * Standard RSL usage tokens that control how content may be used.
+ * Standard RSL 1.0 usage tokens that control how content may be used.
+ * @see https://rslstandard.org/rsl for the canonical RSL 1.0 specification
  *
- * Well-known tokens:
+ * RSL 1.0 tokens:
+ * - "all": All usage types (shorthand for everything)
+ * - "ai-all": All AI usage types (ai-train + ai-input + ai-index)
  * - "ai-train": AI/ML model training
  * - "ai-input": RAG/grounding (using content as input to AI)
- * - "ai-search": AI-powered search
+ * - "ai-index": AI-powered search/indexing
  * - "search": Traditional search engine indexing
- * - "ai-all": Shorthand for ai-train + ai-input + ai-search
  */
-export type RslUsageToken = 'ai-train' | 'ai-input' | 'ai-search' | 'search' | 'ai-all';
+export type RslUsageToken = 'all' | 'ai-all' | 'ai-train' | 'ai-input' | 'ai-index' | 'search';
 
 /**
  * RSL rule structure (simplified)

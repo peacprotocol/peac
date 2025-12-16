@@ -302,7 +302,7 @@ describe('complex policy validation', () => {
   });
 
   it('should validate all valid purposes', () => {
-    const purposes = ['crawl', 'index', 'train', 'inference', 'ai_input', 'ai_search', 'search'];
+    const purposes = ['crawl', 'index', 'train', 'inference', 'ai_input', 'ai_index', 'search'];
 
     for (const purpose of purposes) {
       const policy = {

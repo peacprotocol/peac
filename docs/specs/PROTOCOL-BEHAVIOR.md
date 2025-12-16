@@ -137,33 +137,38 @@ When `combinator == "any_can_veto"`:
 
 **Well-known purposes**:
 
-| Purpose     | Description                                             |
-| ----------- | ------------------------------------------------------- |
-| `crawl`     | Web crawling/scraping                                   |
-| `index`     | Search engine indexing                                  |
-| `train`     | AI/ML model training                                    |
-| `inference` | AI/ML inference/generation                              |
-| `ai_input`  | RAG/grounding (using content as input to AI) [v0.9.17+] |
-| `ai_search` | AI-powered search [v0.9.17+]                            |
-| `search`    | Traditional search indexing [v0.9.17+]                  |
+| Purpose     | Description                                              |
+| ----------- | -------------------------------------------------------- |
+| `crawl`     | Web crawling/scraping                                    |
+| `index`     | Search engine indexing                                   |
+| `train`     | AI/ML model training                                     |
+| `inference` | AI/ML inference/generation                               |
+| `ai_input`  | RAG/grounding (using content as input to AI) [v0.9.17+]  |
+| `ai_index`  | AI-powered search/indexing [v0.9.18+, RSL 1.0 alignment] |
+| `search`    | Traditional search indexing [v0.9.17+]                   |
 
-### 2.5 RSL to CAL Mapping (v0.9.17+)
+### 2.5 RSL to CAL Mapping (v0.9.17+, updated v0.9.18)
 
-RSL (Robots Specification Layer) usage tokens can be mapped to PEAC `ControlPurpose` values using the `@peac/mappings-rsl` package.
+RSL (Robots Specification Layer) 1.0 usage tokens can be mapped to PEAC `ControlPurpose` values using the `@peac/mappings-rsl` package.
+
+**RSL 1.0 Specification**: [rslstandard.org/rsl](https://rslstandard.org/rsl)
 
 **Mapping Table**:
 
-| RSL Token   | CAL ControlPurpose                   | Notes                        |
-| ----------- | ------------------------------------ | ---------------------------- |
-| `ai-train`  | `['train']`                          | AI/ML model training         |
-| `ai-input`  | `['ai_input']`                       | RAG/grounding                |
-| `ai-search` | `['ai_search']`                      | AI-powered search            |
-| `search`    | `['search']`                         | Traditional search indexing  |
-| `ai-all`    | `['train', 'ai_input', 'ai_search']` | Expands to multiple purposes |
+| RSL Token  | CAL ControlPurpose                            | Notes                       |
+| ---------- | --------------------------------------------- | --------------------------- |
+| `all`      | `['train', 'ai_input', 'ai_index', 'search']` | All usage types             |
+| `ai-all`   | `['train', 'ai_input', 'ai_index']`           | All AI usage types          |
+| `ai-train` | `['train']`                                   | AI/ML model training        |
+| `ai-input` | `['ai_input']`                                | RAG/grounding               |
+| `ai-index` | `['ai_index']`                                | AI-powered search/indexing  |
+| `search`   | `['search']`                                  | Traditional search indexing |
+
+**Note**: RSL 1.0 uses `ai-index`, not `ai-search`. Previous versions of PEAC used `ai_search` which has been removed in v0.9.18.
 
 **Semantics**:
 
-- Mapping is **many-to-many**: RSL `ai-all` expands to multiple purposes
+- Mapping is **many-to-many**: RSL `ai-all` and `all` expand to multiple purposes
 - Unknown RSL tokens SHOULD log a warning but MUST NOT cause validation failure
 - Reverse mapping is **partial**: CAL purposes without RSL equivalents (`crawl`, `index`, `inference`) return `null`
 
@@ -174,7 +179,10 @@ Input: ["ai-train", "ai-input"]
 Output: { purposes: ["train", "ai_input"], unknownTokens: [] }
 
 Input: ["ai-all"]
-Output: { purposes: ["train", "ai_input", "ai_search"], unknownTokens: [] }
+Output: { purposes: ["train", "ai_input", "ai_index"], unknownTokens: [] }
+
+Input: ["all"]
+Output: { purposes: ["train", "ai_input", "ai_index", "search"], unknownTokens: [] }
 
 Input: ["ai-train", "future-token"]
 Output: { purposes: ["train"], unknownTokens: ["future-token"] }
@@ -823,10 +831,15 @@ An implementation is **conformant with PEAC v0.9** if it:
 
 ## 12. Version History
 
-- **v0.9.17 (WIP)**: RSL 1.0 Alignment + Subject Binding
-  - Extended `ControlPurpose` with RSL usage tokens: `ai_input`, `ai_search`, `search`
+- **v0.9.18 (WIP)**: RSL 1.0 Alignment Correction
+  - Corrected RSL token mapping: RSL 1.0 uses `ai-index`, not `ai-search`
+  - Added `ai_index` purpose, removed `ai_search` (breaking change)
+  - Added `all` RSL token support (expands to all purposes)
+  - RSL `ai-all` now expands to `['train', 'ai_input', 'ai_index']`
+
+- **v0.9.17**: RSL Alignment + Subject Binding
+  - Extended `ControlPurpose` with RSL usage tokens: `ai_input`, `search`
   - Added `@peac/mappings-rsl` package for RSL to CAL mapping
-  - RSL `ai-train` maps to existing `train`, `ai-all` expands to `['train', 'ai_input', 'ai_search']`
   - Lenient handling: unknown RSL tokens log warning but do not cause validation failure
   - Subject Binding: Optional `subject_snapshot` on `auth` block for identity context at issuance
   - Section 8.5 documents placement, validation behavior, and security considerations

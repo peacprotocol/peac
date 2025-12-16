@@ -377,7 +377,7 @@ const peacTxt = compilePeacTxt(policy, {
 **Key features:**
 
 - First-match-wins rule semantics (like firewall rules)
-- CAL purposes: `crawl`, `index`, `train`, `inference`, `ai_input`, `ai_search`, `search`
+- CAL purposes: `crawl`, `index`, `train`, `inference`, `ai_input`, `ai_index`, `search`
 - Deterministic, auditable, side-effect free evaluation
 - No scripting or dynamic code
 

@@ -80,7 +80,10 @@ export const VerifyRequest = z
 /**
  * Control purpose - what the access is for
  *
- * v0.9.17+: Added ai_input, ai_search, search for RSL alignment
+ * v0.9.17+: Added ai_input, search for RSL alignment
+ * v0.9.18+: Added ai_index (RSL 1.0 canonical token). Removed ai_search.
+ *
+ * @see https://rslstandard.org/rsl for RSL 1.0 specification
  */
 export const ControlPurposeSchema = z.enum([
   'crawl',
@@ -88,7 +91,7 @@ export const ControlPurposeSchema = z.enum([
   'train',
   'inference',
   'ai_input',
-  'ai_search',
+  'ai_index',
   'search',
 ]);
 

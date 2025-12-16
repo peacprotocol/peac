@@ -305,7 +305,7 @@ policy
   .option('-i, --id <id>', 'Subject ID')
   .option(
     '-p, --purpose <purpose>',
-    'Access purpose (crawl, index, train, inference, ai_input, ai_search, search)'
+    'Access purpose (crawl, index, train, inference, ai_input, ai_index, search)'
   )
   .option(
     '-m, --licensing-mode <mode>',
