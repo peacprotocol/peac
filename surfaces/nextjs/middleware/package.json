@@ -1,0 +1,53 @@
+{
+  "name": "@peac/middleware-nextjs",
+  "version": "0.9.18",
+  "private": true,
+  "description": "PEAC TAP verifier and 402 access gate for Next.js Edge Runtime",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "nextjs",
+    "middleware",
+    "edge",
+    "peac",
+    "tap",
+    "verification"
+  ],
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://peacprotocol.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "surfaces/nextjs/middleware"
+  },
+  "dependencies": {
+    "@peac/http-signatures": "workspace:*",
+    "@peac/jwks-cache": "workspace:*",
+    "@peac/mappings-tap": "workspace:*"
+  },
+  "devDependencies": {
+    "next": "^15.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "next": ">=13.0.0"
+  }
+}
