@@ -17,10 +17,17 @@ import {
 
 describe('Surface Parity - Error Codes', () => {
   it('should export all canonical error codes', () => {
-    const canonicalKeys = Object.keys(CANONICAL_ERROR_CODES);
-    const implementationKeys = Object.keys(ErrorCodes);
+    const canonicalKeys = Object.keys(CANONICAL_ERROR_CODES).sort();
+    const implementationKeys = Object.keys(ErrorCodes).sort();
 
     expect(implementationKeys).toEqual(canonicalKeys);
+  });
+
+  it('every ErrorCodes.* must have a status mapping (completeness invariant)', () => {
+    const allCodes = Object.values(ErrorCodes);
+    for (const code of allCodes) {
+      expect(CANONICAL_STATUS_MAPPINGS[code]).toBeDefined();
+    }
   });
 
   it('should match canonical error code values', () => {
