@@ -1,6 +1,6 @@
 # PEAC Protocol Architecture
 
-**Version:** 0.9.15
+**Version:** 0.9.18
 **Status:** Authoritative
 
 This document describes the kernel-first architecture of the PEAC Protocol monorepo.
@@ -121,14 +121,19 @@ peac/
 │   ├── crypto/             # Layer 2: Ed25519 JWS, JCS, base64url
 │   ├── protocol/           # Layer 3: issue(), verify(), discovery
 │   ├── control/            # Layer 3: Constraint types and enforcement
+│   ├── policy-kit/         # Layer 3: YAML/JSON policy evaluation
 │   ├── server/             # Layer 5: HTTP verification server
 │   ├── cli/                # Layer 5: Command-line tools
+│   ├── http-signatures/    # Layer 4: RFC 9421 HTTP Message Signatures
+│   ├── jwks-cache/         # Layer 4: Edge-safe JWKS fetch
 │   ├── rails/              # Layer 4: Payment rail adapters
 │   │   ├── x402/
 │   │   └── stripe/
 │   ├── mappings/           # Layer 4: Agent protocol mappings
 │   │   ├── mcp/
-│   │   └── acp/
+│   │   ├── acp/
+│   │   ├── rsl/            # Robots Specification Layer (RSL 1.0)
+│   │   └── tap/            # Trusted Agent Protocol
 │   ├── access/             # Layer 6: Access control
 │   ├── attribution/        # Layer 6: Attribution and revenue sharing
 │   ├── compliance/         # Layer 6: Regulatory compliance
@@ -136,6 +141,13 @@ peac/
 │   ├── intelligence/       # Layer 6: Analytics
 │   ├── privacy/            # Layer 6: Privacy budgeting
 │   └── provenance/         # Layer 6: Content provenance, C2PA
+├── surfaces/               # Platform integration surfaces
+│   ├── workers/cloudflare/ # Cloudflare Worker TAP verifier
+│   └── nextjs/middleware/  # Next.js Edge middleware
+├── examples/               # Canonical flow examples
+│   ├── pay-per-inference/  # 402 flow: agent obtains receipt, retries
+│   ├── pay-per-crawl/      # Policy Kit + receipt flow for AI crawlers
+│   └── rsl-collective/     # RSL token mapping + core claims parity
 ├── tests/                  # Global test harness
 │   ├── conformance/
 │   ├── performance/
@@ -152,13 +164,14 @@ peac/
 
 ### Core (Normative)
 
-| Package          | Layer | Description                                   |
-| ---------------- | ----- | --------------------------------------------- |
-| `@peac/kernel`   | 0     | Zero-dependency constants from specs/kernel   |
-| `@peac/schema`   | 1     | TypeScript types, Zod validators, JSON Schema |
-| `@peac/crypto`   | 2     | Ed25519 JWS signing and verification          |
-| `@peac/protocol` | 3     | High-level issue() and verify() functions     |
-| `@peac/control`  | 3     | Constraint types and enforcement              |
+| Package            | Layer | Description                                   |
+| ------------------ | ----- | --------------------------------------------- |
+| `@peac/kernel`     | 0     | Zero-dependency constants from specs/kernel   |
+| `@peac/schema`     | 1     | TypeScript types, Zod validators, JSON Schema |
+| `@peac/crypto`     | 2     | Ed25519 JWS, JCS canonicalization (RFC 8785)  |
+| `@peac/protocol`   | 3     | High-level issue() and verify() functions     |
+| `@peac/control`    | 3     | Constraint types and enforcement              |
+| `@peac/policy-kit` | 3     | YAML/JSON policy evaluation for CAL semantics |
 
 ### Runtime
 
@@ -180,6 +193,22 @@ peac/
 | -------------------- | ----- | ------------------------------------- |
 | `@peac/mappings-mcp` | 4     | Model Context Protocol integration    |
 | `@peac/mappings-acp` | 4     | Agentic Commerce Protocol integration |
+| `@peac/mappings-rsl` | 4     | Robots Specification Layer (RSL 1.0)  |
+| `@peac/mappings-tap` | 4     | Trusted Agent Protocol (Visa TAP)     |
+
+### Infrastructure
+
+| Package                 | Layer | Description                               |
+| ----------------------- | ----- | ----------------------------------------- |
+| `@peac/http-signatures` | 4     | RFC 9421 HTTP Message Signatures          |
+| `@peac/jwks-cache`      | 4     | Edge-safe JWKS fetch with SSRF protection |
+
+### Surfaces (Platform Integrations)
+
+| Package                   | Layer | Description                          |
+| ------------------------- | ----- | ------------------------------------ |
+| `@peac/worker-cloudflare` | 5     | Cloudflare Worker TAP verifier       |
+| `@peac/middleware-nextjs` | 5     | Next.js Edge middleware TAP verifier |
 
 ### Pillars
 
@@ -284,7 +313,10 @@ interface PaymentEvidence {
 
 ## Version History
 
-| Version | Date       | Changes                                      |
-| ------- | ---------- | -------------------------------------------- |
-| 0.9.15  | 2025-11-18 | Kernel-first architecture, vendor neutrality |
-| 0.9.14  | -          | Initial wire format freeze                   |
+| Version | Date       | Changes                                                        |
+| ------- | ---------- | -------------------------------------------------------------- |
+| 0.9.18  | 2025-12-19 | TAP, HTTP signatures, surfaces, examples, schema normalization |
+| 0.9.17  | 2025-12-14 | x402 v2, Policy Kit, RSL alignment, subject binding            |
+| 0.9.16  | 2025-12-07 | CAL semantics, PaymentEvidence, SubjectProfile                 |
+| 0.9.15  | 2025-11-18 | Kernel-first architecture, vendor neutrality                   |
+| 0.9.14  | -          | Initial wire format freeze                                     |

@@ -638,6 +638,102 @@ Output: boolean or PEACError
 - Issued via: `WWW-Authenticate: DPoP error="use_dpop_nonce", error_description="..."`
 - TTL: 60 seconds
 
+### 7.4 HTTP Message Signatures (RFC 9421)
+
+**Status**: NORMATIVE (v0.9.18+)
+
+When `auth.binding.method == "http-signature"`, verifiers MUST validate HTTP Message Signatures per RFC 9421.
+
+PEAC surfaces (e.g., Cloudflare Worker, Next.js middleware) implement signature verification for agent protocols like Visa TAP (Trusted Agent Protocol).
+
+**Required Parameters**:
+
+- `@method`: HTTP method
+- `@authority`: Request host
+- `@request-target`: Request path + query
+- `content-digest`: SHA-256 digest of request body (if present)
+- `content-length`: Request body length (if present)
+- `content-type`: Request content type (if present)
+
+**TAP-Specific Tags** (covered components):
+
+| Tag        | Components Covered                                                    |
+| ---------- | --------------------------------------------------------------------- |
+| `peac-all` | `@method`, `@authority`, `@request-target`, body headers (if present) |
+| `peac-min` | `@method`, `@authority` only                                          |
+
+**Verification Algorithm**:
+
+```text
+Input: request, signature_input (Signature-Input header), signature (Signature header)
+Output: boolean or PEACError
+
+1. Parse Signature-Input header:
+   TRY:
+     params = parse_structured_field(signature_input)
+   CATCH parse_error:
+     RETURN PEACError(
+       code: "E_TAP_SIGNATURE_INPUT_MALFORMED",
+       category: "validation",
+       severity: "error"
+     )
+
+2. Extract keyid from params:
+   keyid = params.keyid
+   IF keyid is absent:
+     RETURN PEACError(code: "E_TAP_KEY_NOT_FOUND")
+
+3. Verify temporal validity:
+   created = params.created
+   expires = params.expires
+
+   // TAP hard limit: 8-minute window
+   IF (expires - created) > 480:
+     RETURN PEACError(code: "E_TAP_WINDOW_TOO_LARGE")
+
+   current_time = UnixTime()
+   clock_skew = 60  // seconds
+
+   IF current_time < (created - clock_skew):
+     RETURN PEACError(code: "E_TAP_TIME_INVALID")
+
+   IF current_time > (expires + clock_skew):
+     RETURN PEACError(code: "E_TAP_TIME_INVALID")
+
+4. Fetch public key via JWKS:
+   key = JWKS.fetch(issuer, keyid)
+   IF key is null:
+     RETURN PEACError(code: "E_TAP_KEY_NOT_FOUND")
+
+5. Construct signature base:
+   base = construct_signature_base(request, params.components)
+
+6. Verify Ed25519 signature:
+   valid = Ed25519.verify(base, signature, key)
+   IF NOT valid:
+     RETURN PEACError(code: "E_TAP_SIGNATURE_INVALID")
+
+7. Check replay (if nonce present):
+   IF params.nonce is present:
+     IF NonceAlreadyUsed(issuer, keyid, params.nonce):
+       RETURN PEACError(code: "E_TAP_REPLAY_DETECTED")
+     RecordNonce(issuer, keyid, params.nonce, ttl=480)
+
+8. RETURN true
+```
+
+**Fail-Closed Semantics**:
+
+- Unknown TAP tags MUST be rejected (no silent acceptance)
+- Missing issuer allowlist MUST reject all requests (configuration required)
+- Replay protection MUST be enforced when nonce is present
+
+**Reference Implementations**:
+
+- `@peac/http-signatures`: RFC 9421 signature creation/verification
+- `@peac/worker-cloudflare`: Cloudflare Worker TAP verifier
+- `@peac/middleware-nextjs`: Next.js Edge middleware TAP verifier
+
 ---
 
 ## 8. Privacy and PII Constraints
@@ -831,11 +927,13 @@ An implementation is **conformant with PEAC v0.9** if it:
 
 ## 12. Version History
 
-- **v0.9.18 (WIP)**: RSL 1.0 Alignment Correction
-  - Corrected RSL token mapping: RSL 1.0 uses `ai-index`, not `ai-search`
-  - Added `ai_index` purpose, removed `ai_search` (breaking change)
-  - Added `all` RSL token support (expands to all purposes)
-  - RSL `ai-all` now expands to `['train', 'ai_input', 'ai_index']`
+- **v0.9.18**: TAP + HTTP Message Signatures + Schema Normalization
+  - HTTP Message Signatures (RFC 9421): Section 7.4 normative verification algorithm
+  - TAP (Trusted Agent Protocol) support via `@peac/mappings-tap`
+  - Reference surfaces: `@peac/worker-cloudflare`, `@peac/middleware-nextjs`
+  - Schema normalization: `toCoreClaims()` for cross-mapping parity (see SCHEMA-NORMALIZATION.md)
+  - RSL 1.0 alignment: `ai-index` token (not `ai-search`), `all` token support
+  - Canonical flow examples in `examples/` directory
 
 - **v0.9.17**: RSL Alignment + Subject Binding
   - Extended `ControlPurpose` with RSL usage tokens: `ai_input`, `search`

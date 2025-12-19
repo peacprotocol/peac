@@ -53,6 +53,20 @@
       "description": "Generic enterprise mandate/approval chain evaluator",
       "reference": null,
       "status": "informational"
+    },
+    {
+      "id": "tap",
+      "category": "agent-verification",
+      "description": "Trusted Agent Protocol control decisions (HTTP signature verification)",
+      "reference": "https://developer.visa.com/",
+      "status": "informational"
+    },
+    {
+      "id": "rsl",
+      "category": "access-policy",
+      "description": "Robots Specification Layer usage token evaluation",
+      "reference": null,
+      "status": "informational"
     }
   ],
   "transport_methods": [
