@@ -57,6 +57,9 @@ jobs:
       - name: Conformance tests
         run: pnpm exec vitest run tests/conformance/parity.spec.ts
 
+      - name: Examples typecheck
+        run: pnpm examples:check
+
       - name: Performance gate (advisory)
         continue-on-error: true
         run: |
