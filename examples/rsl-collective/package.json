@@ -1,0 +1,22 @@
+{
+  "name": "@peac/example-rsl-collective",
+  "version": "0.0.0",
+  "private": true,
+  "description": "RSL collective integration - demonstrates core claims parity across mappings",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/mappings-acp": "workspace:*",
+    "@peac/mappings-rsl": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
