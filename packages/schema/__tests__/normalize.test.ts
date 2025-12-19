@@ -1,15 +1,16 @@
 /**
- * Schema Normalization Tests
+ * Schema Normalization Unit Tests
  *
- * Verifies that toCoreClaims() produces byte-identical output
- * regardless of how the receipt was created.
+ * Tests for toCoreClaims() - the projection function that extracts
+ * minimal semantic fields from receipt claims.
+ *
+ * NOTE: Cross-mapping parity tests (using real mapping outputs) are in
+ * tests/parity/core-claims.test.ts to avoid workspace cycles.
  */
 
 import { describe, it, expect } from 'vitest';
 import {
   toCoreClaims,
-  coreClaimsEqual,
-  type CoreClaims,
   type PEACReceiptClaims,
   type PaymentEvidence,
   type ControlBlock,
@@ -129,7 +130,7 @@ describe('toCoreClaims', () => {
     expect(core.subject).toEqual({ uri: 'https://resource.example.com/article/1' });
   });
 
-  it('normalizes control block', () => {
+  it('normalizes control block - strips non-semantic fields', () => {
     const control: ControlBlock = {
       chain: [
         { engine: 'tap', result: 'allow', policy_id: 'policy_123', reason: 'Valid TAP' },
@@ -177,66 +178,42 @@ describe('toCoreClaims', () => {
     expect(core.payment.aggregator).toBe('marketplace_abc');
     expect(core.payment.routing).toBe('direct');
   });
-});
 
-describe('coreClaimsEqual', () => {
-  it('returns true for identical receipts', () => {
-    const a = createReceipt();
-    const b = createReceipt();
-
-    expect(coreClaimsEqual(a, b)).toBe(true);
-  });
-
-  it('returns false for different amounts', () => {
-    const a = createReceipt({ amt: 1000 });
-    const b = createReceipt({ amt: 2000 });
-
-    expect(coreClaimsEqual(a, b)).toBe(false);
-  });
-
-  it('returns true when rail-specific evidence differs', () => {
-    const a = createReceipt({
-      payment: createPayment({ evidence: { payment_intent: 'pi_123' } }),
-    });
-    const b = createReceipt({
-      payment: createPayment({ evidence: { payment_intent: 'pi_456' } }),
-    });
-
-    // Core claims should be equal because evidence is stripped
-    expect(coreClaimsEqual(a, b)).toBe(true);
-  });
-
-  it('returns true when extra ext fields differ', () => {
-    const a = createReceipt({
-      ext: { aipref_snapshot: { url: 'https://a.com', hash: 'abc' } },
-    });
-    const b = createReceipt({
-      ext: { aipref_snapshot: { url: 'https://b.com', hash: 'def' } },
-    });
-
-    // Core claims don't include aipref_snapshot
-    expect(coreClaimsEqual(a, b)).toBe(true);
-  });
-
-  it('returns false when control decisions differ', () => {
-    const controlA: ControlBlock = {
-      chain: [{ engine: 'tap', result: 'allow' }],
-      decision: 'allow',
+  it('is stable when optional blocks are absent', () => {
+    // Minimal receipt with no optional fields
+    const minimal: PEACReceiptClaims = {
+      iss: 'https://issuer.example.com',
+      aud: 'https://resource.example.com',
+      iat: 1703000000,
+      rid: 'receipt-001',
+      amt: 100,
+      cur: 'USD',
+      payment: {
+        rail: 'x402',
+        reference: 'ref-001',
+        amount: 100,
+        currency: 'USD',
+        asset: 'USD',
+        env: 'live',
+        evidence: {},
+      },
     };
-    const controlB: ControlBlock = {
-      chain: [{ engine: 'tap', result: 'deny' }],
-      decision: 'deny',
-    };
-    const a = createReceipt({ ext: { control: controlA } });
-    const b = createReceipt({ ext: { control: controlB } });
 
-    expect(coreClaimsEqual(a, b)).toBe(false);
+    const core = toCoreClaims(minimal);
+    const canonical = canonicalize(core);
+
+    // Should be deterministic and not contain undefined
+    expect(canonical).not.toContain('undefined');
+    expect(canonical).not.toContain('null');
+    expect(core.exp).toBeUndefined();
+    expect(core.subject).toBeUndefined();
+    expect(core.control).toBeUndefined();
   });
 });
 
-describe('JCS Canonical Parity', () => {
-  it('produces byte-identical JCS output for equivalent receipts', () => {
-    // Create two receipts with different field ordering and extra fields
+describe('JCS Canonical Output', () => {
+  it('produces byte-identical JCS output for equivalent receipts with different field order', () => {
+    // Receipt with one field order
     const receiptA: PEACReceiptClaims = {
       iss: 'https://issuer.example.com',
       aud: 'https://resource.example.com/article/1',
@@ -255,7 +232,7 @@ describe('JCS Canonical Parity', () => {
       },
     };
 
-    // Same receipt with different ordering and different evidence
+    // Same receipt with different field ordering and different evidence
     const receiptB: PEACReceiptClaims = {
       cur: 'USD',
       amt: 1000,
@@ -295,69 +272,9 @@ describe('JCS Canonical Parity', () => {
 
     expect(canonicalA).not.toBe(canonicalB);
   });
-});
 
-describe('Cross-Mapping Parity', () => {
-  /**
-   * These tests verify that receipts created from different sources
-   * (ACP, TAP, RSL) produce identical core claims when they represent
-   * the same semantic payment.
-   */
-
-  it('ACP and x402 receipts with same payment produce identical core claims', () => {
-    // Simulating a receipt created via ACP mapping
-    const acpReceipt: PEACReceiptClaims = {
-      iss: 'https://publisher.example.com',
-      aud: 'https://publisher.example.com/article/123',
-      iat: 1703000000,
-      rid: 'acp-receipt-001',
-      amt: 500,
-      cur: 'USD',
-      payment: {
-        rail: 'x402',
-        reference: 'checkout_abc',
-        amount: 500,
-        currency: 'USD',
-        asset: 'USD',
-        env: 'live',
-        evidence: {
-          checkout_id: 'checkout_abc',
-          customer_id: 'cust_123',
-          acp_metadata: { source: 'acp' },
-        },
-      },
-    };
-
-    // Simulating the same receipt created directly via x402
-    const x402Receipt: PEACReceiptClaims = {
-      iss: 'https://publisher.example.com',
-      aud: 'https://publisher.example.com/article/123',
-      iat: 1703000000,
-      rid: 'acp-receipt-001',
-      amt: 500,
-      cur: 'USD',
-      payment: {
-        rail: 'x402',
-        reference: 'checkout_abc',
-        amount: 500,
-        currency: 'USD',
-        asset: 'USD',
-        env: 'live',
-        evidence: {
-          payment_intent: 'pi_xyz',
-          session_id: 'cs_xyz',
-        },
-      },
-    };
-
-    const canonicalAcp = canonicalize(toCoreClaims(acpReceipt));
-    const canonicalX402 = canonicalize(toCoreClaims(x402Receipt));
-
-    expect(canonicalAcp).toBe(canonicalX402);
-  });
-
-  it('receipts with TAP control produce consistent core claims', () => {
-    const tapControlA: ControlBlock = {
+  it('control blocks with same engine/result but different metadata produce identical output', () => {
+    const controlA: ControlBlock = {
       chain: [
         {
           engine: 'tap',
@@ -371,7 +288,7 @@ describe('Cross-Mapping Parity', () => {
       combinator: 'any_can_veto',
     };
 
-    const tapControlB: ControlBlock = {
+    const controlB: ControlBlock = {
       chain: [
         {
           engine: 'tap',
@@ -385,35 +302,13 @@ describe('Cross-Mapping Parity', () => {
       decision: 'allow',
     };
 
-    const receiptA = createReceipt({ ext: { control: tapControlA } });
-    const receiptB = createReceipt({ ext: { control: tapControlB } });
+    const receiptA = createReceipt({ ext: { control: controlA } });
+    const receiptB = createReceipt({ ext: { control: controlB } });
 
     const canonicalA = canonicalize(toCoreClaims(receiptA));
     const canonicalB = canonicalize(toCoreClaims(receiptB));
 
-    // Both should have same core claims - only engine and result matter
-    expect(canonicalA).toBe(canonicalB);
-  });
-
-  it('receipts with RSL-derived control have consistent normalization', () => {
-    // RSL might set different purposes but if engine and result match, core is same
-    const rslControlA: ControlBlock = {
-      chain: [{ engine: 'rsl', result: 'allow', purpose: 'ai_index' }],
-      decision: 'allow',
-    };
-
-    const rslControlB: ControlBlock = {
-      chain: [{ engine: 'rsl', result: 'allow', purpose: 'train' }],
-      decision: 'allow',
-    };
-
-    const receiptA = createReceipt({ ext: { control: rslControlA } });
-    const receiptB = createReceipt({ ext: { control: rslControlB } });
-
-    const canonicalA = canonicalize(toCoreClaims(receiptA));
-    const canonicalB = canonicalize(toCoreClaims(receiptB));
-
-    // Core claims are identical - purpose is not in core normalization
+    // Both should produce identical core claims
     expect(canonicalA).toBe(canonicalB);
   });
 });

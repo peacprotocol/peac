@@ -186,9 +186,17 @@ These fields provide context but do not affect the semantic meaning of the recei
 
 ## 4. Canonical Comparison
 
-### 4.1 JCS Canonicalization
+### 4.1 JCS Canonicalization (REQUIRED)
 
-To produce byte-identical output for comparison, implementations MUST use JSON Canonicalization Scheme (JCS) as defined in RFC 8785.
+**CRITICAL**: To produce byte-identical output for comparison, implementations MUST use JSON Canonicalization Scheme (JCS) as defined in RFC 8785. No other canonicalization scheme is permitted.
+
+This specification does NOT provide a standalone comparison function. Comparison MUST be performed as:
+
+```
+isEqual = canonicalize(toCoreClaims(A)) === canonicalize(toCoreClaims(B))
+```
+
+Where `canonicalize` is a conformant RFC 8785 implementation.
 
 **Comparison Algorithm**:
 
@@ -211,13 +219,27 @@ The normalization algorithm guarantees:
 
 ---
 
-## 5. Cross-Mapping Parity
+## 5. Non-Goals
 
-### 5.1 Requirement
+The following are explicitly **NOT** goals of this specification:
+
+1. **Standalone comparison function**: This specification provides `toCoreClaims()` for projection only. Comparison MUST use RFC 8785 canonicalization from `@peac/crypto` or equivalent. Implementations MUST NOT provide non-RFC8785 comparison utilities.
+
+2. **Full receipt equivalence**: Core claims represent semantic equivalence, not byte-identical receipts. Two receipts with identical core claims may have different signatures, timestamps, or rail-specific evidence.
+
+3. **Cryptographic verification**: Normalization is for comparison only. Receipt authenticity MUST be verified via JWS signature verification before any comparison.
+
+4. **Evidence preservation**: Rail-specific evidence is intentionally excluded. Systems requiring evidence access MUST use the original receipt claims, not normalized core claims.
+
+---
+
+## 6. Cross-Mapping Parity
+
+### 6.1 Requirement
 
 Implementations that create receipts from different sources MUST ensure that semantically equivalent receipts produce byte-identical JCS-canonicalized core claims.
 
-### 5.2 Example
+### 6.2 Example
 
 Given an ACP checkout event and an x402 payment that represent the same transaction:
 
@@ -257,27 +279,26 @@ canonicalize(toCoreClaims(acpReceipt)) === canonicalize(toCoreClaims(x402Receipt
 
 ---
 
-## 6. Implementation Notes
+## 7. Implementation Notes
 
-### 6.1 TypeScript Reference
+### 7.1 TypeScript Reference
 
 The reference implementation is in `@peac/schema`:
 
 ```typescript
-import { toCoreClaims, coreClaimsEqual } from '@peac/schema';
+import { toCoreClaims } from '@peac/schema';
 import { canonicalize } from '@peac/crypto';
 
 // Extract core claims
 const core = toCoreClaims(receiptClaims);
 
-// Compare two receipts
-const equal = coreClaimsEqual(receiptA, receiptB);
-
-// JCS canonical comparison
-const canonical = canonicalize(toCoreClaims(receipt));
+// Compare two receipts via JCS canonicalization (REQUIRED)
+const coreA = toCoreClaims(receiptA);
+const coreB = toCoreClaims(receiptB);
+const isEqual = canonicalize(coreA) === canonicalize(coreB);
 ```
 
-### 6.2 Testing Requirements
+### 7.2 Testing Requirements
 
 Implementations MUST include parity tests that verify:
 
@@ -287,7 +308,7 @@ Implementations MUST include parity tests that verify:
 
 ---
 
-## 7. Changelog
+## 8. Changelog
 
 ### v0.9.18
 
@@ -295,3 +316,5 @@ Implementations MUST include parity tests that verify:
 - Defined CoreClaims, NormalizedPayment, NormalizedControl
 - Defined normalization algorithms
 - Defined JCS canonical comparison requirements
+- Added non-goals section (Section 5)
+- Removed coreClaimsEqual() - comparison MUST use RFC 8785 canonicalization
