@@ -9,6 +9,7 @@ export * from './control';
 export * from './evidence';
 export * from './subject';
 export * from './errors';
+export * from './normalize';
 
 // Legacy types (for backward compatibility in tests)
 export * from './constants';
