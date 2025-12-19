@@ -1,6 +1,6 @@
 {
   "name": "@peac/disc",
-  "version": "0.9.17",
+  "version": "0.9.18",
   "description": "PEAC discovery with ≤20 lines enforcement",
   "type": "module",
   "main": "dist/index.js",

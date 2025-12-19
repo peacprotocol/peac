@@ -1,6 +1,6 @@
 {
   "name": "@peac/privacy",
-  "version": "0.9.17",
+  "version": "0.9.18",
   "private": true,
   "description": "Privacy pillar for PEAC protocol - privacy budgeting, data protection, and privacy-preserving receipts",
   "main": "dist/index.js",

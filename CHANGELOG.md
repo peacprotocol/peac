@@ -7,13 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.18] - 2025-12-19
+
+### Added
+
+- **@peac/http-signatures**: RFC 9421 HTTP Message Signatures parsing and verification (22 tests)
+  - WebCrypto Ed25519 signature verification
+  - Signature-Input and Signature header parsing per RFC 8941
+  - Signature base construction per RFC 9421 Section 2.5
+- **@peac/jwks-cache**: Edge-safe JWKS fetch with SSRF protection and caching (19 tests)
+  - Multi-path resolution: `/.well-known/jwks` -> `/keys?keyID=` -> `/.well-known/jwks.json`
+  - SSRF hardening: literal IP blocking, localhost blocking, no redirect following
+  - TTL-based caching with ETag support
+- **@peac/mappings-tap**: Visa Trusted Agent Protocol (TAP) to control evidence mapping (29 tests)
+  - 8-minute (480s) max window enforcement (Visa TAP hard limit)
+  - Fail-closed tag handling (unknown tags rejected by default)
+  - Time validation: `created <= now <= expires` with clock skew tolerance
+- **Cloudflare Worker TAP verifier**: Reference surface at `surfaces/workers/cloudflare/` (34 tests, private)
+  - Fail-closed security defaults: issuer allowlist required, replay protection when nonce present
+  - Pluggable ReplayStore: DO (strong), D1 (strong), KV (best-effort)
+  - RFC 9457 problem+json with stable error codes (E*TAP*_, E*RECEIPT*_, E*CONFIG*\*)
+- **Next.js Edge middleware**: Reference surface at `surfaces/nextjs/middleware/` (21 tests, private)
+  - Exact parity with Cloudflare Worker: same error codes, status mappings, security defaults
+  - Mode config: `receipt_or_tap` (402 challenge) or `tap_only` (401 missing)
+  - LRUReplayStore exported utility for best-effort replay protection
+- **Schema normalization**: `toCoreClaims()` projection function for cross-mapping parity
+  - Parity tests ensure TAP, RSL, ACP produce byte-identical core claims for equivalent events
+- **Canonical flow examples** at `examples/`:
+  - `pay-per-inference/`: Agent-side receipt acquisition and retry
+  - `pay-per-crawl/`: Policy Kit + receipt flow for AI crawlers
+  - `rsl-collective/`: RSL token mapping + collective licensing demonstration
+
 ### Fixed
 
+- **TAP terminology**: "Trusted Agent Protocol" (was incorrectly "Token Authentication Protocol")
 - **RSL 1.0 Token Vocabulary**: Corrected RSL token mapping to match RSL 1.0 specification
   - RSL uses `ai-index`, not `ai-search` (was a mistaken assumption in v0.9.17)
   - Added `ai_index` ControlPurpose (RSL 1.0 canonical)
   - Added `all` RSL token support (expands to all purposes)
   - **BREAKING**: Removed `ai_search` ControlPurpose (use `ai_index` or `ai_input` instead)
+- **Registry sync**: `specs/kernel/registries.json` now includes `tap` and `rsl` control engines
+
+### Documentation
+
+- PROTOCOL-BEHAVIOR Section 7.4: HTTP Message Signatures (RFC 9421) normative verification algorithm
+- REGISTRIES.md: Added `tap` and `rsl` control engines
+- ARCHITECTURE.md: Updated package inventory with new packages, surfaces, and examples
+- SCHEMA-NORMALIZATION.md: Cross-mapping parity rules and `toCoreClaims()` specification
+
+### Security Defaults (v0.9.18 Surfaces)
+
+- **Fail-closed issuer allowlist**: ISSUER_ALLOWLIST required; 500 error if empty
+- **Fail-closed unknown tags**: Unknown TAP tags rejected; 400 error
+- **Replay protection required**: 401 error if nonce present but no replay store (unless UNSAFE_ALLOW_NO_REPLAY)
+- **402 reserved for payment**: Only RECEIPT_MISSING/INVALID/EXPIRED use 402
+- **UNSAFE\_\* escape hatches**: Explicit naming for dev-only overrides (never use in production)
 
 ### Migration (ai_search removal)
 

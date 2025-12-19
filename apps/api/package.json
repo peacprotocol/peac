@@ -1,6 +1,6 @@
 {
   "name": "@peac/app-api",
-  "version": "0.9.17",
+  "version": "0.9.18",
   "description": "PEAC Protocol API server with OpenAPI 3.1, RFC 9457 Problem Details, and content negotiation",
   "type": "module",
   "main": "dist/index.js",
