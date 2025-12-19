@@ -93,11 +93,13 @@ To propose a new rail:
 
 ### 4.1 Current Entries
 
-| ID                      | Category | Description                                    |
-| ----------------------- | -------- | ---------------------------------------------- |
-| `spend-control-service` | limits   | Generic spend control (per-tx, daily, monthly) |
-| `risk-engine`           | fraud    | Generic risk/fraud scoring                     |
-| `mandate-service`       | mandate  | Enterprise mandate/approval chain              |
+| ID                      | Category           | Description                                         |
+| ----------------------- | ------------------ | --------------------------------------------------- |
+| `spend-control-service` | limits             | Generic spend control (per-tx, daily, monthly)      |
+| `risk-engine`           | fraud              | Generic risk/fraud scoring                          |
+| `mandate-service`       | mandate            | Enterprise mandate/approval chain                   |
+| `tap`                   | agent-verification | Trusted Agent Protocol control decisions (HTTP sig) |
+| `rsl`                   | access-policy      | Robots Specification Layer usage token evaluation   |
 
 ### 4.2 Vendor-Neutral Names
 
