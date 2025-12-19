@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.15",
+  "version": "0.9.18",
   "description": "PEAC protocol registries - payment rails, control engines, transport methods, agent protocols",
   "payment_rails": [
     {

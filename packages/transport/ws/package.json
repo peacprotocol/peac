@@ -1,6 +1,6 @@
 {
   "name": "@peac/transport-ws",
-  "version": "0.9.16",
+  "version": "0.9.18",
   "private": true,
   "description": "PEAC WebSocket transport layer (placeholder for v0.9.17+)",
   "type": "module",
