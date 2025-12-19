@@ -6,3 +6,4 @@ packages:
   - 'apps/*'
   - 'surfaces/workers/*'
   - 'surfaces/nextjs/*'
+  - 'examples/*'

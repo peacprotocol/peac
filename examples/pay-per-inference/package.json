@@ -1,0 +1,20 @@
+{
+  "name": "@peac/example-pay-per-inference",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC pay-per-inference example - agent handles 402, obtains receipt, retries",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

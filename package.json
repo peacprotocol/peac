@@ -13,7 +13,8 @@
     "packages/*",
     "packages/rails/*",
     "packages/mappings/*",
-    "apps/*"
+    "apps/*",
+    "examples/*"
   ],
   "scripts": {
     "test": "vitest",
@@ -32,7 +33,8 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "ci:guards": "bash scripts/ci/forbid-strings.sh",
     "ci:surface": "bash scripts/ci/surface-validator.sh",
-    "ci:all": "pnpm run ci:guards && pnpm run ci:surface && pnpm run lint && pnpm run typecheck && pnpm test"
+    "ci:all": "pnpm run ci:guards && pnpm run ci:surface && pnpm run lint && pnpm run typecheck && pnpm test",
+    "examples:check": "pnpm --filter './examples/*' exec tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
