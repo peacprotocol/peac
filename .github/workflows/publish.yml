@@ -70,6 +70,7 @@ jobs:
           echo "OK: Running from tag ref"
 
       - name: Check version integrity (fail-closed)
+        if: ${{ !inputs.dry_run }}
         run: |
           TAG_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "")
           ROOT_VERSION=$(node -e "console.log(require('./package.json').version)")
@@ -79,11 +80,15 @@ jobs:
             echo "FAIL: No git tag found. Publishing requires a tagged release."
             exit 1
           fi
-          if [ "$TAG_VERSION" != "$ROOT_VERSION" ]; then
-            echo "FAIL: Tag version ($TAG_VERSION) does not match root package.json ($ROOT_VERSION)"
+          # Allow infrastructure patches: v0.9.18.1 can publish 0.9.18 packages
+          # Extract base version (first 3 components: major.minor.patch)
+          TAG_BASE=$(echo "$TAG_VERSION" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          if [ "$TAG_BASE" != "$ROOT_VERSION" ]; then
+            echo "FAIL: Tag base version ($TAG_BASE from $TAG_VERSION) does not match root package.json ($ROOT_VERSION)"
             exit 1
           fi
-          ./scripts/check-version-integrity.sh "$TAG_VERSION"
+          echo "OK: Tag $TAG_VERSION is compatible with package version $ROOT_VERSION"
+          ./scripts/check-version-integrity.sh "$ROOT_VERSION"
 
       - name: Dry run - pack all public packages
         if: ${{ inputs.dry_run }}
