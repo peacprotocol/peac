@@ -39,8 +39,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # Uses packageManager field from package.json
 
       - name: Install deps
         run: pnpm -w install --frozen-lockfile
