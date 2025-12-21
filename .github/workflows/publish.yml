@@ -3,9 +3,29 @@ name: Publish (manual)
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to publish from (tag or branch)'
+        required: true
+        default: 'v0.9.18'
+        type: string
+      dist_tag:
+        description: 'npm dist-tag (next for pre-1.0, latest for 1.0+)'
+        required: true
+        default: 'next'
+        type: choice
+        options:
+          - next
+          - latest
+      dry_run:
+        description: 'Dry run (do not actually publish)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
+  id-token: write # Required for npm provenance
 
 jobs:
   publish:
@@ -13,40 +33,207 @@ jobs:
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Install deps
-        run: pnpm -w install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Build & test
-        run: pnpm -w build && pnpm -w test
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Run gates
+        run: |
+          pnpm lint
+          pnpm typecheck:core
+          pnpm test:core
+
+      - name: Strict version check
+        run: |
+          # Extract expected version from ref (strip 'v' prefix if present)
+          EXPECTED_VERSION="${{ inputs.ref }}"
+          EXPECTED_VERSION="${EXPECTED_VERSION#v}"
+
+          # Get actual version from root package.json
+          ACTUAL_VERSION=$(jq -r .version package.json)
+
+          echo "Expected version: $EXPECTED_VERSION"
+          echo "Actual version: $ACTUAL_VERSION"
+
+          if [ "$EXPECTED_VERSION" != "$ACTUAL_VERSION" ]; then
+            echo "ERROR: Version mismatch! ref=${{ inputs.ref }} but package.json has $ACTUAL_VERSION"
+            exit 1
+          fi
+
+          echo "Version check passed: $ACTUAL_VERSION"
+
+      - name: Generate publish list
+        id: publish_list
+        run: |
+          echo "## Packages to publish:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+          # List all non-private packages
+          PACKAGES=""
+          for pkg in kernel schema crypto protocol control policy-kit http-signatures jwks-cache \
+                     mappings-mcp mappings-acp mappings-rsl mappings-tap \
+                     rails-x402 rails-stripe server cli core receipts disc pay402 pref sdk; do
+            echo "@peac/$pkg@$(jq -r .version package.json)" >> $GITHUB_STEP_SUMMARY
+            PACKAGES="$PACKAGES @peac/$pkg"
+          done
+
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Total: 22 packages" >> $GITHUB_STEP_SUMMARY
 
       - name: Configure npm auth
         run: |
           echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc
-          pnpm config set publish-branch "main|master|release/.*"
 
-      - name: Publish selected packages
+      - name: Publish packages (dry run)
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "DRY RUN - would publish the following packages to dist-tag '${{ inputs.dist_tag }}':"
+          echo ""
+          pnpm -r \
+            --filter '@peac/kernel' \
+            --filter '@peac/schema' \
+            --filter '@peac/crypto' \
+            --filter '@peac/protocol' \
+            --filter '@peac/control' \
+            --filter '@peac/policy-kit' \
+            --filter '@peac/http-signatures' \
+            --filter '@peac/jwks-cache' \
+            --filter '@peac/mappings-mcp' \
+            --filter '@peac/mappings-acp' \
+            --filter '@peac/mappings-rsl' \
+            --filter '@peac/mappings-tap' \
+            --filter '@peac/rails-x402' \
+            --filter '@peac/rails-stripe' \
+            --filter '@peac/server' \
+            --filter '@peac/cli' \
+            --filter '@peac/core' \
+            --filter '@peac/receipts' \
+            --filter '@peac/disc' \
+            --filter '@peac/pay402' \
+            --filter '@peac/pref' \
+            --filter '@peac/sdk' \
+            publish --access public --tag ${{ inputs.dist_tag }} --dry-run
+
+      - name: Publish packages
+        if: ${{ !inputs.dry_run }}
         run: |
           pnpm -r \
-            --filter @peac/core \
-            --filter @peac/receipts \
-            --filter @peac/pref \
-            --filter @peac/disc \
-            --filter @peac/pay402 \
-            --filter @peac/sdk \
-            publish --access public --no-git-checks
+            --filter '@peac/kernel' \
+            --filter '@peac/schema' \
+            --filter '@peac/crypto' \
+            --filter '@peac/protocol' \
+            --filter '@peac/control' \
+            --filter '@peac/policy-kit' \
+            --filter '@peac/http-signatures' \
+            --filter '@peac/jwks-cache' \
+            --filter '@peac/mappings-mcp' \
+            --filter '@peac/mappings-acp' \
+            --filter '@peac/mappings-rsl' \
+            --filter '@peac/mappings-tap' \
+            --filter '@peac/rails-x402' \
+            --filter '@peac/rails-stripe' \
+            --filter '@peac/server' \
+            --filter '@peac/cli' \
+            --filter '@peac/core' \
+            --filter '@peac/receipts' \
+            --filter '@peac/disc' \
+            --filter '@peac/pay402' \
+            --filter '@peac/pref' \
+            --filter '@peac/sdk' \
+            publish --access public --tag ${{ inputs.dist_tag }} --no-git-checks
 
-      - name: Verify versions
+      - name: Post-publish smoke test
+        if: ${{ !inputs.dry_run }}
         run: |
-          pnpm view @peac/core version
-          pnpm view @peac/sdk version
+          echo "Running post-publish smoke test..."
+
+          # Create temp directory
+          SMOKE_DIR=$(mktemp -d)
+          cd "$SMOKE_DIR"
+
+          # Initialize package
+          npm init -y > /dev/null
+
+          # Install key packages from the dist-tag we just published
+          npm install @peac/schema@${{ inputs.dist_tag }} \
+                      @peac/protocol@${{ inputs.dist_tag }} \
+                      @peac/http-signatures@${{ inputs.dist_tag }} \
+                      @peac/mappings-tap@${{ inputs.dist_tag }}
+
+          # Smoke test imports
+          node -e "
+            const schema = require('@peac/schema');
+            const protocol = require('@peac/protocol');
+            const httpSig = require('@peac/http-signatures');
+            const tap = require('@peac/mappings-tap');
+
+            console.log('schema exports:', Object.keys(schema).length);
+            console.log('protocol exports:', Object.keys(protocol).length);
+            console.log('http-signatures exports:', Object.keys(httpSig).length);
+            console.log('mappings-tap exports:', Object.keys(tap).length);
+
+            // Verify toCoreClaims exists
+            if (typeof schema.toCoreClaims !== 'function') {
+              console.error('ERROR: toCoreClaims not found');
+              process.exit(1);
+            }
+            console.log('toCoreClaims: OK');
+          "
+
+          echo "Smoke test passed!"
+
+          # Cleanup
+          cd /
+          rm -rf "$SMOKE_DIR"
+
+      - name: Verify published versions
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "## Published Versions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Version |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          for pkg in kernel schema crypto protocol control policy-kit http-signatures jwks-cache \
+                     mappings-mcp mappings-acp mappings-rsl mappings-tap \
+                     rails-x402 rails-stripe server cli core receipts disc pay402 pref sdk; do
+            VERSION=$(npm view @peac/$pkg@${{ inputs.dist_tag }} version 2>/dev/null || echo "not found")
+            echo "| @peac/$pkg | $VERSION |" >> $GITHUB_STEP_SUMMARY
+          done
+
+      - name: Summary
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Ref:** ${{ inputs.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dist-tag:** ${{ inputs.dist_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry run:** ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "**This was a dry run. No packages were published.**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**22 packages published to npm with dist-tag \`${{ inputs.dist_tag }}\`**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Smoke test: PASSED" >> $GITHUB_STEP_SUMMARY
+          fi
