@@ -56,6 +56,20 @@ jobs:
       - name: Check publish list drift
         run: ./scripts/check-publish-list.sh
 
+      - name: Validate ref for real publish
+        if: ${{ !inputs.dry_run }}
+        run: |
+          REF="${{ github.ref }}"
+          echo "Current ref: $REF"
+          if [[ ! "$REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "FAIL: Real publish (dry_run=false) requires a version tag (v*)."
+            echo "Either:"
+            echo "  1. Run with dry_run=true for testing, OR"
+            echo "  2. Trigger from a tag ref (e.g., v0.9.18)"
+            exit 1
+          fi
+          echo "OK: Running from tag ref"
+
       - name: Check version integrity (fail-closed)
         run: |
           TAG_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "")

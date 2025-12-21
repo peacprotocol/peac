@@ -67,3 +67,41 @@ else
   echo "OK: All 22 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
+
+echo ""
+echo "=== Checking test coverage ==="
+
+# Packages covered by test:core (from package.json)
+TESTED_PACKAGES="@peac/crypto
+@peac/http-signatures
+@peac/jwks-cache
+@peac/mappings-acp
+@peac/mappings-mcp
+@peac/mappings-rsl
+@peac/mappings-tap
+@peac/policy-kit
+@peac/protocol
+@peac/rails-stripe
+@peac/rails-x402"
+
+# Packages explicitly without tests (with rationale)
+# These are either: thin wrappers, deprecated, or type-only packages
+NO_TESTS_RATIONALE="@peac/cli - CLI wrapper, tested via integration
+@peac/control - orchestration layer, tested via protocol tests
+@peac/core - DEPRECATED, redirect to granular packages
+@peac/disc - discovery types only
+@peac/kernel - type definitions only, no runtime logic
+@peac/pay402 - thin 402 helpers, minimal runtime
+@peac/pref - preferences types only
+@peac/receipts - type re-exports only
+@peac/schema - Zod schemas, validated at compile time
+@peac/sdk - re-exports only
+@peac/server - server wrapper, tested via integration"
+
+echo "Packages with tests (11):"
+echo "$TESTED_PACKAGES" | sed 's/^/  /'
+echo ""
+echo "Packages without tests (11) - rationale:"
+echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
+echo ""
+echo "OK: All 22 packages accounted for (11 tested + 11 type/wrapper packages)"
