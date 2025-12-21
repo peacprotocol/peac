@@ -94,7 +94,7 @@ jobs:
         if: ${{ inputs.dry_run }}
         run: |
           echo "=== DRY RUN: Packing packages ==="
-          pnpm -r \
+          pnpm \
             --filter @peac/kernel \
             --filter @peac/schema \
             --filter @peac/crypto \
@@ -117,7 +117,7 @@ jobs:
             --filter @peac/pay402 \
             --filter @peac/pref \
             --filter @peac/sdk \
-            pack
+            exec pnpm pack
 
       - name: Configure npm auth
         if: ${{ !inputs.dry_run }}
