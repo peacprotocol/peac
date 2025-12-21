@@ -20,7 +20,7 @@
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
-    "test:core": "turbo run test --filter=@peac/crypto --filter=@peac/protocol --filter=@peac/mappings-acp --filter=@peac/rails-stripe --filter=@peac/rails-x402",
+    "test:core": "turbo run test --filter=@peac/crypto --filter=@peac/protocol --filter=@peac/policy-kit --filter=@peac/http-signatures --filter=@peac/jwks-cache --filter=@peac/mappings-mcp --filter=@peac/mappings-acp --filter=@peac/mappings-rsl --filter=@peac/mappings-tap --filter=@peac/rails-x402 --filter=@peac/rails-stripe",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --write --ignore-path .prettierignore",

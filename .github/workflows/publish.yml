@@ -16,6 +16,11 @@ on:
           - latest
         default: next
 
+# Prevent concurrent publishes
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
 permissions:
   contents: read
   id-token: write # Required for npm provenance
@@ -51,14 +56,21 @@ jobs:
       - name: Check publish list drift
         run: ./scripts/check-publish-list.sh
 
-      - name: Check version integrity
+      - name: Check version integrity (fail-closed)
         run: |
           TAG_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "")
-          if [ -n "$TAG_VERSION" ]; then
-            ./scripts/check-version-integrity.sh "$TAG_VERSION"
-          else
-            echo "No git tag found, skipping version integrity check"
+          ROOT_VERSION=$(node -e "console.log(require('./package.json').version)")
+          echo "Tag version: ${TAG_VERSION:-none}"
+          echo "Root package.json version: $ROOT_VERSION"
+          if [ -z "$TAG_VERSION" ]; then
+            echo "FAIL: No git tag found. Publishing requires a tagged release."
+            exit 1
           fi
+          if [ "$TAG_VERSION" != "$ROOT_VERSION" ]; then
+            echo "FAIL: Tag version ($TAG_VERSION) does not match root package.json ($ROOT_VERSION)"
+            exit 1
+          fi
+          ./scripts/check-version-integrity.sh "$TAG_VERSION"
 
       - name: Dry run - pack all public packages
         if: ${{ inputs.dry_run }}
