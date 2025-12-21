@@ -1,7 +1,18 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  // Exclude archive from vite transforms entirely
+  resolve: {
+    alias: [],
+  },
+  server: {
+    fs: {
+      deny: ['archive', 'ex', 'sdks'],
+    },
+  },
   test: {
+    // Root-level exclude prevents scanning these directories at all
+    root: '.',
     // Exclude archive and legacy code from tests
     exclude: [
       '**/node_modules/**',
