@@ -3,9 +3,22 @@ name: Publish (manual)
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (pack only, no publish)'
+        type: boolean
+        default: false
+      dist_tag:
+        description: 'npm dist-tag (next for pre-1.0, latest for 1.0+)'
+        type: choice
+        options:
+          - next
+          - latest
+        default: next
 
 permissions:
   contents: read
+  id-token: write  # Required for npm provenance
 
 jobs:
   publish:
@@ -27,26 +40,63 @@ jobs:
       - name: Install deps
         run: pnpm -w install --frozen-lockfile
 
-      - name: Build & test
-        run: pnpm -w build && pnpm -w test
+      - name: Run gates (lint, build, typecheck, guard)
+        run: |
+          pnpm -w lint
+          pnpm -w build
+          pnpm -w typecheck:core
+          ./scripts/guard.sh
+          pnpm -w format:check
+
+      - name: Check publish list drift
+        run: ./scripts/check-publish-list.sh
+
+      - name: Dry run - pack all public packages
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "=== DRY RUN: Packing packages ==="
+          pnpm -r --filter '@peac/*' --filter '!@peac/access' --filter '!@peac/attribution' --filter '!@peac/compliance' --filter '!@peac/consent' --filter '!@peac/intelligence' --filter '!@peac/privacy' --filter '!@peac/provenance' --filter '!@peac/transport-*' --filter '!@peac/worker-*' --filter '!@peac/middleware-*' exec npm pack --dry-run
 
       - name: Configure npm auth
+        if: ${{ !inputs.dry_run }}
         run: |
           echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc
           pnpm config set publish-branch "main|master|release/.*"
 
-      - name: Publish selected packages
+      - name: Publish all public packages
+        if: ${{ !inputs.dry_run }}
         run: |
           pnpm -r \
+            --filter @peac/kernel \
+            --filter @peac/schema \
+            --filter @peac/crypto \
+            --filter @peac/protocol \
+            --filter @peac/control \
+            --filter @peac/policy-kit \
+            --filter @peac/http-signatures \
+            --filter @peac/jwks-cache \
+            --filter @peac/mappings-mcp \
+            --filter @peac/mappings-acp \
+            --filter @peac/mappings-rsl \
+            --filter @peac/mappings-tap \
+            --filter @peac/rails-x402 \
+            --filter @peac/rails-stripe \
+            --filter @peac/server \
+            --filter @peac/cli \
             --filter @peac/core \
             --filter @peac/receipts \
-            --filter @peac/pref \
             --filter @peac/disc \
             --filter @peac/pay402 \
+            --filter @peac/pref \
             --filter @peac/sdk \
-            publish --access public --no-git-checks
+            publish --access public --tag ${{ inputs.dist_tag }} --no-git-checks
+        env:
+          NPM_CONFIG_PROVENANCE: true
 
-      - name: Verify versions
+      - name: Verify published versions
+        if: ${{ !inputs.dry_run }}
         run: |
-          pnpm view @peac/core version
-          pnpm view @peac/sdk version
+          echo "=== Verifying published packages ==="
+          for pkg in kernel schema crypto protocol control policy-kit http-signatures jwks-cache sdk; do
+            echo "@peac/$pkg: $(pnpm view @peac/$pkg version 2>/dev/null || echo 'not found')"
+          done
