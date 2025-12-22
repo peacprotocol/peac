@@ -68,3 +68,14 @@ When items move from DEFER to SHIP, they must meet these criteria:
 | v0.9.21 | Risk Evidence Hook, Edge adapters, TAL extensions       | -                        |
 | v0.9.22 | Go SDK, Publisher Playbooks                             | -                        |
 | v0.9.23 | Dispute and Audit                                       | -                        |
+
+## Scope Audit
+
+Verify all deferred items remain tracked in this file:
+
+```bash
+# Run from repo root - all keywords must appear in this file
+rg -l "Analytics|Daydreams|Fluora|Faremeter|Pinata|Card-Rails|Risk.Evidence" docs/roadmap/DEFERRED.md
+```
+
+Keywords that must be tracked: Analytics, Daydreams, Fluora, Faremeter, Pinata, Card-Rails Bridge, Risk Evidence Hook, Go SDK, Publisher Playbooks, Dispute and Audit

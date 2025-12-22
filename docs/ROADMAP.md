@@ -1,6 +1,8 @@
 # PEAC Protocol Roadmap
 
 > **Policy:** No feature is removed; only shipped, deferred, or cancelled with explicit rationale.
+>
+> See [Scope Ledger](roadmap/DEFERRED.md) for detailed tracking and acceptance criteria.
 
 ## Current Release: v0.9.18 (Dec 19, 2025)
 
@@ -74,3 +76,9 @@ This preserves x402 interop without lifecycle complexity in PEAC core.
 | v0.9.17 | Dec 14, 2025 | x402 v2, RSL 1.0, Policy Kit, subject binding             |
 | v0.9.16 | Dec 7, 2025  | CAL semantics, PaymentEvidence extensions, SubjectProfile |
 | v0.9.15 | Nov 2025     | Kernel-first architecture, package layering               |
+
+## Publishing
+
+- **npm dist-tag:** `next` for v0.9.x releases, `latest` reserved for v1.0+
+- **Tag requirement:** Real publishes require version tag (v0.9.18.1, etc.)
+- **Provenance:** npm provenance enabled via OIDC
