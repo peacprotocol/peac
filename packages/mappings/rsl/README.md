@@ -28,3 +28,13 @@ const result = rslUsageTokensToControlPurposes(['ai-train', 'ai-input']);
 const allAi = rslUsageTokensToControlPurposes(['ai-all']);
 // result.purposes = ['train', 'ai_input', 'ai_index']
 ```
+
+## License
+
+Apache-2.0
+
+---
+
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Originary](https://www.originary.xyz) | [Docs](https://peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac)

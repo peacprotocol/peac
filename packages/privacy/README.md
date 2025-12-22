@@ -20,4 +20,10 @@ Scaffold package for v0.9.16+. Core privacy primitives will be implemented along
 
 ## License
 
-Apache 2.0 - See LICENSE in repository root.
+Apache-2.0
+
+---
+
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Originary](https://www.originary.xyz) | [Docs](https://peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac)
