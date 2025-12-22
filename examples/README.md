@@ -6,6 +6,7 @@ Canonical flow examples demonstrating PEAC protocol integration patterns.
 
 | Example                                   | Description                                      |
 | ----------------------------------------- | ------------------------------------------------ |
+| [x402-node-server](./x402-node-server/)   | x402 HTTP 402 payment flow with PEAC receipts    |
 | [pay-per-inference](./pay-per-inference/) | Agent handles 402, obtains receipt, retries      |
 | [pay-per-crawl](./pay-per-crawl/)         | Policy evaluation + receipt flow for AI crawlers |
 | [rsl-collective](./rsl-collective/)       | RSL integration and core claims parity           |
@@ -24,6 +25,9 @@ pnpm build
 Each example has a `demo` script:
 
 ```bash
+# x402 payment flow with PEAC receipts
+cd examples/x402-node-server && pnpm demo
+
 # Pay-per-inference flow
 cd examples/pay-per-inference && pnpm demo
 

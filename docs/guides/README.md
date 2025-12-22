@@ -1,10 +1,11 @@
 # PEAC User Guides
 
-**Status:** Planned for v0.9.16
+## Available Guides
+
+- [x402 + PEAC Integration](x402-peac.md) - HTTP 402 payment flows with receipts
+- [Policy Kit Quickstart](../policy-kit/quickstart.md) - File-based policy authoring
 
 ## Coming Soon
-
-User guides and tutorials including:
 
 - Getting started with PEAC
 - JWKS key rotation best practices
