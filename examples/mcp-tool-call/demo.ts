@@ -31,11 +31,7 @@ const CURRENCY = 'USD';
 async function webSearchTool(query: string): Promise<{ results: string[] }> {
   // Simulate search
   return {
-    results: [
-      `Result 1 for "${query}"`,
-      `Result 2 for "${query}"`,
-      `Result 3 for "${query}"`,
-    ],
+    results: [`Result 1 for "${query}"`, `Result 2 for "${query}"`, `Result 3 for "${query}"`],
   };
 }
 
@@ -81,10 +77,7 @@ async function mcpToolHandler(params: {
 /**
  * MCP client that makes paid tool calls.
  */
-async function mcpClient(params: {
-  privateKey: Uint8Array;
-  publicKey: Uint8Array;
-}): Promise<void> {
+async function mcpClient(params: { privateKey: Uint8Array; publicKey: Uint8Array }): Promise<void> {
   console.log('\n=== PEAC MCP Tool Call Demo ===\n');
 
   // Make a few tool calls

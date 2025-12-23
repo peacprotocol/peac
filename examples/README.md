@@ -4,12 +4,12 @@ Canonical examples demonstrating PEAC Protocol integration patterns.
 
 ## Examples
 
-| Example | Description |
-|---------|-------------|
+| Example                                  | Description                                 |
+| ---------------------------------------- | ------------------------------------------- |
 | [pay-per-inference/](pay-per-inference/) | Agent handles 402, obtains receipt, retries |
-| [pay-per-crawl/](pay-per-crawl/) | Policy Kit + receipts for AI crawlers |
-| [rsl-collective/](rsl-collective/) | RSL token mapping to PEAC ControlPurpose |
-| [mcp-tool-call/](mcp-tool-call/) | MCP paid tools with budget enforcement |
+| [pay-per-crawl/](pay-per-crawl/)         | Policy Kit + receipts for AI crawlers       |
+| [rsl-collective/](rsl-collective/)       | RSL token mapping to PEAC ControlPurpose    |
+| [mcp-tool-call/](mcp-tool-call/)         | MCP paid tools with budget enforcement      |
 
 ## Running Examples
 
