@@ -11,44 +11,103 @@
  */
 
 /**
- * Minimal headers interface to avoid DOM lib dependency.
- * Works with native Headers, node-fetch, undici, etc.
- *
- * Note: Header lookup must be case-insensitive in practice.
- * Native Headers.get() is case-insensitive, but plain objects may not be.
- * Implementation tries common casings to ensure compatibility.
+ * Headers-like object with .get() method.
+ * Compatible with native Headers, node-fetch, undici, etc.
  */
-export type HeadersLike = {
+export interface HeadersWithGet {
   get(name: string): string | null;
-};
+}
+
+/**
+ * Plain header object (Node.js/Express IncomingHttpHeaders style).
+ * Values can be string, string[], or undefined.
+ */
+export type HeadersPlainObject = Record<string, string | string[] | undefined>;
+
+/**
+ * Union type accepting both Headers-like objects and plain objects.
+ * Works with:
+ * - Native Headers (browser, Cloudflare Workers, Deno)
+ * - node-fetch, undici Headers
+ * - Express/Node.js req.headers (IncomingHttpHeaders)
+ * - Plain objects
+ */
+export type HeadersLike = HeadersWithGet | HeadersPlainObject;
+
+/**
+ * Check if headers object has a .get() method.
+ */
+function hasGetMethod(headers: HeadersLike): headers is HeadersWithGet {
+  return typeof (headers as HeadersWithGet).get === 'function';
+}
+
+/**
+ * Get header value from plain object, handling case-insensitivity and arrays.
+ * Node.js lowercases all header names, so we check multiple casings.
+ */
+function getFromPlainObject(
+  headers: HeadersPlainObject,
+  name: string
+): string | null {
+  // Common casings to try
+  const casings = [
+    name.toLowerCase(),
+    name.toUpperCase(),
+    name.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()).join('-'),
+  ];
+
+  for (const key of casings) {
+    const value = headers[key];
+    if (value !== undefined) {
+      // Handle array values (take first element)
+      return Array.isArray(value) ? value[0] ?? null : value;
+    }
+  }
+
+  // Also try exact match and iterate all keys for case-insensitive match
+  const lowerName = name.toLowerCase();
+  for (const key of Object.keys(headers)) {
+    if (key.toLowerCase() === lowerName) {
+      const value = headers[key];
+      if (value !== undefined) {
+        return Array.isArray(value) ? value[0] ?? null : value;
+      }
+    }
+  }
+
+  return null;
+}
 
 /**
  * Case-insensitive header getter helper.
- * Tries: lowercase, Title-Case, UPPERCASE
+ * Handles both Headers-like objects (.get() method) and plain objects.
  *
- * @param headers - Headers object to query
+ * @param headers - Headers object or plain object to query
  * @param name - Header name to look up
  * @returns Header value or null if not found
  */
 function getHeaderCaseInsensitive(headers: HeadersLike, name: string): string | null {
-  // Try lowercase first (most common for custom headers)
-  const lower = headers.get(name.toLowerCase());
-  if (lower !== null) return lower;
+  if (hasGetMethod(headers)) {
+    // Use .get() method - most Headers implementations are case-insensitive
+    // but we try multiple casings for implementations that aren't
+    const lower = headers.get(name.toLowerCase());
+    if (lower !== null) return lower;
 
-  // Try Title-Case (HTTP standard format)
-  const titleCase = name
-    .split('-')
-    .map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
-    .join('-');
-  const title = headers.get(titleCase);
-  if (title !== null) return title;
+    const titleCase = name
+      .split('-')
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+      .join('-');
+    const title = headers.get(titleCase);
+    if (title !== null) return title;
 
-  // Try UPPERCASE (sometimes used for custom headers)
-  const upper = headers.get(name.toUpperCase());
-  if (upper !== null) return upper;
+    const upper = headers.get(name.toUpperCase());
+    if (upper !== null) return upper;
 
-  // Not found
-  return null;
+    return null;
+  }
+
+  // Plain object path
+  return getFromPlainObject(headers, name);
 }
 
 /**

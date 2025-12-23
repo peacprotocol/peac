@@ -306,6 +306,84 @@ describe('x402 payment headers - no body access', () => {
   });
 });
 
+describe('x402 payment headers - plain object support (Node/Express)', () => {
+  it('should accept plain object headers (lowercase keys)', () => {
+    // Node.js/Express lowercases all header names
+    const headers = {
+      'content-type': 'application/json',
+      'payment-required': 'ln:invoice123',
+      'payment-response': 'success:tx_abc123',
+    };
+
+    expect(detectPaymentRequired(headers)).toBe(true);
+    expect(extractPaymentReference(headers)).toBe('ln:invoice123');
+    expect(extractPaymentResponse(headers)).toBe('success:tx_abc123');
+  });
+
+  it('should accept plain object headers (mixed case keys)', () => {
+    const headers = {
+      'Payment-Required': 'ln:invoice123',
+      'Payment-Response': 'success:tx_abc123',
+    };
+
+    expect(detectPaymentRequired(headers)).toBe(true);
+    expect(extractPaymentReference(headers)).toBe('ln:invoice123');
+    expect(extractPaymentResponse(headers)).toBe('success:tx_abc123');
+  });
+
+  it('should accept plain object headers (uppercase keys)', () => {
+    const headers = {
+      'PAYMENT-REQUIRED': 'ln:invoice123',
+      'PAYMENT-RESPONSE': 'success:tx_abc123',
+    };
+
+    expect(detectPaymentRequired(headers)).toBe(true);
+    expect(extractPaymentReference(headers)).toBe('ln:invoice123');
+    expect(extractPaymentResponse(headers)).toBe('success:tx_abc123');
+  });
+
+  it('should handle array values (take first element)', () => {
+    // HTTP allows multiple headers with same name, represented as arrays
+    const headers = {
+      'payment-required': ['ln:invoice123', 'ln:invoice456'],
+    };
+
+    expect(detectPaymentRequired(headers)).toBe(true);
+    expect(extractPaymentReference(headers)).toBe('ln:invoice123');
+  });
+
+  it('should handle undefined values in plain object', () => {
+    const headers: Record<string, string | undefined> = {
+      'content-type': 'application/json',
+      'payment-required': undefined,
+    };
+
+    expect(detectPaymentRequired(headers)).toBe(false);
+    expect(extractPaymentReference(headers)).toBeUndefined();
+  });
+
+  it('should handle empty plain object', () => {
+    const headers = {};
+
+    expect(detectPaymentRequired(headers)).toBe(false);
+    expect(extractPaymentReference(headers)).toBeUndefined();
+    expect(extractPaymentResponse(headers)).toBeUndefined();
+  });
+
+  it('should work with simulated Express req.headers', () => {
+    // Express/Node.js IncomingHttpHeaders style
+    const headers: Record<string, string | string[] | undefined> = {
+      host: 'example.com',
+      'content-type': 'application/json',
+      'payment-required': 'eip155:8453:0xabc:inv_123',
+      'x-custom-header': ['value1', 'value2'],
+    };
+
+    expect(detectPaymentRequired(headers)).toBe(true);
+    expect(extractPaymentReference(headers)).toBe('eip155:8453:0xabc:inv_123');
+  });
+});
+
 describe('x402 payment headers - edge cases', () => {
   it('should handle multiple headers (only PAYMENT-REQUIRED checked)', () => {
     const headers = createHeaders({
