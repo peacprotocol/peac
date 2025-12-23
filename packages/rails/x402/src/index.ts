@@ -13,6 +13,7 @@ import type { PaymentEvidence, PaymentSplit } from '@peac/schema';
 export * from './constants';
 export * from './types';
 export * from './helpers';
+export * from './payment-headers';
 
 import type { X402Dialect } from './constants';
 import type { X402Invoice, X402Settlement, X402WebhookEvent, X402Evidence } from './types';
