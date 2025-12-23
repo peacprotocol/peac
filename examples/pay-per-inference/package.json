@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "demo": "tsx demo.ts",
-    "check": "tsc --noEmit"
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@peac/crypto": "workspace:*",

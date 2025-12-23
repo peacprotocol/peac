@@ -1,6 +1,6 @@
-# PEAC Protocol Examples
+# PEAC Flagship Examples
 
-Canonical flow examples demonstrating PEAC protocol integration patterns.
+Canonical examples demonstrating PEAC Protocol integration patterns.
 
 ## Examples
 
@@ -10,6 +10,7 @@ Canonical flow examples demonstrating PEAC protocol integration patterns.
 | [pay-per-inference](./pay-per-inference/) | Agent handles 402, obtains receipt, retries      |
 | [pay-per-crawl](./pay-per-crawl/)         | Policy evaluation + receipt flow for AI crawlers |
 | [rsl-collective](./rsl-collective/)       | RSL integration and core claims parity           |
+| [mcp-tool-call](./mcp-tool-call/)         | MCP paid tools with budget enforcement           |
 
 ## Prerequisites
 
@@ -36,58 +37,19 @@ cd examples/pay-per-crawl && pnpm demo
 
 # RSL collective integration
 cd examples/rsl-collective && pnpm demo
+
+# MCP tool call with budget
+cd examples/mcp-tool-call && pnpm demo
 ```
 
-## CI Verification
+## CI Harness
 
-From the repository root:
+All examples are verified in CI:
 
-```bash
-pnpm examples:check
-```
+- `pnpm examples:check` - TypeScript compilation check
+- No X-PEAC headers allowed (use `PEAC-Receipt` instead)
 
-This typechecks all examples without running them.
+## Requirements
 
-## No External Dependencies
-
-All examples use:
-
-- Local keypair generation
-- Simulated payment services
-- In-memory verification
-
-No network calls, no secrets required.
-
-## Key Concepts Demonstrated
-
-### 402 Payment Required
-
-Resources return HTTP 402 with payment requirements:
-
-- `PEAC-Price`: Amount in smallest currency unit
-- `PEAC-Currency`: ISO 4217 currency code
-- `PEAC-Issuer`: URL of receipt issuer
-
-### Receipt Verification
-
-Before granting access, verify:
-
-1. JWS signature is valid (cryptographic)
-2. `aud` matches resource URL (audience)
-3. `amt`/`cur` meet price requirements (payment)
-
-### Core Claims Parity
-
-`toCoreClaims()` extracts semantic fields for comparison:
-
-- Strips rail-specific evidence
-- Produces byte-identical JCS output regardless of source
-- Requires RFC 8785 canonicalization for comparison
-
-### Policy Evaluation
-
-`@peac/policy-kit` provides:
-
-- YAML/JSON policy parsing
-- First-match-wins rule evaluation
-- Artifact generation (peac.txt, robots.txt)
+- Node.js 20+
+- pnpm 8+
