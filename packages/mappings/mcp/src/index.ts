@@ -3,6 +3,8 @@
  * Attach PEAC receipts to MCP tool responses
  */
 
+export * from './budget';
+
 /**
  * MCP Tool Response
  */

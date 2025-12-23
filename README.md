@@ -47,6 +47,26 @@ PEAC focuses on cryptographic receipts and payment verification. It is designed 
 
 _Names above are illustrative examples for interoperability. PEAC is vendor neutral and does not imply endorsement by, or affiliation with, these projects._
 
+### x402 Integration
+
+PEAC works as the receipts and verification layer for [x402](https://x402.org) payment flows. x402 handles the payment; PEAC proves it happened.
+
+**Live demo:** [x402.peacprotocol.org](https://x402.peacprotocol.org) | [Visual demo repo](https://github.com/peacprotocol/peac-x402-receipts-demo)
+
+**How it works:**
+
+1. Client requests a protected resource
+2. Server returns `402 Payment Required` with x402 payment details
+3. Client pays via x402 (Base/USDC or other supported networks)
+4. Server issues a signed `PEAC-Receipt` header proving payment
+5. Client can verify the receipt offline and reuse it within its validity window
+
+**Package:** `@peac/rails-x402` provides the adapter with full x402 v2 support (v1 fallback via `X402Dialect`).
+
+**Discovery:** Servers publish `/.well-known/peac.txt` describing payment terms, purposes, and receipt requirements.
+
+See [examples/x402-node-server](examples/x402-node-server) for a working implementation.
+
 ---
 
 ## At a glance
