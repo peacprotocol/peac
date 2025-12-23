@@ -45,22 +45,22 @@ function hasGetMethod(headers: HeadersLike): headers is HeadersWithGet {
  * Get header value from plain object, handling case-insensitivity and arrays.
  * Node.js lowercases all header names, so we check multiple casings.
  */
-function getFromPlainObject(
-  headers: HeadersPlainObject,
-  name: string
-): string | null {
+function getFromPlainObject(headers: HeadersPlainObject, name: string): string | null {
   // Common casings to try
   const casings = [
     name.toLowerCase(),
     name.toUpperCase(),
-    name.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()).join('-'),
+    name
+      .split('-')
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+      .join('-'),
   ];
 
   for (const key of casings) {
     const value = headers[key];
     if (value !== undefined) {
       // Handle array values (take first element)
-      return Array.isArray(value) ? value[0] ?? null : value;
+      return Array.isArray(value) ? (value[0] ?? null) : value;
     }
   }
 
@@ -70,7 +70,7 @@ function getFromPlainObject(
     if (key.toLowerCase() === lowerName) {
       const value = headers[key];
       if (value !== undefined) {
-        return Array.isArray(value) ? value[0] ?? null : value;
+        return Array.isArray(value) ? (value[0] ?? null) : value;
       }
     }
   }
