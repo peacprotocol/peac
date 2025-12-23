@@ -34,7 +34,7 @@ const config: RazorpayConfig = {
 
 // In your webhook handler (see Raw Body section below):
 // 1. Get raw body (NOT parsed JSON)
-const rawBody = req.rawBody; // Uint8Array
+const rawBody = req.body as Buffer; // Buffer when using express.raw()
 const signature = req.headers['x-razorpay-signature'];
 
 // 2. Verify signature FIRST (before parsing)

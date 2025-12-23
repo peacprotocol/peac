@@ -4,7 +4,6 @@
   "description": "Razorpay payment rail adapter for PEAC protocol (UPI, cards, netbanking)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/peacprotocol/peac.git",
@@ -22,13 +21,6 @@
   ],
   "publishConfig": {
     "access": "public"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
-    }
   },
   "scripts": {
     "build": "tsc",
