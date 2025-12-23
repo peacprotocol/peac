@@ -7,8 +7,6 @@ Supports UPI, cards, netbanking, and wallets for India-focused payment flows.
 ## Installation
 
 ```bash
-npm install @peac/rails-razorpay
-# or
 pnpm add @peac/rails-razorpay
 ```
 
