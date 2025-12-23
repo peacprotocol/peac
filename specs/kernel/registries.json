@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.18",
+  "version": "0.9.19",
   "description": "PEAC protocol registries - payment rails, control engines, transport methods, agent protocols",
   "payment_rails": [
     {
@@ -29,6 +29,13 @@
       "category": "account-to-account",
       "description": "Unified Payments Interface",
       "reference": "https://www.npci.org.in/",
+      "status": "informational"
+    },
+    {
+      "id": "razorpay",
+      "category": "payment-gateway",
+      "description": "Razorpay payment gateway (UPI, cards, netbanking, wallets)",
+      "reference": "https://razorpay.com/docs/",
       "status": "informational"
     }
   ],
