@@ -64,12 +64,13 @@ Located at: `docs/specs/registries.json`
 
 ### 3.1 Current Entries
 
-| ID             | Category           | Description                         | Reference                                                     |
-| -------------- | ------------------ | ----------------------------------- | ------------------------------------------------------------- |
-| `x402`         | agentic-payment    | HTTP 402-based paid call receipts   | https://www.x402.org/                                         |
-| `l402`         | agentic-payment    | Lightning HTTP 402 Protocol (LSAT)  | https://docs.lightning.engineering/the-lightning-network/l402 |
-| `card-network` | card               | Generic card network (Visa/MC/etc.) | -                                                             |
-| `upi`          | account-to-account | Unified Payments Interface (India)  | https://www.npci.org.in/                                      |
+| ID             | Category           | Description                               | Reference                                                     |
+| -------------- | ------------------ | ----------------------------------------- | ------------------------------------------------------------- |
+| `x402`         | agentic-payment    | HTTP 402-based paid call receipts         | https://www.x402.org/                                         |
+| `l402`         | agentic-payment    | Lightning HTTP 402 Protocol (LSAT)        | https://docs.lightning.engineering/the-lightning-network/l402 |
+| `card-network` | card               | Generic card network (Visa/MC/etc.)       | -                                                             |
+| `upi`          | account-to-account | Unified Payments Interface (India)        | https://www.npci.org.in/                                      |
+| `razorpay`     | payment-gateway    | Razorpay gateway (UPI, cards, netbanking) | https://razorpay.com/docs/                                    |
 
 ### 3.2 Adding New Rails
 

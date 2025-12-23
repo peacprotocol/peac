@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.19] - 2025-12-24
+
+### Added
+
+- **@peac/rails-razorpay** (private, not published to npm): India-focused payment adapter for Razorpay (UPI, cards, netbanking)
+  - Webhook signature verification using raw bytes + constant-time compare (`timingSafeEqual`)
+  - Payment normalization to PEAC PaymentEvidence with safe integer enforcement
+  - VPA privacy: HMAC-SHA256 hashing by default (prevents dictionary attacks)
+  - Structured error handling with RFC 9457 problem+json support
+- **MCP/ACP Budget Utilities**: Budget enforcement for agent commerce
+  - `checkBudget()`: Pure function with bigint minor units for precise currency math
+  - Per-call, daily, and monthly budget limits with currency match enforcement
+  - Explicit "unbounded" semantics when no limits configured
+  - Identical implementation in `@peac/mappings-mcp` and `@peac/mappings-acp`
+- **x402 Payment Headers**: Headers-only detection in `@peac/rails-x402`
+  - `detectPaymentRequired()`, `extractPaymentReference()`, `extractPaymentResponse()`
+  - Case-insensitive header lookup (works with any `HeadersLike` interface)
+  - No DOM types leaked into core packages
+- **MCP Tool Call Example**: `examples/mcp-tool-call/` demonstrating paid MCP tools with budget enforcement
+- **CI Examples Harness**: `pnpm examples:check` for TypeScript validation of all examples
+- **Unicode Scanner**: `scripts/find-invisible-unicode.mjs` for Trojan Source attack prevention
+  - Detects bidirectional controls, direction marks, zero-width chars, BOM
+  - Integrated into `scripts/guard.sh` as CI gate
+
+### Security
+
+- **Razorpay webhook**: Raw bytes verification prevents JSON canonicalization attacks
+- **VPA hashing**: HMAC-SHA256 prevents rainbow table attacks on common VPAs
+- **Amount validation**: Safe integer enforcement prevents precision loss
+- **Trojan Source prevention**: Unicode scanner blocks hidden bidirectional characters
+
+### Notes
+
+- PaymentEvidence.amount remains `number` for v0.9.19 (enforced as integer minor units)
+- x402 payment headers are headers-only (no body parsing, no Response dependency)
+- VPA hashing uses HMAC-SHA256; changing hash key changes all hashes (audit trail impact)
+
 ## [0.9.18] - 2025-12-19
 
 ### Added
