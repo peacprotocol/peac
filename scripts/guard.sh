@@ -109,4 +109,15 @@ else
   echo "OK"
 fi
 
+echo "== forbid bidirectional Unicode (Trojan Source) =="
+# Scan for dangerous bidi control characters that can hide malicious code
+# U+200E-U+200F (LRM/RLM), U+202A-U+202E (embedding/override), U+2066-U+2069 (isolates)
+BIDI_PATTERN='[\xE2\x80\x8E\xE2\x80\x8F]|[\xE2\x80\xAA-\xE2\x80\xAE]|[\xE2\x81\xA6-\xE2\x81\xA9]'
+if git grep -Pn "$BIDI_PATTERN" -- ':!node_modules' ':!archive/**' ':!pnpm-lock.yaml' 2>/dev/null | grep .; then
+  echo "FAIL: Found bidirectional Unicode control characters (Trojan Source risk)"
+  bad=1
+else
+  echo "OK"
+fi
+
 exit $bad

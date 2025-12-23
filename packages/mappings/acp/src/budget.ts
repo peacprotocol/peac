@@ -17,8 +17,18 @@ export interface BudgetConfig {
 export interface BudgetResult {
   /** Whether the cost is allowed within budget limits */
   allowed: boolean;
-  /** Remaining budget in minor units (after this operation) */
-  remainingMinor: bigint;
+  /**
+   * Remaining budget in minor units (after this operation).
+   * - When allowed: the minimum remaining across all applicable limits
+   * - When denied: 0n (never negative)
+   * - When unbounded: undefined (check `unbounded` flag instead)
+   */
+  remainingMinor?: bigint;
+  /**
+   * True when no budget limits are configured.
+   * In this case, remainingMinor is undefined.
+   */
+  unbounded?: boolean;
   /** Error code if not allowed */
   code?: 'budget_exceeded' | 'currency_mismatch';
   /** Human-readable reason if not allowed */
@@ -77,7 +87,7 @@ export function checkBudget(
   if (config.maxPerCallMinor !== undefined && costMinor > config.maxPerCallMinor) {
     return {
       allowed: false,
-      remainingMinor: config.maxPerCallMinor - costMinor,
+      remainingMinor: 0n, // Never negative - clamp to 0
       code: 'budget_exceeded',
       reason: `Per-call limit exceeded: cost ${costMinor} > limit ${config.maxPerCallMinor}`,
     };
@@ -131,10 +141,15 @@ export function checkBudget(
   }
 
   // Return the most restrictive limit
-  const remainingMinor =
-    remainingCandidates.length > 0
-      ? remainingCandidates.reduce((min, val) => (val < min ? val : min))
-      : BigInt(Number.MAX_SAFE_INTEGER);
+  if (remainingCandidates.length === 0) {
+    // No limits configured - unbounded
+    return {
+      allowed: true,
+      unbounded: true,
+    };
+  }
+
+  const remainingMinor = remainingCandidates.reduce((min, val) => (val < min ? val : min));
 
   return {
     allowed: true,

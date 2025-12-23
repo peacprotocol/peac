@@ -83,7 +83,7 @@ describe('ACP Budget Utilities', () => {
       expect(result.allowed).toBe(false);
       expect(result.code).toBe('budget_exceeded');
       expect(result.reason).toContain('Per-call limit exceeded');
-      expect(result.remainingMinor).toBe(-1n);
+      expect(result.remainingMinor).toBe(0n); // Never negative - clamped to 0
     });
 
     it('should allow when no per-call limit is set', () => {
@@ -325,6 +325,18 @@ describe('ACP Budget Utilities', () => {
 
       expect(result.allowed).toBe(true);
       expect(result.remainingMinor).toBe(1n);
+    });
+
+    it('should return unbounded when no limits configured', () => {
+      const config: BudgetConfig = {
+        currency: 'INR',
+      };
+
+      const result = checkBudget(0n, 100000000n, 'INR', config);
+
+      expect(result.allowed).toBe(true);
+      expect(result.unbounded).toBe(true);
+      expect(result.remainingMinor).toBeUndefined();
     });
   });
 
