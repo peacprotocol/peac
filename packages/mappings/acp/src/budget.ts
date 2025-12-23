@@ -48,14 +48,14 @@ export interface BudgetResult {
  * @example
  * ```typescript
  * const config: BudgetConfig = {
- *   maxPerCallMinor: 50000n, // ₹500.00 max per checkout
- *   maxDailyMinor: 1000000n, // ₹10000.00 max per day
+ *   maxPerCallMinor: 50000n, // 500.00 INR max per checkout
+ *   maxDailyMinor: 1000000n, // 10000.00 INR max per day
  *   currency: 'INR'
  * };
  *
  * const result = checkBudget(
- *   850000n, // Already spent ₹8500.00 today
- *   100000n, // Current checkout costs ₹1000.00
+ *   850000n, // Already spent 8500.00 INR today
+ *   100000n, // Current checkout costs 1000.00 INR
  *   'INR',
  *   config
  * );
