@@ -109,4 +109,19 @@ else
   echo "OK"
 fi
 
+echo "== forbid invisible/bidi Unicode (Trojan Source) =="
+if [ -f scripts/find-invisible-unicode.mjs ]; then
+  # Scan all tracked text files for dangerous Unicode
+  if git ls-files -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' '*.json' '*.md' '*.yaml' '*.yml' \
+    | grep -vE '^(archive/|node_modules/)' \
+    | node scripts/find-invisible-unicode.mjs --stdin 2>&1 | grep -v "No dangerous Unicode"; then
+    echo "FAIL: Found dangerous invisible/bidi Unicode characters"
+    bad=1
+  else
+    echo "OK"
+  fi
+else
+  echo "SKIP: scripts/find-invisible-unicode.mjs not found"
+fi
+
 exit $bad
