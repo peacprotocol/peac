@@ -60,6 +60,14 @@ jobs:
       - name: Examples typecheck
         run: pnpm examples:check
 
+      - name: No X-PEAC headers in examples
+        run: |
+          if rg -i "x-peac" examples/ --glob '!*.md' 2>/dev/null | grep -q .; then
+            echo "FAIL: Found X-PEAC headers in examples (use PEAC-Receipt instead)"
+            exit 1
+          fi
+          echo "OK: No X-PEAC headers found"
+
       - name: Performance gate (advisory)
         continue-on-error: true
         run: |

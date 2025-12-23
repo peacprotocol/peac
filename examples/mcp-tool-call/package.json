@@ -1,8 +1,8 @@
 {
-  "name": "@peac/example-rsl-collective",
+  "name": "@peac/example-mcp-tool-call",
   "version": "0.0.0",
   "private": true,
-  "description": "RSL collective integration - demonstrates core claims parity across mappings",
+  "description": "PEAC MCP tool call example - paid MCP tool with receipt proof and budget enforcement",
   "type": "module",
   "scripts": {
     "demo": "tsx demo.ts",
@@ -11,8 +11,7 @@
   },
   "dependencies": {
     "@peac/crypto": "workspace:*",
-    "@peac/mappings-acp": "workspace:*",
-    "@peac/mappings-rsl": "workspace:*",
+    "@peac/mappings-mcp": "workspace:*",
     "@peac/protocol": "workspace:*",
     "@peac/schema": "workspace:*"
   },

@@ -131,6 +131,28 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  examples/mcp-tool-call:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/mappings-mcp':
+        specifier: workspace:*
+        version: link:../../packages/mappings/mcp
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+    devDependencies:
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/pay-per-crawl:
     dependencies:
       '@peac/crypto':
@@ -154,6 +176,25 @@ importers:
         version: 5.9.3
 
   examples/pay-per-inference:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+    devDependencies:
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  examples/razorpay-upi:
     dependencies:
       '@peac/crypto':
         specifier: workspace:*

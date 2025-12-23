@@ -1,12 +1,34 @@
-# v0.9.19 Examples
+# PEAC Flagship Examples
 
-Flagship examples with CI harness:
-1. pay-per-inference/ - Agent receipt acquisition
-2. pay-per-crawl/ - Policy Kit + receipts
-3. rsl-collective/ - RSL token mapping
-4. mcp-tool-call/ - MCP integration
-5. razorpay-upi/ - India UPI flow
+Canonical examples demonstrating PEAC Protocol integration patterns.
+
+## Examples
+
+| Example | Description |
+|---------|-------------|
+| [pay-per-inference/](pay-per-inference/) | Agent handles 402, obtains receipt, retries |
+| [pay-per-crawl/](pay-per-crawl/) | Policy Kit + receipts for AI crawlers |
+| [rsl-collective/](rsl-collective/) | RSL token mapping to PEAC ControlPurpose |
+| [mcp-tool-call/](mcp-tool-call/) | MCP paid tools with budget enforcement |
+
+## Running Examples
+
+Each example can be run with:
+
+```bash
+cd examples/<name>
+pnpm install
+pnpm demo
+```
 
 ## CI Harness
 
-All examples are verified in CI via `pnpm examples:check`
+All examples are verified in CI:
+
+- `pnpm examples:check` - TypeScript compilation check
+- No X-PEAC headers allowed (use `PEAC-Receipt` instead)
+
+## Requirements
+
+- Node.js 20+
+- pnpm 8+
