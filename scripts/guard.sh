@@ -96,7 +96,8 @@ fi
 
 echo "== forbid npm invocations =="
 # Allow npm in README.md for end-user install instructions (pnpm is recommended, npm is fallback)
-if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep -vE '^(IMPLEMENTATION_STATUS\.md|README\.md):' | grep .; then
+# Allow npm in RELEASING.md for documenting what NOT to do (pnpm is required)
+if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep -vE '^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md):' | grep .; then
   bad=1
 else
   echo "OK"
