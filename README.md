@@ -27,9 +27,6 @@ PEAC does not replace existing protocols. It is the receipts and verification la
 **Payment rails (v0.9.19 status):**
 
 - [x402](https://github.com/coinbase/x402) HTTP 402 payment flows for agentic interactions. Adapter implemented in `@peac/rails-x402`.
-- Card payments via Stripe API. Adapter implemented in `@peac/rails-stripe`.
-- [Razorpay](https://razorpay.com) India-focused payment gateway (UPI, cards, netbanking). Adapter in `@peac/rails-razorpay` (internal).
-- Additional rails such as regional gateways and Lightning style networks. Planned.
 
 The protocol is designed to work with generic HTTP 402 services, paywalls, routers, and data stores. Receipts do not depend on any single provider.
 
