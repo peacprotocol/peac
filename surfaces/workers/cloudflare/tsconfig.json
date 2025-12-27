@@ -23,11 +23,6 @@
       "@peac/http-signatures/*": ["../../../packages/http-signatures/src/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts",
-    "../_shared/**/*.ts",
-    "../../_shared/**/*.ts"
-  ],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "../_shared/**/*.ts", "../../_shared/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

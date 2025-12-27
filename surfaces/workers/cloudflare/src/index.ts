@@ -21,7 +21,11 @@ import type { Env, WorkerConfig } from './types.js';
 import { parseConfig } from './config.js';
 import { createReplayStore } from './replay-store.js';
 import { createErrorResponse, createChallengeResponse, ErrorCodes } from './errors.js';
-import { handleVerification, type HandlerResult, type RequestLike } from '../../_shared/core/index.js';
+import {
+  handleVerification,
+  type HandlerResult,
+  type RequestLike,
+} from '../../_shared/core/index.js';
 
 // Re-export types and utilities
 export type {
