@@ -7,7 +7,7 @@ Maps card-based billing events from Flowglad, Stripe Billing, and Lago into PEAC
 ## Installation
 
 ```bash
-npm install @peac/rails-card
+pnpm add @peac/rails-card
 ```
 
 ## Usage
