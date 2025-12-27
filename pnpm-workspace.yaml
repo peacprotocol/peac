@@ -4,6 +4,7 @@ packages:
   - 'packages/mappings/*'
   - 'packages/transport/*'
   - 'apps/*'
+  - 'surfaces/analytics'
   - 'surfaces/workers/*'
   - 'surfaces/nextjs/*'
   - 'examples/*'
