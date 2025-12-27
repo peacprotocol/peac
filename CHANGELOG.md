@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned (v0.9.20)
+
+- Analytics surface
+- x402 service adapters
+- Card payment rails
+- Additional edge workers
+- gRPC transport
+
 ## [0.9.19] - 2025-12-24
 
 ### Added
