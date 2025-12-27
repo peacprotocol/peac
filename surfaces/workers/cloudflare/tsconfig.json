@@ -3,7 +3,7 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "WebWorker"],
     "types": ["@cloudflare/workers-types"],
     "noEmit": true,
     "strict": true,
@@ -12,8 +12,22 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@peac/mappings-tap": ["../../../packages/mappings/tap/src"],
+      "@peac/mappings-tap/*": ["../../../packages/mappings/tap/src/*"],
+      "@peac/jwks-cache": ["../../../packages/jwks-cache/src"],
+      "@peac/jwks-cache/*": ["../../../packages/jwks-cache/src/*"],
+      "@peac/http-signatures": ["../../../packages/http-signatures/src"],
+      "@peac/http-signatures/*": ["../../../packages/http-signatures/src/*"]
+    }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "../_shared/**/*.ts",
+    "../../_shared/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }
