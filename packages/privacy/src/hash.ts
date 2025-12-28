@@ -3,6 +3,9 @@
  *
  * Used to hash identifiers before storage in receipts or metrics
  * to prevent re-identification.
+ *
+ * IMPORTANT: Salt is REQUIRED by default to prevent rainbow table attacks.
+ * Use unsafeAllowUnsalted=true only for non-sensitive test data.
  */
 
 import { createHash } from 'crypto';
@@ -12,10 +15,19 @@ import type { HashOptions, HashResult } from './types.js';
  * Hash an identifier for privacy-preserving storage
  *
  * @param value - The value to hash
- * @param options - Hashing options
+ * @param options - Hashing options (salt REQUIRED unless unsafeAllowUnsalted=true)
  * @returns Hash result
+ * @throws Error if salt is not provided and unsafeAllowUnsalted is not true
  */
 export function hashIdentifier(value: string, options: HashOptions = {}): HashResult {
+  // Enforce salt requirement for privacy safety
+  if (!options.salt && !options.unsafeAllowUnsalted) {
+    throw new Error(
+      'Salt is required for privacy-preserving hashing. ' +
+        'Provide a salt or set unsafeAllowUnsalted=true for non-sensitive data.'
+    );
+  }
+
   const algorithm = options.algorithm ?? 'sha256';
   const hash = createHash(algorithm);
 

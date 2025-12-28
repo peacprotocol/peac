@@ -21,12 +21,20 @@ export interface ClassificationHint {
 
 /**
  * Options for hashing identifiers
+ *
+ * By default, salt is REQUIRED to prevent rainbow table attacks.
+ * Set unsafeAllowUnsalted=true only for non-sensitive test data.
  */
 export interface HashOptions {
-  /** Salt for hashing (required for deterministic hashes) */
+  /** Salt for hashing (REQUIRED unless unsafeAllowUnsalted=true) */
   salt?: string;
   /** Algorithm to use (default: sha256) */
   algorithm?: 'sha256' | 'sha384' | 'sha512';
+  /**
+   * Allow unsalted hashing. UNSAFE for production use with PII.
+   * Only use for non-sensitive data or testing.
+   */
+  unsafeAllowUnsalted?: boolean;
 }
 
 /**
