@@ -46,7 +46,7 @@ describe('card rail parsers', () => {
     });
 
     it('should reject invalid event type', () => {
-      const invalidEvent = { ...validEvent, type: 'charge.failed' } as FlowgladChargeEvent;
+      const invalidEvent = { ...validEvent, type: 'charge.failed' } as unknown as FlowgladChargeEvent;
       const result = parseFlowgladEvent(invalidEvent);
 
       expect(result.ok).toBe(false);
@@ -112,7 +112,7 @@ describe('card rail parsers', () => {
     });
 
     it('should reject invalid event type', () => {
-      const invalidEvent = { ...validEvent, type: 'invoice.created' } as StripeInvoicePaidEvent;
+      const invalidEvent = { ...validEvent, type: 'invoice.created' } as unknown as StripeInvoicePaidEvent;
       const result = parseStripeInvoicePaid(invalidEvent);
 
       expect(result.ok).toBe(false);
