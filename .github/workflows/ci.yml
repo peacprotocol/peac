@@ -38,6 +38,13 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Unicode security scan (Trojan Source)
+        run: |
+          # Scan active packages for invisible/bidirectional Unicode (CVE-2021-42574)
+          git ls-files -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' '*.json' '*.md' '*.yaml' '*.yml' \
+            | grep -vE '^(archive/|node_modules/)' \
+            | node scripts/find-invisible-unicode.mjs --stdin
+
       - name: Domain guard
         run: bash -euxo pipefail scripts/guard.sh
 
