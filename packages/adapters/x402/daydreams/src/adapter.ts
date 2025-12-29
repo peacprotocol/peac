@@ -15,7 +15,8 @@ import type {
   AdapterErrorCode,
 } from './types.js';
 
-const RAIL_ID = 'x402.daydreams';
+const RAIL_ID = 'x402';
+const FACILITATOR = 'daydreams';
 
 /**
  * Create an error result
@@ -176,6 +177,7 @@ export function mapToPaymentEvidence(
     currency: event.currency.toUpperCase(),
     asset: event.currency.toUpperCase(),
     env: event.env ?? config?.defaultEnv ?? 'live',
+    facilitator: FACILITATOR,
     evidence,
   };
 }
