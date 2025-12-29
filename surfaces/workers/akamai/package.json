@@ -1,0 +1,43 @@
+{
+  "name": "@peac/worker-akamai",
+  "version": "0.9.20",
+  "private": true,
+  "description": "PEAC receipt verification worker for Akamai EdgeWorkers",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "akamai",
+    "edgeworkers",
+    "peac",
+    "tap",
+    "receipts",
+    "verification"
+  ],
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://peacprotocol.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "surfaces/workers/akamai"
+  },
+  "dependencies": {
+    "@peac/http-signatures": "workspace:*",
+    "@peac/jwks-cache": "workspace:*",
+    "@peac/mappings-tap": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  }
+}
