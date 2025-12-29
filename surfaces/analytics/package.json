@@ -1,8 +1,8 @@
 {
-  "name": "@peac/privacy",
+  "name": "@peac/analytics",
   "version": "0.9.20",
   "private": true,
-  "description": "Privacy pillar for PEAC protocol - k-anonymity, privacy-preserving hashing, data protection",
+  "description": "Analytics surface for PEAC Protocol - metrics API with k-anonymity protection",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,13 +12,6 @@
       "import": "./dist/index.js"
     }
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
-    "directory": "packages/privacy"
-  },
-  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
-  "license": "Apache-2.0",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:types": "tsc -p tsconfig.build.json --emitDeclarationOnly",
@@ -26,6 +19,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@peac/privacy": "workspace:*",
+    "@peac/kernel": "workspace:*",
+    "@peac/schema": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
