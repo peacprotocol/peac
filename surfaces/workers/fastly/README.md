@@ -33,15 +33,15 @@ addEventListener('fetch', (event) => {
 
 ### Edge Dictionary (`peac_config`)
 
-| Key                       | Required | Description                                    |
-| ------------------------- | -------- | ---------------------------------------------- |
-| `issuer_allowlist`        | Yes*     | Comma-separated list of allowed issuer origins |
-| `bypass_paths`            | No       | Comma-separated list of paths to bypass        |
-| `unsafe_allow_any_issuer` | No       | Set to "true" to allow any issuer (UNSAFE)     |
-| `unsafe_allow_unknown_tags` | No     | Set to "true" to allow unknown TAP tags        |
-| `unsafe_allow_no_replay`  | No       | Set to "true" to skip replay protection        |
+| Key                         | Required | Description                                    |
+| --------------------------- | -------- | ---------------------------------------------- |
+| `issuer_allowlist`          | Yes\*    | Comma-separated list of allowed issuer origins |
+| `bypass_paths`              | No       | Comma-separated list of paths to bypass        |
+| `unsafe_allow_any_issuer`   | No       | Set to "true" to allow any issuer (UNSAFE)     |
+| `unsafe_allow_unknown_tags` | No       | Set to "true" to allow unknown TAP tags        |
+| `unsafe_allow_no_replay`    | No       | Set to "true" to skip replay protection        |
 
-*Required unless `unsafe_allow_any_issuer=true`
+\*Required unless `unsafe_allow_any_issuer=true`
 
 ### Example fastly.toml
 
@@ -92,25 +92,25 @@ const handler = createHandler({
 
 ### HTTP Status Codes
 
-| Status | Meaning                        |
-| ------ | ------------------------------ |
-| 400    | Malformed request              |
-| 401    | Authentication failed          |
-| 402    | Payment/receipt required       |
-| 403    | Issuer not in allowlist        |
-| 409    | Replay detected                |
-| 500    | Server/configuration error     |
+| Status | Meaning                    |
+| ------ | -------------------------- |
+| 400    | Malformed request          |
+| 401    | Authentication failed      |
+| 402    | Payment/receipt required   |
+| 403    | Issuer not in allowlist    |
+| 409    | Replay detected            |
+| 500    | Server/configuration error |
 
 ## Response Headers
 
 On successful verification:
 
-| Header          | Description                    |
-| --------------- | ------------------------------ |
-| X-PEAC-Verified | Always "true"                  |
-| X-PEAC-Engine   | Always "tap"                   |
-| X-PEAC-TAP-Tag  | TAP usage tag (if present)     |
-| X-PEAC-Warning  | Warning message (if applicable)|
+| Header          | Description                     |
+| --------------- | ------------------------------- |
+| X-PEAC-Verified | Always "true"                   |
+| X-PEAC-Engine   | Always "tap"                    |
+| X-PEAC-TAP-Tag  | TAP usage tag (if present)      |
+| X-PEAC-Warning  | Warning message (if applicable) |
 
 ## Architecture
 

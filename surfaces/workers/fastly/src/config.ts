@@ -42,7 +42,9 @@ export function parseConfig(dictName?: string): WorkerConfig {
 
   // Fallback to environment variables for any missing values
   if (typeof globalThis !== 'undefined' && 'fastly' in globalThis) {
-    const fastly = (globalThis as unknown as { fastly: { getEnv: (k: string) => string | undefined } }).fastly;
+    const fastly = (
+      globalThis as unknown as { fastly: { getEnv: (k: string) => string | undefined } }
+    ).fastly;
     env.ISSUER_ALLOWLIST ??= fastly.getEnv('ISSUER_ALLOWLIST');
     env.BYPASS_PATHS ??= fastly.getEnv('BYPASS_PATHS');
     env.UNSAFE_ALLOW_ANY_ISSUER ??= fastly.getEnv('UNSAFE_ALLOW_ANY_ISSUER');
@@ -66,7 +68,9 @@ function getDictionary(name: string): Map<string, string> | null {
   // This allows testing without Fastly runtime
   try {
     if (typeof globalThis !== 'undefined' && 'Dictionary' in globalThis) {
-      const DictClass = (globalThis as unknown as { Dictionary: new (name: string) => Map<string, string> }).Dictionary;
+      const DictClass = (
+        globalThis as unknown as { Dictionary: new (name: string) => Map<string, string> }
+      ).Dictionary;
       return new DictClass(name);
     }
   } catch {

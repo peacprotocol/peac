@@ -86,7 +86,7 @@ describe('createChallengeResponse', () => {
 
   it('includes request URL as instance', async () => {
     const response = createChallengeResponse('https://example.com/resource');
-    const body = await response.json() as { instance: string; code: string };
+    const body = (await response.json()) as { instance: string; code: string };
 
     expect(body.instance).toBe('https://example.com/resource');
     expect(body.code).toBe('E_RECEIPT_MISSING');

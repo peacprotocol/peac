@@ -34,10 +34,7 @@ function ok<T>(value: T): AdapterResult<T> {
 /**
  * Validate required string field
  */
-function validateRequiredString(
-  value: unknown,
-  fieldName: string
-): AdapterResult<string> {
+function validateRequiredString(value: unknown, fieldName: string): AdapterResult<string> {
   if (typeof value !== 'string' || value.trim() === '') {
     return err(`${fieldName} is required and must be a non-empty string`, 'missing_required_field');
   }

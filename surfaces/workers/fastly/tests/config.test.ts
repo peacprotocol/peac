@@ -78,12 +78,16 @@ describe('matchesBypassPath', () => {
 describe('isIssuerAllowed', () => {
   it('allows issuer in allowlist', () => {
     const allowlist = ['https://issuer.example.com'];
-    expect(isIssuerAllowed('https://issuer.example.com/.well-known/jwks.json', allowlist)).toBe(true);
+    expect(isIssuerAllowed('https://issuer.example.com/.well-known/jwks.json', allowlist)).toBe(
+      true
+    );
   });
 
   it('rejects issuer not in allowlist', () => {
     const allowlist = ['https://issuer.example.com'];
-    expect(isIssuerAllowed('https://other.example.com/.well-known/jwks.json', allowlist)).toBe(false);
+    expect(isIssuerAllowed('https://other.example.com/.well-known/jwks.json', allowlist)).toBe(
+      false
+    );
   });
 
   it('returns false for empty allowlist', () => {
@@ -97,6 +101,8 @@ describe('isIssuerAllowed', () => {
 
   it('compares origins (ignores path)', () => {
     const allowlist = ['https://issuer.example.com/different/path'];
-    expect(isIssuerAllowed('https://issuer.example.com/.well-known/jwks.json', allowlist)).toBe(true);
+    expect(isIssuerAllowed('https://issuer.example.com/.well-known/jwks.json', allowlist)).toBe(
+      true
+    );
   });
 });

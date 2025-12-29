@@ -57,7 +57,8 @@ export class KVStoreReplayStore implements ReplayStore {
     if (!this.store) {
       // Lazy initialization to support testing
       if (typeof globalThis !== 'undefined' && 'KVStore' in globalThis) {
-        const KVStoreClass = (globalThis as unknown as { KVStore: new (name: string) => KVStore }).KVStore;
+        const KVStoreClass = (globalThis as unknown as { KVStore: new (name: string) => KVStore })
+          .KVStore;
         this.store = new KVStoreClass(this.storeName);
       } else {
         throw new Error('KVStore not available');

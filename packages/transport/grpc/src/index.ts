@@ -217,11 +217,7 @@ export interface GrpcError {
 /**
  * Create a gRPC error from a PEAC error code.
  */
-export function createGrpcError(
-  peacCode: string,
-  message: string,
-  details?: unknown
-): GrpcError {
+export function createGrpcError(peacCode: string, message: string, details?: unknown): GrpcError {
   return {
     code: peacErrorToGrpc(peacCode),
     message,

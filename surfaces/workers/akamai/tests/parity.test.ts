@@ -74,10 +74,7 @@ describe('Status Code Parity', () => {
   });
 
   it('returns 500 for config/internal errors', () => {
-    const serverErrors = [
-      ErrorCodes.CONFIG_ISSUER_ALLOWLIST_REQUIRED,
-      ErrorCodes.INTERNAL_ERROR,
-    ];
+    const serverErrors = [ErrorCodes.CONFIG_ISSUER_ALLOWLIST_REQUIRED, ErrorCodes.INTERNAL_ERROR];
 
     for (const code of serverErrors) {
       const problem = createProblemDetails(code);

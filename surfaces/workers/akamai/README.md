@@ -42,15 +42,15 @@ export const onClientResponse = createOnClientResponse();
 
 ### Property Manager Variables
 
-| Variable                             | Required | Description                                    |
-| ------------------------------------ | -------- | ---------------------------------------------- |
-| `PMUSER_ISSUER_ALLOWLIST`            | Yes*     | Comma-separated list of allowed issuer origins |
-| `PMUSER_BYPASS_PATHS`                | No       | Comma-separated list of paths to bypass        |
-| `PMUSER_UNSAFE_ALLOW_ANY_ISSUER`     | No       | Set to "true" to allow any issuer (UNSAFE)     |
-| `PMUSER_UNSAFE_ALLOW_UNKNOWN_TAGS`   | No       | Set to "true" to allow unknown TAP tags        |
-| `PMUSER_UNSAFE_ALLOW_NO_REPLAY`      | No       | Set to "true" to skip replay protection        |
+| Variable                           | Required | Description                                    |
+| ---------------------------------- | -------- | ---------------------------------------------- |
+| `PMUSER_ISSUER_ALLOWLIST`          | Yes\*    | Comma-separated list of allowed issuer origins |
+| `PMUSER_BYPASS_PATHS`              | No       | Comma-separated list of paths to bypass        |
+| `PMUSER_UNSAFE_ALLOW_ANY_ISSUER`   | No       | Set to "true" to allow any issuer (UNSAFE)     |
+| `PMUSER_UNSAFE_ALLOW_UNKNOWN_TAGS` | No       | Set to "true" to allow unknown TAP tags        |
+| `PMUSER_UNSAFE_ALLOW_NO_REPLAY`    | No       | Set to "true" to skip replay protection        |
 
-*Required unless `PMUSER_UNSAFE_ALLOW_ANY_ISSUER=true`
+\*Required unless `PMUSER_UNSAFE_ALLOW_ANY_ISSUER=true`
 
 ### Property Manager Configuration
 
@@ -100,22 +100,22 @@ Note: EdgeKV is eventually consistent. For stronger guarantees, consider using a
 
 ### HTTP Status Codes
 
-| Status | Meaning                        |
-| ------ | ------------------------------ |
-| 400    | Malformed request              |
-| 401    | Authentication failed          |
-| 402    | Payment/receipt required       |
-| 403    | Issuer not in allowlist        |
-| 409    | Replay detected                |
-| 500    | Server/configuration error     |
+| Status | Meaning                    |
+| ------ | -------------------------- |
+| 400    | Malformed request          |
+| 401    | Authentication failed      |
+| 402    | Payment/receipt required   |
+| 403    | Issuer not in allowlist    |
+| 409    | Replay detected            |
+| 500    | Server/configuration error |
 
 ## Response Headers
 
 On successful verification:
 
-| Header          | Description                    |
-| --------------- | ------------------------------ |
-| X-PEAC-Engine   | Always "tap"                   |
+| Header        | Description  |
+| ------------- | ------------ |
+| X-PEAC-Engine | Always "tap" |
 
 Note: Due to EdgeWorkers limitations, verification metadata is primarily
 handled via response headers in `onClientResponse` or at origin.

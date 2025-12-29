@@ -63,7 +63,11 @@ export class EdgeKVReplayStore implements ReplayStore {
     if (!this.edgeKV) {
       // Lazy initialization to support testing
       if (typeof globalThis !== 'undefined' && 'EdgeKV' in globalThis) {
-        const EdgeKVClass = (globalThis as unknown as { EdgeKV: new (options: { namespace: string; group: string }) => EdgeKV }).EdgeKV;
+        const EdgeKVClass = (
+          globalThis as unknown as {
+            EdgeKV: new (options: { namespace: string; group: string }) => EdgeKV;
+          }
+        ).EdgeKV;
         this.edgeKV = new EdgeKVClass({
           namespace: this.namespace,
           group: this.group,

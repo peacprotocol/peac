@@ -17,10 +17,21 @@
  */
 
 import { createResolver } from '@peac/jwks-cache';
-import type { WorkerConfig, EWRequest, EWResponse, EWRequestHandler, EdgeKVConfig } from './types.js';
+import type {
+  WorkerConfig,
+  EWRequest,
+  EWResponse,
+  EWRequestHandler,
+  EdgeKVConfig,
+} from './types.js';
 import { parseConfig } from './config.js';
 import { createReplayStore } from './replay-store.js';
-import { respondWithError, respondWithChallenge, ErrorCodes, createErrorResponse } from './errors.js';
+import {
+  respondWithError,
+  respondWithChallenge,
+  ErrorCodes,
+  createErrorResponse,
+} from './errors.js';
 import {
   handleVerification,
   type HandlerResult,
@@ -40,14 +51,24 @@ export type {
   EWResponse,
   EWRequestHandler,
 } from './types.js';
-export { parseConfig, parseConfigFromRecord, matchesBypassPath, isIssuerAllowed } from './config.js';
+export {
+  parseConfig,
+  parseConfigFromRecord,
+  matchesBypassPath,
+  isIssuerAllowed,
+} from './config.js';
 export {
   createReplayStore,
   EdgeKVReplayStore,
   InMemoryReplayStore,
   NoOpReplayStore,
 } from './replay-store.js';
-export { ErrorCodes, respondWithError, respondWithChallenge, createErrorResponse } from './errors.js';
+export {
+  ErrorCodes,
+  respondWithError,
+  respondWithChallenge,
+  createErrorResponse,
+} from './errors.js';
 
 /**
  * Configuration for the PEAC verifier.
@@ -66,7 +87,10 @@ export interface PeacVerifierConfig {
 export function createOnClientRequest(config?: PeacVerifierConfig) {
   const edgeKVConfig = config?.edgeKV;
 
-  return async function onClientRequest(request: EWRequest, handler: EWRequestHandler): Promise<void> {
+  return async function onClientRequest(
+    request: EWRequest,
+    handler: EWRequestHandler
+  ): Promise<void> {
     const workerConfig = parseConfig(request);
 
     // Create JWKS resolver with issuer allowlist (or allow all if UNSAFE mode)
@@ -145,7 +169,12 @@ export function createOnClientRequest(config?: PeacVerifierConfig) {
             'or set PMUSER_UNSAFE_ALLOW_ANY_ISSUER=true for development (NOT recommended for production).'
         );
       }
-      respondWithError(handler, result.errorCode ?? ErrorCodes.INTERNAL_ERROR, result.errorDetail, requestUrl);
+      respondWithError(
+        handler,
+        result.errorCode ?? ErrorCodes.INTERNAL_ERROR,
+        result.errorDetail,
+        requestUrl
+      );
       return;
     }
 

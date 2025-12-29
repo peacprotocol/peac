@@ -192,7 +192,10 @@ async function fetchOrigin(request: Request, backend: string): Promise<Response>
   // The backend parameter would be used in real Fastly Compute
   if (typeof globalThis !== 'undefined' && 'fetch' in globalThis) {
     // Check if Fastly's fetch with backend is available
-    const fastlyFetch = globalThis.fetch as (input: Request | string, init?: RequestInit & { backend?: string }) => Promise<Response>;
+    const fastlyFetch = globalThis.fetch as (
+      input: Request | string,
+      init?: RequestInit & { backend?: string }
+    ) => Promise<Response>;
     return fastlyFetch(request, { backend });
   }
   return fetch(request);

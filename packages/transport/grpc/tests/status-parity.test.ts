@@ -203,7 +203,9 @@ describe('gRPC Transport', () => {
       });
 
       it('should map E_TAP_REPLAY_PROTECTION_REQUIRED', () => {
-        expect(peacErrorToGrpc('E_TAP_REPLAY_PROTECTION_REQUIRED')).toBe(GrpcStatus.UNAUTHENTICATED);
+        expect(peacErrorToGrpc('E_TAP_REPLAY_PROTECTION_REQUIRED')).toBe(
+          GrpcStatus.UNAUTHENTICATED
+        );
       });
     });
 

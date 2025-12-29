@@ -55,7 +55,10 @@ peac/
 - PRs are **always merged manually on GitHub** web interface by maintainers
 - Contributors: create branch, commit, push, open PR via `gh pr create`
 - Tags are created **only after** PR is merged and confirmed on GitHub
-- Never force push to any branch, especially `main`
+- **Never force push to `main`** - main branch history must be immutable
+- **Preserve git history** - Never delete or erase commits from the repository
+- Force pushing to feature branches/PRs is fine (your own branch, before merge)
+- Rebasing and amending on feature branches is fine
 
 ## Development Standards
 
