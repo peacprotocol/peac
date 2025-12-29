@@ -38,7 +38,7 @@ git tag -a vX.Y.Z -m "vX.Y.Z"
 git push origin vX.Y.Z
 ```
 
-### 3. Publish Packages (22 public packages)
+### 3. Publish Packages (26 public packages)
 
 **IMPORTANT: Use pnpm, not npm!**
 
@@ -46,31 +46,22 @@ git push origin vX.Y.Z
 # Verify npm auth
 npm whoami  # Should show: peacprotocol
 
-# Publish all public packages with pnpm (resolves workspace:* correctly)
-# Use dist-tag 'next' for pre-1.0 releases
+# Option A: Use automated publish script (recommended)
+# Discovers public packages, publishes in topological order
+node scripts/publish-public.mjs --dry-run  # Preview first
+node scripts/publish-public.mjs            # Actual publish
+
+# Option B: Manual publish (for single packages or debugging)
 pnpm --filter "@peac/kernel" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/schema" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/crypto" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/protocol" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/control" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/cli" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/server" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/core" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/receipts" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/pref" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/disc" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/pay402" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/sdk" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/http-signatures" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/jwks-cache" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/policy-kit" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/rails-stripe" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/rails-x402" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/mappings-acp" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/mappings-mcp" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/mappings-rsl" publish --access public --tag next --no-git-checks
-pnpm --filter "@peac/mappings-tap" publish --access public --tag next --no-git-checks
+# ... etc (see scripts/publish-public.mjs for full list)
 ```
+
+The publish script (`scripts/publish-public.mjs`):
+
+- Automatically discovers workspace packages
+- Filters to public packages only (skips private)
+- Publishes in topological order (dependencies first)
+- Reports success/failure for each package
 
 ### 4. Verify Publication
 
@@ -103,18 +94,19 @@ node -e "import('@peac/protocol').then(m => console.log('verifyReceipt OK:', typ
 gh release create vX.Y.Z --title "vX.Y.Z" --notes "Release notes here..."
 ```
 
-## Package List (22 public packages)
+## Package List (26 public packages)
 
-Managed by `./scripts/check-publish-list.sh`:
+Managed by `./scripts/publish-public.mjs` (auto-discovers from workspace):
 
 **Core:** kernel, schema, crypto, protocol, control
 **Runtime:** cli, server, core (deprecated), receipts, pref, disc, pay402, sdk
 **Security:** http-signatures, jwks-cache
 **Policy:** policy-kit
-**Rails:** rails-stripe, rails-x402
+**Rails:** rails-stripe, rails-x402, rails-card
+**Adapters:** adapter-x402-daydreams, adapter-x402-fluora, adapter-x402-pinata
 **Mappings:** mappings-acp, mappings-mcp, mappings-rsl, mappings-tap
 
-**Private (not published):** rails-razorpay, worker-cloudflare, middleware-nextjs
+**Private (not published):** rails-razorpay, worker-cloudflare, middleware-nextjs, examples, surfaces
 
 ## Dist-Tag Policy
 
