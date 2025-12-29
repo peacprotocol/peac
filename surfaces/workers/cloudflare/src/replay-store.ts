@@ -1,7 +1,8 @@
 /**
  * @peac/worker-cloudflare - Replay Store implementations
  *
- * Pluggable interface for nonce replay prevention.
+ * Cloudflare-specific replay store implementations.
+ * Uses shared core for hashing and types.
  *
  * SECURITY: All nonces are stored as SHA-256 hashes of `issuer|keyid|nonce`
  * to prevent correlation of raw identifiers in storage.
@@ -11,26 +12,15 @@
  * - D1: Strong consistency, atomic via SQLite transactions
  * - KV: Eventual consistency, best-effort only (NOT atomic, may allow replays)
  *
- * Cloudflare KV is NOT strongly consistent. Do NOT rely on it for
- * strong replay protection. For enterprise-grade security, use
- * Durable Objects or D1.
+ * @packageDocumentation
  */
 
-import type { ReplayStore, ReplayContext, Env } from './types.js';
+import type { ReplayStore, ReplayContext } from './types.js';
+import type { Env } from './types.js';
+import { hashReplayKey } from '../../_shared/core/index.js';
 
-/**
- * Hash a replay context to create a storage key.
- *
- * Uses SHA-256 to hash `issuer|keyid|nonce` to prevent storing
- * correlatable identifiers in external storage.
- */
-async function hashReplayKey(ctx: ReplayContext): Promise<string> {
-  const data = `${ctx.issuer}|${ctx.keyid}|${ctx.nonce}`;
-  const encoder = new TextEncoder();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-}
+// Re-export hash function for testing
+export { hashReplayKey };
 
 /**
  * Create a replay store from environment bindings.
@@ -248,6 +238,3 @@ export class NoOpReplayStore implements ReplayStore {
     return false;
   }
 }
-
-// Export hash function for testing
-export { hashReplayKey };
