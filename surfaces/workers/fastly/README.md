@@ -51,7 +51,7 @@ name = "peac-verifier"
 language = "javascript"
 
 [scripts]
-build = "npm run build"
+build = "pnpm run build"
 
 [local_server]
 [local_server.backends]

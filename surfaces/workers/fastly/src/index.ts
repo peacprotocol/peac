@@ -221,7 +221,7 @@ export const defaultHandler = createHandler({
  * Usage in fastly.toml:
  * ```toml
  * [scripts]
- * build = "npm run build"
+ * build = "pnpm run build"
  *
  * [local_server]
  * [local_server.backends]
