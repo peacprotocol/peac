@@ -3,6 +3,7 @@ packages:
   - 'packages/rails/*'
   - 'packages/mappings/*'
   - 'packages/transport/*'
+  - 'packages/adapters/*/*'
   - 'apps/*'
   - 'surfaces/analytics'
   - 'surfaces/workers/*'
