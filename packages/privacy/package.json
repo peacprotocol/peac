@@ -20,8 +20,7 @@
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "build:types": "tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

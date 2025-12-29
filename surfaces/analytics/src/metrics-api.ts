@@ -82,10 +82,10 @@ export function aggregateRequestsByBot(
   );
 
   const hadSuppression = filtered.length < buckets.length;
-  const hasOther = filtered.some((b) => b.key === '__other__');
+  const hasOther = filtered.some((b: MetricBucket<RequestMetric>) => b.key === '__other__');
 
   return {
-    metrics: filtered.map((b) => b.value),
+    metrics: filtered.map((b: MetricBucket<RequestMetric>) => b.value),
     suppressed: hadSuppression && !hasOther,
   };
 }
@@ -164,10 +164,10 @@ export function aggregateRevenueByRail(
   );
 
   const hadSuppression = filtered.length < buckets.length;
-  const hasOther = filtered.some((b) => b.key.startsWith('__other__'));
+  const hasOther = filtered.some((b: MetricBucket<RevenueMetric>) => b.key.startsWith('__other__'));
 
   return {
-    metrics: filtered.map((b) => b.value),
+    metrics: filtered.map((b: MetricBucket<RevenueMetric>) => b.value),
     suppressed: hadSuppression && !hasOther,
   };
 }
