@@ -7,13 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned (v0.9.20)
+### Planned (v0.9.21)
 
 - Analytics surface
-- x402 service adapters
-- Card payment rails
-- Additional edge workers
-- gRPC transport
+- Go SDK
+- Security hardening
+
+## [0.9.20] - 2025-12-30
+
+### Added
+
+- **Adapter taxonomy**: x402 vendor packages moved from `packages/rails/` to `packages/adapters/x402/`
+  - `@peac/adapter-x402-daydreams`: AI inference event normalizer
+  - `@peac/adapter-x402-fluora`: MCP marketplace event normalizer
+  - `@peac/adapter-x402-pinata`: Private IPFS objects event normalizer
+- **PaymentEvidence.facilitator**: New optional field to identify the platform/vendor operating on a payment rail
+  - Separates protocol (`rail: "x402"`) from vendor (`facilitator: "daydreams"`)
+  - Allows querying by protocol while knowing specific facilitator
+- **CI unicode security scan**: Dedicated step for Trojan Source attack prevention (CVE-2021-42574)
+- **@peac/rails-card**: Card payment rail foundation (private)
+- **@peac/transport-grpc**: gRPC transport bindings (private)
+- **@peac/worker-fastly**: Fastly Compute@Edge worker (private)
+- **@peac/worker-akamai**: Akamai EdgeWorkers support (private)
+- **@peac/privacy**: Privacy primitives for k-anonymity and data minimization (private)
+
+### Changed
+
+- **Breaking**: Adapter package names changed from `@peac/rails-x402-*` to `@peac/adapter-x402-*`
+- **Breaking**: Adapter `rail` field now set to `"x402"` (was `"x402.<vendor>"`)
+- x402 adapters now set `facilitator` field to vendor name (e.g., `"daydreams"`, `"fluora"`, `"pinata"`)
+
+### Notes
+
+- The 3 adapter packages were never published to npm, so the rename has no migration impact
+- Existing code using `rail: "x402.<vendor>"` pattern should migrate to `rail: "x402"` + `facilitator: "<vendor>"`
 
 ## [0.9.19] - 2025-12-24
 
