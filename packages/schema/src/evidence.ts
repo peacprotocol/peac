@@ -157,6 +157,24 @@ export interface PaymentEvidence {
   network?: string;
 
   /**
+   * Facilitator/platform name (OPTIONAL)
+   *
+   * Identifies the platform or service facilitating payments on a given rail.
+   * Used when the rail is a protocol (like "x402") and multiple vendors
+   * operate on that protocol.
+   *
+   * Examples:
+   * - "daydreams" - Daydreams AI inference platform
+   * - "fluora" - Fluora MCP marketplace
+   * - "pinata" - Pinata IPFS gateway
+   * - "coinbase" - Coinbase Commerce
+   *
+   * Note: This is the platform/vendor name, not an account identifier.
+   * For account references, use `facilitator_ref`.
+   */
+  facilitator?: string;
+
+  /**
    * Facilitator reference (OPTIONAL)
    *
    * Stable identifier for the PSP/facilitator processing this payment.

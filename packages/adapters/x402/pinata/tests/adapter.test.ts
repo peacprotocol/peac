@@ -149,9 +149,10 @@ describe('x402-pinata adapter', () => {
   });
 
   describe('mapToPaymentEvidence', () => {
-    it('should map to PaymentEvidence with correct rail', () => {
+    it('should map to PaymentEvidence with correct rail and facilitator', () => {
       const evidence = mapToPaymentEvidence(validEvent);
-      expect(evidence.rail).toBe('x402.pinata');
+      expect(evidence.rail).toBe('x402');
+      expect(evidence.facilitator).toBe('pinata');
     });
 
     it('should map reference to accessId', () => {
@@ -209,7 +210,8 @@ describe('x402-pinata adapter', () => {
       const result = fromAccessEvent(validEvent);
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.value.rail).toBe('x402.pinata');
+        expect(result.value.rail).toBe('x402');
+        expect(result.value.facilitator).toBe('pinata');
         expect(result.value.amount).toBe(250);
       }
     });

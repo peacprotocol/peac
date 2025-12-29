@@ -143,9 +143,10 @@ describe('x402-daydreams adapter', () => {
   });
 
   describe('mapToPaymentEvidence', () => {
-    it('should map to PaymentEvidence with correct rail', () => {
+    it('should map to PaymentEvidence with correct rail and facilitator', () => {
       const evidence = mapToPaymentEvidence(validEvent);
-      expect(evidence.rail).toBe('x402.daydreams');
+      expect(evidence.rail).toBe('x402');
+      expect(evidence.facilitator).toBe('daydreams');
     });
 
     it('should map reference to eventId', () => {
@@ -183,7 +184,8 @@ describe('x402-daydreams adapter', () => {
       const result = fromInferenceEvent(validEvent);
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.value.rail).toBe('x402.daydreams');
+        expect(result.value.rail).toBe('x402');
+        expect(result.value.facilitator).toBe('daydreams');
         expect(result.value.amount).toBe(500);
         expect(result.value.currency).toBe('USD');
       }

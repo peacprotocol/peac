@@ -136,9 +136,10 @@ describe('x402-fluora adapter', () => {
   });
 
   describe('mapToPaymentEvidence', () => {
-    it('should map to PaymentEvidence with correct rail', () => {
+    it('should map to PaymentEvidence with correct rail and facilitator', () => {
       const evidence = mapToPaymentEvidence(validEvent);
-      expect(evidence.rail).toBe('x402.fluora');
+      expect(evidence.rail).toBe('x402');
+      expect(evidence.facilitator).toBe('fluora');
     });
 
     it('should map reference to callId', () => {
@@ -189,7 +190,8 @@ describe('x402-fluora adapter', () => {
       const result = fromMcpCallEvent(validEvent);
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.value.rail).toBe('x402.fluora');
+        expect(result.value.rail).toBe('x402');
+        expect(result.value.facilitator).toBe('fluora');
         expect(result.value.amount).toBe(100);
       }
     });
