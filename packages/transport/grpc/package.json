@@ -1,23 +1,33 @@
 {
   "name": "@peac/transport-grpc",
-  "version": "0.9.19",
+  "version": "0.9.20",
   "private": true,
-  "description": "PEAC gRPC transport layer (placeholder for v0.9.17+)",
+  "description": "PEAC gRPC transport layer with HTTP StatusCode parity",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "keywords": [
     "peac",
     "transport",
-    "grpc"
+    "grpc",
+    "status-codes"
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "devDependencies": {
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.0"
   }
 }
