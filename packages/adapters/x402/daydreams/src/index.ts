@@ -1,7 +1,7 @@
 /**
- * @peac/rails-x402-daydreams
+ * @peac/adapter-x402-daydreams
  *
- * x402+Daydreams AI inference router adapter for PEAC protocol.
+ * Daydreams AI inference event normalizer for PEAC protocol.
  * Maps Daydreams inference events to PaymentEvidence using PEIP-AI/inference@1 profile.
  */
 

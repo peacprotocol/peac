@@ -1,7 +1,7 @@
 /**
- * @peac/rails-x402-fluora
+ * @peac/adapter-x402-fluora
  *
- * x402+Fluora MCP marketplace adapter for PEAC protocol.
+ * Fluora MCP marketplace event normalizer for PEAC protocol.
  * Maps Fluora MCP tool call events to PaymentEvidence using PEIP-SVC/mcp-call@1 profile.
  */
 

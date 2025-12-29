@@ -1,13 +1,13 @@
 {
-  "name": "@peac/rails-x402-fluora",
+  "name": "@peac/adapter-x402-pinata",
   "version": "0.9.20",
-  "description": "x402+Fluora MCP marketplace adapter for PEAC protocol",
+  "description": "Pinata private IPFS objects event normalizer for PEAC protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/peacprotocol/peac.git",
-    "directory": "packages/rails/x402-fluora"
+    "directory": "packages/adapters/x402/pinata"
   },
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
   "license": "Apache-2.0",

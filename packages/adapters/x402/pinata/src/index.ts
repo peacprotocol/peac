@@ -1,7 +1,7 @@
 /**
- * @peac/rails-x402-pinata
+ * @peac/adapter-x402-pinata
  *
- * x402+Pinata private IPFS objects adapter for PEAC protocol.
+ * Pinata private IPFS objects event normalizer for PEAC protocol.
  * Maps Pinata access events to PaymentEvidence using PEIP-OBJ/private@1 profile.
  */
 
