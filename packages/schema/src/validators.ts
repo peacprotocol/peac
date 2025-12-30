@@ -277,7 +277,7 @@ export const SubjectProfileSnapshotSchema = z
   .strict();
 
 // -----------------------------------------------------------------------------
-// Attestation Validators (v0.9.22+)
+// Attestation Validators (v0.9.21+)
 // -----------------------------------------------------------------------------
 
 /**

@@ -54,7 +54,7 @@ export {
   SubjectTypeSchema,
   SubjectProfileSchema,
   SubjectProfileSnapshotSchema,
-  // Attestation validators (v0.9.22+)
+  // Attestation validators (v0.9.21+)
   AttestationSchema,
   ExtensionsSchema,
   // Subject snapshot validation helper (v0.9.17+)
