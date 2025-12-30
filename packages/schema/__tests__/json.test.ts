@@ -827,6 +827,67 @@ describe('assertJsonSafeIterative', () => {
     });
   });
 
+  describe('DoS caps - total nodes limit', () => {
+    it('accepts structure at max total nodes', () => {
+      // Create structure with exactly maxTotalNodes nodes (100k by default)
+      // Using a smaller limit for test performance
+      const arr = Array.from({ length: 99 }, (_, i) => i);
+      const result = assertJsonSafeIterative(arr, { maxTotalNodes: 100 });
+      expect(result.ok).toBe(true);
+    });
+
+    it('rejects structure exceeding max total nodes', () => {
+      // Create wide structure that exceeds node limit
+      const arr = Array.from({ length: 101 }, (_, i) => i);
+      const result = assertJsonSafeIterative(arr, { maxTotalNodes: 100 });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Maximum total nodes exceeded');
+        expect(result.error).toContain('100');
+      }
+    });
+
+    it('respects custom total nodes limit', () => {
+      const obj = { a: 1, b: 2, c: 3, d: 4, e: 5 };
+      // obj counts as 1 + 5 = 6 nodes
+      const result = assertJsonSafeIterative(obj, { maxTotalNodes: 5 });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Maximum total nodes exceeded');
+      }
+    });
+
+    it('counts all nodes including primitives', () => {
+      // { a: [1, 2, 3] } = 1 (root) + 1 (array) + 3 (numbers) = 5 nodes
+      const obj = { a: [1, 2, 3] };
+      const result = assertJsonSafeIterative(obj, { maxTotalNodes: 4 });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Maximum total nodes exceeded');
+      }
+    });
+
+    it('prevents wide DoS attack that bypasses per-container limits', () => {
+      // Create 100 objects each with 900 keys (under 1000 limit)
+      // Total nodes would be 100 * 900 = 90,000 (under 100k default)
+      // But with maxTotalNodes=1000, it fails fast
+      const wideStructure: Record<string, number>[] = [];
+      for (let i = 0; i < 10; i++) {
+        const obj: Record<string, number> = {};
+        for (let j = 0; j < 200; j++) {
+          obj[`key${j}`] = j;
+        }
+        wideStructure.push(obj);
+      }
+      // This has 1 (root) + 10 (array elements) + 10*200 (object values) = 2011 nodes
+      const result = assertJsonSafeIterative(wideStructure, { maxTotalNodes: 1000 });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Maximum total nodes exceeded');
+      }
+    });
+  });
+
   describe('error paths', () => {
     it('reports correct path for nested invalid value', () => {
       const obj = { a: { b: { c: NaN } } };

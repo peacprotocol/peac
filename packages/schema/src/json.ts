@@ -103,16 +103,23 @@ export const JSON_EVIDENCE_LIMITS = {
   maxObjectKeys: 1_000,
   /** Maximum string length in bytes (default: 65,536 = 64KB) */
   maxStringLength: 65_536,
+  /** Maximum total nodes to visit (default: 100,000) */
+  maxTotalNodes: 100_000,
 } as const;
 
 /**
  * Limits for JSON evidence validation
+ *
+ * @internal - Not part of public API. Use validateEvidence() with defaults.
+ *
+ * For testing only: import via UNSAFE_JsonEvidenceLimits
  */
 export interface JsonEvidenceLimits {
   maxDepth?: number;
   maxArrayLength?: number;
   maxObjectKeys?: number;
   maxStringLength?: number;
+  maxTotalNodes?: number;
 }
 
 /**
@@ -148,15 +155,29 @@ export function assertJsonSafeIterative(
   const maxArrayLength = limits.maxArrayLength ?? JSON_EVIDENCE_LIMITS.maxArrayLength;
   const maxObjectKeys = limits.maxObjectKeys ?? JSON_EVIDENCE_LIMITS.maxObjectKeys;
   const maxStringLength = limits.maxStringLength ?? JSON_EVIDENCE_LIMITS.maxStringLength;
+  const maxTotalNodes = limits.maxTotalNodes ?? JSON_EVIDENCE_LIMITS.maxTotalNodes;
 
   // Track visited objects for cycle detection
   const visited = new WeakSet<object>();
+
+  // Track total nodes visited for DoS protection
+  let nodeCount = 0;
 
   // Stack of items to process: [value, path, depth]
   const stack: Array<[unknown, (string | number)[], number]> = [[value, [], 0]];
 
   while (stack.length > 0) {
     const [current, path, depth] = stack.pop()!;
+
+    // Check total node limit
+    nodeCount++;
+    if (nodeCount > maxTotalNodes) {
+      return {
+        ok: false,
+        error: `Maximum total nodes exceeded (limit: ${maxTotalNodes})`,
+        path,
+      };
+    }
 
     // Check depth limit
     if (depth > maxDepth) {
