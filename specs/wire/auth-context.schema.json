@@ -85,11 +85,13 @@
         },
         "iat": {
           "type": "integer",
-          "description": "Issued at (Unix timestamp in seconds)"
+          "minimum": 0,
+          "description": "Issued at (seconds since Unix epoch, 1970-01-01T00:00:00Z)"
         },
         "exp": {
           "type": "integer",
-          "description": "Expiration (Unix timestamp in seconds)"
+          "minimum": 0,
+          "description": "Expiration (seconds since Unix epoch, 1970-01-01T00:00:00Z)"
         },
         "rid": {
           "type": "string",
