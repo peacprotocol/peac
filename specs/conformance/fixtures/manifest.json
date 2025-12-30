@@ -1,0 +1,61 @@
+{
+  "$comment": "Fixture manifest for PEAC conformance testing. This file contains metadata about fixtures so the fixture files themselves can be pure receipts.",
+  "valid": {
+    "minimal-receipt.json": {
+      "description": "Minimal valid PEAC receipt - only required fields"
+    },
+    "full-receipt.json": {
+      "description": "Full PEAC receipt with all fields populated"
+    },
+    "payment-receipt.json": {
+      "description": "PEAC receipt with payment evidence"
+    },
+    "control-chain.json": {
+      "description": "PEAC receipt with multi-step control chain (CAL)"
+    },
+    "subject-snapshot.json": {
+      "description": "PEAC receipt with subject profile snapshot"
+    }
+  },
+  "invalid": {
+    "missing-iss.json": {
+      "description": "Missing required 'iss' field in auth context",
+      "expected_keyword": "required",
+      "expected_path": "/auth"
+    },
+    "missing-iat.json": {
+      "description": "Missing required 'iat' field in auth context",
+      "expected_keyword": "required",
+      "expected_path": "/auth"
+    },
+    "invalid-type.json": {
+      "description": "Wrong type for 'iat' field (string instead of number)",
+      "expected_keyword": "type",
+      "expected_path": "/auth/iat"
+    },
+    "extra-field.json": {
+      "description": "Extra field 'unknown_field' not allowed (additionalProperties: false)",
+      "expected_keyword": "additionalProperties",
+      "expected_path": "/auth"
+    }
+  },
+  "edge": {
+    "empty-evidence.json": {
+      "description": "Empty evidence block (valid - no payment or attestation)",
+      "expected_valid": true
+    },
+    "null-values.json": {
+      "description": "Explicit null for optional evidence block",
+      "expected_valid": false,
+      "note": "null is not valid for object types with additionalProperties: false"
+    },
+    "unicode-strings.json": {
+      "description": "Unicode characters in string fields",
+      "expected_valid": true
+    },
+    "max-depth.json": {
+      "description": "Deeply nested but valid structure (tests depth handling)",
+      "expected_valid": true
+    }
+  }
+}

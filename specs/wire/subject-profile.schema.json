@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/wire/0.9/subject-profile.schema.json",
+  "title": "PEAC Subject Profile",
+  "description": "Subject profile and snapshot types for identity context in PEAC receipts",
+
+  "$defs": {
+    "SubjectType": {
+      "type": "string",
+      "enum": ["human", "org", "agent"],
+      "description": "Subject type classification"
+    },
+
+    "SubjectProfile": {
+      "type": "object",
+      "description": "Identity and classification of a subject",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable, unique subject identifier"
+        },
+        "type": {
+          "$ref": "#/$defs/SubjectType"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Freeform tags for categorization"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Application-specific attributes"
+        }
+      },
+      "required": ["id", "type"],
+      "additionalProperties": false
+    },
+
+    "SubjectProfileSnapshot": {
+      "type": "object",
+      "description": "Point-in-time capture of a subject profile",
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/SubjectProfile"
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 / RFC 3339 UTC timestamp"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the snapshot (e.g., idp:auth0)"
+        },
+        "version": {
+          "type": "string",
+          "description": "Profile version tag"
+        }
+      },
+      "required": ["subject", "captured_at"],
+      "additionalProperties": false
+    }
+  }
+}

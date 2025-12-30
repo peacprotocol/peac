@@ -1,0 +1,50 @@
+{
+  "auth": {
+    "iss": "https://issuer.example.com",
+    "aud": "https://publisher.example.com",
+    "sub": "user:alice",
+    "iat": 1735600000,
+    "rid": "r_edge_004",
+    "policy_hash": "sha256:abc123",
+    "policy_uri": "https://publisher.example.com/policy",
+    "control": {
+      "chain": [
+        {
+          "engine": "spend-control-service",
+          "result": "allow",
+          "limits_snapshot": {
+            "level1": {
+              "level2": {
+                "level3": {
+                  "level4": {
+                    "level5": {
+                      "value": 100
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "decision": "allow"
+    }
+  },
+  "evidence": {
+    "payment": {
+      "rail": "x402",
+      "reference": "pay_001",
+      "amount": 100,
+      "currency": "USD",
+      "asset": "USD",
+      "env": "test",
+      "evidence": {
+        "nested": {
+          "data": {
+            "values": [1, 2, 3]
+          }
+        }
+      }
+    }
+  }
+}

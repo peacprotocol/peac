@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "iss": "https://issuer.example.com",
+    "aud": "https://publisher.example.com",
+    "sub": "user:alice",
+    "iat": 1735600000,
+    "rid": "r_minimal_001",
+    "policy_hash": "sha256:abc123def456",
+    "policy_uri": "https://publisher.example.com/.well-known/peac.txt"
+  }
+}

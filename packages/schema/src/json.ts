@@ -130,11 +130,27 @@ export type JsonSafetyResult =
   | { ok: false; error: string; path: (string | number)[] };
 
 /**
+ * Stack entry type for iterative traversal
+ *
+ * - "enter": entering an object/array, need to validate and push children
+ * - "exit": exiting an object/array, remove from current path (for cycle detection)
+ */
+type StackEntry =
+  | { type: 'enter'; value: unknown; path: (string | number)[]; depth: number }
+  | { type: 'exit'; obj: object };
+
+/**
  * Iterative JSON safety validator
  *
  * Validates that a value is JSON-safe without using recursion, preventing
  * stack overflow on deeply nested structures. Uses an explicit stack for
- * traversal and WeakSet for cycle detection.
+ * traversal with entry/exit markers for correct cycle detection.
+ *
+ * Cycle Detection:
+ * Uses a path-based approach where only objects on the current traversal
+ * path are tracked. This correctly allows diamond structures (same object
+ * referenced from multiple paths) while rejecting actual cycles (object
+ * references itself through its descendants).
  *
  * Rejects:
  * - Cycles (object references itself directly or indirectly)
@@ -142,6 +158,9 @@ export type JsonSafetyResult =
  * - Non-finite numbers (NaN, Infinity, -Infinity)
  * - undefined, BigInt, functions, symbols
  * - Structures exceeding depth/size limits
+ *
+ * Allows:
+ * - Diamond structures (same object referenced from multiple paths)
  *
  * @param value - Value to validate
  * @param limits - Optional limits (defaults to JSON_EVIDENCE_LIMITS)
@@ -157,17 +176,27 @@ export function assertJsonSafeIterative(
   const maxStringLength = limits.maxStringLength ?? JSON_EVIDENCE_LIMITS.maxStringLength;
   const maxTotalNodes = limits.maxTotalNodes ?? JSON_EVIDENCE_LIMITS.maxTotalNodes;
 
-  // Track visited objects for cycle detection
-  const visited = new WeakSet<object>();
+  // Track objects on the current traversal path for cycle detection.
+  // An object appearing twice on the same path is a cycle.
+  // An object appearing on different paths (diamond) is NOT a cycle.
+  const pathSet = new WeakSet<object>();
 
   // Track total nodes visited for DoS protection
   let nodeCount = 0;
 
-  // Stack of items to process: [value, path, depth]
-  const stack: Array<[unknown, (string | number)[], number]> = [[value, [], 0]];
+  // Stack with entry/exit markers for path tracking
+  const stack: StackEntry[] = [{ type: 'enter', value, path: [], depth: 0 }];
 
   while (stack.length > 0) {
-    const [current, path, depth] = stack.pop()!;
+    const entry = stack.pop()!;
+
+    // Handle exit marker - remove object from current path
+    if (entry.type === 'exit') {
+      pathSet.delete(entry.obj);
+      continue;
+    }
+
+    const { value: current, path, depth } = entry;
 
     // Check total node limit
     nodeCount++;
@@ -243,11 +272,15 @@ export function assertJsonSafeIterative(
     if (type === 'object') {
       const obj = current as object;
 
-      // Cycle detection
-      if (visited.has(obj)) {
+      // Cycle detection - check if object is already on the current path
+      // (not just visited anywhere, but specifically an ancestor)
+      if (pathSet.has(obj)) {
         return { ok: false, error: 'Cycle detected in object graph', path };
       }
-      visited.add(obj);
+
+      // Add to current path and push exit marker to remove when done
+      pathSet.add(obj);
+      stack.push({ type: 'exit', obj });
 
       // Handle arrays
       if (Array.isArray(obj)) {
@@ -260,7 +293,7 @@ export function assertJsonSafeIterative(
         }
         // Push array elements to stack in reverse order for correct traversal
         for (let i = obj.length - 1; i >= 0; i--) {
-          stack.push([obj[i], [...path, i], depth + 1]);
+          stack.push({ type: 'enter', value: obj[i], path: [...path, i], depth: depth + 1 });
         }
         continue;
       }
@@ -288,7 +321,12 @@ export function assertJsonSafeIterative(
       // Push object values to stack
       for (let i = keys.length - 1; i >= 0; i--) {
         const key = keys[i];
-        stack.push([(obj as Record<string, unknown>)[key], [...path, key], depth + 1]);
+        stack.push({
+          type: 'enter',
+          value: (obj as Record<string, unknown>)[key],
+          path: [...path, key],
+          depth: depth + 1,
+        });
       }
       continue;
     }

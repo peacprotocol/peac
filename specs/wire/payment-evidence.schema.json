@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/wire/0.9/payment-evidence.schema.json",
+  "title": "PEAC Payment Evidence",
+  "description": "Payment and attestation evidence types for PEAC receipts",
+
+  "$defs": {
+    "JsonValue": {
+      "description": "Any valid JSON value (for opaque evidence payloads)",
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/$defs/JsonValue" } },
+        { "type": "object", "additionalProperties": { "$ref": "#/$defs/JsonValue" } }
+      ]
+    },
+
+    "PaymentSplit": {
+      "type": "object",
+      "description": "Allocation of payment to a party",
+      "properties": {
+        "party": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Party identifier (merchant, platform, affiliate, etc.)"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Absolute amount in smallest currency unit"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code"
+        },
+        "share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fractional share of total (0-1)"
+        },
+        "rail": {
+          "type": "string",
+          "description": "Payment rail for this split"
+        },
+        "account_ref": {
+          "type": "string",
+          "description": "Account reference for recipient"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Rail-specific or application-specific data"
+        }
+      },
+      "required": ["party"],
+      "additionalProperties": false
+    },
+
+    "PaymentEvidence": {
+      "type": "object",
+      "description": "Rail-agnostic normalized payment evidence",
+      "properties": {
+        "rail": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Payment rail identifier (x402, l402, card-network, upi, etc.)"
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Rail-specific payment reference/ID"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Amount in smallest currency unit"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code"
+        },
+        "asset": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Asset transferred (USD, USDC, BTC, etc.)"
+        },
+        "env": {
+          "type": "string",
+          "enum": ["live", "test"],
+          "description": "Environment (live or test)"
+        },
+        "network": {
+          "type": "string",
+          "description": "Network/rail identifier (lightning, base-mainnet, etc.)"
+        },
+        "facilitator": {
+          "type": "string",
+          "description": "Facilitator/platform name"
+        },
+        "facilitator_ref": {
+          "type": "string",
+          "description": "Facilitator account reference"
+        },
+        "evidence": {
+          "$ref": "#/$defs/JsonValue",
+          "description": "Rail-specific evidence (opaque in v0.9)"
+        },
+        "aggregator": {
+          "type": "string",
+          "description": "Aggregator/marketplace identifier"
+        },
+        "splits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PaymentSplit"
+          },
+          "description": "Payment allocation among parties"
+        },
+        "routing": {
+          "type": "string",
+          "enum": ["direct", "callback", "role"],
+          "description": "Payment routing mode"
+        }
+      },
+      "required": ["rail", "reference", "amount", "currency", "asset", "env", "evidence"],
+      "additionalProperties": false
+    },
+
+    "AttestationEvidence": {
+      "type": "object",
+      "description": "TEE/platform attestation evidence",
+      "properties": {
+        "format": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Attestation format (tpm2.0, sgx, sev-snp, nitro, custom)"
+        },
+        "evidence": {
+          "$ref": "#/$defs/JsonValue",
+          "description": "Format-specific attestation evidence"
+        }
+      },
+      "required": ["format", "evidence"],
+      "additionalProperties": false
+    }
+  }
+}

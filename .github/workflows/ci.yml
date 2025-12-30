@@ -68,7 +68,16 @@ jobs:
       - name: Core tests
         run: pnpm test:core
 
-      - name: Conformance tests
+      - name: Schema meta-validation
+        run: node scripts/lint-schemas.mjs
+
+      - name: Schema conformance
+        run: pnpm exec vitest run tests/conformance/schema.spec.ts
+
+      - name: Protocol conformance
+        run: pnpm exec vitest run tests/conformance/protocol.spec.ts
+
+      - name: Parity tests
         run: pnpm exec vitest run tests/conformance/parity.spec.ts
 
       - name: Examples typecheck

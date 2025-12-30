@@ -1,9 +1,17 @@
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
 
 export default defineConfig({
   // Exclude archive from vite transforms entirely
   resolve: {
-    alias: [],
+    alias: {
+      // Workspace package aliases for root-level tests
+      '@peac/kernel': resolve(__dirname, 'packages/kernel/src/index.ts'),
+      '@peac/schema': resolve(__dirname, 'packages/schema/src/index.ts'),
+      '@peac/crypto': resolve(__dirname, 'packages/crypto/src/index.ts'),
+      '@peac/protocol': resolve(__dirname, 'packages/protocol/src/index.ts'),
+      '@peac/control': resolve(__dirname, 'packages/control/src/index.ts'),
+    },
   },
   server: {
     fs: {

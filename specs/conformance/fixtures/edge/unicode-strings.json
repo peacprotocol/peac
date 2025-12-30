@@ -1,0 +1,23 @@
+{
+  "auth": {
+    "iss": "https://issuer.example.com",
+    "aud": "https://publisher.example.com",
+    "sub": "user:alice",
+    "iat": 1735600000,
+    "rid": "r_edge_003",
+    "policy_hash": "sha256:abc123",
+    "policy_uri": "https://publisher.example.com/policy",
+    "subject_snapshot": {
+      "subject": {
+        "id": "user:alice",
+        "type": "human",
+        "labels": ["verified", "premium"],
+        "metadata": {
+          "display_name": "Alice",
+          "locale": "en-US"
+        }
+      },
+      "captured_at": "2025-01-01T00:00:00Z"
+    }
+  }
+}
