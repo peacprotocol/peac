@@ -64,7 +64,21 @@ Custom extensions in `metadata`:
 
 ### Strict Validation
 
-All schema types use `additionalProperties: false`. Unknown fields at the top level will be rejected. Use `metadata` for extensions.
+All schema types use `additionalProperties: false` by default. Unknown fields at the top level of any type will be rejected.
+
+**Designated extension surfaces** (where `additionalProperties: true`):
+
+| Location               | Type      | Purpose                                           |
+| ---------------------- | --------- | ------------------------------------------------- |
+| `subject.metadata`     | object    | Application-specific subject attributes           |
+| `auth.ctx`             | object    | Request context metadata (resource, method, etc.) |
+| `payment.evidence`     | JsonValue | Rail-specific payment proof                       |
+| `attestation.evidence` | JsonValue | Format-specific attestation data                  |
+| `enforcement.details`  | object    | Enforcement method details                        |
+| `binding.evidence`     | object    | Transport binding proof                           |
+| `split.metadata`       | object    | Split-specific metadata                           |
+
+Use these designated fields for vendor extensions. Do not attempt to add unknown keys to strict objects.
 
 ## Conformance Testing
 
