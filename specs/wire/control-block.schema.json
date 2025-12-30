@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/wire/0.9/control-block.schema.json",
+  "title": "PEAC Control Block",
+  "description": "Control Abstraction Layer (CAL) types for multi-party governance",
+
+  "$defs": {
+    "ControlDecision": {
+      "type": "string",
+      "enum": ["allow", "deny", "review"],
+      "description": "Control decision type"
+    },
+
+    "ControlPurpose": {
+      "type": "string",
+      "enum": ["crawl", "index", "train", "inference", "ai_input", "ai_index", "search"],
+      "description": "Purpose of access (RSL-aligned)"
+    },
+
+    "ControlLicensingMode": {
+      "type": "string",
+      "enum": ["subscription", "pay_per_crawl", "pay_per_inference"],
+      "description": "Licensing mode for access"
+    },
+
+    "ControlStep": {
+      "type": "object",
+      "description": "Single control step in governance chain",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Control engine identifier"
+        },
+        "version": {
+          "type": "string",
+          "description": "Engine version"
+        },
+        "policy_id": {
+          "type": "string",
+          "description": "Policy ID within engine"
+        },
+        "result": {
+          "$ref": "#/$defs/ControlDecision"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable reason for decision"
+        },
+        "purpose": {
+          "$ref": "#/$defs/ControlPurpose"
+        },
+        "licensing_mode": {
+          "$ref": "#/$defs/ControlLicensingMode"
+        },
+        "scope": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          ],
+          "description": "URI pattern(s) this step applies to"
+        },
+        "limits_snapshot": {
+          "description": "Engine-specific limits snapshot"
+        },
+        "evidence_ref": {
+          "type": "string",
+          "description": "Reference to external evidence"
+        }
+      },
+      "required": ["engine", "result"],
+      "additionalProperties": false
+    },
+
+    "ControlBlock": {
+      "type": "object",
+      "description": "Composable control block for multi-party governance",
+      "properties": {
+        "chain": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ControlStep"
+          },
+          "minItems": 1,
+          "description": "Chain of control decisions"
+        },
+        "decision": {
+          "$ref": "#/$defs/ControlDecision"
+        },
+        "combinator": {
+          "type": "string",
+          "enum": ["any_can_veto"],
+          "description": "Combinator logic (v0.9: only any_can_veto)"
+        }
+      },
+      "required": ["chain", "decision"],
+      "additionalProperties": false
+    }
+  }
+}

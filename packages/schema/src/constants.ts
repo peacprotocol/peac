@@ -32,3 +32,14 @@ export const PEAC_DISCOVERY_PATH = DISCOVERY.manifestPath;
  * Maximum discovery file size (20 lines × ~100 chars/line)
  */
 export const PEAC_DISCOVERY_MAX_BYTES = 2000 as const;
+
+/**
+ * JSON Schema URL for PEAC receipt wire format v0.9
+ *
+ * This is the canonical $id for the root schema.
+ * Use for schema references and cross-implementation validation.
+ *
+ * @since v0.9.21
+ */
+export const PEAC_RECEIPT_SCHEMA_URL =
+  'https://peacprotocol.org/schemas/wire/0.9/peac.receipt.0.9.schema.json' as const;

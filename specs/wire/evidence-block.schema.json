@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/wire/0.9/evidence-block.schema.json",
+  "title": "PEAC Evidence Block",
+  "description": "Evidence block containing payment and attestation evidence",
+
+  "$defs": {
+    "EvidenceBlock": {
+      "type": "object",
+      "description": "Container for payment and attestation evidence",
+      "properties": {
+        "payment": {
+          "$ref": "payment-evidence.schema.json#/$defs/PaymentEvidence"
+        },
+        "attestation": {
+          "$ref": "payment-evidence.schema.json#/$defs/AttestationEvidence"
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "$ref": "payment-evidence.schema.json#/$defs/PaymentEvidence"
+          },
+          "description": "Multiple payment evidence entries"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

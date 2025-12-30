@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/wire/0.9/envelope.schema.json",
+  "title": "PEAC Envelope",
+  "description": "PEAC receipt envelope structure (v0.9.15+)",
+
+  "$defs": {
+    "MetadataBlock": {
+      "type": "object",
+      "description": "Optional metadata block",
+      "properties": {
+        "redactions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of redacted fields"
+        },
+        "privacy_budget": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Privacy budget information"
+        },
+        "debug": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Debug information"
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "PEACEnvelope": {
+      "type": "object",
+      "description": "PEAC receipt envelope - normative structure for v0.9.15+",
+      "properties": {
+        "auth": {
+          "$ref": "auth-context.schema.json#/$defs/AuthContext"
+        },
+        "evidence": {
+          "$ref": "evidence-block.schema.json#/$defs/EvidenceBlock"
+        },
+        "meta": {
+          "$ref": "#/$defs/MetadataBlock"
+        }
+      },
+      "required": ["auth"],
+      "additionalProperties": false
+    }
+  }
+}

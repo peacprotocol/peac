@@ -1,0 +1,43 @@
+{
+  "auth": {
+    "iss": "https://governance.example.com",
+    "aud": "https://content.example.com",
+    "sub": "agent:claude-crawler",
+    "iat": 1735600000,
+    "rid": "r_control_001",
+    "policy_hash": "sha256:control_policy_hash",
+    "policy_uri": "https://content.example.com/.well-known/peac.txt",
+    "control": {
+      "chain": [
+        {
+          "engine": "visa-tap",
+          "version": "1.0",
+          "result": "allow",
+          "reason": "TAP mandate verified",
+          "purpose": "ai_input",
+          "evidence_ref": "https://tap.visa.com/evidence/001"
+        },
+        {
+          "engine": "spend-control-service",
+          "policy_id": "budget_daily",
+          "result": "allow",
+          "reason": "Within daily limit",
+          "limits_snapshot": {
+            "daily_limit": 10000,
+            "daily_spent": 2500,
+            "remaining": 7500
+          }
+        },
+        {
+          "engine": "merchant-policy",
+          "result": "allow",
+          "purpose": "ai_input",
+          "licensing_mode": "pay_per_inference",
+          "scope": ["https://content.example.com/api/*", "https://content.example.com/docs/*"]
+        }
+      ],
+      "decision": "allow",
+      "combinator": "any_can_veto"
+    }
+  }
+}

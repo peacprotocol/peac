@@ -1,0 +1,109 @@
+{
+  "auth": {
+    "iss": "https://issuer.example.com",
+    "aud": "https://publisher.example.com",
+    "sub": "agent:gpt-4-crawler",
+    "iat": 1735600000,
+    "exp": 1735686400,
+    "rid": "r_full_001",
+    "policy_hash": "sha256:abc123def456789",
+    "policy_uri": "https://publisher.example.com/.well-known/peac.txt",
+    "control": {
+      "chain": [
+        {
+          "engine": "merchant-policy",
+          "version": "1.0",
+          "policy_id": "pol_001",
+          "result": "allow",
+          "reason": "Subscription active",
+          "purpose": "crawl",
+          "licensing_mode": "subscription",
+          "scope": "https://publisher.example.com/articles/*"
+        },
+        {
+          "engine": "platform-policy",
+          "result": "allow",
+          "reason": "Agent verified"
+        }
+      ],
+      "decision": "allow",
+      "combinator": "any_can_veto"
+    },
+    "enforcement": {
+      "method": "http-header",
+      "details": {
+        "header": "PEAC-Receipt"
+      }
+    },
+    "binding": {
+      "transport": "https",
+      "method": "dpop",
+      "evidence": {
+        "jti": "binding_001"
+      }
+    },
+    "ctx": {
+      "resource": "/articles/latest",
+      "method": "GET",
+      "user_agent": "GPT-4-Crawler/1.0"
+    },
+    "subject_snapshot": {
+      "subject": {
+        "id": "agent:gpt-4-crawler",
+        "type": "agent",
+        "labels": ["crawler", "verified", "openai"]
+      },
+      "captured_at": "2025-01-01T00:00:00Z",
+      "source": "idp:openai",
+      "version": "1.0"
+    }
+  },
+  "evidence": {
+    "payment": {
+      "rail": "x402",
+      "reference": "pay_full_001",
+      "amount": 100,
+      "currency": "USD",
+      "asset": "USD",
+      "env": "live",
+      "network": "base-mainnet",
+      "facilitator": "daydreams",
+      "facilitator_ref": "acct_001",
+      "evidence": {
+        "payment_hash": "abc123"
+      },
+      "aggregator": "marketplace_abc",
+      "splits": [
+        {
+          "party": "merchant",
+          "amount": 80,
+          "currency": "USD",
+          "share": 0.8
+        },
+        {
+          "party": "platform",
+          "amount": 20,
+          "currency": "USD",
+          "share": 0.2
+        }
+      ],
+      "routing": "direct"
+    },
+    "attestation": {
+      "format": "sgx",
+      "evidence": {
+        "mrenclave": "abc123",
+        "quote": "base64_quote_data"
+      }
+    }
+  },
+  "meta": {
+    "redactions": ["auth.sub"],
+    "privacy_budget": {
+      "remaining": 100
+    },
+    "debug": {
+      "trace_id": "trace_001"
+    }
+  }
+}

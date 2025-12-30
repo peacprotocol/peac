@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "iss": "https://identity.example.com",
+    "aud": "https://service.example.com",
+    "sub": "org:acme-corp",
+    "iat": 1735600000,
+    "rid": "r_subject_001",
+    "policy_hash": "sha256:subject_policy_hash",
+    "policy_uri": "https://service.example.com/policy",
+    "subject_snapshot": {
+      "subject": {
+        "id": "org:acme-corp",
+        "type": "org",
+        "labels": ["enterprise", "verified", "premium"],
+        "metadata": {
+          "tier": "platinum",
+          "region": "us-west"
+        }
+      },
+      "captured_at": "2025-01-01T12:00:00Z",
+      "source": "directory:ldap",
+      "version": "2.0"
+    }
+  }
+}

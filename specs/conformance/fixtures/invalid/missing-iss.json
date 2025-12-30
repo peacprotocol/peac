@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "aud": "https://publisher.example.com",
+    "sub": "user:alice",
+    "iat": 1735600000,
+    "rid": "r_invalid_001",
+    "policy_hash": "sha256:abc123",
+    "policy_uri": "https://publisher.example.com/policy"
+  }
+}

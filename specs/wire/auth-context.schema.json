@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/wire/0.9/auth-context.schema.json",
+  "title": "PEAC Auth Context",
+  "description": "Authentication and authorization context for PEAC receipts",
+
+  "$defs": {
+    "EnforcementContext": {
+      "type": "object",
+      "description": "How the receipt will be enforced",
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Enforcement method"
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Method-specific details"
+        }
+      },
+      "required": ["method"],
+      "additionalProperties": false
+    },
+
+    "TransportBinding": {
+      "type": "object",
+      "description": "Transport binding evidence",
+      "properties": {
+        "transport": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Transport protocol"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Binding method"
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Binding evidence"
+        }
+      },
+      "required": ["transport", "method"],
+      "additionalProperties": false
+    },
+
+    "ContextMetadata": {
+      "type": "object",
+      "description": "Additional context metadata",
+      "properties": {
+        "resource": {
+          "type": "string",
+          "description": "Resource identifier"
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP method or equivalent"
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "AuthContext": {
+      "type": "object",
+      "description": "Authentication and authorization context",
+      "properties": {
+        "iss": {
+          "type": "string",
+          "format": "uri",
+          "description": "Issuer identifier (URI)"
+        },
+        "aud": {
+          "type": "string",
+          "format": "uri",
+          "description": "Audience identifier (URI)"
+        },
+        "sub": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Subject identifier"
+        },
+        "iat": {
+          "type": "integer",
+          "description": "Issued at (Unix timestamp in seconds)"
+        },
+        "exp": {
+          "type": "integer",
+          "description": "Expiration (Unix timestamp in seconds)"
+        },
+        "rid": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Receipt ID"
+        },
+        "policy_hash": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Policy content hash"
+        },
+        "policy_uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Policy URI"
+        },
+        "control": {
+          "$ref": "control-block.schema.json#/$defs/ControlBlock"
+        },
+        "enforcement": {
+          "$ref": "#/$defs/EnforcementContext"
+        },
+        "binding": {
+          "$ref": "#/$defs/TransportBinding"
+        },
+        "ctx": {
+          "$ref": "#/$defs/ContextMetadata"
+        },
+        "subject_snapshot": {
+          "$ref": "subject-profile.schema.json#/$defs/SubjectProfileSnapshot"
+        }
+      },
+      "required": ["iss", "aud", "sub", "iat", "rid", "policy_hash", "policy_uri"],
+      "additionalProperties": false
+    }
+  }
+}

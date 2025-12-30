@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "iss": "https://issuer.example.com",
+    "aud": "https://publisher.example.com",
+    "sub": "user:alice",
+    "rid": "r_invalid_002",
+    "policy_hash": "sha256:abc123",
+    "policy_uri": "https://publisher.example.com/policy"
+  }
+}

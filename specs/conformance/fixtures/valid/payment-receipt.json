@@ -1,0 +1,26 @@
+{
+  "auth": {
+    "iss": "https://payments.example.com",
+    "aud": "https://api.example.com",
+    "sub": "user:bob",
+    "iat": 1735600000,
+    "rid": "r_payment_001",
+    "policy_hash": "sha256:payment_policy_hash",
+    "policy_uri": "https://api.example.com/policy"
+  },
+  "evidence": {
+    "payment": {
+      "rail": "x402",
+      "reference": "pay_x402_001",
+      "amount": 1000,
+      "currency": "USD",
+      "asset": "USDC",
+      "env": "live",
+      "network": "base-mainnet",
+      "evidence": {
+        "tx_hash": "0xabc123",
+        "block": 12345678
+      }
+    }
+  }
+}
