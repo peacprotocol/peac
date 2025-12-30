@@ -103,7 +103,12 @@ describe('JsonValueSchema', () => {
     });
 
     it('accepts nested arrays', () => {
-      expect(JsonValueSchema.safeParse([[1, 2], [3, 4]]).success).toBe(true);
+      expect(
+        JsonValueSchema.safeParse([
+          [1, 2],
+          [3, 4],
+        ]).success
+      ).toBe(true);
     });
 
     it('accepts empty object', () => {

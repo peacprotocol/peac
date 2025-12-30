@@ -119,10 +119,7 @@ function validateCurrency(currency: unknown): string {
 /**
  * Build evidence object from payment entity
  */
-function buildEvidence(
-  payment: RazorpayPaymentEntity,
-  config: RazorpayConfig
-): JsonObject {
+function buildEvidence(payment: RazorpayPaymentEntity, config: RazorpayConfig): JsonObject {
   const evidence: JsonObject = {
     payment_id: payment.id,
     status: payment.status,
@@ -164,7 +161,8 @@ function buildEvidence(
         if (payment.card.network) cardInfo.network = payment.card.network;
         if (payment.card.type) cardInfo.type = payment.card.type;
         if (payment.card.last4) cardInfo.last4 = payment.card.last4;
-        if (payment.card.international !== undefined) cardInfo.international = payment.card.international;
+        if (payment.card.international !== undefined)
+          cardInfo.international = payment.card.international;
         evidence.card = cardInfo;
       }
       break;

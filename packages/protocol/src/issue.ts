@@ -185,10 +185,7 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
           issue.path.some((p: string | number) => p === 'evidence' || p === 'payment')
       );
       if (evidenceIssue && evidenceIssue.path.includes('evidence')) {
-        const peacError = createEvidenceNotJsonError(
-          evidenceIssue.message,
-          evidenceIssue.path
-        );
+        const peacError = createEvidenceNotJsonError(evidenceIssue.message, evidenceIssue.path);
         throw new IssueError(peacError);
       }
     }

@@ -37,21 +37,14 @@ const JsonNumberSchema = z.number().finite();
 /**
  * JSON primitive schema - string, finite number, boolean, null
  */
-export const JsonPrimitiveSchema = z.union([
-  z.string(),
-  JsonNumberSchema,
-  z.boolean(),
-  z.null(),
-]);
+export const JsonPrimitiveSchema = z.union([z.string(), JsonNumberSchema, z.boolean(), z.null()]);
 
 /**
  * Plain object schema (internal) - validates object is plain before recursive validation
  */
-const PlainObjectSchema = z
-  .unknown()
-  .refine(isPlainObject, {
-    message: 'Expected plain object, received non-plain object (Date, Map, Set, or class instance)',
-  });
+const PlainObjectSchema = z.unknown().refine(isPlainObject, {
+  message: 'Expected plain object, received non-plain object (Date, Map, Set, or class instance)',
+});
 
 /**
  * JSON value schema - recursive type for any valid JSON value

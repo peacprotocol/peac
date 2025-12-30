@@ -15,10 +15,7 @@ import type { AdapterError } from './types.js';
  * @param fieldName - Field name for error messages
  * @returns Result with string value or error
  */
-export function requireString(
-  value: unknown,
-  fieldName: string
-): Result<string, AdapterError> {
+export function requireString(value: unknown, fieldName: string): Result<string, AdapterError> {
   if (typeof value !== 'string' || value.trim() === '') {
     return adapterErr(
       `${fieldName} is required and must be a non-empty string`,
@@ -44,11 +41,7 @@ export function optionalString(
     return ok(undefined);
   }
   if (typeof value !== 'string') {
-    return adapterErr(
-      `${fieldName} must be a string if provided`,
-      'validation_error',
-      fieldName
-    );
+    return adapterErr(`${fieldName} must be a string if provided`, 'validation_error', fieldName);
   }
   return ok(value);
 }
@@ -60,16 +53,9 @@ export function optionalString(
  * @param fieldName - Field name for error messages
  * @returns Result with number value or error
  */
-export function requireNumber(
-  value: unknown,
-  fieldName: string
-): Result<number, AdapterError> {
+export function requireNumber(value: unknown, fieldName: string): Result<number, AdapterError> {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return adapterErr(
-      `${fieldName} must be a finite number`,
-      'validation_error',
-      fieldName
-    );
+    return adapterErr(`${fieldName} must be a finite number`, 'validation_error', fieldName);
   }
   return ok(value);
 }
@@ -146,11 +132,7 @@ export function requireObject(
   fieldName: string = 'input'
 ): Result<Record<string, unknown>, AdapterError> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return adapterErr(
-      `${fieldName} must be a non-null object`,
-      'parse_error',
-      fieldName
-    );
+    return adapterErr(`${fieldName} must be a non-null object`, 'parse_error', fieldName);
   }
   return ok(value as Record<string, unknown>);
 }
@@ -195,11 +177,7 @@ export function optionalBoolean(
     return ok(undefined);
   }
   if (typeof value !== 'boolean') {
-    return adapterErr(
-      `${fieldName} must be a boolean if provided`,
-      'validation_error',
-      fieldName
-    );
+    return adapterErr(`${fieldName} must be a boolean if provided`, 'validation_error', fieldName);
   }
   return ok(value);
 }
@@ -218,11 +196,7 @@ export function requireEnum<T extends string>(
   fieldName: string
 ): Result<T, AdapterError> {
   if (typeof value !== 'string') {
-    return adapterErr(
-      `${fieldName} must be a string`,
-      'validation_error',
-      fieldName
-    );
+    return adapterErr(`${fieldName} must be a string`, 'validation_error', fieldName);
   }
   if (!allowed.includes(value as T)) {
     return adapterErr(

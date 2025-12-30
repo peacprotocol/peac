@@ -18,10 +18,7 @@ import {
   type AdapterError,
   type JsonObject,
 } from '@peac/adapter-core';
-import type {
-  DaydreamsInferenceEvent,
-  DaydreamsConfig,
-} from './types.js';
+import type { DaydreamsInferenceEvent, DaydreamsConfig } from './types.js';
 
 const RAIL_ID = 'x402';
 const FACILITATOR = 'daydreams';
@@ -55,11 +52,19 @@ export function parseInferenceEvent(
 
   // Validate against config if provided
   if (config?.allowedProviders && !config.allowedProviders.includes(providerResult.value)) {
-    return adapterErr(`provider '${providerResult.value}' is not in allowed list`, 'validation_error', 'provider');
+    return adapterErr(
+      `provider '${providerResult.value}' is not in allowed list`,
+      'validation_error',
+      'provider'
+    );
   }
 
   if (config?.allowedModels && !config.allowedModels.includes(modelIdResult.value)) {
-    return adapterErr(`model '${modelIdResult.value}' is not in allowed list`, 'validation_error', 'modelId');
+    return adapterErr(
+      `model '${modelIdResult.value}' is not in allowed list`,
+      'validation_error',
+      'modelId'
+    );
   }
 
   // Build validated event
@@ -177,7 +182,11 @@ export function fromWebhookEvent(
 
   // Only process completed inference events
   if (typeResult.value !== 'inference.completed' && typeResult.value !== 'payment.captured') {
-    return adapterErr(`unsupported webhook event type: ${typeResult.value}`, 'validation_error', 'type');
+    return adapterErr(
+      `unsupported webhook event type: ${typeResult.value}`,
+      'validation_error',
+      'type'
+    );
   }
 
   return fromInferenceEvent(w.data, config);

@@ -7,12 +7,7 @@
 
 import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
-import type {
-  FluoraMcpCallEvent,
-  FluoraConfig,
-  AdapterResult,
-  AdapterErrorCode,
-} from './types.js';
+import type { FluoraMcpCallEvent, FluoraConfig, AdapterResult, AdapterErrorCode } from './types.js';
 
 const RAIL_ID = 'x402';
 const FACILITATOR = 'fluora';
@@ -171,7 +166,8 @@ export function mapToPaymentEvidence(
     const marketplace: JsonObject = {};
     if (event.marketplace.sellerId) marketplace.seller_id = event.marketplace.sellerId;
     if (event.marketplace.listingId) marketplace.listing_id = event.marketplace.listingId;
-    if (event.marketplace.commission !== undefined) marketplace.commission = event.marketplace.commission;
+    if (event.marketplace.commission !== undefined)
+      marketplace.commission = event.marketplace.commission;
     evidence.marketplace = marketplace;
   }
 

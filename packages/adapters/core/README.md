@@ -38,12 +38,7 @@ if (isOk(result)) {
 Common validation functions for adapter inputs:
 
 ```typescript
-import {
-  requireString,
-  requireAmount,
-  requireCurrency,
-  requireObject,
-} from '@peac/adapter-core';
+import { requireString, requireAmount, requireCurrency, requireObject } from '@peac/adapter-core';
 
 function parseWebhook(event: unknown) {
   const objResult = requireObject(event);
@@ -61,19 +56,19 @@ function parseWebhook(event: unknown) {
 
 ### Available Validators
 
-| Validator | Description |
-|-----------|-------------|
-| `requireString(value, field)` | Non-empty string required |
-| `optionalString(value, field)` | String or undefined |
-| `requireNumber(value, field)` | Finite number required |
-| `requireAmount(value)` | Non-negative safe integer |
-| `requireCurrency(value)` | ISO 4217 currency code |
-| `optionalNetwork(value)` | Network identifier (CAIP-2) |
-| `requireObject(value, field)` | Non-null object |
-| `optionalTimestamp(value)` | ISO 8601 or Unix seconds |
-| `optionalBoolean(value, field)` | Boolean or undefined |
-| `requireEnum(value, allowed, field)` | Value from allowed list |
-| `optionalEnum(value, allowed, field)` | Enum or undefined |
+| Validator                             | Description                 |
+| ------------------------------------- | --------------------------- |
+| `requireString(value, field)`         | Non-empty string required   |
+| `optionalString(value, field)`        | String or undefined         |
+| `requireNumber(value, field)`         | Finite number required      |
+| `requireAmount(value)`                | Non-negative safe integer   |
+| `requireCurrency(value)`              | ISO 4217 currency code      |
+| `optionalNetwork(value)`              | Network identifier (CAIP-2) |
+| `requireObject(value, field)`         | Non-null object             |
+| `optionalTimestamp(value)`            | ISO 8601 or Unix seconds    |
+| `optionalBoolean(value, field)`       | Boolean or undefined        |
+| `requireEnum(value, allowed, field)`  | Value from allowed list     |
+| `optionalEnum(value, allowed, field)` | Enum or undefined           |
 
 ### JSON Types
 
@@ -84,7 +79,7 @@ import type { JsonObject, JsonValue } from '@peac/adapter-core';
 
 interface PaymentEvidence {
   rail: string;
-  evidence: JsonObject;  // JSON-safe, no unknown
+  evidence: JsonObject; // JSON-safe, no unknown
 }
 ```
 

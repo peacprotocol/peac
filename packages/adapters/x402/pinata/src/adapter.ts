@@ -7,12 +7,7 @@
 
 import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
-import type {
-  PinataAccessEvent,
-  PinataConfig,
-  AdapterResult,
-  AdapterErrorCode,
-} from './types.js';
+import type { PinataAccessEvent, PinataConfig, AdapterResult, AdapterErrorCode } from './types.js';
 
 const RAIL_ID = 'x402';
 const FACILITATOR = 'pinata';

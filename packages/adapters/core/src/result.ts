@@ -21,9 +21,7 @@ import type { AdapterError, AdapterErrorCode } from './types.js';
  *   return ok({ ... });
  * }
  */
-export type Result<T, E = AdapterError> =
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+export type Result<T, E = AdapterError> = { ok: true; value: T } | { ok: false; error: E };
 
 /**
  * Create a success result
@@ -75,10 +73,7 @@ export function isErr<T, E>(result: Result<T, E>): result is { ok: false; error:
  * const result = ok(5);
  * const doubled = map(result, x => x * 2); // ok(10)
  */
-export function map<T, U, E>(
-  result: Result<T, E>,
-  fn: (value: T) => U
-): Result<U, E> {
+export function map<T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> {
   return result.ok ? ok(fn(result.value)) : result;
 }
 
@@ -89,10 +84,7 @@ export function map<T, U, E>(
  * const result = err({ message: 'oops' });
  * const mapped = mapErr(result, e => ({ ...e, prefix: 'Error: ' }));
  */
-export function mapErr<T, E, F>(
-  result: Result<T, E>,
-  fn: (error: E) => F
-): Result<T, F> {
+export function mapErr<T, E, F>(result: Result<T, E>, fn: (error: E) => F): Result<T, F> {
   return result.ok ? result : err(fn(result.error));
 }
 
@@ -107,10 +99,7 @@ export function mapErr<T, E, F>(
  *
  * const result = chain(ok('42'), parseNumber); // ok(42)
  */
-export function chain<T, U, E>(
-  result: Result<T, E>,
-  fn: (value: T) => Result<U, E>
-): Result<U, E> {
+export function chain<T, U, E>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> {
   return result.ok ? fn(result.value) : result;
 }
 
