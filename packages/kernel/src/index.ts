@@ -7,6 +7,12 @@
 
 // Export types
 export type {
+  // JSON-safe types (v0.9.21+)
+  JsonPrimitive,
+  JsonValue,
+  JsonArray,
+  JsonObject,
+  // Registry types
   ErrorDefinition,
   PaymentRailEntry,
   ControlEngineEntry,

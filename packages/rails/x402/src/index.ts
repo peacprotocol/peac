@@ -7,6 +7,7 @@
  * Default behavior is auto-detection with v1 fallback for backwards compatibility.
  */
 
+import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence, PaymentSplit } from '@peac/schema';
 
 // Re-export types and constants for consumers
@@ -16,7 +17,7 @@ export * from './helpers';
 export * from './payment-headers';
 
 import type { X402Dialect } from './constants';
-import type { X402Invoice, X402Settlement, X402WebhookEvent, X402Evidence } from './types';
+import type { X402Invoice, X402Settlement, X402WebhookEvent } from './types';
 import {
   detectDialect,
   resolveDialectFromInvoice,
@@ -139,8 +140,8 @@ export function fromInvoice(
   // Normalize network (canonical ID, not label)
   const network = normalizeNetworkId(invoice.network);
 
-  // Build x402-specific evidence (namespaced, not top-level)
-  const evidence: X402Evidence = {
+  // Build x402-specific evidence as JsonObject (typed internally as X402Evidence structure)
+  const evidence: JsonObject = {
     invoice_id: invoice.id,
     dialect: resolvedDialect,
   };
@@ -162,12 +163,17 @@ export function fromInvoice(
     evidence.memo = invoice.memo;
   }
   if (invoice.metadata) {
-    evidence.metadata = invoice.metadata;
+    // Cast metadata to JsonObject (Record<string, unknown> -> JsonObject)
+    evidence.metadata = invoice.metadata as JsonObject;
   }
 
   // v2: Add payTo if present
   if (invoice.payTo) {
-    evidence.pay_to = invoice.payTo;
+    const payTo: JsonObject = {};
+    if (invoice.payTo.mode) payTo.mode = invoice.payTo.mode;
+    if (invoice.payTo.callback_url) payTo.callback_url = invoice.payTo.callback_url;
+    if (invoice.payTo.role) payTo.role = invoice.payTo.role;
+    evidence.pay_to = payTo;
   }
 
   // Build aggregator and splits (v2 only)
@@ -236,8 +242,8 @@ export function fromSettlement(
   // Normalize network
   const network = normalizeNetworkId(settlement.network);
 
-  // Build x402-specific evidence
-  const evidence: X402Evidence = {
+  // Build x402-specific evidence as JsonObject
+  const evidence: JsonObject = {
     invoice_id: settlement.invoice_id,
     settlement_id: settlement.id,
     dialect: resolvedDialect,
@@ -254,7 +260,8 @@ export function fromSettlement(
     evidence.settled_at = settlement.settled_at;
   }
   if (settlement.metadata) {
-    evidence.metadata = settlement.metadata;
+    // Cast metadata to JsonObject (Record<string, unknown> -> JsonObject)
+    evidence.metadata = settlement.metadata as JsonObject;
   }
 
   return {

@@ -12,6 +12,7 @@
  */
 
 import { createHmac } from 'crypto';
+import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
 import type {
   RazorpayConfig,
@@ -118,11 +119,8 @@ function validateCurrency(currency: unknown): string {
 /**
  * Build evidence object from payment entity
  */
-function buildEvidence(
-  payment: RazorpayPaymentEntity,
-  config: RazorpayConfig
-): Record<string, unknown> {
-  const evidence: Record<string, unknown> = {
+function buildEvidence(payment: RazorpayPaymentEntity, config: RazorpayConfig): JsonObject {
+  const evidence: JsonObject = {
     payment_id: payment.id,
     status: payment.status,
     method: payment.method,
@@ -159,12 +157,13 @@ function buildEvidence(
     case 'card': {
       // Card details - only include non-sensitive info
       if (payment.card) {
-        evidence.card = {
-          network: payment.card.network,
-          type: payment.card.type,
-          last4: payment.card.last4,
-          international: payment.card.international,
-        };
+        const cardInfo: JsonObject = {};
+        if (payment.card.network) cardInfo.network = payment.card.network;
+        if (payment.card.type) cardInfo.type = payment.card.type;
+        if (payment.card.last4) cardInfo.last4 = payment.card.last4;
+        if (payment.card.international !== undefined)
+          cardInfo.international = payment.card.international;
+        evidence.card = cardInfo;
       }
       break;
     }
@@ -184,7 +183,7 @@ function buildEvidence(
 
   // Add acquirer data if present (useful for reconciliation)
   if (payment.acquirer_data) {
-    const acq: Record<string, string> = {};
+    const acq: JsonObject = {};
     if (payment.acquirer_data.rrn) {
       acq.rrn = payment.acquirer_data.rrn;
     }

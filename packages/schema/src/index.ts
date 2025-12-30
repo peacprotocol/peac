@@ -11,6 +11,9 @@ export * from './subject';
 export * from './errors';
 export * from './normalize';
 
+// JSON-safe validation schemas (v0.9.21+)
+export { JsonPrimitiveSchema, JsonValueSchema, JsonObjectSchema, JsonArraySchema } from './json';
+
 // Legacy types (for backward compatibility in tests)
 export * from './constants';
 export * from './types';

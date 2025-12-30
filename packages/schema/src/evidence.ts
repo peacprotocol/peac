@@ -4,6 +4,8 @@
  * Payment and attestation evidence for receipts.
  */
 
+import type { JsonValue, JsonObject } from '@peac/kernel';
+
 /**
  * Payment rail identifier (vendor-neutral string)
  *
@@ -96,7 +98,7 @@ export interface PaymentSplit {
    *
    * Rail-specific or application-specific data.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: JsonObject;
 }
 
 /**
@@ -215,8 +217,11 @@ export interface PaymentEvidence {
    * }
    *
    * Future: May become discriminated union in v1.0.
+   *
+   * v0.9.21+: Changed from JsonObject to JsonValue for flexibility.
+   * Runtime validation ensures only JSON-safe values are accepted.
    */
-  evidence: unknown;
+  evidence: JsonValue;
 
   /**
    * Aggregator/marketplace identifier (OPTIONAL)
@@ -302,6 +307,8 @@ export interface AttestationEvidence {
    *   "mrenclave": "...",
    *   "mrsigner": "..."
    * }
+   *
+   * v0.9.21+: Changed from JsonObject to JsonValue for flexibility.
    */
-  evidence: unknown;
+  evidence: JsonValue;
 }

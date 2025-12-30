@@ -125,6 +125,7 @@ export const ERROR_CODES = {
   E_INVALID_PAYMENT: 'E_INVALID_PAYMENT',
   E_INVALID_POLICY_HASH: 'E_INVALID_POLICY_HASH',
   E_EXPIRED_RECEIPT: 'E_EXPIRED_RECEIPT',
+  E_EVIDENCE_NOT_JSON: 'E_EVIDENCE_NOT_JSON',
 
   // Security errors (401/403)
   E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
@@ -172,4 +173,20 @@ export function createPEACError(
     retryable,
     ...options,
   };
+}
+
+/**
+ * Create an evidence validation error
+ *
+ * Used when evidence contains non-JSON-safe values like NaN, Infinity,
+ * undefined, Date, Map, Set, BigInt, functions, or class instances.
+ */
+export function createEvidenceNotJsonError(message: string, path?: (string | number)[]): PEACError {
+  return createPEACError(ERROR_CODES.E_EVIDENCE_NOT_JSON, 'validation', 'error', false, {
+    http_status: 400,
+    pointer: path ? '/' + path.join('/') : undefined,
+    remediation:
+      'Ensure evidence contains only JSON-safe values (strings, finite numbers, booleans, null, arrays, plain objects)',
+    details: { message },
+  });
 }

@@ -3,6 +3,7 @@
  * Maps ACP checkout events to PEAC receipts
  */
 
+import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
 
 export * from './budget';
@@ -58,12 +59,13 @@ export function fromACPCheckoutSuccess(event: ACPCheckoutSuccess): PEACReceiptIn
     throw new Error('ACP checkout event missing payment_reference');
   }
 
-  // Build payment evidence from ACP event
-  const evidence: Record<string, unknown> = {};
+  // Build payment evidence from ACP event as JsonObject
+  const evidence: JsonObject = {};
 
   // Include ACP metadata in evidence
   if (event.metadata) {
-    evidence.acp_metadata = event.metadata;
+    // Cast metadata to JsonObject (Record<string, unknown> -> JsonObject)
+    evidence.acp_metadata = event.metadata as JsonObject;
   }
   if (event.customer_id) {
     evidence.customer_id = event.customer_id;

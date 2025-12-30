@@ -244,8 +244,27 @@ importers:
         specifier: ^5.6.2
         version: 5.9.3
 
+  packages/adapters/core:
+    dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.25
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@20.19.25)
+
   packages/adapters/x402/daydreams:
     dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../../core
       '@peac/schema':
         specifier: workspace:*
         version: link:../../../schema
@@ -262,6 +281,9 @@ importers:
 
   packages/adapters/x402/fluora:
     dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../../kernel
       '@peac/schema':
         specifier: workspace:*
         version: link:../../../schema
@@ -278,6 +300,9 @@ importers:
 
   packages/adapters/x402/pinata:
     dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../../kernel
       '@peac/schema':
         specifier: workspace:*
         version: link:../../../schema
@@ -473,6 +498,9 @@ importers:
 
   packages/mappings/acp:
     dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
       '@peac/protocol':
         specifier: workspace:*
         version: link:../../protocol
@@ -610,12 +638,18 @@ importers:
       '@peac/crypto':
         specifier: workspace:*
         version: link:../crypto
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../kernel
       '@peac/schema':
         specifier: workspace:*
         version: link:../schema
       uuidv7:
         specifier: ^0.6.3
         version: 0.6.3
+      zod:
+        specifier: ^3.22.4
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -645,6 +679,9 @@ importers:
 
   packages/rails/card:
     dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
       '@peac/schema':
         specifier: workspace:*
         version: link:../../schema
@@ -661,6 +698,9 @@ importers:
 
   packages/rails/razorpay:
     dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
       '@peac/schema':
         specifier: workspace:*
         version: link:../../schema
@@ -677,6 +717,9 @@ importers:
 
   packages/rails/stripe:
     dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
       '@peac/schema':
         specifier: workspace:*
         version: link:../../schema
@@ -693,6 +736,9 @@ importers:
 
   packages/rails/x402:
     dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
       '@peac/schema':
         specifier: workspace:*
         version: link:../../schema

@@ -4,6 +4,7 @@
  * Converts card billing events to PEAC PaymentEvidence.
  */
 
+import type { JsonObject, JsonArray } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
 import type { CardBillingEvent, BillingSnapshot, CardRailId } from './types.js';
 
@@ -43,6 +44,44 @@ export function buildCardRailId(
 export function toPaymentEvidence(event: CardBillingEvent, processor?: string): PaymentEvidence {
   const railId = buildCardRailId(event.billingSnapshot.provider, processor);
 
+  // Build entitlements array - only include defined properties
+  const entitlements: JsonArray = event.billingSnapshot.entitlements.map((e) => {
+    const entitlement: JsonObject = {
+      feature: e.feature,
+    };
+    // Only include limit if defined (number or null)
+    if (e.limit !== undefined) {
+      entitlement.limit = e.limit;
+    }
+    // Only include meter_id if defined
+    if (e.meterId !== undefined) {
+      entitlement.meter_id = e.meterId;
+    }
+    return entitlement;
+  });
+
+  // Build billing_snapshot with only defined optional properties
+  const billingSnapshot: JsonObject = {
+    provider: event.billingSnapshot.provider,
+    customer_external_id: event.billingSnapshot.customerExternalId,
+    plan_slug: event.billingSnapshot.planSlug,
+    entitlements,
+    captured_at: event.billingSnapshot.capturedAt,
+  };
+
+  // Optional properties
+  if (event.billingSnapshot.subscriptionId !== undefined) {
+    billingSnapshot.subscription_id = event.billingSnapshot.subscriptionId;
+  }
+  if (event.billingSnapshot.invoiceId !== undefined) {
+    billingSnapshot.invoice_id = event.billingSnapshot.invoiceId;
+  }
+
+  // Build evidence as JsonObject
+  const evidence: JsonObject = {
+    billing_snapshot: billingSnapshot,
+  };
+
   return {
     rail: railId,
     reference: event.eventId,
@@ -50,21 +89,7 @@ export function toPaymentEvidence(event: CardBillingEvent, processor?: string): 
     currency: event.currency,
     asset: event.currency, // For card payments, asset is the currency
     env: event.env,
-    evidence: {
-      billing_snapshot: {
-        provider: event.billingSnapshot.provider,
-        customer_external_id: event.billingSnapshot.customerExternalId,
-        plan_slug: event.billingSnapshot.planSlug,
-        entitlements: event.billingSnapshot.entitlements.map((e) => ({
-          feature: e.feature,
-          limit: e.limit,
-          meter_id: e.meterId,
-        })),
-        captured_at: event.billingSnapshot.capturedAt,
-        subscription_id: event.billingSnapshot.subscriptionId,
-        invoice_id: event.billingSnapshot.invoiceId,
-      },
-    },
+    evidence,
   };
 }
 

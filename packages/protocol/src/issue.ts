@@ -5,11 +5,15 @@
 
 import { uuidv7 } from 'uuidv7';
 import { sign } from '@peac/crypto';
+import type { JsonValue } from '@peac/kernel';
+import { ZodError } from 'zod';
 import {
   PEACReceiptClaims,
   ReceiptClaims,
   SubjectProfileSnapshot,
   validateSubjectSnapshot,
+  createEvidenceNotJsonError,
+  type PEACError,
 } from '@peac/schema';
 
 /**
@@ -46,8 +50,8 @@ export interface IssueOptions {
   /** Facilitator reference (optional) */
   facilitator_ref?: string;
 
-  /** Rail-specific evidence (opaque) - defaults to empty object if not provided */
-  evidence?: unknown;
+  /** Rail-specific evidence (JSON-safe) - defaults to empty object if not provided */
+  evidence?: JsonValue;
 
   /** Idempotency key (optional) */
   idempotency_key?: string;
@@ -86,10 +90,28 @@ export interface IssueResult {
 }
 
 /**
+ * Error thrown during receipt issuance
+ *
+ * Wraps a structured PEACError for programmatic handling.
+ */
+export class IssueError extends Error {
+  /** Structured error details */
+  readonly peacError: PEACError;
+
+  constructor(peacError: PEACError) {
+    const details = peacError.details as { message?: string } | undefined;
+    super(details?.message ?? peacError.code);
+    this.name = 'IssueError';
+    this.peacError = peacError;
+  }
+}
+
+/**
  * Issue a PEAC receipt
  *
  * @param options - Receipt options
  * @returns Issue result with JWS and optional subject_snapshot
+ * @throws IssueError if evidence contains non-JSON-safe values
  */
 export async function issue(options: IssueOptions): Promise<IssueResult> {
   // Validate URLs
@@ -152,8 +174,23 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
     ...(options.ext && { ext: options.ext }),
   };
 
-  // Validate claims with Zod
-  ReceiptClaims.parse(claims);
+  // Validate claims with Zod - map evidence errors to typed error
+  try {
+    ReceiptClaims.parse(claims);
+  } catch (err: unknown) {
+    if (err instanceof ZodError) {
+      // Check if any error path touches evidence
+      const evidenceIssue = err.issues.find(
+        (issue: { path: (string | number)[]; message: string }) =>
+          issue.path.some((p: string | number) => p === 'evidence' || p === 'payment')
+      );
+      if (evidenceIssue && evidenceIssue.path.includes('evidence')) {
+        const peacError = createEvidenceNotJsonError(evidenceIssue.message, evidenceIssue.path);
+        throw new IssueError(peacError);
+      }
+    }
+    throw err;
+  }
 
   // Validate subject_snapshot if provided (v0.9.17+)
   // This validates schema and logs advisory PII warning if applicable

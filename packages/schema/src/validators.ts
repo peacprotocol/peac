@@ -3,6 +3,7 @@
  */
 import { z } from 'zod';
 import { PEAC_WIRE_TYP, PEAC_ALG } from './constants';
+import { JsonValueSchema, JsonObjectSchema } from './json';
 
 const httpsUrl = z
   .string()
@@ -21,8 +22,8 @@ export const NormalizedPayment = z
     currency: iso4217,
     asset: z.string().optional(),
     env: z.string().optional(),
-    evidence: z.record(z.unknown()).optional(),
-    metadata: z.record(z.unknown()).optional(),
+    evidence: JsonValueSchema.optional(),
+    metadata: JsonObjectSchema.optional(),
   })
   .strict();
 
@@ -179,7 +180,7 @@ export const PaymentSplitSchema = z
     share: z.number().min(0).max(1).optional(),
     rail: z.string().min(1).optional(),
     account_ref: z.string().min(1).optional(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: JsonObjectSchema.optional(),
   })
   .strict()
   .refine((data) => data.amount !== undefined || data.share !== undefined, {
@@ -219,7 +220,7 @@ export const PaymentEvidenceSchema = z
     env: z.enum(['live', 'test']),
     network: z.string().min(1).optional(),
     facilitator_ref: z.string().min(1).optional(),
-    evidence: z.unknown(),
+    evidence: JsonValueSchema,
     aggregator: z.string().min(1).optional(),
     splits: z.array(PaymentSplitSchema).optional(),
     routing: PaymentRoutingSchema.optional(),
@@ -248,7 +249,7 @@ export const SubjectProfileSchema = z
     id: z.string().min(1),
     type: SubjectTypeSchema,
     labels: z.array(z.string().min(1)).optional(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: JsonObjectSchema.optional(),
   })
   .strict();
 

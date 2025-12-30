@@ -5,14 +5,9 @@
  * following the "never throws" invariant with Result types.
  */
 
+import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
-import type {
-  FluoraMcpCallEvent,
-  FluoraEvidence,
-  FluoraConfig,
-  AdapterResult,
-  AdapterErrorCode,
-} from './types.js';
+import type { FluoraMcpCallEvent, FluoraConfig, AdapterResult, AdapterErrorCode } from './types.js';
 
 const RAIL_ID = 'x402';
 const FACILITATOR = 'fluora';
@@ -154,7 +149,8 @@ export function mapToPaymentEvidence(
   event: FluoraMcpCallEvent,
   config?: FluoraConfig
 ): PaymentEvidence {
-  const evidence: FluoraEvidence = {
+  // Build evidence as JsonObject (typed internally as FluoraEvidence structure)
+  const evidence: JsonObject = {
     call_id: event.callId,
     server_id: event.serverId,
     tool_name: event.toolName,
@@ -167,11 +163,12 @@ export function mapToPaymentEvidence(
   if (event.executionMs !== undefined) evidence.execution_ms = event.executionMs;
   if (event.timestamp) evidence.timestamp = event.timestamp;
   if (event.marketplace) {
-    evidence.marketplace = {
-      seller_id: event.marketplace.sellerId,
-      listing_id: event.marketplace.listingId,
-      commission: event.marketplace.commission,
-    };
+    const marketplace: JsonObject = {};
+    if (event.marketplace.sellerId) marketplace.seller_id = event.marketplace.sellerId;
+    if (event.marketplace.listingId) marketplace.listing_id = event.marketplace.listingId;
+    if (event.marketplace.commission !== undefined)
+      marketplace.commission = event.marketplace.commission;
+    evidence.marketplace = marketplace;
   }
 
   const result: PaymentEvidence = {
