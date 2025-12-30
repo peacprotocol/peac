@@ -5,7 +5,7 @@ Shared utilities for PEAC payment rail adapters.
 ## Installation
 
 ```bash
-npm install @peac/adapter-core
+pnpm add @peac/adapter-core
 ```
 
 ## Usage
