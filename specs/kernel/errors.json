@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.15",
+  "version": "0.9.21",
   "description": "PEAC error codes - normative source of truth",
   "errors": [
     {
@@ -130,6 +130,14 @@
       "description": "Control engine requires manual review",
       "retriable": true,
       "category": "control"
+    },
+    {
+      "code": "E_EVIDENCE_NOT_JSON",
+      "http_status": 400,
+      "title": "Evidence Not JSON-Safe",
+      "description": "Evidence contains non-JSON-safe values (NaN, Infinity, undefined, BigInt, Date, Map, Set, functions, symbols, class instances, or cycles)",
+      "retriable": false,
+      "category": "validation"
     }
   ]
 }

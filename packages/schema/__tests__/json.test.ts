@@ -13,7 +13,10 @@ import {
   JsonValueSchema,
   JsonObjectSchema,
   JsonArraySchema,
+  assertJsonSafeIterative,
+  JSON_EVIDENCE_LIMITS,
 } from '../src/json';
+import { validateEvidence } from '../src/validators';
 
 /**
  * Test utility: assert value survives JSON roundtrip unchanged
@@ -513,5 +516,416 @@ describe('regression tests', () => {
     }
     const result = JsonObjectSchema.safeParse(new Simple());
     expect(result.success).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Iterative JSON Safety Validator Tests (v0.9.21+)
+// -----------------------------------------------------------------------------
+
+describe('assertJsonSafeIterative', () => {
+  describe('valid JSON values', () => {
+    it('accepts null', () => {
+      expect(assertJsonSafeIterative(null)).toEqual({ ok: true });
+    });
+
+    it('accepts string', () => {
+      expect(assertJsonSafeIterative('hello')).toEqual({ ok: true });
+    });
+
+    it('accepts number', () => {
+      expect(assertJsonSafeIterative(42)).toEqual({ ok: true });
+    });
+
+    it('accepts boolean', () => {
+      expect(assertJsonSafeIterative(true)).toEqual({ ok: true });
+    });
+
+    it('accepts empty object', () => {
+      expect(assertJsonSafeIterative({})).toEqual({ ok: true });
+    });
+
+    it('accepts empty array', () => {
+      expect(assertJsonSafeIterative([])).toEqual({ ok: true });
+    });
+
+    it('accepts nested structure within limits', () => {
+      const nested = { a: { b: { c: [1, 2, { d: 'deep' }] } } };
+      expect(assertJsonSafeIterative(nested)).toEqual({ ok: true });
+    });
+  });
+
+  describe('invalid JSON values', () => {
+    it('rejects undefined', () => {
+      const result = assertJsonSafeIterative(undefined);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('undefined');
+      }
+    });
+
+    it('rejects NaN', () => {
+      const result = assertJsonSafeIterative(NaN);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Non-finite');
+      }
+    });
+
+    it('rejects Infinity', () => {
+      const result = assertJsonSafeIterative(Infinity);
+      expect(result.ok).toBe(false);
+    });
+
+    it('rejects -Infinity', () => {
+      const result = assertJsonSafeIterative(-Infinity);
+      expect(result.ok).toBe(false);
+    });
+
+    it('rejects BigInt', () => {
+      const result = assertJsonSafeIterative(BigInt(123));
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('BigInt');
+      }
+    });
+
+    it('rejects function', () => {
+      const result = assertJsonSafeIterative(() => {});
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Function');
+      }
+    });
+
+    it('rejects Symbol', () => {
+      const result = assertJsonSafeIterative(Symbol('test'));
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Symbol');
+      }
+    });
+
+    it('rejects Date', () => {
+      const result = assertJsonSafeIterative(new Date());
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Non-plain object');
+        expect(result.error).toContain('Date');
+      }
+    });
+
+    it('rejects Map', () => {
+      const result = assertJsonSafeIterative(new Map());
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Map');
+      }
+    });
+
+    it('rejects Set', () => {
+      const result = assertJsonSafeIterative(new Set());
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Set');
+      }
+    });
+
+    it('rejects class instance', () => {
+      class CustomClass {
+        value = 42;
+      }
+      const result = assertJsonSafeIterative(new CustomClass());
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Non-plain object');
+        expect(result.error).toContain('CustomClass');
+      }
+    });
+  });
+
+  describe('cycle detection', () => {
+    it('rejects direct self-reference', () => {
+      const obj: Record<string, unknown> = {};
+      obj.self = obj;
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Cycle detected');
+      }
+    });
+
+    it('rejects indirect cycle (A -> B -> A)', () => {
+      const a: Record<string, unknown> = {};
+      const b: Record<string, unknown> = {};
+      a.child = b;
+      b.parent = a;
+      const result = assertJsonSafeIterative(a);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Cycle detected');
+      }
+    });
+
+    it('rejects cycle in array', () => {
+      const arr: unknown[] = [1, 2];
+      arr.push(arr);
+      const result = assertJsonSafeIterative(arr);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Cycle detected');
+      }
+    });
+
+    it('rejects deep cycle', () => {
+      const a: Record<string, unknown> = {};
+      const b: Record<string, unknown> = {};
+      const c: Record<string, unknown> = {};
+      a.b = b;
+      b.c = c;
+      c.a = a;
+      const result = assertJsonSafeIterative(a);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Cycle detected');
+      }
+    });
+  });
+
+  describe('DoS caps - depth limit', () => {
+    it('accepts structure at max depth', () => {
+      // Build nested object at exactly maxDepth (32)
+      let obj: Record<string, unknown> = { value: 'leaf' };
+      for (let i = 0; i < 31; i++) {
+        obj = { nested: obj };
+      }
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(true);
+    });
+
+    it('rejects structure exceeding max depth', () => {
+      // Build nested object beyond maxDepth
+      let obj: Record<string, unknown> = { value: 'leaf' };
+      for (let i = 0; i < 35; i++) {
+        obj = { nested: obj };
+      }
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Maximum depth exceeded');
+        expect(result.error).toContain('32');
+      }
+    });
+
+    it('respects custom depth limit', () => {
+      let obj: Record<string, unknown> = { value: 'leaf' };
+      for (let i = 0; i < 10; i++) {
+        obj = { nested: obj };
+      }
+      const result = assertJsonSafeIterative(obj, { maxDepth: 5 });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Maximum depth exceeded');
+      }
+    });
+
+    it('does not stack overflow on extremely deep nesting (10k depth)', () => {
+      // This test proves the iterative approach prevents stack overflow
+      let obj: Record<string, unknown> = { value: 'leaf' };
+      for (let i = 0; i < 10_000; i++) {
+        obj = { nested: obj };
+      }
+      // Should fail fast with depth error, NOT throw stack overflow
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Maximum depth exceeded');
+      }
+    });
+  });
+
+  describe('DoS caps - array length limit', () => {
+    it('accepts array at max length', () => {
+      const arr = Array.from({ length: JSON_EVIDENCE_LIMITS.maxArrayLength }, (_, i) => i);
+      const result = assertJsonSafeIterative(arr);
+      expect(result.ok).toBe(true);
+    });
+
+    it('rejects array exceeding max length', () => {
+      const arr = Array.from({ length: JSON_EVIDENCE_LIMITS.maxArrayLength + 1 }, (_, i) => i);
+      const result = assertJsonSafeIterative(arr);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Array exceeds maximum length');
+      }
+    });
+
+    it('respects custom array length limit', () => {
+      const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const result = assertJsonSafeIterative(arr, { maxArrayLength: 5 });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Array exceeds maximum length');
+      }
+    });
+  });
+
+  describe('DoS caps - object keys limit', () => {
+    it('accepts object at max key count', () => {
+      const obj: Record<string, number> = {};
+      for (let i = 0; i < JSON_EVIDENCE_LIMITS.maxObjectKeys; i++) {
+        obj[`key${i}`] = i;
+      }
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(true);
+    });
+
+    it('rejects object exceeding max key count', () => {
+      const obj: Record<string, number> = {};
+      for (let i = 0; i < JSON_EVIDENCE_LIMITS.maxObjectKeys + 1; i++) {
+        obj[`key${i}`] = i;
+      }
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Object exceeds maximum key count');
+      }
+    });
+
+    it('respects custom object keys limit', () => {
+      const obj = { a: 1, b: 2, c: 3, d: 4, e: 5 };
+      const result = assertJsonSafeIterative(obj, { maxObjectKeys: 3 });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Object exceeds maximum key count');
+      }
+    });
+  });
+
+  describe('DoS caps - string length limit', () => {
+    it('accepts string at max length', () => {
+      const str = 'x'.repeat(JSON_EVIDENCE_LIMITS.maxStringLength);
+      const result = assertJsonSafeIterative(str);
+      expect(result.ok).toBe(true);
+    });
+
+    it('rejects string exceeding max length', () => {
+      const str = 'x'.repeat(JSON_EVIDENCE_LIMITS.maxStringLength + 1);
+      const result = assertJsonSafeIterative(str);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('String exceeds maximum length');
+      }
+    });
+
+    it('respects custom string length limit', () => {
+      const result = assertJsonSafeIterative('hello world', { maxStringLength: 5 });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('String exceeds maximum length');
+      }
+    });
+  });
+
+  describe('error paths', () => {
+    it('reports correct path for nested invalid value', () => {
+      const obj = { a: { b: { c: NaN } } };
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.path).toEqual(['a', 'b', 'c']);
+      }
+    });
+
+    it('reports correct path for invalid array element', () => {
+      const arr = [1, 2, [3, undefined]];
+      const result = assertJsonSafeIterative(arr);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.path).toEqual([2, 1]);
+      }
+    });
+
+    it('reports path for cycle', () => {
+      const obj: Record<string, unknown> = { a: { b: {} } };
+      (obj.a as Record<string, unknown>).b = { cycle: obj.a };
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toContain('Cycle detected');
+      }
+    });
+  });
+});
+
+describe('validateEvidence', () => {
+  describe('valid evidence', () => {
+    it('returns ok for valid payment evidence', () => {
+      const evidence = {
+        txId: 'tx_123',
+        amount: 100,
+        status: 'captured',
+      };
+      const result = validateEvidence(evidence);
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value).toEqual(evidence);
+      }
+    });
+
+    it('returns ok for empty evidence', () => {
+      const result = validateEvidence({});
+      expect(result.ok).toBe(true);
+    });
+  });
+
+  describe('invalid evidence', () => {
+    it('returns error for NaN in evidence', () => {
+      const evidence = { amount: NaN };
+      const result = validateEvidence(evidence);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe('E_EVIDENCE_NOT_JSON');
+      }
+    });
+
+    it('returns error for cycle in evidence', () => {
+      const evidence: Record<string, unknown> = { txId: 'tx_123' };
+      evidence.self = evidence;
+      const result = validateEvidence(evidence);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe('E_EVIDENCE_NOT_JSON');
+        expect(result.error.remediation).toContain('JSON-safe');
+      }
+    });
+
+    it('returns error with path for deep invalid value', () => {
+      const evidence = {
+        payment: {
+          details: {
+            amount: Infinity,
+          },
+        },
+      };
+      const result = validateEvidence(evidence);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe('E_EVIDENCE_NOT_JSON');
+        expect(result.error.pointer).toBe('/payment/details/amount');
+      }
+    });
+
+    it('returns error for evidence exceeding depth limit', () => {
+      let obj: Record<string, unknown> = { value: 'leaf' };
+      for (let i = 0; i < 50; i++) {
+        obj = { nested: obj };
+      }
+      const result = validateEvidence(obj);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe('E_EVIDENCE_NOT_JSON');
+      }
+    });
   });
 });

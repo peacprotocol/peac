@@ -48,6 +48,9 @@ jobs:
       - name: Domain guard
         run: bash -euxo pipefail scripts/guard.sh
 
+      - name: Package hygiene (drift, duplicates, private+publishConfig)
+        run: bash scripts/check-publish-list.sh
+
       - name: TypeScript check (core packages)
         run: pnpm typecheck:core
 

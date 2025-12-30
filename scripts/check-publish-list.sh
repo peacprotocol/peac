@@ -9,11 +9,38 @@ echo "=== Checking publish list drift ==="
 # Get all public packages from package.json files
 ACTUAL_PACKAGES=$(node -e "
 const fs = require('fs');
+const path = require('path');
+
+function getPackages(dir) {
+  try {
+    return fs.readdirSync(dir).filter(d => !d.startsWith('.')).map(d => path.join(dir, d, 'package.json'));
+  } catch { return []; }
+}
+
+function getPackagesRecursive(dir, depth = 0) {
+  if (depth > 2) return [];
+  const results = [];
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory() && !entry.name.startsWith('.')) {
+        const pkgPath = path.join(dir, entry.name, 'package.json');
+        if (fs.existsSync(pkgPath)) {
+          results.push(pkgPath);
+        }
+        results.push(...getPackagesRecursive(path.join(dir, entry.name), depth + 1));
+      }
+    }
+  } catch {}
+  return results;
+}
+
 const pkgPaths = [
-  ...fs.readdirSync('packages').filter(d => !d.startsWith('.')).map(d => 'packages/' + d + '/package.json'),
-  ...fs.readdirSync('packages/rails').filter(d => !d.startsWith('.')).map(d => 'packages/rails/' + d + '/package.json'),
-  ...fs.readdirSync('packages/mappings').filter(d => !d.startsWith('.')).map(d => 'packages/mappings/' + d + '/package.json'),
-  ...fs.readdirSync('packages/transport').filter(d => !d.startsWith('.')).map(d => 'packages/transport/' + d + '/package.json'),
+  ...getPackages('packages'),
+  ...getPackagesRecursive('packages/rails'),
+  ...getPackagesRecursive('packages/mappings'),
+  ...getPackagesRecursive('packages/transport'),
+  ...getPackagesRecursive('packages/adapters'),
 ];
 const pub = [];
 for (const p of pkgPaths) {
@@ -25,8 +52,12 @@ for (const p of pkgPaths) {
 console.log(pub.sort().join('\n'));
 ")
 
-# Expected packages (from v0.9.18_publish_inventory.md)
+# Expected packages (updated for v0.9.21)
 EXPECTED_PACKAGES=$(cat <<'EOF'
+@peac/adapter-core
+@peac/adapter-x402-daydreams
+@peac/adapter-x402-fluora
+@peac/adapter-x402-pinata
 @peac/cli
 @peac/control
 @peac/core
@@ -43,6 +74,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/policy-kit
 @peac/pref
 @peac/protocol
+@peac/rails-card
 @peac/rails-stripe
 @peac/rails-x402
 @peac/receipts
@@ -64,7 +96,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 22 public packages match"
+  echo "OK: All 27 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -105,3 +137,133 @@ echo "Packages without tests (11) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
 echo "OK: All 22 packages accounted for (11 tested + 11 type/wrapper packages)"
+
+echo ""
+echo "=== Checking for duplicate package names ==="
+
+# Check for duplicate package names in workspace
+DUPLICATES=$(node -e "
+const fs = require('fs');
+const path = require('path');
+
+// Directories to skip (build outputs, node_modules, etc.)
+const SKIP_DIRS = new Set(['node_modules', 'dist', 'build', 'out', '.git']);
+
+function findPackages(dir) {
+  const results = [];
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory() && !entry.name.startsWith('.') && !SKIP_DIRS.has(entry.name)) {
+        const pkgPath = path.join(dir, entry.name, 'package.json');
+        if (fs.existsSync(pkgPath)) {
+          try {
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            if (pkg.name) results.push({ name: pkg.name, path: pkgPath });
+          } catch {}
+        }
+        // Recurse into subdirectories
+        results.push(...findPackages(path.join(dir, entry.name)));
+      }
+    }
+  } catch {}
+  return results;
+}
+
+const packages = [
+  ...findPackages('packages'),
+  ...findPackages('apps'),
+  ...findPackages('surfaces'),
+  ...findPackages('examples'),
+];
+
+const seen = new Map();
+const duplicates = [];
+for (const pkg of packages) {
+  if (seen.has(pkg.name)) {
+    duplicates.push({ name: pkg.name, paths: [seen.get(pkg.name), pkg.path] });
+  } else {
+    seen.set(pkg.name, pkg.path);
+  }
+}
+
+if (duplicates.length > 0) {
+  console.log(JSON.stringify(duplicates));
+}
+")
+
+if [ -n "$DUPLICATES" ]; then
+  echo "FAIL: Duplicate package names detected!"
+  echo "$DUPLICATES" | node -e "
+    const input = require('fs').readFileSync(0, 'utf8');
+    const dups = JSON.parse(input);
+    for (const d of dups) {
+      console.log('  ' + d.name + ': ' + d.paths.join(', '));
+    }
+  "
+  exit 1
+else
+  echo "OK: No duplicate package names"
+fi
+
+echo ""
+echo "=== Checking for private packages with publishConfig ==="
+
+# Private packages should not have publishConfig (confusing and error-prone)
+VIOLATIONS=$(node -e "
+const fs = require('fs');
+const path = require('path');
+
+// Directories to skip (build outputs, node_modules, etc.)
+const SKIP_DIRS = new Set(['node_modules', 'dist', 'build', 'out', '.git']);
+
+function findPackages(dir) {
+  const results = [];
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory() && !entry.name.startsWith('.') && !SKIP_DIRS.has(entry.name)) {
+        const pkgPath = path.join(dir, entry.name, 'package.json');
+        if (fs.existsSync(pkgPath)) {
+          try {
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            if (pkg.private === true && pkg.publishConfig) {
+              results.push({ name: pkg.name || pkgPath, path: pkgPath });
+            }
+          } catch {}
+        }
+        // Recurse into subdirectories
+        results.push(...findPackages(path.join(dir, entry.name)));
+      }
+    }
+  } catch {}
+  return results;
+}
+
+const violations = [
+  ...findPackages('packages'),
+  ...findPackages('apps'),
+  ...findPackages('surfaces'),
+  ...findPackages('examples'),
+];
+
+if (violations.length > 0) {
+  console.log(JSON.stringify(violations));
+}
+")
+
+if [ -n "$VIOLATIONS" ]; then
+  echo "FAIL: Private packages with publishConfig detected!"
+  echo "$VIOLATIONS" | node -e "
+    const input = require('fs').readFileSync(0, 'utf8');
+    const viols = JSON.parse(input);
+    for (const v of viols) {
+      console.log('  ' + v.name + ': ' + v.path);
+    }
+  "
+  echo ""
+  echo "Remove publishConfig from private packages to avoid confusion."
+  exit 1
+else
+  echo "OK: No private packages with publishConfig"
+fi
