@@ -21,7 +21,11 @@ export {
   JSON_EVIDENCE_LIMITS,
   assertJsonSafeIterative,
 } from './json';
-export type { JsonEvidenceLimits, JsonSafetyResult } from './json';
+export type { JsonSafetyResult } from './json';
+
+// Internal types - exported with UNSAFE_ prefix for testing only
+// Do NOT use in production code; use validateEvidence() with defaults instead
+export type { JsonEvidenceLimits as UNSAFE_JsonEvidenceLimits } from './json';
 
 // Legacy types (for backward compatibility in tests)
 export * from './constants';

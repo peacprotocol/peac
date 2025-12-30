@@ -51,6 +51,10 @@ jobs:
       - name: Package hygiene (drift, duplicates, private+publishConfig)
         run: bash scripts/check-publish-list.sh
 
+      - name: Error code parity (advisory)
+        continue-on-error: true
+        run: bash scripts/check-error-codes.sh
+
       - name: TypeScript check (core packages)
         run: pnpm typecheck:core
 
