@@ -12,7 +12,16 @@ export * from './errors';
 export * from './normalize';
 
 // JSON-safe validation schemas (v0.9.21+)
-export { JsonPrimitiveSchema, JsonValueSchema, JsonObjectSchema, JsonArraySchema } from './json';
+export {
+  JsonPrimitiveSchema,
+  JsonValueSchema,
+  JsonObjectSchema,
+  JsonArraySchema,
+  // Iterative validator for DoS protection (v0.9.21+)
+  JSON_EVIDENCE_LIMITS,
+  assertJsonSafeIterative,
+} from './json';
+export type { JsonEvidenceLimits, JsonSafetyResult } from './json';
 
 // Legacy types (for backward compatibility in tests)
 export * from './constants';
@@ -43,7 +52,10 @@ export {
   SubjectProfileSnapshotSchema,
   // Subject snapshot validation helper (v0.9.17+)
   validateSubjectSnapshot,
+  // Evidence validation with DoS protection (v0.9.21+)
+  validateEvidence,
 } from './validators';
+export type { EvidenceValidationResult } from './validators';
 
 // Envelope types (v0.9.15+ normative structure)
 export type {

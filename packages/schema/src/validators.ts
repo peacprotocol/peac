@@ -3,7 +3,13 @@
  */
 import { z } from 'zod';
 import { PEAC_WIRE_TYP, PEAC_ALG } from './constants';
-import { JsonValueSchema, JsonObjectSchema } from './json';
+import {
+  JsonValueSchema,
+  JsonObjectSchema,
+  assertJsonSafeIterative,
+  type JsonEvidenceLimits,
+} from './json';
+import { createEvidenceNotJsonError, type PEACError } from './errors';
 
 const httpsUrl = z
   .string()
@@ -320,4 +326,50 @@ export function validateSubjectSnapshot(
   }
 
   return validated;
+}
+
+// -----------------------------------------------------------------------------
+// Evidence Validation (v0.9.21+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Result type for evidence validation
+ */
+export type EvidenceValidationResult =
+  | { ok: true; value: unknown }
+  | { ok: false; error: PEACError };
+
+/**
+ * Validate payment evidence for JSON safety
+ *
+ * Uses iterative validation (no recursion) to prevent stack overflow on
+ * deeply nested structures. Enforces limits on depth, array length,
+ * object keys, and string length.
+ *
+ * @param evidence - Evidence value to validate
+ * @param limits - Optional limits (internal, not part of public API)
+ * @returns Result indicating success with validated value, or failure with PEACError
+ *
+ * @example
+ * ```ts
+ * const result = validateEvidence({ txId: '123', amount: 100 });
+ * if (!result.ok) {
+ *   console.error(result.error.code, result.error.remediation);
+ * }
+ * ```
+ */
+export function validateEvidence(
+  evidence: unknown,
+  limits?: JsonEvidenceLimits
+): EvidenceValidationResult {
+  const result = assertJsonSafeIterative(evidence, limits);
+
+  if (!result.ok) {
+    return {
+      ok: false,
+      error: createEvidenceNotJsonError(result.error, result.path),
+    };
+  }
+
+  return { ok: true, value: evidence };
 }
