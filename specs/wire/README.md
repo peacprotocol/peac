@@ -4,15 +4,15 @@ JSON Schema definitions for the PEAC receipt wire format (`peac.receipt/0.9`).
 
 ## Schema Files
 
-| File                           | Description                               |
-| ------------------------------ | ----------------------------------------- |
-| `peac.receipt.0.9.schema.json` | Root receipt envelope schema              |
-| `auth-context.schema.json`     | Authentication/authorization context      |
-| `control-block.schema.json`    | Control block with purpose and licensing  |
-| `evidence-block.schema.json`   | Evidence container (payment, attestation) |
-| `payment-evidence.schema.json` | Payment and attestation evidence types    |
-| `subject-profile.schema.json`  | Subject identity and snapshots            |
-| `VERSION.json`                 | Schema set version metadata               |
+| File                           | Description                                |
+| ------------------------------ | ------------------------------------------ |
+| `peac.receipt.0.9.schema.json` | Root receipt envelope schema               |
+| `auth-context.schema.json`     | Authentication/authorization context       |
+| `control-block.schema.json`    | Control block with purpose and licensing   |
+| `evidence-block.schema.json`   | Evidence container (payment, attestations) |
+| `payment-evidence.schema.json` | Payment and attestation evidence types     |
+| `subject-profile.schema.json`  | Subject identity and snapshots             |
+| `VERSION.json`                 | Schema set version metadata                |
 
 ## Versioning
 
@@ -68,17 +68,69 @@ All schema types use `additionalProperties: false` by default. Unknown fields at
 
 **Designated extension surfaces** (where `additionalProperties: true`):
 
-| Location               | Type      | Purpose                                           |
-| ---------------------- | --------- | ------------------------------------------------- |
-| `subject.metadata`     | object    | Application-specific subject attributes           |
-| `auth.ctx`             | object    | Request context metadata (resource, method, etc.) |
-| `payment.evidence`     | JsonValue | Rail-specific payment proof                       |
-| `attestation.evidence` | JsonValue | Format-specific attestation data                  |
-| `enforcement.details`  | object    | Enforcement method details                        |
-| `binding.evidence`     | object    | Transport binding proof                           |
-| `split.metadata`       | object    | Split-specific metadata                           |
+| Location               | Type       | Purpose                                           |
+| ---------------------- | ---------- | ------------------------------------------------- |
+| `subject.metadata`     | object     | Application-specific subject attributes           |
+| `auth.ctx`             | object     | Request context metadata (resource, method, etc.) |
+| `auth.extensions`      | Extensions | Namespaced auth-level extensions                  |
+| `control.extensions`   | Extensions | Namespaced control-level extensions               |
+| `evidence.extensions`  | Extensions | Namespaced evidence-level extensions              |
+| `payment.evidence`     | JsonValue  | Rail-specific payment proof                       |
+| `attestation.evidence` | JsonValue  | Format-specific attestation data                  |
+| `enforcement.details`  | object     | Enforcement method details                        |
+| `binding.evidence`     | object     | Transport binding proof                           |
+| `split.metadata`       | object     | Split-specific metadata                           |
 
 Use these designated fields for vendor extensions. Do not attempt to add unknown keys to strict objects.
+
+### Namespaced Extensions
+
+The `extensions` fields use namespaced keys following the pattern `domain/key`:
+
+```json
+{
+  "extensions": {
+    "com.example/custom-field": "value",
+    "io.vendor/metadata": { "key": "value" }
+  }
+}
+```
+
+Extension key requirements:
+
+- MUST match pattern `^[a-z0-9_.-]+/[a-z0-9_.-]+$`
+- SHOULD use reverse domain notation (e.g., `com.example/field`)
+- MAY contain any JSON value
+
+### Generic Attestations
+
+The `attestations` array supports any type of third-party attestation:
+
+```json
+{
+  "evidence": {
+    "attestations": [
+      {
+        "issuer": "https://cloudflare.com",
+        "type": "risk_assessment",
+        "issued_at": "2025-01-01T00:00:00Z",
+        "expires_at": "2025-01-02T00:00:00Z",
+        "ref": "https://cloudflare.com/r/abc123",
+        "evidence": { "score": 0.15, "outcome": "allow" }
+      }
+    ]
+  }
+}
+```
+
+Attestation fields:
+
+- `issuer` (required): URI or DID of the attestation issuer
+- `type` (required): Attestation type (e.g., `risk_assessment`, `kyc`, `compliance`)
+- `issued_at` (required): RFC 3339 timestamp when issued
+- `expires_at` (optional): RFC 3339 timestamp when attestation expires
+- `ref` (optional): URI reference to the attestation
+- `evidence` (required): Type-specific evidence payload (any JSON value)
 
 ## Conformance Testing
 

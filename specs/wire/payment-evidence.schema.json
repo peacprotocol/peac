@@ -147,6 +147,55 @@
       },
       "required": ["format", "evidence"],
       "additionalProperties": false
+    },
+
+    "Attestation": {
+      "type": "object",
+      "description": "Generic attestation from any issuer (risk, compliance, KYC, provenance, etc.)",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Issuer identifier (DID, URI, or opaque string)"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Attestation type (e.g., risk_assessment, kyc, compliance, provenance)"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the attestation was issued (RFC 3339)"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the attestation expires (RFC 3339)"
+        },
+        "ref": {
+          "type": "string",
+          "format": "uri",
+          "description": "Reference URI for the attestation"
+        },
+        "evidence": {
+          "$ref": "#/$defs/JsonValue",
+          "description": "Type-specific attestation data (opaque)"
+        }
+      },
+      "required": ["issuer", "type", "issued_at", "evidence"],
+      "additionalProperties": false
+    },
+
+    "Extensions": {
+      "type": "object",
+      "description": "Namespaced extension fields (keys must be namespaced, e.g., com.example/field)",
+      "propertyNames": {
+        "pattern": "^[a-z0-9_.-]+/[a-z0-9_.-]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      }
     }
   }
 }

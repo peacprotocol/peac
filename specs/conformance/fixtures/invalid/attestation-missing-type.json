@@ -1,0 +1,20 @@
+{
+  "auth": {
+    "iss": "https://api.example.com",
+    "aud": "https://consumer.example.com",
+    "sub": "user:bad_attest",
+    "iat": 1735600000,
+    "rid": "r_attest_bad_001",
+    "policy_hash": "sha256:bad_attest_hash",
+    "policy_uri": "https://api.example.com/policy"
+  },
+  "evidence": {
+    "attestations": [
+      {
+        "issuer": "https://cloudflare.com",
+        "issued_at": "2025-01-01T00:00:00Z",
+        "evidence": {}
+      }
+    ]
+  }
+}

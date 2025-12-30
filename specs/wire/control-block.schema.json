@@ -94,6 +94,9 @@
           "type": "string",
           "enum": ["any_can_veto"],
           "description": "Combinator logic (v0.9: only any_can_veto)"
+        },
+        "extensions": {
+          "$ref": "payment-evidence.schema.json#/$defs/Extensions"
         }
       },
       "required": ["chain", "decision"],

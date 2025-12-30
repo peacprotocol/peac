@@ -21,6 +21,16 @@
             "$ref": "payment-evidence.schema.json#/$defs/PaymentEvidence"
           },
           "description": "Multiple payment evidence entries"
+        },
+        "attestations": {
+          "type": "array",
+          "items": {
+            "$ref": "payment-evidence.schema.json#/$defs/Attestation"
+          },
+          "description": "Generic attestations (risk, compliance, KYC, provenance, etc.)"
+        },
+        "extensions": {
+          "$ref": "payment-evidence.schema.json#/$defs/Extensions"
         }
       },
       "additionalProperties": false
