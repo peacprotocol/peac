@@ -51,7 +51,9 @@ function loadManifest(): Manifest {
 
 // Load all schemas for $ref resolution
 function loadSchemas() {
-  const files = readdirSync(SPECS_DIR).filter((f) => f.endsWith('.schema.json')).sort();
+  const files = readdirSync(SPECS_DIR)
+    .filter((f) => f.endsWith('.schema.json'))
+    .sort();
 
   for (const file of files) {
     const filepath = join(SPECS_DIR, file);
@@ -90,7 +92,9 @@ describe('Schema Conformance', () => {
 
   describe('Valid Fixtures', () => {
     const validDir = join(FIXTURES_DIR, 'valid');
-    const files = readdirSync(validDir).filter((f) => f.endsWith('.json')).sort();
+    const files = readdirSync(validDir)
+      .filter((f) => f.endsWith('.json'))
+      .sort();
 
     for (const file of files) {
       it(`should accept ${file}`, () => {
@@ -110,7 +114,9 @@ describe('Schema Conformance', () => {
 
   describe('Invalid Fixtures', () => {
     const invalidDir = join(FIXTURES_DIR, 'invalid');
-    const files = readdirSync(invalidDir).filter((f) => f.endsWith('.json')).sort();
+    const files = readdirSync(invalidDir)
+      .filter((f) => f.endsWith('.json'))
+      .sort();
 
     for (const file of files) {
       it(`should reject ${file}`, () => {
@@ -135,7 +141,9 @@ describe('Schema Conformance', () => {
 
   describe('Edge Cases', () => {
     const edgeDir = join(FIXTURES_DIR, 'edge');
-    const files = readdirSync(edgeDir).filter((f) => f.endsWith('.json')).sort();
+    const files = readdirSync(edgeDir)
+      .filter((f) => f.endsWith('.json'))
+      .sort();
 
     for (const file of files) {
       it(`should handle edge case: ${file}`, () => {

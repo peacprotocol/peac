@@ -438,13 +438,9 @@ describe('Protocol Conformance', () => {
       const [header, payload, signature] = result.jws.split('.');
 
       // Decode, modify, re-encode payload
-      const decodedPayload = JSON.parse(
-        Buffer.from(payload, 'base64url').toString('utf8')
-      );
+      const decodedPayload = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
       decodedPayload.amt = 1; // Tamper: reduce amount
-      const tamperedPayload = Buffer.from(
-        JSON.stringify(decodedPayload)
-      ).toString('base64url');
+      const tamperedPayload = Buffer.from(JSON.stringify(decodedPayload)).toString('base64url');
 
       const tamperedJws = `${header}.${tamperedPayload}.${signature}`;
 

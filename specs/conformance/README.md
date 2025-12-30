@@ -46,11 +46,11 @@ Tests semantic invariants using `@peac/protocol` runtime validators.
 
 Some invalid cases **cannot exist as JSON files**:
 
-| Case               | Why                                        | Layer    |
-|--------------------|--------------------------------------------|----------|
-| Cycles             | JSON cannot represent circular references  | Protocol |
-| NaN/Infinity       | JSON only supports finite numbers          | Protocol |
-| Invalid signatures | Signature bytes are valid JSON strings     | Protocol |
+| Case               | Why                                       | Layer    |
+| ------------------ | ----------------------------------------- | -------- |
+| Cycles             | JSON cannot represent circular references | Protocol |
+| NaN/Infinity       | JSON only supports finite numbers         | Protocol |
+| Invalid signatures | Signature bytes are valid JSON strings    | Protocol |
 
 ## Fixture Format
 
@@ -66,11 +66,11 @@ Each fixture includes metadata comments:
 
 ## Normative vs Informational
 
-| Directory      | Status          | Meaning                              |
-|----------------|-----------------|--------------------------------------|
-| `valid/`       | **NORMATIVE**   | Implementations MUST accept these    |
-| `invalid/`     | **NORMATIVE**   | Implementations MUST reject these    |
-| `edge/`        | INFORMATIONAL   | Guidance for edge case handling      |
+| Directory  | Status        | Meaning                           |
+| ---------- | ------------- | --------------------------------- |
+| `valid/`   | **NORMATIVE** | Implementations MUST accept these |
+| `invalid/` | **NORMATIVE** | Implementations MUST reject these |
+| `edge/`    | INFORMATIONAL | Guidance for edge case handling   |
 
 ## Adding New Fixtures
 
