@@ -5,24 +5,10 @@
  * using PEIP-AI/inference@1 subject profile.
  */
 
-/**
- * Result type for parse operations - "never throws" invariant
- */
-export type AdapterResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: string; code: AdapterErrorCode };
+import type { JsonObject } from '@peac/adapter-core';
 
-/**
- * Error codes for adapter operations
- */
-export type AdapterErrorCode =
-  | 'missing_required_field'
-  | 'invalid_amount'
-  | 'invalid_currency'
-  | 'invalid_model_id'
-  | 'invalid_provider'
-  | 'parse_error'
-  | 'validation_error';
+// Re-export shared types from adapter-core
+export type { Result, AdapterError, AdapterErrorCode, JsonObject } from '@peac/adapter-core';
 
 /**
  * Daydreams inference request event
@@ -56,7 +42,7 @@ export interface DaydreamsInferenceEvent {
   /** Timestamp */
   timestamp?: string;
   /** Additional metadata */
-  metadata?: Record<string, unknown>;
+  metadata?: JsonObject;
 }
 
 /**

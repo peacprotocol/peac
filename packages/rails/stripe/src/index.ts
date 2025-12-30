@@ -3,6 +3,7 @@
  * Normalizes Stripe webhooks/checkout sessions to PEAC PaymentEvidence
  */
 
+import type { JsonObject } from '@peac/kernel';
 import { PaymentEvidence } from '@peac/schema';
 
 /**
@@ -57,7 +58,7 @@ export function fromCheckoutSession(
   }
 
   // Build evidence object with Stripe-specific data
-  const evidence: Record<string, unknown> = {
+  const evidence: JsonObject = {
     checkout_session_id: session.id,
   };
 
@@ -69,7 +70,7 @@ export function fromCheckoutSession(
     evidence.customer_id = session.customer;
   }
 
-  // Include user metadata if present
+  // Include user metadata if present (metadata is Record<string, string> which is JsonObject-compatible)
   if (session.metadata) {
     evidence.metadata = session.metadata;
   }
@@ -104,7 +105,7 @@ export function fromPaymentIntent(
   }
 
   // Build evidence object with Stripe-specific data
-  const evidence: Record<string, unknown> = {
+  const evidence: JsonObject = {
     payment_intent_id: intent.id,
   };
 
@@ -112,7 +113,7 @@ export function fromPaymentIntent(
     evidence.customer_id = intent.customer;
   }
 
-  // Include user metadata if present
+  // Include user metadata if present (metadata is Record<string, string> which is JsonObject-compatible)
   if (intent.metadata) {
     evidence.metadata = intent.metadata;
   }

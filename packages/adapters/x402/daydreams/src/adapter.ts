@@ -6,71 +6,25 @@
  */
 
 import type { PaymentEvidence } from '@peac/schema';
+import {
+  ok,
+  adapterErr,
+  isErr,
+  requireString,
+  requireAmount,
+  requireCurrency,
+  requireObject,
+  type Result,
+  type AdapterError,
+  type JsonObject,
+} from '@peac/adapter-core';
 import type {
   DaydreamsInferenceEvent,
-  DaydreamsWebhookEvent,
-  DaydreamsEvidence,
   DaydreamsConfig,
-  AdapterResult,
-  AdapterErrorCode,
 } from './types.js';
 
 const RAIL_ID = 'x402';
 const FACILITATOR = 'daydreams';
-
-/**
- * Create an error result
- */
-function err<T>(error: string, code: AdapterErrorCode): AdapterResult<T> {
-  return { ok: false, error, code };
-}
-
-/**
- * Create a success result
- */
-function ok<T>(value: T): AdapterResult<T> {
-  return { ok: true, value };
-}
-
-/**
- * Validate required string field
- */
-function validateRequiredString(value: unknown, fieldName: string): AdapterResult<string> {
-  if (typeof value !== 'string' || value.trim() === '') {
-    return err(`${fieldName} is required and must be a non-empty string`, 'missing_required_field');
-  }
-  return ok(value);
-}
-
-/**
- * Validate amount (must be safe positive integer in minor units)
- */
-function validateAmount(amount: unknown): AdapterResult<number> {
-  if (typeof amount !== 'number') {
-    return err('amount must be a number', 'invalid_amount');
-  }
-  if (!Number.isSafeInteger(amount)) {
-    return err('amount must be a safe integer', 'invalid_amount');
-  }
-  if (amount < 0) {
-    return err('amount must be non-negative', 'invalid_amount');
-  }
-  return ok(amount);
-}
-
-/**
- * Validate currency (ISO 4217, uppercase)
- */
-function validateCurrency(currency: unknown): AdapterResult<string> {
-  if (typeof currency !== 'string') {
-    return err('currency must be a string', 'invalid_currency');
-  }
-  const normalized = currency.toUpperCase();
-  if (!/^[A-Z]{3}$/.test(normalized)) {
-    return err('currency must be a valid ISO 4217 code (3 uppercase letters)', 'invalid_currency');
-  }
-  return ok(normalized);
-}
 
 /**
  * Parse and validate a Daydreams inference event
@@ -78,36 +32,34 @@ function validateCurrency(currency: unknown): AdapterResult<string> {
 export function parseInferenceEvent(
   event: unknown,
   config?: DaydreamsConfig
-): AdapterResult<DaydreamsInferenceEvent> {
-  if (!event || typeof event !== 'object') {
-    return err('event must be an object', 'parse_error');
-  }
-
-  const e = event as Record<string, unknown>;
+): Result<DaydreamsInferenceEvent, AdapterError> {
+  const objResult = requireObject(event, 'event');
+  if (isErr(objResult)) return objResult;
+  const e = objResult.value;
 
   // Validate required fields
-  const eventIdResult = validateRequiredString(e.eventId, 'eventId');
-  if (!eventIdResult.ok) return eventIdResult as AdapterResult<DaydreamsInferenceEvent>;
+  const eventIdResult = requireString(e.eventId, 'eventId');
+  if (isErr(eventIdResult)) return eventIdResult;
 
-  const modelIdResult = validateRequiredString(e.modelId, 'modelId');
-  if (!modelIdResult.ok) return modelIdResult as AdapterResult<DaydreamsInferenceEvent>;
+  const modelIdResult = requireString(e.modelId, 'modelId');
+  if (isErr(modelIdResult)) return modelIdResult;
 
-  const providerResult = validateRequiredString(e.provider, 'provider');
-  if (!providerResult.ok) return providerResult as AdapterResult<DaydreamsInferenceEvent>;
+  const providerResult = requireString(e.provider, 'provider');
+  if (isErr(providerResult)) return providerResult;
 
-  const amountResult = validateAmount(e.amount);
-  if (!amountResult.ok) return amountResult as AdapterResult<DaydreamsInferenceEvent>;
+  const amountResult = requireAmount(e.amount);
+  if (isErr(amountResult)) return amountResult;
 
-  const currencyResult = validateCurrency(e.currency);
-  if (!currencyResult.ok) return currencyResult as AdapterResult<DaydreamsInferenceEvent>;
+  const currencyResult = requireCurrency(e.currency);
+  if (isErr(currencyResult)) return currencyResult;
 
   // Validate against config if provided
   if (config?.allowedProviders && !config.allowedProviders.includes(providerResult.value)) {
-    return err(`provider '${providerResult.value}' is not in allowed list`, 'invalid_provider');
+    return adapterErr(`provider '${providerResult.value}' is not in allowed list`, 'validation_error', 'provider');
   }
 
   if (config?.allowedModels && !config.allowedModels.includes(modelIdResult.value)) {
-    return err(`model '${modelIdResult.value}' is not in allowed list`, 'invalid_model_id');
+    return adapterErr(`model '${modelIdResult.value}' is not in allowed list`, 'validation_error', 'modelId');
   }
 
   // Build validated event
@@ -141,8 +93,8 @@ export function parseInferenceEvent(
   if (e.timestamp && typeof e.timestamp === 'string') {
     validated.timestamp = e.timestamp;
   }
-  if (e.metadata && typeof e.metadata === 'object') {
-    validated.metadata = e.metadata as Record<string, unknown>;
+  if (e.metadata && typeof e.metadata === 'object' && !Array.isArray(e.metadata)) {
+    validated.metadata = e.metadata as JsonObject;
   }
 
   return ok(validated);
@@ -155,7 +107,8 @@ export function mapToPaymentEvidence(
   event: DaydreamsInferenceEvent,
   config?: DaydreamsConfig
 ): PaymentEvidence {
-  const evidence: DaydreamsEvidence = {
+  // Build evidence as JsonObject (typed internally as DaydreamsEvidence)
+  const evidence: JsonObject = {
     event_id: event.eventId,
     model_id: event.modelId,
     provider: event.provider,
@@ -165,7 +118,12 @@ export function mapToPaymentEvidence(
   // Optional evidence fields
   if (event.inputClass) evidence.input_class = event.inputClass;
   if (event.outputType) evidence.output_type = event.outputType;
-  if (event.tokens) evidence.tokens = event.tokens;
+  if (event.tokens) {
+    evidence.tokens = {
+      ...(event.tokens.input !== undefined && { input: event.tokens.input }),
+      ...(event.tokens.output !== undefined && { output: event.tokens.output }),
+    };
+  }
   if (event.sessionId) evidence.session_id = event.sessionId;
   if (event.userId) evidence.user_id = event.userId;
   if (event.timestamp) evidence.timestamp = event.timestamp;
@@ -189,10 +147,10 @@ export function mapToPaymentEvidence(
 export function fromInferenceEvent(
   event: unknown,
   config?: DaydreamsConfig
-): AdapterResult<PaymentEvidence> {
+): Result<PaymentEvidence, AdapterError> {
   const parseResult = parseInferenceEvent(event, config);
-  if (!parseResult.ok) {
-    return parseResult as AdapterResult<PaymentEvidence>;
+  if (isErr(parseResult)) {
+    return parseResult;
   }
 
   const paymentEvidence = mapToPaymentEvidence(parseResult.value, config);
@@ -205,24 +163,21 @@ export function fromInferenceEvent(
 export function fromWebhookEvent(
   webhookEvent: unknown,
   config?: DaydreamsConfig
-): AdapterResult<PaymentEvidence> {
-  if (!webhookEvent || typeof webhookEvent !== 'object') {
-    return err('webhook event must be an object', 'parse_error');
-  }
+): Result<PaymentEvidence, AdapterError> {
+  const objResult = requireObject(webhookEvent, 'webhookEvent');
+  if (isErr(objResult)) return objResult;
+  const w = objResult.value;
 
-  const w = webhookEvent as Record<string, unknown>;
-
-  if (!w.type || typeof w.type !== 'string') {
-    return err('webhook event type is required', 'missing_required_field');
-  }
+  const typeResult = requireString(w.type, 'type');
+  if (isErr(typeResult)) return typeResult;
 
   if (!w.data || typeof w.data !== 'object') {
-    return err('webhook event data is required', 'missing_required_field');
+    return adapterErr('webhook event data is required', 'missing_required_field', 'data');
   }
 
   // Only process completed inference events
-  if (w.type !== 'inference.completed' && w.type !== 'payment.captured') {
-    return err(`unsupported webhook event type: ${w.type}`, 'validation_error');
+  if (typeResult.value !== 'inference.completed' && typeResult.value !== 'payment.captured') {
+    return adapterErr(`unsupported webhook event type: ${typeResult.value}`, 'validation_error', 'type');
   }
 
   return fromInferenceEvent(w.data, config);

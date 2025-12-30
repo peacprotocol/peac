@@ -5,6 +5,7 @@
  * The envelope is the canonical structure for PEAC receipts.
  */
 
+import type { JsonObject, JsonValue } from '@peac/kernel';
 import type { ControlBlock } from './control';
 import type { PaymentEvidence, AttestationEvidence } from './evidence';
 import type { SubjectProfileSnapshot } from './subject';
@@ -31,19 +32,19 @@ export interface AuthContext {
 
 export interface EnforcementContext {
   method: string;
-  details?: Record<string, unknown>;
+  details?: JsonObject;
 }
 
 export interface TransportBinding {
   transport: string;
   method: string;
-  evidence?: Record<string, unknown>;
+  evidence?: JsonObject;
 }
 
 export interface ContextMetadata {
   resource?: string;
   method?: string;
-  [key: string]: unknown;
+  [key: string]: JsonValue | undefined;
 }
 
 export interface EvidenceBlock {
@@ -54,9 +55,9 @@ export interface EvidenceBlock {
 
 export interface MetadataBlock {
   redactions?: string[];
-  privacy_budget?: Record<string, unknown>;
-  debug?: Record<string, unknown>;
-  [key: string]: unknown;
+  privacy_budget?: JsonObject;
+  debug?: JsonObject;
+  [key: string]: JsonValue | undefined;
 }
 
 /**

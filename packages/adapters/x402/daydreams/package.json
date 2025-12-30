@@ -25,6 +25,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@peac/adapter-core": "workspace:*",
     "@peac/schema": "workspace:*"
   },
   "devDependencies": {

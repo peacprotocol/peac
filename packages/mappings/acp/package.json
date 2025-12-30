@@ -29,6 +29,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@peac/kernel": "workspace:*",
     "@peac/schema": "workspace:*",
     "@peac/protocol": "workspace:*"
   },

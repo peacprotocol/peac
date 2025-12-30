@@ -10,8 +10,11 @@ export type {
   DaydreamsWebhookEvent,
   DaydreamsEvidence,
   DaydreamsConfig,
-  AdapterResult,
+  // Re-exported from @peac/adapter-core
+  Result,
+  AdapterError,
   AdapterErrorCode,
+  JsonObject,
 } from './types.js';
 
 export {

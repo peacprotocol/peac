@@ -32,7 +32,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent(null);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('parse_error');
+        expect(result.error.code).toBe('parse_error');
       }
     });
 
@@ -40,8 +40,8 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent({ ...validEvent, eventId: '' });
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('missing_required_field');
-        expect(result.error).toContain('eventId');
+        expect(result.error.code).toBe('missing_required_field');
+        expect(result.error.message).toContain('eventId');
       }
     });
 
@@ -49,7 +49,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent({ ...validEvent, modelId: '' });
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('missing_required_field');
+        expect(result.error.code).toBe('missing_required_field');
       }
     });
 
@@ -57,7 +57,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent({ ...validEvent, provider: '' });
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('missing_required_field');
+        expect(result.error.code).toBe('missing_required_field');
       }
     });
 
@@ -65,7 +65,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent({ ...validEvent, amount: 'invalid' });
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('invalid_amount');
+        expect(result.error.code).toBe('invalid_amount');
       }
     });
 
@@ -73,7 +73,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent({ ...validEvent, amount: -100 });
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('invalid_amount');
+        expect(result.error.code).toBe('invalid_amount');
       }
     });
 
@@ -81,7 +81,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent({ ...validEvent, amount: Number.MAX_SAFE_INTEGER + 1 });
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('invalid_amount');
+        expect(result.error.code).toBe('invalid_amount');
       }
     });
 
@@ -89,7 +89,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent({ ...validEvent, currency: 'US' });
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('invalid_currency');
+        expect(result.error.code).toBe('invalid_currency');
       }
     });
 
@@ -106,7 +106,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent(validEvent, config);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('invalid_provider');
+        expect(result.error.code).toBe('validation_error');
       }
     });
 
@@ -115,7 +115,7 @@ describe('x402-daydreams adapter', () => {
       const result = parseInferenceEvent(validEvent, config);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('invalid_model_id');
+        expect(result.error.code).toBe('validation_error');
       }
     });
 
@@ -224,7 +224,7 @@ describe('x402-daydreams adapter', () => {
       const result = fromWebhookEvent(webhook);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.code).toBe('validation_error');
+        expect(result.error.code).toBe('validation_error');
       }
     });
 

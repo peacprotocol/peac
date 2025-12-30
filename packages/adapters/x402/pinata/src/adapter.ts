@@ -5,10 +5,10 @@
  * following the "never throws" invariant with Result types.
  */
 
+import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
 import type {
   PinataAccessEvent,
-  PinataEvidence,
   PinataConfig,
   AdapterResult,
   AdapterErrorCode,
@@ -186,7 +186,8 @@ export function mapToPaymentEvidence(
 ): PaymentEvidence {
   const visibility = event.visibility ?? config?.defaultVisibility ?? 'private';
 
-  const evidence: PinataEvidence = {
+  // Build evidence as JsonObject (typed internally as PinataEvidence structure)
+  const evidence: JsonObject = {
     access_id: event.accessId,
     cid: event.cid,
     store: 'ipfs',

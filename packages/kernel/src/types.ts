@@ -3,6 +3,49 @@
  * Shared type definitions for kernel exports
  */
 
+// -----------------------------------------------------------------------------
+// JSON-Safe Types (v0.9.21+)
+// -----------------------------------------------------------------------------
+
+/**
+ * JSON-safe primitive value
+ *
+ * Represents values that can be directly serialized to JSON.
+ */
+export type JsonPrimitive = string | number | boolean | null;
+
+/**
+ * JSON-safe value (recursive)
+ *
+ * Use for any data that must be JSON-serializable.
+ * Excludes undefined, functions, symbols, BigInt, Date, etc.
+ */
+export type JsonValue = JsonPrimitive | JsonArray | JsonObject;
+
+/**
+ * JSON-safe array
+ */
+export type JsonArray = JsonValue[];
+
+/**
+ * JSON-safe object
+ *
+ * Use for opaque/extensible evidence fields instead of `unknown`.
+ * Provides JSON-serializability guarantee without requiring full type knowledge.
+ *
+ * @example
+ * // Before (type hole)
+ * evidence: unknown;
+ *
+ * // After (JSON-safe guarantee)
+ * evidence: JsonObject;
+ */
+export type JsonObject = { [key: string]: JsonValue };
+
+// -----------------------------------------------------------------------------
+// Registry Types
+// -----------------------------------------------------------------------------
+
 /**
  * Error code definition
  */
