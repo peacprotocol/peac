@@ -330,7 +330,7 @@ export interface AttestationEvidence {
  * This is a generic slot for third-party claims. Specific attestation
  * types (like risk_assessment) define their evidence schema by convention.
  *
- * v0.9.22+: Added in schema_set_version 0.9.22.
+ * v0.9.21+: Added in schema_set_version 0.9.21.
  */
 export interface Attestation {
   /**
@@ -415,7 +415,7 @@ export interface Attestation {
  * This provides a forward-compatible extension mechanism for all blocks
  * that use `additionalProperties: false`.
  *
- * v0.9.22+: Added in schema_set_version 0.9.22.
+ * v0.9.21+: Added in schema_set_version 0.9.21.
  */
 export interface Extensions {
   [key: string]: JsonValue;

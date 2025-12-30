@@ -28,7 +28,7 @@ export interface AuthContext {
   ctx?: ContextMetadata;
   /** Subject profile snapshot for policy evaluation (v0.9.17+) */
   subject_snapshot?: SubjectProfileSnapshot;
-  /** Namespaced extensions (v0.9.22+) */
+  /** Namespaced extensions (v0.9.21+) */
   extensions?: Extensions;
 }
 
@@ -53,9 +53,9 @@ export interface EvidenceBlock {
   payment?: PaymentEvidence;
   attestation?: AttestationEvidence;
   payments?: PaymentEvidence[];
-  /** Generic attestations (v0.9.22+) */
+  /** Generic attestations (v0.9.21+) */
   attestations?: Attestation[];
-  /** Namespaced extensions (v0.9.22+) */
+  /** Namespaced extensions (v0.9.21+) */
   extensions?: Extensions;
 }
 
