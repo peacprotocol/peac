@@ -277,6 +277,40 @@ export const SubjectProfileSnapshotSchema = z
   .strict();
 
 // -----------------------------------------------------------------------------
+// Attestation Validators (v0.9.22+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Namespaced extensions schema
+ *
+ * Keys must be namespaced (e.g., "com.example/field", "io.vendor/data").
+ * This provides a forward-compatible extension mechanism.
+ */
+export const ExtensionsSchema = z.record(
+  z.string().regex(/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/),
+  JsonValueSchema
+);
+
+/**
+ * Generic attestation schema
+ *
+ * Invariants:
+ * - issuer, type, issued_at, evidence are required
+ * - issued_at and expires_at must be RFC 3339 date-time
+ * - ref if present must be a valid URI
+ */
+export const AttestationSchema = z
+  .object({
+    issuer: z.string().min(1),
+    type: z.string().min(1),
+    issued_at: z.string().datetime(),
+    expires_at: z.string().datetime().optional(),
+    ref: z.string().url().optional(),
+    evidence: JsonValueSchema,
+  })
+  .strict();
+
+// -----------------------------------------------------------------------------
 // Subject Snapshot Validation Helper (v0.9.17+)
 // -----------------------------------------------------------------------------
 

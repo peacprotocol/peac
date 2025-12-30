@@ -15,6 +15,15 @@
     },
     "subject-snapshot.json": {
       "description": "PEAC receipt with subject profile snapshot"
+    },
+    "attestation-single.json": {
+      "description": "PEAC receipt with single attestation (risk assessment type)"
+    },
+    "attestation-multiple.json": {
+      "description": "PEAC receipt with multiple attestations (risk + KYC)"
+    },
+    "extensions.json": {
+      "description": "PEAC receipt with namespaced extensions in auth and evidence blocks"
     }
   },
   "invalid": {
@@ -37,6 +46,16 @@
       "description": "Extra field 'unknown_field' not allowed (additionalProperties: false)",
       "expected_keyword": "additionalProperties",
       "expected_path": "/auth"
+    },
+    "attestation-missing-type.json": {
+      "description": "Attestation missing required 'type' field",
+      "expected_keyword": "required",
+      "expected_path": "/evidence/attestations/0"
+    },
+    "attestation-invalid-date.json": {
+      "description": "Attestation with invalid date-time format",
+      "expected_keyword": "format",
+      "expected_path": "/evidence/attestations/0/issued_at"
     }
   },
   "edge": {

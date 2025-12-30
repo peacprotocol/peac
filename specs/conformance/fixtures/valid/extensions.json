@@ -1,0 +1,26 @@
+{
+  "auth": {
+    "iss": "https://api.example.com",
+    "aud": "https://consumer.example.com",
+    "sub": "user:ext_test",
+    "iat": 1735600000,
+    "rid": "r_ext_001",
+    "policy_hash": "sha256:ext_policy_hash",
+    "policy_uri": "https://api.example.com/policy",
+    "extensions": {
+      "com.example/custom-field": "custom-value",
+      "io.vendor/metadata": {
+        "key": "value",
+        "nested": { "deep": true }
+      }
+    }
+  },
+  "evidence": {
+    "extensions": {
+      "org.peac/audit-trail": {
+        "request_id": "req_123",
+        "trace_id": "trace_456"
+      }
+    }
+  }
+}

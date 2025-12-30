@@ -312,3 +312,111 @@ export interface AttestationEvidence {
    */
   evidence: JsonValue;
 }
+
+/**
+ * Generic attestation from any issuer
+ *
+ * A flexible container for various types of attestations:
+ * - Risk assessments (fraud, bot detection, abuse)
+ * - Compliance attestations (KYC, AML, jurisdiction)
+ * - Provenance attestations (content origin, model attestation)
+ * - Platform attestations (TEE, enclave verification)
+ *
+ * Invariants:
+ * - `issuer`, `type`, `issued_at`, `evidence` are REQUIRED
+ * - `expires_at` and `ref` are OPTIONAL
+ * - `evidence` is opaque (type-specific data)
+ *
+ * This is a generic slot for third-party claims. Specific attestation
+ * types (like risk_assessment) define their evidence schema by convention.
+ *
+ * v0.9.22+: Added in schema_set_version 0.9.22.
+ */
+export interface Attestation {
+  /**
+   * Issuer identifier (REQUIRED)
+   *
+   * Who issued this attestation. Examples:
+   * - "did:web:issuer.example" - DID-based issuer
+   * - "https://cloudflare.com" - URI-based issuer
+   * - "cloudflare" - Opaque string identifier
+   */
+  issuer: string;
+
+  /**
+   * Attestation type (REQUIRED)
+   *
+   * What kind of attestation this is. Examples:
+   * - "risk_assessment" - Risk/fraud assessment
+   * - "kyc" - Know Your Customer verification
+   * - "compliance" - Regulatory compliance
+   * - "provenance" - Content/model provenance
+   * - "platform" - Platform/TEE attestation
+   */
+  type: string;
+
+  /**
+   * When the attestation was issued (REQUIRED)
+   *
+   * RFC 3339 / ISO 8601 UTC timestamp.
+   */
+  issued_at: string;
+
+  /**
+   * When the attestation expires (OPTIONAL)
+   *
+   * RFC 3339 / ISO 8601 UTC timestamp.
+   * Omit for non-expiring attestations.
+   */
+  expires_at?: string;
+
+  /**
+   * Reference URI for the attestation (OPTIONAL)
+   *
+   * Link to more details, verification endpoint, or the attestation itself.
+   */
+  ref?: string;
+
+  /**
+   * Type-specific attestation data (REQUIRED)
+   *
+   * Structure varies by type. Examples:
+   *
+   * risk_assessment:
+   * {
+   *   "provider": "cloudflare",
+   *   "category": "bot",
+   *   "outcome": "allow",
+   *   "score": 0.15,
+   *   "confidence": 0.95
+   * }
+   *
+   * kyc:
+   * {
+   *   "level": "enhanced",
+   *   "jurisdiction": "US",
+   *   "verified_fields": ["name", "address", "dob"]
+   * }
+   *
+   * provenance:
+   * {
+   *   "model": "gpt-4",
+   *   "version": "2024-01",
+   *   "content_hash": "sha256:..."
+   * }
+   */
+  evidence: JsonValue;
+}
+
+/**
+ * Namespaced extensions object
+ *
+ * Keys must be namespaced (e.g., "com.example/field", "io.vendor/data").
+ * This provides a forward-compatible extension mechanism for all blocks
+ * that use `additionalProperties: false`.
+ *
+ * v0.9.22+: Added in schema_set_version 0.9.22.
+ */
+export interface Extensions {
+  [key: string]: JsonValue;
+}

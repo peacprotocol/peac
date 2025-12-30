@@ -122,6 +122,9 @@
         },
         "subject_snapshot": {
           "$ref": "subject-profile.schema.json#/$defs/SubjectProfileSnapshot"
+        },
+        "extensions": {
+          "$ref": "payment-evidence.schema.json#/$defs/Extensions"
         }
       },
       "required": ["iss", "aud", "sub", "iat", "rid", "policy_hash", "policy_uri"],

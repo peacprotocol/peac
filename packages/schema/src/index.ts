@@ -54,6 +54,9 @@ export {
   SubjectTypeSchema,
   SubjectProfileSchema,
   SubjectProfileSnapshotSchema,
+  // Attestation validators (v0.9.22+)
+  AttestationSchema,
+  ExtensionsSchema,
   // Subject snapshot validation helper (v0.9.17+)
   validateSubjectSnapshot,
   // Evidence validation with DoS protection (v0.9.21+)

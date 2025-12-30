@@ -1,0 +1,29 @@
+{
+  "auth": {
+    "iss": "https://api.example.com",
+    "aud": "https://consumer.example.com",
+    "sub": "user:attest_test",
+    "iat": 1735600000,
+    "rid": "r_attest_001",
+    "policy_hash": "sha256:attest_policy_hash",
+    "policy_uri": "https://api.example.com/policy"
+  },
+  "evidence": {
+    "attestations": [
+      {
+        "issuer": "https://cloudflare.com",
+        "type": "risk_assessment",
+        "issued_at": "2025-01-01T00:00:00Z",
+        "expires_at": "2025-01-02T00:00:00Z",
+        "ref": "https://cloudflare.com/r/abc123",
+        "evidence": {
+          "provider": "cloudflare",
+          "category": "bot",
+          "outcome": "allow",
+          "score": 0.15,
+          "confidence": 0.95
+        }
+      }
+    ]
+  }
+}

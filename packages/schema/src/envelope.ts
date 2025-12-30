@@ -7,7 +7,7 @@
 
 import type { JsonObject, JsonValue } from '@peac/kernel';
 import type { ControlBlock } from './control';
-import type { PaymentEvidence, AttestationEvidence } from './evidence';
+import type { PaymentEvidence, AttestationEvidence, Attestation, Extensions } from './evidence';
 import type { SubjectProfileSnapshot } from './subject';
 
 /**
@@ -28,6 +28,8 @@ export interface AuthContext {
   ctx?: ContextMetadata;
   /** Subject profile snapshot for policy evaluation (v0.9.17+) */
   subject_snapshot?: SubjectProfileSnapshot;
+  /** Namespaced extensions (v0.9.22+) */
+  extensions?: Extensions;
 }
 
 export interface EnforcementContext {
@@ -51,6 +53,10 @@ export interface EvidenceBlock {
   payment?: PaymentEvidence;
   attestation?: AttestationEvidence;
   payments?: PaymentEvidence[];
+  /** Generic attestations (v0.9.22+) */
+  attestations?: Attestation[];
+  /** Namespaced extensions (v0.9.22+) */
+  extensions?: Extensions;
 }
 
 export interface MetadataBlock {
