@@ -1,0 +1,65 @@
+# API Provider Profile
+# For API documentation, developer portals, and technical references
+#
+# Default behavior:
+# - Allow search and indexing for discoverability
+# - Block training to protect API design IP
+# - Require receipt for inference (API usage tracking)
+
+id: api-provider
+name: API Provider
+description: |
+  Policy profile for API providers and developer platforms.
+  Allows search indexing for API discoverability.
+  Blocks training to protect API design and documentation IP.
+  Requires receipts for inference to enable usage tracking.
+
+policy:
+  version: 'peac-policy/0.1'
+  name: API Provider Policy
+  defaults:
+    decision: deny
+    reason: Default deny - explicit permission required
+  rules:
+    - name: allow-discovery
+      purpose:
+        - crawl
+        - index
+        - search
+        - ai_index
+      decision: allow
+      reason: Allow API discovery and search indexing
+
+    - name: block-training
+      purpose: train
+      decision: deny
+      reason: API documentation training requires license
+
+    - name: inference-with-receipt
+      purpose:
+        - inference
+        - ai_input
+      decision: review
+      reason: Inference requires valid PEAC receipt for tracking
+
+parameters:
+  contact:
+    description: Developer relations or API support email
+    required: true
+    example: api-support@example.com
+    validate: email
+  rate_limit:
+    description: Rate limit for API documentation access
+    default: '200/hour'
+    validate: rate_limit
+  negotiate_url:
+    description: URL for API access negotiation
+    required: false
+    validate: url
+
+defaults:
+  requirements:
+    receipt: true
+  rate_limit:
+    limit: 200
+    window_seconds: 3600

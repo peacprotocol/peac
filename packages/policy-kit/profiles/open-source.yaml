@@ -1,0 +1,39 @@
+# Open Source Project Profile
+# For open source project documentation, wikis, and community content
+#
+# Default behavior:
+# - Allow all AI access including training
+# - Fully open (receipts optional)
+# - Minimal restrictions
+
+id: open-source
+name: Open Source Project
+description: |
+  Policy profile for open source projects.
+  Fully open access including AI training.
+  Encourages broad AI ecosystem adoption.
+  Receipts are optional for attribution tracking.
+
+policy:
+  version: 'peac-policy/0.1'
+  name: Open Source Policy
+  defaults:
+    decision: allow
+    reason: Open source - all access permitted
+  rules: []
+
+parameters:
+  contact:
+    description: Project contact or maintainer email
+    required: false
+    example: maintainer@example.com
+    validate: email
+  attribution:
+    description: Attribution requirement
+    default: 'optional'
+    example: 'required'
+
+defaults:
+  rate_limit:
+    limit: 1000
+    window_seconds: 3600

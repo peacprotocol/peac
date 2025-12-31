@@ -1,0 +1,64 @@
+# News Media Publisher Profile
+# For news sites, media outlets, and journalism publications
+#
+# Default behavior:
+# - Allow search indexing (crawl, index, search, ai_index)
+# - Block AI training without explicit agreement
+# - Require receipt for inference access
+
+id: news-media
+name: News Media Publisher
+description: |
+  Policy profile for news and media publishers.
+  Allows search engine indexing while blocking unauthorized AI training.
+  Inference access requires a valid PEAC receipt.
+
+policy:
+  version: 'peac-policy/0.1'
+  name: News Media Policy
+  defaults:
+    decision: deny
+    reason: Default deny - explicit permission required
+  rules:
+    - name: allow-search-indexing
+      purpose:
+        - crawl
+        - index
+        - search
+        - ai_index
+      decision: allow
+      reason: Allow discovery and search engine indexing
+
+    - name: block-training
+      purpose: train
+      decision: deny
+      reason: Training requires explicit licensing agreement
+
+    - name: inference-needs-receipt
+      purpose:
+        - inference
+        - ai_input
+      decision: review
+      reason: Inference access requires valid PEAC receipt
+
+parameters:
+  contact:
+    description: Contact email for licensing inquiries
+    required: true
+    example: licensing@example.com
+    validate: email
+  rate_limit:
+    description: Rate limit for allowed purposes
+    default: '100/hour'
+    validate: rate_limit
+  negotiate_url:
+    description: URL for license negotiation
+    required: false
+    validate: url
+
+defaults:
+  requirements:
+    receipt: true
+  rate_limit:
+    limit: 100
+    window_seconds: 3600

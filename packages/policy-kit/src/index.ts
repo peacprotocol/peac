@@ -42,11 +42,24 @@ export {
   type PolicyDocument,
   type EvaluationContext,
   type EvaluationResult,
+  // Rate limiting (v0.9.23+)
+  type RateLimitConfig,
+  parseRateLimit,
+  formatRateLimit,
+  // Decision requirements (v0.9.23+)
+  type DecisionRequirements,
+  // Profile system (v0.9.23+)
+  type ProfileParameter,
+  type ProfileDefinition,
   // Schemas for advanced validation
   SubjectMatcherSchema,
   PolicyRuleSchema,
   PolicyDefaultsSchema,
   PolicyDocumentSchema,
+  RateLimitConfigSchema,
+  DecisionRequirementsSchema,
+  ProfileParameterSchema,
+  ProfileDefinitionSchema,
 } from './types';
 
 // Loader
@@ -83,3 +96,33 @@ export {
   type CompileOptions,
   type AiprefTemplate,
 } from './compiler';
+
+// Generated profiles (v0.9.23+)
+export { PROFILES, PROFILE_IDS, type ProfileId } from './generated/profiles';
+
+// Profile loader API (v0.9.23+)
+export {
+  listProfiles,
+  hasProfile,
+  loadProfile,
+  getProfile,
+  validateProfileParams,
+  customizeProfile,
+  getAllProfiles,
+  getProfileSummary,
+  ProfileError,
+  type ValidationResult,
+  type ValidationError,
+  type ValidationWarning,
+  type CustomizeResult,
+} from './profiles';
+
+// Decision enforcement (v0.9.23+)
+export {
+  enforceDecision,
+  requiresChallenge,
+  getChallengeHeader,
+  enforceForHttp,
+  type EnforcementContext,
+  type EnforcementResult,
+} from './enforce';
