@@ -1,0 +1,43 @@
+# SaaS Documentation Profile
+# For SaaS product documentation, developer guides, and API references
+#
+# Default behavior:
+# - Allow most AI access (search, index, inference)
+# - Block AI training to protect proprietary content
+# - Receipts optional (good for adoption)
+
+id: saas-docs
+name: SaaS Documentation
+description: |
+  Policy profile for SaaS documentation sites.
+  Open access for search and inference to improve discoverability.
+  Training blocked to protect proprietary documentation.
+  Receipts are optional to encourage AI agent adoption.
+
+policy:
+  version: 'peac-policy/0.1'
+  name: SaaS Documentation Policy
+  defaults:
+    decision: allow
+    reason: Open by default for documentation
+  rules:
+    - name: block-training
+      purpose: train
+      decision: deny
+      reason: Proprietary documentation - training requires license
+
+parameters:
+  contact:
+    description: Contact email for questions
+    required: false
+    example: docs@example.com
+    validate: email
+  rate_limit:
+    description: Rate limit for access
+    default: '500/hour'
+    validate: rate_limit
+
+defaults:
+  rate_limit:
+    limit: 500
+    window_seconds: 3600

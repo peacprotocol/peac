@@ -23,7 +23,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc",
+    "generate:profiles": "tsx scripts/generate-profiles.ts",
+    "generate:profiles:check": "tsx scripts/generate-profiles.ts --check",
+    "build": "pnpm generate:profiles && tsc",
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf dist"
@@ -35,6 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0"
   }

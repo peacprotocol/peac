@@ -96,3 +96,6 @@ export {
   type CompileOptions,
   type AiprefTemplate,
 } from './compiler';
+
+// Generated profiles (v0.9.23+)
+export { PROFILES, PROFILE_IDS, type ProfileId } from './generated/profiles';
