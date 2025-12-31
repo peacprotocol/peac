@@ -42,11 +42,24 @@ export {
   type PolicyDocument,
   type EvaluationContext,
   type EvaluationResult,
+  // Rate limiting (v0.9.23+)
+  type RateLimitConfig,
+  parseRateLimit,
+  formatRateLimit,
+  // Decision requirements (v0.9.23+)
+  type DecisionRequirements,
+  // Profile system (v0.9.23+)
+  type ProfileParameter,
+  type ProfileDefinition,
   // Schemas for advanced validation
   SubjectMatcherSchema,
   PolicyRuleSchema,
   PolicyDefaultsSchema,
   PolicyDocumentSchema,
+  RateLimitConfigSchema,
+  DecisionRequirementsSchema,
+  ProfileParameterSchema,
+  ProfileDefinitionSchema,
 } from './types';
 
 // Loader
