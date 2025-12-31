@@ -52,7 +52,7 @@ for (const p of pkgPaths) {
 console.log(pub.sort().join('\n'));
 ")
 
-# Expected packages (updated for v0.9.21)
+# Expected packages (updated for v0.9.22)
 EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/adapter-core
 @peac/adapter-x402-daydreams
@@ -81,6 +81,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/schema
 @peac/sdk
 @peac/server
+@peac/telemetry
 EOF
 )
 
@@ -96,7 +97,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 27 public packages match"
+  echo "OK: All 28 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -114,7 +115,8 @@ TESTED_PACKAGES="@peac/crypto
 @peac/policy-kit
 @peac/protocol
 @peac/rails-stripe
-@peac/rails-x402"
+@peac/rails-x402
+@peac/telemetry"
 
 # Packages explicitly without tests (with rationale)
 # These are either: thin wrappers, deprecated, or type-only packages
@@ -130,13 +132,13 @@ NO_TESTS_RATIONALE="@peac/cli - CLI wrapper, tested via integration
 @peac/sdk - re-exports only
 @peac/server - server wrapper, tested via integration"
 
-echo "Packages with tests (11):"
+echo "Packages with tests (12):"
 echo "$TESTED_PACKAGES" | sed 's/^/  /'
 echo ""
 echo "Packages without tests (11) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 22 packages accounted for (11 tested + 11 type/wrapper packages)"
+echo "OK: All 23 packages accounted for (12 tested + 11 type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="
