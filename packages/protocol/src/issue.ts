@@ -15,6 +15,8 @@ import {
   createEvidenceNotJsonError,
   type PEACError,
 } from '@peac/schema';
+import { providerRef } from '@peac/telemetry';
+import { hashReceipt } from './telemetry.js';
 
 /**
  * Options for issuing a receipt
@@ -196,8 +198,27 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
   // This validates schema and logs advisory PII warning if applicable
   const validatedSnapshot = validateSubjectSnapshot(options.subject_snapshot);
 
+  // Track start time for telemetry
+  const startTime = performance.now();
+
   // Sign with Ed25519
   const jws = await sign(claims, options.privateKey, options.kid);
+
+  // Emit telemetry (no-throw guard)
+  const p = providerRef.current;
+  if (p) {
+    try {
+      const durationMs = performance.now() - startTime;
+      p.onReceiptIssued({
+        receiptHash: hashReceipt(jws),
+        issuer: options.iss,
+        kid: options.kid,
+        durationMs,
+      });
+    } catch {
+      // Telemetry MUST NOT break core flow
+    }
+  }
 
   return {
     jws,

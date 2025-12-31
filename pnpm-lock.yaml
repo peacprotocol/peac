@@ -653,6 +653,9 @@ importers:
       '@peac/schema':
         specifier: workspace:*
         version: link:../schema
+      '@peac/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       uuidv7:
         specifier: ^0.6.3
         version: 0.6.3

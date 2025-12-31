@@ -9,6 +9,8 @@ import {
   SubjectProfileSnapshot,
   validateSubjectSnapshot,
 } from '@peac/schema';
+import { providerRef } from '@peac/telemetry';
+import { hashReceipt } from './telemetry.js';
 
 /**
  * JWKS key entry
@@ -181,6 +183,34 @@ export interface VerifyOptions {
 }
 
 /**
+ * Emit verification telemetry (no-throw guard)
+ */
+function emitVerifyTelemetry(
+  receiptJws: string,
+  valid: boolean,
+  reasonCode: string | undefined,
+  issuer: string | undefined,
+  kid: string | undefined,
+  durationMs: number
+): void {
+  const p = providerRef.current;
+  if (p) {
+    try {
+      p.onReceiptVerified({
+        receiptHash: hashReceipt(receiptJws),
+        valid,
+        reasonCode,
+        issuer,
+        kid,
+        durationMs,
+      });
+    } catch {
+      // Telemetry MUST NOT break core flow
+    }
+  }
+}
+
+/**
  * Verify a PEAC receipt JWS
  *
  * @param optionsOrJws - Verify options or JWS compact serialization (for backwards compatibility)
@@ -205,6 +235,8 @@ export async function verifyReceipt(
 
     // Check expiry
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      const durationMs = performance.now() - startTime;
+      emitVerifyTelemetry(receiptJws, false, 'expired', payload.iss, header.kid, durationMs);
       return {
         ok: false,
         reason: 'expired',
@@ -222,6 +254,8 @@ export async function verifyReceipt(
     // Find key by kid
     const jwk = jwks.keys.find((k) => k.kid === header.kid);
     if (!jwk) {
+      const durationMs = performance.now() - startTime;
+      emitVerifyTelemetry(receiptJws, false, 'unknown_key', payload.iss, header.kid, durationMs);
       return {
         ok: false,
         reason: 'unknown_key',
@@ -236,6 +270,15 @@ export async function verifyReceipt(
     const result = await jwsVerify<PEACReceiptClaims>(receiptJws, publicKey);
 
     if (!result.valid) {
+      const durationMs = performance.now() - startTime;
+      emitVerifyTelemetry(
+        receiptJws,
+        false,
+        'invalid_signature',
+        payload.iss,
+        header.kid,
+        durationMs
+      );
       return {
         ok: false,
         reason: 'invalid_signature',
@@ -249,6 +292,9 @@ export async function verifyReceipt(
 
     const verifyTime = performance.now() - startTime;
 
+    // Emit success telemetry
+    emitVerifyTelemetry(receiptJws, true, undefined, payload.iss, header.kid, verifyTime);
+
     return {
       ok: true,
       claims: payload,
@@ -259,6 +305,8 @@ export async function verifyReceipt(
       },
     };
   } catch (err) {
+    const durationMs = performance.now() - startTime;
+    emitVerifyTelemetry(receiptJws, false, 'verification_error', undefined, undefined, durationMs);
     return {
       ok: false,
       reason: 'verification_error',
