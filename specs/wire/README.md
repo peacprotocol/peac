@@ -132,6 +132,65 @@ Attestation fields:
 - `ref` (optional): URI reference to the attestation
 - `evidence` (required): Type-specific evidence payload (any JSON value)
 
+## Evidence Lane Rules (Normative)
+
+Evidence in PEAC receipts is organized into distinct "lanes" with specific scopes and semantics. This separation is critical for correct interpretation and prevents scope confusion.
+
+| Lane             | Location                  | Scope                      | Examples                                             |
+| ---------------- | ------------------------- | -------------------------- | ---------------------------------------------------- |
+| Payment Evidence | `payment.evidence.*`      | **Rail-scoped**            | Fraud signals, charge lifecycle, processor refs      |
+| Attestations     | `evidence.attestations[]` | **Interaction-scoped**     | Content safety, bot classification, policy decisions |
+| Extensions       | `*.extensions`            | **Non-normative metadata** | Trace correlation, vendor extras, audit hints        |
+
+### Lane Semantics
+
+**Payment Evidence** (`payment.evidence`):
+
+- Bound to a specific payment rail (Stripe, x402, Razorpay, etc.)
+- Contains rail-specific proof and metadata
+- Used for payment verification and dispute resolution
+
+**Attestations** (`evidence.attestations[]`):
+
+- Interaction-scoped third-party claims
+- Independent of payment rail
+- Used for risk assessment, compliance, content classification
+
+**Extensions** (`auth.extensions`, `control.extensions`, `evidence.extensions`):
+
+- Non-normative metadata
+- Correlation hints (e.g., trace context)
+- Vendor-specific extras
+
+### Critical Invariant
+
+**Extensions MUST NOT be required for verification correctness.**
+
+A receipt is valid if and only if:
+
+1. The signature verifies
+2. Required fields are present and valid
+3. Time constraints are satisfied
+
+Extensions provide correlation and metadata but NEVER affect authorization decisions unless a relying party explicitly opts in by policy.
+
+### Trace Context in Extensions
+
+When audit/compliance flows require cryptographic binding of trace context to receipts:
+
+```json
+{
+  "auth": {
+    "extensions": {
+      "w3c/traceparent": "00-abc123def456...-01",
+      "w3c/tracestate": "vendor=value"
+    }
+  }
+}
+```
+
+This is a **correlation hint**, never an enforcement input. Use only when cryptographic proof of trace linkage is required (EU AI Act, SOC 2, dispute resolution).
+
 ## Conformance Testing
 
 Conformance tests live in:
