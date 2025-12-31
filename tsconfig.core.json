@@ -19,7 +19,8 @@
     "packages/policy-kit/src/**/*.ts",
     "packages/core/src/**/*.ts",
     "packages/rails/**/src/**/*.ts",
-    "packages/mappings/**/src/**/*.ts"
+    "packages/mappings/**/src/**/*.ts",
+    "packages/telemetry/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
