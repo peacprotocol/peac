@@ -62,35 +62,6 @@ describe('Decision Enforcement', () => {
         expect(result.statusCode).toBe(200);
         expect(result.challenge).toBe(false);
       });
-
-      it('allows with humanAttested=true', () => {
-        const result = enforceDecision('review', { humanAttested: true });
-        expect(result.allowed).toBe(true);
-        expect(result.statusCode).toBe(200);
-      });
-
-      it('allows with customRequirementMet=true', () => {
-        const result = enforceDecision('review', { customRequirementMet: true });
-        expect(result.allowed).toBe(true);
-        expect(result.statusCode).toBe(200);
-      });
-
-      it('customRequirementMet takes priority', () => {
-        // Custom requirement met, even if receipt not verified
-        const result = enforceDecision('review', {
-          customRequirementMet: true,
-          receiptVerified: false,
-        });
-        expect(result.allowed).toBe(true);
-      });
-
-      it('customRequirementMet=false denies even with receipt', () => {
-        const result = enforceDecision('review', {
-          customRequirementMet: false,
-          receiptVerified: true,
-        });
-        expect(result.allowed).toBe(false);
-      });
     });
   });
 

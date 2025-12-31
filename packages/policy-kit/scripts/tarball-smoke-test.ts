@@ -42,11 +42,18 @@ async function main() {
     encoding: 'utf-8',
   }).trim();
 
-  const tarballPath = path.join(PACKAGE_DIR, packOutput);
+  // pnpm pack may output multiple lines; the tarball name is the last .tgz line
+  const lines = packOutput.split('\n').map((l) => l.trim());
+  const tarballName = lines.find((l) => l.endsWith('.tgz'));
+  if (!tarballName) {
+    fail(`No .tgz file found in pack output: ${packOutput}`);
+  }
+
+  const tarballPath = path.join(PACKAGE_DIR, tarballName);
   if (!fs.existsSync(tarballPath)) {
     fail(`Tarball not found: ${tarballPath}`);
   }
-  log(`Created tarball: ${packOutput}`);
+  log(`Created tarball: ${tarballName}`);
 
   // 3. Create temp directory
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'policy-kit-smoke-'));
@@ -80,10 +87,14 @@ import {
   PROFILES,
 } from '@peac/policy-kit';
 
-// Test 1: List profiles
+// Test 1: List profiles (at least 1, matches PROFILE_IDS)
 const profiles = listProfiles();
-if (!Array.isArray(profiles) || profiles.length !== 4) {
-  console.error('FAIL: listProfiles() did not return 4 profiles');
+if (!Array.isArray(profiles) || profiles.length === 0) {
+  console.error('FAIL: listProfiles() returned empty or invalid array');
+  process.exit(1);
+}
+if (profiles.length !== PROFILE_IDS.length) {
+  console.error('FAIL: listProfiles() count does not match PROFILE_IDS');
   process.exit(1);
 }
 console.log('PASS: listProfiles() returned', profiles.length, 'profiles');

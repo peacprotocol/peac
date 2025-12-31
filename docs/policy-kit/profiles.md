@@ -296,11 +296,11 @@ const { status, headers, allowed } = enforceForHttp(result.decision, {
 
 ### Enforcement Context Options
 
-| Option                 | Description                         | Effect on `review` |
-| ---------------------- | ----------------------------------- | ------------------ |
-| `receiptVerified`      | Valid PEAC receipt present          | Allow if true      |
-| `humanAttested`        | Human attestation present           | Allow if true      |
-| `customRequirementMet` | Custom requirement (takes priority) | Allow if true      |
+| Option            | Description                | Effect on `review`      |
+| ----------------- | -------------------------- | ----------------------- |
+| `receiptVerified` | Valid PEAC receipt present | Allow if true, else 402 |
+
+In v0.9.23, `receiptVerified` is the only requirement for `review` decisions. Future versions may add additional attestation models.
 
 ## Next Steps
 

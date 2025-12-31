@@ -18,7 +18,7 @@
  * if (enforcement.allowed) {
  *   // proceed
  * } else {
- *   // return enforcement.statusCode (401, 402, 403)
+ *   // return enforcement.statusCode (402 or 403)
  * }
  * ```
  *
@@ -34,20 +34,11 @@ export interface EnforcementContext {
   /**
    * Whether a valid PEAC receipt has been verified.
    * If true, `review` decisions are allowed.
+   *
+   * This is the only requirement for `review` decisions in v0.9.23.
+   * Future versions may add additional attestation models.
    */
   receiptVerified?: boolean;
-
-  /**
-   * Whether human attestation is present.
-   * Reserved for future use.
-   */
-  humanAttested?: boolean;
-
-  /**
-   * Custom requirement check.
-   * If provided, overrides default receipt check for `review` decisions.
-   */
-  customRequirementMet?: boolean;
 }
 
 /**
@@ -60,12 +51,12 @@ export interface EnforcementResult {
   allowed: boolean;
 
   /**
-   * Recommended HTTP status code if not allowed
-   * - 401: Unauthorized (review decision, no receipt)
+   * Recommended HTTP status code
+   * - 200: OK (allowed)
    * - 402: Payment Required (review decision, receipt needed)
    * - 403: Forbidden (deny decision)
    */
-  statusCode: 200 | 401 | 402 | 403;
+  statusCode: 200 | 402 | 403;
 
   /**
    * Reason for the decision
@@ -141,30 +132,22 @@ export function enforceDecision(
       };
 
     case 'review': {
-      // Check if requirement is satisfied
-      // Priority: customRequirementMet > receiptVerified > humanAttested
-      const requirementMet =
-        context.customRequirementMet ?? context.receiptVerified ?? context.humanAttested ?? false;
-
-      if (requirementMet) {
+      // review = "challenge unless receiptVerified === true"
+      // This is the only requirement in v0.9.23
+      if (context.receiptVerified === true) {
         return {
           allowed: true,
           statusCode: 200,
-          reason: 'Access allowed - requirement satisfied',
+          reason: 'Access allowed - receipt verified',
           challenge: false,
           decision,
         };
       }
 
-      // Determine appropriate status code
-      // 402 if we expect a receipt, 401 otherwise
-      const expectsReceipt =
-        context.receiptVerified === undefined || context.receiptVerified === false;
-      const statusCode = expectsReceipt ? 402 : 401;
-
+      // No valid receipt - return 402 Payment Required with challenge
       return {
         allowed: false,
-        statusCode,
+        statusCode: 402,
         reason: 'Access requires verification - present valid receipt',
         challenge: true,
         decision,
