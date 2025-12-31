@@ -116,3 +116,13 @@ export {
   type ValidationWarning,
   type CustomizeResult,
 } from './profiles';
+
+// Decision enforcement (v0.9.23+)
+export {
+  enforceDecision,
+  requiresChallenge,
+  getChallengeHeader,
+  enforceForHttp,
+  type EnforcementContext,
+  type EnforcementResult,
+} from './enforce';
