@@ -271,7 +271,14 @@ export async function verifyReceipt(
 
     if (!result.valid) {
       const durationMs = performance.now() - startTime;
-      emitVerifyTelemetry(receiptJws, false, 'invalid_signature', payload.iss, header.kid, durationMs);
+      emitVerifyTelemetry(
+        receiptJws,
+        false,
+        'invalid_signature',
+        payload.iss,
+        header.kid,
+        durationMs
+      );
       return {
         ok: false,
         reason: 'invalid_signature',
