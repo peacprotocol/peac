@@ -43,11 +43,11 @@ Compatible with: Jaeger, Honeycomb, Grafana Tempo, Datadog, etc.
 
 ## Privacy Modes
 
-| Mode | Identifiers | Payment Details |
-|------|-------------|-----------------|
-| `strict` | SHA-256 hashed | Omitted |
-| `balanced` | SHA-256 hashed | Included (rail, amount) |
-| `custom` | Allowlist-based | Allowlist-based |
+| Mode       | Identifiers     | Payment Details         |
+| ---------- | --------------- | ----------------------- |
+| `strict`   | SHA-256 hashed  | Omitted                 |
+| `balanced` | SHA-256 hashed  | Included (rail, amount) |
+| `custom`   | Allowlist-based | Allowlist-based         |
 
 ## Related
 
