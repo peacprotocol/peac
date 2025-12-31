@@ -21,11 +21,7 @@ pnpm add @peac/telemetry
 ### Basic Setup
 
 ```typescript
-import {
-  setTelemetryProvider,
-  providerRef,
-  noopProvider,
-} from '@peac/telemetry';
+import { setTelemetryProvider, providerRef, noopProvider } from '@peac/telemetry';
 
 // Enable telemetry with a provider (e.g., from @peac/telemetry-otel)
 setTelemetryProvider(myOtelProvider);

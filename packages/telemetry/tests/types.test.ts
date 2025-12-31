@@ -64,10 +64,7 @@ describe('TelemetryConfig', () => {
       allowAttributes: ['peac.receipt.hash', 'peac.decision'],
     };
 
-    expect(config.allowAttributes).toEqual([
-      'peac.receipt.hash',
-      'peac.decision',
-    ]);
+    expect(config.allowAttributes).toEqual(['peac.receipt.hash', 'peac.decision']);
   });
 
   it('should accept optional redaction hook', () => {

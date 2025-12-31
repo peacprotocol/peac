@@ -60,9 +60,4 @@ export {
 } from './provider.js';
 
 // Attribute constants
-export {
-  PEAC_ATTRS,
-  PEAC_EVENTS,
-  PEAC_METRICS,
-  TRACE_CONTEXT_EXTENSIONS,
-} from './attributes.js';
+export { PEAC_ATTRS, PEAC_EVENTS, PEAC_METRICS, TRACE_CONTEXT_EXTENSIONS } from './attributes.js';

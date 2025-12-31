@@ -58,12 +58,8 @@ describe('PEAC_ATTRS', () => {
   });
 
   it('should use peac. prefix consistently', () => {
-    const peacPrefixed = Object.values(PEAC_ATTRS).filter((v) =>
-      v.startsWith('peac.')
-    );
-    const otherPrefixed = Object.values(PEAC_ATTRS).filter(
-      (v) => !v.startsWith('peac.')
-    );
+    const peacPrefixed = Object.values(PEAC_ATTRS).filter((v) => v.startsWith('peac.'));
+    const otherPrefixed = Object.values(PEAC_ATTRS).filter((v) => !v.startsWith('peac.'));
 
     // Most should be peac. prefixed
     expect(peacPrefixed.length).toBeGreaterThan(otherPrefixed.length);

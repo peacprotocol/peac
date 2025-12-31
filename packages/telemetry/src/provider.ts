@@ -38,9 +38,7 @@ export const providerRef: { current?: TelemetryProvider } = {
  *
  * @param provider - The provider to use, or undefined to disable
  */
-export function setTelemetryProvider(
-  provider: TelemetryProvider | undefined
-): void {
+export function setTelemetryProvider(provider: TelemetryProvider | undefined): void {
   providerRef.current = provider;
 }
 
