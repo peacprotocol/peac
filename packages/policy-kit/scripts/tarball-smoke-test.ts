@@ -71,9 +71,9 @@ async function main() {
     };
     fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify(testPackageJson, null, 2));
 
-    // 5. Install the tarball
+    // 5. Install the tarball (use pnpm for consistency with monorepo)
     log('Installing tarball...');
-    execSync('npm install', { cwd: tempDir, stdio: 'inherit' });
+    execSync('pnpm install', { cwd: tempDir, stdio: 'inherit' });
 
     // 6. Create test script
     const testScript = `
