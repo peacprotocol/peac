@@ -1,0 +1,57 @@
+{
+  "name": "@peac/telemetry-otel",
+  "version": "0.9.22",
+  "description": "OpenTelemetry adapter for PEAC telemetry",
+  "keywords": [
+    "peac",
+    "telemetry",
+    "opentelemetry",
+    "observability"
+  ],
+  "author": "PEAC Protocol contributors",
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@peac/privacy": "workspace:*",
+    "@peac/telemetry": "workspace:*"
+  },
+  "peerDependencies": {
+    "@opentelemetry/api": "^1.7.0"
+  },
+  "devDependencies": {
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/sdk-metrics": "^1.29.0",
+    "@opentelemetry/sdk-trace-base": "^1.29.0",
+    "vitest": "^1.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/telemetry-otel"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://peacprotocol.org",
+  "sideEffects": false
+}
