@@ -37,6 +37,9 @@ export interface TelemetryConfig {
 
   /** Enable experimental GenAI semantic conventions (default: false) */
   enableExperimentalGenAI?: boolean;
+
+  /** Salt for privacy-preserving hashing (should be configured per deployment) */
+  hashSalt?: string;
 }
 
 /**

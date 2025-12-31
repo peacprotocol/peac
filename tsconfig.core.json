@@ -20,7 +20,8 @@
     "packages/core/src/**/*.ts",
     "packages/rails/**/src/**/*.ts",
     "packages/mappings/**/src/**/*.ts",
-    "packages/telemetry/src/**/*.ts"
+    "packages/telemetry/src/**/*.ts",
+    "packages/telemetry-otel/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

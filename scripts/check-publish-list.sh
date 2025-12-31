@@ -82,6 +82,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/sdk
 @peac/server
 @peac/telemetry
+@peac/telemetry-otel
 EOF
 )
 
@@ -97,7 +98,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 28 public packages match"
+  echo "OK: All 29 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -116,7 +117,8 @@ TESTED_PACKAGES="@peac/crypto
 @peac/protocol
 @peac/rails-stripe
 @peac/rails-x402
-@peac/telemetry"
+@peac/telemetry
+@peac/telemetry-otel"
 
 # Packages explicitly without tests (with rationale)
 # These are either: thin wrappers, deprecated, or type-only packages
@@ -132,13 +134,13 @@ NO_TESTS_RATIONALE="@peac/cli - CLI wrapper, tested via integration
 @peac/sdk - re-exports only
 @peac/server - server wrapper, tested via integration"
 
-echo "Packages with tests (12):"
+echo "Packages with tests (13):"
 echo "$TESTED_PACKAGES" | sed 's/^/  /'
 echo ""
 echo "Packages without tests (11) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 23 packages accounted for (12 tested + 11 type/wrapper packages)"
+echo "OK: All 24 packages accounted for (13 tested + 11 type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="
