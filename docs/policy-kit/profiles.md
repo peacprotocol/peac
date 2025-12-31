@@ -257,6 +257,51 @@ peac policy generate peac-policy.yaml --out -
 peac policy validate peac-policy.yaml --strict
 ```
 
+## Decision Enforcement
+
+The `review` decision has explicit, enforceable semantics. Use `enforceDecision()` to apply consistent enforcement:
+
+| Decision | Meaning                      | HTTP Status | Challenge |
+| -------- | ---------------------------- | ----------- | --------- |
+| `allow`  | Access permitted             | 200         | No        |
+| `deny`   | Access forbidden             | 403         | No        |
+| `review` | Challenge unless requirement | 402         | Yes       |
+
+For `review` decisions, access is allowed only when the requirement is satisfied (default: valid receipt).
+
+```typescript
+import { evaluate, enforceDecision, enforceForHttp } from '@peac/policy-kit';
+
+// Evaluate policy
+const result = evaluate(policy, { purpose: 'inference' });
+
+// Enforce the decision
+const enforcement = enforceDecision(result.decision, {
+  receiptVerified: hasValidReceipt, // true if receipt was verified
+});
+
+if (enforcement.allowed) {
+  // Proceed with request
+} else {
+  // Return enforcement.statusCode (402 for review, 403 for deny)
+}
+
+// Or use HTTP helper for response details
+const { status, headers, allowed } = enforceForHttp(result.decision, {
+  receiptVerified: false,
+});
+// status: 402
+// headers: { 'WWW-Authenticate': 'PEAC realm="receipt", error="receipt_required"' }
+```
+
+### Enforcement Context Options
+
+| Option                 | Description                         | Effect on `review` |
+| ---------------------- | ----------------------------------- | ------------------ |
+| `receiptVerified`      | Valid PEAC receipt present          | Allow if true      |
+| `humanAttested`        | Human attestation present           | Allow if true      |
+| `customRequirementMet` | Custom requirement (takes priority) | Allow if true      |
+
 ## Next Steps
 
 - [Policy Kit Quickstart](./quickstart.md) - Getting started
