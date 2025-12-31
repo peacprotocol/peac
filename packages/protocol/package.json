@@ -32,6 +32,7 @@
     "@peac/kernel": "workspace:*",
     "@peac/schema": "workspace:*",
     "@peac/crypto": "workspace:*",
+    "@peac/telemetry": "workspace:*",
     "uuidv7": "^0.6.3",
     "zod": "^3.22.4"
   },
