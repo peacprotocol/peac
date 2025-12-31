@@ -99,3 +99,20 @@ export {
 
 // Generated profiles (v0.9.23+)
 export { PROFILES, PROFILE_IDS, type ProfileId } from './generated/profiles';
+
+// Profile loader API (v0.9.23+)
+export {
+  listProfiles,
+  hasProfile,
+  loadProfile,
+  getProfile,
+  validateProfileParams,
+  customizeProfile,
+  getAllProfiles,
+  getProfileSummary,
+  ProfileError,
+  type ValidationResult,
+  type ValidationError,
+  type ValidationWarning,
+  type CustomizeResult,
+} from './profiles';

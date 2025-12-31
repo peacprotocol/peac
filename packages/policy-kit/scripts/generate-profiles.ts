@@ -16,6 +16,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { execSync } from 'node:child_process';
 import { parse as parseYaml } from 'yaml';
 import { ProfileDefinitionSchema, type ProfileDefinition } from '../src/types';
 
@@ -45,6 +46,20 @@ function sortKeys<T>(obj: T): T {
 }
 
 /**
+ * Convert a string to a single-quoted TypeScript string literal
+ */
+function toSingleQuotedString(value: string): string {
+  // Escape backslashes first, then single quotes, then handle special chars
+  const escaped = value
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');
+  return `'${escaped}'`;
+}
+
+/**
  * Convert a value to TypeScript literal string
  */
 function toTsLiteral(value: unknown, indent = 0): string {
@@ -53,7 +68,7 @@ function toTsLiteral(value: unknown, indent = 0): string {
 
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
-  if (typeof value === 'string') return JSON.stringify(value);
+  if (typeof value === 'string') return toSingleQuotedString(value);
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
 
   if (Array.isArray(value)) {
@@ -70,7 +85,7 @@ function toTsLiteral(value: unknown, indent = 0): string {
     if (entries.length === 0) return '{}';
 
     const lines = entries.map(([k, v]) => {
-      const key = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(k) ? k : JSON.stringify(k);
+      const key = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(k) ? k : toSingleQuotedString(k);
       return `${padInner}${key}: ${toTsLiteral(v, indent + 1)}`;
     });
 
@@ -184,6 +199,25 @@ function generateTs(profiles: Map<string, ProfileDefinition>): string {
 }
 
 /**
+ * Format code with prettier
+ */
+function formatWithPrettier(code: string): string {
+  try {
+    // Use prettier via stdin to format the code
+    const formatted = execSync('npx prettier --parser typescript', {
+      input: code,
+      encoding: 'utf-8',
+      cwd: path.join(__dirname, '..'),
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return formatted;
+  } catch (error) {
+    console.error('Failed to format with prettier, using raw output');
+    return code;
+  }
+}
+
+/**
  * Main entry point
  */
 function main() {
@@ -194,7 +228,10 @@ function main() {
   console.log(`Found ${profiles.size} profiles: ${Array.from(profiles.keys()).join(', ')}`);
 
   console.log('Generating TypeScript...');
-  const generated = generateTs(profiles);
+  const rawGenerated = generateTs(profiles);
+
+  console.log('Formatting...');
+  const generated = formatWithPrettier(rawGenerated);
 
   // Ensure output directory exists
   const outputDir = path.dirname(OUTPUT_FILE);
