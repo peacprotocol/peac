@@ -136,11 +136,11 @@ Attestation fields:
 
 Evidence in PEAC receipts is organized into distinct "lanes" with specific scopes and semantics. This separation is critical for correct interpretation and prevents scope confusion.
 
-| Lane             | Location                   | Scope                      | Examples                                             |
-| ---------------- | -------------------------- | -------------------------- | ---------------------------------------------------- |
-| Payment Evidence | `payment.evidence.*`       | **Rail-scoped**            | Fraud signals, charge lifecycle, processor refs      |
-| Attestations     | `evidence.attestations[]`  | **Interaction-scoped**     | Content safety, bot classification, policy decisions |
-| Extensions       | `*.extensions`             | **Non-normative metadata** | Trace correlation, vendor extras, audit hints        |
+| Lane             | Location                  | Scope                      | Examples                                             |
+| ---------------- | ------------------------- | -------------------------- | ---------------------------------------------------- |
+| Payment Evidence | `payment.evidence.*`      | **Rail-scoped**            | Fraud signals, charge lifecycle, processor refs      |
+| Attestations     | `evidence.attestations[]` | **Interaction-scoped**     | Content safety, bot classification, policy decisions |
+| Extensions       | `*.extensions`            | **Non-normative metadata** | Trace correlation, vendor extras, audit hints        |
 
 ### Lane Semantics
 

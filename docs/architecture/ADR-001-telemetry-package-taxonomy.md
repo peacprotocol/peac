@@ -25,11 +25,11 @@ When adding OpenTelemetry support, we considered several package naming options:
 
 ### Package Type Taxonomy
 
-| Package Type   | Purpose                  | Examples                        |
-| -------------- | ------------------------ | ------------------------------- |
-| `rails/*`      | **Payment normalization**| stripe, x402, razorpay, card    |
-| `mappings/*`   | **Protocol mappings**    | mcp, acp, rsl, tap              |
-| `transport/*`  | **Transport bindings**   | grpc, http, ws                  |
+| Package Type  | Purpose                   | Examples                     |
+| ------------- | ------------------------- | ---------------------------- |
+| `rails/*`     | **Payment normalization** | stripe, x402, razorpay, card |
+| `mappings/*`  | **Protocol mappings**     | mcp, acp, rsl, tap           |
+| `transport/*` | **Transport bindings**    | grpc, http, ws               |
 
 OpenTelemetry is **none of these**. It is:
 
