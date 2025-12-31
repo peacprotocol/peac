@@ -11,6 +11,7 @@ Canonical examples demonstrating PEAC Protocol integration patterns.
 | [pay-per-crawl](./pay-per-crawl/)         | Policy evaluation + receipt flow for AI crawlers |
 | [rsl-collective](./rsl-collective/)       | RSL integration and core claims parity           |
 | [mcp-tool-call](./mcp-tool-call/)         | MCP paid tools with budget enforcement           |
+| [telemetry-otel](./telemetry-otel/)       | OpenTelemetry integration with privacy modes     |
 
 ## Prerequisites
 
@@ -40,6 +41,9 @@ cd examples/rsl-collective && pnpm demo
 
 # MCP tool call with budget
 cd examples/mcp-tool-call && pnpm demo
+
+# OpenTelemetry integration
+cd examples/telemetry-otel && pnpm build && pnpm start
 ```
 
 ## CI Harness
