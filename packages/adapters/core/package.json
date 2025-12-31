@@ -1,6 +1,6 @@
 {
   "name": "@peac/adapter-core",
-  "version": "0.9.20",
+  "version": "0.9.22",
   "description": "Shared utilities for PEAC payment rail adapters",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

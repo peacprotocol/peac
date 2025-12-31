@@ -59,6 +59,7 @@ sdk.start();
 const provider = createOtelProvider({
   serviceName: 'my-api',
   privacyMode: 'strict',
+  hashSalt: process.env.TELEMETRY_SALT,
 });
 
 setTelemetryProvider(provider);
