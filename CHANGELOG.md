@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.23] - 2025-12-31
+
+### Added
+
+- **Policy Profiles**: Pre-built policy templates for common publisher archetypes
+  - 4 profiles: `news-media`, `api-provider`, `open-source`, `saas-docs`
+  - YAML source files compiled to TypeScript at build time (no runtime fs/YAML deps)
+  - `listProfiles()`, `loadProfile()`, `validateProfileParams()`, `customizeProfile()`
+  - `PROFILES` and `PROFILE_IDS` constants for direct access
+  - Profile summaries with `getProfileSummary()` for quick metadata
+- **Decision Enforcement**: Explicit semantics for `review` decisions
+  - `enforceDecision()` with strict `receiptVerified` requirement
+  - `enforceForHttp()` for HTTP response details (status, headers)
+  - `requiresChallenge()` and `getChallengeHeader()` helpers
+  - HTTP 402 with `WWW-Authenticate: PEAC realm="receipt"` challenge
+- **CLI Profile Commands**: New policy subcommands
+  - `peac policy list-profiles` - List available profiles
+  - `peac policy show-profile <id>` - Show profile details
+  - `--profile` flag for `peac policy init`
+  - Automation flags: `--json`, `--yes`, `--strict`, `--out -`
+- **Generator CI Gate**: Build-time profile generation with drift check
+  - `pnpm --filter @peac/policy-kit generate:profiles` - Generate TypeScript from YAML
+  - `pnpm --filter @peac/policy-kit generate:profiles:check` - Verify no drift
+  - Prettier-stable output with deterministic key ordering
+- **Tarball Smoke Test**: `pnpm --filter @peac/policy-kit test:smoke`
+  - Packs, installs, and verifies published package works correctly
+  - Tests profile loading, evaluation, and enforcement
+
+### Changed
+
+- `RateLimitConfig` uses `window_seconds` (IETF-aligned) instead of string format
+- `formatRateLimit()` added for round-trip serialization
+- `EnforcementContext` simplified to only `receiptVerified` (deferred: humanAttested, customRequirementMet)
+
 ## [0.9.22] - 2025-12-31
 
 ### Added

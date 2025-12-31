@@ -3,7 +3,7 @@
 **Policy • Economics • Attribution • Compliance**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.19-blue.svg)](https://github.com/peacprotocol/peac)
+[![Version](https://img.shields.io/badge/version-0.9.23-blue.svg)](https://github.com/peacprotocol/peac)
 
 PEAC is an open protocol for verifiable receipts and policy aware access across digital interactions between agents, APIs, crawlers, and web applications.
 
@@ -24,13 +24,13 @@ PEAC is stewarded by contributors from [Originary](https://www.originary.xyz) an
 
 PEAC does not replace existing protocols. It is the receipts and verification layer that works alongside them for plain APIs, human driven applications, and agentic workflows.
 
-**Payment rails (v0.9.19 status):**
+**Payment rails (v0.9.23 status):**
 
 - [x402](https://github.com/coinbase/x402) HTTP 402 payment flows for agentic interactions. Adapter implemented in `@peac/rails-x402`.
 
 The protocol is designed to work with generic HTTP 402 services, paywalls, routers, and data stores. Receipts do not depend on any single provider.
 
-**Agent protocols (v0.9.19 status):**
+**Agent protocols (v0.9.23 status):**
 
 - [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) Tool context for language models. Mapping implemented with budget utilities.
 - [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) Agent driven commerce. Mapping implemented with budget utilities.
@@ -83,7 +83,7 @@ See [examples/x402-node-server](examples/x402-node-server) for a working impleme
 - Errors via `application/problem+json` (RFC 9457)
 - DPoP proof-of-possession binding (RFC 9449)
 
-**Rails and mappings (v0.9.19):**
+**Rails and mappings (v0.9.23):**
 
 - Payment rails: x402, Stripe, Razorpay (via `@peac/rails-*`)
 - Agent protocols: MCP, ACP with budget utilities (via `@peac/mappings-*`)
@@ -237,7 +237,7 @@ peac.txt is an optional, web-facing policy surface. The core of the protocol is 
 
 ```yaml
 # /.well-known/peac.txt
-version: 0.9.19
+version: 0.9.23
 usage: open
 
 purposes: [indexing, research, documentation]
@@ -254,7 +254,7 @@ repository: https://github.com/peacprotocol/peac
 **Example: Conditional API access**
 
 ```yaml
-version: 0.9.19
+version: 0.9.23
 usage: conditional
 
 purposes: [research, commercial]
@@ -295,9 +295,31 @@ Libraries in this repo are structured so that you do not need to hand parse ever
 
 ### Policy Kit
 
-> **Start here:** [docs/policy-kit/quickstart.md](docs/policy-kit/quickstart.md)
+> **Start here:** [docs/policy-kit/quickstart.md](docs/policy-kit/quickstart.md) | **Profiles:** [docs/policy-kit/profiles.md](docs/policy-kit/profiles.md)
 
 The `@peac/policy-kit` package provides a file-based policy format for authoring policies once and compiling them to multiple deployment surfaces.
+
+**Policy Profiles (v0.9.23):**
+
+Start with a pre-built profile instead of writing policies from scratch:
+
+| Profile ID     | Default | Receipt | Use Case                       |
+| -------------- | ------- | ------- | ------------------------------ |
+| `news-media`   | deny    | yes     | News sites, journalism         |
+| `api-provider` | deny    | yes     | Developer docs, API references |
+| `open-source`  | allow   | no      | OSS documentation, wikis       |
+| `saas-docs`    | allow   | no      | Product docs, help centers     |
+
+```bash
+# List available profiles
+peac policy list-profiles
+
+# Initialize from profile
+peac policy init --profile news-media
+
+# View profile details
+peac policy show-profile api-provider
+```
 
 **Install:**
 
@@ -486,32 +508,32 @@ peac/
 
 ## Packages
 
-**Core (stable, v0.9.19):**
+**Core (stable, v0.9.23):**
 
 - `@peac/kernel` - Zero-dependency constants and registries
 - `@peac/schema` - TypeScript types, Zod validators, JSON Schema
 - `@peac/crypto` - Ed25519 JWS signing and verification
 - `@peac/protocol` - High-level issue() and verify() functions
 
-**Runtime (stable, v0.9.19):**
+**Runtime (stable, v0.9.23):**
 
 - `@peac/server` - HTTP verification server with 402 support
 - `@peac/cli` - Command-line tools for receipts and policy
 
-**Rails (stable, v0.9.19):**
+**Rails (stable, v0.9.23):**
 
 - `@peac/rails-x402` - x402 payment rail adapter with payment header detection
 - `@peac/rails-stripe` - Stripe payment rail adapter
 - `@peac/rails-razorpay` - Razorpay payment rail adapter (internal, not published)
 
-**Mappings (stable, v0.9.19):**
+**Mappings (stable, v0.9.23):**
 
 - `@peac/mappings-mcp` - Model Context Protocol integration with budget utilities
 - `@peac/mappings-acp` - Agentic Commerce Protocol integration with budget utilities
 
-**Policy (stable, v0.9.19):**
+**Policy (stable, v0.9.23):**
 
-- `@peac/policy-kit` - Policy authoring, evaluation, and artifact generation
+- `@peac/policy-kit` - Policy authoring, evaluation, artifact generation, and pre-built profiles
 - `@peac/mappings-rsl` - RSL (Robots Standard Language) mapping to CAL purposes
 
 **Pillars (early scaffolding, APIs may change):**
@@ -541,7 +563,7 @@ PEAC addresses seven protocol capabilities for AI and API infrastructure:
 | **Privacy**     | `@peac/privacy`     | Privacy budgeting and retention policy hooks      |
 | **Provenance**  | `@peac/provenance`  | Content provenance and C2PA integration           |
 
-These are optional higher-layer helpers built on top of the core receipt/kernel stack. The stable, production-ready surface for v0.9.19 is the kernel / schema / crypto / protocol / rails / server / cli stack. PEAC remains vendor-neutral; pillar packages provide building blocks, not a hosted service.
+These are optional higher-layer helpers built on top of the core receipt/kernel stack. The stable, production-ready surface for v0.9.23 is the kernel / schema / crypto / protocol / rails / server / cli stack. PEAC remains vendor-neutral; pillar packages provide building blocks, not a hosted service.
 
 ---
 
@@ -584,7 +606,7 @@ These are optional higher-layer helpers built on top of the core receipt/kernel 
 **Library surface:**
 
 - TypeScript APIs are pre-1.0 and may have breaking changes between minor releases
-- Core packages (kernel, schema, crypto, protocol) are stable for v0.9.19
+- Core packages (kernel, schema, crypto, protocol) are stable for v0.9.23
 - Pillar packages (access, consent, etc.) are early scaffolding; APIs may change
 
 For forward-looking details, see the docs in `docs/` and the CHANGELOG.
