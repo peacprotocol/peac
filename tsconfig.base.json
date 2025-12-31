@@ -39,7 +39,8 @@
       "@peac/http-signatures": ["./packages/http-signatures/src"],
       "@peac/jwks-cache": ["./packages/jwks-cache/src"],
       "@peac/mappings-tap": ["./packages/mappings/tap/src"],
-      "@peac/privacy": ["./packages/privacy/src"]
+      "@peac/privacy": ["./packages/privacy/src"],
+      "@peac/telemetry": ["./packages/telemetry/src"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "lib", "coverage"]
