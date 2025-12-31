@@ -1,6 +1,6 @@
 {
   "name": "@peac/adapter-x402-pinata",
-  "version": "0.9.20",
+  "version": "0.9.22",
   "description": "Pinata private IPFS objects event normalizer for PEAC protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

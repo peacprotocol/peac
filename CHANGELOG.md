@@ -7,11 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned (v0.9.21)
+## [0.9.22] - 2025-12-31
 
-- Analytics surface
-- Go SDK
-- Security hardening
+### Added
+
+- **@peac/telemetry**: Core telemetry interfaces and no-op implementation
+  - `TelemetryProvider` interface with `onReceiptIssued`, `onReceiptVerified`, `onAccessDecision` hooks
+  - Privacy modes: `strict` (hash all), `balanced` (hash + payment), `custom` (allowlist)
+  - `TelemetryConfig` with `serviceName`, `privacyMode`, `allowAttributes`, `hashSalt`, `enableExperimentalGenAI`
+  - Runtime-portable: works in Node, edge, WASM (no Node-specific APIs)
+  - Zero-overhead no-op provider when telemetry not configured
+- **@peac/telemetry-otel**: OpenTelemetry adapter for PEAC telemetry (90 tests)
+  - Bridges PEAC events to OTel spans, events, and metrics
+  - Privacy-preserving attribute filtering with `createPrivacyFilter()`
+  - W3C Trace Context validation (`parseTraceparent`, `parseTracestate`, `validateTraceContext`)
+  - Metrics: `peac.receipt.issued`, `peac.receipt.verified`, `peac.access.decision` counters/histograms
+  - Never-throw provider pattern with defensive try/catch guards
+- **Protocol telemetry hooks**: `setTelemetryProvider()` in `@peac/protocol`
+  - `issue()` now calls `onReceiptIssued()` with receipt hash, issuer, kid, duration
+  - `verify()` now calls `onReceiptVerified()` with receipt hash, valid flag, reason code, duration
+- **Telemetry example**: `examples/telemetry-otel/` with console exporter demo
+- **Evidence lane rules**: Documented in `specs/wire/README.md`
+  - `payment.evidence.*` - Rail-scoped (fraud tools, charge lifecycle)
+  - `attestations[]` - Interaction-scoped (content safety, policy decisions)
+  - `extensions.*` - Non-normative metadata (trace correlation, vendor extras)
+- **Telemetry ADR**: `docs/architecture/ADR-001-telemetry-package-taxonomy.md`
+
+### Changed
+
+- `TelemetryConfig.hashSalt` added for privacy-preserving identifier hashing
+- Protocol package now depends on `@peac/telemetry` (workspace dependency)
+
+## [0.9.21] - 2025-12-31
+
+### Added
+
+- **Generic Attestation type**: Extensible attestation container in `@peac/schema`
+  - `Attestation<T>` with `type`, `issued_at`, `issuer`, `signature`, and type-safe `claims`
+  - `AttestationInput<T>` for attestation creation
+  - Pre-defined attestation types: `ContentSafetyAttestation`, `BotClassificationAttestation`, `PolicyDecisionAttestation`
+- **Extensions type**: Non-normative metadata container
+  - `Extensions` type with vendor-prefixed keys (`x_*`)
+  - `ExtensionsInput` for creating extensions
+  - Clear separation from normative receipt fields
+- **Wire schema specification**: `specs/wire/` with JSON Schema definitions
+  - `receipt.schema.json`, `payment-evidence.schema.json`, `attestation.schema.json`
+  - Conformance test harness with golden vectors
+- **JSON validation with DoS protection**: `@peac/schema` additions
+  - `validateJsonValue()` with depth limit (default 32), breadth limit (default 1000), total nodes cap (10000)
+  - Cycle detection for object graphs
+  - JSON-safe evidence validation (no functions, symbols, undefined)
+- **Property-based tests**: fast-check integration for schema validation
+  - Arbitrary generators for receipt fields, payment evidence, attestations
+  - Roundtrip property tests for JSON serialization
+
+### Security
+
+- **DoS protection**: JSON validator prevents stack overflow via depth limiting
+- **Cycle detection**: Prevents infinite loops in nested object validation
+- **Node count cap**: Limits total JSON nodes to prevent memory exhaustion
 
 ## [0.9.20] - 2025-12-30
 
