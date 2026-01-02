@@ -30,7 +30,7 @@ Shipped:
 | -------- | -------------- | ------------------------------------------------------ |
 | v0.9.24  | Adoption       | Purpose vocabulary, policy profiles, robots.txt bridge |
 | v0.9.25  | Infrastructure | Agent identity (HTTP signatures), Go SDK (verifier)    |
-| v0.9.26  | Credibility    | Attribution, conformance suite, npm publish            |
+| v0.9.26  | Credibility    | Attribution, conformance suite, registry publish       |
 | v0.9.27  | Resolution     | Dispute and audit                                      |
 | v0.9.28+ | Distribution   | Edge workers, full Go SDK, WebSocket transport         |
 | v0.10.0  | GA             | Wire format freeze, multi-implementation validation    |
