@@ -925,7 +925,192 @@ An implementation is **conformant with PEAC v0.9** if it:
 
 ---
 
-## 12. Version History
+## 12. HTTP Header Semantics (v0.9.24+)
+
+This section defines the normative behavior for PEAC HTTP headers.
+
+### 12.1 Canonical Header Names
+
+PEAC uses the following HTTP headers. All names follow RFC 6648 (no `X-` prefix for new headers).
+
+| Header                 | Direction | Description                          |
+| ---------------------- | --------- | ------------------------------------ |
+| `PEAC-Receipt`         | Response  | JWS-encoded receipt                  |
+| `PEAC-Purpose`         | Request   | Declared purpose(s) of access        |
+| `PEAC-Purpose-Applied` | Response  | Purpose enforced by server           |
+| `PEAC-Purpose-Reason`  | Response  | Reason for enforcement decision      |
+| `DPoP`                 | Request   | Proof of possession token (RFC 9449) |
+
+**Canonical source**: `specs/kernel/constants.json`
+
+### 12.2 PEAC-Purpose Request Header
+
+The `PEAC-Purpose` header declares the requester's intended use of the resource.
+
+**Format**:
+
+```
+PEAC-Purpose: train
+PEAC-Purpose: train, search
+PEAC-Purpose: user_action
+```
+
+**Parsing Rules (MUST)**:
+
+1. Split on commas (`,`)
+2. Trim optional whitespace (OWS) around tokens
+3. Lowercase all tokens
+4. Drop empty tokens
+5. Deduplicate (preserve first occurrence)
+6. Preserve input order (no sorting)
+7. Preserve unknown tokens (normalized) - never reject by default
+
+**Algorithm**:
+
+```
+Input: header_value (string)
+Output: purposes (string[])
+
+1. Split header_value by ','
+2. For each token:
+   a. Trim leading/trailing whitespace
+   b. Convert to lowercase
+   c. If empty after trim, skip
+3. Deduplicate (keep first occurrence)
+4. Return array in input order
+```
+
+**Canonical Purpose Tokens**:
+
+| Token         | Description                    |
+| ------------- | ------------------------------ |
+| `train`       | Model training data collection |
+| `search`      | Traditional search indexing    |
+| `user_action` | Agent acting on user behalf    |
+| `inference`   | Runtime inference / RAG        |
+| `index`       | Content indexing (store)       |
+
+**Internal-Only Tokens** (never valid on wire):
+
+| Token        | Description                       |
+| ------------ | --------------------------------- |
+| `undeclared` | Applied when header missing/empty |
+
+**Extension Tokens**:
+
+- Format: `namespace:purpose` (lowercase, colon-separated)
+- Examples: `cf:ai_crawler`, `vendor:custom_purpose`
+- MUST be preserved and forwarded even if unknown
+
+### 12.3 Missing or Empty PEAC-Purpose
+
+When `PEAC-Purpose` header is **missing or empty**:
+
+- Internal state: `purpose_declared: []` (empty array)
+- Receipt claim: `purpose_reason: "undeclared_default"`
+- Server applies default policy based on profile
+
+When `PEAC-Purpose: undeclared` is **explicitly sent**:
+
+- **400 Bad Request** - `undeclared` is not a valid wire token
+- Rationale: Prevents gaming by explicitly declaring "undeclared"
+
+### 12.4 Multi-Purpose Semantics
+
+When multiple purposes are declared:
+
+```
+PEAC-Purpose: train, search
+```
+
+**Server Behavior**:
+
+- Choose ONE `purpose_enforced` for the access decision
+- MUST be one of the declared known purposes, OR
+- A more restrictive known purpose (downgrade)
+
+**Receipt Claims**:
+
+- `purpose_declared`: Array of all declared purposes (e.g., `["train", "search"]`)
+- `purpose_enforced`: Single token enforced (e.g., `"train"`)
+- `purpose_reason`: Enum explaining enforcement (e.g., `"allowed"`)
+
+### 12.5 Unknown Purpose Tokens
+
+Unknown tokens (not in canonical list, not registered extensions):
+
+- MUST be preserved and forwarded (for forward-compatibility)
+- MAY be recorded in receipt metadata or logs
+- MUST NOT affect policy evaluation unless explicitly understood
+- Implementations SHOULD warn on unknown tokens but MUST NOT reject
+
+**Security Rationale**: Unknown tokens cannot become an accidental bypass surface.
+
+### 12.6 PEAC-Purpose-Applied Response Header
+
+The `PEAC-Purpose-Applied` header indicates which purpose was enforced.
+
+**Format**:
+
+```
+PEAC-Purpose-Applied: train
+```
+
+- Single token (matches `purpose_enforced` in receipt)
+- MUST be present when `PEAC-Purpose` was sent
+
+### 12.7 PEAC-Purpose-Reason Response Header
+
+The `PEAC-Purpose-Reason` header explains why the enforced purpose differs from declared.
+
+**Format**:
+
+```
+PEAC-Purpose-Reason: allowed
+PEAC-Purpose-Reason: undeclared_default
+```
+
+**Reason Values**:
+
+| Value                | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `allowed`            | Purpose permitted as declared (happy path)   |
+| `constrained`        | Allowed with rate limits applied             |
+| `denied`             | Purpose rejected by policy                   |
+| `downgraded`         | More restrictive purpose applied             |
+| `undeclared_default` | No purpose declared, default applied         |
+| `unknown_preserved`  | Unknown purpose token, preserved but flagged |
+
+### 12.8 Cache Guidance
+
+If response behavior varies by `PEAC-Purpose`:
+
+- Server MUST emit `Vary: PEAC-Purpose`
+- Caching layers MUST respect this header for correct cache invalidation
+
+**Example**:
+
+```http
+HTTP/1.1 200 OK
+PEAC-Purpose-Applied: train
+PEAC-Purpose-Reason: allowed
+Vary: PEAC-Purpose
+```
+
+### 12.9 Limits (RECOMMENDED)
+
+These limits are RECOMMENDED for implementation safety, not wire constraints:
+
+| Limit                 | Value | Rationale                           |
+| --------------------- | ----- | ----------------------------------- |
+| Max tokens per header | 8     | Prevent abuse                       |
+| Max chars per token   | 48    | Reasonable namespace:purpose length |
+
+Implementations SHOULD warn when limits are exceeded but MAY accept larger values.
+
+---
+
+## 13. Version History
 
 - **v0.9.18**: TAP + HTTP Message Signatures + Schema Normalization
   - HTTP Message Signatures (RFC 9421): Section 7.4 normative verification algorithm
