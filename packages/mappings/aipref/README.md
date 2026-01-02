@@ -17,10 +17,7 @@ pnpm add @peac/mappings-aipref
 ### Map AIPREF keys to PEAC purposes
 
 ```typescript
-import {
-  aiprefKeyToCanonicalPurpose,
-  mapAiprefKeys,
-} from '@peac/mappings-aipref';
+import { aiprefKeyToCanonicalPurpose, mapAiprefKeys } from '@peac/mappings-aipref';
 
 // Single key mapping
 const result = aiprefKeyToCanonicalPurpose('train-ai');
@@ -43,10 +40,7 @@ const batch = mapAiprefKeys(['train-ai', 'search', 'custom']);
 ### Parse Content-Usage header
 
 ```typescript
-import {
-  parseContentUsageHeader,
-  contentUsageToCanonicalPurposes,
-} from '@peac/mappings-aipref';
+import { parseContentUsageHeader, contentUsageToCanonicalPurposes } from '@peac/mappings-aipref';
 
 // Parse RFC 8941 structured fields
 const parsed = parseContentUsageHeader('train-ai=?1, search=?0');
@@ -76,16 +70,16 @@ const headerWithDeny = canonicalPurposesToContentUsage(['train'], { search: fals
 ### Standard Keys (IETF Normative)
 
 | AIPREF Key | PEAC CanonicalPurpose |
-|------------|----------------------|
-| `train-ai` | `train` |
-| `search` | `search` |
+| ---------- | --------------------- |
+| `train-ai` | `train`               |
+| `search`   | `search`              |
 
 ### Extension Keys (Deployed in Wild)
 
-| AIPREF Key | PEAC CanonicalPurpose | Notes |
-|------------|----------------------|-------|
-| `train-genai` | `train` | Extension key |
-| `ai` | `train` | Legacy key |
+| AIPREF Key    | PEAC CanonicalPurpose | Notes         |
+| ------------- | --------------------- | ------------- |
+| `train-genai` | `train`               | Extension key |
+| `ai`          | `train`               | Legacy key    |
 
 ### PEAC Purposes Without AIPREF Equivalent
 
