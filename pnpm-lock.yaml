@@ -564,6 +564,22 @@ importers:
         specifier: ^1.1.0
         version: 1.6.1(@types/node@20.19.25)
 
+  packages/mappings/aipref:
+    dependencies:
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../schema
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.25
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.1.0
+        version: 1.6.1(@types/node@20.19.25)
+
   packages/mappings/mcp:
     dependencies:
       '@peac/schema':
