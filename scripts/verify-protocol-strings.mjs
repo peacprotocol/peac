@@ -13,8 +13,7 @@
  * @see docs/specs/PROTOCOL-BEHAVIOR.md Section 7 (Header Semantics)
  */
 
-import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -65,29 +64,85 @@ const EXCLUDE_GLOBS = [
 
 /**
  * Search for a pattern using ripgrep (rg) or grep as fallback
+ * Uses execFileSync with array arguments to avoid shell injection (CodeQL safe)
  * @param {string} pattern - Pattern to search for
  * @param {boolean} caseSensitive - Whether search is case-sensitive
  * @returns {{ file: string, line: number, content: string }[]}
  */
 function searchPattern(pattern, caseSensitive) {
-  const excludeArgs = EXCLUDE_GLOBS.map((g) => `--glob '!${g}'`).join(' ');
-  const caseFlag = caseSensitive ? '' : '-i';
+  // Build ripgrep arguments as array (no shell interpolation)
+  const rgArgs = [
+    '--line-number',
+    '--no-heading',
+    ...EXCLUDE_GLOBS.flatMap((g) => ['--glob', `!${g}`]),
+    ...(caseSensitive ? [] : ['-i']),
+    pattern,
+    ROOT_DIR,
+  ];
 
   // Try ripgrep first (faster, respects .gitignore)
   try {
-    const cmd = `rg ${caseFlag} --line-number --no-heading ${excludeArgs} '${pattern}' ${ROOT_DIR} 2>/dev/null || true`;
-    const output = execSync(cmd, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+    const output = execFileSync('rg', rgArgs, {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
     return parseRipgrepOutput(output);
-  } catch {
-    // Fallback to grep
-    try {
-      const grepCaseFlag = caseSensitive ? '' : '-i';
-      const cmd = `grep -rn ${grepCaseFlag} '${pattern}' ${ROOT_DIR} --include='*.ts' --include='*.js' --include='*.mjs' --include='*.json' --include='*.md' --include='*.yaml' --include='*.yml' 2>/dev/null || true`;
-      const output = execSync(cmd, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
-      return parseGrepOutput(output);
-    } catch {
+  } catch (error) {
+    // ripgrep exits with code 1 when no matches found, which is not an error
+    if (error.status === 1 && error.stdout === '') {
       return [];
     }
+    // If ripgrep not found or other error, fallback to grep
+    if (error.code === 'ENOENT' || error.status !== 1) {
+      return searchWithGrep(pattern, caseSensitive);
+    }
+    // Parse any output that was captured
+    if (error.stdout) {
+      return parseRipgrepOutput(error.stdout);
+    }
+    return [];
+  }
+}
+
+/**
+ * Fallback search using grep
+ * @param {string} pattern - Pattern to search for
+ * @param {boolean} caseSensitive - Whether search is case-sensitive
+ * @returns {{ file: string, line: number, content: string }[]}
+ */
+function searchWithGrep(pattern, caseSensitive) {
+  const grepArgs = [
+    '-rn',
+    ...(caseSensitive ? [] : ['-i']),
+    '--include=*.ts',
+    '--include=*.js',
+    '--include=*.mjs',
+    '--include=*.json',
+    '--include=*.md',
+    '--include=*.yaml',
+    '--include=*.yml',
+    pattern,
+    ROOT_DIR,
+  ];
+
+  try {
+    const output = execFileSync('grep', grepArgs, {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return parseGrepOutput(output);
+  } catch (error) {
+    // grep exits with code 1 when no matches found
+    if (error.status === 1) {
+      return [];
+    }
+    // Parse any output that was captured
+    if (error.stdout) {
+      return parseGrepOutput(error.stdout);
+    }
+    return [];
   }
 }
 
