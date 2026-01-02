@@ -37,6 +37,4 @@ Shipped:
 
 ## Future Development
 
-The public roadmap is tracked via GitHub releases and tags. Detailed implementation plans are maintained privately.
-
 For the latest release notes and shipped features, see [GitHub Releases](https://github.com/peacprotocol/peac/releases).
