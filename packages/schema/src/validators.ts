@@ -60,6 +60,18 @@ export const JWSHeader = z
   })
   .strict();
 
+// Forward-declare purpose validators used in ReceiptClaims
+// Full definitions are below
+const CanonicalPurposeValues = ['train', 'search', 'user_action', 'inference', 'index'] as const;
+const PurposeReasonValues = [
+  'allowed',
+  'constrained',
+  'denied',
+  'downgraded',
+  'undeclared_default',
+  'unknown_preserved',
+] as const;
+
 export const ReceiptClaims = z
   .object({
     iss: httpsUrl,
@@ -73,9 +85,12 @@ export const ReceiptClaims = z
     subject: Subject.optional(),
     ext: Extensions.optional(),
     // Purpose claims (v0.9.24+)
+    // purpose_declared: string[] - preserves unknown tokens for forward-compat
     purpose_declared: z.array(z.string()).optional(),
-    purpose_enforced: z.string().optional(),
-    purpose_reason: z.string().optional(),
+    // purpose_enforced: CanonicalPurpose - must be one with enforcement semantics
+    purpose_enforced: z.enum(CanonicalPurposeValues).optional(),
+    // purpose_reason: PurposeReason - audit spine for enforcement decisions
+    purpose_reason: z.enum(PurposeReasonValues).optional(),
   })
   .strict();
 

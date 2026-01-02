@@ -240,3 +240,205 @@ export function enforceForHttp(
     reason: result.reason,
   };
 }
+
+// ============================================================================
+// Purpose-Specific Enforcement (v0.9.24+)
+// ============================================================================
+
+/**
+ * Result of purpose-specific enforcement
+ *
+ * Purpose enforcement NEVER uses 402. 402 is reserved for payment/receipt challenges.
+ * Purpose decisions use:
+ * - 200: OK (purpose allowed)
+ * - 400: Bad Request (invalid purpose token)
+ * - 403: Forbidden (purpose denied by policy)
+ */
+export interface PurposeEnforcementResult {
+  /**
+   * Whether access should be allowed based on purpose
+   */
+  allowed: boolean;
+
+  /**
+   * HTTP status code for purpose enforcement
+   * - 200: OK (allowed)
+   * - 400: Bad Request (invalid purpose token, explicit "undeclared")
+   * - 403: Forbidden (purpose denied by policy)
+   *
+   * NOTE: 402 is NEVER returned. 402 is reserved for payment/receipt challenges.
+   */
+  statusCode: 200 | 400 | 403;
+
+  /**
+   * Reason for the decision
+   */
+  reason: string;
+
+  /**
+   * The purpose decision that was enforced
+   */
+  decision: ControlDecision;
+}
+
+/**
+ * Context for purpose enforcement
+ */
+export interface PurposeEnforcementContext {
+  /**
+   * Whether the purpose token(s) passed grammar validation.
+   * If false, returns 400 Bad Request.
+   */
+  purposeValid: boolean;
+
+  /**
+   * Whether the request explicitly included "undeclared" as a purpose.
+   * If true, returns 400 Bad Request.
+   */
+  explicitUndeclared?: boolean;
+
+  /**
+   * Optional list of invalid tokens for error messaging
+   */
+  invalidTokens?: string[];
+}
+
+/**
+ * Enforce a policy decision for purpose-based access control.
+ *
+ * This function is specifically for purpose enforcement and NEVER returns 402.
+ * 402 is reserved for payment/receipt challenges (use `enforceDecision` for that).
+ *
+ * Status code semantics:
+ * - 200: Purpose allowed
+ * - 400: Invalid purpose token (grammar violation or explicit "undeclared")
+ * - 403: Purpose denied by policy
+ *
+ * @param decision - The policy decision to enforce
+ * @param context - Purpose enforcement context
+ * @returns Purpose enforcement result with HTTP status code
+ *
+ * @example
+ * ```typescript
+ * import { enforcePurposeDecision } from '@peac/policy-kit';
+ *
+ * // Valid purpose, allowed
+ * enforcePurposeDecision('allow', { purposeValid: true });
+ * // { allowed: true, statusCode: 200, decision: 'allow' }
+ *
+ * // Valid purpose, denied by policy
+ * enforcePurposeDecision('deny', { purposeValid: true });
+ * // { allowed: false, statusCode: 403, decision: 'deny' }
+ *
+ * // Invalid purpose token
+ * enforcePurposeDecision('allow', { purposeValid: false, invalidTokens: ['train-'] });
+ * // { allowed: false, statusCode: 400, reason: 'Invalid purpose token(s): train-' }
+ *
+ * // Explicit "undeclared" in request (forbidden)
+ * enforcePurposeDecision('allow', { purposeValid: true, explicitUndeclared: true });
+ * // { allowed: false, statusCode: 400, reason: '"undeclared" is not a valid purpose token' }
+ * ```
+ */
+export function enforcePurposeDecision(
+  decision: ControlDecision,
+  context: PurposeEnforcementContext
+): PurposeEnforcementResult {
+  // Check for explicit "undeclared" first (always 400)
+  if (context.explicitUndeclared) {
+    return {
+      allowed: false,
+      statusCode: 400,
+      reason: '"undeclared" is not a valid purpose token - it is internal-only',
+      decision,
+    };
+  }
+
+  // Check for invalid purpose tokens (400)
+  if (!context.purposeValid) {
+    const tokenList = context.invalidTokens?.join(', ') || 'unknown';
+    return {
+      allowed: false,
+      statusCode: 400,
+      reason: `Invalid purpose token(s): ${tokenList}`,
+      decision,
+    };
+  }
+
+  // Valid purpose - apply policy decision
+  switch (decision) {
+    case 'allow':
+      return {
+        allowed: true,
+        statusCode: 200,
+        reason: 'Purpose allowed by policy',
+        decision,
+      };
+
+    case 'deny':
+      return {
+        allowed: false,
+        statusCode: 403,
+        reason: 'Purpose denied by policy',
+        decision,
+      };
+
+    case 'review':
+      // For purpose enforcement, 'review' is treated as 'deny' (403)
+      // 402 is reserved for payment/receipt challenges
+      return {
+        allowed: false,
+        statusCode: 403,
+        reason: 'Purpose requires review - treated as denied for purpose enforcement',
+        decision,
+      };
+
+    default: {
+      const _exhaustive: never = decision;
+      return {
+        allowed: false,
+        statusCode: 403,
+        reason: `Unknown decision: ${_exhaustive}`,
+        decision,
+      };
+    }
+  }
+}
+
+/**
+ * Get HTTP status code for a purpose decision.
+ *
+ * This helper maps policy decisions to HTTP status codes for purpose enforcement.
+ * It NEVER returns 402 - that is reserved for payment/receipt challenges.
+ *
+ * @param decision - Policy decision
+ * @param purposeValid - Whether the purpose token(s) passed validation
+ * @returns HTTP status code (200, 400, or 403)
+ *
+ * @example
+ * ```typescript
+ * getPurposeStatusCode('allow', true);  // 200
+ * getPurposeStatusCode('deny', true);   // 403
+ * getPurposeStatusCode('review', true); // 403 (NOT 402!)
+ * getPurposeStatusCode('allow', false); // 400 (invalid token)
+ * ```
+ */
+export function getPurposeStatusCode(
+  decision: ControlDecision,
+  purposeValid: boolean
+): 200 | 400 | 403 {
+  // Invalid purpose always returns 400
+  if (!purposeValid) {
+    return 400;
+  }
+
+  // Map decision to status code (never 402)
+  switch (decision) {
+    case 'allow':
+      return 200;
+    case 'deny':
+    case 'review':
+      return 403;
+    default:
+      return 403;
+  }
+}

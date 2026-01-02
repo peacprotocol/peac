@@ -125,4 +125,10 @@ export {
   enforceForHttp,
   type EnforcementContext,
   type EnforcementResult,
+  // Purpose-specific enforcement (v0.9.24+)
+  // These functions NEVER return 402 - that is reserved for payment/receipts
+  enforcePurposeDecision,
+  getPurposeStatusCode,
+  type PurposeEnforcementContext,
+  type PurposeEnforcementResult,
 } from './enforce';
