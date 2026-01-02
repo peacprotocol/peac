@@ -5,6 +5,7 @@
 import { PEAC_WIRE_TYP, PEAC_ALG } from './constants';
 import type { ControlBlock } from './control';
 import type { PaymentEvidence, PaymentRailId } from './evidence';
+import type { PurposeToken, CanonicalPurpose, PurposeReason } from './purpose';
 
 /**
  * Subject of the receipt (what was paid for)
@@ -86,6 +87,30 @@ export interface PEACReceiptClaims {
 
   /** Extensions (additive-only) */
   ext?: ReceiptExtensions;
+
+  /**
+   * Purposes declared by requester (v0.9.24+)
+   *
+   * ALWAYS array, even for single purpose: ["train"]
+   * Empty array if header missing/empty (internal 'undeclared' state)
+   * Uses PurposeToken (string) to preserve unknown tokens (forward-compat)
+   */
+  purpose_declared?: PurposeToken[];
+
+  /**
+   * Single purpose enforced by policy (v0.9.24+)
+   *
+   * MUST be one of declared purposes OR a downgrade
+   * Uses CanonicalPurpose (enforcement requires semantics)
+   */
+  purpose_enforced?: CanonicalPurpose;
+
+  /**
+   * Reason for enforcement decision (v0.9.24+)
+   *
+   * The audit spine - explains WHY purpose was enforced as it was
+   */
+  purpose_reason?: PurposeReason;
 }
 
 /**

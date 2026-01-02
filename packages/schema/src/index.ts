@@ -10,6 +10,7 @@ export * from './evidence';
 export * from './subject';
 export * from './errors';
 export * from './normalize';
+export * from './purpose';
 
 // JSON-safe validation schemas (v0.9.21+)
 export {
@@ -57,6 +58,10 @@ export {
   // Attestation validators (v0.9.21+)
   AttestationSchema,
   ExtensionsSchema,
+  // Purpose validators (v0.9.24+)
+  PurposeTokenSchema,
+  CanonicalPurposeSchema,
+  PurposeReasonSchema,
   // Subject snapshot validation helper (v0.9.17+)
   validateSubjectSnapshot,
   // Evidence validation with DoS protection (v0.9.21+)

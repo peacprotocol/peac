@@ -21,6 +21,7 @@ export type ControlDecision = 'allow' | 'deny' | 'review';
  * - "index": Search engine indexing
  * - "train": AI/ML model training
  * - "inference": AI/ML inference/generation
+ * - "user_action": Agent acting on user behalf [v0.9.24+]
  * - "ai_input": RAG/grounding (using content as input to AI) [v0.9.17+, RSL alignment]
  * - "ai_index": AI-powered search/indexing [v0.9.18+, RSL 1.0 alignment]
  * - "search": Traditional search indexing [v0.9.17+, RSL alignment]
@@ -35,6 +36,7 @@ export type ControlPurpose =
   | 'index'
   | 'train'
   | 'inference'
+  | 'user_action'
   | 'ai_input'
   | 'ai_index'
   | 'search';

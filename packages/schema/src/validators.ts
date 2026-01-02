@@ -10,6 +10,7 @@ import {
   type JsonEvidenceLimits,
 } from './json';
 import { createEvidenceNotJsonError, type PEACError } from './errors';
+import { PURPOSE_TOKEN_REGEX, MAX_PURPOSE_TOKEN_LENGTH } from './purpose';
 
 const httpsUrl = z
   .string()
@@ -71,6 +72,10 @@ export const ReceiptClaims = z
     payment: NormalizedPayment,
     subject: Subject.optional(),
     ext: Extensions.optional(),
+    // Purpose claims (v0.9.24+)
+    purpose_declared: z.array(z.string()).optional(),
+    purpose_enforced: z.string().optional(),
+    purpose_reason: z.string().optional(),
   })
   .strict();
 
@@ -89,6 +94,7 @@ export const VerifyRequest = z
  *
  * v0.9.17+: Added ai_input, search for RSL alignment
  * v0.9.18+: Added ai_index (RSL 1.0 canonical token). Removed ai_search.
+ * v0.9.24+: Added user_action for agent-on-behalf-of-user scenarios.
  *
  * @see https://rslstandard.org/rsl for RSL 1.0 specification
  */
@@ -97,6 +103,7 @@ export const ControlPurposeSchema = z.enum([
   'index',
   'train',
   'inference',
+  'user_action',
   'ai_input',
   'ai_index',
   'search',
@@ -164,6 +171,57 @@ export const ControlBlockSchema = z
       message: 'Control block decision must be consistent with chain results',
     }
   );
+
+// -----------------------------------------------------------------------------
+// Purpose Type Validators (v0.9.24+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Purpose token validator
+ *
+ * PurposeToken is a string that matches the purpose grammar:
+ * - Lowercase letters, digits, underscores
+ * - Optional vendor prefix with colon (e.g., "cf:ai_crawler")
+ * - Max 64 characters
+ *
+ * Uses string type (not enum) to preserve unknown tokens for forward-compat.
+ */
+export const PurposeTokenSchema = z
+  .string()
+  .min(1)
+  .max(MAX_PURPOSE_TOKEN_LENGTH)
+  .refine((token) => PURPOSE_TOKEN_REGEX.test(token), {
+    message:
+      'Invalid purpose token format. Must be lowercase, alphanumeric with underscores, optional vendor prefix.',
+  });
+
+/**
+ * Canonical purpose validator
+ *
+ * CanonicalPurpose is one of PEAC's normative purpose tokens.
+ * Only these tokens have enforcement semantics.
+ */
+export const CanonicalPurposeSchema = z.enum([
+  'train',
+  'search',
+  'user_action',
+  'inference',
+  'index',
+]);
+
+/**
+ * Purpose reason validator
+ *
+ * PurposeReason is the audit spine explaining enforcement decisions.
+ */
+export const PurposeReasonSchema = z.enum([
+  'allowed',
+  'constrained',
+  'denied',
+  'downgraded',
+  'undeclared_default',
+  'unknown_preserved',
+]);
 
 // -----------------------------------------------------------------------------
 // Payment Evidence Validators (v0.9.16+)
