@@ -342,9 +342,7 @@ export function robotsToPeacStarter(robotsContent: string): RobotsToPeacResult {
     // Handle wildcard rules that affect AI crawlers
     if (isWildcard && hasDisallowAll) {
       hasAiRestrictions = true;
-      notes.push(
-        'Note: Wildcard Disallow: / detected. Consider if this applies to all AI agents.'
-      );
+      notes.push('Note: Wildcard Disallow: / detected. Consider if this applies to all AI agents.');
 
       // Add a catch-all deny rule for AI crawlers (lower priority)
       policyRules.push({

@@ -28,9 +28,7 @@ Allow: /
       const result = robotsToPeacStarter(robotsTxt);
       expect(result.policy.rules.length).toBe(0);
       expect(result.hasAiRestrictions).toBe(false);
-      expect(result.notes).toContainEqual(
-        expect.stringContaining('No AI-specific restrictions')
-      );
+      expect(result.notes).toContainEqual(expect.stringContaining('No AI-specific restrictions'));
     });
   });
 
@@ -132,9 +130,7 @@ Disallow: /admin/
 Allow: /public/
 `;
       const result = robotsToPeacStarter(robotsTxt);
-      expect(result.notes).toContainEqual(
-        expect.stringContaining('Path-specific rules')
-      );
+      expect(result.notes).toContainEqual(expect.stringContaining('Path-specific rules'));
       expect(result.notes).toContainEqual(expect.stringContaining('simplified'));
     });
   });
