@@ -1,0 +1,104 @@
+{
+  "$schema": "../../schema.json",
+  "description": "Purpose reason derivation golden vectors (v0.9.24+)",
+  "version": "0.9.24",
+  "vectors": [
+    {
+      "id": "undeclared-default",
+      "description": "Missing purpose header results in undeclared_default",
+      "input": {
+        "declared": false,
+        "hasUnknownTokens": false,
+        "decision": "allowed"
+      },
+      "expected": {
+        "reason": "undeclared_default"
+      }
+    },
+    {
+      "id": "undeclared-priority",
+      "description": "undeclared_default takes priority over unknown_preserved",
+      "input": {
+        "declared": false,
+        "hasUnknownTokens": true,
+        "decision": "allowed"
+      },
+      "expected": {
+        "reason": "undeclared_default"
+      }
+    },
+    {
+      "id": "unknown-preserved",
+      "description": "Unknown tokens with valid declaration results in unknown_preserved",
+      "input": {
+        "declared": true,
+        "hasUnknownTokens": true,
+        "decision": "allowed"
+      },
+      "expected": {
+        "reason": "unknown_preserved"
+      }
+    },
+    {
+      "id": "allowed-happy-path",
+      "description": "Valid purpose allowed by policy",
+      "input": {
+        "declared": true,
+        "hasUnknownTokens": false,
+        "decision": "allowed"
+      },
+      "expected": {
+        "reason": "allowed"
+      }
+    },
+    {
+      "id": "constrained",
+      "description": "Purpose allowed with rate limits applied",
+      "input": {
+        "declared": true,
+        "hasUnknownTokens": false,
+        "decision": "constrained"
+      },
+      "expected": {
+        "reason": "constrained"
+      }
+    },
+    {
+      "id": "denied",
+      "description": "Purpose denied by policy",
+      "input": {
+        "declared": true,
+        "hasUnknownTokens": false,
+        "decision": "denied"
+      },
+      "expected": {
+        "reason": "denied"
+      }
+    },
+    {
+      "id": "downgraded",
+      "description": "More restrictive purpose applied",
+      "input": {
+        "declared": true,
+        "hasUnknownTokens": false,
+        "decision": "downgraded"
+      },
+      "expected": {
+        "reason": "downgraded"
+      }
+    },
+    {
+      "id": "unknown-priority-over-denied",
+      "description": "unknown_preserved takes priority over policy decision",
+      "input": {
+        "declared": true,
+        "hasUnknownTokens": true,
+        "decision": "denied"
+      },
+      "expected": {
+        "reason": "unknown_preserved",
+        "note": "Unknown tokens should be flagged even when policy denies"
+      }
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "$schema": "../../schema.json",
+  "description": "Purpose token validation golden vectors (v0.9.24+)",
+  "version": "0.9.24",
+  "vectors": [
+    {
+      "id": "invalid-leading-digit",
+      "description": "Token cannot start with digit",
+      "input": {
+        "tokens": ["123abc"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": ["123abc"],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "invalid-leading-underscore",
+      "description": "Token cannot start with underscore",
+      "input": {
+        "tokens": ["_train"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": ["_train"],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "invalid-hyphen",
+      "description": "Hyphens are not allowed (use underscore)",
+      "input": {
+        "tokens": ["user-action"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": ["user-action"],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "invalid-trailing-colon",
+      "description": "Trailing colon is invalid",
+      "input": {
+        "tokens": ["vendor:"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": ["vendor:"],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "invalid-leading-colon",
+      "description": "Leading colon is invalid",
+      "input": {
+        "tokens": [":purpose"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": [":purpose"],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "invalid-double-colon",
+      "description": "Double colon is invalid",
+      "input": {
+        "tokens": ["vendor::purpose"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": ["vendor::purpose"],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "invalid-special-chars",
+      "description": "Special characters are not allowed",
+      "input": {
+        "tokens": ["train!", "search@", "index#"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": ["train!", "search@", "index#"],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "explicit-undeclared-rejected",
+      "description": "Explicit 'undeclared' in request is rejected (400)",
+      "input": {
+        "tokens": ["undeclared"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": [],
+        "undeclaredPresent": true
+      }
+    },
+    {
+      "id": "undeclared-with-valid",
+      "description": "Explicit 'undeclared' with valid tokens still rejected",
+      "input": {
+        "tokens": ["train", "undeclared", "search"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": [],
+        "undeclaredPresent": true
+      }
+    },
+    {
+      "id": "mixed-valid-invalid",
+      "description": "Mix of valid and invalid tokens",
+      "input": {
+        "tokens": ["train", "UPPERCASE", "search", "123bad"]
+      },
+      "expected": {
+        "valid": false,
+        "invalidTokens": ["UPPERCASE", "123bad"],
+        "undeclaredPresent": false,
+        "note": "After normalization, UPPERCASE becomes 'uppercase' which is valid but unknown"
+      }
+    }
+  ]
+}
