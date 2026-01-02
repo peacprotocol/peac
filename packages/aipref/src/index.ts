@@ -4,7 +4,13 @@
  */
 
 export { PrefResolver } from './resolver.js';
-export { parseRobots, robotsToAIPref, fetchRobots } from './robots.js';
+export {
+  parseRobots,
+  robotsToAIPref,
+  fetchRobots,
+  robotsToPeacStarter,
+} from './robots.js';
+export type { RobotsToPeacResult } from './robots.js';
 export type {
   AIPrefSnapshot,
   AIPrefPolicy,
