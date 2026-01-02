@@ -24,8 +24,19 @@ Shipped:
 | v0.9.16 | CAL semantics, PaymentEvidence extensions, SubjectProfile   |
 | v0.9.15 | Kernel-first architecture, package layering                 |
 
+## Upcoming Releases
+
+| Version  | Theme          | Key Deliverables                                       |
+| -------- | -------------- | ------------------------------------------------------ |
+| v0.9.24  | Adoption       | Purpose vocabulary, policy profiles, robots.txt bridge |
+| v0.9.25  | Infrastructure | Agent identity, Go SDK (verifier)                      |
+| v0.9.26  | Credibility    | Attribution, conformance suite, npm publish            |
+| v0.9.27  | Resolution     | Dispute and audit                                      |
+| v0.9.28+ | Distribution   | Edge workers, full Go SDK, WebSocket transport         |
+| v0.10.0  | GA             | Wire format freeze, multi-implementation validation    |
+
 ## Future Development
 
-The public roadmap is tracked via GitHub releases and tags. Implementation plans and feature prioritization are maintained privately.
+The public roadmap is tracked via GitHub releases and tags. Detailed implementation plans are maintained privately.
 
 For the latest release notes and shipped features, see [GitHub Releases](https://github.com/peacprotocol/peac/releases).
