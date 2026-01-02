@@ -51,6 +51,11 @@ export {
   // Profile system (v0.9.23+)
   type ProfileParameter,
   type ProfileDefinition,
+  // Policy constraints (v0.9.24+)
+  type PolicyConstraints,
+  // Enforcement profiles (v0.9.24+)
+  type EnforcementProfileId,
+  type EnforcementProfile,
   // Schemas for advanced validation
   SubjectMatcherSchema,
   PolicyRuleSchema,
@@ -60,6 +65,8 @@ export {
   DecisionRequirementsSchema,
   ProfileParameterSchema,
   ProfileDefinitionSchema,
+  PolicyConstraintsSchema,
+  EnforcementProfileSchema,
 } from './types';
 
 // Loader
@@ -132,3 +139,23 @@ export {
   type PurposeEnforcementContext,
   type PurposeEnforcementResult,
 } from './enforce';
+
+// Enforcement profiles (v0.9.24+)
+export {
+  // Profile definitions
+  STRICT_PROFILE,
+  BALANCED_PROFILE,
+  OPEN_PROFILE,
+  ENFORCEMENT_PROFILES,
+  ENFORCEMENT_PROFILE_IDS,
+  DEFAULT_ENFORCEMENT_PROFILE,
+  // Profile lookup
+  getEnforcementProfile,
+  isEnforcementProfileId,
+  getDefaultEnforcementProfile,
+  // Purpose evaluation
+  evaluatePurpose,
+  getPurposeStatusCode,
+  getRetryAfter,
+  type PurposeEvaluationResult,
+} from './enforcement-profiles';

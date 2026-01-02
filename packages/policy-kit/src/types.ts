@@ -389,3 +389,110 @@ export const ProfileDefinitionSchema = z
   .strict();
 
 export type ProfileDefinition = z.infer<typeof ProfileDefinitionSchema>;
+
+// -----------------------------------------------------------------------------
+// Policy Constraints (v0.9.24+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Policy constraints for rate limiting and budget control.
+ *
+ * These constraints are ADVISORY - enforcement happens at the edge/application layer.
+ * PEAC receipts capture what constraints were DECLARED, not whether they were enforced.
+ *
+ * @example
+ * ```typescript
+ * const constraints: PolicyConstraints = {
+ *   rate_limit: { window_s: 3600, max: 100 },
+ *   budget: { max_requests: 1000 },
+ * };
+ * ```
+ */
+export const PolicyConstraintsSchema = z
+  .object({
+    /** Rate limit configuration */
+    rate_limit: z
+      .object({
+        /** Window size in seconds */
+        window_s: z.number().int().positive(),
+        /** Maximum requests allowed in the window */
+        max: z.number().int().positive(),
+        /** Retry-After header value in seconds (optional) */
+        retry_after_s: z.number().int().positive().optional(),
+      })
+      .strict()
+      .optional(),
+
+    /** Budget constraints */
+    budget: z
+      .object({
+        /** Maximum tokens allowed */
+        max_tokens: z.number().int().positive().optional(),
+        /** Maximum requests allowed */
+        max_requests: z.number().int().positive().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+export type PolicyConstraints = z.infer<typeof PolicyConstraintsSchema>;
+
+// -----------------------------------------------------------------------------
+// Enforcement Profiles (v0.9.24+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Enforcement profile for purpose handling.
+ *
+ * Defines how undeclared or unknown purposes are handled at the enforcement layer.
+ * These are distinct from use-case profiles (api-provider, news-media, etc.).
+ *
+ * Three canonical profiles:
+ * - `strict`: Deny undeclared purposes (regulated data, private APIs)
+ * - `balanced`: Review + constraints for undeclared purposes (general web, default)
+ * - `open`: Allow undeclared purposes with recording (public content, research)
+ */
+export type EnforcementProfileId = 'strict' | 'balanced' | 'open';
+
+/**
+ * Enforcement profile definition.
+ *
+ * Specifies how to handle requests with undeclared, unknown, or missing purposes.
+ */
+export const EnforcementProfileSchema = z
+  .object({
+    /** Profile identifier */
+    id: z.enum(['strict', 'balanced', 'open']),
+
+    /** Human-readable name */
+    name: z.string().min(1),
+
+    /** Description of when to use this profile */
+    description: z.string().min(1),
+
+    /** Decision for requests with no purpose declared (missing header) */
+    undeclared_decision: z.enum(['allow', 'deny', 'review']),
+
+    /** Decision for requests with unknown purpose tokens */
+    unknown_decision: z.enum(['allow', 'deny', 'review']),
+
+    /** Purpose reason to record when undeclared/unknown is processed */
+    purpose_reason: z.enum([
+      'allowed',
+      'constrained',
+      'denied',
+      'downgraded',
+      'undeclared_default',
+      'unknown_preserved',
+    ]),
+
+    /** Default constraints to apply for 'review' decisions */
+    default_constraints: PolicyConstraintsSchema.optional(),
+
+    /** Whether receipts are required for allowed requests */
+    receipts: z.enum(['required', 'optional', 'omit']),
+  })
+  .strict();
+
+export type EnforcementProfile = z.infer<typeof EnforcementProfileSchema>;
