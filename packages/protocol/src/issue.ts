@@ -14,6 +14,12 @@ import {
   validateSubjectSnapshot,
   createEvidenceNotJsonError,
   type PEACError,
+  type PurposeToken,
+  type CanonicalPurpose,
+  type PurposeReason,
+  isValidPurposeToken,
+  isCanonicalPurpose,
+  isValidPurposeReason,
 } from '@peac/schema';
 import { providerRef } from '@peac/telemetry';
 import { hashReceipt } from './telemetry.js';
@@ -72,6 +78,29 @@ export interface IssueOptions {
 
   /** Subject profile snapshot for envelope (v0.9.17+, optional) */
   subject_snapshot?: SubjectProfileSnapshot;
+
+  /**
+   * Purposes declared by the requesting agent (v0.9.24+, optional)
+   *
+   * From PEAC-Purpose request header. Accepts single token or array.
+   * Unknown tokens are preserved for forward compatibility.
+   */
+  purpose?: PurposeToken | PurposeToken[];
+
+  /**
+   * Single purpose enforced by policy (v0.9.24+, optional)
+   *
+   * MUST be one of declared purposes OR a more restrictive downgrade.
+   * Only canonical purposes have enforcement semantics.
+   */
+  purpose_enforced?: CanonicalPurpose;
+
+  /**
+   * Reason for enforcement decision (v0.9.24+, optional)
+   *
+   * The audit spine - explains WHY purpose was enforced as it was.
+   */
+  purpose_reason?: PurposeReason;
 
   /** Ed25519 private key (32 bytes) */
   privateKey: Uint8Array;
@@ -144,6 +173,47 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
     }
   }
 
+  // Normalize and validate purpose (v0.9.24+)
+  let purposeDeclared: PurposeToken[] | undefined;
+  if (options.purpose !== undefined) {
+    // Normalize to array
+    const rawPurposes = Array.isArray(options.purpose) ? options.purpose : [options.purpose];
+
+    // Validate each token
+    const invalidTokens: string[] = [];
+    for (const token of rawPurposes) {
+      if (!isValidPurposeToken(token)) {
+        invalidTokens.push(token);
+      }
+    }
+    if (invalidTokens.length > 0) {
+      throw new Error(`Invalid purpose tokens: ${invalidTokens.join(', ')}`);
+    }
+
+    // Check for explicit 'undeclared' which is invalid on wire
+    if (rawPurposes.includes('undeclared')) {
+      throw new Error("Explicit 'undeclared' is not a valid purpose token (internal-only)");
+    }
+
+    purposeDeclared = rawPurposes;
+  }
+
+  // Validate purpose_enforced (must be canonical)
+  if (options.purpose_enforced !== undefined) {
+    if (!isCanonicalPurpose(options.purpose_enforced)) {
+      throw new Error(
+        `purpose_enforced must be a canonical purpose, got: ${options.purpose_enforced}`
+      );
+    }
+  }
+
+  // Validate purpose_reason
+  if (options.purpose_reason !== undefined) {
+    if (!isValidPurposeReason(options.purpose_reason)) {
+      throw new Error(`Invalid purpose_reason: ${options.purpose_reason}`);
+    }
+  }
+
   // Generate UUIDv7 for receipt ID
   const rid = uuidv7();
 
@@ -174,6 +244,10 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
     ...(options.exp && { exp: options.exp }),
     ...(options.subject && { subject: { uri: options.subject } }),
     ...(options.ext && { ext: options.ext }),
+    // Purpose claims (v0.9.24+)
+    ...(purposeDeclared && { purpose_declared: purposeDeclared }),
+    ...(options.purpose_enforced && { purpose_enforced: options.purpose_enforced }),
+    ...(options.purpose_reason && { purpose_reason: options.purpose_reason }),
   };
 
   // Validate claims with Zod - map evidence errors to typed error

@@ -24,6 +24,13 @@ export const PEAC_ALG = ALGORITHMS.default;
 export const PEAC_RECEIPT_HEADER = HEADERS.receipt;
 
 /**
+ * Purpose header names (v0.9.24+)
+ */
+export const PEAC_PURPOSE_HEADER = HEADERS.purpose;
+export const PEAC_PURPOSE_APPLIED_HEADER = HEADERS.purposeApplied;
+export const PEAC_PURPOSE_REASON_HEADER = HEADERS.purposeReason;
+
+/**
  * Discovery file path
  */
 export const PEAC_DISCOVERY_PATH = DISCOVERY.manifestPath;

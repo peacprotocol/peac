@@ -32,6 +32,10 @@ export const ALGORITHMS = {
 export const HEADERS = {
   receipt: 'PEAC-Receipt' as const,
   dpop: 'DPoP' as const,
+  // Purpose headers (v0.9.24+)
+  purpose: 'PEAC-Purpose' as const,
+  purposeApplied: 'PEAC-Purpose-Applied' as const,
+  purposeReason: 'PEAC-Purpose-Reason' as const,
 } as const;
 
 /**
