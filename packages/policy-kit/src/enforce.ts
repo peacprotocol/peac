@@ -405,10 +405,13 @@ export function enforcePurposeDecision(
 }
 
 /**
- * Get HTTP status code for a purpose decision.
+ * Get HTTP status code for a purpose decision (low-level helper).
  *
  * This helper maps policy decisions to HTTP status codes for purpose enforcement.
  * It NEVER returns 402 - that is reserved for payment/receipt challenges.
+ *
+ * For evaluating purpose with profiles, use getPurposeStatusCode from enforcement-profiles
+ * which takes a PurposeEvaluationResult directly.
  *
  * @param decision - Policy decision
  * @param purposeValid - Whether the purpose token(s) passed validation
@@ -416,13 +419,13 @@ export function enforcePurposeDecision(
  *
  * @example
  * ```typescript
- * getPurposeStatusCode('allow', true);  // 200
- * getPurposeStatusCode('deny', true);   // 403
- * getPurposeStatusCode('review', true); // 403 (NOT 402!)
- * getPurposeStatusCode('allow', false); // 400 (invalid token)
+ * getPurposeDecisionStatusCode('allow', true);  // 200
+ * getPurposeDecisionStatusCode('deny', true);   // 403
+ * getPurposeDecisionStatusCode('review', true); // 403 (NOT 402!)
+ * getPurposeDecisionStatusCode('allow', false); // 400 (invalid token)
  * ```
  */
-export function getPurposeStatusCode(
+export function getPurposeDecisionStatusCode(
   decision: ControlDecision,
   purposeValid: boolean
 ): 200 | 400 | 403 {

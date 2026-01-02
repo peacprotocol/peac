@@ -258,9 +258,9 @@ describe('Enforcement Profiles (v0.9.24+)', () => {
         expect(getPurposeStatusCode(result)).toBe(200);
       });
 
-      it('should return 402 for review', () => {
+      it('should return 403 for review (402 reserved for payment)', () => {
         const result = evaluatePurpose([], 'balanced');
-        expect(getPurposeStatusCode(result)).toBe(402);
+        expect(getPurposeStatusCode(result)).toBe(403);
       });
 
       it('should return 403 for deny', () => {

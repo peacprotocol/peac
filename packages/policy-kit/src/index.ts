@@ -135,7 +135,7 @@ export {
   // Purpose-specific enforcement (v0.9.24+)
   // These functions NEVER return 402 - that is reserved for payment/receipts
   enforcePurposeDecision,
-  getPurposeStatusCode,
+  getPurposeDecisionStatusCode, // Low-level: (decision, purposeValid) -> status
   type PurposeEnforcementContext,
   type PurposeEnforcementResult,
 } from './enforce';

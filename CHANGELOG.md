@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.24] - 2026-01-03
+
+### Added
+
+- **Purpose on Wire**: First-class purpose tracking in receipts and HTTP headers
+  - `PEAC-Purpose` request header for declaring agent intent
+  - `PEAC-Purpose-Applied` and `PEAC-Purpose-Reason` response headers
+  - Receipt claims: `purpose_declared`, `purpose_enforced`, `purpose_reason`
+  - Canonical purposes: `train`, `search`, `user_action`, `inference`, `index`
+- **Purpose Type Hierarchy** (`@peac/schema`)
+  - `PurposeToken` (string): Wire format preserving unknown tokens for forward-compat
+  - `CanonicalPurpose` (enum): PEAC normative vocabulary
+  - `PurposeReason` (enum): `allowed`, `constrained`, `denied`, `downgraded`, `undeclared_default`, `unknown_preserved`
+  - `parsePurposeHeader()` for header normalization (lowercase, trim, dedupe, preserve order)
+  - `isValidPurposeToken()` with grammar validation
+- **Enforcement Profiles** (`@peac/policy-kit`)
+  - 3 profiles: `strict`, `balanced`, `open` for undeclared purpose handling
+  - `strict`: deny undeclared (regulated data, private APIs)
+  - `balanced`: review + constraints (general web, gradual compliance) - DEFAULT
+  - `open`: allow recorded (public content, research)
+  - `createEnforcementProfile()` and `getEnforcementProfile()` helpers
+- **@peac/mappings-aipref**: NEW PACKAGE - IETF AIPREF vocabulary alignment
+  - Maps IETF AIPREF keys (`train-ai`, `search`) to PEAC `CanonicalPurpose`
+  - `aiprefKeyToPurpose()` and `purposeToAiprefKey()` bidirectional mapping
+  - Handles extension keys (`train-genai`, `ai`) with audit notes
+  - Preserves unknown keys for forward-compatibility
+- **Robots.txt Migration Helper** (`@peac/pref`)
+  - `robotsToPeacStarter()`: Convert robots.txt to starter PEAC policy document
+  - Advisory-only output with clear migration guidance
+  - Detects AI crawler user agents (GPTBot, Claude-Web, etc.)
+  - Returns `RobotsToPeacResult` with policy, notes, and processed agents
+- **Purpose Conformance Suite**: Golden vectors for cross-implementation parity
+  - `specs/conformance/fixtures/purpose/normalization.json` - 10 header parsing vectors
+  - `specs/conformance/fixtures/purpose/validation.json` - 10 token validation vectors
+  - `specs/conformance/fixtures/purpose/reason.json` - 8 reason derivation vectors
+- **Purpose Parsing Limits** (`specs/kernel/constants.json`)
+  - `max_token_length`: 64 characters
+  - `max_tokens_per_request`: 10 tokens
+  - Grammar: `/^[a-z][a-z0-9_-]*(?::[a-z][a-z0-9_-]*)?$/`
+
+### Changed
+
+- `issue()` now accepts `purpose` option (`PurposeToken | PurposeToken[]`)
+- Purpose token grammar widened to allow hyphens (e.g., `train-ai`)
+- Protocol emits purpose-related headers in HTTP responses
+
+### Security
+
+- `undeclared` is internal-only, never valid on wire (explicit `PEAC-Purpose: undeclared` returns 400)
+- Unknown purpose tokens preserved but cannot affect enforcement (forward-compat without bypass risk)
+
 ## [0.9.23] - 2025-12-31
 
 ### Added

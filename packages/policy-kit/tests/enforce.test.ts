@@ -9,7 +9,7 @@ import {
   getChallengeHeader,
   enforceForHttp,
   enforcePurposeDecision,
-  getPurposeStatusCode,
+  getPurposeDecisionStatusCode,
 } from '../src';
 
 describe('Decision Enforcement', () => {
@@ -278,32 +278,32 @@ describe('Purpose Enforcement (v0.9.24+)', () => {
     });
   });
 
-  describe('getPurposeStatusCode', () => {
+  describe('getPurposeDecisionStatusCode', () => {
     it('returns 200 for allowed purpose', () => {
-      expect(getPurposeStatusCode('allow', true)).toBe(200);
+      expect(getPurposeDecisionStatusCode('allow', true)).toBe(200);
     });
 
     it('returns 403 for denied purpose', () => {
-      expect(getPurposeStatusCode('deny', true)).toBe(403);
+      expect(getPurposeDecisionStatusCode('deny', true)).toBe(403);
     });
 
     it('returns 403 (NOT 402) for review purpose', () => {
-      const status = getPurposeStatusCode('review', true);
+      const status = getPurposeDecisionStatusCode('review', true);
       expect(status).toBe(403);
       expect(status).not.toBe(402);
     });
 
     it('returns 400 for invalid purpose tokens', () => {
-      expect(getPurposeStatusCode('allow', false)).toBe(400);
-      expect(getPurposeStatusCode('deny', false)).toBe(400);
-      expect(getPurposeStatusCode('review', false)).toBe(400);
+      expect(getPurposeDecisionStatusCode('allow', false)).toBe(400);
+      expect(getPurposeDecisionStatusCode('deny', false)).toBe(400);
+      expect(getPurposeDecisionStatusCode('review', false)).toBe(400);
     });
 
     it('never returns 402', () => {
       const decisions = ['allow', 'deny', 'review'] as const;
       for (const decision of decisions) {
-        expect(getPurposeStatusCode(decision, true)).not.toBe(402);
-        expect(getPurposeStatusCode(decision, false)).not.toBe(402);
+        expect(getPurposeDecisionStatusCode(decision, true)).not.toBe(402);
+        expect(getPurposeDecisionStatusCode(decision, false)).not.toBe(402);
       }
     });
   });
