@@ -1,8 +1,17 @@
 /**
- * HTTP header utilities for PEAC receipts
+ * HTTP header utilities for PEAC receipts and purpose
  */
 
-import { PEAC_RECEIPT_HEADER } from '@peac/schema';
+import {
+  PEAC_RECEIPT_HEADER,
+  PEAC_PURPOSE_HEADER,
+  PEAC_PURPOSE_APPLIED_HEADER,
+  PEAC_PURPOSE_REASON_HEADER,
+  parsePurposeHeader,
+  type PurposeToken,
+  type CanonicalPurpose,
+  type PurposeReason,
+} from '@peac/schema';
 
 /**
  * Set PEAC-Receipt header on a response
@@ -39,5 +48,69 @@ export function setVaryHeader(headers: Headers): void {
     }
   } else {
     headers.set('Vary', PEAC_RECEIPT_HEADER);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Purpose Header Utilities (v0.9.24+)
+// -----------------------------------------------------------------------------
+
+/**
+ * Get PEAC-Purpose header from a request
+ *
+ * Parses the comma-separated purpose token list into an array.
+ * Normalizes tokens (lowercase, trim whitespace), deduplicates.
+ *
+ * @param headers - Request headers
+ * @returns Array of normalized PurposeToken values, empty if header missing
+ */
+export function getPurposeHeader(headers: Headers): PurposeToken[] {
+  const value = headers.get(PEAC_PURPOSE_HEADER);
+  if (!value) {
+    return [];
+  }
+  return parsePurposeHeader(value);
+}
+
+/**
+ * Set PEAC-Purpose-Applied header on a response
+ *
+ * Indicates which purpose(s) were enforced for this request.
+ *
+ * @param headers - Response headers
+ * @param purpose - Single canonical purpose that was enforced
+ */
+export function setPurposeAppliedHeader(headers: Headers, purpose: CanonicalPurpose): void {
+  headers.set(PEAC_PURPOSE_APPLIED_HEADER, purpose);
+}
+
+/**
+ * Set PEAC-Purpose-Reason header on a response
+ *
+ * Explains WHY the purpose was enforced as it was (audit trail).
+ *
+ * @param headers - Response headers
+ * @param reason - Purpose reason enum value
+ */
+export function setPurposeReasonHeader(headers: Headers, reason: PurposeReason): void {
+  headers.set(PEAC_PURPOSE_REASON_HEADER, reason);
+}
+
+/**
+ * Set Vary: PEAC-Purpose header for caching
+ *
+ * If response behavior varies by declared purpose, MUST set this header.
+ *
+ * @param headers - Response headers
+ */
+export function setVaryPurposeHeader(headers: Headers): void {
+  const existing = headers.get('Vary');
+  if (existing) {
+    const varies = existing.split(',').map((v) => v.trim());
+    if (!varies.includes(PEAC_PURPOSE_HEADER)) {
+      headers.set('Vary', `${existing}, ${PEAC_PURPOSE_HEADER}`);
+    }
+  } else {
+    headers.set('Vary', PEAC_PURPOSE_HEADER);
   }
 }
