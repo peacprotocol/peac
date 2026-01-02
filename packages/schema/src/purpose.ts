@@ -338,3 +338,100 @@ export function normalizeToCanonicalOrPreserve(
   }
   return { purpose: token, mapped: false, unknown: true };
 }
+
+// ============================================================================
+// Purpose Reason Determination (v0.9.24+)
+// ============================================================================
+
+/**
+ * Decision type for purpose reason determination
+ *
+ * Maps to policy decisions that affect purpose enforcement.
+ */
+export type PurposeDecision = 'allowed' | 'constrained' | 'denied' | 'downgraded';
+
+/**
+ * Context for determining purpose reason
+ */
+export interface PurposeReasonContext {
+  /**
+   * Whether purposes were declared (PEAC-Purpose header present and non-empty).
+   * If false, reason will be 'undeclared_default'.
+   */
+  declared: boolean;
+
+  /**
+   * Whether any unknown (non-canonical) tokens are present in declared purposes.
+   * If true and declared is true, reason will be 'unknown_preserved'.
+   */
+  hasUnknownTokens: boolean;
+
+  /**
+   * The policy decision (only used if declared and no unknown tokens).
+   * Defaults to 'allowed' if not provided.
+   */
+  decision?: PurposeDecision;
+}
+
+/**
+ * Determine the appropriate PurposeReason based on context
+ *
+ * This helper implements the decision logic for the audit spine:
+ * 1. If no purposes declared -> 'undeclared_default'
+ * 2. If unknown tokens present -> 'unknown_preserved'
+ * 3. Otherwise -> maps to policy decision
+ *
+ * @param context - Context for determination
+ * @returns The appropriate PurposeReason for the audit spine
+ *
+ * @example
+ * ```typescript
+ * // Missing PEAC-Purpose header
+ * determinePurposeReason({ declared: false, hasUnknownTokens: false });
+ * // => 'undeclared_default'
+ *
+ * // Has vendor-prefixed tokens
+ * determinePurposeReason({ declared: true, hasUnknownTokens: true, decision: 'allowed' });
+ * // => 'unknown_preserved'
+ *
+ * // All canonical tokens, allowed by policy
+ * determinePurposeReason({ declared: true, hasUnknownTokens: false, decision: 'allowed' });
+ * // => 'allowed'
+ * ```
+ */
+export function determinePurposeReason(context: PurposeReasonContext): PurposeReason {
+  // Priority 1: No purposes declared
+  if (!context.declared) {
+    return 'undeclared_default';
+  }
+
+  // Priority 2: Unknown tokens present (preserved for forward-compat)
+  if (context.hasUnknownTokens) {
+    return 'unknown_preserved';
+  }
+
+  // Priority 3: Map policy decision to reason
+  const decision = context.decision ?? 'allowed';
+  switch (decision) {
+    case 'allowed':
+      return 'allowed';
+    case 'constrained':
+      return 'constrained';
+    case 'denied':
+      return 'denied';
+    case 'downgraded':
+      return 'downgraded';
+    default:
+      return 'allowed';
+  }
+}
+
+/**
+ * Check if any tokens in an array are unknown (non-canonical)
+ *
+ * @param tokens - Array of purpose tokens
+ * @returns true if any token is not a canonical purpose
+ */
+export function hasUnknownPurposeTokens(tokens: PurposeToken[]): boolean {
+  return tokens.some((token) => !isCanonicalPurpose(token));
+}

@@ -493,3 +493,156 @@ describe('Zod Validators', () => {
     });
   });
 });
+
+// Import reason determination functions for testing
+import { determinePurposeReason, hasUnknownPurposeTokens } from '../src/purpose';
+
+describe('Purpose Reason Determination (v0.9.24+)', () => {
+  describe('determinePurposeReason', () => {
+    describe('undeclared_default (header missing/empty)', () => {
+      it('should return undeclared_default when not declared', () => {
+        const reason = determinePurposeReason({ declared: false, hasUnknownTokens: false });
+        expect(reason).toBe('undeclared_default');
+      });
+
+      it('should return undeclared_default even if hasUnknownTokens is true but not declared', () => {
+        // If not declared, hasUnknownTokens should be ignored
+        const reason = determinePurposeReason({ declared: false, hasUnknownTokens: true });
+        expect(reason).toBe('undeclared_default');
+      });
+
+      it('should return undeclared_default regardless of decision when not declared', () => {
+        const reason = determinePurposeReason({
+          declared: false,
+          hasUnknownTokens: false,
+          decision: 'allowed',
+        });
+        expect(reason).toBe('undeclared_default');
+      });
+    });
+
+    describe('unknown_preserved (unknown tokens present)', () => {
+      it('should return unknown_preserved when hasUnknownTokens is true', () => {
+        const reason = determinePurposeReason({ declared: true, hasUnknownTokens: true });
+        expect(reason).toBe('unknown_preserved');
+      });
+
+      it('should return unknown_preserved regardless of decision when unknown tokens present', () => {
+        const decisions = ['allowed', 'constrained', 'denied', 'downgraded'] as const;
+        for (const decision of decisions) {
+          const reason = determinePurposeReason({
+            declared: true,
+            hasUnknownTokens: true,
+            decision,
+          });
+          expect(reason).toBe('unknown_preserved');
+        }
+      });
+    });
+
+    describe('policy decision mapping', () => {
+      it('should return allowed for allowed decision', () => {
+        const reason = determinePurposeReason({
+          declared: true,
+          hasUnknownTokens: false,
+          decision: 'allowed',
+        });
+        expect(reason).toBe('allowed');
+      });
+
+      it('should return constrained for constrained decision', () => {
+        const reason = determinePurposeReason({
+          declared: true,
+          hasUnknownTokens: false,
+          decision: 'constrained',
+        });
+        expect(reason).toBe('constrained');
+      });
+
+      it('should return denied for denied decision', () => {
+        const reason = determinePurposeReason({
+          declared: true,
+          hasUnknownTokens: false,
+          decision: 'denied',
+        });
+        expect(reason).toBe('denied');
+      });
+
+      it('should return downgraded for downgraded decision', () => {
+        const reason = determinePurposeReason({
+          declared: true,
+          hasUnknownTokens: false,
+          decision: 'downgraded',
+        });
+        expect(reason).toBe('downgraded');
+      });
+
+      it('should default to allowed when no decision provided', () => {
+        const reason = determinePurposeReason({
+          declared: true,
+          hasUnknownTokens: false,
+        });
+        expect(reason).toBe('allowed');
+      });
+    });
+
+    describe('priority order', () => {
+      // Priority: 1) undeclared_default, 2) unknown_preserved, 3) decision
+      it('should prioritize undeclared_default over everything', () => {
+        const reason = determinePurposeReason({
+          declared: false,
+          hasUnknownTokens: true,
+          decision: 'denied',
+        });
+        expect(reason).toBe('undeclared_default');
+      });
+
+      it('should prioritize unknown_preserved over policy decision', () => {
+        const reason = determinePurposeReason({
+          declared: true,
+          hasUnknownTokens: true,
+          decision: 'denied',
+        });
+        expect(reason).toBe('unknown_preserved');
+      });
+    });
+  });
+
+  describe('hasUnknownPurposeTokens', () => {
+    it('should return false for empty array', () => {
+      expect(hasUnknownPurposeTokens([])).toBe(false);
+    });
+
+    it('should return false for all canonical tokens', () => {
+      expect(hasUnknownPurposeTokens(['train'])).toBe(false);
+      expect(hasUnknownPurposeTokens(['train', 'search'])).toBe(false);
+      expect(
+        hasUnknownPurposeTokens(['train', 'search', 'user_action', 'inference', 'index'])
+      ).toBe(false);
+    });
+
+    it('should return true for vendor-prefixed tokens', () => {
+      expect(hasUnknownPurposeTokens(['cf:ai_crawler'])).toBe(true);
+      expect(hasUnknownPurposeTokens(['train', 'cf:ai_crawler'])).toBe(true);
+    });
+
+    it('should return true for legacy tokens', () => {
+      // Legacy tokens like 'crawl' are not canonical (even though valid)
+      expect(hasUnknownPurposeTokens(['crawl'])).toBe(true);
+      expect(hasUnknownPurposeTokens(['ai_input'])).toBe(true);
+      expect(hasUnknownPurposeTokens(['ai_index'])).toBe(true);
+    });
+
+    it('should return true for unknown custom tokens', () => {
+      expect(hasUnknownPurposeTokens(['my_custom_purpose'])).toBe(true);
+      expect(hasUnknownPurposeTokens(['train', 'custom'])).toBe(true);
+    });
+
+    it('should correctly identify mixed arrays', () => {
+      // All canonical -> false
+      expect(hasUnknownPurposeTokens(['train', 'search'])).toBe(false);
+      // One unknown -> true
+      expect(hasUnknownPurposeTokens(['train', 'search', 'unknown'])).toBe(true);
+    });
+  });
+});
