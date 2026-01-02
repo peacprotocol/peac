@@ -31,6 +31,15 @@
       "undeclared_default",
       "unknown_preserved"
     ],
+    "limits": {
+      "max_token_length": 64,
+      "max_tokens_per_request": 10,
+      "description": "Purpose header parsing limits (implementation safety, RECOMMENDED)"
+    },
+    "grammar": {
+      "pattern": "^[a-z][a-z0-9_]*(?::[a-z][a-z0-9_]*)?$",
+      "description": "Purpose token grammar: lowercase start, alphanumeric/underscore, optional vendor prefix"
+    },
     "description": "Purpose vocabulary for PEAC-Purpose header (v0.9.24+)"
   },
   "discovery": {

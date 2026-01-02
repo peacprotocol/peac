@@ -75,7 +75,7 @@ const scope = controlPurposeToAiprefScope('inference');
 ### 3.2 Integration Pattern
 
 1. **Publisher declares** RSL directives in `robots.txt` or RSL manifest
-2. **PEAC parses** RSL via `@peac/aipref` (includes RSL parsing)
+2. **PEAC parses** RSL via `@peac/pref` (includes RSL parsing)
 3. **Policy Kit** generates policy rules from RSL declarations
 4. **Receipt** captures which RSL-derived purpose was enforced
 

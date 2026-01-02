@@ -1,4 +1,4 @@
-# @peac/rails-x402-fluora
+# @peac/adapter-x402-fluora
 
 x402+Fluora MCP marketplace adapter for PEAC protocol.
 
@@ -7,13 +7,13 @@ Maps Fluora MCP tool call events to PaymentEvidence using the PEIP-SVC/mcp-call@
 ## Installation
 
 ```bash
-pnpm add @peac/rails-x402-fluora
+pnpm add @peac/adapter-x402-fluora
 ```
 
 ## Usage
 
 ```typescript
-import { fromMcpCallEvent, fromWebhookEvent } from '@peac/rails-x402-fluora';
+import { fromMcpCallEvent, fromWebhookEvent } from '@peac/adapter-x402-fluora';
 
 // Process an MCP call event
 const result = fromMcpCallEvent({
@@ -56,7 +56,7 @@ if (marketplaceResult.ok) {
 ## Configuration
 
 ```typescript
-import { fromMcpCallEvent, type FluoraConfig } from '@peac/rails-x402-fluora';
+import { fromMcpCallEvent, type FluoraConfig } from '@peac/adapter-x402-fluora';
 
 const config: FluoraConfig = {
   defaultEnv: 'test',

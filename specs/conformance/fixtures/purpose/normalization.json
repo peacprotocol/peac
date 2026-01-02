@@ -1,0 +1,137 @@
+{
+  "$schema": "../../schema.json",
+  "description": "Purpose header normalization golden vectors (v0.9.24+)",
+  "version": "0.9.24",
+  "vectors": [
+    {
+      "id": "single-canonical",
+      "description": "Single canonical purpose token",
+      "input": {
+        "header": "train"
+      },
+      "expected": {
+        "tokens": ["train"],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "multi-canonical",
+      "description": "Multiple canonical purpose tokens",
+      "input": {
+        "header": "train, search, inference"
+      },
+      "expected": {
+        "tokens": ["train", "search", "inference"],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "whitespace-normalization",
+      "description": "Whitespace around tokens is trimmed",
+      "input": {
+        "header": "  train  ,  search  "
+      },
+      "expected": {
+        "tokens": ["train", "search"],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "case-normalization",
+      "description": "Uppercase tokens normalized to lowercase",
+      "input": {
+        "header": "TRAIN, Search, INDEX"
+      },
+      "expected": {
+        "tokens": ["train", "search", "index"],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "deduplication",
+      "description": "Duplicate tokens are removed (first occurrence kept)",
+      "input": {
+        "header": "train, search, train, index, search"
+      },
+      "expected": {
+        "tokens": ["train", "search", "index"],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "empty-tokens-dropped",
+      "description": "Empty tokens from consecutive commas are dropped",
+      "input": {
+        "header": "train,,search,,,index"
+      },
+      "expected": {
+        "tokens": ["train", "search", "index"],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "vendor-prefixed",
+      "description": "Vendor-prefixed tokens are valid and preserved",
+      "input": {
+        "header": "train, cf:ai_crawler, vendor:custom_purpose"
+      },
+      "expected": {
+        "tokens": ["train", "cf:ai_crawler", "vendor:custom_purpose"],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "unknown-preserved",
+      "description": "Unknown tokens are preserved (forward compatibility)",
+      "input": {
+        "header": "train, future_purpose, another_unknown"
+      },
+      "expected": {
+        "tokens": ["train", "future_purpose", "another_unknown"],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "empty-header",
+      "description": "Empty header returns empty array",
+      "input": {
+        "header": ""
+      },
+      "expected": {
+        "tokens": [],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    },
+    {
+      "id": "whitespace-only",
+      "description": "Whitespace-only header returns empty array",
+      "input": {
+        "header": "   "
+      },
+      "expected": {
+        "tokens": [],
+        "valid": true,
+        "invalidTokens": [],
+        "undeclaredPresent": false
+      }
+    }
+  ]
+}

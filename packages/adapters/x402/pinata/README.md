@@ -1,4 +1,4 @@
-# @peac/rails-x402-pinata
+# @peac/adapter-x402-pinata
 
 x402+Pinata private IPFS objects adapter for PEAC protocol.
 
@@ -7,13 +7,13 @@ Maps Pinata private object access events to PaymentEvidence using the PEIP-OBJ/p
 ## Installation
 
 ```bash
-pnpm add @peac/rails-x402-pinata
+pnpm add @peac/adapter-x402-pinata
 ```
 
 ## Usage
 
 ```typescript
-import { fromAccessEvent, fromWebhookEvent } from '@peac/rails-x402-pinata';
+import { fromAccessEvent, fromWebhookEvent } from '@peac/adapter-x402-pinata';
 
 // Process an access event with CIDv0
 const result = fromAccessEvent({
@@ -58,7 +58,7 @@ const webhookResult = fromWebhookEvent({
 ## Configuration
 
 ```typescript
-import { fromAccessEvent, type PinataConfig } from '@peac/rails-x402-pinata';
+import { fromAccessEvent, type PinataConfig } from '@peac/adapter-x402-pinata';
 
 const config: PinataConfig = {
   defaultEnv: 'test',

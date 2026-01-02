@@ -76,5 +76,19 @@
       "description": "Deeply nested but valid structure (tests depth handling)",
       "expected_valid": true
     }
+  },
+  "purpose": {
+    "normalization.json": {
+      "description": "Purpose header normalization golden vectors (v0.9.24+)",
+      "version": "0.9.24"
+    },
+    "validation.json": {
+      "description": "Purpose token validation golden vectors (v0.9.24+)",
+      "version": "0.9.24"
+    },
+    "reason.json": {
+      "description": "Purpose reason derivation golden vectors (v0.9.24+)",
+      "version": "0.9.24"
+    }
   }
 }
