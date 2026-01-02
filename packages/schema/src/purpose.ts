@@ -15,8 +15,10 @@
  * Allows unknown tokens for forward compatibility. Any valid token
  * that matches the grammar is accepted and preserved.
  *
- * Grammar: lowercase, max 64 chars, [a-z0-9_] + optional vendor prefix (vendor:token)
- * Examples: "train", "search", "user_action", "cf:ai_crawler", "vendor:custom_purpose"
+ * Grammar: lowercase, max 64 chars, [a-z0-9_-] + optional vendor prefix (vendor:token)
+ * Hyphens allowed for interop with external systems (Cloudflare, IETF AIPREF, etc.)
+ *
+ * Examples: "train", "search", "user_action", "user-action", "cf:ai_crawler", "cf:ai-crawler"
  */
 export type PurposeToken = string;
 
@@ -71,13 +73,16 @@ export type LegacyPurpose = 'crawl' | 'ai_input' | 'ai_index';
 /**
  * Grammar validation for PurposeToken
  *
- * Pattern: lowercase letter followed by lowercase letters, digits, or underscores,
- * with optional vendor prefix separated by colon.
+ * Pattern: lowercase letter followed by lowercase letters, digits, underscores,
+ * or hyphens, with optional vendor prefix separated by colon.
  *
- * Valid: "train", "user_action", "cf:ai_crawler"
- * Invalid: "Train", "USER_ACTION", "123abc", ""
+ * Hyphens are allowed for interoperability with external systems (Cloudflare,
+ * IETF AIPREF, etc.) that use hyphenated tokens like "user-action" or "train-ai".
+ *
+ * Valid: "train", "user_action", "user-action", "cf:ai_crawler", "cf:ai-crawler"
+ * Invalid: "Train", "USER_ACTION", "123abc", "", "-train", "train-"
  */
-export const PURPOSE_TOKEN_REGEX = /^[a-z][a-z0-9_]*(?::[a-z][a-z0-9_]*)?$/;
+export const PURPOSE_TOKEN_REGEX = /^[a-z][a-z0-9_-]*(?::[a-z][a-z0-9_-]*)?$/;
 
 /** Maximum length for a purpose token */
 export const MAX_PURPOSE_TOKEN_LENGTH = 64;
@@ -115,9 +120,10 @@ export const INTERNAL_PURPOSE_UNDECLARED: InternalPurpose = 'undeclared';
  * Check if a string is a valid PurposeToken
  *
  * Validates against the purpose token grammar:
- * - Lowercase letters, digits, underscores
+ * - Lowercase letters, digits, underscores, hyphens
  * - Optional vendor prefix with colon
  * - Max 64 characters
+ * - Must start with lowercase letter
  *
  * @param token - String to validate
  * @returns true if valid PurposeToken

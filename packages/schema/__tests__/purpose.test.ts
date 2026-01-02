@@ -89,13 +89,39 @@ describe('Purpose Types (v0.9.24+)', () => {
       });
     });
 
+    describe('valid hyphenated tokens (interop)', () => {
+      // Hyphens allowed for interop with external systems (Cloudflare, IETF AIPREF, etc.)
+      const hyphenatedTokens = [
+        'user-action', // Cloudflare style
+        'train-ai', // IETF AIPREF style
+        'train-genai', // IETF AIPREF extension
+        'ai-crawler',
+        'my-custom-purpose',
+        'a-b',
+        'a-1',
+        'a-b-c-d',
+        'purpose-with-multiple-hyphens',
+      ];
+
+      hyphenatedTokens.forEach((token) => {
+        it(`should accept hyphenated token: "${token}"`, () => {
+          expect(isValidPurposeToken(token)).toBe(true);
+          expect(PURPOSE_TOKEN_REGEX.test(token)).toBe(true);
+        });
+      });
+    });
+
     describe('valid vendor-prefixed tokens', () => {
       const validVendorTokens = [
         'cf:ai_crawler',
+        'cf:ai-crawler', // hyphenated suffix
         'vendor:custom_purpose',
+        'vendor:custom-purpose', // hyphenated suffix
         'peac:experimental',
         'akamai:bot_check',
+        'akamai:bot-check', // hyphenated suffix
         'fastly:edge_compute',
+        'fastly:edge-compute', // hyphenated suffix
         'x:y',
       ];
 
@@ -113,9 +139,9 @@ describe('Purpose Types (v0.9.24+)', () => {
         '   ', // whitespace only
         'Train', // uppercase
         'USER_ACTION', // all caps
-        'user-action', // hyphen (not allowed)
         '123abc', // starts with number
         '_train', // starts with underscore
+        '-train', // starts with hyphen
         'train!', // special character
         'train@search', // @ symbol
         'a'.repeat(65), // too long
