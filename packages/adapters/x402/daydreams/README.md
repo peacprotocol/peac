@@ -1,4 +1,4 @@
-# @peac/rails-x402-daydreams
+# @peac/adapter-x402-daydreams
 
 x402+Daydreams AI inference router adapter for PEAC protocol.
 
@@ -7,13 +7,13 @@ Maps Daydreams AI inference events to PaymentEvidence using the PEIP-AI/inferenc
 ## Installation
 
 ```bash
-pnpm add @peac/rails-x402-daydreams
+pnpm add @peac/adapter-x402-daydreams
 ```
 
 ## Usage
 
 ```typescript
-import { fromInferenceEvent, fromWebhookEvent } from '@peac/rails-x402-daydreams';
+import { fromInferenceEvent, fromWebhookEvent } from '@peac/adapter-x402-daydreams';
 
 // Process an inference event
 const result = fromInferenceEvent({
@@ -49,7 +49,7 @@ const webhookResult = fromWebhookEvent({
 ## Configuration
 
 ```typescript
-import { fromInferenceEvent, type DaydreamsConfig } from '@peac/rails-x402-daydreams';
+import { fromInferenceEvent, type DaydreamsConfig } from '@peac/adapter-x402-daydreams';
 
 const config: DaydreamsConfig = {
   defaultEnv: 'test',
