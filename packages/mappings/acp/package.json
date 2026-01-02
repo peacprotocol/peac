@@ -1,6 +1,6 @@
 {
   "name": "@peac/mappings-acp",
-  "version": "0.9.23",
+  "version": "0.9.24",
   "description": "Agentic Commerce Protocol (ACP) integration for PEAC",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

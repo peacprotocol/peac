@@ -322,15 +322,19 @@ export function evaluatePurpose(
 /**
  * Get the HTTP status code for a purpose evaluation result.
  *
+ * NOTE: 402 is RESERVED for payment - purpose decisions never return 402.
+ * - allow -> 200
+ * - review -> 403 (NOT 402)
+ * - deny -> 403
+ *
  * @param result - Purpose evaluation result
- * @returns HTTP status code (200, 402, 403)
+ * @returns HTTP status code (200 or 403)
  */
-export function getPurposeStatusCode(result: PurposeEvaluationResult): 200 | 402 | 403 {
+export function getPurposeStatusCode(result: PurposeEvaluationResult): 200 | 403 {
   switch (result.decision) {
     case 'allow':
       return 200;
     case 'review':
-      return 402;
     case 'deny':
       return 403;
   }
