@@ -7,8 +7,6 @@ Maps IETF AIPREF Content-Usage header keys to PEAC CanonicalPurpose values using
 ## Installation
 
 ```bash
-npm install @peac/mappings-aipref
-# or
 pnpm add @peac/mappings-aipref
 ```
 
