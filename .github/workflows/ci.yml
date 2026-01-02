@@ -51,6 +51,12 @@ jobs:
       - name: Package hygiene (drift, duplicates, private+publishConfig)
         run: bash scripts/check-publish-list.sh
 
+      - name: Protocol string verification (forbidden patterns)
+        run: pnpm verify:protocol-strings
+
+      - name: Spec drift verification (constants parity)
+        run: pnpm verify:spec-drift
+
       - name: Error code parity (advisory)
         continue-on-error: true
         run: bash scripts/check-error-codes.sh

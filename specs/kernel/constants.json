@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.15",
+  "version": "0.9.24",
   "description": "PEAC protocol constants - normative source of truth",
   "wire_format": {
     "type": "peac.receipt/0.9",
@@ -14,8 +14,24 @@
   },
   "headers": {
     "receipt": "PEAC-Receipt",
+    "purpose": "PEAC-Purpose",
+    "purpose_applied": "PEAC-Purpose-Applied",
+    "purpose_reason": "PEAC-Purpose-Reason",
     "dpop": "DPoP",
     "description": "HTTP header names for PEAC protocol"
+  },
+  "purpose": {
+    "canonical_tokens": ["train", "search", "user_action", "inference", "index"],
+    "internal_only": ["undeclared"],
+    "reason_values": [
+      "allowed",
+      "constrained",
+      "denied",
+      "downgraded",
+      "undeclared_default",
+      "unknown_preserved"
+    ],
+    "description": "Purpose vocabulary for PEAC-Purpose header (v0.9.24+)"
   },
   "discovery": {
     "manifest_path": "/.well-known/peac.txt",
@@ -39,5 +55,13 @@
     "max_amount_cents": 999999999999,
     "min_amount_cents": 1,
     "description": "Payment amount validation limits"
+  },
+  "related_specs": {
+    "wire_version": "specs/wire/VERSION.json",
+    "errors": "specs/kernel/errors.json",
+    "registries_doc": "docs/specs/REGISTRIES.md",
+    "header_semantics": "docs/specs/PROTOCOL-BEHAVIOR.md#13-http-header-semantics",
+    "interop": "docs/specs/INTEROP.md",
+    "description": "Related specification documents"
   }
 }
