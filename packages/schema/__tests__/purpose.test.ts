@@ -157,7 +157,35 @@ describe('Purpose Types (v0.9.24+)', () => {
           expect(isValidPurposeToken(token)).toBe(false);
         });
       });
+    });
 
+    describe('trailing separator rejection', () => {
+      // Trailing separators are explicitly forbidden (grammar must end with alphanumeric)
+      const trailingSeparatorTokens = [
+        'train-', // trailing hyphen
+        'train_', // trailing underscore
+        'a-', // single letter + trailing hyphen
+        'a_', // single letter + trailing underscore
+        'train--', // double trailing hyphen
+        'train__', // double trailing underscore
+        'train-_', // mixed trailing separators
+        'cf:ai-', // vendor prefix with trailing hyphen in suffix
+        'cf:ai_', // vendor prefix with trailing underscore in suffix
+        'cf-:ai', // trailing hyphen in prefix (before colon)
+        'cf_:ai', // trailing underscore in prefix (before colon)
+        'cf:-ai', // leading hyphen in suffix (after colon)
+        'cf:_ai', // leading underscore in suffix (after colon)
+      ];
+
+      trailingSeparatorTokens.forEach((token) => {
+        it(`should reject trailing/invalid separator: "${token}"`, () => {
+          expect(isValidPurposeToken(token)).toBe(false);
+          expect(PURPOSE_TOKEN_REGEX.test(token)).toBe(false);
+        });
+      });
+    });
+
+    describe('non-string values', () => {
       it('should reject non-string values', () => {
         expect(isValidPurposeToken(123 as unknown as string)).toBe(false);
         expect(isValidPurposeToken(null as unknown as string)).toBe(false);

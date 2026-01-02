@@ -73,16 +73,18 @@ export type LegacyPurpose = 'crawl' | 'ai_input' | 'ai_index';
 /**
  * Grammar validation for PurposeToken
  *
- * Pattern: lowercase letter followed by lowercase letters, digits, underscores,
- * or hyphens, with optional vendor prefix separated by colon.
+ * Pattern: lowercase letter, optionally followed by alphanumeric/underscore/hyphen
+ * characters that MUST end with a letter or digit (no trailing separators).
+ * Optional vendor prefix separated by colon follows the same rules.
  *
  * Hyphens are allowed for interoperability with external systems (Cloudflare,
  * IETF AIPREF, etc.) that use hyphenated tokens like "user-action" or "train-ai".
  *
- * Valid: "train", "user_action", "user-action", "cf:ai_crawler", "cf:ai-crawler"
- * Invalid: "Train", "USER_ACTION", "123abc", "", "-train", "train-"
+ * Valid: "train", "user_action", "user-action", "cf:ai_crawler", "cf:ai-crawler", "a", "a1"
+ * Invalid: "Train", "123abc", "", "-train", "train-", "train_", "cf:ai-", "cf:-ai"
  */
-export const PURPOSE_TOKEN_REGEX = /^[a-z][a-z0-9_-]*(?::[a-z][a-z0-9_-]*)?$/;
+export const PURPOSE_TOKEN_REGEX =
+  /^[a-z](?:[a-z0-9_-]*[a-z0-9])?(?::[a-z](?:[a-z0-9_-]*[a-z0-9])?)?$/;
 
 /** Maximum length for a purpose token */
 export const MAX_PURPOSE_TOKEN_LENGTH = 64;
