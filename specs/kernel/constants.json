@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "description": "PEAC protocol constants - normative source of truth",
   "wire_format": {
     "type": "peac.receipt/0.9",
@@ -17,8 +17,29 @@
     "purpose": "PEAC-Purpose",
     "purpose_applied": "PEAC-Purpose-Applied",
     "purpose_reason": "PEAC-Purpose-Reason",
+    "agent_identity": "PEAC-Agent-Identity",
     "dpop": "DPoP",
-    "description": "HTTP header names for PEAC protocol"
+    "description": "HTTP header names for PEAC protocol (v0.9.25: added agent_identity)"
+  },
+  "identity": {
+    "attestation_type": "peac/agent-identity",
+    "control_types": ["operator", "user-delegated"],
+    "proof_methods": ["http-message-signature", "dpop", "mtls", "jwk-thumbprint"],
+    "key_lifecycle_states": ["pending", "active", "deprecated", "retired", "revoked"],
+    "limits": {
+      "max_agent_id_length": 256,
+      "max_capabilities": 32,
+      "max_capability_length": 64,
+      "max_delegation_chain": 8,
+      "max_key_directory_url_length": 2048,
+      "description": "Agent identity field limits (implementation safety)"
+    },
+    "binding": {
+      "clock_skew_seconds": 30,
+      "max_binding_age_seconds": 300,
+      "description": "Identity binding time validation parameters"
+    },
+    "description": "Agent identity attestation constants (v0.9.25+)"
   },
   "purpose": {
     "canonical_tokens": ["train", "search", "user_action", "inference", "index"],
@@ -71,6 +92,7 @@
     "registries_doc": "docs/specs/REGISTRIES.md",
     "header_semantics": "docs/specs/PROTOCOL-BEHAVIOR.md#13-http-header-semantics",
     "interop": "docs/specs/INTEROP.md",
-    "description": "Related specification documents"
+    "agent_identity": "docs/specs/AGENT-IDENTITY.md",
+    "description": "Related specification documents (v0.9.25: added agent_identity)"
   }
 }

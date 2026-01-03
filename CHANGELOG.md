@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.25] - 2026-01-04
+
+### Added
+
+- **Agent Identity Attestation**: Cryptographic proof-of-control binding for agents
+  - `AgentIdentityAttestation` type extending generic Attestation framework
+  - `ControlType`: `operator` (verified bots) vs `user-delegated` (user agents)
+  - `AgentProof` with multiple proof methods: `http-message-signature`, `dpop`, `mtls`, `jwk-thumbprint`
+  - `AgentIdentityEvidence` with agent_id, capabilities, delegation_chain, operator
+  - Validation helpers: `validateAgentIdentityAttestation()`, `isAgentIdentityAttestation()`, `createAgentIdentityAttestation()`
+- **Identity Binding** (`@peac/schema`)
+  - `IdentityBinding` type for cryptographic request-receipt binding
+  - `constructBindingMessage()` for canonical binding message construction
+  - `verifyIdentityBinding()` for publisher-side verification algorithm
+  - Key rotation semantics: PENDING, ACTIVE, DEPRECATED, REVOKED
+- **Identity Error Codes**: 13 new identity\_\* error codes (`specs/kernel/errors.json`)
+  - `E_IDENTITY_MISSING`, `E_IDENTITY_INVALID_FORMAT`, `E_IDENTITY_EXPIRED`
+  - `E_IDENTITY_NOT_YET_VALID`, `E_IDENTITY_SIG_INVALID`, `E_IDENTITY_KEY_UNKNOWN`
+  - `E_IDENTITY_KEY_EXPIRED`, `E_IDENTITY_KEY_REVOKED`, `E_IDENTITY_BINDING_MISMATCH`
+  - `E_IDENTITY_BINDING_STALE`, `E_IDENTITY_BINDING_FUTURE`, `E_IDENTITY_PROOF_UNSUPPORTED`
+  - `E_IDENTITY_DIRECTORY_UNAVAILABLE`
+- **docs/specs/AGENT-IDENTITY.md**: Normative agent identity specification
+  - Binding message construction algorithm
+  - Verification algorithm (VERIFY_IDENTITY pseudocode)
+  - Key rotation semantics (lifecycle states)
+  - Error taxonomy with HTTP status mappings
+  - Security considerations (replay resistance, time bounds)
+  - AAIF/MCP/A2A interop patterns (informative)
+- **Go Verifier SDK** (`sdks/go/`)
+  - `Verify()` function for Ed25519 receipt verification
+  - `PEACReceiptClaims` with all claim fields including purpose and identity
+  - JWS parsing and header validation (`jws/`)
+  - JWKS fetching with timeout and size limits (`jwks/`)
+  - Thread-safe cache with TTL and stale-while-revalidate
+  - 21 error codes with HTTP status mapping and retriability
+  - Conformance tests for golden vector validation
+- **Go net/http Middleware** (`sdks/go/middleware/`)
+  - `Middleware()` for configurable receipt verification
+  - `RequireReceipt()` and `OptionalReceipt()` helper constructors
+  - `GetClaims()` and `GetResult()` for context-based claim access
+  - RFC 9457 Problem Details error responses
+  - Framework integration examples (gorilla/mux, chi, gin)
+- **Agent Identity Example** (`examples/agent-identity/`)
+  - TypeScript: publisher issuing receipts, agent with identity attestation
+  - Go: verifier example using Go SDK
+  - End-to-end flow demonstration
+
+### Changed
+
+- `@peac/schema` exports agent identity types from main entry point
+- `sdks/README.md` updated to reflect Go SDK availability (v0.9.25+)
+
 ## [0.9.24] - 2026-01-03
 
 ### Added

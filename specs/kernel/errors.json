@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.21",
+  "version": "0.9.25",
   "description": "PEAC error codes - normative source of truth",
   "errors": [
     {
@@ -138,6 +138,110 @@
       "description": "Evidence contains non-JSON-safe values (NaN, Infinity, undefined, BigInt, Date, Map, Set, functions, symbols, class instances, or cycles)",
       "retriable": false,
       "category": "validation"
+    },
+    {
+      "code": "E_IDENTITY_MISSING",
+      "http_status": 401,
+      "title": "Identity Missing",
+      "description": "No agent identity attestation provided in request",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Identity Invalid Format",
+      "description": "Agent identity attestation does not conform to schema",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_EXPIRED",
+      "http_status": 401,
+      "title": "Identity Expired",
+      "description": "Agent identity attestation has exceeded its expiration time",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_NOT_YET_VALID",
+      "http_status": 401,
+      "title": "Identity Not Yet Valid",
+      "description": "Agent identity attestation issued_at time is in the future",
+      "retriable": true,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_SIG_INVALID",
+      "http_status": 401,
+      "title": "Identity Signature Invalid",
+      "description": "Agent identity proof signature verification failed",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_KEY_UNKNOWN",
+      "http_status": 401,
+      "title": "Identity Key Unknown",
+      "description": "Key ID not found in agent key directory",
+      "retriable": true,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_KEY_EXPIRED",
+      "http_status": 401,
+      "title": "Identity Key Expired",
+      "description": "Agent signing key has expired per directory metadata",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_KEY_REVOKED",
+      "http_status": 401,
+      "title": "Identity Key Revoked",
+      "description": "Agent signing key has been explicitly revoked",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_BINDING_MISMATCH",
+      "http_status": 400,
+      "title": "Identity Binding Mismatch",
+      "description": "Identity binding does not match the request being verified",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_BINDING_STALE",
+      "http_status": 401,
+      "title": "Identity Binding Stale",
+      "description": "Identity binding is too old and requires fresh binding",
+      "retriable": true,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_BINDING_FUTURE",
+      "http_status": 400,
+      "title": "Identity Binding Future",
+      "description": "Identity binding signed_at timestamp is in the future",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_PROOF_UNSUPPORTED",
+      "http_status": 400,
+      "title": "Identity Proof Unsupported",
+      "description": "Agent identity proof method is not supported",
+      "retriable": false,
+      "category": "identity"
+    },
+    {
+      "code": "E_IDENTITY_DIRECTORY_UNAVAILABLE",
+      "http_status": 503,
+      "title": "Identity Directory Unavailable",
+      "description": "Failed to fetch agent key directory",
+      "retriable": true,
+      "category": "identity"
     }
   ]
 }

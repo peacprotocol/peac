@@ -4,14 +4,15 @@ Language-specific client libraries for PEAC protocol integration.
 
 ## Structure
 
-- **[typescript/](typescript/)** - TypeScript/JavaScript SDK (v0.9.17+)
-- **[python/](python/)** - Python SDK (v0.9.18+)
-- **[go/](go/)** - Go SDK (v0.9.19+)
-- **[rust/](rust/)** - Rust SDK (v0.9.20+)
+- **[go/](go/)** - Go SDK (v0.9.25+) - Receipt verification, JWKS caching
+- **typescript/** - TypeScript SDK (via `@peac/protocol` package)
+- **python/** - Python SDK (planned)
+- **rust/** - Rust SDK (planned)
 
 ## Status
 
-All SDKs are placeholders in v0.9.15. Implementation begins in v0.9.17+.
+- **Go SDK (v0.9.25+):** Minimal verifier with Ed25519 + JWKS support
+- **TypeScript:** Use `@peac/protocol` and `@peac/schema` packages
 
 ## Architecture
 

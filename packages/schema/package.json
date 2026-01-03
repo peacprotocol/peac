@@ -1,6 +1,6 @@
 {
   "name": "@peac/schema",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "description": "PEAC Protocol JSON schemas, OpenAPI specs, and TypeScript types",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
