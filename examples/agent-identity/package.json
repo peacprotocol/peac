@@ -1,0 +1,22 @@
+{
+  "name": "@peac/example-agent-identity",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC Agent Identity example - demonstrates operator and user-delegated agent attestations",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start:agent": "tsx src/agent.ts",
+    "start:publisher": "tsx src/publisher.ts",
+    "demo": "tsx src/demo.ts"
+  },
+  "dependencies": {
+    "@peac/schema": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
