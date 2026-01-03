@@ -51,12 +51,7 @@ export type ProofMethod = z.infer<typeof ProofMethodSchema>;
 /**
  * Array of valid proof methods for runtime checks
  */
-export const PROOF_METHODS = [
-  'http-message-signature',
-  'dpop',
-  'mtls',
-  'jwk-thumbprint',
-] as const;
+export const PROOF_METHODS = ['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint'] as const;
 
 // =============================================================================
 // BINDING DETAILS (v0.9.25+)
@@ -312,9 +307,9 @@ export function validateAgentIdentityAttestation(
  * @param attestation - Object with a type field
  * @returns True if the type is 'peac/agent-identity'
  */
-export function isAgentIdentityAttestation(
-  attestation: { type: string }
-): attestation is AgentIdentityAttestation {
+export function isAgentIdentityAttestation(attestation: {
+  type: string;
+}): attestation is AgentIdentityAttestation {
   return attestation.type === AGENT_IDENTITY_TYPE;
 }
 

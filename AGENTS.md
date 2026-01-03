@@ -22,18 +22,21 @@ PEAC Protocol provides:
 
 Supported agent proof methods:
 
-| Method | Standard | Description |
-|--------|----------|-------------|
-| `http-message-signature` | RFC 9421 | HTTP Message Signatures |
-| `dpop` | RFC 9449 | DPoP token binding |
-| `mtls` | RFC 8705 | Mutual TLS client certificate |
-| `jwk-thumbprint` | RFC 7638 | JWK Thumbprint confirmation |
+| Method                   | Standard | Description                   |
+| ------------------------ | -------- | ----------------------------- |
+| `http-message-signature` | RFC 9421 | HTTP Message Signatures       |
+| `dpop`                   | RFC 9449 | DPoP token binding            |
+| `mtls`                   | RFC 8705 | Mutual TLS client certificate |
+| `jwk-thumbprint`         | RFC 7638 | JWK Thumbprint confirmation   |
 
 ## MCP Integration
 
 PEAC receipts can be attached to MCP (Model Context Protocol) messages:
 
 **JSON-RPC Response (stdio transport):**
+
+Per MCP specification, use reverse-DNS keys in `_meta` to avoid collisions:
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -41,17 +44,16 @@ PEAC receipts can be attached to MCP (Model Context Protocol) messages:
   "result": {
     "content": [...],
     "_meta": {
-      "peac": {
-        "receipt": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ...",
-        "agent_id": "assistant:example",
-        "verified_at": "2026-01-04T12:00:00Z"
-      }
+      "org.peacprotocol/receipt": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ...",
+      "org.peacprotocol/agent_id": "assistant:example",
+      "org.peacprotocol/verified_at": "2026-01-04T12:00:00Z"
     }
   }
 }
 ```
 
 **HTTP Transport:**
+
 ```http
 PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ...
 PEAC-Agent-Identity: eyJ0eXBlIjoicGVhYy9hZ2VudC1pZGVudGl0eSJ9...
@@ -67,12 +69,11 @@ For A2A (Agent-to-Agent) discovery via `/.well-known/agent.json`:
   "url": "https://agent.example",
   "capabilities": ["search", "inference"],
   "extensions": {
-    "peac": {
+    "org.peacprotocol": {
       "version": "0.9",
-      "policy_url": "/.well-known/peac-policy.yaml",
+      "discovery_url": "/.well-known/peac.txt",
       "key_directory": "/.well-known/jwks.json",
       "control_type": "operator",
-      "supported_purposes": ["search", "inference", "user_action"],
       "receipts_endpoint": "/api/receipts"
     }
   }
@@ -81,24 +82,24 @@ For A2A (Agent-to-Agent) discovery via `/.well-known/agent.json`:
 
 ## Discovery
 
-| Path | Content |
-|------|---------|
-| `/.well-known/peac.txt` | PEAC discovery manifest |
-| `/.well-known/peac-policy.yaml` | Policy document |
-| `/.well-known/jwks.json` | JWKS key directory |
-| `/.well-known/agent.json` | A2A Agent Card (with PEAC extension) |
+| Path                            | Content                              |
+| ------------------------------- | ------------------------------------ |
+| `/.well-known/peac.txt`         | PEAC discovery manifest              |
+| `/.well-known/peac-policy.yaml` | Policy document                      |
+| `/.well-known/jwks.json`        | JWKS key directory                   |
+| `/.well-known/agent.json`       | A2A Agent Card (with PEAC extension) |
 
 ## Purpose Tokens
 
 Canonical PEAC purpose vocabulary:
 
-| Token | Description |
-|-------|-------------|
-| `train` | Model training data collection |
-| `search` | Traditional search indexing |
-| `user_action` | Agent acting on user behalf |
-| `inference` | Runtime inference / RAG |
-| `index` | Content indexing (store) |
+| Token         | Description                    |
+| ------------- | ------------------------------ |
+| `train`       | Model training data collection |
+| `search`      | Traditional search indexing    |
+| `user_action` | Agent acting on user behalf    |
+| `inference`   | Runtime inference / RAG        |
+| `index`       | Content indexing (store)       |
 
 ## Contact
 

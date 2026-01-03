@@ -25,7 +25,7 @@
     "attestation_type": "peac/agent-identity",
     "control_types": ["operator", "user-delegated"],
     "proof_methods": ["http-message-signature", "dpop", "mtls", "jwk-thumbprint"],
-    "key_lifecycle_states": ["pending", "active", "deprecated", "revoked"],
+    "key_lifecycle_states": ["pending", "active", "deprecated", "retired", "revoked"],
     "limits": {
       "max_agent_id_length": 256,
       "max_capabilities": 32,

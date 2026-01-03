@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `constructBindingMessage()` for canonical binding message construction
   - `verifyIdentityBinding()` for publisher-side verification algorithm
   - Key rotation semantics: PENDING, ACTIVE, DEPRECATED, REVOKED
-- **Identity Error Codes**: 13 new identity_* error codes (`specs/kernel/errors.json`)
+- **Identity Error Codes**: 13 new identity\_\* error codes (`specs/kernel/errors.json`)
   - `E_IDENTITY_MISSING`, `E_IDENTITY_INVALID_FORMAT`, `E_IDENTITY_EXPIRED`
   - `E_IDENTITY_NOT_YET_VALID`, `E_IDENTITY_SIG_INVALID`, `E_IDENTITY_KEY_UNKNOWN`
   - `E_IDENTITY_KEY_EXPIRED`, `E_IDENTITY_KEY_REVOKED`, `E_IDENTITY_BINDING_MISMATCH`

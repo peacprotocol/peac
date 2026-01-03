@@ -60,16 +60,16 @@ Verifies a PEAC receipt JWS and returns the verified claims.
 
 #### VerifyOptions
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `Issuer` | `string` | Expected issuer (required) |
-| `Audience` | `string` | Expected audience (required) |
-| `MaxAge` | `time.Duration` | Maximum receipt age (default: 1 hour) |
-| `ClockSkew` | `time.Duration` | Clock skew tolerance (default: 30s) |
-| `JWKSURL` | `string` | Explicit JWKS URL (optional) |
-| `KeySet` | `*jwks.KeySet` | Pre-loaded key set (optional) |
-| `JWKSCache` | `*jwks.Cache` | JWKS cache instance (optional) |
-| `Context` | `context.Context` | Request context |
+| Field       | Type              | Description                           |
+| ----------- | ----------------- | ------------------------------------- |
+| `Issuer`    | `string`          | Expected issuer (required)            |
+| `Audience`  | `string`          | Expected audience (required)          |
+| `MaxAge`    | `time.Duration`   | Maximum receipt age (default: 1 hour) |
+| `ClockSkew` | `time.Duration`   | Clock skew tolerance (default: 30s)   |
+| `JWKSURL`   | `string`          | Explicit JWKS URL (optional)          |
+| `KeySet`    | `*jwks.KeySet`    | Pre-loaded key set (optional)         |
+| `JWKSCache` | `*jwks.Cache`     | JWKS cache instance (optional)        |
+| `Context`   | `context.Context` | Request context                       |
 
 #### VerifyResult
 
@@ -117,25 +117,25 @@ if err != nil {
 
 #### Error Codes
 
-| Code | HTTP | Description |
-|------|------|-------------|
-| `E_INVALID_SIGNATURE` | 400 | Signature verification failed |
-| `E_INVALID_FORMAT` | 400 | Invalid JWS format |
-| `E_EXPIRED` | 401 | Receipt has expired |
-| `E_NOT_YET_VALID` | 401 | Receipt not yet valid |
-| `E_INVALID_ISSUER` | 400 | Issuer mismatch |
-| `E_INVALID_AUDIENCE` | 400 | Audience mismatch |
-| `E_JWKS_FETCH_FAILED` | 503 | Failed to fetch JWKS |
-| `E_KEY_NOT_FOUND` | 400 | Key ID not in JWKS |
+| Code                  | HTTP | Description                   |
+| --------------------- | ---- | ----------------------------- |
+| `E_INVALID_SIGNATURE` | 400  | Signature verification failed |
+| `E_INVALID_FORMAT`    | 400  | Invalid JWS format            |
+| `E_EXPIRED`           | 401  | Receipt has expired           |
+| `E_NOT_YET_VALID`     | 401  | Receipt not yet valid         |
+| `E_INVALID_ISSUER`    | 400  | Issuer mismatch               |
+| `E_INVALID_AUDIENCE`  | 400  | Audience mismatch             |
+| `E_JWKS_FETCH_FAILED` | 503  | Failed to fetch JWKS          |
+| `E_KEY_NOT_FOUND`     | 400  | Key ID not in JWKS            |
 
 #### Identity Error Codes (v0.9.25+)
 
-| Code | HTTP | Description |
-|------|------|-------------|
-| `E_IDENTITY_MISSING` | 401 | No identity attestation |
-| `E_IDENTITY_SIG_INVALID` | 401 | Identity signature invalid |
-| `E_IDENTITY_EXPIRED` | 401 | Identity attestation expired |
-| `E_IDENTITY_KEY_UNKNOWN` | 401 | Identity key not found |
+| Code                     | HTTP | Description                  |
+| ------------------------ | ---- | ---------------------------- |
+| `E_IDENTITY_MISSING`     | 401  | No identity attestation      |
+| `E_IDENTITY_SIG_INVALID` | 401  | Identity signature invalid   |
+| `E_IDENTITY_EXPIRED`     | 401  | Identity attestation expired |
+| `E_IDENTITY_KEY_UNKNOWN` | 401  | Identity key not found       |
 
 ## Claims Structure
 

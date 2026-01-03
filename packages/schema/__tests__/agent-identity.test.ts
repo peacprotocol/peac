@@ -57,12 +57,7 @@ describe('ProofMethodSchema', () => {
   });
 
   it('should match PROOF_METHODS constant', () => {
-    expect(PROOF_METHODS).toEqual([
-      'http-message-signature',
-      'dpop',
-      'mtls',
-      'jwk-thumbprint',
-    ]);
+    expect(PROOF_METHODS).toEqual(['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint']);
   });
 });
 

@@ -9,11 +9,7 @@
  */
 
 import { createOperatorBot, createUserDelegatedAgent } from './agent.js';
-import {
-  verifyAgentIdentity,
-  evaluateAccess,
-  type AccessPolicy,
-} from './publisher.js';
+import { verifyAgentIdentity, evaluateAccess, type AccessPolicy } from './publisher.js';
 
 // Publisher access policies
 const publisherPolicies: AccessPolicy[] = [

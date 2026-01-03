@@ -11,11 +11,11 @@ Agent identity attestations enable cryptographic proof-of-control binding, allow
 
 ## Files
 
-| File | Description |
-|------|-------------|
-| `src/agent.ts` | How agents create identity attestations |
+| File               | Description                                        |
+| ------------------ | -------------------------------------------------- |
+| `src/agent.ts`     | How agents create identity attestations            |
 | `src/publisher.ts` | How publishers verify identity and evaluate access |
-| `src/demo.ts` | End-to-end demonstration |
+| `src/demo.ts`      | End-to-end demonstration                           |
 
 ## Running the Example
 
@@ -61,6 +61,7 @@ pnpm start:publisher  # Show verification flow
 ### Operator
 
 Operator bots are controlled by an organization and verified through:
+
 - JWKS key directory
 - HTTP message signatures
 - Operator metadata
@@ -79,6 +80,7 @@ const operatorBot = createOperatorBot({
 ### User-Delegated
 
 User-delegated agents act on behalf of human users:
+
 - Include delegation chain showing authority path
 - Use opaque user identifiers (not PII)
 - Scoped capabilities
@@ -120,12 +122,12 @@ const policies: AccessPolicy[] = [
 
 The verification function returns standardized error codes:
 
-| Error Code | Description |
-|------------|-------------|
-| `E_IDENTITY_MISSING` | No attestation provided |
-| `E_IDENTITY_INVALID_FORMAT` | Schema validation failed |
-| `E_IDENTITY_EXPIRED` | Attestation has expired |
-| `E_IDENTITY_NOT_YET_VALID` | Future issued_at timestamp |
+| Error Code                  | Description                |
+| --------------------------- | -------------------------- |
+| `E_IDENTITY_MISSING`        | No attestation provided    |
+| `E_IDENTITY_INVALID_FORMAT` | Schema validation failed   |
+| `E_IDENTITY_EXPIRED`        | Attestation has expired    |
+| `E_IDENTITY_NOT_YET_VALID`  | Future issued_at timestamp |
 
 ## See Also
 

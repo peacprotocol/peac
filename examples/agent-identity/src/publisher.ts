@@ -30,15 +30,9 @@ export interface VerificationResult {
  * This function performs structural validation and time-based checks.
  * In production, you would also verify cryptographic signatures.
  */
-export function verifyAgentIdentity(
-  attestation: unknown
-): VerificationResult {
+export function verifyAgentIdentity(attestation: unknown): VerificationResult {
   // Check if it's the right type
-  if (
-    !attestation ||
-    typeof attestation !== 'object' ||
-    !('type' in attestation)
-  ) {
+  if (!attestation || typeof attestation !== 'object' || !('type' in attestation)) {
     return {
       valid: false,
       error: 'No attestation provided',
@@ -118,10 +112,7 @@ export function evaluateAccess(
   }
 
   for (const policy of policies) {
-    if (
-      policy.controlType === '*' ||
-      policy.controlType === verification.controlType
-    ) {
+    if (policy.controlType === '*' || policy.controlType === verification.controlType) {
       return { decision: policy.decision, matchedPolicy: policy };
     }
   }
