@@ -1,0 +1,220 @@
+{
+  "$comment": "Edge case AgentIdentityAttestation golden vectors (v0.9.25+)",
+  "version": "0.9.25",
+  "fixtures": [
+    {
+      "name": "unicode-agent-id",
+      "description": "Unicode characters in agent_id",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:crawler-alpha-2026",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "max-capabilities",
+      "description": "Maximum allowed capabilities (32)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:max-caps",
+          "control_type": "operator",
+          "capabilities": [
+            "cap01", "cap02", "cap03", "cap04", "cap05", "cap06", "cap07", "cap08",
+            "cap09", "cap10", "cap11", "cap12", "cap13", "cap14", "cap15", "cap16",
+            "cap17", "cap18", "cap19", "cap20", "cap21", "cap22", "cap23", "cap24",
+            "cap25", "cap26", "cap27", "cap28", "cap29", "cap30", "cap31", "cap32"
+          ]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "capabilities_count": 32
+      }
+    },
+    {
+      "name": "max-delegation-chain",
+      "description": "Maximum allowed delegation chain (8)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "agent:deep-delegation",
+          "control_type": "user-delegated",
+          "delegation_chain": [
+            "user:alice",
+            "app:frontend",
+            "service:orchestrator",
+            "agent:level4",
+            "agent:level5",
+            "agent:level6",
+            "agent:level7",
+            "agent:level8"
+          ]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "delegation_depth": 8
+      }
+    },
+    {
+      "name": "all-proof-fields",
+      "description": "Proof with all optional fields populated",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:full-proof",
+          "control_type": "operator",
+          "proof": {
+            "method": "http-message-signature",
+            "key_id": "key-2026-01",
+            "alg": "EdDSA",
+            "signature": "base64url-sig",
+            "dpop_proof": "optional-dpop",
+            "cert_thumbprint": "optional-cert-thumb",
+            "binding": {
+              "method": "POST",
+              "target": "https://example.com/api",
+              "headers_included": ["host", "content-type"],
+              "body_hash": "sha256-hash",
+              "signed_at": "2026-01-03T12:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "long-agent-id",
+      "description": "Agent ID at maximum length (256 chars)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "note": "256 character agent_id is valid"
+      }
+    },
+    {
+      "name": "expiry-in-past",
+      "description": "Attestation with past expiry (structurally valid, semantically expired)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2020-01-01T00:00:00Z",
+        "expires_at": "2020-01-02T00:00:00Z",
+        "evidence": {
+          "agent_id": "bot:expired",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "semantically_expired": true,
+        "note": "Schema validation passes, runtime should check isAttestationExpired()"
+      }
+    },
+    {
+      "name": "issued-at-future",
+      "description": "Attestation with future issued_at (structurally valid, semantically not yet valid)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2030-01-01T00:00:00Z",
+        "evidence": {
+          "agent_id": "bot:future",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "semantically_not_yet_valid": true,
+        "note": "Schema validation passes, runtime should check isAttestationNotYetValid()"
+      }
+    },
+    {
+      "name": "empty-capabilities",
+      "description": "Empty capabilities array (valid)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:no-caps",
+          "control_type": "operator",
+          "capabilities": []
+        }
+      },
+      "expected": {
+        "valid": true,
+        "capabilities_count": 0
+      }
+    },
+    {
+      "name": "empty-delegation-chain",
+      "description": "Empty delegation chain (valid for user-delegated)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "agent:no-delegation",
+          "control_type": "user-delegated",
+          "delegation_chain": []
+        }
+      },
+      "expected": {
+        "valid": true,
+        "delegation_depth": 0
+      }
+    },
+    {
+      "name": "minimal-binding",
+      "description": "Binding with only required fields",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:minimal-binding",
+          "control_type": "operator",
+          "proof": {
+            "method": "http-message-signature",
+            "key_id": "key-001",
+            "binding": {
+              "method": "GET",
+              "target": "https://example.com",
+              "headers_included": [],
+              "signed_at": "2026-01-03T12:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "note": "body_hash is optional for GET requests"
+      }
+    }
+  ]
+}

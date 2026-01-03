@@ -90,5 +90,22 @@
       "description": "Purpose reason derivation golden vectors (v0.9.24+)",
       "version": "0.9.24"
     }
+  },
+  "agent-identity": {
+    "valid.json": {
+      "description": "Valid AgentIdentityAttestation golden vectors (v0.9.25+)",
+      "version": "0.9.25",
+      "fixture_count": 9
+    },
+    "invalid.json": {
+      "description": "Invalid AgentIdentityAttestation golden vectors (v0.9.25+)",
+      "version": "0.9.25",
+      "fixture_count": 12
+    },
+    "edge-cases.json": {
+      "description": "Edge case AgentIdentityAttestation golden vectors (v0.9.25+)",
+      "version": "0.9.25",
+      "fixture_count": 10
+    }
   }
 }

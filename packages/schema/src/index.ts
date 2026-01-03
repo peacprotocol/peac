@@ -11,6 +11,7 @@ export * from './subject';
 export * from './errors';
 export * from './normalize';
 export * from './purpose';
+export * from './agent-identity';
 
 // JSON-safe validation schemas (v0.9.21+)
 export {
@@ -68,6 +69,40 @@ export {
   validateEvidence,
 } from './validators';
 export type { EvidenceValidationResult } from './validators';
+
+// Agent Identity validators (v0.9.25+)
+export {
+  ControlTypeSchema,
+  ProofMethodSchema,
+  BindingDetailsSchema,
+  AgentProofSchema,
+  AgentIdentityEvidenceSchema,
+  AgentIdentityAttestationSchema,
+  IdentityBindingSchema,
+  AgentIdentityVerifiedSchema,
+  // Constants
+  AGENT_IDENTITY_TYPE,
+  CONTROL_TYPES,
+  PROOF_METHODS,
+  // Helpers
+  validateAgentIdentityAttestation,
+  isAgentIdentityAttestation,
+  createAgentIdentityAttestation,
+  validateIdentityBinding,
+  isAttestationExpired,
+  isAttestationNotYetValid,
+} from './agent-identity';
+export type {
+  ControlType,
+  ProofMethod,
+  BindingDetails,
+  AgentProof,
+  AgentIdentityEvidence,
+  AgentIdentityAttestation,
+  IdentityBinding,
+  AgentIdentityVerified,
+  CreateAgentIdentityAttestationParams,
+} from './agent-identity';
 
 // Envelope types (v0.9.15+ normative structure)
 export type {

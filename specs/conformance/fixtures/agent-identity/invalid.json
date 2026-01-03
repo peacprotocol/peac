@@ -1,0 +1,237 @@
+{
+  "$comment": "Invalid AgentIdentityAttestation golden vectors (v0.9.25+)",
+  "version": "0.9.25",
+  "fixtures": [
+    {
+      "name": "missing-agent-id",
+      "description": "Missing required agent_id field",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "evidence.agent_id",
+        "error_type": "required"
+      }
+    },
+    {
+      "name": "missing-control-type",
+      "description": "Missing required control_type field",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "evidence.control_type",
+        "error_type": "required"
+      }
+    },
+    {
+      "name": "invalid-control-type",
+      "description": "Invalid control_type value (not in enum)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "unknown-type"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "evidence.control_type",
+        "error_type": "enum"
+      }
+    },
+    {
+      "name": "invalid-proof-method",
+      "description": "Invalid proof method value",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "operator",
+          "proof": {
+            "method": "unknown-method",
+            "key_id": "key-001"
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "evidence.proof.method",
+        "error_type": "enum"
+      }
+    },
+    {
+      "name": "wrong-attestation-type",
+      "description": "Wrong attestation type literal",
+      "input": {
+        "type": "peac/other-type",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "type",
+        "error_type": "literal"
+      }
+    },
+    {
+      "name": "invalid-datetime-format",
+      "description": "Invalid datetime format for issued_at",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "not-a-valid-date",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "issued_at",
+        "error_type": "format"
+      }
+    },
+    {
+      "name": "invalid-binding-datetime",
+      "description": "Invalid datetime format in binding details",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "operator",
+          "proof": {
+            "method": "http-message-signature",
+            "key_id": "key-001",
+            "binding": {
+              "method": "GET",
+              "target": "https://example.com",
+              "headers_included": [],
+              "signed_at": "invalid-date"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "evidence.proof.binding.signed_at",
+        "error_type": "format"
+      }
+    },
+    {
+      "name": "missing-issuer",
+      "description": "Missing required issuer field",
+      "input": {
+        "type": "peac/agent-identity",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "issuer",
+        "error_type": "required"
+      }
+    },
+    {
+      "name": "extra-field-strict",
+      "description": "Extra field not allowed (strict mode)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "operator",
+          "unknown_field": "should fail"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_type": "unrecognized_keys"
+      }
+    },
+    {
+      "name": "invalid-key-directory-url",
+      "description": "Invalid URL format for key_directory_url",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "operator",
+          "key_directory_url": "not-a-valid-url"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "evidence.key_directory_url",
+        "error_type": "url"
+      }
+    },
+    {
+      "name": "empty-agent-id",
+      "description": "Empty string for agent_id (min length violation)",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "evidence.agent_id",
+        "error_type": "too_small"
+      }
+    },
+    {
+      "name": "missing-proof-key-id",
+      "description": "Missing required key_id in proof",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:test",
+          "control_type": "operator",
+          "proof": {
+            "method": "http-message-signature"
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_path": "evidence.proof.key_id",
+        "error_type": "required"
+      }
+    }
+  ]
+}

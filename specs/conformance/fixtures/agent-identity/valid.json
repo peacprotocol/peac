@@ -1,0 +1,203 @@
+{
+  "$comment": "Valid AgentIdentityAttestation golden vectors (v0.9.25+)",
+  "version": "0.9.25",
+  "fixtures": [
+    {
+      "name": "operator-bot",
+      "description": "Operator-verified bot attestation with full evidence",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://crawler.example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "expires_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:crawler-prod-001",
+          "control_type": "operator",
+          "operator": "Example Crawler Inc.",
+          "capabilities": ["crawl", "index"],
+          "proof": {
+            "method": "http-message-signature",
+            "key_id": "key-2026-01",
+            "alg": "EdDSA"
+          },
+          "key_directory_url": "https://crawler.example.com/.well-known/jwks.json"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "agent_id": "bot:crawler-prod-001",
+        "control_type": "operator"
+      }
+    },
+    {
+      "name": "user-delegated-agent",
+      "description": "User-delegated agent attestation with delegation chain",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://assistant.example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "agent:assistant-001",
+          "control_type": "user-delegated",
+          "delegation_chain": ["user:alice", "app:myapp"],
+          "user_id": "user:alice-opaque-id",
+          "capabilities": ["inference", "search"]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "agent_id": "agent:assistant-001",
+        "control_type": "user-delegated"
+      }
+    },
+    {
+      "name": "with-capabilities",
+      "description": "Agent with multiple capability scopes",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://platform.example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:multi-capability",
+          "control_type": "operator",
+          "capabilities": ["crawl", "index", "train", "inference", "search"]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "capabilities_count": 5
+      }
+    },
+    {
+      "name": "with-http-signature-proof",
+      "description": "Agent with HTTP message signature proof and binding details",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://bot.example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:signed-001",
+          "control_type": "operator",
+          "proof": {
+            "method": "http-message-signature",
+            "key_id": "key-2026-01",
+            "alg": "EdDSA",
+            "signature": "base64url-encoded-signature-here",
+            "binding": {
+              "method": "POST",
+              "target": "https://publisher.example.com/api/content",
+              "headers_included": ["host", "content-type", "peac-purpose"],
+              "body_hash": "n4bQgYhMfWWaL28IoEbM8Qa8jG7x0QXJZJqL-w_zZdA",
+              "signed_at": "2026-01-03T12:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "proof_method": "http-message-signature"
+      }
+    },
+    {
+      "name": "with-dpop-proof",
+      "description": "Agent with DPoP token binding proof",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://agent.example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "agent:dpop-bound",
+          "control_type": "user-delegated",
+          "proof": {
+            "method": "dpop",
+            "key_id": "dpop-key-001",
+            "dpop_proof": "eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVkRFNBIn0.eyJqdGkiOiItQndDM0VTYzZhY2MybFRjIiwiaHRtIjoiUE9TVCIsImh0dSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vYXBpIiwiaWF0IjoxNjE1MjIxNTk4fQ.sig"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "proof_method": "dpop"
+      }
+    },
+    {
+      "name": "with-mtls-proof",
+      "description": "Agent with mutual TLS certificate proof",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://secure.example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:mtls-verified",
+          "control_type": "operator",
+          "proof": {
+            "method": "mtls",
+            "key_id": "cert-sha256-thumbprint",
+            "cert_thumbprint": "sha256-thumbprint-of-client-certificate"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "proof_method": "mtls"
+      }
+    },
+    {
+      "name": "with-metadata",
+      "description": "Agent with additional metadata",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://platform.example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:metadata-test",
+          "control_type": "operator",
+          "metadata": {
+            "version": "2.0.0",
+            "region": "us-west-2",
+            "rate_limit": 100
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_metadata": true
+      }
+    },
+    {
+      "name": "minimal-attestation",
+      "description": "Minimal attestation with only required fields",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "evidence": {
+          "agent_id": "bot:minimal",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "agent_id": "bot:minimal"
+      }
+    },
+    {
+      "name": "with-ref-url",
+      "description": "Attestation with external verification reference",
+      "input": {
+        "type": "peac/agent-identity",
+        "issuer": "https://verifier.example.com",
+        "issued_at": "2026-01-03T12:00:00Z",
+        "ref": "https://verifier.example.com/verify/abc123",
+        "evidence": {
+          "agent_id": "bot:verified",
+          "control_type": "operator"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_ref": true
+      }
+    }
+  ]
+}
