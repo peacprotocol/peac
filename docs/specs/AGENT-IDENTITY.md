@@ -2,7 +2,7 @@
 
 **Version:** 0.9.25
 **Status:** Normative
-**Last Updated:** 2026-01-03
+**Last Updated:** 2026-01-04
 
 ## Table of Contents
 
@@ -497,18 +497,23 @@ X-PEAC-Agent-Identity: eyJ0eXBlIjoicGVhYy9hZ2VudC1pZGVudGl0eSI...
 ```
 
 **stdio Transport (JSON-RPC):**
+
+Per MCP specification, use the `_meta` namespace with PEAC-controlled prefix:
+
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
     "content": [...],
-    "meta": {
-      "peac_receipt": "eyJhbGciOiJFZERTQSI...",
-      "peac_agent_identity": {
-        "agent_id": "assistant:claude-v1",
-        "control_type": "user-delegated",
-        "verified_by": "mcp-server.example"
+    "_meta": {
+      "peac": {
+        "receipt": "eyJhbGciOiJFZERTQSI...",
+        "agent_identity": {
+          "agent_id": "assistant:claude-v1",
+          "control_type": "user-delegated",
+          "verified_by": "mcp-server.example"
+        }
       }
     }
   }
@@ -602,3 +607,4 @@ baggage: peac-agent-id=bot%3Acrawler-prod-001,peac-control-type=operator
 - RFC 9421: HTTP Message Signatures
 - RFC 9449: OAuth 2.0 Demonstrating Proof of Possession
 - RFC 9457: Problem Details for HTTP APIs
+- RFC 9651: Structured Field Values for HTTP (supersedes RFC 8941)
