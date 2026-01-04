@@ -10,10 +10,7 @@ import { HEADERS } from './constants.js';
  * Headers that affect response behavior and MUST be included in Vary
  * when enforcement decisions depend on them.
  */
-export const VARY_HEADERS = [
-  HEADERS.purpose,
-  HEADERS.receipt,
-] as const;
+export const VARY_HEADERS = [HEADERS.purpose, HEADERS.receipt] as const;
 
 /**
  * Apply Vary header for purpose-aware caching.
@@ -32,7 +29,10 @@ export const VARY_HEADERS = [
  * ```
  */
 export function applyPurposeVary(
-  headers: Headers | { setHeader: (name: string, value: string) => void } | { set: (name: string, value: string) => void }
+  headers:
+    | Headers
+    | { setHeader: (name: string, value: string) => void }
+    | { set: (name: string, value: string) => void }
 ): void {
   const purposeHeader = HEADERS.purpose;
 
@@ -44,7 +44,9 @@ export function applyPurposeVary(
     }
   } else if ('setHeader' in headers && typeof headers.setHeader === 'function') {
     // Node.js ServerResponse
-    const existing = (headers as { getHeader?: (name: string) => string | string[] | number | undefined }).getHeader?.('Vary');
+    const existing = (
+      headers as { getHeader?: (name: string) => string | string[] | number | undefined }
+    ).getHeader?.('Vary');
     const existingStr = Array.isArray(existing) ? existing.join(', ') : String(existing || '');
     if (!existingStr.toLowerCase().includes(purposeHeader.toLowerCase())) {
       headers.setHeader('Vary', existingStr ? `${existingStr}, ${purposeHeader}` : purposeHeader);

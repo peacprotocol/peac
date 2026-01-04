@@ -207,7 +207,9 @@ async function benchmarkIssue(attempt: number = 1): Promise<BenchmarkResult> {
 }
 
 function printResults(result: BenchmarkResult): void {
-  console.log(`\n${result.operation.toUpperCase()} Performance Results (attempt ${result.attempt}):`);
+  console.log(
+    `\n${result.operation.toUpperCase()} Performance Results (attempt ${result.attempt}):`
+  );
   console.log(`   Min: ${result.timings_ms.min}ms`);
   console.log(`   Max: ${result.timings_ms.max}ms`);
   console.log(`   Avg: ${result.timings_ms.avg}ms`);

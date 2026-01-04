@@ -50,9 +50,4 @@ export {
 } from './registries.js';
 
 // Export HTTP utilities (cache safety, header management)
-export {
-  VARY_HEADERS,
-  applyPurposeVary,
-  getPeacVaryHeaders,
-  needsPurposeVary,
-} from './http.js';
+export { VARY_HEADERS, applyPurposeVary, getPeacVaryHeaders, needsPurposeVary } from './http.js';
