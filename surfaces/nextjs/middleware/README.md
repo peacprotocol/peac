@@ -95,7 +95,7 @@ export const middleware = createPeacMiddleware({
 
 **WARNING**: LRU store is per-isolate only. Different edge instances have separate caches.
 This provides best-effort protection but is NOT globally consistent.
-A warning header `X-PEAC-Warning: replay-best-effort` is added to responses.
+A warning header `PEAC-Warning: replay-best-effort` is added to responses.
 
 ### Option 2: External Store (Recommended for Production)
 
@@ -130,16 +130,16 @@ This middleware maintains exact behavioral parity with `@peac/worker-cloudflare`
 On successful verification:
 
 ```
-X-PEAC-Verified: true
-X-PEAC-Engine: tap
-X-PEAC-TAP-Tag: agent-browser-auth
+PEAC-Verified: true
+PEAC-Engine: tap
+PEAC-TAP-Tag: agent-browser-auth
 ```
 
 Warnings (if applicable):
 
 ```
-X-PEAC-Warning: replay-best-effort     # LRU store in use
-X-PEAC-Warning: replay-protection-disabled  # unsafeAllowNoReplay=true
+PEAC-Warning: replay-best-effort     # LRU store in use
+PEAC-Warning: replay-protection-disabled  # unsafeAllowNoReplay=true
 ```
 
 ## License

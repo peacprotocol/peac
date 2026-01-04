@@ -316,18 +316,18 @@ export function getVerificationHeaders(
   result: VerificationResult & { warnReplayDisabled?: boolean; warnBestEffortReplay?: boolean }
 ): Record<string, string> {
   const headers: Record<string, string> = {
-    'X-PEAC-Verified': 'true',
-    'X-PEAC-Engine': 'tap',
+    'PEAC-Verified': 'true',
+    'PEAC-Engine': 'tap',
   };
 
   if (result.controlEntry?.evidence.tag) {
-    headers['X-PEAC-TAP-Tag'] = result.controlEntry.evidence.tag;
+    headers['PEAC-TAP-Tag'] = result.controlEntry.evidence.tag;
   }
 
   if (result.warnReplayDisabled) {
-    headers['X-PEAC-Warning'] = 'replay-protection-disabled';
+    headers['PEAC-Warning'] = 'replay-protection-disabled';
   } else if (result.warnBestEffortReplay) {
-    headers['X-PEAC-Warning'] = 'replay-best-effort';
+    headers['PEAC-Warning'] = 'replay-best-effort';
   }
 
   return headers;
