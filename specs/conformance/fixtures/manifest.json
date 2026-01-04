@@ -107,5 +107,17 @@
       "version": "0.9.25",
       "fixture_count": 10
     }
+  },
+  "obligations": {
+    "valid.json": {
+      "description": "Valid obligations extension golden vectors (v0.9.26+)",
+      "version": "0.9.26",
+      "fixture_count": 4
+    },
+    "invalid.json": {
+      "description": "Invalid obligations extension golden vectors (v0.9.26+)",
+      "version": "0.9.26",
+      "fixture_count": 6
+    }
   }
 }

@@ -55,7 +55,13 @@ export interface ErrorDefinition {
   title: string;
   description: string;
   retriable: boolean;
-  category: 'verification' | 'validation' | 'infrastructure' | 'control' | 'identity';
+  category:
+    | 'verification'
+    | 'validation'
+    | 'infrastructure'
+    | 'control'
+    | 'identity'
+    | 'attribution';
 }
 
 /**

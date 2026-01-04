@@ -1,0 +1,482 @@
+{
+  "$comment": "Invalid AttributionAttestation golden vectors (v0.9.26+)",
+  "version": "0.9.26",
+  "fixtures": [
+    {
+      "name": "missing-sources",
+      "description": "Attribution with empty sources array",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_MISSING_SOURCES"
+      }
+    },
+    {
+      "name": "missing-type",
+      "description": "Attribution missing type field",
+      "input": {
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "wrong-type",
+      "description": "Attribution with wrong type value",
+      "input": {
+        "type": "peac/wrong-type",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "missing-issuer",
+      "description": "Attribution missing issuer field",
+      "input": {
+        "type": "peac/attribution",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "missing-issued-at",
+      "description": "Attribution missing issued_at field",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-issued-at-format",
+      "description": "Attribution with non-RFC3339 issued_at",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026/01/04 12:00:00",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-receipt-ref-format",
+      "description": "Attribution with invalid receipt reference format",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "invalid-format-ref",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_REF"
+      }
+    },
+    {
+      "name": "missing-receipt-ref",
+      "description": "Source missing receipt_ref field",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-usage",
+      "description": "Source with unknown usage type",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "unknown_usage_type"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_UNKNOWN_USAGE"
+      }
+    },
+    {
+      "name": "missing-usage",
+      "description": "Source missing usage field",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-derivation-type",
+      "description": "Attribution with unknown derivation type",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "unknown_derivation"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "missing-derivation-type",
+      "description": "Attribution missing derivation_type field",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "weight-too-low",
+      "description": "Source with weight below 0",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context",
+              "weight": -0.1
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_WEIGHT"
+      }
+    },
+    {
+      "name": "weight-too-high",
+      "description": "Source with weight above 1.0",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context",
+              "weight": 1.5
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_WEIGHT"
+      }
+    },
+    {
+      "name": "invalid-content-hash-algorithm",
+      "description": "Content hash with unsupported algorithm",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "content_hash": {
+                "alg": "sha-512",
+                "value": "n4bQgYhMfWWaL28IoEbM8Qa8jG7x0QXJZJqL-w_zZdA",
+                "enc": "base64url"
+              },
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_HASH_INVALID"
+      }
+    },
+    {
+      "name": "invalid-content-hash-encoding",
+      "description": "Content hash with unsupported encoding",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "content_hash": {
+                "alg": "sha-256",
+                "value": "n4bQgYhMfWWaL28IoEbM8Qa8jG7x0QXJZJqL+w/zZdA=",
+                "enc": "base64"
+              },
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_HASH_INVALID"
+      }
+    },
+    {
+      "name": "invalid-content-hash-value-length",
+      "description": "Content hash with wrong value length",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "content_hash": {
+                "alg": "sha-256",
+                "value": "short",
+                "enc": "base64url"
+              },
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_HASH_INVALID"
+      }
+    },
+    {
+      "name": "invalid-content-hash-chars",
+      "description": "Content hash with invalid base64url characters",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "content_hash": {
+                "alg": "sha-256",
+                "value": "n4bQgYhMfWWaL28IoEbM8Qa8jG7x0QXJ+/qL-w_zZdA",
+                "enc": "base64url"
+              },
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_HASH_INVALID"
+      }
+    },
+    {
+      "name": "invalid-ref-url",
+      "description": "Attribution with non-URL ref field",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "ref": "not-a-valid-url",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-inference-provider-url",
+      "description": "Attribution with non-URL inference_provider",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "inference",
+          "inference_provider": "not-a-valid-url"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "extra-unknown-field",
+      "description": "Attribution with unknown extra field (strict mode)",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "unknown_field": "should fail",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_test",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
+      }
+    }
+  ]
+}

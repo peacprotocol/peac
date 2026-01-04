@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Guard script for v0.9.14 safety checks
+# Guard script for PEAC protocol safety checks
 set -euo pipefail
 bad=0
 
 echo "== forbid dist imports =="
-if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/guard.sh' ':!archive/**' \
+# Allow dist imports in scripts/ (benchmarks run after build) and nightly workflow
+if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/**' ':!archive/**' \
   | grep -vE '^(\.github/workflows/nightly\.yml)' | grep .; then
   bad=1
 else
@@ -41,8 +42,8 @@ fi
 
 echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
-# Note: issued_at is valid for Attestation type (v0.9.21+) and AgentIdentityAttestation (v0.9.25+)
-LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors\.ts|schema/(src/(evidence|validators|agent-identity)\.ts|__tests__/agent-identity\.test\.ts))|examples/agent-identity/|sdks/go/)'
+# Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), and Attribution (v0.9.26+)
+LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors\.ts|schema/(src/(evidence|validators|agent-identity|attribution)\.ts|__tests__/agent-identity\.test\.ts)|attribution/)|examples/agent-identity/|sdks/go/)'
 if git grep -nE '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
@@ -137,6 +138,16 @@ if [ -f scripts/find-invisible-unicode.mjs ]; then
   fi
 else
   echo "SKIP: scripts/find-invisible-unicode.mjs not found"
+fi
+
+echo "== forbid header casing drift (Peac-Receipt) =="
+# PEAC-Receipt is canonical; Peac-Receipt is incorrect casing
+# Allow in guard/verification scripts (they check FOR this pattern) and CHANGELOG (historical)
+if git grep -n 'Peac-Receipt' -- ':!node_modules' ':!archive/**' ':!dist/**' ':!scripts/*.sh' ':!scripts/*.mjs' ':!CHANGELOG.md' | grep .; then
+  echo "FAIL: Found incorrect header casing 'Peac-Receipt' - use 'PEAC-Receipt'"
+  bad=1
+else
+  echo "OK"
 fi
 
 exit $bad
