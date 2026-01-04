@@ -21,6 +21,7 @@ coverage/
 *.lcov
 test-results/
 playwright-report/
+perf-results.json
 
 # Environment
 .env
