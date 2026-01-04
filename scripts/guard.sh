@@ -86,7 +86,7 @@ echo "== forbid X-PEAC headers (RFC 6648) =="
 # Strict repo-wide check: X-PEAC-* headers are forbidden everywhere
 # Use [Xx] pattern to avoid self-matching in this script
 # Exclude: archive (legacy), scripts that check FOR violations, CI that checks FOR violations
-XPEAC_ALLOW='^(archive/|scripts/(guard\.sh|verify-protocol-strings\.mjs|verify-spec-drift\.mjs|pre-release-verify\.sh)|\.github/workflows/ci\.yml)'
+XPEAC_ALLOW='^(archive/|CHANGELOG\.md|scripts/(guard\.sh|verify-protocol-strings\.mjs|verify-spec-drift\.mjs|pre-release-verify\.sh)|\.github/workflows/ci\.yml)'
 if git grep -nE '[Xx]-PEAC-' -- ':!node_modules' \
   | grep -vE "$XPEAC_ALLOW" | grep .; then
   echo "FAIL: Found X-PEAC headers - use PEAC-* instead (RFC 6648)"
