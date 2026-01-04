@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.25",
+  "version": "0.9.26",
   "description": "PEAC error codes - normative source of truth",
   "errors": [
     {
@@ -242,6 +242,118 @@
       "description": "Failed to fetch agent key directory",
       "retriable": true,
       "category": "identity"
+    },
+    {
+      "code": "E_ATTRIBUTION_MISSING_SOURCES",
+      "http_status": 400,
+      "title": "Attribution Missing Sources",
+      "description": "Attribution attestation has empty sources array",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Attribution Invalid Format",
+      "description": "Attribution attestation does not conform to schema",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_REF",
+      "http_status": 400,
+      "title": "Attribution Invalid Reference",
+      "description": "Receipt reference format is invalid (must be jti:{id}, URL, or URN)",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_HASH_INVALID",
+      "http_status": 400,
+      "title": "Attribution Hash Invalid",
+      "description": "Content hash structure is invalid (wrong algorithm, encoding, or value length)",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_UNKNOWN_USAGE",
+      "http_status": 400,
+      "title": "Attribution Unknown Usage",
+      "description": "Attribution usage type is not recognized",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_WEIGHT",
+      "http_status": 400,
+      "title": "Attribution Invalid Weight",
+      "description": "Attribution weight is out of valid range (must be 0.0-1.0)",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_CIRCULAR_CHAIN",
+      "http_status": 400,
+      "title": "Attribution Circular Chain",
+      "description": "Circular reference detected in attribution chain",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_CHAIN_TOO_DEEP",
+      "http_status": 400,
+      "title": "Attribution Chain Too Deep",
+      "description": "Attribution chain exceeds maximum allowed depth (8)",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_TOO_MANY_SOURCES",
+      "http_status": 400,
+      "title": "Attribution Too Many Sources",
+      "description": "Attribution has too many sources (maximum 100)",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_SIZE_EXCEEDED",
+      "http_status": 400,
+      "title": "Attribution Size Exceeded",
+      "description": "Attribution attestation exceeds maximum size (64KB)",
+      "retriable": false,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_RESOLUTION_FAILED",
+      "http_status": 502,
+      "title": "Attribution Resolution Failed",
+      "description": "Failed to resolve receipt reference in attribution chain",
+      "retriable": true,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_RESOLUTION_TIMEOUT",
+      "http_status": 504,
+      "title": "Attribution Resolution Timeout",
+      "description": "Timeout while resolving receipt reference in attribution chain",
+      "retriable": true,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_NOT_YET_VALID",
+      "http_status": 401,
+      "title": "Attribution Not Yet Valid",
+      "description": "Attribution attestation issued_at time is in the future",
+      "retriable": true,
+      "category": "attribution"
+    },
+    {
+      "code": "E_ATTRIBUTION_EXPIRED",
+      "http_status": 401,
+      "title": "Attribution Expired",
+      "description": "Attribution attestation has exceeded its expiration time",
+      "retriable": false,
+      "category": "attribution"
     }
   ]
 }

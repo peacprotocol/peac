@@ -28,6 +28,7 @@
     "schemas:lint": "pnpm format:check -- 'specs/wire/*.json' && node scripts/lint-schemas.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:deps": "depcruise packages/ --config .dependency-cruiser.json",
     "format": "prettier \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --write --ignore-path .prettierignore",
     "format:check": "prettier \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --check --ignore-path .prettierignore",
     "typecheck": "pnpm typecheck:core",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "dependency-cruiser": "^16.6.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "ajv": "^8.17.1",

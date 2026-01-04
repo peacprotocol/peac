@@ -38,6 +38,7 @@ export default defineConfig({
       'packages/*/tests/**/*.test.ts',
       'packages/*/*/tests/**/*.test.ts',
       'packages/*/__tests__/**/*.test.ts',
+      'packages/*/src/__tests__/**/*.test.ts',
       'surfaces/nextjs/**/tests/**/*.test.ts',
       // Workers have their own vitest configs with custom paths
       // Run them via pnpm --filter @peac/worker-* test

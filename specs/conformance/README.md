@@ -1,6 +1,8 @@
 # PEAC Conformance Test Fixtures
 
-This directory contains test fixtures for validating PEAC receipt implementations against the wire format specification.
+This directory contains test fixtures for validating PEAC implementations against the wire format specification.
+
+**Version:** 0.9.26
 
 ## Directory Structure
 
@@ -22,6 +24,14 @@ fixtures/
     null-values.json
     unicode-strings.json
     max-depth.json
+  attribution/        # Attribution attestation fixtures (v0.9.26+)
+    valid.json        # 16 valid attribution attestations
+    invalid.json      # 21 invalid attribution attestations
+    edge-cases.json   # 16 edge case fixtures
+  purpose/            # Purpose header fixtures (v0.9.24+)
+    normalization.json
+    validation.json
+    reason.json
 ```
 
 ## Conformance Layers
@@ -43,6 +53,19 @@ Tests semantic invariants using `@peac/protocol` runtime validators.
 - **Test file**: `tests/conformance/protocol.spec.ts`
 - **Validator**: `@peac/protocol` (Zod-based)
 - **What it tests**: Signatures, cycles, NaN/Infinity, semantic invariants
+
+### Attribution Conformance (v0.9.26+)
+
+Tests attribution attestation validation using `@peac/schema` and `@peac/attribution`.
+
+- **Test file**: `tests/conformance/attribution.spec.ts`
+- **Fixtures**: `fixtures/attribution/` (53 total fixtures)
+- **What it tests**:
+  - Schema validation (type, required fields, strict mode)
+  - Sync verification (without chain resolution)
+  - Derivation types: `training`, `inference`, `rag`, `synthesis`, `embedding`
+  - Usage types: `training_input`, `rag_context`, `direct_reference`, `synthesis_source`, `embedding_source`
+  - Content/excerpt hashes, weights, metadata, expiration
 
 Some invalid cases **cannot exist as JSON files**:
 
@@ -88,3 +111,16 @@ All fixtures are validated against:
 - Components: `specs/wire/*.schema.json`
 
 Schema version: `peac.receipt/0.9` (wire format frozen until v1.0)
+
+## Running Conformance Tests
+
+```bash
+# All conformance tests
+pnpm vitest run tests/conformance/
+
+# Specific test suites
+pnpm vitest run tests/conformance/schema.spec.ts      # Schema validation
+pnpm vitest run tests/conformance/protocol.spec.ts   # Protocol semantics
+pnpm vitest run tests/conformance/attribution.spec.ts # Attribution attestations
+pnpm vitest run tests/conformance/parity.spec.ts     # Rail parity
+```
