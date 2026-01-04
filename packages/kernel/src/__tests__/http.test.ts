@@ -59,7 +59,7 @@ describe('applyPurposeVary', () => {
     it('works for deny responses (vary must apply to denials too)', () => {
       // Deny responses must also vary to prevent caching denial across purposes
       const headers = new Headers();
-      headers.set('X-PEAC-Decision', 'deny');
+      headers.set('PEAC-Decision', 'deny');
       applyPurposeVary(headers);
       expect(headers.get('Vary')).toBe('PEAC-Purpose');
     });

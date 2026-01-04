@@ -349,7 +349,7 @@ Implementations MUST NOT transport attribution as JSON in HTTP headers. Use Link
 **Prohibited:**
 
 ```http
-X-PEAC-Attribution: {"type":"peac/attribution",...}
+PEAC-Attribution: {"type":"peac/attribution",...}
 ```
 
 **Allowed:**
