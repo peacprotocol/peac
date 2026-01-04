@@ -45,7 +45,8 @@
     "verify:spec-drift": "node scripts/verify-spec-drift.mjs",
     "bench": "tsx scripts/bench-protocol.ts all",
     "bench:verify": "tsx scripts/bench-protocol.ts verify",
-    "bench:issue": "tsx scripts/bench-protocol.ts issue"
+    "bench:issue": "tsx scripts/bench-protocol.ts issue",
+    "test:exports": "node scripts/test-package-exports.mjs"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

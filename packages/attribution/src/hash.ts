@@ -111,10 +111,14 @@ export function normalizeBase64url(input: string): string {
   // Convert standard base64 alphabet to base64url
   let normalized = input.replace(/\+/g, '-').replace(/\//g, '_');
 
-  // Remove padding
-  normalized = normalized.replace(/=+$/, '');
+  // Remove trailing padding (O(n) without ReDoS-vulnerable regex)
+  let end = normalized.length;
+  while (end > 0 && normalized.charCodeAt(end - 1) === 0x3d) {
+    // 0x3d = '='
+    end--;
+  }
 
-  return normalized;
+  return end < normalized.length ? normalized.slice(0, end) : normalized;
 }
 
 /**

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Guard script for v0.9.14 safety checks
+# Guard script for PEAC protocol safety checks
 set -euo pipefail
 bad=0
 
 echo "== forbid dist imports =="
-if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/guard.sh' ':!archive/**' \
+# Allow dist imports in scripts/ (benchmarks run after build) and nightly workflow
+if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/**' ':!archive/**' \
   | grep -vE '^(\.github/workflows/nightly\.yml)' | grep .; then
   bad=1
 else
@@ -137,6 +138,25 @@ if [ -f scripts/find-invisible-unicode.mjs ]; then
   fi
 else
   echo "SKIP: scripts/find-invisible-unicode.mjs not found"
+fi
+
+echo "== forbid header casing drift (Peac-Receipt) =="
+# PEAC-Receipt is canonical; Peac-Receipt is incorrect casing
+# Allow in guard/verification scripts (they check FOR this pattern) and CHANGELOG (historical)
+if git grep -n 'Peac-Receipt' -- ':!node_modules' ':!archive/**' ':!dist/**' ':!scripts/*.sh' ':!scripts/*.mjs' ':!CHANGELOG.md' | grep .; then
+  echo "FAIL: Found incorrect header casing 'Peac-Receipt' - use 'PEAC-Receipt'"
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== forbid x-peac headers =="
+# RFC 6648 deprecates X- prefix; PEAC-* is canonical
+if git grep -nE '\b[xX]-[pP][eE][aA][cC]-' -- ':!node_modules' ':!archive/**' ':!dist/**' ':!scripts/guard.sh' | grep .; then
+  echo "FAIL: Found deprecated X-PEAC-* header prefix - use PEAC-* without X- prefix"
+  bad=1
+else
+  echo "OK"
 fi
 
 exit $bad
