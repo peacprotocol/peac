@@ -476,7 +476,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 
 ### Removed
 
-- All legacy X-PEAC-\* headers; emojis/em-dashes in logs; dead discovery code paths
+- All legacy `X-`-prefixed PEAC headers; emojis/em-dashes in logs; dead discovery code paths
 
 ### Security
 
@@ -513,7 +513,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 
 ### Changed
 
-- Protocol version updated to 0.9.10 (X-PEAC-Protocol header)
+- Protocol version updated to 0.9.10 (legacy protocol header, since removed)
 - Package versions updated to 0.9.10 across all packages
 - Web Bot Auth verification now uses cached directory system
 - Receipt verification supports multiple keys with `kid` matching

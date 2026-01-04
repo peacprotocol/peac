@@ -235,9 +235,9 @@ export const GrpcMetadataKeys = {
   /** PEAC receipt type */
   RECEIPT_TYPE: 'peac-receipt-type',
   /** TAP signature */
-  TAP_SIGNATURE: 'x-peac-tap-signature',
+  TAP_SIGNATURE: 'peac-tap-signature',
   /** TAP signature input */
-  TAP_SIGNATURE_INPUT: 'x-peac-tap-signature-input',
+  TAP_SIGNATURE_INPUT: 'peac-tap-signature-input',
   /** PEAC error code in trailer */
   ERROR_CODE: 'peac-error-code',
   /** Request ID for tracing */

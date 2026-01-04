@@ -151,16 +151,16 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 
     // Add verification headers to response
     const headers = new Headers(response.headers);
-    headers.set('X-PEAC-Verified', 'true');
-    headers.set('X-PEAC-Engine', 'tap');
+    headers.set('PEAC-Verified', 'true');
+    headers.set('PEAC-Engine', 'tap');
 
     if (result.controlEntry?.evidence.tag) {
-      headers.set('X-PEAC-TAP-Tag', result.controlEntry.evidence.tag);
+      headers.set('PEAC-TAP-Tag', result.controlEntry.evidence.tag);
     }
 
     // Warn in response header if replay protection is not configured (UNSAFE mode only)
     if (result.warning) {
-      headers.set('X-PEAC-Warning', result.warning);
+      headers.set('PEAC-Warning', result.warning);
       console.warn(
         '[PEAC] WARNING: No replay store configured with UNSAFE_ALLOW_NO_REPLAY=true. ' +
           'Replay attacks are possible. This is UNSAFE for production.'

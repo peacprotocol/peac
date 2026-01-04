@@ -352,8 +352,8 @@ describe('gRPC Transport', () => {
     it('should define standard keys', () => {
       expect(GrpcMetadataKeys.RECEIPT).toBe('peac-receipt');
       expect(GrpcMetadataKeys.RECEIPT_TYPE).toBe('peac-receipt-type');
-      expect(GrpcMetadataKeys.TAP_SIGNATURE).toBe('x-peac-tap-signature');
-      expect(GrpcMetadataKeys.TAP_SIGNATURE_INPUT).toBe('x-peac-tap-signature-input');
+      expect(GrpcMetadataKeys.TAP_SIGNATURE).toBe('peac-tap-signature');
+      expect(GrpcMetadataKeys.TAP_SIGNATURE_INPUT).toBe('peac-tap-signature-input');
       expect(GrpcMetadataKeys.ERROR_CODE).toBe('peac-error-code');
       expect(GrpcMetadataKeys.REQUEST_ID).toBe('peac-request-id');
     });
