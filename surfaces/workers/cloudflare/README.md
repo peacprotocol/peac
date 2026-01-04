@@ -236,12 +236,12 @@ Error details are automatically sanitized to prevent leaking sensitive informati
 
 Successful verification adds these headers:
 
-| Header           | Description                              |
-| ---------------- | ---------------------------------------- |
-| `PEAC-Verified`  | `true` if verification succeeded         |
-| `PEAC-Engine`    | `tap` for TAP verification               |
-| `PEAC-TAP-Tag`   | TAP tag (e.g., `agent-browser-auth`)     |
-| `PEAC-Warning`   | `replay-protection-disabled` if no store |
+| Header          | Description                              |
+| --------------- | ---------------------------------------- |
+| `PEAC-Verified` | `true` if verification succeeded         |
+| `PEAC-Engine`   | `tap` for TAP verification               |
+| `PEAC-TAP-Tag`  | TAP tag (e.g., `agent-browser-auth`)     |
+| `PEAC-Warning`  | `replay-protection-disabled` if no store |
 
 ## Example Requests
 

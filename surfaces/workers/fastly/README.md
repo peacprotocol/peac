@@ -105,12 +105,12 @@ const handler = createHandler({
 
 On successful verification:
 
-| Header         | Description                     |
-| -------------- | ------------------------------- |
-| PEAC-Verified  | Always "true"                   |
-| PEAC-Engine    | Always "tap"                    |
-| PEAC-TAP-Tag   | TAP usage tag (if present)      |
-| PEAC-Warning   | Warning message (if applicable) |
+| Header        | Description                     |
+| ------------- | ------------------------------- |
+| PEAC-Verified | Always "true"                   |
+| PEAC-Engine   | Always "tap"                    |
+| PEAC-TAP-Tag  | TAP usage tag (if present)      |
+| PEAC-Warning  | Warning message (if applicable) |
 
 ## Architecture
 
