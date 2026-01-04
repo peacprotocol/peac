@@ -43,7 +43,7 @@ fi
 echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
 # Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), and Attribution (v0.9.26+)
-LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors\.ts|schema/(src/(evidence|validators|agent-identity)\.ts|__tests__/agent-identity\.test\.ts)|attribution/)|examples/agent-identity/|sdks/go/)'
+LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors\.ts|schema/(src/(evidence|validators|agent-identity|attribution)\.ts|__tests__/agent-identity\.test\.ts)|attribution/)|examples/agent-identity/|sdks/go/)'
 if git grep -nE '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
