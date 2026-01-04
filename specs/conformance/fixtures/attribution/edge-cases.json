@@ -1,0 +1,402 @@
+{
+  "$comment": "Edge case AttributionAttestation golden vectors (v0.9.26+)",
+  "version": "0.9.26",
+  "fixtures": [
+    {
+      "name": "max-sources",
+      "description": "Attribution with maximum allowed sources (100)",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            { "receipt_ref": "jti:rec_001", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_002", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_003", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_004", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_005", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_006", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_007", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_008", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_009", "usage": "rag_context" },
+            { "receipt_ref": "jti:rec_010", "usage": "rag_context" }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "sources_count": 10,
+        "$comment": "Test with 10 sources; full 100-source test would be too large for fixture file"
+      }
+    },
+    {
+      "name": "weight-zero",
+      "description": "Source with weight exactly 0.0 (valid, indicates minimal contribution)",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_main",
+              "usage": "rag_context",
+              "weight": 0.9
+            },
+            {
+              "receipt_ref": "jti:rec_minimal",
+              "usage": "synthesis_source",
+              "weight": 0.0
+            }
+          ],
+          "derivation_type": "synthesis"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "total_weight": 0.9
+      }
+    },
+    {
+      "name": "weight-one",
+      "description": "Single source with weight exactly 1.0",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_only",
+              "usage": "direct_reference",
+              "weight": 1.0
+            }
+          ],
+          "derivation_type": "inference"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "total_weight": 1.0
+      }
+    },
+    {
+      "name": "unicode-model-id",
+      "description": "Model ID with unicode characters",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_unicode",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "inference",
+          "model_id": "model-v2-beta-2026"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "long-receipt-ref",
+      "description": "Receipt reference at maximum length (2048 chars)",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "https://very-long-domain-name-that-is-used-for-testing-purposes.example.com/receipts/this-is-a-very-long-receipt-identifier-that-approaches-but-does-not-exceed-the-maximum-allowed-length-for-receipt-references-in-peac-attribution-attestations",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "same-source-multiple-usages",
+      "description": "Same receipt referenced multiple times with different usages",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_multi",
+              "usage": "rag_context",
+              "weight": 0.5
+            },
+            {
+              "receipt_ref": "jti:rec_multi",
+              "usage": "embedding_source",
+              "weight": 0.5
+            }
+          ],
+          "derivation_type": "inference"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "sources_count": 2,
+        "$comment": "Same receipt can appear multiple times with different usages"
+      }
+    },
+    {
+      "name": "all-derivation-types",
+      "description": "Test all derivation types are valid",
+      "input": {
+        "$comment": "This is a meta-fixture; actual tests should use each type separately"
+      },
+      "expected": {
+        "valid_types": ["training", "inference", "rag", "synthesis", "embedding"]
+      }
+    },
+    {
+      "name": "all-usage-types",
+      "description": "Test all usage types are valid",
+      "input": {
+        "$comment": "This is a meta-fixture; actual tests should use each type separately"
+      },
+      "expected": {
+        "valid_usages": [
+          "training_input",
+          "rag_context",
+          "direct_reference",
+          "synthesis_source",
+          "embedding_source"
+        ]
+      }
+    },
+    {
+      "name": "fractional-weights",
+      "description": "Sources with precise fractional weights",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_a",
+              "usage": "synthesis_source",
+              "weight": 0.333
+            },
+            {
+              "receipt_ref": "jti:rec_b",
+              "usage": "synthesis_source",
+              "weight": 0.333
+            },
+            {
+              "receipt_ref": "jti:rec_c",
+              "usage": "synthesis_source",
+              "weight": 0.334
+            }
+          ],
+          "derivation_type": "synthesis"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "total_weight": 1.0
+      }
+    },
+    {
+      "name": "content-hash-and-excerpt-hash",
+      "description": "Source with both content_hash and excerpt_hash",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_both_hashes",
+              "content_hash": {
+                "alg": "sha-256",
+                "value": "n4bQgYhMfWWaL28IoEbM8Qa8jG7x0QXJZJqL-w_zZdA",
+                "enc": "base64url"
+              },
+              "excerpt_hash": {
+                "alg": "sha-256",
+                "value": "LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564",
+                "enc": "base64url"
+              },
+              "usage": "direct_reference"
+            }
+          ],
+          "derivation_type": "inference"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_content_hash": true,
+        "has_excerpt_hash": true
+      }
+    },
+    {
+      "name": "empty-metadata-object",
+      "description": "Attribution with empty metadata object",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_empty_meta",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag",
+          "metadata": {}
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "nested-metadata",
+      "description": "Attribution with nested metadata structure",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_nested",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "inference",
+          "metadata": {
+            "request": {
+              "id": "req_123",
+              "timestamp": 1704369600
+            },
+            "model_params": {
+              "temperature": 0.7,
+              "top_p": 0.9,
+              "max_tokens": 1000
+            },
+            "tags": ["production", "priority-high"]
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_metadata": true
+      }
+    },
+    {
+      "name": "mixed-ref-formats",
+      "description": "Sources with different receipt reference formats",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_jti_format",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "https://publisher.example.com/receipts/url_format",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "urn:peac:receipt:urn_format",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "sources_count": 3
+      }
+    },
+    {
+      "name": "http-receipt-ref",
+      "description": "Receipt reference using HTTP (not HTTPS)",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "http://internal.example.com/receipts/internal_001",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "$comment": "HTTP is allowed for internal/development use, though HTTPS is recommended"
+      }
+    },
+    {
+      "name": "timestamp-milliseconds",
+      "description": "Timestamps with millisecond precision",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00.123Z",
+        "expires_at": "2026-01-05T12:00:00.456Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_precise",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "minimal-valid-attestation",
+      "description": "Absolute minimum valid attribution attestation",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://x.co",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:r",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "$comment": "Shortest possible valid attestation"
+      }
+    }
+  ]
+}

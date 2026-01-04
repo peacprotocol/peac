@@ -4,6 +4,7 @@
 
 - [x402 + PEAC Integration](x402-peac.md) - HTTP 402 payment flows with receipts
 - [Policy Kit Quickstart](../policy-kit/quickstart.md) - File-based policy authoring
+- [Go SDK Middleware](go-middleware.md) - chi, gin, and net/http integration (v0.9.26+)
 
 ## Coming Soon
 

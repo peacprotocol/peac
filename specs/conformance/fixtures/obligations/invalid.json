@@ -1,0 +1,90 @@
+{
+  "$comment": "Invalid obligations extension golden vectors (v0.9.26+)",
+  "fixtures": [
+    {
+      "id": "credit-required-no-details",
+      "description": "Credit required=true but missing citation_url, credit_text, and method",
+      "input": {
+        "credit": {
+          "required": true
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "at least one of citation_url, credit_text, or method must be specified"
+      }
+    },
+    {
+      "id": "direct-contribution-no-destination",
+      "description": "Direct contribution type without destination",
+      "input": {
+        "contribution": {
+          "type": "direct"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "Destination is required when contribution type is 'direct'"
+      }
+    },
+    {
+      "id": "ecosystem-contribution-no-destination",
+      "description": "Ecosystem contribution type without destination",
+      "input": {
+        "contribution": {
+          "type": "ecosystem",
+          "min_amount": 100,
+          "currency": "USD"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "Destination is required when contribution type is 'ecosystem'"
+      }
+    },
+    {
+      "id": "min-amount-without-currency",
+      "description": "min_amount specified without currency",
+      "input": {
+        "contribution": {
+          "type": "open",
+          "min_amount": 1000
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "Currency is required when min_amount is specified"
+      }
+    },
+    {
+      "id": "invalid-currency-format",
+      "description": "Currency with invalid format (lowercase)",
+      "input": {
+        "contribution": {
+          "type": "open",
+          "min_amount": 100,
+          "currency": "usd"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "Invalid"
+      }
+    },
+    {
+      "id": "currency-too-short",
+      "description": "Currency with less than 3 characters",
+      "input": {
+        "contribution": {
+          "type": "open",
+          "min_amount": 100,
+          "currency": "US"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "String must contain at least 3 character"
+      }
+    }
+  ]
+}

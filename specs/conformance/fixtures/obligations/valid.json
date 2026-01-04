@@ -1,0 +1,73 @@
+{
+  "$comment": "Valid obligations extension golden vectors (v0.9.26+)",
+  "fixtures": [
+    {
+      "id": "credit-with-citation-and-ecosystem",
+      "description": "Full credit obligation with citation URL and ecosystem contribution",
+      "input": {
+        "credit": {
+          "required": true,
+          "citation_url": "https://publisher.example/collection",
+          "method": "references",
+          "credit_text": "Source: Publisher Example Collection"
+        },
+        "contribution": {
+          "type": "ecosystem",
+          "destination": "https://fund.creativecommons.org",
+          "min_amount": 100,
+          "currency": "USD"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "id": "open-contribution-with-optional-credit",
+      "description": "Open contribution type with credit not required",
+      "input": {
+        "credit": {
+          "required": false
+        },
+        "contribution": {
+          "type": "open"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "id": "direct-with-crypto-currency",
+      "description": "Direct contribution with USDC cryptocurrency",
+      "input": {
+        "credit": {
+          "required": true,
+          "method": "model-card"
+        },
+        "contribution": {
+          "type": "direct",
+          "destination": "0x1234567890abcdef1234567890abcdef12345678",
+          "min_amount": 500000,
+          "currency": "USDC"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "id": "credit-only-with-text",
+      "description": "Credit obligation with just credit_text (no URL)",
+      "input": {
+        "credit": {
+          "required": true,
+          "credit_text": "Content provided by Example Corp"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    }
+  ]
+}

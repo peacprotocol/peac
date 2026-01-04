@@ -38,6 +38,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Dependency architecture check
+        run: pnpm lint:deps
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
       - name: Unicode security scan (Trojan Source)
         run: |
           # Scan active packages for invisible/bidirectional Unicode (CVE-2021-42574)

@@ -1,0 +1,441 @@
+{
+  "$comment": "Valid AttributionAttestation golden vectors (v0.9.26+)",
+  "version": "0.9.26",
+  "fixtures": [
+    {
+      "name": "single-source-rag",
+      "description": "Single source RAG context attribution",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_abc123def456",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "sources_count": 1,
+        "derivation_type": "rag"
+      }
+    },
+    {
+      "name": "multiple-sources-synthesis",
+      "description": "Multiple sources combined for synthesis",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_source1",
+              "usage": "synthesis_source",
+              "weight": 0.4
+            },
+            {
+              "receipt_ref": "jti:rec_source2",
+              "usage": "synthesis_source",
+              "weight": 0.3
+            },
+            {
+              "receipt_ref": "jti:rec_source3",
+              "usage": "synthesis_source",
+              "weight": 0.3
+            }
+          ],
+          "derivation_type": "synthesis"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "sources_count": 3,
+        "total_weight": 1.0
+      }
+    },
+    {
+      "name": "training-input",
+      "description": "Training data attribution with model ID",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ml.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "https://publisher.example.com/receipts/rec_training1",
+              "usage": "training_input"
+            },
+            {
+              "receipt_ref": "https://publisher.example.com/receipts/rec_training2",
+              "usage": "training_input"
+            }
+          ],
+          "derivation_type": "training",
+          "model_id": "custom-model-v2"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "derivation_type": "training",
+        "has_model_id": true
+      }
+    },
+    {
+      "name": "with-content-hashes",
+      "description": "Attribution with content hash verification",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_hashed",
+              "content_hash": {
+                "alg": "sha-256",
+                "value": "n4bQgYhMfWWaL28IoEbM8Qa8jG7x0QXJZJqL-w_zZdA",
+                "enc": "base64url"
+              },
+              "usage": "direct_reference"
+            }
+          ],
+          "derivation_type": "inference"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_content_hash": true
+      }
+    },
+    {
+      "name": "with-excerpt-hash",
+      "description": "Privacy-preserving attribution with excerpt hash",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_excerpt",
+              "excerpt_hash": {
+                "alg": "sha-256",
+                "value": "LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564",
+                "enc": "base64url"
+              },
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_excerpt_hash": true
+      }
+    },
+    {
+      "name": "with-output-hash",
+      "description": "Attribution with derived output hash",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_source",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "inference",
+          "output_hash": {
+            "alg": "sha-256",
+            "value": "kE5ybkxqdNW9oLmNYd4c3rNCCHdZM2y_Z7T8cGpvLq0",
+            "enc": "base64url"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_output_hash": true
+      }
+    },
+    {
+      "name": "embedding-source",
+      "description": "Embedding generation attribution",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://embeddings.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "urn:peac:receipt:emb_source_001",
+              "usage": "embedding_source"
+            }
+          ],
+          "derivation_type": "embedding",
+          "model_id": "text-embedding-3-large"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "derivation_type": "embedding"
+      }
+    },
+    {
+      "name": "with-inference-provider",
+      "description": "Attribution with inference provider URL",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_infer",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "inference",
+          "inference_provider": "https://api.openai.com"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_inference_provider": true
+      }
+    },
+    {
+      "name": "with-session-id",
+      "description": "Attribution with session correlation",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_session",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag",
+          "session_id": "sess_abc123xyz"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_session_id": true
+      }
+    },
+    {
+      "name": "with-metadata",
+      "description": "Attribution with additional metadata",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_meta",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "inference",
+          "metadata": {
+            "temperature": 0.7,
+            "max_tokens": 1000,
+            "top_p": 0.9
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_metadata": true
+      }
+    },
+    {
+      "name": "with-expiration",
+      "description": "Attribution with expiration timestamp",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "expires_at": "2026-01-05T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_expiring",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_expiration": true
+      }
+    },
+    {
+      "name": "with-ref-url",
+      "description": "Attribution with external verification reference",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "ref": "https://ai.example.com/attribution/verify/attr_001",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_verifiable",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_ref": true
+      }
+    },
+    {
+      "name": "mixed-usage-types",
+      "description": "Multiple sources with different usage types",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_context",
+              "usage": "rag_context",
+              "weight": 0.5
+            },
+            {
+              "receipt_ref": "jti:rec_direct",
+              "usage": "direct_reference",
+              "weight": 0.3
+            },
+            {
+              "receipt_ref": "jti:rec_synth",
+              "usage": "synthesis_source",
+              "weight": 0.2
+            }
+          ],
+          "derivation_type": "inference"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "sources_count": 3
+      }
+    },
+    {
+      "name": "url-receipt-refs",
+      "description": "Sources using URL-based receipt references",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "https://publisher1.example.com/receipts/rec_001",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "https://publisher2.example.com/receipts/rec_002",
+              "usage": "rag_context"
+            }
+          ],
+          "derivation_type": "rag"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "sources_count": 2
+      }
+    },
+    {
+      "name": "urn-receipt-refs",
+      "description": "Sources using URN-based receipt references",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "urn:peac:receipt:rec_urn_001",
+              "usage": "embedding_source"
+            }
+          ],
+          "derivation_type": "embedding"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "full-attribution",
+      "description": "Attribution with all optional fields populated",
+      "input": {
+        "type": "peac/attribution",
+        "issuer": "https://ai.example.com",
+        "issued_at": "2026-01-04T12:00:00Z",
+        "expires_at": "2026-01-05T12:00:00Z",
+        "ref": "https://ai.example.com/attribution/full_001",
+        "evidence": {
+          "sources": [
+            {
+              "receipt_ref": "jti:rec_full",
+              "content_hash": {
+                "alg": "sha-256",
+                "value": "n4bQgYhMfWWaL28IoEbM8Qa8jG7x0QXJZJqL-w_zZdA",
+                "enc": "base64url"
+              },
+              "excerpt_hash": {
+                "alg": "sha-256",
+                "value": "LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564",
+                "enc": "base64url"
+              },
+              "usage": "rag_context",
+              "weight": 1.0
+            }
+          ],
+          "derivation_type": "inference",
+          "output_hash": {
+            "alg": "sha-256",
+            "value": "kE5ybkxqdNW9oLmNYd4c3rNCCHdZM2y_Z7T8cGpvLq0",
+            "enc": "base64url"
+          },
+          "model_id": "gpt-4-turbo",
+          "inference_provider": "https://api.openai.com",
+          "session_id": "sess_full_test",
+          "metadata": {
+            "request_id": "req_123",
+            "latency_ms": 250
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_all_optional_fields": true
+      }
+    }
+  ]
+}

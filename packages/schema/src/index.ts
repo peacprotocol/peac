@@ -12,6 +12,7 @@ export * from './errors';
 export * from './normalize';
 export * from './purpose';
 export * from './agent-identity';
+export * from './attribution';
 
 // JSON-safe validation schemas (v0.9.21+)
 export {
@@ -103,6 +104,75 @@ export type {
   AgentIdentityVerified,
   CreateAgentIdentityAttestationParams,
 } from './agent-identity';
+
+// Attribution validators (v0.9.26+)
+export {
+  HashAlgorithmSchema,
+  HashEncodingSchema,
+  ContentHashSchema,
+  AttributionUsageSchema,
+  DerivationTypeSchema,
+  AttributionSourceSchema,
+  AttributionEvidenceSchema,
+  AttributionAttestationSchema,
+  // Constants
+  ATTRIBUTION_TYPE,
+  ATTRIBUTION_LIMITS,
+  ATTRIBUTION_USAGES,
+  DERIVATION_TYPES,
+  // Helpers
+  validateContentHash,
+  validateAttributionSource,
+  validateAttributionAttestation,
+  isAttributionAttestation,
+  createAttributionAttestation,
+  isAttributionExpired,
+  isAttributionNotYetValid,
+  computeTotalWeight,
+  detectCycleInSources,
+} from './attribution';
+export type {
+  HashAlgorithm,
+  HashEncoding,
+  ContentHash,
+  AttributionUsage,
+  DerivationType,
+  AttributionSource,
+  AttributionEvidence,
+  AttributionAttestation,
+  ChainVerificationResult,
+  CreateAttributionAttestationParams,
+} from './attribution';
+
+// Obligations extension (v0.9.26+ CC Signals alignment)
+export {
+  CreditMethodSchema,
+  ContributionTypeSchema,
+  CreditObligationSchema,
+  ContributionObligationSchema,
+  ObligationsExtensionSchema,
+  // Constants
+  OBLIGATIONS_EXTENSION_KEY,
+  CREDIT_METHODS,
+  CONTRIBUTION_TYPES,
+  // Helpers
+  validateCreditObligation,
+  validateContributionObligation,
+  validateObligationsExtension,
+  extractObligationsExtension,
+  isCreditRequired,
+  isContributionRequired,
+  createCreditObligation,
+  createContributionObligation,
+  createObligationsExtension,
+} from './obligations';
+export type {
+  CreditMethod,
+  ContributionType,
+  CreditObligation,
+  ContributionObligation,
+  ObligationsExtension,
+} from './obligations';
 
 // Envelope types (v0.9.15+ normative structure)
 export type {
