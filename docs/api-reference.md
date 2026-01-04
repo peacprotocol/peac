@@ -10,7 +10,7 @@ PEAC uses a single canonical HTTP header for receipts:
 
 HTTP header names are case-insensitive per RFC 7230. Implementations MUST accept `PEAC-Receipt` and SHOULD tolerate lowercase variants (e.g., `peac-receipt`) as seen in HTTP/2 or gRPC metadata.
 
-**Note:** All legacy `X-PEAC-*` headers were removed in v0.9.15. Do not use or implement them.
+**Note:** All legacy `X-`-prefixed PEAC headers were removed in v0.9.15. Do not use or implement them.
 
 ## Endpoints
 

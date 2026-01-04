@@ -51,7 +51,7 @@ cd examples/telemetry-otel && pnpm build && pnpm start
 All examples are verified in CI:
 
 - `pnpm examples:check` - TypeScript compilation check
-- No X-PEAC headers allowed (use `PEAC-Receipt` instead)
+- No `X-`-prefixed PEAC headers allowed (use `PEAC-Receipt` instead)
 
 ## Requirements
 

@@ -195,7 +195,7 @@ export function createOnClientResponse() {
   return function onClientResponse(request: EWRequest, response: EWResponse): void {
     // Check if verification was successful (could use a shared state mechanism)
     // For now, just add a header indicating PEAC is active
-    response.setHeader('X-PEAC-Engine', 'tap');
+    response.setHeader('PEAC-Engine', 'tap');
   };
 }
 
@@ -282,12 +282,12 @@ function resultToResponse(result: HandlerResult, requestUrl: string): Response {
       return new Response('OK', {
         status: 200,
         headers: {
-          'X-PEAC-Verified': 'true',
-          'X-PEAC-Engine': 'tap',
+          'PEAC-Verified': 'true',
+          'PEAC-Engine': 'tap',
           ...(result.controlEntry?.evidence.tag
-            ? { 'X-PEAC-TAP-Tag': result.controlEntry.evidence.tag }
+            ? { 'PEAC-TAP-Tag': result.controlEntry.evidence.tag }
             : {}),
-          ...(result.warning ? { 'X-PEAC-Warning': result.warning } : {}),
+          ...(result.warning ? { 'PEAC-Warning': result.warning } : {}),
         },
       });
 

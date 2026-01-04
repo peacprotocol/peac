@@ -236,12 +236,12 @@ Error details are automatically sanitized to prevent leaking sensitive informati
 
 Successful verification adds these headers:
 
-| Header            | Description                              |
-| ----------------- | ---------------------------------------- |
-| `X-PEAC-Verified` | `true` if verification succeeded         |
-| `X-PEAC-Engine`   | `tap` for TAP verification               |
-| `X-PEAC-TAP-Tag`  | TAP tag (e.g., `agent-browser-auth`)     |
-| `X-PEAC-Warning`  | `replay-protection-disabled` if no store |
+| Header           | Description                              |
+| ---------------- | ---------------------------------------- |
+| `PEAC-Verified`  | `true` if verification succeeded         |
+| `PEAC-Engine`    | `tap` for TAP verification               |
+| `PEAC-TAP-Tag`   | TAP tag (e.g., `agent-browser-auth`)     |
+| `PEAC-Warning`   | `replay-protection-disabled` if no store |
 
 ## Example Requests
 
@@ -256,9 +256,9 @@ curl -i https://your-worker.example.com/api/resource \
 Expected response headers on success:
 
 ```http
-X-PEAC-Verified: true
-X-PEAC-Engine: tap
-X-PEAC-TAP-Tag: agent-browser-auth
+PEAC-Verified: true
+PEAC-Engine: tap
+PEAC-TAP-Tag: agent-browser-auth
 ```
 
 ### Missing Receipt (402 Challenge)

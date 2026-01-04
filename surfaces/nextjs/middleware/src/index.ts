@@ -117,8 +117,8 @@ export function createPeacMiddleware(config: MiddlewareConfig): NextMiddlewareLi
       return new Response(null, {
         headers: {
           'x-middleware-next': '1',
-          'X-PEAC-Verified': 'true',
-          'X-PEAC-Engine': 'tap',
+          'PEAC-Verified': 'true',
+          'PEAC-Engine': 'tap',
         },
       });
     } catch (error) {

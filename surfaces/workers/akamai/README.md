@@ -113,9 +113,9 @@ Note: EdgeKV is eventually consistent. For stronger guarantees, consider using a
 
 On successful verification:
 
-| Header        | Description  |
-| ------------- | ------------ |
-| X-PEAC-Engine | Always "tap" |
+| Header      | Description  |
+| ----------- | ------------ |
+| PEAC-Engine | Always "tap" |
 
 Note: Due to EdgeWorkers limitations, verification metadata is primarily
 handled via response headers in `onClientResponse` or at origin.
