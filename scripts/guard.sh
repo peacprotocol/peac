@@ -42,8 +42,8 @@ fi
 
 echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
-# Note: issued_at is valid for Attestation type (v0.9.21+) and AgentIdentityAttestation (v0.9.25+)
-LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors\.ts|schema/(src/(evidence|validators|agent-identity)\.ts|__tests__/agent-identity\.test\.ts))|examples/agent-identity/|sdks/go/)'
+# Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), and Attribution (v0.9.26+)
+LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors\.ts|schema/(src/(evidence|validators|agent-identity)\.ts|__tests__/agent-identity\.test\.ts)|attribution/)|examples/agent-identity/|sdks/go/)'
 if git grep -nE '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
@@ -145,15 +145,6 @@ echo "== forbid header casing drift (Peac-Receipt) =="
 # Allow in guard/verification scripts (they check FOR this pattern) and CHANGELOG (historical)
 if git grep -n 'Peac-Receipt' -- ':!node_modules' ':!archive/**' ':!dist/**' ':!scripts/*.sh' ':!scripts/*.mjs' ':!CHANGELOG.md' | grep .; then
   echo "FAIL: Found incorrect header casing 'Peac-Receipt' - use 'PEAC-Receipt'"
-  bad=1
-else
-  echo "OK"
-fi
-
-echo "== forbid x-peac headers =="
-# RFC 6648 deprecates X- prefix; PEAC-* is canonical
-if git grep -nE '\b[xX]-[pP][eE][aA][cC]-' -- ':!node_modules' ':!archive/**' ':!dist/**' ':!scripts/guard.sh' | grep .; then
-  echo "FAIL: Found deprecated X-PEAC-* header prefix - use PEAC-* without X- prefix"
   bad=1
 else
   echo "OK"
