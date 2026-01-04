@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.26] - 2026-01-04
+
+### Added
+
+- **Attribution Package** (`@peac/attribution`): Full implementation for provenance tracking
+  - `computeContentHash()`: SHA-256 content hashing with base64url encoding
+  - `verifyContentHash()`: Verify content matches expected hash (accepts padded/unpadded)
+  - `normalizeBase64url()`: Canonical unpadded base64url normalization
+  - `buildAttributionChain()`: Construct attribution chains from source receipts
+  - `verifyAttributionChain()`: Verify chain integrity and signatures
+  - 4 test files with comprehensive coverage (chain, errors, hash, verify)
+- **Attribution Schema** (`@peac/schema`)
+  - `AttributionAttestation`: Core attestation type for content provenance
+  - `AttributionEvidence`: source_receipt_ref, content_hash, usage_type, excerpts
+  - `AttributionSource`: Represents a source in the attribution chain
+  - `UsageType`: `training_input`, `rag_context`, `direct_reference`, `synthesis_source`, `embedding_source`
+  - `ContentHash`: SHA-256 hash with base64url encoding
+  - `ExcerptReference`: Character ranges with optional hash
+- **Obligations Extension** (`@peac/schema`)
+  - `ObligationsExtension`: CC Signals-aligned credit and contribution requirements
+  - `CreditRequirement`: `required`, `recommended`, `optional` with citation_url
+  - `ContributionRequirement`: `direct`, `ecosystem`, `open` contribution types
+  - Validators: `validateObligationsExtension()`, `isValidObligationsExtension()`
+  - 655 lines of obligation tests
+- **Attribution Error Codes** (`specs/kernel/errors.json`): 16 new attribution\_\* codes
+  - `E_ATTR_INVALID_CHAIN`, `E_ATTR_CIRCULAR_REF`, `E_ATTR_DEPTH_EXCEEDED`
+  - `E_ATTR_RECEIPT_INVALID`, `E_ATTR_HASH_MISMATCH`, `E_ATTR_MISSING_SOURCE`
+  - `E_ATTR_USAGE_INVALID`, `E_ATTR_EXCERPT_INVALID`, `E_ATTR_OBLIGATIONS_INVALID`
+- **HTTP Helpers** (`@peac/kernel`)
+  - `applyPurposeVary()`: Add PEAC-Purpose to Vary header
+  - `getPeacVaryHeaders()`: Get comma-separated PEAC headers for Vary
+  - `needsPurposeVary()`: Check if purpose-based caching is needed
+  - Works with Web API Headers, Node.js response objects, and Map-like headers
+- **Attribution Conformance Suite** (`specs/conformance/fixtures/attribution/`)
+  - `valid.json`: 15 valid attribution attestation vectors
+  - `invalid.json`: 20 invalid attestation vectors with expected errors
+  - `edge-cases.json`: 12 edge case vectors for boundary conditions
+- **docs/specs/ATTRIBUTION.md**: Normative attribution specification (685 lines)
+- **docs/compliance/eu-ai-act.md**: EU AI Act compliance guide with PEAC mappings
+- **docs/guides/go-middleware.md**: Go middleware integration guide
+
+### Changed
+
+- RFC 6648 compliance: All HTTP headers now use `PEAC-*` prefix (removed `X-PEAC-*`)
+  - `PEAC-Verified`, `PEAC-Engine`, `PEAC-TAP-Tag`, `PEAC-Warning`, `PEAC-Decision`
+  - Updated: Cloudflare, Fastly, Akamai workers and Next.js middleware
+- Guard script enhanced with attribution package exclusions for `issued_at` field
+- Publish list updated: 31 public packages (added `@peac/attribution`)
+
 ## [0.9.25] - 2026-01-04
 
 ### Added
