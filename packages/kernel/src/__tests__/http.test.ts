@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  applyPurposeVary,
-  getPeacVaryHeaders,
-  needsPurposeVary,
-  VARY_HEADERS,
-} from '../http.js';
+import { applyPurposeVary, getPeacVaryHeaders, needsPurposeVary, VARY_HEADERS } from '../http.js';
 
 describe('VARY_HEADERS', () => {
   it('includes PEAC-Purpose and PEAC-Receipt', () => {
