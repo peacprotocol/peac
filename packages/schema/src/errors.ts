@@ -14,7 +14,8 @@ export type ErrorCategory =
   | 'network' // Network/transport failures
   | 'authorization' // Authorization/control failures
   | 'rate_limit' // Rate limiting
-  | 'internal'; // Internal server errors
+  | 'internal' // Internal server errors
+  | 'attribution'; // Attribution attestation failures (v0.9.26+)
 
 /**
  * Error severity

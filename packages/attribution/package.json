@@ -1,18 +1,45 @@
 {
   "name": "@peac/attribution",
-  "version": "0.9.25",
-  "private": true,
-  "description": "PEAC attribution pillar (placeholder for v0.9.18+)",
+  "version": "0.9.26",
+  "description": "PEAC attribution attestation - content derivation and usage proofs",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@peac/kernel": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "vitest": "^3.0.0"
   },
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "typescript": "^5.6.2"
-  }
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/attribution"
+  },
+  "keywords": [
+    "peac",
+    "attribution",
+    "content-derivation",
+    "usage-proof",
+    "ai-training",
+    "rag"
+  ]
 }

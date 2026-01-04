@@ -1,19 +1,23 @@
 # PEAC Protocol Roadmap
 
-## Current Release: v0.9.23
+## Current Release: v0.9.25
 
 Shipped:
 
-- Policy Profiles - Pre-built policy templates (news-media, api-provider, open-source, saas-docs)
-- Decision Enforcement - enforceDecision() with strict review semantics
-- CLI profile commands - list-profiles, show-profile, --profile flag
-- Build-time YAML->TypeScript compilation with CI drift check
-- Tarball smoke test for publish verification
+- Agent Identity Attestations - `peac/agent-identity` type with proof-of-control binding
+- Identity Binding - `IdentityBinding` type, `constructBindingMessage()`, `verifyIdentityBinding()`
+- Control Types - `operator` (verified bots) and `user-delegated` (agents acting on behalf)
+- Proof Methods - HTTP message signatures, DPoP, mTLS, JWK thumbprint
+- Key Rotation - PENDING -> ACTIVE -> DEPRECATED -> REVOKED lifecycle
+- Error Taxonomy - 13 `identity_*` error codes for standardized handling
+- Go Middleware Guide - `docs/guides/go-middleware.md` for chi/gin integration
 
 ## Version History
 
 | Version | Highlights                                                  |
 | ------- | ----------------------------------------------------------- |
+| v0.9.25 | Agent identity attestations, Go middleware guide            |
+| v0.9.24 | Purpose on wire, enforcement profiles, AIPREF mapping       |
 | v0.9.23 | Policy profiles, decision enforcement, CLI profile commands |
 | v0.9.22 | OpenTelemetry integration, telemetry hooks, privacy modes   |
 | v0.9.21 | Attestations, Extensions, wire schema, DoS protection       |
@@ -26,14 +30,12 @@ Shipped:
 
 ## Upcoming Releases
 
-| Version  | Theme          | Key Deliverables                                       |
-| -------- | -------------- | ------------------------------------------------------ |
-| v0.9.24  | Adoption       | Purpose vocabulary, policy profiles, robots.txt bridge |
-| v0.9.25  | Infrastructure | Agent identity (HTTP signatures), Go SDK (verifier)    |
-| v0.9.26  | Credibility    | Attribution, conformance suite, registry publish       |
-| v0.9.27  | Resolution     | Dispute and audit                                      |
-| v0.9.28+ | Distribution   | Edge workers, full Go SDK, WebSocket transport         |
-| v0.10.0  | GA             | Wire format freeze, multi-implementation validation    |
+| Version  | Theme        | Key Deliverables                                      |
+| -------- | ------------ | ----------------------------------------------------- |
+| v0.9.26  | Credibility  | Attribution, obligations extension, conformance suite |
+| v0.9.27  | Resolution   | Dispute and audit                                     |
+| v0.9.28+ | Distribution | Edge workers, full Go SDK, WebSocket transport        |
+| v0.10.0  | GA           | Wire format freeze, multi-implementation validation   |
 
 ## Future Development
 
