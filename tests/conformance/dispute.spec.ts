@@ -14,7 +14,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { validateDisputeAttestation } from '../../packages/schema/src/dispute';
+import { validateDisputeAttestation } from '@peac/schema';
 
 const FIXTURES_DIR = join(__dirname, '..', '..', 'specs', 'conformance', 'fixtures', 'dispute');
 
