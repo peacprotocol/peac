@@ -48,6 +48,26 @@ Normative error codes for PEAC Protocol v0.9.
 | ------------------ | -------- | -------- | --------- | ---- | --------------------- | ---------------------- |
 | `E_INTERNAL_ERROR` | internal | error    | false     | 500  | Internal server error | Contact issuer support |
 
+## Attestation Temporal Validity (401 Convention)
+
+Attestations (agent identity, attribution, dispute) use **401** for temporal validity errors,
+while receipts use **400**. This distinction reflects their different roles:
+
+| Credential Type | Temporal Error                               | HTTP Status | Rationale                                                                  |
+| --------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------- |
+| Receipt         | E_EXPIRED, E_NOT_YET_VALID                   | 400         | Receipts are data objects - temporal issues are validation failures        |
+| Attestation     | `E_{TYPE}_EXPIRED`, `E_{TYPE}_NOT_YET_VALID` | 401         | Attestations are credentials - temporal issues are authentication failures |
+
+**Affected error codes:**
+
+- `E_IDENTITY_NOT_YET_VALID`, `E_IDENTITY_EXPIRED` (401)
+- `E_ATTRIBUTION_NOT_YET_VALID`, `E_ATTRIBUTION_EXPIRED` (401)
+- `E_DISPUTE_NOT_YET_VALID`, `E_DISPUTE_EXPIRED` (401)
+
+This convention treats attestations as token-like credentials that authenticate the presenter.
+An expired or not-yet-valid attestation is analogous to an expired OAuth token - an auth failure (401),
+not a format error (400).
+
 ## Error Response Format
 
 All errors MUST be returned in this JSON structure:
