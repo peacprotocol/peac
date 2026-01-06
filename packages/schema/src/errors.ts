@@ -15,7 +15,9 @@ export type ErrorCategory =
   | 'authorization' // Authorization/control failures
   | 'rate_limit' // Rate limiting
   | 'internal' // Internal server errors
-  | 'attribution'; // Attribution attestation failures (v0.9.26+)
+  | 'attribution' // Attribution attestation failures (v0.9.26+)
+  | 'identity' // Agent identity attestation failures (v0.9.25+)
+  | 'dispute'; // Dispute attestation failures (v0.9.27+)
 
 /**
  * Error severity

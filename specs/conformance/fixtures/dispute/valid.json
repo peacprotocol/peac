@@ -1,0 +1,439 @@
+{
+  "$comment": "Valid DisputeAttestation golden vectors (v0.9.27+)",
+  "version": "0.9.27",
+  "fixtures": [
+    {
+      "name": "minimal-filed",
+      "description": "Minimal dispute in filed state",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123def456",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "filed",
+        "dispute_type": "unauthorized_access"
+      }
+    },
+    {
+      "name": "attribution-dispute",
+      "description": "Dispute about incorrect attribution",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://original-author.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FBW",
+        "evidence": {
+          "dispute_type": "attribution_incorrect",
+          "target_ref": "https://ai.example.com/attributions/attr_xyz789",
+          "target_type": "attribution",
+          "grounds": [
+            {
+              "code": "source_misidentified",
+              "details": "My content was attributed to wrong source"
+            },
+            { "code": "weight_inaccurate", "details": "Attribution weight should be 0.7 not 0.1" }
+          ],
+          "description": "The attribution incorrectly identifies the source and underweights my contribution.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "filed",
+        "dispute_type": "attribution_incorrect",
+        "grounds_count": 2
+      }
+    },
+    {
+      "name": "identity-dispute-with-contact",
+      "description": "Identity spoofing dispute with contact info",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://legit-agent.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FCX",
+        "evidence": {
+          "dispute_type": "identity_spoofed",
+          "target_ref": "did:web:impersonator.example.com",
+          "target_type": "identity",
+          "grounds": [
+            { "code": "agent_impersonation", "details": "Agent ID was used without authorization" }
+          ],
+          "description": "Another agent impersonated my identity to access content.",
+          "contact": {
+            "method": "email",
+            "value": "security@legit-agent.example.com"
+          },
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "filed",
+        "has_contact": true
+      }
+    },
+    {
+      "name": "acknowledged-state",
+      "description": "Dispute in acknowledged state",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FDY",
+        "evidence": {
+          "dispute_type": "purpose_mismatch",
+          "target_ref": "jti:rec_purpose123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "purpose_exceeded" }],
+          "description": "Content was used for training but declared as search.",
+          "state": "acknowledged",
+          "state_changed_at": "2026-01-07T09:00:00Z",
+          "state_reason": "Dispute received and assigned to review team"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "acknowledged"
+      }
+    },
+    {
+      "name": "under-review-state",
+      "description": "Dispute under review with supporting docs",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FEZ",
+        "evidence": {
+          "dispute_type": "policy_violation",
+          "target_ref": "jti:rec_policy456",
+          "target_type": "receipt",
+          "grounds": [{ "code": "terms_violated" }],
+          "description": "Terms of service were violated despite having a valid receipt.",
+          "supporting_documents": [
+            {
+              "uri": "https://publisher.example.com/evidence/screenshot1.png",
+              "description": "Screenshot showing violation"
+            },
+            {
+              "uri": "https://publisher.example.com/evidence/logs.json",
+              "content_hash": {
+                "alg": "sha-256",
+                "value": "LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564",
+                "enc": "base64url"
+              },
+              "description": "Access logs with timestamps"
+            }
+          ],
+          "state": "under_review",
+          "state_changed_at": "2026-01-08T14:30:00Z"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "under_review",
+        "supporting_documents_count": 2
+      }
+    },
+    {
+      "name": "resolved-upheld",
+      "description": "Resolved dispute with upheld outcome and remediation",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FF0",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_unauth789",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "resolved",
+          "state_changed_at": "2026-01-10T16:00:00Z",
+          "resolution": {
+            "outcome": "upheld",
+            "decided_at": "2026-01-10T16:00:00Z",
+            "decided_by": "https://platform.example.com/disputes",
+            "rationale": "Evidence confirmed unauthorized access. Content provider violated access policy.",
+            "remediation": {
+              "type": "compensation",
+              "details": "Content provider will pay licensing fee of $500 and cease unauthorized access."
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "resolved",
+        "outcome": "upheld",
+        "has_remediation": true
+      }
+    },
+    {
+      "name": "rejected-dismissed",
+      "description": "Rejected dispute with dismissed outcome",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FG1",
+        "evidence": {
+          "dispute_type": "receipt_invalid",
+          "target_ref": "jti:rec_valid123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "forged_receipt" }],
+          "description": "Receipt signature appears to be forged.",
+          "state": "rejected",
+          "state_changed_at": "2026-01-09T11:00:00Z",
+          "resolution": {
+            "outcome": "dismissed",
+            "decided_at": "2026-01-09T11:00:00Z",
+            "decided_by": "https://platform.example.com/disputes",
+            "rationale": "Receipt signature verified successfully. No evidence of forgery found."
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "rejected",
+        "outcome": "dismissed"
+      }
+    },
+    {
+      "name": "appealed-state",
+      "description": "Dispute that was appealed after rejection",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FH2",
+        "evidence": {
+          "dispute_type": "attribution_missing",
+          "target_ref": "https://ai.example.com/outputs/out_abc",
+          "target_type": "attribution",
+          "grounds": [
+            {
+              "code": "content_not_used",
+              "details": "Content was used but no attribution provided"
+            }
+          ],
+          "description": "My content was used in AI output but no attribution was provided.",
+          "state": "appealed",
+          "state_changed_at": "2026-01-12T08:00:00Z",
+          "state_reason": "Appealing due to new evidence discovered"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "appealed"
+      }
+    },
+    {
+      "name": "final-state",
+      "description": "Dispute in final state after appeal resolution",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FJ3",
+        "evidence": {
+          "dispute_type": "policy_violation",
+          "target_ref": "jti:rec_policy789",
+          "target_type": "policy",
+          "grounds": [{ "code": "rate_limit_exceeded" }],
+          "description": "Rate limits were exceeded despite policy restrictions.",
+          "state": "final",
+          "state_changed_at": "2026-01-15T10:00:00Z",
+          "resolution": {
+            "outcome": "partially_upheld",
+            "decided_at": "2026-01-15T10:00:00Z",
+            "decided_by": "https://platform.example.com/appeals",
+            "rationale": "Some rate limit violations confirmed, but within acceptable margin. Partial remediation ordered.",
+            "remediation": {
+              "type": "policy_updated",
+              "details": "Rate limit monitoring enhanced. Minor policy adjustments applied."
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "final",
+        "outcome": "partially_upheld"
+      }
+    },
+    {
+      "name": "other-type-with-long-description",
+      "description": "Dispute of type 'other' with required long description",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FK4",
+        "evidence": {
+          "dispute_type": "other",
+          "target_ref": "jti:rec_other123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "terms_violated", "details": "Custom violation type" }],
+          "description": "This is a custom dispute that does not fit into any predefined category. The situation involves a complex combination of technical and policy issues that require special consideration.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "dispute_type": "other",
+        "description_length_gte": 50
+      }
+    },
+    {
+      "name": "with-supporting-receipts-and-attributions",
+      "description": "Dispute with supporting receipts and attributions",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FL5",
+        "evidence": {
+          "dispute_type": "attribution_incorrect",
+          "target_ref": "https://ai.example.com/attributions/attr_wrong",
+          "target_type": "attribution",
+          "grounds": [{ "code": "source_misidentified" }],
+          "description": "The attribution chain incorrectly identifies sources.",
+          "supporting_receipts": ["jti:rec_correct_source1", "jti:rec_correct_source2"],
+          "supporting_attributions": ["https://other.example.com/attributions/attr_correct"],
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "supporting_receipts_count": 2,
+        "supporting_attributions_count": 1
+      }
+    },
+    {
+      "name": "with-expiry",
+      "description": "Dispute with expiration time",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "expires_at": "2026-04-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FM6",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_expiry123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed",
+          "window_hint_days": 90
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_expiry": true,
+        "has_window_hint": true
+      }
+    },
+    {
+      "name": "url-contact-method",
+      "description": "Dispute with URL contact method",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FN7",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_url_contact",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "contact": {
+            "method": "url",
+            "value": "https://publisher.example.com/disputes/webhook"
+          },
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "contact_method": "url"
+      }
+    },
+    {
+      "name": "did-contact-method",
+      "description": "Dispute with DID contact method",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FP8",
+        "evidence": {
+          "dispute_type": "identity_spoofed",
+          "target_ref": "did:web:spoofed.example.com",
+          "target_type": "identity",
+          "grounds": [{ "code": "agent_impersonation" }],
+          "description": "Agent identity was impersonated.",
+          "contact": {
+            "method": "did",
+            "value": "did:web:publisher.example.com"
+          },
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "contact_method": "did"
+      }
+    },
+    {
+      "name": "settled-outcome",
+      "description": "Resolved dispute with settled outcome",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FQ9",
+        "evidence": {
+          "dispute_type": "attribution_missing",
+          "target_ref": "https://ai.example.com/outputs/out_settle",
+          "target_type": "attribution",
+          "grounds": [{ "code": "content_not_used" }],
+          "description": "Content was used without attribution.",
+          "state": "resolved",
+          "resolution": {
+            "outcome": "settled",
+            "decided_at": "2026-01-09T14:00:00Z",
+            "decided_by": "https://platform.example.com/disputes",
+            "rationale": "Parties reached mutual agreement. Attribution will be added retroactively.",
+            "remediation": {
+              "type": "attribution_corrected",
+              "details": "Attribution added to all affected outputs.",
+              "deadline": "2026-01-16T14:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "resolved",
+        "outcome": "settled",
+        "remediation_has_deadline": true
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.26",
+  "version": "0.9.27",
   "description": "PEAC error codes - normative source of truth",
   "errors": [
     {
@@ -354,6 +354,118 @@
       "description": "Attribution attestation has exceeded its expiration time",
       "retriable": false,
       "category": "attribution"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Dispute Invalid Format",
+      "description": "Dispute attestation does not conform to schema",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_ID",
+      "http_status": 400,
+      "title": "Dispute Invalid ID",
+      "description": "Dispute ID is not a valid ULID format (26 uppercase alphanumeric characters)",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TYPE",
+      "http_status": 400,
+      "title": "Dispute Invalid Type",
+      "description": "Dispute type is not recognized",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TARGET_TYPE",
+      "http_status": 400,
+      "title": "Dispute Invalid Target Type",
+      "description": "Dispute target type is not recognized (must be receipt, attribution, identity, or policy)",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_GROUNDS",
+      "http_status": 400,
+      "title": "Dispute Invalid Grounds",
+      "description": "Dispute grounds code is not recognized",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_STATE",
+      "http_status": 400,
+      "title": "Dispute Invalid State",
+      "description": "Dispute state is not recognized",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TRANSITION",
+      "http_status": 400,
+      "title": "Dispute Invalid Transition",
+      "description": "Invalid state transition for dispute lifecycle",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_MISSING_RESOLUTION",
+      "http_status": 400,
+      "title": "Dispute Missing Resolution",
+      "description": "Resolution is required for terminal states (resolved, rejected, final)",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_RESOLUTION_NOT_ALLOWED",
+      "http_status": 400,
+      "title": "Dispute Resolution Not Allowed",
+      "description": "Resolution is only valid for terminal states",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_NOT_YET_VALID",
+      "http_status": 401,
+      "title": "Dispute Not Yet Valid",
+      "description": "Dispute attestation issued_at time is in the future",
+      "retriable": true,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_EXPIRED",
+      "http_status": 401,
+      "title": "Dispute Expired",
+      "description": "Dispute attestation has exceeded its expiration time",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_OTHER_REQUIRES_DESCRIPTION",
+      "http_status": 400,
+      "title": "Dispute Other Requires Description",
+      "description": "Dispute type 'other' requires description of at least 50 characters",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_DUPLICATE",
+      "http_status": 409,
+      "title": "Dispute Duplicate",
+      "description": "A dispute with this ID already exists",
+      "retriable": false,
+      "category": "dispute"
+    },
+    {
+      "code": "E_DISPUTE_TARGET_NOT_FOUND",
+      "http_status": 404,
+      "title": "Dispute Target Not Found",
+      "description": "The target receipt, attribution, or identity being disputed was not found",
+      "retriable": true,
+      "category": "dispute"
     }
   ]
 }

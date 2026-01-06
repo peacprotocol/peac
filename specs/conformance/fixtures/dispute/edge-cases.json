@@ -1,0 +1,538 @@
+{
+  "$comment": "Edge case DisputeAttestation golden vectors (v0.9.27+)",
+  "version": "0.9.27",
+  "fixtures": [
+    {
+      "name": "max-grounds",
+      "description": "Dispute with exactly 10 grounds (maximum allowed)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "policy_violation",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [
+            { "code": "missing_receipt" },
+            { "code": "expired_receipt" },
+            { "code": "forged_receipt" },
+            { "code": "receipt_not_applicable" },
+            { "code": "content_not_used" },
+            { "code": "source_misidentified" },
+            { "code": "usage_type_wrong" },
+            { "code": "weight_inaccurate" },
+            { "code": "purpose_exceeded" },
+            { "code": "terms_violated" }
+          ],
+          "description": "Multiple violations detected across all categories.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "grounds_count": 10
+      }
+    },
+    {
+      "name": "other-type-exactly-50-chars",
+      "description": "Dispute type 'other' with exactly 50 character description",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "other",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "terms_violated" }],
+          "description": "This is exactly 50 characters for other type!!!",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "description_length": 50
+      }
+    },
+    {
+      "name": "transition-filed-to-acknowledged",
+      "description": "Valid transition from filed to acknowledged",
+      "transition_test": true,
+      "from_state": "filed",
+      "to_state": "acknowledged",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid_transition": true,
+        "to_state": "acknowledged"
+      }
+    },
+    {
+      "name": "transition-filed-to-rejected",
+      "description": "Valid transition from filed to rejected (requires resolution)",
+      "transition_test": true,
+      "from_state": "filed",
+      "to_state": "rejected",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "resolution": {
+        "outcome": "dismissed",
+        "decided_at": "2026-01-07T12:00:00Z",
+        "decided_by": "https://platform.example.com",
+        "rationale": "Insufficient evidence to proceed."
+      },
+      "expected": {
+        "valid_transition": true,
+        "to_state": "rejected",
+        "requires_resolution": true
+      }
+    },
+    {
+      "name": "transition-invalid-filed-to-resolved",
+      "description": "Invalid transition from filed directly to resolved",
+      "transition_test": true,
+      "from_state": "filed",
+      "to_state": "resolved",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid_transition": false,
+        "error_code": "E_DISPUTE_INVALID_TRANSITION"
+      }
+    },
+    {
+      "name": "transition-resolved-to-appealed",
+      "description": "Valid transition from resolved to appealed (resolution cleared)",
+      "transition_test": true,
+      "from_state": "resolved",
+      "to_state": "appealed",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "resolved",
+          "resolution": {
+            "outcome": "dismissed",
+            "decided_at": "2026-01-08T12:00:00Z",
+            "decided_by": "https://platform.example.com",
+            "rationale": "Initial decision."
+          }
+        }
+      },
+      "expected": {
+        "valid_transition": true,
+        "to_state": "appealed",
+        "resolution_cleared": true
+      }
+    },
+    {
+      "name": "transition-final-no-exit",
+      "description": "No transitions allowed from final state",
+      "transition_test": true,
+      "from_state": "final",
+      "to_state": "appealed",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "final",
+          "resolution": {
+            "outcome": "upheld",
+            "decided_at": "2026-01-10T12:00:00Z",
+            "decided_by": "https://platform.example.com/appeals",
+            "rationale": "Final appeal decision."
+          }
+        }
+      },
+      "expected": {
+        "valid_transition": false,
+        "error_code": "E_DISPUTE_INVALID_TRANSITION"
+      }
+    },
+    {
+      "name": "all-target-types",
+      "description": "Verify all target types are valid",
+      "multi_input": true,
+      "inputs": [
+        {
+          "target_type": "receipt",
+          "target_ref": "jti:rec_abc123"
+        },
+        {
+          "target_type": "attribution",
+          "target_ref": "https://ai.example.com/attributions/attr_xyz"
+        },
+        {
+          "target_type": "identity",
+          "target_ref": "did:web:agent.example.com"
+        },
+        {
+          "target_type": "policy",
+          "target_ref": "https://publisher.example.com/policies/p123"
+        }
+      ],
+      "expected": {
+        "all_valid": true,
+        "target_types_count": 4
+      }
+    },
+    {
+      "name": "all-dispute-types",
+      "description": "Verify all dispute types are valid",
+      "multi_input": true,
+      "inputs": [
+        { "dispute_type": "unauthorized_access" },
+        { "dispute_type": "attribution_missing" },
+        { "dispute_type": "attribution_incorrect" },
+        { "dispute_type": "receipt_invalid" },
+        { "dispute_type": "identity_spoofed" },
+        { "dispute_type": "purpose_mismatch" },
+        { "dispute_type": "policy_violation" },
+        { "dispute_type": "other", "description_length": 50 }
+      ],
+      "expected": {
+        "all_valid": true,
+        "dispute_types_count": 8
+      }
+    },
+    {
+      "name": "all-grounds-codes",
+      "description": "Verify all grounds codes are valid",
+      "multi_input": true,
+      "inputs": [
+        { "code": "missing_receipt" },
+        { "code": "expired_receipt" },
+        { "code": "forged_receipt" },
+        { "code": "receipt_not_applicable" },
+        { "code": "content_not_used" },
+        { "code": "source_misidentified" },
+        { "code": "usage_type_wrong" },
+        { "code": "weight_inaccurate" },
+        { "code": "agent_impersonation" },
+        { "code": "key_compromise" },
+        { "code": "delegation_invalid" },
+        { "code": "purpose_exceeded" },
+        { "code": "terms_violated" },
+        { "code": "rate_limit_exceeded" }
+      ],
+      "expected": {
+        "all_valid": true,
+        "grounds_codes_count": 14
+      }
+    },
+    {
+      "name": "all-outcomes",
+      "description": "Verify all resolution outcomes are valid",
+      "multi_input": true,
+      "inputs": [
+        { "outcome": "upheld" },
+        { "outcome": "dismissed" },
+        { "outcome": "partially_upheld" },
+        { "outcome": "settled" }
+      ],
+      "expected": {
+        "all_valid": true,
+        "outcomes_count": 4
+      }
+    },
+    {
+      "name": "all-remediation-types",
+      "description": "Verify all remediation types are valid",
+      "multi_input": true,
+      "inputs": [
+        { "type": "attribution_corrected" },
+        { "type": "receipt_revoked" },
+        { "type": "access_restored" },
+        { "type": "compensation" },
+        { "type": "policy_updated" },
+        { "type": "no_action" },
+        { "type": "other" }
+      ],
+      "expected": {
+        "all_valid": true,
+        "remediation_types_count": 7
+      }
+    },
+    {
+      "name": "ulid-boundary-chars",
+      "description": "ULID with boundary characters (0-9, A-H, J, K, M, N, P-T, V-Z)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "7ZZZZZZZZZZZZZZZZZZZZZZZZZ",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Testing ULID boundary characters.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "note": "ULID uses Crockford Base32 which excludes I, L, O, U"
+      }
+    },
+    {
+      "name": "escalated-state",
+      "description": "Dispute in escalated state (only transitions to resolved)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "escalated",
+          "state_changed_at": "2026-01-09T10:00:00Z",
+          "state_reason": "Escalated to senior review team"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "state": "escalated",
+        "valid_transitions": ["resolved"]
+      }
+    },
+    {
+      "name": "time-validation-future-issued-at",
+      "description": "Dispute with issued_at in the future (validation behavior)",
+      "runtime_test": true,
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2030-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_NOT_YET_VALID",
+        "note": "Schema validation passes, runtime validation rejects future timestamps"
+      }
+    },
+    {
+      "name": "time-validation-expired",
+      "description": "Dispute with expires_at in the past (validation behavior)",
+      "runtime_test": true,
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2025-01-06T12:00:00Z",
+        "expires_at": "2025-04-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD1",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_EXPIRED",
+        "note": "Schema validation passes, runtime validation rejects expired attestations"
+      }
+    },
+    {
+      "name": "runtime-duplicate-dispute",
+      "description": "Submitting a dispute with an ID that already exists",
+      "runtime_test": true,
+      "test_sequence": [
+        {
+          "action": "submit",
+          "input": {
+            "type": "peac/dispute",
+            "issuer": "https://publisher.example.com",
+            "issued_at": "2026-01-06T12:00:00Z",
+            "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD2",
+            "evidence": {
+              "dispute_type": "unauthorized_access",
+              "target_ref": "jti:rec_first123",
+              "target_type": "receipt",
+              "grounds": [{ "code": "missing_receipt" }],
+              "description": "First dispute submission.",
+              "state": "filed"
+            }
+          },
+          "expected": { "success": true }
+        },
+        {
+          "action": "submit",
+          "input": {
+            "type": "peac/dispute",
+            "issuer": "https://other-publisher.example.com",
+            "issued_at": "2026-01-07T12:00:00Z",
+            "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD2",
+            "evidence": {
+              "dispute_type": "attribution_missing",
+              "target_ref": "jti:rec_second456",
+              "target_type": "attribution",
+              "grounds": [{ "code": "content_not_used" }],
+              "description": "Second dispute with same ref (duplicate).",
+              "state": "filed"
+            }
+          },
+          "expected": {
+            "success": false,
+            "error_code": "E_DISPUTE_DUPLICATE"
+          }
+        }
+      ],
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_DUPLICATE",
+        "note": "Runtime rejects duplicate dispute IDs even if schema is valid"
+      }
+    },
+    {
+      "name": "runtime-target-not-found-receipt",
+      "description": "Dispute referencing a receipt that does not exist",
+      "runtime_test": true,
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD3",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_nonexistent_xyz789",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Disputing a receipt that does not exist in the system.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
+        "note": "Runtime validation may verify target_ref exists; schema cannot",
+        "retriable": true
+      }
+    },
+    {
+      "name": "runtime-target-not-found-attribution",
+      "description": "Dispute referencing an attribution that does not exist",
+      "runtime_test": true,
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD4",
+        "evidence": {
+          "dispute_type": "attribution_incorrect",
+          "target_ref": "https://ai.example.com/attributions/attr_nonexistent_abc",
+          "target_type": "attribution",
+          "grounds": [{ "code": "source_misidentified" }],
+          "description": "Disputing an attribution that does not exist.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
+        "note": "Attribution URL returns 404, dispute cannot proceed",
+        "retriable": true
+      }
+    },
+    {
+      "name": "runtime-target-not-found-identity",
+      "description": "Dispute referencing an identity that cannot be resolved",
+      "runtime_test": true,
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD5",
+        "evidence": {
+          "dispute_type": "identity_spoofed",
+          "target_ref": "did:web:nonexistent-agent.example.com",
+          "target_type": "identity",
+          "grounds": [{ "code": "agent_impersonation" }],
+          "description": "Disputing an identity that cannot be resolved.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
+        "note": "DID resolution fails, dispute target not found",
+        "retriable": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,611 @@
+{
+  "$comment": "Invalid DisputeAttestation golden vectors (v0.9.27+)",
+  "version": "0.9.27",
+  "fixtures": [
+    {
+      "name": "missing-type",
+      "description": "Dispute missing type field",
+      "input": {
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA1",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "wrong-type",
+      "description": "Dispute with wrong type value",
+      "input": {
+        "type": "peac/wrong-type",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA2",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "missing-issuer",
+      "description": "Dispute missing issuer field",
+      "input": {
+        "type": "peac/dispute",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA3",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "missing-issued-at",
+      "description": "Dispute missing issued_at field",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA4",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-ulid-too-short",
+      "description": "Dispute ref with too short ULID",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4R",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_ID"
+      }
+    },
+    {
+      "name": "invalid-ulid-lowercase",
+      "description": "Dispute ref with lowercase ULID (PEAC requires uppercase)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01arz3ndektsv4rrffq69g5fa6",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_ID"
+      }
+    },
+    {
+      "name": "invalid-ulid-invalid-chars",
+      "description": "Dispute ref with invalid characters (I, L, O, U not allowed in Crockford Base32)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69GILOV",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_ID"
+      }
+    },
+    {
+      "name": "invalid-dispute-type",
+      "description": "Dispute with unknown dispute_type",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA8",
+        "evidence": {
+          "dispute_type": "unknown_type",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_TYPE"
+      }
+    },
+    {
+      "name": "invalid-target-type",
+      "description": "Dispute with unknown target_type",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA9",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "unknown_target",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_TARGET_TYPE"
+      }
+    },
+    {
+      "name": "invalid-grounds-code",
+      "description": "Dispute with unknown grounds code",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB0",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "unknown_grounds" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_GROUNDS"
+      }
+    },
+    {
+      "name": "invalid-state",
+      "description": "Dispute with unknown state",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB1",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "unknown_state"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_STATE"
+      }
+    },
+    {
+      "name": "missing-resolution-resolved",
+      "description": "Resolved state without resolution",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB2",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "resolved"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_MISSING_RESOLUTION"
+      }
+    },
+    {
+      "name": "missing-resolution-rejected",
+      "description": "Rejected state without resolution",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB3",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "rejected"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_MISSING_RESOLUTION"
+      }
+    },
+    {
+      "name": "missing-resolution-final",
+      "description": "Final state without resolution",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB4",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "final"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_MISSING_RESOLUTION"
+      }
+    },
+    {
+      "name": "resolution-not-allowed-filed",
+      "description": "Filed state with resolution (not allowed)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB5",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed",
+          "resolution": {
+            "outcome": "upheld",
+            "decided_at": "2026-01-10T16:00:00Z",
+            "decided_by": "https://platform.example.com",
+            "rationale": "This should not be here."
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_RESOLUTION_NOT_ALLOWED"
+      }
+    },
+    {
+      "name": "resolution-not-allowed-under-review",
+      "description": "Under review state with resolution (not allowed)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB6",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "under_review",
+          "resolution": {
+            "outcome": "dismissed",
+            "decided_at": "2026-01-10T16:00:00Z",
+            "decided_by": "https://platform.example.com",
+            "rationale": "This should not be here."
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_RESOLUTION_NOT_ALLOWED"
+      }
+    },
+    {
+      "name": "resolution-not-allowed-appealed",
+      "description": "Appealed state with resolution (not allowed)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB7",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "appealed",
+          "resolution": {
+            "outcome": "settled",
+            "decided_at": "2026-01-10T16:00:00Z",
+            "decided_by": "https://platform.example.com",
+            "rationale": "This should not be here."
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_RESOLUTION_NOT_ALLOWED"
+      }
+    },
+    {
+      "name": "other-type-short-description",
+      "description": "Dispute type 'other' with description less than 50 chars",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB8",
+        "evidence": {
+          "dispute_type": "other",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "terms_violated" }],
+          "description": "Too short for other type.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_OTHER_REQUIRES_DESCRIPTION"
+      }
+    },
+    {
+      "name": "empty-grounds",
+      "description": "Dispute with empty grounds array",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB9",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-email-contact",
+      "description": "Dispute with invalid email in contact",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC0",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "contact": {
+            "method": "email",
+            "value": "not-an-email"
+          },
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-url-contact",
+      "description": "Dispute with invalid URL in contact",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC1",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "contact": {
+            "method": "url",
+            "value": "not-a-valid-url"
+          },
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-did-contact",
+      "description": "Dispute with invalid DID in contact (missing did: prefix)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC2",
+        "evidence": {
+          "dispute_type": "identity_spoofed",
+          "target_ref": "did:web:spoofed.example.com",
+          "target_type": "identity",
+          "grounds": [{ "code": "agent_impersonation" }],
+          "description": "Agent identity was impersonated.",
+          "contact": {
+            "method": "did",
+            "value": "web:publisher.example.com"
+          },
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-outcome",
+      "description": "Resolution with invalid outcome",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC3",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "resolved",
+          "resolution": {
+            "outcome": "invalid_outcome",
+            "decided_at": "2026-01-10T16:00:00Z",
+            "decided_by": "https://platform.example.com",
+            "rationale": "Decision rationale."
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "invalid-remediation-type",
+      "description": "Resolution with invalid remediation type",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC4",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Content was accessed without a valid receipt.",
+          "state": "resolved",
+          "resolution": {
+            "outcome": "upheld",
+            "decided_at": "2026-01-10T16:00:00Z",
+            "decided_by": "https://platform.example.com",
+            "rationale": "Decision rationale.",
+            "remediation": {
+              "type": "invalid_type",
+              "details": "Some details."
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "too-many-grounds",
+      "description": "Dispute exceeding max grounds limit (10)",
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC5",
+        "evidence": {
+          "dispute_type": "policy_violation",
+          "target_ref": "jti:rec_abc123",
+          "target_type": "receipt",
+          "grounds": [
+            { "code": "missing_receipt" },
+            { "code": "expired_receipt" },
+            { "code": "forged_receipt" },
+            { "code": "receipt_not_applicable" },
+            { "code": "content_not_used" },
+            { "code": "source_misidentified" },
+            { "code": "usage_type_wrong" },
+            { "code": "weight_inaccurate" },
+            { "code": "purpose_exceeded" },
+            { "code": "terms_violated" },
+            { "code": "rate_limit_exceeded" }
+          ],
+          "description": "Too many grounds.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_DISPUTE_INVALID_FORMAT"
+      }
+    }
+  ]
+}
