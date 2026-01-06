@@ -691,7 +691,9 @@ describe('DisputeEvidenceSchema invariants', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const errorMessages = result.error.errors.map((e) => e.message);
-        expect(errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))).toBe(true);
+        expect(
+          errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))
+        ).toBe(true);
       }
     });
 
@@ -705,7 +707,9 @@ describe('DisputeEvidenceSchema invariants', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const errorMessages = result.error.errors.map((e) => e.message);
-        expect(errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))).toBe(true);
+        expect(
+          errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))
+        ).toBe(true);
       }
     });
 
@@ -719,7 +723,9 @@ describe('DisputeEvidenceSchema invariants', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const errorMessages = result.error.errors.map((e) => e.message);
-        expect(errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))).toBe(true);
+        expect(
+          errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))
+        ).toBe(true);
       }
     });
 
@@ -733,7 +739,9 @@ describe('DisputeEvidenceSchema invariants', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const errorMessages = result.error.errors.map((e) => e.message);
-        expect(errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))).toBe(true);
+        expect(
+          errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))
+        ).toBe(true);
       }
     });
   });
@@ -749,7 +757,9 @@ describe('DisputeEvidenceSchema invariants', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const errorMessages = result.error.errors.map((e) => e.message);
-        expect(errorMessages.some((m) => m.includes('requires description of at least'))).toBe(true);
+        expect(errorMessages.some((m) => m.includes('requires description of at least'))).toBe(
+          true
+        );
       }
     });
 
@@ -909,7 +919,11 @@ describe('createDisputeAttestation', () => {
 
 describe('transitionDisputeState', () => {
   it('should transition from filed to acknowledged', () => {
-    const result = transitionDisputeState(validAttestation, 'acknowledged', 'Received and reviewing');
+    const result = transitionDisputeState(
+      validAttestation,
+      'acknowledged',
+      'Received and reviewing'
+    );
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.evidence.state).toBe('acknowledged');
@@ -1056,26 +1070,31 @@ describe('DISPUTE_LIMITS', () => {
 
 describe('State machine comprehensive coverage', () => {
   // Test all valid transitions in the state machine
-  const allTransitions: Array<{ from: DisputeState; to: DisputeState; needsResolution: boolean }> = [
-    { from: 'filed', to: 'acknowledged', needsResolution: false },
-    { from: 'filed', to: 'rejected', needsResolution: true },
-    { from: 'acknowledged', to: 'under_review', needsResolution: false },
-    { from: 'acknowledged', to: 'rejected', needsResolution: true },
-    { from: 'under_review', to: 'resolved', needsResolution: true },
-    { from: 'under_review', to: 'escalated', needsResolution: false },
-    { from: 'escalated', to: 'resolved', needsResolution: true },
-    { from: 'resolved', to: 'appealed', needsResolution: false },
-    { from: 'resolved', to: 'final', needsResolution: true },
-    { from: 'rejected', to: 'appealed', needsResolution: false },
-    { from: 'rejected', to: 'final', needsResolution: true },
-    { from: 'appealed', to: 'under_review', needsResolution: false },
-    { from: 'appealed', to: 'final', needsResolution: true },
-  ];
+  const allTransitions: Array<{ from: DisputeState; to: DisputeState; needsResolution: boolean }> =
+    [
+      { from: 'filed', to: 'acknowledged', needsResolution: false },
+      { from: 'filed', to: 'rejected', needsResolution: true },
+      { from: 'acknowledged', to: 'under_review', needsResolution: false },
+      { from: 'acknowledged', to: 'rejected', needsResolution: true },
+      { from: 'under_review', to: 'resolved', needsResolution: true },
+      { from: 'under_review', to: 'escalated', needsResolution: false },
+      { from: 'escalated', to: 'resolved', needsResolution: true },
+      { from: 'resolved', to: 'appealed', needsResolution: false },
+      { from: 'resolved', to: 'final', needsResolution: true },
+      { from: 'rejected', to: 'appealed', needsResolution: false },
+      { from: 'rejected', to: 'final', needsResolution: true },
+      { from: 'appealed', to: 'under_review', needsResolution: false },
+      { from: 'appealed', to: 'final', needsResolution: true },
+    ];
 
   allTransitions.forEach(({ from, to, needsResolution }) => {
     it(`should allow transition from ${from} to ${to}`, () => {
       const evidence: DisputeEvidence = needsResolution
-        ? { ...validEvidence, state: from, resolution: from === 'filed' ? undefined : validResolution }
+        ? {
+            ...validEvidence,
+            state: from,
+            resolution: from === 'filed' ? undefined : validResolution,
+          }
         : { ...validEvidence, state: from };
 
       // Remove resolution if starting from 'filed' since it's non-terminal
@@ -1105,21 +1124,22 @@ describe('State machine comprehensive coverage', () => {
 
 describe('transitionDisputeState schema safety', () => {
   // Every valid transition output MUST pass DisputeAttestationSchema
-  const allTransitions: Array<{ from: DisputeState; to: DisputeState; needsResolution: boolean }> = [
-    { from: 'filed', to: 'acknowledged', needsResolution: false },
-    { from: 'filed', to: 'rejected', needsResolution: true },
-    { from: 'acknowledged', to: 'under_review', needsResolution: false },
-    { from: 'acknowledged', to: 'rejected', needsResolution: true },
-    { from: 'under_review', to: 'resolved', needsResolution: true },
-    { from: 'under_review', to: 'escalated', needsResolution: false },
-    { from: 'escalated', to: 'resolved', needsResolution: true },
-    { from: 'resolved', to: 'appealed', needsResolution: false },
-    { from: 'resolved', to: 'final', needsResolution: true },
-    { from: 'rejected', to: 'appealed', needsResolution: false },
-    { from: 'rejected', to: 'final', needsResolution: true },
-    { from: 'appealed', to: 'under_review', needsResolution: false },
-    { from: 'appealed', to: 'final', needsResolution: true },
-  ];
+  const allTransitions: Array<{ from: DisputeState; to: DisputeState; needsResolution: boolean }> =
+    [
+      { from: 'filed', to: 'acknowledged', needsResolution: false },
+      { from: 'filed', to: 'rejected', needsResolution: true },
+      { from: 'acknowledged', to: 'under_review', needsResolution: false },
+      { from: 'acknowledged', to: 'rejected', needsResolution: true },
+      { from: 'under_review', to: 'resolved', needsResolution: true },
+      { from: 'under_review', to: 'escalated', needsResolution: false },
+      { from: 'escalated', to: 'resolved', needsResolution: true },
+      { from: 'resolved', to: 'appealed', needsResolution: false },
+      { from: 'resolved', to: 'final', needsResolution: true },
+      { from: 'rejected', to: 'appealed', needsResolution: false },
+      { from: 'rejected', to: 'final', needsResolution: true },
+      { from: 'appealed', to: 'under_review', needsResolution: false },
+      { from: 'appealed', to: 'final', needsResolution: true },
+    ];
 
   allTransitions.forEach(({ from, to, needsResolution }) => {
     it(`transition ${from} -> ${to} produces schema-valid output`, () => {
@@ -1220,7 +1240,12 @@ describe('transitionDisputeState schema safety', () => {
       ...validResolution,
       rationale: 'Final decision - no further appeals.',
     };
-    const result = transitionDisputeState(resolvedDispute, 'final', 'Closing dispute', finalResolution);
+    const result = transitionDisputeState(
+      resolvedDispute,
+      'final',
+      'Closing dispute',
+      finalResolution
+    );
 
     expect(result.ok).toBe(true);
     if (result.ok) {

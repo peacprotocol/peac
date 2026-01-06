@@ -679,7 +679,9 @@ export function isValidDisputeAttestation(data: unknown): data is DisputeAttesta
  * @param attestation - Object with a type field
  * @returns True if type is 'peac/dispute'
  */
-export function isDisputeAttestation(attestation: { type: string }): attestation is DisputeAttestation {
+export function isDisputeAttestation(attestation: {
+  type: string;
+}): attestation is DisputeAttestation {
   return attestation.type === DISPUTE_TYPE;
 }
 
@@ -770,7 +772,9 @@ export interface CreateDisputeAttestationParams {
  * });
  * ```
  */
-export function createDisputeAttestation(params: CreateDisputeAttestationParams): DisputeAttestation {
+export function createDisputeAttestation(
+  params: CreateDisputeAttestationParams
+): DisputeAttestation {
   const now = new Date().toISOString();
 
   const evidence: DisputeEvidence = {
@@ -852,7 +856,11 @@ export function transitionDisputeState(
   resolution?: DisputeResolution
 ):
   | { ok: true; value: DisputeAttestation }
-  | { ok: false; error: string; code: 'INVALID_TRANSITION' | 'RESOLUTION_REQUIRED' | 'RESOLUTION_NOT_ALLOWED' } {
+  | {
+      ok: false;
+      error: string;
+      code: 'INVALID_TRANSITION' | 'RESOLUTION_REQUIRED' | 'RESOLUTION_NOT_ALLOWED';
+    } {
   const currentState = dispute.evidence.state;
 
   // Check if transition is valid
@@ -926,7 +934,10 @@ export function transitionDisputeState(
  * @param clockSkew - Clock skew tolerance in milliseconds (default: 30000)
  * @returns True if expired
  */
-export function isDisputeExpired(attestation: DisputeAttestation, clockSkew: number = 30000): boolean {
+export function isDisputeExpired(
+  attestation: DisputeAttestation,
+  clockSkew: number = 30000
+): boolean {
   if (!attestation.expires_at) {
     return false; // No expiry = never expires
   }
@@ -942,7 +953,10 @@ export function isDisputeExpired(attestation: DisputeAttestation, clockSkew: num
  * @param clockSkew - Clock skew tolerance in milliseconds (default: 30000)
  * @returns True if not yet valid
  */
-export function isDisputeNotYetValid(attestation: DisputeAttestation, clockSkew: number = 30000): boolean {
+export function isDisputeNotYetValid(
+  attestation: DisputeAttestation,
+  clockSkew: number = 30000
+): boolean {
   const issuedAt = new Date(attestation.issued_at).getTime();
   const now = Date.now();
   return issuedAt > now + clockSkew;
