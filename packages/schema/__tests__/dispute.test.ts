@@ -1098,3 +1098,163 @@ describe('State machine comprehensive coverage', () => {
     });
   });
 });
+
+// =============================================================================
+// TRANSITION OUTPUT SCHEMA VALIDATION (v0.9.27+ critical tests)
+// =============================================================================
+
+describe('transitionDisputeState schema safety', () => {
+  // Every valid transition output MUST pass DisputeAttestationSchema
+  const allTransitions: Array<{ from: DisputeState; to: DisputeState; needsResolution: boolean }> = [
+    { from: 'filed', to: 'acknowledged', needsResolution: false },
+    { from: 'filed', to: 'rejected', needsResolution: true },
+    { from: 'acknowledged', to: 'under_review', needsResolution: false },
+    { from: 'acknowledged', to: 'rejected', needsResolution: true },
+    { from: 'under_review', to: 'resolved', needsResolution: true },
+    { from: 'under_review', to: 'escalated', needsResolution: false },
+    { from: 'escalated', to: 'resolved', needsResolution: true },
+    { from: 'resolved', to: 'appealed', needsResolution: false },
+    { from: 'resolved', to: 'final', needsResolution: true },
+    { from: 'rejected', to: 'appealed', needsResolution: false },
+    { from: 'rejected', to: 'final', needsResolution: true },
+    { from: 'appealed', to: 'under_review', needsResolution: false },
+    { from: 'appealed', to: 'final', needsResolution: true },
+  ];
+
+  allTransitions.forEach(({ from, to, needsResolution }) => {
+    it(`transition ${from} -> ${to} produces schema-valid output`, () => {
+      // Build a valid attestation in the 'from' state
+      const evidence: DisputeEvidence = { ...validEvidence, state: from };
+
+      // Terminal states require resolution
+      if (isTerminalState(from)) {
+        evidence.resolution = validResolution;
+      }
+
+      const attestation: DisputeAttestation = {
+        ...validAttestation,
+        evidence,
+      };
+
+      const resolution = needsResolution ? validResolution : undefined;
+      const result = transitionDisputeState(attestation, to, 'Test transition', resolution);
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        // CRITICAL: Validate the output against the schema
+        const parseResult = DisputeAttestationSchema.safeParse(result.value);
+        expect(parseResult.success).toBe(true);
+        if (!parseResult.success) {
+          // Helpful debug output if test fails
+          console.error('Schema validation failed:', parseResult.error.errors);
+        }
+      }
+    });
+  });
+
+  it('should clear resolution when transitioning from resolved to appealed', () => {
+    // Build a dispute in resolved state WITH resolution
+    const resolvedDispute: DisputeAttestation = {
+      ...validAttestation,
+      evidence: {
+        ...validEvidence,
+        state: 'resolved',
+        resolution: validResolution,
+      },
+    };
+
+    // Transition to appealed (non-terminal, must NOT have resolution)
+    const result = transitionDisputeState(resolvedDispute, 'appealed', 'Appealing decision');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // Resolution must be cleared
+      expect(result.value.evidence.resolution).toBeUndefined();
+      expect(result.value.evidence.state).toBe('appealed');
+
+      // CRITICAL: Must pass schema validation
+      const parseResult = DisputeAttestationSchema.safeParse(result.value);
+      expect(parseResult.success).toBe(true);
+    }
+  });
+
+  it('should clear resolution when transitioning from rejected to appealed', () => {
+    // Build a dispute in rejected state WITH resolution
+    const rejectedDispute: DisputeAttestation = {
+      ...validAttestation,
+      evidence: {
+        ...validEvidence,
+        state: 'rejected',
+        resolution: validResolution,
+      },
+    };
+
+    // Transition to appealed (non-terminal, must NOT have resolution)
+    const result = transitionDisputeState(rejectedDispute, 'appealed', 'Appealing rejection');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // Resolution must be cleared
+      expect(result.value.evidence.resolution).toBeUndefined();
+      expect(result.value.evidence.state).toBe('appealed');
+
+      // CRITICAL: Must pass schema validation
+      const parseResult = DisputeAttestationSchema.safeParse(result.value);
+      expect(parseResult.success).toBe(true);
+    }
+  });
+
+  it('should preserve resolution when transitioning from resolved to final', () => {
+    // Build a dispute in resolved state WITH resolution
+    const resolvedDispute: DisputeAttestation = {
+      ...validAttestation,
+      evidence: {
+        ...validEvidence,
+        state: 'resolved',
+        resolution: validResolution,
+      },
+    };
+
+    // Transition to final (terminal, needs new resolution)
+    const finalResolution: DisputeResolution = {
+      ...validResolution,
+      rationale: 'Final decision - no further appeals.',
+    };
+    const result = transitionDisputeState(resolvedDispute, 'final', 'Closing dispute', finalResolution);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // New resolution must be present
+      expect(result.value.evidence.resolution).toEqual(finalResolution);
+      expect(result.value.evidence.state).toBe('final');
+
+      // CRITICAL: Must pass schema validation
+      const parseResult = DisputeAttestationSchema.safeParse(result.value);
+      expect(parseResult.success).toBe(true);
+    }
+  });
+
+  it('should clear resolution when transitioning from appealed to under_review', () => {
+    // Build a dispute in appealed state (non-terminal, no resolution)
+    const appealedDispute: DisputeAttestation = {
+      ...validAttestation,
+      evidence: {
+        ...validEvidence,
+        state: 'appealed',
+      },
+    };
+
+    // Transition to under_review (non-terminal)
+    const result = transitionDisputeState(appealedDispute, 'under_review', 'Re-opening review');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.evidence.resolution).toBeUndefined();
+      expect(result.value.evidence.state).toBe('under_review');
+
+      // CRITICAL: Must pass schema validation
+      const parseResult = DisputeAttestationSchema.safeParse(result.value);
+      expect(parseResult.success).toBe(true);
+    }
+  });
+});

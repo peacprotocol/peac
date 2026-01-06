@@ -44,10 +44,21 @@ export const DISPUTE_LIMITS = {
 // =============================================================================
 
 /**
- * ULID format regex: 26 characters, Crockford Base32.
+ * ULID format regex: 26 characters, Crockford Base32, UPPERCASE ONLY.
  *
  * ULIDs are time-ordered, globally unique identifiers that are URL-safe.
  * Format: 10 characters timestamp + 16 characters randomness
+ *
+ * CASE SENSITIVITY DECISION (v0.9.27):
+ * While the ULID spec allows case-insensitive decoding (lowercase is valid),
+ * PEAC enforces UPPERCASE as the canonical form for dispute IDs. This ensures:
+ * 1. Consistent string comparison without normalization
+ * 2. Predictable indexing and lookup in storage systems
+ * 3. Deterministic hash computation for audit trails
+ *
+ * Implementations generating ULIDs MUST use uppercase encoding.
+ * Implementations receiving ULIDs MAY normalize to uppercase before validation
+ * if interoperating with systems that produce lowercase, but SHOULD warn.
  *
  * @see https://github.com/ulid/spec
  */
@@ -56,7 +67,7 @@ const ULID_REGEX = /^[0-9A-HJKMNP-TV-Z]{26}$/;
 /**
  * Dispute ID schema using ULID format.
  *
- * @example "01JFCBK1234567890ABCDEF"
+ * @example "01ARZ3NDEKTSV4RRFFQ69G5FAV"
  */
 export const DisputeIdSchema = z.string().regex(ULID_REGEX, 'Invalid ULID format');
 export type DisputeId = z.infer<typeof DisputeIdSchema>;
@@ -592,10 +603,10 @@ export const DISPUTE_TYPE = 'peac/dispute' as const;
  *   type: 'peac/dispute',
  *   issuer: 'https://publisher.example.com',
  *   issued_at: '2026-01-06T12:00:00Z',
- *   ref: '01JFCBK1234567890ABCDEF',
+ *   ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
  *   evidence: {
  *     dispute_type: 'unauthorized_access',
- *     target_ref: 'jti:01JABC1234567890ABCDEF',
+ *     target_ref: 'jti:01H5KPT9QZA123456789VWXYZG',
  *     target_type: 'receipt',
  *     grounds: [{ code: 'missing_receipt' }],
  *     description: 'Content was accessed without a valid receipt.',
@@ -750,9 +761,9 @@ export interface CreateDisputeAttestationParams {
  * ```typescript
  * const dispute = createDisputeAttestation({
  *   issuer: 'https://publisher.example.com',
- *   ref: '01JFCBK1234567890ABCDEF',
+ *   ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
  *   dispute_type: 'unauthorized_access',
- *   target_ref: 'jti:01JABC1234567890ABCDEF',
+ *   target_ref: 'jti:01H5KPT9QZA123456789VWXYZG',
  *   target_type: 'receipt',
  *   grounds: [{ code: 'missing_receipt' }],
  *   description: 'Content was accessed without a valid receipt.',
@@ -874,8 +885,14 @@ export function transitionDisputeState(
 
   // Create updated dispute
   const now = new Date().toISOString();
+
+  // Destructure to separate resolution from other evidence fields
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { resolution: _existingResolution, ...evidenceWithoutResolution } = dispute.evidence;
+
+  // Build updated evidence: start without resolution, add back only if terminal
   const updatedEvidence: DisputeEvidence = {
-    ...dispute.evidence,
+    ...evidenceWithoutResolution,
     state: newState,
     state_changed_at: now,
   };
@@ -883,7 +900,9 @@ export function transitionDisputeState(
   if (reason) {
     updatedEvidence.state_reason = reason;
   }
-  if (resolution) {
+
+  // Only add resolution for terminal states
+  if (isTargetTerminal && resolution) {
     updatedEvidence.resolution = resolution;
   }
 
