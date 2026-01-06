@@ -68,6 +68,8 @@ This convention treats attestations as token-like credentials that authenticate 
 An expired or not-yet-valid attestation is analogous to an expired OAuth token - an auth failure (401),
 not a format error (400).
 
+See also: [Error Catalog](../api/error-catalog.md) for RFC 9457 response format.
+
 ## Error Response Format
 
 All errors MUST be returned in this JSON structure:
