@@ -119,5 +119,22 @@
       "version": "0.9.26",
       "fixture_count": 6
     }
+  },
+  "dispute": {
+    "valid.json": {
+      "description": "Valid DisputeAttestation golden vectors (v0.9.27+)",
+      "version": "0.9.27",
+      "fixture_count": 15
+    },
+    "invalid.json": {
+      "description": "Invalid DisputeAttestation golden vectors (v0.9.27+)",
+      "version": "0.9.27",
+      "fixture_count": 25
+    },
+    "edge-cases.json": {
+      "description": "Edge case DisputeAttestation golden vectors (v0.9.27+)",
+      "version": "0.9.27",
+      "fixture_count": 17
+    }
   }
 }
