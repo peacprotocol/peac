@@ -132,9 +132,9 @@
       "fixture_count": 25
     },
     "edge-cases.json": {
-      "description": "Edge case DisputeAttestation golden vectors (v0.9.27+)",
+      "description": "Edge case DisputeAttestation golden vectors including runtime tests (v0.9.27+)",
       "version": "0.9.27",
-      "fixture_count": 17
+      "fixture_count": 22
     }
   }
 }

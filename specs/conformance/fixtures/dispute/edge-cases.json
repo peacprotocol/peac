@@ -387,7 +387,7 @@
         "issuer": "https://publisher.example.com",
         "issued_at": "2025-01-06T12:00:00Z",
         "expires_at": "2025-04-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD1",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -402,6 +402,136 @@
         "runtime_valid": false,
         "error_code": "E_DISPUTE_EXPIRED",
         "note": "Schema validation passes, runtime validation rejects expired attestations"
+      }
+    },
+    {
+      "name": "runtime-duplicate-dispute",
+      "description": "Submitting a dispute with an ID that already exists",
+      "runtime_test": true,
+      "test_sequence": [
+        {
+          "action": "submit",
+          "input": {
+            "type": "peac/dispute",
+            "issuer": "https://publisher.example.com",
+            "issued_at": "2026-01-06T12:00:00Z",
+            "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD2",
+            "evidence": {
+              "dispute_type": "unauthorized_access",
+              "target_ref": "jti:rec_first123",
+              "target_type": "receipt",
+              "grounds": [{ "code": "missing_receipt" }],
+              "description": "First dispute submission.",
+              "state": "filed"
+            }
+          },
+          "expected": { "success": true }
+        },
+        {
+          "action": "submit",
+          "input": {
+            "type": "peac/dispute",
+            "issuer": "https://other-publisher.example.com",
+            "issued_at": "2026-01-07T12:00:00Z",
+            "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD2",
+            "evidence": {
+              "dispute_type": "attribution_missing",
+              "target_ref": "jti:rec_second456",
+              "target_type": "attribution",
+              "grounds": [{ "code": "content_not_used" }],
+              "description": "Second dispute with same ref (duplicate).",
+              "state": "filed"
+            }
+          },
+          "expected": {
+            "success": false,
+            "error_code": "E_DISPUTE_DUPLICATE"
+          }
+        }
+      ],
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_DUPLICATE",
+        "note": "Runtime rejects duplicate dispute IDs even if schema is valid"
+      }
+    },
+    {
+      "name": "runtime-target-not-found-receipt",
+      "description": "Dispute referencing a receipt that does not exist",
+      "runtime_test": true,
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD3",
+        "evidence": {
+          "dispute_type": "unauthorized_access",
+          "target_ref": "jti:rec_nonexistent_xyz789",
+          "target_type": "receipt",
+          "grounds": [{ "code": "missing_receipt" }],
+          "description": "Disputing a receipt that does not exist in the system.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
+        "note": "Runtime validation may verify target_ref exists; schema cannot",
+        "retriable": true
+      }
+    },
+    {
+      "name": "runtime-target-not-found-attribution",
+      "description": "Dispute referencing an attribution that does not exist",
+      "runtime_test": true,
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD4",
+        "evidence": {
+          "dispute_type": "attribution_incorrect",
+          "target_ref": "https://ai.example.com/attributions/attr_nonexistent_abc",
+          "target_type": "attribution",
+          "grounds": [{ "code": "source_misidentified" }],
+          "description": "Disputing an attribution that does not exist.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
+        "note": "Attribution URL returns 404, dispute cannot proceed",
+        "retriable": true
+      }
+    },
+    {
+      "name": "runtime-target-not-found-identity",
+      "description": "Dispute referencing an identity that cannot be resolved",
+      "runtime_test": true,
+      "input": {
+        "type": "peac/dispute",
+        "issuer": "https://publisher.example.com",
+        "issued_at": "2026-01-06T12:00:00Z",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FD5",
+        "evidence": {
+          "dispute_type": "identity_spoofed",
+          "target_ref": "did:web:nonexistent-agent.example.com",
+          "target_type": "identity",
+          "grounds": [{ "code": "agent_impersonation" }],
+          "description": "Disputing an identity that cannot be resolved.",
+          "state": "filed"
+        }
+      },
+      "expected": {
+        "schema_valid": true,
+        "runtime_valid": false,
+        "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
+        "note": "DID resolution fails, dispute target not found",
+        "retriable": true
       }
     }
   ]

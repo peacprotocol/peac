@@ -8,7 +8,7 @@
       "input": {
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA1",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -30,7 +30,7 @@
         "type": "peac/wrong-type",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA2",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -51,7 +51,7 @@
       "input": {
         "type": "peac/dispute",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA3",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -72,7 +72,7 @@
       "input": {
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA4",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -116,7 +116,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01arz3ndektsv4rrffq69g5fav",
+        "ref": "01arz3ndektsv4rrffq69g5fa6",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -160,7 +160,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA8",
         "evidence": {
           "dispute_type": "unknown_type",
           "target_ref": "jti:rec_abc123",
@@ -182,7 +182,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FA9",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -204,7 +204,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB0",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -226,7 +226,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB1",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -248,7 +248,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB2",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -270,7 +270,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB3",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -292,7 +292,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB4",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -314,7 +314,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB5",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -342,7 +342,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB6",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -370,7 +370,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB7",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -398,7 +398,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB8",
         "evidence": {
           "dispute_type": "other",
           "target_ref": "jti:rec_abc123",
@@ -420,7 +420,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FB9",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -442,7 +442,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC0",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -468,7 +468,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC1",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -494,7 +494,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC2",
         "evidence": {
           "dispute_type": "identity_spoofed",
           "target_ref": "did:web:spoofed.example.com",
@@ -520,7 +520,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC3",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -548,7 +548,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC4",
         "evidence": {
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
@@ -580,7 +580,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FC5",
         "evidence": {
           "dispute_type": "policy_violation",
           "target_ref": "jti:rec_abc123",
