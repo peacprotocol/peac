@@ -8,13 +8,13 @@ This document contains detailed package catalogs, layer maps, ecosystem fit, and
 
 PEAC does not replace existing protocols. It is the receipts and verification layer that works alongside them for APIs, applications, and agentic workflows.
 
-**Payment rails (v0.9.26 status):**
+**Payment rails (v0.9.27 status):**
 
 - [x402](https://github.com/coinbase/x402) - HTTP 402 payment flows. Adapter: `@peac/rails-x402`
 
 The protocol works with generic HTTP 402 services, paywalls, routers, and data stores. Receipts do not depend on any single provider.
 
-**Agent protocols (v0.9.26 status):**
+**Agent protocols (v0.9.27 status):**
 
 - [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) - Tool context for language models. Mapping with budget utilities.
 - [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) - Agent-driven commerce. Mapping with budget utilities.
@@ -83,7 +83,7 @@ Declares allowed purposes, quotas, attribution requirements, payment terms, and 
 
 ```yaml
 # /.well-known/peac.txt
-version: 0.9.26
+version: 0.9.27
 usage: open
 
 purposes: [indexing, research, documentation]
@@ -100,7 +100,7 @@ repository: https://github.com/peacprotocol/peac
 **Example: Conditional API access**
 
 ```yaml
-version: 0.9.26
+version: 0.9.27
 usage: conditional
 
 purposes: [research, commercial]
@@ -145,7 +145,7 @@ PEAC sits alongside existing policy mechanisms rather than replacing them. A PEA
 
 The `@peac/policy-kit` package provides a file-based policy format for authoring policies once and compiling them to multiple deployment surfaces.
 
-**Policy Profiles (v0.9.26):**
+**Policy Profiles (v0.9.27):**
 
 | Profile ID     | Default | Receipt | Use Case                       |
 | -------------- | ------- | ------- | ------------------------------ |

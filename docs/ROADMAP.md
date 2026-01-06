@@ -1,6 +1,18 @@
 # PEAC Protocol Roadmap
 
-## Current Release: v0.9.25
+## Current Release: v0.9.26
+
+Shipped:
+
+- Attribution Attestations - `peac/attribution` type for content provenance tracking
+- Obligations Extension - CC Signals-aligned credit and contribution requirements
+- Conformance Suite - 15 attribution fixtures (valid, invalid, edge-cases)
+- Content Hashing - SHA-256 with base64url encoding, excerpt hashing
+- HTTP Helpers - PEAC-Purpose Vary header utilities
+- RFC 6648 Compliance - All headers now use `PEAC-*` prefix (removed `X-PEAC-*`)
+- EU AI Act Compliance Guide - `docs/compliance/eu-ai-act.md`
+
+## v0.9.25
 
 Shipped:
 
@@ -8,34 +20,35 @@ Shipped:
 - Identity Binding - `IdentityBinding` type, `constructBindingMessage()`, `verifyIdentityBinding()`
 - Control Types - `operator` (verified bots) and `user-delegated` (agents acting on behalf)
 - Proof Methods - HTTP message signatures, DPoP, mTLS, JWK thumbprint
-- Key Rotation - PENDING -> ACTIVE -> DEPRECATED -> REVOKED lifecycle
+- Key Rotation - PENDING -> ACTIVE -> DEPRECATED -> RETIRED -> REVOKED lifecycle
 - Error Taxonomy - 13 `identity_*` error codes for standardized handling
+- Go SDK - Receipt verification with Ed25519 + JWS + JWKS in `sdks/go/`
 - Go Middleware Guide - `docs/guides/go-middleware.md` for chi/gin integration
 
 ## Version History
 
-| Version | Highlights                                                  |
-| ------- | ----------------------------------------------------------- |
-| v0.9.25 | Agent identity attestations, Go middleware guide            |
-| v0.9.24 | Purpose on wire, enforcement profiles, AIPREF mapping       |
-| v0.9.23 | Policy profiles, decision enforcement, CLI profile commands |
-| v0.9.22 | OpenTelemetry integration, telemetry hooks, privacy modes   |
-| v0.9.21 | Attestations, Extensions, wire schema, DoS protection       |
-| v0.9.20 | x402 adapters, card-rails, Fastly/Akamai, gRPC              |
-| v0.9.19 | Razorpay adapter, MCP/ACP budget, x402 headers, examples    |
-| v0.9.18 | TAP foundation, surfaces, schema normalization              |
-| v0.9.17 | x402 v2, RSL 1.0, Policy Kit, subject binding               |
-| v0.9.16 | CAL semantics, PaymentEvidence extensions, SubjectProfile   |
-| v0.9.15 | Kernel-first architecture, package layering                 |
+| Version | Highlights                                                   |
+| ------- | ------------------------------------------------------------ |
+| v0.9.26 | Attribution attestations, obligations extension, conformance |
+| v0.9.25 | Agent identity attestations, Go SDK, middleware guide        |
+| v0.9.24 | Purpose on wire, enforcement profiles, AIPREF mapping        |
+| v0.9.23 | Policy profiles, decision enforcement, CLI profile commands  |
+| v0.9.22 | OpenTelemetry integration, telemetry hooks, privacy modes    |
+| v0.9.21 | Attestations, Extensions, wire schema, DoS protection        |
+| v0.9.20 | x402 adapters, card-rails, Fastly/Akamai, gRPC               |
+| v0.9.19 | Razorpay adapter, MCP/ACP budget, x402 headers, examples     |
+| v0.9.18 | TAP foundation, surfaces, schema normalization               |
+| v0.9.17 | x402 v2, RSL 1.0, Policy Kit, subject binding                |
+| v0.9.16 | CAL semantics, PaymentEvidence extensions, SubjectProfile    |
+| v0.9.15 | Kernel-first architecture, package layering                  |
 
 ## Upcoming Releases
 
-| Version  | Theme        | Key Deliverables                                      |
-| -------- | ------------ | ----------------------------------------------------- |
-| v0.9.26  | Credibility  | Attribution, obligations extension, conformance suite |
-| v0.9.27  | Resolution   | Dispute and audit                                     |
-| v0.9.28+ | Distribution | Edge workers, full Go SDK, WebSocket transport        |
-| v0.10.0  | GA           | Wire format freeze, multi-implementation validation   |
+| Version  | Theme        | Key Deliverables                                    |
+| -------- | ------------ | --------------------------------------------------- |
+| v0.9.27  | Resolution   | Dispute attestations, audit logs, case bundles      |
+| v0.9.28+ | Distribution | Edge workers, full Go SDK, WebSocket transport      |
+| v0.10.0  | GA           | Wire format freeze, multi-implementation validation |
 
 ## Future Development
 

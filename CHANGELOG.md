@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.27] - 2026-01-07
+
+### Added
+
+- **Dispute Attestation Schema** (`@peac/schema`)
+  - `DisputeAttestation`: Formal mechanism for contesting PEAC claims
+  - `DisputeEvidence`: dispute_type, target_ref, grounds, state, resolution
+  - `DisputeType`: 8 types (unauthorized_access, attribution_missing, receipt_invalid, etc.)
+  - `DisputeTargetType`: receipt, attribution, identity, policy
+  - `DisputeGroundsCode`: 14 codes (missing_receipt, source_misidentified, agent_impersonation, etc.)
+  - `DisputeState`: 8 lifecycle states with transition rules
+  - `DisputeResolution`: outcome, rationale, remediation for terminal states
+  - State machine helpers: `canTransitionTo()`, `isTerminalState()`, `getValidTransitions()`
+  - Factory helpers: `createDisputeAttestation()`, `transitionDisputeState()`
+  - Time validation: `isDisputeExpired()`, `isDisputeNotYetValid()`
+  - ULID format enforcement for dispute IDs (uppercase canonical form)
+- **Dispute Error Codes** (`specs/kernel/errors.json`): 14 new dispute\_\* codes
+  - `E_DISPUTE_INVALID_FORMAT`, `E_DISPUTE_INVALID_ID`, `E_DISPUTE_INVALID_TYPE`
+  - `E_DISPUTE_INVALID_TARGET_TYPE`, `E_DISPUTE_INVALID_GROUNDS`, `E_DISPUTE_INVALID_STATE`
+  - `E_DISPUTE_INVALID_TRANSITION`, `E_DISPUTE_MISSING_RESOLUTION`
+  - `E_DISPUTE_RESOLUTION_NOT_ALLOWED`, `E_DISPUTE_NOT_YET_VALID`, `E_DISPUTE_EXPIRED`
+  - `E_DISPUTE_OTHER_REQUIRES_DESCRIPTION`, `E_DISPUTE_DUPLICATE`, `E_DISPUTE_TARGET_NOT_FOUND`
+- **Audit Types** (`@peac/audit`)
+  - `AuditEntry`: JSONL normative format with trace context, actor, resource, outcome
+  - `AuditEventType`: 15 event types including dispute lifecycle events
+  - `CaseBundle`: Aggregate audit entries for dispute resolution
+  - `CaseBundleSummary`: Statistics for case bundles
+  - `TraceContext`: W3C Trace Context for distributed tracing
+- **Dispute Conformance Suite** (`specs/conformance/fixtures/dispute/`)
+  - `valid.json`: 12 valid dispute attestation vectors
+  - `invalid.json`: 25 invalid attestation vectors with expected errors
+  - `edge-cases.json`: 18 edge case vectors (state transitions, ULID boundaries, time validation)
+- **docs/specs/DISPUTE.md**: Normative dispute specification (450+ lines)
+  - Dispute types and grounds codes
+  - Lifecycle state machine with transition table
+  - Resolution and remediation semantics
+  - Error taxonomy with HTTP status mappings
+  - ULID format requirements
+  - Audit integration patterns
+- **docs/compliance/gdpr.md**: GDPR compliance template
+- **docs/compliance/soc2.md**: SOC 2 compliance template
+
+### Changed
+
+- **Error Category Parity**: TypeScript `ErrorCategory` type now syncs with `specs/kernel/errors.json`
+  - Added `dispute` category to canonical categories
+  - CI test ensures categories stay in sync
+- **README Streamlined**: Root README reduced from ~690 lines to ~186 lines
+  - Canonical expansion: "Portable Evidence for Agent Coordination"
+  - Machine-to-machine framing (crawling as one use case)
+  - Long content moved to `docs/README_LONG.md`
+- **docs/specs/ERRORS.md**: Added 401 convention documentation
+  - WWW-Authenticate header with PEAC-Attestation scheme
+  - 401 vs 403 HTTP status semantics
+  - Attestation temporal validity rules
+- **ROADMAP.md**: Updated to show v0.9.26 as current release
+
 ## [0.9.26] - 2026-01-04
 
 ### Added
