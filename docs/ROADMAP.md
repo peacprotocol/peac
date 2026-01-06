@@ -9,7 +9,7 @@ Shipped:
 - Conformance Suite - 15 attribution fixtures (valid, invalid, edge-cases)
 - Content Hashing - SHA-256 with base64url encoding, excerpt hashing
 - HTTP Helpers - PEAC-Purpose Vary header utilities
-- RFC 6648 Compliance - All headers now use `PEAC-*` prefix (removed `X-PEAC-*`)
+- RFC 6648 Compliance - All headers now use canonical `PEAC-*` prefix (legacy headers removed)
 - EU AI Act Compliance Guide - `docs/compliance/eu-ai-act.md`
 
 ## v0.9.25
