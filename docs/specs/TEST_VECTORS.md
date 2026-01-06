@@ -248,7 +248,7 @@ tests/vectors/
 ```json
 {
   "code": "E_SSRF_BLOCKED",
-  "category": "security",
+  "category": "verification",
   "severity": "error",
   "retryable": false,
   "remediation": "SSRF protection blocked request to private/metadata IP: 169.254.169.254"
@@ -279,7 +279,7 @@ tests/vectors/
 ```json
 {
   "code": "E_INVALID_SIGNATURE",
-  "category": "security",
+  "category": "verification",
   "severity": "error",
   "retryable": false,
   "remediation": "JWS signature verification failed"
@@ -311,7 +311,7 @@ These vectors require HTTP request context (method, URI, headers) for validation
 ```json
 {
   "code": "E_DPOP_REPLAY",
-  "category": "security",
+  "category": "verification",
   "severity": "error",
   "retryable": false,
   "remediation": "DPoP nonce has already been used"
@@ -342,7 +342,7 @@ These vectors require HTTP request context (method, URI, headers) for validation
 ```json
 {
   "code": "E_DPOP_INVALID",
-  "category": "security",
+  "category": "verification",
   "severity": "error",
   "retryable": false,
   "remediation": "DPoP jkt does not match public key thumbprint"

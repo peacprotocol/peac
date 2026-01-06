@@ -305,7 +305,7 @@
         "type": "peac/dispute",
         "issuer": "https://publisher.example.com",
         "issued_at": "2026-01-06T12:00:00Z",
-        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FL5",
+        "ref": "01ARZ3NDEKTSV4RRFFQ69G5FK5",
         "evidence": {
           "dispute_type": "attribution_incorrect",
           "target_ref": "https://ai.example.com/attributions/attr_wrong",
