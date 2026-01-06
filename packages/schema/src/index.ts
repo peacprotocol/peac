@@ -144,6 +144,67 @@ export type {
   CreateAttributionAttestationParams,
 } from './attribution';
 
+// Dispute attestation types (v0.9.27+)
+export {
+  DisputeIdSchema,
+  DisputeTypeSchema,
+  DisputeTargetTypeSchema,
+  DisputeGroundsCodeSchema,
+  DisputeGroundsSchema,
+  DisputeStateSchema,
+  DisputeOutcomeSchema,
+  RemediationTypeSchema,
+  RemediationSchema,
+  DisputeResolutionSchema,
+  ContactMethodSchema,
+  DisputeContactSchema,
+  DocumentRefSchema,
+  DisputeEvidenceSchema,
+  DisputeAttestationSchema,
+  // Constants
+  DISPUTE_TYPE,
+  DISPUTE_LIMITS,
+  DISPUTE_TYPES,
+  DISPUTE_TARGET_TYPES,
+  DISPUTE_GROUNDS_CODES,
+  DISPUTE_STATES,
+  TERMINAL_STATES,
+  DISPUTE_TRANSITIONS,
+  DISPUTE_OUTCOMES,
+  REMEDIATION_TYPES,
+  // Helpers
+  validateDisputeAttestation,
+  isValidDisputeAttestation,
+  isDisputeAttestation,
+  validateDisputeResolution,
+  validateDisputeContact,
+  createDisputeAttestation,
+  transitionDisputeState,
+  canTransitionTo,
+  isTerminalState,
+  getValidTransitions,
+  isDisputeExpired,
+  isDisputeNotYetValid,
+} from './dispute';
+export type {
+  DisputeId,
+  DisputeType,
+  DisputeTargetType,
+  DisputeGroundsCode,
+  DisputeGrounds,
+  DisputeState,
+  DisputeOutcome,
+  RemediationType,
+  Remediation,
+  DisputeResolution,
+  ContactMethod,
+  DisputeContact,
+  DocumentRef,
+  DisputeEvidence,
+  DisputeAttestation,
+  CreateDisputeAttestationParams,
+} from './dispute';
+
 // Obligations extension (v0.9.26+ CC Signals alignment)
 export {
   CreditMethodSchema,
