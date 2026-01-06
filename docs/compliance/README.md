@@ -2,16 +2,16 @@
 
 Compliance documentation for PEAC Protocol and how receipt-based auditability supports regulatory frameworks.
 
-**Version:** 0.9.26+
+**Version:** 0.9.27+
 
 ## Available Guides
 
 - [EU AI Act Compliance](eu-ai-act.md) - Traceability and transparency requirements (v0.9.26+)
+- [GDPR Compliance](gdpr.md) - Data protection and privacy (v0.9.27+)
+- [SOC 2 Compliance](soc2.md) - Trust Service Criteria audit support (v0.9.27+)
 
 ## Planned Coverage
 
-- GDPR and data protection considerations
-- SOC2 audit support
 - PCI DSS payment data handling
 - Additional compliance checklist templates
 
