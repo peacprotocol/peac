@@ -6,18 +6,24 @@
  */
 
 /**
- * Error category - broad classification of error type
+ * Canonical error categories from specs/kernel/errors.json.
+ * This is the normative source of truth for category names.
  */
-export type ErrorCategory =
-  | 'validation' // Schema/structure validation failures
-  | 'security' // Security violations (SSRF, signature, etc.)
-  | 'network' // Network/transport failures
-  | 'authorization' // Authorization/control failures
-  | 'rate_limit' // Rate limiting
-  | 'internal' // Internal server errors
-  | 'attribution' // Attribution attestation failures (v0.9.26+)
-  | 'identity' // Agent identity attestation failures (v0.9.25+)
-  | 'dispute'; // Dispute attestation failures (v0.9.27+)
+export const ERROR_CATEGORIES_CANONICAL = [
+  'validation', // Schema/structure validation failures
+  'verification', // Signature/authentication failures
+  'infrastructure', // Network/transport failures
+  'control', // Authorization/access control failures
+  'attribution', // Attribution attestation failures
+  'identity', // Agent identity attestation failures
+  'dispute', // Dispute attestation failures
+] as const;
+
+/**
+ * Error category - broad classification of error type.
+ * Categories match specs/kernel/errors.json (normative).
+ */
+export type ErrorCategory = (typeof ERROR_CATEGORIES_CANONICAL)[number];
 
 /**
  * Error severity
@@ -77,10 +83,9 @@ export interface PEACError {
    * Maps error to appropriate HTTP response code.
    * Examples:
    * - 400: Validation errors
-   * - 401: Signature/authentication failures
-   * - 403: Authorization/control denials
-   * - 429: Rate limit exceeded
-   * - 502: Network failures (JWKS fetch, etc.)
+   * - 401: Verification failures (signature, attestation temporal)
+   * - 403: Control denials (authorization)
+   * - 502: Infrastructure failures (JWKS fetch, etc.)
    */
   http_status?: number;
 
@@ -130,23 +135,19 @@ export const ERROR_CODES = {
   E_EXPIRED_RECEIPT: 'E_EXPIRED_RECEIPT',
   E_EVIDENCE_NOT_JSON: 'E_EVIDENCE_NOT_JSON',
 
-  // Security errors (401/403)
+  // Verification errors (401)
   E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
   E_SSRF_BLOCKED: 'E_SSRF_BLOCKED',
   E_DPOP_REPLAY: 'E_DPOP_REPLAY',
   E_DPOP_INVALID: 'E_DPOP_INVALID',
+
+  // Control errors (403)
   E_CONTROL_DENIED: 'E_CONTROL_DENIED',
 
-  // Network errors (502/503)
+  // Infrastructure errors (502/503)
   E_JWKS_FETCH_FAILED: 'E_JWKS_FETCH_FAILED',
   E_POLICY_FETCH_FAILED: 'E_POLICY_FETCH_FAILED',
   E_NETWORK_ERROR: 'E_NETWORK_ERROR',
-
-  // Rate limit errors (429)
-  E_RATE_LIMIT: 'E_RATE_LIMIT',
-
-  // Internal errors (500)
-  E_INTERNAL_ERROR: 'E_INTERNAL_ERROR',
 } as const;
 
 /**

@@ -48,7 +48,7 @@
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
           "grounds": [{ "code": "terms_violated" }],
-          "description": "This is exactly 50 characters for other type!!!",
+          "description": "This is exactly fifty characters for other type!!!",
           "state": "filed"
         }
       },

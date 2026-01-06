@@ -356,7 +356,7 @@ Output: policy (JSON) or PEACError
    CATCH parse_error:
      RETURN PEACError(
        code: "E_POLICY_FETCH_FAILED",
-       category: "network",
+       category: "infrastructure",
        severity: "error",
        retryable: true,
        remediation: "Policy document is not valid JSON"
@@ -444,7 +444,7 @@ Output: content (string) or PEACError
      IF parsed.hostname NOT IN ["localhost", "127.0.0.1", "::1"]:
        RETURN PEACError(
          code: "E_SSRF_BLOCKED",
-         category: "security",
+         category: "verification",
          severity: "error",
          retryable: false,
          remediation: "HTTP URLs only allowed for localhost; use HTTPS"
@@ -452,7 +452,7 @@ Output: content (string) or PEACError
    ELSE IF parsed.scheme != "https":
      RETURN PEACError(
        code: "E_SSRF_BLOCKED",
-       category: "security",
+       category: "verification",
        remediation: "Only HTTPS URLs allowed"
      )
 
@@ -464,7 +464,7 @@ Output: content (string) or PEACError
      IF ip IN blocked_ip_ranges:  // See Section 6.2
        RETURN PEACError(
          code: "E_SSRF_BLOCKED",
-         category: "security",
+         category: "verification",
          severity: "error",
          retryable: false,
          remediation: "SSRF protection blocked request to private/metadata IP: " + ip,
@@ -484,7 +484,7 @@ Output: content (string) or PEACError
    CATCH network_error:
      RETURN PEACError(
        code: "E_POLICY_FETCH_FAILED",  // or E_JWKS_FETCH_FAILED
-       category: "network",
+       category: "infrastructure",
        severity: "error",
        retryable: true,
        remediation: "Network error fetching resource"
@@ -535,7 +535,7 @@ Output: boolean or PEACError
    CATCH parse_error:
      RETURN PEACError(
        code: "E_DPOP_INVALID",
-       category: "security",
+       category: "verification",
        severity: "error",
        retryable: false,
        remediation: "DPoP proof is not a valid JWT"
@@ -607,7 +607,7 @@ Output: boolean or PEACError
     IF NonceAlreadyUsed(claims.nonce):
       RETURN PEACError(
         code: "E_DPOP_REPLAY",
-        category: "security",
+        category: "verification",
         severity: "error",
         retryable: false,
         remediation: "DPoP nonce has already been used"

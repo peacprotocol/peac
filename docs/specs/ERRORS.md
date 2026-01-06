@@ -18,35 +18,43 @@ Normative error codes for PEAC Protocol v0.9.
 | `E_INVALID_POLICY_HASH`   | validation | error    | false     | 400  | Policy hash does not match policy content                                   | Recompute policy_hash as base64url(sha256(JCS(policy)))                              |
 | `E_EXPIRED_RECEIPT`       | validation | error    | false     | 401  | Receipt exp claim is in the past                                            | Use a current receipt                                                                |
 
-## Security Errors (401/403)
+## Verification Errors (401)
 
-| Code                  | Category      | Severity | Retryable | HTTP | Description                                            | Remediation                                                     |
-| --------------------- | ------------- | -------- | --------- | ---- | ------------------------------------------------------ | --------------------------------------------------------------- |
-| `E_INVALID_SIGNATURE` | security      | error    | false     | 401  | JWS signature verification failed                      | Ensure receipt is signed with correct private key and alg=EdDSA |
-| `E_SSRF_BLOCKED`      | security      | error    | false     | 403  | SSRF protection blocked request to private/metadata IP | Use only public HTTPS URLs for JWKS/policy endpoints            |
-| `E_DPOP_REPLAY`       | security      | error    | false     | 403  | DPoP nonce has already been used                       | Generate a fresh DPoP proof with new nonce                      |
-| `E_DPOP_INVALID`      | security      | error    | false     | 403  | DPoP proof is invalid or malformed                     | Ensure DPoP JWT has correct claims (jkt, iat, htm, htu)         |
-| `E_CONTROL_DENIED`    | authorization | error    | false     | 403  | Control decision was deny                              | Check control chain for denial reason                           |
+| Code                  | Category     | Severity | Retryable | HTTP | Description                                            | Remediation                                                     |
+| --------------------- | ------------ | -------- | --------- | ---- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| `E_INVALID_SIGNATURE` | verification | error    | false     | 401  | JWS signature verification failed                      | Ensure receipt is signed with correct private key and alg=EdDSA |
+| `E_SSRF_BLOCKED`      | verification | error    | false     | 403  | SSRF protection blocked request to private/metadata IP | Use only public HTTPS URLs for JWKS/policy endpoints            |
+| `E_DPOP_REPLAY`       | verification | error    | false     | 403  | DPoP nonce has already been used                       | Generate a fresh DPoP proof with new nonce                      |
+| `E_DPOP_INVALID`      | verification | error    | false     | 403  | DPoP proof is invalid or malformed                     | Ensure DPoP JWT has correct claims (jkt, iat, htm, htu)         |
 
-## Network Errors (502/503)
+## Control Errors (403)
 
-| Code                    | Category | Severity | Retryable | HTTP | Description                            | Remediation                                       |
-| ----------------------- | -------- | -------- | --------- | ---- | -------------------------------------- | ------------------------------------------------- |
-| `E_JWKS_FETCH_FAILED`   | network  | error    | true      | 502  | Failed to fetch JWKS from issuer       | Retry after delay; check JWKS URL is accessible   |
-| `E_POLICY_FETCH_FAILED` | network  | error    | true      | 502  | Failed to fetch policy from policy_uri | Retry after delay; check policy URI is accessible |
-| `E_NETWORK_ERROR`       | network  | error    | true      | 502  | Generic network/transport failure      | Retry after delay                                 |
+| Code               | Category | Severity | Retryable | HTTP | Description             | Remediation                    |
+| ------------------ | -------- | -------- | --------- | ---- | ----------------------- | ------------------------------ |
+| `E_CONTROL_DENIED` | control  | error    | false     | 403  | Control decision denied | Check control chain for reason |
 
-## Rate Limit Errors (429)
+## Infrastructure Errors (429/502/503)
 
-| Code           | Category   | Severity | Retryable | HTTP | Description         | Remediation                          |
-| -------------- | ---------- | -------- | --------- | ---- | ------------------- | ------------------------------------ |
-| `E_RATE_LIMIT` | rate_limit | error    | true      | 429  | Rate limit exceeded | Retry after Retry-After header value |
+| Code                    | Category       | Severity | Retryable | HTTP | Description                            | Remediation                                       |
+| ----------------------- | -------------- | -------- | --------- | ---- | -------------------------------------- | ------------------------------------------------- |
+| `E_JWKS_FETCH_FAILED`   | infrastructure | error    | true      | 502  | Failed to fetch JWKS from issuer       | Retry after delay; check JWKS URL is accessible   |
+| `E_POLICY_FETCH_FAILED` | infrastructure | error    | true      | 502  | Failed to fetch policy from policy_uri | Retry after delay; check policy URI is accessible |
+| `E_NETWORK_ERROR`       | infrastructure | error    | true      | 502  | Generic network/transport failure      | Retry after delay                                 |
+| `E_RATE_LIMITED`        | infrastructure | error    | true      | 429  | Rate limit exceeded                    | Retry after Retry-After header value              |
 
-## Internal Errors (500)
+## HTTP Status Semantics (401 vs 403)
 
-| Code               | Category | Severity | Retryable | HTTP | Description           | Remediation            |
-| ------------------ | -------- | -------- | --------- | ---- | --------------------- | ---------------------- |
-| `E_INTERNAL_ERROR` | internal | error    | false     | 500  | Internal server error | Contact issuer support |
+PEAC follows standard HTTP semantics for authentication and authorization errors:
+
+| Status  | Meaning                              | When to Use                                                    | Client Action                      |
+| ------- | ------------------------------------ | -------------------------------------------------------------- | ---------------------------------- |
+| **401** | Unauthorized (missing/invalid creds) | Attestation missing, expired, not yet valid, signature invalid | Retry with valid attestation       |
+| **403** | Forbidden (denied by policy)         | Authenticated but control decision was deny                    | Do not retry with same credentials |
+
+**Key distinction:**
+
+- **401**: "I don't know who you are" or "your credentials are invalid" - client CAN retry with different/renewed credentials
+- **403**: "I know who you are, but you're not allowed" - retrying with same identity won't help
 
 ## Attestation Temporal Validity (401 Convention)
 
@@ -67,6 +75,71 @@ while receipts use **400**. This distinction reflects their different roles:
 This convention treats attestations as token-like credentials that authenticate the presenter.
 An expired or not-yet-valid attestation is analogous to an expired OAuth token - an auth failure (401),
 not a format error (400).
+
+### WWW-Authenticate Header (RFC 9110 Requirement)
+
+Per [RFC 9110 Section 15.5.2](https://www.rfc-editor.org/rfc/rfc9110#section-15.5.2), 401 responses
+**MUST** include a `WWW-Authenticate` header with at least one authentication challenge.
+
+PEAC defines the `PEAC-Attestation` authentication scheme for attestation-based authentication:
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: PEAC-Attestation realm="peac", attestation_type="identity"
+Content-Type: application/problem+json
+
+{
+  "type": "https://peacprotocol.org/errors#E_IDENTITY_EXPIRED",
+  "title": "Identity Attestation Expired",
+  "status": 401,
+  "detail": "The agent identity attestation has expired.",
+  "instance": "/api/resource/123"
+}
+```
+
+### WWW-Authenticate Parameters
+
+Parameters follow [RFC 9110 auth-param syntax](https://www.rfc-editor.org/rfc/rfc9110#section-11.2):
+`parameter = token "=" ( token / quoted-string )`.
+
+| Parameter           | Required | Type          | Values                               | Description                      |
+| ------------------- | -------- | ------------- | ------------------------------------ | -------------------------------- |
+| `realm`             | Yes      | quoted-string | `"peac"`                             | Fixed realm identifier           |
+| `attestation_type`  | Yes      | token         | `identity`, `attribution`, `dispute` | Attestation type required/failed |
+| `error`             | No       | token         | Error code (e.g., `expired`)         | Machine-readable error category  |
+| `error_description` | No       | quoted-string | Human-readable message               | Explanation for debugging        |
+
+**Example challenges:**
+
+```http
+# Missing agent identity attestation
+WWW-Authenticate: PEAC-Attestation realm="peac", attestation_type=identity
+
+# Expired identity attestation
+WWW-Authenticate: PEAC-Attestation realm="peac", attestation_type=identity, error=expired, error_description="Attestation expired at 2026-01-06T12:00:00Z"
+
+# Invalid signature on attribution attestation
+WWW-Authenticate: PEAC-Attestation realm="peac", attestation_type=attribution, error=invalid_signature
+
+# Dispute attestation not yet valid
+WWW-Authenticate: PEAC-Attestation realm="peac", attestation_type=dispute, error=not_yet_valid
+```
+
+**Error tokens (for `error` parameter):**
+
+| Token               | Meaning                         |
+| ------------------- | ------------------------------- |
+| `missing`           | No attestation provided         |
+| `expired`           | Attestation `exp` in the past   |
+| `not_yet_valid`     | Attestation `iat` in the future |
+| `invalid_signature` | Signature verification failed   |
+| `invalid_format`    | Malformed attestation structure |
+| `key_unknown`       | Signing key not found           |
+| `key_expired`       | Signing key expired             |
+| `key_revoked`       | Signing key revoked             |
+
+Implementations MUST include the `WWW-Authenticate` header when returning 401 for attestation errors.
+Failure to include this header violates HTTP semantics and may cause interoperability issues.
 
 See also: [Error Catalog](../api/error-catalog.md) for RFC 9457 response format.
 
@@ -93,7 +166,7 @@ All errors MUST be returned in this JSON structure:
 ### Fields
 
 - **code** (string, required): Error code from registry
-- **category** (string, required): `validation` | `security` | `network` | `authorization` | `rate_limit` | `internal`
+- **category** (string, required): `validation` | `verification` | `infrastructure` | `control` | `attribution` | `identity` | `dispute`
 - **severity** (string, required): `error` | `warning`
 - **retryable** (boolean, required): Whether client should retry
 - **http_status** (number, optional): Suggested HTTP status code
