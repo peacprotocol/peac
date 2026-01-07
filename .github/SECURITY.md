@@ -1,92 +1,100 @@
 # Security Policy
 
-## Reporting Security Vulnerabilities
+## Supported Versions
 
-PEAC Protocol takes security seriously. If you discover a security vulnerability, please report it responsibly.
+Currently supported versions for security updates:
 
-### Where to Report
+| Version  | Supported          |
+| -------- | ------------------ |
+| 0.9.12.x | :white_check_mark: |
+| 0.9.11.x | :x:                |
+| < 0.9.11 | :x:                |
 
-Email: security@peacprotocol.org
+## Reporting a Vulnerability
 
-Please include:
+We take security vulnerabilities seriously. If you discover a security issue, please follow these steps:
 
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested remediation (if any)
+1. **DO NOT** open a public issue
+2. Email security@peacprotocol.org with:
+   - Description of the vulnerability
+   - Steps to reproduce
+   - Potential impact
+   - Suggested fix (if available)
 
-### Response Timeline
+3. We will acknowledge receipt within 48 hours
+4. We will investigate and provide updates within 7 days
+5. We will coordinate disclosure timing with you
 
-- Acknowledgment: Within 48 hours
-- Initial assessment: Within 7 days
-- Fix timeline: Depends on severity
+## Security Measures
 
-## Security Considerations
+### Cryptographic Security
 
-### Policy File Security
+- EdDSA (Ed25519) signatures only
+- JWS Compact Serialization
+- Key rotation every 30 days
+- Hardware security module support
 
-PEAC policy files (peac.txt) are public by design. Do not include:
+### Input Validation
 
-- Private keys or secrets
-- Personally identifiable information
-- Internal system details
+- Strict JSON schema validation
+- SSRF protection on all external calls
+- Rate limiting with token buckets
+- Request size limits enforced
 
-### Transport Security
+### Operational Security
 
-- Always use HTTPS in production
-- Validate SSL certificates
-- Implement appropriate timeouts
+- No secrets in code or commits
+- Environment-based configuration
+- Audit logging for security events
+- Automated vulnerability scanning
 
-### Parser Security
+## Security Checklist for Contributors
 
-When implementing PEAC parsers:
+Before submitting code:
 
-- Validate all input against the schema
-- Set reasonable size limits
-- Handle malformed content gracefully
-- Avoid recursive parsing vulnerabilities
+- [ ] No hardcoded secrets or credentials
+- [ ] All user input validated
+- [ ] External URLs validated against SSRF
+- [ ] Rate limiting considered
+- [ ] Error messages don't leak sensitive info
+- [ ] Dependencies audited (`pnpm audit`)
+- [ ] Security tests written for new features
 
-### Signature Verification
+## Known Security Considerations
 
-If using signed policies:
+### SSRF Protection
 
-- Verify signatures before trusting content
-- Use established cryptographic libraries
-- Rotate keys periodically
-- Store private keys securely
+All crawler and verification endpoints implement SSRF guards:
 
-## Best Practices
+- Private IP range blocking
+- DNS rebinding protection
+- Redirect limit enforcement
+- Timeout controls
 
-### For Publishers
+### DoS Prevention
 
-1. Serve peac.txt over HTTPS only
-2. Set appropriate cache headers
-3. Monitor access logs for anomalies
-4. Keep policies simple and minimal
+- Token bucket rate limiting
+- Request size limits
+- Computation timeouts
+- Circuit breakers for external services
 
-### For Implementers
+### Data Privacy
 
-1. Validate all parsed content
-2. Implement request rate limiting
-3. Use timeouts for network requests
-4. Log security-relevant events
+- No PII in logs
+- Structured telemetry with privacy controls
+- GDPR-compliant data handling
+- Configurable retention policies
 
-### For Users
+## Compliance
 
-1. Verify the authenticity of PEAC implementations
-2. Check policy details before granting access
-3. Report suspicious behavior
+The PEAC Protocol aims to comply with:
 
-## Known Limitations
+- OWASP API Security Top 10
+- NIST Cybersecurity Framework
+- EU GDPR requirements
+- California CCPA requirements
 
-- Policy files are public and can be read by anyone
-- No built-in encryption for policy content
-- Enforcement depends on implementation compliance
+## Contact
 
-## Security Updates
-
-Security updates will be announced via:
-
-- GitHub security advisories
-- Project mailing list (when established)
-- CHANGELOG.md notes
+- Security issues: security@peacprotocol.org
+- General inquiries: contact@peacprotocol.org
