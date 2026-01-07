@@ -4,7 +4,7 @@ Thank you for your interest in contributing to PEAC Protocol. This guide provide
 
 ## Code of Conduct
 
-Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md). We strive to maintain a welcoming and inclusive community.
+Please read and follow our [Code of Conduct](../../.github/CODE_OF_CONDUCT.md). We strive to maintain a welcoming and inclusive community.
 
 ## How to Contribute
 

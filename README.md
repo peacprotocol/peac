@@ -154,7 +154,7 @@ For the full package catalog and layer map, see [docs/README_LONG.md](docs/READM
 - Enforce timeouts and SSRF guards when fetching JWKS
 - Map errors to RFC 9457 Problem Details
 
-See [SECURITY.md](SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](docs/specs/PROTOCOL-BEHAVIOR.md).
+See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](docs/specs/PROTOCOL-BEHAVIOR.md).
 
 ---
 
