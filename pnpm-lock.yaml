@@ -476,6 +476,15 @@ importers:
         specifier: ^5.6.2
         version: 5.9.3
 
+  packages/contracts:
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.25)
+
   packages/control:
     dependencies:
       '@peac/schema':
@@ -1038,6 +1047,22 @@ importers:
         specifier: ^5.6.2
         version: 5.9.3
 
+  packages/worker-core:
+    dependencies:
+      '@peac/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@peac/mappings-tap':
+        specifier: workspace:*
+        version: link:../mappings/tap
+    devDependencies:
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.25)
+
   surfaces/analytics:
     dependencies:
       '@peac/kernel':
@@ -1084,6 +1109,9 @@ importers:
 
   surfaces/workers/akamai:
     dependencies:
+      '@peac/contracts':
+        specifier: workspace:^
+        version: link:../../../packages/contracts
       '@peac/http-signatures':
         specifier: workspace:*
         version: link:../../../packages/http-signatures
@@ -1103,6 +1131,9 @@ importers:
 
   surfaces/workers/cloudflare:
     dependencies:
+      '@peac/contracts':
+        specifier: workspace:^
+        version: link:../../../packages/contracts
       '@peac/http-signatures':
         specifier: workspace:*
         version: link:../../../packages/http-signatures
@@ -1128,6 +1159,9 @@ importers:
 
   surfaces/workers/fastly:
     dependencies:
+      '@peac/contracts':
+        specifier: workspace:^
+        version: link:../../../packages/contracts
       '@peac/http-signatures':
         specifier: workspace:*
         version: link:../../../packages/http-signatures
