@@ -112,4 +112,4 @@ Early crawler-oriented features and pre-kernel-refactor layout. This release is 
 
 ---
 
-_For questions about releases, see [CONTRIBUTING.md](CONTRIBUTING.md) or [SECURITY.md](SECURITY.md)_
+_For questions about releases, see [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) or [SECURITY.md](../../.github/SECURITY.md)_
