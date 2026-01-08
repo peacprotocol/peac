@@ -181,7 +181,10 @@ describe('Contract Invariants: WWW-Authenticate Builder', () => {
   });
 
   it('buildWwwAuthenticate accepts custom realm', () => {
-    const header = buildWwwAuthenticate(CANONICAL_ERROR_CODES.TAP_SIGNATURE_MISSING, 'custom-realm');
+    const header = buildWwwAuthenticate(
+      CANONICAL_ERROR_CODES.TAP_SIGNATURE_MISSING,
+      'custom-realm'
+    );
     expect(header).toContain('PEAC realm="custom-realm"');
   });
 

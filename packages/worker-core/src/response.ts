@@ -91,10 +91,7 @@ export function buildErrorResponse(
  * @param instance - Optional request URL
  * @returns Response parts for 402 challenge
  */
-export function buildChallengeResponse(
-  detail: string,
-  instance?: string
-): ResponseParts {
+export function buildChallengeResponse(detail: string, instance?: string): ResponseParts {
   return buildErrorResponse(ErrorCodes.RECEIPT_MISSING, detail, instance);
 }
 

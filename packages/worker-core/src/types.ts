@@ -82,7 +82,6 @@ export interface VerificationResult {
   controlEntry?: TapControlEntry;
 }
 
-
 /**
  * Headers-like interface for runtime neutrality.
  *

@@ -79,9 +79,10 @@ export function createHandler<TRequest>(
       // SECURITY: Generic message by default (no leak)
       // Only include error details if UNSAFE_DEV_MODE=true (development only)
       const unsafeDevMode = globalThis.process?.env?.UNSAFE_DEV_MODE === 'true';
-      const detail = unsafeDevMode && error instanceof Error
-        ? `Internal error: ${error.message}`
-        : 'An unexpected internal error occurred. Please contact support if the issue persists.';
+      const detail =
+        unsafeDevMode && error instanceof Error
+          ? `Internal error: ${error.message}`
+          : 'An unexpected internal error occurred. Please contact support if the issue persists.';
 
       const problem = createProblemDetails(code, detail);
 

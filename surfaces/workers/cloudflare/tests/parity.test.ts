@@ -91,17 +91,13 @@ describe('Surface Parity - Mode Behavior', () => {
   it('receipt_or_tap mode returns 402 for missing TAP headers', () => {
     // This is verified in handler tests, but we document the contract here
     expect(MODE_BEHAVIOR.receipt_or_tap.status).toBe(402);
-    expect(MODE_BEHAVIOR.receipt_or_tap.code).toBe(
-      CANONICAL_ERROR_CODES.RECEIPT_MISSING
-    );
+    expect(MODE_BEHAVIOR.receipt_or_tap.code).toBe(CANONICAL_ERROR_CODES.RECEIPT_MISSING);
     expect(MODE_BEHAVIOR.receipt_or_tap.action).toBe('challenge');
   });
 
   it('tap_only mode returns 401 for missing TAP headers', () => {
     expect(MODE_BEHAVIOR.tap_only.status).toBe(401);
-    expect(MODE_BEHAVIOR.tap_only.code).toBe(
-      CANONICAL_ERROR_CODES.TAP_SIGNATURE_MISSING
-    );
+    expect(MODE_BEHAVIOR.tap_only.code).toBe(CANONICAL_ERROR_CODES.TAP_SIGNATURE_MISSING);
     expect(MODE_BEHAVIOR.tap_only.action).toBe('error');
   });
 });

@@ -13,11 +13,7 @@
  * @packageDocumentation
  */
 
-import {
-  verifyTapProof,
-  TAP_CONSTANTS,
-  type TapRequest,
-} from '@peac/mappings-tap';
+import { verifyTapProof, TAP_CONSTANTS, type TapRequest } from '@peac/mappings-tap';
 import type {
   InternalWorkerConfig,
   RequestLike,

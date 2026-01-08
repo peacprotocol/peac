@@ -35,10 +35,7 @@ describe('buildErrorResponse', () => {
   });
 
   it('should build 403 response without WWW-Authenticate header', () => {
-    const response = buildErrorResponse(
-      ErrorCodes.ISSUER_NOT_ALLOWED,
-      'Issuer not in allowlist'
-    );
+    const response = buildErrorResponse(ErrorCodes.ISSUER_NOT_ALLOWED, 'Issuer not in allowlist');
 
     expect(response.status).toBe(403);
     expect(response.headers['WWW-Authenticate']).toBeUndefined();
@@ -46,20 +43,14 @@ describe('buildErrorResponse', () => {
   });
 
   it('should build 400 response without WWW-Authenticate header', () => {
-    const response = buildErrorResponse(
-      ErrorCodes.TAP_TAG_UNKNOWN,
-      'Unknown TAP tag'
-    );
+    const response = buildErrorResponse(ErrorCodes.TAP_TAG_UNKNOWN, 'Unknown TAP tag');
 
     expect(response.status).toBe(400);
     expect(response.headers['WWW-Authenticate']).toBeUndefined();
   });
 
   it('should build 409 response without WWW-Authenticate header', () => {
-    const response = buildErrorResponse(
-      ErrorCodes.TAP_NONCE_REPLAY,
-      'Nonce replay detected'
-    );
+    const response = buildErrorResponse(ErrorCodes.TAP_NONCE_REPLAY, 'Nonce replay detected');
 
     expect(response.status).toBe(409);
     expect(response.headers['WWW-Authenticate']).toBeUndefined();
@@ -88,9 +79,7 @@ describe('buildErrorResponse', () => {
 
 describe('buildChallengeResponse', () => {
   it('should build 402 challenge response', () => {
-    const response = buildChallengeResponse(
-      'A valid PEAC receipt is required.'
-    );
+    const response = buildChallengeResponse('A valid PEAC receipt is required.');
 
     expect(response.status).toBe(402);
     expect(response.headers['Content-Type']).toBe('application/problem+json');

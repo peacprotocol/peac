@@ -69,11 +69,13 @@ const catalogEntry = ERROR_CATALOG[CANONICAL_ERROR_CODES.TAP_SIGNATURE_INVALID];
 All error codes use the `E_*` prefix format:
 
 ### Receipt Errors (402 - Payment Required)
+
 - `E_RECEIPT_MISSING` - Receipt required but not provided
 - `E_RECEIPT_INVALID` - Receipt validation failed
 - `E_RECEIPT_EXPIRED` - Receipt has expired
 
 ### TAP Authentication Errors (401)
+
 - `E_TAP_SIGNATURE_MISSING` - TAP headers missing
 - `E_TAP_SIGNATURE_INVALID` - Signature verification failed
 - `E_TAP_TIME_INVALID` - Signature time invalid
@@ -81,26 +83,32 @@ All error codes use the `E_*` prefix format:
 - `E_TAP_REPLAY_PROTECTION_REQUIRED` - Replay protection required but not configured
 
 ### TAP Malformed Request Errors (400)
+
 - `E_TAP_WINDOW_TOO_LARGE` - Time window exceeds maximum
 - `E_TAP_TAG_UNKNOWN` - Unknown signature tag
 - `E_TAP_ALGORITHM_INVALID` - Invalid signature algorithm
 
 ### Authorization Errors (403 - Forbidden)
+
 - `E_ISSUER_NOT_ALLOWED` - Issuer not in allowlist
 
 ### Replay Errors (409 - Conflict)
+
 - `E_TAP_NONCE_REPLAY` - Nonce replay detected
 
 ### Configuration Errors (500)
+
 - `E_CONFIG_ISSUER_ALLOWLIST_REQUIRED` - ISSUER_ALLOWLIST required but not configured
 - `E_INTERNAL_ERROR` - Internal server error
 
 ## Verification Modes
 
 ### `tap_only` (Default)
+
 Missing TAP headers → 401 + `E_TAP_SIGNATURE_MISSING`
 
 ### `receipt_or_tap`
+
 Missing TAP headers → 402 + `E_RECEIPT_MISSING` (payment remedy)
 
 ## Contract Guarantees

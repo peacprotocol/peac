@@ -49,11 +49,7 @@ export {
 // Response building
 // -----------------------------------------------------------------------------
 
-export {
-  buildErrorResponse,
-  buildChallengeResponse,
-  type ResponseParts,
-} from './response.js';
+export { buildErrorResponse, buildChallengeResponse, type ResponseParts } from './response.js';
 
 // -----------------------------------------------------------------------------
 // Replay protection
@@ -90,8 +86,4 @@ export {
 // Handler Factories
 // -----------------------------------------------------------------------------
 
-export {
-  createHandler,
-  type Handler,
-  type ErrorResponse,
-} from './handler.js';
+export { createHandler, type Handler, type ErrorResponse } from './handler.js';

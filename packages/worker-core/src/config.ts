@@ -82,7 +82,9 @@ export function parseConfigFromEnv(env: Record<string, string | undefined>): Int
  * @param env - Environment variables as a Record
  * @returns Unsafe configuration
  */
-export function parseUnsafeConfigFromEnv(env: Record<string, string | undefined>): UnsafeWorkerConfig {
+export function parseUnsafeConfigFromEnv(
+  env: Record<string, string | undefined>
+): UnsafeWorkerConfig {
   return {
     issuerAllowlist: parseCommaSeparated(env.ISSUER_ALLOWLIST),
     bypassPaths: parseCommaSeparated(env.BYPASS_PATHS),

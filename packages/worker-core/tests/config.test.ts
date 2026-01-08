@@ -19,10 +19,7 @@ describe('parseSafeConfigFromEnv', () => {
 
     const config = parseSafeConfigFromEnv(env);
 
-    expect(config.issuerAllowlist).toEqual([
-      'https://issuer1.com',
-      'https://issuer2.com',
-    ]);
+    expect(config.issuerAllowlist).toEqual(['https://issuer1.com', 'https://issuer2.com']);
   });
 
   it('should handle empty ISSUER_ALLOWLIST', () => {
@@ -40,10 +37,7 @@ describe('parseSafeConfigFromEnv', () => {
 
     const config = parseSafeConfigFromEnv(env);
 
-    expect(config.issuerAllowlist).toEqual([
-      'https://issuer1.com',
-      'https://issuer2.com',
-    ]);
+    expect(config.issuerAllowlist).toEqual(['https://issuer1.com', 'https://issuer2.com']);
   });
 
   it('should filter empty entries from allowlist', () => {
@@ -53,10 +47,7 @@ describe('parseSafeConfigFromEnv', () => {
 
     const config = parseSafeConfigFromEnv(env);
 
-    expect(config.issuerAllowlist).toEqual([
-      'https://issuer1.com',
-      'https://issuer2.com',
-    ]);
+    expect(config.issuerAllowlist).toEqual(['https://issuer1.com', 'https://issuer2.com']);
   });
 
   it('should parse BYPASS_PATHS from comma-separated string', () => {

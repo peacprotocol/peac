@@ -127,9 +127,7 @@ describe('handleVerification', () => {
     } as unknown as Headers,
   });
 
-  const createConfig = (
-    overrides: Partial<InternalWorkerConfig> = {}
-  ): InternalWorkerConfig => ({
+  const createConfig = (overrides: Partial<InternalWorkerConfig> = {}): InternalWorkerConfig => ({
     issuerAllowlist: ['https://issuer.example.com'],
     bypassPaths: [],
     unsafeAllowAnyIssuer: false,

@@ -16,11 +16,7 @@ import {
   type PeacErrorCode,
   type PeacHttpStatus,
 } from '@peac/contracts';
-import {
-  ErrorCodes,
-  mapTapErrorCode,
-  createProblemDetails,
-} from '../src/errors.js';
+import { ErrorCodes, mapTapErrorCode, createProblemDetails } from '../src/errors.js';
 import { buildErrorResponse } from '../src/response.js';
 import { handleVerification } from '../src/verification.js';
 import type { RequestLike, InternalWorkerConfig, InternalVerifyTapOptions } from '../src/types.js';
@@ -286,13 +282,7 @@ describe('Parity: Legacy Input Mapping', () => {
   });
 
   it('should map unknown codes to canonical fallback E_TAP_SIGNATURE_INVALID', () => {
-    const unknownCodes = [
-      'unknown_error',
-      'some_random_code',
-      'tap_future_error',
-      '',
-      'INVALID',
-    ];
+    const unknownCodes = ['unknown_error', 'some_random_code', 'tap_future_error', '', 'INVALID'];
 
     unknownCodes.forEach((code) => {
       // All unknown codes should map to the canonical fallback
