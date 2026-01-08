@@ -32,6 +32,7 @@
     "directory": "surfaces/workers/akamai"
   },
   "dependencies": {
+    "@peac/contracts": "workspace:^",
     "@peac/http-signatures": "workspace:*",
     "@peac/jwks-cache": "workspace:*",
     "@peac/mappings-tap": "workspace:*"

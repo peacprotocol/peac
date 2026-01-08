@@ -86,13 +86,15 @@ describe('Status Code Parity', () => {
 describe('Mode Behavior Parity', () => {
   it('receipt_or_tap mode returns 402 for missing TAP headers', () => {
     const behavior = MODE_BEHAVIOR.receipt_or_tap;
-    expect(behavior.noTapHeadersStatus).toBe(402);
-    expect(behavior.noTapHeadersCode).toBe(CANONICAL_ERROR_CODES.RECEIPT_MISSING);
+    expect(behavior.status).toBe(402);
+    expect(behavior.code).toBe(CANONICAL_ERROR_CODES.RECEIPT_MISSING);
+    expect(behavior.action).toBe('challenge');
   });
 
   it('tap_only mode returns 401 for missing TAP headers', () => {
     const behavior = MODE_BEHAVIOR.tap_only;
-    expect(behavior.noTapHeadersStatus).toBe(401);
-    expect(behavior.noTapHeadersCode).toBe(CANONICAL_ERROR_CODES.TAP_SIGNATURE_MISSING);
+    expect(behavior.status).toBe(401);
+    expect(behavior.code).toBe(CANONICAL_ERROR_CODES.TAP_SIGNATURE_MISSING);
+    expect(behavior.action).toBe('error');
   });
 });

@@ -12,6 +12,7 @@ import {
   CANONICAL_STATUS_MAPPINGS,
   CANONICAL_TITLES,
   PROBLEM_TYPE_BASE,
+  type PeacErrorCode,
 } from '../../../_shared/contracts/index.js';
 import type { ProblemDetails } from './types.js';
 
@@ -53,13 +54,16 @@ export function createProblemDetails(
   detail?: string,
   instance?: string
 ): ProblemDetails {
+  // Cast to PeacErrorCode for type-safe indexing
+  const peacCode = code as PeacErrorCode;
+
   // Map code to URL-safe slug for type URI
   const typeSlug = code.toLowerCase().replace(/^e_/, '');
 
   return {
     type: `${PROBLEM_TYPE_BASE}/${typeSlug}`,
-    title: CANONICAL_TITLES[code] ?? 'Error',
-    status: CANONICAL_STATUS_MAPPINGS[code] ?? 500,
+    title: CANONICAL_TITLES[peacCode] ?? 'Error',
+    status: CANONICAL_STATUS_MAPPINGS[peacCode] ?? 500,
     detail: sanitizeDetail(detail),
     instance,
     code, // Stable error code extension
@@ -73,7 +77,7 @@ export function createProblemDetails(
  * @returns HTTP status code
  */
 export function getStatusForCode(code: string): number {
-  return CANONICAL_STATUS_MAPPINGS[code] ?? 500;
+  return CANONICAL_STATUS_MAPPINGS[code as PeacErrorCode] ?? 500;
 }
 
 /**

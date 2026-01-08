@@ -22,6 +22,7 @@
       "@peac/crypto": ["./packages/crypto/src"],
       "@peac/protocol": ["./packages/protocol/src"],
       "@peac/control": ["./packages/control/src"],
+      "@peac/contracts": ["./packages/contracts/src"],
       "@peac/receipts": ["./packages/receipts/src"],
       "@peac/disc": ["./packages/discovery/src"],
       "@peac/server": ["./packages/server/src"],

@@ -33,6 +33,7 @@
     "directory": "surfaces/workers/cloudflare"
   },
   "dependencies": {
+    "@peac/contracts": "workspace:^",
     "@peac/http-signatures": "workspace:*",
     "@peac/jwks-cache": "workspace:*",
     "@peac/mappings-tap": "workspace:*"

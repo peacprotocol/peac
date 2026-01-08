@@ -11,4 +11,12 @@ export {
   CANONICAL_TITLES,
   PROBLEM_TYPE_BASE,
   MODE_BEHAVIOR,
+  WWW_AUTHENTICATE_STATUSES,
+  ERROR_CATALOG,
+  problemTypeFor,
+  getStatusForCode,
+  requiresWwwAuthenticate,
+  type PeacErrorCode,
+  type VerificationMode,
+  type ErrorCatalogEntry,
 } from './error-contract.js';
