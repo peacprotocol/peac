@@ -88,7 +88,7 @@ export function createHandler<TRequest>(
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/problem+json',
-        'X-PEAC-Error': code,
+        'PEAC-Error': code,
         'Cache-Control': 'no-store',
       };
 

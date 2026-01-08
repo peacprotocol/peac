@@ -4,7 +4,7 @@
  * Builds RFC 9457 Problem Details responses with all required headers:
  * - Content-Type: application/problem+json
  * - WWW-Authenticate: PEAC realm="peac", error="<code>", error_uri="<uri>" (401 and 402)
- * - X-PEAC-Error: <code>
+ * - PEAC-Error: <code>
  * - Cache-Control: no-store
  * - Retry-After: <seconds> (503 only)
  *
@@ -60,7 +60,7 @@ export function buildErrorResponse(
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/problem+json',
-    'X-PEAC-Error': code,
+    'PEAC-Error': code,
     'Cache-Control': 'no-store',
   };
 
@@ -110,7 +110,7 @@ export function buildForwardHeaders(
 
   if (controlEntry) {
     // Add verified issuer info for upstream
-    headers['X-PEAC-Issuer'] = controlEntry.evidence.keyid ?? '';
+    headers['PEAC-Issuer'] = controlEntry.evidence.keyid ?? '';
   }
 
   if (warning) {
