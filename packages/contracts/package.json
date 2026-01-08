@@ -1,0 +1,36 @@
+{
+  "name": "@peac/contracts",
+  "version": "0.9.28",
+  "description": "PEAC canonical error codes and verification mode contracts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "peac",
+    "protocol",
+    "errors",
+    "rfc9457",
+    "http"
+  ],
+  "author": "PEAC Protocol contributors",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vitest": "^2.0.0"
+  }
+}
