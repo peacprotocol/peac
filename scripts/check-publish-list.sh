@@ -52,7 +52,7 @@ for (const p of pkgPaths) {
 console.log(pub.sort().join('\n'));
 ")
 
-# Expected packages (updated for v0.9.26)
+# Expected packages (updated for v0.9.28)
 EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/adapter-core
 @peac/adapter-x402-daydreams
@@ -60,6 +60,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/adapter-x402-pinata
 @peac/attribution
 @peac/cli
+@peac/contracts
 @peac/control
 @peac/core
 @peac/crypto
@@ -85,6 +86,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/server
 @peac/telemetry
 @peac/telemetry-otel
+@peac/worker-core
 EOF
 )
 
@@ -100,7 +102,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 31 public packages match"
+  echo "OK: All 33 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -109,6 +111,7 @@ echo "=== Checking test coverage ==="
 
 # Packages covered by test:core (from package.json)
 TESTED_PACKAGES="@peac/attribution
+@peac/contracts
 @peac/crypto
 @peac/http-signatures
 @peac/jwks-cache
@@ -122,29 +125,35 @@ TESTED_PACKAGES="@peac/attribution
 @peac/rails-stripe
 @peac/rails-x402
 @peac/telemetry
-@peac/telemetry-otel"
+@peac/telemetry-otel
+@peac/worker-core"
 
 # Packages explicitly without tests (with rationale)
 # These are either: thin wrappers, deprecated, or type-only packages
-NO_TESTS_RATIONALE="@peac/cli - CLI wrapper, tested via integration
+NO_TESTS_RATIONALE="@peac/adapter-core - shared adapter utilities, tested via adapter implementations
+@peac/adapter-x402-daydreams - x402 adapter, tested via integration
+@peac/adapter-x402-fluora - x402 adapter, tested via integration
+@peac/adapter-x402-pinata - x402 adapter, tested via integration
+@peac/cli - CLI wrapper, tested via integration
 @peac/control - orchestration layer, tested via protocol tests
 @peac/core - DEPRECATED, redirect to granular packages
 @peac/disc - discovery types only
 @peac/kernel - type definitions only, no runtime logic
 @peac/pay402 - thin 402 helpers, minimal runtime
 @peac/pref - preferences types only
+@peac/rails-card - card billing bridge, tested via integration
 @peac/receipts - type re-exports only
 @peac/schema - Zod schemas, validated at compile time
 @peac/sdk - re-exports only
 @peac/server - server wrapper, tested via integration"
 
-echo "Packages with tests (15):"
+echo "Packages with tests (17):"
 echo "$TESTED_PACKAGES" | sed 's/^/  /'
 echo ""
-echo "Packages without tests (11) - rationale:"
+echo "Packages without tests (16) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 26 packages accounted for (15 tested + 11 type/wrapper packages)"
+echo "OK: All 33 packages accounted for (17 tested + 16 type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="
