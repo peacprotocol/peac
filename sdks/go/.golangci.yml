@@ -1,6 +1,5 @@
 # golangci-lint configuration for PEAC Go SDK
 # Compatible with golangci-lint v2.x
-# Keep this minimal to avoid yak-shaving; expand as needed.
 
 version: '2'
 
@@ -10,29 +9,9 @@ run:
 linters:
   default: none
   enable:
-    - errcheck # Check for unchecked errors
-    - govet # Reports suspicious constructs
-    - ineffassign # Detects ineffective assignments
-    - staticcheck # Advanced static analysis
-    - unused # Reports unused code
-    - gosimple # Suggests code simplifications
-
-linters-settings:
-  errcheck:
-    # Don't check for error checking on these functions
-    exclude-functions:
-      - (*testing.T).Errorf
-      - (*testing.T).Fatalf
-      - (*testing.T).Error
-      - (*testing.T).Fatal
-
-issues:
-  # Don't skip any linter issues
-  max-issues-per-linter: 0
-  max-same-issues: 0
-
-  exclude-rules:
-    # Allow unused parameters in test files
-    - path: _test\.go
-      linters:
-        - unused
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gosimple
