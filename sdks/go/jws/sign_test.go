@@ -1,6 +1,7 @@
 package jws
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"encoding/json"
 	"testing"
@@ -49,6 +50,101 @@ func TestNewSigningKey(t *testing.T) {
 	}
 }
 
+func TestNewSigningKeyFromSeed(t *testing.T) {
+	// Generate a valid seed (32 bytes)
+	_, privateKey, _ := ed25519.GenerateKey(nil)
+	validSeed := privateKey.Seed()
+
+	tests := []struct {
+		name    string
+		seed    []byte
+		keyID   string
+		wantErr bool
+	}{
+		{
+			name:    "valid seed",
+			seed:    validSeed,
+			keyID:   "seed-key-001",
+			wantErr: false,
+		},
+		{
+			name:    "empty key ID",
+			seed:    validSeed,
+			keyID:   "",
+			wantErr: true,
+		},
+		{
+			name:    "seed too short",
+			seed:    []byte("short"),
+			keyID:   "key-001",
+			wantErr: true,
+		},
+		{
+			name:    "seed too long",
+			seed:    make([]byte, 64),
+			keyID:   "key-001",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			key, err := NewSigningKeyFromSeed(tt.seed, tt.keyID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewSigningKeyFromSeed() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && key == nil {
+				t.Error("NewSigningKeyFromSeed() returned nil without error")
+			}
+		})
+	}
+}
+
+func TestNewSigningKeyFromSeed_RoundTrip(t *testing.T) {
+	// Create a key from seed
+	seed := make([]byte, ed25519.SeedSize)
+	for i := range seed {
+		seed[i] = byte(i)
+	}
+
+	key, err := NewSigningKeyFromSeed(seed, "seed-test")
+	if err != nil {
+		t.Fatalf("NewSigningKeyFromSeed() error = %v", err)
+	}
+
+	// Sign some data
+	payload := []byte(`{"test":"data"}`)
+	jws, err := key.Sign(payload)
+	if err != nil {
+		t.Fatalf("Sign() error = %v", err)
+	}
+
+	// Parse and verify
+	parsed, err := Parse(jws)
+	if err != nil {
+		t.Fatalf("Parse() error = %v", err)
+	}
+
+	if err := VerifyJWS(parsed, key.PublicKey()); err != nil {
+		t.Errorf("VerifyJWS() error = %v", err)
+	}
+
+	// Verify KeyID accessor
+	if key.KeyID() != "seed-test" {
+		t.Errorf("KeyID() = %s, want seed-test", key.KeyID())
+	}
+}
+
+func TestSigningKey_KeyID(t *testing.T) {
+	_, privateKey, _ := ed25519.GenerateKey(nil)
+	key, _ := NewSigningKey(privateKey, "my-key-id")
+
+	if got := key.KeyID(); got != "my-key-id" {
+		t.Errorf("KeyID() = %s, want my-key-id", got)
+	}
+}
+
 func TestSigningKey_PublicKey(t *testing.T) {
 	publicKey, privateKey, _ := ed25519.GenerateKey(nil)
 	key, _ := NewSigningKey(privateKey, "key-001")
@@ -80,8 +176,8 @@ func TestSigningKey_Sign(t *testing.T) {
 	if parsed.Header.Algorithm != "EdDSA" {
 		t.Errorf("Algorithm = %s, want EdDSA", parsed.Header.Algorithm)
 	}
-	if parsed.Header.Type != "peac.receipt/0.9" {
-		t.Errorf("Type = %s, want peac.receipt/0.9", parsed.Header.Type)
+	if parsed.Header.Type != DefaultReceiptTyp {
+		t.Errorf("Type = %s, want %s", parsed.Header.Type, DefaultReceiptTyp)
 	}
 	if parsed.Header.KeyID != "key-001" {
 		t.Errorf("KeyID = %s, want key-001", parsed.Header.KeyID)
@@ -151,12 +247,8 @@ func TestGenerateSigningKey(t *testing.T) {
 		t.Fatalf("GenerateSigningKey() error = %v", err)
 	}
 
-	if key.KeyID != "test-key" {
-		t.Errorf("KeyID = %s, want test-key", key.KeyID)
-	}
-
-	if len(key.PrivateKey) != ed25519.PrivateKeySize {
-		t.Errorf("PrivateKey size = %d, want %d", len(key.PrivateKey), ed25519.PrivateKeySize)
+	if key.KeyID() != "test-key" {
+		t.Errorf("KeyID() = %s, want test-key", key.KeyID())
 	}
 
 	// Should be able to sign and verify
@@ -173,6 +265,35 @@ func TestGenerateSigningKey(t *testing.T) {
 
 	if err := VerifyJWS(parsed, key.PublicKey()); err != nil {
 		t.Errorf("VerifyJWS() error = %v", err)
+	}
+}
+
+func TestGenerateSigningKey_EmptyKeyID(t *testing.T) {
+	_, err := GenerateSigningKey("")
+	if err == nil {
+		t.Error("GenerateSigningKey() with empty keyID should error")
+	}
+}
+
+func TestGenerateSigningKeyWithRand_Deterministic(t *testing.T) {
+	// Use deterministic "random" source
+	deterministicRand := bytes.NewReader(make([]byte, 64))
+
+	key1, err := GenerateSigningKeyWithRand(deterministicRand, "det-key")
+	if err != nil {
+		t.Fatalf("GenerateSigningKeyWithRand() error = %v", err)
+	}
+
+	// Reset and generate again - should get same key
+	deterministicRand = bytes.NewReader(make([]byte, 64))
+	key2, err := GenerateSigningKeyWithRand(deterministicRand, "det-key")
+	if err != nil {
+		t.Fatalf("GenerateSigningKeyWithRand() error = %v", err)
+	}
+
+	// Public keys should match
+	if !key1.PublicKey().Equal(key2.PublicKey()) {
+		t.Error("Deterministic keygen should produce same keys")
 	}
 }
 
@@ -247,5 +368,79 @@ func TestSigningKey_DifferentKeysProduceDifferentSignatures(t *testing.T) {
 	}
 	if err := VerifyJWS(parsed2, key1.PublicKey()); err == nil {
 		t.Error("Verification with wrong key should fail")
+	}
+}
+
+// Header validation tests
+
+func TestValidateHeader_UnsupportedAlgorithm(t *testing.T) {
+	header := Header{
+		Algorithm: "RS256",
+		KeyID:     "key-001",
+		Type:      "peac.receipt/0.9",
+	}
+
+	err := ValidateHeader(header)
+	if err == nil {
+		t.Error("ValidateHeader() should reject non-EdDSA algorithm")
+	}
+}
+
+func TestValidateHeader_MissingKeyID(t *testing.T) {
+	header := Header{
+		Algorithm: "EdDSA",
+		KeyID:     "",
+		Type:      "peac.receipt/0.9",
+	}
+
+	err := ValidateHeader(header)
+	if err == nil {
+		t.Error("ValidateHeader() should reject missing key ID")
+	}
+}
+
+func TestValidateHeader_InvalidType(t *testing.T) {
+	header := Header{
+		Algorithm: "EdDSA",
+		KeyID:     "key-001",
+		Type:      "invalid/type",
+	}
+
+	err := ValidateHeader(header)
+	if err == nil {
+		t.Error("ValidateHeader() should reject non-peac.receipt type")
+	}
+}
+
+func TestValidateHeader_EmptyTypeAllowed(t *testing.T) {
+	// Empty type should be allowed (omitted is valid)
+	header := Header{
+		Algorithm: "EdDSA",
+		KeyID:     "key-001",
+		Type:      "",
+	}
+
+	err := ValidateHeader(header)
+	if err != nil {
+		t.Errorf("ValidateHeader() should allow empty type, got error: %v", err)
+	}
+}
+
+func TestValidateHeader_ValidPeacType(t *testing.T) {
+	header := Header{
+		Algorithm: "EdDSA",
+		KeyID:     "key-001",
+		Type:      "peac.receipt/0.9",
+	}
+
+	err := ValidateHeader(header)
+	if err != nil {
+		t.Errorf("ValidateHeader() error = %v", err)
+	}
+}
+
+func TestDefaultReceiptTyp_Constant(t *testing.T) {
+	if DefaultReceiptTyp != "peac.receipt/0.9" {
+		t.Errorf("DefaultReceiptTyp = %s, want peac.receipt/0.9", DefaultReceiptTyp)
 	}
 }
