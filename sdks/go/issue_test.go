@@ -296,6 +296,9 @@ func TestIssue_Error_InvalidAudience(t *testing.T) {
 		{"http scheme", "http://example.com"},
 		{"no scheme", "example.com"},
 		{"empty", ""},
+		{"fragment", "https://example.com#section"},
+		{"userinfo", "https://user:pass@example.com"},
+		{"userinfo no password", "https://user@example.com"},
 	}
 
 	for _, tt := range tests {
@@ -322,17 +325,37 @@ func TestIssue_Error_InvalidAudience(t *testing.T) {
 }
 
 func TestIssue_Error_InvalidSubject(t *testing.T) {
-	opts := validIssueOptions(t)
-	opts.Subject = "http://example.com" // Must be https
-
-	_, err := Issue(opts)
-	if err == nil {
-		t.Fatal("expected error for http:// subject")
+	tests := []struct {
+		name    string
+		subject string
+	}{
+		{"http scheme", "http://example.com"},
+		{"no scheme", "example.com"},
+		{"fragment", "https://example.com#section"},
+		{"userinfo", "https://user:pass@example.com"},
+		{"userinfo no password", "https://user@example.com"},
 	}
 
-	ie := err.(*IssueError)
-	if ie.Code != ErrCodeInvalidSubject {
-		t.Errorf("error code = %s, want %s", ie.Code, ErrCodeInvalidSubject)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opts := validIssueOptions(t)
+			opts.Subject = tt.subject
+
+			_, err := Issue(opts)
+			if err == nil {
+				t.Error("expected error for invalid subject")
+				return
+			}
+
+			ie, ok := err.(*IssueError)
+			if !ok {
+				t.Errorf("error type = %T, want *IssueError", err)
+				return
+			}
+			if ie.Code != ErrCodeInvalidSubject {
+				t.Errorf("error code = %s, want %s", ie.Code, ErrCodeInvalidSubject)
+			}
+		})
 	}
 }
 
@@ -812,10 +835,10 @@ func TestIssue_ZeroAmount(t *testing.T) {
 	}
 }
 
-// Evidence omitempty tests - verify evidence field is omitted when nil
+// Evidence omitempty tests - verify evidence field in payment is omitted when nil
 
 func TestIssue_EvidenceOmittedWhenNil(t *testing.T) {
-	// When Evidence is nil, the serialized payload should NOT contain "evidence" field
+	// When Evidence is nil, payment.evidence should NOT be present
 	opts := validIssueOptions(t)
 	opts.Evidence = nil // Explicitly nil
 
@@ -826,15 +849,24 @@ func TestIssue_EvidenceOmittedWhenNil(t *testing.T) {
 
 	parsed, _ := jws.Parse(result.JWS)
 
-	// Check raw JSON for "evidence" field
-	payloadStr := string(parsed.Payload)
-	if strings.Contains(payloadStr, `"evidence"`) {
-		t.Errorf("payload should NOT contain 'evidence' field when nil, got: %s", payloadStr)
+	// Use JSON unmarshal to check for payment.evidence field presence
+	var claims map[string]any
+	if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+		t.Fatalf("failed to unmarshal payload: %v", err)
+	}
+
+	payment, ok := claims["payment"].(map[string]any)
+	if !ok {
+		t.Fatal("payment claim should be a map")
+	}
+
+	if _, exists := payment["evidence"]; exists {
+		t.Errorf("payment should NOT contain 'evidence' key when nil, got: %v", payment["evidence"])
 	}
 }
 
 func TestIssue_EvidencePresentWhenProvided(t *testing.T) {
-	// When Evidence is provided, it should be in the payload
+	// When Evidence is provided, it should be in payment.evidence
 	opts := validIssueOptions(t)
 	opts.Evidence = map[string]any{"key": "value"}
 
@@ -845,10 +877,29 @@ func TestIssue_EvidencePresentWhenProvided(t *testing.T) {
 
 	parsed, _ := jws.Parse(result.JWS)
 
-	// Check raw JSON for "evidence" field
-	payloadStr := string(parsed.Payload)
-	if !strings.Contains(payloadStr, `"evidence"`) {
-		t.Errorf("payload should contain 'evidence' field when provided, got: %s", payloadStr)
+	// Use JSON unmarshal to check for payment.evidence field presence and value
+	var claims map[string]any
+	if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+		t.Fatalf("failed to unmarshal payload: %v", err)
+	}
+
+	payment, ok := claims["payment"].(map[string]any)
+	if !ok {
+		t.Fatal("payment claim should be a map")
+	}
+
+	evidence, exists := payment["evidence"]
+	if !exists {
+		t.Fatal("payment should contain 'evidence' key when provided")
+	}
+
+	// Verify evidence content
+	evidenceMap, ok := evidence.(map[string]any)
+	if !ok {
+		t.Fatalf("evidence should be a map, got %T", evidence)
+	}
+	if evidenceMap["key"] != "value" {
+		t.Errorf("evidence[key] = %v, want 'value'", evidenceMap["key"])
 	}
 }
 
