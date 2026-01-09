@@ -4,7 +4,7 @@ Full Go SDK parity with TypeScript implementation.
 
 ## Status
 
-- ✅ **Verify()** - Implemented in v0.9.25
+- **Verify()** - Implemented in v0.9.25
 - ⏳ **Issue()** - Pending (this document)
 - ⏳ **Policy Evaluation** - Pending (this document)
 

@@ -254,12 +254,12 @@ function buildWwwAuthenticate(error: PEACError): string {
 
 **Acceptance Criteria:**
 
-- ✅ Extract receipt from `PEAC-Receipt` or `Payment-Signature` headers
-- ✅ Call `verify()` with provided options
-- ✅ Return verified claims to handler
-- ✅ Return RFC 9457 problem+json on errors
-- ✅ Support custom error handlers via `onError` option
-- ✅ Add `WWW-Authenticate` header on 401/402 errors
+- Extract receipt from `PEAC-Receipt` or `Payment-Signature` headers
+- Call `verify()` with provided options
+- Return verified claims to handler
+- Return RFC 9457 problem+json on errors
+- Support custom error handlers via `onError` option
+- Add `WWW-Authenticate` header on 401/402 errors
 
 ### Day 2: Policy File Helpers
 
@@ -391,12 +391,12 @@ export function serveAiPolicyMd(
 
 **Acceptance Criteria:**
 
-- ✅ `servePeacTxt()` compiles policy to peac.txt format
-- ✅ `serveAiprefJson()` returns AIPREF JSON with proper cache headers
-- ✅ `serveLlmsTxt()` generates llms.txt from allowed/denied lists
-- ✅ `serveAiPolicyMd()` renders policy as markdown
-- ✅ All helpers return proper content-type headers
-- ✅ All helpers add cache-control headers (public, max-age=3600)
+- `servePeacTxt()` compiles policy to peac.txt format
+- `serveAiprefJson()` returns AIPREF JSON with proper cache headers
+- `serveLlmsTxt()` generates llms.txt from allowed/denied lists
+- `serveAiPolicyMd()` renders policy as markdown
+- All helpers return proper content-type headers
+- All helpers add cache-control headers (public, max-age=3600)
 
 ### Day 3: TypeScript Types and Error Handling
 
@@ -482,10 +482,10 @@ function buildWwwAuthenticate(error: PEACError): string {
 
 **Acceptance Criteria:**
 
-- ✅ All TypeScript types exported from `src/types.ts`
-- ✅ `createProblemResponse()` generates RFC 9457 responses
-- ✅ `buildWwwAuthenticate()` formats error code for WWW-Authenticate header
-- ✅ Full type safety for all public APIs
+- All TypeScript types exported from `src/types.ts`
+- `createProblemResponse()` generates RFC 9457 responses
+- `buildWwwAuthenticate()` formats error code for WWW-Authenticate header
+- Full type safety for all public APIs
 
 ### Day 4: Testing
 
@@ -651,13 +651,13 @@ describe('Policy File Helpers', () => {
 
 **Acceptance Criteria:**
 
-- ✅ 40+ tests covering all public APIs
-- ✅ Receipt verification success/failure paths
-- ✅ Missing receipt (402 response)
-- ✅ Custom error handlers
-- ✅ All policy file helpers
-- ✅ Content-Type and Cache-Control headers
-- ✅ Integration tests with Next.js Request/Response
+- 40+ tests covering all public APIs
+- Receipt verification success/failure paths
+- Missing receipt (402 response)
+- Custom error handlers
+- All policy file helpers
+- Content-Type and Cache-Control headers
+- Integration tests with Next.js Request/Response
 
 ### Day 5: Documentation and Examples
 
@@ -882,11 +882,11 @@ Without receipt (402 Payment Required):
 ````
 
 **Acceptance Criteria:**
-- ✅ Comprehensive README with quick start, API reference, examples
-- ✅ 3 complete examples in `examples/` directory
-- ✅ TypeScript types documented
-- ✅ Error handling patterns documented
-- ✅ Test examples with curl commands
+- Comprehensive README with quick start, API reference, examples
+- 3 complete examples in `examples/` directory
+- TypeScript types documented
+- Error handling patterns documented
+- Test examples with curl commands
 
 ## Dependencies
 
@@ -1025,26 +1025,26 @@ All error responses follow RFC 9457 (Problem Details for HTTP APIs):
 
 ### P0 - MUST SHIP
 
-- ✅ `withPeac()` route handler wrapper with receipt verification
-- ✅ Extract receipt from `PEAC-Receipt` or `Payment-Signature` headers
-- ✅ Inject verified claims into handler context
-- ✅ Return RFC 9457 problem+json on errors
-- ✅ Custom error handler support
-- ✅ All 4 policy file helpers (peac.txt, aipref.json, llms.txt, ai-policy.md)
-- ✅ 40+ tests with 100% coverage
-- ✅ TypeScript types exported
-- ✅ README with API reference and examples
+- `withPeac()` route handler wrapper with receipt verification
+- Extract receipt from `PEAC-Receipt` or `Payment-Signature` headers
+- Inject verified claims into handler context
+- Return RFC 9457 problem+json on errors
+- Custom error handler support
+- All 4 policy file helpers (peac.txt, aipref.json, llms.txt, ai-policy.md)
+- 40+ tests with 100% coverage
+- TypeScript types exported
+- README with API reference and examples
 
 ### P1 - SHOULD SHIP
 
-- ⚠️ 3 complete examples in `examples/` directory
-- ⚠️ Replay protection integration
-- ⚠️ JWKS caching guidance
+- 3 complete examples in `examples/` directory
+- Replay protection integration
+- JWKS caching guidance
 
 ### P2 - NICE TO HAVE
 
-- ⚠️ Client-side helper for sending receipts
-- ⚠️ Middleware integration guidance
+- Client-side helper for sending receipts
+- Middleware integration guidance
 
 ## Notes
 
