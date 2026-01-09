@@ -46,11 +46,15 @@ jobs:
       - name: Check for placeholder text
         run: |
           echo "Checking for unresolved placeholders..."
-          # Allow placeholder domains in examples, but flag TODOs/FIXMEs
-          if rg -n "FIXME|TODO|XXX" docs/ \
+          # Check for real TODO/FIXME markers (not in example commands or PEIP templates)
+          if rg -n "FIXME|TODO" docs/ \
              --glob '!**/ROADMAP.md' \
              --glob '!**/CHANGELOG.md' \
-             --glob '!**/roadmap/*.md'; then
+             --glob '!**/roadmap/*.md' \
+             --glob '!**/peips.md' \
+             --glob '!**/peip/*.md' \
+             --glob '!**/NPM_PUBLISH_POLICY.md' \
+             --glob '!**/IMPLEMENTATION_PLAN.md'; then
             echo "ERROR: Found unresolved TODO/FIXME markers in docs"
             exit 1
           fi

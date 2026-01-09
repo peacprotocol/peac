@@ -558,7 +558,7 @@ Issues = "https://github.com/peacprotocol/peac/issues"
 
 ### README.md
 
-```markdown
+````markdown
 # PEAC Protocol SDK for Python
 
 Official Python SDK for PEAC Protocol receipt verification and issuance.
@@ -568,6 +568,7 @@ Official Python SDK for PEAC Protocol receipt verification and issuance.
 ```bash
 pip install peac-protocol
 ```
+````
 
 ## Quick Start
 
@@ -607,7 +608,8 @@ print(f"Receipt JWS: {result.jws}")
 ## License
 
 Apache-2.0
-```
+
+````
 
 ### Type Stubs
 
@@ -635,7 +637,7 @@ __all__ = [
     "PEACError",
     "PEACReceiptClaims",
 ]
-```
+````
 
 ## Publishing
 

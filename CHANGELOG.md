@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Contracts Package** (`@peac/contracts`, Layer 1)
-  - Canonical error codes with E_* prefix format
+  - Canonical error codes with E\_\* prefix format
   - Contract definitions for protocol invariants
   - Shared error taxonomy across TypeScript and Go implementations
 - **Worker Core Package** (`@peac/worker-core`, Layer 4)
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### CI/Quality
 
 - **Documentation Quality Workflow** (`.github/workflows/docs-quality.yml`)
-  - Forbidden header checks (no Payment-*, enforce RFC 9421)
+  - Forbidden header checks (no Payment-\*, enforce RFC 9421)
   - RFC 9421 usage verification in edge guides
   - Performance claim qualification checks
   - Placeholder text detection

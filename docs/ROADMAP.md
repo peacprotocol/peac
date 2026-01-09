@@ -7,7 +7,7 @@ Shipped:
 - Dispute Attestations - `peac/dispute` type for formal contestation
 - Audit Logs - Case bundle generation with trace correlation
 - Dispute Lifecycle - Filed, acknowledged, resolved, appealed states
-- 13 Dispute Error Codes - E_DISPUTE_* codes for standardized handling
+- 13 Dispute Error Codes - E*DISPUTE*\* codes for standardized handling
 - Repo Cleanup - 121 stale branches archived, community health files reorganized
 
 ## v0.9.26

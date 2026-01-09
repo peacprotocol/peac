@@ -86,11 +86,7 @@ export class FaremeterAdapter {
    * @param secret - Webhook secret
    * @returns true if valid, false otherwise
    */
-  static verifyWebhookSignature(
-    payload: string,
-    signature: string,
-    secret: string
-  ): boolean {
+  static verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
     // HMAC-SHA256 verification
   }
 }
@@ -153,15 +149,19 @@ app.post('/webhooks/faremeter', async (req, res) => {
   const evidence = result.value;
 
   // Issue PEAC receipt
-  const receipt = await issue({
-    iss: 'https://api.example.com',
-    aud: 'https://agent.example.com',
-    amt: evidence.amount,
-    cur: evidence.currency,
-    rail: evidence.rail,
-    reference: evidence.reference,
-    evidence: evidence.evidence,
-  }, privateKey, keyID);
+  const receipt = await issue(
+    {
+      iss: 'https://api.example.com',
+      aud: 'https://agent.example.com',
+      amt: evidence.amount,
+      cur: evidence.currency,
+      rail: evidence.rail,
+      reference: evidence.reference,
+      evidence: evidence.evidence,
+    },
+    privateKey,
+    keyID
+  );
 
   res.json({ receipt: receipt.jws });
 });
@@ -186,33 +186,30 @@ export function verifyWebhookSignature(
   const computed = hmac.digest('hex');
 
   // Constant-time comparison
-  return timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(computed)
-  );
+  return timingSafeEqual(Buffer.from(signature), Buffer.from(computed));
 }
 ```
 
 ### Event Types
 
-| Faremeter Event | PEAC Mapping | Notes |
-|-----------------|--------------|-------|
-| `usage.metered` | PaymentEvidence | Usage-based billing event |
+| Faremeter Event        | PEAC Mapping    | Notes                         |
+| ---------------------- | --------------- | ----------------------------- |
+| `usage.metered`        | PaymentEvidence | Usage-based billing event     |
 | `subscription.charged` | PaymentEvidence | Recurring subscription charge |
-| `invoice.paid` | PaymentEvidence | Invoice payment confirmation |
+| `invoice.paid`         | PaymentEvidence | Invoice payment confirmation  |
 
 ### Evidence Fields
 
 ```typescript
 interface FaremeterEvidence {
-  event_id: string;           // Unique event ID
-  event_type: string;         // Event type
-  customer_id: string;        // Faremeter customer ID
-  meter_id?: string;          // Meter ID (for usage.metered)
-  usage_quantity?: number;    // Usage amount
-  usage_unit?: string;        // Usage unit (e.g., "requests", "GB")
-  invoice_id?: string;        // Invoice ID (for invoice.paid)
-  subscription_id?: string;   // Subscription ID
+  event_id: string; // Unique event ID
+  event_type: string; // Event type
+  customer_id: string; // Faremeter customer ID
+  meter_id?: string; // Meter ID (for usage.metered)
+  usage_quantity?: number; // Usage amount
+  usage_unit?: string; // Usage unit (e.g., "requests", "GB")
+  invoice_id?: string; // Invoice ID (for invoice.paid)
+  subscription_id?: string; // Subscription ID
 }
 ```
 
@@ -304,31 +301,29 @@ import { issue } from '@peac/protocol';
 
 const app = express();
 
-app.post(
-  '/webhooks/faremeter',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
-    const signature = req.headers['faremeter-signature'] as string;
-    const payload = req.body.toString('utf8');
-    const secret = process.env.FAREMETER_WEBHOOK_SECRET!;
+app.post('/webhooks/faremeter', express.raw({ type: 'application/json' }), async (req, res) => {
+  const signature = req.headers['faremeter-signature'] as string;
+  const payload = req.body.toString('utf8');
+  const secret = process.env.FAREMETER_WEBHOOK_SECRET!;
 
-    // Verify signature
-    if (!FaremeterAdapter.verifyWebhookSignature(payload, signature, secret)) {
-      return res.status(401).json({ error: 'Invalid signature' });
-    }
+  // Verify signature
+  if (!FaremeterAdapter.verifyWebhookSignature(payload, signature, secret)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
 
-    // Parse event
-    const event = JSON.parse(payload);
+  // Parse event
+  const event = JSON.parse(payload);
 
-    // Convert to PaymentEvidence
-    const result = FaremeterAdapter.toPaymentEvidence(event);
+  // Convert to PaymentEvidence
+  const result = FaremeterAdapter.toPaymentEvidence(event);
 
-    if (!result.ok) {
-      return res.status(400).json({ error: result.error.message });
-    }
+  if (!result.ok) {
+    return res.status(400).json({ error: result.error.message });
+  }
 
-    // Issue receipt
-    const receipt = await issue({
+  // Issue receipt
+  const receipt = await issue(
+    {
       iss: 'https://api.example.com',
       aud: 'https://agent.example.com',
       amt: result.value.amount,
@@ -336,12 +331,14 @@ app.post(
       rail: result.value.rail,
       reference: result.value.reference,
       evidence: result.value.evidence,
-    }, privateKey, keyID);
+    },
+    privateKey,
+    keyID
+  );
 
-    // Acknowledge webhook
-    res.json({ received: true, receipt: receipt.jws });
-  }
-);
+  // Acknowledge webhook
+  res.json({ received: true, receipt: receipt.jws });
+});
 ```
 
 ## Dependencies

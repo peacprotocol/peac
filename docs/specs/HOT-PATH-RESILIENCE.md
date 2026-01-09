@@ -36,8 +36,8 @@ function parseJWS(jws: string): ParsedJWS {
   }
 
   // Base64url decode - O(n) where n = part length (bounded by MAX_JWS_SIZE)
-  const header = base64urlDecode(parts[0]);    // Bounded: max 1KB
-  const payload = base64urlDecode(parts[1]);   // Bounded: max 64KB
+  const header = base64urlDecode(parts[0]); // Bounded: max 1KB
+  const payload = base64urlDecode(parts[1]); // Bounded: max 64KB
   const signature = base64urlDecode(parts[2]); // Fixed: 64 bytes (Ed25519)
 
   return { header, payload, signature };
@@ -45,6 +45,7 @@ function parseJWS(jws: string): ParsedJWS {
 ```
 
 **Bounds:**
+
 - Header: max 1KB
 - Payload: max 64KB
 - Signature: fixed 64 bytes (Ed25519)
@@ -67,6 +68,7 @@ function parseClaims(payload: Uint8Array): PEACReceiptClaims {
 ```
 
 **Bounds:**
+
 - Payload size: max 64KB
 - Object depth: max 32 levels
 - Array length: max 10,000 elements
@@ -148,6 +150,7 @@ export function assertJsonSafeIterative(value: unknown, limits: JsonEvidenceLimi
 ```
 
 **Guarantees:**
+
 - No recursion (stack-based)
 - Bounded stack size: O(maxDepth)
 - Bounded total nodes: maxTotalNodes (default 100k)
@@ -160,7 +163,7 @@ export const JSON_EVIDENCE_LIMITS = {
   maxDepth: 32,
   maxArrayLength: 10_000,
   maxObjectKeys: 1_000,
-  maxStringLength: 65_536,  // 64KB
+  maxStringLength: 65_536, // 64KB
   maxTotalNodes: 100_000,
 } as const;
 ```
@@ -187,6 +190,7 @@ async function verifySignature(
 ```
 
 **Guarantees:**
+
 - Fixed-time execution (timing attack resistant)
 - No data-dependent branches
 - Input size: fixed (message hash + signature + public key)
@@ -195,15 +199,15 @@ async function verifySignature(
 
 ### Per-Request Memory Budget
 
-| Component | Max Memory | Notes |
-|-----------|------------|-------|
-| JWS input | 100 KB | Enforced at ingress |
-| Parsed header | 1 KB | Fixed structure |
-| Parsed payload | 64 KB | Claims + extensions |
-| Evidence tree | 1 MB | 100k nodes @ ~10 bytes/node |
-| JWKS cache entry | 10 KB | Per issuer |
-| Replay nonce entry | 100 bytes | Per nonce |
-| Total per request | ~1.2 MB | Worst case |
+| Component          | Max Memory | Notes                       |
+| ------------------ | ---------- | --------------------------- |
+| JWS input          | 100 KB     | Enforced at ingress         |
+| Parsed header      | 1 KB       | Fixed structure             |
+| Parsed payload     | 64 KB      | Claims + extensions         |
+| Evidence tree      | 1 MB       | 100k nodes @ ~10 bytes/node |
+| JWKS cache entry   | 10 KB      | Per issuer                  |
+| Replay nonce entry | 100 bytes  | Per nonce                   |
+| Total per request  | ~1.2 MB    | Worst case                  |
 
 ### JWKS Cache Memory
 
@@ -211,8 +215,8 @@ async function verifySignature(
 // packages/jwks-cache/src/cache.ts
 class JWKSCache {
   private cache: Map<string, CacheEntry> = new Map();
-  private readonly maxEntries = 100;  // Max 100 issuers
-  private readonly maxSizePerEntry = 10_240;  // 10KB per JWKS
+  private readonly maxEntries = 100; // Max 100 issuers
+  private readonly maxSizePerEntry = 10_240; // 10KB per JWKS
 
   async get(url: string): Promise<JWKS> {
     // LRU eviction when full
@@ -235,6 +239,7 @@ class JWKSCache {
 ```
 
 **Guarantees:**
+
 - Bounded cache size: max 100 entries
 - Bounded entry size: max 10KB per JWKS
 - LRU eviction when full
@@ -254,6 +259,7 @@ interface ReplayStore {
 ```
 
 **Storage:**
+
 - **D1 (Cloudflare):** SQL-based, atomic, no memory impact on worker
 - **KV (Fastly/Akamai):** Eventually consistent, no memory impact on worker
 - **Memory limit:** N/A (external storage)
@@ -282,72 +288,85 @@ export async function handleTAP(request: Request, opts: TAPOptions): Promise<Res
 
   // Missing TAP in tap_only mode → HTTP 402
   if (opts.mode === 'tap_only' && !tap) {
-    return new Response(JSON.stringify({
-      type: 'https://peacprotocol.org/errors#E_TAP_MISSING',
-      title: 'TAP Missing',
-      status: 402,
-    }), {
-      status: 402,
-      headers: {
-        'WWW-Authenticate': 'PEAC realm="peac", error="tap_missing"',
-        'Content-Type': 'application/problem+json',
-      },
-    });
+    return new Response(
+      JSON.stringify({
+        type: 'https://peacprotocol.org/errors#E_TAP_MISSING',
+        title: 'TAP Missing',
+        status: 402,
+      }),
+      {
+        status: 402,
+        headers: {
+          'WWW-Authenticate': 'PEAC realm="peac", error="tap_missing"',
+          'Content-Type': 'application/problem+json',
+        },
+      }
+    );
   }
 
   // Unknown TAP tags → HTTP 400 (reject)
   if (tap && hasUnknownTags(tap)) {
-    return new Response(JSON.stringify({
-      type: 'https://peacprotocol.org/errors#E_TAP_TAG_UNKNOWN',
-      title: 'Unknown TAP Tag',
-      status: 400,
-    }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/problem+json' },
-    });
+    return new Response(
+      JSON.stringify({
+        type: 'https://peacprotocol.org/errors#E_TAP_TAG_UNKNOWN',
+        title: 'Unknown TAP Tag',
+        status: 400,
+      }),
+      {
+        status: 400,
+        headers: { 'Content-Type': 'application/problem+json' },
+      }
+    );
   }
 
   // Nonce present but no replay store → HTTP 401
   if (tap?.nonce && !opts.replayStore) {
-    return new Response(JSON.stringify({
-      type: 'https://peacprotocol.org/errors#E_TAP_REPLAY_PROTECTION_REQUIRED',
-      title: 'Replay Protection Required',
-      status: 401,
-    }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/problem+json' },
-    });
+    return new Response(
+      JSON.stringify({
+        type: 'https://peacprotocol.org/errors#E_TAP_REPLAY_PROTECTION_REQUIRED',
+        title: 'Replay Protection Required',
+        status: 401,
+      }),
+      {
+        status: 401,
+        headers: { 'Content-Type': 'application/problem+json' },
+      }
+    );
   }
 
   // Issuer not in allowlist → HTTP 403
   if (!opts.issuerAllowlist.includes(claims.issuer)) {
-    return new Response(JSON.stringify({
-      type: 'https://peacprotocol.org/errors#E_TAP_ISSUER_NOT_ALLOWED',
-      title: 'Issuer Not Allowed',
-      status: 403,
-    }), {
-      status: 403,
-      headers: { 'Content-Type': 'application/problem+json' },
-    });
+    return new Response(
+      JSON.stringify({
+        type: 'https://peacprotocol.org/errors#E_TAP_ISSUER_NOT_ALLOWED',
+        title: 'Issuer Not Allowed',
+        status: 403,
+      }),
+      {
+        status: 403,
+        headers: { 'Content-Type': 'application/problem+json' },
+      }
+    );
   }
 }
 ```
 
 ### Error Recovery Matrix
 
-| Failure | Response | Retryable | Degradation |
-|---------|----------|-----------|-------------|
-| JWS parse error | 400 | No | Fail-closed (deny) |
-| Claims validation error | 400 | No | Fail-closed (deny) |
-| Evidence too large | 400 | No | Fail-closed (deny) |
-| Signature invalid | 401 | No | Fail-closed (deny) |
-| Time validation failed | 401 | Yes (after clock sync) | Fail-closed (deny) |
-| JWKS fetch failed | 503 | Yes (exponential backoff) | Fail-closed (deny) |
-| Replay store unavailable | 503 | Yes | Fail-closed (deny) |
-| Empty issuer allowlist | 500 | No | Fail-closed (deny) |
-| Mode misconfigured | 500 | No | Fail-closed (deny) |
+| Failure                  | Response | Retryable                 | Degradation        |
+| ------------------------ | -------- | ------------------------- | ------------------ |
+| JWS parse error          | 400      | No                        | Fail-closed (deny) |
+| Claims validation error  | 400      | No                        | Fail-closed (deny) |
+| Evidence too large       | 400      | No                        | Fail-closed (deny) |
+| Signature invalid        | 401      | No                        | Fail-closed (deny) |
+| Time validation failed   | 401      | Yes (after clock sync)    | Fail-closed (deny) |
+| JWKS fetch failed        | 503      | Yes (exponential backoff) | Fail-closed (deny) |
+| Replay store unavailable | 503      | Yes                       | Fail-closed (deny) |
+| Empty issuer allowlist   | 500      | No                        | Fail-closed (deny) |
+| Mode misconfigured       | 500      | No                        | Fail-closed (deny) |
 
 **Graceful Degradation:**
+
 - JWKS fetch failure → serve cached JWKS if available (with warning)
 - Replay store failure → deny all nonce-based TAPs (fail-closed)
 - Evidence validation failure → deny but log for audit
@@ -363,7 +382,7 @@ class CircuitBreaker {
   private state: 'closed' | 'open' | 'half-open' = 'closed';
 
   private readonly maxFailures = 5;
-  private readonly timeout = 60_000;  // 60 seconds
+  private readonly timeout = 60_000; // 60 seconds
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     // Open state → fail fast
@@ -396,6 +415,7 @@ class CircuitBreaker {
 ```
 
 **Usage:**
+
 - JWKS fetching: open circuit after 5 consecutive failures
 - Replay store: open circuit after 5 consecutive timeouts
 - Half-open → allow 1 request to test recovery
@@ -404,17 +424,17 @@ class CircuitBreaker {
 
 ### Latency Budgets
 
-| Operation | P50 | P95 | P99 | Max |
-|-----------|-----|-----|-----|-----|
-| JWS parse | < 0.1ms | < 0.2ms | < 0.5ms | 1ms |
-| Claims validation | < 0.1ms | < 0.2ms | < 0.5ms | 1ms |
-| Evidence validation | < 1ms | < 2ms | < 5ms | 10ms |
-| Signature verification | < 0.5ms | < 1ms | < 2ms | 5ms |
-| JWKS fetch (cached) | < 0.1ms | < 0.2ms | < 0.5ms | 1ms |
-| JWKS fetch (uncached) | < 50ms | < 100ms | < 200ms | 500ms |
-| Replay check (D1) | < 1ms | < 2ms | < 5ms | 10ms |
-| Replay check (KV) | < 1ms | < 3ms | < 10ms | 20ms |
-| **Total verify** | **< 2ms** | **< 5ms** | **< 10ms** | **20ms** |
+| Operation              | P50       | P95       | P99        | Max      |
+| ---------------------- | --------- | --------- | ---------- | -------- |
+| JWS parse              | < 0.1ms   | < 0.2ms   | < 0.5ms    | 1ms      |
+| Claims validation      | < 0.1ms   | < 0.2ms   | < 0.5ms    | 1ms      |
+| Evidence validation    | < 1ms     | < 2ms     | < 5ms      | 10ms     |
+| Signature verification | < 0.5ms   | < 1ms     | < 2ms      | 5ms      |
+| JWKS fetch (cached)    | < 0.1ms   | < 0.2ms   | < 0.5ms    | 1ms      |
+| JWKS fetch (uncached)  | < 50ms    | < 100ms   | < 200ms    | 500ms    |
+| Replay check (D1)      | < 1ms     | < 2ms     | < 5ms      | 10ms     |
+| Replay check (KV)      | < 1ms     | < 3ms     | < 10ms     | 20ms     |
+| **Total verify**       | **< 2ms** | **< 5ms** | **< 10ms** | **20ms** |
 
 ### Throughput Targets
 
@@ -436,19 +456,19 @@ class CircuitBreaker {
 // packages/telemetry-otel/src/metrics.ts
 interface VerificationMetrics {
   // Counters
-  receipts_verified_total: Counter;       // By status (success/failure)
-  jwks_fetches_total: Counter;            // By issuer, cached/uncached
-  replay_checks_total: Counter;           // By result (allowed/denied)
+  receipts_verified_total: Counter; // By status (success/failure)
+  jwks_fetches_total: Counter; // By issuer, cached/uncached
+  replay_checks_total: Counter; // By result (allowed/denied)
 
   // Histograms
-  verification_duration_ms: Histogram;    // P50/P95/P99
-  jwks_fetch_duration_ms: Histogram;      // P50/P95/P99
-  evidence_size_bytes: Histogram;         // Distribution
+  verification_duration_ms: Histogram; // P50/P95/P99
+  jwks_fetch_duration_ms: Histogram; // P50/P95/P99
+  evidence_size_bytes: Histogram; // Distribution
 
   // Gauges
-  jwks_cache_size: Gauge;                 // Current cache entries
-  jwks_cache_hit_rate: Gauge;             // Hit rate (0-1)
-  circuit_breaker_state: Gauge;           // 0=closed, 1=open, 2=half-open
+  jwks_cache_size: Gauge; // Current cache entries
+  jwks_cache_hit_rate: Gauge; // Hit rate (0-1)
+  circuit_breaker_state: Gauge; // 0=closed, 1=open, 2=half-open
 }
 ```
 
@@ -468,19 +488,21 @@ interface HealthCheck {
 
   // Performance indicators
   latency_p95_ms: number;
-  error_rate_5m: number;  // Last 5 minutes
+  error_rate_5m: number; // Last 5 minutes
 }
 ```
 
 ### Alerts
 
 **Critical (P0):**
+
 - Error rate > 5% (5-minute window)
 - P95 latency > 10ms (5-minute window)
 - Circuit breaker open > 60 seconds
 - JWKS cache hit rate < 90%
 
 **Warning (P1):**
+
 - Error rate > 1% (15-minute window)
 - P95 latency > 5ms (15-minute window)
 - Memory usage > 80% of limit
@@ -493,8 +515,8 @@ All inputs validated at ingress:
 
 ```typescript
 // Size limits
-const MAX_JWS_SIZE = 102_400;  // 100KB
-const MAX_HEADER_SIZE = 8_192;  // 8KB per header
+const MAX_JWS_SIZE = 102_400; // 100KB
+const MAX_HEADER_SIZE = 8_192; // 8KB per header
 
 // Format validation
 function validateJWS(jws: string): void {
@@ -554,8 +576,8 @@ Per-issuer rate limiting to prevent abuse:
 // packages/worker-core/src/rate-limit.ts
 class RateLimiter {
   private readonly limits = new Map<string, { count: number; resetAt: number }>();
-  private readonly maxRequests = 1000;  // Per minute per issuer
-  private readonly window = 60_000;     // 1 minute
+  private readonly maxRequests = 1000; // Per minute per issuer
+  private readonly window = 60_000; // 1 minute
 
   async check(issuer: string): Promise<boolean> {
     const now = Date.now();
@@ -567,7 +589,7 @@ class RateLimiter {
     }
 
     if (limit.count >= this.maxRequests) {
-      return false;  // Rate limited
+      return false; // Rate limited
     }
 
     limit.count++;
@@ -577,6 +599,7 @@ class RateLimiter {
 ```
 
 **Limits:**
+
 - 1,000 requests per minute per issuer
 - 429 response if exceeded
 - Retry-After header with reset time
@@ -588,12 +611,14 @@ class RateLimiter {
 **Symptom:** P95 latency > 10ms
 
 **Investigation:**
+
 1. Check JWKS cache hit rate (should be > 90%)
 2. Check evidence validation time (most variable component)
 3. Check replay store latency (D1 vs KV)
 4. Check network latency to JWKS endpoints
 
 **Mitigation:**
+
 1. Increase JWKS cache TTL (if stale keys not an issue)
 2. Tighten evidence limits (reduce maxTotalNodes)
 3. Switch to D1 for replay (if using KV)
@@ -604,12 +629,14 @@ class RateLimiter {
 **Symptom:** Error rate > 5%
 
 **Investigation:**
+
 1. Check error code distribution (which errors?)
 2. Check JWKS fetch failures (503 errors)
 3. Check signature validation failures (401 errors)
 4. Check time validation failures (401 errors)
 
 **Mitigation:**
+
 1. For JWKS failures: verify issuer endpoints are up
 2. For signature failures: verify issuers are using correct keys
 3. For time failures: verify clock synchronization
@@ -619,11 +646,13 @@ class RateLimiter {
 **Symptom:** Worker OOM errors
 
 **Investigation:**
+
 1. Check evidence size distribution
 2. Check JWKS cache size
 3. Check request rate (high RPS can amplify memory usage)
 
 **Mitigation:**
+
 1. Reduce evidence limits (maxTotalNodes)
 2. Reduce JWKS cache size (maxEntries)
 3. Add more worker instances

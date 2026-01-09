@@ -131,11 +131,11 @@ fastly compute publish
 
 ### MODE (Required)
 
-| Mode | Behavior | Use Case |
-|------|----------|----------|
-| `tap_only` | TAP required (default) | Production APIs |
-| `receipt_or_tap` | TAP or receipt accepted | Migration period |
-| `unsafe_no_tap` | No TAP required (DEV ONLY) | Local development |
+| Mode             | Behavior                   | Use Case          |
+| ---------------- | -------------------------- | ----------------- |
+| `tap_only`       | TAP required (default)     | Production APIs   |
+| `receipt_or_tap` | TAP or receipt accepted    | Migration period  |
+| `unsafe_no_tap`  | No TAP required (DEV ONLY) | Local development |
 
 ### ISSUER_ALLOWLIST (Required)
 
@@ -199,19 +199,19 @@ Content-Type: application/problem+json
 
 ### Error Codes
 
-| HTTP | Code | Description | Retryable |
-|------|------|-------------|-----------|
-| 400 | E_TAP_MALFORMED | Invalid TAP format | No |
-| 400 | E_TAP_TAG_UNKNOWN | Unknown TAP tag | No |
-| 400 | E_TAP_WINDOW_TOO_LARGE | Time window > 8 min | No |
-| 401 | E_TAP_SIGNATURE_INVALID | Signature verification failed | No |
-| 401 | E_TAP_TIME_INVALID | Outside time window | Yes |
-| 401 | E_TAP_KEY_NOT_FOUND | Key ID not in JWKS | Maybe |
-| 401 | E_TAP_REPLAY_PROTECTION_REQUIRED | Nonce present but no replay store | No |
-| 402 | E_TAP_MISSING | TAP required but not provided | Yes |
-| 403 | E_TAP_ISSUER_NOT_ALLOWED | Issuer not in allowlist | No |
-| 409 | E_TAP_REPLAY_DETECTED | Nonce already used | No |
-| 503 | E_TAP_JWKS_UNAVAILABLE | Cannot fetch JWKS | Yes |
+| HTTP | Code                             | Description                       | Retryable |
+| ---- | -------------------------------- | --------------------------------- | --------- |
+| 400  | E_TAP_MALFORMED                  | Invalid TAP format                | No        |
+| 400  | E_TAP_TAG_UNKNOWN                | Unknown TAP tag                   | No        |
+| 400  | E_TAP_WINDOW_TOO_LARGE           | Time window > 8 min               | No        |
+| 401  | E_TAP_SIGNATURE_INVALID          | Signature verification failed     | No        |
+| 401  | E_TAP_TIME_INVALID               | Outside time window               | Yes       |
+| 401  | E_TAP_KEY_NOT_FOUND              | Key ID not in JWKS                | Maybe     |
+| 401  | E_TAP_REPLAY_PROTECTION_REQUIRED | Nonce present but no replay store | No        |
+| 402  | E_TAP_MISSING                    | TAP required but not provided     | Yes       |
+| 403  | E_TAP_ISSUER_NOT_ALLOWED         | Issuer not in allowlist           | No        |
+| 409  | E_TAP_REPLAY_DETECTED            | Nonce already used                | No        |
+| 503  | E_TAP_JWKS_UNAVAILABLE           | Cannot fetch JWKS                 | Yes       |
 
 ## Security Hardening
 
@@ -259,6 +259,7 @@ fastly config-store-entry create \
 ```
 
 Enables:
+
 - Bypass TAP validation
 - Skip issuer allowlist
 - Detailed error messages (includes sensitive data)
@@ -309,14 +310,16 @@ async function handleRequest(event) {
 
   // Log to Fastly logging endpoints
   const duration = Date.now() - start;
-  console.log(JSON.stringify({
-    timestamp: new Date().toISOString(),
-    method: event.request.method,
-    url: event.request.url,
-    status: response.status,
-    duration_ms: duration,
-    mode: env.MODE,
-  }));
+  console.log(
+    JSON.stringify({
+      timestamp: new Date().toISOString(),
+      method: event.request.method,
+      url: event.request.url,
+      status: response.status,
+      duration_ms: duration,
+      mode: env.MODE,
+    })
+  );
 
   return response;
 }
@@ -370,6 +373,7 @@ fastly resource-link create --resource-id=your-kv-store-id --version=latest
 **Cause:** Cannot fetch issuer JWKS (network error, timeout, SSRF block).
 
 **Fix:**
+
 1. Verify issuer URL is reachable
 2. Check backend configuration in `fastly.toml`
 3. Verify HTTPS (required except localhost)

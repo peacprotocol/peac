@@ -247,7 +247,7 @@ After successful publish:
 
 ## Troubleshooting
 
-### "workspace:* not resolved"
+### "workspace:\* not resolved"
 
 **Cause:** Used `npm publish` instead of `pnpm publish`.
 
@@ -364,10 +364,10 @@ npm token create --read-only=false
 
 ## Version History
 
-| Version          | Published | npm Status    | Notes                |
-|------------------|-----------|---------------|----------------------|
-| v0.9.20-v0.9.30  | N/A       | Not published | Tagged in Git only   |
-| v0.9.31          | TBD       | Planned       | First npm publish    |
+| Version         | Published | npm Status    | Notes              |
+| --------------- | --------- | ------------- | ------------------ |
+| v0.9.20-v0.9.30 | N/A       | Not published | Tagged in Git only |
+| v0.9.31         | TBD       | Planned       | First npm publish  |
 
 ## References
 

@@ -11,12 +11,14 @@
 Minimal Next.js integration package providing route handler wrappers and helpers to serve PEAC policy files. Designed for Next.js App Router (Next.js 13+).
 
 **Goals:**
+
 - Zero-config route handler wrapper with PEAC receipt verification
 - Helpers to serve `peac.txt`, `aipref.json`, `llms.txt`, `ai-policy.md`
 - TypeScript-first with excellent DX
 - No heavy opinions - developers retain full control
 
 **Non-Goals:**
+
 - Pages Router support (App Router only)
 - Middleware (use `@peac/middleware-nextjs` for Edge Runtime)
 - Client-side components
@@ -82,6 +84,7 @@ export const POST = withPeac(
 ```
 
 **Behavior:**
+
 1. Extract receipt from `PEAC-Receipt` header or `Payment-Signature` header (TAP mode)
 2. Call `verify()` with provided options
 3. On success: inject `claims` into handler context
@@ -140,7 +143,9 @@ export const GET = serveLlmsTxt({
 import { serveAiPolicyMd } from '@peac/nextjs';
 import type { PolicyDocument } from '@peac/policy-kit';
 
-const policy: PolicyDocument = { /* ... */ };
+const policy: PolicyDocument = {
+  /* ... */
+};
 
 export const GET = serveAiPolicyMd(policy, {
   includeAttribution: true,
@@ -248,6 +253,7 @@ function buildWwwAuthenticate(error: PEACError): string {
 ```
 
 **Acceptance Criteria:**
+
 - ✅ Extract receipt from `PEAC-Receipt` or `Payment-Signature` headers
 - ✅ Call `verify()` with provided options
 - ✅ Return verified claims to handler
@@ -384,6 +390,7 @@ export function serveAiPolicyMd(
 ```
 
 **Acceptance Criteria:**
+
 - ✅ `servePeacTxt()` compiles policy to peac.txt format
 - ✅ `serveAiprefJson()` returns AIPREF JSON with proper cache headers
 - ✅ `serveLlmsTxt()` generates llms.txt from allowed/denied lists
@@ -404,10 +411,7 @@ export interface PeacContext {
   claims: ReceiptClaims;
 }
 
-export type PeacHandler = (
-  req: NextRequest,
-  context: PeacContext
-) => Promise<Response> | Response;
+export type PeacHandler = (req: NextRequest, context: PeacContext) => Promise<Response> | Response;
 
 export interface WithPeacOptions {
   issuer: string;
@@ -477,6 +481,7 @@ function buildWwwAuthenticate(error: PEACError): string {
 ```
 
 **Acceptance Criteria:**
+
 - ✅ All TypeScript types exported from `src/types.ts`
 - ✅ `createProblemResponse()` generates RFC 9457 responses
 - ✅ `buildWwwAuthenticate()` formats error code for WWW-Authenticate header
@@ -512,7 +517,10 @@ describe('withPeac', () => {
 
     const response = await wrappedHandler(req);
     expect(response.status).toBe(200);
-    expect(handler).toHaveBeenCalledWith(req, expect.objectContaining({ claims: expect.any(Object) }));
+    expect(handler).toHaveBeenCalledWith(
+      req,
+      expect.objectContaining({ claims: expect.any(Object) })
+    );
   });
 
   it('should return 402 when receipt is missing', async () => {
@@ -567,7 +575,11 @@ describe('Policy File Helpers', () => {
     const policy = {
       version: 'peac-policy/0.1' as const,
       rules: [
-        { subject: { type: 'agent' as const }, purpose: 'crawl' as const, effect: 'allow' as const },
+        {
+          subject: { type: 'agent' as const },
+          purpose: 'crawl' as const,
+          effect: 'allow' as const,
+        },
       ],
     };
 
@@ -638,6 +650,7 @@ describe('Policy File Helpers', () => {
 ```
 
 **Acceptance Criteria:**
+
 - ✅ 40+ tests covering all public APIs
 - ✅ Receipt verification success/failure paths
 - ✅ Missing receipt (402 response)
@@ -650,7 +663,7 @@ describe('Policy File Helpers', () => {
 
 **File:** `README.md`
 
-```markdown
+````markdown
 # @peac/nextjs
 
 Next.js integration for PEAC Protocol - route handler wrappers and policy file helpers.
@@ -660,6 +673,7 @@ Next.js integration for PEAC Protocol - route handler wrappers and policy file h
 ```bash
 pnpm add @peac/nextjs @peac/protocol @peac/policy-kit
 ```
+````
 
 ## Quick Start
 
@@ -731,12 +745,14 @@ export const GET = serveAiprefJson({
 Wraps a Next.js route handler with PEAC receipt verification.
 
 **Parameters:**
+
 - `handler: PeacHandler` - Your route handler function
 - `options: WithPeacOptions` - Verification options
 
 **Returns:** Next.js route handler with receipt verification
 
 **Options:**
+
 - `issuer: string` - Expected receipt issuer URL
 - `audience: string` - Expected receipt audience URL
 - `jwksUri: string` - JWKS endpoint for signature verification
@@ -749,6 +765,7 @@ Wraps a Next.js route handler with PEAC receipt verification.
 Generates peac.txt route handler from PolicyDocument.
 
 **Parameters:**
+
 - `policy: PolicyDocument` - PEAC policy document
 - `options?: ServePeacTxtOptions` - Compilation options
 
@@ -759,6 +776,7 @@ Generates peac.txt route handler from PolicyDocument.
 Generates aipref.json route handler.
 
 **Parameters:**
+
 - `prefs: AiprefPreferences` - AIPREF preferences object
 
 **Returns:** Next.js GET route handler
@@ -768,6 +786,7 @@ Generates aipref.json route handler.
 Generates llms.txt route handler.
 
 **Parameters:**
+
 - `options: LlmsTxtOptions` - Allowed/denied purposes and contact
 
 **Returns:** Next.js GET route handler
@@ -777,6 +796,7 @@ Generates llms.txt route handler.
 Generates ai-policy.md route handler.
 
 **Parameters:**
+
 - `policy: PolicyDocument` - PEAC policy document
 - `options?: ServeAiPolicyMdOptions` - Rendering options
 
@@ -785,6 +805,7 @@ Generates ai-policy.md route handler.
 ## Examples
 
 See `examples/` directory for complete examples:
+
 - `examples/basic-api/` - Basic protected API route
 - `examples/policy-files/` - Serving all policy file formats
 - `examples/custom-error-handling/` - Custom error responses
@@ -796,7 +817,8 @@ Apache-2.0
 ---
 
 Built with PEAC Protocol by [Originary](https://originary.com)
-```
+
+````
 
 **File:** `examples/basic-api/README.md`
 
@@ -810,9 +832,10 @@ Minimal example of protecting a Next.js API route with PEAC receipt verification
 1. Install dependencies:
    ```bash
    pnpm install
-   ```
+````
 
 2. Create `.env.local`:
+
    ```env
    PEAC_ISSUER=https://publisher.example
    PEAC_AUDIENCE=https://agent.example
@@ -834,6 +857,7 @@ curl -X POST http://localhost:3000/api/inference \
 ```
 
 Expected response (200 OK):
+
 ```json
 {
   "status": "ok",
@@ -845,6 +869,7 @@ Expected response (200 OK):
 ```
 
 Without receipt (402 Payment Required):
+
 ```json
 {
   "type": "https://peacprotocol.org/errors#E_TAP_MISSING",
@@ -853,7 +878,8 @@ Without receipt (402 Payment Required):
   "detail": "PEAC receipt or TAP signature required"
 }
 ```
-```
+
+````
 
 **Acceptance Criteria:**
 - ✅ Comprehensive README with quick start, API reference, examples
@@ -921,11 +947,12 @@ Without receipt (402 Payment Required):
     "directory": "packages/nextjs"
   }
 }
-```
+````
 
 ## Testing Strategy
 
 ### Unit Tests (30 tests)
+
 - `withPeac()` wrapper (10 tests)
   - Successful verification with claims injection
   - Missing receipt (402 response)
@@ -948,6 +975,7 @@ Without receipt (402 Payment Required):
   - Cache-Control headers
 
 ### Integration Tests (10 tests)
+
 - End-to-end Next.js route testing
 - Request/Response object handling
 - Header extraction from NextRequest
@@ -958,22 +986,22 @@ Without receipt (402 Payment Required):
 
 All error responses follow RFC 9457 (Problem Details for HTTP APIs):
 
-| Status | Code | Description |
-|--------|------|-------------|
-| 402 | E_TAP_MISSING | PEAC receipt or TAP signature required |
-| 401 | E_TAP_SIGNATURE_INVALID | Signature verification failed |
-| 401 | E_TAP_TIME_INVALID | Receipt outside time window |
-| 401 | E_TAP_KEY_NOT_FOUND | Key ID not in JWKS |
-| 403 | E_TAP_ISSUER_NOT_ALLOWED | Issuer not in allowlist |
-| 409 | E_TAP_REPLAY_DETECTED | Nonce already used |
+| Status | Code                     | Description                            |
+| ------ | ------------------------ | -------------------------------------- |
+| 402    | E_TAP_MISSING            | PEAC receipt or TAP signature required |
+| 401    | E_TAP_SIGNATURE_INVALID  | Signature verification failed          |
+| 401    | E_TAP_TIME_INVALID       | Receipt outside time window            |
+| 401    | E_TAP_KEY_NOT_FOUND      | Key ID not in JWKS                     |
+| 403    | E_TAP_ISSUER_NOT_ALLOWED | Issuer not in allowlist                |
+| 409    | E_TAP_REPLAY_DETECTED    | Nonce already used                     |
 
 ## Performance Targets
 
-| Metric | Target | Notes |
-|--------|--------|-------|
-| Handler overhead | < 2ms | Time added by withPeac() wrapper |
-| Policy file generation | < 5ms | servePeacTxt() compilation |
-| Memory footprint | < 100KB | Per request |
+| Metric                 | Target  | Notes                            |
+| ---------------------- | ------- | -------------------------------- |
+| Handler overhead       | < 2ms   | Time added by withPeac() wrapper |
+| Policy file generation | < 5ms   | servePeacTxt() compilation       |
+| Memory footprint       | < 100KB | Per request                      |
 
 ## Security Considerations
 
@@ -996,6 +1024,7 @@ All error responses follow RFC 9457 (Problem Details for HTTP APIs):
 ## Acceptance Criteria
 
 ### P0 - MUST SHIP
+
 - ✅ `withPeac()` route handler wrapper with receipt verification
 - ✅ Extract receipt from `PEAC-Receipt` or `Payment-Signature` headers
 - ✅ Inject verified claims into handler context
@@ -1007,11 +1036,13 @@ All error responses follow RFC 9457 (Problem Details for HTTP APIs):
 - ✅ README with API reference and examples
 
 ### P1 - SHOULD SHIP
+
 - ⚠️ 3 complete examples in `examples/` directory
 - ⚠️ Replay protection integration
 - ⚠️ JWKS caching guidance
 
 ### P2 - NICE TO HAVE
+
 - ⚠️ Client-side helper for sending receipts
 - ⚠️ Middleware integration guidance
 

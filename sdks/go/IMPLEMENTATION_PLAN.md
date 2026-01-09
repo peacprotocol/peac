@@ -216,15 +216,15 @@ perf := &IssuePerf{
 
 #### 6. Error Codes
 
-| Code | Description | HTTP |
-|------|-------------|------|
-| `ErrMissingRequiredField` | Required field not provided | 400 |
-| `ErrInvalidURL` | Invalid URL format | 400 |
-| `ErrInvalidCurrency` | Invalid currency code | 400 |
-| `ErrInvalidAmount` | Amount < 0 | 400 |
-| `ErrEvidenceNotJSON` | Evidence contains non-JSON types | 400 |
-| `ErrEvidenceTooLarge` | Evidence exceeds size limits | 400 |
-| `ErrSigningFailed` | JWS signing failed | 500 |
+| Code                      | Description                      | HTTP |
+| ------------------------- | -------------------------------- | ---- |
+| `ErrMissingRequiredField` | Required field not provided      | 400  |
+| `ErrInvalidURL`           | Invalid URL format               | 400  |
+| `ErrInvalidCurrency`      | Invalid currency code            | 400  |
+| `ErrInvalidAmount`        | Amount < 0                       | 400  |
+| `ErrEvidenceNotJSON`      | Evidence contains non-JSON types | 400  |
+| `ErrEvidenceTooLarge`     | Evidence exceeds size limits     | 400  |
+| `ErrSigningFailed`        | JWS signing failed               | 500  |
 
 ## Policy Evaluation
 
@@ -583,20 +583,26 @@ require (
 ### From TypeScript to Go
 
 **TypeScript:**
+
 ```typescript
 import { issue } from '@peac/protocol';
 
-const result = await issue({
-  iss: 'https://publisher.example',
-  aud: 'https://agent.example',
-  amt: 1000,
-  cur: 'USD',
-  rail: 'stripe',
-  reference: 'ch_abc123',
-}, privateKey, keyID);
+const result = await issue(
+  {
+    iss: 'https://publisher.example',
+    aud: 'https://agent.example',
+    amt: 1000,
+    cur: 'USD',
+    rail: 'stripe',
+    reference: 'ch_abc123',
+  },
+  privateKey,
+  keyID
+);
 ```
 
 **Go:**
+
 ```go
 import "github.com/peacprotocol/peac-go"
 
