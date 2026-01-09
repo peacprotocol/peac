@@ -18,13 +18,6 @@ func (e *ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }
 
-// Error codes for policy validation.
-const (
-	ErrCodeInvalidPolicy        = "E_INVALID_POLICY"
-	ErrCodeInvalidPolicyVersion = "E_INVALID_POLICY_VERSION"
-	ErrCodeInvalidPolicyEnum    = "E_INVALID_POLICY_ENUM"
-)
-
 // Validate validates a policy document.
 // Returns nil if valid, or a ValidationError if invalid.
 //

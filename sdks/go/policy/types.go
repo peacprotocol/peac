@@ -48,6 +48,16 @@ const (
 // PolicyVersion is the supported policy format version.
 const PolicyVersion = "peac-policy/0.1"
 
+// Error codes for policy validation.
+const (
+	ErrCodeInvalidPolicy        = "E_INVALID_POLICY"
+	ErrCodeInvalidPolicyVersion = "E_INVALID_POLICY_VERSION"
+	ErrCodeInvalidPolicyEnum    = "E_INVALID_POLICY_ENUM"
+)
+
+// ReasonNilPolicy is the reason returned when evaluating a nil policy.
+const ReasonNilPolicy = "nil policy"
+
 // PolicyDocument represents a PEAC policy document.
 type PolicyDocument struct {
 	// Version of the policy format (must be "peac-policy/0.1")

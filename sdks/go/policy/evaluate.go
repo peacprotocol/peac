@@ -4,9 +4,6 @@ import (
 	"strings"
 )
 
-// ReasonNilPolicy is the reason returned when evaluating a nil policy.
-const ReasonNilPolicy = "nil policy"
-
 // Evaluate evaluates a policy against a context and returns the result.
 // Rules are evaluated in order; the first matching rule wins.
 // If no rule matches, the default decision is used.
