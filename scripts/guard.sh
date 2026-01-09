@@ -43,7 +43,7 @@ fi
 echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
 # Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), Attribution (v0.9.26+), and DisputeAttestation (v0.9.27+)
-LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors\.ts|schema/(src/(evidence|validators|agent-identity|attribution|dispute)\.ts|__tests__/(agent-identity|dispute)\.test\.ts)|attribution/)|examples/agent-identity/|sdks/go/)'
+LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors\.ts|schema/(src/(evidence|validators|agent-identity|attribution|dispute)\.ts|__tests__/(agent-identity|dispute)\.test\.ts)|attribution/)|examples/agent-identity/|sdks/(go|python)/)'
 if git grep -nE '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
@@ -52,7 +52,8 @@ else
 fi
 
 echo "== forbid internal notes =="
-DOCS_ALLOW='^(docs/peip/|docs/peips\.md|pnpm-lock\.yaml|scripts/guard\.sh)'
+# Allow TODO/FIXME in: PEIP templates, guard script itself, docs-quality workflow (checks FOR them), NPM policy (example commands)
+DOCS_ALLOW='^(docs/peip/|docs/peips\.md|pnpm-lock\.yaml|scripts/guard\.sh|\.github/workflows/docs-quality\.yml|docs/maintainers/NPM_PUBLISH_POLICY\.md)'
 if git grep -nE 'TODO|FIXME|HACK|XXX|@ts-ignore' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$DOCS_ALLOW" | grep .; then
   bad=1
@@ -110,9 +111,10 @@ else
 fi
 
 echo "== forbid npm invocations =="
-# Allow npm in README.md for end-user install instructions (pnpm is recommended, npm is fallback)
-# Allow npm in RELEASING.md for documenting what NOT to do (pnpm is required)
-if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep -vE '^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md|docs/maintainers/RELEASING\.md):' | grep .; then
+# Allow npm in: README (end-user install), RELEASING (what NOT to do), CHANGELOG (release notes),
+# NPM_PUBLISH docs (policy), edge guides (CLI install), .old files (archived)
+NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md|CHANGELOG\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/)'
+if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else
   echo "OK"
