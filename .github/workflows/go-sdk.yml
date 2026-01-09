@@ -98,4 +98,4 @@ jobs:
           cache-dependency-path: sdks/go/go.sum
 
       - name: Fuzz evidence validator (10s)
-        run: go test ./evidence -run=^$ -fuzz=FuzzValidate -fuzztime=10s
+        run: go test ./evidence -run=^$ -fuzz=^FuzzValidate$ -fuzztime=10s
