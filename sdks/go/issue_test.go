@@ -144,7 +144,9 @@ func TestIssue_Invariant_ReceiptIDIsUUID(t *testing.T) {
 	// Verify the claims also contain the receipt ID
 	parsed, _ := jws.Parse(result.JWS)
 	var claims map[string]any
-	json.Unmarshal(parsed.Payload, &claims)
+	if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+		t.Fatalf("json.Unmarshal error = %v", err)
+	}
 	if claims["rid"] != result.ReceiptID {
 		t.Errorf("claims.rid = %v, want %s", claims["rid"], result.ReceiptID)
 	}
@@ -168,7 +170,9 @@ func TestIssue_Invariant_IssuedAtMatchesResult(t *testing.T) {
 
 	parsed, _ := jws.Parse(result.JWS)
 	var claims map[string]any
-	json.Unmarshal(parsed.Payload, &claims)
+	if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+		t.Fatalf("json.Unmarshal error = %v", err)
+	}
 	claimsIat := int64(claims["iat"].(float64))
 	if claimsIat != expectedIat {
 		t.Errorf("claims.iat = %d, want %d", claimsIat, expectedIat)
@@ -219,7 +223,9 @@ func TestIssue_Invariant_AssetDefaultsToCurrency(t *testing.T) {
 
 	parsed, _ := jws.Parse(result.JWS)
 	var claims testReceiptClaims
-	json.Unmarshal(parsed.Payload, &claims)
+	if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+		t.Fatalf("json.Unmarshal error = %v", err)
+	}
 
 	if claims.Payment.Asset != opts.Currency {
 		t.Errorf("payment.asset = %s, want %s (default to currency)", claims.Payment.Asset, opts.Currency)
@@ -238,7 +244,9 @@ func TestIssue_Invariant_EnvDefaultsToTest(t *testing.T) {
 
 	parsed, _ := jws.Parse(result.JWS)
 	var claims testReceiptClaims
-	json.Unmarshal(parsed.Payload, &claims)
+	if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+		t.Fatalf("json.Unmarshal error = %v", err)
+	}
 
 	if claims.Payment.Env != "test" {
 		t.Errorf("payment.env = %s, want test (default)", claims.Payment.Env)
@@ -566,7 +574,9 @@ func TestIssue_OptionalFields(t *testing.T) {
 
 		parsed, _ := jws.Parse(result.JWS)
 		var claims testReceiptClaims
-		json.Unmarshal(parsed.Payload, &claims)
+		if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+			t.Fatalf("json.Unmarshal error = %v", err)
+		}
 
 		if claims.Expiry != opts.Expiry {
 			t.Errorf("claims.exp = %d, want %d", claims.Expiry, opts.Expiry)
@@ -584,7 +594,9 @@ func TestIssue_OptionalFields(t *testing.T) {
 
 		parsed, _ := jws.Parse(result.JWS)
 		var claims testReceiptClaims
-		json.Unmarshal(parsed.Payload, &claims)
+		if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+			t.Fatalf("json.Unmarshal error = %v", err)
+		}
 
 		if claims.Subject == nil {
 			t.Fatal("claims.subject is nil")
@@ -605,7 +617,9 @@ func TestIssue_OptionalFields(t *testing.T) {
 
 		parsed, _ := jws.Parse(result.JWS)
 		var claims testReceiptClaims
-		json.Unmarshal(parsed.Payload, &claims)
+		if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+			t.Fatalf("json.Unmarshal error = %v", err)
+		}
 
 		if claims.Payment.Network != opts.Network {
 			t.Errorf("payment.network = %s, want %s", claims.Payment.Network, opts.Network)
@@ -626,7 +640,9 @@ func TestIssue_OptionalFields(t *testing.T) {
 
 		parsed, _ := jws.Parse(result.JWS)
 		var claims testReceiptClaims
-		json.Unmarshal(parsed.Payload, &claims)
+		if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+			t.Fatalf("json.Unmarshal error = %v", err)
+		}
 
 		evidence, ok := claims.Payment.Evidence.(map[string]any)
 		if !ok {
@@ -828,7 +844,9 @@ func TestIssue_ZeroAmount(t *testing.T) {
 
 	parsed, _ := jws.Parse(result.JWS)
 	var claims testReceiptClaims
-	json.Unmarshal(parsed.Payload, &claims)
+	if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
+		t.Fatalf("json.Unmarshal error = %v", err)
+	}
 
 	if claims.Amount != 0 {
 		t.Errorf("amt = %d, want 0", claims.Amount)
