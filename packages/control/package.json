@@ -1,6 +1,6 @@
 {
   "name": "@peac/control",
-  "version": "0.9.27",
+  "version": "0.9.28",
   "description": "PEAC Protocol Control - control engine interfaces and validation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
