@@ -386,8 +386,8 @@ func TestValidate_UnknownSubjectType(t *testing.T) {
 	if !ok {
 		t.Fatalf("error type = %T, want *ValidationError", err)
 	}
-	if ve.Code != ErrCodeUnknownEnumValue {
-		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	if ve.Code != ErrCodeInvalidPolicyEnum {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeInvalidPolicyEnum)
 	}
 	if ve.Field != "rules[0].subject.type" {
 		t.Errorf("error field = %s, want rules[0].subject.type", ve.Field)
@@ -415,8 +415,8 @@ func TestValidate_UnknownPurpose(t *testing.T) {
 	if !ok {
 		t.Fatalf("error type = %T, want *ValidationError", err)
 	}
-	if ve.Code != ErrCodeUnknownEnumValue {
-		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	if ve.Code != ErrCodeInvalidPolicyEnum {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeInvalidPolicyEnum)
 	}
 	if ve.Field != "rules[0].purpose[0]" {
 		t.Errorf("error field = %s, want rules[0].purpose[0]", ve.Field)
@@ -444,8 +444,8 @@ func TestValidate_UnknownLicensingMode(t *testing.T) {
 	if !ok {
 		t.Fatalf("error type = %T, want *ValidationError", err)
 	}
-	if ve.Code != ErrCodeUnknownEnumValue {
-		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	if ve.Code != ErrCodeInvalidPolicyEnum {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeInvalidPolicyEnum)
 	}
 	if ve.Field != "rules[0].licensing_mode[0]" {
 		t.Errorf("error field = %s, want rules[0].licensing_mode[0]", ve.Field)
@@ -473,8 +473,8 @@ func TestValidate_EmptyPurposeInArray(t *testing.T) {
 	if !ok {
 		t.Fatalf("error type = %T, want *ValidationError", err)
 	}
-	if ve.Code != ErrCodeUnknownEnumValue {
-		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	if ve.Code != ErrCodeInvalidPolicyEnum {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeInvalidPolicyEnum)
 	}
 }
 
@@ -499,8 +499,8 @@ func TestValidate_EmptyLicensingModeInArray(t *testing.T) {
 	if !ok {
 		t.Fatalf("error type = %T, want *ValidationError", err)
 	}
-	if ve.Code != ErrCodeUnknownEnumValue {
-		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	if ve.Code != ErrCodeInvalidPolicyEnum {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeInvalidPolicyEnum)
 	}
 }
 

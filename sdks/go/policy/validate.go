@@ -22,7 +22,7 @@ func (e *ValidationError) Error() string {
 const (
 	ErrCodeInvalidPolicy        = "E_INVALID_POLICY"
 	ErrCodeInvalidPolicyVersion = "E_INVALID_POLICY_VERSION"
-	ErrCodeUnknownEnumValue     = "E_INVALID_POLICY_ENUM"
+	ErrCodeInvalidPolicyEnum    = "E_INVALID_POLICY_ENUM"
 )
 
 // Validate validates a policy document.
@@ -158,7 +158,7 @@ func validateSubjectType(st SubjectType, field string) error {
 		return nil
 	default:
 		return &ValidationError{
-			Code:    ErrCodeUnknownEnumValue,
+			Code:    ErrCodeInvalidPolicyEnum,
 			Message: fmt.Sprintf("unknown subject type: %s (must be human, agent, or org)", st),
 			Field:   field,
 		}
@@ -173,13 +173,13 @@ func validatePurpose(p ControlPurpose, field string) error {
 		return nil
 	case "":
 		return &ValidationError{
-			Code:    ErrCodeUnknownEnumValue,
+			Code:    ErrCodeInvalidPolicyEnum,
 			Message: "purpose cannot be empty",
 			Field:   field,
 		}
 	default:
 		return &ValidationError{
-			Code:    ErrCodeUnknownEnumValue,
+			Code:    ErrCodeInvalidPolicyEnum,
 			Message: fmt.Sprintf("unknown purpose: %s", p),
 			Field:   field,
 		}
@@ -193,13 +193,13 @@ func validateLicensingMode(m ControlLicensingMode, field string) error {
 		return nil
 	case "":
 		return &ValidationError{
-			Code:    ErrCodeUnknownEnumValue,
+			Code:    ErrCodeInvalidPolicyEnum,
 			Message: "licensing mode cannot be empty",
 			Field:   field,
 		}
 	default:
 		return &ValidationError{
-			Code:    ErrCodeUnknownEnumValue,
+			Code:    ErrCodeInvalidPolicyEnum,
 			Message: fmt.Sprintf("unknown licensing mode: %s", m),
 			Field:   field,
 		}

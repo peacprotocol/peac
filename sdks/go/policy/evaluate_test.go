@@ -526,8 +526,8 @@ func TestEvaluate_NilPolicy(t *testing.T) {
 	if result.Decision != Deny {
 		t.Errorf("Decision = %s, want deny for nil policy", result.Decision)
 	}
-	if result.Reason != "nil policy" {
-		t.Errorf("Reason = %q, want %q", result.Reason, "nil policy")
+	if result.Reason != ReasonNilPolicy {
+		t.Errorf("Reason = %q, want %q", result.Reason, ReasonNilPolicy)
 	}
 	if !result.IsDefault {
 		t.Error("IsDefault = false, want true for nil policy")
@@ -540,8 +540,8 @@ func TestEvaluate_NilPolicyNilContext(t *testing.T) {
 	if result.Decision != Deny {
 		t.Errorf("Decision = %s, want deny for nil policy", result.Decision)
 	}
-	if result.Reason != "nil policy" {
-		t.Errorf("Reason = %q, want %q", result.Reason, "nil policy")
+	if result.Reason != ReasonNilPolicy {
+		t.Errorf("Reason = %q, want %q", result.Reason, ReasonNilPolicy)
 	}
 }
 

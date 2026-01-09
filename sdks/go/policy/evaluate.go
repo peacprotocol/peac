@@ -4,18 +4,21 @@ import (
 	"strings"
 )
 
+// ReasonNilPolicy is the reason returned when evaluating a nil policy.
+const ReasonNilPolicy = "nil policy"
+
 // Evaluate evaluates a policy against a context and returns the result.
 // Rules are evaluated in order; the first matching rule wins.
 // If no rule matches, the default decision is used.
 //
-// If policy is nil, returns a deny result with reason "nil policy".
+// If policy is nil, returns a deny result with reason ReasonNilPolicy.
 // If context is nil, an empty context is used.
 func Evaluate(policy *PolicyDocument, context *EvaluationContext) *EvaluationResult {
 	// Guard against nil policy
 	if policy == nil {
 		return &EvaluationResult{
 			Decision:  Deny,
-			Reason:    "nil policy",
+			Reason:    ReasonNilPolicy,
 			IsDefault: true,
 		}
 	}
