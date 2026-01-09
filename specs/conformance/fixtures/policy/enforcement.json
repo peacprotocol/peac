@@ -1,0 +1,87 @@
+{
+  "$comment": "Policy enforcement HTTP mapping golden vectors for cross-language conformance (v0.9.29+)",
+  "version": "0.9.29",
+  "fixtures": [
+    {
+      "name": "allow-200",
+      "description": "Allow decision maps to 200 OK",
+      "decision": {
+        "allow": "allow",
+        "rule": "test-allow"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {}
+      }
+    },
+    {
+      "name": "deny-403",
+      "description": "Deny decision maps to 403 Forbidden",
+      "decision": {
+        "allow": "deny",
+        "rule": "test-deny"
+      },
+      "expected": {
+        "status": 403,
+        "headers": {}
+      }
+    },
+    {
+      "name": "review-without-receipt-402",
+      "description": "Review decision without receipt maps to 402 with WWW-Authenticate",
+      "decision": {
+        "allow": "review",
+        "rule": "test-review",
+        "receipt_required": true,
+        "receipt_verified": false
+      },
+      "expected": {
+        "status": 402,
+        "headers": {
+          "WWW-Authenticate": "PEAC realm=\"receipt\", error=\"receipt_required\""
+        }
+      }
+    },
+    {
+      "name": "review-with-receipt-200",
+      "description": "Review decision with verified receipt maps to 200 OK",
+      "decision": {
+        "allow": "review",
+        "rule": "test-review",
+        "receipt_required": true,
+        "receipt_verified": true
+      },
+      "expected": {
+        "status": 200,
+        "headers": {}
+      }
+    },
+    {
+      "name": "review-optional-receipt-403",
+      "description": "Review decision without required receipt maps to 403",
+      "decision": {
+        "allow": "review",
+        "rule": "test-review",
+        "receipt_required": false,
+        "receipt_verified": false
+      },
+      "expected": {
+        "status": 403,
+        "headers": {}
+      }
+    },
+    {
+      "name": "default-deny-403",
+      "description": "Default deny maps to 403",
+      "decision": {
+        "allow": "deny",
+        "rule": null,
+        "is_default": true
+      },
+      "expected": {
+        "status": 403,
+        "headers": {}
+      }
+    }
+  ]
+}
