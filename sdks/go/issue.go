@@ -3,8 +3,8 @@ package peac
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/peacprotocol/peac/sdks/go/evidence"
@@ -136,6 +136,7 @@ const (
 	ErrCodeInvalidCurrency   = "E_ISSUE_INVALID_CURRENCY"
 	ErrCodeInvalidAmount     = "E_ISSUE_INVALID_AMOUNT"
 	ErrCodeInvalidExpiry     = "E_ISSUE_INVALID_EXPIRY"
+	ErrCodeInvalidEnv        = "E_ISSUE_INVALID_ENV"
 	ErrCodeInvalidRail       = "E_ISSUE_INVALID_RAIL"
 	ErrCodeInvalidReference  = "E_ISSUE_INVALID_REFERENCE"
 	ErrCodeInvalidEvidence   = "E_ISSUE_INVALID_EVIDENCE"
@@ -146,43 +147,64 @@ const (
 
 var currencyRegex = regexp.MustCompile(`^[A-Z]{3}$`)
 
+// validateHTTPSURL validates that a URL is a valid https:// URL with a host.
+func validateHTTPSURL(rawURL string) error {
+	if rawURL == "" {
+		return fmt.Errorf("URL is required")
+	}
+	u, err := url.ParseRequestURI(rawURL)
+	if err != nil {
+		return fmt.Errorf("invalid URL: %w", err)
+	}
+	if u.Scheme != "https" {
+		return fmt.Errorf("URL must use https scheme, got %q", u.Scheme)
+	}
+	if u.Host == "" {
+		return fmt.Errorf("URL must have a host")
+	}
+	return nil
+}
+
 // Issue creates a signed PEAC receipt.
 //
 // The function validates all inputs, generates a UUIDv7 receipt ID,
 // and signs the claims with Ed25519.
 //
 // Invariants enforced:
-//   - Issuer and Audience must be https:// URLs
+//   - Issuer and Audience must be valid https:// URLs with a host
 //   - Currency must be ISO 4217 uppercase (3 letters)
 //   - Amount must be non-negative
-//   - Expiry (if set) must be positive
+//   - Env must be "live" or "test" (defaults to "test" if empty)
+//   - Expiry (if set) must be non-negative; typically should be >= iat
 //   - Evidence (if provided) must pass DoS validation
 //   - SigningKey must be provided
 func Issue(opts IssueOptions) (*IssueResult, error) {
 	// Validate issuer URL
-	if !strings.HasPrefix(opts.Issuer, "https://") {
+	if err := validateHTTPSURL(opts.Issuer); err != nil {
 		return nil, &IssueError{
 			Code:    ErrCodeInvalidIssuer,
-			Message: "issuer must start with https://",
+			Message: fmt.Sprintf("invalid issuer: %v", err),
 			Field:   "Issuer",
 		}
 	}
 
 	// Validate audience URL
-	if !strings.HasPrefix(opts.Audience, "https://") {
+	if err := validateHTTPSURL(opts.Audience); err != nil {
 		return nil, &IssueError{
 			Code:    ErrCodeInvalidAudience,
-			Message: "audience must start with https://",
+			Message: fmt.Sprintf("invalid audience: %v", err),
 			Field:   "Audience",
 		}
 	}
 
 	// Validate subject URL (if provided)
-	if opts.Subject != "" && !strings.HasPrefix(opts.Subject, "https://") {
-		return nil, &IssueError{
-			Code:    ErrCodeInvalidSubject,
-			Message: "subject must start with https://",
-			Field:   "Subject",
+	if opts.Subject != "" {
+		if err := validateHTTPSURL(opts.Subject); err != nil {
+			return nil, &IssueError{
+				Code:    ErrCodeInvalidSubject,
+				Message: fmt.Sprintf("invalid subject: %v", err),
+				Field:   "Subject",
+			}
 		}
 	}
 
@@ -208,8 +230,17 @@ func Issue(opts IssueOptions) (*IssueResult, error) {
 	if opts.Expiry != 0 && opts.Expiry < 0 {
 		return nil, &IssueError{
 			Code:    ErrCodeInvalidExpiry,
-			Message: "expiry must be positive",
+			Message: "expiry must be non-negative",
 			Field:   "Expiry",
+		}
+	}
+
+	// Validate env (must be "live" or "test", empty defaults to "test")
+	if opts.Env != "" && opts.Env != "live" && opts.Env != "test" {
+		return nil, &IssueError{
+			Code:    ErrCodeInvalidEnv,
+			Message: fmt.Sprintf("env must be \"live\" or \"test\", got %q", opts.Env),
+			Field:   "Env",
 		}
 	}
 

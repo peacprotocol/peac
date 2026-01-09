@@ -256,6 +256,10 @@ func TestIssue_Error_InvalidIssuer(t *testing.T) {
 		{"no scheme", "example.com"},
 		{"empty", ""},
 		{"ftp scheme", "ftp://example.com"},
+		{"https no host", "https://"},
+		{"just scheme", "https:"},
+		{"whitespace", "https:// "},
+		{"invalid URL chars", "https://exam ple.com"},
 	}
 
 	for _, tt := range tests {
@@ -391,6 +395,66 @@ func TestIssue_Error_NegativeExpiry(t *testing.T) {
 	ie := err.(*IssueError)
 	if ie.Code != ErrCodeInvalidExpiry {
 		t.Errorf("error code = %s, want %s", ie.Code, ErrCodeInvalidExpiry)
+	}
+}
+
+func TestIssue_Error_InvalidEnv(t *testing.T) {
+	tests := []struct {
+		name string
+		env  string
+	}{
+		{"production", "production"},
+		{"prod", "prod"},
+		{"dev", "dev"},
+		{"staging", "staging"},
+		{"LIVE", "LIVE"},
+		{"TEST", "TEST"},
+		{"Live", "Live"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opts := validIssueOptions(t)
+			opts.Env = tt.env
+
+			_, err := Issue(opts)
+			if err == nil {
+				t.Error("expected error for invalid env")
+				return
+			}
+
+			ie, ok := err.(*IssueError)
+			if !ok {
+				t.Errorf("error type = %T, want *IssueError", err)
+				return
+			}
+			if ie.Code != ErrCodeInvalidEnv {
+				t.Errorf("error code = %s, want %s", ie.Code, ErrCodeInvalidEnv)
+			}
+		})
+	}
+}
+
+func TestIssue_ValidEnv(t *testing.T) {
+	tests := []struct {
+		name string
+		env  string
+	}{
+		{"live", "live"},
+		{"test", "test"},
+		{"empty defaults to test", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opts := validIssueOptions(t)
+			opts.Env = tt.env
+
+			_, err := Issue(opts)
+			if err != nil {
+				t.Errorf("Issue() error = %v, want nil for env=%q", err, tt.env)
+			}
+		})
 	}
 }
 
@@ -742,5 +806,116 @@ func TestIssue_ZeroAmount(t *testing.T) {
 
 	if claims.Amount != 0 {
 		t.Errorf("amt = %d, want 0", claims.Amount)
+	}
+}
+
+// Evidence omitempty tests - verify evidence field is omitted when nil
+
+func TestIssue_EvidenceOmittedWhenNil(t *testing.T) {
+	// When Evidence is nil, the serialized payload should NOT contain "evidence" field
+	opts := validIssueOptions(t)
+	opts.Evidence = nil // Explicitly nil
+
+	result, err := Issue(opts)
+	if err != nil {
+		t.Fatalf("Issue() error = %v", err)
+	}
+
+	parsed, _ := jws.Parse(result.JWS)
+
+	// Check raw JSON for "evidence" field
+	payloadStr := string(parsed.Payload)
+	if strings.Contains(payloadStr, `"evidence"`) {
+		t.Errorf("payload should NOT contain 'evidence' field when nil, got: %s", payloadStr)
+	}
+}
+
+func TestIssue_EvidencePresentWhenProvided(t *testing.T) {
+	// When Evidence is provided, it should be in the payload
+	opts := validIssueOptions(t)
+	opts.Evidence = map[string]any{"key": "value"}
+
+	result, err := Issue(opts)
+	if err != nil {
+		t.Fatalf("Issue() error = %v", err)
+	}
+
+	parsed, _ := jws.Parse(result.JWS)
+
+	// Check raw JSON for "evidence" field
+	payloadStr := string(parsed.Payload)
+	if !strings.Contains(payloadStr, `"evidence"`) {
+		t.Errorf("payload should contain 'evidence' field when provided, got: %s", payloadStr)
+	}
+}
+
+// Header invariant tests
+
+func TestIssue_Invariant_HeaderTypIsCorrect(t *testing.T) {
+	// Invariant: The JWS header type must be the PEAC receipt type
+	opts := validIssueOptions(t)
+	result, err := Issue(opts)
+	if err != nil {
+		t.Fatalf("Issue() error = %v", err)
+	}
+
+	parsed, _ := jws.Parse(result.JWS)
+
+	// Verify header has correct type
+	expectedTyp := jws.DefaultReceiptTyp
+	if parsed.Header.Type != expectedTyp {
+		t.Errorf("Header.Type = %s, want %s", parsed.Header.Type, expectedTyp)
+	}
+}
+
+func TestIssue_Invariant_HeaderKeyIDMatchesSigningKey(t *testing.T) {
+	// Invariant: The JWS header key ID must match the signing key's ID
+	opts := validIssueOptions(t)
+	result, err := Issue(opts)
+	if err != nil {
+		t.Fatalf("Issue() error = %v", err)
+	}
+
+	parsed, _ := jws.Parse(result.JWS)
+
+	// Verify header has correct key ID
+	expectedKid := opts.SigningKey.KeyID()
+	if parsed.Header.KeyID != expectedKid {
+		t.Errorf("Header.KeyID = %s, want %s", parsed.Header.KeyID, expectedKid)
+	}
+}
+
+// URL validation edge cases
+
+func TestIssue_URLValidation_StrictParsing(t *testing.T) {
+	// Verify that URL validation catches various malformed URLs
+	tests := []struct {
+		name string
+		url  string
+	}{
+		{"path only", "/path/to/resource"},
+		{"relative URL", "../resource"},
+		{"mailto scheme", "mailto:test@example.com"},
+		{"data URI", "data:text/plain,hello"},
+	}
+
+	for _, tt := range tests {
+		t.Run("issuer_"+tt.name, func(t *testing.T) {
+			opts := validIssueOptions(t)
+			opts.Issuer = tt.url
+			_, err := Issue(opts)
+			if err == nil {
+				t.Errorf("expected error for issuer URL: %q", tt.url)
+			}
+		})
+
+		t.Run("audience_"+tt.name, func(t *testing.T) {
+			opts := validIssueOptions(t)
+			opts.Audience = tt.url
+			_, err := Issue(opts)
+			if err == nil {
+				t.Errorf("expected error for audience URL: %q", tt.url)
+			}
+		})
 	}
 }
