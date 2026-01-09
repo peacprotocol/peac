@@ -5,5 +5,3 @@ use (
 	./middleware/chi
 	./middleware/gin
 )
-
-replace github.com/peacprotocol/peac/sdks/go => ./

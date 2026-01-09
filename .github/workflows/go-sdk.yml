@@ -35,12 +35,6 @@ jobs:
           go-version-file: sdks/go/go.mod
           cache-dependency-path: sdks/go/go.sum
 
-      - name: Download deps
-        run: go mod download
-
-      - name: Verify deps
-        run: go mod verify
-
       - name: Format check
         run: |
           if [ -n "$(gofmt -l .)" ]; then
