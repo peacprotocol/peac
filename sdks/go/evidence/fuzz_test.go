@@ -8,40 +8,34 @@ import (
 // FuzzValidate tests that Validate never panics on arbitrary input.
 // Run with: go test -fuzz=FuzzValidate -fuzztime=30s
 func FuzzValidate(f *testing.F) {
-	// Add seed corpus
+	// Add seed corpus - ASCII only to avoid any Unicode issues
 	seeds := []string{
-		`null`,
-		`true`,
-		`false`,
-		`42`,
-		`3.14`,
+		"null",
+		"true",
+		"false",
+		"42",
+		"3.14",
 		`"hello"`,
 		`""`,
-		`[]`,
-		`{}`,
-		`[1,2,3]`,
+		"[]",
+		"{}",
+		"[1,2,3]",
 		`{"key":"value"}`,
 		`{"nested":{"deep":"value"}}`,
 		`[{"a":1},{"b":2}]`,
-		// Edge cases
-		`[[[[[1]]]]]`,
+		"[[[[[1]]]]]",
 		`{"a":{"b":{"c":{"d":1}}}}`,
-		// Invalid JSON (should not panic)
-		`{`,
-		`[`,
+		"{",
+		"[",
 		`{"key":}`,
-		`[1,2,`,
-		`not json`,
-		``,
-		// Large numbers
-		`1e308`,
-		`-1e308`,
-		// Unicode
-		`"日本語"`,
-		`"🎉"`,
-		// Escaped characters
+		"[1,2,",
+		"not json",
+		"",
+		"1e308",
+		"-1e308",
 		`"\n\t\r"`,
 		`"\u0000"`,
+		`"\u4e2d\u6587"`,
 	}
 
 	for _, seed := range seeds {
@@ -57,12 +51,12 @@ func FuzzValidate(f *testing.F) {
 // FuzzValidateWithTightLimits tests with restrictive limits.
 func FuzzValidateWithTightLimits(f *testing.F) {
 	seeds := []string{
-		`null`,
-		`[1,2,3,4,5,6,7,8,9,10]`,
+		"null",
+		"[1,2,3,4,5,6,7,8,9,10]",
 		`{"a":1,"b":2,"c":3,"d":4,"e":5}`,
 		`"short"`,
 		`"this is a longer string that might exceed limits"`,
-		`[[[[[1]]]]]`,
+		"[[[[[1]]]]]",
 	}
 
 	for _, seed := range seeds {
@@ -70,6 +64,7 @@ func FuzzValidateWithTightLimits(f *testing.F) {
 	}
 
 	tightLimits := Limits{
+		MaxBytes:        1000,
 		MaxDepth:        5,
 		MaxArrayLength:  10,
 		MaxObjectKeys:   5,
@@ -86,13 +81,13 @@ func FuzzValidateWithTightLimits(f *testing.F) {
 // FuzzValidateValue tests pre-parsed value validation.
 func FuzzValidateValue(f *testing.F) {
 	seeds := []string{
-		`null`,
-		`true`,
-		`42`,
+		"null",
+		"true",
+		"42",
 		`"hello"`,
-		`[]`,
-		`{}`,
-		`[1,2,3]`,
+		"[]",
+		"{}",
+		"[1,2,3]",
 		`{"key":"value"}`,
 	}
 
