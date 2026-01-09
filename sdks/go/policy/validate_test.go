@@ -325,3 +325,246 @@ func TestIsValid(t *testing.T) {
 		t.Error("IsValid() = true for invalid policy, want false")
 	}
 }
+
+// Nil policy tests
+
+func TestValidate_NilPolicy(t *testing.T) {
+	err := Validate(nil)
+	if err == nil {
+		t.Fatal("Validate(nil) error = nil, want error")
+	}
+
+	ve, ok := err.(*ValidationError)
+	if !ok {
+		t.Fatalf("error type = %T, want *ValidationError", err)
+	}
+	if ve.Code != ErrCodeInvalidPolicy {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeInvalidPolicy)
+	}
+	if ve.Message != "policy is nil" {
+		t.Errorf("error message = %q, want %q", ve.Message, "policy is nil")
+	}
+}
+
+func TestIsValid_NilPolicy(t *testing.T) {
+	if IsValid(nil) {
+		t.Error("IsValid(nil) = true, want false")
+	}
+}
+
+func TestMustValidate_NilPolicy(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("MustValidate(nil) should panic")
+		}
+	}()
+	MustValidate(nil)
+}
+
+// Unknown enum value tests
+
+func TestValidate_UnknownSubjectType(t *testing.T) {
+	policy := &PolicyDocument{
+		Version: PolicyVersion,
+		Rules: []PolicyRule{
+			{
+				Name:     "test-rule",
+				Decision: Allow,
+				Subject: &SubjectMatcher{
+					Type: SubjectType("robot"), // Unknown type
+				},
+			},
+		},
+	}
+
+	err := Validate(policy)
+	if err == nil {
+		t.Fatal("Validate() error = nil, want error for unknown SubjectType")
+	}
+
+	ve, ok := err.(*ValidationError)
+	if !ok {
+		t.Fatalf("error type = %T, want *ValidationError", err)
+	}
+	if ve.Code != ErrCodeUnknownEnumValue {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	}
+	if ve.Field != "rules[0].subject.type" {
+		t.Errorf("error field = %s, want rules[0].subject.type", ve.Field)
+	}
+}
+
+func TestValidate_UnknownPurpose(t *testing.T) {
+	policy := &PolicyDocument{
+		Version: PolicyVersion,
+		Rules: []PolicyRule{
+			{
+				Name:     "test-rule",
+				Decision: Allow,
+				Purpose:  Purposes{ControlPurpose("unknown_purpose")},
+			},
+		},
+	}
+
+	err := Validate(policy)
+	if err == nil {
+		t.Fatal("Validate() error = nil, want error for unknown Purpose")
+	}
+
+	ve, ok := err.(*ValidationError)
+	if !ok {
+		t.Fatalf("error type = %T, want *ValidationError", err)
+	}
+	if ve.Code != ErrCodeUnknownEnumValue {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	}
+	if ve.Field != "rules[0].purpose[0]" {
+		t.Errorf("error field = %s, want rules[0].purpose[0]", ve.Field)
+	}
+}
+
+func TestValidate_UnknownLicensingMode(t *testing.T) {
+	policy := &PolicyDocument{
+		Version: PolicyVersion,
+		Rules: []PolicyRule{
+			{
+				Name:          "test-rule",
+				Decision:      Allow,
+				LicensingMode: LicensingModes{ControlLicensingMode("freemium")},
+			},
+		},
+	}
+
+	err := Validate(policy)
+	if err == nil {
+		t.Fatal("Validate() error = nil, want error for unknown LicensingMode")
+	}
+
+	ve, ok := err.(*ValidationError)
+	if !ok {
+		t.Fatalf("error type = %T, want *ValidationError", err)
+	}
+	if ve.Code != ErrCodeUnknownEnumValue {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	}
+	if ve.Field != "rules[0].licensing_mode[0]" {
+		t.Errorf("error field = %s, want rules[0].licensing_mode[0]", ve.Field)
+	}
+}
+
+func TestValidate_EmptyPurposeInArray(t *testing.T) {
+	policy := &PolicyDocument{
+		Version: PolicyVersion,
+		Rules: []PolicyRule{
+			{
+				Name:     "test-rule",
+				Decision: Allow,
+				Purpose:  Purposes{""}, // Empty purpose in array
+			},
+		},
+	}
+
+	err := Validate(policy)
+	if err == nil {
+		t.Fatal("Validate() error = nil, want error for empty Purpose in array")
+	}
+
+	ve, ok := err.(*ValidationError)
+	if !ok {
+		t.Fatalf("error type = %T, want *ValidationError", err)
+	}
+	if ve.Code != ErrCodeUnknownEnumValue {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	}
+}
+
+func TestValidate_EmptyLicensingModeInArray(t *testing.T) {
+	policy := &PolicyDocument{
+		Version: PolicyVersion,
+		Rules: []PolicyRule{
+			{
+				Name:          "test-rule",
+				Decision:      Allow,
+				LicensingMode: LicensingModes{""}, // Empty mode in array
+			},
+		},
+	}
+
+	err := Validate(policy)
+	if err == nil {
+		t.Fatal("Validate() error = nil, want error for empty LicensingMode in array")
+	}
+
+	ve, ok := err.(*ValidationError)
+	if !ok {
+		t.Fatalf("error type = %T, want *ValidationError", err)
+	}
+	if ve.Code != ErrCodeUnknownEnumValue {
+		t.Errorf("error code = %s, want %s", ve.Code, ErrCodeUnknownEnumValue)
+	}
+}
+
+func TestValidate_ValidEnumValues(t *testing.T) {
+	// All known enum values should be valid
+	policy := &PolicyDocument{
+		Version: PolicyVersion,
+		Rules: []PolicyRule{
+			{
+				Name:     "test-human",
+				Decision: Allow,
+				Subject: &SubjectMatcher{
+					Type: Human,
+				},
+				Purpose:       Purposes{PurposeCrawl, PurposeIndex, PurposeTrain, PurposeInference, PurposeAiInput, PurposeAiIndex, PurposeSearch},
+				LicensingMode: LicensingModes{LicensingSubscription, LicensingPayPerInference, LicensingPayPerCrawl},
+			},
+			{
+				Name:     "test-agent",
+				Decision: Deny,
+				Subject: &SubjectMatcher{
+					Type: Agent,
+				},
+			},
+			{
+				Name:     "test-org",
+				Decision: Review,
+				Subject: &SubjectMatcher{
+					Type: Org,
+				},
+			},
+		},
+	}
+
+	if err := Validate(policy); err != nil {
+		t.Errorf("Validate() error = %v, want nil for valid enum values", err)
+	}
+}
+
+func TestValidate_MultipleUnknownEnums(t *testing.T) {
+	// First unknown enum is reported
+	policy := &PolicyDocument{
+		Version: PolicyVersion,
+		Rules: []PolicyRule{
+			{
+				Name:          "test-rule",
+				Decision:      Allow,
+				Purpose:       Purposes{ControlPurpose("bad_purpose")},
+				LicensingMode: LicensingModes{ControlLicensingMode("bad_mode")},
+			},
+		},
+	}
+
+	err := Validate(policy)
+	if err == nil {
+		t.Fatal("Validate() error = nil, want error")
+	}
+
+	ve, ok := err.(*ValidationError)
+	if !ok {
+		t.Fatalf("error type = %T, want *ValidationError", err)
+	}
+	// Purpose is validated before LicensingMode, so it should be reported first
+	if ve.Field != "rules[0].purpose[0]" {
+		t.Errorf("error field = %s, want rules[0].purpose[0]", ve.Field)
+	}
+}

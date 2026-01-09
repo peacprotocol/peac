@@ -517,3 +517,66 @@ func TestMatchesIDPattern(t *testing.T) {
 		})
 	}
 }
+
+// Nil policy tests
+
+func TestEvaluate_NilPolicy(t *testing.T) {
+	result := Evaluate(nil, &EvaluationContext{Purpose: PurposeCrawl})
+
+	if result.Decision != Deny {
+		t.Errorf("Decision = %s, want deny for nil policy", result.Decision)
+	}
+	if result.Reason != "nil policy" {
+		t.Errorf("Reason = %q, want %q", result.Reason, "nil policy")
+	}
+	if !result.IsDefault {
+		t.Error("IsDefault = false, want true for nil policy")
+	}
+}
+
+func TestEvaluate_NilPolicyNilContext(t *testing.T) {
+	result := Evaluate(nil, nil)
+
+	if result.Decision != Deny {
+		t.Errorf("Decision = %s, want deny for nil policy", result.Decision)
+	}
+	if result.Reason != "nil policy" {
+		t.Errorf("Reason = %q, want %q", result.Reason, "nil policy")
+	}
+}
+
+func TestIsAllowed_NilPolicy(t *testing.T) {
+	if IsAllowed(nil, &EvaluationContext{}) {
+		t.Error("IsAllowed(nil, ctx) = true, want false")
+	}
+}
+
+func TestIsDenied_NilPolicy(t *testing.T) {
+	if !IsDenied(nil, &EvaluationContext{}) {
+		t.Error("IsDenied(nil, ctx) = false, want true")
+	}
+}
+
+func TestRequiresReview_NilPolicy(t *testing.T) {
+	if RequiresReview(nil, &EvaluationContext{}) {
+		t.Error("RequiresReview(nil, ctx) = true, want false")
+	}
+}
+
+func TestEvaluateBatch_NilPolicy(t *testing.T) {
+	contexts := []*EvaluationContext{
+		{Purpose: PurposeCrawl},
+		{Purpose: PurposeTrain},
+	}
+
+	results := EvaluateBatch(nil, contexts)
+
+	if len(results) != 2 {
+		t.Fatalf("len(results) = %d, want 2", len(results))
+	}
+	for i, r := range results {
+		if r.Decision != Deny {
+			t.Errorf("results[%d].Decision = %s, want deny", i, r.Decision)
+		}
+	}
+}
