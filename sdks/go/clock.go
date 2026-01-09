@@ -1,7 +1,6 @@
 package peac
 
 import (
-	"sync"
 	"time"
 )
 
@@ -33,32 +32,10 @@ func (c FixedClock) Now() time.Time {
 	return c.Time
 }
 
-// AdvancingClock returns a fixed time that advances by a delta on each call.
-// Use this for tests that need sequential, predictable timestamps.
-type AdvancingClock struct {
-	mu      sync.Mutex
-	current time.Time
-	delta   time.Duration
-}
-
-// NewAdvancingClock creates a clock starting at start, advancing by delta each call.
-func NewAdvancingClock(start time.Time, delta time.Duration) *AdvancingClock {
-	return &AdvancingClock{
-		current: start,
-		delta:   delta,
-	}
-}
-
-// Now returns the current time and advances by delta.
-func (c *AdvancingClock) Now() time.Time {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	t := c.current
-	c.current = c.current.Add(c.delta)
-	return t
-}
+// defaultClock is the package-level default clock.
+var defaultClock Clock = RealClock{}
 
 // DefaultClock returns the default clock (RealClock).
 func DefaultClock() Clock {
-	return RealClock{}
+	return defaultClock
 }

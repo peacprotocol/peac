@@ -8,11 +8,12 @@ import (
 	"time"
 )
 
-// IDGenerator generates unique receipt IDs.
+// ReceiptIDGenerator generates unique receipt IDs.
 // Use UUIDv7Generator for production and FixedIDGenerator for testing.
-type IDGenerator interface {
-	// NewID generates a new unique ID.
-	NewID() string
+type ReceiptIDGenerator interface {
+	// NewReceiptID generates a new unique receipt ID.
+	// Returns an error if ID generation fails (e.g., crypto/rand failure).
+	NewReceiptID() (string, error)
 }
 
 // UUIDv7Generator generates UUID v7 identifiers.
@@ -30,8 +31,9 @@ func NewUUIDv7Generator(clock Clock) *UUIDv7Generator {
 	return &UUIDv7Generator{clock: clock}
 }
 
-// NewID generates a new UUID v7.
-func (g *UUIDv7Generator) NewID() string {
+// NewReceiptID generates a new UUID v7.
+// Returns an error if random number generation fails.
+func (g *UUIDv7Generator) NewReceiptID() (string, error) {
 	return uuidv7(g.clock.Now())
 }
 
@@ -52,46 +54,28 @@ func NewFixedIDGenerator(ids ...string) *FixedIDGenerator {
 	return &FixedIDGenerator{ids: ids}
 }
 
-// NewID returns the next ID from the list.
-func (g *FixedIDGenerator) NewID() string {
+// NewReceiptID returns the next ID from the list.
+// This never fails since IDs are pre-defined.
+func (g *FixedIDGenerator) NewReceiptID() (string, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	id := g.ids[g.index]
 	g.index = (g.index + 1) % len(g.ids)
-	return id
+	return id, nil
 }
 
-// SequentialIDGenerator returns IDs with a prefix and incrementing counter.
-// Use this when you need unique but predictable IDs.
-type SequentialIDGenerator struct {
-	mu      sync.Mutex
-	prefix  string
-	counter int
-}
-
-// NewSequentialIDGenerator creates a generator with the given prefix.
-func NewSequentialIDGenerator(prefix string) *SequentialIDGenerator {
-	return &SequentialIDGenerator{prefix: prefix, counter: 1}
-}
-
-// NewID returns the next sequential ID.
-func (g *SequentialIDGenerator) NewID() string {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	id := fmt.Sprintf("%s%03d", g.prefix, g.counter)
-	g.counter++
-	return id
-}
+// defaultIDGenerator is the package-level default generator.
+var defaultIDGenerator ReceiptIDGenerator = NewUUIDv7Generator(nil)
 
 // DefaultIDGenerator returns the default ID generator (UUIDv7Generator).
-func DefaultIDGenerator() IDGenerator {
-	return NewUUIDv7Generator(nil)
+func DefaultIDGenerator() ReceiptIDGenerator {
+	return defaultIDGenerator
 }
 
 // uuidv7 generates a UUID v7 string for the given timestamp.
 // Format: xxxxxxxx-xxxx-7xxx-yxxx-xxxxxxxxxxxx
 // where x is timestamp/random and y is variant (8, 9, a, or b).
-func uuidv7(t time.Time) string {
+func uuidv7(t time.Time) (string, error) {
 	var uuid [16]byte
 
 	// Timestamp: milliseconds since Unix epoch (48 bits)
@@ -104,7 +88,9 @@ func uuidv7(t time.Time) string {
 	uuid[5] = byte(ms)
 
 	// Random bytes for the rest
-	rand.Read(uuid[6:])
+	if _, err := rand.Read(uuid[6:]); err != nil {
+		return "", fmt.Errorf("failed to generate random bytes: %w", err)
+	}
 
 	// Set version to 7 (0111 in top 4 bits of byte 6)
 	uuid[6] = (uuid[6] & 0x0f) | 0x70
@@ -118,5 +104,5 @@ func uuidv7(t time.Time) string {
 		binary.BigEndian.Uint16(uuid[6:8]),
 		binary.BigEndian.Uint16(uuid[8:10]),
 		uuid[10:16],
-	)
+	), nil
 }
