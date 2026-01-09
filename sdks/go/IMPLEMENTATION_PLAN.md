@@ -1,6 +1,54 @@
-# Go SDK Implementation Plan - v0.9.28
+# Go SDK Implementation Plan - v0.9.29
 
 Full Go SDK parity with TypeScript implementation.
+
+**Last Updated:** 2026-01-10 (DOC SYNC with locked decisions)
+
+---
+
+## Locked Decisions (v0.9.29 - FINAL)
+
+These decisions are FINAL and must be consistent across implementation, tests, and docs.
+
+### Cross-Language Conformance
+
+Conformance is **invariant-based**, NOT byte-equality. Go's `encoding/json` produces different output than JS `JSON.stringify`. Tests check semantic equivalence, not JWS token byte-equality.
+
+### Key Material API
+
+Accept EITHER `PrivateKey` (64 bytes) OR `PrivateKeySeed` (32 bytes), error if both or neither.
+
+### JCS Usage
+
+JCS (RFC 8785) is used ONLY for `policy_hash` computation, NOT for JWS payload signing.
+
+### 402 Semantics
+
+402 returned ONLY when `decision=review AND receiptVerified=false`. MUST include `WWW-Authenticate: PEAC realm="receipt", error="receipt_required"`.
+
+### UUIDv7 Testing
+
+Test parses + version==7. Do NOT assert lexicographic monotonicity.
+
+### Policy Parsing
+
+MUST reject unknown fields. Use `DisallowUnknownFields()` for JSON, `KnownFields(true)` for YAML.
+
+### Evidence Validator
+
+Limits: maxDepth=32, maxArrayLength=10k, maxObjectKeys=1k, maxStringLength=64KB, maxTotalNodes=100k. Sort map keys. Only `json.RawMessage` valid.
+
+### Middleware
+
+Optional middleware (chi, gin) in separate go.mod submodules.
+
+### EnforceDecision Return Type
+
+Returns `(int, http.Header)` not `map[string]string`.
+
+See `reference/GO_SDK_IMPLEMENTATION_PLAN.md` for full decision rationale.
+
+---
 
 ## Status
 

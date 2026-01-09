@@ -5,7 +5,19 @@ Go client library for PEAC protocol receipt verification.
 ## Installation
 
 ```bash
-go get github.com/peacprotocol/peac-go
+go get github.com/peacprotocol/peac/sdks/go
+```
+
+## Middleware
+
+Framework-specific middleware packages are available as separate modules to avoid pulling unnecessary dependencies:
+
+```bash
+# Chi router
+go get github.com/peacprotocol/peac/sdks/go/middleware/chi
+
+# Gin framework
+go get github.com/peacprotocol/peac/sdks/go/middleware/gin
 ```
 
 ## Quick Start
@@ -18,7 +30,7 @@ import (
     "log"
     "time"
 
-    peac "github.com/peacprotocol/peac-go"
+    peac "github.com/peacprotocol/peac/sdks/go"
 )
 
 func main() {
@@ -38,6 +50,30 @@ func main() {
     fmt.Printf("Purpose: %v\n", result.Claims.PurposeDeclared)
 }
 ```
+
+## Module Versioning
+
+This SDK uses Go module versioning with path prefixes for nested modules. Tags follow the pattern `sdks/go/vX.Y.Z`:
+
+| Module         | Tag Pattern                     | Example                          |
+| -------------- | ------------------------------- | -------------------------------- |
+| Core SDK       | `sdks/go/vX.Y.Z`                | `sdks/go/v0.9.29`                |
+| Chi middleware | `sdks/go/middleware/chi/vX.Y.Z` | `sdks/go/middleware/chi/v0.9.29` |
+| Gin middleware | `sdks/go/middleware/gin/vX.Y.Z` | `sdks/go/middleware/gin/v0.9.29` |
+
+This tagging strategy allows `go get` to resolve nested modules correctly from the monorepo.
+
+## Local Development
+
+For local development, use Go workspaces:
+
+```bash
+cd sdks/go
+go work sync
+go test ./...
+```
+
+The workspace file (`go.work`) links all modules for seamless local development without modifying `go.mod` files.
 
 ## Features
 

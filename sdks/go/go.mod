@@ -1,7 +1,3 @@
-module github.com/peacprotocol/peac-go
+module github.com/peacprotocol/peac/sdks/go
 
 go 1.21
-
-require (
-	golang.org/x/crypto v0.31.0
-)
