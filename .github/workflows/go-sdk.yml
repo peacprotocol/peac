@@ -45,9 +45,9 @@ jobs:
           echo "OK: All files are formatted"
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v2.6
+          version: v1.64
           working-directory: sdks/go
           args: --timeout=5m
 

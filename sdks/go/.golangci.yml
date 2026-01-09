@@ -1,13 +1,11 @@
 # golangci-lint configuration for PEAC Go SDK
-# Compatible with golangci-lint v2.x
-
-version: '2'
+# Compatible with golangci-lint v1.x
 
 run:
   timeout: 5m
 
 linters:
-  default: none
+  disable-all: true
   enable:
     - errcheck
     - govet
@@ -15,3 +13,15 @@ linters:
     - staticcheck
     - unused
     - gosimple
+
+linters-settings:
+  errcheck:
+    exclude-functions:
+      - (*testing.T).Errorf
+      - (*testing.T).Fatalf
+      - (*testing.T).Error
+      - (*testing.T).Fatal
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
