@@ -2,7 +2,7 @@
 # Compatible with golangci-lint v2.x
 # Keep this minimal to avoid yak-shaving; expand as needed.
 
-version: "2"
+version: '2'
 
 run:
   timeout: 5m
@@ -10,12 +10,12 @@ run:
 linters:
   default: none
   enable:
-    - errcheck      # Check for unchecked errors
-    - govet         # Reports suspicious constructs
-    - ineffassign   # Detects ineffective assignments
-    - staticcheck   # Advanced static analysis
-    - unused        # Reports unused code
-    - gosimple      # Suggests code simplifications
+    - errcheck # Check for unchecked errors
+    - govet # Reports suspicious constructs
+    - ineffassign # Detects ineffective assignments
+    - staticcheck # Advanced static analysis
+    - unused # Reports unused code
+    - gosimple # Suggests code simplifications
 
 linters-settings:
   errcheck:

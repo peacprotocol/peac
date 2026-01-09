@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "sdks/go/**"
-      - ".github/workflows/go-sdk.yml"
+      - 'sdks/go/**'
+      - '.github/workflows/go-sdk.yml'
   pull_request:
     branches: [main]
     paths:
-      - "sdks/go/**"
-      - ".github/workflows/go-sdk.yml"
+      - 'sdks/go/**'
+      - '.github/workflows/go-sdk.yml'
 
 concurrency:
   group: go-sdk-${{ github.ref }}
