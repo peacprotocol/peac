@@ -6,4 +6,4 @@ use (
 	./middleware/gin
 )
 
-replace github.com/peacprotocol/peac/sdks/go => .
+replace github.com/peacprotocol/peac/sdks/go => ./
