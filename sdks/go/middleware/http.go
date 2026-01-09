@@ -174,7 +174,7 @@ func defaultErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 		resp["peac_error"] = peacErr.Details
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp) // Error intentionally ignored in error handler
 }
 
 // RequireReceipt creates a middleware that requires a valid PEAC receipt.

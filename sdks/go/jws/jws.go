@@ -18,11 +18,11 @@ type Header struct {
 
 // ParsedJWS represents a parsed JWS.
 type ParsedJWS struct {
-	Header           Header
-	HeaderRaw        []byte
-	Payload          []byte
-	Signature        []byte
-	SigningInput     []byte
+	Header               Header
+	HeaderRaw            []byte
+	Payload              []byte
+	Signature            []byte
+	SigningInput         []byte
 	CompactSerialization string
 }
 
@@ -56,11 +56,11 @@ func Parse(compact string) (*ParsedJWS, error) {
 	signingInput := []byte(parts[0] + "." + parts[1])
 
 	return &ParsedJWS{
-		Header:              header,
-		HeaderRaw:           headerBytes,
-		Payload:             payload,
-		Signature:           signature,
-		SigningInput:        signingInput,
+		Header:               header,
+		HeaderRaw:            headerBytes,
+		Payload:              payload,
+		Signature:            signature,
+		SigningInput:         signingInput,
 		CompactSerialization: compact,
 	}, nil
 }

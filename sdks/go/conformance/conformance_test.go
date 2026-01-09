@@ -312,7 +312,7 @@ func TestAgentIdentityGoldenVectors(t *testing.T) {
 
 			// Parse the attestation
 			var attestation struct {
-				Type     string                    `json:"type"`
+				Type     string                     `json:"type"`
 				Evidence peac.AgentIdentityEvidence `json:"evidence"`
 			}
 

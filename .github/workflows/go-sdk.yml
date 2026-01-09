@@ -1,0 +1,101 @@
+name: Go SDK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sdks/go/**'
+      - '.github/workflows/go-sdk.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'sdks/go/**'
+      - '.github/workflows/go-sdk.yml'
+
+concurrency:
+  group: go-sdk-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: sdks/go
+
+jobs:
+  lint:
+    name: Format + Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: sdks/go/go.mod
+          cache-dependency-path: sdks/go/go.sum
+
+      - name: Format check
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "FAIL: The following files are not formatted:"
+            gofmt -l .
+            exit 1
+          fi
+          echo "OK: All files are formatted"
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64
+          working-directory: sdks/go
+          args: --timeout=5m
+
+  test:
+    name: Build + Test + Race
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: sdks/go/go.mod
+          cache-dependency-path: sdks/go/go.sum
+
+      - name: Build
+        run: go build ./...
+
+      - name: Test
+        run: go test ./... -count=1 -coverprofile=coverage.out
+
+      - name: Test with race detector
+        run: go test -race ./... -count=1
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: sdks/go/coverage.out
+          retention-days: 7
+
+  fuzz:
+    name: Fuzz (bounded)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: sdks/go/go.mod
+          cache-dependency-path: sdks/go/go.sum
+
+      - name: Fuzz evidence validator (10s)
+        run: go test ./evidence -run=^$ -fuzz=^FuzzValidate$ -fuzztime=10s
