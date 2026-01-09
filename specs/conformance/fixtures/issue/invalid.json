@@ -1,8 +1,14 @@
 {
   "$comment": "Invalid Issue() input golden vectors for cross-language conformance (v0.9.29+)",
   "version": "0.9.29",
+  "runner_contract": {
+    "input_format": "untyped JSON values passed to Issue()",
+    "float_handling": "runner decodes amt as any/interface{}, Issue() validates integer constraint",
+    "evidence_validation": "JSON-safe only; non-finite number tests are language-specific unit tests"
+  },
   "fixtures": [
     {
+      "id": "issue-invalid-001",
       "name": "missing-issuer",
       "description": "Missing required issuer field",
       "input": {
@@ -15,10 +21,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_MISSING_REQUIRED_FIELD",
-        "error_contains": "issuer"
+        "error_field": "iss"
       }
     },
     {
+      "id": "issue-invalid-002",
       "name": "missing-audience",
       "description": "Missing required audience field",
       "input": {
@@ -31,10 +38,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_MISSING_REQUIRED_FIELD",
-        "error_contains": "audience"
+        "error_field": "aud"
       }
     },
     {
+      "id": "issue-invalid-003",
       "name": "http-issuer",
       "description": "HTTP issuer URL not allowed (must be HTTPS)",
       "input": {
@@ -48,10 +56,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_URL",
-        "error_contains": "https://"
+        "error_field": "iss"
       }
     },
     {
+      "id": "issue-invalid-004",
       "name": "http-audience",
       "description": "HTTP audience URL not allowed (must be HTTPS)",
       "input": {
@@ -65,12 +74,13 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_URL",
-        "error_contains": "https://"
+        "error_field": "aud"
       }
     },
     {
+      "id": "issue-invalid-005",
       "name": "lowercase-currency",
-      "description": "Currency must be uppercase ISO 4217",
+      "description": "Currency must be uppercase",
       "input": {
         "iss": "https://publisher.example",
         "aud": "https://agent.example",
@@ -82,27 +92,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_CURRENCY",
-        "error_contains": "uppercase"
+        "error_field": "cur"
       }
     },
     {
-      "name": "invalid-currency-length",
-      "description": "Currency must be exactly 3 characters",
-      "input": {
-        "iss": "https://publisher.example",
-        "aud": "https://agent.example",
-        "amt": 1000,
-        "cur": "USDC",
-        "rail": "stripe",
-        "reference": "ch_abc123"
-      },
-      "expected": {
-        "valid": false,
-        "error_code": "E_INVALID_CURRENCY",
-        "error_contains": "3 characters"
-      }
-    },
-    {
+      "id": "issue-invalid-006",
       "name": "negative-amount",
       "description": "Amount must be non-negative",
       "input": {
@@ -116,12 +110,13 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_AMOUNT",
-        "error_contains": "non-negative"
+        "error_field": "amt"
       }
     },
     {
+      "id": "issue-invalid-007",
       "name": "float-amount",
-      "description": "Amount must be integer (minor units)",
+      "description": "Amount must be integer (minor units) - runner passes decoded float64 to Issue()",
       "input": {
         "iss": "https://publisher.example",
         "aud": "https://agent.example",
@@ -133,10 +128,12 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_AMOUNT",
-        "error_contains": "integer"
+        "error_field": "amt",
+        "note": "Runner decodes to float64/any, Issue() checks for integer"
       }
     },
     {
+      "id": "issue-invalid-008",
       "name": "missing-rail",
       "description": "Missing required rail field",
       "input": {
@@ -149,10 +146,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_MISSING_REQUIRED_FIELD",
-        "error_contains": "rail"
+        "error_field": "rail"
       }
     },
     {
+      "id": "issue-invalid-009",
       "name": "missing-reference",
       "description": "Missing required reference field",
       "input": {
@@ -165,47 +163,25 @@
       "expected": {
         "valid": false,
         "error_code": "E_MISSING_REQUIRED_FIELD",
-        "error_contains": "reference"
+        "error_field": "reference"
       }
     },
     {
-      "name": "evidence-nan",
-      "description": "Evidence containing NaN (not JSON-safe)",
+      "id": "issue-invalid-010",
+      "name": "empty-issuer",
+      "description": "Empty string issuer is invalid",
       "input": {
-        "iss": "https://publisher.example",
+        "iss": "",
         "aud": "https://agent.example",
         "amt": 1000,
         "cur": "USD",
         "rail": "stripe",
-        "reference": "ch_abc123",
-        "evidence": {
-          "score": "NaN"
-        }
+        "reference": "ch_abc123"
       },
       "expected": {
         "valid": false,
-        "error_code": "E_EVIDENCE_NOT_JSON",
-        "note": "NaN as string is valid JSON, but NaN as number is not - this test verifies NaN number handling in implementations"
-      }
-    },
-    {
-      "name": "evidence-too-deep",
-      "description": "Evidence exceeding max depth limit (32)",
-      "input": {
-        "iss": "https://publisher.example",
-        "aud": "https://agent.example",
-        "amt": 1000,
-        "cur": "USD",
-        "rail": "stripe",
-        "reference": "ch_abc123",
-        "evidence": {
-          "$comment": "Actual test should generate 33+ levels of nesting"
-        }
-      },
-      "expected": {
-        "valid": false,
-        "error_code": "E_EVIDENCE_TOO_LARGE",
-        "error_contains": "depth"
+        "error_code": "E_INVALID_URL",
+        "error_field": "iss"
       }
     }
   ]

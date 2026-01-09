@@ -1,6 +1,11 @@
 {
   "$comment": "Policy evaluation golden vectors for cross-language conformance (v0.9.29+)",
   "version": "0.9.29",
+  "runner_contract": {
+    "semantics": "first-match-wins",
+    "empty_rules": "valid, falls back to defaults.decision",
+    "wildcard_syntax": "* matches any suffix (e.g., internal:* matches internal:foo)"
+  },
   "test_policy": {
     "version": "peac-policy/0.1",
     "name": "conformance-test-policy",
@@ -67,6 +72,7 @@
   },
   "fixtures": [
     {
+      "id": "eval-001",
       "name": "first-match-wins",
       "description": "When multiple rules match, first rule wins",
       "context": {
@@ -84,6 +90,7 @@
       }
     },
     {
+      "id": "eval-002",
       "name": "default-on-no-match",
       "description": "Default applies when no rules match",
       "context": {
@@ -101,6 +108,7 @@
       }
     },
     {
+      "id": "eval-003",
       "name": "array-purpose-match",
       "description": "Rule with array of purposes matches any",
       "context": {
@@ -117,6 +125,7 @@
       }
     },
     {
+      "id": "eval-004",
       "name": "no-subject-constraint",
       "description": "Rule without subject constraint matches any subject",
       "context": {
@@ -132,6 +141,7 @@
       }
     },
     {
+      "id": "eval-005",
       "name": "no-purpose-constraint",
       "description": "Rule without purpose constraint matches any purpose",
       "context": {
@@ -147,6 +157,7 @@
       }
     },
     {
+      "id": "eval-006",
       "name": "all-labels-required",
       "description": "All specified labels must be present",
       "context": {
@@ -165,6 +176,7 @@
       }
     },
     {
+      "id": "eval-007",
       "name": "id-prefix-match",
       "description": "Wildcard pattern matches ID prefix",
       "context": {
@@ -179,6 +191,7 @@
       }
     },
     {
+      "id": "eval-008",
       "name": "id-prefix-no-match",
       "description": "Non-matching ID prefix falls through",
       "context": {
@@ -194,6 +207,7 @@
       }
     },
     {
+      "id": "eval-009",
       "name": "empty-context",
       "description": "Empty context matches no rules",
       "context": {},
@@ -203,6 +217,7 @@
       }
     },
     {
+      "id": "eval-010",
       "name": "only-subject",
       "description": "Context with only subject",
       "context": {
@@ -217,6 +232,7 @@
       }
     },
     {
+      "id": "eval-011",
       "name": "only-purpose",
       "description": "Context with only purpose",
       "context": {
@@ -228,6 +244,7 @@
       }
     },
     {
+      "id": "eval-012",
       "name": "org-index-allow",
       "description": "Org type can index",
       "context": {

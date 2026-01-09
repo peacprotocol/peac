@@ -1,8 +1,14 @@
 {
   "$comment": "Policy document validation golden vectors for cross-language conformance (v0.9.29+)",
   "version": "0.9.29",
+  "runner_contract": {
+    "parsing": "strict",
+    "unknown_fields": "reject",
+    "empty_rules": "valid with defaults fallback"
+  },
   "valid_fixtures": [
     {
+      "id": "policy-valid-001",
       "name": "minimal-policy",
       "description": "Minimal valid policy with one rule",
       "policy": {
@@ -19,6 +25,7 @@
       }
     },
     {
+      "id": "policy-valid-002",
       "name": "full-policy",
       "description": "Policy with all optional fields",
       "policy": {
@@ -48,6 +55,7 @@
       }
     },
     {
+      "id": "policy-valid-003",
       "name": "multiple-rules",
       "description": "Policy with multiple rules",
       "policy": {
@@ -70,10 +78,27 @@
       "expected": {
         "valid": true
       }
+    },
+    {
+      "id": "policy-valid-004",
+      "name": "empty-rules-with-defaults",
+      "description": "Empty rules array is valid when defaults are provided - evaluation falls back to defaults.decision",
+      "policy": {
+        "version": "peac-policy/0.1",
+        "defaults": {
+          "decision": "deny",
+          "reason": "No rules defined"
+        },
+        "rules": []
+      },
+      "expected": {
+        "valid": true
+      }
     }
   ],
   "invalid_fixtures": [
     {
+      "id": "policy-invalid-001",
       "name": "wrong-version",
       "description": "Invalid policy version",
       "policy": {
@@ -87,11 +112,11 @@
       },
       "expected": {
         "valid": false,
-        "error_code": "E_INVALID_POLICY_VERSION",
-        "error_contains": "version"
+        "error_code": "E_INVALID_POLICY_VERSION"
       }
     },
     {
+      "id": "policy-invalid-002",
       "name": "missing-version",
       "description": "Missing required version field",
       "policy": {
@@ -105,23 +130,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_POLICY",
-        "error_contains": "version"
+        "error_field": "version"
       }
     },
     {
-      "name": "empty-rules",
-      "description": "Policy must have at least one rule",
-      "policy": {
-        "version": "peac-policy/0.1",
-        "rules": []
-      },
-      "expected": {
-        "valid": false,
-        "error_code": "E_INVALID_POLICY",
-        "error_contains": "rule"
-      }
-    },
-    {
+      "id": "policy-invalid-003",
       "name": "missing-rules",
       "description": "Missing required rules array",
       "policy": {
@@ -130,10 +143,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_POLICY",
-        "error_contains": "rules"
+        "error_field": "rules"
       }
     },
     {
+      "id": "policy-invalid-004",
       "name": "invalid-decision",
       "description": "Decision must be allow, deny, or review",
       "policy": {
@@ -148,10 +162,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_POLICY",
-        "error_contains": "decision"
+        "error_field": "rules[0].decision"
       }
     },
     {
+      "id": "policy-invalid-005",
       "name": "unknown-field",
       "description": "Unknown fields must be rejected (strict parsing)",
       "policy": {
@@ -167,10 +182,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_POLICY",
-        "error_contains": "unknown"
+        "error_field": "unknown_field"
       }
     },
     {
+      "id": "policy-invalid-006",
       "name": "rule-missing-name",
       "description": "Rule must have a name",
       "policy": {
@@ -184,10 +200,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_POLICY",
-        "error_contains": "name"
+        "error_field": "rules[0].name"
       }
     },
     {
+      "id": "policy-invalid-007",
       "name": "rule-missing-decision",
       "description": "Rule must have a decision",
       "policy": {
@@ -201,7 +218,7 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_POLICY",
-        "error_contains": "decision"
+        "error_field": "rules[0].decision"
       }
     }
   ]

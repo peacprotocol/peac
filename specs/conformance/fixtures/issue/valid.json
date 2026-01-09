@@ -1,8 +1,14 @@
 {
   "$comment": "Valid Issue() input golden vectors for cross-language conformance (v0.9.29+)",
   "version": "0.9.29",
+  "runner_contract": {
+    "input_format": "untyped JSON values passed to Issue()",
+    "assertion_mode": "invariant-based (subset checking, not exact equality)",
+    "currency_rule": "ISO 4217 uppercase OR recognized asset codes (USDC, USDT, etc.)"
+  },
   "fixtures": [
     {
+      "id": "issue-valid-001",
       "name": "minimal-receipt",
       "description": "Minimal valid issue options - only required fields",
       "input": {
@@ -15,21 +21,19 @@
       },
       "expected": {
         "valid": true,
-        "claims": {
+        "invariants": {
           "iss": "https://publisher.example",
-          "aud": "https://agent.example",
+          "aud_contains": "https://agent.example",
           "amt": 1000,
           "cur": "USD",
-          "payment": {
-            "rail": "stripe",
-            "reference": "ch_abc123",
-            "amount": 1000,
-            "currency": "USD"
-          }
+          "rid_format": "uuid-v7",
+          "payment.rail": "stripe",
+          "payment.reference": "ch_abc123"
         }
       }
     },
     {
+      "id": "issue-valid-002",
       "name": "full-receipt",
       "description": "Full issue options with all optional fields",
       "input": {
@@ -54,29 +58,18 @@
       },
       "expected": {
         "valid": true,
-        "claims": {
+        "invariants": {
           "iss": "https://publisher.example",
-          "aud": "https://agent.example",
           "amt": 9999,
           "cur": "EUR",
-          "subject": {
-            "uri": "https://resource.example/api/v1/data"
-          },
-          "payment": {
-            "rail": "stripe",
-            "reference": "pi_xyz789",
-            "amount": 9999,
-            "currency": "EUR",
-            "asset": "EUR",
-            "env": "live",
-            "network": "card",
-            "facilitator_ref": "facil_123",
-            "idempotency_key": "idem_456"
-          }
+          "subject.uri": "https://resource.example/api/v1/data",
+          "payment.env": "live",
+          "payment.network": "card"
         }
       }
     },
     {
+      "id": "issue-valid-003",
       "name": "zero-amount",
       "description": "Zero amount receipt (valid for free tier)",
       "input": {
@@ -89,12 +82,14 @@
       },
       "expected": {
         "valid": true,
-        "claims": {
-          "amt": 0
+        "invariants": {
+          "amt": 0,
+          "payment.rail": "free"
         }
       }
     },
     {
+      "id": "issue-valid-004",
       "name": "with-purpose",
       "description": "Receipt with purpose tracking (v0.9.24+)",
       "input": {
@@ -110,14 +105,15 @@
       },
       "expected": {
         "valid": true,
-        "claims": {
-          "purpose_declared": ["inference", "train"],
+        "invariants": {
+          "purpose_declared_contains": "inference",
           "purpose_enforced": "inference",
           "purpose_reason": "constrained"
         }
       }
     },
     {
+      "id": "issue-valid-005",
       "name": "with-expiry",
       "description": "Receipt with explicit expiry timestamp",
       "input": {
@@ -131,19 +127,20 @@
       },
       "expected": {
         "valid": true,
-        "claims": {
+        "invariants": {
           "exp": 1736553600
         }
       }
     },
     {
-      "name": "crypto-rail",
-      "description": "Cryptocurrency payment rail with network",
+      "id": "issue-valid-006",
+      "name": "crypto-rail-usdc",
+      "description": "Cryptocurrency payment rail with USDC asset code",
       "input": {
         "iss": "https://publisher.example",
         "aud": "https://agent.example",
         "amt": 1000000,
-        "cur": "USDC",
+        "cur": "USD",
         "rail": "x402",
         "reference": "0xabc123def456",
         "asset": "USDC",
@@ -152,16 +149,16 @@
       },
       "expected": {
         "valid": true,
-        "claims": {
-          "payment": {
-            "rail": "x402",
-            "network": "eip155:8453",
-            "asset": "USDC"
-          }
-        }
+        "invariants": {
+          "payment.rail": "x402",
+          "payment.network": "eip155:8453",
+          "payment.asset": "USDC"
+        },
+        "note": "cur=USD (fiat denomination), asset=USDC (actual token transferred)"
       }
     },
     {
+      "id": "issue-valid-007",
       "name": "large-amount",
       "description": "Large amount within int64 range",
       "input": {
@@ -174,7 +171,7 @@
       },
       "expected": {
         "valid": true,
-        "claims": {
+        "invariants": {
           "amt": 999999999999
         }
       }

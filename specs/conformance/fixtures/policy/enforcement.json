@@ -1,13 +1,19 @@
 {
   "$comment": "Policy enforcement HTTP mapping golden vectors for cross-language conformance (v0.9.29+)",
   "version": "0.9.29",
+  "runner_contract": {
+    "api_shape": "EnforceDecision(decision Decision, receiptVerified bool) (int, http.Header)",
+    "402_semantics": "Only when decision=review AND receiptVerified=false",
+    "www_authenticate": "Required for 402 responses"
+  },
   "fixtures": [
     {
+      "id": "enforce-001",
       "name": "allow-200",
       "description": "Allow decision maps to 200 OK",
-      "decision": {
-        "allow": "allow",
-        "rule": "test-allow"
+      "input": {
+        "decision": "allow",
+        "receipt_verified": false
       },
       "expected": {
         "status": 200,
@@ -15,11 +21,12 @@
       }
     },
     {
+      "id": "enforce-002",
       "name": "deny-403",
       "description": "Deny decision maps to 403 Forbidden",
-      "decision": {
-        "allow": "deny",
-        "rule": "test-deny"
+      "input": {
+        "decision": "deny",
+        "receipt_verified": false
       },
       "expected": {
         "status": 403,
@@ -27,12 +34,11 @@
       }
     },
     {
-      "name": "review-without-receipt-402",
+      "id": "enforce-003",
+      "name": "review-no-receipt-402",
       "description": "Review decision without receipt maps to 402 with WWW-Authenticate",
-      "decision": {
-        "allow": "review",
-        "rule": "test-review",
-        "receipt_required": true,
+      "input": {
+        "decision": "review",
         "receipt_verified": false
       },
       "expected": {
@@ -43,12 +49,11 @@
       }
     },
     {
+      "id": "enforce-004",
       "name": "review-with-receipt-200",
       "description": "Review decision with verified receipt maps to 200 OK",
-      "decision": {
-        "allow": "review",
-        "rule": "test-review",
-        "receipt_required": true,
+      "input": {
+        "decision": "review",
         "receipt_verified": true
       },
       "expected": {
@@ -57,26 +62,25 @@
       }
     },
     {
-      "name": "review-optional-receipt-403",
-      "description": "Review decision without required receipt maps to 403",
-      "decision": {
-        "allow": "review",
-        "rule": "test-review",
-        "receipt_required": false,
-        "receipt_verified": false
+      "id": "enforce-005",
+      "name": "allow-with-receipt-200",
+      "description": "Allow with receipt still 200 (receipt is bonus)",
+      "input": {
+        "decision": "allow",
+        "receipt_verified": true
       },
       "expected": {
-        "status": 403,
+        "status": 200,
         "headers": {}
       }
     },
     {
-      "name": "default-deny-403",
-      "description": "Default deny maps to 403",
-      "decision": {
-        "allow": "deny",
-        "rule": null,
-        "is_default": true
+      "id": "enforce-006",
+      "name": "deny-with-receipt-403",
+      "description": "Deny with receipt still 403 (receipt doesn't override deny)",
+      "input": {
+        "decision": "deny",
+        "receipt_verified": true
       },
       "expected": {
         "status": 403,
