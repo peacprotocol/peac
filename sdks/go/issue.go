@@ -148,6 +148,7 @@ const (
 var currencyRegex = regexp.MustCompile(`^[A-Z]{3}$`)
 
 // validateHTTPSURL validates that a URL is a valid https:// URL with a host.
+// Fragments and userinfo are forbidden in issuer/audience/subject URLs.
 func validateHTTPSURL(rawURL string) error {
 	if rawURL == "" {
 		return fmt.Errorf("URL is required")
@@ -162,6 +163,14 @@ func validateHTTPSURL(rawURL string) error {
 	if u.Host == "" {
 		return fmt.Errorf("URL must have a host")
 	}
+	// Forbid fragments - issuer/audience identifiers should not have fragments
+	if u.Fragment != "" {
+		return fmt.Errorf("URL must not contain a fragment")
+	}
+	// Forbid userinfo - credentials in URLs are a security risk
+	if u.User != nil {
+		return fmt.Errorf("URL must not contain userinfo")
+	}
 	return nil
 }
 
@@ -171,7 +180,8 @@ func validateHTTPSURL(rawURL string) error {
 // and signs the claims with Ed25519.
 //
 // Invariants enforced:
-//   - Issuer and Audience must be valid https:// URLs with a host
+//   - Issuer and Audience must be valid https:// URLs with a host (no fragment, no userinfo)
+//   - Subject (if provided) must be a valid https:// URL (no fragment, no userinfo)
 //   - Currency must be ISO 4217 uppercase (3 letters)
 //   - Amount must be non-negative
 //   - Env must be "live" or "test" (defaults to "test" if empty)

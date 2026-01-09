@@ -260,6 +260,9 @@ func TestIssue_Error_InvalidIssuer(t *testing.T) {
 		{"just scheme", "https:"},
 		{"whitespace", "https:// "},
 		{"invalid URL chars", "https://exam ple.com"},
+		{"fragment", "https://example.com#section"},
+		{"userinfo", "https://user:pass@example.com"},
+		{"userinfo no password", "https://user@example.com"},
 	}
 
 	for _, tt := range tests {
