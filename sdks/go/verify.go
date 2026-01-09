@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/peacprotocol/peac/sdks/go/jws"
 	"github.com/peacprotocol/peac/sdks/go/jwks"
+	"github.com/peacprotocol/peac/sdks/go/jws"
 )
 
 // VerifyOptions configures receipt verification.

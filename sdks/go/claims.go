@@ -87,13 +87,13 @@ type AgentIdentityEvidence struct {
 
 // AgentProof represents proof of agent identity control.
 type AgentProof struct {
-	Method        string          `json:"method"`
-	KeyID         string          `json:"key_id"`
-	Algorithm     string          `json:"alg,omitempty"`
-	Signature     string          `json:"signature,omitempty"`
-	DPoPProof     string          `json:"dpop_proof,omitempty"`
-	CertThumbprint string         `json:"cert_thumbprint,omitempty"`
-	Binding       *BindingDetails `json:"binding,omitempty"`
+	Method         string          `json:"method"`
+	KeyID          string          `json:"key_id"`
+	Algorithm      string          `json:"alg,omitempty"`
+	Signature      string          `json:"signature,omitempty"`
+	DPoPProof      string          `json:"dpop_proof,omitempty"`
+	CertThumbprint string          `json:"cert_thumbprint,omitempty"`
+	Binding        *BindingDetails `json:"binding,omitempty"`
 }
 
 // BindingDetails represents the HTTP request binding details.

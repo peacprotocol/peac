@@ -1,0 +1,92 @@
+name: Go SDK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sdks/go/**'
+      - '.github/workflows/go-sdk.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'sdks/go/**'
+      - '.github/workflows/go-sdk.yml'
+
+concurrency:
+  group: go-sdk-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: sdks/go
+
+jobs:
+  test:
+    name: Build, Lint, Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache-dependency-path: sdks/go/go.sum
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Format check
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "FAIL: The following files are not formatted:"
+            gofmt -l .
+            exit 1
+          fi
+          echo "OK: All files are formatted"
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: v1.55
+          working-directory: sdks/go
+          args: --timeout=5m
+
+      - name: Build
+        run: go build ./...
+
+      - name: Test
+        run: go test ./... -v -coverprofile=coverage.out
+
+      - name: Test with race detector
+        run: go test -race ./...
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: sdks/go/coverage.out
+          retention-days: 7
+
+  fuzz:
+    name: Fuzz Tests (bounded)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache-dependency-path: sdks/go/go.sum
+
+      - name: Fuzz evidence validator (10s)
+        working-directory: sdks/go
+        run: go test ./evidence -run=^$ -fuzz=FuzzValidate -fuzztime=10s
+        continue-on-error: true

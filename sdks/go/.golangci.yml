@@ -1,0 +1,40 @@
+# golangci-lint configuration for PEAC Go SDK
+# Keep this minimal to avoid yak-shaving; expand as needed.
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck      # Check for unchecked errors
+    - govet         # Reports suspicious constructs
+    - ineffassign   # Detects ineffective assignments
+    - staticcheck   # Advanced static analysis
+    - unused        # Reports unused code
+    - gosimple      # Suggests code simplifications
+    - typecheck     # Type-checking (always enabled)
+  disable:
+    - godot         # We don't require periods on comments
+    - wsl           # Whitespace linter is too opinionated
+    - gofumpt       # We use standard gofmt
+
+linters-settings:
+  errcheck:
+    # Don't check for error checking on these functions
+    exclude-functions:
+      - (*testing.T).Errorf
+      - (*testing.T).Fatalf
+      - (*testing.T).Error
+      - (*testing.T).Fatal
+
+issues:
+  # Don't skip any linter issues
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  exclude-rules:
+    # Allow unused parameters in test files
+    - path: _test\.go
+      linters:
+        - unused
