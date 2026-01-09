@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	peac "github.com/peacprotocol/peac-go"
-	"github.com/peacprotocol/peac-go/jws"
+	peac "github.com/peacprotocol/peac/sdks/go"
+	"github.com/peacprotocol/peac/sdks/go/jws"
 )
 
 // TestJWSParsing tests JWS parsing functionality.

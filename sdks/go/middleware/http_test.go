@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	peac "github.com/peacprotocol/peac-go"
+	peac "github.com/peacprotocol/peac/sdks/go"
 )
 
 func TestDefaultConfig(t *testing.T) {

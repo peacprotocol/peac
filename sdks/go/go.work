@@ -1,0 +1,9 @@
+go 1.21
+
+use (
+	.
+	./middleware/chi
+	./middleware/gin
+)
+
+replace github.com/peacprotocol/peac/sdks/go v0.0.0 => .

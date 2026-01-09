@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	peac "github.com/peacprotocol/peac-go"
-	"github.com/peacprotocol/peac-go/jwks"
+	peac "github.com/peacprotocol/peac/sdks/go"
+	"github.com/peacprotocol/peac/sdks/go/jwks"
 )
 
 // ContextKey is the type for context keys.
