@@ -1,6 +1,16 @@
 # PEAC Protocol Roadmap
 
-## Current Release: v0.9.26
+## Current Release: v0.9.27
+
+Shipped:
+
+- Dispute Attestations - `peac/dispute` type for formal contestation
+- Audit Logs - Case bundle generation with trace correlation
+- Dispute Lifecycle - Filed, acknowledged, resolved, appealed states
+- 13 Dispute Error Codes - E*DISPUTE*\* codes for standardized handling
+- Repo Cleanup - 121 stale branches archived, community health files reorganized
+
+## v0.9.26
 
 Shipped:
 
@@ -29,6 +39,7 @@ Shipped:
 
 | Version | Highlights                                                   |
 | ------- | ------------------------------------------------------------ |
+| v0.9.27 | Dispute attestations, audit logs, repo cleanup               |
 | v0.9.26 | Attribution attestations, obligations extension, conformance |
 | v0.9.25 | Agent identity attestations, Go SDK, middleware guide        |
 | v0.9.24 | Purpose on wire, enforcement profiles, AIPREF mapping        |
@@ -46,8 +57,8 @@ Shipped:
 
 | Version  | Theme        | Key Deliverables                                    |
 | -------- | ------------ | --------------------------------------------------- |
-| v0.9.27  | Resolution   | Dispute attestations, audit logs, case bundles      |
-| v0.9.28+ | Distribution | Edge workers, full Go SDK, WebSocket transport      |
+| v0.9.28  | Distribution | Edge deployment guides, worker-core, contracts      |
+| v0.9.29+ | Parity       | Full Go SDK (Issue + Policy), WebSocket transport   |
 | v0.10.0  | GA           | Wire format freeze, multi-implementation validation |
 
 ## Future Development

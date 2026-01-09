@@ -7,6 +7,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.28] - 2026-01-09
+
+### Added
+
+- **Contracts Package** (`@peac/contracts`, Layer 1)
+  - Canonical error codes with E\_\* prefix format
+  - Contract definitions for protocol invariants
+  - Shared error taxonomy across TypeScript and Go implementations
+- **Worker Core Package** (`@peac/worker-core`, Layer 4)
+  - Runtime-neutral TAP verification handler
+  - MODE_BEHAVIOR table-driven verification (tap_only, receipt_or_tap, unsafe_no_tap)
+  - RFC 9421 HTTP Message Signatures support
+  - Replay protection with D1/KV/EdgeKV backends
+  - Error normalization with RFC 9457 Problem Details
+  - 34 comprehensive tests
+
+### Documentation
+
+- **Edge Deployment Guides** (3 guides)
+  - `docs/guides/edge/cloudflare-workers.md`: Cloudflare Workers deployment
+  - `docs/guides/edge/fastly-compute.md`: Fastly Compute deployment
+  - `docs/guides/edge/akamai-edgeworkers.md`: Akamai EdgeWorkers deployment
+  - All guides use RFC 9421 HTTP Message Signatures (Signature-Input, Signature)
+  - Protocol Standards sections (RFC 9421, RFC 9457, RFC 8615, Visa TAP)
+  - Security and Operations sections (threat model, fail modes, replay semantics)
+  - Performance targets clearly labeled as design goals
+- **NPM Publishing Policy** (`docs/maintainers/NPM_PUBLISH_POLICY.md`)
+  - Latest-only publishing policy
+  - First npm publish deferred to v0.9.31
+  - Comprehensive quality gates and verification procedures
+  - pnpm publish enforcement (NOT npm publish)
+- **HOT-PATH-RESILIENCE.md** (`docs/specs/HOT-PATH-RESILIENCE.md`)
+  - Reclassified from Normative to Informational
+  - Design targets for O(1) parsing, fail mode guidance
+  - Explicit disclaimer about enforcement status
+
+### CI/Quality
+
+- **Documentation Quality Workflow** (`.github/workflows/docs-quality.yml`)
+  - Forbidden header checks (no Payment-\*, enforce RFC 9421)
+  - RFC 9421 usage verification in edge guides
+  - Performance claim qualification checks
+  - Placeholder text detection
+  - Error code format consistency
+  - Normative spec status validation
+
+### Deferred
+
+The following items were originally planned for v0.9.28 but deferred to future releases:
+
+- **Full Go SDK (Issue + Policy)** → Moved to v0.9.29
+  - Only verify.go exists; issue.go and policy.go not implemented
+  - 4-6 day implementation timeline required
+- **npm publish** → Moved to v0.9.31
+  - Latest-only publishing policy
+  - Quality gates need validation with real deployments
+- **Faremeter Adapter** → Moved to v0.9.30
+- **Python SDK** → Moved to post-v0.10.0
+- **@peac/nextjs v0.1** → Moved to v0.9.30
+
+### Notes
+
+- No breaking changes (additive only)
+- All packages bumped to 0.9.28
+- Cross-referenced with quality audit: `reference/V0928_QUALITY_AUDIT.md`
+
 ## [0.9.27] - 2026-01-07
 
 ### Added

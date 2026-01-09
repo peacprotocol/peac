@@ -1,0 +1,397 @@
+# NPM Publish Procedure - v0.9.28
+
+Comprehensive procedure for publishing v0.9.20 through v0.9.28 packages to npm.
+
+**Last Updated:** 2026-01-09
+**Status:** Ready for execution
+**Packages:** 33 public packages (was 31 in v0.9.27)
+
+## Context
+
+v0.9.20 through v0.9.27 npm publishes were postponed due to:
+1. npm auth issues (v0.9.20)
+2. Focus on protocol work (v0.9.21-v0.9.27)
+
+v0.9.28 will catch up all missed versions (v0.9.20-v0.9.28) in a single batch.
+
+## Package List (33 Public Packages)
+
+```bash
+# From scripts/check-publish-list.sh EXPECTED_PACKAGES
+@peac/adapter-core
+@peac/adapter-x402-daydreams
+@peac/adapter-x402-fluora
+@peac/adapter-x402-pinata
+@peac/attribution
+@peac/cli
+@peac/contracts          # NEW in v0.9.28
+@peac/control
+@peac/core
+@peac/crypto
+@peac/disc
+@peac/http-signatures
+@peac/jwks-cache
+@peac/kernel
+@peac/mappings-acp
+@peac/mappings-aipref
+@peac/mappings-mcp
+@peac/mappings-rsl
+@peac/mappings-tap
+@peac/pay402
+@peac/policy-kit
+@peac/pref
+@peac/protocol
+@peac/rails-card
+@peac/rails-stripe
+@peac/rails-x402
+@peac/receipts
+@peac/schema
+@peac/sdk
+@peac/server
+@peac/telemetry
+@peac/telemetry-otel
+@peac/worker-core        # NEW in v0.9.28
+```
+
+## Prerequisites
+
+### 1. Environment Setup
+
+```bash
+# Verify pnpm version (MUST be pnpm, NOT npm)
+pnpm --version  # Should be 8+
+
+# Verify npm authentication
+npm whoami --registry https://registry.npmjs.org/
+# Should show: peacprotocol (or authorized user)
+
+# Verify npm org access
+npm access ls-packages @peac
+# Should list all packages with write access
+
+# Verify git state
+git status
+# Should show: On branch main, working tree clean
+git log -1 --oneline
+# Should show: Latest commit is v0.9.28 release
+```
+
+### 2. Version Verification
+
+```bash
+# Run version integrity check
+./scripts/check-version-integrity.sh
+# Should pass: All packages at 0.9.28
+
+# Run publish list check
+./scripts/check-publish-list.sh
+# Should pass: All 33 public packages match
+```
+
+### 3. Quality Gates
+
+```bash
+# CRITICAL: All CI gates must pass before publishing
+pnpm lint
+pnpm build
+pnpm typecheck:core
+pnpm test
+./scripts/guard.sh
+
+# Verify no uncommitted changes
+git status | grep "nothing to commit"
+```
+
+## Publishing Procedure
+
+### Option A: Automated (Recommended)
+
+Use the automated publish script:
+
+```bash
+# Dry run first (ALWAYS run dry run first!)
+node scripts/publish-public.mjs --dry-run
+
+# Review output carefully:
+# - Package versions (all should be 0.9.28)
+# - Topological order (dependencies published before dependents)
+# - Dist-tag (should be "next" for pre-1.0 versions)
+
+# If dry run looks good, publish for real
+node scripts/publish-public.mjs
+
+# Monitor output for errors
+# - Should publish 33 packages in topological order
+# - Each package should show: "Published @peac/package@0.9.28"
+```
+
+### Option B: Manual (For Debugging)
+
+If automated script fails, publish manually in topological order:
+
+```bash
+# Layer 0 (no dependencies)
+pnpm --filter "@peac/kernel" publish --access public --tag next --no-git-checks
+
+# Layer 1
+pnpm --filter "@peac/schema" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/crypto" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/disc" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/telemetry" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/contracts" publish --access public --tag next --no-git-checks
+
+# Layer 2
+pnpm --filter "@peac/protocol" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/control" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/receipts" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/pay402" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/pref" publish --access public --tag next --no-git-checks
+
+# Layer 3
+pnpm --filter "@peac/http-signatures" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/jwks-cache" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/policy-kit" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/attribution" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/telemetry-otel" publish --access public --tag next --no-git-checks
+
+# Layer 4 (Adapters & Mappings)
+pnpm --filter "@peac/mappings-acp" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/mappings-mcp" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/mappings-rsl" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/mappings-tap" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/mappings-aipref" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/rails-stripe" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/rails-x402" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/rails-card" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/adapter-core" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/adapter-x402-daydreams" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/adapter-x402-fluora" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/adapter-x402-pinata" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/worker-core" publish --access public --tag next --no-git-checks
+
+# Layer 5 (High-level)
+pnpm --filter "@peac/server" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/cli" publish --access public --tag next --no-git-checks
+pnpm --filter "@peac/core" publish --access public --tag next --no-git-checks
+
+# Layer 6 (SDK)
+pnpm --filter "@peac/sdk" publish --access public --tag next --no-git-checks
+```
+
+## Post-Publish Verification
+
+### 1. Version Check
+
+```bash
+# Verify all packages published successfully
+for pkg in \
+  adapter-core adapter-x402-daydreams adapter-x402-fluora adapter-x402-pinata \
+  attribution cli contracts control core crypto disc http-signatures jwks-cache \
+  kernel mappings-acp mappings-aipref mappings-mcp mappings-rsl mappings-tap \
+  pay402 policy-kit pref protocol rails-card rails-stripe rails-x402 receipts \
+  schema sdk server telemetry telemetry-otel worker-core; do
+  echo "Checking @peac/${pkg}@next..."
+  npm view @peac/${pkg}@next version
+done
+
+# All should show: 0.9.28
+```
+
+### 2. Dependency Resolution Check
+
+```bash
+# Verify workspace:* resolved correctly
+npm view @peac/protocol@next dependencies
+npm view @peac/server@next dependencies
+npm view @peac/cli@next dependencies
+
+# Should show version numbers (e.g., "0.9.28"), NOT "workspace:*"
+```
+
+### 3. Smoke Test
+
+```bash
+# Create temporary directory
+mkdir -p /tmp/peac-smoke-test
+cd /tmp/peac-smoke-test
+
+# Initialize package.json
+npm init -y
+
+# Install from registry
+npm install @peac/protocol@next
+
+# Test import
+node -e "const { verify } = require('@peac/protocol'); console.log('OK');"
+
+# Should print: OK
+
+# Cleanup
+cd -
+rm -rf /tmp/peac-smoke-test
+```
+
+### 4. Documentation Update
+
+After successful publish:
+
+```bash
+# Update README.md badges (if needed)
+# Update CHANGELOG.md with npm publish date
+# Commit and push changes
+git add README.md CHANGELOG.md
+git commit -m "docs: update npm publish status for v0.9.28"
+git push origin main
+```
+
+## Troubleshooting
+
+### "401 Unauthorized"
+
+**Cause:** npm authentication failed.
+
+**Fix:**
+```bash
+# Re-authenticate
+npm login --registry https://registry.npmjs.org/
+
+# Or set token manually
+npm config set //registry.npmjs.org/:_authToken <your-token>
+```
+
+### "403 Forbidden"
+
+**Cause:** User lacks write access to @peac org.
+
+**Fix:** Contact @peac org owner to grant publish access.
+
+### "workspace:* not resolved"
+
+**Cause:** Used `npm publish` instead of `pnpm publish`.
+
+**Fix:** ALWAYS use `pnpm publish` (not `npm publish`). pnpm resolves workspace protocol.
+
+### "Version already exists"
+
+**Cause:** Package version already published.
+
+**Fix:** This is expected if re-running after partial failure. Skip already-published packages.
+
+### "Tarball integrity check failed"
+
+**Cause:** Corrupted build artifacts.
+
+**Fix:**
+```bash
+# Clean and rebuild
+pnpm clean
+pnpm build
+
+# Retry publish
+pnpm --filter "@peac/package" publish --access public --tag next --no-git-checks
+```
+
+## Rollback Procedure
+
+### If Critical Bug Found After Publish
+
+```bash
+# Deprecate problematic version
+npm deprecate @peac/package@0.9.28 "Critical bug - use 0.9.29 instead"
+
+# Publish hotfix as 0.9.29
+# ... fix bug, version bump, test ...
+pnpm --filter "@peac/package" publish --access public --tag next
+
+# Communicate via:
+# 1. GitHub release notes
+# 2. npm deprecation message
+# 3. Discord/Slack channels
+```
+
+### If Publish Fails Mid-Way
+
+```bash
+# Check which packages succeeded
+for pkg in ...; do npm view @peac/${pkg}@next version 2>/dev/null || echo "NOT PUBLISHED: @peac/${pkg}"; done
+
+# Resume from first unpublished package
+# Use manual procedure (Option B) starting from failed package
+```
+
+## Security Considerations
+
+### npm Token Security
+
+- **NEVER** commit npm tokens to git
+- **NEVER** share npm tokens
+- Store in `~/.npmrc` with restrictive permissions (600)
+- Use automation tokens for CI (not user tokens)
+- Rotate tokens quarterly
+
+### Provenance
+
+Consider enabling npm provenance for future publishes:
+
+```bash
+# Publish with provenance (requires GitHub Actions OIDC)
+npm publish --provenance --access public
+```
+
+**Note:** Provenance currently only supported in GitHub Actions, not local publishes.
+
+## Acceptance Criteria
+
+- [ ] All 33 packages published to npm at version 0.9.28
+- [ ] Dist-tag set to "next" (not "latest" until v1.0)
+- [ ] workspace:* dependencies resolved to version numbers
+- [ ] Smoke test passes (import + basic usage works)
+- [ ] Documentation updated with publish status
+- [ ] No security warnings or vulnerabilities
+
+## Timeline
+
+**Estimated time:** 30-60 minutes (including dry run, publish, verification)
+
+**Steps:**
+1. Prerequisites check: 10 minutes
+2. Dry run: 5 minutes
+3. Actual publish: 15-30 minutes (33 packages)
+4. Verification: 10 minutes
+5. Documentation: 5 minutes
+
+## Communication
+
+### Pre-Publish Announcement
+
+Post to GitHub Discussions:
+
+> **Upcoming npm publish: v0.9.20-v0.9.28 batch**
+>
+> We will be publishing a batch of packages (v0.9.20 through v0.9.28) to catch up missed releases. This includes:
+> - 33 public packages
+> - 2 new packages: @peac/contracts, @peac/worker-core
+> - All packages at version 0.9.28
+>
+> ETA: [Date/Time]
+> Dist-tag: next (use `npm install @peac/package@next`)
+
+### Post-Publish Announcement
+
+Post to GitHub Discussions + Update Release Notes:
+
+> **npm publish complete: v0.9.28**
+>
+> All 33 packages now available on npm:
+> ```bash
+> npm install @peac/protocol@next
+> ```
+>
+> See CHANGELOG for full details: <https://github.com/peacprotocol/peac/blob/main/CHANGELOG.md>
+
+## References
+
+- [RELEASING.md](./RELEASING.md) - General release procedure
+- [scripts/publish-public.mjs](../../scripts/publish-public.mjs) - Automated publish script
+- [scripts/check-publish-list.sh](../../scripts/check-publish-list.sh) - Package list verification
+- [pnpm workspaces](https://pnpm.io/workspaces) - Workspace protocol documentation

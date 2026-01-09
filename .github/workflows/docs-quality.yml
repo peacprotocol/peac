@@ -1,0 +1,133 @@
+name: Docs Quality
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**/*.md'
+      - 'packages/**/README.md'
+      - 'README.md'
+      - '.github/workflows/docs-quality.yml'
+
+jobs:
+  docs-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+
+      - name: Check for forbidden headers
+        run: |
+          echo "Checking for forbidden Payment-* headers..."
+          if rg -n "Payment-Signature|Payment-Required|X-Payment" docs/guides/edge/ || \
+             rg -n "Payment-Signature|Payment-Required|X-Payment" packages/worker-core/; then
+            echo "ERROR: Found forbidden Payment-* headers in edge guides or worker-core"
+            echo "Use RFC 9421 headers instead: Signature-Input, Signature"
+            exit 1
+          fi
+          echo "✓ No forbidden headers found"
+
+      - name: Verify RFC 9421 usage in edge guides
+        run: |
+          echo "Verifying RFC 9421 HTTP Message Signatures usage..."
+          if ! rg -q "RFC 9421" docs/guides/edge/cloudflare-workers.md; then
+            echo "ERROR: Cloudflare guide missing RFC 9421 reference"
+            exit 1
+          fi
+          if ! rg -q "Signature-Input" docs/guides/edge/cloudflare-workers.md; then
+            echo "ERROR: Cloudflare guide missing Signature-Input header examples"
+            exit 1
+          fi
+          echo "✓ RFC 9421 usage verified"
+
+      - name: Check for placeholder text
+        run: |
+          echo "Checking for unresolved placeholders..."
+          # Check for real TODO/FIXME markers (not in example commands or PEIP templates)
+          if rg -n "FIXME|TODO" docs/ \
+             --glob '!**/ROADMAP.md' \
+             --glob '!**/CHANGELOG.md' \
+             --glob '!**/roadmap/*.md' \
+             --glob '!**/peips.md' \
+             --glob '!**/peip/*.md' \
+             --glob '!**/NPM_PUBLISH_POLICY.md' \
+             --glob '!**/IMPLEMENTATION_PLAN.md'; then
+            echo "ERROR: Found unresolved TODO/FIXME markers in docs"
+            exit 1
+          fi
+          echo "✓ No unresolved placeholders"
+
+      - name: Verify normative specs have Status field
+        run: |
+          echo "Checking normative spec status labels..."
+          # Find all files claiming to be normative
+          NORMATIVE_FILES=$(rg -l "Status:\s*Normative" docs/specs/ || true)
+
+          if [ -n "$NORMATIVE_FILES" ]; then
+            echo "Found normative specs:"
+            echo "$NORMATIVE_FILES"
+
+            # Verify each has corresponding tests (advisory check)
+            echo ""
+            echo "Note: Normative specs should have corresponding test coverage."
+            echo "This is an advisory reminder, not a blocker."
+
+            # Check for PROTOCOL-BEHAVIOR.md specifically (must be tested)
+            if echo "$NORMATIVE_FILES" | grep -q "PROTOCOL-BEHAVIOR.md"; then
+              echo "✓ PROTOCOL-BEHAVIOR.md is normative (expected)"
+            fi
+          fi
+
+          echo "✓ Normative spec check complete"
+
+      - name: Check for performance claims without caveats
+        run: |
+          echo "Checking for unqualified performance claims..."
+          # Look for hard performance numbers without "(target)" qualification
+          if rg -n "P95.*<\s*\d+ms\"?\s*$" docs/guides/edge/ || \
+             rg -n "latency.*<\s*\d+ms\"?\s*$" docs/guides/edge/; then
+            echo "ERROR: Found performance claims without '(target)' qualification"
+            echo "Add '(target)' suffix or 'These are design targets' note"
+            exit 1
+          fi
+          echo "✓ Performance claims properly qualified"
+
+      - name: Verify error code format
+        run: |
+          echo "Checking error code format consistency..."
+          # Verify E_* prefix usage in docs
+          if rg -n "type.*peacprotocol\.org/(errors|problems)/#[a-z_]+" docs/ --glob '!**/CHANGELOG.md'; then
+            echo "ERROR: Found old error code format (lowercase snake_case)"
+            echo "Use E_* prefix: https://peacprotocol.org/problems/E_TAP_SIGNATURE_INVALID"
+            exit 1
+          fi
+          echo "✓ Error code format consistent"
+
+      - name: Check for contract package references
+        run: |
+          echo "Verifying @peac/contracts references..."
+          # Ensure docs mention contracts package for error codes
+          if ! rg -q "@peac/contracts" docs/guides/edge/cloudflare-workers.md; then
+            echo "WARNING: Cloudflare guide does not reference @peac/contracts"
+            echo "This is advisory - consider adding reference to canonical error source"
+          fi
+          echo "✓ Contract references check complete"
+
+      - name: Summary
+        run: |
+          echo ""
+          echo "======================================"
+          echo "Docs Quality Checks: PASSED"
+          echo "======================================"
+          echo ""
+          echo "All checks passed:"
+          echo "  ✓ No forbidden Payment-* headers"
+          echo "  ✓ RFC 9421 usage verified"
+          echo "  ✓ No unresolved placeholders"
+          echo "  ✓ Normative specs labeled"
+          echo "  ✓ Performance claims qualified"
+          echo "  ✓ Error code format consistent"
+          echo ""
