@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'sdks/go/**'
-      - '.github/workflows/go-sdk.yml'
+      - "sdks/go/**"
+      - ".github/workflows/go-sdk.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'sdks/go/**'
-      - '.github/workflows/go-sdk.yml'
+      - "sdks/go/**"
+      - ".github/workflows/go-sdk.yml"
 
 concurrency:
   group: go-sdk-${{ github.ref }}
@@ -21,22 +21,24 @@ defaults:
     working-directory: sdks/go
 
 jobs:
-  test:
-    name: Build, Lint, Test
+  lint:
+    name: Format + Lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.21'
+          go-version-file: sdks/go/go.mod
           cache-dependency-path: sdks/go/go.sum
 
-      - name: Verify dependencies
+      - name: Download deps
+        run: go mod download
+
+      - name: Verify deps
         run: go mod verify
 
       - name: Format check
@@ -49,20 +51,35 @@ jobs:
           echo "OK: All files are formatted"
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v1.55
+          version: v2.6
           working-directory: sdks/go
           args: --timeout=5m
+
+  test:
+    name: Build + Test + Race
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: sdks/go/go.mod
+          cache-dependency-path: sdks/go/go.sum
 
       - name: Build
         run: go build ./...
 
       - name: Test
-        run: go test ./... -v -coverprofile=coverage.out
+        run: go test ./... -count=1 -coverprofile=coverage.out
 
       - name: Test with race detector
-        run: go test -race ./...
+        run: go test -race ./... -count=1
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -72,21 +89,19 @@ jobs:
           retention-days: 7
 
   fuzz:
-    name: Fuzz Tests (bounded)
+    name: Fuzz (bounded)
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
+    needs: lint
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.21'
+          go-version-file: sdks/go/go.mod
           cache-dependency-path: sdks/go/go.sum
 
       - name: Fuzz evidence validator (10s)
-        working-directory: sdks/go
         run: go test ./evidence -run=^$ -fuzz=FuzzValidate -fuzztime=10s
-        continue-on-error: true

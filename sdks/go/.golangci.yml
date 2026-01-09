@@ -1,11 +1,14 @@
 # golangci-lint configuration for PEAC Go SDK
+# Compatible with golangci-lint v2.x
 # Keep this minimal to avoid yak-shaving; expand as needed.
+
+version: "2"
 
 run:
   timeout: 5m
-  modules-download-mode: readonly
 
 linters:
+  default: none
   enable:
     - errcheck      # Check for unchecked errors
     - govet         # Reports suspicious constructs
@@ -13,11 +16,6 @@ linters:
     - staticcheck   # Advanced static analysis
     - unused        # Reports unused code
     - gosimple      # Suggests code simplifications
-    - typecheck     # Type-checking (always enabled)
-  disable:
-    - godot         # We don't require periods on comments
-    - wsl           # Whitespace linter is too opinionated
-    - gofumpt       # We use standard gofmt
 
 linters-settings:
   errcheck:
