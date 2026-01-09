@@ -1,0 +1,180 @@
+{
+  "$comment": "Valid Issue() input golden vectors for cross-language conformance (v0.9.29+)",
+  "version": "0.9.29",
+  "runner_contract": {
+    "input_format": "untyped JSON values passed to Issue()",
+    "assertion_mode": "invariant-based (subset checking, not exact equality)",
+    "currency_rule": "ISO 4217 uppercase OR recognized asset codes (USDC, USDT, etc.)"
+  },
+  "fixtures": [
+    {
+      "id": "issue-valid-001",
+      "name": "minimal-receipt",
+      "description": "Minimal valid issue options - only required fields",
+      "input": {
+        "iss": "https://publisher.example",
+        "aud": "https://agent.example",
+        "amt": 1000,
+        "cur": "USD",
+        "rail": "stripe",
+        "reference": "ch_abc123"
+      },
+      "expected": {
+        "valid": true,
+        "invariants": {
+          "iss": "https://publisher.example",
+          "aud_contains": "https://agent.example",
+          "amt": 1000,
+          "cur": "USD",
+          "rid_format": "uuid-v7",
+          "payment.rail": "stripe",
+          "payment.reference": "ch_abc123"
+        }
+      }
+    },
+    {
+      "id": "issue-valid-002",
+      "name": "full-receipt",
+      "description": "Full issue options with all optional fields",
+      "input": {
+        "iss": "https://publisher.example",
+        "aud": "https://agent.example",
+        "amt": 9999,
+        "cur": "EUR",
+        "rail": "stripe",
+        "reference": "pi_xyz789",
+        "asset": "EUR",
+        "env": "live",
+        "network": "card",
+        "facilitator_ref": "facil_123",
+        "idempotency_key": "idem_456",
+        "subject": "https://resource.example/api/v1/data",
+        "evidence": {
+          "session_id": "sess_abc",
+          "metadata": {
+            "source": "api"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "invariants": {
+          "iss": "https://publisher.example",
+          "amt": 9999,
+          "cur": "EUR",
+          "subject.uri": "https://resource.example/api/v1/data",
+          "payment.env": "live",
+          "payment.network": "card"
+        }
+      }
+    },
+    {
+      "id": "issue-valid-003",
+      "name": "zero-amount",
+      "description": "Zero amount receipt (valid for free tier)",
+      "input": {
+        "iss": "https://publisher.example",
+        "aud": "https://agent.example",
+        "amt": 0,
+        "cur": "USD",
+        "rail": "free",
+        "reference": "free_tier_123"
+      },
+      "expected": {
+        "valid": true,
+        "invariants": {
+          "amt": 0,
+          "payment.rail": "free"
+        }
+      }
+    },
+    {
+      "id": "issue-valid-004",
+      "name": "with-purpose",
+      "description": "Receipt with purpose tracking (v0.9.24+)",
+      "input": {
+        "iss": "https://publisher.example",
+        "aud": "https://agent.example",
+        "amt": 500,
+        "cur": "USD",
+        "rail": "stripe",
+        "reference": "ch_purpose123",
+        "purpose": ["inference", "train"],
+        "purpose_enforced": "inference",
+        "purpose_reason": "constrained"
+      },
+      "expected": {
+        "valid": true,
+        "invariants": {
+          "purpose_declared_contains": "inference",
+          "purpose_enforced": "inference",
+          "purpose_reason": "constrained"
+        }
+      }
+    },
+    {
+      "id": "issue-valid-005",
+      "name": "with-expiry",
+      "description": "Receipt with explicit expiry timestamp",
+      "input": {
+        "iss": "https://publisher.example",
+        "aud": "https://agent.example",
+        "amt": 1000,
+        "cur": "USD",
+        "rail": "stripe",
+        "reference": "ch_exp123",
+        "exp": 1736553600
+      },
+      "expected": {
+        "valid": true,
+        "invariants": {
+          "exp": 1736553600
+        }
+      }
+    },
+    {
+      "id": "issue-valid-006",
+      "name": "crypto-rail-usdc",
+      "description": "Cryptocurrency payment rail with USDC asset code",
+      "input": {
+        "iss": "https://publisher.example",
+        "aud": "https://agent.example",
+        "amt": 1000000,
+        "cur": "USD",
+        "rail": "x402",
+        "reference": "0xabc123def456",
+        "asset": "USDC",
+        "network": "eip155:8453",
+        "env": "live"
+      },
+      "expected": {
+        "valid": true,
+        "invariants": {
+          "payment.rail": "x402",
+          "payment.network": "eip155:8453",
+          "payment.asset": "USDC"
+        },
+        "note": "cur=USD (fiat denomination), asset=USDC (actual token transferred)"
+      }
+    },
+    {
+      "id": "issue-valid-007",
+      "name": "large-amount",
+      "description": "Large amount within int64 range",
+      "input": {
+        "iss": "https://publisher.example",
+        "aud": "https://agent.example",
+        "amt": 999999999999,
+        "cur": "JPY",
+        "rail": "stripe",
+        "reference": "ch_large123"
+      },
+      "expected": {
+        "valid": true,
+        "invariants": {
+          "amt": 999999999999
+        }
+      }
+    }
+  ]
+}

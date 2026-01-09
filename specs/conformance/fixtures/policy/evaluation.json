@@ -1,0 +1,262 @@
+{
+  "$comment": "Policy evaluation golden vectors for cross-language conformance (v0.9.29+)",
+  "version": "0.9.29",
+  "runner_contract": {
+    "semantics": "first-match-wins",
+    "empty_rules": "valid, falls back to defaults.decision",
+    "wildcard_syntax": "* matches any suffix (e.g., internal:* matches internal:foo)"
+  },
+  "test_policy": {
+    "version": "peac-policy/0.1",
+    "name": "conformance-test-policy",
+    "defaults": {
+      "decision": "deny",
+      "reason": "No matching rule found"
+    },
+    "rules": [
+      {
+        "name": "allow-subscribed-humans-crawl",
+        "subject": {
+          "type": "human",
+          "labels": ["subscribed"]
+        },
+        "purpose": "crawl",
+        "licensing_mode": "subscription",
+        "decision": "allow",
+        "reason": "Subscribed humans can crawl"
+      },
+      {
+        "name": "allow-verified-agents-inference",
+        "subject": {
+          "type": "agent",
+          "labels": ["verified"]
+        },
+        "purpose": ["inference", "ai_input"],
+        "licensing_mode": "pay_per_inference",
+        "decision": "allow",
+        "reason": "Verified agents can run inference"
+      },
+      {
+        "name": "allow-org-index",
+        "subject": {
+          "type": "org"
+        },
+        "purpose": "index",
+        "decision": "allow",
+        "reason": "Any org can index"
+      },
+      {
+        "name": "review-train",
+        "purpose": "train",
+        "decision": "review",
+        "reason": "All training requires review"
+      },
+      {
+        "name": "allow-premium-users-all",
+        "subject": {
+          "type": "human",
+          "labels": ["premium"]
+        },
+        "decision": "allow",
+        "reason": "Premium users can do anything"
+      },
+      {
+        "name": "allow-by-id-prefix",
+        "subject": {
+          "id": "internal:*"
+        },
+        "decision": "allow",
+        "reason": "Internal subjects allowed"
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "id": "eval-001",
+      "name": "first-match-wins",
+      "description": "When multiple rules match, first rule wins",
+      "context": {
+        "subject": {
+          "type": "human",
+          "labels": ["subscribed", "premium"]
+        },
+        "purpose": "crawl",
+        "licensing_mode": "subscription"
+      },
+      "expected": {
+        "decision": "allow",
+        "matched_rule": "allow-subscribed-humans-crawl",
+        "is_default": false
+      }
+    },
+    {
+      "id": "eval-002",
+      "name": "default-on-no-match",
+      "description": "Default applies when no rules match",
+      "context": {
+        "subject": {
+          "type": "human",
+          "labels": []
+        },
+        "purpose": "index"
+      },
+      "expected": {
+        "decision": "deny",
+        "matched_rule": null,
+        "is_default": true,
+        "reason": "No matching rule found"
+      }
+    },
+    {
+      "id": "eval-003",
+      "name": "array-purpose-match",
+      "description": "Rule with array of purposes matches any",
+      "context": {
+        "subject": {
+          "type": "agent",
+          "labels": ["verified"]
+        },
+        "purpose": "ai_input",
+        "licensing_mode": "pay_per_inference"
+      },
+      "expected": {
+        "decision": "allow",
+        "matched_rule": "allow-verified-agents-inference"
+      }
+    },
+    {
+      "id": "eval-004",
+      "name": "no-subject-constraint",
+      "description": "Rule without subject constraint matches any subject",
+      "context": {
+        "subject": {
+          "type": "human",
+          "labels": []
+        },
+        "purpose": "train"
+      },
+      "expected": {
+        "decision": "review",
+        "matched_rule": "review-train"
+      }
+    },
+    {
+      "id": "eval-005",
+      "name": "no-purpose-constraint",
+      "description": "Rule without purpose constraint matches any purpose",
+      "context": {
+        "subject": {
+          "type": "human",
+          "labels": ["premium"]
+        },
+        "purpose": "search"
+      },
+      "expected": {
+        "decision": "allow",
+        "matched_rule": "allow-premium-users-all"
+      }
+    },
+    {
+      "id": "eval-006",
+      "name": "all-labels-required",
+      "description": "All specified labels must be present",
+      "context": {
+        "subject": {
+          "type": "human",
+          "labels": ["verified"]
+        },
+        "purpose": "crawl",
+        "licensing_mode": "subscription"
+      },
+      "expected": {
+        "decision": "deny",
+        "matched_rule": null,
+        "is_default": true,
+        "note": "Subject has 'verified' but rule requires 'subscribed'"
+      }
+    },
+    {
+      "id": "eval-007",
+      "name": "id-prefix-match",
+      "description": "Wildcard pattern matches ID prefix",
+      "context": {
+        "subject": {
+          "id": "internal:service-123"
+        },
+        "purpose": "inference"
+      },
+      "expected": {
+        "decision": "allow",
+        "matched_rule": "allow-by-id-prefix"
+      }
+    },
+    {
+      "id": "eval-008",
+      "name": "id-prefix-no-match",
+      "description": "Non-matching ID prefix falls through",
+      "context": {
+        "subject": {
+          "id": "external:user-456"
+        },
+        "purpose": "inference"
+      },
+      "expected": {
+        "decision": "deny",
+        "matched_rule": null,
+        "is_default": true
+      }
+    },
+    {
+      "id": "eval-009",
+      "name": "empty-context",
+      "description": "Empty context matches no rules",
+      "context": {},
+      "expected": {
+        "decision": "deny",
+        "is_default": true
+      }
+    },
+    {
+      "id": "eval-010",
+      "name": "only-subject",
+      "description": "Context with only subject",
+      "context": {
+        "subject": {
+          "type": "human",
+          "labels": ["premium"]
+        }
+      },
+      "expected": {
+        "decision": "allow",
+        "matched_rule": "allow-premium-users-all"
+      }
+    },
+    {
+      "id": "eval-011",
+      "name": "only-purpose",
+      "description": "Context with only purpose",
+      "context": {
+        "purpose": "train"
+      },
+      "expected": {
+        "decision": "review",
+        "matched_rule": "review-train"
+      }
+    },
+    {
+      "id": "eval-012",
+      "name": "org-index-allow",
+      "description": "Org type can index",
+      "context": {
+        "subject": {
+          "type": "org"
+        },
+        "purpose": "index"
+      },
+      "expected": {
+        "decision": "allow",
+        "matched_rule": "allow-org-index"
+      }
+    }
+  ]
+}

@@ -136,5 +136,37 @@
       "version": "0.9.27",
       "fixture_count": 22
     }
+  },
+  "issue": {
+    "valid.json": {
+      "description": "Valid Issue() input golden vectors with invariant-based assertions (v0.9.29+)",
+      "version": "0.9.29",
+      "fixture_count": 7
+    },
+    "invalid.json": {
+      "description": "Invalid Issue() input golden vectors (v0.9.29+)",
+      "version": "0.9.29",
+      "fixture_count": 10,
+      "note": "Evidence non-finite/depth tests are language-specific unit tests, not cross-language fixtures"
+    }
+  },
+  "policy": {
+    "evaluation.json": {
+      "description": "Policy evaluation golden vectors with first-match-wins semantics (v0.9.29+)",
+      "version": "0.9.29",
+      "fixture_count": 12
+    },
+    "validation.json": {
+      "description": "Policy document validation golden vectors including empty-rules-valid case (v0.9.29+)",
+      "version": "0.9.29",
+      "fixture_count": 11,
+      "valid_count": 4,
+      "invalid_count": 7
+    },
+    "enforcement.json": {
+      "description": "Policy enforcement HTTP mapping golden vectors using locked API (v0.9.29+)",
+      "version": "0.9.29",
+      "fixture_count": 6
+    }
   }
 }
