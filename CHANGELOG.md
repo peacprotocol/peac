@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Notes
 
-- No breaking changes to TypeScript packages
+- TypeScript packages bumped to 0.9.29 for repo version alignment (no TS behavioral changes)
 - Go SDK packages not published to pkg.go.dev yet (local import only)
 - Cross-language conformance with TypeScript SDK maintained
 

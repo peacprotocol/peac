@@ -86,12 +86,16 @@ jobs:
 
       - name: Build + Test (middleware/chi)
         working-directory: sdks/go/middleware/chi
+        env:
+          GOWORK: ${{ github.workspace }}/sdks/go/go.work
         run: |
           go build ./...
           go test ./... -count=1
 
       - name: Build + Test (middleware/gin)
         working-directory: sdks/go/middleware/gin
+        env:
+          GOWORK: ${{ github.workspace }}/sdks/go/go.work
         run: |
           go build ./...
           go test ./... -count=1
