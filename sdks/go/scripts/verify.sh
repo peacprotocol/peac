@@ -44,22 +44,22 @@ go test -race ./... -count=1
 echo "OK: Race detection passed"
 echo ""
 
-# Build and test middleware/chi (from workspace root)
+# Build and test middleware/chi
 if [ -d "$SDK_DIR/middleware/chi" ]; then
     echo "Building middleware/chi..."
-    cd "$SDK_DIR"
-    go build ./middleware/chi/...
-    go test ./middleware/chi/... -count=1
+    cd "$SDK_DIR/middleware/chi"
+    go build ./...
+    go test ./... -count=1
     echo "OK: middleware/chi passed"
     echo ""
 fi
 
-# Build and test middleware/gin (from workspace root)
+# Build and test middleware/gin
 if [ -d "$SDK_DIR/middleware/gin" ]; then
     echo "Building middleware/gin..."
-    cd "$SDK_DIR"
-    go build ./middleware/gin/...
-    go test ./middleware/gin/... -count=1
+    cd "$SDK_DIR/middleware/gin"
+    go build ./...
+    go test ./... -count=1
     echo "OK: middleware/gin passed"
     echo ""
 fi
