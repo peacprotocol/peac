@@ -13,5 +13,13 @@
     "scripts/**/*.ts",
     "tests/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist", "**/dist/**", "**/node_modules/**", "archive/**"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/dist/**",
+    "**/node_modules/**",
+    "archive/**",
+    "apps/**",
+    "examples/**"
+  ]
 }
