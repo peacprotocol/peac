@@ -85,20 +85,16 @@ jobs:
         run: go test -race ./... -count=1
 
       - name: Build + Test (middleware/chi)
-        working-directory: sdks/go/middleware/chi
-        env:
-          GOWORK: ${{ github.workspace }}/sdks/go/go.work
+        working-directory: sdks/go
         run: |
-          go build ./...
-          go test ./... -count=1
+          go build ./middleware/chi/...
+          go test ./middleware/chi/... -count=1
 
       - name: Build + Test (middleware/gin)
-        working-directory: sdks/go/middleware/gin
-        env:
-          GOWORK: ${{ github.workspace }}/sdks/go/go.work
+        working-directory: sdks/go
         run: |
-          go build ./...
-          go test ./... -count=1
+          go build ./middleware/gin/...
+          go test ./middleware/gin/... -count=1
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
