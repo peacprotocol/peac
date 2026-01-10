@@ -12,18 +12,17 @@ on:
       - 'sdks/go/**'
       - '.github/workflows/go-sdk.yml'
 
+permissions:
+  contents: read
+
 concurrency:
   group: go-sdk-${{ github.ref }}
   cancel-in-progress: true
 
-defaults:
-  run:
-    working-directory: sdks/go
-
 jobs:
   lint:
     name: Format + Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -33,9 +32,13 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: sdks/go/go.mod
-          cache-dependency-path: sdks/go/go.sum
+          cache-dependency-path: |
+            sdks/go/go.sum
+            sdks/go/middleware/chi/go.sum
+            sdks/go/middleware/gin/go.sum
 
-      - name: Format check
+      - name: Format check (core)
+        working-directory: sdks/go
         run: |
           if [ -n "$(gofmt -l .)" ]; then
             echo "FAIL: The following files are not formatted:"
@@ -44,7 +47,7 @@ jobs:
           fi
           echo "OK: All files are formatted"
 
-      - name: Lint
+      - name: Lint (core)
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.64
@@ -53,7 +56,7 @@ jobs:
 
   test:
     name: Build + Test + Race
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: lint
     steps:
@@ -64,16 +67,34 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: sdks/go/go.mod
-          cache-dependency-path: sdks/go/go.sum
+          cache-dependency-path: |
+            sdks/go/go.sum
+            sdks/go/middleware/chi/go.sum
+            sdks/go/middleware/gin/go.sum
 
-      - name: Build
+      - name: Build (core)
+        working-directory: sdks/go
         run: go build ./...
 
-      - name: Test
+      - name: Test (core)
+        working-directory: sdks/go
         run: go test ./... -count=1 -coverprofile=coverage.out
 
-      - name: Test with race detector
+      - name: Test with race detector (core)
+        working-directory: sdks/go
         run: go test -race ./... -count=1
+
+      - name: Build + Test (middleware/chi)
+        working-directory: sdks/go/middleware/chi
+        run: |
+          go build ./...
+          go test ./... -count=1
+
+      - name: Build + Test (middleware/gin)
+        working-directory: sdks/go/middleware/gin
+        run: |
+          go build ./...
+          go test ./... -count=1
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -84,7 +105,7 @@ jobs:
 
   fuzz:
     name: Fuzz (bounded)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     needs: lint
     steps:
@@ -98,4 +119,5 @@ jobs:
           cache-dependency-path: sdks/go/go.sum
 
       - name: Fuzz evidence validator (10s)
+        working-directory: sdks/go
         run: go test ./evidence -run=^$ -fuzz=^FuzzValidate$ -fuzztime=10s

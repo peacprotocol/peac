@@ -3,7 +3,7 @@
 **Portable Evidence for Agent Coordination**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.27-blue.svg)](https://github.com/peacprotocol/peac)
+[![Version](https://img.shields.io/badge/version-0.9.29-blue.svg)](https://github.com/peacprotocol/peac)
 
 PEAC is an open protocol for **verifiable receipts** and **policy-aware access** across machine-to-machine interactions.
 
@@ -27,7 +27,7 @@ PEAC is stewarded by contributors from [Originary](https://www.originary.xyz) an
 - Cross-org audit evidence (security, compliance, billing disputes)
 - Crawls, indexing, and AI training access with verifiable terms
 
-This repository contains the **reference TypeScript implementation** for the v0.9.x series (kernel, schema, crypto, protocol, rails, server, CLI).
+This repository contains the **reference TypeScript implementation** for the v0.9.x series (kernel, schema, crypto, protocol, rails, server, CLI) and a **Go SDK** for server-side verification, issuance, and policy evaluation.
 
 ---
 
@@ -87,6 +87,35 @@ const { jws } = await issue({
 
 console.log('PEAC-Receipt:', jws);
 ```
+
+### Go SDK
+
+```bash
+go get github.com/peacprotocol/peac/sdks/go
+```
+
+```go
+import peac "github.com/peacprotocol/peac/sdks/go"
+
+// Verify a receipt
+result, err := peac.Verify(receiptJWS, peac.VerifyOptions{
+    Issuer:   "https://api.example.com",
+    Audience: "https://client.example.com",
+})
+
+// Issue a receipt
+result, err := peac.Issue(peac.IssueOptions{
+    Issuer:     "https://api.example.com",
+    Audience:   "https://client.example.com",
+    Amount:     1000,
+    Currency:   "USD",
+    Rail:       "stripe",
+    Reference:  "pi_123",
+    SigningKey: signingKey,
+})
+```
+
+See [sdks/go/README.md](sdks/go/README.md) for full documentation.
 
 ### CLI
 

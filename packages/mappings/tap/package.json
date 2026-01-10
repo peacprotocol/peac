@@ -1,6 +1,6 @@
 {
   "name": "@peac/mappings-tap",
-  "version": "0.9.28",
+  "version": "0.9.29",
   "description": "Visa Trusted Agent Protocol mapping to PEAC control evidence",
   "type": "module",
   "main": "./dist/index.js",

@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.29] - 2026-01-10
+
+### Added
+
+- **Go SDK Issue API** (`sdks/go/`)
+  - `Issue()`: Receipt issuance with Ed25519 signing
+  - `IssueOptions`: Configurable subject, resource, payment, env, extensions
+  - URL validation: Rejects fragments (`#`) and userinfo (`user:pass@`)
+  - Evidence placement: `payment.evidence` field (not top-level)
+  - `IssueError` type with structured error codes
+- **Go SDK Policy Evaluation** (`sdks/go/policy/`)
+  - `Evaluate()`: First-match-wins rule evaluation
+  - `Validate()`: Policy document validation with enum checks
+  - `IsAllowed()`, `IsDenied()`, `RequiresReview()`: Convenience helpers
+  - `EvaluateBatch()`: Batch evaluation for multiple contexts
+  - Nil policy handling: Returns deny with `ReasonNilPolicy` constant
+  - Subject matching: Type, labels, and ID patterns (wildcards supported)
+  - Purpose and licensing mode matching with OR semantics
+- **Go SDK Evidence Validation** (`sdks/go/evidence/`)
+  - JSON-safe evidence validation with DoS protection
+  - Configurable limits: maxDepth (32), maxKeys (1000), maxArrayLen (10000)
+  - Cycle detection for object graphs
+  - Fuzz testing with `FuzzValidate`
+- **Go SDK CI Workflow** (`.github/workflows/go-sdk.yml`)
+  - Format check with `gofmt`
+  - Lint with golangci-lint v1.64
+  - Build, test, and race detection
+  - Bounded fuzz testing (10s)
+  - Coverage artifact upload
+
+### Documentation
+
+- **Go SDK README** (`sdks/go/README.md`)
+  - Issue API documentation with options table
+  - URL restrictions section (no fragments, no userinfo)
+  - Evidence structure documentation
+  - Policy evaluation with nil behavior
+  - Error codes reference
+
+### Notes
+
+- TypeScript packages bumped to 0.9.29 for repo version alignment (no TS behavioral changes)
+- Go SDK packages not published to pkg.go.dev yet (local import only)
+- Cross-language conformance with TypeScript SDK maintained
+
 ## [0.9.28] - 2026-01-09
 
 ### Added

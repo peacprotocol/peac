@@ -1,6 +1,6 @@
 {
   "name": "@peac/cli",
-  "version": "0.9.28",
+  "version": "0.9.29",
   "description": "PEAC protocol command-line tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
