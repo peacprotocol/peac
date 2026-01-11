@@ -1,9 +1,52 @@
 #!/bin/bash
 # scripts/check-error-codes.sh
 # Verify TS error codes are defined in kernel SoT
+# Also checks for uniqueness and category validity
 
 set -e
 
+echo "=== Checking error code integrity ==="
+
+# Check for duplicate error codes in kernel SoT (BLOCKING)
+echo "Checking for duplicate error codes..."
+DUPLICATES=$(node -e "
+const errors = require('./specs/kernel/errors.json').errors;
+const codes = errors.map(e => e.code);
+const seen = new Set();
+const dups = [];
+for (const code of codes) {
+  if (seen.has(code)) dups.push(code);
+  seen.add(code);
+}
+if (dups.length > 0) console.log(dups.join('\n'));
+")
+
+if [ -n "$DUPLICATES" ]; then
+  echo "FAIL: Duplicate error codes found in specs/kernel/errors.json:"
+  echo "$DUPLICATES" | sed 's/^/  /'
+  exit 1
+fi
+echo "OK: No duplicate error codes"
+
+# Check for valid categories (BLOCKING)
+echo "Checking category validity..."
+VALID_CATEGORIES="verification validation infrastructure control identity attribution dispute bundle"
+INVALID_CATEGORIES=$(node -e "
+const errors = require('./specs/kernel/errors.json').errors;
+const valid = new Set('$VALID_CATEGORIES'.split(' '));
+const invalid = errors.filter(e => !valid.has(e.category)).map(e => e.code + ': ' + e.category);
+if (invalid.length > 0) console.log(invalid.join('\n'));
+")
+
+if [ -n "$INVALID_CATEGORIES" ]; then
+  echo "FAIL: Invalid categories found in specs/kernel/errors.json:"
+  echo "$INVALID_CATEGORIES" | sed 's/^/  /'
+  echo "Valid categories: $VALID_CATEGORIES"
+  exit 1
+fi
+echo "OK: All categories are valid"
+
+echo ""
 echo "=== Checking error code parity ==="
 
 # Get error codes from kernel SoT
@@ -72,12 +115,17 @@ done <<< "$KERNEL_CODES"
 
 echo ""
 if [ ${#MISSING_IN_KERNEL[@]} -gt 0 ]; then
-  echo "DRIFT: Codes defined in TS but not in kernel SoT (${#MISSING_IN_KERNEL[@]}):"
+  echo "INFO: Codes defined in TS but not in kernel SoT (${#MISSING_IN_KERNEL[@]}):"
   for code in "${MISSING_IN_KERNEL[@]}"; do
     echo "  $code"
   done
   echo ""
-  echo "Action: Add these to specs/kernel/errors.json"
+  echo "These may be:"
+  echo "  (a) Package-local codes (JWKS, TAP, SSRF, etc.) - OK to keep separate"
+  echo "  (b) Protocol-stable codes that should be added to kernel SoT"
+  echo "  (c) Legacy codes that should be renamed/removed"
+  echo ""
+  echo "Review each code and decide appropriate action."
 else
   echo "OK: All TS error codes are in kernel SoT"
 fi

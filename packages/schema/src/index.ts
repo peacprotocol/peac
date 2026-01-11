@@ -39,7 +39,8 @@ export {
   NormalizedPayment,
   Extensions,
   JWSHeader,
-  ReceiptClaims,
+  ReceiptClaimsSchema,
+  ReceiptClaims, // @deprecated - use ReceiptClaimsSchema
   Subject as SubjectSchema,
   AIPREFSnapshot as AIPREFSnapshotSchema,
   VerifyRequest as VerifyRequestSchema,
@@ -69,7 +70,7 @@ export {
   // Evidence validation with DoS protection (v0.9.21+)
   validateEvidence,
 } from './validators';
-export type { EvidenceValidationResult } from './validators';
+export type { EvidenceValidationResult, ReceiptClaimsType } from './validators';
 
 // Agent Identity validators (v0.9.25+)
 export {

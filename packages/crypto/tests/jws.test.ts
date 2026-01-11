@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { sign, verify, decode, generateKeypair } from '../src/jws';
+import { CryptoError, isFormatError } from '../src/errors';
 import { PEAC_WIRE_TYP, PEAC_ALG } from '@peac/schema';
 
 describe('Ed25519 JWS', () => {
@@ -160,5 +161,106 @@ describe('Ed25519 JWS', () => {
     const jws = `${headerB64}.${payloadB64}.fake-signature`;
 
     await expect(verify(jws, publicKey)).rejects.toThrow('Invalid alg: expected EdDSA');
+  });
+});
+
+/**
+ * Tests for CryptoError typed error codes
+ * These codes are INTERNAL to @peac/crypto (CRYPTO_* prefix)
+ * and should NOT be exposed as protocol-stable E_* codes.
+ */
+describe('CryptoError codes', () => {
+  const testPayload = { test: true };
+  const testKid = '2025-01-15T10:30:00Z';
+
+  it('should throw CRYPTO_INVALID_KEY_LENGTH for wrong private key size', async () => {
+    const invalidKey = new Uint8Array(16);
+
+    try {
+      await sign(testPayload, invalidKey, testKid);
+      expect.fail('Should have thrown');
+    } catch (err) {
+      expect(err).toBeInstanceOf(CryptoError);
+      expect((err as CryptoError).code).toBe('CRYPTO_INVALID_KEY_LENGTH');
+      expect(isFormatError((err as CryptoError).code)).toBe(true);
+    }
+  });
+
+  it('should throw CRYPTO_INVALID_KEY_LENGTH for wrong public key size', async () => {
+    const invalidKey = new Uint8Array(16);
+
+    try {
+      await verify('a.b.c', invalidKey);
+      expect.fail('Should have thrown');
+    } catch (err) {
+      expect(err).toBeInstanceOf(CryptoError);
+      expect((err as CryptoError).code).toBe('CRYPTO_INVALID_KEY_LENGTH');
+      expect(isFormatError((err as CryptoError).code)).toBe(true);
+    }
+  });
+
+  it('should throw CRYPTO_INVALID_JWS_FORMAT for malformed JWS', async () => {
+    const { publicKey } = await generateKeypair();
+
+    try {
+      await verify('invalid-no-dots', publicKey);
+      expect.fail('Should have thrown');
+    } catch (err) {
+      expect(err).toBeInstanceOf(CryptoError);
+      expect((err as CryptoError).code).toBe('CRYPTO_INVALID_JWS_FORMAT');
+      expect(isFormatError((err as CryptoError).code)).toBe(true);
+    }
+  });
+
+  it('should throw CRYPTO_INVALID_TYP for wrong typ header', async () => {
+    const { publicKey } = await generateKeypair();
+    const wrongHeader = { typ: 'wrong', alg: PEAC_ALG, kid: testKid };
+    const headerB64 = Buffer.from(JSON.stringify(wrongHeader)).toString('base64url');
+    const payloadB64 = Buffer.from(JSON.stringify(testPayload)).toString('base64url');
+    const jws = `${headerB64}.${payloadB64}.fake`;
+
+    try {
+      await verify(jws, publicKey);
+      expect.fail('Should have thrown');
+    } catch (err) {
+      expect(err).toBeInstanceOf(CryptoError);
+      expect((err as CryptoError).code).toBe('CRYPTO_INVALID_TYP');
+      expect(isFormatError((err as CryptoError).code)).toBe(true);
+    }
+  });
+
+  it('should throw CRYPTO_INVALID_ALG for wrong alg header', async () => {
+    const { publicKey } = await generateKeypair();
+    const wrongHeader = { typ: PEAC_WIRE_TYP, alg: 'RS256', kid: testKid };
+    const headerB64 = Buffer.from(JSON.stringify(wrongHeader)).toString('base64url');
+    const payloadB64 = Buffer.from(JSON.stringify(testPayload)).toString('base64url');
+    const jws = `${headerB64}.${payloadB64}.fake`;
+
+    try {
+      await verify(jws, publicKey);
+      expect.fail('Should have thrown');
+    } catch (err) {
+      expect(err).toBeInstanceOf(CryptoError);
+      expect((err as CryptoError).code).toBe('CRYPTO_INVALID_ALG');
+      expect(isFormatError((err as CryptoError).code)).toBe(true);
+    }
+  });
+
+  it('should classify all format errors correctly via isFormatError', () => {
+    // Format errors (structure/validation issues)
+    expect(isFormatError('CRYPTO_INVALID_KEY_LENGTH')).toBe(true);
+    expect(isFormatError('CRYPTO_INVALID_JWS_FORMAT')).toBe(true);
+    expect(isFormatError('CRYPTO_INVALID_TYP')).toBe(true);
+    expect(isFormatError('CRYPTO_INVALID_ALG')).toBe(true);
+
+    // Signature verification failure is NOT a format error
+    expect(isFormatError('CRYPTO_INVALID_SIGNATURE')).toBe(false);
+  });
+
+  it('should maintain proper prototype chain for instanceof', () => {
+    const error = new CryptoError('CRYPTO_INVALID_KEY_LENGTH', 'test');
+    expect(error).toBeInstanceOf(CryptoError);
+    expect(error).toBeInstanceOf(Error);
+    expect(error.name).toBe('CryptoError');
   });
 });
