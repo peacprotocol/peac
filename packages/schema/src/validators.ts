@@ -72,7 +72,7 @@ const PurposeReasonValues = [
   'unknown_preserved',
 ] as const;
 
-export const ReceiptClaims = z
+export const ReceiptClaimsSchema = z
   .object({
     iss: httpsUrl,
     aud: httpsUrl,
@@ -93,6 +93,19 @@ export const ReceiptClaims = z
     purpose_reason: z.enum(PurposeReasonValues).optional(),
   })
   .strict();
+
+/**
+ * Schema-derived receipt claims type (v0.9.30+)
+ *
+ * This is the canonical type for receipt claims - derived from the Zod schema.
+ * Use this type instead of manually-defined interfaces to ensure type/schema parity.
+ */
+export type ReceiptClaimsType = z.infer<typeof ReceiptClaimsSchema>;
+
+/**
+ * @deprecated Use ReceiptClaimsSchema instead. Renamed in v0.9.30.
+ */
+export const ReceiptClaims = ReceiptClaimsSchema;
 
 export const VerifyRequest = z
   .object({
