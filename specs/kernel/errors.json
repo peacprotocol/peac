@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.27",
+  "version": "0.9.29",
   "description": "PEAC error codes - normative source of truth",
   "errors": [
     {
@@ -138,6 +138,38 @@
       "description": "Evidence contains non-JSON-safe values (NaN, Infinity, undefined, BigInt, Date, Map, Set, functions, symbols, class instances, or cycles)",
       "retriable": false,
       "category": "validation"
+    },
+    {
+      "code": "E_INVALID_SUBJECT",
+      "http_status": 400,
+      "title": "Invalid Subject",
+      "description": "Receipt subject claim does not match expected value",
+      "retriable": false,
+      "category": "validation"
+    },
+    {
+      "code": "E_INVALID_RECEIPT_ID",
+      "http_status": 400,
+      "title": "Invalid Receipt ID",
+      "description": "Receipt ID (rid) does not match expected value",
+      "retriable": false,
+      "category": "validation"
+    },
+    {
+      "code": "E_MISSING_EXP",
+      "http_status": 400,
+      "title": "Missing Expiration",
+      "description": "Receipt is missing required exp claim",
+      "retriable": false,
+      "category": "validation"
+    },
+    {
+      "code": "E_INTERNAL",
+      "http_status": 500,
+      "title": "Internal Error",
+      "description": "An unexpected internal error occurred during verification",
+      "retriable": true,
+      "category": "infrastructure"
     },
     {
       "code": "E_IDENTITY_MISSING",
@@ -466,6 +498,78 @@
       "description": "The target receipt, attribution, or identity being disputed was not found",
       "retriable": true,
       "category": "dispute"
+    },
+    {
+      "code": "E_BUNDLE_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Bundle Invalid Format",
+      "description": "Bundle archive structure is invalid (not a valid ZIP or missing required files)",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_MANIFEST_MISSING",
+      "http_status": 400,
+      "title": "Bundle Manifest Missing",
+      "description": "manifest.json not found at bundle archive root",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_MANIFEST_INVALID",
+      "http_status": 400,
+      "title": "Bundle Manifest Invalid",
+      "description": "manifest.json does not conform to schema or contains invalid values",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_HASH_MISMATCH",
+      "http_status": 400,
+      "title": "Bundle Hash Mismatch",
+      "description": "File hash does not match value declared in manifest.json",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_SIGNATURE_INVALID",
+      "http_status": 400,
+      "title": "Bundle Signature Invalid",
+      "description": "bundle.sig JWS verification failed over manifest hash",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_RECEIPTS_UNORDERED",
+      "http_status": 400,
+      "title": "Bundle Receipts Unordered",
+      "description": "receipts.ndjson is not in deterministic order (issued_at, receipt_id, receipt_hash)",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_POLICY_HASH_MISMATCH",
+      "http_status": 400,
+      "title": "Bundle Policy Hash Mismatch",
+      "description": "Policy snapshot hash does not match policy used to evaluate receipts",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_KEY_MISSING",
+      "http_status": 400,
+      "title": "Bundle Key Missing",
+      "description": "Required signing key not found in bundle (offline verification mode)",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_TIME_RANGE_INVALID",
+      "http_status": 400,
+      "title": "Bundle Time Range Invalid",
+      "description": "Receipt issued_at is outside the bundle declared time_range",
+      "retriable": false,
+      "category": "bundle"
     }
   ]
 }

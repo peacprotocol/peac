@@ -43,6 +43,7 @@
     "@peac/mappings-tap": "workspace:*"
   },
   "devDependencies": {
+    "@peac/contracts": "workspace:*",
     "next": "^15.0.0",
     "typescript": "^5.3.0",
     "vitest": "^2.0.0"

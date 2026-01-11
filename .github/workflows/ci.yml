@@ -76,6 +76,9 @@ jobs:
       - name: Build all packages
         run: pnpm build
 
+      - name: Pack and install gate
+        run: bash scripts/pack-and-install.sh
+
       - name: Generated profiles drift check
         run: pnpm --filter @peac/policy-kit generate:profiles:check
 
@@ -96,6 +99,9 @@ jobs:
 
       - name: Examples typecheck
         run: pnpm examples:check
+
+      - name: Quickstart demo (issue + verify)
+        run: pnpm --filter @peac/example-quickstart demo
 
       - name: No X-PEAC headers in examples
         run: |
