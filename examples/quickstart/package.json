@@ -1,0 +1,19 @@
+{
+  "name": "@peac/example-quickstart",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC quickstart - issue and verify a receipt with one package",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

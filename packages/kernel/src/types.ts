@@ -61,7 +61,9 @@ export interface ErrorDefinition {
     | 'infrastructure'
     | 'control'
     | 'identity'
-    | 'attribution';
+    | 'attribution'
+    | 'dispute'
+    | 'bundle';
 }
 
 /**

@@ -58,6 +58,16 @@ export const ERROR_CODES = {
   E_ATTRIBUTION_RESOLUTION_TIMEOUT: 'E_ATTRIBUTION_RESOLUTION_TIMEOUT',
   E_ATTRIBUTION_NOT_YET_VALID: 'E_ATTRIBUTION_NOT_YET_VALID',
   E_ATTRIBUTION_EXPIRED: 'E_ATTRIBUTION_EXPIRED',
+  // Bundle error codes (v0.9.30+)
+  E_BUNDLE_INVALID_FORMAT: 'E_BUNDLE_INVALID_FORMAT',
+  E_BUNDLE_MANIFEST_MISSING: 'E_BUNDLE_MANIFEST_MISSING',
+  E_BUNDLE_MANIFEST_INVALID: 'E_BUNDLE_MANIFEST_INVALID',
+  E_BUNDLE_HASH_MISMATCH: 'E_BUNDLE_HASH_MISMATCH',
+  E_BUNDLE_SIGNATURE_INVALID: 'E_BUNDLE_SIGNATURE_INVALID',
+  E_BUNDLE_RECEIPTS_UNORDERED: 'E_BUNDLE_RECEIPTS_UNORDERED',
+  E_BUNDLE_POLICY_HASH_MISMATCH: 'E_BUNDLE_POLICY_HASH_MISMATCH',
+  E_BUNDLE_KEY_MISSING: 'E_BUNDLE_KEY_MISSING',
+  E_BUNDLE_TIME_RANGE_INVALID: 'E_BUNDLE_TIME_RANGE_INVALID',
 } as const;
 
 /**
@@ -418,6 +428,80 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     description: 'Attribution attestation has exceeded its expiration time',
     retriable: false,
     category: 'attribution',
+  },
+  // Bundle error codes (v0.9.30+)
+  E_BUNDLE_INVALID_FORMAT: {
+    code: 'E_BUNDLE_INVALID_FORMAT',
+    http_status: 400,
+    title: 'Bundle Invalid Format',
+    description: 'Bundle archive structure is invalid (not a valid ZIP or missing required files)',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_MANIFEST_MISSING: {
+    code: 'E_BUNDLE_MANIFEST_MISSING',
+    http_status: 400,
+    title: 'Bundle Manifest Missing',
+    description: 'manifest.json not found at bundle archive root',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_MANIFEST_INVALID: {
+    code: 'E_BUNDLE_MANIFEST_INVALID',
+    http_status: 400,
+    title: 'Bundle Manifest Invalid',
+    description: 'manifest.json does not conform to schema or contains invalid values',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_HASH_MISMATCH: {
+    code: 'E_BUNDLE_HASH_MISMATCH',
+    http_status: 400,
+    title: 'Bundle Hash Mismatch',
+    description: 'File hash does not match value declared in manifest.json',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_SIGNATURE_INVALID: {
+    code: 'E_BUNDLE_SIGNATURE_INVALID',
+    http_status: 400,
+    title: 'Bundle Signature Invalid',
+    description: 'bundle.sig JWS verification failed over manifest hash',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_RECEIPTS_UNORDERED: {
+    code: 'E_BUNDLE_RECEIPTS_UNORDERED',
+    http_status: 400,
+    title: 'Bundle Receipts Unordered',
+    description:
+      'receipts.ndjson is not in deterministic order (issued_at, receipt_id, receipt_hash)',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_POLICY_HASH_MISMATCH: {
+    code: 'E_BUNDLE_POLICY_HASH_MISMATCH',
+    http_status: 400,
+    title: 'Bundle Policy Hash Mismatch',
+    description: 'Policy snapshot hash does not match policy used to evaluate receipts',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_KEY_MISSING: {
+    code: 'E_BUNDLE_KEY_MISSING',
+    http_status: 400,
+    title: 'Bundle Key Missing',
+    description: 'Required signing key not found in bundle (offline verification mode)',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_TIME_RANGE_INVALID: {
+    code: 'E_BUNDLE_TIME_RANGE_INVALID',
+    http_status: 400,
+    title: 'Bundle Time Range Invalid',
+    description: 'Receipt issued_at is outside the bundle declared time_range',
+    retriable: false,
+    category: 'bundle',
   },
 };
 

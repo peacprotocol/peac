@@ -17,6 +17,7 @@ export const ERROR_CATEGORIES_CANONICAL = [
   'attribution', // Attribution attestation failures
   'identity', // Agent identity attestation failures
   'dispute', // Dispute attestation failures
+  'bundle', // Dispute bundle verification failures
 ] as const;
 
 /**

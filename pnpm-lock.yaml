@@ -225,6 +225,19 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/quickstart:
+    dependencies:
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+    devDependencies:
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/rsl-collective:
     dependencies:
       '@peac/crypto':
@@ -1097,6 +1110,9 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/mappings/tap
     devDependencies:
+      '@peac/contracts':
+        specifier: workspace:*
+        version: link:../../../packages/contracts
       next:
         specifier: ^15.0.0
         version: 15.5.9(react-dom@19.2.3)(react@19.2.3)
