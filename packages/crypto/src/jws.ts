@@ -87,7 +87,10 @@ export async function verify<T = unknown>(
   // Split JWS
   const parts = jws.split('.');
   if (parts.length !== 3) {
-    throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'Invalid JWS: must have three dot-separated parts');
+    throw new CryptoError(
+      'CRYPTO_INVALID_JWS_FORMAT',
+      'Invalid JWS: must have three dot-separated parts'
+    );
   }
 
   const [headerB64, payloadB64, signatureB64] = parts;
@@ -98,10 +101,16 @@ export async function verify<T = unknown>(
 
   // Validate header
   if (header.typ !== PEAC_WIRE_TYP) {
-    throw new CryptoError('CRYPTO_INVALID_TYP', `Invalid typ: expected ${PEAC_WIRE_TYP}, got ${header.typ}`);
+    throw new CryptoError(
+      'CRYPTO_INVALID_TYP',
+      `Invalid typ: expected ${PEAC_WIRE_TYP}, got ${header.typ}`
+    );
   }
   if (header.alg !== PEAC_ALG) {
-    throw new CryptoError('CRYPTO_INVALID_ALG', `Invalid alg: expected ${PEAC_ALG}, got ${header.alg}`);
+    throw new CryptoError(
+      'CRYPTO_INVALID_ALG',
+      `Invalid alg: expected ${PEAC_ALG}, got ${header.alg}`
+    );
   }
 
   // Decode payload
@@ -133,7 +142,10 @@ export async function verify<T = unknown>(
 export function decode<T = unknown>(jws: string): { header: JWSHeader; payload: T } {
   const parts = jws.split('.');
   if (parts.length !== 3) {
-    throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'Invalid JWS: must have three dot-separated parts');
+    throw new CryptoError(
+      'CRYPTO_INVALID_JWS_FORMAT',
+      'Invalid JWS: must have three dot-separated parts'
+    );
   }
 
   const [headerB64, payloadB64] = parts;
