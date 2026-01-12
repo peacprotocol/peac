@@ -1,0 +1,64 @@
+{
+  "version": "0.9.30",
+  "description": "PEAC Dispute Bundle conformance vectors",
+  "vectors": [
+    {
+      "vector_id": "valid_minimal",
+      "file": "valid_minimal.zip",
+      "expected_valid": true,
+      "expected_report_hash_file": "valid_minimal.report_hash.txt"
+    },
+    {
+      "vector_id": "valid_multi_receipt",
+      "file": "valid_multi_receipt.zip",
+      "expected_valid": true,
+      "expected_report_hash_file": "valid_multi_receipt.report_hash.txt"
+    },
+    {
+      "vector_id": "invalid_signature",
+      "file": "invalid_signature.zip",
+      "expected_valid": false,
+      "expected_receipt_error": "E_RECEIPT_SIGNATURE_INVALID",
+      "expected_error_file": "invalid_signature.expected_error.txt"
+    },
+    {
+      "vector_id": "missing_key",
+      "file": "missing_key.zip",
+      "expected_valid": false,
+      "expected_receipt_error": "E_BUNDLE_KEY_MISSING",
+      "expected_error_file": "missing_key.expected_error.txt"
+    },
+    {
+      "vector_id": "path_traversal_unix",
+      "file": "path_traversal_unix.zip",
+      "expected_valid": false,
+      "expected_error": "E_BUNDLE_PATH_TRAVERSAL",
+      "expected_error_file": "path_traversal_unix.expected_error.txt",
+      "description": "Zip-slip attack with Unix-style path (../)"
+    },
+    {
+      "vector_id": "path_traversal_windows",
+      "file": "path_traversal_windows.zip",
+      "expected_valid": false,
+      "expected_error": "E_BUNDLE_PATH_TRAVERSAL",
+      "expected_error_file": "path_traversal_windows.expected_error.txt",
+      "description": "Zip-slip attack with Windows-style path (..\\)"
+    },
+    {
+      "vector_id": "duplicate_receipt",
+      "file": "duplicate_receipt.zip",
+      "expected_valid": false,
+      "expected_error": "E_BUNDLE_DUPLICATE_RECEIPT",
+      "expected_error_file": "duplicate_receipt.expected_error.txt",
+      "description": "Bundle with two receipts having the same jti"
+    },
+    {
+      "vector_id": "size_exceeded",
+      "file": "size_exceeded.zip",
+      "expected_valid": false,
+      "expected_error": "E_BUNDLE_SIZE_EXCEEDED",
+      "expected_error_file": "size_exceeded.expected_error.txt",
+      "description": "DoS attack with falsely large uncompressed size claim in ZIP metadata"
+    }
+  ]
+}

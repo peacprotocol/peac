@@ -168,5 +168,22 @@
       "version": "0.9.29",
       "fixture_count": 6
     }
+  },
+  "bundle": {
+    "valid.json": {
+      "description": "Valid DisputeBundle manifest golden vectors (v0.9.30+)",
+      "version": "0.9.30",
+      "fixture_count": 2
+    },
+    "invalid.json": {
+      "description": "Invalid DisputeBundle golden vectors with error codes (v0.9.30+)",
+      "version": "0.9.30",
+      "fixture_count": 12
+    },
+    "determinism.json": {
+      "description": "Determinism tests for cross-language parity of report_hash (v0.9.30+)",
+      "version": "0.9.30",
+      "fixture_count": 5
+    }
   }
 }

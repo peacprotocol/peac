@@ -42,8 +42,8 @@ fi
 
 echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
-# Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), Attribution (v0.9.26+), and DisputeAttestation (v0.9.27+)
-LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/guard\.sh|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors(\.generated)?\.ts|schema/(src/(evidence|validators|agent-identity|attribution|dispute)\.ts|__tests__/(agent-identity|dispute)\.test\.ts)|attribution/)|examples/agent-identity/|sdks/(go|python)/)'
+# Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), Attribution (v0.9.26+), DisputeAttestation (v0.9.27+), and DisputeBundle (v0.9.30+)
+LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/(guard\.sh|generate-bundle-vectors\.ts)|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors(\.generated)?\.ts|schema/(src/(evidence|validators|agent-identity|attribution|dispute)\.ts|__tests__/(agent-identity|dispute)\.test\.ts)|attribution/|audit/|cli/src/commands/bundle\.ts)|examples/agent-identity/|sdks/(go|python)/)'
 if git grep -nE '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1

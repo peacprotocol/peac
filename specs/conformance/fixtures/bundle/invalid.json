@@ -1,0 +1,217 @@
+{
+  "$comment": "Invalid DisputeBundle golden vectors (v0.9.30+)",
+  "version": "0.9.30",
+  "fixtures": [
+    {
+      "name": "missing-manifest",
+      "description": "Bundle ZIP without manifest.json",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_MISSING_MANIFEST",
+        "error_message": "manifest.json not found in bundle"
+      }
+    },
+    {
+      "name": "invalid-manifest-json",
+      "description": "Bundle with malformed manifest.json (not valid JSON)",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_INVALID_MANIFEST",
+        "error_message": "Failed to parse manifest.json"
+      }
+    },
+    {
+      "name": "unsupported-version",
+      "description": "Bundle with unsupported version string",
+      "manifest_partial": {
+        "version": "peac.dispute-bundle/99.0"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_VERSION_UNSUPPORTED",
+        "error_message": "Unsupported bundle version"
+      }
+    },
+    {
+      "name": "hash-mismatch-content",
+      "description": "Bundle where content_hash does not match computed JCS hash",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_HASH_MISMATCH",
+        "error_message": "Bundle content_hash verification failed"
+      }
+    },
+    {
+      "name": "hash-mismatch-file",
+      "description": "Bundle where a file hash does not match",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_HASH_MISMATCH",
+        "error_message": "File hash mismatch"
+      }
+    },
+    {
+      "name": "missing-receipts",
+      "description": "Bundle creation with empty receipts array",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_MISSING_RECEIPTS",
+        "error_message": "No receipts provided"
+      }
+    },
+    {
+      "name": "missing-keys",
+      "description": "Bundle creation with empty keys array",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_MISSING_KEYS",
+        "error_message": "No keys provided in JWKS"
+      }
+    },
+    {
+      "name": "invalid-receipt-jws",
+      "description": "Bundle with malformed JWS receipt",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_RECEIPT_INVALID",
+        "error_message": "Invalid JWS"
+      }
+    },
+    {
+      "name": "receipt-missing-jti",
+      "description": "Receipt JWS without required jti claim",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_RECEIPT_INVALID",
+        "error_message": "missing jti claim"
+      }
+    },
+    {
+      "name": "receipt-missing-iat",
+      "description": "Receipt JWS without required iat claim",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_RECEIPT_INVALID",
+        "error_message": "missing or invalid iat claim"
+      }
+    },
+    {
+      "name": "key-not-found",
+      "description": "Verification with receipt referencing unknown key",
+      "verification_result": {
+        "error_code": "E_BUNDLE_KEY_NOT_FOUND",
+        "receipt_errors": ["E_BUNDLE_KEY_NOT_FOUND"]
+      },
+      "expected": {
+        "valid": false,
+        "summary": {
+          "total_receipts": 1,
+          "valid": 0,
+          "invalid": 1
+        }
+      }
+    },
+    {
+      "name": "corrupted-zip",
+      "description": "Invalid ZIP file (corrupted or not a ZIP)",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_INVALID_FORMAT",
+        "error_message": "Failed to open ZIP"
+      }
+    },
+    {
+      "name": "receipts-unordered",
+      "description": "receipts.ndjson not in deterministic order (issued_at, receipt_id, receipt_hash)",
+      "receipts_order": [
+        {
+          "receipt_id": "receipt-002",
+          "issued_at": "2026-01-05T12:00:00.000Z"
+        },
+        {
+          "receipt_id": "receipt-001",
+          "issued_at": "2026-01-01T00:00:00.000Z"
+        }
+      ],
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_RECEIPTS_UNORDERED",
+        "error_message": "receipts.ndjson is not in deterministic order"
+      },
+      "note": "Second receipt has earlier issued_at but appears after first"
+    },
+    {
+      "name": "duplicate-receipt-id",
+      "description": "Bundle contains two receipts with the same jti",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_DUPLICATE_RECEIPT",
+        "error_message": "Duplicate receipt ID"
+      }
+    },
+    {
+      "name": "invalid-bundle-sig-signature",
+      "description": "bundle.sig has invalid Ed25519 signature",
+      "expected": {
+        "bundle_signature": {
+          "present": true,
+          "valid": false,
+          "error": "E_INVALID_SIGNATURE"
+        }
+      },
+      "note": "Bundle reads successfully but signature verification fails"
+    },
+    {
+      "name": "invalid-bundle-sig-content-hash",
+      "description": "bundle.sig payload.content_hash does not match manifest.content_hash",
+      "expected": {
+        "bundle_signature": {
+          "present": true,
+          "valid": false,
+          "error": "E_BUNDLE_SIGNATURE_CONTENT_MISMATCH"
+        }
+      },
+      "note": "Signature is valid but content hash in payload differs from manifest"
+    },
+    {
+      "name": "invalid-bundle-sig-key-not-found",
+      "description": "bundle.sig references key not in bundle JWKS",
+      "expected": {
+        "bundle_signature": {
+          "present": true,
+          "valid": false,
+          "error": "E_BUNDLE_SIGNATURE_KEY_NOT_FOUND"
+        }
+      }
+    },
+    {
+      "name": "path-traversal-dotdot",
+      "description": "ZIP entry with path traversal via ..",
+      "entry_path": "../etc/passwd",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_PATH_TRAVERSAL",
+        "error_message": "Unsafe path in bundle"
+      }
+    },
+    {
+      "name": "path-traversal-backslash",
+      "description": "ZIP entry with backslash path separator (zip-slip variant)",
+      "entry_path": "..\\..\\etc\\passwd",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_PATH_TRAVERSAL",
+        "error_message": "Unsafe path in bundle"
+      }
+    },
+    {
+      "name": "size-exceeded-entries",
+      "description": "ZIP with more than 10000 entries (DoS protection)",
+      "expected": {
+        "valid": false,
+        "error_code": "E_BUNDLE_SIZE_EXCEEDED",
+        "error_message": "Too many ZIP entries"
+      }
+    }
+  ]
+}
