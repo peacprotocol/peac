@@ -457,8 +457,9 @@ export async function createDisputeBundle(
   const zipfile = new yazl.ZipFile();
 
   // Use manifest.created_at as the mtime for all entries to ensure deterministic ZIP output
+  // Disable compression to ensure byte-identical output across platforms (zlib implementations vary)
   const mtime = new Date(manifest.created_at);
-  const zipOptions = { mtime };
+  const zipOptions = { mtime, compress: false };
 
   // Add manifest.json
   const manifestJson = JSON.stringify(manifest, null, 2);
