@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.30] - 2026-01-12
+
+### Added
+
+- **Dispute Bundle Format** (`@peac/audit`)
+  - ZIP-based archive format for offline verification (`peac.dispute-bundle/0.1`)
+  - `createDisputeBundle()`: Create bundles from receipts, keys, and optional policy
+  - `readDisputeBundle()`: Parse and validate bundle structure
+  - `verifyBundle()`: Offline verification with deterministic reports
+  - Content-layer hashing for cross-platform determinism (manifest-based, not ZIP bytes)
+  - Support for yazl (write) and yauzl (read) ZIP libraries
+- **Verification Reports** (`@peac/audit`)
+  - `VerificationReport` type with deterministic JCS canonicalization
+  - `formatReportText()`: Human-readable auditor summary
+  - `serializeReport()`: JSON serialization with stable ordering
+  - `report_hash`: SHA-256 of JCS-canonicalized report for cross-language parity
+- **CLI Bundle Commands** (`@peac/cli`)
+  - `peac bundle create`: Create dispute bundles from receipts and JWKS
+  - `peac bundle verify`: Offline verification with JSON/text output
+  - `peac bundle info`: Display bundle manifest information
+  - `--json` flag for automation-friendly output
+- **Error Codegen** (`scripts/codegen-errors.ts`)
+  - Auto-generate `errors.generated.ts` from `specs/kernel/errors.json`
+  - Type-safe error code constants with HTTP status mapping
+  - CI drift check to ensure codegen stays in sync
+- **Bundle Error Codes** (`specs/kernel/errors.json`)
+  - `E_BUNDLE_INVALID_FORMAT`: Bundle ZIP structure invalid
+  - `E_BUNDLE_MISSING_MANIFEST`: manifest.json not found
+  - `E_BUNDLE_INVALID_MANIFEST`: manifest.json schema invalid
+  - `E_BUNDLE_MISSING_RECEIPTS`: No receipts in bundle
+  - `E_BUNDLE_MISSING_KEYS`: No keys for verification
+  - `E_BUNDLE_KEY_NOT_FOUND`: Receipt references unknown key
+  - `E_BUNDLE_RECEIPT_INVALID`: Receipt JWS invalid
+  - `E_BUNDLE_HASH_MISMATCH`: Bundle integrity check failed
+  - `E_BUNDLE_VERSION_UNSUPPORTED`: Bundle version not supported
+- **Crypto Testkit** (`@peac/crypto/testkit`)
+  - `generateKeypairFromSeed()`: Deterministic keypair generation for tests
+  - Separate subpath export to prevent accidental production use
+  - Export surface guard test to verify main entry exclusion
+- **Conformance Vectors** (`specs/conformance/fixtures/bundle/`)
+  - 8 golden vector ZIPs (2 valid, 6 invalid)
+  - Expected report hashes for cross-implementation parity
+  - Determinism spec with fixed timestamps and seeded keys
+
+### CI/Quality
+
+- **Error Codes Drift Check**: Ensures `errors.generated.ts` matches `errors.json`
+- **Bundle Vectors Sanity Check**: Verifies generator runs without errors
+- **Guard Script Updates**: Allow `issued_at` in audit package, skip binary files
+
+### PRs
+
+- #262: Kernel error codegen and bundle error codes
+- #263: Audit dispute bundle verifier with deterministic conformance vectors
+- #264: Crypto testkit subpath export and export-surface guard
+- #265: CI bundle vector drift gate
+
 ## [0.9.29] - 2026-01-10
 
 ### Added

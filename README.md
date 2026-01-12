@@ -3,7 +3,7 @@
 **Portable evidence for automated interactions**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.29-blue.svg)](https://github.com/peacprotocol/peac/releases/tag/v0.9.29)
+[![Version](https://img.shields.io/badge/version-0.9.30-blue.svg)](https://github.com/peacprotocol/peac/releases/tag/v0.9.30)
 
 **What:** Signed receipts that prove who accessed what, when, under which terms, with which payment evidence.
 
