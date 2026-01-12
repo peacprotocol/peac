@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.29",
+  "version": "0.9.30",
   "description": "PEAC error codes - normative source of truth",
   "errors": [
     {
@@ -568,6 +568,54 @@
       "http_status": 400,
       "title": "Bundle Time Range Invalid",
       "description": "Receipt issued_at is outside the bundle declared time_range",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_MISSING_RECEIPTS",
+      "http_status": 400,
+      "title": "Bundle Missing Receipts",
+      "description": "No receipts provided when creating bundle",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_MISSING_KEYS",
+      "http_status": 400,
+      "title": "Bundle Missing Keys",
+      "description": "No verification keys provided in bundle JWKS",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_RECEIPT_INVALID",
+      "http_status": 400,
+      "title": "Bundle Receipt Invalid",
+      "description": "Receipt JWS in bundle is malformed or missing required claims",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_DUPLICATE_RECEIPT",
+      "http_status": 400,
+      "title": "Bundle Duplicate Receipt",
+      "description": "Bundle contains multiple receipts with the same ID",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_PATH_TRAVERSAL",
+      "http_status": 400,
+      "title": "Bundle Path Traversal",
+      "description": "Bundle contains path traversal attack (zip-slip vulnerability)",
+      "retriable": false,
+      "category": "bundle"
+    },
+    {
+      "code": "E_BUNDLE_SIZE_EXCEEDED",
+      "http_status": 400,
+      "title": "Bundle Size Exceeded",
+      "description": "Bundle exceeds size limits (entry count, entry size, or total size)",
       "retriable": false,
       "category": "bundle"
     }

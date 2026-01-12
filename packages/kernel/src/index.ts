@@ -34,7 +34,15 @@ export {
 } from './constants.js';
 
 // Export errors
-export { ERROR_CODES, ERRORS, getError, isRetriable } from './errors.js';
+export {
+  ERROR_CODES,
+  ERRORS,
+  BUNDLE_ERRORS,
+  DISPUTE_ERRORS,
+  getError,
+  isRetriable,
+  type ErrorCode,
+} from './errors.js';
 
 // Export registries
 export {
