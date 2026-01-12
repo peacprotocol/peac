@@ -30,7 +30,7 @@ echo "OK: No duplicate error codes"
 
 # Check for valid categories (BLOCKING)
 echo "Checking category validity..."
-VALID_CATEGORIES="verification validation infrastructure control identity attribution dispute bundle"
+VALID_CATEGORIES="verification validation infrastructure control identity attribution dispute bundle ucp"
 INVALID_CATEGORIES=$(node -e "
 const errors = require('./specs/kernel/errors.json').errors;
 const valid = new Set('$VALID_CATEGORIES'.split(' '));

@@ -63,7 +63,8 @@ export interface ErrorDefinition {
     | 'identity'
     | 'attribution'
     | 'dispute'
-    | 'bundle';
+    | 'bundle'
+    | 'ucp';
 }
 
 /**

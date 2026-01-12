@@ -73,6 +73,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/mappings-mcp
 @peac/mappings-rsl
 @peac/mappings-tap
+@peac/mappings-ucp
 @peac/pay402
 @peac/policy-kit
 @peac/pref
@@ -102,7 +103,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 33 public packages match"
+  echo "OK: All 34 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -120,6 +121,7 @@ TESTED_PACKAGES="@peac/attribution
 @peac/mappings-mcp
 @peac/mappings-rsl
 @peac/mappings-tap
+@peac/mappings-ucp
 @peac/policy-kit
 @peac/protocol
 @peac/rails-stripe
@@ -147,13 +149,13 @@ NO_TESTS_RATIONALE="@peac/adapter-core - shared adapter utilities, tested via ad
 @peac/sdk - re-exports only
 @peac/server - server wrapper, tested via integration"
 
-echo "Packages with tests (17):"
+echo "Packages with tests (18):"
 echo "$TESTED_PACKAGES" | sed 's/^/  /'
 echo ""
 echo "Packages without tests (16) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 33 packages accounted for (17 tested + 16 type/wrapper packages)"
+echo "OK: All 34 packages accounted for (18 tested + 16 type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="

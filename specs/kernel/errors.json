@@ -618,6 +618,166 @@
       "description": "Bundle exceeds size limits (entry count, entry size, or total size)",
       "retriable": false,
       "category": "bundle"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_MISSING",
+      "http_status": 400,
+      "title": "UCP Signature Missing",
+      "description": "Request-Signature header is missing from UCP webhook request",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_MALFORMED",
+      "http_status": 400,
+      "title": "UCP Signature Malformed",
+      "description": "Request-Signature header is not a valid detached JWS (RFC 7797)",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_ALGORITHM_UNSUPPORTED",
+      "http_status": 400,
+      "title": "UCP Signature Algorithm Unsupported",
+      "description": "Signature algorithm is not ES256, ES384, or ES512",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_B64_INVALID",
+      "http_status": 400,
+      "title": "UCP Signature b64 Invalid",
+      "description": "b64=false requires 'b64' in 'crit' array per RFC 7797",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_KEY_NOT_FOUND",
+      "http_status": 401,
+      "title": "UCP Key Not Found",
+      "description": "Key ID from signature not found in business UCP profile",
+      "retriable": true,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_KEY_ALGORITHM_MISMATCH",
+      "http_status": 401,
+      "title": "UCP Key Algorithm Mismatch",
+      "description": "Key type is not EC as required for ECDSA signatures",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_KEY_CURVE_MISMATCH",
+      "http_status": 401,
+      "title": "UCP Key Curve Mismatch",
+      "description": "Key curve does not match signature algorithm (ES256=P-256, ES384=P-384, ES512=P-521)",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_INVALID",
+      "http_status": 401,
+      "title": "UCP Signature Invalid",
+      "description": "Webhook signature verification failed against payload",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_VERIFICATION_FAILED",
+      "http_status": 401,
+      "title": "UCP Verification Failed",
+      "description": "All verification attempts failed (raw and JCS canonicalized)",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_PROFILE_FETCH_FAILED",
+      "http_status": 502,
+      "title": "UCP Profile Fetch Failed",
+      "description": "Failed to fetch business UCP profile from /.well-known/ucp",
+      "retriable": true,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_PROFILE_INVALID",
+      "http_status": 502,
+      "title": "UCP Profile Invalid",
+      "description": "Business UCP profile does not conform to expected schema",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_PROFILE_NO_SIGNING_KEYS",
+      "http_status": 502,
+      "title": "UCP Profile No Signing Keys",
+      "description": "Business UCP profile has empty or missing signing_keys array",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_PAYLOAD_EMPTY",
+      "http_status": 400,
+      "title": "UCP Payload Empty",
+      "description": "Webhook request body is empty",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_PAYLOAD_NOT_JSON",
+      "http_status": 400,
+      "title": "UCP Payload Not JSON",
+      "description": "Webhook request body is not valid JSON",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_PAYLOAD_TOO_LARGE",
+      "http_status": 400,
+      "title": "UCP Payload Too Large",
+      "description": "Webhook request body exceeds maximum allowed size",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_ORDER_INVALID",
+      "http_status": 400,
+      "title": "UCP Order Invalid",
+      "description": "UCP order object does not conform to expected schema",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_ID",
+      "http_status": 400,
+      "title": "UCP Order Missing ID",
+      "description": "UCP order is missing required id field",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_LINE_ITEMS",
+      "http_status": 400,
+      "title": "UCP Order Missing Line Items",
+      "description": "UCP order is missing required line_items array",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_TOTALS",
+      "http_status": 400,
+      "title": "UCP Order Missing Totals",
+      "description": "UCP order is missing required totals array or total entry",
+      "retriable": false,
+      "category": "ucp"
+    },
+    {
+      "code": "E_UCP_EVIDENCE_SERIALIZATION_FAILED",
+      "http_status": 500,
+      "title": "UCP Evidence Serialization Failed",
+      "description": "Failed to serialize UCP evidence to YAML format",
+      "retriable": false,
+      "category": "ucp"
     }
   ]
 }

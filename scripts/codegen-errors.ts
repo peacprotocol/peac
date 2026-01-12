@@ -42,6 +42,7 @@ const VALID_CATEGORIES = new Set([
   'bundle',
   'control',
   'infrastructure',
+  'ucp',
 ]);
 
 interface ErrorSpec {

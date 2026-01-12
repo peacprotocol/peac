@@ -18,6 +18,7 @@ export const ERROR_CATEGORIES_CANONICAL = [
   'identity', // Agent identity attestation failures
   'dispute', // Dispute attestation failures
   'bundle', // Dispute bundle verification failures
+  'ucp', // UCP (Universal Commerce Protocol) mapping failures
 ] as const;
 
 /**
