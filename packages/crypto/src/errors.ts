@@ -16,6 +16,7 @@
  */
 export type CryptoErrorCode =
   | 'CRYPTO_INVALID_KEY_LENGTH'
+  | 'CRYPTO_INVALID_SEED_LENGTH'
   | 'CRYPTO_INVALID_JWS_FORMAT'
   | 'CRYPTO_INVALID_TYP'
   | 'CRYPTO_INVALID_ALG'
@@ -51,6 +52,7 @@ export function isFormatError(code: CryptoErrorCode): boolean {
     code === 'CRYPTO_INVALID_JWS_FORMAT' ||
     code === 'CRYPTO_INVALID_TYP' ||
     code === 'CRYPTO_INVALID_ALG' ||
-    code === 'CRYPTO_INVALID_KEY_LENGTH'
+    code === 'CRYPTO_INVALID_KEY_LENGTH' ||
+    code === 'CRYPTO_INVALID_SEED_LENGTH'
   );
 }

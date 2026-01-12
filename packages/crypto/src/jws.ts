@@ -173,3 +173,7 @@ export async function generateKeypair(): Promise<{
 
   return { privateKey, publicKey };
 }
+
+// NOTE: generateKeypairFromSeed has been moved to @peac/crypto/testkit
+// It's intentionally NOT exported from the main module to prevent accidental
+// use in production. Use: import { generateKeypairFromSeed } from '@peac/crypto/testkit'
