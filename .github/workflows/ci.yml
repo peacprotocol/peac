@@ -82,6 +82,25 @@ jobs:
       - name: Generated profiles drift check
         run: pnpm --filter @peac/policy-kit generate:profiles:check
 
+      - name: Error codes codegen drift check
+        run: |
+          pnpm codegen:errors
+          pnpm exec prettier --write packages/kernel/src/errors.generated.ts
+          if ! git diff --exit-code packages/kernel/src/errors.generated.ts; then
+            echo "FAIL: errors.generated.ts is out of sync with specs/kernel/errors.json"
+            echo "Run: pnpm codegen:errors && pnpm exec prettier --write packages/kernel/src/errors.generated.ts"
+            exit 1
+          fi
+          echo "OK: Error codes are in sync"
+
+      - name: Bundle vectors sanity check
+        run: |
+          # Verify the vector generator runs without errors
+          # Note: ZIP files are not byte-identical across platforms (macOS vs Linux)
+          # so we only check that generation succeeds, not binary equality
+          pnpm conformance:regen:bundle
+          echo "OK: Bundle vector generator executed successfully"
+
       - name: Core tests
         run: pnpm test:core
 

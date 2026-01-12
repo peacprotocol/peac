@@ -520,8 +520,9 @@ async function generateDuplicateReceiptBundle(
   const keysHash = createHash('sha256').update(keysJson).digest('hex');
 
   // Build the ZIP manually to bypass createDisputeBundle's validation
+  // Disable compression to ensure byte-identical output across platforms
   const mtime = new Date(FIXED_CREATED_AT);
-  const zipOptions = { mtime };
+  const zipOptions = { mtime, compress: false };
   const zipfile = new yazl.ZipFile();
 
   // Create manifest in the correct format WITHOUT content_hash first
