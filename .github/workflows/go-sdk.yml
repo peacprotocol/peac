@@ -97,7 +97,7 @@ jobs:
           go test ./... -count=1
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage
           path: sdks/go/coverage.out
