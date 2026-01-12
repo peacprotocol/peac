@@ -42,7 +42,8 @@
       "@peac/mappings-tap": ["./packages/mappings/tap/src"],
       "@peac/privacy": ["./packages/privacy/src"],
       "@peac/telemetry": ["./packages/telemetry/src"],
-      "@peac/telemetry-otel": ["./packages/telemetry-otel/src"]
+      "@peac/telemetry-otel": ["./packages/telemetry-otel/src"],
+      "@peac/audit": ["./packages/audit/src"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "lib", "coverage"]

@@ -32,11 +32,12 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@peac/schema": "workspace:*",
-    "@peac/protocol": "workspace:*",
+    "@peac/audit": "workspace:*",
     "@peac/crypto": "workspace:*",
     "@peac/disc": "workspace:*",
     "@peac/policy-kit": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*",
     "chalk": "^4.1.2",
     "commander": "^11.0.0"
   },

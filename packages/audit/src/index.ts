@@ -109,3 +109,35 @@ export {
   serializeBundle,
   type TraceCorrelation,
 } from './bundle.js';
+
+// Dispute bundle (v0.9.30+)
+export {
+  DISPUTE_BUNDLE_VERSION,
+  VERIFICATION_REPORT_VERSION,
+  type ManifestFileEntry,
+  type ManifestReceiptEntry,
+  type ManifestKeyEntry,
+  type BundleTimeRange,
+  type DisputeBundleManifest,
+  type CreateDisputeBundleOptions,
+  type JsonWebKeySet,
+  type JsonWebKey,
+  type DisputeBundleContents,
+  type ReceiptVerificationResult,
+  type KeyUsageEntry,
+  type AuditorSummary,
+  type VerificationReport,
+  type VerifyBundleOptions,
+  type BundleError,
+  type BundleResult,
+} from './dispute-bundle-types.js';
+
+export {
+  createDisputeBundle,
+  readDisputeBundle,
+  verifyBundleIntegrity,
+  getBundleContentHash,
+} from './dispute-bundle.js';
+
+// Verification report (v0.9.30+)
+export { verifyBundle, serializeReport, formatReportText } from './verification-report.js';

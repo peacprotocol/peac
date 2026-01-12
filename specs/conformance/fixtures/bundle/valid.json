@@ -1,0 +1,177 @@
+{
+  "$comment": "Valid DisputeBundle golden vectors (v0.9.30+)",
+  "version": "0.9.30",
+  "description": "Specification of valid bundle manifest structure and verification semantics",
+  "fixtures": [
+    {
+      "name": "minimal-bundle",
+      "description": "Minimal valid bundle with single receipt and key",
+      "manifest": {
+        "version": "peac.dispute-bundle/0.1",
+        "bundle_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "dispute_ref": "01ARZ3NDEKTSV4RRFFQ69G5FBW",
+        "created_by": "https://auditor.example.com",
+        "created_at": "2026-01-10T12:00:00.000Z",
+        "time_range": {
+          "start": "2026-01-09T00:00:00.000Z",
+          "end": "2026-01-09T00:00:00.000Z"
+        },
+        "receipts": [
+          {
+            "receipt_id": "receipt-001",
+            "issued_at": "2026-01-09T00:00:00.000Z",
+            "receipt_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "keys": [
+          {
+            "kid": "key-001",
+            "alg": "EdDSA"
+          }
+        ],
+        "files": [
+          {
+            "path": "keys/keys.json",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "size": 156
+          },
+          {
+            "path": "receipts.ndjson",
+            "sha256": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+            "size": 512
+          }
+        ],
+        "content_hash": "sha256_of_jcs_manifest_without_content_hash"
+      },
+      "expected": {
+        "valid": true,
+        "receipts_count": 1,
+        "keys_count": 1,
+        "has_policy": false
+      },
+      "notes": [
+        "receipts.ndjson contains all receipts as newline-delimited JWS strings",
+        "receipts array in manifest has receipt_hash (SHA-256 of JWS bytes, hex-lowercase)",
+        "content_hash = SHA-256(JCS(manifest without content_hash))"
+      ]
+    },
+    {
+      "name": "full-bundle-with-policy-and-signature",
+      "description": "Full bundle with multiple receipts, keys, policy, and bundle.sig",
+      "manifest": {
+        "version": "peac.dispute-bundle/0.1",
+        "bundle_id": "01ARZ3NDEKTSV4RRFFQ69G5FCX",
+        "dispute_ref": "01ARZ3NDEKTSV4RRFFQ69G5FDY",
+        "created_by": "https://enterprise.example.com",
+        "created_at": "2026-01-10T15:30:00.000Z",
+        "time_range": {
+          "start": "2026-01-01T00:00:00.000Z",
+          "end": "2026-01-09T23:59:59.000Z"
+        },
+        "receipts": [
+          {
+            "receipt_id": "receipt-001",
+            "issued_at": "2026-01-01T00:00:00.000Z",
+            "receipt_hash": "hash_of_receipt_001_jws"
+          },
+          {
+            "receipt_id": "receipt-002",
+            "issued_at": "2026-01-05T12:00:00.000Z",
+            "receipt_hash": "hash_of_receipt_002_jws"
+          },
+          {
+            "receipt_id": "receipt-003",
+            "issued_at": "2026-01-09T23:59:59.000Z",
+            "receipt_hash": "hash_of_receipt_003_jws"
+          }
+        ],
+        "keys": [
+          {
+            "kid": "key-001",
+            "alg": "EdDSA"
+          },
+          {
+            "kid": "key-002",
+            "alg": "EdDSA"
+          }
+        ],
+        "files": [
+          {
+            "path": "keys/keys.json",
+            "sha256": "jwks_file_hash",
+            "size": 512
+          },
+          {
+            "path": "policy/policy.yaml",
+            "sha256": "policy_file_hash",
+            "size": 1024
+          },
+          {
+            "path": "receipts.ndjson",
+            "sha256": "receipts_ndjson_hash",
+            "size": 2048
+          }
+        ],
+        "policy_hash": "sha256_of_policy_yaml_content",
+        "content_hash": "sha256_of_jcs_manifest_without_content_hash"
+      },
+      "bundle_sig": {
+        "description": "JWS over { content_hash: manifest.content_hash } in bundle.sig file",
+        "header": {
+          "alg": "EdDSA",
+          "typ": "bundle.sig",
+          "kid": "bundle-signer-key"
+        },
+        "payload": {
+          "content_hash": "must_match_manifest_content_hash"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "receipts_count": 3,
+        "keys_count": 2,
+        "has_policy": true,
+        "has_bundle_sig": true,
+        "bundle_signature": {
+          "present": true,
+          "valid": true
+        }
+      }
+    },
+    {
+      "name": "receipt-verification-semantics",
+      "description": "Demonstrates real Ed25519 signature verification for receipts",
+      "receipt_jws_structure": {
+        "header": {
+          "alg": "EdDSA",
+          "typ": "receipt",
+          "kid": "key-001"
+        },
+        "payload": {
+          "jti": "receipt-id",
+          "iat": 1704758400,
+          "iss": "https://issuer.example.com",
+          "sub": "subject-uri"
+        },
+        "signature": "ed25519_signature_base64url"
+      },
+      "verification_behavior": {
+        "signature_verification": "Real Ed25519 verification using @peac/crypto",
+        "key_lookup": "Extract kid from JWS header, find in bundle JWKS",
+        "key_format": "JWK with kty=OKP, crv=Ed25519, x=base64url_public_key",
+        "invalid_signature_result": {
+          "signature_valid": false,
+          "errors": ["E_INVALID_SIGNATURE"]
+        },
+        "missing_key_result": {
+          "signature_valid": false,
+          "errors": ["E_RECEIPT_KEY_NOT_FOUND"]
+        }
+      },
+      "expected": {
+        "performs_real_crypto": true,
+        "not_just_key_existence_check": true
+      }
+    }
+  ]
+}

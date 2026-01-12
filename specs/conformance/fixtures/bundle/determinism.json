@@ -1,0 +1,108 @@
+{
+  "$comment": "Determinism tests for DisputeBundle verification reports (v0.9.30+)",
+  "version": "0.9.30",
+  "description": "Tests that verification reports are deterministic across implementations",
+  "rules": {
+    "content_hash": {
+      "algorithm": "SHA-256",
+      "encoding": "hex-lowercase",
+      "input": "JCS(manifest_without_content_hash)",
+      "note": "JCS = JSON Canonicalization Scheme (RFC 8785)"
+    },
+    "report_hash": {
+      "algorithm": "SHA-256",
+      "encoding": "hex-lowercase",
+      "input": "JCS(report_without_report_hash)",
+      "note": "All undefined values stripped before JCS canonicalization"
+    }
+  },
+  "sorting": {
+    "manifest_receipts": "Sort by: issued_at (asc), then receipt_id (lex), then receipt_hash (lex)",
+    "manifest_keys": "Sort by: kid (lex)",
+    "manifest_files": "Sort by: path (lex)",
+    "report_receipts": "Sort by: receipt_id (lex)",
+    "report_keys_used": "Sort by: kid (lex)",
+    "auditor_issues": "Sort lexicographically"
+  },
+  "fixtures": [
+    {
+      "name": "same-inputs-same-hash",
+      "description": "Same bundle inputs must produce same content_hash",
+      "inputs": {
+        "dispute_ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "created_by": "https://auditor.example.com",
+        "bundle_id": "FIXED_BUNDLE_ID_001",
+        "receipts": ["jws-string-1", "jws-string-2"],
+        "keys": ["key-1", "key-2"]
+      },
+      "expected": {
+        "same_content_hash": true,
+        "note": "content_hash differs only if created_at differs (not controllable)"
+      }
+    },
+    {
+      "name": "same-verification-same-report-hash",
+      "description": "Same bundle verified at same time must produce same report_hash",
+      "verification_options": {
+        "offline": true,
+        "now": "2026-01-10T12:00:00.000Z"
+      },
+      "expected": {
+        "same_report_hash": true,
+        "note": "Fixed 'now' ensures deterministic time-based validation"
+      }
+    },
+    {
+      "name": "receipt-order-invariant",
+      "description": "Receipt order in input should not affect content_hash",
+      "note": "Receipts are sorted before manifest generation",
+      "expected": {
+        "order_independent": true
+      }
+    },
+    {
+      "name": "key-order-invariant",
+      "description": "Key order in JWKS input should not affect manifest",
+      "note": "Keys are sorted by kid before manifest generation",
+      "expected": {
+        "order_independent": true
+      }
+    },
+    {
+      "name": "verification-report-format",
+      "description": "Expected report structure for cross-language parity",
+      "report_structure": {
+        "version": "peac.verification-report/0.1",
+        "bundle_content_hash": "string (64 hex chars)",
+        "summary": {
+          "total_receipts": "number",
+          "valid": "number",
+          "invalid": "number"
+        },
+        "receipts": [
+          {
+            "receipt_id": "string",
+            "signature_valid": "boolean",
+            "claims_valid": "boolean",
+            "key_id": "string | undefined",
+            "errors": "string[]",
+            "claims": "object | undefined"
+          }
+        ],
+        "keys_used": [
+          {
+            "kid": "string",
+            "receipts_signed": "number",
+            "receipt_ids": "string[]"
+          }
+        ],
+        "auditor_summary": {
+          "headline": "string",
+          "issues": "string[]",
+          "recommendation": "'valid' | 'invalid' | 'needs_review'"
+        },
+        "report_hash": "string (64 hex chars)"
+      }
+    }
+  ]
+}
