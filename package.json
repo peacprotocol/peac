@@ -1,6 +1,6 @@
 {
   "name": "@peac/monorepo",
-  "version": "0.9.30",
+  "version": "0.9.31",
   "private": true,
   "description": "PEAC Protocol - Cryptographic receipts for agentic commerce",
   "repository": {
@@ -20,8 +20,8 @@
     "examples/*"
   ],
   "scripts": {
-    "test": "vitest",
-    "test:watch": "vitest --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:coverage": "vitest --coverage",
     "test:core": "turbo run test --filter=@peac/crypto --filter=@peac/protocol --filter=@peac/policy-kit --filter=@peac/http-signatures --filter=@peac/jwks-cache --filter=@peac/mappings-mcp --filter=@peac/mappings-acp --filter=@peac/mappings-rsl --filter=@peac/mappings-tap --filter=@peac/rails-x402 --filter=@peac/rails-stripe --filter=@peac/rails-razorpay --filter=@peac/adapter-x402-daydreams --filter=@peac/adapter-x402-fluora --filter=@peac/adapter-x402-pinata --filter=@peac/worker-fastly --filter=@peac/worker-akamai --filter=@peac/transport-grpc",
     "conformance:test": "vitest run tests/conformance/",

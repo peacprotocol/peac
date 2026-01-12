@@ -1,6 +1,6 @@
 {
   "name": "@peac/rails-x402",
-  "version": "0.9.30",
+  "version": "0.9.31",
   "description": "x402 payment rail adapter for PEAC protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

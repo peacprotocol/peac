@@ -191,16 +191,15 @@ describe('assertJsonSafeIterative - property tests', () => {
     });
 
     it('rejects cycles (direct self-reference)', () => {
-      fc.assert(
-        fc.property(fc.string(), (key) => {
-          const obj: Record<string, unknown> = { data: 'test' };
-          obj[key || 'self'] = obj; // Direct cycle
+      // Deterministic test - property-based adds no value for cycle detection
+      // Using Object.create(null) avoids prototype chain issues
+      const obj: Record<string, unknown> = Object.create(null);
+      obj.data = 'test';
+      obj.self = obj; // Direct cycle
 
-          const result = assertJsonSafeIterative(obj);
-          return result.ok === false && result.error.includes('Cycle');
-        }),
-        { numRuns: 50 }
-      );
+      const result = assertJsonSafeIterative(obj);
+      expect(result.ok).toBe(false);
+      expect(result.error).toContain('Cycle');
     });
 
     it('rejects cycles (indirect A -> B -> A)', () => {

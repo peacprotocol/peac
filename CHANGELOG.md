@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.31] - 2026-01-13
+
+### Added
+
+- **UCP Webhook Mapping** (`@peac/mappings-ucp`)
+  - Google Universal Commerce Protocol (UCP) webhook signature verification
+  - Detached JWS (RFC 7797) with ES256/ES384/ES512 support
+  - Raw-first, JCS fallback verification strategy for UCP's ambiguous spec
+  - UCP order to PEAC receipt mapping with amounts in minor units
+  - Dispute evidence generation for @peac/audit bundles
+  - Deterministic YAML evidence schema with hardened format
+
+### Security
+
+- **RFC 7797 b64=false**: Raw bytes passed to jose library (not ASCII-decoded)
+- **JOSE crit semantics**: Unknown critical header parameters rejected with clear error
+- **Strict header validation**: `crit` must be array of strings (no duplicates), `b64` must be boolean
+- **Single profile fetch**: Verifier returns both parsed profile and raw JSON to eliminate race conditions
+- **IEEE P1363 ECDSA**: Demo signing uses correct JWS signature format (raw R||S, not DER)
+
+### Changed
+
+- Root `test` script now uses `vitest run` (no watch mode hang in CI)
+- Extracted shared crypto utilities to `util.ts` module (decouples verify.ts from evidence.ts)
+
+### Documentation
+
+- Security and Correctness Notes section in @peac/mappings-ucp README
+- UCP webhook Express example in `examples/ucp-webhook-express/`
+
 ## [0.9.30] - 2026-01-12
 
 ### Added
