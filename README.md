@@ -9,7 +9,7 @@
 
 **Who:** APIs, gateways, tool servers, and agents that need audit-grade proof of every interaction.
 
-**Why best:** One narrow format that plugs into your existing identity, policy, and payment systems -- not another platform to adopt.
+**Why:** Plugs into existing identity, policy, and payment systems -- no new platform to adopt.
 
 PEAC is stewarded by contributors from [Originary](https://www.originary.xyz) and the broader community. See [https://peacprotocol.org](https://peacprotocol.org) for protocol documentation.
 
