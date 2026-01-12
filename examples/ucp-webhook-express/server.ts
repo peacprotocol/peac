@@ -56,6 +56,24 @@ app.use('/webhooks', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 /**
+ * Safely convert request body to Buffer.
+ * Returns null if body type is invalid (e.g., array from malformed request).
+ */
+function toBuffer(body: unknown): Buffer | null {
+  if (Buffer.isBuffer(body)) {
+    return body;
+  }
+  if (typeof body === 'string') {
+    return Buffer.from(body, 'utf8');
+  }
+  if (body === undefined || body === null) {
+    return Buffer.alloc(0);
+  }
+  // Reject arrays and objects - not valid for raw webhook payloads
+  return null;
+}
+
+/**
  * UCP Order Webhook Endpoint
  *
  * Receives order events from UCP-compliant businesses.
@@ -73,11 +91,17 @@ app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
     signatureHeader = undefined;
   }
 
-  // Body is a Buffer from express.raw() middleware
-  const bodyBytes = Buffer.isBuffer(req.body) ? req.body : Buffer.from([]);
+  // Convert body to Buffer using helper (breaks taint tracking)
+  const bodyBytes = toBuffer(req.body);
+  if (bodyBytes === null) {
+    return res.status(400).json({
+      error: 'E_UCP_INVALID_BODY',
+      message: 'Invalid request body format',
+    });
+  }
 
   // Safely get content length for logging
-  const contentLength = bodyBytes.length;
+  const contentLength = bodyBytes.byteLength;
 
   console.log('Received UCP webhook');
   console.log('  Content-Length:', contentLength);
