@@ -4,6 +4,20 @@
   "description": "Ed25519 JWS signing and verification for PEAC protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./testkit": {
+      "types": "./dist/testkit.d.ts",
+      "import": "./dist/testkit.js",
+      "require": "./dist/testkit.js",
+      "default": "./dist/testkit.js"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/peacprotocol/peac.git",
