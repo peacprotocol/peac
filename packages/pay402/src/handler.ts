@@ -61,8 +61,16 @@ export class Http402Handler {
     if (!header || !header.trim()) return null;
 
     // Parse: "x402 proof_abc123" or "Bearer x402 evidence_xyz"
-    const bearerMatch = header.match(/^Bearer\s+(.+)$/i);
-    const direct = bearerMatch ? bearerMatch[1] : header;
+    // Use string methods instead of regex to avoid ReDoS vulnerabilities
+    const trimmed = header.trim();
+    const lowerTrimmed = trimmed.toLowerCase();
+    let direct: string;
+    if (lowerTrimmed.startsWith('bearer ')) {
+      // Extract content after "Bearer " (case-insensitive)
+      direct = trimmed.slice(7).trim();
+    } else {
+      direct = trimmed;
+    }
 
     const parts = direct
       .trim()

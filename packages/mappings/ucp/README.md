@@ -1,6 +1,6 @@
 # @peac/mappings-ucp
 
-Google Universal Commerce Protocol (UCP) mapping to PEAC receipts and dispute evidence.
+Universal Commerce Protocol (UCP) mapping to PEAC receipts and dispute evidence.
 
 ## Features
 
