@@ -1,0 +1,807 @@
+/**
+ * PEAC Protocol Error Codes
+ *
+ * AUTO-GENERATED from specs/kernel/errors.json
+ * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts
+ * Spec version: 0.9.30
+ */
+
+import type { ErrorDefinition } from './types.js';
+
+/**
+ * Error code string constants
+ */
+export const ERROR_CODES = {
+  // Attribution error codes
+  E_ATTRIBUTION_CHAIN_TOO_DEEP: 'E_ATTRIBUTION_CHAIN_TOO_DEEP',
+  E_ATTRIBUTION_CIRCULAR_CHAIN: 'E_ATTRIBUTION_CIRCULAR_CHAIN',
+  E_ATTRIBUTION_EXPIRED: 'E_ATTRIBUTION_EXPIRED',
+  E_ATTRIBUTION_HASH_INVALID: 'E_ATTRIBUTION_HASH_INVALID',
+  E_ATTRIBUTION_INVALID_FORMAT: 'E_ATTRIBUTION_INVALID_FORMAT',
+  E_ATTRIBUTION_INVALID_REF: 'E_ATTRIBUTION_INVALID_REF',
+  E_ATTRIBUTION_INVALID_WEIGHT: 'E_ATTRIBUTION_INVALID_WEIGHT',
+  E_ATTRIBUTION_MISSING_SOURCES: 'E_ATTRIBUTION_MISSING_SOURCES',
+  E_ATTRIBUTION_NOT_YET_VALID: 'E_ATTRIBUTION_NOT_YET_VALID',
+  E_ATTRIBUTION_RESOLUTION_FAILED: 'E_ATTRIBUTION_RESOLUTION_FAILED',
+  E_ATTRIBUTION_RESOLUTION_TIMEOUT: 'E_ATTRIBUTION_RESOLUTION_TIMEOUT',
+  E_ATTRIBUTION_SIZE_EXCEEDED: 'E_ATTRIBUTION_SIZE_EXCEEDED',
+  E_ATTRIBUTION_TOO_MANY_SOURCES: 'E_ATTRIBUTION_TOO_MANY_SOURCES',
+  E_ATTRIBUTION_UNKNOWN_USAGE: 'E_ATTRIBUTION_UNKNOWN_USAGE',
+
+  // Bundle error codes
+  E_BUNDLE_DUPLICATE_RECEIPT: 'E_BUNDLE_DUPLICATE_RECEIPT',
+  E_BUNDLE_HASH_MISMATCH: 'E_BUNDLE_HASH_MISMATCH',
+  E_BUNDLE_INVALID_FORMAT: 'E_BUNDLE_INVALID_FORMAT',
+  E_BUNDLE_KEY_MISSING: 'E_BUNDLE_KEY_MISSING',
+  E_BUNDLE_MANIFEST_INVALID: 'E_BUNDLE_MANIFEST_INVALID',
+  E_BUNDLE_MANIFEST_MISSING: 'E_BUNDLE_MANIFEST_MISSING',
+  E_BUNDLE_MISSING_KEYS: 'E_BUNDLE_MISSING_KEYS',
+  E_BUNDLE_MISSING_RECEIPTS: 'E_BUNDLE_MISSING_RECEIPTS',
+  E_BUNDLE_PATH_TRAVERSAL: 'E_BUNDLE_PATH_TRAVERSAL',
+  E_BUNDLE_POLICY_HASH_MISMATCH: 'E_BUNDLE_POLICY_HASH_MISMATCH',
+  E_BUNDLE_RECEIPT_INVALID: 'E_BUNDLE_RECEIPT_INVALID',
+  E_BUNDLE_RECEIPTS_UNORDERED: 'E_BUNDLE_RECEIPTS_UNORDERED',
+  E_BUNDLE_SIGNATURE_INVALID: 'E_BUNDLE_SIGNATURE_INVALID',
+  E_BUNDLE_SIZE_EXCEEDED: 'E_BUNDLE_SIZE_EXCEEDED',
+  E_BUNDLE_TIME_RANGE_INVALID: 'E_BUNDLE_TIME_RANGE_INVALID',
+
+  // Control error codes
+  E_CONTROL_DENIED: 'E_CONTROL_DENIED',
+  E_CONTROL_REVIEW_REQUIRED: 'E_CONTROL_REVIEW_REQUIRED',
+
+  // Dispute error codes
+  E_DISPUTE_DUPLICATE: 'E_DISPUTE_DUPLICATE',
+  E_DISPUTE_EXPIRED: 'E_DISPUTE_EXPIRED',
+  E_DISPUTE_INVALID_FORMAT: 'E_DISPUTE_INVALID_FORMAT',
+  E_DISPUTE_INVALID_GROUNDS: 'E_DISPUTE_INVALID_GROUNDS',
+  E_DISPUTE_INVALID_ID: 'E_DISPUTE_INVALID_ID',
+  E_DISPUTE_INVALID_STATE: 'E_DISPUTE_INVALID_STATE',
+  E_DISPUTE_INVALID_TARGET_TYPE: 'E_DISPUTE_INVALID_TARGET_TYPE',
+  E_DISPUTE_INVALID_TRANSITION: 'E_DISPUTE_INVALID_TRANSITION',
+  E_DISPUTE_INVALID_TYPE: 'E_DISPUTE_INVALID_TYPE',
+  E_DISPUTE_MISSING_RESOLUTION: 'E_DISPUTE_MISSING_RESOLUTION',
+  E_DISPUTE_NOT_YET_VALID: 'E_DISPUTE_NOT_YET_VALID',
+  E_DISPUTE_OTHER_REQUIRES_DESCRIPTION: 'E_DISPUTE_OTHER_REQUIRES_DESCRIPTION',
+  E_DISPUTE_RESOLUTION_NOT_ALLOWED: 'E_DISPUTE_RESOLUTION_NOT_ALLOWED',
+  E_DISPUTE_TARGET_NOT_FOUND: 'E_DISPUTE_TARGET_NOT_FOUND',
+
+  // Identity error codes
+  E_IDENTITY_BINDING_FUTURE: 'E_IDENTITY_BINDING_FUTURE',
+  E_IDENTITY_BINDING_MISMATCH: 'E_IDENTITY_BINDING_MISMATCH',
+  E_IDENTITY_BINDING_STALE: 'E_IDENTITY_BINDING_STALE',
+  E_IDENTITY_DIRECTORY_UNAVAILABLE: 'E_IDENTITY_DIRECTORY_UNAVAILABLE',
+  E_IDENTITY_EXPIRED: 'E_IDENTITY_EXPIRED',
+  E_IDENTITY_INVALID_FORMAT: 'E_IDENTITY_INVALID_FORMAT',
+  E_IDENTITY_KEY_EXPIRED: 'E_IDENTITY_KEY_EXPIRED',
+  E_IDENTITY_KEY_REVOKED: 'E_IDENTITY_KEY_REVOKED',
+  E_IDENTITY_KEY_UNKNOWN: 'E_IDENTITY_KEY_UNKNOWN',
+  E_IDENTITY_MISSING: 'E_IDENTITY_MISSING',
+  E_IDENTITY_NOT_YET_VALID: 'E_IDENTITY_NOT_YET_VALID',
+  E_IDENTITY_PROOF_UNSUPPORTED: 'E_IDENTITY_PROOF_UNSUPPORTED',
+  E_IDENTITY_SIG_INVALID: 'E_IDENTITY_SIG_INVALID',
+
+  // Infrastructure error codes
+  E_CIRCUIT_BREAKER_OPEN: 'E_CIRCUIT_BREAKER_OPEN',
+  E_INTERNAL: 'E_INTERNAL',
+  E_JWKS_FETCH_FAILED: 'E_JWKS_FETCH_FAILED',
+  E_RATE_LIMITED: 'E_RATE_LIMITED',
+
+  // Validation error codes
+  E_EVIDENCE_NOT_JSON: 'E_EVIDENCE_NOT_JSON',
+  E_EXPIRED: 'E_EXPIRED',
+  E_INVALID_AMOUNT: 'E_INVALID_AMOUNT',
+  E_INVALID_AUDIENCE: 'E_INVALID_AUDIENCE',
+  E_INVALID_CURRENCY: 'E_INVALID_CURRENCY',
+  E_INVALID_FORMAT: 'E_INVALID_FORMAT',
+  E_INVALID_ISSUER: 'E_INVALID_ISSUER',
+  E_INVALID_RAIL: 'E_INVALID_RAIL',
+  E_INVALID_RECEIPT_ID: 'E_INVALID_RECEIPT_ID',
+  E_INVALID_SUBJECT: 'E_INVALID_SUBJECT',
+  E_MISSING_EXP: 'E_MISSING_EXP',
+  E_MISSING_REQUIRED_CLAIM: 'E_MISSING_REQUIRED_CLAIM',
+  E_NOT_YET_VALID: 'E_NOT_YET_VALID',
+
+  // Verification error codes
+  E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
+  E_KEY_NOT_FOUND: 'E_KEY_NOT_FOUND',
+} as const;
+
+/**
+ * Union type of all error codes
+ */
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
+
+/**
+ * Error definitions map with full metadata
+ */
+export const ERRORS: Record<string, ErrorDefinition> = {
+  // Attribution error codes
+  E_ATTRIBUTION_CHAIN_TOO_DEEP: {
+    code: 'E_ATTRIBUTION_CHAIN_TOO_DEEP',
+    http_status: 400,
+    title: 'Attribution Chain Too Deep',
+    description: 'Attribution chain exceeds maximum allowed depth (8)',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_CIRCULAR_CHAIN: {
+    code: 'E_ATTRIBUTION_CIRCULAR_CHAIN',
+    http_status: 400,
+    title: 'Attribution Circular Chain',
+    description: 'Circular reference detected in attribution chain',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_EXPIRED: {
+    code: 'E_ATTRIBUTION_EXPIRED',
+    http_status: 401,
+    title: 'Attribution Expired',
+    description: 'Attribution attestation has exceeded its expiration time',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_HASH_INVALID: {
+    code: 'E_ATTRIBUTION_HASH_INVALID',
+    http_status: 400,
+    title: 'Attribution Hash Invalid',
+    description: 'Content hash structure is invalid (wrong algorithm, encoding, or value length)',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_INVALID_FORMAT: {
+    code: 'E_ATTRIBUTION_INVALID_FORMAT',
+    http_status: 400,
+    title: 'Attribution Invalid Format',
+    description: 'Attribution attestation does not conform to schema',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_INVALID_REF: {
+    code: 'E_ATTRIBUTION_INVALID_REF',
+    http_status: 400,
+    title: 'Attribution Invalid Reference',
+    description: 'Receipt reference format is invalid (must be jti:{id}, URL, or URN)',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_INVALID_WEIGHT: {
+    code: 'E_ATTRIBUTION_INVALID_WEIGHT',
+    http_status: 400,
+    title: 'Attribution Invalid Weight',
+    description: 'Attribution weight is out of valid range (must be 0.0-1.0)',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_MISSING_SOURCES: {
+    code: 'E_ATTRIBUTION_MISSING_SOURCES',
+    http_status: 400,
+    title: 'Attribution Missing Sources',
+    description: 'Attribution attestation has empty sources array',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_NOT_YET_VALID: {
+    code: 'E_ATTRIBUTION_NOT_YET_VALID',
+    http_status: 401,
+    title: 'Attribution Not Yet Valid',
+    description: 'Attribution attestation issued_at time is in the future',
+    retriable: true,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_RESOLUTION_FAILED: {
+    code: 'E_ATTRIBUTION_RESOLUTION_FAILED',
+    http_status: 502,
+    title: 'Attribution Resolution Failed',
+    description: 'Failed to resolve receipt reference in attribution chain',
+    retriable: true,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_RESOLUTION_TIMEOUT: {
+    code: 'E_ATTRIBUTION_RESOLUTION_TIMEOUT',
+    http_status: 504,
+    title: 'Attribution Resolution Timeout',
+    description: 'Timeout while resolving receipt reference in attribution chain',
+    retriable: true,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_SIZE_EXCEEDED: {
+    code: 'E_ATTRIBUTION_SIZE_EXCEEDED',
+    http_status: 400,
+    title: 'Attribution Size Exceeded',
+    description: 'Attribution attestation exceeds maximum size (64KB)',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_TOO_MANY_SOURCES: {
+    code: 'E_ATTRIBUTION_TOO_MANY_SOURCES',
+    http_status: 400,
+    title: 'Attribution Too Many Sources',
+    description: 'Attribution has too many sources (maximum 100)',
+    retriable: false,
+    category: 'attribution',
+  },
+  E_ATTRIBUTION_UNKNOWN_USAGE: {
+    code: 'E_ATTRIBUTION_UNKNOWN_USAGE',
+    http_status: 400,
+    title: 'Attribution Unknown Usage',
+    description: 'Attribution usage type is not recognized',
+    retriable: false,
+    category: 'attribution',
+  },
+
+  // Bundle error codes
+  E_BUNDLE_DUPLICATE_RECEIPT: {
+    code: 'E_BUNDLE_DUPLICATE_RECEIPT',
+    http_status: 400,
+    title: 'Bundle Duplicate Receipt',
+    description: 'Bundle contains multiple receipts with the same ID',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_HASH_MISMATCH: {
+    code: 'E_BUNDLE_HASH_MISMATCH',
+    http_status: 400,
+    title: 'Bundle Hash Mismatch',
+    description: 'File hash does not match value declared in manifest.json',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_INVALID_FORMAT: {
+    code: 'E_BUNDLE_INVALID_FORMAT',
+    http_status: 400,
+    title: 'Bundle Invalid Format',
+    description: 'Bundle archive structure is invalid (not a valid ZIP or missing required files)',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_KEY_MISSING: {
+    code: 'E_BUNDLE_KEY_MISSING',
+    http_status: 400,
+    title: 'Bundle Key Missing',
+    description: 'Required signing key not found in bundle (offline verification mode)',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_MANIFEST_INVALID: {
+    code: 'E_BUNDLE_MANIFEST_INVALID',
+    http_status: 400,
+    title: 'Bundle Manifest Invalid',
+    description: 'manifest.json does not conform to schema or contains invalid values',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_MANIFEST_MISSING: {
+    code: 'E_BUNDLE_MANIFEST_MISSING',
+    http_status: 400,
+    title: 'Bundle Manifest Missing',
+    description: 'manifest.json not found at bundle archive root',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_MISSING_KEYS: {
+    code: 'E_BUNDLE_MISSING_KEYS',
+    http_status: 400,
+    title: 'Bundle Missing Keys',
+    description: 'No verification keys provided in bundle JWKS',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_MISSING_RECEIPTS: {
+    code: 'E_BUNDLE_MISSING_RECEIPTS',
+    http_status: 400,
+    title: 'Bundle Missing Receipts',
+    description: 'No receipts provided when creating bundle',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_PATH_TRAVERSAL: {
+    code: 'E_BUNDLE_PATH_TRAVERSAL',
+    http_status: 400,
+    title: 'Bundle Path Traversal',
+    description: 'Bundle contains path traversal attack (zip-slip vulnerability)',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_POLICY_HASH_MISMATCH: {
+    code: 'E_BUNDLE_POLICY_HASH_MISMATCH',
+    http_status: 400,
+    title: 'Bundle Policy Hash Mismatch',
+    description: 'Policy snapshot hash does not match policy used to evaluate receipts',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_RECEIPT_INVALID: {
+    code: 'E_BUNDLE_RECEIPT_INVALID',
+    http_status: 400,
+    title: 'Bundle Receipt Invalid',
+    description: 'Receipt JWS in bundle is malformed or missing required claims',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_RECEIPTS_UNORDERED: {
+    code: 'E_BUNDLE_RECEIPTS_UNORDERED',
+    http_status: 400,
+    title: 'Bundle Receipts Unordered',
+    description:
+      'receipts.ndjson is not in deterministic order (issued_at, receipt_id, receipt_hash)',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_SIGNATURE_INVALID: {
+    code: 'E_BUNDLE_SIGNATURE_INVALID',
+    http_status: 400,
+    title: 'Bundle Signature Invalid',
+    description: 'bundle.sig JWS verification failed over manifest hash',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_SIZE_EXCEEDED: {
+    code: 'E_BUNDLE_SIZE_EXCEEDED',
+    http_status: 400,
+    title: 'Bundle Size Exceeded',
+    description: 'Bundle exceeds size limits (entry count, entry size, or total size)',
+    retriable: false,
+    category: 'bundle',
+  },
+  E_BUNDLE_TIME_RANGE_INVALID: {
+    code: 'E_BUNDLE_TIME_RANGE_INVALID',
+    http_status: 400,
+    title: 'Bundle Time Range Invalid',
+    description: 'Receipt issued_at is outside the bundle declared time_range',
+    retriable: false,
+    category: 'bundle',
+  },
+
+  // Control error codes
+  E_CONTROL_DENIED: {
+    code: 'E_CONTROL_DENIED',
+    http_status: 403,
+    title: 'Control Decision Denied',
+    description: 'Control engine denied authorization',
+    retriable: false,
+    category: 'control',
+  },
+  E_CONTROL_REVIEW_REQUIRED: {
+    code: 'E_CONTROL_REVIEW_REQUIRED',
+    http_status: 202,
+    title: 'Review Required',
+    description: 'Control engine requires manual review',
+    retriable: true,
+    category: 'control',
+  },
+
+  // Dispute error codes
+  E_DISPUTE_DUPLICATE: {
+    code: 'E_DISPUTE_DUPLICATE',
+    http_status: 409,
+    title: 'Dispute Duplicate',
+    description: 'A dispute with this ID already exists',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_EXPIRED: {
+    code: 'E_DISPUTE_EXPIRED',
+    http_status: 401,
+    title: 'Dispute Expired',
+    description: 'Dispute attestation has exceeded its expiration time',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_INVALID_FORMAT: {
+    code: 'E_DISPUTE_INVALID_FORMAT',
+    http_status: 400,
+    title: 'Dispute Invalid Format',
+    description: 'Dispute attestation does not conform to schema',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_INVALID_GROUNDS: {
+    code: 'E_DISPUTE_INVALID_GROUNDS',
+    http_status: 400,
+    title: 'Dispute Invalid Grounds',
+    description: 'Dispute grounds code is not recognized',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_INVALID_ID: {
+    code: 'E_DISPUTE_INVALID_ID',
+    http_status: 400,
+    title: 'Dispute Invalid ID',
+    description: 'Dispute ID is not a valid ULID format (26 uppercase alphanumeric characters)',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_INVALID_STATE: {
+    code: 'E_DISPUTE_INVALID_STATE',
+    http_status: 400,
+    title: 'Dispute Invalid State',
+    description: 'Dispute state is not recognized',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_INVALID_TARGET_TYPE: {
+    code: 'E_DISPUTE_INVALID_TARGET_TYPE',
+    http_status: 400,
+    title: 'Dispute Invalid Target Type',
+    description:
+      'Dispute target type is not recognized (must be receipt, attribution, identity, or policy)',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_INVALID_TRANSITION: {
+    code: 'E_DISPUTE_INVALID_TRANSITION',
+    http_status: 400,
+    title: 'Dispute Invalid Transition',
+    description: 'Invalid state transition for dispute lifecycle',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_INVALID_TYPE: {
+    code: 'E_DISPUTE_INVALID_TYPE',
+    http_status: 400,
+    title: 'Dispute Invalid Type',
+    description: 'Dispute type is not recognized',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_MISSING_RESOLUTION: {
+    code: 'E_DISPUTE_MISSING_RESOLUTION',
+    http_status: 400,
+    title: 'Dispute Missing Resolution',
+    description: 'Resolution is required for terminal states (resolved, rejected, final)',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_NOT_YET_VALID: {
+    code: 'E_DISPUTE_NOT_YET_VALID',
+    http_status: 401,
+    title: 'Dispute Not Yet Valid',
+    description: 'Dispute attestation issued_at time is in the future',
+    retriable: true,
+    category: 'dispute',
+  },
+  E_DISPUTE_OTHER_REQUIRES_DESCRIPTION: {
+    code: 'E_DISPUTE_OTHER_REQUIRES_DESCRIPTION',
+    http_status: 400,
+    title: 'Dispute Other Requires Description',
+    description: "Dispute type 'other' requires description of at least 50 characters",
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_RESOLUTION_NOT_ALLOWED: {
+    code: 'E_DISPUTE_RESOLUTION_NOT_ALLOWED',
+    http_status: 400,
+    title: 'Dispute Resolution Not Allowed',
+    description: 'Resolution is only valid for terminal states',
+    retriable: false,
+    category: 'dispute',
+  },
+  E_DISPUTE_TARGET_NOT_FOUND: {
+    code: 'E_DISPUTE_TARGET_NOT_FOUND',
+    http_status: 404,
+    title: 'Dispute Target Not Found',
+    description: 'The target receipt, attribution, or identity being disputed was not found',
+    retriable: true,
+    category: 'dispute',
+  },
+
+  // Identity error codes
+  E_IDENTITY_BINDING_FUTURE: {
+    code: 'E_IDENTITY_BINDING_FUTURE',
+    http_status: 400,
+    title: 'Identity Binding Future',
+    description: 'Identity binding signed_at timestamp is in the future',
+    retriable: false,
+    category: 'identity',
+  },
+  E_IDENTITY_BINDING_MISMATCH: {
+    code: 'E_IDENTITY_BINDING_MISMATCH',
+    http_status: 400,
+    title: 'Identity Binding Mismatch',
+    description: 'Identity binding does not match the request being verified',
+    retriable: false,
+    category: 'identity',
+  },
+  E_IDENTITY_BINDING_STALE: {
+    code: 'E_IDENTITY_BINDING_STALE',
+    http_status: 401,
+    title: 'Identity Binding Stale',
+    description: 'Identity binding is too old and requires fresh binding',
+    retriable: true,
+    category: 'identity',
+  },
+  E_IDENTITY_DIRECTORY_UNAVAILABLE: {
+    code: 'E_IDENTITY_DIRECTORY_UNAVAILABLE',
+    http_status: 503,
+    title: 'Identity Directory Unavailable',
+    description: 'Failed to fetch agent key directory',
+    retriable: true,
+    category: 'identity',
+  },
+  E_IDENTITY_EXPIRED: {
+    code: 'E_IDENTITY_EXPIRED',
+    http_status: 401,
+    title: 'Identity Expired',
+    description: 'Agent identity attestation has exceeded its expiration time',
+    retriable: false,
+    category: 'identity',
+  },
+  E_IDENTITY_INVALID_FORMAT: {
+    code: 'E_IDENTITY_INVALID_FORMAT',
+    http_status: 400,
+    title: 'Identity Invalid Format',
+    description: 'Agent identity attestation does not conform to schema',
+    retriable: false,
+    category: 'identity',
+  },
+  E_IDENTITY_KEY_EXPIRED: {
+    code: 'E_IDENTITY_KEY_EXPIRED',
+    http_status: 401,
+    title: 'Identity Key Expired',
+    description: 'Agent signing key has expired per directory metadata',
+    retriable: false,
+    category: 'identity',
+  },
+  E_IDENTITY_KEY_REVOKED: {
+    code: 'E_IDENTITY_KEY_REVOKED',
+    http_status: 401,
+    title: 'Identity Key Revoked',
+    description: 'Agent signing key has been explicitly revoked',
+    retriable: false,
+    category: 'identity',
+  },
+  E_IDENTITY_KEY_UNKNOWN: {
+    code: 'E_IDENTITY_KEY_UNKNOWN',
+    http_status: 401,
+    title: 'Identity Key Unknown',
+    description: 'Key ID not found in agent key directory',
+    retriable: true,
+    category: 'identity',
+  },
+  E_IDENTITY_MISSING: {
+    code: 'E_IDENTITY_MISSING',
+    http_status: 401,
+    title: 'Identity Missing',
+    description: 'No agent identity attestation provided in request',
+    retriable: false,
+    category: 'identity',
+  },
+  E_IDENTITY_NOT_YET_VALID: {
+    code: 'E_IDENTITY_NOT_YET_VALID',
+    http_status: 401,
+    title: 'Identity Not Yet Valid',
+    description: 'Agent identity attestation issued_at time is in the future',
+    retriable: true,
+    category: 'identity',
+  },
+  E_IDENTITY_PROOF_UNSUPPORTED: {
+    code: 'E_IDENTITY_PROOF_UNSUPPORTED',
+    http_status: 400,
+    title: 'Identity Proof Unsupported',
+    description: 'Agent identity proof method is not supported',
+    retriable: false,
+    category: 'identity',
+  },
+  E_IDENTITY_SIG_INVALID: {
+    code: 'E_IDENTITY_SIG_INVALID',
+    http_status: 401,
+    title: 'Identity Signature Invalid',
+    description: 'Agent identity proof signature verification failed',
+    retriable: false,
+    category: 'identity',
+  },
+
+  // Infrastructure error codes
+  E_CIRCUIT_BREAKER_OPEN: {
+    code: 'E_CIRCUIT_BREAKER_OPEN',
+    http_status: 503,
+    title: 'Circuit Breaker Open',
+    description: 'Service temporarily unavailable due to circuit breaker',
+    retriable: true,
+    category: 'infrastructure',
+  },
+  E_INTERNAL: {
+    code: 'E_INTERNAL',
+    http_status: 500,
+    title: 'Internal Error',
+    description: 'An unexpected internal error occurred during verification',
+    retriable: true,
+    category: 'infrastructure',
+  },
+  E_JWKS_FETCH_FAILED: {
+    code: 'E_JWKS_FETCH_FAILED',
+    http_status: 503,
+    title: 'JWKS Fetch Failed',
+    description: 'Failed to fetch public keys from JWKS endpoint',
+    retriable: true,
+    category: 'infrastructure',
+  },
+  E_RATE_LIMITED: {
+    code: 'E_RATE_LIMITED',
+    http_status: 429,
+    title: 'Rate Limited',
+    description: 'Too many requests, please retry later',
+    retriable: true,
+    category: 'infrastructure',
+  },
+
+  // Validation error codes
+  E_EVIDENCE_NOT_JSON: {
+    code: 'E_EVIDENCE_NOT_JSON',
+    http_status: 400,
+    title: 'Evidence Not JSON-Safe',
+    description:
+      'Evidence contains non-JSON-safe values (NaN, Infinity, undefined, BigInt, Date, Map, Set, functions, symbols, class instances, or cycles)',
+    retriable: false,
+    category: 'validation',
+  },
+  E_EXPIRED: {
+    code: 'E_EXPIRED',
+    http_status: 400,
+    title: 'Receipt Expired',
+    description: 'Receipt has exceeded its expiration time',
+    retriable: false,
+    category: 'validation',
+  },
+  E_INVALID_AMOUNT: {
+    code: 'E_INVALID_AMOUNT',
+    http_status: 400,
+    title: 'Invalid Amount',
+    description: 'Payment amount is invalid or out of allowed range',
+    retriable: false,
+    category: 'validation',
+  },
+  E_INVALID_AUDIENCE: {
+    code: 'E_INVALID_AUDIENCE',
+    http_status: 400,
+    title: 'Invalid Audience',
+    description: 'Receipt audience claim does not match expected value',
+    retriable: false,
+    category: 'validation',
+  },
+  E_INVALID_CURRENCY: {
+    code: 'E_INVALID_CURRENCY',
+    http_status: 400,
+    title: 'Invalid Currency',
+    description: 'Currency code is not a valid ISO 4217 code',
+    retriable: false,
+    category: 'validation',
+  },
+  E_INVALID_FORMAT: {
+    code: 'E_INVALID_FORMAT',
+    http_status: 400,
+    title: 'Invalid Format',
+    description: 'Receipt does not conform to JWS format',
+    retriable: false,
+    category: 'validation',
+  },
+  E_INVALID_ISSUER: {
+    code: 'E_INVALID_ISSUER',
+    http_status: 400,
+    title: 'Invalid Issuer',
+    description: 'Receipt issuer claim is invalid or untrusted',
+    retriable: false,
+    category: 'validation',
+  },
+  E_INVALID_RAIL: {
+    code: 'E_INVALID_RAIL',
+    http_status: 400,
+    title: 'Invalid Payment Rail',
+    description: 'Payment rail identifier is not recognized',
+    retriable: false,
+    category: 'validation',
+  },
+  E_INVALID_RECEIPT_ID: {
+    code: 'E_INVALID_RECEIPT_ID',
+    http_status: 400,
+    title: 'Invalid Receipt ID',
+    description: 'Receipt ID (rid) does not match expected value',
+    retriable: false,
+    category: 'validation',
+  },
+  E_INVALID_SUBJECT: {
+    code: 'E_INVALID_SUBJECT',
+    http_status: 400,
+    title: 'Invalid Subject',
+    description: 'Receipt subject claim does not match expected value',
+    retriable: false,
+    category: 'validation',
+  },
+  E_MISSING_EXP: {
+    code: 'E_MISSING_EXP',
+    http_status: 400,
+    title: 'Missing Expiration',
+    description: 'Receipt is missing required exp claim',
+    retriable: false,
+    category: 'validation',
+  },
+  E_MISSING_REQUIRED_CLAIM: {
+    code: 'E_MISSING_REQUIRED_CLAIM',
+    http_status: 400,
+    title: 'Missing Required Claim',
+    description: 'Receipt is missing a required JWT claim',
+    retriable: false,
+    category: 'validation',
+  },
+  E_NOT_YET_VALID: {
+    code: 'E_NOT_YET_VALID',
+    http_status: 400,
+    title: 'Not Yet Valid',
+    description: 'Receipt nbf (not before) time is in the future',
+    retriable: true,
+    category: 'validation',
+  },
+
+  // Verification error codes
+  E_INVALID_SIGNATURE: {
+    code: 'E_INVALID_SIGNATURE',
+    http_status: 400,
+    title: 'Invalid Signature',
+    description: 'Receipt signature verification failed',
+    retriable: false,
+    category: 'verification',
+  },
+  E_KEY_NOT_FOUND: {
+    code: 'E_KEY_NOT_FOUND',
+    http_status: 400,
+    title: 'Key Not Found',
+    description: 'Public key with specified kid not found in JWKS',
+    retriable: false,
+    category: 'verification',
+  },
+};
+
+/**
+ * Get error definition by code
+ */
+export function getError(code: string): ErrorDefinition | undefined {
+  return ERRORS[code];
+}
+
+/**
+ * Check if error is retriable
+ */
+export function isRetriable(code: string): boolean {
+  return ERRORS[code]?.retriable ?? false;
+}
+
+/**
+ * Bundle error codes (for @peac/audit)
+ */
+export const BUNDLE_ERRORS = {
+  DUPLICATE_RECEIPT: 'E_BUNDLE_DUPLICATE_RECEIPT',
+  HASH_MISMATCH: 'E_BUNDLE_HASH_MISMATCH',
+  INVALID_FORMAT: 'E_BUNDLE_INVALID_FORMAT',
+  KEY_MISSING: 'E_BUNDLE_KEY_MISSING',
+  MANIFEST_INVALID: 'E_BUNDLE_MANIFEST_INVALID',
+  MANIFEST_MISSING: 'E_BUNDLE_MANIFEST_MISSING',
+  MISSING_KEYS: 'E_BUNDLE_MISSING_KEYS',
+  MISSING_RECEIPTS: 'E_BUNDLE_MISSING_RECEIPTS',
+  PATH_TRAVERSAL: 'E_BUNDLE_PATH_TRAVERSAL',
+  POLICY_HASH_MISMATCH: 'E_BUNDLE_POLICY_HASH_MISMATCH',
+  RECEIPT_INVALID: 'E_BUNDLE_RECEIPT_INVALID',
+  RECEIPTS_UNORDERED: 'E_BUNDLE_RECEIPTS_UNORDERED',
+  SIGNATURE_INVALID: 'E_BUNDLE_SIGNATURE_INVALID',
+  SIZE_EXCEEDED: 'E_BUNDLE_SIZE_EXCEEDED',
+  TIME_RANGE_INVALID: 'E_BUNDLE_TIME_RANGE_INVALID',
+} as const;
+
+/**
+ * Dispute error codes
+ */
+export const DISPUTE_ERRORS = {
+  DUPLICATE: 'E_DISPUTE_DUPLICATE',
+  EXPIRED: 'E_DISPUTE_EXPIRED',
+  INVALID_FORMAT: 'E_DISPUTE_INVALID_FORMAT',
+  INVALID_GROUNDS: 'E_DISPUTE_INVALID_GROUNDS',
+  INVALID_ID: 'E_DISPUTE_INVALID_ID',
+  INVALID_STATE: 'E_DISPUTE_INVALID_STATE',
+  INVALID_TARGET_TYPE: 'E_DISPUTE_INVALID_TARGET_TYPE',
+  INVALID_TRANSITION: 'E_DISPUTE_INVALID_TRANSITION',
+  INVALID_TYPE: 'E_DISPUTE_INVALID_TYPE',
+  MISSING_RESOLUTION: 'E_DISPUTE_MISSING_RESOLUTION',
+  NOT_YET_VALID: 'E_DISPUTE_NOT_YET_VALID',
+  OTHER_REQUIRES_DESCRIPTION: 'E_DISPUTE_OTHER_REQUIRES_DESCRIPTION',
+  RESOLUTION_NOT_ALLOWED: 'E_DISPUTE_RESOLUTION_NOT_ALLOWED',
+  TARGET_NOT_FOUND: 'E_DISPUTE_TARGET_NOT_FOUND',
+} as const;
