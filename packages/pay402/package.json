@@ -1,6 +1,6 @@
 {
   "name": "@peac/pay402",
-  "version": "0.9.29",
+  "version": "0.9.30",
   "description": "Generic HTTP 402 adapter with multi-rail payment negotiation",
   "type": "module",
   "main": "dist/index.js",

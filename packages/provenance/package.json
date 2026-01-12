@@ -1,6 +1,6 @@
 {
   "name": "@peac/provenance",
-  "version": "0.9.29",
+  "version": "0.9.30",
   "private": true,
   "description": "Provenance pillar for PEAC protocol - content provenance, C2PA integration, and chain-of-custody",
   "main": "dist/index.js",
