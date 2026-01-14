@@ -268,7 +268,7 @@ export function addReceiptToMetadata(
   receiptJws: string
 ): void {
   metadata[GrpcMetadataKeys.RECEIPT] = receiptJws;
-  metadata[GrpcMetadataKeys.RECEIPT_TYPE] = 'peac.receipt/0.9';
+  metadata[GrpcMetadataKeys.RECEIPT_TYPE] = 'peac-receipt/0.1';
 }
 
 /**

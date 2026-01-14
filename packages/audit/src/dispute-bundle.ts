@@ -32,7 +32,7 @@ import type {
   ManifestReceiptEntry,
 } from './dispute-bundle-types.js';
 
-import { DISPUTE_BUNDLE_VERSION } from './dispute-bundle-types.js';
+import { BUNDLE_VERSION, type BundleKind, type BundleRef } from './dispute-bundle-types.js';
 
 // ============================================================================
 // Constants and Limits (DoS protection)
@@ -114,12 +114,16 @@ function generateBundleId(): string {
   return timestampChars.join('') + randomChars.join('');
 }
 
-/** Compute SHA-256 hash of data (hex-encoded, lowercase) */
+/**
+ * Compute SHA-256 hash of data with self-describing format.
+ * Returns `sha256:<64 lowercase hex chars>` format.
+ */
 function sha256Hex(data: string | Buffer): string {
   const hash = createHash('sha256');
   hash.update(data);
-  return hash.digest('hex');
+  return `sha256:${hash.digest('hex')}`;
 }
+
 
 /** Decode base64url to Buffer */
 function base64urlDecode(str: string): Buffer {
@@ -249,6 +253,8 @@ export async function createDisputeBundle(
   options: CreateDisputeBundleOptions
 ): Promise<BundleResult<Buffer>> {
   const {
+    kind = 'dispute',
+    refs,
     dispute_ref,
     created_by,
     receipts,
@@ -259,6 +265,9 @@ export async function createDisputeBundle(
     signing_key,
     signing_kid,
   } = options;
+
+  // Build refs from either new refs or deprecated dispute_ref
+  const bundleRefs: BundleRef[] = refs ?? (dispute_ref ? [{ type: 'dispute', id: dispute_ref }] : []);
 
   // Validate receipts
   if (receipts.length === 0) {
@@ -430,9 +439,12 @@ export async function createDisputeBundle(
   };
 
   const manifestWithoutHash: Omit<DisputeBundleManifest, 'content_hash'> = {
-    version: DISPUTE_BUNDLE_VERSION,
+    version: BUNDLE_VERSION,
+    kind,
     bundle_id: bundle_id ?? generateBundleId(),
-    dispute_ref,
+    refs: bundleRefs,
+    // Include deprecated dispute_ref for backwards compatibility
+    dispute_ref: dispute_ref,
     created_by,
     created_at: created_at ?? new Date().toISOString(),
     time_range: timeRange,
@@ -755,13 +767,13 @@ function processExtractedFiles(
   }
 
   // Validate version
-  if (manifest.version !== DISPUTE_BUNDLE_VERSION) {
+  if (manifest.version !== BUNDLE_VERSION) {
     resolve({
       ok: false,
       error: bundleError(
         BundleErrorCodes.MANIFEST_INVALID,
         `Unsupported bundle version: ${manifest.version}`,
-        { expected: DISPUTE_BUNDLE_VERSION, actual: manifest.version }
+        { expected: BUNDLE_VERSION, actual: manifest.version }
       ),
     });
     return;

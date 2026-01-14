@@ -169,33 +169,92 @@ export interface VerifyResponseFailure {
 export type VerifyResponse = VerifyResponseSuccess | VerifyResponseFailure;
 
 /**
- * Discovery manifest (peac.txt parsed)
+ * Issuer Configuration (/.well-known/peac-issuer.json)
+ *
+ * Enables verifiers to discover cryptographic keys and verification
+ * endpoints for validating PEAC receipts.
+ *
+ * @see docs/specs/PEAC-ISSUER.md
  */
-export interface PEACDiscovery {
-  /** PEAC protocol version */
+export interface PEACIssuerConfig {
+  /** Configuration format version (e.g., "peac-issuer/0.1") */
   version: string;
 
-  /** Issuer URL */
+  /** Issuer identifier URL (MUST match receipt iss claim) */
   issuer: string;
 
-  /** Verify endpoint URL */
-  verify: string;
+  /** JWKS endpoint URL */
+  jwks_uri: string;
 
-  /** JWKS URL */
-  jwks: string;
+  /** Verification endpoint URL (optional) */
+  verify_endpoint?: string;
 
-  /** Supported payment rails */
-  payments: Array<{
-    rail: string;
-    info?: string;
-  }>;
+  /** Supported receipt versions (default: ["peac.receipt/0.9"]) */
+  receipt_versions?: string[];
 
-  /** AIPREF URL (optional) */
-  aipref?: string;
+  /** Supported signing algorithms (default: ["EdDSA"]) */
+  algorithms?: string[];
 
-  /** SLO endpoint (optional) */
-  slos?: string;
+  /** Supported payment rails (optional) */
+  payment_rails?: string[];
 
-  /** Security contact (optional) */
-  security?: string;
+  /** Security contact email or URL (optional) */
+  security_contact?: string;
 }
+
+/**
+ * Policy Manifest (/.well-known/peac.txt)
+ *
+ * Declares machine-readable access terms for automated interactions:
+ * allowed purposes, receipt requirements, rate limits, and payment terms.
+ *
+ * @see docs/specs/PEAC-TXT.md
+ */
+export interface PEACPolicyManifest {
+  /** Policy format version (e.g., "0.9") */
+  version: string;
+
+  /** Access model: "open" or "conditional" */
+  usage: 'open' | 'conditional';
+
+  /** Allowed purposes (optional) */
+  purposes?: string[];
+
+  /** Receipt requirement: "required", "optional", or "omit" */
+  receipts?: 'required' | 'optional' | 'omit';
+
+  /** Attribution requirement (optional) */
+  attribution?: 'required' | 'optional' | 'none';
+
+  /** Rate limit string (e.g., "100/hour", "unlimited") */
+  rate_limit?: string;
+
+  /** Daily request limit (optional) */
+  daily_limit?: number;
+
+  /** Negotiation endpoint URL (optional) */
+  negotiate?: string;
+
+  /** Contact email or URL (optional) */
+  contact?: string;
+
+  /** License identifier (e.g., "Apache-2.0") */
+  license?: string;
+
+  /** Price per request in minor units (optional) */
+  price?: number;
+
+  /** Currency code ISO 4217 (optional) */
+  currency?: string;
+
+  /** Supported payment methods (optional) */
+  payment_methods?: string[];
+
+  /** Payment endpoint URL (optional) */
+  payment_endpoint?: string;
+}
+
+/**
+ * @deprecated Use PEACIssuerConfig instead. Will be removed in v1.0.
+ */
+export type PEACDiscovery = PEACIssuerConfig;

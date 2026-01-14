@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/wire/0.9/control-block.schema.json",
+  "$id": "https://peacprotocol.org/schemas/wire/0.1/control-block.schema.json",
   "title": "PEAC Control Block",
   "description": "Control Abstraction Layer (CAL) types for multi-party governance",
 

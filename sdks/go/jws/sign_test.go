@@ -377,7 +377,7 @@ func TestValidateHeader_UnsupportedAlgorithm(t *testing.T) {
 	header := Header{
 		Algorithm: "RS256",
 		KeyID:     "key-001",
-		Type:      "peac.receipt/0.9",
+		Type:      "peac-receipt/0.1",
 	}
 
 	err := ValidateHeader(header)
@@ -390,7 +390,7 @@ func TestValidateHeader_MissingKeyID(t *testing.T) {
 	header := Header{
 		Algorithm: "EdDSA",
 		KeyID:     "",
-		Type:      "peac.receipt/0.9",
+		Type:      "peac-receipt/0.1",
 	}
 
 	err := ValidateHeader(header)
@@ -408,7 +408,7 @@ func TestValidateHeader_InvalidType(t *testing.T) {
 
 	err := ValidateHeader(header)
 	if err == nil {
-		t.Error("ValidateHeader() should reject non-peac.receipt type")
+		t.Error("ValidateHeader() should reject non-peac-receipt type")
 	}
 }
 
@@ -430,7 +430,7 @@ func TestValidateHeader_ValidPeacType(t *testing.T) {
 	header := Header{
 		Algorithm: "EdDSA",
 		KeyID:     "key-001",
-		Type:      "peac.receipt/0.9",
+		Type:      "peac-receipt/0.1",
 	}
 
 	err := ValidateHeader(header)
@@ -440,7 +440,7 @@ func TestValidateHeader_ValidPeacType(t *testing.T) {
 }
 
 func TestDefaultReceiptTyp_Constant(t *testing.T) {
-	if DefaultReceiptTyp != "peac.receipt/0.9" {
-		t.Errorf("DefaultReceiptTyp = %s, want peac.receipt/0.9", DefaultReceiptTyp)
+	if DefaultReceiptTyp != "peac-receipt/0.1" {
+		t.Errorf("DefaultReceiptTyp = %s, want peac-receipt/0.1", DefaultReceiptTyp)
 	}
 }

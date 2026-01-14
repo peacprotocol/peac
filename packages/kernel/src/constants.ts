@@ -8,15 +8,15 @@
 
 /**
  * Wire format type for PEAC receipts
- * Frozen at peac.receipt/0.9 until v1.0.0
+ * Normalized to peac-receipt/0.1 per DEC-20260114-002
  */
-export const WIRE_TYPE = 'peac.receipt/0.9' as const;
+export const WIRE_TYPE = 'peac-receipt/0.1' as const;
 
 /**
  * Wire format version (extracted from WIRE_TYPE)
  * Use this for wire_version fields in receipts
  */
-export const WIRE_VERSION = '0.9' as const;
+export const WIRE_VERSION = '0.1' as const;
 
 /**
  * Supported cryptographic algorithms
@@ -39,12 +39,42 @@ export const HEADERS = {
 } as const;
 
 /**
- * Discovery manifest settings
+ * Policy manifest settings (/.well-known/peac.txt)
+ *
+ * Policy documents declare access terms for agents and gateways.
+ * @see docs/specs/PEAC-TXT.md
+ */
+export const POLICY = {
+  manifestPath: '/.well-known/peac.txt' as const,
+  fallbackPath: '/peac.txt' as const,
+  manifestVersion: 'peac-policy/0.1' as const,
+  cacheTtlSeconds: 3600,
+  maxBytes: 262144, // 256 KiB
+  maxDepth: 8,
+} as const;
+
+/**
+ * Issuer configuration settings (/.well-known/peac-issuer.json)
+ *
+ * Issuer config enables verifiers to discover JWKS and verification endpoints.
+ * @see docs/specs/PEAC-ISSUER.md
+ */
+export const ISSUER_CONFIG = {
+  configPath: '/.well-known/peac-issuer.json' as const,
+  configVersion: 'peac-issuer/0.1' as const,
+  cacheTtlSeconds: 3600,
+  maxBytes: 65536, // 64 KiB
+  maxDepth: 4,
+  fetchTimeoutMs: 10000,
+} as const;
+
+/**
+ * @deprecated Use POLICY instead. Will be removed in v1.0.
  */
 export const DISCOVERY = {
-  manifestPath: '/.well-known/peac.txt' as const,
+  manifestPath: POLICY.manifestPath,
   manifestVersion: 'peac/0.9' as const,
-  cacheTtlSeconds: 3600,
+  cacheTtlSeconds: POLICY.cacheTtlSeconds,
 } as const;
 
 /**
@@ -74,6 +104,76 @@ export const LIMITS = {
 } as const;
 
 /**
+ * Bundle format version.
+ * Used in dispute bundles, audit bundles, and archive bundles.
+ */
+export const BUNDLE_VERSION = 'peac-bundle/0.1' as const;
+
+/**
+ * Verification report format version.
+ */
+export const VERIFICATION_REPORT_VERSION = 'peac-verification-report/0.1' as const;
+
+/**
+ * Hash format constants and utilities.
+ * All hashes use the self-describing format: sha256:<64 lowercase hex chars>
+ */
+export const HASH = {
+  /** Canonical hash algorithm */
+  algorithm: 'sha256' as const,
+
+  /** Hash prefix pattern */
+  prefix: 'sha256:' as const,
+
+  /** Valid hash regex: sha256:<64 lowercase hex> */
+  pattern: /^sha256:[0-9a-f]{64}$/,
+
+  /** Hex-only pattern for legacy comparison */
+  hexPattern: /^[0-9a-f]{64}$/,
+};
+
+/**
+ * Parse a sha256:<hex> hash string into components.
+ * Returns null if the format is invalid.
+ *
+ * @param hash - Hash string to parse (e.g., "sha256:abc123...")
+ * @returns Parsed hash or null if invalid
+ */
+export function parseHash(hash: string): { alg: 'sha256'; hex: string } | null {
+  if (!HASH.pattern.test(hash)) {
+    return null;
+  }
+  return {
+    alg: 'sha256',
+    hex: hash.slice(7), // Remove 'sha256:' prefix
+  };
+}
+
+/**
+ * Format a hex string as a sha256:<hex> hash.
+ * Validates that the hex is exactly 64 lowercase characters.
+ *
+ * @param hex - Hex string (64 lowercase characters)
+ * @returns Formatted hash or null if invalid
+ */
+export function formatHash(hex: string): string | null {
+  if (!HASH.hexPattern.test(hex)) {
+    return null;
+  }
+  return `sha256:${hex}`;
+}
+
+/**
+ * Validate a hash string is in the correct format.
+ *
+ * @param hash - Hash string to validate
+ * @returns true if valid sha256:<64 hex> format
+ */
+export function isValidHash(hash: string): boolean {
+  return HASH.pattern.test(hash);
+}
+
+/**
  * All constants export
  */
 export const CONSTANTS = {
@@ -85,4 +185,7 @@ export const CONSTANTS = {
   JWKS,
   RECEIPT,
   LIMITS,
+  BUNDLE_VERSION,
+  VERIFICATION_REPORT_VERSION,
+  HASH,
 } as const;

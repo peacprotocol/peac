@@ -24,8 +24,8 @@ const ajv = new Ajv2020({
   verbose: true,
   loadSchema: async (uri) => {
     // Handle relative $ref within specs/wire
-    if (uri.startsWith('https://peacprotocol.org/schemas/wire/0.9/')) {
-      const filename = uri.replace('https://peacprotocol.org/schemas/wire/0.9/', '');
+    if (uri.startsWith('https://peacprotocol.org/schemas/wire/0.1/')) {
+      const filename = uri.replace('https://peacprotocol.org/schemas/wire/0.1/', '');
       const filepath = join(SPECS_DIR, filename);
       try {
         return JSON.parse(readFileSync(filepath, 'utf8'));
@@ -102,7 +102,7 @@ function lintSchemas() {
       }
 
       // Check $id format
-      const expectedIdPrefix = 'https://peacprotocol.org/schemas/wire/0.9/';
+      const expectedIdPrefix = 'https://peacprotocol.org/schemas/wire/0.1/';
       if (!schema.$id.startsWith(expectedIdPrefix)) {
         throw new Error(`$id must start with ${expectedIdPrefix}, got: ${schema.$id}`);
       }

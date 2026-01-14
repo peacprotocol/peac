@@ -1,12 +1,12 @@
 # PEAC Wire Format Schemas
 
-JSON Schema definitions for the PEAC receipt wire format (`peac.receipt/0.9`).
+JSON Schema definitions for the PEAC receipt wire format (`peac-receipt/0.1`).
 
 ## Schema Files
 
 | File                           | Description                                |
 | ------------------------------ | ------------------------------------------ |
-| `peac.receipt.0.9.schema.json` | Root receipt envelope schema               |
+| `peac-receipt.0.1.schema.json` | Root receipt envelope schema               |
 | `auth-context.schema.json`     | Authentication/authorization context       |
 | `control-block.schema.json`    | Control block with purpose and licensing   |
 | `evidence-block.schema.json`   | Evidence container (payment, attestations) |
@@ -16,7 +16,7 @@ JSON Schema definitions for the PEAC receipt wire format (`peac.receipt/0.9`).
 
 ## Versioning
 
-- **Wire format**: `peac.receipt/0.9` (frozen until v1.0)
+- **Wire format**: `peac-receipt/0.1`
 - **Schema set version**: Tracked in `VERSION.json`, independent of npm package versions
 - **JSON Schema draft**: 2020-12
 
@@ -32,7 +32,7 @@ New optional fields MAY be added to existing types without bumping the wire form
 
 ### Adding New Required Fields
 
-New required fields require a wire format version bump (e.g., `peac.receipt/1.0`).
+New required fields require a wire format version bump (e.g., `peac-receipt/1.0`).
 
 ### Removing Fields
 
@@ -207,4 +207,4 @@ pnpm test --filter conformance
 
 ## Base URI
 
-All schemas use the base URI: `https://peacprotocol.org/schemas/wire/0.9/`
+All schemas use the base URI: `https://peacprotocol.org/schemas/wire/0.1/`

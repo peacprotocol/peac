@@ -1,11 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.25",
+  "version": "0.10.0",
   "description": "PEAC protocol constants - normative source of truth",
   "wire_format": {
-    "type": "peac.receipt/0.9",
+    "type": "peac-receipt/0.1",
+    "wire_version": "0.1",
     "frozen_until": "v1.0.0",
-    "description": "JWT type header value for PEAC receipts"
+    "description": "JWT type header value for PEAC receipts (normalized to peac-<artifact>/<major>.<minor> pattern)"
   },
   "algorithms": {
     "supported": ["EdDSA"],
@@ -65,9 +66,27 @@
   },
   "discovery": {
     "manifest_path": "/.well-known/peac.txt",
-    "manifest_version": "peac/0.9",
+    "manifest_version": "peac-policy/0.1",
     "cache_ttl_seconds": 3600,
-    "description": "Discovery manifest location and settings"
+    "description": "Discovery manifest location and settings (deprecated - see policy/issuer config)"
+  },
+  "policy": {
+    "manifest_path": "/.well-known/peac.txt",
+    "fallback_path": "/peac.txt",
+    "version": "peac-policy/0.1",
+    "max_bytes": 262144,
+    "max_depth": 8,
+    "cache_ttl_seconds": 3600,
+    "description": "Policy manifest settings per PEAC-TXT.md"
+  },
+  "issuer_config": {
+    "config_path": "/.well-known/peac-issuer.json",
+    "version": "peac-issuer/0.1",
+    "max_bytes": 65536,
+    "max_depth": 4,
+    "fetch_timeout_ms": 10000,
+    "cache_ttl_seconds": 3600,
+    "description": "Issuer configuration settings per PEAC-ISSUER.md"
   },
   "jwks": {
     "rotation_days": 90,

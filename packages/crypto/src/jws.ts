@@ -1,6 +1,6 @@
 /**
  * JWS compact serialization with Ed25519 (RFC 8032)
- * Implements peac.receipt/0.9 wire format
+ * Implements peac-receipt/0.1 wire format
  */
 
 import * as ed25519 from '@noble/ed25519';

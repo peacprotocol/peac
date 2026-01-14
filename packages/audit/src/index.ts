@@ -110,10 +110,13 @@ export {
   type TraceCorrelation,
 } from './bundle.js';
 
-// Dispute bundle (v0.9.30+)
+// Dispute bundle (v0.9.30+, normalized in v0.10.0)
 export {
+  BUNDLE_VERSION as DISPUTE_BUNDLE_VERSION_v2,
   DISPUTE_BUNDLE_VERSION,
   VERIFICATION_REPORT_VERSION,
+  type BundleKind,
+  type BundleRef,
   type ManifestFileEntry,
   type ManifestReceiptEntry,
   type ManifestKeyEntry,

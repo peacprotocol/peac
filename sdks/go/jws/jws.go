@@ -72,9 +72,9 @@ func ValidateHeader(header Header) error {
 		return fmt.Errorf("unsupported algorithm: %s (expected EdDSA)", header.Algorithm)
 	}
 
-	// Check type if present
-	if header.Type != "" && !strings.HasPrefix(header.Type, "peac.receipt/") {
-		return fmt.Errorf("invalid type: %s (expected peac.receipt/*)", header.Type)
+	// Check type if present (peac-receipt/0.1 format as of v0.10.0)
+	if header.Type != "" && !strings.HasPrefix(header.Type, "peac-receipt/") {
+		return fmt.Errorf("invalid type: %s (expected peac-receipt/*)", header.Type)
 	}
 
 	// Key ID should be present
