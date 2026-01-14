@@ -299,7 +299,7 @@ describe('gRPC Transport', () => {
         const metadata: Record<string, string | string[]> = {};
         addReceiptToMetadata(metadata, 'eyJ...');
         expect(metadata[GrpcMetadataKeys.RECEIPT]).toBe('eyJ...');
-        expect(metadata[GrpcMetadataKeys.RECEIPT_TYPE]).toBe('peac.receipt/0.9');
+        expect(metadata[GrpcMetadataKeys.RECEIPT_TYPE]).toBe('peac-receipt/0.1');
       });
     });
   });

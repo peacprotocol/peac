@@ -4,7 +4,7 @@
 
 **Version**: 0.9.18
 
-**Wire Format**: `peac.receipt/0.9`
+**Wire Format**: `peac-receipt/0.1`
 
 ---
 

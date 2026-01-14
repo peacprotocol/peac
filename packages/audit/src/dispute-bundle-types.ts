@@ -12,15 +12,27 @@
  */
 
 /**
- * Dispute Bundle format version.
- * Distinct from `peac.bundle/0.9` (CaseBundle JSONL format).
+ * Bundle format version.
+ * Normalized in v0.10.0 to peac-<artifact>/<major>.<minor> pattern.
+ * The `kind` field distinguishes bundle types (dispute, audit, etc.).
  */
-export const DISPUTE_BUNDLE_VERSION = 'peac.dispute-bundle/0.1' as const;
+export const BUNDLE_VERSION = 'peac-bundle/0.1' as const;
+
+/**
+ * @deprecated Use BUNDLE_VERSION instead. Will be removed in v1.0.
+ */
+export const DISPUTE_BUNDLE_VERSION = BUNDLE_VERSION;
 
 /**
  * Verification report format version.
+ * Normalized in v0.10.0 to peac-<artifact>/<major>.<minor> pattern.
  */
-export const VERIFICATION_REPORT_VERSION = 'peac.verification-report/0.1' as const;
+export const VERIFICATION_REPORT_VERSION = 'peac-verification-report/0.1' as const;
+
+/**
+ * Bundle kind - identifies the purpose of the bundle.
+ */
+export type BundleKind = 'dispute' | 'audit' | 'archive';
 
 /**
  * File entry in the bundle manifest.
@@ -77,20 +89,41 @@ export interface BundleTimeRange {
 }
 
 /**
+ * Bundle reference - identifies what this bundle is for.
+ * Format: sha256:<hex> for hash-based refs, or ULID/UUID for ID refs.
+ */
+export interface BundleRef {
+  /** Reference type */
+  type: 'dispute' | 'receipt' | 'audit_case' | 'external';
+
+  /** Reference ID (ULID, UUID, or sha256:<hex> hash) */
+  id: string;
+}
+
+/**
  * Bundle manifest (manifest.json).
  *
  * The manifest is the source of truth for bundle integrity.
- * `content_hash` is SHA-256 of JCS(manifest without content_hash).
+ * `content_hash` is sha256:<hex> of JCS(manifest without content_hash).
  */
 export interface DisputeBundleManifest {
-  /** Bundle format version */
-  version: typeof DISPUTE_BUNDLE_VERSION;
+  /** Bundle format version (peac-bundle/0.1) */
+  version: typeof BUNDLE_VERSION;
+
+  /** Bundle kind - what type of bundle this is */
+  kind: BundleKind;
 
   /** Unique bundle identifier (ULID) */
   bundle_id: string;
 
-  /** Dispute reference this bundle is for (ULID) */
-  dispute_ref: string;
+  /** What this bundle references (replaces dispute_ref) */
+  refs: BundleRef[];
+
+  /**
+   * @deprecated Use refs instead. Will be removed in v1.0.
+   * Dispute reference this bundle is for (ULID)
+   */
+  dispute_ref?: string;
 
   /** Who created the bundle (URI) */
   created_by: string;
@@ -110,10 +143,10 @@ export interface DisputeBundleManifest {
   /** All files in the bundle (sorted by path) */
   files: ManifestFileEntry[];
 
-  /** SHA-256 hash of policy.yaml if included */
+  /** sha256:<hex> hash of policy.yaml if included */
   policy_hash?: string;
 
-  /** SHA-256 of JCS(manifest without content_hash) - deterministic bundle hash */
+  /** sha256:<hex> of JCS(manifest without content_hash) - deterministic bundle hash */
   content_hash: string;
 }
 
@@ -121,8 +154,17 @@ export interface DisputeBundleManifest {
  * Options for creating a dispute bundle.
  */
 export interface CreateDisputeBundleOptions {
-  /** Dispute reference (ULID) */
-  dispute_ref: string;
+  /** Bundle kind (defaults to 'dispute') */
+  kind?: BundleKind;
+
+  /** Bundle references (what this bundle is for) */
+  refs?: BundleRef[];
+
+  /**
+   * @deprecated Use refs instead. Will be removed in v1.0.
+   * Dispute reference (ULID)
+   */
+  dispute_ref?: string;
 
   /** Who is creating the bundle (URI) */
   created_by: string;

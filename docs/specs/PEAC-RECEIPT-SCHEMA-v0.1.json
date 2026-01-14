@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/docs/receipt/0.1.json",
+  "$comment": "Documentation copy - canonical source is specs/wire/peac-receipt.0.1.schema.json",
+  "title": "PEAC Receipt Schema (Documentation Reference)",
+  "description": "This is a reference stub. See specs/wire/ for the canonical schema definitions.",
+  "$ref": "../../specs/wire/peac-receipt.0.1.schema.json"
+}

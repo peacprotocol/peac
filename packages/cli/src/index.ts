@@ -6,7 +6,7 @@
 
 import { Command } from 'commander';
 import { verifyReceipt } from '@peac/protocol';
-import { parseDiscovery, fetchDiscovery } from '@peac/protocol';
+import { parseIssuerConfig, fetchIssuerConfig } from '@peac/protocol';
 import { decode } from '@peac/crypto';
 import { PEACReceiptClaims } from '@peac/schema';
 import * as fs from 'fs';
@@ -76,49 +76,54 @@ program
   });
 
 /**
- * peac validate-discovery <path|url>
+ * peac validate-issuer <path|url>
+ *
+ * Validates a PEAC issuer configuration (/.well-known/peac-issuer.json)
  */
 program
-  .command('validate-discovery')
-  .description('Validate a PEAC discovery manifest')
-  .argument('<input>', 'Path to peac.txt file or issuer URL')
+  .command('validate-issuer')
+  .description('Validate a PEAC issuer configuration')
+  .argument('<input>', 'Path to peac-issuer.json file or issuer URL')
   .action(async (input: string) => {
     try {
-      console.log('Validating discovery manifest...\n');
+      console.log('Validating issuer configuration...\n');
 
-      let discovery;
+      let config;
       if (input.startsWith('http://') || input.startsWith('https://')) {
         // Fetch from URL
         console.log(`Fetching from ${input}...`);
-        discovery = await fetchDiscovery(input);
+        config = await fetchIssuerConfig(input);
       } else {
         // Read from file
         const text = fs.readFileSync(input, 'utf-8');
-        discovery = parseDiscovery(text);
+        config = parseIssuerConfig(text);
       }
 
-      console.log('Discovery manifest is valid!\n');
+      console.log('Issuer configuration is valid!\n');
 
-      console.log('Discovery Information:');
-      console.log(`   Version:  ${discovery.version}`);
-      console.log(`   Issuer:   ${discovery.issuer}`);
-      console.log(`   Verify:   ${discovery.verify}`);
-      console.log(`   JWKS:     ${discovery.jwks}`);
+      console.log('Issuer Configuration:');
+      console.log(`   Version:   ${config.version}`);
+      console.log(`   Issuer:    ${config.issuer}`);
+      console.log(`   JWKS URI:  ${config.jwks_uri}`);
 
-      if (discovery.payments && discovery.payments.length > 0) {
-        console.log(`   Payments: ${discovery.payments.map((p) => p.rail).join(', ')}`);
+      if (config.verify_endpoint) {
+        console.log(`   Verify:    ${config.verify_endpoint}`);
       }
 
-      if (discovery.aipref) {
-        console.log(`   AIPREF:   ${discovery.aipref}`);
+      if (config.receipt_versions && config.receipt_versions.length > 0) {
+        console.log(`   Receipts:  ${config.receipt_versions.join(', ')}`);
       }
 
-      if (discovery.slos) {
-        console.log(`   SLOs:     ${discovery.slos}`);
+      if (config.algorithms && config.algorithms.length > 0) {
+        console.log(`   Algorithms: ${config.algorithms.join(', ')}`);
       }
 
-      if (discovery.security) {
-        console.log(`   Security: ${discovery.security}`);
+      if (config.payment_rails && config.payment_rails.length > 0) {
+        console.log(`   Rails:     ${config.payment_rails.join(', ')}`);
+      }
+
+      if (config.security_contact) {
+        console.log(`   Security:  ${config.security_contact}`);
       }
 
       process.exit(0);

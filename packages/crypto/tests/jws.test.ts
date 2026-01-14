@@ -98,7 +98,7 @@ describe('Ed25519 JWS', () => {
 
   it('should decode JWS without verification', () => {
     const jws =
-      'eyJ0eXAiOiJwZWFjLnJlY2VpcHQvMC45IiwiYWxnIjoiRWREU0EiLCJraWQiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXBwLmV4YW1wbGUuY29tIiwiaWF0IjoxNzM2OTM0NjAwLCJyaWQiOiIwMTkzYzRkMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDAiLCJhbXQiOjk5OTksImN1ciI6IlVTRCIsInBheW1lbnQiOnsic2NoZW1lIjoic3RyaXBlIiwicmVmZXJlbmNlIjoiY3NfMTIzNDU2IiwiYW1vdW50Ijo5OTk5LCJjdXJyZW5jeSI6IlVTRCJ9fQ.dGVzdC1zaWduYXR1cmU';
+      'eyJ0eXAiOiJwZWFjLXJlY2VpcHQvMC4xIiwiYWxnIjoiRWREU0EiLCJraWQiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXBwLmV4YW1wbGUuY29tIiwiaWF0IjoxNzM2OTM0NjAwLCJyaWQiOiIwMTkzYzRkMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDAiLCJhbXQiOjk5OTksImN1ciI6IlVTRCIsInBheW1lbnQiOnsic2NoZW1lIjoic3RyaXBlIiwicmVmZXJlbmNlIjoiY3NfMTIzNDU2IiwiYW1vdW50Ijo5OTk5LCJjdXJyZW5jeSI6IlVTRCJ9fQ.dGVzdC1zaWduYXR1cmU';
 
     const decoded = decode(jws);
 
@@ -144,7 +144,7 @@ describe('Ed25519 JWS', () => {
     const payloadB64 = Buffer.from(JSON.stringify(testPayload)).toString('base64url');
     const jws = `${headerB64}.${payloadB64}.fake-signature`;
 
-    await expect(verify(jws, publicKey)).rejects.toThrow('Invalid typ: expected peac.receipt/0.9');
+    await expect(verify(jws, publicKey)).rejects.toThrow('Invalid typ: expected peac-receipt/0.1');
   });
 
   it('should reject wrong alg in header', async () => {

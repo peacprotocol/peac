@@ -96,7 +96,7 @@ describe('verifyBundle', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.version).toBe('peac.verification-report/0.1');
+      expect(result.value.version).toBe('peac-verification-report/0.1');
       expect(result.value.summary.total_receipts).toBe(2);
       expect(result.value.summary.valid).toBe(2);
       expect(result.value.summary.invalid).toBe(0);
@@ -109,7 +109,7 @@ describe('verifyBundle', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.report_hash).toBeDefined();
-      expect(result.value.report_hash.length).toBe(64); // SHA-256 hex
+      expect(result.value.report_hash.length).toBe(71); // sha256:<64 hex>
     }
   });
 
@@ -147,7 +147,7 @@ describe('verifyBundle', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.bundle_content_hash).toBeDefined();
-      expect(result.value.bundle_content_hash.length).toBe(64);
+      expect(result.value.bundle_content_hash.length).toBe(71); // sha256:<64 hex>
     }
   });
 });

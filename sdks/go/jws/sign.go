@@ -8,8 +8,8 @@ import (
 )
 
 // DefaultReceiptTyp is the default JWS type header for PEAC receipts.
-// This follows the wire format version and is stable within the v0.9.x series.
-const DefaultReceiptTyp = "peac.receipt/0.9"
+// Normalized in v0.10.0 to peac-<artifact>/<major>.<minor> pattern.
+const DefaultReceiptTyp = "peac-receipt/0.1"
 
 // SigningKey represents an Ed25519 private key for signing JWS.
 // This type clearly indicates a key used for signing (private key),
@@ -67,7 +67,7 @@ func (k *SigningKey) PublicKey() ed25519.PublicKey {
 }
 
 // Sign creates a JWS compact serialization for the given payload.
-// The typ header is set to DefaultReceiptTyp ("peac.receipt/0.9").
+// The typ header is set to DefaultReceiptTyp ("peac-receipt/0.1").
 func (k *SigningKey) Sign(payload []byte) (string, error) {
 	return k.SignWithType(payload, DefaultReceiptTyp)
 }

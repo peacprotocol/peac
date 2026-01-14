@@ -30,11 +30,14 @@ import type {
 } from './dispute-bundle-types.js';
 import { VERIFICATION_REPORT_VERSION } from './dispute-bundle-types.js';
 
-/** Compute SHA-256 hash of data (hex-encoded, lowercase) */
+/**
+ * Compute SHA-256 hash of data with self-describing format.
+ * Returns `sha256:<64 lowercase hex chars>` format.
+ */
 function sha256Hex(data: string | Buffer): string {
   const hash = createHash('sha256');
   hash.update(data);
-  return hash.digest('hex');
+  return `sha256:${hash.digest('hex')}`;
 }
 
 /** Decode base64url to Buffer */

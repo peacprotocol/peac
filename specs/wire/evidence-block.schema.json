@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/wire/0.9/evidence-block.schema.json",
+  "$id": "https://peacprotocol.org/schemas/wire/0.1/evidence-block.schema.json",
   "title": "PEAC Evidence Block",
   "description": "Evidence block containing payment and attestation evidence",
 

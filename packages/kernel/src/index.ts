@@ -26,10 +26,18 @@ export {
   WIRE_VERSION,
   ALGORITHMS,
   HEADERS,
-  DISCOVERY,
+  POLICY,
+  ISSUER_CONFIG,
+  DISCOVERY, // @deprecated - use POLICY instead
   JWKS,
   RECEIPT,
   LIMITS,
+  BUNDLE_VERSION,
+  VERIFICATION_REPORT_VERSION,
+  HASH,
+  parseHash,
+  formatHash,
+  isValidHash,
   CONSTANTS,
 } from './constants.js';
 

@@ -152,4 +152,19 @@ else
   echo "OK"
 fi
 
+echo "== forbid legacy wire format IDs (v0.10.0 break) =="
+# These old format IDs were replaced in v0.10.0 wire normalization
+# peac.receipt/0.9 -> peac-receipt/0.1
+# peac.dispute-bundle/0.1 -> peac-bundle/0.1
+# wire/0.9/ -> wire/0.1/
+# Allow in: CHANGELOG, guard script, migration docs, versioning doctrine (historical), deprecated packages, tests pending migration, Go SDK
+LEGACY_WIRE_ALLOW='^(CHANGELOG\.md|scripts/(guard\.sh|lint-schemas\.mjs)|docs/(migration/|specs/VERSIONING\.md)|packages/(core|sdk-js)/|packages/(crypto|protocol|schema)/(tests|openapi|src/(index|types|envelope))|tests/(golden|vectors)/|specs/(kernel/README|conformance/fixtures/bundle/invalid)|sdks/go/|examples/x402-node-server/)'
+if git grep -nE 'peac\.receipt/0\.9|peac\.dispute-bundle|wire/0\.9/|PEAC-RECEIPT-SCHEMA-v0\.9' -- ':!node_modules' ':!archive/**' \
+  | grep -vE "$LEGACY_WIRE_ALLOW" | grep .; then
+  echo "FAIL: Found legacy wire format IDs - use normalized 0.1 versions"
+  bad=1
+else
+  echo "OK"
+fi
+
 exit $bad

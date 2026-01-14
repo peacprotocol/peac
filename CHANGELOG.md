@@ -7,6 +7,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-01-14
+
+### Wire Format Normalization
+
+This release normalizes all wire format identifiers to the `peac-<artifact>/<major>.<minor>` pattern. Repo version (0.10.0) is now decoupled from wire format versions (0.1).
+
+**Wire Format Changes:**
+
+| Artifact            | Old Format                     | New Format                     |
+| ------------------- | ------------------------------ | ------------------------------ |
+| Receipt JWS `typ`   | `peac.receipt/0.9`             | `peac-receipt/0.1`             |
+| Policy document     | `version: "0.9"`               | `version: "peac-policy/0.1"`   |
+| Dispute bundle      | `peac.dispute-bundle/0.1`      | `peac-bundle/0.1`              |
+| Verification report | `peac.verification-report/0.1` | `peac-verification-report/0.1` |
+| Hash values         | `<64 hex chars>`               | `sha256:<64 hex chars>`        |
+| Schema base URI     | `wire/0.9/`                    | `wire/0.1/`                    |
+
+**Versioning Doctrine:**
+
+- **Repo version** (0.10.0): Governs package releases, tooling, and APIs
+- **Wire version** (0.1): Governs interoperability of signed artifacts and schemas
+- Wire version only increments when schema or semantics change
+- See `docs/specs/VERSIONING.md` for full versioning doctrine
+
+### Added
+
+- **Versioning doctrine** (`docs/specs/VERSIONING.md`)
+  - Canonical documentation of wire vs repo versioning
+  - Artifact identifier patterns and canonical constants
+  - Compatibility guarantees within and across wire versions
+- **Hash utilities** (`@peac/kernel`)
+  - `parseHash()`: Parse `sha256:<hex>` into structured `{ alg, hex }`
+  - `formatHash()`: Format hex string as `sha256:<hex>`
+  - `isValidHash()`: Validate `sha256:<64 lowercase hex>` format
+  - `HASH.pattern`: Regex for strict hash validation
+- **Bundle `kind` and `refs` fields** - Extensible bundle types
+  - `kind`: `'dispute' | 'audit' | 'archive'` (required in manifest, default: `'dispute'`)
+  - `refs`: Array of `{ type, id }` references linking to external entities
+  - Enables future bundle types beyond dispute bundles
+- **Self-describing hash format** - All hashes now include algorithm prefix
+  - Format: `sha256:<64 lowercase hex characters>`
+  - Strict validation: lowercase only, exact length
+  - Eliminates ambiguity about hash algorithm
+- **Canonical constants** (`@peac/kernel`)
+  - `BUNDLE_VERSION`: `'peac-bundle/0.1'`
+  - `VERIFICATION_REPORT_VERSION`: `'peac-verification-report/0.1'`
+  - All packages should import from kernel, not use string literals
+- **Guard patterns** for legacy wire IDs
+  - CI will fail if old format IDs appear in code
+  - Patterns: `peac.receipt/0.9`, `peac.dispute-bundle`, `wire/0.9/`
+- **Conformance vectors** - Updated for new wire format
+  - `specs/conformance/fixtures/bundle/determinism.json` - Determinism test specification
+  - `specs/conformance/fixtures/bundle/valid.json` - Valid bundle vectors
+  - All golden vectors regenerated with new format
+- **README records-first positioning**
+  - Tagline: "Verifiable interaction records for automated systems"
+  - Quick glossary: Record (concept) vs Receipt (serialization)
+  - Non-payment-first quickstart example
+  - Status labels (Implemented/Specified/Planned) on all mappings
+
+### Changed
+
+- **Wire format identifiers** - Normalized to kebab-case pattern
+  - Uses `peac-<artifact>/<major>.<minor>` consistently
+  - Major version changes require parser updates (breaking)
+  - Minor version changes are backward compatible
+- **Hash encoding** - Changed from raw hex to prefixed format
+  - `content_hash`: `sha256:<hex>` in bundle manifest
+  - `report_hash`: `sha256:<hex>` in verification report
+  - `receipt_hash`: `sha256:<hex>` in manifest receipts
+- **JWS header `typ`** - Changed from `peac.receipt/0.9` to `peac-receipt/0.1`
+- **Bundle version** - Changed from `peac.dispute-bundle/0.1` to `peac-bundle/0.1`
+- **Verification report version** - Changed to `peac-verification-report/0.1`
+- **Schema base URI** - Changed from `wire/0.9/` to `wire/0.1/`
+- **Schema files renamed** - `peac.receipt.0.9.schema.json` to `peac-receipt.0.1.schema.json`
+- **Constants** - Updated in `@peac/kernel` and `specs/kernel/constants.json`
+  - `WIRE_TYPE`: `'peac-receipt/0.1'`
+  - `WIRE_VERSION`: `'0.1'`
+  - `POLICY.manifestVersion`: `'peac-policy/0.1'`
+  - `BUNDLE_VERSION`: `'peac-bundle/0.1'`
+  - `VERIFICATION_REPORT_VERSION`: `'peac-verification-report/0.1'`
+
+### Removed
+
+- Legacy backward compatibility code for old wire format
+- `LEGACY_WIRE_TYP` and `hashEquals()` functions
+- Old wire schema file (`peac.receipt.0.9.schema.json`)
+
+### Deprecated
+
+- `docs/specs/PEAC-RECEIPT-SCHEMA-v0.9.json` - Now a stub redirect to v0.1 schema
+
+### Documentation
+
+- **VERSIONING.md** - Wire vs repo versioning doctrine
+- **SPEC_INDEX.md** - Link to versioning doctrine
+- **ARCHITECTURE.md** - Updated wire format table and version references
+- **README.md** - Records-first positioning with glossary
+- **Conformance fixtures** - Updated with new format specifications
+
 ## [0.9.31] - 2026-01-13
 
 ### Added

@@ -6,10 +6,15 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 
 ### Core Protocol
 
-- **[Receipt Schema (JSON)](specs/PEAC-RECEIPT-SCHEMA-v0.9.json)** - JSON Schema for PEAC receipts (v0.9.x wire format)
+- **[Receipt Schema (JSON)](specs/PEAC-RECEIPT-SCHEMA-v0.1.json)** - JSON Schema for PEAC receipts (peac-receipt/0.1 wire format)
 - **[Protocol Behavior](specs/PROTOCOL-BEHAVIOR.md)** - Issuance, verification, and discovery flows
 - **[Errors](specs/ERRORS.md)** - Error codes, HTTP status mappings, and retry semantics
 - **[Registries](specs/REGISTRIES.md)** - Payment rails, control engines, and transport methods
+
+### Discovery
+
+- **[Policy Document (PEAC-TXT)](specs/PEAC-TXT.md)** - `/.well-known/peac.txt` access terms for agents
+- **[Issuer Configuration (PEAC-ISSUER)](specs/PEAC-ISSUER.md)** - `/.well-known/peac-issuer.json` JWKS discovery
 
 ### Wire Format Profiles
 
@@ -28,4 +33,6 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 
 ## Versioning
 
-Current wire format: `peac.receipt/0.9`
+- **[Versioning Doctrine](specs/VERSIONING.md)** - Wire version vs repo version, artifact identifiers, compatibility guarantees
+
+Current wire format: `peac-receipt/0.1`

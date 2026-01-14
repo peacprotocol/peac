@@ -188,7 +188,7 @@ describe('readDisputeBundle', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.manifest.version).toBe('peac.dispute-bundle/0.1');
+      expect(result.value.manifest.version).toBe('peac-bundle/0.1');
       expect(result.value.manifest.dispute_ref).toBe('01ARZ3NDEKTSV4RRFFQ69G5FAV');
       expect(result.value.receipts.size).toBe(2);
       expect(result.value.keys.keys.length).toBe(2);
@@ -201,7 +201,7 @@ describe('readDisputeBundle', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.manifest.content_hash).toBeDefined();
-      expect(result.value.manifest.content_hash.length).toBe(64); // SHA-256 hex
+      expect(result.value.manifest.content_hash.length).toBe(71); // sha256:<64 hex>
     }
   });
 
@@ -249,7 +249,7 @@ describe('verifyBundleIntegrity', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.manifest.version).toBe('peac.dispute-bundle/0.1');
+      expect(result.value.manifest.version).toBe('peac-bundle/0.1');
     }
   });
 });

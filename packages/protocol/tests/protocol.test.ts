@@ -37,7 +37,7 @@ describe('PEAC Protocol', () => {
       // Decode and validate
       const decoded = decode<PEACReceiptClaims>(jws);
 
-      expect(decoded.header.typ).toBe('peac.receipt/0.9');
+      expect(decoded.header.typ).toBe('peac-receipt/0.1');
       expect(decoded.header.alg).toBe('EdDSA');
       expect(decoded.header.kid).toBe('2025-01-15T10:30:00Z');
 

@@ -166,7 +166,7 @@ PEAC receipts with x402 evidence:
 
 ```json
 {
-  "typ": "peac.receipt/0.9",
+  "typ": "peac-receipt/0.1",
   "iss": "https://your-api.com",
   "aud": "https://your-api.com/resource",
   "iat": 1703001234,

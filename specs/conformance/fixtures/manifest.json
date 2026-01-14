@@ -185,5 +185,23 @@
       "version": "0.9.30",
       "fixture_count": 5
     }
+  },
+  "discovery": {
+    "issuer-config.json": {
+      "description": "PEAC issuer configuration parsing and validation vectors (v0.10.0+)",
+      "version": "0.10.0",
+      "format": "peac-issuer/0.1",
+      "location": "/.well-known/peac-issuer.json",
+      "valid_count": 4,
+      "invalid_count": 7
+    },
+    "policy-manifest.json": {
+      "description": "PEAC policy manifest parsing and validation vectors (v0.10.0+)",
+      "version": "0.10.0",
+      "format": "peac-policy/0.1",
+      "location": "/.well-known/peac.txt",
+      "valid_count": 9,
+      "invalid_count": 11
+    }
   }
 }

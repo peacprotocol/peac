@@ -1,0 +1,235 @@
+{
+  "$comment": "PEAC policy manifest conformance vectors (v0.10.0+)",
+  "version": "0.10.0",
+  "spec": "docs/specs/PEAC-TXT.md",
+  "format": "peac-policy/0.1",
+  "location": "/.well-known/peac.txt",
+  "fallback_location": "/peac.txt",
+  "fixtures": {
+    "valid": [
+      {
+        "id": "policy-001",
+        "name": "minimal-open",
+        "description": "Minimal open access policy",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: open",
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "open"
+        }
+      },
+      {
+        "id": "policy-002",
+        "name": "minimal-conditional",
+        "description": "Minimal conditional access policy",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: conditional",
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "conditional"
+        }
+      },
+      {
+        "id": "policy-003",
+        "name": "open-with-purposes",
+        "description": "Open policy with allowed purposes",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: open\npurposes: [crawl, index, search]",
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "open",
+          "purposes": ["crawl", "index", "search"]
+        }
+      },
+      {
+        "id": "policy-004",
+        "name": "conditional-full",
+        "description": "Conditional policy with all fields",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: conditional\npurposes: [inference, ai_input]\nreceipts: required\nrate_limit: 100/hour\nprice: 10\ncurrency: USD",
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "conditional",
+          "purposes": ["inference", "ai_input"],
+          "receipts": "required",
+          "rate_limit": "100/hour",
+          "price": 10,
+          "currency": "USD"
+        }
+      },
+      {
+        "id": "policy-005",
+        "name": "json-format",
+        "description": "Policy in JSON format",
+        "input_json": {
+          "version": "peac-policy/0.1",
+          "usage": "open",
+          "purposes": ["crawl", "index"]
+        },
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "open",
+          "purposes": ["crawl", "index"]
+        }
+      },
+      {
+        "id": "policy-006",
+        "name": "yaml-with-comments",
+        "description": "YAML with comments (should be ignored)",
+        "input_yaml": "# Site policy\nversion: \"peac-policy/0.1\"\n# Allow open access\nusage: open",
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "open"
+        }
+      },
+      {
+        "id": "policy-007",
+        "name": "yaml-quoted-strings",
+        "description": "YAML with quoted strings",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: 'open'\ncontact: \"support@example.com\"",
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "open",
+          "contact": "support@example.com"
+        }
+      },
+      {
+        "id": "policy-008",
+        "name": "yaml-single-doc-separator",
+        "description": "YAML with single document separator",
+        "input_yaml": "---\nversion: \"peac-policy/0.1\"\nusage: open",
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "open"
+        }
+      },
+      {
+        "id": "policy-009",
+        "name": "unknown-fields-ignored",
+        "description": "Unknown fields are ignored for forward compatibility",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: open\nfuture_field: some_value",
+        "expected": {
+          "valid": true,
+          "version": "peac-policy/0.1",
+          "usage": "open"
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "id": "policy-err-001",
+        "name": "missing-version",
+        "description": "Missing required version field",
+        "input_yaml": "usage: open",
+        "expected": {
+          "valid": false,
+          "error": "Missing required field: version"
+        }
+      },
+      {
+        "id": "policy-err-002",
+        "name": "missing-usage",
+        "description": "Missing required usage field",
+        "input_yaml": "version: \"peac-policy/0.1\"",
+        "expected": {
+          "valid": false,
+          "error_pattern": "Missing or invalid field: usage"
+        }
+      },
+      {
+        "id": "policy-err-003",
+        "name": "invalid-usage",
+        "description": "Invalid usage value",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: invalid",
+        "expected": {
+          "valid": false,
+          "error_pattern": "Missing or invalid field: usage"
+        }
+      },
+      {
+        "id": "policy-err-004",
+        "name": "yaml-anchors",
+        "description": "YAML anchors are not allowed",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: open\nanchor: &ref value",
+        "expected": {
+          "valid": false,
+          "error": "YAML anchors and aliases are not allowed"
+        }
+      },
+      {
+        "id": "policy-err-005",
+        "name": "yaml-aliases",
+        "description": "YAML aliases are not allowed",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: open\nalias: *ref",
+        "expected": {
+          "valid": false,
+          "error": "YAML anchors and aliases are not allowed"
+        }
+      },
+      {
+        "id": "policy-err-006",
+        "name": "yaml-merge-keys",
+        "description": "YAML merge keys are not allowed",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: open\n<<: *ref",
+        "expected": {
+          "valid": false,
+          "error": "YAML merge keys are not allowed"
+        }
+      },
+      {
+        "id": "policy-err-007",
+        "name": "yaml-custom-tags",
+        "description": "YAML custom tags are not allowed",
+        "input_yaml": "version: \"peac-policy/0.1\"\nusage: open\ncustom: !tag value",
+        "expected": {
+          "valid": false,
+          "error": "YAML custom tags are not allowed"
+        }
+      },
+      {
+        "id": "policy-err-008",
+        "name": "yaml-multi-document",
+        "description": "Multi-document YAML is not allowed",
+        "input_yaml": "---\nversion: \"peac-policy/0.1\"\nusage: open\n---\nversion: \"peac-policy/0.1\"\nusage: conditional",
+        "expected": {
+          "valid": false,
+          "error": "Multi-document YAML is not allowed"
+        }
+      },
+      {
+        "id": "policy-err-009",
+        "name": "bare-version-number",
+        "description": "Version without peac-policy/ prefix is rejected",
+        "input_yaml": "version: \"0.1\"\nusage: open",
+        "expected": {
+          "valid": false,
+          "error_pattern": "Invalid version format.*Must start with \"peac-policy/\""
+        }
+      },
+      {
+        "id": "policy-err-010",
+        "name": "wrong-namespace-prefix",
+        "description": "Version with wrong namespace prefix is rejected",
+        "input_yaml": "version: \"peac.policy/0.1\"\nusage: open",
+        "expected": {
+          "valid": false,
+          "error_pattern": "Invalid version format.*Must start with \"peac-policy/\""
+        }
+      },
+      {
+        "id": "policy-err-011",
+        "name": "legacy-version-format",
+        "description": "Legacy version format (0.9) is rejected",
+        "input_yaml": "version: \"0.9\"\nusage: open",
+        "expected": {
+          "valid": false,
+          "error_pattern": "Invalid version format.*Must start with \"peac-policy/\""
+        }
+      }
+    ]
+  }
+}

@@ -41,6 +41,13 @@ const { sign, canonicalize } = cryptoModule;
 const { generateKeypairFromSeed } = testkitModule;
 const { createDisputeBundle, verifyBundle } = auditModule;
 
+/**
+ * Compute SHA-256 hash with sha256:<hex> prefix format.
+ */
+function sha256Hex(data: Buffer | string): string {
+  return `sha256:${createHash('sha256').update(data).digest('hex')}`;
+}
+
 // Type definitions
 interface BundleError {
   code: string;
@@ -373,7 +380,7 @@ async function generatePathTraversalBundle(
 
   // Create manifest content
   const manifest = {
-    version: 'peac.dispute-bundle/0.1',
+    version: 'peac-bundle/0.1',
     bundle_id: '01HQXG0000PATHTRAVERSE',
     dispute_ref: '01HQXG0000DISPUTE00005',
     created_by: 'https://attacker.example.com',
@@ -516,8 +523,8 @@ async function generateDuplicateReceiptBundle(
   const keysJson = Buffer.from(JSON.stringify(jwks, null, 2));
 
   // Compute file hashes
-  const receiptsHash = createHash('sha256').update(receiptsNdjson).digest('hex');
-  const keysHash = createHash('sha256').update(keysJson).digest('hex');
+  const receiptsHash = sha256Hex(receiptsNdjson);
+  const keysHash = sha256Hex(keysJson);
 
   // Build the ZIP manually to bypass createDisputeBundle's validation
   // Disable compression to ensure byte-identical output across platforms
@@ -527,7 +534,7 @@ async function generateDuplicateReceiptBundle(
 
   // Create manifest in the correct format WITHOUT content_hash first
   const manifestWithoutHash = {
-    version: 'peac.dispute-bundle/0.1',
+    version: 'peac-bundle/0.1',
     bundle_id: '01HQXG0000DUPETEST001',
     dispute_ref: '01HQXG0000DISPUTE00006',
     created_by: 'https://auditor.example.com',
@@ -537,12 +544,12 @@ async function generateDuplicateReceiptBundle(
       {
         receipt_id: 'duplicate-receipt-id',
         issued_at: FIXED_ISSUED_AT_1,
-        receipt_hash: createHash('sha256').update(receipt1).digest('hex'),
+        receipt_hash: sha256Hex(receipt1),
       },
       {
         receipt_id: 'duplicate-receipt-id', // Same receipt_id!
         issued_at: FIXED_ISSUED_AT_2,
-        receipt_hash: createHash('sha256').update(receipt2).digest('hex'),
+        receipt_hash: sha256Hex(receipt2),
       },
     ],
     keys: [{ kid: 'key-001', alg: 'EdDSA' }],
@@ -553,7 +560,7 @@ async function generateDuplicateReceiptBundle(
   };
 
   // Compute content_hash = SHA-256 of JCS(manifest without content_hash)
-  const contentHash = createHash('sha256').update(canonicalize(manifestWithoutHash)).digest('hex');
+  const contentHash = sha256Hex(canonicalize(manifestWithoutHash));
 
   const manifest = {
     ...manifestWithoutHash,
@@ -626,7 +633,7 @@ async function generateSizeExceededBundle(): Promise<{ zip: Buffer; expectedErro
 
   // Create valid manifest content (small)
   const manifest = {
-    version: 'peac.dispute-bundle/0.1',
+    version: 'peac-bundle/0.1',
     bundle_id: '01HQXG0000SIZEEXCEED1',
     dispute_ref: '01HQXG0000DISPUTE00007',
     created_by: 'https://auditor.example.com',

@@ -107,10 +107,10 @@ Each fixture includes metadata comments:
 
 All fixtures are validated against:
 
-- Root: `specs/wire/peac.receipt.0.9.schema.json`
+- Root: `specs/wire/peac-receipt-0.1.schema.json`
 - Components: `specs/wire/*.schema.json`
 
-Schema version: `peac.receipt/0.9` (wire format frozen until v1.0)
+Schema version: `peac-receipt/0.1` (wire format frozen until v1.0)
 
 ## Running Conformance Tests
 

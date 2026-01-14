@@ -7,7 +7,7 @@
       "name": "minimal-bundle",
       "description": "Minimal valid bundle with single receipt and key",
       "manifest": {
-        "version": "peac.dispute-bundle/0.1",
+        "version": "peac-bundle/0.1",
         "bundle_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "dispute_ref": "01ARZ3NDEKTSV4RRFFQ69G5FBW",
         "created_by": "https://auditor.example.com",
@@ -59,7 +59,7 @@
       "name": "full-bundle-with-policy-and-signature",
       "description": "Full bundle with multiple receipts, keys, policy, and bundle.sig",
       "manifest": {
-        "version": "peac.dispute-bundle/0.1",
+        "version": "peac-bundle/0.1",
         "bundle_id": "01ARZ3NDEKTSV4RRFFQ69G5FCX",
         "dispute_ref": "01ARZ3NDEKTSV4RRFFQ69G5FDY",
         "created_by": "https://enterprise.example.com",

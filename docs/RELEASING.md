@@ -109,7 +109,7 @@ PEAC Protocol follows [Semantic Versioning](https://semver.org/):
 
 ### Wire Protocol Compatibility
 
-The wire format version in receipts (`typ: "peac.receipt/0.9"`) is independent of package versions:
+The wire format version in receipts (`typ: "peac-receipt/0.1"`) is independent of package versions:
 
 - Wire format changes require explicit version bump in the `typ` header
 - Multiple package versions may share the same wire format version

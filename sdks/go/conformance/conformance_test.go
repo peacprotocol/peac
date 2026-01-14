@@ -62,7 +62,7 @@ func TestHeaderValidation(t *testing.T) {
 			name: "valid EdDSA header",
 			header: jws.Header{
 				Algorithm: "EdDSA",
-				Type:      "peac.receipt/0.9",
+				Type:      "peac-receipt/0.1",
 				KeyID:     "test-key",
 			},
 			wantErr: false,
