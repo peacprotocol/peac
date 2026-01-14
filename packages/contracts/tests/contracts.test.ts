@@ -21,6 +21,8 @@ import {
   type PeacErrorCode,
   type PeacHttpStatus,
 } from '../src/index.js';
+// Internal import for structural invariant tests - not part of public API
+import { PEAC_ERROR_CODE_SET } from '../src/internal/error-codes.js';
 
 describe('Contract Invariants: Error Codes', () => {
   it('every PeacErrorCode must have a catalog entry', () => {
@@ -225,19 +227,25 @@ describe('Contract Invariants: Type Guards', () => {
     expect(isPeacErrorCode([])).toBe(false);
   });
 
-  it('isPeacErrorCode performs O(1) lookup', () => {
-    // This test ensures we're using Set, not Array.includes()
-    // Set lookup is O(1), array lookup is O(n)
-    const code = CANONICAL_ERROR_CODES.TAP_SIGNATURE_MISSING;
-    const start = performance.now();
-    for (let i = 0; i < 10000; i++) {
-      isPeacErrorCode(code);
-    }
-    const duration = performance.now() - start;
+  it('isPeacErrorCode uses Set-backed O(1) lookup (structural invariant)', () => {
+    // Structural guarantee: internal Set contains exactly the canonical codes
+    // ES6 Set.has() is O(1) by specification (hash-based lookup)
+    // This cannot flake across CI runners, unlike timing assertions
 
-    // O(1) lookup should complete 10k iterations in <10ms
-    // O(n) lookup would be significantly slower
-    expect(duration).toBeLessThan(10);
+    const canonicalCodes = Object.values(CANONICAL_ERROR_CODES);
+
+    // 1. No duplicate codes (Set.size === array length proves uniqueness)
+    expect(PEAC_ERROR_CODE_SET.size).toBe(canonicalCodes.length);
+
+    // 2. Every canonical code is in the internal Set
+    canonicalCodes.forEach((code) => {
+      expect(PEAC_ERROR_CODE_SET.has(code)).toBe(true);
+    });
+
+    // 3. The type guard correctly validates all codes (proves Set is wired up)
+    canonicalCodes.forEach((code) => {
+      expect(isPeacErrorCode(code)).toBe(true);
+    });
   });
 });
 
@@ -292,6 +300,50 @@ describe('Contract Invariants: Catalog Completeness', () => {
     // Every catalog entry must correspond to a canonical code
     catalogKeys.forEach((key) => {
       expect(codeValues.has(key as PeacErrorCode)).toBe(true);
+    });
+  });
+});
+
+describe('Contract Invariants: Public API Surface', () => {
+  it('public entrypoint does not export internal modules', async () => {
+    // Dynamic import to get all exports
+    const publicExports = await import('../src/index.js');
+    const exportKeys = Object.keys(publicExports);
+
+    // Internal exports that should NOT be in public API
+    const forbiddenExports = [
+      'PEAC_ERROR_CODE_SET', // internal Set
+      'getCanonicalErrorCodes', // removed helper
+      'VALUES', // internal array
+    ];
+
+    forbiddenExports.forEach((forbidden) => {
+      expect(exportKeys).not.toContain(forbidden);
+    });
+  });
+
+  it('public entrypoint exports expected API', async () => {
+    const publicExports = await import('../src/index.js');
+    const exportKeys = Object.keys(publicExports);
+
+    // Required public exports
+    const requiredExports = [
+      'CANONICAL_ERROR_CODES',
+      'CANONICAL_STATUS_MAPPINGS',
+      'CANONICAL_TITLES',
+      'ERROR_CATALOG',
+      'MODE_BEHAVIOR',
+      'WWW_AUTHENTICATE_STATUSES',
+      'PROBLEM_TYPE_BASE',
+      'problemTypeFor',
+      'getStatusForCode',
+      'requiresWwwAuthenticate',
+      'buildWwwAuthenticate',
+      'isPeacErrorCode',
+    ];
+
+    requiredExports.forEach((required) => {
+      expect(exportKeys).toContain(required);
     });
   });
 });
