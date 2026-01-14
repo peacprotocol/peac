@@ -72,8 +72,8 @@
       "name": "verification-report-format",
       "description": "Expected report structure for cross-language parity",
       "report_structure": {
-        "version": "peac.verification-report/0.1",
-        "bundle_content_hash": "string (64 hex chars)",
+        "version": "peac-verification-report/0.1",
+        "bundle_content_hash": "string (sha256:<64 hex chars>)",
         "summary": {
           "total_receipts": "number",
           "valid": "number",
@@ -101,7 +101,7 @@
           "issues": "string[]",
           "recommendation": "'valid' | 'invalid' | 'needs_review'"
         },
-        "report_hash": "string (64 hex chars)"
+        "report_hash": "string (sha256:<64 hex chars>)"
       }
     }
   ]

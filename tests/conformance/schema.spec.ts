@@ -82,7 +82,7 @@ describe('Schema Conformance', () => {
     manifest = loadManifest();
 
     // Get the compiled validator for the root schema
-    const rootSchemaId = 'https://peacprotocol.org/schemas/wire/0.9/peac.receipt.0.9.schema.json';
+    const rootSchemaId = 'https://peacprotocol.org/schemas/wire/0.1/peac-receipt.0.1.schema.json';
     validate = ajv.getSchema(rootSchemaId)!;
 
     if (!validate) {

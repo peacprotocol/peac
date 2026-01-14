@@ -1,0 +1,178 @@
+{
+  "$comment": "PEAC issuer configuration conformance vectors (v0.10.0+)",
+  "version": "0.10.0",
+  "spec": "docs/specs/PEAC-ISSUER.md",
+  "format": "peac-issuer/0.1",
+  "location": "/.well-known/peac-issuer.json",
+  "fixtures": {
+    "valid": [
+      {
+        "id": "issuer-001",
+        "name": "minimal-config",
+        "description": "Minimal valid issuer configuration with required fields only",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json"
+        },
+        "expected": {
+          "valid": true,
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json"
+        }
+      },
+      {
+        "id": "issuer-002",
+        "name": "full-config",
+        "description": "Complete issuer configuration with all optional fields",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json",
+          "verify_endpoint": "https://api.example.com/verify",
+          "receipt_versions": ["peac-receipt/0.1"],
+          "algorithms": ["EdDSA"],
+          "payment_rails": ["x402", "stripe"],
+          "security_contact": "security@example.com"
+        },
+        "expected": {
+          "valid": true,
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json",
+          "verify_endpoint": "https://api.example.com/verify",
+          "receipt_versions": ["peac-receipt/0.1"],
+          "algorithms": ["EdDSA"],
+          "payment_rails": ["x402", "stripe"],
+          "security_contact": "security@example.com"
+        }
+      },
+      {
+        "id": "issuer-003",
+        "name": "multiple-algorithms",
+        "description": "Issuer with multiple algorithms",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json",
+          "algorithms": ["EdDSA", "ES256"]
+        },
+        "expected": {
+          "valid": true,
+          "algorithms": ["EdDSA", "ES256"]
+        }
+      },
+      {
+        "id": "issuer-004",
+        "name": "unknown-fields-ignored",
+        "description": "Unknown fields are ignored for forward compatibility",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json",
+          "future_field": "some_value",
+          "another_unknown": 123
+        },
+        "expected": {
+          "valid": true,
+          "version": "peac-issuer/0.1"
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "id": "issuer-err-001",
+        "name": "missing-version",
+        "description": "Missing required version field",
+        "input": {
+          "issuer": "https://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json"
+        },
+        "expected": {
+          "valid": false,
+          "error": "Missing required field: version"
+        }
+      },
+      {
+        "id": "issuer-err-002",
+        "name": "missing-issuer",
+        "description": "Missing required issuer field",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json"
+        },
+        "expected": {
+          "valid": false,
+          "error": "Missing required field: issuer"
+        }
+      },
+      {
+        "id": "issuer-err-003",
+        "name": "missing-jwks-uri",
+        "description": "Missing required jwks_uri field",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com"
+        },
+        "expected": {
+          "valid": false,
+          "error": "Missing required field: jwks_uri"
+        }
+      },
+      {
+        "id": "issuer-err-004",
+        "name": "http-issuer",
+        "description": "Issuer must be HTTPS",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "http://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json"
+        },
+        "expected": {
+          "valid": false,
+          "error": "issuer must be an HTTPS URL"
+        }
+      },
+      {
+        "id": "issuer-err-005",
+        "name": "http-jwks-uri",
+        "description": "JWKS URI must be HTTPS",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com",
+          "jwks_uri": "http://api.example.com/.well-known/jwks.json"
+        },
+        "expected": {
+          "valid": false,
+          "error": "jwks_uri must be an HTTPS URL"
+        }
+      },
+      {
+        "id": "issuer-err-006",
+        "name": "http-verify-endpoint",
+        "description": "Verify endpoint must be HTTPS",
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "https://api.example.com",
+          "jwks_uri": "https://api.example.com/.well-known/jwks.json",
+          "verify_endpoint": "http://api.example.com/verify"
+        },
+        "expected": {
+          "valid": false,
+          "error": "verify_endpoint must be an HTTPS URL"
+        }
+      },
+      {
+        "id": "issuer-err-007",
+        "name": "invalid-json",
+        "description": "Invalid JSON input",
+        "input_raw": "not valid json",
+        "expected": {
+          "valid": false,
+          "error_pattern": "not valid JSON"
+        }
+      }
+    ]
+  }
+}
