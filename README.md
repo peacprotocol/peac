@@ -19,11 +19,11 @@ Works over HTTP/REST (headers), MCP/A2A, and streaming transports; verification 
 
 ## Quick glossary
 
-| Term               | Definition                                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| **Record**         | The portable interaction artifact (concept)                                                 |
-| **Receipt**        | The signed serialization of a record (JWS file / header value)                              |
-| **Dispute Bundle** | Portable export containing receipts + policy snapshot + deterministic verification report   |
+| Term               | Definition                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| **Record**         | The portable interaction artifact (concept)                                               |
+| **Receipt**        | The signed serialization of a record (JWS file / header value)                            |
+| **Dispute Bundle** | Portable export containing receipts + policy snapshot + deterministic verification report |
 
 Use **record(s)** when talking conceptually. Use **receipt(s)** when referring to the serialized file/header/JWS.
 
@@ -94,10 +94,10 @@ const { jws } = await issue({
   iss: 'https://api.example.com',
   aud: 'https://client.example.com',
   subject: 'https://api.example.com/inference',
-  amt: 1000,       // Amount in minor units (e.g., cents)
-  cur: 'USD',      // Currency code
-  rail: 'x402',    // Payment rail
-  reference: 'tx_abc123',  // Rail-specific reference
+  amt: 1000, // Amount in minor units (e.g., cents)
+  cur: 'USD', // Currency code
+  rail: 'x402', // Payment rail
+  reference: 'tx_abc123', // Rail-specific reference
   privateKey,
   kid: 'key-2026-01',
 });
@@ -202,16 +202,16 @@ PEAC is transport-agnostic. The most common binding is **HTTP/REST**, where rece
 
 PEAC records can be carried through other interaction standards via mappings:
 
-| Standard / Rail | PEAC role                                | Status                              |
-| --------------- | ---------------------------------------- | ----------------------------------- |
-| MCP             | Records in tool response metadata        | Implemented (`@peac/mappings-mcp`)  |
-| ACP             | Agentic Commerce Protocol integration    | Implemented (`@peac/mappings-acp`)  |
-| A2A             | Agent-to-Agent exchange attachments      | Specified                           |
-| AP2             | Evidence for payment authorization flows | Specified                           |
-| UCP             | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`)  |
-| x402            | Settlement evidence in receipt claims    | Implemented (`@peac/rails-x402`)    |
-| Stripe          | Payment intent evidence                  | Implemented (`@peac/rails-stripe`)  |
-| Razorpay        | UPI/card/netbanking evidence             | Implemented (`@peac/rails-razorpay`)|
+| Standard / Rail | PEAC role                                | Status                               |
+| --------------- | ---------------------------------------- | ------------------------------------ |
+| MCP             | Records in tool response metadata        | Implemented (`@peac/mappings-mcp`)   |
+| ACP             | Agentic Commerce Protocol integration    | Implemented (`@peac/mappings-acp`)   |
+| A2A             | Agent-to-Agent exchange attachments      | Specified                            |
+| AP2             | Evidence for payment authorization flows | Specified                            |
+| UCP             | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`)   |
+| x402            | Settlement evidence in receipt claims    | Implemented (`@peac/rails-x402`)     |
+| Stripe          | Payment intent evidence                  | Implemented (`@peac/rails-stripe`)   |
+| Razorpay        | UPI/card/netbanking evidence             | Implemented (`@peac/rails-razorpay`) |
 
 PEAC does not orchestrate these protocols. It provides portable proof of what terms applied and what happened.
 

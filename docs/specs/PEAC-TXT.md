@@ -50,22 +50,22 @@ Implementations MAY check this location if the primary returns 404.
 
 A PEAC Policy Document is a structured object with the following fields:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `version` | string | Yes | Policy format version (e.g., `peac-policy/0.1`) |
-| `usage` | enum | Yes | Access model: `open` or `conditional` |
-| `purposes` | string[] | No | Allowed purposes (e.g., `crawl`, `index`, `train`) |
-| `receipts` | enum | No | Receipt requirement: `required`, `optional`, or `omit` |
-| `attribution` | enum | No | Attribution requirement: `required`, `optional`, or `none` |
-| `rate_limit` | string | No | Rate limit (e.g., `100/hour`, `unlimited`) |
-| `daily_limit` | number | No | Daily request limit |
-| `negotiate` | string | No | Negotiation endpoint URL |
-| `contact` | string | No | Contact email or URL |
-| `license` | string | No | License identifier (e.g., `Apache-2.0`) |
-| `price` | number | No | Price per request (minor units) |
-| `currency` | string | No | Currency code (ISO 4217) |
-| `payment_methods` | string[] | No | Supported payment rails |
-| `payment_endpoint` | string | No | Payment endpoint URL |
+| Field              | Type     | Required | Description                                                |
+| ------------------ | -------- | -------- | ---------------------------------------------------------- |
+| `version`          | string   | Yes      | Policy format version (e.g., `peac-policy/0.1`)            |
+| `usage`            | enum     | Yes      | Access model: `open` or `conditional`                      |
+| `purposes`         | string[] | No       | Allowed purposes (e.g., `crawl`, `index`, `train`)         |
+| `receipts`         | enum     | No       | Receipt requirement: `required`, `optional`, or `omit`     |
+| `attribution`      | enum     | No       | Attribution requirement: `required`, `optional`, or `none` |
+| `rate_limit`       | string   | No       | Rate limit (e.g., `100/hour`, `unlimited`)                 |
+| `daily_limit`      | number   | No       | Daily request limit                                        |
+| `negotiate`        | string   | No       | Negotiation endpoint URL                                   |
+| `contact`          | string   | No       | Contact email or URL                                       |
+| `license`          | string   | No       | License identifier (e.g., `Apache-2.0`)                    |
+| `price`            | number   | No       | Price per request (minor units)                            |
+| `currency`         | string   | No       | Currency code (ISO 4217)                                   |
+| `payment_methods`  | string[] | No       | Supported payment rails                                    |
+| `payment_endpoint` | string   | No       | Payment endpoint URL                                       |
 
 ### 3.2 Version Field
 
@@ -81,25 +81,25 @@ Implementations MUST:
 
 ### 3.3 Usage Field
 
-| Value | Description |
-|-------|-------------|
-| `open` | Default allow; receipts optional |
+| Value         | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `open`        | Default allow; receipts optional                 |
 | `conditional` | Default deny/review; receipts typically required |
 
 ### 3.4 Purpose Tokens
 
 Well-known purpose tokens:
 
-| Token | Description |
-|-------|-------------|
-| `crawl` | Web crawling/scraping |
-| `index` | Search engine indexing |
-| `train` | AI/ML model training |
-| `inference` | AI/ML inference/generation |
-| `ai_input` | RAG/grounding (content as AI input) |
-| `ai_index` | AI-powered search/indexing |
-| `search` | Traditional search |
-| `user_action` | Direct user-initiated action |
+| Token         | Description                         |
+| ------------- | ----------------------------------- |
+| `crawl`       | Web crawling/scraping               |
+| `index`       | Search engine indexing              |
+| `train`       | AI/ML model training                |
+| `inference`   | AI/ML inference/generation          |
+| `ai_input`    | RAG/grounding (content as AI input) |
+| `ai_index`    | AI-powered search/indexing          |
+| `search`      | Traditional search                  |
+| `user_action` | Direct user-initiated action        |
 
 Custom purpose tokens MUST match the grammar: `/^[a-z][a-z0-9_]*(?::[a-z][a-z0-9_]*)?$/`
 
@@ -117,7 +117,7 @@ Policy documents MAY be serialized as YAML or JSON.
 
 ```yaml
 # Example: Open documentation policy
-version: "peac-policy/0.1"
+version: 'peac-policy/0.1'
 usage: open
 purposes: [crawl, index, search]
 attribution: optional
@@ -176,16 +176,16 @@ Output: parsed policy object or error
 
 When parsing YAML, implementations MUST enforce these restrictions:
 
-| Feature | Rule | Reason |
-|---------|------|--------|
-| Anchors (`&`) | MUST reject | Prevents exponential expansion attacks |
-| Aliases (`*`) | MUST reject | Prevents exponential expansion attacks |
-| Merge keys (`<<`) | MUST reject | Avoids ambiguous merge semantics |
-| Custom tags (`!tag`) | MUST reject | Security and portability |
-| Non-core schemas | MUST reject | Deterministic parsing |
-| Multi-document (`---`) | MUST reject (after first) | Single document only |
-| Encoding | MUST be UTF-8 | Interoperability |
-| Mapping keys | MUST be strings | JSON compatibility |
+| Feature                | Rule                      | Reason                                 |
+| ---------------------- | ------------------------- | -------------------------------------- |
+| Anchors (`&`)          | MUST reject               | Prevents exponential expansion attacks |
+| Aliases (`*`)          | MUST reject               | Prevents exponential expansion attacks |
+| Merge keys (`<<`)      | MUST reject               | Avoids ambiguous merge semantics       |
+| Custom tags (`!tag`)   | MUST reject               | Security and portability               |
+| Non-core schemas       | MUST reject               | Deterministic parsing                  |
+| Multi-document (`---`) | MUST reject (after first) | Single document only                   |
+| Encoding               | MUST be UTF-8             | Interoperability                       |
+| Mapping keys           | MUST be strings           | JSON compatibility                     |
 
 ### 5.3 JSON Restrictions
 
@@ -201,19 +201,19 @@ When parsing JSON, implementations MUST:
 
 ### 6.1 Hard Limits (MUST enforce)
 
-| Limit | Value | Reason |
-|-------|-------|--------|
-| Maximum bytes | 256 KiB | DoS protection |
-| Maximum nesting depth | 8 levels | Stack safety |
-| Maximum array length | 1000 elements | Memory bounds |
-| Maximum string length | 64 KiB | Memory bounds |
+| Limit                 | Value         | Reason         |
+| --------------------- | ------------- | -------------- |
+| Maximum bytes         | 256 KiB       | DoS protection |
+| Maximum nesting depth | 8 levels      | Stack safety   |
+| Maximum array length  | 1000 elements | Memory bounds  |
+| Maximum string length | 64 KiB        | Memory bounds  |
 
 ### 6.2 Recommended Limits
 
-| Limit | Value | Reason |
-|-------|-------|--------|
-| Maximum line count | 100 lines | Readability |
-| Maximum purposes | 50 tokens | Practical limit |
+| Limit              | Value     | Reason          |
+| ------------------ | --------- | --------------- |
+| Maximum line count | 100 lines | Readability     |
+| Maximum purposes   | 50 tokens | Practical limit |
 
 ---
 
@@ -230,16 +230,16 @@ Implementations MUST reject documents that:
 
 ### 7.2 Type Validation
 
-| Field | Type Constraint |
-|-------|-----------------|
-| `version` | Non-empty string |
-| `usage` | String in `[open, conditional]` |
-| `purposes` | Array of strings |
-| `receipts` | String in `[required, optional, omit]` |
+| Field         | Type Constraint                        |
+| ------------- | -------------------------------------- |
+| `version`     | Non-empty string                       |
+| `usage`       | String in `[open, conditional]`        |
+| `purposes`    | Array of strings                       |
+| `receipts`    | String in `[required, optional, omit]` |
 | `attribution` | String in `[required, optional, none]` |
-| `rate_limit` | String matching rate limit grammar |
-| `price` | Non-negative number |
-| `currency` | 3-letter ISO 4217 code |
+| `rate_limit`  | String matching rate limit grammar     |
+| `price`       | Non-negative number                    |
+| `currency`    | 3-letter ISO 4217 code                 |
 
 ### 7.3 Rate Limit Grammar
 
@@ -306,7 +306,7 @@ All parsed fields MUST be validated before use. Never trust user-controlled inpu
 ### 10.1 Open Documentation
 
 ```yaml
-version: "peac-policy/0.1"
+version: 'peac-policy/0.1'
 usage: open
 purposes: [crawl, index, search, ai_index]
 attribution: optional
@@ -319,7 +319,7 @@ contact: docs@example.com
 ### 10.2 Conditional API Access
 
 ```yaml
-version: "peac-policy/0.1"
+version: 'peac-policy/0.1'
 usage: conditional
 purposes: [inference, ai_input]
 receipts: required
@@ -336,7 +336,7 @@ contact: api-support@example.com
 ### 10.3 News Media (No Training)
 
 ```yaml
-version: "peac-policy/0.1"
+version: 'peac-policy/0.1'
 usage: conditional
 purposes: [crawl, index, search]
 receipts: required
@@ -349,12 +349,12 @@ contact: licensing@news.example.com
 
 ## 11. Relationship to Other Specifications
 
-| Specification | Relationship |
-|--------------|--------------|
-| [PEAC-ISSUER.md](PEAC-ISSUER.md) | Issuer configuration (JWKS, verification) |
-| [PROTOCOL-BEHAVIOR.md](PROTOCOL-BEHAVIOR.md) | Receipt issuance and verification |
-| robots.txt | Complementary crawl directives |
-| ai.txt / llm.txt | Complementary AI usage signals |
+| Specification                                | Relationship                              |
+| -------------------------------------------- | ----------------------------------------- |
+| [PEAC-ISSUER.md](PEAC-ISSUER.md)             | Issuer configuration (JWKS, verification) |
+| [PROTOCOL-BEHAVIOR.md](PROTOCOL-BEHAVIOR.md) | Receipt issuance and verification         |
+| robots.txt                                   | Complementary crawl directives            |
+| ai.txt / llm.txt                             | Complementary AI usage signals            |
 
 ---
 
@@ -384,9 +384,9 @@ An L1-conformant implementation MUST also:
 
 ## 13. Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 0.1 | 2026-01-14 | Initial specification |
+| Version | Date       | Changes               |
+| ------- | ---------- | --------------------- |
+| 0.1     | 2026-01-14 | Initial specification |
 
 ---
 

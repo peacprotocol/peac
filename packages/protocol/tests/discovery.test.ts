@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  parseIssuerConfig,
-  parsePolicyManifest,
-  parseDiscovery,
-} from '../src/discovery';
+import { parseIssuerConfig, parsePolicyManifest, parseDiscovery } from '../src/discovery';
 
 describe('Issuer Configuration (peac-issuer.json)', () => {
   it('should parse a valid issuer config', () => {
@@ -121,7 +117,8 @@ describe('Issuer Configuration (peac-issuer.json)', () => {
 
 describe('Policy Manifest (peac.txt)', () => {
   it('should parse a valid YAML policy manifest', () => {
-    const manifest = parsePolicyManifest(`
+    const manifest = parsePolicyManifest(
+      `
 version: "peac-policy/0.1"
 usage: open
 purposes: [crawl, index, search]
@@ -130,7 +127,8 @@ attribution: optional
 rate_limit: unlimited
 license: Apache-2.0
 contact: docs@example.com
-    `.trim());
+    `.trim()
+    );
 
     expect(manifest.version).toBe('peac-policy/0.1');
     expect(manifest.usage).toBe('open');
@@ -143,7 +141,8 @@ contact: docs@example.com
   });
 
   it('should parse a conditional policy manifest', () => {
-    const manifest = parsePolicyManifest(`
+    const manifest = parsePolicyManifest(
+      `
 version: "peac-policy/0.1"
 usage: conditional
 purposes: [inference, ai_input]
@@ -151,7 +150,8 @@ receipts: required
 rate_limit: 100/hour
 price: 10
 currency: USD
-    `.trim());
+    `.trim()
+    );
 
     expect(manifest.usage).toBe('conditional');
     expect(manifest.receipts).toBe('required');
@@ -183,21 +183,21 @@ currency: USD
   });
 
   it('should skip comments', () => {
-    const manifest = parsePolicyManifest(`
+    const manifest = parsePolicyManifest(
+      `
 # This is a comment
 version: "peac-policy/0.1"
 # Another comment
 usage: open
-    `.trim());
+    `.trim()
+    );
 
     expect(manifest.version).toBe('peac-policy/0.1');
     expect(manifest.usage).toBe('open');
   });
 
   it('should reject missing version', () => {
-    expect(() => parsePolicyManifest('usage: open')).toThrow(
-      'Missing required field: version'
-    );
+    expect(() => parsePolicyManifest('usage: open')).toThrow('Missing required field: version');
   });
 
   it('should reject missing usage', () => {
@@ -208,109 +208,131 @@ usage: open
 
   it('should reject invalid usage value', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 version: "peac-policy/0.1"
 usage: invalid
-      `.trim())
+      `.trim()
+      )
     ).toThrow('Missing or invalid field: usage');
   });
 
   it('should reject bare version number (missing peac-policy/ prefix)', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 version: "0.1"
 usage: open
-      `.trim())
+      `.trim()
+      )
     ).toThrow('Invalid version format');
   });
 
   it('should reject legacy version format', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 version: "0.9"
 usage: open
-      `.trim())
+      `.trim()
+      )
     ).toThrow('Invalid version format');
   });
 
   it('should reject wrong namespace prefix (dot instead of hyphen)', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 version: "peac.policy/0.1"
 usage: open
-      `.trim())
+      `.trim()
+      )
     ).toThrow('Invalid version format');
   });
 
   it('should reject YAML anchors', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 version: "peac-policy/0.1"
 usage: open
 anchor: &ref value
-      `.trim())
+      `.trim()
+      )
     ).toThrow('YAML anchors and aliases are not allowed');
   });
 
   it('should reject YAML aliases', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 version: "peac-policy/0.1"
 usage: open
 alias: *ref
-      `.trim())
+      `.trim()
+      )
     ).toThrow('YAML anchors and aliases are not allowed');
   });
 
   it('should reject YAML merge keys', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 version: "peac-policy/0.1"
 usage: open
 <<: *ref
-      `.trim())
+      `.trim()
+      )
     ).toThrow('YAML merge keys are not allowed');
   });
 
   it('should reject YAML custom tags', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 version: "peac-policy/0.1"
 usage: open
 custom: !tag value
-      `.trim())
+      `.trim()
+      )
     ).toThrow('YAML custom tags are not allowed');
   });
 
   it('should reject multi-document YAML', () => {
     expect(() =>
-      parsePolicyManifest(`
+      parsePolicyManifest(
+        `
 ---
 version: "peac-policy/0.1"
 usage: open
 ---
 version: "peac-policy/0.1"
 usage: conditional
-      `.trim())
+      `.trim()
+      )
     ).toThrow('Multi-document YAML is not allowed');
   });
 
   it('should allow single document separator', () => {
-    const manifest = parsePolicyManifest(`
+    const manifest = parsePolicyManifest(
+      `
 ---
 version: "peac-policy/0.1"
 usage: open
-    `.trim());
+    `.trim()
+    );
 
     expect(manifest.version).toBe('peac-policy/0.1');
   });
 
   it('should parse quoted strings', () => {
-    const manifest = parsePolicyManifest(`
+    const manifest = parsePolicyManifest(
+      `
 version: "peac-policy/0.1"
 usage: 'open'
 contact: "support@example.com"
-    `.trim());
+    `.trim()
+    );
 
     expect(manifest.version).toBe('peac-policy/0.1');
     expect(manifest.usage).toBe('open');
@@ -318,12 +340,14 @@ contact: "support@example.com"
   });
 
   it('should parse numbers', () => {
-    const manifest = parsePolicyManifest(`
+    const manifest = parsePolicyManifest(
+      `
 version: "peac-policy/0.1"
 usage: conditional
 price: 100
 daily_limit: 5000
-    `.trim());
+    `.trim()
+    );
 
     expect(manifest.price).toBe(100);
     expect(manifest.daily_limit).toBe(5000);
@@ -369,17 +393,13 @@ jwks: https://keys.peacprotocol.org/jwks.json
     const lines = Array.from({ length: 25 }, (_, i) => `line${i}: value${i}`);
     const manifest = lines.join('\n');
 
-    expect(() => parseDiscovery(manifest)).toThrow(
-      'Discovery manifest exceeds 20 lines (got 25)'
-    );
+    expect(() => parseDiscovery(manifest)).toThrow('Discovery manifest exceeds 20 lines (got 25)');
   });
 
   it('should reject manifest exceeding 2000 bytes', () => {
     const manifest = 'a'.repeat(2001);
 
-    expect(() => parseDiscovery(manifest)).toThrow(
-      'Discovery manifest exceeds 2000 bytes'
-    );
+    expect(() => parseDiscovery(manifest)).toThrow('Discovery manifest exceeds 2000 bytes');
   });
 
   it('should reject manifest missing version', () => {
@@ -389,9 +409,7 @@ verify: https://api.example.com/verify
 jwks: https://keys.peacprotocol.org/jwks.json
     `.trim();
 
-    expect(() => parseDiscovery(manifest)).toThrow(
-      'Missing required field: version'
-    );
+    expect(() => parseDiscovery(manifest)).toThrow('Missing required field: version');
   });
 
   it('should reject manifest missing issuer', () => {
@@ -401,9 +419,7 @@ verify: https://api.example.com/verify
 jwks: https://keys.peacprotocol.org/jwks.json
     `.trim();
 
-    expect(() => parseDiscovery(manifest)).toThrow(
-      'Missing required field: issuer'
-    );
+    expect(() => parseDiscovery(manifest)).toThrow('Missing required field: issuer');
   });
 
   it('should reject manifest missing verify', () => {
@@ -413,9 +429,7 @@ issuer: https://api.example.com
 jwks: https://keys.peacprotocol.org/jwks.json
     `.trim();
 
-    expect(() => parseDiscovery(manifest)).toThrow(
-      'Missing required field: verify'
-    );
+    expect(() => parseDiscovery(manifest)).toThrow('Missing required field: verify');
   });
 
   it('should reject manifest missing jwks', () => {
@@ -425,8 +439,6 @@ issuer: https://api.example.com
 verify: https://api.example.com/verify
     `.trim();
 
-    expect(() => parseDiscovery(manifest)).toThrow(
-      'Missing required field: jwks'
-    );
+    expect(() => parseDiscovery(manifest)).toThrow('Missing required field: jwks');
   });
 });

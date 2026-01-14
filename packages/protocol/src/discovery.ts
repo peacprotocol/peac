@@ -37,9 +37,7 @@ export function parseIssuerConfig(json: string | object): PEACIssuerConfig {
   if (typeof json === 'string') {
     const bytes = new TextEncoder().encode(json).length;
     if (bytes > PEAC_ISSUER_CONFIG_MAX_BYTES) {
-      throw new Error(
-        `Issuer config exceeds ${PEAC_ISSUER_CONFIG_MAX_BYTES} bytes (got ${bytes})`
-      );
+      throw new Error(`Issuer config exceeds ${PEAC_ISSUER_CONFIG_MAX_BYTES} bytes (got ${bytes})`);
     }
 
     try {
@@ -149,9 +147,7 @@ export async function fetchIssuerConfig(issuerUrl: string): Promise<PEACIssuerCo
     const normalizedExpected = baseUrl.replace(/\/$/, '');
     const normalizedActual = config.issuer.replace(/\/$/, '');
     if (normalizedActual !== normalizedExpected) {
-      throw new Error(
-        `Issuer mismatch: expected ${normalizedExpected}, got ${normalizedActual}`
-      );
+      throw new Error(`Issuer mismatch: expected ${normalizedExpected}, got ${normalizedActual}`);
     }
 
     return config;

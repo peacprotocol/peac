@@ -124,7 +124,6 @@ function sha256Hex(data: string | Buffer): string {
   return `sha256:${hash.digest('hex')}`;
 }
 
-
 /** Decode base64url to Buffer */
 function base64urlDecode(str: string): Buffer {
   const padded = str + '='.repeat((4 - (str.length % 4)) % 4);
@@ -267,7 +266,8 @@ export async function createDisputeBundle(
   } = options;
 
   // Build refs from either new refs or deprecated dispute_ref
-  const bundleRefs: BundleRef[] = refs ?? (dispute_ref ? [{ type: 'dispute', id: dispute_ref }] : []);
+  const bundleRefs: BundleRef[] =
+    refs ?? (dispute_ref ? [{ type: 'dispute', id: dispute_ref }] : []);
 
   // Validate receipts
   if (receipts.length === 0) {

@@ -83,7 +83,7 @@ Declares allowed purposes, quotas, attribution requirements, payment terms, and 
 
 ```yaml
 # /.well-known/peac.txt
-version: "0.9"
+version: '0.9'
 usage: open
 
 purposes: [crawl, index, search]
@@ -99,7 +99,7 @@ contact: docs@example.com
 **Example: Conditional API access**
 
 ```yaml
-version: "0.9"
+version: '0.9'
 usage: conditional
 
 purposes: [inference, ai_input]
@@ -158,13 +158,13 @@ Enables verifiers to discover JWKS endpoints and verification configuration for 
 
 **Key fields:**
 
-| Field             | Required | Description                          |
-| ----------------- | -------- | ------------------------------------ |
-| `version`         | Yes      | Configuration format version         |
-| `issuer`          | Yes      | Issuer URL (must match receipt `iss`)|
-| `jwks_uri`        | Yes      | JWKS endpoint for key discovery      |
-| `verify_endpoint` | No       | Verification endpoint URL            |
-| `algorithms`      | No       | Supported signing algorithms         |
+| Field             | Required | Description                           |
+| ----------------- | -------- | ------------------------------------- |
+| `version`         | Yes      | Configuration format version          |
+| `issuer`          | Yes      | Issuer URL (must match receipt `iss`) |
+| `jwks_uri`        | Yes      | JWKS endpoint for key discovery       |
+| `verify_endpoint` | No       | Verification endpoint URL             |
+| `algorithms`      | No       | Supported signing algorithms          |
 
 For the complete specification, see `docs/specs/PEAC-ISSUER.md`.
 

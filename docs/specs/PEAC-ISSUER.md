@@ -40,6 +40,7 @@ Output: issuer configuration URL
 ```
 
 Example:
+
 - Receipt `iss`: `https://api.example.com`
 - Config URL: `https://api.example.com/.well-known/peac-issuer.json`
 
@@ -57,16 +58,16 @@ Example:
 
 A PEAC Issuer Configuration is a JSON object with the following fields:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `version` | string | Yes | Configuration format version |
-| `issuer` | string | Yes | Issuer identifier URL (MUST match receipt `iss`) |
-| `jwks_uri` | string | Yes | JWKS endpoint URL |
-| `verify_endpoint` | string | No | Verification endpoint URL |
-| `receipt_versions` | string[] | No | Supported receipt versions |
-| `algorithms` | string[] | No | Supported signing algorithms |
-| `payment_rails` | string[] | No | Supported payment rails |
-| `security_contact` | string | No | Security contact email/URL |
+| Field              | Type     | Required | Description                                      |
+| ------------------ | -------- | -------- | ------------------------------------------------ |
+| `version`          | string   | Yes      | Configuration format version                     |
+| `issuer`           | string   | Yes      | Issuer identifier URL (MUST match receipt `iss`) |
+| `jwks_uri`         | string   | Yes      | JWKS endpoint URL                                |
+| `verify_endpoint`  | string   | No       | Verification endpoint URL                        |
+| `receipt_versions` | string[] | No       | Supported receipt versions                       |
+| `algorithms`       | string[] | No       | Supported signing algorithms                     |
+| `payment_rails`    | string[] | No       | Supported payment rails                          |
+| `security_contact` | string   | No       | Security contact email/URL                       |
 
 ### 3.2 Version Field
 
@@ -99,8 +100,8 @@ Default if not specified: `["peac-receipt/0.1"]`
 
 Well-known receipt versions:
 
-| Version | Description |
-|---------|-------------|
+| Version            | Description                |
+| ------------------ | -------------------------- |
 | `peac-receipt/0.1` | Current stable wire format |
 
 ### 3.6 Algorithms
@@ -109,10 +110,10 @@ Default if not specified: `["EdDSA"]`
 
 Supported algorithms:
 
-| Algorithm | Description |
-|-----------|-------------|
-| `EdDSA` | Ed25519 (recommended) |
-| `ES256` | ECDSA with P-256 and SHA-256 |
+| Algorithm | Description                  |
+| --------- | ---------------------------- |
+| `EdDSA`   | Ed25519 (recommended)        |
+| `ES256`   | ECDSA with P-256 and SHA-256 |
 
 ---
 
@@ -167,10 +168,10 @@ Implementations MUST ignore unknown fields for forward compatibility.
 
 ### 6.1 Hard Limits
 
-| Limit | Value | Reason |
-|-------|-------|--------|
-| Maximum bytes | 64 KiB | DoS protection |
-| Maximum nesting depth | 4 levels | Stack safety |
+| Limit                 | Value    | Reason         |
+| --------------------- | -------- | -------------- |
+| Maximum bytes         | 64 KiB   | DoS protection |
+| Maximum nesting depth | 4 levels | Stack safety   |
 
 ### 6.2 Timeout
 
@@ -247,16 +248,16 @@ On verification failure due to unknown key ID:
 
 Implementations MUST block:
 
-| Range | Reason |
-|-------|--------|
-| 10.0.0.0/8 | Private (RFC 1918) |
-| 172.16.0.0/12 | Private (RFC 1918) |
-| 192.168.0.0/16 | Private (RFC 1918) |
-| 127.0.0.0/8 | Loopback |
-| ::1 | IPv6 loopback |
-| 169.254.0.0/16 | Link-local |
-| 169.254.169.254 | Cloud metadata |
-| fe80::/10 | IPv6 link-local |
+| Range           | Reason             |
+| --------------- | ------------------ |
+| 10.0.0.0/8      | Private (RFC 1918) |
+| 172.16.0.0/12   | Private (RFC 1918) |
+| 192.168.0.0/16  | Private (RFC 1918) |
+| 127.0.0.0/8     | Loopback           |
+| ::1             | IPv6 loopback      |
+| 169.254.0.0/16  | Link-local         |
+| 169.254.169.254 | Cloud metadata     |
+| fe80::/10       | IPv6 link-local    |
 
 ### 9.2 Redirect Handling
 
@@ -272,23 +273,23 @@ Implementations MUST:
 
 ### 10.1 Fetch Errors
 
-| Condition | Behavior |
-|-----------|----------|
-| Network error | Retry with backoff, then fail |
-| 404 Not Found | Fail (issuer not configured) |
-| 5xx Server Error | Retry with backoff |
-| Timeout | Fail with timeout error |
-| Invalid JSON | Fail with parse error |
+| Condition        | Behavior                      |
+| ---------------- | ----------------------------- |
+| Network error    | Retry with backoff, then fail |
+| 404 Not Found    | Fail (issuer not configured)  |
+| 5xx Server Error | Retry with backoff            |
+| Timeout          | Fail with timeout error       |
+| Invalid JSON     | Fail with parse error         |
 
 ### 10.2 Error Codes
 
-| Code | HTTP | Description |
-|------|------|-------------|
-| `E_ISSUER_CONFIG_NOT_FOUND` | 404 | Configuration endpoint not found |
-| `E_ISSUER_CONFIG_INVALID` | 400 | Configuration failed validation |
-| `E_ISSUER_CONFIG_FETCH_FAILED` | 502 | Network or server error |
-| `E_ISSUER_CONFIG_TIMEOUT` | 504 | Fetch timeout |
-| `E_ISSUER_MISMATCH` | 400 | Config issuer doesn't match receipt |
+| Code                           | HTTP | Description                         |
+| ------------------------------ | ---- | ----------------------------------- |
+| `E_ISSUER_CONFIG_NOT_FOUND`    | 404  | Configuration endpoint not found    |
+| `E_ISSUER_CONFIG_INVALID`      | 400  | Configuration failed validation     |
+| `E_ISSUER_CONFIG_FETCH_FAILED` | 502  | Network or server error             |
+| `E_ISSUER_CONFIG_TIMEOUT`      | 504  | Fetch timeout                       |
+| `E_ISSUER_MISMATCH`            | 400  | Config issuer doesn't match receipt |
 
 ---
 
@@ -386,9 +387,9 @@ A verifier implementation MUST:
 
 ## 15. Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 0.1 | 2026-01-14 | Initial specification |
+| Version | Date       | Changes               |
+| ------- | ---------- | --------------------- |
+| 0.1     | 2026-01-14 | Initial specification |
 
 ---
 
