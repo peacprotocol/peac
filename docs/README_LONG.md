@@ -51,7 +51,7 @@ See [examples/x402-node-server](../examples/x402-node-server) for a working impl
 
 **Receipts:**
 
-- Receipt type: `typ: "peac.receipt/0.9"` (frozen across v0.9.x)
+- Receipt type: `typ: "peac-receipt/0.1"` (frozen across v0.9.x)
 - Envelope structure: `PEACEnvelope` with auth, payment evidence, and metadata
 - Signature: Ed25519 JWS (RFC 8032)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
@@ -83,39 +83,38 @@ Declares allowed purposes, quotas, attribution requirements, payment terms, and 
 
 ```yaml
 # /.well-known/peac.txt
-version: 0.9.27
+version: "0.9"
 usage: open
 
-purposes: [indexing, research, documentation]
+purposes: [crawl, index, search]
 attribution: optional
-attribution_format: 'Source: PEAC Protocol ({url})'
 
 receipts: optional
 rate_limit: unlimited
 
 license: Apache-2.0
-repository: https://github.com/peacprotocol/peac
+contact: docs@example.com
 ```
 
 **Example: Conditional API access**
 
 ```yaml
-version: 0.9.27
+version: "0.9"
 usage: conditional
 
-purposes: [research, commercial]
-attribution: required
-
+purposes: [inference, ai_input]
 receipts: required
-rate_limit: 600/hour
-daily_limit: 3000
 
-price: 0.01
+rate_limit: 100/hour
+daily_limit: 1000
+
+price: 10
 currency: USD
 payment_methods: [x402, stripe]
 payment_endpoint: https://api.example.com/pay
 
 negotiate: https://api.example.com/negotiate
+contact: api-support@example.com
 ```
 
 **Protocol flow:**
@@ -128,6 +127,46 @@ negotiate: https://api.example.com/negotiate
 6. Server verifies receipt and grants access
 
 For the complete peac.txt specification, see `docs/specs/PEAC-TXT.md`.
+
+---
+
+## Issuer configuration: peac-issuer.json
+
+`/.well-known/peac-issuer.json` is the issuer configuration file for PEAC receipt verification.
+
+**Location:**
+
+- `https://issuer-domain/.well-known/peac-issuer.json`
+
+**Purpose:**
+Enables verifiers to discover JWKS endpoints and verification configuration for validating PEAC receipts.
+
+**Example:**
+
+```json
+{
+  "version": "peac-issuer/0.1",
+  "issuer": "https://api.example.com",
+  "jwks_uri": "https://api.example.com/.well-known/jwks.json",
+  "verify_endpoint": "https://api.example.com/verify",
+  "receipt_versions": ["peac-receipt/0.1"],
+  "algorithms": ["EdDSA"],
+  "payment_rails": ["x402", "stripe"],
+  "security_contact": "security@example.com"
+}
+```
+
+**Key fields:**
+
+| Field             | Required | Description                          |
+| ----------------- | -------- | ------------------------------------ |
+| `version`         | Yes      | Configuration format version         |
+| `issuer`          | Yes      | Issuer URL (must match receipt `iss`)|
+| `jwks_uri`        | Yes      | JWKS endpoint for key discovery      |
+| `verify_endpoint` | No       | Verification endpoint URL            |
+| `algorithms`      | No       | Supported signing algorithms         |
+
+For the complete specification, see `docs/specs/PEAC-ISSUER.md`.
 
 ### Policy discovery and other signals
 
@@ -416,7 +455,7 @@ These are optional higher-layer helpers built on top of the core receipt/kernel 
 
 **Wire format:**
 
-- `peac.receipt/0.9` is frozen throughout the v0.9.x series
+- `peac-receipt/0.1` is frozen throughout the v0.9.x series
 - Libraries may evolve APIs but must emit/accept 0.9 receipts
 
 **Library surface:**

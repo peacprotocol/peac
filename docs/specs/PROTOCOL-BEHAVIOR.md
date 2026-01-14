@@ -2,9 +2,9 @@
 
 **Status**: NORMATIVE
 
-**Version**: 0.9.16
+**Version**: 0.10.0
 
-**Wire Format**: `peac.receipt/0.9`
+**Wire Format**: `peac-receipt/0.1`
 
 ---
 
@@ -12,7 +12,7 @@
 
 This document defines the normative behavioral semantics for PEAC receipts. It MUST be read in conjunction with:
 
-- [PEAC-RECEIPT-SCHEMA-v0.9.json](PEAC-RECEIPT-SCHEMA-v0.9.json) - Normative structural schema
+- [PEAC-RECEIPT-SCHEMA-v0.1.json](PEAC-RECEIPT-SCHEMA-v0.1.json) - Normative structural schema
 - [TEST_VECTORS.md](TEST_VECTORS.md) - Normative conformance tests
 - [ERRORS.md](ERRORS.md) - Normative error codes
 
@@ -878,7 +878,7 @@ interface AuthContext {
 
 **Wire Format**:
 
-Wire format `peac.receipt/0.9` is unchanged. `subject_snapshot` is envelope-level metadata, not part of the signed JWS payload.
+Wire format `peac-receipt/0.1` is unchanged. `subject_snapshot` is envelope-level metadata, not part of the signed JWS payload.
 
 ---
 
@@ -918,7 +918,7 @@ Reserved fields (e.g., `payments[]`, chaining fields) are present in the schema 
 
 An implementation is **conformant with PEAC v0.9** if it:
 
-1. Validates receipts according to PEAC-RECEIPT-SCHEMA-v0.9.json
+1. Validates receipts according to PEAC-RECEIPT-SCHEMA-v0.1.json
 2. Enforces all behavioral rules in this document
 3. Passes all normative test vectors in TEST_VECTORS.md
 4. Returns errors using codes from ERRORS.md

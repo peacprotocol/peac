@@ -24,7 +24,7 @@ This document defines which documentation files are the canonical, up-to-date re
 | Document                                                                   | Status        | Purpose                        |
 | -------------------------------------------------------------------------- | ------------- | ------------------------------ |
 | [SPEC_INDEX.md](SPEC_INDEX.md)                                             | **Normative** | Entry point for implementers   |
-| [specs/PEAC-RECEIPT-SCHEMA-v0.9.json](specs/PEAC-RECEIPT-SCHEMA-v0.9.json) | **Normative** | Wire format JSON Schema        |
+| [specs/PEAC-RECEIPT-SCHEMA-v0.1.json](specs/PEAC-RECEIPT-SCHEMA-v0.1.json) | **Normative** | Wire format JSON Schema        |
 | [specs/PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md)                   | **Normative** | Issue, verify, discovery flows |
 | [specs/ERRORS.md](specs/ERRORS.md)                                         | **Normative** | Error codes and HTTP mappings  |
 | [specs/REGISTRIES.md](specs/REGISTRIES.md)                                 | **Normative** | Payment rails, agent protocols |
@@ -55,7 +55,7 @@ These values NEVER change until v1.0:
 
 | Value                     | Definition          | Location                    |
 | ------------------------- | ------------------- | --------------------------- |
-| `typ: "peac.receipt/0.9"` | Wire format type    | ARCHITECTURE.md, specs/     |
+| `typ: "peac-receipt/0.1"` | Wire format type    | ARCHITECTURE.md, specs/     |
 | `alg: "EdDSA"`            | Signature algorithm | specs/kernel/constants.json |
 | `PEAC-Receipt`            | HTTP header name    | specs/kernel/constants.json |
 
@@ -67,7 +67,7 @@ These values NEVER change until v1.0:
 
 1. [SPEC_INDEX.md](SPEC_INDEX.md)
 2. [specs/PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md)
-3. [specs/PEAC-RECEIPT-SCHEMA-v0.9.json](specs/PEAC-RECEIPT-SCHEMA-v0.9.json)
+3. [specs/PEAC-RECEIPT-SCHEMA-v0.1.json](specs/PEAC-RECEIPT-SCHEMA-v0.1.json)
 4. [specs/TEST_VECTORS.md](specs/TEST_VECTORS.md)
 5. [ARCHITECTURE.md](ARCHITECTURE.md)
 

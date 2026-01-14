@@ -48,8 +48,8 @@ Layer 6: pillars         (depends on protocol, control)
 
 ### 4. Spec-First Development
 
-- Wire format `peac.receipt/0.9` is frozen across all 0.9.x releases
-- JSON Schema at `docs/specs/PEAC-RECEIPT-SCHEMA-v0.9.json` is normative
+- Wire format `peac-receipt/0.1` is the canonical wire format identifier (v0.10.0+)
+- JSON Schema at `specs/wire/peac-receipt-0.1.schema.json` is normative
 - TypeScript is one implementation; Go, Rust, Python SDKs follow same specs
 
 ---
@@ -231,7 +231,7 @@ The PEAC receipt envelope follows this structure:
 ```typescript
 interface PEACEnvelope {
   // Header (JWS protected header)
-  typ: 'peac.receipt/0.9';
+  typ: 'peac-receipt/0.1';
   alg: 'EdDSA';
   kid: string;
 
