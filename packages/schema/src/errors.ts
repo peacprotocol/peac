@@ -19,6 +19,7 @@ export const ERROR_CATEGORIES_CANONICAL = [
   'dispute', // Dispute attestation failures
   'bundle', // Dispute bundle verification failures
   'ucp', // UCP (Universal Commerce Protocol) mapping failures
+  'workflow', // Workflow correlation failures
 ] as const;
 
 /**
@@ -150,6 +151,16 @@ export const ERROR_CODES = {
   E_JWKS_FETCH_FAILED: 'E_JWKS_FETCH_FAILED',
   E_POLICY_FETCH_FAILED: 'E_POLICY_FETCH_FAILED',
   E_NETWORK_ERROR: 'E_NETWORK_ERROR',
+
+  // Workflow errors (400)
+  E_WORKFLOW_CONTEXT_INVALID: 'E_WORKFLOW_CONTEXT_INVALID',
+  E_WORKFLOW_DAG_INVALID: 'E_WORKFLOW_DAG_INVALID',
+  E_WORKFLOW_LIMIT_EXCEEDED: 'E_WORKFLOW_LIMIT_EXCEEDED',
+  E_WORKFLOW_ID_INVALID: 'E_WORKFLOW_ID_INVALID',
+  E_WORKFLOW_STEP_ID_INVALID: 'E_WORKFLOW_STEP_ID_INVALID',
+  E_WORKFLOW_PARENT_NOT_FOUND: 'E_WORKFLOW_PARENT_NOT_FOUND',
+  E_WORKFLOW_SUMMARY_INVALID: 'E_WORKFLOW_SUMMARY_INVALID',
+  E_WORKFLOW_CYCLE_DETECTED: 'E_WORKFLOW_CYCLE_DETECTED',
 } as const;
 
 /**
@@ -194,5 +205,44 @@ export function createEvidenceNotJsonError(message: string, path?: (string | num
     remediation:
       'Ensure evidence contains only JSON-safe values (strings, finite numbers, booleans, null, arrays, plain objects)',
     details: { message },
+  });
+}
+
+// ============================================================================
+// Workflow Error Helpers (v0.10.2+)
+// ============================================================================
+
+/**
+ * Create a workflow context validation error
+ *
+ * Used when workflow_context does not conform to WorkflowContextSchema.
+ */
+export function createWorkflowContextInvalidError(details?: string): PEACError {
+  return createPEACError(ERROR_CODES.E_WORKFLOW_CONTEXT_INVALID, 'validation', 'error', false, {
+    http_status: 400,
+    pointer: '/ext/org.peacprotocol~1workflow',
+    remediation: 'Ensure workflow_context conforms to WorkflowContextSchema',
+    details: { message: details ?? 'Invalid workflow context' },
+  });
+}
+
+/**
+ * Create a workflow DAG validation error
+ *
+ * Used when workflow DAG semantics are violated (self-parent, duplicate parents, cycle).
+ */
+export function createWorkflowDagInvalidError(
+  reason: 'self_parent' | 'duplicate_parent' | 'cycle'
+): PEACError {
+  const messages = {
+    self_parent: 'Step cannot be its own parent',
+    duplicate_parent: 'Parent step IDs must be unique',
+    cycle: 'Workflow DAG contains a cycle',
+  };
+  return createPEACError(ERROR_CODES.E_WORKFLOW_DAG_INVALID, 'validation', 'error', false, {
+    http_status: 400,
+    pointer: '/ext/org.peacprotocol~1workflow/parent_step_ids',
+    remediation: 'Ensure workflow forms a valid directed acyclic graph (DAG)',
+    details: { reason, message: messages[reason] },
   });
 }

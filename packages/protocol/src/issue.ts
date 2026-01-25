@@ -13,6 +13,8 @@ import {
   SubjectProfileSnapshot,
   validateSubjectSnapshot,
   createEvidenceNotJsonError,
+  createWorkflowContextInvalidError,
+  createWorkflowDagInvalidError,
   type PEACError,
   type PurposeToken,
   type CanonicalPurpose,
@@ -230,12 +232,15 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
   // Validate workflow_context (v0.10.2+)
   if (options.workflow_context !== undefined) {
     if (!isValidWorkflowContext(options.workflow_context)) {
-      throw new Error('Invalid workflow_context: must match WorkflowContextSchema');
+      throw new IssueError(createWorkflowContextInvalidError('Does not conform to WorkflowContextSchema'));
     }
     if (!hasValidDagSemantics(options.workflow_context)) {
-      throw new Error(
-        'Invalid workflow_context DAG semantics: step cannot be its own parent or have duplicate parents'
-      );
+      // Determine specific reason
+      const ctx = options.workflow_context;
+      const isSelfParent = ctx.parent_step_ids.includes(ctx.step_id);
+      const hasDuplicates = new Set(ctx.parent_step_ids).size !== ctx.parent_step_ids.length;
+      const reason = isSelfParent ? 'self_parent' : hasDuplicates ? 'duplicate_parent' : 'cycle';
+      throw new IssueError(createWorkflowDagInvalidError(reason));
     }
   }
 

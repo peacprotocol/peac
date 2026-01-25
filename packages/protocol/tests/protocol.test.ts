@@ -379,7 +379,7 @@ describe('PEAC Protocol', () => {
             kid: '2025-01-15T10:30:00Z',
             workflow_context: invalidContext,
           })
-        ).rejects.toThrow('Invalid workflow_context DAG semantics');
+        ).rejects.toThrow('Step cannot be its own parent');
       });
 
       it('should reject workflow_context with duplicate parent step IDs', async () => {
@@ -409,7 +409,7 @@ describe('PEAC Protocol', () => {
             kid: '2025-01-15T10:30:00Z',
             workflow_context: invalidContext,
           })
-        ).rejects.toThrow('Invalid workflow_context DAG semantics');
+        ).rejects.toThrow('Parent step IDs must be unique');
       });
 
       it('should reject workflow_context with invalid schema', async () => {
@@ -436,7 +436,7 @@ describe('PEAC Protocol', () => {
             kid: '2025-01-15T10:30:00Z',
             workflow_context: invalidContext,
           })
-        ).rejects.toThrow('Invalid workflow_context');
+        ).rejects.toThrow('Does not conform to WorkflowContextSchema');
       });
     });
   });

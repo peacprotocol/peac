@@ -14,25 +14,26 @@ import {
   type StepId,
   WORKFLOW_EXTENSION_KEY,
   type PEACReceiptClaims,
+  createWorkflowId,
+  createStepId,
 } from '@peac/schema';
 import { decode } from '@peac/crypto';
 
-// Generate unique IDs (in production, use proper UUIDv7/ULID generators)
-// IDs must be 20-48 chars after prefix (wf_ or step_)
-function generateWorkflowId(): WorkflowId {
-  const timestamp = Date.now().toString(36).padStart(10, '0');
+/**
+ * Generate a ULID-like identifier for demo purposes.
+ *
+ * In production, use a proper ULID library (e.g., 'ulid' or 'ulidx' npm package)
+ * for cryptographic randomness and correct Crockford Base32 encoding.
+ *
+ * IDs must be 20-48 chars to pass schema validation.
+ */
+function generateUlidLike(): string {
+  // 10 chars timestamp (Crockford Base32-ish) + 16 chars random
+  const timestamp = Date.now().toString(36).toUpperCase().padStart(10, '0');
   const random = Array.from({ length: 16 }, () =>
-    Math.random().toString(36).charAt(2)
+    '0123456789ABCDEFGHJKMNPQRSTVWXYZ'.charAt(Math.floor(Math.random() * 32))
   ).join('');
-  return `wf_${timestamp}${random}` as WorkflowId;
-}
-
-function generateStepId(): StepId {
-  const timestamp = Date.now().toString(36).padStart(10, '0');
-  const random = Array.from({ length: 16 }, () =>
-    Math.random().toString(36).charAt(2)
-  ).join('');
-  return `step_${timestamp}${random}` as StepId;
+  return `${timestamp}${random}`;
 }
 
 async function main() {
@@ -42,12 +43,13 @@ async function main() {
   // Generate a signing keypair
   const { privateKey, publicKey } = await generateKeypair();
 
-  // Create workflow and step IDs
-  const workflowId = generateWorkflowId();
-  const rootStepId = generateStepId();
-  const branchAStepId = generateStepId();
-  const branchBStepId = generateStepId();
-  const joinStepId = generateStepId();
+  // Create workflow and step IDs using schema constructors
+  // In production, use a proper ULID library instead of generateUlidLike()
+  const workflowId = createWorkflowId(generateUlidLike());
+  const rootStepId = createStepId(generateUlidLike());
+  const branchAStepId = createStepId(generateUlidLike());
+  const branchBStepId = createStepId(generateUlidLike());
+  const joinStepId = createStepId(generateUlidLike());
 
   console.log('Workflow ID:', workflowId);
   console.log('');

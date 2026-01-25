@@ -49,7 +49,7 @@ PEAC fills the gap by providing **portable, offline-verifiable, cryptographic ev
 
 ### 2.1 Non-Breaking
 
-All workflow fields use the existing extensions mechanism (`auth.extensions`). The wire format `peac-receipt/0.1` remains unchanged.
+All workflow fields use the existing extensions mechanism (`claims.ext`). The wire format `peac-receipt/0.1` remains unchanged.
 
 ### 2.2 Framework-Agnostic
 
@@ -76,11 +76,15 @@ All verification can be performed offline with the same result across implementa
 
 ### 3.1 Extension Key
 
-The workflow context is placed in the receipt's auth context extensions:
+The workflow context is placed in the receipt claims extensions:
 
 ```
-auth.extensions['org.peacprotocol/workflow']
+claims.ext['org.peacprotocol/workflow']
 ```
+
+**Canonical location (JWS payload):** `ext["org.peacprotocol/workflow"]`
+
+The constant `WORKFLOW_EXTENSION_KEY` is exported from `@peac/schema` for programmatic access.
 
 ### 3.2 Schema
 
@@ -134,20 +138,25 @@ interface WorkflowContext {
 
 ### 3.5 Example
 
+Receipt claims with workflow context (JWS payload):
+
 ```json
 {
-  "auth": {
-    "iss": "https://orchestrator.example.com",
-    "aud": "https://tool.example.com",
-    "extensions": {
-      "org.peacprotocol/workflow": {
-        "workflow_id": "wf_01HXZ5NWJQ8QJXKZ3V5N7BMGHC",
-        "step_id": "step_01HXZ5NWJQ8QJXKZ3V5N7BMGHD",
-        "parent_step_ids": ["step_01HXZ5NWJQ8QJXKZ3V5N7BMGHA"],
-        "orchestrator_id": "agent:orchestrator@example.com",
-        "tool_name": "web_search",
-        "framework": "mcp"
-      }
+  "iss": "https://orchestrator.example.com",
+  "aud": "https://tool.example.com",
+  "iat": 1706000000,
+  "rid": "019abc12-def3-7890-abcd-ef1234567890",
+  "amt": 500,
+  "cur": "USD",
+  "payment": { "rail": "internal", "reference": "step-001" },
+  "ext": {
+    "org.peacprotocol/workflow": {
+      "workflow_id": "wf_01HXZ5NWJQ8QJXKZ3V5N7BMGHC",
+      "step_id": "step_01HXZ5NWJQ8QJXKZ3V5N7BMGHD",
+      "parent_step_ids": ["step_01HXZ5NWJQ8QJXKZ3V5N7BMGHA"],
+      "orchestrator_id": "agent:orchestrator@example.com",
+      "tool_name": "web_search",
+      "framework": "mcp"
     }
   }
 }
@@ -494,7 +503,66 @@ For CrewAI, LangGraph, AutoGen, or custom orchestrators:
 
 - Set `framework` field to identify the source
 - Use native IDs (run_id, task_id) as payload in PEAC IDs
-- Store framework-specific context in `auth.extensions['your.domain/context']`
+- Store framework-specific context in `ext['your.domain/context']`
+
+### 9.4 OpenTelemetry / W3C Trace Context Mapping
+
+PEAC workflow correlation can integrate with existing observability pipelines through W3C Trace Context (OpenTelemetry). This enables enterprises to correlate receipts with distributed traces.
+
+**Mapping:**
+
+| PEAC Field | OTel/Trace Context | Notes |
+|------------|-------------------|-------|
+| `workflow_id` | `trace-id` | Both identify the overall operation |
+| `step_id` | `span-id` | Both identify a single step |
+| `parent_step_ids[0]` | `parent-id` | OTel spans have single parent |
+| `parent_step_ids[1..]` | span links | Multi-parent joins use span links |
+| `tool_name` | `span.name` / attributes | Maps to operation name |
+| `framework` | `otel.library.name` | Instrumentation library |
+
+**Multi-parent handling:**
+
+OTel spans have exactly one parent, but PEAC supports multi-parent DAGs (fork-join). When mapping:
+
+```typescript
+// PEAC multi-parent join
+{
+  "step_id": "step_join",
+  "parent_step_ids": ["step_branch_a", "step_branch_b"]
+}
+
+// OTel representation
+{
+  "span_id": "step_join_span",
+  "parent_span_id": "step_branch_a_span",  // First parent
+  "links": [
+    { "span_id": "step_branch_b_span" }    // Additional parents as links
+  ]
+}
+```
+
+**Traceparent header integration:**
+
+When issuing receipts in an OTel-instrumented context:
+
+```typescript
+import { context, trace } from '@opentelemetry/api';
+
+const span = trace.getActiveSpan();
+if (span) {
+  const ctx = span.spanContext();
+  // Use trace_id as workflow_id basis (or create mapping)
+  const workflowId = createWorkflowId(ctx.traceId);
+  const stepId = createStepId(ctx.spanId);
+}
+```
+
+**Recommended practices:**
+
+- Store OTel trace-id in receipt for cross-system correlation
+- Use span links for multi-parent relationships
+- Include `trace.trace_id` in receipt metadata for debugging
+- Export receipts as OTel span events for unified observability
 
 ## 10. Security Considerations
 
@@ -504,11 +572,44 @@ Workflow and step IDs should be unpredictable:
 - Use cryptographically random ULID/UUID payloads
 - Do not derive IDs from predictable inputs
 
-### 10.2 Correlation Privacy
+### 10.2 Correlation Privacy and Threat Model
 
-Workflow IDs correlate receipts across steps:
-- Consider privacy implications before sharing workflow IDs
-- Use separate workflow IDs for separate trust domains
+Workflow correlation creates **linkability** - the ability to connect multiple receipts and infer business process structure. Enterprises deploying this feature MUST understand these implications.
+
+**What correlation reveals:**
+
+| Data Element | Risk | Mitigation |
+|--------------|------|------------|
+| `workflow_id` | Links all steps in a workflow | Use opaque, non-semantic IDs |
+| `parent_step_ids` | Reveals execution graph structure | Consider redaction for external parties |
+| `orchestrator_id` | Identifies coordinator agent | May leak organizational structure |
+| `tool_name` | Reveals capabilities used | Use generic names when sensitive |
+| `step_total` | Reveals workflow complexity | Omit if not needed |
+
+**Privacy requirements:**
+
+- **MUST** allow pseudonymous IDs (opaque, non-semantic workflow/step IDs)
+- **SHOULD** support tenant scoping (e.g., namespace workflow IDs by `iss` domain)
+- **SHOULD** support selective disclosure (publish summary without full step graph)
+- **MAY** support redaction mode (omit `parent_step_ids` in shared receipts)
+
+**Threat scenarios:**
+
+1. **Cross-tenant correlation**: A vendor correlates workflow IDs across tenants to infer usage patterns.
+   - Mitigation: Generate unique workflow ID prefixes per tenant.
+
+2. **Business process inference**: An attacker reconstructs business logic from DAG structure.
+   - Mitigation: Use generic tool names; omit `step_index`/`step_total` if sensitive.
+
+3. **Selective omission**: An orchestrator selectively omits steps to hide failures.
+   - Mitigation: Require Merkle commitment for audited workflows; verify completeness.
+
+**Recommended practices:**
+
+- Generate workflow IDs with per-tenant entropy
+- Do not embed semantic information in IDs (e.g., avoid `wf_payroll_2026_01`)
+- Consider workflow correlation an opt-in feature for privacy-sensitive deployments
+- Document what correlation reveals in your privacy policy
 
 ### 10.3 DoS Protection
 
