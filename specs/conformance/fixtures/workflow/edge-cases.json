@@ -1,0 +1,249 @@
+{
+  "$comment": "Edge case WorkflowContext and WorkflowSummaryAttestation vectors (v0.10.2+)",
+  "version": "0.10.2",
+  "fixtures": [
+    {
+      "name": "max-parents-allowed",
+      "description": "Maximum allowed parent steps (16)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789VWXYZG",
+        "parent_step_ids": [
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA1",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA2",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA3",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA4",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA5",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA6",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA7",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA8",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA9",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F10",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F11",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F12",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F13",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F14",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F15",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F16"
+        ]
+      },
+      "expected": {
+        "valid": true,
+        "parent_count": 16
+      }
+    },
+    {
+      "name": "uuid-format-ids",
+      "description": "Workflow and step IDs using UUID format",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_550e8400-e29b-41d4-a716-446655440000",
+        "step_id": "step_550e8400-e29b-41d4-a716-446655440001",
+        "parent_step_ids": []
+      },
+      "expected": {
+        "valid": true,
+        "id_format": "uuid"
+      }
+    },
+    {
+      "name": "langgraph-framework",
+      "description": "LangGraph orchestration framework",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "langgraph",
+        "tool_name": "langgraph:agent-node"
+      },
+      "expected": {
+        "valid": true,
+        "framework": "langgraph"
+      }
+    },
+    {
+      "name": "autogen-framework",
+      "description": "AutoGen orchestration framework",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "autogen",
+        "tool_name": "autogen:conversation-agent"
+      },
+      "expected": {
+        "valid": true,
+        "framework": "autogen"
+      }
+    },
+    {
+      "name": "custom-framework",
+      "description": "Custom orchestration framework",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "custom",
+        "tool_name": "custom:internal-workflow-engine"
+      },
+      "expected": {
+        "valid": true,
+        "framework": "custom"
+      }
+    },
+    {
+      "name": "step-index-zero",
+      "description": "First step with step_index 0",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "step_index": 0,
+        "step_total": 100
+      },
+      "expected": {
+        "valid": true,
+        "step_index": 0
+      }
+    },
+    {
+      "name": "long-tool-name",
+      "description": "Tool name at maximum length (256)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "tool_name": "mcp:very-long-tool-namespace/extremely-detailed-tool-name-that-describes-the-functionality-in-great-detail-including-all-the-parameters-and-options-that-are-available-to-the-user-when-invoking-this-specific-tool-which-might-be-necessary-for-complex"
+      },
+      "expected": {
+        "valid": true,
+        "tool_name_length": 256
+      }
+    },
+    {
+      "name": "summary-empty-receipt-refs",
+      "description": "Summary with empty receipt_refs array",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "cancelled",
+          "started_at": "2026-01-20T10:00:00Z",
+          "receipt_refs": [],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": []
+        }
+      },
+      "expected": {
+        "valid": true,
+        "receipt_count": 0,
+        "comment": "Empty arrays are valid - workflow was cancelled before any receipts"
+      }
+    },
+    {
+      "name": "summary-both-refs-and-merkle",
+      "description": "Summary with both receipt_refs and merkle_root",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "completed",
+          "started_at": "2026-01-20T10:00:00Z",
+          "receipt_refs": ["jti:sample-receipt"],
+          "receipt_merkle_root": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+          "receipt_count": 10000,
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": ["agent:worker-001"]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "has_refs": true,
+        "has_merkle": true,
+        "comment": "Both can be present - refs might be recent/important receipts, merkle covers all"
+      }
+    },
+    {
+      "name": "summary-max-agents",
+      "description": "Summary at maximum agents_involved limit (100)",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://large-workflow.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01H5KPT9QZA123456789LARGEW",
+          "status": "completed",
+          "started_at": "2026-01-20T08:00:00Z",
+          "receipt_refs": ["jti:receipt1"],
+          "orchestrator_id": "agent:production-orchestrator",
+          "agents_involved": [
+            "agent:worker-001", "agent:worker-002", "agent:worker-003", "agent:worker-004", "agent:worker-005",
+            "agent:worker-006", "agent:worker-007", "agent:worker-008", "agent:worker-009", "agent:worker-010",
+            "agent:worker-011", "agent:worker-012", "agent:worker-013", "agent:worker-014", "agent:worker-015",
+            "agent:worker-016", "agent:worker-017", "agent:worker-018", "agent:worker-019", "agent:worker-020",
+            "agent:worker-021", "agent:worker-022", "agent:worker-023", "agent:worker-024", "agent:worker-025",
+            "agent:worker-026", "agent:worker-027", "agent:worker-028", "agent:worker-029", "agent:worker-030",
+            "agent:worker-031", "agent:worker-032", "agent:worker-033", "agent:worker-034", "agent:worker-035",
+            "agent:worker-036", "agent:worker-037", "agent:worker-038", "agent:worker-039", "agent:worker-040",
+            "agent:worker-041", "agent:worker-042", "agent:worker-043", "agent:worker-044", "agent:worker-045",
+            "agent:worker-046", "agent:worker-047", "agent:worker-048", "agent:worker-049", "agent:worker-050",
+            "agent:worker-051", "agent:worker-052", "agent:worker-053", "agent:worker-054", "agent:worker-055",
+            "agent:worker-056", "agent:worker-057", "agent:worker-058", "agent:worker-059", "agent:worker-060",
+            "agent:worker-061", "agent:worker-062", "agent:worker-063", "agent:worker-064", "agent:worker-065",
+            "agent:worker-066", "agent:worker-067", "agent:worker-068", "agent:worker-069", "agent:worker-070",
+            "agent:worker-071", "agent:worker-072", "agent:worker-073", "agent:worker-074", "agent:worker-075",
+            "agent:worker-076", "agent:worker-077", "agent:worker-078", "agent:worker-079", "agent:worker-080",
+            "agent:worker-081", "agent:worker-082", "agent:worker-083", "agent:worker-084", "agent:worker-085",
+            "agent:worker-086", "agent:worker-087", "agent:worker-088", "agent:worker-089", "agent:worker-090",
+            "agent:worker-091", "agent:worker-092", "agent:worker-093", "agent:worker-094", "agent:worker-095",
+            "agent:worker-096", "agent:worker-097", "agent:worker-098", "agent:worker-099", "agent:worker-100"
+          ]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "agent_count": 100
+      }
+    },
+    {
+      "name": "error-context-boundary",
+      "description": "Error message at exactly maxErrorMessageLength (1024)",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "failed",
+          "started_at": "2026-01-20T10:00:00Z",
+          "receipt_refs": ["jti:receipt1"],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": ["agent:worker-001"],
+          "error_context": {
+            "failed_step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "error_code": "E_DETAILED_ERROR",
+            "error_message": "This is an error message that is exactly 1024 characters long including all the detailed information about what went wrong during the execution of this particular step in the workflow. The error includes diagnostic information, stack traces, context about the input parameters, details about the environment in which the step was running, information about any retries that were attempted, timestamps for each phase of the execution, memory and CPU usage at the time of failure, network conditions, dependent service states, and recommendations for how to resolve the issue. This comprehensive error message helps operators quickly identify and fix problems in their multi-agent workflows without having to dig through logs. The message is designed to be machine-parseable while also being human-readable for debugging purposes. Additional context may be available in the associated receipt chain. The error code provides a stable identifier for automated error handling and alerting systems. Please refer to the documentation for more information about this error type and its common causes and resolutions. Truncating now......"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "error_message_length": 1024
+      }
+    }
+  ]
+}

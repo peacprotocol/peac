@@ -206,6 +206,48 @@ export type {
   CreateDisputeAttestationParams,
 } from './dispute';
 
+// Workflow correlation (v0.10.2+ multi-agent orchestration)
+export {
+  WorkflowIdSchema,
+  StepIdSchema,
+  WorkflowStatusSchema,
+  OrchestrationFrameworkSchema,
+  WorkflowContextSchema,
+  WorkflowErrorContextSchema,
+  WorkflowSummaryEvidenceSchema,
+  WorkflowSummaryAttestationSchema,
+  // Constants
+  WORKFLOW_EXTENSION_KEY,
+  WORKFLOW_SUMMARY_TYPE,
+  WORKFLOW_STATUSES,
+  ORCHESTRATION_FRAMEWORKS,
+  WORKFLOW_LIMITS,
+  WORKFLOW_ID_PATTERN,
+  STEP_ID_PATTERN,
+  // Helpers
+  createWorkflowId,
+  createStepId,
+  validateWorkflowContext,
+  isValidWorkflowContext,
+  validateWorkflowSummaryAttestation,
+  isWorkflowSummaryAttestation,
+  isTerminalWorkflowStatus,
+  hasValidDagSemantics,
+  createWorkflowContext,
+  createWorkflowSummaryAttestation,
+} from './workflow';
+export type {
+  WorkflowId,
+  StepId,
+  WorkflowStatus,
+  OrchestrationFramework,
+  WorkflowContext,
+  WorkflowErrorContext,
+  WorkflowSummaryEvidence,
+  WorkflowSummaryAttestation,
+  CreateWorkflowSummaryParams,
+} from './workflow';
+
 // Obligations extension (v0.9.26+ CC Signals alignment)
 export {
   CreditMethodSchema,

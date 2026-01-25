@@ -1,0 +1,21 @@
+{
+  "name": "@peac/example-workflow-correlation",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC workflow correlation - link receipts into a multi-step workflow DAG",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

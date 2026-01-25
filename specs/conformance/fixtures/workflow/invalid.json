@@ -1,0 +1,278 @@
+{
+  "$comment": "Invalid WorkflowContext and WorkflowSummaryAttestation vectors (v0.10.2+)",
+  "version": "0.10.2",
+  "fixtures": [
+    {
+      "name": "invalid-workflow-id-format",
+      "description": "Workflow ID without wf_ prefix",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": []
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid workflow ID format"
+      }
+    },
+    {
+      "name": "invalid-step-id-format",
+      "description": "Step ID without step_ prefix",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": []
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid step ID format"
+      }
+    },
+    {
+      "name": "self-parent-cycle",
+      "description": "Step is its own parent (cycle)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": ["step_01ARZ3NDEKTSV4RRFFQ69G5FAV"]
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid DAG semantics: step cannot be its own parent"
+      }
+    },
+    {
+      "name": "duplicate-parents",
+      "description": "Duplicate parent step IDs",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789VWXYZG",
+        "parent_step_ids": [
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FAV"
+        ]
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid DAG semantics: duplicate parents"
+      }
+    },
+    {
+      "name": "too-many-parents",
+      "description": "Exceeds maxParentSteps limit (16)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789VWXYZG",
+        "parent_step_ids": [
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA1",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA2",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA3",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA4",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA5",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA6",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA7",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA8",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA9",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F10",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F11",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F12",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F13",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F14",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F15",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F16",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F17"
+        ]
+      },
+      "expected": {
+        "valid": false,
+        "error": "Exceeds maximum parent steps"
+      }
+    },
+    {
+      "name": "invalid-hash-format",
+      "description": "Invalid prev_receipt_hash format",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "prev_receipt_hash": "invalid-hash"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid hash format"
+      }
+    },
+    {
+      "name": "invalid-framework",
+      "description": "Unknown orchestration framework",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "unknown_framework"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid orchestration framework"
+      }
+    },
+    {
+      "name": "extra-unknown-field",
+      "description": "Unknown field in strict schema",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "unknown_field": "should_fail"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Unrecognized keys"
+      }
+    },
+    {
+      "name": "summary-wrong-type",
+      "description": "Wrong attestation type for workflow summary",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/wrong-type",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "completed",
+          "started_at": "2026-01-20T10:00:00Z",
+          "receipt_refs": ["jti:receipt1"],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": ["agent:worker-001"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid type"
+      }
+    },
+    {
+      "name": "summary-no-receipts-or-merkle",
+      "description": "Summary without receipt_refs or receipt_merkle_root",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "completed",
+          "started_at": "2026-01-20T10:00:00Z",
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": ["agent:worker-001"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error": "Workflow summary must include receipt_refs or receipt_merkle_root"
+      }
+    },
+    {
+      "name": "summary-merkle-without-count",
+      "description": "Merkle root without receipt_count",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "completed",
+          "started_at": "2026-01-20T10:00:00Z",
+          "receipt_merkle_root": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": ["agent:worker-001"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error": "receipt_count is required when using receipt_merkle_root"
+      }
+    },
+    {
+      "name": "summary-invalid-status",
+      "description": "Invalid workflow status",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "pending",
+          "started_at": "2026-01-20T10:00:00Z",
+          "receipt_refs": ["jti:receipt1"],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": ["agent:worker-001"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid status"
+      }
+    },
+    {
+      "name": "summary-http-issuer",
+      "description": "Non-HTTPS issuer URL",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "http://insecure.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "completed",
+          "started_at": "2026-01-20T10:00:00Z",
+          "receipt_refs": ["jti:receipt1"],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": ["agent:worker-001"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error": "Issuer must be HTTPS"
+      }
+    },
+    {
+      "name": "error-message-too-long",
+      "description": "Error message exceeds maxErrorMessageLength",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "failed",
+          "started_at": "2026-01-20T10:00:00Z",
+          "receipt_refs": ["jti:receipt1"],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": ["agent:worker-001"],
+          "error_context": {
+            "failed_step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "error_code": "E_LONG_ERROR",
+            "error_message": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error": "Error message too long"
+      }
+    }
+  ]
+}

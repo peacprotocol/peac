@@ -6,7 +6,13 @@ import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
 import { issue } from '../src/issue';
 import { decode } from '@peac/crypto';
-import { PEACReceiptClaims } from '@peac/schema';
+import {
+  PEACReceiptClaims,
+  type WorkflowContext,
+  type WorkflowId,
+  type StepId,
+  WORKFLOW_EXTENSION_KEY,
+} from '@peac/schema';
 
 describe('PEAC Protocol', () => {
   describe('issue()', () => {
@@ -243,6 +249,195 @@ describe('PEAC Protocol', () => {
 
       // RIDs should be different
       expect(decoded1.payload.rid).not.toBe(decoded2.payload.rid);
+    });
+
+    // Workflow correlation tests (v0.10.2+)
+    describe('workflow_context', () => {
+      it('should include workflow_context in ext if provided', async () => {
+        const { privateKey } = await generateKeypair();
+
+        const workflowContext: WorkflowContext = {
+          workflow_id: 'wf_01ARZ3NDEKTSV4RRFFQ69G5FAV' as WorkflowId,
+          step_id: 'step_01ARZ3NDEKTSV4RRFFQ69G5FAV' as StepId,
+          parent_step_ids: [],
+        };
+
+        const result = await issue({
+          iss: 'https://api.example.com',
+          aud: 'https://app.example.com',
+          amt: 9999,
+          cur: 'USD',
+          rail: 'stripe',
+          reference: 'cs_123456',
+          asset: 'USD',
+          env: 'test',
+          evidence: { session_id: 'cs_123456' },
+          privateKey,
+          kid: '2025-01-15T10:30:00Z',
+          workflow_context: workflowContext,
+        });
+
+        const decoded = decode<PEACReceiptClaims>(result.jws);
+
+        // Workflow context should be in ext under the extension key
+        expect(decoded.payload.ext).toBeDefined();
+        expect(decoded.payload.ext![WORKFLOW_EXTENSION_KEY]).toEqual(workflowContext);
+      });
+
+      it('should include workflow_context with parent steps', async () => {
+        const { privateKey } = await generateKeypair();
+
+        const workflowContext: WorkflowContext = {
+          workflow_id: 'wf_01ARZ3NDEKTSV4RRFFQ69G5FAV' as WorkflowId,
+          step_id: 'step_01H5KPT9QZA123456789CHILD1' as StepId,
+          parent_step_ids: [
+            'step_01ARZ3NDEKTSV4RRFFQ69G5FAV' as StepId,
+            'step_01H5KPT9QZA123456789PARENT' as StepId,
+          ],
+          step_index: 2,
+          step_total: 5,
+        };
+
+        const result = await issue({
+          iss: 'https://api.example.com',
+          aud: 'https://app.example.com',
+          amt: 9999,
+          cur: 'USD',
+          rail: 'stripe',
+          reference: 'cs_123456',
+          asset: 'USD',
+          env: 'test',
+          evidence: { session_id: 'cs_123456' },
+          privateKey,
+          kid: '2025-01-15T10:30:00Z',
+          workflow_context: workflowContext,
+        });
+
+        const decoded = decode<PEACReceiptClaims>(result.jws);
+
+        const storedContext = decoded.payload.ext![WORKFLOW_EXTENSION_KEY] as WorkflowContext;
+        expect(storedContext.workflow_id).toBe('wf_01ARZ3NDEKTSV4RRFFQ69G5FAV');
+        expect(storedContext.step_id).toBe('step_01H5KPT9QZA123456789CHILD1');
+        expect(storedContext.parent_step_ids).toHaveLength(2);
+        expect(storedContext.step_index).toBe(2);
+        expect(storedContext.step_total).toBe(5);
+      });
+
+      it('should merge workflow_context with existing ext', async () => {
+        const { privateKey } = await generateKeypair();
+
+        const workflowContext: WorkflowContext = {
+          workflow_id: 'wf_01ARZ3NDEKTSV4RRFFQ69G5FAV' as WorkflowId,
+          step_id: 'step_01ARZ3NDEKTSV4RRFFQ69G5FAV' as StepId,
+          parent_step_ids: [],
+        };
+
+        const result = await issue({
+          iss: 'https://api.example.com',
+          aud: 'https://app.example.com',
+          amt: 9999,
+          cur: 'USD',
+          rail: 'stripe',
+          reference: 'cs_123456',
+          asset: 'USD',
+          env: 'test',
+          evidence: { session_id: 'cs_123456' },
+          privateKey,
+          kid: '2025-01-15T10:30:00Z',
+          ext: { 'custom/key': { value: 'test' } },
+          workflow_context: workflowContext,
+        });
+
+        const decoded = decode<PEACReceiptClaims>(result.jws);
+
+        // Both custom ext and workflow_context should be present
+        expect(decoded.payload.ext!['custom/key']).toEqual({ value: 'test' });
+        expect(decoded.payload.ext![WORKFLOW_EXTENSION_KEY]).toEqual(workflowContext);
+      });
+
+      it('should reject workflow_context with step as its own parent', async () => {
+        const { privateKey } = await generateKeypair();
+
+        const invalidContext: WorkflowContext = {
+          workflow_id: 'wf_01ARZ3NDEKTSV4RRFFQ69G5FAV' as WorkflowId,
+          step_id: 'step_01ARZ3NDEKTSV4RRFFQ69G5FAV' as StepId,
+          parent_step_ids: ['step_01ARZ3NDEKTSV4RRFFQ69G5FAV' as StepId], // Self-parent
+        };
+
+        await expect(
+          issue({
+            iss: 'https://api.example.com',
+            aud: 'https://app.example.com',
+            amt: 9999,
+            cur: 'USD',
+            rail: 'stripe',
+            reference: 'cs_123456',
+            asset: 'USD',
+            env: 'test',
+            evidence: { session_id: 'cs_123456' },
+            privateKey,
+            kid: '2025-01-15T10:30:00Z',
+            workflow_context: invalidContext,
+          })
+        ).rejects.toThrow('Invalid workflow_context DAG semantics');
+      });
+
+      it('should reject workflow_context with duplicate parent step IDs', async () => {
+        const { privateKey } = await generateKeypair();
+
+        const invalidContext: WorkflowContext = {
+          workflow_id: 'wf_01ARZ3NDEKTSV4RRFFQ69G5FAV' as WorkflowId,
+          step_id: 'step_01H5KPT9QZA123456789CHILD1' as StepId,
+          parent_step_ids: [
+            'step_01ARZ3NDEKTSV4RRFFQ69G5FAV' as StepId,
+            'step_01ARZ3NDEKTSV4RRFFQ69G5FAV' as StepId, // Duplicate
+          ],
+        };
+
+        await expect(
+          issue({
+            iss: 'https://api.example.com',
+            aud: 'https://app.example.com',
+            amt: 9999,
+            cur: 'USD',
+            rail: 'stripe',
+            reference: 'cs_123456',
+            asset: 'USD',
+            env: 'test',
+            evidence: { session_id: 'cs_123456' },
+            privateKey,
+            kid: '2025-01-15T10:30:00Z',
+            workflow_context: invalidContext,
+          })
+        ).rejects.toThrow('Invalid workflow_context DAG semantics');
+      });
+
+      it('should reject workflow_context with invalid schema', async () => {
+        const { privateKey } = await generateKeypair();
+
+        // Missing required field (step_id)
+        const invalidContext = {
+          workflow_id: 'wf_01ARZ3NDEKTSV4RRFFQ69G5FAV',
+          parent_step_ids: [],
+        } as unknown as WorkflowContext;
+
+        await expect(
+          issue({
+            iss: 'https://api.example.com',
+            aud: 'https://app.example.com',
+            amt: 9999,
+            cur: 'USD',
+            rail: 'stripe',
+            reference: 'cs_123456',
+            asset: 'USD',
+            env: 'test',
+            evidence: { session_id: 'cs_123456' },
+            privateKey,
+            kid: '2025-01-15T10:30:00Z',
+            workflow_context: invalidContext,
+          })
+        ).rejects.toThrow('Invalid workflow_context');
+      });
     });
   });
 });

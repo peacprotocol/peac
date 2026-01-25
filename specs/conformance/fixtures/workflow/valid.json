@@ -1,0 +1,278 @@
+{
+  "$comment": "Valid WorkflowContext and WorkflowSummaryAttestation golden vectors (v0.10.2+)",
+  "version": "0.10.2",
+  "fixtures": [
+    {
+      "name": "minimal-root-step",
+      "description": "Minimal workflow context for root step (no parents)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": []
+      },
+      "expected": {
+        "valid": true,
+        "is_root_step": true,
+        "parent_count": 0
+      }
+    },
+    {
+      "name": "linear-workflow-step",
+      "description": "Step in a linear workflow with single parent",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789VWXYZG",
+        "parent_step_ids": ["step_01ARZ3NDEKTSV4RRFFQ69G5FAV"],
+        "step_index": 1,
+        "step_total": 5
+      },
+      "expected": {
+        "valid": true,
+        "is_root_step": false,
+        "parent_count": 1
+      }
+    },
+    {
+      "name": "fork-join-step",
+      "description": "Join step with multiple parents (fork-join pattern)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789JOINSS",
+        "parent_step_ids": [
+          "step_01H5KPT9QZA123456789BRANCH1",
+          "step_01H5KPT9QZA123456789BRANCH2"
+        ]
+      },
+      "expected": {
+        "valid": true,
+        "parent_count": 2
+      }
+    },
+    {
+      "name": "mcp-tool-step",
+      "description": "Step with MCP framework and tool metadata",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789MCPTOO",
+        "parent_step_ids": ["step_01ARZ3NDEKTSV4RRFFQ69G5FAV"],
+        "tool_name": "mcp:github/create-issue",
+        "framework": "mcp",
+        "orchestrator_id": "agent:orchestrator-001"
+      },
+      "expected": {
+        "valid": true,
+        "framework": "mcp"
+      }
+    },
+    {
+      "name": "a2a-skill-step",
+      "description": "Step with A2A framework and skill metadata",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789A2ATOO",
+        "parent_step_ids": [],
+        "tool_name": "a2a:research/deep-search",
+        "framework": "a2a",
+        "orchestrator_receipt_ref": "jti:orchestrator-receipt-123"
+      },
+      "expected": {
+        "valid": true,
+        "framework": "a2a"
+      }
+    },
+    {
+      "name": "hash-chained-step",
+      "description": "Step with previous receipt hash for streaming",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789STREAM",
+        "parent_step_ids": ["step_01ARZ3NDEKTSV4RRFFQ69G5FAV"],
+        "prev_receipt_hash": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      },
+      "expected": {
+        "valid": true,
+        "has_hash_chain": true
+      }
+    },
+    {
+      "name": "complete-context-all-fields",
+      "description": "Workflow context with all optional fields populated",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789COMPLE",
+        "parent_step_ids": ["step_01ARZ3NDEKTSV4RRFFQ69G5FAV"],
+        "orchestrator_id": "agent:main-orchestrator",
+        "orchestrator_receipt_ref": "jti:orch-receipt-abc",
+        "step_index": 2,
+        "step_total": 10,
+        "tool_name": "crewai:research-agent/analyze",
+        "framework": "crewai",
+        "prev_receipt_hash": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+      },
+      "expected": {
+        "valid": true,
+        "framework": "crewai",
+        "has_orchestrator_id": true,
+        "has_step_sequence": true,
+        "has_hash_chain": true
+      }
+    },
+    {
+      "name": "summary-completed-with-refs",
+      "description": "Completed workflow summary with receipt refs",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T12:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "status": "completed",
+          "started_at": "2026-01-20T10:00:00Z",
+          "completed_at": "2026-01-20T11:30:00Z",
+          "receipt_refs": [
+            "jti:step1-receipt",
+            "jti:step2-receipt",
+            "jti:step3-receipt"
+          ],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": [
+            "agent:worker-001",
+            "agent:worker-002"
+          ]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "status": "completed",
+        "receipt_count": 3,
+        "agent_count": 2
+      }
+    },
+    {
+      "name": "summary-completed-with-merkle",
+      "description": "Completed workflow summary with Merkle root for large workflows",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://large-workflow.example.com",
+        "issued_at": "2026-01-20T15:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01H5KPT9QZA123456789LARGEW",
+          "status": "completed",
+          "started_at": "2026-01-20T08:00:00Z",
+          "completed_at": "2026-01-20T14:30:00Z",
+          "receipt_merkle_root": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+          "receipt_count": 5000,
+          "orchestrator_id": "agent:production-orchestrator",
+          "agents_involved": [
+            "agent:batch-worker-001",
+            "agent:batch-worker-002",
+            "agent:batch-worker-003"
+          ],
+          "final_result_hash": "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "status": "completed",
+        "uses_merkle": true,
+        "receipt_count": 5000
+      }
+    },
+    {
+      "name": "summary-failed-with-error",
+      "description": "Failed workflow summary with error context",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T16:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01H5KPT9QZA123456789FAILED",
+          "status": "failed",
+          "started_at": "2026-01-20T15:00:00Z",
+          "receipt_refs": [
+            "jti:step1-receipt",
+            "jti:step2-receipt"
+          ],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": [
+            "agent:worker-001"
+          ],
+          "error_context": {
+            "failed_step_id": "step_01H5KPT9QZA123456789FAILST",
+            "error_code": "E_TIMEOUT",
+            "error_message": "Tool execution timed out after 30 seconds"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "status": "failed",
+        "has_error_context": true,
+        "error_code": "E_TIMEOUT"
+      }
+    },
+    {
+      "name": "summary-in-progress",
+      "description": "In-progress workflow summary (streaming)",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://streaming.example.com",
+        "issued_at": "2026-01-20T17:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01H5KPT9QZA123456789STREAM",
+          "status": "in_progress",
+          "started_at": "2026-01-20T16:30:00Z",
+          "receipt_refs": [
+            "jti:partial-step1"
+          ],
+          "orchestrator_id": "agent:streaming-orchestrator",
+          "agents_involved": [
+            "agent:streaming-worker"
+          ]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "status": "in_progress",
+        "is_terminal": false
+      }
+    },
+    {
+      "name": "summary-cancelled",
+      "description": "Cancelled workflow summary",
+      "type": "WorkflowSummaryAttestation",
+      "input": {
+        "type": "peac/workflow-summary",
+        "issuer": "https://orchestrator.example.com",
+        "issued_at": "2026-01-20T18:00:00Z",
+        "expires_at": "2027-01-20T18:00:00Z",
+        "evidence": {
+          "workflow_id": "wf_01H5KPT9QZA123456789CANCEL",
+          "status": "cancelled",
+          "started_at": "2026-01-20T17:00:00Z",
+          "completed_at": "2026-01-20T17:15:00Z",
+          "receipt_refs": [],
+          "orchestrator_id": "agent:orchestrator-001",
+          "agents_involved": []
+        }
+      },
+      "expected": {
+        "valid": true,
+        "status": "cancelled",
+        "is_terminal": true,
+        "has_expiry": true
+      }
+    }
+  ]
+}

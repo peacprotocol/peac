@@ -20,6 +20,11 @@ import {
   isValidPurposeToken,
   isCanonicalPurpose,
   isValidPurposeReason,
+  // Workflow correlation (v0.10.2+)
+  type WorkflowContext,
+  isValidWorkflowContext,
+  hasValidDagSemantics,
+  WORKFLOW_EXTENSION_KEY,
 } from '@peac/schema';
 import { providerRef } from '@peac/telemetry';
 import { hashReceipt } from './telemetry.js';
@@ -101,6 +106,14 @@ export interface IssueOptions {
    * The audit spine - explains WHY purpose was enforced as it was.
    */
   purpose_reason?: PurposeReason;
+
+  /**
+   * Workflow correlation context (v0.10.2+, optional)
+   *
+   * Links this receipt into a multi-step workflow DAG.
+   * Added to ext['org.peacprotocol/workflow'].
+   */
+  workflow_context?: WorkflowContext;
 
   /** Ed25519 private key (32 bytes) */
   privateKey: Uint8Array;
@@ -214,6 +227,18 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
     }
   }
 
+  // Validate workflow_context (v0.10.2+)
+  if (options.workflow_context !== undefined) {
+    if (!isValidWorkflowContext(options.workflow_context)) {
+      throw new Error('Invalid workflow_context: must match WorkflowContextSchema');
+    }
+    if (!hasValidDagSemantics(options.workflow_context)) {
+      throw new Error(
+        'Invalid workflow_context DAG semantics: step cannot be its own parent or have duplicate parents'
+      );
+    }
+  }
+
   // Generate UUIDv7 for receipt ID
   const rid = uuidv7();
 
@@ -243,7 +268,15 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
     },
     ...(options.exp && { exp: options.exp }),
     ...(options.subject && { subject: { uri: options.subject } }),
-    ...(options.ext && { ext: options.ext }),
+    // Build extensions (merge user-provided ext with workflow_context)
+    ...((options.ext || options.workflow_context) && {
+      ext: {
+        ...options.ext,
+        ...(options.workflow_context && {
+          [WORKFLOW_EXTENSION_KEY]: options.workflow_context,
+        }),
+      },
+    }),
     // Purpose claims (v0.9.24+)
     ...(purposeDeclared && { purpose_declared: purposeDeclared }),
     ...(options.purpose_enforced && { purpose_enforced: options.purpose_enforced }),
