@@ -20,13 +20,7 @@ import { createHash } from 'crypto';
 import * as dns from 'dns/promises';
 import { Agent, fetch as undiciFetch, type Dispatcher } from 'undici';
 // Local SSRF types (not from @peac/schema to keep package self-contained)
-import {
-  validateUrlForSSRF,
-  type SSRFPolicy,
-  DEFAULT_SSRF_POLICY,
-  TRUST_ERROR_CODES,
-  ALLOW_DANGEROUS_CIDRS_ACK,
-} from './ssrf.js';
+import { validateUrlForSSRF, type SSRFPolicy, DEFAULT_SSRF_POLICY } from './ssrf.js';
 
 // Import finalizeEvidence from internal module (not exported from main entry)
 import { finalizeEvidence } from './internal.js';
@@ -36,34 +30,18 @@ import {
   isPrivateIP,
   resolveDnsSecure,
   createPinnedAgent,
-  parseCidr,
-  matchesAnyCidr,
   validateAllowCidrsAck,
-  cidrOverlapsDangerousRanges,
-  getRegistrableDomain,
   isRedirectAllowed,
-  normalizeHostname,
   sanitizeUrl,
   readBodyWithLimit,
   attemptWithFallback,
-  hasHeaderCaseInsensitive,
   stripHopByHopHeaders,
-  hasIPv6ZoneId,
-  normalizeIPv4MappedIPv6,
   canonicalizeHost,
   emitAuditEvent,
   createRequestAuditContext,
-  hashIpAddress,
   redactIp,
-  resetAuditQueueStats,
   getAuditQueueStats,
   withTimeout,
-  BLOCKED_IPV4_RANGES,
-  BLOCKED_IPV6_RANGES,
-  ADDITIONAL_BLOCKED_CIDRS_V4,
-  ADDITIONAL_BLOCKED_CIDRS_V6,
-  HOP_BY_HOP_HEADERS,
-  HAPPY_EYEBALLS_FIRST_TIMEOUT_MS,
   type RequestAuditContext,
 } from './impl.js';
 
@@ -252,6 +230,18 @@ export const ALLOW_MIXED_DNS_ACK = 'I_UNDERSTAND_MIXED_DNS_SECURITY_RISKS' as co
 // -----------------------------------------------------------------------------
 
 /**
+ * Check if a value is a plain object (prototype is Object.prototype or null)
+ *
+ * This excludes Date, RegExp, Map, Set, and other non-JSON-serializable objects.
+ * @internal
+ */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object') return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+/**
  * Canonicalize a JSON value per RFC 8785 (JSON Canonicalization Scheme)
  *
  * This ensures deterministic serialization for cross-implementation parity:
@@ -283,14 +273,12 @@ function jcsCanonicalizeValue(value: unknown): string {
     const elements = value.map(jcsCanonicalizeValue);
     return '[' + elements.join(',') + ']';
   }
-  if (typeof value === 'object' && value !== null) {
+  if (isPlainObject(value)) {
     // Sort keys lexicographically (Unicode code point order)
     const keys = Object.keys(value).sort();
     const pairs = keys
-      .filter((k) => (value as Record<string, unknown>)[k] !== undefined)
-      .map(
-        (k) => JSON.stringify(k) + ':' + jcsCanonicalizeValue((value as Record<string, unknown>)[k])
-      );
+      .filter((k) => value[k] !== undefined)
+      .map((k) => JSON.stringify(k) + ':' + jcsCanonicalizeValue(value[k]));
     return '{' + pairs.join(',') + '}';
   }
   throw new Error(`Cannot canonicalize value of type ${typeof value}`);
@@ -1628,7 +1616,7 @@ export async function safeFetchRaw(
       ...(isPrivateEvidence ? { dns_answers: dnsAnswers } : {}),
       ...(isPrivateEvidence && pinnedIp ? { selected_ip: pinnedIp } : {}),
       // Public/tenant evidence: include DNS answer counts
-      ...(!isPrivateEvidence && dnsAnswers && dnsAnswers.length > 0
+      ...(!isPrivateEvidence && dnsAnswers.length > 0
         ? {
             dns_answer_count: {
               ipv4: dnsAnswers.filter((a) => a.family === 4).length,
@@ -1811,7 +1799,7 @@ export async function safeFetchRaw(
     ...(isPrivateEvidence ? { dns_answers: dnsAnswers } : {}),
     ...(isPrivateEvidence && effectiveIp ? { selected_ip: effectiveIp } : {}),
     // Public/tenant evidence: include DNS answer counts
-    ...(!isPrivateEvidence && dnsAnswers && dnsAnswers.length > 0
+    ...(!isPrivateEvidence && dnsAnswers.length > 0
       ? {
           dns_answer_count: {
             ipv4: dnsAnswers.filter((a) => a.family === 4).length,
