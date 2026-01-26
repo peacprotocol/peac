@@ -114,7 +114,7 @@ echo "== forbid npm invocations =="
 # Allow npm in: README (end-user install), RELEASING (what NOT to do), CHANGELOG (release notes),
 # NPM_PUBLISH docs (policy), edge guides (CLI install), pack scripts (consumer-reality smoke tests),
 # net-node test-pack-install (tests published package in clean npm project)
-NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md|CHANGELOG\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|scripts/pack-.*\.sh|packages/net/scripts/test-pack-install\.mjs)'
+NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md|CHANGELOG\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|scripts/pack-.*\.sh|packages/net/node/scripts/test-pack-install\.mjs)'
 if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else

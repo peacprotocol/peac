@@ -37,6 +37,7 @@ function getPackagesRecursive(dir, depth = 0) {
 
 const pkgPaths = [
   ...getPackages('packages'),
+  ...getPackagesRecursive('packages/net'),
   ...getPackagesRecursive('packages/rails'),
   ...getPackagesRecursive('packages/mappings'),
   ...getPackagesRecursive('packages/transport'),

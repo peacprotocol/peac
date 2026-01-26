@@ -10,8 +10,8 @@
     {
       "name": "no-circular",
       "severity": "error",
-      "comment": "No circular dependencies allowed (net package exempt - type-only internal cycles)",
-      "from": { "pathNot": "^packages/net/" },
+      "comment": "No circular dependencies allowed (net/node package exempt - type-only internal cycles)",
+      "from": { "pathNot": "^packages/net/node/" },
       "to": { "circular": true }
     },
     {

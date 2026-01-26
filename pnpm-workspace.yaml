@@ -1,5 +1,6 @@
 packages:
   - 'packages/*'
+  - 'packages/net/*'
   - 'packages/rails/*'
   - 'packages/mappings/*'
   - 'packages/transport/*'

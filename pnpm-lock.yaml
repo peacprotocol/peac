@@ -770,11 +770,11 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@20.19.25)
 
-  packages/net:
+  packages/net/node:
     dependencies:
       '@peac/schema':
         specifier: workspace:*
-        version: link:../schema
+        version: link:../../schema
       ipaddr.js:
         specifier: ^2.3.0
         version: 2.3.0
