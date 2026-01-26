@@ -1,0 +1,314 @@
+{
+  "description": "Golden vectors for RFC 8785 JCS canonicalization verification",
+  "version": "1.0.0",
+  "test_cases": [
+    {
+      "name": "empty_object",
+      "input": {},
+      "canonical": "{}",
+      "digest": "0x44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "name": "simple_object",
+      "input": {
+        "a": 1,
+        "b": 2
+      },
+      "canonical": "{\"a\":1,\"b\":2}",
+      "digest": "0x43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777"
+    },
+    {
+      "name": "key_ordering",
+      "input": {
+        "z": 3,
+        "a": 1,
+        "m": 2
+      },
+      "canonical": "{\"a\":1,\"m\":2,\"z\":3}",
+      "digest": "0x70d1ebc7a727a476f15f7b4436d65b0bca07718c03a0843fa008659badad79c7"
+    },
+    {
+      "name": "nested_object",
+      "input": {
+        "outer": {
+          "inner": "value"
+        }
+      },
+      "canonical": "{\"outer\":{\"inner\":\"value\"}}",
+      "digest": "0xbaceb36f70797f9be9e55a51b0aacef83a0eb69a9fb77b06c3c0e06283e5afbe"
+    },
+    {
+      "name": "array",
+      "input": {
+        "arr": [
+          3,
+          1,
+          2
+        ]
+      },
+      "canonical": "{\"arr\":[3,1,2]}",
+      "digest": "0xcab5b2405701293d6fae18f8809e9946d87a2720a4cff2b9fcac9dde50528852"
+    },
+    {
+      "name": "unicode_string",
+      "input": {
+        "emoji": "Hello, World!"
+      },
+      "canonical": "{\"emoji\":\"Hello, World!\"}",
+      "digest": "0x5ce7e78a0faff83eb40a82537dcc89ec6b3b0ba9a5ddf07fb904aff0c8818220"
+    },
+    {
+      "name": "null_value",
+      "input": {
+        "n": null
+      },
+      "canonical": "{\"n\":null}",
+      "digest": "0x5b4da02351c1c20974b216a5e3a4edb59ac51cbda6be3e9d82952b4f5beea463"
+    },
+    {
+      "name": "boolean_values",
+      "input": {
+        "t": true,
+        "f": false
+      },
+      "canonical": "{\"f\":false,\"t\":true}",
+      "digest": "0xc22848c47426fcf4d27e55573c22f1d23546315c251e8e4bc384820ba5fae568"
+    },
+    {
+      "name": "negative_zero",
+      "input": {
+        "z": 0
+      },
+      "canonical": "{\"z\":0}",
+      "digest": "0xe313adcae40818c4a48a6f5a32c7ab937365ffb0962282a5bf1a629f8d456b63",
+      "note": "-0 must be normalized to 0 per RFC 8785"
+    },
+    {
+      "name": "evidence_sample",
+      "input": {
+        "schema_version": "peac-safe-fetch-evidence/0.1",
+        "evidence_level": "public",
+        "request_timestamp": 1706284800000,
+        "request_url": "https://example.com/api",
+        "canonical_host": "example.com",
+        "is_ip_literal": false,
+        "policy_decision": "allow",
+        "decision_code": "OK",
+        "max_response_bytes": 2097152
+      },
+      "canonical": "{\"canonical_host\":\"example.com\",\"decision_code\":\"OK\",\"evidence_level\":\"public\",\"is_ip_literal\":false,\"max_response_bytes\":2097152,\"policy_decision\":\"allow\",\"request_timestamp\":1706284800000,\"request_url\":\"https://example.com/api\",\"schema_version\":\"peac-safe-fetch-evidence/0.1\"}",
+      "digest": "0x09cf04fe35ad74db9b9c413f0bca5a1525987ec6df26a450a570cade0a1bc12a",
+      "note": "Representative evidence object for integration testing"
+    },
+    {
+      "name": "large_integer",
+      "input": {
+        "big": 9007199254740991
+      },
+      "canonical": "{\"big\":9007199254740991}",
+      "digest": "0xfbbfc58f166e612251143585fa8f37eb44a5aef5de611eed4e7d5ec7a9b5879c",
+      "note": "Number.MAX_SAFE_INTEGER - tests large integer handling"
+    },
+    {
+      "name": "small_negative",
+      "input": {
+        "neg": -9007199254740991
+      },
+      "canonical": "{\"neg\":-9007199254740991}",
+      "digest": "0xcc30e50fed78608cbfcb4392e4b719fec156b0f3c83aaeaf7445d61675cf9ccd",
+      "note": "Negative MAX_SAFE_INTEGER"
+    },
+    {
+      "name": "decimal_number",
+      "input": {
+        "pi": 3.141592653589793
+      },
+      "canonical": "{\"pi\":3.141592653589793}",
+      "digest": "0xf2110e8ae10f60717b750b89f5e44a186ed8e8bf267aaaccef3a077711fb87a5",
+      "note": "Decimal precision handling"
+    },
+    {
+      "name": "exponent_notation",
+      "input": {
+        "exp": 10000000000
+      },
+      "canonical": "{\"exp\":10000000000}",
+      "digest": "0xa8aa91e757d432809ee377d663bbbf0b419ed2a6cd54fbeb1a254a92dea704b8",
+      "note": "Exponent notation normalized to decimal per RFC 8785"
+    },
+    {
+      "name": "unicode_escapes",
+      "input": {
+        "text": "Hello\\nWorld\\t!"
+      },
+      "canonical": "{\"text\":\"Hello\\\\nWorld\\\\t!\"}",
+      "digest": "0xf05c78c386641cc8c25e5e869e8b02722dfb79e0a4a6e4af90b70592ad2c3eaa",
+      "note": "Escaped characters in strings"
+    },
+    {
+      "name": "unicode_codepoints",
+      "input": {
+        "greek": "αβγ"
+      },
+      "canonical": "{\"greek\":\"αβγ\"}",
+      "digest": "0x0bd9d8818a1a0f5eb8663653fcbd19ad63e1eafddc393900219b2a214835294f",
+      "note": "Greek letters alpha beta gamma"
+    },
+    {
+      "name": "deep_nesting",
+      "input": {
+        "a": {
+          "b": {
+            "c": {
+              "d": {
+                "e": 1
+              }
+            }
+          }
+        }
+      },
+      "canonical": "{\"a\":{\"b\":{\"c\":{\"d\":{\"e\":1}}}}}",
+      "digest": "0x2908f1617b1a6274cf5e566f145c6fa02f5fd013de5669839e980c5cef0c6aa5",
+      "note": "5 levels of nesting"
+    },
+    {
+      "name": "mixed_array",
+      "input": {
+        "mix": [
+          1,
+          "two",
+          true,
+          null,
+          {
+            "n": 3
+          }
+        ]
+      },
+      "canonical": "{\"mix\":[1,\"two\",true,null,{\"n\":3}]}",
+      "digest": "0xeac867fefe80d831dad6d3cb6154d2e0f05557315b25d85199d92585bfbf44e7",
+      "note": "Array with mixed types"
+    },
+    {
+      "name": "empty_array",
+      "input": {
+        "arr": []
+      },
+      "canonical": "{\"arr\":[]}",
+      "digest": "0x3a4fcd86c2fec910985cc6cca01b7e6e260e139e273fe39ab9e8284330a19174",
+      "note": "Empty array handling"
+    },
+    {
+      "name": "empty_string",
+      "input": {
+        "s": ""
+      },
+      "canonical": "{\"s\":\"\"}",
+      "digest": "0x6f600f2520d1f84f59052fea1223d39ea8f79da21817fd1ca486770e17ddb1b8",
+      "note": "Empty string handling"
+    },
+    {
+      "name": "long_key",
+      "input": {
+        "verylongkeynamethatexceedstypicallengths": 1
+      },
+      "canonical": "{\"verylongkeynamethatexceedstypicallengths\":1}",
+      "digest": "0x4ba3b8b90aaa5592518a41f68fb38f0f5bd0a17dbc3318815a2d4ac86e4a505a",
+      "note": "Long key name handling"
+    },
+    {
+      "name": "special_chars_in_key",
+      "input": {
+        "key-with-dash": 1,
+        "key.with.dot": 2,
+        "key_with_underscore": 3
+      },
+      "canonical": "{\"key-with-dash\":1,\"key.with.dot\":2,\"key_with_underscore\":3}",
+      "digest": "0xf7f608d547058193109107311fa6b5e3bf85a8097a8dcba68a25e01d1e05f4aa",
+      "note": "Special characters in keys are sorted lexically"
+    },
+    {
+      "name": "integer_like_keys",
+      "input": {
+        "0": "zero",
+        "2": "two",
+        "10": "ten"
+      },
+      "canonical": "{\"0\":\"zero\",\"10\":\"ten\",\"2\":\"two\"}",
+      "digest": "0x7d7806c0acf13cab05395c7beecdeba30ad4e9ee915190e086d423f779094a19",
+      "note": "Integer-like keys sort lexicographically (0 < 10 < 2), not numerically"
+    },
+    {
+      "name": "surrogate_pair_emoji",
+      "input": {
+        "party": "🎉"
+      },
+      "canonical": "{\"party\":\"🎉\"}",
+      "digest": "0xe063d2a122dc190ac7b715df0641896b9aaa5f932621db4bac637906d3403aac",
+      "note": "Surrogate pair U+1F389 (party popper emoji) - tests 4-byte UTF-8"
+    },
+    {
+      "name": "small_exponent",
+      "input": {
+        "tiny": 1e-7
+      },
+      "canonical": "{\"tiny\":1e-7}",
+      "digest": "0xb00f6aefd44a07cefc0befa550f958d8f29b3433d81496569ea98d93da280050",
+      "note": "Very small number uses exponent notation per ES2015"
+    },
+    {
+      "name": "large_exponent",
+      "input": {
+        "huge": 1e+21
+      },
+      "canonical": "{\"huge\":1e+21}",
+      "digest": "0xbd4f9c72b218b69f323c61def5febdaca9576b48e615c0c0e14ed45d8b780cd4",
+      "note": "Very large number (1e21) uses exponent notation per ES2015"
+    },
+    {
+      "name": "control_chars_in_string",
+      "input": {
+        "ctrl": "a\u0000b\u001fc"
+      },
+      "canonical": "{\"ctrl\":\"a\\u0000b\\u001fc\"}",
+      "digest": "0xb4039e1675e16ef08723839d9285f4686fb3a455f938b92f8ece97db78b20c3f",
+      "note": "Control characters (NUL and US) are escaped in JCS"
+    }
+  ],
+  "invalid_inputs": [
+    {
+      "name": "nan",
+      "input": "NaN",
+      "error": "JCS does not support Infinity or NaN"
+    },
+    {
+      "name": "infinity",
+      "input": "Infinity",
+      "error": "JCS does not support Infinity or NaN"
+    },
+    {
+      "name": "negative_infinity",
+      "input": "-Infinity",
+      "error": "JCS does not support Infinity or NaN"
+    },
+    {
+      "name": "undefined_value",
+      "input": "undefined",
+      "note": "undefined values are filtered out (not an error)"
+    },
+    {
+      "name": "function",
+      "input": "function() {}",
+      "error": "Cannot canonicalize value of type function"
+    },
+    {
+      "name": "symbol",
+      "input": "Symbol('test')",
+      "error": "Cannot canonicalize value of type symbol"
+    },
+    {
+      "name": "bigint",
+      "input": "BigInt(123)",
+      "error": "Cannot canonicalize value of type bigint"
+    }
+  ]
+}
