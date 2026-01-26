@@ -26,7 +26,7 @@ import { MAX_PENDING_AUDIT_EVENTS, SAFE_FETCH_EVENT_SCHEMA_VERSION } from './con
 export { MAX_PENDING_AUDIT_EVENTS };
 
 // -----------------------------------------------------------------------------
-// Type Imports (type-only to avoid circular dependencies)
+// Type Imports (type-only to avoid runtime circular dependencies)
 // -----------------------------------------------------------------------------
 
 import type {

@@ -11,7 +11,7 @@
  * @module @peac/net-node/internal
  */
 
-// Import types from index.ts (type-only imports are safe for circular deps)
+// Import types from index.ts (type-only imports don't create runtime cycles)
 import type { SafeFetchEvidence, SafeFetchEvidenceCore, RequestAuditContext } from './index.js';
 
 // Import from evidence-utils.ts to break the circular dependency
