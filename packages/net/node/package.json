@@ -1,0 +1,68 @@
+{
+  "name": "@peac/net-node",
+  "version": "0.10.0",
+  "description": "SSRF-safe network utilities for PEAC Protocol with DNS resolution pinning (Node.js only)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js"
+    },
+    "./*": null
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "packages/net"
+  },
+  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepack": "pnpm build",
+    "lint": "echo 'Run pnpm lint from repo root'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist",
+    "verify:jcs-vectors": "node scripts/verify-jcs-vectors.mjs",
+    "regen:jcs-vectors": "node scripts/verify-jcs-vectors.mjs --regenerate",
+    "test:pack-install": "node scripts/test-pack-install.mjs",
+    "lint:pkg": "publint && attw --pack . --ignore-rules cjs-resolves-to-esm no-resolution",
+    "lint:publint": "publint",
+    "lint:attw": "attw --pack . --ignore-rules cjs-resolves-to-esm no-resolution"
+  },
+  "dependencies": {
+    "@peac/schema": "workspace:*",
+    "ipaddr.js": "^2.3.0",
+    "tldts": "^6.1.86",
+    "undici": "^6.0.0"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@types/node": "^20.10.0",
+    "publint": "^0.3.17",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}
