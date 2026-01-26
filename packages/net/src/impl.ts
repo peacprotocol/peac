@@ -16,17 +16,11 @@ import ipaddr from 'ipaddr.js';
 import { getDomain, parse as parseDomain } from 'tldts';
 import { Agent, fetch as undiciFetch, type Dispatcher } from 'undici';
 // Local SSRF types (not from @peac/schema to keep package self-contained)
-import {
-  type SSRFPolicy,
-  ALLOW_DANGEROUS_CIDRS_ACK,
-} from './ssrf.js';
+import { type SSRFPolicy, ALLOW_DANGEROUS_CIDRS_ACK } from './ssrf.js';
 
 // Import from single source of truth modules (no circular deps)
 import { SAFE_FETCH_ERROR_CODES } from './codes.js';
-import {
-  MAX_PENDING_AUDIT_EVENTS,
-  SAFE_FETCH_EVENT_SCHEMA_VERSION,
-} from './constants.js';
+import { MAX_PENDING_AUDIT_EVENTS, SAFE_FETCH_EVENT_SCHEMA_VERSION } from './constants.js';
 
 // Re-export for consumers
 export { MAX_PENDING_AUDIT_EVENTS };
@@ -89,14 +83,14 @@ export const HOP_BY_HOP_HEADERS: Set<string> = new Set([
  * These are always blocked (fail-closed security)
  */
 export const BLOCKED_IPV4_RANGES: Set<string> = new Set([
-  'unspecified',      // 0.0.0.0/8
-  'broadcast',        // 255.255.255.255/32
-  'loopback',         // 127.0.0.0/8
-  'private',          // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
-  'linkLocal',        // 169.254.0.0/16
-  'carrierGradeNat',  // 100.64.0.0/10 (CGNAT - special handling)
-  'reserved',         // 240.0.0.0/4
-  'multicast',        // 224.0.0.0/4
+  'unspecified', // 0.0.0.0/8
+  'broadcast', // 255.255.255.255/32
+  'loopback', // 127.0.0.0/8
+  'private', // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+  'linkLocal', // 169.254.0.0/16
+  'carrierGradeNat', // 100.64.0.0/10 (CGNAT - special handling)
+  'reserved', // 240.0.0.0/4
+  'multicast', // 224.0.0.0/4
 ]);
 
 /**
@@ -104,34 +98,34 @@ export const BLOCKED_IPV4_RANGES: Set<string> = new Set([
  * Not covered by ipaddr.js range() but should be blocked
  */
 export const ADDITIONAL_BLOCKED_CIDRS_V4: Array<[ipaddr.IPv4, number]> = [
-  [ipaddr.IPv4.parse('192.0.0.0'), 24],      // IETF Protocol Assignments
-  [ipaddr.IPv4.parse('192.0.2.0'), 24],      // Documentation (TEST-NET-1)
-  [ipaddr.IPv4.parse('198.18.0.0'), 15],     // Benchmarking
-  [ipaddr.IPv4.parse('198.51.100.0'), 24],   // Documentation (TEST-NET-2)
-  [ipaddr.IPv4.parse('203.0.113.0'), 24],    // Documentation (TEST-NET-3)
+  [ipaddr.IPv4.parse('192.0.0.0'), 24], // IETF Protocol Assignments
+  [ipaddr.IPv4.parse('192.0.2.0'), 24], // Documentation (TEST-NET-1)
+  [ipaddr.IPv4.parse('198.18.0.0'), 15], // Benchmarking
+  [ipaddr.IPv4.parse('198.51.100.0'), 24], // Documentation (TEST-NET-2)
+  [ipaddr.IPv4.parse('203.0.113.0'), 24], // Documentation (TEST-NET-3)
 ];
 
 /**
  * Blocked IPv6 range names from ipaddr.js
  */
 export const BLOCKED_IPV6_RANGES: Set<string> = new Set([
-  'unspecified',      // ::/128
-  'loopback',         // ::1/128
-  'linkLocal',        // fe80::/10
-  'uniqueLocal',      // fc00::/7
-  'multicast',        // ff00::/8
-  'reserved',         // various reserved ranges
+  'unspecified', // ::/128
+  'loopback', // ::1/128
+  'linkLocal', // fe80::/10
+  'uniqueLocal', // fc00::/7
+  'multicast', // ff00::/8
+  'reserved', // various reserved ranges
 ]);
 
 /**
  * Additional IPv6 CIDR ranges to block
  */
 export const ADDITIONAL_BLOCKED_CIDRS_V6: Array<[ipaddr.IPv6, number]> = [
-  [ipaddr.IPv6.parse('2001:db8::'), 32],     // Documentation
-  [ipaddr.IPv6.parse('2001::'), 23],         // TEREDO (deprecated)
-  [ipaddr.IPv6.parse('2002::'), 16],         // 6to4 (deprecated)
-  [ipaddr.IPv6.parse('64:ff9b::'), 96],      // NAT64
-  [ipaddr.IPv6.parse('100::'), 64],          // Discard prefix
+  [ipaddr.IPv6.parse('2001:db8::'), 32], // Documentation
+  [ipaddr.IPv6.parse('2001::'), 23], // TEREDO (deprecated)
+  [ipaddr.IPv6.parse('2002::'), 16], // 6to4 (deprecated)
+  [ipaddr.IPv6.parse('64:ff9b::'), 96], // NAT64
+  [ipaddr.IPv6.parse('100::'), 64], // Discard prefix
 ];
 
 // Error codes imported from codes.ts (single source of truth)
@@ -207,11 +201,7 @@ export function redactIp(
  * Header input type (compatible with RequestInit.headers)
  * Using a type alias to avoid dependency on DOM types
  */
-type HeaderInput =
-  | Headers
-  | Record<string, string>
-  | Array<[string, string]>
-  | undefined;
+type HeaderInput = Headers | Record<string, string> | Array<[string, string]> | undefined;
 
 /**
  * Case-insensitive header presence check
@@ -225,10 +215,7 @@ type HeaderInput =
  * @returns true if header exists (any casing)
  * @internal
  */
-export function hasHeaderCaseInsensitive(
-  headers: HeaderInput,
-  name: string
-): boolean {
+export function hasHeaderCaseInsensitive(headers: HeaderInput, name: string): boolean {
   if (!headers) return false;
   const lowerName = name.toLowerCase();
 
@@ -262,10 +249,7 @@ export function parseCidr(cidrStr: string): [ipaddr.IPv4 | ipaddr.IPv6, number] 
  * Check if an IP address matches any CIDR in a list
  * @internal
  */
-export function matchesAnyCidr(
-  addr: ipaddr.IPv4 | ipaddr.IPv6,
-  cidrStrings: string[]
-): boolean {
+export function matchesAnyCidr(addr: ipaddr.IPv4 | ipaddr.IPv6, cidrStrings: string[]): boolean {
   for (const cidrStr of cidrStrings) {
     const parsed = parseCidr(cidrStr);
     if (!parsed) continue;
@@ -327,8 +311,10 @@ function ipv6CidrEnd(network: ipaddr.IPv6, prefixLen: number): bigint {
  * @internal
  */
 function ipv4RangesOverlap(
-  net1: ipaddr.IPv4, prefix1: number,
-  net2: ipaddr.IPv4, prefix2: number
+  net1: ipaddr.IPv4,
+  prefix1: number,
+  net2: ipaddr.IPv4,
+  prefix2: number
 ): boolean {
   const start1 = ipv4ToUint32(net1);
   const end1 = ipv4CidrEnd(net1, prefix1);
@@ -344,8 +330,10 @@ function ipv4RangesOverlap(
  * @internal
  */
 function ipv6RangesOverlap(
-  net1: ipaddr.IPv6, prefix1: number,
-  net2: ipaddr.IPv6, prefix2: number
+  net1: ipaddr.IPv6,
+  prefix1: number,
+  net2: ipaddr.IPv6,
+  prefix2: number
 ): boolean {
   const start1 = ipv6ToBigInt(net1);
   const end1 = ipv6CidrEnd(net1, prefix1);
@@ -475,8 +463,8 @@ export function isPrivateIP(ip: string, policy?: SSRFPolicy): boolean {
     if (BLOCKED_IPV4_RANGES.has(range)) {
       // Special case: CGNAT requires explicit ack
       if (range === 'carrierGradeNat') {
-        const cgnatAllowed = policy?.allowCgnat &&
-          policy?.ack_allow_cgnat === 'I_UNDERSTAND_CGNAT_SECURITY_RISKS';
+        const cgnatAllowed =
+          policy?.allowCgnat && policy?.ack_allow_cgnat === 'I_UNDERSTAND_CGNAT_SECURITY_RISKS';
         return !cgnatAllowed;
       }
       return true;
@@ -683,8 +671,8 @@ export function stripHopByHopHeaders(headers: Headers): void {
     // Connection header can list additional headers to treat as hop-by-hop
     const additionalHeaders = connectionHeader
       .split(',')
-      .map(h => h.trim().toLowerCase())
-      .filter(h => h.length > 0);
+      .map((h) => h.trim().toLowerCase())
+      .filter((h) => h.length > 0);
 
     for (const header of additionalHeaders) {
       headers.delete(header);
@@ -761,10 +749,7 @@ export function isRedirectAllowed(
       return false;
 
     case 'same-origin':
-      return (
-        originalUrl.protocol === redirectUrl.protocol &&
-        originalUrl.host === redirectUrl.host
-      );
+      return originalUrl.protocol === redirectUrl.protocol && originalUrl.host === redirectUrl.host;
 
     case 'same-registrable-domain': {
       if (originalUrl.protocol !== redirectUrl.protocol) {
@@ -792,8 +777,10 @@ export function isRedirectAllowed(
       if (!allowHosts || allowHosts.length === 0) {
         return false;
       }
-      return allowHosts.includes(redirectUrl.hostname) ||
-        allowHosts.includes(getRegistrableDomain(redirectUrl.hostname));
+      return (
+        allowHosts.includes(redirectUrl.hostname) ||
+        allowHosts.includes(getRegistrableDomain(redirectUrl.hostname))
+      );
 
     default:
       return false;
@@ -1054,17 +1041,20 @@ export async function attemptWithFallback(
     let result: AttemptResult | null = null;
     let settled = false;
 
-    const promise = httpClient.fetch(url, ip, {
-      ...options,
-      timeoutMs: attemptTimeoutMs,
-    }).then((r) => {
-      result = r;
-      settled = true;
-      return r;
-    }).catch((err) => {
-      settled = true;
-      throw err;
-    });
+    const promise = httpClient
+      .fetch(url, ip, {
+        ...options,
+        timeoutMs: attemptTimeoutMs,
+      })
+      .then((r) => {
+        result = r;
+        settled = true;
+        return r;
+      })
+      .catch((err) => {
+        settled = true;
+        throw err;
+      });
 
     const cleanupOnLose = async () => {
       // If this attempt completed, close its agent
@@ -1075,7 +1065,13 @@ export async function attemptWithFallback(
       // (the httpClient handles cleanup on error)
     };
 
-    return { promise, cleanupOnLose, get settled() { return settled; } };
+    return {
+      promise,
+      cleanupOnLose,
+      get settled() {
+        return settled;
+      },
+    };
   };
 
   // Define types for Promise.race results
@@ -1095,7 +1091,9 @@ export async function attemptWithFallback(
       setTimeout(() => resolve({ winner: 'timeout' }), HAPPY_EYEBALLS_FIRST_TIMEOUT_MS)
     ),
     ipv6Attempt.promise.then(
-      (): never => { throw new Error('should not reach'); },
+      (): never => {
+        throw new Error('should not reach');
+      },
       (): RaceFailed => ({ winner: 'ipv6_failed' })
     ),
   ]);

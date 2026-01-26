@@ -433,12 +433,12 @@ The `onEvent` hook provides real-time observability into fetch operations. To bu
 
 All counters in evidence are **request-scoped** (per-safeFetch invocation):
 
-| Field in `audit_stats`   | Scope       | Description                                    |
-| ------------------------ | ----------- | ---------------------------------------------- |
-| `pending`                | Per-request | Events pending at evidence finalization        |
-| `dropped`                | Per-request | Events dropped due to queue overflow           |
-| `hook_errors`            | Per-request | Hook errors that occurred during this request  |
-| `hook_suppressed`        | Per-request | Hook errors suppressed by rate limiting        |
+| Field in `audit_stats` | Scope       | Description                                   |
+| ---------------------- | ----------- | --------------------------------------------- |
+| `pending`              | Per-request | Events pending at evidence finalization       |
+| `dropped`              | Per-request | Events dropped due to queue overflow          |
+| `hook_errors`          | Per-request | Hook errors that occurred during this request |
+| `hook_suppressed`      | Per-request | Hook errors suppressed by rate limiting       |
 
 Note: All counters in `audit_stats` are specific to **this request** only. They reset for each `safeFetch` call, ensuring evidence accurately describes that specific request without noise from other concurrent requests.
 

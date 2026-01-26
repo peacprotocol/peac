@@ -40,10 +40,7 @@ import { _internals } from '../src/testing';
 /**
  * Create a mock DNS resolver that returns separate IPv4/IPv6 arrays
  */
-function createMockDnsResolver(
-  ipv4: string[] = [],
-  ipv6: string[] = []
-): DnsResolver {
+function createMockDnsResolver(ipv4: string[] = [], ipv6: string[] = []): DnsResolver {
   return {
     resolveAll: vi.fn().mockResolvedValue({ ipv4, ipv6 }),
   };
@@ -75,10 +72,7 @@ function createMockBody(data: unknown): ReadableStream<Uint8Array> {
 /**
  * Create a mock HTTP client that returns { response, close }
  */
-function createMockHttpClient(
-  response: Partial<Response>,
-  json?: unknown
-): HttpClient {
+function createMockHttpClient(response: Partial<Response>, json?: unknown): HttpClient {
   const mockResponse = {
     status: 200,
     headers: new Headers(),
@@ -151,11 +145,17 @@ describe('@peac/net-node', () => {
 
     it('should export SAFE_FETCH_ERROR_CODES', () => {
       expect(SAFE_FETCH_ERROR_CODES.E_SSRF_URL_REJECTED).toBe('E_NET_SSRF_URL_REJECTED');
-      expect(SAFE_FETCH_ERROR_CODES.E_SSRF_DNS_RESOLVED_PRIVATE).toBe('E_NET_SSRF_DNS_RESOLVED_PRIVATE');
+      expect(SAFE_FETCH_ERROR_CODES.E_SSRF_DNS_RESOLVED_PRIVATE).toBe(
+        'E_NET_SSRF_DNS_RESOLVED_PRIVATE'
+      );
       expect(SAFE_FETCH_ERROR_CODES.E_SSRF_ALL_IPS_BLOCKED).toBe('E_NET_SSRF_ALL_IPS_BLOCKED');
       expect(SAFE_FETCH_ERROR_CODES.E_SSRF_REDIRECT_BLOCKED).toBe('E_NET_SSRF_REDIRECT_BLOCKED');
-      expect(SAFE_FETCH_ERROR_CODES.E_SSRF_TOO_MANY_REDIRECTS).toBe('E_NET_SSRF_TOO_MANY_REDIRECTS');
-      expect(SAFE_FETCH_ERROR_CODES.E_SSRF_ALLOWCIDRS_ACK_REQUIRED).toBe('E_NET_SSRF_ALLOWCIDRS_ACK_REQUIRED');
+      expect(SAFE_FETCH_ERROR_CODES.E_SSRF_TOO_MANY_REDIRECTS).toBe(
+        'E_NET_SSRF_TOO_MANY_REDIRECTS'
+      );
+      expect(SAFE_FETCH_ERROR_CODES.E_SSRF_ALLOWCIDRS_ACK_REQUIRED).toBe(
+        'E_NET_SSRF_ALLOWCIDRS_ACK_REQUIRED'
+      );
       expect(SAFE_FETCH_ERROR_CODES.E_DNS_RESOLUTION_FAILED).toBe('E_NET_DNS_RESOLUTION_FAILED');
       expect(SAFE_FETCH_ERROR_CODES.E_REQUEST_TIMEOUT).toBe('E_NET_REQUEST_TIMEOUT');
       expect(SAFE_FETCH_ERROR_CODES.E_NETWORK_ERROR).toBe('E_NET_NETWORK_ERROR');
@@ -565,7 +565,7 @@ describe('@peac/net-node', () => {
         {
           response: {
             status: 302,
-            headers: new Headers({ 'location': '/new-path' }),
+            headers: new Headers({ location: '/new-path' }),
           },
         },
         {
@@ -588,7 +588,7 @@ describe('@peac/net-node', () => {
       const mockResolver = createMockDnsResolver(['8.8.8.8']);
       const mockHttpClient = createMockHttpClient({
         status: 302,
-        headers: new Headers({ 'location': 'https://evil.com/redirect' }),
+        headers: new Headers({ location: 'https://evil.com/redirect' }),
       });
 
       const result = await safeFetch('https://example.com/api', {
@@ -609,7 +609,7 @@ describe('@peac/net-node', () => {
         {
           response: {
             status: 302,
-            headers: new Headers({ 'location': 'https://cdn.example.com/file' }),
+            headers: new Headers({ location: 'https://cdn.example.com/file' }),
           },
         },
         {
@@ -631,7 +631,7 @@ describe('@peac/net-node', () => {
       const mockResolver = createMockDnsResolver(['8.8.8.8']);
       const mockHttpClient = createMockHttpClient({
         status: 302,
-        headers: new Headers({ 'location': 'https://evil.com/redirect' }),
+        headers: new Headers({ location: 'https://evil.com/redirect' }),
       });
 
       const result = await safeFetch('https://example.com/api', {
@@ -652,7 +652,7 @@ describe('@peac/net-node', () => {
         {
           response: {
             status: 302,
-            headers: new Headers({ 'location': 'https://trusted-cdn.com/file' }),
+            headers: new Headers({ location: 'https://trusted-cdn.com/file' }),
           },
         },
         {
@@ -675,7 +675,7 @@ describe('@peac/net-node', () => {
       const mockResolver = createMockDnsResolver(['8.8.8.8']);
       const mockHttpClient = createMockHttpClient({
         status: 302,
-        headers: new Headers({ 'location': '/same-host' }),
+        headers: new Headers({ location: '/same-host' }),
       });
 
       const result = await safeFetch('https://example.com/api', {
@@ -696,7 +696,7 @@ describe('@peac/net-node', () => {
         {
           response: {
             status: 302,
-            headers: new Headers({ 'location': 'https://cdn.example.com/file' }),
+            headers: new Headers({ location: 'https://cdn.example.com/file' }),
           },
         },
         {
@@ -713,7 +713,9 @@ describe('@peac/net-node', () => {
 
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.warnings).toContain('allowCrossHostRedirects is deprecated, use redirectPolicy instead');
+        expect(result.warnings).toContain(
+          'allowCrossHostRedirects is deprecated, use redirectPolicy instead'
+        );
       }
     });
 
@@ -721,7 +723,7 @@ describe('@peac/net-node', () => {
       const mockResolver = createMockDnsResolver(['8.8.8.8']);
       const mockHttpClient = createMockHttpClient({
         status: 302,
-        headers: new Headers({ 'location': '/redirect' }),
+        headers: new Headers({ location: '/redirect' }),
       });
 
       const result = await safeFetch('https://example.com/api', {
@@ -809,7 +811,7 @@ describe('@peac/net-node', () => {
       const mockResolver = createMockDnsResolver(['8.8.8.8']);
       const mockHttpClient = createMockHttpClient({
         status: 302,
-        headers: new Headers({ 'location': '/moved' }),
+        headers: new Headers({ location: '/moved' }),
       });
 
       const result = await safeFetchJWKS('https://issuer.example.com/.well-known/jwks.json', {
@@ -982,10 +984,12 @@ describe('@peac/net-node', () => {
     });
 
     it('should allow CGNAT when policy allows with ack', () => {
-      expect(_internals.isPrivateIP('100.64.0.1', {
-        allowCgnat: true,
-        ack_allow_cgnat: 'I_UNDERSTAND_CGNAT_SECURITY_RISKS',
-      })).toBe(false);
+      expect(
+        _internals.isPrivateIP('100.64.0.1', {
+          allowCgnat: true,
+          ack_allow_cgnat: 'I_UNDERSTAND_CGNAT_SECURITY_RISKS',
+        })
+      ).toBe(false);
     });
 
     it('should block CGNAT when allowCgnat but missing ack', () => {
@@ -1000,11 +1004,11 @@ describe('@peac/net-node', () => {
     });
 
     it('should detect RFC 6890 special ranges', () => {
-      expect(_internals.isPrivateIP('192.0.2.1')).toBe(true);     // TEST-NET-1
-      expect(_internals.isPrivateIP('198.18.1.1')).toBe(true);    // Benchmarking
-      expect(_internals.isPrivateIP('198.51.100.1')).toBe(true);  // TEST-NET-2
-      expect(_internals.isPrivateIP('203.0.113.1')).toBe(true);   // TEST-NET-3
-      expect(_internals.isPrivateIP('2001:db8::1')).toBe(true);   // IPv6 doc
+      expect(_internals.isPrivateIP('192.0.2.1')).toBe(true); // TEST-NET-1
+      expect(_internals.isPrivateIP('198.18.1.1')).toBe(true); // Benchmarking
+      expect(_internals.isPrivateIP('198.51.100.1')).toBe(true); // TEST-NET-2
+      expect(_internals.isPrivateIP('203.0.113.1')).toBe(true); // TEST-NET-3
+      expect(_internals.isPrivateIP('2001:db8::1')).toBe(true); // IPv6 doc
     });
 
     it('should allow public IPs', () => {
@@ -1026,9 +1030,11 @@ describe('@peac/net-node', () => {
     });
 
     it('should pass for public CIDRs without ack', () => {
-      expect(_internals.validateAllowCidrsAck({
-        allowCidrs: ['8.8.8.0/24'],
-      })).toEqual({ valid: true });
+      expect(
+        _internals.validateAllowCidrsAck({
+          allowCidrs: ['8.8.8.0/24'],
+        })
+      ).toEqual({ valid: true });
     });
 
     it('should fail for private CIDRs without ack', () => {
@@ -1040,10 +1046,12 @@ describe('@peac/net-node', () => {
     });
 
     it('should pass for private CIDRs with proper ack', () => {
-      expect(_internals.validateAllowCidrsAck({
-        allowCidrs: ['10.0.0.0/8'],
-        ack_allow_dangerous_cidrs: 'I_UNDERSTAND_ALLOWING_PRIVATE_CIDRS_IS_DANGEROUS',
-      })).toEqual({ valid: true });
+      expect(
+        _internals.validateAllowCidrsAck({
+          allowCidrs: ['10.0.0.0/8'],
+          ack_allow_dangerous_cidrs: 'I_UNDERSTAND_ALLOWING_PRIVATE_CIDRS_IS_DANGEROUS',
+        })
+      ).toEqual({ valid: true });
     });
   });
 
@@ -1329,7 +1337,9 @@ describe('@peac/net-node', () => {
         // Should use the mixed DNS blocked code (not the generic private IP code)
         expect(result.code).toBe(SAFE_FETCH_ERROR_CODES.E_SSRF_MIXED_DNS_BLOCKED);
         // P0.1: Error messages are now generic (non-sensitive)
-        expect(result.error).toBe('DNS returned mixed public/private addresses (blocked by policy)');
+        expect(result.error).toBe(
+          'DNS returned mixed public/private addresses (blocked by policy)'
+        );
         // Verify dns_answers contains structured audit data
         expect(result.dns_answers).toBeDefined();
       }
@@ -1570,7 +1580,9 @@ describe('@peac/net-node', () => {
     it('should block different registrable domain', () => {
       const origUrl = new URL('https://example.com/api');
       const redirUrl = new URL('https://example.org/api');
-      expect(_internals.isRedirectAllowed(origUrl, redirUrl, 'same-registrable-domain')).toBe(false);
+      expect(_internals.isRedirectAllowed(origUrl, redirUrl, 'same-registrable-domain')).toBe(
+        false
+      );
     });
 
     it('should block HTTPS to HTTP downgrade', () => {
@@ -1599,7 +1611,9 @@ describe('@peac/net-node', () => {
       const origUrl = new URL('https://example.com/api');
       const redirUrl = new URL('https://192.168.1.1/api');
       // IP addresses have themselves as registrable domain
-      expect(_internals.isRedirectAllowed(origUrl, redirUrl, 'same-registrable-domain')).toBe(false);
+      expect(_internals.isRedirectAllowed(origUrl, redirUrl, 'same-registrable-domain')).toBe(
+        false
+      );
     });
 
     it('should block redirect to private IP (via DNS check)', async () => {
@@ -2085,7 +2099,7 @@ describe('@peac/net-node', () => {
 
   describe('adversarial: hop-by-hop header stripping', () => {
     it('should strip Connection header', () => {
-      const headers = new Headers({ 'Connection': 'keep-alive' });
+      const headers = new Headers({ Connection: 'keep-alive' });
       _internals.stripHopByHopHeaders(headers);
       expect(headers.has('connection')).toBe(false);
     });
@@ -2097,7 +2111,7 @@ describe('@peac/net-node', () => {
     });
 
     it('should strip Upgrade header', () => {
-      const headers = new Headers({ 'Upgrade': 'websocket' });
+      const headers = new Headers({ Upgrade: 'websocket' });
       _internals.stripHopByHopHeaders(headers);
       expect(headers.has('upgrade')).toBe(false);
     });
@@ -2111,7 +2125,7 @@ describe('@peac/net-node', () => {
     it('should strip headers listed in Connection header', () => {
       // Custom headers listed in Connection should also be stripped
       const headers = new Headers({
-        'Connection': 'X-Custom-Header, Keep-Alive',
+        Connection: 'X-Custom-Header, Keep-Alive',
         'X-Custom-Header': 'sensitive-value',
         'Keep-Alive': 'timeout=5',
       });
@@ -2124,8 +2138,8 @@ describe('@peac/net-node', () => {
     it('should preserve non-hop-by-hop headers', () => {
       const headers = new Headers({
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer token',
-        'Accept': 'application/json',
+        Authorization: 'Bearer token',
+        Accept: 'application/json',
       });
       _internals.stripHopByHopHeaders(headers);
       expect(headers.get('content-type')).toBe('application/json');
@@ -2135,9 +2149,9 @@ describe('@peac/net-node', () => {
 
     it('should strip hop-by-hop headers case-insensitively', () => {
       const headers = new Headers({
-        'CONNECTION': 'keep-alive',
+        CONNECTION: 'keep-alive',
         'TRANSFER-ENCODING': 'chunked',
-        'TE': 'trailers',
+        TE: 'trailers',
       });
       _internals.stripHopByHopHeaders(headers);
       // Headers normalizes to lowercase, so check lowercase
@@ -2168,7 +2182,7 @@ describe('@peac/net-node', () => {
         _httpClient: mockHttpClient,
         headers: {
           'Content-Type': 'application/json',
-          'Connection': 'keep-alive',
+          Connection: 'keep-alive',
           'Transfer-Encoding': 'chunked',
         },
       });
@@ -2329,7 +2343,9 @@ describe('@peac/net-node', () => {
       const result = await safeFetch('https://example.com/api', {
         _dnsResolver: mockResolver,
         _httpClient: mockHttpClient,
-        onEvent: () => { throw new Error('Hook error'); },
+        onEvent: () => {
+          throw new Error('Hook error');
+        },
       });
 
       // Request should still succeed despite hook error
@@ -2371,7 +2387,7 @@ describe('@peac/net-node', () => {
       const slowResolver: DnsResolver = {
         resolveAll: vi.fn().mockImplementation(async () => {
           // Simulate slow DNS (100ms, but timeout is 50ms)
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           return { ipv4: ['8.8.8.8'], ipv6: [] };
         }),
       };
@@ -2404,7 +2420,7 @@ describe('@peac/net-node', () => {
       const fastResolver: DnsResolver = {
         resolveAll: vi.fn().mockImplementation(async () => {
           // Simulate fast DNS (10ms, timeout is 100ms)
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           return { ipv4: ['8.8.8.8'], ipv6: [] };
         }),
       };
@@ -2462,9 +2478,15 @@ describe('@peac/net-node', () => {
         const canonical = canonicalizeEvidence(evidence);
 
         // Keys should be sorted: canonical_host, decision_code, evidence_level, ...
-        expect(canonical.indexOf('"canonical_host"')).toBeLessThan(canonical.indexOf('"decision_code"'));
-        expect(canonical.indexOf('"decision_code"')).toBeLessThan(canonical.indexOf('"evidence_level"'));
-        expect(canonical.indexOf('"evidence_level"')).toBeLessThan(canonical.indexOf('"is_ip_literal"'));
+        expect(canonical.indexOf('"canonical_host"')).toBeLessThan(
+          canonical.indexOf('"decision_code"')
+        );
+        expect(canonical.indexOf('"decision_code"')).toBeLessThan(
+          canonical.indexOf('"evidence_level"')
+        );
+        expect(canonical.indexOf('"evidence_level"')).toBeLessThan(
+          canonical.indexOf('"is_ip_literal"')
+        );
       });
 
       it('should produce no whitespace', () => {
@@ -2779,7 +2801,7 @@ describe('@peac/net-node', () => {
           is_ip_literal: false,
           policy_decision: 'allow',
           decision_code: 'OK',
-          max_response_bytes: 2097152
+          max_response_bytes: 2097152,
         };
         const digest = computeEvidenceDigest(input as any);
         expect(digest).toBe('0x09cf04fe35ad74db9b9c413f0bca5a1525987ec6df26a450a570cade0a1bc12a');
@@ -2836,11 +2858,17 @@ describe('@peac/net-node', () => {
       const events: any[] = [];
       const hook = (e: any) => events.push(e);
 
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), hook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        hook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask queue to flush
       await new Promise((resolve) => queueMicrotask(resolve));
@@ -2995,14 +3023,16 @@ describe('@peac/net-node', () => {
         expect(result.ok).toBe(true);
         if (result.ok) {
           // Should have warning about dangerous port
-          expect(result.warnings).toContain('Dangerous port 22 allowed via explicit acknowledgment');
+          expect(result.warnings).toContain(
+            'Dangerous port 22 allowed via explicit acknowledgment'
+          );
         }
       });
 
       it('should include all expected dangerous ports', () => {
         // Verify the DANGEROUS_PORTS set contains critical ports
-        expect(DANGEROUS_PORTS.has(22)).toBe(true);   // SSH
-        expect(DANGEROUS_PORTS.has(25)).toBe(true);   // SMTP
+        expect(DANGEROUS_PORTS.has(22)).toBe(true); // SSH
+        expect(DANGEROUS_PORTS.has(25)).toBe(true); // SMTP
         expect(DANGEROUS_PORTS.has(3306)).toBe(true); // MySQL
         expect(DANGEROUS_PORTS.has(5432)).toBe(true); // PostgreSQL
         expect(DANGEROUS_PORTS.has(6379)).toBe(true); // Redis
@@ -3188,7 +3218,9 @@ describe('@peac/net-node', () => {
 
         expect(result.ok).toBe(true);
         if (result.ok) {
-          expect(result.warnings).toContain('Dangerous port 22 allowed via explicit acknowledgment');
+          expect(result.warnings).toContain(
+            'Dangerous port 22 allowed via explicit acknowledgment'
+          );
           expect(result.evidence.policy_decision).toBe('allow');
         }
         // Both requests should have been made
@@ -3394,7 +3426,7 @@ describe('@peac/net-node', () => {
           expect(result.evidence?.evidence_level).toBe('private');
           // Private error evidence should include DNS answers
           expect(result.evidence?.dns_answers).toBeDefined();
-          expect(result.evidence?.dns_answers?.some(a => a.ip === '10.0.0.1')).toBe(true);
+          expect(result.evidence?.dns_answers?.some((a) => a.ip === '10.0.0.1')).toBe(true);
         }
       });
     });
@@ -3436,14 +3468,20 @@ describe('@peac/net-node', () => {
       const events: any[] = [];
       const hook = (e: any) => events.push(e);
 
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), hook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        hook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask to execute
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise((resolve) => queueMicrotask(resolve));
 
       expect(events).toHaveLength(1);
       expect(events[0].type).toBe('dns_start');
@@ -3452,27 +3490,41 @@ describe('@peac/net-node', () => {
     });
 
     it('emitAuditEvent should swallow hook errors', async () => {
-      const badHook = () => { throw new Error('oops'); };
+      const badHook = () => {
+        throw new Error('oops');
+      };
 
       // Should not throw (error is swallowed in microtask)
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), badHook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        badHook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask to execute (it should not throw)
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise((resolve) => queueMicrotask(resolve));
     });
 
     it('emitAuditEvent should handle undefined hook', () => {
       // Should not throw with undefined hook
       expect(() => {
-        _internals.emitAuditEvent(_internals.createRequestAuditContext(), undefined, undefined, 'onEvent', {
-          type: 'dns_start',
-          timestamp: Date.now(),
-          url: 'https://example.com',
-        });
+        _internals.emitAuditEvent(
+          _internals.createRequestAuditContext(),
+          undefined,
+          undefined,
+          'onEvent',
+          {
+            type: 'dns_start',
+            timestamp: Date.now(),
+            url: 'https://example.com',
+          }
+        );
       }).not.toThrow();
     });
   });
@@ -3501,11 +3553,17 @@ describe('@peac/net-node', () => {
       const hook = (e: any) => received.push(e);
 
       // Emit events synchronously - they're queued but not yet processed
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), hook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        hook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Immediately after emitting, pending count should be 1
       // (microtask hasn't run yet)
@@ -3518,14 +3576,20 @@ describe('@peac/net-node', () => {
       const received: any[] = [];
       const hook = (e: any) => received.push(e);
 
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), hook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        hook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask to execute
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise((resolve) => queueMicrotask(resolve));
 
       // Pending should be 0 after processing
       const stats = getAuditQueueStats();
@@ -3552,11 +3616,11 @@ describe('@peac/net-node', () => {
       }
 
       // Wait for all microtasks to execute
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Filter out overflow events (they're delivered directly, not queued)
-      const regularEvents = received.filter(e => e.type !== 'audit_overflow');
-      const overflowEvents = received.filter(e => e.type === 'audit_overflow');
+      const regularEvents = received.filter((e) => e.type !== 'audit_overflow');
+      const overflowEvents = received.filter((e) => e.type === 'audit_overflow');
 
       // Should have received at most MAX_PENDING_AUDIT_EVENTS regular events
       expect(regularEvents.length).toBeLessThanOrEqual(MAX_PENDING_AUDIT_EVENTS);
@@ -3576,15 +3640,21 @@ describe('@peac/net-node', () => {
 
       // Emit some events
       for (let i = 0; i < 10; i++) {
-        _internals.emitAuditEvent(_internals.createRequestAuditContext(), hook, undefined, 'onEvent', {
-          type: 'dns_start',
-          timestamp: Date.now(),
-          url: 'https://example.com',
-        });
+        _internals.emitAuditEvent(
+          _internals.createRequestAuditContext(),
+          hook,
+          undefined,
+          'onEvent',
+          {
+            type: 'dns_start',
+            timestamp: Date.now(),
+            url: 'https://example.com',
+          }
+        );
       }
 
       // Wait for events to process
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Reset stats
       _internals.resetAuditQueueStats();
@@ -3595,16 +3665,24 @@ describe('@peac/net-node', () => {
     });
 
     it('should decrement pending count even when hook throws', async () => {
-      const badHook = () => { throw new Error('hook error'); };
+      const badHook = () => {
+        throw new Error('hook error');
+      };
 
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), badHook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        badHook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask to execute
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Pending should be 0 (decremented in finally block)
       const stats = getAuditQueueStats();
@@ -3622,14 +3700,20 @@ describe('@peac/net-node', () => {
         }
       };
 
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), errorHook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        errorHook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask to execute
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Should have received both the original event and an error event
       expect(received.length).toBe(2);
@@ -3650,14 +3734,20 @@ describe('@peac/net-node', () => {
         throw new Error(`error ${errorCount}`);
       };
 
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), recursiveErrorHook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        recursiveErrorHook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask to execute
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Should have received exactly 2 events: the original and one error event
       // The explicit non-recursion guard prevents infinite loops:
@@ -3684,16 +3774,22 @@ describe('@peac/net-node', () => {
         }
       };
 
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), sensitiveErrorHook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        sensitiveErrorHook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask to execute
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
-      const errorEvent = received.find(e => e.type === 'audit_hook_error');
+      const errorEvent = received.find((e) => e.type === 'audit_hook_error');
       expect(errorEvent).toBeDefined();
       // Sensitive data should be redacted
       expect(errorEvent.meta.error_message).not.toContain('abc123token');
@@ -3712,16 +3808,22 @@ describe('@peac/net-node', () => {
         }
       };
 
-      _internals.emitAuditEvent(_internals.createRequestAuditContext(), longErrorHook, undefined, 'onEvent', {
-        type: 'dns_start',
-        timestamp: Date.now(),
-        url: 'https://example.com',
-      });
+      _internals.emitAuditEvent(
+        _internals.createRequestAuditContext(),
+        longErrorHook,
+        undefined,
+        'onEvent',
+        {
+          type: 'dns_start',
+          timestamp: Date.now(),
+          url: 'https://example.com',
+        }
+      );
 
       // Wait for microtask to execute
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
-      const errorEvent = received.find(e => e.type === 'audit_hook_error');
+      const errorEvent = received.find((e) => e.type === 'audit_hook_error');
       expect(errorEvent).toBeDefined();
       // Error message should be truncated to 200 chars + '...'
       expect(errorEvent.meta.error_message.length).toBeLessThanOrEqual(203);
@@ -3769,7 +3871,7 @@ describe('@peac/net-node', () => {
       expect(evidence.audit_stats!.dropped).toBeGreaterThan(0);
 
       // Wait for events to process to clean up
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     });
 
     it('should not set audit_truncated when no events are dropped', async () => {
@@ -3781,15 +3883,21 @@ describe('@peac/net-node', () => {
 
       // Emit just a few events (well under the limit)
       for (let i = 0; i < 5; i++) {
-        _internals.emitAuditEvent(_internals.createRequestAuditContext(), hook, undefined, 'onEvent', {
-          type: 'dns_start',
-          timestamp: Date.now(),
-          url: `https://example.com/${i}`,
-        });
+        _internals.emitAuditEvent(
+          _internals.createRequestAuditContext(),
+          hook,
+          undefined,
+          'onEvent',
+          {
+            type: 'dns_start',
+            timestamp: Date.now(),
+            url: `https://example.com/${i}`,
+          }
+        );
       }
 
       // Wait for events to process
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Build evidence using finalizeEvidence
       const core = {

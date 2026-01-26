@@ -57,7 +57,9 @@ export function jcsCanonicalizeValue(value: unknown): string {
     const keys = Object.keys(value).sort();
     const pairs = keys
       .filter((k) => (value as Record<string, unknown>)[k] !== undefined)
-      .map((k) => JSON.stringify(k) + ':' + jcsCanonicalizeValue((value as Record<string, unknown>)[k]));
+      .map(
+        (k) => JSON.stringify(k) + ':' + jcsCanonicalizeValue((value as Record<string, unknown>)[k])
+      );
     return '{' + pairs.join(',') + '}';
   }
   throw new Error(`Cannot canonicalize value of type ${typeof value}`);
@@ -92,9 +94,7 @@ export function canonicalizeEvidence(evidence: Record<string, unknown>): string 
  * @param evidence - Evidence object with optional digest fields
  * @returns 0x-prefixed SHA-256 hex digest
  */
-export function computeEvidenceDigest(
-  evidence: Record<string, unknown>
-): string {
+export function computeEvidenceDigest(evidence: Record<string, unknown>): string {
   // Strip digest fields if present (self-omission rule)
   const { evidence_digest, evidence_alg, canonicalization, ...core } = evidence;
   const canonical = canonicalizeEvidence(core);

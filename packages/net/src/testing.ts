@@ -55,10 +55,7 @@ import {
 } from './impl.js';
 
 // Import schema version constants from index.ts (public API)
-import {
-  SAFE_FETCH_EVENT_SCHEMA_VERSION,
-  SAFE_FETCH_EVIDENCE_SCHEMA_VERSION,
-} from './index.js';
+import { SAFE_FETCH_EVENT_SCHEMA_VERSION, SAFE_FETCH_EVIDENCE_SCHEMA_VERSION } from './index.js';
 
 // Import JCS canonicalization helper from evidence-utils
 import { jcsCanonicalizeValue } from './evidence-utils.js';

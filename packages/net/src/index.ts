@@ -112,14 +112,20 @@ export interface SafeFetchError {
  */
 export type SafeFetchResult<T> =
   | { ok: true; response: Response; data: T; warnings?: string[]; evidence: SafeFetchEvidence }
-  | { ok: false } & SafeFetchError;
+  | ({ ok: false } & SafeFetchError);
 
 /**
  * Result type for raw fetch (returns stream with cleanup)
  */
 export type SafeFetchRawResult =
-  | { ok: true; response: Response; close: () => Promise<void>; warnings?: string[]; evidence: SafeFetchEvidence }
-  | { ok: false } & SafeFetchError;
+  | {
+      ok: true;
+      response: Response;
+      close: () => Promise<void>;
+      warnings?: string[];
+      evidence: SafeFetchEvidence;
+    }
+  | ({ ok: false } & SafeFetchError);
 
 /**
  * DNS resolution result
@@ -192,10 +198,10 @@ export interface HttpClient {
  * Redirect policy for cross-host redirects
  */
 export type RedirectPolicy =
-  | 'none'                      // No redirects allowed
-  | 'same-origin'               // Same scheme + host + port
-  | 'same-registrable-domain'   // Same eTLD+1 (e.g., api.example.com -> www.example.com)
-  | 'allowlist';                // Must match redirectAllowHosts
+  | 'none' // No redirects allowed
+  | 'same-origin' // Same scheme + host + port
+  | 'same-registrable-domain' // Same eTLD+1 (e.g., api.example.com -> www.example.com)
+  | 'allowlist'; // Must match redirectAllowHosts
 
 /**
  * Evidence redaction level for portable receipts
@@ -284,7 +290,9 @@ function jcsCanonicalizeValue(value: unknown): string {
     const keys = Object.keys(value).sort();
     const pairs = keys
       .filter((k) => (value as Record<string, unknown>)[k] !== undefined)
-      .map((k) => JSON.stringify(k) + ':' + jcsCanonicalizeValue((value as Record<string, unknown>)[k]));
+      .map(
+        (k) => JSON.stringify(k) + ':' + jcsCanonicalizeValue((value as Record<string, unknown>)[k])
+      );
     return '{' + pairs.join(',') + '}';
   }
   throw new Error(`Cannot canonicalize value of type ${typeof value}`);
@@ -316,9 +324,7 @@ export type SafeFetchEvidenceCore = Omit<
  * @param evidence - SafeFetchEvidence or SafeFetchEvidenceCore object
  * @returns Canonical JSON string
  */
-export function canonicalizeEvidence(
-  evidence: SafeFetchEvidence | SafeFetchEvidenceCore
-): string {
+export function canonicalizeEvidence(evidence: SafeFetchEvidence | SafeFetchEvidenceCore): string {
   return jcsCanonicalizeValue(evidence);
 }
 
@@ -334,9 +340,7 @@ export function canonicalizeEvidence(
  * @param evidence - SafeFetchEvidence or SafeFetchEvidenceCore object
  * @returns 0x-prefixed SHA-256 hex digest
  */
-export function computeEvidenceDigest(
-  evidence: SafeFetchEvidence | SafeFetchEvidenceCore
-): string {
+export function computeEvidenceDigest(evidence: SafeFetchEvidence | SafeFetchEvidenceCore): string {
   // Strip digest fields if present (self-omission rule)
   const { evidence_digest, evidence_alg, canonicalization, ...core } =
     evidence as SafeFetchEvidence;
@@ -941,36 +945,36 @@ export const MAX_JWKS_RESPONSE_BYTES = 512 * 1024;
  */
 export const DANGEROUS_PORTS: ReadonlySet<number> = new Set([
   // Remote access
-  21,    // FTP control
-  22,    // SSH
-  23,    // Telnet
-  25,    // SMTP
-  53,    // DNS
-  110,   // POP3
-  143,   // IMAP
-  445,   // SMB
-  513,   // rlogin
-  514,   // rsh/syslog
-  587,   // SMTP submission
+  21, // FTP control
+  22, // SSH
+  23, // Telnet
+  25, // SMTP
+  53, // DNS
+  110, // POP3
+  143, // IMAP
+  445, // SMB
+  513, // rlogin
+  514, // rsh/syslog
+  587, // SMTP submission
   // Databases
-  1433,  // MSSQL
-  1521,  // Oracle
-  3306,  // MySQL
-  5432,  // PostgreSQL
-  5984,  // CouchDB
-  6379,  // Redis
-  9042,  // Cassandra
+  1433, // MSSQL
+  1521, // Oracle
+  3306, // MySQL
+  5432, // PostgreSQL
+  5984, // CouchDB
+  6379, // Redis
+  9042, // Cassandra
   27017, // MongoDB
   // Container/orchestration
-  2375,  // Docker daemon (unencrypted)
-  2376,  // Docker daemon (TLS)
-  2379,  // etcd client
-  2380,  // etcd peer
-  6443,  // Kubernetes API
+  2375, // Docker daemon (unencrypted)
+  2376, // Docker daemon (TLS)
+  2379, // etcd client
+  2380, // etcd peer
+  6443, // Kubernetes API
   10250, // Kubelet
   10255, // Kubelet read-only
   // Service mesh/proxy
-  9090,  // Prometheus
+  9090, // Prometheus
   15000, // Envoy admin
   15001, // Istio proxy
   15004, // Istio debug
@@ -984,7 +988,6 @@ export const ALLOW_DANGEROUS_PORTS_ACK = 'I_UNDERSTAND_DANGEROUS_PORTS_RISK' as 
 // Internal constants are now imported from impl.ts
 
 // Internal helper functions are now imported from impl.ts
-
 
 // -----------------------------------------------------------------------------
 // Default Implementations
@@ -1032,7 +1035,6 @@ export const defaultDnsResolver: DnsResolver = {
     return { ipv4, ipv6 };
   },
 };
-
 
 /**
  * Default HTTP client using undici with DNS pinning
@@ -1121,7 +1123,6 @@ export const defaultHttpClient: HttpClient = {
     }
   },
 };
-
 
 // -----------------------------------------------------------------------------
 // Main API
@@ -1250,9 +1251,10 @@ export async function safeFetchRaw(
     selectedIp?: string
   ): SafeFetchEvidence => {
     // Build redaction options for tenant mode
-    const redactOpts = evidenceLevel === 'tenant' && options?.redactionKey
-      ? { key: options.redactionKey, keyId: options?.redactionKeyId }
-      : undefined;
+    const redactOpts =
+      evidenceLevel === 'tenant' && options?.redactionKey
+        ? { key: options.redactionKey, keyId: options?.redactionKeyId }
+        : undefined;
 
     // Build base evidence (without digest - will be added by finalizeEvidence)
     const core: SafeFetchEvidenceCore = {
@@ -1283,8 +1285,8 @@ export async function safeFetchRaw(
         core.dns_answers = dnsAnswers;
       } else {
         // Public/tenant: only include counts
-        const ipv4Count = dnsAnswers.filter(a => a.family === 4).length;
-        const ipv6Count = dnsAnswers.filter(a => a.family === 6).length;
+        const ipv4Count = dnsAnswers.filter((a) => a.family === 4).length;
+        const ipv6Count = dnsAnswers.filter((a) => a.family === 6).length;
         core.dns_answer_count = { ipv4: ipv4Count, ipv6: ipv6Count };
       }
     }
@@ -1346,7 +1348,9 @@ export async function safeFetchRaw(
   const portStr = parsedUrl.port;
   const effectivePort = portStr
     ? parseInt(portStr, 10)
-    : parsedUrl.protocol === 'https:' ? 443 : 80;
+    : parsedUrl.protocol === 'https:'
+      ? 443
+      : 80;
 
   // Check if port is in dangerous ports list
   if (DANGEROUS_PORTS.has(effectivePort)) {
@@ -1402,11 +1406,13 @@ export async function safeFetchRaw(
     // URL contains IP literal (may have been normalized from IPv4-mapped IPv6)
     // No DNS resolution needed, but we still validate the IP
     const isBlocked = isPrivateIP(hostname, ssrfPolicy);
-    dnsAnswers = [{
-      ip: hostname,
-      family: hostname.includes(':') ? 6 : 4,
-      blocked_reason: isBlocked ? 'private_ip' : undefined,
-    }];
+    dnsAnswers = [
+      {
+        ip: hostname,
+        family: hostname.includes(':') ? 6 : 4,
+        blocked_reason: isBlocked ? 'private_ip' : undefined,
+      },
+    ];
 
     if (isBlocked) {
       emitAuditEvent(auditCtx, onEvent, hookSanitizer, 'onEvent', {
@@ -1476,7 +1482,10 @@ export async function safeFetchRaw(
 
     if (!result.ok) {
       dnsAnswers = result.dns_answers;
-      const eventType = result.code === SAFE_FETCH_ERROR_CODES.E_DNS_RESOLUTION_FAILED ? 'dns_error' : 'dns_blocked';
+      const eventType =
+        result.code === SAFE_FETCH_ERROR_CODES.E_DNS_RESOLUTION_FAILED
+          ? 'dns_error'
+          : 'dns_blocked';
       emitAuditEvent(auditCtx, onEvent, hookSanitizer, 'onEvent', {
         type: eventType,
         timestamp: Date.now(),
@@ -1489,12 +1498,7 @@ export async function safeFetchRaw(
       });
       return {
         ...result,
-        evidence: buildErrorEvidence(
-          result.code,
-          hostname,
-          false,
-          dnsAnswers
-        ),
+        evidence: buildErrorEvidence(result.code, hostname, false, dnsAnswers),
       };
     }
     dnsResult = result;
@@ -1514,14 +1518,16 @@ export async function safeFetchRaw(
       hostname,
       selected_ip: pinnedIp,
       policy_decision: 'allow',
-      meta: debug ? {
-        dns_answers: dnsAnswers,
-        ipv4_count: result.ipv4Addresses.length,
-        ipv6_count: result.ipv6Addresses.length,
-      } : {
-        ipv4_count: result.ipv4Addresses.length,
-        ipv6_count: result.ipv6Addresses.length,
-      },
+      meta: debug
+        ? {
+            dns_answers: dnsAnswers,
+            ipv4_count: result.ipv4Addresses.length,
+            ipv6_count: result.ipv6Addresses.length,
+          }
+        : {
+            ipv4_count: result.ipv4Addresses.length,
+            ipv6_count: result.ipv6Addresses.length,
+          },
     });
   }
 
@@ -1604,9 +1610,10 @@ export async function safeFetchRaw(
 
     const elapsedMs = Date.now() - requestTimestamp;
     // Build redaction options for tenant mode
-    const redactOpts = evidenceLevel === 'tenant' && options?.redactionKey
-      ? { key: options.redactionKey, keyId: options?.redactionKeyId }
-      : undefined;
+    const redactOpts =
+      evidenceLevel === 'tenant' && options?.redactionKey
+        ? { key: options.redactionKey, keyId: options?.redactionKeyId }
+        : undefined;
     // P0.3: Build network error evidence with proper redaction
     const errorCore: SafeFetchEvidenceCore = {
       schema_version: SAFE_FETCH_EVIDENCE_SCHEMA_VERSION,
@@ -1616,17 +1623,21 @@ export async function safeFetchRaw(
       canonical_host: hostname,
       is_ip_literal: hostResult.isIP,
       // Public/tenant evidence: include redacted IP info
-      ...(pinnedIp && !isPrivateEvidence ? { selected_ip_info: redactIp(pinnedIp, redactOpts) } : {}),
+      ...(pinnedIp && !isPrivateEvidence
+        ? { selected_ip_info: redactIp(pinnedIp, redactOpts) }
+        : {}),
       // Private evidence: include raw details
       ...(isPrivateEvidence && dnsAnswers ? { dns_answers: dnsAnswers } : {}),
       ...(isPrivateEvidence && pinnedIp ? { selected_ip: pinnedIp } : {}),
       // Public/tenant evidence: include DNS answer counts
-      ...(!isPrivateEvidence && dnsAnswers && dnsAnswers.length > 0 ? {
-        dns_answer_count: {
-          ipv4: dnsAnswers.filter(a => a.family === 4).length,
-          ipv6: dnsAnswers.filter(a => a.family === 6).length,
-        },
-      } : {}),
+      ...(!isPrivateEvidence && dnsAnswers && dnsAnswers.length > 0
+        ? {
+            dns_answer_count: {
+              ipv4: dnsAnswers.filter((a) => a.family === 4).length,
+              ipv6: dnsAnswers.filter((a) => a.family === 6).length,
+            },
+          }
+        : {}),
       policy_decision: 'block',
       decision_code: code,
       max_response_bytes: maxResponseBytes,
@@ -1672,9 +1683,10 @@ export async function safeFetchRaw(
   // P0.3: Respects evidenceLevel for redaction
   const buildRedirectErrorEvidence = (code: string): SafeFetchEvidence => {
     // Build redaction options for tenant mode
-    const redactOpts = evidenceLevel === 'tenant' && options?.redactionKey
-      ? { key: options.redactionKey, keyId: options?.redactionKeyId }
-      : undefined;
+    const redactOpts =
+      evidenceLevel === 'tenant' && options?.redactionKey
+        ? { key: options.redactionKey, keyId: options?.redactionKeyId }
+        : undefined;
 
     const core: SafeFetchEvidenceCore = {
       schema_version: SAFE_FETCH_EVIDENCE_SCHEMA_VERSION,
@@ -1707,8 +1719,8 @@ export async function safeFetchRaw(
         core.dns_answers = dnsAnswers;
       } else {
         core.dns_answer_count = {
-          ipv4: dnsAnswers.filter(a => a.family === 4).length,
-          ipv6: dnsAnswers.filter(a => a.family === 6).length,
+          ipv4: dnsAnswers.filter((a) => a.family === 4).length,
+          ipv6: dnsAnswers.filter((a) => a.family === 6).length,
         };
       }
     }
@@ -1781,9 +1793,10 @@ export async function safeFetchRaw(
   // Build success evidence with P0.3 redaction
   const effectiveIp = pinnedIp ?? (hostResult.isIP ? hostname : undefined);
   // Build redaction options for tenant mode
-  const redactOptsSuccess = evidenceLevel === 'tenant' && options?.redactionKey
-    ? { key: options.redactionKey, keyId: options?.redactionKeyId }
-    : undefined;
+  const redactOptsSuccess =
+    evidenceLevel === 'tenant' && options?.redactionKey
+      ? { key: options.redactionKey, keyId: options?.redactionKeyId }
+      : undefined;
   const successCore: SafeFetchEvidenceCore = {
     schema_version: SAFE_FETCH_EVIDENCE_SCHEMA_VERSION,
     evidence_level: evidenceLevel,
@@ -1793,17 +1806,21 @@ export async function safeFetchRaw(
     canonical_host: hostname,
     is_ip_literal: hostResult.isIP,
     // Public/tenant evidence: include redacted IP info
-    ...(effectiveIp && !isPrivateEvidence ? { selected_ip_info: redactIp(effectiveIp, redactOptsSuccess) } : {}),
+    ...(effectiveIp && !isPrivateEvidence
+      ? { selected_ip_info: redactIp(effectiveIp, redactOptsSuccess) }
+      : {}),
     // Private evidence: include raw details
     ...(isPrivateEvidence && dnsAnswers ? { dns_answers: dnsAnswers } : {}),
     ...(isPrivateEvidence && effectiveIp ? { selected_ip: effectiveIp } : {}),
     // Public/tenant evidence: include DNS answer counts
-    ...(!isPrivateEvidence && dnsAnswers && dnsAnswers.length > 0 ? {
-      dns_answer_count: {
-        ipv4: dnsAnswers.filter(a => a.family === 4).length,
-        ipv6: dnsAnswers.filter(a => a.family === 6).length,
-      },
-    } : {}),
+    ...(!isPrivateEvidence && dnsAnswers && dnsAnswers.length > 0
+      ? {
+          dns_answer_count: {
+            ipv4: dnsAnswers.filter((a) => a.family === 4).length,
+            ipv6: dnsAnswers.filter((a) => a.family === 6).length,
+          },
+        }
+      : {}),
     policy_decision: 'allow',
     decision_code: 'OK',
     response_status: response.status,

@@ -117,7 +117,7 @@ const jsonValue = fc.letrec((tie) => ({
   value: fc.oneof(
     { weight: 3, arbitrary: tie('primitive') },
     { weight: 1, arbitrary: tie('array') },
-    { weight: 1, arbitrary: tie('object') },
+    { weight: 1, arbitrary: tie('object') }
   ),
 })).value;
 
@@ -149,7 +149,7 @@ const numberEdgeCases = fc.oneof(
   fc.constant(Number.MAX_SAFE_INTEGER),
   fc.constant(Number.MIN_SAFE_INTEGER),
   fc.double({ min: -1e10, max: 1e10, noNaN: true, noDefaultInfinity: true }),
-  fc.integer(),
+  fc.integer()
 );
 
 // -----------------------------------------------------------------------------
@@ -279,7 +279,7 @@ describe('JCS canonicalization - property tests', () => {
         { '0': 'zero', '10': 'ten', '2': 'two' },
         { '9': 'nine', '1': 'one', '11': 'eleven' },
         { '100': 'hundred', '20': 'twenty', '3': 'three' },
-        { 'a': 1, '1': 2, 'b': 3, '2': 4 },
+        { a: 1, '1': 2, b: 3, '2': 4 },
       ];
 
       for (const obj of testCases) {
@@ -594,8 +594,10 @@ describe('extractTopLevelKeys helper', () => {
       { canonical: '{"a":1,"m":2,"z":3}', expected: ['a', 'm', 'z'] },
       { canonical: '{"f":false,"t":true}', expected: ['f', 't'] },
       { canonical: '{"0":"zero","10":"ten","2":"two"}', expected: ['0', '10', '2'] },
-      { canonical: '{"key-with-dash":1,"key.with.dot":2,"key_with_underscore":3}',
-        expected: ['key-with-dash', 'key.with.dot', 'key_with_underscore'] },
+      {
+        canonical: '{"key-with-dash":1,"key.with.dot":2,"key_with_underscore":3}',
+        expected: ['key-with-dash', 'key.with.dot', 'key_with_underscore'],
+      },
     ];
 
     for (const { canonical, expected } of vectors) {

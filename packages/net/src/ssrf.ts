@@ -127,7 +127,7 @@ function isPrivateIPv4Literal(hostname: string): boolean {
   if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
     return false;
   }
-  return PRIVATE_IPV4_PATTERNS.some(pattern => pattern.test(hostname));
+  return PRIVATE_IPV4_PATTERNS.some((pattern) => pattern.test(hostname));
 }
 
 /**
@@ -171,10 +171,7 @@ function isIPLiteral(hostname: string): boolean {
  * @param policy - SSRF policy (affects which checks are applied)
  * @returns Validation result with parsed URL or error
  */
-export function validateUrlForSSRF(
-  urlString: string,
-  policy?: SSRFPolicy
-): UrlValidationResult {
+export function validateUrlForSSRF(urlString: string, policy?: SSRFPolicy): UrlValidationResult {
   // Step 1: Parse URL
   let parsedUrl: URL;
   try {
@@ -237,7 +234,7 @@ export function validateUrlForSSRF(
   // Step 7: Block private IPv4 literals (unless policy allows)
   if (isPrivateIPv4Literal(hostname)) {
     // Check if policy explicitly allows this CIDR
-    const allowed = policy?.allowCidrs?.some(cidr => {
+    const allowed = policy?.allowCidrs?.some((cidr) => {
       // Simple check - if any allowCidr is set, we let DNS-level validation handle it
       return cidr.length > 0;
     });
@@ -278,7 +275,9 @@ export function validateUrlForSSRF(
   const portStr = parsedUrl.port;
   const effectivePort = portStr
     ? parseInt(portStr, 10)
-    : parsedUrl.protocol === 'https:' ? 443 : 80;
+    : parsedUrl.protocol === 'https:'
+      ? 443
+      : 80;
 
   if (!allowedPorts.includes(effectivePort)) {
     return {

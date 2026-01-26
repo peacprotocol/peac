@@ -52,4 +52,5 @@ export const SAFE_FETCH_ERROR_CODES = {
   E_PARSE_ERROR: 'E_NET_PARSE_ERROR',
 } as const;
 
-export type SafeFetchErrorCode = typeof SAFE_FETCH_ERROR_CODES[keyof typeof SAFE_FETCH_ERROR_CODES];
+export type SafeFetchErrorCode =
+  (typeof SAFE_FETCH_ERROR_CODES)[keyof typeof SAFE_FETCH_ERROR_CODES];

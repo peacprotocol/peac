@@ -12,18 +12,11 @@
  */
 
 // Import types from index.ts (type-only imports are safe for circular deps)
-import type {
-  SafeFetchEvidence,
-  SafeFetchEvidenceCore,
-  RequestAuditContext,
-} from './index.js';
+import type { SafeFetchEvidence, SafeFetchEvidenceCore, RequestAuditContext } from './index.js';
 
 // Import from evidence-utils.ts to break the circular dependency
 // These were previously imported from index.ts, creating a cycle
-import {
-  MAX_PENDING_AUDIT_EVENTS,
-  computeEvidenceDigest,
-} from './evidence-utils.js';
+import { MAX_PENDING_AUDIT_EVENTS, computeEvidenceDigest } from './evidence-utils.js';
 
 // -----------------------------------------------------------------------------
 // Evidence Finalization (INTERNAL-ONLY)
@@ -44,7 +37,7 @@ import {
  */
 export function finalizeEvidence(
   core: SafeFetchEvidenceCore,
-  ctx?: RequestAuditContext,
+  ctx?: RequestAuditContext
 ): SafeFetchEvidence {
   const hasDrops = ctx && ctx.dropped > 0;
 

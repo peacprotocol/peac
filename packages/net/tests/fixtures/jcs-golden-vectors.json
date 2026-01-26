@@ -40,11 +40,7 @@
     {
       "name": "array",
       "input": {
-        "arr": [
-          3,
-          1,
-          2
-        ]
+        "arr": [3, 1, 2]
       },
       "canonical": "{\"arr\":[3,1,2]}",
       "digest": "0xcab5b2405701293d6fae18f8809e9946d87a2720a4cff2b9fcac9dde50528852"
@@ -258,7 +254,7 @@
     {
       "name": "large_exponent",
       "input": {
-        "huge": 1e+21
+        "huge": 1e21
       },
       "canonical": "{\"huge\":1e+21}",
       "digest": "0xbd4f9c72b218b69f323c61def5febdaca9576b48e615c0c0e14ed45d8b780cd4",
