@@ -15,10 +15,11 @@ import { createHash, createHmac } from 'crypto';
 import ipaddr from 'ipaddr.js';
 import { getDomain, parse as parseDomain } from 'tldts';
 import { Agent, fetch as undiciFetch, type Dispatcher } from 'undici';
+// Local SSRF types (not from @peac/schema to keep package self-contained)
 import {
   type SSRFPolicy,
   ALLOW_DANGEROUS_CIDRS_ACK,
-} from '@peac/schema';
+} from './ssrf.js';
 
 // Import from single source of truth modules (no circular deps)
 import { SAFE_FETCH_ERROR_CODES } from './codes.js';

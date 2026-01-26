@@ -21,13 +21,14 @@ import * as dns from 'dns/promises';
 import ipaddr from 'ipaddr.js';
 import { getDomain, parse as parseDomain } from 'tldts';
 import { Agent, fetch as undiciFetch, type Dispatcher } from 'undici';
+// Local SSRF types (not from @peac/schema to keep package self-contained)
 import {
   validateUrlForSSRF,
   type SSRFPolicy,
   DEFAULT_SSRF_POLICY,
   TRUST_ERROR_CODES,
   ALLOW_DANGEROUS_CIDRS_ACK,
-} from '@peac/schema';
+} from './ssrf.js';
 
 // Import finalizeEvidence from internal module (not exported from main entry)
 import { finalizeEvidence } from './internal.js';
