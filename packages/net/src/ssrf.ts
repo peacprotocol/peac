@@ -15,7 +15,7 @@
  * this acknowledgment must be set to confirm intentional usage.
  */
 export const ALLOW_DANGEROUS_CIDRS_ACK =
-  'I_UNDERSTAND_ALLOWING_PRIVATE_CIDRS_BYPASSES_SSRF_PROTECTION' as const;
+  'I_UNDERSTAND_ALLOWING_PRIVATE_CIDRS_IS_DANGEROUS' as const;
 
 /**
  * SSRF policy configuration
@@ -67,6 +67,19 @@ export interface SSRFPolicy {
    * @default false
    */
   allowIPLiterals?: boolean;
+
+  /**
+   * Allowed ports (default [80, 443]).
+   * Only these ports are allowed in URLs. Other ports are blocked.
+   */
+  allowPorts?: number[];
+
+  /**
+   * Allow credentials in URLs (default false).
+   * When false, URLs with username:password are rejected.
+   * @default false
+   */
+  allowCredentials?: boolean;
 }
 
 /**
@@ -244,6 +257,34 @@ export function validateUrlForSSRF(
       ok: false,
       code: 'E_NET_SSRF_IP_LITERAL_BLOCKED',
       error: 'IP literals not allowed - use hostnames',
+    };
+  }
+
+  // Step 9: Block credentials in URLs by default
+  const allowCredentials = policy?.allowCredentials === true;
+  if (!allowCredentials && (parsedUrl.username || parsedUrl.password)) {
+    return {
+      ok: false,
+      code: 'E_NET_SSRF_CREDENTIALS_BLOCKED',
+      error: 'Credentials in URLs not allowed',
+    };
+  }
+
+  // Step 10: Port validation - only allow standard ports by default
+  // allowPorts is ADDITIVE to the default [80, 443]
+  const defaultPorts = [80, 443];
+  const additionalPorts = policy?.allowPorts ?? [];
+  const allowedPorts = [...new Set([...defaultPorts, ...additionalPorts])];
+  const portStr = parsedUrl.port;
+  const effectivePort = portStr
+    ? parseInt(portStr, 10)
+    : parsedUrl.protocol === 'https:' ? 443 : 80;
+
+  if (!allowedPorts.includes(effectivePort)) {
+    return {
+      ok: false,
+      code: 'E_NET_SSRF_PORT_BLOCKED',
+      error: `Port ${effectivePort} not allowed`,
     };
   }
 
