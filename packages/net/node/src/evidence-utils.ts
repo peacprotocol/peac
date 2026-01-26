@@ -22,6 +22,18 @@ export { MAX_PENDING_AUDIT_EVENTS };
 // -----------------------------------------------------------------------------
 
 /**
+ * Check if a value is a plain object (prototype is Object.prototype or null)
+ *
+ * This excludes Date, RegExp, Map, Set, and other non-JSON-serializable objects.
+ * @internal
+ */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object') return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+/**
  * Canonicalize a value according to RFC 8785 (JSON Canonicalization Scheme)
  *
  * Key ordering is lexicographic by Unicode code point (UTF-16 code units).
@@ -52,14 +64,12 @@ export function jcsCanonicalizeValue(value: unknown): string {
     const elements = value.map(jcsCanonicalizeValue);
     return '[' + elements.join(',') + ']';
   }
-  if (typeof value === 'object' && value !== null) {
+  if (isPlainObject(value)) {
     // Sort keys lexicographically (Unicode code point order)
     const keys = Object.keys(value).sort();
     const pairs = keys
-      .filter((k) => (value as Record<string, unknown>)[k] !== undefined)
-      .map(
-        (k) => JSON.stringify(k) + ':' + jcsCanonicalizeValue((value as Record<string, unknown>)[k])
-      );
+      .filter((k) => value[k] !== undefined)
+      .map((k) => JSON.stringify(k) + ':' + jcsCanonicalizeValue(value[k]));
     return '{' + pairs.join(',') + '}';
   }
   throw new Error(`Cannot canonicalize value of type ${typeof value}`);

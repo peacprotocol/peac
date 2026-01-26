@@ -16,7 +16,7 @@
  */
 
 import { execSync } from 'child_process';
-import { mkdtempSync, rmSync, writeFileSync, existsSync } from 'fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
@@ -29,7 +29,6 @@ const repoRoot = join(packageDir, '..', '..');
 // ANSI colors for output
 const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
-const YELLOW = '\x1b[33m';
 const RESET = '\x1b[0m';
 
 function log(msg) {
@@ -43,10 +42,6 @@ function pass(msg) {
 function fail(msg) {
   console.error(`${RED}FAIL${RESET}: ${msg}`);
   process.exit(1);
-}
-
-function warn(msg) {
-  console.log(`${YELLOW}WARN${RESET}: ${msg}`);
 }
 
 /**

@@ -310,12 +310,9 @@ describe('JCS canonicalization - property tests', () => {
         fc.property(integerLikeKeys, (obj) => {
           const canonical = jcsCanonicalizeValue(obj);
 
-          // Extract keys by finding "key": patterns at top level
-          const keyPattern = /"([^"\\]*(?:\\.[^"\\]*)*)"\s*:/g;
+          // Extract keys at top level using manual parsing
           const keys: string[] = [];
-          let match;
           let depth = 0;
-          let lastIndex = 0;
 
           // Only extract top-level keys
           for (let i = 0; i < canonical.length; i++) {

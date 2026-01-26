@@ -14,7 +14,7 @@
 import { createHash, createHmac } from 'crypto';
 import ipaddr from 'ipaddr.js';
 import { getDomain, parse as parseDomain } from 'tldts';
-import { Agent, fetch as undiciFetch, type Dispatcher } from 'undici';
+import { Agent, type Dispatcher } from 'undici';
 // Local SSRF types (not from @peac/schema to keep package self-contained)
 import { type SSRFPolicy, ALLOW_DANGEROUS_CIDRS_ACK } from './ssrf.js';
 

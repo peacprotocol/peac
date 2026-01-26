@@ -18,8 +18,6 @@
 
 import { createHash } from 'crypto';
 import * as dns from 'dns/promises';
-import ipaddr from 'ipaddr.js';
-import { getDomain, parse as parseDomain } from 'tldts';
 import { Agent, fetch as undiciFetch, type Dispatcher } from 'undici';
 // Local SSRF types (not from @peac/schema to keep package self-contained)
 import {
@@ -1627,7 +1625,7 @@ export async function safeFetchRaw(
         ? { selected_ip_info: redactIp(pinnedIp, redactOpts) }
         : {}),
       // Private evidence: include raw details
-      ...(isPrivateEvidence && dnsAnswers ? { dns_answers: dnsAnswers } : {}),
+      ...(isPrivateEvidence ? { dns_answers: dnsAnswers } : {}),
       ...(isPrivateEvidence && pinnedIp ? { selected_ip: pinnedIp } : {}),
       // Public/tenant evidence: include DNS answer counts
       ...(!isPrivateEvidence && dnsAnswers && dnsAnswers.length > 0
@@ -1810,7 +1808,7 @@ export async function safeFetchRaw(
       ? { selected_ip_info: redactIp(effectiveIp, redactOptsSuccess) }
       : {}),
     // Private evidence: include raw details
-    ...(isPrivateEvidence && dnsAnswers ? { dns_answers: dnsAnswers } : {}),
+    ...(isPrivateEvidence ? { dns_answers: dnsAnswers } : {}),
     ...(isPrivateEvidence && effectiveIp ? { selected_ip: effectiveIp } : {}),
     // Public/tenant evidence: include DNS answer counts
     ...(!isPrivateEvidence && dnsAnswers && dnsAnswers.length > 0
