@@ -29,10 +29,10 @@
     "perf": "node scripts/perf-test.js"
   },
   "dependencies": {
-    "@peac/core": "workspace:^0.9.14",
-    "@peac/disc": "workspace:^0.9.14",
-    "@peac/receipts": "workspace:^0.9.14",
-    "@peac/pay402": "workspace:^0.9.14",
+    "@peac/core": "workspace:*",
+    "@peac/disc": "workspace:*",
+    "@peac/receipts": "workspace:*",
+    "@peac/pay402": "workspace:*",
     "hono": "^4.9.7",
     "@hono/node-server": "^1.8.2",
     "zod": "^3.22.0"

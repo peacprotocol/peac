@@ -28,7 +28,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@peac/disc": "workspace:^0.9.14",
+    "@peac/disc": "workspace:*",
     "typescript": "^5.0.0"
   },
   "keywords": [
