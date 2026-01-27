@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-01-27
+
+### Workflow Correlation
+
+Multi-agent orchestration support. Receipts now carry workflow context for DAG reconstruction across MCP, A2A, CrewAI, LangGraph, AutoGen, and other orchestration frameworks.
+
+### Added
+
+- **Workflow context extension** (`@peac/schema`)
+  - `WorkflowContext` type in receipt extensions (`ext['org.peacprotocol/workflow']`)
+  - Fields: `workflow_id`, `step_id`, `parent_step_ids`, `framework`, `tool_name`, `orchestrator_id`, `external_ids`
+  - DAG verification: cycle detection (DFS with color marking), parent validation, limits enforcement
+  - Helper functions: `generateWorkflowId()`, `generateStepId()`, `createOTelExternalId()`, `createTemporalExternalId()`, `createAirflowExternalId()`
+  - `ExternalIdEntry` type for bi-directional correlation with OTel, Temporal, Airflow, Prefect, Dagster, Argo
+- **Workflow summary attestation** (`@peac/schema`)
+  - `WorkflowSummaryAttestation` type (`peac/workflow-summary`)
+  - Proof-of-run artifact committing the full receipt set by reference or Merkle root
+  - Fields: `workflow_id`, `status`, `receipt_refs`, `agents_involved`, `started_at`, `completed_at`
+- **12 workflow error codes** in `specs/kernel/errors.json`
+  - Validation: `E_WORKFLOW_CONTEXT_INVALID`, `E_WORKFLOW_ID_INVALID`, `E_WORKFLOW_STEP_ID_INVALID`, `E_WORKFLOW_SUMMARY_INVALID`
+  - DAG semantics: `E_WORKFLOW_DAG_INVALID`, `E_WORKFLOW_CYCLE_DETECTED`, `E_WORKFLOW_PARENT_NOT_FOUND`, `E_WORKFLOW_LIMIT_EXCEEDED`
+  - Correlation: `E_CORRELATION_SALT_REQUIRED`, `E_CORRELATION_SALT_TOO_SHORT`, `E_CORRELATION_INVALID_ID`, `E_CORRELATION_INVALID_MODE`
+- **Error categories codegen** (`scripts/codegen-errors.ts`)
+  - Auto-generate `error-categories.generated.ts` from `specs/kernel/errors.json`
+  - New `workflow` and `correlation` categories
+- **Conformance vectors** (`specs/conformance/fixtures/workflow/`)
+  - `valid.json`: Valid WorkflowContext and WorkflowSummaryAttestation vectors
+  - `invalid.json`: Schema validation and DAG semantics failure vectors
+  - `edge-cases.json`: Boundary conditions (max parents, deep DAGs, hash chaining)
+  - `fixtures.schema.json`: JSON Schema for fixture files
+- **Conformance test harness** (`tests/conformance/workflow.spec.ts`)
+  - Ajv 2020-12 fixture schema validation
+  - Automated assertion of error codes for invalid fixtures
+- **Workflow correlation spec** (`docs/specs/WORKFLOW-CORRELATION.md`)
+  - 676-line normative specification covering types, DAG verification, external ID interop, security
+- **Workflow correlation example** (`examples/workflow-correlation/`)
+  - Fork-join demo with external ID correlation
+
+### Changed
+
+- **Website URL normalization** - All references updated from `https://peacprotocol.org` to `https://www.peacprotocol.org` (136 files)
+- **Guard script** (`scripts/guard.sh`) - HTTPS enforcement covers both `www.` and bare domain forms
+
+### Documentation
+
+- **README.md** - Added workflow context row to core primitives table and brief workflow correlation section
+- **docs/README_LONG.md** - Full workflow correlation section with code examples, invariants, and external ID interop
+- **docs/SPEC_INDEX.md** - Attestations and Extensions section (Agent Identity, Attribution, Dispute, Workflow Correlation)
+- **docs/CANONICAL_DOCS_INDEX.md** - Four normative specification entries added
+
+## [0.10.1] - 2026-01-27
+
+### SSRF-Safe Network Utilities
+
+New package for protocol-grade network operations with SSRF prevention.
+
+### Added
+
+- **@peac/net-node** (Layer 4) - SSRF-safe network utilities
+  - `safeFetch()` with DNS resolution pinning and RFC 6890 special-use IP blocking
+  - Redirect policy with host-change validation
+  - Protocol-grade audit events with request-scoped counters
+  - Three-tier evidence redaction (public/tenant/private)
+  - RFC 8785 JCS canonicalization for evidence digests
+  - Self-contained types (no @peac/schema dependency)
+  - 284 tests covering security, audit, and edge cases
+  - Group folder pattern: `packages/net/node/` for future transport expansion
+
 ## [0.10.0] - 2026-01-14
 
 ### Wire Format Normalization

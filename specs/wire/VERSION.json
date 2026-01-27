@@ -1,7 +1,7 @@
 {
   "$comment": "PEAC Wire Format Schema Version Metadata. schema_set_version tracks the JSON Schema definitions independently of npm package versions.",
   "wire_format": "peac-receipt/0.1",
-  "schema_set_version": "0.10.0",
+  "schema_set_version": "0.10.2",
   "json_schema_draft": "2020-12",
   "last_updated": "2026-01-14",
   "status": "stable",
