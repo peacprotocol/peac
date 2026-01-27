@@ -53,6 +53,11 @@ Each fixture file has the following top-level structure:
 these fixtures (v0.10.2 = Workflow Correlation). It tracks the spec, not the npm
 package version.
 
+**Schema Resolution**: The `$id` in `fixtures.schema.json` is a logical identifier,
+not a fetch URL. Tooling MUST resolve the schema from the local repository bundle
+(`specs/conformance/fixtures/workflow/fixtures.schema.json`), not via network fetch.
+This enables offline validation in air-gapped and enterprise environments.
+
 ### Expected Fields (Invalid Fixtures)
 
 For invalid fixtures, `expected` contains:

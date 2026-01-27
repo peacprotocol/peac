@@ -31,7 +31,6 @@
     "lint:deps": "depcruise packages/ --config .dependency-cruiser.json",
     "format": "prettier \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --write --ignore-path .prettierignore",
     "format:check": "prettier \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --check --ignore-path .prettierignore",
-    "format:check:paper": "prettier \"paper/**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --check",
     "typecheck": "pnpm typecheck:core",
     "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
     "typecheck:legacy": "tsc -p tsconfig.legacy.json --noEmit",

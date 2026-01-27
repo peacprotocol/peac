@@ -25,7 +25,7 @@ git grep -nE "peac-version|application/peac-receipt\+jws" -- '**/*.{md,ts,js,jso
 echo "== forbid peac.dev domain =="
 # Fail if any peac.dev reference appears outside allowed migration docs
 DOCS_MIGRATION_ALLOW='^(docs/migration|CHANGELOG\.md)'
-if git grep -nE 'https?://([a-z0-9.-]*\.)?peac\.dev\b' -- ':!node_modules' ':!archive/**' \
+if git grep -nP 'https?://([a-z0-9.-]*\.)?peac\.dev\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$DOCS_MIGRATION_ALLOW" | grep .; then
   bad=1
 else
@@ -34,7 +34,7 @@ fi
 
 # Require https for peacprotocol.org
 echo "== peacprotocol.org must be https =="
-if git grep -nE 'http://peacprotocol\.org\b' -- ':!node_modules' ':!archive/**' | grep .; then
+if git grep -nP 'http://peacprotocol\.org\b' -- ':!node_modules' ':!archive/**' | grep .; then
   bad=1
 else
   echo "OK"
@@ -44,7 +44,7 @@ echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
 # Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), Attribution (v0.9.26+), DisputeAttestation (v0.9.27+), DisputeBundle (v0.9.30+), UCP evidence (v0.9.31+), and WorkflowSummaryAttestation (v0.10.2+)
 LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/(guard\.sh|generate-bundle-vectors\.ts)|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors(\.generated)?\.ts|schema/(src/(evidence|validators|agent-identity|attribution|dispute|workflow)\.ts|__tests__/(agent-identity|dispute|workflow)\.test\.ts)|attribution/|audit/|cli/src/commands/bundle\.ts|mappings/ucp/)|examples/(agent-identity|ucp-webhook-express|workflow-correlation)/|sdks/(go|python)/)'
-if git grep -nIE '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
+if git grep -nIP '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
 else
@@ -115,7 +115,7 @@ echo "== forbid npm invocations =="
 # NPM_PUBLISH docs (policy), edge guides (CLI install), pack scripts (consumer-reality smoke tests),
 # net-node test-pack-install (tests published package in clean npm project)
 NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md|CHANGELOG\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|scripts/pack-.*\.sh|packages/net/node/scripts/test-pack-install\.mjs)'
-if git grep -nE '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
+if git grep -nP '\bnpm (run|ci|install|pack|publish)\b' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else
   echo "OK"

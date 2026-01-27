@@ -35,10 +35,6 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      - name: Format check - paper (advisory)
-        continue-on-error: true
-        run: pnpm format:check:paper
-
       - name: Lint
         run: pnpm lint
 

@@ -19,7 +19,7 @@ pnpm-lock.yaml
 CLAUDE.md
 reference/
 
-# paper artifacts (checked separately via format:check:paper - advisory)
+# paper artifacts (local only)
 paper/
 
 # performance result snapshots (generated artifact)
