@@ -64,6 +64,11 @@ describe('Error Category Parity', () => {
     expect(ERROR_CATEGORIES_CANONICAL).toBe(ERROR_CATEGORIES);
   });
 
+  it('generated categories are sorted alphabetically (codegen invariant)', () => {
+    const sorted = [...ERROR_CATEGORIES].sort();
+    expect(ERROR_CATEGORIES).toEqual(sorted);
+  });
+
   it('registry version is valid semver', () => {
     // Future-proof: accepts any semver version
     expect(registry.version).toMatch(/^\d+\.\d+\.\d+$/);

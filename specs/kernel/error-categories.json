@@ -1,0 +1,16 @@
+{
+  "$comment": "AUTO-GENERATED from specs/kernel/errors.json - DO NOT EDIT MANUALLY",
+  "version": "0.9.30",
+  "categories": [
+    "attribution",
+    "bundle",
+    "control",
+    "dispute",
+    "identity",
+    "infrastructure",
+    "ucp",
+    "validation",
+    "verification",
+    "workflow"
+  ]
+}

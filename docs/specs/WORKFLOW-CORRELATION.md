@@ -371,6 +371,21 @@ Implementations MUST enforce these rules when issuing or validating a single rec
 
 Violations of any MUST rule MUST cause issuance to fail with the corresponding error code. Issuers MUST return a deterministic error code for equivalent invalid inputs.
 
+#### 6.5.1 Validation Order (Normative)
+
+When an input violates multiple MUST rules simultaneously, implementations MUST evaluate checks in the following order and return the error code for the **first** failing rule:
+
+1. **Required field format** (rules 4, 5): `workflow_id` format, then `step_id` format
+2. **Structural constraints** (rule 3): `parent_step_ids` length limit
+3. **Optional field format** (rules 6, 7): `framework` grammar, then `prev_receipt_hash` format
+4. **Semantic DAG checks** (rules 1, 2): self-parent, then duplicate parents
+
+This ordering follows the principle "fail at the most basic structural level first." Schema validation (steps 1-3) occurs before semantic validation (step 4). Within each step, fields are evaluated in definition order.
+
+**Rationale**: Without a defined order, two conformant implementations could return different error codes for the same invalid input, breaking deterministic verification. The first-failure-wins strategy is the simplest to implement and test.
+
+Conformance vectors for multi-failure inputs are provided in `specs/conformance/fixtures/workflow/invalid.json` (names prefixed `multi-failure-`).
+
 ### 6.6 Workflow-Level Verification Rules (SHOULD)
 
 Implementations SHOULD enforce these rules when verifying a complete workflow (e.g., when verifying a `peac/workflow-summary` attestation). These require the full receipt set and cannot be checked per-receipt.
@@ -642,17 +657,42 @@ Workflow correlation creates **linkability** - the ability to connect multiple r
 
 Workflow correlation data lives in the **receipt** and is therefore portable, replayable, and disclosable by design. Any party with access to a receipt can read the workflow context it contains.
 
-**Receipt content (in-band, portable):**
+#### 10.3.1 Data Classification
+
+Receipts are **portable artifacts**. Assume they may be shared with external auditors, counterparties, or dispute resolution systems. Issuers SHOULD therefore avoid including:
+
+- Raw prompts, inference inputs, or model outputs
+- Secrets, access tokens, or credentials
+- Personal data (names, email addresses, government IDs)
+- Internal system identifiers that reveal infrastructure topology
+
+If any of these are needed for audit purposes, use opaque hashes or commitments in the receipt and store the plaintext in access-controlled telemetry or evidence stores.
+
+#### 10.3.2 Receipt Content (In-Band, Portable)
 
 - `workflow_id`, `step_id`, `parent_step_ids` - always present when workflow context is attached
 - `framework`, `tool_name`, `orchestrator_id` - optional metadata, included at producer discretion
 - `agents_involved` (in summaries) - lists participating agent IDs
 
-**Telemetry content (out-of-band, redactable):**
+#### 10.3.3 Telemetry Content (Out-of-Band, Redactable)
 
 - OpenTelemetry spans, traces, and metrics emitted by `@peac/telemetry-otel`
 - Subject to privacy modes (`strict`, `balanced`, `custom`) which may hash or redact identifiers
 - Telemetry exporters do NOT change what the receipt contains
+
+#### 10.3.4 Redaction Posture
+
+The recommended posture is:
+
+- **Receipts**: Contain opaque IDs, structural links, and cryptographic commitments. Minimal by default.
+- **Telemetry**: Contains detailed payloads (tool inputs/outputs, timing, resource usage) under access control.
+- **Evidence stores**: Hold plaintext corresponding to receipt commitments, disclosed on demand.
+
+This separation ensures receipts are safe to share without leaking operational detail, while full audit information remains available to authorized parties.
+
+#### 10.3.5 Compatibility Note
+
+The disclosure boundary is a **recommended posture**, not a prohibition. Advanced deployments may include richer metadata in receipts when all parties have agreed to the disclosure scope (e.g., within a single enterprise or under a data processing agreement). The guidance above represents the safe default for multi-party, cross-organization workflows.
 
 **Operational guidance:**
 
@@ -834,6 +874,172 @@ These principles apply regardless of framework:
    identifier from the registry (or a custom identifier matching the grammar).
    This enables cross-framework analytics and debugging.
 
+### A.5 Mapping Invariants
+
+These invariants apply to all framework mappings. Violating them produces
+non-interoperable receipts.
+
+1. **ID derivation MUST be deterministic.** Given the same native framework ID
+   (e.g., LangGraph `thread_id`, CrewAI run ID), the derived PEAC
+   `workflow_id` MUST be identical across invocations. Use a stable hash or
+   prefix-and-pad strategy, never a random suffix.
+
+2. **One workflow_id per orchestration run.** All steps within a single
+   orchestration run MUST share the same `workflow_id`. Splitting a run across
+   multiple workflow IDs breaks DAG reconstruction.
+
+3. **parent_step_ids MUST reflect actual data dependencies.** If step B
+   consumed the output of step A, step B MUST list step A as a parent. If
+   step B ran after step A but did not use its output (temporal ordering only),
+   a parent link is NOT required.
+
+4. **Retry attempts MUST produce distinct step_ids.** If a step fails and is
+   retried, the retry MUST have a new `step_id`. The retry step SHOULD list
+   the same `parent_step_ids` as the original attempt. The failed attempt's
+   receipt remains in the workflow history.
+
+5. **Fan-out steps MUST share the same parent.** When an orchestrator spawns
+   N parallel tasks from a single decision point, all N child steps MUST
+   reference the spawning step in their `parent_step_ids`.
+
+6. **Fan-in joins MUST list all contributing parents.** A step that aggregates
+   results from multiple parallel branches MUST list all contributing steps in
+   `parent_step_ids` (up to the maxParentSteps limit of 16).
+
+### A.6 Anti-Patterns
+
+Common mistakes when integrating workflow correlation. Avoid these.
+
+**Anti-pattern: Sequential numbering as the sole ordering mechanism**
+
+Using `step_index` without `parent_step_ids` loses the execution graph.
+Sequential numbering cannot represent forks, joins, or parallel execution.
+Always use `parent_step_ids` for structural ordering; `step_index` is a
+supplementary hint for linear-only workflows.
+
+**Anti-pattern: Semantic workflow IDs**
+
+Embedding business meaning in workflow IDs (e.g., `wf_payroll-2026-jan`) leaks
+organizational context. Use opaque ULID or UUID payloads. See Section 10.2 for
+privacy implications.
+
+**Anti-pattern: Omitting failed steps**
+
+Selectively omitting failed steps from the workflow to present a "clean" DAG
+undermines audit integrity. Failed steps MUST be included with their receipts.
+If a step fails, issue a receipt with an appropriate error code and include it
+in the summary's `receipt_refs` or Merkle tree.
+
+**Anti-pattern: Using tool_name for routing**
+
+The `tool_name` field is metadata for audit and debugging, not a routing
+directive. Do not use it to determine which tool to call -- that logic belongs
+in the orchestrator.
+
+**Anti-pattern: One step per LLM token**
+
+Not every intermediate output needs a workflow step. Map steps to
+**observable actions** (tool calls, API invocations, substantive agent outputs),
+not to internal reasoning tokens or intermediate chain-of-thought stages.
+
+## Appendix B: Interop Hooks
+
+This appendix provides non-normative guidance for integrating PEAC workflow
+correlation with enterprise observability and event systems. These patterns
+complement (not replace) the OTel mapping in Section 9.4.
+
+### B.1 Trace Context Propagation
+
+PEAC receipts are durable evidence; OpenTelemetry spans are ephemeral
+observations. The two systems serve different purposes but benefit from
+cross-referencing.
+
+**Recommended propagation strategy:**
+
+1. At receipt issuance, capture the active W3C `traceparent` (if any) and
+   store it in `ext['org.peacprotocol/workflow']` via a framework-specific
+   field or in a separate extension key (`ext['org.peacprotocol/trace']`).
+2. At span creation, attach the PEAC `workflow_id` and `step_id` as span
+   attributes (`peac.workflow_id`, `peac.step_id`).
+3. Never derive `workflow_id` from `trace-id` or vice versa. The two ID
+   spaces have different semantics (trace-id is sampling-aware; workflow_id
+   is deterministic and audit-grade).
+
+**Attribute conventions:**
+
+| Span Attribute     | Value Source                  | Notes              |
+| ------------------ | ----------------------------- | ------------------ |
+| `peac.workflow_id` | `WorkflowContext.workflow_id` | Set on every span  |
+| `peac.step_id`     | `WorkflowContext.step_id`     | Set on every span  |
+| `peac.framework`   | `WorkflowContext.framework`   | Set if present     |
+| `peac.receipt_ref` | Receipt JTI or JWS hash       | Set after issuance |
+
+### B.2 Event Bus Mapping
+
+Enterprise event buses (Kafka, CloudEvents, AWS EventBridge, etc.) can carry
+PEAC workflow events for downstream consumers (billing, compliance, dashboards).
+
+**CloudEvents mapping:**
+
+```json
+{
+  "specversion": "1.0",
+  "type": "org.peacprotocol.workflow.step.completed",
+  "source": "https://orchestrator.example.com",
+  "id": "step_01HXZ5NWJQ8QJXKZ3V5N7BMGHD",
+  "subject": "wf_01HXZ5NWJQ8QJXKZ3V5N7BMGHC",
+  "datacontenttype": "application/json",
+  "data": {
+    "workflow_id": "wf_01HXZ5NWJQ8QJXKZ3V5N7BMGHC",
+    "step_id": "step_01HXZ5NWJQ8QJXKZ3V5N7BMGHD",
+    "receipt_ref": "jti:019abc12-def3-7890-abcd-ef1234567890"
+  }
+}
+```
+
+**Event type conventions:**
+
+- `org.peacprotocol.workflow.started` -- first receipt in workflow
+- `org.peacprotocol.workflow.step.completed` -- each step receipt issued
+- `org.peacprotocol.workflow.completed` -- summary attestation issued
+- `org.peacprotocol.workflow.failed` -- workflow failure
+
+These event types are informational suggestions. Implementations MAY use any
+event naming convention consistent with their event bus.
+
+### B.3 Receipt Correlation in Logs
+
+Structured logging systems (ELK, Datadog, Splunk) can correlate log entries
+with PEAC receipts using consistent field names.
+
+**Recommended structured log fields:**
+
+```json
+{
+  "message": "Tool call completed",
+  "level": "info",
+  "peac_workflow_id": "wf_01HXZ5NWJQ8QJXKZ3V5N7BMGHC",
+  "peac_step_id": "step_01HXZ5NWJQ8QJXKZ3V5N7BMGHD",
+  "peac_receipt_ref": "jti:019abc12-def3-7890-abcd-ef1234567890",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736"
+}
+```
+
+**Field naming convention:**
+
+- Prefix PEAC fields with `peac_` to avoid collisions with application fields
+- Use snake_case for consistency with OpenTelemetry semantic conventions
+- Include `trace_id` alongside PEAC fields for cross-system joins
+
+**Query example (structured log system):**
+
+```text
+peac_workflow_id:"wf_01HXZ5NWJQ8QJXKZ3V5N7BMGHC" | sort by timestamp
+```
+
+This retrieves all log entries for a single workflow run, regardless of which
+service or agent emitted them.
+
 ## References
 
 - [RFC 6962: Certificate Transparency](https://datatracker.ietf.org/doc/html/rfc6962) - Merkle tree construction
@@ -841,3 +1047,5 @@ These principles apply regardless of framework:
 - [MCP Specification](https://modelcontextprotocol.io/specification) - Model Context Protocol
 - [A2A Protocol](https://a2a-protocol.org/) - Agent-to-Agent Protocol
 - [W3C PROV-DM](https://www.w3.org/TR/prov-dm/) - Provenance Data Model
+- [W3C Trace Context](https://www.w3.org/TR/trace-context/) - Distributed trace propagation
+- [CloudEvents](https://cloudevents.io/) - Event format specification

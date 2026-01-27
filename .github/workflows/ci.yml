@@ -35,6 +35,10 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: Format check - paper (advisory)
+        continue-on-error: true
+        run: pnpm format:check:paper
+
       - name: Lint
         run: pnpm lint
 
@@ -86,12 +90,12 @@ jobs:
         run: |
           pnpm codegen:errors
           pnpm exec prettier --write packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts
-          if ! git diff --exit-code packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts; then
+          if ! git diff --exit-code packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts specs/kernel/error-categories.json; then
             echo "FAIL: Generated files are out of sync with specs/kernel/errors.json"
             echo "Run: pnpm codegen:errors && pnpm exec prettier --write packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts"
             exit 1
           fi
-          echo "OK: Error codes and categories are in sync"
+          echo "OK: Error codes, categories, and JSON artifact are in sync"
 
       - name: Bundle vectors sanity check
         run: |

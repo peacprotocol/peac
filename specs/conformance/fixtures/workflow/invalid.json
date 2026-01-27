@@ -290,6 +290,105 @@
       }
     },
     {
+      "name": "multi-failure-bad-wfid-and-bad-framework",
+      "description": "Multi-failure: invalid workflow_id format AND invalid framework grammar. Per Section 6.5.1, workflow_id format (rule 4) is checked first.",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "INVALID_NO_PREFIX",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "LangGraph"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid workflow ID format",
+        "validation_order_note": "Required field format (rule 4) before optional field format (rule 6)"
+      }
+    },
+    {
+      "name": "multi-failure-bad-stepid-and-too-many-parents",
+      "description": "Multi-failure: invalid step_id format AND exceeds parent limit. Per Section 6.5.1, step_id format (rule 5) is checked first.",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "NO_PREFIX_STEP",
+        "parent_step_ids": [
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA1",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA2",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA3",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA4",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA5",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA6",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA7",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA8",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA9",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F10",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F11",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F12",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F13",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F14",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F15",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F16",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F17"
+        ]
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid step ID format",
+        "validation_order_note": "Required field format (rule 5) before structural constraint (rule 3)"
+      }
+    },
+    {
+      "name": "multi-failure-bad-framework-and-self-parent",
+      "description": "Multi-failure: invalid framework grammar AND self-parent cycle. Per Section 6.5.1, framework grammar (rule 6) is checked before DAG semantics (rule 1).",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": ["step_01ARZ3NDEKTSV4RRFFQ69G5FAV"],
+        "framework": "UPPER_CASE"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid framework identifier grammar",
+        "validation_order_note": "Optional field format (rule 6) before semantic DAG check (rule 1)"
+      }
+    },
+    {
+      "name": "multi-failure-too-many-parents-and-bad-hash",
+      "description": "Multi-failure: exceeds parent limit AND invalid hash format. Per Section 6.5.1, structural constraint (rule 3) is checked before optional field format (rule 7).",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789VWXYZG",
+        "parent_step_ids": [
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA1",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA2",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA3",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA4",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA5",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA6",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA7",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA8",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5FA9",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F10",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F11",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F12",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F13",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F14",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F15",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F16",
+          "step_01ARZ3NDEKTSV4RRFFQ69G5F17"
+        ],
+        "prev_receipt_hash": "not-a-valid-hash"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Exceeds maximum parent steps",
+        "validation_order_note": "Structural constraint (rule 3) before optional field format (rule 7)"
+      }
+    },
+    {
       "name": "error-message-too-long",
       "description": "Error message exceeds maxErrorMessageLength",
       "type": "WorkflowSummaryAttestation",

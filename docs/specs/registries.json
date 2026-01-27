@@ -122,6 +122,16 @@
     }
   ],
   "_governance": {
+    "_comment": "Governance metadata for each registry. See REGISTRIES.md Section 11.",
+    "_entry_lifecycle": {
+      "description": "Entries may include lifecycle fields for deprecation tracking",
+      "fields": {
+        "introduced": "Registry version where the entry was added (e.g., '0.2.0')",
+        "deprecated_since": "Registry version where the entry was deprecated (absent if active)",
+        "deprecated_by": "ID of the replacement entry (absent if no replacement)",
+        "sunset_version": "Registry version where the entry may be removed (major version)"
+      }
+    },
     "payment_rails": {
       "stability": "stable",
       "owner": "peac-core",

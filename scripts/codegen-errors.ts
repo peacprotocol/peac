@@ -238,6 +238,8 @@ function main() {
   }
 }
 
+const CATEGORIES_JSON_PATH = path.join(__dirname, '../specs/kernel/error-categories.json');
+
 function generateCategoriesFile(categories: string[], specVersion: string) {
   const lines: string[] = [];
 
@@ -252,6 +254,7 @@ function generateCategoriesFile(categories: string[], specVersion: string) {
   lines.push('/**');
   lines.push(' * Canonical error categories derived from specs/kernel/errors.json.');
   lines.push(' * This is the single source of truth for all error category definitions.');
+  lines.push(' * Sorted alphabetically. This ordering is a codegen invariant.');
   lines.push(' */');
   lines.push('export const ERROR_CATEGORIES = [');
   for (const cat of categories) {
@@ -269,6 +272,15 @@ function generateCategoriesFile(categories: string[], specVersion: string) {
   console.log(`Writing ${CATEGORIES_OUTPUT_PATH}...`);
   fs.writeFileSync(CATEGORIES_OUTPUT_PATH, content);
   console.log(`Generated ${categories.length} error categories`);
+
+  // Generate language-neutral JSON artifact for non-TS SDKs
+  const jsonArtifact = {
+    $comment: 'AUTO-GENERATED from specs/kernel/errors.json - DO NOT EDIT MANUALLY',
+    version: specVersion,
+    categories,
+  };
+  console.log(`Writing ${CATEGORIES_JSON_PATH}...`);
+  fs.writeFileSync(CATEGORIES_JSON_PATH, JSON.stringify(jsonArtifact, null, 2) + '\n');
 }
 
 function capitalizeCategory(category: string): string {

@@ -19,8 +19,8 @@ pnpm-lock.yaml
 CLAUDE.md
 reference/
 
-# paper artifacts (separate formatting)
+# paper artifacts (checked separately via format:check:paper - advisory)
 paper/
 
-# performance result snapshots
+# performance result snapshots (generated artifact)
 perf-results.json

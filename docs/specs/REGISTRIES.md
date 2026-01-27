@@ -140,10 +140,14 @@ Vendor-specific details go in:
 > Implementations MUST accept any identifier that passes the framework grammar
 > (`/^[a-z][a-z0-9_-]*$/`, max 64 chars). The registry is NOT an allowlist --
 > absence from this table does not make an identifier invalid.
+> Implementations MUST NOT reject unknown frameworks solely because they are
+> not listed here. Governance affects the registry, not protocol validity.
 
 ### 6.1 Current Entries
 
 The `framework` field in WorkflowContext is an **open string field**. Any identifier matching the framework grammar (`/^[a-z][a-z0-9_-]*$/`, max 64 chars) is valid. Well-known values are listed here for interoperability. New frameworks do NOT require protocol updates.
+
+The following table is **NON-NORMATIVE**. It lists well-known frameworks for discovery purposes.
 
 | ID          | Category       | Description                            | Reference                                 |
 | ----------- | -------------- | -------------------------------------- | ----------------------------------------- |
@@ -280,16 +284,35 @@ Each registry in `registries.json` includes governance metadata:
 - **`additive`**: New entries can be added in minor versions. Existing IDs are never removed in minor versions.
 - **`breaking-requires-major`**: Removing or renaming an entry requires a major version bump.
 
-### 11.2 Entry Deprecation
+### 11.2 Entry Lifecycle Fields
+
+Each registry entry MAY include lifecycle fields for deprecation tracking:
+
+| Field              | Type   | Description                                            |
+| ------------------ | ------ | ------------------------------------------------------ |
+| `introduced`       | string | Registry version where the entry was added             |
+| `deprecated_since` | string | Registry version where the entry was deprecated        |
+| `deprecated_by`    | string | ID of the replacement entry (absent if no replacement) |
+| `sunset_version`   | string | Major version where the entry may be removed           |
+
+### 11.3 Entry Deprecation
 
 Entries may be deprecated but not removed in minor versions:
 
 1. Set `"status": "deprecated"` on the entry
 2. Add `"deprecated_by"` field pointing to the replacement (if any)
 3. Add `"deprecated_since"` with the registry version that deprecated it
-4. Removal only happens in a major version bump
+4. Add `"sunset_version"` to indicate the major version where removal is permitted
+5. Removal only happens in a major version bump
 
-### 11.3 Governance Flow
+**Implementation guidance for deprecated entries:**
+
+- Implementations SHOULD emit a warning when encountering a deprecated entry
+- Implementations MUST NOT reject data solely because it references a deprecated entry
+- If `deprecated_by` is present, implementations SHOULD suggest the replacement in warnings
+- Deprecated entries remain valid identifiers until the `sunset_version` is reached
+
+### 11.4 Governance Flow
 
 ```text
 1. Proposer opens GitHub issue with:
