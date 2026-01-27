@@ -37,6 +37,41 @@ Two main types are tested:
 - **Error Context**: Failed workflow with error details
 - **Limits**: maxAgentsInvolved (100), maxReceiptRefs (10000), maxErrorMessageLength (1024)
 
+## Fixture Schema
+
+Each fixture file has the following top-level structure:
+
+```json
+{
+  "$comment": "...",
+  "version": "0.10.2",
+  "fixtures": [...]
+}
+```
+
+**Versioning**: The `version` field refers to the PEAC spec version that introduced
+these fixtures (v0.10.2 = Workflow Correlation). It tracks the spec, not the npm
+package version.
+
+### Expected Fields (Invalid Fixtures)
+
+For invalid fixtures, `expected` contains:
+
+| Field        | Status        | Description                                                                                                                                                  |
+| ------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `valid`      | Normative     | Must be `false`                                                                                                                                              |
+| `error_code` | Normative     | Canonical error code from `specs/kernel/errors.json`. Test harnesses MUST assert this value matches.                                                         |
+| `error`      | Informational | Human-readable description. Test harnesses MUST NOT assert exact match on this field -- it is for documentation only and may change between implementations. |
+| `meta`       | Informational | Optional metadata (e.g., `validation_order_note`). Not used for assertion.                                                                                   |
+
+### Conformance Assertion Rule
+
+Cross-language test harnesses SHOULD:
+
+1. Parse `expected.error_code` and compare against the validator's emitted code
+2. Ignore `expected.error` (or use it only for diagnostic output on failure)
+3. Ignore `expected.meta` (informational only)
+
 ## Key Invariants
 
 1. **ID Format**: Workflow IDs must match `wf_[a-zA-Z0-9_-]{20,48}`

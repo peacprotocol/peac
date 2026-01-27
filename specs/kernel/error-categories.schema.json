@@ -32,6 +32,6 @@
       "description": "Alphabetically sorted list of error categories. Sort order is a codegen invariant."
     }
   },
-  "required": ["$comment", "version", "source_file", "categories"],
+  "required": ["version", "source_file", "categories"],
   "additionalProperties": false
 }

@@ -660,6 +660,36 @@ Workflow correlation creates **linkability** - the ability to connect multiple r
 - Consider workflow correlation an opt-in feature for privacy-sensitive deployments
 - Document what correlation reveals in your privacy policy
 
+#### 10.2.1 Correlation Privacy Modes
+
+Enterprises deploying workflow correlation SHOULD adopt one of the following privacy modes based on their compliance requirements. These modes map to the privacy mode concept used in `@peac/telemetry-otel`.
+
+**Strict mode** (regulated data, cross-organization workflows):
+
+- Use opaque, non-semantic IDs only
+- Omit `tool_name`, `step_index`, `step_total`, and `orchestrator_id`
+- Do not include `agents_involved` in summaries
+- Generate per-audience workflow IDs for cross-party disclosure
+- Namespace all IDs by tenant to prevent cross-tenant correlation
+
+**Balanced mode** (default, general enterprise use):
+
+- Use opaque IDs (no semantic information)
+- Allow generic `tool_name` values (e.g., `tool_call`, `api_request`)
+- Include `step_index`/`step_total` only when needed for linear workflows
+- Include `agents_involved` with opaque agent IDs
+- Per-tenant ID namespacing recommended but not required
+
+**Open mode** (single-tenant, explicit agreement between all parties):
+
+- Richer metadata permitted (specific tool names, orchestrator details)
+- `agents_involved` may include descriptive agent identifiers
+- All parties have agreed to the disclosure scope (e.g., under a data processing agreement)
+- Still MUST NOT include PII, secrets, or raw inference data in receipts
+
+Implementations SHOULD document which mode they operate in and SHOULD allow
+configuration to switch between modes without code changes.
+
 ### 10.3 Disclosure Boundary (Receipt vs Telemetry)
 
 Workflow correlation data lives in the **receipt** and is therefore portable, replayable, and disclosable by design. Any party with access to a receipt can read the workflow context it contains.
@@ -971,6 +1001,21 @@ cross-referencing.
 3. Never derive `workflow_id` from `trace-id` or vice versa. The two ID
    spaces have different semantics (trace-id is sampling-aware; workflow_id
    is deterministic and audit-grade).
+
+**Attribute naming conventions:**
+
+PEAC uses **dotted names** for OTel span attributes (e.g., `peac.workflow_id`)
+to align with the
+[OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)
+naming style. This is the canonical form for PEAC attributes in OTel contexts.
+
+For structured log fields and non-OTel contexts (Kafka headers, CloudEvents
+extensions), PEAC uses **snake*case with a `peac*` prefix** (e.g.,
+`peac_workflow_id`). See Section B.3 for structured log field conventions.
+
+Both forms are equivalent; the choice depends on the target system's
+conventions. Implementations SHOULD use the form that matches their
+observability stack.
 
 **Attribute conventions:**
 

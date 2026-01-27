@@ -326,13 +326,31 @@ Removal of a registry entry is a **major-version-only** operation with explicit 
 
 Entries without a `sunset_version` field are implicitly permanent. To explicitly mark an entry as permanent, set `"sunset_version": "never"`. Both the absence of `sunset_version` and the value `"never"` carry the same semantics: the entry will not be removed in any future version.
 
+**Tombstone semantics:**
+
+Registry entries are **never deleted from the registry file**. Removal means setting `"status": "removed"` on the entry (a tombstone), not deleting the JSON object. This preserves the full history of the registry and enables consumers to distinguish "never existed" from "existed and was removed."
+
+- Producers MUST NOT emit removed values in new data.
+- Verifiers MUST continue accepting previously valid values in existing data (stored receipts, historical attestations) until a major-version boundary.
+- Consumers encountering a removed entry SHOULD log a warning and MAY suggest the replacement via `deprecated_by`.
+
+The entry lifecycle is:
+
+```text
+active -> deprecated -> removed
+```
+
+Each transition is a separate minor (deprecation) or major (removal) version bump. Entries MUST pass through `deprecated` before reaching `removed` -- direct removal of an active entry is not permitted.
+
 **Removal checklist:**
 
+- [ ] Entry is currently `deprecated` (not `active`)
 - [ ] `sunset_version` is set and current major version >= that value
 - [ ] Replacement entry exists (or explicit "no replacement" rationale documented)
 - [ ] Migration guidance published in changelog
 - [ ] Major version bump applied to registry version
 - [ ] At least one minor version has passed since `deprecated_since` (grace period)
+- [ ] Entry JSON updated to `"status": "removed"` (not deleted from file)
 
 ### 11.5 Governance Flow
 

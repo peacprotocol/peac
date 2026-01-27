@@ -1,4 +1,5 @@
 {
+  "$schema": "https://peacprotocol.org/schemas/conformance/workflow-fixtures.schema.json",
   "$comment": "Edge case WorkflowContext and WorkflowSummaryAttestation vectors (v0.10.2+)",
   "version": "0.10.2",
   "fixtures": [
