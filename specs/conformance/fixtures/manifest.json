@@ -203,5 +203,22 @@
       "valid_count": 9,
       "invalid_count": 11
     }
+  },
+  "workflow": {
+    "valid.json": {
+      "description": "Valid WorkflowContext and WorkflowSummaryAttestation golden vectors (v0.10.2+)",
+      "version": "0.10.2",
+      "fixture_count": 12
+    },
+    "invalid.json": {
+      "description": "Invalid WorkflowContext and WorkflowSummaryAttestation vectors (v0.10.2+)",
+      "version": "0.10.2",
+      "fixture_count": 14
+    },
+    "edge-cases.json": {
+      "description": "Edge case workflow correlation vectors including limits testing (v0.10.2+)",
+      "version": "0.10.2",
+      "fixture_count": 11
+    }
   }
 }

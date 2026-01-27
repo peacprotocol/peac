@@ -72,8 +72,9 @@ desktop.ini
 
 # Generated files
 *.generated.*
-# Exception: track kernel error codes (CI verifies sync with spec)
+# Exception: track kernel codegen (CI verifies sync with spec)
 !packages/kernel/src/errors.generated.ts
+!packages/kernel/src/error-categories.generated.ts
 
 # Backup files
 *.bak

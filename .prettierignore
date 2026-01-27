@@ -18,3 +18,9 @@ pnpm-lock.yaml
 # local planning docs (gitignored)
 CLAUDE.md
 reference/
+
+# paper artifacts (local only)
+paper/
+
+# performance result snapshots (generated artifact)
+perf-results.json

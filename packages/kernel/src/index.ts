@@ -14,11 +14,15 @@ export type {
   JsonObject,
   // Registry types
   ErrorDefinition,
+  ErrorCategory,
   PaymentRailEntry,
   ControlEngineEntry,
   TransportMethodEntry,
   AgentProtocolEntry,
 } from './types.js';
+
+// Export error categories (generated from specs/kernel/errors.json)
+export { ERROR_CATEGORIES } from './types.js';
 
 // Export constants
 export {

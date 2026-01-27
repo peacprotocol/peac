@@ -12,6 +12,10 @@ import * as path from 'path';
 
 const SPEC_PATH = path.join(__dirname, '../specs/kernel/errors.json');
 const OUTPUT_PATH = path.join(__dirname, '../packages/kernel/src/errors.generated.ts');
+const CATEGORIES_OUTPUT_PATH = path.join(
+  __dirname,
+  '../packages/kernel/src/error-categories.generated.ts'
+);
 
 // Valid HTTP status codes for errors
 const VALID_HTTP_STATUSES = new Set([
@@ -32,18 +36,8 @@ const VALID_HTTP_STATUSES = new Set([
   504, // Server errors
 ]);
 
-// Valid error categories
-const VALID_CATEGORIES = new Set([
-  'validation',
-  'verification',
-  'identity',
-  'attribution',
-  'dispute',
-  'bundle',
-  'control',
-  'infrastructure',
-  'ucp',
-]);
+// Categories are derived from errors.json at runtime (single source of truth).
+// The codegen script validates these against the kernel types.ts union to prevent drift.
 
 interface ErrorSpec {
   code: string;
@@ -81,9 +75,11 @@ function main() {
       console.warn(`Warning: ${err.code} has unusual HTTP status ${err.http_status}`);
     }
 
-    // Validate category
-    if (!VALID_CATEGORIES.has(err.category)) {
-      console.warn(`Warning: ${err.code} has unknown category '${err.category}'`);
+    // Validate category format (lowercase, starts with letter)
+    if (!/^[a-z][a-z0-9_]*$/.test(err.category)) {
+      throw new Error(
+        `Invalid category format: ${err.category} (must be lowercase alphanumeric, starting with letter)`
+      );
     }
 
     // Validate code format
@@ -91,6 +87,16 @@ function main() {
       throw new Error(`Invalid error code format: ${err.code} (must match E_[A-Z][A-Z0-9_]*)`);
     }
   }
+
+  // Derive unique categories from spec data (single source of truth: errors.json)
+  const derivedCategories = new Set(spec.errors.map((e) => e.category));
+  const sortedDerivedCategories = Array.from(derivedCategories).sort((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0
+  );
+  console.log(`Derived categories: ${sortedDerivedCategories.join(', ')}`);
+
+  // Generate error-categories.generated.ts (eliminates drift by generating from JSON)
+  generateCategoriesFile(sortedDerivedCategories, spec.version);
 
   // Group errors by category for better organization
   const byCategory = new Map<string, ErrorSpec[]>();
@@ -102,7 +108,7 @@ function main() {
 
   // Sort errors by code within each category for deterministic output
   for (const [category, errors] of byCategory) {
-    errors.sort((a, b) => a.code.localeCompare(b.code));
+    errors.sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
     byCategory.set(category, errors);
   }
 
@@ -127,7 +133,7 @@ function main() {
   lines.push(' */');
   lines.push('export const ERROR_CODES = {');
 
-  const categories = Array.from(byCategory.keys()).sort();
+  const categories = Array.from(byCategory.keys()).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   let first = true;
   for (const category of categories) {
     const errors = byCategory.get(category)!;
@@ -232,6 +238,53 @@ function main() {
     const count = byCategory.get(category)!.length;
     console.log(`  ${category}: ${count} codes`);
   }
+}
+
+const CATEGORIES_JSON_PATH = path.join(__dirname, '../specs/kernel/error-categories.json');
+
+function generateCategoriesFile(categories: string[], specVersion: string) {
+  const lines: string[] = [];
+
+  lines.push('/**');
+  lines.push(' * PEAC Protocol Error Categories');
+  lines.push(' *');
+  lines.push(' * AUTO-GENERATED from specs/kernel/errors.json');
+  lines.push(' * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts');
+  lines.push(` * Spec version: ${specVersion}`);
+  lines.push(' */');
+  lines.push('');
+  lines.push('/**');
+  lines.push(' * Canonical error categories derived from specs/kernel/errors.json.');
+  lines.push(' * This is the single source of truth for all error category definitions.');
+  lines.push(' * Sorted alphabetically. This ordering is a codegen invariant.');
+  lines.push(' */');
+  lines.push('export const ERROR_CATEGORIES = [');
+  for (const cat of categories) {
+    lines.push(`  '${cat}',`);
+  }
+  lines.push('] as const;');
+  lines.push('');
+  lines.push('/**');
+  lines.push(' * Error category type - union of all categories in specs/kernel/errors.json');
+  lines.push(' */');
+  lines.push('export type ErrorCategory = (typeof ERROR_CATEGORIES)[number];');
+  lines.push('');
+
+  const content = lines.join('\n');
+  console.log(`Writing ${CATEGORIES_OUTPUT_PATH}...`);
+  fs.writeFileSync(CATEGORIES_OUTPUT_PATH, content);
+  console.log(`Generated ${categories.length} error categories`);
+
+  // Generate language-neutral JSON artifact for non-TS SDKs
+  const jsonArtifact = {
+    $schema: 'https://peacprotocol.org/schemas/kernel/error-categories.schema.json',
+    $comment: 'AUTO-GENERATED from specs/kernel/errors.json - DO NOT EDIT MANUALLY',
+    version: specVersion,
+    source_file: 'specs/kernel/errors.json',
+    categories,
+  };
+  console.log(`Writing ${CATEGORIES_JSON_PATH}...`);
+  fs.writeFileSync(CATEGORIES_JSON_PATH, JSON.stringify(jsonArtifact, null, 2) + '\n');
 }
 
 function capitalizeCategory(category: string): string {

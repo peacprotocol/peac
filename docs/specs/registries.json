@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "payment_rails": [
     {
       "id": "x402",
@@ -118,6 +118,157 @@
       "category": "card-protocol",
       "description": "Trusted Agent Protocol (Visa TAP)",
       "reference": "https://developer.visa.com/",
+      "status": "informational"
+    }
+  ],
+  "_governance": {
+    "_comment": "Governance metadata for each registry. See REGISTRIES.md Section 11.",
+    "_entry_lifecycle": {
+      "description": "Entries may include lifecycle fields for deprecation tracking",
+      "fields": {
+        "introduced": "Registry version where the entry was added (e.g., '0.2.0')",
+        "deprecated_since": "Registry version where the entry was deprecated (absent if active)",
+        "deprecated_by": "ID of the replacement entry (absent if no replacement)",
+        "sunset_version": "Registry version where the entry may be removed (major version)"
+      }
+    },
+    "payment_rails": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "control_engines": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "transport_methods": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "agent_protocols": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "orchestration_frameworks": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "extension_keys": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "attestation_types": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    }
+  },
+  "orchestration_frameworks": [
+    {
+      "id": "mcp",
+      "category": "tool-protocol",
+      "description": "Model Context Protocol orchestration",
+      "reference": "https://modelcontextprotocol.io/",
+      "status": "informational"
+    },
+    {
+      "id": "a2a",
+      "category": "agent-protocol",
+      "description": "Google Agent2Agent Protocol orchestration",
+      "reference": "https://a2a-protocol.org/",
+      "status": "informational"
+    },
+    {
+      "id": "crewai",
+      "category": "framework",
+      "description": "CrewAI multi-agent framework",
+      "reference": "https://www.crewai.com/",
+      "status": "informational"
+    },
+    {
+      "id": "langgraph",
+      "category": "framework",
+      "description": "LangGraph stateful agent orchestration",
+      "reference": "https://langchain-ai.github.io/langgraph/",
+      "status": "informational"
+    },
+    {
+      "id": "autogen",
+      "category": "framework",
+      "description": "Microsoft AutoGen multi-agent framework",
+      "reference": "https://microsoft.github.io/autogen/",
+      "status": "informational"
+    },
+    {
+      "id": "custom",
+      "category": "generic",
+      "description": "Custom orchestration framework (catch-all)",
+      "reference": null,
+      "status": "informational"
+    }
+  ],
+  "extension_keys": [
+    {
+      "id": "org.peacprotocol/workflow",
+      "category": "orchestration",
+      "description": "Workflow correlation context for multi-agent orchestration",
+      "reference": "docs/specs/WORKFLOW-CORRELATION.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/obligations",
+      "category": "attribution",
+      "description": "Credit and contribution requirements (CC Signals alignment)",
+      "reference": "docs/specs/ATTRIBUTION.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/receipt",
+      "category": "metadata",
+      "description": "Receipt JWS in MCP tool response metadata",
+      "reference": "docs/specs/PROTOCOL-BEHAVIOR.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/agent_id",
+      "category": "identity",
+      "description": "Agent identity reference in MCP metadata",
+      "reference": "docs/specs/AGENT-IDENTITY.md",
+      "status": "informational"
+    }
+  ],
+  "attestation_types": [
+    {
+      "id": "peac/attribution",
+      "category": "provenance",
+      "description": "Content provenance and usage attestation",
+      "reference": "docs/specs/ATTRIBUTION.md",
+      "status": "informational"
+    },
+    {
+      "id": "peac/dispute",
+      "category": "resolution",
+      "description": "Formal contestation of receipts, attributions, or policy decisions",
+      "reference": "docs/specs/DISPUTE.md",
+      "status": "informational"
+    },
+    {
+      "id": "peac/agent-identity",
+      "category": "identity",
+      "description": "Cryptographic proof-of-control binding for agents",
+      "reference": "docs/specs/AGENT-IDENTITY.md",
+      "status": "informational"
+    },
+    {
+      "id": "peac/workflow-summary",
+      "category": "orchestration",
+      "description": "Proof-of-run attestation for multi-step workflows",
+      "reference": "docs/specs/WORKFLOW-CORRELATION.md",
       "status": "informational"
     }
   ]

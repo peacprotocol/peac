@@ -46,8 +46,15 @@ export type JsonObject = { [key: string]: JsonValue };
 // Registry Types
 // -----------------------------------------------------------------------------
 
+// Re-export generated error categories (single source of truth: specs/kernel/errors.json)
+export { ERROR_CATEGORIES } from './error-categories.generated.js';
+export type { ErrorCategory } from './error-categories.generated.js';
+
 /**
  * Error code definition
+ *
+ * The category type is generated from specs/kernel/errors.json by codegen-errors.ts.
+ * Run: npx tsx scripts/codegen-errors.ts
  */
 export interface ErrorDefinition {
   code: string;
@@ -55,16 +62,7 @@ export interface ErrorDefinition {
   title: string;
   description: string;
   retriable: boolean;
-  category:
-    | 'verification'
-    | 'validation'
-    | 'infrastructure'
-    | 'control'
-    | 'identity'
-    | 'attribution'
-    | 'dispute'
-    | 'bundle'
-    | 'ucp';
+  category: import('./error-categories.generated.js').ErrorCategory;
 }
 
 /**

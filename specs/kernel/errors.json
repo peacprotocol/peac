@@ -778,6 +778,70 @@
       "description": "Failed to serialize UCP evidence to YAML format",
       "retriable": false,
       "category": "ucp"
+    },
+    {
+      "code": "E_WORKFLOW_CONTEXT_INVALID",
+      "http_status": 400,
+      "title": "Invalid Workflow Context",
+      "description": "Workflow context does not conform to WorkflowContextSchema",
+      "retriable": false,
+      "category": "workflow"
+    },
+    {
+      "code": "E_WORKFLOW_DAG_INVALID",
+      "http_status": 400,
+      "title": "Invalid Workflow DAG",
+      "description": "Workflow DAG semantics violated (self-parent, duplicate parents, or cycle detected)",
+      "retriable": false,
+      "category": "workflow"
+    },
+    {
+      "code": "E_WORKFLOW_LIMIT_EXCEEDED",
+      "http_status": 400,
+      "title": "Workflow Limit Exceeded",
+      "description": "Workflow exceeds defined limits (parent count, ID length, etc.)",
+      "retriable": false,
+      "category": "workflow"
+    },
+    {
+      "code": "E_WORKFLOW_ID_INVALID",
+      "http_status": 400,
+      "title": "Invalid Workflow ID",
+      "description": "Workflow ID does not match required format (wf_{ulid|uuid})",
+      "retriable": false,
+      "category": "workflow"
+    },
+    {
+      "code": "E_WORKFLOW_STEP_ID_INVALID",
+      "http_status": 400,
+      "title": "Invalid Step ID",
+      "description": "Step ID does not match required format (step_{ulid|uuid})",
+      "retriable": false,
+      "category": "workflow"
+    },
+    {
+      "code": "E_WORKFLOW_PARENT_NOT_FOUND",
+      "http_status": 400,
+      "title": "Parent Step Not Found",
+      "description": "Referenced parent step ID does not exist in the workflow",
+      "retriable": false,
+      "category": "workflow"
+    },
+    {
+      "code": "E_WORKFLOW_SUMMARY_INVALID",
+      "http_status": 400,
+      "title": "Invalid Workflow Summary",
+      "description": "Workflow summary attestation does not conform to schema",
+      "retriable": false,
+      "category": "workflow"
+    },
+    {
+      "code": "E_WORKFLOW_CYCLE_DETECTED",
+      "http_status": 400,
+      "title": "Workflow Cycle Detected",
+      "description": "Workflow DAG contains a cycle (not acyclic)",
+      "retriable": false,
+      "category": "workflow"
     }
   ]
 }
