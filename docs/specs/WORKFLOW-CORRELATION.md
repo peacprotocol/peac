@@ -53,14 +53,16 @@ All workflow fields use the existing extensions mechanism (`claims.ext`). The wi
 
 ### 2.2 Framework-Agnostic
 
-The correlation primitive works with any orchestration layer:
+The correlation primitive works with any orchestration layer. The `framework` field is an open string identifier -- any value matching the grammar `/^[a-z][a-z0-9_-]*$/` (max 64 chars) is valid. Well-known values are listed in the PEAC registries for interoperability, but new frameworks do NOT require protocol updates.
 
-- MCP (Model Context Protocol)
-- A2A (Google Agent2Agent Protocol)
-- CrewAI
-- LangGraph
-- AutoGen
-- Custom orchestrators
+Well-known frameworks (informational):
+
+- `mcp` - Model Context Protocol
+- `a2a` - Google Agent2Agent Protocol
+- `crewai` - CrewAI
+- `langgraph` - LangGraph
+- `autogen` - AutoGen
+- `custom` - Generic/custom orchestrators
 
 ### 2.3 DAG Semantics
 
@@ -353,25 +355,37 @@ step_B -/
 { "parent_step_ids": ["step_A", "step_B"] }
 ```
 
-### 6.5 Validation Rules
+### 6.5 Per-Receipt Validation Rules (MUST)
 
-1. **No self-parent**: `step_id` MUST NOT appear in `parent_step_ids` (schema-enforced)
-2. **No duplicate parents**: `parent_step_ids` MUST NOT contain duplicates (schema-enforced)
-3. **Acyclic**: The full workflow graph MUST be acyclic
-4. **Max fan-in**: `parent_step_ids.length` MUST be <= 16 (schema-enforced)
+Implementations MUST enforce these rules when issuing or validating a single receipt's WorkflowContext. These are enforced at schema validation time (issuance boundary).
 
-> **Note:** Rules 1, 2, and 4 are enforced at schema validation time. Rule 3 (acyclic) requires full graph analysis and is enforced at workflow summary verification (see Section 6.6).
+1. **No self-parent**: `step_id` MUST NOT appear in `parent_step_ids`
+2. **No duplicate parents**: `parent_step_ids` MUST NOT contain duplicate values
+3. **Max fan-in**: `parent_step_ids.length` MUST be <= 16
+4. **ID format**: `workflow_id` MUST match `/^wf_[a-zA-Z0-9_-]{20,48}$/`; `step_id` MUST match `/^step_[a-zA-Z0-9_-]{20,48}$/`
+5. **Framework grammar**: If present, `framework` MUST match `/^[a-z][a-z0-9_-]*$/` (max 64 chars)
+6. **Hash format**: If present, `prev_receipt_hash` MUST match `/^sha256:[a-f0-9]{64}$/`
 
-### 6.6 DAG Verification (Future: Verifier Requirements)
+Violations of any MUST rule MUST cause issuance to fail with an appropriate `E_WORKFLOW_*` error code.
 
-When verifying a workflow summary, implementations SHOULD:
+### 6.6 Workflow-Level Verification Rules (SHOULD)
 
-1. Build graph from all receipts' `WorkflowContext`
-2. Check for cycles using topological sort
-3. Verify all `parent_step_ids` references exist
-4. Verify single workflow_id across all receipts
+Implementations SHOULD enforce these rules when verifying a complete workflow (e.g., when verifying a `peac/workflow-summary` attestation). These require the full receipt set and cannot be checked per-receipt.
 
-> **Implementation Status:** This section describes verifier requirements. The `@peac/audit` package will provide `verifyWorkflowSummary()` in a future release.
+1. **Acyclic**: The full workflow graph SHOULD be verified as acyclic (topological sort)
+2. **Parent existence**: All `parent_step_ids` references SHOULD resolve to existing step IDs within the workflow
+3. **Single workflow**: All receipts in a summary SHOULD share the same `workflow_id`
+4. **Hash chain integrity**: If `prev_receipt_hash` is used, the hash SHOULD match the SHA-256 of the referenced previous receipt
+
+### 6.7 Optional Verification (MAY)
+
+Implementations MAY additionally check:
+
+1. **Step ordering**: `step_index` values are sequential and consistent with `step_total`
+2. **Agent consistency**: All agent IDs in workflow contexts appear in the summary's `agents_involved`
+3. **Temporal ordering**: Receipt timestamps are consistent with the DAG structure
+
+> **Implementation Status:** Per-receipt validation (Section 6.5) is enforced by `@peac/schema` and `@peac/protocol` at `issue()` time. Workflow-level verification (Section 6.6) will be provided by `@peac/audit` via `verifyWorkflowSummary()` in a future release.
 
 ## 7. Merkle Commitment
 
@@ -640,29 +654,37 @@ Workflow summaries should include:
 
 ### 11.1 Conformance Levels
 
-**MUST** (required for conformance):
+**MUST** (per-receipt, enforced at issuance -- see Section 6.5):
 
-- Validate `workflow_id` and `step_id` formats
-- Enforce `parent_step_ids` limits
+- Validate `workflow_id` and `step_id` formats against regex patterns
+- Enforce `parent_step_ids` max limit (16)
 - Reject self-parent and duplicate parents
-- Validate workflow summary has receipt commitment
+- Validate `framework` grammar if present
+- Validate `prev_receipt_hash` format if present
+- Validate workflow summary has receipt commitment (`receipt_refs` or `receipt_merkle_root`)
+- Accept any `framework` value matching the grammar (open string, not closed enum)
 
-**SHOULD** (recommended):
+**SHOULD** (workflow-level, enforced at summary verification -- see Section 6.6):
 
+- Verify acyclic graph structure
+- Verify all parent step references exist
+- Verify single `workflow_id` across all receipts
+- Verify hash chain integrity for streaming receipts
 - Use ULID for new IDs
 - Include `framework` field for traceability
-- Include hash chain for streaming receipts
 
-**MAY** (optional):
+**MAY** (optional -- see Section 6.7):
 
 - Support Merkle inclusion proofs
 - Support framework-specific bindings
+- Verify step ordering consistency
+- Verify temporal ordering consistency
 
 ### 11.2 Test Vectors
 
 Conformance fixtures are provided at:
 
-```
+```text
 specs/conformance/fixtures/workflow/
   valid.json           # Valid WorkflowContext and WorkflowSummaryAttestation vectors
   invalid.json         # Invalid vectors that must be rejected
@@ -672,18 +694,20 @@ specs/conformance/fixtures/workflow/
 
 ### 11.3 Implementation Requirements
 
-Implementations MUST:
+Implementations MUST (per-receipt):
 
 1. Parse and validate WorkflowContext from extensions
 2. Validate ID formats with provided regex patterns
-3. Enforce DAG semantics (no self-parent, no duplicates)
-4. Verify workflow summaries include receipt commitment
+3. Enforce per-receipt DAG semantics (no self-parent, no duplicates, max fan-in)
+4. Validate framework grammar when present (open string, constrained pattern)
+5. Verify workflow summaries include receipt commitment
 
-Implementations SHOULD:
+Implementations SHOULD (workflow-level):
 
 1. Provide helpers for ID generation
 2. Support Merkle root computation for large workflows
-3. Provide DAG reconstruction from receipt set
+3. Provide DAG reconstruction and cycle detection from receipt set
+4. Verify parent step reference existence
 
 ## References
 

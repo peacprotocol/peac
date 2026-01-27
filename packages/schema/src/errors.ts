@@ -6,8 +6,9 @@
  */
 
 /**
- * Canonical error categories from specs/kernel/errors.json.
- * This is the normative source of truth for category names.
+ * Canonical error categories from specs/kernel/errors.json (single source of truth).
+ * This list MUST match the categories in errors.json and the ErrorDefinition.category
+ * union in packages/kernel/src/types.ts. The codegen script cross-validates at generation time.
  */
 export const ERROR_CATEGORIES_CANONICAL = [
   'validation', // Schema/structure validation failures

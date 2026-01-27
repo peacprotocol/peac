@@ -106,18 +106,18 @@
       }
     },
     {
-      "name": "invalid-framework",
-      "description": "Unknown orchestration framework",
+      "name": "invalid-framework-grammar",
+      "description": "Framework identifier with invalid grammar (uppercase)",
       "type": "WorkflowContext",
       "input": {
         "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "parent_step_ids": [],
-        "framework": "unknown_framework"
+        "framework": "LangGraph"
       },
       "expected": {
         "valid": false,
-        "error": "Invalid orchestration framework"
+        "error": "Invalid framework identifier grammar"
       }
     },
     {

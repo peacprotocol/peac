@@ -17,10 +17,12 @@ import {
   WORKFLOW_EXTENSION_KEY,
   WORKFLOW_SUMMARY_TYPE,
   WORKFLOW_STATUSES,
+  WELL_KNOWN_FRAMEWORKS,
   ORCHESTRATION_FRAMEWORKS,
   WORKFLOW_LIMITS,
   WORKFLOW_ID_PATTERN,
   STEP_ID_PATTERN,
+  FRAMEWORK_ID_PATTERN,
   createWorkflowId,
   createStepId,
   validateWorkflowContext,
@@ -93,8 +95,8 @@ describe('Workflow Constants', () => {
     expect(WORKFLOW_STATUSES).toEqual(['in_progress', 'completed', 'failed', 'cancelled']);
   });
 
-  it('should have all orchestration frameworks', () => {
-    expect(ORCHESTRATION_FRAMEWORKS).toEqual([
+  it('should have well-known orchestration frameworks', () => {
+    expect(WELL_KNOWN_FRAMEWORKS).toEqual([
       'mcp',
       'a2a',
       'crewai',
@@ -102,6 +104,10 @@ describe('Workflow Constants', () => {
       'autogen',
       'custom',
     ]);
+  });
+
+  it('should export ORCHESTRATION_FRAMEWORKS as alias for backwards compatibility', () => {
+    expect(ORCHESTRATION_FRAMEWORKS).toBe(WELL_KNOWN_FRAMEWORKS);
   });
 
   it('should have all workflow limits', () => {
@@ -220,19 +226,63 @@ describe('WorkflowStatusSchema', () => {
 });
 
 // =============================================================================
-// ORCHESTRATION FRAMEWORK SCHEMA TESTS
+// ORCHESTRATION FRAMEWORK SCHEMA TESTS (Open String)
 // =============================================================================
 
 describe('OrchestrationFrameworkSchema', () => {
-  it('should accept all valid frameworks', () => {
-    ORCHESTRATION_FRAMEWORKS.forEach((framework) => {
+  it('should accept all well-known frameworks', () => {
+    WELL_KNOWN_FRAMEWORKS.forEach((framework) => {
       expect(OrchestrationFrameworkSchema.parse(framework)).toBe(framework);
     });
   });
 
-  it('should reject invalid frameworks', () => {
-    expect(() => OrchestrationFrameworkSchema.parse('invalid')).toThrow();
+  it('should accept unknown/new frameworks (open string)', () => {
+    expect(OrchestrationFrameworkSchema.parse('dspy')).toBe('dspy');
+    expect(OrchestrationFrameworkSchema.parse('smolagents')).toBe('smolagents');
+    expect(OrchestrationFrameworkSchema.parse('temporal-ai')).toBe('temporal-ai');
+    expect(OrchestrationFrameworkSchema.parse('my_custom_orch')).toBe('my_custom_orch');
+  });
+
+  it('should reject empty string', () => {
     expect(() => OrchestrationFrameworkSchema.parse('')).toThrow();
+  });
+
+  it('should reject strings not starting with a letter', () => {
+    expect(() => OrchestrationFrameworkSchema.parse('123abc')).toThrow();
+    expect(() => OrchestrationFrameworkSchema.parse('-mcp')).toThrow();
+    expect(() => OrchestrationFrameworkSchema.parse('_test')).toThrow();
+  });
+
+  it('should reject uppercase letters', () => {
+    expect(() => OrchestrationFrameworkSchema.parse('MCP')).toThrow();
+    expect(() => OrchestrationFrameworkSchema.parse('LangGraph')).toThrow();
+  });
+
+  it('should reject strings exceeding max length', () => {
+    const longName = 'a' + 'b'.repeat(WORKFLOW_LIMITS.maxFrameworkLength);
+    expect(() => OrchestrationFrameworkSchema.parse(longName)).toThrow();
+  });
+
+  it('should accept strings at max length', () => {
+    const maxName = 'a' + 'b'.repeat(WORKFLOW_LIMITS.maxFrameworkLength - 1);
+    expect(OrchestrationFrameworkSchema.parse(maxName)).toBe(maxName);
+  });
+});
+
+describe('FRAMEWORK_ID_PATTERN', () => {
+  it('should match valid framework identifiers', () => {
+    expect(FRAMEWORK_ID_PATTERN.test('mcp')).toBe(true);
+    expect(FRAMEWORK_ID_PATTERN.test('a2a')).toBe(true);
+    expect(FRAMEWORK_ID_PATTERN.test('crewai')).toBe(true);
+    expect(FRAMEWORK_ID_PATTERN.test('lang-graph')).toBe(true);
+    expect(FRAMEWORK_ID_PATTERN.test('my_framework')).toBe(true);
+  });
+
+  it('should reject invalid framework identifiers', () => {
+    expect(FRAMEWORK_ID_PATTERN.test('')).toBe(false);
+    expect(FRAMEWORK_ID_PATTERN.test('123')).toBe(false);
+    expect(FRAMEWORK_ID_PATTERN.test('MCP')).toBe(false);
+    expect(FRAMEWORK_ID_PATTERN.test('has spaces')).toBe(false);
   });
 });
 
@@ -900,6 +950,17 @@ describe('Workflow correlation edge cases', () => {
       });
 
       expect(context.framework).toBe('custom');
+    });
+
+    it('should support unknown/new frameworks (open string)', () => {
+      const context = createWorkflowContext({
+        workflow_id: VALID_WORKFLOW_ID,
+        step_id: VALID_STEP_ID,
+        framework: 'dspy',
+        tool_name: 'dspy:chain-of-thought',
+      });
+
+      expect(context.framework).toBe('dspy');
     });
   });
 });

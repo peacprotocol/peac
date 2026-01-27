@@ -83,6 +83,23 @@
       }
     },
     {
+      "name": "unknown-framework-open-string",
+      "description": "Non-well-known framework accepted (open string field)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01H5KPT9QZA123456789DSPYTT",
+        "parent_step_ids": [],
+        "tool_name": "dspy:chain-of-thought",
+        "framework": "dspy"
+      },
+      "expected": {
+        "valid": true,
+        "framework": "dspy",
+        "comment": "Framework field is open string - new frameworks do not require protocol updates"
+      }
+    },
+    {
       "name": "hash-chained-step",
       "description": "Step with previous receipt hash for streaming",
       "type": "WorkflowContext",

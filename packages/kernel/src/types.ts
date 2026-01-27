@@ -48,6 +48,9 @@ export type JsonObject = { [key: string]: JsonValue };
 
 /**
  * Error code definition
+ *
+ * The category union MUST match the categories present in specs/kernel/errors.json.
+ * The codegen script (scripts/codegen-errors.ts) cross-validates at generation time.
  */
 export interface ErrorDefinition {
   code: string;

@@ -134,9 +134,42 @@ Vendor-specific details go in:
 
 ---
 
-## 6. Extension Keys Registry
+## 6. Orchestration Frameworks Registry
 
 ### 6.1 Current Entries
+
+The `framework` field in WorkflowContext is an **open string field**. Any identifier matching the framework grammar (`/^[a-z][a-z0-9_-]*$/`, max 64 chars) is valid. Well-known values are listed here for interoperability. New frameworks do NOT require protocol updates.
+
+| ID          | Category       | Description                            | Reference                                 |
+| ----------- | -------------- | -------------------------------------- | ----------------------------------------- |
+| `mcp`       | tool-protocol  | Model Context Protocol orchestration   | https://modelcontextprotocol.io/          |
+| `a2a`       | agent-protocol | Google Agent2Agent Protocol            | https://a2a-protocol.org/                 |
+| `crewai`    | framework      | CrewAI multi-agent framework           | https://www.crewai.com/                   |
+| `langgraph` | framework      | LangGraph stateful agent orchestration | https://langchain-ai.github.io/langgraph/ |
+| `autogen`   | framework      | Microsoft AutoGen multi-agent          | https://microsoft.github.io/autogen/      |
+| `custom`    | generic        | Custom orchestration (catch-all)       | -                                         |
+
+### 6.2 Framework Identifier Grammar
+
+Framework identifiers MUST match: `/^[a-z][a-z0-9_-]*$/` (max 64 characters)
+
+- Lowercase letters, digits, hyphens, and underscores
+- Must start with a lowercase letter
+- Examples: `dspy`, `smolagents`, `temporal-ai`, `my_orchestrator`
+
+### 6.3 Adding New Frameworks
+
+No protocol update is required. To add a well-known entry:
+
+1. Open GitHub issue with proposed entry
+2. Provide: id, category, description, reference
+3. Submit PR to `registries.json`
+
+---
+
+## 7. Extension Keys Registry
+
+### 7.1 Current Entries
 
 Extension keys use reverse-DNS naming (`org.peacprotocol/...`) to avoid collisions with third-party extensions.
 
@@ -147,7 +180,7 @@ Extension keys use reverse-DNS naming (`org.peacprotocol/...`) to avoid collisio
 | `org.peacprotocol/receipt`     | metadata      | Receipt JWS in MCP tool response metadata                   | PROTOCOL-BEHAVIOR.md    |
 | `org.peacprotocol/agent_id`    | identity      | Agent identity reference in MCP metadata                    | AGENT-IDENTITY.md       |
 
-### 6.2 Naming Convention
+### 7.2 Naming Convention
 
 Extension keys MUST use reverse-DNS format:
 
@@ -156,9 +189,9 @@ Extension keys MUST use reverse-DNS format:
 
 ---
 
-## 7. Attestation Types Registry
+## 8. Attestation Types Registry
 
-### 7.1 Current Entries
+### 8.1 Current Entries
 
 Attestation types use the `peac/{name}` pattern for first-party types.
 
@@ -169,16 +202,16 @@ Attestation types use the `peac/{name}` pattern for first-party types.
 | `peac/agent-identity`   | identity      | Cryptographic proof-of-control binding for agents                  | AGENT-IDENTITY.md       |
 | `peac/workflow-summary` | orchestration | Proof-of-run attestation for multi-step workflows                  | WORKFLOW-CORRELATION.md |
 
-### 7.2 Naming Convention
+### 8.2 Naming Convention
 
 - First-party: `peac/{name}`
 - Third-party: Use extension keys in `ext` rather than custom attestation types
 
 ---
 
-## 8. Stability and Versioning
+## 9. Stability and Versioning
 
-### 8.1 Entry Lifecycle
+### 9.1 Entry Lifecycle
 
 Entries can be:
 
@@ -187,7 +220,7 @@ Entries can be:
 - **Deprecated**: Marked as `"status": "deprecated"`
 - **Removed**: Only if never widely used
 
-### 8.2 Versioning
+### 9.2 Versioning
 
 Registry version (e.g., "0.1.0") increments on:
 
@@ -197,7 +230,7 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 9. Relationship to Core Protocol
+## 10. Relationship to Core Protocol
 
 **Core protocol** (JSON Schema, PROTOCOL-BEHAVIOR.md):
 
@@ -219,7 +252,7 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 10. Registry Governance
+## 11. Registry Governance
 
 This file and `registries.json` serve as the authoritative registries for the PEAC ecosystem:
 
@@ -229,7 +262,7 @@ This file and `registries.json` serve as the authoritative registries for the PE
 
 ---
 
-## 11. Questions
+## 12. Questions
 
 For registry questions:
 

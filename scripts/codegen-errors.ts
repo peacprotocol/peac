@@ -32,19 +32,8 @@ const VALID_HTTP_STATUSES = new Set([
   504, // Server errors
 ]);
 
-// Valid error categories
-const VALID_CATEGORIES = new Set([
-  'validation',
-  'verification',
-  'identity',
-  'attribution',
-  'dispute',
-  'bundle',
-  'control',
-  'infrastructure',
-  'ucp',
-  'workflow',
-]);
+// Categories are derived from errors.json at runtime (single source of truth).
+// The codegen script validates these against the kernel types.ts union to prevent drift.
 
 interface ErrorSpec {
   code: string;
@@ -82,15 +71,49 @@ function main() {
       console.warn(`Warning: ${err.code} has unusual HTTP status ${err.http_status}`);
     }
 
-    // Validate category
-    if (!VALID_CATEGORIES.has(err.category)) {
-      console.warn(`Warning: ${err.code} has unknown category '${err.category}'`);
+    // Validate category format (lowercase, starts with letter)
+    if (!/^[a-z][a-z0-9_]*$/.test(err.category)) {
+      throw new Error(
+        `Invalid category format: ${err.category} (must be lowercase alphanumeric, starting with letter)`
+      );
     }
 
     // Validate code format
     if (!/^E_[A-Z][A-Z0-9_]*$/.test(err.code)) {
       throw new Error(`Invalid error code format: ${err.code} (must match E_[A-Z][A-Z0-9_]*)`);
     }
+  }
+
+  // Derive unique categories from spec data (single source of truth: errors.json)
+  const derivedCategories = new Set(spec.errors.map((e) => e.category));
+  const sortedDerivedCategories = Array.from(derivedCategories).sort();
+  console.log(`Derived categories: ${sortedDerivedCategories.join(', ')}`);
+
+  // Cross-validate against kernel types.ts ErrorDefinition.category union
+  const TYPES_PATH = path.join(__dirname, '../packages/kernel/src/types.ts');
+  const typesContent = fs.readFileSync(TYPES_PATH, 'utf-8');
+  const categorySection = typesContent.match(/category:\s*\n([\s\S]*?);/);
+  if (categorySection) {
+    const typesCategories = new Set(
+      Array.from(categorySection[1].matchAll(/'([a-z_]+)'/g), (m) => m[1])
+    );
+    for (const cat of derivedCategories) {
+      if (!typesCategories.has(cat)) {
+        throw new Error(
+          `Category '${cat}' found in errors.json but missing from packages/kernel/src/types.ts ErrorDefinition.category union. Add it to keep them in sync.`
+        );
+      }
+    }
+    for (const cat of typesCategories) {
+      if (!derivedCategories.has(cat)) {
+        console.warn(
+          `Warning: Category '${cat}' exists in types.ts union but has no error codes in errors.json`
+        );
+      }
+    }
+    console.log('Category cross-validation passed (errors.json <-> types.ts)');
+  } else {
+    console.warn('Warning: Could not extract category union from types.ts for cross-validation');
   }
 
   // Group errors by category for better organization

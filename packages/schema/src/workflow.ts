@@ -37,9 +37,15 @@ export const WORKFLOW_SUMMARY_TYPE = 'peac/workflow-summary' as const;
 export const WORKFLOW_STATUSES = ['in_progress', 'completed', 'failed', 'cancelled'] as const;
 
 /**
- * Supported orchestration frameworks
+ * Well-known orchestration frameworks (informational, not normative)
+ *
+ * The framework field accepts any string matching the framework grammar.
+ * These well-known values are listed in the PEAC registries for interop.
+ * New frameworks do NOT require protocol updates - just use the name.
+ *
+ * @see docs/specs/registries.json - orchestration_frameworks section
  */
-export const ORCHESTRATION_FRAMEWORKS = [
+export const WELL_KNOWN_FRAMEWORKS = [
   'mcp',
   'a2a',
   'crewai',
@@ -47,6 +53,20 @@ export const ORCHESTRATION_FRAMEWORKS = [
   'autogen',
   'custom',
 ] as const;
+
+/**
+ * @deprecated Use WELL_KNOWN_FRAMEWORKS instead. Kept for backwards compatibility.
+ */
+export const ORCHESTRATION_FRAMEWORKS = WELL_KNOWN_FRAMEWORKS;
+
+/**
+ * Framework identifier grammar pattern
+ *
+ * Lowercase letters, digits, hyphens, underscores.
+ * Must start with a letter. Max 64 characters.
+ * Examples: "mcp", "a2a", "crewai", "langgraph", "dspy", "smolagents"
+ */
+export const FRAMEWORK_ID_PATTERN = /^[a-z][a-z0-9_-]*$/;
 
 /**
  * Workflow correlation limits (DoS protection)
@@ -60,6 +80,8 @@ export const WORKFLOW_LIMITS = {
   maxStepIdLength: 128,
   /** Maximum tool name length */
   maxToolNameLength: 256,
+  /** Maximum framework identifier length */
+  maxFrameworkLength: 64,
   /** Maximum agents in a workflow summary */
   maxAgentsInvolved: 100,
   /** Maximum receipt refs in a workflow summary */
@@ -115,8 +137,20 @@ export const WorkflowStatusSchema = z.enum(WORKFLOW_STATUSES);
 
 /**
  * Orchestration framework schema
+ *
+ * Open string field with constrained grammar. Any lowercase identifier
+ * matching the framework grammar is valid. Well-known values are listed
+ * in WELL_KNOWN_FRAMEWORKS and the PEAC registries.
+ *
+ * Grammar: /^[a-z][a-z0-9_-]*$/ (max 64 chars)
  */
-export const OrchestrationFrameworkSchema = z.enum(ORCHESTRATION_FRAMEWORKS);
+export const OrchestrationFrameworkSchema = z
+  .string()
+  .regex(
+    FRAMEWORK_ID_PATTERN,
+    'Invalid framework identifier (must be lowercase alphanumeric with hyphens/underscores, starting with a letter)'
+  )
+  .max(WORKFLOW_LIMITS.maxFrameworkLength);
 
 /**
  * Workflow context schema - attached to individual receipts
@@ -408,7 +442,7 @@ export function createWorkflowContext(params: {
   step_index?: number;
   step_total?: number;
   tool_name?: string;
-  framework?: OrchestrationFramework;
+  framework?: string;
   prev_receipt_hash?: string;
 }): WorkflowContext {
   const context: WorkflowContext = {
