@@ -96,6 +96,36 @@
       }
     },
     {
+      "name": "framework-at-max-length",
+      "description": "Framework identifier at exactly 64 characters (valid boundary)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123"
+      },
+      "expected": {
+        "valid": true,
+        "framework_length": 64
+      }
+    },
+    {
+      "name": "unknown-framework-accepted",
+      "description": "Unknown framework identifier that passes grammar (registry is advisory)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "my-custom-orchestrator"
+      },
+      "expected": {
+        "valid": true,
+        "comment": "Registry is advisory - any identifier passing the grammar is valid"
+      }
+    },
+    {
       "name": "step-index-zero",
       "description": "First step with step_index 0",
       "type": "WorkflowContext",

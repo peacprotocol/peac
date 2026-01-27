@@ -136,6 +136,11 @@ Vendor-specific details go in:
 
 ## 6. Orchestration Frameworks Registry
 
+> **Advisory**: This registry is for discovery and interoperability guidance only.
+> Implementations MUST accept any identifier that passes the framework grammar
+> (`/^[a-z][a-z0-9_-]*$/`, max 64 chars). The registry is NOT an allowlist --
+> absence from this table does not make an identifier invalid.
+
 ### 6.1 Current Entries
 
 The `framework` field in WorkflowContext is an **open string field**. Any identifier matching the framework grammar (`/^[a-z][a-z0-9_-]*$/`, max 64 chars) is valid. Well-known values are listed here for interoperability. New frameworks do NOT require protocol updates.
@@ -259,6 +264,48 @@ This file and `registries.json` serve as the authoritative registries for the PE
 - Centralized, maintained by the PEAC project
 - Standardized submission process via GitHub
 - Long-term stability through versioning
+
+### 11.1 Governance Metadata
+
+Each registry in `registries.json` includes governance metadata:
+
+| Field           | Type                                        | Description                           |
+| --------------- | ------------------------------------------- | ------------------------------------- |
+| `stability`     | `"stable"` or `"experimental"`              | Whether the registry shape is settled |
+| `owner`         | string                                      | Maintaining team or working group     |
+| `change_policy` | `"additive"` or `"breaking-requires-major"` | How the registry evolves              |
+
+- **`stable`**: Schema shape and existing entries are settled. New entries are additive only.
+- **`experimental`**: Schema shape may change. Entries may be renamed or restructured.
+- **`additive`**: New entries can be added in minor versions. Existing IDs are never removed in minor versions.
+- **`breaking-requires-major`**: Removing or renaming an entry requires a major version bump.
+
+### 11.2 Entry Deprecation
+
+Entries may be deprecated but not removed in minor versions:
+
+1. Set `"status": "deprecated"` on the entry
+2. Add `"deprecated_by"` field pointing to the replacement (if any)
+3. Add `"deprecated_since"` with the registry version that deprecated it
+4. Removal only happens in a major version bump
+
+### 11.3 Governance Flow
+
+```text
+1. Proposer opens GitHub issue with:
+   - Proposed entry (id, category, description, reference)
+   - Rationale and usage evidence
+
+2. Maintainers review for:
+   - Non-conflicting ID
+   - Clear description
+   - At least one implementation (or credible intent)
+
+3. If approved: PR merged, minor version bump
+4. If rejected: Issue closed with rationale
+5. If deprecated: status changed, minor version bump
+6. If removed: major version bump required
+```
 
 ---
 

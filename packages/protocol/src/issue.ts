@@ -232,7 +232,9 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
   // Validate workflow_context (v0.10.2+)
   if (options.workflow_context !== undefined) {
     if (!isValidWorkflowContext(options.workflow_context)) {
-      throw new IssueError(createWorkflowContextInvalidError('Does not conform to WorkflowContextSchema'));
+      throw new IssueError(
+        createWorkflowContextInvalidError('Does not conform to WorkflowContextSchema')
+      );
     }
     if (!hasValidDagSemantics(options.workflow_context)) {
       // Determine specific reason

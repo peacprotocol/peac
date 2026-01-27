@@ -53,9 +53,9 @@ All workflow fields use the existing extensions mechanism (`claims.ext`). The wi
 
 ### 2.2 Framework-Agnostic
 
-The correlation primitive works with any orchestration layer. The `framework` field is an open string identifier -- any value matching the grammar `/^[a-z][a-z0-9_-]*$/` (max 64 chars) is valid. Well-known values are listed in the PEAC registries for interoperability, but new frameworks do NOT require protocol updates.
+The correlation primitive works with any orchestration layer. The `framework` field is an open string identifier -- any value matching the grammar `/^[a-z][a-z0-9_-]*$/` (max 64 chars) is valid. Implementations MUST accept any identifier that passes the grammar; the registry is for discovery and interoperability, not allowlisting. Producers MUST NOT emit uppercase framework identifiers.
 
-Well-known frameworks (informational):
+Well-known frameworks (informational, advisory only):
 
 - `mcp` - Model Context Protocol
 - `a2a` - Google Agent2Agent Protocol
@@ -359,14 +359,17 @@ step_B -/
 
 Implementations MUST enforce these rules when issuing or validating a single receipt's WorkflowContext. These are enforced at schema validation time (issuance boundary).
 
-1. **No self-parent**: `step_id` MUST NOT appear in `parent_step_ids`
-2. **No duplicate parents**: `parent_step_ids` MUST NOT contain duplicate values
-3. **Max fan-in**: `parent_step_ids.length` MUST be <= 16
-4. **ID format**: `workflow_id` MUST match `/^wf_[a-zA-Z0-9_-]{20,48}$/`; `step_id` MUST match `/^step_[a-zA-Z0-9_-]{20,48}$/`
-5. **Framework grammar**: If present, `framework` MUST match `/^[a-z][a-z0-9_-]*$/` (max 64 chars)
-6. **Hash format**: If present, `prev_receipt_hash` MUST match `/^sha256:[a-f0-9]{64}$/`
+| #   | Rule                                                                                            | Error Code                   |
+| --- | ----------------------------------------------------------------------------------------------- | ---------------------------- |
+| 1   | **No self-parent**: `step_id` MUST NOT appear in `parent_step_ids`                              | `E_WORKFLOW_DAG_INVALID`     |
+| 2   | **No duplicate parents**: `parent_step_ids` MUST NOT contain duplicate values                   | `E_WORKFLOW_DAG_INVALID`     |
+| 3   | **Max fan-in**: `parent_step_ids.length` MUST be <= 16                                          | `E_WORKFLOW_LIMIT_EXCEEDED`  |
+| 4   | **ID format**: `workflow_id` MUST match `/^wf_[a-zA-Z0-9_-]{20,48}$/`                           | `E_WORKFLOW_ID_INVALID`      |
+| 5   | **ID format**: `step_id` MUST match `/^step_[a-zA-Z0-9_-]{20,48}$/`                             | `E_WORKFLOW_STEP_ID_INVALID` |
+| 6   | **Framework grammar**: If present, `framework` MUST match `/^[a-z][a-z0-9_-]*$/` (max 64 chars) | `E_WORKFLOW_CONTEXT_INVALID` |
+| 7   | **Hash format**: If present, `prev_receipt_hash` MUST match `/^sha256:[a-f0-9]{64}$/`           | `E_WORKFLOW_CONTEXT_INVALID` |
 
-Violations of any MUST rule MUST cause issuance to fail with an appropriate `E_WORKFLOW_*` error code.
+Violations of any MUST rule MUST cause issuance to fail with the corresponding error code. Issuers MUST return a deterministic error code for equivalent invalid inputs.
 
 ### 6.6 Workflow-Level Verification Rules (SHOULD)
 
@@ -635,7 +638,30 @@ Workflow correlation creates **linkability** - the ability to connect multiple r
 - Consider workflow correlation an opt-in feature for privacy-sensitive deployments
 - Document what correlation reveals in your privacy policy
 
-### 10.3 DoS Protection
+### 10.3 Disclosure Boundary (Receipt vs Telemetry)
+
+Workflow correlation data lives in the **receipt** and is therefore portable, replayable, and disclosable by design. Any party with access to a receipt can read the workflow context it contains.
+
+**Receipt content (in-band, portable):**
+
+- `workflow_id`, `step_id`, `parent_step_ids` - always present when workflow context is attached
+- `framework`, `tool_name`, `orchestrator_id` - optional metadata, included at producer discretion
+- `agents_involved` (in summaries) - lists participating agent IDs
+
+**Telemetry content (out-of-band, redactable):**
+
+- OpenTelemetry spans, traces, and metrics emitted by `@peac/telemetry-otel`
+- Subject to privacy modes (`strict`, `balanced`, `custom`) which may hash or redact identifiers
+- Telemetry exporters do NOT change what the receipt contains
+
+**Operational guidance:**
+
+- Minimize correlation fields by default: include only IDs and parent links
+- Treat `agents_involved` and `tool_name` as potentially sensitive metadata
+- Use generic tool names in privacy-sensitive deployments (e.g., `tool_call` instead of `process-payroll`)
+- Document what workflow correlation reveals in your privacy policy
+
+### 10.4 DoS Protection
 
 Limits prevent resource exhaustion:
 
@@ -643,7 +669,7 @@ Limits prevent resource exhaustion:
 - Max 10,000 receipt refs in summary
 - Max 100 agents involved
 
-### 10.4 Replay Protection
+### 10.5 Replay Protection
 
 Workflow summaries should include:
 
@@ -708,6 +734,105 @@ Implementations SHOULD (workflow-level):
 2. Support Merkle root computation for large workflows
 3. Provide DAG reconstruction and cycle detection from receipt set
 4. Verify parent step reference existence
+
+## Appendix A: Integration Patterns
+
+This appendix provides non-normative guidance for mapping common orchestration
+frameworks to PEAC workflow correlation. These patterns are informational -- the
+authoritative semantics are defined in Sections 1-11 above.
+
+### A.1 LangGraph
+
+LangGraph models workflows as state machines with typed graph nodes. Each node
+invocation maps to a PEAC workflow step.
+
+```text
+LangGraph Concept    -> PEAC Field
+-------------------------------------------
+thread_id            -> workflow_id (prefix with wf_)
+node name            -> tool_name (e.g., "langgraph:researcher")
+graph checkpoint     -> prev_receipt_hash
+parallel branches    -> multiple steps with same parent_step_ids
+conditional edges    -> step_index omitted (non-linear)
+framework            -> "langgraph"
+```
+
+**Mapping guidance:**
+
+- Use `thread_id` as the workflow correlation key; prefix with `wf_` and pad or
+  hash if the native ID does not meet the `wf_{ulid|uuid}` pattern.
+- For conditional edges, omit `step_index` and `step_total` since execution
+  order is not predetermined.
+- Map LangGraph's `send()` fan-out to multiple child steps sharing the same
+  `parent_step_ids`.
+
+### A.2 CrewAI
+
+CrewAI organizes work as a Crew executing Tasks assigned to Agents. Each Task
+execution maps to a PEAC workflow step.
+
+```text
+CrewAI Concept       -> PEAC Field
+-------------------------------------------
+crew run ID          -> workflow_id (prefix with wf_)
+task name            -> tool_name (e.g., "crewai:research-task")
+agent name           -> agents_involved entry
+sequential flow      -> step_index / step_total
+hierarchical flow    -> parent_step_ids linking manager to workers
+framework            -> "crewai"
+```
+
+**Mapping guidance:**
+
+- CrewAI's sequential process maps directly to linear `step_index` / `step_total`.
+- For hierarchical processes, the manager agent's step is the parent of all
+  delegated worker steps.
+- Populate `agents_involved` in the workflow summary from the Crew's agent roster.
+
+### A.3 AutoGen
+
+AutoGen models multi-agent conversations as message-passing patterns. Each agent
+turn or tool call maps to a PEAC workflow step.
+
+```text
+AutoGen Concept      -> PEAC Field
+-------------------------------------------
+chat session ID      -> workflow_id (prefix with wf_)
+agent reply          -> one step per substantive reply
+tool use             -> tool_name (e.g., "autogen:code-executor")
+group chat           -> parent_step_ids linking to triggering message
+nested chats         -> child workflow (new workflow_id)
+framework            -> "autogen"
+```
+
+**Mapping guidance:**
+
+- In group chat patterns, each agent reply references the message that triggered
+  it via `parent_step_ids`.
+- For nested chats (AutoGen's `initiate_chats`), create a new `workflow_id` for
+  the inner conversation and reference the outer step via `orchestrator_receipt_ref`.
+- AutoGen's `AssistantAgent` and `UserProxyAgent` both generate steps when they
+  produce substantive outputs or invoke tools.
+
+### A.4 General Mapping Principles
+
+These principles apply regardless of framework:
+
+1. **One step per observable action**: Map each tool call, API invocation, or
+   substantive agent output to a PEAC workflow step. Internal reasoning or
+   planning steps that produce no external effect may be omitted.
+
+2. **Workflow ID stability**: Use a single `workflow_id` for the entire
+   orchestration run. If the framework provides a native run/session ID,
+   derive the PEAC workflow ID from it deterministically.
+
+3. **Parent linking over ordering**: Prefer `parent_step_ids` DAG links over
+   `step_index` sequential numbering. DAG links are more expressive and handle
+   parallel execution correctly.
+
+4. **Framework field**: Always set the `framework` field to the lowercase
+   identifier from the registry (or a custom identifier matching the grammar).
+   This enables cross-framework analytics and debugging.
 
 ## References
 

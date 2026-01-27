@@ -85,13 +85,13 @@ jobs:
       - name: Error codes codegen drift check
         run: |
           pnpm codegen:errors
-          pnpm exec prettier --write packages/kernel/src/errors.generated.ts
-          if ! git diff --exit-code packages/kernel/src/errors.generated.ts; then
-            echo "FAIL: errors.generated.ts is out of sync with specs/kernel/errors.json"
-            echo "Run: pnpm codegen:errors && pnpm exec prettier --write packages/kernel/src/errors.generated.ts"
+          pnpm exec prettier --write packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts
+          if ! git diff --exit-code packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts; then
+            echo "FAIL: Generated files are out of sync with specs/kernel/errors.json"
+            echo "Run: pnpm codegen:errors && pnpm exec prettier --write packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts"
             exit 1
           fi
-          echo "OK: Error codes are in sync"
+          echo "OK: Error codes and categories are in sync"
 
       - name: Bundle vectors sanity check
         run: |

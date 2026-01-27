@@ -121,6 +121,43 @@
       "status": "informational"
     }
   ],
+  "_governance": {
+    "payment_rails": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "control_engines": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "transport_methods": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "agent_protocols": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "orchestration_frameworks": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "extension_keys": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "attestation_types": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    }
+  },
   "orchestration_frameworks": [
     {
       "id": "mcp",

@@ -5,29 +5,16 @@
  * See docs/specs/ERRORS.md for complete error registry.
  */
 
-/**
- * Canonical error categories from specs/kernel/errors.json (single source of truth).
- * This list MUST match the categories in errors.json and the ErrorDefinition.category
- * union in packages/kernel/src/types.ts. The codegen script cross-validates at generation time.
- */
-export const ERROR_CATEGORIES_CANONICAL = [
-  'validation', // Schema/structure validation failures
-  'verification', // Signature/authentication failures
-  'infrastructure', // Network/transport failures
-  'control', // Authorization/access control failures
-  'attribution', // Attribution attestation failures
-  'identity', // Agent identity attestation failures
-  'dispute', // Dispute attestation failures
-  'bundle', // Dispute bundle verification failures
-  'ucp', // UCP (Universal Commerce Protocol) mapping failures
-  'workflow', // Workflow correlation failures
-] as const;
+// Import the generated categories from kernel (single source of truth: specs/kernel/errors.json)
+import { ERROR_CATEGORIES } from '@peac/kernel';
+import type { ErrorCategory } from '@peac/kernel';
+export type { ErrorCategory };
 
 /**
- * Error category - broad classification of error type.
- * Categories match specs/kernel/errors.json (normative).
+ * @deprecated Use ERROR_CATEGORIES from @peac/kernel instead.
+ * Re-exported for backwards compatibility.
  */
-export type ErrorCategory = (typeof ERROR_CATEGORIES_CANONICAL)[number];
+export const ERROR_CATEGORIES_CANONICAL = ERROR_CATEGORIES;
 
 /**
  * Error severity

@@ -258,6 +258,16 @@ describe('OrchestrationFrameworkSchema', () => {
     expect(() => OrchestrationFrameworkSchema.parse('LangGraph')).toThrow();
   });
 
+  it('should reject identifiers containing dots', () => {
+    expect(() => OrchestrationFrameworkSchema.parse('my.framework')).toThrow();
+    expect(() => OrchestrationFrameworkSchema.parse('v2.0')).toThrow();
+  });
+
+  it('should reject identifiers containing slashes', () => {
+    expect(() => OrchestrationFrameworkSchema.parse('my/framework')).toThrow();
+    expect(() => OrchestrationFrameworkSchema.parse('org/tool')).toThrow();
+  });
+
   it('should reject strings exceeding max length', () => {
     const longName = 'a' + 'b'.repeat(WORKFLOW_LIMITS.maxFrameworkLength);
     expect(() => OrchestrationFrameworkSchema.parse(longName)).toThrow();

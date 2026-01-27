@@ -8,6 +8,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { ERROR_CATEGORIES } from '@peac/kernel';
 import { ERROR_CATEGORIES_CANONICAL } from '../src/errors';
 
 // Load the normative error registry
@@ -39,24 +40,28 @@ describe('Error Category Parity', () => {
     registryCategories = new Set(registry.errors.map((e) => e.category));
   });
 
-  it('TypeScript categories exactly match registry categories', () => {
-    const canonicalSet = new Set(ERROR_CATEGORIES_CANONICAL);
+  it('generated categories exactly match registry categories', () => {
+    const generatedSet = new Set(ERROR_CATEGORIES);
 
     // Print diff for easier debugging if test fails
-    const missingInTS = [...registryCategories].filter((c) => !canonicalSet.has(c));
-    const extraInTS = [...canonicalSet].filter((c) => !registryCategories.has(c));
+    const missingInTS = [...registryCategories].filter((c) => !generatedSet.has(c));
+    const extraInTS = [...generatedSet].filter((c) => !registryCategories.has(c));
 
     if (missingInTS.length > 0 || extraInTS.length > 0) {
       console.error('Category drift detected:');
       if (missingInTS.length > 0) {
-        console.error('  Missing in TypeScript:', missingInTS);
+        console.error('  Missing in generated file:', missingInTS);
       }
       if (extraInTS.length > 0) {
-        console.error('  Extra in TypeScript (not in registry):', extraInTS);
+        console.error('  Extra in generated file (not in registry):', extraInTS);
       }
     }
 
-    expect(canonicalSet).toEqual(registryCategories);
+    expect(generatedSet).toEqual(registryCategories);
+  });
+
+  it('deprecated ERROR_CATEGORIES_CANONICAL re-export matches kernel', () => {
+    expect(ERROR_CATEGORIES_CANONICAL).toBe(ERROR_CATEGORIES);
   });
 
   it('registry version is valid semver', () => {

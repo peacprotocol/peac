@@ -121,6 +121,51 @@
       }
     },
     {
+      "name": "framework-with-dot",
+      "description": "Framework identifier containing a dot (invalid character)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "my.framework"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid framework identifier grammar"
+      }
+    },
+    {
+      "name": "framework-with-slash",
+      "description": "Framework identifier containing a slash (invalid character)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "org/tool"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Invalid framework identifier grammar"
+      }
+    },
+    {
+      "name": "framework-over-max-length",
+      "description": "Framework identifier exceeding 64 character limit (65 chars)",
+      "type": "WorkflowContext",
+      "input": {
+        "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "parent_step_ids": [],
+        "framework": "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01234"
+      },
+      "expected": {
+        "valid": false,
+        "error": "Framework identifier exceeds maximum length"
+      }
+    },
+    {
       "name": "extra-unknown-field",
       "description": "Unknown field in strict schema",
       "type": "WorkflowContext",

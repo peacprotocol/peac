@@ -12,6 +12,10 @@ import * as path from 'path';
 
 const SPEC_PATH = path.join(__dirname, '../specs/kernel/errors.json');
 const OUTPUT_PATH = path.join(__dirname, '../packages/kernel/src/errors.generated.ts');
+const CATEGORIES_OUTPUT_PATH = path.join(
+  __dirname,
+  '../packages/kernel/src/error-categories.generated.ts'
+);
 
 // Valid HTTP status codes for errors
 const VALID_HTTP_STATUSES = new Set([
@@ -89,32 +93,8 @@ function main() {
   const sortedDerivedCategories = Array.from(derivedCategories).sort();
   console.log(`Derived categories: ${sortedDerivedCategories.join(', ')}`);
 
-  // Cross-validate against kernel types.ts ErrorDefinition.category union
-  const TYPES_PATH = path.join(__dirname, '../packages/kernel/src/types.ts');
-  const typesContent = fs.readFileSync(TYPES_PATH, 'utf-8');
-  const categorySection = typesContent.match(/category:\s*\n([\s\S]*?);/);
-  if (categorySection) {
-    const typesCategories = new Set(
-      Array.from(categorySection[1].matchAll(/'([a-z_]+)'/g), (m) => m[1])
-    );
-    for (const cat of derivedCategories) {
-      if (!typesCategories.has(cat)) {
-        throw new Error(
-          `Category '${cat}' found in errors.json but missing from packages/kernel/src/types.ts ErrorDefinition.category union. Add it to keep them in sync.`
-        );
-      }
-    }
-    for (const cat of typesCategories) {
-      if (!derivedCategories.has(cat)) {
-        console.warn(
-          `Warning: Category '${cat}' exists in types.ts union but has no error codes in errors.json`
-        );
-      }
-    }
-    console.log('Category cross-validation passed (errors.json <-> types.ts)');
-  } else {
-    console.warn('Warning: Could not extract category union from types.ts for cross-validation');
-  }
+  // Generate error-categories.generated.ts (eliminates drift by generating from JSON)
+  generateCategoriesFile(sortedDerivedCategories, spec.version);
 
   // Group errors by category for better organization
   const byCategory = new Map<string, ErrorSpec[]>();
@@ -256,6 +236,39 @@ function main() {
     const count = byCategory.get(category)!.length;
     console.log(`  ${category}: ${count} codes`);
   }
+}
+
+function generateCategoriesFile(categories: string[], specVersion: string) {
+  const lines: string[] = [];
+
+  lines.push('/**');
+  lines.push(' * PEAC Protocol Error Categories');
+  lines.push(' *');
+  lines.push(' * AUTO-GENERATED from specs/kernel/errors.json');
+  lines.push(' * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts');
+  lines.push(` * Spec version: ${specVersion}`);
+  lines.push(' */');
+  lines.push('');
+  lines.push('/**');
+  lines.push(' * Canonical error categories derived from specs/kernel/errors.json.');
+  lines.push(' * This is the single source of truth for all error category definitions.');
+  lines.push(' */');
+  lines.push('export const ERROR_CATEGORIES = [');
+  for (const cat of categories) {
+    lines.push(`  '${cat}',`);
+  }
+  lines.push('] as const;');
+  lines.push('');
+  lines.push('/**');
+  lines.push(' * Error category type - union of all categories in specs/kernel/errors.json');
+  lines.push(' */');
+  lines.push('export type ErrorCategory = (typeof ERROR_CATEGORIES)[number];');
+  lines.push('');
+
+  const content = lines.join('\n');
+  console.log(`Writing ${CATEGORIES_OUTPUT_PATH}...`);
+  fs.writeFileSync(CATEGORIES_OUTPUT_PATH, content);
+  console.log(`Generated ${categories.length} error categories`);
 }
 
 function capitalizeCategory(category: string): string {
