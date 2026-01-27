@@ -51,10 +51,7 @@
       "input": {
         "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "step_id": "step_01H5KPT9QZA123456789VWXYZG",
-        "parent_step_ids": [
-          "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
-          "step_01ARZ3NDEKTSV4RRFFQ69G5FAV"
-        ]
+        "parent_step_ids": ["step_01ARZ3NDEKTSV4RRFFQ69G5FAV", "step_01ARZ3NDEKTSV4RRFFQ69G5FAV"]
       },
       "expected": {
         "valid": false,

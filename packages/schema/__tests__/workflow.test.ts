@@ -283,7 +283,10 @@ describe('WorkflowContextSchema', () => {
   });
 
   it('should reject context with too many parents', () => {
-    const parents = Array.from({ length: 17 }, (_, i) => `step_${VALID_ULID.slice(0, -2)}${String(i).padStart(2, '0')}`);
+    const parents = Array.from(
+      { length: 17 },
+      (_, i) => `step_${VALID_ULID.slice(0, -2)}${String(i).padStart(2, '0')}`
+    );
     const context = {
       workflow_id: VALID_WORKFLOW_ID,
       step_id: VALID_STEP_ID,
@@ -382,7 +385,8 @@ describe('WorkflowSummaryEvidenceSchema', () => {
       workflow_id: VALID_WORKFLOW_ID,
       status: 'completed' as const,
       started_at: VALID_DATETIME,
-      receipt_merkle_root: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+      receipt_merkle_root:
+        'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
       receipt_count: 1000,
       orchestrator_id: 'agent:orchestrator-001',
       agents_involved: ['agent:worker-001'],
@@ -398,7 +402,8 @@ describe('WorkflowSummaryEvidenceSchema', () => {
       status: 'completed' as const,
       started_at: VALID_DATETIME,
       receipt_refs: ['jti:receipt1'],
-      receipt_merkle_root: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+      receipt_merkle_root:
+        'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
       receipt_count: 100,
       orchestrator_id: 'agent:orchestrator-001',
       agents_involved: ['agent:worker-001'],
@@ -424,7 +429,8 @@ describe('WorkflowSummaryEvidenceSchema', () => {
       workflow_id: VALID_WORKFLOW_ID,
       status: 'completed' as const,
       started_at: VALID_DATETIME,
-      receipt_merkle_root: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+      receipt_merkle_root:
+        'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
       orchestrator_id: 'agent:orchestrator-001',
       agents_involved: ['agent:worker-001'],
     };
@@ -456,7 +462,10 @@ describe('WorkflowSummaryEvidenceSchema', () => {
       workflow_id: VALID_WORKFLOW_ID,
       status: 'completed' as const,
       started_at: VALID_DATETIME,
-      receipt_refs: Array.from({ length: WORKFLOW_LIMITS.maxReceiptRefs + 1 }, (_, i) => `jti:receipt${i}`),
+      receipt_refs: Array.from(
+        { length: WORKFLOW_LIMITS.maxReceiptRefs + 1 },
+        (_, i) => `jti:receipt${i}`
+      ),
       orchestrator_id: 'agent:orchestrator-001',
       agents_involved: ['agent:worker-001'],
     };
@@ -470,7 +479,10 @@ describe('WorkflowSummaryEvidenceSchema', () => {
       started_at: VALID_DATETIME,
       receipt_refs: ['jti:receipt1'],
       orchestrator_id: 'agent:orchestrator-001',
-      agents_involved: Array.from({ length: WORKFLOW_LIMITS.maxAgentsInvolved + 1 }, (_, i) => `agent:worker-${i}`),
+      agents_involved: Array.from(
+        { length: WORKFLOW_LIMITS.maxAgentsInvolved + 1 },
+        (_, i) => `agent:worker-${i}`
+      ),
     };
     expect(() => WorkflowSummaryEvidenceSchema.parse(evidence)).toThrow();
   });
@@ -505,7 +517,9 @@ describe('WorkflowSummaryAttestationSchema', () => {
       ...validWorkflowSummaryAttestation,
       expires_at: VALID_DATETIME_FUTURE,
     };
-    expect(WorkflowSummaryAttestationSchema.parse(attestation).expires_at).toBe(VALID_DATETIME_FUTURE);
+    expect(WorkflowSummaryAttestationSchema.parse(attestation).expires_at).toBe(
+      VALID_DATETIME_FUTURE
+    );
   });
 
   it('should reject extra fields (strict mode)', () => {
@@ -722,7 +736,8 @@ describe('createWorkflowSummaryAttestation', () => {
       started_at: VALID_DATETIME,
       orchestrator_id: 'agent:orch-001',
       agents_involved: ['agent:worker-001'],
-      receipt_merkle_root: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+      receipt_merkle_root:
+        'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
       receipt_count: 1000,
       issuer: 'https://orchestrator.example.com',
       issued_at: VALID_DATETIME,
@@ -844,7 +859,8 @@ describe('Workflow correlation edge cases', () => {
       const context = createWorkflowContext({
         workflow_id: VALID_WORKFLOW_ID,
         step_id: VALID_STEP_ID,
-        prev_receipt_hash: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        prev_receipt_hash:
+          'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
       });
 
       expect(context.prev_receipt_hash).toBeDefined();

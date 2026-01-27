@@ -11,6 +11,8 @@ PEAC registries provide **informational guidance** on common identifiers for:
 - Payment rails (`payment.rail`)
 - Control engines (`control.chain[].engine`)
 - Transport binding methods (`binding.method`)
+- Extension keys (`ext['org.peacprotocol/...']`)
+- Attestation types (`type: 'peac/...'`)
 
 **Important**: Registries are NOT normative. The core protocol uses opaque `string` types, allowing any identifier. Registries exist for:
 
@@ -31,10 +33,13 @@ Located at: `docs/specs/registries.json`
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "payment_rails": [ ... ],
   "control_engines": [ ... ],
-  "transport_methods": [ ... ]
+  "transport_methods": [ ... ],
+  "agent_protocols": [ ... ],
+  "extension_keys": [ ... ],
+  "attestation_types": [ ... ]
 }
 ```
 
@@ -129,9 +134,51 @@ Vendor-specific details go in:
 
 ---
 
-## 6. Stability and Versioning
+## 6. Extension Keys Registry
 
-### 6.1 Entry Lifecycle
+### 6.1 Current Entries
+
+Extension keys use reverse-DNS naming (`org.peacprotocol/...`) to avoid collisions with third-party extensions.
+
+| ID                             | Category      | Description                                                 | Reference               |
+| ------------------------------ | ------------- | ----------------------------------------------------------- | ----------------------- |
+| `org.peacprotocol/workflow`    | orchestration | Workflow correlation context for multi-agent orchestration  | WORKFLOW-CORRELATION.md |
+| `org.peacprotocol/obligations` | attribution   | Credit and contribution requirements (CC Signals alignment) | ATTRIBUTION.md          |
+| `org.peacprotocol/receipt`     | metadata      | Receipt JWS in MCP tool response metadata                   | PROTOCOL-BEHAVIOR.md    |
+| `org.peacprotocol/agent_id`    | identity      | Agent identity reference in MCP metadata                    | AGENT-IDENTITY.md       |
+
+### 6.2 Naming Convention
+
+Extension keys MUST use reverse-DNS format:
+
+- First-party: `org.peacprotocol/{name}`
+- Third-party: `{reverse-dns}/{name}` (e.g., `com.example/custom-field`)
+
+---
+
+## 7. Attestation Types Registry
+
+### 7.1 Current Entries
+
+Attestation types use the `peac/{name}` pattern for first-party types.
+
+| ID                      | Category      | Description                                                        | Reference               |
+| ----------------------- | ------------- | ------------------------------------------------------------------ | ----------------------- |
+| `peac/attribution`      | provenance    | Content provenance and usage attestation                           | ATTRIBUTION.md          |
+| `peac/dispute`          | resolution    | Formal contestation of receipts, attributions, or policy decisions | DISPUTE.md              |
+| `peac/agent-identity`   | identity      | Cryptographic proof-of-control binding for agents                  | AGENT-IDENTITY.md       |
+| `peac/workflow-summary` | orchestration | Proof-of-run attestation for multi-step workflows                  | WORKFLOW-CORRELATION.md |
+
+### 7.2 Naming Convention
+
+- First-party: `peac/{name}`
+- Third-party: Use extension keys in `ext` rather than custom attestation types
+
+---
+
+## 8. Stability and Versioning
+
+### 8.1 Entry Lifecycle
 
 Entries can be:
 
@@ -140,7 +187,7 @@ Entries can be:
 - **Deprecated**: Marked as `"status": "deprecated"`
 - **Removed**: Only if never widely used
 
-### 6.2 Versioning
+### 8.2 Versioning
 
 Registry version (e.g., "0.1.0") increments on:
 
@@ -150,7 +197,7 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 7. Relationship to Core Protocol
+## 9. Relationship to Core Protocol
 
 **Core protocol** (JSON Schema, PROTOCOL-BEHAVIOR.md):
 
@@ -172,7 +219,7 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 8. Registry Governance
+## 10. Registry Governance
 
 This file and `registries.json` serve as the authoritative registries for the PEAC ecosystem:
 
@@ -182,7 +229,7 @@ This file and `registries.json` serve as the authoritative registries for the PE
 
 ---
 
-## 9. Questions
+## 11. Questions
 
 For registry questions:
 

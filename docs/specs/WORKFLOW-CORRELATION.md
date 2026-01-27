@@ -54,6 +54,7 @@ All workflow fields use the existing extensions mechanism (`claims.ext`). The wi
 ### 2.2 Framework-Agnostic
 
 The correlation primitive works with any orchestration layer:
+
 - MCP (Model Context Protocol)
 - A2A (Google Agent2Agent Protocol)
 - CrewAI
@@ -64,6 +65,7 @@ The correlation primitive works with any orchestration layer:
 ### 2.3 DAG Semantics
 
 Workflow steps form a directed acyclic graph (DAG), not a linear chain. This supports:
+
 - Fork/join patterns
 - Parallel execution
 - Conditional branches
@@ -91,21 +93,21 @@ The constant `WORKFLOW_EXTENSION_KEY` is exported from `@peac/schema` for progra
 ```typescript
 interface WorkflowContext {
   // Correlation (REQUIRED)
-  workflow_id: string;        // Format: wf_{ulid|uuid}
-  step_id: string;            // Format: step_{ulid|uuid}
-  parent_step_ids: string[];  // DAG parents (empty for root)
+  workflow_id: string; // Format: wf_{ulid|uuid}
+  step_id: string; // Format: step_{ulid|uuid}
+  parent_step_ids: string[]; // DAG parents (empty for root)
 
   // Orchestration (OPTIONAL)
-  orchestrator_id?: string;           // Agent identity ref
-  orchestrator_receipt_ref?: string;  // Receipt that started the workflow
+  orchestrator_id?: string; // Agent identity ref
+  orchestrator_receipt_ref?: string; // Receipt that started the workflow
 
   // Sequencing (OPTIONAL, for linear workflows)
-  step_index?: number;        // 0-based position
-  step_total?: number;        // Total steps if known
+  step_index?: number; // 0-based position
+  step_total?: number; // Total steps if known
 
   // Metadata (OPTIONAL)
-  tool_name?: string;         // MCP tool, A2A skill, etc.
-  framework?: string;         // "mcp" | "a2a" | "crewai" | etc.
+  tool_name?: string; // MCP tool, A2A skill, etc.
+  framework?: string; // "mcp" | "a2a" | "crewai" | etc.
 
   // Hash Chain (OPTIONAL, for streaming)
   prev_receipt_hash?: string; // Format: sha256:{hex64}
@@ -114,27 +116,27 @@ interface WorkflowContext {
 
 ### 3.3 Field Definitions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `workflow_id` | string | Yes | Globally unique run identifier |
-| `step_id` | string | Yes | This step's unique identifier |
-| `parent_step_ids` | string[] | Yes | DAG parent edges (empty for root) |
-| `orchestrator_id` | string | No | Agent identity of coordinator |
-| `orchestrator_receipt_ref` | string | No | Receipt ID that initiated this workflow |
-| `step_index` | number | No | 0-based position (linear workflows) |
-| `step_total` | number | No | Total steps if known upfront |
-| `tool_name` | string | No | Tool or skill invoked |
-| `framework` | string | No | Orchestration framework identifier |
-| `prev_receipt_hash` | string | No | SHA-256 of previous receipt (streaming) |
+| Field                      | Type     | Required | Description                             |
+| -------------------------- | -------- | -------- | --------------------------------------- |
+| `workflow_id`              | string   | Yes      | Globally unique run identifier          |
+| `step_id`                  | string   | Yes      | This step's unique identifier           |
+| `parent_step_ids`          | string[] | Yes      | DAG parent edges (empty for root)       |
+| `orchestrator_id`          | string   | No       | Agent identity of coordinator           |
+| `orchestrator_receipt_ref` | string   | No       | Receipt ID that initiated this workflow |
+| `step_index`               | number   | No       | 0-based position (linear workflows)     |
+| `step_total`               | number   | No       | Total steps if known upfront            |
+| `tool_name`                | string   | No       | Tool or skill invoked                   |
+| `framework`                | string   | No       | Orchestration framework identifier      |
+| `prev_receipt_hash`        | string   | No       | SHA-256 of previous receipt (streaming) |
 
 ### 3.4 Limits (DoS Protection)
 
-| Limit | Value | Rationale |
-|-------|-------|-----------|
-| Max parent steps | 16 | Prevent unbounded fan-in |
-| Max workflow ID length | 128 | Reasonable for ULID + prefix |
-| Max step ID length | 128 | Reasonable for ULID + prefix |
-| Max tool name length | 256 | Accommodate namespaced tools |
+| Limit                  | Value | Rationale                    |
+| ---------------------- | ----- | ---------------------------- |
+| Max parent steps       | 16    | Prevent unbounded fan-in     |
+| Max workflow ID length | 128   | Reasonable for ULID + prefix |
+| Max step ID length     | 128   | Reasonable for ULID + prefix |
+| Max tool name length   | 256   | Accommodate namespaced tools |
 
 ### 3.5 Example
 
@@ -174,30 +176,30 @@ peac/workflow-summary
 
 ```typescript
 interface WorkflowSummaryAttestation {
-  type: "peac/workflow-summary";
-  issuer: string;              // HTTPS URL
-  issued_at: string;           // ISO 8601
-  expires_at?: string;         // ISO 8601
+  type: 'peac/workflow-summary';
+  issuer: string; // HTTPS URL
+  issued_at: string; // ISO 8601
+  expires_at?: string; // ISO 8601
   evidence: WorkflowSummaryEvidence;
 }
 
 interface WorkflowSummaryEvidence {
   workflow_id: string;
-  status: "in_progress" | "completed" | "failed" | "cancelled";
-  started_at: string;          // ISO 8601
-  completed_at?: string;       // ISO 8601
+  status: 'in_progress' | 'completed' | 'failed' | 'cancelled';
+  started_at: string; // ISO 8601
+  completed_at?: string; // ISO 8601
 
   // Receipt commitment (at least one required)
-  receipt_refs?: string[];     // For small workflows
+  receipt_refs?: string[]; // For small workflows
   receipt_merkle_root?: string; // For large workflows (sha256:{hex64})
-  receipt_count?: number;      // Required if using Merkle root
+  receipt_count?: number; // Required if using Merkle root
 
   // Orchestration
   orchestrator_id: string;
   agents_involved: string[];
 
   // Outcome
-  final_result_hash?: string;  // sha256:{hex64}
+  final_result_hash?: string; // sha256:{hex64}
   error_context?: WorkflowErrorContext;
 }
 
@@ -250,12 +252,14 @@ interface WorkflowErrorContext {
 Format: `wf_{payload}`
 
 Where `{payload}` is:
+
 - **ULID** (recommended): 26 uppercase alphanumeric characters
 - **UUID**: 36 characters with hyphens
 
 Pattern: `/^wf_[a-zA-Z0-9_-]{20,48}$/`
 
 Examples:
+
 - `wf_01HXZ5NWJQ8QJXKZ3V5N7BMGHC` (ULID)
 - `wf_550e8400-e29b-41d4-a716-446655440000` (UUID)
 
@@ -268,12 +272,14 @@ Where `{payload}` follows the same rules as workflow ID.
 Pattern: `/^step_[a-zA-Z0-9_-]{20,48}$/`
 
 Examples:
+
 - `step_01HXZ5NWJQ8QJXKZ3V5N7BMGHD` (ULID)
 - `step_550e8400-e29b-41d4-a716-446655440001` (UUID)
 
 ### 5.3 ID Generation
 
 Implementations SHOULD use ULID for new IDs because:
+
 - Time-ordered (millisecond precision)
 - Lexicographically sortable
 - URL-safe
@@ -381,6 +387,7 @@ MTH(D[n]) = SHA-256(0x01 || MTH(D[0:k]) || MTH(D[k:n]))  // Internal node
 ```
 
 Where:
+
 - `d(i)` is the receipt digest (SHA-256 of JWS bytes)
 - Leaves are prefixed with `0x00`
 - Internal nodes are prefixed with `0x01`
@@ -404,7 +411,7 @@ To prove a receipt is part of a workflow:
 interface MerkleInclusionProof {
   leaf_index: number;
   tree_size: number;
-  hashes: string[];  // sha256:{hex64}
+  hashes: string[]; // sha256:{hex64}
 }
 ```
 
@@ -412,8 +419,8 @@ interface MerkleInclusionProof {
 
 ```typescript
 function verifyMerkleInclusion(
-  root: string,           // Expected Merkle root
-  receiptDigest: string,  // SHA-256 of receipt JWS
+  root: string, // Expected Merkle root
+  receiptDigest: string, // SHA-256 of receipt JWS
   proof: MerkleInclusionProof
 ): boolean;
 ```
@@ -472,6 +479,7 @@ interface MCPOrchestrationContext {
 ```
 
 MCP bindings:
+
 - `mcp_session_id` maps to same-session receipts
 - `tool_call_id` is unique per invocation
 - Store in `auth.extensions['org.peacprotocol/mcp']`
@@ -482,7 +490,7 @@ MCP bindings:
 // In @peac/mappings-a2a
 interface A2ATaskBinding {
   task_id: string;
-  context_id: string;        // A2A's grouping ID
+  context_id: string; // A2A's grouping ID
   agent_card_url: string;
   skill_name: string;
 
@@ -493,6 +501,7 @@ interface A2ATaskBinding {
 ```
 
 A2A bindings:
+
 - `context_id` maps to `workflow_id`
 - `task_id` maps to `step_id`
 - Store in `auth.extensions['org.peacprotocol/a2a']`
@@ -511,14 +520,14 @@ PEAC workflow correlation can integrate with existing observability pipelines th
 
 **Mapping:**
 
-| PEAC Field | OTel/Trace Context | Notes |
-|------------|-------------------|-------|
-| `workflow_id` | `trace-id` | Both identify the overall operation |
-| `step_id` | `span-id` | Both identify a single step |
-| `parent_step_ids[0]` | `parent-id` | OTel spans have single parent |
-| `parent_step_ids[1..]` | span links | Multi-parent joins use span links |
-| `tool_name` | `span.name` / attributes | Maps to operation name |
-| `framework` | `otel.library.name` | Instrumentation library |
+| PEAC Field             | OTel/Trace Context       | Notes                               |
+| ---------------------- | ------------------------ | ----------------------------------- |
+| `workflow_id`          | `trace-id`               | Both identify the overall operation |
+| `step_id`              | `span-id`                | Both identify a single step         |
+| `parent_step_ids[0]`   | `parent-id`              | OTel spans have single parent       |
+| `parent_step_ids[1..]` | span links               | Multi-parent joins use span links   |
+| `tool_name`            | `span.name` / attributes | Maps to operation name              |
+| `framework`            | `otel.library.name`      | Instrumentation library             |
 
 **Multi-parent handling:**
 
@@ -569,6 +578,7 @@ if (span) {
 ### 10.1 ID Guessing
 
 Workflow and step IDs should be unpredictable:
+
 - Use cryptographically random ULID/UUID payloads
 - Do not derive IDs from predictable inputs
 
@@ -578,13 +588,13 @@ Workflow correlation creates **linkability** - the ability to connect multiple r
 
 **What correlation reveals:**
 
-| Data Element | Risk | Mitigation |
-|--------------|------|------------|
-| `workflow_id` | Links all steps in a workflow | Use opaque, non-semantic IDs |
+| Data Element      | Risk                              | Mitigation                              |
+| ----------------- | --------------------------------- | --------------------------------------- |
+| `workflow_id`     | Links all steps in a workflow     | Use opaque, non-semantic IDs            |
 | `parent_step_ids` | Reveals execution graph structure | Consider redaction for external parties |
-| `orchestrator_id` | Identifies coordinator agent | May leak organizational structure |
-| `tool_name` | Reveals capabilities used | Use generic names when sensitive |
-| `step_total` | Reveals workflow complexity | Omit if not needed |
+| `orchestrator_id` | Identifies coordinator agent      | May leak organizational structure       |
+| `tool_name`       | Reveals capabilities used         | Use generic names when sensitive        |
+| `step_total`      | Reveals workflow complexity       | Omit if not needed                      |
 
 **Privacy requirements:**
 
@@ -614,6 +624,7 @@ Workflow correlation creates **linkability** - the ability to connect multiple r
 ### 10.3 DoS Protection
 
 Limits prevent resource exhaustion:
+
 - Max 16 parent steps (fan-in limit)
 - Max 10,000 receipt refs in summary
 - Max 100 agents involved
@@ -621,6 +632,7 @@ Limits prevent resource exhaustion:
 ### 10.4 Replay Protection
 
 Workflow summaries should include:
+
 - Unique workflow_id (prevents replay of entire workflow)
 - Timestamps (issued_at, completed_at) for freshness
 
@@ -629,23 +641,27 @@ Workflow summaries should include:
 ### 11.1 Conformance Levels
 
 **MUST** (required for conformance):
+
 - Validate `workflow_id` and `step_id` formats
 - Enforce `parent_step_ids` limits
 - Reject self-parent and duplicate parents
 - Validate workflow summary has receipt commitment
 
 **SHOULD** (recommended):
+
 - Use ULID for new IDs
 - Include `framework` field for traceability
 - Include hash chain for streaming receipts
 
 **MAY** (optional):
+
 - Support Merkle inclusion proofs
 - Support framework-specific bindings
 
 ### 11.2 Test Vectors
 
 Conformance fixtures are provided at:
+
 ```
 specs/conformance/fixtures/workflow/
   valid.json           # Valid WorkflowContext and WorkflowSummaryAttestation vectors
@@ -657,12 +673,14 @@ specs/conformance/fixtures/workflow/
 ### 11.3 Implementation Requirements
 
 Implementations MUST:
+
 1. Parse and validate WorkflowContext from extensions
 2. Validate ID formats with provided regex patterns
 3. Enforce DAG semantics (no self-parent, no duplicates)
 4. Verify workflow summaries include receipt commitment
 
 Implementations SHOULD:
+
 1. Provide helpers for ID generation
 2. Support Merkle root computation for large workflows
 3. Provide DAG reconstruction from receipt set

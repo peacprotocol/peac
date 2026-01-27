@@ -64,7 +64,8 @@ export interface ErrorDefinition {
     | 'attribution'
     | 'dispute'
     | 'bundle'
-    | 'ucp';
+    | 'ucp'
+    | 'workflow';
 }
 
 /**

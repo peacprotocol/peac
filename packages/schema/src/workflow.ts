@@ -34,12 +34,7 @@ export const WORKFLOW_SUMMARY_TYPE = 'peac/workflow-summary' as const;
 /**
  * Workflow status values
  */
-export const WORKFLOW_STATUSES = [
-  'in_progress',
-  'completed',
-  'failed',
-  'cancelled',
-] as const;
+export const WORKFLOW_STATUSES = ['in_progress', 'completed', 'failed', 'cancelled'] as const;
 
 /**
  * Supported orchestration frameworks
@@ -139,10 +134,7 @@ export const WorkflowContextSchema = z
     step_id: StepIdSchema,
 
     /** DAG parent step IDs (empty array for root step) */
-    parent_step_ids: z
-      .array(StepIdSchema)
-      .max(WORKFLOW_LIMITS.maxParentSteps)
-      .default([]),
+    parent_step_ids: z.array(StepIdSchema).max(WORKFLOW_LIMITS.maxParentSteps).default([]),
 
     // Orchestration identity
     /** Agent identity ref of the orchestrator (optional) */
@@ -212,10 +204,7 @@ export const WorkflowSummaryEvidenceSchema = z
 
     // Receipt commitment
     /** Ordered list of receipt IDs (for small workflows) */
-    receipt_refs: z
-      .array(z.string().max(256))
-      .max(WORKFLOW_LIMITS.maxReceiptRefs)
-      .optional(),
+    receipt_refs: z.array(z.string().max(256)).max(WORKFLOW_LIMITS.maxReceiptRefs).optional(),
 
     /** Merkle root of receipt digests (for large workflows, RFC 6962 style) */
     receipt_merkle_root: z
@@ -231,9 +220,7 @@ export const WorkflowSummaryEvidenceSchema = z
     orchestrator_id: z.string().max(256),
 
     /** List of agent IDs involved in the workflow */
-    agents_involved: z
-      .array(z.string().max(256))
-      .max(WORKFLOW_LIMITS.maxAgentsInvolved),
+    agents_involved: z.array(z.string().max(256)).max(WORKFLOW_LIMITS.maxAgentsInvolved),
 
     // Outcome
     /** SHA-256 hash of final output artifact (optional) */
@@ -444,7 +431,9 @@ export function createWorkflowContext(params: {
 
   // Check DAG semantics
   if (!hasValidDagSemantics(validated)) {
-    throw new Error('Invalid DAG semantics: step cannot be its own parent or have duplicate parents');
+    throw new Error(
+      'Invalid DAG semantics: step cannot be its own parent or have duplicate parents'
+    );
   }
 
   return validated;

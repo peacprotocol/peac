@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "payment_rails": [
     {
       "id": "x402",
@@ -118,6 +118,66 @@
       "category": "card-protocol",
       "description": "Trusted Agent Protocol (Visa TAP)",
       "reference": "https://developer.visa.com/",
+      "status": "informational"
+    }
+  ],
+  "extension_keys": [
+    {
+      "id": "org.peacprotocol/workflow",
+      "category": "orchestration",
+      "description": "Workflow correlation context for multi-agent orchestration",
+      "reference": "docs/specs/WORKFLOW-CORRELATION.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/obligations",
+      "category": "attribution",
+      "description": "Credit and contribution requirements (CC Signals alignment)",
+      "reference": "docs/specs/ATTRIBUTION.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/receipt",
+      "category": "metadata",
+      "description": "Receipt JWS in MCP tool response metadata",
+      "reference": "docs/specs/PROTOCOL-BEHAVIOR.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/agent_id",
+      "category": "identity",
+      "description": "Agent identity reference in MCP metadata",
+      "reference": "docs/specs/AGENT-IDENTITY.md",
+      "status": "informational"
+    }
+  ],
+  "attestation_types": [
+    {
+      "id": "peac/attribution",
+      "category": "provenance",
+      "description": "Content provenance and usage attestation",
+      "reference": "docs/specs/ATTRIBUTION.md",
+      "status": "informational"
+    },
+    {
+      "id": "peac/dispute",
+      "category": "resolution",
+      "description": "Formal contestation of receipts, attributions, or policy decisions",
+      "reference": "docs/specs/DISPUTE.md",
+      "status": "informational"
+    },
+    {
+      "id": "peac/agent-identity",
+      "category": "identity",
+      "description": "Cryptographic proof-of-control binding for agents",
+      "reference": "docs/specs/AGENT-IDENTITY.md",
+      "status": "informational"
+    },
+    {
+      "id": "peac/workflow-summary",
+      "category": "orchestration",
+      "description": "Proof-of-run attestation for multi-step workflows",
+      "reference": "docs/specs/WORKFLOW-CORRELATION.md",
       "status": "informational"
     }
   ]

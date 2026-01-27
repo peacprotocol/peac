@@ -41,10 +41,7 @@
       "input": {
         "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "step_id": "step_01H5KPT9QZA123456789JOINSS",
-        "parent_step_ids": [
-          "step_01H5KPT9QZA123456789BRANCH1",
-          "step_01H5KPT9QZA123456789BRANCH2"
-        ]
+        "parent_step_ids": ["step_01H5KPT9QZA123456789BRANCH1", "step_01H5KPT9QZA123456789BRANCH2"]
       },
       "expected": {
         "valid": true,
@@ -137,16 +134,9 @@
           "status": "completed",
           "started_at": "2026-01-20T10:00:00Z",
           "completed_at": "2026-01-20T11:30:00Z",
-          "receipt_refs": [
-            "jti:step1-receipt",
-            "jti:step2-receipt",
-            "jti:step3-receipt"
-          ],
+          "receipt_refs": ["jti:step1-receipt", "jti:step2-receipt", "jti:step3-receipt"],
           "orchestrator_id": "agent:orchestrator-001",
-          "agents_involved": [
-            "agent:worker-001",
-            "agent:worker-002"
-          ]
+          "agents_involved": ["agent:worker-001", "agent:worker-002"]
         }
       },
       "expected": {
@@ -199,14 +189,9 @@
           "workflow_id": "wf_01H5KPT9QZA123456789FAILED",
           "status": "failed",
           "started_at": "2026-01-20T15:00:00Z",
-          "receipt_refs": [
-            "jti:step1-receipt",
-            "jti:step2-receipt"
-          ],
+          "receipt_refs": ["jti:step1-receipt", "jti:step2-receipt"],
           "orchestrator_id": "agent:orchestrator-001",
-          "agents_involved": [
-            "agent:worker-001"
-          ],
+          "agents_involved": ["agent:worker-001"],
           "error_context": {
             "failed_step_id": "step_01H5KPT9QZA123456789FAILST",
             "error_code": "E_TIMEOUT",
@@ -233,13 +218,9 @@
           "workflow_id": "wf_01H5KPT9QZA123456789STREAM",
           "status": "in_progress",
           "started_at": "2026-01-20T16:30:00Z",
-          "receipt_refs": [
-            "jti:partial-step1"
-          ],
+          "receipt_refs": ["jti:partial-step1"],
           "orchestrator_id": "agent:streaming-orchestrator",
-          "agents_involved": [
-            "agent:streaming-worker"
-          ]
+          "agents_involved": ["agent:streaming-worker"]
         }
       },
       "expected": {

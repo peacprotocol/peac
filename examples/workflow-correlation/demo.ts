@@ -201,10 +201,7 @@ async function main() {
       if (workflowCtx) {
         console.log('   Workflow ID:', workflowCtx.workflow_id);
         console.log('   Step ID:', workflowCtx.step_id);
-        console.log(
-          '   Is Root:',
-          workflowCtx.parent_step_ids.length === 0 ? 'yes' : 'no'
-        );
+        console.log('   Is Root:', workflowCtx.parent_step_ids.length === 0 ? 'yes' : 'no');
         if (workflowCtx.tool_name) {
           console.log('   Tool:', workflowCtx.tool_name);
         }

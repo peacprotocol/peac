@@ -14,11 +14,11 @@ Two main types are tested:
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `valid.json` | Valid WorkflowContext and WorkflowSummaryAttestation vectors |
-| `invalid.json` | Invalid vectors that must be rejected |
-| `edge-cases.json` | Boundary conditions and limits testing |
+| File              | Purpose                                                      |
+| ----------------- | ------------------------------------------------------------ |
+| `valid.json`      | Valid WorkflowContext and WorkflowSummaryAttestation vectors |
+| `invalid.json`    | Invalid vectors that must be rejected                        |
+| `edge-cases.json` | Boundary conditions and limits testing                       |
 
 ## Test Categories
 
@@ -55,9 +55,10 @@ import { WorkflowContextSchema, WorkflowSummaryAttestationSchema } from '@peac/s
 import validFixtures from './valid.json';
 
 for (const fixture of validFixtures.fixtures) {
-  const result = fixture.type === 'WorkflowContext'
-    ? WorkflowContextSchema.safeParse(fixture.input)
-    : WorkflowSummaryAttestationSchema.safeParse(fixture.input);
+  const result =
+    fixture.type === 'WorkflowContext'
+      ? WorkflowContextSchema.safeParse(fixture.input)
+      : WorkflowSummaryAttestationSchema.safeParse(fixture.input);
 
   expect(result.success).toBe(fixture.expected.valid);
 }

@@ -126,6 +126,16 @@ export const ERROR_CODES = {
   // Verification error codes
   E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
   E_KEY_NOT_FOUND: 'E_KEY_NOT_FOUND',
+
+  // Workflow error codes
+  E_WORKFLOW_CONTEXT_INVALID: 'E_WORKFLOW_CONTEXT_INVALID',
+  E_WORKFLOW_CYCLE_DETECTED: 'E_WORKFLOW_CYCLE_DETECTED',
+  E_WORKFLOW_DAG_INVALID: 'E_WORKFLOW_DAG_INVALID',
+  E_WORKFLOW_ID_INVALID: 'E_WORKFLOW_ID_INVALID',
+  E_WORKFLOW_LIMIT_EXCEEDED: 'E_WORKFLOW_LIMIT_EXCEEDED',
+  E_WORKFLOW_PARENT_NOT_FOUND: 'E_WORKFLOW_PARENT_NOT_FOUND',
+  E_WORKFLOW_STEP_ID_INVALID: 'E_WORKFLOW_STEP_ID_INVALID',
+  E_WORKFLOW_SUMMARY_INVALID: 'E_WORKFLOW_SUMMARY_INVALID',
 } as const;
 
 /**
@@ -933,6 +943,73 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     description: 'Public key with specified kid not found in JWKS',
     retriable: false,
     category: 'verification',
+  },
+
+  // Workflow error codes
+  E_WORKFLOW_CONTEXT_INVALID: {
+    code: 'E_WORKFLOW_CONTEXT_INVALID',
+    http_status: 400,
+    title: 'Invalid Workflow Context',
+    description: 'Workflow context does not conform to WorkflowContextSchema',
+    retriable: false,
+    category: 'workflow',
+  },
+  E_WORKFLOW_CYCLE_DETECTED: {
+    code: 'E_WORKFLOW_CYCLE_DETECTED',
+    http_status: 400,
+    title: 'Workflow Cycle Detected',
+    description: 'Workflow DAG contains a cycle (not acyclic)',
+    retriable: false,
+    category: 'workflow',
+  },
+  E_WORKFLOW_DAG_INVALID: {
+    code: 'E_WORKFLOW_DAG_INVALID',
+    http_status: 400,
+    title: 'Invalid Workflow DAG',
+    description:
+      'Workflow DAG semantics violated (self-parent, duplicate parents, or cycle detected)',
+    retriable: false,
+    category: 'workflow',
+  },
+  E_WORKFLOW_ID_INVALID: {
+    code: 'E_WORKFLOW_ID_INVALID',
+    http_status: 400,
+    title: 'Invalid Workflow ID',
+    description: 'Workflow ID does not match required format (wf_{ulid|uuid})',
+    retriable: false,
+    category: 'workflow',
+  },
+  E_WORKFLOW_LIMIT_EXCEEDED: {
+    code: 'E_WORKFLOW_LIMIT_EXCEEDED',
+    http_status: 400,
+    title: 'Workflow Limit Exceeded',
+    description: 'Workflow exceeds defined limits (parent count, ID length, etc.)',
+    retriable: false,
+    category: 'workflow',
+  },
+  E_WORKFLOW_PARENT_NOT_FOUND: {
+    code: 'E_WORKFLOW_PARENT_NOT_FOUND',
+    http_status: 400,
+    title: 'Parent Step Not Found',
+    description: 'Referenced parent step ID does not exist in the workflow',
+    retriable: false,
+    category: 'workflow',
+  },
+  E_WORKFLOW_STEP_ID_INVALID: {
+    code: 'E_WORKFLOW_STEP_ID_INVALID',
+    http_status: 400,
+    title: 'Invalid Step ID',
+    description: 'Step ID does not match required format (step_{ulid|uuid})',
+    retriable: false,
+    category: 'workflow',
+  },
+  E_WORKFLOW_SUMMARY_INVALID: {
+    code: 'E_WORKFLOW_SUMMARY_INVALID',
+    http_status: 400,
+    title: 'Invalid Workflow Summary',
+    description: 'Workflow summary attestation does not conform to schema',
+    retriable: false,
+    category: 'workflow',
   },
 };
 
