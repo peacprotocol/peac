@@ -384,6 +384,8 @@ This ordering follows the principle "fail at the most basic structural level fir
 
 **Rationale**: Without a defined order, two conformant implementations could return different error codes for the same invalid input, breaking deterministic verification. The first-failure-wins strategy is the simplest to implement and test.
 
+**Stability**: The validation order defined above is stable within a major spec version. Implementations MUST NOT reorder checks within a v0.x or v1.x series. Changes to validation order require a new major version and updated conformance vectors.
+
 Conformance vectors for multi-failure inputs are provided in `specs/conformance/fixtures/workflow/invalid.json` (names prefixed `multi-failure-`).
 
 ### 6.6 Workflow-Level Verification Rules (SHOULD)

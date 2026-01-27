@@ -120,6 +120,9 @@ jobs:
       - name: Parity tests
         run: pnpm exec vitest run tests/conformance/parity.spec.ts
 
+      - name: Workflow conformance (fixture schema + domain validation)
+        run: pnpm exec vitest run tests/conformance/workflow.spec.ts
+
       - name: Examples typecheck
         run: pnpm examples:check
 

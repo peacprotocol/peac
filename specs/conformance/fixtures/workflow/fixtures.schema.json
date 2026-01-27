@@ -62,11 +62,6 @@
           "type": "boolean",
           "description": "Whether the input should pass validation"
         },
-        "error_code": {
-          "type": "string",
-          "pattern": "^E_WORKFLOW_[A-Z_]+$",
-          "description": "Normative: canonical error code from specs/kernel/errors.json. Test harnesses MUST assert this value."
-        },
         "error": {
           "type": "string",
           "description": "Informational: human-readable error description. Test harnesses MUST NOT assert exact match."
@@ -82,9 +77,15 @@
         "properties": { "valid": { "const": false } }
       },
       "then": {
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "pattern": "^E_WORKFLOW_[A-Z_]+$",
+            "description": "Normative: canonical error code from specs/kernel/errors.json. Test harnesses MUST assert this value."
+          }
+        },
         "required": ["valid", "error_code"]
-      },
-      "additionalProperties": false
+      }
     }
   }
 }

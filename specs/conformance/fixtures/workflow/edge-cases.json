@@ -104,7 +104,7 @@
         "workflow_id": "wf_01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "parent_step_ids": [],
-        "framework": "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123"
+        "framework": "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01"
       },
       "expected": {
         "valid": true,
@@ -347,7 +347,7 @@
           "error_context": {
             "failed_step_id": "step_01ARZ3NDEKTSV4RRFFQ69G5FAV",
             "error_code": "E_DETAILED_ERROR",
-            "error_message": "This is an error message that is exactly 1024 characters long including all the detailed information about what went wrong during the execution of this particular step in the workflow. The error includes diagnostic information, stack traces, context about the input parameters, details about the environment in which the step was running, information about any retries that were attempted, timestamps for each phase of the execution, memory and CPU usage at the time of failure, network conditions, dependent service states, and recommendations for how to resolve the issue. This comprehensive error message helps operators quickly identify and fix problems in their multi-agent workflows without having to dig through logs. The message is designed to be machine-parseable while also being human-readable for debugging purposes. Additional context may be available in the associated receipt chain. The error code provides a stable identifier for automated error handling and alerting systems. Please refer to the documentation for more information about this error type and its common causes and resolutions. Truncating now......"
+            "error_message": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
           }
         }
       },

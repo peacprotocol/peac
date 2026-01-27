@@ -228,6 +228,7 @@ export {
   createWorkflowId,
   createStepId,
   validateWorkflowContext,
+  validateWorkflowContextOrdered,
   isValidWorkflowContext,
   validateWorkflowSummaryAttestation,
   isWorkflowSummaryAttestation,
@@ -245,6 +246,7 @@ export type {
   WorkflowErrorContext,
   WorkflowSummaryEvidence,
   WorkflowSummaryAttestation,
+  WorkflowValidationResult,
   CreateWorkflowSummaryParams,
 } from './workflow';
 
