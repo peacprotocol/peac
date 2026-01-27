@@ -85,11 +85,7 @@ function validateFixtureInput(fixture: Fixture): {
 // ---------------------------------------------------------------------------
 
 function createFixtureSchemaValidator() {
-  // strictRequired: false because the allOf/if/then conditional uses
-  // required: ["error_code"] in the then clause while error_code is declared
-  // in the parent properties scope. Valid JSON Schema 2020-12, but Ajv
-  // strictRequired enforces co-located property definitions.
-  const ajv = new Ajv2020({ strict: true, strictRequired: false, allErrors: true });
+  const ajv = new Ajv2020({ strict: true, allErrors: true });
   addFormats(ajv);
   const schemaContent = readFileSync(join(FIXTURES_DIR, 'fixtures.schema.json'), 'utf8');
   const schema = JSON.parse(schemaContent);
