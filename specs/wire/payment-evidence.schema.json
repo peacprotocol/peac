@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/wire/0.1/payment-evidence.schema.json",
+  "$id": "https://www.peacprotocol.org/schemas/wire/0.1/payment-evidence.schema.json",
   "title": "PEAC Payment Evidence",
   "description": "Payment and attestation evidence types for PEAC receipts",
 

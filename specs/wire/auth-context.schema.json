@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/wire/0.1/auth-context.schema.json",
+  "$id": "https://www.peacprotocol.org/schemas/wire/0.1/auth-context.schema.json",
   "title": "PEAC Auth Context",
   "description": "Authentication and authorization context for PEAC receipts",
 

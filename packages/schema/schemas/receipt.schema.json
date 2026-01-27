@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://peacprotocol.org/schemas/receipt/0.9",
+  "$id": "https://www.peacprotocol.org/schemas/receipt/0.9",
   "title": "PEAC Receipt Claims",
   "description": "JSON Schema for PEAC protocol receipt claims (JWS payload)",
   "type": "object",

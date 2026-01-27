@@ -46,7 +46,7 @@ async function resourceServer(
         'peac-issuer': ISSUER_URL,
       },
       body: {
-        type: 'https://peacprotocol.org/errors/payment-required',
+        type: 'https://www.peacprotocol.org/errors/payment-required',
         title: 'Payment Required',
         status: 402,
         detail: 'A valid PEAC receipt is required to access this resource.',
@@ -63,7 +63,7 @@ async function resourceServer(
       status: 401,
       headers: { 'content-type': 'application/problem+json' },
       body: {
-        type: 'https://peacprotocol.org/errors/invalid-receipt',
+        type: 'https://www.peacprotocol.org/errors/invalid-receipt',
         title: 'Invalid Receipt',
         status: 401,
         detail: 'The provided receipt could not be verified.',

@@ -89,7 +89,7 @@ WWW-Authenticate: PEAC-Attestation realm="peac", attestation_type="identity"
 Content-Type: application/problem+json
 
 {
-  "type": "https://peacprotocol.org/errors#E_IDENTITY_EXPIRED",
+  "type": "https://www.peacprotocol.org/errors#E_IDENTITY_EXPIRED",
   "title": "Identity Attestation Expired",
   "status": 401,
   "detail": "The agent identity attestation has expired.",

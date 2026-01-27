@@ -104,7 +104,7 @@ Do not use string literals for these values in application code.
 All JSON schemas use the base URI:
 
 ```
-https://peacprotocol.org/schemas/wire/0.1/
+https://www.peacprotocol.org/schemas/wire/0.1/
 ```
 
 The canonical schema source is `specs/wire/`. Documentation copies in `docs/specs/` are generated from the canonical source.

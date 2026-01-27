@@ -5,5 +5,5 @@
   "json_schema_draft": "2020-12",
   "last_updated": "2026-01-14",
   "status": "stable",
-  "base_uri": "https://peacprotocol.org/schemas/wire/0.1/"
+  "base_uri": "https://www.peacprotocol.org/schemas/wire/0.1/"
 }

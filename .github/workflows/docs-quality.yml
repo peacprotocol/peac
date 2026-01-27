@@ -101,7 +101,7 @@ jobs:
           # Verify E_* prefix usage in docs
           if rg -n "type.*peacprotocol\.org/(errors|problems)/#[a-z_]+" docs/ --glob '!**/CHANGELOG.md'; then
             echo "ERROR: Found old error code format (lowercase snake_case)"
-            echo "Use E_* prefix: https://peacprotocol.org/problems/E_TAP_SIGNATURE_INVALID"
+            echo "Use E_* prefix: https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_INVALID"
             exit 1
           fi
           echo "✓ Error code format consistent"

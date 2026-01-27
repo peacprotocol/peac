@@ -29,7 +29,7 @@ const status = CANONICAL_STATUS_MAPPINGS[CANONICAL_ERROR_CODES.TAP_SIGNATURE_INV
 
 // Get RFC 9457 Problem Details type URI
 const problemType = problemTypeFor(CANONICAL_ERROR_CODES.TAP_SIGNATURE_INVALID);
-// "https://peacprotocol.org/problems/E_TAP_SIGNATURE_INVALID"
+// "https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_INVALID"
 
 // Check verification mode behavior
 const modeBehavior = MODE_BEHAVIOR.tap_only;

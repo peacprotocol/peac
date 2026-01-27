@@ -168,7 +168,7 @@ Content-Type: application/problem+json
 PEAC-Error: E_TAP_SIGNATURE_INVALID
 
 {
-  "type": "https://peacprotocol.org/problems/E_TAP_SIGNATURE_INVALID",
+  "type": "https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_INVALID",
   "title": "TAP Signature Invalid",
   "status": 401,
   "detail": "Signature verification failed",
@@ -483,6 +483,6 @@ curl -i https://your-worker.workers.dev/api/resource \
 
 ## Support
 
-- Documentation: <https://peacprotocol.org/docs>
+- Documentation: <https://www.peacprotocol.org/docs>
 - Issues: <https://github.com/peacprotocol/peac/issues>
 - Discussions: <https://github.com/peacprotocol/peac/discussions>

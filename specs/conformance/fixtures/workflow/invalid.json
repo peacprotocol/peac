@@ -1,5 +1,5 @@
 {
-  "$schema": "https://peacprotocol.org/schemas/conformance/workflow-fixtures.schema.json",
+  "$schema": "https://www.peacprotocol.org/schemas/conformance/workflow-fixtures.schema.json",
   "$comment": "Invalid WorkflowContext and WorkflowSummaryAttestation vectors (v0.10.2+)",
   "version": "0.10.2",
   "fixtures": [

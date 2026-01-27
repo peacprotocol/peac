@@ -118,7 +118,7 @@ By default, errors are returned as RFC 9457 Problem Details:
 
 ```json
 {
-  "type": "https://peacprotocol.org/errors/e_invalid_signature",
+  "type": "https://www.peacprotocol.org/errors/e_invalid_signature",
   "title": "E_INVALID_SIGNATURE",
   "status": 400,
   "detail": "signature verification failed",

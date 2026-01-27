@@ -293,7 +293,7 @@ By default, the middleware returns RFC 9457 Problem Details responses:
 
 ```json
 {
-  "type": "https://peacprotocol.org/errors/receipt_expired",
+  "type": "https://www.peacprotocol.org/errors/receipt_expired",
   "title": "Receipt Expired",
   "status": 401,
   "detail": "Receipt issued at 2026-01-01T00:00:00Z has exceeded max age"

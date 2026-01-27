@@ -132,7 +132,7 @@ describe('compilePeacTxt', () => {
 
     expect(output).toContain('# PEAC Policy Discovery File');
     expect(output).toContain('# Serve at: /.well-known/peac.txt');
-    expect(output).toContain('# See: https://peacprotocol.org');
+    expect(output).toContain('# See: https://www.peacprotocol.org');
   });
 
   it('should preserve rule order in comments (first-match-wins)', () => {

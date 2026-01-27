@@ -58,4 +58,4 @@ Apache-2.0
 
 ---
 
-Part of [PEAC Protocol](https://peacprotocol.org) - Policy, Economics, Attribution, Compliance for AI commerce.
+Part of [PEAC Protocol](https://www.peacprotocol.org) - Policy, Economics, Attribution, Compliance for AI commerce.

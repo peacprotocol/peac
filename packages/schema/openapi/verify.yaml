@@ -10,7 +10,7 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   contact:
     name: PEAC Protocol
-    url: https://peacprotocol.org
+    url: https://www.peacprotocol.org
 servers:
   - url: https://api.example.com
     description: Example PEAC issuer
@@ -112,7 +112,7 @@ paths:
                 malformed_jws:
                   summary: Malformed JWS
                   value:
-                    type: 'https://peacprotocol.org/errors/malformed-jws'
+                    type: 'https://www.peacprotocol.org/errors/malformed-jws'
                     title: 'Malformed JWS'
                     status: 400
                     detail: 'JWS does not have three dot-separated parts'
@@ -133,7 +133,7 @@ paths:
                 rate_limit:
                   summary: Rate limit exceeded
                   value:
-                    type: 'https://peacprotocol.org/errors/rate-limit'
+                    type: 'https://www.peacprotocol.org/errors/rate-limit'
                     title: 'Rate Limit Exceeded'
                     status: 429
                     detail: 'IP-based rate limit: 100 requests per second'
@@ -154,7 +154,7 @@ paths:
                 circuit_breaker:
                   summary: Circuit breaker open
                   value:
-                    type: 'https://peacprotocol.org/errors/circuit-breaker'
+                    type: 'https://www.peacprotocol.org/errors/circuit-breaker'
                     title: 'Service Unavailable'
                     status: 503
                     detail: 'JWKS fetch circuit breaker is open (5 consecutive failures)'
@@ -427,7 +427,7 @@ components:
           type: string
           format: uri
           description: URI reference identifying the problem type (RFC 9457)
-          example: 'https://peacprotocol.org/errors/rate-limit'
+          example: 'https://www.peacprotocol.org/errors/rate-limit'
         title:
           type: string
           description: Short, human-readable summary

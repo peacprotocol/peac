@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/receipt/0.9.json",
+  "$id": "https://www.peacprotocol.org/schemas/receipt/0.9.json",
   "$comment": "DEPRECATED: This schema version is obsolete. Use peac-receipt/0.1 instead. See PEAC-RECEIPT-SCHEMA-v0.1.json for the current schema.",
   "$ref": "./PEAC-RECEIPT-SCHEMA-v0.1.json",
   "deprecated": true

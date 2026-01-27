@@ -163,7 +163,7 @@ import { ERRORS } from '@peac/kernel';
 
 // Return standardized error
 return {
-  type: `https://peacprotocol.org/errors/${ERRORS.E_INVALID_SIGNATURE.code}`,
+  type: `https://www.peacprotocol.org/errors/${ERRORS.E_INVALID_SIGNATURE.code}`,
   title: ERRORS.E_INVALID_SIGNATURE.title,
   status: ERRORS.E_INVALID_SIGNATURE.http_status,
   detail: 'Signature verification failed for kid=2024-11-18T00:00:00Z',

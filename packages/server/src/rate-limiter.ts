@@ -108,7 +108,7 @@ export function rateLimiter() {
       c.header('Retry-After', String(result.retryAfter || 60));
       return c.json(
         {
-          type: 'https://peacprotocol.org/errors/rate-limit',
+          type: 'https://www.peacprotocol.org/errors/rate-limit',
           title: 'Rate Limit Exceeded',
           status: 429,
           detail: `Rate limit exceeded. IP limit: ${DEFAULT_CONFIG.perIpLimit} req/s, Global limit: ${DEFAULT_CONFIG.globalLimit} req/s`,

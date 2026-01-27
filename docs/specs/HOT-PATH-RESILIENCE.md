@@ -290,7 +290,7 @@ export async function handleTAP(request: Request, opts: TAPOptions): Promise<Res
   if (opts.mode === 'tap_only' && !tap) {
     return new Response(
       JSON.stringify({
-        type: 'https://peacprotocol.org/errors#E_TAP_MISSING',
+        type: 'https://www.peacprotocol.org/errors#E_TAP_MISSING',
         title: 'TAP Missing',
         status: 402,
       }),
@@ -308,7 +308,7 @@ export async function handleTAP(request: Request, opts: TAPOptions): Promise<Res
   if (tap && hasUnknownTags(tap)) {
     return new Response(
       JSON.stringify({
-        type: 'https://peacprotocol.org/errors#E_TAP_TAG_UNKNOWN',
+        type: 'https://www.peacprotocol.org/errors#E_TAP_TAG_UNKNOWN',
         title: 'Unknown TAP Tag',
         status: 400,
       }),
@@ -323,7 +323,7 @@ export async function handleTAP(request: Request, opts: TAPOptions): Promise<Res
   if (tap?.nonce && !opts.replayStore) {
     return new Response(
       JSON.stringify({
-        type: 'https://peacprotocol.org/errors#E_TAP_REPLAY_PROTECTION_REQUIRED',
+        type: 'https://www.peacprotocol.org/errors#E_TAP_REPLAY_PROTECTION_REQUIRED',
         title: 'Replay Protection Required',
         status: 401,
       }),
@@ -338,7 +338,7 @@ export async function handleTAP(request: Request, opts: TAPOptions): Promise<Res
   if (!opts.issuerAllowlist.includes(claims.issuer)) {
     return new Response(
       JSON.stringify({
-        type: 'https://peacprotocol.org/errors#E_TAP_ISSUER_NOT_ALLOWED',
+        type: 'https://www.peacprotocol.org/errors#E_TAP_ISSUER_NOT_ALLOWED',
         title: 'Issuer Not Allowed',
         status: 403,
       }),
@@ -538,7 +538,7 @@ Production errors NEVER leak sensitive data:
 // packages/worker-core/src/errors.ts
 export function sanitizeError(error: PEACError, mode: Mode): ErrorResponse {
   const response: ErrorResponse = {
-    type: `https://peacprotocol.org/errors#${error.code}`,
+    type: `https://www.peacprotocol.org/errors#${error.code}`,
     title: error.title,
     status: error.status,
     trace_id: generateTraceID(),

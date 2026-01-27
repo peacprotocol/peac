@@ -37,7 +37,7 @@ export class RazorpayError extends Error {
    */
   toProblemJson(): Record<string, unknown> {
     return {
-      type: `https://peacprotocol.org/errors/razorpay/${this.code}`,
+      type: `https://www.peacprotocol.org/errors/razorpay/${this.code}`,
       title: this.message,
       status: this.statusCode,
       detail: this.message,

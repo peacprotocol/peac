@@ -133,4 +133,4 @@ Apache-2.0
 
 ---
 
-Built by [PEAC Protocol](https://peacprotocol.org) contributors.
+Built by [PEAC Protocol](https://www.peacprotocol.org) contributors.

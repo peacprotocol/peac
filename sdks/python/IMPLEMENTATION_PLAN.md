@@ -548,8 +548,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://peacprotocol.org"
-Documentation = "https://peacprotocol.org/docs"
+Homepage = "https://www.peacprotocol.org"
+Documentation = "https://www.peacprotocol.org/docs"
 Repository = "https://github.com/peacprotocol/peac"
 Issues = "https://github.com/peacprotocol/peac/issues"
 ```

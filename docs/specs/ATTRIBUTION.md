@@ -512,7 +512,7 @@ Errors SHOULD follow RFC 9457 Problem Details:
 
 ```json
 {
-  "type": "https://peacprotocol.org/errors/attribution_chain_too_deep",
+  "type": "https://www.peacprotocol.org/errors/attribution_chain_too_deep",
   "title": "Attribution Chain Too Deep",
   "status": 400,
   "detail": "Chain depth of 12 exceeds maximum allowed depth of 8",
@@ -659,7 +659,7 @@ Extensions SHOULD provide JSON Schema for validation:
 
 ```json
 {
-  "$id": "https://peacprotocol.org/schemas/obligations/v1",
+  "$id": "https://www.peacprotocol.org/schemas/obligations/v1",
   "type": "object",
   "properties": {
     "credit": {

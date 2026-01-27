@@ -122,7 +122,7 @@ const ErrorTitles: Record<ErrorCode, string> = {
 /**
  * Base URI for problem types.
  */
-const PROBLEM_TYPE_BASE = 'https://peacprotocol.org/problems';
+const PROBLEM_TYPE_BASE = 'https://www.peacprotocol.org/problems';
 
 /**
  * Sanitize error detail to prevent leaking sensitive information.

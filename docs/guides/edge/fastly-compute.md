@@ -188,7 +188,7 @@ WWW-Authenticate: PEAC realm="peac", error="signature_invalid"
 Content-Type: application/problem+json
 
 {
-  "type": "https://peacprotocol.org/errors#E_TAP_SIGNATURE_INVALID",
+  "type": "https://www.peacprotocol.org/errors#E_TAP_SIGNATURE_INVALID",
   "title": "TAP Signature Invalid",
   "status": 401,
   "detail": "Signature verification failed",
@@ -499,7 +499,7 @@ sub vcl_recv {
 
 ## Support
 
-- Documentation: <https://peacprotocol.org/docs>
+- Documentation: <https://www.peacprotocol.org/docs>
 - Issues: <https://github.com/peacprotocol/peac/issues>
 - Discussions: <https://github.com/peacprotocol/peac/discussions>
 - Fastly Support: <https://support.fastly.com>

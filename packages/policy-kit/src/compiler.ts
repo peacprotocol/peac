@@ -88,7 +88,7 @@ export function compilePeacTxt(policy: PolicyDocument, options: CompileOptions =
     lines.push(`# Generated from: ${policy.name || 'peac-policy.yaml'}`);
     lines.push('#');
     lines.push('# Serve at: /.well-known/peac.txt');
-    lines.push('# See: https://peacprotocol.org');
+    lines.push('# See: https://www.peacprotocol.org');
     lines.push('');
   }
 
@@ -348,7 +348,7 @@ export function renderPolicyMarkdown(policy: PolicyDocument, options: CompileOpt
   lines.push('---');
   lines.push('');
   lines.push(
-    '*This policy is enforced via the PEAC Protocol. See [peacprotocol.org](https://peacprotocol.org) for more information.*'
+    '*This policy is enforced via the PEAC Protocol. See [peacprotocol.org](https://www.peacprotocol.org) for more information.*'
   );
   lines.push('');
 

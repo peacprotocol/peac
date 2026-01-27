@@ -11,7 +11,7 @@ export const VERSION = '0.9.15';
 export const MAX_LINES = 20;
 export const WELL_KNOWN_PATH = '/.well-known/peac.txt';
 
-const UA = `PEAC/${VERSION} (+https://peacprotocol.org)`;
+const UA = `PEAC/${VERSION} (+https://www.peacprotocol.org)`;
 
 // Convenience function for fetching and parsing discovery documents
 export async function discover(origin: string): Promise<import('./types.js').ParseResult> {

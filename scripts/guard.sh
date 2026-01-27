@@ -54,9 +54,9 @@ else
   echo "OK"
 fi
 
-# Require https for peacprotocol.org
+# Require https for www.peacprotocol.org (and bare peacprotocol.org)
 echo "== peacprotocol.org must be https =="
-if gg_wb n 'http://peacprotocol\.org\b' 'http://peacprotocol\.org([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep .; then
+if gg_wb n 'http://(www\.)?peacprotocol\.org\b' 'http://(www\.)?peacprotocol\.org([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep .; then
   bad=1
 else
   echo "OK"

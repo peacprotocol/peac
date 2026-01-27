@@ -173,7 +173,7 @@ func defaultErrorHandler(c *gin.Context, err error) {
 	}
 
 	resp := gin.H{
-		"type":   "https://peacprotocol.org/errors/" + strings.ToLower(code),
+		"type":   "https://www.peacprotocol.org/errors/" + strings.ToLower(code),
 		"title":  code,
 		"status": status,
 		"detail": message,

@@ -100,7 +100,7 @@ export function createBridgeApp() {
   // 404 handler
   app.notFound((c) => {
     const body = JSON.stringify({
-      type: 'https://peacprotocol.org/problems/not-found',
+      type: 'https://www.peacprotocol.org/problems/not-found',
       status: 404,
       title: 'Not Found',
       detail: `Endpoint ${c.req.path} not found on bridge`,

@@ -2,7 +2,7 @@
  * /enforce endpoint - Core orchestration with proper standards compliance
  * - Wire version: 0.9.13
  * - Media types: application/peac+json (success), application/problem+json (errors)
- * - Problem URIs: https://peacprotocol.org/problems/<slug>
+ * - Problem URIs: https://www.peacprotocol.org/problems/<slug>
  * - AIPREF mandatory in receipts
  * - Normalized payment object for 402
  */
@@ -12,7 +12,7 @@ import { enforce } from '@peac/core';
 import { peacHeaders } from '../util/http.js';
 import { recordEnforce } from './metrics.js';
 
-const PROBLEM_BASE = 'https://peacprotocol.org/problems/';
+const PROBLEM_BASE = 'https://www.peacprotocol.org/problems/';
 
 export async function enforceRoute(c: Context) {
   const startTime = performance.now();

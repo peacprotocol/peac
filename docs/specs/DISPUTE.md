@@ -381,7 +381,7 @@ WWW-Authenticate: PEAC-Attestation realm="peac", attestation_type=dispute, error
 Content-Type: application/problem+json
 
 {
-  "type": "https://peacprotocol.org/errors#E_DISPUTE_EXPIRED",
+  "type": "https://www.peacprotocol.org/errors#E_DISPUTE_EXPIRED",
   "title": "Dispute Expired",
   "status": 401,
   "detail": "The dispute attestation has expired."

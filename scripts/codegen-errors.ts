@@ -277,7 +277,7 @@ function generateCategoriesFile(categories: string[], specVersion: string) {
 
   // Generate language-neutral JSON artifact for non-TS SDKs
   const jsonArtifact = {
-    $schema: 'https://peacprotocol.org/schemas/kernel/error-categories.schema.json',
+    $schema: 'https://www.peacprotocol.org/schemas/kernel/error-categories.schema.json',
     $comment: 'AUTO-GENERATED from specs/kernel/errors.json - DO NOT EDIT MANUALLY',
     version: specVersion,
     source_file: 'specs/kernel/errors.json',
