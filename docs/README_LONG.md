@@ -404,6 +404,83 @@ Dependencies flow DOWN only. Never import from a higher layer.
 
 ---
 
+## Workflow correlation
+
+Multi-step agentic workflows (MCP tool chains, A2A exchanges, CrewAI crews, LangGraph graphs) produce multiple receipts. Workflow correlation links those receipts into a verifiable DAG so that auditors and downstream systems can reconstruct what happened, in what order, and under which terms.
+
+**Two types:**
+
+| Type                         | Purpose                                               |
+| ---------------------------- | ----------------------------------------------------- |
+| `WorkflowContext`            | Per-receipt extension for DAG reconstruction          |
+| `WorkflowSummaryAttestation` | Proof-of-run artifact committing the full receipt set |
+
+**WorkflowContext** is attached as a receipt extension (`ext['org.peacprotocol/workflow']`):
+
+```typescript
+import { issue } from '@peac/protocol';
+import { generateWorkflowId, generateStepId } from '@peac/schema';
+
+const workflowId = generateWorkflowId();
+const stepId = generateStepId();
+
+const { jws } = await issue({
+  iss: 'https://api.example.com',
+  aud: 'https://client.example.com',
+  subject: '/tools/search',
+  privateKey,
+  kid: 'key-2026-01',
+  ext: {
+    'org.peacprotocol/workflow': {
+      workflow_id: workflowId,
+      step_id: stepId,
+      parent_step_ids: [], // root step
+      tool_name: 'web_search',
+      framework: { name: 'mcp', version: '1.0' },
+    },
+  },
+});
+```
+
+**WorkflowSummaryAttestation** commits the receipt set at workflow completion:
+
+```typescript
+import { WorkflowSummaryAttestationSchema } from '@peac/schema';
+
+const summary = WorkflowSummaryAttestationSchema.parse({
+  type: 'peac/workflow-summary',
+  issuer: 'https://orchestrator.example.com',
+  issued_at: new Date().toISOString(),
+  evidence: {
+    workflow_id: workflowId,
+    status: 'completed',
+    receipt_refs: ['sha256:abc...', 'sha256:def...'],
+    agents_involved: ['search-agent', 'synthesis-agent'],
+    started_at: '2026-01-27T10:00:00Z',
+    completed_at: '2026-01-27T10:00:05Z',
+  },
+});
+```
+
+**Key invariants:**
+
+- Workflow IDs: `wf_[a-zA-Z0-9_-]{20,48}`
+- Step IDs: `step_[a-zA-Z0-9_-]{20,48}`
+- A step cannot be its own parent (no self-loops)
+- No duplicate parent step IDs
+- Hash chaining via `prev_receipt_hash` (`sha256:[a-f0-9]{64}`)
+- Max 16 parent steps, max 256-char tool names
+
+**External ID interop:**
+
+Bi-directional correlation with OTel trace IDs, Temporal workflow/run IDs, Airflow dag/run/task IDs, Prefect flow/run IDs, Dagster run/step IDs, and Argo workflow/node IDs via the `external_ids` array.
+
+**Conformance vectors:** `specs/conformance/fixtures/workflow/` (valid, invalid, edge-cases)
+
+See [docs/specs/WORKFLOW-CORRELATION.md](specs/WORKFLOW-CORRELATION.md) for the normative specification and [examples/workflow-correlation/](../examples/workflow-correlation/) for a working demo.
+
+---
+
 ## Seven pillars
 
 PEAC addresses seven protocol capabilities for AI and API infrastructure:
@@ -539,9 +616,9 @@ See [LICENSE](LICENSE) for full details.
 ## Community
 
 - **Source:** [https://github.com/peacprotocol/peac](https://github.com/peacprotocol/peac)
-- **Website:** [https://peacprotocol.org](https://peacprotocol.org)
+- **Website:** [https://www.peacprotocol.org](https://www.peacprotocol.org)
 - **Issues:** Bug reports and feature requests via GitHub Issues
 - **Discussions:** Design questions and ecosystem proposals via GitHub Discussions
-- **Contact:** See [https://peacprotocol.org](https://peacprotocol.org) for working group and contact information
+- **Contact:** See [https://www.peacprotocol.org](https://www.peacprotocol.org) for working group and contact information
 
 PEAC is designed for multiple independent implementations across languages and platforms. If you are building an implementation, SDK, or rail adapter, please open an issue so it can be linked from ecosystem documentation.

@@ -4,7 +4,7 @@
 
 A record is the portable interaction artifact; a receipt is the signed file format.
 
-[Docs](https://peacprotocol.org) | [Spec Index](docs/SPEC_INDEX.md) | [Discussions](https://github.com/peacprotocol/peac/discussions) | [Releases](https://github.com/peacprotocol/peac/releases)
+[Docs](https://www.peacprotocol.org) | [Spec Index](docs/SPEC_INDEX.md) | [Discussions](https://github.com/peacprotocol/peac/discussions) | [Releases](https://github.com/peacprotocol/peac/releases)
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac)](https://github.com/peacprotocol/peac/releases)
@@ -180,6 +180,7 @@ peac policy generate policy.yaml  # Compile to deployment artifacts
 | Issuer config       | Yes    | `/.well-known/peac-issuer.json` JWKS discovery        |
 | Verification report | Yes    | Deterministic JSON output from verify operations      |
 | Dispute Bundle      | Yes    | ZIP with receipts + policy + report for offline audit |
+| Workflow context    | Yes    | DAG correlation for multi-step agentic workflows      |
 | Conformance vectors | Yes    | Golden inputs/outputs in `specs/conformance/`         |
 
 ---
@@ -234,6 +235,16 @@ peac bundle verify ./evidence.peacbundle --offline
 ```
 
 See [docs/specs/DISPUTE.md](docs/specs/DISPUTE.md) for the specification.
+
+---
+
+## Workflow correlation
+
+Track multi-step agentic workflows across orchestration frameworks (MCP, A2A, CrewAI, LangGraph, AutoGen). Each receipt carries a `WorkflowContext` extension linking it to a workflow DAG -- step IDs, parent references, framework metadata, and optional hash chaining.
+
+At workflow completion, a `WorkflowSummaryAttestation` commits the full receipt set (by reference or Merkle root) for proof-of-run verification.
+
+See [docs/specs/WORKFLOW-CORRELATION.md](docs/specs/WORKFLOW-CORRELATION.md) for the specification and [examples/workflow-correlation/](examples/workflow-correlation/) for a working demo.
 
 ---
 
@@ -359,9 +370,9 @@ See [LICENSE](LICENSE) for full details.
 ## Community
 
 - **Source:** [https://github.com/peacprotocol/peac](https://github.com/peacprotocol/peac)
-- **Website:** [https://peacprotocol.org](https://peacprotocol.org)
+- **Website:** [https://www.peacprotocol.org](https://www.peacprotocol.org)
 - **Issues:** Bug reports and feature requests via GitHub Issues
 - **Discussions:** Design questions and ecosystem proposals via GitHub Discussions
-- **Contact:** See [https://peacprotocol.org](https://peacprotocol.org) for working group and contact information
+- **Contact:** See [https://www.peacprotocol.org](https://www.peacprotocol.org) for working group and contact information
 
 PEAC is designed for multiple independent implementations across languages and platforms. If you are building an implementation, SDK, or rail adapter, please open an issue so it can be linked from ecosystem documentation.

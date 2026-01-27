@@ -29,6 +29,10 @@ This document defines which documentation files are the canonical, up-to-date re
 | [specs/ERRORS.md](specs/ERRORS.md)                                         | **Normative** | Error codes and HTTP mappings  |
 | [specs/REGISTRIES.md](specs/REGISTRIES.md)                                 | **Normative** | Payment rails, agent protocols |
 | [specs/PEAC-HTTP402-PROFILE.md](specs/PEAC-HTTP402-PROFILE.md)             | **Normative** | HTTP 402 integration           |
+| [specs/AGENT-IDENTITY.md](specs/AGENT-IDENTITY.md)                         | **Normative** | Agent identity attestations    |
+| [specs/ATTRIBUTION.md](specs/ATTRIBUTION.md)                               | **Normative** | Attribution chain semantics    |
+| [specs/DISPUTE.md](specs/DISPUTE.md)                                       | **Normative** | Dispute attestations           |
+| [specs/WORKFLOW-CORRELATION.md](specs/WORKFLOW-CORRELATION.md)             | **Normative** | Workflow DAG correlation       |
 | [specs/TEST_VECTORS.md](specs/TEST_VECTORS.md)                             | **Normative** | Conformance test cases         |
 | `specs/kernel/*.json`                                                      | **Normative** | Machine-readable constants     |
 

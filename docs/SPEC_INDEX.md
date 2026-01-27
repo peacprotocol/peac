@@ -16,6 +16,13 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 - **[Policy Document (PEAC-TXT)](specs/PEAC-TXT.md)** - `/.well-known/peac.txt` access terms for agents
 - **[Issuer Configuration (PEAC-ISSUER)](specs/PEAC-ISSUER.md)** - `/.well-known/peac-issuer.json` JWKS discovery
 
+### Attestations and Extensions
+
+- **[Agent Identity](specs/AGENT-IDENTITY.md)** - Cryptographic proof-of-control binding for agents
+- **[Attribution](specs/ATTRIBUTION.md)** - Content provenance and attribution chain semantics
+- **[Dispute](specs/DISPUTE.md)** - Formal contestation of receipts and attestations
+- **[Workflow Correlation](specs/WORKFLOW-CORRELATION.md)** - Multi-agent workflow DAG reconstruction and proof-of-run
+
 ### Wire Format Profiles
 
 - **[HTTP 402 Profile](specs/PEAC-HTTP402-PROFILE.md)** - HTTP 402 Payment Required integration
