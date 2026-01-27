@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/wire/0.1/subject-profile.schema.json",
+  "$id": "https://www.peacprotocol.org/schemas/wire/0.1/subject-profile.schema.json",
   "title": "PEAC Subject Profile",
   "description": "Subject profile and snapshot types for identity context in PEAC receipts",
 

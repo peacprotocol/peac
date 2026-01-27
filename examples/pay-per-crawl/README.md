@@ -69,7 +69,7 @@ Discovery file for PEAC-aware agents:
 
 ```
 # PEAC Policy v0.1
-# https://peacprotocol.org
+# https://www.peacprotocol.org
 
 PEAC-Version: 0.9
 Contact: https://publisher.example.com/contact

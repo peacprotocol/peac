@@ -198,7 +198,7 @@ app.use(async (req, res, next) => {
 
   if (!receipt) {
     return res.status(402).json({
-      type: 'https://peacprotocol.org/errors/payment-required',
+      type: 'https://www.peacprotocol.org/errors/payment-required',
       title: 'Payment Required',
       status: 402,
     });
@@ -207,7 +207,7 @@ app.use(async (req, res, next) => {
   const result = await verifyReceipt(receipt);
   if (!result.ok) {
     return res.status(401).json({
-      type: 'https://peacprotocol.org/errors/invalid-receipt',
+      type: 'https://www.peacprotocol.org/errors/invalid-receipt',
       title: 'Invalid Receipt',
       status: 401,
     });
@@ -268,7 +268,7 @@ app.get('/premium', async (req, res) => {
 
   if (!receipt) {
     return res.status(402).json({
-      type: 'https://peacprotocol.org/errors/payment-required',
+      type: 'https://www.peacprotocol.org/errors/payment-required',
       title: 'Payment Required',
       x402: {
         network: 'eip155:8453',

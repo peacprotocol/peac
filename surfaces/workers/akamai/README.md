@@ -162,4 +162,4 @@ Apache-2.0
 
 ---
 
-Part of [PEAC Protocol](https://peacprotocol.org)
+Part of [PEAC Protocol](https://www.peacprotocol.org)

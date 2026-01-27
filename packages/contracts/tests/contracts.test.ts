@@ -151,7 +151,7 @@ describe('Contract Invariants: Problem Type URIs', () => {
       const uri = problemTypeFor(code);
 
       // Must start with base URI
-      expect(uri).toMatch(/^https:\/\/peacprotocol\.org\/problems\/E_[A-Z_]+$/);
+      expect(uri).toMatch(/^https:\/\/www\.peacprotocol\.org\/problems\/E_[A-Z_]+$/);
 
       // Must contain the code
       expect(uri).toContain(code);

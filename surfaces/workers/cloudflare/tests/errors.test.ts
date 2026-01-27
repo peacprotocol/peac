@@ -15,7 +15,7 @@ describe('createProblemDetails', () => {
   it('should create problem details for receipt_missing', () => {
     const problem = createProblemDetails(ErrorCodes.RECEIPT_MISSING);
 
-    expect(problem.type).toBe('https://peacprotocol.org/problems/receipt_missing');
+    expect(problem.type).toBe('https://www.peacprotocol.org/problems/receipt_missing');
     expect(problem.title).toBe('Payment Required');
     expect(problem.status).toBe(402);
     expect(problem.code).toBe('E_RECEIPT_MISSING');
@@ -30,7 +30,7 @@ describe('createProblemDetails', () => {
       'https://api.example.com/resource'
     );
 
-    expect(problem.type).toBe('https://peacprotocol.org/problems/tap_signature_invalid');
+    expect(problem.type).toBe('https://www.peacprotocol.org/problems/tap_signature_invalid');
     expect(problem.title).toBe('Invalid Signature');
     expect(problem.status).toBe(401);
     expect(problem.code).toBe('E_TAP_SIGNATURE_INVALID');
@@ -70,7 +70,9 @@ describe('createProblemDetails', () => {
   it('should create config error for missing issuer allowlist', () => {
     const problem = createProblemDetails(ErrorCodes.CONFIG_ISSUER_ALLOWLIST_REQUIRED);
 
-    expect(problem.type).toBe('https://peacprotocol.org/problems/config_issuer_allowlist_required');
+    expect(problem.type).toBe(
+      'https://www.peacprotocol.org/problems/config_issuer_allowlist_required'
+    );
     expect(problem.title).toBe('Configuration Error');
     expect(problem.status).toBe(500);
     expect(problem.code).toBe('E_CONFIG_ISSUER_ALLOWLIST_REQUIRED');
@@ -79,7 +81,9 @@ describe('createProblemDetails', () => {
   it('should create replay protection required error', () => {
     const problem = createProblemDetails(ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED);
 
-    expect(problem.type).toBe('https://peacprotocol.org/problems/tap_replay_protection_required');
+    expect(problem.type).toBe(
+      'https://www.peacprotocol.org/problems/tap_replay_protection_required'
+    );
     expect(problem.title).toBe('Replay Protection Required');
     expect(problem.status).toBe(401);
     expect(problem.code).toBe('E_TAP_REPLAY_PROTECTION_REQUIRED');
@@ -115,7 +119,7 @@ describe('createErrorResponse', () => {
     expect(response.headers.get('Cache-Control')).toBe('no-store');
 
     const body = (await response.json()) as ProblemDetails;
-    expect(body.type).toBe('https://peacprotocol.org/problems/tap_signature_invalid');
+    expect(body.type).toBe('https://www.peacprotocol.org/problems/tap_signature_invalid');
     expect(body.code).toBe('E_TAP_SIGNATURE_INVALID');
     expect(body.detail).toBe('Invalid signature');
   });
@@ -130,7 +134,7 @@ describe('createChallengeResponse', () => {
     expect(response.headers.get('WWW-Authenticate')).toBe('PEAC realm="peac-verifier"');
 
     const body = (await response.json()) as ProblemDetails;
-    expect(body.type).toBe('https://peacprotocol.org/problems/receipt_missing');
+    expect(body.type).toBe('https://www.peacprotocol.org/problems/receipt_missing');
     expect(body.title).toBe('Payment Required');
     expect(body.code).toBe('E_RECEIPT_MISSING');
     expect(body.instance).toBe('https://api.example.com/resource');

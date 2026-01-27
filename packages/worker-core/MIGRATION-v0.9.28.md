@@ -93,7 +93,7 @@ MODE_BEHAVIOR.receipt_or_tap;
 import { buildWwwAuthenticate } from '@peac/contracts';
 
 buildWwwAuthenticate('E_TAP_SIGNATURE_MISSING');
-// 'PEAC realm="peac", error="E_TAP_SIGNATURE_MISSING", error_uri="https://peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING"'
+// 'PEAC realm="peac", error="E_TAP_SIGNATURE_MISSING", error_uri="https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING"'
 ```
 
 ### Type Guards
@@ -131,7 +131,7 @@ const safeHandler = createHandler(async (request) => {
 
 ```json
 {
-  "type": "https://peacprotocol.org/problems/E_INTERNAL_ERROR",
+  "type": "https://www.peacprotocol.org/problems/E_INTERNAL_ERROR",
   "title": "Internal Server Error",
   "status": 500,
   "detail": "An unexpected internal error occurred. Please contact support if the issue persists."
@@ -142,7 +142,7 @@ const safeHandler = createHandler(async (request) => {
 
 ```json
 {
-  "type": "https://peacprotocol.org/problems/E_INTERNAL_ERROR",
+  "type": "https://www.peacprotocol.org/problems/E_INTERNAL_ERROR",
   "title": "Internal Server Error",
   "status": 500,
   "detail": "Internal error: Database connection failed"

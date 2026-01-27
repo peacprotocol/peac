@@ -195,7 +195,7 @@ All errors are returned as RFC 9457 Problem Details with a stable `code` extensi
 
 ```json
 {
-  "type": "https://peacprotocol.org/problems/tap_signature_invalid",
+  "type": "https://www.peacprotocol.org/problems/tap_signature_invalid",
   "title": "Invalid Signature",
   "status": 401,
   "detail": "Signature verification failed",
@@ -275,7 +275,7 @@ Content-Type: application/problem+json
 WWW-Authenticate: PEAC realm="peac-verifier"
 
 {
-  "type": "https://peacprotocol.org/problems/receipt_missing",
+  "type": "https://www.peacprotocol.org/problems/receipt_missing",
   "title": "Payment Required",
   "status": 402,
   "code": "E_RECEIPT_MISSING",

@@ -207,4 +207,4 @@ pnpm test --filter conformance
 
 ## Base URI
 
-All schemas use the base URI: `https://peacprotocol.org/schemas/wire/0.1/`
+All schemas use the base URI: `https://www.peacprotocol.org/schemas/wire/0.1/`

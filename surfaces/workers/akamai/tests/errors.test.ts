@@ -18,7 +18,7 @@ describe('createProblemDetails', () => {
       'https://example.com/resource'
     );
 
-    expect(problem.type).toBe('https://peacprotocol.org/problems/receipt_missing');
+    expect(problem.type).toBe('https://www.peacprotocol.org/problems/receipt_missing');
     expect(problem.title).toBe('Payment Required');
     expect(problem.status).toBe(402);
     expect(problem.detail).toBe('Payment required');

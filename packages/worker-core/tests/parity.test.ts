@@ -162,7 +162,7 @@ describe('Parity: Problem Type URI', () => {
 
       // Assert exact match - no string concatenation allowed
       expect(problem.type).toBe(expectedType);
-      expect(problem.type).toContain('https://peacprotocol.org/problems/');
+      expect(problem.type).toContain('https://www.peacprotocol.org/problems/');
     });
   });
 
@@ -173,7 +173,7 @@ describe('Parity: Problem Type URI', () => {
     expect(problem.type).toBe(problemTypeFor('E_TAP_SIGNATURE_INVALID'));
 
     // Verify format (should be from canonical function, not ad-hoc concatenation)
-    expect(problem.type).toMatch(/^https:\/\/peacprotocol\.org\/problems\/E_[A-Z_]+$/);
+    expect(problem.type).toMatch(/^https:\/\/www\.peacprotocol\.org\/problems\/E_[A-Z_]+$/);
   });
 });
 
@@ -334,7 +334,7 @@ describe('Parity: Cross-Contract Consistency', () => {
     Object.values(CANONICAL_ERROR_CODES).forEach((code) => {
       const uri = problemTypeFor(code);
 
-      expect(uri).toMatch(/^https:\/\/peacprotocol\.org\/problems\/E_[A-Z_]+$/);
+      expect(uri).toMatch(/^https:\/\/www\.peacprotocol\.org\/problems\/E_[A-Z_]+$/);
       expect(uri).toContain(code);
     });
   });

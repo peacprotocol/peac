@@ -864,7 +864,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 
 - **apps/bridge/** Hono server on 127.0.0.1:31415 with /enforce, /verify, /health, /ready; /metrics on :31416
 - Wire headers: peac-version: 0.9.13 on all endpoints
-- Media types: success application/peac+json, errors application/problem+json (RFC 7807 with canonical https://peacprotocol.org/problems/<slug>)
+- Media types: success application/peac+json, errors application/problem+json (RFC 7807 with canonical https://www.peacprotocol.org/problems/<slug>)
 - PEAC-Receipt header on allow; sensitive responses send Cache-Control: no-store, no-cache, must-revalidate, private
 - 402 responses mirror payment timing via Retry-After and normalized payment{} extension
 - Prometheus metrics with Content-Type: text/plain; version=0.0.4; charset=utf-8, peac-version header, and Cache-Control: no-cache
@@ -943,7 +943,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 - Permissions-Policy uses explicit deny list
 - X-XSS-Protection disabled (deprecated header)
 - frame-src replaces deprecated child-src in CSP
-- Problem type URIs now use absolute URLs (https://peacprotocol.org/problems/)
+- Problem type URIs now use absolute URLs (https://www.peacprotocol.org/problems/)
 - RateLimit-Reset uses delta seconds instead of epoch timestamp
 
 ### Security

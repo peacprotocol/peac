@@ -1,5 +1,5 @@
 # PEAC Receipt Verification Worker
-# https://peacprotocol.org
+# https://www.peacprotocol.org
 
 name = "peac-verifier"
 main = "src/index.ts"

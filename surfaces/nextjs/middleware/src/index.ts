@@ -16,7 +16,7 @@
  * - Same fail-closed security defaults
  * - Same replay protection semantics
  *
- * @see https://peacprotocol.org
+ * @see https://www.peacprotocol.org
  */
 
 import { handleRequest } from './handler.js';
@@ -129,7 +129,7 @@ export function createPeacMiddleware(config: MiddlewareConfig): NextMiddlewareLi
 
       return new Response(
         JSON.stringify({
-          type: 'https://peacprotocol.org/problems/internal_error',
+          type: 'https://www.peacprotocol.org/problems/internal_error',
           title: 'Internal Server Error',
           status: 500,
           detail: errorMessage,

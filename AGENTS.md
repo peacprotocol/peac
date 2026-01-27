@@ -5,7 +5,7 @@ Agent-readable metadata for PEAC Protocol.
 ## Identity
 
 - **Protocol**: PEAC/0.9
-- **Specification**: https://peacprotocol.org/specs/agent-identity
+- **Specification**: https://www.peacprotocol.org/specs/agent-identity
 - **Key Directory**: Discovered via `/.well-known/jwks.json` or `Link` header with `rel="jwks"`
 - **Algorithms**: EdDSA (Ed25519)
 
@@ -103,6 +103,6 @@ Canonical PEAC purpose vocabulary:
 
 ## Contact
 
-- **Specification**: https://peacprotocol.org
+- **Specification**: https://www.peacprotocol.org
 - **Repository**: https://github.com/peacprotocol/peac
 - **Issues**: https://github.com/peacprotocol/peac/issues

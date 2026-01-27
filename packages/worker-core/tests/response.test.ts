@@ -16,9 +16,11 @@ describe('buildErrorResponse', () => {
     expect(response.status).toBe(401);
     expect(response.headers['Content-Type']).toBe('application/problem+json');
     expect(response.headers['WWW-Authenticate']).toBe(
-      'PEAC realm="peac", error="E_TAP_SIGNATURE_MISSING", error_uri="https://peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING"'
+      'PEAC realm="peac", error="E_TAP_SIGNATURE_MISSING", error_uri="https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING"'
     );
-    expect(response.body.type).toBe('https://peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING');
+    expect(response.body.type).toBe(
+      'https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING'
+    );
     expect(response.body.status).toBe(401);
   });
 
@@ -30,7 +32,7 @@ describe('buildErrorResponse', () => {
 
     expect(response.status).toBe(402);
     expect(response.headers['WWW-Authenticate']).toBe(
-      'PEAC realm="peac", error="E_RECEIPT_MISSING", error_uri="https://peacprotocol.org/problems/E_RECEIPT_MISSING"'
+      'PEAC realm="peac", error="E_RECEIPT_MISSING", error_uri="https://www.peacprotocol.org/problems/E_RECEIPT_MISSING"'
     );
   });
 
@@ -84,9 +86,9 @@ describe('buildChallengeResponse', () => {
     expect(response.status).toBe(402);
     expect(response.headers['Content-Type']).toBe('application/problem+json');
     expect(response.headers['WWW-Authenticate']).toBe(
-      'PEAC realm="peac", error="E_RECEIPT_MISSING", error_uri="https://peacprotocol.org/problems/E_RECEIPT_MISSING"'
+      'PEAC realm="peac", error="E_RECEIPT_MISSING", error_uri="https://www.peacprotocol.org/problems/E_RECEIPT_MISSING"'
     );
-    expect(response.body.type).toBe('https://peacprotocol.org/problems/E_RECEIPT_MISSING');
+    expect(response.body.type).toBe('https://www.peacprotocol.org/problems/E_RECEIPT_MISSING');
     expect(response.body.status).toBe(402);
   });
 

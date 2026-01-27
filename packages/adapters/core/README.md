@@ -89,4 +89,4 @@ Apache-2.0
 
 ---
 
-Part of the [PEAC Protocol](https://peacprotocol.org).
+Part of the [PEAC Protocol](https://www.peacprotocol.org).

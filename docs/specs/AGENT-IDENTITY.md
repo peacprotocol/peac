@@ -423,7 +423,7 @@ Errors SHOULD follow RFC 9457 Problem Details:
 
 ```json
 {
-  "type": "https://peacprotocol.org/errors/identity_sig_invalid",
+  "type": "https://www.peacprotocol.org/errors/identity_sig_invalid",
   "title": "Identity Signature Invalid",
   "status": 401,
   "detail": "Ed25519 signature verification failed for key 'agent-key-2026-01'",

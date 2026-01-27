@@ -164,4 +164,4 @@ Apache-2.0
 
 ---
 
-Part of the [PEAC Protocol](https://peacprotocol.org) - Portable Evidence for Automated Commerce.
+Part of the [PEAC Protocol](https://www.peacprotocol.org) - Portable Evidence for Automated Commerce.

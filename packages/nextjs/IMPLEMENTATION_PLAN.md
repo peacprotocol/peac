@@ -185,7 +185,7 @@ export function withPeac(
       if (!receipt) {
         return new Response(
           JSON.stringify({
-            type: 'https://peacprotocol.org/errors#E_TAP_MISSING',
+            type: 'https://www.peacprotocol.org/errors#E_TAP_MISSING',
             title: 'Receipt Required',
             status: 402,
             detail: 'PEAC receipt or TAP signature required',
@@ -218,7 +218,7 @@ export function withPeac(
       const peacError = error as PEACError;
       return new Response(
         JSON.stringify({
-          type: `https://peacprotocol.org/errors#${peacError.code}`,
+          type: `https://www.peacprotocol.org/errors#${peacError.code}`,
           title: peacError.message,
           status: peacError.status || 401,
           detail: peacError.detail || peacError.message,
@@ -459,7 +459,7 @@ import { PEACError } from '@peac/kernel';
 export function createProblemResponse(error: PEACError): Response {
   return new Response(
     JSON.stringify({
-      type: `https://peacprotocol.org/errors#${error.code}`,
+      type: `https://www.peacprotocol.org/errors#${error.code}`,
       title: error.message,
       status: error.status || 500,
       detail: error.detail || error.message,
@@ -872,7 +872,7 @@ Without receipt (402 Payment Required):
 
 ```json
 {
-  "type": "https://peacprotocol.org/errors#E_TAP_MISSING",
+  "type": "https://www.peacprotocol.org/errors#E_TAP_MISSING",
   "title": "Receipt Required",
   "status": 402,
   "detail": "PEAC receipt or TAP signature required"

@@ -114,7 +114,7 @@ Retry-After: 60
 X-Request-ID: 123e4567-e89b-12d3-a456-426614174000
 
 {
-  "type": "https://peacprotocol.org/problems/payment-required",
+  "type": "https://www.peacprotocol.org/problems/payment-required",
   "title": "Payment Required",
   "status": 402,
   "detail": "Payment required to access this resource",
@@ -156,7 +156,7 @@ peac-version: 0.9.13
 Content-Type: application/problem+json
 
 {
-  "type": "https://peacprotocol.org/problems/invalid-receipt",
+  "type": "https://www.peacprotocol.org/problems/invalid-receipt",
   "title": "Invalid Receipt",
   "status": 400,
   "detail": "Receipt signature verification failed"

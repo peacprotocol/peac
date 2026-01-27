@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/wire/0.1/peac-receipt.0.1.schema.json",
+  "$id": "https://www.peacprotocol.org/schemas/wire/0.1/peac-receipt.0.1.schema.json",
   "title": "PEAC Receipt Wire Format v0.1",
   "description": "Machine-readable JSON Schema for PEAC receipt wire format (peac-receipt/0.1). Schema version: 0.10.0. See VERSION.json for metadata.",
 

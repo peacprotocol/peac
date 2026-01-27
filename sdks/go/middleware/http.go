@@ -164,7 +164,7 @@ func defaultErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	w.WriteHeader(status)
 
 	resp := map[string]interface{}{
-		"type":   "https://peacprotocol.org/errors/" + strings.ToLower(code),
+		"type":   "https://www.peacprotocol.org/errors/" + strings.ToLower(code),
 		"title":  code,
 		"status": status,
 		"detail": message,

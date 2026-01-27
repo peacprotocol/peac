@@ -87,7 +87,7 @@ describe('createProblemDetails', () => {
       'TAP signature headers are required.'
     );
 
-    expect(problem.type).toBe('https://peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING');
+    expect(problem.type).toBe('https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING');
     expect(problem.title).toBe('Signature Missing');
     expect(problem.status).toBe(401);
     expect(problem.detail).toBe('TAP signature headers are required.');
@@ -120,7 +120,7 @@ describe('createProblemDetails', () => {
     );
 
     expect(problem.status).toBe(402);
-    expect(problem.type).toBe('https://peacprotocol.org/problems/E_RECEIPT_MISSING');
+    expect(problem.type).toBe('https://www.peacprotocol.org/problems/E_RECEIPT_MISSING');
   });
 });
 

@@ -81,4 +81,4 @@ export const PEAC_DISCOVERY_MAX_BYTES = 2000 as const;
  * @since v0.10.0
  */
 export const PEAC_RECEIPT_SCHEMA_URL =
-  'https://peacprotocol.org/schemas/wire/0.1/peac-receipt.0.1.schema.json' as const;
+  'https://www.peacprotocol.org/schemas/wire/0.1/peac-receipt.0.1.schema.json' as const;

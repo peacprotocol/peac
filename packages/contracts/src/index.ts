@@ -14,7 +14,7 @@ import { CANONICAL_ERROR_CODES, type PeacErrorCode } from './codes.js';
 /**
  * Base URI for RFC 9457 Problem Details type field.
  */
-export const PROBLEM_TYPE_BASE = 'https://peacprotocol.org/problems';
+export const PROBLEM_TYPE_BASE = 'https://www.peacprotocol.org/problems';
 
 /**
  * Canonical HTTP status code mappings.
@@ -142,7 +142,7 @@ export const WWW_AUTHENTICATE_STATUSES = [401, 402] as const;
  * Get RFC 9457 Problem Details type URI for an error code.
  *
  * @param code - PEAC error code
- * @returns Problem Details type URI (e.g., "https://peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING")
+ * @returns Problem Details type URI (e.g., "https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_MISSING")
  */
 export function problemTypeFor(code: PeacErrorCode): string {
   return `${PROBLEM_TYPE_BASE}/${code}`;

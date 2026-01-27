@@ -17,7 +17,7 @@ export async function verifyRoute(c: Context) {
     // Validate required fields
     if (!receipt || typeof receipt !== 'string') {
       const problem = {
-        type: 'https://peacprotocol.org/problems/bad-request',
+        type: 'https://www.peacprotocol.org/problems/bad-request',
         title: 'Bad Request',
         status: 400,
         detail: 'Missing or invalid required field: receipt',
@@ -108,7 +108,7 @@ export async function verifyRoute(c: Context) {
     console.error(`Verify error after ${elapsed.toFixed(2)}ms:`, error);
 
     const problem = {
-      type: 'https://peacprotocol.org/problems/internal-error',
+      type: 'https://www.peacprotocol.org/problems/internal-error',
       title: 'Internal Server Error',
       status: 500,
       detail: 'Verification failed due to internal error',

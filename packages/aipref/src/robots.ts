@@ -11,7 +11,7 @@ import type { AIPrefSnapshot, RobotsRule } from './types.js';
 import type { PolicyDocument, PolicyRule } from '@peac/policy-kit';
 
 const VERSION = '0.9.15';
-const UA = `PEAC/${VERSION} (+https://peacprotocol.org)`;
+const UA = `PEAC/${VERSION} (+https://www.peacprotocol.org)`;
 
 // SSRF protection: Check if hostname/IP is in private network range
 function isPrivateNetwork(hostname: string): boolean {

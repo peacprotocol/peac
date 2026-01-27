@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/conformance/workflow-fixtures.schema.json",
+  "$id": "https://www.peacprotocol.org/schemas/conformance/workflow-fixtures.schema.json",
   "title": "PEAC Workflow Conformance Fixtures",
   "description": "Schema for workflow correlation conformance test vectors. Used by valid.json, invalid.json, and edge-cases.json.",
   "type": "object",
   "properties": {
     "$schema": {
       "type": "string",
-      "const": "https://peacprotocol.org/schemas/conformance/workflow-fixtures.schema.json"
+      "const": "https://www.peacprotocol.org/schemas/conformance/workflow-fixtures.schema.json"
     },
     "$comment": {
       "type": "string"

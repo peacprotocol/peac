@@ -13,7 +13,7 @@
  *
  * Uses shared worker core for runtime-neutral verification logic.
  *
- * @see https://peacprotocol.org
+ * @see https://www.peacprotocol.org
  */
 
 import { createResolver } from '@peac/jwks-cache';

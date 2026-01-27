@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/kernel/error-categories.schema.json",
+  "$id": "https://www.peacprotocol.org/schemas/kernel/error-categories.schema.json",
   "title": "PEAC Error Categories",
   "description": "Schema for the auto-generated error-categories.json artifact. Validates the language-neutral category list used by non-TypeScript SDKs.",
   "type": "object",
   "properties": {
     "$schema": {
       "type": "string",
-      "const": "https://peacprotocol.org/schemas/kernel/error-categories.schema.json"
+      "const": "https://www.peacprotocol.org/schemas/kernel/error-categories.schema.json"
     },
     "$comment": {
       "type": "string"
