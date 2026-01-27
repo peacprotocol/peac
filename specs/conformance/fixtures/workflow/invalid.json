@@ -13,6 +13,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_ID_INVALID",
         "error": "Invalid workflow ID format"
       }
     },
@@ -27,6 +28,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_STEP_ID_INVALID",
         "error": "Invalid step ID format"
       }
     },
@@ -41,7 +43,8 @@
       },
       "expected": {
         "valid": false,
-        "error": "Invalid DAG semantics: step cannot be its own parent"
+        "error_code": "E_WORKFLOW_DAG_INVALID",
+        "error": "Self-parent cycle detected"
       }
     },
     {
@@ -55,7 +58,8 @@
       },
       "expected": {
         "valid": false,
-        "error": "Invalid DAG semantics: duplicate parents"
+        "error_code": "E_WORKFLOW_DAG_INVALID",
+        "error": "Duplicate parent step IDs"
       }
     },
     {
@@ -87,6 +91,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_LIMIT_EXCEEDED",
         "error": "Exceeds maximum parent steps"
       }
     },
@@ -102,6 +107,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_CONTEXT_INVALID",
         "error": "Invalid hash format"
       }
     },
@@ -117,6 +123,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_CONTEXT_INVALID",
         "error": "Invalid framework identifier grammar"
       }
     },
@@ -132,6 +139,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_CONTEXT_INVALID",
         "error": "Invalid framework identifier grammar"
       }
     },
@@ -147,6 +155,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_CONTEXT_INVALID",
         "error": "Invalid framework identifier grammar"
       }
     },
@@ -162,6 +171,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_CONTEXT_INVALID",
         "error": "Framework identifier exceeds maximum length"
       }
     },
@@ -177,6 +187,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_CONTEXT_INVALID",
         "error": "Unrecognized keys"
       }
     },
@@ -199,6 +210,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_SUMMARY_INVALID",
         "error": "Invalid type"
       }
     },
@@ -220,6 +232,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_SUMMARY_INVALID",
         "error": "Workflow summary must include receipt_refs or receipt_merkle_root"
       }
     },
@@ -242,6 +255,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_SUMMARY_INVALID",
         "error": "receipt_count is required when using receipt_merkle_root"
       }
     },
@@ -264,6 +278,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_SUMMARY_INVALID",
         "error": "Invalid status"
       }
     },
@@ -286,6 +301,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_SUMMARY_INVALID",
         "error": "Issuer must be HTTPS"
       }
     },
@@ -301,8 +317,11 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_ID_INVALID",
         "error": "Invalid workflow ID format",
-        "validation_order_note": "Required field format (rule 4) before optional field format (rule 6)"
+        "meta": {
+          "validation_order_note": "Required field format (rule 4) before optional field format (rule 6)"
+        }
       }
     },
     {
@@ -334,8 +353,11 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_STEP_ID_INVALID",
         "error": "Invalid step ID format",
-        "validation_order_note": "Required field format (rule 5) before structural constraint (rule 3)"
+        "meta": {
+          "validation_order_note": "Required field format (rule 5) before structural constraint (rule 3)"
+        }
       }
     },
     {
@@ -350,8 +372,11 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_CONTEXT_INVALID",
         "error": "Invalid framework identifier grammar",
-        "validation_order_note": "Optional field format (rule 6) before semantic DAG check (rule 1)"
+        "meta": {
+          "validation_order_note": "Optional field format (rule 6) before semantic DAG check (rule 1)"
+        }
       }
     },
     {
@@ -384,8 +409,11 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_LIMIT_EXCEEDED",
         "error": "Exceeds maximum parent steps",
-        "validation_order_note": "Structural constraint (rule 3) before optional field format (rule 7)"
+        "meta": {
+          "validation_order_note": "Structural constraint (rule 3) before optional field format (rule 7)"
+        }
       }
     },
     {
@@ -412,6 +440,7 @@
       },
       "expected": {
         "valid": false,
+        "error_code": "E_WORKFLOW_SUMMARY_INVALID",
         "error": "Error message too long"
       }
     }

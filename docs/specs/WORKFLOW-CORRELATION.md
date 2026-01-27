@@ -646,6 +646,13 @@ Workflow correlation creates **linkability** - the ability to connect multiple r
 3. **Selective omission**: An orchestrator selectively omits steps to hide failures.
    - Mitigation: Require Merkle commitment for audited workflows; verify completeness.
 
+4. **Linkability across receipts**: An observer with access to multiple receipts can use shared `workflow_id` values to link steps that belong to the same business process, even if the observer was only intended to see individual steps.
+   - Mitigation: Use per-audience workflow IDs when disclosing receipts to different parties. Generate a derived (opaque) workflow ID for each disclosure context rather than sharing the canonical internal ID.
+
+5. **Cross-tenant leakage via shared infrastructure**: In multi-tenant deployments where a shared orchestrator issues receipts for multiple tenants, workflow IDs or step IDs may inadvertently reveal cross-tenant relationships (e.g., shared vendor steps, common tool invocations).
+   - Mitigation: Namespace workflow IDs by tenant (e.g., include a tenant-scoped prefix or use per-tenant ID generation seeds). Ensure that receipts disclosed to one tenant never contain workflow or step IDs from another tenant's namespace.
+   - Mitigation: Audit receipt issuance pipelines for cross-tenant ID leakage, particularly in fan-in steps where multiple upstream tenants converge.
+
 **Recommended practices:**
 
 - Generate workflow IDs with per-tenant entropy
@@ -974,6 +981,39 @@ cross-referencing.
 | `peac.framework`   | `WorkflowContext.framework`   | Set if present     |
 | `peac.receipt_ref` | Receipt JTI or JWS hash       | Set after issuance |
 
+**Cardinality guidance:**
+
+Span attributes with unbounded cardinality (unique values per request) can
+cause metric explosion in backends that index attribute values. PEAC
+workflow attributes have the following cardinality characteristics:
+
+| Attribute          | Cardinality | Index Guidance                    |
+| ------------------ | ----------- | --------------------------------- |
+| `peac.workflow_id` | High        | Use for trace search, not metrics |
+| `peac.step_id`     | High        | Use for trace search, not metrics |
+| `peac.framework`   | Low         | Safe for metric labels/dimensions |
+| `peac.receipt_ref` | High        | Use for trace search, not metrics |
+
+Backends SHOULD avoid creating metric dimensions from high-cardinality
+attributes. Use `peac.framework` for dashboards and alerting; use
+`peac.workflow_id` and `peac.step_id` only for trace-level queries.
+
+**Sampling considerations:**
+
+PEAC receipts are **100% sampled by design** -- every receipt is a durable
+evidence artifact. OpenTelemetry spans, by contrast, are often subject to
+head-based or tail-based sampling.
+
+When correlating the two systems:
+
+- Do NOT rely on OTel spans existing for every PEAC receipt (sampling may
+  have dropped the corresponding span).
+- PEAC `workflow_id` and `step_id` are always available in the receipt,
+  regardless of OTel sampling decisions.
+- For audit-critical paths, consider setting OTel sampling to `AlwaysOn`
+  for spans that carry `peac.workflow_id` to ensure both systems record
+  the same transactions.
+
 ### B.2 Event Bus Mapping
 
 Enterprise event buses (Kafka, CloudEvents, AWS EventBridge, etc.) can carry
@@ -1006,6 +1046,31 @@ PEAC workflow events for downstream consumers (billing, compliance, dashboards).
 
 These event types are informational suggestions. Implementations MAY use any
 event naming convention consistent with their event bus.
+
+**Kafka topic conventions:**
+
+For Apache Kafka deployments, the recommended topic naming pattern is:
+
+```text
+peac.workflow.events          # All workflow events (single-topic)
+peac.workflow.step-completed  # Per-event-type topics (multi-topic)
+peac.workflow.completed
+peac.workflow.failed
+```
+
+Partitioning guidance:
+
+- Use `workflow_id` as the partition key to ensure all events for a single
+  workflow land on the same partition (preserves per-workflow ordering).
+- Do NOT use `step_id` as the partition key -- this scatters related events
+  across partitions and breaks per-workflow consumption ordering.
+- For high-throughput deployments, use a composite key
+  (`tenant_id + workflow_id`) to balance load across partitions while
+  maintaining per-tenant ordering.
+
+Consumer group naming should follow your organization's conventions.
+A suggested pattern: `peac-workflow-<consumer-purpose>` (e.g.,
+`peac-workflow-billing`, `peac-workflow-compliance`).
 
 ### B.3 Receipt Correlation in Logs
 

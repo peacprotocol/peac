@@ -273,6 +273,140 @@ describe('DAG constraints - property tests', () => {
 });
 
 // -----------------------------------------------------------------------------
+// Property Tests: Boundary Coverage (Limits)
+// -----------------------------------------------------------------------------
+
+describe('boundary coverage - property tests', () => {
+  it('accepts exactly maxParentSteps (16) parents', () => {
+    fc.assert(
+      fc.property(
+        validWorkflowId,
+        validStepId,
+        fc.array(validStepId, { minLength: 16, maxLength: 16 }),
+        (wfId, stepId, parentIds) => {
+          // Ensure all parents are unique and none equal stepId
+          const uniqueParents = [...new Set(parentIds.filter((p) => p !== stepId))];
+          // Only test when we have exactly 16 unique non-self parents
+          if (uniqueParents.length !== WORKFLOW_LIMITS.maxParentSteps) return true;
+
+          const result = WorkflowContextSchema.safeParse({
+            workflow_id: wfId,
+            step_id: stepId,
+            parent_step_ids: uniqueParents,
+          });
+
+          return result.success;
+        }
+      ),
+      { numRuns: 200 }
+    );
+  });
+
+  it('rejects maxParentSteps + 1 (17) parents', () => {
+    fc.assert(
+      fc.property(
+        validWorkflowId,
+        validStepId,
+        fc.array(validStepId, { minLength: 17, maxLength: 17 }),
+        (wfId, stepId, parentIds) => {
+          // Ensure all parents are unique and none equal stepId
+          const uniqueParents = [...new Set(parentIds.filter((p) => p !== stepId))];
+          // Only test when we have exactly 17 unique non-self parents
+          if (uniqueParents.length !== WORKFLOW_LIMITS.maxParentSteps + 1) return true;
+
+          const result = WorkflowContextSchema.safeParse({
+            workflow_id: wfId,
+            step_id: stepId,
+            parent_step_ids: uniqueParents,
+          });
+
+          return !result.success;
+        }
+      ),
+      { numRuns: 200 }
+    );
+  });
+
+  it('accepts framework at exactly maxFrameworkLength (64) characters', () => {
+    // Generate exactly 64-char framework IDs: 1 leading [a-z] + 63 trailing [a-z0-9_-]
+    const exactMaxFramework = fc.stringMatching(/^[a-z][a-z0-9_-]{63}$/);
+
+    fc.assert(
+      fc.property(validWorkflowId, validStepId, exactMaxFramework, (wfId, stepId, framework) => {
+        if (framework.length !== WORKFLOW_LIMITS.maxFrameworkLength) return true;
+
+        const result = WorkflowContextSchema.safeParse({
+          workflow_id: wfId,
+          step_id: stepId,
+          parent_step_ids: [],
+          framework,
+        });
+
+        return result.success;
+      }),
+      { numRuns: 200 }
+    );
+  });
+
+  it('rejects framework at maxFrameworkLength + 1 (65) characters', () => {
+    // Generate exactly 65-char framework IDs
+    const overMaxFramework = fc.stringMatching(/^[a-z][a-z0-9_-]{64}$/);
+
+    fc.assert(
+      fc.property(validWorkflowId, validStepId, overMaxFramework, (wfId, stepId, framework) => {
+        if (framework.length !== WORKFLOW_LIMITS.maxFrameworkLength + 1) return true;
+
+        const result = WorkflowContextSchema.safeParse({
+          workflow_id: wfId,
+          step_id: stepId,
+          parent_step_ids: [],
+          framework,
+        });
+
+        return !result.success;
+      }),
+      { numRuns: 200 }
+    );
+  });
+
+  it('accepts tool_name at exactly maxToolNameLength (256) characters', () => {
+    fc.assert(
+      fc.property(validWorkflowId, validStepId, (wfId, stepId) => {
+        const toolName = 'a'.repeat(WORKFLOW_LIMITS.maxToolNameLength);
+
+        const result = WorkflowContextSchema.safeParse({
+          workflow_id: wfId,
+          step_id: stepId,
+          parent_step_ids: [],
+          tool_name: toolName,
+        });
+
+        return result.success;
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  it('rejects tool_name at maxToolNameLength + 1 (257) characters', () => {
+    fc.assert(
+      fc.property(validWorkflowId, validStepId, (wfId, stepId) => {
+        const toolName = 'a'.repeat(WORKFLOW_LIMITS.maxToolNameLength + 1);
+
+        const result = WorkflowContextSchema.safeParse({
+          workflow_id: wfId,
+          step_id: stepId,
+          parent_step_ids: [],
+          tool_name: toolName,
+        });
+
+        return !result.success;
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// -----------------------------------------------------------------------------
 // Property Tests: WorkflowContext Schema Round-Trip
 // -----------------------------------------------------------------------------
 

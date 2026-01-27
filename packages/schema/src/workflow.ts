@@ -327,6 +327,142 @@ export type WorkflowSummaryEvidence = z.infer<typeof WorkflowSummaryEvidenceSche
 export type WorkflowSummaryAttestation = z.infer<typeof WorkflowSummaryAttestationSchema>;
 
 // ============================================================================
+// Ordered Validation (Conformance)
+// ============================================================================
+
+/**
+ * Result of ordered workflow context validation.
+ *
+ * Returns a canonical error code per Section 6.5.1 validation ordering
+ * instead of Zod error messages, enabling language-neutral conformance testing.
+ */
+export type WorkflowValidationResult =
+  | { valid: true; value: WorkflowContext }
+  | { valid: false; error_code: string; error: string };
+
+/**
+ * Validate a WorkflowContext with explicit evaluation ordering.
+ *
+ * Implements Section 6.5.1 of WORKFLOW-CORRELATION.md:
+ * 1. Required field format (rules 4, 5)
+ * 2. Structural constraints (rule 3)
+ * 3. Optional field format (rules 6, 7)
+ * 4. Semantic DAG checks (rules 1, 2)
+ *
+ * This function does NOT depend on Zod's internal validation ordering.
+ * Cross-language implementations MUST produce identical error_code values
+ * for the same invalid input.
+ *
+ * @param input - Raw input to validate
+ * @returns Validation result with canonical error code on failure
+ */
+export function validateWorkflowContextOrdered(input: unknown): WorkflowValidationResult {
+  if (typeof input !== 'object' || input === null) {
+    return {
+      valid: false,
+      error_code: 'E_WORKFLOW_CONTEXT_INVALID',
+      error: 'Input must be an object',
+    };
+  }
+
+  const obj = input as Record<string, unknown>;
+
+  // Step 1: Required field format (rules 4, 5)
+  if (
+    typeof obj.workflow_id !== 'string' ||
+    !WORKFLOW_ID_PATTERN.test(obj.workflow_id) ||
+    obj.workflow_id.length > WORKFLOW_LIMITS.maxWorkflowIdLength
+  ) {
+    return {
+      valid: false,
+      error_code: 'E_WORKFLOW_ID_INVALID',
+      error: 'Invalid workflow ID format',
+    };
+  }
+
+  if (
+    typeof obj.step_id !== 'string' ||
+    !STEP_ID_PATTERN.test(obj.step_id) ||
+    obj.step_id.length > WORKFLOW_LIMITS.maxStepIdLength
+  ) {
+    return {
+      valid: false,
+      error_code: 'E_WORKFLOW_STEP_ID_INVALID',
+      error: 'Invalid step ID format',
+    };
+  }
+
+  // Step 2: Structural constraints (rule 3)
+  const parentStepIds = obj.parent_step_ids;
+  if (Array.isArray(parentStepIds) && parentStepIds.length > WORKFLOW_LIMITS.maxParentSteps) {
+    return {
+      valid: false,
+      error_code: 'E_WORKFLOW_LIMIT_EXCEEDED',
+      error: 'Exceeds maximum parent steps',
+    };
+  }
+
+  // Step 3: Optional field format (rules 6, 7)
+  if (obj.framework !== undefined) {
+    if (
+      typeof obj.framework !== 'string' ||
+      !FRAMEWORK_ID_PATTERN.test(obj.framework) ||
+      obj.framework.length > WORKFLOW_LIMITS.maxFrameworkLength
+    ) {
+      return {
+        valid: false,
+        error_code: 'E_WORKFLOW_CONTEXT_INVALID',
+        error: 'Invalid framework identifier grammar',
+      };
+    }
+  }
+
+  if (obj.prev_receipt_hash !== undefined) {
+    if (
+      typeof obj.prev_receipt_hash !== 'string' ||
+      !/^sha256:[a-f0-9]{64}$/.test(obj.prev_receipt_hash)
+    ) {
+      return {
+        valid: false,
+        error_code: 'E_WORKFLOW_CONTEXT_INVALID',
+        error: 'Invalid hash format',
+      };
+    }
+  }
+
+  // Step 4: Semantic DAG checks (rules 1, 2)
+  if (Array.isArray(parentStepIds)) {
+    if (parentStepIds.includes(obj.step_id)) {
+      return {
+        valid: false,
+        error_code: 'E_WORKFLOW_DAG_INVALID',
+        error: 'Self-parent cycle detected',
+      };
+    }
+    const uniqueParents = new Set(parentStepIds);
+    if (uniqueParents.size !== parentStepIds.length) {
+      return {
+        valid: false,
+        error_code: 'E_WORKFLOW_DAG_INVALID',
+        error: 'Duplicate parent step IDs',
+      };
+    }
+  }
+
+  // Full schema validation for remaining structural rules (types, strict mode, etc.)
+  const result = WorkflowContextSchema.safeParse(input);
+  if (!result.success) {
+    return {
+      valid: false,
+      error_code: 'E_WORKFLOW_CONTEXT_INVALID',
+      error: result.error.issues[0]?.message || 'Schema validation failed',
+    };
+  }
+
+  return { valid: true, value: result.data };
+}
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 

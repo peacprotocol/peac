@@ -1,6 +1,8 @@
 {
+  "$schema": "https://peacprotocol.org/schemas/kernel/error-categories.schema.json",
   "$comment": "AUTO-GENERATED from specs/kernel/errors.json - DO NOT EDIT MANUALLY",
   "version": "0.9.30",
+  "source_file": "specs/kernel/errors.json",
   "categories": [
     "attribution",
     "bundle",

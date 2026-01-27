@@ -90,7 +90,9 @@ function main() {
 
   // Derive unique categories from spec data (single source of truth: errors.json)
   const derivedCategories = new Set(spec.errors.map((e) => e.category));
-  const sortedDerivedCategories = Array.from(derivedCategories).sort();
+  const sortedDerivedCategories = Array.from(derivedCategories).sort((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0
+  );
   console.log(`Derived categories: ${sortedDerivedCategories.join(', ')}`);
 
   // Generate error-categories.generated.ts (eliminates drift by generating from JSON)
@@ -106,7 +108,7 @@ function main() {
 
   // Sort errors by code within each category for deterministic output
   for (const [category, errors] of byCategory) {
-    errors.sort((a, b) => a.code.localeCompare(b.code));
+    errors.sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
     byCategory.set(category, errors);
   }
 
@@ -131,7 +133,7 @@ function main() {
   lines.push(' */');
   lines.push('export const ERROR_CODES = {');
 
-  const categories = Array.from(byCategory.keys()).sort();
+  const categories = Array.from(byCategory.keys()).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   let first = true;
   for (const category of categories) {
     const errors = byCategory.get(category)!;
@@ -275,8 +277,10 @@ function generateCategoriesFile(categories: string[], specVersion: string) {
 
   // Generate language-neutral JSON artifact for non-TS SDKs
   const jsonArtifact = {
+    $schema: 'https://peacprotocol.org/schemas/kernel/error-categories.schema.json',
     $comment: 'AUTO-GENERATED from specs/kernel/errors.json - DO NOT EDIT MANUALLY',
     version: specVersion,
+    source_file: 'specs/kernel/errors.json',
     categories,
   };
   console.log(`Writing ${CATEGORIES_JSON_PATH}...`);

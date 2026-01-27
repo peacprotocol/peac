@@ -312,7 +312,29 @@ Entries may be deprecated but not removed in minor versions:
 - If `deprecated_by` is present, implementations SHOULD suggest the replacement in warnings
 - Deprecated entries remain valid identifiers until the `sunset_version` is reached
 
-### 11.4 Governance Flow
+### 11.4 Removal Semantics
+
+Removal of a registry entry is a **major-version-only** operation with explicit constraints:
+
+1. An entry may only be removed if `sunset_version` has been set AND the current major version is >= the `sunset_version` value.
+2. If no `sunset_version` is set, the entry is considered **valid indefinitely** and MUST NOT be removed. Implementations should treat entries without `sunset_version` as permanent.
+3. Removal requires a major version bump to the registry version.
+4. Removed entries MUST be documented in the registry changelog with: the removal version, the original entry ID, and a reference to the replacement (if any).
+5. Implementations encountering a removed entry in existing data (e.g., stored receipts referencing a removed rail ID) MUST NOT reject the data. Historical references remain valid for verification purposes.
+
+**"Valid forever" semantics:**
+
+Entries without a `sunset_version` field are implicitly permanent. To explicitly mark an entry as permanent, set `"sunset_version": "never"`. Both the absence of `sunset_version` and the value `"never"` carry the same semantics: the entry will not be removed in any future version.
+
+**Removal checklist:**
+
+- [ ] `sunset_version` is set and current major version >= that value
+- [ ] Replacement entry exists (or explicit "no replacement" rationale documented)
+- [ ] Migration guidance published in changelog
+- [ ] Major version bump applied to registry version
+- [ ] At least one minor version has passed since `deprecated_since` (grace period)
+
+### 11.5 Governance Flow
 
 ```text
 1. Proposer opens GitHub issue with:
