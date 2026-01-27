@@ -202,16 +202,15 @@ PEAC is transport-agnostic. The most common binding is **HTTP/REST**, where rece
 
 PEAC records can be carried through other interaction standards via mappings:
 
-| Standard / Rail | PEAC role                                | Status                               |
-| --------------- | ---------------------------------------- | ------------------------------------ |
-| MCP             | Records in tool response metadata        | Implemented (`@peac/mappings-mcp`)   |
-| ACP             | Agentic Commerce Protocol integration    | Implemented (`@peac/mappings-acp`)   |
-| A2A             | Agent-to-Agent exchange attachments      | Specified                            |
-| AP2             | Evidence for payment authorization flows | Specified                            |
-| UCP             | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`)   |
-| x402            | Settlement evidence in receipt claims    | Implemented (`@peac/rails-x402`)     |
-| Stripe          | Payment intent evidence                  | Implemented (`@peac/rails-stripe`)   |
-| Razorpay        | UPI/card/netbanking evidence             | Implemented (`@peac/rails-razorpay`) |
+| Standard / Rail  | PEAC role                                | Status                             |
+| ---------------- | ---------------------------------------- | ---------------------------------- |
+| MCP              | Records in tool response metadata        | Implemented (`@peac/mappings-mcp`) |
+| ACP              | Agentic Commerce Protocol integration    | Implemented (`@peac/mappings-acp`) |
+| A2A              | Agent-to-Agent exchange attachments      | Specified                          |
+| AP2              | Evidence for payment authorization flows | Specified                          |
+| UCP              | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`) |
+| x402             | Settlement evidence in receipt claims    | Implemented (`@peac/rails-x402`)   |
+| Payment gateways | Payment intent evidence                  | Implemented (`@peac/rails-stripe`) |
 
 PEAC does not orchestrate these protocols. It provides portable proof of what terms applied and what happened.
 
