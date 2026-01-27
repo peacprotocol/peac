@@ -4,13 +4,15 @@ set -euo pipefail
 export LC_ALL=C
 bad=0
 
-# Detect PCRE support for word-boundary (\b) patterns
-if git grep -qP '.' -- README.md 2>/dev/null; then
-  _PCRE=1
-else
-  _PCRE=0
-  echo "NOTE: git lacks PCRE (-P); word-boundary guards use ERE fallback"
-fi
+# Detect PCRE support for git grep (-P).
+# (?!) is a zero-width negative lookahead that always fails to match.
+# Exit 1 = "no matches" (PCRE works), exit 2+ = error (no PCRE).
+_pcre_rc=0
+git grep -qP '(?!)' -- README.md 2>/dev/null || _pcre_rc=$?
+case $_pcre_rc in
+  1) _PCRE=1 ;;
+  *) _PCRE=0; echo "NOTE: git lacks PCRE (-P); word-boundary guards use ERE fallback" ;;
+esac
 
 # git grep with word-boundary support (PCRE primary, ERE fallback).
 # Usage: gg_wb <base_flags> <pcre_pattern> <ere_pattern> [-- pathspecs...]
@@ -45,7 +47,7 @@ git grep -nE "peac-version|application/peac-receipt\+jws" -- '**/*.{md,ts,js,jso
 echo "== forbid peac.dev domain =="
 # Fail if any peac.dev reference appears outside allowed migration docs
 DOCS_MIGRATION_ALLOW='^(docs/migration|CHANGELOG\.md)'
-if gg_wb n 'https?://([a-z0-9.-]*\.)?peac\.dev\b' 'https?://([a-z0-9.-]*\.)?peac\.dev([^a-zA-Z0-9]|$)' -- ':!node_modules' ':!archive/**' \
+if gg_wb n 'https?://([a-z0-9.-]*\.)?peac\.dev\b' 'https?://([a-z0-9.-]*\.)?peac\.dev([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$DOCS_MIGRATION_ALLOW" | grep .; then
   bad=1
 else
@@ -54,7 +56,7 @@ fi
 
 # Require https for peacprotocol.org
 echo "== peacprotocol.org must be https =="
-if gg_wb n 'http://peacprotocol\.org\b' 'http://peacprotocol\.org([^a-zA-Z0-9]|$)' -- ':!node_modules' ':!archive/**' | grep .; then
+if gg_wb n 'http://peacprotocol\.org\b' 'http://peacprotocol\.org([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep .; then
   bad=1
 else
   echo "OK"
@@ -64,7 +66,7 @@ echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
 # Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), Attribution (v0.9.26+), DisputeAttestation (v0.9.27+), DisputeBundle (v0.9.30+), UCP evidence (v0.9.31+), and WorkflowSummaryAttestation (v0.10.2+)
 LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/(guard\.sh|generate-bundle-vectors\.ts)|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors(\.generated)?\.ts|schema/(src/(evidence|validators|agent-identity|attribution|dispute|workflow)\.ts|__tests__/(agent-identity|dispute|workflow)\.test\.ts)|attribution/|audit/|cli/src/commands/bundle\.ts|mappings/ucp/)|examples/(agent-identity|ucp-webhook-express|workflow-correlation)/|sdks/(go|python)/)'
-if gg_wb nI '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' '(^|[^a-zA-Z0-9_])issued_at([^a-zA-Z0-9_]|$)|payment\.scheme|peacrece?i?e?pt(s)?([^a-zA-Z0-9]|$)' -- ':!node_modules' ':!archive/**' \
+if gg_wb nI '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' '(^|[^[:alnum:]_])issued_at([^[:alnum:]_]|$)|payment\.scheme|peacrece?i?e?pt(s)?([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
 else
@@ -135,7 +137,7 @@ echo "== forbid npm invocations =="
 # NPM_PUBLISH docs (policy), edge guides (CLI install), pack scripts (consumer-reality smoke tests),
 # net-node test-pack-install (tests published package in clean npm project)
 NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md|CHANGELOG\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|scripts/pack-.*\.sh|packages/net/node/scripts/test-pack-install\.mjs)'
-if gg_wb n '\bnpm (run|ci|install|pack|publish)\b' '(^|[^a-zA-Z0-9_])npm (run|ci|install|pack|publish)([^a-zA-Z0-9_]|$)' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
+if gg_wb n '\bnpm (run|ci|install|pack|publish)\b' '(^|[^[:alnum:]_])npm (run|ci|install|pack|publish)([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else
   echo "OK"
