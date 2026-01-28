@@ -1,0 +1,46 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-accept-term-mismatch",
+  "description": "acceptIndex points to entry that does not match signed payload - MUST fail",
+  "category": "invalid",
+  "threat_model": "This is the core security property. acceptIndex is UNSIGNED and can be tampered. Term-matching prevents this attack.",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      },
+      {
+        "network": "eip155:8453",
+        "asset": "ETH",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "50000000000000"
+      }
+    ],
+    "acceptIndex": 1
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "accept_term_mismatch",
+        "field": "acceptIndex"
+      }
+    ]
+  },
+  "notes": "acceptIndex 1 points to ETH entry, but offer is for USDC. Term-matching detects the mismatch. This is the attack that unsigned acceptIndex enables - PEAC's term-matching prevents it."
+}

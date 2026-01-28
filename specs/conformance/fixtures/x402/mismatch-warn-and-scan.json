@@ -1,0 +1,45 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-mismatch-warn-and-scan",
+  "description": "With warn_and_scan policy, acceptIndex mismatch logs warning but continues with scan",
+  "category": "edge-cases",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      },
+      {
+        "network": "eip155:8453",
+        "asset": "ETH",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "50000000000000"
+      }
+    ],
+    "acceptIndex": 1
+  },
+  "config": {
+    "mismatchPolicy": "warn_and_scan"
+  },
+  "expected": {
+    "valid": true,
+    "matchedIndex": 0,
+    "usedHint": false,
+    "errors": []
+  },
+  "notes": "acceptIndex 1 points to ETH entry but offer is USDC. With warn_and_scan policy, we warn about mismatch but continue with scan. Scan finds USDC entry at index 0. mismatchDetected should be set in hints."
+}

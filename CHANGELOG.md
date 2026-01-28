@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.3] - 2026-01-29
+
+### x402 Adapter v0.2 Polish
+
+Production hardening for the x402 offer/receipt adapter with deterministic verification output, byte-safe DoS guards, and comprehensive conformance vectors.
+
+### Added
+
+- **Profile rename**: `peac-x402-offer-receipt/0.1` (from `peac-x402/0.1`)
+- **4 new error codes** in `specs/kernel/errors.json`:
+  - `receipt_version_unsupported` - Receipt has unsupported version
+  - `accept_too_many_entries` - DoS protection (>128 entries or >256 KiB)
+  - `amount_invalid` - Non-integer, negative, or leading zeros
+  - `network_invalid` - Not CAIP-2 compliant
+- **DoS guards with byte limits** (`@peac/adapter-x402`):
+  - `MAX_ACCEPT_ENTRIES = 128` (entry count limit)
+  - `MAX_TOTAL_ACCEPTS_BYTES = 262144` (256 KiB total limit)
+  - `MAX_FIELD_BYTES = 256` (per-field byte limit, UTF-8 aware)
+  - `MAX_ENTRY_BYTES = 2048` (per-entry total size including settlement)
+  - `MAX_AMOUNT_LENGTH = 78` (uint256 max digits)
+  - Per-entry size validation runs BEFORE aggregate JSON.stringify (no "stringify bomb" path)
+  - Uses `TextEncoder` for edge runtime portability (Cloudflare Workers, Deno, etc.)
+- **CAIP-2 split parser** - Reference segment now allows hyphens, 64 chars (e.g., `cosmos:cosmoshub-4`)
+- **termMatching first-class** (`OfferVerification.termMatching`):
+  - Always present with `method`, `hintProvided`, `hintMismatchDetected` (no optional booleans)
+  - Deterministic output for downstream consumers
+- **Conformance vectors**: 19 total (3 valid + 13 invalid + 3 edge-cases)
+  - New: `dos-too-many-accepts.json` with 129 entries
+  - New: `invalid-amount-negative.json`, `invalid-amount-decimal.json`, `invalid-amount-leading-zero.json`
+- **Error precedence tests** - verifyReceipt checks: structural -> version -> signature -> amount -> network
+- **Multibyte DoS tests** - UTF-8 string handling and settlement bomb protection tests
+
+### Changed
+
+- **verifyReceipt error precedence**: Version check now runs before amount/network validation
+- **Vendor neutrality**: `payTo` (x402) -> `payee` (neutral) at adapter boundary
+- **termMatching derivation**: `mismatchDetected` derived from `termMatching.hintMismatchDetected` in `toPeacRecord()`
+
+### Documentation
+
+- **docs/specs/X402-PROFILE.md** - Updated to v0.2 with DoS limits, CAIP-2 notes, error codes
+- **docs/adapters/README.md** - Added neutral field naming rationale (`payee` vs `payTo`)
+- **docs/adapters/x402.md** - Profile rename, mapping table updates
+
+### Migration Notes
+
+- `OfferVerification.termMatching` is now always present (was optional)
+- `termMatching.hintMismatchDetected` is now always boolean (was optional)
+- Per-field byte limits enforce UTF-8 byte length, not character count
+- Per-entry size limits bound `settlement` objects (max 2KB per entry)
+- CAIP-2 reference segment allows hyphens (was restricted to alphanumeric)
+- Uses `TextEncoder` for byte length (no Node.js `Buffer` dependency)
+
 ## [0.10.2] - 2026-01-27
 
 ### Workflow Correlation

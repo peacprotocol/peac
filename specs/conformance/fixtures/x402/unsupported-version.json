@@ -1,0 +1,39 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-unsupported-version",
+  "description": "Unsupported payload version must fail",
+  "category": "invalid",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "99",
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ],
+    "acceptIndex": 0
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "offer_version_unsupported",
+        "field": "payload.version"
+      }
+    ]
+  },
+  "notes": "Version 99 is not in supported versions list. Default supported: ['1']."
+}

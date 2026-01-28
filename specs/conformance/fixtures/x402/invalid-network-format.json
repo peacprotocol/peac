@@ -1,0 +1,39 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-invalid-network-format",
+  "description": "Network not matching CAIP-2 format must fail network validation",
+  "category": "invalid",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "ethereum-mainnet",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "ethereum-mainnet",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ],
+    "acceptIndex": 0
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "network_invalid",
+        "field": "payload.network"
+      }
+    ]
+  },
+  "notes": "Network must be CAIP-2 format: namespace:reference (e.g., eip155:8453). 'ethereum-mainnet' is invalid."
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-valid-with-hint",
+  "description": "Valid offer verification using acceptIndex hint",
+  "category": "valid",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ],
+    "acceptIndex": 0
+  },
+  "expected": {
+    "valid": true,
+    "matchedIndex": 0,
+    "usedHint": true,
+    "errors": []
+  },
+  "notes": "acceptIndex 0 points to matching accept entry. Term-match succeeds."
+}
