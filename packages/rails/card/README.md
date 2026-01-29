@@ -58,4 +58,6 @@ Apache-2.0
 
 ---
 
-Part of [PEAC Protocol](https://www.peacprotocol.org) - Policy, Economics, Attribution, Compliance for AI commerce.
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)
