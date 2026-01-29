@@ -170,6 +170,12 @@ jobs:
           echo "Installing npm@${{ env.NPM_VERSION }} for Trusted Publishing support..."
           npm install -g npm@${{ env.NPM_VERSION }}
 
+          # Add global npm bin to PATH for subsequent steps
+          NPM_PREFIX=$(npm config get prefix)
+          echo "$NPM_PREFIX/bin" >> $GITHUB_PATH
+          # Also update current step's PATH
+          export PATH="$NPM_PREFIX/bin:$PATH"
+
           echo "Toolchain versions:"
           echo "  Node: $(node --version)"
           echo "  npm: $(npm --version)"
@@ -285,6 +291,10 @@ jobs:
       - name: Upgrade npm for consistency
         run: |
           npm install -g npm@${{ env.NPM_VERSION }}
+          # Add global npm bin to PATH for subsequent steps
+          NPM_PREFIX=$(npm config get prefix)
+          echo "$NPM_PREFIX/bin" >> $GITHUB_PATH
+          export PATH="$NPM_PREFIX/bin:$PATH"
           echo "npm version: $(npm --version)"
 
       - name: Install dependencies
@@ -359,6 +369,11 @@ jobs:
       - name: Upgrade npm for Trusted Publishing
         run: |
           npm install -g npm@${{ env.NPM_VERSION }}
+          # Add global npm bin to PATH for subsequent steps
+          NPM_PREFIX=$(npm config get prefix)
+          echo "$NPM_PREFIX/bin" >> $GITHUB_PATH
+          # Verify in current step
+          export PATH="$NPM_PREFIX/bin:$PATH"
           echo "npm version: $(npm --version)"
 
       - name: Assert toolchain versions
