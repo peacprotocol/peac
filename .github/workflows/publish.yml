@@ -396,12 +396,12 @@ jobs:
           # Run publish script with:
           #   --skip-existing: Idempotent (safe reruns)
           #   --provenance: Generate provenance attestation
-          #   --strict: Fail if manifest mismatch
+          # Note: --strict removed to allow incremental OIDC rollout
+          # (only packages in manifest with Trusted Publishing configured are published)
           node scripts/publish-public.mjs \
             --tag=${{ env.NPM_TAG }} \
             --skip-existing \
-            --provenance \
-            --strict
+            --provenance
 
       - name: Verify published packages
         run: |
