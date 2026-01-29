@@ -75,8 +75,9 @@ jobs:
       tag_ref: ${{ steps.extract.outputs.tag_ref }}
       package_count: ${{ steps.count.outputs.count }}
     steps:
+      # SHA-pinned for supply chain security (v4.x)
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0 # Full history for tag validation
           persist-credentials: false # Security hardening
@@ -151,10 +152,10 @@ jobs:
           echo "Dry run: $IS_DRY_RUN"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1 # v4.2.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: 'pnpm'
@@ -258,17 +259,18 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      # SHA-pinned for supply chain security
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ needs.preflight.outputs.tag_ref }}
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1 # v4.2.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: 'pnpm'
@@ -276,7 +278,9 @@ jobs:
 
       # Match npm version from preflight for consistent behavior
       - name: Upgrade npm for consistency
-        run: npm install -g npm@${{ env.NPM_VERSION }}
+        run: |
+          npm install -g npm@${{ env.NPM_VERSION }}
+          echo "npm version: $(npm --version)"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -322,17 +326,18 @@ jobs:
     timeout-minutes: 30
     environment: npm-production
     steps:
+      # SHA-pinned for supply chain security
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ needs.preflight.outputs.tag_ref }}
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1 # v4.2.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: 'pnpm'
@@ -343,6 +348,22 @@ jobs:
         run: |
           npm install -g npm@${{ env.NPM_VERSION }}
           echo "npm version: $(npm --version)"
+
+      - name: Assert toolchain versions
+        run: |
+          echo "Toolchain versions:"
+          echo "  Node: $(node --version)"
+          echo "  npm: $(npm --version)"
+          echo "  pnpm: $(pnpm --version)"
+
+          # Assert npm meets Trusted Publishing requirement
+          NPM_VER=$(npm --version)
+          REQUIRED="${{ env.NPM_VERSION }}"
+          if [ "$(printf '%s\n' "$REQUIRED" "$NPM_VER" | sort -V | head -n1)" != "$REQUIRED" ]; then
+            echo "ERROR: npm $NPM_VER < $REQUIRED (required for Trusted Publishing)"
+            exit 1
+          fi
+          echo "OK: npm $NPM_VER meets Trusted Publishing requirement"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
