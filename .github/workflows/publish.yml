@@ -320,6 +320,10 @@ jobs:
 
   # ==========================================================================
   # Production Publish - requires environment approval, uses OIDC
+  #
+  # SECURITY: This job requires manual approval via the 'npm-production' environment.
+  # Configure required reviewers in GitHub repo settings > Environments.
+  # This prevents a merged PR from immediately publishing without human review.
   # ==========================================================================
   publish_prod:
     name: Publish (Production)
@@ -403,34 +407,47 @@ jobs:
         run: |
           VERSION="${{ needs.preflight.outputs.version }}"
 
-          echo "Verifying published packages..."
+          echo "=== POST-PUBLISH VERIFICATION ==="
+          echo ""
 
-          # Check key packages
-          for PKG in kernel schema crypto protocol; do
-            echo "Checking @peac/$PKG@$VERSION..."
+          # Check key packages (Day 1 set)
+          echo "1. Checking package availability on npm..."
+          VERIFY_PKGS="kernel schema crypto telemetry protocol"
+          for PKG in $VERIFY_PKGS; do
+            echo "   @peac/$PKG@$VERSION..."
             npm view "@peac/$PKG@$VERSION" version > /dev/null 2>&1 || {
-              echo "ERROR: @peac/$PKG@$VERSION not found on npm"
+              echo "   ERROR: @peac/$PKG@$VERSION not found on npm"
               exit 1
             }
+            echo "   OK"
           done
 
-          # Verify workspace:* resolution
+          # Verify workspace:* resolution (critical correctness check)
           echo ""
-          echo "Verifying workspace:* resolution..."
+          echo "2. Verifying workspace:* dependencies are resolved..."
           DEPS=$(npm view "@peac/protocol@$VERSION" dependencies --json 2>/dev/null || echo "{}")
           if echo "$DEPS" | grep -q "workspace:"; then
-            echo "ERROR: workspace:* dependencies not resolved!"
+            echo "   ERROR: workspace:* dependencies not resolved!"
+            echo "   This means pnpm publish was used incorrectly."
             echo "$DEPS"
             exit 1
           fi
+          echo "   OK: No unresolved workspace:* dependencies"
 
-          # Verify provenance
+          # Verify provenance attestation
           echo ""
-          echo "Verifying provenance attestation..."
-          npm audit signatures @peac/protocol@$VERSION 2>/dev/null || echo "Provenance check skipped (may take time to propagate)"
+          echo "3. Verifying provenance attestation..."
+          echo "   Note: Provenance may take a few minutes to propagate after publish."
+          if npm audit signatures @peac/protocol 2>&1 | grep -q "verified"; then
+            echo "   OK: Provenance signatures verified"
+          else
+            echo "   INFO: Provenance check inconclusive (may still be propagating)"
+            echo "   Run 'npm audit signatures @peac/protocol' manually later to confirm"
+          fi
 
           echo ""
-          echo "OK: All packages published successfully"
+          echo "=== VERIFICATION COMPLETE ==="
+          echo "All critical checks passed."
 
       - name: Summary
         run: |

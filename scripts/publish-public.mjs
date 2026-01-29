@@ -508,6 +508,21 @@ function main() {
     process.exit(1);
   }
 
+  // No-op guard: if all packages were skipped (already exist), warn or error
+  // This prevents silently thinking a release happened when nothing changed
+  if (!DRY_RUN && succeeded.length === 0 && skippedExisting.length > 0) {
+    console.log('\nWARNING: All packages were already published (nothing new)');
+    if (STRICT) {
+      console.log('ERROR: --strict mode requires at least one new package to publish');
+      console.log('       This prevents accidentally believing a release happened.');
+      console.log('');
+      console.log('If this is intentional (re-running after partial failure):');
+      console.log('  - Remove --strict flag, or');
+      console.log('  - Bump versions before re-running');
+      process.exit(1);
+    }
+  }
+
   if (DRY_RUN) {
     console.log('\nAll packages validated successfully!');
     console.log('Ready for production publish.');
