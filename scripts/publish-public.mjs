@@ -506,12 +506,40 @@ function main() {
     for (const f of failed) {
       console.log(`  - ${f.name}:`);
       // Indent the output for readability
-      const lines = f.output.split('\n');
-      for (const line of lines.slice(0, 20)) {
-        console.log(`      ${line}`);
+      const lines = f.output.split('\n').filter((l) => l.trim());
+
+      // Look for npm error lines specifically (most useful for debugging)
+      const errorLines = lines.filter(
+        (l) =>
+          l.includes('npm error') ||
+          l.includes('npm ERR!') ||
+          l.includes('E403') ||
+          l.includes('E401') ||
+          l.includes('ENEEDAUTH') ||
+          l.includes('Forbidden') ||
+          l.includes('Unauthorized')
+      );
+
+      if (errorLines.length > 0) {
+        console.log('      npm errors:');
+        for (const line of errorLines.slice(0, 10)) {
+          console.log(`        ${line}`);
+        }
       }
-      if (lines.length > 20) {
-        console.log(`      ... (${lines.length - 20} more lines)`);
+
+      // Show first few lines (command info)
+      console.log('      output (first 5 lines):');
+      for (const line of lines.slice(0, 5)) {
+        console.log(`        ${line}`);
+      }
+
+      // Show last few lines (where actual error usually is)
+      if (lines.length > 10) {
+        console.log(`      ... (${lines.length - 10} lines omitted)`);
+        console.log('      output (last 5 lines):');
+        for (const line of lines.slice(-5)) {
+          console.log(`        ${line}`);
+        }
       }
     }
     process.exit(1);
