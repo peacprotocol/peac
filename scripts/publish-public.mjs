@@ -344,8 +344,30 @@ function main() {
   }
   console.log('');
 
-  // Build lookup map
+  // Build lookup maps
   const packageMap = new Map(publicPackages.map((p) => [p.name, p]));
+  const allPackageMap = new Map(allPackages.map((p) => [p.name, p]));
+
+  // SAFETY GUARD: Validate manifest entries are real and public
+  // This prevents "nothing happened" confusion from typos or renamed packages
+  const manifestErrors = [];
+  for (const name of LAYER_ORDER) {
+    const pkg = allPackageMap.get(name);
+    if (!pkg) {
+      manifestErrors.push(`  - ${name}: not found in workspace`);
+    } else if (!isPublic(pkg.path)) {
+      manifestErrors.push(`  - ${name}: is private (private: true in package.json)`);
+    }
+  }
+  if (manifestErrors.length > 0) {
+    console.log('ERROR: Invalid packages in publish-manifest.json:');
+    for (const err of manifestErrors) {
+      console.log(err);
+    }
+    console.log('');
+    console.log('Fix: Remove or correct these entries in scripts/publish-manifest.json');
+    process.exit(1);
+  }
 
   // Sort public packages by layer order
   let sortedPublic = [];
@@ -380,25 +402,8 @@ function main() {
     }
   }
 
-  // Check for packages in LAYER_ORDER that don't exist
-  const missing = LAYER_ORDER.filter((name) => !packageMap.has(name));
-  if (missing.length > 0) {
-    if (STRICT) {
-      console.log('ERROR: Packages in manifest but not found (--strict mode):');
-      for (const name of missing) {
-        console.log(`  - ${name}`);
-      }
-      console.log('');
-      console.log('Remove these packages from scripts/publish-manifest.json or ensure they exist');
-      process.exit(1);
-    } else {
-      console.log('NOTE: Packages in manifest but not found (may be private or removed):');
-      for (const name of missing) {
-        console.log(`  - ${name}`);
-      }
-      console.log('');
-    }
-  }
+  // Note: The "packages in manifest but not found" check is now handled by
+  // the SAFETY GUARD above, which validates all manifest entries are real + public
 
   // Apply --only filter
   if (ONLY.length > 0) {
