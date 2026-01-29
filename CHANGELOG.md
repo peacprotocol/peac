@@ -40,7 +40,7 @@ Production hardening for the x402 offer/receipt adapter with deterministic verif
   - New: `dos-too-many-accepts.json` with 129 entries
   - New: `invalid-amount-negative.json`, `invalid-amount-decimal.json`, `invalid-amount-leading-zero.json`
 - **Error precedence tests** - verifyReceipt checks: structural -> version -> signature -> amount -> network
-- **Multibyte DoS tests** - UTF-8 string handling and settlement bomb protection tests
+- **Multibyte DoS tests** - UTF-8 string handling and settlement size validation tests
 - **Orphan fixture detection** - Conformance runner checks for fixture files not listed in manifest
 
 ### Changed

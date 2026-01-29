@@ -107,10 +107,10 @@ This design ensures PEAC remains the neutral evidence layer across multiple ecos
 
 Adapters use domain-neutral field names in the core interface, mapping vendor-specific terms at the boundary:
 
-| Neutral Field | Purpose                | Why Not `to`                                |
-| ------------- | ---------------------- | ------------------------------------------- |
-| `payee`       | Payment recipient      | `to` is overloaded (message routing, email) |
-| `payer`       | Payment sender         | Consistent with `payee`                     |
+| Neutral Field | Purpose           | Why Not `to`                                |
+| ------------- | ----------------- | ------------------------------------------- |
+| `payee`       | Payment recipient | `to` is overloaded (message routing, email) |
+| `payer`       | Payment sender    | Consistent with `payee`                     |
 
 **Rationale for `payee`:**
 

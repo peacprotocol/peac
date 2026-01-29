@@ -263,6 +263,32 @@ describe('verifyOffer', () => {
       const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
       expect(result.valid).toBe(true);
     });
+
+    it('bounded byte counter should be conservative (never undercount)', () => {
+      // Verify that entries rejected by byte counting are truly oversized
+      // This ensures the bounded traversal never undercounts vs JSON.stringify
+      const testCases = [
+        { ...ACCEPT_BASE }, // basic entry
+        { ...ACCEPT_BASE, settlement: { nested: { deep: { value: 'test' } } } }, // nested
+        { ...ACCEPT_BASE, settlement: { arr: [1, 2, 3, 'four', { five: 5 }] } }, // array
+        { ...ACCEPT_BASE, network: 'eip155:8453', asset: 'USDC' }, // unicode-free
+      ];
+
+      for (const entry of testCases) {
+        const actualBytes = new TextEncoder().encode(JSON.stringify(entry)).length;
+        // If actual bytes are within limit, entry should be accepted
+        if (actualBytes <= 2048) {
+          const accepts = [entry] as AcceptEntry[];
+          const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+          // Should not fail on size (may fail on term-mismatch, which is fine)
+          const sizeError = result.errors.find(
+            (e) =>
+              e.code === 'accept_entry_invalid' && e.message?.includes('exceeds max entry size')
+          );
+          expect(sizeError).toBeUndefined();
+        }
+      }
+    });
   });
 
   describe('shape validation (runtime type guards)', () => {

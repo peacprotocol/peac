@@ -25,6 +25,7 @@ x402 is a payment protocol built on HTTP 402. The Offer/Receipt extension provid
 **Reserved:** `peac-x402/0.1` (for baseline header flow)
 
 The distinction is critical:
+
 - **Offer/Receipt extension**: Signed payload artifacts with full verification
 - **Baseline flow**: HTTP headers only, no signed payloads
 
@@ -75,13 +76,13 @@ interface ReceiptPayload {
 
 Implementations MUST enforce these limits to prevent denial-of-service:
 
-| Limit                    | Value   | Rationale                               |
-| ------------------------ | ------- | --------------------------------------- |
-| `MAX_ACCEPT_ENTRIES`     | 128     | Bounds O(n) scan to O(128)              |
-| `MAX_TOTAL_ACCEPTS_BYTES`| 262144  | 256 KiB - prevents memory exhaustion    |
-| `MAX_ENTRY_BYTES`        | 2048    | 2 KiB per entry - bounds settlement     |
-| `MAX_FIELD_BYTES`        | 256     | Per-field limit (UTF-8 bytes)           |
-| `MAX_AMOUNT_LENGTH`      | 78      | uint256 max (Ethereum's largest)        |
+| Limit                     | Value  | Rationale                            |
+| ------------------------- | ------ | ------------------------------------ |
+| `MAX_ACCEPT_ENTRIES`      | 128    | Bounds O(n) scan to O(128)           |
+| `MAX_TOTAL_ACCEPTS_BYTES` | 262144 | 256 KiB - prevents memory exhaustion |
+| `MAX_ENTRY_BYTES`         | 2048   | 2 KiB per entry - bounds settlement  |
+| `MAX_FIELD_BYTES`         | 256    | Per-field limit (UTF-8 bytes)        |
+| `MAX_AMOUNT_LENGTH`       | 78     | uint256 max (Ethereum's largest)     |
 
 When limits are exceeded, return `accept_too_many_entries` or `accept_entry_invalid`.
 
@@ -100,6 +101,7 @@ Regex: ^(0|[1-9][0-9]*)$
 ```
 
 Invalid amounts:
+
 - Negative: `-100` (fails regex)
 - Decimal: `100.50` (fails regex)
 - Leading zeros: `0100` (fails regex)
@@ -202,24 +204,24 @@ The following fields **MUST** match exactly:
 
 ### 5.4 Error Taxonomy
 
-| Code                          | HTTP | Description                                    |
-| ----------------------------- | ---- | ---------------------------------------------- |
-| `offer_invalid_format`        | 400  | Offer structure is malformed                   |
-| `offer_expired`               | 400  | `validUntil` is in the past                    |
-| `offer_version_unsupported`   | 400  | Version not in supported list                  |
-| `offer_signature_invalid`     | 401  | Signature format is structurally invalid       |
-| `receipt_invalid_format`      | 400  | Receipt structure is malformed                 |
+| Code                          | HTTP | Description                                      |
+| ----------------------------- | ---- | ------------------------------------------------ |
+| `offer_invalid_format`        | 400  | Offer structure is malformed                     |
+| `offer_expired`               | 400  | `validUntil` is in the past                      |
+| `offer_version_unsupported`   | 400  | Version not in supported list                    |
+| `offer_signature_invalid`     | 401  | Signature format is structurally invalid         |
+| `receipt_invalid_format`      | 400  | Receipt structure is malformed                   |
 | `receipt_signature_invalid`   | 401  | Receipt signature format is structurally invalid |
-| `receipt_version_unsupported` | 400  | Receipt version not in supported list          |
-| `accept_index_out_of_range`   | 400  | acceptIndex exceeds accepts array bounds       |
-| `accept_no_match`             | 400  | No accept entry matches signed payload         |
-| `accept_ambiguous`            | 400  | Multiple entries match; index needed           |
-| `accept_term_mismatch`        | 400  | acceptIndex entry does not match payload       |
-| `accept_too_many_entries`     | 400  | Accepts array exceeds MAX_ACCEPT_ENTRIES       |
-| `payload_missing_field`       | 400  | Required payload field is missing              |
-| `payload_tampered`            | 401  | RESERVED: Cryptographic integrity check failed |
-| `amount_invalid`              | 400  | Amount is not a valid non-negative integer     |
-| `network_invalid`             | 400  | Network does not match CAIP-2 format           |
+| `receipt_version_unsupported` | 400  | Receipt version not in supported list            |
+| `accept_index_out_of_range`   | 400  | acceptIndex exceeds accepts array bounds         |
+| `accept_no_match`             | 400  | No accept entry matches signed payload           |
+| `accept_ambiguous`            | 400  | Multiple entries match; index needed             |
+| `accept_term_mismatch`        | 400  | acceptIndex entry does not match payload         |
+| `accept_too_many_entries`     | 400  | Accepts array exceeds MAX_ACCEPT_ENTRIES         |
+| `payload_missing_field`       | 400  | Required payload field is missing                |
+| `payload_tampered`            | 401  | RESERVED: Cryptographic integrity check failed   |
+| `amount_invalid`              | 400  | Amount is not a valid non-negative integer       |
+| `network_invalid`             | 400  | Network does not match CAIP-2 format             |
 
 **Note on `payload_tampered`:** This error code is reserved for implementations that perform cryptographic signature verification. The base adapter performs structural validation only.
 
@@ -365,8 +367,8 @@ hints: {
   acceptIndex: {
     value: number;
     untrusted: true;
-    mismatchDetected: true;  // Indicates hint was incorrect
-  };
+    mismatchDetected: true; // Indicates hint was incorrect
+  }
 }
 ```
 

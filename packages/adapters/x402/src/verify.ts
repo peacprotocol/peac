@@ -328,7 +328,12 @@ export function verifyOffer(
   // 1. Structural validation
   const structErrors = validateOfferStructure(offer);
   if (structErrors.length > 0) {
-    return { valid: false, usedHint: false, errors: structErrors, termMatching: preMatchTermMatching };
+    return {
+      valid: false,
+      usedHint: false,
+      errors: structErrors,
+      termMatching: preMatchTermMatching,
+    };
   }
 
   const payload = offer.payload;
@@ -343,8 +348,8 @@ export function verifyOffer(
   }
 
   // 2b. DoS guard: validate entry shape first (prevents crashes from malformed JSON)
-  // Then validate per-entry size (including settlement) BEFORE aggregate stringify
-  // This bounds the memory cost of subsequent operations and prevents "stringify bomb" attacks
+  // Then validate per-entry size (including settlement) BEFORE aggregate operations
+  // This bounds memory cost and rejects oversized nested objects early
   for (let i = 0; i < accepts.length; i++) {
     const entry = accepts[i];
 
@@ -825,7 +830,7 @@ function validateAmount(amount: string, kind: 'offer' | 'receipt'): Verification
  * Uses bounded traversal that stops early when limit is exceeded, avoiding
  * full JSON string allocation.
  *
- * This prevents "stringify bomb" attacks where small string fields hide large settlement objects.
+ * Rejects entries where small string fields hide oversized nested objects.
  */
 function validateAcceptEntrySize(entry: AcceptEntry, index: number): VerificationError | null {
   // Use bounded traversal instead of JSON.stringify to avoid allocating full string
