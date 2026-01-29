@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.5] - 2026-01-30
+
+### npm Publish Script Hardening
+
+Fixes for reliable incremental OIDC Trusted Publishing rollout.
+
+### Changed
+
+- **Manifest-only publishing**: Publish script now only publishes packages explicitly listed in `scripts/publish-manifest.json` (previously published all public packages with non-manifest at end)
+- **Removed `--strict` from workflow**: Allows incremental OIDC rollout (add packages to manifest as you configure them on npm)
+
+### Added
+
+- **Manifest validity guard**: Validates every manifest entry:
+  - Exists in workspace
+  - Is not private (`private: true`)
+  - Fails fast with clear error messages
+  - Prevents "nothing happened" confusion from typos or renamed packages
+
+### Fixed
+
+- Publish workflow no longer attempts to publish packages without OIDC Trusted Publishing configured
+- Clear separation: manifest = allowlist of packages to publish
+
+### Migration Notes
+
+- During OIDC rollout: Keep `--strict=false`, add packages to manifest as you configure them
+- Once all packages configured: Switch to `--strict=true` in workflow
+
 ## [0.10.4] - 2026-01-29
 
 ### GitHub Actions npm Publish with OIDC Trusted Publishing
