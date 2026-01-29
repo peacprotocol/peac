@@ -3,7 +3,7 @@
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.10.5",
   "lastUpdated": "2026-01-30",
-  "totalPackages": 12,
+  "totalPackages": 14,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -15,8 +15,10 @@
     "@peac/http-signatures",
     "@peac/jwks-cache",
     "@peac/policy-kit",
+    "@peac/adapter-core",
     "@peac/mappings-mcp",
-    "@peac/rails-x402"
+    "@peac/rails-x402",
+    "@peac/adapter-x402"
   ],
   "layers": {
     "0-kernel": ["@peac/kernel"],
@@ -24,8 +26,8 @@
     "2-crypto": ["@peac/crypto"],
     "2.5-telemetry": ["@peac/telemetry"],
     "3-protocol": ["@peac/protocol", "@peac/control"],
-    "4-infra": ["@peac/contracts", "@peac/http-signatures", "@peac/jwks-cache", "@peac/policy-kit"],
-    "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402"]
+    "4-infra": ["@peac/contracts", "@peac/http-signatures", "@peac/jwks-cache", "@peac/policy-kit", "@peac/adapter-core"],
+    "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402", "@peac/adapter-x402"]
   },
   "trustedPublisher": {
     "repository": "peacprotocol/peac",
@@ -42,10 +44,8 @@
     "@peac/worker-core",
     "@peac/net-node",
     "@peac/attribution",
-    "@peac/adapter-core",
     "@peac/rails-stripe",
     "@peac/rails-card",
-    "@peac/adapter-x402",
     "@peac/adapter-x402-daydreams",
     "@peac/adapter-x402-fluora",
     "@peac/adapter-x402-pinata",
