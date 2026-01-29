@@ -26,7 +26,13 @@
     "2-crypto": ["@peac/crypto"],
     "2.5-telemetry": ["@peac/telemetry"],
     "3-protocol": ["@peac/protocol", "@peac/control"],
-    "4-infra": ["@peac/contracts", "@peac/http-signatures", "@peac/jwks-cache", "@peac/policy-kit", "@peac/adapter-core"],
+    "4-infra": [
+      "@peac/contracts",
+      "@peac/http-signatures",
+      "@peac/jwks-cache",
+      "@peac/policy-kit",
+      "@peac/adapter-core"
+    ],
     "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402", "@peac/adapter-x402"]
   },
   "trustedPublisher": {

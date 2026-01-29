@@ -27,12 +27,14 @@ Packages not in the manifest are logged but **not published**, even if they are 
 Version numbers should reflect meaningful API or runtime changes, not operational updates:
 
 **DO bump version for:**
+
 - New features or capabilities
 - Bug fixes
 - Breaking changes
 - Dependency updates that affect behavior
 
 **DO NOT bump version for:**
+
 - Adding packages to the manifest
 - CI/workflow changes
 - Documentation updates
@@ -87,6 +89,7 @@ For dry_run=false, the tag must exist and be reachable from `main`.
      - Environment: `npm-production`
 
 2. **Update the manifest:**
+
    ```bash
    # Edit scripts/publish-manifest.json
    # Add package to "packages" array in topological order
@@ -94,11 +97,13 @@ For dry_run=false, the tag must exist and be reachable from `main`.
    ```
 
 3. **Verify topological order:**
+
    ```bash
    node scripts/check-manifest-topo.mjs
    ```
 
 4. **Commit and merge:**
+
    ```bash
    git add scripts/publish-manifest.json
    git commit -m "chore: add @peac/new-package to manifest"
