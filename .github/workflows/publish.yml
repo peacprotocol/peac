@@ -50,10 +50,9 @@ concurrency:
   group: npm-publish
   cancel-in-progress: false
 
-# Required for OIDC Trusted Publishing
-permissions:
-  contents: read
-  id-token: write
+# Workflow-level permissions: minimal by default
+# Each job declares its own permissions explicitly
+permissions: {}
 
 env:
   # npm dist-tag: 'next' for v0.x, 'latest' for v1.0+
@@ -69,6 +68,8 @@ jobs:
     name: Preflight Validation
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read # Checkout and read files
     outputs:
       version: ${{ steps.extract.outputs.version }}
       is_dry_run: ${{ steps.check.outputs.is_dry_run }}
@@ -258,6 +259,8 @@ jobs:
     if: needs.preflight.outputs.is_dry_run == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    permissions:
+      contents: read # Checkout and read files
     steps:
       # SHA-pinned for supply chain security
       - name: Checkout
@@ -324,6 +327,9 @@ jobs:
     if: needs.preflight.outputs.is_dry_run == 'false'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    permissions:
+      contents: read # Checkout and read files
+      id-token: write # OIDC token for Trusted Publishing
     environment: npm-production
     steps:
       # SHA-pinned for supply chain security

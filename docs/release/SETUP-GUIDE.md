@@ -283,6 +283,41 @@ This prevents anyone from publishing with a stolen npm token. Only the GitHub wo
 1. Go to: `https://github.com/peacprotocol/peac/settings/secrets/actions`
 2. If `NPM_TOKEN` exists, delete it (no longer needed)
 
+## Part 5: Maintenance
+
+### Step 5.1: Updating Pinned GitHub Actions
+
+The publish workflow pins GitHub Actions by SHA for supply chain security. When Dependabot creates PRs to update actions, review and merge them.
+
+**Manual update process:**
+
+1. Find the new SHA for an action:
+
+   ```bash
+   # Example: get SHA for actions/checkout v4.3.0
+   gh api repos/actions/checkout/git/refs/tags/v4.3.0 --jq '.object.sha'
+   ```
+
+2. Update `.github/workflows/publish.yml`:
+
+   ```yaml
+   # Before
+   uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+   # After
+   uses: actions/checkout@NEW_SHA_HERE # v4.3.0
+   ```
+
+3. Always keep the version comment (`# v4.x.x`) for auditability.
+
+**Currently pinned actions:**
+
+| Action               | Version | Purpose       |
+| -------------------- | ------- | ------------- |
+| `actions/checkout`   | v4.2.2  | Checkout code |
+| `actions/setup-node` | v4.4.0  | Setup Node.js |
+| `pnpm/action-setup`  | v4.2.0  | Setup pnpm    |
+
 ## Troubleshooting
 
 ### "Not authorized to publish package"
