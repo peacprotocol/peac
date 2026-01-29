@@ -311,6 +311,8 @@ export interface VerificationStatus {
     method: 'hint' | 'scan';
     /** Index of matched accept entry */
     matchedIndex?: number;
+    /** Why term-matching wasn't performed (if matched is false and no verification was done) */
+    reason?: 'not_verified';
   };
 }
 

@@ -247,14 +247,14 @@ describe('verifyOffer', () => {
       expect(result.errors[0].field).toBe('accepts[0].network');
     });
 
-    it('should reject oversized settlement objects (stringify bomb protection)', () => {
+    it('should reject oversized settlement objects (allocation-safe protection)', () => {
       // Settlement is JsonObject - could be arbitrarily large
-      // Per-entry check bounds total size including settlement
+      // Per-entry check bounds total size including settlement using bounded traversal
       const largeSettlement = { data: 'x'.repeat(3000) }; // > MAX_ENTRY_BYTES (2048)
       const accepts = [{ ...ACCEPT_BASE, settlement: largeSettlement }] as AcceptEntry[];
       const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
       expect(result.valid).toBe(false);
-      expect(result.errors[0].code).toBe('accept_too_many_entries');
+      expect(result.errors[0].code).toBe('accept_entry_invalid');
       expect(result.errors[0].message).toContain('exceeds max entry size');
     });
 
@@ -263,6 +263,68 @@ describe('verifyOffer', () => {
       const smallSettlement = { fee: '100', recipient: '0x123' };
       const accepts = [{ ...ACCEPT_BASE, settlement: smallSettlement }] as AcceptEntry[];
       const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+      expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('shape validation (runtime type guards)', () => {
+    it('should reject accept entry with network as number', () => {
+      // JSON.parse could produce non-string values from untrusted input
+      const accepts = [{ ...ACCEPT_BASE, network: 1 }] as unknown as AcceptEntry[];
+      const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].code).toBe('accept_entry_invalid');
+      expect(result.errors[0].message).toContain('must be a string');
+      expect(result.errors[0].field).toBe('accepts[0].network');
+    });
+
+    it('should reject accept entry with scheme as boolean', () => {
+      const accepts = [{ ...ACCEPT_BASE, scheme: false }] as unknown as AcceptEntry[];
+      const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].code).toBe('accept_entry_invalid');
+      expect(result.errors[0].message).toContain('must be a string');
+      expect(result.errors[0].field).toBe('accepts[0].scheme');
+    });
+
+    it('should reject accept entry with amount as number', () => {
+      const accepts = [{ ...ACCEPT_BASE, amount: 1000000 }] as unknown as AcceptEntry[];
+      const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].code).toBe('accept_entry_invalid');
+    });
+
+    it('should reject non-object accept entry', () => {
+      const accepts = ['not an object'] as unknown as AcceptEntry[];
+      const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].code).toBe('accept_entry_invalid');
+      expect(result.errors[0].message).toContain('must be a plain object');
+    });
+
+    it('should reject accept entry with missing required field', () => {
+      const { network: _, ...incomplete } = ACCEPT_BASE;
+      const accepts = [incomplete] as unknown as AcceptEntry[];
+      const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].code).toBe('accept_entry_invalid');
+      expect(result.errors[0].message).toContain('network is required');
+    });
+
+    it('should reject settlement that is not a plain object', () => {
+      const accepts = [{ ...ACCEPT_BASE, settlement: 'not an object' }] as unknown as AcceptEntry[];
+      const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].code).toBe('accept_entry_invalid');
+      expect(result.errors[0].message).toContain('settlement must be a plain object');
+    });
+
+    it('should accept entry with null fields (optional)', () => {
+      // scheme is optional, null should be treated as absent
+      const accepts = [{ ...ACCEPT_BASE, scheme: null }] as unknown as AcceptEntry[];
+      const result = verifyOffer(SIGNED_OFFER_VALID, accepts, 0);
+      // Should pass shape validation (null is allowed for optional fields)
+      // Will fail term-matching since payload has no scheme either
       expect(result.valid).toBe(true);
     });
   });

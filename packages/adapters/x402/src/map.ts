@@ -108,6 +108,11 @@ export function toPeacRecord(
   }
 
   // Build verification status
+  // IMPORTANT: If offerVerification is not provided, we cannot assume terms matched.
+  // Callers SHOULD provide offerVerification for a complete record.
+  const offerVerification = options?.offerVerification;
+  const termMatchingVerified = offerVerification !== undefined;
+
   const verification: VerificationStatus = {
     structural: true,
     cryptographic: {
@@ -117,11 +122,14 @@ export function toPeacRecord(
       ...(options?.cryptoSigner && { signer: options.cryptoSigner }),
     },
     termMatching: {
-      matched: options?.offerVerification?.valid ?? true,
-      method: options?.offerVerification?.usedHint ? 'hint' : 'scan',
-      ...(options?.offerVerification?.matchedIndex !== undefined && {
-        matchedIndex: options.offerVerification.matchedIndex,
+      // Safe-by-default: if verification wasn't performed, indicate that clearly
+      matched: termMatchingVerified ? offerVerification.valid : false,
+      method: offerVerification?.usedHint ? 'hint' : 'scan',
+      ...(offerVerification?.matchedIndex !== undefined && {
+        matchedIndex: offerVerification.matchedIndex,
       }),
+      // Add flag to indicate if term-matching was actually performed
+      ...(!termMatchingVerified && { reason: 'not_verified' }),
     },
   };
 

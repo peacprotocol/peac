@@ -75,13 +75,21 @@ interface ReceiptPayload {
 
 Implementations MUST enforce these limits to prevent denial-of-service:
 
-| Limit                  | Value   | Rationale                           |
-| ---------------------- | ------- | ----------------------------------- |
-| `MAX_ACCEPT_ENTRIES`   | 128     | Bounds O(n) scan to O(128)          |
-| `MAX_TOTAL_ACCEPTS_KB` | 256 KiB | Prevents memory exhaustion          |
-| `MAX_AMOUNT_LENGTH`    | 78      | uint256 max (Ethereum's largest)    |
+| Limit                    | Value   | Rationale                               |
+| ------------------------ | ------- | --------------------------------------- |
+| `MAX_ACCEPT_ENTRIES`     | 128     | Bounds O(n) scan to O(128)              |
+| `MAX_TOTAL_ACCEPTS_BYTES`| 262144  | 256 KiB - prevents memory exhaustion    |
+| `MAX_ENTRY_BYTES`        | 2048    | 2 KiB per entry - bounds settlement     |
+| `MAX_FIELD_BYTES`        | 256     | Per-field limit (UTF-8 bytes)           |
+| `MAX_AMOUNT_LENGTH`      | 78      | uint256 max (Ethereum's largest)        |
 
-When limits are exceeded, return `accept_too_many_entries`.
+When limits are exceeded, return `accept_too_many_entries` or `accept_entry_invalid`.
+
+**Implementation notes:**
+
+- Size checks use bounded traversal (stack-based byte counting) to avoid allocating full JSON strings
+- Shape validation runs before byte checks to prevent crashes from malformed JSON
+- Uses `TextEncoder` for portable UTF-8 byte length (works in Node.js and edge runtimes)
 
 ### 4.2 Amount Validation
 
@@ -101,10 +109,16 @@ When validation fails, return `amount_invalid`.
 
 ### 4.3 Network Validation
 
-Network strings MUST match CAIP-2 format when strict validation is enabled:
+Network strings MUST match CAIP-2 format when strict validation is enabled.
 
-```
-Regex: ^[a-z]{3,8}:[a-zA-Z0-9]{1,32}$
+Per [CAIP-2 spec](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md):
+
+- **Namespace**: 3-8 lowercase characters, starting with a letter, may contain digits and hyphens
+- **Reference**: 1-64 characters, starting with alphanumeric, may contain letters, digits, hyphens, underscores
+
+```text
+Namespace regex: ^[a-z][a-z0-9-]{2,7}$
+Reference regex: ^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$
 ```
 
 Valid examples: `eip155:8453`, `solana:mainnet`, `cosmos:cosmoshub-4`
@@ -478,7 +492,7 @@ PEAC does not privilege any particular payment protocol. x402 is one proof sourc
 ## 12. References
 
 - [x402 Protocol](https://github.com/coinbase/x402)
-- [x402 PR #935: Offer/Receipt Extension](https://github.com/coinbase/x402/pull/935)
+- [x402 Offer/Receipt Extension](https://github.com/coinbase/x402) (draft specification)
 - [CAIP-2: Blockchain ID Specification](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md)
 - [RFC 8785: JSON Canonicalization Scheme (JCS)](https://datatracker.ietf.org/doc/html/rfc8785)
 - [PEAC Protocol](https://peacprotocol.org)

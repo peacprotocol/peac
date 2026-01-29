@@ -5,10 +5,9 @@ x402 offer/receipt verification, term-matching, and PEAC record mapping.
 ## Overview
 
 This package verifies x402 extension objects (offers and receipts) and maps
-them into canonical PEAC interaction records. It implements the term-matching
-verification strategy where `acceptIndex` is treated as an untrusted hint
-and the binding comes from matching signed payload fields against accept
-terms.
+them into canonical PEAC interaction records. It implements term-matching
+verification where `acceptIndex` is treated as an untrusted hint and the
+binding comes from matching signed payload fields against accept terms.
 
 ## Install
 

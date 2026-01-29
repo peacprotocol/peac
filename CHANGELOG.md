@@ -11,14 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### x402 Adapter v0.2 Polish
 
-Production hardening for the x402 offer/receipt adapter with deterministic verification output, byte-safe DoS guards, and comprehensive conformance vectors.
+Production hardening for the x402 offer/receipt adapter with deterministic verification output, allocation-safe DoS guards, and comprehensive conformance vectors.
 
 ### Added
 
 - **Profile rename**: `peac-x402-offer-receipt/0.1` (from `peac-x402/0.1`)
-- **4 new error codes** in `specs/kernel/errors.json`:
+- **4 new error codes** (local to `@peac/adapter-x402`, not in central registry):
   - `receipt_version_unsupported` - Receipt has unsupported version
   - `accept_too_many_entries` - DoS protection (>128 entries or >256 KiB)
+  - `accept_entry_invalid` - Entry shape invalid (non-string fields, circular refs)
   - `amount_invalid` - Non-integer, negative, or leading zeros
   - `network_invalid` - Not CAIP-2 compliant
 - **DoS guards with byte limits** (`@peac/adapter-x402`):
@@ -27,17 +28,20 @@ Production hardening for the x402 offer/receipt adapter with deterministic verif
   - `MAX_FIELD_BYTES = 256` (per-field byte limit, UTF-8 aware)
   - `MAX_ENTRY_BYTES = 2048` (per-entry total size including settlement)
   - `MAX_AMOUNT_LENGTH = 78` (uint256 max digits)
-  - Per-entry size validation runs BEFORE aggregate JSON.stringify (no "stringify bomb" path)
+  - **Allocation-safe bounded traversal** - Size checks use stack-based JSON byte counting without allocating full JSON strings
+  - **Runtime shape validation** - Validates entry types before byte checks to prevent crashes from malformed JSON
   - Uses `TextEncoder` for edge runtime portability (Cloudflare Workers, Deno, etc.)
-- **CAIP-2 split parser** - Reference segment now allows hyphens, 64 chars (e.g., `cosmos:cosmoshub-4`)
+- **CAIP-2 split parser** - Reference segment now allows hyphens, underscores, 64 chars (e.g., `cosmos:cosmoshub-4`)
 - **termMatching first-class** (`OfferVerification.termMatching`):
   - Always present with `method`, `hintProvided`, `hintMismatchDetected` (no optional booleans)
   - Deterministic output for downstream consumers
+- **Safe-by-default mapping** - `toPeacRecord()` now marks `termMatching.matched: false` with `reason: 'not_verified'` when offerVerification is not provided
 - **Conformance vectors**: 19 total (3 valid + 13 invalid + 3 edge-cases)
   - New: `dos-too-many-accepts.json` with 129 entries
   - New: `invalid-amount-negative.json`, `invalid-amount-decimal.json`, `invalid-amount-leading-zero.json`
 - **Error precedence tests** - verifyReceipt checks: structural -> version -> signature -> amount -> network
 - **Multibyte DoS tests** - UTF-8 string handling and settlement bomb protection tests
+- **Orphan fixture detection** - Conformance runner checks for fixture files not listed in manifest
 
 ### Changed
 

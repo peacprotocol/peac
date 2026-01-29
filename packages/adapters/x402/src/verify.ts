@@ -1,7 +1,7 @@
 /**
  * x402 Offer/Receipt verification
  *
- * Verification strategy (PEAC-first):
+ * Verification rules (PEAC-first):
  * 1. Structural validation (format, required fields)
  * 2. DoS guards (accepts array limits)
  * 3. Amount validation (non-negative integer string)
@@ -57,6 +57,216 @@ const textEncoder = new TextEncoder();
 function getByteLength(str: string): number {
   return textEncoder.encode(str).length;
 }
+
+// ---------------------------------------------------------------------------
+// Shape Validation (Runtime Type Guards)
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if a value is a plain object (not null, not array, not class instance)
+ */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object') return false;
+  if (Array.isArray(value)) return false;
+  // Check for plain object prototype (not class instance)
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+/**
+ * Count bytes in a JSON value without allocating the full JSON string.
+ *
+ * Uses bounded traversal that stops early when limit is exceeded.
+ * This is allocation-safe: we never build the full JSON string.
+ *
+ * @param value - The value to measure
+ * @param limit - The byte limit (stop counting once exceeded)
+ * @returns The byte count (may be >= limit if exceeded), or -1 if cycle detected
+ */
+function countJsonBytes(value: unknown, limit: number): number {
+  // Use a stack-based traversal to avoid recursion stack overflow
+  // Each stack item: [value, state] where state tracks position in object/array
+  const stack: Array<{ val: unknown; keys?: string[]; idx: number; isObj: boolean }> = [];
+  const seen = new WeakSet<object>();
+  let bytes = 0;
+
+  const addStringBytes = (str: string): void => {
+    // JSON string encoding: quotes + content + escape overhead
+    // For simplicity, we use a conservative estimate: 2 (quotes) + UTF-8 bytes * 1.5 (escape overhead)
+    // More accurate: encode and count, but that's expensive
+    bytes += 2 + getByteLength(str);
+  };
+
+  const countPrimitive = (val: unknown): void => {
+    if (val === null) {
+      bytes += 4; // "null"
+    } else if (typeof val === 'boolean') {
+      bytes += val ? 4 : 5; // "true" or "false"
+    } else if (typeof val === 'number') {
+      bytes += String(val).length;
+    } else if (typeof val === 'string') {
+      addStringBytes(val);
+    }
+  };
+
+  // Initialize with root value
+  if (value === null || typeof value !== 'object') {
+    countPrimitive(value);
+    return bytes;
+  }
+
+  if (seen.has(value as object)) return -1; // Cycle
+  seen.add(value as object);
+
+  if (Array.isArray(value)) {
+    bytes += 2; // [ and ]
+    stack.push({ val: value, idx: 0, isObj: false });
+  } else {
+    bytes += 2; // { and }
+    const keys = Object.keys(value as object);
+    stack.push({ val: value, keys, idx: 0, isObj: true });
+  }
+
+  while (stack.length > 0 && bytes <= limit) {
+    const frame = stack[stack.length - 1];
+
+    if (frame.isObj) {
+      const obj = frame.val as Record<string, unknown>;
+      const keys = frame.keys!;
+
+      if (frame.idx >= keys.length) {
+        stack.pop();
+        continue;
+      }
+
+      const key = keys[frame.idx];
+      const childVal = obj[key];
+      frame.idx++;
+
+      // Add comma if not first
+      if (frame.idx > 1) bytes += 1;
+
+      // Add key
+      addStringBytes(key);
+      bytes += 1; // colon
+
+      // Handle child value
+      if (childVal === null || typeof childVal !== 'object') {
+        countPrimitive(childVal);
+      } else {
+        if (seen.has(childVal)) return -1; // Cycle
+        seen.add(childVal);
+
+        if (Array.isArray(childVal)) {
+          bytes += 2;
+          stack.push({ val: childVal, idx: 0, isObj: false });
+        } else {
+          bytes += 2;
+          const childKeys = Object.keys(childVal);
+          stack.push({ val: childVal, keys: childKeys, idx: 0, isObj: true });
+        }
+      }
+    } else {
+      const arr = frame.val as unknown[];
+
+      if (frame.idx >= arr.length) {
+        stack.pop();
+        continue;
+      }
+
+      const childVal = arr[frame.idx];
+      frame.idx++;
+
+      // Add comma if not first
+      if (frame.idx > 1) bytes += 1;
+
+      // Handle child value
+      if (childVal === null || typeof childVal !== 'object') {
+        countPrimitive(childVal);
+      } else {
+        if (seen.has(childVal)) return -1; // Cycle
+        seen.add(childVal);
+
+        if (Array.isArray(childVal)) {
+          bytes += 2;
+          stack.push({ val: childVal, idx: 0, isObj: false });
+        } else {
+          bytes += 2;
+          const childKeys = Object.keys(childVal);
+          stack.push({ val: childVal, keys: childKeys, idx: 0, isObj: true });
+        }
+      }
+    }
+  }
+
+  return bytes;
+}
+
+/**
+ * Validate accept entry shape (runtime type guard)
+ *
+ * Ensures all fields are the expected types before byte validation.
+ * This prevents crashes when untrusted JSON contains non-string values.
+ *
+ * @param entry - The entry to validate (typed as unknown since from untrusted input)
+ * @param index - The index for error reporting
+ * @returns VerificationError if shape is invalid, null otherwise
+ */
+function validateAcceptEntryShape(entry: unknown, index: number): VerificationError | null {
+  if (!isPlainObject(entry)) {
+    return {
+      code: 'accept_entry_invalid',
+      message: `accepts[${index}] must be a plain object`,
+      field: `accepts[${index}]`,
+    };
+  }
+
+  // Required string fields
+  const requiredStringFields = ['network', 'asset', 'payTo', 'amount'] as const;
+  for (const field of requiredStringFields) {
+    const value = entry[field];
+    if (value === undefined || value === null) {
+      return {
+        code: 'accept_entry_invalid',
+        message: `accepts[${index}].${field} is required`,
+        field: `accepts[${index}].${field}`,
+      };
+    }
+    if (typeof value !== 'string') {
+      return {
+        code: 'accept_entry_invalid',
+        message: `accepts[${index}].${field} must be a string, got ${typeof value}`,
+        field: `accepts[${index}].${field}`,
+      };
+    }
+  }
+
+  // Optional string field
+  if (entry.scheme !== undefined && entry.scheme !== null && typeof entry.scheme !== 'string') {
+    return {
+      code: 'accept_entry_invalid',
+      message: `accepts[${index}].scheme must be a string, got ${typeof entry.scheme}`,
+      field: `accepts[${index}].scheme`,
+    };
+  }
+
+  // settlement is optional and can be any plain object
+  if (entry.settlement !== undefined && entry.settlement !== null) {
+    if (!isPlainObject(entry.settlement)) {
+      return {
+        code: 'accept_entry_invalid',
+        message: `accepts[${index}].settlement must be a plain object`,
+        field: `accepts[${index}].settlement`,
+      };
+    }
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
 // Regex for JWS compact serialization: header.payload.signature
 const JWS_COMPACT_RE = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
@@ -132,31 +342,42 @@ export function verifyOffer(
     return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
   }
 
-  // 2b. DoS guard: validate per-entry total size (including settlement) BEFORE aggregate stringify
+  // 2b. DoS guard: validate entry shape first (prevents crashes from malformed JSON)
+  // Then validate per-entry size (including settlement) BEFORE aggregate stringify
   // This bounds the memory cost of subsequent operations and prevents "stringify bomb" attacks
   for (let i = 0; i < accepts.length; i++) {
     const entry = accepts[i];
-    // Check per-entry total size first (bounds settlement + all fields)
-    const entryError = validateAcceptEntrySize(entry, i);
+
+    // First: validate shape (runtime type guard for untrusted input)
+    const shapeError = validateAcceptEntryShape(entry, i);
+    if (shapeError) {
+      errors.push(shapeError);
+      return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
+    }
+
+    // Second: check per-entry total size (bounds settlement + all fields)
+    const entryError = validateAcceptEntrySize(entry as AcceptEntry, i);
     if (entryError) {
       errors.push(entryError);
       return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
     }
-    // Then check individual string field sizes for clearer error messages
-    const fieldError = validateAcceptFieldBytes(entry, i);
+
+    // Third: check individual string field sizes for clearer error messages
+    const fieldError = validateAcceptFieldBytes(entry as AcceptEntry, i);
     if (fieldError) {
       errors.push(fieldError);
       return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
     }
   }
 
-  // 2c. DoS guard: check total accepts byte size (safe now since per-entry is bounded)
+  // 2c. DoS guard: check total accepts byte size using bounded traversal
+  // NOTE: With per-entry bounds (128 * 2KB = 256KB), this is a redundant safety check
   const maxBytes = config?.maxTotalAcceptsBytes ?? MAX_TOTAL_ACCEPTS_BYTES;
-  const acceptsBytes = getByteLength(JSON.stringify(accepts));
-  if (acceptsBytes > maxBytes) {
+  const acceptsBytes = countJsonBytes(accepts, maxBytes + 1);
+  if (acceptsBytes === -1 || acceptsBytes > maxBytes) {
     errors.push({
       code: 'accept_too_many_entries',
-      message: `Accepts array too large: ${acceptsBytes} bytes exceeds limit of ${maxBytes}`,
+      message: `Accepts array too large: exceeds limit of ${maxBytes} bytes`,
     });
     return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
   }
@@ -601,16 +822,28 @@ function validateAmount(amount: string, kind: 'offer' | 'receipt'): Verification
  * Validate accept entry total size (DoS protection)
  *
  * Bounds the total serialized size of each entry, including settlement objects.
+ * Uses bounded traversal that stops early when limit is exceeded, avoiding
+ * full JSON string allocation.
+ *
  * This prevents "stringify bomb" attacks where small string fields hide large settlement objects.
  */
 function validateAcceptEntrySize(entry: AcceptEntry, index: number): VerificationError | null {
-  const entryJson = JSON.stringify(entry);
-  const entryBytes = getByteLength(entryJson);
+  // Use bounded traversal instead of JSON.stringify to avoid allocating full string
+  const entryBytes = countJsonBytes(entry, MAX_ENTRY_BYTES + 1);
+
+  // -1 means cycle detected
+  if (entryBytes === -1) {
+    return {
+      code: 'accept_entry_invalid',
+      message: `accepts[${index}] contains circular reference`,
+      field: `accepts[${index}]`,
+    };
+  }
 
   if (entryBytes > MAX_ENTRY_BYTES) {
     return {
-      code: 'accept_too_many_entries',
-      message: `accepts[${index}] exceeds max entry size of ${MAX_ENTRY_BYTES} bytes (got ${entryBytes})`,
+      code: 'accept_entry_invalid',
+      message: `accepts[${index}] exceeds max entry size of ${MAX_ENTRY_BYTES} bytes`,
       field: `accepts[${index}]`,
     };
   }

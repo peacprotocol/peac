@@ -17,7 +17,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import {
   verifyOffer,
@@ -333,6 +333,25 @@ describe('x402 Adapter Conformance', () => {
       for (const filename of allVectors) {
         expect(() => loadFixture(filename)).not.toThrow();
       }
+    });
+
+    it('no orphan fixture files (all .json files must be in manifest)', () => {
+      // Get all .json files in fixtures directory (excluding manifest.json and schema files)
+      const allFiles = readdirSync(FIXTURES_DIR).filter(
+        (f) => f.endsWith('.json') && f !== 'manifest.json' && !f.endsWith('.schema.json')
+      );
+
+      // Get all vectors listed in manifest
+      const manifestVectors = new Set([
+        ...manifest.categories.valid.vectors,
+        ...manifest.categories.invalid.vectors,
+        ...manifest.categories['edge-cases'].vectors,
+      ]);
+
+      // Find orphan files (in directory but not in manifest)
+      const orphans = allFiles.filter((f) => !manifestVectors.has(f));
+
+      expect(orphans, `Orphan fixture files found: ${orphans.join(', ')}`).toHaveLength(0);
     });
   });
 });
