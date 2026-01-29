@@ -43,22 +43,11 @@
     "@peac/sdk"
   ],
   "layers": {
-    "0-kernel": [
-      "@peac/kernel"
-    ],
-    "1-schema": [
-      "@peac/schema"
-    ],
-    "2-crypto": [
-      "@peac/crypto"
-    ],
-    "2.5-telemetry": [
-      "@peac/telemetry"
-    ],
-    "3-protocol": [
-      "@peac/protocol",
-      "@peac/control"
-    ],
+    "0-kernel": ["@peac/kernel"],
+    "1-schema": ["@peac/schema"],
+    "2-crypto": ["@peac/crypto"],
+    "2.5-telemetry": ["@peac/telemetry"],
+    "3-protocol": ["@peac/protocol", "@peac/control"],
     "4-utilities": [
       "@peac/contracts",
       "@peac/http-signatures",
@@ -74,17 +63,8 @@
       "@peac/mappings-tap",
       "@peac/mappings-ucp"
     ],
-    "4-worker": [
-      "@peac/worker-core",
-      "@peac/net-node",
-      "@peac/attribution",
-      "@peac/adapter-core"
-    ],
-    "4-rails": [
-      "@peac/rails-stripe",
-      "@peac/rails-x402",
-      "@peac/rails-card"
-    ],
+    "4-worker": ["@peac/worker-core", "@peac/net-node", "@peac/attribution", "@peac/adapter-core"],
+    "4-rails": ["@peac/rails-stripe", "@peac/rails-x402", "@peac/rails-card"],
     "4-adapters": [
       "@peac/adapter-x402",
       "@peac/adapter-x402-daydreams",
@@ -99,10 +79,7 @@
       "@peac/server",
       "@peac/cli"
     ],
-    "6-sdk": [
-      "@peac/core",
-      "@peac/sdk"
-    ]
+    "6-sdk": ["@peac/core", "@peac/sdk"]
   },
   "trustedPublisher": {
     "repository": "peacprotocol/peac",
