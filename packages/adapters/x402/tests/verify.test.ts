@@ -9,7 +9,6 @@ import {
 import type { SignedOffer, SignedReceipt, AcceptEntry, OfferPayload } from '../src/index.js';
 import {
   ACCEPT_BASE,
-  ACCEPT_ETH,
   ACCEPTS_SINGLE,
   ACCEPTS_MULTI,
   ACCEPTS_DUPLICATE,
@@ -18,7 +17,6 @@ import {
   SIGNED_OFFER_EXPIRED,
   SIGNED_OFFER_BAD_VERSION,
   SIGNED_OFFER_WRONG_NETWORK,
-  SIGNED_OFFER_WRONG_AMOUNT,
   SIGNED_RECEIPT_VALID,
   OFFER_PAYLOAD_VALID,
   SIG_EIP712,

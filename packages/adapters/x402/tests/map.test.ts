@@ -7,7 +7,6 @@ import {
   SETTLEMENT_RESPONSE_VALID,
   OFFER_PAYLOAD_VALID,
   SIG_EIP712,
-  SIGNED_RECEIPT_VALID,
 } from './fixtures/index.js';
 
 // ---------------------------------------------------------------------------

@@ -16,7 +16,7 @@ Production hardening for the x402 offer/receipt adapter with deterministic verif
 ### Added
 
 - **Profile rename**: `peac-x402-offer-receipt/0.1` (from `peac-x402/0.1`)
-- **4 new error codes** (local to `@peac/adapter-x402`, not in central registry):
+- **5 new error codes** (local to `@peac/adapter-x402`, not in central registry):
   - `receipt_version_unsupported` - Receipt has unsupported version
   - `accept_too_many_entries` - DoS protection (>128 entries or >256 KiB)
   - `accept_entry_invalid` - Entry shape invalid (non-string fields, circular refs)
