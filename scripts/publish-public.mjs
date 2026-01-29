@@ -367,11 +367,15 @@ function main() {
       console.log('Add these packages to scripts/publish-manifest.json');
       process.exit(1);
     } else {
-      console.log('WARNING: Found public packages not in manifest:');
+      // Without --strict, we only publish packages IN the manifest
+      // This allows incremental OIDC rollout (only configured packages are published)
+      console.log('NOTE: Found public packages not in manifest (will NOT publish):');
       for (const pkg of unlisted) {
-        console.log(`  - ${pkg.name} (will publish last)`);
+        console.log(`  - ${pkg.name}`);
       }
-      sortedPublic.push(...unlisted.map((p) => p.name));
+      console.log('');
+      console.log('To publish these packages, add them to scripts/publish-manifest.json');
+      console.log('after configuring npm Trusted Publishing for each one.');
       console.log('');
     }
   }
