@@ -3,14 +3,28 @@
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.10.4",
   "lastUpdated": "2026-01-29",
-  "totalPackages": 36,
+  "totalPackages": 6,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
     "@peac/crypto",
     "@peac/telemetry",
     "@peac/protocol",
-    "@peac/control",
+    "@peac/control"
+  ],
+  "layers": {
+    "0-kernel": ["@peac/kernel"],
+    "1-schema": ["@peac/schema"],
+    "2-crypto": ["@peac/crypto"],
+    "2.5-telemetry": ["@peac/telemetry"],
+    "3-protocol": ["@peac/protocol", "@peac/control"]
+  },
+  "trustedPublisher": {
+    "repository": "peacprotocol/peac",
+    "workflow": "publish.yml",
+    "environment": "npm-production"
+  },
+  "pendingTrustedPublishing": [
     "@peac/contracts",
     "@peac/http-signatures",
     "@peac/jwks-cache",
@@ -41,49 +55,5 @@
     "@peac/cli",
     "@peac/core",
     "@peac/sdk"
-  ],
-  "layers": {
-    "0-kernel": ["@peac/kernel"],
-    "1-schema": ["@peac/schema"],
-    "2-crypto": ["@peac/crypto"],
-    "2.5-telemetry": ["@peac/telemetry"],
-    "3-protocol": ["@peac/protocol", "@peac/control"],
-    "4-utilities": [
-      "@peac/contracts",
-      "@peac/http-signatures",
-      "@peac/jwks-cache",
-      "@peac/policy-kit",
-      "@peac/telemetry-otel"
-    ],
-    "4-mappings": [
-      "@peac/mappings-acp",
-      "@peac/mappings-aipref",
-      "@peac/mappings-mcp",
-      "@peac/mappings-rsl",
-      "@peac/mappings-tap",
-      "@peac/mappings-ucp"
-    ],
-    "4-worker": ["@peac/worker-core", "@peac/net-node", "@peac/attribution", "@peac/adapter-core"],
-    "4-rails": ["@peac/rails-stripe", "@peac/rails-x402", "@peac/rails-card"],
-    "4-adapters": [
-      "@peac/adapter-x402",
-      "@peac/adapter-x402-daydreams",
-      "@peac/adapter-x402-fluora",
-      "@peac/adapter-x402-pinata"
-    ],
-    "5-apps": [
-      "@peac/disc",
-      "@peac/pref",
-      "@peac/receipts",
-      "@peac/pay402",
-      "@peac/server",
-      "@peac/cli"
-    ],
-    "6-sdk": ["@peac/core", "@peac/sdk"]
-  },
-  "trustedPublisher": {
-    "repository": "peacprotocol/peac",
-    "workflow": "publish.yml",
-    "environment": "npm-production"
-  }
+  ]
 }
