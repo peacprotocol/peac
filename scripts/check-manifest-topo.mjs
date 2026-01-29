@@ -44,16 +44,52 @@ console.log(`Checking ${packages.length} packages...`);
 console.log('');
 
 // Use pnpm to find all workspace packages and their paths
-const pnpmOutput = execFileSync('pnpm', ['-r', 'list', '--json', '--depth', '-1'], {
-  cwd: ROOT,
-  encoding: 'utf-8',
-});
+let pnpmOutput;
+try {
+  pnpmOutput = execFileSync('pnpm', ['-r', 'list', '--json', '--depth', '-1'], {
+    cwd: ROOT,
+    encoding: 'utf-8',
+  });
+} catch (err) {
+  console.error('ERROR: Failed to run pnpm');
+  console.error('');
+  console.error('pnpm is required to check manifest topological order.');
+  console.error('In CI, ensure setup-pnpm runs before this step.');
+  console.error('');
+  console.error('Details:', err.message);
+  process.exit(1);
+}
 
-const workspacePackages = JSON.parse(pnpmOutput);
+let workspacePackages;
+try {
+  workspacePackages = JSON.parse(pnpmOutput);
+} catch (err) {
+  console.error('ERROR: Failed to parse pnpm output as JSON');
+  console.error('');
+  console.error('The pnpm list command returned invalid JSON.');
+  console.error('This may indicate a pnpm version incompatibility.');
+  console.error('');
+  console.error('Details:', err.message);
+  process.exit(1);
+}
+
+// Validate pnpm output structure (should be an array of package objects)
+if (!Array.isArray(workspacePackages)) {
+  console.error('ERROR: Unexpected pnpm output format');
+  console.error('');
+  console.error('Expected an array from pnpm -r list --json, got:', typeof workspacePackages);
+  console.error('This may indicate a pnpm version incompatibility.');
+  process.exit(1);
+}
+
 const packagePathMap = new Map();
 
 for (const pkg of workspacePackages) {
-  if (pkg.name && pkg.name.startsWith('@peac/')) {
+  // Validate each entry has expected shape
+  if (typeof pkg !== 'object' || pkg === null) continue;
+  if (typeof pkg.name !== 'string' || typeof pkg.path !== 'string') continue;
+
+  if (pkg.name.startsWith('@peac/')) {
     packagePathMap.set(pkg.name, pkg.path);
   }
 }

@@ -159,6 +159,8 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
+      # OIDC Trusted Publishing requires npm >= 11.5.1
+      # Node 22 bundles npm 10.x, so we must upgrade globally
       - name: Upgrade npm for Trusted Publishing
         run: |
           echo "Installing npm@${{ env.NPM_VERSION }} for Trusted Publishing support..."
@@ -272,6 +274,7 @@ jobs:
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
+      # Match npm version from preflight for consistent behavior
       - name: Upgrade npm for consistency
         run: npm install -g npm@${{ env.NPM_VERSION }}
 
@@ -335,6 +338,7 @@ jobs:
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
+      # OIDC Trusted Publishing requires npm >= 11.5.1
       - name: Upgrade npm for Trusted Publishing
         run: |
           npm install -g npm@${{ env.NPM_VERSION }}
