@@ -2,22 +2,38 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.10.5",
-  "lastUpdated": "2026-01-29",
-  "totalPackages": 6,
+  "lastUpdated": "2026-01-30",
+  "totalPackages": 14,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
     "@peac/crypto",
     "@peac/telemetry",
     "@peac/protocol",
-    "@peac/control"
+    "@peac/control",
+    "@peac/contracts",
+    "@peac/http-signatures",
+    "@peac/jwks-cache",
+    "@peac/policy-kit",
+    "@peac/adapter-core",
+    "@peac/mappings-mcp",
+    "@peac/rails-x402",
+    "@peac/adapter-x402"
   ],
   "layers": {
     "0-kernel": ["@peac/kernel"],
     "1-schema": ["@peac/schema"],
     "2-crypto": ["@peac/crypto"],
     "2.5-telemetry": ["@peac/telemetry"],
-    "3-protocol": ["@peac/protocol", "@peac/control"]
+    "3-protocol": ["@peac/protocol", "@peac/control"],
+    "4-infra": [
+      "@peac/contracts",
+      "@peac/http-signatures",
+      "@peac/jwks-cache",
+      "@peac/policy-kit",
+      "@peac/adapter-core"
+    ],
+    "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402", "@peac/adapter-x402"]
   },
   "trustedPublisher": {
     "repository": "peacprotocol/peac",
@@ -25,25 +41,17 @@
     "environment": "npm-production"
   },
   "pendingTrustedPublishing": [
-    "@peac/contracts",
-    "@peac/http-signatures",
-    "@peac/jwks-cache",
-    "@peac/policy-kit",
     "@peac/telemetry-otel",
     "@peac/mappings-acp",
     "@peac/mappings-aipref",
-    "@peac/mappings-mcp",
     "@peac/mappings-rsl",
     "@peac/mappings-tap",
     "@peac/mappings-ucp",
     "@peac/worker-core",
     "@peac/net-node",
     "@peac/attribution",
-    "@peac/adapter-core",
     "@peac/rails-stripe",
-    "@peac/rails-x402",
     "@peac/rails-card",
-    "@peac/adapter-x402",
     "@peac/adapter-x402-daydreams",
     "@peac/adapter-x402-fluora",
     "@peac/adapter-x402-pinata",

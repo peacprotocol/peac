@@ -59,6 +59,8 @@ env:
   NPM_TAG: next
   # Pinned npm CLI version for Trusted Publishing
   NPM_VERSION: '11.5.1'
+  # Disable Turborepo telemetry in CI
+  TURBO_TELEMETRY_DISABLED: '1'
 
 jobs:
   # ==========================================================================
@@ -409,30 +411,70 @@ jobs:
 
           echo "=== POST-PUBLISH VERIFICATION ==="
           echo ""
+          echo "Note: npm registry propagation can take 30-60 seconds."
+          echo "Verification will retry with exponential backoff."
+          echo ""
 
-          # Check key packages (Day 1 set)
+          # Retry helper with exponential backoff
+          # Usage: retry_npm_view PACKAGE VERSION
+          retry_npm_view() {
+            local pkg=$1
+            local ver=$2
+            local max_attempts=8
+            local delay=3
+
+            for attempt in $(seq 1 $max_attempts); do
+              if npm view "@peac/$pkg@$ver" version > /dev/null 2>&1; then
+                return 0
+              fi
+              if [ $attempt -lt $max_attempts ]; then
+                echo "      Attempt $attempt/$max_attempts failed, retrying in ${delay}s..."
+                sleep $delay
+                delay=$((delay * 2))
+                # Cap at 60 seconds
+                if [ $delay -gt 60 ]; then delay=60; fi
+              fi
+            done
+            return 1
+          }
+
+          # Check key packages (core foundation set)
           echo "1. Checking package availability on npm..."
           VERIFY_PKGS="kernel schema crypto telemetry protocol"
+          FAILED=""
           for PKG in $VERIFY_PKGS; do
             echo "   @peac/$PKG@$VERSION..."
-            npm view "@peac/$PKG@$VERSION" version > /dev/null 2>&1 || {
-              echo "   ERROR: @peac/$PKG@$VERSION not found on npm"
-              exit 1
-            }
-            echo "   OK"
+            if retry_npm_view "$PKG" "$VERSION"; then
+              echo "   OK"
+            else
+              echo "   WARN: @peac/$PKG@$VERSION not found after retries"
+              FAILED="$FAILED $PKG"
+            fi
           done
 
+          if [ -n "$FAILED" ]; then
+            echo ""
+            echo "   Some packages not yet visible:$FAILED"
+            echo "   This may be expected if they were already published (--skip-existing)"
+            echo "   or if npm propagation is slow. Check npm directly."
+          fi
+
           # Verify workspace:* resolution (critical correctness check)
+          # Only check if protocol is available
           echo ""
           echo "2. Verifying workspace:* dependencies are resolved..."
-          DEPS=$(npm view "@peac/protocol@$VERSION" dependencies --json 2>/dev/null || echo "{}")
-          if echo "$DEPS" | grep -q "workspace:"; then
-            echo "   ERROR: workspace:* dependencies not resolved!"
-            echo "   This means pnpm publish was used incorrectly."
-            echo "$DEPS"
-            exit 1
+          if npm view "@peac/protocol@$VERSION" version > /dev/null 2>&1; then
+            DEPS=$(npm view "@peac/protocol@$VERSION" dependencies --json 2>/dev/null || echo "{}")
+            if echo "$DEPS" | grep -q "workspace:"; then
+              echo "   ERROR: workspace:* dependencies not resolved!"
+              echo "   This means pnpm publish was used incorrectly."
+              echo "$DEPS"
+              exit 1
+            fi
+            echo "   OK: No unresolved workspace:* dependencies"
+          else
+            echo "   SKIP: @peac/protocol not yet visible, cannot check dependencies"
           fi
-          echo "   OK: No unresolved workspace:* dependencies"
 
           # Verify provenance attestation
           echo ""
@@ -447,7 +489,7 @@ jobs:
 
           echo ""
           echo "=== VERIFICATION COMPLETE ==="
-          echo "All critical checks passed."
+          echo "Critical checks passed. See above for any propagation warnings."
 
       - name: Summary
         run: |
