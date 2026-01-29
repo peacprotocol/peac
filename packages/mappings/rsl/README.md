@@ -17,6 +17,12 @@ Maps RSL 1.0 usage tokens (`all`, `ai-all`, `ai-train`, `ai-input`, `ai-index`, 
 - No live robots.txt discovery or XML parsing
 - No hardcoded license server endpoints
 
+## Installation
+
+```bash
+pnpm add @peac/mappings-rsl
+```
+
 ## Usage
 
 ```ts
@@ -37,4 +43,4 @@ Apache-2.0
 
 PEAC Protocol is an open source project stewarded by Originary and community contributors.
 
-[Originary](https://www.originary.xyz) | [Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac)
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)

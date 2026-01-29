@@ -1,0 +1,471 @@
+# Publish to npm with OIDC Trusted Publishing (no secrets needed)
+#
+# Triggered by:
+#   - Tag push: v* (e.g., v0.10.4)
+#   - Manual dispatch: workflow_dispatch with dry_run option
+#
+# Security:
+#   - Uses npm Trusted Publishing with GitHub OIDC (NO long-lived tokens)
+#   - Requires protected environment approval for production publish
+#   - Validates tag format and commit reachability from main
+#   - Idempotent: skips already-published packages
+#   - Provenance attestation for supply chain security
+#
+# Prerequisites:
+#   1. Configure Trusted Publisher on npm for each @peac/* package:
+#      - Repository: peacprotocol/peac
+#      - Workflow: publish.yml
+#      - Environment: npm-production
+#      See: docs/release/npm-oidc.md
+#   2. Create "npm-production" environment in GitHub repo settings
+#   3. Set environment protection rules (require approval)
+#
+# Hard Requirements:
+#   - npm CLI >= 11.5.1 (for Trusted Publishing OIDC support)
+#   - GitHub-hosted runners only (self-hosted not supported for OIDC)
+#
+# References:
+#   - npm Trusted Publishing: https://docs.npmjs.com/trusted-publishers
+#   - npm Provenance: https://docs.npmjs.com/generating-provenance-statements
+
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (validates publish without uploading)'
+        type: boolean
+        default: true
+      tag_override:
+        description: 'Tag to publish (e.g., v0.10.4) - only for manual dispatch'
+        type: string
+        required: false
+
+# Prevent concurrent publish runs
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+# Workflow-level permissions: minimal by default
+# Each job declares its own permissions explicitly
+permissions: {}
+
+env:
+  # npm dist-tag: 'next' for v0.x, 'latest' for v1.0+
+  NPM_TAG: next
+  # Pinned npm CLI version for Trusted Publishing
+  NPM_VERSION: '11.5.1'
+
+jobs:
+  # ==========================================================================
+  # Preflight validation - runs for all triggers
+  # ==========================================================================
+  preflight:
+    name: Preflight Validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read # Checkout and read files
+    outputs:
+      version: ${{ steps.extract.outputs.version }}
+      is_dry_run: ${{ steps.check.outputs.is_dry_run }}
+      tag_ref: ${{ steps.extract.outputs.tag_ref }}
+      package_count: ${{ steps.count.outputs.count }}
+    steps:
+      # SHA-pinned for supply chain security (v4.x)
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0 # Full history for tag validation
+          persist-credentials: false # Security hardening
+
+      - name: Fetch main branch for reachability check
+        run: |
+          git fetch origin main --depth=1
+          echo "Fetched origin/main for reachability validation"
+
+      - name: Extract version from tag
+        id: extract
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag_override }}"
+            if [ -z "$TAG" ]; then
+              echo "ERROR: tag_override required for manual dispatch"
+              exit 1
+            fi
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+
+          echo "tag_ref=$TAG" >> $GITHUB_OUTPUT
+
+          # Extract version (strip 'v' prefix)
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Tag: $TAG, Version: $VERSION"
+
+      - name: Validate tag format
+        run: |
+          TAG="${{ steps.extract.outputs.tag_ref }}"
+
+          # Must match semver: vMAJOR.MINOR.PATCH (optional -prerelease)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "ERROR: Invalid tag format: $TAG"
+            echo "Expected: vMAJOR.MINOR.PATCH (e.g., v0.10.4)"
+            exit 1
+          fi
+          echo "OK: Tag format valid"
+
+      - name: Validate tag commit is on main
+        run: |
+          TAG="${{ steps.extract.outputs.tag_ref }}"
+
+          # Get commit SHA for the tag
+          TAG_COMMIT=$(git rev-parse "$TAG^{commit}" 2>/dev/null || echo "")
+          if [ -z "$TAG_COMMIT" ]; then
+            echo "ERROR: Tag $TAG not found"
+            exit 1
+          fi
+
+          # Check if commit is reachable from origin/main (fetched earlier)
+          if ! git merge-base --is-ancestor "$TAG_COMMIT" origin/main; then
+            echo "ERROR: Tag commit is not on main branch"
+            echo "Tag commit: $TAG_COMMIT"
+            echo "This prevents publishing from feature branches"
+            exit 1
+          fi
+          echo "OK: Tag commit is on main"
+
+      - name: Determine dry run mode
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            IS_DRY_RUN="${{ inputs.dry_run }}"
+          else
+            # Tag push = production publish (not dry run)
+            IS_DRY_RUN="false"
+          fi
+          echo "is_dry_run=$IS_DRY_RUN" >> $GITHUB_OUTPUT
+          echo "Dry run: $IS_DRY_RUN"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1 # v4.2.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # OIDC Trusted Publishing requires npm >= 11.5.1
+      # Node 22 bundles npm 10.x, so we must upgrade globally
+      - name: Upgrade npm for Trusted Publishing
+        run: |
+          echo "Installing npm@${{ env.NPM_VERSION }} for Trusted Publishing support..."
+          npm install -g npm@${{ env.NPM_VERSION }}
+
+          echo "Toolchain versions:"
+          echo "  Node: $(node --version)"
+          echo "  npm: $(npm --version)"
+          echo "  pnpm: $(pnpm --version)"
+
+          # Verify npm version
+          NPM_VER=$(npm --version)
+          REQUIRED="11.5.1"
+          if [ "$(printf '%s\n' "$REQUIRED" "$NPM_VER" | sort -V | head -n1)" != "$REQUIRED" ]; then
+            echo "ERROR: npm $NPM_VER < $REQUIRED (required for Trusted Publishing)"
+            exit 1
+          fi
+          echo "OK: npm $NPM_VER meets Trusted Publishing requirement"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify package versions match tag
+        run: |
+          VERSION="${{ steps.extract.outputs.version }}"
+
+          # Check root package.json
+          ROOT_VERSION=$(node -p "require('./package.json').version")
+          if [ "$ROOT_VERSION" != "$VERSION" ]; then
+            echo "ERROR: Root package.json version ($ROOT_VERSION) does not match tag ($VERSION)"
+            exit 1
+          fi
+
+          # Check VERSION.json
+          if [ -f "VERSION.json" ]; then
+            PKG_VERSION=$(node -p "require('./VERSION.json').version")
+            if [ "$PKG_VERSION" != "$VERSION" ]; then
+              echo "ERROR: VERSION.json ($PKG_VERSION) does not match tag ($VERSION)"
+              exit 1
+            fi
+          fi
+
+          echo "OK: Root version $VERSION matches tag"
+
+      - name: Verify all public packages have matching versions
+        run: |
+          VERSION="${{ steps.extract.outputs.version }}"
+          echo "Checking all public packages have version $VERSION..."
+          node scripts/check-package-versions.mjs "$VERSION"
+
+      - name: Load publish manifest and validate
+        id: count
+        run: |
+          # Load package count from manifest (single source of truth)
+          if [ -f "scripts/publish-manifest.json" ]; then
+            COUNT=$(node -p "require('./scripts/publish-manifest.json').packages.length")
+          else
+            # Fallback to dynamic discovery
+            COUNT=$(node -e "
+              const { execSync } = require('child_process');
+              const fs = require('fs');
+              const out = execSync('pnpm -r list --json --depth -1', { encoding: 'utf8' });
+              const pkgs = JSON.parse(out).filter(p => p.name?.startsWith('@peac/'));
+              const pub = pkgs.filter(p => {
+                const pkg = JSON.parse(fs.readFileSync(p.path + '/package.json', 'utf8'));
+                return pkg.private !== true;
+              });
+              console.log(pub.length);
+            ")
+          fi
+
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "Package count: $COUNT"
+
+      - name: Run publish list validation
+        run: ./scripts/check-publish-list.sh
+
+      - name: Validate manifest topological order
+        run: node scripts/check-manifest-topo.mjs
+
+      - name: Run quality gates
+        run: |
+          pnpm lint
+          pnpm build
+          pnpm typecheck:core
+          pnpm test
+
+  # ==========================================================================
+  # Dry Run Publish - validates packaging without uploading
+  # ==========================================================================
+  publish_dry_run:
+    name: Publish (Dry Run)
+    needs: preflight
+    if: needs.preflight.outputs.is_dry_run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # Checkout and read files
+    steps:
+      # SHA-pinned for supply chain security
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.preflight.outputs.tag_ref }}
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1 # v4.2.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Match npm version from preflight for consistent behavior
+      - name: Upgrade npm for consistency
+        run: |
+          npm install -g npm@${{ env.NPM_VERSION }}
+          echo "npm version: $(npm --version)"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Publish packages (DRY RUN)
+        run: |
+          echo "=== DRY RUN MODE ==="
+          echo "Validating publish for ${{ needs.preflight.outputs.package_count }} packages @ ${{ needs.preflight.outputs.version }}"
+          echo "npm tag: ${{ env.NPM_TAG }}"
+          echo ""
+          echo "This runs 'pnpm publish --dry-run' to catch packaging issues."
+          echo ""
+
+          # Run publish script with real --dry-run to validate packaging
+          node scripts/publish-public.mjs \
+            --dry-run \
+            --tag=${{ env.NPM_TAG }} \
+            --strict
+
+      - name: Summary
+        run: |
+          echo "## Dry Run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ needs.preflight.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ needs.preflight.outputs.tag_ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **npm tag:** ${{ env.NPM_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Packages:** ${{ needs.preflight.outputs.package_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode:** Dry run (no packages published)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All packaging validations passed. Ready for production publish." >> $GITHUB_STEP_SUMMARY
+
+  # ==========================================================================
+  # Production Publish - requires environment approval, uses OIDC
+  #
+  # SECURITY: This job requires manual approval via the 'npm-production' environment.
+  # Configure required reviewers in GitHub repo settings > Environments.
+  # This prevents a merged PR from immediately publishing without human review.
+  # ==========================================================================
+  publish_prod:
+    name: Publish (Production)
+    needs: preflight
+    if: needs.preflight.outputs.is_dry_run == 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # Checkout and read files
+      id-token: write # OIDC token for Trusted Publishing
+    environment: npm-production
+    steps:
+      # SHA-pinned for supply chain security
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.preflight.outputs.tag_ref }}
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1 # v4.2.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      # OIDC Trusted Publishing requires npm >= 11.5.1
+      - name: Upgrade npm for Trusted Publishing
+        run: |
+          npm install -g npm@${{ env.NPM_VERSION }}
+          echo "npm version: $(npm --version)"
+
+      - name: Assert toolchain versions
+        run: |
+          echo "Toolchain versions:"
+          echo "  Node: $(node --version)"
+          echo "  npm: $(npm --version)"
+          echo "  pnpm: $(pnpm --version)"
+
+          # Assert npm meets Trusted Publishing requirement
+          NPM_VER=$(npm --version)
+          REQUIRED="${{ env.NPM_VERSION }}"
+          if [ "$(printf '%s\n' "$REQUIRED" "$NPM_VER" | sort -V | head -n1)" != "$REQUIRED" ]; then
+            echo "ERROR: npm $NPM_VER < $REQUIRED (required for Trusted Publishing)"
+            exit 1
+          fi
+          echo "OK: npm $NPM_VER meets Trusted Publishing requirement"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Publish packages with OIDC provenance
+        env:
+          # NO NODE_AUTH_TOKEN - using Trusted Publishing OIDC
+          NPM_CONFIG_PROVENANCE: 'true'
+        run: |
+          echo "=== PRODUCTION PUBLISH ==="
+          echo "Publishing ${{ needs.preflight.outputs.package_count }} packages @ ${{ needs.preflight.outputs.version }}"
+          echo "npm tag: ${{ env.NPM_TAG }}"
+          echo "Authentication: GitHub OIDC (Trusted Publishing)"
+          echo "Provenance: Enabled"
+          echo ""
+
+          # Run publish script with:
+          #   --skip-existing: Idempotent (safe reruns)
+          #   --provenance: Generate provenance attestation
+          #   --strict: Fail if manifest mismatch
+          node scripts/publish-public.mjs \
+            --tag=${{ env.NPM_TAG }} \
+            --skip-existing \
+            --provenance \
+            --strict
+
+      - name: Verify published packages
+        run: |
+          VERSION="${{ needs.preflight.outputs.version }}"
+
+          echo "=== POST-PUBLISH VERIFICATION ==="
+          echo ""
+
+          # Check key packages (Day 1 set)
+          echo "1. Checking package availability on npm..."
+          VERIFY_PKGS="kernel schema crypto telemetry protocol"
+          for PKG in $VERIFY_PKGS; do
+            echo "   @peac/$PKG@$VERSION..."
+            npm view "@peac/$PKG@$VERSION" version > /dev/null 2>&1 || {
+              echo "   ERROR: @peac/$PKG@$VERSION not found on npm"
+              exit 1
+            }
+            echo "   OK"
+          done
+
+          # Verify workspace:* resolution (critical correctness check)
+          echo ""
+          echo "2. Verifying workspace:* dependencies are resolved..."
+          DEPS=$(npm view "@peac/protocol@$VERSION" dependencies --json 2>/dev/null || echo "{}")
+          if echo "$DEPS" | grep -q "workspace:"; then
+            echo "   ERROR: workspace:* dependencies not resolved!"
+            echo "   This means pnpm publish was used incorrectly."
+            echo "$DEPS"
+            exit 1
+          fi
+          echo "   OK: No unresolved workspace:* dependencies"
+
+          # Verify provenance attestation
+          echo ""
+          echo "3. Verifying provenance attestation..."
+          echo "   Note: Provenance may take a few minutes to propagate after publish."
+          if npm audit signatures @peac/protocol 2>&1 | grep -q "verified"; then
+            echo "   OK: Provenance signatures verified"
+          else
+            echo "   INFO: Provenance check inconclusive (may still be propagating)"
+            echo "   Run 'npm audit signatures @peac/protocol' manually later to confirm"
+          fi
+
+          echo ""
+          echo "=== VERIFICATION COMPLETE ==="
+          echo "All critical checks passed."
+
+      - name: Summary
+        run: |
+          echo "## Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ needs.preflight.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ needs.preflight.outputs.tag_ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **npm tag:** ${{ env.NPM_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Packages:** ${{ needs.preflight.outputs.package_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Authentication:** GitHub OIDC (Trusted Publishing)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Provenance:** Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Verify on npm" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "npm view @peac/protocol@${{ needs.preflight.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Post-publish hardening" >> $GITHUB_STEP_SUMMARY
+          echo "After verifying packages work correctly, consider:" >> $GITHUB_STEP_SUMMARY
+          echo "- Enabling 'Require 2FA and disallow tokens' in npm org settings" >> $GITHUB_STEP_SUMMARY
+          echo "- This locks publishing to Trusted Publishers only" >> $GITHUB_STEP_SUMMARY

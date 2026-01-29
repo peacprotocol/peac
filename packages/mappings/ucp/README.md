@@ -164,4 +164,6 @@ Apache-2.0
 
 ---
 
-Part of the [PEAC Protocol](https://www.peacprotocol.org) - Portable Evidence for Automated Commerce.
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)
