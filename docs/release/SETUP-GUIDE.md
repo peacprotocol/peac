@@ -283,6 +283,39 @@ This prevents anyone from publishing with a stolen npm token. Only the GitHub wo
 1. Go to: `https://github.com/peacprotocol/peac/settings/secrets/actions`
 2. If `NPM_TOKEN` exists, delete it (no longer needed)
 
+### Step 4.3: Configure Branch Protection on main
+
+1. Go to: `https://github.com/peacprotocol/peac/settings/branches`
+2. Click **Add branch protection rule** (or edit existing)
+3. Branch name pattern: `main`
+4. Enable:
+   - **Require a pull request before merging**
+   - **Require status checks to pass before merging** (select CI checks)
+   - **Require branches to be up to date before merging**
+   - (Optional) **Require signed commits** for signed tag validation
+   - (Optional) **Require linear history** for clean commit history
+
+### Step 4.4: Restrict Tag Creation (Recommended)
+
+To prevent unauthorized tag pushes from triggering production publishes:
+
+1. Go to: `https://github.com/peacprotocol/peac/settings/tag_protection`
+2. Click **New rule**
+3. Pattern: `v*`
+4. This restricts who can create release tags
+
+**Alternative:** Use only `workflow_dispatch` for production publishes:
+
+- Remove `push: tags: [v*]` from the workflow
+- All publishes require manual trigger with environment approval
+- Tags become documentation-only (not publish triggers)
+
+### Step 4.5: Enforce 2FA on npm Organization
+
+1. Go to: `https://www.npmjs.com/settings/peac/members`
+2. Ensure all members have 2FA enabled
+3. Under organization settings, enable **"Require 2FA for all members"**
+
 ## Part 5: Maintenance
 
 ### Step 5.1: Updating Pinned GitHub Actions
