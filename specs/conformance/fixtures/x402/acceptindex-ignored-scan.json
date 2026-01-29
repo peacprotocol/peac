@@ -1,0 +1,42 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-acceptindex-ignored-scan",
+  "description": "Verification succeeds via scan even when acceptIndex would fail",
+  "category": "edge-cases",
+  "threat_model": "Demonstrates that term-matching (scan) is the true binding. If acceptIndex points to wrong entry but a correct entry exists, scan-mode finds it.",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      },
+      {
+        "network": "eip155:8453",
+        "asset": "ETH",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "50000000000000"
+      }
+    ]
+  },
+  "expected": {
+    "valid": true,
+    "matchedIndex": 0,
+    "usedHint": false,
+    "errors": []
+  },
+  "notes": "No acceptIndex provided. Scan finds unique match at index 0 (USDC). This proves term-matching is authoritative - unsigned acceptIndex is just a hint."
+}

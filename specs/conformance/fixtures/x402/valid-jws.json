@@ -1,0 +1,36 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-valid-jws",
+  "description": "Valid offer verification with JWS signature format",
+  "category": "valid",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "eyJhbGciOiJFUzI1NiJ9.eyJ0ZXN0IjoiZGF0YSJ9.dGVzdHNpZ25hdHVyZQ",
+      "format": "jws"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ],
+    "acceptIndex": 0
+  },
+  "expected": {
+    "valid": true,
+    "matchedIndex": 0,
+    "usedHint": true,
+    "errors": []
+  },
+  "notes": "JWS compact serialization format (header.payload.signature) is structurally valid."
+}

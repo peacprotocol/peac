@@ -1,0 +1,39 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-invalid-amount-decimal",
+  "description": "Amount with decimal point must fail amount validation",
+  "category": "invalid",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100.50",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ],
+    "acceptIndex": 0
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "amount_invalid",
+        "field": "payload.amount"
+      }
+    ]
+  },
+  "notes": "Amount must be an integer string in minor units. Decimal points indicate misuse (should use minor units)."
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "x402-adapter",
+  "version": "0.2.0",
+  "description": "Conformance vectors for @peac/adapter-x402 verification and record mapping",
+  "profile": "peac-x402-offer-receipt/0.1",
+  "categories": {
+    "valid": {
+      "description": "Valid verification scenarios",
+      "vectors": ["valid-with-hint.json", "valid-scan.json", "valid-jws.json"]
+    },
+    "invalid": {
+      "description": "Invalid verification scenarios that must fail",
+      "vectors": [
+        "expired-offer.json",
+        "accept-index-out-of-range.json",
+        "accept-term-mismatch.json",
+        "accept-no-match.json",
+        "accept-ambiguous.json",
+        "invalid-signature-format.json",
+        "missing-payload-fields.json",
+        "unsupported-version.json",
+        "invalid-amount-negative.json",
+        "invalid-amount-decimal.json",
+        "invalid-amount-leading-zero.json",
+        "invalid-network-format.json",
+        "dos-too-many-accepts.json"
+      ]
+    },
+    "edge-cases": {
+      "description": "Edge cases and boundary conditions",
+      "vectors": [
+        "clock-skew-tolerance.json",
+        "acceptindex-ignored-scan.json",
+        "mismatch-warn-and-scan.json"
+      ]
+    }
+  },
+  "binding_rules": {
+    "description": "Term-matching is the binding mechanism, not acceptIndex",
+    "invariants": [
+      "acceptIndex is UNSIGNED and MUST be treated as a hint only",
+      "Verifiers MUST compare accepts[acceptIndex] terms against signed payload",
+      "Mismatch between acceptIndex entry and signed payload MUST fail",
+      "Absent acceptIndex requires unique match via full scan",
+      "Multiple matches without acceptIndex MUST fail (ambiguous)"
+    ]
+  },
+  "validation_rules": {
+    "description": "Input validation constraints",
+    "invariants": [
+      "Amount MUST be a non-negative integer string (regex: ^(0|[1-9][0-9]*)$)",
+      "Amount MUST NOT exceed 78 characters (uint256 max)",
+      "Network MUST match CAIP-2 format (namespace:reference)",
+      "Accepts array MUST NOT exceed 128 entries (DoS protection)",
+      "Accepts array JSON MUST NOT exceed 256 KiB (memory protection)"
+    ]
+  }
+}

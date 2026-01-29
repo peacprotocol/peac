@@ -42,3 +42,16 @@ export {
   requireEnum,
   optionalEnum,
 } from './validators.js';
+
+// Payment Proof Adapter Interface
+export type {
+  NormalizedTerms,
+  NormalizedSettlement,
+  TermsVerification,
+  SettlementVerification,
+  VerificationError,
+  PaymentProofRecord,
+  VerificationContext,
+  PaymentProofAdapter,
+  CryptoVerifier,
+} from './payment-proof.js';

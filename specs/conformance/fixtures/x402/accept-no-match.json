@@ -1,0 +1,37 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-accept-no-match",
+  "description": "No accept entry matches signed payload - must fail",
+  "category": "invalid",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "eip155:1",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ]
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "accept_no_match"
+      }
+    ]
+  },
+  "notes": "Offer network is eip155:1 (Ethereum mainnet), but accepts only has eip155:8453 (Base). No match exists."
+}

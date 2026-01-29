@@ -1,0 +1,39 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-invalid-signature-format",
+  "description": "Malformed signature format must fail structural validation",
+  "category": "invalid",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": "1",
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+      },
+      "signature": "not-a-valid-signature",
+      "format": "eip712"
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ],
+    "acceptIndex": 0
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "offer_signature_invalid",
+        "field": "signature"
+      }
+    ]
+  },
+  "notes": "EIP-712 signature must be 0x-prefixed 65-byte hex string. This is structural validation only - cryptographic verification is caller's responsibility."
+}

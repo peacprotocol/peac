@@ -363,6 +363,22 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/x402-weather-proof:
+    dependencies:
+      '@peac/adapter-x402':
+        specifier: workspace:*
+        version: link:../../packages/adapters/x402
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+    devDependencies:
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   packages/access:
     devDependencies:
       typescript:
@@ -374,6 +390,28 @@ importers:
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.25
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@20.19.25)
+
+  packages/adapters/x402:
+    dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../core
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../schema
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
