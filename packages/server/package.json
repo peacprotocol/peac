@@ -1,6 +1,6 @@
 {
   "name": "@peac/server",
-  "version": "0.10.2",
+  "version": "0.10.4",
   "description": "PEAC verification server with DoS protection and rate limiting",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

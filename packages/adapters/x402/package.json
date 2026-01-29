@@ -1,6 +1,6 @@
 {
   "name": "@peac/adapter-x402",
-  "version": "0.10.2",
+  "version": "0.10.4",
   "description": "x402 offer/receipt verification, term-matching, and PEAC record mapping",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

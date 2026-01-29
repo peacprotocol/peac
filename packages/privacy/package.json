@@ -1,6 +1,6 @@
 {
   "name": "@peac/privacy",
-  "version": "0.10.2",
+  "version": "0.10.4",
   "private": true,
   "description": "Privacy pillar for PEAC protocol - k-anonymity, privacy-preserving hashing, data protection",
   "main": "dist/index.js",
