@@ -3,7 +3,7 @@
  *
  * x402 Offer/Receipt extension verification, term-matching, and PEAC record mapping.
  *
- * NOTE: This adapter targets the x402 Offer/Receipt EXTENSION (PR #935),
+ * NOTE: This adapter targets the x402 Offer/Receipt EXTENSION,
  * NOT the baseline x402 header flow. The profile identifier reflects this:
  * `peac-x402-offer-receipt/0.1` (extension) vs `peac-x402/0.1` (baseline, reserved).
  *

@@ -548,7 +548,7 @@ export function matchAcceptTerms(payload: OfferPayload, accept: AcceptEntry): st
 /**
  * Select the matching accept entry from the list
  *
- * Strategy:
+ * Selection logic:
  * - If acceptIndex provided: bounds-check, then term-match that entry
  * - If absent: scan all entries for a unique match
  * - If multiple matches: fail closed (ambiguous)

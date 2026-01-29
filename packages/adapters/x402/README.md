@@ -58,8 +58,9 @@ const record = toPeacRecord(paymentRequired, settlementResponse);
 
 ## acceptIndex: hint-only semantics
 
-Per x402 PR #935, `acceptIndex` is an unsigned envelope field outside the
-signed payload. Verifiers MUST NOT rely on it as a binding mechanism.
+In the x402 Offer/Receipt extension, `acceptIndex` is an unsigned envelope
+field outside the signed payload. Verifiers MUST NOT rely on it as a binding
+mechanism.
 
 This package treats `acceptIndex` as advisory:
 

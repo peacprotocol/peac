@@ -1,19 +1,19 @@
 /**
  * x402 Offer/Receipt extension types
  *
- * Models the x402 offer/receipt flow as defined by the spec:
+ * Models the x402 offer/receipt flow:
  * - SignedOffer: EIP-712 or JWS signed payment terms
  * - SignedReceipt: Settlement proof binding offer to on-chain transaction
  * - AcceptEntry: Terms an offer can match against
  * - acceptIndex: Unsigned envelope field (hint only, not binding)
  *
- * Key decisions from x402 PR #935:
+ * Key design choices:
  * - validUntil: epoch seconds in signed payload
  * - version: in signed payload
  * - acceptIndex: unsigned envelope field (outside signature)
  * - metadata: deferred to v2
  *
- * NOTE: This adapter targets the x402 Offer/Receipt EXTENSION (PR #935),
+ * NOTE: This adapter targets the x402 Offer/Receipt EXTENSION,
  * NOT the baseline x402 header flow. The profile identifier reflects this:
  * `peac-x402-offer-receipt/0.1` (extension) vs `peac-x402/0.1` (baseline, reserved).
  */
@@ -83,9 +83,9 @@ export type SignatureFormat = 'eip712' | 'jws';
  * Any modification invalidates the signature.
  */
 export interface OfferPayload {
-  /** Schema version (in signed payload per PR #935) */
+  /** Schema version (in signed payload) */
   version: string;
-  /** Offer expiry as epoch seconds (in signed payload per PR #935) */
+  /** Offer expiry as epoch seconds (in signed payload) */
   validUntil: number;
   /** CAIP-2 network identifier (e.g., "eip155:8453") */
   network: string;
@@ -322,7 +322,7 @@ export interface VerificationStatus {
  * This is the canonical record produced by mapping x402 proofs
  * into the PEAC evidence layer.
  *
- * NOTE: This profile targets the x402 Offer/Receipt EXTENSION (PR #935),
+ * NOTE: This profile targets the x402 Offer/Receipt EXTENSION,
  * NOT the baseline x402 header flow.
  */
 export interface X402PeacRecord {
