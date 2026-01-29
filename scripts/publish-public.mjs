@@ -325,7 +325,7 @@ function main() {
   console.log('');
 
   // Load package order from manifest
-  const { packages: LAYER_ORDER, version: manifestVersion } = loadPackageOrder();
+  const { packages: LAYER_ORDER } = loadPackageOrder();
 
   // Find packages
   const allPackages = findWorkspacePackages();

@@ -109,7 +109,7 @@ node -e 'const m=require("./scripts/publish-manifest.json"); for (const p of m.p
 
 Configure each of these packages:
 
-```
+```text
 https://www.npmjs.com/package/@peac/adapter-core/access
 https://www.npmjs.com/package/@peac/adapter-x402/access
 https://www.npmjs.com/package/@peac/adapter-x402-daydreams/access
@@ -233,7 +233,7 @@ Publish with: `node scripts/publish-public.mjs --skip-existing --provenance --st
 2. Click **Run workflow** (dropdown on right)
 3. Select branch: `main`
 4. Set **dry_run**: `true`
-5. Set **tag_override**: `v0.10.4` (or current version)
+5. Set **tag_override**: `vX.Y.Z` (use version from root `package.json`)
 6. Click **Run workflow**
 
 This runs the workflow without actually publishing. Check that:
@@ -246,11 +246,11 @@ This runs the workflow without actually publishing. Check that:
 
 After dry run succeeds:
 
-1. Create and push a tag:
+1. Create and push a tag (use version from root `package.json`):
 
    ```bash
-   git tag v0.10.4
-   git push origin v0.10.4
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
    ```
 
 2. The workflow will:
@@ -260,8 +260,9 @@ After dry run succeeds:
    - Publish all packages
 
 3. Verify on npm:
+
    ```bash
-   npm view @peac/protocol@0.10.4 version
+   npm view @peac/protocol@X.Y.Z version
    npm audit signatures @peac/protocol
    ```
 
