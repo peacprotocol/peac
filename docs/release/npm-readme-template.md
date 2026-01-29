@@ -73,11 +73,11 @@ DEPRECATED - Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instea
 
 All links must be correct and consistent:
 
-| Link | URL |
-|------|-----|
-| Docs | `https://www.peacprotocol.org` |
-| GitHub | `https://github.com/peacprotocol/peac` |
-| Originary | `https://www.originary.xyz` |
+| Link      | URL                                    |
+| --------- | -------------------------------------- |
+| Docs      | `https://www.peacprotocol.org`         |
+| GitHub    | `https://github.com/peacprotocol/peac` |
+| Originary | `https://www.originary.xyz`            |
 
 ## Validation
 

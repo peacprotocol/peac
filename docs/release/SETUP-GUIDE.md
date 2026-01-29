@@ -5,6 +5,7 @@ This guide walks you through the complete setup for publishing PEAC Protocol pac
 ## Overview
 
 You need to configure two services:
+
 1. **GitHub** - Create a protected environment
 2. **npm** - Configure Trusted Publisher for each package
 
@@ -24,16 +25,19 @@ You need to configure two services:
 On the environment configuration page:
 
 **Required reviewers:**
+
 1. Check "Required reviewers"
 2. Add yourself and/or team members who can approve production publishes
 3. Click **Save protection rules**
 
 **Wait timer (optional but recommended):**
+
 1. Check "Wait timer"
 2. Set to `5` minutes (gives time to cancel accidental publishes)
 3. Click **Save protection rules**
 
 **Deployment branches:**
+
 1. Under "Deployment branches", select "Selected branches"
 2. Add a rule for `main` only
 3. Click **Save protection rules**
@@ -77,13 +81,13 @@ You need to repeat this for all 36 packages. Here's the process:
 4. Click **Add trusted publisher** or **Manage trusted publishers**
 5. Fill in the form:
 
-   | Field | Value |
-   |-------|-------|
-   | **Select a CI/CD service** | GitHub Actions |
-   | **Repository owner** | `peacprotocol` |
-   | **Repository name** | `peac` |
-   | **Workflow filename** | `publish.yml` |
-   | **Environment name** | `npm-production` |
+   | Field                      | Value            |
+   | -------------------------- | ---------------- |
+   | **Select a CI/CD service** | GitHub Actions   |
+   | **Repository owner**       | `peacprotocol`   |
+   | **Repository name**        | `peac`           |
+   | **Workflow filename**      | `publish.yml`    |
+   | **Environment name**       | `npm-production` |
 
 6. Click **Add trusted publisher**
 
@@ -233,6 +237,7 @@ Publish with: `node scripts/publish-public.mjs --skip-existing --provenance --st
 6. Click **Run workflow**
 
 This runs the workflow without actually publishing. Check that:
+
 - Preflight validation passes
 - Dry run job completes successfully
 - No "Not authorized" errors
@@ -242,6 +247,7 @@ This runs the workflow without actually publishing. Check that:
 After dry run succeeds:
 
 1. Create and push a tag:
+
    ```bash
    git tag v0.10.4
    git push origin v0.10.4

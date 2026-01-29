@@ -22,12 +22,12 @@ npm Trusted Publishing allows GitHub Actions to publish packages without storing
 
 Before using Trusted Publishing, ensure these requirements are met:
 
-| Requirement | Value | Notes |
-|-------------|-------|-------|
-| npm CLI version | >= 11.5.1 | Required for OIDC support |
-| Runner type | GitHub-hosted | Self-hosted runners NOT supported |
-| Workflow permissions | `id-token: write` | Required for OIDC token |
-| Package access | Public or scoped | Private packages need additional config |
+| Requirement          | Value             | Notes                                   |
+| -------------------- | ----------------- | --------------------------------------- |
+| npm CLI version      | >= 11.5.1         | Required for OIDC support               |
+| Runner type          | GitHub-hosted     | Self-hosted runners NOT supported       |
+| Workflow permissions | `id-token: write` | Required for OIDC token                 |
+| Package access       | Public or scoped  | Private packages need additional config |
 
 The workflow automatically installs npm 11.5.1 to meet this requirement.
 
@@ -59,13 +59,13 @@ For **each** `@peac/*` package you want to publish:
 2. Click "Manage trusted publishers"
 3. Add a new publisher with these settings:
 
-   | Field | Value |
-   |-------|-------|
-   | Provider | GitHub Actions |
-   | Owner | `peacprotocol` |
-   | Repository | `peac` |
-   | Workflow filename | `publish.yml` |
-   | Environment | `npm-production` |
+   | Field             | Value            |
+   | ----------------- | ---------------- |
+   | Provider          | GitHub Actions   |
+   | Owner             | `peacprotocol`   |
+   | Repository        | `peac`           |
+   | Workflow filename | `publish.yml`    |
+   | Environment       | `npm-production` |
 
 4. Save the configuration
 
@@ -86,8 +86,8 @@ The publish workflow requires these permissions:
 
 ```yaml
 permissions:
-  contents: read    # Read repository
-  id-token: write   # OIDC token for npm
+  contents: read # Read repository
+  id-token: write # OIDC token for npm
 ```
 
 These are already configured in `.github/workflows/publish.yml`.
