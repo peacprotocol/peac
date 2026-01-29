@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.4] - 2026-01-29
+
+### GitHub Actions npm Publish with OIDC Trusted Publishing
+
+Secure, automated npm publishing via GitHub Actions with OIDC Trusted Publishing - no long-lived npm tokens required.
+
+### Added
+
+- **GitHub Actions publish workflow** (`.github/workflows/publish.yml`)
+  - OIDC Trusted Publishing with `id-token: write` permission
+  - SHA-pinned actions for supply chain security:
+    - `actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683` (v4.2.2)
+    - `actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af` (v4.4.0)
+    - `pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda` (v4.2.0)
+  - Empty workflow-level permissions with explicit job-level (`id-token: write`, `contents: read`)
+  - Protected environment `npm-production` with required reviewers
+  - Version assertions in production job
+  - Dry-run validation job before production publish
+- **Publish manifest** (`scripts/publish-manifest.json`)
+  - Single source of truth for package publish order
+  - Topological ordering (36 packages, dependencies first)
+  - Layer annotations for audit
+- **Publish scripts** (`scripts/publish-public.mjs`)
+  - Idempotent publishing with `--skip-existing`
+  - `--strict` mode: error if all packages already published
+  - `--dry-run` for local testing
+  - `execFileSync` instead of `execSync` (shell injection prevention)
+  - Enhanced post-publish verification (npm view + provenance check)
+- **CI gates for publishing**
+  - `scripts/check-manifest-topo.mjs` - Validates topological order with pnpm workspace introspection
+  - `scripts/check-version-sync.mjs` - Validates version consistency across manifest and packages
+  - Error handling with actionable messages for CI debugging
+- **Release documentation** (`docs/release/`)
+  - `SETUP-GUIDE.md` - Complete setup guide (npm granular tokens, GitHub environments, branch protection)
+  - `WORKFLOW-REFERENCE.md` - Workflow reference
+  - `npm-oidc.md` - OIDC Trusted Publishing deep dive
+
+### Changed
+
+- **Publish method**: Migrated from local pnpm publish to GitHub Actions workflow
+- **Provenance**: All packages now include npm provenance attestations (SLSA L3)
+
+### Security
+
+- **No long-lived npm tokens**: OIDC tokens are ephemeral and scoped to workflow run
+- **Protected environment**: Requires manual approval before production publish
+- **SHA-pinned actions**: Prevents supply chain attacks via compromised action tags
+- **Job-level permissions**: Minimal permissions at workflow level with explicit job-level grants
+- **Strict mode guard**: Prevents silent no-ops in CI (catches "nothing to publish" scenarios)
+
+### Migration Notes
+
+- npm publishing now requires GitHub Actions (not local pnpm)
+- First-time setup: Configure npm granular access token, link to GitHub OIDC
+- See `docs/release/SETUP-GUIDE.md` for complete setup instructions
+- Tag format: `vX.Y.Z` triggers publish workflow
+
 ## [0.10.3] - 2026-01-29
 
 ### x402 Adapter v0.2 Polish

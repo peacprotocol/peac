@@ -1,6 +1,6 @@
 {
   "name": "@peac/jwks-cache",
-  "version": "0.10.2",
+  "version": "0.10.4",
   "description": "Edge-safe JWKS fetch and cache with SSRF protection",
   "type": "module",
   "main": "./dist/index.js",
