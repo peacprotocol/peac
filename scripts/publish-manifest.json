@@ -3,7 +3,7 @@
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.10.5",
   "lastUpdated": "2026-01-30",
-  "totalPackages": 14,
+  "totalPackages": 13,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -17,8 +17,7 @@
     "@peac/policy-kit",
     "@peac/adapter-core",
     "@peac/mappings-mcp",
-    "@peac/rails-x402",
-    "@peac/adapter-x402"
+    "@peac/rails-x402"
   ],
   "layers": {
     "0-kernel": ["@peac/kernel"],
@@ -33,7 +32,7 @@
       "@peac/policy-kit",
       "@peac/adapter-core"
     ],
-    "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402", "@peac/adapter-x402"]
+    "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402"]
   },
   "trustedPublisher": {
     "repository": "peacprotocol/peac",
@@ -41,6 +40,7 @@
     "environment": "npm-production"
   },
   "pendingTrustedPublishing": [
+    "@peac/adapter-x402",
     "@peac/telemetry-otel",
     "@peac/mappings-acp",
     "@peac/mappings-aipref",
