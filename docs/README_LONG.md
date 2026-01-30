@@ -8,13 +8,13 @@ This document contains detailed package catalogs, layer maps, ecosystem fit, and
 
 PEAC does not replace existing protocols. It is the receipts and verification layer that works alongside them for APIs, applications, and agentic workflows.
 
-**Payment rails (v0.9.27 status):**
+**Payment rails:**
 
 - [x402](https://github.com/coinbase/x402) - HTTP 402 payment flows. Adapter: `@peac/rails-x402`
 
 The protocol works with generic HTTP 402 services, paywalls, routers, and data stores. Receipts do not depend on any single provider.
 
-**Agent protocols (v0.9.27 status):**
+**Agent protocols:**
 
 - [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) - Tool context for language models. Mapping with budget utilities.
 - [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) - Agent-driven commerce. Mapping with budget utilities.
@@ -184,7 +184,7 @@ PEAC sits alongside existing policy mechanisms rather than replacing them. A PEA
 
 The `@peac/policy-kit` package provides a file-based policy format for authoring policies once and compiling them to multiple deployment surfaces.
 
-**Policy Profiles (v0.9.27):**
+**Policy Profiles:**
 
 | Profile ID     | Default | Receipt | Use Case                       |
 | -------------- | ------- | ------- | ------------------------------ |
@@ -377,6 +377,7 @@ Dependencies flow DOWN only. Never import from a higher layer.
 | `@peac/mappings-rsl`    | RSL (Robots Standard Language) mapping to CAL purposes      |
 | `@peac/mappings-tap`    | Visa TAP mapping                                            |
 | `@peac/mappings-aipref` | IETF AIPREF vocabulary mapping                              |
+| `@peac/mappings-ucp`    | Google Universal Commerce Protocol webhook verification     |
 
 **Policy (stable):**
 
@@ -386,14 +387,18 @@ Dependencies flow DOWN only. Never import from a higher layer.
 
 **Infrastructure:**
 
-| Package                 | Description                               |
-| ----------------------- | ----------------------------------------- |
-| `@peac/http-signatures` | RFC 9421 HTTP Message Signatures          |
-| `@peac/jwks-cache`      | Edge-safe JWKS fetch with SSRF protection |
-| `@peac/telemetry`       | Core telemetry interfaces                 |
-| `@peac/telemetry-otel`  | OpenTelemetry adapter with privacy modes  |
-| `@peac/privacy`         | Privacy-preserving hashing                |
-| `@peac/transport-grpc`  | gRPC transport binding                    |
+| Package                 | Description                                       |
+| ----------------------- | ------------------------------------------------- |
+| `@peac/contracts`       | Canonical error codes and verification contracts  |
+| `@peac/http-signatures` | RFC 9421 HTTP Message Signatures                  |
+| `@peac/jwks-cache`      | Edge-safe JWKS fetch with SSRF protection         |
+| `@peac/net-node`        | SSRF-safe network utilities with DNS pinning      |
+| `@peac/adapter-core`    | Shared utilities for payment rail adapters        |
+| `@peac/worker-core`     | Runtime-neutral TAP verification handler          |
+| `@peac/telemetry`       | Core telemetry interfaces                         |
+| `@peac/telemetry-otel`  | OpenTelemetry adapter with privacy modes          |
+| `@peac/privacy`         | Privacy-preserving hashing                        |
+| `@peac/transport-grpc`  | gRPC transport binding                            |
 
 **Attestations:**
 
@@ -607,7 +612,7 @@ See `docs/SPEC_INDEX.md` for normative specifications and `docs/CI_BEHAVIOR.md` 
 
 ## License
 
-© 2025 PEAC Protocol - Apache 2.0 License - Stewarded by contributors from Originary and the community.
+PEAC Protocol - Apache 2.0 License - Stewarded by contributors from [Originary](https://www.originary.xyz) and the community.
 
 See [LICENSE](LICENSE) for full details.
 

@@ -4,7 +4,7 @@ Agent-readable metadata for PEAC Protocol.
 
 ## Identity
 
-- **Protocol**: PEAC/0.9
+- **Protocol**: PEAC (wire format: `peac-receipt/0.1`)
 - **Specification**: https://www.peacprotocol.org/specs/agent-identity
 - **Key Directory**: Discovered via `/.well-known/jwks.json` or `Link` header with `rel="jwks"`
 - **Algorithms**: EdDSA (Ed25519)
@@ -44,9 +44,9 @@ Per MCP specification, use reverse-DNS keys in `_meta` to avoid collisions:
   "result": {
     "content": [...],
     "_meta": {
-      "org.peacprotocol/receipt": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ...",
+      "org.peacprotocol/receipt": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...",
       "org.peacprotocol/agent_id": "assistant:example",
-      "org.peacprotocol/verified_at": "2026-01-04T12:00:00Z"
+      "org.peacprotocol/verified_at": "2026-01-30T12:00:00Z"
     }
   }
 }
@@ -55,7 +55,7 @@ Per MCP specification, use reverse-DNS keys in `_meta` to avoid collisions:
 **HTTP Transport:**
 
 ```http
-PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ...
+PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
 PEAC-Agent-Identity: eyJ0eXBlIjoicGVhYy9hZ2VudC1pZGVudGl0eSJ9...
 ```
 
@@ -70,7 +70,7 @@ For A2A (Agent-to-Agent) discovery via `/.well-known/agent.json`:
   "capabilities": ["search", "inference"],
   "extensions": {
     "org.peacprotocol": {
-      "version": "0.9",
+      "version": "0.1",
       "discovery_url": "/.well-known/peac.txt",
       "key_directory": "/.well-known/jwks.json",
       "control_type": "operator",
