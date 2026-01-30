@@ -29,6 +29,11 @@
   ],
   "author": "PEAC Protocol contributors",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/contracts"
+  },
   "devDependencies": {
     "typescript": "^5.3.3",
     "vitest": "^2.0.0"
