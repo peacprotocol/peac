@@ -15,17 +15,17 @@ Key capabilities:
 
 ## Upcoming
 
-| Theme       | Deliverables                                    |
-| ----------- | ----------------------------------------------- |
-| Transport   | WebSocket, streaming receipts                   |
-| Security    | External audit, production hardening            |
-| Stability   | Wire format freeze, cross-implementation parity |
+| Theme     | Deliverables                                    |
+| --------- | ----------------------------------------------- |
+| Transport | WebSocket, streaming receipts                   |
+| Security  | External audit, production hardening            |
+| Stability | Wire format freeze, cross-implementation parity |
 
 ## Version History
 
 See [GitHub Releases](https://github.com/peacprotocol/peac/releases) for detailed release notes.
 
-| Version  | Highlights                                           |
-| -------- | ---------------------------------------------------- |
-| v0.10.x  | Wire format normalization, npm publishing, x402 v0.2 |
-| v0.9.x   | Core protocol, attestations, Go SDK, Policy Kit      |
+| Version | Highlights                                           |
+| ------- | ---------------------------------------------------- |
+| v0.10.x | Wire format normalization, npm publishing, x402 v0.2 |
+| v0.9.x  | Core protocol, attestations, Go SDK, Policy Kit      |

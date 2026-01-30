@@ -387,18 +387,18 @@ Dependencies flow DOWN only. Never import from a higher layer.
 
 **Infrastructure:**
 
-| Package                 | Description                                       |
-| ----------------------- | ------------------------------------------------- |
-| `@peac/contracts`       | Canonical error codes and verification contracts  |
-| `@peac/http-signatures` | RFC 9421 HTTP Message Signatures                  |
-| `@peac/jwks-cache`      | Edge-safe JWKS fetch with SSRF protection         |
-| `@peac/net-node`        | SSRF-safe network utilities with DNS pinning      |
-| `@peac/adapter-core`    | Shared utilities for payment rail adapters        |
-| `@peac/worker-core`     | Runtime-neutral TAP verification handler          |
-| `@peac/telemetry`       | Core telemetry interfaces                         |
-| `@peac/telemetry-otel`  | OpenTelemetry adapter with privacy modes          |
-| `@peac/privacy`         | Privacy-preserving hashing                        |
-| `@peac/transport-grpc`  | gRPC transport binding                            |
+| Package                 | Description                                      |
+| ----------------------- | ------------------------------------------------ |
+| `@peac/contracts`       | Canonical error codes and verification contracts |
+| `@peac/http-signatures` | RFC 9421 HTTP Message Signatures                 |
+| `@peac/jwks-cache`      | Edge-safe JWKS fetch with SSRF protection        |
+| `@peac/net-node`        | SSRF-safe network utilities with DNS pinning     |
+| `@peac/adapter-core`    | Shared utilities for payment rail adapters       |
+| `@peac/worker-core`     | Runtime-neutral TAP verification handler         |
+| `@peac/telemetry`       | Core telemetry interfaces                        |
+| `@peac/telemetry-otel`  | OpenTelemetry adapter with privacy modes         |
+| `@peac/privacy`         | Privacy-preserving hashing                       |
+| `@peac/transport-grpc`  | gRPC transport binding                           |
 
 **Attestations:**
 
