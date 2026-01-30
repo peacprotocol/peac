@@ -137,7 +137,7 @@ echo "== forbid npm invocations =="
 # NPM_PUBLISH docs (policy), edge guides (CLI install), pack scripts (consumer-reality smoke tests),
 # net-node test-pack-install (tests published package in clean npm project),
 # publish workflow (npm install for OIDC), docs/release (npm publish docs), publish-manifest (description)
-NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md|CHANGELOG\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|docs/release/|scripts/(guard\.sh|pack-.*\.sh|check-readme-consistency\.sh|publish-manifest\.json)|packages/net/node/scripts/test-pack-install\.mjs|\.github/workflows/publish\.yml)'
+NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|RELEASING\.md|CHANGELOG\.md|docs/ROADMAP\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|docs/release/|scripts/(guard\.sh|pack-.*\.sh|check-readme-consistency\.sh|publish-manifest\.json)|packages/net/node/scripts/test-pack-install\.mjs|\.github/workflows/publish\.yml)'
 if gg_wb n '\bnpm (run|ci|install|pack|publish)\b' '(^|[^[:alnum:]_])npm (run|ci|install|pack|publish)([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else
