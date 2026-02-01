@@ -34,7 +34,7 @@
   "dependencies": {
     "@peac/schema": "workspace:*",
     "yaml": "^2.3.4",
-    "zod": "^3.22.4"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
