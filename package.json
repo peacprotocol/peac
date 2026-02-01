@@ -52,7 +52,7 @@
     "test:exports": "node scripts/test-package-exports.mjs"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^25.1.0",
     "dependency-cruiser": "^16.6.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
