@@ -125,6 +125,9 @@ jobs:
       - name: Quickstart demo (issue + verify)
         run: pnpm --filter @peac/example-quickstart demo
 
+      - name: ERC-8004 mapping conformance
+        run: pnpm --filter @peac/example-erc8004-feedback verify
+
       - name: No X-PEAC headers in examples
         run: |
           if rg -i "x-peac" examples/ --glob '!*.md' 2>/dev/null | grep -q .; then

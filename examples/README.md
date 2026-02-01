@@ -12,6 +12,7 @@ Canonical examples demonstrating PEAC Protocol integration patterns.
 | [rsl-collective](./rsl-collective/)       | RSL integration and core claims parity           |
 | [mcp-tool-call](./mcp-tool-call/)         | MCP paid tools with budget enforcement           |
 | [telemetry-otel](./telemetry-otel/)       | OpenTelemetry integration with privacy modes     |
+| [erc8004-feedback](./erc8004-feedback/)   | PEAC records as ERC-8004 reputation evidence     |
 
 ## Prerequisites
 

@@ -1,0 +1,39 @@
+{
+  "$schema": "../common/conformance-vector.schema.json",
+  "name": "erc8004-feedback-hash",
+  "description": "ERC-8004 feedbackHash computation from PEAC receipt via JCS canonicalization",
+  "version": "0.1",
+  "input": {
+    "file": "golden-receipt.json",
+    "description": "PEAC receipt in peac-receipt/0.1 wire format"
+  },
+  "canonicalization": {
+    "method": "RFC 8785 JCS",
+    "output": "{\"amt\":100,\"aud\":\"https://agent.example.com\",\"cur\":\"USD\",\"exp\":1769904000,\"iat\":1769817600,\"iss\":\"https://api.example.com\",\"jti\":\"01JJQX5KQHV7Z3M8R4N6P9W2Y1\",\"payment\":{\"asset\":\"USDC\",\"env\":\"live\",\"evidence\":{\"fromAddress\":\"0x1111111111111111111111111111111111111111\",\"network\":\"eip155:8453\",\"payTo\":\"0x2222222222222222222222222222222222222222\"},\"rail\":\"x402\",\"reference\":\"0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef\"},\"purpose_declared\":[\"inference\"],\"purpose_enforced\":\"inference\",\"sub\":\"https://api.example.com/v1/weather\",\"typ\":\"peac-receipt/0.1\"}",
+    "byte_length": 574
+  },
+  "hashes": {
+    "keccak256": {
+      "algorithm": "keccak256",
+      "input": "canonical JSON bytes (UTF-8 encoded)",
+      "expected": "0xf6194f761fdecef4eaf577f04465229551185e5e8e716d30d955f20eae12fafc",
+      "usage": "ERC-8004 feedbackHash parameter"
+    },
+    "sha256": {
+      "algorithm": "SHA-256",
+      "input": "canonical JSON bytes (UTF-8 encoded)",
+      "expected_base64url": "xkkSOFHq6ZXPwpODsrDMdDLd2dIB4IO1mTJP-8tR2zU",
+      "usage": "PEAC internal digest (for reference)"
+    }
+  },
+  "verification": {
+    "steps": [
+      "1. Parse golden-receipt.json as JSON object",
+      "2. Apply RFC 8785 JCS canonicalization",
+      "3. Encode canonical string as UTF-8 bytes",
+      "4. Compute keccak256 over the bytes",
+      "5. Compare hex output to expected value"
+    ],
+    "command": "cd examples/erc8004-feedback && pnpm verify"
+  }
+}

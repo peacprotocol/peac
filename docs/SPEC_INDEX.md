@@ -31,6 +31,13 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 
 - **[Test Vectors](specs/TEST_VECTORS.md)** - Golden vectors and negative test cases
 
+## Protocol Mappings
+
+External protocol integrations and identity anchors.
+
+- **[ERC-8004 (Trustless Agents)](mappings/erc-8004.md)** - On-chain agent identity and reputation integration
+- **[EAS (Ethereum Attestation Service)](mappings/eas.md)** - On-chain receipt anchoring via attestations (Planned)
+
 ## Related Documentation
 
 - [API Reference](api/) - Endpoint documentation (v0.9.16+)
@@ -43,3 +50,14 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 - **[Versioning Doctrine](specs/VERSIONING.md)** - Wire version vs repo version, artifact identifiers, compatibility guarantees
 
 Current wire format: `peac-receipt/0.1`
+
+## Release Artifacts
+
+The ERC-8004 mapping release bundle (`erc8004-mapping-v0.10.6-*.zip`) contains a subset of this repository focused on the ERC-8004 integration:
+
+- `docs/mappings/erc-8004.md` - Core mapping specification
+- `docs/mappings/eas.md` - EAS integration (Planned, non-normative)
+- `examples/erc8004-feedback/` - Working example with verification
+- `specs/conformance/erc8004-mapping/` - Conformance test vectors
+
+Links to other specifications in this index may not resolve within the release bundle. For the full specification set, see the [PEAC Protocol repository](https://github.com/peacprotocol/peac).

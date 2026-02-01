@@ -1,0 +1,20 @@
+{
+  "name": "@peac/example-erc8004-feedback",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ERC-8004 feedback example - demonstrates PEAC records as reputation evidence",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "demo": "tsx src/demo.ts",
+    "verify": "tsx src/verify-hash.ts"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
