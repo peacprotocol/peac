@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@peac/kernel": "workspace:*",
-    "zod": "^3.22.4"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
