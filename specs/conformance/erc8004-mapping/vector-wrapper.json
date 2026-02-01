@@ -1,0 +1,37 @@
+{
+  "$schema": "../common/conformance-vector.schema.json",
+  "name": "erc8004-feedback-hash-wrapper",
+  "description": "ERC-8004 feedbackHash computation from Pattern B wrapper file via JCS canonicalization",
+  "version": "0.1",
+  "input": {
+    "file": "golden-wrapper.json",
+    "description": "ERC-8004 wrapper file referencing a PEAC receipt (Pattern B integration)"
+  },
+  "canonicalization": {
+    "method": "RFC 8785 JCS",
+    "output": "{\"agentId\":1234,\"agentRegistry\":\"eip155:1:0x0000000000000000000000000000000000000000\",\"clientAddress\":\"eip155:8453:0x1111111111111111111111111111111111111111\",\"createdAt\":\"2026-01-31T12:00:00Z\",\"peac\":{\"sha256\":\"xkkSOFHq6ZXPwpODsrDMdDLd2dIB4IO1mTJP-8tR2zU\",\"typ\":\"peac-receipt/0.1\",\"uri\":\"https://api.example.com/peac/receipts/01JJQX5KQHV7Z3M8R4N6P9W2Y1\"},\"proofOfPayment\":{\"chainId\":\"8453\",\"fromAddress\":\"0x1111111111111111111111111111111111111111\",\"toAddress\":\"0x2222222222222222222222222222222222222222\",\"txHash\":\"0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef\"},\"tag1\":\"payment\",\"tag2\":\"x402\",\"value\":100,\"valueDecimals\":0}",
+    "byte_length": 647
+  },
+  "hashes": {
+    "keccak256": {
+      "algorithm": "keccak256",
+      "input": "canonical JSON bytes (UTF-8 encoded)",
+      "expected": "0x58a0056caf5fb01a324b023bfac341b5fdef8fb8b21e7f7a4d0f279de3ec1083",
+      "usage": "ERC-8004 feedbackHash parameter (when using wrapper mode)"
+    }
+  },
+  "notes": {
+    "wrapper_mode": "Pattern B: wrapper file is served at feedbackURI, not the PEAC receipt directly",
+    "peac_reference": "The peac.sha256 field contains the PEAC receipt's internal digest for independent verification",
+    "determinism": "Wrapper MUST also be JCS-canonicalized; feedbackHash commits to wrapper bytes, not fetched receipt bytes"
+  },
+  "verification": {
+    "steps": [
+      "1. Parse golden-wrapper.json as JSON object",
+      "2. Apply RFC 8785 JCS canonicalization",
+      "3. Encode canonical string as UTF-8 bytes",
+      "4. Compute keccak256 over the bytes",
+      "5. Compare hex output to expected value"
+    ]
+  }
+}

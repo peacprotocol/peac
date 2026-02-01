@@ -1,0 +1,24 @@
+{
+  "typ": "peac-receipt/0.1",
+  "iss": "https://api.example.com",
+  "aud": "https://agent.example.com",
+  "sub": "https://api.example.com/v1/weather",
+  "iat": 1769817600,
+  "exp": 1769904000,
+  "jti": "01JJQX5KQHV7Z3M8R4N6P9W2Y1",
+  "amt": 100,
+  "cur": "USD",
+  "payment": {
+    "rail": "x402",
+    "asset": "USDC",
+    "env": "live",
+    "reference": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    "evidence": {
+      "network": "eip155:8453",
+      "payTo": "0x2222222222222222222222222222222222222222",
+      "fromAddress": "0x1111111111111111111111111111111111111111"
+    }
+  },
+  "purpose_declared": ["inference"],
+  "purpose_enforced": "inference"
+}
