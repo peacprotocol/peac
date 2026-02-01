@@ -53,17 +53,17 @@ As of 2026-01-31, the `eas-contracts` repository publishes deployment metadata f
 
 ### Base Mainnet
 
-| Contract    | Address                                      |
-| ----------- | -------------------------------------------- |
-| EIP712Proxy | `0xF095fE4b23958b08D38e52d5d5674bBF0C03cbF6` |
-| Indexer     | `0x37AC6006646f2e687B7fB379F549Dc7634dF5b84` |
+| Contract    | Address                                                                                                                 |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| EIP712Proxy | [`0xF095fE4b23958b08D38e52d5d5674bBF0C03cbF6`](https://basescan.org/address/0xF095fE4b23958b08D38e52d5d5674bBF0C03cbF6) |
+| Indexer     | [`0x37AC6006646f2e687B7fB379F549Dc7634dF5b84`](https://basescan.org/address/0x37AC6006646f2e687B7fB379F549Dc7634dF5b84) |
 
 ### Optimism Mainnet
 
-| Contract    | Address                                      |
-| ----------- | -------------------------------------------- |
-| EIP712Proxy | `0xE132c2E90274B44FfD8090b58399D04ddc060AE1` |
-| Indexer     | `0x6dd0CB3C3711c8B5d03b3790e5339Bbc2Bbcf934` |
+| Contract    | Address                                                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| EIP712Proxy | [`0xE132c2E90274B44FfD8090b58399D04ddc060AE1`](https://optimistic.etherscan.io/address/0xE132c2E90274B44FfD8090b58399D04ddc060AE1) |
+| Indexer     | [`0x6dd0CB3C3711c8B5d03b3790e5339Bbc2Bbcf934`](https://optimistic.etherscan.io/address/0x6dd0CB3C3711c8B5d03b3790e5339Bbc2Bbcf934) |
 
 > **Note:** EAS core contracts (`EAS`, `SchemaRegistry`) may be deployed as regular contracts or as OP Stack predeploys depending on the chain. Always consult chain-specific documentation and the [eas-contracts deployment metadata](https://github.com/ethereum-attestation-service/eas-contracts#deployments) for the exact network you target.
 
