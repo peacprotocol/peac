@@ -30,7 +30,7 @@ A minimal schema that anchors a PEAC receipt commitment:
 | `receipt_hash` | bytes32 | keccak256 hash of the PEAC receipt canonical bytes    |
 | `receipt_uri`  | string  | URI to fetch the receipt (or a stable wrapper)        |
 | `media_type`   | string  | e.g., `application/json`                              |
-| `issued_at`    | uint64  | Unix seconds                                          |
+| `iat`          | uint64  | Unix seconds (JWT `iat` claim)                        |
 | `issuer`       | string  | Issuer identity (e.g., `did:web:...` or `eip155:...`) |
 | `subject`      | string  | Subject identity, if applicable                       |
 | `context_uri`  | string  | Optional context bundle URI                           |
