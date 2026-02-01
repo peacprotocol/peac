@@ -76,6 +76,9 @@ desktop.ini
 !packages/kernel/src/errors.generated.ts
 !packages/kernel/src/error-categories.generated.ts
 
+# Example generated outputs (canonical bytes, hashes)
+examples/*/generated/
+
 # Backup files
 *.bak
 *.backup

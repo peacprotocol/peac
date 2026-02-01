@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "PEAC: Verifiable Interaction Records for Machine-to-Machine Systems"
+message: "If you use PEAC, please cite this repository."
+type: software
+authors:
+  - family-names: Raj
+    given-names: Jithin
+    email: contact@peacprotocol.org
+    orcid: "https://orcid.org/0009-0009-7602-1629"
+repository-code: "https://github.com/peacprotocol/peac"
+url: "https://www.peacprotocol.org"
+abstract: >-
+  PEAC is an open standard for verifiable interaction records across automated
+  systems. It provides a transport-neutral receipt format built on JWS with
+  deterministic verification semantics, enabling independent implementations to
+  produce identical accept/reject decisions.
+keywords:
+  - verifiable-credentials
+  - digital-receipts
+  - machine-to-machine
+  - api-billing
+  - content-licensing
+  - agent-protocols
+license: MIT
+version: "0.10.5"
+date-released: "2026-01-30"
