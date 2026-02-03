@@ -436,36 +436,53 @@ async function verifySingleReceipt(
       const { verify, base64urlDecode, base64urlDecodeString } = await import('@peac/crypto');
       const jwks = JSON.parse(await fs.promises.readFile(jwksPath, 'utf-8'));
 
-      // Parse JWS header to get kid
+      // Parse JWS header to get kid and alg
       const jwsParts = receipt._jws.split('.');
       if (jwsParts.length !== 3) {
-        errors.push('Invalid JWS format');
+        errors.push('Invalid JWS format (expected 3 parts)');
       } else {
         const headerJson = base64urlDecodeString(jwsParts[0]);
-        const header = JSON.parse(headerJson) as { kid?: string; alg?: string };
+        const header = JSON.parse(headerJson) as { kid?: string; alg?: string; crit?: string[] };
+
+        // Reject 'none' algorithm (security)
+        if (header.alg === 'none') {
+          errors.push('Algorithm "none" is not allowed');
+        }
+
+        // Reject unknown critical headers
+        if (header.crit && header.crit.length > 0) {
+          errors.push(`Unknown critical headers: ${header.crit.join(', ')}`);
+        }
+
         const targetKid = header.kid;
 
-        // Select key by kid from JWKS
+        // Strict key selection by kid
         let keyJwk;
-        if (targetKid && Array.isArray(jwks.keys)) {
+        if (!Array.isArray(jwks.keys) || jwks.keys.length === 0) {
+          errors.push('JWKS has no keys');
+        } else if (targetKid) {
+          // JWS has kid: require exact match
           keyJwk = jwks.keys.find((k: { kid?: string }) => k.kid === targetKid);
           if (!keyJwk) {
             errors.push(`Key with kid "${targetKid}" not found in JWKS`);
           }
-        } else if (Array.isArray(jwks.keys) && jwks.keys.length > 0) {
-          // Fallback to first key if no kid in JWS header
+        } else if (jwks.keys.length === 1) {
+          // JWS has no kid but JWKS has exactly 1 key: accept it
           keyJwk = jwks.keys[0];
-          warnings.push('JWS has no kid - using first key from JWKS');
+          warnings.push('JWS has no kid - using only key from JWKS');
+        } else {
+          // JWS has no kid and JWKS has multiple keys: fail
+          errors.push(`JWS missing kid but JWKS has ${jwks.keys.length} keys - cannot select`);
         }
 
-        if (keyJwk) {
+        if (keyJwk && errors.length === 0) {
           if (!keyJwk.x) {
             errors.push('Selected key missing public key (x parameter)');
           } else {
             // Decode base64url public key bytes
             const publicKeyBytes = base64urlDecode(keyJwk.x);
             await verify(receipt._jws, publicKeyBytes);
-            logger.info(`Signature verified with key ${keyJwk.kid || 'unknown'}`);
+            logger.info(`Signature verified with key ${keyJwk.kid || 'anonymous'}`);
           }
         }
       }

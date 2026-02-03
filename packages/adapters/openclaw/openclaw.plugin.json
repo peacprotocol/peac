@@ -8,6 +8,7 @@
   "experimental": true,
   "configSchema": {
     "type": "object",
+    "additionalProperties": false,
     "properties": {
       "enabled": {
         "type": "boolean",
@@ -21,8 +22,10 @@
       },
       "capture": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "mode": {
+            "type": "string",
             "enum": ["hash_only", "allowlist"],
             "default": "hash_only",
             "description": "hash_only: Never capture plaintext. allowlist: Capture for specified tools only."
@@ -42,6 +45,7 @@
       },
       "signing": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "key_ref": {
             "type": "string",
@@ -62,6 +66,7 @@
       },
       "correlation": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "include_workflow": {
             "type": "boolean",
@@ -72,6 +77,7 @@
       },
       "background": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "drain_interval_ms": {
             "type": "integer",

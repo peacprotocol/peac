@@ -259,22 +259,29 @@ export function generateKeyId(jwk: JWK): string {
 // =============================================================================
 
 /**
- * Create a file system receipt writer.
+ * Create a file system receipt writer with atomic writes.
+ *
+ * Writes are atomic: write to .tmp, fsync, rename. This ensures
+ * partially written files are never observable.
  *
  * @param outputDir - Directory for receipt files
  * @returns Promise resolving to ReceiptWriter
  */
 export async function createFileReceiptWriter(outputDir: string): Promise<ReceiptWriter> {
   const fs = await import('fs');
-  const path = await import('path');
+  const pathModule = await import('path');
+
+  // Use path.resolve for portability
+  const resolvedOutputDir = pathModule.resolve(outputDir);
 
   // Ensure directory exists
-  await fs.promises.mkdir(outputDir, { recursive: true });
+  await fs.promises.mkdir(resolvedOutputDir, { recursive: true });
 
   return {
     async write(receipt) {
       const filename = `${receipt.rid}.peac.json`;
-      const filepath = path.join(outputDir, filename);
+      const filepath = pathModule.join(resolvedOutputDir, filename);
+      const tempPath = `${filepath}.tmp`;
 
       const content = JSON.stringify(
         {
@@ -287,7 +294,17 @@ export async function createFileReceiptWriter(outputDir: string): Promise<Receip
         2
       );
 
-      await fs.promises.writeFile(filepath, content, 'utf-8');
+      // Atomic write: write to .tmp, fsync, rename
+      await fs.promises.writeFile(tempPath, content, 'utf-8');
+
+      // fsync for durability (open, sync, close)
+      const fd = await fs.promises.open(tempPath, 'r');
+      await fd.sync();
+      await fd.close();
+
+      // Atomic rename (POSIX guarantees atomicity)
+      await fs.promises.rename(tempPath, filepath);
+
       return filepath;
     },
 
@@ -424,33 +441,57 @@ export async function createPluginInstance(options: CreatePluginOptions): Promis
   });
 
   // Track last emitted sequence for cursor-based emission
+  // This is the in-memory cursor; on restart, we rebuild from dedupe index
   let lastEmittedSequence = 0;
 
+  // Mutex to prevent overlapping drain cycles
+  let drainInProgress = false;
+
   // Create background service with proper cursor tracking
+  // Note: For full restart safety, the dedupe index should be persistent.
+  // The getPendingEntries filters out already-emitted entries using the dedupe index.
   const backgroundService = createBackgroundService({
     emitter,
     drainIntervalMs,
     getPendingEntries: async () => {
-      // Read entries after the last emitted sequence
-      const currentSequence = await store.getSequence();
-      if (currentSequence <= lastEmittedSequence) return [];
-      // Read from cursor position, not from 0
-      const entries = await store.read(lastEmittedSequence, batchSize);
-      // Filter to only entries we haven't emitted
-      return entries.filter((e) => e.sequence > lastEmittedSequence);
+      // Prevent overlapping drain cycles
+      if (drainInProgress) return [];
+      drainInProgress = true;
+
+      try {
+        // Read entries after the last emitted sequence
+        const currentSequence = await store.getSequence();
+        if (currentSequence <= lastEmittedSequence) return [];
+
+        // Read from cursor position
+        const entries = await store.read(lastEmittedSequence, batchSize);
+
+        // Filter out entries that are already emitted (restart safety)
+        // This uses the persistent dedupe index as source of truth
+        const pending = [];
+        for (const entry of entries) {
+          if (entry.sequence <= lastEmittedSequence) continue;
+          // Check if already emitted in dedupe index
+          const dedupeEntry = await dedupe.get(entry.action.id);
+          if (dedupeEntry?.emitted) continue;
+          pending.push(entry);
+        }
+        return pending;
+      } finally {
+        drainInProgress = false;
+      }
     },
     markEmitted: async (digest) => {
       // Find the entry with this digest and update cursor
       const entries = await store.read(lastEmittedSequence, batchSize);
       const entry = entries.find((e) => e.entry_digest === digest);
-      if (entry && entry.sequence > lastEmittedSequence) {
-        lastEmittedSequence = entry.sequence;
-      }
-      // Also mark in dedupe index for cross-session persistence
-      // Find the action ID from the entry
-      const matchingEntry = entries.find((e) => e.entry_digest === digest);
-      if (matchingEntry) {
-        await dedupe.markEmitted(matchingEntry.action.id);
+      if (entry) {
+        // Update in-memory cursor
+        if (entry.sequence > lastEmittedSequence) {
+          lastEmittedSequence = entry.sequence;
+        }
+        // Mark in persistent dedupe index (restart-safe)
+        await dedupe.markEmitted(entry.action.id);
       }
     },
     onError,
