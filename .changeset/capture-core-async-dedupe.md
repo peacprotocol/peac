@@ -1,6 +1,6 @@
 ---
-"@peac/capture-core": patch
-"@peac/crypto": patch
+'@peac/capture-core': patch
+'@peac/crypto': patch
 ---
 
 ## @peac/capture-core

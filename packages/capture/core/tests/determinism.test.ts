@@ -6,16 +6,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  createHasher,
-  createCaptureSession,
-  toInteractionEvidence,
-  GENESIS_DIGEST,
-} from '../src';
-import {
-  createInMemorySpoolStore,
-  createInMemoryDedupeIndex,
-} from '../src/testkit';
+import { createHasher, createCaptureSession, toInteractionEvidence, GENESIS_DIGEST } from '../src';
+import { createInMemorySpoolStore, createInMemoryDedupeIndex } from '../src/testkit';
 import type { CapturedAction, SpoolEntry } from '../src';
 
 // =============================================================================

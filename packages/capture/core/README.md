@@ -87,7 +87,7 @@ simplify chain verification (check for all-zeros rather than compute a hash).
 `captured_at` is derived deterministically from action timestamps:
 
 ```typescript
-captured_at = action.completed_at ?? action.started_at
+captured_at = action.completed_at ?? action.started_at;
 ```
 
 This ensures the same action stream produces identical chain digests across sessions.
@@ -102,10 +102,10 @@ order, NOT by timestamp order.
 
 Payloads are hashed according to truncation thresholds:
 
-| Size | Algorithm | Label |
-|------|-----------|-------|
-| <= 1MB | Full SHA-256 | `sha-256` |
-| > 1MB | First 1MB SHA-256 | `sha-256:trunc-1m` |
+| Size   | Algorithm         | Label              |
+| ------ | ----------------- | ------------------ |
+| <= 1MB | Full SHA-256      | `sha-256`          |
+| > 1MB  | First 1MB SHA-256 | `sha-256:trunc-1m` |
 
 The `bytes` field always contains the original payload size (for audit).
 
@@ -158,6 +158,7 @@ if (!result.success) {
 ```
 
 Error codes:
+
 - `E_CAPTURE_DUPLICATE` - Action ID already captured
 - `E_CAPTURE_INVALID_ACTION` - Missing required fields
 - `E_CAPTURE_HASH_FAILED` - Hashing operation failed
@@ -171,7 +172,7 @@ If a capture fails, subsequent captures can still succeed. The queue is designed
 be resilient:
 
 ```typescript
-const r1 = await session.capture(badAction);  // Fails
+const r1 = await session.capture(badAction); // Fails
 const r2 = await session.capture(goodAction); // Succeeds (queue not wedged)
 ```
 
@@ -180,6 +181,7 @@ const r2 = await session.capture(goodAction); // Succeeds (queue not wedged)
 The `close()` method releases session resources. Its behavior is:
 
 **Semantics:**
+
 - **Immediate:** `close()` does NOT wait for in-flight captures to drain. Any
   capture already in progress may complete or fail.
 - **Idempotent:** Multiple `close()` calls are safe and have no additional effect.
@@ -190,15 +192,12 @@ The `close()` method releases session resources. Its behavior is:
 
 ```typescript
 // Good: wait for captures, then close
-const results = await Promise.all([
-  session.capture(action1),
-  session.capture(action2),
-]);
+const results = await Promise.all([session.capture(action1), session.capture(action2)]);
 await session.close();
 
 // Risky: closing while captures in-flight
-session.capture(action1);  // May or may not complete
-await session.close();     // Immediate - doesn't wait
+session.capture(action1); // May or may not complete
+await session.close(); // Immediate - doesn't wait
 ```
 
 **Resource cleanup:** `close()` calls `store.close()` on the underlying SpoolStore.
@@ -212,15 +211,15 @@ or other resources in their `close()` method.
 ```typescript
 import {
   // Constants
-  GENESIS_DIGEST,    // Protocol-defined sentinel: 64 zeros (NOT sha256 of empty)
-  SIZE_CONSTANTS,    // { TRUNC_64K: 65536, TRUNC_1M: 1048576 }
+  GENESIS_DIGEST, // Protocol-defined sentinel: 64 zeros (NOT sha256 of empty)
+  SIZE_CONSTANTS, // { TRUNC_64K: 65536, TRUNC_1M: 1048576 }
 
   // Factories
-  createHasher,         // Create a Hasher instance
+  createHasher, // Create a Hasher instance
   createCaptureSession, // Create a CaptureSession
 
   // Mappers
-  toInteractionEvidence,      // SpoolEntry -> InteractionEvidenceV01
+  toInteractionEvidence, // SpoolEntry -> InteractionEvidenceV01
   toInteractionEvidenceBatch, // SpoolEntry[] -> InteractionEvidenceV01[]
 
   // Types
@@ -280,7 +279,7 @@ This package ships **CommonJS** output. ESM `import` is supported via Node's CJS
 
 ```typescript
 // Both work
-import { createCaptureSession } from '@peac/capture-core';      // ESM (Node synthesizes default)
+import { createCaptureSession } from '@peac/capture-core'; // ESM (Node synthesizes default)
 const { createCaptureSession } = require('@peac/capture-core'); // CJS
 ```
 

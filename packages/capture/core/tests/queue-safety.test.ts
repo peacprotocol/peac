@@ -8,17 +8,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { createCaptureSession, createHasher } from '../src';
-import {
-  createInMemorySpoolStore,
-  createInMemoryDedupeIndex,
-} from '../src/testkit';
-import type {
-  CapturedAction,
-  SpoolStore,
-  DedupeIndex,
-  DedupeEntry,
-  SpoolEntry,
-} from '../src';
+import { createInMemorySpoolStore, createInMemoryDedupeIndex } from '../src/testkit';
+import type { CapturedAction, SpoolStore, DedupeIndex, DedupeEntry, SpoolEntry } from '../src';
 
 // =============================================================================
 // Test Fixtures
