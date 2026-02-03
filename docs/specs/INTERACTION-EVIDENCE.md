@@ -5,6 +5,8 @@
 **Target:** v0.10.7
 **Extension Key:** `org.peacprotocol/interaction@0.1`
 
+**Terminology:** This specification uses MUST, SHOULD, and MAY per RFC 2119. Sections labeled "Non-Normative" are implementation guidance and not conformance requirements.
+
 ## Abstract
 
 This specification defines the InteractionEvidence extension for PEAC Protocol, enabling verifiable capture of tool calls, API requests, and other agent interactions. The design provides:
@@ -319,7 +321,10 @@ PEAC defines a canonical set of digest algorithms:
 
 - Implementations MUST accept the canonical set above
 - Default validators MUST reject unknown algorithms with `E_INTERACTION_INVALID_DIGEST_ALG`
-- Implementations MAY provide an "accept-unknown" mode for forward compatibility; in this mode, unknown algorithms MUST NOT be treated as verified and SHOULD surface a warning (recommended code: `W_INTERACTION_UNKNOWN_DIGEST_ALG`)
+- Implementations MAY provide an "accept-unknown" mode as a validator configuration option; in this mode:
+  - Validation passes (receipt is structurally valid)
+  - The digest MUST NOT be treated as verified (cannot be used for payload binding)
+  - Implementations SHOULD surface a warning (recommended code: `W_INTERACTION_UNKNOWN_DIGEST_ALG`)
 
 ### 5.2 Size Constants
 

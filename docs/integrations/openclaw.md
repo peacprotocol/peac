@@ -296,7 +296,7 @@ interface CapturedAction {
 ### 1. Protect Signing Keys
 
 - Never commit keys to version control
-- Use OS keychain in production
+- Use OS keychain when available (see Key Reference Formats for support status)
 - Rotate keys periodically
 
 ### 2. Hash-Only Mode
