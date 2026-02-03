@@ -15,7 +15,6 @@ import {
   ResourceTargetSchema,
   ResultSchema,
   PolicyContextSchema,
-  RefsSchema,
   KindSchema,
   InteractionEvidenceV01Schema,
   // Constants
@@ -60,7 +59,6 @@ import {
 const VALID_DATETIME = '2024-02-01T10:00:00Z';
 const VALID_DATETIME_LATER = '2024-02-01T10:00:01Z';
 const VALID_DIGEST_VALUE = 'a'.repeat(64);
-const VALID_DIGEST_VALUE_2 = 'b'.repeat(64);
 
 const validDigest = {
   alg: 'sha-256' as const,

@@ -76,6 +76,12 @@ jobs:
       - name: Build all packages
         run: pnpm build
 
+      - name: Capture-core exports verification
+        run: |
+          # Ensure build exists (self-contained, resilient to CI refactors)
+          pnpm build --filter @peac/capture-core
+          node packages/capture/core/scripts/test-exports.mjs
+
       - name: Pack and install gate
         run: bash scripts/pack-and-install.sh
 

@@ -146,18 +146,6 @@ function usesReservedPrefix(kind: string): boolean {
 }
 
 /**
- * Check if an error result has valid detail (internal helper)
- */
-function hasValidErrorDetail(
-  errorCode: string | undefined,
-  extensions: Record<string, unknown> | undefined
-): boolean {
-  if (errorCode) return true;
-  if (extensions && Object.keys(extensions).length > 0) return true;
-  return false;
-}
-
-/**
  * Check if a resource object is meaningful - has at least uri (internal helper)
  * Empty resource objects {} are not valid targets.
  */

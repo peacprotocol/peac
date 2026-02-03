@@ -84,6 +84,70 @@ describe('JSON Canonicalization (RFC 8785)', () => {
     expect(() => canonicalize(NaN)).toThrow('Cannot canonicalize non-finite number');
   });
 
+  // =============================================================================
+  // Undefined Handling (per JSON spec)
+  // =============================================================================
+
+  describe('undefined handling', () => {
+    it('should throw for top-level undefined', () => {
+      expect(() => canonicalize(undefined)).toThrow('Cannot canonicalize type: undefined');
+    });
+
+    it('should skip undefined values in objects (per JSON spec)', () => {
+      // JSON.stringify({a: 1, b: undefined, c: 3}) === '{"a":1,"c":3}'
+      expect(canonicalize({ a: 1, b: undefined, c: 3 })).toBe('{"a":1,"c":3}');
+    });
+
+    it('should convert undefined in arrays to null (per JSON spec)', () => {
+      // JSON.stringify([1, undefined, 3]) === '[1,null,3]'
+      expect(canonicalize([1, undefined, 3])).toBe('[1,null,3]');
+    });
+
+    it('should handle object with all undefined values', () => {
+      // JSON.stringify({a: undefined, b: undefined}) === '{}'
+      expect(canonicalize({ a: undefined, b: undefined })).toBe('{}');
+    });
+
+    it('should handle array with all undefined values', () => {
+      // JSON.stringify([undefined, undefined]) === '[null,null]'
+      expect(canonicalize([undefined, undefined])).toBe('[null,null]');
+    });
+
+    it('should handle nested undefined in objects', () => {
+      const obj = {
+        outer: {
+          inner: undefined,
+          kept: 'value',
+        },
+        removed: undefined,
+      };
+      // Undefined keys are removed at all nesting levels
+      expect(canonicalize(obj)).toBe('{"outer":{"kept":"value"}}');
+    });
+
+    it('should handle nested undefined in arrays', () => {
+      const arr = [[undefined], { a: undefined }];
+      // Arrays convert undefined to null, objects skip undefined
+      expect(canonicalize(arr)).toBe('[[null],{}]');
+    });
+
+    it('should match JSON.stringify behavior for undefined', () => {
+      // Verify our implementation matches native JSON behavior
+      const testCases = [
+        { a: 1, b: undefined },
+        [1, undefined, 2],
+        { nested: { x: undefined, y: 1 } },
+        [{ a: undefined }],
+      ];
+
+      for (const obj of testCases) {
+        // Parse JSON.stringify result to normalize, then canonicalize
+        const jsonResult = JSON.parse(JSON.stringify(obj));
+        expect(canonicalize(obj)).toBe(canonicalize(jsonResult));
+      }
+    });
+  });
+
   it('should compute JCS+SHA-256 hash', async () => {
     const obj = { a: 1, b: 2 };
     const hash = await jcsHash(obj);

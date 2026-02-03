@@ -19,7 +19,7 @@
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync, readdirSync, existsSync, statSync } from 'fs';
-import { join, basename, dirname } from 'path';
+import { join } from 'path';
 import {
   CONFORMANCE_ROOT,
   loadManifest,
@@ -325,7 +325,7 @@ describe('Global Conformance Manifest Hygiene', () => {
         if (category.startsWith('$')) continue;
 
         const versions = new Set<string>();
-        for (const [filename, entry] of Object.entries(entries)) {
+        for (const entry of Object.values(entries)) {
           if (entry.version) {
             versions.add(entry.version);
           }

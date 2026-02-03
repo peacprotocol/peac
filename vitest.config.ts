@@ -4,14 +4,23 @@ import { resolve } from 'path';
 export default defineConfig({
   // Exclude archive from vite transforms entirely
   resolve: {
-    alias: {
+    alias: [
+      // Subpath exports must come before main package alias (more specific first)
+      {
+        find: '@peac/capture-core/testkit',
+        replacement: resolve(__dirname, 'packages/capture/core/src/testkit.ts'),
+      },
       // Workspace package aliases for root-level tests
-      '@peac/kernel': resolve(__dirname, 'packages/kernel/src/index.ts'),
-      '@peac/schema': resolve(__dirname, 'packages/schema/src/index.ts'),
-      '@peac/crypto': resolve(__dirname, 'packages/crypto/src/index.ts'),
-      '@peac/protocol': resolve(__dirname, 'packages/protocol/src/index.ts'),
-      '@peac/control': resolve(__dirname, 'packages/control/src/index.ts'),
-    },
+      { find: '@peac/kernel', replacement: resolve(__dirname, 'packages/kernel/src/index.ts') },
+      { find: '@peac/schema', replacement: resolve(__dirname, 'packages/schema/src/index.ts') },
+      { find: '@peac/crypto', replacement: resolve(__dirname, 'packages/crypto/src/index.ts') },
+      { find: '@peac/protocol', replacement: resolve(__dirname, 'packages/protocol/src/index.ts') },
+      { find: '@peac/control', replacement: resolve(__dirname, 'packages/control/src/index.ts') },
+      {
+        find: '@peac/capture-core',
+        replacement: resolve(__dirname, 'packages/capture/core/src/index.ts'),
+      },
+    ],
   },
   server: {
     fs: {
