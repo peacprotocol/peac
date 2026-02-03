@@ -94,3 +94,41 @@ export type {
 } from './emitter.js';
 
 export { createReceiptEmitter, createBackgroundService } from './emitter.js';
+
+// =============================================================================
+// Plugin (OpenClaw plugin types and utilities)
+// =============================================================================
+
+export type {
+  JWK,
+  PluginConfig,
+  PluginContext,
+  PluginLogger,
+  ToolCallEvent,
+  ToolResultEvent,
+  ToolCallHandler,
+  ToolResultHandler,
+  PluginTool,
+  PluginInstance,
+  PluginStats,
+  CreatePluginOptions,
+} from './plugin.js';
+
+export {
+  createJwkSigner,
+  resolveSigner,
+  generateKeyId,
+  createFileReceiptWriter,
+  createPluginInstance,
+} from './plugin.js';
+
+// =============================================================================
+// Tools
+// =============================================================================
+
+export {
+  createStatusTool,
+  createExportBundleTool,
+  createVerifyTool,
+  createQueryTool,
+} from './tools.js';
