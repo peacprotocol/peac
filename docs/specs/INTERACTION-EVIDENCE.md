@@ -2,7 +2,7 @@
 
 **Version:** 0.1
 **Status:** Draft
-**Target:** v0.10.7
+**Since:** v0.10.7
 **Extension Key:** `org.peacprotocol/interaction@0.1`
 
 **Terminology:** This specification uses MUST, SHOULD, and MAY per RFC 2119. Sections labeled "Non-Normative" are implementation guidance and not conformance requirements.

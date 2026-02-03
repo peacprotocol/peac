@@ -1,7 +1,7 @@
 # OpenClaw Integration Guide
 
 **Package:** `@peac/adapter-openclaw`
-**Target:** v0.10.7
+**Since:** v0.10.7
 **Status:** Experimental
 
 This guide explains how to integrate PEAC receipts with OpenClaw, generating signed interaction records for every tool call.

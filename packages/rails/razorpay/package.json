@@ -1,6 +1,6 @@
 {
   "name": "@peac/rails-razorpay",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "private": true,
   "description": "Razorpay payment rail adapter for PEAC protocol (UPI, cards, netbanking)",
   "main": "dist/index.js",

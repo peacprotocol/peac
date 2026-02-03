@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Interaction Evidence Extension (v0.10.7)
+## [0.10.7] - 2026-02-04
+
+### Interaction Evidence Extension
 
 New extension type for capturing agent execution evidence at `evidence.extensions["org.peacprotocol/interaction@0.1"]`.
 
@@ -39,6 +41,50 @@ New extension type for capturing agent execution evidence at `evidence.extension
   - `valid.json` - 16 valid fixtures
   - `invalid.json` - 36 invalid fixtures with expected error codes
   - `edge-cases.json` - 22 fixtures with warnings
+
+- **@peac/capture-core** (NEW package, Layer 2)
+  - Runtime-neutral capture pipeline for any agent execution platform
+  - `CapturedAction` type for platform-agnostic action representation
+  - `SpoolEntry` type for append-only event spool
+  - `ActionHasher` with truncate-inline strategy (Option A)
+  - `SpoolWriter`/`SpoolReader` with crash-safety guarantees:
+    - O_APPEND semantics for atomic writes
+    - fsync before checkpoint advancement
+    - Atomic checkpoint (write temp, fsync, rename)
+    - File locking for concurrent writers
+  - RFC 8785 JCS for deterministic chain serialization
+  - Tamper-evident chain with spool-anchor extension support
+  - Dedupe index keyed by `interaction_id`
+  - `toInteractionEvidence()` mapper
+
+- **@peac/adapter-openclaw** (NEW package, Layer 4)
+  - OpenClaw plugin for PEAC interaction evidence capture
+  - Plugin manifest with configurable capture modes
+  - Two-stage pipeline: sync capture (< 10ms) + async emit with signing
+  - OpenClaw event to `CapturedAction` to `InteractionEvidence` mapping
+  - Session-history tailer fallback for resilience
+  - Signer abstraction (env var, keychain, sidecar, HSM)
+  - Key rotation support (ACTIVE/DEPRECATED/RETIRED lifecycle)
+  - Plugin tools: `peac_receipts.status`, `peac_receipts.export_bundle`, `peac_receipts.verify`, `peac_receipts.query`
+  - Skills: `/peac-export`, `/peac-verify`, `/peac-status`
+
+### Documentation
+
+- **docs/specs/INTERACTION-EVIDENCE.md**: Normative specification for InteractionEvidenceV01
+  - Extension placement at `evidence.extensions["org.peacprotocol/interaction@0.1"]`
+  - Type contracts with Zod schemas
+  - Validation semantics with 6 REJECT invariants
+  - Canonical digest algorithms and handling
+  - Well-known interaction kinds registry
+  - Error code taxonomy (E*INTERACTION*_, W*INTERACTION*_)
+  - Security considerations (hash-only defaults, secret detection)
+
+- **docs/integrations/openclaw.md**: OpenClaw integration guide
+  - Quick start with configuration examples
+  - Two-stage capture architecture explanation
+  - Key management levels (1-4)
+  - Plugin tools reference
+  - Verification workflow
 
 ### Changed
 
