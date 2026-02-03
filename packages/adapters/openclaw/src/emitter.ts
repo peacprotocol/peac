@@ -22,12 +22,19 @@ import { OPENCLAW_ERROR_CODES } from './types.js';
  * - Level 2: OS Keychain
  * - Level 3: Sidecar process
  * - Level 4: Hardware module (YubiKey, TPM, HSM)
+ *
+ * IMPORTANT: Implementations MUST include the key ID (kid) in the JWS header.
+ * The getKeyId() method allows callers to inspect which kid will be used
+ * without parsing the resulting JWS.
  */
 export interface Signer {
-  /** Sign a payload and return JWS */
+  /**
+   * Sign a payload and return JWS compact serialization.
+   * The JWS header MUST include the 'kid' claim for verifier key selection.
+   */
   sign(payload: unknown): Promise<string>;
 
-  /** Get the key ID (kid) for the current signing key */
+  /** Get the key ID (kid) that will be included in the JWS header */
   getKeyId(): string;
 
   /** Get the issuer URI */

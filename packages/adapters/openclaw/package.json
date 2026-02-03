@@ -28,6 +28,7 @@
   "dependencies": {
     "@peac/adapter-core": "workspace:*",
     "@peac/capture-core": "workspace:*",
+    "@peac/crypto": "workspace:*",
     "@peac/kernel": "workspace:*",
     "@peac/schema": "workspace:*"
   },

@@ -4,6 +4,7 @@
  * Maps OpenClaw tool call events to PEAC CapturedAction format.
  */
 
+import { canonicalize } from '@peac/crypto';
 import type { CapturedAction } from '@peac/capture-core';
 import type {
   OpenClawToolCallEvent,
@@ -277,13 +278,14 @@ function serializePayloadWithPolicy(
     return {};
   }
 
-  // Try to serialize
+  // Try to serialize using canonical JSON (RFC 8785)
+  // This ensures deterministic hashes across implementations
   let bytes: Uint8Array;
   try {
-    const json = JSON.stringify(payload);
+    const json = canonicalize(payload);
     bytes = new TextEncoder().encode(json);
   } catch {
-    // Serialization failed (circular references, BigInt, etc.)
+    // Serialization failed (circular references, BigInt, functions, etc.)
     return {
       warning: {
         code: OPENCLAW_WARNING_CODES.SERIALIZATION_FAILED,

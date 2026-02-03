@@ -425,6 +425,9 @@ importers:
       '@peac/capture-core':
         specifier: workspace:*
         version: link:../../capture/core
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../crypto
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel
