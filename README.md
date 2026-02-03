@@ -362,9 +362,9 @@ See `docs/SPEC_INDEX.md` for normative specifications and `docs/CI_BEHAVIOR.md` 
 
 ## License
 
-PEAC Protocol - Apache 2.0 License - Stewarded by contributors from [Originary](https://www.originary.xyz) and the community.
+Apache-2.0. See [LICENSE](LICENSE). Contributions are licensed under Apache-2.0.
 
-See [LICENSE](LICENSE) for full details.
+Stewardship: [Originary](https://www.originary.xyz/) and the open source community.
 
 ---
 

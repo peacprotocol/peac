@@ -1,5 +1,5 @@
 {
-  "$comment": "Fixture manifest for PEAC conformance testing. This file contains metadata about fixtures so the fixture files themselves can be pure receipts.",
+  "$comment": "Fixture manifest for PEAC conformance testing. This file contains metadata about fixtures so the fixture files themselves can be pure receipts. The 'version' field indicates the minimum PEAC protocol version required to validate the fixture (fixture pack format version, not repo release version).",
   "valid": {
     "minimal-receipt.json": {
       "description": "Minimal valid PEAC receipt - only required fields"
@@ -219,6 +219,23 @@
       "description": "Edge case workflow correlation vectors including limits testing (v0.10.2+)",
       "version": "0.10.2",
       "fixture_count": 11
+    }
+  },
+  "interaction": {
+    "valid.json": {
+      "description": "Valid InteractionEvidenceV01 golden vectors (v0.10.7+)",
+      "version": "0.10.7",
+      "fixture_count": 16
+    },
+    "invalid.json": {
+      "description": "Invalid InteractionEvidenceV01 vectors with expected error codes (v0.10.7+)",
+      "version": "0.10.7",
+      "fixture_count": 36
+    },
+    "edge-cases.json": {
+      "description": "Edge case InteractionEvidenceV01 vectors with warnings (v0.10.7+)",
+      "version": "0.10.7",
+      "fixture_count": 22
     }
   }
 }

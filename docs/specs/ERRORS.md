@@ -184,6 +184,73 @@ To add a new error code:
 4. Add test vectors demonstrating the error
 5. Document in relevant package README
 
+## Interaction Evidence Validation Semantics (v0.10.7+)
+
+The `InteractionEvidenceV01` extension uses layered error codes with specific validation precedence.
+These semantics are normative for conformant implementations.
+
+### Error Code Layers
+
+| Prefix            | Layer              | Meaning                                              |
+| ----------------- | ------------------ | ---------------------------------------------------- |
+| `E_INTERACTION_*` | Profile validation | Schema/format errors in the interaction extension    |
+| `W_INTERACTION_*` | Warnings           | Non-fatal issues (valid but potentially problematic) |
+
+### Validation Precedence (Normative)
+
+Validators MUST check in this order, returning the first error encountered:
+
+1. **Type check**: Input must be a plain object (not null, not array)
+2. **Required fields**: `interaction_id`, `kind`, `executor.platform`, `started_at`
+3. **Field format**: Regex patterns, length limits, datetime parsing
+4. **Reserved prefixes**: `peac.*` and `org.peacprotocol.*` kinds not in registry
+5. **Target consistency**: `tool.*` requires `tool` field; `http.*`/`fs.*` requires `resource.uri`
+6. **Timing invariants**: `completed_at >= started_at`
+7. **Error detail requirement**: `result.status=error` requires `error_code` or extensions
+
+### Semantic Decisions (Normative)
+
+These validation behaviors are intentional and stable:
+
+| Input                              | Error Code                         | Rationale                              |
+| ---------------------------------- | ---------------------------------- | -------------------------------------- |
+| `Array.isArray(input)`             | `E_INTERACTION_INVALID_FORMAT`     | Arrays are objects but not valid input |
+| `kind: ""`                         | `E_INTERACTION_MISSING_KIND`       | Empty string is semantically missing   |
+| `started_at: "not-a-date"`         | `E_INTERACTION_MISSING_STARTED_AT` | Unparseable datetime is unusable       |
+| `completed_at < started_at`        | `E_INTERACTION_INVALID_TIMING`     | Relational timing constraint violation |
+| `resource: {}` for `http.*`/`fs.*` | `E_INTERACTION_MISSING_TARGET`     | Must have meaningful `uri` field       |
+
+**Key distinction**: `E_INTERACTION_INVALID_TIMING` is reserved exclusively for relational
+constraints between fields (e.g., `completed_at` before `started_at`). Format/parsing
+errors use `E_INTERACTION_MISSING_*` codes.
+
+### Interaction Error Codes
+
+| Code                                  | HTTP | Description                                     |
+| ------------------------------------- | ---- | ----------------------------------------------- |
+| `E_INTERACTION_INVALID_FORMAT`        | 400  | Input is not a valid object                     |
+| `E_INTERACTION_MISSING_ID`            | 400  | Missing or empty `interaction_id`               |
+| `E_INTERACTION_MISSING_KIND`          | 400  | Missing or empty `kind`                         |
+| `E_INTERACTION_INVALID_KIND_FORMAT`   | 400  | Kind fails format validation                    |
+| `E_INTERACTION_KIND_RESERVED`         | 400  | Kind uses reserved prefix not in registry       |
+| `E_INTERACTION_MISSING_EXECUTOR`      | 400  | Missing `executor` or `executor.platform`       |
+| `E_INTERACTION_MISSING_STARTED_AT`    | 400  | Missing or unparseable `started_at`             |
+| `E_INTERACTION_INVALID_TIMING`        | 400  | `completed_at < started_at`                     |
+| `E_INTERACTION_MISSING_TARGET`        | 400  | Kind requires target field not present          |
+| `E_INTERACTION_INVALID_DIGEST`        | 400  | Digest value not 64 lowercase hex               |
+| `E_INTERACTION_INVALID_DIGEST_ALG`    | 400  | Unknown digest algorithm                        |
+| `E_INTERACTION_MISSING_RESULT`        | 400  | Output present but no `result.status`           |
+| `E_INTERACTION_MISSING_ERROR_DETAIL`  | 400  | Error status without `error_code` or extensions |
+| `E_INTERACTION_INVALID_EXTENSION_KEY` | 400  | Extension key not properly namespaced           |
+
+### Interaction Warning Codes
+
+| Code                              | Description                                 |
+| --------------------------------- | ------------------------------------------- |
+| `W_INTERACTION_KIND_UNREGISTERED` | Kind not in well-known registry             |
+| `W_INTERACTION_MISSING_TARGET`    | No tool or resource field (non-strict kind) |
+
 ## Version History
 
+- **v0.10.7**: Added Interaction Evidence error codes and validation semantics
 - **v0.9.15**: Initial error registry with structured error model

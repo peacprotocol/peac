@@ -106,7 +106,7 @@ PEAC-Issuer: https://your-api.com
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
-PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ...
+PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
 ```
 
 ## x402 v2 Dialect

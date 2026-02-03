@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/kernel/error-categories.schema.json",
   "$comment": "AUTO-GENERATED from specs/kernel/errors.json - DO NOT EDIT MANUALLY",
-  "version": "0.9.30",
+  "version": "0.10.7",
   "source_file": "specs/kernel/errors.json",
   "categories": [
     "attribution",
@@ -10,6 +10,7 @@
     "dispute",
     "identity",
     "infrastructure",
+    "interaction",
     "ucp",
     "validation",
     "verification",

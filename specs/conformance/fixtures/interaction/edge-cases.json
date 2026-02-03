@@ -1,0 +1,564 @@
+{
+  "$schema": "https://www.peacprotocol.org/schemas/conformance/interaction-fixtures.schema.json",
+  "$comment": "Edge cases and warnings for InteractionEvidenceV01 (v0.10.7+)",
+  "version": "0.10.7",
+  "fixtures": [
+    {
+      "name": "unregistered-kind-warns",
+      "description": "Unknown kind not in registry produces warning but is valid",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "custom:session_001:action_001",
+        "kind": "com.acme.custom-action",
+        "executor": {
+          "platform": "custom"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "W_INTERACTION_KIND_UNREGISTERED",
+            "field": "kind",
+            "message": "Kind not in recommended registry"
+          },
+          {
+            "code": "W_INTERACTION_MISSING_TARGET",
+            "field": "tool|resource",
+            "message": "No tool or resource field present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "message-kind-warns-missing-target",
+      "description": "Message kind without tool or resource warns but is valid",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "a2a:conv_001:msg_001",
+        "kind": "message",
+        "executor": {
+          "platform": "a2a"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "W_INTERACTION_MISSING_TARGET",
+            "field": "tool|resource",
+            "message": "No tool or resource field present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-at-min-length",
+      "description": "Kind at minimum length (2 characters)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "ab",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "W_INTERACTION_KIND_UNREGISTERED",
+            "field": "kind"
+          }
+        ],
+        "kind_length": 2
+      }
+    },
+    {
+      "name": "kind-at-max-length",
+      "description": "Kind at maximum length (128 characters)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "abcdefghijklmnopqrstuvwxyz0123456789.abcdefghijklmnopqrstuvwxyz0123456789.abcdefghijklmnopqrstuvwxyz0123456789.abcdefghijk0",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "W_INTERACTION_KIND_UNREGISTERED",
+            "field": "kind"
+          }
+        ],
+        "kind_length": 128
+      }
+    },
+    {
+      "name": "interaction-id-at-max-length",
+      "description": "interaction_id at maximum length (256 characters)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789:call_abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01234",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "id_length": 256
+      }
+    },
+    {
+      "name": "executor-platform-at-max-length",
+      "description": "executor.platform at maximum length (64 characters)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "custom:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01"
+        },
+        "tool": {
+          "name": "test"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "platform_length": 64
+      }
+    },
+    {
+      "name": "tool-name-at-max-length",
+      "description": "tool.name at maximum length (256 characters)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01234567"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "tool_name_length": 256
+      }
+    },
+    {
+      "name": "resource-uri-at-max-length",
+      "description": "resource.uri at maximum length (2048 characters)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "mcp:session_abc:req_123",
+        "kind": "http.request",
+        "executor": {
+          "platform": "mcp"
+        },
+        "resource": {
+          "uri": "https://api.example.com/v1/data?query=abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdef",
+          "method": "GET"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "uri_length": 2048
+      }
+    },
+    {
+      "name": "completed-at-equals-started-at",
+      "description": "completed_at equals started_at (instant completion)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "fast_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "completed_at": "2026-01-20T10:00:00Z",
+        "duration_ms": 0,
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "comment": "Equal timestamps allowed for instant operations"
+      }
+    },
+    {
+      "name": "duration-ms-zero",
+      "description": "duration_ms at minimum value (0)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "cached_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "duration_ms": 0,
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "bytes-zero",
+      "description": "Digest bytes field at zero (empty payload)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "no_input_tool"
+        },
+        "input": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "comment": "SHA-256 of empty input is valid"
+      }
+    },
+    {
+      "name": "error-with-extensions-detail",
+      "description": "Error status with extensions providing detail (no error_code)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "complex_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "result": {
+          "status": "error"
+        },
+        "extensions": {
+          "org.openclaw/error-detail": {
+            "stack_trace_hash": "abc123",
+            "category": "network"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "comment": "Extensions can provide error detail instead of error_code"
+      }
+    },
+    {
+      "name": "all-registry-kinds-tool-call",
+      "description": "Registry kind tool.call produces no warnings",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_001:call_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "web_search"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "all-registry-kinds-http-request",
+      "description": "Registry kind http.request produces no warnings",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "mcp:session_001:req_001",
+        "kind": "http.request",
+        "executor": {
+          "platform": "mcp"
+        },
+        "resource": {
+          "uri": "https://api.example.com/data",
+          "method": "POST"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "all-registry-kinds-fs-read",
+      "description": "Registry kind fs.read produces no warnings",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "claude-code:sess_001:read_001",
+        "kind": "fs.read",
+        "executor": {
+          "platform": "claude-code"
+        },
+        "resource": {
+          "uri": "file:///etc/config.json"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "all-registry-kinds-fs-write",
+      "description": "Registry kind fs.write produces no warnings",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "claude-code:sess_001:write_001",
+        "kind": "fs.write",
+        "executor": {
+          "platform": "claude-code"
+        },
+        "resource": {
+          "uri": "file:///tmp/output.log"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "all-registry-kinds-message",
+      "description": "Registry kind message (no target required, but warns)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "a2a:conv_001:msg_001",
+        "kind": "message",
+        "executor": {
+          "platform": "a2a"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "W_INTERACTION_MISSING_TARGET",
+            "field": "tool|resource"
+          }
+        ],
+        "comment": "message kind is in registry but warns about missing target"
+      }
+    },
+    {
+      "name": "extension-key-with-version",
+      "description": "Extension key with version suffix",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "extensions": {
+          "org.peacprotocol/spool-anchor@0.1": {
+            "spool_head_digest": "abc123",
+            "entry_index": 42
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "extension-key-multi-segment-dns",
+      "description": "Extension key with multi-segment reverse DNS",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "custom:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "custom"
+        },
+        "tool": {
+          "name": "test"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "extensions": {
+          "com.example.subdomain/custom-field": "value",
+          "io.github.user/metadata@1.0.0": {
+            "field": "data"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "policy-deny-decision",
+      "description": "Policy with deny decision (action was denied)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_denied:call_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "dangerous_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "result": {
+          "status": "error",
+          "error_code": "E_POLICY_DENIED"
+        },
+        "policy": {
+          "decision": "deny",
+          "sandbox_enabled": true,
+          "elevated": false
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "tool-invoke-kind-future",
+      "description": "tool.invoke kind (future registry expansion) requires tool field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "future:run_abc:call_123",
+        "kind": "tool.invoke",
+        "executor": {
+          "platform": "future-platform"
+        },
+        "tool": {
+          "name": "new_style_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "W_INTERACTION_KIND_UNREGISTERED",
+            "field": "kind",
+            "comment": "tool.invoke not in current registry but has tool.* prefix"
+          }
+        ]
+      }
+    },
+    {
+      "name": "http-stream-kind-future",
+      "description": "http.stream kind (future registry expansion) requires resource field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "mcp:session_stream:req_001",
+        "kind": "http.stream",
+        "executor": {
+          "platform": "mcp"
+        },
+        "resource": {
+          "uri": "wss://api.example.com/stream",
+          "method": "GET"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "W_INTERACTION_KIND_UNREGISTERED",
+            "field": "kind",
+            "comment": "http.stream not in current registry but has http.* prefix"
+          }
+        ]
+      }
+    }
+  ]
+}

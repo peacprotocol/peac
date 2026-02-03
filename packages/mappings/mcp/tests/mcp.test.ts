@@ -25,7 +25,7 @@ describe('MCP integration', () => {
         },
       };
 
-      const receiptJWS = 'eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkifQ.eyJpc3MiOi...';
+      const receiptJWS = 'eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ.eyJpc3MiOi...';
 
       const withReceipt = attachReceipt(toolResponse, receiptJWS);
 
@@ -192,7 +192,7 @@ describe('MCP integration', () => {
           completion: 'Quantum entanglement is a phenomenon where...',
           tokens_used: 150,
         },
-        'eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMucmVjZWlwdC8wLjkiLCJraWQiOiIyMDI1LTAxLTI2VDEyOjAwOjAwWiJ9.eyJpc3MiOiJodHRwczovL21lcmNoYW50LmV4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3Mzc4OTI4MDAsInJpZCI6IjAxOTNjNGQwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwMDAwMCIsImFtdCI6MTUwLCJjdXIiOiJVU0QiLCJwYXltZW50Ijp7InNjaGVtZSI6InN0cmlwZSIsInJlZmVyZW5jZSI6ImNzX3Rlc3RfZ29sZGVuIiwiYW1vdW50IjoxNTAsImN1cnJlbmN5IjoiVVNEIn19.signature',
+        'eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEiLCJraWQiOiIyMDI1LTAxLTI2VDEyOjAwOjAwWiJ9.eyJpc3MiOiJodHRwczovL21lcmNoYW50LmV4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3Mzc4OTI4MDAsInJpZCI6IjAxOTNjNGQwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwMDAwMCIsImFtdCI6MTUwLCJjdXIiOiJVU0QiLCJwYXltZW50Ijp7InNjaGVtZSI6InN0cmlwZSIsInJlZmVyZW5jZSI6ImNzX3Rlc3RfZ29sZGVuIiwiYW1vdW50IjoxNTAsImN1cnJlbmN5IjoiVVNEIn19.signature',
         {
           cost_usd: 0.015,
           model: 'example-model',

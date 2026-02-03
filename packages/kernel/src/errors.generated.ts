@@ -3,7 +3,7 @@
  *
  * AUTO-GENERATED from specs/kernel/errors.json
  * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts
- * Spec version: 0.9.30
+ * Spec version: 0.10.7
  */
 
 import type { ErrorDefinition } from './types.js';
@@ -85,6 +85,22 @@ export const ERROR_CODES = {
   E_INTERNAL: 'E_INTERNAL',
   E_JWKS_FETCH_FAILED: 'E_JWKS_FETCH_FAILED',
   E_RATE_LIMITED: 'E_RATE_LIMITED',
+
+  // Interaction error codes
+  E_INTERACTION_INVALID_DIGEST: 'E_INTERACTION_INVALID_DIGEST',
+  E_INTERACTION_INVALID_DIGEST_ALG: 'E_INTERACTION_INVALID_DIGEST_ALG',
+  E_INTERACTION_INVALID_EXTENSION_KEY: 'E_INTERACTION_INVALID_EXTENSION_KEY',
+  E_INTERACTION_INVALID_FORMAT: 'E_INTERACTION_INVALID_FORMAT',
+  E_INTERACTION_INVALID_KIND_FORMAT: 'E_INTERACTION_INVALID_KIND_FORMAT',
+  E_INTERACTION_INVALID_TIMING: 'E_INTERACTION_INVALID_TIMING',
+  E_INTERACTION_KIND_RESERVED: 'E_INTERACTION_KIND_RESERVED',
+  E_INTERACTION_MISSING_ERROR_DETAIL: 'E_INTERACTION_MISSING_ERROR_DETAIL',
+  E_INTERACTION_MISSING_EXECUTOR: 'E_INTERACTION_MISSING_EXECUTOR',
+  E_INTERACTION_MISSING_ID: 'E_INTERACTION_MISSING_ID',
+  E_INTERACTION_MISSING_KIND: 'E_INTERACTION_MISSING_KIND',
+  E_INTERACTION_MISSING_RESULT: 'E_INTERACTION_MISSING_RESULT',
+  E_INTERACTION_MISSING_STARTED_AT: 'E_INTERACTION_MISSING_STARTED_AT',
+  E_INTERACTION_MISSING_TARGET: 'E_INTERACTION_MISSING_TARGET',
 
   // Ucp error codes
   E_UCP_EVIDENCE_SERIALIZATION_FAILED: 'E_UCP_EVIDENCE_SERIALIZATION_FAILED',
@@ -655,6 +671,125 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     description: 'Too many requests, please retry later',
     retriable: true,
     category: 'infrastructure',
+  },
+
+  // Interaction error codes
+  E_INTERACTION_INVALID_DIGEST: {
+    code: 'E_INTERACTION_INVALID_DIGEST',
+    http_status: 400,
+    title: 'Interaction Invalid Digest',
+    description: 'Digest structure is invalid (wrong value format or missing bytes)',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_INVALID_DIGEST_ALG: {
+    code: 'E_INTERACTION_INVALID_DIGEST_ALG',
+    http_status: 400,
+    title: 'Interaction Invalid Digest Algorithm',
+    description:
+      'Digest algorithm is not in the canonical set (sha-256, sha-256:trunc-64k, sha-256:trunc-1m)',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_INVALID_EXTENSION_KEY: {
+    code: 'E_INTERACTION_INVALID_EXTENSION_KEY',
+    http_status: 400,
+    title: 'Interaction Invalid Extension Key',
+    description: 'Extension key does not match required format (reverse-DNS/name[@version])',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_INVALID_FORMAT: {
+    code: 'E_INTERACTION_INVALID_FORMAT',
+    http_status: 400,
+    title: 'Interaction Invalid Format',
+    description: 'Interaction evidence does not conform to InteractionEvidenceV01 schema',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_INVALID_KIND_FORMAT: {
+    code: 'E_INTERACTION_INVALID_KIND_FORMAT',
+    http_status: 400,
+    title: 'Interaction Invalid Kind Format',
+    description:
+      'Interaction kind does not match required format (lowercase, 2-128 chars, starts with letter)',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_INVALID_TIMING: {
+    code: 'E_INTERACTION_INVALID_TIMING',
+    http_status: 400,
+    title: 'Interaction Invalid Timing',
+    description:
+      'Timing constraint violated (completed_at < started_at or invalid datetime format)',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_KIND_RESERVED: {
+    code: 'E_INTERACTION_KIND_RESERVED',
+    http_status: 400,
+    title: 'Interaction Kind Reserved',
+    description:
+      'Interaction kind uses reserved prefix (peac.*, org.peacprotocol.*) but is not in the well-known registry',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_MISSING_ERROR_DETAIL: {
+    code: 'E_INTERACTION_MISSING_ERROR_DETAIL',
+    http_status: 400,
+    title: 'Interaction Missing Error Detail',
+    description: 'error_code or extensions required when result.status is error',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_MISSING_EXECUTOR: {
+    code: 'E_INTERACTION_MISSING_EXECUTOR',
+    http_status: 400,
+    title: 'Interaction Missing Executor',
+    description: 'Interaction evidence is missing required executor or executor.platform field',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_MISSING_ID: {
+    code: 'E_INTERACTION_MISSING_ID',
+    http_status: 400,
+    title: 'Interaction Missing ID',
+    description: 'Interaction evidence is missing required interaction_id field',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_MISSING_KIND: {
+    code: 'E_INTERACTION_MISSING_KIND',
+    http_status: 400,
+    title: 'Interaction Missing Kind',
+    description: 'Interaction evidence is missing required kind field',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_MISSING_RESULT: {
+    code: 'E_INTERACTION_MISSING_RESULT',
+    http_status: 400,
+    title: 'Interaction Missing Result',
+    description: 'result.status is required when output is present',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_MISSING_STARTED_AT: {
+    code: 'E_INTERACTION_MISSING_STARTED_AT',
+    http_status: 400,
+    title: 'Interaction Missing Started At',
+    description: 'Interaction evidence is missing required started_at field',
+    retriable: false,
+    category: 'interaction',
+  },
+  E_INTERACTION_MISSING_TARGET: {
+    code: 'E_INTERACTION_MISSING_TARGET',
+    http_status: 400,
+    title: 'Interaction Missing Target',
+    description:
+      'Kind prefix requires matching target field (tool.* needs tool, http.*/fs.* need resource)',
+    retriable: false,
+    category: 'interaction',
   },
 
   // Ucp error codes

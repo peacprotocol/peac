@@ -1,6 +1,6 @@
 /**
  * PEAC Protocol Schema Package
- * Wire format frozen at peac.receipt/0.9 with v1.0-equivalent semantics
+ * Wire format frozen at peac-receipt/0.1 with v1.0-equivalent semantics
  */
 
 // Core envelope and types
@@ -249,6 +249,71 @@ export type {
   WorkflowValidationResult,
   CreateWorkflowSummaryParams,
 } from './workflow';
+
+// Interaction evidence (v0.10.7+ agent execution capture)
+export {
+  DigestAlgSchema,
+  DigestSchema,
+  PayloadRefSchema,
+  ExecutorSchema,
+  ToolTargetSchema,
+  ResourceTargetSchema,
+  ResultSchema,
+  PolicyContextSchema,
+  RefsSchema,
+  KindSchema,
+  InteractionEvidenceV01Schema,
+  // Constants
+  INTERACTION_EXTENSION_KEY,
+  CANONICAL_DIGEST_ALGS,
+  DIGEST_SIZE_CONSTANTS,
+  RESULT_STATUSES,
+  REDACTION_MODES,
+  POLICY_DECISIONS,
+  WELL_KNOWN_KINDS,
+  RESERVED_KIND_PREFIXES,
+  INTERACTION_LIMITS,
+  KIND_FORMAT_PATTERN,
+  EXTENSION_KEY_PATTERN,
+  DIGEST_VALUE_PATTERN,
+  // Validation
+  validateInteraction,
+  validateInteractionOrdered,
+  validateInteractionEvidence,
+  isValidInteractionEvidence,
+  // Helpers
+  isWellKnownKind,
+  isReservedKindPrefix,
+  isDigestTruncated,
+  // SDK Accessors
+  getInteraction,
+  setInteraction,
+  hasInteraction,
+  // Projection API
+  createReceiptView,
+  // Factory
+  createInteractionEvidence,
+} from './interaction';
+export type {
+  DigestAlg,
+  Digest,
+  PayloadRef,
+  Executor,
+  ToolTarget,
+  ResourceTarget,
+  ResultStatus,
+  Result,
+  PolicyDecision,
+  PolicyContext,
+  Refs,
+  InteractionEvidenceV01,
+  ValidationError,
+  ValidationWarning,
+  InteractionValidationResult,
+  SimpleValidationResult,
+  ReceiptView,
+  CreateInteractionParams,
+} from './interaction';
 
 // Obligations extension (v0.9.26+ CC Signals alignment)
 export {

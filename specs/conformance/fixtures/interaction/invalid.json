@@ -1,0 +1,742 @@
+{
+  "$schema": "https://www.peacprotocol.org/schemas/conformance/interaction-fixtures.schema.json",
+  "$comment": "Invalid InteractionEvidenceV01 vectors with expected error codes (v0.10.7+)",
+  "version": "0.10.7",
+  "fixtures": [
+    {
+      "name": "not-an-object",
+      "description": "Input is not an object",
+      "type": "InteractionEvidenceV01",
+      "input": "not an object",
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_FORMAT",
+        "error": "Input must be an object"
+      }
+    },
+    {
+      "name": "null-input",
+      "description": "Input is null",
+      "type": "InteractionEvidenceV01",
+      "input": null,
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_FORMAT",
+        "error": "Input must be an object"
+      }
+    },
+    {
+      "name": "array-input",
+      "description": "Input is an array (ORDERING LOCK: arrays must yield INVALID_FORMAT, not MISSING_ID)",
+      "type": "InteractionEvidenceV01",
+      "input": [],
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_FORMAT",
+        "error": "Input must be an object",
+        "meta": {
+          "ordering_lock": "Type check (step 1) must run before required fields (step 2)"
+        }
+      }
+    },
+    {
+      "name": "missing-interaction-id",
+      "description": "Missing required interaction_id field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_ID",
+        "error": "interaction_id is required"
+      }
+    },
+    {
+      "name": "empty-interaction-id",
+      "description": "Empty string for interaction_id",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_ID",
+        "error": "interaction_id is required"
+      }
+    },
+    {
+      "name": "missing-kind",
+      "description": "Missing required kind field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_KIND",
+        "error": "kind is required"
+      }
+    },
+    {
+      "name": "empty-kind",
+      "description": "Empty string for kind (ORDERING LOCK: empty string = missing, not invalid format)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_KIND",
+        "error": "kind is required",
+        "meta": {
+          "ordering_lock": "Empty string is semantically missing, not invalid format"
+        }
+      }
+    },
+    {
+      "name": "kind-too-short",
+      "description": "Kind is too short (less than 2 characters)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "a",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_KIND_FORMAT",
+        "error": "Kind must be 2-128 characters"
+      }
+    },
+    {
+      "name": "kind-uppercase",
+      "description": "Kind with uppercase characters",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "Tool.Call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_KIND_FORMAT",
+        "error": "Kind must be lowercase"
+      }
+    },
+    {
+      "name": "kind-starts-with-number",
+      "description": "Kind starting with a number",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "1tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_KIND_FORMAT",
+        "error": "Kind must start with a letter"
+      }
+    },
+    {
+      "name": "kind-reserved-peac-prefix",
+      "description": "Kind using reserved peac.* prefix not in registry",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "peac.custom-type",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_KIND_RESERVED",
+        "error": "Kind uses reserved prefix"
+      }
+    },
+    {
+      "name": "kind-reserved-peacprotocol-prefix",
+      "description": "Kind using reserved org.peacprotocol.* prefix not in registry",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "org.peacprotocol.custom-action",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_KIND_RESERVED",
+        "error": "Kind uses reserved prefix"
+      }
+    },
+    {
+      "name": "missing-started-at",
+      "description": "Missing required started_at field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_STARTED_AT",
+        "error": "started_at is required"
+      }
+    },
+    {
+      "name": "invalid-started-at-format",
+      "description": "Invalid datetime format for started_at (ORDERING LOCK: unparseable = missing, not invalid timing)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "not-a-date"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_STARTED_AT",
+        "error": "started_at must be a valid datetime",
+        "meta": {
+          "ordering_lock": "Unparseable datetime is missing (unusable), INVALID_TIMING reserved for relational constraints"
+        }
+      }
+    },
+    {
+      "name": "missing-executor",
+      "description": "Missing required executor field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_EXECUTOR",
+        "error": "executor is required"
+      }
+    },
+    {
+      "name": "executor-missing-platform",
+      "description": "Executor without required platform field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {},
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_EXECUTOR",
+        "error": "executor.platform is required"
+      }
+    },
+    {
+      "name": "invalid-digest-not-64-hex",
+      "description": "Digest value not 64 lowercase hex characters",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "input": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "too-short",
+            "bytes": 100
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_DIGEST",
+        "error": "Digest must be 64 lowercase hex characters"
+      }
+    },
+    {
+      "name": "invalid-digest-uppercase",
+      "description": "Digest value with uppercase characters",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "input": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789",
+            "bytes": 100
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_DIGEST",
+        "error": "Digest must be lowercase hex"
+      }
+    },
+    {
+      "name": "invalid-digest-algorithm",
+      "description": "Invalid digest algorithm not in canonical set",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "input": {
+          "digest": {
+            "alg": "md5",
+            "value": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+            "bytes": 100
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_DIGEST_ALG",
+        "error": "Invalid digest algorithm"
+      }
+    },
+    {
+      "name": "invalid-digest-alg-case",
+      "description": "Digest algorithm with wrong case (SHA-256 instead of sha-256)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "input": {
+          "digest": {
+            "alg": "SHA-256",
+            "value": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+            "bytes": 100
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_DIGEST_ALG",
+        "error": "Digest algorithm must be exact canonical form"
+      }
+    },
+    {
+      "name": "completed-at-before-started-at",
+      "description": "completed_at timestamp before started_at (ORDERING LOCK: relational constraint = INVALID_TIMING)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "completed_at": "2026-01-20T09:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_TIMING",
+        "error": "completed_at must be >= started_at",
+        "meta": {
+          "ordering_lock": "INVALID_TIMING is reserved for relational constraints between valid timestamps"
+        }
+      }
+    },
+    {
+      "name": "output-without-result",
+      "description": "Output present but result.status missing",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "output": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+            "bytes": 100
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_RESULT",
+        "error": "result.status required when output present"
+      }
+    },
+    {
+      "name": "error-status-without-detail",
+      "description": "Error status without error_code or extensions",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "result": {
+          "status": "error"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_ERROR_DETAIL",
+        "error": "error_code or non-empty extensions required when status is error"
+      }
+    },
+    {
+      "name": "error-status-with-empty-extensions",
+      "description": "Error status with empty extensions object (not valid detail)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "result": {
+          "status": "error"
+        },
+        "extensions": {}
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_ERROR_DETAIL",
+        "error": "Empty extensions object is not valid error detail"
+      }
+    },
+    {
+      "name": "tool-kind-without-tool-field",
+      "description": "tool.call kind without tool field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_TARGET",
+        "error": "tool field required for tool.* kinds"
+      }
+    },
+    {
+      "name": "http-kind-without-resource-field",
+      "description": "http.request kind without resource field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "mcp:session_abc:req_123",
+        "kind": "http.request",
+        "executor": {
+          "platform": "mcp"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_TARGET",
+        "error": "resource field required for http.* kinds"
+      }
+    },
+    {
+      "name": "fs-kind-without-resource-field",
+      "description": "fs.read kind without resource field",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "claude-code:sess_abc:read_123",
+        "kind": "fs.read",
+        "executor": {
+          "platform": "claude-code"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_TARGET",
+        "error": "resource field required for fs.* kinds"
+      }
+    },
+    {
+      "name": "invalid-extension-key-not-namespaced",
+      "description": "Extension key not properly namespaced",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "extensions": {
+          "invalid_key": "value"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_EXTENSION_KEY",
+        "error": "Extension keys must be namespaced (reverse-DNS + /)"
+      }
+    },
+    {
+      "name": "invalid-extension-key-no-slash",
+      "description": "Extension key missing slash separator",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "extensions": {
+          "org.example": "value"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_EXTENSION_KEY",
+        "error": "Extension keys must include / separator"
+      }
+    },
+    {
+      "name": "extra-unknown-field",
+      "description": "Unknown field in strict schema",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "test_tool"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "unknown_field": "should_fail"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_FORMAT",
+        "error": "Unrecognized keys"
+      }
+    },
+    {
+      "name": "multi-failure-missing-id-and-kind",
+      "description": "Multi-failure: missing interaction_id AND kind. Per validation order, interaction_id is checked first.",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_ID",
+        "error": "interaction_id is required",
+        "meta": {
+          "validation_order_note": "interaction_id checked before kind"
+        }
+      }
+    },
+    {
+      "name": "multi-failure-bad-kind-and-bad-timing",
+      "description": "Multi-failure: invalid kind format AND invalid timing. Per validation order, kind format is checked first.",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "INVALID_KIND",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "completed_at": "2026-01-20T09:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_INVALID_KIND_FORMAT",
+        "error": "Kind must be lowercase",
+        "meta": {
+          "validation_order_note": "Kind format checked before timing invariant"
+        }
+      }
+    },
+    {
+      "name": "multi-failure-reserved-kind-and-missing-target",
+      "description": "Multi-failure: reserved kind prefix AND missing tool target. Per validation order, reserved prefix is checked first.",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "peac.custom-tool",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_KIND_RESERVED",
+        "error": "Kind uses reserved prefix",
+        "meta": {
+          "validation_order_note": "Reserved prefix checked before target consistency"
+        }
+      }
+    },
+    {
+      "name": "http-kind-with-empty-resource",
+      "description": "http.request kind with empty resource object (ORDERING LOCK: empty resource = missing target)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "mcp:session_abc:req_123",
+        "kind": "http.request",
+        "executor": {
+          "platform": "mcp"
+        },
+        "resource": {},
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_TARGET",
+        "error": "resource.uri required for http.* kinds",
+        "meta": {
+          "ordering_lock": "resource: {} is semantically missing (no uri), not a valid target"
+        }
+      }
+    },
+    {
+      "name": "fs-kind-with-empty-resource",
+      "description": "fs.read kind with empty resource object (no uri)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "claude-code:sess_abc:read_123",
+        "kind": "fs.read",
+        "executor": {
+          "platform": "claude-code"
+        },
+        "resource": {},
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_TARGET",
+        "error": "resource.uri required for fs.* kinds"
+      }
+    },
+    {
+      "name": "fs-kind-with-method-only-resource",
+      "description": "fs.write kind with resource having only method (no uri)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "claude-code:sess_abc:write_123",
+        "kind": "fs.write",
+        "executor": {
+          "platform": "claude-code"
+        },
+        "resource": {
+          "method": "write"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INTERACTION_MISSING_TARGET",
+        "error": "resource.uri required for fs.* kinds"
+      }
+    }
+  ]
+}
