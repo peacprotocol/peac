@@ -21,6 +21,19 @@ import { OPENCLAW_ERROR_CODES, OPENCLAW_EXTENSION_KEYS } from '../src/types.js';
 const VALID_TIMESTAMP = '2024-02-01T10:00:00Z';
 const VALID_TIMESTAMP_LATER = '2024-02-01T10:00:01Z';
 
+/**
+ * Build expected interaction ID in the new format.
+ * Format: openclaw/{base64url(run_id)}/{base64url(tool_call_id)}
+ */
+function expectedInteractionId(runId: string, toolCallId: string): string {
+  const encode = (s: string) => {
+    const bytes = new TextEncoder().encode(s);
+    const base64 = btoa(String.fromCharCode(...bytes));
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+  return `openclaw/${encode(runId)}/${encode(toolCallId)}`;
+}
+
 function createValidEvent(overrides?: Partial<OpenClawToolCallEvent>): OpenClawToolCallEvent {
   return {
     tool_call_id: 'call_123',
@@ -47,7 +60,7 @@ describe('mapToolCallEvent', () => {
 
       expect(result.success).toBe(true);
       expect(result.action).toBeDefined();
-      expect(result.action!.id).toBe('openclaw:run_abc:call_123');
+      expect(result.action!.id).toBe(expectedInteractionId('run_abc', 'call_123'));
       expect(result.action!.kind).toBe('tool.call');
       expect(result.action!.platform).toBe('openclaw');
       expect(result.action!.tool_name).toBe('web_search');
@@ -188,7 +201,7 @@ describe('mapToolCallEvent', () => {
       const result2 = mapToolCallEvent(event);
 
       expect(result1.action!.id).toBe(result2.action!.id);
-      expect(result1.action!.id).toBe('openclaw:run_abc:call_123');
+      expect(result1.action!.id).toBe(expectedInteractionId('run_abc', 'call_123'));
     });
 
     it('different events have different IDs', () => {
@@ -380,9 +393,9 @@ describe('mapToolCallEventBatch', () => {
 
     expect(results).toHaveLength(3);
     expect(results.every((r) => r.success)).toBe(true);
-    expect(results[0].action!.id).toBe('openclaw:run_abc:call_1');
-    expect(results[1].action!.id).toBe('openclaw:run_abc:call_2');
-    expect(results[2].action!.id).toBe('openclaw:run_abc:call_3');
+    expect(results[0].action!.id).toBe(expectedInteractionId('run_abc', 'call_1'));
+    expect(results[1].action!.id).toBe(expectedInteractionId('run_abc', 'call_2'));
+    expect(results[2].action!.id).toBe(expectedInteractionId('run_abc', 'call_3'));
   });
 
   it('handles mixed valid/invalid events', () => {

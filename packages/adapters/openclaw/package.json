@@ -4,14 +4,7 @@
   "description": "OpenClaw adapter for PEAC interaction evidence capture",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
-  },
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/peacprotocol/peac.git",

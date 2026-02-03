@@ -296,14 +296,20 @@ export type OpenClawErrorCode = (typeof OPENCLAW_ERROR_CODES)[keyof typeof OPENC
  * OpenClaw adapter warning codes.
  */
 export const OPENCLAW_WARNING_CODES = {
-  /** Payload exceeded size limit, truncated */
+  /** Payload exceeded size limit and was truncated for hashing */
   PAYLOAD_TRUNCATED: 'W_OPENCLAW_PAYLOAD_TRUNCATED',
+
+  /** Payload serialization failed (circular refs, BigInt, etc.) */
+  SERIALIZATION_FAILED: 'W_OPENCLAW_SERIALIZATION_FAILED',
 
   /** Optional field missing (non-critical) */
   OPTIONAL_FIELD_MISSING: 'W_OPENCLAW_OPTIONAL_FIELD_MISSING',
 
   /** Unknown tool provider */
   UNKNOWN_PROVIDER: 'W_OPENCLAW_UNKNOWN_PROVIDER',
+
+  /** Payload dropped due to redaction policy (hash_only mode for non-allowlisted tool) */
+  PAYLOAD_REDACTED: 'W_OPENCLAW_PAYLOAD_REDACTED',
 } as const;
 
 export type OpenClawWarningCode =

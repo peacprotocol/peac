@@ -100,10 +100,8 @@ export interface EmitterConfig {
  * @returns Receipt emitter instance
  */
 export function createReceiptEmitter(emitterConfig: EmitterConfig): ReceiptEmitter {
-  const { signer, writer, config, onEmit, onError } = emitterConfig;
+  const { signer, writer, onEmit, onError } = emitterConfig;
 
-  // Pending entries queue (for batching)
-  const pendingEntries: SpoolEntry[] = [];
   let closed = false;
 
   return {
@@ -165,16 +163,12 @@ export function createReceiptEmitter(emitterConfig: EmitterConfig): ReceiptEmitt
     },
 
     async flush(): Promise<void> {
-      // Process any pending entries
-      while (pendingEntries.length > 0) {
-        const entry = pendingEntries.shift()!;
-        await this.emit(entry);
-      }
+      // No-op: entries are emitted immediately via emit()
+      // This method exists for API consistency
     },
 
     async close(): Promise<void> {
       closed = true;
-      await this.flush();
       await writer.close();
     },
   };
@@ -217,7 +211,7 @@ function buildReceiptPayload(
   signer: Signer
 ): ReceiptPayload {
   const now = Math.floor(Date.now() / 1000);
-  const rid = generateReceiptId();
+  const rid = generateReceiptId(entry.entry_digest);
 
   const payload: ReceiptPayload = {
     iss: signer.getIssuer(),
@@ -239,14 +233,19 @@ function buildReceiptPayload(
 }
 
 /**
- * Generate a unique receipt ID.
+ * Generate a deterministic receipt ID from entry digest.
  *
- * Format: r_{timestamp}_{random}
+ * Using a deterministic ID (derived from entry_digest) provides:
+ * - Idempotency: same entry always produces same rid
+ * - Replay safety: retries don't create duplicates
+ * - Correlation: rid can be traced back to spool entry
+ *
+ * Format: r_{first 32 chars of entry_digest}
  */
-function generateReceiptId(): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 10);
-  return `r_${timestamp}_${random}`;
+function generateReceiptId(entryDigest: string): string {
+  // Use first 32 chars of entry digest for reasonable uniqueness
+  // while keeping the ID short enough for practical use
+  return `r_${entryDigest.slice(0, 32)}`;
 }
 
 // =============================================================================
@@ -328,6 +327,8 @@ export function createBackgroundService(
   } = serviceConfig;
 
   let running = false;
+  let stopping = false;
+  let inFlight = false;
   let intervalHandle: ReturnType<typeof setInterval> | undefined;
   const stats: EmitterStats = {
     emitted: 0,
@@ -335,10 +336,18 @@ export function createBackgroundService(
   };
 
   const drainOnce = async () => {
+    // Prevent overlapping drains - if a drain takes longer than the
+    // interval, skip this tick rather than double-processing
+    if (inFlight) return;
+
+    inFlight = true;
     try {
       const entries = await getPendingEntries();
 
       for (const entry of entries) {
+        // Check if service is being stopped during processing
+        if (stopping) break;
+
         const result = await emitter.emit(entry);
 
         if (result.success) {
@@ -355,6 +364,8 @@ export function createBackgroundService(
       if (onError) {
         onError(error instanceof Error ? error : new Error(String(error)));
       }
+    } finally {
+      inFlight = false;
     }
   };
 
@@ -369,6 +380,7 @@ export function createBackgroundService(
 
     stop(): void {
       if (!running) return;
+      stopping = true;
       running = false;
       if (intervalHandle) {
         clearInterval(intervalHandle);

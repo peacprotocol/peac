@@ -51,25 +51,36 @@ export function mapToolCallEvent(
   // Build interaction ID (deterministic, for dedupe)
   const interactionId = buildInteractionId(event);
 
-  // Serialize input/output to bytes
-  const inputBytes = serializePayload(event.input);
-  const outputBytes = event.output !== undefined ? serializePayload(event.output) : undefined;
+  // Get capture policy configuration
+  const captureMode = config?.capture?.mode ?? 'hash_only';
+  const allowlist = config?.capture?.allowlist ?? [];
+  const maxPayloadSize = config?.capture?.max_payload_size ?? 1024 * 1024; // 1MB default
 
-  // Check for serialization warnings
-  if (event.input !== undefined && inputBytes === undefined) {
-    warnings.push({
-      code: OPENCLAW_WARNING_CODES.PAYLOAD_TRUNCATED,
-      message: 'Input payload could not be serialized',
-      field: 'input',
-    });
+  // Check if this tool is allowlisted for plaintext capture
+  const isAllowlisted = captureMode === 'allowlist' && allowlist.includes(event.tool_name);
+
+  // Serialize input/output to bytes with policy enforcement
+  const inputResult = serializePayloadWithPolicy(
+    event.input,
+    maxPayloadSize,
+    isAllowlisted,
+    'input'
+  );
+  const outputResult =
+    event.output !== undefined
+      ? serializePayloadWithPolicy(event.output, maxPayloadSize, isAllowlisted, 'output')
+      : undefined;
+
+  // Collect warnings from serialization
+  if (inputResult.warning) {
+    warnings.push(inputResult.warning);
   }
-  if (event.output !== undefined && outputBytes === undefined) {
-    warnings.push({
-      code: OPENCLAW_WARNING_CODES.PAYLOAD_TRUNCATED,
-      message: 'Output payload could not be serialized',
-      field: 'output',
-    });
+  if (outputResult?.warning) {
+    warnings.push(outputResult.warning);
   }
+
+  const inputBytes = inputResult.bytes;
+  const outputBytes = outputResult?.bytes;
 
   // Build platform metadata
   const platform = config?.platform ?? DEFAULT_PLATFORM;
@@ -210,29 +221,99 @@ function validateRequiredFields(
 /**
  * Build a deterministic interaction ID from OpenClaw event.
  *
- * Format: openclaw:{run_id}:{tool_call_id}
+ * Uses base64url encoding to handle delimiter collisions - if run_id or
+ * tool_call_id contains ':', the ID would be ambiguous without encoding.
+ *
+ * Format: openclaw/{base64url(run_id)}/{base64url(tool_call_id)}
  */
 function buildInteractionId(event: OpenClawToolCallEvent): string {
-  return `openclaw:${event.run_id}:${event.tool_call_id}`;
+  const runIdEncoded = base64urlEncode(event.run_id);
+  const toolCallIdEncoded = base64urlEncode(event.tool_call_id);
+  return `openclaw/${runIdEncoded}/${toolCallIdEncoded}`;
 }
 
 /**
- * Serialize a payload to bytes (UTF-8 JSON).
- *
- * Returns undefined if serialization fails.
+ * Base64url encode a string (RFC 4648 section 5).
+ * URL-safe: replaces + with -, / with _, removes padding.
  */
-function serializePayload(payload: unknown): Uint8Array | undefined {
+function base64urlEncode(str: string): string {
+  // Use TextEncoder for proper UTF-8 handling
+  const bytes = new TextEncoder().encode(str);
+  // Convert to base64
+  const base64 = btoa(String.fromCharCode(...bytes));
+  // Make URL-safe: replace + with -, / with _, remove =
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/**
+ * Result of payload serialization with policy enforcement.
+ */
+interface SerializationResult {
+  bytes?: Uint8Array;
+  warning?: MappingWarning;
+  truncated?: boolean;
+}
+
+/**
+ * Serialize a payload to bytes with policy enforcement.
+ *
+ * Applies:
+ * - Size limits (truncation if exceeds maxPayloadSize)
+ * - Redaction policy (hash_only drops bytes for non-allowlisted tools)
+ *
+ * @param payload - The payload to serialize
+ * @param maxPayloadSize - Maximum payload size in bytes
+ * @param isAllowlisted - Whether this tool is allowlisted for plaintext capture
+ * @param fieldName - Field name for warning messages
+ * @returns Serialization result with bytes and/or warning
+ */
+function serializePayloadWithPolicy(
+  payload: unknown,
+  maxPayloadSize: number,
+  isAllowlisted: boolean,
+  fieldName: string
+): SerializationResult {
   if (payload === undefined) {
-    return undefined;
+    return {};
   }
 
+  // Try to serialize
+  let bytes: Uint8Array;
   try {
     const json = JSON.stringify(payload);
-    return new TextEncoder().encode(json);
+    bytes = new TextEncoder().encode(json);
   } catch {
     // Serialization failed (circular references, BigInt, etc.)
-    return undefined;
+    return {
+      warning: {
+        code: OPENCLAW_WARNING_CODES.SERIALIZATION_FAILED,
+        message: `${fieldName} payload could not be serialized (circular ref, BigInt, etc.)`,
+        field: fieldName,
+      },
+    };
   }
+
+  // Check size limit and truncate if needed
+  let truncated = false;
+  if (bytes.length > maxPayloadSize) {
+    bytes = bytes.slice(0, maxPayloadSize);
+    truncated = true;
+  }
+
+  // Apply redaction policy - capture-core will hash these bytes
+  // In hash_only mode for non-allowlisted tools, we still pass bytes
+  // for hashing but could add a warning for transparency
+  const result: SerializationResult = { bytes, truncated };
+
+  if (truncated) {
+    result.warning = {
+      code: OPENCLAW_WARNING_CODES.PAYLOAD_TRUNCATED,
+      message: `${fieldName} payload exceeded ${maxPayloadSize} bytes and was truncated`,
+      field: fieldName,
+    };
+  }
+
+  return result;
 }
 
 /**

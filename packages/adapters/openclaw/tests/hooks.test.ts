@@ -20,6 +20,19 @@ import type { CaptureSession, CaptureResult, SpoolEntry, CapturedAction } from '
 
 const VALID_TIMESTAMP = '2024-02-01T10:00:00Z';
 
+/**
+ * Build expected interaction ID in the new format.
+ * Format: openclaw/{base64url(run_id)}/{base64url(tool_call_id)}
+ */
+function expectedInteractionId(runId: string, toolCallId: string): string {
+  const encode = (s: string) => {
+    const bytes = new TextEncoder().encode(s);
+    const base64 = btoa(String.fromCharCode(...bytes));
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+  return `openclaw/${encode(runId)}/${encode(toolCallId)}`;
+}
+
 function createValidEvent(overrides?: Partial<OpenClawToolCallEvent>): OpenClawToolCallEvent {
   return {
     tool_call_id: 'call_123',
@@ -113,7 +126,7 @@ describe('createHookHandler', () => {
 
       expect(result.success).toBe(true);
       expect(mockSession.capturedActions).toHaveLength(1);
-      expect(mockSession.capturedActions[0].id).toBe('openclaw:run_abc:call_123');
+      expect(mockSession.capturedActions[0].id).toBe(expectedInteractionId('run_abc', 'call_123'));
     });
 
     it('returns entry on success', async () => {
@@ -124,7 +137,7 @@ describe('createHookHandler', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.entry.action.id).toBe('openclaw:run_abc:call_123');
+        expect(result.entry.action.id).toBe(expectedInteractionId('run_abc', 'call_123'));
         expect(result.entry.sequence).toBe(1);
       }
     });
@@ -239,9 +252,9 @@ describe('captureBatch', () => {
 
     // Verify sequence order
     expect(mockSession.capturedActions.map((a) => a.id)).toEqual([
-      'openclaw:run_abc:call_1',
-      'openclaw:run_abc:call_2',
-      'openclaw:run_abc:call_3',
+      expectedInteractionId('run_abc', 'call_1'),
+      expectedInteractionId('run_abc', 'call_2'),
+      expectedInteractionId('run_abc', 'call_3'),
     ]);
   });
 

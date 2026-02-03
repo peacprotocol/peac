@@ -212,14 +212,23 @@ export function createSessionHistoryTailer(tailerConfig: TailerConfig): SessionH
   const { handler, sessionId, pollIntervalMs = 1000, fetchHistory, onError } = tailerConfig;
 
   let running = false;
+  let inFlight = false;
   let lastEventId: string | undefined;
   let intervalHandle: ReturnType<typeof setInterval> | undefined;
 
   const poll = async () => {
+    // Prevent overlapping polls - if a poll takes longer than the
+    // interval, skip this tick rather than double-processing
+    if (inFlight) return;
+
+    inFlight = true;
     try {
       const events = await fetchHistory(sessionId, lastEventId);
 
       for (const event of events) {
+        // Check if tailer was stopped during processing
+        if (!running) break;
+
         await handler.afterToolCall(event);
         lastEventId = event.tool_call_id;
       }
@@ -227,6 +236,8 @@ export function createSessionHistoryTailer(tailerConfig: TailerConfig): SessionH
       if (onError) {
         onError(error instanceof Error ? error : new Error(String(error)));
       }
+    } finally {
+      inFlight = false;
     }
   };
 
