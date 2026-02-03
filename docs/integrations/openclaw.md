@@ -18,11 +18,7 @@ The `@peac/adapter-openclaw` package provides a plugin for OpenClaw that:
 ## Installation
 
 ```bash
-# Install the adapter
 pnpm add @peac/adapter-openclaw
-
-# Or with npm
-npm install @peac/adapter-openclaw
 ```
 
 ## Configuration
