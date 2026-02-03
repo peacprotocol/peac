@@ -575,6 +575,112 @@ describe('createVerifyTool', () => {
       expect(result.valid).toBe(false);
       expect(result.errors?.some((e) => e.includes('requires curve') && e.includes('but key has "X25519"'))).toBe(true);
     });
+
+    it('rejects key with wrong use field', async () => {
+      // Create a receipt with a valid JWS
+      const receipt = createValidReceipt('001');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString('base64url');
+      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+
+      const receiptPath = path.join(tempDir, 'r_001.peac.json');
+      fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+      // Key has use: "enc" (encryption) instead of "sig" (signature)
+      const jwksPath = path.join(tempDir, 'keys.jwks.json');
+      fs.writeFileSync(jwksPath, JSON.stringify({
+        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1', use: 'enc' }],
+      }));
+
+      const tool = createVerifyTool(mockLogger);
+      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+        status: string;
+        valid: boolean;
+        errors?: string[];
+      };
+
+      expect(result.status).toBe('error');
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((e) => e.includes('use "enc"') && e.includes('not valid for signature'))).toBe(true);
+    });
+
+    it('rejects key with missing verify in key_ops', async () => {
+      // Create a receipt with a valid JWS
+      const receipt = createValidReceipt('001');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString('base64url');
+      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+
+      const receiptPath = path.join(tempDir, 'r_001.peac.json');
+      fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+      // Key has key_ops without "verify"
+      const jwksPath = path.join(tempDir, 'keys.jwks.json');
+      fs.writeFileSync(jwksPath, JSON.stringify({
+        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1', key_ops: ['sign'] }],
+      }));
+
+      const tool = createVerifyTool(mockLogger);
+      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+        status: string;
+        valid: boolean;
+        errors?: string[];
+      };
+
+      expect(result.status).toBe('error');
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((e) => e.includes('do not include "verify"'))).toBe(true);
+    });
+
+    it('rejects JWS with crit header', async () => {
+      // Create a receipt with crit header
+      const receipt = createValidReceipt('001');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1', crit: ['exp'], exp: 12345 })).toString('base64url');
+      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+
+      const receiptPath = path.join(tempDir, 'r_001.peac.json');
+      fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+      const jwksPath = path.join(tempDir, 'keys.jwks.json');
+      fs.writeFileSync(jwksPath, JSON.stringify({
+        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
+      }));
+
+      const tool = createVerifyTool(mockLogger);
+      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+        status: string;
+        valid: boolean;
+        errors?: string[];
+      };
+
+      expect(result.status).toBe('error');
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((e) => e.includes('Unsupported critical headers'))).toBe(true);
+    });
+
+    it('rejects JWS with crit referencing missing header', async () => {
+      // Create a receipt with crit header that references a missing header
+      const receipt = createValidReceipt('001');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1', crit: ['missing_header'] })).toString('base64url');
+      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+
+      const receiptPath = path.join(tempDir, 'r_001.peac.json');
+      fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+      const jwksPath = path.join(tempDir, 'keys.jwks.json');
+      fs.writeFileSync(jwksPath, JSON.stringify({
+        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
+      }));
+
+      const tool = createVerifyTool(mockLogger);
+      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+        status: string;
+        valid: boolean;
+        errors?: string[];
+      };
+
+      expect(result.status).toBe('error');
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((e) => e.includes('Critical headers declared but missing'))).toBe(true);
+    });
   });
 });
 

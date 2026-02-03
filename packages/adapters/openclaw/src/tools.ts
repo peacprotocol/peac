@@ -482,15 +482,23 @@ async function verifySingleReceipt(
           errors.push(`Algorithm "${header.alg}" is not in allowed list: ${ALLOWED_ALGORITHMS.join(', ')}`);
         }
 
-        // Reject unknown critical headers
+        // Reject unknown critical headers (JOSE compliance)
+        // Per RFC 7515: crit lists headers that MUST be understood, we don't support any
         if (header.crit && header.crit.length > 0) {
-          errors.push(`Unknown critical headers: ${header.crit.join(', ')}`);
+          // Check if crit references headers that are missing (per JOSE spec)
+          const headerObj = header as Record<string, unknown>;
+          const missingCrit = header.crit.filter((h) => !(h in headerObj));
+          if (missingCrit.length > 0) {
+            errors.push(`Critical headers declared but missing: ${missingCrit.join(', ')}`);
+          }
+          // Reject all crit headers since we don't understand any extensions
+          errors.push(`Unsupported critical headers: ${header.crit.join(', ')}`);
         }
 
         const targetKid = header.kid;
 
         // Strict key selection by kid
-        let keyJwk: { kid?: string; kty?: string; crv?: string; x?: string; n?: string } | undefined;
+        let keyJwk: { kid?: string; kty?: string; crv?: string; x?: string; n?: string; use?: string; key_ops?: string[] } | undefined;
         if (!Array.isArray(jwks.keys) || jwks.keys.length === 0) {
           errors.push('JWKS has no keys');
         } else if (targetKid) {
@@ -517,6 +525,16 @@ async function verifySingleReceipt(
             } else if (expectedKeyType.crv && keyJwk.crv && !expectedKeyType.crv.includes(keyJwk.crv)) {
               errors.push(`Algorithm "${header.alg}" requires curve ${expectedKeyType.crv.join(' or ')} but key has "${keyJwk.crv}"`);
             }
+          }
+
+          // Validate key use if present (must be "sig" for signature verification)
+          if (keyJwk.use && keyJwk.use !== 'sig') {
+            errors.push(`Key use "${keyJwk.use}" is not valid for signature verification (expected "sig")`);
+          }
+
+          // Validate key_ops if present (must include "verify")
+          if (keyJwk.key_ops && !keyJwk.key_ops.includes('verify')) {
+            errors.push(`Key operations ${JSON.stringify(keyJwk.key_ops)} do not include "verify"`);
           }
         }
 
@@ -721,6 +739,7 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
         let skippedForFilters = 0;
 
         let filesSkippedForSize = 0;
+        let filesSkippedForInvalidJson = 0;
         for (const { file } of fileInfos) {
           const filePath = pathModule.join(resolvedOutputDir, file);
 
@@ -741,6 +760,7 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
             content = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
           } catch {
             // Skip invalid JSON files
+            filesSkippedForInvalidJson++;
             continue;
           }
 
@@ -804,6 +824,11 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
         if (filesSkippedForSize > 0) {
           warnings.push(`${filesSkippedForSize} files skipped (exceeded ${MAX_FILE_SIZE_BYTES} byte limit)`);
         }
+        if (filesSkippedForInvalidJson > 0) {
+          warnings.push(`${filesSkippedForInvalidJson} files skipped (invalid JSON)`);
+        }
+
+        const hasTruncation = receiptFiles.length > MAX_QUERY_FILE_PARSE || filesSkippedForSize > 0 || filesSkippedForInvalidJson > 0;
 
         return {
           status: 'ok',
@@ -811,7 +836,12 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           offset,
           limit,
           results: paginated,
-          truncated: receiptFiles.length > MAX_QUERY_FILE_PARSE || filesSkippedForSize > 0,
+          truncated: hasTruncation,
+          skipped: hasTruncation ? {
+            too_large: filesSkippedForSize,
+            invalid_json: filesSkippedForInvalidJson,
+            capped: receiptFiles.length > MAX_QUERY_FILE_PARSE ? receiptFiles.length - MAX_QUERY_FILE_PARSE : 0,
+          } : undefined,
           ...(warnings.length > 0 && { warning: warnings.join('; ') }),
         };
       } catch (error) {
@@ -857,6 +887,11 @@ interface QueryResult {
   limit: number;
   results: QueryMatch[];
   truncated?: boolean;
+  skipped?: {
+    too_large: number;
+    invalid_json: number;
+    capped: number;
+  };
   error?: string;
   warning?: string;
 }

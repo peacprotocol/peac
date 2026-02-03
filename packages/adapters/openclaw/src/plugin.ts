@@ -307,9 +307,15 @@ export async function createFileReceiptWriter(outputDir: string): Promise<Receip
 
       // fsync parent directory for full crash durability (POSIX best practice)
       // This ensures the rename is persisted even on power loss
-      const dirFd = await fs.promises.open(resolvedOutputDir, 'r');
-      await dirFd.sync();
-      await dirFd.close();
+      // Best-effort: may fail on some platforms (Windows, network FS)
+      try {
+        const dirFd = await fs.promises.open(resolvedOutputDir, 'r');
+        await dirFd.sync();
+        await dirFd.close();
+      } catch {
+        // Directory fsync not supported on this platform - continue anyway
+        // Receipt is still atomic via rename, just not fully durable on power loss
+      }
 
       return filepath;
     },
