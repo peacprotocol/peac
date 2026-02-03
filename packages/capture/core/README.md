@@ -11,8 +11,6 @@ and can run in any JavaScript environment with WebCrypto support.
 ## Installation
 
 ```bash
-npm install @peac/capture-core
-# or
 pnpm add @peac/capture-core
 ```
 
