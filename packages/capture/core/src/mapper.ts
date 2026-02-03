@@ -250,9 +250,26 @@ export function toInteractionEvidence(
 
   // Add platform-specific metadata if present
   if (action.metadata && Object.keys(action.metadata).length > 0) {
-    // Platform metadata should be namespaced by the adapter
-    // We store it under a generic key that adapters can refine
-    extensions['org.peacprotocol/capture-metadata@0.1'] = action.metadata;
+    // Check if metadata keys are already properly namespaced
+    // Namespaced keys (e.g., org.openclaw/context) go directly into extensions
+    // Non-namespaced keys go under the generic capture-metadata key
+    const EXTENSION_KEY_PATTERN = /^[a-z0-9-]+\.[a-z0-9-]+\//;
+    const genericMetadata: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(action.metadata)) {
+      if (EXTENSION_KEY_PATTERN.test(key)) {
+        // Already namespaced - add directly to extensions
+        extensions[key] = value;
+      } else {
+        // Not namespaced - collect for generic key
+        genericMetadata[key] = value;
+      }
+    }
+
+    // Add non-namespaced metadata under generic key
+    if (Object.keys(genericMetadata).length > 0) {
+      extensions['org.peacprotocol/capture-metadata@0.1'] = genericMetadata;
+    }
   }
 
   // Add spool anchor if requested

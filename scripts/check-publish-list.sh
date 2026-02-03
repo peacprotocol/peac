@@ -42,6 +42,7 @@ const pkgPaths = [
   ...getPackagesRecursive('packages/mappings'),
   ...getPackagesRecursive('packages/transport'),
   ...getPackagesRecursive('packages/adapters'),
+  ...getPackagesRecursive('packages/capture'),
 ];
 const pub = [];
 for (const p of pkgPaths) {
@@ -56,11 +57,13 @@ console.log(pub.sort().join('\n'));
 # Expected packages (updated for v0.10.0 + net-node)
 EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/adapter-core
+@peac/adapter-openclaw
 @peac/adapter-x402
 @peac/adapter-x402-daydreams
 @peac/adapter-x402-fluora
 @peac/adapter-x402-pinata
 @peac/attribution
+@peac/capture-core
 @peac/cli
 @peac/contracts
 @peac/control
