@@ -417,6 +417,31 @@ importers:
         specifier: ^1.6.0
         version: 1.6.1(@types/node@20.19.25)
 
+  packages/adapters/openclaw:
+    dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../core
+      '@peac/capture-core':
+        specifier: workspace:*
+        version: link:../../capture/core
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../schema
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.25
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@20.19.25)
+
   packages/adapters/x402:
     dependencies:
       '@peac/adapter-core':
