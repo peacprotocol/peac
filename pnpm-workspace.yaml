@@ -4,6 +4,7 @@ packages:
   - 'packages/rails/*'
   - 'packages/mappings/*'
   - 'packages/transport/*'
+  - 'packages/capture/*'
   - 'packages/adapters/*'
   - 'packages/adapters/*/*'
   - 'apps/*'

@@ -16,21 +16,17 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { join } from 'path';
 import {
   validateInteractionOrdered,
   validateInteraction,
   InteractionEvidenceV01Schema,
 } from '@peac/schema';
 import {
-  CONFORMANCE_ROOT,
   loadFixtureFile,
   assertValidDigests,
   type BaseFixture,
   type BaseFixtureFile,
 } from './_harness';
-
-const FIXTURES_DIR = join(CONFORMANCE_ROOT, 'interaction');
 
 // ---------------------------------------------------------------------------
 // Fixture types (extends base types with interaction-specific fields)
