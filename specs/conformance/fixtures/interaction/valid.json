@@ -1,0 +1,518 @@
+{
+  "$schema": "https://www.peacprotocol.org/schemas/conformance/interaction-fixtures.schema.json",
+  "$comment": "Valid InteractionEvidenceV01 golden vectors (v0.10.7+)",
+  "version": "0.10.7",
+  "fixtures": [
+    {
+      "name": "minimal-tool-call",
+      "description": "Minimal valid interaction evidence for a tool call",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_abc:call_123",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "web_search"
+        },
+        "started_at": "2026-01-20T10:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "complete-tool-call-with-digests",
+      "description": "Complete tool call with input/output digests and all fields",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_def:call_456",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw",
+          "version": "0.2.0",
+          "plugin_id": "peac-receipts",
+          "plugin_digest": {
+            "alg": "sha-256",
+            "value": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+            "bytes": 65536
+          }
+        },
+        "tool": {
+          "name": "web_search",
+          "provider": "builtin",
+          "version": "1.0.0"
+        },
+        "input": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+            "bytes": 256
+          },
+          "redaction": "hash_only"
+        },
+        "output": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+            "bytes": 8192
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T10:00:00Z",
+        "completed_at": "2026-01-20T10:00:01Z",
+        "duration_ms": 1000,
+        "result": {
+          "status": "ok"
+        },
+        "policy": {
+          "decision": "allow",
+          "sandbox_enabled": true,
+          "elevated": false
+        },
+        "refs": {
+          "payment_reference": "pay_abc123",
+          "related_receipt_rid": "r_01HXYZ"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "http-request",
+      "description": "HTTP request interaction with resource target",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "mcp:session_xyz:req_789",
+        "kind": "http.request",
+        "executor": {
+          "platform": "mcp",
+          "version": "1.0.0"
+        },
+        "resource": {
+          "uri": "https://api.example.com/v1/data",
+          "method": "GET"
+        },
+        "started_at": "2026-01-20T11:00:00Z",
+        "completed_at": "2026-01-20T11:00:00.500Z",
+        "duration_ms": 500,
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "fs-read-operation",
+      "description": "File system read operation",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "claude-code:sess_abc:read_001",
+        "kind": "fs.read",
+        "executor": {
+          "platform": "claude-code"
+        },
+        "resource": {
+          "uri": "file:///path/to/document.txt"
+        },
+        "started_at": "2026-01-20T12:00:00Z",
+        "completed_at": "2026-01-20T12:00:00.050Z",
+        "duration_ms": 50,
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "fs-write-operation",
+      "description": "File system write operation",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "claude-code:sess_abc:write_002",
+        "kind": "fs.write",
+        "executor": {
+          "platform": "claude-code"
+        },
+        "resource": {
+          "uri": "file:///path/to/output.json"
+        },
+        "output": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+            "bytes": 1024
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T12:01:00Z",
+        "completed_at": "2026-01-20T12:01:00.100Z",
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "message-interaction",
+      "description": "Message/chat interaction kind",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "a2a:conv_123:msg_456",
+        "kind": "message",
+        "executor": {
+          "platform": "a2a",
+          "version": "0.1.0"
+        },
+        "input": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "1111111122222222333333334444444455555555666666667777777788888888",
+            "bytes": 512
+          },
+          "redaction": "hash_only"
+        },
+        "output": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "aaaaaaaa11111111bbbbbbbb22222222cccccccc33333333dddddddd44444444",
+            "bytes": 2048
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T13:00:00Z",
+        "completed_at": "2026-01-20T13:00:05Z",
+        "duration_ms": 5000,
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "error-result-with-details",
+      "description": "Failed interaction with error code",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_ghi:call_789",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "database_query"
+        },
+        "started_at": "2026-01-20T14:00:00Z",
+        "completed_at": "2026-01-20T14:00:30Z",
+        "result": {
+          "status": "error",
+          "error_code": "E_CONNECTION_TIMEOUT",
+          "retryable": true
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "timeout-result",
+      "description": "Interaction that timed out",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "mcp:session_timeout:req_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "mcp"
+        },
+        "tool": {
+          "name": "long_running_task"
+        },
+        "started_at": "2026-01-20T15:00:00Z",
+        "completed_at": "2026-01-20T15:05:00Z",
+        "result": {
+          "status": "timeout",
+          "error_code": "E_TIMEOUT"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "canceled-result",
+      "description": "Interaction that was canceled",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "a2a:conv_cancel:task_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "a2a"
+        },
+        "tool": {
+          "name": "batch_process"
+        },
+        "started_at": "2026-01-20T16:00:00Z",
+        "result": {
+          "status": "canceled"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "policy-constrained",
+      "description": "Interaction with constrained policy decision",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_policy:call_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "shell_execute"
+        },
+        "started_at": "2026-01-20T17:00:00Z",
+        "completed_at": "2026-01-20T17:00:01Z",
+        "result": {
+          "status": "ok"
+        },
+        "policy": {
+          "decision": "constrained",
+          "sandbox_enabled": true,
+          "elevated": false,
+          "effective_policy_digest": {
+            "alg": "sha-256",
+            "value": "a1b2c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef0123",
+            "bytes": 4096
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "truncated-digest-64k",
+      "description": "Interaction with truncated 64KB digest",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_large:call_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "file_processor"
+        },
+        "input": {
+          "digest": {
+            "alg": "sha-256:trunc-64k",
+            "value": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "bytes": 1048576
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T18:00:00Z",
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "truncated-digest-1m",
+      "description": "Interaction with truncated 1MB digest",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_xlarge:call_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "video_processor"
+        },
+        "output": {
+          "digest": {
+            "alg": "sha-256:trunc-1m",
+            "value": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+            "bytes": 104857600
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-01-20T19:00:00Z",
+        "completed_at": "2026-01-20T19:01:00Z",
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "redaction-plaintext-allowlisted",
+      "description": "Interaction with allowlisted plaintext redaction",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_allowed:call_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "public_data_fetch"
+        },
+        "input": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "aabbccdd00112233445566778899aabbccdd00112233445566778899aabbccdd",
+            "bytes": 128
+          },
+          "redaction": "plaintext_allowlisted"
+        },
+        "started_at": "2026-01-20T20:00:00Z",
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "redaction-redacted",
+      "description": "Interaction with redacted content",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_redact:call_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "sensitive_operation"
+        },
+        "output": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "1122334455667788990011223344556677889900112233445566778899001122",
+            "bytes": 2048
+          },
+          "redaction": "redacted"
+        },
+        "started_at": "2026-01-20T21:00:00Z",
+        "completed_at": "2026-01-20T21:00:00.100Z",
+        "result": {
+          "status": "ok"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "namespaced-extensions",
+      "description": "Interaction with properly namespaced platform extensions",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "openclaw:run_ext:call_001",
+        "kind": "tool.call",
+        "executor": {
+          "platform": "openclaw"
+        },
+        "tool": {
+          "name": "advanced_tool"
+        },
+        "started_at": "2026-01-20T22:00:00Z",
+        "result": {
+          "status": "ok"
+        },
+        "extensions": {
+          "org.openclaw/context": {
+            "channel": "direct",
+            "workspace_digest": "ws123"
+          },
+          "org.openclaw/audit-digest": "audit456",
+          "com.example/custom-metadata@0.1": {
+            "trace_id": "trace_xyz"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "custom-kind-reverse-dns",
+      "description": "Custom kind with reverse-DNS format",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "custom:session_001:action_001",
+        "kind": "com.example.custom-action",
+        "executor": {
+          "platform": "custom-platform"
+        },
+        "started_at": "2026-01-20T23:00:00Z"
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "W_INTERACTION_KIND_UNREGISTERED",
+            "field": "kind"
+          },
+          {
+            "code": "W_INTERACTION_MISSING_TARGET",
+            "field": "tool|resource"
+          }
+        ]
+      }
+    }
+  ]
+}

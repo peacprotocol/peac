@@ -24,6 +24,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest --coverage",
     "test:core": "turbo run test --filter=@peac/crypto --filter=@peac/protocol --filter=@peac/policy-kit --filter=@peac/http-signatures --filter=@peac/jwks-cache --filter=@peac/mappings-mcp --filter=@peac/mappings-acp --filter=@peac/mappings-rsl --filter=@peac/mappings-tap --filter=@peac/rails-x402 --filter=@peac/rails-stripe --filter=@peac/rails-razorpay --filter=@peac/adapter-x402-daydreams --filter=@peac/adapter-x402-fluora --filter=@peac/adapter-x402-pinata --filter=@peac/worker-fastly --filter=@peac/worker-akamai --filter=@peac/transport-grpc",
+    "test:conformance": "vitest run tests/conformance/",
     "conformance:test": "vitest run tests/conformance/",
     "schemas:lint": "pnpm format:check -- 'specs/wire/*.json' && node scripts/lint-schemas.js",
     "lint": "eslint .",

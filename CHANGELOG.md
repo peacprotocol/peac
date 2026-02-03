@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Interaction Evidence Extension (v0.10.7)
+
+New extension type for capturing agent execution evidence at `evidence.extensions["org.peacprotocol/interaction@0.1"]`.
+
+### Added
+
+- **InteractionEvidenceV01 schema** (`@peac/schema`)
+  - Full type definitions with Zod validation
+  - SDK accessors: `getInteraction()`, `setInteraction()`, `hasInteraction()`
+  - Projection API: `createReceiptView()` for first-class ergonomics
+  - Warning-capable validation: `validateInteractionOrdered()` returns `{ valid, errors[], warnings[] }`
+  - Compatibility API: `validateInteraction()` for harness compatibility
+  - Strict schema with 6 REJECT invariants enforced in superRefine
+
+- **Canonical digest algorithms**
+  - `sha-256` (full SHA-256)
+  - `sha-256:trunc-64k` (first 64KB)
+  - `sha-256:trunc-1m` (first 1MB)
+  - Binary units: k=1024, m=1024\*1024
+
+- **Well-known interaction kinds**
+  - `tool.call`, `http.request`, `fs.read`, `fs.write`, `message`
+  - Reserved prefixes: `peac.*`, `org.peacprotocol.*` (REJECT if not in registry)
+
+- **Error codes** (14 new codes in `specs/kernel/errors.json`)
+  - `E_INTERACTION_*` for validation errors
+  - `W_INTERACTION_*` for warnings
+
+- **Conformance fixtures** (`specs/conformance/fixtures/interaction/`)
+  - `valid.json` - 16 valid fixtures
+  - `invalid.json` - 36 invalid fixtures with expected error codes
+  - `edge-cases.json` - 22 fixtures with warnings
+
+### Changed
+
+- **Wire format documentation**: Updated all references from legacy `peac.receipt/0.9` to canonical `peac-receipt/0.1`
+  - `specs/kernel/README.md`
+  - `packages/schema/src/index.ts` (comment)
+  - `docs/guides/x402-peac.md`
+  - `examples/quickstart/README.md`
+  - `packages/mappings/mcp/tests/mcp.test.ts` (test fixtures)
+
+### Validation Semantics
+
+See [docs/specs/ERRORS.md](docs/specs/ERRORS.md#interaction-evidence-validation-semantics-v0107) for
+normative validation precedence and semantic decisions (array rejection, empty-as-missing, timing error layering).
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- Interaction evidence stored in extensions, NOT top-level `evidence.interaction`
+- Extension key: `org.peacprotocol/interaction@0.1`
+
 ## [0.10.5] - 2026-01-30
 
 ### npm Publish Script Hardening

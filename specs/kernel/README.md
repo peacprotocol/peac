@@ -20,7 +20,7 @@ The `specs/kernel/` directory contains the **normative source of truth** for all
 
 **Normative constants** for the PEAC protocol:
 
-- **Wire format:** `peac.receipt/0.9` (frozen until v1.0)
+- **Wire format:** `peac-receipt/0.1` (frozen until v1.0)
 - **Algorithms:** EdDSA (Ed25519 signatures)
 - **HTTP headers:** `PEAC-Receipt`, `DPoP`
 - **Discovery:** `/.well-known/peac.txt` location and caching
@@ -119,7 +119,7 @@ Each error includes:
 ## Versioning
 
 - **Spec Version:** Incremented on any change to kernel specs
-- **Wire Format:** Frozen at `peac.receipt/0.9` until v1.0 GA
+- **Wire Format:** Frozen at `peac-receipt/0.1` until v1.0 GA
 - **Registries:** Additive-only in v0.9.x (no removals until v1.0)
 
 ---
@@ -148,7 +148,7 @@ import { WIRE_TYPE, ALGORITHMS, HEADERS } from '@peac/kernel';
 
 // Issue a receipt
 const header = {
-  typ: WIRE_TYPE, // "peac.receipt/0.9"
+  typ: WIRE_TYPE, // "peac-receipt/0.1"
   alg: ALGORITHMS.default, // "EdDSA"
 };
 
