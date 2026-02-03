@@ -7,7 +7,7 @@ A record is the portable interaction artifact; a receipt is the signed file form
 [Docs](https://www.peacprotocol.org) | [Spec Index](docs/SPEC_INDEX.md) | [Discussions](https://github.com/peacprotocol/peac/discussions) | [Releases](https://github.com/peacprotocol/peac/releases)
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac)](https://github.com/peacprotocol/peac/releases)
+[![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac?color=blue)](https://github.com/peacprotocol/peac/releases)
 
 **What:** PEAC standardizes a file-discoverable policy surface and a signed receipt format that make automated interactions provable -- consent, attribution, settlement references, decisions, outcomes.
 
