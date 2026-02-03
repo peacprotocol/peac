@@ -1,10 +1,11 @@
 {
   "id": "peac-receipts",
   "name": "PEAC Receipts",
-  "version": "0.10.7",
-  "description": "Generate cryptographic receipts for tool calls with PEAC protocol",
+  "version": "0.10.6",
+  "description": "Generate signed, verifiable evidence records for tool calls with PEAC protocol",
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
+  "experimental": true,
   "configSchema": {
     "type": "object",
     "properties": {
@@ -44,7 +45,7 @@
         "properties": {
           "key_ref": {
             "type": "string",
-            "description": "Key reference: env:VAR_NAME, keychain:key-name, sidecar:unix:///path, or file:/path"
+            "description": "Key reference: env:VAR_NAME or file:/path (keychain/sidecar not yet implemented)"
           },
           "issuer": {
             "type": "string",
@@ -66,15 +67,6 @@
             "type": "boolean",
             "default": true,
             "description": "Include workflow context in receipts"
-          },
-          "include_identity": {
-            "type": "boolean",
-            "default": false,
-            "description": "Include agent identity attestation in receipts"
-          },
-          "identity_attestation_ref": {
-            "type": "string",
-            "description": "Reference to identity attestation (when include_identity=true)"
           }
         }
       },
@@ -105,7 +97,7 @@
     },
     {
       "name": "peac_receipts.export_bundle",
-      "description": "Export receipts as a dispute bundle ZIP for audit"
+      "description": "Export receipts as a bundle directory for audit (manifest.json + receipts/)"
     },
     {
       "name": "peac_receipts.verify",

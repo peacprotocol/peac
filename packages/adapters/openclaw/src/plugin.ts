@@ -10,7 +10,7 @@
 
 import type { CaptureSession, SpoolStore, DedupeIndex } from '@peac/capture-core';
 import { createCaptureSession, createHasher } from '@peac/capture-core';
-import { sign } from '@peac/crypto';
+import { sign, base64urlDecode } from '@peac/crypto';
 import type { OpenClawAdapterConfig } from './types.js';
 import { createHookHandler, type OpenClawHookHandler } from './hooks.js';
 import {
@@ -44,6 +44,8 @@ export interface JWK {
 
 /**
  * Plugin configuration from openclaw.plugin.json configSchema.
+ *
+ * @experimental This interface is experimental and may change.
  */
 export interface PluginConfig {
   enabled?: boolean;
@@ -60,8 +62,7 @@ export interface PluginConfig {
   };
   correlation?: {
     include_workflow?: boolean;
-    include_identity?: boolean;
-    identity_attestation_ref?: string;
+    // Note: include_identity and identity_attestation_ref are reserved for future use
   };
   background?: {
     drain_interval_ms?: number;
@@ -422,20 +423,35 @@ export async function createPluginInstance(options: CreatePluginOptions): Promis
     },
   });
 
-  // Create background service
+  // Track last emitted sequence for cursor-based emission
+  let lastEmittedSequence = 0;
+
+  // Create background service with proper cursor tracking
   const backgroundService = createBackgroundService({
     emitter,
     drainIntervalMs,
     getPendingEntries: async () => {
-      // Read entries from store that haven't been emitted
-      const sequence = await store.getSequence();
-      if (sequence === 0) return [];
-      return store.read(0, batchSize);
+      // Read entries after the last emitted sequence
+      const currentSequence = await store.getSequence();
+      if (currentSequence <= lastEmittedSequence) return [];
+      // Read from cursor position, not from 0
+      const entries = await store.read(lastEmittedSequence, batchSize);
+      // Filter to only entries we haven't emitted
+      return entries.filter((e) => e.sequence > lastEmittedSequence);
     },
     markEmitted: async (digest) => {
-      // Mark in dedupe index
-      // This is a simplified implementation - production would track emitted state properly
-      void digest;
+      // Find the entry with this digest and update cursor
+      const entries = await store.read(lastEmittedSequence, batchSize);
+      const entry = entries.find((e) => e.entry_digest === digest);
+      if (entry && entry.sequence > lastEmittedSequence) {
+        lastEmittedSequence = entry.sequence;
+      }
+      // Also mark in dedupe index for cross-session persistence
+      // Find the action ID from the entry
+      const matchingEntry = entries.find((e) => e.entry_digest === digest);
+      if (matchingEntry) {
+        await dedupe.markEmitted(matchingEntry.action.id);
+      }
     },
     onError,
   });
@@ -463,23 +479,3 @@ export async function createPluginInstance(options: CreatePluginOptions): Promis
   };
 }
 
-// =============================================================================
-// Utilities
-// =============================================================================
-
-/**
- * Decode base64url string to Uint8Array.
- */
-function base64urlDecode(str: string): Uint8Array {
-  // Add padding if needed
-  const padded = str + '==='.slice(0, (4 - (str.length % 4)) % 4);
-  // Convert base64url to base64
-  const base64 = padded.replace(/-/g, '+').replace(/_/g, '/');
-  // Decode
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
-}

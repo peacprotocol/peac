@@ -2,9 +2,21 @@
  * @peac/adapter-openclaw - Plugin Tools
  *
  * Tools exposed by the PEAC receipts plugin for OpenClaw.
+ *
+ * @experimental This module is experimental and may change.
  */
 
 import type { PluginTool, PluginLogger } from './plugin.js';
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+/** Maximum files to scan for status (DoS protection) */
+const MAX_STATUS_FILE_SCAN = 1000;
+
+/** Maximum files to parse for query (DoS protection) */
+const MAX_QUERY_FILE_PARSE = 10000;
 
 // =============================================================================
 // Status Tool Types
@@ -42,23 +54,31 @@ export function createStatusTool(
 
     async execute(): Promise<StatusResult> {
       const fs = await import('fs');
-      const path = await import('path');
+      const pathModule = await import('path');
 
-      // Count receipts in output directory
+      // Use path.resolve for portability
+      const resolvedOutputDir = pathModule.resolve(outputDir);
+
+      // Count receipts in output directory (capped for performance)
       let receiptCount = 0;
       let lastReceiptTime: string | null = null;
       let oldestReceiptTime: string | null = null;
+      let countApproximate = false;
 
       try {
-        const files = await fs.promises.readdir(outputDir);
+        const files = await fs.promises.readdir(resolvedOutputDir);
         const receiptFiles = files.filter((f) => f.endsWith('.peac.json'));
         receiptCount = receiptFiles.length;
 
-        if (receiptFiles.length > 0) {
-          // Get timestamps from filenames or file stats
+        // Cap the scan for performance
+        const filesToScan = receiptFiles.slice(0, MAX_STATUS_FILE_SCAN);
+        countApproximate = receiptFiles.length > MAX_STATUS_FILE_SCAN;
+
+        if (filesToScan.length > 0) {
+          // Get timestamps from file stats (capped)
           const fileStats = await Promise.all(
-            receiptFiles.map(async (f) => {
-              const stat = await fs.promises.stat(path.join(outputDir, f));
+            filesToScan.map(async (f) => {
+              const stat = await fs.promises.stat(pathModule.join(resolvedOutputDir, f));
               return { file: f, mtime: stat.mtime };
             })
           );
@@ -80,7 +100,8 @@ export function createStatusTool(
         },
         receipts: {
           count: receiptCount,
-          output_dir: outputDir,
+          count_approximate: countApproximate,
+          output_dir: resolvedOutputDir,
           last_receipt_time: lastReceiptTime,
           oldest_receipt_time: oldestReceiptTime,
         },
@@ -104,6 +125,7 @@ interface StatusResult {
   };
   receipts: {
     count: number;
+    count_approximate: boolean;
     output_dir: string;
     last_receipt_time: string | null;
     oldest_receipt_time: string | null;
@@ -122,7 +144,10 @@ interface StatusResult {
 
 /**
  * Create the peac_receipts.export_bundle tool.
- * Exports receipts as a dispute bundle ZIP for audit.
+ * Exports receipts as a bundle directory for audit.
+ *
+ * Note: Creates a directory structure, not a ZIP archive.
+ * Use @peac/audit createDisputeBundle for production ZIP bundles.
  */
 export function createExportBundleTool(
   outputDir: string,
@@ -130,7 +155,7 @@ export function createExportBundleTool(
 ): PluginTool {
   return {
     name: 'peac_receipts.export_bundle',
-    description: 'Export receipts as a dispute bundle ZIP for audit',
+    description: 'Export receipts as a bundle directory for audit (manifest.json + receipts/)',
     parameters: {
       type: 'object',
       properties: {
@@ -148,18 +173,21 @@ export function createExportBundleTool(
         },
         output_path: {
           type: 'string',
-          description: 'Output path for the bundle ZIP (default: peac-bundle-{timestamp}.zip)',
+          description: 'Output path for bundle directory (default: peac-bundle-{timestamp})',
         },
       },
     },
 
     async execute(params: ExportBundleParams): Promise<ExportBundleResult> {
       const fs = await import('fs');
-      const path = await import('path');
+      const pathModule = await import('path');
+
+      // Use path.resolve for portability
+      const resolvedOutputDir = pathModule.resolve(outputDir);
 
       try {
         // List receipts
-        const files = await fs.promises.readdir(outputDir);
+        const files = await fs.promises.readdir(resolvedOutputDir);
         const receiptFiles = files.filter((f) => f.endsWith('.peac.json'));
 
         if (receiptFiles.length === 0) {
@@ -174,8 +202,14 @@ export function createExportBundleTool(
         const receipts: Array<{ file: string; content: unknown; mtime: Date }> = [];
 
         for (const file of receiptFiles) {
-          const filePath = path.join(outputDir, file);
-          const stat = await fs.promises.stat(filePath);
+          const filePath = pathModule.join(resolvedOutputDir, file);
+          let stat;
+          try {
+            stat = await fs.promises.stat(filePath);
+          } catch {
+            // Skip files that can't be stat'd
+            continue;
+          }
 
           // Apply time filters
           if (params.since && stat.mtime < new Date(params.since)) {
@@ -185,8 +219,14 @@ export function createExportBundleTool(
             continue;
           }
 
-          // Read and parse receipt
-          const content = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
+          // Read and parse receipt (tolerate invalid JSON)
+          let content;
+          try {
+            content = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
+          } catch {
+            logger.warn(`Skipping invalid JSON in ${file}`);
+            continue;
+          }
 
           // Apply workflow filter
           if (params.workflow_id) {
@@ -210,6 +250,7 @@ export function createExportBundleTool(
         // Create bundle manifest
         const manifest = {
           version: '1.0',
+          format: 'peac-bundle-directory',
           created_at: new Date().toISOString(),
           receipt_count: receipts.length,
           filters: {
@@ -223,29 +264,27 @@ export function createExportBundleTool(
           })),
         };
 
-        // Determine output path
+        // Determine output path (directory, not ZIP)
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const bundlePath = params.output_path || path.join(outputDir, `peac-bundle-${timestamp}.zip`);
+        const bundleDir = params.output_path
+          ? pathModule.resolve(params.output_path)
+          : pathModule.join(resolvedOutputDir, `peac-bundle-${timestamp}`);
 
-        // Create ZIP bundle
-        // Note: In production, would use archiver or similar
-        // For now, create a directory-based bundle
-        const bundleDir = bundlePath.replace('.zip', '');
         await fs.promises.mkdir(bundleDir, { recursive: true });
 
         // Write manifest
         await fs.promises.writeFile(
-          path.join(bundleDir, 'manifest.json'),
+          pathModule.join(bundleDir, 'manifest.json'),
           JSON.stringify(manifest, null, 2)
         );
 
         // Copy receipts
-        const receiptsDir = path.join(bundleDir, 'receipts');
+        const receiptsDir = pathModule.join(bundleDir, 'receipts');
         await fs.promises.mkdir(receiptsDir, { recursive: true });
 
         for (const receipt of receipts) {
           await fs.promises.writeFile(
-            path.join(receiptsDir, receipt.file),
+            pathModule.join(receiptsDir, receipt.file),
             JSON.stringify(receipt.content, null, 2)
           );
         }
@@ -254,7 +293,7 @@ export function createExportBundleTool(
 
         return {
           status: 'ok',
-          message: `Exported ${receipts.length} receipts`,
+          message: `Exported ${receipts.length} receipts to directory`,
           receipt_count: receipts.length,
           bundle_path: bundleDir,
         };
@@ -394,17 +433,41 @@ async function verifySingleReceipt(
   // Signature verification (if JWKS provided)
   if (jwksPath && receipt._jws) {
     try {
-      const { verify, base64urlDecode } = await import('@peac/crypto');
+      const { verify, base64urlDecode, base64urlDecodeString } = await import('@peac/crypto');
       const jwks = JSON.parse(await fs.promises.readFile(jwksPath, 'utf-8'));
-      // Extract public key from JWKS
-      const keyJwk = jwks.keys?.[0];
-      if (!keyJwk || !keyJwk.x) {
-        errors.push('No valid Ed25519 keys found in JWKS');
+
+      // Parse JWS header to get kid
+      const jwsParts = receipt._jws.split('.');
+      if (jwsParts.length !== 3) {
+        errors.push('Invalid JWS format');
       } else {
-        // Decode base64url public key bytes
-        const publicKeyBytes = base64urlDecode(keyJwk.x);
-        await verify(receipt._jws, publicKeyBytes);
-        logger.info('Signature verified successfully');
+        const headerJson = base64urlDecodeString(jwsParts[0]);
+        const header = JSON.parse(headerJson) as { kid?: string; alg?: string };
+        const targetKid = header.kid;
+
+        // Select key by kid from JWKS
+        let keyJwk;
+        if (targetKid && Array.isArray(jwks.keys)) {
+          keyJwk = jwks.keys.find((k: { kid?: string }) => k.kid === targetKid);
+          if (!keyJwk) {
+            errors.push(`Key with kid "${targetKid}" not found in JWKS`);
+          }
+        } else if (Array.isArray(jwks.keys) && jwks.keys.length > 0) {
+          // Fallback to first key if no kid in JWS header
+          keyJwk = jwks.keys[0];
+          warnings.push('JWS has no kid - using first key from JWKS');
+        }
+
+        if (keyJwk) {
+          if (!keyJwk.x) {
+            errors.push('Selected key missing public key (x parameter)');
+          } else {
+            // Decode base64url public key bytes
+            const publicKeyBytes = base64urlDecode(keyJwk.x);
+            await verify(receipt._jws, publicKeyBytes);
+            logger.info(`Signature verified with key ${keyJwk.kid || 'unknown'}`);
+          }
+        }
       }
     } catch (error) {
       errors.push(`Signature verification failed: ${error instanceof Error ? error.message : 'Unknown'}`);
@@ -551,45 +614,78 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
 
     async execute(params: QueryParams): Promise<QueryResult> {
       const fs = await import('fs');
-      const path = await import('path');
+      const pathModule = await import('path');
+
+      // Use path.resolve for portability
+      const resolvedOutputDir = pathModule.resolve(outputDir);
 
       try {
-        const files = await fs.promises.readdir(outputDir);
+        const files = await fs.promises.readdir(resolvedOutputDir);
         const receiptFiles = files.filter((f) => f.endsWith('.peac.json'));
 
-        const matches: QueryMatch[] = [];
-        const limit = params.limit || 100;
+        const limit = Math.min(params.limit || 100, MAX_QUERY_FILE_PARSE);
         const offset = params.offset || 0;
 
-        for (const file of receiptFiles) {
-          const filePath = path.join(outputDir, file);
-          const stat = await fs.promises.stat(filePath);
+        // If we have time filters, we can sort by mtime first (cheap) to reduce parsing
+        // Get file stats first for time-based pre-filtering
+        const fileInfos: Array<{ file: string; mtime: Date }> = [];
+        for (const file of receiptFiles.slice(0, MAX_QUERY_FILE_PARSE)) {
+          try {
+            const filePath = pathModule.join(resolvedOutputDir, file);
+            const stat = await fs.promises.stat(filePath);
 
-          // Apply time filters
-          if (params.since && stat.mtime < new Date(params.since)) {
+            // Apply time filters early (before parsing JSON)
+            if (params.since && stat.mtime < new Date(params.since)) {
+              continue;
+            }
+            if (params.until && stat.mtime > new Date(params.until)) {
+              continue;
+            }
+
+            fileInfos.push({ file, mtime: stat.mtime });
+          } catch {
+            // Skip files that can't be stat'd
             continue;
           }
-          if (params.until && stat.mtime > new Date(params.until)) {
+        }
+
+        // Sort by mtime descending (newest first) before parsing
+        fileInfos.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+
+        // Now parse files until we have enough matches
+        const matches: QueryMatch[] = [];
+        let skippedForFilters = 0;
+
+        for (const { file } of fileInfos) {
+          const filePath = pathModule.join(resolvedOutputDir, file);
+
+          // Read and parse receipt (tolerate invalid JSON)
+          let content;
+          try {
+            content = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
+          } catch {
+            // Skip invalid JSON files
             continue;
           }
 
-          // Read and parse receipt
-          const content = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
           const interaction = content?.evidence?.extensions?.['org.peacprotocol/interaction@0.1'];
           const workflow = content?.auth?.extensions?.['org.peacprotocol/workflow'];
 
           // Apply workflow filter
           if (params.workflow_id && workflow?.workflow_id !== params.workflow_id) {
+            skippedForFilters++;
             continue;
           }
 
           // Apply tool filter
           if (params.tool_name && interaction?.tool?.name !== params.tool_name) {
+            skippedForFilters++;
             continue;
           }
 
           // Apply status filter
           if (params.status && interaction?.result?.status !== params.status) {
+            skippedForFilters++;
             continue;
           }
 
@@ -603,9 +699,16 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
             started_at: interaction?.started_at,
             completed_at: interaction?.completed_at,
           });
+
+          // Early exit if we have enough matches (limit + offset)
+          // This avoids parsing all files when we only need a few
+          if (matches.length >= offset + limit + 100) {
+            // Buffer of 100 for sorting stability
+            break;
+          }
         }
 
-        // Sort by started_at descending (newest first)
+        // Final sort by started_at (more accurate than mtime)
         matches.sort((a, b) => {
           const aTime = a.started_at ? new Date(a.started_at).getTime() : 0;
           const bTime = b.started_at ? new Date(b.started_at).getTime() : 0;
@@ -621,6 +724,9 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           offset,
           limit,
           results: paginated,
+          ...(receiptFiles.length > MAX_QUERY_FILE_PARSE && {
+            warning: `Results capped at ${MAX_QUERY_FILE_PARSE} files`,
+          }),
         };
       } catch (error) {
         logger.error('Query failed:', error);
@@ -665,4 +771,5 @@ interface QueryResult {
   limit: number;
   results: QueryMatch[];
   error?: string;
+  warning?: string;
 }

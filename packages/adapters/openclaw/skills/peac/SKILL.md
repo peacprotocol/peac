@@ -1,6 +1,8 @@
 # PEAC Receipts Skills
 
-Slash commands for working with PEAC cryptographic receipts.
+> **Experimental**: This plugin is experimental and may change.
+
+Slash commands for working with PEAC signed evidence records.
 
 ## /peac-status
 
@@ -21,7 +23,7 @@ Show the current status of PEAC receipt generation.
 
 ## /peac-export
 
-Export receipts as an audit bundle for review or dispute resolution.
+Export receipts as a bundle directory for review or audit.
 
 **Usage:**
 ```
@@ -32,7 +34,7 @@ Export receipts as an audit bundle for review or dispute resolution.
 - `--workflow <id>` - Filter by workflow ID
 - `--since <timestamp>` - Include receipts since RFC 3339 timestamp
 - `--until <timestamp>` - Include receipts until RFC 3339 timestamp
-- `--output <path>` - Output path for bundle (default: auto-generated)
+- `--output <path>` - Output path for bundle directory (default: auto-generated)
 
 **Examples:**
 ```
@@ -40,6 +42,8 @@ Export receipts as an audit bundle for review or dispute resolution.
 /peac-export --workflow wf_abc123
 /peac-export --since 2024-02-01T00:00:00Z --until 2024-02-02T00:00:00Z
 ```
+
+**Output:** Creates a directory with `manifest.json` and `receipts/` subdirectory.
 
 ---
 
@@ -64,7 +68,7 @@ Verify a receipt or bundle for correctness and signature validity.
 **Verification includes:**
 - Structure validation (auth, evidence blocks)
 - Interaction evidence validation (required fields, timing invariants)
-- Signature verification (when JWKS provided)
+- Signature verification (when JWKS provided, key selected by kid)
 
 ---
 
@@ -123,10 +127,10 @@ PEAC receipts are configured in your OpenClaw gateway config:
 
 ### Signing Key Reference Formats
 
-- `env:VAR_NAME` - Load from environment variable (development)
-- `keychain:key-name` - Load from OS keychain (recommended)
-- `sidecar:unix:///path` - Use sidecar signing service (enterprise)
+- `env:VAR_NAME` - Load from environment variable
 - `file:/path` - Load from file (development only)
+
+> **Note:** `keychain:` and `sidecar:` schemes are reserved for future implementation.
 
 ### Capture Modes
 
@@ -135,17 +139,20 @@ PEAC receipts are configured in your OpenClaw gateway config:
 
 ---
 
-## What PEAC Receipts Prove
+## What PEAC Receipts Record
 
-Each receipt provides cryptographic proof of:
+Each receipt is a signed, verifiable record of:
 - A tool call was recorded at a specific time
-- Input/output content hashes (for later verification)
+- Input/output content hashes (for later verification against original data)
 - Policy context at execution time
 - Workflow correlation (related tool calls)
 - Outcome (success, error, timeout)
 
 Receipts are signed with your configured key, enabling:
 - Offline verification without network access
+- Audit trail for compliance
 - Dispute resolution with third parties
-- Compliance audit trails
-- Forensic analysis of agent behavior
+- Analysis of agent behavior
+
+**Important:** Receipts record that an event was captured; they do not prove
+semantic correctness of the tool execution itself.
