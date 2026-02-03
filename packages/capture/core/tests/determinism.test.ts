@@ -403,8 +403,8 @@ describe('Mapper Determinism', () => {
         metadata: {
           'org.openclaw/context': { tool_call_id: 'call_123', channel: { kind: 'direct' } },
           'org.openclaw/audit_digest': 'abc123',
-          'foo': 'bar',
-          'platform_version': '1.0.0',
+          foo: 'bar',
+          platform_version: '1.0.0',
         },
       },
       prev_entry_digest: GENESIS_DIGEST,
@@ -422,10 +422,9 @@ describe('Mapper Determinism', () => {
     expect(evidence.extensions?.['org.openclaw/audit_digest']).toBe('abc123');
 
     // Non-namespaced keys go under generic capture-metadata key
-    const genericMetadata = evidence.extensions?.['org.peacprotocol/capture-metadata@0.1'] as Record<
-      string,
-      unknown
-    >;
+    const genericMetadata = evidence.extensions?.[
+      'org.peacprotocol/capture-metadata@0.1'
+    ] as Record<string, unknown>;
     expect(genericMetadata).toBeDefined();
     expect(genericMetadata.foo).toBe('bar');
     expect(genericMetadata.platform_version).toBe('1.0.0');
@@ -481,10 +480,9 @@ describe('Mapper Determinism', () => {
     const evidence = toInteractionEvidence(entry);
 
     // All should be under generic key
-    const genericMetadata = evidence.extensions?.['org.peacprotocol/capture-metadata@0.1'] as Record<
-      string,
-      unknown
-    >;
+    const genericMetadata = evidence.extensions?.[
+      'org.peacprotocol/capture-metadata@0.1'
+    ] as Record<string, unknown>;
     expect(genericMetadata).toEqual({ foo: 'bar', count: 42 });
   });
 });
