@@ -18,6 +18,23 @@ const MAX_STATUS_FILE_SCAN = 1000;
 /** Maximum files to parse for query (DoS protection) */
 const MAX_QUERY_FILE_PARSE = 10000;
 
+/** Maximum file size in bytes to read (DoS protection) - 10MB */
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
+/** Allowed JWS algorithms (security) */
+const ALLOWED_ALGORITHMS = ['EdDSA', 'ES256', 'ES384', 'ES512', 'RS256', 'RS384', 'RS512'] as const;
+
+/** Algorithm to key type compatibility map */
+const ALG_KEY_TYPE_MAP: Record<string, { kty: string; crv?: string[] }> = {
+  EdDSA: { kty: 'OKP', crv: ['Ed25519', 'Ed448'] },
+  ES256: { kty: 'EC', crv: ['P-256'] },
+  ES384: { kty: 'EC', crv: ['P-384'] },
+  ES512: { kty: 'EC', crv: ['P-521'] },
+  RS256: { kty: 'RSA' },
+  RS384: { kty: 'RSA' },
+  RS512: { kty: 'RSA' },
+};
+
 // =============================================================================
 // Status Tool Types
 // =============================================================================
@@ -384,6 +401,17 @@ async function verifySingleReceipt(
   fs: typeof import('fs'),
   logger: PluginLogger
 ): Promise<VerifyResult> {
+  // Check file size before reading (DoS protection)
+  const stat = await fs.promises.stat(receiptPath);
+  if (stat.size > MAX_FILE_SIZE_BYTES) {
+    return {
+      status: 'error',
+      valid: false,
+      message: `File too large: ${stat.size} bytes exceeds limit of ${MAX_FILE_SIZE_BYTES} bytes`,
+      errors: [`File size ${stat.size} bytes exceeds ${MAX_FILE_SIZE_BYTES} byte limit`],
+    };
+  }
+
   const content = await fs.promises.readFile(receiptPath, 'utf-8');
   const receipt = JSON.parse(content);
 
@@ -449,6 +477,11 @@ async function verifySingleReceipt(
           errors.push('Algorithm "none" is not allowed');
         }
 
+        // Reject algorithms not in allowlist
+        if (header.alg && !ALLOWED_ALGORITHMS.includes(header.alg as typeof ALLOWED_ALGORITHMS[number])) {
+          errors.push(`Algorithm "${header.alg}" is not in allowed list: ${ALLOWED_ALGORITHMS.join(', ')}`);
+        }
+
         // Reject unknown critical headers
         if (header.crit && header.crit.length > 0) {
           errors.push(`Unknown critical headers: ${header.crit.join(', ')}`);
@@ -457,7 +490,7 @@ async function verifySingleReceipt(
         const targetKid = header.kid;
 
         // Strict key selection by kid
-        let keyJwk;
+        let keyJwk: { kid?: string; kty?: string; crv?: string; x?: string; n?: string } | undefined;
         if (!Array.isArray(jwks.keys) || jwks.keys.length === 0) {
           errors.push('JWKS has no keys');
         } else if (targetKid) {
@@ -475,12 +508,26 @@ async function verifySingleReceipt(
           errors.push(`JWS missing kid but JWKS has ${jwks.keys.length} keys - cannot select`);
         }
 
+        // Verify algorithm matches key type
+        if (keyJwk && header.alg && errors.length === 0) {
+          const expectedKeyType = ALG_KEY_TYPE_MAP[header.alg];
+          if (expectedKeyType) {
+            if (keyJwk.kty !== expectedKeyType.kty) {
+              errors.push(`Algorithm "${header.alg}" requires key type "${expectedKeyType.kty}" but key has "${keyJwk.kty}"`);
+            } else if (expectedKeyType.crv && keyJwk.crv && !expectedKeyType.crv.includes(keyJwk.crv)) {
+              errors.push(`Algorithm "${header.alg}" requires curve ${expectedKeyType.crv.join(' or ')} but key has "${keyJwk.crv}"`);
+            }
+          }
+        }
+
         if (keyJwk && errors.length === 0) {
-          if (!keyJwk.x) {
-            errors.push('Selected key missing public key (x parameter)');
+          // Get the public key bytes (x for OKP/EC, n for RSA)
+          const publicKeyParam = keyJwk.x || keyJwk.n;
+          if (!publicKeyParam) {
+            errors.push('Selected key missing public key (x or n parameter)');
           } else {
             // Decode base64url public key bytes
-            const publicKeyBytes = base64urlDecode(keyJwk.x);
+            const publicKeyBytes = base64urlDecode(publicKeyParam);
             await verify(receipt._jws, publicKeyBytes);
             logger.info(`Signature verified with key ${keyJwk.kid || 'anonymous'}`);
           }
@@ -673,8 +720,20 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
         const matches: QueryMatch[] = [];
         let skippedForFilters = 0;
 
+        let filesSkippedForSize = 0;
         for (const { file } of fileInfos) {
           const filePath = pathModule.join(resolvedOutputDir, file);
+
+          // Check file size before reading (DoS protection)
+          try {
+            const fileStat = await fs.promises.stat(filePath);
+            if (fileStat.size > MAX_FILE_SIZE_BYTES) {
+              filesSkippedForSize++;
+              continue;
+            }
+          } catch {
+            continue;
+          }
 
           // Read and parse receipt (tolerate invalid JSON)
           let content;
@@ -725,15 +784,26 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           }
         }
 
-        // Final sort by started_at (more accurate than mtime)
+        // Final sort by started_at (more accurate than mtime), then by filename for determinism
         matches.sort((a, b) => {
           const aTime = a.started_at ? new Date(a.started_at).getTime() : 0;
           const bTime = b.started_at ? new Date(b.started_at).getTime() : 0;
-          return bTime - aTime;
+          if (bTime !== aTime) return bTime - aTime;
+          // Secondary sort by filename for deterministic ordering
+          return a.file.localeCompare(b.file);
         });
 
         // Apply pagination
         const paginated = matches.slice(offset, offset + limit);
+
+        // Build warnings for truncation
+        const warnings: string[] = [];
+        if (receiptFiles.length > MAX_QUERY_FILE_PARSE) {
+          warnings.push(`Results capped at ${MAX_QUERY_FILE_PARSE} files`);
+        }
+        if (filesSkippedForSize > 0) {
+          warnings.push(`${filesSkippedForSize} files skipped (exceeded ${MAX_FILE_SIZE_BYTES} byte limit)`);
+        }
 
         return {
           status: 'ok',
@@ -741,9 +811,8 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           offset,
           limit,
           results: paginated,
-          ...(receiptFiles.length > MAX_QUERY_FILE_PARSE && {
-            warning: `Results capped at ${MAX_QUERY_FILE_PARSE} files`,
-          }),
+          truncated: receiptFiles.length > MAX_QUERY_FILE_PARSE || filesSkippedForSize > 0,
+          ...(warnings.length > 0 && { warning: warnings.join('; ') }),
         };
       } catch (error) {
         logger.error('Query failed:', error);
@@ -787,6 +856,7 @@ interface QueryResult {
   offset: number;
   limit: number;
   results: QueryMatch[];
+  truncated?: boolean;
   error?: string;
   warning?: string;
 }

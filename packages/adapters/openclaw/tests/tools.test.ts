@@ -497,6 +497,84 @@ describe('createVerifyTool', () => {
       expect(result.valid).toBe(false);
       expect(result.errors?.some((e) => e.includes('"none" is not allowed'))).toBe(true);
     });
+
+    it('rejects unknown algorithm not in allowlist', async () => {
+      // Create a receipt with an unknown algorithm
+      const receipt = createValidReceipt('001');
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', kid: 'key1' })).toString('base64url');
+      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+
+      const receiptPath = path.join(tempDir, 'r_001.peac.json');
+      fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+      const jwksPath = path.join(tempDir, 'keys.jwks.json');
+      fs.writeFileSync(jwksPath, JSON.stringify({
+        keys: [{ kty: 'oct', kid: 'key1', k: 'dGVzdA' }],
+      }));
+
+      const tool = createVerifyTool(mockLogger);
+      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+        status: string;
+        valid: boolean;
+        errors?: string[];
+      };
+
+      expect(result.status).toBe('error');
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((e) => e.includes('not in allowed list'))).toBe(true);
+    });
+
+    it('rejects algorithm-key type mismatch', async () => {
+      // Create a receipt with EdDSA algorithm but RSA key
+      const receipt = createValidReceipt('001');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString('base64url');
+      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+
+      const receiptPath = path.join(tempDir, 'r_001.peac.json');
+      fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+      const jwksPath = path.join(tempDir, 'keys.jwks.json');
+      fs.writeFileSync(jwksPath, JSON.stringify({
+        keys: [{ kty: 'RSA', kid: 'key1', n: 'test123', e: 'AQAB' }],
+      }));
+
+      const tool = createVerifyTool(mockLogger);
+      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+        status: string;
+        valid: boolean;
+        errors?: string[];
+      };
+
+      expect(result.status).toBe('error');
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((e) => e.includes('requires key type "OKP" but key has "RSA"'))).toBe(true);
+    });
+
+    it('rejects algorithm-curve mismatch', async () => {
+      // Create a receipt with EdDSA algorithm but wrong curve
+      const receipt = createValidReceipt('001');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString('base64url');
+      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+
+      const receiptPath = path.join(tempDir, 'r_001.peac.json');
+      fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+      const jwksPath = path.join(tempDir, 'keys.jwks.json');
+      fs.writeFileSync(jwksPath, JSON.stringify({
+        keys: [{ kty: 'OKP', crv: 'X25519', kid: 'key1', x: 'test1' }],
+      }));
+
+      const tool = createVerifyTool(mockLogger);
+      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+        status: string;
+        valid: boolean;
+        errors?: string[];
+      };
+
+      expect(result.status).toBe('error');
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((e) => e.includes('requires curve') && e.includes('but key has "X25519"'))).toBe(true);
+    });
   });
 });
 

@@ -294,16 +294,22 @@ export async function createFileReceiptWriter(outputDir: string): Promise<Receip
         2
       );
 
-      // Atomic write: write to .tmp, fsync, rename
+      // Atomic write: write to .tmp, fsync, rename, fsync dir
       await fs.promises.writeFile(tempPath, content, 'utf-8');
 
-      // fsync for durability (open, sync, close)
+      // fsync file for durability (open, sync, close)
       const fd = await fs.promises.open(tempPath, 'r');
       await fd.sync();
       await fd.close();
 
       // Atomic rename (POSIX guarantees atomicity)
       await fs.promises.rename(tempPath, filepath);
+
+      // fsync parent directory for full crash durability (POSIX best practice)
+      // This ensures the rename is persisted even on power loss
+      const dirFd = await fs.promises.open(resolvedOutputDir, 'r');
+      await dirFd.sync();
+      await dirFd.close();
 
       return filepath;
     },
