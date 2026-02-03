@@ -103,7 +103,12 @@ describe('createStatusTool', () => {
     const stats = createMockStats();
     const tool = createStatusTool(stats, tempDir);
 
-    const result = await tool.execute({}) as { status: string; spool: unknown; receipts: { count: number }; emitter: unknown };
+    const result = (await tool.execute({})) as {
+      status: string;
+      spool: unknown;
+      receipts: { count: number };
+      emitter: unknown;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.spool).toBeDefined();
@@ -125,7 +130,7 @@ describe('createStatusTool', () => {
     const stats = createMockStats();
     const tool = createStatusTool(stats, tempDir);
 
-    const result = await tool.execute({}) as {
+    const result = (await tool.execute({})) as {
       status: string;
       spool: { pending_entries: number; total_captured: number; duplicates_skipped: number };
       receipts: { count: number; output_dir: string; last_receipt_time: string | null };
@@ -150,7 +155,7 @@ describe('createStatusTool', () => {
     const stats = createMockStats();
     const tool = createStatusTool(stats, '/nonexistent/path');
 
-    const result = await tool.execute({}) as { status: string; receipts: { count: number } };
+    const result = (await tool.execute({})) as { status: string; receipts: { count: number } };
 
     expect(result.status).toBe('ok');
     expect(result.receipts.count).toBe(0);
@@ -183,7 +188,11 @@ describe('createExportBundleTool', () => {
   it('returns message when no receipts exist', async () => {
     const tool = createExportBundleTool(tempDir, mockLogger);
 
-    const result = await tool.execute({}) as { status: string; message: string; receipt_count: number };
+    const result = (await tool.execute({})) as {
+      status: string;
+      message: string;
+      receipt_count: number;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.message).toContain('No receipts');
@@ -202,7 +211,11 @@ describe('createExportBundleTool', () => {
     );
 
     const tool = createExportBundleTool(tempDir, mockLogger);
-    const result = await tool.execute({}) as { status: string; receipt_count: number; bundle_path?: string };
+    const result = (await tool.execute({})) as {
+      status: string;
+      receipt_count: number;
+      bundle_path?: string;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.receipt_count).toBe(2);
@@ -227,7 +240,10 @@ describe('createExportBundleTool', () => {
     fs.writeFileSync(path.join(tempDir, 'r_002.peac.json'), JSON.stringify(receipt2));
 
     const tool = createExportBundleTool(tempDir, mockLogger);
-    const result = await tool.execute({ workflow_id: 'wf_alpha' }) as { status: string; receipt_count: number };
+    const result = (await tool.execute({ workflow_id: 'wf_alpha' })) as {
+      status: string;
+      receipt_count: number;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.receipt_count).toBe(1);
@@ -262,7 +278,7 @@ describe('createVerifyTool', () => {
     fs.writeFileSync(receiptPath, JSON.stringify(createValidReceipt('001')));
 
     const tool = createVerifyTool(mockLogger);
-    const result = await tool.execute({ path: receiptPath }) as {
+    const result = (await tool.execute({ path: receiptPath })) as {
       status: string;
       valid: boolean;
       receipt_id?: string;
@@ -284,7 +300,11 @@ describe('createVerifyTool', () => {
     fs.writeFileSync(receiptPath, JSON.stringify(invalidReceipt));
 
     const tool = createVerifyTool(mockLogger);
-    const result = await tool.execute({ path: receiptPath }) as { status: string; valid: boolean; errors?: string[] };
+    const result = (await tool.execute({ path: receiptPath })) as {
+      status: string;
+      valid: boolean;
+      errors?: string[];
+    };
 
     expect(result.status).toBe('error');
     expect(result.valid).toBe(false);
@@ -297,7 +317,11 @@ describe('createVerifyTool', () => {
     fs.writeFileSync(receiptPath, JSON.stringify(invalidReceipt));
 
     const tool = createVerifyTool(mockLogger);
-    const result = await tool.execute({ path: receiptPath }) as { status: string; valid: boolean; errors?: string[] };
+    const result = (await tool.execute({ path: receiptPath })) as {
+      status: string;
+      valid: boolean;
+      errors?: string[];
+    };
 
     expect(result.status).toBe('error');
     expect(result.valid).toBe(false);
@@ -313,7 +337,11 @@ describe('createVerifyTool', () => {
     fs.writeFileSync(receiptPath, JSON.stringify(invalidReceipt));
 
     const tool = createVerifyTool(mockLogger);
-    const result = await tool.execute({ path: receiptPath }) as { status: string; valid: boolean; errors?: string[] };
+    const result = (await tool.execute({ path: receiptPath })) as {
+      status: string;
+      valid: boolean;
+      errors?: string[];
+    };
 
     expect(result.status).toBe('error');
     expect(result.valid).toBe(false);
@@ -329,7 +357,11 @@ describe('createVerifyTool', () => {
     fs.writeFileSync(receiptPath, JSON.stringify(invalidReceipt));
 
     const tool = createVerifyTool(mockLogger);
-    const result = await tool.execute({ path: receiptPath }) as { status: string; valid: boolean; errors?: string[] };
+    const result = (await tool.execute({ path: receiptPath })) as {
+      status: string;
+      valid: boolean;
+      errors?: string[];
+    };
 
     expect(result.status).toBe('error');
     expect(result.valid).toBe(false);
@@ -359,7 +391,7 @@ describe('createVerifyTool', () => {
     );
 
     const tool = createVerifyTool(mockLogger);
-    const result = await tool.execute({ path: bundleDir }) as {
+    const result = (await tool.execute({ path: bundleDir })) as {
       status: string;
       valid: boolean;
       bundle_stats?: { total: number; valid: number; invalid: number };
@@ -374,7 +406,10 @@ describe('createVerifyTool', () => {
 
   it('handles file not found gracefully', async () => {
     const tool = createVerifyTool(mockLogger);
-    const result = await tool.execute({ path: '/nonexistent/file.json' }) as { status: string; valid: boolean };
+    const result = (await tool.execute({ path: '/nonexistent/file.json' })) as {
+      status: string;
+      valid: boolean;
+    };
 
     expect(result.status).toBe('error');
     expect(result.valid).toBe(false);
@@ -393,15 +428,18 @@ describe('createVerifyTool', () => {
 
       // Create JWKS with multiple keys
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [
-          { kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' },
-          { kty: 'OKP', crv: 'Ed25519', kid: 'key2', x: 'test2' },
-        ],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [
+            { kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' },
+            { kty: 'OKP', crv: 'Ed25519', kid: 'key2', x: 'test2' },
+          ],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -409,14 +447,18 @@ describe('createVerifyTool', () => {
 
       expect(result.status).toBe('error');
       expect(result.valid).toBe(false);
-      expect(result.errors?.some((e) => e.includes('missing kid') && e.includes('2 keys'))).toBe(true);
+      expect(result.errors?.some((e) => e.includes('missing kid') && e.includes('2 keys'))).toBe(
+        true
+      );
     });
 
     it('fails when JWKS has wrong kid', async () => {
       // Create a receipt with a JWS that has kid: "key3"
       const receipt = createValidReceipt('001');
       // Mock JWS with kid: header = {"alg":"EdDSA","kid":"key3"} (base64url)
-      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key3' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key3' })).toString(
+        'base64url'
+      );
       receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
@@ -424,15 +466,18 @@ describe('createVerifyTool', () => {
 
       // Create JWKS with different key IDs
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [
-          { kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' },
-          { kty: 'OKP', crv: 'Ed25519', kid: 'key2', x: 'test2' },
-        ],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [
+            { kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' },
+            { kty: 'OKP', crv: 'Ed25519', kid: 'key2', x: 'test2' },
+          ],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -453,14 +498,15 @@ describe('createVerifyTool', () => {
 
       // Create JWKS with exactly one key
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [
-          { kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' },
-        ],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         warnings?: string[];
@@ -482,12 +528,15 @@ describe('createVerifyTool', () => {
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
 
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -501,19 +550,24 @@ describe('createVerifyTool', () => {
     it('rejects unknown algorithm not in allowlist', async () => {
       // Create a receipt with an unknown algorithm
       const receipt = createValidReceipt('001');
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', kid: 'key1' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', kid: 'key1' })).toString(
+        'base64url'
+      );
       receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
 
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [{ kty: 'oct', kid: 'key1', k: 'dGVzdA' }],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'oct', kid: 'key1', k: 'dGVzdA' }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -527,19 +581,24 @@ describe('createVerifyTool', () => {
     it('rejects algorithm-key type mismatch', async () => {
       // Create a receipt with EdDSA algorithm but RSA key
       const receipt = createValidReceipt('001');
-      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString(
+        'base64url'
+      );
       receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
 
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [{ kty: 'RSA', kid: 'key1', n: 'test123', e: 'AQAB' }],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'RSA', kid: 'key1', n: 'test123', e: 'AQAB' }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -547,25 +606,32 @@ describe('createVerifyTool', () => {
 
       expect(result.status).toBe('error');
       expect(result.valid).toBe(false);
-      expect(result.errors?.some((e) => e.includes('requires key type "OKP" but key has "RSA"'))).toBe(true);
+      expect(
+        result.errors?.some((e) => e.includes('requires key type "OKP" but key has "RSA"'))
+      ).toBe(true);
     });
 
     it('rejects algorithm-curve mismatch', async () => {
       // Create a receipt with EdDSA algorithm but wrong curve
       const receipt = createValidReceipt('001');
-      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString(
+        'base64url'
+      );
       receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
 
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [{ kty: 'OKP', crv: 'X25519', kid: 'key1', x: 'test1' }],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'OKP', crv: 'X25519', kid: 'key1', x: 'test1' }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -573,13 +639,19 @@ describe('createVerifyTool', () => {
 
       expect(result.status).toBe('error');
       expect(result.valid).toBe(false);
-      expect(result.errors?.some((e) => e.includes('requires curve') && e.includes('but key has "X25519"'))).toBe(true);
+      expect(
+        result.errors?.some(
+          (e) => e.includes('requires curve') && e.includes('but key has "X25519"')
+        )
+      ).toBe(true);
     });
 
     it('rejects key with wrong use field', async () => {
       // Create a receipt with a valid JWS
       const receipt = createValidReceipt('001');
-      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString(
+        'base64url'
+      );
       receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
@@ -587,12 +659,15 @@ describe('createVerifyTool', () => {
 
       // Key has use: "enc" (encryption) instead of "sig" (signature)
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1', use: 'enc' }],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1', use: 'enc' }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -600,13 +675,17 @@ describe('createVerifyTool', () => {
 
       expect(result.status).toBe('error');
       expect(result.valid).toBe(false);
-      expect(result.errors?.some((e) => e.includes('use "enc"') && e.includes('not valid for signature'))).toBe(true);
+      expect(
+        result.errors?.some((e) => e.includes('use "enc"') && e.includes('not valid for signature'))
+      ).toBe(true);
     });
 
     it('rejects key with missing verify in key_ops', async () => {
       // Create a receipt with a valid JWS
       const receipt = createValidReceipt('001');
-      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString(
+        'base64url'
+      );
       receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
@@ -614,12 +693,15 @@ describe('createVerifyTool', () => {
 
       // Key has key_ops without "verify"
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1', key_ops: ['sign'] }],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1', key_ops: ['sign'] }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -633,19 +715,24 @@ describe('createVerifyTool', () => {
     it('rejects JWS with crit header', async () => {
       // Create a receipt with crit header
       const receipt = createValidReceipt('001');
-      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1', crit: ['exp'], exp: 12345 })).toString('base64url');
+      const header = Buffer.from(
+        JSON.stringify({ alg: 'EdDSA', kid: 'key1', crit: ['exp'], exp: 12345 })
+      ).toString('base64url');
       receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
 
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -659,19 +746,24 @@ describe('createVerifyTool', () => {
     it('rejects JWS with crit referencing missing header', async () => {
       // Create a receipt with crit header that references a missing header
       const receipt = createValidReceipt('001');
-      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1', crit: ['missing_header'] })).toString('base64url');
+      const header = Buffer.from(
+        JSON.stringify({ alg: 'EdDSA', kid: 'key1', crit: ['missing_header'] })
+      ).toString('base64url');
       receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
 
       const jwksPath = path.join(tempDir, 'keys.jwks.json');
-      fs.writeFileSync(jwksPath, JSON.stringify({
-        keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
-      }));
+      fs.writeFileSync(
+        jwksPath,
+        JSON.stringify({
+          keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'key1', x: 'test1' }],
+        })
+      );
 
       const tool = createVerifyTool(mockLogger);
-      const result = await tool.execute({ path: receiptPath, jwks_path: jwksPath }) as {
+      const result = (await tool.execute({ path: receiptPath, jwks_path: jwksPath })) as {
         status: string;
         valid: boolean;
         errors?: string[];
@@ -679,7 +771,9 @@ describe('createVerifyTool', () => {
 
       expect(result.status).toBe('error');
       expect(result.valid).toBe(false);
-      expect(result.errors?.some((e) => e.includes('Critical headers declared but missing'))).toBe(true);
+      expect(result.errors?.some((e) => e.includes('Critical headers declared but missing'))).toBe(
+        true
+      );
     });
   });
 });
@@ -728,7 +822,11 @@ describe('createQueryTool', () => {
 
   it('returns all receipts with no filter', async () => {
     const tool = createQueryTool(tempDir, mockLogger);
-    const result = await tool.execute({}) as { status: string; total: number; results: unknown[] };
+    const result = (await tool.execute({})) as {
+      status: string;
+      total: number;
+      results: unknown[];
+    };
 
     expect(result.status).toBe('ok');
     expect(result.total).toBe(3);
@@ -737,7 +835,11 @@ describe('createQueryTool', () => {
 
   it('filters by workflow_id', async () => {
     const tool = createQueryTool(tempDir, mockLogger);
-    const result = await tool.execute({ workflow_id: 'wf_alpha' }) as { status: string; total: number; results: Array<{ workflow_id?: string }> };
+    const result = (await tool.execute({ workflow_id: 'wf_alpha' })) as {
+      status: string;
+      total: number;
+      results: Array<{ workflow_id?: string }>;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.total).toBe(2);
@@ -746,7 +848,11 @@ describe('createQueryTool', () => {
 
   it('filters by tool_name', async () => {
     const tool = createQueryTool(tempDir, mockLogger);
-    const result = await tool.execute({ tool_name: 'web_search' }) as { status: string; total: number; results: Array<{ tool_name?: string }> };
+    const result = (await tool.execute({ tool_name: 'web_search' })) as {
+      status: string;
+      total: number;
+      results: Array<{ tool_name?: string }>;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.total).toBe(2);
@@ -755,7 +861,11 @@ describe('createQueryTool', () => {
 
   it('filters by status', async () => {
     const tool = createQueryTool(tempDir, mockLogger);
-    const result = await tool.execute({ status: 'error' }) as { status: string; total: number; results: Array<{ status?: string }> };
+    const result = (await tool.execute({ status: 'error' })) as {
+      status: string;
+      total: number;
+      results: Array<{ status?: string }>;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.total).toBe(1);
@@ -764,10 +874,10 @@ describe('createQueryTool', () => {
 
   it('combines multiple filters', async () => {
     const tool = createQueryTool(tempDir, mockLogger);
-    const result = await tool.execute({
+    const result = (await tool.execute({
       workflow_id: 'wf_alpha',
       tool_name: 'web_search',
-    }) as { status: string; total: number };
+    })) as { status: string; total: number };
 
     expect(result.status).toBe('ok');
     expect(result.total).toBe(2);
@@ -775,7 +885,12 @@ describe('createQueryTool', () => {
 
   it('applies limit', async () => {
     const tool = createQueryTool(tempDir, mockLogger);
-    const result = await tool.execute({ limit: 2 }) as { status: string; total: number; results: unknown[]; limit: number };
+    const result = (await tool.execute({ limit: 2 })) as {
+      status: string;
+      total: number;
+      results: unknown[];
+      limit: number;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.total).toBe(3); // Total matches
@@ -785,7 +900,12 @@ describe('createQueryTool', () => {
 
   it('applies offset for pagination', async () => {
     const tool = createQueryTool(tempDir, mockLogger);
-    const result = await tool.execute({ limit: 2, offset: 1 }) as { status: string; total: number; results: unknown[]; offset: number };
+    const result = (await tool.execute({ limit: 2, offset: 1 })) as {
+      status: string;
+      total: number;
+      results: unknown[];
+      offset: number;
+    };
 
     expect(result.status).toBe('ok');
     expect(result.total).toBe(3);
@@ -795,7 +915,11 @@ describe('createQueryTool', () => {
 
   it('handles empty results gracefully', async () => {
     const tool = createQueryTool(tempDir, mockLogger);
-    const result = await tool.execute({ workflow_id: 'nonexistent' }) as { status: string; total: number; results: unknown[] };
+    const result = (await tool.execute({ workflow_id: 'nonexistent' })) as {
+      status: string;
+      total: number;
+      results: unknown[];
+    };
 
     expect(result.status).toBe('ok');
     expect(result.total).toBe(0);
@@ -804,7 +928,7 @@ describe('createQueryTool', () => {
 
   it('handles non-existent directory gracefully', async () => {
     const tool = createQueryTool('/nonexistent/path', mockLogger);
-    const result = await tool.execute({}) as { status: string; error?: string };
+    const result = (await tool.execute({})) as { status: string; error?: string };
 
     expect(result.status).toBe('error');
     expect(result.error).toBeDefined();

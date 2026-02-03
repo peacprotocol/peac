@@ -9,11 +9,13 @@ Slash commands for working with PEAC signed evidence records.
 Show the current status of PEAC receipt generation.
 
 **Usage:**
+
 ```
 /peac-status
 ```
 
 **Output includes:**
+
 - Spool status (pending entries, total captured, duplicates skipped)
 - Receipt count and output directory
 - Last and oldest receipt timestamps
@@ -26,17 +28,20 @@ Show the current status of PEAC receipt generation.
 Export receipts as a bundle directory for review or audit.
 
 **Usage:**
+
 ```
 /peac-export [options]
 ```
 
 **Options:**
+
 - `--workflow <id>` - Filter by workflow ID
 - `--since <timestamp>` - Include receipts since RFC 3339 timestamp
 - `--until <timestamp>` - Include receipts until RFC 3339 timestamp
 - `--output <path>` - Output path for bundle directory (default: auto-generated)
 
 **Examples:**
+
 ```
 /peac-export
 /peac-export --workflow wf_abc123
@@ -52,20 +57,24 @@ Export receipts as a bundle directory for review or audit.
 Verify a receipt or bundle for correctness and signature validity.
 
 **Usage:**
+
 ```
 /peac-verify <path> [options]
 ```
 
 **Options:**
+
 - `--jwks <path>` - Path to JWKS file for signature verification
 
 **Examples:**
+
 ```
 /peac-verify ./receipts/r_abc123.peac.json
 /peac-verify ./bundles/peac-bundle-2024-02-01 --jwks ./keys.jwks.json
 ```
 
 **Verification includes:**
+
 - Structure validation (auth, evidence blocks)
 - Interaction evidence validation (required fields, timing invariants)
 - Signature verification (when JWKS provided, key selected by kid)
@@ -77,11 +86,13 @@ Verify a receipt or bundle for correctness and signature validity.
 Query receipts by various criteria.
 
 **Usage:**
+
 ```
 /peac-query [options]
 ```
 
 **Options:**
+
 - `--workflow <id>` - Filter by workflow ID
 - `--tool <name>` - Filter by tool name
 - `--status <status>` - Filter by result status (ok, error, timeout, canceled)
@@ -91,6 +102,7 @@ Query receipts by various criteria.
 - `--offset <n>` - Skip results (for pagination)
 
 **Examples:**
+
 ```
 /peac-query --tool web_search
 /peac-query --workflow wf_abc123 --status error
@@ -142,6 +154,7 @@ PEAC receipts are configured in your OpenClaw gateway config:
 ## What PEAC Receipts Record
 
 Each receipt is a signed, verifiable record of:
+
 - A tool call was recorded at a specific time
 - Input/output content hashes (for later verification against original data)
 - Policy context at execution time
@@ -149,6 +162,7 @@ Each receipt is a signed, verifiable record of:
 - Outcome (success, error, timeout)
 
 Receipts are signed with your configured key, enabling:
+
 - Offline verification without network access
 - Audit trail for compliance
 - Dispute resolution with third parties

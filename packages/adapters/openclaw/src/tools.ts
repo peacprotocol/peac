@@ -60,10 +60,7 @@ interface PluginStats {
  * Create the peac_receipts.status tool.
  * Shows spool size, last receipt time, and config summary.
  */
-export function createStatusTool(
-  stats: PluginStats,
-  outputDir: string
-): PluginTool {
+export function createStatusTool(stats: PluginStats, outputDir: string): PluginTool {
   return {
     name: 'peac_receipts.status',
     description: 'Show PEAC receipts status: spool size, last receipt time, config summary',
@@ -166,10 +163,7 @@ interface StatusResult {
  * Note: Creates a directory structure, not a ZIP archive.
  * Use @peac/audit createDisputeBundle for production ZIP bundles.
  */
-export function createExportBundleTool(
-  outputDir: string,
-  logger: PluginLogger
-): PluginTool {
+export function createExportBundleTool(outputDir: string, logger: PluginLogger): PluginTool {
   return {
     name: 'peac_receipts.export_bundle',
     description: 'Export receipts as a bundle directory for audit (manifest.json + receipts/)',
@@ -377,7 +371,13 @@ export function createVerifyTool(logger: PluginLogger): PluginTool {
 
         if (stat.isDirectory()) {
           // Verify bundle
-          return await verifyBundle(verifyParams.path, verifyParams.jwks_path, fs, pathModule, logger);
+          return await verifyBundle(
+            verifyParams.path,
+            verifyParams.jwks_path,
+            fs,
+            pathModule,
+            logger
+          );
         } else {
           // Verify single receipt
           return await verifySingleReceipt(verifyParams.path, verifyParams.jwks_path, fs, logger);
@@ -478,8 +478,13 @@ async function verifySingleReceipt(
         }
 
         // Reject algorithms not in allowlist
-        if (header.alg && !ALLOWED_ALGORITHMS.includes(header.alg as typeof ALLOWED_ALGORITHMS[number])) {
-          errors.push(`Algorithm "${header.alg}" is not in allowed list: ${ALLOWED_ALGORITHMS.join(', ')}`);
+        if (
+          header.alg &&
+          !ALLOWED_ALGORITHMS.includes(header.alg as (typeof ALLOWED_ALGORITHMS)[number])
+        ) {
+          errors.push(
+            `Algorithm "${header.alg}" is not in allowed list: ${ALLOWED_ALGORITHMS.join(', ')}`
+          );
         }
 
         // Reject unknown critical headers (JOSE compliance)
@@ -498,7 +503,17 @@ async function verifySingleReceipt(
         const targetKid = header.kid;
 
         // Strict key selection by kid
-        let keyJwk: { kid?: string; kty?: string; crv?: string; x?: string; n?: string; use?: string; key_ops?: string[] } | undefined;
+        let keyJwk:
+          | {
+              kid?: string;
+              kty?: string;
+              crv?: string;
+              x?: string;
+              n?: string;
+              use?: string;
+              key_ops?: string[];
+            }
+          | undefined;
         if (!Array.isArray(jwks.keys) || jwks.keys.length === 0) {
           errors.push('JWKS has no keys');
         } else if (targetKid) {
@@ -521,15 +536,25 @@ async function verifySingleReceipt(
           const expectedKeyType = ALG_KEY_TYPE_MAP[header.alg];
           if (expectedKeyType) {
             if (keyJwk.kty !== expectedKeyType.kty) {
-              errors.push(`Algorithm "${header.alg}" requires key type "${expectedKeyType.kty}" but key has "${keyJwk.kty}"`);
-            } else if (expectedKeyType.crv && keyJwk.crv && !expectedKeyType.crv.includes(keyJwk.crv)) {
-              errors.push(`Algorithm "${header.alg}" requires curve ${expectedKeyType.crv.join(' or ')} but key has "${keyJwk.crv}"`);
+              errors.push(
+                `Algorithm "${header.alg}" requires key type "${expectedKeyType.kty}" but key has "${keyJwk.kty}"`
+              );
+            } else if (
+              expectedKeyType.crv &&
+              keyJwk.crv &&
+              !expectedKeyType.crv.includes(keyJwk.crv)
+            ) {
+              errors.push(
+                `Algorithm "${header.alg}" requires curve ${expectedKeyType.crv.join(' or ')} but key has "${keyJwk.crv}"`
+              );
             }
           }
 
           // Validate key use if present (must be "sig" for signature verification)
           if (keyJwk.use && keyJwk.use !== 'sig') {
-            errors.push(`Key use "${keyJwk.use}" is not valid for signature verification (expected "sig")`);
+            errors.push(
+              `Key use "${keyJwk.use}" is not valid for signature verification (expected "sig")`
+            );
           }
 
           // Validate key_ops if present (must include "verify")
@@ -552,7 +577,9 @@ async function verifySingleReceipt(
         }
       }
     } catch (error) {
-      errors.push(`Signature verification failed: ${error instanceof Error ? error.message : 'Unknown'}`);
+      errors.push(
+        `Signature verification failed: ${error instanceof Error ? error.message : 'Unknown'}`
+      );
     }
   } else if (!jwksPath) {
     warnings.push('No JWKS provided - signature not verified');
@@ -822,13 +849,18 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           warnings.push(`Results capped at ${MAX_QUERY_FILE_PARSE} files`);
         }
         if (filesSkippedForSize > 0) {
-          warnings.push(`${filesSkippedForSize} files skipped (exceeded ${MAX_FILE_SIZE_BYTES} byte limit)`);
+          warnings.push(
+            `${filesSkippedForSize} files skipped (exceeded ${MAX_FILE_SIZE_BYTES} byte limit)`
+          );
         }
         if (filesSkippedForInvalidJson > 0) {
           warnings.push(`${filesSkippedForInvalidJson} files skipped (invalid JSON)`);
         }
 
-        const hasTruncation = receiptFiles.length > MAX_QUERY_FILE_PARSE || filesSkippedForSize > 0 || filesSkippedForInvalidJson > 0;
+        const hasTruncation =
+          receiptFiles.length > MAX_QUERY_FILE_PARSE ||
+          filesSkippedForSize > 0 ||
+          filesSkippedForInvalidJson > 0;
 
         return {
           status: 'ok',
@@ -837,11 +869,16 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           limit,
           results: paginated,
           truncated: hasTruncation,
-          skipped: hasTruncation ? {
-            too_large: filesSkippedForSize,
-            invalid_json: filesSkippedForInvalidJson,
-            capped: receiptFiles.length > MAX_QUERY_FILE_PARSE ? receiptFiles.length - MAX_QUERY_FILE_PARSE : 0,
-          } : undefined,
+          skipped: hasTruncation
+            ? {
+                too_large: filesSkippedForSize,
+                invalid_json: filesSkippedForInvalidJson,
+                capped:
+                  receiptFiles.length > MAX_QUERY_FILE_PARSE
+                    ? receiptFiles.length - MAX_QUERY_FILE_PARSE
+                    : 0,
+              }
+            : undefined,
           ...(warnings.length > 0 && { warning: warnings.join('; ') }),
         };
       } catch (error) {

@@ -248,7 +248,7 @@ export function generateKeyId(jwk: JWK): string {
   let hash = 0;
   for (let i = 0; i < publicPart.length; i++) {
     const char = publicPart.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return `k_${Math.abs(hash).toString(16).padStart(8, '0')}`;
@@ -531,4 +531,3 @@ export async function createPluginInstance(options: CreatePluginOptions): Promis
     },
   };
 }
-

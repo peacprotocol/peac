@@ -15,7 +15,13 @@ import {
   type CreatePluginOptions,
 } from '../src/plugin.js';
 import type { Signer, ReceiptWriter, SignedReceipt } from '../src/emitter.js';
-import type { SpoolStore, DedupeIndex, SpoolEntry, DedupeEntry, CapturedAction } from '@peac/capture-core';
+import type {
+  SpoolStore,
+  DedupeIndex,
+  SpoolEntry,
+  DedupeEntry,
+  CapturedAction,
+} from '@peac/capture-core';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
