@@ -5,7 +5,7 @@
  * OpenClaw event -> Hook Handler -> Capture Session -> Spool -> Emitter -> Receipt
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { createCaptureSession, createHasher } from '@peac/capture-core';
 import { createInMemorySpoolStore, createInMemoryDedupeIndex } from '@peac/capture-core/testkit';
 import { createHookHandler, createReceiptEmitter, createBackgroundService } from '../src/index.js';
