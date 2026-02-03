@@ -100,28 +100,28 @@ openssl genpkey -algorithm Ed25519 -out signing-key.pem
 jose jwk pub -i signing-key.pem -o public.jwk
 ```
 
-Or generate programmatically (illustrative pseudocode):
+**Example JWK structure** (Ed25519):
 
-```typescript
-// Illustrative - actual API may differ
-import { generateKeyPair } from '@peac/crypto';
-
-const { publicKey, privateKey } = await generateKeyPair('Ed25519');
-
-// Export as JWK for configuration
-const jwk = {
-  kty: 'OKP',
-  crv: 'Ed25519',
-  x: publicKey, // base64url-encoded public key
-  d: privateKey, // base64url-encoded private key
-  kid: 'my-key-id',
-  alg: 'EdDSA',
-  use: 'sig',
-};
-
-// Set as environment variable
-process.env.PEAC_SIGNING_KEY = JSON.stringify(jwk);
+```json
+{
+  "kty": "OKP",
+  "crv": "Ed25519",
+  "x": "<base64url-encoded-public-key>",
+  "d": "<base64url-encoded-private-key>",
+  "kid": "my-key-id",
+  "alg": "EdDSA",
+  "use": "sig"
+}
 ```
+
+**Loading from environment:**
+
+```bash
+# Set the JWK as an environment variable
+export PEAC_SIGNING_KEY='{"kty":"OKP","crv":"Ed25519","x":"...","d":"...","kid":"k1","alg":"EdDSA","use":"sig"}'
+```
+
+The plugin reads the key via `key_ref: "env:PEAC_SIGNING_KEY"` in your configuration.
 
 ## Plugin Tools
 
@@ -258,68 +258,36 @@ The `_jws` field contains the signed PEAC envelope with:
 
 ## Programmatic Usage
 
-The following examples are illustrative. See the package exports for the exact API.
+The following shows the conceptual flow. See the package exports for the exact API.
 
-### Creating a Plugin Instance
+### Plugin Lifecycle
 
-```typescript
-// Illustrative - see package exports for exact API
-import {
-  createPluginInstance,
-  createJwkSigner,
-  createFileReceiptWriter,
-} from '@peac/adapter-openclaw';
-
-// Create signer from JWK
-const signer = createJwkSigner(jwk, 'https://issuer.example.com');
-
-// Create writer for receipt files
-const writer = await createFileReceiptWriter('.peac/receipts');
-
-// Create plugin with storage (use testkit for in-memory implementations)
-const plugin = await createPluginInstance({
-  signer,
-  writer,
-  store, // SpoolStore implementation
-  dedupe, // DedupeIndex implementation
-  drainIntervalMs: 1000,
-  batchSize: 100,
-});
-
-// Start background service
-plugin.start();
-
-// Use hook handler for tool calls
-plugin.hookHandler.onToolCall(event);
-plugin.hookHandler.onToolResult(event);
-
-// Stop gracefully
-await plugin.stop();
+```text
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Tool Call      │     │  Spool          │     │  Receipts       │
+│  (sync hook)    │────▶│  (append-only)  │────▶│  (signed JWS)   │
+│  < 10ms         │     │  events.jsonl   │     │  *.peac.json    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+     Capture stage           Background            Emit stage
+     (hash inline)           service               (sign + write)
 ```
 
-### Manual Capture
+### Capture Input Shape
+
+When capturing a tool call, the adapter expects this shape:
 
 ```typescript
-// Illustrative - see @peac/capture-core exports
-import { createCaptureSession } from '@peac/capture-core';
-
-// Create session with required dependencies
-const session = createCaptureSession({ store, dedupe, hasher });
-
-// Capture an action
-const result = await session.capture({
-  id: 'unique-action-id',
-  kind: 'tool.call',
-  platform: 'openclaw',
-  tool_name: 'web_search',
-  input_bytes: new TextEncoder().encode(JSON.stringify(input)),
-  started_at: '2024-02-01T10:00:00Z',
-  completed_at: '2024-02-01T10:00:01Z',
-  status: 'ok',
-});
-
-if (result.success) {
-  console.log('Captured:', result.entry.entry_digest);
+// Pseudocode - data shape for capture
+interface CapturedAction {
+  id: string; // Stable ID for dedupe
+  kind: string; // "tool.call", "http.request", etc.
+  platform: string; // "openclaw"
+  tool_name?: string; // For tool.* kinds
+  input_bytes?: Uint8Array; // Will be hashed
+  output_bytes?: Uint8Array; // Will be hashed
+  started_at: string; // RFC 3339
+  completed_at?: string; // RFC 3339
+  status?: 'ok' | 'error' | 'timeout' | 'canceled';
 }
 ```
 
@@ -345,15 +313,10 @@ Always use `hash_only` capture mode unless you have explicit requirements for pl
 
 ### 3. Verify Receipts
 
-Regularly verify receipts to detect tampering:
+Regularly verify receipts to detect tampering using the plugin's verify tool or slash command:
 
-```typescript
-import { verifyReceipt } from '@peac/adapter-openclaw';
-
-const result = await verifyReceipt(receiptPath, jwksPath);
-if (!result.valid) {
-  console.error('Verification failed:', result.errors);
-}
+```bash
+/peac-verify ./receipts/r_abc123.peac.json --jwks ./keys.jwks.json
 ```
 
 ### 4. Backup Receipts

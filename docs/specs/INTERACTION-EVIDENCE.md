@@ -318,8 +318,8 @@ PEAC defines a canonical set of digest algorithms:
 **Algorithm handling:**
 
 - Implementations MUST accept the canonical set above
-- Implementations MAY accept additional algorithms for forward compatibility
-- If an unknown algorithm is encountered, implementations MUST NOT treat the digest as verified and SHOULD surface a structured warning (`W_INTERACTION_UNKNOWN_DIGEST_ALG`)
+- Default validators MUST reject unknown algorithms with `E_INTERACTION_INVALID_DIGEST_ALG`
+- Implementations MAY provide an "accept-unknown" mode for forward compatibility; in this mode, unknown algorithms MUST NOT be treated as verified and SHOULD surface a warning (recommended code: `W_INTERACTION_UNKNOWN_DIGEST_ALG`)
 
 ### 5.2 Size Constants
 
@@ -601,11 +601,11 @@ For production deployments:
 
 ### 10.3 Warning Codes
 
-| Code                               | Description                       |
-| ---------------------------------- | --------------------------------- |
-| `W_INTERACTION_KIND_UNREGISTERED`  | Kind not in recommended registry  |
-| `W_INTERACTION_MISSING_TARGET`     | No tool or resource field         |
-| `W_INTERACTION_UNKNOWN_DIGEST_ALG` | Unknown digest algorithm (accept) |
+| Code                               | Description                                         |
+| ---------------------------------- | --------------------------------------------------- |
+| `W_INTERACTION_KIND_UNREGISTERED`  | Kind not in recommended registry                    |
+| `W_INTERACTION_MISSING_TARGET`     | No tool or resource field                           |
+| `W_INTERACTION_UNKNOWN_DIGEST_ALG` | Unknown digest algorithm (accept-unknown mode only) |
 
 ### 10.4 Test Vectors
 
