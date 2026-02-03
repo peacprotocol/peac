@@ -1,0 +1,119 @@
+{
+  "id": "peac-receipts",
+  "name": "PEAC Receipts",
+  "version": "0.10.7",
+  "description": "Generate cryptographic receipts for tool calls with PEAC protocol",
+  "author": "PEAC Protocol",
+  "license": "Apache-2.0",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable or disable receipt generation"
+      },
+      "output_dir": {
+        "type": "string",
+        "default": ".peac/receipts",
+        "description": "Directory for storing generated receipts"
+      },
+      "capture": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": ["hash_only", "allowlist"],
+            "default": "hash_only",
+            "description": "hash_only: Never capture plaintext. allowlist: Capture for specified tools only."
+          },
+          "allowlist": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": [],
+            "description": "Tool names for plaintext capture (only when mode=allowlist)"
+          },
+          "max_payload_size": {
+            "type": "integer",
+            "default": 1048576,
+            "description": "Maximum payload size in bytes before truncation (default: 1MB)"
+          }
+        }
+      },
+      "signing": {
+        "type": "object",
+        "properties": {
+          "key_ref": {
+            "type": "string",
+            "description": "Key reference: env:VAR_NAME, keychain:key-name, sidecar:unix:///path, or file:/path"
+          },
+          "issuer": {
+            "type": "string",
+            "format": "uri",
+            "description": "Issuer URI for receipts (e.g., https://my-org.example.com)"
+          },
+          "audience": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional audience URI for receipts"
+          }
+        },
+        "required": ["key_ref", "issuer"]
+      },
+      "correlation": {
+        "type": "object",
+        "properties": {
+          "include_workflow": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include workflow context in receipts"
+          },
+          "include_identity": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include agent identity attestation in receipts"
+          },
+          "identity_attestation_ref": {
+            "type": "string",
+            "description": "Reference to identity attestation (when include_identity=true)"
+          }
+        }
+      },
+      "background": {
+        "type": "object",
+        "properties": {
+          "drain_interval_ms": {
+            "type": "integer",
+            "default": 1000,
+            "description": "Interval for background receipt emission (ms)"
+          },
+          "batch_size": {
+            "type": "integer",
+            "default": 100,
+            "description": "Maximum entries to process per drain cycle"
+          }
+        }
+      }
+    },
+    "required": ["signing"]
+  },
+  "extensions": ["dist/plugin.js"],
+  "skills": ["skills/peac"],
+  "tools": [
+    {
+      "name": "peac_receipts.status",
+      "description": "Show PEAC receipts status: spool size, last receipt time, config summary"
+    },
+    {
+      "name": "peac_receipts.export_bundle",
+      "description": "Export receipts as a dispute bundle ZIP for audit"
+    },
+    {
+      "name": "peac_receipts.verify",
+      "description": "Verify a receipt or bundle offline"
+    },
+    {
+      "name": "peac_receipts.query",
+      "description": "Query receipts by workflow_id, tool name, or time range"
+    }
+  ]
+}
