@@ -131,21 +131,23 @@ async function main() {
     log(`Created: ${tarballName}`);
 
     // -------------------------------------------------------------------------
-    // Step 3: Install tarball in fixture
+    // Step 3: Extract tarball in fixture (no npm install - avoids unpublished dep issues)
     // -------------------------------------------------------------------------
-    logSection('Step 3: Installing tarball...');
-    // Use npm (not pnpm) to avoid workspace protocol issues
-    // Flags for CI determinism: no audit, no fund, quiet output, ignore scripts
-    execInDir(
-      `npm install "${tarballPath}" --ignore-scripts --no-audit --no-fund --loglevel=error`,
-      fixture
-    );
-    log('Installed successfully');
+    logSection('Step 3: Extracting tarball...');
+    // We use tar extraction instead of npm install because:
+    // 1. npm install would try to fetch workspace deps (@peac/crypto, @peac/schema) from npm
+    // 2. Those deps might not be published yet (pre-release testing)
+    // 3. We only need to test the exports map, not actually load the module
+    const nodeModulesPath = join(fixture, 'node_modules', '@peac', 'capture-core');
+    execInDir(`mkdir -p "${nodeModulesPath}"`, fixture);
+    // tar xzf extracts, --strip-components=1 removes the "package/" prefix
+    execInDir(`tar xzf "${tarballPath}" --strip-components=1 -C "${nodeModulesPath}"`, fixture);
+    log('Extracted successfully');
 
     // Verify the package exists
-    const installedPath = join(fixture, 'node_modules', '@peac', 'capture-core');
+    const installedPath = nodeModulesPath;
     if (!existsSync(installedPath)) {
-      throw new Error(`Package not installed at expected path: ${installedPath}`);
+      throw new Error(`Package not extracted at expected path: ${installedPath}`);
     }
 
     // -------------------------------------------------------------------------
