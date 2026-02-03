@@ -391,6 +391,102 @@ describe('Mapper Determinism', () => {
     expect(anchor.spool_head_digest).toBe('c'.repeat(64));
     expect(anchor.sequence).toBe(42);
   });
+
+  it('promotes namespaced metadata keys directly to extensions', () => {
+    const entry: SpoolEntry = {
+      captured_at: FIXED_TIMESTAMP,
+      action: {
+        id: 'test-001',
+        kind: 'tool.call',
+        platform: 'openclaw',
+        started_at: FIXED_TIMESTAMP,
+        metadata: {
+          'org.openclaw/context': { tool_call_id: 'call_123', channel: { kind: 'direct' } },
+          'org.openclaw/audit_digest': 'abc123',
+          'foo': 'bar',
+          'platform_version': '1.0.0',
+        },
+      },
+      prev_entry_digest: GENESIS_DIGEST,
+      entry_digest: 'c'.repeat(64),
+      sequence: 1,
+    };
+
+    const evidence = toInteractionEvidence(entry);
+
+    // Namespaced keys go directly to extensions
+    expect(evidence.extensions?.['org.openclaw/context']).toEqual({
+      tool_call_id: 'call_123',
+      channel: { kind: 'direct' },
+    });
+    expect(evidence.extensions?.['org.openclaw/audit_digest']).toBe('abc123');
+
+    // Non-namespaced keys go under generic capture-metadata key
+    const genericMetadata = evidence.extensions?.['org.peacprotocol/capture-metadata@0.1'] as Record<
+      string,
+      unknown
+    >;
+    expect(genericMetadata).toBeDefined();
+    expect(genericMetadata.foo).toBe('bar');
+    expect(genericMetadata.platform_version).toBe('1.0.0');
+
+    // Namespaced keys should NOT be in generic metadata
+    expect(genericMetadata['org.openclaw/context']).toBeUndefined();
+    expect(genericMetadata['org.openclaw/audit_digest']).toBeUndefined();
+  });
+
+  it('handles metadata with only namespaced keys', () => {
+    const entry: SpoolEntry = {
+      captured_at: FIXED_TIMESTAMP,
+      action: {
+        id: 'test-001',
+        kind: 'tool.call',
+        platform: 'test',
+        started_at: FIXED_TIMESTAMP,
+        metadata: {
+          'org.example/custom': { value: 42 },
+        },
+      },
+      prev_entry_digest: GENESIS_DIGEST,
+      entry_digest: 'c'.repeat(64),
+      sequence: 1,
+    };
+
+    const evidence = toInteractionEvidence(entry);
+
+    // Only the namespaced key should be present
+    expect(evidence.extensions?.['org.example/custom']).toEqual({ value: 42 });
+    // No generic metadata key should exist
+    expect(evidence.extensions?.['org.peacprotocol/capture-metadata@0.1']).toBeUndefined();
+  });
+
+  it('handles metadata with only non-namespaced keys', () => {
+    const entry: SpoolEntry = {
+      captured_at: FIXED_TIMESTAMP,
+      action: {
+        id: 'test-001',
+        kind: 'tool.call',
+        platform: 'test',
+        started_at: FIXED_TIMESTAMP,
+        metadata: {
+          foo: 'bar',
+          count: 42,
+        },
+      },
+      prev_entry_digest: GENESIS_DIGEST,
+      entry_digest: 'c'.repeat(64),
+      sequence: 1,
+    };
+
+    const evidence = toInteractionEvidence(entry);
+
+    // All should be under generic key
+    const genericMetadata = evidence.extensions?.['org.peacprotocol/capture-metadata@0.1'] as Record<
+      string,
+      unknown
+    >;
+    expect(genericMetadata).toEqual({ foo: 'bar', count: 42 });
+  });
 });
 
 // =============================================================================
