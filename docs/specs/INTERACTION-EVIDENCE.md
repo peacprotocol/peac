@@ -2,7 +2,7 @@
 
 **Version:** 0.1
 **Status:** Draft
-**Since:** v0.10.7
+**Target:** v0.10.7
 **Extension Key:** `org.peacprotocol/interaction@0.1`
 
 ## Abstract
@@ -32,11 +32,11 @@ These primitives enable auditors, compliance systems, and cross-organization par
 
 Agent systems increasingly perform actions with real-world consequences: API calls, file operations, payments, and tool invocations. Current observability provides:
 
-- **Framework-native logs** - Not portable or cryptographically verifiable
+- **Framework-native logs** - Not portable or independently verifiable
 - **Telemetry spans** - Ephemeral, subject to sampling
 - **Blockchain proofs** - High latency, infrastructure requirements
 
-PEAC fills the gap by providing **portable, offline-verifiable, cryptographic evidence** for agent interactions without requiring blockchain infrastructure or access to original payloads.
+PEAC fills the gap by providing **portable, offline-verifiable, signed interaction records** without requiring blockchain infrastructure or access to original payloads.
 
 ### Use Cases
 
@@ -307,13 +307,19 @@ interface Refs {
 
 ### 5.1 Canonical Algorithm Set
 
-PEAC defines a canonical set of digest algorithms. Implementations MUST reject unknown algorithms.
+PEAC defines a canonical set of digest algorithms:
 
 | Algorithm           | Description           | Threshold |
 | ------------------- | --------------------- | --------- |
 | `sha-256`           | Full SHA-256          | <= 1MB    |
 | `sha-256:trunc-64k` | SHA-256 of first 64KB | > 64KB    |
 | `sha-256:trunc-1m`  | SHA-256 of first 1MB  | > 1MB     |
+
+**Algorithm handling:**
+
+- Implementations MUST accept the canonical set above
+- Implementations MAY accept additional algorithms for forward compatibility
+- If an unknown algorithm is encountered, implementations MUST NOT treat the digest as verified and SHOULD surface a structured warning (`W_INTERACTION_UNKNOWN_DIGEST_ALG`)
 
 ### 5.2 Size Constants
 
@@ -515,25 +521,32 @@ const view = createReceiptView(envelope);
 ### 9.1 Privacy Defaults
 
 1. **Hash-only by default** - `redaction: "hash_only"` is the default
-2. **No secret patterns** - Validate inputs don't match API key, token, password patterns
-3. **Size caps** - Large payloads use truncated hash algorithm
-4. **Allowlist required** - Plaintext capture requires explicit tool allowlist
+2. **Size caps** - Large payloads use truncated hash algorithm
+3. **Allowlist required** - Plaintext capture requires explicit tool allowlist
 
-### 9.2 What Receipts Prove
+### 9.2 Implementation Guidance (Non-Normative)
+
+Implementations SHOULD consider:
+
+- **Secret detection** - Validate inputs don't match common API key, token, or password patterns before hashing
+- **Audit logging** - Log capture events separately from receipt content for debugging
+- **Rate limiting** - Apply capture rate limits to prevent resource exhaustion
+
+### 9.3 What Receipts Prove
 
 - A tool call was recorded at time T
 - Inputs/outputs had digests H1, H2
 - Policy P was in effect (if captured)
 - Receipt was signed by key K (verifiable)
 
-### 9.3 What Receipts Do NOT Prove
+### 9.4 What Receipts Do NOT Prove
 
 - Tool actually executed (runtime can lie)
 - Inputs/outputs weren't modified post-hoc
 - Attacker didn't have access to signing key
 - Prevention of malicious behavior
 
-### 9.4 Signing Key Protection
+### 9.5 Signing Key Protection
 
 For production deployments:
 
@@ -588,10 +601,11 @@ For production deployments:
 
 ### 10.3 Warning Codes
 
-| Code                              | Description                      |
-| --------------------------------- | -------------------------------- |
-| `W_INTERACTION_KIND_UNREGISTERED` | Kind not in recommended registry |
-| `W_INTERACTION_MISSING_TARGET`    | No tool or resource field        |
+| Code                               | Description                       |
+| ---------------------------------- | --------------------------------- |
+| `W_INTERACTION_KIND_UNREGISTERED`  | Kind not in recommended registry  |
+| `W_INTERACTION_MISSING_TARGET`     | No tool or resource field         |
+| `W_INTERACTION_UNKNOWN_DIGEST_ALG` | Unknown digest algorithm (accept) |
 
 ### 10.4 Test Vectors
 

@@ -1,10 +1,10 @@
 # OpenClaw Integration Guide
 
 **Package:** `@peac/adapter-openclaw`
-**Version:** 0.10.7
+**Target:** v0.10.7
 **Status:** Experimental
 
-This guide explains how to integrate PEAC receipts with OpenClaw, generating signed, verifiable evidence records for every tool call.
+This guide explains how to integrate PEAC receipts with OpenClaw, generating signed interaction records for every tool call.
 
 ## Overview
 
@@ -100,9 +100,10 @@ openssl genpkey -algorithm Ed25519 -out signing-key.pem
 jose jwk pub -i signing-key.pem -o public.jwk
 ```
 
-Or generate programmatically:
+Or generate programmatically (illustrative pseudocode):
 
 ```typescript
+// Illustrative - actual API may differ
 import { generateKeyPair } from '@peac/crypto';
 
 const { publicKey, privateKey } = await generateKeyPair('Ed25519');
@@ -111,8 +112,8 @@ const { publicKey, privateKey } = await generateKeyPair('Ed25519');
 const jwk = {
   kty: 'OKP',
   crv: 'Ed25519',
-  x: publicKey,
-  d: privateKey,
+  x: publicKey, // base64url-encoded public key
+  d: privateKey, // base64url-encoded private key
   kid: 'my-key-id',
   alg: 'EdDSA',
   use: 'sig',
@@ -257,37 +258,30 @@ The `_jws` field contains the signed PEAC envelope with:
 
 ## Programmatic Usage
 
+The following examples are illustrative. See the package exports for the exact API.
+
 ### Creating a Plugin Instance
 
 ```typescript
+// Illustrative - see package exports for exact API
 import {
   createPluginInstance,
   createJwkSigner,
   createFileReceiptWriter,
 } from '@peac/adapter-openclaw';
-import {
-  createCaptureSession,
-  createHasher,
-  InMemorySpoolStore,
-  InMemoryDedupeIndex,
-} from '@peac/capture-core';
 
-// Create signer
+// Create signer from JWK
 const signer = createJwkSigner(jwk, 'https://issuer.example.com');
 
-// Create writer
+// Create writer for receipt files
 const writer = await createFileReceiptWriter('.peac/receipts');
 
-// Create storage
-const store = new InMemorySpoolStore();
-const dedupe = new InMemoryDedupeIndex();
-
-// Create plugin
+// Create plugin with storage (use testkit for in-memory implementations)
 const plugin = await createPluginInstance({
   signer,
   writer,
-  store,
-  dedupe,
+  store, // SpoolStore implementation
+  dedupe, // DedupeIndex implementation
   drainIntervalMs: 1000,
   batchSize: 100,
 });
@@ -306,10 +300,10 @@ await plugin.stop();
 ### Manual Capture
 
 ```typescript
-import { mapToInteractionEvidence } from '@peac/adapter-openclaw';
+// Illustrative - see @peac/capture-core exports
 import { createCaptureSession } from '@peac/capture-core';
 
-// Create session
+// Create session with required dependencies
 const session = createCaptureSession({ store, dedupe, hasher });
 
 // Capture an action
