@@ -16,9 +16,13 @@ The protocol works with generic HTTP 402 services, paywalls, routers, and data s
 
 **Agent protocols:**
 
-- [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) - Tool context for language models. Mapping with budget utilities.
-- [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) - Agent-driven commerce. Mapping with budget utilities.
-- [A2A Project](https://github.com/a2aproject/A2A) - Agent-to-agent coordination. Planned.
+- [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) - Tool context for language models. Mapping: `@peac/mappings-mcp`
+- [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) - Agent-driven commerce. Mapping: `@peac/mappings-acp`
+- [Agent2Agent Protocol (A2A)](https://github.com/google/A2A) - Agent-to-agent coordination. Planned.
+
+**Agent frameworks/runtimes:**
+
+- [OpenClaw](https://github.com/anthropics/claude-code) - Agent execution framework. Adapter: `@peac/adapter-openclaw`
 
 **Web policy surfaces:**
 
@@ -302,6 +306,10 @@ peac/
 │  ├─ protocol/            # issue(), verify(), discovery
 │  ├─ server/              # HTTP verification server
 │  ├─ cli/                 # Command-line tools
+│  ├─ capture/
+│  │  └─ core/             # Runtime-neutral capture pipeline
+│  ├─ adapters/
+│  │  └─ openclaw/         # OpenClaw agent framework adapter
 │  ├─ rails/
 │  │  ├─ x402/             # HTTP 402 / x402 payment rail
 │  │  ├─ stripe/           # Stripe payment rail
@@ -333,7 +341,7 @@ Layer 0: @peac/kernel
 Layer 1: @peac/schema
 Layer 2: @peac/crypto
 Layer 3: @peac/protocol, @peac/control
-Layer 4: @peac/rails-*, @peac/mappings-*, @peac/transport-*
+Layer 4: @peac/rails-*, @peac/mappings-*, @peac/adapter-*, @peac/transport-*
 Layer 5: @peac/server, @peac/cli
 ```
 
@@ -399,6 +407,18 @@ Dependencies flow DOWN only. Never import from a higher layer.
 | `@peac/telemetry-otel`  | OpenTelemetry adapter with privacy modes         |
 | `@peac/privacy`         | Privacy-preserving hashing                       |
 | `@peac/transport-grpc`  | gRPC transport binding                           |
+
+**Capture:**
+
+| Package              | Description                                          |
+| -------------------- | ---------------------------------------------------- |
+| `@peac/capture-core` | Runtime-neutral capture pipeline for agent platforms |
+
+**Adapters:**
+
+| Package                  | Description                          |
+| ------------------------ | ------------------------------------ |
+| `@peac/adapter-openclaw` | OpenClaw agent framework integration |
 
 **Attestations:**
 

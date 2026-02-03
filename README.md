@@ -4,10 +4,10 @@
 
 A record is the portable interaction artifact; a receipt is the signed file format.
 
-[Docs](https://www.peacprotocol.org) | [Spec Index](docs/SPEC_INDEX.md) | [Discussions](https://github.com/peacprotocol/peac/discussions) | [Releases](https://github.com/peacprotocol/peac/releases)
-
+[Website](https://www.peacprotocol.org) | [Spec Index](docs/SPEC_INDEX.md) | [Discussions](https://github.com/peacprotocol/peac/discussions) | [Releases](https://github.com/peacprotocol/peac/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac)](https://github.com/peacprotocol/peac/releases)
+[![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat)](https://www.npmjs.com/package/@peac/protocol)
 
 **What:** PEAC standardizes a file-discoverable policy surface and a signed receipt format that make automated interactions provable -- consent, attribution, settlement references, decisions, outcomes.
 
@@ -29,15 +29,24 @@ Use **record(s)** when talking conceptually. Use **receipt(s)** when referring t
 
 ## The model
 
-```
-1. Publish terms        2. Attach records        3. Verify and export
-/.well-known/           Issue receipts on        Deterministic report;
-peac.txt                governed interactions    Dispute Bundle for handoff
+```mermaid
+flowchart LR
+    subgraph "1. Publish policy"
+        A[Service] -->|hosts| B["/.well-known/peac.txt"]
+    end
+    subgraph "2. Issue receipt"
+        C[Gateway] -->|signs| D[PEAC-Receipt]
+    end
+    subgraph "3. Verify + bundle"
+        E[Verifier] -->|exports| F[Dispute Bundle]
+    end
+    B -.->|policy discovery| C
+    D -.->|offline verify| E
 ```
 
-1. **Publish terms**: Services publish terms and record requirements (`/.well-known/peac.txt`)
-2. **Attach records**: Gateways issue receipts for governed interactions (identity, purpose, settlement)
-3. **Verify and export**: Outcomes are verified offline; Dispute Bundles provide portable evidence
+1. **Publish policy**: Services publish terms and record requirements (`/.well-known/peac.txt`)
+2. **Issue receipt**: Gateways issue signed receipts for governed interactions (identity, purpose, settlement, extensions)
+3. **Verify + bundle**: Receipts verified offline; Dispute Bundles provide portable evidence for audits
 
 ## Where it fits
 
