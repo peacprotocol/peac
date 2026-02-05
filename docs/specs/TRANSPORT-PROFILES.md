@@ -172,18 +172,39 @@ Example:
 PEAC-Receipt-Pointer: sha256="7d8f3d0c9d0b6aebd1c3b8d0ab8f7c1d8c7f1d2b0b2a3f4e5d6c7b8a9f0e1d2c", url="https://receipts.example.com/abc123"
 ```
 
-### 5.3 Digest binding
+### 5.3 Digest binding (NORMATIVE)
 
-The digest MUST bind the pointer to the exact receipt bytes:
-- Algorithm: SHA-256
-- Input: Exact receipt JWS bytes (UTF-8 encoded)
-- Output: Lowercase hexadecimal (64 characters)
+The digest MUST bind the pointer to the exact receipt bytes. This section defines the canonical computation:
+
+**Algorithm:** SHA-256 (FIPS 180-4)
+
+**Input canonicalization:**
+
+- Input: The JWS Compact Serialization string (header.payload.signature)
+- Encoding: UTF-8 (the JWS is ASCII, but UTF-8 encoding is used for consistency)
+- No whitespace, no BOM, no normalization - the exact bytes of the JWS string
+
+**Output encoding:**
+
+- Format: Lowercase hexadecimal
+- Length: 64 characters (256 bits / 4 bits per hex char)
+- No prefix (no "0x")
+- No separators (no colons, dashes, or spaces)
+
+**Example computation (pseudocode):**
+
+```text
+receipt = "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.abc123..."
+bytes = utf8_encode(receipt)
+hash = sha256(bytes)
+digest = lowercase_hex(hash)  // e.g., "7d8f3d0c9d0b6aebd1c3b8d0ab8f7c1d8c7f1d2c"
+```
 
 Verifiers MUST:
 1. Fetch the URL
-2. Compute SHA-256 of the fetched bytes
-3. Compare to the declared digest
-4. Reject if mismatch
+2. Compute SHA-256 of the fetched bytes using the same canonicalization
+3. Compare to the declared digest (case-insensitive comparison allowed, but lowercase RECOMMENDED)
+4. Reject if mismatch with error `pointer_digest_mismatch`
 
 ### 5.4 Pointer URL requirements
 
