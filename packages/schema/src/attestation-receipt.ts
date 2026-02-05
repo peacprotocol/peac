@@ -256,7 +256,11 @@ export function createAttestationReceiptClaims(
   const expiresIn = params.expiresIn ?? 300;
 
   // Normalize issuer (remove trailing slashes)
-  const normalizedIssuer = params.issuer.replace(/\/+$/, '');
+  // Using explicit loop instead of regex to avoid ReDoS with quantifiers
+  let normalizedIssuer = params.issuer;
+  while (normalizedIssuer.endsWith('/')) {
+    normalizedIssuer = normalizedIssuer.slice(0, -1);
+  }
 
   // Build extensions
   const ext: Record<string, unknown> = { ...params.extensions };
