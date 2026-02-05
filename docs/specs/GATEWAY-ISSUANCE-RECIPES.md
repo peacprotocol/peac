@@ -4,7 +4,7 @@ Status: MIXED (Normative requirements + Illustrative examples)
 Version: 0.1
 Last-Updated: 2026-02-05
 
-This document describes how to issue PEAC receipts at gateways and edges (CDN, reverse proxy, service mesh). Gateway issuance is a primary enterprise adoption pattern because it requires no application code changes.
+This document describes how to issue PEAC receipts at gateways and edges (CDN, reverse proxy, service mesh). Gateway issuance requires no application code changes.
 
 ## 1. Terminology
 
@@ -21,7 +21,6 @@ Benefits:
 - No application code changes required
 - Single deployment point for platform teams
 - Uniform receipt policy across services
-- Faster enterprise adoption path
 
 ## 3. NORMATIVE: Gateway issuer constraints
 
