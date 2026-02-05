@@ -1,0 +1,193 @@
+{
+  "description": "Verification report conformance fixtures per VERIFICATION-REPORT-FORMAT.md",
+  "version": "0.10.8",
+  "report_version": "peac-verification-report/0.1",
+  "test_cases": [
+    {
+      "id": "report-structure-required-fields",
+      "description": "Report MUST include all required top-level fields",
+      "expected": {
+        "required_fields": [
+          "report_version",
+          "input",
+          "policy",
+          "result",
+          "checks"
+        ],
+        "optional_fields": [
+          "artifacts",
+          "meta"
+        ]
+      }
+    },
+    {
+      "id": "check-order-stable",
+      "description": "Checks MUST be in stable, documented order",
+      "expected": {
+        "check_order": [
+          "jws.parse",
+          "limits.receipt_bytes",
+          "jws.protected_header",
+          "claims.schema_unverified",
+          "issuer.trust_policy",
+          "issuer.discovery",
+          "key.resolve",
+          "jws.signature",
+          "claims.time_window",
+          "extensions.limits",
+          "transport.profile_binding"
+        ]
+      }
+    },
+    {
+      "id": "success-report-example",
+      "description": "Example successful verification report",
+      "input": {
+        "receipt_jws": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEiLCJraWQiOiJwcm9kLTIwMjYtMDIifQ.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImlhdCI6MTczNTYwMDAwMH0.abc123",
+        "policy": {
+          "mode": "offline_only",
+          "issuer_allowlist": ["https://api.example.com"]
+        }
+      },
+      "expected": {
+        "report": {
+          "report_version": "peac-verification-report/0.1",
+          "input": {
+            "type": "receipt_jws",
+            "receipt_digest": {
+              "alg": "sha-256",
+              "value": "<64 lowercase hex chars>"
+            }
+          },
+          "result": {
+            "valid": true,
+            "reason": "ok",
+            "severity": "info",
+            "receipt_type": "peac-receipt/0.1",
+            "issuer": "https://api.example.com",
+            "kid": "prod-2026-02"
+          },
+          "checks": [
+            {"id": "jws.parse", "status": "pass"},
+            {"id": "limits.receipt_bytes", "status": "pass"},
+            {"id": "jws.protected_header", "status": "pass"},
+            {"id": "claims.schema_unverified", "status": "pass"},
+            {"id": "issuer.trust_policy", "status": "pass"},
+            {"id": "issuer.discovery", "status": "skip"},
+            {"id": "key.resolve", "status": "pass", "detail": {"source": "pinned_keys"}},
+            {"id": "jws.signature", "status": "pass"},
+            {"id": "claims.time_window", "status": "pass"},
+            {"id": "extensions.limits", "status": "pass"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "failure-report-ssrf-blocked",
+      "description": "Example SSRF blocked verification report",
+      "input": {
+        "issuer": "https://internal.example.com",
+        "resolved_ip": "10.0.0.1"
+      },
+      "expected": {
+        "report": {
+          "result": {
+            "valid": false,
+            "reason": "key_fetch_blocked",
+            "severity": "error",
+            "issuer": "https://internal.example.com"
+          },
+          "checks": [
+            {"id": "jws.parse", "status": "pass"},
+            {"id": "limits.receipt_bytes", "status": "pass"},
+            {"id": "jws.protected_header", "status": "pass"},
+            {"id": "claims.schema_unverified", "status": "pass"},
+            {"id": "issuer.trust_policy", "status": "pass"},
+            {
+              "id": "issuer.discovery",
+              "status": "fail",
+              "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+              "detail": {
+                "blocked_reason": "private_ip_range"
+              }
+            },
+            {"id": "key.resolve", "status": "skip"},
+            {"id": "jws.signature", "status": "skip"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "determinism-no-meta",
+      "description": "Deterministic mode MUST exclude meta field",
+      "expected": {
+        "deterministic_mode": true,
+        "excluded_fields": ["meta"],
+        "meta_fields": ["generated_at", "verifier"]
+      }
+    },
+    {
+      "id": "reason-codes-complete",
+      "description": "All reason codes from VERIFIER-SECURITY-MODEL.md",
+      "expected": {
+        "reason_codes": [
+          "ok",
+          "receipt_too_large",
+          "malformed_receipt",
+          "signature_invalid",
+          "issuer_not_allowed",
+          "key_not_found",
+          "key_fetch_blocked",
+          "key_fetch_failed",
+          "key_fetch_timeout",
+          "pointer_fetch_blocked",
+          "pointer_fetch_failed",
+          "pointer_fetch_timeout",
+          "pointer_fetch_too_large",
+          "pointer_digest_mismatch",
+          "jwks_too_large",
+          "jwks_too_many_keys",
+          "expired",
+          "not_yet_valid",
+          "audience_mismatch",
+          "schema_invalid",
+          "policy_violation",
+          "extension_too_large",
+          "invalid_transport"
+        ]
+      }
+    },
+    {
+      "id": "short-circuit-behavior",
+      "description": "Failed check SHOULD short-circuit subsequent checks",
+      "input": {
+        "failing_check": "jws.parse"
+      },
+      "expected": {
+        "checks": [
+          {"id": "jws.parse", "status": "fail"},
+          {"id": "limits.receipt_bytes", "status": "skip"},
+          {"id": "jws.protected_header", "status": "skip"},
+          {"id": "claims.schema_unverified", "status": "skip"},
+          {"id": "issuer.trust_policy", "status": "skip"},
+          {"id": "issuer.discovery", "status": "skip"},
+          {"id": "key.resolve", "status": "skip"},
+          {"id": "jws.signature", "status": "skip"},
+          {"id": "claims.time_window", "status": "skip"},
+          {"id": "extensions.limits", "status": "skip"}
+        ]
+      }
+    },
+    {
+      "id": "input-digest-format",
+      "description": "Receipt digest MUST be SHA-256 lowercase hex",
+      "expected": {
+        "digest": {
+          "alg": "sha-256",
+          "value_format": "lowercase hex",
+          "value_length": 64
+        }
+      }
+    }
+  ]
+}

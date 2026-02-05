@@ -954,6 +954,142 @@
       "description": "Extension key does not match required format (reverse-DNS/name[@version])",
       "retriable": false,
       "category": "interaction"
+    },
+    {
+      "code": "E_VERIFY_RECEIPT_TOO_LARGE",
+      "http_status": 413,
+      "title": "Receipt Too Large",
+      "description": "Receipt exceeds maximum size limit (256 KB)",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_MALFORMED_RECEIPT",
+      "http_status": 400,
+      "title": "Malformed Receipt",
+      "description": "Cannot parse receipt as JWS Compact Serialization",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_ISSUER_NOT_ALLOWED",
+      "http_status": 403,
+      "title": "Issuer Not Allowed",
+      "description": "Receipt issuer is not in the verifier policy allowlist",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_BLOCKED",
+      "http_status": 403,
+      "title": "Key Fetch Blocked",
+      "description": "JWKS discovery blocked by SSRF protection (private IP, non-HTTPS, or blocked redirect)",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_FAILED",
+      "http_status": 502,
+      "title": "Key Fetch Failed",
+      "description": "Network error while fetching JWKS from issuer",
+      "retriable": true,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_TIMEOUT",
+      "http_status": 504,
+      "title": "Key Fetch Timeout",
+      "description": "JWKS discovery timed out (5 second limit)",
+      "retriable": true,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_BLOCKED",
+      "http_status": 403,
+      "title": "Pointer Fetch Blocked",
+      "description": "Pointer URL fetch blocked by SSRF protection (private IP, non-HTTPS, or blocked redirect)",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_FAILED",
+      "http_status": 502,
+      "title": "Pointer Fetch Failed",
+      "description": "Network error while fetching receipt from pointer URL",
+      "retriable": true,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_TIMEOUT",
+      "http_status": 504,
+      "title": "Pointer Fetch Timeout",
+      "description": "Pointer URL fetch timed out (5 second limit)",
+      "retriable": true,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_TOO_LARGE",
+      "http_status": 413,
+      "title": "Pointer Fetch Too Large",
+      "description": "Pointer URL response exceeds maximum size limit (256 KB)",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_POINTER_DIGEST_MISMATCH",
+      "http_status": 400,
+      "title": "Pointer Digest Mismatch",
+      "description": "Fetched receipt SHA-256 digest does not match pointer declaration",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_JWKS_TOO_LARGE",
+      "http_status": 400,
+      "title": "JWKS Too Large",
+      "description": "JWKS response exceeds maximum size limit (64 KB)",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_JWKS_TOO_MANY_KEYS",
+      "http_status": 400,
+      "title": "JWKS Too Many Keys",
+      "description": "JWKS contains more than maximum allowed keys (20)",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_SCHEMA_INVALID",
+      "http_status": 400,
+      "title": "Schema Invalid",
+      "description": "Receipt claims do not conform to expected schema",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_POLICY_VIOLATION",
+      "http_status": 403,
+      "title": "Policy Violation",
+      "description": "Receipt violates verifier trust policy",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_INVALID_TRANSPORT",
+      "http_status": 400,
+      "title": "Invalid Transport",
+      "description": "Multiple PEAC-Receipt or PEAC-Receipt-Pointer headers detected (ambiguous transport)",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_EXTENSION_TOO_LARGE",
+      "http_status": 400,
+      "title": "Extension Too Large",
+      "description": "Receipt extension data exceeds maximum size limit (64 KB)",
+      "retriable": false,
+      "category": "verifier"
     }
   ]
 }

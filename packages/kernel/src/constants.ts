@@ -174,6 +174,79 @@ export function isValidHash(hash: string): boolean {
 }
 
 /**
+ * Verifier security limits per VERIFIER-SECURITY-MODEL.md
+ */
+export const VERIFIER_LIMITS = {
+  /** Maximum receipt size in bytes (256 KB) */
+  maxReceiptBytes: 262144,
+  /** Maximum number of claims in a receipt */
+  maxClaimsCount: 100,
+  /** Maximum extension size in bytes (64 KB) */
+  maxExtensionBytes: 65536,
+  /** Maximum string length for individual claims (64 KB) */
+  maxStringLength: 65536,
+  /** Maximum JWKS document size in bytes (64 KB) */
+  maxJwksBytes: 65536,
+  /** Maximum number of keys in a JWKS */
+  maxJwksKeys: 20,
+  /** Maximum individual key size in bytes */
+  maxKeySize: 4096,
+  /** Network fetch timeout in milliseconds */
+  fetchTimeoutMs: 5000,
+  /** Maximum number of redirects to follow */
+  maxRedirects: 3,
+  /** Maximum network response size in bytes (256 KB) */
+  maxResponseBytes: 262144,
+} as const;
+
+/**
+ * Verifier network security settings per VERIFIER-SECURITY-MODEL.md
+ */
+export const VERIFIER_NETWORK = {
+  /** Only allow HTTPS URLs */
+  httpsOnly: true,
+  /** Block requests to private IP ranges */
+  blockPrivateIps: true,
+  /** Default redirect policy (false = no redirects) */
+  allowRedirects: false,
+} as const;
+
+/**
+ * Private IPv4 CIDR blocks to block for SSRF protection
+ */
+export const PRIVATE_IP_RANGES = {
+  /** RFC 1918 private ranges */
+  rfc1918: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'] as const,
+  /** Link-local addresses */
+  linkLocal: ['169.254.0.0/16'] as const,
+  /** Loopback addresses */
+  loopback: ['127.0.0.0/8'] as const,
+  /** IPv6 loopback */
+  ipv6Loopback: ['::1/128'] as const,
+  /** IPv6 link-local */
+  ipv6LinkLocal: ['fe80::/10'] as const,
+} as const;
+
+/**
+ * Verifier policy version
+ */
+export const VERIFIER_POLICY_VERSION = 'peac-verifier-policy/0.1' as const;
+
+/**
+ * Verification modes per VERIFIER-SECURITY-MODEL.md
+ */
+export const VERIFICATION_MODES = {
+  /** All verification in browser/client, may fetch JWKS */
+  clientSide: 'client_side' as const,
+  /** No network access, uses bundled/pinned keys */
+  offlineOnly: 'offline_only' as const,
+  /** Prefer offline, fallback to network */
+  offlinePreferred: 'offline_preferred' as const,
+  /** Allow network fetches for key discovery */
+  networkAllowed: 'network_allowed' as const,
+} as const;
+
+/**
  * All constants export
  */
 export const CONSTANTS = {
@@ -188,4 +261,8 @@ export const CONSTANTS = {
   BUNDLE_VERSION,
   VERIFICATION_REPORT_VERSION,
   HASH,
+  VERIFIER_LIMITS,
+  VERIFIER_NETWORK,
+  VERIFIER_POLICY_VERSION,
+  VERIFICATION_MODES,
 } as const;

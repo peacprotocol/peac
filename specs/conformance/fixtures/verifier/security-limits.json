@@ -1,0 +1,142 @@
+{
+  "description": "Security limits conformance fixtures per VERIFIER-SECURITY-MODEL.md",
+  "version": "0.10.8",
+  "limits": {
+    "max_receipt_bytes": 262144,
+    "max_jwks_bytes": 65536,
+    "max_jwks_keys": 20,
+    "max_extension_bytes": 65536,
+    "max_string_length": 65536,
+    "fetch_timeout_ms": 5000,
+    "max_redirects": 3,
+    "max_response_bytes": 262144
+  },
+  "test_cases": [
+    {
+      "id": "receipt-size-at-limit",
+      "description": "Receipt at exactly 256 KB MUST be accepted",
+      "input": {
+        "receipt_bytes": 262144
+      },
+      "expected": {
+        "valid": true,
+        "check": "limits.receipt_bytes",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "receipt-size-over-limit",
+      "description": "Receipt over 256 KB MUST be rejected",
+      "input": {
+        "receipt_bytes": 262145
+      },
+      "expected": {
+        "valid": false,
+        "check": "limits.receipt_bytes",
+        "status": "fail",
+        "error_code": "E_VERIFY_RECEIPT_TOO_LARGE",
+        "reason": "receipt_too_large"
+      }
+    },
+    {
+      "id": "jwks-size-at-limit",
+      "description": "JWKS at exactly 64 KB MUST be accepted",
+      "input": {
+        "jwks_bytes": 65536
+      },
+      "expected": {
+        "valid": true,
+        "check": "issuer.discovery",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "jwks-size-over-limit",
+      "description": "JWKS over 64 KB MUST be rejected",
+      "input": {
+        "jwks_bytes": 65537
+      },
+      "expected": {
+        "valid": false,
+        "check": "issuer.discovery",
+        "status": "fail",
+        "error_code": "E_VERIFY_JWKS_TOO_LARGE",
+        "reason": "jwks_too_large"
+      }
+    },
+    {
+      "id": "jwks-keys-at-limit",
+      "description": "JWKS with exactly 20 keys MUST be accepted",
+      "input": {
+        "jwks_key_count": 20
+      },
+      "expected": {
+        "valid": true,
+        "check": "issuer.discovery",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "jwks-keys-over-limit",
+      "description": "JWKS with more than 20 keys MUST be rejected",
+      "input": {
+        "jwks_key_count": 21
+      },
+      "expected": {
+        "valid": false,
+        "check": "issuer.discovery",
+        "status": "fail",
+        "error_code": "E_VERIFY_JWKS_TOO_MANY_KEYS",
+        "reason": "jwks_too_many_keys"
+      }
+    },
+    {
+      "id": "extension-size-at-limit",
+      "description": "Extension at exactly 64 KB MUST be accepted",
+      "input": {
+        "extension_bytes": 65536
+      },
+      "expected": {
+        "valid": true,
+        "check": "extensions.limits",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "extension-size-over-limit",
+      "description": "Extension over 64 KB MUST be rejected",
+      "input": {
+        "extension_bytes": 65537
+      },
+      "expected": {
+        "valid": false,
+        "check": "extensions.limits",
+        "status": "fail",
+        "error_code": "E_VERIFY_EXTENSION_TOO_LARGE",
+        "reason": "extension_too_large"
+      }
+    },
+    {
+      "id": "pointer-response-at-limit",
+      "description": "Pointer response at exactly 256 KB MUST be accepted",
+      "input": {
+        "pointer_response_bytes": 262144
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "id": "pointer-response-over-limit",
+      "description": "Pointer response over 256 KB MUST be rejected",
+      "input": {
+        "pointer_response_bytes": 262145
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_POINTER_FETCH_TOO_LARGE",
+        "reason": "pointer_fetch_too_large"
+      }
+    }
+  ]
+}
