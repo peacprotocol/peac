@@ -4,10 +4,10 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createReceipt, createReceiptWithClaims } from '../src/receipt.js';
-import { decode } from '@peac/crypto';
-import { base64urlEncode } from '@peac/crypto';
+import { decode, verify, generateKeypair, base64urlEncode } from '@peac/crypto';
 import type { MiddlewareConfig, RequestContext, ResponseContext, Ed25519PrivateJwk } from '../src/types.js';
 import { HEADERS } from '@peac/kernel';
+import { MIDDLEWARE_INTERACTION_KEY } from '@peac/schema';
 
 // Test key (deterministic for testing)
 function createTestKey(): Ed25519PrivateJwk {
@@ -96,8 +96,8 @@ describe('createReceipt', () => {
       const result = await createReceipt(config, request, response);
 
       const { payload } = decode(result.receipt);
-      expect(payload.ext).toHaveProperty('peac.interaction');
-      const interaction = (payload.ext as Record<string, unknown>)['peac.interaction'] as {
+      expect(payload.ext).toHaveProperty(MIDDLEWARE_INTERACTION_KEY);
+      const interaction = (payload.ext as Record<string, unknown>)[MIDDLEWARE_INTERACTION_KEY] as {
         method: string;
         path: string;
         status: number;
@@ -113,10 +113,54 @@ describe('createReceipt', () => {
       const result = await createReceipt(config, request, createTestResponse());
 
       const { payload } = decode(result.receipt);
-      const interaction = (payload.ext as Record<string, unknown>)['peac.interaction'] as {
+      const interaction = (payload.ext as Record<string, unknown>)[MIDDLEWARE_INTERACTION_KEY] as {
         method: string;
       };
       expect(interaction.method).toBe('POST'); // should be uppercase
+    });
+
+    it('should strip query string in minimal mode (default)', async () => {
+      const config = createTestConfig();
+      const request = {
+        ...createTestRequest(),
+        path: '/api/users?apiKey=secret&token=12345',
+      };
+      const result = await createReceipt(config, request, createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      const interaction = (payload.ext as Record<string, unknown>)[MIDDLEWARE_INTERACTION_KEY] as {
+        path: string;
+      };
+      expect(interaction.path).toBe('/api/users'); // Query string stripped
+    });
+
+    it('should include query string in full mode', async () => {
+      const config: MiddlewareConfig = {
+        ...createTestConfig(),
+        interactionBinding: 'full',
+      };
+      const request = {
+        ...createTestRequest(),
+        path: '/api/users?page=1&limit=10',
+      };
+      const result = await createReceipt(config, request, createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      const interaction = (payload.ext as Record<string, unknown>)[MIDDLEWARE_INTERACTION_KEY] as {
+        path: string;
+      };
+      expect(interaction.path).toBe('/api/users?page=1&limit=10'); // Full path preserved
+    });
+
+    it('should omit interaction binding when mode is off', async () => {
+      const config: MiddlewareConfig = {
+        ...createTestConfig(),
+        interactionBinding: 'off',
+      };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload.ext).toBeUndefined();
     });
 
     it('should derive audience from Host header', async () => {
@@ -448,5 +492,103 @@ describe('Edge Cases', () => {
 
     expect(result.transport).toBe('pointer');
     expect(result.headers['PEAC-Receipt-Pointer']).toContain('https://receipts.example.com/');
+  });
+});
+
+describe('Signature Verification', () => {
+  /**
+   * Create a real keypair for signature verification tests
+   * Unlike the deterministic test key, this produces valid Ed25519 keypairs
+   */
+  async function createRealTestKey(): Promise<{
+    jwk: Ed25519PrivateJwk;
+    publicKey: Uint8Array;
+  }> {
+    const { privateKey, publicKey } = await generateKeypair();
+    return {
+      jwk: {
+        kty: 'OKP',
+        crv: 'Ed25519',
+        x: base64urlEncode(publicKey),
+        d: base64urlEncode(privateKey),
+      },
+      publicKey,
+    };
+  }
+
+  it('should create receipts with valid signatures', async () => {
+    const { jwk, publicKey } = await createRealTestKey();
+    const config: MiddlewareConfig = {
+      issuer: 'https://api.example.com',
+      signingKey: jwk,
+      keyId: 'test-key-2026-02',
+    };
+    const request = createTestRequest();
+    const response = createTestResponse();
+
+    const result = await createReceipt(config, request, response);
+
+    // Verify the signature
+    const verifyResult = await verify(result.receipt, publicKey);
+    expect(verifyResult.valid).toBe(true);
+    expect(verifyResult.payload).toHaveProperty('iss', 'https://api.example.com');
+  });
+
+  it('should fail verification with wrong public key', async () => {
+    const { jwk } = await createRealTestKey();
+    const { publicKey: wrongPublicKey } = await generateKeypair(); // Different keypair
+
+    const config: MiddlewareConfig = {
+      issuer: 'https://api.example.com',
+      signingKey: jwk,
+      keyId: 'test-key-2026-02',
+    };
+    const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+    // Verification with wrong key should fail
+    const verifyResult = await verify(result.receipt, wrongPublicKey);
+    expect(verifyResult.valid).toBe(false);
+  });
+
+  it('should fail verification when payload is tampered', async () => {
+    const { jwk, publicKey } = await createRealTestKey();
+    const config: MiddlewareConfig = {
+      issuer: 'https://api.example.com',
+      signingKey: jwk,
+      keyId: 'test-key-2026-02',
+    };
+    const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+    // Tamper with the receipt - modify the payload
+    const parts = result.receipt.split('.');
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    payload.iss = 'https://evil.example.com'; // Tamper
+    const tamperedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const tamperedReceipt = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
+
+    // Verification of tampered receipt should fail
+    const verifyResult = await verify(tamperedReceipt, publicKey);
+    expect(verifyResult.valid).toBe(false);
+  });
+
+  it('should fail verification when signature is tampered', async () => {
+    const { jwk, publicKey } = await createRealTestKey();
+    const config: MiddlewareConfig = {
+      issuer: 'https://api.example.com',
+      signingKey: jwk,
+      keyId: 'test-key-2026-02',
+    };
+    const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+    // Tamper with the signature - flip some bits
+    const parts = result.receipt.split('.');
+    const signatureBytes = Uint8Array.from(atob(parts[2].replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    signatureBytes[0] ^= 0xff; // Flip bits
+    const tamperedSig = btoa(String.fromCharCode(...signatureBytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const tamperedReceipt = `${parts[0]}.${parts[1]}.${tamperedSig}`;
+
+    // Verification of tampered receipt should fail
+    const verifyResult = await verify(tamperedReceipt, publicKey);
+    expect(verifyResult.valid).toBe(false);
   });
 });

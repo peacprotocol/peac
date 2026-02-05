@@ -19,6 +19,15 @@ export interface Ed25519PrivateJwk {
 }
 
 /**
+ * Interaction binding mode for privacy control
+ *
+ * - 'minimal': Include method, path (no query), status (default)
+ * - 'off': Do not include interaction binding
+ * - 'full': Include method, full path with query string, status
+ */
+export type InteractionBindingMode = 'minimal' | 'off' | 'full';
+
+/**
  * Middleware configuration for PEAC receipt issuance
  */
 export interface MiddlewareConfig {
@@ -39,6 +48,19 @@ export interface MiddlewareConfig {
 
   /** Maximum header size in bytes before fallback to body (default: 4096) */
   maxHeaderSize?: number;
+
+  /**
+   * Interaction binding mode (default: 'minimal')
+   *
+   * Controls what request/response data is included in the receipt:
+   * - 'minimal': method, path (no query string), status (default, privacy-safe)
+   * - 'off': No interaction binding included
+   * - 'full': method, full path with query string, status
+   *
+   * Privacy note: Query strings often contain API keys, tokens, or PII.
+   * Use 'minimal' (default) unless you explicitly need query parameters.
+   */
+  interactionBinding?: InteractionBindingMode;
 
   /** Pointer URL generator for 'pointer' transport */
   pointerUrlGenerator?: (receipt: string) => Promise<string>;

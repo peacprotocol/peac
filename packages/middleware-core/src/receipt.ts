@@ -12,6 +12,7 @@
 
 import { uuidv7 } from 'uuidv7';
 import { sign, base64urlDecode } from '@peac/crypto';
+import { MIDDLEWARE_INTERACTION_KEY } from '@peac/schema';
 import type {
   MiddlewareConfig,
   RequestContext,
@@ -19,7 +20,7 @@ import type {
   ReceiptResult,
   ReceiptClaimsInput,
 } from './types.js';
-import { validateConfig, applyDefaults } from './config.js';
+import { validateConfig, applyDefaults, MAX_PATH_LENGTH } from './config.js';
 import { selectTransport, buildReceiptResult } from './transport.js';
 
 /**
@@ -99,6 +100,35 @@ function normalizeIssuer(issuer: string): string {
 }
 
 /**
+ * Process path for interaction binding based on mode
+ *
+ * - 'minimal': Strip query string, truncate to MAX_PATH_LENGTH
+ * - 'full': Keep full path with query string, truncate to MAX_PATH_LENGTH
+ *
+ * @param path - Original request path (may include query string)
+ * @param mode - Interaction binding mode
+ * @returns Processed path
+ */
+function processPath(path: string, mode: 'minimal' | 'full'): string {
+  let processedPath = path;
+
+  // Strip query string in minimal mode (privacy-safe default)
+  if (mode === 'minimal') {
+    const queryIndex = path.indexOf('?');
+    if (queryIndex !== -1) {
+      processedPath = path.substring(0, queryIndex);
+    }
+  }
+
+  // Truncate to maximum length (DoS protection)
+  if (processedPath.length > MAX_PATH_LENGTH) {
+    processedPath = processedPath.substring(0, MAX_PATH_LENGTH);
+  }
+
+  return processedPath;
+}
+
+/**
  * Extract audience from request context
  *
  * Derives audience from the request host or origin header (case-insensitive).
@@ -138,7 +168,7 @@ function jwkToPrivateKeyBytes(jwk: { d: string }): Uint8Array {
  * and determines the appropriate transport profile.
  *
  * By default, includes minimal interaction binding (method, path, status)
- * in the `ext['peac.interaction']` field for evidentiary value.
+ * in the `ext[MIDDLEWARE_INTERACTION_KEY]` field for evidentiary value.
  *
  * @param config - Middleware configuration
  * @param request - Request context
@@ -185,24 +215,30 @@ export async function createReceipt(
   const normalizedIssuer = normalizeIssuer(config.issuer);
   const audience = extractAudience(normalizedHeaders);
 
-  // Build interaction binding (minimal evidentiary data)
-  const interactionBinding: InteractionBinding = {
-    method: request.method.toUpperCase(),
-    path: request.path,
-    status: response.statusCode,
-  };
-
-  // Build base claims with interaction binding
+  // Build base claims
   const claims: AttestationReceiptClaims = {
     iss: normalizedIssuer,
     aud: audience,
     iat,
     exp,
     rid,
-    ext: {
-      'peac.interaction': interactionBinding,
-    },
   };
+
+  // Add interaction binding unless disabled
+  if (fullConfig.interactionBinding !== 'off') {
+    const processedPath = processPath(
+      request.path,
+      fullConfig.interactionBinding as 'minimal' | 'full'
+    );
+    const interactionBinding: InteractionBinding = {
+      method: request.method.toUpperCase(),
+      path: processedPath,
+      status: response.statusCode,
+    };
+    claims.ext = {
+      [MIDDLEWARE_INTERACTION_KEY]: interactionBinding,
+    };
+  }
 
   // Apply custom claims if generator is provided
   if (config.claimsGenerator) {

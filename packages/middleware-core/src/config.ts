@@ -6,8 +6,13 @@
  * @packageDocumentation
  */
 
-import { base64urlDecode } from '@peac/crypto';
-import type { MiddlewareConfig, ConfigValidationError } from './types.js';
+import { base64urlDecode, validateKeypair } from '@peac/crypto';
+import type { MiddlewareConfig, ConfigValidationError, Ed25519PrivateJwk } from './types.js';
+
+/**
+ * Maximum path length for interaction binding (DoS protection)
+ */
+export const MAX_PATH_LENGTH = 2048;
 
 /**
  * Default configuration values
@@ -16,6 +21,7 @@ export const CONFIG_DEFAULTS = {
   expiresIn: 300,
   transport: 'header' as const,
   maxHeaderSize: 4096,
+  interactionBinding: 'minimal' as const,
 } as const;
 
 /**
@@ -167,6 +173,13 @@ export function validateConfig(config: MiddlewareConfig): void {
     });
   }
 
+  // Validate interactionBinding (if provided)
+  if (config.interactionBinding !== undefined) {
+    if (!['minimal', 'off', 'full'].includes(config.interactionBinding)) {
+      errors.push({ field: 'interactionBinding', message: 'must be "minimal", "off", or "full"' });
+    }
+  }
+
   // Validate claimsGenerator is a function (if provided)
   if (config.claimsGenerator !== undefined && typeof config.claimsGenerator !== 'function') {
     errors.push({ field: 'claimsGenerator', message: 'must be a function' });
@@ -183,13 +196,46 @@ export function validateConfig(config: MiddlewareConfig): void {
 }
 
 /**
+ * Validate middleware configuration with async keypair verification
+ *
+ * This extends basic validation with cryptographic verification that
+ * the private key (d) correctly derives to the public key (x).
+ *
+ * @param config - Configuration to validate
+ * @throws ConfigError if configuration is invalid
+ *
+ * @example
+ * ```typescript
+ * await validateConfigAsync(config);
+ * ```
+ */
+export async function validateConfigAsync(config: MiddlewareConfig): Promise<void> {
+  // First run synchronous validation
+  validateConfig(config);
+
+  // Then validate keypair consistency (d derives to x)
+  const jwk = config.signingKey as Ed25519PrivateJwk;
+  const isValidKeypair = await validateKeypair(jwk);
+
+  if (!isValidKeypair) {
+    throw new ConfigError([
+      {
+        field: 'signingKey',
+        message: 'keypair inconsistent: private key (d) does not derive to public key (x)',
+      },
+    ]);
+  }
+}
+
+/**
  * Apply default values to configuration
  */
-export function applyDefaults(config: MiddlewareConfig): Required<Pick<MiddlewareConfig, 'expiresIn' | 'transport' | 'maxHeaderSize'>> & MiddlewareConfig {
+export function applyDefaults(config: MiddlewareConfig): Required<Pick<MiddlewareConfig, 'expiresIn' | 'transport' | 'maxHeaderSize' | 'interactionBinding'>> & MiddlewareConfig {
   return {
     ...config,
     expiresIn: config.expiresIn ?? CONFIG_DEFAULTS.expiresIn,
     transport: config.transport ?? CONFIG_DEFAULTS.transport,
     maxHeaderSize: config.maxHeaderSize ?? CONFIG_DEFAULTS.maxHeaderSize,
+    interactionBinding: config.interactionBinding ?? CONFIG_DEFAULTS.interactionBinding,
   };
 }

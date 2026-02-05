@@ -44,10 +44,11 @@ export type {
   ConfigValidationError,
   Ed25519PrivateJwk,
   TransportSelectionInput,
+  InteractionBindingMode,
 } from './types.js';
 
 // Configuration
-export { validateConfig, ConfigError, CONFIG_DEFAULTS, applyDefaults } from './config.js';
+export { validateConfig, validateConfigAsync, ConfigError, CONFIG_DEFAULTS, MAX_PATH_LENGTH, applyDefaults } from './config.js';
 
 // Transport
 export {
