@@ -1,0 +1,35 @@
+{
+  "$comment": "PEAC receipt with InteractionEvidence extension for AI agent tool calls",
+  "header": {
+    "alg": "EdDSA",
+    "typ": "peac-receipt/0.1",
+    "kid": "sandbox-2026-02"
+  },
+  "payload": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "aud": "https://agent.example.com",
+    "sub": "agent:demo-agent-v1",
+    "iat": 1738756800,
+    "exp": 1738760400,
+    "rid": "sample-ie-001",
+    "ext": {
+      "org.peacprotocol/interaction@0.1": {
+        "version": "0.1",
+        "interaction_id": "int_sample_001",
+        "started_at": "2026-02-05T10:00:00.000Z",
+        "completed_at": "2026-02-05T10:00:01.234Z",
+        "outcome": {
+          "kind": "success"
+        },
+        "input": {
+          "hash": "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+          "byte_length": 1024
+        },
+        "output": {
+          "hash": "sha256:f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5",
+          "byte_length": 2048
+        }
+      }
+    }
+  }
+}

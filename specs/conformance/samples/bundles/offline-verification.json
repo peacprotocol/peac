@@ -1,0 +1,64 @@
+{
+  "$comment": "Offline verification bundle with sample receipts and JWKS",
+  "description": "Bundle for offline verification testing. Contains test JWKS and sample metadata.",
+  "generated_at": "2026-02-05T00:00:00.000Z",
+  "jwks": {
+    "keys": [
+      {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kid": "sandbox-2026-02",
+        "use": "sig",
+        "alg": "EdDSA"
+      }
+    ]
+  },
+  "samples": [
+    {
+      "id": "basic-receipt",
+      "description": "Minimal valid PEAC receipt with only required fields",
+      "category": "valid"
+    },
+    {
+      "id": "full-receipt",
+      "description": "Full PEAC receipt with all optional claims populated",
+      "category": "valid"
+    },
+    {
+      "id": "interaction-evidence",
+      "description": "PEAC receipt with InteractionEvidence extension for AI agent calls",
+      "category": "valid"
+    },
+    {
+      "id": "payment-evidence",
+      "description": "PEAC receipt with payment evidence (402 flow)",
+      "category": "valid"
+    },
+    {
+      "id": "long-expiry",
+      "description": "PEAC receipt with 24-hour expiration",
+      "category": "valid"
+    },
+    {
+      "id": "expired",
+      "description": "Expired receipt (for testing rejection)",
+      "category": "invalid"
+    },
+    {
+      "id": "future-iat",
+      "description": "Receipt with iat in the future (for testing rejection)",
+      "category": "invalid"
+    },
+    {
+      "id": "missing-iss",
+      "description": "Receipt missing required issuer claim (for testing rejection)",
+      "category": "invalid"
+    }
+  ],
+  "notes": [
+    "The JWKS contains a placeholder key. Use 'peac samples generate' to create actual signed samples.",
+    "Sample timestamps are examples; regenerate for current timestamps.",
+    "Do NOT use sandbox samples in production."
+  ]
+}

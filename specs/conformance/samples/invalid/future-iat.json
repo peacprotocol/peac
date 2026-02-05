@@ -1,0 +1,16 @@
+{
+  "$comment": "PEAC receipt with iat in the future. Verifiers MUST reject (clock skew violation).",
+  "header": {
+    "alg": "EdDSA",
+    "typ": "peac-receipt/0.1",
+    "kid": "sandbox-2026-02"
+  },
+  "payload": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "aud": "https://example.com",
+    "iat": 1838756800,
+    "exp": 1838760400,
+    "rid": "sample-future-iat-001"
+  },
+  "expected_error": "E_FUTURE_IAT"
+}

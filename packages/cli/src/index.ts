@@ -4,17 +4,24 @@
  * Command-line tools for receipt verification and conformance testing
  */
 
-import { Command } from 'commander';
+import { Command, CommanderError } from 'commander';
 import { verifyReceipt } from '@peac/protocol';
 import { parseIssuerConfig, fetchIssuerConfig } from '@peac/protocol';
 import { decode } from '@peac/crypto';
 import { PEACReceiptClaims } from '@peac/schema';
 import * as fs from 'fs';
-import { policy } from './commands/policy';
+import { policy } from './commands/policy.js';
+import { conformance } from './commands/conformance.js';
+import { samples } from './commands/samples.js';
+import { getVersion } from './lib/version.js';
 
 const program = new Command();
 
-program.name('peac').description('PEAC protocol command-line tools').version('0.9.15');
+program
+  .name('peac')
+  .description('PEAC protocol command-line tools')
+  .version(getVersion())
+  .exitOverride(); // Throws CommanderError instead of calling process.exit()
 
 /**
  * peac verify <jws>
@@ -61,17 +68,17 @@ program
             console.log(`   JWKS fetch time: ${result.perf.jwks_fetch_ms.toFixed(2)}ms`);
           }
         }
-        process.exit(0);
+        process.exitCode = 0;
       } else {
         console.log(`Verification failed: ${result.reason}`);
         if (result.details) {
           console.log(`   Details: ${result.details}`);
         }
-        process.exit(1);
+        process.exitCode = 1;
       }
     } catch (err) {
       console.error('Error:', err instanceof Error ? err.message : String(err));
-      process.exit(1);
+      process.exitCode = 1;
     }
   });
 
@@ -126,10 +133,10 @@ program
         console.log(`   Security:  ${config.security_contact}`);
       }
 
-      process.exit(0);
+      process.exitCode = 0;
     } catch (err) {
       console.error('Error:', err instanceof Error ? err.message : String(err));
-      process.exit(1);
+      process.exitCode = 1;
     }
   });
 
@@ -193,14 +200,30 @@ program
         }
       }
 
-      process.exit(0);
+      process.exitCode = 0;
     } catch (err) {
       console.error('Error:', err instanceof Error ? err.message : String(err));
-      process.exit(1);
+      process.exitCode = 1;
     }
   });
 
 // Policy commands (v0.9.17+)
 program.addCommand(policy);
 
-program.parse();
+// Conformance testing commands (v0.10.8+)
+program.addCommand(conformance);
+
+// Sample receipts commands (v0.10.8+)
+program.addCommand(samples);
+
+// Parse and handle Commander errors (exitOverride causes CommanderError on --help, --version, etc.)
+try {
+  program.parse();
+} catch (err) {
+  if (err instanceof CommanderError) {
+    // CommanderError from --help, --version, or validation errors
+    process.exitCode = err.exitCode;
+  } else {
+    throw err;
+  }
+}

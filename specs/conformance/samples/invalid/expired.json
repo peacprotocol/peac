@@ -1,0 +1,16 @@
+{
+  "$comment": "Expired PEAC receipt - exp is in the past. Verifiers MUST reject.",
+  "header": {
+    "alg": "EdDSA",
+    "typ": "peac-receipt/0.1",
+    "kid": "sandbox-2026-02"
+  },
+  "payload": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "aud": "https://example.com",
+    "iat": 1738749600,
+    "exp": 1738753200,
+    "rid": "sample-expired-001"
+  },
+  "expected_error": "E_EXPIRED_RECEIPT"
+}
