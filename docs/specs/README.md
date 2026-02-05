@@ -99,6 +99,6 @@ Encoding: JWS Compact Serialization (RFC 7515)
 
 ## Canonical URLs
 
-- Protocol home: `https://peacprotocol.org`
+- Protocol home: `https://www.peacprotocol.org`
 - Error namespace: `https://www.peacprotocol.org/errors/`
 - Issuer discovery: `https://<issuer>/.well-known/peac-issuer.json`

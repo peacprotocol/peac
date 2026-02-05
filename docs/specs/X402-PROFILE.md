@@ -497,4 +497,4 @@ PEAC does not privilege any particular payment protocol. x402 is one proof sourc
 - [x402 Offer/Receipt Extension](https://github.com/coinbase/x402) (draft specification)
 - [CAIP-2: Blockchain ID Specification](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md)
 - [RFC 8785: JSON Canonicalization Scheme (JCS)](https://datatracker.ietf.org/doc/html/rfc8785)
-- [PEAC Protocol](https://peacprotocol.org)
+- [PEAC Protocol](https://www.peacprotocol.org)
