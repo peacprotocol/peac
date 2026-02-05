@@ -1,14 +1,13 @@
 {
-  "name": "@peac/adapter-openclaw",
-  "version": "0.10.7",
-  "description": "OpenClaw adapter for PEAC interaction evidence capture",
+  "name": "@peac/middleware-core",
+  "version": "0.10.8",
+  "description": "Framework-agnostic middleware primitives for PEAC receipt issuance",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/peacprotocol/peac.git",
-    "directory": "packages/adapters/openclaw"
+    "directory": "packages/middleware-core"
   },
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
   "license": "Apache-2.0",
@@ -18,12 +17,11 @@
   "homepage": "https://github.com/peacprotocol/peac#readme",
   "files": [
     "dist",
-    "openclaw.plugin.json",
-    "skills",
     "README.md"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsc",
@@ -32,15 +30,14 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@peac/adapter-core": "workspace:*",
-    "@peac/capture-core": "workspace:*",
-    "@peac/crypto": "workspace:*",
     "@peac/kernel": "workspace:*",
-    "@peac/schema": "workspace:*"
+    "@peac/schema": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "uuidv7": "^0.6.3"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.6.0"
+    "vitest": "^1.1.0"
   }
 }

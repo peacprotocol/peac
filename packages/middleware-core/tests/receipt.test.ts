@@ -1,0 +1,392 @@
+/**
+ * Receipt Generation Tests
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { createReceipt, createReceiptWithClaims } from '../src/receipt.js';
+import { decode } from '@peac/crypto';
+import { base64urlEncode } from '@peac/crypto';
+import type { MiddlewareConfig, RequestContext, ResponseContext, Ed25519PrivateJwk } from '../src/types.js';
+import { HEADERS } from '@peac/kernel';
+
+// Test key (deterministic for testing)
+function createTestKey(): Ed25519PrivateJwk {
+  const publicKey = new Uint8Array(32).fill(1);
+  const privateKey = new Uint8Array(32).fill(2);
+  return {
+    kty: 'OKP',
+    crv: 'Ed25519',
+    x: base64urlEncode(publicKey),
+    d: base64urlEncode(privateKey),
+  };
+}
+
+function createTestConfig(): MiddlewareConfig {
+  return {
+    issuer: 'https://api.example.com',
+    signingKey: createTestKey(),
+    keyId: 'test-key-2026-02',
+  };
+}
+
+function createTestRequest(): RequestContext {
+  return {
+    method: 'GET',
+    path: '/api/data',
+    headers: {
+      host: 'api.example.com',
+      'content-type': 'application/json',
+    },
+    timestamp: Date.now(),
+  };
+}
+
+function createTestResponse(): ResponseContext {
+  return {
+    statusCode: 200,
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: { items: [1, 2, 3] },
+  };
+}
+
+describe('createReceipt', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-05T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('Basic Receipt Generation', () => {
+    it('should create a valid JWS receipt', async () => {
+      const config = createTestConfig();
+      const request = createTestRequest();
+      const response = createTestResponse();
+
+      const result = await createReceipt(config, request, response);
+
+      expect(result.receipt).toBeDefined();
+      expect(result.receipt.split('.').length).toBe(3); // JWS has 3 parts
+    });
+
+    it('should include correct issuer in claims', async () => {
+      const config = createTestConfig();
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('iss', 'https://api.example.com');
+    });
+
+    it('should derive audience from Host header', async () => {
+      const config = createTestConfig();
+      const request = {
+        ...createTestRequest(),
+        headers: { host: 'myapi.example.com' },
+      };
+      const result = await createReceipt(config, request, createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('aud', 'https://myapi.example.com');
+    });
+
+    it('should derive audience from Origin header if Host not present', async () => {
+      const config = createTestConfig();
+      const request = {
+        ...createTestRequest(),
+        headers: { origin: 'https://client.example.com' },
+      };
+      const result = await createReceipt(config, request, createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('aud', 'https://client.example.com');
+    });
+
+    it('should include iat timestamp', async () => {
+      const config = createTestConfig();
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('iat');
+      // 2026-02-05T12:00:00Z in Unix seconds
+      expect(payload.iat).toBe(Math.floor(new Date('2026-02-05T12:00:00Z').getTime() / 1000));
+    });
+
+    it('should include exp based on expiresIn', async () => {
+      const config = { ...createTestConfig(), expiresIn: 600 };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('exp');
+      expect(payload.exp).toBe(payload.iat + 600);
+    });
+
+    it('should use default expiresIn (300 seconds)', async () => {
+      const config = createTestConfig();
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload.exp).toBe(payload.iat + 300);
+    });
+
+    it('should generate UUIDv7 receipt ID', async () => {
+      const config = createTestConfig();
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('rid');
+      // UUIDv7 format: xxxxxxxx-xxxx-7xxx-yxxx-xxxxxxxxxxxx
+      expect(payload.rid).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
+    });
+
+    it('should include keyId in JWS header', async () => {
+      const config = { ...createTestConfig(), keyId: 'my-key-2026-02' };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { header } = decode(result.receipt);
+      expect(header).toHaveProperty('kid', 'my-key-2026-02');
+    });
+  });
+
+  describe('Transport Selection', () => {
+    it('should use header transport by default', async () => {
+      const config = createTestConfig();
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      expect(result.transport).toBe('header');
+      expect(result.headers[HEADERS.receipt]).toBe(result.receipt);
+      expect(result.bodyWrapper).toBeUndefined();
+    });
+
+    it('should use body transport when configured', async () => {
+      const config: MiddlewareConfig = { ...createTestConfig(), transport: 'body' };
+      const response = createTestResponse();
+      const result = await createReceipt(config, createTestRequest(), response);
+
+      expect(result.transport).toBe('body');
+      expect(result.headers).toEqual({});
+      expect(result.bodyWrapper).toBeDefined();
+      expect(result.bodyWrapper?.data).toEqual(response.body);
+      expect(result.bodyWrapper?.peac_receipt).toBe(result.receipt);
+    });
+
+    it('should use pointer transport when configured', async () => {
+      const config: MiddlewareConfig = {
+        ...createTestConfig(),
+        transport: 'pointer',
+        pointerUrlGenerator: async (receipt) => `https://receipts.example.com/${receipt.slice(-10)}`,
+      };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      expect(result.transport).toBe('pointer');
+      expect(result.headers['PEAC-Receipt-Pointer']).toBeDefined();
+      expect(result.headers['PEAC-Receipt-Pointer']).toContain('sha256=');
+      expect(result.headers['PEAC-Receipt-Pointer']).toContain('url=');
+    });
+
+    it('should fallback to body when receipt exceeds maxHeaderSize', async () => {
+      const config: MiddlewareConfig = {
+        ...createTestConfig(),
+        transport: 'header',
+        maxHeaderSize: 50, // Very small to force fallback
+      };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      expect(result.transport).toBe('body');
+    });
+  });
+
+  describe('Custom Claims Generator', () => {
+    it('should apply custom claims from generator', async () => {
+      const config: MiddlewareConfig = {
+        ...createTestConfig(),
+        claimsGenerator: async () => ({
+          sub: 'user:12345',
+        }),
+      };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('sub', 'user:12345');
+    });
+
+    it('should allow audience override from generator', async () => {
+      const config: MiddlewareConfig = {
+        ...createTestConfig(),
+        claimsGenerator: async () => ({
+          aud: 'https://custom-audience.example.com',
+        }),
+      };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('aud', 'https://custom-audience.example.com');
+    });
+
+    it('should merge extensions from generator', async () => {
+      const config: MiddlewareConfig = {
+        ...createTestConfig(),
+        claimsGenerator: async () => ({
+          ext: {
+            'custom.namespace/data': { value: 123 },
+          },
+        }),
+      };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('ext');
+      expect(payload.ext).toHaveProperty('custom.namespace/data');
+    });
+
+    it('should pass request context to generator', async () => {
+      let capturedContext: RequestContext | null = null;
+      const config: MiddlewareConfig = {
+        ...createTestConfig(),
+        claimsGenerator: async (ctx) => {
+          capturedContext = ctx;
+          return {};
+        },
+      };
+      const request = createTestRequest();
+      await createReceipt(config, request, createTestResponse());
+
+      expect(capturedContext).not.toBeNull();
+      expect(capturedContext!.method).toBe(request.method);
+      expect(capturedContext!.path).toBe(request.path);
+    });
+  });
+
+  describe('Configuration Validation', () => {
+    it('should throw ConfigError for invalid configuration', async () => {
+      const config = {
+        issuer: 'http://insecure.com', // Not HTTPS
+        signingKey: createTestKey(),
+        keyId: 'test',
+      };
+
+      await expect(createReceipt(config, createTestRequest(), createTestResponse())).rejects.toThrow(
+        /Invalid middleware configuration/
+      );
+    });
+  });
+});
+
+describe('createReceiptWithClaims', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-05T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should create receipt with explicit claims', async () => {
+    const config = createTestConfig();
+    const result = await createReceiptWithClaims(config, {
+      aud: 'https://explicit-audience.example.com',
+      sub: 'explicit-subject',
+    });
+
+    const { payload } = decode(result.receipt);
+    expect(payload).toHaveProperty('aud', 'https://explicit-audience.example.com');
+    expect(payload).toHaveProperty('sub', 'explicit-subject');
+    expect(payload).toHaveProperty('iss', 'https://api.example.com');
+  });
+
+  it('should include extensions in explicit claims', async () => {
+    const config = createTestConfig();
+    const result = await createReceiptWithClaims(config, {
+      aud: 'https://audience.example.com',
+      ext: { 'my.namespace/key': 'value' },
+    });
+
+    const { payload } = decode(result.receipt);
+    expect(payload).toHaveProperty('ext');
+    expect(payload.ext).toHaveProperty('my.namespace/key', 'value');
+  });
+
+  it('should wrap response body for body transport', async () => {
+    const config: MiddlewareConfig = { ...createTestConfig(), transport: 'body' };
+    const responseBody = { data: 'test' };
+    const result = await createReceiptWithClaims(
+      config,
+      { aud: 'https://audience.example.com' },
+      responseBody
+    );
+
+    expect(result.transport).toBe('body');
+    expect(result.bodyWrapper).toBeDefined();
+    expect(result.bodyWrapper?.data).toEqual(responseBody);
+  });
+
+  it('should validate configuration', async () => {
+    const config = {
+      issuer: 'invalid', // Not HTTPS URL
+      signingKey: createTestKey(),
+      keyId: 'test',
+    };
+
+    await expect(
+      createReceiptWithClaims(config, { aud: 'https://audience.example.com' })
+    ).rejects.toThrow(/Invalid middleware configuration/);
+  });
+});
+
+describe('Edge Cases', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-05T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should handle array header values', async () => {
+    const config = createTestConfig();
+    const request = {
+      ...createTestRequest(),
+      headers: { host: ['api1.example.com', 'api2.example.com'] },
+    };
+    const result = await createReceipt(config, request, createTestResponse());
+
+    const { payload } = decode(result.receipt);
+    // Should use first value from array
+    expect(payload).toHaveProperty('aud', 'https://api1.example.com');
+  });
+
+  it('should handle empty body response', async () => {
+    const config: MiddlewareConfig = { ...createTestConfig(), transport: 'body' };
+    const response = { ...createTestResponse(), body: undefined };
+    const result = await createReceipt(config, createTestRequest(), response);
+
+    expect(result.transport).toBe('body');
+    // bodyWrapper should still be undefined since originalBody is undefined
+    expect(result.bodyWrapper).toBeUndefined();
+  });
+
+  it('should handle async pointer URL generator', async () => {
+    const config: MiddlewareConfig = {
+      ...createTestConfig(),
+      transport: 'pointer',
+      pointerUrlGenerator: async (receipt) => {
+        // Simulate async storage
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        return `https://receipts.example.com/${receipt.slice(-8)}`;
+      },
+    };
+
+    vi.useRealTimers(); // Need real timers for async
+    const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+    expect(result.transport).toBe('pointer');
+    expect(result.headers['PEAC-Receipt-Pointer']).toContain('https://receipts.example.com/');
+  });
+});
