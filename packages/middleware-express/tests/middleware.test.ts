@@ -257,7 +257,7 @@ describe('peacMiddleware', () => {
 
       vi.useRealTimers(); // Need real timers for async error handling
 
-      const response = await request(app).get('/api/data').expect(200);
+      await request(app).get('/api/data').expect(200);
 
       // Wait for async error handling
       await new Promise((resolve) => setTimeout(resolve, 100));

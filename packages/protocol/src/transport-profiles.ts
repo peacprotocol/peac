@@ -331,23 +331,66 @@ interface DictionaryParseResult {
 }
 
 /**
- * Simple RFC 8941-like dictionary parser
+ * Simple RFC 8941-like dictionary parser (ReDoS-safe)
  *
  * Parses: key1="value1", key2="value2"
  * Returns map of key -> value (unquoted) plus metadata for strict validation
+ *
+ * Uses explicit character-by-character parsing to avoid ReDoS vulnerabilities
+ * from regex alternation patterns.
  */
 function parseSimpleDictionary(input: string): DictionaryParseResult {
   const params: Record<string, string> = {};
   const duplicates: string[] = [];
   const keys: string[] = [];
 
-  // Match patterns like: key="value" or key=value
-  const regex = /(\w+)=(?:"([^"]*)"|([^,\s]*))/g;
-  let match;
+  let i = 0;
+  const len = input.length;
 
-  while ((match = regex.exec(input)) !== null) {
-    const key = match[1];
-    const value = match[2] ?? match[3]; // Quoted or unquoted value
+  while (i < len) {
+    // Skip whitespace and commas
+    while (i < len && (input[i] === ' ' || input[i] === ',' || input[i] === '\t')) {
+      i++;
+    }
+    if (i >= len) break;
+
+    // Parse key (word characters only)
+    const keyStart = i;
+    while (i < len && /\w/.test(input[i])) {
+      i++;
+    }
+    const key = input.slice(keyStart, i);
+    if (!key) break;
+
+    // Skip whitespace before '='
+    while (i < len && input[i] === ' ') i++;
+
+    // Expect '='
+    if (i >= len || input[i] !== '=') break;
+    i++; // skip '='
+
+    // Skip whitespace after '='
+    while (i < len && input[i] === ' ') i++;
+
+    // Parse value (quoted or unquoted)
+    let value: string;
+    if (input[i] === '"') {
+      // Quoted value - find closing quote
+      i++; // skip opening quote
+      const valueStart = i;
+      while (i < len && input[i] !== '"') {
+        i++;
+      }
+      value = input.slice(valueStart, i);
+      if (i < len) i++; // skip closing quote
+    } else {
+      // Unquoted value - read until comma or whitespace
+      const valueStart = i;
+      while (i < len && input[i] !== ',' && input[i] !== ' ' && input[i] !== '\t') {
+        i++;
+      }
+      value = input.slice(valueStart, i);
+    }
 
     keys.push(key);
 

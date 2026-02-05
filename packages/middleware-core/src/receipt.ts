@@ -93,10 +93,16 @@ function getHeader(
 }
 
 /**
- * Normalize issuer URL (remove trailing slash for consistency)
+ * Normalize issuer URL (remove trailing slashes for consistency)
+ *
+ * Uses explicit loop instead of regex to avoid ReDoS with quantifiers.
  */
 function normalizeIssuer(issuer: string): string {
-  return issuer.replace(/\/+$/, '');
+  let end = issuer.length;
+  while (end > 0 && issuer[end - 1] === '/') {
+    end--;
+  }
+  return end === issuer.length ? issuer : issuer.slice(0, end);
 }
 
 /**

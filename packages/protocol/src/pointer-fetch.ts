@@ -298,6 +298,67 @@ function validateJwsCompactStructure(value: string): { valid: true } | { valid: 
 }
 
 /**
+ * Parse pointer header key=value pairs (ReDoS-safe)
+ *
+ * Handles both quoted and unquoted values without complex regex alternation.
+ */
+function parsePointerHeader(input: string): Record<string, string> {
+  const params: Record<string, string> = {};
+  let i = 0;
+  const len = input.length;
+
+  while (i < len) {
+    // Skip whitespace and commas
+    while (i < len && (input[i] === ' ' || input[i] === ',' || input[i] === '\t')) {
+      i++;
+    }
+    if (i >= len) break;
+
+    // Parse key (word characters only)
+    const keyStart = i;
+    while (i < len && /\w/.test(input[i])) {
+      i++;
+    }
+    const key = input.slice(keyStart, i);
+    if (!key) break;
+
+    // Skip whitespace before '='
+    while (i < len && input[i] === ' ') i++;
+
+    // Expect '='
+    if (i >= len || input[i] !== '=') break;
+    i++; // skip '='
+
+    // Skip whitespace after '='
+    while (i < len && input[i] === ' ') i++;
+
+    // Parse value (quoted or unquoted)
+    let value: string;
+    if (input[i] === '"') {
+      // Quoted value - find closing quote
+      i++; // skip opening quote
+      const valueStart = i;
+      while (i < len && input[i] !== '"') {
+        i++;
+      }
+      value = input.slice(valueStart, i);
+      if (i < len) i++; // skip closing quote
+    } else {
+      // Unquoted value - read until comma or whitespace
+      const valueStart = i;
+      while (i < len && input[i] !== ',' && input[i] !== ' ' && input[i] !== '\t') {
+        i++;
+      }
+      value = input.slice(valueStart, i);
+    }
+
+    params[key] = value;
+  }
+
+  return params;
+}
+
+/**
  * Verify a pointer header and fetch the receipt
  *
  * Combines parsing and fetching in a single operation.
@@ -312,15 +373,8 @@ export async function verifyAndFetchPointer(
 ): Promise<PointerFetchResult> {
   // Parse pointer header (RFC 8941 dictionary format)
   // Format: sha256="<hex>", url="<url>"
-  const regex = /(\w+)=(?:"([^"]*)"|([^,\s]*))/g;
-  const params: Record<string, string> = {};
-  let match;
-
-  while ((match = regex.exec(pointerHeader)) !== null) {
-    const key = match[1];
-    const value = match[2] ?? match[3];
-    params[key] = value;
-  }
+  // Using explicit parsing to avoid ReDoS in regex alternation
+  const params = parsePointerHeader(pointerHeader);
 
   if (!params.sha256) {
     return {

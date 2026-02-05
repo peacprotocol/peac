@@ -9,7 +9,6 @@ import {
   buildResponseHeaders,
   buildReceiptResult,
 } from '../src/transport.js';
-import { CONFIG_DEFAULTS } from '../src/config.js';
 import { HEADERS } from '@peac/kernel';
 
 describe('selectTransport', () => {
