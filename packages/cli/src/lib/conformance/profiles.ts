@@ -103,14 +103,18 @@ export const PROFILE_CAPABILITIES: Record<string, ProfileDetail> = {
 
 /**
  * Get profile capability for a category
+ *
+ * For unknown categories, honestly reports that the default validator uses
+ * heuristic semantic receipt validation (ReceiptClaimsSchema) when input
+ * looks like claims. This prevents capability misrepresentation.
  */
 export function getCategoryCapability(category: string): ProfileDetail {
   return (
     PROFILE_CAPABILITIES[category] ?? {
       profile: `receipt.verify.${category}`,
-      level: 'shape' as ProfileLevel,
-      validator: 'unknown',
-      notes: 'Unknown category - using default shape validation',
+      level: 'semantic' as ProfileLevel,
+      validator: '@peac/schema:ReceiptClaimsSchema (heuristic)',
+      notes: 'Unknown category - uses semantic receipt validation when input looks like claims',
     }
   );
 }

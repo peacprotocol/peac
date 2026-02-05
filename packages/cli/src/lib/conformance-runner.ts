@@ -56,16 +56,18 @@ export function runConformance(
   options: RunnerOptions,
   callbacks?: RunnerCallbacks
 ): ConformanceReport {
+  const startTime = Date.now();
   const { fixturesDir, level, category, implementationName, implementationVersion } = options;
 
   // Load manifest for reason checking
   const manifest = loadManifest(fixturesDir);
 
-  // Collect categories to test
+  // Collect categories to test (SORTED for determinism)
   const entries = fs.readdirSync(fixturesDir, { withFileTypes: true });
   let categories = entries
     .filter((e) => e.isDirectory() && !e.name.startsWith('.'))
-    .map((e) => e.name);
+    .map((e) => e.name)
+    .sort(); // Deterministic ordering
 
   if (category) {
     if (!categories.includes(category)) {
@@ -92,7 +94,8 @@ export function runConformance(
     profiles.add(profile);
 
     const validator = getValidator(cat);
-    const files = fs.readdirSync(categoryPath).filter((f) => f.endsWith('.json'));
+    // SORTED for deterministic ordering across OS/filesystems
+    const files = fs.readdirSync(categoryPath).filter((f) => f.endsWith('.json')).sort();
 
     for (const file of files) {
       const filePath = path.join(categoryPath, file);
@@ -231,6 +234,10 @@ export function runConformance(
           manifestEntry?.expected_error_code ??
           (manifestEntry?.expected_keyword ? `E_${manifestEntry.expected_keyword.toUpperCase()}` : undefined);
 
+        // Get expected path and keyword from manifest (first-class assertions)
+        const expectedPath = manifestEntry?.expected_path;
+        const expectedKeyword = manifestEntry?.expected_keyword;
+
         const observed = validator(inputToValidate);
 
         let status: TestStatus;
@@ -239,7 +246,19 @@ export function runConformance(
           passed++;
         } else if (!expectedValid && !observed.valid) {
           // Both invalid - check if error codes match (if specified)
+          let mismatch = false;
           if (expectedError && observed.error_code && expectedError !== observed.error_code) {
+            mismatch = true;
+          }
+          // Check expected_path if specified (first-class assertion)
+          if (expectedPath && observed.error_path && expectedPath !== observed.error_path) {
+            mismatch = true;
+          }
+          // Check expected_keyword if specified (first-class assertion)
+          if (expectedKeyword && observed.error_keyword && expectedKeyword !== observed.error_keyword) {
+            mismatch = true;
+          }
+          if (mismatch) {
             status = 'fail';
             failed++;
           } else {
@@ -258,10 +277,14 @@ export function runConformance(
           expected: {
             valid: expectedValid,
             error_code: expectedError,
+            error_path: expectedPath,
+            error_keyword: expectedKeyword,
           },
           observed: {
             valid: observed.valid,
             error_code: observed.error_code,
+            error_path: observed.error_path,
+            error_keyword: observed.error_keyword,
             error_message: observed.error_message,
           },
           diagnostics: {
@@ -285,6 +308,8 @@ export function runConformance(
     }
   }
   capabilities.sort((a, b) => a.profile.localeCompare(b.profile));
+
+  const endTime = Date.now();
 
   // Build report
   const report: ConformanceReport = {
@@ -311,6 +336,14 @@ export function runConformance(
       status: failed === 0 ? 'pass' : 'fail',
     },
     results,
+    meta: {
+      generated_at: new Date().toISOString(),
+      duration_ms: endTime - startTime,
+      runner: {
+        name: '@peac/cli',
+        version: implementationVersion ?? '0.0.0',
+      },
+    },
   };
 
   return report;

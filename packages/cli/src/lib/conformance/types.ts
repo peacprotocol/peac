@@ -38,10 +38,14 @@ export interface TestResult {
   expected?: {
     valid: boolean;
     error_code?: string;
+    error_path?: string;
+    error_keyword?: string;
   };
   observed?: {
     valid: boolean;
     error_code?: string;
+    error_path?: string;
+    error_keyword?: string;
     error_message?: string;
   };
   diagnostics?: TestDiagnostics;
@@ -191,5 +195,6 @@ export type Manifest = Record<string, Record<string, ManifestEntry>>;
 
 /**
  * Category validator function type
+ * Returns ValidationResultWithPath to include error_path and error_keyword
  */
-export type CategoryValidator = (input: unknown) => ValidationResult;
+export type CategoryValidator = (input: unknown) => ValidationResultWithPath;
