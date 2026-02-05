@@ -81,6 +81,44 @@ describe('createReceipt', () => {
       expect(payload).toHaveProperty('iss', 'https://api.example.com');
     });
 
+    it('should normalize issuer URL (remove trailing slash)', async () => {
+      const config = { ...createTestConfig(), issuer: 'https://api.example.com/' };
+      const result = await createReceipt(config, createTestRequest(), createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      expect(payload).toHaveProperty('iss', 'https://api.example.com');
+    });
+
+    it('should include interaction binding in extensions', async () => {
+      const config = createTestConfig();
+      const request = { ...createTestRequest(), method: 'POST', path: '/api/users' };
+      const response = { ...createTestResponse(), statusCode: 201 };
+      const result = await createReceipt(config, request, response);
+
+      const { payload } = decode(result.receipt);
+      expect(payload.ext).toHaveProperty('peac.interaction');
+      const interaction = (payload.ext as Record<string, unknown>)['peac.interaction'] as {
+        method: string;
+        path: string;
+        status: number;
+      };
+      expect(interaction.method).toBe('POST');
+      expect(interaction.path).toBe('/api/users');
+      expect(interaction.status).toBe(201);
+    });
+
+    it('should normalize HTTP method to uppercase', async () => {
+      const config = createTestConfig();
+      const request = { ...createTestRequest(), method: 'post' }; // lowercase
+      const result = await createReceipt(config, request, createTestResponse());
+
+      const { payload } = decode(result.receipt);
+      const interaction = (payload.ext as Record<string, unknown>)['peac.interaction'] as {
+        method: string;
+      };
+      expect(interaction.method).toBe('POST'); // should be uppercase
+    });
+
     it('should derive audience from Host header', async () => {
       const config = createTestConfig();
       const request = {
@@ -91,6 +129,28 @@ describe('createReceipt', () => {
 
       const { payload } = decode(result.receipt);
       expect(payload).toHaveProperty('aud', 'https://myapi.example.com');
+    });
+
+    it('should handle case-insensitive headers (Host vs host)', async () => {
+      const config = createTestConfig();
+
+      // Test with uppercase Host header
+      const requestUpper = {
+        ...createTestRequest(),
+        headers: { Host: 'upper.example.com' },
+      };
+      const resultUpper = await createReceipt(config, requestUpper, createTestResponse());
+      const { payload: payloadUpper } = decode(resultUpper.receipt);
+      expect(payloadUpper).toHaveProperty('aud', 'https://upper.example.com');
+
+      // Test with mixed case
+      const requestMixed = {
+        ...createTestRequest(),
+        headers: { HOST: 'mixed.example.com' },
+      };
+      const resultMixed = await createReceipt(config, requestMixed, createTestResponse());
+      const { payload: payloadMixed } = decode(resultMixed.receipt);
+      expect(payloadMixed).toHaveProperty('aud', 'https://mixed.example.com');
     });
 
     it('should derive audience from Origin header if Host not present', async () => {
@@ -184,9 +244,9 @@ describe('createReceipt', () => {
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
       expect(result.transport).toBe('pointer');
-      expect(result.headers['PEAC-Receipt-Pointer']).toBeDefined();
-      expect(result.headers['PEAC-Receipt-Pointer']).toContain('sha256=');
-      expect(result.headers['PEAC-Receipt-Pointer']).toContain('url=');
+      expect(result.headers[HEADERS.receiptPointer]).toBeDefined();
+      expect(result.headers[HEADERS.receiptPointer]).toContain('sha256=');
+      expect(result.headers[HEADERS.receiptPointer]).toContain('url=');
     });
 
     it('should fallback to body when receipt exceeds maxHeaderSize', async () => {

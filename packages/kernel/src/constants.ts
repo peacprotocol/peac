@@ -31,6 +31,7 @@ export const ALGORITHMS = {
  */
 export const HEADERS = {
   receipt: 'PEAC-Receipt' as const,
+  receiptPointer: 'PEAC-Receipt-Pointer' as const,
   dpop: 'DPoP' as const,
   // Purpose headers (v0.9.24+)
   purpose: 'PEAC-Purpose' as const,

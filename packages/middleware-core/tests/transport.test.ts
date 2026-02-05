@@ -171,13 +171,14 @@ describe('buildResponseHeaders', () => {
   });
 
   describe('Pointer Transport', () => {
-    it('should add PEAC-Receipt-Pointer header with sha256 and url', async () => {
+    it('should add PEAC-Receipt-Pointer header using constant', async () => {
       const pointerUrl = 'https://receipts.example.com/abc123';
       const headers = await buildResponseHeaders(testReceipt, 'pointer', pointerUrl);
 
-      expect(headers['PEAC-Receipt-Pointer']).toBeDefined();
-      expect(headers['PEAC-Receipt-Pointer']).toContain('sha256="');
-      expect(headers['PEAC-Receipt-Pointer']).toContain(`url="${pointerUrl}"`);
+      // Should use HEADERS.receiptPointer constant
+      expect(headers[HEADERS.receiptPointer]).toBeDefined();
+      expect(headers[HEADERS.receiptPointer]).toContain('sha256="');
+      expect(headers[HEADERS.receiptPointer]).toContain(`url="${pointerUrl}"`);
     });
 
     it('should compute correct SHA-256 digest', async () => {
@@ -185,7 +186,7 @@ describe('buildResponseHeaders', () => {
       const headers = await buildResponseHeaders(testReceipt, 'pointer', pointerUrl);
 
       // Extract digest from header
-      const match = headers['PEAC-Receipt-Pointer'].match(/sha256="([^"]+)"/);
+      const match = headers[HEADERS.receiptPointer].match(/sha256="([^"]+)"/);
       expect(match).not.toBeNull();
       const digest = match![1];
 
@@ -197,6 +198,50 @@ describe('buildResponseHeaders', () => {
       await expect(buildResponseHeaders(testReceipt, 'pointer')).rejects.toThrow(
         'pointerUrl is required for pointer transport'
       );
+    });
+
+    describe('Pointer URL Validation', () => {
+      it('should reject HTTP URLs (HTTPS only)', async () => {
+        const httpUrl = 'http://receipts.example.com/abc123';
+        await expect(buildResponseHeaders(testReceipt, 'pointer', httpUrl)).rejects.toThrow(
+          'Pointer URL must use HTTPS'
+        );
+      });
+
+      it('should reject URLs with quotes (header injection)', async () => {
+        const quotedUrl = 'https://receipts.example.com/abc"123';
+        await expect(buildResponseHeaders(testReceipt, 'pointer', quotedUrl)).rejects.toThrow(
+          'Pointer URL contains invalid characters for structured header'
+        );
+      });
+
+      it('should reject URLs with backslashes', async () => {
+        const backslashUrl = 'https://receipts.example.com/abc\\123';
+        await expect(buildResponseHeaders(testReceipt, 'pointer', backslashUrl)).rejects.toThrow(
+          'Pointer URL contains invalid characters for structured header'
+        );
+      });
+
+      it('should reject URLs with control characters', async () => {
+        const controlCharUrl = 'https://receipts.example.com/abc\x00123';
+        await expect(buildResponseHeaders(testReceipt, 'pointer', controlCharUrl)).rejects.toThrow(
+          'Pointer URL contains control characters'
+        );
+      });
+
+      it('should reject invalid URLs', async () => {
+        const invalidUrl = 'not-a-url';
+        await expect(buildResponseHeaders(testReceipt, 'pointer', invalidUrl)).rejects.toThrow(
+          'Pointer URL is not a valid URL'
+        );
+      });
+
+      it('should reject excessively long URLs', async () => {
+        const longUrl = 'https://receipts.example.com/' + 'a'.repeat(2100);
+        await expect(buildResponseHeaders(testReceipt, 'pointer', longUrl)).rejects.toThrow(
+          'Pointer URL exceeds maximum length'
+        );
+      });
     });
   });
 
@@ -264,7 +309,7 @@ describe('buildReceiptResult', () => {
 
       expect(result.receipt).toBe(testReceipt);
       expect(result.transport).toBe('pointer');
-      expect(result.headers['PEAC-Receipt-Pointer']).toBeDefined();
+      expect(result.headers[HEADERS.receiptPointer]).toBeDefined();
       expect(result.bodyWrapper).toBeUndefined();
     });
   });

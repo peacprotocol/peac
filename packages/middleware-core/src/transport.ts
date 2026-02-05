@@ -9,7 +9,48 @@
 import { HEADERS } from '@peac/kernel';
 import { sha256Hex } from '@peac/crypto';
 import { CONFIG_DEFAULTS } from './config.js';
-import type { MiddlewareConfig, TransportSelectionInput } from './types.js';
+import type { MiddlewareConfig } from './types.js';
+
+/**
+ * Maximum pointer header size (prevents oversized headers)
+ */
+const MAX_POINTER_HEADER_SIZE = 2048;
+
+/**
+ * Validate pointer URL for safety (SSRF prevention and header injection)
+ *
+ * @throws Error if URL is invalid or unsafe
+ */
+function validatePointerUrl(url: string): void {
+  // Must be absolute HTTPS URL
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error('Pointer URL is not a valid URL');
+  }
+
+  if (parsed.protocol !== 'https:') {
+    throw new Error('Pointer URL must use HTTPS');
+  }
+
+  // Prevent header injection via URL content
+  // RFC 8941 quoted strings cannot contain " or \ without escaping
+  if (url.includes('"') || url.includes('\\')) {
+    throw new Error('Pointer URL contains invalid characters for structured header');
+  }
+
+  // Control characters are never valid in headers
+  // eslint-disable-next-line no-control-regex
+  if (/[\x00-\x1f\x7f]/.test(url)) {
+    throw new Error('Pointer URL contains control characters');
+  }
+
+  // Sanity check on length to prevent oversized headers
+  if (url.length > MAX_POINTER_HEADER_SIZE) {
+    throw new Error(`Pointer URL exceeds maximum length (${MAX_POINTER_HEADER_SIZE})`);
+  }
+}
 
 /**
  * Calculate receipt size and determine appropriate transport
@@ -18,18 +59,21 @@ import type { MiddlewareConfig, TransportSelectionInput } from './types.js';
  * Pointer transport is only used if explicitly configured (never auto-selected).
  *
  * @param receipt - JWS compact serialization
- * @param config - Transport configuration
+ * @param config - Transport configuration (optional fields)
  * @returns Selected transport profile
  *
  * @example
  * ```typescript
  * const transport = selectTransport(receipt, { maxHeaderSize: 4096 });
  * // Returns 'header' if receipt fits, 'body' otherwise
+ *
+ * // Also accepts empty config for defaults
+ * const transport = selectTransport(receipt, {});
  * ```
  */
 export function selectTransport(
   receipt: string,
-  config: Pick<MiddlewareConfig, 'transport' | 'maxHeaderSize'>
+  config: Partial<Pick<MiddlewareConfig, 'transport' | 'maxHeaderSize'>> = {}
 ): 'header' | 'body' | 'pointer' {
   const preferredTransport = config.transport ?? CONFIG_DEFAULTS.transport;
   const maxHeaderSize = config.maxHeaderSize ?? CONFIG_DEFAULTS.maxHeaderSize;
@@ -110,11 +154,13 @@ export async function buildResponseHeaders(
       if (!pointerUrl) {
         throw new Error('pointerUrl is required for pointer transport');
       }
+      // Validate pointer URL (SSRF prevention, header injection prevention)
+      validatePointerUrl(pointerUrl);
       // Compute SHA-256 digest of receipt (lowercase hex)
       const digestHex = await sha256Hex(receipt);
-      // RFC 8941 structured header dictionary format
+      // RFC 8941 structured header dictionary format with quoted strings
       return {
-        'PEAC-Receipt-Pointer': `sha256="${digestHex}", url="${pointerUrl}"`,
+        [HEADERS.receiptPointer]: `sha256="${digestHex}", url="${pointerUrl}"`,
       };
     }
 

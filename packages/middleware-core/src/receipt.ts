@@ -3,6 +3,10 @@
  *
  * Creates PEAC receipts from request/response context.
  *
+ * This module produces **attestation receipts** - lightweight signed tokens
+ * that attest to API interactions. For full payment receipts with amt/cur/payment
+ * fields, use @peac/protocol directly.
+ *
  * @packageDocumentation
  */
 
@@ -19,13 +23,19 @@ import { validateConfig, applyDefaults } from './config.js';
 import { selectTransport, buildReceiptResult } from './transport.js';
 
 /**
- * PEAC Receipt claims structure (minimal for middleware)
+ * PEAC Attestation Receipt claims structure
  *
- * This is a simplified claims structure for middleware use.
- * Full claims with payment evidence should use @peac/protocol directly.
+ * This is an attestation receipt format for middleware use - it attests to
+ * API interactions without payment fields. For full payment receipts with
+ * amt/cur/payment, use @peac/protocol issue() directly.
+ *
+ * Claims structure:
+ * - Core JWT claims: iss, aud, iat, exp
+ * - PEAC claims: rid (UUIDv7 receipt ID)
+ * - Optional: sub, ext (extensions including interaction binding)
  */
-interface ReceiptClaims {
-  /** Issuer URL */
+interface AttestationReceiptClaims {
+  /** Issuer URL (normalized, no trailing slash) */
   iss: string;
   /** Audience URL */
   aud: string;
@@ -42,33 +52,75 @@ interface ReceiptClaims {
 }
 
 /**
+ * Interaction binding data included in ext by default
+ */
+interface InteractionBinding {
+  /** HTTP method */
+  method: string;
+  /** Request path */
+  path: string;
+  /** Response status code */
+  status: number;
+}
+
+/**
+ * Create a lowercase header lookup map for case-insensitive access
+ *
+ * HTTP headers are case-insensitive per RFC 7230, but different frameworks
+ * may provide them with different casing. This normalizes to lowercase.
+ */
+function normalizeHeaders(
+  headers: Record<string, string | string[] | undefined>
+): Record<string, string | string[] | undefined> {
+  const normalized: Record<string, string | string[] | undefined> = {};
+  for (const [key, value] of Object.entries(headers)) {
+    normalized[key.toLowerCase()] = value;
+  }
+  return normalized;
+}
+
+/**
+ * Get a header value (case-insensitive)
+ */
+function getHeader(
+  headers: Record<string, string | string[] | undefined>,
+  name: string
+): string | undefined {
+  const value = headers[name.toLowerCase()];
+  if (value === undefined) return undefined;
+  return Array.isArray(value) ? value[0] : value;
+}
+
+/**
+ * Normalize issuer URL (remove trailing slash for consistency)
+ */
+function normalizeIssuer(issuer: string): string {
+  return issuer.replace(/\/+$/, '');
+}
+
+/**
  * Extract audience from request context
  *
- * Derives audience from the request origin or host header.
+ * Derives audience from the request host or origin header (case-insensitive).
  */
-function extractAudience(request: RequestContext): string {
-  // Try to get from Host header
-  const host = request.headers['host'];
+function extractAudience(
+  normalizedHeaders: Record<string, string | string[] | undefined>
+): string {
+  // Try to get from Host header (case-insensitive)
+  const host = getHeader(normalizedHeaders, 'host');
   if (host) {
-    const hostValue = Array.isArray(host) ? host[0] : host;
-    if (hostValue) {
-      // Assume HTTPS for audience
-      return `https://${hostValue}`;
-    }
+    // Assume HTTPS for audience
+    return `https://${host}`;
   }
 
   // Fallback to origin header
-  const origin = request.headers['origin'];
+  const origin = getHeader(normalizedHeaders, 'origin');
   if (origin) {
-    const originValue = Array.isArray(origin) ? origin[0] : origin;
-    if (originValue) {
-      return originValue;
-    }
+    return origin;
   }
 
-  // Last resort: use the request path as a relative audience
-  // This is not ideal but ensures we always have an audience
-  return `https://localhost${request.path}`;
+  // Should not happen with proper request context
+  return 'https://localhost';
 }
 
 /**
@@ -84,6 +136,9 @@ function jwkToPrivateKeyBytes(jwk: { d: string }): Uint8Array {
  * This is the main function for middleware receipt generation.
  * It validates configuration, builds claims, signs the receipt,
  * and determines the appropriate transport profile.
+ *
+ * By default, includes minimal interaction binding (method, path, status)
+ * in the `ext['peac.interaction']` field for evidentiary value.
  *
  * @param config - Middleware configuration
  * @param request - Request context
@@ -116,6 +171,9 @@ export async function createReceipt(
   // Apply defaults
   const fullConfig = applyDefaults(config);
 
+  // Normalize headers for case-insensitive access
+  const normalizedHeaders = normalizeHeaders(request.headers);
+
   // Generate receipt ID (UUIDv7 for time-ordering)
   const rid = uuidv7();
 
@@ -123,16 +181,27 @@ export async function createReceipt(
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + fullConfig.expiresIn;
 
-  // Extract audience from request
-  const audience = extractAudience(request);
+  // Normalize issuer and extract audience
+  const normalizedIssuer = normalizeIssuer(config.issuer);
+  const audience = extractAudience(normalizedHeaders);
 
-  // Build base claims
-  const claims: ReceiptClaims = {
-    iss: config.issuer,
+  // Build interaction binding (minimal evidentiary data)
+  const interactionBinding: InteractionBinding = {
+    method: request.method.toUpperCase(),
+    path: request.path,
+    status: response.statusCode,
+  };
+
+  // Build base claims with interaction binding
+  const claims: AttestationReceiptClaims = {
+    iss: normalizedIssuer,
     aud: audience,
     iat,
     exp,
     rid,
+    ext: {
+      'peac.interaction': interactionBinding,
+    },
   };
 
   // Apply custom claims if generator is provided
@@ -149,7 +218,7 @@ export async function createReceipt(
       claims.sub = customClaims.sub;
     }
 
-    // Merge extensions
+    // Merge extensions (custom claims override defaults)
     if (customClaims.ext) {
       claims.ext = { ...claims.ext, ...customClaims.ext };
     }
@@ -181,6 +250,7 @@ export async function createReceipt(
  * Create a receipt with explicit claims (bypasses context extraction)
  *
  * Use this when you have explicit claims and don't need context extraction.
+ * Does NOT include automatic interaction binding.
  *
  * @param config - Middleware configuration
  * @param claims - Explicit claims to include
@@ -205,9 +275,12 @@ export async function createReceiptWithClaims(
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + fullConfig.expiresIn;
 
+  // Normalize issuer
+  const normalizedIssuer = normalizeIssuer(config.issuer);
+
   // Build claims
-  const receiptClaims: ReceiptClaims = {
-    iss: config.issuer,
+  const receiptClaims: AttestationReceiptClaims = {
+    iss: normalizedIssuer,
     aud: claims.aud,
     iat,
     exp,
