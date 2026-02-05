@@ -13,6 +13,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## 2. Purpose
 
 The conformance report:
+
 - Proves an implementation passes the test suite
 - Provides machine-readable results for automation
 - Enables conformance badges and certification
@@ -21,6 +22,7 @@ The conformance report:
 ## 3. Determinism requirements
 
 A conformance runner MUST be able to emit a report whose contents depend only on:
+
 - The input test vectors (by digest)
 - The runner configuration (profiles enabled, strictness)
 - The implementation-under-test (IUT) outputs
@@ -33,15 +35,15 @@ If a tool includes a timestamp, it MUST be placed in `meta.generated_at` and exc
 
 A report MUST be a JSON object (UTF-8) with these top-level fields:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
+| Field            | Type   | Required | Description               |
+| ---------------- | ------ | -------- | ------------------------- |
 | `report_version` | string | REQUIRED | Format version identifier |
-| `suite` | object | REQUIRED | Test suite information |
-| `implementation` | object | REQUIRED | IUT information |
-| `summary` | object | REQUIRED | High-level results |
-| `results` | array | REQUIRED | Per-test results |
-| `artifacts` | object | OPTIONAL | Additional outputs |
-| `meta` | object | OPTIONAL | Non-deterministic fields |
+| `suite`          | object | REQUIRED | Test suite information    |
+| `implementation` | object | REQUIRED | IUT information           |
+| `summary`        | object | REQUIRED | High-level results        |
+| `results`        | array  | REQUIRED | Per-test results          |
+| `artifacts`      | object | OPTIONAL | Additional outputs        |
+| `meta`           | object | OPTIONAL | Non-deterministic fields  |
 
 ## 5. Field definitions
 
@@ -57,14 +59,15 @@ MUST equal `peac-conformance-report/0.1` for this version.
 
 Information about the test suite.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | REQUIRED | Suite name (e.g., `peac-core-conformance`) |
-| `version` | string | REQUIRED | Suite version |
-| `vectors_digest` | object | REQUIRED | Digest of test vector bundle |
-| `profiles` | array | REQUIRED | Enabled test profiles |
+| Field            | Type   | Required | Description                                |
+| ---------------- | ------ | -------- | ------------------------------------------ |
+| `name`           | string | REQUIRED | Suite name (e.g., `peac-core-conformance`) |
+| `version`        | string | REQUIRED | Suite version                              |
+| `vectors_digest` | object | REQUIRED | Digest of test vector bundle               |
+| `profiles`       | array  | REQUIRED | Enabled test profiles                      |
 
 Profiles examples:
+
 - `receipt.verify`
 - `receipt.issue`
 - `bundle.verify`
@@ -94,12 +97,12 @@ Profiles examples:
 
 Information about the implementation under test.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | REQUIRED | Package/library name |
-| `version` | string | REQUIRED | Version string |
-| `runtime` | string | OPTIONAL | Runtime environment |
-| `commit` | string | OPTIONAL | Git commit hash |
+| Field           | Type   | Required | Description             |
+| --------------- | ------ | -------- | ----------------------- |
+| `name`          | string | REQUIRED | Package/library name    |
+| `version`       | string | REQUIRED | Version string          |
+| `runtime`       | string | OPTIONAL | Runtime environment     |
+| `commit`        | string | OPTIONAL | Git commit hash         |
 | `config_digest` | object | OPTIONAL | Digest of runner config |
 
 ```json
@@ -115,13 +118,13 @@ Information about the implementation under test.
 
 High-level results.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `passed` | integer | REQUIRED | Count of passed tests |
-| `failed` | integer | REQUIRED | Count of failed tests |
-| `skipped` | integer | REQUIRED | Count of skipped tests |
-| `total` | integer | REQUIRED | Total test count |
-| `status` | string | REQUIRED | `pass` if failed == 0, else `fail` |
+| Field     | Type    | Required | Description                        |
+| --------- | ------- | -------- | ---------------------------------- |
+| `passed`  | integer | REQUIRED | Count of passed tests              |
+| `failed`  | integer | REQUIRED | Count of failed tests              |
+| `skipped` | integer | REQUIRED | Count of skipped tests             |
+| `total`   | integer | REQUIRED | Total test count                   |
+| `status`  | string  | REQUIRED | `pass` if failed == 0, else `fail` |
 
 ```json
 {
@@ -139,14 +142,14 @@ Array of per-test results. Order MUST be stable.
 
 Each result entry:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | REQUIRED | Stable test identifier |
-| `category` | string | REQUIRED | Test category |
-| `status` | string | REQUIRED | `pass`, `fail`, `skip` |
-| `expected` | object | OPTIONAL | Expected outcome |
-| `observed` | object | OPTIONAL | Observed outcome |
-| `diagnostics` | object | OPTIONAL | Debug information |
+| Field         | Type   | Required | Description            |
+| ------------- | ------ | -------- | ---------------------- |
+| `id`          | string | REQUIRED | Stable test identifier |
+| `category`    | string | REQUIRED | Test category          |
+| `status`      | string | REQUIRED | `pass`, `fail`, `skip` |
+| `expected`    | object | OPTIONAL | Expected outcome       |
+| `observed`    | object | OPTIONAL | Observed outcome       |
+| `diagnostics` | object | OPTIONAL | Debug information      |
 
 ```json
 {
@@ -162,50 +165,52 @@ Each result entry:
 
 Additional outputs for auditing.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `logs_digest` | object | Digest of separate log file |
+| Field           | Type   | Description                    |
+| --------------- | ------ | ------------------------------ |
+| `logs_digest`   | object | Digest of separate log file    |
 | `report_digest` | object | Digest of canonicalized report |
 
 ### 5.7 `meta` (OPTIONAL)
 
 Non-deterministic fields ONLY.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `generated_at` | string | RFC 3339 timestamp |
-| `runner` | object | Runner name/version |
-| `duration_ms` | integer | Total run time |
+| Field          | Type    | Description         |
+| -------------- | ------- | ------------------- |
+| `generated_at` | string  | RFC 3339 timestamp  |
+| `runner`       | object  | Runner name/version |
+| `duration_ms`  | integer | Total run time      |
 
 ## 6. Test categories
 
 ### 6.1 Standard categories
 
-| Category | Description |
-|----------|-------------|
+| Category                   | Description            |
+| -------------------------- | ---------------------- |
 | `receipt.verify.signature` | Signature verification |
-| `receipt.verify.claims` | Claims validation |
-| `receipt.verify.time` | Time window checks |
-| `receipt.issue` | Receipt issuance |
-| `bundle.verify` | Bundle verification |
-| `bundle.offline` | Offline verification |
-| `transport.header` | Header profile |
-| `transport.body` | Body profile |
-| `transport.pointer` | Pointer profile |
-| `policy.allowlist` | Issuer allowlisting |
-| `policy.pinning` | Key pinning |
-| `security.ssrf` | SSRF protections |
-| `security.limits` | Resource limits |
-| `privacy.redaction` | Privacy redaction |
+| `receipt.verify.claims`    | Claims validation      |
+| `receipt.verify.time`      | Time window checks     |
+| `receipt.issue`            | Receipt issuance       |
+| `bundle.verify`            | Bundle verification    |
+| `bundle.offline`           | Offline verification   |
+| `transport.header`         | Header profile         |
+| `transport.body`           | Body profile           |
+| `transport.pointer`        | Pointer profile        |
+| `policy.allowlist`         | Issuer allowlisting    |
+| `policy.pinning`           | Key pinning            |
+| `security.ssrf`            | SSRF protections       |
+| `security.limits`          | Resource limits        |
+| `privacy.redaction`        | Privacy redaction      |
 
 ### 6.2 Test ID format
 
 Test IDs SHOULD follow the pattern:
+
 ```
 <category>.<subcategory>.<test_name>_<sequence>
 ```
 
 Examples:
+
 - `receipt.verify.signature.valid_001`
 - `receipt.verify.signature.invalid_wrong_key_001`
 - `security.ssrf.block_private_ip_001`
@@ -224,13 +229,13 @@ Diagnostics help debug failures without exposing sensitive data.
 
 ### 7.3 Standard diagnostic fields
 
-| Field | Description |
-|-------|-------------|
-| `error_code` | Stable error code |
-| `error_message` | Human-readable message |
-| `stack_trace` | Stack trace (optional, may truncate) |
-| `input_digest` | Digest of test input |
-| `diff` | Structured diff of expected vs observed |
+| Field           | Description                             |
+| --------------- | --------------------------------------- |
+| `error_code`    | Stable error code                       |
+| `error_message` | Human-readable message                  |
+| `stack_trace`   | Stack trace (optional, may truncate)    |
+| `input_digest`  | Digest of test input                    |
+| `diff`          | Structured diff of expected vs observed |
 
 ## 8. Examples
 
@@ -362,18 +367,19 @@ peac conformance validate report.json --suite-version 0.1.0
 ### 10.1 Badge criteria
 
 An implementation MAY claim conformance if:
+
 - All tests in enabled profiles pass
 - Report is reproducible
 - Report is signed or verifiable
 
 ### 10.2 Badge levels
 
-| Level | Requirement |
-|-------|-------------|
-| **Basic** | `receipt.verify` profile passes |
-| **Standard** | Basic + `bundle.verify` + `transport.*` |
-| **Full** | All profiles pass |
-| **Enterprise** | Full + `security.*` + `privacy.*` |
+| Level          | Requirement                             |
+| -------------- | --------------------------------------- |
+| **Basic**      | `receipt.verify` profile passes         |
+| **Standard**   | Basic + `bundle.verify` + `transport.*` |
+| **Full**       | All profiles pass                       |
+| **Enterprise** | Full + `security.*` + `privacy.*`       |
 
 ### 10.3 Badge format
 
@@ -387,6 +393,7 @@ Report: https://example.com/conformance/report.json
 ## 11. Canonicalization
 
 When computing a digest of the report:
+
 - Serialize using RFC 8785 JCS
 - Exclude `meta` field
 - Use SHA-256, lowercase hex output
@@ -396,6 +403,7 @@ When computing a digest of the report:
 ### 12.1 Report authenticity
 
 For official conformance claims:
+
 - Reports SHOULD be signed
 - Reports SHOULD include commit hash
 - Reports SHOULD be reproducible
@@ -411,6 +419,7 @@ For official conformance claims:
 ### 13.1 Test isolation
 
 Each test SHOULD be independent:
+
 - No shared state between tests
 - Deterministic ordering
 - Parallelizable where possible

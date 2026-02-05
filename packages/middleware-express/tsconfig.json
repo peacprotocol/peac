@@ -8,7 +8,5 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests"],
-  "references": [
-    { "path": "../middleware-core" }
-  ]
+  "references": [{ "path": "../middleware-core" }]
 }

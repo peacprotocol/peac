@@ -23,11 +23,7 @@ import { PEACReceiptClaims, ReceiptClaims } from '@peac/schema';
 import type { SSRFFetchError } from './ssrf-safe-fetch.js';
 import { fetchJWKSSafe, ssrfSafeFetch } from './ssrf-safe-fetch.js';
 import { createReportBuilder } from './verification-report.js';
-import type {
-  PinnedKey,
-  VerificationReport,
-  VerifierPolicy,
-} from './verifier-types.js';
+import type { PinnedKey, VerificationReport, VerifierPolicy } from './verifier-types.js';
 import {
   createDefaultPolicy,
   createDigest,
@@ -138,21 +134,23 @@ function isIssuerAllowed(issuer: string, allowlist?: string[]): boolean {
   }
 
   const normalized = normalizeIssuer(issuer);
-  return allowlist.some(allowed => normalizeIssuer(allowed) === normalized);
+  return allowlist.some((allowed) => normalizeIssuer(allowed) === normalized);
 }
 
 /**
  * Find pinned key for issuer and kid
  */
-function findPinnedKey(issuer: string, kid: string, pinnedKeys?: PinnedKey[]): PinnedKey | undefined {
+function findPinnedKey(
+  issuer: string,
+  kid: string,
+  pinnedKeys?: PinnedKey[]
+): PinnedKey | undefined {
   if (!pinnedKeys || pinnedKeys.length === 0) {
     return undefined;
   }
 
   const normalizedIssuer = normalizeIssuer(issuer);
-  return pinnedKeys.find(
-    pk => normalizeIssuer(pk.issuer) === normalizedIssuer && pk.kid === kid
-  );
+  return pinnedKeys.find((pk) => normalizeIssuer(pk.issuer) === normalizedIssuer && pk.kid === kid);
 }
 
 /**
@@ -289,12 +287,8 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
   } = options;
 
   // Convert receipt to string if needed
-  const receiptJws = typeof receipt === 'string'
-    ? receipt
-    : new TextDecoder().decode(receipt);
-  const receiptBytes = typeof receipt === 'string'
-    ? new TextEncoder().encode(receipt)
-    : receipt;
+  const receiptJws = typeof receipt === 'string' ? receipt : new TextDecoder().decode(receipt);
+  const receiptBytes = typeof receipt === 'string' ? new TextEncoder().encode(receipt) : receipt;
 
   // Compute receipt digest for report
   const receiptDigestHex = await sha256Hex(receiptBytes);
@@ -429,12 +423,20 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
           actual: actualThumbprint,
         });
         builder.failure('policy_violation', normalizedIssuer, kid);
-        return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+        return {
+          valid: false,
+          report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+        };
       }
       publicKey = jwkToPublicKeyBytes(pinnedKey.jwk);
       keySource = 'pinned_keys';
       keyThumbprint = actualThumbprint;
-      builder.pass('key.resolve', { source: keySource, kid, thumbprint_verified: true, offline: true });
+      builder.pass('key.resolve', {
+        source: keySource,
+        kid,
+        thumbprint_verified: true,
+        offline: true,
+      });
     } else if (pinnedKey.public_key) {
       // Raw public key bytes provided (base64url, 32 bytes for Ed25519)
       try {
@@ -447,13 +449,21 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
         // The thumbprint is computed from canonical JWK JSON
         // Use the declared thumbprint from the pinned key entry
         keyThumbprint = pinnedKey.jwk_thumbprint_sha256;
-        builder.pass('key.resolve', { source: keySource, kid, offline: true, thumbprint_verified: false });
+        builder.pass('key.resolve', {
+          source: keySource,
+          kid,
+          offline: true,
+          thumbprint_verified: false,
+        });
       } catch (err) {
         builder.fail('key.resolve', 'E_VERIFY_KEY_NOT_FOUND', {
           error: `Invalid pinned public_key: ${err instanceof Error ? err.message : String(err)}`,
         });
         builder.failure('key_not_found', normalizedIssuer, kid);
-        return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+        return {
+          valid: false,
+          report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+        };
       }
     } else if (policy.mode === 'offline_only') {
       // Offline mode but pinned key has no key material - fail
@@ -461,7 +471,10 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
         error: 'Offline mode requires key material (jwk or public_key) in pinned_keys',
       });
       builder.failure('key_not_found', normalizedIssuer, kid);
-      return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+      return {
+        valid: false,
+        report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+      };
     } else {
       // Network mode - fetch JWKS and verify thumbprint
       const jwksResult = await fetchIssuerJWKS(normalizedIssuer);
@@ -473,7 +486,10 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
           url: jwksResult.error.blockedUrl,
         });
         builder.failure(reason, normalizedIssuer, kid);
-        return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+        return {
+          valid: false,
+          report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+        };
       }
 
       // Store raw bytes for digest computation (only when not from cache)
@@ -487,14 +503,17 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
       });
 
       // Find the key
-      const jwk = jwksResult.jwks.keys.find(k => k.kid === kid);
+      const jwk = jwksResult.jwks.keys.find((k) => k.kid === kid);
       if (!jwk) {
         builder.fail('key.resolve', 'E_VERIFY_KEY_NOT_FOUND', {
           kid,
-          available_kids: jwksResult.jwks.keys.map(k => k.kid),
+          available_kids: jwksResult.jwks.keys.map((k) => k.kid),
         });
         builder.failure('key_not_found', normalizedIssuer, kid);
-        return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+        return {
+          valid: false,
+          report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+        };
       }
 
       // Verify thumbprint matches
@@ -506,7 +525,10 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
           actual: actualThumbprint,
         });
         builder.failure('policy_violation', normalizedIssuer, kid);
-        return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+        return {
+          valid: false,
+          report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+        };
       }
 
       publicKey = jwkToPublicKeyBytes(jwk);
@@ -521,7 +543,10 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
         error: 'Offline mode requires pinned keys',
       });
       builder.failure('key_not_found', normalizedIssuer, kid);
-      return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+      return {
+        valid: false,
+        report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+      };
     }
 
     const jwksResult = await fetchIssuerJWKS(normalizedIssuer);
@@ -533,7 +558,10 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
         url: jwksResult.error.blockedUrl,
       });
       builder.failure(reason, normalizedIssuer, kid);
-      return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+      return {
+        valid: false,
+        report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+      };
     }
 
     // Store raw bytes for digest computation (only when not from cache)
@@ -547,14 +575,17 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
     });
 
     // Find the key
-    const jwk = jwksResult.jwks.keys.find(k => k.kid === kid);
+    const jwk = jwksResult.jwks.keys.find((k) => k.kid === kid);
     if (!jwk) {
       builder.fail('key.resolve', 'E_VERIFY_KEY_NOT_FOUND', {
         kid,
-        available_kids: jwksResult.jwks.keys.map(k => k.kid),
+        available_kids: jwksResult.jwks.keys.map((k) => k.kid),
       });
       builder.failure('key_not_found', normalizedIssuer, kid);
-      return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+      return {
+        valid: false,
+        report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+      };
     }
 
     publicKey = jwkToPublicKeyBytes(jwk);
@@ -574,7 +605,10 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
         error: 'Ed25519 signature verification failed',
       });
       builder.failure('signature_invalid', normalizedIssuer, kid);
-      return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+      return {
+        valid: false,
+        report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+      };
     }
 
     parsedClaims = result.payload;
@@ -613,7 +647,10 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
         now: nowSeconds,
       });
       builder.failure('expired', normalizedIssuer, kid);
-      return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+      return {
+        valid: false,
+        report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+      };
     }
   }
 
@@ -638,7 +675,10 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
             limit: policy.limits.max_extension_bytes,
           });
           builder.failure('extension_too_large', normalizedIssuer, kid);
-          return { valid: false, report: includeMeta ? builder.addTimestamp().build() : builder.build() };
+          return {
+            valid: false,
+            report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+          };
         }
       }
     }

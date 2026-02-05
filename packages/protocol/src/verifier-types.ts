@@ -457,7 +457,9 @@ export function createDigest(hexValue: string): DigestObject {
 /**
  * Create an empty verification report structure
  */
-export function createEmptyReport(policy: VerifierPolicy): Omit<VerificationReport, 'input' | 'result' | 'checks'> {
+export function createEmptyReport(
+  policy: VerifierPolicy
+): Omit<VerificationReport, 'input' | 'result' | 'checks'> {
   return {
     report_version: VERIFICATION_REPORT_VERSION,
     policy,

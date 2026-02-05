@@ -13,6 +13,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## 2. Scope
 
 This document applies to PEAC receipts that include:
+
 - Interaction evidence (tool inputs/outputs)
 - Agent action records
 - API request/response data
@@ -31,6 +32,7 @@ This document applies to PEAC receipts that include:
 ### 3.2 Default posture
 
 The default posture MUST be **privacy-preserving**:
+
 - Hash-only for inputs and outputs by default
 - No verbatim content unless explicitly enabled
 - No PII unless explicitly required and consented
@@ -39,35 +41,35 @@ The default posture MUST be **privacy-preserving**:
 
 ### 4.1 Never include (MUST NOT)
 
-| Data Type | Examples | Rationale |
-|-----------|----------|-----------|
-| Credentials | API keys, tokens, passwords | Security |
-| Secrets | Private keys, encryption keys | Security |
-| Authentication data | Session cookies, JWTs | Security |
-| Raw PII | SSN, credit card numbers | Privacy/Legal |
-| Medical data | PHI, health records | HIPAA |
-| Financial data | Bank accounts, full card numbers | PCI-DSS |
+| Data Type           | Examples                         | Rationale     |
+| ------------------- | -------------------------------- | ------------- |
+| Credentials         | API keys, tokens, passwords      | Security      |
+| Secrets             | Private keys, encryption keys    | Security      |
+| Authentication data | Session cookies, JWTs            | Security      |
+| Raw PII             | SSN, credit card numbers         | Privacy/Legal |
+| Medical data        | PHI, health records              | HIPAA         |
+| Financial data      | Bank accounts, full card numbers | PCI-DSS       |
 
 ### 4.2 Hash-only by default (SHOULD hash)
 
-| Data Type | Examples | Hash Rationale |
-|-----------|----------|----------------|
-| Tool inputs | Function arguments | May contain user queries |
-| Tool outputs | Function results | May contain sensitive data |
-| Request bodies | API payloads | May contain PII |
-| Response bodies | API responses | May contain PII |
-| User queries | Search terms, prompts | Privacy |
-| Generated content | AI outputs | Copyright/Privacy |
+| Data Type         | Examples              | Hash Rationale             |
+| ----------------- | --------------------- | -------------------------- |
+| Tool inputs       | Function arguments    | May contain user queries   |
+| Tool outputs      | Function results      | May contain sensitive data |
+| Request bodies    | API payloads          | May contain PII            |
+| Response bodies   | API responses         | May contain PII            |
+| User queries      | Search terms, prompts | Privacy                    |
+| Generated content | AI outputs            | Copyright/Privacy          |
 
 ### 4.3 May include verbatim (MAY include)
 
-| Data Type | Examples | When Appropriate |
-|-----------|----------|------------------|
-| Metadata | Timestamps, status codes | Always |
-| Public identifiers | URLs, resource IDs | When not PII |
-| Error codes | HTTP status, error types | Always |
-| Non-sensitive config | Feature flags | When not secret |
-| Truncated previews | First N characters | With explicit limit |
+| Data Type            | Examples                 | When Appropriate    |
+| -------------------- | ------------------------ | ------------------- |
+| Metadata             | Timestamps, status codes | Always              |
+| Public identifiers   | URLs, resource IDs       | When not PII        |
+| Error codes          | HTTP status, error types | Always              |
+| Non-sensitive config | Feature flags            | When not secret     |
+| Truncated previews   | First N characters       | With explicit limit |
 
 ## 5. Hash-only mode
 
@@ -118,28 +120,29 @@ For interaction evidence in hash-only mode:
 ### 6.1 When to use
 
 Use redaction when:
+
 - You need some verbatim content for debugging
 - Specific fields are known to be safe
 - Compliance requires partial disclosure
 
 ### 6.2 Redaction strategies
 
-| Strategy | Description | Example |
-|----------|-------------|---------|
-| Field removal | Remove sensitive fields entirely | Remove `password` field |
-| Value masking | Replace value with placeholder | `"api_key": "[REDACTED]"` |
-| Truncation | Keep only first N characters | `"query": "How do I..."` |
-| Type-only | Replace value with type indicator | `"data": "[object: 1.2KB]"` |
+| Strategy      | Description                       | Example                     |
+| ------------- | --------------------------------- | --------------------------- |
+| Field removal | Remove sensitive fields entirely  | Remove `password` field     |
+| Value masking | Replace value with placeholder    | `"api_key": "[REDACTED]"`   |
+| Truncation    | Keep only first N characters      | `"query": "How do I..."`    |
+| Type-only     | Replace value with type indicator | `"data": "[object: 1.2KB]"` |
 
 ### 6.3 Redaction markers
 
 When redacting, use standard markers:
 
-| Marker | Meaning |
-|--------|---------|
-| `[REDACTED]` | Value intentionally removed |
-| `[TRUNCATED:N]` | Value truncated to N characters |
-| `[HASH:sha256:...]` | Value replaced with hash |
+| Marker               | Meaning                           |
+| -------------------- | --------------------------------- |
+| `[REDACTED]`         | Value intentionally removed       |
+| `[TRUNCATED:N]`      | Value truncated to N characters   |
+| `[HASH:sha256:...]`  | Value replaced with hash          |
 | `[TYPE:object:1234]` | Value replaced with type and size |
 
 ### 6.4 Example redacted interaction
@@ -170,6 +173,7 @@ When redacting, use standard markers:
 ### 7.1 When appropriate
 
 Verbatim capture MAY be used when:
+
 - Data is explicitly public (e.g., public API responses)
 - User has consented to full capture
 - Audit requirements mandate full records
@@ -178,6 +182,7 @@ Verbatim capture MAY be used when:
 ### 7.2 Requirements for verbatim mode
 
 If using verbatim mode:
+
 - MUST NOT include data classified as "Never include"
 - MUST document what is captured
 - MUST enforce size limits
@@ -186,23 +191,23 @@ If using verbatim mode:
 
 ### 7.3 Size limits for verbatim
 
-| Field | Maximum Size | Behavior if Exceeded |
-|-------|--------------|----------------------|
-| `input_verbatim` | 64 KB | Truncate or hash |
-| `output_verbatim` | 64 KB | Truncate or hash |
-| Total extension | 256 KB | Reject or truncate |
+| Field             | Maximum Size | Behavior if Exceeded |
+| ----------------- | ------------ | -------------------- |
+| `input_verbatim`  | 64 KB        | Truncate or hash     |
+| `output_verbatim` | 64 KB        | Truncate or hash     |
+| Total extension   | 256 KB       | Reject or truncate   |
 
 ## 8. Retention guidelines
 
 ### 8.1 Recommended retention periods
 
-| Purpose | Retention | Rationale |
-|---------|-----------|-----------|
-| Real-time verification | 1 hour | Immediate use |
-| Audit trail | 90 days | Standard audit period |
-| Compliance | Per regulation | Legal requirement |
-| Dispute resolution | 2 years | Statute of limitations |
-| Permanent record | Indefinite | Business requirement |
+| Purpose                | Retention      | Rationale              |
+| ---------------------- | -------------- | ---------------------- |
+| Real-time verification | 1 hour         | Immediate use          |
+| Audit trail            | 90 days        | Standard audit period  |
+| Compliance             | Per regulation | Legal requirement      |
+| Dispute resolution     | 2 years        | Statute of limitations |
+| Permanent record       | Indefinite     | Business requirement   |
 
 ### 8.2 Retention implementation
 
@@ -215,6 +220,7 @@ If using verbatim mode:
 ### 9.1 Personal data in receipts
 
 If receipts may contain personal data:
+
 - Treat entire receipt as potentially containing PII
 - Apply appropriate access controls
 - Support data subject access requests
@@ -223,18 +229,19 @@ If receipts may contain personal data:
 ### 9.2 Legal basis
 
 Common legal bases for PEAC receipts:
+
 - **Legitimate interest**: Fraud prevention, audit trails
 - **Contract performance**: Settlement proof
 - **Legal obligation**: Regulatory compliance
 
 ### 9.3 Data subject rights
 
-| Right | Implementation |
-|-------|----------------|
-| Access | Provide receipt copies on request |
+| Right         | Implementation                                   |
+| ------------- | ------------------------------------------------ |
+| Access        | Provide receipt copies on request                |
 | Rectification | Receipts are immutable; issue correction receipt |
-| Erasure | Delete receipts; retain hash for audit |
-| Portability | Export receipts in standard format |
+| Erasure       | Delete receipts; retain hash for audit           |
+| Portability   | Export receipts in standard format               |
 
 ## 10. Implementation guidance
 
@@ -242,8 +249,8 @@ Common legal bases for PEAC receipts:
 
 ```typescript
 const defaultPrivacyConfig = {
-  mode: 'hash-only',           // Default to hash-only
-  verbatim: false,             // No verbatim by default
+  mode: 'hash-only', // Default to hash-only
+  verbatim: false, // No verbatim by default
   redaction: {
     enabled: true,
     fields: ['api_key', 'token', 'password', 'secret'],
@@ -284,7 +291,7 @@ async function hashValue(value: unknown): Promise<string> {
   const bytes = new TextEncoder().encode(json);
   const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 ```
 
@@ -305,6 +312,7 @@ async function hashValue(value: unknown): Promise<string> {
 ### 11.3 Metadata inference
 
 Even with hash-only mode:
+
 - Tool name reveals what was called
 - Timing reveals when
 - Success/failure reveals outcome
@@ -315,6 +323,7 @@ Even with hash-only mode:
 ### 12.1 Minimum requirements
 
 A conformant implementation MUST:
+
 - Default to hash-only mode
 - Never include data classified as "Never include"
 - Enforce size limits
@@ -323,6 +332,7 @@ A conformant implementation MUST:
 ### 12.2 Recommended
 
 A conformant implementation SHOULD:
+
 - Provide configurable privacy modes
 - Support custom redaction rules
 - Log privacy-related decisions

@@ -5,7 +5,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createReceipt, createReceiptWithClaims } from '../src/receipt.js';
 import { decode, verify, generateKeypair, base64urlEncode } from '@peac/crypto';
-import type { MiddlewareConfig, RequestContext, ResponseContext, Ed25519PrivateJwk } from '../src/types.js';
+import type {
+  MiddlewareConfig,
+  RequestContext,
+  ResponseContext,
+  Ed25519PrivateJwk,
+} from '../src/types.js';
 import { HEADERS } from '@peac/kernel';
 import { MIDDLEWARE_INTERACTION_KEY } from '@peac/schema';
 
@@ -283,7 +288,8 @@ describe('createReceipt', () => {
       const config: MiddlewareConfig = {
         ...createTestConfig(),
         transport: 'pointer',
-        pointerUrlGenerator: async (receipt) => `https://receipts.example.com/${receipt.slice(-10)}`,
+        pointerUrlGenerator: async (receipt) =>
+          `https://receipts.example.com/${receipt.slice(-10)}`,
       };
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
@@ -374,9 +380,9 @@ describe('createReceipt', () => {
         keyId: 'test',
       };
 
-      await expect(createReceipt(config, createTestRequest(), createTestResponse())).rejects.toThrow(
-        /Invalid middleware configuration/
-      );
+      await expect(
+        createReceipt(config, createTestRequest(), createTestResponse())
+      ).rejects.toThrow(/Invalid middleware configuration/);
     });
   });
 });
@@ -563,7 +569,10 @@ describe('Signature Verification', () => {
     const parts = result.receipt.split('.');
     const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
     payload.iss = 'https://evil.example.com'; // Tamper
-    const tamperedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const tamperedPayload = btoa(JSON.stringify(payload))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
     const tamperedReceipt = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
 
     // Verification of tampered receipt should fail
@@ -582,9 +591,15 @@ describe('Signature Verification', () => {
 
     // Tamper with the signature - flip some bits
     const parts = result.receipt.split('.');
-    const signatureBytes = Uint8Array.from(atob(parts[2].replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    const signatureBytes = Uint8Array.from(
+      atob(parts[2].replace(/-/g, '+').replace(/_/g, '/')),
+      (c) => c.charCodeAt(0)
+    );
     signatureBytes[0] ^= 0xff; // Flip bits
-    const tamperedSig = btoa(String.fromCharCode(...signatureBytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const tamperedSig = btoa(String.fromCharCode(...signatureBytes))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
     const tamperedReceipt = `${parts[0]}.${parts[1]}.${tamperedSig}`;
 
     // Verification of tampered receipt should fail

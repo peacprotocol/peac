@@ -73,10 +73,12 @@ const httpsUrl = z
 /**
  * UUIDv7 format validation
  */
-const uuidv7 = z.string().regex(
-  /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-  'Must be UUIDv7 format'
-);
+const uuidv7 = z
+  .string()
+  .regex(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    'Must be UUIDv7 format'
+  );
 
 /**
  * Minimal interaction binding schema (for middleware use)
@@ -214,7 +216,9 @@ export function validateMinimalInteractionBinding(input: unknown): AttestationVa
  * @param binding - Object to check
  * @returns True if valid MinimalInteractionBinding
  */
-export function isMinimalInteractionBinding(binding: unknown): binding is MinimalInteractionBinding {
+export function isMinimalInteractionBinding(
+  binding: unknown
+): binding is MinimalInteractionBinding {
   return MinimalInteractionBindingSchema.safeParse(binding).success;
 }
 

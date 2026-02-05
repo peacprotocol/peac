@@ -117,10 +117,7 @@ export function selectTransport(
  * res.json(wrapped);
  * ```
  */
-export function wrapResponse<T>(
-  data: T,
-  receipt: string
-): { data: T; peac_receipt: string } {
+export function wrapResponse<T>(data: T, receipt: string): { data: T; peac_receipt: string } {
   return {
     data,
     peac_receipt: receipt,

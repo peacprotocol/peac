@@ -206,8 +206,7 @@ export async function fetchPointerWithDigest(
   const contentType = fetchResult.contentType;
   const expectedContentTypes = ['application/jose', 'application/json', 'text/plain'];
   const contentTypeWarning =
-    contentType &&
-    !expectedContentTypes.some(expected => contentType.startsWith(expected))
+    contentType && !expectedContentTypes.some((expected) => contentType.startsWith(expected))
       ? `Unexpected Content-Type: ${contentType}; expected application/jose, application/json, or text/plain`
       : undefined;
 
@@ -265,7 +264,9 @@ export async function fetchPointerWithDigest(
  * @param value - String to validate
  * @returns Validation result
  */
-function validateJwsCompactStructure(value: string): { valid: true } | { valid: false; message: string } {
+function validateJwsCompactStructure(
+  value: string
+): { valid: true } | { valid: false; message: string } {
   const segments = value.split('.');
 
   if (segments.length !== 3) {

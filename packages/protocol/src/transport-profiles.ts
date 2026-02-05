@@ -53,10 +53,7 @@ export interface BodyProfileResult {
 /**
  * Parsed transport profile (discriminated union)
  */
-export type ParsedTransportProfile =
-  | HeaderProfileResult
-  | PointerProfileResult
-  | BodyProfileResult;
+export type ParsedTransportProfile = HeaderProfileResult | PointerProfileResult | BodyProfileResult;
 
 /**
  * Transport profile parse error
@@ -71,7 +68,9 @@ export interface TransportProfileError {
 /**
  * Transport profile parse success
  */
-export interface TransportProfileSuccess<T extends ParsedTransportProfile = ParsedTransportProfile> {
+export interface TransportProfileSuccess<
+  T extends ParsedTransportProfile = ParsedTransportProfile,
+> {
   ok: true;
   result: T;
 }
@@ -80,8 +79,7 @@ export interface TransportProfileSuccess<T extends ParsedTransportProfile = Pars
  * Transport profile parse result
  */
 export type TransportProfileParseResult<T extends ParsedTransportProfile = ParsedTransportProfile> =
-  | TransportProfileSuccess<T>
-  | TransportProfileError;
+  TransportProfileSuccess<T> | TransportProfileError;
 
 // ---------------------------------------------------------------------------
 // Header Profile Parser
@@ -126,7 +124,7 @@ export function parseHeaderProfile(
     // Could be comma in base64url, but JWS compact has exactly 2 periods
     // If there are commas between periods, it's likely multiple values
     const parts = headerValue.split('.');
-    if (parts.length !== 3 || parts.some(p => p.includes(','))) {
+    if (parts.length !== 3 || parts.some((p) => p.includes(','))) {
       return {
         ok: false,
         reason: 'invalid_transport',
@@ -237,7 +235,7 @@ export function parsePointerProfile(
   // Strict: Reject unknown parameters (only sha256, url, and ext_* are valid)
   // Extension keys (ext_*) are allowed for forward-compatibility
   const ALLOWED_KEYS = new Set(['sha256', 'url']);
-  const unknownKeys = parseResult.keys.filter(k => !ALLOWED_KEYS.has(k) && !k.startsWith('ext_'));
+  const unknownKeys = parseResult.keys.filter((k) => !ALLOWED_KEYS.has(k) && !k.startsWith('ext_'));
   if (unknownKeys.length > 0) {
     return {
       ok: false,
@@ -419,9 +417,7 @@ function parseSimpleDictionary(input: string): DictionaryParseResult {
  * @param body - Parsed JSON body object
  * @returns Parse result
  */
-export function parseBodyProfile(
-  body: unknown
-): TransportProfileParseResult<BodyProfileResult> {
+export function parseBodyProfile(body: unknown): TransportProfileParseResult<BodyProfileResult> {
   if (body === null || typeof body !== 'object') {
     return {
       ok: false,
@@ -528,7 +524,8 @@ export function parseTransportProfile(context: {
   body?: unknown;
 }): TransportProfileParseResult {
   const peacReceipt = context.headers['peac-receipt'] ?? context.headers['PEAC-Receipt'];
-  const peacPointer = context.headers['peac-receipt-pointer'] ?? context.headers['PEAC-Receipt-Pointer'];
+  const peacPointer =
+    context.headers['peac-receipt-pointer'] ?? context.headers['PEAC-Receipt-Pointer'];
 
   // Header profile takes precedence
   if (peacReceipt !== undefined) {
@@ -549,6 +546,7 @@ export function parseTransportProfile(context: {
     ok: false,
     reason: 'invalid_transport',
     errorCode: 'E_VERIFY_INVALID_TRANSPORT',
-    message: 'No transport profile detected (missing PEAC-Receipt, PEAC-Receipt-Pointer, or body receipt)',
+    message:
+      'No transport profile detected (missing PEAC-Receipt, PEAC-Receipt-Pointer, or body receipt)',
   };
 }

@@ -13,6 +13,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## 2. Design goals
 
 A verifier policy MUST:
+
 - Make trust decisions explicit and auditable
 - Be safe by default (SSRF-safe, bounded)
 - Support offline verification
@@ -24,6 +25,7 @@ A verifier policy MUST:
 ### 3.1 What cryptographic verification proves
 
 A valid PEAC signature proves:
+
 - The receipt was signed by a key with the declared `kid`
 - The receipt has not been modified since signing
 - The issuer controlled the private key at signing time
@@ -31,6 +33,7 @@ A valid PEAC signature proves:
 ### 3.2 What cryptographic verification does NOT prove
 
 A valid signature does NOT prove:
+
 - The issuer is legitimate
 - The issuer is who they claim to be
 - The receipt contents are true
@@ -39,6 +42,7 @@ A valid signature does NOT prove:
 ### 3.3 Trust is out-of-band
 
 By default, trust in an issuer comes from:
+
 - Existing business relationship
 - DNS ownership (issuer URL matches known domain)
 - Explicit allowlist configuration
@@ -50,14 +54,14 @@ A verifier policy is a JSON object.
 
 ### 4.1 Top-level fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `policy_version` | string | REQUIRED | Must be `peac-verifier-policy/0.1` |
-| `mode` | string | REQUIRED | Verification mode |
-| `issuer_allowlist` | array | OPTIONAL | Allowed issuer origins |
-| `pinned_keys` | array | OPTIONAL | Pinned key fingerprints |
-| `network` | object | REQUIRED | Network security settings |
-| `limits` | object | REQUIRED | Resource limits |
+| Field              | Type   | Required | Description                        |
+| ------------------ | ------ | -------- | ---------------------------------- |
+| `policy_version`   | string | REQUIRED | Must be `peac-verifier-policy/0.1` |
+| `mode`             | string | REQUIRED | Verification mode                  |
+| `issuer_allowlist` | array  | OPTIONAL | Allowed issuer origins             |
+| `pinned_keys`      | array  | OPTIONAL | Pinned key fingerprints            |
+| `network`          | object | REQUIRED | Network security settings          |
+| `limits`           | object | REQUIRED | Resource limits                    |
 
 ### 4.2 Minimal policy example
 
@@ -90,6 +94,7 @@ A verifier policy is a JSON object.
 - If required key unavailable, fail with `key_not_found`
 
 Use cases:
+
 - Dispute resolution
 - Air-gapped environments
 - Deterministic verification
@@ -101,6 +106,7 @@ Use cases:
 - If network blocked by policy, fail with `key_fetch_blocked`
 
 Use cases:
+
 - Normal operation with caching
 - Graceful degradation
 
@@ -110,6 +116,7 @@ Use cases:
 - Still SSRF-safe and bounded
 
 Use cases:
+
 - First-time verification
 - Unknown issuers
 
@@ -146,10 +153,12 @@ Allowlist entries are **issuer origins** (scheme + host + optional port), NOT ho
 ### 6.4 Behavior
 
 If `issuer_allowlist` is present and non-empty:
+
 - Receipt issuer MUST match an entry
 - If no match, verification fails with `issuer_not_allowed`
 
 If `issuer_allowlist` is absent or empty:
+
 - All issuers are potentially accepted
 - Other policy checks still apply
 
@@ -179,10 +188,10 @@ Accept only specific keys for specific issuers.
 
 ### 7.3 Pin fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `issuer` | string | REQUIRED | Issuer origin (`https://host[:port]`) |
-| `kid` | string | OPTIONAL | Specific key ID |
+| Field                   | Type   | Required | Description                                     |
+| ----------------------- | ------ | -------- | ----------------------------------------------- |
+| `issuer`                | string | REQUIRED | Issuer origin (`https://host[:port]`)           |
+| `kid`                   | string | OPTIONAL | Specific key ID                                 |
 | `jwk_thumbprint_sha256` | string | REQUIRED | RFC 7638 JWK thumbprint, base64url (no padding) |
 
 ### 7.4 Thumbprint calculation (RFC 7638)
@@ -220,6 +229,7 @@ thumbprint, _ := jwk.Thumbprint(key, crypto.SHA256)
 ### 7.5 Matching behavior
 
 When verifying a receipt from issuer X:
+
 1. Find all pins for issuer X
 2. If pins exist for X:
    - Receipt's signing key MUST match at least one pin
@@ -232,15 +242,16 @@ When verifying a receipt from issuer X:
 
 ### 8.1 Required settings
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `https_only` | boolean | true | Reject non-HTTPS |
-| `block_private_ips` | boolean | true | Block private ranges |
-| `allow_redirects` | boolean | false | Allow HTTP redirects |
+| Setting             | Type    | Default | Description          |
+| ------------------- | ------- | ------- | -------------------- |
+| `https_only`        | boolean | true    | Reject non-HTTPS     |
+| `block_private_ips` | boolean | true    | Block private ranges |
+| `allow_redirects`   | boolean | false   | Allow HTTP redirects |
 
 ### 8.2 SSRF protections
 
 When `block_private_ips` is true, block:
+
 - `10.0.0.0/8`
 - `172.16.0.0/12`
 - `192.168.0.0/16`
@@ -252,6 +263,7 @@ When `block_private_ips` is true, block:
 ### 8.3 Redirect handling
 
 When `allow_redirects` is true:
+
 - Limit to `limits.max_redirects`
 - Same-origin redirects only (RECOMMENDED)
 - Never downgrade HTTPS to HTTP
@@ -260,14 +272,14 @@ When `allow_redirects` is true:
 
 ### 9.1 Required limits
 
-| Limit | Type | Default | Description |
-|-------|------|---------|-------------|
-| `max_receipt_bytes` | integer | 262144 | Max receipt size |
-| `max_jwks_bytes` | integer | 65536 | Max JWKS response |
-| `max_jwks_keys` | integer | 20 | Max keys in JWKS |
-| `max_redirects` | integer | 3 | Max HTTP redirects |
-| `fetch_timeout_ms` | integer | 5000 | Fetch timeout |
-| `max_extension_bytes` | integer | 65536 | Max extension data |
+| Limit                 | Type    | Default | Description        |
+| --------------------- | ------- | ------- | ------------------ |
+| `max_receipt_bytes`   | integer | 262144  | Max receipt size   |
+| `max_jwks_bytes`      | integer | 65536   | Max JWKS response  |
+| `max_jwks_keys`       | integer | 20      | Max keys in JWKS   |
+| `max_redirects`       | integer | 3       | Max HTTP redirects |
+| `fetch_timeout_ms`    | integer | 5000    | Fetch timeout      |
+| `max_extension_bytes` | integer | 65536   | Max extension data |
 
 ### 9.2 Fail-closed
 
@@ -284,6 +296,7 @@ Dispute bundles MUST include issuer JWKS for contained receipts.
 ### 10.2 Local key cache
 
 Verifiers MAY cache JWKS from previous fetches:
+
 - Cache keyed by issuer origin
 - Respect HTTP cache headers
 - Invalidate on rotation signals
@@ -291,6 +304,7 @@ Verifiers MAY cache JWKS from previous fetches:
 ### 10.3 Policy packs
 
 Enterprises MAY distribute "policy packs" containing:
+
 - Verifier policy JSON
 - Pinned keys for approved issuers
 - Optional JWKS snapshots
@@ -305,10 +319,7 @@ Policy packs SHOULD be signed by the enterprise.
 {
   "policy_version": "peac-verifier-policy/0.1",
   "mode": "offline_only",
-  "issuer_allowlist": [
-    "https://api.internal.example.com",
-    "https://billing.example.com"
-  ],
+  "issuer_allowlist": ["https://api.internal.example.com", "https://billing.example.com"],
   "pinned_keys": [
     {
       "issuer": "https://api.internal.example.com",
@@ -363,18 +374,19 @@ Policy packs SHOULD be signed by the enterprise.
 
 Verifiers SHOULD display clear trust indicators:
 
-| Scenario | Message |
-|----------|---------|
-| Valid + pinned | "Verified (pinned issuer)" |
-| Valid + allowlisted | "Verified (allowed issuer)" |
-| Valid + unknown | "Signature valid (issuer not verified)" |
-| Invalid | "Verification failed: [reason]" |
+| Scenario            | Message                                 |
+| ------------------- | --------------------------------------- |
+| Valid + pinned      | "Verified (pinned issuer)"              |
+| Valid + allowlisted | "Verified (allowed issuer)"             |
+| Valid + unknown     | "Signature valid (issuer not verified)" |
+| Invalid             | "Verification failed: [reason]"         |
 
 ## 13. Security considerations
 
 ### 13.1 Pin rotation
 
 When issuers rotate keys:
+
 - Update pins before old key is removed
 - Maintain overlap period in pins
 - Test verification before removing old pins
@@ -382,14 +394,15 @@ When issuers rotate keys:
 ### 13.2 Compromised pins
 
 If a pinned key is compromised:
+
 - Remove pin immediately
 - Add new pin for replacement key
 - Old receipts become unverifiable (correct behavior)
 
 ### 13.3 Allowlist vs pins
 
-| Approach | Trust Level | Operational Burden |
-|----------|-------------|-------------------|
-| Allowlist only | Medium (DNS trust) | Low |
-| Pins only | High (explicit keys) | High |
-| Both | Highest | Medium |
+| Approach       | Trust Level          | Operational Burden |
+| -------------- | -------------------- | ------------------ |
+| Allowlist only | Medium (DNS trust)   | Low                |
+| Pins only      | High (explicit keys) | High               |
+| Both           | Highest              | Medium             |

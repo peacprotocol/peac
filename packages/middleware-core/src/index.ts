@@ -48,7 +48,14 @@ export type {
 } from './types.js';
 
 // Configuration
-export { validateConfig, validateConfigAsync, ConfigError, CONFIG_DEFAULTS, MAX_PATH_LENGTH, applyDefaults } from './config.js';
+export {
+  validateConfig,
+  validateConfigAsync,
+  ConfigError,
+  CONFIG_DEFAULTS,
+  MAX_PATH_LENGTH,
+  applyDefaults,
+} from './config.js';
 
 // Transport
 export {

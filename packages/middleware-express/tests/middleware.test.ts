@@ -5,7 +5,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import express, { type Express, type Request, type Response } from 'express';
 import request from 'supertest';
-import { peacMiddleware, peacMiddlewareSync, getReceiptFromResponse, hasPeacContext } from '../src/middleware.js';
+import {
+  peacMiddleware,
+  peacMiddlewareSync,
+  getReceiptFromResponse,
+  hasPeacContext,
+} from '../src/middleware.js';
 import type { ExpressMiddlewareConfig } from '../src/middleware.js';
 import { base64urlEncode, decode } from '@peac/crypto';
 import type { Ed25519PrivateJwk } from '@peac/middleware-core';
@@ -65,9 +70,7 @@ describe('peacMiddleware', () => {
     it('should add PEAC-Receipt header to JSON responses', async () => {
       const app = createTestApp(createTestConfig());
 
-      const response = await request(app)
-        .get('/api/data')
-        .expect(200);
+      const response = await request(app).get('/api/data').expect(200);
 
       expect(response.headers['peac-receipt']).toBeDefined();
 
@@ -79,9 +82,7 @@ describe('peacMiddleware', () => {
     it('should include correct issuer in receipt', async () => {
       const app = createTestApp(createTestConfig());
 
-      const response = await request(app)
-        .get('/api/data')
-        .expect(200);
+      const response = await request(app).get('/api/data').expect(200);
 
       const receipt = response.headers['peac-receipt'];
       const { payload } = decode(receipt);
@@ -92,9 +93,7 @@ describe('peacMiddleware', () => {
       const config = { ...createTestConfig(), keyId: 'custom-key-id' };
       const app = createTestApp(config);
 
-      const response = await request(app)
-        .get('/api/data')
-        .expect(200);
+      const response = await request(app).get('/api/data').expect(200);
 
       const receipt = response.headers['peac-receipt'];
       const { header } = decode(receipt);
@@ -117,10 +116,7 @@ describe('peacMiddleware', () => {
     it('should work with POST requests', async () => {
       const app = createTestApp(createTestConfig());
 
-      const response = await request(app)
-        .post('/api/echo')
-        .send({ message: 'hello' })
-        .expect(200);
+      const response = await request(app).post('/api/echo').send({ message: 'hello' }).expect(200);
 
       expect(response.headers['peac-receipt']).toBeDefined();
       expect(response.body).toEqual({ echo: { message: 'hello' } });
@@ -157,9 +153,7 @@ describe('peacMiddleware', () => {
       };
       const app = createTestApp(config);
 
-      const response = await request(app)
-        .get('/api/data')
-        .expect(200);
+      const response = await request(app).get('/api/data').expect(200);
 
       const receipt = response.headers['peac-receipt'];
       const { payload } = decode(receipt);
@@ -173,10 +167,7 @@ describe('peacMiddleware', () => {
       };
       const app = createTestApp(config);
 
-      const response = await request(app)
-        .get('/api/data')
-        .set('X-User-Id', '12345')
-        .expect(200);
+      const response = await request(app).get('/api/data').set('X-User-Id', '12345').expect(200);
 
       const receipt = response.headers['peac-receipt'];
       const { payload } = decode(receipt);
@@ -188,9 +179,7 @@ describe('peacMiddleware', () => {
     it('should use header transport by default', async () => {
       const app = createTestApp(createTestConfig());
 
-      const response = await request(app)
-        .get('/api/data')
-        .expect(200);
+      const response = await request(app).get('/api/data').expect(200);
 
       // Receipt in header
       expect(response.headers['peac-receipt']).toBeDefined();
@@ -205,9 +194,7 @@ describe('peacMiddleware', () => {
       };
       const app = createTestApp(config);
 
-      const response = await request(app)
-        .get('/api/data')
-        .expect(200);
+      const response = await request(app).get('/api/data').expect(200);
 
       // No receipt in header
       expect(response.headers['peac-receipt']).toBeUndefined();
@@ -227,9 +214,7 @@ describe('peacMiddleware', () => {
 
       vi.useRealTimers(); // Need real timers for async
 
-      const response = await request(app)
-        .get('/api/data')
-        .expect(200);
+      const response = await request(app).get('/api/data').expect(200);
 
       // Pointer header instead of receipt
       expect(response.headers['peac-receipt']).toBeUndefined();
@@ -326,9 +311,7 @@ describe('peacMiddlewareSync', () => {
     app.use(peacMiddlewareSync(createTestConfig()));
     app.get('/api/data', (_req, res) => res.json({ data: 'test' }));
 
-    const response = await request(app)
-      .get('/api/data')
-      .expect(200);
+    const response = await request(app).get('/api/data').expect(200);
 
     expect(response.headers['peac-receipt']).toBeDefined();
   });

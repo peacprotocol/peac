@@ -359,8 +359,7 @@ function isInCIDR(ip: IPv4Address, cidr: string): boolean {
   if (isNaN(maskBits) || maskBits < 0 || maskBits > 32) return false;
 
   // Convert to 32-bit integers
-  const ipNum =
-    (ip.octets[0] << 24) | (ip.octets[1] << 16) | (ip.octets[2] << 8) | ip.octets[3];
+  const ipNum = (ip.octets[0] << 24) | (ip.octets[1] << 16) | (ip.octets[2] << 8) | ip.octets[3];
   const rangeNum =
     (range.octets[0] << 24) | (range.octets[1] << 16) | (range.octets[2] << 8) | range.octets[3];
 
@@ -383,13 +382,20 @@ function isIPv6Loopback(ip: string): boolean {
  */
 function isIPv6LinkLocal(ip: string): boolean {
   const normalized = ip.toLowerCase();
-  return normalized.startsWith('fe8') || normalized.startsWith('fe9') || normalized.startsWith('fea') || normalized.startsWith('feb');
+  return (
+    normalized.startsWith('fe8') ||
+    normalized.startsWith('fe9') ||
+    normalized.startsWith('fea') ||
+    normalized.startsWith('feb')
+  );
 }
 
 /**
  * Check if an IP address is private/blocked
  */
-export function isBlockedIP(ip: string): { blocked: true; reason: 'private_ip' | 'loopback' | 'link_local' } | { blocked: false } {
+export function isBlockedIP(
+  ip: string
+): { blocked: true; reason: 'private_ip' | 'loopback' | 'link_local' } | { blocked: false } {
   // Handle IPv4-mapped IPv6 addresses
   const ipv4Match = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
   const effectiveIP = ipv4Match ? ipv4Match[1] : ip;
@@ -458,7 +464,9 @@ interface DNSResolutionFailure {
  * In Node.js environments, this uses dns.resolve.
  * In browser environments, we cannot check IPs before fetch.
  */
-async function resolveHostname(hostname: string): Promise<DNSResolutionResult | DNSResolutionFailure> {
+async function resolveHostname(
+  hostname: string
+): Promise<DNSResolutionResult | DNSResolutionFailure> {
   // Node.js environment detection
   if (typeof process !== 'undefined' && process.versions?.node) {
     try {

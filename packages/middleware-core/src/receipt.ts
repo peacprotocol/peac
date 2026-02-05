@@ -139,9 +139,7 @@ function processPath(path: string, mode: 'minimal' | 'full'): string {
  *
  * Derives audience from the request host or origin header (case-insensitive).
  */
-function extractAudience(
-  normalizedHeaders: Record<string, string | string[] | undefined>
-): string {
+function extractAudience(normalizedHeaders: Record<string, string | string[] | undefined>): string {
   // Try to get from Host header (case-insensitive)
   const host = getHeader(normalizedHeaders, 'host');
   if (host) {

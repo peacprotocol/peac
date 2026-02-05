@@ -26,16 +26,18 @@ PEAC includes multiple artifact classes. This policy defines commitments for eac
 ### 3.1 Format versioning
 
 A "format" MUST declare a version identifier in one of:
+
 - A media-type-like token (e.g., `peac-receipt/0.1`)
 - A top-level `*_version` field (e.g., `report_version: "peac-verification-report/0.1"`)
 
 A format version implies:
+
 - Backward-compatible additions MAY occur within a minor line (e.g., `0.1` to `0.1` with added OPTIONAL fields).
 - Breaking changes MUST increment the major component (e.g., `0.1` to `1.0`, or `0.x` to `0.y` only if explicitly marked "pre-stable" below).
 
 ### 3.2 Pre-stable caveat
 
-While PEAC is pre-1.0, not all artifacts are equally stable. PEAC therefore uses a *tiered stability* model. Each artifact class is classified as:
+While PEAC is pre-1.0, not all artifacts are equally stable. PEAC therefore uses a _tiered stability_ model. Each artifact class is classified as:
 
 - **FROZEN**: no breaking changes expected prior to 1.0, except for security emergencies.
 - **STABLE**: backwards-compatible changes only; breaking changes require a new major format version.
@@ -50,6 +52,7 @@ While PEAC is pre-1.0, not all artifacts are equally stable. PEAC therefore uses
 - Tier: **FROZEN**
 
 Commitments:
+
 - Implementations MUST accept `peac-receipt/0.1` receipts indefinitely.
 - New OPTIONAL claims MAY be added, but MUST NOT change the meaning of existing claims.
 - Existing REQUIRED claims MUST NOT be removed or redefined.
@@ -61,6 +64,7 @@ Commitments:
 - Tier: **STABLE**
 
 Commitments:
+
 - Bundle verification MUST remain possible with tools that implement the bundle version declared in the bundle manifest.
 - Bundles intended for offline verification MUST include sufficient issuer key material as specified by current bundle rules.
 - Any breaking change MUST be a new bundle format version and MUST include explicit migration guidance.
@@ -72,6 +76,7 @@ Commitments:
 - Canonical schema defined in `VERIFICATION-REPORT-FORMAT.md`
 
 Commitments:
+
 - Report schema changes MUST be backwards compatible within the same report version.
 - Any new fields MUST be OPTIONAL and MUST NOT change the semantics of existing fields.
 - Any breaking change MUST increment the report version identifier.
@@ -83,6 +88,7 @@ Commitments:
 - Canonical schema defined in `CONFORMANCE-REPORT-FORMAT.md`
 
 Commitments:
+
 - Same as verification reports: additions MUST be backwards compatible; breaking requires new report version.
 
 ### 4.5 Transport profiles (behavior)
@@ -90,6 +96,7 @@ Commitments:
 - Tier: **STABLE**
 
 Commitments:
+
 - Header/Body/Pointer profiles MUST preserve verification equivalence: a receipt delivered via any profile MUST verify to the same claims bytes.
 - Size limits and fallback behaviors MAY evolve with clearer operational guidance, but MUST NOT break well-formed flows that comply with the published budgets.
 
@@ -98,6 +105,7 @@ Commitments:
 - Tier: **STABLE**
 
 Commitments:
+
 - Security limits MAY tighten over time (e.g., stricter SSRF protections), but MUST NOT loosen in ways that expand attack surface without a major policy version bump.
 - The default posture SHOULD remain "client-side verification preferred" where feasible.
 
@@ -107,6 +115,7 @@ Commitments:
 - The list of well-known kinds is Tier: **EVOLVING**.
 
 Commitments:
+
 - Reservation rules MUST NOT change (to prevent squatting).
 - New well-known kinds MAY be added, but old kinds MUST NOT be redefined.
 
@@ -115,6 +124,7 @@ Commitments:
 - Tier: **EVOLVING** (pre-1.0 SDK ergonomics may change)
 
 Commitments:
+
 - SDKs SHOULD provide deprecation warnings for renamed APIs.
 - Breaking API changes SHOULD be minimized and documented in release notes.
 - Wire and verification correctness MUST NOT be compromised by API changes.
@@ -122,6 +132,7 @@ Commitments:
 ## 5. Deprecation policy
 
 If an artifact or behavior is deprecated:
+
 - It MUST be marked deprecated in docs and release notes.
 - It MUST remain supported for at least one minor release line after deprecation announcement, unless a security vulnerability requires removal.
 - A migration path MUST be documented.
@@ -129,6 +140,7 @@ If an artifact or behavior is deprecated:
 ## 6. Security emergency exception
 
 In case of a critical vulnerability:
+
 - PEAC MAY ship a breaking change within a "frozen" line ONLY if necessary to prevent exploitation.
 - Such changes MUST be explicitly called out as a security emergency in release notes.
 - When possible, both old and new behaviors SHOULD be supported with opt-in hardening before full enforcement.
@@ -136,12 +148,14 @@ In case of a critical vulnerability:
 ## 7. Change communication requirements
 
 Every release that touches:
+
 - receipt verification semantics,
 - verifier security constraints,
 - transport profile constraints,
 - privacy defaults,
 
 MUST include:
+
 - A "Behavior Changes" section in release notes.
 - A short "Upgrade Impact" note with concrete examples.
 
@@ -156,26 +170,28 @@ MUST include:
 ## 9. Practical guidance
 
 **If you are integrating PEAC for production today, treat these as "must not change":**
+
 - `peac-receipt/0.1` parsing and verification
 - dispute bundle offline verification rules
 - verification report schema for `peac-verification-report/0.1`
 - transport profile equivalence guarantees
 
 **Treat these as "may evolve":**
+
 - SDK convenience APIs
 - additional optional claims and extensions
 - verifier UX and tooling ergonomics
 
 ## 10. Summary table
 
-| Artifact | Tier | Change Policy |
-|----------|------|---------------|
-| `peac-receipt/0.1` | FROZEN | No breaking changes until v1.0 |
-| `peac-bundle/0.1` | STABLE | Backwards-compatible only |
-| `peac-verification-report/0.1` | STABLE | Backwards-compatible only |
-| `peac-conformance-report/0.1` | STABLE | Backwards-compatible only |
-| Transport profiles | STABLE | Profile equivalence guaranteed |
-| Verifier security model | STABLE | May tighten, not loosen |
-| Registry namespaces | FROZEN | Reservation rules fixed |
-| Well-known kinds | EVOLVING | Additions only |
-| SDK APIs | EVOLVING | May change with notice |
+| Artifact                       | Tier     | Change Policy                  |
+| ------------------------------ | -------- | ------------------------------ |
+| `peac-receipt/0.1`             | FROZEN   | No breaking changes until v1.0 |
+| `peac-bundle/0.1`              | STABLE   | Backwards-compatible only      |
+| `peac-verification-report/0.1` | STABLE   | Backwards-compatible only      |
+| `peac-conformance-report/0.1`  | STABLE   | Backwards-compatible only      |
+| Transport profiles             | STABLE   | Profile equivalence guaranteed |
+| Verifier security model        | STABLE   | May tighten, not loosen        |
+| Registry namespaces            | FROZEN   | Reservation rules fixed        |
+| Well-known kinds               | EVOLVING | Additions only                 |
+| SDK APIs                       | EVOLVING | May change with notice         |

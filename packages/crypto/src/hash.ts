@@ -24,7 +24,7 @@ export async function sha256Hex(data: Uint8Array | string): Promise<string> {
   if (typeof globalThis.crypto?.subtle?.digest === 'function') {
     const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', bytes);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 
   // Fallback to Node.js crypto
@@ -34,7 +34,9 @@ export async function sha256Hex(data: Uint8Array | string): Promise<string> {
     hash.update(bytes);
     return hash.digest('hex');
   } catch {
-    throw new Error('No SHA-256 implementation available. Ensure Web Crypto API or Node.js crypto is available.');
+    throw new Error(
+      'No SHA-256 implementation available. Ensure Web Crypto API or Node.js crypto is available.'
+    );
   }
 }
 
@@ -82,7 +84,7 @@ export function hexToBytes(hex: string): Uint8Array {
   if (!matches) {
     throw new Error('Invalid hex string');
   }
-  return new Uint8Array(matches.map(byte => parseInt(byte, 16)));
+  return new Uint8Array(matches.map((byte) => parseInt(byte, 16)));
 }
 
 /**
@@ -93,7 +95,7 @@ export function hexToBytes(hex: string): Uint8Array {
  */
 export function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes)
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 }
 

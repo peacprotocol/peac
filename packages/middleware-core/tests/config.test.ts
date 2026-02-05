@@ -50,7 +50,8 @@ describe('validateConfig', () => {
       const config: MiddlewareConfig = {
         ...createValidConfig(),
         transport: 'pointer',
-        pointerUrlGenerator: async (receipt) => `https://receipts.example.com/${receipt.slice(0, 10)}`,
+        pointerUrlGenerator: async (receipt) =>
+          `https://receipts.example.com/${receipt.slice(0, 10)}`,
       };
       expect(() => validateConfig(config)).not.toThrow();
     });
@@ -132,9 +133,7 @@ describe('validateConfig', () => {
       };
 
       const error = getConfigError(() => validateConfig(config));
-      expect(error.errors).toContainEqual(
-        expect.objectContaining({ field: 'signingKey.kty' })
-      );
+      expect(error.errors).toContainEqual(expect.objectContaining({ field: 'signingKey.kty' }));
     });
 
     it('should reject wrong curve', () => {
@@ -147,9 +146,7 @@ describe('validateConfig', () => {
       };
 
       const error = getConfigError(() => validateConfig(config));
-      expect(error.errors).toContainEqual(
-        expect.objectContaining({ field: 'signingKey.crv' })
-      );
+      expect(error.errors).toContainEqual(expect.objectContaining({ field: 'signingKey.crv' }));
     });
 
     it('should reject invalid base64url in x', () => {
@@ -162,9 +159,7 @@ describe('validateConfig', () => {
       };
 
       const error = getConfigError(() => validateConfig(config));
-      expect(error.errors).toContainEqual(
-        expect.objectContaining({ field: 'signingKey.x' })
-      );
+      expect(error.errors).toContainEqual(expect.objectContaining({ field: 'signingKey.x' }));
     });
 
     it('should reject wrong length public key', () => {
@@ -192,9 +187,7 @@ describe('validateConfig', () => {
       const config = { ...createValidConfig(), signingKey: key };
 
       const error = getConfigError(() => validateConfig(config));
-      expect(error.errors).toContainEqual(
-        expect.objectContaining({ field: 'signingKey.d' })
-      );
+      expect(error.errors).toContainEqual(expect.objectContaining({ field: 'signingKey.d' }));
     });
 
     it('should reject wrong length private key', () => {
@@ -275,9 +268,7 @@ describe('validateConfig', () => {
       };
 
       const error = getConfigError(() => validateConfig(config));
-      expect(error.errors).toContainEqual(
-        expect.objectContaining({ field: 'transport' })
-      );
+      expect(error.errors).toContainEqual(expect.objectContaining({ field: 'transport' }));
     });
 
     it('should reject negative maxHeaderSize', () => {

@@ -31,7 +31,7 @@ export class ConfigError extends Error {
   readonly errors: ConfigValidationError[];
 
   constructor(errors: ConfigValidationError[]) {
-    const message = errors.map(e => `${e.field}: ${e.message}`).join('; ');
+    const message = errors.map((e) => `${e.field}: ${e.message}`).join('; ');
     super(`Invalid middleware configuration: ${message}`);
     this.name = 'ConfigError';
     this.errors = errors;
@@ -53,10 +53,7 @@ function isValidHttpsUrl(url: string): boolean {
 /**
  * Validate Ed25519 JWK private key
  */
-function validateSigningKey(
-  key: unknown,
-  errors: ConfigValidationError[]
-): void {
+function validateSigningKey(key: unknown, errors: ConfigValidationError[]): void {
   if (!key || typeof key !== 'object') {
     errors.push({ field: 'signingKey', message: 'must be an object' });
     return;
@@ -186,7 +183,10 @@ export function validateConfig(config: MiddlewareConfig): void {
   }
 
   // Validate pointerUrlGenerator is a function (if provided)
-  if (config.pointerUrlGenerator !== undefined && typeof config.pointerUrlGenerator !== 'function') {
+  if (
+    config.pointerUrlGenerator !== undefined &&
+    typeof config.pointerUrlGenerator !== 'function'
+  ) {
     errors.push({ field: 'pointerUrlGenerator', message: 'must be a function' });
   }
 
@@ -230,7 +230,12 @@ export async function validateConfigAsync(config: MiddlewareConfig): Promise<voi
 /**
  * Apply default values to configuration
  */
-export function applyDefaults(config: MiddlewareConfig): Required<Pick<MiddlewareConfig, 'expiresIn' | 'transport' | 'maxHeaderSize' | 'interactionBinding'>> & MiddlewareConfig {
+export function applyDefaults(
+  config: MiddlewareConfig
+): Required<
+  Pick<MiddlewareConfig, 'expiresIn' | 'transport' | 'maxHeaderSize' | 'interactionBinding'>
+> &
+  MiddlewareConfig {
   return {
     ...config,
     expiresIn: config.expiresIn ?? CONFIG_DEFAULTS.expiresIn,

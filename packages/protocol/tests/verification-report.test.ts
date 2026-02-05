@@ -204,7 +204,7 @@ describe('VerificationReportBuilder', () => {
       expect(report.checks.length).toBe(11);
 
       // Check IDs in expected order
-      const checkIds = report.checks.map(c => c.id);
+      const checkIds = report.checks.map((c) => c.id);
       expect(checkIds).toEqual([
         'jws.parse',
         'limits.receipt_bytes',
@@ -244,12 +244,12 @@ describe('VerificationReportBuilder', () => {
       expect(report.result.reason).toBe('signature_invalid');
 
       // Checks before jws.signature passed
-      expect(report.checks.find(c => c.id === 'jws.parse')?.status).toBe('pass');
-      expect(report.checks.find(c => c.id === 'jws.protected_header')?.status).toBe('pass');
-      expect(report.checks.find(c => c.id === 'key.resolve')?.status).toBe('pass');
+      expect(report.checks.find((c) => c.id === 'jws.parse')?.status).toBe('pass');
+      expect(report.checks.find((c) => c.id === 'jws.protected_header')?.status).toBe('pass');
+      expect(report.checks.find((c) => c.id === 'key.resolve')?.status).toBe('pass');
 
       // Signature check failed
-      expect(report.checks.find(c => c.id === 'jws.signature')?.status).toBe('fail');
+      expect(report.checks.find((c) => c.id === 'jws.signature')?.status).toBe('fail');
     });
 
     it('buildSuccessReport should create proper success report', async () => {

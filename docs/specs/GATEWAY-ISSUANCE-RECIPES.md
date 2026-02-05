@@ -18,6 +18,7 @@ Sections marked **ILLUSTRATIVE** provide implementation sketches.
 Gateway issuance attaches PEAC receipts at the network edge, before or after traffic reaches application servers.
 
 Benefits:
+
 - No application code changes required
 - Single deployment point for platform teams
 - Uniform receipt policy across services
@@ -29,6 +30,7 @@ Benefits:
 A gateway issuer MUST NOT assert facts it did not observe.
 
 If the gateway cannot safely observe:
+
 - Full response bytes
 - Origin-authenticated identity
 - Stable request principal
@@ -38,6 +40,7 @@ Then it MUST NOT include claims that imply those facts.
 ### 3.2 Required behaviors
 
 A gateway issuer MUST:
+
 - Sign receipts using an issuer key controlled by the issuer domain
 - Publish issuer public keys at `/.well-known/peac-issuer.json`
 - Adhere to transport profiles and size budgets
@@ -50,6 +53,7 @@ Gateways MUST implement at least one transport profile.
 RECOMMENDED: Pointer profile for receipts that may exceed header limits.
 
 If using header delivery:
+
 - Gateways MUST enforce maximum header size
 - Gateways MUST fall back to pointer profile when exceeded
 
@@ -57,25 +61,26 @@ If using header delivery:
 
 ### 4.1 Safe to include
 
-| Claim Type | Examples | Notes |
-|------------|----------|-------|
-| Request metadata | Method, path, status | Always observable |
-| Content digests | SHA-256 of body | If body observed |
-| Timing | Request/response timestamps | Always observable |
-| Policy decisions | Allow/deny | If gateway enforces |
-| Error codes | HTTP status | Always observable |
+| Claim Type       | Examples                    | Notes               |
+| ---------------- | --------------------------- | ------------------- |
+| Request metadata | Method, path, status        | Always observable   |
+| Content digests  | SHA-256 of body             | If body observed    |
+| Timing           | Request/response timestamps | Always observable   |
+| Policy decisions | Allow/deny                  | If gateway enforces |
+| Error codes      | HTTP status                 | Always observable   |
 
 ### 4.2 Requires caution
 
-| Claim Type | Risk | Mitigation |
-|------------|------|------------|
-| Full body content | Size, secrets | Use digest or truncate |
-| Request headers | Auth tokens | Redact sensitive headers |
-| Client identity | Privacy | Use opaque identifiers |
+| Claim Type        | Risk          | Mitigation               |
+| ----------------- | ------------- | ------------------------ |
+| Full body content | Size, secrets | Use digest or truncate   |
+| Request headers   | Auth tokens   | Redact sensitive headers |
+| Client identity   | Privacy       | Use opaque identifiers   |
 
 ### 4.3 Content digests with truncation
 
 If computing a digest over large or streaming responses:
+
 - Use truncation strategy: `sha-256:trunc-64k` or `sha-256:trunc-1m`
 - Disclose truncation in the evidence field
 - Example: `{"alg": "sha-256:trunc-64k", "value": "7d8f..."}`
@@ -85,6 +90,7 @@ If computing a digest over large or streaming responses:
 ### 5.1 Private key protection
 
 Gateway private keys MUST be protected as production secrets:
+
 - Never hardcode in source control
 - Store in platform secrets (worker secrets, KMS, vault)
 - Rotate per issuer ops baseline
@@ -92,6 +98,7 @@ Gateway private keys MUST be protected as production secrets:
 ### 5.2 Signing service pattern
 
 If the edge platform cannot safely store private keys:
+
 1. Gateway forwards bounded signing request to internal signer
 2. Signer validates request and returns receipt JWS
 3. Gateway attaches receipt to response
@@ -160,14 +167,14 @@ export default {
     }
 
     return newResponse;
-  }
+  },
 };
 
 // Helper functions (pseudocode)
 async function sha256Hex(bytes) {
   const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
   return Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 }
 
@@ -303,11 +310,11 @@ static_resources:
         - filters:
             - name: envoy.filters.network.http_connection_manager
               typed_config:
-                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 http_filters:
                   - name: envoy.filters.http.ext_proc
                     typed_config:
-                      "@type": type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExternalProcessor
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExternalProcessor
                       grpc_service:
                         envoy_grpc:
                           cluster_name: peac_signer
@@ -316,7 +323,7 @@ static_resources:
                         response_body_mode: NONE
                   - name: envoy.filters.http.router
                     typed_config:
-                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
     - name: peac_signer
       connect_timeout: 0.25s
@@ -403,6 +410,7 @@ func (p *peacProcessor) Process(stream extproc.ExternalProcessor_ProcessServer) 
 ### 9.1 Requirements
 
 When using `PEAC-Receipt-Pointer`:
+
 - MUST include SHA-256 digest binding
 - Digest MUST cover exact receipt JWS bytes
 - URL MUST be HTTPS
@@ -410,15 +418,16 @@ When using `PEAC-Receipt-Pointer`:
 
 ### 9.2 Storage options
 
-| Storage | Pros | Cons |
-|---------|------|------|
-| CDN (Cloudflare R2, S3) | Fast, scalable | Cost |
-| KV store | Simple | Size limits |
-| Dedicated receipt service | Control | Complexity |
+| Storage                   | Pros           | Cons        |
+| ------------------------- | -------------- | ----------- |
+| CDN (Cloudflare R2, S3)   | Fast, scalable | Cost        |
+| KV store                  | Simple         | Size limits |
+| Dedicated receipt service | Control        | Complexity  |
 
 ### 9.3 Cache headers
 
 Receipt storage SHOULD return:
+
 ```
 Cache-Control: public, max-age=31536000, immutable
 Content-Type: application/jose
@@ -428,29 +437,31 @@ Content-Type: application/jose
 
 ### 10.1 Gateway recommended
 
-| Scenario | Why Gateway |
-|----------|-------------|
-| Fast pilot deployment | No code changes |
-| Uniform receipt policy | Single config point |
-| Legacy services | Can't modify code |
+| Scenario                | Why Gateway         |
+| ----------------------- | ------------------- |
+| Fast pilot deployment   | No code changes     |
+| Uniform receipt policy  | Single config point |
+| Legacy services         | Can't modify code   |
 | Platform team ownership | Centralized control |
 
 ### 10.2 Application recommended
 
-| Scenario | Why Application |
-|----------|-----------------|
-| Per-endpoint semantics | Custom claims |
-| Deep domain claims | Business-level evidence |
-| Precise identity | Tied to app auth |
-| Complex signing logic | Conditional receipts |
+| Scenario               | Why Application         |
+| ---------------------- | ----------------------- |
+| Per-endpoint semantics | Custom claims           |
+| Deep domain claims     | Business-level evidence |
+| Precise identity       | Tied to app auth        |
+| Complex signing logic  | Conditional receipts    |
 
 ### 10.3 Hybrid approach
 
 Many deployments use both:
+
 - Gateway for baseline receipts everywhere
 - Applications for richer receipts where needed
 
 Gateway receipts and application receipts MAY coexist:
+
 - Multiple `PEAC-Receipt` headers allowed
 - Verifiers process all receipts
 
@@ -459,6 +470,7 @@ Gateway receipts and application receipts MAY coexist:
 ### 11.1 Default minimization
 
 Gateways SHOULD default to privacy-minimizing receipts:
+
 - Do not include request headers or payloads
 - Prefer digests over verbatim content
 - Enforce size limits on evidence/extension data
@@ -466,6 +478,7 @@ Gateways SHOULD default to privacy-minimizing receipts:
 ### 11.2 Interaction evidence
 
 If attaching interaction evidence at gateway:
+
 - Default capture mode MUST be "hash-only"
 - Explicit opt-in required for verbatim capture
 - See PRIVACY-PROFILE.md for details
@@ -480,19 +493,19 @@ If attaching interaction evidence at gateway:
 
 ### 12.2 Monitoring
 
-| Metric | Description |
-|--------|-------------|
-| `receipts_issued_total` | Counter by status |
-| `receipt_size_bytes` | Histogram |
-| `signing_latency_ms` | Histogram |
+| Metric                   | Description              |
+| ------------------------ | ------------------------ |
+| `receipts_issued_total`  | Counter by status        |
+| `receipt_size_bytes`     | Histogram                |
+| `signing_latency_ms`     | Histogram                |
 | `pointer_fallback_total` | Counter of pointer usage |
 
 ### 12.3 Error handling
 
-| Error | Behavior |
-|-------|----------|
-| Signing failure | Log, omit receipt, continue |
-| Storage failure | Log, omit pointer, continue |
+| Error           | Behavior                                  |
+| --------------- | ----------------------------------------- |
+| Signing failure | Log, omit receipt, continue               |
+| Storage failure | Log, omit pointer, continue               |
 | Key unavailable | Alert, fail open or closed (configurable) |
 
 ## 13. Implementation checklist

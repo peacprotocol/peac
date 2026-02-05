@@ -235,9 +235,7 @@ export class VerificationReportBuilder {
 
     // Build shape-stable checks array
     const checks: CheckResult[] = [];
-    const failedIndex = this.state.failedAtCheck
-      ? CHECK_IDS.indexOf(this.state.failedAtCheck)
-      : -1;
+    const failedIndex = this.state.failedAtCheck ? CHECK_IDS.indexOf(this.state.failedAtCheck) : -1;
 
     for (let i = 0; i < CHECK_IDS.length; i++) {
       const checkId = CHECK_IDS[i];
@@ -328,9 +326,8 @@ export function createReportBuilder(policy: VerifierPolicy): VerificationReportB
  * @returns SHA-256 digest as lowercase hex (64 chars)
  */
 export async function computeReceiptDigest(receiptBytes: Uint8Array | string): Promise<string> {
-  const bytes = typeof receiptBytes === 'string'
-    ? new TextEncoder().encode(receiptBytes)
-    : receiptBytes;
+  const bytes =
+    typeof receiptBytes === 'string' ? new TextEncoder().encode(receiptBytes) : receiptBytes;
   return sha256Hex(bytes);
 }
 
@@ -353,9 +350,8 @@ export async function buildFailureReport(
     meta?: VerificationMeta;
   }
 ): Promise<VerificationReport> {
-  const bytes = typeof receiptBytes === 'string'
-    ? new TextEncoder().encode(receiptBytes)
-    : receiptBytes;
+  const bytes =
+    typeof receiptBytes === 'string' ? new TextEncoder().encode(receiptBytes) : receiptBytes;
   const digestHex = await sha256Hex(bytes);
 
   const builder = createReportBuilder(policy)
@@ -395,14 +391,11 @@ export async function buildSuccessReport(
     meta?: VerificationMeta;
   }
 ): Promise<VerificationReport> {
-  const bytes = typeof receiptBytes === 'string'
-    ? new TextEncoder().encode(receiptBytes)
-    : receiptBytes;
+  const bytes =
+    typeof receiptBytes === 'string' ? new TextEncoder().encode(receiptBytes) : receiptBytes;
   const digestHex = await sha256Hex(bytes);
 
-  const builder = createReportBuilder(policy)
-    .setInputWithDigest(digestHex)
-    .success(issuer, kid);
+  const builder = createReportBuilder(policy).setInputWithDigest(digestHex).success(issuer, kid);
 
   // Add all checks as passing (except optional ones)
   for (const checkId of CHECK_IDS) {

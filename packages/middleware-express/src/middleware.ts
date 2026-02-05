@@ -128,9 +128,7 @@ export function peacMiddleware(config: ExpressMiddlewareConfig): RequestHandler 
     const enhancedConfig: MiddlewareConfig = {
       ...config,
       claimsGenerator: async (ctx) => {
-        const baseClaims = config.claimsGenerator
-          ? await config.claimsGenerator(ctx)
-          : {};
+        const baseClaims = config.claimsGenerator ? await config.claimsGenerator(ctx) : {};
 
         return {
           ...baseClaims,
@@ -148,15 +146,11 @@ export function peacMiddleware(config: ExpressMiddlewareConfig): RequestHandler 
     // Override res.json to inject receipt
     res.json = function jsonWithReceipt(body: unknown): Response {
       // Generate receipt asynchronously
-      createReceipt(
-        enhancedConfig,
-        requestContext,
-        {
-          statusCode: res.statusCode,
-          headers: res.getHeaders() as Record<string, string | string[] | undefined>,
-          body,
-        }
-      )
+      createReceipt(enhancedConfig, requestContext, {
+        statusCode: res.statusCode,
+        headers: res.getHeaders() as Record<string, string | string[] | undefined>,
+        body,
+      })
         .then((result) => {
           // Add headers from receipt result
           for (const [key, value] of Object.entries(result.headers)) {
@@ -225,9 +219,7 @@ export function peacMiddlewareSync(config: ExpressMiddlewareConfig): RequestHand
     const enhancedConfig: MiddlewareConfig = {
       ...config,
       claimsGenerator: async (ctx) => {
-        const baseClaims = config.claimsGenerator
-          ? await config.claimsGenerator(ctx)
-          : {};
+        const baseClaims = config.claimsGenerator ? await config.claimsGenerator(ctx) : {};
 
         return {
           ...baseClaims,
@@ -246,15 +238,11 @@ export function peacMiddlewareSync(config: ExpressMiddlewareConfig): RequestHand
       // but we can make it blocking by using a sync wrapper
       const syncWrapper = async (): Promise<void> => {
         try {
-          const result = await createReceipt(
-            enhancedConfig,
-            requestContext,
-            {
-              statusCode: res.statusCode,
-              headers: res.getHeaders() as Record<string, string | string[] | undefined>,
-              body,
-            }
-          );
+          const result = await createReceipt(enhancedConfig, requestContext, {
+            statusCode: res.statusCode,
+            headers: res.getHeaders() as Record<string, string | string[] | undefined>,
+            body,
+          });
 
           // Add headers
           for (const [key, value] of Object.entries(result.headers)) {

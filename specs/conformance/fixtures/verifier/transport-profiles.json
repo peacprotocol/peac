@@ -101,7 +101,10 @@
       "profile": "pointer",
       "input": {
         "headers": {
-          "PEAC-Receipt-Pointer": ["sha256=\"abc\", url=\"https://a.com\"", "sha256=\"def\", url=\"https://b.com\""]
+          "PEAC-Receipt-Pointer": [
+            "sha256=\"abc\", url=\"https://a.com\"",
+            "sha256=\"def\", url=\"https://b.com\""
+          ]
         }
       },
       "expected": {
@@ -131,7 +134,7 @@
       "profile": "body",
       "input": {
         "body": {
-          "data": {"items": ["a", "b"]},
+          "data": { "items": ["a", "b"] },
           "peac_receipt": "eyJhbGciOiJFZERTQSJ9.payload.signature"
         }
       },
@@ -147,7 +150,7 @@
       "profile": "body",
       "input": {
         "body": {
-          "data": {"items": ["a", "b"]},
+          "data": { "items": ["a", "b"] },
           "peac_receipts": [
             "eyJhbGciOiJFZERTQSJ9.payload1.sig1",
             "eyJhbGciOiJFZERTQSJ9.payload2.sig2"

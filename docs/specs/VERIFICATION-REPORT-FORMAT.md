@@ -20,6 +20,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## 3. Determinism requirements
 
 A verifier MUST be able to emit a report whose contents depend only on:
+
 - The receipt bytes being verified
 - The verifier policy configuration
 - Issuer key material available under that policy
@@ -27,6 +28,7 @@ A verifier MUST be able to emit a report whose contents depend only on:
 A verifier MUST NOT require wall-clock time to generate the core report fields.
 
 If a UI wants a display timestamp, it MAY include a non-normative `meta.generated_at` field, but:
+
 - `meta.generated_at` MUST be excluded from report hash calculations
 - Tools MUST provide a "deterministic mode" that omits `meta`
 
@@ -34,15 +36,15 @@ If a UI wants a display timestamp, it MAY include a non-normative `meta.generate
 
 A report MUST be a JSON object (UTF-8) with these top-level fields:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `report_version` | string | REQUIRED | Format version identifier |
-| `input` | object | REQUIRED | What was verified |
-| `policy` | object | REQUIRED | Policy used for verification |
-| `result` | object | REQUIRED | High-level outcome |
-| `checks` | array | REQUIRED | Ordered list of checks |
-| `artifacts` | object | OPTIONAL | Additional outputs |
-| `meta` | object | OPTIONAL | Non-deterministic fields |
+| Field            | Type   | Required | Description                  |
+| ---------------- | ------ | -------- | ---------------------------- |
+| `report_version` | string | REQUIRED | Format version identifier    |
+| `input`          | object | REQUIRED | What was verified            |
+| `policy`         | object | REQUIRED | Policy used for verification |
+| `result`         | object | REQUIRED | High-level outcome           |
+| `checks`         | array  | REQUIRED | Ordered list of checks       |
+| `artifacts`      | object | OPTIONAL | Additional outputs           |
+| `meta`           | object | OPTIONAL | Non-deterministic fields     |
 
 ## 5. Field definitions
 
@@ -58,21 +60,22 @@ MUST equal `peac-verification-report/0.1` for this version.
 
 Describes what was verified.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `type` | string | REQUIRED | One of: `receipt_jws`, `bundle_entry` |
-| `receipt_digest` | object | REQUIRED | Digest of receipt bytes |
+| Field            | Type   | Required | Description                           |
+| ---------------- | ------ | -------- | ------------------------------------- |
+| `type`           | string | REQUIRED | One of: `receipt_jws`, `bundle_entry` |
+| `receipt_digest` | object | REQUIRED | Digest of receipt bytes               |
 
 For bundles:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `bundle` | object | OPTIONAL | Bundle context if `type = "bundle_entry"` |
-| `bundle.bundle_digest` | object | REQUIRED | Digest of bundle bytes |
-| `bundle.entry_index` | integer | REQUIRED | 0-based index |
-| `bundle.entry_id` | string | OPTIONAL | Stable ID if available |
+| Field                  | Type    | Required | Description                               |
+| ---------------------- | ------- | -------- | ----------------------------------------- |
+| `bundle`               | object  | OPTIONAL | Bundle context if `type = "bundle_entry"` |
+| `bundle.bundle_digest` | object  | REQUIRED | Digest of bundle bytes                    |
+| `bundle.entry_index`   | integer | REQUIRED | 0-based index                             |
+| `bundle.entry_id`      | string  | OPTIONAL | Stable ID if available                    |
 
 Digest object:
+
 ```json
 {
   "alg": "sha-256",
@@ -84,16 +87,17 @@ Digest object:
 
 Echoes the verification policy used. This makes trust decisions auditable.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `policy_version` | string | REQUIRED | Policy schema version |
-| `mode` | string | REQUIRED | `offline_only`, `offline_preferred`, `network_allowed` |
-| `issuer_allowlist` | array | OPTIONAL | Allowed issuer origins |
-| `pinned_keys` | array | OPTIONAL | Pinned key fingerprints |
-| `limits` | object | REQUIRED | Effective limits |
-| `network` | object | REQUIRED | Network security settings |
+| Field              | Type   | Required | Description                                            |
+| ------------------ | ------ | -------- | ------------------------------------------------------ |
+| `policy_version`   | string | REQUIRED | Policy schema version                                  |
+| `mode`             | string | REQUIRED | `offline_only`, `offline_preferred`, `network_allowed` |
+| `issuer_allowlist` | array  | OPTIONAL | Allowed issuer origins                                 |
+| `pinned_keys`      | array  | OPTIONAL | Pinned key fingerprints                                |
+| `limits`           | object | REQUIRED | Effective limits                                       |
+| `network`          | object | REQUIRED | Network security settings                              |
 
 Limits object:
+
 ```json
 {
   "max_receipt_bytes": 262144,
@@ -106,6 +110,7 @@ Limits object:
 ```
 
 Network object:
+
 ```json
 {
   "https_only": true,
@@ -118,16 +123,17 @@ Network object:
 
 High-level outcome.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `valid` | boolean | REQUIRED | Overall verification result |
-| `reason` | string | REQUIRED | Stable reason code |
-| `severity` | string | REQUIRED | `info`, `warning`, `error` |
-| `receipt_type` | string | REQUIRED | Receipt wire format |
-| `issuer` | string | OPTIONAL | Normalized issuer origin |
-| `kid` | string | OPTIONAL | Key ID used for verification |
+| Field          | Type    | Required | Description                  |
+| -------------- | ------- | -------- | ---------------------------- |
+| `valid`        | boolean | REQUIRED | Overall verification result  |
+| `reason`       | string  | REQUIRED | Stable reason code           |
+| `severity`     | string  | REQUIRED | `info`, `warning`, `error`   |
+| `receipt_type` | string  | REQUIRED | Receipt wire format          |
+| `issuer`       | string  | OPTIONAL | Normalized issuer origin     |
+| `kid`          | string  | OPTIONAL | Key ID used for verification |
 
 Reason codes:
+
 - `ok` - Verification passed
 - `receipt_too_large` - Receipt exceeds size limit
 - `malformed_receipt` - Cannot parse JWS
@@ -178,24 +184,25 @@ Standard check IDs (in order):
 
 Additional outputs for auditing.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `issuer_jwks_digest` | object | Digest of JWKS used |
+| Field                      | Type   | Description                    |
+| -------------------------- | ------ | ------------------------------ |
+| `issuer_jwks_digest`       | object | Digest of JWKS used            |
 | `normalized_claims_digest` | object | Digest of canonicalized claims |
-| `receipt_pointer` | object | Pointer resolution details |
+| `receipt_pointer`          | object | Pointer resolution details     |
 
 ### 5.7 `meta` (OPTIONAL)
 
 Non-deterministic fields ONLY. MUST be excluded from report hashes.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `generated_at` | string | RFC 3339 timestamp |
-| `verifier` | object | Verifier implementation info |
+| Field          | Type   | Description                  |
+| -------------- | ------ | ---------------------------- |
+| `generated_at` | string | RFC 3339 timestamp           |
+| `verifier`     | object | Verifier implementation info |
 
 ## 6. Canonicalization
 
 When computing a digest of the report:
+
 - Serialize using RFC 8785 JCS
 - Exclude `meta` field
 - Use SHA-256, lowercase hex output
@@ -324,6 +331,7 @@ When computing a digest of the report:
 ### 8.1 Report size limits
 
 Reports SHOULD be bounded:
+
 - Maximum total size: 64 KB
 - Maximum `detail` per check: 4 KB
 - Truncate or omit large details
@@ -331,6 +339,7 @@ Reports SHOULD be bounded:
 ### 8.2 Sensitive data
 
 Reports MUST NOT include:
+
 - Private key material
 - Full receipt claims (reference by digest)
 - Secrets from error messages
@@ -338,5 +347,6 @@ Reports MUST NOT include:
 ### 8.3 Caching
 
 Reports MAY be cached by receipt digest + policy digest:
+
 - Same receipt + same policy = same report
 - Policy changes invalidate cache
