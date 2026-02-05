@@ -32,10 +32,11 @@
     "provenance": true
   },
   "scripts": {
+    "prebuild": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@peac/middleware-core": "workspace:*"
