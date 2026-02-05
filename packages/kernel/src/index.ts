@@ -42,6 +42,12 @@ export {
   parseHash,
   formatHash,
   isValidHash,
+  // Verifier constants (v0.10.8+)
+  VERIFIER_LIMITS,
+  VERIFIER_NETWORK,
+  PRIVATE_IP_RANGES,
+  VERIFIER_POLICY_VERSION,
+  VERIFICATION_MODES,
   CONSTANTS,
 } from './constants.js';
 

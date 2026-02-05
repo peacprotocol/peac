@@ -1,0 +1,172 @@
+{
+  "description": "SSRF protection conformance fixtures per VERIFIER-SECURITY-MODEL.md",
+  "version": "0.10.8",
+  "test_cases": [
+    {
+      "id": "https-required",
+      "description": "JWKS URL MUST be HTTPS",
+      "input": {
+        "issuer": "http://insecure.example.com"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "not_https"
+      }
+    },
+    {
+      "id": "private-ip-10.x-blocked",
+      "description": "Private IP 10.0.0.0/8 MUST be blocked",
+      "input": {
+        "issuer": "https://internal.example.com",
+        "resolved_ip": "10.0.0.1"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "private_ip"
+      }
+    },
+    {
+      "id": "private-ip-172.16.x-blocked",
+      "description": "Private IP 172.16.0.0/12 MUST be blocked",
+      "input": {
+        "issuer": "https://internal.example.com",
+        "resolved_ip": "172.16.0.1"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "private_ip"
+      }
+    },
+    {
+      "id": "private-ip-192.168.x-blocked",
+      "description": "Private IP 192.168.0.0/16 MUST be blocked",
+      "input": {
+        "issuer": "https://internal.example.com",
+        "resolved_ip": "192.168.1.1"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "private_ip"
+      }
+    },
+    {
+      "id": "loopback-blocked",
+      "description": "Loopback 127.0.0.0/8 MUST be blocked",
+      "input": {
+        "issuer": "https://localhost",
+        "resolved_ip": "127.0.0.1"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "loopback"
+      }
+    },
+    {
+      "id": "link-local-blocked",
+      "description": "Link-local 169.254.0.0/16 MUST be blocked",
+      "input": {
+        "issuer": "https://metadata.example.com",
+        "resolved_ip": "169.254.169.254"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "link_local"
+      }
+    },
+    {
+      "id": "ipv6-loopback-blocked",
+      "description": "IPv6 loopback ::1 MUST be blocked",
+      "input": {
+        "issuer": "https://localhost",
+        "resolved_ip": "::1"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "loopback"
+      }
+    },
+    {
+      "id": "ipv6-link-local-blocked",
+      "description": "IPv6 link-local fe80::/10 MUST be blocked",
+      "input": {
+        "issuer": "https://internal.example.com",
+        "resolved_ip": "fe80::1"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "link_local"
+      }
+    },
+    {
+      "id": "pointer-private-ip-blocked",
+      "description": "Pointer URL to private IP MUST be blocked",
+      "input": {
+        "pointer_url": "https://internal.example.com/receipt",
+        "resolved_ip": "10.0.0.1"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_POINTER_FETCH_BLOCKED",
+        "reason": "pointer_fetch_blocked",
+        "blocked_reason": "private_ip"
+      }
+    },
+    {
+      "id": "redirect-scheme-downgrade-blocked",
+      "description": "HTTPS to HTTP redirect MUST be blocked",
+      "input": {
+        "issuer": "https://api.example.com",
+        "redirect_to": "http://api.example.com/jwks"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "scheme_downgrade"
+      }
+    },
+    {
+      "id": "redirect-to-private-ip-blocked",
+      "description": "Redirect to private IP MUST be blocked",
+      "input": {
+        "issuer": "https://api.example.com",
+        "redirect_to": "https://internal.corp.local/jwks",
+        "redirect_resolved_ip": "10.0.0.1"
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+        "reason": "key_fetch_blocked",
+        "blocked_reason": "private_ip"
+      }
+    },
+    {
+      "id": "public-ip-allowed",
+      "description": "Public IP addresses MUST be allowed",
+      "input": {
+        "issuer": "https://api.example.com",
+        "resolved_ip": "93.184.216.34"
+      },
+      "expected": {
+        "valid": true,
+        "fetch_allowed": true
+      }
+    }
+  ]
+}

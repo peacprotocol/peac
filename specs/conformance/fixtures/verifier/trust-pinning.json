@@ -1,0 +1,214 @@
+{
+  "description": "Trust pinning conformance fixtures per TRUST-PINNING-POLICY.md",
+  "version": "0.10.8",
+  "test_cases": [
+    {
+      "id": "issuer-in-allowlist",
+      "description": "Issuer in allowlist MUST be accepted",
+      "input": {
+        "issuer": "https://api.example.com",
+        "policy": {
+          "issuer_allowlist": ["https://api.example.com", "https://api2.example.com"]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "check": "issuer.trust_policy",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "issuer-not-in-allowlist",
+      "description": "Issuer not in allowlist MUST be rejected",
+      "input": {
+        "issuer": "https://evil.example.com",
+        "policy": {
+          "issuer_allowlist": ["https://api.example.com"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "check": "issuer.trust_policy",
+        "status": "fail",
+        "error_code": "E_VERIFY_ISSUER_NOT_ALLOWED",
+        "reason": "issuer_not_allowed"
+      }
+    },
+    {
+      "id": "issuer-empty-allowlist-all-allowed",
+      "description": "Empty allowlist allows all issuers",
+      "input": {
+        "issuer": "https://any.example.com",
+        "policy": {
+          "issuer_allowlist": []
+        }
+      },
+      "expected": {
+        "valid": true,
+        "check": "issuer.trust_policy",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "issuer-no-allowlist-all-allowed",
+      "description": "No allowlist allows all issuers",
+      "input": {
+        "issuer": "https://any.example.com",
+        "policy": {}
+      },
+      "expected": {
+        "valid": true,
+        "check": "issuer.trust_policy",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "issuer-origin-normalization",
+      "description": "Issuer origins are normalized (port 443 omitted for https)",
+      "input": {
+        "issuer": "https://api.example.com:443/path",
+        "policy": {
+          "issuer_allowlist": ["https://api.example.com"]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "check": "issuer.trust_policy",
+        "status": "pass",
+        "normalized_issuer": "https://api.example.com"
+      }
+    },
+    {
+      "id": "issuer-non-standard-port",
+      "description": "Non-standard port MUST be included in origin",
+      "input": {
+        "issuer": "https://api.example.com:8443",
+        "policy": {
+          "issuer_allowlist": ["https://api.example.com"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "check": "issuer.trust_policy",
+        "status": "fail",
+        "error_code": "E_VERIFY_ISSUER_NOT_ALLOWED"
+      }
+    },
+    {
+      "id": "pinned-key-thumbprint-match",
+      "description": "Pinned key with matching RFC 7638 thumbprint (base64url) MUST be accepted",
+      "input": {
+        "issuer": "https://api.example.com",
+        "kid": "prod-2026-02",
+        "jwk": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+          "kid": "prod-2026-02"
+        },
+        "policy": {
+          "pinned_keys": [
+            {
+              "issuer": "https://api.example.com",
+              "kid": "prod-2026-02",
+              "jwk_thumbprint_sha256": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "check": "key.resolve",
+        "status": "pass",
+        "source": "pinned_keys",
+        "thumbprint_verified": true
+      }
+    },
+    {
+      "id": "pinned-key-thumbprint-mismatch",
+      "description": "Pinned key with mismatched thumbprint MUST be rejected",
+      "input": {
+        "issuer": "https://api.example.com",
+        "kid": "prod-2026-02",
+        "jwk": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "different_key_material_base64url",
+          "kid": "prod-2026-02"
+        },
+        "policy": {
+          "pinned_keys": [
+            {
+              "issuer": "https://api.example.com",
+              "kid": "prod-2026-02",
+              "jwk_thumbprint_sha256": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "check": "key.resolve",
+        "status": "fail",
+        "error_code": "E_VERIFY_POLICY_VIOLATION",
+        "reason": "policy_violation"
+      }
+    },
+    {
+      "id": "pinned-key-wrong-kid",
+      "description": "Pinned key with wrong kid falls back to discovery",
+      "input": {
+        "issuer": "https://api.example.com",
+        "kid": "prod-2026-03",
+        "policy": {
+          "mode": "network_allowed",
+          "pinned_keys": [
+            {
+              "issuer": "https://api.example.com",
+              "kid": "prod-2026-02",
+              "jwk_thumbprint_sha256": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "check": "key.resolve",
+        "source": "jwks_discovery"
+      }
+    },
+    {
+      "id": "offline-mode-requires-pinned-keys",
+      "description": "Offline mode with no pinned key MUST fail",
+      "input": {
+        "issuer": "https://api.example.com",
+        "kid": "prod-2026-02",
+        "policy": {
+          "mode": "offline_only",
+          "pinned_keys": []
+        }
+      },
+      "expected": {
+        "valid": false,
+        "check": "issuer.discovery",
+        "status": "fail",
+        "error_code": "E_VERIFY_KEY_NOT_FOUND",
+        "reason": "key_not_found"
+      }
+    },
+    {
+      "id": "thumbprint-encoding-base64url",
+      "description": "Thumbprint MUST be base64url encoded (43 chars for SHA-256), not hex",
+      "input": {
+        "thumbprint_format": "base64url",
+        "thumbprint_length": 43,
+        "example": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs"
+      },
+      "expected": {
+        "valid": true,
+        "encoding": "base64url",
+        "bytes": 32
+      }
+    }
+  ]
+}

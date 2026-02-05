@@ -1,0 +1,167 @@
+{
+  "description": "Transport profile conformance fixtures per TRANSPORT-PROFILES.md",
+  "version": "0.10.8",
+  "test_cases": [
+    {
+      "id": "header-valid",
+      "description": "Valid PEAC-Receipt header with JWS compact serialization",
+      "profile": "header",
+      "input": {
+        "headers": {
+          "PEAC-Receipt": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEiLCJraWQiOiJrZXktMjAyNiJ9.eyJpc3MiOiJodHRwczovL2lzc3Vlci5leGFtcGxlLmNvbSIsImlhdCI6MTczNTYwMDAwMH0.abc123"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "profile": "header"
+      }
+    },
+    {
+      "id": "header-multiple-invalid",
+      "description": "Multiple PEAC-Receipt headers MUST be rejected",
+      "profile": "header",
+      "input": {
+        "headers": {
+          "PEAC-Receipt": ["eyJhbGci.payload1.sig1", "eyJhbGci.payload2.sig2"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_INVALID_TRANSPORT",
+        "reason": "invalid_transport"
+      }
+    },
+    {
+      "id": "header-comma-separated-invalid",
+      "description": "Comma-separated PEAC-Receipt values MUST be rejected",
+      "profile": "header",
+      "input": {
+        "headers": {
+          "PEAC-Receipt": "eyJhbGci.payload1.sig1, eyJhbGci.payload2.sig2"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_INVALID_TRANSPORT",
+        "reason": "invalid_transport"
+      }
+    },
+    {
+      "id": "header-not-jws-compact",
+      "description": "Header value MUST be JWS compact serialization (three segments)",
+      "profile": "header",
+      "input": {
+        "headers": {
+          "PEAC-Receipt": "not-a-valid-jws"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_MALFORMED_RECEIPT",
+        "reason": "malformed_receipt"
+      }
+    },
+    {
+      "id": "header-jws-two-segments-invalid",
+      "description": "JWS with only two segments is invalid",
+      "profile": "header",
+      "input": {
+        "headers": {
+          "PEAC-Receipt": "eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_MALFORMED_RECEIPT",
+        "reason": "malformed_receipt"
+      }
+    },
+    {
+      "id": "pointer-valid",
+      "description": "Valid PEAC-Receipt-Pointer with RFC 8941 dictionary format",
+      "profile": "pointer",
+      "input": {
+        "headers": {
+          "PEAC-Receipt-Pointer": "sha256=\"7d8f3d0c9d0b6aebd1c3b8d0ab8f7c1d8c7f1d2b0b2a3f4e5d6c7b8a9f0e1d2c\", url=\"https://receipts.example.com/abc123\""
+        }
+      },
+      "expected": {
+        "valid": true,
+        "profile": "pointer",
+        "parsed": {
+          "digest_alg": "sha256",
+          "digest_value": "7d8f3d0c9d0b6aebd1c3b8d0ab8f7c1d8c7f1d2b0b2a3f4e5d6c7b8a9f0e1d2c",
+          "url": "https://receipts.example.com/abc123"
+        }
+      }
+    },
+    {
+      "id": "pointer-multiple-invalid",
+      "description": "Multiple PEAC-Receipt-Pointer headers MUST be rejected",
+      "profile": "pointer",
+      "input": {
+        "headers": {
+          "PEAC-Receipt-Pointer": [
+            "sha256=\"abc\", url=\"https://a.com\"",
+            "sha256=\"def\", url=\"https://b.com\""
+          ]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_INVALID_TRANSPORT",
+        "reason": "invalid_transport"
+      }
+    },
+    {
+      "id": "pointer-http-rejected",
+      "description": "Pointer URL MUST be HTTPS",
+      "profile": "pointer",
+      "input": {
+        "headers": {
+          "PEAC-Receipt-Pointer": "sha256=\"abc123\", url=\"http://insecure.example.com/receipt\""
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_VERIFY_POINTER_FETCH_BLOCKED",
+        "reason": "pointer_fetch_blocked"
+      }
+    },
+    {
+      "id": "body-valid-single",
+      "description": "Valid body profile with single receipt",
+      "profile": "body",
+      "input": {
+        "body": {
+          "data": { "items": ["a", "b"] },
+          "peac_receipt": "eyJhbGciOiJFZERTQSJ9.payload.signature"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "profile": "body",
+        "receipt_count": 1
+      }
+    },
+    {
+      "id": "body-valid-multiple",
+      "description": "Valid body profile with multiple receipts",
+      "profile": "body",
+      "input": {
+        "body": {
+          "data": { "items": ["a", "b"] },
+          "peac_receipts": [
+            "eyJhbGciOiJFZERTQSJ9.payload1.sig1",
+            "eyJhbGciOiJFZERTQSJ9.payload2.sig2"
+          ]
+        }
+      },
+      "expected": {
+        "valid": true,
+        "profile": "body",
+        "receipt_count": 2
+      }
+    }
+  ]
+}

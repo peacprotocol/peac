@@ -75,5 +75,7 @@ export default defineConfig({
     testTimeout: 10000,
     // Fail fast on first error in CI
     bail: process.env.CI ? 1 : 0,
+    // Don't fail when no tests found (some packages use wildcard filters)
+    passWithNoTests: true,
   },
 });

@@ -22,6 +22,7 @@ export const ERROR_CATEGORIES = [
   'ucp',
   'validation',
   'verification',
+  'verifier',
   'workflow',
 ] as const;
 

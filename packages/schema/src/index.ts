@@ -355,3 +355,29 @@ export type {
   TransportBinding,
   ContextMetadata,
 } from './envelope';
+
+// Attestation receipt types (v0.10.8+ middleware profile)
+export {
+  MinimalInteractionBindingSchema,
+  AttestationExtensionsSchema,
+  AttestationReceiptClaimsSchema,
+  // Constants
+  ATTESTATION_RECEIPT_TYPE,
+  MIDDLEWARE_INTERACTION_KEY,
+  ATTESTATION_LIMITS,
+  // Helpers
+  validateAttestationReceiptClaims,
+  isAttestationReceiptClaims,
+  validateMinimalInteractionBinding,
+  isMinimalInteractionBinding,
+  createAttestationReceiptClaims,
+  isAttestationOnly,
+  isPaymentReceipt,
+} from './attestation-receipt';
+export type {
+  MinimalInteractionBinding,
+  AttestationExtensions,
+  AttestationReceiptClaims,
+  AttestationValidationResult,
+  CreateAttestationReceiptParams,
+} from './attestation-receipt';
