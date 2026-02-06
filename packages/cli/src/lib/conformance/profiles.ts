@@ -129,7 +129,10 @@ export function getCategoryProfile(category: string): string {
 /**
  * Determine if a fixture should run at a given level
  */
-export function shouldRunAtLevel(fixtureVersion: string | undefined, level: ConformanceLevel): boolean {
+export function shouldRunAtLevel(
+  fixtureVersion: string | undefined,
+  level: ConformanceLevel
+): boolean {
   if (!fixtureVersion) return true; // Default to basic
 
   const [major, minor] = fixtureVersion.split('.').map(Number);

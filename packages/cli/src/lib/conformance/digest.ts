@@ -20,7 +20,7 @@ export function sha256(content: string): string {
  * Convert Zod path array to JSON Pointer (RFC 6901)
  *
  * @param path - Array of path segments from Zod (string for keys, number for array indices)
- * @returns JSON Pointer string (e.g., "/auth/attestations/0/issued_at")
+ * @returns JSON Pointer string (e.g., "/evidence/attestations/0/scope")
  */
 export function zodPathToJsonPointer(path: (string | number)[]): string {
   if (path.length === 0) return '';

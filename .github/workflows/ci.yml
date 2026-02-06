@@ -49,6 +49,8 @@ jobs:
           git ls-files -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' '*.json' '*.md' '*.yaml' '*.yml' \
             | grep -vE '^(archive/|node_modules/)' \
             | node scripts/find-invisible-unicode.mjs --stdin
+          # Secondary scan via Python (hidden/bidi ranges)
+          bash scripts/check-unicode.sh
 
       - name: Domain guard
         run: bash -euxo pipefail scripts/guard.sh

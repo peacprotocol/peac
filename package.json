@@ -51,7 +51,8 @@
     "bench": "tsx scripts/bench-protocol.ts all",
     "bench:verify": "tsx scripts/bench-protocol.ts verify",
     "bench:issue": "tsx scripts/bench-protocol.ts issue",
-    "test:exports": "node scripts/test-package-exports.mjs"
+    "test:exports": "node scripts/test-package-exports.mjs",
+    "check:unicode": "bash scripts/check-unicode.sh"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

@@ -28,10 +28,20 @@ export type {
 export { loadManifest, getManifestEntry } from './manifest.js';
 
 // Digest computation
-export { sha256, zodPathToJsonPointer, computeCanonicalDigest, computeVectorsDigest } from './digest.js';
+export {
+  sha256,
+  zodPathToJsonPointer,
+  computeCanonicalDigest,
+  computeVectorsDigest,
+} from './digest.js';
 
 // Profile capabilities
-export { PROFILE_CAPABILITIES, getCategoryCapability, getCategoryProfile, shouldRunAtLevel } from './profiles.js';
+export {
+  PROFILE_CAPABILITIES,
+  getCategoryCapability,
+  getCategoryProfile,
+  shouldRunAtLevel,
+} from './profiles.js';
 
 // Validators
 export { validateReceiptPayload, CATEGORY_VALIDATORS, getValidator } from './validators.js';

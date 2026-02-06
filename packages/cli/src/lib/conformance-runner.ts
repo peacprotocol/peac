@@ -45,7 +45,11 @@ import type {
 
 import { loadManifest, getManifestEntry } from './conformance/manifest.js';
 import { sha256, computeCanonicalDigest, computeVectorsDigest } from './conformance/digest.js';
-import { getCategoryCapability, getCategoryProfile, shouldRunAtLevel } from './conformance/profiles.js';
+import {
+  getCategoryCapability,
+  getCategoryProfile,
+  shouldRunAtLevel,
+} from './conformance/profiles.js';
 import { getValidator } from './conformance/validators.js';
 
 /**
@@ -95,7 +99,10 @@ export function runConformance(
 
     const validator = getValidator(cat);
     // SORTED for deterministic ordering across OS/filesystems
-    const files = fs.readdirSync(categoryPath).filter((f) => f.endsWith('.json')).sort();
+    const files = fs
+      .readdirSync(categoryPath)
+      .filter((f) => f.endsWith('.json'))
+      .sort();
 
     for (const file of files) {
       const filePath = path.join(categoryPath, file);
@@ -228,11 +235,8 @@ export function runConformance(
           manifestEntry?.expected_valid ??
           (cat === 'valid' || cat === 'edge');
 
-        // Get expected error from fixture, manifest, or manifest keyword
-        const expectedError =
-          singleFixture.expected_error ??
-          manifestEntry?.expected_error_code ??
-          (manifestEntry?.expected_keyword ? `E_${manifestEntry.expected_keyword.toUpperCase()}` : undefined);
+        // Get expected error from fixture or manifest (never derived from keyword)
+        const expectedError = singleFixture.expected_error ?? manifestEntry?.expected_error_code;
 
         // Get expected path and keyword from manifest (first-class assertions)
         const expectedPath = manifestEntry?.expected_path;
@@ -255,7 +259,11 @@ export function runConformance(
             mismatch = true;
           }
           // Check expected_keyword if specified (first-class assertion)
-          if (expectedKeyword && observed.error_keyword && expectedKeyword !== observed.error_keyword) {
+          if (
+            expectedKeyword &&
+            observed.error_keyword &&
+            expectedKeyword !== observed.error_keyword
+          ) {
             mismatch = true;
           }
           if (mismatch) {

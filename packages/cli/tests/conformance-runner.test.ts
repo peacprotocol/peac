@@ -43,8 +43,8 @@ describe('Conformance Runner', () => {
     });
 
     it('should convert path with array index', () => {
-      expect(zodPathToJsonPointer(['evidence', 'attestations', 0, 'issued_at'])).toBe(
-        '/evidence/attestations/0/issued_at'
+      expect(zodPathToJsonPointer(['evidence', 'attestations', 0, 'scope'])).toBe(
+        '/evidence/attestations/0/scope'
       );
     });
 
@@ -149,17 +149,17 @@ describe('Conformance Runner', () => {
       expect(testResult?.observed?.error_code).not.toBe('E_INVALID_RID');
     });
 
-    it('should use manifest expected_keyword to derive error code', () => {
+    it('should track expected_keyword independently from error_code', () => {
       // Set up test fixtures
       const categoryDir = join(TEST_FIXTURES_DIR, 'test-keyword');
       mkdirSync(categoryDir, { recursive: true });
 
-      // Create manifest with expected_keyword (not expected_error_code)
+      // Create manifest with expected_keyword only (no expected_error_code)
       const manifest = {
         'test-keyword': {
           'missing-field.json': {
             description: 'Missing required field',
-            expected_keyword: 'required', // Will become E_REQUIRED
+            expected_keyword: 'required',
           },
         },
       };
@@ -183,10 +183,11 @@ describe('Conformance Runner', () => {
         category: 'test-keyword',
       });
 
-      // Check that expected_keyword was converted to E_REQUIRED
+      // expected_keyword is tracked independently - no error_code derivation
       const testResult = report.results.find((r) => r.id === 'test-keyword.missing-field');
       expect(testResult).toBeDefined();
-      expect(testResult?.expected?.error_code).toBe('E_REQUIRED');
+      expect(testResult?.expected?.error_keyword).toBe('required');
+      expect(testResult?.expected?.error_code).toBeUndefined();
     });
 
     it('should fail when expected_path does not match observed path', () => {

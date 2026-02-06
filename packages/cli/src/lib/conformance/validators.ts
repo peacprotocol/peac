@@ -412,20 +412,23 @@ export const CATEGORY_VALIDATORS: Record<string, CategoryValidator> = {
  * Get validator for a category
  */
 export function getValidator(category: string): CategoryValidator {
-  return CATEGORY_VALIDATORS[category] ?? ((input) => {
-    // Default: validate as receipt payload
-    // Input may be the raw fixture (with payload/claims wrapper) or the payload directly
-    if (typeof input === 'object' && input !== null) {
-      const obj = input as Record<string, unknown>;
-      // Check for wrapped payload/claims first
-      if (obj.payload || obj.claims) {
-        return validateReceiptPayload(obj.payload ?? obj.claims);
+  return (
+    CATEGORY_VALIDATORS[category] ??
+    ((input) => {
+      // Default: validate as receipt payload
+      // Input may be the raw fixture (with payload/claims wrapper) or the payload directly
+      if (typeof input === 'object' && input !== null) {
+        const obj = input as Record<string, unknown>;
+        // Check for wrapped payload/claims first
+        if (obj.payload || obj.claims) {
+          return validateReceiptPayload(obj.payload ?? obj.claims);
+        }
+        // Otherwise, if it looks like receipt claims (has standard fields), validate directly
+        if ('iss' in obj || 'aud' in obj || 'iat' in obj || 'rid' in obj) {
+          return validateReceiptPayload(input);
+        }
       }
-      // Otherwise, if it looks like receipt claims (has standard fields), validate directly
-      if ('iss' in obj || 'aud' in obj || 'iat' in obj || 'rid' in obj) {
-        return validateReceiptPayload(input);
-      }
-    }
-    return { valid: true };
-  });
+      return { valid: true };
+    })
+  );
 }

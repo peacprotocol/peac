@@ -170,7 +170,8 @@ conformance
               console.log(`Running: ${testId}`);
             },
             onTestComplete: (result: TestResult) => {
-              const status = result.status === 'pass' ? 'PASS' : result.status === 'fail' ? 'FAIL' : 'SKIP';
+              const status =
+                result.status === 'pass' ? 'PASS' : result.status === 'fail' ? 'FAIL' : 'SKIP';
               console.log(`  ${status}: ${result.id}`);
             },
           }
