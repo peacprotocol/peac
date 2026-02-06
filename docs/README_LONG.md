@@ -51,6 +51,150 @@ See [examples/x402-node-server](../examples/x402-node-server) for a working impl
 
 ---
 
+## Integration examples
+
+### Settlement fields
+
+If an interaction includes payment, add settlement fields to the receipt:
+
+```typescript
+import { issue } from '@peac/protocol';
+
+const { jws } = await issue({
+  iss: 'https://api.example.com',
+  aud: 'https://client.example.com',
+  subject: 'https://api.example.com/inference',
+  amt: 1000, // Amount in minor units (e.g., cents)
+  cur: 'USD', // Currency code
+  rail: 'x402', // Payment rail
+  reference: 'tx_abc123', // Rail-specific reference
+  privateKey,
+  kid: 'key-2026-01',
+});
+```
+
+### HTTP/REST integration
+
+Attach receipts to any HTTP response:
+
+```typescript
+import express from 'express';
+import { issue } from '@peac/protocol';
+
+const app = express();
+
+app.get('/data', async (req, res) => {
+  const body = { items: ['a', 'b', 'c'] };
+  const { jws } = await issue({
+    iss: 'https://api.example.com',
+    aud: req.headers['origin'] || 'https://client.example.com',
+    subject: '/data',
+    privateKey,
+    kid: 'key-2026-01',
+  });
+  res.setHeader('PEAC-Receipt', jws);
+  res.json(body);
+});
+```
+
+Clients retrieve the receipt from the `PEAC-Receipt` header and verify offline or store for audit.
+
+### Express middleware
+
+`@peac/middleware-express` provides automatic receipt issuance as Express middleware:
+
+```typescript
+import express from 'express';
+import { peacMiddleware } from '@peac/middleware-express';
+
+const app = express();
+
+app.use(
+  peacMiddleware({
+    issuer: 'https://api.example.com',
+    privateKey,
+    kid: 'key-2026-01',
+  })
+);
+
+app.get('/data', (req, res) => {
+  res.json({ items: ['a', 'b', 'c'] }); // Receipt attached automatically
+});
+```
+
+See [packages/middleware-core/README.md](../packages/middleware-core/README.md) and [packages/middleware-express/README.md](../packages/middleware-express/README.md).
+
+---
+
+## Transports and bindings
+
+PEAC is transport-agnostic. The most common binding is **HTTP/REST**, where receipts travel as a response header and policies are discovered via `/.well-known/peac.txt`.
+
+| Binding             | How receipts travel                                     | Status      |
+| ------------------- | ------------------------------------------------------- | ----------- |
+| HTTP/REST (default) | Response header `PEAC-Receipt: <jws>`                   | Implemented |
+| MCP                 | Tool result metadata (`_meta.org.peacprotocol/receipt`) | Implemented |
+| A2A                 | Agent exchange attachments                              | Specified   |
+| WebSocket/streaming | Periodic or terminal receipts for long-running sessions | Planned     |
+| Queues/batches      | NDJSON receipts verified offline via bundles            | Implemented |
+
+---
+
+## Interoperability and mappings
+
+PEAC records can be carried through other interaction standards via mappings:
+
+| Standard / Rail  | PEAC role                                | Status                             |
+| ---------------- | ---------------------------------------- | ---------------------------------- |
+| MCP              | Records in tool response metadata        | Implemented (`@peac/mappings-mcp`) |
+| ACP              | Agentic Commerce Protocol integration    | Implemented (`@peac/mappings-acp`) |
+| A2A              | Agent-to-Agent exchange attachments      | Specified                          |
+| AP2              | Evidence for payment authorization flows | Specified                          |
+| UCP              | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`) |
+| ERC-8004         | Reputation signals for Trustless Agents  | Implemented (docs/mappings)        |
+| x402             | Settlement evidence in receipt claims    | Implemented (`@peac/rails-x402`)   |
+| Payment gateways | Payment intent evidence                  | Implemented (`@peac/rails-stripe`) |
+
+PEAC does not orchestrate these protocols. It provides portable proof of what terms applied and what happened.
+
+---
+
+## Dispute Bundle
+
+Portable, offline-verifiable evidence packages for disputes, audits, and cross-org handoffs.
+
+A bundle contains receipts, policy snapshots, and a deterministic verification report -- everything needed to prove what happened without trusting either party's internal logs.
+
+**Design constraints:**
+
+- ZIP archive with deterministic structure (RFC 8785 canonical JSON)
+- Offline verification fails if keys are missing (no silent network fallback)
+- Cross-language parity: TypeScript and Go produce identical verification reports
+
+```bash
+peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
+peac bundle verify ./evidence.peacbundle --offline
+```
+
+See [specs/DISPUTE.md](specs/DISPUTE.md) for the specification.
+
+---
+
+## Use cases
+
+| Use case                   | How PEAC helps                                                          |
+| -------------------------- | ----------------------------------------------------------------------- |
+| **HTTP 402 micropayments** | Rails settle funds; receipts prove settlement offline.                  |
+| **Agent-to-API calls**     | Every call carries signed proof of who, what, when, under which terms.  |
+| **Priced datasets**        | Records capture which object or window was paid for.                    |
+| **AI training access**     | Policy surfaces describe terms; records prove compliance.               |
+| **Audit trails**           | Signed receipts form evidence for internal and external investigations. |
+| **Rate limiting**          | Records tie usage to identity and payment for quota enforcement.        |
+
+PEAC is not a paywall, billing engine, or storage system. It is the records layer that sits beside your payment rails and policy files.
+
+---
+
 ## Wire format and HTTP integration
 
 **Receipts:**

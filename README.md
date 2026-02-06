@@ -17,16 +17,6 @@ A record is the portable interaction artifact; a receipt is the signed file form
 
 Works over HTTP/REST (headers), MCP/A2A, and streaming transports; verification is offline and deterministic.
 
-## Quick glossary
-
-| Term               | Definition                                                                                |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| **Record**         | The portable interaction artifact (concept)                                               |
-| **Receipt**        | The signed serialization of a record (JWS file / header value)                            |
-| **Dispute Bundle** | Portable export containing receipts + policy snapshot + deterministic verification report |
-
-Use **record(s)** when talking conceptually. Use **receipt(s)** when referring to the serialized file/header/JWS.
-
 ## The model
 
 ```mermaid
@@ -54,21 +44,22 @@ flowchart LR
 - Cross-org audit evidence (security, compliance, billing disputes)
 - Crawls, indexing, and AI training access with verifiable terms
 
-This repository contains the **reference TypeScript implementation** (kernel, schema, crypto, protocol, rails, server, CLI) and a **Go SDK** for server-side verification, issuance, and policy evaluation.
+PEAC is the evidence layer. It does not replace identity, payment, or observability systems:
+
+- **OpenTelemetry** is observability. PEAC is portable proof that can correlate to traces.
+- **MCP / A2A** coordinate tool use and agent exchanges. PEAC carries proof alongside them.
+- **AP2 / ACP / UCP** authorize and orchestrate commerce flows. PEAC provides verifiable evidence around those flows.
+- **Payment rails** move funds. PEAC records settlement references and makes outcomes verifiable.
+
+This repository contains the **reference TypeScript implementation** and a **Go SDK** ([sdks/go/](sdks/go/)).
 
 ---
 
 ## Quick start
 
-### Install
-
 ```bash
 pnpm add @peac/protocol
 ```
-
-Optional: `@peac/cli` for command-line tools.
-
-### Issue and verify a record
 
 ```typescript
 import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
@@ -96,86 +87,25 @@ if (result.valid) {
 }
 ```
 
-**If this interaction includes settlement**, add payment fields:
+See [examples/quickstart/](examples/quickstart/) for runnable code. For settlement fields, HTTP/REST integration, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
 
-```typescript
-const { jws } = await issue({
-  iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  subject: 'https://api.example.com/inference',
-  amt: 1000, // Amount in minor units (e.g., cents)
-  cur: 'USD', // Currency code
-  rail: 'x402', // Payment rail
-  reference: 'tx_abc123', // Rail-specific reference
-  privateKey,
-  kid: 'key-2026-01',
-});
-```
+---
 
-See [examples/quickstart/](examples/quickstart/) for runnable code.
-
-### HTTP/REST integration
-
-Attach receipts to any HTTP response:
-
-```typescript
-import express from 'express';
-import { issue } from '@peac/protocol';
-
-const app = express();
-
-app.get('/data', async (req, res) => {
-  const body = { items: ['a', 'b', 'c'] };
-  const { jws } = await issue({
-    iss: 'https://api.example.com',
-    aud: req.headers['origin'] || 'https://client.example.com',
-    subject: '/data',
-    privateKey,
-    kid: 'key-2026-01',
-  });
-  res.setHeader('PEAC-Receipt', jws);
-  res.json(body);
-});
-```
-
-Clients retrieve the receipt from the `PEAC-Receipt` header and verify offline or store for audit.
-
-### Go SDK
-
-```bash
-go get github.com/peacprotocol/peac/sdks/go
-```
-
-```go
-import peac "github.com/peacprotocol/peac/sdks/go"
-
-// Verify a receipt
-result, err := peac.Verify(receiptJWS, peac.VerifyOptions{
-    Issuer:   "https://api.example.com",
-    Audience: "https://client.example.com",
-})
-
-// Issue a receipt
-result, err := peac.Issue(peac.IssueOptions{
-    Issuer:     "https://api.example.com",
-    Audience:   "https://client.example.com",
-    Subject:    "https://api.example.com/inference",
-    SigningKey: signingKey,
-})
-```
-
-See [sdks/go/README.md](sdks/go/README.md) for full documentation.
-
-### CLI
+## CLI
 
 ```bash
 pnpm add -g @peac/cli
 
-peac verify 'eyJhbGc...'          # Verify a receipt
-peac policy init                  # Create peac-policy.yaml
-peac policy validate policy.yaml  # Validate policy syntax
-peac policy generate policy.yaml  # Compile to deployment artifacts
+peac verify 'eyJhbGc...'                # Verify a receipt
+peac conformance run                     # Run conformance tests
+peac conformance run --level full        # Full conformance suite
+peac samples list                        # List sample receipts
+peac policy init                         # Create peac-policy.yaml
+peac policy validate policy.yaml         # Validate policy syntax
+peac policy generate policy.yaml         # Compile to deployment artifacts
 ```
+
+See [packages/cli/README.md](packages/cli/README.md) for the full command reference.
 
 ---
 
@@ -194,170 +124,36 @@ peac policy generate policy.yaml  # Compile to deployment artifacts
 
 ---
 
-## Transports and bindings
+## Versioning
 
-PEAC is transport-agnostic. The most common binding is **HTTP/REST**, where receipts travel as a response header and policies are discovered via `/.well-known/peac.txt`.
+Wire format identifiers (`peac-receipt/0.1`, `peac-bundle/0.1`) are independent of npm package versions and frozen for the v0.x series. Protocol surfaces (`PEAC-Receipt` header, `/.well-known/peac.txt`, `/.well-known/peac-issuer.json`) are stable. Implementation APIs (`@peac/protocol`, `@peac/cli`) aim for stability; internal packages may change between releases.
 
-| Binding             | How receipts travel                                     | Status      |
-| ------------------- | ------------------------------------------------------- | ----------- |
-| HTTP/REST (default) | Response header `PEAC-Receipt: <jws>`                   | Implemented |
-| MCP                 | Tool result metadata (`_meta.org.peacprotocol/receipt`) | Implemented |
-| A2A                 | Agent exchange attachments                              | Specified   |
-| WebSocket/streaming | Periodic or terminal receipts for long-running sessions | Planned     |
-| Queues/batches      | NDJSON receipts verified offline via bundles            | Implemented |
+See [docs/specs/VERSIONING.md](docs/specs/VERSIONING.md) for the versioning doctrine.
 
 ---
 
-## Interoperability and mappings
-
-PEAC records can be carried through other interaction standards via mappings:
-
-| Standard / Rail  | PEAC role                                | Status                             |
-| ---------------- | ---------------------------------------- | ---------------------------------- |
-| MCP              | Records in tool response metadata        | Implemented (`@peac/mappings-mcp`) |
-| ACP              | Agentic Commerce Protocol integration    | Implemented (`@peac/mappings-acp`) |
-| A2A              | Agent-to-Agent exchange attachments      | Specified                          |
-| AP2              | Evidence for payment authorization flows | Specified                          |
-| UCP              | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`) |
-| ERC-8004         | Reputation signals for Trustless Agents  | Implemented (docs/mappings)        |
-| x402             | Settlement evidence in receipt claims    | Implemented (`@peac/rails-x402`)   |
-| Payment gateways | Payment intent evidence                  | Implemented (`@peac/rails-stripe`) |
-
-PEAC does not orchestrate these protocols. It provides portable proof of what terms applied and what happened.
-
----
-
-## Dispute Bundle
-
-Portable, offline-verifiable evidence packages for disputes, audits, and cross-org handoffs.
-
-A bundle contains receipts, policy snapshots, and a deterministic verification report -- everything needed to prove what happened without trusting either party's internal logs.
-
-**Design constraints:**
-
-- ZIP archive with deterministic structure (RFC 8785 canonical JSON)
-- Offline verification fails if keys are missing (no silent network fallback)
-- Cross-language parity: TypeScript and Go produce identical verification reports
-
-```bash
-peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
-peac bundle verify ./evidence.peacbundle --offline
-```
-
-See [docs/specs/DISPUTE.md](docs/specs/DISPUTE.md) for the specification.
-
----
-
-## Workflow correlation
-
-Track multi-step agentic workflows across orchestration frameworks (MCP, A2A, CrewAI, LangGraph, AutoGen). Each receipt carries a `WorkflowContext` extension linking it to a workflow DAG -- step IDs, parent references, framework metadata, and optional hash chaining.
-
-At workflow completion, a `WorkflowSummaryAttestation` commits the full receipt set (by reference or Merkle root) for proof-of-run verification.
-
-See [docs/specs/WORKFLOW-CORRELATION.md](docs/specs/WORKFLOW-CORRELATION.md) for the specification and [examples/workflow-correlation/](examples/workflow-correlation/) for a working demo.
-
----
-
-## Use cases
-
-| Use case                   | How PEAC helps                                                          |
-| -------------------------- | ----------------------------------------------------------------------- |
-| **HTTP 402 micropayments** | Rails settle funds; receipts prove settlement offline.                  |
-| **Agent-to-API calls**     | Every call carries signed proof of who, what, when, under which terms.  |
-| **Priced datasets**        | Records capture which object or window was paid for.                    |
-| **AI training access**     | Policy surfaces describe terms; records prove compliance.               |
-| **Audit trails**           | Signed receipts form evidence for internal and external investigations. |
-| **Rate limiting**          | Records tie usage to identity and payment for quota enforcement.        |
-
-PEAC is not a paywall, billing engine, or storage system. It is the records layer that sits beside your payment rails and policy files.
-
----
-
-## What PEAC does not replace
-
-- **OpenTelemetry**: OTel is observability. PEAC is portable proof that can correlate to traces.
-- **MCP / A2A**: These coordinate tool use and agent exchanges. PEAC carries proof alongside them.
-- **AP2 / ACP / UCP**: These authorize and orchestrate commerce flows. PEAC provides verifiable evidence of terms, decisions, and outcomes around those flows.
-- **Payment rails**: Rails move funds. PEAC records settlement references and makes outcomes verifiable.
-
-PEAC is the evidence layer, not a replacement for identity, payment, or observability systems.
-
----
-
-## What to install
-
-**Public API (stable):**
-
-- `@peac/protocol` - Issue and verify receipts (includes crypto re-exports)
-- `@peac/cli` - Command-line tools (optional)
-
-**Go SDK (stable):**
-
-- `github.com/peacprotocol/peac/sdks/go` - Server-side verification, issuance, policy
-
-**Monorepo internals (may change between versions):**
-
-Everything else in this repo (`@peac/kernel`, `@peac/schema`, `@peac/crypto`, rails adapters, surfaces, workers) is used to build the public packages. You can depend on them, but expect more frequent changes.
-
----
-
-## Security and verification
+## Security
 
 - JWS signature verification required before trusting any receipt claim
 - Key discovery via `/.well-known/peac-issuer.json` JWKS endpoints with SSRF guards and timeouts
 - No silent network fallback for offline verification (fail-closed)
 - Replay protection via nonce + timestamp validation
-- Request binding (DPoP) supported where rail adapter enables it
 - Errors mapped to RFC 9457 Problem Details (no internal details exposed)
 
 See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](docs/specs/PROTOCOL-BEHAVIOR.md).
 
 ---
 
-## Versioning and compatibility
-
-**Wire format (stable):**
-
-Wire format identifiers use the pattern `peac-<artifact>/<major>.<minor>`:
-
-- `peac-receipt/0.1` - Receipt envelope format
-- `peac-bundle/0.1` - Dispute bundle format
-- `peac-verification-report/0.1` - Verification report format
-
-These wire identifiers are independent of npm package versions. A wire format change requires a new version number; package updates that do not change wire semantics keep the same wire version.
-
-**Protocol surfaces (stable):**
-
-- Header name: `PEAC-Receipt`
-- Policy path: `/.well-known/peac.txt`
-- Issuer config path: `/.well-known/peac-issuer.json`
-- Conformance vector format
-
-**Implementation/API:**
-
-- `@peac/protocol` and `@peac/cli` aim for API stability
-- Internal packages (`@peac/kernel`, `@peac/schema`, etc.) may change between releases
-- Rail adapter interfaces are evolving
-
-**Compatibility guarantees:**
-
-- Conformance vectors and changelogs published for every release
-- Cross-language parity: TypeScript and Go implementations produce identical outputs
-
-See [docs/specs/VERSIONING.md](docs/specs/VERSIONING.md) for the versioning doctrine.
-
----
-
 ## Documentation
 
-| Document                                               | Purpose                                        |
-| ------------------------------------------------------ | ---------------------------------------------- |
-| [Spec Index](docs/SPEC_INDEX.md)                       | Normative specifications                       |
-| [Architecture](docs/ARCHITECTURE.md)                   | Kernel-first design                            |
-| [Policy Kit Quickstart](docs/policy-kit/quickstart.md) | Policy authoring guide                         |
-| [Engineering Guide](docs/engineering-guide.md)         | Development patterns                           |
-| [CI Behavior](docs/CI_BEHAVIOR.md)                     | CI pipeline and gates                          |
-| [Full README](docs/README_LONG.md)                     | Package catalog, layer maps, detailed sections |
+| Document                                               | Purpose                                           |
+| ------------------------------------------------------ | ------------------------------------------------- |
+| [Spec Index](docs/SPEC_INDEX.md)                       | Normative specifications                          |
+| [Architecture](docs/ARCHITECTURE.md)                   | Kernel-first design                               |
+| [Policy Kit Quickstart](docs/policy-kit/quickstart.md) | Policy authoring guide                            |
+| [Engineering Guide](docs/engineering-guide.md)         | Development patterns                              |
+| [CI Behavior](docs/CI_BEHAVIOR.md)                     | CI pipeline and gates                             |
+| [Extended README](docs/README_LONG.md)                 | Package catalog, integration examples, layer maps |
 
 ---
 
