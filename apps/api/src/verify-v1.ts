@@ -250,6 +250,7 @@ export function createVerifyV1Handler() {
 
     c.header('X-Content-Type-Options', 'nosniff');
     c.header('Cache-Control', 'no-store');
+    c.header('Referrer-Policy', 'no-referrer');
 
     if (result.valid) {
       return c.json({

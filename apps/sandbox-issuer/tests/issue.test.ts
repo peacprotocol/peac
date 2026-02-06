@@ -41,9 +41,6 @@ describe('POST /api/v1/issue', () => {
     expect(data.receipt_id).toBeDefined();
     expect(data.issuer).toBe('https://test-issuer.example.com');
     expect(data.key_id).toBeDefined();
-    expect(data.issued_at).toBeTypeOf('number');
-    expect(data.expires_at).toBeTypeOf('number');
-    expect(data.expires_at).toBeGreaterThan(data.issued_at);
   });
 
   it('should verify the issued receipt round-trip', async () => {
@@ -80,9 +77,14 @@ describe('POST /api/v1/issue', () => {
   });
 
   it('should respect custom expires_in', async () => {
+    const keys = await resolveKeys();
     const res = await app.fetch(req({ aud: 'https://example.com', expires_in: 600 }));
     const data = await res.json();
-    expect(data.expires_at - data.issued_at).toBe(600);
+
+    const result = await verify(data.receipt, keys.publicKey);
+    expect(result.valid).toBe(true);
+    const payload = result.payload as Record<string, unknown>;
+    expect((payload.exp as number) - (payload.iat as number)).toBe(600);
   });
 
   it('should reject missing aud', async () => {

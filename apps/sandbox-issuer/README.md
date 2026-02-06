@@ -53,6 +53,18 @@ Keys are resolved in order:
 For stable keys across restarts, the issuer auto-persists generated keys
 to `.local/keys.json`.
 
+## Environment variables
+
+| Variable                   | Default                | Description                                        |
+| -------------------------- | ---------------------- | -------------------------------------------------- |
+| `PORT`                     | `3100`                 | HTTP listen port                                   |
+| `PEAC_ISSUER_URL`          | (derived from request) | Override the `iss` claim in issued receipts        |
+| `PEAC_SANDBOX_PRIVATE_JWK` | (none)                 | Ed25519 private key as JWK JSON string             |
+| `PEAC_TRUST_PROXY`         | (unset)                | Set to `1` to trust X-Forwarded-Proto/Host headers |
+
+When `PEAC_ISSUER_URL` is not set, the issuer URL is derived from the request
+URL origin. Forwarded headers are only honored when `PEAC_TRUST_PROXY=1`.
+
 ## Rate limiting
 
 1000 requests per hour per IP. Resets on process restart.

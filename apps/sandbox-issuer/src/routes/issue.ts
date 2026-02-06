@@ -116,7 +116,5 @@ export async function issueHandler(c: Context) {
     receipt_id: rid,
     issuer: issuerUrl,
     key_id: keys.kid,
-    issued_at: now,
-    expires_at: now + expires_in,
   });
 }
