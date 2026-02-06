@@ -41,7 +41,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "ci:guards": "bash scripts/ci/forbid-strings.sh",
     "ci:surface": "bash scripts/ci/surface-validator.sh",
-    "ci:all": "pnpm run ci:guards && pnpm run ci:surface && pnpm run lint && pnpm run typecheck && pnpm test",
+    "ci:all": "pnpm run ci:guards && pnpm run ci:surface && pnpm run lint && pnpm run check:unicode && pnpm run typecheck && pnpm test",
     "examples:check": "pnpm --filter './examples/*' exec tsc --noEmit",
     "verify:protocol-strings": "node scripts/verify-protocol-strings.mjs",
     "verify:spec-drift": "node scripts/verify-spec-drift.mjs",
@@ -51,6 +51,7 @@
     "bench": "tsx scripts/bench-protocol.ts all",
     "bench:verify": "tsx scripts/bench-protocol.ts verify",
     "bench:issue": "tsx scripts/bench-protocol.ts issue",
+    "test:apps": "pnpm --filter @peac/app-sandbox-issuer test && pnpm --filter @peac/app-verifier test && pnpm --filter @peac/app-api test",
     "test:exports": "node scripts/test-package-exports.mjs",
     "check:unicode": "bash scripts/check-unicode.sh"
   },
