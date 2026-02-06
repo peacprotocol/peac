@@ -1,6 +1,6 @@
 # PEAC Protocol - Canonical Documentation Index
 
-**Version:** 0.9.17
+**Version:** 0.10.8
 **Status:** Authoritative
 
 This document defines which documentation files are the canonical, up-to-date references for the PEAC Protocol.
