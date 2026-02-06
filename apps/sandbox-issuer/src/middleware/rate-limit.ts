@@ -39,15 +39,22 @@ export async function rateLimitMiddleware(c: Context, next: Next) {
 
   entry.count++;
 
+  const resetSeconds = Math.ceil((entry.resetAt - now) / 1000);
+  const remaining = Math.max(0, MAX_REQUESTS - entry.count);
+
+  // RFC 9333 RateLimit-* headers on all responses
+  c.header('RateLimit-Limit', String(MAX_REQUESTS));
+  c.header('RateLimit-Remaining', String(remaining));
+  c.header('RateLimit-Reset', String(resetSeconds));
+
   if (entry.count > MAX_REQUESTS) {
-    const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
-    c.header('Retry-After', String(retryAfter));
+    c.header('Retry-After', String(resetSeconds));
     return c.json(
       {
         type: 'https://www.peacprotocol.org/errors/rate_limited',
         title: 'Rate Limited',
         status: 429,
-        detail: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
+        detail: `Rate limit exceeded. Try again in ${resetSeconds} seconds.`,
       },
       429
     );

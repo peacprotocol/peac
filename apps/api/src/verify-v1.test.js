@@ -2,22 +2,28 @@
  * @peac/api/verify-v1 - Test verify V1 endpoint
  *
  * Tests issuer allowlist rejection, rate limit tiering,
- * and security header consistency.
+ * RFC 9457 Content-Type enforcement, and security header consistency.
  */
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { createVerifyV1Handler, resetVerifyV1RateLimit } from '../dist/verify-v1.js';
+import {
+  createVerifyV1Handler,
+  resetVerifyV1RateLimit,
+  isProblemError,
+  PROBLEM_MEDIA_TYPE,
+} from '../dist/index.js';
 import { Hono } from 'hono';
 
 // Build a minimal Hono app with the verify handler and ProblemError handler.
-// Uses duck-typing because tsup bundles a separate ProblemError class copy.
+// Uses isProblemError() for duck-typed detection across bundle boundaries.
 function buildApp() {
   resetVerifyV1RateLimit();
   const app = new Hono();
   app.onError((err, c) => {
-    if (err.name === 'ProblemError' && typeof err.toProblemDetails === 'function') {
-      return c.json(err.toProblemDetails(), err.status);
+    if (isProblemError(err)) {
+      c.header('Content-Type', PROBLEM_MEDIA_TYPE);
+      return c.body(JSON.stringify(err.toProblemDetails()), err.status);
     }
     return c.json({ title: 'Internal Server Error', status: 500 }, 500);
   });
@@ -115,31 +121,61 @@ test('API key rate limit (1000/min) is separate from anonymous', async () => {
   assert.notStrictEqual(apiRes.status, 429);
 });
 
-test('verify response includes security headers', async () => {
+test('error responses include security headers', async () => {
   const app = buildApp();
   const jws = fakeJws({ alg: 'EdDSA', kid: 'k1' }, { iss: 'https://evil.example.com' });
 
-  // Even error responses should have security headers via the handler path
-  // For this test, use a receipt with public_key to hit the verify path directly
-  const res = await app.fetch(
-    verifyReq({
-      receipt: jws,
-      public_key: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-    })
-  );
-
-  // Should reach the verify stage (may fail verification, but headers should be set)
-  if (res.status === 200) {
-    assert.strictEqual(res.headers.get('x-content-type-options'), 'nosniff');
-    assert.strictEqual(res.headers.get('cache-control'), 'no-store');
-    assert.strictEqual(res.headers.get('referrer-policy'), 'no-referrer');
-  }
+  // Error responses (thrown ProblemError) must include security headers
+  const res = await app.fetch(verifyReq({ receipt: jws }));
+  assert.strictEqual(res.status, 422);
+  assert.strictEqual(res.headers.get('x-content-type-options'), 'nosniff');
+  assert.strictEqual(res.headers.get('cache-control'), 'no-store');
+  assert.strictEqual(res.headers.get('referrer-policy'), 'no-referrer');
+  assert.strictEqual(res.headers.get('x-frame-options'), 'DENY');
 });
 
-test('rejects oversized body via content-length', async () => {
+test('thrown ProblemError returns application/problem+json Content-Type', async () => {
+  const app = buildApp();
+  const jws = fakeJws(
+    { alg: 'EdDSA', kid: 'key-1' },
+    { iss: 'https://evil.example.com', aud: 'https://example.com' }
+  );
+
+  // Thrown ProblemError (untrusted issuer) caught by onError
+  const res = await app.fetch(verifyReq({ receipt: jws }));
+  assert.strictEqual(res.status, 422);
+  assert.ok(
+    res.headers.get('content-type')?.includes('application/problem+json'),
+    `Expected application/problem+json, got: ${res.headers.get('content-type')}`
+  );
+});
+
+test('early-return error (rate limit) returns application/problem+json Content-Type', async () => {
+  const app = buildApp();
+  const jws = fakeJws({ alg: 'EdDSA', kid: 'k1' }, { iss: 'https://evil.example.com' });
+
+  // Exhaust rate limit
+  for (let i = 0; i < 100; i++) {
+    await app.fetch(verifyReq({ receipt: jws }));
+  }
+
+  // Rate limit is early-return (not thrown), must still have problem+json
+  const res = await app.fetch(verifyReq({ receipt: jws }));
+  assert.strictEqual(res.status, 429);
+  assert.ok(
+    res.headers.get('content-type')?.includes('application/problem+json'),
+    `Expected application/problem+json, got: ${res.headers.get('content-type')}`
+  );
+});
+
+test('early-return error (oversized body) returns application/problem+json Content-Type', async () => {
   const app = buildApp();
   const res = await app.fetch(verifyReq({ receipt: 'test' }, { 'content-length': '999999' }));
   assert.strictEqual(res.status, 413);
+  assert.ok(
+    res.headers.get('content-type')?.includes('application/problem+json'),
+    `Expected application/problem+json, got: ${res.headers.get('content-type')}`
+  );
 });
 
 test('rejects invalid public_key length', async () => {
@@ -155,4 +191,21 @@ test('rejects invalid public_key length', async () => {
   assert.strictEqual(res.status, 422);
   const data = await res.json();
   assert.strictEqual(data.title, 'Invalid Public Key');
+});
+
+test('rate limit includes RateLimit-* headers (RFC 9333)', async () => {
+  const app = buildApp();
+  const jws = fakeJws({ alg: 'EdDSA', kid: 'k1' }, { iss: 'https://evil.example.com' });
+
+  // First request should include rate limit headers
+  const res = await app.fetch(verifyReq({ receipt: jws }));
+  assert.ok(res.headers.get('ratelimit-limit'), 'Expected RateLimit-Limit header');
+  assert.ok(res.headers.get('ratelimit-remaining'), 'Expected RateLimit-Remaining header');
+  assert.ok(res.headers.get('ratelimit-reset'), 'Expected RateLimit-Reset header');
+
+  // Remaining should decrease
+  const remaining1 = parseInt(res.headers.get('ratelimit-remaining'));
+  const res2 = await app.fetch(verifyReq({ receipt: jws }));
+  const remaining2 = parseInt(res2.headers.get('ratelimit-remaining'));
+  assert.ok(remaining2 < remaining1, 'RateLimit-Remaining should decrease');
 });

@@ -7,6 +7,7 @@ import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { createV13HonoHandler } from './routes.js';
 import { createVerifyV1Handler } from './verify-v1.js';
+import { isProblemError } from './errors.js';
 
 // Legacy v0.9.12 handlers
 export {
@@ -17,6 +18,7 @@ export {
 } from './handler.js';
 export {
   ProblemError,
+  isProblemError,
   createProblemDetails,
   handleVerifyError,
   validationError,
@@ -36,7 +38,7 @@ export { createV13ExpressHandler, createV13HonoHandler } from './routes.js';
 export type { V13VerifyRequest, V13VerifyResponse, VerifierOptions } from './verifier.js';
 
 // v1 verify endpoint
-export { createVerifyV1Handler } from './verify-v1.js';
+export { createVerifyV1Handler, resetVerifyV1RateLimit } from './verify-v1.js';
 
 // RFC 9457 Problem Details media type
 export const PROBLEM_MEDIA_TYPE = 'application/problem+json';
@@ -60,21 +62,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   // Global error handler: ProblemError -> RFC 9457 JSON response
   app.onError((err, c) => {
-    if (err.name === 'ProblemError' && typeof (err as any).toProblemDetails === 'function') {
-      const problem = (err as any).toProblemDetails();
-      return c.json(problem, {
-        status: problem.status,
-        headers: { 'Content-Type': PROBLEM_MEDIA_TYPE },
-      });
+    c.header('Content-Type', PROBLEM_MEDIA_TYPE);
+    if (isProblemError(err)) {
+      const problem = err.toProblemDetails();
+      return c.body(JSON.stringify(problem), problem.status);
     }
-    return c.json(
-      {
+    return c.body(
+      JSON.stringify({
         type: 'https://www.peacprotocol.org/problems/processing-error',
         title: 'Processing Error',
         status: 500,
         detail: 'An internal error occurred',
-      },
-      { status: 500, headers: { 'Content-Type': PROBLEM_MEDIA_TYPE } }
+      }),
+      500
     );
   });
 

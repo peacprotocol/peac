@@ -54,7 +54,8 @@
     "build:apps": "pnpm --filter @peac/app-sandbox-issuer build && pnpm --filter @peac/app-verifier build && pnpm --filter @peac/app-api build",
     "test:apps": "pnpm --filter @peac/app-sandbox-issuer test && pnpm --filter @peac/app-verifier test && pnpm --filter @peac/app-api test",
     "test:exports": "node scripts/test-package-exports.mjs",
-    "check:unicode": "bash scripts/check-unicode.sh"
+    "check:unicode": "bash scripts/check-unicode.sh",
+    "sanitize:unicode": "node scripts/sanitize-unicode.mjs --fix"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

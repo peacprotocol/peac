@@ -17,6 +17,7 @@ Environment variable reference for PEAC infrastructure apps.
 | --------------------------- | ------------ | ------------------------------------------------- |
 | `PORT`                      | `3000`       | HTTP listen port                                  |
 | `PEAC_TRUSTED_ISSUERS_JSON` | sandbox only | JSON array of trusted issuers for JWKS resolution |
+| `PEAC_TRUST_PROXY`          | (unset)      | Set to `1` to trust forwarded IP headers          |
 
 ### Trusted issuers format
 
@@ -30,7 +31,9 @@ Environment variable reference for PEAC infrastructure apps.
 ```
 
 When `PEAC_TRUSTED_ISSUERS_JSON` is not set, only the sandbox issuer
-(`https://sandbox.peacprotocol.org`) is trusted by default.
+(`https://sandbox.peacprotocol.org`) is trusted by default. Entries are
+validated at boot with Zod -- malformed JSON or non-HTTPS `jwks_uri`
+values cause an immediate startup failure.
 
 ### Rate limits
 
@@ -40,6 +43,8 @@ When `PEAC_TRUSTED_ISSUERS_JSON` is not set, only the sandbox issuer
 | API key (`X-API-Key` header) | 1000 requests | 1 minute |
 
 Rate limit state is in-memory and resets on process restart.
+All responses include `RateLimit-Limit`, `RateLimit-Remaining`, and
+`RateLimit-Reset` headers per RFC 9333.
 
 ## Browser Verifier (`apps/verifier`)
 
@@ -55,3 +60,23 @@ The "Load Local Issuer" button fetches from `http://127.0.0.1:3100`
 
 Browser code imports `@peac/protocol/verify-local` to avoid pulling in
 Node.js-only dependencies from the protocol barrel export.
+
+## Reverse proxy trust model
+
+Both the sandbox issuer and verify API gate forwarded-header trust behind
+`PEAC_TRUST_PROXY=1`. Without this flag:
+
+- IP-based rate limiting uses `127.0.0.1` for all requests
+- `X-Forwarded-Proto`, `X-Forwarded-Host`, and `X-Forwarded-For` are ignored
+- Issuer URL is derived from the direct request URL
+
+When `PEAC_TRUST_PROXY=1` is set:
+
+- `cf-connecting-ip` and `x-forwarded-for` are used for rate limit bucketing
+- `x-forwarded-proto` is validated strictly (`http` or `https` only)
+- `x-forwarded-host` is validated with a conservative hostname pattern
+  (alphanumeric, dots, hyphens, optional port -- no spaces or slashes)
+
+Only set `PEAC_TRUST_PROXY=1` when running behind a reverse proxy that
+strips inbound `X-Forwarded-*` headers from the public edge and injects
+its own canonical values.

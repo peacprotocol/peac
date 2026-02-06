@@ -15,6 +15,9 @@ import type { Context } from 'hono';
 const DEFAULT_ISSUER_URL = 'https://sandbox.peacprotocol.org';
 const VALID_PROTOS = new Set(['http', 'https']);
 
+/** Conservative hostname[:port] check -- no spaces, no slashes, no query */
+const VALID_HOST_RE = /^[a-zA-Z0-9._-]+(:\d{1,5})?$/;
+
 /**
  * Resolve the issuer URL for the current request.
  *
@@ -31,7 +34,7 @@ export function resolveIssuerUrl(c: Context): string {
   if (process.env.PEAC_TRUST_PROXY === '1') {
     const proto = c.req.header('x-forwarded-proto');
     const host = c.req.header('x-forwarded-host') ?? c.req.header('host');
-    if (proto && host && VALID_PROTOS.has(proto)) {
+    if (proto && host && VALID_PROTOS.has(proto) && VALID_HOST_RE.test(host)) {
       return `${proto}://${host}`;
     }
   }

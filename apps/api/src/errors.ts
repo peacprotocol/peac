@@ -30,6 +30,27 @@ export class ProblemError extends Error {
   }
 }
 
+/** Shape used by isProblemError for duck-typed detection */
+interface ProblemErrorLike {
+  name: string;
+  status: number;
+  toProblemDetails: () => ProblemDetails;
+}
+
+/**
+ * Duck-typed ProblemError detection.
+ *
+ * Bundlers (tsup) can duplicate the ProblemError class, breaking instanceof.
+ * This predicate checks by shape so error handlers work across bundle boundaries.
+ */
+export function isProblemError(err: unknown): err is ProblemErrorLike {
+  return (
+    err instanceof Error &&
+    err.name === 'ProblemError' &&
+    typeof (err as any).toProblemDetails === 'function'
+  );
+}
+
 export function createProblemDetails(ctx: ErrorContext, instance?: string): VerifyErrorDetails {
   const baseUrl = 'https://www.peacprotocol.org/problems';
 

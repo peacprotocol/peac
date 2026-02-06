@@ -13,6 +13,7 @@ import pathlib, unicodedata, sys
 roots = [
     "package.json",
     "packages/",
+    "apps/",
     "specs/",
     "docs/",
 ]
@@ -23,6 +24,8 @@ PROBLEMATIC_RANGES = [
     (0x202A, 0x202E),  # Bidi embedding controls
     (0x2066, 0x2069),  # Bidi isolate controls
     (0x00A0, 0x00A0),  # NBSP (suspicious in code)
+    (0x00AD, 0x00AD),  # Soft hyphen
+    (0xFEFF, 0xFEFF),  # BOM / ZWNBSP
 ]
 
 def is_problematic(ch):

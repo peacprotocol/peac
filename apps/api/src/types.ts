@@ -39,7 +39,7 @@ export interface VerifyErrorDetails extends ProblemDetails {
 }
 
 // HTTP status code mappings
-export type HttpStatus = 200 | 400 | 401 | 403 | 422 | 500;
+export type HttpStatus = 200 | 400 | 401 | 403 | 413 | 422 | 429 | 500;
 
 // Error categories for structured responses
 export interface ErrorContext {

@@ -112,7 +112,14 @@ function getRateLimit(c: Context): { key: string; limit: number } {
   return { key: `ip:${ip}`, limit: ANON_LIMIT };
 }
 
-function checkRateLimit(key: string, limit: number): { allowed: boolean; retryAfter?: number } {
+interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetSeconds: number;
+  retryAfter?: number;
+}
+
+function checkRateLimit(key: string, limit: number): RateLimitResult {
   const now = Date.now();
   let entry = rateLimitStore.get(key);
 
@@ -122,10 +129,20 @@ function checkRateLimit(key: string, limit: number): { allowed: boolean; retryAf
   }
 
   entry.count++;
+  const resetSeconds = Math.ceil((entry.resetAt - now) / 1000);
+  const remaining = Math.max(0, limit - entry.count);
+
   if (entry.count > limit) {
-    return { allowed: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+    return { allowed: false, remaining: 0, resetSeconds, retryAfter: resetSeconds };
   }
-  return { allowed: true };
+  return { allowed: true, remaining, resetSeconds };
+}
+
+/** Emit RFC 9333 RateLimit-* headers on every response */
+function setRateLimitHeaders(c: Context, limit: number, result: RateLimitResult): void {
+  c.header('RateLimit-Limit', String(limit));
+  c.header('RateLimit-Remaining', String(result.remaining));
+  c.header('RateLimit-Reset', String(result.resetSeconds));
 }
 
 /** JWKS cache (shared across requests) */
@@ -139,34 +156,38 @@ export function createVerifyV1Handler() {
     c.header('X-Content-Type-Options', 'nosniff');
     c.header('Cache-Control', 'no-store');
     c.header('Referrer-Policy', 'no-referrer');
+    c.header('X-Frame-Options', 'DENY');
 
-    // Rate limit with Retry-After
+    // Rate limit with Retry-After + RFC 9333 RateLimit-* headers
     const rl = getRateLimit(c);
     const check = checkRateLimit(rl.key, rl.limit);
+    setRateLimitHeaders(c, rl.limit, check);
     if (!check.allowed) {
       c.header('Retry-After', String(check.retryAfter));
-      return c.json(
-        {
+      c.header('Content-Type', PROBLEM_CONTENT_TYPE);
+      return c.body(
+        JSON.stringify({
           type: 'https://www.peacprotocol.org/problems/rate-limited',
           title: 'Rate Limited',
           status: 429,
           detail: `Rate limit exceeded. Try again in ${check.retryAfter} seconds.`,
-        },
-        { status: 429, headers: { 'Content-Type': PROBLEM_CONTENT_TYPE } }
+        }),
+        429
       );
     }
 
     // Body size check
     const contentLength = c.req.header('content-length');
     if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
-      return c.json(
-        {
+      c.header('Content-Type', PROBLEM_CONTENT_TYPE);
+      return c.body(
+        JSON.stringify({
           type: 'https://www.peacprotocol.org/problems/request-too-large',
           title: 'Request Too Large',
           status: 413,
           detail: `Request body exceeds ${MAX_BODY_SIZE} byte limit`,
-        },
-        { status: 413, headers: { 'Content-Type': PROBLEM_CONTENT_TYPE } }
+        }),
+        413
       );
     }
 
