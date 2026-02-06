@@ -249,9 +249,38 @@ button:disabled {
   background: var(--accent);
 }
 
+#load-local {
+  background: white;
+  color: var(--fg);
+  font-size: 0.75rem;
+}
+
 #add-manual {
   background: white;
   color: var(--fg);
+}
+
+.trust-message {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.trust-message:empty {
+  display: none;
+}
+
+.trust-message.error {
+  background: #fef2f2;
+  color: var(--invalid);
+  border: 1px solid #fecaca;
+}
+
+.trust-message.success {
+  background: #f0fdf4;
+  color: var(--valid);
+  border: 1px solid #bbf7d0;
 }
 
 .empty {

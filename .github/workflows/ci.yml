@@ -136,6 +136,9 @@ jobs:
           fi
           echo "OK: No X-PEAC headers found"
 
+      - name: App builds (sandbox-issuer, verifier, api)
+        run: pnpm build:apps
+
       - name: App tests (sandbox-issuer, verifier, api)
         run: pnpm test:apps
 

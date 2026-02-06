@@ -62,6 +62,9 @@ importers:
       '@peac/disc':
         specifier: workspace:*
         version: link:../../packages/discovery
+      '@peac/jwks-cache':
+        specifier: workspace:*
+        version: link:../../packages/jwks-cache
       '@peac/pay402':
         specifier: workspace:*
         version: link:../../packages/pay402

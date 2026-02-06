@@ -11,11 +11,10 @@ import type { Context } from 'hono';
 import { sign } from '@peac/crypto';
 import { resolveKeys } from '../keys.js';
 import { IssueRequestSchema, MAX_BODY_SIZE } from '../schemas.js';
-
-const ISSUER_URL = 'https://sandbox.peacprotocol.org';
+import { resolveIssuerUrl } from '../config.js';
 
 export async function issueHandler(c: Context) {
-  // Body size check
+  // Content-Length pre-check (fast reject before reading body)
   const contentLength = c.req.header('content-length');
   if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
     return c.json(
@@ -29,10 +28,37 @@ export async function issueHandler(c: Context) {
     );
   }
 
-  // Parse and validate
+  // Hard body read limit (enforce actual bytes, not just header)
+  let rawBody: string;
+  try {
+    rawBody = await c.req.text();
+  } catch {
+    return c.json(
+      {
+        type: 'https://www.peacprotocol.org/errors/invalid_request',
+        title: 'Invalid Request',
+        status: 400,
+        detail: 'Failed to read request body',
+      },
+      400
+    );
+  }
+
+  if (new TextEncoder().encode(rawBody).length > MAX_BODY_SIZE) {
+    return c.json(
+      {
+        type: 'https://www.peacprotocol.org/errors/request_too_large',
+        title: 'Request Too Large',
+        status: 413,
+        detail: `Request body exceeds ${MAX_BODY_SIZE} byte limit`,
+      },
+      413
+    );
+  }
+
   let body: unknown;
   try {
-    body = await c.req.json();
+    body = JSON.parse(rawBody);
   } catch {
     return c.json(
       {
@@ -60,13 +86,14 @@ export async function issueHandler(c: Context) {
   }
 
   const { aud, sub, purpose, expires_in } = parsed.data;
+  const issuerUrl = resolveIssuerUrl(c);
   const keys = await resolveKeys();
   const now = Math.floor(Date.now() / 1000);
   const rid = crypto.randomUUID();
 
   // Build claims -- server sets everything except caller-provided fields
   const claims: Record<string, unknown> = {
-    iss: ISSUER_URL,
+    iss: issuerUrl,
     aud,
     iat: now,
     exp: now + expires_in,
@@ -81,10 +108,13 @@ export async function issueHandler(c: Context) {
 
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('Cache-Control', 'no-store');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('Referrer-Policy', 'no-referrer');
+  c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   return c.json({
     receipt,
     receipt_id: rid,
-    issuer: ISSUER_URL,
+    issuer: issuerUrl,
     key_id: keys.kid,
     issued_at: now,
     expires_at: now + expires_in,

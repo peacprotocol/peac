@@ -32,6 +32,7 @@
     "@peac/core": "workspace:*",
     "@peac/crypto": "workspace:*",
     "@peac/disc": "workspace:*",
+    "@peac/jwks-cache": "workspace:*",
     "@peac/protocol": "workspace:*",
     "@peac/receipts": "workspace:*",
     "@peac/pay402": "workspace:*",

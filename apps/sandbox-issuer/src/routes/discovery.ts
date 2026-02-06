@@ -7,17 +7,17 @@
 
 import type { Context } from 'hono';
 import { getPublicJwk, resolveKeys } from '../keys.js';
-
-const ISSUER_URL = 'https://sandbox.peacprotocol.org';
+import { resolveIssuerUrl } from '../config.js';
 
 export async function issuerConfigHandler(c: Context) {
   const keys = await resolveKeys();
   const isEphemeral = keys.mode === 'ephemeral';
+  const issuerUrl = resolveIssuerUrl(c);
 
   const config = {
     version: 'peac-issuer/0.1',
-    issuer: ISSUER_URL,
-    jwks_uri: `${ISSUER_URL}/.well-known/jwks.json`,
+    issuer: issuerUrl,
+    jwks_uri: `${issuerUrl}/.well-known/jwks.json`,
     receipt_versions: ['peac-receipt/0.1'],
     algorithms: ['EdDSA'],
     ...(isEphemeral ? { sandbox_mode: 'ephemeral' } : {}),

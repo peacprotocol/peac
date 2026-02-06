@@ -51,6 +51,7 @@
     "bench": "tsx scripts/bench-protocol.ts all",
     "bench:verify": "tsx scripts/bench-protocol.ts verify",
     "bench:issue": "tsx scripts/bench-protocol.ts issue",
+    "build:apps": "pnpm --filter @peac/app-sandbox-issuer build && pnpm --filter @peac/app-verifier build && pnpm --filter @peac/app-api build",
     "test:apps": "pnpm --filter @peac/app-sandbox-issuer test && pnpm --filter @peac/app-verifier test && pnpm --filter @peac/app-api test",
     "test:exports": "node scripts/test-package-exports.mjs",
     "check:unicode": "bash scripts/check-unicode.sh"

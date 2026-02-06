@@ -5,11 +5,13 @@
  * receipt issuance, and round-trip verification.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { app } from '../src/app.js';
 import { verify } from '@peac/crypto';
 import { resolveKeys, resetKeyCache } from '../src/keys.js';
 import { resetRateLimitStore } from '../src/middleware/rate-limit.js';
+
+const TEST_ISSUER_URL = 'https://test-issuer.example.com';
 
 function req(body: unknown, headers?: Record<string, string>) {
   return new Request('http://localhost/api/v1/issue', {
@@ -23,6 +25,11 @@ describe('POST /api/v1/issue', () => {
   beforeEach(() => {
     resetKeyCache();
     resetRateLimitStore();
+    process.env.PEAC_ISSUER_URL = TEST_ISSUER_URL;
+  });
+
+  afterEach(() => {
+    delete process.env.PEAC_ISSUER_URL;
   });
 
   it('should issue a valid receipt', async () => {
@@ -32,7 +39,7 @@ describe('POST /api/v1/issue', () => {
     const data = await res.json();
     expect(data.receipt).toBeDefined();
     expect(data.receipt_id).toBeDefined();
-    expect(data.issuer).toBe('https://sandbox.peacprotocol.org');
+    expect(data.issuer).toBe('https://test-issuer.example.com');
     expect(data.key_id).toBeDefined();
     expect(data.issued_at).toBeTypeOf('number');
     expect(data.expires_at).toBeTypeOf('number');
@@ -47,7 +54,7 @@ describe('POST /api/v1/issue', () => {
     const result = await verify(data.receipt, keys.publicKey);
     expect(result.valid).toBe(true);
     expect(result.payload).toMatchObject({
-      iss: 'https://sandbox.peacprotocol.org',
+      iss: 'https://test-issuer.example.com',
       aud: 'https://example.com',
     });
   });
@@ -126,5 +133,8 @@ describe('POST /api/v1/issue', () => {
     const res = await app.fetch(req({ aud: 'https://example.com' }));
     expect(res.headers.get('x-content-type-options')).toBe('nosniff');
     expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(res.headers.get('x-frame-options')).toBe('DENY');
+    expect(res.headers.get('referrer-policy')).toBe('no-referrer');
+    expect(res.headers.get('permissions-policy')).toContain('camera=()');
   });
 });

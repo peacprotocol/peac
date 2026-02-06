@@ -2,7 +2,12 @@
 /**
  * Service Worker -- App Shell Cache
  *
- * Caches static assets for offline use.
+ * Intentionally minimal: caches only the app shell (index.html) for
+ * offline use. Does NOT cache API responses, JWKS, or receipts --
+ * verification must always use fresh cryptographic material.
+ *
+ * Strategy: cache-first for static assets, network-fallback.
+ * Bump CACHE_NAME to invalidate on deploy.
  */
 
 const CACHE_NAME = 'peac-verifier-v1';

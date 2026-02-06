@@ -14,7 +14,8 @@ import {
 } from '../lib/trust-store.js';
 
 const SANDBOX_ISSUER = 'https://sandbox.peacprotocol.org';
-const SANDBOX_JWKS_URI = 'http://127.0.0.1:3100/.well-known/jwks.json';
+const SANDBOX_JWKS_URI = 'https://sandbox.peacprotocol.org/.well-known/jwks.json';
+const LOCAL_JWKS_URI = 'http://127.0.0.1:3100/.well-known/jwks.json';
 
 export function initTrustConfig(): void {
   const container = document.getElementById('trust-config');
@@ -28,8 +29,10 @@ function render(container: HTMLElement): void {
 
   let html = `
     <h2>Trusted Issuers</h2>
+    <div id="trust-message" class="trust-message"></div>
     <div class="trust-actions">
       <button id="load-sandbox" type="button">Load Sandbox JWKS</button>
+      <button id="load-local" type="button">Load Local Issuer</button>
       <button id="add-manual" type="button">Add Key Manually</button>
     </div>
   `;
@@ -69,9 +72,14 @@ function render(container: HTMLElement): void {
 
   container.innerHTML = html;
 
-  // Event: Load Sandbox JWKS
+  // Event: Load Sandbox JWKS (HTTPS)
   document.getElementById('load-sandbox')?.addEventListener('click', async () => {
-    await loadSandboxJwks(container);
+    await loadJwks(container, SANDBOX_JWKS_URI, SANDBOX_ISSUER);
+  });
+
+  // Event: Load Local Issuer (dev)
+  document.getElementById('load-local')?.addEventListener('click', async () => {
+    await loadJwks(container, LOCAL_JWKS_URI, 'http://127.0.0.1:3100');
   });
 
   // Event: Toggle manual form
@@ -97,27 +105,45 @@ function render(container: HTMLElement): void {
   });
 }
 
-async function loadSandboxJwks(container: HTMLElement): Promise<void> {
+function showMessage(msg: string, type: 'error' | 'success'): void {
+  const el = document.getElementById('trust-message');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `trust-message ${type}`;
+  // Auto-clear success messages
+  if (type === 'success') {
+    setTimeout(() => {
+      el.textContent = '';
+      el.className = 'trust-message';
+    }, 3000);
+  }
+}
+
+async function loadJwks(container: HTMLElement, jwksUri: string, issuerUrl: string): Promise<void> {
   try {
-    const res = await fetch(SANDBOX_JWKS_URI);
+    const res = await fetch(jwksUri);
     if (!res.ok) {
-      alert(`Failed to fetch JWKS: ${res.status} ${res.statusText}`);
+      showMessage(`Failed to fetch JWKS: ${res.status} ${res.statusText}`, 'error');
       return;
     }
 
     const jwks = (await res.json()) as { keys: TrustedKey[] };
     const issuer: TrustedIssuer = {
-      issuer: SANDBOX_ISSUER,
-      jwks_uri: SANDBOX_JWKS_URI,
+      issuer: issuerUrl,
+      jwks_uri: jwksUri,
       keys: jwks.keys,
     };
 
     addIssuer(issuer);
+    showMessage(`Loaded ${jwks.keys.length} key(s) from ${issuerUrl}`, 'success');
     render(container);
-  } catch (err) {
-    alert(
-      `Could not connect to sandbox issuer at ${SANDBOX_JWKS_URI}. Is it running?\n\n` +
-        `Start it with: pnpm --filter @peac/app-sandbox-issuer start`
+  } catch {
+    showMessage(
+      `Could not connect to ${jwksUri}. ` +
+        (jwksUri.includes('127.0.0.1')
+          ? 'Is the local issuer running? Start it with: pnpm --filter @peac/app-sandbox-issuer start'
+          : 'Check that the issuer is reachable.'),
+      'error'
     );
   }
 }
@@ -128,7 +154,7 @@ function saveManualKey(container: HTMLElement): void {
 
   const issuerUrl = issuerInput.value.trim();
   if (!issuerUrl) {
-    alert('Issuer URL is required');
+    showMessage('Issuer URL is required', 'error');
     return;
   }
 
@@ -136,11 +162,11 @@ function saveManualKey(container: HTMLElement): void {
   try {
     key = JSON.parse(jwkInput.value) as TrustedKey;
     if (!key.kid || !key.x || !key.crv) {
-      alert('JWK must include kid, x, and crv fields');
+      showMessage('JWK must include kid, x, and crv fields', 'error');
       return;
     }
   } catch {
-    alert('Invalid JSON in public key field');
+    showMessage('Invalid JSON in public key field', 'error');
     return;
   }
 
@@ -150,6 +176,7 @@ function saveManualKey(container: HTMLElement): void {
     : { issuer: issuerUrl, keys: [key] };
 
   addIssuer(issuer);
+  showMessage(`Added key ${key.kid} for ${issuerUrl}`, 'success');
   render(container);
 }
 
