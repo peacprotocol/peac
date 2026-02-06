@@ -15,7 +15,7 @@ A record is the portable interaction artifact; a receipt is the signed file form
 
 **Why:** Internal logs are not neutral proof and integrations do not interoperate. PEAC makes terms machine-readable and outcomes verifiable, without replacing your auth, rails, or observability.
 
-Works over HTTP/REST (headers), MCP/A2A, and streaming transports; verification is offline and deterministic.
+HTTP/REST is the primary binding today (receipt header + well-known policy). MCP mapping is implemented; A2A and streaming bindings are specified/planned. Verification is offline and deterministic.
 
 ## The model
 
@@ -61,6 +61,8 @@ This repository contains the **reference TypeScript implementation** and a **Go 
 pnpm add @peac/protocol
 ```
 
+Requires Node ESM or top-level await.
+
 ```typescript
 import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
 
@@ -93,7 +95,7 @@ See [examples/quickstart/](examples/quickstart/) for runnable code. For settleme
 
 ## CLI
 
-> **Note:** `@peac/cli` publishes to npm with v0.10.9. Until then, run from source: `pnpm --filter @peac/cli exec peac`.
+> **Note:** `@peac/cli` may not be published to npm yet. From this repo root: `pnpm install && pnpm --filter @peac/cli exec peac --help`.
 
 ```bash
 peac verify 'eyJhbGc...'                # Verify a receipt
@@ -110,6 +112,8 @@ See [packages/cli/README.md](packages/cli/README.md) for the full command refere
 ---
 
 ## Core primitives
+
+**Stable** = wire identifiers and spec are stable and conformance-gated; implementations may evolve.
 
 | Primitive           | Stable | Description                                           |
 | ------------------- | ------ | ----------------------------------------------------- |

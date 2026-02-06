@@ -51,6 +51,8 @@ See [examples/x402-node-server](../examples/x402-node-server) for a working impl
 
 ---
 
+**Package availability:** Some packages referenced below (CLI, middleware, adapters) may exist in this repo but not yet be published to npm. If so, run commands via `pnpm --filter <pkg> exec ...` from this repo root, or use the lower-level `@peac/protocol` APIs shown.
+
 ## Integration examples
 
 ### Settlement fields
@@ -172,8 +174,13 @@ A bundle contains receipts, policy snapshots, and a deterministic verification r
 - Cross-language parity: TypeScript and Go produce identical verification reports
 
 ```bash
+# If peac is on PATH
 peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
 peac bundle verify ./evidence.peacbundle --offline
+
+# From this repo root (always works when CLI is not published)
+pnpm --filter @peac/cli exec peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
+pnpm --filter @peac/cli exec peac bundle verify ./evidence.peacbundle --offline
 ```
 
 See [specs/DISPUTE.md](specs/DISPUTE.md) for the specification.
@@ -199,7 +206,7 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 
 **Receipts:**
 
-- Receipt type: `typ: "peac-receipt/0.1"` (frozen across v0.9.x)
+- Receipt type: `typ: "peac-receipt/0.1"` (frozen across v0.x)
 - Envelope structure: `PEACEnvelope` with auth, payment evidence, and metadata
 - Signature: Ed25519 JWS (RFC 8032)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
@@ -701,8 +708,8 @@ These are optional higher-layer helpers built on top of the core receipt/kernel 
 
 **Wire format:**
 
-- `peac-receipt/0.1` is frozen throughout the v0.9.x series
-- Libraries may evolve APIs but must emit/accept 0.9 receipts
+- `peac-receipt/0.1` is frozen throughout the v0.x series
+- Libraries may evolve APIs but must emit/accept `peac-receipt/0.1`
 
 **Library surface:**
 
