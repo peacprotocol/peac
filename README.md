@@ -93,9 +93,9 @@ See [examples/quickstart/](examples/quickstart/) for runnable code. For settleme
 
 ## CLI
 
-```bash
-pnpm add -g @peac/cli
+> **Note:** `@peac/cli` publishes to npm with v0.10.9. Until then, run from source: `pnpm --filter @peac/cli exec peac`.
 
+```bash
 peac verify 'eyJhbGc...'                # Verify a receipt
 peac conformance run                     # Run conformance tests
 peac conformance run --level full        # Full conformance suite

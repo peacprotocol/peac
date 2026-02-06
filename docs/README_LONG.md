@@ -151,7 +151,7 @@ PEAC records can be carried through other interaction standards via mappings:
 | A2A              | Agent-to-Agent exchange attachments      | Specified                          |
 | AP2              | Evidence for payment authorization flows | Specified                          |
 | UCP              | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`) |
-| ERC-8004         | Reputation signals for Trustless Agents  | Implemented (docs/mappings)        |
+| ERC-8004         | Reputation signals for Trustless Agents  | Specified (docs + example)         |
 | x402             | Settlement evidence in receipt claims    | Implemented (`@peac/rails-x402`)   |
 | Payment gateways | Payment intent evidence                  | Implemented (`@peac/rails-stripe`) |
 
