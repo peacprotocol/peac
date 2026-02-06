@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { execSync, spawn } from 'child_process';
+import { execSync } from 'child_process';
 import { existsSync, mkdirSync, rmSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
