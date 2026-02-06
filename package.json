@@ -58,7 +58,7 @@
     "sanitize:unicode": "node scripts/sanitize-unicode.mjs --fix"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^25.2.1",
     "dependency-cruiser": "^16.6.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
