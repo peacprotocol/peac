@@ -30,7 +30,9 @@
   },
   "dependencies": {
     "@peac/core": "workspace:*",
+    "@peac/crypto": "workspace:*",
     "@peac/disc": "workspace:*",
+    "@peac/protocol": "workspace:*",
     "@peac/receipts": "workspace:*",
     "@peac/pay402": "workspace:*",
     "hono": "^4.9.7",

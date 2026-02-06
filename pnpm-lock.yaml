@@ -56,12 +56,18 @@ importers:
       '@peac/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
       '@peac/disc':
         specifier: workspace:*
         version: link:../../packages/discovery
       '@peac/pay402':
         specifier: workspace:*
         version: link:../../packages/pay402
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
       '@peac/receipts':
         specifier: workspace:*
         version: link:../../packages/receipts

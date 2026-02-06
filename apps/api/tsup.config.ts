@@ -1,7 +1,14 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/handler.ts', 'src/errors.ts', 'src/verifier.ts', 'src/routes.ts'],
+  entry: [
+    'src/index.ts',
+    'src/handler.ts',
+    'src/errors.ts',
+    'src/verifier.ts',
+    'src/routes.ts',
+    'src/verify-v1.ts',
+  ],
   format: ['cjs', 'esm'],
   dts: false, // Temporarily disable declaration generation
   sourcemap: true,
