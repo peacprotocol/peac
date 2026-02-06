@@ -136,6 +136,26 @@ jobs:
           fi
           echo "OK: No X-PEAC headers found"
 
+      - name: App builds (sandbox-issuer, verifier, api)
+        run: pnpm build:apps
+
+      - name: App tests (sandbox-issuer, verifier, api)
+        run: pnpm test:apps
+
+      - name: Sandbox issuer health smoke
+        run: |
+          # Boot sandbox issuer, hit /health, shutdown
+          node apps/sandbox-issuer/dist/node.js &
+          SERVER_PID=$!
+          sleep 2
+          STATUS=$(curl -sf http://127.0.0.1:3100/health | node -e "process.stdin.setEncoding('utf8');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).status))")
+          kill $SERVER_PID 2>/dev/null || true
+          if [ "$STATUS" != "ok" ]; then
+            echo "FAIL: Sandbox issuer /health returned '$STATUS', expected 'ok'"
+            exit 1
+          fi
+          echo "OK: Sandbox issuer health check passed"
+
       - name: Performance gate (advisory)
         continue-on-error: true
         run: |

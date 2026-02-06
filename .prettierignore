@@ -15,6 +15,9 @@ pnpm-lock.yaml
 # test artifacts
 **/__snapshots__/**
 
+# local development state (gitignored)
+**/.local/**
+
 # local planning docs (gitignored)
 CLAUDE.md
 reference/
