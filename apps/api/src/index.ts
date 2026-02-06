@@ -89,7 +89,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   // Start server
   const port = parseInt(process.env.PORT || '3000');
-  console.log(`PEAC Verify API starting on port ${port}`);
+  const version = process.env.npm_package_version || 'dev';
+  console.log(`PEAC Verify API v${version} starting on port ${port}`);
 
   serve({
     fetch: app.fetch,
