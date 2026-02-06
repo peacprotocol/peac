@@ -1,0 +1,3 @@
+# Local development keys (persisted for stable sandbox verification)
+.local/
+dist/

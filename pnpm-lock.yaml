@@ -143,6 +143,40 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  apps/sandbox-issuer:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^1.8.2
+        version: 1.19.6(hono@4.10.6)
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+      hono:
+        specifier: ^4.9.7
+        version: 4.10.6
+      zod:
+        specifier: ^3.22.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.25
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(tsx@4.20.6)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.1.0
+        version: 1.6.1(@types/node@20.19.25)
+
   examples/agent-identity:
     dependencies:
       '@peac/crypto':
