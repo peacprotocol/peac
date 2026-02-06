@@ -67,7 +67,7 @@ All error responses use `Content-Type: application/problem+json`.
 Health check endpoint.
 
 ```json
-{"ok": true}
+{ "ok": true }
 ```
 
 ### `POST /verify` (deprecated)
@@ -76,29 +76,31 @@ Legacy verify endpoint. Use `/api/v1/verify` instead.
 
 ## Rate Limits
 
-| Tier | Limit | Window | Header |
-|------|-------|--------|--------|
-| Anonymous | 100 requests | 1 minute | -- |
-| API Key | 1000 requests | 1 minute | `X-API-Key` |
+| Tier      | Limit         | Window   | Header      |
+| --------- | ------------- | -------- | ----------- |
+| Anonymous | 100 requests  | 1 minute | --          |
+| API Key   | 1000 requests | 1 minute | `X-API-Key` |
 
 All responses include RFC 9333 rate limit headers:
+
 - `RateLimit-Limit` -- Maximum requests per window
 - `RateLimit-Remaining` -- Remaining requests in current window
 - `RateLimit-Reset` -- Seconds until window reset
 
 ## HTTP Status Codes
 
-| Status | Meaning |
-|--------|---------|
-| 200 | Verification complete |
-| 413 | Receipt too large (> 256 KB) |
-| 422 | Invalid receipt, untrusted issuer, or missing claims |
-| 429 | Rate limit exceeded |
-| 500 | Internal server error |
+| Status | Meaning                                              |
+| ------ | ---------------------------------------------------- |
+| 200    | Verification complete                                |
+| 413    | Receipt too large (> 256 KB)                         |
+| 422    | Invalid receipt, untrusted issuer, or missing claims |
+| 429    | Rate limit exceeded                                  |
+| 500    | Internal server error                                |
 
 ## Security Headers
 
 All responses include:
+
 - `X-Content-Type-Options: nosniff`
 - `Cache-Control: no-store`
 - `Referrer-Policy: no-referrer`
@@ -106,10 +108,10 @@ All responses include:
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `3000` | Server port |
-| `PEAC_TRUST_PROXY` | unset | Set to `1` to trust `X-Forwarded-*` headers behind a reverse proxy |
+| Variable           | Default | Description                                                        |
+| ------------------ | ------- | ------------------------------------------------------------------ |
+| `PORT`             | `3000`  | Server port                                                        |
+| `PEAC_TRUST_PROXY` | unset   | Set to `1` to trust `X-Forwarded-*` headers behind a reverse proxy |
 
 ## Trusted Issuers
 

@@ -16,7 +16,7 @@ import { createReceipt, validateConfig } from '@peac/middleware-core';
 // Validate configuration at startup
 const config = {
   issuer: 'https://api.example.com',
-  signingKey: privateJwk,  // Ed25519 JWK
+  signingKey: privateJwk, // Ed25519 JWK
   keyId: 'prod-2026-02',
 };
 validateConfig(config);
@@ -60,12 +60,12 @@ Lower-level utilities for constructing response headers and receipt results.
 
 ```typescript
 interface MiddlewareConfig {
-  issuer: string;           // Issuer URL (becomes `iss` claim)
-  signingKey: Ed25519PrivateJwk;  // Ed25519 private key (JWK format)
-  keyId: string;            // Key ID for JWKS lookup
-  expiresIn?: number;       // Receipt expiration in seconds (default: 300)
-  transport?: 'header' | 'body' | 'pointer';  // Transport profile (default: 'header')
-  maxHeaderSize?: number;   // Max header size before fallback (default: 4096)
+  issuer: string; // Issuer URL (becomes `iss` claim)
+  signingKey: Ed25519PrivateJwk; // Ed25519 private key (JWK format)
+  keyId: string; // Key ID for JWKS lookup
+  expiresIn?: number; // Receipt expiration in seconds (default: 300)
+  transport?: 'header' | 'body' | 'pointer'; // Transport profile (default: 'header')
+  maxHeaderSize?: number; // Max header size before fallback (default: 4096)
   pointerUrlGenerator?: (receipt: string) => Promise<string>;
   claimsGenerator?: (context: RequestContext) => Promise<Partial<ReceiptClaimsInput>>;
 }

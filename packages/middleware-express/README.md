@@ -18,16 +18,18 @@ import { peacMiddleware } from '@peac/middleware-express';
 
 const app = express();
 
-app.use(peacMiddleware({
-  issuer: 'https://api.example.com',
-  signingKey: {
-    kty: 'OKP',
-    crv: 'Ed25519',
-    x: '<base64url public key>',
-    d: '<base64url private key>',
-  },
-  keyId: 'prod-2026-02',
-}));
+app.use(
+  peacMiddleware({
+    issuer: 'https://api.example.com',
+    signingKey: {
+      kty: 'OKP',
+      crv: 'Ed25519',
+      x: '<base64url public key>',
+      d: '<base64url private key>',
+    },
+    keyId: 'prod-2026-02',
+  })
+);
 
 app.get('/api/data', (req, res) => {
   res.json({ message: 'Hello World' });

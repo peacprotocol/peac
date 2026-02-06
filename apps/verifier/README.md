@@ -42,6 +42,7 @@ The verifier uses `verifyLocal()` from `@peac/protocol` to verify receipt signat
 The verifier maintains a local trust store in `localStorage`. You must add trusted issuer public keys before verification will succeed.
 
 To verify sandbox receipts:
+
 1. Open the Trust Configuration tab
 2. Add the sandbox issuer public key (from `https://sandbox.peacprotocol.org/.well-known/jwks.json`)
 

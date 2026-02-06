@@ -35,13 +35,13 @@ peac conformance run --fixtures ./my-vectors  # Custom fixtures path
 
 **Options:**
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--level` | `standard` | Conformance level: `basic`, `standard`, `full` |
-| `--output` | `text` | Output format: `text`, `json`, `markdown` |
-| `--category` | all | Filter by category (e.g., `claims`, `signature`, `time`) |
-| `--fixtures` | built-in | Path to custom conformance fixtures |
-| `--verbose` | `false` | Show detailed test output |
+| Option       | Default    | Description                                              |
+| ------------ | ---------- | -------------------------------------------------------- |
+| `--level`    | `standard` | Conformance level: `basic`, `standard`, `full`           |
+| `--output`   | `text`     | Output format: `text`, `json`, `markdown`                |
+| `--category` | all        | Filter by category (e.g., `claims`, `signature`, `time`) |
+| `--fixtures` | built-in   | Path to custom conformance fixtures                      |
+| `--verbose`  | `false`    | Show detailed test output                                |
 
 ### `peac conformance list`
 
@@ -80,10 +80,10 @@ peac samples generate --format json
 
 **Options:**
 
-| Option | Default | Description |
-|--------|---------|-------------|
+| Option     | Default  | Description                          |
+| ---------- | -------- | ------------------------------------ |
 | `--output` | `stdout` | Output directory for generated files |
-| `--format` | `jws` | Format: `jws`, `json` |
+| `--format` | `jws`    | Format: `jws`, `json`                |
 
 ## License
 
