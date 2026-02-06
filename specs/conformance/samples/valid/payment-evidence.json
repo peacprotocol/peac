@@ -1,0 +1,23 @@
+{
+  "$comment": "PEAC receipt with payment evidence for 402 payment flows",
+  "header": {
+    "alg": "EdDSA",
+    "typ": "peac-receipt/0.1",
+    "kid": "sandbox-2026-02"
+  },
+  "payload": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "aud": "https://api.example.com",
+    "iat": 1738756800,
+    "exp": 1738760400,
+    "rid": "sample-payment-001",
+    "amt": "100",
+    "cur": "USD",
+    "payment": {
+      "rail": "x402",
+      "reference": "pay_sample_001",
+      "amount": "100",
+      "currency": "USD"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$comment": "Minimal valid PEAC receipt - only required fields. Timestamps are examples; use CLI to generate with current timestamps.",
+  "header": {
+    "alg": "EdDSA",
+    "typ": "peac-receipt/0.1",
+    "kid": "sandbox-2026-02"
+  },
+  "payload": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "aud": "https://example.com",
+    "iat": 1738756800,
+    "exp": 1738760400,
+    "rid": "sample-basic-001"
+  }
+}

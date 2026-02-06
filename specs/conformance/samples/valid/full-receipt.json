@@ -1,0 +1,19 @@
+{
+  "$comment": "Full PEAC receipt with all optional claims populated",
+  "header": {
+    "alg": "EdDSA",
+    "typ": "peac-receipt/0.1",
+    "kid": "sandbox-2026-02"
+  },
+  "payload": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "aud": "https://api.example.com",
+    "sub": "user:demo-user",
+    "iat": 1738756800,
+    "exp": 1738760400,
+    "rid": "sample-full-001",
+    "purpose_declared": ["search", "index"],
+    "purpose_enforced": "search",
+    "purpose_reason": "allowed"
+  }
+}
