@@ -1,6 +1,6 @@
 {
   "name": "@peac/net-node",
-  "version": "0.10.7",
+  "version": "0.10.8",
   "description": "SSRF-safe network utilities for PEAC Protocol with DNS resolution pinning (Node.js only)",
   "type": "module",
   "main": "dist/index.js",
