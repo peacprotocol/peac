@@ -101,6 +101,7 @@ export interface ConformanceReport {
     runner?: {
       name: string;
       version: string;
+      git_sha?: string;
     };
     duration_ms?: number;
   };

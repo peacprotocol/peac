@@ -13,6 +13,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 
 // Re-export types and utilities from modules
 export type {
@@ -51,6 +52,14 @@ import {
   shouldRunAtLevel,
 } from './conformance/profiles.js';
 import { getValidator } from './conformance/validators.js';
+
+function getGitSha(): string | undefined {
+  try {
+    return execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim();
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * Run conformance tests and generate report
@@ -350,6 +359,7 @@ export function runConformance(
       runner: {
         name: '@peac/cli',
         version: implementationVersion ?? '0.0.0',
+        git_sha: getGitSha(),
       },
     },
   };
