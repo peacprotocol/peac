@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.8] - 2026-02-07
+
+### Adoption Release -- Middleware, Conformance, and Infrastructure
+
+v0.10.8 ships the full adoption stack: middleware for receipt issuance, conformance
+testing tools, and infrastructure apps (sandbox issuer, browser verifier, verify API).
+
+### Added
+
+- **@peac/middleware-core** -- Framework-agnostic middleware primitives for PEAC receipt issuance
+  - `createReceipt()`, `wrapResponse()`, `selectTransport()`, `validateConfig()`
+  - Ed25519 signing, automatic transport selection (header/body/pointer)
+
+- **@peac/middleware-express** -- Express.js middleware for automatic receipt issuance
+  - `peacMiddleware()` with skip, audience/subject extractors, error isolation
+  - Express 4.x and 5.x compatibility
+
+- **Conformance runner** (`peac conformance run`)
+  - Runs conformance tests against @peac/schema validators
+  - Output formats: JSON, text, markdown
+  - Levels: basic, standard, full with category filtering
+  - Report format: `peac-conformance-report/0.1`
+  - Deterministic ordering, vectors digest, JCS canonicalization
+
+- **Sample receipts** (`peac samples list`, `peac samples show`, `peac samples generate`)
+  - Generate and inspect sample receipts for testing
+
+- **Sandbox issuer** (`apps/sandbox-issuer/`)
+  - POST /api/v1/issue with strict whitelist (aud required)
+  - Discovery: GET /.well-known/peac-issuer.json + jwks.json
+  - Stable key management (env -> .local/keys.json -> ephemeral)
+  - In-memory rate limit with RFC 9333 RateLimit headers
+  - CORS for cross-origin JWKS/discovery fetch
+
+- **Browser verifier** (`apps/verifier/`)
+  - Pure static Vite site, all verification via verifyLocal() in-browser
+  - Paste-and-verify, file upload (drag-drop), trust configuration UI
+  - Service worker for offline mode, localStorage trust store
+
+- **Verify API** (`apps/api/src/verify-v1.ts`)
+  - POST /api/v1/verify with RFC 9457 Problem Details (application/problem+json)
+  - Rate limiting: 100/min anonymous, 1000/min with API key
+  - RFC 9333 RateLimit-Limit/Remaining/Reset headers
+  - Trusted issuer allowlist with boot-time Zod validation
+  - Security headers: nosniff, no-store, no-referrer, DENY
+
+- **isProblemError() type guard** -- Centralized duck-typed ProblemError detection
+  across tsup bundle boundaries (solves instanceof drift)
+
+- **Unicode sanitizer** (`scripts/sanitize-unicode.mjs`)
+  - Uses `git ls-files` as single source of truth (1236 files)
+  - Supports --fix mode (NBSP -> space, strip others)
+
+- **CI enhancements** -- test:apps, check:unicode, sandbox health smoke job
+
+- **Root SECURITY.md** pointer to `.github/SECURITY.md`
+
+### Fixed
+
+- RFC 9457 Content-Type enforcement: use `c.body()` not `c.json()` for problem details
+  (Hono's c.json() always overrides Content-Type to application/json)
+- Security headers now applied on all error paths including early-return 429/413
+
 ## [0.10.7] - 2026-02-04
 
 ### Interaction Evidence Extension
