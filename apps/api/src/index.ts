@@ -9,7 +9,7 @@ import { createV13HonoHandler } from './routes.js';
 import { createVerifyV1Handler } from './verify-v1.js';
 import { isProblemError } from './errors.js';
 
-// Legacy v0.9.12 handlers
+// Legacy handlers (deprecated -- use createVerifyV1Handler instead)
 export {
   VerifyApiHandler,
   createExpressHandler,
@@ -32,7 +32,7 @@ export type {
   HttpStatus,
 } from './types.js';
 
-// v0.9.13.1 enhanced verifier
+// Legacy enhanced verifier (deprecated -- kept for backwards compat, will be removed)
 export { VerifierV13 } from './verifier.js';
 export { createV13ExpressHandler, createV13HonoHandler } from './routes.js';
 export type { V13VerifyRequest, V13VerifyResponse, VerifierOptions } from './verifier.js';
@@ -81,7 +81,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Health check endpoint
   app.get('/health', (c) => c.json({ ok: true }));
 
-  // v0.9.13.1 verify endpoint (legacy)
+  // Legacy verify endpoint (deprecated -- will be removed in a future version)
   app.post('/verify', createV13HonoHandler());
 
   // v1 verify endpoint
@@ -90,14 +90,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Start server
   const port = parseInt(process.env.PORT || '3000');
   const version = process.env.npm_package_version || 'dev';
-  console.log(`PEAC Verify API v${version} starting on port ${port}`);
 
   serve({
     fetch: app.fetch,
     port,
   });
 
-  console.log(`Server running at http://localhost:${port}`);
-  console.log(`Health check: http://localhost:${port}/health`);
-  console.log(`Verify endpoint: POST http://localhost:${port}/api/v1/verify`);
+  console.log(`PEAC Verify API v${version} listening on http://localhost:${port}`);
 }
