@@ -1,30 +1,37 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Single source of truth for PEAC Protocol npm publish order",
-  "version": "0.10.5",
-  "lastUpdated": "2026-01-30",
-  "totalPackages": 13,
+  "version": "0.10.8",
+  "lastUpdated": "2026-02-06",
+  "totalPackages": 18,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
     "@peac/crypto",
     "@peac/telemetry",
+    "@peac/capture-core",
     "@peac/protocol",
     "@peac/control",
+    "@peac/middleware-core",
+    "@peac/middleware-express",
     "@peac/contracts",
     "@peac/http-signatures",
     "@peac/jwks-cache",
     "@peac/policy-kit",
     "@peac/adapter-core",
     "@peac/mappings-mcp",
-    "@peac/rails-x402"
+    "@peac/rails-x402",
+    "@peac/adapter-openclaw",
+    "@peac/cli"
   ],
   "layers": {
     "0-kernel": ["@peac/kernel"],
     "1-schema": ["@peac/schema"],
     "2-crypto": ["@peac/crypto"],
     "2.5-telemetry": ["@peac/telemetry"],
+    "2.5-capture": ["@peac/capture-core"],
     "3-protocol": ["@peac/protocol", "@peac/control"],
+    "3.5-middleware": ["@peac/middleware-core", "@peac/middleware-express"],
     "4-infra": [
       "@peac/contracts",
       "@peac/http-signatures",
@@ -32,7 +39,8 @@
       "@peac/policy-kit",
       "@peac/adapter-core"
     ],
-    "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402"]
+    "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402", "@peac/adapter-openclaw"],
+    "6-cli": ["@peac/cli"]
   },
   "trustedPublisher": {
     "repository": "peacprotocol/peac",
@@ -60,7 +68,6 @@
     "@peac/receipts",
     "@peac/pay402",
     "@peac/server",
-    "@peac/cli",
     "@peac/core",
     "@peac/sdk"
   ]

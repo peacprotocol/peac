@@ -1,6 +1,6 @@
 {
   "name": "@peac/protocol",
-  "version": "0.10.7",
+  "version": "0.10.8",
   "description": "PEAC protocol implementation - receipt issuance and verification",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
