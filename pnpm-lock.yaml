@@ -177,6 +177,31 @@ importers:
         specifier: ^1.1.0
         version: 1.6.1(@types/node@20.19.25)
 
+  apps/verifier:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.25
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.21(@types/node@20.19.25)
+      vitest:
+        specifier: ^1.1.0
+        version: 1.6.1(@types/node@20.19.25)
+
   examples/agent-identity:
     dependencies:
       '@peac/crypto':
