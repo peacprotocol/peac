@@ -18,11 +18,13 @@ interface RateEntry {
 const store = new Map<string, RateEntry>();
 
 function getClientIp(c: Context): string {
-  return (
-    c.req.header('cf-connecting-ip') ??
-    c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ??
-    '127.0.0.1'
-  );
+  // Only trust forwarded headers when running behind a known reverse proxy
+  if (process.env.PEAC_TRUST_PROXY === '1') {
+    const forwarded =
+      c.req.header('cf-connecting-ip') ?? c.req.header('x-forwarded-for')?.split(',')[0]?.trim();
+    if (forwarded) return forwarded;
+  }
+  return '127.0.0.1';
 }
 
 export async function rateLimitMiddleware(c: Context, next: Next) {

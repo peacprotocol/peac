@@ -106,11 +106,6 @@ export async function issueHandler(c: Context) {
   // Sign
   const receipt = await sign(claims, keys.privateKey, keys.kid);
 
-  c.header('X-Content-Type-Options', 'nosniff');
-  c.header('Cache-Control', 'no-store');
-  c.header('X-Frame-Options', 'DENY');
-  c.header('Referrer-Policy', 'no-referrer');
-  c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   return c.json({
     receipt,
     receipt_id: rid,

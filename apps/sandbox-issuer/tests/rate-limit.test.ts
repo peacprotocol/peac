@@ -4,15 +4,15 @@
  * Tests the in-memory sliding window rate limiter.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { app } from '../src/app.js';
 import { resetRateLimitStore } from '../src/middleware/rate-limit.js';
 import { resetKeyCache } from '../src/keys.js';
 
-function issueReq() {
+function issueReq(headers?: Record<string, string>) {
   return new Request('http://localhost/api/v1/issue', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify({ aud: 'https://example.com' }),
   });
 }
@@ -21,6 +21,10 @@ describe('Rate limiting', () => {
   beforeEach(() => {
     resetRateLimitStore();
     resetKeyCache();
+  });
+
+  afterEach(() => {
+    delete process.env.PEAC_TRUST_PROXY;
   });
 
   it('should allow requests within the limit', async () => {
@@ -82,5 +86,34 @@ describe('Rate limiting', () => {
 
     const allowed = await app.fetch(issueReq());
     expect(allowed.status).toBe(200);
+  });
+
+  it('should ignore x-forwarded-for when PEAC_TRUST_PROXY is not set', async () => {
+    // Without PEAC_TRUST_PROXY, two different x-forwarded-for IPs should
+    // share the same rate limit bucket (both map to 127.0.0.1)
+    for (let i = 0; i < 1000; i++) {
+      await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.1' }));
+    }
+
+    // Even with a different forwarded IP, should be rate-limited (same bucket)
+    const res = await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.2' }));
+    expect(res.status).toBe(429);
+  });
+
+  it('should respect x-forwarded-for when PEAC_TRUST_PROXY=1', async () => {
+    process.env.PEAC_TRUST_PROXY = '1';
+
+    // Exhaust limit for IP 10.0.0.1
+    for (let i = 0; i < 1000; i++) {
+      await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.1' }));
+    }
+
+    // 10.0.0.1 is now rate-limited
+    const blockedRes = await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.1' }));
+    expect(blockedRes.status).toBe(429);
+
+    // Different IP should still be allowed (separate bucket)
+    const allowedRes = await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.2' }));
+    expect(allowedRes.status).toBe(200);
   });
 });

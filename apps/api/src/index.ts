@@ -58,6 +58,26 @@ export const PROBLEM_TYPES = {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const app = new Hono();
 
+  // Global error handler: ProblemError -> RFC 9457 JSON response
+  app.onError((err, c) => {
+    if (err.name === 'ProblemError' && typeof (err as any).toProblemDetails === 'function') {
+      const problem = (err as any).toProblemDetails();
+      return c.json(problem, {
+        status: problem.status,
+        headers: { 'Content-Type': PROBLEM_MEDIA_TYPE },
+      });
+    }
+    return c.json(
+      {
+        type: 'https://www.peacprotocol.org/problems/processing-error',
+        title: 'Processing Error',
+        status: 500,
+        detail: 'An internal error occurred',
+      },
+      { status: 500, headers: { 'Content-Type': PROBLEM_MEDIA_TYPE } }
+    );
+  });
+
   // Health check endpoint
   app.get('/health', (c) => c.json({ ok: true }));
 
@@ -69,7 +89,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   // Start server
   const port = parseInt(process.env.PORT || '3000');
-  console.log(`PEAC Verify API v0.9.13.1 starting on port ${port}`);
+  console.log(`PEAC Verify API starting on port ${port}`);
 
   serve({
     fetch: app.fetch,
@@ -78,5 +98,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   console.log(`Server running at http://localhost:${port}`);
   console.log(`Health check: http://localhost:${port}/health`);
-  console.log(`Verify endpoint: POST http://localhost:${port}/verify`);
+  console.log(`Verify endpoint: POST http://localhost:${port}/api/v1/verify`);
 }

@@ -11,8 +11,12 @@ import { issuerConfigHandler, jwksHandler } from './routes/discovery.js';
 import { issueHandler } from './routes/issue.js';
 import { rateLimitMiddleware } from './middleware/rate-limit.js';
 import { corsMiddleware } from './middleware/cors.js';
+import { securityHeaders } from './middleware/security-headers.js';
 
 const app = new Hono();
+
+// Global security headers on all responses
+app.use('*', securityHeaders);
 
 // CORS on discovery endpoints (browser verifier needs cross-origin access)
 app.use('/.well-known/*', corsMiddleware);

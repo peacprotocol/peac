@@ -22,6 +22,7 @@ import { InMemoryCache, resolveKey, type CacheBackend } from '@peac/jwks-cache';
 import { ProblemError } from './errors.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
+const PROBLEM_CONTENT_TYPE = 'application/problem+json';
 
 const VerifyRequestSchema = z
   .object({
@@ -44,11 +45,16 @@ const VerifyRequestSchema = z
   })
   .strict();
 
-/** Trusted issuer configuration from env */
-interface TrustedIssuerEntry {
-  issuer: string;
-  jwks_uri: string;
-}
+/** Trusted issuer entry schema -- validated at boot */
+const TrustedIssuerSchema = z.object({
+  issuer: z.string().url(),
+  jwks_uri: z
+    .string()
+    .url()
+    .refine((u) => u.startsWith('https://'), { message: 'jwks_uri must use HTTPS' }),
+});
+
+type TrustedIssuerEntry = z.infer<typeof TrustedIssuerSchema>;
 
 function loadTrustedIssuers(): TrustedIssuerEntry[] {
   const raw = process.env.PEAC_TRUSTED_ISSUERS_JSON;
@@ -61,11 +67,28 @@ function loadTrustedIssuers(): TrustedIssuerEntry[] {
       },
     ];
   }
+
+  let parsed: unknown;
   try {
-    return JSON.parse(raw) as TrustedIssuerEntry[];
-  } catch {
-    return [];
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(
+      `PEAC_TRUSTED_ISSUERS_JSON is not valid JSON: ${err instanceof Error ? err.message : String(err)}`
+    );
   }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error('PEAC_TRUSTED_ISSUERS_JSON must be a non-empty JSON array');
+  }
+
+  return parsed.map((entry, i) => {
+    const result = TrustedIssuerSchema.safeParse(entry);
+    if (!result.success) {
+      const issues = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
+      throw new Error(`PEAC_TRUSTED_ISSUERS_JSON[${i}] invalid: ${issues.join('; ')}`);
+    }
+    return result.data;
+  });
 }
 
 /** Rate limit store: key -> { count, resetAt } */
@@ -77,10 +100,15 @@ const WINDOW_MS = 60 * 1000; // 1 minute
 function getRateLimit(c: Context): { key: string; limit: number } {
   const apiKey = c.req.header('x-api-key');
   if (apiKey) return { key: `key:${apiKey}`, limit: API_KEY_LIMIT };
-  const ip =
-    c.req.header('cf-connecting-ip') ??
-    c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ??
-    '127.0.0.1';
+
+  // Only trust forwarded IP headers behind a known reverse proxy
+  let ip = '127.0.0.1';
+  if (process.env.PEAC_TRUST_PROXY === '1') {
+    ip =
+      c.req.header('cf-connecting-ip') ??
+      c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ??
+      '127.0.0.1';
+  }
   return { key: `ip:${ip}`, limit: ANON_LIMIT };
 }
 
@@ -107,6 +135,11 @@ export function createVerifyV1Handler() {
   const trustedIssuers = loadTrustedIssuers();
 
   return async (c: Context) => {
+    // Security headers on all responses (including errors)
+    c.header('X-Content-Type-Options', 'nosniff');
+    c.header('Cache-Control', 'no-store');
+    c.header('Referrer-Policy', 'no-referrer');
+
     // Rate limit with Retry-After
     const rl = getRateLimit(c);
     const check = checkRateLimit(rl.key, rl.limit);
@@ -119,7 +152,7 @@ export function createVerifyV1Handler() {
           status: 429,
           detail: `Rate limit exceeded. Try again in ${check.retryAfter} seconds.`,
         },
-        429
+        { status: 429, headers: { 'Content-Type': PROBLEM_CONTENT_TYPE } }
       );
     }
 
@@ -133,7 +166,7 @@ export function createVerifyV1Handler() {
           status: 413,
           detail: `Request body exceeds ${MAX_BODY_SIZE} byte limit`,
         },
-        413
+        { status: 413, headers: { 'Content-Type': PROBLEM_CONTENT_TYPE } }
       );
     }
 
@@ -247,10 +280,6 @@ export function createVerifyV1Handler() {
       requireExp: options?.require_exp,
       maxClockSkew: options?.max_clock_skew,
     });
-
-    c.header('X-Content-Type-Options', 'nosniff');
-    c.header('Cache-Control', 'no-store');
-    c.header('Referrer-Policy', 'no-referrer');
 
     if (result.valid) {
       return c.json({
