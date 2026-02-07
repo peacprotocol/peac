@@ -1,39 +1,23 @@
 /**
  * Protocol telemetry integration tests
+ *
+ * Tests that telemetry hooks are:
+ * 1. Called with correct data on successful issue
+ * 2. Not called when no hook is provided
+ * 3. Non-fatal when hook throws (sync or async)
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { issue } from '../src/issue.js';
-import { setTelemetryProvider, type TelemetryProvider } from '@peac/telemetry';
 import { generateKeypair } from '@peac/crypto';
+import type { TelemetryHook } from '../src/telemetry.js';
 
 describe('Protocol Telemetry Hooks', () => {
-  let mockProvider: TelemetryProvider;
-  let onReceiptIssued: ReturnType<typeof vi.fn>;
-  let onReceiptVerified: ReturnType<typeof vi.fn>;
-  let onAccessDecision: ReturnType<typeof vi.fn>;
-
-  beforeEach(() => {
-    onReceiptIssued = vi.fn();
-    onReceiptVerified = vi.fn();
-    onAccessDecision = vi.fn();
-
-    mockProvider = {
-      onReceiptIssued,
-      onReceiptVerified,
-      onAccessDecision,
-    };
-
-    setTelemetryProvider(mockProvider);
-  });
-
-  afterEach(() => {
-    setTelemetryProvider(undefined);
-  });
-
   describe('issue() telemetry', () => {
     it('should emit telemetry on successful issue', async () => {
       const { privateKey } = await generateKeypair();
+      const onReceiptIssued = vi.fn();
+      const telemetry: TelemetryHook = { onReceiptIssued };
 
       const result = await issue({
         iss: 'https://api.example.com',
@@ -44,6 +28,7 @@ describe('Protocol Telemetry Hooks', () => {
         reference: 'pi_123',
         privateKey,
         kid: '2025-01-01',
+        telemetry,
       });
 
       expect(result.jws).toBeDefined();
@@ -56,32 +41,9 @@ describe('Protocol Telemetry Hooks', () => {
       expect(call.durationMs).toBeGreaterThanOrEqual(0);
     });
 
-    it('should not emit telemetry when provider is not set', async () => {
-      const { privateKey } = await generateKeypair();
-      setTelemetryProvider(undefined);
-
-      await issue({
-        iss: 'https://api.example.com',
-        aud: 'https://resource.example.com',
-        amt: 100,
-        cur: 'USD',
-        rail: 'stripe',
-        reference: 'pi_123',
-        privateKey,
-        kid: '2025-01-01',
-      });
-
-      expect(onReceiptIssued).not.toHaveBeenCalled();
-    });
-
-    it('should not throw when telemetry throws', async () => {
+    it('should not emit telemetry when hook is not provided', async () => {
       const { privateKey } = await generateKeypair();
 
-      onReceiptIssued.mockImplementation(() => {
-        throw new Error('Telemetry error');
-      });
-
-      // Should not throw
       const result = await issue({
         iss: 'https://api.example.com',
         aud: 'https://resource.example.com',
@@ -91,6 +53,49 @@ describe('Protocol Telemetry Hooks', () => {
         reference: 'pi_123',
         privateKey,
         kid: '2025-01-01',
+        // No telemetry option
+      });
+
+      expect(result.jws).toBeDefined();
+    });
+
+    it('should not throw when telemetry hook throws synchronously', async () => {
+      const { privateKey } = await generateKeypair();
+      const onReceiptIssued = vi.fn(() => {
+        throw new Error('Telemetry sync error');
+      });
+      const telemetry: TelemetryHook = { onReceiptIssued };
+
+      const result = await issue({
+        iss: 'https://api.example.com',
+        aud: 'https://resource.example.com',
+        amt: 100,
+        cur: 'USD',
+        rail: 'stripe',
+        reference: 'pi_123',
+        privateKey,
+        kid: '2025-01-01',
+        telemetry,
+      });
+
+      expect(result.jws).toBeDefined();
+    });
+
+    it('should not throw when telemetry hook rejects asynchronously', async () => {
+      const { privateKey } = await generateKeypair();
+      const onReceiptIssued = vi.fn(() => Promise.reject(new Error('Telemetry async error')));
+      const telemetry: TelemetryHook = { onReceiptIssued };
+
+      const result = await issue({
+        iss: 'https://api.example.com',
+        aud: 'https://resource.example.com',
+        amt: 100,
+        cur: 'USD',
+        rail: 'stripe',
+        reference: 'pi_123',
+        privateKey,
+        kid: '2025-01-01',
+        telemetry,
       });
 
       expect(result.jws).toBeDefined();
@@ -100,6 +105,8 @@ describe('Protocol Telemetry Hooks', () => {
   describe('hashReceipt format', () => {
     it('should produce consistent hash format', async () => {
       const { privateKey } = await generateKeypair();
+      const onReceiptIssued = vi.fn();
+      const telemetry: TelemetryHook = { onReceiptIssued };
 
       await issue({
         iss: 'https://api.example.com',
@@ -110,6 +117,7 @@ describe('Protocol Telemetry Hooks', () => {
         reference: 'pi_123',
         privateKey,
         kid: '2025-01-01',
+        telemetry,
       });
 
       const call = onReceiptIssued.mock.calls[0][0];
@@ -120,6 +128,8 @@ describe('Protocol Telemetry Hooks', () => {
 
     it('should produce different hashes for different receipts', async () => {
       const { privateKey } = await generateKeypair();
+      const onReceiptIssued = vi.fn();
+      const telemetry: TelemetryHook = { onReceiptIssued };
 
       await issue({
         iss: 'https://api1.example.com',
@@ -130,6 +140,7 @@ describe('Protocol Telemetry Hooks', () => {
         reference: 'pi_123',
         privateKey,
         kid: '2025-01-01',
+        telemetry,
       });
 
       await issue({
@@ -141,6 +152,7 @@ describe('Protocol Telemetry Hooks', () => {
         reference: 'pi_456',
         privateKey,
         kid: '2025-01-02',
+        telemetry,
       });
 
       const hash1 = onReceiptIssued.mock.calls[0][0].receiptHash;
