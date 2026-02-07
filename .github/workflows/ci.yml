@@ -55,6 +55,9 @@ jobs:
       - name: Domain guard
         run: bash -euxo pipefail scripts/guard.sh
 
+      - name: Planning leak check
+        run: bash scripts/check-planning-leak.sh
+
       - name: Package hygiene (drift, duplicates, private+publishConfig)
         run: bash scripts/check-publish-list.sh
 
