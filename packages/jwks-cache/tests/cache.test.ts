@@ -26,7 +26,7 @@ describe('InMemoryCache', () => {
     expect(result).toBeNull();
   });
 
-  it('returns null for expired entries', async () => {
+  it('returns null for expired entries via get()', async () => {
     const now = Math.floor(Date.now() / 1000);
     const entry = {
       jwk: { kty: 'OKP', crv: 'Ed25519', x: 'test' },
@@ -37,6 +37,45 @@ describe('InMemoryCache', () => {
     const result = await cache.get('key1');
 
     expect(result).toBeNull();
+  });
+
+  it('returns expired entries via getStale() for stale-if-error', async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const entry = {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'test-stale' },
+      expiresAt: now - 100, // Already expired
+    };
+
+    await cache.set('key1', entry);
+
+    // get() returns null (expired)
+    expect(await cache.get('key1')).toBeNull();
+
+    // getStale() returns the entry anyway
+    const stale = await cache.getStale('key1');
+    expect(stale).toEqual(entry);
+    expect(stale!.jwk.x).toBe('test-stale');
+  });
+
+  it('getStale() returns null for never-cached keys', async () => {
+    const result = await cache.getStale('nonexistent');
+    expect(result).toBeNull();
+  });
+
+  it('retains expired entries for stale fallback (not deleted on get)', async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const entry = {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'retained' },
+      expiresAt: now - 50,
+    };
+
+    await cache.set('key1', entry);
+    await cache.get('key1'); // Returns null but should NOT delete
+
+    // Entry should still be retrievable via getStale
+    const stale = await cache.getStale('key1');
+    expect(stale).not.toBeNull();
+    expect(stale!.jwk.x).toBe('retained');
   });
 
   it('deletes entries', async () => {

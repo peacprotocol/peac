@@ -21,6 +21,7 @@ const MIN_TTL_SECONDS = 60;
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MAX_RESPONSE_BYTES = 1024 * 1024; // 1MB
 const DEFAULT_MAX_KEYS = 100;
+const DEFAULT_MAX_STALE_AGE_SECONDS = 172800; // 48 hours
 
 /**
  * Create a JWKS key resolver.
@@ -39,6 +40,8 @@ export function createResolver(options: ResolverOptions = {}): JwksKeyResolver {
     maxKeys = DEFAULT_MAX_KEYS,
     isAllowedHost,
     allowLocalhost = false,
+    allowStale = false,
+    maxStaleAgeSeconds = DEFAULT_MAX_STALE_AGE_SECONDS,
   } = options;
 
   return async (issuer: string, keyid: string): Promise<SignatureVerifier | null> => {
@@ -52,6 +55,8 @@ export function createResolver(options: ResolverOptions = {}): JwksKeyResolver {
       maxKeys,
       isAllowedHost,
       allowLocalhost,
+      allowStale,
+      maxStaleAgeSeconds,
     });
 
     if (!resolvedKey) {
@@ -84,11 +89,13 @@ export async function resolveKey(
       | 'maxResponseBytes'
       | 'maxKeys'
       | 'allowLocalhost'
+      | 'allowStale'
+      | 'maxStaleAgeSeconds'
     >
   > &
     Pick<ResolverOptions, 'isAllowedHost'>
 ): Promise<ResolvedKey | null> {
-  const { cache, isAllowedHost, allowLocalhost } = options;
+  const { cache, isAllowedHost, allowLocalhost, allowStale, maxStaleAgeSeconds } = options;
 
   // Normalize issuer to origin
   const issuerOrigin = new URL(issuer).origin;
@@ -202,8 +209,28 @@ export async function resolveKey(
     }
   }
 
-  // All paths failed
+  // All paths failed -- try stale fallback if allowed
   if (errors.length > 0) {
+    if (allowStale && 'getStale' in cache && typeof cache.getStale === 'function') {
+      const staleEntry = await (
+        cache as { getStale: (k: string) => Promise<typeof cached> }
+      ).getStale(cacheKey);
+      if (staleEntry) {
+        const now = Math.floor(Date.now() / 1000);
+        const staleAge = now - staleEntry.expiresAt;
+        if (staleAge >= 0 && staleAge <= maxStaleAgeSeconds) {
+          return {
+            jwk: staleEntry.jwk,
+            source: '/.well-known/jwks',
+            cached: true,
+            stale: true,
+            staleAgeSeconds: staleAge,
+            keyExpiredAt: staleEntry.expiresAt,
+          };
+        }
+      }
+    }
+
     const lastError = errors[errors.length - 1];
     if (lastError instanceof JwksError) {
       throw lastError;

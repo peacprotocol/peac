@@ -17,14 +17,21 @@ export class InMemoryCache implements CacheBackend {
       return null;
     }
 
-    // Check expiration
+    // Check expiration -- return null but KEEP entry for stale fallback
     const now = Math.floor(Date.now() / 1000);
     if (now >= entry.expiresAt) {
-      this.cache.delete(key);
       return null;
     }
 
     return entry;
+  }
+
+  /**
+   * Get entry even if expired (for stale-if-error fallback).
+   * Returns null only if key was never cached.
+   */
+  async getStale(key: string): Promise<CacheEntry | null> {
+    return this.cache.get(key) ?? null;
   }
 
   async set(key: string, value: CacheEntry): Promise<void> {

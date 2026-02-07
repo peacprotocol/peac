@@ -67,3 +67,7 @@ export {
 
 // Receipt generation
 export { createReceipt, createReceiptWithClaims } from './receipt.js';
+
+// Rate limiting
+export type { RateLimitStore, MemoryRateLimitStoreOptions } from './rate-limit.js';
+export { MemoryRateLimitStore } from './rate-limit.js';
