@@ -16,6 +16,7 @@ export type {
 } from './types.js';
 
 // Cache
+export type { InMemoryCacheOptions } from './cache.js';
 export {
   InMemoryCache,
   buildCacheKey,

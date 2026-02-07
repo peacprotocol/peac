@@ -106,6 +106,70 @@ describe('InMemoryCache', () => {
 
     expect(cache.size).toBe(0);
   });
+
+  it('evicts oldest entries when maxEntries exceeded', async () => {
+    const bounded = new InMemoryCache({ maxEntries: 3 });
+    const now = Math.floor(Date.now() / 1000);
+
+    await bounded.set('a', {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'a' },
+      expiresAt: now + 3600,
+    });
+    await bounded.set('b', {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'b' },
+      expiresAt: now + 3600,
+    });
+    await bounded.set('c', {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'c' },
+      expiresAt: now + 3600,
+    });
+    await bounded.set('d', {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'd' },
+      expiresAt: now + 3600,
+    });
+
+    expect(bounded.size).toBe(3);
+    // 'a' (oldest) should have been evicted
+    expect(await bounded.get('a')).toBeNull();
+    expect(await bounded.getStale('a')).toBeNull();
+    // 'b', 'c', 'd' should remain
+    expect(await bounded.get('b')).not.toBeNull();
+    expect(await bounded.get('c')).not.toBeNull();
+    expect(await bounded.get('d')).not.toBeNull();
+  });
+
+  it('refreshes LRU position on get()', async () => {
+    const bounded = new InMemoryCache({ maxEntries: 3 });
+    const now = Math.floor(Date.now() / 1000);
+
+    await bounded.set('a', {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'a' },
+      expiresAt: now + 3600,
+    });
+    await bounded.set('b', {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'b' },
+      expiresAt: now + 3600,
+    });
+    await bounded.set('c', {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'c' },
+      expiresAt: now + 3600,
+    });
+
+    // Access 'a' to refresh its LRU position
+    await bounded.get('a');
+
+    // Add 'd' -- should evict 'b' (now oldest), not 'a'
+    await bounded.set('d', {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: 'd' },
+      expiresAt: now + 3600,
+    });
+
+    expect(bounded.size).toBe(3);
+    expect(await bounded.get('a')).not.toBeNull();
+    expect(await bounded.get('b')).toBeNull();
+    expect(await bounded.get('c')).not.toBeNull();
+    expect(await bounded.get('d')).not.toBeNull();
+  });
 });
 
 describe('buildCacheKey', () => {
