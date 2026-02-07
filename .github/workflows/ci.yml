@@ -58,6 +58,9 @@ jobs:
       - name: Package hygiene (drift, duplicates, private+publishConfig)
         run: bash scripts/check-publish-list.sh
 
+      - name: Publish-manifest closure check
+        run: npx tsx scripts/check-publish-closure.ts
+
       - name: Protocol string verification (forbidden patterns)
         run: pnpm verify:protocol-strings
 

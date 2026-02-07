@@ -1,6 +1,9 @@
 #!/bin/bash
-# Pack and install smoke test
-# Tests that @peac/protocol can be installed and imported from a clean project.
+# Pack and install smoke test (manifest-driven)
+#
+# Reads packages from scripts/publish-manifest.json.
+# Tests that all manifest packages can be installed from tarballs
+# and that @peac/protocol can be imported from a clean project.
 # Uses npm (not pnpm) to match real consumer install experience.
 #
 # NOTE: This test works pre-publish because npm can satisfy transitive deps
@@ -11,6 +14,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 TEMP_DIR=$(mktemp -d)
+MANIFEST="$ROOT_DIR/scripts/publish-manifest.json"
 
 cleanup() {
   rm -rf "$TEMP_DIR"
@@ -21,35 +25,44 @@ echo "=== Pack Install Smoke Test ==="
 echo "Root: $ROOT_DIR"
 echo "Temp: $TEMP_DIR"
 
-# Build only the packages we're going to pack
+# Read package list from manifest
+PACKAGES=()
+while IFS= read -r line; do
+  PACKAGES+=("$line")
+done < <(node -e "
+  const m = JSON.parse(require('fs').readFileSync('$MANIFEST', 'utf-8'));
+  m.packages.forEach(p => console.log(p));
+")
+echo "Manifest: ${#PACKAGES[@]} packages"
+
+# Build manifest packages
 echo ""
-echo "0. Building packages..."
+echo "0. Building manifest packages..."
 cd "$ROOT_DIR"
-pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/telemetry --filter @peac/protocol build
+FILTER_ARGS=""
+for pkg in "${PACKAGES[@]}"; do
+  FILTER_ARGS+=" --filter $pkg"
+done
+pnpm $FILTER_ARGS build
 
-# Pack all packages in dependency order
-PACKAGES=(
-  "kernel"
-  "schema"
-  "crypto"
-  "telemetry"
-  "protocol"
-)
-
+# Pack all packages in manifest order
 echo ""
 echo "1. Packing packages..."
 declare -a TARBALLS=()
 for pkg in "${PACKAGES[@]}"; do
-  cd "$ROOT_DIR/packages/$pkg"
+  pkg_dir=$(cd "$ROOT_DIR" && pnpm --filter "$pkg" exec pwd 2>/dev/null | tail -1)
+  cd "$pkg_dir"
   tarball=$(pnpm pack --pack-destination "$TEMP_DIR" 2>/dev/null | tail -1)
-  echo "   @peac/$pkg -> $(basename "$tarball")"
+  echo "   $pkg -> $(basename "$tarball")"
   TARBALLS+=("$tarball")
 done
 
 # Create test project
 echo ""
 echo "2. Creating test project..."
-cd "$TEMP_DIR"
+TEST_DIR="$TEMP_DIR/test-project"
+mkdir -p "$TEST_DIR"
+cd "$TEST_DIR"
 cat > package.json << 'EOF'
 {
   "name": "pack-smoke-test",
