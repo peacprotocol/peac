@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createResolver } from '../src/resolver.js';
+import { InMemoryCache } from '../src/cache.js';
 
 // RFC 8037 appendix A -- valid Ed25519 public key (32 bytes base64url)
 const TEST_ED25519_X = '11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo';
@@ -60,5 +61,36 @@ describe('createResolver singleflight', () => {
 
     // Different keys should NOT be coalesced -- each gets its own resolve
     expect(fetchCallCount).toBeGreaterThan(1);
+  });
+});
+
+describe('createResolver stale-if-error', () => {
+  const originalFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it('does not fall back to stale on non-JwksError failures', async () => {
+    // Preload an expired-but-stale-eligible entry
+    const cache = new InMemoryCache();
+    const cacheKey = 'https://issuer.example.com:test-kid';
+    await cache.set(cacheKey, {
+      jwk: { kty: 'OKP', crv: 'Ed25519', x: TEST_ED25519_X, kid: 'test-kid' },
+      expiresAt: Math.floor(Date.now() / 1000) - 60, // expired 60s ago
+    });
+
+    // isAllowedHost throws a plain Error (not JwksError).
+    // With fail-closed logic, this must NOT enable stale fallback --
+    // even though allowStale is true and a stale entry exists.
+    const resolver = createResolver({
+      cache,
+      isAllowedHost: () => {
+        throw new Error('boom');
+      },
+      allowStale: true,
+    });
+
+    await expect(resolver('https://issuer.example.com', 'test-kid')).rejects.toThrow();
   });
 });

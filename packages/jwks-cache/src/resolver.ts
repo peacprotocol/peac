@@ -233,13 +233,12 @@ export async function resolveKey(
   // and parse failures -- these indicate the server is misconfigured or
   // compromised, not that the network is temporarily unreachable.
   if (errors.length > 0) {
-    // errors[] contains per-path errors from the discovery loop.
-    // ALL_PATHS_FAILED is only thrown below (line ~272) and never appears here.
+    // Fail closed: stale only if every error is a known-transient JwksError.
+    // Non-JwksError (bugs, unexpected throws) must NOT widen stale eligibility.
     const allTransient = errors.every(
       (e) =>
-        !(e instanceof JwksError) ||
-        e.code === ErrorCodes.JWKS_FETCH_FAILED ||
-        e.code === ErrorCodes.JWKS_TIMEOUT
+        e instanceof JwksError &&
+        (e.code === ErrorCodes.JWKS_FETCH_FAILED || e.code === ErrorCodes.JWKS_TIMEOUT)
     );
     if (
       allowStale &&
