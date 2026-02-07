@@ -20,6 +20,102 @@
       "comment": "No imports from legacy pkgs/ directory",
       "from": { "path": ".*" },
       "to": { "path": "^pkgs/" }
+    },
+    {
+      "name": "kernel-no-upward",
+      "severity": "error",
+      "comment": "L0 kernel must not import any higher layer",
+      "from": {
+        "path": "^packages/kernel/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(schema|crypto|protocol|telemetry|control|middleware|rails|mappings|adapters|server|cli)/"
+      }
+    },
+    {
+      "name": "schema-no-upward",
+      "severity": "error",
+      "comment": "L1 schema must not import L2+ layers",
+      "from": {
+        "path": "^packages/schema/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(crypto|protocol|telemetry|control|middleware|rails|mappings|adapters|server|cli)/"
+      }
+    },
+    {
+      "name": "crypto-no-upward",
+      "severity": "error",
+      "comment": "L2 crypto must not import L3+ layers",
+      "from": {
+        "path": "^packages/crypto/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(protocol|control|telemetry|middleware|rails|mappings|adapters|server|cli)/"
+      }
+    },
+    {
+      "name": "protocol-no-upward",
+      "severity": "error",
+      "comment": "L3 protocol must not import L3.5+ layers",
+      "from": {
+        "path": "^packages/protocol/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(middleware-(core|express)|rails|mappings|adapters|server|cli)/"
+      }
+    },
+    {
+      "name": "control-no-upward",
+      "severity": "error",
+      "comment": "L3 control must not import L3.5+ layers",
+      "from": {
+        "path": "^packages/control/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(middleware-(core|express)|rails|mappings|adapters|server|cli)/"
+      }
+    },
+    {
+      "name": "telemetry-no-upward",
+      "severity": "error",
+      "comment": "Telemetry must not import protocol or control (would create cycle)",
+      "from": {
+        "path": "^packages/telemetry/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(protocol|control)/"
+      }
+    },
+    {
+      "name": "middleware-no-upward",
+      "severity": "error",
+      "comment": "L3.5 middleware may import protocol/control (down) but not rails/mappings/adapters/server/cli",
+      "from": {
+        "path": "^packages/middleware-(core|express)/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(rails|mappings|adapters|server|cli)/"
+      }
+    },
+    {
+      "name": "adapters-no-upward",
+      "severity": "error",
+      "comment": "L4 adapters/rails/mappings must not import server or cli",
+      "from": {
+        "path": "^packages/(adapters|rails|mappings)/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(server|cli)/"
+      }
     }
   ],
   "options": {
@@ -30,7 +126,7 @@
       "path": ["node_modules", "\\.d\\.ts$", "__tests__", "dist", "archive"]
     },
     "includeOnly": {
-      "path": "^packages/[^/]+/src/"
+      "path": "^packages/([^/]+/){1,2}src/"
     },
     "tsPreCompilationDeps": true,
     "tsConfig": {
