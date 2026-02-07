@@ -79,12 +79,18 @@ for tarball in "${TARBALLS[@]}"; do
     echo "   OK: $pkg_name - no workspace:* refs"
   fi
 
-  # Check tarball hygiene: no planning artifacts or sensitive files
-  BAD_FILES=$(tar -tzf "$tarball" | grep -E '(reference/|\.local\.md$|\.env)' || true)
+  # Check tarball hygiene: no planning artifacts, build cache, or sensitive files
+  BAD_FILES=$(tar -tzf "$tarball" | grep -E '(reference/|\.local\.md$|\.env|\.tsbuildinfo$|node_modules/|\.turbo/|\.log$)' || true)
   if [ -n "$BAD_FILES" ]; then
     echo "   FAIL: $pkg_name contains disallowed files:"
     echo "$BAD_FILES" | sed 's/^/      /' | head -10
     FAILED=1
+  fi
+
+  # Warn if LICENSE is missing from tarball (compliance)
+  HAS_LICENSE=$(tar -tzf "$tarball" | grep -i '^package/LICENSE' || true)
+  if [ -z "$HAS_LICENSE" ]; then
+    echo "      WARN: no LICENSE file in tarball"
   fi
 
   # Show @peac/* dependencies (should have version numbers)

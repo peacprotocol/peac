@@ -36,7 +36,19 @@ else
   echo "  OK: No strategic content leaks"
 fi
 
-# 3. Check for planning artifacts in packages (build outputs in source)
+# 3. Check for internal planning markers in source code
+echo "Checking for internal planning markers..."
+PLANNING_PATTERNS='(NEXT_STEPS|ROADMAP_LOCAL|STRATEGY_LOCAL|SCOPE_LEDGER|MASTER_PLAN_LOCAL)'
+PLANNING_HITS=$(git grep -liE "$PLANNING_PATTERNS" -- '*.ts' '*.js' 2>/dev/null | grep -v 'node_modules' || true)
+if [ -n "$PLANNING_HITS" ]; then
+  echo "  FAIL: Found internal planning markers in source code:"
+  echo "$PLANNING_HITS" | sed 's/^/    /'
+  FAILED=1
+else
+  echo "  OK: No planning markers in source"
+fi
+
+# 4. Check for planning artifacts in packages (build outputs in source)
 echo "Checking for build artifacts in source directories..."
 BUILD_ARTIFACTS=$(git ls-files 'packages/*/src/*.d.ts' 'packages/*/src/*.d.ts.map' 'packages/*/src/*.js.map' 2>/dev/null || true)
 if [ -n "$BUILD_ARTIFACTS" ]; then
