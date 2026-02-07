@@ -154,15 +154,15 @@ async function demonstrateParity() {
   console.log(`     iss: ${coreA.iss}`);
   console.log(`     aud: ${coreA.aud}`);
   console.log(`     amt: ${coreA.amt} ${coreA.cur}`);
-  console.log(`     payment.rail: ${coreA.payment.rail}`);
-  console.log(`     payment.reference: ${coreA.payment.reference}`);
+  console.log(`     payment.rail: ${coreA.payment?.rail}`);
+  console.log(`     payment.reference: ${coreA.payment?.reference}`);
 
   console.log('\n   Receipt B (direct issuance):');
   console.log(`     iss: ${coreB.iss}`);
   console.log(`     aud: ${coreB.aud}`);
   console.log(`     amt: ${coreB.amt} ${coreB.cur}`);
-  console.log(`     payment.rail: ${coreB.payment.rail}`);
-  console.log(`     payment.reference: ${coreB.payment.reference}`);
+  console.log(`     payment.rail: ${coreB.payment?.rail}`);
+  console.log(`     payment.reference: ${coreB.payment?.reference}`);
 
   // Normalize for comparison (remove unique fields)
   const normalizedA = {

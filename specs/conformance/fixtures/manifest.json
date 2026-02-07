@@ -237,5 +237,37 @@
       "version": "0.10.7",
       "fixture_count": 22
     }
+  },
+  "parse": {
+    "valid-commerce-receipt.json": {
+      "description": "Valid commerce receipt for parseReceiptClaims (v0.10.9+)",
+      "version": "0.10.9",
+      "expected_variant": "commerce"
+    },
+    "valid-attestation-receipt.json": {
+      "description": "Valid attestation receipt for parseReceiptClaims (v0.10.9+)",
+      "version": "0.10.9",
+      "expected_variant": "attestation"
+    },
+    "invalid-partial-commerce-amt-only.json": {
+      "description": "Has amt but missing payment -- must fail as E_PARSE_COMMERCE_INVALID",
+      "version": "0.10.9",
+      "expected_error": "E_PARSE_COMMERCE_INVALID"
+    },
+    "invalid-commerce-wrong-types.json": {
+      "description": "Commerce receipt with amt as string -- must fail as E_PARSE_COMMERCE_INVALID",
+      "version": "0.10.9",
+      "expected_error": "E_PARSE_COMMERCE_INVALID"
+    },
+    "edge-attestation-with-accidental-amt.json": {
+      "description": "Attestation-shaped but has amt key -- classified as commerce, fails as E_PARSE_COMMERCE_INVALID",
+      "version": "0.10.9",
+      "expected_error": "E_PARSE_COMMERCE_INVALID"
+    },
+    "edge-unknown-top-level-keys.json": {
+      "description": "Extra keys beyond schema -- rejected by strict schemas",
+      "version": "0.10.9",
+      "expected_error": "E_PARSE_ATTESTATION_INVALID"
+    }
   }
 }

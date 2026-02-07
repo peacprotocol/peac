@@ -120,17 +120,17 @@ describe('Cross-Mapping Core Claims Parity', () => {
       const x402Core = toCoreClaims(x402Claims);
 
       // Rail and reference SHOULD differ (they're rail-specific)
-      expect(stripeCore.payment.rail).toBe('stripe');
-      expect(x402Core.payment.rail).toBe('x402');
-      expect(stripeCore.payment.reference).not.toBe(x402Core.payment.reference);
+      expect(stripeCore.payment!.rail).toBe('stripe');
+      expect(x402Core.payment!.rail).toBe('x402');
+      expect(stripeCore.payment!.reference).not.toBe(x402Core.payment!.reference);
 
       // But other semantic fields MUST match
       expect(stripeCore.iss).toBe(x402Core.iss);
       expect(stripeCore.aud).toBe(x402Core.aud);
       expect(stripeCore.amt).toBe(x402Core.amt);
       expect(stripeCore.cur).toBe(x402Core.cur);
-      expect(stripeCore.payment.amount).toBe(x402Core.payment.amount);
-      expect(stripeCore.payment.currency).toBe(x402Core.payment.currency);
+      expect(stripeCore.payment!.amount).toBe(x402Core.payment!.amount);
+      expect(stripeCore.payment!.currency).toBe(x402Core.payment!.currency);
 
       // Normalize rail/reference to verify all OTHER fields are identical
       const normalizedStripe = {

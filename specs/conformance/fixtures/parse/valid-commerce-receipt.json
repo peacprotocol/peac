@@ -1,0 +1,21 @@
+{
+  "description": "Valid commerce receipt with all required payment fields",
+  "expected_variant": "commerce",
+  "claims": {
+    "iss": "https://payments.example.com",
+    "aud": "https://api.example.com",
+    "iat": 1735600000,
+    "rid": "019412e0-7b3a-7000-8000-000000000001",
+    "amt": 1000,
+    "cur": "USD",
+    "payment": {
+      "rail": "stripe",
+      "reference": "pi_abc123",
+      "amount": 1000,
+      "currency": "USD",
+      "asset": "USD",
+      "env": "test",
+      "evidence": {}
+    }
+  }
+}

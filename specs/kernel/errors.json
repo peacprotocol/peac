@@ -1090,6 +1090,30 @@
       "description": "Receipt extension data exceeds maximum size limit (64 KB)",
       "retriable": false,
       "category": "verifier"
+    },
+    {
+      "code": "E_PARSE_INVALID_INPUT",
+      "http_status": 400,
+      "title": "Parse Invalid Input",
+      "description": "Input to receipt parser is not a non-null object",
+      "retriable": false,
+      "category": "validation"
+    },
+    {
+      "code": "E_PARSE_COMMERCE_INVALID",
+      "http_status": 400,
+      "title": "Commerce Receipt Invalid",
+      "description": "Receipt has commerce fields (amt/cur/payment) but fails commerce schema validation",
+      "retriable": false,
+      "category": "validation"
+    },
+    {
+      "code": "E_PARSE_ATTESTATION_INVALID",
+      "http_status": 400,
+      "title": "Attestation Receipt Invalid",
+      "description": "Receipt classified as attestation but fails attestation schema validation",
+      "retriable": false,
+      "category": "validation"
     }
   ]
 }

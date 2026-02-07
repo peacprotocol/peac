@@ -381,3 +381,14 @@ export type {
   AttestationValidationResult,
   CreateAttestationReceiptParams,
 } from './attestation-receipt';
+
+// Unified receipt parser (v0.10.9+)
+export { parseReceiptClaims } from './receipt-parser';
+export type {
+  ParseReceiptResult,
+  ParseSuccess,
+  ParseFailure,
+  PEACParseError,
+  ReceiptVariant,
+  ParseReceiptOptions,
+} from './receipt-parser';
