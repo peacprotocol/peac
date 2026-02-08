@@ -273,10 +273,19 @@ export function createVerifyV1Handler() {
       try {
         const resolved = await resolveKey(iss, kid, {
           cache: jwksCache,
-          fetchTimeoutMs: 5000,
-          connectTimeoutMs: 2000,
-          cacheTtlSeconds: 600, // 10 min
+          defaultTtlSeconds: 600, // 10 min
+          maxTtlSeconds: 86400,
+          minTtlSeconds: 60,
+          timeoutMs: 5000,
+          maxResponseBytes: 1024 * 1024,
+          maxKeys: 100,
+          allowLocalhost: false,
+          allowStale: true,
+          maxStaleAgeSeconds: 172800,
         });
+        if (!resolved) {
+          throw new Error(`Key ${kid} not found in JWKS for ${iss}`);
+        }
         publicKeyBytes = jwkToPublicKeyBytes(resolved.jwk);
       } catch (err) {
         throw new ProblemError(

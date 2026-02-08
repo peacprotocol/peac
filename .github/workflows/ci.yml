@@ -81,6 +81,10 @@ jobs:
         continue-on-error: true
         run: pnpm typecheck:legacy || true
 
+      - name: TypeScript check (apps - advisory)
+        continue-on-error: true
+        run: pnpm typecheck:apps || true
+
       - name: Build all packages
         run: pnpm build
 

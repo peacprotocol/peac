@@ -36,6 +36,7 @@
     "typecheck": "pnpm typecheck:core",
     "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
     "typecheck:legacy": "tsc -p tsconfig.legacy.json --noEmit",
+    "typecheck:apps": "pnpm --filter @peac/app-sandbox-issuer typecheck && pnpm --filter @peac/app-verifier typecheck && pnpm --filter @peac/app-api typecheck",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "clean": "turbo run clean && rm -rf node_modules",
