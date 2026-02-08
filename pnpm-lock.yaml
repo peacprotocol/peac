@@ -65,6 +65,9 @@ importers:
       '@peac/jwks-cache':
         specifier: workspace:*
         version: link:../../packages/jwks-cache
+      '@peac/middleware-core':
+        specifier: workspace:*
+        version: link:../../packages/middleware-core
       '@peac/pay402':
         specifier: workspace:*
         version: link:../../packages/pay402
@@ -160,6 +163,9 @@ importers:
       '@peac/crypto':
         specifier: workspace:*
         version: link:../../packages/crypto
+      '@peac/middleware-core':
+        specifier: workspace:*
+        version: link:../../packages/middleware-core
       '@peac/schema':
         specifier: workspace:*
         version: link:../../packages/schema

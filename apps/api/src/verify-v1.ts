@@ -18,6 +18,7 @@ import type { Context } from 'hono';
 import { z } from 'zod';
 import { verifyLocal } from '@peac/protocol';
 import { decode, base64urlDecode, jwkToPublicKeyBytes } from '@peac/crypto';
+import { MemoryRateLimitStore } from '@peac/middleware-core';
 import { InMemoryCache, resolveKey, type CacheBackend } from '@peac/jwks-cache';
 import { ProblemError } from './errors.js';
 
@@ -91,8 +92,8 @@ function loadTrustedIssuers(): TrustedIssuerEntry[] {
   });
 }
 
-/** Rate limit store: key -> { count, resetAt } */
-const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+/** Rate limit store -- bounded with LRU eviction at 10k keys */
+const rateLimitStore = new MemoryRateLimitStore({ maxKeys: 10_000 });
 const ANON_LIMIT = 100;
 const API_KEY_LIMIT = 1000;
 const WINDOW_MS = 60 * 1000; // 1 minute
@@ -119,20 +120,13 @@ interface RateLimitResult {
   retryAfter?: number;
 }
 
-function checkRateLimit(key: string, limit: number): RateLimitResult {
+async function checkRateLimit(key: string, limit: number): Promise<RateLimitResult> {
+  const { count, resetAt } = await rateLimitStore.increment(key, WINDOW_MS);
   const now = Date.now();
-  let entry = rateLimitStore.get(key);
+  const resetSeconds = Math.ceil((resetAt - now) / 1000);
+  const remaining = Math.max(0, limit - count);
 
-  if (!entry || now >= entry.resetAt) {
-    entry = { count: 0, resetAt: now + WINDOW_MS };
-    rateLimitStore.set(key, entry);
-  }
-
-  entry.count++;
-  const resetSeconds = Math.ceil((entry.resetAt - now) / 1000);
-  const remaining = Math.max(0, limit - entry.count);
-
-  if (entry.count > limit) {
+  if (count > limit) {
     return { allowed: false, remaining: 0, resetSeconds, retryAfter: resetSeconds };
   }
   return { allowed: true, remaining, resetSeconds };
@@ -160,7 +154,7 @@ export function createVerifyV1Handler() {
 
     // Rate limit with Retry-After + RFC 9333 RateLimit-* headers
     const rl = getRateLimit(c);
-    const check = checkRateLimit(rl.key, rl.limit);
+    const check = await checkRateLimit(rl.key, rl.limit);
     setRateLimitHeaders(c, rl.limit, check);
     if (!check.allowed) {
       c.header('Retry-After', String(check.retryAfter));
