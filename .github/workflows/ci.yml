@@ -83,7 +83,7 @@ jobs:
 
       - name: TypeScript check (apps - advisory)
         continue-on-error: true
-        run: pnpm typecheck:apps || true
+        run: pnpm typecheck:apps
 
       - name: Build all packages
         run: pnpm build
