@@ -5,7 +5,7 @@
  * Run with: pnpm demo
  */
 
-import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
+import { issue, verifyLocal, isCommerceResult, generateKeypair } from '@peac/protocol';
 
 async function main() {
   console.log('PEAC Quickstart Demo\n');
@@ -37,17 +37,20 @@ async function main() {
     audience: 'https://client.example.com',
   });
 
-  if (result.valid) {
+  if (isCommerceResult(result)) {
+    // After isCommerceResult(), claims is typed as ReceiptClaimsType
     const { claims } = result;
     console.log('   Signature + schema valid!\n');
     console.log('   Claims:');
     console.log('   - Issuer:', claims.iss);
     console.log('   - Audience:', claims.aud);
+    console.log('   - Receipt ID:', claims.rid);
+    console.log('   - Issued at:', new Date(claims.iat * 1000).toISOString());
     console.log('   - Amount:', claims.amt, claims.cur);
     console.log('   - Rail:', claims.payment.rail);
     console.log('   - Reference:', claims.payment.reference);
-    console.log('   - Receipt ID:', claims.rid);
-    console.log('   - Issued at:', new Date(claims.iat * 1000).toISOString());
+  } else if (result.valid) {
+    console.log('   Signature + schema valid (attestation receipt)');
   } else {
     console.error('   Verification failed:', result.code, result.message);
     process.exit(1);

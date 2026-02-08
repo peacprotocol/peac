@@ -30,12 +30,15 @@ describe('verifyLocal', () => {
 
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.claims.iss).toBe('https://api.example.com');
-        expect(result.claims.aud).toBe('https://client.example.com');
-        expect(result.claims.amt).toBe(1000);
-        expect(result.claims.cur).toBe('USD');
-        expect(result.claims.payment.rail).toBe('x402');
-        expect(result.claims.payment.reference).toBe('tx_abc123');
+        expect(result.variant).toBe('commerce');
+        if (result.variant === 'commerce') {
+          expect(result.claims.iss).toBe('https://api.example.com');
+          expect(result.claims.aud).toBe('https://client.example.com');
+          expect(result.claims.amt).toBe(1000);
+          expect(result.claims.cur).toBe('USD');
+          expect(result.claims.payment.rail).toBe('x402');
+          expect(result.claims.payment.reference).toBe('tx_abc123');
+        }
       }
     });
 
@@ -427,15 +430,17 @@ describe('verifyLocal', () => {
 
       expect(result.valid).toBe(true);
       if (result.valid) {
-        // claims should have all expected properties from ReceiptClaimsType
-        expect(typeof result.claims.iss).toBe('string');
-        expect(typeof result.claims.aud).toBe('string');
-        expect(typeof result.claims.iat).toBe('number');
-        expect(typeof result.claims.rid).toBe('string');
-        expect(typeof result.claims.amt).toBe('number');
-        expect(typeof result.claims.cur).toBe('string');
-        expect(typeof result.claims.payment).toBe('object');
-        expect(result.claims.subject?.uri).toBe('https://api.example.com/resource');
+        expect(result.variant).toBe('commerce');
+        if (result.variant === 'commerce') {
+          expect(typeof result.claims.iss).toBe('string');
+          expect(typeof result.claims.aud).toBe('string');
+          expect(typeof result.claims.iat).toBe('number');
+          expect(typeof result.claims.rid).toBe('string');
+          expect(typeof result.claims.amt).toBe('number');
+          expect(typeof result.claims.cur).toBe('string');
+          expect(typeof result.claims.payment).toBe('object');
+          expect(result.claims.subject?.uri).toBe('https://api.example.com/resource');
+        }
       }
     });
 
@@ -712,6 +717,111 @@ describe('verifyLocal', () => {
       });
 
       expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('attestation receipt verification', () => {
+    it('verifies an attestation receipt with variant=attestation', async () => {
+      const { privateKey, publicKey } = await generateKeypair();
+      const now = Math.floor(Date.now() / 1000);
+
+      // Attestation receipts have no commerce fields (amt, cur, payment)
+      const attestationPayload = {
+        iss: 'https://middleware.example.com',
+        aud: 'https://api.example.com',
+        iat: now,
+        exp: now + 3600,
+        rid: '01234567-0123-7123-8123-0123456789ab',
+      };
+
+      const jws = await sign(attestationPayload, privateKey, 'key-2026-01');
+
+      const result = await verifyLocal(jws, publicKey);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.variant).toBe('attestation');
+        expect(result.claims.iss).toBe('https://middleware.example.com');
+        expect(result.claims.aud).toBe('https://api.example.com');
+        expect(typeof result.claims.iat).toBe('number');
+        expect(typeof result.claims.rid).toBe('string');
+        expect(result.kid).toBe('key-2026-01');
+      }
+    });
+
+    it('supports issuer binding on attestation receipts', async () => {
+      const { privateKey, publicKey } = await generateKeypair();
+      const now = Math.floor(Date.now() / 1000);
+
+      const attestationPayload = {
+        iss: 'https://middleware.example.com',
+        aud: 'https://api.example.com',
+        iat: now,
+        exp: now + 3600,
+        rid: '01234567-0123-7123-8123-0123456789ab',
+      };
+
+      const jws = await sign(attestationPayload, privateKey, 'key-2026-01');
+
+      const result = await verifyLocal(jws, publicKey, {
+        issuer: 'https://middleware.example.com',
+      });
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.variant).toBe('attestation');
+      }
+    });
+
+    it('returns E_INVALID_FORMAT with details for invalid attestation payload', async () => {
+      const { privateKey, publicKey } = await generateKeypair();
+
+      // Missing required fields (iss, aud, iat, rid)
+      const invalidPayload = { iss: 'https://example.com' };
+      const jws = await sign(invalidPayload, privateKey, 'key-2026-01');
+
+      const result = await verifyLocal(jws, publicKey);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.code).toBe('E_INVALID_FORMAT');
+        expect(result.details).toBeDefined();
+        expect(result.details?.parse_code).toBe('E_PARSE_ATTESTATION_INVALID');
+      }
+    });
+
+    it('details.issues is a bounded array of {path, message} objects', async () => {
+      const { privateKey, publicKey } = await generateKeypair();
+      const now = Math.floor(Date.now() / 1000);
+
+      // Commerce-classified (has amt) but invalid (missing required payment fields)
+      const invalidPayload = {
+        iss: 'https://example.com',
+        aud: 'https://api.example.com',
+        iat: now,
+        rid: '01234567-0123-7123-8123-0123456789ab',
+        amt: 1000,
+      };
+      const jws = await sign(invalidPayload, privateKey, 'key-2026-01');
+
+      const result = await verifyLocal(jws, publicKey);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.code).toBe('E_INVALID_FORMAT');
+        expect(result.details?.parse_code).toBe('E_PARSE_COMMERCE_INVALID');
+        // Verify issues shape: bounded array of {path, message}
+        expect(result.details?.issues).toBeDefined();
+        expect(Array.isArray(result.details?.issues)).toBe(true);
+        expect(result.details!.issues!.length).toBeGreaterThan(0);
+        expect(result.details!.issues!.length).toBeLessThanOrEqual(25);
+        for (const issue of result.details!.issues!) {
+          expect(typeof issue.path).toBe('string');
+          expect(typeof issue.message).toBe('string');
+          // No extra fields leak beyond the stable shape
+          expect(Object.keys(issue)).toEqual(['path', 'message']);
+        }
+      }
     });
   });
 });

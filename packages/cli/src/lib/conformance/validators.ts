@@ -6,6 +6,7 @@
 
 import {
   ReceiptClaimsSchema,
+  parseReceiptClaims,
   validateAgentIdentityAttestation,
   validateAttributionAttestation,
   validateDisputeAttestation,
@@ -73,6 +74,25 @@ export function validateReceiptPayload(payload: unknown): ValidationResultWithPa
     error_message: firstIssue?.message ?? 'Unknown validation error',
     error_path: errorPath,
     error_keyword: errorKeyword,
+  };
+}
+
+/**
+ * Validate receipt claims using unified parser (parse-level error codes).
+ *
+ * Separate from validateReceiptPayload which returns path-level codes.
+ * Use this for the `parse` conformance category where fixtures assert
+ * parse-level codes (E_PARSE_COMMERCE_INVALID, E_PARSE_ATTESTATION_INVALID).
+ */
+export function validateParseReceiptClaims(payload: unknown): ValidationResultWithPath {
+  const pr = parseReceiptClaims(payload);
+  if (pr.ok) {
+    return { valid: true };
+  }
+  return {
+    valid: false,
+    error_code: pr.error.code,
+    error_message: pr.error.message,
   };
 }
 
@@ -387,6 +407,13 @@ export const CATEGORY_VALIDATORS: Record<string, CategoryValidator> = {
   edge: (input) => {
     const obj = input as Record<string, unknown>;
     return validateReceiptPayload(obj.payload ?? obj.claims ?? input);
+  },
+
+  // Parse-level validation (unified parser, parse-level error codes).
+  // The claims/payload ambiguity guard lives in the runner (test-harness concern).
+  parse: (input) => {
+    const obj = input as Record<string, unknown>;
+    return validateParseReceiptClaims(obj.claims ?? obj.payload ?? input);
   },
 
   // Category-specific validators

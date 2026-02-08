@@ -6,7 +6,11 @@
  */
 
 import { verify as jwsVerify } from '@peac/crypto';
-import { ReceiptClaimsSchema, type ReceiptClaimsType } from '@peac/schema';
+import {
+  parseReceiptClaims,
+  type ReceiptClaimsType,
+  type AttestationReceiptClaims,
+} from '@peac/schema';
 
 /**
  * Structural type for CryptoError
@@ -113,17 +117,31 @@ export interface VerifyLocalOptions {
 
 /**
  * Result of successful local verification
+ *
+ * Discriminated union on `variant` -- callers narrow claims type via variant check:
+ *   if (result.valid && result.variant === 'commerce') { result.claims.amt }
  */
-export interface VerifyLocalSuccess {
-  /** Verification succeeded */
-  valid: true;
-
-  /** Validated receipt claims (schema-derived type) */
-  claims: ReceiptClaimsType;
-
-  /** Key ID from JWS header (for logging/indexing) */
-  kid: string;
-}
+export type VerifyLocalSuccess =
+  | {
+      /** Verification succeeded */
+      valid: true;
+      /** Receipt variant (commerce = payment receipt, attestation = non-payment) */
+      variant: 'commerce';
+      /** Validated commerce receipt claims */
+      claims: ReceiptClaimsType;
+      /** Key ID from JWS header (for logging/indexing) */
+      kid: string;
+    }
+  | {
+      /** Verification succeeded */
+      valid: true;
+      /** Receipt variant (commerce = payment receipt, attestation = non-payment) */
+      variant: 'attestation';
+      /** Validated attestation receipt claims */
+      claims: AttestationReceiptClaims;
+      /** Key ID from JWS header (for logging/indexing) */
+      kid: string;
+    };
 
 /**
  * Result of failed local verification
@@ -137,6 +155,14 @@ export interface VerifyLocalFailure {
 
   /** Human-readable error message */
   message: string;
+
+  /** Structured details for debugging (stable error code preserved in `code`) */
+  details?: {
+    /** Precise parse error code from unified parser (e.g. E_PARSE_COMMERCE_INVALID) */
+    parse_code?: string;
+    /** Zod validation issues (bounded, stable shape -- non-normative, may change) */
+    issues?: ReadonlyArray<{ path: string; message: string }>;
+  };
 }
 
 /**
@@ -154,6 +180,23 @@ const FORMAT_ERROR_CODES = new Set([
   'CRYPTO_INVALID_ALG',
   'CRYPTO_INVALID_KEY_LENGTH',
 ]);
+
+/** Max parse issues to include in details (prevents log bloat) */
+const MAX_PARSE_ISSUES = 25;
+
+/**
+ * Sanitize Zod issues into a bounded, stable structure.
+ * Avoids exposing raw Zod internals or unbounded arrays in the public API.
+ */
+function sanitizeParseIssues(
+  issues: unknown
+): ReadonlyArray<{ path: string; message: string }> | undefined {
+  if (!Array.isArray(issues)) return undefined;
+  return issues.slice(0, MAX_PARSE_ISSUES).map((issue) => ({
+    path: Array.isArray(issue?.path) ? issue.path.join('.') : '',
+    message: typeof issue?.message === 'string' ? issue.message : String(issue),
+  }));
+}
 
 /**
  * Verify a PEAC receipt locally with a known public key
@@ -208,61 +251,48 @@ export async function verifyLocal(
       };
     }
 
-    // 2. Validate schema
-    const parseResult = ReceiptClaimsSchema.safeParse(result.payload);
+    // 2. Validate schema (unified parser supports both commerce and attestation)
+    const pr = parseReceiptClaims(result.payload);
 
-    if (!parseResult.success) {
-      const firstIssue = parseResult.error.issues[0];
+    if (!pr.ok) {
       return {
         valid: false,
         code: 'E_INVALID_FORMAT',
-        message: `Receipt schema validation failed: ${firstIssue?.message ?? 'unknown error'}`,
+        message: `Receipt schema validation failed: ${pr.error.message}`,
+        details: { parse_code: pr.error.code, issues: sanitizeParseIssues(pr.error.issues) },
       };
     }
 
-    const claims = parseResult.data;
-
+    // Shared binding checks (iss, aud, rid, iat, exp exist on both receipt types)
     // 3. Check issuer binding
-    if (issuer !== undefined && claims.iss !== issuer) {
+    if (issuer !== undefined && pr.claims.iss !== issuer) {
       return {
         valid: false,
         code: 'E_INVALID_ISSUER',
-        message: `Issuer mismatch: expected "${issuer}", got "${claims.iss}"`,
+        message: `Issuer mismatch: expected "${issuer}", got "${pr.claims.iss}"`,
       };
     }
 
     // 4. Check audience binding
-    if (audience !== undefined && claims.aud !== audience) {
+    if (audience !== undefined && pr.claims.aud !== audience) {
       return {
         valid: false,
         code: 'E_INVALID_AUDIENCE',
-        message: `Audience mismatch: expected "${audience}", got "${claims.aud}"`,
+        message: `Audience mismatch: expected "${audience}", got "${pr.claims.aud}"`,
       };
     }
 
-    // 5. Check subject binding
-    if (subjectUri !== undefined) {
-      const actualSubjectUri = claims.subject?.uri;
-      if (actualSubjectUri !== subjectUri) {
-        return {
-          valid: false,
-          code: 'E_INVALID_SUBJECT',
-          message: `Subject mismatch: expected "${subjectUri}", got "${actualSubjectUri ?? 'undefined'}"`,
-        };
-      }
-    }
-
-    // 6. Check receipt ID binding
-    if (rid !== undefined && claims.rid !== rid) {
+    // 5. Check receipt ID binding
+    if (rid !== undefined && pr.claims.rid !== rid) {
       return {
         valid: false,
         code: 'E_INVALID_RECEIPT_ID',
-        message: `Receipt ID mismatch: expected "${rid}", got "${claims.rid}"`,
+        message: `Receipt ID mismatch: expected "${rid}", got "${pr.claims.rid}"`,
       };
     }
 
-    // 7. Check requireExp
-    if (requireExp && claims.exp === undefined) {
+    // 6. Check requireExp
+    if (requireExp && pr.claims.exp === undefined) {
       return {
         valid: false,
         code: 'E_MISSING_EXP',
@@ -270,29 +300,46 @@ export async function verifyLocal(
       };
     }
 
-    // 8. Check not-yet-valid (iat with clock skew)
-    if (claims.iat > now + maxClockSkew) {
+    // 7. Check not-yet-valid (iat with clock skew)
+    if (pr.claims.iat > now + maxClockSkew) {
       return {
         valid: false,
         code: 'E_NOT_YET_VALID',
-        message: `Receipt not yet valid: issued at ${new Date(claims.iat * 1000).toISOString()}, now is ${new Date(now * 1000).toISOString()}`,
+        message: `Receipt not yet valid: issued at ${new Date(pr.claims.iat * 1000).toISOString()}, now is ${new Date(now * 1000).toISOString()}`,
       };
     }
 
-    // 9. Check expiry (with clock skew tolerance)
-    if (claims.exp !== undefined && claims.exp < now - maxClockSkew) {
+    // 8. Check expiry (with clock skew tolerance)
+    if (pr.claims.exp !== undefined && pr.claims.exp < now - maxClockSkew) {
       return {
         valid: false,
         code: 'E_EXPIRED',
-        message: `Receipt expired at ${new Date(claims.exp * 1000).toISOString()}`,
+        message: `Receipt expired at ${new Date(pr.claims.exp * 1000).toISOString()}`,
       };
     }
 
-    return {
-      valid: true,
-      claims,
-      kid: result.header.kid,
-    };
+    // 9. Subject binding + typed return (variant-branched, no unsafe casts)
+    if (pr.variant === 'commerce') {
+      const claims = pr.claims as ReceiptClaimsType;
+      if (subjectUri !== undefined && claims.subject?.uri !== subjectUri) {
+        return {
+          valid: false,
+          code: 'E_INVALID_SUBJECT',
+          message: `Subject mismatch: expected "${subjectUri}", got "${claims.subject?.uri ?? 'undefined'}"`,
+        };
+      }
+      return { valid: true, variant: 'commerce', claims, kid: result.header.kid };
+    } else {
+      const claims = pr.claims as AttestationReceiptClaims;
+      if (subjectUri !== undefined && claims.sub !== subjectUri) {
+        return {
+          valid: false,
+          code: 'E_INVALID_SUBJECT',
+          message: `Subject mismatch: expected "${subjectUri}", got "${claims.sub ?? 'undefined'}"`,
+        };
+      }
+      return { valid: true, variant: 'attestation', claims, kid: result.header.kid };
+    }
   } catch (err) {
     // Handle typed CryptoError from @peac/crypto
     // Use structural check instead of instanceof for robustness across ESM/CJS boundaries
@@ -323,4 +370,28 @@ export async function verifyLocal(
       message: `Unexpected verification error: ${message}`,
     };
   }
+}
+
+/**
+ * Type guard: narrows a VerifyLocalResult to a commerce success.
+ *
+ * Use instead of manual `result.valid && result.variant === 'commerce'` checks
+ * to get proper claims narrowing to ReceiptClaimsType.
+ */
+export function isCommerceResult(
+  r: VerifyLocalResult
+): r is VerifyLocalSuccess & { variant: 'commerce' } {
+  return r.valid === true && r.variant === 'commerce';
+}
+
+/**
+ * Type guard: narrows a VerifyLocalResult to an attestation success.
+ *
+ * Use instead of manual `result.valid && result.variant === 'attestation'` checks
+ * to get proper claims narrowing to AttestationReceiptClaims.
+ */
+export function isAttestationResult(
+  r: VerifyLocalResult
+): r is VerifyLocalSuccess & { variant: 'attestation' } {
+  return r.valid === true && r.variant === 'attestation';
 }

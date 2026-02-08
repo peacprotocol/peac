@@ -14,6 +14,7 @@ import {
   zodPathToJsonPointer,
   type ConformanceReport,
 } from '../src/lib/conformance-runner';
+import { CATEGORY_VALIDATORS } from '../src/lib/conformance/validators';
 
 const TEST_FIXTURES_DIR = join(__dirname, '..', '.test-fixtures');
 
@@ -318,6 +319,87 @@ describe('Conformance Runner', () => {
       expect(testResult?.observed?.error_path).toBe('/iss');
       expect(testResult?.observed?.error_keyword).toBe('type');
       expect(testResult?.status).toBe('pass'); // Should pass since expectations match
+    });
+  });
+
+  describe('Parse Category Validation', () => {
+    it('should reject fixture input with both claims and payload as ambiguous', () => {
+      // Ambiguity guard lives in the runner (test-harness concern, not protocol).
+      // Create a fixture pack with ambiguous input and verify the runner catches it.
+      const parseDir = join(TEST_FIXTURES_DIR, 'parse');
+      mkdirSync(parseDir, { recursive: true });
+      writeFileSync(
+        join(parseDir, 'ambiguous.json'),
+        JSON.stringify({
+          version: '0.1',
+          fixtures: [
+            {
+              name: 'both_keys',
+              input: {
+                claims: {
+                  iss: 'https://example.com',
+                  aud: 'https://api.example.com',
+                  iat: 1735600000,
+                  rid: 'test-001',
+                },
+                payload: {
+                  iss: 'https://example.com',
+                  aud: 'https://api.example.com',
+                  iat: 1735600000,
+                  rid: 'test-001',
+                },
+              },
+              expected: { valid: false },
+            },
+          ],
+        })
+      );
+
+      const report = runConformance({
+        fixturesDir: TEST_FIXTURES_DIR,
+        level: 'basic',
+        category: 'parse',
+      });
+
+      const testResult = report.results.find((r) => r.id.includes('both_keys'));
+      expect(testResult).toBeDefined();
+      expect(testResult?.status).toBe('fail');
+      expect(testResult?.diagnostics?.error_message).toContain('ambiguous');
+
+      // Clean up
+      rmSync(parseDir, { recursive: true });
+    });
+
+    it('should validate parse fixtures using unified parser error codes', () => {
+      // Parse fixtures with claims wrapper should route through parseReceiptClaims
+      const parseValidator = CATEGORY_VALIDATORS['parse'];
+
+      // Valid attestation receipt
+      const validResult = parseValidator({
+        claims: {
+          iss: 'https://example.com',
+          aud: 'https://api.example.com',
+          iat: 1735600000,
+          exp: 1735603600,
+          rid: '01234567-0123-7123-8123-0123456789ab',
+        },
+      });
+      expect(validResult.valid).toBe(true);
+
+      // Invalid commerce (has amt but missing payment)
+      const invalidResult = parseValidator({
+        claims: {
+          iss: 'https://example.com',
+          aud: 'https://api.example.com',
+          iat: 1735600000,
+          rid: '01234567-0123-7123-8123-0123456789ab',
+          amt: 1000,
+        },
+      });
+      expect(invalidResult.valid).toBe(false);
+      if (!invalidResult.valid) {
+        expect(invalidResult.error_code).toBe('E_PARSE_COMMERCE_INVALID');
+      }
     });
   });
 
