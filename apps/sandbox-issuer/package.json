@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@peac/crypto": "workspace:*",
+    "@peac/middleware-core": "workspace:*",
     "@peac/schema": "workspace:*",
     "hono": "^4.9.7",
     "@hono/node-server": "^1.8.2",

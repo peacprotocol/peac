@@ -2,20 +2,17 @@
  * In-memory sliding window rate limiter
  *
  * 1000 requests per hour per IP. Resets on window expiry.
+ * Uses bounded MemoryRateLimitStore (LRU eviction at 10k keys).
  * Stateless (resets on process restart) -- acceptable for sandbox.
  */
 
 import type { Context, Next } from 'hono';
+import { MemoryRateLimitStore } from '@peac/middleware-core';
 
 const MAX_REQUESTS = 1000;
 const WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
-interface RateEntry {
-  count: number;
-  resetAt: number;
-}
-
-const store = new Map<string, RateEntry>();
+const store = new MemoryRateLimitStore({ maxKeys: 10_000 });
 
 function getClientIp(c: Context): string {
   // Only trust forwarded headers when running behind a known reverse proxy
@@ -29,25 +26,18 @@ function getClientIp(c: Context): string {
 
 export async function rateLimitMiddleware(c: Context, next: Next) {
   const ip = getClientIp(c);
+  const { count, resetAt } = await store.increment(ip, WINDOW_MS);
+
   const now = Date.now();
-  let entry = store.get(ip);
-
-  if (!entry || now >= entry.resetAt) {
-    entry = { count: 0, resetAt: now + WINDOW_MS };
-    store.set(ip, entry);
-  }
-
-  entry.count++;
-
-  const resetSeconds = Math.ceil((entry.resetAt - now) / 1000);
-  const remaining = Math.max(0, MAX_REQUESTS - entry.count);
+  const resetSeconds = Math.ceil((resetAt - now) / 1000);
+  const remaining = Math.max(0, MAX_REQUESTS - count);
 
   // RFC 9333 RateLimit-* headers on all responses
   c.header('RateLimit-Limit', String(MAX_REQUESTS));
   c.header('RateLimit-Remaining', String(remaining));
   c.header('RateLimit-Reset', String(resetSeconds));
 
-  if (entry.count > MAX_REQUESTS) {
+  if (count > MAX_REQUESTS) {
     c.header('Retry-After', String(resetSeconds));
     return c.json(
       {
