@@ -27,8 +27,9 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
     `E_PARSE_ATTESTATION_INVALID`
   - 6 conformance vectors with exact error code assertions
   - `isCommerceResult()` / `isAttestationResult()` type guards for downstream narrowing
-  - Conformance `parse` category routed with ambiguity guard (rejects both `claims`
-    and `payload`)
+  - Conformance `parse` category routed through unified parser
+  - Fixture ambiguity guard in runner (rejects inputs with both `claims` and
+    `payload`)
 
 - **Dependency-cruiser layer enforcement** (14 rules)
   - Pattern-based rules encoding full layer structure (L0 through L6)
@@ -66,6 +67,8 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
 
 - **Graceful shutdown** (`apps/sandbox-issuer`, `apps/api`)
   - SIGTERM/SIGINT handlers with 10s forced shutdown timeout
+
+- **`typecheck:apps`** CI step (advisory) for app-level typechecking
 
 - **`.gitattributes`** enforcing LF line endings for text files
 
@@ -114,6 +117,13 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
 
 - **Orphaned directory removed** -- `packages/nextjs/` (plan doc moved to
   `reference/`)
+
+- **JWKS resolver options** in verify API -- fixed option names to match
+  `ResolverOptions` type (`fetchTimeoutMs` -> `timeoutMs`, `cacheTtlSeconds` ->
+  `defaultTtlSeconds`)
+
+- **Unicode guard made fail-closed** (`scripts/guard.sh`) -- missing detector
+  script now fails the gate instead of silently skipping
 
 ### Security
 
