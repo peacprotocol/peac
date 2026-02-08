@@ -240,12 +240,7 @@ export async function resolveKey(
         e instanceof JwksError &&
         (e.code === ErrorCodes.JWKS_FETCH_FAILED || e.code === ErrorCodes.JWKS_TIMEOUT)
     );
-    if (
-      allowStale &&
-      allTransient &&
-      'getStale' in cache &&
-      typeof cache.getStale === 'function'
-    ) {
+    if (allowStale && allTransient && 'getStale' in cache && typeof cache.getStale === 'function') {
       const staleEntry = await (
         cache as { getStale: (k: string) => Promise<typeof cached> }
       ).getStale(cacheKey);
