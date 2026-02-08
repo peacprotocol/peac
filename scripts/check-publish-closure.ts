@@ -86,6 +86,16 @@ function main() {
     }
 
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
+
+    // Verify files field exists and is restrictive (prevents tarball artifact leaks)
+    if (!Array.isArray(pkgJson.files)) {
+      errors.push(`${pkgName}: missing "files" field -- tarballs will include build artifacts`);
+    } else if (pkgJson.files.some((f: string) => f === '.' || f === '**/*' || f === '*')) {
+      errors.push(`${pkgName}: overly broad "files" field -- use ["dist", "README.md"] pattern`);
+    } else if (!pkgJson.files.includes('dist')) {
+      warnings.push(`${pkgName}: "files" field does not include "dist"`);
+    }
+
     const deps = pkgJson.dependencies || {};
 
     for (const [depName, depVersion] of Object.entries(deps)) {
