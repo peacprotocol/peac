@@ -6,6 +6,7 @@
 
 import {
   ReceiptClaimsSchema,
+  parseReceiptClaims,
   validateAgentIdentityAttestation,
   validateAttributionAttestation,
   validateDisputeAttestation,
@@ -73,6 +74,25 @@ export function validateReceiptPayload(payload: unknown): ValidationResultWithPa
     error_message: firstIssue?.message ?? 'Unknown validation error',
     error_path: errorPath,
     error_keyword: errorKeyword,
+  };
+}
+
+/**
+ * Validate receipt claims using unified parser (parse-level error codes).
+ *
+ * Separate from validateReceiptPayload which returns path-level codes.
+ * Use this for the `parse` conformance category where fixtures assert
+ * parse-level codes (E_PARSE_COMMERCE_INVALID, E_PARSE_ATTESTATION_INVALID).
+ */
+export function validateParseReceiptClaims(payload: unknown): ValidationResultWithPath {
+  const pr = parseReceiptClaims(payload);
+  if (pr.ok) {
+    return { valid: true };
+  }
+  return {
+    valid: false,
+    error_code: pr.error.code,
+    error_message: pr.error.message,
   };
 }
 
@@ -387,6 +407,22 @@ export const CATEGORY_VALIDATORS: Record<string, CategoryValidator> = {
   edge: (input) => {
     const obj = input as Record<string, unknown>;
     return validateReceiptPayload(obj.payload ?? obj.claims ?? input);
+  },
+
+  // Parse-level validation (unified parser, parse-level error codes).
+  // Fixtures must have exactly one of "claims" or "payload" -- never both.
+  // This is a test-harness input concern (not a protocol concern): if both
+  // keys exist, precedence silently picks one and can hide fixture bugs.
+  parse: (input) => {
+    const obj = input as Record<string, unknown>;
+    if (obj.claims !== undefined && obj.payload !== undefined) {
+      return {
+        valid: false,
+        error_code: 'E_PARSE_INVALID_INPUT',
+        error_message: 'Fixture has both "claims" and "payload" -- ambiguous; use one',
+      };
+    }
+    return validateParseReceiptClaims(obj.claims ?? obj.payload ?? input);
   },
 
   // Category-specific validators

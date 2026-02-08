@@ -14,6 +14,7 @@ import {
   zodPathToJsonPointer,
   type ConformanceReport,
 } from '../src/lib/conformance-runner';
+import { CATEGORY_VALIDATORS } from '../src/lib/conformance/validators';
 
 const TEST_FIXTURES_DIR = join(__dirname, '..', '.test-fixtures');
 
@@ -318,6 +319,59 @@ describe('Conformance Runner', () => {
       expect(testResult?.observed?.error_path).toBe('/iss');
       expect(testResult?.observed?.error_keyword).toBe('type');
       expect(testResult?.status).toBe('pass'); // Should pass since expectations match
+    });
+  });
+
+  describe('Parse Category Validation', () => {
+    it('should reject input with both claims and payload as ambiguous', () => {
+      // Test the parse category validator directly (the runner unwraps payload
+      // before reaching the validator, so this guards against direct calls).
+      const parseValidator = CATEGORY_VALIDATORS['parse'];
+      expect(parseValidator).toBeDefined();
+
+      const ambiguousInput = {
+        claims: { iss: 'https://example.com', aud: 'https://api.example.com', iat: 1735600000, rid: 'test-001' },
+        payload: { iss: 'https://example.com', aud: 'https://api.example.com', iat: 1735600000, rid: 'test-001' },
+      };
+
+      const result = parseValidator(ambiguousInput);
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error_code).toBe('E_PARSE_INVALID_INPUT');
+        expect(result.error_message).toContain('ambiguous');
+      }
+    });
+
+    it('should validate parse fixtures using unified parser error codes', () => {
+      // Parse fixtures with claims wrapper should route through parseReceiptClaims
+      const parseValidator = CATEGORY_VALIDATORS['parse'];
+
+      // Valid attestation receipt
+      const validResult = parseValidator({
+        claims: {
+          iss: 'https://example.com',
+          aud: 'https://api.example.com',
+          iat: 1735600000,
+          exp: 1735603600,
+          rid: '01234567-0123-7123-8123-0123456789ab',
+        },
+      });
+      expect(validResult.valid).toBe(true);
+
+      // Invalid commerce (has amt but missing payment)
+      const invalidResult = parseValidator({
+        claims: {
+          iss: 'https://example.com',
+          aud: 'https://api.example.com',
+          iat: 1735600000,
+          rid: '01234567-0123-7123-8123-0123456789ab',
+          amt: 1000,
+        },
+      });
+      expect(invalidResult.valid).toBe(false);
+      if (!invalidResult.valid) {
+        expect(invalidResult.error_code).toBe('E_PARSE_COMMERCE_INVALID');
+      }
     });
   });
 
