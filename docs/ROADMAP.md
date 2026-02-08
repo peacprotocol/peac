@@ -1,16 +1,20 @@
 # PEAC Protocol Roadmap
 
-## Current Release: v0.10.5
+## Current Release: v0.10.9
 
 **Wire Format:** `peac-receipt/0.1` (stable)
 
 Key capabilities:
 
 - Receipt issuance and verification (TypeScript + Go)
+- Unified receipt parser (commerce + attestation)
+- Middleware for Express.js (automatic receipt issuance)
+- Conformance runner with category-aware validation
 - Policy Kit for declarative access control
 - Dispute bundles for offline verification
 - Workflow correlation for multi-agent DAGs
 - SSRF-safe networking with DNS pinning
+- Dependency-cruiser layer enforcement (14 rules)
 - GitHub Actions npm publish with OIDC Trusted Publishing
 
 ## Upcoming
