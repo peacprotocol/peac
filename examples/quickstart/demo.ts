@@ -38,16 +38,17 @@ async function main() {
   });
 
   if (isCommerceResult(result)) {
+    // After isCommerceResult(), claims is typed as ReceiptClaimsType
+    const { claims } = result;
     console.log('   Signature + schema valid!\n');
-    console.log('   Variant:', result.variant);
     console.log('   Claims:');
-    console.log('   - Issuer:', result.claims.iss);
-    console.log('   - Audience:', result.claims.aud);
-    console.log('   - Receipt ID:', result.claims.rid);
-    console.log('   - Issued at:', new Date(result.claims.iat * 1000).toISOString());
-    console.log('   - Amount:', result.claims.amt, result.claims.cur);
-    console.log('   - Rail:', result.claims.payment.rail);
-    console.log('   - Reference:', result.claims.payment.reference);
+    console.log('   - Issuer:', claims.iss);
+    console.log('   - Audience:', claims.aud);
+    console.log('   - Receipt ID:', claims.rid);
+    console.log('   - Issued at:', new Date(claims.iat * 1000).toISOString());
+    console.log('   - Amount:', claims.amt, claims.cur);
+    console.log('   - Rail:', claims.payment.rail);
+    console.log('   - Reference:', claims.payment.reference);
   } else if (result.valid) {
     console.log('   Signature + schema valid (attestation receipt)');
   } else {

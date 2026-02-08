@@ -177,6 +177,28 @@ export function runConformance(
 
           callbacks?.onTestStart?.(testId);
 
+          // Guard: fixture inputs must not have both "claims" and "payload".
+          // Ambiguity is a test-harness concern -- precedence would silently
+          // pick one and hide fixture authoring bugs.
+          if (typeof f.input === 'object' && f.input !== null) {
+            const inputObj = f.input as Record<string, unknown>;
+            if (inputObj.claims !== undefined && inputObj.payload !== undefined) {
+              failed++;
+              const result: TestResult = {
+                id: testId,
+                category: profile,
+                status: 'fail',
+                diagnostics: {
+                  error_message:
+                    'Fixture has both "claims" and "payload" -- ambiguous; use one',
+                },
+              };
+              results.push(result);
+              callbacks?.onTestComplete?.(result);
+              continue;
+            }
+          }
+
           const observed = validator(f.input);
 
           // Check if result matches expectation

@@ -323,23 +323,41 @@ describe('Conformance Runner', () => {
   });
 
   describe('Parse Category Validation', () => {
-    it('should reject input with both claims and payload as ambiguous', () => {
-      // Test the parse category validator directly (the runner unwraps payload
-      // before reaching the validator, so this guards against direct calls).
-      const parseValidator = CATEGORY_VALIDATORS['parse'];
-      expect(parseValidator).toBeDefined();
+    it('should reject fixture input with both claims and payload as ambiguous', () => {
+      // Ambiguity guard lives in the runner (test-harness concern, not protocol).
+      // Create a fixture pack with ambiguous input and verify the runner catches it.
+      const parseDir = join(TEST_FIXTURES_DIR, 'parse');
+      mkdirSync(parseDir, { recursive: true });
+      writeFileSync(
+        join(parseDir, 'ambiguous.json'),
+        JSON.stringify({
+          version: '0.1',
+          fixtures: [
+            {
+              name: 'both_keys',
+              input: {
+                claims: { iss: 'https://example.com', aud: 'https://api.example.com', iat: 1735600000, rid: 'test-001' },
+                payload: { iss: 'https://example.com', aud: 'https://api.example.com', iat: 1735600000, rid: 'test-001' },
+              },
+              expected: { valid: false },
+            },
+          ],
+        })
+      );
 
-      const ambiguousInput = {
-        claims: { iss: 'https://example.com', aud: 'https://api.example.com', iat: 1735600000, rid: 'test-001' },
-        payload: { iss: 'https://example.com', aud: 'https://api.example.com', iat: 1735600000, rid: 'test-001' },
-      };
+      const report = runConformance({
+        fixturesDir: TEST_FIXTURES_DIR,
+        level: 'basic',
+        category: 'parse',
+      });
 
-      const result = parseValidator(ambiguousInput);
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error_code).toBe('E_PARSE_INVALID_INPUT');
-        expect(result.error_message).toContain('ambiguous');
-      }
+      const testResult = report.results.find((r) => r.id.includes('both_keys'));
+      expect(testResult).toBeDefined();
+      expect(testResult?.status).toBe('fail');
+      expect(testResult?.diagnostics?.error_message).toContain('ambiguous');
+
+      // Clean up
+      rmSync(parseDir, { recursive: true });
     });
 
     it('should validate parse fixtures using unified parser error codes', () => {

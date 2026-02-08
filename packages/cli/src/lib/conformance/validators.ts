@@ -410,18 +410,9 @@ export const CATEGORY_VALIDATORS: Record<string, CategoryValidator> = {
   },
 
   // Parse-level validation (unified parser, parse-level error codes).
-  // Fixtures must have exactly one of "claims" or "payload" -- never both.
-  // This is a test-harness input concern (not a protocol concern): if both
-  // keys exist, precedence silently picks one and can hide fixture bugs.
+  // The claims/payload ambiguity guard lives in the runner (test-harness concern).
   parse: (input) => {
     const obj = input as Record<string, unknown>;
-    if (obj.claims !== undefined && obj.payload !== undefined) {
-      return {
-        valid: false,
-        error_code: 'E_PARSE_INVALID_INPUT',
-        error_message: 'Fixture has both "claims" and "payload" -- ambiguous; use one',
-      };
-    }
     return validateParseReceiptClaims(obj.claims ?? obj.payload ?? input);
   },
 
