@@ -164,7 +164,8 @@ if [ -f scripts/find-invisible-unicode.mjs ]; then
     echo "OK"
   fi
 else
-  echo "SKIP: scripts/find-invisible-unicode.mjs not found"
+  echo "FAIL: scripts/find-invisible-unicode.mjs not found (required for Trojan Source detection)"
+  bad=1
 fi
 
 echo "== forbid header casing drift (Peac-Receipt) =="
