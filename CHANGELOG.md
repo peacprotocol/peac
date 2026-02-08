@@ -7,6 +7,102 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.9] - 2026-02-07
+
+### Foundation Hardening -- Architecture, CI, and Server Reliability
+
+v0.10.9 ships architectural fixes, CI hardening, and server reliability
+improvements. Publish manifest expanded from 18 to 20 packages. Four packages
+deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-openclaw`,
+`cli`) are now bootstrap-ready with all CI guards in place.
+
+### Added
+
+- **Unified receipt parser** (`@peac/schema`)
+  - `parseReceiptClaims(input, opts?)` -- single entry point for commerce and
+    attestation receipt validation
+  - Classification by key presence (`amt`, `cur`, `payment`), not truthiness
+  - Returns `{ ok, variant, claims }` or `{ ok: false, error }` result type
+  - 3 canonical error codes: `E_PARSE_INVALID_INPUT`, `E_PARSE_COMMERCE_INVALID`,
+    `E_PARSE_ATTESTATION_INVALID`
+  - 6 conformance vectors with exact error code assertions
+
+- **Dependency-cruiser layer enforcement** (11 rules)
+  - Pattern-based rules encoding full layer structure (L0 through L6)
+  - Layer 3.5 middleware explicitly modeled
+  - Narrow test-only exception via `pathNot`
+  - `pnpm lint:deps` CI gate
+
+- **Publish-manifest closure check** (`scripts/check-publish-closure.ts`)
+  - Traverses all manifest packages' runtime dependencies
+  - Fails if any `@peac/*` dep is missing from manifest or uses `workspace:*`
+  - Manifest expanded: added `@peac/audit` and `@peac/disc` (20 packages total)
+
+- **Manifest-driven pack scripts**
+  - `pack-verify.sh` and `pack-install-smoke.sh` now read from
+    `publish-manifest.json` -- no more hardcoded package arrays
+  - Tarball hygiene checks: no `reference/`, `.local.md`, `.env*` in tarballs
+
+- **Planning leak check** (`scripts/check-planning-leak.sh`)
+  - Detects `reference/*_LOCAL.*` path leaks in tracked code
+  - Detects strategic content keywords in tracked files
+  - Added to CI workflow
+
+- **JWKS stale-if-error** (`@peac/jwks-cache`)
+  - Expired cache entries retained for fallback when all discovery paths fail
+  - `allowStale` option (library default: `false`, conservative)
+  - `maxStaleAgeSeconds` hard cap (default: 48h) prevents accepting ancient keys
+  - `ResolvedKey` extended with `stale`, `staleAgeSeconds`, `keyExpiredAt`
+
+- **Bounded rate-limit store** (`@peac/middleware-core`)
+  - `RateLimitStore` interface with `increment()` and `reset()`
+  - `MemoryRateLimitStore` with LRU eviction (`maxKeys`, default: 10000)
+  - Lazy expired window cleanup prevents unbounded Map growth
+
+- **Graceful shutdown** (`apps/sandbox-issuer`, `apps/api`)
+  - SIGTERM/SIGINT handlers with 10s forced shutdown timeout
+
+- **`.gitattributes`** enforcing LF line endings for text files
+
+### Changed
+
+- **Telemetry decoupled from protocol** (`@peac/protocol`)
+  - Removed `@peac/telemetry` runtime dependency
+  - Telemetry accepted via `TelemetryHook` options injection
+  - Hooks are fire-and-forget: sync throws and async rejections guarded
+  - `TelemetryHook` exported as type-only from protocol (no runtime edge)
+
+- **`@peac/audit` made publishable** -- removed `private: true`, added
+  `publishConfig.access: public`
+
+- **`CoreClaims.payment` now optional** (`@peac/schema`) -- supports attestation
+  receipts that have no payment field
+
+- **SHA-pinned GitHub Actions** in CI workflow
+  - `actions/checkout@11bd71901...` (v4.2.2)
+  - `actions/setup-node@49933ea52...` (v4.4.0)
+
+- **DevDep bumps**: fast-check 4.5.3, prettier 3.8.1, tsx 4.21.0
+
+### Fixed
+
+- **Broken Husky pre-commit hook removed** -- called `lint-staged` which was
+  not installed, giving false "local gate passed" signal
+
+- **Build artifacts removed from source** -- deleted `.d.ts` and `.d.ts.map`
+  files from `packages/pay402/src/`
+
+- **Orphaned directory removed** -- `packages/nextjs/` (plan doc moved to
+  `reference/`)
+
+### Security
+
+- JWKS stale-if-error defaults to disabled (`allowStale: false`) -- server apps
+  must explicitly opt in
+- Rate-limit store bounded by `maxKeys` with LRU eviction -- prevents memory
+  exhaustion under sustained load
+- Publish-manifest closure check prevents broken dependency chains on npm
+
 ## [0.10.8] - 2026-02-07
 
 ### Adoption Release -- Middleware, Conformance, and Infrastructure

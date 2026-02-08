@@ -26,12 +26,12 @@ export interface CoreClaims {
   iat: number;
   /** Expiry timestamp (omitted if not present) */
   exp?: number;
-  /** Amount in smallest currency unit */
-  amt: number;
-  /** Currency code (ISO 4217) */
-  cur: string;
-  /** Normalized payment evidence */
-  payment: NormalizedPayment;
+  /** Amount in smallest currency unit (commerce receipts) */
+  amt?: number;
+  /** Currency code (ISO 4217, commerce receipts) */
+  cur?: string;
+  /** Normalized payment evidence (commerce receipts) */
+  payment?: NormalizedPayment;
   /** Subject (omitted if not present) */
   subject?: Subject;
   /** Control block (omitted if not present) */
@@ -151,9 +151,10 @@ export function toCoreClaims(claims: PEACReceiptClaims): CoreClaims {
     aud: claims.aud,
     rid: claims.rid,
     iat: claims.iat,
-    amt: claims.amt,
-    cur: claims.cur,
-    payment: normalizePayment(claims.payment),
+    // Commerce fields (omitted for attestation receipts)
+    ...(claims.amt !== undefined && { amt: claims.amt }),
+    ...(claims.cur !== undefined && { cur: claims.cur }),
+    ...(claims.payment !== undefined && { payment: normalizePayment(claims.payment) }),
   };
 
   // Only include optional fields if defined

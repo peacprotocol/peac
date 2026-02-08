@@ -79,7 +79,8 @@ export interface TransportProfileSuccess<
  * Transport profile parse result
  */
 export type TransportProfileParseResult<T extends ParsedTransportProfile = ParsedTransportProfile> =
-  TransportProfileSuccess<T> | TransportProfileError;
+  | TransportProfileSuccess<T>
+  | TransportProfileError;
 
 // ---------------------------------------------------------------------------
 // Header Profile Parser

@@ -88,6 +88,18 @@ export interface ResolverOptions {
   isAllowedHost?: (host: string) => boolean;
   /** Allow localhost in dev mode (defaults to false) */
   allowLocalhost?: boolean;
+  /**
+   * Allow serving stale cached keys when fetch fails (default: false).
+   * When true, expired cache entries are served as a fallback if all
+   * discovery paths fail, up to maxStaleAgeSeconds past expiry.
+   */
+  allowStale?: boolean;
+  /**
+   * Hard cap for stale age in seconds (default: 172800 / 48h).
+   * Entries older than this past their original expiry are never served,
+   * even with allowStale: true. Prevents silently accepting ancient keys.
+   */
+  maxStaleAgeSeconds?: number;
 }
 
 /**
@@ -100,6 +112,12 @@ export interface ResolvedKey {
   source: '/.well-known/jwks' | '/.well-known/jwks.json' | '/keys';
   /** Whether result was from cache */
   cached: boolean;
+  /** True when serving a past-expiry cached entry (stale-if-error) */
+  stale?: boolean;
+  /** How many seconds past the original TTL expiry */
+  staleAgeSeconds?: number;
+  /** Unix timestamp (seconds) when the cache entry expired */
+  keyExpiredAt?: number;
 }
 
 /**

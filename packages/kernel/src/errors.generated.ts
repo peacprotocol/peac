@@ -138,6 +138,9 @@ export const ERROR_CODES = {
   E_MISSING_EXP: 'E_MISSING_EXP',
   E_MISSING_REQUIRED_CLAIM: 'E_MISSING_REQUIRED_CLAIM',
   E_NOT_YET_VALID: 'E_NOT_YET_VALID',
+  E_PARSE_ATTESTATION_INVALID: 'E_PARSE_ATTESTATION_INVALID',
+  E_PARSE_COMMERCE_INVALID: 'E_PARSE_COMMERCE_INVALID',
+  E_PARSE_INVALID_INPUT: 'E_PARSE_INVALID_INPUT',
 
   // Verification error codes
   E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
@@ -1078,6 +1081,31 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Not Yet Valid',
     description: 'Receipt nbf (not before) time is in the future',
     retriable: true,
+    category: 'validation',
+  },
+  E_PARSE_ATTESTATION_INVALID: {
+    code: 'E_PARSE_ATTESTATION_INVALID',
+    http_status: 400,
+    title: 'Attestation Receipt Invalid',
+    description: 'Receipt classified as attestation but fails attestation schema validation',
+    retriable: false,
+    category: 'validation',
+  },
+  E_PARSE_COMMERCE_INVALID: {
+    code: 'E_PARSE_COMMERCE_INVALID',
+    http_status: 400,
+    title: 'Commerce Receipt Invalid',
+    description:
+      'Receipt has commerce fields (amt/cur/payment) but fails commerce schema validation',
+    retriable: false,
+    category: 'validation',
+  },
+  E_PARSE_INVALID_INPUT: {
+    code: 'E_PARSE_INVALID_INPUT',
+    http_status: 400,
+    title: 'Parse Invalid Input',
+    description: 'Input to receipt parser is not a non-null object',
+    retriable: false,
     category: 'validation',
   },
 

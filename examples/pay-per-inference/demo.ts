@@ -165,7 +165,7 @@ async function agent(params: {
     console.log(`      iss: ${core.iss}`);
     console.log(`      aud: ${core.aud}`);
     console.log(`      amt: ${core.amt} ${core.cur}`);
-    console.log(`      payment.rail: ${core.payment.rail}`);
+    console.log(`      payment.rail: ${core.payment?.rail}`);
     console.log(`   -> Canonical JCS (${canonical.length} bytes)`);
   }
 

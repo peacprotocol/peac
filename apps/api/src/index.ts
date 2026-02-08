@@ -91,10 +91,27 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const port = parseInt(process.env.PORT || '3000');
   const version = process.env.npm_package_version || 'dev';
 
-  serve({
+  const server = serve({
     fetch: app.fetch,
     port,
   });
 
   console.log(`PEAC Verify API v${version} listening on http://localhost:${port}`);
+
+  const SHUTDOWN_TIMEOUT_MS = 10_000;
+
+  function shutdown(signal: string) {
+    console.log(`${signal} received, shutting down gracefully...`);
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+    setTimeout(() => {
+      console.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, SHUTDOWN_TIMEOUT_MS).unref();
+  }
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }

@@ -107,8 +107,8 @@ describe('toCoreClaims', () => {
     expect(core.rid).toBe('0191234567890abc');
     expect(core.amt).toBe(1000);
     expect(core.cur).toBe('USD');
-    expect(core.payment.rail).toBe('x402');
-    expect(core.payment.reference).toBe('pay_123');
+    expect(core.payment!.rail).toBe('x402');
+    expect(core.payment!.reference).toBe('pay_123');
     expect(core.exp).toBeUndefined();
     expect(core.subject).toBeUndefined();
     expect(core.control).toBeUndefined();
@@ -162,7 +162,7 @@ describe('toCoreClaims', () => {
     const core = toCoreClaims(claims);
 
     // Normalized payment should not have evidence field
-    expect((core.payment as unknown as Record<string, unknown>).evidence).toBeUndefined();
+    expect((core.payment! as unknown as Record<string, unknown>).evidence).toBeUndefined();
   });
 
   it('includes optional payment fields when present', () => {
@@ -174,9 +174,9 @@ describe('toCoreClaims', () => {
     const claims = createReceipt({ payment });
     const core = toCoreClaims(claims);
 
-    expect(core.payment.network).toBe('lightning');
-    expect(core.payment.aggregator).toBe('marketplace_abc');
-    expect(core.payment.routing).toBe('direct');
+    expect(core.payment!.network).toBe('lightning');
+    expect(core.payment!.aggregator).toBe('marketplace_abc');
+    expect(core.payment!.routing).toBe('direct');
   });
 
   it('is stable when optional blocks are absent', () => {

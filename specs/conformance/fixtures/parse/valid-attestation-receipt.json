@@ -1,0 +1,11 @@
+{
+  "description": "Valid attestation receipt without payment fields",
+  "expected_variant": "attestation",
+  "claims": {
+    "iss": "https://issuer.example.com",
+    "aud": "https://api.example.com",
+    "iat": 1735600000,
+    "exp": 1735603600,
+    "rid": "019412e0-7b3a-7000-8000-000000000002"
+  }
+}

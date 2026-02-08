@@ -241,6 +241,7 @@ describe('Global Conformance Manifest Hygiene', () => {
     invalid: 'Single-receipt fixtures, not fixture packs',
     edge: 'Single-receipt fixtures, not fixture packs',
     verifier: 'New v0.10.8 fixtures; not yet tracked in manifest.json',
+    parse: 'Receipt parser fixtures (v0.10.9+); claims-level not wire-level format',
   };
 
   // -------------------------------------------------------------------------

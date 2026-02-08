@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Single source of truth for PEAC Protocol npm publish order",
-  "version": "0.10.8",
-  "lastUpdated": "2026-02-06",
-  "totalPackages": 18,
+  "version": "0.10.9",
+  "lastUpdated": "2026-02-07",
+  "totalPackages": 20,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -12,6 +12,8 @@
     "@peac/capture-core",
     "@peac/protocol",
     "@peac/control",
+    "@peac/disc",
+    "@peac/audit",
     "@peac/middleware-core",
     "@peac/middleware-express",
     "@peac/contracts",
@@ -31,6 +33,8 @@
     "2.5-telemetry": ["@peac/telemetry"],
     "2.5-capture": ["@peac/capture-core"],
     "3-protocol": ["@peac/protocol", "@peac/control"],
+    "3-disc": ["@peac/disc"],
+    "3-audit": ["@peac/audit"],
     "3.5-middleware": ["@peac/middleware-core", "@peac/middleware-express"],
     "4-infra": [
       "@peac/contracts",
@@ -63,7 +67,6 @@
     "@peac/adapter-x402-daydreams",
     "@peac/adapter-x402-fluora",
     "@peac/adapter-x402-pinata",
-    "@peac/disc",
     "@peac/pref",
     "@peac/receipts",
     "@peac/pay402",

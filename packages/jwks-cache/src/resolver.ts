@@ -21,9 +21,13 @@ const MIN_TTL_SECONDS = 60;
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MAX_RESPONSE_BYTES = 1024 * 1024; // 1MB
 const DEFAULT_MAX_KEYS = 100;
+const DEFAULT_MAX_STALE_AGE_SECONDS = 172800; // 48 hours
 
 /**
- * Create a JWKS key resolver.
+ * Create a JWKS key resolver with singleflight dedup.
+ *
+ * Concurrent calls for the same issuer+keyid coalesce into a single
+ * network request, preventing thundering herd on cache miss.
  *
  * @param options - Resolver options
  * @returns Key resolver function
@@ -39,10 +43,22 @@ export function createResolver(options: ResolverOptions = {}): JwksKeyResolver {
     maxKeys = DEFAULT_MAX_KEYS,
     isAllowedHost,
     allowLocalhost = false,
+    allowStale = false,
+    maxStaleAgeSeconds = DEFAULT_MAX_STALE_AGE_SECONDS,
   } = options;
 
+  // Singleflight: dedup concurrent resolves for the same issuer+keyid
+  const inflight = new Map<string, Promise<ResolvedKey | null>>();
+
   return async (issuer: string, keyid: string): Promise<SignatureVerifier | null> => {
-    const resolvedKey = await resolveKey(issuer, keyid, {
+    const flightKey = `${issuer}:${keyid}`;
+    const existing = inflight.get(flightKey);
+    if (existing) {
+      const resolvedKey = await existing;
+      return resolvedKey ? createJwkVerifier(resolvedKey.jwk) : null;
+    }
+
+    const promise = resolveKey(issuer, keyid, {
       cache,
       defaultTtlSeconds,
       maxTtlSeconds,
@@ -52,8 +68,15 @@ export function createResolver(options: ResolverOptions = {}): JwksKeyResolver {
       maxKeys,
       isAllowedHost,
       allowLocalhost,
+      allowStale,
+      maxStaleAgeSeconds,
+    }).finally(() => {
+      inflight.delete(flightKey);
     });
 
+    inflight.set(flightKey, promise);
+
+    const resolvedKey = await promise;
     if (!resolvedKey) {
       return null;
     }
@@ -84,11 +107,13 @@ export async function resolveKey(
       | 'maxResponseBytes'
       | 'maxKeys'
       | 'allowLocalhost'
+      | 'allowStale'
+      | 'maxStaleAgeSeconds'
     >
   > &
     Pick<ResolverOptions, 'isAllowedHost'>
 ): Promise<ResolvedKey | null> {
-  const { cache, isAllowedHost, allowLocalhost } = options;
+  const { cache, isAllowedHost, allowLocalhost, allowStale, maxStaleAgeSeconds } = options;
 
   // Normalize issuer to origin
   const issuerOrigin = new URL(issuer).origin;
@@ -202,8 +227,39 @@ export async function resolveKey(
     }
   }
 
-  // All paths failed
+  // All paths failed -- try stale fallback if allowed.
+  // Only fall back on transient network errors. Fail closed on security policy
+  // violations (SSRF), semantic errors (invalid JWKS, too many keys, too large),
+  // and parse failures -- these indicate the server is misconfigured or
+  // compromised, not that the network is temporarily unreachable.
   if (errors.length > 0) {
+    // Fail closed: stale only if every error is a known-transient JwksError.
+    // Non-JwksError (bugs, unexpected throws) must NOT widen stale eligibility.
+    const allTransient = errors.every(
+      (e) =>
+        e instanceof JwksError &&
+        (e.code === ErrorCodes.JWKS_FETCH_FAILED || e.code === ErrorCodes.JWKS_TIMEOUT)
+    );
+    if (allowStale && allTransient && 'getStale' in cache && typeof cache.getStale === 'function') {
+      const staleEntry = await (
+        cache as { getStale: (k: string) => Promise<typeof cached> }
+      ).getStale(cacheKey);
+      if (staleEntry) {
+        const now = Math.floor(Date.now() / 1000);
+        const staleAge = now - staleEntry.expiresAt;
+        if (staleAge >= 0 && staleAge <= maxStaleAgeSeconds) {
+          return {
+            jwk: staleEntry.jwk,
+            source: '/.well-known/jwks',
+            cached: true,
+            stale: true,
+            staleAgeSeconds: staleAge,
+            keyExpiredAt: staleEntry.expiresAt,
+          };
+        }
+      }
+    }
+
     const lastError = errors[errors.length - 1];
     if (lastError instanceof JwksError) {
       throw lastError;

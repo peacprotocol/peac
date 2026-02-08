@@ -1,0 +1,10 @@
+# Enforce LF line endings for text files
+# Prevents cross-platform drift in conformance fixtures and evidence bundles
+* text=auto eol=lf
+*.json text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf

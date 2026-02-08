@@ -1,0 +1,12 @@
+{
+  "description": "Extra top-level keys beyond schema -- strict schemas reject unrecognized keys",
+  "expected_error": "E_PARSE_ATTESTATION_INVALID",
+  "claims": {
+    "iss": "https://issuer.example.com",
+    "aud": "https://api.example.com",
+    "iat": 1735600000,
+    "exp": 1735603600,
+    "rid": "019412e0-7b3a-7000-8000-000000000006",
+    "custom_field": "this should cause rejection under strict schemas"
+  }
+}

@@ -106,9 +106,8 @@ export async function create402Response(
   const negotiator = new PaymentNegotiator();
 
   // Register default mock adapters for structure validation
-  const { X402MockAdapter, TempoMockAdapter, L402MockAdapter, StripeMockAdapter } = await import(
-    './negotiator.js'
-  );
+  const { X402MockAdapter, TempoMockAdapter, L402MockAdapter, StripeMockAdapter } =
+    await import('./negotiator.js');
   negotiator.register(new X402MockAdapter());
   negotiator.register(new TempoMockAdapter());
   negotiator.register(new L402MockAdapter());

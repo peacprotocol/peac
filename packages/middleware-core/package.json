@@ -1,6 +1,6 @@
 {
   "name": "@peac/middleware-core",
-  "version": "0.10.8",
+  "version": "0.10.9",
   "description": "Framework-agnostic middleware primitives for PEAC receipt issuance",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

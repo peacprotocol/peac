@@ -9,8 +9,7 @@ import {
   SubjectProfileSnapshot,
   validateSubjectSnapshot,
 } from '@peac/schema';
-import { providerRef } from '@peac/telemetry';
-import { hashReceipt } from './telemetry.js';
+import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 
 /**
  * JWKS key entry
@@ -180,34 +179,9 @@ export interface VerifyOptions {
 
   /** Subject profile snapshot (v0.9.17+, optional envelope metadata) */
   subject_snapshot?: SubjectProfileSnapshot;
-}
 
-/**
- * Emit verification telemetry (no-throw guard)
- */
-function emitVerifyTelemetry(
-  receiptJws: string,
-  valid: boolean,
-  reasonCode: string | undefined,
-  issuer: string | undefined,
-  kid: string | undefined,
-  durationMs: number
-): void {
-  const p = providerRef.current;
-  if (p) {
-    try {
-      p.onReceiptVerified({
-        receiptHash: hashReceipt(receiptJws),
-        valid,
-        reasonCode,
-        issuer,
-        kid,
-        durationMs,
-      });
-    } catch {
-      // Telemetry MUST NOT break core flow
-    }
-  }
+  /** Telemetry hook (optional, fire-and-forget) */
+  telemetry?: TelemetryHook;
 }
 
 /**
@@ -223,6 +197,7 @@ export async function verifyReceipt(
   const receiptJws = typeof optionsOrJws === 'string' ? optionsOrJws : optionsOrJws.receiptJws;
   const inputSnapshot =
     typeof optionsOrJws === 'string' ? undefined : optionsOrJws.subject_snapshot;
+  const telemetry = typeof optionsOrJws === 'string' ? undefined : optionsOrJws.telemetry;
   const startTime = performance.now();
   let jwksFetchTime: number | undefined;
 
@@ -236,7 +211,14 @@ export async function verifyReceipt(
     // Check expiry
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
       const durationMs = performance.now() - startTime;
-      emitVerifyTelemetry(receiptJws, false, 'expired', payload.iss, header.kid, durationMs);
+      fireTelemetryHook(telemetry?.onReceiptVerified, {
+        receiptHash: hashReceipt(receiptJws),
+        valid: false,
+        reasonCode: 'expired',
+        issuer: payload.iss,
+        kid: header.kid,
+        durationMs,
+      });
       return {
         ok: false,
         reason: 'expired',
@@ -255,7 +237,14 @@ export async function verifyReceipt(
     const jwk = jwks.keys.find((k) => k.kid === header.kid);
     if (!jwk) {
       const durationMs = performance.now() - startTime;
-      emitVerifyTelemetry(receiptJws, false, 'unknown_key', payload.iss, header.kid, durationMs);
+      fireTelemetryHook(telemetry?.onReceiptVerified, {
+        receiptHash: hashReceipt(receiptJws),
+        valid: false,
+        reasonCode: 'unknown_key',
+        issuer: payload.iss,
+        kid: header.kid,
+        durationMs,
+      });
       return {
         ok: false,
         reason: 'unknown_key',
@@ -271,14 +260,14 @@ export async function verifyReceipt(
 
     if (!result.valid) {
       const durationMs = performance.now() - startTime;
-      emitVerifyTelemetry(
-        receiptJws,
-        false,
-        'invalid_signature',
-        payload.iss,
-        header.kid,
-        durationMs
-      );
+      fireTelemetryHook(telemetry?.onReceiptVerified, {
+        receiptHash: hashReceipt(receiptJws),
+        valid: false,
+        reasonCode: 'invalid_signature',
+        issuer: payload.iss,
+        kid: header.kid,
+        durationMs,
+      });
       return {
         ok: false,
         reason: 'invalid_signature',
@@ -292,8 +281,14 @@ export async function verifyReceipt(
 
     const verifyTime = performance.now() - startTime;
 
-    // Emit success telemetry
-    emitVerifyTelemetry(receiptJws, true, undefined, payload.iss, header.kid, verifyTime);
+    // Emit success telemetry (fire-and-forget, guarded)
+    fireTelemetryHook(telemetry?.onReceiptVerified, {
+      receiptHash: hashReceipt(receiptJws),
+      valid: true,
+      issuer: payload.iss,
+      kid: header.kid,
+      durationMs: verifyTime,
+    });
 
     return {
       ok: true,
@@ -306,7 +301,12 @@ export async function verifyReceipt(
     };
   } catch (err) {
     const durationMs = performance.now() - startTime;
-    emitVerifyTelemetry(receiptJws, false, 'verification_error', undefined, undefined, durationMs);
+    fireTelemetryHook(telemetry?.onReceiptVerified, {
+      receiptHash: hashReceipt(receiptJws),
+      valid: false,
+      reasonCode: 'verification_error',
+      durationMs,
+    });
     return {
       ok: false,
       reason: 'verification_error',

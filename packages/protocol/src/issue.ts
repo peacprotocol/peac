@@ -28,8 +28,7 @@ import {
   hasValidDagSemantics,
   WORKFLOW_EXTENSION_KEY,
 } from '@peac/schema';
-import { providerRef } from '@peac/telemetry';
-import { hashReceipt } from './telemetry.js';
+import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 
 /**
  * Options for issuing a receipt
@@ -122,6 +121,9 @@ export interface IssueOptions {
 
   /** Key ID (ISO 8601 timestamp) */
   kid: string;
+
+  /** Telemetry hook (optional, fire-and-forget) */
+  telemetry?: TelemetryHook;
 }
 
 /**
@@ -318,21 +320,13 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
   // Sign with Ed25519
   const jws = await sign(claims, options.privateKey, options.kid);
 
-  // Emit telemetry (no-throw guard)
-  const p = providerRef.current;
-  if (p) {
-    try {
-      const durationMs = performance.now() - startTime;
-      p.onReceiptIssued({
-        receiptHash: hashReceipt(jws),
-        issuer: options.iss,
-        kid: options.kid,
-        durationMs,
-      });
-    } catch {
-      // Telemetry MUST NOT break core flow
-    }
-  }
+  // Emit telemetry (fire-and-forget, guarded)
+  fireTelemetryHook(options.telemetry?.onReceiptIssued, {
+    receiptHash: hashReceipt(jws),
+    issuer: options.iss,
+    kid: options.kid,
+    durationMs: performance.now() - startTime,
+  });
 
   return {
     jws,

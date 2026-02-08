@@ -1,13 +1,19 @@
 #!/bin/bash
-# Pack verification gate
-# Verifies that pnpm pack correctly resolves workspace:* dependencies.
-# This catches issues where tarballs would be published with unresolved workspace:* refs.
+# Pack verification gate (manifest-driven)
+#
+# Reads packages from scripts/publish-manifest.json and verifies:
+#   1. No unresolved workspace:* dependencies in tarballs
+#   2. No planning artifacts, .env, or test fixtures in tarballs
+#   3. @peac/* deps in tarballs have resolved version numbers
+#
+# Run: bash scripts/pack-verify.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 TEMP_DIR=$(mktemp -d)
+MANIFEST="$ROOT_DIR/scripts/publish-manifest.json"
 
 cleanup() {
   rm -rf "$TEMP_DIR"
@@ -18,32 +24,35 @@ echo "=== Pack Verification Gate ==="
 echo "Root: $ROOT_DIR"
 echo "Temp: $TEMP_DIR"
 
-# Build only the packages we're going to pack (not the whole monorepo)
+# Read package list from manifest
+PACKAGES=()
+while IFS= read -r line; do
+  PACKAGES+=("$line")
+done < <(node -e "
+  const m = JSON.parse(require('fs').readFileSync('$MANIFEST', 'utf-8'));
+  m.packages.forEach(p => console.log(p));
+")
+echo "Manifest: ${#PACKAGES[@]} packages"
+
+# Build manifest packages
 echo ""
-echo "0. Building packages..."
+echo "0. Building manifest packages..."
 cd "$ROOT_DIR"
-pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/telemetry --filter @peac/protocol build
+FILTER_ARGS=""
+for pkg in "${PACKAGES[@]}"; do
+  FILTER_ARGS+=" --filter $pkg"
+done
+pnpm $FILTER_ARGS build
 
-# Pack all packages in dependency order
-# Layer 0: kernel (no deps)
-# Layer 1: schema (kernel), telemetry (kernel)
-# Layer 2: crypto (kernel, schema)
-# Layer 3: protocol (kernel, schema, crypto, telemetry)
-PACKAGES=(
-  "kernel"
-  "schema"
-  "crypto"
-  "telemetry"
-  "protocol"
-)
-
+# Pack all packages in manifest order
 echo ""
 echo "1. Packing packages..."
 declare -a TARBALLS=()
 for pkg in "${PACKAGES[@]}"; do
-  cd "$ROOT_DIR/packages/$pkg"
+  pkg_dir=$(cd "$ROOT_DIR" && pnpm --filter "$pkg" exec pwd 2>/dev/null | tail -1)
+  cd "$pkg_dir"
   tarball=$(pnpm pack --pack-destination "$TEMP_DIR" 2>/dev/null | tail -1)
-  echo "   @peac/$pkg -> $(basename "$tarball")"
+  echo "   $pkg -> $(basename "$tarball")"
   TARBALLS+=("$tarball")
 done
 
@@ -68,6 +77,20 @@ for tarball in "${TARBALLS[@]}"; do
     FAILED=1
   else
     echo "   OK: $pkg_name - no workspace:* refs"
+  fi
+
+  # Check tarball hygiene: no planning artifacts, build cache, or sensitive files
+  BAD_FILES=$(tar -tzf "$tarball" | grep -E '(reference/|\.local\.md$|\.env|\.tsbuildinfo$|node_modules/|\.turbo/|\.log$)' || true)
+  if [ -n "$BAD_FILES" ]; then
+    echo "   FAIL: $pkg_name contains disallowed files:"
+    echo "$BAD_FILES" | sed 's/^/      /' | head -10
+    FAILED=1
+  fi
+
+  # Warn if LICENSE is missing from tarball (compliance)
+  HAS_LICENSE=$(tar -tzf "$tarball" | grep -i '^package/LICENSE' || true)
+  if [ -z "$HAS_LICENSE" ]; then
+    echo "      WARN: no LICENSE file in tarball"
   fi
 
   # Show @peac/* dependencies (should have version numbers)
