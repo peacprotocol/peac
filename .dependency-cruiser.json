@@ -24,13 +24,13 @@
     {
       "name": "kernel-no-upward",
       "severity": "error",
-      "comment": "L0 kernel must not import any higher layer",
+      "comment": "L0 kernel must not import any higher layer. [^/]* suffix on telemetry/middleware matches hyphenated variants (telemetry-otel, middleware-core, middleware-express) since bare 'middleware/' would not match 'middleware-core/'.",
       "from": {
         "path": "^packages/kernel/src/",
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
-        "path": "^packages/(schema|crypto|protocol|telemetry|control|middleware|rails|mappings|adapters|server|cli)/"
+        "path": "^packages/(schema|crypto|protocol|telemetry[^/]*|control|middleware[^/]*|rails|mappings|adapters|server|cli)/"
       }
     },
     {
@@ -42,7 +42,7 @@
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
-        "path": "^packages/(crypto|protocol|telemetry|control|middleware|rails|mappings|adapters|server|cli)/"
+        "path": "^packages/(crypto|protocol|telemetry[^/]*|control|middleware[^/]*|rails|mappings|adapters|server|cli)/"
       }
     },
     {
@@ -54,7 +54,7 @@
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
-        "path": "^packages/(protocol|control|telemetry|middleware|rails|mappings|adapters|server|cli)/"
+        "path": "^packages/(protocol|control|telemetry[^/]*|middleware[^/]*|rails|mappings|adapters|server|cli)/"
       }
     },
     {
@@ -66,7 +66,7 @@
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
-        "path": "^packages/(middleware-(core|express)|rails|mappings|adapters|server|cli)/"
+        "path": "^packages/(middleware[^/]*|rails|mappings|adapters|server|cli)/"
       }
     },
     {
@@ -78,19 +78,19 @@
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
-        "path": "^packages/(middleware-(core|express)|rails|mappings|adapters|server|cli)/"
+        "path": "^packages/(middleware[^/]*|rails|mappings|adapters|server|cli)/"
       }
     },
     {
       "name": "telemetry-no-upward",
       "severity": "error",
-      "comment": "Telemetry must not import protocol or control (would create cycle)",
+      "comment": "Telemetry packages must not import L3+ layers (would create cycle or violate boundary)",
       "from": {
-        "path": "^packages/telemetry/src/",
+        "path": "^packages/telemetry[^/]*/src/",
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
-        "path": "^packages/(protocol|control)/"
+        "path": "^packages/(protocol|control|middleware[^/]*|rails|mappings|adapters|server|cli)/"
       }
     },
     {
@@ -98,7 +98,7 @@
       "severity": "error",
       "comment": "L3.5 middleware may import protocol/control (down) but not rails/mappings/adapters/server/cli",
       "from": {
-        "path": "^packages/middleware-(core|express)/src/",
+        "path": "^packages/middleware[^/]*/src/",
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
@@ -116,6 +116,42 @@
       "to": {
         "path": "^packages/(server|cli)/"
       }
+    },
+    {
+      "name": "no-l5-import-from-libraries",
+      "severity": "error",
+      "comment": "Catch-all: library/utility packages must not import L5 application packages. Covers pillar packages, jwks-cache, pay402, sdk-js, etc. that lack individual layer rules.",
+      "from": {
+        "path": "^packages/(?!server/|cli/)",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/(server|cli)/"
+      }
+    },
+    {
+      "name": "server-no-cli",
+      "severity": "error",
+      "comment": "L5 horizontal isolation: server must not import cli",
+      "from": {
+        "path": "^packages/server/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/cli/"
+      }
+    },
+    {
+      "name": "cli-no-server",
+      "severity": "error",
+      "comment": "L5 horizontal isolation: cli must not import server",
+      "from": {
+        "path": "^packages/cli/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/server/"
+      }
     }
   ],
   "options": {
@@ -126,7 +162,7 @@
       "path": ["node_modules", "\\.d\\.ts$", "__tests__", "dist", "archive"]
     },
     "includeOnly": {
-      "path": "^packages/([^/]+/){1,2}src/"
+      "path": "^packages/([^/]+/){1,4}src/"
     },
     "tsPreCompilationDeps": true,
     "tsConfig": {
