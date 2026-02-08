@@ -189,8 +189,7 @@ export function runConformance(
                 category: profile,
                 status: 'fail',
                 diagnostics: {
-                  error_message:
-                    'Fixture has both "claims" and "payload" -- ambiguous; use one',
+                  error_message: 'Fixture has both "claims" and "payload" -- ambiguous; use one',
                 },
               };
               results.push(result);

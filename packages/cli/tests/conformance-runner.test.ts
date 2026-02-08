@@ -336,8 +336,18 @@ describe('Conformance Runner', () => {
             {
               name: 'both_keys',
               input: {
-                claims: { iss: 'https://example.com', aud: 'https://api.example.com', iat: 1735600000, rid: 'test-001' },
-                payload: { iss: 'https://example.com', aud: 'https://api.example.com', iat: 1735600000, rid: 'test-001' },
+                claims: {
+                  iss: 'https://example.com',
+                  aud: 'https://api.example.com',
+                  iat: 1735600000,
+                  rid: 'test-001',
+                },
+                payload: {
+                  iss: 'https://example.com',
+                  aud: 'https://api.example.com',
+                  iat: 1735600000,
+                  rid: 'test-001',
+                },
               },
               expected: { valid: false },
             },
