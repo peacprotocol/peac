@@ -24,7 +24,7 @@
     {
       "name": "kernel-no-upward",
       "severity": "error",
-      "comment": "L0 kernel must not import any higher layer",
+      "comment": "L0 kernel must not import any higher layer. [^/]* suffix on telemetry/middleware matches hyphenated variants (telemetry-otel, middleware-core, middleware-express) since bare 'middleware/' would not match 'middleware-core/'.",
       "from": {
         "path": "^packages/kernel/src/",
         "pathNot": "\\.(test|spec)\\.ts$"
