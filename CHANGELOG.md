@@ -26,11 +26,16 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
   - 3 canonical error codes: `E_PARSE_INVALID_INPUT`, `E_PARSE_COMMERCE_INVALID`,
     `E_PARSE_ATTESTATION_INVALID`
   - 6 conformance vectors with exact error code assertions
+  - `isCommerceResult()` / `isAttestationResult()` type guards for downstream narrowing
+  - Conformance `parse` category routed with ambiguity guard (rejects both `claims`
+    and `payload`)
 
-- **Dependency-cruiser layer enforcement** (11 rules)
+- **Dependency-cruiser layer enforcement** (14 rules)
   - Pattern-based rules encoding full layer structure (L0 through L6)
   - Layer 3.5 middleware explicitly modeled
   - Narrow test-only exception via `pathNot`
+  - Catch-all rule prevents any library package from importing L5 (server/cli)
+  - L5 horizontal isolation (server and cli cannot import each other)
   - `pnpm lint:deps` CI gate
 
 - **Publish-manifest closure check** (`scripts/check-publish-closure.ts`)
@@ -66,11 +71,21 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
 
 ### Changed
 
+- **`verifyLocal()` returns discriminated union** (`@peac/protocol`)
+  - `VerifyLocalSuccess` now branches on `variant: 'commerce' | 'attestation'`
+  - `VerifyLocalFailure` includes `details?: { parse_code?, issues? }` for debugging
+  - `details.issues` bounded to 25 entries with stable `{ path, message }` shape
+  - Error code contract unchanged: parse failures return `E_INVALID_FORMAT`
+
 - **Telemetry decoupled from protocol** (`@peac/protocol`)
   - Removed `@peac/telemetry` runtime dependency
   - Telemetry accepted via `TelemetryHook` options injection
   - Hooks are fire-and-forget: sync throws and async rejections guarded
   - `TelemetryHook` exported as type-only from protocol (no runtime edge)
+
+- **Rate-limit stores migrated to bounded implementation** (`apps/`)
+  - Sandbox-issuer and API app now use `MemoryRateLimitStore` from
+    `@peac/middleware-core` (was bare `Map` without memory bounds)
 
 - **`@peac/audit` made publishable** -- removed `private: true`, added
   `publishConfig.access: public`
@@ -85,6 +100,11 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
 - **DevDep bumps**: fast-check 4.5.3, prettier 3.8.1, tsx 4.21.0
 
 ### Fixed
+
+- **Dependency-cruiser regex bug** -- `middleware` and `telemetry` alternations
+  in layer rules did not match hyphenated names (`middleware-core`,
+  `middleware-express`, `telemetry-otel`). Changed to `[^/]*` suffix pattern.
+  `includeOnly` expanded from `{1,2}` to `{1,4}` for nested adapters.
 
 - **Broken Husky pre-commit hook removed** -- called `lint-staged` which was
   not installed, giving false "local gate passed" signal
