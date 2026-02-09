@@ -23,7 +23,7 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "pnpm run build:js && pnpm run build:types",
-    "build:types": "rm -f dist/.tsbuildinfo && tsc",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo",
     "test": "node --test src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
     "typecheck": "tsc --noEmit",

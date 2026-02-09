@@ -36,7 +36,7 @@
   },
   "scripts": {
     "build:js": "tsup",
-    "build:types": "rm -f dist/.tsbuildinfo && tsc -p tsconfig.types.json",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc -p tsconfig.types.json && rm -f dist/.tsbuildinfo",
     "prebuild": "rm -rf dist",
     "build": "pnpm run build:js && pnpm run build:types",
     "test": "jest --passWithNoTests",

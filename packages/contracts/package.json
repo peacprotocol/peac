@@ -24,7 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build:js": "tsup",
-    "build:types": "rm -f dist/.tsbuildinfo && tsc"
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo"
   },
   "keywords": [
     "peac",

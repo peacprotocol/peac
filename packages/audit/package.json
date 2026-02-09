@@ -35,7 +35,7 @@
     "test:watch": "vitest",
     "clean": "rm -rf dist",
     "build:js": "tsup",
-    "build:types": "rm -f dist/.tsbuildinfo && tsc"
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo"
   },
   "dependencies": {
     "@peac/crypto": "workspace:*",
