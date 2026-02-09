@@ -361,7 +361,26 @@ export async function verifyLocal(
       }
     }
 
-    // All other errors (JSON parse, unexpected) -> E_INTERNAL
+    // Handle JSON parse errors from malformed payloads
+    // Use structural check for cross-boundary robustness (consistent with isCryptoError pattern)
+    if (
+      err !== null &&
+      typeof err === 'object' &&
+      'name' in err &&
+      (err as { name: unknown }).name === 'SyntaxError'
+    ) {
+      const syntaxMessage =
+        'message' in err && typeof (err as { message: unknown }).message === 'string'
+          ? (err as { message: string }).message
+          : 'Invalid JSON';
+      return {
+        valid: false,
+        code: 'E_INVALID_FORMAT',
+        message: `Invalid receipt payload: ${syntaxMessage}`,
+      };
+    }
+
+    // All other errors -> E_INTERNAL
     // No message parsing - code-based mapping only
     const message = err instanceof Error ? err.message : String(err);
     return {

@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
 import { existsSync, mkdirSync, rmSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
-const CLI_PATH = join(__dirname, '..', 'dist', 'index.js');
+const CLI_PATH = join(__dirname, '..', 'dist', 'index.cjs');
 const TEST_OUTPUT_DIR = join(__dirname, '..', '.test-output');
 
 /**

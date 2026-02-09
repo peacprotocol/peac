@@ -2,14 +2,16 @@
   "name": "@peac/telemetry",
   "version": "0.10.9",
   "description": "Telemetry interfaces and no-op implementation for PEAC protocol",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.js"
-    }
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -23,11 +25,13 @@
   "author": "PEAC Protocol contributors",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run build:js && pnpm run build:types",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc"
   },
   "dependencies": {
     "@peac/kernel": "workspace:*"
@@ -35,7 +39,8 @@
   "devDependencies": {
     "@types/node": "^20.10.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "tsup": "^8.0.0"
   },
   "sideEffects": false
 }

@@ -16,7 +16,12 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
+
+// ESM-compatible __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { parse as parseYaml } from 'yaml';
 import { ProfileDefinitionSchema, type ProfileDefinition } from '../src/types';
 

@@ -3,22 +3,27 @@
   "version": "0.10.9",
   "description": "PEAC canonical error codes and verification mode contracts",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run build:js && pnpm run build:types",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc"
   },
   "keywords": [
     "peac",
@@ -36,6 +41,7 @@
   },
   "devDependencies": {
     "typescript": "^5.3.3",
-    "vitest": "^2.0.0"
+    "vitest": "^2.0.0",
+    "tsup": "^8.0.0"
   }
 }

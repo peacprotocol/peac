@@ -2,14 +2,16 @@
   "name": "@peac/audit",
   "version": "0.10.9",
   "description": "Audit logging and case bundle generation for PEAC protocol disputes",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
-    }
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -26,11 +28,13 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run build:js && pnpm run build:types",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc"
   },
   "dependencies": {
     "@peac/crypto": "workspace:*",
@@ -44,7 +48,8 @@
     "@types/yauzl": "^2.10.3",
     "@types/yazl": "^2.4.5",
     "typescript": "^5.3.3",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "tsup": "^8.0.0"
   },
   "publishConfig": {
     "access": "public",

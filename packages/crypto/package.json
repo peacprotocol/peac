@@ -2,21 +2,21 @@
   "name": "@peac/crypto",
   "version": "0.10.9",
   "description": "Ed25519 JWS signing and verification for PEAC protocol",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
     },
     "./testkit": {
       "types": "./dist/testkit.d.ts",
-      "import": "./dist/testkit.js",
-      "require": "./dist/testkit.js",
-      "default": "./dist/testkit.js"
-    }
+      "import": "./dist/testkit.mjs",
+      "require": "./dist/testkit.cjs"
+    },
+    "./package.json": "./package.json"
   },
   "repository": {
     "type": "git",
@@ -37,10 +37,13 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run build:js && pnpm run build:types",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist"
+    "bench": "vitest bench --run",
+    "clean": "rm -rf dist",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc"
   },
   "dependencies": {
     "@noble/ed25519": "^2.0.0",
@@ -49,6 +52,7 @@
   "devDependencies": {
     "@types/node": "^20.10.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.1.0"
+    "vitest": "^1.1.0",
+    "tsup": "^8.0.0"
   }
 }

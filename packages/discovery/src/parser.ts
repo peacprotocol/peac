@@ -115,6 +115,17 @@ function parsePublicKeys(content: string): PublicKeyInfo[] {
   return keys;
 }
 
+/** Characters that break peac.txt wire format: quotes, colons, brackets, control chars */
+const UNSAFE_FIELD_CHARS = /["\n\r\x00-\x1f:\[\]]/;
+
+function assertSafeFieldValue(value: string, fieldName: string): void {
+  if (UNSAFE_FIELD_CHARS.test(value)) {
+    throw new Error(
+      `Invalid ${fieldName}: must not contain quotes, colons, brackets, newlines, or control characters`
+    );
+  }
+}
+
 export function emit(data: PeacDiscovery): string {
   const lines: string[] = [];
 
@@ -127,6 +138,7 @@ export function emit(data: PeacDiscovery): string {
   }
 
   if (data.payments && data.payments.length > 0) {
+    data.payments.forEach((p) => assertSafeFieldValue(p, 'payment'));
     const paymentsStr = data.payments.map((p) => `"${p}"`).join(', ');
     lines.push(`payments: [${paymentsStr}]`);
   }
@@ -144,6 +156,11 @@ export function emit(data: PeacDiscovery): string {
   }
 
   if (data.public_keys && data.public_keys.length > 0) {
+    data.public_keys.forEach((k) => {
+      assertSafeFieldValue(k.kid, 'kid');
+      assertSafeFieldValue(k.alg, 'alg');
+      assertSafeFieldValue(k.key, 'key');
+    });
     const keysStr = data.public_keys.map((k) => `"${k.kid}:${k.alg}:${k.key}"`).join(', ');
     lines.push(`public_keys: [${keysStr}]`);
   }

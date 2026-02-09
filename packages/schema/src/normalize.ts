@@ -8,6 +8,8 @@
 import type { PEACReceiptClaims, Subject } from './types.js';
 import type { PaymentEvidence } from './evidence.js';
 import type { ControlBlock, ControlStep } from './control.js';
+import type { AttestationReceiptClaims } from './attestation-receipt.js';
+import type { ParseSuccess } from './receipt-parser.js';
 
 /**
  * Normalized core claims for comparison.
@@ -122,9 +124,13 @@ function normalizeControl(control: ControlBlock): NormalizedControl {
 /**
  * Extract core claims from a receipt for comparison.
  *
- * This function produces a normalized object that can be JCS-canonicalized
- * to produce byte-identical output regardless of how the receipt was created
- * (via x402, TAP, RSL, ACP, or direct issuance).
+ * Supports both commerce and attestation receipts. Accepts either a
+ * ParseSuccess result from parseReceiptClaims() (preferred) or bare
+ * PEACReceiptClaims (backward compat).
+ *
+ * For attestation receipts, maps sub -> subject.uri (normative mapping
+ * per PEAC attestation profile -- sub is a URI identifying the
+ * interaction target).
  *
  * The output:
  * - Contains only semantically meaningful fields
@@ -132,32 +138,45 @@ function normalizeControl(control: ControlBlock): NormalizedControl {
  * - Uses consistent field ordering (JCS handles this)
  * - Strips rail-specific evidence details
  *
- * @param claims - Receipt claims to normalize
+ * @param input - Parsed receipt result or bare commerce claims
  * @returns Normalized core claims
  *
  * @example
  * ```ts
- * import { toCoreClaims } from '@peac/schema';
- * import { canonicalize } from '@peac/crypto';
+ * import { parseReceiptClaims, toCoreClaims } from '@peac/schema';
  *
- * const core = toCoreClaims(receiptClaims);
- * const canonical = canonicalize(core);
- * // canonical is byte-identical regardless of source
+ * const parsed = parseReceiptClaims(decodedPayload);
+ * if (parsed.ok) {
+ *   const core = toCoreClaims(parsed);
+ * }
  * ```
  */
-export function toCoreClaims(claims: PEACReceiptClaims): CoreClaims {
+export function toCoreClaims(parsed: ParseSuccess): CoreClaims;
+export function toCoreClaims(claims: PEACReceiptClaims): CoreClaims;
+export function toCoreClaims(input: ParseSuccess | PEACReceiptClaims): CoreClaims {
+  // Detect ParseSuccess shape
+  if ('ok' in input && input.ok === true && 'variant' in input) {
+    const parsed = input as ParseSuccess;
+    if (parsed.variant === 'commerce') {
+      return commerceCoreClaims(parsed.claims as PEACReceiptClaims);
+    }
+    return attestationCoreClaims(parsed.claims as AttestationReceiptClaims);
+  }
+  // Legacy: bare PEACReceiptClaims (backward compat)
+  return commerceCoreClaims(input as PEACReceiptClaims);
+}
+
+function commerceCoreClaims(claims: PEACReceiptClaims): CoreClaims {
   const result: CoreClaims = {
     iss: claims.iss,
     aud: claims.aud,
     rid: claims.rid,
     iat: claims.iat,
-    // Commerce fields (omitted for attestation receipts)
     ...(claims.amt !== undefined && { amt: claims.amt }),
     ...(claims.cur !== undefined && { cur: claims.cur }),
     ...(claims.payment !== undefined && { payment: normalizePayment(claims.payment) }),
   };
 
-  // Only include optional fields if defined
   if (claims.exp !== undefined) {
     result.exp = claims.exp;
   }
@@ -168,6 +187,27 @@ export function toCoreClaims(claims: PEACReceiptClaims): CoreClaims {
 
   if (claims.ext?.control !== undefined) {
     result.control = normalizeControl(claims.ext.control);
+  }
+
+  return result;
+}
+
+function attestationCoreClaims(claims: AttestationReceiptClaims): CoreClaims {
+  const result: CoreClaims = {
+    iss: claims.iss,
+    aud: claims.aud,
+    rid: claims.rid,
+    iat: claims.iat,
+  };
+
+  if (claims.exp !== undefined) {
+    result.exp = claims.exp;
+  }
+
+  // sub -> subject.uri mapping: attestation profile uses sub (string)
+  // as the interaction target URI, equivalent to commerce subject.uri
+  if (claims.sub !== undefined) {
+    result.subject = { uri: claims.sub };
   }
 
   return result;

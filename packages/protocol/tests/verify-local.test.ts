@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { generateKeypair, sign } from '@peac/crypto';
+import { generateKeypair, sign, base64urlEncodeString, base64urlEncode } from '@peac/crypto';
 import { issue } from '../src/issue';
 import { verifyLocal } from '../src/verify-local';
 
@@ -821,6 +821,28 @@ describe('verifyLocal', () => {
           // No extra fields leak beyond the stable shape
           expect(Object.keys(issue)).toEqual(['path', 'message']);
         }
+      }
+    });
+  });
+
+  describe('SyntaxError -> E_INVALID_FORMAT mapping', () => {
+    it('returns E_INVALID_FORMAT for JWS with invalid JSON payload', async () => {
+      const { publicKey } = await generateKeypair();
+
+      // Construct a JWS with valid header JSON but invalid payload JSON
+      const header = base64urlEncodeString(
+        JSON.stringify({ typ: 'peac-receipt/0.1', alg: 'EdDSA', kid: 'test-key' })
+      );
+      const invalidPayload = base64urlEncodeString('not valid json {{{');
+      const fakeSig = base64urlEncode(new Uint8Array(64));
+
+      const malformedJws = `${header}.${invalidPayload}.${fakeSig}`;
+      const result = await verifyLocal(malformedJws, publicKey);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.code).toBe('E_INVALID_FORMAT');
+        expect(result.message).toContain('Invalid receipt payload');
       }
     });
   });

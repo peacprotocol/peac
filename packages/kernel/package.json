@@ -2,44 +2,43 @@
   "name": "@peac/kernel",
   "version": "0.10.9",
   "description": "PEAC protocol kernel - normative constants, errors, and registries",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
     },
     "./constants": {
       "types": "./dist/constants.d.ts",
-      "import": "./dist/constants.js",
-      "require": "./dist/constants.js",
-      "default": "./dist/constants.js"
+      "import": "./dist/constants.mjs",
+      "require": "./dist/constants.cjs"
     },
     "./errors": {
       "types": "./dist/errors.d.ts",
-      "import": "./dist/errors.js",
-      "require": "./dist/errors.js",
-      "default": "./dist/errors.js"
+      "import": "./dist/errors.mjs",
+      "require": "./dist/errors.cjs"
     },
     "./registries": {
       "types": "./dist/registries.d.ts",
-      "import": "./dist/registries.js",
-      "require": "./dist/registries.js",
-      "default": "./dist/registries.js"
+      "import": "./dist/registries.mjs",
+      "require": "./dist/registries.cjs"
     },
     "./types": {
       "types": "./dist/types.d.ts",
-      "import": "./dist/types.js",
-      "require": "./dist/types.js",
-      "default": "./dist/types.js"
-    }
+      "import": "./dist/types.mjs",
+      "require": "./dist/types.cjs"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run build:js && pnpm run build:types",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc"
   },
   "keywords": [
     "peac",
@@ -68,6 +67,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "tsup": "^8.0.0"
   }
 }

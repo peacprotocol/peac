@@ -2,21 +2,21 @@
   "name": "@peac/capture-core",
   "version": "0.10.9",
   "description": "Runtime-neutral capture pipeline for PEAC interaction evidence",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
     },
     "./testkit": {
       "types": "./dist/testkit.d.ts",
-      "require": "./dist/testkit.js",
-      "import": "./dist/testkit.js",
-      "default": "./dist/testkit.js"
-    }
+      "import": "./dist/testkit.mjs",
+      "require": "./dist/testkit.cjs"
+    },
+    "./package.json": "./package.json"
   },
   "repository": {
     "type": "git",
@@ -38,11 +38,13 @@
     "provenance": true
   },
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run build:js && pnpm run build:types",
     "test": "pnpm -w vitest run packages/capture/core/tests",
     "test:watch": "pnpm -w vitest packages/capture/core/tests",
     "test:exports": "node scripts/test-exports.mjs",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc"
   },
   "dependencies": {
     "@peac/crypto": "workspace:*",
@@ -51,6 +53,7 @@
   "devDependencies": {
     "@types/node": "^20.10.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.1.0"
+    "vitest": "^1.1.0",
+    "tsup": "^8.0.0"
   }
 }

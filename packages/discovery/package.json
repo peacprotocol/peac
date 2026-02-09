@@ -3,15 +3,16 @@
   "version": "0.10.9",
   "description": "PEAC discovery with ≤20 lines enforcement",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -20,15 +21,17 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
-    "build:types": "tsc -b",
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc",
     "test": "node --test src/*.test.js",
     "lint": "echo 'Lint temporarily disabled due to workspace dependencies - run from root'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:js": "tsup"
   },
   "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "tsup": "^8.0.0"
   },
   "keywords": [
     "peac",
