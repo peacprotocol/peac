@@ -115,19 +115,21 @@ protocol_name=$(basename "$protocol_tarball" .tgz)
 protocol_dist="$TEMP_DIR/extract-$protocol_name/package/dist"
 
 if [ -d "$protocol_dist" ]; then
-  # Check that verify-local.js exists and exports verifyLocal
-  if [ -f "$protocol_dist/verify-local.js" ] && grep -q "verifyLocal" "$protocol_dist/verify-local.js" 2>/dev/null; then
-    echo "   OK: verify-local.js contains verifyLocal"
+  # Check that verify-local exists and exports verifyLocal (.mjs or .js)
+  vl_file=$(ls "$protocol_dist"/verify-local.{mjs,js} 2>/dev/null | head -1)
+  if [ -n "$vl_file" ] && grep -q "verifyLocal" "$vl_file" 2>/dev/null; then
+    echo "   OK: $(basename "$vl_file") contains verifyLocal"
   else
     echo "   FAIL: verifyLocal not found in dist"
     FAILED=1
   fi
 
-  # Check that index.js re-exports verify-local
-  if grep -q "verify-local" "$protocol_dist/index.js" 2>/dev/null; then
-    echo "   OK: index.js re-exports verify-local"
+  # Check that index re-exports verify-local (.mjs or .js)
+  idx_file=$(ls "$protocol_dist"/index.{mjs,js} 2>/dev/null | head -1)
+  if [ -n "$idx_file" ] && grep -q "verify-local" "$idx_file" 2>/dev/null; then
+    echo "   OK: $(basename "$idx_file") re-exports verify-local"
   else
-    echo "   FAIL: index.js does not re-export verify-local"
+    echo "   FAIL: index does not re-export verify-local"
     FAILED=1
   fi
 else
