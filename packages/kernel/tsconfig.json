@@ -5,8 +5,11 @@
     "declarationMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "composite": true,
-    "noEmit": false
+    "noEmit": false,
+    "module": "ESNext",
+    "emitDeclarationOnly": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "composite": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

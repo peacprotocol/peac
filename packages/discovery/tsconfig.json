@@ -3,7 +3,6 @@
     "target": "ES2022",
     "module": "ESNext",
     "lib": ["ES2022"],
-    "moduleResolution": "bundler",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -12,8 +11,13 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "composite": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

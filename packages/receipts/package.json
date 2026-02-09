@@ -26,6 +26,7 @@
     "tag": "dev"
   },
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "tsup",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",

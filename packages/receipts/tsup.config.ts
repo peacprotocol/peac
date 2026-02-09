@@ -5,7 +5,7 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: false, // TS refs issue with workspace packages
   sourcemap: true,
-  clean: true,
+  clean: false,
   splitting: false,
   treeshake: true,
   minify: false,

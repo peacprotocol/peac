@@ -11,9 +11,11 @@
 import { describe, it, expect } from 'vitest';
 import {
   toCoreClaims,
+  parseReceiptClaims,
   type PEACReceiptClaims,
   type PaymentEvidence,
   type ControlBlock,
+  type ParseSuccess,
 } from '../src/index.js';
 
 /**
@@ -310,5 +312,112 @@ describe('JCS Canonical Output', () => {
 
     // Both should produce identical core claims
     expect(canonicalA).toBe(canonicalB);
+  });
+});
+
+describe('toCoreClaims with ParseSuccess', () => {
+  it('normalizes a parsed attestation receipt', () => {
+    const parsed = parseReceiptClaims({
+      iss: 'https://issuer.example.com',
+      aud: 'https://resource.example.com',
+      iat: 1703000000,
+      exp: 1703003600,
+      rid: '019abc12-3456-7890-abcd-ef0123456789',
+    });
+
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+
+    expect(parsed.variant).toBe('attestation');
+    const core = toCoreClaims(parsed);
+
+    expect(core.iss).toBe('https://issuer.example.com');
+    expect(core.aud).toBe('https://resource.example.com');
+    expect(core.iat).toBe(1703000000);
+    expect(core.exp).toBe(1703003600);
+    expect(core.rid).toBe('019abc12-3456-7890-abcd-ef0123456789');
+    // Attestation receipts have no payment fields
+    expect(core.amt).toBeUndefined();
+    expect(core.cur).toBeUndefined();
+    expect(core.payment).toBeUndefined();
+    expect(core.control).toBeUndefined();
+  });
+
+  it('maps attestation sub to subject.uri', () => {
+    const parsed = parseReceiptClaims({
+      iss: 'https://issuer.example.com',
+      aud: 'https://resource.example.com',
+      iat: 1703000000,
+      exp: 1703003600,
+      rid: '019abc12-3456-7890-abcd-ef0123456789',
+      sub: 'https://api.example.com/inference/v1',
+    });
+
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+
+    const core = toCoreClaims(parsed);
+    expect(core.subject).toEqual({ uri: 'https://api.example.com/inference/v1' });
+  });
+
+  it('normalizes a parsed commerce receipt via ParseSuccess', () => {
+    const parsed = parseReceiptClaims({
+      iss: 'https://issuer.example.com',
+      aud: 'https://resource.example.com/article/1',
+      iat: 1703000000,
+      rid: '019abc12-3456-7890-abcd-ef0123456789',
+      amt: 1000,
+      cur: 'USD',
+      payment: {
+        rail: 'x402',
+        reference: 'pay_123',
+        amount: 1000,
+        currency: 'USD',
+        asset: 'USD',
+        env: 'live',
+        evidence: { payment_intent: 'pi_123' },
+      },
+    });
+
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+
+    expect(parsed.variant).toBe('commerce');
+    const core = toCoreClaims(parsed);
+
+    expect(core.iss).toBe('https://issuer.example.com');
+    expect(core.amt).toBe(1000);
+    expect(core.cur).toBe('USD');
+    expect(core.payment?.rail).toBe('x402');
+  });
+
+  it('backward compat: bare PEACReceiptClaims still works', () => {
+    const claims = createReceipt();
+    const core = toCoreClaims(claims);
+
+    expect(core.iss).toBe('https://issuer.example.com');
+    expect(core.amt).toBe(1000);
+    expect(core.payment?.rail).toBe('x402');
+  });
+
+  it('produces deterministic output for both variants', () => {
+    const attestation = parseReceiptClaims({
+      iss: 'https://issuer.example.com',
+      aud: 'https://resource.example.com',
+      iat: 1703000000,
+      exp: 1703003600,
+      rid: '019abc12-3456-7890-abcd-ef0123456789',
+    }) as ParseSuccess;
+
+    const core = toCoreClaims(attestation);
+    const canonical = canonicalize(core);
+
+    // No undefined values in canonical output
+    expect(canonical).not.toContain('undefined');
+    expect(canonical).not.toContain('null');
+
+    // Re-run produces identical output
+    const core2 = toCoreClaims(attestation);
+    expect(canonicalize(core2)).toBe(canonical);
   });
 });

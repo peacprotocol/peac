@@ -2,15 +2,18 @@
  * @peac/sdk/types - Client SDK types for PEAC operations
  */
 
+/** Map of key ID to public key (Uint8Array or base64url-encoded string) */
+export type PublicKeyMap = Record<string, Uint8Array | string>;
+
 export interface ClientConfig {
-  defaultKeys?: Record<string, any>;
+  defaultKeys?: PublicKeyMap;
   timeout?: number;
   userAgent?: string;
   retries?: number;
   inject?: {
-    core?: { verifyReceipt: Function };
-    disc?: { discover: Function };
-    pref?: { resolveAIPref: Function };
+    core?: { verifyReceipt: (receipt: string, keys: PublicKeyMap) => Promise<unknown> };
+    disc?: { discover: (origin: string) => Promise<unknown> };
+    pref?: { resolveAIPref: (uri: string) => Promise<unknown> };
   };
 }
 
@@ -20,7 +23,7 @@ export interface DiscoverOptions {
 }
 
 export interface VerifyLocalOptions {
-  keys?: Record<string, any>;
+  keys?: PublicKeyMap;
   validateReceipt?: boolean;
   validateAIPref?: boolean;
 }
@@ -28,7 +31,7 @@ export interface VerifyLocalOptions {
 export interface VerifyRemoteOptions {
   endpoint?: string;
   timeout?: number;
-  keys?: Record<string, any>;
+  keys?: PublicKeyMap;
 }
 
 export interface DiscoveryResult {

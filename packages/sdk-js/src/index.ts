@@ -6,6 +6,7 @@
 export { PeacClient } from './client.js';
 export type {
   ClientConfig,
+  PublicKeyMap,
   DiscoverOptions,
   VerifyLocalOptions,
   VerifyRemoteOptions,
@@ -13,6 +14,8 @@ export type {
   VerificationResult,
   ClientError,
 } from './types.js';
+
+import type { PublicKeyMap, VerifyLocalOptions, VerifyRemoteOptions } from './types.js';
 
 // Convenience functions for single-use operations
 export async function discover(
@@ -26,8 +29,8 @@ export async function discover(
 
 export async function verifyLocal(
   receipt: string,
-  keys: Record<string, any>,
-  options?: import('./types.js').VerifyLocalOptions
+  keys: PublicKeyMap,
+  options?: VerifyLocalOptions
 ): Promise<import('./types.js').VerificationResult> {
   const { PeacClient } = await import('./client.js');
   const client = new PeacClient({ defaultKeys: keys });
@@ -37,7 +40,7 @@ export async function verifyLocal(
 export async function verifyRemote(
   receipt: string,
   endpoint?: string,
-  options?: import('./types.js').VerifyRemoteOptions
+  options?: VerifyRemoteOptions
 ): Promise<import('./types.js').VerificationResult> {
   const { PeacClient } = await import('./client.js');
   const client = new PeacClient();
@@ -46,17 +49,9 @@ export async function verifyRemote(
 
 export async function verify(
   receipt: string,
-  keysOrOptions?: Record<string, any> | import('./types.js').VerifyLocalOptions,
-  options?: import('./types.js').VerifyRemoteOptions
+  options?: VerifyLocalOptions & VerifyRemoteOptions
 ): Promise<import('./types.js').VerificationResult> {
   const { PeacClient } = await import('./client.js');
   const client = new PeacClient();
-
-  if (typeof keysOrOptions === 'object' && !('keys' in keysOrOptions)) {
-    // First param is keys object
-    return client.verify(receipt, { keys: keysOrOptions, ...options });
-  } else {
-    // First param is options object
-    return client.verify(receipt, keysOrOptions as any);
-  }
+  return client.verify(receipt, options);
 }

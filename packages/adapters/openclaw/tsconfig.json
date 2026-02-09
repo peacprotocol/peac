@@ -2,15 +2,15 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "module": "ESNext",
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "composite": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"],
-  "references": [
-    { "path": "../core" },
-    { "path": "../../crypto" },
-    { "path": "../../kernel" },
-    { "path": "../../schema" },
-    { "path": "../../capture/core" }
-  ]
+  "exclude": ["node_modules", "dist", "tests"]
 }

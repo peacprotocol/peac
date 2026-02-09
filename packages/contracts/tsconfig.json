@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "noEmit": false
+    "noEmit": false,
+    "module": "ESNext",
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "composite": true
   },
   "include": ["src/**/*"]
 }

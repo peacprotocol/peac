@@ -19,8 +19,8 @@ import { writeFileSync } from 'node:fs';
 
 // Dynamic imports for ESM compatibility
 async function loadModules() {
-  const protocol = await import('../packages/protocol/dist/index.js');
-  const cryptoPkg = await import('../packages/crypto/dist/index.js');
+  const protocol = await import('../packages/protocol/dist/index.mjs');
+  const cryptoPkg = await import('../packages/crypto/dist/index.mjs');
   return { protocol, crypto: cryptoPkg };
 }
 

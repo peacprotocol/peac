@@ -16,19 +16,19 @@ import * as path from 'path';
 import { createHash } from 'crypto';
 
 // Import from built packages using relative paths to dist
-const cryptoModule = require('../packages/crypto/dist/index.js') as {
+const cryptoModule = require('../packages/crypto/dist/index.cjs') as {
   sign: (payload: unknown, privateKey: Uint8Array, kid: string) => Promise<string>;
   canonicalize: (obj: unknown) => string;
 };
 
 // Import test-only utilities from testkit (separate export for tree-shaking)
-const testkitModule = require('../packages/crypto/dist/testkit.js') as {
+const testkitModule = require('../packages/crypto/dist/testkit.cjs') as {
   generateKeypairFromSeed: (
     seed: Uint8Array
   ) => Promise<{ privateKey: Uint8Array; publicKey: Uint8Array }>;
 };
 
-const auditModule = require('../packages/audit/dist/index.js') as {
+const auditModule = require('../packages/audit/dist/index.cjs') as {
   createDisputeBundle: (options: CreateDisputeBundleOptions) => Promise<BundleResult<Buffer>>;
   verifyBundle: (
     zip: Buffer,
