@@ -13,5 +13,5 @@
     "composite": false,
     "resolveJsonModule": true
   },
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "coverage", "archive", "**/*.test.ts", "**/*.spec.ts"]
 }

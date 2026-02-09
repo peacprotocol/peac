@@ -31,6 +31,10 @@
       "dependsOn": ["build"],
       "outputs": []
     },
+    "bench": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
     "sbom": {
       "dependsOn": ["build"],
       "outputs": ["*.sbom.json"]

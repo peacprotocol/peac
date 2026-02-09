@@ -4,7 +4,7 @@
 .PHONY: help install dev build test lint typecheck clean conformance perf sbom release dep-check
 
 help: ## Show this help message
-	@echo "PEAC Protocol v0.9.15 - Enterprise Monorepo"
+	@echo "PEAC Protocol v0.10.9 - Monorepo"
 	@echo ""
 	@echo "Available commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)

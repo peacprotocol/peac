@@ -19,6 +19,7 @@
     "**/dist/**",
     "**/node_modules/**",
     "archive/**",
+    "surfaces/**",
     "apps/**",
     "examples/**"
   ]
