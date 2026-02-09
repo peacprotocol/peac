@@ -28,6 +28,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "pnpm run build:js && pnpm run build:types",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

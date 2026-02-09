@@ -6,7 +6,7 @@ export default defineConfig({
   dts: false,
   outDir: 'dist', // Align with tsconfig.json outDir
   sourcemap: true,
-  clean: true,
+  clean: false,
   splitting: false,
   treeshake: true,
   minify: false,

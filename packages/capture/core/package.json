@@ -38,6 +38,7 @@
     "provenance": true
   },
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "pnpm run build:js && pnpm run build:types",
     "test": "pnpm -w vitest run packages/capture/core/tests",
     "test:watch": "pnpm -w vitest packages/capture/core/tests",

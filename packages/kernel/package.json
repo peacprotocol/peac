@@ -34,6 +34,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "pnpm run build:js && pnpm run build:types",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "typecheck": "tsc --noEmit",

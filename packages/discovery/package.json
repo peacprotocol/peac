@@ -21,6 +21,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "pnpm run build:js && pnpm run build:types",
     "build:types": "rm -f dist/.tsbuildinfo && tsc",
     "test": "node --test src/*.test.js",

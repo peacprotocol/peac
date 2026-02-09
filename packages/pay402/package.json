@@ -23,6 +23,7 @@
     "tag": "dev"
   },
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "tsup",
     "pretest": "pnpm build",
     "test": "node --test src/*.test.js",
