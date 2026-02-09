@@ -9,9 +9,7 @@ describe('emit() sanitization', () => {
   const validData = {
     verify: 'https://api.example.com/verify',
     payments: ['x402', 'stripe'],
-    public_keys: [
-      { kid: 'key-1', alg: 'EdDSA', key: 'base64urlPublicKey' },
-    ],
+    public_keys: [{ kid: 'key-1', alg: 'EdDSA', key: 'base64urlPublicKey' }],
   };
 
   it('should emit valid data without errors', () => {
@@ -22,37 +20,25 @@ describe('emit() sanitization', () => {
   });
 
   it('should throw when payment contains a double quote', () => {
-    expect(() =>
-      emit({ ...validData, payments: ['x"402'] })
-    ).toThrow(/Invalid payment/);
+    expect(() => emit({ ...validData, payments: ['x"402'] })).toThrow(/Invalid payment/);
   });
 
   it('should throw when payment contains a colon', () => {
-    expect(() =>
-      emit({ ...validData, payments: ['x:402'] })
-    ).toThrow(/Invalid payment/);
+    expect(() => emit({ ...validData, payments: ['x:402'] })).toThrow(/Invalid payment/);
   });
 
   it('should throw when payment contains a bracket', () => {
-    expect(() =>
-      emit({ ...validData, payments: ['x[402'] })
-    ).toThrow(/Invalid payment/);
+    expect(() => emit({ ...validData, payments: ['x[402'] })).toThrow(/Invalid payment/);
 
-    expect(() =>
-      emit({ ...validData, payments: ['x]402'] })
-    ).toThrow(/Invalid payment/);
+    expect(() => emit({ ...validData, payments: ['x]402'] })).toThrow(/Invalid payment/);
   });
 
   it('should throw when payment contains a newline', () => {
-    expect(() =>
-      emit({ ...validData, payments: ['x\n402'] })
-    ).toThrow(/Invalid payment/);
+    expect(() => emit({ ...validData, payments: ['x\n402'] })).toThrow(/Invalid payment/);
   });
 
   it('should throw when payment contains a control character', () => {
-    expect(() =>
-      emit({ ...validData, payments: ['x\x00402'] })
-    ).toThrow(/Invalid payment/);
+    expect(() => emit({ ...validData, payments: ['x\x00402'] })).toThrow(/Invalid payment/);
   });
 
   it('should throw when kid contains a colon', () => {
@@ -98,9 +84,7 @@ describe('parse/emit round-trip', () => {
       verify: 'https://api.example.com/verify',
       receipts: 'required' as const,
       payments: ['x402', 'stripe'],
-      public_keys: [
-        { kid: 'key-1', alg: 'EdDSA', key: 'base64urlPublicKey' },
-      ],
+      public_keys: [{ kid: 'key-1', alg: 'EdDSA', key: 'base64urlPublicKey' }],
     };
 
     const emitted = emit(original);

@@ -1,7 +1,15 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/receipt-parser.ts', 'src/attestation-receipt.ts', 'src/workflow.ts', 'src/interaction.ts', 'src/attribution.ts', 'src/normalize.ts'],
+  entry: [
+    'src/index.ts',
+    'src/receipt-parser.ts',
+    'src/attestation-receipt.ts',
+    'src/workflow.ts',
+    'src/interaction.ts',
+    'src/attribution.ts',
+    'src/normalize.ts',
+  ],
   format: ['cjs', 'esm'],
   dts: false,
   outDir: 'dist',

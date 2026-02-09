@@ -5,7 +5,7 @@
  * Run with: pnpm --filter @peac/crypto bench
  */
 
-import { bench, describe, beforeAll } from 'vitest';
+import { bench, describe } from 'vitest';
 import { sign, verify, generateKeypair } from '../../src/index';
 
 const PAYLOAD = {

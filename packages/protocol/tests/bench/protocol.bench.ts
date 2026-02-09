@@ -37,7 +37,7 @@ describe('protocol hot paths', async () => {
       rid: '01234567-0123-7123-8123-0123456789ab',
     },
     privateKey,
-    'bench-key',
+    'bench-key'
   );
 
   bench('verifyLocal (commerce)', async () => {

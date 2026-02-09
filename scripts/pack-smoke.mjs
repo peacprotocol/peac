@@ -9,7 +9,7 @@
  * On failure: keeps temp dir for debugging (override with PEAC_SMOKE_CLEAN=1).
  */
 
-import { readFileSync, mkdirSync, mkdtempSync, rmSync, existsSync, writeFileSync } from 'node:fs';
+import { readFileSync, mkdtempSync, rmSync, existsSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';

@@ -359,7 +359,18 @@ describe('round-trip integration', () => {
     expect(attestCore.subject?.uri).toBe('https://api.example.com/v1/endpoint');
 
     // No extra keys leak into CoreClaims
-    const allowedKeys = ['iss', 'aud', 'rid', 'iat', 'exp', 'amt', 'cur', 'payment', 'subject', 'control'];
+    const allowedKeys = [
+      'iss',
+      'aud',
+      'rid',
+      'iat',
+      'exp',
+      'amt',
+      'cur',
+      'payment',
+      'subject',
+      'control',
+    ];
     for (const key of Object.keys(commerceCore)) {
       expect(allowedKeys).toContain(key);
     }
