@@ -60,7 +60,7 @@ const FORBIDDEN_INTERNAL_PATHS = [
   'dist/mapper',
   'dist/testkit-impl',
   'src/index',
-  'package.json', // Should be blocked by exports (modern Node behavior)
+  // package.json is intentionally exposed via exports map
 ];
 
 // =============================================================================
@@ -165,8 +165,8 @@ async function main() {
       log(`      ${mainResolved}`);
 
       // Verify it resolves to the right file
-      if (!mainResolved.endsWith('dist/index.js')) {
-        console.error(`FAIL: Expected to resolve to dist/index.js, got: ${mainResolved}`);
+      if (!mainResolved.endsWith('dist/index.cjs')) {
+        console.error(`FAIL: Expected to resolve to dist/index.cjs, got: ${mainResolved}`);
         allPassed = false;
       }
     } catch (err) {
@@ -181,8 +181,8 @@ async function main() {
       log(`      ${testkitResolved}`);
 
       // Verify it resolves to the right file
-      if (!testkitResolved.endsWith('dist/testkit.js')) {
-        console.error(`FAIL: Expected to resolve to dist/testkit.js, got: ${testkitResolved}`);
+      if (!testkitResolved.endsWith('dist/testkit.cjs')) {
+        console.error(`FAIL: Expected to resolve to dist/testkit.cjs, got: ${testkitResolved}`);
         allPassed = false;
       }
     } catch (err) {
@@ -212,7 +212,7 @@ async function main() {
     const distPath = join(installedPath, 'dist');
 
     try {
-      const mainModule = fixtureRequire(join(distPath, 'index.js'));
+      const mainModule = fixtureRequire(join(distPath, 'index.cjs'));
       const missing = EXPECTED_MAIN_EXPORTS.filter((exp) => !(exp in mainModule));
       if (missing.length > 0) {
         console.error(`FAIL: Main entry missing exports: ${missing.join(', ')}`);
@@ -240,7 +240,7 @@ async function main() {
     }
 
     try {
-      const testkitModule = fixtureRequire(join(distPath, 'testkit.js'));
+      const testkitModule = fixtureRequire(join(distPath, 'testkit.cjs'));
       const missing = EXPECTED_TESTKIT_EXPORTS.filter((exp) => !(exp in testkitModule));
       if (missing.length > 0) {
         console.error(`FAIL: Testkit entry missing exports: ${missing.join(', ')}`);
