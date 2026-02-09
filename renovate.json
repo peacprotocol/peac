@@ -14,7 +14,10 @@
         "typescript",
         "eslint",
         "prettier",
-        "@typescript-eslint/**"
+        "@typescript-eslint/**",
+        "tsup",
+        "vitest",
+        "turbo"
       ],
       "groupName": "dev tooling",
       "schedule": ["before 6am on monday"]

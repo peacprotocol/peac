@@ -43,7 +43,15 @@
       "@peac/privacy": ["./packages/privacy/src"],
       "@peac/telemetry": ["./packages/telemetry/src"],
       "@peac/telemetry-otel": ["./packages/telemetry-otel/src"],
-      "@peac/audit": ["./packages/audit/src"]
+      "@peac/audit": ["./packages/audit/src"],
+      "@peac/capture-core": ["./packages/capture/core/src"],
+      "@peac/middleware-core": ["./packages/middleware-core/src"],
+      "@peac/middleware-express": ["./packages/middleware-express/src"],
+      "@peac/adapter-core": ["./packages/adapters/core/src"],
+      "@peac/adapter-openclaw": ["./packages/adapters/openclaw/src"],
+      "@peac/mappings-mcp": ["./packages/mappings/mcp/src"],
+      "@peac/mappings-ucp": ["./packages/mappings/ucp/src"],
+      "@peac/mappings-aipref": ["./packages/mappings/aipref/src"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "lib", "coverage"]

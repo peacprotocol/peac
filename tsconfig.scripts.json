@@ -3,5 +3,5 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["scripts/**/*", "tests/golden/**/*", "tests/performance/**/*"]
+  "include": ["scripts/**/*", "tests/golden/**/*", "tests/performance/**/*", "tests/bench/**/*"]
 }

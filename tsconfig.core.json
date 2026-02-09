@@ -22,7 +22,15 @@
     "packages/rails/**/src/**/*.ts",
     "packages/mappings/**/src/**/*.ts",
     "packages/telemetry/src/**/*.ts",
-    "packages/telemetry-otel/src/**/*.ts"
+    "packages/telemetry-otel/src/**/*.ts",
+    "packages/contracts/src/**/*.ts",
+    "packages/capture/core/src/**/*.ts",
+    "packages/middleware-core/src/**/*.ts",
+    "packages/middleware-express/src/**/*.ts",
+    "packages/adapters/**/src/**/*.ts",
+    "packages/http-signatures/src/**/*.ts",
+    "packages/jwks-cache/src/**/*.ts",
+    "packages/pay402/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
