@@ -14,6 +14,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0" /></a>
   <a href="https://github.com/peacprotocol/peac/releases"><img src="https://img.shields.io/github/v/release/peacprotocol/peac" alt="Latest Release" /></a>
   <a href="https://www.npmjs.com/package/@peac/protocol"><img src="https://img.shields.io/npm/dm/@peac/protocol?style=flat" alt="npm downloads" /></a>
+  <a href="https://github.com/peacprotocol/peac/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=tests%20%2B%20lint" alt="CI Status" /></a>
 </p>
 
 <p align="center">
@@ -31,26 +32,76 @@
 
 HTTP/REST is the primary binding today (receipt header + well-known policy). MCP mapping is implemented; A2A and streaming bindings are specified/planned. Verification is offline and deterministic.
 
+## Why PEAC exists
+
+**The problem:** AI agents and automated systems operate across organizational boundaries, but proof of what happened stays locked in internal logs. When disputes arise—billing errors, policy violations, safety incidents—there's no neutral, portable evidence that both parties can verify.
+
+**Traditional approaches:**
+
+- **Internal logs** - Not portable, not verifiable by third parties
+- **API observability** - Captures _how_ systems behave, not _what terms applied_
+- **Audit trails** - Vendor-specific, can't be independently verified offline
+
+**PEAC's approach:** Standardize machine-readable policies and cryptographically signed receipts that create verifiable evidence at interaction time. Verification is offline and deterministic—no trust in the issuer's live systems required.
+
+**Result:** Security teams get verifiable evidence for incident response. Compliance teams can prove what terms applied. Billing disputes resolve with cryptographic proof. AI safety reviews have portable artifacts to analyze.
+
 ## The model
 
 ```mermaid
+%%{init: {'theme':'neutral'} }%%
 flowchart LR
-    subgraph "1. Publish policy"
-        A[Service] -->|hosts| B["/.well-known/peac.txt"]
-    end
-    subgraph "2. Issue receipt"
-        C[Gateway] -->|signs| D[PEAC-Receipt]
-    end
-    subgraph "3. Verify + bundle"
-        E[Verifier] -->|exports| F[Dispute Bundle]
-    end
-    B -.->|policy discovery| C
-    D -.->|offline verify| E
+  accTitle: PEAC proof flow
+  accDescr: Agent discovers policy, makes a request, receives a signed receipt, verifier checks it offline, and exports an evidence bundle.
+
+  A["Client / AI agent"]:::actor
+  S["Service / API (issuer)"]:::actor
+  V["Offline verifier"]:::actor
+  T["Third party (audit / dispute)"]:::actor
+
+  P["Policy<br/>/.well-known/peac.txt"]:::artifact
+  K["Issuer keys<br/>/.well-known/peac-issuer.json (JWKS)"]:::artifact
+  R["Receipt<br/>JWS (typ: peac-receipt/0.1)<br/>HTTP: PEAC-Receipt: &lt;jws&gt;"]:::artifact
+  B["Dispute Bundle<br/>ZIP (peac-bundle/0.1)<br/>receipts + policy + report"]:::evidence
+
+  %% Setup (out of band)
+  S -->|publish terms| P
+  S -->|publish verification keys| K
+
+  %% Runtime (per interaction)
+  A d1@-->|1) discover policy| P
+  A r2@-->|2) request (API / tool / download)| S
+  S s3@-->|3) response (includes PEAC-Receipt header)| A
+  A x3@-->|extract receipt| R
+  R v4@-->|4) verify signature + claims| V
+  P -.->|policy context| V
+  K -.->|public keys| V
+  V e5@-->|5) export portable evidence| B
+  B -->|audit / dispute / incident review| T
+
+  %% Animate the narrative edges
+  d1@{ animate: true, animation: slow }
+  r2@{ animate: true, animation: slow }
+  s3@{ animate: true, animation: slow }
+  v4@{ animate: true, animation: slow }
+  e5@{ animate: true, animation: slow }
+
+  classDef actor stroke-width:2px
+  classDef artifact stroke-width:2px
+  classDef evidence stroke-width:2px
 ```
 
-1. **Publish policy**: Services publish terms and record requirements (`/.well-known/peac.txt`)
-2. **Issue receipt**: Gateways issue signed receipts for governed interactions (identity, purpose, settlement, extensions)
-3. **Verify + bundle**: Receipts verified offline; Dispute Bundles provide portable evidence for audits
+**The proof flow (per interaction):**
+
+1. **Discover policy** - Agent reads `/.well-known/peac.txt` before making requests (machine-readable terms)
+2. **Make request** - Client/agent calls API, tool, or dataset endpoint
+3. **Receive signed receipt** - Service returns `PEAC-Receipt: <jws>` header with response (cryptographic proof of interaction)
+4. **Verify offline** - Verifier checks JWS signature + claims using issuer's public keys (deterministic, no network required)
+5. **Export evidence** - Bundle receipts + policy + verification report into portable `.zip` for audits, disputes, or incident review
+
+**Setup (out of band):** Service publishes policy at `/.well-known/peac.txt` and verification keys at `/.well-known/peac-issuer.json`.
+
+**Why this matters:** Internal logs don't travel across org boundaries. PEAC makes terms machine-readable and outcomes cryptographically verifiable.
 
 ## Where it fits
 
@@ -59,24 +110,42 @@ flowchart LR
 - Crawls, indexing, and AI training access with verifiable terms
 - Safety, incident response, and governance workflows that need verifiable evidence (what terms applied, what was requested, what happened)
 
-PEAC is the evidence layer. It does not replace identity, payment, or observability systems:
+**Complements existing systems:**
 
-- **OpenTelemetry** is observability. PEAC is portable proof that can correlate to traces.
-- **MCP / A2A** coordinate tool use and agent exchanges. PEAC carries proof alongside them.
-- **AP2 / ACP / UCP** authorize and orchestrate commerce flows. PEAC provides verifiable evidence around those flows.
-- **Payment rails** move funds. PEAC records settlement references and makes outcomes verifiable.
+- **OpenTelemetry** - Observability traces; PEAC adds portable proof that correlates to those traces
+- **MCP / A2A** - Tool coordination and agent exchanges; PEAC carries verifiable evidence alongside
+- **AP2 / ACP / UCP** - Commerce authorization and orchestration; PEAC provides cryptographic proof of outcomes
+- **Payment rails** - Fund movement; PEAC records settlement references and makes outcomes verifiable
 
 This repository contains the **reference TypeScript implementation** and a **Go SDK** ([sdks/go/](sdks/go/)).
 
 ---
 
+## PEAC vs. alternatives
+
+| Concern                    | Internal Logs                  | PEAC Receipts                               |
+| -------------------------- | ------------------------------ | ------------------------------------------- |
+| **Portability**            | Locked in vendor systems       | Portable across orgs                        |
+| **Verifiability**          | Trust the log owner            | Cryptographic proof (offline)               |
+| **Dispute resolution**     | "My logs vs. your logs"        | Neutral evidence both parties verify        |
+| **Machine-readable terms** | Human docs, maybe OpenAPI      | `/.well-known/peac.txt` for agent discovery |
+| **Interoperability**       | Vendor-specific formats        | Open spec, multiple implementations         |
+| **Privacy**                | Full request/response captured | Structured claims (supports minimization)   |
+| **Replaces auth/payment?** | N/A                            | No—complements existing rails               |
+
+PEAC is the **evidence layer**. It records what happened in a format that survives organizational boundaries.
+
+---
+
 ## Principles
 
-- **Neutral by design:** PEAC does not replace identity, payment rails, or observability. It records what happened in a portable format.
-- **Offline-verifiable:** Verification is deterministic and can run without network access.
-- **Interoperable:** Works alongside HTTP and MCP today; A2A and streaming bindings are specified/planned.
-- **Privacy-aware:** Receipts are structured for auditability while supporting minimization and selective disclosure via bundles.
-- **Open source:** Apache-2.0 licensed, designed for multiple independent implementations.
+- **Neutral by design:** Records what happened in a portable, verifiable format
+- **Offline-verifiable:** Verification is deterministic and can run without network access
+- **Interoperable:** Works alongside HTTP and MCP today; A2A and streaming bindings are specified/planned
+- **Privacy-aware:** Receipts are structured for auditability while supporting minimization and selective disclosure via bundles
+- **Open source:** Apache-2.0 licensed, designed for multiple independent implementations
+
+**Non-goals:** PEAC is not an auth system, not a payment rail, not observability infrastructure. It is the evidence layer that complements these systems.
 
 PEAC produces portable, verifiable evidence that can feed AI safety reviews, incident response, and governance workflows.
 
@@ -84,11 +153,13 @@ PEAC produces portable, verifiable evidence that can feed AI safety reviews, inc
 
 ## Quick start
 
+**Requirements:** Node >= 20
+
 ```bash
 pnpm add @peac/protocol
 ```
 
-Requires Node ESM or top-level await.
+### Issue and verify a receipt
 
 ```typescript
 import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
@@ -116,7 +187,26 @@ if (result.valid) {
 }
 ```
 
+### Verify an existing receipt (CLI)
+
+```bash
+peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...'
+```
+
 See [examples/quickstart/](examples/quickstart/) for runnable code. For settlement fields, HTTP/REST integration, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
+
+---
+
+## Choose your path
+
+| You are...                          | Start here                                                                         |
+| ----------------------------------- | ---------------------------------------------------------------------------------- |
+| **Building an AI agent**            | [Quick start](#quick-start) → Issue/verify receipts in 5 lines                     |
+| **Running an API that agents call** | [Express middleware](docs/README_LONG.md#express-middleware) → Add PEAC in 3 lines |
+| **Implementing in Go**              | [Go SDK](sdks/go/) → `peac.Issue()` + `peac.Verify()`                              |
+| **Writing policy files**            | [Policy Kit Quickstart](docs/policy-kit/quickstart.md) → Author + validate terms   |
+| **Auditing/compliance role**        | [Dispute Bundles](#core-primitives) → Portable evidence format                     |
+| **Integrating with your protocol**  | [Spec Index](docs/SPEC_INDEX.md) → Normative specifications                        |
 
 ---
 
@@ -201,6 +291,25 @@ See `docs/SPEC_INDEX.md` for normative specifications and `docs/CI_BEHAVIOR.md` 
 Apache-2.0. See [LICENSE](LICENSE). Contributions are licensed under Apache-2.0.
 
 Stewardship: [Originary](https://www.originary.xyz/) and the open source community.
+
+---
+
+## Adoption
+
+<p align="center">
+  <a href="https://star-history.com/#peacprotocol/peac&Date">
+    <img src="https://api.star-history.com/svg?repos=peacprotocol/peac&type=Date" alt="Star History Chart" width="600">
+  </a>
+</p>
+
+**Implementations:**
+
+- **TypeScript** (this repo) - `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
+- **Go** - [sdks/go/](sdks/go/) native implementation
+- **MCP servers** - [MCP adapter](packages/adapter-mcp/) for Model Context Protocol
+- **HTTP middleware** - [Express](packages/middleware/express/), [Hono](packages/middleware/hono/) adapters
+
+Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new) to be listed in ecosystem docs.
 
 ---
 
