@@ -294,15 +294,13 @@ Stewardship: [Originary](https://www.originary.xyz/) and the open source communi
 
 ---
 
-## Adoption
+## Implementations
 
 <p align="center">
   <a href="https://star-history.com/#peacprotocol/peac&Date">
     <img src="https://api.star-history.com/svg?repos=peacprotocol/peac&type=Date" alt="Star History Chart" width="600">
   </a>
 </p>
-
-**Implementations:**
 
 - **TypeScript** (this repo) - `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
 - **Go** - [sdks/go/](sdks/go/) native implementation
