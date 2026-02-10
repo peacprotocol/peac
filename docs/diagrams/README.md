@@ -19,7 +19,7 @@ The PEAC proof flow diagram exists in two forms:
 
 ```bash
 # Install
-npm install -g @mermaid-js/mermaid-cli
+pnpm add -g @mermaid-js/mermaid-cli
 
 # Generate
 ./scripts/generate-diagram.sh
@@ -88,7 +88,7 @@ Add to `.github/workflows/ci.yml` to ensure SVG stays in sync:
 ```yaml
 - name: Diagram drift check
   run: |
-    npm install -g @mermaid-js/mermaid-cli
+    pnpm add -g @mermaid-js/mermaid-cli
     ./scripts/generate-diagram.sh
     if ! git diff --exit-code docs/diagrams/peac-proof-flow.svg; then
       echo "FAIL: SVG is out of sync with .mmd source"

@@ -15,7 +15,7 @@ if ! command -v mmdc &> /dev/null; then
   echo "Error: mermaid-cli not found"
   echo ""
   echo "Install with:"
-  echo "  npm install -g @mermaid-js/mermaid-cli"
+  echo "  pnpm add -g @mermaid-js/mermaid-cli"
   echo ""
   echo "Or use Docker:"
   echo "  docker run --rm -v \"\$PWD:/data\" minlag/mermaid-cli -i /data/docs/diagrams/peac-proof-flow.mmd -o /data/docs/diagrams/peac-proof-flow.svg"
