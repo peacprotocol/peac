@@ -61,11 +61,8 @@ flowchart LR
   R["Receipt<br/>JWS (typ: peac-receipt/0.1)<br/>HTTP: PEAC-Receipt: &lt;jws&gt;"]:::artifact
   B["Dispute Bundle<br/>ZIP (peac-bundle/0.1)<br/>receipts + policy + report"]:::evidence
 
-  %% Setup (out of band)
   S -->|publish terms| P
   S -->|publish verification keys| K
-
-  %% Runtime (per interaction)
   A -->|1) discover policy| P
   A -->|2) request (API / tool / download)| S
   S -->|3) response (includes PEAC-Receipt header)| A
