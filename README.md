@@ -24,13 +24,11 @@
   <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
 </p>
 
-**What:** PEAC standardizes a file-discoverable policy surface and a signed receipt format that make automated interactions provable: consent, attribution, settlement references, decisions, outcomes.
+**What:** PEAC standardizes three artifacts: a discoverable policy file (`/.well-known/peac.txt`), a signed receipt format (`peac-receipt/0.1` JWS), and a portable evidence bundle for offline verification.
 
 **Who:** AI agents and agent platforms, APIs, gateways, tool servers, and compliance/security teams operating automated traffic across org boundaries.
 
-**Why:** Internal logs don't travel and aren't neutral proof. PEAC makes terms machine-readable and outcomes verifiable, without replacing your auth, rails, or observability.
-
-HTTP/REST is the primary binding today (receipt header + well-known policy). MCP mapping is implemented; A2A and streaming bindings are specified/planned. Verification is offline and deterministic.
+**Why:** Internal logs don't travel across org boundaries and aren't neutral proof. PEAC makes terms machine-readable and outcomes cryptographically verifiable, without replacing your auth, rails, or observability.
 
 ## Why PEAC exists
 
@@ -91,7 +89,29 @@ flowchart LR
 
 **Setup (out of band):** Service publishes policy at `/.well-known/peac.txt` and verification keys at `/.well-known/peac-issuer.json`.
 
-**Why this matters:** Internal logs don't travel across org boundaries. PEAC makes terms machine-readable and outcomes cryptographically verifiable.
+### What the artifacts look like
+
+`/.well-known/peac.txt` -- machine-readable terms (YAML):
+
+```yaml
+version: 0.9.2
+protocol: peac
+peac:
+  consent:
+    ai_training: conditional
+  economics:
+    pricing: $0.01/gb
+  attribution:
+    required: true
+```
+
+`PEAC-Receipt` header -- signed proof returned on governed responses:
+
+```text
+PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
+```
+
+The receipt is a standard JWS (Ed25519) that can be verified offline using the issuer's published keys. Full specification: [Spec Index](docs/SPEC_INDEX.md).
 
 ## Where it fits
 
@@ -113,17 +133,14 @@ This repository contains the **reference TypeScript implementation** and a **Go 
 
 ## PEAC vs. alternatives
 
-| Concern                    | Internal Logs                  | PEAC Receipts                               |
-| -------------------------- | ------------------------------ | ------------------------------------------- |
-| **Portability**            | Locked in vendor systems       | Portable across orgs                        |
-| **Verifiability**          | Trust the log owner            | Cryptographic proof (offline)               |
-| **Dispute resolution**     | "My logs vs. your logs"        | Neutral evidence both parties verify        |
-| **Machine-readable terms** | Human docs, maybe OpenAPI      | `/.well-known/peac.txt` for agent discovery |
-| **Interoperability**       | Vendor-specific formats        | Open spec, multiple implementations         |
-| **Privacy**                | Full request/response captured | Structured claims (supports minimization)   |
-| **Replaces auth/payment?** | N/A                            | No—complements existing rails               |
+| Concern                    | Internal Logs             | PEAC Receipts                               |
+| -------------------------- | ------------------------- | ------------------------------------------- |
+| **Portability**            | Locked in vendor systems  | Portable across orgs                        |
+| **Verifiability**          | Trust the log owner       | Cryptographic proof (offline)               |
+| **Machine-readable terms** | Human docs, maybe OpenAPI | `/.well-known/peac.txt` for agent discovery |
+| **Dispute resolution**     | "My logs vs. your logs"   | Neutral evidence both parties verify        |
 
-PEAC is the **evidence layer**. It records what happened in a format that survives organizational boundaries.
+PEAC is the evidence layer. It records what happened in a format that survives organizational boundaries.
 
 ---
 
@@ -189,14 +206,12 @@ See [examples/quickstart/](examples/quickstart/) for runnable code. For settleme
 
 ## Choose your path
 
-| You are...                          | Start here                                                                         |
-| ----------------------------------- | ---------------------------------------------------------------------------------- |
-| **Building an AI agent**            | [Quick start](#quick-start) → Issue/verify receipts in 5 lines                     |
-| **Running an API that agents call** | [Express middleware](docs/README_LONG.md#express-middleware) → Add PEAC in 3 lines |
-| **Implementing in Go**              | [Go SDK](sdks/go/) → `peac.Issue()` + `peac.Verify()`                              |
-| **Writing policy files**            | [Policy Kit Quickstart](docs/policy-kit/quickstart.md) → Author + validate terms   |
-| **Auditing/compliance role**        | [Dispute Bundles](#core-primitives) → Portable evidence format                     |
-| **Integrating with your protocol**  | [Spec Index](docs/SPEC_INDEX.md) → Normative specifications                        |
+- **Agent developer** -- [Quick start](#quick-start): issue and verify receipts in 5 lines
+- **API operator** -- [Express middleware](docs/README_LONG.md#express-middleware): add PEAC in 3 lines
+- **Go developer** -- [Go SDK](sdks/go/): `peac.Issue()` + `peac.Verify()`
+- **Policy author** -- [Policy Kit](docs/policy-kit/quickstart.md): author and validate terms
+- **Auditor / compliance** -- [Dispute Bundles](#core-primitives): portable evidence format
+- **Protocol integrator** -- [Spec Index](docs/SPEC_INDEX.md): normative specifications
 
 ---
 
@@ -286,18 +301,12 @@ Stewardship: [Originary](https://www.originary.xyz/) and the open source communi
 
 ## Implementations
 
-<p align="center">
-  <a href="https://star-history.com/#peacprotocol/peac&Date">
-    <img src="https://api.star-history.com/svg?repos=peacprotocol/peac&type=Date" alt="Star History Chart" width="600">
-  </a>
-</p>
+- **TypeScript** (this repo) -- `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
+- **Go** -- [sdks/go/](sdks/go/) native implementation
+- **MCP** -- [MCP adapter](packages/adapter-mcp/) for Model Context Protocol
+- **HTTP middleware** -- [Express](packages/middleware/express/), [Hono](packages/middleware/hono/)
 
-- **TypeScript** (this repo) - `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
-- **Go** - [sdks/go/](sdks/go/) native implementation
-- **MCP servers** - [MCP adapter](packages/adapter-mcp/) for Model Context Protocol
-- **HTTP middleware** - [Express](packages/middleware/express/), [Hono](packages/middleware/hono/) adapters
-
-Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new) to be listed in ecosystem docs.
+Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new).
 
 ---
 
