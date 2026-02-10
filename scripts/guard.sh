@@ -193,4 +193,19 @@ else
   echo "OK"
 fi
 
+echo "== forbid stale generated artifacts in src/ =="
+stale=$(find packages -path "*/src/*" \
+  -not -path "*/dist/*" -not -path "*/node_modules/*" \( \
+  -name "*.generated.js" -o -name "*.generated.js.map" \
+  -o -name "*.generated.d.ts" -o -name "*.generated.d.ts.map" \
+\) -print 2>/dev/null)
+if [ -n "$stale" ]; then
+  echo "FAIL: Generated build artifacts found under src/ (shadow TS resolution):"
+  echo "$stale"
+  echo "Fix: rm -f $stale"
+  bad=1
+else
+  echo "OK"
+fi
+
 exit $bad
