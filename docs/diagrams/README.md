@@ -48,13 +48,15 @@ docker run --rm -v "$PWD:/data" minlag/mermaid-cli \
 
 ### Current Approach (GitHub-optimized)
 
-```markdown
+````markdown
 ## The model
 
 ```mermaid
 <mermaid source>
 ```
-```
+````
+
+````
 
 **Pros:** Animation works, source is diffable
 **Cons:** Doesn't render on npm
@@ -71,7 +73,7 @@ docker run --rm -v "$PWD:/data" minlag/mermaid-cli \
 
 ```mermaid
 <mermaid source>
-```
+````
 
 </details>
 ```

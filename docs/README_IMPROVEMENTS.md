@@ -13,6 +13,7 @@
 **Problem:** Diagram started with service publishing, not the reader's mental model (agent discovering terms).
 
 **Fix:**
+
 - Added **policy discovery as step 1** (agent reading `/.well-known/peac.txt` before acting)
 - Made publish/keys **setup (out of band)** - unnumbered, supporting context
 - Animated the **per-interaction runtime path**: discover → request → response → verify → export
@@ -22,6 +23,7 @@
 **Why it matters:** Readers now see PEAC as "terms + proof" not just "logging/receipts". The animated edges track the reader's mental model, not the maintainer's architecture.
 
 **Files changed:**
+
 - `README.md` - Updated Mermaid diagram (lines 49-93)
 - `docs/diagrams/peac-proof-flow.mmd` - Canonical source (new file)
 
@@ -32,6 +34,7 @@
 **Problem:** "Does not replace identity/payment/observability" repeated in 3+ sections.
 
 **Fix:**
+
 - Added **"Non-goals"** block in Principles section (line 148)
 - Removed repeated disclaimers from "Where it fits" and "Why this matters"
 - Tightened "Complements existing systems" to be concise, not defensive
@@ -39,6 +42,7 @@
 **Why it matters:** README feels shorter and more confident. Single source of truth for positioning.
 
 **Lines changed:**
+
 - `README.md:140-150` - Principles + Non-goals
 - `README.md:106-122` - Where it fits (compressed)
 
@@ -49,6 +53,7 @@
 **Problem:** "Requires Node ESM or top-level await" was vague and created friction.
 
 **Fix:**
+
 - Replaced with **"Requirements: Node >= 20"** (from `package.json` engines)
 - Added **"Verify an existing receipt (CLI)"** mini-snippet after issue/verify
 - Shows both programmatic (TypeScript) and CLI paths
@@ -56,6 +61,7 @@
 **Why it matters:** Clearer contract, faster "aha" moment for readers who want to verify first.
 
 **Lines changed:**
+
 - `README.md:154-195` - Quick start section
 
 ---
@@ -63,11 +69,13 @@
 ### 4. ✅ **Fixed Credibility Claims** (No Brittle Facts)
 
 **Removed from earlier draft:**
+
 - ❌ "3561 tests passing" - Brittle count unless CI-generated
 - ❌ "Sequential animation" - Mermaid doesn't guarantee step-by-step semantics
 - ✅ Now says: "Animated edges highlight the primary flow" (accurate)
 
 **Added:**
+
 - ✅ Real accessibility via `accTitle`/`accDescr` (per Mermaid docs)
 - ✅ CI badge shows live test status instead of hardcoded count
 
@@ -78,6 +86,7 @@
 **Problem:** GitHub renders Mermaid, but npm/PyPI/docs sites do not.
 
 **Solution implemented:**
+
 - Created `docs/diagrams/peac-proof-flow.mmd` - Canonical Mermaid source
 - Created `scripts/generate-diagram.sh` - Deterministic SVG generation
 - Created `docs/diagrams/README.md` - Full fallback documentation
@@ -85,13 +94,16 @@
 **Two usage patterns:**
 
 #### Pattern A (Current - GitHub-optimized)
-```markdown
+
+````markdown
 ## The model
 
 ```mermaid
 <mermaid source>
 ```
-```
+````
+
+````
 
 **Pros:** Animation works, source is diffable
 **Cons:** Doesn't render on npm
@@ -107,7 +119,7 @@
 
 ```mermaid
 <mermaid source>
-```
+````
 
 </details>
 ```
@@ -118,6 +130,7 @@
 **Recommendation:** Start with Pattern A (current), switch to Pattern B when npm README is primary discovery surface.
 
 **Files created:**
+
 - `docs/diagrams/peac-proof-flow.mmd` - Canonical Mermaid source
 - `scripts/generate-diagram.sh` - SVG generation script
 - `docs/diagrams/README.md` - Documentation + CI integration instructions
@@ -126,14 +139,14 @@
 
 ## Summary of Changes
 
-| Section | Change | Why |
-|---------|--------|-----|
-| **Diagram** | Policy discovery first, setup vs runtime, accessibility | Matches reader mental model |
-| **Non-goals** | Added "Non-goals" block, removed repetition | Confidence, clarity, compression |
-| **Quick start** | Node >= 20, verify-first CLI snippet | Clear contract, faster "aha" |
-| **Principles** | Compressed disclaimers | Less defensive, more factual |
-| **Where it fits** | "Complements existing systems" table | Concise positioning |
-| **CI badge** | Added tests+lint status badge | Live quality signal |
+| Section           | Change                                                  | Why                              |
+| ----------------- | ------------------------------------------------------- | -------------------------------- |
+| **Diagram**       | Policy discovery first, setup vs runtime, accessibility | Matches reader mental model      |
+| **Non-goals**     | Added "Non-goals" block, removed repetition             | Confidence, clarity, compression |
+| **Quick start**   | Node >= 20, verify-first CLI snippet                    | Clear contract, faster "aha"     |
+| **Principles**    | Compressed disclaimers                                  | Less defensive, more factual     |
+| **Where it fits** | "Complements existing systems" table                    | Concise positioning              |
+| **CI badge**      | Added tests+lint status badge                           | Live quality signal              |
 
 ---
 
@@ -153,12 +166,14 @@
 ## How to Generate SVG (When Needed)
 
 ### Option 1: Mermaid CLI
+
 ```bash
 npm install -g @mermaid-js/mermaid-cli
 ./scripts/generate-diagram.sh
 ```
 
 ### Option 2: Docker (No Install)
+
 ```bash
 docker run --rm -v "$PWD:/data" minlag/mermaid-cli \
   -i /data/docs/diagrams/peac-proof-flow.mmd \
@@ -167,6 +182,7 @@ docker run --rm -v "$PWD:/data" minlag/mermaid-cli \
 ```
 
 ### Option 3: Mermaid Live Editor
+
 1. Copy `docs/diagrams/peac-proof-flow.mmd`
 2. Paste into https://mermaid.live
 3. Export SVG (neutral theme, transparent background)
