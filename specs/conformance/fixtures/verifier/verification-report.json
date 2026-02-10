@@ -26,7 +26,8 @@
           "jws.signature",
           "claims.time_window",
           "extensions.limits",
-          "transport.profile_binding"
+          "transport.profile_binding",
+          "policy.binding"
         ]
       }
     },
@@ -165,7 +166,9 @@
           { "id": "key.resolve", "status": "skip" },
           { "id": "jws.signature", "status": "skip" },
           { "id": "claims.time_window", "status": "skip" },
-          { "id": "extensions.limits", "status": "skip" }
+          { "id": "extensions.limits", "status": "skip" },
+          { "id": "transport.profile_binding", "status": "skip" },
+          { "id": "policy.binding", "status": "skip" }
         ]
       }
     },
@@ -178,6 +181,28 @@
           "value_format": "lowercase hex",
           "value_length": 64
         }
+      }
+    },
+    {
+      "id": "check-list-append-only-contract",
+      "description": "Check list is APPEND-ONLY: new checks MUST only be appended. Existing entries MUST NOT be removed, reordered, or renamed.",
+      "expected": {
+        "contract": "append_only",
+        "frozen_prefix": [
+          "jws.parse",
+          "limits.receipt_bytes",
+          "jws.protected_header",
+          "claims.schema_unverified",
+          "issuer.trust_policy",
+          "issuer.discovery",
+          "key.resolve",
+          "jws.signature",
+          "claims.time_window",
+          "extensions.limits",
+          "transport.profile_binding",
+          "policy.binding"
+        ],
+        "note": "Breaking this contract invalidates all existing verification reports and conformance vectors. To add a new check, append it to the end of the list and update all specs and conformance fixtures."
       }
     }
   ]

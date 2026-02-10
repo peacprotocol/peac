@@ -1,0 +1,172 @@
+{
+  "description": "Policy binding conformance fixtures (DD-49)",
+  "version": "0.10.10",
+  "design_decision": "DD-49",
+  "deferred_convention": "Test cases with 'deferred_until' and 'executable: false' describe future Wire 0.2 behavior. They are non-executable placeholders -- input values use angle-bracket pseudocode (e.g. '<base64url of SHA-256>'). They become executable when the deferred_until version ships.",
+  "test_cases": [
+    {
+      "id": "policy-binding-wire-01-unavailable",
+      "description": "Wire 0.1 receipts MUST always report policy_binding as 'unavailable' (no policy digest on wire)",
+      "wire_format": "peac-receipt/0.1",
+      "expected": {
+        "policy_binding": "unavailable",
+        "check": {
+          "id": "policy.binding",
+          "status": "skip",
+          "detail": {
+            "reason": "wire_01_no_policy_digest"
+          }
+        }
+      }
+    },
+    {
+      "id": "policy-binding-wire-02-verified",
+      "description": "Wire 0.2 receipt with peac.policy.digest matching local policy bytes MUST report 'verified'",
+      "wire_format": "peac-receipt/0.2",
+      "deferred_until": "v0.12.0",
+      "executable": false,
+      "input": {
+        "receipt_policy": {
+          "uri": "https://api.example.com/.well-known/peac.txt",
+          "digest": {
+            "alg": "sha-256",
+            "value": "<base64url of SHA-256 of raw policy bytes>"
+          },
+          "content_type": "text/plain"
+        },
+        "local_policy_bytes": "<raw peac.txt bytes>"
+      },
+      "expected": {
+        "policy_binding": "verified",
+        "check": {
+          "id": "policy.binding",
+          "status": "pass",
+          "detail": {
+            "digest_match": true,
+            "policy_uri": "https://api.example.com/.well-known/peac.txt"
+          }
+        }
+      }
+    },
+    {
+      "id": "policy-binding-wire-02-failed",
+      "description": "Wire 0.2 receipt with peac.policy.digest NOT matching local policy bytes MUST report 'failed'",
+      "wire_format": "peac-receipt/0.2",
+      "deferred_until": "v0.12.0",
+      "executable": false,
+      "input": {
+        "receipt_policy": {
+          "uri": "https://api.example.com/.well-known/peac.txt",
+          "digest": {
+            "alg": "sha-256",
+            "value": "<base64url of SHA-256 of DIFFERENT policy bytes>"
+          },
+          "content_type": "text/plain"
+        },
+        "local_policy_bytes": "<raw peac.txt bytes (different from what receipt claims)>"
+      },
+      "expected": {
+        "policy_binding": "failed",
+        "check": {
+          "id": "policy.binding",
+          "status": "fail",
+          "error_code": "E_INVALID_POLICY_HASH",
+          "detail": {
+            "digest_match": false,
+            "expected_digest": "<digest from receipt>",
+            "computed_digest": "<digest of local policy bytes>"
+          }
+        }
+      }
+    },
+    {
+      "id": "policy-binding-wire-02-no-digest-unavailable",
+      "description": "Wire 0.2 receipt WITHOUT peac.policy.digest MUST report 'unavailable' (issuer opted out)",
+      "wire_format": "peac-receipt/0.2",
+      "deferred_until": "v0.12.0",
+      "executable": false,
+      "input": {
+        "receipt_policy": {
+          "uri": "https://api.example.com/.well-known/peac.txt"
+        },
+        "local_policy_bytes": "<raw peac.txt bytes>"
+      },
+      "expected": {
+        "policy_binding": "unavailable",
+        "check": {
+          "id": "policy.binding",
+          "status": "skip",
+          "detail": {
+            "reason": "no_digest_in_receipt"
+          }
+        }
+      }
+    },
+    {
+      "id": "policy-binding-wire-02-no-local-bytes-unavailable",
+      "description": "Wire 0.2 receipt with digest but NO local policy bytes MUST report 'unavailable' (verifier has no policy to compare)",
+      "wire_format": "peac-receipt/0.2",
+      "deferred_until": "v0.12.0",
+      "executable": false,
+      "input": {
+        "receipt_policy": {
+          "uri": "https://api.example.com/.well-known/peac.txt",
+          "digest": {
+            "alg": "sha-256",
+            "value": "<base64url of SHA-256>"
+          }
+        },
+        "local_policy_bytes": null
+      },
+      "expected": {
+        "policy_binding": "unavailable",
+        "check": {
+          "id": "policy.binding",
+          "status": "skip",
+          "detail": {
+            "reason": "no_local_policy_bytes"
+          }
+        }
+      }
+    },
+    {
+      "id": "policy-binding-digest-algorithm",
+      "description": "Policy digest MUST use raw-bytes SHA-256, base64url-encoded (not parsed/re-serialized)",
+      "deferred_until": "v0.12.0",
+      "executable": false,
+      "expected": {
+        "digest_algorithm": "sha-256",
+        "digest_encoding": "base64url",
+        "digest_input": "raw_bytes",
+        "note": "Policy bytes are hashed as-is. Do NOT parse then re-serialize -- formatting/whitespace differences would change the digest.",
+        "hash_format_alignment": "Wire 0.2 receipts use DigestRef (alg + base64url value). Evidence bundles use sha256:<hex> (self-describing, human-readable). A conversion bridge between the two formats is planned for v0.12.0."
+      }
+    },
+    {
+      "id": "policy-binding-bundle-peac-txt",
+      "description": "Evidence bundles MAY include peac.txt as policy/peac.txt with peac_txt_hash in manifest",
+      "expected": {
+        "bundle_file": "policy/peac.txt",
+        "manifest_field": "peac_txt_hash",
+        "hash_format": "sha256:<64 lowercase hex chars>",
+        "note": "Enables offline policy binding verification by providing the policy bytes alongside the receipts. Bundle path policy/peac.txt is a locked convention."
+      }
+    },
+    {
+      "id": "policy-binding-bundle-path-convention",
+      "description": "Bundle path convention for policy artifacts is locked: policy/policy.yaml for policy, policy/peac.txt for discovery manifest",
+      "expected": {
+        "paths": {
+          "policy": "policy/policy.yaml",
+          "peac_txt": "policy/peac.txt"
+        },
+        "manifest_fields": {
+          "policy": "policy_hash",
+          "peac_txt": "peac_txt_hash"
+        },
+        "hash_format": "sha256:<64 lowercase hex chars>",
+        "note": "These paths are part of the ALLOWED_PATHS whitelist in the bundle reader. New policy-related artifacts MUST be added under the policy/ prefix."
+      }
+    }
+  ]
+}
