@@ -51,9 +51,6 @@ HTTP/REST is the primary binding today (receipt header + well-known policy). MCP
 ```mermaid
 %%{init: {'theme':'neutral'} }%%
 flowchart LR
-  accTitle: PEAC proof flow
-  accDescr: Agent discovers policy, makes a request, receives a signed receipt, verifier checks it offline, and exports an evidence bundle.
-
   A["Client / AI agent"]:::actor
   S["Service / API (issuer)"]:::actor
   V["Offline verifier"]:::actor
@@ -69,22 +66,15 @@ flowchart LR
   S -->|publish verification keys| K
 
   %% Runtime (per interaction)
-  A d1@-->|1) discover policy| P
-  A r2@-->|2) request (API / tool / download)| S
-  S s3@-->|3) response (includes PEAC-Receipt header)| A
-  A x3@-->|extract receipt| R
-  R v4@-->|4) verify signature + claims| V
+  A -->|1) discover policy| P
+  A -->|2) request (API / tool / download)| S
+  S -->|3) response (includes PEAC-Receipt header)| A
+  A -->|extract receipt| R
+  R -->|4) verify signature + claims| V
   P -.->|policy context| V
   K -.->|public keys| V
-  V e5@-->|5) export portable evidence| B
+  V -->|5) export portable evidence| B
   B -->|audit / dispute / incident review| T
-
-  %% Animate the narrative edges
-  d1@{ animate: true, animation: slow }
-  r2@{ animate: true, animation: slow }
-  s3@{ animate: true, animation: slow }
-  v4@{ animate: true, animation: slow }
-  e5@{ animate: true, animation: slow }
 
   classDef actor stroke-width:2px
   classDef artifact stroke-width:2px
