@@ -179,6 +179,9 @@ Standard check IDs (in order):
 9. `claims.time_window` - Check iat/exp
 10. `extensions.limits` - Check extension sizes
 11. `transport.profile_binding` - Verify transport profile (optional)
+12. `policy.binding` - Verify policy binding (DD-49; always `skip` for Wire 0.1)
+
+**Append-only contract**: The check list is APPEND-ONLY. New checks MUST only be appended to the end of this list. Existing entries MUST NOT be removed, reordered, or renamed. Downstream consumers (conformance fixtures, report builders, dashboards) depend on stable indices. Breaking this contract invalidates all existing verification reports and conformance vectors.
 
 ### 5.6 `artifacts` (OPTIONAL)
 

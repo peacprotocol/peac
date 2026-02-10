@@ -11,6 +11,7 @@ import {
   type ReceiptClaimsType,
   type AttestationReceiptClaims,
 } from '@peac/schema';
+import type { PolicyBindingStatus } from './verifier-types';
 
 /**
  * Structural type for CryptoError
@@ -131,6 +132,13 @@ export type VerifyLocalSuccess =
       claims: ReceiptClaimsType;
       /** Key ID from JWS header (for logging/indexing) */
       kid: string;
+      /**
+       * Policy binding status (DD-49).
+       *
+       * Always 'unavailable' for Wire 0.1 receipts (no policy digest on wire).
+       * Wire 0.2 receipts with `peac.policy.digest` will report 'verified' or 'failed'.
+       */
+      policy_binding: PolicyBindingStatus;
     }
   | {
       /** Verification succeeded */
@@ -141,6 +149,13 @@ export type VerifyLocalSuccess =
       claims: AttestationReceiptClaims;
       /** Key ID from JWS header (for logging/indexing) */
       kid: string;
+      /**
+       * Policy binding status (DD-49).
+       *
+       * Always 'unavailable' for Wire 0.1 receipts (no policy digest on wire).
+       * Wire 0.2 receipts with `peac.policy.digest` will report 'verified' or 'failed'.
+       */
+      policy_binding: PolicyBindingStatus;
     };
 
 /**
@@ -328,7 +343,14 @@ export async function verifyLocal(
           message: `Subject mismatch: expected "${subjectUri}", got "${claims.subject?.uri ?? 'undefined'}"`,
         };
       }
-      return { valid: true, variant: 'commerce', claims, kid: result.header.kid };
+      // Wire 0.1: no policy digest on wire, always 'unavailable' (DD-49)
+      return {
+        valid: true,
+        variant: 'commerce',
+        claims,
+        kid: result.header.kid,
+        policy_binding: 'unavailable',
+      };
     } else {
       const claims = pr.claims as AttestationReceiptClaims;
       if (subjectUri !== undefined && claims.sub !== subjectUri) {
@@ -338,7 +360,14 @@ export async function verifyLocal(
           message: `Subject mismatch: expected "${subjectUri}", got "${claims.sub ?? 'undefined'}"`,
         };
       }
-      return { valid: true, variant: 'attestation', claims, kid: result.header.kid };
+      // Wire 0.1: no policy digest on wire, always 'unavailable' (DD-49)
+      return {
+        valid: true,
+        variant: 'attestation',
+        claims,
+        kid: result.header.kid,
+        policy_binding: 'unavailable',
+      };
     }
   } catch (err) {
     // Handle typed CryptoError from @peac/crypto

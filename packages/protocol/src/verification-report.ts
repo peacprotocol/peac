@@ -167,6 +167,8 @@ export class VerificationReportBuilder {
       reason,
       severity: reasonCodeToSeverity(reason),
       receipt_type: options?.receiptType ?? WIRE_TYPE,
+      // Wire 0.1: always 'unavailable' (DD-49). Wire 0.2 will set this via options.
+      policy_binding: 'unavailable',
       ...(options?.issuer && { issuer: options.issuer }),
       ...(options?.kid && { kid: options.kid }),
     };
@@ -248,9 +250,16 @@ export class VerificationReportBuilder {
         checks.push({ id: checkId, status: 'skip', detail: { reason: 'short_circuit' } });
       } else {
         // Before failure or in success, missing checks get default status
-        // For optional checks like transport.profile_binding, mark as skip
+        // For optional/deferred checks, mark as skip with appropriate reason
         if (checkId === 'transport.profile_binding') {
           checks.push({ id: checkId, status: 'skip', detail: { reason: 'not_applicable' } });
+        } else if (checkId === 'policy.binding') {
+          // Wire 0.1: always skip (DD-49). Wire 0.2 will produce pass/fail.
+          checks.push({
+            id: checkId,
+            status: 'skip',
+            detail: { reason: 'wire_01_no_policy_digest' },
+          });
         } else {
           // This shouldn't happen in well-formed builds - indicates a bug
           checks.push({ id: checkId, status: 'skip', detail: { reason: 'not_executed' } });
@@ -411,6 +420,12 @@ export async function buildSuccessReport(
         builder.pass(checkId, checkDetails[checkId]);
       }
       // Will be marked as skip by build() if not added
+      continue;
+    }
+
+    // policy.binding: Wire 0.1 always skip (DD-49)
+    if (checkId === 'policy.binding') {
+      // Will be marked as skip with wire_01_no_policy_digest by build()
       continue;
     }
 

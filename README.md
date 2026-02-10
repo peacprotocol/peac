@@ -1,19 +1,33 @@
-# PEAC Protocol
+<p align="center">
+  <a href="https://www.peacprotocol.org">
+    <h1 align="center">PEAC Protocol</h1>
+  </a>
+</p>
 
-**Verifiable interaction records for automated systems**
+<p align="center">
+  <strong>Verifiable interaction records for AI agents and automated systems</strong>
+  <br />
+  A record is the portable interaction artifact; a receipt is the signed file format.
+</p>
 
-A record is the portable interaction artifact; a receipt is the signed file format.
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0" /></a>
+  <a href="https://github.com/peacprotocol/peac/releases"><img src="https://img.shields.io/github/v/release/peacprotocol/peac" alt="Latest Release" /></a>
+  <a href="https://www.npmjs.com/package/@peac/protocol"><img src="https://img.shields.io/npm/dm/@peac/protocol?style=flat" alt="npm downloads" /></a>
+</p>
 
-[Website](https://www.peacprotocol.org) | [Spec Index](docs/SPEC_INDEX.md) | [Discussions](https://github.com/peacprotocol/peac/discussions) | [Releases](https://github.com/peacprotocol/peac/releases)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac)](https://github.com/peacprotocol/peac/releases)
-[![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat)](https://www.npmjs.com/package/@peac/protocol)
+<p align="center">
+  <a href="https://www.peacprotocol.org">Website</a> &middot;
+  <a href="docs/SPEC_INDEX.md">Spec Index</a> &middot;
+  <a href="https://github.com/peacprotocol/peac/discussions">Discussions</a> &middot;
+  <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
+</p>
 
-**What:** PEAC standardizes a file-discoverable policy surface and a signed receipt format that make automated interactions provable -- consent, attribution, settlement references, decisions, outcomes.
+**What:** PEAC standardizes a file-discoverable policy surface and a signed receipt format that make automated interactions provable: consent, attribution, settlement references, decisions, outcomes.
 
-**Who:** APIs, gateways, tool servers, agent platforms, and compliance/security teams operating automated traffic across org boundaries.
+**Who:** AI agents and agent platforms, APIs, gateways, tool servers, and compliance/security teams operating automated traffic across org boundaries.
 
-**Why:** Internal logs are not neutral proof and integrations do not interoperate. PEAC makes terms machine-readable and outcomes verifiable, without replacing your auth, rails, or observability.
+**Why:** Internal logs don't travel and aren't neutral proof. PEAC makes terms machine-readable and outcomes verifiable, without replacing your auth, rails, or observability.
 
 HTTP/REST is the primary binding today (receipt header + well-known policy). MCP mapping is implemented; A2A and streaming bindings are specified/planned. Verification is offline and deterministic.
 
@@ -43,6 +57,7 @@ flowchart LR
 - HTTP APIs (paid or permissioned), tool invocations, dataset downloads, long-running sessions
 - Cross-org audit evidence (security, compliance, billing disputes)
 - Crawls, indexing, and AI training access with verifiable terms
+- Safety, incident response, and governance workflows that need verifiable evidence (what terms applied, what was requested, what happened)
 
 PEAC is the evidence layer. It does not replace identity, payment, or observability systems:
 
@@ -52,6 +67,18 @@ PEAC is the evidence layer. It does not replace identity, payment, or observabil
 - **Payment rails** move funds. PEAC records settlement references and makes outcomes verifiable.
 
 This repository contains the **reference TypeScript implementation** and a **Go SDK** ([sdks/go/](sdks/go/)).
+
+---
+
+## Principles
+
+- **Neutral by design:** PEAC does not replace identity, payment rails, or observability. It records what happened in a portable format.
+- **Offline-verifiable:** Verification is deterministic and can run without network access.
+- **Interoperable:** Works alongside HTTP and MCP today; A2A and streaming bindings are specified/planned.
+- **Privacy-aware:** Receipts are structured for auditability while supporting minimization and selective disclosure via bundles.
+- **Open source:** Apache-2.0 licensed, designed for multiple independent implementations.
+
+PEAC produces portable, verifiable evidence that can feed AI safety reviews, incident response, and governance workflows.
 
 ---
 

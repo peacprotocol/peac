@@ -146,6 +146,17 @@ export interface DisputeBundleManifest {
   /** sha256:<hex> hash of policy.yaml if included */
   policy_hash?: string;
 
+  /**
+   * sha256:<hex> hash of peac.txt file if included (DD-49).
+   *
+   * Enables offline policy binding verification: verifiers can compare this
+   * hash against the policy digest in Wire 0.2 receipts to confirm the policy
+   * in effect at issuance time matches what is bundled.
+   *
+   * Bundle path: policy/peac.txt (locked convention).
+   */
+  peac_txt_hash?: string;
+
   /** sha256:<hex> of JCS(manifest without content_hash) - deterministic bundle hash */
   content_hash: string;
 }
@@ -177,6 +188,16 @@ export interface CreateDisputeBundleOptions {
 
   /** Optional policy YAML content */
   policy?: string;
+
+  /**
+   * Optional peac.txt file content (DD-49).
+   *
+   * If provided, stored as policy/peac.txt in the bundle and its SHA-256
+   * hash is recorded in the manifest as peac_txt_hash.
+   *
+   * Bundle path: policy/peac.txt (locked convention).
+   */
+  peac_txt?: string;
 
   /** Optional bundle ID (generated if not provided) */
   bundle_id?: string;
@@ -239,6 +260,9 @@ export interface DisputeBundleContents {
 
   /** Policy content if present */
   policy?: string;
+
+  /** peac.txt file content if present (DD-49) */
+  peac_txt?: string;
 
   /** bundle.sig JWS if present */
   bundle_sig?: string;

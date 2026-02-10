@@ -159,6 +159,8 @@ Verifiers MUST perform these checks in order (reflecting the real dependency cha
 
 ### 6.1 Check order
 
+**Append-only contract**: This list is APPEND-ONLY. New checks MUST only be appended to the end. Existing entries MUST NOT be removed, reordered, or renamed. Downstream consumers (conformance fixtures, report builders, dashboards) depend on stable indices. Breaking this contract invalidates all existing verification reports and conformance vectors.
+
 1. `jws.parse` - Parse JWS structure (header, payload, signature)
 2. `limits.receipt_bytes` - Check receipt size against max_receipt_bytes
 3. `jws.protected_header` - Validate protected header (alg, typ, kid)
@@ -169,6 +171,8 @@ Verifiers MUST perform these checks in order (reflecting the real dependency cha
 8. `jws.signature` - Verify Ed25519 signature with resolved key
 9. `claims.time_window` - Check iat/exp against clock (only after signature verified)
 10. `extensions.limits` - Check extension sizes
+11. `transport.profile_binding` - Verify transport profile binding (optional)
+12. `policy.binding` - Verify policy binding (DD-49; always `skip` for Wire 0.1)
 
 ### 6.2 Check dependencies
 
@@ -183,6 +187,8 @@ jws.parse
                                       └── jws.signature
                                             └── claims.time_window (only after sig verified)
                                                   └── extensions.limits
+                                                        └── transport.profile_binding (optional)
+                                                              └── policy.binding (DD-49)
 ```
 
 **Rationale**: Schema validation happens twice conceptually:

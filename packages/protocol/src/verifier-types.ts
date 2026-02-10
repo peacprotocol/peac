@@ -16,6 +16,20 @@ import {
 } from '@peac/kernel';
 
 // ---------------------------------------------------------------------------
+// Policy Binding (DD-49)
+// ---------------------------------------------------------------------------
+
+/**
+ * Three-state policy binding status (DD-49)
+ *
+ * - 'verified': Policy digest in receipt matches local policy bytes (Wire 0.2+)
+ * - 'failed': Policy digest mismatch (Wire 0.2+)
+ * - 'unavailable': No policy digest in receipt or no policy bytes available.
+ *   Always 'unavailable' for Wire 0.1 receipts.
+ */
+export type PolicyBindingStatus = 'verified' | 'failed' | 'unavailable';
+
+// ---------------------------------------------------------------------------
 // Verification Mode
 // ---------------------------------------------------------------------------
 
@@ -191,7 +205,28 @@ export function createDefaultPolicy(mode: VerificationMode): VerifierPolicy {
 export type CheckStatus = 'pass' | 'fail' | 'skip';
 
 /**
- * Standard check IDs per VERIFIER-SECURITY-MODEL.md (in order)
+ * Standard check IDs per VERIFIER-SECURITY-MODEL.md (in order).
+ *
+ * APPEND-ONLY CONTRACT:
+ * - New checks MUST only be appended to the end of this array.
+ * - Existing entries MUST NOT be removed, reordered, or renamed.
+ * - Downstream consumers (conformance fixtures, report builders, dashboards)
+ *   depend on stable indices and the `as const` tuple type.
+ * - Breaking this contract invalidates all existing verification reports
+ *   and conformance vectors.
+ * - Enforced by prefix-pinning test in verification-report.test.ts.
+ *
+ * OUTPUT ORDER vs EVALUATION ORDER:
+ * This array defines the report output (render) order only. Verifier
+ * implementations MAY evaluate checks in any order internally (e.g.,
+ * checking signature before discovery). The report builder normalizes
+ * results into this canonical order regardless of evaluation sequence.
+ *
+ * To add a new check:
+ * 1. Append the new ID to the end of this array.
+ * 2. Update the conformance fixture: specs/conformance/fixtures/verifier/verification-report.json
+ * 3. Update the spec: docs/specs/VERIFICATION-REPORT-FORMAT.md (Section 5.5)
+ * 4. Update the spec: docs/specs/VERIFIER-SECURITY-MODEL.md (Section 6.1)
  */
 export const CHECK_IDS = [
   'jws.parse',
@@ -205,6 +240,7 @@ export const CHECK_IDS = [
   'claims.time_window',
   'extensions.limits',
   'transport.profile_binding',
+  'policy.binding',
 ] as const;
 
 export type CheckId = (typeof CHECK_IDS)[number];
@@ -319,6 +355,16 @@ export interface VerificationResult {
   issuer?: string;
   /** Key ID used for verification (optional) */
   kid?: string;
+  /**
+   * Policy binding status (DD-49).
+   *
+   * Always 'unavailable' for Wire 0.1 receipts.
+   * Wire 0.2+ receipts with `peac.policy.digest` will report 'verified' or 'failed'.
+   *
+   * This field is ALWAYS present (never undefined). Consumers can rely on it
+   * without null checks.
+   */
+  policy_binding: PolicyBindingStatus;
 }
 
 // ---------------------------------------------------------------------------
