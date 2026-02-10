@@ -63,14 +63,14 @@ flowchart LR
 
   S -->|publish terms| P
   S -->|publish verification keys| K
-  A -->|1) discover policy| P
-  A -->|2) request (API / tool / download)| S
-  S -->|3) response (includes PEAC-Receipt header)| A
+  A -->|1. discover policy| P
+  A -->|2. request| S
+  S -->|3. response + receipt| A
   A -->|extract receipt| R
-  R -->|4) verify signature + claims| V
+  R -->|4. verify signature + claims| V
   P -.->|policy context| V
   K -.->|public keys| V
-  V -->|5) export portable evidence| B
+  V -->|5. export evidence| B
   B -->|audit / dispute / incident review| T
 
   classDef actor stroke-width:2px
