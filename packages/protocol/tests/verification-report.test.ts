@@ -200,8 +200,8 @@ describe('VerificationReportBuilder', () => {
 
       const report = builder.build();
 
-      // All checks present (11 checks total)
-      expect(report.checks.length).toBe(11);
+      // All checks present (12 checks total: 11 original + policy.binding DD-49)
+      expect(report.checks.length).toBe(12);
 
       // Check IDs in expected order
       const checkIds = report.checks.map((c) => c.id);
@@ -217,6 +217,7 @@ describe('VerificationReportBuilder', () => {
         'claims.time_window',
         'extensions.limits',
         'transport.profile_binding',
+        'policy.binding',
       ]);
 
       // First check failed, rest skipped
@@ -262,9 +263,9 @@ describe('VerificationReportBuilder', () => {
       expect(report.result.issuer).toBe('https://example.com');
       expect(report.result.kid).toBe('key-1');
 
-      // All checks passed (except optional transport.profile_binding)
+      // All checks passed (except optional transport.profile_binding and policy.binding)
       for (const check of report.checks) {
-        if (check.id === 'transport.profile_binding') {
+        if (check.id === 'transport.profile_binding' || check.id === 'policy.binding') {
           continue; // Optional, may be skip
         }
         expect(check.status).toBe('pass');
