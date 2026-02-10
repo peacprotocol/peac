@@ -1,4 +1,4 @@
-# README 10/10 Polish - Implementation Summary
+# README Improvements - Implementation Summary
 
 **Date:** 2026-02-10
 **Version:** v0.10.9
@@ -8,7 +8,7 @@
 
 ## What Was Fixed
 
-### 1. ✅ **Diagram Narrative** (Policy Discovery First)
+### 1. **Diagram Narrative** (Policy Discovery First)
 
 **Problem:** Diagram started with service publishing, not the reader's mental model (agent discovering terms).
 
@@ -29,7 +29,7 @@
 
 ---
 
-### 2. ✅ **Non-Goals Section** (Reduced Repetition)
+### 2. **Non-Goals Section** (Reduced Repetition)
 
 **Problem:** "Does not replace identity/payment/observability" repeated in 3+ sections.
 
@@ -48,7 +48,7 @@
 
 ---
 
-### 3. ✅ **Tightened Quick Start** (Node >= 20 + Verify-First)
+### 3. **Tightened Quick Start** (Node >= 20 + Verify-First)
 
 **Problem:** "Requires Node ESM or top-level await" was vague and created friction.
 
@@ -66,22 +66,22 @@
 
 ---
 
-### 4. ✅ **Fixed Credibility Claims** (No Brittle Facts)
+### 4. **Fixed Credibility Claims** (No Brittle Facts)
 
 **Removed from earlier draft:**
 
-- ❌ "3561 tests passing" - Brittle count unless CI-generated
-- ❌ "Sequential animation" - Mermaid doesn't guarantee step-by-step semantics
-- ✅ Now says: "Animated edges highlight the primary flow" (accurate)
+- REMOVED: "3561 tests passing" - Brittle count unless CI-generated
+- REMOVED: "Sequential animation" - Mermaid doesn't guarantee step-by-step semantics
+- ADDED: Now says: "Animated edges highlight the primary flow" (accurate)
 
 **Added:**
 
-- ✅ Real accessibility via `accTitle`/`accDescr` (per Mermaid docs)
-- ✅ CI badge shows live test status instead of hardcoded count
+- ADDED: Real accessibility via `accTitle`/`accDescr` (per Mermaid docs)
+- ADDED: CI badge shows live test status instead of hardcoded count
 
 ---
 
-### 5. ✅ **Universal Rendering** (SVG Fallback Pattern)
+### 5. **Universal Rendering** (SVG Fallback Pattern)
 
 **Problem:** GitHub renders Mermaid, but npm/PyPI/docs sites do not.
 
@@ -150,16 +150,16 @@
 
 ---
 
-## What Makes This 10/10
+## Key Improvements
 
-✅ **Diagram narrative** - Starts with policy discovery (PEAC's differentiator)
-✅ **Accessibility** - Real `accTitle`/`accDescr` for screen readers
-✅ **Universal rendering** - SVG fallback pattern documented
-✅ **No brittle facts** - No hardcoded test counts or unverifiable claims
-✅ **Non-goals clarity** - Single source of truth for positioning
-✅ **Tightened Quick start** - Node >= 20, verify-first path
-✅ **Reduced repetition** - Compressed disclaimers, confident tone
-✅ **Professional adaptations** - Parlant's structure, PEAC's tone (no emojis, no hype)
+- **Diagram narrative** - Starts with policy discovery (PEAC's differentiator)
+- **Accessibility** - Real `accTitle`/`accDescr` for screen readers
+- **Universal rendering** - SVG fallback pattern documented
+- **No brittle facts** - No hardcoded test counts or unverifiable claims
+- **Non-goals clarity** - Single source of truth for positioning
+- **Tightened Quick start** - Node >= 20, verify-first path
+- **Reduced repetition** - Compressed disclaimers, confident tone
+- **Professional adaptations** - Parlant's structure, PEAC's tone (no emojis, no hype)
 
 ---
 
@@ -235,10 +235,10 @@ git push origin HEAD
 
 ## Files Modified
 
-- ✏️ `README.md` - All 5 improvements applied
-- ✨ `docs/diagrams/peac-proof-flow.mmd` - Canonical Mermaid source (new)
-- ✨ `scripts/generate-diagram.sh` - SVG generation script (new)
-- ✨ `docs/diagrams/README.md` - Fallback documentation (new)
+- `README.md` - All 5 improvements applied
+- `docs/diagrams/peac-proof-flow.mmd` - Canonical Mermaid source (new)
+- `scripts/generate-diagram.sh` - SVG generation script (new)
+- `docs/diagrams/README.md` - Fallback documentation (new)
 
 ---
 
