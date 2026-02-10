@@ -1,13 +1,27 @@
-# PEAC Protocol
+<p align="center">
+  <a href="https://www.peacprotocol.org">
+    <h1 align="center">PEAC Protocol</h1>
+  </a>
+</p>
 
-**Verifiable interaction records for automated systems**
+<p align="center">
+  <strong>Verifiable interaction records for automated systems</strong>
+  <br />
+  A record is the portable interaction artifact; a receipt is the signed file format.
+</p>
 
-A record is the portable interaction artifact; a receipt is the signed file format.
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0" /></a>
+  <a href="https://github.com/peacprotocol/peac/releases"><img src="https://img.shields.io/github/v/release/peacprotocol/peac" alt="Latest Release" /></a>
+  <a href="https://www.npmjs.com/package/@peac/protocol"><img src="https://img.shields.io/npm/dm/@peac/protocol?style=flat" alt="npm downloads" /></a>
+</p>
 
-[Website](https://www.peacprotocol.org) | [Spec Index](docs/SPEC_INDEX.md) | [Discussions](https://github.com/peacprotocol/peac/discussions) | [Releases](https://github.com/peacprotocol/peac/releases)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac)](https://github.com/peacprotocol/peac/releases)
-[![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat)](https://www.npmjs.com/package/@peac/protocol)
+<p align="center">
+  <a href="https://www.peacprotocol.org">Website</a> &middot;
+  <a href="docs/SPEC_INDEX.md">Spec Index</a> &middot;
+  <a href="https://github.com/peacprotocol/peac/discussions">Discussions</a> &middot;
+  <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
+</p>
 
 **What:** PEAC standardizes a file-discoverable policy surface and a signed receipt format that make automated interactions provable -- consent, attribution, settlement references, decisions, outcomes.
 
