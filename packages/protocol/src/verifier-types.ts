@@ -214,6 +214,13 @@ export type CheckStatus = 'pass' | 'fail' | 'skip';
  *   depend on stable indices and the `as const` tuple type.
  * - Breaking this contract invalidates all existing verification reports
  *   and conformance vectors.
+ * - Enforced by prefix-pinning test in verification-report.test.ts.
+ *
+ * OUTPUT ORDER vs EVALUATION ORDER:
+ * This array defines the report output (render) order only. Verifier
+ * implementations MAY evaluate checks in any order internally (e.g.,
+ * checking signature before discovery). The report builder normalizes
+ * results into this canonical order regardless of evaluation sequence.
  *
  * To add a new check:
  * 1. Append the new ID to the end of this array.

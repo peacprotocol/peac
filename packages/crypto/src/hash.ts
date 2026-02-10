@@ -100,6 +100,48 @@ export function bytesToHex(bytes: Uint8Array): string {
 }
 
 /**
+ * Compute SHA-256 hash of data and return as base64url string
+ *
+ * Used by Wire 0.2 DigestRef format. Evidence bundles use sha256Hex() with
+ * "sha256:<hex>" prefix instead. A conversion bridge between the two formats
+ * (hex <-> base64url) is provided by hexToBase64url() and base64urlToHex().
+ *
+ * @param data - Data to hash (Uint8Array or string)
+ * @returns Base64url-encoded SHA-256 hash (43 characters)
+ */
+export async function sha256Base64url(data: Uint8Array | string): Promise<string> {
+  const hashBytes = await sha256Bytes(data);
+  return base64urlEncode(hashBytes);
+}
+
+/**
+ * Convert a hex-encoded hash to base64url encoding
+ *
+ * Bridges evidence bundle format (sha256:<hex>) to Wire 0.2 DigestRef format
+ * (base64url value). Strips the "sha256:" prefix if present.
+ *
+ * @param hex - Hex string, optionally prefixed with "sha256:"
+ * @returns Base64url-encoded bytes (43 characters for SHA-256)
+ */
+export function hexToBase64url(hex: string): string {
+  const cleanHex = hex.startsWith('sha256:') ? hex.slice(7) : hex;
+  return base64urlEncode(hexToBytes(cleanHex));
+}
+
+/**
+ * Convert a base64url-encoded hash to hex encoding
+ *
+ * Bridges Wire 0.2 DigestRef format (base64url) to evidence bundle format
+ * (hex). Does NOT add the "sha256:" prefix -- caller adds it if needed.
+ *
+ * @param b64u - Base64url-encoded hash
+ * @returns Lowercase hex string (64 characters for SHA-256)
+ */
+export function base64urlToHex(b64u: string): string {
+  return bytesToHex(base64urlDecode(b64u));
+}
+
+/**
  * JWK structure for Ed25519 public keys (minimal required fields for thumbprint)
  */
 export interface JWKThumbprintInput {

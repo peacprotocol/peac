@@ -469,6 +469,94 @@ describe('manifest structure', () => {
   });
 });
 
+describe('Bundle Path Convention (DD-49)', () => {
+  it('should store peac_txt at locked path policy/peac.txt', async () => {
+    const receipts = [createMockJws('receipt-001', 1704067200)];
+    const peacTxt = `issuer: https://api.example.com
+keys: https://api.example.com/.well-known/peac-issuer.json
+`;
+
+    const result = await createDisputeBundle({
+      dispute_ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      created_by: 'https://auditor.example.com',
+      receipts,
+      keys: mockJwks,
+      peac_txt: peacTxt,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const readResult = await readDisputeBundle(result.value);
+      expect(readResult.ok).toBe(true);
+      if (readResult.ok) {
+        // Canonical path must be policy/peac.txt (locked convention)
+        const filePaths = readResult.value.manifest.files.map((f) => f.path);
+        expect(filePaths).toContain('policy/peac.txt');
+        // Must NOT appear at any other path
+        const peacTxtPaths = filePaths.filter((p) => p.includes('peac.txt'));
+        expect(peacTxtPaths).toEqual(['policy/peac.txt']);
+      }
+    }
+  });
+
+  it('should store policy at locked path policy/policy.yaml', async () => {
+    const receipts = [createMockJws('receipt-001', 1704067200)];
+    const policy = `version: "peac-policy/0.1"
+rules:
+  - action: allow
+`;
+
+    const result = await createDisputeBundle({
+      dispute_ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      created_by: 'https://auditor.example.com',
+      receipts,
+      keys: mockJwks,
+      policy,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const readResult = await readDisputeBundle(result.value);
+      expect(readResult.ok).toBe(true);
+      if (readResult.ok) {
+        // Canonical path must be policy/policy.yaml (locked convention)
+        const filePaths = readResult.value.manifest.files.map((f) => f.path);
+        expect(filePaths).toContain('policy/policy.yaml');
+        // Must NOT appear at any other path
+        const policyPaths = filePaths.filter((p) => p.includes('policy.yaml'));
+        expect(policyPaths).toEqual(['policy/policy.yaml']);
+      }
+    }
+  });
+
+  it('should use sha256:<hex> format for peac_txt_hash and policy_hash', async () => {
+    const receipts = [createMockJws('receipt-001', 1704067200)];
+    const peacTxt = `issuer: https://api.example.com`;
+    const policy = `version: "peac-policy/0.1"`;
+
+    const result = await createDisputeBundle({
+      dispute_ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      created_by: 'https://auditor.example.com',
+      receipts,
+      keys: mockJwks,
+      peac_txt: peacTxt,
+      policy,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const readResult = await readDisputeBundle(result.value);
+      expect(readResult.ok).toBe(true);
+      if (readResult.ok) {
+        const { peac_txt_hash, policy_hash } = readResult.value.manifest;
+        // Both hashes must use sha256:<64 hex chars> format
+        expect(peac_txt_hash).toMatch(/^sha256:[a-f0-9]{64}$/);
+        expect(policy_hash).toMatch(/^sha256:[a-f0-9]{64}$/);
+      }
+    }
+  });
+});
+
 describe('deterministic content_hash', () => {
   it('should produce same content_hash for same inputs', async () => {
     const receipts = [

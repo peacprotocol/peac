@@ -11,6 +11,7 @@ import {
   buildFailureReport,
   buildSuccessReport,
 } from '../src/verification-report.js';
+import { CHECK_IDS } from '../src/verifier-types.js';
 import type { VerifierPolicy } from '../src/verifier-types.js';
 
 describe('VerificationReportBuilder', () => {
@@ -225,6 +226,135 @@ describe('VerificationReportBuilder', () => {
       for (let i = 1; i < report.checks.length; i++) {
         expect(report.checks[i].status).toBe('skip');
       }
+    });
+  });
+
+  describe('Append-Only CHECK_IDS Contract', () => {
+    /**
+     * Prefix-pinning test for the append-only CHECK_IDS contract.
+     *
+     * This test snapshots the first N check IDs known at a given version.
+     * If someone reorders, renames, or removes an entry, this test breaks.
+     * New entries MUST only be appended to the end.
+     */
+
+    // Frozen prefix: the 10 original check IDs (pre-DD-49, v0.10.9)
+    const V0_10_9_PREFIX = [
+      'jws.parse',
+      'limits.receipt_bytes',
+      'jws.protected_header',
+      'claims.schema_unverified',
+      'issuer.trust_policy',
+      'issuer.discovery',
+      'key.resolve',
+      'jws.signature',
+      'claims.time_window',
+      'extensions.limits',
+    ] as const;
+
+    // Frozen prefix: check IDs added in v0.10.10 (DD-49)
+    const V0_10_10_SUFFIX = ['transport.profile_binding', 'policy.binding'] as const;
+
+    it('should preserve v0.10.9 prefix (first 10 check IDs are frozen)', () => {
+      expect(CHECK_IDS.slice(0, V0_10_9_PREFIX.length)).toEqual([...V0_10_9_PREFIX]);
+    });
+
+    it('should preserve v0.10.10 additions at correct indices', () => {
+      const fullPrefix = [...V0_10_9_PREFIX, ...V0_10_10_SUFFIX];
+      expect(CHECK_IDS.slice(0, fullPrefix.length)).toEqual(fullPrefix);
+    });
+
+    it('should never shrink (monotonically growing)', () => {
+      // As of v0.10.10, there are 12 check IDs
+      expect(CHECK_IDS.length).toBeGreaterThanOrEqual(12);
+    });
+
+    it('should have no duplicate check IDs', () => {
+      const unique = new Set(CHECK_IDS);
+      expect(unique.size).toBe(CHECK_IDS.length);
+    });
+
+    it('should match report builder output order exactly', async () => {
+      const receipt = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJ0ZXN0In0.signature';
+      const digestHex = await computeReceiptDigest(receipt);
+
+      // Build a success report (all checks populated)
+      const builder = createReportBuilder(testPolicy).setInputWithDigest(digestHex);
+
+      for (const checkId of CHECK_IDS) {
+        if (checkId === 'transport.profile_binding' || checkId === 'policy.binding') {
+          continue; // Optional checks handled by build()
+        }
+        builder.pass(checkId);
+      }
+      builder.success('https://example.com', 'key-1');
+
+      const report = builder.build();
+      const reportCheckIds = report.checks.map((c) => c.id);
+
+      // Report output order MUST match CHECK_IDS exactly
+      expect(reportCheckIds).toEqual([...CHECK_IDS]);
+    });
+  });
+
+  describe('Policy Binding (DD-49)', () => {
+    it('should set policy_binding to unavailable on failure reports', async () => {
+      const receipt = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJ0ZXN0In0.signature';
+
+      const report = await buildFailureReport(
+        testPolicy,
+        receipt,
+        'signature_invalid',
+        'jws.signature',
+        'E_VERIFY_SIGNATURE_INVALID',
+        { reason: 'Ed25519 verification failed' }
+      );
+
+      // result.policy_binding MUST be present and 'unavailable' for Wire 0.1
+      expect(report.result.policy_binding).toBe('unavailable');
+
+      // policy.binding check MUST exist and be 'skip'
+      const policyCheck = report.checks.find((c) => c.id === 'policy.binding');
+      expect(policyCheck).toBeDefined();
+      expect(policyCheck?.status).toBe('skip');
+    });
+
+    it('should set policy_binding to unavailable on success reports', async () => {
+      const receipt = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJ0ZXN0In0.signature';
+
+      const report = await buildSuccessReport(testPolicy, receipt, 'https://example.com', 'key-1');
+
+      // result.policy_binding MUST be present and 'unavailable' for Wire 0.1
+      expect(report.result.policy_binding).toBe('unavailable');
+
+      // policy.binding check MUST exist as 'skip' with wire_01 reason
+      const policyCheck = report.checks.find((c) => c.id === 'policy.binding');
+      expect(policyCheck).toBeDefined();
+      expect(policyCheck?.status).toBe('skip');
+      expect(policyCheck?.detail).toEqual({ reason: 'wire_01_no_policy_digest' });
+    });
+
+    it('should include policy.binding check even on early failure (jws.parse)', async () => {
+      const receipt = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJ0ZXN0In0.signature';
+
+      const report = await buildFailureReport(
+        testPolicy,
+        receipt,
+        'malformed_receipt',
+        'jws.parse',
+        'E_VERIFY_MALFORMED_RECEIPT'
+      );
+
+      // All 12 checks must be present even on earliest failure
+      expect(report.checks.length).toBe(CHECK_IDS.length);
+
+      // policy.binding is the last check, should be skip (short-circuited)
+      const lastCheck = report.checks[report.checks.length - 1];
+      expect(lastCheck.id).toBe('policy.binding');
+      expect(lastCheck.status).toBe('skip');
+
+      // result.policy_binding is unavailable
+      expect(report.result.policy_binding).toBe('unavailable');
     });
   });
 
