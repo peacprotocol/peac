@@ -94,6 +94,76 @@ rules:
     }
   });
 
+  it('should include peac.txt when provided', async () => {
+    const receipts = [
+      createMockJws('receipt-001', 1704067200),
+      createMockJws('receipt-002', 1704153600),
+    ];
+
+    const peacTxt = `# peac.txt -- PEAC discovery manifest
+issuer: https://api.example.com
+keys: https://api.example.com/.well-known/peac-issuer.json
+`;
+
+    const result = await createDisputeBundle({
+      dispute_ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      created_by: 'https://auditor.example.com',
+      receipts,
+      keys: mockJwks,
+      peac_txt: peacTxt,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // Read it back to verify peac.txt is included
+      const readResult = await readDisputeBundle(result.value);
+      expect(readResult.ok).toBe(true);
+      if (readResult.ok) {
+        expect(readResult.value.peac_txt).toBe(peacTxt);
+        expect(readResult.value.manifest.peac_txt_hash).toBeDefined();
+        // peac_txt_hash should be sha256:<hex> format
+        expect(readResult.value.manifest.peac_txt_hash).toMatch(/^sha256:[a-f0-9]{64}$/);
+      }
+    }
+  });
+
+  it('should include both policy and peac_txt when both provided', async () => {
+    const receipts = [createMockJws('receipt-001', 1704067200)];
+
+    const policy = `rules:
+  - purpose: train
+    action: deny
+`;
+    const peacTxt = `issuer: https://api.example.com
+keys: https://api.example.com/.well-known/peac-issuer.json
+`;
+
+    const result = await createDisputeBundle({
+      dispute_ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      created_by: 'https://auditor.example.com',
+      receipts,
+      keys: mockJwks,
+      policy,
+      peac_txt: peacTxt,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const readResult = await readDisputeBundle(result.value);
+      expect(readResult.ok).toBe(true);
+      if (readResult.ok) {
+        expect(readResult.value.policy).toBe(policy);
+        expect(readResult.value.peac_txt).toBe(peacTxt);
+        expect(readResult.value.manifest.policy_hash).toBeDefined();
+        expect(readResult.value.manifest.peac_txt_hash).toBeDefined();
+        // Both files should be listed in manifest.files
+        const filePaths = readResult.value.manifest.files.map((f) => f.path);
+        expect(filePaths).toContain('policy/policy.yaml');
+        expect(filePaths).toContain('policy/peac.txt');
+      }
+    }
+  });
+
   it('should fail with empty receipts', async () => {
     const result = await createDisputeBundle({
       dispute_ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',

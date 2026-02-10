@@ -259,6 +259,7 @@ export async function createDisputeBundle(
     receipts,
     keys,
     policy,
+    peac_txt,
     bundle_id,
     created_at,
     signing_key,
@@ -429,6 +430,21 @@ export async function createDisputeBundle(
     });
   }
 
+  // Include peac.txt if provided (DD-49)
+  // Bundle path: policy/peac.txt (locked convention)
+  let peacTxtBytes: Buffer | undefined;
+  let peacTxtHash: string | undefined;
+
+  if (peac_txt) {
+    peacTxtBytes = Buffer.from(peac_txt, 'utf8');
+    peacTxtHash = sha256Hex(peacTxtBytes);
+    fileEntries.push({
+      path: 'policy/peac.txt',
+      sha256: peacTxtHash,
+      size: peacTxtBytes.length,
+    });
+  }
+
   // Sort files by path
   fileEntries.sort((a, b) => a.path.localeCompare(b.path));
 
@@ -455,6 +471,10 @@ export async function createDisputeBundle(
 
   if (policyHash) {
     (manifestWithoutHash as DisputeBundleManifest).policy_hash = policyHash;
+  }
+
+  if (peacTxtHash) {
+    (manifestWithoutHash as DisputeBundleManifest).peac_txt_hash = peacTxtHash;
   }
 
   // Compute content_hash = SHA-256 of JCS(manifest without content_hash)
@@ -486,6 +506,11 @@ export async function createDisputeBundle(
   // Add policy if present
   if (policyBytes) {
     zipfile.addBuffer(policyBytes, 'policy/policy.yaml', zipOptions);
+  }
+
+  // Add peac.txt if present (DD-49)
+  if (peacTxtBytes) {
+    zipfile.addBuffer(peacTxtBytes, 'policy/peac.txt', zipOptions);
   }
 
   // Add bundle.sig if signing key is provided
@@ -930,6 +955,28 @@ function processExtractedFiles(
     }
   }
 
+  // Extract peac.txt if present (DD-49)
+  let peacTxtContent: string | undefined;
+  const peacTxtBuffer = files.get('policy/peac.txt');
+  if (peacTxtBuffer) {
+    peacTxtContent = peacTxtBuffer.toString('utf8');
+
+    // Verify peac.txt hash if declared
+    if (manifest.peac_txt_hash) {
+      const computedPeacTxtHash = sha256Hex(peacTxtBuffer);
+      if (computedPeacTxtHash !== manifest.peac_txt_hash) {
+        resolve({
+          ok: false,
+          error: bundleError(BundleErrorCodes.POLICY_HASH_MISMATCH, 'peac.txt hash mismatch', {
+            expected: manifest.peac_txt_hash,
+            computed: computedPeacTxtHash,
+          }),
+        });
+        return;
+      }
+    }
+  }
+
   // Extract bundle.sig if present
   let bundleSig: string | undefined;
   const sigBuffer = files.get('bundle.sig');
@@ -944,6 +991,7 @@ function processExtractedFiles(
       receipts,
       keys,
       policy: policyContent,
+      peac_txt: peacTxtContent,
       bundle_sig: bundleSig,
     },
   });
