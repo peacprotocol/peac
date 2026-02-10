@@ -1,0 +1,40 @@
+%%{init: {'theme':'neutral'} }%%
+flowchart LR
+  accTitle: PEAC proof flow
+  accDescr: Agent discovers policy, makes a request, receives a signed receipt, verifier checks it offline, and exports an evidence bundle.
+
+  A["Client / AI agent"]:::actor
+  S["Service / API (issuer)"]:::actor
+  V["Offline verifier"]:::actor
+  T["Third party (audit / dispute)"]:::actor
+
+  P["Policy<br/>/.well-known/peac.txt"]:::artifact
+  K["Issuer keys<br/>/.well-known/peac-issuer.json (JWKS)"]:::artifact
+  R["Receipt<br/>JWS (typ: peac-receipt/0.1)<br/>HTTP: PEAC-Receipt: &lt;jws&gt;"]:::artifact
+  B["Dispute Bundle<br/>ZIP (peac-bundle/0.1)<br/>receipts + policy + report"]:::evidence
+
+  %% Setup (out of band)
+  S -->|publish terms| P
+  S -->|publish verification keys| K
+
+  %% Runtime (per interaction)
+  A d1@-->|1) discover policy| P
+  A r2@-->|2) request (API / tool / download)| S
+  S s3@-->|3) response (includes PEAC-Receipt header)| A
+  A x3@-->|extract receipt| R
+  R v4@-->|4) verify signature + claims| V
+  P -.->|policy context| V
+  K -.->|public keys| V
+  V e5@-->|5) export portable evidence| B
+  B -->|audit / dispute / incident review| T
+
+  %% Animate the narrative edges
+  d1@{ animate: true, animation: slow }
+  r2@{ animate: true, animation: slow }
+  s3@{ animate: true, animation: slow }
+  v4@{ animate: true, animation: slow }
+  e5@{ animate: true, animation: slow }
+
+  classDef actor stroke-width:2px
+  classDef artifact stroke-width:2px
+  classDef evidence stroke-width:2px
