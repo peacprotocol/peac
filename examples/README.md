@@ -4,15 +4,16 @@ Canonical examples demonstrating PEAC Protocol integration patterns.
 
 ## Examples
 
-| Example                                   | Description                                      |
-| ----------------------------------------- | ------------------------------------------------ |
-| [x402-node-server](./x402-node-server/)   | x402 HTTP 402 payment flow with PEAC receipts    |
-| [pay-per-inference](./pay-per-inference/) | Agent handles 402, obtains receipt, retries      |
-| [pay-per-crawl](./pay-per-crawl/)         | Policy evaluation + receipt flow for AI crawlers |
-| [rsl-collective](./rsl-collective/)       | RSL integration and core claims parity           |
-| [mcp-tool-call](./mcp-tool-call/)         | MCP paid tools with budget enforcement           |
-| [telemetry-otel](./telemetry-otel/)       | OpenTelemetry integration with privacy modes     |
-| [erc8004-feedback](./erc8004-feedback/)   | PEAC records as ERC-8004 reputation evidence     |
+| Example                                   | Description                                        |
+| ----------------------------------------- | -------------------------------------------------- |
+| [x402-node-server](./x402-node-server/)   | x402 HTTP 402 payment flow with PEAC receipts      |
+| [pay-per-inference](./pay-per-inference/) | Agent handles 402, obtains receipt, retries        |
+| [pay-per-crawl](./pay-per-crawl/)         | Policy evaluation + receipt flow for AI crawlers   |
+| [rsl-collective](./rsl-collective/)       | RSL integration and core claims parity             |
+| [mcp-tool-call](./mcp-tool-call/)         | MCP paid tools with budget enforcement             |
+| [telemetry-otel](./telemetry-otel/)       | OpenTelemetry integration with privacy modes       |
+| [erc8004-feedback](./erc8004-feedback/)   | PEAC records as ERC-8004 reputation evidence       |
+| [openclaw-capture](./openclaw-capture/)   | OpenClaw tool calls as signed interaction evidence |
 
 ## Prerequisites
 

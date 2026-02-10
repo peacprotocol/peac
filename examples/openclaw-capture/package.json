@@ -1,0 +1,20 @@
+{
+  "name": "@peac/example-openclaw-capture",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Capture OpenClaw tool calls as signed PEAC interaction evidence receipts",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/adapter-openclaw": "workspace:*",
+    "@peac/capture-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
