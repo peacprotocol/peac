@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Verifiable interaction records for automated systems</strong>
+  <strong>Verifiable interaction records for AI agents and automated systems</strong>
   <br />
   A record is the portable interaction artifact; a receipt is the signed file format.
 </p>
@@ -23,11 +23,11 @@
   <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
 </p>
 
-**What:** PEAC standardizes a file-discoverable policy surface and a signed receipt format that make automated interactions provable -- consent, attribution, settlement references, decisions, outcomes.
+**What:** PEAC standardizes a file-discoverable policy surface and a signed receipt format that make automated interactions provable: consent, attribution, settlement references, decisions, outcomes.
 
-**Who:** APIs, gateways, tool servers, agent platforms, and compliance/security teams operating automated traffic across org boundaries.
+**Who:** AI agents and agent platforms, APIs, gateways, tool servers, and compliance/security teams operating automated traffic across org boundaries.
 
-**Why:** Internal logs are not neutral proof and integrations do not interoperate. PEAC makes terms machine-readable and outcomes verifiable, without replacing your auth, rails, or observability.
+**Why:** Internal logs don't travel and aren't neutral proof. PEAC makes terms machine-readable and outcomes verifiable, without replacing your auth, rails, or observability.
 
 HTTP/REST is the primary binding today (receipt header + well-known policy). MCP mapping is implemented; A2A and streaming bindings are specified/planned. Verification is offline and deterministic.
 
@@ -57,6 +57,7 @@ flowchart LR
 - HTTP APIs (paid or permissioned), tool invocations, dataset downloads, long-running sessions
 - Cross-org audit evidence (security, compliance, billing disputes)
 - Crawls, indexing, and AI training access with verifiable terms
+- Safety, incident response, and governance workflows that need verifiable evidence (what terms applied, what was requested, what happened)
 
 PEAC is the evidence layer. It does not replace identity, payment, or observability systems:
 
@@ -66,6 +67,18 @@ PEAC is the evidence layer. It does not replace identity, payment, or observabil
 - **Payment rails** move funds. PEAC records settlement references and makes outcomes verifiable.
 
 This repository contains the **reference TypeScript implementation** and a **Go SDK** ([sdks/go/](sdks/go/)).
+
+---
+
+## Principles
+
+- **Neutral by design:** PEAC does not replace identity, payment rails, or observability. It records what happened in a portable format.
+- **Offline-verifiable:** Verification is deterministic and can run without network access.
+- **Interoperable:** Works alongside HTTP and MCP today; A2A and streaming bindings are specified/planned.
+- **Privacy-aware:** Receipts are structured for auditability while supporting minimization and selective disclosure via bundles.
+- **Open source:** Apache-2.0 licensed, designed for multiple independent implementations.
+
+PEAC produces portable, verifiable evidence that can feed AI safety reviews, incident response, and governance workflows.
 
 ---
 
