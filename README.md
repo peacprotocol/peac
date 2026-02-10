@@ -51,15 +51,15 @@ HTTP/REST is the primary binding today (receipt header + well-known policy). MCP
 ```mermaid
 %%{init: {'theme':'neutral'} }%%
 flowchart LR
-  A["Client / AI agent"]:::actor
-  S["Service / API (issuer)"]:::actor
-  V["Offline verifier"]:::actor
-  T["Third party (audit / dispute)"]:::actor
+  A["Client / AI agent"]
+  S["Service / API (issuer)"]
+  V["Offline verifier"]
+  T["Third party (audit / dispute)"]
 
-  P["Policy<br/>/.well-known/peac.txt"]:::artifact
-  K["Issuer keys<br/>/.well-known/peac-issuer.json (JWKS)"]:::artifact
-  R["Receipt<br/>JWS (typ: peac-receipt/0.1)<br/>HTTP: PEAC-Receipt: &lt;jws&gt;"]:::artifact
-  B["Dispute Bundle<br/>ZIP (peac-bundle/0.1)<br/>receipts + policy + report"]:::evidence
+  P["Policy<br/>/.well-known/peac.txt"]
+  K["Issuer keys<br/>/.well-known/peac-issuer.json (JWKS)"]
+  R["Receipt<br/>JWS (typ: peac-receipt/0.1)<br/>HTTP: PEAC-Receipt: &lt;jws&gt;"]
+  B["Dispute Bundle<br/>ZIP (peac-bundle/0.1)<br/>receipts + policy + report"]
 
   S -->|publish terms| P
   S -->|publish verification keys| K
@@ -76,6 +76,9 @@ flowchart LR
   classDef actor stroke-width:2px
   classDef artifact stroke-width:2px
   classDef evidence stroke-width:2px
+  class A,S,V,T actor
+  class P,K,R artifact
+  class B evidence
 ```
 
 **The proof flow (per interaction):**
