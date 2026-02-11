@@ -1,6 +1,6 @@
 {
   "name": "@peac/app-bridge",
-  "version": "0.10.2",
+  "version": "0.10.10",
   "description": "PEAC Protocol Bridge - Local development sidecar",
   "type": "module",
   "main": "dist/server.js",
@@ -55,6 +55,6 @@
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }

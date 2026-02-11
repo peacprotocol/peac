@@ -1,6 +1,6 @@
 {
   "name": "@peac/app-verifier",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "PEAC Protocol Browser Verifier - Client-side receipt verification",
   "type": "module",
   "private": true,
@@ -27,6 +27,6 @@
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }

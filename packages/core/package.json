@@ -1,6 +1,6 @@
 {
   "name": "@peac/core",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "DEPRECATED - Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead",
   "type": "module",
   "homepage": "https://www.peacprotocol.org",
@@ -71,6 +71,6 @@
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@peac/receipts",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "PEAC Protocol receipt builders, parsers, and validators with CBOR support",
   "type": "module",
   "main": "dist/index.js",
@@ -69,6 +69,6 @@
   },
   "homepage": "https://github.com/peacprotocol/peac#readme",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }

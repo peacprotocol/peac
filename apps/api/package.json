@@ -1,6 +1,6 @@
 {
   "name": "@peac/app-api",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "PEAC Protocol API server with OpenAPI 3.1, RFC 9457 Problem Details, and content negotiation",
   "type": "module",
   "main": "dist/index.js",
@@ -61,6 +61,6 @@
   "author": "PEAC Protocol",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }
