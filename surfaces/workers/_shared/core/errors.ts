@@ -13,7 +13,7 @@ import {
   CANONICAL_TITLES,
   PROBLEM_TYPE_BASE,
   type PeacErrorCode,
-} from '../../../_shared/contracts/index.js';
+} from '@peac/contracts';
 import type { ProblemDetails } from './types.js';
 
 // Re-export canonical error codes for convenience

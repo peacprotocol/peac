@@ -27,7 +27,7 @@
     "typescript": "^5.3.3",
     "tsx": "^4.7.0",
     "tsup": "^8.0.0",
-    "vitest": "^1.1.0"
+    "vitest": "^4.0.0"
   },
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
   "license": "Apache-2.0",

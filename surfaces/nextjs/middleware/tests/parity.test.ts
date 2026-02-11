@@ -13,7 +13,7 @@ import {
   CANONICAL_TITLES,
   PROBLEM_TYPE_BASE,
   MODE_BEHAVIOR,
-} from '../../../_shared/contracts/index.js';
+} from '@peac/contracts';
 
 describe('Surface Parity - Error Codes', () => {
   it('should export all canonical error codes', () => {

@@ -49,7 +49,7 @@
     "@types/yauzl": "^2.10.3",
     "@types/yazl": "^2.4.5",
     "typescript": "^5.3.3",
-    "vitest": "^1.6.0",
+    "vitest": "^4.0.0",
     "tsup": "^8.0.0"
   },
   "publishConfig": {
