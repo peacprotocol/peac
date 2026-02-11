@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.10] - 2026-02-11
+
+### Dev Toolchain Modernization
+
+v0.10.10 upgrades the entire dev toolchain to current majors and bumps the
+Node.js baseline to 22 LTS. No runtime, API, or wire format changes.
+
+### Changed
+
+- **Turbo v1 -> v2** (`turbo ^2.8.0`)
+  - `pipeline` renamed to `tasks` in turbo.json
+  - Strict env mode is now the default
+- **Vitest v1 -> v4** (`vitest ^4.0.0`)
+  - Unified all 38 workspace packages from mixed v1/v2/v3 to ^4.0.0
+  - Vite bumped to ^6.0.0 in app-verifier (required by vitest v4)
+- **ESLint v8 -> v10** with flat config (`eslint ^10.0.0`)
+  - Migrated from `.eslintrc.json` to `eslint.config.mjs` (flat config)
+  - Replaced `@typescript-eslint/eslint-plugin` + `@typescript-eslint/parser`
+    with unified `typescript-eslint` (^8.55.0)
+  - Added `@eslint/js` (^10.0.0) and `globals` (^17.0.0)
+  - Removed vestigial ESLint devDeps from 4 package-level package.json files
+  - Removed `lint:ts` script (TS parser now configured in flat config)
+  - Fixed 6 `preserve-caught-error` violations (new v10 recommended rule)
+- **dependency-cruiser v16 -> v17** (`dependency-cruiser ^17.3.0`)
+  - v17 config format is backward-compatible; no `.dependency-cruiser.json` changes
+- **Node.js baseline: 20 -> 22 LTS**
+  - `engines.node` bumped to `>=22.0.0` across all packages
+  - CI now runs on Node 22 (was 20.19)
+  - Node 20 reaches EOL on 2026-04-30
+
+### Added
+
+- **Dual ESM/CJS output** (from #332, post-v0.10.9)
+  - All 20 published packages now ship `.mjs` (ESM) and `.cjs` (CJS) via tsup
+  - Schema subpath exports with round-trip tests
+  - Pack-smoke and bench scripts
+- **DD-49 policy binding precursors** (from #343, post-v0.10.9)
+  - `PolicyBindingStatus` type and `policy.binding` check #12
+  - `policy_binding` required on `VerificationResult` (always `'unavailable'` in Wire 0.1)
+  - Evidence bundle options: `peac_txt`, `peac_txt_hash` manifest field
+  - Crypto bridge functions and 9 conformance vectors
+- **OpenClaw quickstart example** (from #351, post-v0.10.9)
+  - `examples/openclaw-capture/` demonstrating interaction evidence capture
+
+### Fixed
+
+- **Mermaid diagrams** -- fixed GitHub rendering issues (#346, #348, #349)
+- **ESLint `preserve-caught-error`** -- 6 re-thrown errors now preserve cause chain
+  via `{ cause: err }` (apps/api, apps/bridge, packages/protocol, packages/discovery)
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- No runtime dependency changes
+- No API surface changes
+
 ## [0.10.9] - 2026-02-07
 
 ### Foundation Hardening -- Architecture, CI, and Server Reliability

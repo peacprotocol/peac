@@ -2,7 +2,7 @@
 
 **Status**: NORMATIVE
 
-**Version**: 0.10.0
+**Version**: 0.10.10
 
 **Wire Format**: `peac-receipt/0.1`
 
