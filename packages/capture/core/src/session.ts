@@ -256,7 +256,6 @@ export class DefaultCaptureSession implements CaptureSession {
   private stripPayloadBytes(
     action: CapturedAction
   ): Omit<CapturedAction, 'input_bytes' | 'output_bytes'> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { input_bytes, output_bytes, ...rest } = action;
     return rest;
   }

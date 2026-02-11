@@ -37,7 +37,7 @@ for (const { filter, file } of packages) {
       { cwd: ROOT, stdio: 'inherit', timeout: 120_000 }
     );
     console.log(`  Output: ${outPath}\n`);
-  } catch (err) {
+  } catch (_err) {
     console.error(`  FAILED: ${filter}`);
     hasErrors = true;
   }

@@ -55,7 +55,7 @@ function loadAllSchemas() {
     if (schema.$id) {
       try {
         ajv.addSchema(schema);
-      } catch (e) {
+      } catch (_e) {
         // Schema might already be added, ignore
       }
     }

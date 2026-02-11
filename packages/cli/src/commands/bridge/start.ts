@@ -30,7 +30,7 @@ export function startCommand() {
       };
 
       // Prefer resolved module path (works for workspace install)
-      let bridgePath = null;
+      let bridgePath: string | null = null;
       try {
         bridgePath = require.resolve('@peac/app-bridge/dist/server.js', { paths: [process.cwd()] });
       } catch {

@@ -155,7 +155,8 @@ export async function fetchIssuerConfig(issuerUrl: string): Promise<PEACIssuerCo
     throw new Error(
       `Failed to fetch issuer config from ${issuerUrl}: ${
         err instanceof Error ? err.message : String(err)
-      }`
+      }`,
+      { cause: err }
     );
   }
 }
@@ -367,7 +368,8 @@ export async function fetchPolicyManifest(baseUrl: string): Promise<PEACPolicyMa
     throw new Error(
       `Failed to fetch policy manifest from ${baseUrl}: ${
         err instanceof Error ? err.message : String(err)
-      }`
+      }`,
+      { cause: err }
     );
   }
 }
@@ -463,7 +465,8 @@ export async function fetchDiscovery(issuerUrl: string): Promise<PEACDiscovery> 
     throw new Error(
       `Failed to fetch discovery from ${issuerUrl}: ${
         err instanceof Error ? err.message : String(err)
-      }`
+      }`,
+      { cause: err }
     );
   }
 }
