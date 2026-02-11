@@ -6,11 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  CANONICAL_ERROR_CODES,
-  CANONICAL_STATUS_MAPPINGS,
-  MODE_BEHAVIOR,
-} from '../../../_shared/contracts/index.js';
+import { CANONICAL_ERROR_CODES, CANONICAL_STATUS_MAPPINGS, MODE_BEHAVIOR } from '@peac/contracts';
 import { ErrorCodes, createProblemDetails } from '../src/errors.js';
 
 describe('Error Code Parity', () => {
