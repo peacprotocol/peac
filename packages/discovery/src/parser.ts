@@ -116,7 +116,7 @@ function parsePublicKeys(content: string): PublicKeyInfo[] {
 }
 
 /** Characters that break peac.txt wire format: quotes, colons, brackets, control chars */
-const UNSAFE_FIELD_CHARS = /["\n\r\x00-\x1f:\[\]]/;
+const UNSAFE_FIELD_CHARS = /["\n\r\x00-\x1f:[\]]/;
 
 function assertSafeFieldValue(value: string, fieldName: string): void {
   if (UNSAFE_FIELD_CHARS.test(value)) {

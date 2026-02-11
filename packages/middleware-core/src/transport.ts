@@ -41,7 +41,6 @@ function validatePointerUrl(url: string): void {
   }
 
   // Control characters are never valid in headers
-  // eslint-disable-next-line no-control-regex
   if (/[\x00-\x1f\x7f]/.test(url)) {
     throw new Error('Pointer URL contains control characters');
   }

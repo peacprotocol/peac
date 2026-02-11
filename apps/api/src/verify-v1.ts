@@ -74,7 +74,8 @@ function loadTrustedIssuers(): TrustedIssuerEntry[] {
     parsed = JSON.parse(raw);
   } catch (err) {
     throw new Error(
-      `PEAC_TRUSTED_ISSUERS_JSON is not valid JSON: ${err instanceof Error ? err.message : String(err)}`
+      `PEAC_TRUSTED_ISSUERS_JSON is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err }
     );
   }
 

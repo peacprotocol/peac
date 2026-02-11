@@ -16,7 +16,9 @@ async function loadCore() {
   try {
     // @ts-expect-error @peac/core is deprecated, use @peac/protocol
     return await import('@peac/core');
-  } catch {}
+  } catch {
+    /* fallback below */
+  }
 
   // 2) Workspace package root (Node resolves via package.json "exports")
   try {
@@ -24,7 +26,9 @@ async function loadCore() {
     const pkgRoot = new URL('../packages/core/', import.meta.url);
     console.log('Loading @peac/core from workspace package root');
     return await import(pkgRoot.href);
-  } catch {}
+  } catch {
+    /* fallback below */
+  }
 
   // 3) TS source (no build needed; tsx compiles it)
   console.log('Fallback: Loading @peac/core from TypeScript source');

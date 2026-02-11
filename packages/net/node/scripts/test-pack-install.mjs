@@ -363,7 +363,7 @@ console.log('\\nAll import tests passed!');
       stdio: 'inherit',
     });
     pass('All import tests passed');
-  } catch (e) {
+  } catch (_e) {
     fail('Import tests failed');
   }
 
@@ -389,11 +389,11 @@ console.log('\\nAll import tests passed!');
   // Cleanup on error
   try {
     rmSync(tempPackDir, { recursive: true, force: true });
-  } catch {}
+  } catch { /* cleanup best-effort */ }
   if (testProjectDir) {
     try {
       rmSync(testProjectDir, { recursive: true, force: true });
-    } catch {}
+    } catch { /* cleanup best-effort */ }
   }
 
   process.exit(1);

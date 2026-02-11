@@ -125,7 +125,9 @@ async function fetchJWKS(issuerUrl: string): Promise<JWKS> {
 
     return jwks;
   } catch (err) {
-    throw new Error(`JWKS fetch failed: ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(`JWKS fetch failed: ${err instanceof Error ? err.message : String(err)}`, {
+      cause: err,
+    });
   }
 }
 

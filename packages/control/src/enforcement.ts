@@ -233,13 +233,14 @@ export function enforceConstraint(
     case 'combined':
       return enforceCombinedConstraint(mandate, state, requestedAmount, currentTime);
 
-    default:
+    default: {
       // TypeScript exhaustiveness check
       const _exhaustive: never = mandate;
       return {
         allowed: false,
         reason: `Unknown mandate type: ${(_exhaustive as any).type}`,
       };
+    }
   }
 }
 

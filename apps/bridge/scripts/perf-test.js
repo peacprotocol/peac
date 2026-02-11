@@ -47,7 +47,7 @@ class PerformanceValidator {
       }
       console.log('Bridge started successfully');
     } catch (error) {
-      throw new Error(`Failed to start bridge: ${error.message}`);
+      throw new Error(`Failed to start bridge: ${error.message}`, { cause: error });
     }
   }
 

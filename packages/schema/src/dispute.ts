@@ -895,7 +895,6 @@ export function transitionDisputeState(
   const now = new Date().toISOString();
 
   // Destructure to separate resolution from other evidence fields
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { resolution: _existingResolution, ...evidenceWithoutResolution } = dispute.evidence;
 
   // Build updated evidence: start without resolution, add back only if terminal
