@@ -11,6 +11,7 @@
     "**/node_modules/**",
     "apps/api/src/**/*.test.js",
     "archive/**",
+    "paper/**",
     "packages/sdk-js/src/**/*.test.js",
     "packages/sdk-js/tests/**"
   ]
