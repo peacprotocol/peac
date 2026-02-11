@@ -34,7 +34,8 @@ Node.js baseline to 22 LTS. No runtime, API, or wire format changes.
   - v17 config format is backward-compatible; no `.dependency-cruiser.json` changes
 - **Node.js baseline: 20 -> 22 LTS**
   - `engines.node` bumped to `>=22.0.0` across all packages
-  - CI now runs on Node 22 (was 20.19)
+  - `.node-version` file added (22.22.0) as single source of truth
+  - All CI workflows now use `node-version-file` instead of hardcoded versions
   - Node 20 reaches EOL on 2026-04-30
 
 ### Added
