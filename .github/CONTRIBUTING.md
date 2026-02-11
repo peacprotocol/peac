@@ -10,7 +10,8 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ### Prerequisites
 
-- Node.js 22+ with pnpm 9+
+- Node.js >= 22.0.0 (pinned in `.node-version`; Node 20 EOL is 2026-04-30)
+- pnpm >= 8.0.0
 - Git with proper configuration
 
 ### Local Development

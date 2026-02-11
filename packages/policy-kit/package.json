@@ -1,6 +1,6 @@
 {
   "name": "@peac/policy-kit",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "PEAC Policy Kit - deterministic policy evaluation for CAL semantics",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

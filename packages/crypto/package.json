@@ -1,6 +1,6 @@
 {
   "name": "@peac/crypto",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "Ed25519 JWS signing and verification for PEAC protocol",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

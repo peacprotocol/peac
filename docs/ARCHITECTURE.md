@@ -1,6 +1,6 @@
 # PEAC Protocol Architecture
 
-**Version:** 0.9.18
+**Version:** 0.10.10
 **Status:** Authoritative
 
 This document describes the kernel-first architecture of the PEAC Protocol monorepo.
@@ -315,6 +315,7 @@ interface PaymentEvidence {
 
 | Version | Date       | Changes                                                        |
 | ------- | ---------- | -------------------------------------------------------------- |
+| 0.10.10 | 2026-02-11 | Dev toolchain modernization, Node 22 baseline                  |
 | 0.9.18  | 2025-12-19 | TAP, HTTP signatures, surfaces, examples, schema normalization |
 | 0.9.17  | 2025-12-14 | x402 v2, Policy Kit, RSL alignment, subject binding            |
 | 0.9.16  | 2025-12-07 | CAL semantics, PaymentEvidence, SubjectProfile                 |

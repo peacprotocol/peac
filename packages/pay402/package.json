@@ -1,6 +1,6 @@
 {
   "name": "@peac/pay402",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "Generic HTTP 402 adapter with multi-rail payment negotiation",
   "type": "module",
   "main": "dist/index.js",
@@ -63,6 +63,6 @@
   },
   "homepage": "https://github.com/peacprotocol/peac#readme",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }
