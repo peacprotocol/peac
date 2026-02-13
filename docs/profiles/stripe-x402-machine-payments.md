@@ -163,6 +163,15 @@ fromCryptoPaymentIntent(intent, {
 For privacy-critical deployments, also omit `recipient` from the input intent
 to prevent transaction graph analysis.
 
+**Design note: why `passthrough` instead of `hash`.** An earlier design
+considered a `'hash'` policy that would SHA-256 metadata values before
+inclusion. This was rejected because hashing low-entropy strings (short
+agent IDs, tool names, boolean flags) is trivially reversible by
+exhaustive guessing. A hash that looks private but isn't is worse than
+plaintext that's clearly visible -- it creates a false sense of
+anonymization. Use `'allowlist'` to include only the keys you need, or
+`'omit'` to exclude metadata entirely.
+
 ## Trust Model
 
 A PEAC receipt with Stripe evidence is an **issuer attestation** -- the receipt
