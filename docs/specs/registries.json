@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "./registries.schema.json",
   "version": "0.3.0",
   "payment_rails": [
     {

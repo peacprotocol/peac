@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.peacprotocol.org/schemas/registries/0.3/registries.schema.json",
+  "title": "PEAC Registries",
+  "description": "Schema for docs/specs/registries.json. Validated by scripts/lint-schemas.mjs.",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "payment_rails": { "$ref": "#/$defs/registryArray" },
+    "control_engines": { "$ref": "#/$defs/registryArray" },
+    "transport_methods": { "$ref": "#/$defs/registryArray" },
+    "agent_protocols": { "$ref": "#/$defs/registryArray" },
+    "orchestration_frameworks": { "$ref": "#/$defs/registryArray" },
+    "extension_keys": { "$ref": "#/$defs/registryArray" },
+    "attestation_types": { "$ref": "#/$defs/registryArray" },
+    "toolcall_op_types": { "$ref": "#/$defs/advisoryRegistry" },
+    "toolcall_resource_types": { "$ref": "#/$defs/advisoryRegistry" },
+    "_governance": {
+      "type": "object",
+      "description": "Governance metadata for each registry"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "registryEntry": {
+      "type": "object",
+      "required": ["id", "category", "description", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "null" }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["informational", "stable", "deprecated"]
+        },
+        "introduced": { "type": "string" },
+        "deprecated_since": { "type": "string" },
+        "deprecated_by": { "type": "string" },
+        "sunset_version": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "registryArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/registryEntry" }
+    },
+    "advisoryRegistry": {
+      "type": "object",
+      "required": ["_advisory", "entries"],
+      "properties": {
+        "_advisory": {
+          "type": "string",
+          "description": "Non-normative disclaimer"
+        },
+        "entries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/registryEntry" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
