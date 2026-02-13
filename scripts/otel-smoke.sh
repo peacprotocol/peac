@@ -65,14 +65,13 @@ for i in "${!PKG_NAMES[@]}"; do
     exit 1
   fi
   cd "$pkg_dir"
-  # Count tarballs before packing so we can find the new one
-  before_count=$(ls -1 "$TEMP_DIR"/*.tgz 2>/dev/null | wc -l)
+  # Snapshot tarballs before packing, then take set difference
+  before=$(ls -1 "$TEMP_DIR"/*.tgz 2>/dev/null || true)
   pnpm pack --pack-destination "$TEMP_DIR"
-  # Find the newest .tgz (the one we just packed)
-  tarball=$(ls -1t "$TEMP_DIR"/*.tgz 2>/dev/null | head -1)
-  after_count=$(ls -1 "$TEMP_DIR"/*.tgz 2>/dev/null | wc -l)
-  if [ -z "$tarball" ] || [ "$after_count" -le "$before_count" ]; then
-    echo "FAIL: Tarball not found for $pkg"
+  after=$(ls -1 "$TEMP_DIR"/*.tgz 2>/dev/null || true)
+  tarball=$(comm -13 <(echo "$before") <(echo "$after"))
+  if [ -z "$tarball" ] || [ "$(echo "$tarball" | wc -l)" -ne 1 ]; then
+    echo "FAIL: Expected exactly 1 new tarball for $pkg, got: $tarball"
     echo "Contents of $TEMP_DIR:"
     ls -la "$TEMP_DIR"
     exit 1

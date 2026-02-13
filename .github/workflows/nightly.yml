@@ -20,7 +20,8 @@ jobs:
       - name: Enable Corepack
         run: |
           corepack enable
-          corepack prepare "$(node -p "require(require('path').join(process.env.GITHUB_WORKSPACE,'package.json')).packageManager")" --activate
+          PM="$(node -p "require(require('path').join(process.env.GITHUB_WORKSPACE,'package.json')).packageManager")"
+          corepack prepare "$PM" --activate
           pnpm --version
 
       - name: Setup pnpm
@@ -113,7 +114,8 @@ jobs:
       - name: Enable Corepack
         run: |
           corepack enable
-          corepack prepare "$(node -p "require(require('path').join(process.env.GITHUB_WORKSPACE,'package.json')).packageManager")" --activate
+          PM="$(node -p "require(require('path').join(process.env.GITHUB_WORKSPACE,'package.json')).packageManager")"
+          corepack prepare "$PM" --activate
           pnpm --version
 
       - name: Setup pnpm
