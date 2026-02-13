@@ -48,6 +48,28 @@ export default [
     },
   },
 
+  // --- @peac/crypto: restrict direct @noble/ed25519 imports ---
+  // All noble usage must go through the async-only wrapper (src/ed25519.ts).
+  // The wrapper itself and test files are exempt.
+  {
+    files: ['packages/crypto/src/**/*.ts'],
+    ignores: ['packages/crypto/src/ed25519.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@noble/ed25519',
+              message:
+                'Import from ./ed25519.js instead. Direct @noble/ed25519 imports bypass the async-only wrapper.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // --- Test files: add test globals ---
   {
     files: [

@@ -3,7 +3,12 @@
  * Implements peac-receipt/0.1 wire format
  */
 
-import * as ed25519 from '@noble/ed25519';
+import {
+  sign as ed25519Sign,
+  verify as ed25519Verify,
+  getPublicKey,
+  randomSecretKey,
+} from './ed25519.js';
 import { PEAC_WIRE_TYP, PEAC_ALG } from '@peac/schema';
 import {
   base64urlEncode,
@@ -60,7 +65,7 @@ export async function sign(payload: unknown, privateKey: Uint8Array, kid: string
   const signingInputBytes = new TextEncoder().encode(signingInput);
 
   // Sign with Ed25519
-  const signatureBytes = await ed25519.signAsync(signingInputBytes, privateKey);
+  const signatureBytes = await ed25519Sign(signingInputBytes, privateKey);
 
   // Encode signature
   const signatureB64 = base64urlEncode(signatureBytes);
@@ -124,7 +129,7 @@ export async function verify<T = unknown>(
   const signingInput = `${headerB64}.${payloadB64}`;
   const signingInputBytes = new TextEncoder().encode(signingInput);
 
-  const valid = await ed25519.verifyAsync(signatureBytes, signingInputBytes, publicKey);
+  const valid = await ed25519Verify(signatureBytes, signingInputBytes, publicKey);
 
   return {
     header,
@@ -168,8 +173,8 @@ export async function generateKeypair(): Promise<{
   privateKey: Uint8Array;
   publicKey: Uint8Array;
 }> {
-  const privateKey = ed25519.utils.randomPrivateKey();
-  const publicKey = await ed25519.getPublicKeyAsync(privateKey);
+  const privateKey = randomSecretKey();
+  const publicKey = await getPublicKey(privateKey);
 
   return { privateKey, publicKey };
 }
@@ -200,7 +205,7 @@ export async function derivePublicKey(privateKey: Uint8Array): Promise<Uint8Arra
   if (privateKey.length !== 32) {
     throw new CryptoError('CRYPTO_INVALID_KEY_LENGTH', 'Ed25519 private key must be 32 bytes');
   }
-  return ed25519.getPublicKeyAsync(privateKey);
+  return getPublicKey(privateKey);
 }
 
 /**
@@ -250,7 +255,7 @@ export async function validateKeypair(jwk: Ed25519PrivateJwk): Promise<boolean> 
   }
 
   // Derive the actual public key from the private key
-  const derivedPublicKeyBytes = await ed25519.getPublicKeyAsync(privateKeyBytes);
+  const derivedPublicKeyBytes = await getPublicKey(privateKeyBytes);
 
   // Compare derived public key with declared public key
   if (derivedPublicKeyBytes.length !== declaredPublicKeyBytes.length) {

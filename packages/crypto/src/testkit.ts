@@ -10,7 +10,7 @@
  * tree-shake this module away since it's a separate export path.
  */
 
-import * as ed25519 from '@noble/ed25519';
+import { getPublicKey } from './ed25519.js';
 import { CryptoError } from './errors.js';
 
 /**
@@ -46,7 +46,7 @@ export async function generateKeypairFromSeed(seed: Uint8Array): Promise<{
   // In Ed25519, the private key IS the seed (32 bytes)
   // The public key is derived from it
   const privateKey = seed;
-  const publicKey = await ed25519.getPublicKeyAsync(privateKey);
+  const publicKey = await getPublicKey(privateKey);
 
   return { privateKey, publicKey };
 }

@@ -165,6 +165,43 @@ describe('Ed25519 JWS', () => {
 });
 
 /**
+ * Noble Ed25519 v3 async-only regression guard
+ *
+ * In @noble/ed25519 v3, sync methods (sign, verify, getPublicKey) require
+ * explicit hash configuration. PEAC uses only async methods (signAsync,
+ * verifyAsync, getPublicKeyAsync) which use built-in Web Crypto and need
+ * no configuration. This test documents and guards that contract.
+ */
+describe('noble v3 async-only regression guard', () => {
+  it('async round-trip: signAsync + verifyAsync succeeds without hash config', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await sign({ test: true }, privateKey, '2026-02-13');
+    const result = await verify(jws, publicKey);
+    expect(result.valid).toBe(true);
+  });
+
+  it('sync getPublicKey throws without hash config (documents why we use async)', async () => {
+    const ed = await import('@noble/ed25519');
+    const { privateKey } = await generateKeypair();
+
+    // Sync getPublicKey requires ed.etc.sha512Sync to be configured.
+    // In PEAC we intentionally never configure it -- we use getPublicKeyAsync.
+    expect(() => ed.getPublicKey(privateKey)).toThrow();
+  });
+
+  it('generateKeypair uses async path and returns valid 32-byte keys', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    expect(privateKey).toHaveLength(32);
+    expect(publicKey).toHaveLength(32);
+
+    // Verify the keypair is consistent (public derives from private)
+    const ed = await import('@noble/ed25519');
+    const derived = await ed.getPublicKeyAsync(privateKey);
+    expect(Buffer.from(publicKey).equals(Buffer.from(derived))).toBe(true);
+  });
+});
+
+/**
  * Tests for CryptoError typed error codes
  * These codes are INTERNAL to @peac/crypto (CRYPTO_* prefix)
  * and should NOT be exposed as protocol-stable E_* codes.
