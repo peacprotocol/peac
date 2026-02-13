@@ -6,9 +6,6 @@ on:
       - 'packages/core/**'
     branches: [main]
 
-env:
-  NODE_VERSION: '22.x'
-
 jobs:
   leak-check:
     name: Jest Open Handles Check
@@ -20,9 +17,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.0
-          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
