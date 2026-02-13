@@ -49,7 +49,13 @@ function loadAllowlist() {
 
   for (const entry of raw.allowlist) {
     // Fail closed: all required fields must be present
-    if (!entry.advisory_id || !entry.reason || !entry.expires_at || !entry.remediation || !entry.issue_url) {
+    if (
+      !entry.advisory_id ||
+      !entry.reason ||
+      !entry.expires_at ||
+      !entry.remediation ||
+      !entry.issue_url
+    ) {
       invalid.push(entry.advisory_id || '<missing id>');
       continue;
     }
@@ -64,7 +70,9 @@ function loadAllowlist() {
     // Enforce max expiry window
     const daysDiff = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
     if (daysDiff > MAX_EXPIRY_DAYS) {
-      invalid.push(`${entry.advisory_id} (expiry ${entry.expires_at} exceeds ${MAX_EXPIRY_DAYS}-day max)`);
+      invalid.push(
+        `${entry.advisory_id} (expiry ${entry.expires_at} exceeds ${MAX_EXPIRY_DAYS}-day max)`
+      );
       continue;
     }
 
@@ -77,7 +85,9 @@ function loadAllowlist() {
   }
 
   if (expired.length > 0) {
-    console.log(`  allowlist: ${expired.length} expired (treated as active): ${expired.join(', ')}`);
+    console.log(
+      `  allowlist: ${expired.length} expired (treated as active): ${expired.join(', ')}`
+    );
   }
   if (invalid.length > 0) {
     console.log(`  allowlist: ${invalid.length} invalid (rejected): ${invalid.join(', ')}`);

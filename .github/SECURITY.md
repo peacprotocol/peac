@@ -4,11 +4,11 @@
 
 Currently supported versions for security updates:
 
-| Version   | Supported          |
-| --------- | ------------------ |
-| 0.10.x    | :white_check_mark: |
-| 0.9.x     | :x:                |
-| < 0.9     | :x:                |
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.10.x  | :white_check_mark: |
+| 0.9.x   | :x:                |
+| < 0.9   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -72,13 +72,13 @@ CI runs `scripts/audit-gate.mjs` which enforces a two-tier policy:
 
 Temporary exceptions are tracked in `security/audit-allowlist.json`. Each entry requires:
 
-| Field | Required | Description |
-| ----- | -------- | ----------- |
-| `advisory_id` | Yes | GHSA or advisory identifier |
-| `reason` | Yes | Why this is temporarily acceptable |
-| `expires_at` | Yes | ISO 8601 date (YYYY-MM-DD), max 90 days from today |
-| `remediation` | Yes | Planned fix (version bump, patch, replacement) |
-| `issue_url` | Yes | Link to tracking issue |
+| Field         | Required | Description                                        |
+| ------------- | -------- | -------------------------------------------------- |
+| `advisory_id` | Yes      | GHSA or advisory identifier                        |
+| `reason`      | Yes      | Why this is temporarily acceptable                 |
+| `expires_at`  | Yes      | ISO 8601 date (YYYY-MM-DD), max 90 days from today |
+| `remediation` | Yes      | Planned fix (version bump, patch, replacement)     |
+| `issue_url`   | Yes      | Link to tracking issue                             |
 
 **Rules:**
 

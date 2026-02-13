@@ -39,7 +39,13 @@ function parseAllowlist(raw, now = new Date()) {
 
   for (const entry of raw.allowlist) {
     // Fail closed: all required fields must be present
-    if (!entry.advisory_id || !entry.reason || !entry.expires_at || !entry.remediation || !entry.issue_url) {
+    if (
+      !entry.advisory_id ||
+      !entry.reason ||
+      !entry.expires_at ||
+      !entry.remediation ||
+      !entry.issue_url
+    ) {
       invalid.push(entry.advisory_id || '<missing id>');
       continue;
     }
@@ -54,7 +60,9 @@ function parseAllowlist(raw, now = new Date()) {
     // Enforce max expiry window
     const daysDiff = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
     if (daysDiff > MAX_EXPIRY_DAYS) {
-      invalid.push(`${entry.advisory_id} (expiry ${entry.expires_at} exceeds ${MAX_EXPIRY_DAYS}-day max)`);
+      invalid.push(
+        `${entry.advisory_id} (expiry ${entry.expires_at} exceeds ${MAX_EXPIRY_DAYS}-day max)`
+      );
       continue;
     }
 
@@ -176,13 +184,16 @@ describe('audit-gate allowlist enforcement', () => {
   });
 
   it('multiple entries: mix of active, expired, and invalid', () => {
-    const { active, expired, invalid } = parseAllowlist({
-      allowlist: [
-        makeEntry({ advisory_id: 'GHSA-active-1', expires_at: '2026-03-15' }),
-        makeEntry({ advisory_id: 'GHSA-expired-1', expires_at: '2026-01-01' }),
-        makeEntry({ advisory_id: 'GHSA-bad-date', expires_at: 'xyz' }),
-      ],
-    }, REF_DATE);
+    const { active, expired, invalid } = parseAllowlist(
+      {
+        allowlist: [
+          makeEntry({ advisory_id: 'GHSA-active-1', expires_at: '2026-03-15' }),
+          makeEntry({ advisory_id: 'GHSA-expired-1', expires_at: '2026-01-01' }),
+          makeEntry({ advisory_id: 'GHSA-bad-date', expires_at: 'xyz' }),
+        ],
+      },
+      REF_DATE
+    );
     expect(active.size).toBe(1);
     expect(active.has('GHSA-active-1')).toBe(true);
     expect(expired).toHaveLength(1);
