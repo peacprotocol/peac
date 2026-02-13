@@ -193,6 +193,42 @@ else
   echo "OK"
 fi
 
+echo "== dependency audit (via audit-gate.mjs) =="
+# Deterministic audit gate: parses JSON, applies time-bounded allowlist,
+# blocks on critical (always), blocks on high (strict mode only).
+# See scripts/audit-gate.mjs and security/audit-allowlist.json.
+if [ "${PEAC_FAST:-}" = "1" ]; then
+  echo "SKIP (PEAC_FAST=1)"
+else
+  if node scripts/audit-gate.mjs; then
+    :
+  else
+    bad=1
+  fi
+fi
+
+echo "== lockfile drift check =="
+# Verify pnpm-lock.yaml is consistent with package.json manifests.
+# A frozen install that succeeds means no drift; if it fails, lockfile
+# doesn't match declared dependencies.
+if [ "${PEAC_FAST:-}" = "1" ]; then
+  echo "SKIP (PEAC_FAST=1)"
+else
+  if pnpm install --frozen-lockfile --prefer-offline 2>/dev/null; then
+    echo "OK"
+  else
+    echo "FAIL: pnpm-lock.yaml drift detected -- run 'pnpm install' and commit the lockfile"
+    bad=1
+  fi
+  # Also verify no uncommitted lockfile changes (catches tooling mutations)
+  if git diff --quiet pnpm-lock.yaml 2>/dev/null; then
+    :
+  else
+    echo "FAIL: pnpm-lock.yaml has uncommitted changes"
+    bad=1
+  fi
+fi
+
 echo "== forbid stale generated artifacts in src/ =="
 stale=$(find packages -path "*/src/*" \
   -not -path "*/dist/*" -not -path "*/node_modules/*" \( \

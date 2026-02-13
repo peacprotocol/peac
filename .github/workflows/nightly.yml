@@ -8,9 +8,6 @@ on:
     tags:
       - 'v*' # Trigger on version tags
 
-env:
-  NODE_VERSION: '22.x'
-
 jobs:
   full-test-suite:
     name: Complete Test Suite
@@ -20,11 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.0
-          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -110,11 +109,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.0
-          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

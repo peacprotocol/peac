@@ -1,0 +1,54 @@
+{
+  "$comment": "Redacted pnpm v9 audit output -- advisories shape (keyed by numeric ID)",
+  "advisories": {
+    "1102341": {
+      "id": 1102341,
+      "severity": "moderate",
+      "module_name": "esbuild",
+      "github_advisory_id": "GHSA-67mh-4wv8-2f99",
+      "title": "esbuild dev server request forwarding",
+      "vulnerable_versions": "<=0.24.2",
+      "patched_versions": ">=0.25.0",
+      "findings": [
+        {
+          "version": "0.17.19",
+          "paths": ["dep > esbuild@0.17.19"]
+        }
+      ]
+    },
+    "1112134": {
+      "id": 1112134,
+      "severity": "high",
+      "module_name": "hono",
+      "github_advisory_id": "GHSA-3vhc-576x-3qv4",
+      "title": "Hono JWK Auth algorithm confusion",
+      "vulnerable_versions": "<4.11.4",
+      "patched_versions": ">=4.11.4",
+      "findings": [
+        {
+          "version": "4.10.6",
+          "paths": ["apps > hono@4.10.6"]
+        }
+      ]
+    },
+    "9999999": {
+      "id": 9999999,
+      "severity": "critical",
+      "module_name": "fake-critical",
+      "github_advisory_id": "GHSA-fake-crit-ical",
+      "title": "Fake critical for testing",
+      "vulnerable_versions": "<1.0.0",
+      "patched_versions": ">=1.0.0",
+      "findings": []
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 1,
+      "high": 1,
+      "critical": 1
+    }
+  }
+}

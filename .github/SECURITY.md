@@ -4,11 +4,11 @@
 
 Currently supported versions for security updates:
 
-| Version  | Supported          |
-| -------- | ------------------ |
-| 0.9.12.x | :white_check_mark: |
-| 0.9.11.x | :x:                |
-| < 0.9.11 | :x:                |
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.10.x  | :white_check_mark: |
+| 0.9.x   | :x:                |
+| < 0.9   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -59,6 +59,34 @@ Before submitting code:
 - [ ] Error messages don't leak sensitive info
 - [ ] Dependencies audited (`pnpm audit`)
 - [ ] Security tests written for new features
+
+## Dependency Audit Policy
+
+CI runs `scripts/audit-gate.mjs` which enforces a two-tier policy:
+
+- **Critical** vulnerabilities always block merges
+- **High** vulnerabilities warn by default; block in strict mode (`AUDIT_STRICT=1`)
+- **Moderate/Low** are logged but never block
+
+### Advisory Allowlist
+
+Temporary exceptions are tracked in `security/audit-allowlist.json`. Each entry requires:
+
+| Field         | Required | Description                                        |
+| ------------- | -------- | -------------------------------------------------- |
+| `advisory_id` | Yes      | GHSA or advisory identifier                        |
+| `reason`      | Yes      | Why this is temporarily acceptable                 |
+| `expires_at`  | Yes      | ISO 8601 date (YYYY-MM-DD), max 90 days from today |
+| `remediation` | Yes      | Planned fix (version bump, patch, replacement)     |
+| `issue_url`   | Yes      | Link to tracking issue                             |
+
+**Rules:**
+
+- Maximum allowlist expiry window: **90 days**
+- Expired entries are ignored (advisory becomes blocking again)
+- Malformed or incomplete entries fail closed (not allowlisted)
+- Every allowlist entry MUST have a tracking issue with a remediation plan
+- In strict mode (`AUDIT_STRICT=1`): expired or invalid entries cause build failure (prevents allowlist fossilization)
 
 ## Known Security Considerations
 

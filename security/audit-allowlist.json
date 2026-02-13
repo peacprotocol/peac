@@ -1,0 +1,5 @@
+{
+  "$schema": "./audit-allowlist.schema.json",
+  "description": "Time-bounded audit advisory allowlist. Expired entries are treated as active (blocking) again.",
+  "allowlist": []
+}

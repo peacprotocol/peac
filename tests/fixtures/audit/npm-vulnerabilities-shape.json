@@ -1,0 +1,67 @@
+{
+  "$comment": "npm-compatible audit output -- vulnerabilities shape (keyed by package name)",
+  "vulnerabilities": {
+    "esbuild": {
+      "name": "esbuild",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1102341,
+          "name": "esbuild",
+          "dependency": "esbuild",
+          "title": "esbuild dev server request forwarding",
+          "url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99",
+          "severity": "moderate",
+          "cwe": ["CWE-918"],
+          "cvss": { "score": 5.0 },
+          "range": "<=0.24.2"
+        }
+      ],
+      "effects": [],
+      "range": "<=0.24.2",
+      "nodes": ["node_modules/esbuild"],
+      "fixAvailable": true
+    },
+    "hono": {
+      "name": "hono",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1112134,
+          "name": "hono",
+          "dependency": "hono",
+          "title": "Hono JWK Auth algorithm confusion",
+          "url": "https://github.com/advisories/GHSA-3vhc-576x-3qv4",
+          "severity": "high",
+          "cwe": ["CWE-327"],
+          "cvss": { "score": 7.5 },
+          "range": "<4.11.4"
+        },
+        {
+          "source": 1112135,
+          "name": "hono",
+          "dependency": "hono",
+          "title": "Hono JWT unsafe default",
+          "url": "https://github.com/advisories/GHSA-f67f-6cw9-8mq4",
+          "severity": "high",
+          "cwe": ["CWE-327"],
+          "cvss": { "score": 7.5 },
+          "range": "<4.11.4"
+        }
+      ],
+      "effects": [],
+      "range": "<4.11.4",
+      "nodes": ["node_modules/hono"]
+    },
+    "some-transitive": {
+      "name": "some-transitive",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["hono"],
+      "effects": [],
+      "range": "*"
+    }
+  }
+}
