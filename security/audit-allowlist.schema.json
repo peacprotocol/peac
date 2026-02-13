@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PEAC Audit Allowlist",
+  "description": "Time-bounded exceptions for pnpm audit advisories. Each entry must have an expiry date to prevent permanent ignores.",
+  "type": "object",
+  "required": ["allowlist"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "allowlist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["advisory_id", "reason", "expires_at"],
+        "properties": {
+          "advisory_id": {
+            "type": "string",
+            "description": "The advisory ID from pnpm audit (e.g., GHSA-xxxx-yyyy-zzzz)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why this advisory is temporarily acceptable"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date",
+            "description": "ISO 8601 date after which the exception expires (YYYY-MM-DD)"
+          },
+          "remediation": {
+            "type": "string",
+            "description": "Planned fix (version bump, patch, or replacement)"
+          },
+          "issue_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Link to tracking issue for remediation"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

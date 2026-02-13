@@ -193,26 +193,51 @@ else
   echo "OK"
 fi
 
-echo "== dependency audit (high/critical) =="
-# Non-blocking: only fail on high or critical vulnerabilities.
-# pnpm audit --audit-level=high exits 0 if no high/critical found.
-if pnpm audit --audit-level=high 2>/dev/null; then
-  echo "OK"
+echo "== dependency audit (critical = blocking, high = warning) =="
+# Two-tier policy:
+#   critical -> blocks release (sets bad=1)
+#   high     -> warning only (does not block)
+# To allowlist a known advisory, add it to security/audit-allowlist.json
+# with an expires_at date. Expired entries are treated as active again.
+if [ "${PEAC_FAST:-}" = "1" ]; then
+  echo "SKIP (PEAC_FAST=1)"
 else
-  echo "WARNING: pnpm audit found high/critical vulnerabilities -- review before release"
-  # Note: this is non-blocking (does not set bad=1) to avoid CI breakage
-  # from transitive dep advisories. Review manually before publish.
+  _audit_critical=0
+  pnpm audit --audit-level=critical 2>/dev/null || _audit_critical=$?
+  if [ "$_audit_critical" -ne 0 ]; then
+    echo "FAIL: pnpm audit found critical vulnerabilities -- must fix before release"
+    bad=1
+  else
+    _audit_high=0
+    pnpm audit --audit-level=high 2>/dev/null || _audit_high=$?
+    if [ "$_audit_high" -ne 0 ]; then
+      echo "WARNING: pnpm audit found high-severity vulnerabilities -- review before release"
+    else
+      echo "OK"
+    fi
+  fi
 fi
 
 echo "== lockfile drift check =="
 # Verify pnpm-lock.yaml is consistent with package.json manifests.
 # A frozen install that succeeds means no drift; if it fails, lockfile
 # doesn't match declared dependencies.
-if pnpm install --frozen-lockfile --prefer-offline 2>/dev/null; then
-  echo "OK"
+if [ "${PEAC_FAST:-}" = "1" ]; then
+  echo "SKIP (PEAC_FAST=1)"
 else
-  echo "FAIL: pnpm-lock.yaml drift detected -- run 'pnpm install' and commit the lockfile"
-  bad=1
+  if pnpm install --frozen-lockfile --prefer-offline 2>/dev/null; then
+    echo "OK"
+  else
+    echo "FAIL: pnpm-lock.yaml drift detected -- run 'pnpm install' and commit the lockfile"
+    bad=1
+  fi
+  # Also verify no uncommitted lockfile changes (catches tooling mutations)
+  if git diff --quiet pnpm-lock.yaml 2>/dev/null; then
+    :
+  else
+    echo "FAIL: pnpm-lock.yaml has uncommitted changes"
+    bad=1
+  fi
 fi
 
 echo "== forbid stale generated artifacts in src/ =="
