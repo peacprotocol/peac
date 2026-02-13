@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Deterministic audit gate for PEAC CI
+ * Deterministic audit gate for PEAC CI (thin CLI wrapper)
  *
  * Reads pnpm audit JSON output, applies time-bounded allowlist,
  * and exits with a stable, parseable summary.
@@ -9,24 +9,26 @@
  *   critical -> always blocks (exit 1)
  *   high     -> blocks in strict mode (AUDIT_STRICT=1), warns otherwise
  *
+ * In strict mode, expired or invalid allowlist entries also cause failure
+ * (prevents allowlist fossilization).
+ *
  * Usage:
  *   node scripts/audit-gate.mjs              # default: block critical, warn high
- *   AUDIT_STRICT=1 node scripts/audit-gate.mjs  # block critical + high
+ *   AUDIT_STRICT=1 node scripts/audit-gate.mjs  # block critical + high + stale allowlist
  */
 
 import { readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseAllowlist, extractAdvisories, classifyAdvisories } from './audit-gate-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ALLOWLIST_PATH = join(__dirname, '..', 'security', 'audit-allowlist.json');
-const MAX_EXPIRY_DAYS = 90;
 const strict = process.env.AUDIT_STRICT === '1';
 
 /**
- * Load and validate the allowlist. Returns active (non-expired) entries.
- * Fails closed: malformed dates or missing fields -> entry NOT allowlisted.
+ * Load and validate the allowlist from disk.
  */
 function loadAllowlist() {
   let raw;
@@ -34,106 +36,99 @@ function loadAllowlist() {
     raw = JSON.parse(readFileSync(ALLOWLIST_PATH, 'utf-8'));
   } catch {
     console.log('  allowlist: not found or invalid JSON -- no exceptions applied');
-    return new Map();
+    return { active: new Map(), expired: [], invalid: [] };
   }
 
-  if (!Array.isArray(raw.allowlist)) {
-    console.log('  allowlist: missing "allowlist" array -- no exceptions applied');
-    return new Map();
-  }
+  const result = parseAllowlist(raw);
 
-  const now = new Date();
-  const active = new Map();
-  const expired = [];
-  const invalid = [];
-
-  for (const entry of raw.allowlist) {
-    // Fail closed: all required fields must be present
-    if (
-      !entry.advisory_id ||
-      !entry.reason ||
-      !entry.expires_at ||
-      !entry.remediation ||
-      !entry.issue_url
-    ) {
-      invalid.push(entry.advisory_id || '<missing id>');
-      continue;
-    }
-
-    // Fail closed: date must parse
-    const expiry = new Date(entry.expires_at + 'T00:00:00Z');
-    if (isNaN(expiry.getTime())) {
-      invalid.push(`${entry.advisory_id} (bad date: ${entry.expires_at})`);
-      continue;
-    }
-
-    // Enforce max expiry window
-    const daysDiff = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-    if (daysDiff > MAX_EXPIRY_DAYS) {
-      invalid.push(
-        `${entry.advisory_id} (expiry ${entry.expires_at} exceeds ${MAX_EXPIRY_DAYS}-day max)`
-      );
-      continue;
-    }
-
-    if (expiry < now) {
-      expired.push(entry.advisory_id);
-      continue;
-    }
-
-    active.set(entry.advisory_id, entry);
-  }
-
-  if (expired.length > 0) {
+  if (result.expired.length > 0) {
     console.log(
-      `  allowlist: ${expired.length} expired (treated as active): ${expired.join(', ')}`
+      `  allowlist: ${result.expired.length} expired (ignored): ${result.expired.join(', ')}`
     );
   }
-  if (invalid.length > 0) {
-    console.log(`  allowlist: ${invalid.length} invalid (rejected): ${invalid.join(', ')}`);
+  if (result.invalid.length > 0) {
+    console.log(
+      `  allowlist: ${result.invalid.length} invalid (rejected): ${result.invalid.join(', ')}`
+    );
   }
-  if (active.size > 0) {
-    console.log(`  allowlist: ${active.size} active exceptions`);
+  if (result.active.size > 0) {
+    console.log(`  allowlist: ${result.active.size} active exceptions`);
   }
 
-  return active;
+  // In strict mode, fail if any entries are expired or invalid
+  if (strict && (result.expired.length > 0 || result.invalid.length > 0)) {
+    const stale = result.expired.length + result.invalid.length;
+    console.log(
+      `FAIL: ${stale} stale/invalid allowlist entries (strict mode requires clean allowlist)`
+    );
+    process.exit(1);
+  }
+
+  return result;
 }
 
 /**
  * Run pnpm audit and parse JSON output.
+ * Handles both single-JSON and NDJSON output shapes.
  */
 function runAudit() {
+  let output;
   try {
-    const output = execSync('pnpm audit --json 2>/dev/null', {
+    output = execSync('pnpm audit --json 2>/dev/null', {
       encoding: 'utf-8',
       maxBuffer: 10 * 1024 * 1024,
     });
-    return JSON.parse(output);
   } catch (err) {
     // pnpm audit exits non-zero when vulnerabilities are found
-    if (err.stdout) {
-      try {
-        return JSON.parse(err.stdout);
-      } catch {
-        // Fall through to error
-      }
-    }
-    // If we can't parse JSON, fall back to exit-code-only mode
-    return null;
+    output = err.stdout || '';
   }
+
+  if (!output.trim()) return null;
+
+  // Try single JSON object first
+  try {
+    return JSON.parse(output);
+  } catch {
+    // Fall through to NDJSON
+  }
+
+  // Try NDJSON (newline-delimited JSON) -- merge all objects
+  const merged = { advisories: {}, vulnerabilities: {} };
+  let parsed = false;
+  for (const line of output.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const obj = JSON.parse(trimmed);
+      if (obj.advisories) {
+        Object.assign(merged.advisories, obj.advisories);
+        parsed = true;
+      }
+      if (obj.vulnerabilities) {
+        Object.assign(merged.vulnerabilities, obj.vulnerabilities);
+        parsed = true;
+      }
+    } catch {
+      // Skip unparseable lines
+    }
+  }
+
+  return parsed ? merged : null;
 }
 
 function main() {
   console.log(`== dependency audit (${strict ? 'strict' : 'default'} mode) ==`);
 
-  const allowlist = loadAllowlist();
+  const { active: allowlist } = loadAllowlist();
   const auditResult = runAudit();
 
   // If JSON parsing failed, fall back to simple exit-code check
   if (!auditResult) {
     console.log('  audit JSON unavailable -- falling back to exit-code mode');
     try {
-      execSync('pnpm audit --audit-level=critical 2>/dev/null', { stdio: 'ignore' });
+      execSync('pnpm audit --audit-level=critical 2>/dev/null', {
+        stdio: 'ignore',
+      });
       console.log('OK');
       process.exit(0);
     } catch {
@@ -142,24 +137,9 @@ function main() {
     }
   }
 
-  // Parse advisories from pnpm audit JSON
-  const advisories = auditResult.advisories || auditResult.vulnerabilities || {};
-  const findings = { critical: [], high: [], moderate: [], low: [] };
-
-  for (const [id, advisory] of Object.entries(advisories)) {
-    const severity = advisory.severity || 'unknown';
-    const ghsaId = advisory.ghpiId || advisory.github_advisory_id || id;
-
-    // Check allowlist
-    if (allowlist.has(ghsaId) || allowlist.has(id)) {
-      continue;
-    }
-
-    if (severity === 'critical') findings.critical.push(id);
-    else if (severity === 'high') findings.high.push(id);
-    else if (severity === 'moderate') findings.moderate.push(id);
-    else findings.low.push(id);
-  }
+  // Extract and classify advisories
+  const advisories = extractAdvisories(auditResult);
+  const findings = classifyAdvisories(advisories, allowlist);
 
   // Summary
   const parts = [];

@@ -83,9 +83,10 @@ Temporary exceptions are tracked in `security/audit-allowlist.json`. Each entry 
 **Rules:**
 
 - Maximum allowlist expiry window: **90 days**
-- Expired entries are treated as active (blocking) again
+- Expired entries are ignored (advisory becomes blocking again)
 - Malformed or incomplete entries fail closed (not allowlisted)
 - Every allowlist entry MUST have a tracking issue with a remediation plan
+- In strict mode (`AUDIT_STRICT=1`): expired or invalid entries cause build failure (prevents allowlist fossilization)
 
 ## Known Security Considerations
 
