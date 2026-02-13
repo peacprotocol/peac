@@ -16,6 +16,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SPECS_DIR = join(__dirname, '..', 'specs', 'wire');
+const DOCS_SPECS_DIR = join(__dirname, '..', 'docs', 'specs');
 
 // Initialize Ajv with 2020-12 draft support
 const ajv = new Ajv2020({
@@ -121,7 +122,60 @@ function lintSchemas() {
     }
   }
 
-  console.log(`\n=== Results ===`);
+  console.log(`\n=== Wire Schema Results: ${passed} passed, ${failed} failed ===`);
+
+  // Validate registries.json against its schema
+  console.log('\n=== Registries Validation ===\n');
+
+  try {
+    const registriesSchemaPath = join(DOCS_SPECS_DIR, 'registries.schema.json');
+    const registriesSchema = JSON.parse(readFileSync(registriesSchemaPath, 'utf8'));
+    const registriesPath = join(DOCS_SPECS_DIR, 'registries.json');
+    const registries = JSON.parse(readFileSync(registriesPath, 'utf8'));
+
+    // Compile and validate
+    const registriesAjv = new Ajv2020({ strict: false, allErrors: true });
+    addFormats(registriesAjv);
+    const validate = registriesAjv.compile(registriesSchema);
+    const valid = validate(registries);
+
+    if (valid) {
+      console.log('  [PASS] registries.json validates against registries.schema.json');
+      passed++;
+    } else {
+      const errMsg = validate.errors.map((e) => `${e.instancePath} ${e.message}`).join('; ');
+      console.log('  [FAIL] registries.json');
+      console.log(`         ${errMsg}`);
+      errors.push({ file: 'registries.json', error: errMsg });
+      failed++;
+    }
+
+    // Check every entry has status and no duplicate IDs within a registry
+    const registryKeys = Object.keys(registries).filter(
+      (k) => !k.startsWith('$') && !k.startsWith('_') && k !== 'version'
+    );
+    for (const key of registryKeys) {
+      const entries = Array.isArray(registries[key])
+        ? registries[key]
+        : (registries[key]?.entries ?? []);
+      const ids = entries.map((e) => e.id);
+      const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+      if (dupes.length > 0) {
+        console.log(`  [FAIL] ${key}: duplicate IDs: ${dupes.join(', ')}`);
+        errors.push({
+          file: `registries.json/${key}`,
+          error: `duplicate IDs: ${dupes.join(', ')}`,
+        });
+        failed++;
+      }
+    }
+  } catch (err) {
+    console.log(`  [FAIL] registries validation: ${err.message}`);
+    errors.push({ file: 'registries.json', error: err.message });
+    failed++;
+  }
+
+  console.log(`\n=== Final Results ===`);
   console.log(`Passed: ${passed}`);
   console.log(`Failed: ${failed}`);
 
