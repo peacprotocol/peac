@@ -94,7 +94,8 @@ async function main(): Promise<void> {
     console.log('  2. PaymentEvidence -> signed JWS receipt (Ed25519)');
     console.log('  3. JWS receipt -> verified with public key (no network)');
     console.log();
-    console.log('The receipt proves payment happened without calling Stripe.');
+    console.log('The receipt is a signed issuer attestation of payment.');
+    console.log('Offline verification confirms integrity -- not on-chain settlement.');
   } else {
     console.log('FAILURE: Receipt verification failed.');
     process.exit(1);

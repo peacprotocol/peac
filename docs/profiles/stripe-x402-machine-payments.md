@@ -22,61 +22,61 @@ Agent -> Stripe (x402) -> Provider API -> PEAC Receipt
 
 ### Input: StripeCryptoPaymentIntent
 
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `id` | string | Yes | Stripe payment intent ID (e.g., `pi_3QxYz...`) |
-| `amount` | number | Yes | Amount in smallest currency unit (cents) |
-| `currency` | string | Yes | Fiat currency code, lowercase ISO 4217 (e.g., `usd`) |
-| `asset` | string | Yes | Crypto asset ticker (e.g., `usdc`, `eth`) |
-| `network` | string | Yes | Network identifier, CAIP-2 format (e.g., `eip155:8453`) |
-| `tx_hash` | string | No | On-chain transaction hash |
-| `recipient` | string | No | Recipient wallet address |
-| `customer` | string | No | Stripe customer ID |
-| `metadata` | object | No | Stripe metadata (key-value strings) |
+| Field       | Type   | Required | Description                                             |
+| ----------- | ------ | -------- | ------------------------------------------------------- |
+| `id`        | string | Yes      | Stripe payment intent ID (e.g., `pi_3QxYz...`)          |
+| `amount`    | number | Yes      | Amount in smallest currency unit (cents)                |
+| `currency`  | string | Yes      | Fiat currency code, lowercase ISO 4217 (e.g., `usd`)    |
+| `asset`     | string | Yes      | Crypto asset ticker (e.g., `usdc`, `eth`)               |
+| `network`   | string | Yes      | Network identifier, CAIP-2 format (e.g., `eip155:8453`) |
+| `tx_hash`   | string | No       | On-chain transaction hash                               |
+| `recipient` | string | No       | Recipient wallet address                                |
+| `customer`  | string | No       | Stripe customer ID                                      |
+| `metadata`  | object | No       | Stripe metadata (key-value strings)                     |
 
 ### Output: PaymentEvidence
 
-| Field | Value | Notes |
-| ----- | ----- | ----- |
-| `rail` | `"stripe"` | Stripe is the payment facilitator |
-| `reference` | `intent.id` | Stripe payment intent ID |
-| `amount` | `intent.amount` | Passed through unchanged |
-| `currency` | `intent.currency.toUpperCase()` | Fiat denomination (e.g., `"USD"`) |
-| `asset` | `intent.asset.toUpperCase()` | Crypto token (e.g., `"USDC"`) |
-| `env` | `"live"` or `"test"` | Caller-specified |
-| `network` | `intent.network` | CAIP-2 identifier (e.g., `"eip155:8453"`) |
-| `evidence` | object | See below |
+| Field       | Value                           | Notes                                     |
+| ----------- | ------------------------------- | ----------------------------------------- |
+| `rail`      | `"stripe"`                      | Stripe is the payment facilitator         |
+| `reference` | `intent.id`                     | Stripe payment intent ID                  |
+| `amount`    | `intent.amount`                 | Passed through unchanged                  |
+| `currency`  | `intent.currency.toUpperCase()` | Fiat denomination (e.g., `"USD"`)         |
+| `asset`     | `intent.asset.toUpperCase()`    | Crypto token (e.g., `"USDC"`)             |
+| `env`       | `"live"` or `"test"`            | Caller-specified                          |
+| `network`   | `intent.network`                | CAIP-2 identifier (e.g., `"eip155:8453"`) |
+| `evidence`  | object                          | See below                                 |
 
 ### Evidence Object
 
-| Field | Source | Presence |
-| ----- | ------ | -------- |
-| `payment_intent_id` | `intent.id` | Always |
-| `asset` | `intent.asset.toUpperCase()` | Always |
-| `network` | `intent.network` | Always |
-| `tx_hash` | `intent.tx_hash` | If provided |
-| `recipient` | `intent.recipient` | If provided |
-| `customer_id` | `intent.customer` | If provided |
-| `metadata` | `intent.metadata` | If provided |
+| Field               | Source                       | Presence    |
+| ------------------- | ---------------------------- | ----------- |
+| `payment_intent_id` | `intent.id`                  | Always      |
+| `asset`             | `intent.asset.toUpperCase()` | Always      |
+| `network`           | `intent.network`             | Always      |
+| `tx_hash`           | `intent.tx_hash`             | If provided |
+| `recipient`         | `intent.recipient`           | If provided |
+| `customer_id`       | `intent.customer`            | If provided |
+| `metadata`          | `intent.metadata`            | If provided |
 
 ## Key Distinction: Fiat vs Crypto
 
-| | `fromPaymentIntent()` (fiat) | `fromCryptoPaymentIntent()` (crypto) |
-| --- | --- | --- |
-| `asset` | Same as `currency` (e.g., `"USD"`) | Crypto token (e.g., `"USDC"`) |
-| `network` | Not set | CAIP-2 ID (e.g., `"eip155:8453"`) |
+|            | `fromPaymentIntent()` (fiat)       | `fromCryptoPaymentIntent()` (crypto)            |
+| ---------- | ---------------------------------- | ----------------------------------------------- |
+| `asset`    | Same as `currency` (e.g., `"USD"`) | Crypto token (e.g., `"USDC"`)                   |
+| `network`  | Not set                            | CAIP-2 ID (e.g., `"eip155:8453"`)               |
 | `evidence` | `payment_intent_id`, `customer_id` | Adds `asset`, `network`, `tx_hash`, `recipient` |
 
 ## Supported Networks
 
 Common CAIP-2 identifiers for Stripe crypto payments:
 
-| Network | CAIP-2 ID | Common Assets |
-| ------- | --------- | ------------- |
-| Ethereum mainnet | `eip155:1` | ETH, USDC, USDT |
-| Base mainnet | `eip155:8453` | ETH, USDC |
-| Base Sepolia (testnet) | `eip155:84532` | ETH, USDC |
-| Solana mainnet | `solana:mainnet` | SOL, USDC |
+| Network                | CAIP-2 ID        | Common Assets   |
+| ---------------------- | ---------------- | --------------- |
+| Ethereum mainnet       | `eip155:1`       | ETH, USDC, USDT |
+| Base mainnet           | `eip155:8453`    | ETH, USDC       |
+| Base Sepolia (testnet) | `eip155:84532`   | ETH, USDC       |
+| Solana mainnet         | `solana:mainnet` | SOL, USDC       |
 
 ## Validation Rules
 
@@ -93,6 +93,43 @@ Violations throw with descriptive error messages. No silent coercion.
 **Note on tx_hash and recipient:** These fields are treated as opaque strings.
 Chain-specific validation (e.g., 0x-prefix for EVM, base58 for Solana) is intentionally
 not performed -- the adapter normalizes, it does not interpret chain semantics.
+
+## Denomination Semantics
+
+| Field      | Unit                               | Example       | Notes                        |
+| ---------- | ---------------------------------- | ------------- | ---------------------------- |
+| `amount`   | Smallest fiat unit                 | `500` = $5.00 | Cents for USD, pence for GBP |
+| `currency` | ISO 4217 (uppercase in output)     | `"USD"`       | Fiat denomination, not token |
+| `asset`    | Token ticker (uppercase in output) | `"USDC"`      | Crypto settlement asset      |
+
+`amount` and `currency` describe the **fiat denomination**. `asset` describes the
+**crypto settlement token**. These may differ (e.g., 500 USD settled in USDC).
+The adapter does not perform exchange rate conversion.
+
+## Privacy Defaults
+
+The adapter passes through all provided fields. Callers are responsible for
+privacy-appropriate usage:
+
+- `customer` (Stripe customer ID) maps to `customer_id` in evidence. **Exclude
+  in privacy-sensitive contexts** or use HMAC pseudonymization.
+- `metadata` is passed through verbatim. **Do not include** PII (emails, IPs,
+  names) in Stripe metadata that will be embedded in receipts.
+- `tx_hash` and `recipient` are on-chain public data. They are safe to include
+  but enable transaction graph analysis.
+
+For privacy-critical deployments, omit `customer`, `metadata`, and optionally
+`recipient` from the input intent.
+
+## Trust Model
+
+A PEAC receipt with Stripe evidence is an **issuer attestation** -- the receipt
+signer asserts that payment occurred. Offline verification confirms the receipt's
+**integrity and origin** (Ed25519 signature check), not on-chain settlement.
+
+To independently verify that an on-chain transaction exists, use the `tx_hash`
+and `network` fields with a block explorer or RPC endpoint. The PEAC adapter
+does not perform on-chain verification.
 
 ## Quick Demo
 
