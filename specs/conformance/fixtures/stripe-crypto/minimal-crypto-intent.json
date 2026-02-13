@@ -1,0 +1,31 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "stripe-crypto-minimal",
+  "description": "Minimal crypto payment intent with only required fields",
+  "category": "valid",
+  "input": {
+    "intent": {
+      "id": "pi_3QxYz1234567890",
+      "amount": 500,
+      "currency": "usd",
+      "asset": "usdc",
+      "network": "eip155:8453"
+    },
+    "env": "live"
+  },
+  "expected": {
+    "rail": "stripe",
+    "reference": "pi_3QxYz1234567890",
+    "amount": 500,
+    "currency": "USD",
+    "asset": "USDC",
+    "network": "eip155:8453",
+    "env": "live",
+    "evidence": {
+      "payment_intent_id": "pi_3QxYz1234567890",
+      "asset": "USDC",
+      "network": "eip155:8453"
+    }
+  },
+  "notes": "Minimal crypto intent uses Base mainnet (eip155:8453) with USDC. Currency is fiat denomination (USD), asset is the crypto token (USDC)."
+}

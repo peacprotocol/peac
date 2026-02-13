@@ -242,6 +242,8 @@ describe('Global Conformance Manifest Hygiene', () => {
     edge: 'Single-receipt fixtures, not fixture packs',
     verifier: 'New v0.10.8 fixtures; not yet tracked in manifest.json',
     crypto: 'Deterministic golden vectors (Ed25519 sign/verify); not fixture packs',
+    'stripe-crypto':
+      'Per-category manifest (v0.10.11+); uses profile-scoped manifest.json, not global fixture_count',
     parse:
       'Single-receipt fixtures (v0.10.9+); tracked via expected_error/expected_variant in manifest.json, not fixture_count',
   };

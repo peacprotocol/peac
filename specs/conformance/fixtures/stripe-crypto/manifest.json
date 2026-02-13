@@ -1,0 +1,30 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "stripe-crypto-payment",
+  "version": "0.1.0",
+  "description": "Conformance vectors for @peac/rails-stripe fromCryptoPaymentIntent()",
+  "profile": "stripe-x402-machine-payment/0.1",
+  "categories": {
+    "valid": {
+      "description": "Valid crypto payment intent normalization scenarios",
+      "vectors": ["minimal-crypto-intent.json", "full-crypto-intent.json"]
+    },
+    "invalid": {
+      "description": "Invalid inputs that must throw",
+      "vectors": ["missing-required-fields.json"]
+    }
+  },
+  "validation_rules": {
+    "description": "Input validation constraints for Stripe crypto payment intents",
+    "invariants": [
+      "id MUST be a non-empty string",
+      "amount MUST be a non-negative number",
+      "currency MUST be lowercase ISO 4217 (3 chars)",
+      "asset MUST be a non-empty string (crypto ticker)",
+      "network MUST be a non-empty string (CAIP-2 format)",
+      "Output currency MUST be uppercase",
+      "Output asset MUST be uppercase",
+      "Output asset MUST differ from output currency for crypto payments"
+    ]
+  }
+}

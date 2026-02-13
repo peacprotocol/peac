@@ -1,0 +1,71 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "stripe-crypto-missing-fields",
+  "description": "Crypto payment intents missing required fields must throw",
+  "category": "invalid",
+  "cases": [
+    {
+      "id": "missing-id",
+      "input": {
+        "intent": {
+          "amount": 100,
+          "currency": "usd",
+          "asset": "usdc",
+          "network": "eip155:8453"
+        }
+      },
+      "expected_error": "missing id"
+    },
+    {
+      "id": "negative-amount",
+      "input": {
+        "intent": {
+          "id": "pi_test",
+          "amount": -1,
+          "currency": "usd",
+          "asset": "usdc",
+          "network": "eip155:8453"
+        }
+      },
+      "expected_error": "invalid amount"
+    },
+    {
+      "id": "invalid-currency-format",
+      "input": {
+        "intent": {
+          "id": "pi_test",
+          "amount": 100,
+          "currency": "INVALID",
+          "asset": "usdc",
+          "network": "eip155:8453"
+        }
+      },
+      "expected_error": "invalid currency"
+    },
+    {
+      "id": "missing-asset",
+      "input": {
+        "intent": {
+          "id": "pi_test",
+          "amount": 100,
+          "currency": "usd",
+          "network": "eip155:8453"
+        }
+      },
+      "expected_error": "missing asset"
+    },
+    {
+      "id": "missing-network",
+      "input": {
+        "intent": {
+          "id": "pi_test",
+          "amount": 100,
+          "currency": "usd",
+          "asset": "usdc"
+        }
+      },
+      "expected_error": "missing network"
+    }
+  ],
+  "notes": "Each case tests a specific required field. All must throw with a message containing the expected_error substring."
+}
