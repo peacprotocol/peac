@@ -4,11 +4,11 @@
 
 Currently supported versions for security updates:
 
-| Version  | Supported          |
-| -------- | ------------------ |
-| 0.9.12.x | :white_check_mark: |
-| 0.9.11.x | :x:                |
-| < 0.9.11 | :x:                |
+| Version   | Supported          |
+| --------- | ------------------ |
+| 0.10.x    | :white_check_mark: |
+| 0.9.x     | :x:                |
+| < 0.9     | :x:                |
 
 ## Reporting a Vulnerability
 

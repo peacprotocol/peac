@@ -193,6 +193,28 @@ else
   echo "OK"
 fi
 
+echo "== dependency audit (high/critical) =="
+# Non-blocking: only fail on high or critical vulnerabilities.
+# pnpm audit --audit-level=high exits 0 if no high/critical found.
+if pnpm audit --audit-level=high 2>/dev/null; then
+  echo "OK"
+else
+  echo "WARNING: pnpm audit found high/critical vulnerabilities -- review before release"
+  # Note: this is non-blocking (does not set bad=1) to avoid CI breakage
+  # from transitive dep advisories. Review manually before publish.
+fi
+
+echo "== lockfile drift check =="
+# Verify pnpm-lock.yaml is consistent with package.json manifests.
+# A frozen install that succeeds means no drift; if it fails, lockfile
+# doesn't match declared dependencies.
+if pnpm install --frozen-lockfile --prefer-offline 2>/dev/null; then
+  echo "OK"
+else
+  echo "FAIL: pnpm-lock.yaml drift detected -- run 'pnpm install' and commit the lockfile"
+  bad=1
+fi
+
 echo "== forbid stale generated artifacts in src/ =="
 stale=$(find packages -path "*/src/*" \
   -not -path "*/dist/*" -not -path "*/node_modules/*" \( \
