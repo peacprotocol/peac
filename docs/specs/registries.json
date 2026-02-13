@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "payment_rails": [
     {
       "id": "x402",
@@ -166,6 +166,16 @@
       "stability": "stable",
       "owner": "peac-core",
       "change_policy": "additive"
+    },
+    "toolcall_op_types": {
+      "stability": "experimental",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "toolcall_resource_types": {
+      "stability": "experimental",
+      "owner": "peac-core",
+      "change_policy": "additive"
     }
   },
   "orchestration_frameworks": [
@@ -240,6 +250,13 @@
       "description": "Agent identity reference in MCP metadata",
       "reference": "docs/specs/AGENT-IDENTITY.md",
       "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/interaction",
+      "category": "evidence",
+      "description": "Interaction evidence for tool calls, API requests, and agent actions",
+      "reference": "docs/specs/INTERACTION-EVIDENCE.md",
+      "status": "informational"
     }
   ],
   "attestation_types": [
@@ -271,5 +288,87 @@
       "reference": "docs/specs/WORKFLOW-CORRELATION.md",
       "status": "informational"
     }
-  ]
+  ],
+  "toolcall_op_types": {
+    "_advisory": "Open-string vocabulary. Implementations MUST accept any value matching /^[a-z][a-z0-9_.:-]*$/ (max 128 chars). This table lists well-known values for interoperability only.",
+    "entries": [
+      {
+        "id": "memory.write",
+        "category": "stateful",
+        "description": "Write to a memory or knowledge store",
+        "status": "informational"
+      },
+      {
+        "id": "memory.read",
+        "category": "stateful",
+        "description": "Read from a memory or knowledge store",
+        "status": "informational"
+      },
+      {
+        "id": "memory.delete",
+        "category": "stateful",
+        "description": "Delete from a memory or knowledge store",
+        "status": "informational"
+      },
+      {
+        "id": "db.query",
+        "category": "stateful",
+        "description": "Execute a database query",
+        "status": "informational"
+      },
+      {
+        "id": "db.mutate",
+        "category": "stateful",
+        "description": "Execute a database mutation (insert, update, delete)",
+        "status": "informational"
+      },
+      {
+        "id": "file.write",
+        "category": "stateful",
+        "description": "Write to a file or object store",
+        "status": "informational"
+      },
+      {
+        "id": "file.read",
+        "category": "stateful",
+        "description": "Read from a file or object store",
+        "status": "informational"
+      },
+      {
+        "id": "http.request",
+        "category": "network",
+        "description": "Make an outbound HTTP request",
+        "status": "informational"
+      }
+    ]
+  },
+  "toolcall_resource_types": {
+    "_advisory": "Open-string vocabulary. Implementations MUST accept any value matching /^[a-z][a-z0-9_.:-]*$/ (max 128 chars). This table lists well-known values for interoperability only.",
+    "entries": [
+      {
+        "id": "memory-store",
+        "category": "stateful",
+        "description": "A memory or knowledge store (e.g., Mem0, Zep)",
+        "status": "informational"
+      },
+      {
+        "id": "database",
+        "category": "stateful",
+        "description": "A database (SQL, document, graph, etc.)",
+        "status": "informational"
+      },
+      {
+        "id": "file-store",
+        "category": "stateful",
+        "description": "A file or object storage system",
+        "status": "informational"
+      },
+      {
+        "id": "api-endpoint",
+        "category": "network",
+        "description": "An external API endpoint",
+        "status": "informational"
+      }
+    ]
+  }
 }

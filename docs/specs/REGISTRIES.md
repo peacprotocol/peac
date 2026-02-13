@@ -33,13 +33,15 @@ Located at: `docs/specs/registries.json`
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "payment_rails": [ ... ],
   "control_engines": [ ... ],
   "transport_methods": [ ... ],
   "agent_protocols": [ ... ],
   "extension_keys": [ ... ],
-  "attestation_types": [ ... ]
+  "attestation_types": [ ... ],
+  "toolcall_op_types": { ... },
+  "toolcall_resource_types": { ... }
 }
 ```
 
@@ -188,6 +190,7 @@ Extension keys use reverse-DNS naming (`org.peacprotocol/...`) to avoid collisio
 | `org.peacprotocol/obligations` | attribution   | Credit and contribution requirements (CC Signals alignment) | ATTRIBUTION.md          |
 | `org.peacprotocol/receipt`     | metadata      | Receipt JWS in MCP tool response metadata                   | PROTOCOL-BEHAVIOR.md    |
 | `org.peacprotocol/agent_id`    | identity      | Agent identity reference in MCP metadata                    | AGENT-IDENTITY.md       |
+| `org.peacprotocol/interaction` | evidence      | Interaction evidence for tool calls and agent actions       | INTERACTION-EVIDENCE.md |
 
 ### 7.2 Naming Convention
 
@@ -218,9 +221,66 @@ Attestation types use the `peac/{name}` pattern for first-party types.
 
 ---
 
-## 9. Stability and Versioning
+## 9. Toolcall Op Types Registry (Advisory)
 
-### 9.1 Entry Lifecycle
+> **Advisory**: This registry is an open-string vocabulary for toolcall side-effect
+> types used in the `toolcall.ops[]` extension (Wire 0.2). Implementations MUST
+> accept any value matching `/^[a-z][a-z0-9_.:-]*$/` (max 128 chars). This table
+> lists well-known values for interoperability only. Absence from this table does
+> NOT make a value invalid.
+
+### 9.1 Current Entries
+
+| ID              | Category | Description                                     |
+| --------------- | -------- | ----------------------------------------------- |
+| `memory.write`  | stateful | Write to a memory or knowledge store            |
+| `memory.read`   | stateful | Read from a memory or knowledge store           |
+| `memory.delete` | stateful | Delete from a memory or knowledge store         |
+| `db.query`      | stateful | Execute a database query                        |
+| `db.mutate`     | stateful | Execute a database mutation (insert/update/del) |
+| `file.write`    | stateful | Write to a file or object store                 |
+| `file.read`     | stateful | Read from a file or object store                |
+| `http.request`  | network  | Make an outbound HTTP request                   |
+
+### 9.2 Identifier Grammar
+
+Op type identifiers MUST match: `/^[a-z][a-z0-9_.:-]*$/` (max 128 characters)
+
+- Lowercase letters, digits, dots, underscores, colons, and hyphens
+- Must start with a lowercase letter
+- Dot-separated namespaces are conventional (e.g., `memory.write`, `db.query`)
+
+---
+
+## 10. Toolcall Resource Types Registry (Advisory)
+
+> **Advisory**: This registry is an open-string vocabulary for toolcall resource
+> types used in the `toolcall.ops[]` extension (Wire 0.2). Implementations MUST
+> accept any value matching `/^[a-z][a-z0-9_.:-]*$/` (max 128 chars). This table
+> lists well-known values for interoperability only. Absence from this table does
+> NOT make a value invalid.
+
+### 10.1 Current Entries
+
+| ID             | Category | Description                              |
+| -------------- | -------- | ---------------------------------------- |
+| `memory-store` | stateful | A memory or knowledge store (e.g., Mem0) |
+| `database`     | stateful | A database (SQL, document, graph, etc.)  |
+| `file-store`   | stateful | A file or object storage system          |
+| `api-endpoint` | network  | An external API endpoint                 |
+
+### 10.2 Identifier Grammar
+
+Resource type identifiers MUST match: `/^[a-z][a-z0-9_.:-]*$/` (max 128 characters)
+
+- Same grammar as op types (Section 9.2)
+- Use hyphens for multi-word names (e.g., `memory-store`, `file-store`)
+
+---
+
+## 11. Stability and Versioning
+
+### 11.1 Entry Lifecycle
 
 Entries can be:
 
@@ -229,7 +289,7 @@ Entries can be:
 - **Deprecated**: Marked as `"status": "deprecated"`
 - **Removed**: Only if never widely used
 
-### 9.2 Versioning
+### 11.2 Versioning
 
 Registry version (e.g., "0.1.0") increments on:
 
@@ -239,7 +299,7 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 10. Relationship to Core Protocol
+## 12. Relationship to Core Protocol
 
 **Core protocol** (JSON Schema, PROTOCOL-BEHAVIOR.md):
 
@@ -261,7 +321,7 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 11. Registry Governance
+## 13. Registry Governance
 
 This file and `registries.json` serve as the authoritative registries for the PEAC ecosystem:
 
@@ -269,7 +329,7 @@ This file and `registries.json` serve as the authoritative registries for the PE
 - Standardized submission process via GitHub
 - Long-term stability through versioning
 
-### 11.1 Governance Metadata
+### 13.1 Governance Metadata
 
 Each registry in `registries.json` includes governance metadata:
 
@@ -284,7 +344,7 @@ Each registry in `registries.json` includes governance metadata:
 - **`additive`**: New entries can be added in minor versions. Existing IDs are never removed in minor versions.
 - **`breaking-requires-major`**: Removing or renaming an entry requires a major version bump.
 
-### 11.2 Entry Lifecycle Fields
+### 13.2 Entry Lifecycle Fields
 
 Each registry entry MAY include lifecycle fields for deprecation tracking:
 
@@ -295,7 +355,7 @@ Each registry entry MAY include lifecycle fields for deprecation tracking:
 | `deprecated_by`    | string | ID of the replacement entry (absent if no replacement) |
 | `sunset_version`   | string | Major version where the entry may be removed           |
 
-### 11.3 Entry Deprecation
+### 13.3 Entry Deprecation
 
 Entries may be deprecated but not removed in minor versions:
 
@@ -312,7 +372,7 @@ Entries may be deprecated but not removed in minor versions:
 - If `deprecated_by` is present, implementations SHOULD suggest the replacement in warnings
 - Deprecated entries remain valid identifiers until the `sunset_version` is reached
 
-### 11.4 Removal Semantics
+### 13.4 Removal Semantics
 
 Removal of a registry entry is a **major-version-only** operation with explicit constraints:
 
@@ -352,7 +412,7 @@ Each transition is a separate minor (deprecation) or major (removal) version bum
 - [ ] At least one minor version has passed since `deprecated_since` (grace period)
 - [ ] Entry JSON updated to `"status": "removed"` (not deleted from file)
 
-### 11.5 Governance Flow
+### 13.5 Governance Flow
 
 ```text
 1. Proposer opens GitHub issue with:
@@ -372,7 +432,7 @@ Each transition is a separate minor (deprecation) or major (removal) version bum
 
 ---
 
-## 12. Questions
+## 14. Questions
 
 For registry questions:
 
