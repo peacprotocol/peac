@@ -208,7 +208,10 @@ describe('Stripe rail adapter', () => {
         },
       };
 
-      const normalized = fromCryptoPaymentIntent(intent);
+      const normalized = fromCryptoPaymentIntent(intent, {
+        includeCustomerId: true,
+        includeMetadata: true,
+      });
 
       expect(normalized.rail).toBe('stripe');
       expect(normalized.reference).toBe('pi_test_crypto_a1b2c3');
@@ -265,7 +268,7 @@ describe('Stripe rail adapter', () => {
         network: 'eip155:84532',
       };
 
-      const normalized = fromCryptoPaymentIntent(intent, 'test');
+      const normalized = fromCryptoPaymentIntent(intent, { env: 'test' });
 
       expect(normalized.env).toBe('test');
     });
@@ -377,6 +380,43 @@ describe('Stripe rail adapter', () => {
       };
 
       expect(() => fromCryptoPaymentIntent(intent)).toThrow('invalid recipient');
+    });
+
+    it('should exclude customer_id and metadata by default (privacy)', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test_crypto_privacy',
+        amount: 500,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:8453',
+        customer: 'cus_should_be_excluded',
+        metadata: { secret: 'should_be_excluded' },
+      };
+
+      const normalized = fromCryptoPaymentIntent(intent);
+
+      expect(normalized.evidence).not.toHaveProperty('customer_id');
+      expect(normalized.evidence).not.toHaveProperty('metadata');
+    });
+
+    it('should include customer_id and metadata when opted in', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test_crypto_optin',
+        amount: 500,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:8453',
+        customer: 'cus_included',
+        metadata: { key: 'included' },
+      };
+
+      const normalized = fromCryptoPaymentIntent(intent, {
+        includeCustomerId: true,
+        includeMetadata: true,
+      });
+
+      expect(normalized.evidence).toHaveProperty('customer_id', 'cus_included');
+      expect(normalized.evidence).toHaveProperty('metadata');
     });
 
     it('should ensure asset differs from currency for crypto payments', () => {

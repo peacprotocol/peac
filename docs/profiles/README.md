@@ -8,9 +8,9 @@ See `reference/PROFILE_RULES.md` for the architectural boundary between profiles
 
 ## Available Profiles
 
-| Profile | Package | Since | Status |
-| ------- | ------- | ----- | ------ |
-| [Stripe x402 Machine Payments](stripe-x402-machine-payments.md) | `@peac/rails-stripe` | v0.10.11 | Draft |
+| Profile                                                         | Package              | Since    | Status |
+| --------------------------------------------------------------- | -------------------- | -------- | ------ |
+| [Stripe x402 Machine Payments](stripe-x402-machine-payments.md) | `@peac/rails-stripe` | v0.10.11 | Draft  |
 
 ## Creating a New Profile
 

@@ -152,16 +152,38 @@ export function fromPaymentIntent(
 }
 
 /**
+ * Options for crypto payment intent normalization
+ */
+export interface CryptoPaymentOptions {
+  /** Environment: live or test (default: 'live') */
+  env?: 'live' | 'test';
+  /** Include Stripe customer ID in evidence (default: false -- privacy) */
+  includeCustomerId?: boolean;
+  /** Include Stripe metadata in evidence (default: false -- privacy) */
+  includeMetadata?: boolean;
+}
+
+/**
  * Normalize Stripe crypto payment intent to PEAC PaymentEvidence
  *
  * Used for x402 machine-to-machine crypto payments settled through Stripe.
  * Unlike fromPaymentIntent(), the asset field is the crypto token (USDC, ETH)
  * and the network field is populated with a CAIP-2 identifier.
+ *
+ * Privacy: customer_id and metadata are excluded by default. Pass
+ * `includeCustomerId: true` or `includeMetadata: true` to opt in.
+ *
+ * Verification meaning: a PEAC receipt containing this evidence is an
+ * issuer attestation. Offline verification confirms the receipt's integrity
+ * and origin (Ed25519 signature), not on-chain settlement.
  */
 export function fromCryptoPaymentIntent(
   intent: StripeCryptoPaymentIntent,
-  env: 'live' | 'test' = 'live'
+  options?: CryptoPaymentOptions
 ): PaymentEvidence {
+  const env = options?.env ?? 'live';
+  const includeCustomerId = options?.includeCustomerId ?? false;
+  const includeMetadata = options?.includeMetadata ?? false;
   // Validate required fields
   if (!intent.id) {
     throw new Error('Stripe crypto payment intent missing id');
@@ -170,9 +192,7 @@ export function fromCryptoPaymentIntent(
     throw new Error('Stripe crypto payment intent invalid amount');
   }
   if (!intent.currency || !/^[a-z]{3}$/.test(intent.currency)) {
-    throw new Error(
-      'Stripe crypto payment intent invalid currency (must be lowercase ISO 4217)'
-    );
+    throw new Error('Stripe crypto payment intent invalid currency (must be lowercase ISO 4217)');
   }
   if (!intent.asset || typeof intent.asset !== 'string') {
     throw new Error('Stripe crypto payment intent missing asset');
@@ -217,11 +237,11 @@ export function fromCryptoPaymentIntent(
     evidence.recipient = intent.recipient;
   }
 
-  if (intent.customer) {
+  if (includeCustomerId && intent.customer) {
     evidence.customer_id = intent.customer;
   }
 
-  if (intent.metadata) {
+  if (includeMetadata && intent.metadata) {
     evidence.metadata = intent.metadata;
   }
 

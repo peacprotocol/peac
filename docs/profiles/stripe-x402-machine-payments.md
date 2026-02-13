@@ -108,18 +108,28 @@ The adapter does not perform exchange rate conversion.
 
 ## Privacy Defaults
 
-The adapter passes through all provided fields. Callers are responsible for
-privacy-appropriate usage:
+`fromCryptoPaymentIntent()` enforces privacy by default:
 
-- `customer` (Stripe customer ID) maps to `customer_id` in evidence. **Exclude
-  in privacy-sensitive contexts** or use HMAC pseudonymization.
-- `metadata` is passed through verbatim. **Do not include** PII (emails, IPs,
-  names) in Stripe metadata that will be embedded in receipts.
-- `tx_hash` and `recipient` are on-chain public data. They are safe to include
-  but enable transaction graph analysis.
+| Field         | Default  | Opt-in flag         | Risk                                    |
+| ------------- | -------- | ------------------- | --------------------------------------- |
+| `customer_id` | Excluded | `includeCustomerId` | Links receipts to Stripe customer       |
+| `metadata`    | Excluded | `includeMetadata`   | May contain PII (emails, IPs)           |
+| `tx_hash`     | Included | n/a                 | On-chain public, enables graph analysis |
+| `recipient`   | Included | n/a                 | On-chain public, enables graph analysis |
 
-For privacy-critical deployments, omit `customer`, `metadata`, and optionally
-`recipient` from the input intent.
+```typescript
+// Default: customer_id and metadata excluded
+fromCryptoPaymentIntent(intent);
+
+// Opt in to include metadata
+fromCryptoPaymentIntent(intent, { includeMetadata: true });
+
+// Opt in to include both
+fromCryptoPaymentIntent(intent, { includeCustomerId: true, includeMetadata: true });
+```
+
+For privacy-critical deployments, also omit `recipient` from the input intent
+to prevent transaction graph analysis.
 
 ## Trust Model
 

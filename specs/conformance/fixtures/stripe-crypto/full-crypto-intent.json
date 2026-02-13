@@ -18,7 +18,11 @@
         "agent_id": "agent-weather-v2"
       }
     },
-    "env": "live"
+    "env": "live",
+    "options": {
+      "includeCustomerId": true,
+      "includeMetadata": true
+    }
   },
   "expected": {
     "rail": "stripe",

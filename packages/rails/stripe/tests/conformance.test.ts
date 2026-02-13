@@ -8,7 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { fromCryptoPaymentIntent, type StripeCryptoPaymentIntent } from '../src/index';
+import { fromCryptoPaymentIntent, type StripeCryptoPaymentIntent, type CryptoPaymentOptions } from '../src/index';
 
 const FIXTURES_DIR = join(__dirname, '..', '..', '..', '..', 'specs', 'conformance', 'fixtures', 'stripe-crypto');
 
@@ -19,6 +19,7 @@ interface ValidVector {
   input: {
     intent: StripeCryptoPaymentIntent;
     env?: 'live' | 'test';
+    options?: CryptoPaymentOptions;
   };
   expected: Record<string, unknown>;
   notes: string;
@@ -47,7 +48,11 @@ describe('stripe-crypto conformance vectors', () => {
     const full = loadVector<ValidVector>('full-crypto-intent.json');
 
     it(`${minimal.id}: ${minimal.description}`, () => {
-      const result = fromCryptoPaymentIntent(minimal.input.intent, minimal.input.env);
+      const options: CryptoPaymentOptions = {
+        env: minimal.input.env,
+        ...minimal.input.options,
+      };
+      const result = fromCryptoPaymentIntent(minimal.input.intent, options);
 
       expect(result.rail).toBe(minimal.expected.rail);
       expect(result.reference).toBe(minimal.expected.reference);
@@ -60,7 +65,11 @@ describe('stripe-crypto conformance vectors', () => {
     });
 
     it(`${full.id}: ${full.description}`, () => {
-      const result = fromCryptoPaymentIntent(full.input.intent, full.input.env);
+      const options: CryptoPaymentOptions = {
+        env: full.input.env,
+        ...full.input.options,
+      };
+      const result = fromCryptoPaymentIntent(full.input.intent, options);
 
       expect(result.rail).toBe(full.expected.rail);
       expect(result.reference).toBe(full.expected.reference);

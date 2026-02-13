@@ -31,19 +31,27 @@ async function main(): Promise<void> {
   // --- Step 1: Normalize crypto payment intent ---
   console.log('[1] Normalizing Stripe crypto payment intent...');
 
-  const payment = fromCryptoPaymentIntent({
-    id: 'pi_3QxYz1234567890abc',
-    amount: 50, // $0.50 in cents
-    currency: 'usd',
-    asset: 'usdc',
-    network: 'eip155:8453', // Base mainnet
-    tx_hash: '0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678',
-    recipient: '0x742d35Cc6634C0532925a3b844Bc9e7595f1e123',
-    metadata: {
-      agent_id: 'weather-agent-v2',
-      tool_call: 'get_forecast',
+  const payment = fromCryptoPaymentIntent(
+    {
+      id: 'pi_3QxYz1234567890abc',
+      amount: 50, // $0.50 in cents
+      currency: 'usd',
+      asset: 'usdc',
+      network: 'eip155:8453', // Base mainnet
+      tx_hash: '0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678',
+      recipient: '0x742d35Cc6634C0532925a3b844Bc9e7595f1e123',
+      customer: 'cus_demo123',
+      metadata: {
+        agent_id: 'weather-agent-v2',
+        tool_call: 'get_forecast',
+      },
     },
-  });
+    {
+      // Privacy defaults: customer_id and metadata excluded unless opted in
+      includeMetadata: true, // opt in for demo purposes
+      // includeCustomerId: false (default -- excluded)
+    }
+  );
 
   console.log('    Rail:     ', payment.rail);
   console.log('    Amount:   ', payment.amount, payment.currency);
@@ -94,8 +102,11 @@ async function main(): Promise<void> {
     console.log('  2. PaymentEvidence -> signed JWS receipt (Ed25519)');
     console.log('  3. JWS receipt -> verified with public key (no network)');
     console.log();
-    console.log('The receipt is a signed issuer attestation of payment.');
-    console.log('Offline verification confirms integrity -- not on-chain settlement.');
+    console.log('Verification meaning:');
+    console.log('  - The receipt is a signed issuer attestation of payment.');
+    console.log('  - Offline verify confirms integrity + origin (Ed25519).');
+    console.log('  - It does NOT confirm on-chain settlement.');
+    console.log('  - Use tx_hash + network with an RPC endpoint for that.');
   } else {
     console.log('FAILURE: Receipt verification failed.');
     process.exit(1);
