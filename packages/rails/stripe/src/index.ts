@@ -30,6 +30,28 @@ export interface StripePaymentIntent {
 }
 
 /**
+ * Stripe Crypto Payment Intent (simplified)
+ *
+ * Represents a Stripe payment intent settled via cryptocurrency,
+ * typically through x402 machine-to-machine payment flows.
+ */
+export interface StripeCryptoPaymentIntent {
+  id: string;
+  amount: number;
+  currency: string;
+  /** Crypto asset ticker (e.g., "usdc", "eth") */
+  asset: string;
+  /** Network identifier (CAIP-2 format, e.g., "eip155:8453") */
+  network: string;
+  /** On-chain transaction hash */
+  tx_hash?: string;
+  /** Recipient wallet address */
+  recipient?: string;
+  customer?: string;
+  metadata?: Record<string, string>;
+}
+
+/**
  * Stripe webhook event payload
  */
 export interface StripeWebhookEvent {
@@ -125,6 +147,71 @@ export function fromPaymentIntent(
     currency: intent.currency.toUpperCase(), // PEAC requires uppercase
     asset: intent.currency.toUpperCase(), // For Stripe, asset is typically same as currency
     env,
+    evidence,
+  };
+}
+
+/**
+ * Normalize Stripe crypto payment intent to PEAC PaymentEvidence
+ *
+ * Used for x402 machine-to-machine crypto payments settled through Stripe.
+ * Unlike fromPaymentIntent(), the asset field is the crypto token (USDC, ETH)
+ * and the network field is populated with a CAIP-2 identifier.
+ */
+export function fromCryptoPaymentIntent(
+  intent: StripeCryptoPaymentIntent,
+  env: 'live' | 'test' = 'live'
+): PaymentEvidence {
+  // Validate required fields
+  if (!intent.id) {
+    throw new Error('Stripe crypto payment intent missing id');
+  }
+  if (typeof intent.amount !== 'number' || intent.amount < 0) {
+    throw new Error('Stripe crypto payment intent invalid amount');
+  }
+  if (!intent.currency || !/^[a-z]{3}$/.test(intent.currency)) {
+    throw new Error(
+      'Stripe crypto payment intent invalid currency (must be lowercase ISO 4217)'
+    );
+  }
+  if (!intent.asset || typeof intent.asset !== 'string') {
+    throw new Error('Stripe crypto payment intent missing asset');
+  }
+  if (!intent.network || typeof intent.network !== 'string') {
+    throw new Error('Stripe crypto payment intent missing network');
+  }
+
+  // Build evidence object with crypto-specific data
+  const evidence: JsonObject = {
+    payment_intent_id: intent.id,
+    asset: intent.asset.toUpperCase(),
+    network: intent.network,
+  };
+
+  if (intent.tx_hash) {
+    evidence.tx_hash = intent.tx_hash;
+  }
+
+  if (intent.recipient) {
+    evidence.recipient = intent.recipient;
+  }
+
+  if (intent.customer) {
+    evidence.customer_id = intent.customer;
+  }
+
+  if (intent.metadata) {
+    evidence.metadata = intent.metadata;
+  }
+
+  return {
+    rail: 'stripe',
+    reference: intent.id,
+    amount: intent.amount,
+    currency: intent.currency.toUpperCase(),
+    asset: intent.asset.toUpperCase(),
+    env,
+    network: intent.network,
     evidence,
   };
 }

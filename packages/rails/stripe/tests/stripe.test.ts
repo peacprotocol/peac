@@ -6,9 +6,11 @@ import { describe, it, expect } from 'vitest';
 import {
   fromCheckoutSession,
   fromPaymentIntent,
+  fromCryptoPaymentIntent,
   fromWebhookEvent,
   type StripeCheckoutSession,
   type StripePaymentIntent,
+  type StripeCryptoPaymentIntent,
   type StripeWebhookEvent,
 } from '../src/index';
 
@@ -187,6 +189,159 @@ describe('Stripe rail adapter', () => {
       };
 
       expect(() => fromWebhookEvent(event)).toThrow('Unsupported Stripe webhook event type');
+    });
+  });
+
+  describe('fromCryptoPaymentIntent', () => {
+    it('should normalize Stripe crypto payment intent with full fields', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test_crypto_a1b2c3',
+        amount: 50000,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:8453',
+        tx_hash: '0xabc123def456',
+        recipient: '0x1234567890abcdef',
+        customer: 'cus_test_789',
+        metadata: {
+          x402_session: 'sess_001',
+        },
+      };
+
+      const normalized = fromCryptoPaymentIntent(intent);
+
+      expect(normalized.rail).toBe('stripe');
+      expect(normalized.reference).toBe('pi_test_crypto_a1b2c3');
+      expect(normalized.amount).toBe(50000);
+      expect(normalized.currency).toBe('USD');
+      expect(normalized.asset).toBe('USDC');
+      expect(normalized.network).toBe('eip155:8453');
+      expect(normalized.env).toBe('live');
+      expect(normalized.evidence).toMatchObject({
+        payment_intent_id: 'pi_test_crypto_a1b2c3',
+        asset: 'USDC',
+        network: 'eip155:8453',
+        tx_hash: '0xabc123def456',
+        recipient: '0x1234567890abcdef',
+        customer_id: 'cus_test_789',
+        metadata: { x402_session: 'sess_001' },
+      });
+    });
+
+    it('should normalize minimal crypto payment intent', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test_crypto_minimal',
+        amount: 100,
+        currency: 'usd',
+        asset: 'eth',
+        network: 'eip155:1',
+      };
+
+      const normalized = fromCryptoPaymentIntent(intent);
+
+      expect(normalized.rail).toBe('stripe');
+      expect(normalized.reference).toBe('pi_test_crypto_minimal');
+      expect(normalized.amount).toBe(100);
+      expect(normalized.currency).toBe('USD');
+      expect(normalized.asset).toBe('ETH');
+      expect(normalized.network).toBe('eip155:1');
+      expect(normalized.evidence).toMatchObject({
+        payment_intent_id: 'pi_test_crypto_minimal',
+        asset: 'ETH',
+        network: 'eip155:1',
+      });
+      // No optional fields in evidence
+      expect(normalized.evidence).not.toHaveProperty('tx_hash');
+      expect(normalized.evidence).not.toHaveProperty('recipient');
+      expect(normalized.evidence).not.toHaveProperty('customer_id');
+    });
+
+    it('should support test environment', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test_crypto_testenv',
+        amount: 500,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:84532',
+      };
+
+      const normalized = fromCryptoPaymentIntent(intent, 'test');
+
+      expect(normalized.env).toBe('test');
+    });
+
+    it('should reject crypto intent without id', () => {
+      const intent = {
+        amount: 100,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:8453',
+      } as StripeCryptoPaymentIntent;
+
+      expect(() => fromCryptoPaymentIntent(intent)).toThrow('missing id');
+    });
+
+    it('should reject crypto intent with invalid amount', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test',
+        amount: -1,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:8453',
+      };
+
+      expect(() => fromCryptoPaymentIntent(intent)).toThrow('invalid amount');
+    });
+
+    it('should reject crypto intent with invalid currency', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test',
+        amount: 100,
+        currency: 'INVALID',
+        asset: 'usdc',
+        network: 'eip155:8453',
+      };
+
+      expect(() => fromCryptoPaymentIntent(intent)).toThrow('invalid currency');
+    });
+
+    it('should reject crypto intent without asset', () => {
+      const intent = {
+        id: 'pi_test',
+        amount: 100,
+        currency: 'usd',
+        network: 'eip155:8453',
+      } as StripeCryptoPaymentIntent;
+
+      expect(() => fromCryptoPaymentIntent(intent)).toThrow('missing asset');
+    });
+
+    it('should reject crypto intent without network', () => {
+      const intent = {
+        id: 'pi_test',
+        amount: 100,
+        currency: 'usd',
+        asset: 'usdc',
+      } as StripeCryptoPaymentIntent;
+
+      expect(() => fromCryptoPaymentIntent(intent)).toThrow('missing network');
+    });
+
+    it('should ensure asset differs from currency for crypto payments', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test_crypto_diff',
+        amount: 1000,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:8453',
+      };
+
+      const normalized = fromCryptoPaymentIntent(intent);
+
+      // Currency is the fiat denomination, asset is the crypto token
+      expect(normalized.currency).toBe('USD');
+      expect(normalized.asset).toBe('USDC');
+      expect(normalized.currency).not.toBe(normalized.asset);
     });
   });
 
