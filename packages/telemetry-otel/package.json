@@ -35,6 +35,11 @@
   "peerDependencies": {
     "@opentelemetry/api": "^1.9.0"
   },
+  "peerDependenciesMeta": {
+    "@opentelemetry/api": {
+      "optional": false
+    }
+  },
   "devDependencies": {
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/sdk-metrics": "^2.0.0",

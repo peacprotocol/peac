@@ -17,7 +17,9 @@ This package bridges PEAC telemetry events to OpenTelemetry spans, events, and m
 pnpm add @peac/telemetry-otel @opentelemetry/api
 ```
 
-Note: `@opentelemetry/api` is a peer dependency. You must install it along with your OTel SDK components.
+Note: `@opentelemetry/api` is the only runtime peer dependency. OTel SDK packages
+(`@opentelemetry/sdk-trace-base`, `@opentelemetry/sdk-metrics`) are **not required** --
+this package uses only the API facade and works with any compatible SDK the consumer provides.
 
 ## Usage
 
