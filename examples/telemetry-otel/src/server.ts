@@ -23,8 +23,9 @@ import { createOtelProvider } from '@peac/telemetry-otel';
  */
 function initOtel(): void {
   // Set up trace provider with console exporter (for demo)
-  const tracerProvider = new BasicTracerProvider();
-  tracerProvider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  const tracerProvider = new BasicTracerProvider({
+    spanProcessors: [new SimpleSpanProcessor(new ConsoleSpanExporter())],
+  });
   trace.setGlobalTracerProvider(tracerProvider);
 
   console.log('[OTel] Tracing initialized with console exporter\n');

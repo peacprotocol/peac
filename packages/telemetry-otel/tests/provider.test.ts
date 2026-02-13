@@ -25,8 +25,9 @@ describe('createOtelProvider', () => {
   beforeEach(() => {
     // Set up trace provider with in-memory exporter
     spanExporter = new InMemorySpanExporter();
-    tracerProvider = new BasicTracerProvider();
-    tracerProvider.addSpanProcessor(new SimpleSpanProcessor(spanExporter));
+    tracerProvider = new BasicTracerProvider({
+      spanProcessors: [new SimpleSpanProcessor(spanExporter)],
+    });
     trace.setGlobalTracerProvider(tracerProvider);
 
     // Set up meter provider

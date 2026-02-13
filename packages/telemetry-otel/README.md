@@ -17,7 +17,9 @@ This package bridges PEAC telemetry events to OpenTelemetry spans, events, and m
 pnpm add @peac/telemetry-otel @opentelemetry/api
 ```
 
-Note: `@opentelemetry/api` is a peer dependency. You must install it along with your OTel SDK components.
+Note: `@opentelemetry/api` is the only runtime peer dependency. OTel SDK packages
+(`@opentelemetry/sdk-trace-base`, `@opentelemetry/sdk-metrics`) are **not required** --
+this package uses only the API facade and works with any compatible SDK the consumer provides.
 
 ## Usage
 
@@ -122,6 +124,24 @@ const extensions = createTraceContextExtensions(req.headers);
 - `recordReceiptIssued(metrics, ...)` - Record receipt issued
 - `recordReceiptVerified(metrics, ...)` - Record receipt verified
 - `recordAccessDecision(metrics, ...)` - Record access decision
+
+## Compatibility Matrix
+
+| Dependency                      | Role                  | Version    | Notes                                      |
+| ------------------------------- | --------------------- | ---------- | ------------------------------------------ |
+| `@opentelemetry/api`            | Peer dep (production) | `^1.9.0`   | Stable API, backward-compatible across 1.x |
+| `@opentelemetry/sdk-metrics`    | Dev dep (tests only)  | `^2.0.0`   | SDK v2 -- NOT shipped to consumers         |
+| `@opentelemetry/sdk-trace-base` | Dev dep (tests only)  | `^2.0.0`   | SDK v2 -- NOT shipped to consumers         |
+| Node.js                         | Runtime               | `>=22.0.0` | Matches monorepo `engines.node`            |
+
+**Key points:**
+
+- `@peac/telemetry-otel` only depends on `@opentelemetry/api` at runtime (peer dep).
+  Consumers bring their own SDK and exporter versions.
+- SDK v2 packages are dev dependencies used for testing. They are NOT bundled
+  into the published package and do not appear in consumers' dependency trees.
+- The OTel exporter in `examples/telemetry-otel/` uses `@opentelemetry/exporter-trace-otlp-http@^0.200.0`.
+  This version is coupled to SDK v2 -- OTel uses a `0.{MAJOR}xx.x` scheme for experimental packages.
 
 ## Related Packages
 

@@ -102,6 +102,9 @@ jobs:
       - name: Pack and install gate
         run: bash scripts/pack-and-install.sh
 
+      - name: OTel pack-and-import smoke test
+        run: bash scripts/otel-smoke.sh
+
       - name: Generated profiles drift check
         run: pnpm --filter @peac/policy-kit generate:profiles:check
 
