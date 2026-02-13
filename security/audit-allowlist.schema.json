@@ -11,7 +11,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["advisory_id", "reason", "expires_at"],
+        "required": ["advisory_id", "reason", "expires_at", "remediation", "issue_url"],
         "properties": {
           "advisory_id": {
             "type": "string",

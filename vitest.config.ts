@@ -70,6 +70,7 @@ export default defineConfig({
       // Run them via pnpm --filter @peac/worker-* test
       'tests/conformance/**/*.spec.ts',
       'tests/parity/**/*.test.ts',
+      'tests/scripts/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,

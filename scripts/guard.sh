@@ -193,28 +193,17 @@ else
   echo "OK"
 fi
 
-echo "== dependency audit (critical = blocking, high = warning) =="
-# Two-tier policy:
-#   critical -> blocks release (sets bad=1)
-#   high     -> warning only (does not block)
-# To allowlist a known advisory, add it to security/audit-allowlist.json
-# with an expires_at date. Expired entries are treated as active again.
+echo "== dependency audit (via audit-gate.mjs) =="
+# Deterministic audit gate: parses JSON, applies time-bounded allowlist,
+# blocks on critical (always), blocks on high (strict mode only).
+# See scripts/audit-gate.mjs and security/audit-allowlist.json.
 if [ "${PEAC_FAST:-}" = "1" ]; then
   echo "SKIP (PEAC_FAST=1)"
 else
-  _audit_critical=0
-  pnpm audit --audit-level=critical 2>/dev/null || _audit_critical=$?
-  if [ "$_audit_critical" -ne 0 ]; then
-    echo "FAIL: pnpm audit found critical vulnerabilities -- must fix before release"
-    bad=1
+  if node scripts/audit-gate.mjs; then
+    :
   else
-    _audit_high=0
-    pnpm audit --audit-level=high 2>/dev/null || _audit_high=$?
-    if [ "$_audit_high" -ne 0 ]; then
-      echo "WARNING: pnpm audit found high-severity vulnerabilities -- review before release"
-    else
-      echo "OK"
-    fi
+    bad=1
   fi
 fi
 
