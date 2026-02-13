@@ -23,15 +23,28 @@ echo "=== OTel Pack-and-Import Smoke Test ==="
 echo "Root: $ROOT_DIR"
 echo "Temp: $TEMP_DIR"
 
-# Packages needed (in dependency order)
-OTEL_DEPS=("@peac/kernel" "@peac/privacy" "@peac/telemetry" "@peac/telemetry-otel")
+# Deterministic package directories (in dependency order)
+PKG_NAMES=("@peac/kernel" "@peac/privacy" "@peac/telemetry" "@peac/telemetry-otel")
+PKG_DIRS=(
+  "$ROOT_DIR/packages/kernel"
+  "$ROOT_DIR/packages/privacy"
+  "$ROOT_DIR/packages/telemetry"
+  "$ROOT_DIR/packages/telemetry-otel"
+)
+
+# Read peer range from package.json (matches what consumers will install)
+OTEL_API_RANGE=$(node -e "
+  const pkg = JSON.parse(require('fs').readFileSync('$ROOT_DIR/packages/telemetry-otel/package.json', 'utf-8'));
+  console.log(pkg.peerDependencies['@opentelemetry/api']);
+")
+echo "OTel API peer range: $OTEL_API_RANGE"
 
 # 0. Build required packages
 echo ""
 echo "0. Building packages..."
 cd "$ROOT_DIR"
 FILTER_ARGS=""
-for pkg in "${OTEL_DEPS[@]}"; do
+for pkg in "${PKG_NAMES[@]}"; do
   FILTER_ARGS+=" --filter $pkg"
 done
 pnpm $FILTER_ARGS build
@@ -40,10 +53,25 @@ pnpm $FILTER_ARGS build
 echo ""
 echo "1. Packing packages..."
 declare -a TARBALLS=()
-for pkg in "${OTEL_DEPS[@]}"; do
-  pkg_dir=$(cd "$ROOT_DIR" && pnpm --filter "$pkg" exec pwd 2>/dev/null | tail -1)
+for i in "${!PKG_NAMES[@]}"; do
+  pkg="${PKG_NAMES[$i]}"
+  pkg_dir="${PKG_DIRS[$i]}"
+  if [ ! -d "$pkg_dir" ]; then
+    echo "FAIL: Package directory not found: $pkg_dir"
+    exit 1
+  fi
   cd "$pkg_dir"
   tarball=$(pnpm pack --pack-destination "$TEMP_DIR" 2>/dev/null | tail -1)
+  # Ensure full path (pnpm pack may return just filename)
+  if [ ! -f "$tarball" ]; then
+    tarball="$TEMP_DIR/$tarball"
+  fi
+  if [ ! -f "$tarball" ]; then
+    echo "FAIL: Tarball not found for $pkg"
+    echo "Contents of $TEMP_DIR:"
+    ls -la "$TEMP_DIR"
+    exit 1
+  fi
   echo "   $pkg -> $(basename "$tarball")"
   TARBALLS+=("$tarball")
 done
@@ -67,8 +95,8 @@ USER_NPMRC="$TEMP_DIR/user.npmrc"
 GLOBAL_NPMRC="$TEMP_DIR/global.npmrc"
 echo "registry=https://registry.npmjs.org/" > "$USER_NPMRC"
 : > "$GLOBAL_NPMRC"
-unset NPM_TOKEN npm_config_token NPM_CONFIG_TOKEN
-unset npm_config__auth NPM_CONFIG__AUTH
+unset NPM_TOKEN npm_config_token NPM_CONFIG_TOKEN 2>/dev/null || true
+unset npm_config__auth NPM_CONFIG__AUTH 2>/dev/null || true
 export NPM_CONFIG_USERCONFIG="$USER_NPMRC"
 export NPM_CONFIG_GLOBALCONFIG="$GLOBAL_NPMRC"
 export NPM_CONFIG_CACHE="$TEMP_DIR/npm-cache"
@@ -76,10 +104,10 @@ export NPM_CONFIG_REGISTRY="https://registry.npmjs.org/"
 export NPM_CONFIG_AUDIT=false
 export NPM_CONFIG_FUND=false
 
-# 3. Install tarballs + peer dep
+# 3. Install tarballs + peer dep (use exact peer range, not @latest)
 echo ""
-echo "3. Installing tarballs + @opentelemetry/api..."
-npm install "${TARBALLS[@]}" @opentelemetry/api@latest
+echo "3. Installing tarballs + @opentelemetry/api@$OTEL_API_RANGE..."
+npm install "${TARBALLS[@]}" "@opentelemetry/api@$OTEL_API_RANGE"
 
 # 4. Verify no unresolved workspace deps
 echo ""
@@ -90,9 +118,25 @@ if grep -r "workspace:" node_modules/@peac/*/package.json 2>/dev/null; then
 fi
 echo "   OK: No unresolved workspace dependencies"
 
-# 5. Run import smoke test
+# 5. Verify resolved dependency tree has expected packages
 echo ""
-echo "5. Running import smoke test..."
+echo "5. Verifying installed packages..."
+for pkg in "${PKG_NAMES[@]}"; do
+  pkg_path="node_modules/${pkg}"
+  if [ ! -d "$pkg_path" ]; then
+    echo "FAIL: $pkg not found in node_modules"
+    exit 1
+  fi
+done
+if [ ! -d "node_modules/@opentelemetry/api" ]; then
+  echo "FAIL: @opentelemetry/api not found in node_modules"
+  exit 1
+fi
+echo "   OK: All expected packages installed"
+
+# 6. Run import smoke test
+echo ""
+echo "6. Running import smoke test..."
 cat > test.mjs << 'SMOKE_EOF'
 // Verify that @peac/telemetry-otel resolves and exports createOtelProvider
 const mod = await import('@peac/telemetry-otel');
