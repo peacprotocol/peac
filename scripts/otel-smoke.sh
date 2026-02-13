@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # OTel pack-and-import smoke test
 #
 # Verifies that @peac/telemetry-otel can be installed from a tarball
@@ -37,17 +37,21 @@ OTEL_API_RANGE=$(node -e "
   const pkg = JSON.parse(require('fs').readFileSync('$ROOT_DIR/packages/telemetry-otel/package.json', 'utf-8'));
   console.log(pkg.peerDependencies['@opentelemetry/api']);
 ")
+if [ -z "$OTEL_API_RANGE" ]; then
+  echo "FAIL: Could not read @opentelemetry/api peer range from package.json"
+  exit 1
+fi
 echo "OTel API peer range: $OTEL_API_RANGE"
 
 # 0. Build required packages
 echo ""
 echo "0. Building packages..."
 cd "$ROOT_DIR"
-FILTER_ARGS=""
+FILTER_ARGS=()
 for pkg in "${PKG_NAMES[@]}"; do
-  FILTER_ARGS+=" --filter $pkg"
+  FILTER_ARGS+=("--filter" "$pkg")
 done
-pnpm $FILTER_ARGS build
+pnpm "${FILTER_ARGS[@]}" build
 
 # 1. Pack all packages
 echo ""
@@ -61,7 +65,7 @@ for i in "${!PKG_NAMES[@]}"; do
     exit 1
   fi
   cd "$pkg_dir"
-  tarball=$(pnpm pack --pack-destination "$TEMP_DIR" 2>/dev/null | tail -1)
+  tarball=$(pnpm pack --pack-destination "$TEMP_DIR" | tail -1)
   # Ensure full path (pnpm pack may return just filename)
   if [ ! -f "$tarball" ]; then
     tarball="$TEMP_DIR/$tarball"
@@ -105,9 +109,11 @@ export NPM_CONFIG_AUDIT=false
 export NPM_CONFIG_FUND=false
 
 # 3. Install tarballs + peer dep (use exact peer range, not @latest)
+#    --ignore-scripts: no post-install side effects
+#    --no-package-lock: no lockfile needed for a throwaway test project
 echo ""
 echo "3. Installing tarballs + @opentelemetry/api@$OTEL_API_RANGE..."
-npm install "${TARBALLS[@]}" "@opentelemetry/api@$OTEL_API_RANGE"
+npm install --ignore-scripts --no-package-lock "${TARBALLS[@]}" "@opentelemetry/api@$OTEL_API_RANGE"
 
 # 4. Verify no unresolved workspace deps
 echo ""
