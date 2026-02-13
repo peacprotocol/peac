@@ -143,7 +143,7 @@ function lintSchemas() {
       console.log('  [PASS] registries.json validates against registries.schema.json');
       passed++;
     } else {
-      const errMsg = validate.errors.map(e => `${e.instancePath} ${e.message}`).join('; ');
+      const errMsg = validate.errors.map((e) => `${e.instancePath} ${e.message}`).join('; ');
       console.log('  [FAIL] registries.json');
       console.log(`         ${errMsg}`);
       errors.push({ file: 'registries.json', error: errMsg });
@@ -152,17 +152,20 @@ function lintSchemas() {
 
     // Check every entry has status and no duplicate IDs within a registry
     const registryKeys = Object.keys(registries).filter(
-      k => !k.startsWith('$') && !k.startsWith('_') && k !== 'version'
+      (k) => !k.startsWith('$') && !k.startsWith('_') && k !== 'version'
     );
     for (const key of registryKeys) {
       const entries = Array.isArray(registries[key])
         ? registries[key]
-        : registries[key]?.entries ?? [];
-      const ids = entries.map(e => e.id);
+        : (registries[key]?.entries ?? []);
+      const ids = entries.map((e) => e.id);
       const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
       if (dupes.length > 0) {
         console.log(`  [FAIL] ${key}: duplicate IDs: ${dupes.join(', ')}`);
-        errors.push({ file: `registries.json/${key}`, error: `duplicate IDs: ${dupes.join(', ')}` });
+        errors.push({
+          file: `registries.json/${key}`,
+          error: `duplicate IDs: ${dupes.join(', ')}`,
+        });
         failed++;
       }
     }

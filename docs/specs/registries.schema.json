@@ -44,10 +44,7 @@
           "minLength": 1
         },
         "reference": {
-          "oneOf": [
-            { "type": "string", "minLength": 1 },
-            { "type": "null" }
-          ]
+          "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
         },
         "status": {
           "type": "string",
