@@ -327,6 +327,58 @@ describe('Stripe rail adapter', () => {
       expect(() => fromCryptoPaymentIntent(intent)).toThrow('missing network');
     });
 
+    it('should reject crypto intent with invalid CAIP-2 network', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test',
+        amount: 100,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'not-a-caip2',
+      };
+
+      expect(() => fromCryptoPaymentIntent(intent)).toThrow('CAIP-2 format');
+    });
+
+    it('should accept valid CAIP-2 network identifiers', () => {
+      const networks = ['eip155:1', 'eip155:8453', 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'];
+      for (const network of networks) {
+        const intent: StripeCryptoPaymentIntent = {
+          id: 'pi_test',
+          amount: 100,
+          currency: 'usd',
+          asset: 'usdc',
+          network,
+        };
+        expect(() => fromCryptoPaymentIntent(intent)).not.toThrow();
+      }
+    });
+
+    it('should reject empty tx_hash', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test',
+        amount: 100,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:1',
+        tx_hash: '',
+      };
+
+      expect(() => fromCryptoPaymentIntent(intent)).toThrow('invalid tx_hash');
+    });
+
+    it('should reject empty recipient', () => {
+      const intent: StripeCryptoPaymentIntent = {
+        id: 'pi_test',
+        amount: 100,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:1',
+        recipient: '',
+      };
+
+      expect(() => fromCryptoPaymentIntent(intent)).toThrow('invalid recipient');
+    });
+
     it('should ensure asset differs from currency for crypto payments', () => {
       const intent: StripeCryptoPaymentIntent = {
         id: 'pi_test_crypto_diff',

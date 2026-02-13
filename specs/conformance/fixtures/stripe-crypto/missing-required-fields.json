@@ -65,7 +65,48 @@
         }
       },
       "expected_error": "missing network"
+    },
+    {
+      "id": "invalid-caip2-network",
+      "input": {
+        "intent": {
+          "id": "pi_test",
+          "amount": 100,
+          "currency": "usd",
+          "asset": "usdc",
+          "network": "not-a-caip2"
+        }
+      },
+      "expected_error": "CAIP-2 format"
+    },
+    {
+      "id": "empty-tx-hash",
+      "input": {
+        "intent": {
+          "id": "pi_test",
+          "amount": 100,
+          "currency": "usd",
+          "asset": "usdc",
+          "network": "eip155:1",
+          "tx_hash": ""
+        }
+      },
+      "expected_error": "invalid tx_hash"
+    },
+    {
+      "id": "empty-recipient",
+      "input": {
+        "intent": {
+          "id": "pi_test",
+          "amount": 100,
+          "currency": "usd",
+          "asset": "usdc",
+          "network": "eip155:1",
+          "recipient": ""
+        }
+      },
+      "expected_error": "invalid recipient"
     }
   ],
-  "notes": "Each case tests a specific required field. All must throw with a message containing the expected_error substring."
+  "notes": "Each case tests a specific required or shape-validated field. All must throw with a message containing the expected_error substring."
 }

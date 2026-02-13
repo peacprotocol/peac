@@ -181,6 +181,27 @@ export function fromCryptoPaymentIntent(
     throw new Error('Stripe crypto payment intent missing network');
   }
 
+  // Validate CAIP-2 format: namespace:reference (e.g., "eip155:1", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
+  if (!/^[a-z][a-z0-9-]{2,31}:[a-zA-Z0-9]{1,64}$/.test(intent.network)) {
+    throw new Error(
+      'Stripe crypto payment intent invalid network (must be CAIP-2 format: namespace:reference)'
+    );
+  }
+
+  // Validate tx_hash shape if present (opaque hex string, 0x-prefixed for EVM chains)
+  if (intent.tx_hash !== undefined) {
+    if (typeof intent.tx_hash !== 'string' || intent.tx_hash.length === 0) {
+      throw new Error('Stripe crypto payment intent invalid tx_hash (must be non-empty string)');
+    }
+  }
+
+  // Validate recipient shape if present (opaque address string)
+  if (intent.recipient !== undefined) {
+    if (typeof intent.recipient !== 'string' || intent.recipient.length === 0) {
+      throw new Error('Stripe crypto payment intent invalid recipient (must be non-empty string)');
+    }
+  }
+
   // Build evidence object with crypto-specific data
   const evidence: JsonObject = {
     payment_intent_id: intent.id,
