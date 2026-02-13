@@ -313,4 +313,6 @@ app.post('/issue-receipt', async (req, res) => {
 - **Live demo:** [x402.peacprotocol.org](https://x402.peacprotocol.org)
 - **x402 spec:** [x402.org](https://x402.org)
 - **Example code:** [examples/x402-node-server](../../examples/x402-node-server)
-- **Package:** [@peac/rails-x402](../../packages/rails/x402)
+- **Stripe x402 crypto demo:** `pnpm --filter @peac/example-stripe-x402-crypto demo` ([source](../../examples/stripe-x402-crypto/demo.ts) | [profile](../profiles/stripe-x402-machine-payments.md))
+- **Package (x402):** [@peac/rails-x402](../../packages/rails/x402)
+- **Package (Stripe):** [@peac/rails-stripe](../../packages/rails/stripe)

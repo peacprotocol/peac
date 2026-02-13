@@ -216,35 +216,14 @@ describe('Global Conformance Manifest Hygiene', () => {
   // -------------------------------------------------------------------------
 
   /**
-   * Categories with accurate manifest tracking (fixture_count, unique names).
-   * These are actively maintained and enforced by this test.
+   * Category tracking loaded from data file (specs/conformance/category-tracking.json).
+   * Edit the JSON file to add/remove categories -- PRs touch data, not test code.
    */
-  const TRACKED_CATEGORIES = ['interaction', 'agent-identity'];
-
-  /**
-   * Categories explicitly NOT tracked in manifest.json.
-   * Each entry documents the reason for exclusion.
-   * To graduate a category: fix the issues and move to TRACKED_CATEGORIES.
-   */
-  const UNTRACKED_CATEGORIES: Record<string, string> = {
-    x402: 'Single-receipt fixtures, not fixture packs; manifest not updated',
-    attribution: 'Category not in manifest.json; needs manifest entry',
-    bundle: 'fixture_count drift (manifest=12, actual=20); needs update',
-    dispute: 'fixture_count drift (edge-cases: manifest=22, actual=20)',
-    workflow: 'fixture_count drift across multiple files; needs audit',
-    obligations: 'Duplicate fixture names in valid.json and invalid.json',
-    issue: 'Moderate drift; not yet audited',
-    policy: 'Moderate drift; not yet audited',
-    discovery: 'Not yet audited for fixture pack hygiene',
-    purpose: 'Legacy category; no fixture_count tracking',
-    valid: 'Single-receipt fixtures, not fixture packs',
-    invalid: 'Single-receipt fixtures, not fixture packs',
-    edge: 'Single-receipt fixtures, not fixture packs',
-    verifier: 'New v0.10.8 fixtures; not yet tracked in manifest.json',
-    crypto: 'Deterministic golden vectors (Ed25519 sign/verify); not fixture packs',
-    parse:
-      'Single-receipt fixtures (v0.10.9+); tracked via expected_error/expected_variant in manifest.json, not fixture_count',
-  };
+  const categoryTracking = JSON.parse(
+    readFileSync(join(CONFORMANCE_ROOT, '..', 'category-tracking.json'), 'utf-8')
+  ) as { tracked: string[]; untracked: Record<string, string> };
+  const TRACKED_CATEGORIES = categoryTracking.tracked;
+  const UNTRACKED_CATEGORIES = categoryTracking.untracked;
 
   // -------------------------------------------------------------------------
   // Fixture Count Validation
@@ -450,6 +429,21 @@ describe('Global Conformance Manifest Hygiene', () => {
 
       // Always passes - this is for visibility only
       expect(true).toBe(true);
+    });
+
+    it('category-tracking.json arrays are sorted alphabetically (merge-conflict guard)', () => {
+      const trackedSorted = [...TRACKED_CATEGORIES].sort((a, b) => a.localeCompare(b));
+      expect(
+        TRACKED_CATEGORIES,
+        `tracked is not sorted. Expected:\n  ${trackedSorted.join(', ')}\nGot:\n  ${TRACKED_CATEGORIES.join(', ')}`
+      ).toEqual(trackedSorted);
+
+      const untrackedKeys = Object.keys(UNTRACKED_CATEGORIES);
+      const untrackedSorted = [...untrackedKeys].sort((a, b) => a.localeCompare(b));
+      expect(
+        untrackedKeys,
+        `untracked keys are not sorted. Expected:\n  ${untrackedSorted.join(', ')}\nGot:\n  ${untrackedKeys.join(', ')}`
+      ).toEqual(untrackedSorted);
     });
   });
 

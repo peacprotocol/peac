@@ -372,6 +372,25 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/stripe-x402-crypto:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/rails-stripe':
+        specifier: workspace:*
+        version: link:../../packages/rails/stripe
+    devDependencies:
+      tsx:
+        specifier: ^4.0.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/telemetry-otel:
     dependencies:
       '@opentelemetry/api':

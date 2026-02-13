@@ -65,13 +65,13 @@ for i in "${!PKG_NAMES[@]}"; do
     exit 1
   fi
   cd "$pkg_dir"
-  tarball=$(pnpm pack --pack-destination "$TEMP_DIR" | tail -1)
-  # Ensure full path (pnpm pack may return just filename)
-  if [ ! -f "$tarball" ]; then
-    tarball="$TEMP_DIR/$tarball"
-  fi
-  if [ ! -f "$tarball" ]; then
-    echo "FAIL: Tarball not found for $pkg"
+  # Snapshot tarballs before packing, then take set difference (locale-safe)
+  before=$(find "$TEMP_DIR" -maxdepth 1 -type f -name '*.tgz' -print | LC_ALL=C sort)
+  pnpm pack --pack-destination "$TEMP_DIR"
+  after=$(find "$TEMP_DIR" -maxdepth 1 -type f -name '*.tgz' -print | LC_ALL=C sort)
+  tarball=$(comm -13 <(printf '%s\n' "$before") <(printf '%s\n' "$after"))
+  if [ -z "$tarball" ] || [ "$(echo "$tarball" | wc -l)" -ne 1 ]; then
+    echo "FAIL: Expected exactly 1 new tarball for $pkg, got: $tarball"
     echo "Contents of $TEMP_DIR:"
     ls -la "$TEMP_DIR"
     exit 1

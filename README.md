@@ -209,6 +209,7 @@ See [examples/quickstart/](examples/quickstart/) for runnable code. For settleme
 - **Agent developer** -- [Quick start](#quick-start): issue and verify receipts in 5 lines
 - **API operator** -- [Express middleware](docs/README_LONG.md#express-middleware): add PEAC in 3 lines
 - **Go developer** -- [Go SDK](sdks/go/): `peac.Issue()` + `peac.Verify()`
+- **x402 / crypto payments** -- [Stripe x402 profile](docs/profiles/stripe-x402-machine-payments.md): normalize + receipt + verify
 - **Policy author** -- [Policy Kit](docs/policy-kit/quickstart.md): author and validate terms
 - **Auditor / compliance** -- [Dispute Bundles](#core-primitives): portable evidence format
 - **Protocol integrator** -- [Spec Index](docs/SPEC_INDEX.md): normative specifications
@@ -277,6 +278,7 @@ See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](doc
 | [Spec Index](docs/SPEC_INDEX.md)                       | Normative specifications                          |
 | [Architecture](docs/ARCHITECTURE.md)                   | Kernel-first design                               |
 | [Policy Kit Quickstart](docs/policy-kit/quickstart.md) | Policy authoring guide                            |
+| [Profiles](docs/profiles/)                             | Integration profiles (Stripe x402, etc.)          |
 | [Engineering Guide](docs/engineering-guide.md)         | Development patterns                              |
 | [CI Behavior](docs/CI_BEHAVIOR.md)                     | CI pipeline and gates                             |
 | [Extended README](docs/README_LONG.md)                 | Package catalog, integration examples, layer maps |

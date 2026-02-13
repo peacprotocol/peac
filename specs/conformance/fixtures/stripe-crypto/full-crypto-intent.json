@@ -1,0 +1,49 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "stripe-crypto-full",
+  "description": "Full crypto payment intent with all optional fields populated",
+  "category": "valid",
+  "input": {
+    "intent": {
+      "id": "pi_3QxYzFull7890123",
+      "amount": 100000,
+      "currency": "usd",
+      "asset": "eth",
+      "network": "eip155:1",
+      "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+      "recipient": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+      "customer": "cus_x402_agent_001",
+      "metadata": {
+        "x402_session": "sess_machine_001",
+        "agent_id": "agent-weather-v2"
+      }
+    },
+    "env": "live",
+    "options": {
+      "includeCustomerId": true,
+      "includeMetadata": true
+    }
+  },
+  "expected": {
+    "rail": "stripe",
+    "reference": "pi_3QxYzFull7890123",
+    "amount": 100000,
+    "currency": "USD",
+    "asset": "ETH",
+    "network": "eip155:1",
+    "env": "live",
+    "evidence": {
+      "payment_intent_id": "pi_3QxYzFull7890123",
+      "asset": "ETH",
+      "network": "eip155:1",
+      "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+      "recipient": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+      "customer_id": "cus_x402_agent_001",
+      "metadata": {
+        "x402_session": "sess_machine_001",
+        "agent_id": "agent-weather-v2"
+      }
+    }
+  },
+  "notes": "Full crypto intent on Ethereum mainnet (eip155:1) with ETH. Includes on-chain tx_hash, recipient address, customer, and x402 session metadata."
+}
