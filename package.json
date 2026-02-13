@@ -62,7 +62,7 @@
   "devDependencies": {
     "@peac/contracts": "workspace:^",
     "@peac/mappings-tap": "workspace:^",
-    "@types/node": "^20.10.0",
+    "@types/node": "^25.2.3",
     "@eslint/js": "^10.0.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
