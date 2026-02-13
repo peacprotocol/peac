@@ -8,9 +8,23 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { fromCryptoPaymentIntent, type StripeCryptoPaymentIntent, type CryptoPaymentOptions } from '../src/index';
+import {
+  fromCryptoPaymentIntent,
+  type StripeCryptoPaymentIntent,
+  type CryptoPaymentOptions,
+} from '../src/index';
 
-const FIXTURES_DIR = join(__dirname, '..', '..', '..', '..', 'specs', 'conformance', 'fixtures', 'stripe-crypto');
+const FIXTURES_DIR = join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  'specs',
+  'conformance',
+  'fixtures',
+  'stripe-crypto'
+);
 
 interface ValidVector {
   id: string;
