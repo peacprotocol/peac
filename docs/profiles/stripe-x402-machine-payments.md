@@ -113,19 +113,51 @@ The adapter does not perform exchange rate conversion.
 | Field         | Default  | Opt-in flag         | Risk                                    |
 | ------------- | -------- | ------------------- | --------------------------------------- |
 | `customer_id` | Excluded | `includeCustomerId` | Links receipts to Stripe customer       |
-| `metadata`    | Excluded | `includeMetadata`   | May contain PII (emails, IPs)           |
+| `metadata`    | Excluded | `metadataPolicy`    | May contain PII (emails, IPs)           |
 | `tx_hash`     | Included | n/a                 | On-chain public, enables graph analysis |
 | `recipient`   | Included | n/a                 | On-chain public, enables graph analysis |
 
+### Metadata Policy
+
+The `metadataPolicy` option controls how Stripe metadata is included in evidence.
+It takes precedence over the boolean `includeMetadata` flag.
+
+| Policy          | Behavior                                          |
+| --------------- | ------------------------------------------------- |
+| `'omit'`        | No metadata in evidence (default)                 |
+| `'passthrough'` | Include all metadata with bounds enforcement      |
+| `'allowlist'`   | Include only keys listed in `metadataAllowedKeys` |
+
+When metadata is included (`passthrough` or `allowlist`), the following bounds
+are enforced:
+
+- Maximum 20 entries (excess silently dropped)
+- Maximum key length: 40 characters (truncated)
+- Maximum value length: 500 characters (truncated)
+- Invisible Unicode characters stripped (zero-width, direction overrides, BOM)
+
 ```typescript
-// Default: customer_id and metadata excluded
+// Default: metadata excluded
 fromCryptoPaymentIntent(intent);
 
-// Opt in to include metadata
+// Passthrough: include all metadata with bounds enforcement
+fromCryptoPaymentIntent(intent, { metadataPolicy: 'passthrough' });
+
+// Allowlist: include only specified keys
+fromCryptoPaymentIntent(intent, {
+  metadataPolicy: 'allowlist',
+  metadataAllowedKeys: ['agent_id', 'tool_call'],
+});
+
+// Legacy boolean (equivalent to metadataPolicy: 'passthrough')
 fromCryptoPaymentIntent(intent, { includeMetadata: true });
 
-// Opt in to include both
-fromCryptoPaymentIntent(intent, { includeCustomerId: true, includeMetadata: true });
+// Include customer ID as well
+fromCryptoPaymentIntent(intent, {
+  includeCustomerId: true,
+  metadataPolicy: 'allowlist',
+  metadataAllowedKeys: ['agent_id'],
+});
 ```
 
 For privacy-critical deployments, also omit `recipient` from the input intent

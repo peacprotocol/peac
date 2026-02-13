@@ -419,6 +419,143 @@ describe('Stripe rail adapter', () => {
       expect(normalized.evidence).toHaveProperty('metadata');
     });
 
+    describe('metadataPolicy', () => {
+      const baseIntent: StripeCryptoPaymentIntent = {
+        id: 'pi_test_policy',
+        amount: 100,
+        currency: 'usd',
+        asset: 'usdc',
+        network: 'eip155:8453',
+        metadata: { agent_id: 'a1', tool_call: 'forecast', session: 'sess_01' },
+      };
+
+      it('passthrough includes all metadata', () => {
+        const result = fromCryptoPaymentIntent(baseIntent, {
+          metadataPolicy: 'passthrough',
+        });
+        expect(result.evidence).toHaveProperty('metadata');
+        const meta = (result.evidence as Record<string, unknown>).metadata as Record<
+          string,
+          string
+        >;
+        expect(meta).toMatchObject({
+          agent_id: 'a1',
+          tool_call: 'forecast',
+          session: 'sess_01',
+        });
+      });
+
+      it('allowlist filters to specified keys', () => {
+        const result = fromCryptoPaymentIntent(baseIntent, {
+          metadataPolicy: 'allowlist',
+          metadataAllowedKeys: ['agent_id'],
+        });
+        const meta = (result.evidence as Record<string, unknown>).metadata as Record<
+          string,
+          string
+        >;
+        expect(meta).toEqual({ agent_id: 'a1' });
+      });
+
+      it('allowlist with no matching keys omits metadata', () => {
+        const result = fromCryptoPaymentIntent(baseIntent, {
+          metadataPolicy: 'allowlist',
+          metadataAllowedKeys: ['nonexistent'],
+        });
+        expect(result.evidence).not.toHaveProperty('metadata');
+      });
+
+      it('omit excludes metadata even when includeMetadata is true', () => {
+        const result = fromCryptoPaymentIntent(baseIntent, {
+          includeMetadata: true,
+          metadataPolicy: 'omit',
+        });
+        expect(result.evidence).not.toHaveProperty('metadata');
+      });
+
+      it('metadataPolicy takes precedence over includeMetadata', () => {
+        // includeMetadata: false but metadataPolicy: 'passthrough' -> include
+        const result = fromCryptoPaymentIntent(baseIntent, {
+          includeMetadata: false,
+          metadataPolicy: 'passthrough',
+        });
+        expect(result.evidence).toHaveProperty('metadata');
+      });
+
+      it('truncates keys exceeding max length', () => {
+        const longKey = 'k'.repeat(60);
+        const intent: StripeCryptoPaymentIntent = {
+          ...baseIntent,
+          metadata: { [longKey]: 'value' },
+        };
+        const result = fromCryptoPaymentIntent(intent, {
+          metadataPolicy: 'passthrough',
+        });
+        const meta = (result.evidence as Record<string, unknown>).metadata as Record<
+          string,
+          string
+        >;
+        const keys = Object.keys(meta);
+        expect(keys[0].length).toBe(40);
+      });
+
+      it('truncates values exceeding max length', () => {
+        const longValue = 'v'.repeat(600);
+        const intent: StripeCryptoPaymentIntent = {
+          ...baseIntent,
+          metadata: { key: longValue },
+        };
+        const result = fromCryptoPaymentIntent(intent, {
+          metadataPolicy: 'passthrough',
+        });
+        const meta = (result.evidence as Record<string, unknown>).metadata as Record<
+          string,
+          string
+        >;
+        expect(meta.key.length).toBe(500);
+      });
+
+      it('limits to max 20 metadata entries', () => {
+        const manyEntries: Record<string, string> = {};
+        for (let i = 0; i < 25; i++) {
+          manyEntries[`key_${String(i).padStart(2, '0')}`] = `val_${i}`;
+        }
+        const intent: StripeCryptoPaymentIntent = {
+          ...baseIntent,
+          metadata: manyEntries,
+        };
+        const result = fromCryptoPaymentIntent(intent, {
+          metadataPolicy: 'passthrough',
+        });
+        const meta = (result.evidence as Record<string, unknown>).metadata as Record<
+          string,
+          string
+        >;
+        expect(Object.keys(meta).length).toBe(20);
+      });
+
+      it('strips invisible Unicode characters from keys and values', () => {
+        const intent: StripeCryptoPaymentIntent = {
+          ...baseIntent,
+          metadata: {
+            // Zero-width space in key and value
+            'agent\u200Bid': 'val\u200Bue',
+            // Direction override
+            'tool\u202Acall': 'fore\u202Acast',
+          },
+        };
+        const result = fromCryptoPaymentIntent(intent, {
+          metadataPolicy: 'passthrough',
+        });
+        const meta = (result.evidence as Record<string, unknown>).metadata as Record<
+          string,
+          string
+        >;
+        expect(meta).toHaveProperty('agentid', 'value');
+        expect(meta).toHaveProperty('toolcall', 'forecast');
+      });
+    });
+
     it('should ensure asset differs from currency for crypto payments', () => {
       const intent: StripeCryptoPaymentIntent = {
         id: 'pi_test_crypto_diff',

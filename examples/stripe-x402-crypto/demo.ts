@@ -47,8 +47,11 @@ async function main(): Promise<void> {
       },
     },
     {
-      // Privacy defaults: customer_id and metadata excluded unless opted in
-      includeMetadata: true, // opt in for demo purposes
+      // Privacy defaults: customer_id and metadata excluded unless opted in.
+      // metadataPolicy controls how metadata is included:
+      //   'omit' (default) | 'passthrough' (all, bounded) | 'allowlist' (named keys only)
+      metadataPolicy: 'allowlist',
+      metadataAllowedKeys: ['agent_id', 'tool_call'],
       // includeCustomerId: false (default -- excluded)
     }
   );

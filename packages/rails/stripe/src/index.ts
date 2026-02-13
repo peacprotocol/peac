@@ -151,6 +151,52 @@ export function fromPaymentIntent(
   };
 }
 
+/** Metadata inclusion policy for crypto payment evidence */
+export type MetadataPolicy = 'omit' | 'passthrough' | 'allowlist';
+
+/** Maximum metadata entries when included */
+const METADATA_MAX_KEYS = 20;
+/** Maximum metadata key length */
+const METADATA_MAX_KEY_LENGTH = 40;
+/** Maximum metadata value length */
+const METADATA_MAX_VALUE_LENGTH = 500;
+
+/** Regex matching invisible Unicode characters (zero-width, direction overrides, BOM) */
+const INVISIBLE_RE = /[\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g;
+
+function stripInvisible(s: string): string {
+  return s.replace(INVISIBLE_RE, '');
+}
+
+function sanitizeMetadata(
+  raw: Record<string, string>,
+  policy: MetadataPolicy,
+  allowedKeys?: string[]
+): Record<string, string> | undefined {
+  if (policy === 'omit') return undefined;
+
+  let entries = Object.entries(raw);
+
+  if (policy === 'allowlist') {
+    const allowed = new Set(allowedKeys ?? []);
+    entries = entries.filter(([key]) => allowed.has(key));
+  }
+
+  // Enforce max entries
+  entries = entries.slice(0, METADATA_MAX_KEYS);
+
+  const result: Record<string, string> = {};
+  for (const [key, value] of entries) {
+    const cleanKey = stripInvisible(key).slice(0, METADATA_MAX_KEY_LENGTH);
+    const cleanValue = stripInvisible(String(value)).slice(0, METADATA_MAX_VALUE_LENGTH);
+    if (cleanKey.length > 0) {
+      result[cleanKey] = cleanValue;
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 /**
  * Options for crypto payment intent normalization
  */
@@ -159,8 +205,24 @@ export interface CryptoPaymentOptions {
   env?: 'live' | 'test';
   /** Include Stripe customer ID in evidence (default: false -- privacy) */
   includeCustomerId?: boolean;
-  /** Include Stripe metadata in evidence (default: false -- privacy) */
+  /**
+   * Include Stripe metadata in evidence (default: false -- privacy).
+   * When true, equivalent to metadataPolicy: 'passthrough'.
+   */
   includeMetadata?: boolean;
+  /**
+   * Metadata inclusion policy (default: 'omit').
+   * - 'omit': no metadata in evidence (default)
+   * - 'passthrough': include all metadata with bounds enforcement
+   * - 'allowlist': include only keys listed in metadataAllowedKeys
+   * Takes precedence over includeMetadata when set.
+   */
+  metadataPolicy?: MetadataPolicy;
+  /**
+   * Allowed metadata keys when metadataPolicy is 'allowlist'.
+   * Keys not in this list are silently dropped.
+   */
+  metadataAllowedKeys?: string[];
 }
 
 /**
@@ -171,7 +233,9 @@ export interface CryptoPaymentOptions {
  * and the network field is populated with a CAIP-2 identifier.
  *
  * Privacy: customer_id and metadata are excluded by default. Pass
- * `includeCustomerId: true` or `includeMetadata: true` to opt in.
+ * `includeCustomerId: true` or configure `metadataPolicy` to opt in.
+ * When metadata is included, values are bounded (key/value length, entry
+ * count) and invisible Unicode characters are stripped.
  *
  * Verification meaning: a PEAC receipt containing this evidence is an
  * issuer attestation. Offline verification confirms the receipt's integrity
@@ -241,8 +305,26 @@ export function fromCryptoPaymentIntent(
     evidence.customer_id = intent.customer;
   }
 
-  if (includeMetadata && intent.metadata) {
-    evidence.metadata = intent.metadata;
+  // Resolve effective metadata policy
+  // metadataPolicy takes precedence over includeMetadata boolean
+  let effectivePolicy: MetadataPolicy;
+  if (options?.metadataPolicy !== undefined) {
+    effectivePolicy = options.metadataPolicy;
+  } else if (includeMetadata) {
+    effectivePolicy = 'passthrough';
+  } else {
+    effectivePolicy = 'omit';
+  }
+
+  if (effectivePolicy !== 'omit' && intent.metadata) {
+    const sanitized = sanitizeMetadata(
+      intent.metadata,
+      effectivePolicy,
+      options?.metadataAllowedKeys
+    );
+    if (sanitized) {
+      evidence.metadata = sanitized;
+    }
   }
 
   return {
