@@ -18,12 +18,7 @@
  *   which is available in Node.js >=15 and all modern runtimes
  */
 
-import {
-  signAsync,
-  verifyAsync,
-  getPublicKeyAsync,
-  utils,
-} from '@noble/ed25519';
+import { signAsync, verifyAsync, getPublicKeyAsync, utils } from '@noble/ed25519';
 
 /** Sign a message with Ed25519 (async, Web Crypto backed) */
 export const sign = signAsync;

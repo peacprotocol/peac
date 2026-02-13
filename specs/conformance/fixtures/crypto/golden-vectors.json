@@ -22,6 +22,41 @@
       },
       "jws": "eyJ0eXAiOiJwZWFjLXJlY2VpcHQvMC4xIiwiYWxnIjoiRWREU0EiLCJraWQiOiJnb2xkZW4tMDAxIn0.eyJpc3MiOiJodHRwczovL2dvbGRlbi5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXBwLmV4YW1wbGUuY29tIiwiaWF0IjoxNzAwMDAwMDAwLCJyaWQiOiIwMTkzMDAwMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDEiLCJhbXQiOjUwMCwiY3VyIjoiVVNEIn0.VEeI7vXfekDQjj23k00VpiD5ivXHQbyd6XRSYisj0hjavZPjKSuywuA6ewkbNKTqejIZlihcJ-0iKSwKrTMACQ",
       "expected_valid": true
+    },
+    {
+      "name": "unicode-nested-array",
+      "description": "Payload with Unicode chars, nested objects, and arrays -- proves JSON serialization stability",
+      "seed_hex": "e14e55866c3659366d386be66bcb7103fb0cfc73b0eb53409d1474168e36943e",
+      "public_key_hex": "05460b04b5e62241659e9441f836b2ef69834047d4eaa77bb4e832cbe402bed8",
+      "header": {
+        "typ": "peac-receipt/0.1",
+        "alg": "EdDSA",
+        "kid": "golden-002"
+      },
+      "payload": {
+        "iss": "https://golden.example.com",
+        "aud": "https://app.example.com",
+        "iat": 1700000000,
+        "rid": "01930000-0000-7000-8000-000000000002",
+        "amt": 1234,
+        "cur": "EUR",
+        "subject": "https://example.com/\u00e9l\u00e8ve/\u00fc\u00f1\u00ee\u00e7\u00f6d\u00e9",
+        "tags": ["privacy", "attribution", "commerce"],
+        "payment": {
+          "rail": "stripe",
+          "reference": "pi_3Qx\u00c9special",
+          "amount": 1234,
+          "currency": "EUR",
+          "evidence": {
+            "nested": {
+              "deep": true,
+              "items": [1, 2, 3]
+            }
+          }
+        }
+      },
+      "jws": "eyJ0eXAiOiJwZWFjLXJlY2VpcHQvMC4xIiwiYWxnIjoiRWREU0EiLCJraWQiOiJnb2xkZW4tMDAyIn0.eyJpc3MiOiJodHRwczovL2dvbGRlbi5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXBwLmV4YW1wbGUuY29tIiwiaWF0IjoxNzAwMDAwMDAwLCJyaWQiOiIwMTkzMDAwMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDIiLCJhbXQiOjEyMzQsImN1ciI6IkVVUiIsInN1YmplY3QiOiJodHRwczovL2V4YW1wbGUuY29tL8OpbMOodmUvw7zDscOuw6fDtmTDqSIsInRhZ3MiOlsicHJpdmFjeSIsImF0dHJpYnV0aW9uIiwiY29tbWVyY2UiXSwicGF5bWVudCI6eyJyYWlsIjoic3RyaXBlIiwicmVmZXJlbmNlIjoicGlfM1F4w4lzcGVjaWFsIiwiYW1vdW50IjoxMjM0LCJjdXJyZW5jeSI6IkVVUiIsImV2aWRlbmNlIjp7Im5lc3RlZCI6eyJkZWVwIjp0cnVlLCJpdGVtcyI6WzEsMiwzXX19fX0.wulE_wdpVSxmYhO2k2L-Bjc7AXivbXujIEnwxFA2NUGIVYy1tWzIygk3ekcuqslxMXUd4RlaqfrnNugBrevtDg",
+      "expected_valid": true
     }
   ],
   "negative_vectors": [
