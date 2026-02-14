@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@peac/crypto": "workspace:*",
-    "viem": "^2.21.0"
+    "viem": "^2.45.3"
   },
   "devDependencies": {
     "tsx": "^4.7.0",
