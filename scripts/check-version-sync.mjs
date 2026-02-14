@@ -75,9 +75,13 @@ for (const pkg of workspacePackages) {
 
   const relPath = relative(ROOT, pkg.path || '');
 
-  // Examples at 0.0.0 are intentionally unversioned
-  if (relPath.startsWith('examples/') && pkg.version === '0.0.0') {
-    skippedExamples++;
+  // Examples must be at 0.0.0 (type-check only, not published)
+  if (relPath.startsWith('examples/')) {
+    if (pkg.version === '0.0.0') {
+      skippedExamples++;
+    } else {
+      errors.push(`${pkg.name} (${relPath}): version "${pkg.version}" -- examples must be 0.0.0`);
+    }
     continue;
   }
 

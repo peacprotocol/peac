@@ -5,6 +5,22 @@ updates:
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 10
+    ignore:
+      # ESM-only -- breaks dual CJS/ESM build
+      - dependency-name: 'chalk'
+        versions: ['>=5']
+      - dependency-name: 'lru-cache'
+        versions: ['>=11']
+      # Pinned to 20.x for Node 22 compatibility
+      - dependency-name: '@types/node'
+        versions: ['>=21']
+      # Major API changes -- deferred
+      - dependency-name: 'jose'
+        versions: ['>=6']
+      - dependency-name: 'commander'
+        versions: ['>=12']
+      - dependency-name: 'uuidv7'
+        versions: ['>=1']
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:

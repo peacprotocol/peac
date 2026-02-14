@@ -91,6 +91,10 @@ if (!Array.isArray(workspacePackages)) {
 let bumped = 0;
 let skippedExamples = 0;
 let alreadyCurrent = 0;
+let exampleErrors = 0;
+
+// Read root name once (already bumped above)
+const rootPkgName = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf-8')).name;
 
 for (const pkg of workspacePackages) {
   if (typeof pkg !== 'object' || pkg === null) continue;
@@ -102,16 +106,18 @@ for (const pkg of workspacePackages) {
   if (!existsSync(pkgJsonPath)) continue;
 
   // Skip root (already bumped above)
-  const rootPkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf-8'));
-  if (pkg.name === rootPkg.name) continue;
+  if (pkg.name === rootPkgName) continue;
 
-  // Examples stay at 0.0.0 by convention
+  // Examples must stay at 0.0.0 (type-check only, not published)
   if (relPath.startsWith('examples/')) {
     const exPkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
     if (exPkg.version === '0.0.0') {
       skippedExamples++;
-      continue;
+    } else {
+      console.error(`  ERROR: ${pkg.name} (${relPath}) has version "${exPkg.version}" -- examples must be 0.0.0`);
+      exampleErrors++;
     }
+    continue;
   }
 
   const result = bumpPackageJson(pkgJsonPath, version);
@@ -145,6 +151,11 @@ console.log(`Bumped: ${bumped} packages`);
 console.log(`Already current: ${alreadyCurrent}`);
 console.log(`Skipped examples (0.0.0): ${skippedExamples}`);
 
+if (exampleErrors > 0) {
+  console.log('');
+  console.error(`FAIL: ${exampleErrors} example(s) have non-0.0.0 versions`);
+}
+
 if (dryRun) {
   console.log('');
   console.log('(dry run -- no files written)');
@@ -152,3 +163,7 @@ if (dryRun) {
 
 console.log('');
 console.log('Next: verify with node scripts/check-version-sync.mjs');
+
+if (exampleErrors > 0) {
+  process.exit(1);
+}

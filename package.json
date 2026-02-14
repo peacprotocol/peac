@@ -57,7 +57,9 @@
     "test:apps": "pnpm --filter @peac/app-sandbox-issuer test && pnpm --filter @peac/app-verifier test && pnpm --filter @peac/app-api test",
     "test:exports": "node scripts/test-package-exports.mjs",
     "check:unicode": "bash scripts/check-unicode.sh",
-    "sanitize:unicode": "node scripts/sanitize-unicode.mjs --fix"
+    "sanitize:unicode": "node scripts/sanitize-unicode.mjs --fix",
+    "version:check": "node scripts/check-version-sync.mjs",
+    "version:bump": "node scripts/bump-version.mjs"
   },
   "devDependencies": {
     "@peac/contracts": "workspace:^",
