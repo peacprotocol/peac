@@ -1,6 +1,6 @@
 {
   "name": "@peac/transport-grpc",
-  "version": "0.10.10",
+  "version": "0.10.11",
   "private": true,
   "description": "PEAC gRPC transport layer with HTTP StatusCode parity",
   "type": "module",

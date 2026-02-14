@@ -1,6 +1,6 @@
 {
   "name": "@peac/analytics",
-  "version": "0.10.2",
+  "version": "0.10.11",
   "private": true,
   "description": "Analytics surface for PEAC Protocol - metrics API with k-anonymity protection",
   "type": "module",

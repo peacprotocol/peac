@@ -1,6 +1,6 @@
 # PEAC Protocol Roadmap
 
-## Current Release: v0.10.9
+## Current Release: v0.10.11
 
 **Wire Format:** `peac-receipt/0.1` (stable)
 
