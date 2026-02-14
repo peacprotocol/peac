@@ -7,6 +7,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.11] - 2026-02-14
+
+### Runtime Dependencies and x402 Payment Rail
+
+v0.10.11 upgrades two runtime dependencies (@noble/ed25519 v3, OpenTelemetry SDK
+v2), expands the registry spec, and adds the Stripe x402 payment rail adapter.
+
+### Changed
+
+- **@noble/ed25519 v2 -> v3** (`@noble/ed25519 ^3.0.0`)
+  - New `packages/crypto/src/ed25519.ts` wrapper exposing async-only surface
+    (`signAsync`, `verifyAsync`, `getPublicKeyAsync`, `randomSecretKey`)
+  - Prevents accidental sync usage (sync methods in v3 require explicit hash
+    configuration)
+  - New `derivePublicKey()` and `validateKeypair()` functions in `@peac/crypto`
+  - Golden vector conformance tests in `specs/conformance/fixtures/crypto/`
+- **OpenTelemetry SDK v1 -> v2** (`@opentelemetry/sdk-metrics ^2.0.0`,
+  `@opentelemetry/sdk-trace-base ^2.0.0`)
+  - SDK packages remain devDependencies only; `@peac/telemetry-otel` runs with
+    only `@opentelemetry/api ^1.9.0` as peer dependency
+  - New pack-and-import smoke test (`scripts/otel-smoke.sh`) verifies tarball
+    installability in an isolated npm project
+  - New import smoke test validates all public exports resolve at runtime
+
+### Added
+
+- **`@peac/rails-stripe`** -- Stripe payment rail adapter (`packages/rails/stripe/`)
+  - `fromCheckoutSession()`, `fromPaymentIntent()`, `fromWebhookEvent()` for
+    fiat Stripe flows
+  - `fromCryptoPaymentIntent()` for x402 crypto payment flows with CAIP-2
+    network identifiers
+  - Privacy-by-default: customer ID and metadata excluded unless opted in
+  - Metadata policy: `'omit'` (default), `'passthrough'`, `'allowlist'`
+  - Metadata bounds enforcement (max 20 entries, key/value length limits,
+    invisible Unicode stripped)
+  - Profile documentation: `docs/profiles/stripe-x402-machine-payments.md`
+  - Conformance vectors in `specs/conformance/fixtures/stripe-crypto/`
+  - Example: `examples/stripe-x402-crypto/`
+- **Registry spec v0.3.0** (`docs/specs/registries.json`)
+  - `org.peacprotocol/interaction` extension key (interaction evidence)
+  - `toolcall_op_types` advisory registry (`memory.write`, `memory.read`,
+    `db.query`, `db.mutate`, `file.write`, `file.read`, `http.request`, etc.)
+  - `toolcall_resource_types` advisory registry (`memory-store`, `database`,
+    `file-store`, `api-endpoint`)
+  - JSON Schema for registry validation (`docs/specs/registries.schema.json`)
+  - Governance metadata: stability levels, deprecation lifecycle, change policy
+- **Dependency audit gate** (`scripts/audit-gate.mjs`)
+  - Deterministic vulnerability checker integrated into `guard.sh`
+  - Two-tier policy: critical blocks, high warns (strict mode via `AUDIT_STRICT=1`)
+  - Time-bounded allowlist at `security/audit-allowlist.json` (90-day max expiry)
+- **`SECURITY.md`** -- security policy, vulnerability reporting, contributor
+  checklist
+- **CI hardening**
+  - `corepack prepare` with `--activate` in all workflow jobs
+  - OTel pack-and-import smoke test in CI pipeline
+  - Category tracking data file (`specs/conformance/category-tracking.json`)
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- No API surface changes to existing packages
+
 ## [0.10.10] - 2026-02-11
 
 ### Dev Toolchain Modernization

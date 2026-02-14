@@ -1,6 +1,6 @@
 {
   "name": "@peac/middleware-nextjs",
-  "version": "0.10.2",
+  "version": "0.10.11",
   "private": true,
   "description": "PEAC TAP verifier and 402 access gate for Next.js Edge Runtime",
   "type": "module",

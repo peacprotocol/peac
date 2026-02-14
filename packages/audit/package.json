@@ -1,6 +1,6 @@
 {
   "name": "@peac/audit",
-  "version": "0.10.10",
+  "version": "0.10.11",
   "description": "Audit logging and case bundle generation for PEAC protocol disputes",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@peac/adapter-openclaw",
-  "version": "0.10.10",
+  "version": "0.10.11",
   "description": "OpenClaw adapter for PEAC interaction evidence capture",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
