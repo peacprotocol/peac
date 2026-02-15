@@ -65,6 +65,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/attribution
 @peac/audit
 @peac/capture-core
+@peac/capture-node
 @peac/cli
 @peac/contracts
 @peac/control
@@ -112,7 +113,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 39 public packages match"
+  echo "OK: All 40 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -122,6 +123,7 @@ echo "=== Checking test coverage ==="
 # Packages covered by test:core (from package.json)
 TESTED_PACKAGES="@peac/adapter-x402
 @peac/audit
+@peac/capture-node
 @peac/attribution
 @peac/contracts
 @peac/crypto
@@ -163,13 +165,13 @@ NO_TESTS_RATIONALE="@peac/adapter-core - shared adapter utilities, tested via ad
 @peac/sdk - re-exports only
 @peac/server - server wrapper, tested via integration"
 
-echo "Packages with tests (23):"
+echo "Packages with tests (24):"
 echo "$TESTED_PACKAGES" | sed 's/^/  /'
 echo ""
 echo "Packages without tests (16) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 39 packages accounted for (23 tested + 16 type/wrapper packages)"
+echo "OK: All 40 packages accounted for (24 tested + 16 type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="
