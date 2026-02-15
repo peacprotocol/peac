@@ -24,6 +24,31 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 /** Allowed JWS algorithms (security) */
 const ALLOWED_ALGORITHMS = ['EdDSA', 'ES256', 'ES384', 'ES512', 'RS256', 'RS384', 'RS512'] as const;
 
+/**
+ * Decode a receipt file's auth + evidence from the _jws payload.
+ * _jws is the source of truth -- top-level auth/evidence are convenience duplicates.
+ * Returns null if _jws is missing or cannot be decoded.
+ */
+function decodeReceiptPayload(receipt: Record<string, unknown>): {
+  auth: Record<string, unknown>;
+  evidence: Record<string, unknown>;
+} | null {
+  const jws = receipt._jws;
+  if (typeof jws !== 'string') return null;
+
+  const parts = jws.split('.');
+  if (parts.length !== 3) return null;
+
+  try {
+    const payloadJson = Buffer.from(parts[1], 'base64url').toString('utf-8');
+    const payload = JSON.parse(payloadJson);
+    const { evidence, ...auth } = payload;
+    return { auth: auth ?? {}, evidence: evidence ?? {} };
+  } catch {
+    return null;
+  }
+}
+
 /** Algorithm to key type compatibility map */
 const ALG_KEY_TYPE_MAP: Record<string, { kty: string; crv?: string[] }> = {
   EdDSA: { kty: 'OKP', crv: ['Ed25519', 'Ed448'] },
@@ -217,8 +242,10 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
           };
         }
 
-        // Filter receipts
+        // Filter receipts with structured skip tracking
         const receipts: Array<{ file: string; content: unknown; mtime: Date }> = [];
+        const skippedReasons = { stat_error: 0, invalid_json: 0, malformed_jws: 0, filtered: 0 };
+        const skippedFiles: string[] = [];
 
         for (const file of receiptFiles) {
           const filePath = pathModule.join(resolvedOutputDir, file);
@@ -226,15 +253,18 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
           try {
             stat = await fs.promises.stat(filePath);
           } catch {
-            // Skip files that can't be stat'd
+            skippedReasons.stat_error++;
+            skippedFiles.push(file);
             continue;
           }
 
           // Apply time filters
           if (params.since && stat.mtime < new Date(params.since)) {
+            skippedReasons.filtered++;
             continue;
           }
           if (params.until && stat.mtime > new Date(params.until)) {
+            skippedReasons.filtered++;
             continue;
           }
 
@@ -244,13 +274,30 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
             content = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
           } catch {
             logger.warn(`Skipping invalid JSON in ${file}`);
+            skippedReasons.invalid_json++;
+            skippedFiles.push(file);
             continue;
           }
 
-          // Apply workflow filter
+          // Apply workflow filter (derive from _jws when present)
           if (params.workflow_id) {
-            const workflowExt = content?.auth?.extensions?.['org.peacprotocol/workflow'];
+            const decoded = content._jws ? decodeReceiptPayload(content) : null;
+            // If _jws exists but is malformed, skip this receipt (untrusted)
+            if (content._jws && !decoded) {
+              logger.warn(`Skipping ${file}: _jws present but malformed`);
+              skippedReasons.malformed_jws++;
+              skippedFiles.push(file);
+              continue;
+            }
+            const authBlock = (decoded?.auth ?? content?.auth) as
+              | Record<string, unknown>
+              | undefined;
+            const extensions = authBlock?.extensions as Record<string, unknown> | undefined;
+            const workflowExt = extensions?.['org.peacprotocol/workflow'] as
+              | Record<string, unknown>
+              | undefined;
             if (workflowExt?.workflow_id !== params.workflow_id) {
+              skippedReasons.filtered++;
               continue;
             }
           }
@@ -263,6 +310,15 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
             status: 'ok',
             message: 'No receipts match the filter criteria',
             receipt_count: 0,
+            scanned_count: receiptFiles.length,
+            exported_count: 0,
+            skipped_count:
+              skippedReasons.stat_error +
+              skippedReasons.invalid_json +
+              skippedReasons.malformed_jws +
+              skippedReasons.filtered,
+            skipped_reasons: skippedReasons,
+            skipped_files: skippedFiles.length > 0 ? skippedFiles.slice(0, 100) : undefined,
           };
         }
 
@@ -315,6 +371,15 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
           message: `Exported ${receipts.length} receipts to directory`,
           receipt_count: receipts.length,
           bundle_path: bundleDir,
+          scanned_count: receiptFiles.length,
+          exported_count: receipts.length,
+          skipped_count:
+            skippedReasons.stat_error +
+            skippedReasons.invalid_json +
+            skippedReasons.malformed_jws +
+            skippedReasons.filtered,
+          skipped_reasons: skippedReasons,
+          skipped_files: skippedFiles.length > 0 ? skippedFiles.slice(0, 100) : undefined,
         };
       } catch (error) {
         logger.error('Export bundle failed:', error);
@@ -340,6 +405,16 @@ interface ExportBundleResult {
   message: string;
   receipt_count: number;
   bundle_path?: string;
+  scanned_count?: number;
+  exported_count?: number;
+  skipped_count?: number;
+  skipped_reasons?: {
+    stat_error: number;
+    invalid_json: number;
+    malformed_jws: number;
+    filtered: number;
+  };
+  skipped_files?: string[];
 }
 
 // =============================================================================
@@ -426,16 +501,61 @@ async function verifySingleReceipt(
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Basic structure validation
-  if (!receipt.auth) {
+  // Trust boundary: _jws is the source of truth for signed data.
+  // If _jws is present but malformed, the receipt is invalid (possible tampering).
+  // Only allow unsigned top-level fields when _jws is genuinely absent.
+  let auth: unknown;
+  let evidence: unknown;
+
+  if (!receipt._jws) {
+    // No JWS -- use top-level fields (unsigned, best-effort)
+    auth = receipt.auth;
+    evidence = receipt.evidence;
+    warnings.push('Missing _jws field -- using unsigned top-level fields');
+  } else {
+    const decoded = decodeReceiptPayload(receipt);
+    if (!decoded) {
+      // _jws exists but is malformed -- receipt is invalid, do not fall back
+      errors.push('_jws field present but payload could not be decoded (malformed JWS)');
+      auth = undefined;
+      evidence = undefined;
+    } else {
+      auth = decoded.auth;
+      evidence = decoded.evidence;
+
+      // Dual-representation mismatch check: if top-level auth/evidence also exist,
+      // they MUST match the signed payload. A mismatch means the unsigned fields
+      // have been tampered with (or carelessly copied), creating ambiguity.
+      if (receipt.auth !== undefined || receipt.evidence !== undefined) {
+        const topAuth = receipt.auth as Record<string, unknown> | undefined;
+        const topEvidence = receipt.evidence as Record<string, unknown> | undefined;
+        const authMatch =
+          topAuth === undefined || JSON.stringify(topAuth) === JSON.stringify(decoded.auth);
+        const evidenceMatch =
+          topEvidence === undefined ||
+          JSON.stringify(topEvidence) === JSON.stringify(decoded.evidence);
+        if (!authMatch || !evidenceMatch) {
+          errors.push(
+            'Dual-representation mismatch: top-level auth/evidence differs from _jws payload'
+          );
+        }
+      }
+    }
+  }
+
+  if (!auth) {
     errors.push('Missing auth block');
   }
-  if (!receipt.evidence) {
+  if (!evidence) {
     errors.push('Missing evidence block');
   }
 
   // Check for interaction evidence
-  const interaction = receipt.evidence?.extensions?.['org.peacprotocol/interaction@0.1'];
+  const evidenceObj = evidence as Record<string, unknown> | undefined;
+  const extensions = evidenceObj?.extensions as Record<string, unknown> | undefined;
+  const interaction = extensions?.['org.peacprotocol/interaction@0.1'] as
+    | Record<string, unknown>
+    | undefined;
   if (interaction) {
     // Validate interaction fields
     if (!interaction.interaction_id) {
@@ -444,7 +564,8 @@ async function verifySingleReceipt(
     if (!interaction.kind) {
       errors.push('Missing kind');
     }
-    if (!interaction.executor?.platform) {
+    const executor = interaction.executor as Record<string, unknown> | undefined;
+    if (!executor?.platform) {
       errors.push('Missing executor.platform');
     }
     if (!interaction.started_at) {
@@ -453,13 +574,16 @@ async function verifySingleReceipt(
 
     // Check timing invariant
     if (interaction.completed_at && interaction.started_at) {
-      if (new Date(interaction.completed_at) < new Date(interaction.started_at)) {
+      if (
+        new Date(interaction.completed_at as string) < new Date(interaction.started_at as string)
+      ) {
         errors.push('completed_at is before started_at');
       }
     }
 
     // Check output requires result
-    if (interaction.output && !interaction.result?.status) {
+    const result = interaction.result as Record<string, unknown> | undefined;
+    if (interaction.output && !result?.status) {
       errors.push('output present but result.status missing');
     }
   } else {
@@ -599,8 +723,8 @@ async function verifySingleReceipt(
     message: errors.length === 0 ? 'Receipt is valid' : 'Receipt has validation errors',
     errors: errors.length > 0 ? errors : undefined,
     warnings: warnings.length > 0 ? warnings : undefined,
-    receipt_id: receipt.auth?.rid,
-    interaction_id: interaction?.interaction_id,
+    receipt_id: (auth as Record<string, unknown>)?.rid as string | undefined,
+    interaction_id: (interaction as Record<string, unknown>)?.interaction_id as string | undefined,
   };
 }
 
@@ -775,6 +899,7 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
 
         let filesSkippedForSize = 0;
         let filesSkippedForInvalidJson = 0;
+        let filesSkippedForMalformedJws = 0;
         for (const { file } of fileInfos) {
           const filePath = pathModule.join(resolvedOutputDir, file);
 
@@ -799,8 +924,27 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
             continue;
           }
 
-          const interaction = content?.evidence?.extensions?.['org.peacprotocol/interaction@0.1'];
-          const workflow = content?.auth?.extensions?.['org.peacprotocol/workflow'];
+          // Derive filter data from _jws (source of truth when present).
+          // If _jws exists but is malformed, skip this receipt (untrusted).
+          const decoded = content._jws ? decodeReceiptPayload(content) : null;
+          if (content._jws && !decoded) {
+            filesSkippedForMalformedJws++;
+            continue;
+          }
+          const authBlock = (decoded?.auth ?? content?.auth) as Record<string, unknown> | undefined;
+          const evidenceBlock = (decoded?.evidence ?? content?.evidence) as
+            | Record<string, unknown>
+            | undefined;
+          const evidenceExtensions = evidenceBlock?.extensions as
+            | Record<string, unknown>
+            | undefined;
+          const interaction = evidenceExtensions?.['org.peacprotocol/interaction@0.1'] as
+            | Record<string, unknown>
+            | undefined;
+          const authExtensions = authBlock?.extensions as Record<string, unknown> | undefined;
+          const workflow = authExtensions?.['org.peacprotocol/workflow'] as
+            | Record<string, unknown>
+            | undefined;
 
           // Apply workflow filter
           if (params.workflow_id && workflow?.workflow_id !== params.workflow_id) {
@@ -809,26 +953,28 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           }
 
           // Apply tool filter
-          if (params.tool_name && interaction?.tool?.name !== params.tool_name) {
+          const tool = interaction?.tool as Record<string, unknown> | undefined;
+          if (params.tool_name && tool?.name !== params.tool_name) {
             skippedForFilters++;
             continue;
           }
 
           // Apply status filter
-          if (params.status && interaction?.result?.status !== params.status) {
+          const result = interaction?.result as Record<string, unknown> | undefined;
+          if (params.status && result?.status !== params.status) {
             skippedForFilters++;
             continue;
           }
 
           matches.push({
             file,
-            receipt_id: content.auth?.rid,
-            interaction_id: interaction?.interaction_id,
-            workflow_id: workflow?.workflow_id,
-            tool_name: interaction?.tool?.name,
-            status: interaction?.result?.status,
-            started_at: interaction?.started_at,
-            completed_at: interaction?.completed_at,
+            receipt_id: authBlock?.rid as string | undefined,
+            interaction_id: interaction?.interaction_id as string | undefined,
+            workflow_id: workflow?.workflow_id as string | undefined,
+            tool_name: tool?.name as string | undefined,
+            status: result?.status as string | undefined,
+            started_at: interaction?.started_at as string | undefined,
+            completed_at: interaction?.completed_at as string | undefined,
           });
 
           // Early exit if we have enough matches (limit + offset)
@@ -864,11 +1010,13 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
         if (filesSkippedForInvalidJson > 0) {
           warnings.push(`${filesSkippedForInvalidJson} files skipped (invalid JSON)`);
         }
+        if (filesSkippedForMalformedJws > 0) {
+          warnings.push(`${filesSkippedForMalformedJws} files skipped (malformed JWS)`);
+        }
 
-        const hasTruncation =
-          receiptFiles.length > MAX_QUERY_FILE_PARSE ||
-          filesSkippedForSize > 0 ||
-          filesSkippedForInvalidJson > 0;
+        const totalSkipped =
+          filesSkippedForSize + filesSkippedForInvalidJson + filesSkippedForMalformedJws;
+        const hasTruncation = receiptFiles.length > MAX_QUERY_FILE_PARSE || totalSkipped > 0;
 
         return {
           status: 'ok',
@@ -876,17 +1024,22 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           offset,
           limit,
           results: paginated,
+          scanned_count: fileInfos.length,
+          matched_count: matches.length,
           truncated: hasTruncation,
-          skipped: hasTruncation
-            ? {
-                too_large: filesSkippedForSize,
-                invalid_json: filesSkippedForInvalidJson,
-                capped:
-                  receiptFiles.length > MAX_QUERY_FILE_PARSE
-                    ? receiptFiles.length - MAX_QUERY_FILE_PARSE
-                    : 0,
-              }
-            : undefined,
+          skipped:
+            hasTruncation || skippedForFilters > 0
+              ? {
+                  too_large: filesSkippedForSize,
+                  invalid_json: filesSkippedForInvalidJson,
+                  malformed_jws: filesSkippedForMalformedJws,
+                  filtered: skippedForFilters,
+                  capped:
+                    receiptFiles.length > MAX_QUERY_FILE_PARSE
+                      ? receiptFiles.length - MAX_QUERY_FILE_PARSE
+                      : 0,
+                }
+              : undefined,
           ...(warnings.length > 0 && { warning: warnings.join('; ') }),
         };
       } catch (error) {
@@ -931,10 +1084,14 @@ interface QueryResult {
   offset: number;
   limit: number;
   results: QueryMatch[];
+  scanned_count?: number;
+  matched_count?: number;
   truncated?: boolean;
   skipped?: {
     too_large: number;
     invalid_json: number;
+    malformed_jws: number;
+    filtered: number;
     capped: number;
   };
   error?: string;

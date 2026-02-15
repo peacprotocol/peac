@@ -31,7 +31,7 @@
     },
     {
       "matchPackageNames": ["node"],
-      "allowedVersions": ">=20.0.0",
+      "allowedVersions": ">=22.0.0",
       "groupName": "node engine",
       "reviewers": ["@peacprotocol/core-team"]
     },

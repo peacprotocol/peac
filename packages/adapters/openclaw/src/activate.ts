@@ -86,6 +86,8 @@ export interface ActivateResult {
   hookHandler: OpenClawHookHandler;
   /** Data directory used. */
   dataDir: string;
+  /** Flush pending spool entries into signed receipts. */
+  flush: () => Promise<void>;
   /** Shut down the plugin cleanly. */
   shutdown: () => Promise<void>;
 }
@@ -222,6 +224,7 @@ export async function activate(options: ActivateOptions): Promise<ActivateResult
     tools,
     hookHandler: instance.hookHandler,
     dataDir,
+    flush: () => instance.backgroundService.drain(),
     shutdown,
   };
 }

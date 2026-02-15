@@ -303,11 +303,27 @@ describe('createFileReceiptWriter', () => {
     const outputDir = path.join(tempDir, 'receipts');
     const writer = await createFileReceiptWriter(outputDir);
 
+    // Build a mock JWS with a valid base64url-encoded payload
+    const mockPayload = {
+      rid: 'r_test123',
+      iss: 'https://test.example.com',
+      iat: 1234567890,
+      evidence: {
+        extensions: {
+          'org.peacprotocol/interaction@0.1': {
+            interaction_id: 'test_interaction',
+          },
+        },
+      },
+    };
+    const payloadB64 = Buffer.from(JSON.stringify(mockPayload)).toString('base64url');
+    const mockJws = `eyJhbGciOiJFZERTQSJ9.${payloadB64}.dGVzdC1zaWduYXR1cmU`;
+
     const receipt: SignedReceipt = {
       rid: 'r_test123',
       interaction_id: 'test_interaction',
       entry_digest: 'abc123',
-      jws: 'test.jws.signature',
+      jws: mockJws,
     };
 
     const filePath = await writer.write(receipt);
@@ -316,8 +332,12 @@ describe('createFileReceiptWriter', () => {
     expect(fs.existsSync(filePath)).toBe(true);
 
     const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    expect(content.rid).toBe('r_test123');
-    expect(content._jws).toBe('test.jws.signature');
+    expect(content.auth.rid).toBe('r_test123');
+    expect(content.auth.iss).toBe('https://test.example.com');
+    expect(content.evidence.extensions['org.peacprotocol/interaction@0.1'].interaction_id).toBe(
+      'test_interaction'
+    );
+    expect(content._jws).toBe(mockJws);
   });
 
   it('close is a no-op', async () => {
