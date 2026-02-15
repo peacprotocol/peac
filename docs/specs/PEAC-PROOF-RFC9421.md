@@ -3,7 +3,7 @@
 **Status:** Informational
 **Version:** 0.1
 **Extension Key:** `org.peacprotocol/rfc9421-proof@0.1`
-**Minimum PEAC Version:** 0.10.12
+**Introduced in:** 0.10.12
 
 ---
 

@@ -65,6 +65,12 @@ See [STABILITY-POLICY.md](STABILITY-POLICY.md) for full stability guarantees.
 | [AGENT-IDENTITY.md](AGENT-IDENTITY.md)             | NORMATIVE | Agent identity claims                |
 | [DISPUTE.md](DISPUTE.md)                           | NORMATIVE | Dispute resolution mechanisms        |
 
+## Proof Capture Profiles
+
+| Specification                                  | Status        | Description                                   |
+| ---------------------------------------------- | ------------- | --------------------------------------------- |
+| [PEAC-PROOF-RFC9421.md](PEAC-PROOF-RFC9421.md) | INFORMATIONAL | RFC 9421 HTTP Message Signature proof capture |
+
 ## Registries and Discovery
 
 | Specification                                      | Status    | Description                          |
