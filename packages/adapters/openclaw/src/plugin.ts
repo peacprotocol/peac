@@ -283,16 +283,28 @@ export async function createFileReceiptWriter(outputDir: string): Promise<Receip
       const filepath = pathModule.join(resolvedOutputDir, filename);
       const tempPath = `${filepath}.tmp`;
 
-      const content = JSON.stringify(
-        {
-          rid: receipt.rid,
-          interaction_id: receipt.interaction_id,
-          entry_digest: receipt.entry_digest,
-          _jws: receipt.jws,
-        },
-        null,
-        2
-      );
+      // Decode the JWS payload to persist the full receipt structure.
+      // The verify and export tools expect auth + evidence blocks at the top level.
+      // JWS compact serialization: header.payload.signature (base64url)
+      let content: string;
+      const jwsParts = receipt.jws.split('.');
+      if (jwsParts.length !== 3) {
+        // Malformed JWS -- write _jws-only receipt (best effort, still recoverable)
+        content = JSON.stringify({ _jws: receipt.jws }, null, 2);
+      } else {
+        try {
+          const payloadJson = Buffer.from(jwsParts[1], 'base64url').toString('utf-8');
+          const payload = JSON.parse(payloadJson);
+
+          // Split payload into auth (identity fields) and evidence (data fields)
+          const { evidence, ...auth } = payload;
+
+          content = JSON.stringify({ auth, evidence, _jws: receipt.jws }, null, 2);
+        } catch {
+          // Payload decode failed -- write _jws-only receipt (best effort)
+          content = JSON.stringify({ _jws: receipt.jws }, null, 2);
+        }
+      }
 
       // Atomic write: write to .tmp, fsync, rename, fsync dir
       await fs.promises.writeFile(tempPath, content, 'utf-8');

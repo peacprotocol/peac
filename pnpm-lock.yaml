@@ -279,9 +279,6 @@ importers:
       '@peac/adapter-openclaw':
         specifier: workspace:*
         version: link:../../packages/adapters/openclaw
-      '@peac/capture-core':
-        specifier: workspace:*
-        version: link:../../packages/capture/core
     devDependencies:
       '@types/node':
         specifier: ^20.19.33

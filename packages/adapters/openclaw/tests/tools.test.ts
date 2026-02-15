@@ -41,38 +41,60 @@ function createMockStats() {
   };
 }
 
-function createValidReceipt(id: string, overrides?: Record<string, unknown>) {
+/**
+ * Build a structurally valid JWS compact serialization from auth + evidence.
+ * The payload is the real receipt data so decodeReceiptPayload() succeeds.
+ * Signature is a placeholder (not cryptographically valid).
+ */
+function buildMockJws(auth: Record<string, unknown>, evidence: Record<string, unknown>): string {
+  const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'test-key-id' })).toString(
+    'base64url'
+  );
+  const payload = Buffer.from(JSON.stringify({ ...auth, evidence })).toString('base64url');
+  return `${header}.${payload}.fake_test_signature`;
+}
+
+interface ReceiptOptions {
+  workflow_id?: string;
+  tool_name?: string;
+  status?: string;
+  overrides?: Record<string, unknown>;
+}
+
+function createValidReceipt(id: string, opts?: ReceiptOptions) {
+  const auth = {
+    rid: `r_${id}`,
+    iss: 'https://issuer.example.com',
+    extensions: {
+      'org.peacprotocol/workflow': {
+        workflow_id: opts?.workflow_id ?? 'wf_test',
+      },
+    },
+  };
+  const evidence = {
+    extensions: {
+      'org.peacprotocol/interaction@0.1': {
+        interaction_id: `int_${id}`,
+        kind: 'tool.call',
+        executor: {
+          platform: 'openclaw',
+        },
+        tool: {
+          name: opts?.tool_name ?? 'web_search',
+        },
+        started_at: '2024-02-01T10:00:00Z',
+        completed_at: '2024-02-01T10:00:01Z',
+        result: {
+          status: opts?.status ?? 'ok',
+        },
+        ...opts?.overrides,
+      },
+    },
+  };
   return {
-    auth: {
-      rid: `r_${id}`,
-      iss: 'https://issuer.example.com',
-      extensions: {
-        'org.peacprotocol/workflow': {
-          workflow_id: 'wf_test',
-        },
-      },
-    },
-    evidence: {
-      extensions: {
-        'org.peacprotocol/interaction@0.1': {
-          interaction_id: `int_${id}`,
-          kind: 'tool.call',
-          executor: {
-            platform: 'openclaw',
-          },
-          tool: {
-            name: 'web_search',
-          },
-          started_at: '2024-02-01T10:00:00Z',
-          completed_at: '2024-02-01T10:00:01Z',
-          result: {
-            status: 'ok',
-          },
-          ...overrides,
-        },
-      },
-    },
-    _jws: 'test.jws.signature',
+    auth,
+    evidence,
+    _jws: buildMockJws(auth, evidence),
   };
 }
 
@@ -230,13 +252,11 @@ describe('createExportBundleTool', () => {
   });
 
   it('filters by workflow_id', async () => {
-    // Create receipts with different workflow IDs
-    const receipt1 = createValidReceipt('001');
-    receipt1.auth.extensions['org.peacprotocol/workflow'] = { workflow_id: 'wf_alpha' };
+    // Create receipts with different workflow IDs (JWS-consistent)
+    const receipt1 = createValidReceipt('001', { workflow_id: 'wf_alpha' });
     fs.writeFileSync(path.join(tempDir, 'r_001.peac.json'), JSON.stringify(receipt1));
 
-    const receipt2 = createValidReceipt('002');
-    receipt2.auth.extensions['org.peacprotocol/workflow'] = { workflow_id: 'wf_beta' };
+    const receipt2 = createValidReceipt('002', { workflow_id: 'wf_beta' });
     fs.writeFileSync(path.join(tempDir, 'r_002.peac.json'), JSON.stringify(receipt2));
 
     const tool = createExportBundleTool(tempDir, mockLogger);
@@ -247,6 +267,40 @@ describe('createExportBundleTool', () => {
 
     expect(result.status).toBe('ok');
     expect(result.receipt_count).toBe(1);
+  });
+
+  it('returns structured skip counters', async () => {
+    // Create a valid receipt, an invalid JSON file, and a malformed JWS receipt
+    fs.writeFileSync(
+      path.join(tempDir, 'r_001.peac.json'),
+      JSON.stringify(createValidReceipt('001'))
+    );
+    fs.writeFileSync(path.join(tempDir, 'r_bad.peac.json'), 'not valid json {{{');
+    fs.writeFileSync(
+      path.join(tempDir, 'r_malformed.peac.json'),
+      JSON.stringify({ auth: {}, evidence: {}, _jws: 'not.valid' })
+    );
+
+    const tool = createExportBundleTool(tempDir, mockLogger);
+    const result = (await tool.execute({ workflow_id: 'wf_test' })) as {
+      status: string;
+      receipt_count: number;
+      scanned_count?: number;
+      exported_count?: number;
+      skipped_count?: number;
+      skipped_reasons?: { invalid_json: number; malformed_jws: number };
+      skipped_files?: string[];
+    };
+
+    expect(result.status).toBe('ok');
+    expect(result.scanned_count).toBe(3);
+    expect(result.exported_count).toBe(1);
+    expect(result.skipped_count).toBeGreaterThanOrEqual(2);
+    expect(result.skipped_reasons?.invalid_json).toBe(1);
+    expect(result.skipped_reasons?.malformed_jws).toBe(1);
+    expect(result.skipped_files).toBeDefined();
+    expect(result.skipped_files).toContain('r_bad.peac.json');
+    expect(result.skipped_files).toContain('r_malformed.peac.json');
   });
 });
 
@@ -294,6 +348,48 @@ describe('createVerifyTool', () => {
     expect(result.warnings).toContain('No JWKS provided - signature not verified');
   });
 
+  it('detects dual-representation mismatch', async () => {
+    // Create a receipt where top-level auth differs from _jws payload
+    const receipt = createValidReceipt('001');
+    // Tamper with top-level auth to create a mismatch
+    receipt.auth = { ...receipt.auth, iss: 'https://tampered.example.com' };
+
+    const receiptPath = path.join(tempDir, 'mismatch.peac.json');
+    fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+    const tool = createVerifyTool(mockLogger);
+    const result = (await tool.execute({ path: receiptPath })) as {
+      status: string;
+      valid: boolean;
+      errors?: string[];
+    };
+
+    expect(result.status).toBe('error');
+    expect(result.valid).toBe(false);
+    expect(result.errors?.some((e) => e.includes('Dual-representation mismatch'))).toBe(true);
+  });
+
+  it('accepts matching dual representation', async () => {
+    // Create a receipt where top-level matches _jws payload (no mismatch)
+    const receipt = createValidReceipt('001');
+    // Top-level auth/evidence are already set by createValidReceipt and match _jws
+
+    const receiptPath = path.join(tempDir, 'matching.peac.json');
+    fs.writeFileSync(receiptPath, JSON.stringify(receipt));
+
+    const tool = createVerifyTool(mockLogger);
+    const result = (await tool.execute({ path: receiptPath })) as {
+      status: string;
+      valid: boolean;
+      errors?: string[];
+    };
+
+    expect(result.status).toBe('ok');
+    expect(result.valid).toBe(true);
+    // Should not have mismatch errors
+    expect(result.errors?.some((e) => e.includes('Dual-representation mismatch'))).toBeFalsy();
+  });
+
   it('detects missing auth block', async () => {
     const invalidReceipt = { evidence: {} };
     const receiptPath = path.join(tempDir, 'invalid.peac.json');
@@ -330,8 +426,10 @@ describe('createVerifyTool', () => {
 
   it('detects invalid timing (completed_at before started_at)', async () => {
     const invalidReceipt = createValidReceipt('001', {
-      started_at: '2024-02-01T10:00:01Z',
-      completed_at: '2024-02-01T10:00:00Z', // Before started_at
+      overrides: {
+        started_at: '2024-02-01T10:00:01Z',
+        completed_at: '2024-02-01T10:00:00Z', // Before started_at
+      },
     });
     const receiptPath = path.join(tempDir, 'invalid.peac.json');
     fs.writeFileSync(receiptPath, JSON.stringify(invalidReceipt));
@@ -350,8 +448,10 @@ describe('createVerifyTool', () => {
 
   it('detects output without result status', async () => {
     const invalidReceipt = createValidReceipt('001', {
-      output: { digest: { alg: 'sha-256', value: 'a'.repeat(64), bytes: 100 } },
-      result: undefined, // No result
+      overrides: {
+        output: { digest: { alg: 'sha-256', value: 'a'.repeat(64), bytes: 100 } },
+        result: undefined, // No result
+      },
     });
     const receiptPath = path.join(tempDir, 'invalid.peac.json');
     fs.writeFileSync(receiptPath, JSON.stringify(invalidReceipt));
@@ -580,11 +680,11 @@ describe('createVerifyTool', () => {
 
     it('rejects algorithm-key type mismatch', async () => {
       // Create a receipt with EdDSA algorithm but RSA key
-      const receipt = createValidReceipt('001');
+      // Use minimal receipt (no top-level fields) to avoid dual-representation mismatch
       const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString(
         'base64url'
       );
-      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+      const receipt = { _jws: `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature` };
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
@@ -613,11 +713,11 @@ describe('createVerifyTool', () => {
 
     it('rejects algorithm-curve mismatch', async () => {
       // Create a receipt with EdDSA algorithm but wrong curve
-      const receipt = createValidReceipt('001');
+      // Use minimal receipt (no top-level fields) to avoid dual-representation mismatch
       const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString(
         'base64url'
       );
-      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+      const receipt = { _jws: `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature` };
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
@@ -647,12 +747,11 @@ describe('createVerifyTool', () => {
     });
 
     it('rejects key with wrong use field', async () => {
-      // Create a receipt with a valid JWS
-      const receipt = createValidReceipt('001');
+      // Use minimal receipt (no top-level fields) to avoid dual-representation mismatch
       const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString(
         'base64url'
       );
-      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+      const receipt = { _jws: `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature` };
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
@@ -681,12 +780,11 @@ describe('createVerifyTool', () => {
     });
 
     it('rejects key with missing verify in key_ops', async () => {
-      // Create a receipt with a valid JWS
-      const receipt = createValidReceipt('001');
+      // Use minimal receipt (no top-level fields) to avoid dual-representation mismatch
       const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', kid: 'key1' })).toString(
         'base64url'
       );
-      receipt._jws = `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature`;
+      const receipt = { _jws: `${header}.eyJ0ZXN0IjoidmFsdWUifQ.fake_signature` };
 
       const receiptPath = path.join(tempDir, 'r_001.peac.json');
       fs.writeFileSync(receiptPath, JSON.stringify(receipt));
@@ -790,23 +888,26 @@ describe('createQueryTool', () => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'peac-test-query-'));
     mockLogger = createMockLogger();
 
-    // Create test receipts with varying properties
-    const receipt1 = createValidReceipt('001');
-    receipt1.auth.extensions['org.peacprotocol/workflow'] = { workflow_id: 'wf_alpha' };
-    receipt1.evidence.extensions['org.peacprotocol/interaction@0.1'].tool = { name: 'web_search' };
-    receipt1.evidence.extensions['org.peacprotocol/interaction@0.1'].result = { status: 'ok' };
+    // Create test receipts with varying properties (JWS-consistent)
+    const receipt1 = createValidReceipt('001', {
+      workflow_id: 'wf_alpha',
+      tool_name: 'web_search',
+      status: 'ok',
+    });
     fs.writeFileSync(path.join(tempDir, 'r_001.peac.json'), JSON.stringify(receipt1));
 
-    const receipt2 = createValidReceipt('002');
-    receipt2.auth.extensions['org.peacprotocol/workflow'] = { workflow_id: 'wf_beta' };
-    receipt2.evidence.extensions['org.peacprotocol/interaction@0.1'].tool = { name: 'file_read' };
-    receipt2.evidence.extensions['org.peacprotocol/interaction@0.1'].result = { status: 'error' };
+    const receipt2 = createValidReceipt('002', {
+      workflow_id: 'wf_beta',
+      tool_name: 'read',
+      status: 'error',
+    });
     fs.writeFileSync(path.join(tempDir, 'r_002.peac.json'), JSON.stringify(receipt2));
 
-    const receipt3 = createValidReceipt('003');
-    receipt3.auth.extensions['org.peacprotocol/workflow'] = { workflow_id: 'wf_alpha' };
-    receipt3.evidence.extensions['org.peacprotocol/interaction@0.1'].tool = { name: 'web_search' };
-    receipt3.evidence.extensions['org.peacprotocol/interaction@0.1'].result = { status: 'ok' };
+    const receipt3 = createValidReceipt('003', {
+      workflow_id: 'wf_alpha',
+      tool_name: 'web_search',
+      status: 'ok',
+    });
     fs.writeFileSync(path.join(tempDir, 'r_003.peac.json'), JSON.stringify(receipt3));
   });
 

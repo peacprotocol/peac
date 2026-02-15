@@ -738,7 +738,7 @@ Test vectors: `tests/vectors/` and `docs/specs/TEST_VECTORS.md`.
 
 **Prerequisites:**
 
-- Node.js 20+
+- Node.js 22+
 - pnpm >= 8
 
 **Setup:**
