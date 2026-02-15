@@ -87,7 +87,7 @@ jobs:
 
       - name: Fetch main branch for reachability check
         run: |
-          git fetch origin main --depth=1
+          git fetch origin main
           echo "Fetched origin/main for reachability validation"
 
       - name: Extract version from tag
