@@ -132,3 +132,19 @@ export {
   createVerifyTool,
   createQueryTool,
 } from './tools.js';
+
+// =============================================================================
+// Activation
+// =============================================================================
+
+export type { ActivateOptions, ActivateConfig, ActivateResult } from './activate.js';
+
+export { activate } from './activate.js';
+
+// =============================================================================
+// Key Generation
+// =============================================================================
+
+export type { KeygenOptions, KeygenResult } from './keygen.js';
+
+export { generateSigningKey, keygenCli } from './keygen.js';

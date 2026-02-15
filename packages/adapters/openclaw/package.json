@@ -25,6 +25,9 @@
     "url": "https://github.com/peacprotocol/peac/issues"
   },
   "homepage": "https://github.com/peacprotocol/peac#readme",
+  "bin": {
+    "peac-keygen": "./dist/keygen-cli.cjs"
+  },
   "files": [
     "dist",
     "openclaw.plugin.json",
@@ -47,12 +50,13 @@
   "dependencies": {
     "@peac/adapter-core": "workspace:*",
     "@peac/capture-core": "workspace:*",
+    "@peac/capture-node": "workspace:*",
     "@peac/crypto": "workspace:*",
     "@peac/kernel": "workspace:*",
     "@peac/schema": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.19.33",
+    "@types/node": "^22.0.0",
     "typescript": "^5.3.3",
     "vitest": "^4.0.0",
     "tsup": "^8.0.0"
