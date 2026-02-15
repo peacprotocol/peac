@@ -272,9 +272,14 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
             continue;
           }
 
-          // Apply workflow filter (prefer _jws as source of truth)
+          // Apply workflow filter (derive from _jws when present)
           if (params.workflow_id) {
-            const decoded = decodeReceiptPayload(content);
+            const decoded = content._jws ? decodeReceiptPayload(content) : null;
+            // If _jws exists but is malformed, skip this receipt (untrusted)
+            if (content._jws && !decoded) {
+              logger.warn(`Skipping ${file}: _jws present but malformed`);
+              continue;
+            }
             const authBlock = (decoded?.auth ?? content?.auth) as
               | Record<string, unknown>
               | undefined;
@@ -458,16 +463,28 @@ async function verifySingleReceipt(
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Derive auth/evidence from _jws (source of truth for signed data).
-  // Top-level auth/evidence are convenience duplicates; prefer _jws when decodable.
-  const decoded = decodeReceiptPayload(receipt);
-  const auth = decoded?.auth ?? receipt.auth;
-  const evidence = decoded?.evidence ?? receipt.evidence;
+  // Trust boundary: _jws is the source of truth for signed data.
+  // If _jws is present but malformed, the receipt is invalid (possible tampering).
+  // Only allow unsigned top-level fields when _jws is genuinely absent.
+  let auth: unknown;
+  let evidence: unknown;
 
   if (!receipt._jws) {
-    warnings.push('Missing _jws field');
-  } else if (!decoded) {
-    warnings.push('Failed to decode _jws payload; using top-level fields');
+    // No JWS -- use top-level fields (unsigned, best-effort)
+    auth = receipt.auth;
+    evidence = receipt.evidence;
+    warnings.push('Missing _jws field -- using unsigned top-level fields');
+  } else {
+    const decoded = decodeReceiptPayload(receipt);
+    if (!decoded) {
+      // _jws exists but is malformed -- receipt is invalid, do not fall back
+      errors.push('_jws field present but payload could not be decoded (malformed JWS)');
+      auth = undefined;
+      evidence = undefined;
+    } else {
+      auth = decoded.auth;
+      evidence = decoded.evidence;
+    }
   }
 
   if (!auth) {
@@ -850,8 +867,13 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
             continue;
           }
 
-          // Derive filter data from _jws (prefer signed payload, fall back to top-level)
-          const decoded = decodeReceiptPayload(content);
+          // Derive filter data from _jws (source of truth when present).
+          // If _jws exists but is malformed, skip this receipt (untrusted).
+          const decoded = content._jws ? decodeReceiptPayload(content) : null;
+          if (content._jws && !decoded) {
+            filesSkippedForInvalidJson++;
+            continue;
+          }
           const authBlock = (decoded?.auth ?? content?.auth) as Record<string, unknown> | undefined;
           const evidenceBlock = (decoded?.evidence ?? content?.evidence) as
             | Record<string, unknown>

@@ -1,6 +1,6 @@
 # OpenClaw Activity Records
 
-Capture OpenClaw tool calls as offline-verifiable activity records with durable file-based storage and real Ed25519 signing.
+Capture OpenClaw tool calls as offline-verifiable activity records with durable file-based storage and real signing.
 
 ## Run
 
@@ -11,7 +11,7 @@ pnpm -C examples/openclaw-capture demo
 
 ## What it does
 
-1. Generates a real Ed25519 signing key (to a temp directory)
+1. Generates a signing key (to a temp directory)
 2. Activates the evidence export plugin with durable file-based storage
 3. Captures 3 simulated tool call events (web_search, file_read, code_execute)
 4. Exports an evidence bundle (manifest.json + signed receipts)
