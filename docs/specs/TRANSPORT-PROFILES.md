@@ -391,3 +391,9 @@ Cache-Control: public, max-age=31536000, immutable
 
 eyJhbGciOiJFZERTQSIs...
 ```
+
+## 11. Related Profiles
+
+Transport profiles define how receipts are delivered. For profiles that define what evidence a receipt records, see:
+
+- [RFC 9421 Proof Capture](PEAC-PROOF-RFC9421.md) -- HTTP Message Signature verification evidence
