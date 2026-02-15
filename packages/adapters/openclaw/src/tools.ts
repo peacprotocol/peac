@@ -242,8 +242,10 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
           };
         }
 
-        // Filter receipts
+        // Filter receipts with structured skip tracking
         const receipts: Array<{ file: string; content: unknown; mtime: Date }> = [];
+        const skippedReasons = { stat_error: 0, invalid_json: 0, malformed_jws: 0, filtered: 0 };
+        const skippedFiles: string[] = [];
 
         for (const file of receiptFiles) {
           const filePath = pathModule.join(resolvedOutputDir, file);
@@ -251,15 +253,18 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
           try {
             stat = await fs.promises.stat(filePath);
           } catch {
-            // Skip files that can't be stat'd
+            skippedReasons.stat_error++;
+            skippedFiles.push(file);
             continue;
           }
 
           // Apply time filters
           if (params.since && stat.mtime < new Date(params.since)) {
+            skippedReasons.filtered++;
             continue;
           }
           if (params.until && stat.mtime > new Date(params.until)) {
+            skippedReasons.filtered++;
             continue;
           }
 
@@ -269,6 +274,8 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
             content = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
           } catch {
             logger.warn(`Skipping invalid JSON in ${file}`);
+            skippedReasons.invalid_json++;
+            skippedFiles.push(file);
             continue;
           }
 
@@ -278,6 +285,8 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
             // If _jws exists but is malformed, skip this receipt (untrusted)
             if (content._jws && !decoded) {
               logger.warn(`Skipping ${file}: _jws present but malformed`);
+              skippedReasons.malformed_jws++;
+              skippedFiles.push(file);
               continue;
             }
             const authBlock = (decoded?.auth ?? content?.auth) as
@@ -288,6 +297,7 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
               | Record<string, unknown>
               | undefined;
             if (workflowExt?.workflow_id !== params.workflow_id) {
+              skippedReasons.filtered++;
               continue;
             }
           }
@@ -300,6 +310,15 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
             status: 'ok',
             message: 'No receipts match the filter criteria',
             receipt_count: 0,
+            scanned_count: receiptFiles.length,
+            exported_count: 0,
+            skipped_count:
+              skippedReasons.stat_error +
+              skippedReasons.invalid_json +
+              skippedReasons.malformed_jws +
+              skippedReasons.filtered,
+            skipped_reasons: skippedReasons,
+            skipped_files: skippedFiles.length > 0 ? skippedFiles.slice(0, 100) : undefined,
           };
         }
 
@@ -352,6 +371,15 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
           message: `Exported ${receipts.length} receipts to directory`,
           receipt_count: receipts.length,
           bundle_path: bundleDir,
+          scanned_count: receiptFiles.length,
+          exported_count: receipts.length,
+          skipped_count:
+            skippedReasons.stat_error +
+            skippedReasons.invalid_json +
+            skippedReasons.malformed_jws +
+            skippedReasons.filtered,
+          skipped_reasons: skippedReasons,
+          skipped_files: skippedFiles.length > 0 ? skippedFiles.slice(0, 100) : undefined,
         };
       } catch (error) {
         logger.error('Export bundle failed:', error);
@@ -377,6 +405,16 @@ interface ExportBundleResult {
   message: string;
   receipt_count: number;
   bundle_path?: string;
+  scanned_count?: number;
+  exported_count?: number;
+  skipped_count?: number;
+  skipped_reasons?: {
+    stat_error: number;
+    invalid_json: number;
+    malformed_jws: number;
+    filtered: number;
+  };
+  skipped_files?: string[];
 }
 
 // =============================================================================
@@ -484,6 +522,24 @@ async function verifySingleReceipt(
     } else {
       auth = decoded.auth;
       evidence = decoded.evidence;
+
+      // Dual-representation mismatch check: if top-level auth/evidence also exist,
+      // they MUST match the signed payload. A mismatch means the unsigned fields
+      // have been tampered with (or carelessly copied), creating ambiguity.
+      if (receipt.auth !== undefined || receipt.evidence !== undefined) {
+        const topAuth = receipt.auth as Record<string, unknown> | undefined;
+        const topEvidence = receipt.evidence as Record<string, unknown> | undefined;
+        const authMatch =
+          topAuth === undefined || JSON.stringify(topAuth) === JSON.stringify(decoded.auth);
+        const evidenceMatch =
+          topEvidence === undefined ||
+          JSON.stringify(topEvidence) === JSON.stringify(decoded.evidence);
+        if (!authMatch || !evidenceMatch) {
+          errors.push(
+            'Dual-representation mismatch: top-level auth/evidence differs from _jws payload'
+          );
+        }
+      }
     }
   }
 
@@ -843,6 +899,7 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
 
         let filesSkippedForSize = 0;
         let filesSkippedForInvalidJson = 0;
+        let filesSkippedForMalformedJws = 0;
         for (const { file } of fileInfos) {
           const filePath = pathModule.join(resolvedOutputDir, file);
 
@@ -871,7 +928,7 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           // If _jws exists but is malformed, skip this receipt (untrusted).
           const decoded = content._jws ? decodeReceiptPayload(content) : null;
           if (content._jws && !decoded) {
-            filesSkippedForInvalidJson++;
+            filesSkippedForMalformedJws++;
             continue;
           }
           const authBlock = (decoded?.auth ?? content?.auth) as Record<string, unknown> | undefined;
@@ -953,11 +1010,13 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
         if (filesSkippedForInvalidJson > 0) {
           warnings.push(`${filesSkippedForInvalidJson} files skipped (invalid JSON)`);
         }
+        if (filesSkippedForMalformedJws > 0) {
+          warnings.push(`${filesSkippedForMalformedJws} files skipped (malformed JWS)`);
+        }
 
-        const hasTruncation =
-          receiptFiles.length > MAX_QUERY_FILE_PARSE ||
-          filesSkippedForSize > 0 ||
-          filesSkippedForInvalidJson > 0;
+        const totalSkipped =
+          filesSkippedForSize + filesSkippedForInvalidJson + filesSkippedForMalformedJws;
+        const hasTruncation = receiptFiles.length > MAX_QUERY_FILE_PARSE || totalSkipped > 0;
 
         return {
           status: 'ok',
@@ -965,17 +1024,22 @@ export function createQueryTool(outputDir: string, logger: PluginLogger): Plugin
           offset,
           limit,
           results: paginated,
+          scanned_count: fileInfos.length,
+          matched_count: matches.length,
           truncated: hasTruncation,
-          skipped: hasTruncation
-            ? {
-                too_large: filesSkippedForSize,
-                invalid_json: filesSkippedForInvalidJson,
-                capped:
-                  receiptFiles.length > MAX_QUERY_FILE_PARSE
-                    ? receiptFiles.length - MAX_QUERY_FILE_PARSE
-                    : 0,
-              }
-            : undefined,
+          skipped:
+            hasTruncation || skippedForFilters > 0
+              ? {
+                  too_large: filesSkippedForSize,
+                  invalid_json: filesSkippedForInvalidJson,
+                  malformed_jws: filesSkippedForMalformedJws,
+                  filtered: skippedForFilters,
+                  capped:
+                    receiptFiles.length > MAX_QUERY_FILE_PARSE
+                      ? receiptFiles.length - MAX_QUERY_FILE_PARSE
+                      : 0,
+                }
+              : undefined,
           ...(warnings.length > 0 && { warning: warnings.join('; ') }),
         };
       } catch (error) {
@@ -1020,10 +1084,14 @@ interface QueryResult {
   offset: number;
   limit: number;
   results: QueryMatch[];
+  scanned_count?: number;
+  matched_count?: number;
   truncated?: boolean;
   skipped?: {
     too_large: number;
     invalid_json: number;
+    malformed_jws: number;
+    filtered: number;
     capped: number;
   };
   error?: string;

@@ -160,7 +160,7 @@ PEAC produces portable, verifiable evidence that can feed AI safety reviews, inc
 
 ## Quick start
 
-**Requirements:** Node >= 20
+**Requirements:** Node >= 22
 
 ```bash
 pnpm add @peac/protocol

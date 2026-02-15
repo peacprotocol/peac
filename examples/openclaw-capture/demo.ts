@@ -76,7 +76,7 @@ async function main(): Promise<void> {
       {
         tool_call_id: 'call_002',
         run_id: 'run_demo',
-        tool_name: 'file_read',
+        tool_name: 'read',
         started_at: new Date().toISOString(),
         completed_at: new Date().toISOString(),
         status: 'ok' as const,
@@ -86,11 +86,11 @@ async function main(): Promise<void> {
       {
         tool_call_id: 'call_003',
         run_id: 'run_demo',
-        tool_name: 'code_execute',
+        tool_name: 'exec',
         started_at: new Date().toISOString(),
         completed_at: new Date().toISOString(),
         status: 'ok' as const,
-        input: { code: 'console.log("hello")' },
+        input: { command: 'echo hello' },
         output: { stdout: 'hello' },
       },
     ];

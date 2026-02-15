@@ -14,7 +14,7 @@ This package addresses the gap by:
 
 ## Requirements
 
-- **Node.js 20+** (uses modern ES modules and native fetch)
+- **Node.js 22+** (uses modern ES modules and native fetch)
 - **ESM only** - This package is published as ES modules only
 
 ### CJS Consumers
@@ -54,7 +54,7 @@ This package passes [publint](https://publint.dev/) and [@arethetypeswrong/cli](
 
 **Support matrix:**
 
-- Node.js >= 20 (uses native fetch, ES modules)
+- Node.js >= 22 (uses native fetch, ES modules)
 - Modern bundlers (Webpack 5+, esbuild, Rollup, Vite) - ESM works out of the box
 - TypeScript >= 5.0 with `moduleResolution: "bundler"` or `"node16"`/`"nodenext"`
 
