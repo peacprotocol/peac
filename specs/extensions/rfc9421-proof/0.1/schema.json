@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.peacprotocol.org/schemas/extensions/rfc9421-proof/0.1/schema.json",
+  "$comment": "Non-wire JSON Schema for the org.peacprotocol/rfc9421-proof@0.1 extension. Conformance vectors validate against BOTH InteractionEvidenceV01Schema AND this extension schema.",
+  "title": "RFC 9421 Proof Capture Extension",
+  "description": "Records the result of verifying an RFC 9421 HTTP Message Signature on an http.request interaction.",
+  "type": "object",
+  "required": ["result", "reason", "covered_components"],
+  "additionalProperties": false,
+  "properties": {
+    "result": {
+      "type": "string",
+      "enum": ["verified", "failed", "unavailable"],
+      "description": "Three-state verification outcome (aligned with DD-49 policy binding model)"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Machine-readable reason code. Well-known values: sig_valid, sig_expired, sig_future, sig_key_not_found, sig_alg_unsupported, sig_base_mismatch. Custom values use reverse-DNS prefixes.",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "covered_components": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "description": "HTTP message component identifier (e.g., @method, content-digest). MUST be names only, NEVER values."
+      },
+      "minItems": 1,
+      "maxItems": 64,
+      "description": "Ordered list of component identifiers from @signature-params. Contains names only, not values (privacy by construction)."
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Signature label from the Signature header (e.g., sig1)"
+    },
+    "alg": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32,
+      "description": "Signing algorithm from the signature parameters (e.g., ed25519, ecdsa-p256-sha256)"
+    },
+    "keyid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Key identifier from the signature parameters. MUST be opaque -- no secrets or PII."
+    },
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp (seconds) from the created parameter"
+    },
+    "expires": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp (seconds) from the expires parameter"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Nonce value from the signature parameters"
+    },
+    "canonical_base_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 hex digest of the signature base string. Preferred over storing the base string itself (privacy)."
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when verification was performed"
+    }
+  },
+  "if": {
+    "properties": { "result": { "const": "verified" } }
+  },
+  "then": {
+    "properties": {
+      "reason": { "const": "sig_valid" }
+    }
+  }
+}

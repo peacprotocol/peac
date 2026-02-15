@@ -236,6 +236,11 @@
       "description": "Edge case InteractionEvidenceV01 vectors with warnings (v0.10.7+)",
       "version": "0.10.7",
       "fixture_count": 22
+    },
+    "rfc9421-proof.json": {
+      "description": "RFC 9421 proof capture extension vectors with org.peacprotocol/rfc9421-proof@0.1 extension",
+      "version": "0.10.7",
+      "fixture_count": 5
     }
   },
   "parse": {
