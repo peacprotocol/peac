@@ -39,7 +39,7 @@
     "@peac/mappings-tap": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241205.0",
+    "@cloudflare/workers-types": "^4.20260214.0",
     "typescript": "^5.3.0",
     "vitest": "^4.0.0",
     "wrangler": "^3.93.0"
