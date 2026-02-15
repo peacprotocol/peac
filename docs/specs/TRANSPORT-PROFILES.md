@@ -394,6 +394,8 @@ eyJhbGciOiJFZERTQSIs...
 
 ## 11. Related Profiles
 
-Transport profiles define how receipts are delivered. For profiles that define what evidence a receipt records, see:
+Transport profiles define how receipts are delivered. For the full profile taxonomy, see [Profiles Overview](PROFILES.md).
+
+For profiles that define what evidence a receipt records, see:
 
 - [RFC 9421 Proof Capture](PEAC-PROOF-RFC9421.md) -- HTTP Message Signature verification evidence

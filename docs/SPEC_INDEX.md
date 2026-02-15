@@ -23,6 +23,10 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 - **[Dispute](specs/DISPUTE.md)** - Formal contestation of receipts and attestations
 - **[Workflow Correlation](specs/WORKFLOW-CORRELATION.md)** - Multi-agent workflow DAG reconstruction and proof-of-run
 
+### Profiles
+
+- **[Profiles Overview](specs/PROFILES.md)** - Transport, proof capture, and wire format profile taxonomy
+
 ### Proof Capture Profiles
 
 - **[RFC 9421 Proof Capture](specs/PEAC-PROOF-RFC9421.md)** - HTTP Message Signature verification evidence
