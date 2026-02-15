@@ -45,6 +45,7 @@
       "@peac/telemetry-otel": ["./packages/telemetry-otel/src"],
       "@peac/audit": ["./packages/audit/src"],
       "@peac/capture-core": ["./packages/capture/core/src"],
+      "@peac/capture-node": ["./packages/capture/node/src"],
       "@peac/middleware-core": ["./packages/middleware-core/src"],
       "@peac/middleware-express": ["./packages/middleware-express/src"],
       "@peac/adapter-core": ["./packages/adapters/core/src"],
