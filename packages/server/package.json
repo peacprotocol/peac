@@ -37,7 +37,7 @@
     "@peac/schema": "workspace:*",
     "@peac/protocol": "workspace:*",
     "@hono/node-server": "^1.8.0",
-    "hono": "^4.0.0"
+    "hono": "^4.11.9"
   },
   "devDependencies": {
     "@types/node": "^20.19.33",
