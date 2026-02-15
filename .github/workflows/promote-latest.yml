@@ -1,0 +1,178 @@
+# Promote npm dist-tag from 'next' to 'latest' for all published @peac/* packages
+#
+# Triggered by: Manual dispatch only (workflow_dispatch)
+#
+# This workflow uses npm OIDC Trusted Publishing (same as publish.yml)
+# to run `npm dist-tag add @peac/<pkg>@<version> latest` for each package.
+#
+# Prerequisites: Same as publish.yml (Trusted Publishing configured per package)
+
+name: Promote to latest
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to promote (e.g., 0.10.11)'
+        type: string
+        required: true
+      dry_run:
+        description: 'Dry run (check tags without changing them)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: npm-promote
+  cancel-in-progress: false
+
+permissions: {}
+
+env:
+  NPM_VERSION: '11.5.1'
+
+jobs:
+  promote:
+    name: Promote dist-tag
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # OIDC token for Trusted Publishing
+    environment: npm-production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: '.node-version'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm for Trusted Publishing
+        run: |
+          npm install -g npm@${{ env.NPM_VERSION }}
+          NPM_PREFIX=$(npm config get prefix)
+          echo "$NPM_PREFIX/bin" >> $GITHUB_PATH
+          export PATH="$NPM_PREFIX/bin:$PATH"
+          echo "npm version: $(npm --version)"
+
+      - name: Load publish manifest
+        id: manifest
+        run: |
+          VERSION="${{ inputs.version }}"
+          PACKAGES=$(node -p "require('./scripts/publish-manifest.json').packages.join(' ')")
+          COUNT=$(node -p "require('./scripts/publish-manifest.json').packages.length")
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "Promoting $COUNT packages to latest @ $VERSION"
+
+      - name: Verify all packages exist at version
+        run: |
+          VERSION="${{ inputs.version }}"
+          PACKAGES="${{ steps.manifest.outputs.packages }}"
+          MISSING=""
+
+          for PKG in $PACKAGES; do
+            if npm view "$PKG@$VERSION" version > /dev/null 2>&1; then
+              echo "OK: $PKG@$VERSION"
+            else
+              echo "MISSING: $PKG@$VERSION"
+              MISSING="$MISSING $PKG"
+            fi
+          done
+
+          if [ -n "$MISSING" ]; then
+            echo ""
+            echo "ERROR: These packages are not published at $VERSION:$MISSING"
+            exit 1
+          fi
+          echo ""
+          echo "All packages verified at $VERSION"
+
+      - name: Show current dist-tags (dry run)
+        if: inputs.dry_run
+        run: |
+          VERSION="${{ inputs.version }}"
+          PACKAGES="${{ steps.manifest.outputs.packages }}"
+
+          echo "=== DRY RUN: Current dist-tags ==="
+          for PKG in $PACKAGES; do
+            CURRENT=$(npm view "$PKG" dist-tags.latest 2>/dev/null || echo "N/A")
+            NEXT=$(npm view "$PKG" dist-tags.next 2>/dev/null || echo "N/A")
+            echo "$PKG  latest=$CURRENT  next=$NEXT  -> would set latest=$VERSION"
+          done
+          echo ""
+          echo "No changes made (dry run)."
+
+      - name: Promote to latest
+        if: ${{ !inputs.dry_run }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          PACKAGES="${{ steps.manifest.outputs.packages }}"
+          SUCCESS=0
+          FAIL=0
+
+          echo "=== PROMOTING TO LATEST ==="
+          for PKG in $PACKAGES; do
+            echo -n "$PKG@$VERSION -> latest ... "
+            if npm dist-tag add "$PKG@$VERSION" latest 2>&1; then
+              echo "OK"
+              SUCCESS=$((SUCCESS + 1))
+            else
+              echo "FAILED"
+              FAIL=$((FAIL + 1))
+            fi
+          done
+
+          echo ""
+          echo "Results: $SUCCESS succeeded, $FAIL failed"
+
+          if [ $FAIL -gt 0 ]; then
+            echo "ERROR: Some packages failed to promote"
+            exit 1
+          fi
+
+      - name: Verify promoted tags
+        if: ${{ !inputs.dry_run }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          PACKAGES="${{ steps.manifest.outputs.packages }}"
+          WRONG=""
+
+          echo "=== POST-PROMOTE VERIFICATION ==="
+          sleep 5  # Brief pause for registry propagation
+
+          for PKG in $PACKAGES; do
+            LATEST=$(npm view "$PKG" dist-tags.latest 2>/dev/null || echo "N/A")
+            if [ "$LATEST" = "$VERSION" ]; then
+              echo "OK: $PKG latest=$LATEST"
+            else
+              echo "WARN: $PKG latest=$LATEST (expected $VERSION)"
+              WRONG="$WRONG $PKG"
+            fi
+          done
+
+          if [ -n "$WRONG" ]; then
+            echo ""
+            echo "Some packages may not have propagated yet:$WRONG"
+            echo "This can be normal -- check again in a few minutes."
+          fi
+
+      - name: Summary
+        run: |
+          VERSION="${{ inputs.version }}"
+          MODE="${{ inputs.dry_run == true && 'Dry Run' || 'Production' }}"
+
+          echo "## Promote to Latest Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Packages:** ${{ steps.manifest.outputs.count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode:** $MODE" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Verify" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "npm view @peac/protocol dist-tags" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
