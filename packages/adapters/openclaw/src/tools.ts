@@ -59,14 +59,22 @@ interface PluginStats {
 /**
  * Create the peac_receipts.status tool.
  * Shows spool size, last receipt time, and config summary.
+ *
+ * @param getStats - Getter function that returns live stats on each invocation.
+ *                   Accepts either a getter or a static PluginStats for backwards compat.
+ * @param outputDir - Directory where receipt files are stored.
  */
-export function createStatusTool(stats: PluginStats, outputDir: string): PluginTool {
+export function createStatusTool(
+  getStats: (() => PluginStats) | PluginStats,
+  outputDir: string
+): PluginTool {
   return {
     name: 'peac_receipts.status',
     description: 'Show PEAC receipts status: spool size, last receipt time, config summary',
     parameters: {},
 
     async execute(): Promise<StatusResult> {
+      const stats = typeof getStats === 'function' ? getStats() : getStats;
       const fs = await import('fs');
       const pathModule = await import('path');
 

@@ -113,7 +113,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 40 public packages match"
+  echo "OK: All 42 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -121,7 +121,8 @@ echo ""
 echo "=== Checking test coverage ==="
 
 # Packages covered by test:core (from package.json)
-TESTED_PACKAGES="@peac/adapter-x402
+TESTED_PACKAGES="@peac/adapter-openclaw
+@peac/adapter-x402
 @peac/audit
 @peac/capture-node
 @peac/attribution
@@ -149,6 +150,7 @@ TESTED_PACKAGES="@peac/adapter-x402
 # Packages explicitly without tests (with rationale)
 # These are either: thin wrappers, deprecated, or type-only packages
 NO_TESTS_RATIONALE="@peac/adapter-core - shared adapter utilities, tested via adapter implementations
+@peac/capture-core - interfaces and in-memory reference impls, tested via capture-node and adapters
 @peac/adapter-x402-daydreams - x402 adapter, tested via integration
 @peac/adapter-x402-fluora - x402 adapter, tested via integration
 @peac/adapter-x402-pinata - x402 adapter, tested via integration
@@ -165,13 +167,13 @@ NO_TESTS_RATIONALE="@peac/adapter-core - shared adapter utilities, tested via ad
 @peac/sdk - re-exports only
 @peac/server - server wrapper, tested via integration"
 
-echo "Packages with tests (24):"
+echo "Packages with tests (25):"
 echo "$TESTED_PACKAGES" | sed 's/^/  /'
 echo ""
-echo "Packages without tests (16) - rationale:"
+echo "Packages without tests (17) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 40 packages accounted for (24 tested + 16 type/wrapper packages)"
+echo "OK: All 42 packages accounted for (25 tested + 17 type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="

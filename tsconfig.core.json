@@ -25,6 +25,7 @@
     "packages/telemetry-otel/src/**/*.ts",
     "packages/contracts/src/**/*.ts",
     "packages/capture/core/src/**/*.ts",
+    "packages/capture/node/src/**/*.ts",
     "packages/middleware-core/src/**/*.ts",
     "packages/middleware-express/src/**/*.ts",
     "packages/adapters/**/src/**/*.ts",

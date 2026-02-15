@@ -30,6 +30,7 @@ const PKG_DIRS = {
   '@peac/crypto': 'packages/crypto',
   '@peac/telemetry': 'packages/telemetry',
   '@peac/capture-core': 'packages/capture/core',
+  '@peac/capture-node': 'packages/capture/node',
   '@peac/protocol': 'packages/protocol',
   '@peac/control': 'packages/control',
   '@peac/disc': 'packages/discovery',

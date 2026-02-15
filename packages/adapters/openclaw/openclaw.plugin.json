@@ -1,7 +1,7 @@
 {
   "id": "peac-receipts",
   "name": "PEAC Receipts",
-  "version": "0.10.6",
+  "version": "0.10.11",
   "description": "Generate signed, verifiable evidence records for tool calls with PEAC protocol",
   "author": "PEAC Protocol",
   "license": "Apache-2.0",

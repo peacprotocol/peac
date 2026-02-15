@@ -229,6 +229,20 @@ else
   fi
 fi
 
+echo "== forbid duplicate JSON keys =="
+if [ -f scripts/check-json-dupes.mjs ]; then
+  if git ls-files -- '*.json' \
+    | grep -vE '^(archive/|node_modules/)' \
+    | node scripts/check-json-dupes.mjs --stdin 2>&1 | grep -v "No duplicate JSON"; then
+    echo "FAIL: Found duplicate JSON keys"
+    bad=1
+  else
+    echo "OK"
+  fi
+else
+  echo "SKIP: scripts/check-json-dupes.mjs not found"
+fi
+
 echo "== forbid stale generated artifacts in src/ =="
 stale=$(find packages -path "*/src/*" \
   -not -path "*/dist/*" -not -path "*/node_modules/*" \( \
