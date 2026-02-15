@@ -43,7 +43,7 @@
     "@peac/kernel": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.33",
     "typescript": "^5.0.0",
     "jest": "^30.2.0",
     "@types/jest": "^30.0.0",
