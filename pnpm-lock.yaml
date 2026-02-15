@@ -1572,8 +1572,8 @@ importers:
         version: link:../../../packages/mappings/tap
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20241205.0
-        version: 4.20251216.0
+        specifier: ^4.20260214.0
+        version: 4.20260214.0
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
@@ -1582,7 +1582,7 @@ importers:
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@20.19.33)(tsx@4.21.0)
       wrangler:
         specifier: ^3.93.0
-        version: 3.114.15(@cloudflare/workers-types@4.20251216.0)
+        version: 3.114.15(@cloudflare/workers-types@4.20260214.0)
 
   surfaces/workers/fastly:
     dependencies:
@@ -2206,8 +2206,8 @@ packages:
     dev: true
     optional: true
 
-  /@cloudflare/workers-types@4.20251216.0:
-    resolution: {integrity: sha512-qRicJsFEPDUjfL83gQi9aMeBRLsoox4O/VQlY2DrXGUOjI2KS/BZKsv0oqJWdT3EX2SKEGZN8Ml/MHrurGBAUA==}
+  /@cloudflare/workers-types@4.20260214.0:
+    resolution: {integrity: sha512-qb8rgbAdJR4BAPXolXhFL/wuGtecHLh1veOyZ1mK6QqWuCdI3vK1biKC0i3lzmzdLR/DZvsN3mNtpUE8zpWGEg==}
     dev: true
 
   /@colors/colors@1.5.0:
@@ -10150,7 +10150,7 @@ packages:
       '@cloudflare/workerd-windows-64': 1.20250718.0
     dev: true
 
-  /wrangler@3.114.15(@cloudflare/workers-types@4.20251216.0):
+  /wrangler@3.114.15(@cloudflare/workers-types@4.20260214.0):
     resolution: {integrity: sha512-OpGikaV6t7AGXZImtGnVXI8WUnqBMFBCQcZzqKmQi0T/pZ5h8iSKhEZf7ItVB8bAG56yswHnWWYyANWF/Jj/JA==}
     engines: {node: '>=16.17.0'}
     hasBin: true
@@ -10162,7 +10162,7 @@ packages:
     dependencies:
       '@cloudflare/kv-asset-handler': 0.3.4
       '@cloudflare/unenv-preset': 2.0.2(unenv@2.0.0-rc.14)(workerd@1.20250718.0)
-      '@cloudflare/workers-types': 4.20251216.0
+      '@cloudflare/workers-types': 4.20260214.0
       '@esbuild-plugins/node-globals-polyfill': 0.2.3(esbuild@0.17.19)
       '@esbuild-plugins/node-modules-polyfill': 0.2.2(esbuild@0.17.19)
       blake3-wasm: 2.1.5
