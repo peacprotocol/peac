@@ -1,0 +1,234 @@
+{
+  "$schema": "https://www.peacprotocol.org/schemas/conformance/interaction-fixtures.schema.json",
+  "$comment": "RFC 9421 proof capture extension vectors (v0.10.12+). All vectors are valid InteractionEvidenceV01 with the org.peacprotocol/rfc9421-proof@0.1 extension.",
+  "version": "0.10.7",
+  "fixtures": [
+    {
+      "name": "rfc9421-verified-signature",
+      "description": "Happy path: RFC 9421 signature verified successfully",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "gateway:req_001",
+        "kind": "http.request",
+        "executor": {
+          "platform": "api-gateway",
+          "version": "2.1.0"
+        },
+        "resource": {
+          "uri": "https://api.example.com/v1/payments",
+          "method": "POST"
+        },
+        "started_at": "2026-02-15T10:00:00Z",
+        "completed_at": "2026-02-15T10:00:00.050Z",
+        "duration_ms": 50,
+        "result": {
+          "status": "ok"
+        },
+        "extensions": {
+          "org.peacprotocol/rfc9421-proof@0.1": {
+            "result": "verified",
+            "reason": "sig_valid",
+            "covered_components": [
+              "@method",
+              "@authority",
+              "@request-target",
+              "content-digest",
+              "content-type"
+            ],
+            "alg": "ed25519",
+            "keyid": "key-2026-02"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "rfc9421-expired-signature",
+      "description": "Signature expires timestamp is in the past",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "gateway:req_002",
+        "kind": "http.request",
+        "executor": {
+          "platform": "api-gateway"
+        },
+        "resource": {
+          "uri": "https://api.example.com/v1/data",
+          "method": "GET"
+        },
+        "started_at": "2026-02-15T10:05:00Z",
+        "completed_at": "2026-02-15T10:05:00.030Z",
+        "duration_ms": 30,
+        "result": {
+          "status": "ok"
+        },
+        "extensions": {
+          "org.peacprotocol/rfc9421-proof@0.1": {
+            "result": "failed",
+            "reason": "sig_expired",
+            "covered_components": ["@method", "@authority"],
+            "alg": "ed25519",
+            "keyid": "key-2026-01",
+            "created": 1739610000,
+            "expires": 1739610300
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "rfc9421-key-not-found",
+      "description": "Key referenced by keyid could not be resolved",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "gateway:req_003",
+        "kind": "http.request",
+        "executor": {
+          "platform": "api-gateway"
+        },
+        "resource": {
+          "uri": "https://api.example.com/v1/status",
+          "method": "GET"
+        },
+        "started_at": "2026-02-15T10:10:00Z",
+        "completed_at": "2026-02-15T10:10:00.100Z",
+        "duration_ms": 100,
+        "result": {
+          "status": "ok"
+        },
+        "extensions": {
+          "org.peacprotocol/rfc9421-proof@0.1": {
+            "result": "unavailable",
+            "reason": "sig_key_not_found",
+            "covered_components": ["@method", "@authority", "@request-target"],
+            "keyid": "key-unknown-rotated"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "rfc9421-base-mismatch",
+      "description": "Signature base reconstruction did not match (tampered body)",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "gateway:req_004",
+        "kind": "http.request",
+        "executor": {
+          "platform": "api-gateway",
+          "version": "2.1.0"
+        },
+        "resource": {
+          "uri": "https://api.example.com/v1/transfers",
+          "method": "POST"
+        },
+        "started_at": "2026-02-15T10:15:00Z",
+        "completed_at": "2026-02-15T10:15:00.020Z",
+        "duration_ms": 20,
+        "result": {
+          "status": "error",
+          "error_code": "E_SIGNATURE_INVALID"
+        },
+        "extensions": {
+          "org.peacprotocol/rfc9421-proof@0.1": {
+            "result": "failed",
+            "reason": "sig_base_mismatch",
+            "covered_components": ["@method", "@authority", "@request-target", "content-digest"],
+            "alg": "ed25519",
+            "keyid": "key-2026-02",
+            "created": 1739614500,
+            "canonical_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "rfc9421-verified-full-metadata",
+      "description": "Verified signature with all optional fields populated",
+      "type": "InteractionEvidenceV01",
+      "input": {
+        "interaction_id": "gateway:req_005",
+        "kind": "http.request",
+        "executor": {
+          "platform": "api-gateway",
+          "version": "2.1.0"
+        },
+        "resource": {
+          "uri": "https://api.example.com/v1/invoices",
+          "method": "PUT"
+        },
+        "input": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+            "bytes": 1024
+          },
+          "redaction": "hash_only"
+        },
+        "output": {
+          "digest": {
+            "alg": "sha-256",
+            "value": "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3",
+            "bytes": 512
+          },
+          "redaction": "hash_only"
+        },
+        "started_at": "2026-02-15T10:20:00Z",
+        "completed_at": "2026-02-15T10:20:00.075Z",
+        "duration_ms": 75,
+        "result": {
+          "status": "ok"
+        },
+        "policy": {
+          "decision": "allow",
+          "sandbox_enabled": false,
+          "elevated": false
+        },
+        "extensions": {
+          "org.peacprotocol/rfc9421-proof@0.1": {
+            "result": "verified",
+            "reason": "sig_valid",
+            "covered_components": [
+              "@method",
+              "@authority",
+              "@request-target",
+              "content-digest",
+              "content-type",
+              "content-length"
+            ],
+            "label": "sig1",
+            "alg": "ed25519",
+            "keyid": "key-2026-02",
+            "created": 1739615990,
+            "expires": 1739616590,
+            "nonce": "a8b3c9d2e1f0",
+            "canonical_base_sha256": "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5",
+            "verified_at": "2026-02-15T10:20:00.050Z"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      }
+    }
+  ]
+}
