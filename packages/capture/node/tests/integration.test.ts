@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { createFsSpoolStore, createFsDedupeIndex, SpoolFullError } from '../src/index.js';
+import { createFsSpoolStore, createFsDedupeIndex } from '../src/index.js';
 import { createCaptureSession, createHasher } from '@peac/capture-core';
 import type { CapturedAction } from '@peac/capture-core';
 
@@ -59,7 +59,7 @@ describe('integration: CaptureSession + FsStores', () => {
   }
 
   it('captures actions end-to-end', async () => {
-    const { session, store, dedupe } = await createSession();
+    const { session, dedupe } = await createSession();
 
     // Capture 3 actions
     const r1 = await session.capture(makeAction('a1', 'read_file'));
@@ -90,7 +90,7 @@ describe('integration: CaptureSession + FsStores', () => {
   });
 
   it('deduplicates across captures', async () => {
-    const { session, store, dedupe } = await createSession();
+    const { session, dedupe } = await createSession();
 
     const action = makeAction('dup-1', 'tool');
     const r1 = await session.capture(action);
@@ -170,7 +170,7 @@ describe('integration: CaptureSession + FsStores', () => {
   });
 
   it('hard-cap blocks captures but session stays alive', async () => {
-    const { session, store, dedupe } = await createSession({ maxEntries: 2 });
+    const { session, dedupe } = await createSession({ maxEntries: 2 });
 
     const r1 = await session.capture(makeAction('a1', 'tool1'));
     expect(r1.success).toBe(true);

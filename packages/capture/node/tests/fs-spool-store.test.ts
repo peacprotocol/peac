@@ -8,7 +8,6 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 import {
   createFsSpoolStore,
-  FsSpoolStore,
   SpoolFullError,
   SpoolCorruptError,
   getFsSpoolDiagnostics,
@@ -430,7 +429,6 @@ describe('FsSpoolStore', () => {
     await fs.writeFile(filePath, content, 'utf-8');
 
     // Set maxLineBytes to just above entry1 size but below giant entry size
-    const giantSize = Buffer.byteLength(JSON.stringify(giantEntry), 'utf-8');
     const warnings: string[] = [];
     const store = await createFsSpoolStore({
       filePath,

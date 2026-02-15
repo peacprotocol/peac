@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { createFsDedupeIndex, FsDedupeIndex } from '../src/index.js';
+import { createFsDedupeIndex } from '../src/index.js';
 import type { DedupeEntry } from '@peac/capture-core';
 
 // =============================================================================
