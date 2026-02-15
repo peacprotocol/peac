@@ -165,7 +165,7 @@ export async function activate(options: ActivateOptions): Promise<ActivateResult
     maxFileBytes: spoolOptions?.maxFileBytes,
     autoCommitIntervalMs: spoolOptions?.autoCommitIntervalMs,
     lockOptions: spoolOptions?.lockOptions,
-    onWarning: (msg) => logger.warn(`spool: ${msg}`),
+    onWarning: (msg: string) => logger.warn(`spool: ${msg}`),
   });
 
   const dedupe = await createFsDedupeIndex({
@@ -189,10 +189,8 @@ export async function activate(options: ActivateOptions): Promise<ActivateResult
   });
 
   // 6. Create tools
-  // Note: createStatusTool takes a snapshot of stats. Tools are re-created
-  // when needed by the caller, or the status tool reads live stats internally.
   const tools: PluginTool[] = [
-    createStatusTool(instance.getStats(), outputDir),
+    createStatusTool(() => instance.getStats(), outputDir),
     createExportBundleTool(outputDir, logger),
     createVerifyTool(logger),
     createQueryTool(outputDir, logger),
