@@ -1,80 +1,120 @@
 # @peac/adapter-openclaw
 
-OpenClaw adapter for PEAC interaction evidence capture.
-
-## Overview
-
-`@peac/adapter-openclaw` provides a complete capture pipeline for recording OpenClaw tool calls as PEAC interaction evidence. It includes:
-
-- **Mapper**: OpenClaw tool call events -> PEAC `CapturedAction`
-- **Hooks**: Sync capture bindings (< 10ms target)
-- **Emitter**: Background receipt signing and persistence
-- **Tailer**: Session history fallback for resilience
-
-## Installation
-
-```bash
-pnpm add @peac/adapter-openclaw
-```
+Offline-verifiable activity records for OpenClaw sessions.
 
 ## Quick Start
 
 ```typescript
-import { createCaptureSession, createHasher } from '@peac/capture-core';
-import { createInMemorySpoolStore, createInMemoryDedupeIndex } from '@peac/capture-core/testkit';
-import { createHookHandler, mapToolCallEvent } from '@peac/adapter-openclaw';
+import { activate, generateSigningKey } from '@peac/adapter-openclaw';
 
-// Create a capture session
-const session = createCaptureSession({
-  store: createInMemorySpoolStore(),
-  dedupe: createInMemoryDedupeIndex(),
-  hasher: createHasher(),
-});
+// Generate a signing key (one-time setup)
+const key = await generateSigningKey({ outputDir: '.peac' });
 
-// Create a hook handler
-const handler = createHookHandler({
-  session,
+// Activate the plugin
+const plugin = await activate({
   config: {
-    platform: 'openclaw',
-    platform_version: '0.2.0',
+    signing: {
+      key_ref: `file:${key.keyPath}`,
+      issuer: 'https://my-org.example.com',
+    },
   },
 });
 
-// Handle OpenClaw tool call events
-const result = await handler.afterToolCall({
-  tool_call_id: 'call_123',
-  run_id: 'run_abc',
-  tool_name: 'web_search',
-  started_at: '2024-02-01T10:00:00Z',
-  completed_at: '2024-02-01T10:00:01Z',
-  status: 'ok',
-  input: { query: 'hello world' },
-  output: { results: ['result1'] },
-});
-
-if (result.success) {
-  console.log('Captured:', result.entry.entry_digest);
-}
-
-await handler.close();
+plugin.instance.start();
+// Records are now captured automatically via hooks.
 ```
+
+> Never log or print the contents of `key_ref`. Use `env:` key references in CI, `file:` for local development. Signing key files are written with 0600 permissions (owner read/write only).
+
+## What It Records
+
+Every tool call your agent makes is captured as a tamper-evident record:
+
+- **Tool name, timing, status** -- what ran, when, whether it succeeded
+- **Input/output digests** -- SHA-256 hashes by default (payloads are never stored in plaintext unless you explicitly allowlist a tool)
+- **Chain linkage** -- each record links to the previous one, so gaps or reordering are detectable
+
+Records are signed with your Ed25519 key and written to disk as individual `.peac.json` files.
+
+## Commands
+
+### Key Generation
+
+```bash
+npx peac-keygen --output-dir .peac
+```
+
+Generates an Ed25519 keypair. The private key is written with 0600 permissions. Print the `kid` and public key for registration with your infrastructure.
+
+### Plugin Tools
+
+The plugin exposes 4 tools to the agent:
+
+| Tool                          | Description                                                       |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `peac_receipts.status`        | Spool size, last receipt time, configuration summary              |
+| `peac_receipts.export_bundle` | Export receipts as an evidence bundle (manifest.json + receipts/) |
+| `peac_receipts.verify`        | Verify a receipt or bundle offline                                |
+| `peac_receipts.query`         | Query receipts by workflow ID, tool name, or time range           |
+
+## Configuration
+
+### `activate()` Options
+
+```typescript
+const plugin = await activate({
+  config: {
+    signing: {
+      key_ref: 'env:PEAC_SIGNING_KEY', // or 'file:/path/to/key.jwk'
+      issuer: 'https://my-org.example.com',
+      audience: 'https://api.example.com', // optional
+    },
+    output_dir: '.peac/receipts', // optional (default: {dataDir}/receipts/)
+    background: {
+      drain_interval_ms: 1000, // optional (default: 1000)
+      batch_size: 100, // optional (default: 100)
+    },
+  },
+  dataDir: '.peac', // optional (default: ~/.openclaw/peac/)
+  spoolOptions: {
+    maxEntries: 100_000, // optional (default: 100,000)
+    maxFileBytes: 104_857_600, // optional (default: 100MB)
+    autoCommitIntervalMs: 5000, // optional (default: 5000, 0 to disable)
+  },
+});
+```
+
+### Key Reference Schemes
+
+| Scheme  | Format                  | Use Case                                       |
+| ------- | ----------------------- | ---------------------------------------------- |
+| `env:`  | `env:PEAC_SIGNING_KEY`  | CI/CD, containers (key in env var as JWK JSON) |
+| `file:` | `file:/path/to/key.jwk` | Local development (key file on disk)           |
+
+## Compatibility
+
+| Requirement   | Value                                                      |
+| ------------- | ---------------------------------------------------------- |
+| Node.js       | >= 22.0.0                                                  |
+| Module format | ESM (`.mjs`) and CJS (`.cjs`) dual-published               |
+| Runtime       | Node.js only (uses `fs`, `path`, `crypto`)                 |
+| Workers/Edge  | Not supported (requires file system access)                |
+| OpenClaw      | v2026.2.7+ (before_tool_call or tool_result_persist hooks) |
 
 ## Architecture
 
 ### Two-Stage Pipeline
 
-1. **Capture Stage** (sync, < 10ms target)
-   - Map OpenClaw event to `CapturedAction`
-   - Hash payloads inline (truncate large payloads)
-   - Write to tamper-evident spool
+```text
+Tool Call        Spool             Receipts
+(sync hook) --> (append-only)  --> (signed JWS)
+< 10ms          spool.jsonl        *.peac.json
+```
 
-2. **Emit Stage** (async background)
-   - Drain spool periodically
-   - Convert to `InteractionEvidenceV01`
-   - Sign with configured key
-   - Write receipt to output
+1. **Capture stage** (sync, < 10ms target): Map OpenClaw event to a captured action, hash payloads inline, write to tamper-evident spool
+2. **Emit stage** (async background): Drain spool periodically, convert to interaction evidence, sign with configured key, write receipt to output directory
 
-### OpenClaw to PEAC Mapping
+### OpenClaw-to-PEAC Mapping
 
 | OpenClaw Concept      | PEAC Location               |
 | --------------------- | --------------------------- |
@@ -88,85 +128,47 @@ await handler.close();
 
 ## API Reference
 
-### Mapper
+### High-Level (Recommended)
 
 ```typescript
-import { mapToolCallEvent, mapToolCallEventBatch } from '@peac/adapter-openclaw';
+import { activate, generateSigningKey } from '@peac/adapter-openclaw';
 
-// Map single event
-const result = mapToolCallEvent(event, config);
-if (result.success) {
-  console.log(result.action);
-}
+// activate() wires all components from config
+const plugin = await activate(options);
+plugin.instance.start();
 
-// Map batch
-const results = mapToolCallEventBatch(events, config);
+// Capture events via the hook handler
+await plugin.hookHandler.afterToolCall(event);
+
+// Flush pending records (supported flush primitive)
+await plugin.instance.backgroundService.drain();
+
+// Clean shutdown (flushes + closes stores)
+await plugin.shutdown();
 ```
 
-### Hook Handler
+### Lower-Level (Advanced)
+
+For custom wiring or when you need direct access to individual components:
 
 ```typescript
-import { createHookHandler, captureBatch, captureParallel } from '@peac/adapter-openclaw';
-
-const handler = createHookHandler({
-  session,
-  config: { platform: 'openclaw' },
-  onCapture: (result, event) => {
-    console.log('Captured:', result);
-  },
-});
-
-// Single event
-await handler.afterToolCall(event);
-
-// Batch (sequential)
-await captureBatch(handler, events);
-
-// Batch (parallel - non-deterministic order)
-await captureParallel(handler, events);
+import {
+  createHookHandler,
+  createReceiptEmitter,
+  createBackgroundService,
+  mapToolCallEvent,
+  createSessionHistoryTailer,
+} from '@peac/adapter-openclaw';
 ```
 
-### Background Emitter
+See the source for `createHookHandler()`, `createReceiptEmitter()`, `createBackgroundService()`, and `createSessionHistoryTailer()`.
 
-```typescript
-import { createReceiptEmitter, createBackgroundService } from '@peac/adapter-openclaw';
+## Security
 
-const emitter = createReceiptEmitter({
-  signer,
-  writer,
-  config: { platform: 'openclaw' },
-});
-
-const service = createBackgroundService({
-  emitter,
-  getPendingEntries: () => spoolStore.getPending(),
-  markEmitted: (digest) => dedupeIndex.markEmitted(digest),
-  drainIntervalMs: 1000,
-});
-
-service.start();
-// ... later
-service.stop();
-```
-
-### Session History Tailer (Fallback)
-
-```typescript
-import { createSessionHistoryTailer } from '@peac/adapter-openclaw';
-
-const tailer = createSessionHistoryTailer({
-  handler,
-  sessionId: 'session_123',
-  fetchHistory: async (sessionId, afterEventId) => {
-    return openclaw.sessions.getHistory(sessionId, { after: afterEventId });
-  },
-  pollIntervalMs: 1000,
-});
-
-tailer.start();
-// ... later
-tailer.stop();
-```
+- **Privacy by default**: All inputs and outputs are hashed (SHA-256). Plaintext is only captured for explicitly allowlisted tools.
+- **Key protection**: Signing key files are written with 0600 permissions. Use `env:` references in CI to avoid keys on disk.
+- **Tamper evidence**: Each spool entry links to the previous via digest. Gaps or reordering are detectable.
+- **No secret logging**: The adapter never logs private key material. Only the key ID (`kid`) and public key component appear in logs.
 
 ## Error Codes
 

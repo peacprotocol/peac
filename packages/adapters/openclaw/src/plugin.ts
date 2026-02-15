@@ -283,11 +283,20 @@ export async function createFileReceiptWriter(outputDir: string): Promise<Receip
       const filepath = pathModule.join(resolvedOutputDir, filename);
       const tempPath = `${filepath}.tmp`;
 
+      // Decode the JWS payload to persist the full receipt structure.
+      // The verify and export tools expect auth + evidence blocks at the top level.
+      // JWS compact serialization: header.payload.signature (base64url)
+      const jwsParts = receipt.jws.split('.');
+      const payloadJson = Buffer.from(jwsParts[1], 'base64url').toString('utf-8');
+      const payload = JSON.parse(payloadJson);
+
+      // Split payload into auth (identity fields) and evidence (data fields)
+      const { evidence, ...auth } = payload;
+
       const content = JSON.stringify(
         {
-          rid: receipt.rid,
-          interaction_id: receipt.interaction_id,
-          entry_digest: receipt.entry_digest,
+          auth,
+          evidence,
           _jws: receipt.jws,
         },
         null,
