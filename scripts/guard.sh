@@ -138,7 +138,7 @@ echo "== forbid npm invocations =="
 # net-node test-pack-install (tests published package in clean npm project),
 # capture-core test-exports (tests consumer exports resolution),
 # publish workflow (npm install for OIDC), docs/release (npm publish docs), publish-manifest (description)
-NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|(docs/)?RELEASING\.md|CHANGELOG\.md|docs/ROADMAP\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|docs/release/|scripts/(guard\.sh|pack-smoke\.mjs|pack-.*\.sh|otel-smoke\.sh|check-readme-consistency\.sh|publish-manifest\.json)|packages/net/node/scripts/test-pack-install\.mjs|packages/capture/core/scripts/test-exports\.mjs|\.github/workflows/(publish|promote-latest)\.yml)'
+NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|packages/.*/README\.md|(docs/)?RELEASING\.md|CHANGELOG\.md|docs/ROADMAP\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|docs/release/|scripts/(guard\.sh|pack-smoke\.mjs|pack-.*\.sh|otel-smoke\.sh|check-readme-consistency\.sh|publish-manifest\.json)|packages/net/node/scripts/test-pack-install\.mjs|packages/capture/core/scripts/test-exports\.mjs|\.github/workflows/(publish|promote-latest)\.yml)'
 if gg_wb n '\bnpm (run|ci|install|pack|publish)\b' '(^|[^[:alnum:]_])npm (run|ci|install|pack|publish)([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else
