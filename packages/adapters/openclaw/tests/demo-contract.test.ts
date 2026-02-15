@@ -92,8 +92,8 @@ describe('demo contract', () => {
         expect(captureResult.success).toBe(true);
       }
 
-      // 5. Flush barrier
-      await result.instance.backgroundService.drain();
+      // 5. Flush barrier (stable API surface)
+      await result.flush();
 
       // 6. Export bundle
       const exportTool = getTool(result.tools, 'peac_receipts.export_bundle');

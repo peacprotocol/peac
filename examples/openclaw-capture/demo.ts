@@ -36,7 +36,7 @@ async function main(): Promise<void> {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'peac-demo-'));
 
   try {
-    // Step 1: Generate a real Ed25519 signing key
+    // Step 1: Generate a signing key
     console.log('1. Generating signing key...');
     const key = await generateSigningKey({ outputDir: tmpDir });
     console.log(`   kid: ${key.kid}`);
@@ -100,9 +100,9 @@ async function main(): Promise<void> {
       console.log(`   ${event.tool_name}: ${captureResult.success ? 'captured' : 'failed'}`);
     }
 
-    // Step 5: Flush -- drain pending entries into signed receipts
+    // Step 5: Flush -- sign and write all pending entries
     console.log('\n4. Flushing receipts...');
-    await result.instance.backgroundService.drain();
+    await result.flush();
     console.log('   Receipts signed and written.');
 
     // Step 6: Export an evidence bundle

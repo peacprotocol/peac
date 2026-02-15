@@ -34,7 +34,7 @@ Every tool call your agent makes is captured as a tamper-evident record:
 - **Input/output digests** -- SHA-256 hashes by default (payloads are never stored in plaintext unless you explicitly allowlist a tool)
 - **Chain linkage** -- each record links to the previous one, so gaps or reordering are detectable
 
-Records are signed with your Ed25519 key and written to disk as individual `.peac.json` files.
+Records are signed with your key and written to disk as individual `.peac.json` files.
 
 ## Commands
 
@@ -44,7 +44,7 @@ Records are signed with your Ed25519 key and written to disk as individual `.pea
 npx peac-keygen --output-dir .peac
 ```
 
-Generates an Ed25519 keypair. The private key is written with 0600 permissions. Print the `kid` and public key for registration with your infrastructure.
+Generates a signing keypair. The private key is written with 0600 permissions. Print the `kid` and public key for registration with your infrastructure.
 
 ### Plugin Tools
 
@@ -107,16 +107,16 @@ const plugin = await activate({
 
 ```text
 Tool Call        Spool             Receipts
-(sync hook) --> (append-only)  --> (signed JWS)
+(sync hook) --> (append-only)  --> (signed receipt)
 < 10ms          spool.jsonl        *.peac.json
 ```
 
 1. **Capture stage** (sync, < 10ms target): Map OpenClaw event to a captured action, hash payloads inline, write to tamper-evident spool
 2. **Emit stage** (async background): Drain spool periodically, convert to interaction evidence, sign with configured key, write receipt to output directory
 
-### OpenClaw-to-PEAC Mapping
+### OpenClaw-to-Receipt Mapping
 
-| OpenClaw Concept      | PEAC Location               |
+| OpenClaw Concept      | Receipt Field               |
 | --------------------- | --------------------------- |
 | Session key           | `workflow_id` (correlation) |
 | Run ID + tool_call_id | `interaction_id` (dedupe)   |
@@ -140,8 +140,8 @@ plugin.instance.start();
 // Capture events via the hook handler
 await plugin.hookHandler.afterToolCall(event);
 
-// Flush pending records (supported flush primitive)
-await plugin.instance.backgroundService.drain();
+// Flush pending records into signed receipts
+await plugin.flush();
 
 // Clean shutdown (flushes + closes stores)
 await plugin.shutdown();
