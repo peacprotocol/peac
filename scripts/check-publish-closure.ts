@@ -53,6 +53,7 @@ function packageDir(npmName: string): string {
     'mappings-tap': 'packages/mappings/tap',
     'mappings-ucp': 'packages/mappings/ucp',
     'capture-core': 'packages/capture/core',
+    'capture-node': 'packages/capture/node',
     'sdk-js': 'packages/sdk-js',
     'net-node': 'packages/net/node',
     disc: 'packages/discovery',
