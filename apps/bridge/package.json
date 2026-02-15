@@ -34,7 +34,7 @@
     "@peac/disc": "workspace:*",
     "@peac/receipts": "workspace:*",
     "@peac/pay402": "workspace:*",
-    "hono": "^4.9.7",
+    "hono": "^4.11.9",
     "@hono/node-server": "^1.8.2",
     "jose": "^5.0.0",
     "zod": "^3.22.0"

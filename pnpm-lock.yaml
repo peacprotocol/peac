@@ -61,7 +61,7 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.8.2
-        version: 1.19.6(hono@4.10.6)
+        version: 1.19.6(hono@4.11.9)
       '@peac/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -87,8 +87,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/receipts
       hono:
-        specifier: ^4.9.7
-        version: 4.10.6
+        specifier: ^4.11.9
+        version: 4.11.9
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -119,7 +119,7 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.8.2
-        version: 1.19.6(hono@4.10.6)
+        version: 1.19.6(hono@4.11.9)
       '@peac/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -133,8 +133,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/receipts
       hono:
-        specifier: ^4.9.7
-        version: 4.10.6
+        specifier: ^4.11.9
+        version: 4.11.9
       jose:
         specifier: ^5.0.0
         version: 5.10.0
@@ -159,7 +159,7 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.8.2
-        version: 1.19.6(hono@4.10.6)
+        version: 1.19.6(hono@4.11.9)
       '@peac/crypto':
         specifier: workspace:*
         version: link:../../packages/crypto
@@ -170,8 +170,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/schema
       hono:
-        specifier: ^4.9.7
-        version: 4.10.6
+        specifier: ^4.11.9
+        version: 4.11.9
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -1381,7 +1381,7 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.8.0
-        version: 1.19.6(hono@4.10.6)
+        version: 1.19.6(hono@4.11.9)
       '@peac/protocol':
         specifier: workspace:*
         version: link:../protocol
@@ -1389,8 +1389,8 @@ importers:
         specifier: workspace:*
         version: link:../schema
       hono:
-        specifier: ^4.0.0
-        version: 4.10.6
+        specifier: ^4.11.9
+        version: 4.11.9
     devDependencies:
       '@types/node':
         specifier: ^20.19.33
@@ -3270,13 +3270,13 @@ packages:
       typescript: 5.9.3
     dev: true
 
-  /@hono/node-server@1.19.6(hono@4.10.6):
+  /@hono/node-server@1.19.6(hono@4.11.9):
     resolution: {integrity: sha512-Shz/KjlIeAhfiuE93NDKVdZ7HdBVLQAfdbaXEaoAVO3ic9ibRSLGIQGkcBbFyuLr+7/1D5ZCINM8B+6IvXeMtw==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
     dependencies:
-      hono: 4.10.6
+      hono: 4.11.9
     dev: false
 
   /@humanfs/core@0.19.1:
@@ -7117,8 +7117,8 @@ packages:
     resolution: {integrity: sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==}
     dev: true
 
-  /hono@4.10.6:
-    resolution: {integrity: sha512-BIdolzGpDO9MQ4nu3AUuDwHZZ+KViNm+EZ75Ae55eMXMqLVhDFqEMXxtUe9Qh8hjL+pIna/frs2j6Y2yD5Ua/g==}
+  /hono@4.11.9:
+    resolution: {integrity: sha512-Eaw2YTGM6WOxA6CXbckaEvslr2Ne4NFsKrvc0v97JD5awbmeBLO5w9Ho9L9kmKonrwF9RJlW6BxT1PVv/agBHQ==}
     engines: {node: '>=16.9.0'}
     dev: false
 
