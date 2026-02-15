@@ -2,10 +2,12 @@
 #
 # Triggered by: Manual dispatch only (workflow_dispatch)
 #
-# This workflow uses npm OIDC Trusted Publishing (same as publish.yml)
-# to run `npm dist-tag add @peac/<pkg>@<version> latest` for each package.
+# Uses NPM_TOKEN secret (automation token) because npm dist-tag operations
+# are not supported by OIDC Trusted Publishing (which only covers npm publish).
 #
-# Prerequisites: Same as publish.yml (Trusted Publishing configured per package)
+# Prerequisites:
+#   1. Create an npm automation token with read/write access to @peac scope
+#   2. Store it as NPM_TOKEN secret in the npm-production environment
 
 name: Promote to latest
 
@@ -27,9 +29,6 @@ concurrency:
 
 permissions: {}
 
-env:
-  NPM_VERSION: '11.5.1'
-
 jobs:
   promote:
     name: Promote dist-tag
@@ -37,7 +36,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      id-token: write # OIDC token for Trusted Publishing
     environment: npm-production
     steps:
       - name: Checkout
@@ -50,14 +48,6 @@ jobs:
         with:
           node-version-file: '.node-version'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Upgrade npm for Trusted Publishing
-        run: |
-          npm install -g npm@${{ env.NPM_VERSION }}
-          NPM_PREFIX=$(npm config get prefix)
-          echo "$NPM_PREFIX/bin" >> $GITHUB_PATH
-          export PATH="$NPM_PREFIX/bin:$PATH"
-          echo "npm version: $(npm --version)"
 
       - name: Load publish manifest
         id: manifest
@@ -109,6 +99,8 @@ jobs:
 
       - name: Promote to latest
         if: ${{ !inputs.dry_run }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           VERSION="${{ inputs.version }}"
           PACKAGES="${{ steps.manifest.outputs.packages }}"
