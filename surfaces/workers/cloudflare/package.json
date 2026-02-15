@@ -1,6 +1,6 @@
 {
   "name": "@peac/worker-cloudflare",
-  "version": "0.10.11",
+  "version": "0.10.12",
   "private": true,
   "description": "PEAC receipt verification worker for Cloudflare Workers",
   "type": "module",
@@ -42,6 +42,6 @@
     "@cloudflare/workers-types": "^4.20260214.0",
     "typescript": "^5.3.0",
     "vitest": "^4.0.0",
-    "wrangler": "^3.93.0"
+    "wrangler": "^3.114.17"
   }
 }

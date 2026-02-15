@@ -7,6 +7,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.12] - 2026-02-16
+
+### OpenClaw Activation, Durable Capture, and RFC 9421 Proof Profile
+
+v0.10.12 ships the production-ready OpenClaw adapter with one-call activation,
+Ed25519 key generation, filesystem-backed durable stores, and structured
+verification counters. It also introduces the RFC 9421 proof capture profile
+specification with conformance vectors and an extension schema.
+
+### Added
+
+- **`@peac/capture-node`** (NEW package, Layer 2)
+  - Filesystem-backed durable capture stores for Node.js environments
+  - `FileSpoolStore`: append-only spool with atomic writes, fsync, and
+    crash-recovery via checkpoint files
+  - `FileDedupeIndex`: persistent deduplication index backed by newline-delimited
+    JSON with periodic compaction
+  - Both stores implement the `SpoolStore`/`DedupeIndex` interfaces from
+    `@peac/capture-core`
+- **OpenClaw `activate()` one-call setup** (`@peac/adapter-openclaw`)
+  - Single function to initialize capture session, background service, hook
+    handler, plugin tools, and signer from a config object
+  - Returns `{ instance, hookHandler, tools, shutdown }` for clean lifecycle
+    management
+  - `generateSigningKey()` CLI and programmatic Ed25519 key generation with
+    file permission enforcement (0o600)
+  - `peac-keygen` CLI command for key generation
+- **Structured verification counters** (`@peac/adapter-openclaw`)
+  - Export bundle: `scanned_count`, `exported_count`, `skipped_count`,
+    `skipped_reasons` (stat_error, invalid_json, malformed_jws, filtered),
+    `skipped_files` (bounded to 100)
+  - Query: `scanned_count`, `matched_count`, `malformed_jws`, `filtered`
+    in skip breakdown
+- **Dual-representation mismatch check** (`@peac/adapter-openclaw`)
+  - Verifier detects when top-level `auth`/`evidence` fields differ from
+    `_jws` payload and reports as error
+- **RFC 9421 proof capture profile** (`docs/specs/PEAC-PROOF-RFC9421.md`)
+  - Normative profile spec for HTTP Message Signature verification evidence
+  - Extension key: `org.peacprotocol/rfc9421-proof@0.1`
+  - Three-state verification: `verified` / `failed` / `unavailable`
+  - Six reason codes: `sig_valid`, `sig_expired`, `sig_future`,
+    `sig_key_not_found`, `sig_alg_unsupported`, `sig_base_mismatch`
+  - Privacy by construction: covered component names only, no raw header values
+- **RFC 9421 extension schema** (`specs/extensions/rfc9421-proof/0.1/schema.json`)
+  - Non-wire JSON Schema for extension payload validation
+  - Conformance vectors validate against both InteractionEvidenceV01Schema and
+    extension schema
+- **RFC 9421 conformance vectors** (`specs/conformance/fixtures/interaction/rfc9421-proof.json`)
+  - 5 vectors covering verified, expired, key-not-found, base-mismatch,
+    and full-metadata scenarios
+- **Profiles taxonomy** (`docs/specs/PROFILES.md`)
+  - Overview of Transport, Proof Capture, and Wire Format profile categories
+  - Design principles: independence, verification equivalence, extension-based,
+    three-state results
+- **Anti-rot demo contract test** (`packages/adapters/openclaw/tests/demo-contract.test.ts`)
+  - Mirrors full activate/capture/drain/export/verify flow in a test
+  - Validates stable fields (counts, verification success) to prevent drift
+- **CI: promote-latest workflow** for npm dist-tag management (#374)
+- **CI: publish preflight main fetch** fix (#373)
+
+### Changed
+
+- **OpenClaw example rewritten** (`examples/openclaw-capture/`)
+  - Uses `activate()` + `generateSigningKey()` instead of inline stores
+    and fake signer
+  - Demonstrates full flow: keygen, activate, capture, drain, export, verify
+- **OpenClaw adapter README rewritten** (`packages/adapters/openclaw/README.md`)
+  - Developer-first language ("activity records", "evidence export")
+  - Quick start, configuration, compatibility, security sections
+- **Node.js baseline references updated** to >= 22 across all docs
+  - `README.md`, `docs/README_LONG.md`, `packages/net/node/README.md`
+  - `renovate.json`: `">=22.0.0"` constraint
+- **OpenClaw example tool names** aligned with real OpenClaw surface
+  - `file_read` -> `read`, `code_execute` -> `exec`
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- RFC 9421 proof capture is a profile (doc + vectors), not a runtime dependency
+- No new registry entries required (uses existing `http.request` op type)
+
 ## [0.10.11] - 2026-02-14
 
 ### Runtime Dependencies and x402 Payment Rail
