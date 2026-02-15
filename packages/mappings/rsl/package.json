@@ -1,6 +1,6 @@
 {
   "name": "@peac/mappings-rsl",
-  "version": "0.10.11",
+  "version": "0.10.12",
   "description": "RSL (Robots Specification Layer) mapping for PEAC",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
