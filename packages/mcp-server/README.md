@@ -1,14 +1,12 @@
 # @peac/mcp-server
 
-Offline trust utilities for AI agents -- verify, inspect, and decode PEAC receipts via MCP.
-
-All operations run locally. No network calls, no external services, no API keys required.
+Verify PEAC receipts in any MCP client (Claude Desktop, Cursor, Windsurf) -- locally, offline, no API keys.
 
 ## Quick Start
 
 ### 1. Add to your AI tool
 
-**Claude Desktop** -- paste into `claude_desktop_config.json`:
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json
 {
@@ -21,7 +19,7 @@ All operations run locally. No network calls, no external services, no API keys 
 }
 ```
 
-**Cursor / Windsurf** -- paste into `.mcp.json` at project root:
+**Cursor / Windsurf** (`.mcp.json` at project root):
 
 ```json
 {
@@ -34,11 +32,19 @@ All operations run locally. No network calls, no external services, no API keys 
 }
 ```
 
-### 2. Try it
+### 2. Try it (15 seconds)
 
-Ask your agent to verify a receipt:
+Decode a demo receipt from the command line:
 
-> "Verify this PEAC receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEiLCJraWQiOiJ0ZXN0In0..."
+```bash
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"demo","version":"1.0"}}}
+{"jsonrpc":"2.0","method":"notifications/initialized"}
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"peac_decode","arguments":{"jws":"eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEiLCJraWQiOiJkZW1vIn0.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vY2xpZW50LmV4YW1wbGUuY29tIiwiYW10IjoxMDAsImN1ciI6IlVTRCIsInJhaWwiOiJzdHJpcGUiLCJyZWYiOiJ0eF9kZW1vIiwiaWF0IjoxNzM5MDAwMDAwfQ.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}}}' | npx -y @peac/mcp-server 2>/dev/null | tail -1 | node -e "process.stdin.on('data',d=>{const r=JSON.parse(d).result;console.log(JSON.stringify(r.structuredContent,null,2))})"
+```
+
+Or ask your agent directly:
+
+> "Decode this PEAC receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMt..."
 
 The agent will use `peac_verify` (with a public key), `peac_inspect` (metadata only), or `peac_decode` (raw header + payload) depending on context.
 

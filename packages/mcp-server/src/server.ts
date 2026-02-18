@@ -150,10 +150,13 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
       })
       .catch(() => {});
 
-    // Timeout race -- handlerPromise keeps running even if timeout fires
+    // Timeout race -- handlerPromise keeps running even if timeout fires.
+    // Timer is cleared when the handler resolves to avoid unnecessary timers
+    // accumulating under load.
     let timedOut = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const timeoutPromise = new Promise<never>((_resolve, reject) => {
-      setTimeout(() => {
+      timer = setTimeout(() => {
         timedOut = true;
         reject(new Error(`Tool "${toolName}" timed out after ${policy.limits.tool_timeout_ms}ms`));
       }, policy.limits.tool_timeout_ms);
@@ -184,6 +187,8 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
         return errorCallToolResult(meta, 'E_MCP_TOOL_TIMEOUT', message);
       }
       return errorCallToolResult(meta, 'E_MCP_INTERNAL', message);
+    } finally {
+      clearTimeout(timer);
     }
   }
 

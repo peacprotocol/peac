@@ -153,10 +153,7 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/e2e-smoke', () => {
     // stdout writes here indicate a bug in the test code.
     const parentStdoutWrites: string[] = [];
     const origStdoutWrite = process.stdout.write.bind(process.stdout);
-    process.stdout.write = ((
-      chunk: string | Uint8Array,
-      ...rest: unknown[]
-    ) => {
+    process.stdout.write = ((chunk: string | Uint8Array, ...rest: unknown[]) => {
       parentStdoutWrites.push(typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString());
       return (origStdoutWrite as Function)(chunk, ...rest);
     }) as typeof process.stdout.write;

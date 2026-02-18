@@ -91,7 +91,7 @@ describe('infra/key-loader', () => {
       await expect(loadIssuerKey('env:NONEXISTENT_VAR_XYZ')).rejects.toThrow(KeyLoadError);
     });
 
-    it('falls back to ISO timestamp for kid when not in JWK', async () => {
+    it('derives deterministic kid from public key when not in JWK', async () => {
       const { privateKey, publicKey } = await generateKeypair();
       const jwk = {
         kty: 'OKP',
@@ -102,7 +102,23 @@ describe('infra/key-loader', () => {
       vi.stubEnv('TEST_PEAC_KEY_NOKID', JSON.stringify(jwk));
 
       const loaded = await loadIssuerKey('env:TEST_PEAC_KEY_NOKID');
-      expect(loaded.kid).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      // kid is truncated SHA-256 hex of base64url(pubkey) -- 16 hex chars
+      expect(loaded.kid).toMatch(/^[a-f0-9]{16}$/);
+    });
+
+    it('derived kid is stable across loads for same key', async () => {
+      const { privateKey, publicKey } = await generateKeypair();
+      const jwk = {
+        kty: 'OKP',
+        crv: 'Ed25519',
+        x: base64urlEncode(publicKey),
+        d: base64urlEncode(privateKey),
+      };
+      vi.stubEnv('TEST_PEAC_KEY_STABLE', JSON.stringify(jwk));
+
+      const loaded1 = await loadIssuerKey('env:TEST_PEAC_KEY_STABLE');
+      const loaded2 = await loadIssuerKey('env:TEST_PEAC_KEY_STABLE');
+      expect(loaded1.kid).toBe(loaded2.kid);
     });
   });
 

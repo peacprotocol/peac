@@ -121,5 +121,28 @@ describe('infra/policy', () => {
       const directHash = await computePolicyHash(loaded.policy);
       expect(loaded.hash).toBe(directHash);
     });
+
+    it('produces identical hash regardless of key insertion order', async () => {
+      // Two PolicyConfig objects with the same values but different key order
+      const policy1 = getDefaultPolicy();
+      // Reconstruct with reversed key order at nested level
+      const policy2: Record<string, unknown> = {
+        version: '1',
+        tools: {},
+        redaction: { strip_payment: false, strip_evidence: false },
+        limits: {
+          max_concurrency: 10,
+          tool_timeout_ms: 30_000,
+          max_response_bytes: 65_536,
+          max_jws_bytes: 16_384,
+        },
+        allow_network: false,
+      };
+      const hash1 = await computePolicyHash(policy1);
+      const hash2 = await computePolicyHash(
+        policy2 as unknown as import('../../src/infra/policy.js').PolicyConfig
+      );
+      expect(hash1).toBe(hash2);
+    });
   });
 });

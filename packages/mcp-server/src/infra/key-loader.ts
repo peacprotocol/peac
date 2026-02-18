@@ -7,7 +7,13 @@
  */
 
 import { readFile } from 'node:fs/promises';
-import { base64urlDecode, derivePublicKey, validateKeypair } from '@peac/crypto';
+import {
+  base64urlDecode,
+  base64urlEncode,
+  derivePublicKey,
+  validateKeypair,
+  sha256Hex,
+} from '@peac/crypto';
 import type { Ed25519PrivateJwk } from '@peac/crypto';
 import { KeyLoadError } from './errors.js';
 
@@ -87,8 +93,16 @@ export async function loadIssuerKey(schemeUri: string): Promise<LoadedKey> {
   const privateKey = base64urlDecode(ed25519Jwk.d);
   const publicKey = await derivePublicKey(privateKey);
 
-  // Extract kid (falls back to timestamp)
-  const kid = typeof j.kid === 'string' ? j.kid : new Date().toISOString();
+  // Extract kid. Falls back to a deterministic derivation from the public key
+  // (truncated SHA-256 of base64url-encoded public key) so runs are reproducible.
+  let kid: string;
+  if (typeof j.kid === 'string') {
+    kid = j.kid;
+  } else {
+    const pubB64 = base64urlEncode(publicKey);
+    const hash = await sha256Hex(pubB64);
+    kid = hash.slice(0, 16);
+  }
 
   return { privateKey, publicKey, kid };
 }

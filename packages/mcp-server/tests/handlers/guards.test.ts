@@ -94,28 +94,23 @@ describe('handlers/guards', () => {
       const obj: Record<string, unknown> = { a: 'short' };
       obj.self = obj; // cyclic reference
       // Should not throw or infinite-loop -- cycle guard skips visited objects
+      // in both sumStringBytes and estimateSerializedBytes
       const result = checkInputSizes(obj, policy);
-      // The string content is small, so it passes the string-sum check.
-      // The serialized-size fallback may throw on JSON.stringify (cyclic),
-      // but checkInputSizes catches that and returns undefined.
       expect(result).toBeUndefined();
     });
 
-    it('rejects large non-string structures via serialized-size fallback', () => {
+    it('rejects large non-string structures via bounded size estimator', () => {
       const policy = getDefaultPolicy();
       policy.limits.max_jws_bytes = 50;
-      // limit = 100 bytes. Build an input with no strings but large serialized size.
-      // 30 numbers at ~2-5 bytes each in JSON = ~120-200 bytes serialized
+      // limit = 100 bytes. Build an input with no strings but large estimated size.
+      // 30 numbers at ~5 bytes each + keys + overhead > 100 bytes
       const input: Record<string, unknown> = {};
       for (let i = 0; i < 30; i++) {
         input[`n${i}`] = 99999;
       }
-      const serialized = Buffer.byteLength(JSON.stringify(input), 'utf8');
-      if (serialized > 100) {
-        const result = checkInputSizes(input, policy);
-        expect(result).toBeDefined();
-        expect(result!.structured.code).toBe('E_MCP_INPUT_TOO_LARGE');
-      }
+      const result = checkInputSizes(input, policy);
+      expect(result).toBeDefined();
+      expect(result!.structured.code).toBe('E_MCP_INPUT_TOO_LARGE');
     });
   });
 
@@ -236,6 +231,25 @@ describe('handlers/guards', () => {
       expect(result.truncated).toBe(true);
       expect(result.originalBytes).toBe(1000);
       expect(result.returnedBytes).toBeLessThan(result.originalBytes);
+    });
+
+    it('guarantees final byte length does not exceed maxBytes', () => {
+      const policy = getDefaultPolicy();
+      policy.limits.max_response_bytes = 150;
+      const text = 'x'.repeat(1000);
+      const result = truncateResponse(text, policy);
+      expect(result.returnedBytes).toBeLessThanOrEqual(150);
+      expect(result.text).toContain('[TRUNCATED');
+    });
+
+    it('handles tiny maxBytes gracefully', () => {
+      const policy = getDefaultPolicy();
+      policy.limits.max_response_bytes = 10; // smaller than suffix
+      const text = 'x'.repeat(100);
+      const result = truncateResponse(text, policy);
+      expect(result.truncated).toBe(true);
+      // Should not throw even with absurdly small budget
+      expect(result.text).toContain('[TRUNCATED');
     });
   });
 });

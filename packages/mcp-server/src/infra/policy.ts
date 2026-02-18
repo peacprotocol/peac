@@ -23,9 +23,11 @@ const LimitsSchema = z.object({
   max_concurrency: z.number().int().positive().default(10),
 });
 
+// JWKS config: file-only. URL fetch is not implemented (SSRF surface).
+// When allow_network + URL fetch is added, gate it behind allow_network
+// with strict allowlist, timeouts, max-size, and no-redirect policy.
 const JwksConfigSchema = z.object({
   file: z.string().optional(),
-  url: z.string().url().optional(),
 });
 
 export const PolicySchema = z.object({
@@ -57,13 +59,31 @@ export function getDefaultPolicy(): PolicyConfig {
 }
 
 /**
+ * Deep stable stringify: recursively sorts all object keys at every level
+ * so semantically identical policies always produce the same hash regardless
+ * of insertion order. Arrays preserve element order (order-significant).
+ */
+function deepStableStringify(value: unknown): string {
+  if (value === null || typeof value !== 'object') {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return '[' + value.map(deepStableStringify).join(',') + ']';
+  }
+  const obj = value as Record<string, unknown>;
+  const keys = Object.keys(obj).sort();
+  const pairs = keys.map((k) => JSON.stringify(k) + ':' + deepStableStringify(obj[k]));
+  return '{' + pairs.join(',') + '}';
+}
+
+/**
  * Compute the policy hash from a canonical JSON representation.
  * Accepts either raw JSON string or a PolicyConfig object.
- * When given a PolicyConfig, serializes with sorted keys for determinism.
+ * When given a PolicyConfig, uses deep stable stringify (recursive key sort)
+ * so semantically identical policies always hash identically.
  */
 export async function computePolicyHash(input: string | PolicyConfig): Promise<string> {
-  const canonical =
-    typeof input === 'string' ? input : JSON.stringify(input, Object.keys(input).sort());
+  const canonical = typeof input === 'string' ? input : deepStableStringify(input);
   return sha256Hex(canonical);
 }
 

@@ -112,4 +112,36 @@ describe('security/stdout-fence', () => {
       teardown = undefined;
     }).toThrow(/stdout fence/i);
   });
+
+  it('throws when buffer grows beyond limit without newline', () => {
+    teardown = installStdoutFence();
+    // Write a large chunk without newline to trigger buffer cap
+    const chunk = 'x'.repeat(2 * 1024 * 1024); // 2 MB
+    process.stdout.write(chunk); // first 2 MB -- under 4 MB cap
+    expect(() => process.stdout.write(chunk)).not.toThrow(); // 4 MB total -- at cap
+    expect(() => process.stdout.write(chunk)).toThrow(/stdout fence/i); // 6 MB -- over cap
+  });
+
+  it('rejects JSON-RPC with only jsonrpc field (no id/result/method)', () => {
+    teardown = installStdoutFence();
+    const msg = JSON.stringify({ jsonrpc: '2.0' }) + '\n';
+    expect(() => process.stdout.write(msg)).toThrow(/stdout fence/i);
+  });
+
+  it('passes valid JSON-RPC notifications (method without id)', () => {
+    teardown = installStdoutFence();
+    const msg = JSON.stringify({ jsonrpc: '2.0', method: 'notifications/progress' }) + '\n';
+    expect(() => process.stdout.write(msg)).not.toThrow();
+  });
+
+  it('passes JSON-RPC error responses', () => {
+    teardown = installStdoutFence();
+    const msg =
+      JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        error: { code: -32600, message: 'Invalid Request' },
+      }) + '\n';
+    expect(() => process.stdout.write(msg)).not.toThrow();
+  });
 });

@@ -12,12 +12,14 @@ import { McpServerError } from './infra/errors.js';
 
 type WriteCallback = (err?: Error | null) => void;
 
-// 4 MB max line length -- prevents memory exhaustion from a single unbounded JSON-RPC message
+// 4 MB max line/buffer length -- prevents memory exhaustion from
+// unbounded writes without newlines or a single huge JSON-RPC message
 const MAX_LINE_BYTES = 4 * 1024 * 1024;
 
 export function installStdoutFence(): () => void {
   const originalWrite = process.stdout.write.bind(process.stdout);
   let buffer = '';
+  let bufferBytes = 0;
 
   function validateJsonRpcLine(line: string): void {
     // Guard: reject lines that exceed the byte budget before attempting JSON.parse
@@ -39,23 +41,49 @@ export function installStdoutFence(): () => void {
       );
     }
 
-    if (
-      typeof parsed !== 'object' ||
-      parsed === null ||
-      !('jsonrpc' in parsed) ||
-      (parsed as Record<string, unknown>).jsonrpc !== '2.0'
-    ) {
+    if (typeof parsed !== 'object' || parsed === null) {
       throw new McpServerError(
         'E_MCP_STDOUT_FENCE_VIOLATION',
         `Stdout fence: non-JSON-RPC 2.0 object on stdout: ${line.slice(0, 100)}`
       );
     }
+
+    const obj = parsed as Record<string, unknown>;
+
+    if (obj.jsonrpc !== '2.0') {
+      throw new McpServerError(
+        'E_MCP_STDOUT_FENCE_VIOLATION',
+        `Stdout fence: non-JSON-RPC 2.0 object on stdout: ${line.slice(0, 100)}`
+      );
+    }
+
+    // Require valid JSON-RPC 2.0 response shape: id + (result or error),
+    // or a notification (method without id). Reject anything else.
+    const hasId = 'id' in obj;
+    const hasResult = 'result' in obj;
+    const hasError = 'error' in obj;
+    const hasMethod = 'method' in obj;
+
+    if (hasId && (hasResult || hasError)) {
+      // Valid response
+      return;
+    }
+    if (hasMethod && !hasId) {
+      // Valid notification (server -> client, e.g. notifications/*)
+      return;
+    }
+
+    throw new McpServerError(
+      'E_MCP_STDOUT_FENCE_VIOLATION',
+      `Stdout fence: malformed JSON-RPC 2.0 message (expected response or notification): ${line.slice(0, 100)}`
+    );
   }
 
   function processBuffer(): void {
     const lines = buffer.split('\n');
     // Keep the last segment (incomplete line or empty string after trailing newline)
     buffer = lines.pop()!;
+    bufferBytes = new TextEncoder().encode(buffer).length;
 
     for (const line of lines) {
       const trimmed = line.trim();
@@ -83,7 +111,18 @@ export function installStdoutFence(): () => void {
     // Convert chunk to string
     const str = typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk);
 
+    // Cap buffer growth before appending -- prevents memory exhaustion from
+    // writes that never include a newline (e.g. broken serializer)
+    const chunkBytes = new TextEncoder().encode(str).length;
+    if (bufferBytes + chunkBytes > MAX_LINE_BYTES) {
+      throw new McpServerError(
+        'E_MCP_STDOUT_FENCE_VIOLATION',
+        `Stdout fence: buffer exceeded ${MAX_LINE_BYTES} bytes without a newline`
+      );
+    }
+
     buffer += str;
+    bufferBytes += chunkBytes;
     processBuffer();
 
     // Forward to original write
@@ -102,6 +141,7 @@ export function installStdoutFence(): () => void {
       validateJsonRpcLine(buffer.trim());
     }
     buffer = '';
+    bufferBytes = 0;
     process.stdout.write = originalWrite;
   };
 }

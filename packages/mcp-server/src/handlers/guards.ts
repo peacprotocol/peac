@@ -81,15 +81,60 @@ function sumStringBytes(value: unknown, seen?: WeakSet<object>): number {
 }
 
 /**
+ * Bounded serialized-size estimator. Walks the object graph and estimates
+ * JSON serialized bytes WITHOUT materializing the full string. Aborts early
+ * when the estimate exceeds the limit (returns Infinity). This prevents
+ * memory exhaustion from adversarial inputs with many small non-string values
+ * (e.g. large arrays of numbers) that would bypass string-only counting.
+ *
+ * Accuracy: conservative overestimate for numbers (uses String(n).length),
+ * exact for strings (JSON.stringify escapes), exact for structural overhead.
+ * Uses a WeakSet cycle guard consistent with sumStringBytes.
+ */
+function estimateSerializedBytes(value: unknown, limit: number, seen?: WeakSet<object>): number {
+  if (value === null) return 4; // "null"
+  if (value === undefined) return 0; // omitted in JSON
+  if (typeof value === 'boolean') return value ? 4 : 5; // "true" / "false"
+  if (typeof value === 'number') return String(value).length;
+  if (typeof value === 'string') return Buffer.byteLength(JSON.stringify(value), 'utf8');
+
+  if (typeof value !== 'object') return 0;
+
+  const visited = seen ?? new WeakSet<object>();
+  if (visited.has(value as object)) return 0;
+  visited.add(value as object);
+
+  let total = 2; // {} or []
+
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      if (i > 0) total += 1; // comma
+      total += estimateSerializedBytes(value[i], limit, visited);
+      if (total > limit) return Infinity; // early exit
+    }
+    return total;
+  }
+
+  const entries = Object.entries(value as Record<string, unknown>);
+  for (let i = 0; i < entries.length; i++) {
+    if (i > 0) total += 1; // comma
+    const [k, v] = entries[i];
+    total += Buffer.byteLength(JSON.stringify(k), 'utf8') + 1; // key + colon
+    total += estimateSerializedBytes(v, limit, visited);
+    if (total > limit) return Infinity; // early exit
+  }
+  return total;
+}
+
+/**
  * Check total input size across all string fields (recursive).
  * Prevents memory exhaustion from oversized jwks, public_key_base64url, etc.
  * Traverses the full object graph so nested payloads cannot bypass the limit.
  * Uses 2x max_jws_bytes as the total budget.
  *
- * Also applies a serialized-size fallback: if the full JSON serialization of
- * the input exceeds the limit, it is rejected even if individual string fields
- * are small (prevents bypass via large non-string structures like deep arrays
- * of numbers).
+ * Also applies a bounded serialized-size estimate (without materializing
+ * the full JSON string) to catch large non-string structures like arrays
+ * of numbers that bypass string-only counting.
  */
 export function checkInputSizes(
   input: Record<string, unknown>,
@@ -111,21 +156,16 @@ export function checkInputSizes(
     };
   }
 
-  // Fallback: serialized size catches large non-string structures
-  let serializedBytes: number;
-  try {
-    serializedBytes = Buffer.byteLength(JSON.stringify(input), 'utf8');
-  } catch {
-    // Cyclic or non-serializable -- already caught by depth/cycle guards
-    return undefined;
-  }
-  if (serializedBytes > limit) {
+  // Fallback: bounded serialized-size estimate catches large non-string structures
+  // without materializing the full JSON string (prevents allocation attacks)
+  const estimatedBytes = estimateSerializedBytes(input, limit);
+  if (estimatedBytes > limit) {
     return {
-      text: `Input rejected: serialized input is ${serializedBytes} bytes, exceeding limit of ${limit} bytes`,
+      text: `Input rejected: estimated serialized input exceeds limit of ${limit} bytes`,
       structured: {
         ok: false,
         code: 'E_MCP_INPUT_TOO_LARGE',
-        message: `Serialized input is ${serializedBytes} bytes, limit is ${limit}`,
+        message: `Estimated serialized input exceeds limit of ${limit} bytes`,
       },
       isError: true,
     };
@@ -197,8 +237,13 @@ export interface TruncationResult {
   returnedBytes: number;
 }
 
+const TRUNCATION_SUFFIX = '\n\n[TRUNCATED: response exceeded policy limit]';
+const TRUNCATION_SUFFIX_BYTES = new TextEncoder().encode(TRUNCATION_SUFFIX).length;
+
 /**
  * Truncate response text to stay within max_response_bytes.
+ * Guarantees the final byte length is <= maxBytes by computing the
+ * suffix size exactly and slicing the body budget accordingly.
  * Returns truncation metadata for structured output signaling.
  */
 export function truncateResponse(text: string, policy: PolicyConfig): TruncationResult {
@@ -207,9 +252,13 @@ export function truncateResponse(text: string, policy: PolicyConfig): Truncation
   if (encoded.length <= maxBytes) {
     return { text, truncated: false, originalBytes: encoded.length, returnedBytes: encoded.length };
   }
-  // Truncate at byte boundary, avoiding mid-character cuts
-  const truncatedText = new TextDecoder().decode(encoded.slice(0, maxBytes - 100));
-  const finalText = truncatedText + '\n\n[TRUNCATED: response exceeded policy limit]';
+
+  // Budget for body = maxBytes - suffix bytes. If maxBytes is tiny,
+  // clamp to 0 so we still return the suffix as signal.
+  const bodyBudget = Math.max(0, maxBytes - TRUNCATION_SUFFIX_BYTES);
+  // Truncate at byte boundary, avoiding mid-character cuts via TextDecoder
+  const truncatedText = new TextDecoder().decode(encoded.slice(0, bodyBudget));
+  const finalText = truncatedText + TRUNCATION_SUFFIX;
   const finalEncoded = new TextEncoder().encode(finalText);
   return {
     text: finalText,
