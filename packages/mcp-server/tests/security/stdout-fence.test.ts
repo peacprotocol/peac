@@ -1,18 +1,39 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { installStdoutFence } from '../../src/stdout-fence.js';
 
 describe('security/stdout-fence', () => {
   let teardown: (() => void) | undefined;
+
+  // Intercept real stdout.write with a sink before each test.
+  // The fence captures this sink as its "originalWrite", so validated
+  // lines forward to the sink -- never to the real terminal.
+  // This prevents JSON-RPC lines and test content from polluting
+  // vitest output, which itself must stay clean (stdout = JSON-RPC
+  // in production, test output must not contradict that).
+  let realWrite: typeof process.stdout.write;
+  let captured: string[];
+
+  beforeEach(() => {
+    realWrite = process.stdout.write;
+    captured = [];
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      captured.push(typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk));
+      return true;
+    }) as typeof process.stdout.write;
+  });
 
   afterEach(() => {
     if (teardown) {
       try {
         teardown();
       } catch {
-        // teardown may fail if buffer has invalid content, restore manually
+        // teardown may fail if buffer has invalid content
       }
       teardown = undefined;
     }
+    // Always restore the real stdout.write -- fence teardown may have
+    // restored to our sink, not the real write
+    process.stdout.write = realWrite;
   });
 
   it('passes valid JSON-RPC 2.0 messages through', () => {

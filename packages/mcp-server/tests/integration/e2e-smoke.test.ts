@@ -148,6 +148,19 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/e2e-smoke', () => {
   }
 
   it('completes initialize -> tools/list -> peac_decode round-trip', async () => {
+    // Parent-process stdout guard: detect any pollution from the test
+    // process itself. Child stdout is piped (not inherited), so any
+    // stdout writes here indicate a bug in the test code.
+    const parentStdoutWrites: string[] = [];
+    const origStdoutWrite = process.stdout.write.bind(process.stdout);
+    process.stdout.write = ((
+      chunk: string | Uint8Array,
+      ...rest: unknown[]
+    ) => {
+      parentStdoutWrites.push(typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString());
+      return (origStdoutWrite as Function)(chunk, ...rest);
+    }) as typeof process.stdout.write;
+
     const client = createStdioClient();
 
     try {
@@ -259,6 +272,18 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/e2e-smoke', () => {
       throw err;
     } finally {
       client.close();
+      process.stdout.write = origStdoutWrite;
+
+      // Assert no parent-process stdout pollution occurred.
+      // Child stdout is piped and fully consumed by the stdio client,
+      // so any writes here come from the test code itself (a bug).
+      const jsonRpcLeaks = parentStdoutWrites.filter((w) => w.includes('"jsonrpc"'));
+      if (jsonRpcLeaks.length > 0) {
+        throw new Error(
+          `Parent process wrote ${jsonRpcLeaks.length} JSON-RPC line(s) to stdout -- ` +
+            `child stdout must be piped, not inherited:\n${jsonRpcLeaks[0]?.slice(0, 200)}`
+        );
+      }
     }
   }, 15_000);
 });
