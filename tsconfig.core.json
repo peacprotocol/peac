@@ -31,7 +31,8 @@
     "packages/adapters/**/src/**/*.ts",
     "packages/http-signatures/src/**/*.ts",
     "packages/jwks-cache/src/**/*.ts",
-    "packages/pay402/src/**/*.ts"
+    "packages/pay402/src/**/*.ts",
+    "packages/mcp-server/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

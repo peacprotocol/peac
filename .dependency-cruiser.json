@@ -108,13 +108,13 @@
     {
       "name": "adapters-no-upward",
       "severity": "error",
-      "comment": "L4 adapters/rails/mappings must not import server or cli",
+      "comment": "L4 adapters/rails/mappings must not import server, cli, or mcp-server",
       "from": {
         "path": "^packages/(adapters|rails|mappings)/",
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
-        "path": "^packages/(server|cli)/"
+        "path": "^packages/(server|cli|mcp-server)/"
       }
     },
     {
@@ -122,11 +122,47 @@
       "severity": "error",
       "comment": "Catch-all: library/utility packages must not import L5 application packages. Covers pillar packages, jwks-cache, pay402, sdk-js, etc. that lack individual layer rules.",
       "from": {
-        "path": "^packages/(?!server/|cli/)",
+        "path": "^packages/(?!server/|cli/|mcp-server/)",
         "pathNot": "\\.(test|spec)\\.ts$"
       },
       "to": {
-        "path": "^packages/(server|cli)/"
+        "path": "^packages/(server|cli|mcp-server)/"
+      }
+    },
+    {
+      "name": "mcp-server-no-sdk-in-core",
+      "severity": "error",
+      "comment": "DD-57: handlers, schemas, and infra must have ZERO MCP SDK imports",
+      "from": {
+        "path": "^packages/mcp-server/src/(handlers|schemas|infra)/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "@modelcontextprotocol"
+      }
+    },
+    {
+      "name": "mcp-server-no-server",
+      "severity": "error",
+      "comment": "L5 horizontal isolation: mcp-server must not import server package",
+      "from": {
+        "path": "^packages/mcp-server/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/server/"
+      }
+    },
+    {
+      "name": "mcp-server-no-cli",
+      "severity": "error",
+      "comment": "L5 horizontal isolation: mcp-server must not import cli package",
+      "from": {
+        "path": "^packages/mcp-server/src/",
+        "pathNot": "\\.(test|spec)\\.ts$"
+      },
+      "to": {
+        "path": "^packages/cli/"
       }
     },
     {

@@ -70,6 +70,15 @@ export default [
     },
   },
 
+  // --- @peac/mcp-server: forbid console.log (stdout is reserved for JSON-RPC) ---
+  // Use process.stderr.write() for diagnostics, never console.log/warn/error.
+  {
+    files: ['packages/mcp-server/src/**/*.ts'],
+    rules: {
+      'no-console': 'error',
+    },
+  },
+
   // --- Test files: add test globals ---
   {
     files: [

@@ -52,7 +52,8 @@
       "@peac/adapter-openclaw": ["./packages/adapters/openclaw/src"],
       "@peac/mappings-mcp": ["./packages/mappings/mcp/src"],
       "@peac/mappings-ucp": ["./packages/mappings/ucp/src"],
-      "@peac/mappings-aipref": ["./packages/mappings/aipref/src"]
+      "@peac/mappings-aipref": ["./packages/mappings/aipref/src"],
+      "@peac/mcp-server": ["./packages/mcp-server/src"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "lib", "coverage"]

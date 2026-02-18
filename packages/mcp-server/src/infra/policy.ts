@@ -1,0 +1,110 @@
+/**
+ * Static policy loader (DD-53: load once, hash, never reload)
+ */
+
+import { readFile, stat } from 'node:fs/promises';
+import { z } from 'zod';
+import { sha256Hex } from '@peac/crypto';
+import { PolicyLoadError } from './errors.js';
+
+const ToolPolicySchema = z.object({
+  enabled: z.boolean().default(true),
+});
+
+const RedactionSchema = z.object({
+  strip_evidence: z.boolean().default(false),
+  strip_payment: z.boolean().default(false),
+});
+
+const LimitsSchema = z.object({
+  max_jws_bytes: z.number().int().positive().default(16_384),
+  max_response_bytes: z.number().int().positive().default(65_536),
+  tool_timeout_ms: z.number().int().positive().default(30_000),
+  max_concurrency: z.number().int().positive().default(10),
+});
+
+const JwksConfigSchema = z.object({
+  file: z.string().optional(),
+  url: z.string().url().optional(),
+});
+
+export const PolicySchema = z.object({
+  version: z.literal('1'),
+  allow_network: z.boolean().default(false),
+  redaction: RedactionSchema.default({}),
+  tools: z.record(z.string(), ToolPolicySchema).default({}),
+  limits: LimitsSchema.default({}),
+  jwks: JwksConfigSchema.optional(),
+});
+
+export type PolicyConfig = z.infer<typeof PolicySchema>;
+
+const DEFAULT_POLICY: PolicyConfig = {
+  version: '1',
+  allow_network: false,
+  redaction: { strip_evidence: false, strip_payment: false },
+  tools: {},
+  limits: {
+    max_jws_bytes: 16_384,
+    max_response_bytes: 65_536,
+    tool_timeout_ms: 30_000,
+    max_concurrency: 10,
+  },
+};
+
+export function getDefaultPolicy(): PolicyConfig {
+  return structuredClone(DEFAULT_POLICY);
+}
+
+/**
+ * Compute the policy hash from a canonical JSON representation.
+ * Accepts either raw JSON string or a PolicyConfig object.
+ * When given a PolicyConfig, serializes with sorted keys for determinism.
+ */
+export async function computePolicyHash(input: string | PolicyConfig): Promise<string> {
+  const canonical =
+    typeof input === 'string' ? input : JSON.stringify(input, Object.keys(input).sort());
+  return sha256Hex(canonical);
+}
+
+export async function loadPolicy(
+  filePath: string
+): Promise<{ policy: PolicyConfig; hash: string }> {
+  let raw: string;
+  try {
+    raw = await readFile(filePath, 'utf-8');
+  } catch (err) {
+    throw new PolicyLoadError(
+      `Failed to read policy file: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  // Warn on world-writable permissions (0o002)
+  try {
+    const s = await stat(filePath);
+    if (s.mode & 0o002) {
+      process.stderr.write(
+        `[peac-mcp-server] WARNING: Policy file ${filePath} is world-writable\n`
+      );
+    }
+  } catch {
+    // stat failure is non-fatal
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new PolicyLoadError(`Policy file is not valid JSON: ${filePath}`);
+  }
+
+  const result = PolicySchema.safeParse(parsed);
+  if (!result.success) {
+    const issues = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    throw new PolicyLoadError(`Policy validation failed: ${issues}`);
+  }
+
+  // Hash the materialized policy (after Zod defaults applied) for determinism
+  const hash = await computePolicyHash(result.data);
+  return { policy: result.data, hash };
+}
