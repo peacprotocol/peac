@@ -18,7 +18,12 @@ export type McpServerErrorCode =
   | 'E_MCP_JWKS_NO_MATCH'
   | 'E_MCP_INVALID_INPUT'
   | 'E_MCP_HANDLER_ERROR'
-  | 'E_MCP_STDOUT_FENCE_VIOLATION';
+  | 'E_MCP_STDOUT_FENCE_VIOLATION'
+  | 'E_MCP_KEY_REQUIRED'
+  | 'E_MCP_ISSUE_FAILED'
+  | 'E_MCP_BUNDLE_FAILED'
+  | 'E_MCP_PATH_TRAVERSAL'
+  | 'E_MCP_BUNDLE_DIR_REQUIRED';
 
 export class McpServerError extends Error {
   readonly code: McpServerErrorCode;
@@ -48,6 +53,27 @@ export class JwksLoadError extends McpServerError {
   constructor(message: string) {
     super('E_MCP_JWKS_LOAD', message);
     this.name = 'JwksLoadError';
+  }
+}
+
+export class IssueToolError extends McpServerError {
+  constructor(message: string) {
+    super('E_MCP_ISSUE_FAILED', message);
+    this.name = 'IssueToolError';
+  }
+}
+
+export class BundleToolError extends McpServerError {
+  constructor(message: string) {
+    super('E_MCP_BUNDLE_FAILED', message);
+    this.name = 'BundleToolError';
+  }
+}
+
+export class PathTraversalError extends McpServerError {
+  constructor(message: string) {
+    super('E_MCP_PATH_TRAVERSAL', message);
+    this.name = 'PathTraversalError';
   }
 }
 
