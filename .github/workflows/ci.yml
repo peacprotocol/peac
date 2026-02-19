@@ -59,6 +59,29 @@ jobs:
           # Secondary scan via Python (hidden/bidi ranges)
           bash scripts/check-unicode.sh
 
+      - name: Unicode targeted scan (previously-flagged files)
+        run: |
+          # Targeted scan of files GitHub flagged for hidden unicode in PR #397.
+          # Permanent CI artifact proving these files are clean.
+          FILES=(
+            packages/capture/core/src/plugin.ts
+            packages/crypto/src/ed25519.ts
+            packages/mcp-server/README.md
+            packages/mcp-server/src/infra/path-safety.ts
+            packages/schema/src/errors.ts
+            security/audit-allowlist.json
+          )
+          EXISTING=()
+          for f in "${FILES[@]}"; do
+            [ -f "$f" ] && EXISTING+=("$f")
+          done
+          if [ ${#EXISTING[@]} -gt 0 ]; then
+            node scripts/find-invisible-unicode.mjs "${EXISTING[@]}"
+            echo "OK: no invisible unicode in ${#EXISTING[@]} previously-flagged files"
+          else
+            echo "SKIP: none of the flagged files exist (renamed or removed)"
+          fi
+
       - name: Domain guard
         run: bash -euxo pipefail scripts/guard.sh
 
