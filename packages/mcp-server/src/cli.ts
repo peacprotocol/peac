@@ -6,6 +6,7 @@
  *          install stdout fence -> create server -> connect transport
  */
 
+import { stat as fsStat, realpath } from 'node:fs/promises';
 import { Command } from 'commander';
 import { SERVER_NAME, SERVER_VERSION, MCP_PROTOCOL_VERSION } from './infra/constants.js';
 import { loadPolicy, getDefaultPolicy, computePolicyHash } from './infra/policy.js';
@@ -29,6 +30,7 @@ program
   .option('--issuer-id <uri>', 'Issuer identifier URI')
   .option('--policy <path>', 'Policy configuration file path')
   .option('--jwks-file <path>', 'JWKS file for verifier key resolution')
+  .option('--bundle-dir <path>', 'Directory for evidence bundle output')
   .action(async (opts) => {
     // Validate key flag pairing
     if (opts.issuerKey && !opts.issuerId) {
@@ -64,6 +66,24 @@ program
       jwksKeys = await loadJwksFile(opts.jwksFile);
     }
 
+    // Validate bundle-dir (optional, for bundle tool)
+    let bundleDir: string | undefined;
+    if (opts.bundleDir) {
+      try {
+        const s = await fsStat(opts.bundleDir);
+        if (!s.isDirectory()) {
+          process.stderr.write(`ERROR: --bundle-dir is not a directory: ${opts.bundleDir}\n`);
+          process.exit(1);
+        }
+        bundleDir = await realpath(opts.bundleDir);
+      } catch (err) {
+        process.stderr.write(
+          `ERROR: --bundle-dir not accessible: ${opts.bundleDir} -- ${err instanceof Error ? err.message : String(err)}\n`
+        );
+        process.exit(1);
+      }
+    }
+
     // Build server context
     const context: ServerContext = {
       version: SERVER_VERSION,
@@ -71,6 +91,8 @@ program
       protocolVersion: MCP_PROTOCOL_VERSION,
       issuerKey,
       jwksKeys,
+      issuerId: opts.issuerId,
+      bundleDir,
     };
 
     // Install stdout fence BEFORE connecting transport (DD-58)
@@ -89,12 +111,19 @@ program
 
     // Banner to stderr (never stdout)
     const tools = ['peac_verify', 'peac_inspect', 'peac_decode'];
+    if (issuerKey && opts.issuerId) {
+      tools.push('peac_issue');
+      if (bundleDir) {
+        tools.push('peac_create_bundle');
+      }
+    }
     process.stderr.write(
       `[${SERVER_NAME}] v${SERVER_VERSION} | protocol ${MCP_PROTOCOL_VERSION}\n`
     );
     process.stderr.write(`  Tools: ${tools.join(', ')}\n`);
     process.stderr.write(`  Key: ${issuerKey ? 'loaded' : 'none'}\n`);
     process.stderr.write(`  JWKS: ${jwksKeys ? `${jwksKeys.length} key(s)` : 'none'}\n`);
+    process.stderr.write(`  Bundle dir: ${bundleDir ?? 'none'}\n`);
     process.stderr.write(`  Policy hash: ${policyHash.slice(0, 16)}...\n`);
 
     // Graceful shutdown

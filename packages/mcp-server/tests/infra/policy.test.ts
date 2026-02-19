@@ -28,6 +28,10 @@ describe('infra/policy', () => {
       expect(policy.allow_network).toBe(false);
       expect(policy.limits.max_jws_bytes).toBe(16_384);
       expect(policy.limits.max_concurrency).toBe(10);
+      expect(policy.limits.max_claims_bytes).toBe(262_144);
+      expect(policy.limits.max_bundle_receipts).toBe(256);
+      expect(policy.limits.max_bundle_bytes).toBe(16_777_216);
+      expect(policy.limits.max_ttl_seconds).toBe(86_400);
     });
 
     it('passes schema validation', () => {
@@ -83,6 +87,24 @@ describe('infra/policy', () => {
       await expect(loadPolicy(filePath)).rejects.toThrow(PolicyLoadError);
     });
 
+    it('accepts tool policy with allowed_kinds', async () => {
+      const filePath = join(tmpDir, 'kinds.json');
+      await writeFile(
+        filePath,
+        JSON.stringify({
+          version: '1',
+          tools: {
+            peac_issue: { enabled: true, allowed_kinds: ['payment', 'consent'] },
+          },
+        })
+      );
+
+      const loaded = await loadPolicy(filePath);
+      const issuePolicy = loaded.policy.tools.peac_issue;
+      expect(issuePolicy).toBeDefined();
+      expect(issuePolicy?.allowed_kinds).toEqual(['payment', 'consent']);
+    });
+
     it('produces stable hash for same content', async () => {
       const content = JSON.stringify({ version: '1' });
       const filePath = join(tmpDir, 'stable.json');
@@ -135,6 +157,10 @@ describe('infra/policy', () => {
           tool_timeout_ms: 30_000,
           max_response_bytes: 65_536,
           max_jws_bytes: 16_384,
+          max_ttl_seconds: 86_400,
+          max_bundle_bytes: 16_777_216,
+          max_bundle_receipts: 256,
+          max_claims_bytes: 262_144,
         },
         allow_network: false,
       };

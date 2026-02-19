@@ -15,6 +15,8 @@ export interface ServerContext {
   protocolVersion: string;
   issuerKey?: LoadedKey;
   jwksKeys?: JwksKeyEntry[];
+  issuerId?: string;
+  bundleDir?: string;
 }
 
 export interface HandlerParams<T = Record<string, unknown>> {

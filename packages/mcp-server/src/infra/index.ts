@@ -3,3 +3,4 @@ export * from './errors.js';
 export * from './policy.js';
 export * from './key-loader.js';
 export * from './jwks-loader.js';
+export * from './path-safety.js';

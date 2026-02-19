@@ -38,6 +38,8 @@ describe('integration/lifecycle', () => {
     expect(mod.handleVerify).toBeDefined();
     expect(mod.handleInspect).toBeDefined();
     expect(mod.handleDecode).toBeDefined();
+    expect(mod.handleIssue).toBeDefined();
+    expect(mod.handleCreateBundle).toBeDefined();
     expect(mod.checkJwsSize).toBeDefined();
     expect(mod.checkToolEnabled).toBeDefined();
     expect(mod.checkInputSizes).toBeDefined();
@@ -47,6 +49,19 @@ describe('integration/lifecycle', () => {
     expect(mod.getDefaultPolicy).toBeDefined();
     expect(mod.installStdoutFence).toBeDefined();
     expect(mod.SERVER_NAME).toBe('peac-mcp-server');
+    // PR2 exports
+    expect(mod.IssueToolError).toBeDefined();
+    expect(mod.BundleToolError).toBeDefined();
+    expect(mod.PathTraversalError).toBeDefined();
+    expect(mod.assertRelativePath).toBeDefined();
+    expect(mod.resolveOutputPath).toBeDefined();
+    expect(mod.safeMkdir).toBeDefined();
+    expect(mod.atomicWriteDir).toBeDefined();
+    expect(mod.createTempDir).toBeDefined();
+    expect(mod.DEFAULT_MAX_CLAIMS_BYTES).toBe(262_144);
+    expect(mod.DEFAULT_MAX_BUNDLE_RECEIPTS).toBe(256);
+    expect(mod.DEFAULT_MAX_BUNDLE_BYTES).toBe(16_777_216);
+    expect(mod.DEFAULT_MAX_TTL_SECONDS).toBe(86_400);
   });
 
   it('package.json files field limits published contents', async () => {

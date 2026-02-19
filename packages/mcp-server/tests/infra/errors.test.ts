@@ -4,6 +4,9 @@ import {
   KeyLoadError,
   PolicyLoadError,
   JwksLoadError,
+  IssueToolError,
+  BundleToolError,
+  PathTraversalError,
   sanitizeOutput,
 } from '../../src/infra/errors.js';
 
@@ -45,6 +48,33 @@ describe('infra/errors', () => {
       const err = new JwksLoadError('bad jwks');
       expect(err.code).toBe('E_MCP_JWKS_LOAD');
       expect(err.name).toBe('JwksLoadError');
+      expect(err).toBeInstanceOf(McpServerError);
+    });
+  });
+
+  describe('IssueToolError', () => {
+    it('has correct code and name', () => {
+      const err = new IssueToolError('issue failed');
+      expect(err.code).toBe('E_MCP_ISSUE_FAILED');
+      expect(err.name).toBe('IssueToolError');
+      expect(err).toBeInstanceOf(McpServerError);
+    });
+  });
+
+  describe('BundleToolError', () => {
+    it('has correct code and name', () => {
+      const err = new BundleToolError('bundle failed');
+      expect(err.code).toBe('E_MCP_BUNDLE_FAILED');
+      expect(err.name).toBe('BundleToolError');
+      expect(err).toBeInstanceOf(McpServerError);
+    });
+  });
+
+  describe('PathTraversalError', () => {
+    it('has correct code and name', () => {
+      const err = new PathTraversalError('bad path');
+      expect(err.code).toBe('E_MCP_PATH_TRAVERSAL');
+      expect(err.name).toBe('PathTraversalError');
       expect(err).toBeInstanceOf(McpServerError);
     });
   });

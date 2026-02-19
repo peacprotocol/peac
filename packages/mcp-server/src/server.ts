@@ -13,13 +13,19 @@ import type { ServerContext, HandlerResult } from './handlers/types.js';
 import { handleVerify } from './handlers/verify.js';
 import { handleInspect } from './handlers/inspect.js';
 import { handleDecode } from './handlers/decode.js';
+import { handleIssue } from './handlers/issue.js';
+import { handleCreateBundle } from './handlers/bundle.js';
 import { checkInputSizes, checkObjectDepth, measureEnvelopeBytes } from './handlers/guards.js';
 import type { VerifyInput } from './schemas/verify.js';
 import type { InspectInput } from './schemas/inspect.js';
 import type { DecodeInput } from './schemas/decode.js';
+import type { IssueInput } from './schemas/issue.js';
+import type { BundleInput } from './schemas/bundle.js';
 import { VerifyInputSchema } from './schemas/verify.js';
 import { InspectInputSchema } from './schemas/inspect.js';
 import { DecodeInputSchema } from './schemas/decode.js';
+import { IssueInputSchema } from './schemas/issue.js';
+import { BundleInputSchema } from './schemas/bundle.js';
 
 export interface ServerOptions {
   version: string;
@@ -53,6 +59,25 @@ const PURE_TOOL_ANNOTATIONS: ToolAnnotations = {
   readOnlyHint: true,
   destructiveHint: false,
   idempotentHint: true,
+  openWorldHint: false,
+};
+
+// peac_issue: pure in-memory signing, no filesystem or network side-effects.
+// readOnlyHint: true -- produces a JWS string, does not mutate state.
+// idempotentHint: false -- each call includes a fresh `iat` timestamp.
+// openWorldHint: false -- closed world; no external I/O or filesystem access.
+const ISSUE_TOOL_ANNOTATIONS: ToolAnnotations = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: false,
+};
+
+const BUNDLE_TOOL_ANNOTATIONS: ToolAnnotations = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: false,
+  openWorldHint: true,
 };
 
 const MAX_INPUT_DEPTH = 10;
@@ -73,13 +98,14 @@ function errorCallToolResult(
  * Narrowed type for McpServer.registerTool that avoids TS2589
  * deep instantiation errors from cross-version Zod generics.
  *
- * The MCP SDK v1.26 uses zod@3.25 types internally. Our workspace
- * uses zod@3.22. Zod schema objects are structurally identical at
- * runtime (SDK duck-types via _def presence check), but TypeScript
- * cannot resolve the deep generic chain across versions.
+ * The MCP SDK and our workspace may pin different Zod versions.
+ * Zod schema objects are structurally identical at runtime (the SDK
+ * duck-types via _def presence check), but TypeScript cannot resolve
+ * the deep generic chain across version boundaries.
  *
  * This type accurately describes the runtime contract: inputSchema
  * accepts any object with Zod-like structure (which our schemas are).
+ * See package.json for actual pinned versions.
  */
 type RegisterToolBridge = (
   name: string,
@@ -94,7 +120,17 @@ type RegisterToolBridge = (
 
 export function createPeacMcpServer(options: ServerOptions): McpServer {
   const { version, policy, context } = options;
-  const meta = makeMeta(context, SERVER_NAME);
+
+  // Compute registered tool list upfront for capability discovery
+  const registeredTools = ['peac_verify', 'peac_inspect', 'peac_decode'];
+  if (context.issuerKey && context.issuerId) {
+    registeredTools.push('peac_issue');
+    if (context.bundleDir) {
+      registeredTools.push('peac_create_bundle');
+    }
+  }
+
+  const meta = { ...makeMeta(context, SERVER_NAME), registeredTools };
   const maxConcurrency = policy.limits.max_concurrency;
   let activeHandlers = 0;
 
@@ -197,7 +233,7 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
     { capabilities: { tools: { listChanged: true } } }
   );
 
-  // Bind with narrowed types to bridge Zod v3.22 <-> SDK v3.25 boundary
+  // Bind with narrowed types to bridge workspace Zod <-> SDK Zod boundary
   const register = server.registerTool.bind(server) as RegisterToolBridge;
 
   // -- peac_verify --
@@ -247,6 +283,44 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
         handleDecode({ input: args as DecodeInput, policy, context })
       )
   );
+
+  // -- Privileged tools (conditionally registered) --
+
+  // peac_issue: requires issuerKey + issuerId
+  if (context.issuerKey && context.issuerId) {
+    register(
+      'peac_issue',
+      {
+        title: 'Issue PEAC Receipt',
+        description:
+          'Sign and return a PEAC receipt JWS. Requires server to be configured with --issuer-key and --issuer-id.',
+        inputSchema: IssueInputSchema,
+        annotations: ISSUE_TOOL_ANNOTATIONS,
+      },
+      async (args) =>
+        wrapHandler('peac_issue', args, () =>
+          handleIssue({ input: args as IssueInput, policy, context })
+        )
+    );
+
+    // peac_create_bundle: additionally requires bundleDir
+    if (context.bundleDir) {
+      register(
+        'peac_create_bundle',
+        {
+          title: 'Create Evidence Bundle',
+          description:
+            'Create a signed evidence bundle directory from receipt JWS strings. Requires --issuer-key, --issuer-id, and --bundle-dir.',
+          inputSchema: BundleInputSchema,
+          annotations: BUNDLE_TOOL_ANNOTATIONS,
+        },
+        async (args) =>
+          wrapHandler('peac_create_bundle', args, () =>
+            handleCreateBundle({ input: args as BundleInput, policy, context })
+          )
+      );
+    }
+  }
 
   return server;
 }

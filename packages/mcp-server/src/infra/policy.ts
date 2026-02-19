@@ -9,6 +9,7 @@ import { PolicyLoadError } from './errors.js';
 
 const ToolPolicySchema = z.object({
   enabled: z.boolean().default(true),
+  allowed_kinds: z.array(z.string()).optional(),
 });
 
 const RedactionSchema = z.object({
@@ -21,6 +22,10 @@ const LimitsSchema = z.object({
   max_response_bytes: z.number().int().positive().default(65_536),
   tool_timeout_ms: z.number().int().positive().default(30_000),
   max_concurrency: z.number().int().positive().default(10),
+  max_claims_bytes: z.number().int().positive().default(262_144),
+  max_bundle_receipts: z.number().int().positive().default(256),
+  max_bundle_bytes: z.number().int().positive().default(16_777_216),
+  max_ttl_seconds: z.number().int().positive().default(86_400),
 });
 
 // JWKS config: file-only. URL fetch is not implemented (SSRF surface).
@@ -51,6 +56,10 @@ const DEFAULT_POLICY: PolicyConfig = {
     max_response_bytes: 65_536,
     tool_timeout_ms: 30_000,
     max_concurrency: 10,
+    max_claims_bytes: 262_144,
+    max_bundle_receipts: 256,
+    max_bundle_bytes: 16_777_216,
+    max_ttl_seconds: 86_400,
   },
 };
 
