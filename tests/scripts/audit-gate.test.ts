@@ -313,7 +313,6 @@ describe('parseAllowlist', () => {
 
   it('all valid scopes are accepted', () => {
     for (const scope of VALID_SCOPES) {
-      const maxDays = scope === 'prod' ? MAX_EXPIRY_DAYS_PROD : MAX_EXPIRY_DAYS;
       // Use a date within the scope's max window
       const { active, invalid } = parseAllowlist(
         { allowlist: [makeEntry({ scope, expires_at: '2026-02-28' })] },
