@@ -169,6 +169,11 @@ export async function handleCreateBundle(
     const receiptHashes: string[] = [];
 
     for (let i = 0; i < input.receipts.length; i++) {
+      // Check cancellation at each iteration to avoid unnecessary disk I/O
+      if (params.signal?.aborted) {
+        throw new McpServerError('E_MCP_CANCELLED', 'Request cancelled during bundle creation');
+      }
+
       const jws = input.receipts[i];
       const data = new TextEncoder().encode(jws);
       const hash = await sha256Hex(data);

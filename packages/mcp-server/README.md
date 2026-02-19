@@ -162,7 +162,8 @@ Optional JSON file to customize behavior:
   "allow_network": false,
   "redaction": {
     "strip_evidence": false,
-    "strip_payment": false
+    "strip_payment": false,
+    "inspect_full_claims": false
   },
   "tools": {
     "peac_verify": { "enabled": true },

@@ -23,7 +23,8 @@ export type McpServerErrorCode =
   | 'E_MCP_ISSUE_FAILED'
   | 'E_MCP_BUNDLE_FAILED'
   | 'E_MCP_PATH_TRAVERSAL'
-  | 'E_MCP_BUNDLE_DIR_REQUIRED';
+  | 'E_MCP_BUNDLE_DIR_REQUIRED'
+  | 'E_MCP_CANCELLED';
 
 export class McpServerError extends Error {
   readonly code: McpServerErrorCode;

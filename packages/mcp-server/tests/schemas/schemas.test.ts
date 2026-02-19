@@ -304,4 +304,22 @@ describe('schemas', () => {
       });
     }
   });
+
+  describe('no $defs in output schemas (client compatibility)', () => {
+    const outputSchemas = [
+      { name: 'VerifyOutputSchema', schema: VerifyOutputSchema },
+      { name: 'InspectOutputSchema', schema: InspectOutputSchema },
+      { name: 'DecodeOutputSchema', schema: DecodeOutputSchema },
+      { name: 'IssueOutputSchema', schema: IssueOutputSchema },
+      { name: 'BundleOutputSchema', schema: BundleOutputSchema },
+    ];
+
+    for (const { name, schema } of outputSchemas) {
+      it(`${name} produces no $defs or $ref`, () => {
+        const jsonStr = JSON.stringify(schema);
+        expect(jsonStr).not.toContain('"$defs"');
+        expect(jsonStr).not.toContain('"$ref"');
+      });
+    }
+  });
 });
