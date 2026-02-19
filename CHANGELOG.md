@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.13] - 2026-02-19
+
+### MCP Server for AI Agents
+
+v0.10.13 ships `@peac/mcp-server`, bringing PEAC receipt operations to any MCP
+client (Claude Desktop, Cursor, Windsurf). Verify, inspect, decode, issue, and
+bundle receipts locally -- no API keys, no network required.
+
+### Added
+
+- **`@peac/mcp-server`** (NEW package, Layer 5)
+  - 5 MCP tools: `peac_verify`, `peac_inspect`, `peac_decode` (pure),
+    `peac_issue`, `peac_create_bundle` (privileged)
+  - Pure tools require no configuration -- safe for any environment
+  - Privileged tools require explicit operator opt-in via `--issuer-key`,
+    `--issuer-id`, and `--bundle-dir` CLI flags
+  - `peac-mcp-server` CLI binary with stdio transport
+  - Structured outputs (`structuredContent` + `text`) on every response
+  - `_meta` audit block on all responses (serverVersion, policyHash,
+    protocolVersion, registeredTools)
+  - `outputSchema` published on all tools for client schema discovery
+  - JSON policy file for tool enablement, size limits, redaction controls,
+    and concurrency bounds
+  - Canonical policy hash (SHA-256, deep-sorted keys) in every response
+  - Cancellation support via MCP SDK AbortSignal (`E_MCP_CANCELLED`)
+  - Line-buffered stdout fence (DD-58) for JSON-RPC framing integrity
+  - Evidence bundles: deterministic `bundle_id` (content-addressable),
+    canonical manifest (sorted keys, SHA-256 receipt hashes), signed
+    provenance (`manifest.jws`)
+  - Path traversal prevention for bundle output directories
+  - Input guards: size limits, depth limits, concurrency limits, timeouts
+  - Output size cap on full JSON-RPC envelope
+  - `inspect_full_claims` policy gate (default: false) for claim visibility
+  - JWKS file support for verifier key resolution
+  - Issuer key loading from `env:VAR` or `file:/path` references
+  - No ambient key discovery (DD-52) -- keys never searched from filesystem
+    or environment
+  - MCP SDK `@modelcontextprotocol/sdk@~1.27.0` (tilde pin, patch-only)
+  - MCP protocol version `2025-11-25`
+  - 226 tests across 18 test files
+  - Design decisions DD-51 through DD-58
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- `--jwks-url` deferred to v0.11.x (SSRF hardening pending)
+- Capability tokens deferred to v0.11.x (HTTP transport)
+- All audit HIGH vulnerabilities are dev-only (eslint/wrangler chains)
+
 ## [0.10.12] - 2026-02-16
 
 ### OpenClaw Activation, Durable Capture, and RFC 9421 Proof Profile

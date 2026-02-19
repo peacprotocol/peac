@@ -1,6 +1,6 @@
 {
   "name": "@peac/telemetry-otel",
-  "version": "0.10.12",
+  "version": "0.10.13",
   "description": "OpenTelemetry adapter for PEAC telemetry",
   "keywords": [
     "peac",
