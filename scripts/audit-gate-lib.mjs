@@ -10,8 +10,20 @@
  * in tests/scripts/audit-gate.test.ts.
  */
 
-/** Maximum days an allowlist entry can be valid */
+/** Maximum days an allowlist entry can be valid (dev/examples scope) */
 export const MAX_EXPIRY_DAYS = 90;
+
+/** Maximum days for prod-scope entries (stricter) */
+export const MAX_EXPIRY_DAYS_PROD = 30;
+
+/** Days remaining before expiry warning fires */
+export const EXPIRY_WARNING_DAYS = 14;
+
+/** Valid scope values */
+export const VALID_SCOPES = ['dev', 'examples', 'prod'];
+
+/** Strict ISO-8601 date format: YYYY-MM-DD */
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * @typedef {Object} AllowlistEntry
@@ -20,6 +32,11 @@ export const MAX_EXPIRY_DAYS = 90;
  * @property {string} expires_at - Expiry date (YYYY-MM-DD)
  * @property {string} remediation - Planned remediation action
  * @property {string} issue_url - Tracking issue URL
+ * @property {string} scope - Where the vuln appears: "dev" | "examples" | "prod"
+ * @property {string[]} dependency_chain - Dep path from root to vulnerable package
+ * @property {string} verified_by - Exact verification command(s) used
+ * @property {string} owner - Who added this exception
+ * @property {string} added_at - ISO 8601 date when entry was added (YYYY-MM-DD)
  */
 
 /**
@@ -27,6 +44,7 @@ export const MAX_EXPIRY_DAYS = 90;
  * @property {Map<string, AllowlistEntry>} active - Active allowlist entries
  * @property {string[]} expired - Advisory IDs of expired entries
  * @property {string[]} invalid - Advisory IDs/descriptions of invalid entries
+ * @property {string[]} warnings - Non-blocking warnings (e.g., expiring soon)
  */
 
 /**
@@ -41,9 +59,10 @@ export function parseAllowlist(raw, now = new Date()) {
   const active = new Map();
   const expired = [];
   const invalid = [];
+  const warnings = [];
 
   if (!raw || !Array.isArray(raw.allowlist)) {
-    return { active, expired, invalid };
+    return { active, expired, invalid, warnings };
   }
 
   for (const entry of raw.allowlist) {
@@ -53,24 +72,59 @@ export function parseAllowlist(raw, now = new Date()) {
       !entry.reason ||
       !entry.expires_at ||
       !entry.remediation ||
-      !entry.issue_url
+      !entry.issue_url ||
+      !entry.scope ||
+      !entry.verified_by ||
+      !entry.owner ||
+      !entry.added_at ||
+      !Array.isArray(entry.dependency_chain) ||
+      entry.dependency_chain.length === 0
     ) {
       invalid.push(entry.advisory_id || '<missing id>');
       continue;
     }
 
-    // Fail closed: date must parse
+    // Validate scope enum
+    if (!VALID_SCOPES.includes(entry.scope)) {
+      invalid.push(`${entry.advisory_id} (invalid scope: ${entry.scope})`);
+      continue;
+    }
+
+    // Validate dependency_chain entries (non-empty, max 20)
+    if (entry.dependency_chain.length > 20) {
+      invalid.push(`${entry.advisory_id} (dependency_chain exceeds 20 entries)`);
+      continue;
+    }
+
+    // Fail closed: dates must be strict YYYY-MM-DD
+    if (!DATE_REGEX.test(entry.expires_at)) {
+      invalid.push(`${entry.advisory_id} (bad date format: ${entry.expires_at}, expected YYYY-MM-DD)`);
+      continue;
+    }
+    if (!DATE_REGEX.test(entry.added_at)) {
+      invalid.push(`${entry.advisory_id} (bad added_at format: ${entry.added_at}, expected YYYY-MM-DD)`);
+      continue;
+    }
+
+    // Parse and validate dates
     const expiry = new Date(entry.expires_at + 'T00:00:00Z');
     if (isNaN(expiry.getTime())) {
       invalid.push(`${entry.advisory_id} (bad date: ${entry.expires_at})`);
       continue;
     }
 
-    // Enforce max expiry window
+    const addedAt = new Date(entry.added_at + 'T00:00:00Z');
+    if (isNaN(addedAt.getTime())) {
+      invalid.push(`${entry.advisory_id} (bad added_at: ${entry.added_at})`);
+      continue;
+    }
+
+    // Enforce scope-aware max expiry window
+    const maxDays = entry.scope === 'prod' ? MAX_EXPIRY_DAYS_PROD : MAX_EXPIRY_DAYS;
     const daysDiff = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-    if (daysDiff > MAX_EXPIRY_DAYS) {
+    if (daysDiff > maxDays) {
       invalid.push(
-        `${entry.advisory_id} (expiry ${entry.expires_at} exceeds ${MAX_EXPIRY_DAYS}-day max)`
+        `${entry.advisory_id} (expiry ${entry.expires_at} exceeds ${maxDays}-day max for scope=${entry.scope})`
       );
       continue;
     }
@@ -80,10 +134,15 @@ export function parseAllowlist(raw, now = new Date()) {
       continue;
     }
 
+    // 14-day expiry warning (non-blocking)
+    if (daysDiff <= EXPIRY_WARNING_DAYS) {
+      warnings.push(`${entry.advisory_id} expires in ${daysDiff} day(s) (${entry.expires_at})`);
+    }
+
     active.set(entry.advisory_id, entry);
   }
 
-  return { active, expired, invalid };
+  return { active, expired, invalid, warnings };
 }
 
 /**

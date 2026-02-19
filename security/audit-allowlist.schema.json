@@ -11,7 +11,18 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["advisory_id", "reason", "expires_at", "remediation", "issue_url"],
+        "required": [
+          "advisory_id",
+          "reason",
+          "expires_at",
+          "remediation",
+          "issue_url",
+          "scope",
+          "dependency_chain",
+          "verified_by",
+          "owner",
+          "added_at"
+        ],
         "properties": {
           "advisory_id": {
             "type": "string",
@@ -23,8 +34,8 @@
           },
           "expires_at": {
             "type": "string",
-            "format": "date",
-            "description": "ISO 8601 date after which the exception expires (YYYY-MM-DD)"
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "ISO 8601 date (YYYY-MM-DD) after which the exception expires"
           },
           "remediation": {
             "type": "string",
@@ -34,6 +45,31 @@
             "type": "string",
             "format": "uri",
             "description": "Link to tracking issue for remediation"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["dev", "examples", "prod"],
+            "description": "Where the vulnerable dependency appears. prod scope has stricter limits (max 30 days, HIGH/CRITICAL never allowed)."
+          },
+          "dependency_chain": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1,
+            "maxItems": 20,
+            "description": "Dependency path from root to vulnerable package (e.g., [\"jest@30\", \"test-exclude\", \"glob\", \"minimatch@3.1.2\"])"
+          },
+          "verified_by": {
+            "type": "string",
+            "description": "Exact command(s) used to verify the scope and impact (e.g., \"pnpm audit --prod shows no HIGH\")"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Who added this exception (accountability)"
+          },
+          "added_at": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "ISO 8601 date (YYYY-MM-DD) when this entry was added"
           }
         },
         "additionalProperties": false
