@@ -6,7 +6,9 @@
  */
 
 // Import the generated categories from kernel (single source of truth: specs/kernel/errors.json)
-import { ERROR_CATEGORIES } from '@peac/kernel';
+// Namespace import avoids tsup tree-shaking false positive in multi-entry builds
+// where ERROR_CATEGORIES appears unused in entry points that don't reference it.
+import * as kernel from '@peac/kernel';
 import type { ErrorCategory } from '@peac/kernel';
 export type { ErrorCategory };
 
@@ -14,7 +16,7 @@ export type { ErrorCategory };
  * @deprecated Use ERROR_CATEGORIES from @peac/kernel instead.
  * Re-exported for backwards compatibility.
  */
-export const ERROR_CATEGORIES_CANONICAL = ERROR_CATEGORIES;
+export const ERROR_CATEGORIES_CANONICAL = kernel.ERROR_CATEGORIES;
 
 /**
  * Error severity

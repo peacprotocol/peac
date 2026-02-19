@@ -9,8 +9,10 @@
  */
 
 import type { CaptureSession, SpoolStore, DedupeIndex } from '@peac/capture-core';
-import { createCaptureSession, createHasher } from '@peac/capture-core';
-import { sign, base64urlDecode } from '@peac/crypto';
+// Namespace imports avoid tsup tree-shaking false positives in multi-entry builds
+// where these symbols appear unused in the keygen-cli entry point.
+import * as captureCore from '@peac/capture-core';
+import * as crypto from '@peac/crypto';
 import type { OpenClawAdapterConfig } from './types.js';
 import { createHookHandler, type OpenClawHookHandler } from './hooks.js';
 import {
@@ -166,11 +168,11 @@ export function createJwkSigner(jwk: JWK, issuer: string, audience?: string): Si
   }
 
   // Decode base64url to get raw key bytes
-  const privateKeyBytes = base64urlDecode(jwk.d);
+  const privateKeyBytes = crypto.base64urlDecode(jwk.d);
 
   return {
     async sign(payload: unknown): Promise<string> {
-      return sign(payload, privateKeyBytes, kid);
+      return crypto.sign(payload, privateKeyBytes, kid);
     },
 
     getKeyId(): string {
@@ -414,10 +416,10 @@ export async function createPluginInstance(options: CreatePluginOptions): Promis
   } = options;
 
   // Create hasher
-  const hasher = await createHasher();
+  const hasher = await captureCore.createHasher();
 
   // Create capture session
-  const session = createCaptureSession({
+  const session = captureCore.createCaptureSession({
     store,
     dedupe,
     hasher,

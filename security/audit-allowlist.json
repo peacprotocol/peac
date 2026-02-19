@@ -1,5 +1,41 @@
 {
   "$schema": "./audit-allowlist.schema.json",
   "description": "Time-bounded audit advisory allowlist. Expired entries are treated as active (blocking) again.",
-  "allowlist": []
+  "allowlist": [
+    {
+      "advisory_id": "GHSA-3ppc-4f35-3m26",
+      "reason": "minimatch ReDoS (HIGH) -- dev-only via jest@30 -> test-exclude -> glob -> minimatch@3.1.2. Not in production dependency tree (verified: pnpm audit --prod shows no HIGH). No user-supplied glob patterns in test runner.",
+      "expires_at": "2026-05-19",
+      "remediation": "Upgrade jest to version that pulls minimatch >= 10.2.1, or wait for upstream fix in test-exclude/glob chain",
+      "issue_url": "https://github.com/advisories/GHSA-3ppc-4f35-3m26"
+    },
+    {
+      "advisory_id": "GHSA-67mh-4wv8-2f99",
+      "reason": "esbuild dev server CSRF (MODERATE) -- dev-only via wrangler@3.114.17 -> esbuild@0.17.19. Surfaces/workers build tool only, not in published packages. Dev server is not exposed in production.",
+      "expires_at": "2026-05-19",
+      "remediation": "Upgrade wrangler to version that pulls esbuild >= 0.25.0",
+      "issue_url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99"
+    },
+    {
+      "advisory_id": "GHSA-g9mf-h72j-4rw9",
+      "reason": "undici decompression bomb (MODERATE) -- dev-only via wrangler@3.114.17 -> miniflare -> undici@5.29.0. Local dev tool only, not in published packages.",
+      "expires_at": "2026-05-19",
+      "remediation": "Upgrade wrangler to version that pulls undici >= 6.23.0",
+      "issue_url": "https://github.com/advisories/GHSA-g9mf-h72j-4rw9"
+    },
+    {
+      "advisory_id": "GHSA-2g4f-4pwh-qvx6",
+      "reason": "ajv $data ReDoS (MODERATE) -- root devDependency ajv@8.17.1. Used for JSON Schema validation in build/test tooling. Not in published package runtime dependencies.",
+      "expires_at": "2026-05-19",
+      "remediation": "Upgrade ajv to >= 8.18.0 when available and compatible with ajv-formats",
+      "issue_url": "https://github.com/advisories/GHSA-2g4f-4pwh-qvx6"
+    },
+    {
+      "advisory_id": "GHSA-w7fw-mjwx-w883",
+      "reason": "qs arrayLimit bypass (LOW) -- examples/ucp-webhook-express -> express@4.22.1 -> qs@6.14.1. Example code only, not published. Express handles query parsing internally.",
+      "expires_at": "2026-05-19",
+      "remediation": "Upgrade express to version that pulls qs >= 6.14.2",
+      "issue_url": "https://github.com/advisories/GHSA-w7fw-mjwx-w883"
+    }
+  ]
 }

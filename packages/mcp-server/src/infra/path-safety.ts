@@ -6,7 +6,7 @@
  */
 
 import { lstat, mkdir, rename, rm, mkdtemp } from 'node:fs/promises';
-import { join, resolve, relative, isAbsolute, normalize } from 'node:path';
+import * as nodePath from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { PathTraversalError } from './errors.js';
 
@@ -21,12 +21,12 @@ export function assertRelativePath(p: string): void {
     throw new PathTraversalError('Path must not be empty');
   }
 
-  if (isAbsolute(p)) {
+  if (nodePath.isAbsolute(p)) {
     throw new PathTraversalError('Absolute paths are not allowed');
   }
 
   // Normalize to detect .. traversal
-  const normalized = normalize(p);
+  const normalized = nodePath.normalize(p);
   if (normalized.startsWith('..') || normalized.includes('/..') || normalized.includes('\\..')) {
     throw new PathTraversalError('Path traversal (..) is not allowed');
   }
@@ -53,14 +53,14 @@ export function assertRelativePath(p: string): void {
 export function resolveOutputPath(basePath: string, relativePath: string): string {
   assertRelativePath(relativePath);
 
-  const normalizedBase = resolve(basePath);
-  const resolved = resolve(normalizedBase, relativePath);
+  const normalizedBase = nodePath.resolve(basePath);
+  const resolved = nodePath.resolve(normalizedBase, relativePath);
 
   // Defense-in-depth: use path.relative to check containment.
   // If the resolved path escapes basePath, relative() produces a string
   // starting with '..' -- this is cross-platform safe unlike string prefix checks.
-  const rel = relative(normalizedBase, resolved);
-  if (rel.startsWith('..') || rel.startsWith('/') || isAbsolute(rel)) {
+  const rel = nodePath.relative(normalizedBase, resolved);
+  if (rel.startsWith('..') || rel.startsWith('/') || nodePath.isAbsolute(rel)) {
     throw new PathTraversalError('Resolved path escapes base directory');
   }
 
@@ -127,6 +127,6 @@ export async function atomicWriteDir(tempDir: string, finalPath: string): Promis
  */
 export async function createTempDir(basePath: string): Promise<string> {
   await assertNotSymlink(basePath);
-  const prefix = join(basePath, `.tmp-${randomUUID().slice(0, 8)}-`);
+  const prefix = nodePath.join(basePath, `.tmp-${randomUUID().slice(0, 8)}-`);
   return mkdtemp(prefix);
 }
