@@ -58,6 +58,83 @@ describe('infra/path-safety', () => {
     it('rejects names longer than 255 chars', () => {
       expect(() => assertRelativePath('x'.repeat(256))).toThrow(PathTraversalError);
     });
+
+    // --- Null byte injection ---
+
+    it('rejects null bytes', () => {
+      expect(() => assertRelativePath('foo\x00bar')).toThrow(PathTraversalError);
+      expect(() => assertRelativePath('foo\x00bar')).toThrow('Null bytes');
+    });
+
+    // --- Colon: drive letters and NTFS ADS ---
+
+    it('rejects colon (drive letter pattern)', () => {
+      expect(() => assertRelativePath('C:foo')).toThrow(PathTraversalError);
+      expect(() => assertRelativePath('C:foo')).toThrow('Colons');
+    });
+
+    it('rejects colon (NTFS Alternate Data Stream)', () => {
+      expect(() => assertRelativePath('file.txt:stream')).toThrow(PathTraversalError);
+    });
+
+    // --- Windows reserved device names ---
+
+    it('rejects CON (Windows reserved)', () => {
+      expect(() => assertRelativePath('CON')).toThrow(PathTraversalError);
+      expect(() => assertRelativePath('CON')).toThrow('reserved device name');
+    });
+
+    it('rejects CON.txt (reserved name with extension)', () => {
+      expect(() => assertRelativePath('CON.txt')).toThrow(PathTraversalError);
+    });
+
+    it('rejects nul (case-insensitive reserved)', () => {
+      expect(() => assertRelativePath('nul')).toThrow(PathTraversalError);
+    });
+
+    it('rejects NUL (uppercase)', () => {
+      expect(() => assertRelativePath('NUL')).toThrow(PathTraversalError);
+    });
+
+    it('rejects PRN', () => {
+      expect(() => assertRelativePath('PRN')).toThrow(PathTraversalError);
+    });
+
+    it('rejects AUX', () => {
+      expect(() => assertRelativePath('AUX')).toThrow(PathTraversalError);
+    });
+
+    it('rejects COM1', () => {
+      expect(() => assertRelativePath('COM1')).toThrow(PathTraversalError);
+    });
+
+    it('rejects LPT3.log (reserved name with extension)', () => {
+      expect(() => assertRelativePath('LPT3.log')).toThrow(PathTraversalError);
+    });
+
+    it('accepts names that start with reserved prefix but are longer', () => {
+      // "CONSOLE" is not reserved, "CON" is
+      expect(() => assertRelativePath('CONSOLE')).not.toThrow();
+      expect(() => assertRelativePath('null-check')).not.toThrow();
+      expect(() => assertRelativePath('printer-driver')).not.toThrow();
+    });
+
+    // --- Trailing dots and spaces ---
+
+    it('rejects trailing dot', () => {
+      expect(() => assertRelativePath('bundle.')).toThrow(PathTraversalError);
+      expect(() => assertRelativePath('bundle.')).toThrow('Trailing dots');
+    });
+
+    it('rejects trailing space', () => {
+      expect(() => assertRelativePath('bundle ')).toThrow(PathTraversalError);
+      expect(() => assertRelativePath('bundle ')).toThrow('Trailing dots');
+    });
+
+    it('accepts names with dots and spaces in the middle', () => {
+      expect(() => assertRelativePath('bundle-2024.01.01')).not.toThrow();
+      expect(() => assertRelativePath('my bundle')).not.toThrow();
+    });
   });
 
   describe('resolveOutputPath', () => {

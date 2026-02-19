@@ -11,14 +11,36 @@ import { randomUUID } from 'node:crypto';
 import { PathTraversalError } from './errors.js';
 
 /**
+ * Windows reserved device names (case-insensitive, even with extensions).
+ * Windows treats CON, CON.txt, NUL, PRN, COM1..COM9, LPT1..LPT9 as special.
+ */
+const WINDOWS_RESERVED_NAMES = new Set([
+  'con', 'prn', 'aux', 'nul',
+  'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
+  'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9',
+]);
+
+/**
  * Assert that a path is a safe single-segment relative name.
  *
  * v1 restriction: no nested directories (single path segment only).
- * Rejects absolute paths, `..`, empty strings, multi-segment paths, and names >255 chars.
+ * Rejects absolute paths, `..`, empty strings, multi-segment paths, names >255 chars,
+ * null bytes, colons (drive letters, NTFS ADS), Windows reserved device names,
+ * and trailing dots/spaces (Windows normalizes these).
  */
 export function assertRelativePath(p: string): void {
   if (!p || p.trim().length === 0) {
     throw new PathTraversalError('Path must not be empty');
+  }
+
+  // Reject null bytes (injection vector)
+  if (p.includes('\0')) {
+    throw new PathTraversalError('Null bytes are not allowed in paths');
+  }
+
+  // Reject colons (blocks drive letters C: and NTFS ADS file.txt:stream)
+  if (p.includes(':')) {
+    throw new PathTraversalError('Colons are not allowed in paths (drive letters, NTFS ADS)');
   }
 
   if (nodePath.isAbsolute(p)) {
@@ -43,6 +65,19 @@ export function assertRelativePath(p: string): void {
   // Reject hidden files/dirs
   if (p.startsWith('.')) {
     throw new PathTraversalError('Hidden paths (starting with .) are not allowed');
+  }
+
+  // Reject trailing dots and spaces (Windows normalizes these, causing confusion)
+  if (p.endsWith('.') || p.endsWith(' ')) {
+    throw new PathTraversalError('Trailing dots and spaces are not allowed');
+  }
+
+  // Reject Windows reserved device names (case-insensitive, even with extensions)
+  // Check the base name before the first dot: "CON.txt" -> "con"
+  const dotIndex = p.indexOf('.');
+  const baseName = (dotIndex >= 0 ? p.slice(0, dotIndex) : p).toLowerCase();
+  if (WINDOWS_RESERVED_NAMES.has(baseName)) {
+    throw new PathTraversalError(`Windows reserved device name: ${baseName.toUpperCase()}`);
   }
 }
 
