@@ -60,8 +60,8 @@ importers:
   apps/api:
     dependencies:
       '@hono/node-server':
-        specifier: ^1.8.2
-        version: 1.19.6(hono@4.11.9)
+        specifier: ^1.19.9
+        version: 1.19.9(hono@4.11.9)
       '@peac/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -118,8 +118,8 @@ importers:
   apps/bridge:
     dependencies:
       '@hono/node-server':
-        specifier: ^1.8.2
-        version: 1.19.6(hono@4.11.9)
+        specifier: ^1.19.9
+        version: 1.19.9(hono@4.11.9)
       '@peac/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -158,8 +158,8 @@ importers:
   apps/sandbox-issuer:
     dependencies:
       '@hono/node-server':
-        specifier: ^1.8.2
-        version: 1.19.6(hono@4.11.9)
+        specifier: ^1.19.9
+        version: 1.19.9(hono@4.11.9)
       '@peac/crypto':
         specifier: workspace:*
         version: link:../../packages/crypto
@@ -1433,8 +1433,8 @@ importers:
   packages/server:
     dependencies:
       '@hono/node-server':
-        specifier: ^1.8.0
-        version: 1.19.6(hono@4.11.9)
+        specifier: ^1.19.9
+        version: 1.19.9(hono@4.11.9)
       '@peac/protocol':
         specifier: workspace:*
         version: link:../protocol
@@ -3322,15 +3322,6 @@ packages:
       regexpu-core: 6.4.0
       typescript: 5.9.3
     dev: true
-
-  /@hono/node-server@1.19.6(hono@4.11.9):
-    resolution: {integrity: sha512-Shz/KjlIeAhfiuE93NDKVdZ7HdBVLQAfdbaXEaoAVO3ic9ibRSLGIQGkcBbFyuLr+7/1D5ZCINM8B+6IvXeMtw==}
-    engines: {node: '>=18.14.1'}
-    peerDependencies:
-      hono: ^4
-    dependencies:
-      hono: 4.11.9
-    dev: false
 
   /@hono/node-server@1.19.9(hono@4.11.9):
     resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
