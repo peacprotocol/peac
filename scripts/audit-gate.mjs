@@ -119,7 +119,15 @@ function runAudit() {
 function main() {
   console.log(`== dependency audit (${strict ? 'strict' : 'default'} mode) ==`);
 
-  const { active: allowlist } = loadAllowlist();
+  const { active: allowlist, warnings: expiryWarnings } = loadAllowlist();
+
+  // Display expiry warnings (non-blocking)
+  if (expiryWarnings && expiryWarnings.length > 0) {
+    for (const w of expiryWarnings) {
+      console.log(`  WARNING: ${w}`);
+    }
+  }
+
   const auditResult = runAudit();
 
   // If JSON parsing failed, fall back to simple exit-code check
@@ -140,6 +148,20 @@ function main() {
   // Extract and classify advisories
   const advisories = extractAdvisories(auditResult);
   const findings = classifyAdvisories(advisories, allowlist);
+
+  // Enforce: prod-scope entries must never allowlist HIGH/CRITICAL
+  // Check all advisories that were filtered out by the allowlist
+  for (const adv of advisories) {
+    const entry = allowlist.get(adv.id) || (adv.ghsaId && allowlist.get(adv.ghsaId));
+    if (!entry) continue; // not allowlisted
+    if (entry.scope === 'prod' && (adv.severity === 'critical' || adv.severity === 'high')) {
+      console.log(
+        `FAIL: ${adv.id} (${adv.severity}) is allowlisted with scope=prod -- ` +
+          'HIGH/CRITICAL vulnerabilities in prod scope can never be allowlisted'
+      );
+      process.exit(1);
+    }
+  }
 
   // Summary
   const parts = [];

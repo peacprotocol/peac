@@ -15,6 +15,9 @@ import {
   extractAdvisories,
   classifyAdvisories,
   MAX_EXPIRY_DAYS,
+  MAX_EXPIRY_DAYS_PROD,
+  EXPIRY_WARNING_DAYS,
+  VALID_SCOPES,
 } from '../../scripts/audit-gate-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -34,6 +37,11 @@ function makeEntry(overrides = {}) {
     expires_at: '2026-03-15',
     remediation: 'Upgrade transitive dep in next patch',
     issue_url: 'https://github.com/peacprotocol/peac/issues/999',
+    scope: 'dev',
+    dependency_chain: ['parent@1.0.0', 'vulnerable@2.0.0'],
+    verified_by: 'pnpm audit --prod shows clean',
+    owner: 'testuser',
+    added_at: '2026-02-13',
     ...overrides,
   };
 }
@@ -72,7 +80,7 @@ describe('parseAllowlist', () => {
     );
     expect(active.size).toBe(0);
     expect(invalid.length).toBeGreaterThan(0);
-    expect(invalid[0]).toContain('bad date');
+    expect(invalid[0]).toContain('bad date format');
   });
 
   it('missing expires_at fails closed', () => {
@@ -146,7 +154,7 @@ describe('parseAllowlist', () => {
             advisory_id: 'GHSA-expired-1',
             expires_at: '2026-01-01',
           }),
-          makeEntry({ advisory_id: 'GHSA-bad-date', expires_at: 'xyz' }),
+          makeEntry({ advisory_id: 'GHSA-bad-date', expires_at: 'bad-date' }),
         ],
       },
       REF_DATE
@@ -158,10 +166,161 @@ describe('parseAllowlist', () => {
     expect(invalid).toHaveLength(1);
   });
 
-  it('schema requires issue_url and remediation', () => {
+  it('schema requires all fields including new ones', () => {
     const required = schema.properties.allowlist.items.required;
     expect(required).toContain('issue_url');
     expect(required).toContain('remediation');
+    expect(required).toContain('scope');
+    expect(required).toContain('dependency_chain');
+    expect(required).toContain('verified_by');
+    expect(required).toContain('owner');
+    expect(required).toContain('added_at');
+  });
+
+  // --- New field validation tests ---
+
+  it('missing scope fails closed', () => {
+    const entry = makeEntry();
+    delete (entry as Record<string, unknown>).scope;
+    const { active, invalid } = parseAllowlist({ allowlist: [entry] }, REF_DATE);
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+  });
+
+  it('invalid scope value fails closed', () => {
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ scope: 'staging' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]).toContain('invalid scope');
+  });
+
+  it('missing dependency_chain fails closed', () => {
+    const entry = makeEntry();
+    delete (entry as Record<string, unknown>).dependency_chain;
+    const { active, invalid } = parseAllowlist({ allowlist: [entry] }, REF_DATE);
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+  });
+
+  it('empty dependency_chain fails closed', () => {
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ dependency_chain: [] })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+  });
+
+  it('dependency_chain exceeding 20 entries fails closed', () => {
+    const chain = Array.from({ length: 21 }, (_, i) => `pkg${i}@1.0.0`);
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ dependency_chain: chain })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]).toContain('exceeds 20');
+  });
+
+  it('missing verified_by fails closed', () => {
+    const entry = makeEntry();
+    delete (entry as Record<string, unknown>).verified_by;
+    const { active, invalid } = parseAllowlist({ allowlist: [entry] }, REF_DATE);
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+  });
+
+  it('missing owner fails closed', () => {
+    const entry = makeEntry();
+    delete (entry as Record<string, unknown>).owner;
+    const { active, invalid } = parseAllowlist({ allowlist: [entry] }, REF_DATE);
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+  });
+
+  it('missing added_at fails closed', () => {
+    const entry = makeEntry();
+    delete (entry as Record<string, unknown>).added_at;
+    const { active, invalid } = parseAllowlist({ allowlist: [entry] }, REF_DATE);
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+  });
+
+  it('non-ISO date format for added_at fails closed', () => {
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ added_at: '02/13/2026' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]).toContain('bad added_at format');
+  });
+
+  it('non-ISO date format for expires_at fails closed', () => {
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ expires_at: '2026-3-15' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]).toContain('bad date format');
+  });
+
+  it('prod scope enforces 30-day max expiry', () => {
+    // 31 days from Feb 13 = March 16
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ scope: 'prod', expires_at: '2026-03-16' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]).toContain(`exceeds ${MAX_EXPIRY_DAYS_PROD}-day max`);
+    expect(invalid[0]).toContain('scope=prod');
+  });
+
+  it('prod scope allows entry within 30-day window', () => {
+    // 30 days from Feb 13 = March 15
+    const { active } = parseAllowlist(
+      { allowlist: [makeEntry({ scope: 'prod', expires_at: '2026-03-15' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(1);
+  });
+
+  it('14-day expiry warning fires for near-expiry entries', () => {
+    // 10 days from Feb 13 = Feb 23
+    const { active, warnings } = parseAllowlist(
+      { allowlist: [makeEntry({ expires_at: '2026-02-23' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(1);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('expires in');
+    expect(warnings[0]).toContain('2026-02-23');
+  });
+
+  it('no expiry warning for entries with more than 14 days remaining', () => {
+    // 30 days from Feb 13 = March 15
+    const { warnings } = parseAllowlist(
+      { allowlist: [makeEntry({ expires_at: '2026-03-15' })] },
+      REF_DATE
+    );
+    expect(warnings).toHaveLength(0);
+  });
+
+  it('all valid scopes are accepted', () => {
+    for (const scope of VALID_SCOPES) {
+      // Use a date within the scope's max window
+      const { active, invalid } = parseAllowlist(
+        { allowlist: [makeEntry({ scope, expires_at: '2026-02-28' })] },
+        REF_DATE
+      );
+      expect(active.size).toBe(1);
+      expect(invalid).toHaveLength(0);
+    }
   });
 });
 
