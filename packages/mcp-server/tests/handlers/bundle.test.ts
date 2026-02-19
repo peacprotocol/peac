@@ -510,6 +510,36 @@ describe('handlers/bundle', () => {
     expect(files1).toEqual(files2);
   });
 
+  it('cancellation via pre-aborted signal returns E_MCP_CANCELLED and cleans up', async () => {
+    const context = await makeIssuerContext(testDir);
+    const receipts = await createTestReceipts(3);
+    const policy = getDefaultPolicy();
+    const input: BundleInput = { receipts };
+
+    // Create a pre-aborted signal
+    const controller = new AbortController();
+    controller.abort();
+
+    const params: HandlerParams<BundleInput> = {
+      input,
+      policy,
+      context,
+      signal: controller.signal,
+    };
+    const result = await handleCreateBundle(params);
+
+    expect(result.isError).toBe(true);
+    expect(result.structured.ok).toBe(false);
+    expect(result.structured.code).toBe('E_MCP_CANCELLED');
+
+    // No bundle directories should have been created (only temp dirs, cleaned up)
+    const { readdir } = await import('node:fs/promises');
+    const entries = await readdir(testDir);
+    // Only temp dirs might remain (should be cleaned up), but no bundle dirs
+    const bundleDirs = entries.filter((e) => e.startsWith('bundle-'));
+    expect(bundleDirs).toHaveLength(0);
+  });
+
   it('duplicate receipts are deduped by sha256', async () => {
     const context = await makeIssuerContext(testDir);
     const receipts = await createTestReceipts(2);

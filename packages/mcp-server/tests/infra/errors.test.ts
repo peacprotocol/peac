@@ -79,6 +79,15 @@ describe('infra/errors', () => {
     });
   });
 
+  describe('E_MCP_CANCELLED', () => {
+    it('is a valid McpServerError code', () => {
+      const err = new McpServerError('E_MCP_CANCELLED', 'Request cancelled');
+      expect(err.code).toBe('E_MCP_CANCELLED');
+      expect(err.message).toBe('Request cancelled');
+      expect(err).toBeInstanceOf(Error);
+    });
+  });
+
   describe('sanitizeOutput', () => {
     it('replaces matching patterns with [REDACTED]', () => {
       const result = sanitizeOutput('key=abc123secret value=safe', [/abc123secret/g]);

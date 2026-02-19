@@ -15,6 +15,7 @@ const ToolPolicySchema = z.object({
 const RedactionSchema = z.object({
   strip_evidence: z.boolean().default(false),
   strip_payment: z.boolean().default(false),
+  inspect_full_claims: z.boolean().default(false),
 });
 
 const LimitsSchema = z.object({
@@ -49,7 +50,7 @@ export type PolicyConfig = z.infer<typeof PolicySchema>;
 const DEFAULT_POLICY: PolicyConfig = {
   version: '1',
   allow_network: false,
-  redaction: { strip_evidence: false, strip_payment: false },
+  redaction: { strip_evidence: false, strip_payment: false, inspect_full_claims: false },
   tools: {},
   limits: {
     max_jws_bytes: 16_384,

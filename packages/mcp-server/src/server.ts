@@ -21,11 +21,11 @@ import type { InspectInput } from './schemas/inspect.js';
 import type { DecodeInput } from './schemas/decode.js';
 import type { IssueInput } from './schemas/issue.js';
 import type { BundleInput } from './schemas/bundle.js';
-import { VerifyInputSchema } from './schemas/verify.js';
-import { InspectInputSchema } from './schemas/inspect.js';
-import { DecodeInputSchema } from './schemas/decode.js';
-import { IssueInputSchema } from './schemas/issue.js';
-import { BundleInputSchema } from './schemas/bundle.js';
+import { VerifyInputSchema, VerifyOutputSchema } from './schemas/verify.js';
+import { InspectInputSchema, InspectOutputSchema } from './schemas/inspect.js';
+import { DecodeInputSchema, DecodeOutputSchema } from './schemas/decode.js';
+import { IssueInputSchema, IssueOutputSchema } from './schemas/issue.js';
+import { BundleInputSchema, BundleOutputSchema } from './schemas/bundle.js';
 
 export interface ServerOptions {
   version: string;
@@ -113,6 +113,7 @@ type RegisterToolBridge = (
     title?: string;
     description?: string;
     inputSchema?: unknown;
+    outputSchema?: unknown;
     annotations?: ToolAnnotations;
   },
   cb: (args: Record<string, unknown>, extra: Record<string, unknown>) => Promise<CallToolResult>
@@ -137,8 +138,14 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
   async function wrapHandler(
     toolName: string,
     args: Record<string, unknown>,
-    handlerFn: () => Promise<HandlerResult>
+    handlerFn: (signal?: AbortSignal) => Promise<HandlerResult>,
+    signal?: AbortSignal
   ): Promise<CallToolResult> {
+    // Cancellation: if already aborted before we start, return immediately
+    if (signal?.aborted) {
+      return errorCallToolResult(meta, 'E_MCP_CANCELLED', 'Request cancelled');
+    }
+
     // Concurrency guard
     if (activeHandlers >= maxConcurrency) {
       return errorCallToolResult(
@@ -176,7 +183,7 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
     // If leaked slots become an operational concern, add a watchdog that logs
     // when a handler exceeds 2x tool_timeout_ms without settling.
     activeHandlers++;
-    const handlerPromise = handlerFn();
+    const handlerPromise = handlerFn(signal);
 
     // Detached slot release: fires when handler settles, regardless of timeout.
     // The void + catch ensure no unhandled rejection if handler throws.
@@ -186,20 +193,39 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
       })
       .catch(() => {});
 
-    // Timeout race -- handlerPromise keeps running even if timeout fires.
-    // Timer is cleared when the handler resolves to avoid unnecessary timers
-    // accumulating under load.
+    // Timeout + cancellation race -- handlerPromise keeps running even if
+    // timeout or cancellation fires. Timer is cleared when the handler
+    // resolves to avoid unnecessary timers accumulating under load.
     let timedOut = false;
+    let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timeoutPromise = new Promise<never>((_resolve, reject) => {
       timer = setTimeout(() => {
         timedOut = true;
         reject(new Error(`Tool "${toolName}" timed out after ${policy.limits.tool_timeout_ms}ms`));
       }, policy.limits.tool_timeout_ms);
+      // Prevent timeout timer from keeping Node.js alive during shutdown
+      timer.unref?.();
     });
 
+    // Build race participants: handler vs timeout vs (optional) cancellation
+    const raceParticipants: Promise<HandlerResult>[] = [handlerPromise, timeoutPromise];
+
+    let abortCleanup: (() => void) | undefined;
+    if (signal && !signal.aborted) {
+      const cancelPromise = new Promise<never>((_resolve, reject) => {
+        const onAbort = () => {
+          cancelled = true;
+          reject(new Error('Request cancelled'));
+        };
+        signal.addEventListener('abort', onAbort, { once: true });
+        abortCleanup = () => signal.removeEventListener('abort', onAbort);
+      });
+      raceParticipants.push(cancelPromise);
+    }
+
     try {
-      const result = await Promise.race([handlerPromise, timeoutPromise]);
+      const result = await Promise.race(raceParticipants);
 
       // Output size cap -- measure the full JSON-RPC envelope that will be
       // serialized to stdout, not just the tool result. This is the actual
@@ -219,18 +245,24 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
       return callResult;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      if (cancelled) {
+        return errorCallToolResult(meta, 'E_MCP_CANCELLED', 'Request cancelled');
+      }
       if (timedOut) {
         return errorCallToolResult(meta, 'E_MCP_TOOL_TIMEOUT', message);
       }
       return errorCallToolResult(meta, 'E_MCP_INTERNAL', message);
     } finally {
       clearTimeout(timer);
+      abortCleanup?.();
     }
   }
 
   const server = new McpServer(
     { name: SERVER_NAME, version },
-    { capabilities: { tools: { listChanged: true } } }
+    // listChanged: false -- tool set is static per server instance (determined
+    // at startup from CLI flags). The server never emits notifications/tools/list_changed.
+    { capabilities: { tools: { listChanged: false } } }
   );
 
   // Bind with narrowed types to bridge workspace Zod <-> SDK Zod boundary
@@ -244,11 +276,15 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
       description:
         'Verify a PEAC receipt JWS signature and validate claims. Returns structured check results.',
       inputSchema: VerifyInputSchema,
+      outputSchema: VerifyOutputSchema,
       annotations: PURE_TOOL_ANNOTATIONS,
     },
-    async (args) =>
-      wrapHandler('peac_verify', args, () =>
-        handleVerify({ input: args as VerifyInput, policy, context })
+    async (args, extra) =>
+      wrapHandler(
+        'peac_verify',
+        args,
+        (signal) => handleVerify({ input: args as VerifyInput, policy, context, signal }),
+        (extra as { signal?: AbortSignal }).signal
       )
   );
 
@@ -260,11 +296,15 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
       description:
         'Decode and inspect a PEAC receipt without verifying the signature. Shows header, payload metadata, and optionally full claims.',
       inputSchema: InspectInputSchema,
+      outputSchema: InspectOutputSchema,
       annotations: PURE_TOOL_ANNOTATIONS,
     },
-    async (args) =>
-      wrapHandler('peac_inspect', args, () =>
-        handleInspect({ input: args as InspectInput, policy, context })
+    async (args, extra) =>
+      wrapHandler(
+        'peac_inspect',
+        args,
+        (signal) => handleInspect({ input: args as InspectInput, policy, context, signal }),
+        (extra as { signal?: AbortSignal }).signal
       )
   );
 
@@ -276,11 +316,15 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
       description:
         'Raw decode of a PEAC receipt JWS. Returns header and payload without signature verification.',
       inputSchema: DecodeInputSchema,
+      outputSchema: DecodeOutputSchema,
       annotations: PURE_TOOL_ANNOTATIONS,
     },
-    async (args) =>
-      wrapHandler('peac_decode', args, () =>
-        handleDecode({ input: args as DecodeInput, policy, context })
+    async (args, extra) =>
+      wrapHandler(
+        'peac_decode',
+        args,
+        (signal) => handleDecode({ input: args as DecodeInput, policy, context, signal }),
+        (extra as { signal?: AbortSignal }).signal
       )
   );
 
@@ -295,11 +339,15 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
         description:
           'Sign and return a PEAC receipt JWS. Requires server to be configured with --issuer-key and --issuer-id.',
         inputSchema: IssueInputSchema,
+        outputSchema: IssueOutputSchema,
         annotations: ISSUE_TOOL_ANNOTATIONS,
       },
-      async (args) =>
-        wrapHandler('peac_issue', args, () =>
-          handleIssue({ input: args as IssueInput, policy, context })
+      async (args, extra) =>
+        wrapHandler(
+          'peac_issue',
+          args,
+          (signal) => handleIssue({ input: args as IssueInput, policy, context, signal }),
+          (extra as { signal?: AbortSignal }).signal
         )
     );
 
@@ -312,11 +360,15 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
           description:
             'Create a signed evidence bundle directory from receipt JWS strings. Requires --issuer-key, --issuer-id, and --bundle-dir.',
           inputSchema: BundleInputSchema,
+          outputSchema: BundleOutputSchema,
           annotations: BUNDLE_TOOL_ANNOTATIONS,
         },
-        async (args) =>
-          wrapHandler('peac_create_bundle', args, () =>
-            handleCreateBundle({ input: args as BundleInput, policy, context })
+        async (args, extra) =>
+          wrapHandler(
+            'peac_create_bundle',
+            args,
+            (signal) => handleCreateBundle({ input: args as BundleInput, policy, context, signal }),
+            (extra as { signal?: AbortSignal }).signal
           )
       );
     }

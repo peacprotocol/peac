@@ -32,6 +32,7 @@ describe('infra/policy', () => {
       expect(policy.limits.max_bundle_receipts).toBe(256);
       expect(policy.limits.max_bundle_bytes).toBe(16_777_216);
       expect(policy.limits.max_ttl_seconds).toBe(86_400);
+      expect(policy.redaction.inspect_full_claims).toBe(false);
     });
 
     it('passes schema validation', () => {
@@ -151,7 +152,7 @@ describe('infra/policy', () => {
       const policy2: Record<string, unknown> = {
         version: '1',
         tools: {},
-        redaction: { strip_payment: false, strip_evidence: false },
+        redaction: { strip_payment: false, strip_evidence: false, inspect_full_claims: false },
         limits: {
           max_concurrency: 10,
           tool_timeout_ms: 30_000,

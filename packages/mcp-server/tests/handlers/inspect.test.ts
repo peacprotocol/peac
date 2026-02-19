@@ -44,7 +44,7 @@ describe('handlers/inspect', () => {
     expect(meta.audience).toBe('https://client.example.com');
   });
 
-  it('includes full payload when requested', async () => {
+  it('includes full payload when requested and policy permits', async () => {
     const { privateKey } = await generateKeypair();
     const { jws } = await issue({
       iss: 'https://api.example.com',
@@ -57,12 +57,32 @@ describe('handlers/inspect', () => {
       kid: 'test-kid',
     });
 
-    const result = await handleInspect(makeParams({ jws, full_claims: true }));
+    const params = makeParams({ jws, full_claims: true });
+    params.policy.redaction.inspect_full_claims = true;
+    const result = await handleInspect(params);
 
     expect(result.structured.fullPayload).toBeDefined();
     const payload = result.structured.fullPayload as Record<string, unknown>;
     expect(payload.iss).toBe('https://api.example.com');
     expect(payload.amt).toBe(500);
+  });
+
+  it('ignores full_claims when policy inspect_full_claims is false (default)', async () => {
+    const { privateKey } = await generateKeypair();
+    const { jws } = await issue({
+      iss: 'https://api.example.com',
+      aud: 'https://client.example.com',
+      amt: 100,
+      cur: 'USD',
+      rail: 'stripe',
+      reference: 'tx_test123',
+      privateKey,
+      kid: 'test-kid',
+    });
+
+    // Default policy has inspect_full_claims: false
+    const result = await handleInspect(makeParams({ jws, full_claims: true }));
+    expect(result.structured.fullPayload).toBeUndefined();
   });
 
   it('omits full payload when not requested', async () => {
@@ -98,6 +118,7 @@ describe('handlers/inspect', () => {
 
     const policy = getDefaultPolicy();
     policy.redaction.strip_payment = true;
+    policy.redaction.inspect_full_claims = true;
 
     const result = await handleInspect({
       input: { jws, full_claims: true },

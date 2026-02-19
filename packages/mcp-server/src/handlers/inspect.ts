@@ -70,7 +70,9 @@ export async function handleInspect(params: HandlerParams<InspectInput>): Promis
   let redacted = false;
   let fullPayload: Record<string, unknown> | undefined;
 
-  if (input.full_claims) {
+  // Gate: full_claims only honored when policy permits (inspect_full_claims)
+  const effectiveFullClaims = input.full_claims && policy.redaction.inspect_full_claims;
+  if (effectiveFullClaims) {
     fullPayload = { ...payload };
 
     if (policy.redaction.strip_evidence && 'evidence' in fullPayload) {

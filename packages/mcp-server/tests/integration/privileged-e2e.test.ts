@@ -302,6 +302,56 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/privileged-e2e', () => {
     }
   }, 15_000);
 
+  it('all tools include outputSchema in tools/list response', async () => {
+    const client = createStdioClient([
+      '--issuer-key',
+      `file:${keyPath}`,
+      '--issuer-id',
+      'https://test.example.com',
+      '--bundle-dir',
+      bundleDir,
+    ]);
+
+    try {
+      await initClient(client);
+
+      client.send({
+        jsonrpc: '2.0',
+        id: 2,
+        method: 'tools/list',
+        params: {},
+      });
+
+      const listResponse = await client.receive();
+      const listResult = listResponse.result as Record<string, unknown>;
+      const tools = listResult.tools as Array<Record<string, unknown>>;
+
+      for (const tool of tools) {
+        expect(tool.outputSchema).toBeDefined();
+        expect(typeof tool.outputSchema).toBe('object');
+        // outputSchema should have JSON Schema structure
+        const schema = tool.outputSchema as Record<string, unknown>;
+        expect(schema.type).toBe('object');
+        // All output schemas include _meta
+        const properties = schema.properties as Record<string, unknown>;
+        expect(properties._meta).toBeDefined();
+      }
+    } catch (err) {
+      const stderr = client.getStderr();
+      if (stderr) {
+        const augmented =
+          err instanceof Error
+            ? new Error(`${err.message}\n\n--- stderr ---\n${stderr}`)
+            : new Error(`${String(err)}\n\n--- stderr ---\n${stderr}`);
+        if (err instanceof Error) augmented.stack = err.stack;
+        throw augmented;
+      }
+      throw err;
+    } finally {
+      client.close();
+    }
+  }, 15_000);
+
   it('annotations snapshot: all tools have expected annotations', async () => {
     const client = createStdioClient([
       '--issuer-key',
