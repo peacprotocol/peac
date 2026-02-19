@@ -1,6 +1,6 @@
 {
   "name": "@peac/mcp-server",
-  "version": "0.10.12",
+  "version": "0.10.13",
   "description": "PEAC receipt operations as MCP tools (verify, inspect, decode)",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

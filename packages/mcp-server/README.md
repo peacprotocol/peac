@@ -199,7 +199,7 @@ const result = await handleVerify({
   input: { jws: 'eyJ...', public_key_base64url: '...' },
   policy,
   context: {
-    version: '0.10.12',
+    version: '0.10.13',
     policyHash,
     protocolVersion: '2025-11-25',
   },

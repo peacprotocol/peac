@@ -1,6 +1,6 @@
 {
   "name": "@peac/worker-fastly",
-  "version": "0.10.12",
+  "version": "0.10.13",
   "private": true,
   "description": "PEAC receipt verification worker for Fastly Compute",
   "type": "module",

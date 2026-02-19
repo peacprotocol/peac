@@ -18,16 +18,18 @@
  *   which is available in Node.js >=15 and all modern runtimes
  */
 
-import { signAsync, verifyAsync, getPublicKeyAsync, utils } from '@noble/ed25519';
+// Namespace import avoids tsup tree-shaking false positive in multi-entry builds
+// where signAsync/verifyAsync appear unused in the testkit entry point.
+import * as ed from '@noble/ed25519';
 
 /** Sign a message with Ed25519 (async, Web Crypto backed) */
-export const sign = signAsync;
+export const sign = ed.signAsync;
 
 /** Verify an Ed25519 signature (async, Web Crypto backed) */
-export const verify = verifyAsync;
+export const verify = ed.verifyAsync;
 
 /** Derive public key from private key (async, Web Crypto backed) */
-export const getPublicKey = getPublicKeyAsync;
+export const getPublicKey = ed.getPublicKeyAsync;
 
 /** Generate a cryptographically random 32-byte secret key (CSPRNG) */
-export const randomSecretKey = utils.randomSecretKey;
+export const randomSecretKey = ed.utils.randomSecretKey;
