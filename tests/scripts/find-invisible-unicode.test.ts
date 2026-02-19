@@ -48,7 +48,7 @@ describe('find-invisible-unicode.mjs (CLI)', () => {
   it('detects LEFT-TO-RIGHT EMBEDDING (U+202A)', () => {
     const file = join(tmpDir, 'lre.ts');
     // "const x = '\u202A';" with actual U+202A byte
-    writeFileSync(file, Buffer.from('const x = \'\xe2\x80\xaa\';\n', 'binary'));
+    writeFileSync(file, Buffer.from("const x = '\xe2\x80\xaa';\n", 'binary'));
 
     const result = runScanner([file]);
     expect(result.exitCode).toBe(1);
@@ -58,7 +58,7 @@ describe('find-invisible-unicode.mjs (CLI)', () => {
 
   it('detects RIGHT-TO-LEFT ISOLATE (U+2067)', () => {
     const file = join(tmpDir, 'rli.ts');
-    writeFileSync(file, Buffer.from('const y = \'\xe2\x81\xa7\';\n', 'binary'));
+    writeFileSync(file, Buffer.from("const y = '\xe2\x81\xa7';\n", 'binary'));
 
     const result = runScanner([file]);
     expect(result.exitCode).toBe(1);
@@ -68,7 +68,7 @@ describe('find-invisible-unicode.mjs (CLI)', () => {
 
   it('detects ZERO WIDTH SPACE (U+200B)', () => {
     const file = join(tmpDir, 'zwsp.ts');
-    writeFileSync(file, Buffer.from('const z = \'\xe2\x80\x8b\';\n', 'binary'));
+    writeFileSync(file, Buffer.from("const z = '\xe2\x80\x8b';\n", 'binary'));
 
     const result = runScanner([file]);
     expect(result.exitCode).toBe(1);
@@ -99,10 +99,7 @@ describe('find-invisible-unicode.mjs (CLI)', () => {
   it('reports multiple codepoints in a single file', () => {
     const file = join(tmpDir, 'multi.ts');
     // U+202A + U+200B on separate lines
-    writeFileSync(
-      file,
-      Buffer.from('line1\xe2\x80\xaa\nline2\xe2\x80\x8b\n', 'binary'),
-    );
+    writeFileSync(file, Buffer.from('line1\xe2\x80\xaa\nline2\xe2\x80\x8b\n', 'binary'));
 
     const result = runScanner([file]);
     expect(result.exitCode).toBe(1);
@@ -122,10 +119,7 @@ describe('find-invisible-unicode.mjs (CLI)', () => {
   it('--fix strips bidi controls and replaces NBSP with space', () => {
     const file = join(tmpDir, 'fixme.ts');
     // "const\u00A0x = '\u202A';" -- NBSP between const and x, LRE in string
-    writeFileSync(
-      file,
-      Buffer.from('const\xc2\xa0x = \'\xe2\x80\xaa\';\n', 'binary'),
-    );
+    writeFileSync(file, Buffer.from("const\xc2\xa0x = '\xe2\x80\xaa';\n", 'binary'));
 
     // First: confirm detection
     const detect = runScanner([file]);
