@@ -151,6 +151,9 @@ jobs:
           # so we only check that generation succeeds, not binary equality
           pnpm conformance:regen:bundle
           echo "OK: Bundle vector generator executed successfully"
+          # Restore committed ZIPs so the clean-tree gate doesn't flag
+          # platform-nondeterministic binary diffs
+          git checkout -- specs/conformance/fixtures/bundle/vectors/ 2>/dev/null || true
 
       - name: Core tests
         run: pnpm test:core
@@ -201,6 +204,19 @@ jobs:
             exit 1
           fi
           echo "OK: Sandbox issuer health check passed"
+
+      - name: No working tree changes after tests
+        run: |
+          # Ensures no test accidentally mutates tracked files (e.g., perf baselines).
+          # Use PEAC_PERF_UPDATE=1 to opt in to baseline writes.
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "FAIL: Working tree has uncommitted changes after tests:"
+            git status --short
+            echo ""
+            echo "If perf baselines changed, run: PEAC_PERF_UPDATE=1 pnpm test"
+            exit 1
+          fi
+          echo "OK: Working tree is clean after tests"
 
       - name: Performance gate (advisory)
         continue-on-error: true

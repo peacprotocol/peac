@@ -14,6 +14,14 @@ export * from './purpose';
 export * from './agent-identity';
 export * from './attribution';
 
+// Kernel constraints (v0.10.14+ formalized limits, DD-60)
+export { KERNEL_CONSTRAINTS, validateKernelConstraints } from './constraints';
+export type {
+  KernelConstraintKey,
+  ConstraintViolation,
+  ConstraintValidationResult,
+} from './constraints';
+
 // JSON-safe validation schemas (v0.9.21+)
 export {
   JsonPrimitiveSchema,

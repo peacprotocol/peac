@@ -71,6 +71,7 @@ export default defineConfig({
       'tests/conformance/**/*.spec.ts',
       'tests/parity/**/*.test.ts',
       'tests/scripts/**/*.test.ts',
+      'tests/perf/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,
