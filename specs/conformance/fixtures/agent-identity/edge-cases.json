@@ -244,5 +244,6 @@
         "note": "body_hash is optional for GET requests"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.25"
 }

@@ -138,5 +138,6 @@
         "reason": "pointer_fetch_too_large"
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.8"
 }

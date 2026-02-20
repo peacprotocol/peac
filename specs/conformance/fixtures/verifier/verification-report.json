@@ -61,16 +61,49 @@
             "kid": "prod-2026-02"
           },
           "checks": [
-            { "id": "jws.parse", "status": "pass" },
-            { "id": "limits.receipt_bytes", "status": "pass" },
-            { "id": "jws.protected_header", "status": "pass" },
-            { "id": "claims.schema_unverified", "status": "pass" },
-            { "id": "issuer.trust_policy", "status": "pass" },
-            { "id": "issuer.discovery", "status": "skip" },
-            { "id": "key.resolve", "status": "pass", "detail": { "source": "pinned_keys" } },
-            { "id": "jws.signature", "status": "pass" },
-            { "id": "claims.time_window", "status": "pass" },
-            { "id": "extensions.limits", "status": "pass" }
+            {
+              "id": "jws.parse",
+              "status": "pass"
+            },
+            {
+              "id": "limits.receipt_bytes",
+              "status": "pass"
+            },
+            {
+              "id": "jws.protected_header",
+              "status": "pass"
+            },
+            {
+              "id": "claims.schema_unverified",
+              "status": "pass"
+            },
+            {
+              "id": "issuer.trust_policy",
+              "status": "pass"
+            },
+            {
+              "id": "issuer.discovery",
+              "status": "skip"
+            },
+            {
+              "id": "key.resolve",
+              "status": "pass",
+              "detail": {
+                "source": "pinned_keys"
+              }
+            },
+            {
+              "id": "jws.signature",
+              "status": "pass"
+            },
+            {
+              "id": "claims.time_window",
+              "status": "pass"
+            },
+            {
+              "id": "extensions.limits",
+              "status": "pass"
+            }
           ]
         }
       }
@@ -92,11 +125,26 @@
             "issuer": "https://internal.example.com"
           },
           "checks": [
-            { "id": "jws.parse", "status": "pass" },
-            { "id": "limits.receipt_bytes", "status": "pass" },
-            { "id": "jws.protected_header", "status": "pass" },
-            { "id": "claims.schema_unverified", "status": "pass" },
-            { "id": "issuer.trust_policy", "status": "pass" },
+            {
+              "id": "jws.parse",
+              "status": "pass"
+            },
+            {
+              "id": "limits.receipt_bytes",
+              "status": "pass"
+            },
+            {
+              "id": "jws.protected_header",
+              "status": "pass"
+            },
+            {
+              "id": "claims.schema_unverified",
+              "status": "pass"
+            },
+            {
+              "id": "issuer.trust_policy",
+              "status": "pass"
+            },
             {
               "id": "issuer.discovery",
               "status": "fail",
@@ -105,8 +153,14 @@
                 "blocked_reason": "private_ip_range"
               }
             },
-            { "id": "key.resolve", "status": "skip" },
-            { "id": "jws.signature", "status": "skip" }
+            {
+              "id": "key.resolve",
+              "status": "skip"
+            },
+            {
+              "id": "jws.signature",
+              "status": "skip"
+            }
           ]
         }
       }
@@ -159,18 +213,54 @@
       },
       "expected": {
         "checks": [
-          { "id": "jws.parse", "status": "fail" },
-          { "id": "limits.receipt_bytes", "status": "skip" },
-          { "id": "jws.protected_header", "status": "skip" },
-          { "id": "claims.schema_unverified", "status": "skip" },
-          { "id": "issuer.trust_policy", "status": "skip" },
-          { "id": "issuer.discovery", "status": "skip" },
-          { "id": "key.resolve", "status": "skip" },
-          { "id": "jws.signature", "status": "skip" },
-          { "id": "claims.time_window", "status": "skip" },
-          { "id": "extensions.limits", "status": "skip" },
-          { "id": "transport.profile_binding", "status": "skip" },
-          { "id": "policy.binding", "status": "skip" }
+          {
+            "id": "jws.parse",
+            "status": "fail"
+          },
+          {
+            "id": "limits.receipt_bytes",
+            "status": "skip"
+          },
+          {
+            "id": "jws.protected_header",
+            "status": "skip"
+          },
+          {
+            "id": "claims.schema_unverified",
+            "status": "skip"
+          },
+          {
+            "id": "issuer.trust_policy",
+            "status": "skip"
+          },
+          {
+            "id": "issuer.discovery",
+            "status": "skip"
+          },
+          {
+            "id": "key.resolve",
+            "status": "skip"
+          },
+          {
+            "id": "jws.signature",
+            "status": "skip"
+          },
+          {
+            "id": "claims.time_window",
+            "status": "skip"
+          },
+          {
+            "id": "extensions.limits",
+            "status": "skip"
+          },
+          {
+            "id": "transport.profile_binding",
+            "status": "skip"
+          },
+          {
+            "id": "policy.binding",
+            "status": "skip"
+          }
         ]
       }
     },
@@ -207,5 +297,6 @@
         "note": "Breaking this contract invalidates all existing verification reports and conformance vectors. To add a new check, append it to the end of the list and update all specs and conformance fixtures."
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.8"
 }

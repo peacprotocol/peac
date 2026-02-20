@@ -213,5 +213,6 @@
         "error_message": "Too many ZIP entries"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.30"
 }

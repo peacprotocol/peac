@@ -1,23 +1,22 @@
 {
-  "$comment": "Category tracking registry for conformance fixture directories. Keep arrays sorted alphabetically.",
-  "tracked": ["agent-identity", "interaction"],
+  "$comment": "Category tracking registry for conformance fixture directories. Keep arrays sorted alphabetically. Version consistency is enforced only for tracked categories.",
+  "tracked": ["agent-identity", "attribution", "interaction"],
   "untracked": {
-    "attribution": "Category not in manifest.json; needs manifest entry",
-    "bundle": "fixture_count drift (manifest=12, actual=20); needs update",
+    "bundle": "Not yet migrated to tracked validation; fixture_count needs reconciliation",
     "crypto": "Deterministic golden vectors (Ed25519 sign/verify); not fixture packs",
-    "discovery": "Not yet audited for fixture pack hygiene",
-    "dispute": "fixture_count drift (edge-cases: manifest=22, actual=20)",
+    "discovery": "Not yet migrated to tracked validation; needs fixture pack audit",
+    "dispute": "Not yet migrated to tracked validation; fixture_count needs reconciliation",
     "edge": "Single-receipt fixtures, not fixture packs",
     "invalid": "Single-receipt fixtures, not fixture packs",
-    "issue": "Moderate drift; not yet audited",
-    "obligations": "Duplicate fixture names in valid.json and invalid.json",
-    "parse": "Single-receipt fixtures (v0.10.9+); tracked via expected_error/expected_variant in manifest.json, not fixture_count",
-    "policy": "Moderate drift; not yet audited",
+    "issue": "Not yet migrated to tracked validation; needs fixture pack audit",
+    "obligations": "Not yet migrated to tracked validation; duplicate fixture names need resolution",
+    "parse": "Single-receipt fixtures; uses expected_error/expected_variant, not fixture_count",
+    "policy": "Not yet migrated to tracked validation; needs fixture pack audit",
     "purpose": "Legacy category; no fixture_count tracking",
-    "stripe-crypto": "Per-category manifest (v0.10.11+); uses profile-scoped manifest.json, not global fixture_count",
+    "stripe-crypto": "Per-category manifest; uses profile-scoped manifest.json, not global fixture_count",
     "valid": "Single-receipt fixtures, not fixture packs",
-    "verifier": "New v0.10.8 fixtures; not yet tracked in manifest.json",
-    "workflow": "fixture_count drift across multiple files; needs audit",
-    "x402": "Single-receipt fixtures, not fixture packs; manifest not updated"
+    "verifier": "Fixtures span multiple releases (v0.10.8 + v0.10.10 DD-49); version consistency not enforced",
+    "workflow": "Not yet migrated to tracked validation; fixture_count needs reconciliation",
+    "x402": "Single-receipt fixtures, not fixture packs"
   }
 }

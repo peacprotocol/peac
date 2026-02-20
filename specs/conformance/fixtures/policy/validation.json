@@ -221,5 +221,6 @@
         "error_field": "rules[0].decision"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.29"
 }

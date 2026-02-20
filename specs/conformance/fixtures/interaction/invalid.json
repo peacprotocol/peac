@@ -738,5 +738,6 @@
         "error": "resource.uri required for fs.* kinds"
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.7"
 }

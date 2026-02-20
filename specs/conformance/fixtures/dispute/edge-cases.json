@@ -15,16 +15,36 @@
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
           "grounds": [
-            { "code": "missing_receipt" },
-            { "code": "expired_receipt" },
-            { "code": "forged_receipt" },
-            { "code": "receipt_not_applicable" },
-            { "code": "content_not_used" },
-            { "code": "source_misidentified" },
-            { "code": "usage_type_wrong" },
-            { "code": "weight_inaccurate" },
-            { "code": "purpose_exceeded" },
-            { "code": "terms_violated" }
+            {
+              "code": "missing_receipt"
+            },
+            {
+              "code": "expired_receipt"
+            },
+            {
+              "code": "forged_receipt"
+            },
+            {
+              "code": "receipt_not_applicable"
+            },
+            {
+              "code": "content_not_used"
+            },
+            {
+              "code": "source_misidentified"
+            },
+            {
+              "code": "usage_type_wrong"
+            },
+            {
+              "code": "weight_inaccurate"
+            },
+            {
+              "code": "purpose_exceeded"
+            },
+            {
+              "code": "terms_violated"
+            }
           ],
           "description": "Multiple violations detected across all categories.",
           "state": "filed"
@@ -47,7 +67,11 @@
           "dispute_type": "other",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "terms_violated" }],
+          "grounds": [
+            {
+              "code": "terms_violated"
+            }
+          ],
           "description": "This is exactly fifty characters for other type!!!",
           "state": "filed"
         }
@@ -72,7 +96,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "filed"
         }
@@ -97,7 +125,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "filed"
         }
@@ -129,7 +161,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "filed"
         }
@@ -154,7 +190,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "resolved",
           "resolution": {
@@ -186,7 +226,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "final",
           "resolution": {
@@ -234,14 +278,31 @@
       "description": "Verify all dispute types are valid",
       "multi_input": true,
       "inputs": [
-        { "dispute_type": "unauthorized_access" },
-        { "dispute_type": "attribution_missing" },
-        { "dispute_type": "attribution_incorrect" },
-        { "dispute_type": "receipt_invalid" },
-        { "dispute_type": "identity_spoofed" },
-        { "dispute_type": "purpose_mismatch" },
-        { "dispute_type": "policy_violation" },
-        { "dispute_type": "other", "description_length": 50 }
+        {
+          "dispute_type": "unauthorized_access"
+        },
+        {
+          "dispute_type": "attribution_missing"
+        },
+        {
+          "dispute_type": "attribution_incorrect"
+        },
+        {
+          "dispute_type": "receipt_invalid"
+        },
+        {
+          "dispute_type": "identity_spoofed"
+        },
+        {
+          "dispute_type": "purpose_mismatch"
+        },
+        {
+          "dispute_type": "policy_violation"
+        },
+        {
+          "dispute_type": "other",
+          "description_length": 50
+        }
       ],
       "expected": {
         "all_valid": true,
@@ -253,20 +314,48 @@
       "description": "Verify all grounds codes are valid",
       "multi_input": true,
       "inputs": [
-        { "code": "missing_receipt" },
-        { "code": "expired_receipt" },
-        { "code": "forged_receipt" },
-        { "code": "receipt_not_applicable" },
-        { "code": "content_not_used" },
-        { "code": "source_misidentified" },
-        { "code": "usage_type_wrong" },
-        { "code": "weight_inaccurate" },
-        { "code": "agent_impersonation" },
-        { "code": "key_compromise" },
-        { "code": "delegation_invalid" },
-        { "code": "purpose_exceeded" },
-        { "code": "terms_violated" },
-        { "code": "rate_limit_exceeded" }
+        {
+          "code": "missing_receipt"
+        },
+        {
+          "code": "expired_receipt"
+        },
+        {
+          "code": "forged_receipt"
+        },
+        {
+          "code": "receipt_not_applicable"
+        },
+        {
+          "code": "content_not_used"
+        },
+        {
+          "code": "source_misidentified"
+        },
+        {
+          "code": "usage_type_wrong"
+        },
+        {
+          "code": "weight_inaccurate"
+        },
+        {
+          "code": "agent_impersonation"
+        },
+        {
+          "code": "key_compromise"
+        },
+        {
+          "code": "delegation_invalid"
+        },
+        {
+          "code": "purpose_exceeded"
+        },
+        {
+          "code": "terms_violated"
+        },
+        {
+          "code": "rate_limit_exceeded"
+        }
       ],
       "expected": {
         "all_valid": true,
@@ -278,10 +367,18 @@
       "description": "Verify all resolution outcomes are valid",
       "multi_input": true,
       "inputs": [
-        { "outcome": "upheld" },
-        { "outcome": "dismissed" },
-        { "outcome": "partially_upheld" },
-        { "outcome": "settled" }
+        {
+          "outcome": "upheld"
+        },
+        {
+          "outcome": "dismissed"
+        },
+        {
+          "outcome": "partially_upheld"
+        },
+        {
+          "outcome": "settled"
+        }
       ],
       "expected": {
         "all_valid": true,
@@ -293,13 +390,27 @@
       "description": "Verify all remediation types are valid",
       "multi_input": true,
       "inputs": [
-        { "type": "attribution_corrected" },
-        { "type": "receipt_revoked" },
-        { "type": "access_restored" },
-        { "type": "compensation" },
-        { "type": "policy_updated" },
-        { "type": "no_action" },
-        { "type": "other" }
+        {
+          "type": "attribution_corrected"
+        },
+        {
+          "type": "receipt_revoked"
+        },
+        {
+          "type": "access_restored"
+        },
+        {
+          "type": "compensation"
+        },
+        {
+          "type": "policy_updated"
+        },
+        {
+          "type": "no_action"
+        },
+        {
+          "type": "other"
+        }
       ],
       "expected": {
         "all_valid": true,
@@ -318,7 +429,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Testing ULID boundary characters.",
           "state": "filed"
         }
@@ -340,7 +455,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "escalated",
           "state_changed_at": "2026-01-09T10:00:00Z",
@@ -366,7 +485,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "filed"
         }
@@ -392,7 +515,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "filed"
         }
@@ -420,12 +547,18 @@
               "dispute_type": "unauthorized_access",
               "target_ref": "jti:rec_first123",
               "target_type": "receipt",
-              "grounds": [{ "code": "missing_receipt" }],
+              "grounds": [
+                {
+                  "code": "missing_receipt"
+                }
+              ],
               "description": "First dispute submission.",
               "state": "filed"
             }
           },
-          "expected": { "success": true }
+          "expected": {
+            "success": true
+          }
         },
         {
           "action": "submit",
@@ -438,7 +571,11 @@
               "dispute_type": "attribution_missing",
               "target_ref": "jti:rec_second456",
               "target_type": "attribution",
-              "grounds": [{ "code": "content_not_used" }],
+              "grounds": [
+                {
+                  "code": "content_not_used"
+                }
+              ],
               "description": "Second dispute with same ref (duplicate).",
               "state": "filed"
             }
@@ -469,7 +606,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_nonexistent_xyz789",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Disputing a receipt that does not exist in the system.",
           "state": "filed"
         }
@@ -495,7 +636,11 @@
           "dispute_type": "attribution_incorrect",
           "target_ref": "https://ai.example.com/attributions/attr_nonexistent_abc",
           "target_type": "attribution",
-          "grounds": [{ "code": "source_misidentified" }],
+          "grounds": [
+            {
+              "code": "source_misidentified"
+            }
+          ],
           "description": "Disputing an attribution that does not exist.",
           "state": "filed"
         }
@@ -521,7 +666,11 @@
           "dispute_type": "identity_spoofed",
           "target_ref": "did:web:nonexistent-agent.example.com",
           "target_type": "identity",
-          "grounds": [{ "code": "agent_impersonation" }],
+          "grounds": [
+            {
+              "code": "agent_impersonation"
+            }
+          ],
           "description": "Disputing an identity that cannot be resolved.",
           "state": "filed"
         }
@@ -534,5 +683,6 @@
         "retriable": true
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.27"
 }

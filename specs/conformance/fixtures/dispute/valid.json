@@ -14,7 +14,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_abc123def456",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "filed"
         }
@@ -42,7 +46,10 @@
               "code": "source_misidentified",
               "details": "My content was attributed to wrong source"
             },
-            { "code": "weight_inaccurate", "details": "Attribution weight should be 0.7 not 0.1" }
+            {
+              "code": "weight_inaccurate",
+              "details": "Attribution weight should be 0.7 not 0.1"
+            }
           ],
           "description": "The attribution incorrectly identifies the source and underweights my contribution.",
           "state": "filed"
@@ -68,7 +75,10 @@
           "target_ref": "did:web:impersonator.example.com",
           "target_type": "identity",
           "grounds": [
-            { "code": "agent_impersonation", "details": "Agent ID was used without authorization" }
+            {
+              "code": "agent_impersonation",
+              "details": "Agent ID was used without authorization"
+            }
           ],
           "description": "Another agent impersonated my identity to access content.",
           "contact": {
@@ -96,7 +106,11 @@
           "dispute_type": "purpose_mismatch",
           "target_ref": "jti:rec_purpose123",
           "target_type": "receipt",
-          "grounds": [{ "code": "purpose_exceeded" }],
+          "grounds": [
+            {
+              "code": "purpose_exceeded"
+            }
+          ],
           "description": "Content was used for training but declared as search.",
           "state": "acknowledged",
           "state_changed_at": "2026-01-07T09:00:00Z",
@@ -120,7 +134,11 @@
           "dispute_type": "policy_violation",
           "target_ref": "jti:rec_policy456",
           "target_type": "receipt",
-          "grounds": [{ "code": "terms_violated" }],
+          "grounds": [
+            {
+              "code": "terms_violated"
+            }
+          ],
           "description": "Terms of service were violated despite having a valid receipt.",
           "supporting_documents": [
             {
@@ -159,7 +177,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_unauth789",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "resolved",
           "state_changed_at": "2026-01-10T16:00:00Z",
@@ -194,7 +216,11 @@
           "dispute_type": "receipt_invalid",
           "target_ref": "jti:rec_valid123",
           "target_type": "receipt",
-          "grounds": [{ "code": "forged_receipt" }],
+          "grounds": [
+            {
+              "code": "forged_receipt"
+            }
+          ],
           "description": "Receipt signature appears to be forged.",
           "state": "rejected",
           "state_changed_at": "2026-01-09T11:00:00Z",
@@ -253,7 +279,11 @@
           "dispute_type": "policy_violation",
           "target_ref": "jti:rec_policy789",
           "target_type": "policy",
-          "grounds": [{ "code": "rate_limit_exceeded" }],
+          "grounds": [
+            {
+              "code": "rate_limit_exceeded"
+            }
+          ],
           "description": "Rate limits were exceeded despite policy restrictions.",
           "state": "final",
           "state_changed_at": "2026-01-15T10:00:00Z",
@@ -287,7 +317,12 @@
           "dispute_type": "other",
           "target_ref": "jti:rec_other123",
           "target_type": "receipt",
-          "grounds": [{ "code": "terms_violated", "details": "Custom violation type" }],
+          "grounds": [
+            {
+              "code": "terms_violated",
+              "details": "Custom violation type"
+            }
+          ],
           "description": "This is a custom dispute that does not fit into any predefined category. The situation involves a complex combination of technical and policy issues that require special consideration.",
           "state": "filed"
         }
@@ -310,7 +345,11 @@
           "dispute_type": "attribution_incorrect",
           "target_ref": "https://ai.example.com/attributions/attr_wrong",
           "target_type": "attribution",
-          "grounds": [{ "code": "source_misidentified" }],
+          "grounds": [
+            {
+              "code": "source_misidentified"
+            }
+          ],
           "description": "The attribution chain incorrectly identifies sources.",
           "supporting_receipts": ["jti:rec_correct_source1", "jti:rec_correct_source2"],
           "supporting_attributions": ["https://other.example.com/attributions/attr_correct"],
@@ -336,7 +375,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_expiry123",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "state": "filed",
           "window_hint_days": 90
@@ -360,7 +403,11 @@
           "dispute_type": "unauthorized_access",
           "target_ref": "jti:rec_url_contact",
           "target_type": "receipt",
-          "grounds": [{ "code": "missing_receipt" }],
+          "grounds": [
+            {
+              "code": "missing_receipt"
+            }
+          ],
           "description": "Content was accessed without a valid receipt.",
           "contact": {
             "method": "url",
@@ -386,7 +433,11 @@
           "dispute_type": "identity_spoofed",
           "target_ref": "did:web:spoofed.example.com",
           "target_type": "identity",
-          "grounds": [{ "code": "agent_impersonation" }],
+          "grounds": [
+            {
+              "code": "agent_impersonation"
+            }
+          ],
           "description": "Agent identity was impersonated.",
           "contact": {
             "method": "did",
@@ -412,7 +463,11 @@
           "dispute_type": "attribution_missing",
           "target_ref": "https://ai.example.com/outputs/out_settle",
           "target_type": "attribution",
-          "grounds": [{ "code": "content_not_used" }],
+          "grounds": [
+            {
+              "code": "content_not_used"
+            }
+          ],
           "description": "Content was used without attribution.",
           "state": "resolved",
           "resolution": {
@@ -435,5 +490,6 @@
         "remediation_has_deadline": true
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.27"
 }

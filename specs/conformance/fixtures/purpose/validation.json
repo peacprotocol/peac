@@ -124,5 +124,6 @@
         "note": "After normalization, UPPERCASE becomes 'uppercase' which is valid but unknown"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.24"
 }

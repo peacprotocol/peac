@@ -17,6 +17,11 @@
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
       "description": "PEAC spec version that introduced these fixtures"
     },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Per-fixture schema version (must match version)"
+    },
     "fixtures": {
       "type": "array",
       "items": {

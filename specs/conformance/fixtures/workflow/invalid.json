@@ -445,5 +445,6 @@
         "error": "Error message too long"
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.2"
 }

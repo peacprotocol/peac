@@ -133,5 +133,6 @@
         "undeclaredPresent": false
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.24"
 }

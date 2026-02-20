@@ -1,5 +1,6 @@
 {
-  "$comment": "Fixture manifest for PEAC conformance testing. This file contains metadata about fixtures so the fixture files themselves can be pure receipts. The 'version' field indicates the minimum PEAC protocol version required to validate the fixture (fixture pack format version, not repo release version).",
+  "manifest_version": "2.0",
+  "$comment": "Fixture manifest for PEAC conformance testing. This file contains metadata about fixtures so the fixture files themselves can be pure receipts. The 'version' field indicates the minimum PEAC protocol version required to validate the fixture (fixture pack format version, not repo release version). Fixture-pack files (those with 'version' at top level) MUST include 'schema_version' matching their protocol version.",
   "valid": {
     "minimal-receipt.json": {
       "description": "Minimal valid PEAC receipt - only required fields"
@@ -241,6 +242,55 @@
       "description": "RFC 9421 proof capture extension vectors with org.peacprotocol/rfc9421-proof@0.1 extension",
       "version": "0.10.7",
       "fixture_count": 5
+    }
+  },
+  "attribution": {
+    "valid.json": {
+      "description": "Valid AttributionAttestation golden vectors (v0.9.26+)",
+      "version": "0.9.26",
+      "fixture_count": 16
+    },
+    "invalid.json": {
+      "description": "Invalid AttributionAttestation golden vectors (v0.9.26+)",
+      "version": "0.9.26",
+      "fixture_count": 21
+    },
+    "edge-cases.json": {
+      "description": "Edge case AttributionAttestation golden vectors (v0.9.26+)",
+      "version": "0.9.26",
+      "fixture_count": 16
+    }
+  },
+  "verifier": {
+    "policy-binding.json": {
+      "description": "Policy binding conformance fixtures (DD-49, v0.10.10+)",
+      "version": "0.10.10",
+      "fixture_count": 8
+    },
+    "security-limits.json": {
+      "description": "Security limits conformance fixtures (v0.10.8+)",
+      "version": "0.10.8",
+      "fixture_count": 10
+    },
+    "ssrf-protection.json": {
+      "description": "SSRF protection conformance fixtures (v0.10.8+)",
+      "version": "0.10.8",
+      "fixture_count": 12
+    },
+    "transport-profiles.json": {
+      "description": "Transport profile conformance fixtures (v0.10.8+)",
+      "version": "0.10.8",
+      "fixture_count": 10
+    },
+    "trust-pinning.json": {
+      "description": "Trust pinning conformance fixtures (v0.10.8+)",
+      "version": "0.10.8",
+      "fixture_count": 11
+    },
+    "verification-report.json": {
+      "description": "Verification report conformance fixtures (v0.10.8+)",
+      "version": "0.10.8",
+      "fixture_count": 9
     }
   },
   "parse": {

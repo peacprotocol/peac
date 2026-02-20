@@ -356,5 +356,6 @@
         "error_message_length": 1024
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.2"
 }

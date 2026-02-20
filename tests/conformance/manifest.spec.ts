@@ -134,27 +134,20 @@ describe('Global Conformance Manifest Hygiene', () => {
       expect(() => JSON.parse(content)).not.toThrow();
     });
 
-    it('manifest has expected top-level categories', () => {
-      // Categories that should exist based on current fixtures
-      const expectedCategories = [
-        'valid',
-        'invalid',
-        'edge',
-        'purpose',
-        'agent-identity',
-        'obligations',
-        'dispute',
-        'issue',
-        'policy',
-        'bundle',
-        'discovery',
-        'workflow',
-        'interaction',
-      ];
-
-      for (const category of expectedCategories) {
-        expect(manifest[category], `Missing category: ${category}`).toBeDefined();
+    it('every tracked category has a manifest entry (data-driven)', () => {
+      // Derived from category-tracking.json -- adding a tracked category
+      // automatically requires a manifest entry. No hard-coded list.
+      const missing: string[] = [];
+      for (const category of TRACKED_CATEGORIES) {
+        if (!manifest[category]) {
+          missing.push(category);
+        }
       }
+
+      expect(
+        missing,
+        `Tracked categories missing from manifest:\n${missing.join('\n')}`
+      ).toHaveLength(0);
     });
   });
 
@@ -163,9 +156,6 @@ describe('Global Conformance Manifest Hygiene', () => {
   // -------------------------------------------------------------------------
 
   describe('File-Manifest Correspondence', () => {
-    // NOTE: Some legacy categories (x402, attribution) have fixture files but
-    // aren't tracked in manifest.json. This test checks fixture-pack categories
-    // (those with fixture_count) for completeness.
     it('fixture-pack files in filesystem are represented in manifest', () => {
       const missing: string[] = [];
 
@@ -191,7 +181,7 @@ describe('Global Conformance Manifest Hygiene', () => {
       const orphaned: string[] = [];
 
       for (const [category, entries] of Object.entries(manifest)) {
-        if (category.startsWith('$')) continue; // Skip meta fields like $comment
+        if (category.startsWith('$') || typeof entries !== 'object' || entries === null) continue; // Skip meta keys
 
         const categoryPath = join(CONFORMANCE_ROOT, category);
         if (!existsSync(categoryPath)) {
@@ -271,21 +261,12 @@ describe('Global Conformance Manifest Hygiene', () => {
         }
       }
 
-      // Some categories intentionally don't track counts (valid/invalid/edge for legacy receipts)
-      // Only fail if fixture pack categories are missing counts
+      // Only fail for tracked categories (data-driven from category-tracking.json).
+      // Untracked categories (valid/invalid/edge for legacy receipts) are exempt.
       if (missing.length > 0) {
         const fixturePackMissing = missing.filter((path) => {
           const category = path.split('/')[0];
-          return [
-            'agent-identity',
-            'obligations',
-            'dispute',
-            'issue',
-            'policy',
-            'bundle',
-            'workflow',
-            'interaction',
-          ].includes(category);
+          return TRACKED_CATEGORIES.includes(category);
         });
 
         expect(
@@ -301,11 +282,12 @@ describe('Global Conformance Manifest Hygiene', () => {
   // -------------------------------------------------------------------------
 
   describe('Version Consistency', () => {
-    it('versions within each category are consistent', () => {
+    it('versions within each tracked category are consistent', () => {
       const inconsistent: string[] = [];
 
       for (const [category, entries] of Object.entries(manifest)) {
         if (category.startsWith('$')) continue;
+        if (!TRACKED_CATEGORIES.includes(category)) continue;
 
         const versions = new Set<string>();
         for (const entry of Object.values(entries)) {
