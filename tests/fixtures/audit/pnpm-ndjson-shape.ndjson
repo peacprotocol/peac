@@ -1,0 +1,2 @@
+{"advisories": {"1102341": {"id": 1102341, "severity": "moderate", "module_name": "esbuild", "github_advisory_id": "GHSA-67mh-4wv8-2f99", "title": "esbuild CSRF"}}}
+{"advisories": {"1112134": {"id": 1112134, "severity": "high", "module_name": "hono", "github_advisory_id": "GHSA-3vhc-576x-3qv4", "title": "Hono algo confusion"}}}

@@ -17,6 +17,7 @@ import {
   MAX_EXPIRY_DAYS,
   MAX_EXPIRY_DAYS_PROD,
   EXPIRY_WARNING_DAYS,
+  REVIEW_WINDOW_DAYS,
   VALID_SCOPES,
 } from '../../scripts/audit-gate-lib.mjs';
 
@@ -33,7 +34,11 @@ function loadFixture(name: string) {
 function makeEntry(overrides = {}) {
   return {
     advisory_id: 'GHSA-test-1234-abcd',
+    package: 'vulnerable',
     reason: 'Transitive dep, no exposure in our usage',
+    why_not_exploitable:
+      'Vulnerable code path requires user-supplied input that never reaches this transitive dependency in our usage',
+    where_used: 'Root devDependency chain: parent@1.0.0 -> vulnerable@2.0.0',
     expires_at: '2026-03-15',
     remediation: 'Upgrade transitive dep in next patch',
     issue_url: 'https://github.com/peacprotocol/peac/issues/999',
@@ -168,6 +173,11 @@ describe('parseAllowlist', () => {
 
   it('schema requires all fields including new ones', () => {
     const required = schema.properties.allowlist.items.required;
+    expect(required).toContain('advisory_id');
+    expect(required).toContain('package');
+    expect(required).toContain('reason');
+    expect(required).toContain('why_not_exploitable');
+    expect(required).toContain('where_used');
     expect(required).toContain('issue_url');
     expect(required).toContain('remediation');
     expect(required).toContain('scope');
@@ -175,6 +185,30 @@ describe('parseAllowlist', () => {
     expect(required).toContain('verified_by');
     expect(required).toContain('owner');
     expect(required).toContain('added_at');
+  });
+
+  it('missing package fails closed', () => {
+    const entry = makeEntry();
+    delete (entry as Record<string, unknown>).package;
+    const { active, invalid } = parseAllowlist({ allowlist: [entry] }, REF_DATE);
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+  });
+
+  it('missing why_not_exploitable fails closed', () => {
+    const entry = makeEntry();
+    delete (entry as Record<string, unknown>).why_not_exploitable;
+    const { active, invalid } = parseAllowlist({ allowlist: [entry] }, REF_DATE);
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+  });
+
+  it('missing where_used fails closed', () => {
+    const entry = makeEntry();
+    delete (entry as Record<string, unknown>).where_used;
+    const { active, invalid } = parseAllowlist({ allowlist: [entry] }, REF_DATE);
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
   });
 
   // --- New field validation tests ---
@@ -321,6 +355,120 @@ describe('parseAllowlist', () => {
       expect(active.size).toBe(1);
       expect(invalid).toHaveLength(0);
     }
+  });
+
+  // --- reviewed_at (renewal tracking) ---
+
+  it('accepts entry with valid reviewed_at', () => {
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ reviewed_at: '2026-02-13' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(1);
+    expect(invalid).toHaveLength(0);
+  });
+
+  it('rejects entry with malformed reviewed_at', () => {
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ reviewed_at: 'bad-date' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]).toContain('bad reviewed_at format');
+  });
+
+  it('warns when entry >30 days old has no reviewed_at', () => {
+    // added_at: 2026-01-01, ref: 2026-02-13 = 43 days ago
+    const { active, warnings } = parseAllowlist(
+      { allowlist: [makeEntry({ added_at: '2026-01-01', expires_at: '2026-03-15' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(1);
+    expect(warnings.some((w: string) => w.includes('without reviewed_at'))).toBe(true);
+  });
+
+  it('no renewal warning when reviewed_at is present', () => {
+    const { warnings } = parseAllowlist(
+      {
+        allowlist: [
+          makeEntry({
+            added_at: '2026-01-01',
+            reviewed_at: '2026-02-10',
+            expires_at: '2026-03-15',
+          }),
+        ],
+      },
+      REF_DATE
+    );
+    expect(warnings.some((w: string) => w.includes('without reviewed_at'))).toBe(false);
+  });
+
+  it('no renewal warning when entry is <30 days old', () => {
+    const { warnings } = parseAllowlist(
+      { allowlist: [makeEntry({ added_at: '2026-02-01', expires_at: '2026-03-15' })] },
+      REF_DATE
+    );
+    expect(warnings.some((w: string) => w.includes('without reviewed_at'))).toBe(false);
+  });
+
+  // --- strict mode reviewed_at enforcement ---
+
+  it('strict mode rejects entry older than REVIEW_WINDOW_DAYS without reviewed_at', () => {
+    // added_at: 2025-12-01, ref: 2026-02-13 = 74 days ago (> REVIEW_WINDOW_DAYS=60)
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ added_at: '2025-12-01', expires_at: '2026-03-15' })] },
+      REF_DATE,
+      { strict: true }
+    );
+    expect(active.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]).toContain('strict mode requires review');
+    expect(invalid[0]).toContain(`${REVIEW_WINDOW_DAYS} days`);
+  });
+
+  it('strict mode accepts old entry with reviewed_at', () => {
+    const { active, invalid } = parseAllowlist(
+      {
+        allowlist: [
+          makeEntry({
+            added_at: '2025-12-01',
+            reviewed_at: '2026-02-10',
+            expires_at: '2026-03-15',
+          }),
+        ],
+      },
+      REF_DATE,
+      { strict: true }
+    );
+    expect(active.size).toBe(1);
+    expect(invalid).toHaveLength(0);
+  });
+
+  it('strict mode accepts entry within REVIEW_WINDOW_DAYS without reviewed_at', () => {
+    // added_at: 2026-01-15, ref: 2026-02-13 = 29 days ago (< REVIEW_WINDOW_DAYS)
+    const { active, invalid } = parseAllowlist(
+      { allowlist: [makeEntry({ added_at: '2026-01-15', expires_at: '2026-03-15' })] },
+      REF_DATE,
+      { strict: true }
+    );
+    expect(active.size).toBe(1);
+    expect(invalid).toHaveLength(0);
+  });
+
+  it('default mode warns but does not reject old entries without reviewed_at', () => {
+    // 74 days old, no reviewed_at, default mode
+    const { active, warnings } = parseAllowlist(
+      { allowlist: [makeEntry({ added_at: '2025-12-01', expires_at: '2026-03-15' })] },
+      REF_DATE
+    );
+    expect(active.size).toBe(1);
+    expect(warnings.some((w: string) => w.includes('without reviewed_at'))).toBe(true);
+  });
+
+  it('REVIEW_WINDOW_DAYS constant is exported and reasonable', () => {
+    expect(REVIEW_WINDOW_DAYS).toBeGreaterThanOrEqual(30);
+    expect(REVIEW_WINDOW_DAYS).toBeLessThanOrEqual(90);
   });
 });
 
@@ -490,5 +638,178 @@ describe('classifyAdvisories', () => {
     expect(findings.critical).toHaveLength(0); // allowlisted
     expect(findings.high).toHaveLength(1); // hono
     expect(findings.moderate).toHaveLength(1); // esbuild
+  });
+});
+
+// ---------------------------------------------------------------------------
+// extractAdvisories -- NDJSON parse robustness
+// ---------------------------------------------------------------------------
+
+describe('extractAdvisories (NDJSON robustness)', () => {
+  it('extracts from merged NDJSON lines', () => {
+    // Simulate NDJSON: two separate JSON objects merged into one
+    const ndjsonLines = readFileSync(join(FIXTURES_DIR, 'pnpm-ndjson-shape.ndjson'), 'utf-8')
+      .split('\n')
+      .filter((l: string) => l.trim());
+
+    // Merge all objects (same logic as audit-gate.mjs)
+    const merged: Record<string, Record<string, unknown>> = { advisories: {}, vulnerabilities: {} };
+    for (const line of ndjsonLines) {
+      const obj = JSON.parse(line);
+      if (obj.advisories) Object.assign(merged.advisories, obj.advisories);
+      if (obj.vulnerabilities) Object.assign(merged.vulnerabilities, obj.vulnerabilities);
+    }
+
+    const advs = extractAdvisories(merged);
+    expect(advs).toHaveLength(2);
+    expect(advs.map((a: { id: string }) => a.id).sort()).toEqual(['1102341', '1112134']);
+  });
+
+  it('handles empty advisories object', () => {
+    const advs = extractAdvisories({ advisories: {} });
+    expect(advs).toHaveLength(0);
+  });
+
+  it('handles advisories with missing optional fields', () => {
+    const result = {
+      advisories: {
+        '999': {
+          id: 999,
+          severity: 'low',
+        },
+      },
+    };
+    const advs = extractAdvisories(result);
+    expect(advs).toHaveLength(1);
+    expect(advs[0].severity).toBe('low');
+    expect(advs[0].ghsaId).toBe('');
+    expect(advs[0].module).toBe('');
+  });
+
+  it('handles vulnerabilities with empty via array', () => {
+    const result = {
+      vulnerabilities: {
+        'some-pkg': {
+          name: 'some-pkg',
+          severity: 'moderate',
+          via: [],
+        },
+      },
+    };
+    const advs = extractAdvisories(result);
+    expect(advs).toHaveLength(0);
+  });
+
+  it('handles vulnerabilities with null via entries', () => {
+    const result = {
+      vulnerabilities: {
+        'some-pkg': {
+          name: 'some-pkg',
+          severity: 'moderate',
+          via: [null, undefined, 42],
+        },
+      },
+    };
+    const advs = extractAdvisories(result);
+    expect(advs).toHaveLength(0);
+  });
+
+  it('unknown severity is classified as low', () => {
+    const advs = [
+      { id: '1', ghsaId: '', severity: 'unknown', module: 'a', title: 'a' },
+      { id: '2', ghsaId: '', severity: 'info', module: 'b', title: 'b' },
+    ];
+    const findings = classifyAdvisories(advs, new Map());
+    expect(findings.low).toEqual(['1', '2']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseAuditOutput -- stdout noise resilience
+// ---------------------------------------------------------------------------
+
+describe('parseAuditOutput (stdout noise)', () => {
+  /**
+   * Inline reimplementation of parseAuditOutput to test the parsing logic
+   * without importing the CLI wrapper (which calls process.exit).
+   * Kept in sync with scripts/audit-gate.mjs.
+   */
+  function parseAuditOutput(output: string) {
+    if (!output.trim()) return null;
+
+    try {
+      return JSON.parse(output);
+    } catch {
+      // Fall through to NDJSON
+    }
+
+    const merged: Record<string, Record<string, unknown>> = {
+      advisories: {},
+      vulnerabilities: {},
+    };
+    let parsed = false;
+    for (const line of output.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      try {
+        const obj = JSON.parse(trimmed);
+        if (obj.advisories) {
+          Object.assign(merged.advisories, obj.advisories);
+          parsed = true;
+        }
+        if (obj.vulnerabilities) {
+          Object.assign(merged.vulnerabilities, obj.vulnerabilities);
+          parsed = true;
+        }
+      } catch {
+        // Skip unparseable lines (progress messages, warnings, etc.)
+      }
+    }
+
+    return parsed ? merged : null;
+  }
+
+  it('extracts advisories from stdout with non-JSON noise lines', () => {
+    const noisy = readFileSync(join(FIXTURES_DIR, 'pnpm-noisy-stdout.txt'), 'utf-8');
+    const result = parseAuditOutput(noisy);
+    expect(result).not.toBeNull();
+    const advs = extractAdvisories(result!);
+    expect(advs).toHaveLength(2);
+    expect(advs.map((a: { id: string }) => a.id).sort()).toEqual(['1102341', '1112134']);
+  });
+
+  it('returns null for entirely non-JSON output', () => {
+    const garbage = 'Packages: +0 -0\nProgress: resolved 42\n WARN  nothing here\n';
+    expect(parseAuditOutput(garbage)).toBeNull();
+  });
+
+  it('returns null for empty string', () => {
+    expect(parseAuditOutput('')).toBeNull();
+    expect(parseAuditOutput('   \n  \n')).toBeNull();
+  });
+
+  it('handles clean single JSON object', () => {
+    const clean = JSON.stringify({
+      advisories: {
+        '999': { id: 999, severity: 'low', module_name: 'test', title: 'test' },
+      },
+    });
+    const result = parseAuditOutput(clean);
+    expect(result).not.toBeNull();
+    expect(result!.advisories['999'].severity).toBe('low');
+  });
+
+  it('handles JSON with extra top-level fields (future-safe)', () => {
+    const extended = JSON.stringify({
+      advisories: {
+        '1': { id: 1, severity: 'high', module_name: 'a', title: 'a' },
+      },
+      metadata: { totalDependencies: 500 },
+      auditReportVersion: 2,
+    });
+    const result = parseAuditOutput(extended);
+    expect(result).not.toBeNull();
+    const advs = extractAdvisories(result!);
+    expect(advs).toHaveLength(1);
   });
 });

@@ -19,6 +19,13 @@ export const MAX_EXPIRY_DAYS_PROD = 30;
 /** Days remaining before expiry warning fires */
 export const EXPIRY_WARNING_DAYS = 14;
 
+/**
+ * Maximum days an allowlist entry can exist without reviewed_at before
+ * strict mode rejects it. Default mode warns at 30 days; strict mode
+ * fails closed at this threshold.
+ */
+export const REVIEW_WINDOW_DAYS = 60;
+
 /** Valid scope values */
 export const VALID_SCOPES = ['dev', 'examples', 'prod'];
 
@@ -28,7 +35,10 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 /**
  * @typedef {Object} AllowlistEntry
  * @property {string} advisory_id - GHSA ID or numeric advisory ID
+ * @property {string} package - Affected package name
  * @property {string} reason - Why this advisory is allowlisted
+ * @property {string} why_not_exploitable - Why the advisory is not exploitable in our context
+ * @property {string} where_used - Which surface/package depends on it
  * @property {string} expires_at - Expiry date (YYYY-MM-DD)
  * @property {string} remediation - Planned remediation action
  * @property {string} issue_url - Tracking issue URL
@@ -37,6 +47,7 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
  * @property {string} verified_by - Exact verification command(s) used
  * @property {string} owner - Who added this exception
  * @property {string} added_at - ISO 8601 date when entry was added (YYYY-MM-DD)
+ * @property {string} [reviewed_at] - ISO 8601 date of last renewal review (YYYY-MM-DD, optional)
  */
 
 /**
@@ -53,9 +64,10 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
  *
  * @param {object} raw - Parsed allowlist JSON
  * @param {Date} [now] - Reference date (defaults to current time)
+ * @param {{ strict?: boolean }} [opts] - Options (strict: enforce reviewed_at freshness)
  * @returns {AllowlistResult}
  */
-export function parseAllowlist(raw, now = new Date()) {
+export function parseAllowlist(raw, now = new Date(), opts = {}) {
   const active = new Map();
   const expired = [];
   const invalid = [];
@@ -69,7 +81,10 @@ export function parseAllowlist(raw, now = new Date()) {
     // Fail closed: all required fields must be present
     if (
       !entry.advisory_id ||
+      !entry.package ||
       !entry.reason ||
+      !entry.why_not_exploitable ||
+      !entry.where_used ||
       !entry.expires_at ||
       !entry.remediation ||
       !entry.issue_url ||
@@ -137,6 +152,34 @@ export function parseAllowlist(raw, now = new Date()) {
     // 14-day expiry warning (non-blocking)
     if (daysDiff <= EXPIRY_WARNING_DAYS) {
       warnings.push(`${entry.advisory_id} expires in ${daysDiff} day(s) (${entry.expires_at})`);
+    }
+
+    // Optional reviewed_at: if present, must be valid ISO date
+    if (entry.reviewed_at !== undefined) {
+      if (!DATE_REGEX.test(entry.reviewed_at)) {
+        invalid.push(`${entry.advisory_id} (bad reviewed_at format: ${entry.reviewed_at}, expected YYYY-MM-DD)`);
+        continue;
+      }
+      const reviewedAt = new Date(entry.reviewed_at + 'T00:00:00Z');
+      if (isNaN(reviewedAt.getTime())) {
+        invalid.push(`${entry.advisory_id} (bad reviewed_at: ${entry.reviewed_at})`);
+        continue;
+      }
+    }
+
+    // Renewal tracking: warn or reject entries without reviewed_at
+    const addedDaysAgo = Math.floor((now - addedAt) / (1000 * 60 * 60 * 24));
+    if (addedDaysAgo > REVIEW_WINDOW_DAYS && !entry.reviewed_at && opts.strict) {
+      // Strict mode: entries older than REVIEW_WINDOW_DAYS without review are rejected
+      invalid.push(
+        `${entry.advisory_id} added ${addedDaysAgo} day(s) ago without reviewed_at (strict mode requires review within ${REVIEW_WINDOW_DAYS} days)`
+      );
+      continue;
+    }
+    if (addedDaysAgo > 30 && !entry.reviewed_at) {
+      warnings.push(
+        `${entry.advisory_id} added ${addedDaysAgo} day(s) ago without reviewed_at -- consider renewal review`
+      );
     }
 
     active.set(entry.advisory_id, entry);
