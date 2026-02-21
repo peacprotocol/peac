@@ -14,6 +14,17 @@ import type {
 import { HEADERS } from '@peac/kernel';
 import { MIDDLEWARE_INTERACTION_KEY } from '@peac/schema';
 
+/** Payload shape for decode<T>() in tests. */
+interface TestPayload {
+  iss: string;
+  aud?: string;
+  iat: number;
+  exp: number;
+  rid: string;
+  sub?: string;
+  ext?: Record<string, unknown>;
+}
+
 // Test key (deterministic for testing)
 function createTestKey(): Ed25519PrivateJwk {
   const publicKey = new Uint8Array(32).fill(1);
@@ -82,7 +93,7 @@ describe('createReceipt', () => {
       const config = createTestConfig();
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('iss', 'https://api.example.com');
     });
 
@@ -90,7 +101,7 @@ describe('createReceipt', () => {
       const config = { ...createTestConfig(), issuer: 'https://api.example.com/' };
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('iss', 'https://api.example.com');
     });
 
@@ -100,7 +111,7 @@ describe('createReceipt', () => {
       const response = { ...createTestResponse(), statusCode: 201 };
       const result = await createReceipt(config, request, response);
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload.ext).toHaveProperty(MIDDLEWARE_INTERACTION_KEY);
       const interaction = (payload.ext as Record<string, unknown>)[MIDDLEWARE_INTERACTION_KEY] as {
         method: string;
@@ -117,7 +128,7 @@ describe('createReceipt', () => {
       const request = { ...createTestRequest(), method: 'post' }; // lowercase
       const result = await createReceipt(config, request, createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       const interaction = (payload.ext as Record<string, unknown>)[MIDDLEWARE_INTERACTION_KEY] as {
         method: string;
       };
@@ -132,7 +143,7 @@ describe('createReceipt', () => {
       };
       const result = await createReceipt(config, request, createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       const interaction = (payload.ext as Record<string, unknown>)[MIDDLEWARE_INTERACTION_KEY] as {
         path: string;
       };
@@ -150,7 +161,7 @@ describe('createReceipt', () => {
       };
       const result = await createReceipt(config, request, createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       const interaction = (payload.ext as Record<string, unknown>)[MIDDLEWARE_INTERACTION_KEY] as {
         path: string;
       };
@@ -164,7 +175,7 @@ describe('createReceipt', () => {
       };
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload.ext).toBeUndefined();
     });
 
@@ -176,7 +187,7 @@ describe('createReceipt', () => {
       };
       const result = await createReceipt(config, request, createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('aud', 'https://myapi.example.com');
     });
 
@@ -189,7 +200,7 @@ describe('createReceipt', () => {
         headers: { Host: 'upper.example.com' },
       };
       const resultUpper = await createReceipt(config, requestUpper, createTestResponse());
-      const { payload: payloadUpper } = decode(resultUpper.receipt);
+      const { payload: payloadUpper } = decode<TestPayload>(resultUpper.receipt);
       expect(payloadUpper).toHaveProperty('aud', 'https://upper.example.com');
 
       // Test with mixed case
@@ -198,7 +209,7 @@ describe('createReceipt', () => {
         headers: { HOST: 'mixed.example.com' },
       };
       const resultMixed = await createReceipt(config, requestMixed, createTestResponse());
-      const { payload: payloadMixed } = decode(resultMixed.receipt);
+      const { payload: payloadMixed } = decode<TestPayload>(resultMixed.receipt);
       expect(payloadMixed).toHaveProperty('aud', 'https://mixed.example.com');
     });
 
@@ -210,7 +221,7 @@ describe('createReceipt', () => {
       };
       const result = await createReceipt(config, request, createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('aud', 'https://client.example.com');
     });
 
@@ -218,7 +229,7 @@ describe('createReceipt', () => {
       const config = createTestConfig();
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('iat');
       // 2026-02-05T12:00:00Z in Unix seconds
       expect(payload.iat).toBe(Math.floor(new Date('2026-02-05T12:00:00Z').getTime() / 1000));
@@ -228,7 +239,7 @@ describe('createReceipt', () => {
       const config = { ...createTestConfig(), expiresIn: 600 };
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('exp');
       expect(payload.exp).toBe(payload.iat + 600);
     });
@@ -237,7 +248,7 @@ describe('createReceipt', () => {
       const config = createTestConfig();
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload.exp).toBe(payload.iat + 300);
     });
 
@@ -245,7 +256,7 @@ describe('createReceipt', () => {
       const config = createTestConfig();
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('rid');
       // UUIDv7 format: xxxxxxxx-xxxx-7xxx-yxxx-xxxxxxxxxxxx
       expect(payload.rid).toMatch(
@@ -321,7 +332,7 @@ describe('createReceipt', () => {
       };
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('sub', 'user:12345');
     });
 
@@ -334,7 +345,7 @@ describe('createReceipt', () => {
       };
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('aud', 'https://custom-audience.example.com');
     });
 
@@ -349,7 +360,7 @@ describe('createReceipt', () => {
       };
       const result = await createReceipt(config, createTestRequest(), createTestResponse());
 
-      const { payload } = decode(result.receipt);
+      const { payload } = decode<TestPayload>(result.receipt);
       expect(payload).toHaveProperty('ext');
       expect(payload.ext).toHaveProperty('custom.namespace/data');
     });
@@ -404,7 +415,7 @@ describe('createReceiptWithClaims', () => {
       sub: 'explicit-subject',
     });
 
-    const { payload } = decode(result.receipt);
+    const { payload } = decode<TestPayload>(result.receipt);
     expect(payload).toHaveProperty('aud', 'https://explicit-audience.example.com');
     expect(payload).toHaveProperty('sub', 'explicit-subject');
     expect(payload).toHaveProperty('iss', 'https://api.example.com');
@@ -417,7 +428,7 @@ describe('createReceiptWithClaims', () => {
       ext: { 'my.namespace/key': 'value' },
     });
 
-    const { payload } = decode(result.receipt);
+    const { payload } = decode<TestPayload>(result.receipt);
     expect(payload).toHaveProperty('ext');
     expect(payload.ext).toHaveProperty('my.namespace/key', 'value');
   });
@@ -467,7 +478,7 @@ describe('Edge Cases', () => {
     };
     const result = await createReceipt(config, request, createTestResponse());
 
-    const { payload } = decode(result.receipt);
+    const { payload } = decode<TestPayload>(result.receipt);
     // Should use first value from array
     expect(payload).toHaveProperty('aud', 'https://api1.example.com');
   });

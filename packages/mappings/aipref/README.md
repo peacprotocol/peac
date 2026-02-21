@@ -40,7 +40,7 @@ const batch = mapAiprefKeys(['train-ai', 'search', 'custom']);
 ```typescript
 import { parseContentUsageHeader, contentUsageToCanonicalPurposes } from '@peac/mappings-aipref';
 
-// Parse RFC 8941 structured fields
+// Parse RFC 9651 structured fields
 const parsed = parseContentUsageHeader('train-ai=?1, search=?0');
 // { entries: Map { 'train-ai' => true, 'search' => false }, valid: true }
 

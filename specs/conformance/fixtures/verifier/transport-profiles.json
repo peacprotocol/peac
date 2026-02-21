@@ -78,7 +78,7 @@
     },
     {
       "id": "pointer-valid",
-      "description": "Valid PEAC-Receipt-Pointer with RFC 8941 dictionary format",
+      "description": "Valid PEAC-Receipt-Pointer with RFC 9651 dictionary format",
       "profile": "pointer",
       "input": {
         "headers": {

@@ -113,9 +113,8 @@ describe('validateConfig', () => {
     it('should reject non-object signing key', () => {
       const config = {
         ...createValidConfig(),
-        // @ts-expect-error Testing invalid config
         signingKey: 'not-an-object',
-      };
+      } as unknown as MiddlewareConfig;
 
       const error = getConfigError(() => validateConfig(config));
       expect(error.errors).toContainEqual(
@@ -263,9 +262,8 @@ describe('validateConfig', () => {
     it('should reject invalid transport', () => {
       const config = {
         ...createValidConfig(),
-        // @ts-expect-error Testing invalid config
         transport: 'invalid',
-      };
+      } as unknown as MiddlewareConfig;
 
       const error = getConfigError(() => validateConfig(config));
       expect(error.errors).toContainEqual(expect.objectContaining({ field: 'transport' }));
@@ -298,9 +296,8 @@ describe('validateConfig', () => {
     it('should reject non-function claimsGenerator', () => {
       const config = {
         ...createValidConfig(),
-        // @ts-expect-error Testing invalid config
         claimsGenerator: 'not-a-function',
-      };
+      } as unknown as MiddlewareConfig;
 
       const error = getConfigError(() => validateConfig(config));
       expect(error.errors).toContainEqual(
@@ -311,9 +308,8 @@ describe('validateConfig', () => {
     it('should reject non-function pointerUrlGenerator', () => {
       const config = {
         ...createValidConfig(),
-        // @ts-expect-error Testing invalid config
         pointerUrlGenerator: 'not-a-function',
-      };
+      } as unknown as MiddlewareConfig;
 
       const error = getConfigError(() => validateConfig(config));
       expect(error.errors).toContainEqual(

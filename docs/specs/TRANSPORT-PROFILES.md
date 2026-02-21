@@ -162,7 +162,7 @@ This is ideal for:
 
 ### 5.2 Header format
 
-The `PEAC-Receipt-Pointer` header is an RFC 8941 Structured Field **Dictionary** with quoted string members:
+The `PEAC-Receipt-Pointer` header is an RFC 9651 Structured Field **Dictionary** with quoted string members:
 
 ```
 PEAC-Receipt-Pointer: sha256="<hex>", url="<https-url>"
@@ -173,7 +173,7 @@ Components:
 - `sha256="<hex>"`: SHA-256 of the receipt JWS bytes, lowercase hex (64 characters), quoted
 - `url="<https-url>"`: HTTPS URL where the receipt can be fetched, quoted
 
-The RFC 8941 Dictionary format with quoted strings ensures URLs are safe even if they contain `;` or `,`, and parsing is consistent across languages.
+The RFC 9651 Dictionary format with quoted strings ensures URLs are safe even if they contain `;` or `,`, and parsing is consistent across languages.
 
 Example:
 

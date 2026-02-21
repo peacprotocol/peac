@@ -185,7 +185,7 @@ export function parseHeaderProfile(
  * Parse PEAC-Receipt-Pointer header
  *
  * Per TRANSPORT-PROFILES.md:
- * - Format: RFC 8941 dictionary with sha256 and url parameters
+ * - Format: RFC 9651 dictionary with sha256 and url parameters
  * - Multiple headers MUST be rejected
  * - URL MUST be HTTPS
  *
@@ -217,9 +217,9 @@ export function parsePointerProfile(
     };
   }
 
-  // Parse RFC 8941 dictionary format
+  // Parse RFC 9651 dictionary format
   // Format: sha256="<hex>", url="<url>"
-  // We use a simple parser here instead of a full RFC 8941 implementation
+  // We use a simple parser here instead of a full RFC 9651 implementation
 
   const parseResult = parseSimpleDictionary(headerValue);
 
@@ -318,7 +318,7 @@ export function parsePointerProfile(
 }
 
 /**
- * Simple RFC 8941-like dictionary parser result
+ * Simple RFC 9651-like dictionary parser result
  */
 interface DictionaryParseResult {
   /** Parsed key-value pairs */
@@ -330,7 +330,7 @@ interface DictionaryParseResult {
 }
 
 /**
- * Simple RFC 8941-like dictionary parser (ReDoS-safe)
+ * Simple RFC 9651-like dictionary parser (ReDoS-safe)
  *
  * Parses: key1="value1", key2="value2"
  * Returns map of key -> value (unquoted) plus metadata for strict validation

@@ -372,7 +372,7 @@ export async function verifyAndFetchPointer(
   pointerHeader: string,
   fetchOptions?: Omit<SSRFFetchOptions, 'maxBytes'>
 ): Promise<PointerFetchResult> {
-  // Parse pointer header (RFC 8941 dictionary format)
+  // Parse pointer header (RFC 9651 dictionary format)
   // Format: sha256="<hex>", url="<url>"
   // Using explicit parsing to avoid ReDoS in regex alternation
   const params = parsePointerHeader(pointerHeader);

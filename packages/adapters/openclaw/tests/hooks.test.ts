@@ -149,7 +149,9 @@ describe('createHookHandler', () => {
       const result = await handler.afterToolCall(event);
 
       expect(result.success).toBe(false);
-      expect(result.code).toContain('MISSING_FIELD');
+      if (!result.success) {
+        expect(result.code).toContain('MISSING_FIELD');
+      }
     });
 
     it('invokes onCapture callback on success', async () => {

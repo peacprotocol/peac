@@ -56,6 +56,17 @@ if [ -n "$BUILD_ARTIFACTS" ]; then
   echo "$BUILD_ARTIFACTS" | sed 's/^/    /'
 fi
 
+# 5. Check for x403 typo (should be x402)
+echo "Checking for x403 typo..."
+X403_HITS=$(git grep -l 'x403' -- '*.ts' '*.js' '*.md' '*.json' 2>/dev/null | grep -v 'node_modules' | grep -v 'scripts/check-planning-leak.sh' || true)
+if [ -n "$X403_HITS" ]; then
+  echo "  FAIL: Found 'x403' typo (should be 'x402') in tracked files:"
+  echo "$X403_HITS" | sed 's/^/    /'
+  FAILED=1
+else
+  echo "  OK: No x403 typos"
+fi
+
 if [ "$FAILED" -eq 1 ]; then
   echo ""
   echo "FAIL: Planning leak check failed"

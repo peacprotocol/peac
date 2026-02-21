@@ -209,6 +209,6 @@ success -- it does not guarantee the signature was valid from all perspectives.
 ## 10. References
 
 - [RFC 9421] HTTP Message Signatures
-- [RFC 8941] Structured Field Values for HTTP
+- [RFC 9651] Structured Field Values for HTTP (obsoletes RFC 8941)
 - [RFC 2119] Key words for use in RFCs to Indicate Requirement Levels
 - [RFC 8174] Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words

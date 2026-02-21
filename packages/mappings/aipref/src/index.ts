@@ -225,16 +225,16 @@ export function mapAiprefKeys(keys: AiprefKey[]): AiprefBatchMappingResult {
 }
 
 // =============================================================================
-// Content-Usage Header Parsing (RFC 8941 Structured Fields)
+// Content-Usage Header Parsing (RFC 9651 Structured Fields)
 // =============================================================================
 
 /**
  * Parse Content-Usage header value
  *
- * Content-Usage is a Structured Fields dictionary (RFC 8941).
+ * Content-Usage is a Structured Fields dictionary (RFC 9651).
  * Format: `train-ai=?1, search=?0`
  *
- * This is a simplified parser for common cases. For full RFC 8941
+ * This is a simplified parser for common cases. For full RFC 9651
  * compliance, use a dedicated structured fields library.
  *
  * @param headerValue - Raw Content-Usage header value
@@ -259,7 +259,7 @@ export function parseContentUsageHeader(headerValue: string): ContentUsageParseR
   }
 
   try {
-    // Split by comma (RFC 8941 dictionary members)
+    // Split by comma (RFC 9651 dictionary members)
     const parts = headerValue.split(',').map((p) => p.trim());
 
     for (const part of parts) {
@@ -277,7 +277,7 @@ export function parseContentUsageHeader(headerValue: string): ContentUsageParseR
         const key = part.slice(0, eqIndex).toLowerCase().trim();
         const value = part.slice(eqIndex + 1).trim();
 
-        // RFC 8941 boolean: ?1 = true, ?0 = false
+        // RFC 9651 boolean: ?1 = true, ?0 = false
         if (value === '?1' || value === 'true' || value === 'y' || value === 'yes') {
           entries.set(key, true);
         } else if (value === '?0' || value === 'false' || value === 'n' || value === 'no') {

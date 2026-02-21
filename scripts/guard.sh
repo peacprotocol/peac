@@ -161,7 +161,7 @@ if [ -f scripts/find-invisible-unicode.mjs ]; then
     echo "FAIL: Found dangerous invisible/bidi Unicode characters"
     bad=1
   else
-    echo "OK"
+    echo "Unicode scan OK (GitHub diff bidi warning is cosmetic; repo runs fail-closed Trojan Source scan)"
   fi
 else
   echo "FAIL: scripts/find-invisible-unicode.mjs not found (required for Trojan Source detection)"
@@ -241,6 +241,15 @@ if [ -f scripts/check-json-dupes.mjs ]; then
   fi
 else
   echo "SKIP: scripts/check-json-dupes.mjs not found"
+fi
+
+echo "== forbid x403 typo (must be x402) =="
+# x403 is a common typo for x402; catch it before it leaks into code or docs
+if git grep -n 'x403' -- ':!node_modules' ':!archive/**' ':!scripts/guard.sh' ':!scripts/check-planning-leak.sh' | grep .; then
+  echo "FAIL: Found 'x403' -- did you mean 'x402'?"
+  bad=1
+else
+  echo "OK"
 fi
 
 echo "== forbid stale generated artifacts in src/ =="
