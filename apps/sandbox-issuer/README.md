@@ -35,7 +35,7 @@ Request body (strict whitelist: no arbitrary claims):
 
 | Field        | Type         | Required | Description                                    |
 | ------------ | ------------ | -------- | ---------------------------------------------- |
-| `aud`        | string (URL) | yes      | Audience: who will verify                    |
+| `aud`        | string (URL) | yes      | Audience: who will verify                      |
 | `sub`        | string       | no       | Subject identifier                             |
 | `purpose`    | string       | no       | Declared purpose                               |
 | `expires_in` | number       | no       | Seconds until expiry (default 3600, max 86400) |

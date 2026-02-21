@@ -130,8 +130,8 @@ const extensions = createTraceContextExtensions(req.headers);
 | Dependency                      | Role                  | Version    | Notes                                      |
 | ------------------------------- | --------------------- | ---------- | ------------------------------------------ |
 | `@opentelemetry/api`            | Peer dep (production) | `^1.9.0`   | Stable API, backward-compatible across 1.x |
-| `@opentelemetry/sdk-metrics`    | Dev dep (tests only)  | `^2.0.0`   | SDK v2: NOT shipped to consumers         |
-| `@opentelemetry/sdk-trace-base` | Dev dep (tests only)  | `^2.0.0`   | SDK v2: NOT shipped to consumers         |
+| `@opentelemetry/sdk-metrics`    | Dev dep (tests only)  | `^2.0.0`   | SDK v2: NOT shipped to consumers           |
+| `@opentelemetry/sdk-trace-base` | Dev dep (tests only)  | `^2.0.0`   | SDK v2: NOT shipped to consumers           |
 | Node.js                         | Runtime               | `>=22.0.0` | Matches monorepo `engines.node`            |
 
 **Key points:**
