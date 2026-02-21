@@ -22,7 +22,8 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"/* no-op: source-exports package has no build artifacts */\""
   },
   "dependencies": {
     "@peac/contracts": "workspace:*",
