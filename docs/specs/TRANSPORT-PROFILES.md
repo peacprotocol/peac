@@ -398,4 +398,4 @@ Transport profiles define how receipts are delivered. For the full profile taxon
 
 For profiles that define what evidence a receipt records, see:
 
-- [RFC 9421 Proof Capture](PEAC-PROOF-RFC9421.md) -- HTTP Message Signature verification evidence
+- [RFC 9421 Proof Capture](PEAC-PROOF-RFC9421.md): HTTP Message Signature verification evidence

@@ -27,9 +27,9 @@ for dev-only exceptions.
 
 ### Recommended CI Configuration
 
-- **Default CI (PRs):** `node scripts/audit-gate.mjs` -- prod must be clean, dev exceptions allowed.
-- **Release/tag CI:** `AUDIT_STRICT=1 node scripts/audit-gate.mjs` -- no known HIGHs anywhere.
-- **Enterprise CI:** `PEAC_AUDIT_STRICT=1 node scripts/audit-gate.mjs` -- zero prod findings.
+- **Default CI (PRs):** `node scripts/audit-gate.mjs`: prod must be clean, dev exceptions allowed.
+- **Release/tag CI:** `AUDIT_STRICT=1 node scripts/audit-gate.mjs`: no known HIGHs anywhere.
+- **Enterprise CI:** `PEAC_AUDIT_STRICT=1 node scripts/audit-gate.mjs`: zero prod findings.
 
 ### Allowlist Quality Bar
 

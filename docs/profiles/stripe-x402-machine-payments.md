@@ -85,14 +85,14 @@ Common CAIP-2 identifiers for Stripe crypto payments:
 3. `currency` MUST match `/^[a-z]{3}$/` (lowercase ISO 4217)
 4. `asset` MUST be a non-empty string
 5. `network` MUST be CAIP-2 format: `/^[a-z][a-z0-9-]{2,31}:[a-zA-Z0-9]{1,64}$/`
-6. `tx_hash`, if present, MUST be a non-empty string (opaque -- no chain-specific validation)
-7. `recipient`, if present, MUST be a non-empty string (opaque -- no chain-specific validation)
+6. `tx_hash`, if present, MUST be a non-empty string (opaque: no chain-specific validation)
+7. `recipient`, if present, MUST be a non-empty string (opaque: no chain-specific validation)
 
 Violations throw with descriptive error messages. No silent coercion.
 
 **Note on tx_hash and recipient:** These fields are treated as opaque strings.
 Chain-specific validation (e.g., 0x-prefix for EVM, base58 for Solana) is intentionally
-not performed -- the adapter normalizes, it does not interpret chain semantics.
+not performed: the adapter normalizes, it does not interpret chain semantics.
 
 ## Denomination Semantics
 
@@ -168,13 +168,13 @@ considered a `'hash'` policy that would SHA-256 metadata values before
 inclusion. This was rejected because hashing low-entropy strings (short
 agent IDs, tool names, boolean flags) is trivially reversible by
 exhaustive guessing. A hash that looks private but isn't is worse than
-plaintext that's clearly visible -- it creates a false sense of
+plaintext that's clearly visible: it creates a false sense of
 anonymization. Use `'allowlist'` to include only the keys you need, or
 `'omit'` to exclude metadata entirely.
 
 ## Trust Model
 
-A PEAC receipt with Stripe evidence is an **issuer attestation** -- the receipt
+A PEAC receipt with Stripe evidence is an **issuer attestation**: the receipt
 signer asserts that payment occurred. Offline verification confirms the receipt's
 **integrity and origin** (Ed25519 signature check), not on-chain settlement.
 
@@ -184,7 +184,7 @@ does not perform on-chain verification.
 
 ## Quick Demo
 
-Normalize a crypto payment, issue a PEAC receipt, and verify offline -- in one command:
+Normalize a crypto payment, issue a PEAC receipt, and verify offline: in one command:
 
 ```bash
 pnpm --filter @peac/example-stripe-x402-crypto demo
@@ -197,9 +197,9 @@ no network or Stripe API needed.
 
 See `specs/conformance/fixtures/stripe-crypto/` for test vectors:
 
-- `minimal-crypto-intent.json` -- required fields only
-- `full-crypto-intent.json` -- all fields populated
-- `missing-required-fields.json` -- validation error cases (8 cases)
+- `minimal-crypto-intent.json`: required fields only
+- `full-crypto-intent.json`: all fields populated
+- `missing-required-fields.json`: validation error cases (8 cases)
 
 Vectors are executed by the conformance runner at
 `packages/rails/stripe/tests/conformance.test.ts`.

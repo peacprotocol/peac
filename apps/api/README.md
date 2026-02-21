@@ -78,14 +78,14 @@ Legacy verify endpoint. Use `/api/v1/verify` instead.
 
 | Tier      | Limit         | Window   | Header      |
 | --------- | ------------- | -------- | ----------- |
-| Anonymous | 100 requests  | 1 minute | --          |
+| Anonymous | 100 requests  | 1 minute | :           |
 | API Key   | 1000 requests | 1 minute | `X-API-Key` |
 
 All responses include RFC 9333 rate limit headers:
 
-- `RateLimit-Limit` -- Maximum requests per window
-- `RateLimit-Remaining` -- Remaining requests in current window
-- `RateLimit-Reset` -- Seconds until window reset
+- `RateLimit-Limit`: Maximum requests per window
+- `RateLimit-Remaining`: Remaining requests in current window
+- `RateLimit-Reset`: Seconds until window reset
 
 ## HTTP Status Codes
 

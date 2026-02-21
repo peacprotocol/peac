@@ -204,7 +204,7 @@ auditors to assess whether clock skew was a factor.
 Per DD-33 and DD-50, the proof result is an issuer assertion about what
 the issuer observed during verification. It is NOT ground truth. A receipt
 claiming `result: "verified"` means the issuer's verification code returned
-success -- it does not guarantee the signature was valid from all perspectives.
+success: it does not guarantee the signature was valid from all perspectives.
 
 ## 10. References
 

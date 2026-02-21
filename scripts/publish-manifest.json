@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Single source of truth for PEAC Protocol npm publish order",
-  "version": "0.10.13",
-  "lastUpdated": "2026-02-19",
+  "version": "0.10.14",
+  "lastUpdated": "2026-02-21",
   "totalPackages": 21,
   "packages": [
     "@peac/kernel",

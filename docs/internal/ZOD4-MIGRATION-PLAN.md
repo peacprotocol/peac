@@ -26,9 +26,9 @@ rather than exploratory work.
 
 ## Breaking Changes Relevant to PEAC
 
-### 1. `.superRefine()` -- DEPRECATED (HIGH)
+### 1. `.superRefine()`: DEPRECATED (HIGH)
 
-**Zod 4 replacement:** `.check()` -- same semantics, new name. The callback
+**Zod 4 replacement:** `.check()`: same semantics, new name. The callback
 signature and `ctx.addIssue()` API are unchanged. Note: the deprecation status
 has shifted across Zod 4 pre-releases. Only rename `.superRefine()` to
 `.check()` if the pinned Zod 4 baseline actually emits deprecation warnings;
@@ -49,7 +49,7 @@ do not create churn for no reason.
 5 locations and verify each callback still type-checks. If no warnings are
 emitted, defer the rename.
 
-### 2. `.strict()` -- STILL AVAILABLE (LOW)
+### 2. `.strict()`: STILL AVAILABLE (LOW)
 
 `.strict()` remains in Zod 4 for backward compatibility. Optionally migrate to
 `z.strictObject()` for cleanliness, but not required.
@@ -67,7 +67,7 @@ emitted, defer the rename.
 **Migration:** No immediate action required. Consider a follow-up PR to migrate
 to `z.strictObject()` for stylistic consistency, but this is P2.
 
-### 3. `.describe()` -- VERIFY MCP TOOL DESCRIPTIONS (MEDIUM)
+### 3. `.describe()`: VERIFY MCP TOOL DESCRIPTIONS (MEDIUM)
 
 `.describe()` is unchanged in Zod 4 but its behavior with MCP SDK structured
 outputs must be verified. The MCP SDK reads `.describe()` metadata from Zod
@@ -94,10 +94,10 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | \
 Check that all `inputSchema.properties[*].description` values match the
 `.describe()` strings.
 
-### 4. `ZodError` imports -- SAFE (MEDIUM)
+### 4. `ZodError` imports: SAFE (MEDIUM)
 
 Zod 4 renames `error.errors` to `error.issues`. PEAC code already uses
-`.issues` exclusively -- no migration needed.
+`.issues` exclusively: no migration needed.
 
 **Occurrences (14):**
 
@@ -113,7 +113,7 @@ Zod 4 renames `error.errors` to `error.issues`. PEAC code already uses
 
 **Migration:** No changes needed. All code uses `.issues`.
 
-### 5. `z.string().uuid()` -- STRICTER VALIDATION (MEDIUM)
+### 5. `z.string().uuid()`: STRICTER VALIDATION (MEDIUM)
 
 Zod 4 enforces strict RFC 4122 UUID validation. Zod 3 accepted some
 non-compliant UUID formats. Zod 4 provides `z.guid()` for v3-compatible
@@ -127,7 +127,7 @@ behavior.
 
 **Migration:** PEAC generates UUIDs via `crypto.randomUUID()` which produces
 RFC 4122 v4 UUIDs. These will pass Zod 4's stricter check. Verify with existing
-conformance test fixtures -- if any fixture contains a non-RFC 4122 UUID,
+conformance test fixtures: if any fixture contains a non-RFC 4122 UUID,
 update it.
 
 ### 6. No-Change APIs
@@ -146,39 +146,39 @@ update it.
 Migration follows package layering (bottom-up). Each step is a separate PR
 within v0.11.0.
 
-### Step 1: `@peac/schema` (Layer 1) -- Foundation
+### Step 1: `@peac/schema` (Layer 1): Foundation
 
 - 76+ schemas, 5 `.superRefine()` (HIGH), 43 `.strict()` (LOW)
 - `.superRefine()` -> `.check()` rename (5 locations)
 - Run full conformance suite after
 - **PR:** v0.11.0-1
 
-### Step 2: `@peac/control` (Layer 3) -- Validators
+### Step 2: `@peac/control` (Layer 3): Validators
 
 - 7 schemas, 1 `z.string().uuid()` (MEDIUM), 0 `.superRefine()`
 - Verify `receipt_id` UUID validation still accepts `crypto.randomUUID()` output
 - **PR:** v0.11.0-2
 
-### Step 3: `@peac/policy-kit` (Layer 3) -- Policy Types
+### Step 3: `@peac/policy-kit` (Layer 3): Policy Types
 
 - 10+ schemas, 14 `.strict()` (LOW), 2 `ZodError` imports (SAFE)
 - No high-risk changes; verify policy loader error handling
 - **PR:** v0.11.0-2 (same as control, both L3)
 
-### Step 4: `@peac/protocol` (Layer 3) -- Issue/Verify
+### Step 4: `@peac/protocol` (Layer 3): Issue/Verify
 
 - 1 `ZodError` import only (SAFE, uses `.issues`)
 - Verify `issue()` error wrapping still works
 - **PR:** v0.11.0-2
 
-### Step 5: `@peac/mcp-server` (Layer 5) -- MCP Tools
+### Step 5: `@peac/mcp-server` (Layer 5): MCP Tools
 
 - 11 schemas, 23 `.describe()` (CRITICAL to verify)
 - Run MCP `tools/list` and verify all descriptions preserved
 - Test structured output roundtrip with Zod 4
 - **PR:** v0.11.0-3
 
-### Step 6: Apps (`sandbox-issuer`, `api`) -- Minimal
+### Step 6: Apps (`sandbox-issuer`, `api`): Minimal
 
 - 1 `.strict()` + 1 `.refine()` each
 - Straightforward after lower layers are migrated
@@ -251,21 +251,21 @@ This is an **escape hatch**, not a long-term strategy. Any package using
 
 ---
 
-## `@zod/mini` -- Future Optimization
+## `@zod/mini`: Future Optimization
 
-Zod 4 ships `@zod/mini` -- a smaller bundle (~57% smaller) for edge runtimes.
+Zod 4 ships `@zod/mini`: a smaller bundle (~57% smaller) for edge runtimes.
 
 **Candidates for `@zod/mini`:**
 
-- `surfaces/workers/cloudflare/` -- Cloudflare Workers (bundle size matters)
-- `surfaces/workers/fastly/` -- Fastly Compute (bundle size matters)
-- `surfaces/workers/akamai/` -- Akamai EdgeWorkers (bundle size matters)
+- `surfaces/workers/cloudflare/`: Cloudflare Workers (bundle size matters)
+- `surfaces/workers/fastly/`: Fastly Compute (bundle size matters)
+- `surfaces/workers/akamai/`: Akamai EdgeWorkers (bundle size matters)
 
 **NOT candidates:**
 
-- `packages/schema/` -- needs full Zod for `.superRefine()`/`.check()`,
+- `packages/schema/`: needs full Zod for `.superRefine()`/`.check()`,
   `.transform()`, `.pipe()`
-- `packages/mcp-server/` -- needs `.describe()` for MCP tool metadata
+- `packages/mcp-server/`: needs `.describe()` for MCP tool metadata
 
 **Action:** Document for v0.11.1+ exploration. Not in scope for v0.11.0.
 

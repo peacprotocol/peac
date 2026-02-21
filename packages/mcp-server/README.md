@@ -1,6 +1,6 @@
 # @peac/mcp-server
 
-Verify, issue, and bundle PEAC receipts in any MCP client (Claude Desktop, Cursor, Windsurf) -- locally, offline, no API keys.
+Verify, issue, and bundle PEAC receipts in any MCP client (Claude Desktop, Cursor, Windsurf): locally, offline, no API keys.
 
 ## Quick Start
 
@@ -117,13 +117,13 @@ Note: stdout is reserved for JSON-RPC messages. All diagnostics, banners, and er
 
 ## Two Operating Modes
 
-**Pure mode** (default) -- verify, inspect, and decode receipts anywhere. No keys, no filesystem writes, no configuration needed. Safe for any environment.
+**Pure mode** (default): verify, inspect, and decode receipts anywhere. No keys, no filesystem writes, no configuration needed. Safe for any environment.
 
 ```bash
 npx -y @peac/mcp-server
 ```
 
-**Issuer mode** -- additionally issue receipts and create signed evidence bundles. Requires explicit operator opt-in via CLI flags. Privileged tools are only visible and callable when their prerequisites are configured:
+**Issuer mode**: additionally issue receipts and create signed evidence bundles. Requires explicit operator opt-in via CLI flags. Privileged tools are only visible and callable when their prerequisites are configured:
 
 - `--issuer-key` + `--issuer-id` enables `peac_issue`
 - `--bundle-dir` additionally enables `peac_create_bundle`
@@ -135,7 +135,7 @@ npx -y @peac/mcp-server \
   --bundle-dir ./bundles
 ```
 
-Evidence bundles are self-contained directories with canonical manifests (sorted keys, SHA-256 receipt hashes, content-addressable `bundle_id`) and signed provenance (`manifest.jws`). The `bundle_id` is deterministic -- same receipts and policy always produce the same ID regardless of when the bundle is created. Manifest content includes `created_at`, so the signature differs across runs. Bundles can be verified offline, diffed, cached, and used for audits, disputes, or SOC 2 evidence collection.
+Evidence bundles are self-contained directories with canonical manifests (sorted keys, SHA-256 receipt hashes, content-addressable `bundle_id`) and signed provenance (`manifest.jws`). The `bundle_id` is deterministic: same receipts and policy always produce the same ID regardless of when the bundle is created. Manifest content includes `created_at`, so the signature differs across runs. Bundles can be verified offline, diffed, cached, and used for audits, disputes, or SOC 2 evidence collection.
 
 ## CLI Options
 
@@ -217,7 +217,7 @@ This package pins `@modelcontextprotocol/sdk` with a tilde range (patch-only upd
 ## Architecture
 
 - **DD-51**: Pure handlers with no MCP SDK dependency
-- **DD-52**: No ambient key discovery -- explicit `--issuer-key` only
+- **DD-52**: No ambient key discovery: explicit `--issuer-key` only
 - **DD-53**: Static policy loaded once at startup with SHA-256 hash
 - **DD-54**: Structured outputs (`structuredContent` + `text`) on every response
 - **DD-55**: No URLs resolved from tool inputs (SSRF prevention)

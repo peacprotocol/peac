@@ -165,7 +165,7 @@ PEAC does not orchestrate these protocols. It provides portable proof of what te
 
 Portable, offline-verifiable evidence packages for disputes, audits, and cross-org handoffs.
 
-A bundle contains receipts, policy snapshots, and a deterministic verification report -- everything needed to prove what happened without trusting either party's internal logs.
+A bundle contains receipts, policy snapshots, and a deterministic verification report: everything needed to prove what happened without trusting either party's internal logs.
 
 **Design constraints:**
 

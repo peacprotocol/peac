@@ -66,16 +66,16 @@ Type guard checking if the request has PEAC context attached.
 
 ## Configuration Options
 
-- **`skip`** -- Skip receipt generation for certain routes (e.g., health checks)
-- **`audienceExtractor`** -- Custom audience extraction from request (default: request origin)
-- **`subjectExtractor`** -- Custom subject extraction from request
-- **`onError`** -- Error handler for receipt generation failures (failures never break the response)
+- **`skip`**: Skip receipt generation for certain routes (e.g., health checks)
+- **`audienceExtractor`**: Custom audience extraction from request (default: request origin)
+- **`subjectExtractor`**: Custom subject extraction from request
+- **`onError`**: Error handler for receipt generation failures (failures never break the response)
 
 All options from `@peac/middleware-core` `MiddlewareConfig` are also supported (issuer, signingKey, keyId, expiresIn, transport, maxHeaderSize).
 
 ## Error Handling
 
-Receipt generation failures are isolated -- they never break the HTTP response. By default, errors are logged to console. Provide an `onError` callback for custom handling.
+Receipt generation failures are isolated: they never break the HTTP response. By default, errors are logged to console. Provide an `onError` callback for custom handling.
 
 ## License
 

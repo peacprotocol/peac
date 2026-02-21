@@ -31,11 +31,11 @@ curl -X POST http://127.0.0.1:3100/api/v1/issue \
   -d '{"aud": "https://example.com"}'
 ```
 
-Request body (strict whitelist -- no arbitrary claims):
+Request body (strict whitelist: no arbitrary claims):
 
 | Field        | Type         | Required | Description                                    |
 | ------------ | ------------ | -------- | ---------------------------------------------- |
-| `aud`        | string (URL) | yes      | Audience -- who will verify                    |
+| `aud`        | string (URL) | yes      | Audience: who will verify                      |
 | `sub`        | string       | no       | Subject identifier                             |
 | `purpose`    | string       | no       | Declared purpose                               |
 | `expires_in` | number       | no       | Seconds until expiry (default 3600, max 86400) |

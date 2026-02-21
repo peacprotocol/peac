@@ -14,4 +14,4 @@ and `notes` explaining the normalization rules exercised.
 | `vector3.json` | Reserved encoding preservation, array ordering, key sorting |
 
 These files are consumed by the policy-kit conformance tests. Do not modify
-the `input` or `expected_hash` fields -- they are normative fixtures.
+the `input` or `expected_hash` fields: they are normative fixtures.

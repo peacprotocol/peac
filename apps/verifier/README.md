@@ -1,6 +1,6 @@
 # @peac/app-verifier
 
-Browser-based PEAC receipt verifier. Pure client-side -- no server, all verification runs locally.
+Browser-based PEAC receipt verifier. Pure client-side: no server, all verification runs locally.
 
 ## Quick Start
 
@@ -31,11 +31,11 @@ The verifier uses `verifyLocal()` from `@peac/protocol` to verify receipt signat
 
 ## Features
 
-- **Paste and verify** -- Textarea input for JWS receipts
-- **File upload** -- Drag-and-drop support for .jwt, .jws, .json files
-- **Trust configuration** -- Add/remove trusted issuers and public keys via the UI
-- **Offline mode** -- Service worker caches the app shell for offline use
-- **Claims display** -- Formatted breakdown of all receipt claims
+- **Paste and verify**: Textarea input for JWS receipts
+- **File upload**: Drag-and-drop support for .jwt, .jws, .json files
+- **Trust configuration**: Add/remove trusted issuers and public keys via the UI
+- **Offline mode**: Service worker caches the app shell for offline use
+- **Claims display**: Formatted breakdown of all receipt claims
 
 ## Trust Store
 

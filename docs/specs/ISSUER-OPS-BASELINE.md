@@ -218,7 +218,7 @@ If a private key is compromised:
 **Verification behavior:**
 
 - Receipts signed by compromised key become unverifiable (by design)
-- This is the correct behavior -- compromised signatures should not verify
+- This is the correct behavior: compromised signatures should not verify
 - Parties with offline bundles retain their evidence
 
 ### 6.2 Discovery endpoint outage

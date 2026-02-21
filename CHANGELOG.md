@@ -7,20 +7,97 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.14] - 2026-02-22
+
+### Quality Hardening and Zod 4 Preparation
+
+v0.10.14 is a hardening release: no new packages, no wire format changes.
+It closes three follow-up issues from prior releases, tightens editorial and
+integrity standards, promotes the shared worker core to a proper workspace
+package, and lays the groundwork for the Zod 4 migration in v0.11.0.
+
+### Added
+
+- **`@peac/worker-shared`** (NEW internal package, private)
+  - Promoted from `surfaces/workers/_shared/core/` to a first-class
+    workspace package (`packages/worker-shared/`)
+  - Eliminates root-level devDep workaround for Vitest strict resolution
+  - Source exports (`./src/index.ts`): no build step, edge-runtime safe
+  - Used by Cloudflare, Akamai, and Fastly worker surfaces
+  - Closes #355
+- **Per-fixture conformance versioning** (`specs/conformance/`)
+  - `category-tracking.json` data file tracks `schema_version` per fixture
+  - `scripts/validate-fixtures.mjs` CI gate enforces versioning
+  - Closes #380
+- **Kernel constraints** (`@peac/schema`)
+  - `KERNEL_CONSTRAINTS` constant: 9 named constraints with name, limit,
+    unit, and rationale fields
+  - `validateKernelConstraints()` function with structured violation reporting
+  - Exported types: `ConstraintViolation`, `ConstraintValidationResult`,
+    `KernelConstraintKey`
+  - Design decision DD-60
+- **Polish Bucket tooling** (DD-118)
+  - 18 fast-check property tests across kernel, schema, and crypto
+  - Fuzz seed tests for boundary conditions
+  - Machine-readable perf baseline (`tests/perf/baseline-results.json`)
+- **Zod 4 migration tooling**
+  - `scripts/audit-zod-usage.mjs`: inventory all Zod API usage across 42
+    packages, generates migration plan with staged ordering and rollback notes
+  - `docs/internal/ZOD4-MIGRATION-PLAN.md`: MCP SDK compatibility analysis,
+    migration order, breaking API changes, and CI gate strategy
+- **Writer-side omission of redundant fields** (`@peac/adapter-openclaw`)
+  - Export bundle writer strips top-level `auth` and `evidence` when `_jws`
+    is present; JWS payload is canonical, duplicate fields risk divergence
+  - Receipts without `_jws` (unsigned) are written unchanged
+  - Closes #382
+
+### Changed
+
+- **RFC 9651 replaces RFC 8941** across all source, spec, test, and fixture
+  files (RFC 8941 obsoleted by RFC 9651: Structured Field Values for HTTP)
+- **Dev dependency freshness**: `@types/node` ^22.x, `turbo`, `prettier`,
+  `typescript-eslint`, `wrangler`, `next` bumped to current ranges
+- **Audit allowlist quality bar**: structured rationale fields
+  (`scope`/`owner`/`added_at`/`dependency_chain`/`verified_by`) enforced
+  by `scripts/audit-gate.mjs`; prod ceiling 30 days, strict ISO dates
+- **`@peac/worker-shared` tsconfig**: `noEmit: true` declared explicitly
+  (was already passed via CLI; now unambiguous for editors and direct `tsc`)
+
+### Fixed
+
+- **`x403` typo gate** added to `guard.sh` and `check-planning-leak.sh`
+  to prevent protocol name typos from entering the codebase
+- **Unicode scan log**: `guard.sh` now prints "Unicode scan OK" explicitly
+  in the Trojan Source section (clarifies GitHub bidi diff banners)
+- Legacy TypeScript annotation errors in openclaw, capture-core,
+  capture-node, and middleware-core test files (advisory-only but visible
+  as CI annotations)
+- `apps/api` Hono `c.body()` overload mismatch (TS2769)
+- `check-error-codes.sh` missing category entries (workflow, interaction,
+  verifier)
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- No new published packages (all 22 packages version-bumped to 0.10.14)
+- `@peac/worker-shared` is private (not published to npm)
+- Design decisions: DD-59 (per-fixture versioning), DD-60 (kernel
+  constraints), DD-101 (editorial hygiene), DD-118 (Polish Bucket)
+
 ## [0.10.13] - 2026-02-19
 
 ### MCP Server for AI Agents
 
 v0.10.13 ships `@peac/mcp-server`, bringing PEAC receipt operations to any MCP
 client (Claude Desktop, Cursor, Windsurf). Verify, inspect, decode, issue, and
-bundle receipts locally -- no API keys, no network required.
+bundle receipts locally: no API keys, no network required.
 
 ### Added
 
 - **`@peac/mcp-server`** (NEW package, Layer 5)
   - 5 MCP tools: `peac_verify`, `peac_inspect`, `peac_decode` (pure),
     `peac_issue`, `peac_create_bundle` (privileged)
-  - Pure tools require no configuration -- safe for any environment
+  - Pure tools require no configuration: safe for any environment
   - Privileged tools require explicit operator opt-in via `--issuer-key`,
     `--issuer-id`, and `--bundle-dir` CLI flags
   - `peac-mcp-server` CLI binary with stdio transport
@@ -42,7 +119,7 @@ bundle receipts locally -- no API keys, no network required.
   - `inspect_full_claims` policy gate (default: false) for claim visibility
   - JWKS file support for verifier key resolution
   - Issuer key loading from `env:VAR` or `file:/path` references
-  - No ambient key discovery (DD-52) -- keys never searched from filesystem
+  - No ambient key discovery (DD-52): keys never searched from filesystem
     or environment
   - MCP SDK `@modelcontextprotocol/sdk@~1.27.0` (tilde pin, patch-only)
   - MCP protocol version `2025-11-25`
@@ -163,7 +240,7 @@ v2), expands the registry spec, and adds the Stripe x402 payment rail adapter.
 
 ### Added
 
-- **`@peac/rails-stripe`** -- Stripe payment rail adapter (`packages/rails/stripe/`)
+- **`@peac/rails-stripe`**: Stripe payment rail adapter (`packages/rails/stripe/`)
   - `fromCheckoutSession()`, `fromPaymentIntent()`, `fromWebhookEvent()` for
     fiat Stripe flows
   - `fromCryptoPaymentIntent()` for x402 crypto payment flows with CAIP-2
@@ -187,7 +264,7 @@ v2), expands the registry spec, and adds the Stripe x402 payment rail adapter.
   - Deterministic vulnerability checker integrated into `guard.sh`
   - Two-tier policy: critical blocks, high warns (strict mode via `AUDIT_STRICT=1`)
   - Time-bounded allowlist at `security/audit-allowlist.json` (90-day max expiry)
-- **`SECURITY.md`** -- security policy, vulnerability reporting, contributor
+- **`SECURITY.md`**: security policy, vulnerability reporting, contributor
   checklist
 - **CI hardening**
   - `corepack prepare` with `--activate` in all workflow jobs
@@ -246,8 +323,8 @@ Node.js baseline to 22 LTS. No runtime, API, or wire format changes.
 
 ### Fixed
 
-- **Mermaid diagrams** -- fixed GitHub rendering issues (#346, #348, #349)
-- **ESLint `preserve-caught-error`** -- 6 re-thrown errors now preserve cause chain
+- **Mermaid diagrams**: fixed GitHub rendering issues (#346, #348, #349)
+- **ESLint `preserve-caught-error`**: 6 re-thrown errors now preserve cause chain
   via `{ cause: err }` (apps/api, apps/bridge, packages/protocol, packages/discovery)
 
 ### Notes
@@ -258,7 +335,7 @@ Node.js baseline to 22 LTS. No runtime, API, or wire format changes.
 
 ## [0.10.9] - 2026-02-07
 
-### Foundation Hardening -- Architecture, CI, and Server Reliability
+### Foundation Hardening: Architecture, CI, and Server Reliability
 
 v0.10.9 ships architectural fixes, CI hardening, and server reliability
 improvements. Publish manifest expanded from 18 to 20 packages. Four packages
@@ -268,7 +345,7 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
 ### Added
 
 - **Unified receipt parser** (`@peac/schema`)
-  - `parseReceiptClaims(input, opts?)` -- single entry point for commerce and
+  - `parseReceiptClaims(input, opts?)`: single entry point for commerce and
     attestation receipt validation
   - Classification by key presence (`amt`, `cur`, `payment`), not truthiness
   - Returns `{ ok, variant, claims }` or `{ ok: false, error }` result type
@@ -295,7 +372,7 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
 
 - **Manifest-driven pack scripts**
   - `pack-verify.sh` and `pack-install-smoke.sh` now read from
-    `publish-manifest.json` -- no more hardcoded package arrays
+    `publish-manifest.json`: no more hardcoded package arrays
   - Tarball hygiene checks: no `reference/`, `.local.md`, `.env*` in tarballs
 
 - **Planning leak check** (`scripts/check-planning-leak.sh`)
@@ -339,10 +416,10 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
   - Sandbox-issuer and API app now use `MemoryRateLimitStore` from
     `@peac/middleware-core` (was bare `Map` without memory bounds)
 
-- **`@peac/audit` made publishable** -- removed `private: true`, added
+- **`@peac/audit` made publishable**: removed `private: true`, added
   `publishConfig.access: public`
 
-- **`CoreClaims.payment` now optional** (`@peac/schema`) -- supports attestation
+- **`CoreClaims.payment` now optional** (`@peac/schema`): supports attestation
   receipts that have no payment field
 
 - **SHA-pinned GitHub Actions** in CI workflow
@@ -353,49 +430,49 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
 
 ### Fixed
 
-- **Dependency-cruiser regex bug** -- `middleware` and `telemetry` alternations
+- **Dependency-cruiser regex bug**: `middleware` and `telemetry` alternations
   in layer rules did not match hyphenated names (`middleware-core`,
   `middleware-express`, `telemetry-otel`). Changed to `[^/]*` suffix pattern.
   `includeOnly` expanded from `{1,2}` to `{1,4}` for nested adapters.
 
-- **Broken Husky pre-commit hook removed** -- called `lint-staged` which was
+- **Broken Husky pre-commit hook removed**: called `lint-staged` which was
   not installed, giving false "local gate passed" signal
 
-- **Build artifacts removed from source** -- deleted `.d.ts` and `.d.ts.map`
+- **Build artifacts removed from source**: deleted `.d.ts` and `.d.ts.map`
   files from `packages/pay402/src/`
 
-- **Orphaned directory removed** -- `packages/nextjs/` (plan doc moved to
+- **Orphaned directory removed**: `packages/nextjs/` (plan doc moved to
   `reference/`)
 
-- **JWKS resolver options** in verify API -- fixed option names to match
+- **JWKS resolver options** in verify API: fixed option names to match
   `ResolverOptions` type (`fetchTimeoutMs` -> `timeoutMs`, `cacheTtlSeconds` ->
   `defaultTtlSeconds`)
 
-- **Unicode guard made fail-closed** (`scripts/guard.sh`) -- missing detector
+- **Unicode guard made fail-closed** (`scripts/guard.sh`): missing detector
   script now fails the gate instead of silently skipping
 
 ### Security
 
-- JWKS stale-if-error defaults to disabled (`allowStale: false`) -- server apps
+- JWKS stale-if-error defaults to disabled (`allowStale: false`): server apps
   must explicitly opt in
-- Rate-limit store bounded by `maxKeys` with LRU eviction -- prevents memory
+- Rate-limit store bounded by `maxKeys` with LRU eviction: prevents memory
   exhaustion under sustained load
 - Publish-manifest closure check prevents broken dependency chains on npm
 
 ## [0.10.8] - 2026-02-07
 
-### Adoption Release -- Middleware, Conformance, and Infrastructure
+### Adoption Release: Middleware, Conformance, and Infrastructure
 
 v0.10.8 ships the full adoption stack: middleware for receipt issuance, conformance
 testing tools, and infrastructure apps (sandbox issuer, browser verifier, verify API).
 
 ### Added
 
-- **@peac/middleware-core** -- Framework-agnostic middleware primitives for PEAC receipt issuance
+- **@peac/middleware-core**: Framework-agnostic middleware primitives for PEAC receipt issuance
   - `createReceipt()`, `wrapResponse()`, `selectTransport()`, `validateConfig()`
   - Ed25519 signing, automatic transport selection (header/body/pointer)
 
-- **@peac/middleware-express** -- Express.js middleware for automatic receipt issuance
+- **@peac/middleware-express**: Express.js middleware for automatic receipt issuance
   - `peacMiddleware()` with skip, audience/subject extractors, error isolation
   - Express 4.x and 5.x compatibility
 
@@ -428,14 +505,14 @@ testing tools, and infrastructure apps (sandbox issuer, browser verifier, verify
   - Trusted issuer allowlist with boot-time Zod validation
   - Security headers: nosniff, no-store, no-referrer, DENY
 
-- **isProblemError() type guard** -- Centralized duck-typed ProblemError detection
+- **isProblemError() type guard**: Centralized duck-typed ProblemError detection
   across tsup bundle boundaries (solves instanceof drift)
 
 - **Unicode sanitizer** (`scripts/sanitize-unicode.mjs`)
   - Uses `git ls-files` as single source of truth (1236 files)
   - Supports --fix mode (NBSP -> space, strip others)
 
-- **CI enhancements** -- test:apps, check:unicode, sandbox health smoke job
+- **CI enhancements**: test:apps, check:unicode, sandbox health smoke job
 
 - **Root SECURITY.md** pointer to `.github/SECURITY.md`
 
