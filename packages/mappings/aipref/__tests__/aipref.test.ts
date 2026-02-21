@@ -188,7 +188,7 @@ describe('mapAiprefKeys', () => {
 
 describe('Content-Usage Header Parsing', () => {
   describe('parseContentUsageHeader', () => {
-    it('should parse RFC 8941 boolean format', () => {
+    it('should parse RFC 9651 boolean format', () => {
       const result = parseContentUsageHeader('train-ai=?1, search=?0');
       expect(result.valid).toBe(true);
       expect(result.entries.get('train-ai')).toBe(true);

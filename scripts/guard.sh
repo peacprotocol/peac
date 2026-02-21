@@ -243,6 +243,15 @@ else
   echo "SKIP: scripts/check-json-dupes.mjs not found"
 fi
 
+echo "== forbid x403 typo (must be x402) =="
+# x403 is a common typo for x402; catch it before it leaks into code or docs
+if git grep -n 'x403' -- ':!node_modules' ':!archive/**' ':!scripts/guard.sh' ':!scripts/check-planning-leak.sh' | grep .; then
+  echo "FAIL: Found 'x403' -- did you mean 'x402'?"
+  bad=1
+else
+  echo "OK"
+fi
+
 echo "== forbid stale generated artifacts in src/ =="
 stale=$(find packages -path "*/src/*" \
   -not -path "*/dist/*" -not -path "*/node_modules/*" \( \

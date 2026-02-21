@@ -1,7 +1,7 @@
 /**
  * Parser for RFC 9421 Signature-Input and Signature headers.
  *
- * Implements minimal RFC 8941 Structured Fields parsing for
+ * Implements minimal RFC 9651 Structured Fields parsing for
  * Dictionary and Inner List types as needed by HTTP Signatures.
  */
 

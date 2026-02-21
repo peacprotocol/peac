@@ -35,7 +35,7 @@ function validatePointerUrl(url: string): void {
   }
 
   // Prevent header injection via URL content
-  // RFC 8941 quoted strings cannot contain " or \ without escaping
+  // RFC 9651 quoted strings cannot contain " or \ without escaping
   if (url.includes('"') || url.includes('\\')) {
     throw new Error('Pointer URL contains invalid characters for structured header');
   }
@@ -154,7 +154,7 @@ export async function buildResponseHeaders(
       validatePointerUrl(pointerUrl);
       // Compute SHA-256 digest of receipt (lowercase hex)
       const digestHex = await sha256Hex(receipt);
-      // RFC 8941 structured header dictionary format with quoted strings
+      // RFC 9651 structured header dictionary format with quoted strings
       return {
         [HEADERS.receiptPointer]: `sha256="${digestHex}", url="${pointerUrl}"`,
       };
