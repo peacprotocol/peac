@@ -61,20 +61,23 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const app = new Hono();
 
   // Global error handler: ProblemError -> RFC 9457 JSON response
-  app.onError((err, c) => {
-    c.header('Content-Type', PROBLEM_MEDIA_TYPE);
+  app.onError((err) => {
+    const headers = { 'Content-Type': PROBLEM_MEDIA_TYPE };
     if (isProblemError(err)) {
       const problem = err.toProblemDetails();
-      return c.body(JSON.stringify(problem), problem.status);
+      return new Response(JSON.stringify(problem), {
+        status: problem.status,
+        headers,
+      });
     }
-    return c.body(
+    return new Response(
       JSON.stringify({
         type: 'https://www.peacprotocol.org/problems/processing-error',
         title: 'Processing Error',
         status: 500,
         detail: 'An internal error occurred',
       }),
-      500
+      { status: 500, headers }
     );
   });
 
