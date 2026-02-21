@@ -1546,10 +1546,6 @@ importers:
       '@peac/mappings-tap':
         specifier: workspace:*
         version: link:../mappings/tap
-    devDependencies:
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
 
   surfaces/analytics:
     dependencies:
