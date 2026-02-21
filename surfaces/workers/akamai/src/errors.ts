@@ -8,7 +8,7 @@
  */
 
 import type { ProblemDetails, EWRequestHandler } from './types.js';
-import { ErrorCodes, createProblemDetails } from '../../_shared/core/index.js';
+import { ErrorCodes, createProblemDetails } from '@peac/worker-shared';
 
 // Re-export error codes from shared core
 export { ErrorCodes };

@@ -14,7 +14,7 @@ export type {
   ReplayStore,
   VerificationResult,
   ProblemDetails,
-} from '../../_shared/core/index.js';
+} from '@peac/worker-shared';
 
 /**
  * Akamai EdgeWorkers environment configuration.

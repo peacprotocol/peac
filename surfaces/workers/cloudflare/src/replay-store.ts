@@ -17,7 +17,7 @@
 
 import type { ReplayStore, ReplayContext } from './types.js';
 import type { Env } from './types.js';
-import { hashReplayKey } from '../../_shared/core/index.js';
+import { hashReplayKey } from '@peac/worker-shared';
 
 // Re-export hash function for testing
 export { hashReplayKey };

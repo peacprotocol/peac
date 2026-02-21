@@ -8,12 +8,8 @@
  */
 
 import type { Env } from './types.js';
-import type { WorkerConfig } from '../../_shared/core/index.js';
-import {
-  parseConfigFromEnv,
-  matchesBypassPath,
-  isIssuerAllowed,
-} from '../../_shared/core/index.js';
+import type { WorkerConfig } from '@peac/worker-shared';
+import { parseConfigFromEnv, matchesBypassPath, isIssuerAllowed } from '@peac/worker-shared';
 
 // Re-export shared utilities
 export { matchesBypassPath, isIssuerAllowed };

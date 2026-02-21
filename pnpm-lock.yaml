@@ -15,12 +15,6 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.0.1)
-      '@peac/contracts':
-        specifier: workspace:^
-        version: link:packages/contracts
-      '@peac/mappings-tap':
-        specifier: workspace:^
-        version: link:packages/mappings/tap
       '@types/node':
         specifier: ^22.19.11
         version: 22.19.11
@@ -1544,6 +1538,15 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)
 
+  packages/worker-shared:
+    dependencies:
+      '@peac/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@peac/mappings-tap':
+        specifier: workspace:*
+        version: link:../mappings/tap
+
   surfaces/analytics:
     dependencies:
       '@peac/kernel':
@@ -1605,6 +1608,9 @@ importers:
       '@peac/mappings-tap':
         specifier: workspace:*
         version: link:../../../packages/mappings/tap
+      '@peac/worker-shared':
+        specifier: workspace:*
+        version: link:../../../packages/worker-shared
     devDependencies:
       typescript:
         specifier: ^5.3.0
@@ -1627,6 +1633,9 @@ importers:
       '@peac/mappings-tap':
         specifier: workspace:*
         version: link:../../../packages/mappings/tap
+      '@peac/worker-shared':
+        specifier: workspace:*
+        version: link:../../../packages/worker-shared
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260214.0
@@ -1655,6 +1664,9 @@ importers:
       '@peac/mappings-tap':
         specifier: workspace:*
         version: link:../../../packages/mappings/tap
+      '@peac/worker-shared':
+        specifier: workspace:*
+        version: link:../../../packages/worker-shared
     devDependencies:
       '@fastly/js-compute':
         specifier: ^3.0.0

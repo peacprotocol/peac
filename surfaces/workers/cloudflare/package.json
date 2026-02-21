@@ -36,7 +36,8 @@
     "@peac/contracts": "workspace:^",
     "@peac/http-signatures": "workspace:*",
     "@peac/jwks-cache": "workspace:*",
-    "@peac/mappings-tap": "workspace:*"
+    "@peac/mappings-tap": "workspace:*",
+    "@peac/worker-shared": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260214.0",
