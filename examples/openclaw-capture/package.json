@@ -12,7 +12,7 @@
     "@peac/adapter-openclaw": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.19.33",
+    "@types/node": "^22.19.11",
     "tsx": "^4.21.0",
     "typescript": "^5.3.3"
   }

@@ -1,0 +1,7 @@
+Packages: +0 -0
+Progress: resolved 1234, reused 1230, downloaded 4, added 0
+ WARN  deprecated some-old-pkg@1.0.0: this package has been deprecated
+{"advisories": {"1102341": {"id": 1102341, "severity": "moderate", "module_name": "esbuild", "github_advisory_id": "GHSA-67mh-4wv8-2f99", "title": "esbuild CSRF"}}}
+ WARN  Issues with peer dependencies found
+some random stderr leak line
+{"advisories": {"1112134": {"id": 1112134, "severity": "high", "module_name": "hono", "github_advisory_id": "GHSA-3vhc-576x-3qv4", "title": "Hono algo confusion"}}}

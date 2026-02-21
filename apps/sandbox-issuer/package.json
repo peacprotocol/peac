@@ -18,12 +18,12 @@
     "@peac/crypto": "workspace:*",
     "@peac/middleware-core": "workspace:*",
     "@peac/schema": "workspace:*",
-    "hono": "^4.11.9",
-    "@hono/node-server": "^1.8.2",
+    "hono": "^4.12.0",
+    "@hono/node-server": "^1.19.9",
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "@types/node": "^20.19.33",
+    "@types/node": "^22.19.11",
     "typescript": "^5.3.3",
     "tsx": "^4.21.0",
     "tsup": "^8.0.0",
