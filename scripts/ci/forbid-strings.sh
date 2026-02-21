@@ -186,7 +186,7 @@ fi
 # =============================================================================
 # Block deprecated package name - use @peac/policy-kit
 echo "Checking for deprecated @peac/declare..."
-matches=$(get_tracked_files | xargs grep -l '@peac/declare' 2>/dev/null || true)
+matches=$(get_tracked_files | grep -v 'forbid-strings\.sh' | xargs grep -l '@peac/declare' 2>/dev/null || true)
 if [ -n "$matches" ]; then
   echo "ERROR: Found @peac/declare in tracked files (use @peac/policy-kit instead):"
   echo "$matches"
