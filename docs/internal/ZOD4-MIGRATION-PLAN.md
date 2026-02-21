@@ -15,12 +15,12 @@ rather than exploratory work.
 
 **Total API surface scanned:** 213 occurrences across 9 pattern categories.
 
-| Risk  | Count | Patterns                                     |
-|-------|-------|----------------------------------------------|
-| HIGH  | 5     | `.superRefine()` (deprecated)                |
-| MEDIUM| 38    | `.describe()` (23), `ZodError` (14), `.uuid()` (1) |
-| LOW   | 62    | `.strict()` (still available)                |
-| NONE  | 108   | `z.infer<>`, `.refine()`, `.transform()`, `.pipe()` |
+| Risk   | Count | Patterns                                            |
+| ------ | ----- | --------------------------------------------------- |
+| HIGH   | 5     | `.superRefine()` (deprecated)                       |
+| MEDIUM | 38    | `.describe()` (23), `ZodError` (14), `.uuid()` (1)  |
+| LOW    | 62    | `.strict()` (still available)                       |
+| NONE   | 108   | `z.infer<>`, `.refine()`, `.transform()`, `.pipe()` |
 
 ---
 
@@ -29,19 +29,25 @@ rather than exploratory work.
 ### 1. `.superRefine()` -- DEPRECATED (HIGH)
 
 **Zod 4 replacement:** `.check()` -- same semantics, new name. The callback
-signature and `ctx.addIssue()` API are unchanged.
+signature and `ctx.addIssue()` API are unchanged. Note: the deprecation status
+has shifted across Zod 4 pre-releases. Only rename `.superRefine()` to
+`.check()` if the pinned Zod 4 baseline actually emits deprecation warnings;
+do not create churn for no reason.
 
 **Occurrences (5):**
 
-| File | Line | Schema |
-|------|------|--------|
-| `packages/schema/src/obligations.ts` | 86 | `CreditObligationSchema` |
-| `packages/schema/src/obligations.ts` | 139 | `ContributionObligationSchema` |
-| `packages/schema/src/dispute.ts` | 439 | `DisputeContactSchema` |
-| `packages/schema/src/dispute.ts` | 550 | `DisputeEvidenceSchema` |
-| `packages/schema/src/interaction.ts` | 376 | `InteractionEvidenceV01Schema` |
+| File                                 | Line | Schema                         |
+| ------------------------------------ | ---- | ------------------------------ |
+| `packages/schema/src/obligations.ts` | 86   | `CreditObligationSchema`       |
+| `packages/schema/src/obligations.ts` | 139  | `ContributionObligationSchema` |
+| `packages/schema/src/dispute.ts`     | 439  | `DisputeContactSchema`         |
+| `packages/schema/src/dispute.ts`     | 550  | `DisputeEvidenceSchema`        |
+| `packages/schema/src/interaction.ts` | 376  | `InteractionEvidenceV01Schema` |
 
-**Migration:** Find-and-replace `.superRefine(` with `.check(` in these 5 locations. Verify each callback still type-checks.
+**Migration:** If the pinned Zod 4 version emits deprecation warnings for
+`.superRefine()`, find-and-replace `.superRefine(` with `.check(` in these
+5 locations and verify each callback still type-checks. If no warnings are
+emitted, defer the rename.
 
 ### 2. `.strict()` -- STILL AVAILABLE (LOW)
 
@@ -50,13 +56,13 @@ signature and `ctx.addIssue()` API are unchanged.
 
 **Occurrences (62):**
 
-| Package | Count | Files |
-|---------|-------|-------|
-| `@peac/schema` | 43 | validators.ts (13), interaction.ts (10), dispute.ts (8), agent-identity.ts (6), attribution.ts (4), obligations.ts (3), attestation-receipt.ts (2), workflow.ts (4) |
-| `@peac/policy-kit` | 14 | types.ts (14) |
-| `apps/sandbox-issuer` | 1 | schemas.ts |
-| `apps/api` | 2 | verify-v1.ts |
-| `@peac/mcp-server` | 2 | infra/policy.ts (implicit via policy-kit re-export) |
+| Package               | Count | Files                                                                                                                                                               |
+| --------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@peac/schema`        | 43    | validators.ts (13), interaction.ts (10), dispute.ts (8), agent-identity.ts (6), attribution.ts (4), obligations.ts (3), attestation-receipt.ts (2), workflow.ts (4) |
+| `@peac/policy-kit`    | 14    | types.ts (14)                                                                                                                                                       |
+| `apps/sandbox-issuer` | 1     | schemas.ts                                                                                                                                                          |
+| `apps/api`            | 2     | verify-v1.ts                                                                                                                                                        |
+| `@peac/mcp-server`    | 2     | infra/policy.ts (implicit via policy-kit re-export)                                                                                                                 |
 
 **Migration:** No immediate action required. Consider a follow-up PR to migrate
 to `z.strictObject()` for stylistic consistency, but this is P2.
@@ -69,9 +75,9 @@ schemas to generate tool parameter descriptions for LLM clients.
 
 **Occurrences (23):**
 
-| Package | Count | Files |
-|---------|-------|-------|
-| `@peac/mcp-server` | 23 | schemas/issue.ts (13), schemas/verify.ts (4), schemas/inspect.ts (2), schemas/decode.ts (1), schemas/bundle.ts (3) |
+| Package            | Count | Files                                                                                                              |
+| ------------------ | ----- | ------------------------------------------------------------------------------------------------------------------ |
+| `@peac/mcp-server` | 23    | schemas/issue.ts (13), schemas/verify.ts (4), schemas/inspect.ts (2), schemas/decode.ts (1), schemas/bundle.ts (3) |
 
 **Migration:** After Zod 4 bump, run the MCP server and verify each tool's
 parameter descriptions are preserved in the `tools/list` response. This is the
@@ -95,15 +101,15 @@ Zod 4 renames `error.errors` to `error.issues`. PEAC code already uses
 
 **Occurrences (14):**
 
-| Package | Import | Property Used | Status |
-|---------|--------|---------------|--------|
-| `@peac/schema` (receipt-parser.ts) | `import { ZodError }` | `.issues` | SAFE |
-| `@peac/schema` (validators.ts) | JSDoc only | N/A | SAFE |
-| `@peac/schema` (interaction.ts) | JSDoc only | N/A | SAFE |
-| `@peac/schema` (workflow.ts) | JSDoc only | N/A | SAFE |
-| `@peac/schema` (attestation-receipt.ts) | JSDoc only | N/A | SAFE |
-| `@peac/protocol` (issue.ts) | `import { ZodError }` | `.issues` | SAFE |
-| `@peac/policy-kit` (loader.ts) | `import { ZodError }` | `.issues`, `ZodError['issues']` type | SAFE |
+| Package                                 | Import                | Property Used                        | Status |
+| --------------------------------------- | --------------------- | ------------------------------------ | ------ |
+| `@peac/schema` (receipt-parser.ts)      | `import { ZodError }` | `.issues`                            | SAFE   |
+| `@peac/schema` (validators.ts)          | JSDoc only            | N/A                                  | SAFE   |
+| `@peac/schema` (interaction.ts)         | JSDoc only            | N/A                                  | SAFE   |
+| `@peac/schema` (workflow.ts)            | JSDoc only            | N/A                                  | SAFE   |
+| `@peac/schema` (attestation-receipt.ts) | JSDoc only            | N/A                                  | SAFE   |
+| `@peac/protocol` (issue.ts)             | `import { ZodError }` | `.issues`                            | SAFE   |
+| `@peac/policy-kit` (loader.ts)          | `import { ZodError }` | `.issues`, `ZodError['issues']` type | SAFE   |
 
 **Migration:** No changes needed. All code uses `.issues`.
 
@@ -115,9 +121,9 @@ behavior.
 
 **Occurrences (1):**
 
-| File | Line | Field |
-|------|------|-------|
-| `packages/control/src/validators.ts` | 164 | `receipt_id` |
+| File                                 | Line | Field        |
+| ------------------------------------ | ---- | ------------ |
+| `packages/control/src/validators.ts` | 164  | `receipt_id` |
 
 **Migration:** PEAC generates UUIDs via `crypto.randomUUID()` which produces
 RFC 4122 v4 UUIDs. These will pass Zod 4's stricter check. Verify with existing
@@ -126,12 +132,12 @@ update it.
 
 ### 6. No-Change APIs
 
-| API | Count | Notes |
-|-----|-------|-------|
-| `z.infer<>` | 88 | Unchanged. Verify inferred types match after bump. |
-| `.refine()` | 15 | Unchanged. |
-| `.transform()` | 3 | Unchanged. |
-| `.pipe()` | 2 | Unchanged. |
+| API            | Count | Notes                                              |
+| -------------- | ----- | -------------------------------------------------- |
+| `z.infer<>`    | 88    | Unchanged. Verify inferred types match after bump. |
+| `.refine()`    | 15    | Unchanged.                                         |
+| `.transform()` | 3     | Unchanged.                                         |
+| `.pipe()`      | 2     | Unchanged.                                         |
 
 ---
 
@@ -190,20 +196,23 @@ within v0.11.0.
 
 ### SDK v1 vs v2
 
-- **Stay on v1.x.** SDK v2 is in active development but NOT the production recommendation.
+- **Stay on v1.x.** SDK v2 ("main" branch) is pre-alpha and NOT the production
+  recommendation. v1.x remains the stable, recommended version.
 - v1.x will receive bug fixes and security patches for 6+ months after v2 ships.
 - v1.27.0 is the current "latest non-vulnerable" baseline.
 - Bump tilde pin only for security patches.
 
 ### Zod 4 + MCP SDK interaction points
 
-1. **Tool input schemas:** MCP SDK uses `zodToJsonSchema()` to convert Zod schemas
-   to JSON Schema for `tools/list`. Zod 4's `zodToJsonSchema()` is built-in
-   (replaces `zod-to-json-schema` package). Verify output is identical.
+1. **Tool input schemas:** MCP SDK v1.27.0 uses the `zod-to-json-schema` package
+   to convert Zod schemas to JSON Schema for `tools/list`. Zod 4 adds first-party
+   JSON Schema conversion via `z.toJSONSchema()`, but the SDK does not use it yet.
+   When upgrading Zod, verify the existing `zod-to-json-schema` path still produces
+   identical output. The SDK explicitly supports `zod ^3.25 || ^4.0`.
 
 2. **`.describe()` metadata:** SDK reads `ZodType._def.description` to populate
-   tool parameter descriptions. Zod 4 stores descriptions in the same location.
-   Should work but MUST be verified.
+   tool parameter descriptions. Zod 4 may store descriptions differently in the
+   internal `_def` structure. MUST be verified post-migration.
 
 3. **Structured outputs:** SDK validates tool results against Zod schemas.
    Zod 4 parse behavior is identical for the schema patterns PEAC uses.
@@ -267,6 +276,7 @@ Zod 4 ships `@zod/mini` -- a smaller bundle (~57% smaller) for edge runtimes.
 Run `node scripts/audit-zod-usage.mjs` for the latest machine-readable audit.
 
 **Scan paths:**
+
 - `packages/schema/src/`
 - `packages/control/src/`
 - `packages/protocol/src/`
