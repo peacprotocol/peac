@@ -10,6 +10,7 @@
 
 import { z } from 'zod';
 import type { JsonValue, JsonObject, JsonArray } from '@peac/kernel';
+import { KERNEL_CONSTRAINTS } from './constraints';
 
 /**
  * Check if value is a plain object (not Date, Map, Set, class instance, etc.)
@@ -89,22 +90,23 @@ export const JsonObjectSchema: z.ZodType<JsonObject> = PlainObjectSchema.transfo
 export const JsonArraySchema: z.ZodType<JsonArray> = z.array(JsonValueSchema);
 
 /**
- * Default limits for JSON evidence validation
+ * Default limits for JSON evidence validation.
  *
+ * Derived from KERNEL_CONSTRAINTS (single source of truth).
  * These are conservative defaults to prevent DoS attacks via deeply nested
  * or excessively large JSON structures.
  */
 export const JSON_EVIDENCE_LIMITS = {
   /** Maximum nesting depth (default: 32) */
-  maxDepth: 32,
+  maxDepth: KERNEL_CONSTRAINTS.MAX_NESTED_DEPTH,
   /** Maximum array length (default: 10,000) */
-  maxArrayLength: 10_000,
+  maxArrayLength: KERNEL_CONSTRAINTS.MAX_ARRAY_LENGTH,
   /** Maximum object keys (default: 1,000) */
-  maxObjectKeys: 1_000,
-  /** Maximum string length in bytes (default: 65,536 = 64KB) */
-  maxStringLength: 65_536,
+  maxObjectKeys: KERNEL_CONSTRAINTS.MAX_OBJECT_KEYS,
+  /** Maximum string length in code units (default: 65,536) */
+  maxStringLength: KERNEL_CONSTRAINTS.MAX_STRING_LENGTH,
   /** Maximum total nodes to visit (default: 100,000) */
-  maxTotalNodes: 100_000,
+  maxTotalNodes: KERNEL_CONSTRAINTS.MAX_TOTAL_NODES,
 } as const;
 
 /**

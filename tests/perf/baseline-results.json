@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-02-21",
+  "node_version": "v22.22.0",
+  "platform": "darwin-arm64",
+  "peac_version": "0.10.14",
+  "benchmarks": {
+    "validate_constraints_per_sec": 1079525,
+    "assert_json_safe_per_sec": 468878
+  }
+}
