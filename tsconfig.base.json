@@ -54,7 +54,8 @@
       "@peac/mappings-mcp": ["./packages/mappings/mcp/src"],
       "@peac/mappings-ucp": ["./packages/mappings/ucp/src"],
       "@peac/mappings-aipref": ["./packages/mappings/aipref/src"],
-      "@peac/mcp-server": ["./packages/mcp-server/src"]
+      "@peac/mcp-server": ["./packages/mcp-server/src"],
+      "@peac/worker-shared": ["./packages/worker-shared/src"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "lib", "coverage"]

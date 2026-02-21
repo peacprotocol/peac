@@ -3,20 +3,33 @@
   "version": "0.10.13",
   "private": true,
   "description": "Shared runtime-neutral TAP verification logic for edge worker surfaces",
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
-  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/worker-shared"
+  },
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
   "dependencies": {
     "@peac/contracts": "workspace:*",
     "@peac/mappings-tap": "workspace:*"
-  }
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "sideEffects": false
 }

@@ -32,11 +32,7 @@ import {
   ErrorCodes,
   createErrorResponse,
 } from './errors.js';
-import {
-  handleVerification,
-  type HandlerResult,
-  type RequestLike,
-} from '@peac/worker-shared';
+import { handleVerification, type HandlerResult, type RequestLike } from '@peac/worker-shared';
 
 // Re-export types and utilities
 export type {
