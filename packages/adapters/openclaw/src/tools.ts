@@ -49,6 +49,16 @@ function decodeReceiptPayload(receipt: Record<string, unknown>): {
   }
 }
 
+/**
+ * Strip redundant top-level auth/evidence when _jws is present.
+ * The JWS payload contains the canonical claims; keeping top-level
+ * copies risks divergence between signed and unsigned data.
+ */
+function stripRedundantFields(content: Record<string, unknown>): Record<string, unknown> {
+  const { auth, evidence, ...rest } = content;
+  return rest;
+}
+
 /** Algorithm to key type compatibility map */
 const ALG_KEY_TYPE_MAP: Record<string, { kty: string; crv?: string[] }> = {
   EdDSA: { kty: 'OKP', crv: ['Ed25519', 'Ed448'] },
@@ -358,9 +368,16 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
         await fs.promises.mkdir(receiptsDir, { recursive: true });
 
         for (const receipt of receipts) {
+          const content = receipt.content as Record<string, unknown>;
+          // When _jws is present, omit redundant top-level auth/evidence.
+          // The JWS payload is the canonical source; redundant fields can diverge.
+          const written =
+            typeof content._jws === 'string'
+              ? stripRedundantFields(content)
+              : content;
           await fs.promises.writeFile(
             pathModule.join(receiptsDir, receipt.file),
-            JSON.stringify(receipt.content, null, 2)
+            JSON.stringify(written, null, 2)
           );
         }
 

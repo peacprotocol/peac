@@ -302,6 +302,63 @@ describe('createExportBundleTool', () => {
     expect(result.skipped_files).toContain('r_bad.peac.json');
     expect(result.skipped_files).toContain('r_malformed.peac.json');
   });
+
+  it('omits redundant auth/evidence when _jws is present', async () => {
+    const receipt = createValidReceipt('omit');
+    // Verify fixture has both _jws and redundant fields
+    expect(receipt._jws).toBeDefined();
+    expect(receipt.auth).toBeDefined();
+    expect(receipt.evidence).toBeDefined();
+
+    fs.writeFileSync(path.join(tempDir, 'r_omit.peac.json'), JSON.stringify(receipt));
+
+    const tool = createExportBundleTool(tempDir, mockLogger);
+    const result = (await tool.execute({})) as {
+      status: string;
+      receipt_count: number;
+      bundle_path?: string;
+    };
+
+    expect(result.status).toBe('ok');
+    expect(result.receipt_count).toBe(1);
+    expect(result.bundle_path).toBeDefined();
+
+    // Read the exported receipt and verify auth/evidence are stripped
+    const exported = JSON.parse(
+      fs.readFileSync(path.join(result.bundle_path!, 'receipts', 'r_omit.peac.json'), 'utf-8')
+    );
+    expect(exported._jws).toBe(receipt._jws);
+    expect(exported.auth).toBeUndefined();
+    expect(exported.evidence).toBeUndefined();
+  });
+
+  it('preserves auth/evidence when _jws is absent', async () => {
+    // Receipt without JWS (unsigned)
+    const receipt = {
+      auth: { rid: 'r_nojws', iss: 'https://issuer.example.com' },
+      evidence: { extensions: {} },
+    };
+    fs.writeFileSync(path.join(tempDir, 'r_nojws.peac.json'), JSON.stringify(receipt));
+
+    const tool = createExportBundleTool(tempDir, mockLogger);
+    const result = (await tool.execute({})) as {
+      status: string;
+      receipt_count: number;
+      bundle_path?: string;
+    };
+
+    expect(result.status).toBe('ok');
+    expect(result.receipt_count).toBe(1);
+    expect(result.bundle_path).toBeDefined();
+
+    // Read the exported receipt and verify auth/evidence are preserved
+    const exported = JSON.parse(
+      fs.readFileSync(path.join(result.bundle_path!, 'receipts', 'r_nojws.peac.json'), 'utf-8')
+    );
+    expect(exported.auth).toBeDefined();
+    expect(exported.evidence).toBeDefined();
+    expect(exported.auth.rid).toBe('r_nojws');
+  });
 });
 
 // =============================================================================
