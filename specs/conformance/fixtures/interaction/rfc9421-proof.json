@@ -230,5 +230,6 @@
         "warnings": []
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.7"
 }

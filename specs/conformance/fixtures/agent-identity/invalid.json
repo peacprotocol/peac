@@ -233,5 +233,6 @@
         "error_type": "required"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.25"
 }

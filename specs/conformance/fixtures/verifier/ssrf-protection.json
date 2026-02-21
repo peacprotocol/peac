@@ -168,5 +168,6 @@
         "fetch_allowed": true
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.8"
 }

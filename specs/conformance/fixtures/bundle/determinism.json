@@ -104,5 +104,6 @@
         "report_hash": "string (sha256:<64 hex chars>)"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.30"
 }

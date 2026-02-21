@@ -158,6 +158,9 @@ jobs:
       - name: Schema meta-validation
         run: node scripts/lint-schemas.mjs
 
+      - name: Fixture integrity (per-fixture versioning)
+        run: node scripts/validate-fixtures.mjs
+
       - name: Conformance tests (all suites)
         # Uses directory path (not glob) because Vitest treats globs as filters
         run: pnpm test:conformance

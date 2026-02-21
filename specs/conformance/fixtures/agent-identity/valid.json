@@ -199,5 +199,6 @@
         "has_ref": true
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.25"
 }

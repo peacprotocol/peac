@@ -100,5 +100,6 @@
         "note": "Unknown tokens should be flagged even when policy denies"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.24"
 }

@@ -184,5 +184,6 @@
         "error_field": "iss"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.29"
 }

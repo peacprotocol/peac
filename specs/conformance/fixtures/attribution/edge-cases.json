@@ -11,16 +11,46 @@
         "issued_at": "2026-01-04T12:00:00Z",
         "evidence": {
           "sources": [
-            { "receipt_ref": "jti:rec_001", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_002", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_003", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_004", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_005", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_006", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_007", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_008", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_009", "usage": "rag_context" },
-            { "receipt_ref": "jti:rec_010", "usage": "rag_context" }
+            {
+              "receipt_ref": "jti:rec_001",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_002",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_003",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_004",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_005",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_006",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_007",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_008",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_009",
+              "usage": "rag_context"
+            },
+            {
+              "receipt_ref": "jti:rec_010",
+              "usage": "rag_context"
+            }
           ],
           "derivation_type": "rag"
         }
@@ -48,7 +78,7 @@
             {
               "receipt_ref": "jti:rec_minimal",
               "usage": "synthesis_source",
-              "weight": 0.0
+              "weight": 0
             }
           ],
           "derivation_type": "synthesis"
@@ -71,7 +101,7 @@
             {
               "receipt_ref": "jti:rec_only",
               "usage": "direct_reference",
-              "weight": 1.0
+              "weight": 1
             }
           ],
           "derivation_type": "inference"
@@ -79,7 +109,7 @@
       },
       "expected": {
         "valid": true,
-        "total_weight": 1.0
+        "total_weight": 1
       }
     },
     {
@@ -210,7 +240,7 @@
       },
       "expected": {
         "valid": true,
-        "total_weight": 1.0
+        "total_weight": 1
       }
     },
     {
@@ -398,5 +428,6 @@
         "$comment": "Shortest possible valid attestation"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.26"
 }

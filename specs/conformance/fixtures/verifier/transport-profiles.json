@@ -134,7 +134,9 @@
       "profile": "body",
       "input": {
         "body": {
-          "data": { "items": ["a", "b"] },
+          "data": {
+            "items": ["a", "b"]
+          },
           "peac_receipt": "eyJhbGciOiJFZERTQSJ9.payload.signature"
         }
       },
@@ -150,7 +152,9 @@
       "profile": "body",
       "input": {
         "body": {
-          "data": { "items": ["a", "b"] },
+          "data": {
+            "items": ["a", "b"]
+          },
           "peac_receipts": [
             "eyJhbGciOiJFZERTQSJ9.payload1.sig1",
             "eyJhbGciOiJFZERTQSJ9.payload2.sig2"
@@ -163,5 +167,6 @@
         "receipt_count": 2
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.8"
 }

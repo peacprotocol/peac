@@ -273,5 +273,6 @@
         "has_expiry": true
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.2"
 }

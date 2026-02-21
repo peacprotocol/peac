@@ -168,5 +168,6 @@
         "note": "These paths are part of the ALLOWED_PATHS whitelist in the bundle reader. New policy-related artifacts MUST be added under the policy/ prefix."
       }
     }
-  ]
+  ],
+  "schema_version": "0.10.10"
 }

@@ -478,5 +478,6 @@
         "error_code": "E_ATTRIBUTION_INVALID_FORMAT"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.26"
 }

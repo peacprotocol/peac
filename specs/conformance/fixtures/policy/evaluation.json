@@ -258,5 +258,6 @@
         "matched_rule": "allow-org-index"
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.29"
 }

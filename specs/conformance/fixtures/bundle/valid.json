@@ -173,5 +173,6 @@
         "not_just_key_existence_check": true
       }
     }
-  ]
+  ],
+  "schema_version": "0.9.30"
 }
