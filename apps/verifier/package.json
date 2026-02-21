@@ -1,6 +1,6 @@
 {
   "name": "@peac/app-verifier",
-  "version": "0.10.13",
+  "version": "0.10.14",
   "description": "PEAC Protocol Browser Verifier - Client-side receipt verification",
   "type": "module",
   "private": true,

@@ -58,7 +58,7 @@ fi
 
 # 5. Check for x403 typo (should be x402)
 echo "Checking for x403 typo..."
-X403_HITS=$(git grep -l 'x403' -- '*.ts' '*.js' '*.md' '*.json' 2>/dev/null | grep -v 'node_modules' | grep -v 'scripts/check-planning-leak.sh' || true)
+X403_HITS=$(git grep -l 'x403' -- '*.ts' '*.js' '*.md' '*.json' 2>/dev/null | grep -v 'node_modules' | grep -v 'scripts/check-planning-leak.sh' | grep -v 'CHANGELOG.md' || true)
 if [ -n "$X403_HITS" ]; then
   echo "  FAIL: Found 'x403' typo (should be 'x402') in tracked files:"
   echo "$X403_HITS" | sed 's/^/    /'

@@ -7,6 +7,83 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.14] - 2026-02-22
+
+### Quality Hardening and Zod 4 Preparation
+
+v0.10.14 is a hardening release: no new packages, no wire format changes.
+It closes three follow-up issues from prior releases, tightens editorial and
+integrity standards, promotes the shared worker core to a proper workspace
+package, and lays the groundwork for the Zod 4 migration in v0.11.0.
+
+### Added
+
+- **`@peac/worker-shared`** (NEW internal package, private)
+  - Promoted from `surfaces/workers/_shared/core/` to a first-class
+    workspace package (`packages/worker-shared/`)
+  - Eliminates root-level devDep workaround for Vitest strict resolution
+  - Source exports (`./src/index.ts`) -- no build step, edge-runtime safe
+  - Used by Cloudflare, Akamai, and Fastly worker surfaces
+  - Closes #355
+- **Per-fixture conformance versioning** (`specs/conformance/`)
+  - `category-tracking.json` data file tracks `schema_version` per fixture
+  - `scripts/validate-fixtures.mjs` CI gate enforces versioning
+  - Closes #380
+- **Kernel constraints** (`@peac/schema`)
+  - `KERNEL_CONSTRAINTS` constant: 9 named constraints with name, limit,
+    unit, and rationale fields
+  - `validateKernelConstraints()` function with structured violation reporting
+  - Exported types: `ConstraintViolation`, `ConstraintValidationResult`,
+    `KernelConstraintKey`
+  - Design decision DD-60
+- **Polish Bucket tooling** (DD-118)
+  - 18 fast-check property tests across kernel, schema, and crypto
+  - Fuzz seed tests for boundary conditions
+  - Machine-readable perf baseline (`tests/perf/baseline-results.json`)
+- **Zod 4 migration tooling**
+  - `scripts/audit-zod-usage.mjs`: inventory all Zod API usage across 42
+    packages, generates migration plan with staged ordering and rollback notes
+  - `docs/internal/ZOD4-MIGRATION-PLAN.md`: MCP SDK compatibility analysis,
+    migration order, breaking API changes, and CI gate strategy
+- **Writer-side omission of redundant fields** (`@peac/adapter-openclaw`)
+  - Export bundle writer strips top-level `auth` and `evidence` when `_jws`
+    is present; JWS payload is canonical, duplicate fields risk divergence
+  - Receipts without `_jws` (unsigned) are written unchanged
+  - Closes #382
+
+### Changed
+
+- **RFC 9651 replaces RFC 8941** across all source, spec, test, and fixture
+  files (RFC 8941 obsoleted by RFC 9651 -- Structured Field Values for HTTP)
+- **Dev dependency freshness**: `@types/node` ^22.x, `turbo`, `prettier`,
+  `typescript-eslint`, `wrangler`, `next` bumped to current ranges
+- **Audit allowlist quality bar**: structured rationale fields
+  (`scope`/`owner`/`added_at`/`dependency_chain`/`verified_by`) enforced
+  by `scripts/audit-gate.mjs`; prod ceiling 30 days, strict ISO dates
+- **`@peac/worker-shared` tsconfig**: `noEmit: true` declared explicitly
+  (was already passed via CLI; now unambiguous for editors and direct `tsc`)
+
+### Fixed
+
+- **`x403` typo gate** added to `guard.sh` and `check-planning-leak.sh`
+  to prevent protocol name typos from entering the codebase
+- **Unicode scan log**: `guard.sh` now prints "Unicode scan OK" explicitly
+  in the Trojan Source section (clarifies GitHub bidi diff banners)
+- Legacy TypeScript annotation errors in openclaw, capture-core,
+  capture-node, and middleware-core test files (advisory-only but visible
+  as CI annotations)
+- `apps/api` Hono `c.body()` overload mismatch (TS2769)
+- `check-error-codes.sh` missing category entries (workflow, interaction,
+  verifier)
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- No new published packages (all 22 packages version-bumped to 0.10.14)
+- `@peac/worker-shared` is private (not published to npm)
+- Design decisions: DD-59 (per-fixture versioning), DD-60 (kernel
+  constraints), DD-101 (editorial hygiene), DD-118 (Polish Bucket)
+
 ## [0.10.13] - 2026-02-19
 
 ### MCP Server for AI Agents

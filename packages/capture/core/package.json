@@ -1,6 +1,6 @@
 {
   "name": "@peac/capture-core",
-  "version": "0.10.13",
+  "version": "0.10.14",
   "description": "Runtime-neutral capture pipeline for PEAC interaction evidence",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

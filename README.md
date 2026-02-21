@@ -32,7 +32,7 @@
 
 ## Why PEAC exists
 
-**The problem:** AI agents and automated systems operate across organizational boundaries, but proof of what happened stays locked in internal logs. When disputes arise—billing errors, policy violations, safety incidents—there's no neutral, portable evidence that both parties can verify.
+**The problem:** AI agents and automated systems operate across organizational boundaries, but proof of what happened stays locked in internal logs. When disputes arise -- billing errors, policy violations, safety incidents -- there's no neutral, portable evidence that both parties can verify.
 
 **Traditional approaches:**
 
@@ -40,7 +40,7 @@
 - **API observability** - Captures _how_ systems behave, not _what terms applied_
 - **Audit trails** - Vendor-specific, can't be independently verified offline
 
-**PEAC's approach:** Standardize machine-readable policies and cryptographically signed receipts that create verifiable evidence at interaction time. Verification is offline and deterministic—no trust in the issuer's live systems required.
+**PEAC's approach:** Standardize machine-readable policies and cryptographically signed receipts that create verifiable evidence at interaction time. Verification is offline and deterministic -- no trust in the issuer's live systems required.
 
 **Result:** Security teams get verifiable evidence for incident response. Compliance teams can prove what terms applied. Billing disputes resolve with cryptographic proof. AI safety reviews have portable artifacts to analyze.
 
