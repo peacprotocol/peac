@@ -87,12 +87,16 @@ class ThrowOnceSpoolStore implements SpoolStore {
     this.throwOnCall = throwOnCall;
   }
 
-  async append(entry: SpoolEntry): Promise<void> {
+  async append(entry: SpoolEntry): Promise<number> {
     this.appendCallCount++;
     if (this.appendCallCount === this.throwOnCall) {
       throw new Error('SpoolStore.append() simulated failure');
     }
     return this.inner.append(entry);
+  }
+
+  async read(fromSequence: number, limit?: number): Promise<SpoolEntry[]> {
+    return this.inner.read(fromSequence, limit);
   }
 
   async getHeadDigest(): Promise<string> {

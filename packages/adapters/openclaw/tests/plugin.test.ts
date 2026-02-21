@@ -51,7 +51,7 @@ function createMockSpoolStore(): SpoolStore {
   let sequence = 0;
 
   return {
-    async append(entry: Omit<SpoolEntry, 'sequence' | 'prev_entry_digest' | 'entry_digest'>) {
+    async append(entry: SpoolEntry): Promise<number> {
       sequence++;
       const spoolEntry: SpoolEntry = {
         ...entry,
@@ -61,7 +61,7 @@ function createMockSpoolStore(): SpoolStore {
       };
       entries.push(spoolEntry);
       headDigest = spoolEntry.entry_digest;
-      return spoolEntry;
+      return sequence;
     },
     async commit(): Promise<void> {
       // No-op for in-memory
@@ -98,11 +98,13 @@ function createMockDedupeIndex(): DedupeIndex {
     async has(id: string): Promise<boolean> {
       return index.has(id);
     },
-    async markEmitted(id: string, receiptPath: string): Promise<void> {
+    async markEmitted(id: string): Promise<boolean> {
       const existing = index.get(id);
       if (existing) {
-        index.set(id, { ...existing, receipt_path: receiptPath });
+        index.set(id, { ...existing, emitted: true });
+        return true;
       }
+      return false;
     },
     async delete(id: string): Promise<boolean> {
       return index.delete(id);

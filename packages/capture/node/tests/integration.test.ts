@@ -208,7 +208,10 @@ describe('integration: CaptureSession + FsStores', () => {
 
     // Simulate background service drain path: commit both stores
     await store.commit();
-    if ('commit' in dedupe && typeof (dedupe as Record<string, unknown>).commit === 'function') {
+    if (
+      'commit' in dedupe &&
+      typeof (dedupe as unknown as Record<string, unknown>).commit === 'function'
+    ) {
       await (dedupe as { commit: () => Promise<void> }).commit();
     }
 

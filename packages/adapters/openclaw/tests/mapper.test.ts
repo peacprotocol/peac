@@ -270,7 +270,7 @@ describe('validation', () => {
   describe('required fields', () => {
     it('rejects missing tool_call_id', () => {
       const event = createValidEvent();
-      (event as Record<string, unknown>).tool_call_id = '';
+      (event as unknown as Record<string, unknown>).tool_call_id = '';
 
       const result = mapToolCallEvent(event);
 
@@ -281,7 +281,7 @@ describe('validation', () => {
 
     it('rejects missing run_id', () => {
       const event = createValidEvent();
-      (event as Record<string, unknown>).run_id = '';
+      (event as unknown as Record<string, unknown>).run_id = '';
 
       const result = mapToolCallEvent(event);
 
@@ -292,7 +292,7 @@ describe('validation', () => {
 
     it('rejects missing tool_name', () => {
       const event = createValidEvent();
-      (event as Record<string, unknown>).tool_name = '';
+      (event as unknown as Record<string, unknown>).tool_name = '';
 
       const result = mapToolCallEvent(event);
 
@@ -303,7 +303,7 @@ describe('validation', () => {
 
     it('rejects missing started_at', () => {
       const event = createValidEvent();
-      (event as Record<string, unknown>).started_at = '';
+      (event as unknown as Record<string, unknown>).started_at = '';
 
       const result = mapToolCallEvent(event);
 
@@ -314,7 +314,7 @@ describe('validation', () => {
 
     it('rejects missing status', () => {
       const event = createValidEvent();
-      (event as Record<string, unknown>).status = '';
+      (event as unknown as Record<string, unknown>).status = '';
 
       const result = mapToolCallEvent(event);
 
@@ -327,7 +327,7 @@ describe('validation', () => {
   describe('field validation', () => {
     it('rejects invalid status', () => {
       const event = createValidEvent();
-      (event as Record<string, unknown>).status = 'invalid_status';
+      (event as unknown as Record<string, unknown>).status = 'invalid_status';
 
       const result = mapToolCallEvent(event);
 
