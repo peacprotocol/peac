@@ -8,7 +8,7 @@
  */
 
 import type { WorkerConfig, EWRequest } from './types.js';
-import { parseConfigFromEnv } from '../../_shared/core/index.js';
+import { parseConfigFromEnv } from '@peac/worker-shared';
 
 /**
  * Parse config from Akamai Property Manager variables.
@@ -44,4 +44,4 @@ export function parseConfigFromRecord(env: Record<string, string | undefined>): 
 }
 
 // Re-export config utilities from shared core
-export { matchesBypassPath, isIssuerAllowed } from '../../_shared/core/index.js';
+export { matchesBypassPath, isIssuerAllowed } from '@peac/worker-shared';

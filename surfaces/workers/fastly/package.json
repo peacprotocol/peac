@@ -35,7 +35,8 @@
     "@peac/contracts": "workspace:^",
     "@peac/http-signatures": "workspace:*",
     "@peac/jwks-cache": "workspace:*",
-    "@peac/mappings-tap": "workspace:*"
+    "@peac/mappings-tap": "workspace:*",
+    "@peac/worker-shared": "workspace:*"
   },
   "devDependencies": {
     "@fastly/js-compute": "^3.0.0",

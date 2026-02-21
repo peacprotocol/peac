@@ -62,8 +62,6 @@
     "version:bump": "node scripts/bump-version.mjs"
   },
   "devDependencies": {
-    "@peac/contracts": "workspace:^",
-    "@peac/mappings-tap": "workspace:^",
     "@types/node": "^22.19.11",
     "@eslint/js": "^10.0.1",
     "ajv": "^8.18.0",

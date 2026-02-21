@@ -25,7 +25,7 @@ import {
   handleVerification,
   type HandlerResult,
   type RequestLike,
-} from '../../_shared/core/index.js';
+} from '@peac/worker-shared';
 
 // Re-export types and utilities
 export type {

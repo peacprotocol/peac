@@ -15,7 +15,7 @@
  */
 
 import type { ReplayStore, ReplayContext, EdgeKVConfig } from './types.js';
-import { hashReplayKey } from '../../_shared/core/index.js';
+import { hashReplayKey } from '@peac/worker-shared';
 
 // Re-export hash function for testing
 export { hashReplayKey };

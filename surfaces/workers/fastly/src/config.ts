@@ -8,7 +8,7 @@
  */
 
 import type { WorkerConfig } from './types.js';
-import { parseConfigFromEnv } from '../../_shared/core/index.js';
+import { parseConfigFromEnv } from '@peac/worker-shared';
 
 /**
  * Parse config from Fastly Edge Dictionary.
@@ -80,4 +80,4 @@ function getDictionary(name: string): Map<string, string> | null {
 }
 
 // Re-export config utilities from shared core
-export { matchesBypassPath, isIssuerAllowed } from '../../_shared/core/index.js';
+export { matchesBypassPath, isIssuerAllowed } from '@peac/worker-shared';
