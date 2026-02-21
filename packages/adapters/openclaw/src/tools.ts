@@ -372,9 +372,7 @@ export function createExportBundleTool(outputDir: string, logger: PluginLogger):
           // When _jws is present, omit redundant top-level auth/evidence.
           // The JWS payload is the canonical source; redundant fields can diverge.
           const written =
-            typeof content._jws === 'string'
-              ? stripRedundantFields(content)
-              : content;
+            typeof content._jws === 'string' ? stripRedundantFields(content) : content;
           await fs.promises.writeFile(
             pathModule.join(receiptsDir, receipt.file),
             JSON.stringify(written, null, 2)
