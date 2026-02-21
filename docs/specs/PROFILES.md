@@ -46,20 +46,20 @@ status codes or protocol flows.
 
 These categories are planned but not yet specified:
 
-- **Policy Enforcement Profiles** -- how policy is evaluated and bound
+- **Policy Enforcement Profiles**: how policy is evaluated and bound
   to receipts (see DD-49, planned for Wire 0.2)
-- **Core Evidence Profiles** -- standardized evidence patterns for
+- **Core Evidence Profiles**: standardized evidence patterns for
   privacy, access control, toolcall coordination, and delegation
   (planned for v0.12.1)
 
 ## Design Principles
 
-1. **Independence** -- each profile is self-contained with its own
+1. **Independence**: each profile is self-contained with its own
    version. Adopting one profile does not require adopting others.
-2. **Verification equivalence** -- transport profiles must not affect
+2. **Verification equivalence**: transport profiles must not affect
    verification outcomes.
-3. **Extension-based** -- proof capture profiles use the
+3. **Extension-based**: proof capture profiles use the
    `extensions` block with reverse-DNS keys
    (e.g., `org.peacprotocol/rfc9421-proof@0.1`).
-4. **Three-state results** -- all proof capture profiles map to
+4. **Three-state results**: all proof capture profiles map to
    `verified` / `failed` / `unavailable` (per DD-49).

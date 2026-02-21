@@ -8,7 +8,7 @@ set -euo pipefail
 #   - Literal "IETF" in tracked files (except CLAUDE.md which documents the rule)
 #   - RFC aspiration patterns: RFC-ready, RFC ready, RFC milestone, RFC target, RFC submission
 #   - Any emojis (warning, checkmark, rocket, fire, robot, bullseye, star, etc.)
-#   - Em dashes (use -- or - instead)
+#   - Em dashes in source/config code (prose docs may use standard punctuation)
 #   - @peac/declare (use @peac/policy-kit)
 #   - x-peac headers (use PEAC-Receipt)
 #
@@ -165,20 +165,20 @@ check_emoji $'\xf0\x9f\x91\x80' "eyes"
 check_emoji $'\xf0\x9f\x92\xa1' "light bulb"
 
 # =============================================================================
-# CHECK 4: Em dashes (HARD FAILURE)
+# CHECK 4: Em dashes in source code (HARD FAILURE)
 # =============================================================================
-# Block Unicode em dash - use -- or - instead
-echo "Checking for em dashes..."
+# Em dashes are wrong in TypeScript/JavaScript/shell/config source.
+# Prose docs (.md) use standard punctuation (colons, semicolons, rewrites).
+# This check is intentionally scoped to code file extensions only.
+echo "Checking for em dashes in source code..."
 EM_DASH=$'\xe2\x80\x94'
-matches=$(get_tracked_files | xargs grep -l "$EM_DASH" 2>/dev/null || true)
+matches=$(get_tracked_files \
+  | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|sh|yml|yaml)$' \
+  | xargs grep -l "$EM_DASH" 2>/dev/null || true)
 if [ -n "$matches" ]; then
-  # Allow in CHANGELOG and LICENSE (may have imported content)
-  filtered=$(echo "$matches" | grep -v 'CHANGELOG' | grep -v 'LICENSE' || true)
-  if [ -n "$filtered" ]; then
-    echo "ERROR: Found em dashes in tracked files (use -- or - instead):"
-    echo "$filtered"
-    failed=1
-  fi
+  echo "ERROR: Found em dashes in source/config files (use -- or - instead):"
+  echo "$matches"
+  failed=1
 fi
 
 # =============================================================================

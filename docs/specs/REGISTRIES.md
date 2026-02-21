@@ -400,7 +400,7 @@ The entry lifecycle is:
 active -> deprecated -> removed
 ```
 
-Each transition is a separate minor (deprecation) or major (removal) version bump. Entries MUST pass through `deprecated` before reaching `removed` -- direct removal of an active entry is not permitted.
+Each transition is a separate minor (deprecation) or major (removal) version bump. Entries MUST pass through `deprecated` before reaching `removed`: direct removal of an active entry is not permitted.
 
 **Removal checklist:**
 

@@ -53,7 +53,7 @@ All workflow fields use the existing extensions mechanism (`claims.ext`). The wi
 
 ### 2.2 Framework-Agnostic
 
-The correlation primitive works with any orchestration layer. The `framework` field is an open string identifier -- any value matching the grammar `/^[a-z][a-z0-9_-]*$/` (max 64 chars) is valid. Implementations MUST accept any identifier that passes the grammar; the registry is for discovery and interoperability, not allowlisting. Producers MUST NOT emit uppercase framework identifiers.
+The correlation primitive works with any orchestration layer. The `framework` field is an open string identifier: any value matching the grammar `/^[a-z][a-z0-9_-]*$/` (max 64 chars) is valid. Implementations MUST accept any identifier that passes the grammar; the registry is for discovery and interoperability, not allowlisting. Producers MUST NOT emit uppercase framework identifiers.
 
 Well-known frameworks (informational, advisory only):
 
@@ -759,7 +759,7 @@ Workflow summaries should include:
 
 ### 11.1 Conformance Levels
 
-**MUST** (per-receipt, enforced at issuance -- see Section 6.5):
+**MUST** (per-receipt, enforced at issuance: see Section 6.5):
 
 - Validate `workflow_id` and `step_id` formats against regex patterns
 - Enforce `parent_step_ids` max limit (16)
@@ -769,7 +769,7 @@ Workflow summaries should include:
 - Validate workflow summary has receipt commitment (`receipt_refs` or `receipt_merkle_root`)
 - Accept any `framework` value matching the grammar (open string, not closed enum)
 
-**SHOULD** (workflow-level, enforced at summary verification -- see Section 6.6):
+**SHOULD** (workflow-level, enforced at summary verification: see Section 6.6):
 
 - Verify acyclic graph structure
 - Verify all parent step references exist
@@ -778,7 +778,7 @@ Workflow summaries should include:
 - Use ULID for new IDs
 - Include `framework` field for traceability
 
-**MAY** (optional -- see Section 6.7):
+**MAY** (optional: see Section 6.7):
 
 - Support Merkle inclusion proofs
 - Support framework-specific bindings
@@ -817,7 +817,7 @@ Implementations SHOULD (workflow-level):
 ## Appendix A: Integration Patterns
 
 This appendix provides non-normative guidance for mapping common orchestration
-frameworks to PEAC workflow correlation. These patterns are informational -- the
+frameworks to PEAC workflow correlation. These patterns are informational: the
 authoritative semantics are defined in Sections 1-11 above.
 
 ### A.1 LangGraph
@@ -972,7 +972,7 @@ in the summary's `receipt_refs` or Merkle tree.
 **Anti-pattern: Using tool_name for routing**
 
 The `tool_name` field is metadata for audit and debugging, not a routing
-directive. Do not use it to determine which tool to call -- that logic belongs
+directive. Do not use it to determine which tool to call: that logic belongs
 in the orchestrator.
 
 **Anti-pattern: One step per LLM token**
@@ -1047,7 +1047,7 @@ attributes. Use `peac.framework` for dashboards and alerting; use
 
 **Sampling considerations:**
 
-PEAC receipts are **100% sampled by design** -- every receipt is a durable
+PEAC receipts are **100% sampled by design**: every receipt is a durable
 evidence artifact. OpenTelemetry spans, by contrast, are often subject to
 head-based or tail-based sampling.
 
@@ -1086,10 +1086,10 @@ PEAC workflow events for downstream consumers (billing, compliance, dashboards).
 
 **Event type conventions:**
 
-- `org.peacprotocol.workflow.started` -- first receipt in workflow
-- `org.peacprotocol.workflow.step.completed` -- each step receipt issued
-- `org.peacprotocol.workflow.completed` -- summary attestation issued
-- `org.peacprotocol.workflow.failed` -- workflow failure
+- `org.peacprotocol.workflow.started`: first receipt in workflow
+- `org.peacprotocol.workflow.step.completed`: each step receipt issued
+- `org.peacprotocol.workflow.completed`: summary attestation issued
+- `org.peacprotocol.workflow.failed`: workflow failure
 
 These event types are informational suggestions. Implementations MAY use any
 event naming convention consistent with their event bus.
@@ -1109,7 +1109,7 @@ Partitioning guidance:
 
 - Use `workflow_id` as the partition key to ensure all events for a single
   workflow land on the same partition (preserves per-workflow ordering).
-- Do NOT use `step_id` as the partition key -- this scatters related events
+- Do NOT use `step_id` as the partition key: this scatters related events
   across partitions and breaks per-workflow consumption ordering.
 - For high-throughput deployments, use a composite key
   (`tenant_id + workflow_id`) to balance load across partitions while

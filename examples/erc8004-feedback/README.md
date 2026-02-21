@@ -4,7 +4,7 @@ This example demonstrates how to use PEAC records as the evidence payload behind
 
 ## Overview
 
-ERC-8004 (Trustless Agents) is an Ethereum standard for on-chain agent identity and reputation. The `giveFeedback()` function accepts a `feedbackURI` and `feedbackHash` -- the URI points to a payload, and the hash commits to its exact bytes. PEAC records are a natural fit for this evidence-pointer pattern.
+ERC-8004 (Trustless Agents) is an Ethereum standard for on-chain agent identity and reputation. The `giveFeedback()` function accepts a `feedbackURI` and `feedbackHash`: the URI points to a payload, and the hash commits to its exact bytes. PEAC records are a natural fit for this evidence-pointer pattern.
 
 This example shows:
 
@@ -185,7 +185,7 @@ const REPUTATION_REGISTRY = '0x0000000000000000000000000000000000000000';
 
 1. **Payload vs Transaction Parameters**: The PEAC record is the payload served at `feedbackURI`. The `feedbackHash` commits to those bytes but is NOT included in the payload (that would be circular).
 
-2. **Canonical Serialization**: Use RFC 8785 JCS, not `JSON.stringify()`. Key order and spacing vary across implementations -- JCS ensures byte-exact reproducibility.
+2. **Canonical Serialization**: Use RFC 8785 JCS, not `JSON.stringify()`. Key order and spacing vary across implementations: JCS ensures byte-exact reproducibility.
 
 3. **Hash Algorithm**: ERC-8004 uses keccak256 for `feedbackHash`. PEAC's internal digest uses SHA-256 + JCS. When bridging to ERC-8004, use keccak256 on the same canonical bytes.
 

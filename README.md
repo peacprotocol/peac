@@ -32,7 +32,7 @@
 
 ## Why PEAC exists
 
-**The problem:** AI agents and automated systems operate across organizational boundaries, but proof of what happened stays locked in internal logs. When disputes arise -- billing errors, policy violations, safety incidents -- there's no neutral, portable evidence that both parties can verify.
+**The problem:** AI agents and automated systems operate across organizational boundaries, but proof of what happened stays locked in internal logs. When billing errors, policy violations, or safety incidents arise, there's no neutral, portable evidence that both parties can verify.
 
 **Traditional approaches:**
 
@@ -40,7 +40,7 @@
 - **API observability** - Captures _how_ systems behave, not _what terms applied_
 - **Audit trails** - Vendor-specific, can't be independently verified offline
 
-**PEAC's approach:** Standardize machine-readable policies and cryptographically signed receipts that create verifiable evidence at interaction time. Verification is offline and deterministic -- no trust in the issuer's live systems required.
+**PEAC's approach:** Standardize machine-readable policies and cryptographically signed receipts that create verifiable evidence at interaction time. Verification is offline and deterministic; it doesn't require trusting the issuer's live systems.
 
 **Result:** Security teams get verifiable evidence for incident response. Compliance teams can prove what terms applied. Billing disputes resolve with cryptographic proof. AI safety reviews have portable artifacts to analyze.
 
@@ -91,7 +91,7 @@ flowchart LR
 
 ### What the artifacts look like
 
-`/.well-known/peac.txt` -- machine-readable terms (YAML):
+`/.well-known/peac.txt`: machine-readable terms (YAML):
 
 ```yaml
 version: 0.9.2
@@ -105,7 +105,7 @@ peac:
     required: true
 ```
 
-`PEAC-Receipt` header -- signed proof returned on governed responses:
+`PEAC-Receipt` header: signed proof returned on governed responses:
 
 ```text
 PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
@@ -206,13 +206,13 @@ See [examples/quickstart/](examples/quickstart/) for runnable code. For settleme
 
 ## Choose your path
 
-- **Agent developer** -- [Quick start](#quick-start): issue and verify receipts in 5 lines
-- **API operator** -- [Express middleware](docs/README_LONG.md#express-middleware): add PEAC in 3 lines
-- **Go developer** -- [Go SDK](sdks/go/): `peac.Issue()` + `peac.Verify()`
-- **x402 / crypto payments** -- [Stripe x402 profile](docs/profiles/stripe-x402-machine-payments.md): normalize + receipt + verify
-- **Policy author** -- [Policy Kit](docs/policy-kit/quickstart.md): author and validate terms
-- **Auditor / compliance** -- [Dispute Bundles](#core-primitives): portable evidence format
-- **Protocol integrator** -- [Spec Index](docs/SPEC_INDEX.md): normative specifications
+- **Agent developer**: [Quick start](#quick-start): issue and verify receipts in 5 lines
+- **API operator**: [Express middleware](docs/README_LONG.md#express-middleware): add PEAC in 3 lines
+- **Go developer**: [Go SDK](sdks/go/): `peac.Issue()` + `peac.Verify()`
+- **x402 / crypto payments**: [Stripe x402 profile](docs/profiles/stripe-x402-machine-payments.md): normalize + receipt + verify
+- **Policy author**: [Policy Kit](docs/policy-kit/quickstart.md): author and validate terms
+- **Auditor / compliance**: [Dispute Bundles](#core-primitives): portable evidence format
+- **Protocol integrator**: [Spec Index](docs/SPEC_INDEX.md): normative specifications
 
 ---
 
@@ -303,10 +303,10 @@ Stewardship: [Originary](https://www.originary.xyz/) and the open source communi
 
 ## Implementations
 
-- **TypeScript** (this repo) -- `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
-- **Go** -- [sdks/go/](sdks/go/) native implementation
-- **MCP** -- [MCP adapter](packages/adapter-mcp/) for Model Context Protocol
-- **HTTP middleware** -- [Express](packages/middleware/express/), [Hono](packages/middleware/hono/)
+- **TypeScript** (this repo): `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
+- **Go**: [sdks/go/](sdks/go/) native implementation
+- **MCP**: [MCP adapter](packages/adapter-mcp/) for Model Context Protocol
+- **HTTP middleware**: [Express](packages/middleware/express/), [Hono](packages/middleware/hono/)
 
 Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new).
 

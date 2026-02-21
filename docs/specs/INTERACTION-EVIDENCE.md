@@ -63,7 +63,7 @@ All interaction fields use the existing extensions mechanism. The wire format `p
 
 ### 2.3 Platform-Neutral
 
-The capture primitives work with any agent platform. The `executor.platform` field is an open string identifier -- any value matching the grammar `/^[a-z][a-z0-9._-]*$/` (max 64 chars) is valid.
+The capture primitives work with any agent platform. The `executor.platform` field is an open string identifier: any value matching the grammar `/^[a-z][a-z0-9._-]*$/` (max 64 chars) is valid.
 
 Well-known platforms (informational):
 

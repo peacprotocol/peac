@@ -66,7 +66,7 @@ For invalid fixtures, `expected` contains:
 | ------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `valid`      | Normative     | Must be `false`                                                                                                                                              |
 | `error_code` | Normative     | Canonical error code from `specs/kernel/errors.json`. Test harnesses MUST assert this value matches.                                                         |
-| `error`      | Informational | Human-readable description. Test harnesses MUST NOT assert exact match on this field -- it is for documentation only and may change between implementations. |
+| `error`      | Informational | Human-readable description. Test harnesses MUST NOT assert exact match on this field: it is for documentation only and may change between implementations. |
 | `meta`       | Informational | Optional metadata (e.g., `validation_order_note`). Not used for assertion.                                                                                   |
 
 ### Conformance Assertion Rule

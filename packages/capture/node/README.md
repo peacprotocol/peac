@@ -33,7 +33,7 @@ const session = createCaptureSession({
 ## Durability Contract
 
 - **`append()`** writes to the OS page cache (no fsync). Fast, but not crash-safe on its own.
-- **`commit()`** calls fsync -- the explicit durability point. Entries written before the last `commit()` survive crashes. Entries after may be lost.
+- **`commit()`** calls fsync: the explicit durability point. Entries written before the last `commit()` survive crashes. Entries after may be lost.
 - **Auto-commit timer** (default 5s) calls `commit()` periodically when dirty. Prevents long unflushed windows. Set `autoCommitIntervalMs: 0` to disable.
 
 ### Commit Ordering
@@ -43,12 +43,12 @@ When used with a dedupe index:
 1. Spool `commit()` first (authoritative evidence log)
 2. Dedupe `commit()` second (best-effort optimization index)
 
-If dedupe commit fails after spool commit, worst case is re-emitting some receipts after restart. No evidence is lost. The dedupe index is disposable -- it can be deleted and rebuilt from the spool.
+If dedupe commit fails after spool commit, worst case is re-emitting some receipts after restart. No evidence is lost. The dedupe index is disposable: it can be deleted and rebuilt from the spool.
 
 ## Corruption Boundaries
 
 - **Incomplete last line** (crash artifact): automatically truncated on startup. `onWarning` callback fired.
-- **Malformed JSON mid-file**: spool marked corrupt. No auto-repair -- mid-file corruption could indicate tampering.
+- **Malformed JSON mid-file**: spool marked corrupt. No auto-repair: mid-file corruption could indicate tampering.
 - **Chain linkage broken**: spool marked corrupt. `prev_entry_digest` chain failed verification.
 - **Oversized line** (exceeds `maxLineBytes`): spool marked corrupt. Line was never materialized as a JS string.
 
@@ -79,7 +79,7 @@ const diag = getFsSpoolDiagnostics(store);
 - `maxEntries` (default: 100,000)
 - `maxFileBytes` (default: 100MB)
 
-When exceeded, `append()` throws `SpoolFullError`. The session returns `E_CAPTURE_STORE_FAILED` with a clear message. The adapter stays running (hooks, tools) -- only new captures are blocked.
+When exceeded, `append()` throws `SpoolFullError`. The session returns `E_CAPTURE_STORE_FAILED` with a clear message. The adapter stays running (hooks, tools): only new captures are blocked.
 
 ## Reset Procedure
 

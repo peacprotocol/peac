@@ -1,4 +1,4 @@
-# Apps -- Environment Variables
+# Apps: Environment Variables
 
 Environment variable reference for PEAC infrastructure apps.
 
@@ -32,7 +32,7 @@ Environment variable reference for PEAC infrastructure apps.
 
 When `PEAC_TRUSTED_ISSUERS_JSON` is not set, only the sandbox issuer
 (`https://sandbox.peacprotocol.org`) is trusted by default. Entries are
-validated at boot with Zod -- malformed JSON or non-HTTPS `jwks_uri`
+validated at boot with Zod: malformed JSON or non-HTTPS `jwks_uri`
 values cause an immediate startup failure.
 
 ### Rate limits
@@ -75,7 +75,7 @@ When `PEAC_TRUST_PROXY=1` is set:
 - `cf-connecting-ip` and `x-forwarded-for` are used for rate limit bucketing
 - `x-forwarded-proto` is validated strictly (`http` or `https` only)
 - `x-forwarded-host` is validated with a conservative hostname pattern
-  (alphanumeric, dots, hyphens, optional port -- no spaces or slashes)
+  (alphanumeric, dots, hyphens, optional port: no spaces or slashes)
 
 Only set `PEAC_TRUST_PROXY=1` when running behind a reverse proxy that
 strips inbound `X-Forwarded-*` headers from the public edge and injects

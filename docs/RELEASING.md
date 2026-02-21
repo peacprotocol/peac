@@ -25,7 +25,7 @@ Both scripts handle:
 - Root `package.json`
 - All workspace packages (via pnpm workspace enumeration)
 - `scripts/publish-manifest.json`
-- Examples at `0.0.0` (enforced -- fails if any example has a different version)
+- Examples at `0.0.0` (enforced: fails if any example has a different version)
 
 ## Pre-Release Checklist
 

@@ -130,8 +130,8 @@ const extensions = createTraceContextExtensions(req.headers);
 | Dependency                      | Role                  | Version    | Notes                                      |
 | ------------------------------- | --------------------- | ---------- | ------------------------------------------ |
 | `@opentelemetry/api`            | Peer dep (production) | `^1.9.0`   | Stable API, backward-compatible across 1.x |
-| `@opentelemetry/sdk-metrics`    | Dev dep (tests only)  | `^2.0.0`   | SDK v2 -- NOT shipped to consumers         |
-| `@opentelemetry/sdk-trace-base` | Dev dep (tests only)  | `^2.0.0`   | SDK v2 -- NOT shipped to consumers         |
+| `@opentelemetry/sdk-metrics`    | Dev dep (tests only)  | `^2.0.0`   | SDK v2: NOT shipped to consumers         |
+| `@opentelemetry/sdk-trace-base` | Dev dep (tests only)  | `^2.0.0`   | SDK v2: NOT shipped to consumers         |
 | Node.js                         | Runtime               | `>=22.0.0` | Matches monorepo `engines.node`            |
 
 **Key points:**
@@ -141,7 +141,7 @@ const extensions = createTraceContextExtensions(req.headers);
 - SDK v2 packages are dev dependencies used for testing. They are NOT bundled
   into the published package and do not appear in consumers' dependency trees.
 - The OTel exporter in `examples/telemetry-otel/` uses `@opentelemetry/exporter-trace-otlp-http@^0.200.0`.
-  This version is coupled to SDK v2 -- OTel uses a `0.{MAJOR}xx.x` scheme for experimental packages.
+  This version is coupled to SDK v2: OTel uses a `0.{MAJOR}xx.x` scheme for experimental packages.
 
 ## Related Packages
 
