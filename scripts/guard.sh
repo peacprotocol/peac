@@ -161,7 +161,7 @@ if [ -f scripts/find-invisible-unicode.mjs ]; then
     echo "FAIL: Found dangerous invisible/bidi Unicode characters"
     bad=1
   else
-    echo "OK"
+    echo "Unicode scan OK (GitHub diff bidi warning is cosmetic; repo runs fail-closed Trojan Source scan)"
   fi
 else
   echo "FAIL: scripts/find-invisible-unicode.mjs not found (required for Trojan Source detection)"
