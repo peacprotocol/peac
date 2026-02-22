@@ -8,6 +8,7 @@
 import { verify as jwsVerify } from '@peac/crypto';
 import {
   parseReceiptClaims,
+  validateKernelConstraints,
   type ReceiptClaimsType,
   type AttestationReceiptClaims,
 } from '@peac/schema';
@@ -49,6 +50,7 @@ function isCryptoError(err: unknown): err is CryptoErrorLike {
 export type VerifyLocalErrorCode =
   | 'E_INVALID_SIGNATURE'
   | 'E_INVALID_FORMAT'
+  | 'E_CONSTRAINT_VIOLATION'
   | 'E_EXPIRED'
   | 'E_NOT_YET_VALID'
   | 'E_INVALID_ISSUER'
@@ -266,7 +268,18 @@ export async function verifyLocal(
       };
     }
 
-    // 2. Validate schema (unified parser supports both commerce and attestation)
+    // 2. Validate structural kernel constraints (DD-121, fail-closed)
+    const constraintResult = validateKernelConstraints(result.payload);
+    if (!constraintResult.valid) {
+      const v = constraintResult.violations[0];
+      return {
+        valid: false,
+        code: 'E_CONSTRAINT_VIOLATION',
+        message: `Kernel constraint violated: ${v.constraint} (actual: ${v.actual}, limit: ${v.limit})`,
+      };
+    }
+
+    // 3. Validate schema (unified parser supports both commerce and attestation)
     const pr = parseReceiptClaims(result.payload);
 
     if (!pr.ok) {
