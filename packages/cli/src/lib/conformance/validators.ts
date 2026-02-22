@@ -52,7 +52,7 @@ export function validateReceiptPayload(payload: unknown): ValidationResultWithPa
 
   const firstIssue = result.error.issues[0];
   const zodPath = firstIssue?.path ?? [];
-  const errorPath = zodPathToJsonPointer(zodPath);
+  const errorPath = zodPathToJsonPointer(zodPath as (string | number)[]);
   const errorKeyword = zodCodeToKeyword(firstIssue?.code ?? 'unknown');
 
   // Map paths to canonical error codes

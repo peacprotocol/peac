@@ -362,7 +362,7 @@ const InteractionEvidenceV01BaseSchema = z
     refs: RefsSchema.optional(),
 
     /** Platform-specific extensions (MUST be namespaced) */
-    extensions: z.record(z.unknown()).optional(),
+    extensions: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 

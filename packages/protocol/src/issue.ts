@@ -298,12 +298,14 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
   } catch (err: unknown) {
     if (err instanceof ZodError) {
       // Check if any error path touches evidence
-      const evidenceIssue = err.issues.find(
-        (issue: { path: (string | number)[]; message: string }) =>
-          issue.path.some((p: string | number) => p === 'evidence' || p === 'payment')
+      const evidenceIssue = err.issues.find((issue) =>
+        issue.path.some((p) => p === 'evidence' || p === 'payment')
       );
       if (evidenceIssue && evidenceIssue.path.includes('evidence')) {
-        const peacError = createEvidenceNotJsonError(evidenceIssue.message, evidenceIssue.path);
+        const peacError = createEvidenceNotJsonError(
+          evidenceIssue.message,
+          evidenceIssue.path as (string | number)[]
+        );
         throw new IssueError(peacError);
       }
     }

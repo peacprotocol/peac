@@ -475,7 +475,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages).toContain('completed_at must be >= started_at');
         }
       });
@@ -491,7 +491,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages).toContain('result.status is required when output is present');
         }
       });
@@ -507,7 +507,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages).toContain(
             'error_code or non-empty extensions required when status is error'
           );
@@ -523,7 +523,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages).toContain(
             'error_code or non-empty extensions required when status is error'
           );
@@ -559,7 +559,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages.some((m) => m.includes('Invalid extension key format'))).toBe(true);
         }
       });
@@ -586,7 +586,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages.some((m) => m.includes('uses reserved prefix'))).toBe(true);
         }
       });
@@ -599,7 +599,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages.some((m) => m.includes('uses reserved prefix'))).toBe(true);
         }
       });
@@ -615,7 +615,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages.some((m) => m.includes('requires tool field'))).toBe(true);
         }
       });
@@ -629,7 +629,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages.some((m) => m.includes('requires resource field'))).toBe(true);
         }
       });
@@ -643,7 +643,7 @@ describe('InteractionEvidenceV01Schema', () => {
         const result = InteractionEvidenceV01Schema.safeParse(evidence);
         expect(result.success).toBe(false);
         if (!result.success) {
-          const messages = result.error.errors.map((e) => e.message);
+          const messages = result.error.issues.map((e) => e.message);
           expect(messages.some((m) => m.includes('requires resource field'))).toBe(true);
         }
       });

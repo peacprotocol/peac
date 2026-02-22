@@ -154,7 +154,7 @@ export const ConstraintSchema = z.discriminatedUnion('type', [
 export const ControlBlockSchema = z.object({
   mandate: ConstraintSchema,
   scope: z.string().url().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**
@@ -167,7 +167,7 @@ export const ControlStateSchema = z.object({
   spent_amount: z.number().int().nonnegative().optional(),
   first_use: z.number().int().positive().optional(),
   last_use: z.number().int().positive().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // -----------------------------------------------------------------------------
