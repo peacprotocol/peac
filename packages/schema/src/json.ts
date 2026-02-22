@@ -70,7 +70,7 @@ export const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
     z.array(JsonValueSchema),
     // Plain object check then record validation
     PlainObjectSchema.transform((obj) => obj as Record<string, unknown>).pipe(
-      z.record(JsonValueSchema)
+      z.record(z.string(), JsonValueSchema)
     ),
   ])
 ) as z.ZodType<JsonValue>;
@@ -82,7 +82,7 @@ export const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
  */
 export const JsonObjectSchema: z.ZodType<JsonObject> = PlainObjectSchema.transform(
   (obj) => obj as Record<string, unknown>
-).pipe(z.record(JsonValueSchema)) as z.ZodType<JsonObject>;
+).pipe(z.record(z.string(), JsonValueSchema)) as z.ZodType<JsonObject>;
 
 /**
  * JSON array schema - array of JSON values

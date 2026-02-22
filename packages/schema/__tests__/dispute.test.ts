@@ -645,7 +645,7 @@ describe('DisputeEvidenceSchema invariants', () => {
       const result = DisputeEvidenceSchema.safeParse(evidence);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errorMessages = result.error.errors.map((e) => e.message);
+        const errorMessages = result.error.issues.map((e) => e.message);
         expect(errorMessages).toContain('Resolution is required when state is "resolved"');
       }
     });
@@ -655,7 +655,7 @@ describe('DisputeEvidenceSchema invariants', () => {
       const result = DisputeEvidenceSchema.safeParse(evidence);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errorMessages = result.error.errors.map((e) => e.message);
+        const errorMessages = result.error.issues.map((e) => e.message);
         expect(errorMessages).toContain('Resolution is required when state is "rejected"');
       }
     });
@@ -665,7 +665,7 @@ describe('DisputeEvidenceSchema invariants', () => {
       const result = DisputeEvidenceSchema.safeParse(evidence);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errorMessages = result.error.errors.map((e) => e.message);
+        const errorMessages = result.error.issues.map((e) => e.message);
         expect(errorMessages).toContain('Resolution is required when state is "final"');
       }
     });
@@ -690,7 +690,7 @@ describe('DisputeEvidenceSchema invariants', () => {
       const result = DisputeEvidenceSchema.safeParse(evidence);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errorMessages = result.error.errors.map((e) => e.message);
+        const errorMessages = result.error.issues.map((e) => e.message);
         expect(
           errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))
         ).toBe(true);
@@ -706,7 +706,7 @@ describe('DisputeEvidenceSchema invariants', () => {
       const result = DisputeEvidenceSchema.safeParse(evidence);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errorMessages = result.error.errors.map((e) => e.message);
+        const errorMessages = result.error.issues.map((e) => e.message);
         expect(
           errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))
         ).toBe(true);
@@ -722,7 +722,7 @@ describe('DisputeEvidenceSchema invariants', () => {
       const result = DisputeEvidenceSchema.safeParse(evidence);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errorMessages = result.error.errors.map((e) => e.message);
+        const errorMessages = result.error.issues.map((e) => e.message);
         expect(
           errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))
         ).toBe(true);
@@ -738,7 +738,7 @@ describe('DisputeEvidenceSchema invariants', () => {
       const result = DisputeEvidenceSchema.safeParse(evidence);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errorMessages = result.error.errors.map((e) => e.message);
+        const errorMessages = result.error.issues.map((e) => e.message);
         expect(
           errorMessages.some((m) => m.includes('Resolution is only valid for terminal states'))
         ).toBe(true);
@@ -756,7 +756,7 @@ describe('DisputeEvidenceSchema invariants', () => {
       const result = DisputeEvidenceSchema.safeParse(evidence);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errorMessages = result.error.errors.map((e) => e.message);
+        const errorMessages = result.error.issues.map((e) => e.message);
         expect(errorMessages.some((m) => m.includes('requires description of at least'))).toBe(
           true
         );
@@ -1166,7 +1166,7 @@ describe('transitionDisputeState schema safety', () => {
         expect(parseResult.success).toBe(true);
         if (!parseResult.success) {
           // Helpful debug output if test fails
-          console.error('Schema validation failed:', parseResult.error.errors);
+          console.error('Schema validation failed:', parseResult.error.issues);
         }
       }
     });

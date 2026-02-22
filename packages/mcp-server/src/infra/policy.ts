@@ -39,9 +39,9 @@ const JwksConfigSchema = z.object({
 export const PolicySchema = z.object({
   version: z.literal('1'),
   allow_network: z.boolean().default(false),
-  redaction: RedactionSchema.default({}),
-  tools: z.record(z.string(), ToolPolicySchema).default({}),
-  limits: LimitsSchema.default({}),
+  redaction: RedactionSchema.prefault({}),
+  tools: z.record(z.string(), ToolPolicySchema).prefault({}),
+  limits: LimitsSchema.prefault({}),
   jwks: JwksConfigSchema.optional(),
 });
 

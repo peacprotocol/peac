@@ -11,7 +11,7 @@ export const BundleInputSchema = z.object({
     .max(256)
     .describe('Receipt JWS strings to bundle (1-256)'),
   metadata: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe('Optional metadata to include in the manifest'),
   output_path: z
