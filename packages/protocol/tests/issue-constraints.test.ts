@@ -124,15 +124,12 @@ describe('issue() kernel constraints (DD-121)', () => {
     }
   });
 
-  it('accepts evidence at exactly the array limit', async () => {
+  it('accepts evidence with an array well within limits', async () => {
     const { privateKey } = await generateKeypair();
-    // Exactly at the limit should pass constraints (may still fail Zod if structure invalid)
-    const exactArray = new Array(KERNEL_CONSTRAINTS.MAX_ARRAY_LENGTH).fill(0);
-
-    // This might fail at Zod layer due to total node count, but should NOT fail
-    // at the constraint check for array length specifically.
-    // For a clean test, use a smaller array that still passes total nodes.
-    const smallArray = new Array(100).fill('ok');
+    // An array at exactly MAX_ARRAY_LENGTH (10,000) would exceed MAX_TOTAL_NODES
+    // (100,000) when combined with the rest of the claims object. Use a smaller
+    // array that validates cleanly through both constraint and Zod layers.
+    const items = new Array(100).fill('ok');
     const result = await issue({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
@@ -142,7 +139,7 @@ describe('issue() kernel constraints (DD-121)', () => {
       reference: 'tx_test',
       asset: 'USD',
       env: 'test',
-      evidence: { items: smallArray },
+      evidence: { items },
       privateKey,
       kid: 'key-1',
     });

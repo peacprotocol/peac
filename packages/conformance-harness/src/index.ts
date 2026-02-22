@@ -262,11 +262,12 @@ export function runFixture(
 
   // Detect legacy fixture format: auth/claims wrapper with non-standard field values.
   // Fixtures using this format predate the current schema and should SKIP, not FAIL.
-  const isLegacyFormat =
-    typeof data === 'object' &&
-    data !== null &&
-    ('auth' in data || ('claims' in data && 'expected_error' in data)) &&
-    !('vectors' in data);
+  // Narrow to Record first to satisfy static analysis (data is typed as unknown).
+  const isLegacyFormat = (() => {
+    if (typeof data !== 'object' || data === null) return false;
+    const obj = data as Record<string, unknown>;
+    return ('auth' in obj || ('claims' in obj && 'expected_error' in obj)) && !('vectors' in obj);
+  })();
 
   try {
     const fixtureData = data as Record<string, unknown>;
