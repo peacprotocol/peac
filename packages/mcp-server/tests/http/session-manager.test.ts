@@ -131,6 +131,37 @@ describe('SessionManager', () => {
     expect(manager.getSession(sessions[0].sessionId)).toBeUndefined();
   });
 
+  it('should enforce per-IP session limit', async () => {
+    manager = new SessionManager({ maxSessionsPerIp: 2, maxSessions: 100 });
+    const factory = makeServerFactory();
+    await manager.createSession(factory, '10.0.0.1');
+    await manager.createSession(factory, '10.0.0.1');
+    await expect(manager.createSession(factory, '10.0.0.1')).rejects.toThrow(
+      /Per-IP session limit/
+    );
+    // Different IP should still work
+    await manager.createSession(factory, '10.0.0.2');
+    expect(manager.size).toBe(3);
+  });
+
+  it('should decrement per-IP count on session termination', async () => {
+    manager = new SessionManager({ maxSessionsPerIp: 2, maxSessions: 100 });
+    const factory = makeServerFactory();
+    const s1 = await manager.createSession(factory, '10.0.0.1');
+    await manager.createSession(factory, '10.0.0.1');
+
+    // Per-IP limit reached
+    await expect(manager.createSession(factory, '10.0.0.1')).rejects.toThrow(
+      /Per-IP session limit/
+    );
+
+    // Terminate one session, should free a slot
+    await manager.terminateSession(s1.sessionId);
+    const s3 = await manager.createSession(factory, '10.0.0.1');
+    expect(s3).toBeTruthy();
+    expect(manager.size).toBe(2);
+  });
+
   it('should cleanup all sessions', async () => {
     manager = new SessionManager();
     await manager.createSession(makeServerFactory());

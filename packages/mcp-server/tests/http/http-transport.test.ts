@@ -539,4 +539,83 @@ describe('HTTP Transport', () => {
       }
     }
   });
+
+  it('should trust XFF from loopback when trust-proxy=loopback', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      trustProxy: 'loopback',
+      rateLimitRpm: 100,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    // Request from 127.0.0.1 with XFF should use the XFF IP for rate limiting.
+    // We just verify the server accepts the request (no crash, no 400).
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/event-stream',
+        'X-Forwarded-For': '203.0.113.50',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'initialize',
+        id: 1,
+        params: {
+          protocolVersion: '2025-11-25',
+          capabilities: {},
+          clientInfo: { name: 'test', version: '1.0' },
+        },
+      }),
+    });
+    // Should succeed (loopback is trusted, XFF parsed)
+    expect(status).not.toBe(429);
+    expect(status).not.toBe(400);
+  });
+
+  // --- Per-IP session limits ---
+
+  it('should enforce per-IP session creation limit', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      maxSessionsPerIp: 2,
+      maxSessions: 100,
+      rateLimitRpm: 100,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const mcpHeaders = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    };
+    // Create sessions until per-IP limit is hit
+    const statuses: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+        method: 'POST',
+        headers: mcpHeaders,
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'initialize',
+          id: i + 1,
+          params: {
+            protocolVersion: '2025-11-25',
+            capabilities: {},
+            clientInfo: { name: 'test', version: '1.0' },
+          },
+        }),
+      });
+      statuses.push(status);
+    }
+    // First two should succeed, third should be rejected (per-IP limit = 2)
+    expect(statuses[0]).not.toBe(503);
+    expect(statuses[1]).not.toBe(503);
+    expect(statuses[2]).toBe(503);
+  });
 });

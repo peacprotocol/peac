@@ -56,6 +56,8 @@ export interface HttpTransportOptions {
   sessionTtlMs?: number;
   /** Max concurrent sessions. Default: 100 */
   maxSessions?: number;
+  /** Max sessions per client IP. Default: 10 */
+  maxSessionsPerIp?: number;
   /** Factory to create new McpServer instances (one per session) */
   serverFactory: () => McpServer;
 }
@@ -164,6 +166,7 @@ export async function createHttpTransport(
   const sessionManager = new SessionManager({
     ttlMs: options.sessionTtlMs,
     maxSessions: options.maxSessions,
+    maxSessionsPerIp: options.maxSessionsPerIp,
   });
   sessionManager.startSweep();
 
@@ -266,7 +269,24 @@ export async function createHttpTransport(
   }
 
   // PRM configuration (RFC 9728 path-aware discovery)
-  const prmEnabled = !!(options.authorizationServers?.length && options.publicUrl);
+  // Both authorizationServers (non-empty) and publicUrl are required for PRM.
+  const authServers = (options.authorizationServers ?? []).filter((s) => s.trim().length > 0);
+  if (options.authorizationServers?.length && authServers.length === 0) {
+    process.stderr.write(
+      `[${SERVER_NAME}] WARNING: --authorization-servers contains only empty entries, PRM disabled\n`
+    );
+  }
+  if (authServers.length > 0 && !options.publicUrl) {
+    process.stderr.write(
+      `[${SERVER_NAME}] WARNING: --authorization-servers set without --public-url, PRM disabled\n`
+    );
+  }
+  if (options.publicUrl && authServers.length === 0) {
+    process.stderr.write(
+      `[${SERVER_NAME}] WARNING: --public-url set without --authorization-servers, PRM disabled\n`
+    );
+  }
+  const prmEnabled = !!(authServers.length > 0 && options.publicUrl);
   let prmPath = '/.well-known/oauth-protected-resource';
   let prmDocument: object | undefined;
   if (prmEnabled && options.publicUrl) {
@@ -284,7 +304,7 @@ export async function createHttpTransport(
       }
       prmDocument = {
         resource: normalized,
-        authorization_servers: options.authorizationServers,
+        authorization_servers: authServers,
       };
     }
   }
@@ -420,7 +440,7 @@ export async function createHttpTransport(
           // Create new session
           let entry;
           try {
-            entry = await sessionManager.createSession(options.serverFactory);
+            entry = await sessionManager.createSession(options.serverFactory, getClientIp(req));
           } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to create session';
             sendJson(res, 503, { error: msg });
@@ -483,7 +503,7 @@ export async function createHttpTransport(
         process.stderr.write(`  PRM: GET ${prmPath}\n`);
       }
       process.stderr.write(
-        `  Sessions: max ${options.maxSessions ?? 100}, TTL ${(options.sessionTtlMs ?? 1_800_000) / 1000}s\n`
+        `  Sessions: max ${options.maxSessions ?? 100} (${options.maxSessionsPerIp ?? 10}/IP), TTL ${(options.sessionTtlMs ?? 1_800_000) / 1000}s\n`
       );
       process.stderr.write(`  Rate limit: ${rateLimitRpm} req/min per session\n`);
       process.stderr.write(
