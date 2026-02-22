@@ -23,28 +23,32 @@
 
 ## Security (DD-123)
 
-| #   | Requirement                                 | Level  | Status    | Test                                                                      |
-| --- | ------------------------------------------- | ------ | --------- | ------------------------------------------------------------------------- |
-| S1  | Origin validation (DNS rebinding defense)   | MUST   | Covered   | `http-transport.test.ts` > "should deny cross-origin requests by default" |
-| S2  | CORS deny-all by default                    | MUST   | Covered   | `http-transport.test.ts` > "should deny cross-origin requests by default" |
-| S3  | CORS opt-in via --cors-origins              | SHOULD | Covered   | `http-transport.test.ts` > "should allow configured CORS origins"         |
-| S4  | Request body size limit (1MB default)       | MUST   | Covered   | `http-transport.test.ts` > "should reject oversized request bodies"       |
-| S5  | Per-session + per-IP rate limiting          | MUST   | Covered   | `http-transport.test.ts` > "should not trust X-Forwarded-For by default"  |
-| S6  | Default bind to 127.0.0.1 (localhost only)  | MUST   | Covered   | All tests bind to 127.0.0.1                                               |
-| S7  | Host header validation                      | MUST   | Covered   | `http-transport.test.ts` > host validation in request handling            |
-| S8  | Node.js server timeouts (slowloris defense) | SHOULD | Covered   | Configured in `createHttpTransport()`                                     |
-| S9  | No redirect following (SSRF prevention)     | MUST   | By design | No outbound HTTP from transport                                           |
+| #   | Requirement                                 | Level  | Status    | Test                                                                          |
+| --- | ------------------------------------------- | ------ | --------- | ----------------------------------------------------------------------------- |
+| S1  | Origin validation (DNS rebinding defense)   | MUST   | Covered   | `http-transport.test.ts` > "should deny cross-origin requests by default"     |
+| S2  | CORS deny-all by default                    | MUST   | Covered   | `http-transport.test.ts` > "should deny cross-origin requests by default"     |
+| S3  | CORS opt-in via --cors-origins              | SHOULD | Covered   | `http-transport.test.ts` > "should allow configured CORS origins"             |
+| S4  | Request body size limit (1MB default)       | MUST   | Covered   | `http-transport.test.ts` > "should reject oversized request bodies"           |
+| S5  | Per-session + per-IP rate limiting          | MUST   | Covered   | `http-transport.test.ts` > "should not trust X-Forwarded-For by default"      |
+| S6  | Default bind to 127.0.0.1 (localhost only)  | MUST   | Covered   | All tests bind to 127.0.0.1                                                   |
+| S7  | Host header validation                      | MUST   | Covered   | `http-transport.test.ts` > host validation in request handling                |
+| S8  | Node.js server timeouts (slowloris defense) | SHOULD | Covered   | Configured in `createHttpTransport()`                                         |
+| S9  | No redirect following (SSRF prevention)     | MUST   | By design | No outbound HTTP from transport                                               |
+| S10 | XFF spoofing defense (untrusted peer)       | MUST   | Covered   | `http-transport.test.ts` > "should ignore spoofed XFF from non-loopback peer" |
+| S11 | Per-IP session creation cap                 | SHOULD | Covered   | `http-transport.test.ts` > "should enforce per-IP session creation limit"     |
 
 ## Session Isolation (CVE-2026-25536)
 
-| #   | Requirement                       | Level  | Status  | Test                                                                                             |
-| --- | --------------------------------- | ------ | ------- | ------------------------------------------------------------------------------------------------ |
-| C1  | Per-session McpServer instance    | MUST   | Covered | `session-manager.test.ts` > "should create multiple isolated sessions"                           |
-| C2  | Per-session transport instance    | MUST   | Covered | `session-manager.test.ts` > "should create multiple isolated sessions"                           |
-| C3  | No shared state between sessions  | MUST   | Covered | `session-manager.test.ts` > "should guarantee per-session isolation (CVE-2026-25536 regression)" |
-| C4  | Session eviction on TTL expiry    | SHOULD | Covered | `session-manager.test.ts` > "should evict stale sessions on TTL expiry"                          |
-| C5  | Max session capacity limit        | SHOULD | Covered | `session-manager.test.ts` > "should enforce max session limit"                                   |
-| C6  | MCP SDK >= 1.26.0 (patched range) | MUST   | Covered | `package.json` pins `~1.27.0`                                                                    |
+| #   | Requirement                       | Level  | Status  | Test                                                                                               |
+| --- | --------------------------------- | ------ | ------- | -------------------------------------------------------------------------------------------------- |
+| C1  | Per-session McpServer instance    | MUST   | Covered | `session-manager.test.ts` > "should create multiple isolated sessions"                             |
+| C2  | Per-session transport instance    | MUST   | Covered | `session-manager.test.ts` > "should create multiple isolated sessions"                             |
+| C3  | No shared state between sessions  | MUST   | Covered | `session-manager.test.ts` > "should guarantee per-session isolation (CVE-2026-25536 regression)"   |
+| C4  | Session eviction on TTL expiry    | SHOULD | Covered | `session-manager.test.ts` > "should evict stale sessions on TTL expiry"                            |
+| C5  | Max session capacity limit        | SHOULD | Covered | `session-manager.test.ts` > "should enforce max session limit"                                     |
+| C6  | MCP SDK >= 1.26.0 (patched range) | MUST   | Covered | `package.json` pins `~1.27.0`                                                                      |
+| C7  | Per-IP session creation cap       | SHOULD | Covered | `session-manager.test.ts` > "should enforce per-IP session limit"                                  |
+| C8  | Multi-client concurrent isolation | MUST   | Covered | `http-transport.test.ts` > "should isolate concurrent client sessions (CVE-2026-25536 regression)" |
 
 ## Authorization (MCP 2025-11-25)
 

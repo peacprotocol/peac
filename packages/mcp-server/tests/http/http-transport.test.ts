@@ -576,6 +576,130 @@ describe('HTTP Transport', () => {
     expect(status).not.toBe(400);
   });
 
+  it('should ignore spoofed XFF from non-loopback peer when trust-proxy=loopback', async () => {
+    // When trust-proxy=loopback, requests from 127.0.0.1 (loopback) trust XFF.
+    // But the test itself connects from 127.0.0.1, so we verify by setting
+    // trust-proxy to a specific IP that is NOT 127.0.0.1 to simulate
+    // an untrusted peer sending a forged XFF header.
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      trustProxy: '10.0.0.1', // Only trust 10.0.0.1 (not 127.0.0.1)
+      rateLimitRpm: 2,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const mcpHeaders = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    };
+
+    // XFF should be IGNORED because peer_ip (127.0.0.1) is not in trusted set (10.0.0.1).
+    // All requests key to the same peer_ip for rate limiting.
+    for (let i = 0; i < 3; i++) {
+      const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+        method: 'POST',
+        headers: {
+          ...mcpHeaders,
+          'X-Forwarded-For': `192.168.${i}.1`, // Spoofed, should be ignored
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'initialize',
+          id: i + 1,
+          params: {
+            protocolVersion: '2025-11-25',
+            capabilities: {},
+            clientInfo: { name: 'test', version: '1.0' },
+          },
+        }),
+      });
+      if (i < 2) {
+        expect(status).not.toBe(429);
+      } else {
+        // Third request rate-limited: XFF ignored, all keyed to same peer_ip
+        expect(status).toBe(429);
+      }
+    }
+  });
+
+  // --- Multi-client isolation (CVE-2026-25536 stop-ship invariant) ---
+
+  it('should isolate concurrent client sessions (CVE-2026-25536 regression)', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      maxSessions: 10,
+      rateLimitRpm: 100,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const mcpHeaders = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    };
+
+    // Concurrently initialize 3 sessions
+    const initResults = await Promise.all(
+      [1, 2, 3].map((id) =>
+        fetchJson(`http://127.0.0.1:${port}/mcp`, {
+          method: 'POST',
+          headers: mcpHeaders,
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'initialize',
+            id,
+            params: {
+              protocolVersion: '2025-11-25',
+              capabilities: {},
+              clientInfo: { name: `client-${id}`, version: '1.0' },
+            },
+          }),
+        })
+      )
+    );
+
+    // All 3 initializations must succeed
+    for (const r of initResults) {
+      expect(r.status).toBe(200);
+    }
+
+    // Each session must have a unique Mcp-Session-Id
+    const sessionIds = initResults.map((r) => r.headers.get('mcp-session-id'));
+    const uniqueIds = new Set(sessionIds.filter(Boolean));
+    expect(uniqueIds.size).toBe(3);
+
+    // Terminating one session must not affect others
+    const [id0, id1, id2] = sessionIds;
+    const { status: deleteStatus } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'DELETE',
+      headers: { 'Mcp-Session-Id': id0! },
+    });
+    expect(deleteStatus).toBe(200);
+
+    // Terminated session returns 404
+    const { status: gone } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: { ...mcpHeaders, 'Mcp-Session-Id': id0! },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 10 }),
+    });
+    expect(gone).toBe(404);
+
+    // Other sessions still alive
+    for (const sid of [id1, id2]) {
+      const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+        method: 'POST',
+        headers: { ...mcpHeaders, 'Mcp-Session-Id': sid! },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 11 }),
+      });
+      expect(status).toBe(200);
+    }
+  });
+
   // --- Per-IP session limits ---
 
   it('should enforce per-IP session creation limit', async () => {

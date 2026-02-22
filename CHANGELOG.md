@@ -33,9 +33,9 @@ assignment-compatible. Consumers pinned to `^0.10.x` will stay on v0.10.14 (safe
   - Session eviction: configurable TTL (default 30 min) + max sessions (default 100)
   - `POST /mcp`: JSON-RPC request/response; `GET /mcp`: 405 Method Not Allowed
   - `GET /health`: health check (no auth, returns version + protocol version)
-  - RFC 9728 PRM endpoint at `GET /.well-known/oauth-protected-resource[/<path>]`
-    only when both `--authorization-servers` and `--public-url` are configured;
-    404 otherwise
+  - RFC 9728 PRM discovery endpoint at `GET /.well-known/oauth-protected-resource[/<path>]`:
+    implemented but disabled by default; enabled when both `--authorization-servers`
+    and `--public-url` are configured; returns 404 otherwise
   - Security: CORS deny-all default, localhost-only bind, 1MB request body limit,
     per-session + per-IP rate limiting (100 req/min default), Origin/Host validation,
     Node.js server timeouts (slowloris defense)
@@ -102,6 +102,8 @@ If you import schemas from `@peac/schema`, align your Zod major to v4:
 - MCP Streamable HTTP runs in unprotected mode only (no token validation);
   "OAuth readiness" hooks provided via optional PRM endpoint
 - stdio transport remains the default (backward compatible)
+- PR merge order: #407 (Zod 4 schema) -> #408 (Zod 4 remaining) -> #409/#410/#411
+  (HTTP transport / kernel constraints / integrator kit, parallel) -> #412 (release)
 
 ### Standards References
 

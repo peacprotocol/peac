@@ -187,16 +187,30 @@ export async function createHttpTransport(
 
   const trustProxyValue: TrustProxyValue = options.trustProxy ?? 'off';
 
+  /**
+   * Resolve the client IP for rate limiting and per-IP session caps.
+   *
+   * Terminology:
+   * - peer_ip: the TCP socket remote address (req.socket.remoteAddress).
+   *   This is the IP the OS reports; it cannot be spoofed at the application layer.
+   * - client_ip: the resolved end-client IP after trust-proxy evaluation.
+   *   When trust-proxy is 'off' (default), client_ip === peer_ip.
+   *   When trust-proxy is enabled AND the peer_ip matches the trusted range,
+   *   client_ip is taken from the first entry in X-Forwarded-For.
+   *   When trust-proxy is enabled but the peer_ip is NOT in the trusted range,
+   *   X-Forwarded-For is IGNORED (peer_ip used as client_ip) to prevent
+   *   spoofing from untrusted peers.
+   */
   function getClientIp(req: IncomingMessage): string {
-    const remoteAddr = req.socket.remoteAddress ?? 'unknown';
-    if (trustProxyValue !== 'off' && isTrustedProxy(remoteAddr, trustProxyValue)) {
+    const peerIp = req.socket.remoteAddress ?? 'unknown';
+    if (trustProxyValue !== 'off' && isTrustedProxy(peerIp, trustProxyValue)) {
       const xff = req.headers['x-forwarded-for'];
       if (typeof xff === 'string') {
         const first = xff.split(',')[0]?.trim();
         if (first) return first;
       }
     }
-    return remoteAddr;
+    return peerIp;
   }
 
   // Allowed hosts for Host header validation
@@ -496,11 +510,15 @@ export async function createHttpTransport(
       process.stderr.write(`[${SERVER_NAME}] HTTP transport listening on http://${host}:${port}\n`);
       process.stderr.write(`  Transport: Streamable HTTP (MCP 2025-06-18)\n`);
       process.stderr.write(
-        `  Auth: unprotected (readiness only; authorization per MCP 2025-11-25)\n`
+        `  Auth: unprotected mode (no token validation); PRM discovery per RFC 9728\n`
       );
       process.stderr.write(`  Endpoints: POST /mcp, DELETE /mcp, GET /health\n`);
       if (prmEnabled) {
-        process.stderr.write(`  PRM: GET ${prmPath}\n`);
+        process.stderr.write(`  PRM: GET ${prmPath} (implemented, enabled by config)\n`);
+      } else {
+        process.stderr.write(
+          `  PRM: disabled (set --authorization-servers + --public-url to enable)\n`
+        );
       }
       process.stderr.write(
         `  Sessions: max ${options.maxSessions ?? 100} (${options.maxSessionsPerIp ?? 10}/IP), TTL ${(options.sessionTtlMs ?? 1_800_000) / 1000}s\n`
@@ -509,7 +527,9 @@ export async function createHttpTransport(
       process.stderr.write(
         `  CORS: ${corsOrigins.size > 0 ? [...corsOrigins].join(', ') : 'deny all'}\n`
       );
-      process.stderr.write(`  Mode: unprotected (no auth enforcement)\n`);
+      process.stderr.write(
+        `  Mode: unprotected (token validation deferred to v0.11.x+; deployer auth via reverse proxy)\n`
+      );
 
       resolve({
         cleanup: async () => {

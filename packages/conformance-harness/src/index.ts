@@ -26,11 +26,26 @@ export interface FixtureResult {
   duration_ms: number;
 }
 
+export interface ReportTooling {
+  /** Git SHA of the commit that produced this report */
+  git_sha?: string;
+  /** Node.js version used */
+  node_version: string;
+  /** Harness package version */
+  harness_version: string;
+}
+
 export interface HarnessReport {
-  schema_version: '1.0.0';
+  /** Report format version (semver). Bump on breaking schema changes. */
+  format_version: '1.1.0';
+  /** PEAC monorepo version that produced this report */
   peac_version: string;
+  /** Adapter name (e.g. 'core', 'mcp', 'a2a') */
   adapter: string;
+  /** ISO 8601 timestamp of the run */
   timestamp: string;
+  /** Environment and tooling metadata for reproducibility */
+  tooling: ReportTooling;
   summary: {
     total: number;
     passed: number;
@@ -390,7 +405,8 @@ export function runFixture(
 export function buildReport(
   adapter: string,
   peacVersion: string,
-  results: FixtureResult[]
+  results: FixtureResult[],
+  tooling?: Partial<ReportTooling>
 ): HarnessReport {
   // Sort deterministically: by category then fixture name
   const sorted = [...results].sort((a, b) => {
@@ -399,10 +415,15 @@ export function buildReport(
   });
 
   return {
-    schema_version: '1.0.0',
+    format_version: '1.1.0',
     peac_version: peacVersion,
     adapter,
     timestamp: new Date().toISOString(),
+    tooling: {
+      git_sha: tooling?.git_sha,
+      node_version: tooling?.node_version ?? process.version,
+      harness_version: tooling?.harness_version ?? peacVersion,
+    },
     summary: {
       total: sorted.length,
       passed: sorted.filter((r) => r.status === 'pass').length,
@@ -420,7 +441,12 @@ export function formatJson(report: HarnessReport): string {
 export function formatPretty(report: HarnessReport): string {
   const lines: string[] = [];
   lines.push(`Conformance Report: ${report.adapter} (PEAC ${report.peac_version})`);
+  lines.push(`Format: ${report.format_version}`);
   lines.push(`Timestamp: ${report.timestamp}`);
+  lines.push(`Node: ${report.tooling.node_version}`);
+  if (report.tooling.git_sha) {
+    lines.push(`Git: ${report.tooling.git_sha}`);
+  }
   lines.push('');
 
   const byCategory = new Map<string, FixtureResult[]>();

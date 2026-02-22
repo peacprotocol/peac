@@ -1,15 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/conformance-report/1.0.0",
+  "$id": "https://peacprotocol.org/schemas/conformance-report/1.1.0",
   "title": "PEAC Conformance Report",
   "description": "Structured output from the PEAC conformance harness CLI. Versioned schema for CI and ecosystem integration.",
   "type": "object",
-  "required": ["schema_version", "peac_version", "adapter", "timestamp", "summary", "results"],
+  "required": [
+    "format_version",
+    "peac_version",
+    "adapter",
+    "timestamp",
+    "tooling",
+    "summary",
+    "results"
+  ],
   "properties": {
-    "schema_version": {
+    "format_version": {
       "type": "string",
-      "const": "1.0.0",
-      "description": "Report schema version (semver)."
+      "const": "1.1.0",
+      "description": "Report format version (semver). Bump on breaking schema changes."
     },
     "peac_version": {
       "type": "string",
@@ -23,6 +31,25 @@
       "type": "string",
       "format": "date-time",
       "description": "ISO 8601 timestamp of the run."
+    },
+    "tooling": {
+      "type": "object",
+      "required": ["node_version", "harness_version"],
+      "properties": {
+        "git_sha": {
+          "type": "string",
+          "description": "Git SHA of the commit that produced this report."
+        },
+        "node_version": {
+          "type": "string",
+          "description": "Node.js version used (e.g. 'v24.13.0')."
+        },
+        "harness_version": {
+          "type": "string",
+          "description": "Harness package version."
+        }
+      },
+      "additionalProperties": false
     },
     "summary": {
       "type": "object",

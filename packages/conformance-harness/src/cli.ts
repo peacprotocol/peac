@@ -13,6 +13,7 @@
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync, readFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import {
   loadCoreAdapter,
@@ -70,6 +71,14 @@ async function main(): Promise<void> {
   const rootPkg = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf-8'));
   const peacVersion = rootPkg.version as string;
 
+  // Resolve git SHA for reproducibility
+  let gitSha: string | undefined;
+  try {
+    gitSha = execSync('git rev-parse --short HEAD', { encoding: 'utf-8', cwd: repoRoot }).trim();
+  } catch {
+    // Not in a git repo or git not available
+  }
+
   // Load and run fixtures
   const fixtures = loadFixtures(fixtureDir);
   const results = fixtures.map(({ category, file, data }) =>
@@ -77,7 +86,11 @@ async function main(): Promise<void> {
   );
 
   // Build report
-  const report = buildReport(adapterName, peacVersion, results);
+  const report = buildReport(adapterName, peacVersion, results, {
+    git_sha: gitSha,
+    node_version: process.version,
+    harness_version: peacVersion,
+  });
 
   // Output
   if (format === 'pretty') {

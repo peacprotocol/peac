@@ -59,7 +59,8 @@
     "check:unicode": "bash scripts/check-unicode.sh",
     "sanitize:unicode": "node scripts/sanitize-unicode.mjs --fix",
     "version:check": "node scripts/check-version-sync.mjs",
-    "version:bump": "node scripts/bump-version.mjs"
+    "version:bump": "node scripts/bump-version.mjs",
+    "check:zod-major": "node scripts/check-zod-single-major.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",
