@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://peacprotocol.org/schemas/conformance-report/1.1.0",
+  "$id": "https://www.peacprotocol.org/schemas/conformance-report/1.1.0",
   "title": "PEAC Conformance Report",
   "description": "Structured output from the PEAC conformance harness CLI. Versioned schema for CI and ecosystem integration.",
   "type": "object",
