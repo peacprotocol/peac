@@ -13,8 +13,10 @@ import {
   SubjectProfileSnapshot,
   validateSubjectSnapshot,
   createEvidenceNotJsonError,
+  createConstraintViolationError,
   createWorkflowContextInvalidError,
   createWorkflowDagInvalidError,
+  validateKernelConstraints,
   type PEACError,
   type PurposeToken,
   type CanonicalPurpose,
@@ -291,6 +293,12 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
     ...(options.purpose_enforced && { purpose_enforced: options.purpose_enforced }),
     ...(options.purpose_reason && { purpose_reason: options.purpose_reason }),
   };
+
+  // Validate structural kernel constraints before signing (DD-121, fail-closed)
+  const constraintResult = validateKernelConstraints(claims);
+  if (!constraintResult.valid) {
+    throw new IssueError(createConstraintViolationError(constraintResult.violations));
+  }
 
   // Validate claims with Zod - map evidence errors to typed error
   try {
