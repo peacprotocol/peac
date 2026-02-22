@@ -44,7 +44,11 @@ program
     'OAuth authorization server URIs (enables PRM with --public-url)'
   )
   .option('--public-url <url>', 'Canonical public URL of this server (required for PRM)')
-  .option('--trust-proxy', 'Trust X-Forwarded-For for rate limiting (off by default)')
+  .option(
+    '--trust-proxy <value>',
+    'Trust X-Forwarded-For: off (default), loopback, or comma-separated IPs',
+    'off'
+  )
   .action(async (opts) => {
     // Validate transport
     const transportType = opts.transport as string;
@@ -164,7 +168,7 @@ program
         corsOrigins,
         authorizationServers,
         publicUrl: opts.publicUrl as string | undefined,
-        trustProxy: !!opts.trustProxy,
+        trustProxy: (opts.trustProxy as string) || 'off',
         serverFactory: () => createPeacMcpServer(serverOptions),
       });
 

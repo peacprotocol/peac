@@ -17,6 +17,18 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionManager } from './session-manager.js';
 import { SERVER_NAME, SERVER_VERSION, MCP_PROTOCOL_VERSION } from './infra/constants.js';
 
+/**
+ * Trust-proxy configuration for X-Forwarded-For interpretation.
+ *
+ * - 'off': never trust forwarded headers (default; safe for direct clients)
+ * - 'loopback': trust only from 127.0.0.0/8 and ::1
+ * - comma-separated IPs: trust only from listed addresses
+ *
+ * WARNING: only enable behind a trusted reverse proxy. An attacker can forge
+ * X-Forwarded-For from an untrusted peer to bypass per-IP rate limiting.
+ */
+export type TrustProxyValue = 'off' | 'loopback' | string;
+
 export interface HttpTransportOptions {
   /** Port to listen on. Default: 3000 */
   port?: number;
@@ -28,8 +40,8 @@ export interface HttpTransportOptions {
   authorizationServers?: string[];
   /** Canonical public URL of this server (required for PRM). */
   publicUrl?: string;
-  /** Trust X-Forwarded-For for rate limiting. Default: false */
-  trustProxy?: boolean;
+  /** Trust X-Forwarded-For for rate limiting. Default: 'off' */
+  trustProxy?: TrustProxyValue;
   /** Max request body bytes. Default: 1MB */
   maxRequestBytes?: number;
   /** Rate limit: requests per minute per session. Default: 100 */
@@ -50,6 +62,62 @@ interface RateLimitEntry {
 const ONE_MINUTE_MS = 60_000;
 const DEFAULT_MAX_REQUEST_BYTES = 1_048_576; // 1 MB
 const DEFAULT_RATE_LIMIT_RPM = 100;
+const MAX_SESSION_ID_LENGTH = 128;
+
+// Loopback addresses for trust-proxy=loopback
+const LOOPBACK_PREFIXES = ['127.', '::1'];
+
+/**
+ * Validate Mcp-Session-Id: visible ASCII (0x21-0x7E), max 128 chars.
+ * MCP spec requires session IDs to be visible ASCII characters only.
+ */
+function isValidSessionId(id: string): boolean {
+  if (id.length === 0 || id.length > MAX_SESSION_ID_LENGTH) return false;
+  for (let i = 0; i < id.length; i++) {
+    const code = id.charCodeAt(i);
+    if (code < 0x21 || code > 0x7e) return false;
+  }
+  return true;
+}
+
+/**
+ * Check if a remote address is a trusted proxy based on trust-proxy config.
+ */
+function isTrustedProxy(remoteAddr: string, trustProxy: TrustProxyValue): boolean {
+  if (trustProxy === 'off') return false;
+  if (trustProxy === 'loopback') {
+    return LOOPBACK_PREFIXES.some((prefix) => remoteAddr.startsWith(prefix));
+  }
+  // Comma-separated trusted IPs
+  const trusted = trustProxy.split(',').map((s) => s.trim());
+  return trusted.includes(remoteAddr);
+}
+
+/**
+ * Validate --public-url for RFC 9728 PRM correctness:
+ * - Must be https (unless loopback for dev ergonomics)
+ * - Must not contain fragments
+ * - Trailing slashes normalized
+ */
+function validatePublicUrl(rawUrl: string): { url: URL; normalized: string } | { error: string } {
+  let u: URL;
+  try {
+    u = new URL(rawUrl);
+  } catch {
+    return { error: `Invalid URL: ${rawUrl}` };
+  }
+  if (u.hash) {
+    return { error: 'Public URL must not contain fragments (#)' };
+  }
+  const isLoopback =
+    u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname === '::1';
+  if (u.protocol !== 'https:' && !isLoopback) {
+    return { error: 'Public URL must use https (except for localhost/loopback dev usage)' };
+  }
+  // Normalize: strip trailing slash for path matching consistency
+  const normalized = u.href.replace(/\/+$/, '') || u.origin;
+  return { url: u, normalized };
+}
 
 /**
  * Create and start an HTTP server for MCP Streamable HTTP transport.
@@ -85,15 +153,18 @@ export async function createHttpTransport(
     return entry.count <= rateLimitRpm;
   }
 
+  const trustProxyValue: TrustProxyValue = options.trustProxy ?? 'off';
+
   function getClientIp(req: IncomingMessage): string {
-    if (options.trustProxy) {
+    const remoteAddr = req.socket.remoteAddress ?? 'unknown';
+    if (trustProxyValue !== 'off' && isTrustedProxy(remoteAddr, trustProxyValue)) {
       const xff = req.headers['x-forwarded-for'];
       if (typeof xff === 'string') {
         const first = xff.split(',')[0]?.trim();
         if (first) return first;
       }
     }
-    return req.socket.remoteAddress ?? 'unknown';
+    return remoteAddr;
   }
 
   // Allowed hosts for Host header validation
@@ -165,22 +236,27 @@ export async function createHttpTransport(
     return Buffer.concat(chunks);
   }
 
-  // PRM configuration
+  // PRM configuration (RFC 9728 path-aware discovery)
   const prmEnabled = !!(options.authorizationServers?.length && options.publicUrl);
   let prmPath = '/.well-known/oauth-protected-resource';
   let prmDocument: object | undefined;
   if (prmEnabled && options.publicUrl) {
-    try {
-      const u = new URL(options.publicUrl);
-      if (u.pathname !== '/') {
-        prmPath = `/.well-known/oauth-protected-resource${u.pathname}`;
+    const validation = validatePublicUrl(options.publicUrl);
+    if ('error' in validation) {
+      process.stderr.write(
+        `[${SERVER_NAME}] WARNING: --public-url invalid, PRM disabled: ${validation.error}\n`
+      );
+    } else {
+      const { url: u, normalized } = validation;
+      // RFC 9728 path insertion: /.well-known/oauth-protected-resource/<resource-path>
+      const resourcePath = u.pathname.replace(/\/+$/, '');
+      if (resourcePath && resourcePath !== '/') {
+        prmPath = `/.well-known/oauth-protected-resource${resourcePath}`;
       }
       prmDocument = {
-        resource: options.publicUrl,
+        resource: normalized,
         authorization_servers: options.authorizationServers,
       };
-    } catch {
-      // Invalid publicUrl, disable PRM
     }
   }
 
@@ -246,6 +322,12 @@ export async function createHttpTransport(
         const sessionId = req.headers['mcp-session-id'] as string | undefined;
         if (!sessionId) {
           sendJson(res, 400, { error: 'Missing Mcp-Session-Id header' });
+          return;
+        }
+        if (!isValidSessionId(sessionId)) {
+          sendJson(res, 400, {
+            error: 'Invalid Mcp-Session-Id: must be visible ASCII (0x21-0x7E), max 128 chars',
+          });
           return;
         }
         const terminated = await sessionManager.terminateSession(sessionId);
@@ -326,6 +408,12 @@ export async function createHttpTransport(
           sendJson(res, 400, { error: 'Missing Mcp-Session-Id header' });
           return;
         }
+        if (!isValidSessionId(sessionId)) {
+          sendJson(res, 400, {
+            error: 'Invalid Mcp-Session-Id: must be visible ASCII (0x21-0x7E), max 128 chars',
+          });
+          return;
+        }
 
         const entry = sessionManager.getSession(sessionId);
         if (!entry) {
@@ -357,6 +445,10 @@ export async function createHttpTransport(
     server.on('error', reject);
     server.listen(port, host, () => {
       process.stderr.write(`[${SERVER_NAME}] HTTP transport listening on http://${host}:${port}\n`);
+      process.stderr.write(`  Transport: Streamable HTTP (MCP 2025-06-18)\n`);
+      process.stderr.write(
+        `  Auth: unprotected (readiness only; authorization per MCP 2025-11-25)\n`
+      );
       process.stderr.write(`  Endpoints: POST /mcp, DELETE /mcp, GET /health\n`);
       if (prmEnabled) {
         process.stderr.write(`  PRM: GET ${prmPath}\n`);

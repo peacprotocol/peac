@@ -326,4 +326,217 @@ describe('HTTP Transport', () => {
     expect(res.status).toBe(204);
     expect(res.headers.get('access-control-allow-methods')).toContain('POST');
   });
+
+  // --- Session ID validation (MCP spec: visible ASCII 0x21-0x7E) ---
+
+  it('should reject session ID with non-visible ASCII characters', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    // Tab (0x09) passes HTTP header validation but is outside visible ASCII 0x21-0x7E
+    const { status, body } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Mcp-Session-Id': 'session\tid',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 1 }),
+    });
+    expect(status).toBe(400);
+    expect(body).toMatchObject({ error: expect.stringContaining('visible ASCII') });
+  });
+
+  it('should reject session ID with space characters', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Mcp-Session-Id': 'session with spaces',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 1 }),
+    });
+    expect(status).toBe(400);
+  });
+
+  it('should reject session ID exceeding max length', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const longId = 'a'.repeat(200);
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'DELETE',
+      headers: { 'Mcp-Session-Id': longId },
+    });
+    expect(status).toBe(400);
+  });
+
+  it('should reject invalid session ID on DELETE', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    // High byte (0x80, obs-text) passes HTTP header validation but is outside visible ASCII 0x21-0x7E
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'DELETE',
+      headers: { 'Mcp-Session-Id': 'bad\x80id' },
+    });
+    expect(status).toBe(400);
+  });
+
+  // --- PRM endpoint path-aware routing (RFC 9728) ---
+
+  it('should serve PRM at root path when public-url has no path', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth.example.com'],
+      publicUrl: 'https://peac.example.com',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { status, body } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource`
+    );
+    expect(status).toBe(200);
+    expect(body).toMatchObject({
+      resource: 'https://peac.example.com',
+      authorization_servers: ['https://auth.example.com'],
+    });
+  });
+
+  it('should serve PRM at path-aware location for /mcp public-url', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth.example.com'],
+      publicUrl: 'https://peac.example.com/mcp',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    // Should be at path-aware location
+    const { status } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource/mcp`
+    );
+    expect(status).toBe(200);
+
+    // Root well-known should NOT serve PRM (wrong path)
+    const { status: rootStatus } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource`
+    );
+    expect(rootStatus).toBe(404);
+  });
+
+  it('should normalize trailing slash in public-url for PRM', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth.example.com'],
+      publicUrl: 'https://peac.example.com/api/mcp/',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { status, body } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource/api/mcp`
+    );
+    expect(status).toBe(200);
+    // Resource URL should be normalized (no trailing slash)
+    expect(body).toMatchObject({
+      resource: expect.not.stringMatching(/\/$/),
+    });
+  });
+
+  it('should reject public-url with fragment', async () => {
+    const port = getPort();
+    // Public URL with fragment should disable PRM
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth.example.com'],
+      publicUrl: 'https://peac.example.com/mcp#section',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { status } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource/mcp`
+    );
+    // PRM disabled due to invalid public-url
+    expect(status).toBe(404);
+  });
+
+  // --- Trust-proxy behavior ---
+
+  it('should not trust X-Forwarded-For by default', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      rateLimitRpm: 2,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    // X-Forwarded-For should be ignored (trust-proxy=off by default).
+    // Send 3 POST /mcp requests with different XFF values but same actual IP.
+    // With trust-proxy=off, all 3 share the same rate-limit key (real IP),
+    // so the 3rd request should hit the rate limit (rpm=2).
+    const mcpHeaders = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    };
+    for (let i = 0; i < 3; i++) {
+      const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+        method: 'POST',
+        headers: {
+          ...mcpHeaders,
+          'X-Forwarded-For': `10.0.0.${i}`,
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'initialize',
+          id: i + 1,
+          params: {
+            protocolVersion: '2025-11-25',
+            capabilities: {},
+            clientInfo: { name: 'test', version: '1.0' },
+          },
+        }),
+      });
+      if (i < 2) {
+        // First two should succeed (initialize creates sessions)
+        expect(status).not.toBe(429);
+      } else {
+        // Third should be rate-limited: XFF ignored, all keyed to same IP
+        expect(status).toBe(429);
+      }
+    }
+  });
 });

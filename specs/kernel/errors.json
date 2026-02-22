@@ -1114,6 +1114,14 @@
       "description": "Receipt classified as attestation but fails attestation schema validation",
       "retriable": false,
       "category": "validation"
+    },
+    {
+      "code": "E_CONSTRAINT_VIOLATION",
+      "http_status": 400,
+      "title": "Kernel Constraint Violation",
+      "description": "Receipt claims exceed a kernel constraint (max keys, max depth, max string length, max evidence bytes, or similar structural limit)",
+      "retriable": false,
+      "category": "validation"
     }
   ]
 }

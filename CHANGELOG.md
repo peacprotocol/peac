@@ -1210,15 +1210,15 @@ This release normalizes all wire format identifiers to the `peac-<artifact>/<maj
 
 The following items were originally planned for v0.9.28 but deferred to future releases:
 
-- **Full Go SDK (Issue + Policy)** → Moved to v0.9.29
+- **Full Go SDK (Issue + Policy)** -> Moved to v0.9.29
   - Only verify.go exists; issue.go and policy.go not implemented
   - 4-6 day implementation timeline required
-- **npm publish** → Moved to v0.9.31
+- **npm publish** -> Moved to v0.9.31
   - Latest-only publishing policy
   - Quality gates need validation with real deployments
-- **Faremeter Adapter** → Moved to v0.9.30
-- **Python SDK** → Moved to post-v0.10.0
-- **@peac/nextjs v0.1** → Moved to v0.9.30
+- **Faremeter Adapter** -> Moved to v0.9.30
+- **Python SDK** -> Moved to post-v0.10.0
+- **@peac/nextjs v0.1** -> Moved to v0.9.30
 
 ### Notes
 
@@ -1822,7 +1822,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 
 - **Signed Agent-Directory Caching**: TOFU pinning with key rotation support and comprehensive SSRF protection
 - **Receipt Key Rotation**: JWS `kid` header support for seamless key rotation without downtime
-- **Batch Verify API**: High-performance batch verification (POST ≤100 items, GET ≤25 items)
+- **Batch Verify API**: High-performance batch verification (POST <=100 items, GET <=25 items)
 - **Hardened Rate Limiting**: Per-tier token bucket rate limiting with RFC 9457 RateLimit headers
 - **Structured Telemetry**: Privacy-safe event logging with correlation IDs and PII protection
 
