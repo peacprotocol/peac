@@ -103,6 +103,16 @@ If you import schemas from `@peac/schema`, align your Zod major to v4:
   "OAuth readiness" hooks provided via optional PRM endpoint
 - stdio transport remains the default (backward compatible)
 
+### Standards References
+
+- **MCP Transport 2025-06-18**: Streamable HTTP implemented (JSON-only mode, SSE deferred)
+- **MCP Authorization 2025-11-25**: Discovery only (RFC 9728 PRM); protected mode deferred
+- **RFC 9728** (OAuth Protected Resource Metadata): Conditional PRM endpoint (path-aware routing)
+- **CVE-2026-25536** (MCP SDK cross-client data leak): Mitigated by per-session transport isolation
+- **MCP SDK ~1.27.0** (v1.x stable): v2 pre-alpha, not production
+- **Zod ^4.3.6**: Full migration from 3.25.x
+- **OWASP ASI-01 through ASI-10**: Alignment mapping in `docs/security/OWASP-ASI-MAPPING.md`
+
 ## [0.10.14] - 2026-02-22
 
 ### Quality Hardening and Zod 4 Preparation

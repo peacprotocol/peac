@@ -139,6 +139,28 @@ describe('find-invisible-unicode.mjs (CLI)', () => {
     expect(rescan.stdout).toContain('No dangerous Unicode');
   });
 
+  // Trojan Source regression: proves scanner catches the exact bidi attack
+  // pattern (RLO/LRI/PDI) that GitHub flags in diff views. This test exists
+  // so we can confidently label GitHub bidi warnings as false positives when
+  // the scanner passes on our codebase.
+  it('catches Trojan Source attack pattern (RLO + LRI + PDI)', () => {
+    const file = join(tmpDir, 'trojan-source.ts');
+    // Simulated Trojan Source: RLO (U+202E) hides code reordering,
+    // LRI (U+2066) + PDI (U+2069) bracket the deceptive region
+    const rlo = '\xe2\x80\xae'; // U+202E RIGHT-TO-LEFT OVERRIDE
+    const lri = '\xe2\x81\xa6'; // U+2066 LEFT-TO-RIGHT ISOLATE
+    const pdi = '\xe2\x81\xa9'; // U+2069 POP DIRECTIONAL ISOLATE
+    const trojan = `const isAdmin = false;${rlo}${lri}// check access${pdi}\n`;
+    writeFileSync(file, Buffer.from(trojan, 'binary'));
+
+    const result = runScanner([file]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain('U+202E');
+    expect(result.stdout).toContain('RIGHT-TO-LEFT OVERRIDE');
+    expect(result.stdout).toContain('U+2066');
+    expect(result.stdout).toContain('U+2069');
+  });
+
   it('reports file path in output', () => {
     const file = join(tmpDir, 'path-check.ts');
     writeFileSync(file, Buffer.from('\xe2\x80\xaa\n', 'binary'));

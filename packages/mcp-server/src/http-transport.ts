@@ -20,14 +20,20 @@ import { SERVER_NAME, SERVER_VERSION, MCP_PROTOCOL_VERSION } from './infra/const
 /**
  * Trust-proxy configuration for X-Forwarded-For interpretation.
  *
+ * Presets:
  * - 'off': never trust forwarded headers (default; safe for direct clients)
  * - 'loopback': trust only from 127.0.0.0/8 and ::1
- * - comma-separated IPs: trust only from listed addresses
+ * - 'linklocal': trust loopback + link-local (169.254.0.0/16, fe80::/10)
+ * - 'private': trust loopback + link-local + RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+ * - 'all': trust any remote address (DISCOURAGED; use only when behind a fully trusted proxy chain)
+ *
+ * Explicit addresses:
+ * - comma-separated IPs: trust only from listed addresses (e.g., '10.0.0.1,10.0.0.2')
  *
  * WARNING: only enable behind a trusted reverse proxy. An attacker can forge
  * X-Forwarded-For from an untrusted peer to bypass per-IP rate limiting.
  */
-export type TrustProxyValue = 'off' | 'loopback' | string;
+export type TrustProxyValue = 'off' | 'loopback' | 'linklocal' | 'private' | 'all' | string;
 
 export interface HttpTransportOptions {
   /** Port to listen on. Default: 3000 */
@@ -64,9 +70,6 @@ const DEFAULT_MAX_REQUEST_BYTES = 1_048_576; // 1 MB
 const DEFAULT_RATE_LIMIT_RPM = 100;
 const MAX_SESSION_ID_LENGTH = 128;
 
-// Loopback addresses for trust-proxy=loopback
-const LOOPBACK_PREFIXES = ['127.', '::1'];
-
 /**
  * Validate Mcp-Session-Id: visible ASCII (0x21-0x7E), max 128 chars.
  * MCP spec requires session IDs to be visible ASCII characters only.
@@ -81,13 +84,39 @@ function isValidSessionId(id: string): boolean {
 }
 
 /**
+ * Check if an IPv4 address falls within a well-known range.
+ * Does NOT perform CIDR parsing; uses prefix matching for known ranges.
+ */
+function isLoopbackAddr(addr: string): boolean {
+  return addr.startsWith('127.') || addr === '::1' || addr === '::ffff:127.0.0.1';
+}
+function isLinkLocalAddr(addr: string): boolean {
+  if (isLoopbackAddr(addr)) return true;
+  return addr.startsWith('169.254.') || addr.startsWith('fe80');
+}
+function isPrivateAddr(addr: string): boolean {
+  if (isLinkLocalAddr(addr)) return true;
+  return (
+    addr.startsWith('10.') ||
+    addr.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(addr) ||
+    addr.startsWith('fc') ||
+    addr.startsWith('fd') ||
+    addr.startsWith('::ffff:10.') ||
+    addr.startsWith('::ffff:192.168.') ||
+    /^::ffff:172\.(1[6-9]|2\d|3[01])\./.test(addr)
+  );
+}
+
+/**
  * Check if a remote address is a trusted proxy based on trust-proxy config.
  */
 function isTrustedProxy(remoteAddr: string, trustProxy: TrustProxyValue): boolean {
   if (trustProxy === 'off') return false;
-  if (trustProxy === 'loopback') {
-    return LOOPBACK_PREFIXES.some((prefix) => remoteAddr.startsWith(prefix));
-  }
+  if (trustProxy === 'all') return true;
+  if (trustProxy === 'loopback') return isLoopbackAddr(remoteAddr);
+  if (trustProxy === 'linklocal') return isLinkLocalAddr(remoteAddr);
+  if (trustProxy === 'private') return isPrivateAddr(remoteAddr);
   // Comma-separated trusted IPs
   const trusted = trustProxy.split(',').map((s) => s.trim());
   return trusted.includes(remoteAddr);

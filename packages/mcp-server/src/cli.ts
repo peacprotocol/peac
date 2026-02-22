@@ -46,7 +46,7 @@ program
   .option('--public-url <url>', 'Canonical public URL of this server (required for PRM)')
   .option(
     '--trust-proxy <value>',
-    'Trust X-Forwarded-For: off (default), loopback, or comma-separated IPs',
+    'Trust X-Forwarded-For: off (default), loopback, linklocal, private, all (discouraged), or comma-separated IPs',
     'off'
   )
   .action(async (opts) => {

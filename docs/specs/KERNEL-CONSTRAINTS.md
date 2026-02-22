@@ -33,6 +33,14 @@ Payment/rail-specific limits (DD-16 x402 DoS guards) are intentionally excluded:
 
 ## Enforcement Points
 
+### Ordering Precedence (normative)
+
+Constraint validation MUST run before expensive operations (JWKS fetch, signature verification, schema parsing) to provide DoS resistance: malformed or bloated payloads are rejected cheaply before triggering network I/O or crypto operations.
+
+The verification pipeline ordering is: **decode -> constraint check -> schema parse -> expiry check -> JWKS fetch -> signature verify**. This ordering ensures that constraint violations are caught before any outbound network request or CPU-intensive cryptographic operation.
+
+Constraint validation MUST NOT mask signature failures: if a payload is structurally valid (passes constraints) but has an invalid signature, the signature failure MUST be reported as the primary reason. Constraints gate entry to the expensive pipeline, but do not suppress downstream failures.
+
 ### Issuance (`issue()`)
 
 Constraint validation runs **after** the claims object is built and **before** Zod schema validation and Ed25519 signing.
