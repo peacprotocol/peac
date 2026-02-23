@@ -61,33 +61,34 @@ PEAC-Agent-Identity: eyJ0eXBlIjoicGVhYy9hZ2VudC1pZGVudGl0eSJ9...
 
 ## A2A Agent Card Extension
 
-For A2A (Agent-to-Agent) discovery via `/.well-known/agent.json`:
+For A2A (Agent-to-Agent Protocol, Linux Foundation) discovery via `/.well-known/agent-card.json` (v0.3.0):
+
+**Agent Card (`capabilities.extensions[]` array per A2A v0.3.0):**
 
 ```json
 {
   "name": "Example Agent",
   "url": "https://agent.example",
-  "capabilities": ["search", "inference"],
-  "extensions": {
-    "org.peacprotocol": {
-      "version": "0.1",
-      "discovery_url": "/.well-known/peac.txt",
-      "key_directory": "/.well-known/jwks.json",
-      "control_type": "operator",
-      "receipts_endpoint": "/api/receipts"
-    }
+  "capabilities": {
+    "extensions": [
+      {
+        "uri": "https://www.peacprotocol.org/ext/traceability/v1",
+        "description": "PEAC evidence traceability for agent interactions",
+        "required": false
+      }
+    ]
   }
 }
 ```
 
 ## Discovery
 
-| Path                            | Content                              |
-| ------------------------------- | ------------------------------------ |
-| `/.well-known/peac.txt`         | PEAC discovery manifest              |
-| `/.well-known/peac-policy.yaml` | Policy document                      |
-| `/.well-known/jwks.json`        | JWKS key directory                   |
-| `/.well-known/agent.json`       | A2A Agent Card (with PEAC extension) |
+| Path                                  | Content                              |
+| ------------------------------------- | ------------------------------------ |
+| `/.well-known/peac.txt`               | PEAC discovery manifest              |
+| `/.well-known/peac-policy.yaml`       | Policy document                      |
+| `/.well-known/peac-issuer.json`       | PEAC issuer JWKS                     |
+| `/.well-known/agent-card.json`        | A2A Agent Card (with PEAC extension) |
 
 ## Purpose Tokens
 

@@ -194,6 +194,50 @@ describe('discoverAgentCard', () => {
     });
     expect(card).toBeNull();
   });
+
+  it('rejects URLs with userinfo (credentials)', async () => {
+    const mockFetch = createMockFetch(new Map());
+
+    const card = await discoverAgentCard('https://user:pass@agent.example.com', {
+      fetch: mockFetch,
+    });
+    expect(card).toBeNull();
+  });
+
+  it('rejects hostnames that resolve to private IPs (DNS rebinding)', async () => {
+    const mockFetch = createMockFetch(
+      new Map([
+        [
+          'https://evil.example.com/.well-known/agent-card.json',
+          { status: 200, body: JSON.stringify(VALID_AGENT_CARD) },
+        ],
+      ])
+    );
+
+    const card = await discoverAgentCard('https://evil.example.com', {
+      fetch: mockFetch,
+      resolveHostname: async () => ['10.0.0.1'],
+    });
+    expect(card).toBeNull();
+  });
+
+  it('allows hostnames that resolve to public IPs', async () => {
+    const mockFetch = createMockFetch(
+      new Map([
+        [
+          'https://agent.example.com/.well-known/agent-card.json',
+          { status: 200, body: JSON.stringify(VALID_AGENT_CARD) },
+        ],
+      ])
+    );
+
+    const card = await discoverAgentCard('https://agent.example.com', {
+      fetch: mockFetch,
+      resolveHostname: async () => ['93.184.216.34'],
+    });
+    expect(card).not.toBeNull();
+    expect(card!.name).toBe('Test Agent');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -413,6 +457,34 @@ describe('discoverPeacCapabilities', () => {
 
     const result = await discoverPeacCapabilities('https://issuer.example.com', {
       fetch: mockFetch,
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('rejects URLs with userinfo', async () => {
+    const mockFetch = createMockFetch(new Map());
+
+    const result = await discoverPeacCapabilities('https://admin:secret@agent.example.com', {
+      fetch: mockFetch,
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('rejects DNS-rebinding via resolveHostname', async () => {
+    const mockFetch = createMockFetch(
+      new Map([
+        [
+          'https://evil.example.com/.well-known/agent-card.json',
+          { status: 200, body: JSON.stringify(AGENT_CARD_WITH_PARAMS) },
+        ],
+      ])
+    );
+
+    const result = await discoverPeacCapabilities('https://evil.example.com', {
+      fetch: mockFetch,
+      resolveHostname: async () => ['192.168.1.100'],
     });
 
     expect(result).toBeNull();

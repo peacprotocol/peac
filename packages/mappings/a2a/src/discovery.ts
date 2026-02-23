@@ -2,8 +2,9 @@
  * A2A agent discovery with SSRF hardening (Polish C).
  *
  * Discovers A2A Agent Cards and checks for PEAC extension support.
- * Implements DNS rebinding defense, scheme allowlist, proxy bypass,
- * response size cap, content-type check, and redirect rejection.
+ * Implements literal-IP blocking, optional DNS resolution checks,
+ * scheme allowlist, userinfo rejection, response size cap,
+ * content-type check, and redirect rejection.
  */
 
 import type { CarrierFormat } from '@peac/kernel';
@@ -48,8 +49,20 @@ export interface DiscoveryOptions {
    */
   allowInsecureLocalhost?: boolean;
 
-  /** Custom fetch implementation (for testing) */
+  /** Custom fetch implementation (for testing or strict environments) */
   fetch?: typeof globalThis.fetch;
+
+  /**
+   * Optional DNS resolver for DNS rebinding defense.
+   *
+   * When provided, discovery resolves the hostname and checks all returned
+   * IP addresses against private ranges before connecting. This provides
+   * full DNS rebinding protection.
+   *
+   * When omitted, discovery checks only literal IP addresses in the URL
+   * hostname (weaker posture, but portable across runtimes).
+   */
+  resolveHostname?: (hostname: string) => Promise<string[]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -65,14 +78,20 @@ function isLocalhostAddress(hostname: string): boolean {
 }
 
 /**
- * Validate URL scheme and hostname for SSRF protection.
+ * Validate URL scheme, hostname, and credentials for SSRF protection.
  *
  * - Only HTTPS in production (Polish C item 6)
  * - HTTP allowed only for localhost when allowInsecureLocalhost is true
- * - Rejects private IP ranges
+ * - Rejects private IP ranges (literal check always; DNS resolution when resolver provided)
+ * - Rejects URLs with userinfo (user:pass@host) to prevent confusion in allowlists
  */
-function validateUrlForDiscovery(url: string, options: DiscoveryOptions): void {
+async function validateUrlForDiscovery(url: string, options: DiscoveryOptions): Promise<void> {
   const parsed = new URL(url);
+
+  // Reject URLs with userinfo (user:pass@host)
+  if (parsed.username || parsed.password) {
+    throw new Error('SSRF: URLs with userinfo (credentials) are not allowed');
+  }
 
   // Scheme allowlist (Polish C item 6)
   if (parsed.protocol === 'http:') {
@@ -86,9 +105,21 @@ function validateUrlForDiscovery(url: string, options: DiscoveryOptions): void {
     throw new Error(`SSRF: unsupported scheme ${parsed.protocol}`);
   }
 
-  // Check for private IP in hostname (DNS rebinding defense)
+  // Check for private IP in hostname (literal IP check)
   if (isPrivateIP(parsed.hostname) && !isLocalhostAddress(parsed.hostname)) {
     throw new Error(`SSRF: private IP address ${parsed.hostname} not allowed`);
+  }
+
+  // DNS rebinding defense: resolve hostname and check all IPs (when resolver provided)
+  if (options.resolveHostname && !isLocalhostAddress(parsed.hostname)) {
+    const resolvedIPs = await options.resolveHostname(parsed.hostname);
+    for (const ip of resolvedIPs) {
+      if (isPrivateIP(ip)) {
+        throw new Error(
+          `SSRF: hostname ${parsed.hostname} resolved to private IP ${ip}`
+        );
+      }
+    }
   }
 }
 
@@ -103,13 +134,13 @@ function validateUrlForDiscovery(url: string, options: DiscoveryOptions): void {
  * as a legacy fallback per A2A v0.3.0.
  *
  * SSRF protection per Polish C:
- * 1. DNS rebinding defense (private IP check)
+ * 1. Private IP blocking (literal check; DNS resolution when resolveHostname provided)
  * 2. Response size cap (256 KB)
  * 3. Content-Type check (application/json)
  * 4. Redirect rejection (redirect: "error")
  * 5. Timeout (5 seconds)
  * 6. Scheme allowlist (HTTPS only; HTTP for localhost dev only)
- * 7. Proxy bypass (not inheriting proxy env vars)
+ * 7. Userinfo rejection (no credentials in URLs)
  */
 export async function discoverAgentCard(
   baseUrl: string,
@@ -122,14 +153,12 @@ export async function discoverAgentCard(
     const url = new URL(path, baseUrl).toString();
 
     try {
-      validateUrlForDiscovery(url, options);
+      await validateUrlForDiscovery(url, options);
 
       const response = await fetchFn(url, {
         method: 'GET',
         redirect: 'error', // Polish C item 4
         signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
-        // Note: proxy bypass achieved by not configuring proxy agent
-        // In Node.js, fetch does not inherit HTTP_PROXY by default
       });
 
       if (!response.ok) {
@@ -277,7 +306,7 @@ async function discoverPeacWellKnown(
   const url = new URL('/.well-known/peac.json', baseUrl).toString();
 
   try {
-    validateUrlForDiscovery(url, options);
+    await validateUrlForDiscovery(url, options);
 
     const response = await fetchFn(url, {
       method: 'GET',
@@ -333,7 +362,7 @@ async function discoverPeacViaHeaderProbe(
   const fetchFn = options.fetch ?? globalThis.fetch;
 
   try {
-    validateUrlForDiscovery(baseUrl, options);
+    await validateUrlForDiscovery(baseUrl, options);
 
     const response = await fetchFn(baseUrl, {
       method: 'HEAD',
