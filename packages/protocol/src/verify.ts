@@ -8,6 +8,7 @@ import {
   ReceiptClaims,
   SubjectProfileSnapshot,
   validateSubjectSnapshot,
+  validateKernelConstraints,
 } from '@peac/schema';
 import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 
@@ -206,6 +207,17 @@ export async function verifyReceipt(
   try {
     // Decode JWS to get issuer
     const { header, payload } = decode<PEACReceiptClaims>(receiptJws);
+
+    // Validate structural kernel constraints (DD-121, fail-closed)
+    const constraintResult = validateKernelConstraints(payload);
+    if (!constraintResult.valid) {
+      const v = constraintResult.violations[0];
+      return {
+        ok: false,
+        reason: 'constraint_violation',
+        details: `Kernel constraint violated: ${v.constraint} (actual: ${v.actual}, limit: ${v.limit})`,
+      };
+    }
 
     // Validate claims structure
     ReceiptClaims.parse(payload);
