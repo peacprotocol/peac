@@ -324,5 +324,39 @@
       "version": "0.10.9",
       "expected_error": "E_PARSE_ATTESTATION_INVALID"
     }
+  },
+  "carrier": {
+    "valid-minimal.json": {
+      "description": "Minimal carrier with only receipt_ref",
+      "version": "0.11.1"
+    },
+    "valid-full.json": {
+      "description": "Full carrier with all optional fields",
+      "version": "0.11.1"
+    },
+    "valid-embed-no-optional.json": {
+      "description": "Embed carrier with receipt_jws but no other optional fields",
+      "version": "0.11.1"
+    },
+    "valid-http-reference.json": {
+      "description": "HTTP reference-only carrier within 8KB header limit",
+      "version": "0.11.1"
+    },
+    "valid-with-redaction.json": {
+      "description": "Carrier with redaction metadata",
+      "version": "0.11.1"
+    },
+    "invalid-receipt-ref.json": {
+      "description": "Carrier with malformed receipt_ref",
+      "version": "0.11.1"
+    },
+    "invalid-jws-format.json": {
+      "description": "Carrier with invalid receipt_jws format",
+      "version": "0.11.1"
+    },
+    "invalid-oversize.json": {
+      "description": "Carrier exceeding transport max_size",
+      "version": "0.11.1"
+    }
   }
 }

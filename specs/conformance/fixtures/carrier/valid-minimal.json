@@ -1,0 +1,12 @@
+{
+  "description": "Minimal valid carrier with only required receipt_ref",
+  "carrier": {
+    "receipt_ref": "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+  },
+  "meta": {
+    "transport": "mcp",
+    "format": "reference",
+    "max_size": 65536
+  },
+  "expected_valid": true
+}

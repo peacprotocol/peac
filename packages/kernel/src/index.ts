@@ -77,3 +77,14 @@ export {
 
 // Export HTTP utilities (cache safety, header management)
 export { VARY_HEADERS, applyPurposeVary, getPeacVaryHeaders, needsPurposeVary } from './http.js';
+
+// Evidence Carrier Contract types (v0.11.1+ DD-124)
+export { PEAC_RECEIPT_HEADER } from './carrier.js';
+export type {
+  ReceiptRef,
+  CarrierFormat,
+  PeacEvidenceCarrier,
+  CarrierMeta,
+  CarrierValidationResult,
+  CarrierAdapter,
+} from './carrier.js';
