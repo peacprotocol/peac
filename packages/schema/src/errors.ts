@@ -151,6 +151,9 @@ export const ERROR_CODES = {
   E_WORKFLOW_PARENT_NOT_FOUND: 'E_WORKFLOW_PARENT_NOT_FOUND',
   E_WORKFLOW_SUMMARY_INVALID: 'E_WORKFLOW_SUMMARY_INVALID',
   E_WORKFLOW_CYCLE_DETECTED: 'E_WORKFLOW_CYCLE_DETECTED',
+
+  // Constraint errors (400, DD-121)
+  E_CONSTRAINT_VIOLATION: 'E_CONSTRAINT_VIOLATION',
 } as const;
 
 /**
@@ -234,5 +237,35 @@ export function createWorkflowDagInvalidError(
     pointer: '/ext/org.peacprotocol~1workflow/parent_step_ids',
     remediation: 'Ensure workflow forms a valid directed acyclic graph (DAG)',
     details: { reason, message: messages[reason] },
+  });
+}
+
+// ============================================================================
+// Constraint Error Helpers (v0.11.0+, DD-121)
+// ============================================================================
+
+/**
+ * Create a kernel constraint violation error
+ *
+ * Used when receipt claims violate structural kernel constraints
+ * (depth, array length, object keys, string length, total nodes).
+ */
+export function createConstraintViolationError(
+  violations: Array<{
+    constraint: string;
+    actual: number;
+    limit: number;
+    path?: string;
+  }>
+): PEACError {
+  const first = violations[0];
+  const summary = violations
+    .map((v) => `${v.constraint} (actual: ${v.actual}, limit: ${v.limit})`)
+    .join('; ');
+  return createPEACError(ERROR_CODES.E_CONSTRAINT_VIOLATION, 'validation', 'error', false, {
+    http_status: 400,
+    pointer: first?.path,
+    remediation: 'Reduce receipt claims size to stay within kernel constraints',
+    details: { message: `Kernel constraint violated: ${summary}`, violations },
   });
 }
