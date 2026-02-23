@@ -5,7 +5,7 @@
 **Since:** v0.10.7
 **Extension Key:** `org.peacprotocol/interaction@0.1`
 
-**Terminology:** This specification uses MUST, SHOULD, and MAY per RFC 2119. Sections labeled "Non-Normative" are implementation guidance and not conformance requirements.
+**Terminology:** This specification uses MUST, SHOULD, and MAY per BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals. Sections labeled "Non-Normative" are implementation guidance and not conformance requirements.
 
 ## Abstract
 

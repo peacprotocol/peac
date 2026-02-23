@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@peac/kernel": "workspace:*",
+    "@peac/schema": "workspace:*",
     "jose": "^5.2.0"
   },
   "devDependencies": {
