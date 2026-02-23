@@ -12,7 +12,7 @@
 
 This document defines the Evidence Carrier Contract: the universal interface that lets any protocol carry PEAC receipts without kernel changes. The carrier is a protocol-neutral envelope that wraps a content-addressed receipt reference with optional verification metadata.
 
-**Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+**Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown here.
 
 ### 1.1 Scope
 
