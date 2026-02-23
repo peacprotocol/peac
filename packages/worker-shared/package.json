@@ -1,6 +1,6 @@
 {
   "name": "@peac/worker-shared",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "private": true,
   "description": "Shared runtime-neutral TAP verification logic for edge worker surfaces",
   "type": "module",

@@ -17,6 +17,10 @@ export default defineConfig({
       { find: '@peac/protocol', replacement: resolve(__dirname, 'packages/protocol/src/index.ts') },
       { find: '@peac/control', replacement: resolve(__dirname, 'packages/control/src/index.ts') },
       {
+        find: '@peac/mappings-mcp',
+        replacement: resolve(__dirname, 'packages/mappings/mcp/src/index.ts'),
+      },
+      {
         find: '@peac/capture-core',
         replacement: resolve(__dirname, 'packages/capture/core/src/index.ts'),
       },
@@ -40,7 +44,7 @@ export default defineConfig({
       'apps/api/**',
       'packages/core/src/**/*.test.js',
       'packages/sdk-js/tests/**',
-      'tests/smoke/**',
+      // tests/smoke re-enabled for v0.11.1 (MCP carrier e2e is a release gate)
       // QUARANTINE: surfaces/nextjs/middleware/tests/parity.test.ts
       //
       // Failing tests:
@@ -72,6 +76,7 @@ export default defineConfig({
       'tests/parity/**/*.test.ts',
       'tests/scripts/**/*.test.ts',
       'tests/perf/**/*.test.ts',
+      'tests/smoke/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,

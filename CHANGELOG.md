@@ -7,6 +7,112 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-02-24
+
+### Evidence Carrier Contract + A2A Mapping
+
+v0.11.1 formalizes the Evidence Carrier Contract: the universal interface that
+lets any protocol (MCP, A2A, ACP, UCP, x402, HTTP) carry PEAC receipts without
+kernel changes. This is the first release with A2A (Agent-to-Agent Protocol)
+support and content-addressed receipt references.
+
+### Added
+
+- **Evidence Carrier Contract** (DD-124)
+  - `PeacEvidenceCarrier` type in `@peac/kernel` (Layer 0, zero runtime)
+  - `CarrierAdapter<TInput, TOutput>` generic interface for protocol adapters
+  - `CarrierMeta` type with transport, format, and size limit metadata
+  - `computeReceiptRef()` in `@peac/schema`: canonical SHA-256 receipt reference
+    computation (WebCrypto, portable across Node >= 20, Deno, Bun, Workers)
+  - `validateCarrierConstraints()`: transport-aware carrier validation
+  - Zod schemas: `ReceiptRefSchema`, `CompactJwsSchema`, `PeacEvidenceCarrierSchema`
+  - Conformance fixtures: 7 carrier fixtures (valid + invalid vectors)
+- **`@peac/mappings-a2a`** (NEW package, DD-126, DD-128)
+  - A2A evidence carrier mapping for Agent-to-Agent Protocol v0.3.0
+  - Extension URI: `https://www.peacprotocol.org/ext/traceability/v1`
+  - Metadata layout: `metadata[extensionURI] = { carriers: [...] }` per A2A convention
+  - Attach/extract for TaskStatus, Message, and Artifact metadata
+  - Agent Card extension type for `capabilities.extensions[]`
+  - `A2A-Extensions` header parser (DD-86: no X-headers)
+  - Agent Card discovery with SSRF protection (DNS rebinding defense,
+    `redirect: "error"`, 256 KB response cap, Content-Type check)
+  - No runtime dependency on `@a2a-js/sdk` (minimal types from spec)
+- **MCP `_meta` carrier format** (DD-125, DD-129)
+  - `attachReceiptToMeta()` / `extractReceiptFromMeta()` in `@peac/mappings-mcp`
+  - Keys: `org.peacprotocol/receipt_ref`, `org.peacprotocol/receipt_jws`
+  - `McpCarrierAdapter` implementing `CarrierAdapter`
+  - `extractReceiptFromMetaAsync()`: async extraction with receipt_ref consistency
+    check (DD-129: `sha256(receipt_jws) MUST equal receipt_ref`)
+  - `assertNotMcpReservedKey()`: MCP \_meta reserved key guard per spec 2025-11-25
+    (checks second label in dot-separated prefix)
+  - Backward compat: reads legacy `org.peacprotocol/receipt` key (v0.10.13),
+    auto-computes `receipt_ref` from JWS
+- **ACP carrier adoption** in `@peac/mappings-acp`
+  - `attachCarrierToACPHeaders()` / `extractCarrierFromACPHeaders()`
+  - Header-only transport: `PEAC-Receipt` = compact JWS (8 KB limit)
+  - ACP state transition helpers (create/update/complete/cancel)
+  - Webhook HMAC binding via `request_nonce`
+- **UCP carrier adoption** in `@peac/mappings-ucp`
+  - `normalizeToCarrier()` from webhook evidence
+  - `attachCarrierToWebhookPayload()` for outbound webhooks
+  - Backward compat with `extensions["org.peacprotocol/interaction@0.1"]`
+- **x402 carrier adapter** in `@peac/adapter-x402`
+  - `fromOfferResponse()` / `fromSettlementResponse()` for HTTP 402/200 flows
+  - `X402CarrierAdapter` implementing `CarrierAdapter`
+  - `ChallengeType` taxonomy: `payment`, `auth`, `consent`, `rate_limit`,
+    `purpose_denied`, `other`
+  - Header-only transport: `PEAC-Receipt` = compact JWS (8 KB limit)
+- **JWKS resolver** in `@peac/protocol`
+  - Shared JWKS key fetching and caching for offline verification
+  - SSRF-hardened: private IP blocking, response size cap, timeout
+- **Discovery Profile** spec and 3-step algorithm (DD-110)
+  - Agent Card -> `/.well-known/peac.json` -> `PEAC-Receipt` header probe
+  - `discoverPeacCapabilities()` in `@peac/mappings-a2a`
+- **Normative specs**
+  - `docs/specs/EVIDENCE-CARRIER-CONTRACT.md`
+  - `docs/specs/A2A-RECEIPT-PROFILE.md`
+  - `docs/specs/MCP-EVIDENCE-PROFILE.md`
+  - `docs/specs/DISCOVERY-PROFILE.md`
+- **MCP carrier e2e smoke test** (release gate)
+  - Full round-trip: issue -> computeReceiptRef -> attachReceiptToMeta ->
+    extractReceiptFromMetaAsync -> verifyLocal
+  - Tampered receipt_ref detection (DD-129)
+  - Legacy `org.peacprotocol/receipt` backward compat verification
+
+### Changed
+
+- **AGENTS.md**: updated MCP section to v0.11.1 carrier format, added A2A
+  metadata carrier example, updated discovery table with spec links
+- **Registry** (`specs/kernel/registries.json`): added `a2a`, `ucp`, `stripe`
+  entries; bumped version to 0.10.0
+
+### Deferred
+
+- NIST CAISI RFI submission: deferred to separate submission (March 9 deadline)
+- Full OAuth 2.1 MCP server: deferred to v0.11.x+
+- A2A body-embed carrier format: deferred to future version (metadata-only in v0.11.1)
+- ACP/x402 body-embed carrier format: deferred to future version (header-only in v0.11.1)
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- Design decisions: DD-124 (carrier types), DD-125 (MCP legacy deprecation),
+  DD-126 (no external SDK deps), DD-127 (carrier size limits), DD-128 (A2A
+  version pinning), DD-129 (carrier field immutability), DD-130 (AGENTS.md
+  alignment), DD-131 (carrier validation as ASI-04 defense)
+- `@modelcontextprotocol/sdk` stays at ~1.26.0 (npm latest; v1.27.0 is GitHub
+  tag only, not published to npm)
+- PRs: #414 (types+schemas), #415 (spec+docs), #416 (A2A mapping), #417 (MCP
+  carrier), #418 (ACP+UCP), #419 (x402), #420 (profile specs), #421 (discovery)
+
+### Standards References
+
+- **A2A Protocol v0.3.0** (Linux Foundation): Extension metadata layout
+- **MCP Specification 2025-11-25**: `_meta` reverse-DNS key conventions
+- **RFC 9711** (EAT, Oct 28, 2025): Entity Attestation Token reference model
+- **OWASP ASI-04** (Supply Chain): Carrier validation as defense
+- **CVE-2026-25536**: MCP SDK floor remains >= 1.26.0
+
 ## [0.11.0] - 2026-02-22
 
 ### Infrastructure Modernization + Enterprise Readiness
