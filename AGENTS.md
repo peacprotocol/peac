@@ -31,11 +31,12 @@ Supported agent proof methods:
 
 ## MCP Integration
 
-PEAC receipts can be attached to MCP (Model Context Protocol) messages:
+PEAC receipts are attached to MCP (Model Context Protocol) messages via the Evidence Carrier Contract.
 
-**JSON-RPC Response (stdio transport):**
+**JSON-RPC Response (`_meta` carrier, v0.11.1+):**
 
-Per MCP specification, use reverse-DNS keys in `_meta` to avoid collisions:
+Per MCP specification (2025-11-25), use reverse-DNS keys in `_meta` to avoid collisions.
+The `org.peacprotocol/` prefix is not reserved (second label is `peacprotocol`, not `modelcontextprotocol` or `mcp`).
 
 ```json
 {
@@ -44,7 +45,8 @@ Per MCP specification, use reverse-DNS keys in `_meta` to avoid collisions:
   "result": {
     "content": [...],
     "_meta": {
-      "org.peacprotocol/receipt": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...",
+      "org.peacprotocol/receipt_ref": "sha256:abc123...",
+      "org.peacprotocol/receipt_jws": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...",
       "org.peacprotocol/agent_id": "assistant:example",
       "org.peacprotocol/verified_at": "2026-01-30T12:00:00Z"
     }
@@ -52,12 +54,15 @@ Per MCP specification, use reverse-DNS keys in `_meta` to avoid collisions:
 }
 ```
 
+**Legacy format (v0.10.13):** The `org.peacprotocol/receipt` key (JWS string without `receipt_ref`) is still readable for backward compatibility. New integrations SHOULD use the carrier format above.
+
 **HTTP Transport:**
 
 ```http
 PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
-PEAC-Agent-Identity: eyJ0eXBlIjoicGVhYy9hZ2VudC1pZGVudGl0eSJ9...
 ```
+
+The `PEAC-Receipt` header always carries a compact JWS (never a bare `receipt_ref`).
 
 ## A2A Agent Card Extension
 
@@ -80,6 +85,25 @@ For A2A (Agent-to-Agent Protocol, Linux Foundation) discovery via `/.well-known/
   }
 }
 ```
+
+**Evidence carrier in A2A metadata (TaskStatus, Message, Artifact):**
+
+```json
+{
+  "metadata": {
+    "https://www.peacprotocol.org/ext/traceability/v1": {
+      "carriers": [
+        {
+          "receipt_ref": "sha256:abc123...",
+          "receipt_jws": "eyJhbGciOi..."
+        }
+      ]
+    }
+  }
+}
+```
+
+The extension URI key maps to a nested object containing the carrier array. This follows the A2A v0.3.0 metadata convention.
 
 ## Discovery
 

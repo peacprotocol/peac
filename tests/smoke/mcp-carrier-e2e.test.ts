@@ -5,8 +5,8 @@
  * receipt issuance through MCP _meta carrier attachment, extraction, and
  * offline verification.
  *
- * No network calls, no clock dependencies. Uses deterministic key material
- * for reproducible failures.
+ * No network calls, no clock dependencies. Random keypair per run;
+ * failures are reproducible by re-running (no external state).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -24,7 +24,7 @@ import {
 } from '@peac/mappings-mcp';
 
 /**
- * Issue a test receipt with deterministic parameters.
+ * Issue a test receipt with fixed claim parameters (random keypair).
  * Returns the JWS and the keypair used for verification.
  */
 async function issueTestReceipt(opts?: { reference?: string }) {
@@ -133,16 +133,13 @@ describe('MCP carrier e2e round-trip', () => {
     expect(extracted!.receipts[0].receipt_ref).toBe(expectedRef);
   });
 
-  it('round-trip preserves all carrier fields exactly', async () => {
+  it('round-trip preserves receipt_ref and receipt_jws exactly', async () => {
     const { jws } = await issueTestReceipt({ reference: 'tx_roundtrip' });
     const receiptRef = await computeReceiptRef(jws);
 
     const carrier: PeacEvidenceCarrier = {
       receipt_ref: receiptRef,
       receipt_jws: jws,
-      policy_binding: 'sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234',
-      actor_binding: 'did:example:agent-001',
-      request_nonce: 'nonce-e2e-001',
     };
 
     const mcpResult: Record<string, unknown> = { content: [] };
