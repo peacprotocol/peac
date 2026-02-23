@@ -21,8 +21,7 @@ import {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const SAMPLE_JWS =
-  'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.c2lnbmF0dXJl';
+const SAMPLE_JWS = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.c2lnbmF0dXJl';
 
 async function makeCarrier(): Promise<PeacEvidenceCarrier> {
   const ref = await computeReceiptRef(SAMPLE_JWS);
@@ -223,9 +222,7 @@ describe('X402CarrierAdapter', () => {
       receipt_jws: oversizeJws,
     };
 
-    expect(() => adapter.attach({}, [carrier])).toThrow(
-      /Carrier constraint violation/
-    );
+    expect(() => adapter.attach({}, [carrier])).toThrow(/Carrier constraint violation/);
   });
 
   it('should throw when receipt_jws is absent (reference mode not supported)', () => {
@@ -234,9 +231,7 @@ describe('X402CarrierAdapter', () => {
         'sha256:0000000000000000000000000000000000000000000000000000000000000000' as PeacEvidenceCarrier['receipt_ref'],
     };
 
-    expect(() => adapter.attach({}, [carrier])).toThrow(
-      /x402 carrier requires receipt_jws/
-    );
+    expect(() => adapter.attach({}, [carrier])).toThrow(/x402 carrier requires receipt_jws/);
   });
 
   it('should validate constraints with header-sized limits', async () => {

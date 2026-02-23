@@ -170,12 +170,8 @@ export async function fromSettlementResponseAsync(
  * v0.11.1: header-only transport. Extracts from and attaches to
  * PEAC-Receipt header. Requires receipt_jws for attachment.
  */
-export class X402CarrierAdapter
-  implements CarrierAdapter<X402ResponseLike, X402ResponseLike>
-{
-  extract(
-    input: X402ResponseLike
-  ): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
+export class X402CarrierAdapter implements CarrierAdapter<X402ResponseLike, X402ResponseLike> {
+  extract(input: X402ResponseLike): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
     if (!input.headers) return null;
     return fromOfferResponse(input.headers, input.body);
   }
@@ -189,18 +185,14 @@ export class X402CarrierAdapter
 
     const carrier = carriers[0];
     if (!carrier.receipt_jws) {
-      throw new Error(
-        'x402 carrier requires receipt_jws (embed format) in v0.11.1'
-      );
+      throw new Error('x402 carrier requires receipt_jws (embed format) in v0.11.1');
     }
 
     const effectiveMeta = meta ?? defaultX402Meta();
 
     const validation = validateCarrierConstraints(carrier, effectiveMeta);
     if (!validation.valid) {
-      throw new Error(
-        `Carrier constraint violation: ${validation.violations.join('; ')}`
-      );
+      throw new Error(`Carrier constraint violation: ${validation.violations.join('; ')}`);
     }
 
     if (!output.headers) {
@@ -212,10 +204,7 @@ export class X402CarrierAdapter
     return output;
   }
 
-  validateConstraints(
-    carrier: PeacEvidenceCarrier,
-    meta: CarrierMeta
-  ): CarrierValidationResult {
+  validateConstraints(carrier: PeacEvidenceCarrier, meta: CarrierMeta): CarrierValidationResult {
     return validateCarrierConstraints(carrier, meta);
   }
 }

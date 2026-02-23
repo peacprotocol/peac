@@ -174,9 +174,7 @@ export function toPeacRecord(
  * @param receiptJws - Compact JWS of the PEAC receipt
  * @returns PeacEvidenceCarrier with computed receipt_ref
  */
-export async function toPeacCarrier(
-  receiptJws: string
-): Promise<PeacEvidenceCarrier> {
+export async function toPeacCarrier(receiptJws: string): Promise<PeacEvidenceCarrier> {
   const ref = await computeReceiptRef(receiptJws);
   return {
     receipt_ref: ref,
