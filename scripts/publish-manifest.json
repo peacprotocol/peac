@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.11.1",
-  "lastUpdated": "2026-02-23",
-  "totalPackages": 21,
+  "lastUpdated": "2026-02-24",
+  "totalPackages": 25,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -23,7 +23,11 @@
     "@peac/policy-kit",
     "@peac/adapter-core",
     "@peac/mappings-mcp",
+    "@peac/mappings-acp",
+    "@peac/mappings-ucp",
+    "@peac/mappings-a2a",
     "@peac/rails-x402",
+    "@peac/adapter-x402",
     "@peac/adapter-openclaw",
     "@peac/cli"
   ],
@@ -44,7 +48,15 @@
       "@peac/policy-kit",
       "@peac/adapter-core"
     ],
-    "5-adapters": ["@peac/mappings-mcp", "@peac/rails-x402", "@peac/adapter-openclaw"],
+    "5-adapters": [
+      "@peac/mappings-mcp",
+      "@peac/mappings-acp",
+      "@peac/mappings-ucp",
+      "@peac/mappings-a2a",
+      "@peac/rails-x402",
+      "@peac/adapter-x402",
+      "@peac/adapter-openclaw"
+    ],
     "6-cli": ["@peac/cli"]
   },
   "trustedPublisher": {
@@ -53,14 +65,10 @@
     "environment": "npm-production"
   },
   "pendingTrustedPublishing": [
-    "@peac/adapter-x402",
     "@peac/telemetry-otel",
-    "@peac/mappings-a2a",
-    "@peac/mappings-acp",
     "@peac/mappings-aipref",
     "@peac/mappings-rsl",
     "@peac/mappings-tap",
-    "@peac/mappings-ucp",
     "@peac/worker-core",
     "@peac/net-node",
     "@peac/attribution",
