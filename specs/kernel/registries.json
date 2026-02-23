@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.9.19",
+  "version": "0.10.0",
   "description": "PEAC protocol registries - payment rails, control engines, transport methods, agent protocols",
   "payment_rails": [
     {
@@ -36,6 +36,13 @@
       "category": "payment-gateway",
       "description": "Razorpay payment gateway (UPI, cards, netbanking, wallets)",
       "reference": "https://razorpay.com/docs/",
+      "status": "informational"
+    },
+    {
+      "id": "stripe",
+      "category": "payment-gateway",
+      "description": "Stripe payment processing",
+      "reference": "https://stripe.com/docs",
       "status": "informational"
     }
   ],
@@ -122,10 +129,24 @@
       "status": "informational"
     },
     {
+      "id": "a2a",
+      "category": "agent-protocol",
+      "description": "Agent-to-Agent Protocol (A2A, Linux Foundation)",
+      "reference": "https://a2a-protocol.org/",
+      "status": "informational"
+    },
+    {
       "id": "tap",
       "category": "card-protocol",
       "description": "Trusted Agent Protocol (Visa TAP)",
       "reference": "https://developer.visa.com/",
+      "status": "informational"
+    },
+    {
+      "id": "ucp",
+      "category": "commerce-protocol",
+      "description": "Universal Commerce Protocol (UCP)",
+      "reference": null,
       "status": "informational"
     }
   ]
