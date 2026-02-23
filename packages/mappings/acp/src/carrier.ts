@@ -1,9 +1,9 @@
 /**
  * ACP carrier adapter for Evidence Carrier Contract (DD-124).
  *
- * Attaches and extracts PEAC evidence carriers via HTTP headers and body.
- * - PEAC-Receipt header: always a compact JWS (never bare receipt_ref)
- * - Link header: rel="peac-receipt" for reference-only transport
+ * v0.11.1: header-only embed transport via PEAC-Receipt (compact JWS).
+ * All size limits enforce the 8 KB header ceiling (acp_headers).
+ * Reference mode is not supported; receipt_jws is required.
  */
 
 import type {
@@ -14,10 +14,8 @@ import type {
 } from '@peac/kernel';
 import { PEAC_RECEIPT_HEADER } from '@peac/kernel';
 import {
-  PeacEvidenceCarrierSchema,
   validateCarrierConstraints,
   computeReceiptRef,
-  verifyReceiptRefConsistency,
   CARRIER_TRANSPORT_LIMITS,
 } from '@peac/schema';
 
@@ -63,21 +61,27 @@ export interface AcpExtractAsyncResult extends AcpExtractResult {
 /**
  * Attach carrier to ACP headers.
  *
- * Sets PEAC-Receipt header with compact JWS (correction item 1).
- * For reference-only transport, sets Link header with rel="peac-receipt".
+ * Sets PEAC-Receipt header with compact JWS.
+ * Requires receipt_jws; reference mode is not supported in v0.11.1.
  */
 export function attachCarrierToACPHeaders(
   headers: HeaderMap,
   carrier: PeacEvidenceCarrier
 ): HeaderMap {
-  if (carrier.receipt_jws) {
-    headers[PEAC_RECEIPT_HEADER] = carrier.receipt_jws;
+  if (!carrier.receipt_jws) {
+    throw new Error(
+      'ACP carrier requires receipt_jws (embed format) in v0.11.1'
+    );
   }
+  headers[PEAC_RECEIPT_HEADER] = carrier.receipt_jws;
   return headers;
 }
 
 /**
- * Attach carrier to ACP message (headers + body).
+ * Attach carrier to ACP message via headers.
+ *
+ * Enforces header-sized limits (8 KB) since ACP v0.11.1 uses
+ * PEAC-Receipt header as the sole transport surface.
  */
 export function attachCarrierToACPMessage(
   msg: AcpMessageLike,
@@ -85,8 +89,8 @@ export function attachCarrierToACPMessage(
 ): AcpMessageLike {
   const meta: CarrierMeta = {
     transport: 'acp',
-    format: carrier.receipt_jws ? 'embed' : 'reference',
-    max_size: carrier.receipt_jws ? ACP_CARRIER_LIMITS.embed : ACP_CARRIER_LIMITS.headers,
+    format: 'embed',
+    max_size: ACP_CARRIER_LIMITS.headers,
   };
 
   const validation = validateCarrierConstraints(carrier, meta);

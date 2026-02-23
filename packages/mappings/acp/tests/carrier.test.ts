@@ -44,13 +44,13 @@ describe('attachCarrierToACPHeaders', () => {
     expect(headers[PEAC_RECEIPT_HEADER]).toBe(SAMPLE_JWS);
   });
 
-  it('should not set header when receipt_jws is absent', () => {
+  it('should throw when receipt_jws is absent (reference mode not supported)', () => {
     const carrier: PeacEvidenceCarrier = { receipt_ref: VALID_REF };
     const headers: Record<string, string> = {};
 
-    attachCarrierToACPHeaders(headers, carrier);
-
-    expect(headers[PEAC_RECEIPT_HEADER]).toBeUndefined();
+    expect(() => attachCarrierToACPHeaders(headers, carrier)).toThrow(
+      /ACP carrier requires receipt_jws/
+    );
   });
 
   it('should preserve existing headers', async () => {
@@ -212,12 +212,12 @@ describe('AcpCarrierAdapter', () => {
     expect(result.headers).toBeUndefined();
   });
 
-  it('should validate constraints', async () => {
+  it('should validate constraints with header-sized limits', async () => {
     const carrier = await makeCarrier();
     const meta: CarrierMeta = {
       transport: 'acp',
       format: 'embed',
-      max_size: ACP_CARRIER_LIMITS.embed,
+      max_size: ACP_CARRIER_LIMITS.headers,
     };
 
     const validation = adapter.validateConstraints(carrier, meta);
