@@ -243,7 +243,7 @@ export interface PeacDiscoveryResult {
   source: PeacDiscoverySource;
   kinds: string[];
   carrier_formats: CarrierFormat[];
-  jwks_uri?: string;
+  issuer_config_url?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -273,7 +273,9 @@ export async function discoverPeacCapabilities(
         source: 'agent_card',
         kinds: ext.params?.supported_kinds ?? ['peac-receipt/0.1'],
         carrier_formats: ext.params?.carrier_formats ?? ['embed'],
-        ...(ext.params?.jwks_uri && { jwks_uri: ext.params.jwks_uri }),
+        ...(ext.params?.issuer_config_url && {
+          issuer_config_url: ext.params.issuer_config_url,
+        }),
       };
     }
   }
@@ -340,7 +342,9 @@ async function discoverPeacWellKnown(
       carrier_formats: Array.isArray(data.carrier_formats)
         ? (data.carrier_formats as CarrierFormat[])
         : ['embed'],
-      ...(typeof data.jwks_uri === 'string' && { jwks_uri: data.jwks_uri }),
+      ...(typeof data.issuer_config_url === 'string' && {
+        issuer_config_url: data.issuer_config_url,
+      }),
     };
   } catch {
     return null;

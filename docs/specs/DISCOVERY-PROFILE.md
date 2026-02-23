@@ -35,7 +35,7 @@ Check if the endpoint publishes a standalone PEAC discovery file.
 
 1. Fetch `{baseUrl}/.well-known/peac.json`
 2. Parse the JSON response
-3. Extract capabilities: `supported_kinds`, `carrier_formats`, `jwks_uri`
+3. Extract capabilities: `supported_kinds`, `carrier_formats`, `issuer_config_url`
 
 This step supports endpoints that implement PEAC but do not publish A2A Agent Cards (standalone PEAC issuers, HTTP middleware, payment gateways).
 
@@ -47,15 +47,15 @@ This step supports endpoints that implement PEAC but do not publish A2A Agent Ca
 {
   "supported_kinds": ["peac-receipt/0.1"],
   "carrier_formats": ["embed", "reference"],
-  "jwks_uri": "https://issuer.example.com/.well-known/jwks.json"
+  "issuer_config_url": "https://issuer.example.com/.well-known/peac-issuer.json"
 }
 ```
 
-| Field             | Type       | Required | Description                                        |
-| ----------------- | ---------- | -------- | -------------------------------------------------- |
-| `supported_kinds` | `string[]` | SHOULD   | Wire format versions (default: `peac-receipt/0.1`) |
-| `carrier_formats` | `string[]` | SHOULD   | Supported formats: `embed`, `reference`            |
-| `jwks_uri`        | `string`   | MAY      | URI for public keys                                |
+| Field               | Type       | Required | Description                                        |
+| ------------------- | ---------- | -------- | -------------------------------------------------- |
+| `supported_kinds`   | `string[]` | SHOULD   | Wire format versions (default: `peac-receipt/0.1`) |
+| `carrier_formats`   | `string[]` | SHOULD   | Supported formats: `embed`, `reference`            |
+| `issuer_config_url` | `string`   | MAY      | URI for issuer configuration (`peac-issuer.json`)  |
 
 ### Step 3: Header Probe
 
@@ -79,8 +79,8 @@ interface PeacDiscoveryResult {
   kinds: string[];
   /** Supported carrier formats */
   carrier_formats: CarrierFormat[];
-  /** URI for public keys (if available) */
-  jwks_uri?: string;
+  /** URI for issuer configuration (peac-issuer.json) */
+  issuer_config_url?: string;
 }
 ```
 
@@ -156,7 +156,7 @@ Discovering PEAC support at an endpoint does NOT establish trust. Receipt verifi
 
 ### 6.2 Well-Known File Integrity
 
-The `/.well-known/peac.json` file is served over HTTPS, providing transport integrity. However, the file itself is not signed. Implementations SHOULD verify the `jwks_uri` separately before trusting public keys discovered through it.
+The `/.well-known/peac.json` file is served over HTTPS, providing transport integrity. However, the file itself is not signed. Key discovery MUST go through the normative issuer configuration chain (`issuer_config_url` -> `peac-issuer.json` -> `jwks_uri` -> JWKS) as specified in PEAC-ISSUER.md. Discovery files MUST NOT expose `jwks_uri` directly to avoid creating a second key-discovery path that bypasses issuer validation.
 
 ### 6.3 Agent Card Spoofing
 

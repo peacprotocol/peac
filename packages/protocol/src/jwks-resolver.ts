@@ -249,7 +249,7 @@ export async function resolveJWKS(
   if (!normalized.ok) {
     return {
       ok: false,
-      code: 'E_VERIFY_INSECURE_SCHEME_BLOCKED',
+      code: 'E_VERIFY_ISSUER_CONFIG_INVALID',
       message: normalized.message,
       blockedUrl: issuerUrl,
     };

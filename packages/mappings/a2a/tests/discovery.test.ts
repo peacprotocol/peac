@@ -299,7 +299,7 @@ const AGENT_CARD_WITH_PARAMS: A2AAgentCard = {
         params: {
           supported_kinds: ['peac-receipt/0.1'],
           carrier_formats: ['embed', 'reference'],
-          jwks_uri: 'https://agent.example.com/.well-known/jwks.json',
+          issuer_config_url: 'https://agent.example.com/.well-known/peac-issuer.json',
         },
       },
     ],
@@ -309,7 +309,7 @@ const AGENT_CARD_WITH_PARAMS: A2AAgentCard = {
 const PEAC_WELL_KNOWN = {
   supported_kinds: ['peac-receipt/0.1'],
   carrier_formats: ['embed'],
-  jwks_uri: 'https://issuer.example.com/.well-known/jwks.json',
+  issuer_config_url: 'https://issuer.example.com/.well-known/peac-issuer.json',
 };
 
 describe('discoverPeacCapabilities', () => {
@@ -331,7 +331,9 @@ describe('discoverPeacCapabilities', () => {
     expect(result!.source).toBe('agent_card');
     expect(result!.kinds).toEqual(['peac-receipt/0.1']);
     expect(result!.carrier_formats).toEqual(['embed', 'reference']);
-    expect(result!.jwks_uri).toBe('https://agent.example.com/.well-known/jwks.json');
+    expect(result!.issuer_config_url).toBe(
+      'https://agent.example.com/.well-known/peac-issuer.json'
+    );
   });
 
   it('step 2: falls back to /.well-known/peac.json', async () => {
@@ -351,7 +353,9 @@ describe('discoverPeacCapabilities', () => {
     expect(result).not.toBeNull();
     expect(result!.source).toBe('well_known');
     expect(result!.kinds).toEqual(['peac-receipt/0.1']);
-    expect(result!.jwks_uri).toBe('https://issuer.example.com/.well-known/jwks.json');
+    expect(result!.issuer_config_url).toBe(
+      'https://issuer.example.com/.well-known/peac-issuer.json'
+    );
   });
 
   it('step 3: falls back to header probe', async () => {
@@ -428,7 +432,7 @@ describe('discoverPeacCapabilities', () => {
     expect(result!.source).toBe('agent_card');
     expect(result!.kinds).toEqual(['peac-receipt/0.1']);
     expect(result!.carrier_formats).toEqual(['embed']);
-    expect(result!.jwks_uri).toBeUndefined();
+    expect(result!.issuer_config_url).toBeUndefined();
   });
 
   it('rejects private IP in well-known discovery', async () => {

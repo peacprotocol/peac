@@ -38,7 +38,7 @@ export interface AgentCardPeacExtension {
   params?: {
     supported_kinds?: string[];
     carrier_formats?: CarrierFormat[];
-    jwks_uri?: string;
+    issuer_config_url?: string;
   };
 }
 

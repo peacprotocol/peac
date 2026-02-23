@@ -9,6 +9,7 @@
  *   E_VERIFY_ISSUER_CONFIG_INVALID - bad JSON / schema
  *   E_VERIFY_ISSUER_MISMATCH      - issuer field mismatch
  *   E_VERIFY_JWKS_URI_INVALID     - jwks_uri not HTTPS (reachable via resolver)
+ *   E_VERIFY_ISSUER_CONFIG_INVALID   - malformed issuer URL / non-hierarchical URI
  *   E_VERIFY_INSECURE_SCHEME_BLOCKED - non-HTTPS issuer URL
  *   E_VERIFY_JWKS_INVALID         - JWKS not valid JSON or missing keys
  *   E_VERIFY_KEY_FETCH_BLOCKED    - SSRF block (private IP)
@@ -208,7 +209,7 @@ describe('resolveJWKS (strict discovery)', () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.code).toBe('E_VERIFY_INSECURE_SCHEME_BLOCKED');
+      expect(result.code).toBe('E_VERIFY_ISSUER_CONFIG_INVALID');
       expect(result.message).toContain('not a valid URL');
       expect(result.blockedUrl).toBe('not-a-url');
     }
@@ -219,7 +220,7 @@ describe('resolveJWKS (strict discovery)', () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.code).toBe('E_VERIFY_INSECURE_SCHEME_BLOCKED');
+      expect(result.code).toBe('E_VERIFY_ISSUER_CONFIG_INVALID');
       expect(result.message).toContain('no valid origin');
     }
   });
