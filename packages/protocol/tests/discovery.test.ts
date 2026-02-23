@@ -89,14 +89,25 @@ describe('Issuer Configuration (peac-issuer.json)', () => {
     ).toThrow('issuer must be an HTTPS URL');
   });
 
-  it('should reject non-HTTPS jwks_uri', () => {
+  it('should accept non-HTTPS jwks_uri at parse time (HTTPS enforced by resolver)', () => {
+    // parseIssuerConfig validates URL syntax only; HTTPS enforcement is
+    // the resolver's responsibility (E_VERIFY_JWKS_URI_INVALID).
+    const config = parseIssuerConfig({
+      version: 'peac-issuer/0.1',
+      issuer: 'https://api.example.com',
+      jwks_uri: 'http://api.example.com/.well-known/jwks.json',
+    });
+    expect(config.jwks_uri).toBe('http://api.example.com/.well-known/jwks.json');
+  });
+
+  it('should reject invalid jwks_uri URL syntax', () => {
     expect(() =>
       parseIssuerConfig({
         version: 'peac-issuer/0.1',
         issuer: 'https://api.example.com',
-        jwks_uri: 'http://api.example.com/.well-known/jwks.json',
+        jwks_uri: 'not-a-valid-url',
       })
-    ).toThrow('jwks_uri must be an HTTPS URL');
+    ).toThrow('jwks_uri must be a valid URL');
   });
 
   it('should reject invalid JSON', () => {

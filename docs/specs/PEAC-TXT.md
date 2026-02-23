@@ -14,7 +14,7 @@ This document defines the normative specification for PEAC Policy Documents, ser
 
 **Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
 
-**Scope**: This specification covers policy documents only. `peac.txt` MUST NOT be used for key discovery; cryptographic key resolution uses `peac-issuer.json` exclusively (see [PEAC-ISSUER.md](PEAC-ISSUER.md)).
+**Scope**: This specification covers policy documents only. `peac.txt` is NOT a key discovery surface. Cryptographic key resolution MUST use the normative discovery chain: `iss` -> `peac-issuer.json` -> `jwks_uri` -> JWKS (see [PEAC-ISSUER.md](PEAC-ISSUER.md) Section 3.4).
 
 ---
 

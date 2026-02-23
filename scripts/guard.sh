@@ -254,12 +254,21 @@ fi
 
 echo "== discovery surface drift =="
 # Prevent protocol verifier code from bypassing peac-issuer.json and fetching JWKS directly.
-# The canonical path is: peac-issuer.json -> jwks_uri -> JWKS.
-# Scoped to packages/protocol/src/ production code (verify.ts, verifier-core.ts).
+# The canonical path is: peac-issuer.json -> jwks_uri -> JWKS (via jwks-resolver.ts).
+# Two checks: (1) import-based: only jwks-resolver.ts may import ssrfSafeFetch/fetchJWKSSafe,
+# (2) string heuristic: no direct well-known/jwks.json references.
 # Allow: jwks-resolver.ts (canonical resolver), discovery.ts (parseIssuerConfig),
-# ssrf-safe-fetch.ts (fetchJWKSSafe helper), verifier-types.ts.
-DISCOVERY_SRC_ALLOW='^packages/protocol/src/(jwks-resolver|discovery|ssrf-safe-fetch|verifier-types)\.ts'
-if git grep -n 'well-known/jwks\.json' -- 'packages/protocol/src/*.ts' ':!node_modules' \
+# ssrf-safe-fetch.ts (fetchJWKSSafe definition), verifier-types.ts, index.ts (re-export),
+# pointer-fetch.ts (pointer fetching, not JWKS discovery),
+# verifier-core.ts (SSRFFetchError type import for report builder compatibility).
+DISCOVERY_SRC_ALLOW='^packages/protocol/src/(jwks-resolver|discovery|ssrf-safe-fetch|verifier-types|verifier-core|pointer-fetch|index)\.ts'
+# Check 1: import-based (ssrfSafeFetch or fetchJWKSSafe imports outside allowed files)
+if git grep -nE "import.*ssrfSafeFetch|import.*fetchJWKSSafe|from.*ssrf-safe-fetch" -- 'packages/protocol/src/*.ts' ':!node_modules' \
+  | grep -vE "$DISCOVERY_SRC_ALLOW" | grep .; then
+  echo "FAIL: Direct ssrf-safe-fetch import in protocol verifier code - use jwks-resolver.ts"
+  bad=1
+# Check 2: string heuristic (direct JWKS URL construction)
+elif git grep -n 'well-known/jwks\.json' -- 'packages/protocol/src/*.ts' ':!node_modules' \
   | grep -vE "$DISCOVERY_SRC_ALLOW" | grep .; then
   echo "FAIL: Direct /.well-known/jwks.json in protocol verifier code - use jwks-resolver.ts"
   bad=1

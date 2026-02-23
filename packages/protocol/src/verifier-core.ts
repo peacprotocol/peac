@@ -148,6 +148,9 @@ interface JWKSFetchSuccess {
 /**
  * Fetch JWKS from issuer via strict discovery (peac-issuer.json -> jwks_uri).
  * Delegates to the shared jwks-resolver module.
+ *
+ * The resolver preserves the original SSRF reason on errors, so no lossy
+ * reverse-mapping is needed.
  */
 async function fetchIssuerJWKS(
   issuerOrigin: string
@@ -155,11 +158,10 @@ async function fetchIssuerJWKS(
   const result = await resolveJWKS(issuerOrigin);
 
   if (!result.ok) {
-    // Map JWKSResolveError back to SSRFFetchError shape for report builder compatibility
     return {
       error: {
         ok: false,
-        reason: resolveCodeToSSRFReason(result.code),
+        reason: result.reason ?? 'network_error',
         message: result.message,
         blockedUrl: result.blockedUrl,
       } as SSRFFetchError,
@@ -171,33 +173,6 @@ async function fetchIssuerJWKS(
     fromCache: result.fromCache,
     rawBytes: result.rawBytes,
   };
-}
-
-/**
- * Map kernel error code from jwks-resolver back to SSRFFetchError reason
- * for compatibility with the report builder's ssrfErrorToReasonCode.
- */
-function resolveCodeToSSRFReason(code: string): SSRFFetchError['reason'] {
-  switch (code) {
-    case 'E_VERIFY_INSECURE_SCHEME_BLOCKED':
-      return 'not_https';
-    case 'E_VERIFY_KEY_FETCH_BLOCKED':
-      return 'private_ip';
-    case 'E_VERIFY_KEY_FETCH_TIMEOUT':
-      return 'timeout';
-    case 'E_VERIFY_JWKS_TOO_LARGE':
-      return 'response_too_large';
-    case 'E_VERIFY_JWKS_TOO_MANY_KEYS':
-      return 'jwks_too_many_keys';
-    case 'E_VERIFY_ISSUER_CONFIG_MISSING':
-    case 'E_VERIFY_ISSUER_CONFIG_INVALID':
-    case 'E_VERIFY_ISSUER_MISMATCH':
-    case 'E_VERIFY_JWKS_URI_INVALID':
-    case 'E_VERIFY_JWKS_INVALID':
-    case 'E_VERIFY_KEY_FETCH_FAILED':
-    default:
-      return 'network_error';
-  }
 }
 
 // ---------------------------------------------------------------------------

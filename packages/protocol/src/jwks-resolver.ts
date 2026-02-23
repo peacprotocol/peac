@@ -3,9 +3,10 @@
  *
  * Centralizes JWKS resolution for both verify.ts and verifier-core.ts:
  * 1. Fetch peac-issuer.json from issuer origin (SSRF-safe)
- * 2. Validate issuer config (schema, issuer match, jwks_uri HTTPS)
- * 3. Fetch JWKS from jwks_uri (SSRF-safe, 64KB cap)
- * 4. Validate JWKS shape
+ * 2. Validate issuer config (schema, issuer match)
+ * 3. Validate jwks_uri is HTTPS (protocol-level enforcement)
+ * 4. Fetch JWKS from jwks_uri (SSRF-safe, 64KB cap)
+ * 5. Validate JWKS shape
  *
  * No fallback paths: peac-issuer.json with jwks_uri is the only
  * supported key discovery mechanism.
@@ -60,14 +61,28 @@ export interface JWKSResolveError {
   code: string;
   /** Human-readable message */
   message: string;
+  /** Original SSRF reason (preserved for diagnostic fidelity) */
+  reason?: SSRFFetchError['reason'];
   /** Blocked URL (if applicable) */
   blockedUrl?: string;
 }
 
 export type JWKSResolveResult = JWKSResolveSuccess | JWKSResolveError;
 
+/**
+ * Options for JWKS resolution
+ */
+export interface ResolveJWKSOptions {
+  /** Cache TTL in milliseconds (default: 300000 = 5 minutes) */
+  cacheTtlMs?: number;
+  /** Maximum cache entries before LRU eviction (default: 1000) */
+  maxCacheEntries?: number;
+  /** Bypass cache entirely (default: false) */
+  noCache?: boolean;
+}
+
 // ---------------------------------------------------------------------------
-// Cache
+// Cache (LRU via Map insertion order)
 // ---------------------------------------------------------------------------
 
 interface JWKSCacheEntry {
@@ -75,8 +90,39 @@ interface JWKSCacheEntry {
   expiresAt: number;
 }
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_MAX_CACHE_ENTRIES = 1000;
 const jwksCache = new Map<string, JWKSCacheEntry>();
+
+/**
+ * LRU cache get: promotes entry to most-recently-used position.
+ * Returns undefined if expired or missing.
+ */
+function cacheGet(key: string, now: number): JWKSCacheEntry | undefined {
+  const entry = jwksCache.get(key);
+  if (!entry) return undefined;
+  if (entry.expiresAt <= now) {
+    jwksCache.delete(key);
+    return undefined;
+  }
+  // LRU promote: delete and re-insert to move to end (most recent)
+  jwksCache.delete(key);
+  jwksCache.set(key, entry);
+  return entry;
+}
+
+/**
+ * LRU cache set: inserts entry and evicts oldest if over capacity.
+ */
+function cacheSet(key: string, entry: JWKSCacheEntry, maxEntries: number): void {
+  if (jwksCache.has(key)) jwksCache.delete(key);
+  jwksCache.set(key, entry);
+  // Evict oldest entries (Map iteration order = insertion order)
+  while (jwksCache.size > maxEntries) {
+    const oldestKey = jwksCache.keys().next().value;
+    if (oldestKey !== undefined) jwksCache.delete(oldestKey);
+  }
+}
 
 /**
  * Clear the shared JWKS cache
@@ -94,38 +140,76 @@ export function getJWKSCacheSize(): number {
 }
 
 // ---------------------------------------------------------------------------
+// Issuer Normalization
+// ---------------------------------------------------------------------------
+
+/**
+ * Canonicalize an issuer URL to its origin (scheme + host + port).
+ * Uses URL parsing for interop correctness: handles trailing slashes,
+ * paths, default port elision, and IDN normalization.
+ *
+ * Examples:
+ *   "https://api.example.com/"      -> "https://api.example.com"
+ *   "https://api.example.com/v1"    -> "https://api.example.com"
+ *   "https://api.example.com:443"   -> "https://api.example.com"
+ *   "https://api.example.com:8443"  -> "https://api.example.com:8443"
+ */
+function canonicalizeIssuerOrigin(issuerUrl: string): string {
+  try {
+    return new URL(issuerUrl).origin;
+  } catch {
+    // If URL parsing fails, return as-is; the HTTPS check will catch it
+    return issuerUrl;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // SSRF Error Mapping
 // ---------------------------------------------------------------------------
 
 /**
- * Map SSRFFetchError reason to kernel error code
+ * Map SSRFFetchError to kernel error code while preserving the original reason.
+ * Returns both the kernel code and the original SSRF reason for diagnostic fidelity.
  */
-function mapSSRFError(reason: SSRFFetchError['reason'], context: 'issuer_config' | 'jwks'): string {
+function mapSSRFError(
+  reason: SSRFFetchError['reason'],
+  context: 'issuer_config' | 'jwks'
+): { code: string; reason: SSRFFetchError['reason'] } {
+  let code: string;
   switch (reason) {
     case 'not_https':
-      return 'E_VERIFY_INSECURE_SCHEME_BLOCKED';
+      code = 'E_VERIFY_INSECURE_SCHEME_BLOCKED';
+      break;
     case 'private_ip':
     case 'loopback':
     case 'link_local':
-      return 'E_VERIFY_KEY_FETCH_BLOCKED';
+      code = 'E_VERIFY_KEY_FETCH_BLOCKED';
+      break;
     case 'timeout':
-      return 'E_VERIFY_KEY_FETCH_TIMEOUT';
+      code = 'E_VERIFY_KEY_FETCH_TIMEOUT';
+      break;
     case 'response_too_large':
-      return context === 'jwks' ? 'E_VERIFY_JWKS_TOO_LARGE' : 'E_VERIFY_KEY_FETCH_FAILED';
+      code = context === 'jwks' ? 'E_VERIFY_JWKS_TOO_LARGE' : 'E_VERIFY_KEY_FETCH_FAILED';
+      break;
     case 'dns_failure':
     case 'network_error':
     case 'too_many_redirects':
     case 'scheme_downgrade':
     case 'cross_origin_redirect':
     case 'invalid_url':
-      return context === 'issuer_config'
-        ? 'E_VERIFY_ISSUER_CONFIG_MISSING'
-        : 'E_VERIFY_KEY_FETCH_FAILED';
+      code =
+        context === 'issuer_config'
+          ? 'E_VERIFY_ISSUER_CONFIG_MISSING'
+          : 'E_VERIFY_KEY_FETCH_FAILED';
+      break;
     case 'jwks_too_many_keys':
-      return 'E_VERIFY_JWKS_TOO_MANY_KEYS';
+      code = 'E_VERIFY_JWKS_TOO_MANY_KEYS';
+      break;
     default:
-      return 'E_VERIFY_KEY_FETCH_FAILED';
+      code = 'E_VERIFY_KEY_FETCH_FAILED';
+      break;
   }
+  return { code, reason };
 }
 
 // ---------------------------------------------------------------------------
@@ -139,17 +223,27 @@ function mapSSRFError(reason: SSRFFetchError['reason'], context: 'issuer_config'
  * No fallback to direct JWKS or peac.txt key discovery.
  *
  * @param issuerUrl - Issuer origin URL (e.g. "https://api.example.com")
+ * @param options - Cache and resolution options
  * @returns Resolved JWKS or error
  */
-export async function resolveJWKS(issuerUrl: string): Promise<JWKSResolveResult> {
-  // Normalize issuer to origin (strip trailing slash, path)
-  const normalizedIssuer = issuerUrl.replace(/\/$/, '');
+export async function resolveJWKS(
+  issuerUrl: string,
+  options?: ResolveJWKSOptions
+): Promise<JWKSResolveResult> {
+  const cacheTtlMs = options?.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS;
+  const maxCacheEntries = options?.maxCacheEntries ?? DEFAULT_MAX_CACHE_ENTRIES;
+  const noCache = options?.noCache ?? false;
+
+  // Normalize issuer to origin via URL parsing (interop-correct)
+  const normalizedIssuer = canonicalizeIssuerOrigin(issuerUrl);
   const now = Date.now();
 
-  // Check cache first
-  const cached = jwksCache.get(normalizedIssuer);
-  if (cached && cached.expiresAt > now) {
-    return { ok: true, jwks: cached.jwks, fromCache: true };
+  // Check cache first (unless bypassed)
+  if (!noCache) {
+    const cached = cacheGet(normalizedIssuer, now);
+    if (cached) {
+      return { ok: true, jwks: cached.jwks, fromCache: true };
+    }
   }
 
   // Step 1: Require HTTPS
@@ -170,10 +264,12 @@ export async function resolveJWKS(issuerUrl: string): Promise<JWKSResolveResult>
   });
 
   if (!configResult.ok) {
+    const mapped = mapSSRFError(configResult.reason, 'issuer_config');
     return {
       ok: false,
-      code: mapSSRFError(configResult.reason, 'issuer_config'),
+      code: mapped.code,
       message: `Failed to fetch peac-issuer.json: ${configResult.message}`,
+      reason: mapped.reason,
       blockedUrl: configResult.blockedUrl,
     };
   }
@@ -190,8 +286,8 @@ export async function resolveJWKS(issuerUrl: string): Promise<JWKSResolveResult>
     };
   }
 
-  // Step 4: Validate issuer match
-  const configIssuer = issuerConfig.issuer.replace(/\/$/, '');
+  // Step 4: Validate issuer match (both sides canonicalized to origin)
+  const configIssuer = canonicalizeIssuerOrigin(issuerConfig.issuer);
   if (configIssuer !== normalizedIssuer) {
     return {
       ok: false,
@@ -200,7 +296,7 @@ export async function resolveJWKS(issuerUrl: string): Promise<JWKSResolveResult>
     };
   }
 
-  // Step 5: Validate jwks_uri
+  // Step 5: Validate jwks_uri (HTTPS enforcement at resolver layer, not parser)
   if (!issuerConfig.jwks_uri) {
     return {
       ok: false,
@@ -222,10 +318,12 @@ export async function resolveJWKS(issuerUrl: string): Promise<JWKSResolveResult>
   const jwksResult = await fetchJWKSSafe(issuerConfig.jwks_uri);
 
   if (!jwksResult.ok) {
+    const mapped = mapSSRFError(jwksResult.reason, 'jwks');
     return {
       ok: false,
-      code: mapSSRFError(jwksResult.reason, 'jwks'),
+      code: mapped.code,
       message: `Failed to fetch JWKS from ${issuerConfig.jwks_uri}: ${jwksResult.message}`,
+      reason: mapped.reason,
       blockedUrl: jwksResult.blockedUrl,
     };
   }
@@ -258,8 +356,10 @@ export async function resolveJWKS(issuerUrl: string): Promise<JWKSResolveResult>
     };
   }
 
-  // Cache and return
-  jwksCache.set(normalizedIssuer, { jwks, expiresAt: now + CACHE_TTL_MS });
+  // Cache and return (with LRU eviction)
+  if (!noCache) {
+    cacheSet(normalizedIssuer, { jwks, expiresAt: now + cacheTtlMs }, maxCacheEntries);
+  }
 
   return {
     ok: true,

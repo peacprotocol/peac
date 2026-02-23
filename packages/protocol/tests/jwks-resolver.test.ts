@@ -8,14 +8,14 @@
  *   E_VERIFY_ISSUER_CONFIG_MISSING - peac-issuer.json not fetchable
  *   E_VERIFY_ISSUER_CONFIG_INVALID - bad JSON / schema
  *   E_VERIFY_ISSUER_MISMATCH      - issuer field mismatch
- *   E_VERIFY_JWKS_URI_INVALID     - jwks_uri not HTTPS
+ *   E_VERIFY_JWKS_URI_INVALID     - jwks_uri not HTTPS (reachable via resolver)
  *   E_VERIFY_INSECURE_SCHEME_BLOCKED - non-HTTPS issuer URL
  *   E_VERIFY_JWKS_INVALID         - JWKS not valid JSON or missing keys
  *   E_VERIFY_KEY_FETCH_BLOCKED    - SSRF block (private IP)
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { resolveJWKS, clearJWKSCache } from '../src/jwks-resolver';
+import { resolveJWKS, clearJWKSCache, getJWKSCacheSize } from '../src/jwks-resolver';
 
 // Mock ssrf-safe-fetch and discovery modules
 vi.mock('../src/ssrf-safe-fetch.js', () => ({
@@ -116,6 +116,10 @@ describe('resolveJWKS (strict discovery)', () => {
     expect(mockFetchJWKSSafe).toHaveBeenCalledTimes(1);
   });
 
+  // ------------------------------------------------------------------
+  // Issuer normalization (URL origin canonicalization)
+  // ------------------------------------------------------------------
+
   it('normalizes trailing slash on issuer URL', async () => {
     mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
     mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
@@ -127,6 +131,62 @@ describe('resolveJWKS (strict discovery)', () => {
       'https://api.example.com/.well-known/peac-issuer.json',
       expect.any(Object)
     );
+  });
+
+  it('normalizes issuer URL with path to origin', async () => {
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+
+    const result = await resolveJWKS('https://api.example.com/v1/issuer');
+
+    expect(result.ok).toBe(true);
+    expect(mockSsrfSafeFetch).toHaveBeenCalledWith(
+      'https://api.example.com/.well-known/peac-issuer.json',
+      expect.any(Object)
+    );
+  });
+
+  it('elides default port 443 from issuer origin', async () => {
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+
+    const result = await resolveJWKS('https://api.example.com:443');
+
+    expect(result.ok).toBe(true);
+    expect(mockSsrfSafeFetch).toHaveBeenCalledWith(
+      'https://api.example.com/.well-known/peac-issuer.json',
+      expect.any(Object)
+    );
+  });
+
+  it('preserves non-standard port in issuer origin', async () => {
+    const config = JSON.stringify({
+      version: 'peac-issuer/0.1',
+      issuer: 'https://api.example.com:8443',
+      jwks_uri: 'https://api.example.com:8443/.well-known/jwks.json',
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(config));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+
+    const result = await resolveJWKS('https://api.example.com:8443');
+
+    expect(result.ok).toBe(true);
+    expect(mockSsrfSafeFetch).toHaveBeenCalledWith(
+      'https://api.example.com:8443/.well-known/peac-issuer.json',
+      expect.any(Object)
+    );
+  });
+
+  it('cache key uses canonicalized origin (path variations share cache)', async () => {
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+
+    await resolveJWKS('https://api.example.com/v1');
+    const result = await resolveJWKS('https://api.example.com/v2');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.fromCache).toBe(true);
+    expect(mockSsrfSafeFetch).toHaveBeenCalledTimes(1);
   });
 
   // ------------------------------------------------------------------
@@ -156,6 +216,7 @@ describe('resolveJWKS (strict discovery)', () => {
     if (!result.ok) {
       expect(result.code).toBe('E_VERIFY_ISSUER_CONFIG_MISSING');
       expect(result.message).toContain('peac-issuer.json');
+      expect(result.reason).toBe('network_error');
     }
   });
 
@@ -167,6 +228,7 @@ describe('resolveJWKS (strict discovery)', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.code).toBe('E_VERIFY_ISSUER_CONFIG_MISSING');
+      expect(result.reason).toBe('dns_failure');
     }
   });
 
@@ -249,12 +311,10 @@ describe('resolveJWKS (strict discovery)', () => {
   });
 
   // ------------------------------------------------------------------
-  // E_VERIFY_JWKS_URI_INVALID
+  // E_VERIFY_JWKS_URI_INVALID (now reachable for non-HTTPS jwks_uri)
   // ------------------------------------------------------------------
 
-  it('rejects non-HTTPS jwks_uri during config parsing', async () => {
-    // parseIssuerConfig validates jwks_uri HTTPS at parse time,
-    // so this surfaces as E_VERIFY_ISSUER_CONFIG_INVALID
+  it('returns E_VERIFY_JWKS_URI_INVALID for non-HTTPS jwks_uri', async () => {
     mockSsrfSafeFetch.mockResolvedValueOnce(
       okResponse(
         JSON.stringify({
@@ -269,8 +329,9 @@ describe('resolveJWKS (strict discovery)', () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.code).toBe('E_VERIFY_ISSUER_CONFIG_INVALID');
+      expect(result.code).toBe('E_VERIFY_JWKS_URI_INVALID');
       expect(result.message).toContain('HTTPS');
+      expect(result.blockedUrl).toBe('http://api.example.com/.well-known/jwks.json');
     }
   });
 
@@ -288,6 +349,7 @@ describe('resolveJWKS (strict discovery)', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.code).toBe('E_VERIFY_KEY_FETCH_BLOCKED');
+      expect(result.reason).toBe('private_ip');
     }
   });
 
@@ -301,6 +363,50 @@ describe('resolveJWKS (strict discovery)', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.code).toBe('E_VERIFY_KEY_FETCH_BLOCKED');
+      expect(result.reason).toBe('loopback');
+    }
+  });
+
+  // ------------------------------------------------------------------
+  // SSRF reason fidelity
+  // ------------------------------------------------------------------
+
+  it('preserves original SSRF reason on JWKS fetch errors', async () => {
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(
+      errorResponse('private_ip', 'Blocked private IP on JWKS')
+    );
+
+    const result = await resolveJWKS('https://api.example.com');
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('E_VERIFY_KEY_FETCH_BLOCKED');
+      expect(result.reason).toBe('private_ip');
+    }
+  });
+
+  it('preserves timeout reason on config fetch', async () => {
+    mockSsrfSafeFetch.mockResolvedValueOnce(errorResponse('timeout', 'Fetch timeout after 5000ms'));
+
+    const result = await resolveJWKS('https://api.example.com');
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('E_VERIFY_KEY_FETCH_TIMEOUT');
+      expect(result.reason).toBe('timeout');
+    }
+  });
+
+  it('does not set reason for non-SSRF errors', async () => {
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse('not json'));
+
+    const result = await resolveJWKS('https://api.example.com');
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('E_VERIFY_ISSUER_CONFIG_INVALID');
+      expect(result.reason).toBeUndefined();
     }
   });
 
@@ -347,6 +453,7 @@ describe('resolveJWKS (strict discovery)', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.code).toBe('E_VERIFY_KEY_FETCH_FAILED');
+      expect(result.reason).toBe('network_error');
     }
   });
 
@@ -359,6 +466,7 @@ describe('resolveJWKS (strict discovery)', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.code).toBe('E_VERIFY_KEY_FETCH_TIMEOUT');
+      expect(result.reason).toBe('timeout');
     }
   });
 
@@ -402,5 +510,75 @@ describe('resolveJWKS (strict discovery)', () => {
     if (!result.ok) {
       expect(result.code).toBe('E_VERIFY_ISSUER_CONFIG_MISSING');
     }
+  });
+
+  // ------------------------------------------------------------------
+  // Configurable cache (LRU, TTL, noCache)
+  // ------------------------------------------------------------------
+
+  it('bypasses cache when noCache is true', async () => {
+    mockSsrfSafeFetch.mockResolvedValue(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValue(okResponse(VALID_JWKS));
+
+    await resolveJWKS('https://api.example.com', { noCache: true });
+    const result2 = await resolveJWKS('https://api.example.com', { noCache: true });
+
+    // Both calls should fetch (no caching)
+    expect(mockSsrfSafeFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetchJWKSSafe).toHaveBeenCalledTimes(2);
+    expect(result2.ok).toBe(true);
+    if (result2.ok) expect(result2.fromCache).toBe(false);
+    // noCache should not populate the cache
+    expect(getJWKSCacheSize()).toBe(0);
+  });
+
+  it('evicts oldest entries when cache exceeds maxCacheEntries', async () => {
+    // Populate cache with 3 entries, then add a 4th with max=3
+    for (let i = 0; i < 3; i++) {
+      const issuer = `https://issuer-${i}.example.com`;
+      const config = JSON.stringify({
+        version: 'peac-issuer/0.1',
+        issuer,
+        jwks_uri: `${issuer}/.well-known/jwks.json`,
+      });
+      mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(config));
+      mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+      await resolveJWKS(issuer, { maxCacheEntries: 3 });
+    }
+
+    expect(getJWKSCacheSize()).toBe(3);
+
+    // Add 4th entry: should evict issuer-0
+    const issuer4 = 'https://issuer-3.example.com';
+    const config4 = JSON.stringify({
+      version: 'peac-issuer/0.1',
+      issuer: issuer4,
+      jwks_uri: `${issuer4}/.well-known/jwks.json`,
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(config4));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+    await resolveJWKS(issuer4, { maxCacheEntries: 3 });
+
+    expect(getJWKSCacheSize()).toBe(3);
+
+    // issuer-0 should have been evicted, issuer-1 should still be cached
+    mockSsrfSafeFetch.mockResolvedValueOnce(
+      okResponse(
+        JSON.stringify({
+          version: 'peac-issuer/0.1',
+          issuer: 'https://issuer-0.example.com',
+          jwks_uri: 'https://issuer-0.example.com/.well-known/jwks.json',
+        })
+      )
+    );
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+
+    const evicted = await resolveJWKS('https://issuer-0.example.com');
+    expect(evicted.ok).toBe(true);
+    if (evicted.ok) expect(evicted.fromCache).toBe(false); // Was evicted, had to re-fetch
+
+    const cached = await resolveJWKS('https://issuer-1.example.com');
+    expect(cached.ok).toBe(true);
+    if (cached.ok) expect(cached.fromCache).toBe(true); // Still in cache
   });
 });
