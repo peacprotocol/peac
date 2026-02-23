@@ -1,10 +1,15 @@
 {
-  "timestamp": "2026-02-21",
-  "node_version": "v22.22.0",
+  "timestamp": "2026-02-22",
+  "node_version": "v24.13.0",
   "platform": "darwin-arm64",
-  "peac_version": "0.10.14",
+  "peac_version": "0.11.0-pre",
+  "zod_version": "4.3.6",
   "benchmarks": {
     "validate_constraints_per_sec": 1079525,
-    "assert_json_safe_per_sec": 468878
+    "assert_json_safe_per_sec": 468878,
+    "parseReceiptClaims_commerce_hz": 388247,
+    "parseReceiptClaims_attestation_hz": 792079,
+    "toCoreClaims_commerce_hz": 11822657,
+    "toCoreClaims_attestation_hz": 27280934
   }
 }
