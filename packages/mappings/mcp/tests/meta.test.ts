@@ -13,8 +13,7 @@ import {
   META_KEY_VERIFIED_AT,
 } from '../src/index';
 
-const VALID_REF =
-  'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+const VALID_REF = 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 const VALID_JWS = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJ0ZXN0In0.dGVzdHNpZw';
 
 const VALID_CARRIER: PeacEvidenceCarrier = {
@@ -93,7 +92,9 @@ describe('attachReceiptToMeta', () => {
 
 describe('extractReceiptFromMeta', () => {
   it('extracts from new carrier format', () => {
-    const result = { _meta: { [META_KEY_RECEIPT_REF]: VALID_REF, [META_KEY_RECEIPT_JWS]: VALID_JWS } };
+    const result = {
+      _meta: { [META_KEY_RECEIPT_REF]: VALID_REF, [META_KEY_RECEIPT_JWS]: VALID_JWS },
+    };
     const extracted = extractReceiptFromMeta(result);
     expect(extracted).not.toBeNull();
     expect(extracted!.receipts).toHaveLength(1);
@@ -158,7 +159,9 @@ describe('extractReceiptFromMetaAsync', () => {
   });
 
   it('reports violation for inconsistent receipt_ref', async () => {
-    const result = { _meta: { [META_KEY_RECEIPT_REF]: VALID_REF, [META_KEY_RECEIPT_JWS]: VALID_JWS } };
+    const result = {
+      _meta: { [META_KEY_RECEIPT_REF]: VALID_REF, [META_KEY_RECEIPT_JWS]: VALID_JWS },
+    };
 
     const extracted = await extractReceiptFromMetaAsync(result);
     expect(extracted).not.toBeNull();

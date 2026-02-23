@@ -105,9 +105,7 @@ export function attachReceiptToMeta(
 
   const validation = validateCarrierConstraints(carrier, meta);
   if (!validation.valid) {
-    throw new Error(
-      `Carrier constraint violation: ${validation.violations.join('; ')}`
-    );
+    throw new Error(`Carrier constraint violation: ${validation.violations.join('; ')}`);
   }
 
   if (!result._meta) {
@@ -154,9 +152,7 @@ export function attachReceiptToMeta(
  * so the sync version uses a placeholder receipt_ref for legacy and marks
  * it in the meta. Use extractReceiptFromMetaAsync for full validation.
  */
-export function extractReceiptFromMeta(
-  result: McpResultLike
-): McpExtractResult | null {
+export function extractReceiptFromMeta(result: McpResultLike): McpExtractResult | null {
   if (!result._meta) return null;
 
   const meta: CarrierMeta = {
@@ -190,7 +186,8 @@ export function extractReceiptFromMeta(
     return {
       receipts: [
         {
-          receipt_ref: 'sha256:0000000000000000000000000000000000000000000000000000000000000000' as PeacEvidenceCarrier['receipt_ref'],
+          receipt_ref:
+            'sha256:0000000000000000000000000000000000000000000000000000000000000000' as PeacEvidenceCarrier['receipt_ref'],
           receipt_jws: legacyReceipt,
         },
       ],
@@ -262,12 +259,8 @@ export async function extractReceiptFromMetaAsync(
 /**
  * CarrierAdapter implementation for MCP _meta format.
  */
-export class McpCarrierAdapter
-  implements CarrierAdapter<McpResultLike, McpResultLike>
-{
-  extract(
-    input: McpResultLike
-  ): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
+export class McpCarrierAdapter implements CarrierAdapter<McpResultLike, McpResultLike> {
+  extract(input: McpResultLike): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
     return extractReceiptFromMeta(input);
   }
 
@@ -283,10 +276,7 @@ export class McpCarrierAdapter
     return output;
   }
 
-  validateConstraints(
-    carrier: PeacEvidenceCarrier,
-    meta: CarrierMeta
-  ): CarrierValidationResult {
+  validateConstraints(carrier: PeacEvidenceCarrier, meta: CarrierMeta): CarrierValidationResult {
     return validateCarrierConstraints(carrier, meta);
   }
 }
