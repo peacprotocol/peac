@@ -19,8 +19,7 @@ import {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const SAMPLE_JWS =
-  'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.c2lnbmF0dXJl';
+const SAMPLE_JWS = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.c2lnbmF0dXJl';
 
 const VALID_REF =
   'sha256:0000000000000000000000000000000000000000000000000000000000000000' as PeacEvidenceCarrier['receipt_ref'];
@@ -88,9 +87,7 @@ describe('attachCarrierToACPMessage', () => {
       receipt_jws: oversizeJws,
     };
 
-    expect(() => attachCarrierToACPMessage({}, carrier)).toThrow(
-      /Carrier constraint violation/
-    );
+    expect(() => attachCarrierToACPMessage({}, carrier)).toThrow(/Carrier constraint violation/);
   });
 });
 

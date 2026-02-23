@@ -69,9 +69,7 @@ export function attachCarrierToACPHeaders(
   carrier: PeacEvidenceCarrier
 ): HeaderMap {
   if (!carrier.receipt_jws) {
-    throw new Error(
-      'ACP carrier requires receipt_jws (embed format) in v0.11.1'
-    );
+    throw new Error('ACP carrier requires receipt_jws (embed format) in v0.11.1');
   }
   headers[PEAC_RECEIPT_HEADER] = carrier.receipt_jws;
   return headers;
@@ -95,9 +93,7 @@ export function attachCarrierToACPMessage(
 
   const validation = validateCarrierConstraints(carrier, meta);
   if (!validation.valid) {
-    throw new Error(
-      `Carrier constraint violation: ${validation.violations.join('; ')}`
-    );
+    throw new Error(`Carrier constraint violation: ${validation.violations.join('; ')}`);
   }
 
   if (!msg.headers) {
@@ -119,9 +115,7 @@ export function attachCarrierToACPMessage(
  * Note: receipt_ref computation requires async; sync version returns a
  * placeholder. Use extractCarrierFromACPHeadersAsync for full validation.
  */
-export function extractCarrierFromACPHeaders(
-  headers: HeaderMap
-): AcpExtractResult | null {
+export function extractCarrierFromACPHeaders(headers: HeaderMap): AcpExtractResult | null {
   // Case-insensitive header lookup per RFC 9110
   const headerKey = Object.keys(headers).find(
     (k) => k.toLowerCase() === PEAC_RECEIPT_HEADER.toLowerCase()
@@ -191,12 +185,8 @@ export async function extractCarrierFromACPHeadersAsync(
 /**
  * CarrierAdapter implementation for ACP messages.
  */
-export class AcpCarrierAdapter
-  implements CarrierAdapter<AcpMessageLike, AcpMessageLike>
-{
-  extract(
-    input: AcpMessageLike
-  ): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
+export class AcpCarrierAdapter implements CarrierAdapter<AcpMessageLike, AcpMessageLike> {
+  extract(input: AcpMessageLike): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
     if (!input.headers) return null;
     return extractCarrierFromACPHeaders(input.headers);
   }
@@ -212,10 +202,7 @@ export class AcpCarrierAdapter
     return output;
   }
 
-  validateConstraints(
-    carrier: PeacEvidenceCarrier,
-    meta: CarrierMeta
-  ): CarrierValidationResult {
+  validateConstraints(carrier: PeacEvidenceCarrier, meta: CarrierMeta): CarrierValidationResult {
     return validateCarrierConstraints(carrier, meta);
   }
 }

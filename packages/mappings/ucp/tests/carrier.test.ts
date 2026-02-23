@@ -19,8 +19,7 @@ import type { UcpWebhookPayload } from '../src/carrier.js';
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const SAMPLE_JWS =
-  'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.c2lnbmF0dXJl';
+const SAMPLE_JWS = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.c2lnbmF0dXJl';
 
 async function makeCarrier(): Promise<PeacEvidenceCarrier> {
   const ref = await computeReceiptRef(SAMPLE_JWS);
@@ -72,9 +71,9 @@ describe('attachCarrierToWebhookPayload', () => {
       receipt_jws: oversizeJws,
     };
 
-    expect(() =>
-      attachCarrierToWebhookPayload({ event_type: 'test' }, carrier)
-    ).toThrow(/Carrier constraint violation/);
+    expect(() => attachCarrierToWebhookPayload({ event_type: 'test' }, carrier)).toThrow(
+      /Carrier constraint violation/
+    );
   });
 
   it('should accept custom meta for validation', async () => {

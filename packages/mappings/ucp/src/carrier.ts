@@ -80,9 +80,7 @@ export function attachCarrierToWebhookPayload(
 
   const validation = validateCarrierConstraints(carrier, effectiveMeta);
   if (!validation.valid) {
-    throw new Error(
-      `Carrier constraint violation: ${validation.violations.join('; ')}`
-    );
+    throw new Error(`Carrier constraint violation: ${validation.violations.join('; ')}`);
   }
 
   payload.peac_evidence = carrier;
@@ -159,12 +157,8 @@ export async function extractCarrierFromWebhookPayloadAsync(
 /**
  * CarrierAdapter implementation for UCP webhook payloads.
  */
-export class UcpCarrierAdapter
-  implements CarrierAdapter<UcpWebhookPayload, UcpWebhookPayload>
-{
-  extract(
-    input: UcpWebhookPayload
-  ): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
+export class UcpCarrierAdapter implements CarrierAdapter<UcpWebhookPayload, UcpWebhookPayload> {
+  extract(input: UcpWebhookPayload): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
     return extractCarrierFromWebhookPayload(input);
   }
 
@@ -179,10 +173,7 @@ export class UcpCarrierAdapter
     return output;
   }
 
-  validateConstraints(
-    carrier: PeacEvidenceCarrier,
-    meta: CarrierMeta
-  ): CarrierValidationResult {
+  validateConstraints(carrier: PeacEvidenceCarrier, meta: CarrierMeta): CarrierValidationResult {
     return validateCarrierConstraints(carrier, meta);
   }
 }

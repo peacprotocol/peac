@@ -11,12 +11,7 @@ import type { PaymentEvidence } from '@peac/schema';
 export * from './budget';
 
 // Evidence Carrier Contract (v0.11.1+ DD-124)
-export type {
-  HeaderMap,
-  AcpMessageLike,
-  AcpExtractResult,
-  AcpExtractAsyncResult,
-} from './carrier';
+export type { HeaderMap, AcpMessageLike, AcpExtractResult, AcpExtractAsyncResult } from './carrier';
 
 export {
   ACP_CARRIER_LIMITS,
