@@ -2,30 +2,30 @@
  * MCP _meta reserved key guard.
  *
  * Per MCP specification (2025-11-25), the reserved prefix rule is:
- * "Any prefix consisting of zero or more labels, followed by
- * `modelcontextprotocol` or `mcp`, followed by any label, is reserved."
+ * "Any prefix where the second label is `modelcontextprotocol` or `mcp`
+ * is reserved."
  *
- * The reserved label (`mcp` or `modelcontextprotocol`) must appear as a
- * non-last label in the dot-separated prefix. If it appears only as the
- * last label, the prefix is NOT reserved.
+ * The prefix is the segment before the first `/`, split by `.` into labels.
+ * Only the second label (labels[1], 0-indexed) determines reservation.
  *
  * Examples:
- *   "mcp.dev/anything"                  -> RESERVED (mcp at index 0, not last)
- *   "tools.mcp.com/data"               -> RESERVED (mcp at index 1, not last)
- *   "api.modelcontextprotocol.org/x"   -> RESERVED (modelcontextprotocol at index 1, not last)
- *   "dev.mcp/anything"                 -> NOT reserved (mcp is last label)
- *   "io.modelcontextprotocol/data"     -> NOT reserved (modelcontextprotocol is last label)
- *   "com.example.mcp/data"             -> NOT reserved (mcp is last label)
- *   "org.peacprotocol/receipt_ref"     -> NOT reserved (no reserved labels at all)
+ *   "dev.mcp/anything"                  -> RESERVED (2nd label = mcp)
+ *   "io.modelcontextprotocol/data"      -> RESERVED (2nd label = modelcontextprotocol)
+ *   "com.mcp.tools/data"               -> RESERVED (2nd label = mcp)
+ *   "tools.mcp.com/data"               -> RESERVED (2nd label = mcp)
+ *   "mcp.dev/anything"                 -> NOT reserved (2nd label = dev)
+ *   "modelcontextprotocol.io/data"     -> NOT reserved (2nd label = io)
+ *   "com.example.mcp/data"             -> NOT reserved (2nd label = example)
+ *   "org.peacprotocol/receipt_ref"     -> NOT reserved (2nd label = peacprotocol)
  */
 
-const MCP_RESERVED_LABELS = ['modelcontextprotocol', 'mcp'];
+const MCP_RESERVED_SECOND_LABELS = ['modelcontextprotocol', 'mcp'];
 
 /**
  * Assert that a _meta key does not use an MCP-reserved prefix.
  *
- * A prefix is reserved if any label except the last equals "mcp" or
- * "modelcontextprotocol" (case-insensitive).
+ * A prefix is reserved when its second label (labels[1], 0-indexed)
+ * equals "mcp" or "modelcontextprotocol" (case-insensitive).
  *
  * @throws Error if the key uses a reserved prefix
  */
@@ -36,15 +36,12 @@ export function assertNotMcpReservedKey(key: string): void {
   const prefix = key.substring(0, slashIndex);
   const labels = prefix.split('.');
 
-  if (labels.length < 2) return; // Single label = not reserved (no label follows)
+  if (labels.length < 2) return; // Single label = no second label = not reserved
 
-  // Check all labels EXCEPT the last one
-  for (let i = 0; i < labels.length - 1; i++) {
-    if (MCP_RESERVED_LABELS.includes(labels[i].toLowerCase())) {
-      throw new Error(
-        `Reserved MCP _meta key prefix: ${key} (label "${labels[i]}" is reserved per MCP spec)`
-      );
-    }
+  if (MCP_RESERVED_SECOND_LABELS.includes(labels[1].toLowerCase())) {
+    throw new Error(
+      `Reserved MCP _meta key prefix: ${key} (second label "${labels[1]}" is reserved per MCP spec)`
+    );
   }
 }
 
