@@ -956,6 +956,54 @@
       "category": "interaction"
     },
     {
+      "code": "E_VERIFY_ISSUER_CONFIG_MISSING",
+      "http_status": 502,
+      "title": "Issuer Config Missing",
+      "description": "peac-issuer.json not found or not fetchable at issuer origin",
+      "retriable": true,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_ISSUER_CONFIG_INVALID",
+      "http_status": 502,
+      "title": "Issuer Config Invalid",
+      "description": "peac-issuer.json is not valid JSON or does not conform to issuer config schema",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_ISSUER_MISMATCH",
+      "http_status": 403,
+      "title": "Issuer Mismatch",
+      "description": "issuer field in peac-issuer.json does not match the expected issuer origin",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_JWKS_URI_INVALID",
+      "http_status": 502,
+      "title": "JWKS URI Invalid",
+      "description": "jwks_uri in peac-issuer.json is not a valid HTTPS URL",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_INSECURE_SCHEME_BLOCKED",
+      "http_status": 403,
+      "title": "Insecure Scheme Blocked",
+      "description": "Non-HTTPS URL encountered during issuer discovery (issuer URL or jwks_uri)",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
+      "code": "E_VERIFY_JWKS_INVALID",
+      "http_status": 502,
+      "title": "JWKS Invalid",
+      "description": "JWKS response is not valid JSON or missing required keys array",
+      "retriable": false,
+      "category": "verifier"
+    },
+    {
       "code": "E_VERIFY_RECEIPT_TOO_LARGE",
       "http_status": 413,
       "title": "Receipt Too Large",

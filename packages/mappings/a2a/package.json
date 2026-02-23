@@ -1,13 +1,13 @@
 {
-  "name": "@peac/mappings-mcp",
+  "name": "@peac/mappings-a2a",
   "version": "0.11.0",
-  "description": "Model Context Protocol (MCP) integration for PEAC",
+  "description": "Agent-to-Agent Protocol (A2A) integration for PEAC",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/peacprotocol/peac.git",
-    "directory": "packages/mappings/mcp"
+    "directory": "packages/mappings/a2a"
   },
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
   "license": "Apache-2.0",

@@ -70,8 +70,13 @@ export function parseIssuerConfig(json: string | object): PEACIssuerConfig {
   if (!obj.issuer.startsWith('https://')) {
     throw new Error('issuer must be an HTTPS URL');
   }
-  if (!obj.jwks_uri.startsWith('https://')) {
-    throw new Error('jwks_uri must be an HTTPS URL');
+  // jwks_uri: validate URL syntax only. HTTPS enforcement is the resolver's
+  // responsibility (jwks-resolver.ts), keeping parser and protocol concerns
+  // separated. This makes E_VERIFY_JWKS_URI_INVALID a reachable error code.
+  try {
+    new URL(obj.jwks_uri);
+  } catch {
+    throw new Error('jwks_uri must be a valid URL');
   }
 
   // Validate optional fields

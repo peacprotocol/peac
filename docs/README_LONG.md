@@ -18,7 +18,7 @@ The protocol works with generic HTTP 402 services, paywalls, routers, and data s
 
 - [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) - Tool context for language models. Mapping: `@peac/mappings-mcp`
 - [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) - Agent-driven commerce. Mapping: `@peac/mappings-acp`
-- [Agent2Agent Protocol (A2A)](https://github.com/google/A2A) - Agent-to-agent coordination. Planned.
+- [Agent2Agent Protocol (A2A)](https://a2a-protocol.org/) - Agent-to-agent coordination (Linux Foundation). Mapping: `@peac/mappings-a2a`
 
 **Agent frameworks/runtimes:**
 
@@ -135,8 +135,8 @@ PEAC is transport-agnostic. The most common binding is **HTTP/REST**, where rece
 | Binding             | How receipts travel                                     | Status      |
 | ------------------- | ------------------------------------------------------- | ----------- |
 | HTTP/REST (default) | Response header `PEAC-Receipt: <jws>`                   | Implemented |
-| MCP                 | Tool result metadata (`_meta.org.peacprotocol/receipt`) | Implemented |
-| A2A                 | Agent exchange attachments                              | Specified   |
+| MCP                 | Tool result `_meta` (carrier format)                    | Implemented |
+| A2A                 | Task/message/artifact metadata (extension URI)          | Implemented |
 | WebSocket/streaming | Periodic or terminal receipts for long-running sessions | Planned     |
 | Queues/batches      | NDJSON receipts verified offline via bundles            | Implemented |
 
@@ -150,7 +150,7 @@ PEAC records can be carried through other interaction standards via mappings:
 | ---------------- | ---------------------------------------- | ---------------------------------- |
 | MCP              | Records in tool response metadata        | Implemented (`@peac/mappings-mcp`) |
 | ACP              | Agentic Commerce Protocol integration    | Implemented (`@peac/mappings-acp`) |
-| A2A              | Agent-to-Agent exchange attachments      | Specified                          |
+| A2A              | Agent-to-Agent metadata extensions       | Implemented (`@peac/mappings-a2a`) |
 | AP2              | Evidence for payment authorization flows | Specified                          |
 | UCP              | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`) |
 | ERC-8004         | Reputation signals for Trustless Agents  | Specified (docs + example)         |
@@ -208,7 +208,7 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 
 - Receipt type: `typ: "peac-receipt/0.1"` (frozen across v0.x)
 - Envelope structure: `PEACEnvelope` with auth, payment evidence, and metadata
-- Signature: Ed25519 JWS (RFC 8032)
+- Signature: EdDSA (Ed25519, RFC 8032) or ES256 (ECDSA P-256)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
 
 **HTTP:**
@@ -305,7 +305,7 @@ Enables verifiers to discover JWKS endpoints and verification configuration for 
   "jwks_uri": "https://api.example.com/.well-known/jwks.json",
   "verify_endpoint": "https://api.example.com/verify",
   "receipt_versions": ["peac-receipt/0.1"],
-  "algorithms": ["EdDSA"],
+  "algorithms": ["EdDSA", "ES256"],
   "payment_rails": ["x402", "stripe"],
   "security_contact": "security@example.com"
 }
@@ -457,10 +457,15 @@ peac/
 │  ├─ protocol/            # issue(), verify(), discovery
 │  ├─ server/              # HTTP verification server
 │  ├─ cli/                 # Command-line tools
+│  ├─ mcp-server/           # MCP server (5 tools: verify, inspect, decode, issue, bundle)
 │  ├─ capture/
-│  │  └─ core/             # Runtime-neutral capture pipeline
+│  │  ├─ core/             # Runtime-neutral capture pipeline
+│  │  └─ node/             # Node.js capture runtime
+│  ├─ middleware-core/      # Transport-neutral middleware
+│  ├─ middleware-express/   # Express middleware
 │  ├─ adapters/
-│  │  └─ openclaw/         # OpenClaw agent framework adapter
+│  │  ├─ openclaw/         # OpenClaw agent framework adapter
+│  │  └─ x402/             # x402 adapter (v1/v2 with dialect detection)
 │  ├─ rails/
 │  │  ├─ x402/             # HTTP 402 / x402 payment rail
 │  │  ├─ stripe/           # Stripe payment rail
@@ -468,6 +473,8 @@ peac/
 │  ├─ mappings/
 │  │  ├─ mcp/              # Model Context Protocol mapping
 │  │  ├─ acp/              # Agentic Commerce Protocol mapping
+│  │  ├─ a2a/              # A2A Protocol mapping
+│  │  ├─ ucp/              # Universal Commerce Protocol mapping
 │  │  └─ rsl/              # RSL usage token mapping
 │  ├─ policy-kit/          # Policy authoring and artifact generation
 │  ├─ transport/
@@ -492,8 +499,10 @@ Layer 0: @peac/kernel
 Layer 1: @peac/schema
 Layer 2: @peac/crypto
 Layer 3: @peac/protocol, @peac/control
+Layer 3.5: @peac/middleware-core, @peac/middleware-express
 Layer 4: @peac/rails-*, @peac/mappings-*, @peac/adapter-*, @peac/transport-*
-Layer 5: @peac/server, @peac/cli
+Layer 5: @peac/server, @peac/cli, @peac/mcp-server
+Layer 6: @peac/sdk-js
 ```
 
 Dependencies flow DOWN only. Never import from a higher layer.
@@ -508,15 +517,17 @@ Dependencies flow DOWN only. Never import from a higher layer.
 | ---------------- | --------------------------------------------- |
 | `@peac/kernel`   | Zero-dependency constants and registries      |
 | `@peac/schema`   | TypeScript types, Zod validators, JSON Schema |
-| `@peac/crypto`   | Ed25519 JWS signing and verification          |
+| `@peac/crypto`   | EdDSA/ES256 JWS signing and verification      |
 | `@peac/protocol` | High-level issue() and verify() functions     |
+| `@peac/control`  | Constraint types and enforcement (CAL)        |
 
 **Runtime (stable):**
 
-| Package        | Description                                |
-| -------------- | ------------------------------------------ |
-| `@peac/server` | HTTP verification server with 402 support  |
-| `@peac/cli`    | Command-line tools for receipts and policy |
+| Package            | Description                                               |
+| ------------------ | --------------------------------------------------------- |
+| `@peac/server`     | HTTP verification server with 402 support                 |
+| `@peac/cli`        | Command-line tools for receipts and policy                |
+| `@peac/mcp-server` | MCP server (verify, inspect, decode, issue, bundle tools) |
 
 **Rails (stable):**
 
@@ -531,12 +542,13 @@ Dependencies flow DOWN only. Never import from a higher layer.
 
 | Package                 | Description                                                 |
 | ----------------------- | ----------------------------------------------------------- |
-| `@peac/mappings-mcp`    | Model Context Protocol integration with budget utilities    |
+| `@peac/mappings-mcp`    | Model Context Protocol integration with carrier format      |
 | `@peac/mappings-acp`    | Agentic Commerce Protocol integration with budget utilities |
+| `@peac/mappings-a2a`    | A2A Protocol mapping with agent card discovery              |
 | `@peac/mappings-rsl`    | RSL (Robots Standard Language) mapping to CAL purposes      |
 | `@peac/mappings-tap`    | Visa TAP mapping                                            |
 | `@peac/mappings-aipref` | IETF AIPREF vocabulary mapping                              |
-| `@peac/mappings-ucp`    | Google Universal Commerce Protocol webhook verification     |
+| `@peac/mappings-ucp`    | Universal Commerce Protocol webhook verification            |
 
 **Policy (stable):**
 
@@ -559,17 +571,26 @@ Dependencies flow DOWN only. Never import from a higher layer.
 | `@peac/privacy`         | Privacy-preserving hashing                       |
 | `@peac/transport-grpc`  | gRPC transport binding                           |
 
+**Middleware:**
+
+| Package                    | Description                          |
+| -------------------------- | ------------------------------------ |
+| `@peac/middleware-core`    | Transport-neutral middleware logic   |
+| `@peac/middleware-express` | Express middleware for auto-issuance |
+
 **Capture:**
 
 | Package              | Description                                          |
 | -------------------- | ---------------------------------------------------- |
 | `@peac/capture-core` | Runtime-neutral capture pipeline for agent platforms |
+| `@peac/capture-node` | Node.js capture runtime with RFC 9421 proof capture  |
 
 **Adapters:**
 
-| Package                  | Description                          |
-| ------------------------ | ------------------------------------ |
-| `@peac/adapter-openclaw` | OpenClaw agent framework integration |
+| Package                  | Description                                 |
+| ------------------------ | ------------------------------------------- |
+| `@peac/adapter-openclaw` | OpenClaw agent framework integration        |
+| `@peac/adapter-x402`     | x402 adapter (v1/v2 with dialect detection) |
 
 **Attestations:**
 
@@ -657,19 +678,22 @@ See [docs/specs/WORKFLOW-CORRELATION.md](specs/WORKFLOW-CORRELATION.md) for the 
 
 ---
 
-## Seven pillars
+## Ten pillars
 
-PEAC addresses seven protocol capabilities for AI and API infrastructure:
+PEAC addresses ten protocol capabilities for AI and API infrastructure:
 
 | Pillar          | Package             | Description                                  |
 | --------------- | ------------------- | -------------------------------------------- |
 | **Access**      | `@peac/access`      | Access control and policy evaluation         |
 | **Attribution** | `@peac/attribution` | Attribution and revenue-share hooks          |
-| **Consent**     | `@peac/consent`     | Consent lifecycle types and helpers          |
 | **Commerce**    | `@peac/rails-*`     | Payment rails and receipt issuance           |
+| **Consent**     | `@peac/consent`     | Consent lifecycle types and helpers          |
 | **Compliance**  | `@peac/compliance`  | Regulatory and audit helpers                 |
 | **Privacy**     | `@peac/privacy`     | Privacy budgeting and retention policy hooks |
 | **Provenance**  | `@peac/provenance`  | Content provenance and C2PA integration      |
+| **Safety**      | `@peac/control`     | Constraint enforcement and safety controls   |
+| **Identity**    | `@peac/protocol`    | Agent identity proof-of-control binding      |
+| **Purpose**     | `@peac/schema`      | Structured purpose declaration vocabulary    |
 
 These are optional higher-layer helpers built on top of the core receipt/kernel stack.
 
@@ -739,7 +763,7 @@ Test vectors: `tests/vectors/` and `docs/specs/TEST_VECTORS.md`.
 **Prerequisites:**
 
 - Node.js 22+
-- pnpm >= 8
+- pnpm >= 9
 
 **Setup:**
 

@@ -18,10 +18,10 @@ import {
   sha256Hex,
   verify as jwsVerify,
 } from '@peac/crypto';
-import { VERIFIER_LIMITS, WIRE_TYPE } from '@peac/kernel';
+import { WIRE_TYPE } from '@peac/kernel';
 import { PEACReceiptClaims, ReceiptClaims } from '@peac/schema';
 import type { SSRFFetchError } from './ssrf-safe-fetch.js';
-import { fetchJWKSSafe, ssrfSafeFetch } from './ssrf-safe-fetch.js';
+import { resolveJWKS } from './jwks-resolver.js';
 import { createReportBuilder } from './verification-report.js';
 import type { PinnedKey, VerificationReport, VerifierPolicy } from './verifier-types.js';
 import {
@@ -87,24 +87,6 @@ export interface VerifyCoreResult {
 }
 
 // ---------------------------------------------------------------------------
-// Internal State
-// ---------------------------------------------------------------------------
-
-/**
- * JWKS cache entry
- */
-interface JWKSCacheEntry {
-  jwks: JWKS;
-  expiresAt: number;
-}
-
-/**
- * In-memory JWKS cache (5 minute TTL)
- */
-const jwksCache = new Map<string, JWKSCacheEntry>();
-const CACHE_TTL_MS = 5 * 60 * 1000;
-
-// ---------------------------------------------------------------------------
 // Helper Functions
 // ---------------------------------------------------------------------------
 
@@ -154,28 +136,6 @@ function findPinnedKey(
 }
 
 /**
- * Fetch issuer configuration
- */
-async function fetchIssuerConfig(issuerOrigin: string): Promise<IssuerConfig | null> {
-  const configUrl = `${issuerOrigin}/.well-known/peac-issuer.json`;
-
-  const result = await ssrfSafeFetch(configUrl, {
-    maxBytes: 65536, // 64 KB
-    headers: { Accept: 'application/json' },
-  });
-
-  if (!result.ok) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(result.body) as IssuerConfig;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * JWKS fetch result (success case)
  */
 interface JWKSFetchSuccess {
@@ -186,77 +146,33 @@ interface JWKSFetchSuccess {
 }
 
 /**
- * Fetch JWKS from issuer
+ * Fetch JWKS from issuer via strict discovery (peac-issuer.json -> jwks_uri).
+ * Delegates to the shared jwks-resolver module.
+ *
+ * The resolver preserves the original SSRF reason on errors, so no lossy
+ * reverse-mapping is needed.
  */
 async function fetchIssuerJWKS(
   issuerOrigin: string
 ): Promise<JWKSFetchSuccess | { error: SSRFFetchError }> {
-  const now = Date.now();
-
-  // Check cache
-  const cached = jwksCache.get(issuerOrigin);
-  if (cached && cached.expiresAt > now) {
-    return { jwks: cached.jwks, fromCache: true };
-  }
-
-  // Fetch issuer config first
-  const config = await fetchIssuerConfig(issuerOrigin);
-  if (!config?.jwks_uri) {
-    // Fallback to well-known JWKS path
-    const fallbackUrl = `${issuerOrigin}/.well-known/jwks.json`;
-    const result = await fetchJWKSSafe(fallbackUrl);
-
-    if (!result.ok) {
-      return { error: result };
-    }
-
-    try {
-      const jwks = JSON.parse(result.body) as JWKS;
-      jwksCache.set(issuerOrigin, { jwks, expiresAt: now + CACHE_TTL_MS });
-      return { jwks, fromCache: false, rawBytes: result.rawBytes };
-    } catch {
-      return {
-        error: {
-          ok: false,
-          reason: 'network_error',
-          message: 'Invalid JWKS JSON',
-        } as SSRFFetchError,
-      };
-    }
-  }
-
-  // Fetch JWKS from discovered URI
-  const result = await fetchJWKSSafe(config.jwks_uri);
+  const result = await resolveJWKS(issuerOrigin);
 
   if (!result.ok) {
-    return { error: result };
-  }
-
-  try {
-    const jwks = JSON.parse(result.body) as JWKS;
-
-    // Validate JWKS limits
-    if (jwks.keys.length > VERIFIER_LIMITS.maxJwksKeys) {
-      return {
-        error: {
-          ok: false,
-          reason: 'jwks_too_many_keys',
-          message: `JWKS has too many keys: ${jwks.keys.length} > ${VERIFIER_LIMITS.maxJwksKeys}`,
-        } as SSRFFetchError,
-      };
-    }
-
-    jwksCache.set(issuerOrigin, { jwks, expiresAt: now + CACHE_TTL_MS });
-    return { jwks, fromCache: false, rawBytes: result.rawBytes };
-  } catch {
     return {
       error: {
         ok: false,
-        reason: 'network_error',
-        message: 'Invalid JWKS JSON',
+        reason: result.reason ?? 'network_error',
+        message: result.message,
+        blockedUrl: result.blockedUrl,
       } as SSRFFetchError,
     };
   }
+
+  return {
+    jwks: result.jwks,
+    fromCache: result.fromCache,
+    rawBytes: result.rawBytes,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -716,16 +632,5 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
   };
 }
 
-/**
- * Clear the JWKS cache
- */
-export function clearJWKSCache(): void {
-  jwksCache.clear();
-}
-
-/**
- * Get JWKS cache size (for testing)
- */
-export function getJWKSCacheSize(): number {
-  return jwksCache.size;
-}
+// JWKS cache management is now in jwks-resolver.ts
+// Use clearJWKSCache() and getJWKSCacheSize() from '@peac/protocol'

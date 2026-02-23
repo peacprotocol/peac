@@ -10,6 +10,16 @@ Email: security@peacprotocol.org
 
 Do not open a public issue for security vulnerabilities.
 
+## Trojan Source Protection
+
+This repository runs a fail-closed invisible/bidi Unicode scan (`scripts/find-invisible-unicode.mjs`)
+on every CI run and local `guard.sh` invocation. The scanner rejects all dangerous Unicode categories
+(bidi overrides, zero-width characters, invisible formatters) in tracked source files.
+
+GitHub's diff view may show a "This file contains bidirectional Unicode text" banner on some files.
+This is a heuristic warning and does not indicate a vulnerability when the repo's Trojan Source scan
+passes. The scanner is the authoritative check.
+
 ## Dependency Audit Policy
 
 Production dependency audit is clean (zero findings). The audit gate runs

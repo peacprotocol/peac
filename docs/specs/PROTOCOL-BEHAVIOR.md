@@ -16,7 +16,7 @@ This document defines the normative behavioral semantics for PEAC receipts. It M
 - [TEST_VECTORS.md](TEST_VECTORS.md) - Normative conformance tests
 - [ERRORS.md](ERRORS.md) - Normative error codes
 
-**Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+**Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown here.
 
 **Implementation requirement**: Even if a JSON Schema validator does not fully support conditional constraints (if/then), a conformant PEAC implementation MUST enforce all behavioral rules defined in this document procedurally.
 
