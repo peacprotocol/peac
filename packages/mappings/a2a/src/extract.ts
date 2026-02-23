@@ -7,10 +7,7 @@
  */
 
 import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
-import {
-  PeacEvidenceCarrierSchema,
-  verifyReceiptRefConsistency,
-} from '@peac/schema';
+import { PeacEvidenceCarrierSchema, verifyReceiptRefConsistency } from '@peac/schema';
 
 import type {
   A2AMetadata,
