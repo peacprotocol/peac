@@ -189,16 +189,14 @@ Output: null (consistent) | error string (inconsistent)
 
 Each transport has a maximum carrier size. These limits are defined in `CARRIER_TRANSPORT_LIMITS`:
 
-| Transport           | Max Size | Default Format | Rationale                |
-| ------------------- | -------- | -------------- | ------------------------ |
-| MCP (`_meta`)       | 64 KB    | embed          | JSON in memory           |
-| A2A (`metadata`)    | 64 KB    | embed          | Metadata map             |
-| ACP (body)          | 64 KB    | embed          | Body envelope            |
-| ACP (headers)       | 8 KB     | reference      | Header limits            |
-| UCP (webhook)       | 64 KB    | embed          | Webhook body             |
-| x402 (body)         | 64 KB    | embed          | Offer/settlement body    |
-| x402 (headers)      | 8 KB     | reference      | Header limits            |
-| HTTP (headers only) | 8 KB     | reference      | Generic header transport |
+| Transport           | Max Size | Default Format | Rationale                         |
+| ------------------- | -------- | -------------- | --------------------------------- |
+| MCP (`_meta`)       | 64 KB    | embed          | JSON in memory                    |
+| A2A (`metadata`)    | 64 KB    | embed          | Metadata map                      |
+| ACP (headers)       | 8 KB     | embed          | PEAC-Receipt header (compact JWS) |
+| UCP (webhook)       | 64 KB    | embed          | Webhook body                      |
+| x402 (headers)      | 8 KB     | embed          | PEAC-Receipt header (compact JWS) |
+| HTTP (headers only) | 8 KB     | reference      | Generic header transport          |
 
 ---
 
@@ -244,11 +242,7 @@ The extension URI (`https://www.peacprotocol.org/ext/traceability/v1`) is regist
 
 ### 7.3 ACP
 
-Carriers are attached via HTTP headers and/or body depending on the carrier format:
-
-- **Embed format:** Carrier JSON in the ACP message body
-- **Header transport:** `PEAC-Receipt` header carries a compact JWS (never a bare `receipt_ref`)
-- **Reference format:** `Link: <url>; rel="peac-receipt"` header for reference-only transport
+Carriers are attached via the `PEAC-Receipt` HTTP header, which carries a compact JWS. The header surface enforces an 8 KB size limit. The `receipt_jws` field is required; carriers without a JWS are rejected at `attach()` time.
 
 ### 7.4 UCP
 
@@ -256,7 +250,7 @@ Carriers are placed in the `peac_evidence` field of webhook payloads. Backward c
 
 ### 7.5 x402
 
-Carriers are embedded in the x402 offer/settlement body. The `PEAC-Receipt` HTTP header carries a compact JWS if present (never a bare `receipt_ref`). This keeps headers stable while the carrier data travels in the body.
+Carriers are attached via the `PEAC-Receipt` HTTP header on x402 offer (HTTP 402) and settlement (HTTP 200) responses. The header carries a compact JWS and enforces an 8 KB size limit. The `receipt_jws` field is required; carriers without a JWS are rejected at `attach()` time.
 
 ### 7.6 HTTP (generic)
 
