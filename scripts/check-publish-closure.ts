@@ -47,6 +47,7 @@ function packageDir(npmName: string): string {
     'rails-card': 'packages/rails/card',
     'rails-razorpay': 'packages/rails/razorpay',
     'mappings-mcp': 'packages/mappings/mcp',
+    'mappings-a2a': 'packages/mappings/a2a',
     'mappings-acp': 'packages/mappings/acp',
     'mappings-aipref': 'packages/mappings/aipref',
     'mappings-rsl': 'packages/mappings/rsl',
