@@ -9,7 +9,7 @@
 
 This document specifies how PEAC evidence carriers are placed within A2A (Agent-to-Agent Protocol) messages and metadata. It covers Agent Card declaration, metadata layout, header conventions, and security considerations.
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown here.
 
 ## 1. Overview
 
@@ -36,7 +36,7 @@ Agents that support PEAC evidence MUST declare the extension in their Agent Card
         "params": {
           "supported_kinds": ["peac-receipt/0.1"],
           "carrier_formats": ["embed", "reference"],
-          "jwks_uri": "https://agent.example.com/.well-known/jwks.json"
+          "issuer_config_url": "https://agent.example.com/.well-known/peac-issuer.json"
         }
       }
     ]
@@ -55,11 +55,11 @@ Agents that support PEAC evidence MUST declare the extension in their Agent Card
 
 **Params schema:**
 
-| Field             | Type       | Description                                     |
-| ----------------- | ---------- | ----------------------------------------------- |
-| `supported_kinds` | `string[]` | Wire format versions (e.g., `peac-receipt/0.1`) |
-| `carrier_formats` | `string[]` | Supported carrier formats: `embed`, `reference` |
-| `jwks_uri`        | `string`   | URI for public keys used to verify receipts     |
+| Field               | Type       | Description                                       |
+| ------------------- | ---------- | ------------------------------------------------- |
+| `supported_kinds`   | `string[]` | Wire format versions (e.g., `peac-receipt/0.1`)   |
+| `carrier_formats`   | `string[]` | Supported carrier formats: `embed`, `reference`   |
+| `issuer_config_url` | `string`   | URI for issuer configuration (`peac-issuer.json`) |
 
 ### 2.2 Discovery
 
