@@ -52,9 +52,7 @@ export function attachReceiptToMetadata(
   for (const carrier of carriers) {
     const result = validateCarrierConstraints(carrier, effectiveMeta);
     if (!result.valid) {
-      throw new Error(
-        `Carrier constraint violation: ${result.violations.join('; ')}`
-      );
+      throw new Error(`Carrier constraint violation: ${result.violations.join('; ')}`);
     }
   }
 

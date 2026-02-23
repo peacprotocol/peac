@@ -13,8 +13,7 @@ import type { CarrierFormat, PeacEvidenceCarrier, CarrierMeta } from '@peac/kern
 // ---------------------------------------------------------------------------
 
 /** PEAC traceability extension URI for A2A metadata */
-export const PEAC_EXTENSION_URI =
-  'https://www.peacprotocol.org/ext/traceability/v1' as const;
+export const PEAC_EXTENSION_URI = 'https://www.peacprotocol.org/ext/traceability/v1' as const;
 
 /** Maximum carrier size for A2A metadata (64 KB, DD-127) */
 export const A2A_MAX_CARRIER_SIZE = 65_536;

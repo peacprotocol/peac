@@ -2,9 +2,13 @@
  * A2A agent discovery with SSRF hardening (Polish C).
  *
  * Discovers A2A Agent Cards and checks for PEAC extension support.
- * Implements DNS rebinding defense, scheme allowlist, proxy bypass,
- * response size cap, content-type check, and redirect rejection.
+ * Implements literal-IP blocking, optional DNS resolution checks,
+ * scheme allowlist, userinfo rejection, response size cap,
+ * content-type check, and redirect rejection.
  */
+
+import type { CarrierFormat } from '@peac/kernel';
+import { PEAC_RECEIPT_HEADER } from '@peac/kernel';
 
 import type { A2AAgentCard, AgentCardPeacExtension } from './types';
 import { PEAC_EXTENSION_URI } from './types';
@@ -45,8 +49,20 @@ export interface DiscoveryOptions {
    */
   allowInsecureLocalhost?: boolean;
 
-  /** Custom fetch implementation (for testing) */
+  /** Custom fetch implementation (for testing or strict environments) */
   fetch?: typeof globalThis.fetch;
+
+  /**
+   * Optional DNS resolver for DNS rebinding defense.
+   *
+   * When provided, discovery resolves the hostname and checks all returned
+   * IP addresses against private ranges before connecting. This provides
+   * full DNS rebinding protection.
+   *
+   * When omitted, discovery checks only literal IP addresses in the URL
+   * hostname (weaker posture, but portable across runtimes).
+   */
+  resolveHostname?: (hostname: string) => Promise<string[]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -58,25 +74,24 @@ function isPrivateIP(ip: string): boolean {
 }
 
 function isLocalhostAddress(hostname: string): boolean {
-  return (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname === '::1'
-  );
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
 /**
- * Validate URL scheme and hostname for SSRF protection.
+ * Validate URL scheme, hostname, and credentials for SSRF protection.
  *
  * - Only HTTPS in production (Polish C item 6)
  * - HTTP allowed only for localhost when allowInsecureLocalhost is true
- * - Rejects private IP ranges
+ * - Rejects private IP ranges (literal check always; DNS resolution when resolver provided)
+ * - Rejects URLs with userinfo (user:pass@host) to prevent confusion in allowlists
  */
-function validateUrlForDiscovery(
-  url: string,
-  options: DiscoveryOptions
-): void {
+async function validateUrlForDiscovery(url: string, options: DiscoveryOptions): Promise<void> {
   const parsed = new URL(url);
+
+  // Reject URLs with userinfo (user:pass@host)
+  if (parsed.username || parsed.password) {
+    throw new Error('SSRF: URLs with userinfo (credentials) are not allowed');
+  }
 
   // Scheme allowlist (Polish C item 6)
   if (parsed.protocol === 'http:') {
@@ -90,9 +105,21 @@ function validateUrlForDiscovery(
     throw new Error(`SSRF: unsupported scheme ${parsed.protocol}`);
   }
 
-  // Check for private IP in hostname (DNS rebinding defense)
+  // Check for private IP in hostname (literal IP check)
   if (isPrivateIP(parsed.hostname) && !isLocalhostAddress(parsed.hostname)) {
     throw new Error(`SSRF: private IP address ${parsed.hostname} not allowed`);
+  }
+
+  // DNS rebinding defense: resolve hostname and check all IPs (when resolver provided)
+  if (options.resolveHostname && !isLocalhostAddress(parsed.hostname)) {
+    const resolvedIPs = await options.resolveHostname(parsed.hostname);
+    for (const ip of resolvedIPs) {
+      if (isPrivateIP(ip)) {
+        throw new Error(
+          `SSRF: hostname ${parsed.hostname} resolved to private IP ${ip}`
+        );
+      }
+    }
   }
 }
 
@@ -107,13 +134,13 @@ function validateUrlForDiscovery(
  * as a legacy fallback per A2A v0.3.0.
  *
  * SSRF protection per Polish C:
- * 1. DNS rebinding defense (private IP check)
+ * 1. Private IP blocking (literal check; DNS resolution when resolveHostname provided)
  * 2. Response size cap (256 KB)
  * 3. Content-Type check (application/json)
  * 4. Redirect rejection (redirect: "error")
  * 5. Timeout (5 seconds)
  * 6. Scheme allowlist (HTTPS only; HTTP for localhost dev only)
- * 7. Proxy bypass (not inheriting proxy env vars)
+ * 7. Userinfo rejection (no credentials in URLs)
  */
 export async function discoverAgentCard(
   baseUrl: string,
@@ -126,14 +153,12 @@ export async function discoverAgentCard(
     const url = new URL(path, baseUrl).toString();
 
     try {
-      validateUrlForDiscovery(url, options);
+      await validateUrlForDiscovery(url, options);
 
       const response = await fetchFn(url, {
         method: 'GET',
         redirect: 'error', // Polish C item 4
         signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
-        // Note: proxy bypass achieved by not configuring proxy agent
-        // In Node.js, fetch does not inherit HTTP_PROXY by default
       });
 
       if (!response.ok) {
@@ -197,9 +222,7 @@ export function hasPeacExtension(card: A2AAgentCard): boolean {
  *
  * Returns the PEAC extension entry or null if not present.
  */
-export function getPeacExtension(
-  card: A2AAgentCard
-): AgentCardPeacExtension | null {
+export function getPeacExtension(card: A2AAgentCard): AgentCardPeacExtension | null {
   const extensions = card.capabilities?.extensions;
   if (!Array.isArray(extensions)) {
     return null;
@@ -208,4 +231,159 @@ export function getPeacExtension(
     (ext) => typeof ext === 'object' && ext !== null && ext.uri === PEAC_EXTENSION_URI
   );
   return (entry as AgentCardPeacExtension) ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// PEAC discovery result
+// ---------------------------------------------------------------------------
+
+/** Source of PEAC capability discovery */
+export type PeacDiscoverySource = 'agent_card' | 'well_known' | 'header_probe';
+
+/** Result of PEAC capability discovery */
+export interface PeacDiscoveryResult {
+  source: PeacDiscoverySource;
+  kinds: string[];
+  carrier_formats: CarrierFormat[];
+  jwks_uri?: string;
+}
+
+// ---------------------------------------------------------------------------
+// 3-step discovery (DD-110)
+// ---------------------------------------------------------------------------
+
+/**
+ * Discover PEAC capabilities from a base URL using a 3-step algorithm:
+ *
+ * 1. Agent Card: check `/.well-known/agent-card.json` for PEAC extension
+ * 2. Well-known: check `/.well-known/peac.json` (standalone PEAC discovery)
+ * 3. Header probe: HEAD request to base URL, check for `PEAC-Receipt` header
+ *
+ * Returns the first successful result or null if PEAC is not supported.
+ * All steps apply SSRF protections per Polish C.
+ */
+export async function discoverPeacCapabilities(
+  baseUrl: string,
+  options: DiscoveryOptions = {}
+): Promise<PeacDiscoveryResult | null> {
+  // Step 1: Agent Card
+  const card = await discoverAgentCard(baseUrl, options);
+  if (card) {
+    const ext = getPeacExtension(card);
+    if (ext) {
+      return {
+        source: 'agent_card',
+        kinds: ext.params?.supported_kinds ?? ['peac-receipt/0.1'],
+        carrier_formats: ext.params?.carrier_formats ?? ['embed'],
+        ...(ext.params?.jwks_uri && { jwks_uri: ext.params.jwks_uri }),
+      };
+    }
+  }
+
+  // Step 2: /.well-known/peac.json
+  const wellKnown = await discoverPeacWellKnown(baseUrl, options);
+  if (wellKnown) {
+    return wellKnown;
+  }
+
+  // Step 3: Header probe
+  const headerProbe = await discoverPeacViaHeaderProbe(baseUrl, options);
+  if (headerProbe) {
+    return headerProbe;
+  }
+
+  return null;
+}
+
+/**
+ * Step 2: Discover PEAC support via `/.well-known/peac.json`.
+ */
+async function discoverPeacWellKnown(
+  baseUrl: string,
+  options: DiscoveryOptions
+): Promise<PeacDiscoveryResult | null> {
+  const fetchFn = options.fetch ?? globalThis.fetch;
+  const url = new URL('/.well-known/peac.json', baseUrl).toString();
+
+  try {
+    await validateUrlForDiscovery(url, options);
+
+    const response = await fetchFn(url, {
+      method: 'GET',
+      redirect: 'error',
+      signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
+    });
+
+    if (!response.ok) return null;
+
+    const contentType = response.headers.get('content-type') ?? '';
+    if (
+      !contentType.includes('application/json') &&
+      !contentType.match(/application\/[a-z0-9.+-]*\+json/)
+    ) {
+      return null;
+    }
+
+    const contentLength = response.headers.get('content-length');
+    if (contentLength && parseInt(contentLength, 10) > MAX_RESPONSE_SIZE) {
+      return null;
+    }
+
+    const text = await response.text();
+    if (text.length > MAX_RESPONSE_SIZE) return null;
+
+    const data = JSON.parse(text) as Record<string, unknown>;
+
+    return {
+      source: 'well_known',
+      kinds: Array.isArray(data.supported_kinds)
+        ? (data.supported_kinds as string[])
+        : ['peac-receipt/0.1'],
+      carrier_formats: Array.isArray(data.carrier_formats)
+        ? (data.carrier_formats as CarrierFormat[])
+        : ['embed'],
+      ...(typeof data.jwks_uri === 'string' && { jwks_uri: data.jwks_uri }),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Step 3: Discover PEAC support via header probe.
+ *
+ * Sends a HEAD request and checks for the presence of a PEAC-Receipt header.
+ * This is a lightweight probe; it indicates support but provides minimal detail.
+ */
+async function discoverPeacViaHeaderProbe(
+  baseUrl: string,
+  options: DiscoveryOptions
+): Promise<PeacDiscoveryResult | null> {
+  const fetchFn = options.fetch ?? globalThis.fetch;
+
+  try {
+    await validateUrlForDiscovery(baseUrl, options);
+
+    const response = await fetchFn(baseUrl, {
+      method: 'HEAD',
+      redirect: 'error',
+      signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
+    });
+
+    const headerKey = [...response.headers.keys()].find(
+      (k) => k.toLowerCase() === PEAC_RECEIPT_HEADER.toLowerCase()
+    );
+
+    if (headerKey) {
+      return {
+        source: 'header_probe',
+        kinds: ['peac-receipt/0.1'],
+        carrier_formats: ['embed'],
+      };
+    }
+  } catch {
+    // Network errors, SSRF: no PEAC support detected
+  }
+
+  return null;
 }

@@ -49,6 +49,11 @@ export { A2ACarrierAdapter, createA2ACarrierMeta } from './carrier';
 export { parseA2AExtensionsHeader, buildA2AExtensionsHeader } from './header';
 
 // Discovery
-export type { DiscoveryOptions } from './discovery';
+export type { DiscoveryOptions, PeacDiscoverySource, PeacDiscoveryResult } from './discovery';
 
-export { discoverAgentCard, hasPeacExtension, getPeacExtension } from './discovery';
+export {
+  discoverAgentCard,
+  hasPeacExtension,
+  getPeacExtension,
+  discoverPeacCapabilities,
+} from './discovery';

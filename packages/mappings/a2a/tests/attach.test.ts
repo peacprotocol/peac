@@ -66,9 +66,7 @@ describe('attachReceiptToMetadata', () => {
       ...VALID_CARRIER,
       policy_binding: 'x'.repeat(100_000),
     };
-    expect(() => attachReceiptToMetadata({}, [oversized])).toThrow(
-      /constraint violation/i
-    );
+    expect(() => attachReceiptToMetadata({}, [oversized])).toThrow(/constraint violation/i);
   });
 
   it('accepts custom CarrierMeta', () => {

@@ -12,8 +12,7 @@ import {
   PEAC_EXTENSION_URI,
 } from '../src/index';
 
-const VALID_REF =
-  'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+const VALID_REF = 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 const VALID_JWS = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJ0ZXN0In0.dGVzdHNpZw';
 
 const VALID_CARRIER: PeacEvidenceCarrier = {
@@ -73,10 +72,7 @@ describe('extractReceiptFromMetadata (sync)', () => {
   it('returns null when all carriers fail validation', () => {
     const metadata = {
       [PEAC_EXTENSION_URI]: {
-        carriers: [
-          { receipt_ref: 'bad1' },
-          { receipt_ref: 'bad2' },
-        ],
+        carriers: [{ receipt_ref: 'bad1' }, { receipt_ref: 'bad2' }],
       },
     };
 
@@ -195,8 +191,6 @@ describe('extractReceiptFromArtifact', () => {
   });
 
   it('returns null for Artifact without metadata', () => {
-    expect(
-      extractReceiptFromArtifact({ artifactId: 'art-1', parts: [] })
-    ).toBeNull();
+    expect(extractReceiptFromArtifact({ artifactId: 'art-1', parts: [] })).toBeNull();
   });
 });

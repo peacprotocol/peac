@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
 import { A2ACarrierAdapter, createA2ACarrierMeta, PEAC_EXTENSION_URI } from '../src/index';
 
-const VALID_REF =
-  'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+const VALID_REF = 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
 const VALID_CARRIER: PeacEvidenceCarrier = {
   receipt_ref: VALID_REF as PeacEvidenceCarrier['receipt_ref'],

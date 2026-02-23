@@ -49,9 +49,7 @@ export interface A2AExtractAsyncResult extends A2AExtractResult {
  * Returns null if no PEAC extension data is present.
  * Silently skips carriers that fail schema validation.
  */
-export function extractReceiptFromMetadata(
-  metadata: A2AMetadata
-): A2AExtractResult | null {
+export function extractReceiptFromMetadata(metadata: A2AMetadata): A2AExtractResult | null {
   const raw = metadata[PEAC_EXTENSION_URI];
   if (raw === undefined || raw === null) {
     return null;
@@ -128,9 +126,7 @@ export async function extractReceiptFromMetadataAsync(
 // ---------------------------------------------------------------------------
 
 /** Extract carriers from A2A TaskStatus (sync) */
-export function extractReceiptFromTaskStatus(
-  status: A2ATaskStatusLike
-): A2AExtractResult | null {
+export function extractReceiptFromTaskStatus(status: A2ATaskStatusLike): A2AExtractResult | null {
   if (!status.metadata) return null;
   return extractReceiptFromMetadata(status.metadata);
 }
@@ -144,9 +140,7 @@ export async function extractReceiptFromTaskStatusAsync(
 }
 
 /** Extract carriers from A2A Message (sync) */
-export function extractReceiptFromMessage(
-  msg: A2AMessageLike
-): A2AExtractResult | null {
+export function extractReceiptFromMessage(msg: A2AMessageLike): A2AExtractResult | null {
   if (!msg.metadata) return null;
   return extractReceiptFromMetadata(msg.metadata);
 }
@@ -160,9 +154,7 @@ export async function extractReceiptFromMessageAsync(
 }
 
 /** Extract carriers from A2A Artifact (sync) */
-export function extractReceiptFromArtifact(
-  artifact: A2AArtifactLike
-): A2AExtractResult | null {
+export function extractReceiptFromArtifact(artifact: A2AArtifactLike): A2AExtractResult | null {
   if (!artifact.metadata) return null;
   return extractReceiptFromMetadata(artifact.metadata);
 }
