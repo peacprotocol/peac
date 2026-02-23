@@ -7,6 +7,114 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-02-22
+
+### Infrastructure Modernization + Enterprise Readiness
+
+v0.11.0 is an infrastructure modernization release: Zod 4 migration for 7-14x
+parsing performance, MCP Streamable HTTP transport for remote agent connectivity,
+kernel constraint enforcement in issuance and verification pipelines, integrator
+kit scaffolding for ecosystem partners, and OWASP Top 10 for Agentic Applications
+security alignment.
+
+**Breaking change:** `@peac/schema` exports Zod 4 types. If you compile against
+exported schemas, align your Zod major to v4. Zod 3 and Zod 4 types are not
+assignment-compatible. Consumers pinned to `^0.10.x` will stay on v0.10.14 (safe);
+`^0.11.x` opts in explicitly.
+
+### Added
+
+- **MCP Streamable HTTP transport** (DD-119, DD-123)
+  - `--transport http` flag enables HTTP transport alongside existing stdio
+  - Session-isolated `McpServer` + `StreamableHTTPServerTransport` per HTTP
+    session (CVE-2026-25536 defense: no cross-client data leak)
+  - `Mcp-Session-Id` lifecycle: server-generated on init, required on subsequent
+    requests, `DELETE /mcp` for session termination
+  - Session eviction: configurable TTL (default 30 min) + max sessions (default 100)
+  - `POST /mcp`: JSON-RPC request/response; `GET /mcp`: 405 Method Not Allowed
+  - `GET /health`: health check (no auth, returns version + protocol version)
+  - RFC 9728 PRM discovery endpoint at `GET /.well-known/oauth-protected-resource[/<path>]`:
+    implemented but disabled by default; enabled when both `--authorization-servers`
+    and `--public-url` are configured; returns 404 otherwise
+  - Security: CORS deny-all default, localhost-only bind, 1MB request body limit,
+    per-session + per-IP rate limiting (100 req/min default), Origin/Host validation,
+    Node.js server timeouts (slowloris defense)
+  - CLI flags: `--transport`, `--port`, `--host`, `--cors-origins`,
+    `--authorization-servers`, `--public-url`, `--trust-proxy`
+- **Kernel constraint enforcement in pipelines** (DD-121)
+  - `validateKernelConstraints()` called in `issue()` before signing (rejects
+    oversized claims pre-sign)
+  - `validateKernelConstraints()` called in `verifyReceipt()` and `verifyLocal()`
+    after decode/signature, before schema parse (rejects malformed payloads early)
+  - New `constraint_violation` reason in `VerifyFailure` taxonomy
+  - New `E_CONSTRAINT_VIOLATION` error code in `@peac/schema` error taxonomy
+  - Fail-closed: all violations produce typed errors (no silent failures)
+  - Normative specification: `docs/specs/KERNEL-CONSTRAINTS.md`
+- **Integrator Kit** (DD-108, DD-122)
+  - Template kit at `integrator-kits/template/` with README, integration guide,
+    and security FAQ
+  - Ecosystem scaffolds: MCP, A2A, ACP, x402, Content Signals
+  - Conformance harness: `scripts/conformance-harness.ts` CLI runner with
+    `--adapter`, `--fixtures`, `--format json|pretty` flags
+  - Deterministic JSON report output for CI consumption
+- **OWASP Top 10 for Agentic Applications alignment**
+  - `docs/security/OWASP-ASI-MAPPING.md` maps all 10 risks (ASI-01 through
+    ASI-10) to specific PEAC mitigations with test file citations
+- **Performance baselines** updated with Zod 4 benchmarks
+  - `parseReceiptClaims` commerce: ~388K ops/sec; attestation: ~792K ops/sec
+  - `toCoreClaims` commerce: ~11.8M ops/sec; attestation: ~27.3M ops/sec
+
+### Changed
+
+- **Zod 4 migration** (DD-120): all workspace packages migrated from Zod 3.25.x
+  to Zod 4.x (`^4.3.6`). Key migration patterns:
+  - `z.record(ValueSchema)` to `z.record(z.string(), ValueSchema)` (2-arg form)
+  - `.default({})` to `.prefault({})` for mutable defaults
+  - `ZodError.errors` to `ZodError.issues`; `issue.path` is `PropertyKey[]`
+  - `pnpm.overrides` enforces single Zod major across workspace
+  - MCP SDK peer dependency accepts `^3.25 || ^4.0` (compatible)
+- **MCP SDK** pinned at `~1.27.0` (>= 1.26.0 for CVE-2026-25536 fix)
+
+### Zod 4 Consumer Migration Notes
+
+If you import schemas from `@peac/schema`, align your Zod major to v4:
+
+1. `z.record(ValueSchema)` now requires two arguments: `z.record(z.string(), ValueSchema)`
+2. `.default({})` replaced by `.prefault({})` for mutable default values
+3. `ZodError.errors` renamed to `ZodError.issues`
+4. `z.infer<>` types remain structurally equivalent for all PEAC schemas
+5. `pnpm.overrides` or equivalent should enforce a single Zod major in your workspace
+
+### Deferred
+
+- Full OAuth 2.1 MCP server: deferred to v0.11.x+ (HTTP transport needs field validation first)
+- MCP protected mode (401 + WWW-Authenticate + token validation): deferred to v0.11.x+
+- Evidence Carrier Contract (`PeacEvidenceCarrier`): deferred to v0.11.1
+- `@peac/mappings-a2a`: deferred to v0.11.1
+- NIST CAISI RFI submission: deferred to v0.11.1
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- 22 published packages version-bumped to 0.11.0
+- Design decisions: DD-119 (Streamable HTTP), DD-120 (Zod 4), DD-121 (kernel
+  constraints pipeline), DD-122 (conformance harness), DD-123 (HTTP security)
+- MCP Streamable HTTP runs in unprotected mode only (no token validation);
+  "OAuth readiness" hooks provided via optional PRM endpoint
+- stdio transport remains the default (backward compatible)
+- PR merge order: #407 (Zod 4 schema) -> #408 (Zod 4 remaining) -> #409/#410/#411
+  (HTTP transport / kernel constraints / integrator kit, parallel) -> #412 (release)
+
+### Standards References
+
+- **MCP Transport 2025-06-18**: Streamable HTTP implemented (JSON-only mode, SSE deferred)
+- **MCP Authorization 2025-11-25**: Discovery only (RFC 9728 PRM); protected mode deferred
+- **RFC 9728** (OAuth Protected Resource Metadata): Conditional PRM endpoint (path-aware routing)
+- **CVE-2026-25536** (MCP SDK cross-client data leak): Mitigated by per-session transport isolation
+- **MCP SDK ~1.27.0** (v1.x stable): v2 pre-alpha, not production
+- **Zod ^4.3.6**: Full migration from 3.25.x
+- **OWASP ASI-01 through ASI-10**: Alignment mapping in `docs/security/OWASP-ASI-MAPPING.md`
+
 ## [0.10.14] - 2026-02-22
 
 ### Quality Hardening and Zod 4 Preparation
@@ -1114,15 +1222,15 @@ This release normalizes all wire format identifiers to the `peac-<artifact>/<maj
 
 The following items were originally planned for v0.9.28 but deferred to future releases:
 
-- **Full Go SDK (Issue + Policy)** → Moved to v0.9.29
+- **Full Go SDK (Issue + Policy)** -> Moved to v0.9.29
   - Only verify.go exists; issue.go and policy.go not implemented
   - 4-6 day implementation timeline required
-- **npm publish** → Moved to v0.9.31
+- **npm publish** -> Moved to v0.9.31
   - Latest-only publishing policy
   - Quality gates need validation with real deployments
-- **Faremeter Adapter** → Moved to v0.9.30
-- **Python SDK** → Moved to post-v0.10.0
-- **@peac/nextjs v0.1** → Moved to v0.9.30
+- **Faremeter Adapter** -> Moved to v0.9.30
+- **Python SDK** -> Moved to post-v0.10.0
+- **@peac/nextjs v0.1** -> Moved to v0.9.30
 
 ### Notes
 
@@ -1726,7 +1834,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 
 - **Signed Agent-Directory Caching**: TOFU pinning with key rotation support and comprehensive SSRF protection
 - **Receipt Key Rotation**: JWS `kid` header support for seamless key rotation without downtime
-- **Batch Verify API**: High-performance batch verification (POST ≤100 items, GET ≤25 items)
+- **Batch Verify API**: High-performance batch verification (POST <=100 items, GET <=25 items)
 - **Hardened Rate Limiting**: Per-tier token bucket rate limiting with RFC 9457 RateLimit headers
 - **Structured Telemetry**: Privacy-safe event logging with correlation IDs and PII protection
 

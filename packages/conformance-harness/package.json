@@ -1,0 +1,41 @@
+{
+  "name": "@peac/conformance-harness",
+  "version": "0.11.0",
+  "private": true,
+  "description": "Conformance test harness for PEAC protocol fixtures",
+  "main": "dist/index.cjs",
+  "bin": {
+    "conformance-harness": "./dist/cli.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/conformance-harness"
+  },
+  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "pnpm run build:js",
+    "build:js": "tsup",
+    "clean": "rm -rf dist",
+    "conformance": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.11",
+    "tsup": "^8.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}

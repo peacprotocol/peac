@@ -17,6 +17,24 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionManager } from './session-manager.js';
 import { SERVER_NAME, SERVER_VERSION, MCP_PROTOCOL_VERSION } from './infra/constants.js';
 
+/**
+ * Trust-proxy configuration for X-Forwarded-For interpretation.
+ *
+ * Presets:
+ * - 'off': never trust forwarded headers (default; safe for direct clients)
+ * - 'loopback': trust only from 127.0.0.0/8 and ::1
+ * - 'linklocal': trust loopback + link-local (169.254.0.0/16, fe80::/10)
+ * - 'private': trust loopback + link-local + RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+ * - 'all': trust any remote address (DISCOURAGED; use only when behind a fully trusted proxy chain)
+ *
+ * Explicit addresses:
+ * - comma-separated IPs: trust only from listed addresses (e.g., '10.0.0.1,10.0.0.2')
+ *
+ * WARNING: only enable behind a trusted reverse proxy. An attacker can forge
+ * X-Forwarded-For from an untrusted peer to bypass per-IP rate limiting.
+ */
+export type TrustProxyValue = 'off' | 'loopback' | 'linklocal' | 'private' | 'all' | string;
+
 export interface HttpTransportOptions {
   /** Port to listen on. Default: 3000 */
   port?: number;
@@ -28,8 +46,8 @@ export interface HttpTransportOptions {
   authorizationServers?: string[];
   /** Canonical public URL of this server (required for PRM). */
   publicUrl?: string;
-  /** Trust X-Forwarded-For for rate limiting. Default: false */
-  trustProxy?: boolean;
+  /** Trust X-Forwarded-For for rate limiting. Default: 'off' */
+  trustProxy?: TrustProxyValue;
   /** Max request body bytes. Default: 1MB */
   maxRequestBytes?: number;
   /** Rate limit: requests per minute per session. Default: 100 */
@@ -38,6 +56,8 @@ export interface HttpTransportOptions {
   sessionTtlMs?: number;
   /** Max concurrent sessions. Default: 100 */
   maxSessions?: number;
+  /** Max sessions per client IP. Default: 10 */
+  maxSessionsPerIp?: number;
   /** Factory to create new McpServer instances (one per session) */
   serverFactory: () => McpServer;
 }
@@ -50,6 +70,85 @@ interface RateLimitEntry {
 const ONE_MINUTE_MS = 60_000;
 const DEFAULT_MAX_REQUEST_BYTES = 1_048_576; // 1 MB
 const DEFAULT_RATE_LIMIT_RPM = 100;
+const MAX_SESSION_ID_LENGTH = 128;
+
+/**
+ * Validate Mcp-Session-Id: visible ASCII (0x21-0x7E), max 128 chars.
+ * MCP spec requires session IDs to be visible ASCII characters only.
+ */
+function isValidSessionId(id: string): boolean {
+  if (id.length === 0 || id.length > MAX_SESSION_ID_LENGTH) return false;
+  for (let i = 0; i < id.length; i++) {
+    const code = id.charCodeAt(i);
+    if (code < 0x21 || code > 0x7e) return false;
+  }
+  return true;
+}
+
+/**
+ * Check if an IPv4 address falls within a well-known range.
+ * Does NOT perform CIDR parsing; uses prefix matching for known ranges.
+ */
+function isLoopbackAddr(addr: string): boolean {
+  return addr.startsWith('127.') || addr === '::1' || addr === '::ffff:127.0.0.1';
+}
+function isLinkLocalAddr(addr: string): boolean {
+  if (isLoopbackAddr(addr)) return true;
+  return addr.startsWith('169.254.') || addr.startsWith('fe80');
+}
+function isPrivateAddr(addr: string): boolean {
+  if (isLinkLocalAddr(addr)) return true;
+  return (
+    addr.startsWith('10.') ||
+    addr.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(addr) ||
+    addr.startsWith('fc') ||
+    addr.startsWith('fd') ||
+    addr.startsWith('::ffff:10.') ||
+    addr.startsWith('::ffff:192.168.') ||
+    /^::ffff:172\.(1[6-9]|2\d|3[01])\./.test(addr)
+  );
+}
+
+/**
+ * Check if a remote address is a trusted proxy based on trust-proxy config.
+ */
+function isTrustedProxy(remoteAddr: string, trustProxy: TrustProxyValue): boolean {
+  if (trustProxy === 'off') return false;
+  if (trustProxy === 'all') return true;
+  if (trustProxy === 'loopback') return isLoopbackAddr(remoteAddr);
+  if (trustProxy === 'linklocal') return isLinkLocalAddr(remoteAddr);
+  if (trustProxy === 'private') return isPrivateAddr(remoteAddr);
+  // Comma-separated trusted IPs
+  const trusted = trustProxy.split(',').map((s) => s.trim());
+  return trusted.includes(remoteAddr);
+}
+
+/**
+ * Validate --public-url for RFC 9728 PRM correctness:
+ * - Must be https (unless loopback for dev ergonomics)
+ * - Must not contain fragments
+ * - Trailing slashes normalized
+ */
+function validatePublicUrl(rawUrl: string): { url: URL; normalized: string } | { error: string } {
+  let u: URL;
+  try {
+    u = new URL(rawUrl);
+  } catch {
+    return { error: `Invalid URL: ${rawUrl}` };
+  }
+  if (u.hash) {
+    return { error: 'Public URL must not contain fragments (#)' };
+  }
+  const isLoopback =
+    u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname === '::1';
+  if (u.protocol !== 'https:' && !isLoopback) {
+    return { error: 'Public URL must use https (except for localhost/loopback dev usage)' };
+  }
+  // Normalize: strip trailing slash for path matching consistency
+  const normalized = u.href.replace(/\/+$/, '') || u.origin;
+  return { url: u, normalized };
+}
 
 /**
  * Create and start an HTTP server for MCP Streamable HTTP transport.
@@ -67,6 +166,7 @@ export async function createHttpTransport(
   const sessionManager = new SessionManager({
     ttlMs: options.sessionTtlMs,
     maxSessions: options.maxSessions,
+    maxSessionsPerIp: options.maxSessionsPerIp,
   });
   sessionManager.startSweep();
 
@@ -85,15 +185,32 @@ export async function createHttpTransport(
     return entry.count <= rateLimitRpm;
   }
 
+  const trustProxyValue: TrustProxyValue = options.trustProxy ?? 'off';
+
+  /**
+   * Resolve the client IP for rate limiting and per-IP session caps.
+   *
+   * Terminology:
+   * - peer_ip: the TCP socket remote address (req.socket.remoteAddress).
+   *   This is the IP the OS reports; it cannot be spoofed at the application layer.
+   * - client_ip: the resolved end-client IP after trust-proxy evaluation.
+   *   When trust-proxy is 'off' (default), client_ip === peer_ip.
+   *   When trust-proxy is enabled AND the peer_ip matches the trusted range,
+   *   client_ip is taken from the first entry in X-Forwarded-For.
+   *   When trust-proxy is enabled but the peer_ip is NOT in the trusted range,
+   *   X-Forwarded-For is IGNORED (peer_ip used as client_ip) to prevent
+   *   spoofing from untrusted peers.
+   */
   function getClientIp(req: IncomingMessage): string {
-    if (options.trustProxy) {
+    const peerIp = req.socket.remoteAddress ?? 'unknown';
+    if (trustProxyValue !== 'off' && isTrustedProxy(peerIp, trustProxyValue)) {
       const xff = req.headers['x-forwarded-for'];
       if (typeof xff === 'string') {
         const first = xff.split(',')[0]?.trim();
         if (first) return first;
       }
     }
-    return req.socket.remoteAddress ?? 'unknown';
+    return peerIp;
   }
 
   // Allowed hosts for Host header validation
@@ -165,22 +282,44 @@ export async function createHttpTransport(
     return Buffer.concat(chunks);
   }
 
-  // PRM configuration
-  const prmEnabled = !!(options.authorizationServers?.length && options.publicUrl);
+  // PRM configuration (RFC 9728 path-aware discovery)
+  // Both authorizationServers (non-empty) and publicUrl are required for PRM.
+  const authServers = (options.authorizationServers ?? []).filter((s) => s.trim().length > 0);
+  if (options.authorizationServers?.length && authServers.length === 0) {
+    process.stderr.write(
+      `[${SERVER_NAME}] WARNING: --authorization-servers contains only empty entries, PRM disabled\n`
+    );
+  }
+  if (authServers.length > 0 && !options.publicUrl) {
+    process.stderr.write(
+      `[${SERVER_NAME}] WARNING: --authorization-servers set without --public-url, PRM disabled\n`
+    );
+  }
+  if (options.publicUrl && authServers.length === 0) {
+    process.stderr.write(
+      `[${SERVER_NAME}] WARNING: --public-url set without --authorization-servers, PRM disabled\n`
+    );
+  }
+  const prmEnabled = !!(authServers.length > 0 && options.publicUrl);
   let prmPath = '/.well-known/oauth-protected-resource';
   let prmDocument: object | undefined;
   if (prmEnabled && options.publicUrl) {
-    try {
-      const u = new URL(options.publicUrl);
-      if (u.pathname !== '/') {
-        prmPath = `/.well-known/oauth-protected-resource${u.pathname}`;
+    const validation = validatePublicUrl(options.publicUrl);
+    if ('error' in validation) {
+      process.stderr.write(
+        `[${SERVER_NAME}] WARNING: --public-url invalid, PRM disabled: ${validation.error}\n`
+      );
+    } else {
+      const { url: u, normalized } = validation;
+      // RFC 9728 path insertion: /.well-known/oauth-protected-resource/<resource-path>
+      const resourcePath = u.pathname.replace(/\/+$/, '');
+      if (resourcePath && resourcePath !== '/') {
+        prmPath = `/.well-known/oauth-protected-resource${resourcePath}`;
       }
       prmDocument = {
-        resource: options.publicUrl,
-        authorization_servers: options.authorizationServers,
+        resource: normalized,
+        authorization_servers: authServers,
       };
-    } catch {
-      // Invalid publicUrl, disable PRM
     }
   }
 
@@ -248,6 +387,12 @@ export async function createHttpTransport(
           sendJson(res, 400, { error: 'Missing Mcp-Session-Id header' });
           return;
         }
+        if (!isValidSessionId(sessionId)) {
+          sendJson(res, 400, {
+            error: 'Invalid Mcp-Session-Id: must be visible ASCII (0x21-0x7E), max 128 chars',
+          });
+          return;
+        }
         const terminated = await sessionManager.terminateSession(sessionId);
         if (terminated) {
           sendJson(res, 200, { ok: true });
@@ -309,7 +454,7 @@ export async function createHttpTransport(
           // Create new session
           let entry;
           try {
-            entry = await sessionManager.createSession(options.serverFactory);
+            entry = await sessionManager.createSession(options.serverFactory, getClientIp(req));
           } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to create session';
             sendJson(res, 503, { error: msg });
@@ -324,6 +469,12 @@ export async function createHttpTransport(
         // Non-init requests require Mcp-Session-Id
         if (!sessionId) {
           sendJson(res, 400, { error: 'Missing Mcp-Session-Id header' });
+          return;
+        }
+        if (!isValidSessionId(sessionId)) {
+          sendJson(res, 400, {
+            error: 'Invalid Mcp-Session-Id: must be visible ASCII (0x21-0x7E), max 128 chars',
+          });
           return;
         }
 
@@ -357,18 +508,28 @@ export async function createHttpTransport(
     server.on('error', reject);
     server.listen(port, host, () => {
       process.stderr.write(`[${SERVER_NAME}] HTTP transport listening on http://${host}:${port}\n`);
+      process.stderr.write(`  Transport: Streamable HTTP (MCP 2025-06-18)\n`);
+      process.stderr.write(
+        `  Auth: unprotected mode (no token validation); PRM discovery per RFC 9728\n`
+      );
       process.stderr.write(`  Endpoints: POST /mcp, DELETE /mcp, GET /health\n`);
       if (prmEnabled) {
-        process.stderr.write(`  PRM: GET ${prmPath}\n`);
+        process.stderr.write(`  PRM: GET ${prmPath} (implemented, enabled by config)\n`);
+      } else {
+        process.stderr.write(
+          `  PRM: disabled (set --authorization-servers + --public-url to enable)\n`
+        );
       }
       process.stderr.write(
-        `  Sessions: max ${options.maxSessions ?? 100}, TTL ${(options.sessionTtlMs ?? 1_800_000) / 1000}s\n`
+        `  Sessions: max ${options.maxSessions ?? 100} (${options.maxSessionsPerIp ?? 10}/IP), TTL ${(options.sessionTtlMs ?? 1_800_000) / 1000}s\n`
       );
       process.stderr.write(`  Rate limit: ${rateLimitRpm} req/min per session\n`);
       process.stderr.write(
         `  CORS: ${corsOrigins.size > 0 ? [...corsOrigins].join(', ') : 'deny all'}\n`
       );
-      process.stderr.write(`  Mode: unprotected (no auth enforcement)\n`);
+      process.stderr.write(
+        `  Mode: unprotected (token validation deferred to v0.11.x+; deployer auth via reverse proxy)\n`
+      );
 
       resolve({
         cleanup: async () => {

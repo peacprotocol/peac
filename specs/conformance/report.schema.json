@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.peacprotocol.org/schemas/conformance-report/1.1.0",
+  "title": "PEAC Conformance Report",
+  "description": "Structured output from the PEAC conformance harness CLI. Versioned schema for CI and ecosystem integration.",
+  "type": "object",
+  "required": [
+    "format_version",
+    "peac_version",
+    "adapter",
+    "timestamp",
+    "tooling",
+    "summary",
+    "results"
+  ],
+  "properties": {
+    "format_version": {
+      "type": "string",
+      "const": "1.1.0",
+      "description": "Report format version (semver). Bump on breaking schema changes."
+    },
+    "peac_version": {
+      "type": "string",
+      "description": "PEAC monorepo version that produced this report."
+    },
+    "adapter": {
+      "type": "string",
+      "description": "Adapter name (e.g. 'core', 'mcp', 'a2a')."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the run."
+    },
+    "tooling": {
+      "type": "object",
+      "required": ["node_version", "harness_version"],
+      "properties": {
+        "git_sha": {
+          "type": "string",
+          "description": "Git SHA of the commit that produced this report."
+        },
+        "node_version": {
+          "type": "string",
+          "description": "Node.js version used (e.g. 'v24.13.0')."
+        },
+        "harness_version": {
+          "type": "string",
+          "description": "Harness package version."
+        }
+      },
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total", "passed", "failed", "skipped"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "skipped": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fixture", "category", "status", "duration_ms"],
+        "properties": {
+          "fixture": {
+            "type": "string",
+            "description": "Fixture path relative to fixture root (e.g. 'valid/minimal.json')."
+          },
+          "category": {
+            "type": "string",
+            "description": "Fixture category name."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pass", "fail", "skip"],
+            "description": "pass: validated successfully. fail: claimed support but validation failed. skip: not in adapter's supported set."
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message (present on fail and skip)."
+          },
+          "skip_reason": {
+            "type": "string",
+            "enum": ["no_validator", "unsupported_format", "parse_error"],
+            "description": "Structured reason for skip status."
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Execution time in milliseconds."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

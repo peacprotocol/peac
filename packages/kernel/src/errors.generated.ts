@@ -3,7 +3,7 @@
  *
  * AUTO-GENERATED from specs/kernel/errors.json
  * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts
- * Spec version: 0.10.7
+ * Spec version: 0.11.0
  */
 
 import type { ErrorDefinition } from './types.js';
@@ -125,6 +125,7 @@ export const ERROR_CODES = {
   E_UCP_VERIFICATION_FAILED: 'E_UCP_VERIFICATION_FAILED',
 
   // Validation error codes
+  E_CONSTRAINT_VIOLATION: 'E_CONSTRAINT_VIOLATION',
   E_EVIDENCE_NOT_JSON: 'E_EVIDENCE_NOT_JSON',
   E_EXPIRED: 'E_EXPIRED',
   E_INVALID_AMOUNT: 'E_INVALID_AMOUNT',
@@ -978,6 +979,15 @@ export const ERRORS: Record<string, ErrorDefinition> = {
   },
 
   // Validation error codes
+  E_CONSTRAINT_VIOLATION: {
+    code: 'E_CONSTRAINT_VIOLATION',
+    http_status: 400,
+    title: 'Kernel Constraint Violation',
+    description:
+      'Receipt claims exceed a kernel constraint (max keys, max depth, max string length, max evidence bytes, or similar structural limit)',
+    retriable: false,
+    category: 'validation',
+  },
   E_EVIDENCE_NOT_JSON: {
     code: 'E_EVIDENCE_NOT_JSON',
     http_status: 400,
