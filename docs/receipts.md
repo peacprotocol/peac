@@ -136,7 +136,8 @@ The `aud` claim MUST contain the canonical form of the resource URL:
 ### Key Management
 
 - Use Ed25519 keys with rotating `kid` format: `YYYY-MM-DD/nn`
-- Publish public keys via `/.well-known/jwks.json`
+- Publish issuer config at `/.well-known/peac-issuer.json` with `jwks_uri` pointing to JWKS
+- Serve public keys at the `jwks_uri` endpoint (typically `/.well-known/jwks.json`)
 - Support key rotation with grace periods
 
 ### Validation Requirements

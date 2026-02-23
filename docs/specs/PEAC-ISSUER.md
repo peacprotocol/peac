@@ -94,6 +94,14 @@ The `jwks_uri` field provides the location of the issuer's JSON Web Key Set:
 - MUST return a valid JWKS document (RFC 7517)
 - SHOULD be cacheable with appropriate headers
 
+**Strict key discovery**: `jwks_uri` is the ONLY supported mechanism for key discovery. Implementations MUST NOT:
+
+- Embed keys directly in `peac-issuer.json` (no inline `keys` array)
+- Fall back to direct `/.well-known/jwks.json` without first resolving `peac-issuer.json`
+- Use `peac.txt` for key discovery (peac.txt is for policy only; see [PEAC-TXT.md](PEAC-TXT.md))
+
+The canonical resolution algorithm is: `iss` claim -> `peac-issuer.json` -> `jwks_uri` -> JWKS.
+
 ### 3.5 Receipt Versions
 
 Default if not specified: `["peac-receipt/0.1"]`
@@ -283,13 +291,17 @@ Implementations MUST:
 
 ### 10.2 Error Codes
 
-| Code                           | HTTP | Description                         |
-| ------------------------------ | ---- | ----------------------------------- |
-| `E_ISSUER_CONFIG_NOT_FOUND`    | 404  | Configuration endpoint not found    |
-| `E_ISSUER_CONFIG_INVALID`      | 400  | Configuration failed validation     |
-| `E_ISSUER_CONFIG_FETCH_FAILED` | 502  | Network or server error             |
-| `E_ISSUER_CONFIG_TIMEOUT`      | 504  | Fetch timeout                       |
-| `E_ISSUER_MISMATCH`            | 400  | Config issuer doesn't match receipt |
+| Code                               | HTTP | Description                                                |
+| ---------------------------------- | ---- | ---------------------------------------------------------- |
+| `E_VERIFY_ISSUER_CONFIG_MISSING`   | 502  | peac-issuer.json not found or not fetchable                |
+| `E_VERIFY_ISSUER_CONFIG_INVALID`   | 502  | peac-issuer.json not valid JSON or fails schema validation |
+| `E_VERIFY_ISSUER_MISMATCH`         | 403  | issuer field does not match expected issuer origin         |
+| `E_VERIFY_JWKS_URI_INVALID`        | 502  | jwks_uri is not a valid HTTPS URL                          |
+| `E_VERIFY_INSECURE_SCHEME_BLOCKED` | 403  | Non-HTTPS URL in issuer discovery                          |
+| `E_VERIFY_JWKS_INVALID`            | 502  | JWKS response not valid JSON or missing keys array         |
+| `E_VERIFY_KEY_FETCH_BLOCKED`       | 403  | SSRF protection blocked the fetch                          |
+| `E_VERIFY_KEY_FETCH_FAILED`        | 502  | Network error during key fetch                             |
+| `E_VERIFY_KEY_FETCH_TIMEOUT`       | 504  | Key fetch timed out                                        |
 
 ---
 

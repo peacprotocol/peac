@@ -22,12 +22,8 @@ import { extractReceiptFromTaskStatus } from './extract';
  *
  * Uses metadata[PEAC_EXTENSION_URI] = { carriers: [...] } layout.
  */
-export class A2ACarrierAdapter
-  implements CarrierAdapter<A2ATaskStatusLike, A2ATaskStatusLike>
-{
-  extract(
-    input: A2ATaskStatusLike
-  ): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
+export class A2ACarrierAdapter implements CarrierAdapter<A2ATaskStatusLike, A2ATaskStatusLike> {
+  extract(input: A2ATaskStatusLike): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null {
     return extractReceiptFromTaskStatus(input);
   }
 
@@ -39,18 +35,13 @@ export class A2ACarrierAdapter
     return attachReceiptToTaskStatus(output, carriers, meta);
   }
 
-  validateConstraints(
-    carrier: PeacEvidenceCarrier,
-    meta: CarrierMeta
-  ): CarrierValidationResult {
+  validateConstraints(carrier: PeacEvidenceCarrier, meta: CarrierMeta): CarrierValidationResult {
     return validateCarrierConstraints(carrier, meta);
   }
 }
 
 /** Default CarrierMeta for A2A transport */
-export function createA2ACarrierMeta(
-  overrides?: Partial<CarrierMeta>
-): CarrierMeta {
+export function createA2ACarrierMeta(overrides?: Partial<CarrierMeta>): CarrierMeta {
   return {
     transport: 'a2a',
     format: 'embed',

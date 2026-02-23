@@ -252,6 +252,21 @@ else
   echo "OK"
 fi
 
+echo "== discovery surface drift =="
+# Prevent protocol verifier code from bypassing peac-issuer.json and fetching JWKS directly.
+# The canonical path is: peac-issuer.json -> jwks_uri -> JWKS.
+# Scoped to packages/protocol/src/ production code (verify.ts, verifier-core.ts).
+# Allow: jwks-resolver.ts (canonical resolver), discovery.ts (parseIssuerConfig),
+# ssrf-safe-fetch.ts (fetchJWKSSafe helper), verifier-types.ts.
+DISCOVERY_SRC_ALLOW='^packages/protocol/src/(jwks-resolver|discovery|ssrf-safe-fetch|verifier-types)\.ts'
+if git grep -n 'well-known/jwks\.json' -- 'packages/protocol/src/*.ts' ':!node_modules' \
+  | grep -vE "$DISCOVERY_SRC_ALLOW" | grep .; then
+  echo "FAIL: Direct /.well-known/jwks.json in protocol verifier code - use jwks-resolver.ts"
+  bad=1
+else
+  echo "OK"
+fi
+
 echo "== forbid stale generated artifacts in src/ =="
 stale=$(find packages -path "*/src/*" \
   -not -path "*/dist/*" -not -path "*/node_modules/*" \( \

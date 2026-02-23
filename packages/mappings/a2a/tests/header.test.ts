@@ -14,10 +14,7 @@ describe('parseA2AExtensionsHeader', () => {
   it('parses comma-separated URIs', () => {
     const header = `${PEAC_EXTENSION_URI}, https://example.com/ext/other`;
     const result = parseA2AExtensionsHeader(header);
-    expect(result).toEqual([
-      PEAC_EXTENSION_URI,
-      'https://example.com/ext/other',
-    ]);
+    expect(result).toEqual([PEAC_EXTENSION_URI, 'https://example.com/ext/other']);
   });
 
   it('trims whitespace around URIs', () => {
@@ -41,19 +38,12 @@ describe('parseA2AExtensionsHeader', () => {
 
 describe('buildA2AExtensionsHeader', () => {
   it('builds single extension header', () => {
-    expect(buildA2AExtensionsHeader([PEAC_EXTENSION_URI])).toBe(
-      PEAC_EXTENSION_URI
-    );
+    expect(buildA2AExtensionsHeader([PEAC_EXTENSION_URI])).toBe(PEAC_EXTENSION_URI);
   });
 
   it('joins multiple extensions with comma-space', () => {
-    const header = buildA2AExtensionsHeader([
-      PEAC_EXTENSION_URI,
-      'https://example.com/ext',
-    ]);
-    expect(header).toBe(
-      `${PEAC_EXTENSION_URI}, https://example.com/ext`
-    );
+    const header = buildA2AExtensionsHeader([PEAC_EXTENSION_URI, 'https://example.com/ext']);
+    expect(header).toBe(`${PEAC_EXTENSION_URI}, https://example.com/ext`);
   });
 
   it('round-trips: build then parse', () => {

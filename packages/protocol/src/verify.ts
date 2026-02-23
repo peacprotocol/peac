@@ -1,5 +1,9 @@
 /**
- * Receipt verification with JWKS fetching and caching
+ * Receipt verification with strict issuer-config-based JWKS discovery
+ *
+ * Key discovery uses peac-issuer.json -> jwks_uri exclusively.
+ * No legacy fallbacks (peac.txt, direct JWKS).
+ * JWKS caching is centralized in jwks-resolver.ts.
  */
 
 import { verify as jwsVerify, decode } from '@peac/crypto';
@@ -10,35 +14,25 @@ import {
   validateSubjectSnapshot,
   validateKernelConstraints,
 } from '@peac/schema';
+import { resolveJWKS, type JWK } from './jwks-resolver.js';
 import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 
 /**
- * JWKS key entry
+ * Convert JWK x coordinate to Ed25519 public key
  */
-interface JWK {
-  kty: string;
-  crv: string;
-  x: string;
-  kid: string;
+function jwkToPublicKey(jwk: JWK): Uint8Array {
+  if (jwk.kty !== 'OKP' || jwk.crv !== 'Ed25519') {
+    throw new Error('Only Ed25519 keys (OKP/Ed25519) are supported');
+  }
+
+  // Decode base64url x coordinate
+  const xBytes = Buffer.from(jwk.x, 'base64url');
+  if (xBytes.length !== 32) {
+    throw new Error('Ed25519 public key must be 32 bytes');
+  }
+
+  return new Uint8Array(xBytes);
 }
-
-/**
- * JWKS document
- */
-interface JWKS {
-  keys: JWK[];
-}
-
-/**
- * In-memory JWKS cache
- * Maps issuer URL to { keys, expiresAt }
- */
-const jwksCache = new Map<string, { keys: JWKS; expiresAt: number }>();
-
-/**
- * Cache TTL (5 minutes)
- */
-const CACHE_TTL_MS = 5 * 60 * 1000;
 
 /**
  * Verification result
@@ -75,105 +69,6 @@ export interface VerifyFailure {
 }
 
 /**
- * Fetch JWKS from issuer (SSRF-safe)
- */
-async function fetchJWKS(issuerUrl: string): Promise<JWKS> {
-  // SSRF protection: only allow https://
-  if (!issuerUrl.startsWith('https://')) {
-    throw new Error('Issuer URL must be https://');
-  }
-
-  // Construct JWKS URL from discovery
-  const discoveryUrl = `${issuerUrl}/.well-known/peac.txt`;
-
-  try {
-    const discoveryResp = await fetch(discoveryUrl, {
-      headers: { Accept: 'text/plain' },
-      // Timeout after 5 seconds
-      signal: AbortSignal.timeout(5000),
-    });
-
-    if (!discoveryResp.ok) {
-      throw new Error(`Discovery fetch failed: ${discoveryResp.status}`);
-    }
-
-    const discoveryText = await discoveryResp.text();
-
-    // Parse YAML-like discovery (simple key: value parsing)
-    const jwksLine = discoveryText.split('\n').find((line) => line.startsWith('jwks:'));
-    if (!jwksLine) {
-      throw new Error('No jwks field in discovery');
-    }
-
-    const jwksUrl = jwksLine.replace('jwks:', '').trim();
-
-    // SSRF protection: verify JWKS URL is also https://
-    if (!jwksUrl.startsWith('https://')) {
-      throw new Error('JWKS URL must be https://');
-    }
-
-    // Fetch JWKS
-    const jwksResp = await fetch(jwksUrl, {
-      headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(5000),
-    });
-
-    if (!jwksResp.ok) {
-      throw new Error(`JWKS fetch failed: ${jwksResp.status}`);
-    }
-
-    const jwks = (await jwksResp.json()) as JWKS;
-
-    return jwks;
-  } catch (err) {
-    throw new Error(`JWKS fetch failed: ${err instanceof Error ? err.message : String(err)}`, {
-      cause: err,
-    });
-  }
-}
-
-/**
- * Get JWKS (from cache or fetch)
- */
-async function getJWKS(issuerUrl: string): Promise<{ jwks: JWKS; fromCache: boolean }> {
-  const now = Date.now();
-
-  // Check cache
-  const cached = jwksCache.get(issuerUrl);
-  if (cached && cached.expiresAt > now) {
-    return { jwks: cached.keys, fromCache: true };
-  }
-
-  // Fetch fresh JWKS
-  const jwks = await fetchJWKS(issuerUrl);
-
-  // Cache it
-  jwksCache.set(issuerUrl, {
-    keys: jwks,
-    expiresAt: now + CACHE_TTL_MS,
-  });
-
-  return { jwks, fromCache: false };
-}
-
-/**
- * Convert JWK x coordinate to Ed25519 public key
- */
-function jwkToPublicKey(jwk: JWK): Uint8Array {
-  if (jwk.kty !== 'OKP' || jwk.crv !== 'Ed25519') {
-    throw new Error('Only Ed25519 keys (OKP/Ed25519) are supported');
-  }
-
-  // Decode base64url x coordinate
-  const xBytes = Buffer.from(jwk.x, 'base64url');
-  if (xBytes.length !== 32) {
-    throw new Error('Ed25519 public key must be 32 bytes');
-  }
-
-  return new Uint8Array(xBytes);
-}
-
-/**
  * Options for verifying a receipt
  */
 export interface VerifyOptions {
@@ -189,6 +84,9 @@ export interface VerifyOptions {
 
 /**
  * Verify a PEAC receipt JWS
+ *
+ * Uses strict issuer-config discovery: peac-issuer.json -> jwks_uri -> JWKS.
+ * No fallback to peac.txt or direct JWKS endpoints.
  *
  * @param optionsOrJws - Verify options or JWS compact serialization (for backwards compatibility)
  * @returns Verification result or failure
@@ -240,15 +138,24 @@ export async function verifyReceipt(
       };
     }
 
-    // Fetch JWKS
+    // Resolve JWKS via strict discovery (peac-issuer.json -> jwks_uri)
     const jwksFetchStart = performance.now();
-    const { jwks, fromCache } = await getJWKS(payload.iss);
-    if (!fromCache) {
+    const jwksResult = await resolveJWKS(payload.iss);
+
+    if (!jwksResult.ok) {
+      return {
+        ok: false,
+        reason: jwksResult.code,
+        details: jwksResult.message,
+      };
+    }
+
+    if (!jwksResult.fromCache) {
       jwksFetchTime = performance.now() - jwksFetchStart;
     }
 
     // Find key by kid
-    const jwk = jwks.keys.find((k) => k.kid === header.kid);
+    const jwk = jwksResult.jwks.keys.find((k) => k.kid === header.kid);
     if (!jwk) {
       const durationMs = performance.now() - startTime;
       fireTelemetryHook(telemetry?.onReceiptVerified, {
