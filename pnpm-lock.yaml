@@ -975,7 +975,7 @@ importers:
         version: 22.19.11
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)
+        version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
