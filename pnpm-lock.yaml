@@ -1083,6 +1083,9 @@ importers:
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../schema
       jose:
         specifier: ^5.2.0
         version: 5.10.0

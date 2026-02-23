@@ -1,12 +1,26 @@
 /**
- * Agentic Commerce Protocol (ACP) integration
- * Maps ACP checkout events to PEAC receipts
+ * @peac/mappings-acp
+ *
+ * Agentic Commerce Protocol (ACP) integration for PEAC.
+ * Maps ACP checkout events to PEAC receipts and carries evidence via HTTP headers.
  */
 
 import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
 
 export * from './budget';
+
+// Evidence Carrier Contract (v0.11.1+ DD-124)
+export type { HeaderMap, AcpMessageLike, AcpExtractResult, AcpExtractAsyncResult } from './carrier';
+
+export {
+  ACP_CARRIER_LIMITS,
+  attachCarrierToACPHeaders,
+  attachCarrierToACPMessage,
+  extractCarrierFromACPHeaders,
+  extractCarrierFromACPHeadersAsync,
+  AcpCarrierAdapter,
+} from './carrier';
 
 /**
  * ACP Checkout Success Event
