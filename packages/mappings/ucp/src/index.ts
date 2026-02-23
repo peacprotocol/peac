@@ -39,6 +39,22 @@
  * ```
  */
 
+// Evidence Carrier Contract (v0.11.1+ DD-124)
+export type {
+  UcpWebhookPayload,
+  UcpExtractResult,
+  UcpExtractAsyncResult,
+} from './carrier.js';
+
+export {
+  UCP_MAX_CARRIER_SIZE,
+  UCP_LEGACY_EXTENSION_KEY,
+  attachCarrierToWebhookPayload,
+  extractCarrierFromWebhookPayload,
+  extractCarrierFromWebhookPayloadAsync,
+  UcpCarrierAdapter,
+} from './carrier.js';
+
 // Types
 export type {
   // Core types
