@@ -183,6 +183,49 @@ describe('MCP integration', () => {
     });
   });
 
+  describe('extractReceipt _meta support (DD-125)', () => {
+    it('should extract receipt from _meta receipt_jws key (v0.11.1+)', () => {
+      const response = {
+        tool: 'test',
+        result: {},
+        _meta: {
+          'org.peacprotocol/receipt_ref': 'sha256:abc123',
+          'org.peacprotocol/receipt_jws': 'eyJhbGciOiJFZERTQSJ9.payload.sig',
+        },
+      };
+
+      const extracted = extractReceipt(response);
+      expect(extracted).toBe('eyJhbGciOiJFZERTQSJ9.payload.sig');
+    });
+
+    it('should extract receipt from _meta legacy key (v0.10.13)', () => {
+      const response = {
+        tool: 'test',
+        result: {},
+        _meta: {
+          'org.peacprotocol/receipt': 'eyJhbGciOiJFZERTQSJ9.legacy.sig',
+        },
+      };
+
+      const extracted = extractReceipt(response);
+      expect(extracted).toBe('eyJhbGciOiJFZERTQSJ9.legacy.sig');
+    });
+
+    it('should prefer _meta over legacy peac_receipt', () => {
+      const response = {
+        tool: 'test',
+        result: {},
+        peac_receipt: 'legacy-jws',
+        _meta: {
+          'org.peacprotocol/receipt_jws': 'meta-jws',
+        },
+      };
+
+      const extracted = extractReceipt(response);
+      expect(extracted).toBe('meta-jws');
+    });
+  });
+
   describe('Golden Vector: MCP Tool Response with PEAC Receipt', () => {
     it('should produce a complete MCP tool response with receipt', () => {
       const toolResponse = createPaidToolResponse(
