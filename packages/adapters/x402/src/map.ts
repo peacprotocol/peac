@@ -14,6 +14,9 @@
  * - Verification status metadata (structural, cryptographic, termMatching)
  */
 
+import type { PeacEvidenceCarrier } from '@peac/kernel';
+import { computeReceiptRef } from '@peac/schema';
+
 import { X402Error } from './errors.js';
 import type {
   X402PaymentRequired,
@@ -155,5 +158,28 @@ export function toPeacRecord(
     },
     hints,
     createdAt: new Date().toISOString(),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Evidence Carrier mapping (DD-124)
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert an x402 PEAC record to a PeacEvidenceCarrier.
+ *
+ * Uses the shared `computeReceiptRef()` from `@peac/schema` (correction item 4)
+ * to produce a canonical, content-addressed receipt_ref from the JWS.
+ *
+ * @param receiptJws - Compact JWS of the PEAC receipt
+ * @returns PeacEvidenceCarrier with computed receipt_ref
+ */
+export async function toPeacCarrier(
+  receiptJws: string
+): Promise<PeacEvidenceCarrier> {
+  const ref = await computeReceiptRef(receiptJws);
+  return {
+    receipt_ref: ref,
+    receipt_jws: receiptJws,
   };
 }

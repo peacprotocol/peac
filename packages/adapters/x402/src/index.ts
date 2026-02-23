@@ -64,4 +64,25 @@ export type { X402ErrorCode } from './errors.js';
 export { verifyOffer, verifyReceipt, matchAcceptTerms, selectAccept } from './verify.js';
 
 // Mapping
-export { toPeacRecord } from './map.js';
+export { toPeacRecord, toPeacCarrier } from './map.js';
+
+// Evidence Carrier Contract (v0.11.1+ DD-124)
+export type {
+  X402HeaderMap,
+  X402ResponseLike,
+  X402ExtractResult,
+  X402ExtractAsyncResult,
+} from './carrier.js';
+
+export {
+  X402_CARRIER_LIMITS,
+  fromOfferResponse,
+  fromOfferResponseAsync,
+  fromSettlementResponse,
+  fromSettlementResponseAsync,
+  X402CarrierAdapter,
+} from './carrier.js';
+
+// Challenge type mapping
+export type { ChallengeType } from './challenge.js';
+export { mapX402ToChallengeType } from './challenge.js';
