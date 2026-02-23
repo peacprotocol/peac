@@ -379,12 +379,13 @@ An issuer implementation MUST:
 
 A verifier implementation MUST:
 
-1. Resolve configuration from issuer URL
+1. Resolve configuration from issuer URL via `/.well-known/peac-issuer.json`
 2. Validate configuration format
 3. Validate issuer field matches expected
-4. Fetch and cache JWKS
-5. Verify receipts using discovered keys
-6. Handle errors appropriately
+4. Fetch JWKS from `jwks_uri` (MUST NOT assume JWKS location without resolving issuer config)
+5. Cache JWKS with appropriate TTL
+6. Verify receipts using discovered keys
+7. Handle errors appropriately
 
 ---
 

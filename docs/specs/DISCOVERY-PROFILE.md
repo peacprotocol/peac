@@ -7,7 +7,7 @@
 
 This document specifies the 3-step discovery algorithm for detecting PEAC evidence support at a given endpoint. It covers Agent Card inspection, well-known file discovery, header probing, and SSRF protection requirements.
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 and RFC 8174 (when, and only when, they appear in all capitals).
 
 ## 1. Overview
 
@@ -90,14 +90,21 @@ If no step succeeds, `discoverPeacCapabilities()` returns `null`.
 
 All network-facing discovery functions MUST implement the following protections:
 
-### 4.1 DNS Rebinding Defense
+### 4.1 Private IP and DNS Rebinding Defense
 
-Resolve the hostname and check the resolved IP against private ranges before connecting:
+Implementations MUST reject requests to private and reserved IP ranges:
 
 - RFC 1918: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`
 - RFC 4193: `fc00::/7` (ULA)
 - Loopback: `127.0.0.0/8`, `::1`
 - Link-local: `169.254.0.0/16`, `fe80::/10`
+
+Two enforcement levels are defined:
+
+1. **Literal IP check (MUST):** Implementations MUST check the URL hostname against private ranges when it is a literal IP address.
+2. **DNS resolution check (SHOULD):** When the caller provides a `resolveHostname` callback (or equivalent), implementations SHOULD resolve the hostname and check all returned IP addresses against private ranges before connecting. This defends against DNS rebinding attacks where a hostname initially resolves to a public IP, then re-resolves to a private IP.
+
+Implementations that only perform literal IP checks MUST document the weaker posture. The `resolveHostname` option provides full DNS rebinding protection in a portable, runtime-agnostic way.
 
 ### 4.2 Scheme Allowlist
 
@@ -119,9 +126,15 @@ Reject non-JSON responses. Accept `application/json` or `application/*+json`.
 
 5 seconds maximum per request.
 
-### 4.7 Proxy Bypass
+### 4.7 Proxy Policy
 
-Discovery functions MUST NOT inherit proxy environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`). In Node.js, the native `fetch` does not inherit proxy settings by default.
+Discovery functions MUST NOT implicitly enable proxying: implementations MUST NOT parse proxy environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) or call runtime APIs that globally enable proxying (such as Node.js `http.setGlobalProxyFromEnv()`).
+
+If the runtime has globally enabled proxying (for example via Node.js `--use-env-proxy` flag or `NODE_USE_ENV_PROXY` environment variable), the caller MUST provide an explicit `fetch` implementation via `DiscoveryOptions.fetch` to control proxy behavior. Implementations SHOULD document this requirement.
+
+### 4.8 Userinfo Rejection
+
+Implementations MUST reject URLs containing userinfo (`user:pass@host`). URLs with embedded credentials create confusion in allowlists and logs, and are a potential vector for credential leakage.
 
 ## 5. Caching
 
@@ -158,3 +171,5 @@ An implementation is conformant with this profile if it:
 3. Applies all SSRF protections listed in Section 4
 4. Returns a `PeacDiscoveryResult` with correct `source` field
 5. Does not follow redirects during discovery
+6. Rejects URLs containing userinfo (Section 4.8)
+7. Performs DNS resolution checks when a `resolveHostname` resolver is provided (Section 4.1)
