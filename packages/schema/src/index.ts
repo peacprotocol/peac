@@ -390,6 +390,27 @@ export type {
   CreateAttestationReceiptParams,
 } from './attestation-receipt';
 
+// Evidence Carrier Contract schemas + helpers (v0.11.1+ DD-124)
+export {
+  ReceiptRefSchema,
+  CompactJwsSchema,
+  CarrierFormatSchema,
+  PeacEvidenceCarrierSchema,
+  CarrierMetaSchema,
+  CARRIER_TRANSPORT_LIMITS,
+  computeReceiptRef,
+  validateCarrierConstraints,
+  verifyReceiptRefConsistency,
+} from './carrier';
+export type {
+  ReceiptRef,
+  CarrierFormat,
+  PeacEvidenceCarrier,
+  CarrierMeta,
+  CarrierValidationResult,
+  CarrierAdapter,
+} from './carrier';
+
 // Unified receipt parser (v0.10.9+)
 export { parseReceiptClaims } from './receipt-parser';
 export type {

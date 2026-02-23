@@ -1,0 +1,21 @@
+{
+  "description": "Carrier exceeds transport max_size (8KB HTTP header limit)",
+  "carrier": {
+    "receipt_ref": "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    "receipt_jws": "eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJkaWQ6a2V5OnoxMjMifQ.c2lnbmF0dXJl",
+    "policy_binding": "sha256:deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    "actor_binding": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+    "request_nonce": "nonce-abc-123-very-long-nonce-that-along-with-other-fields-pushes-the-carrier-well-over-the-limit",
+    "verification_report_ref": "sha256:cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe",
+    "use_policy_ref": "https://example.com/policies/ai-train-v1",
+    "representation_ref": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "attestation_ref": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  },
+  "meta": {
+    "transport": "http",
+    "format": "reference",
+    "max_size": 256
+  },
+  "expected_valid": false,
+  "expected_violation": "carrier size"
+}
