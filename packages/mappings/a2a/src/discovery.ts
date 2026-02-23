@@ -115,9 +115,7 @@ async function validateUrlForDiscovery(url: string, options: DiscoveryOptions): 
     const resolvedIPs = await options.resolveHostname(parsed.hostname);
     for (const ip of resolvedIPs) {
       if (isPrivateIP(ip)) {
-        throw new Error(
-          `SSRF: hostname ${parsed.hostname} resolved to private IP ${ip}`
-        );
+        throw new Error(`SSRF: hostname ${parsed.hostname} resolved to private IP ${ip}`);
       }
     }
   }

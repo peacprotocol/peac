@@ -83,12 +83,12 @@ For A2A (Agent-to-Agent Protocol, Linux Foundation) discovery via `/.well-known/
 
 ## Discovery
 
-| Path                                  | Content                              |
-| ------------------------------------- | ------------------------------------ |
-| `/.well-known/peac.txt`               | PEAC discovery manifest              |
-| `/.well-known/peac-policy.yaml`       | Policy document                      |
-| `/.well-known/peac-issuer.json`       | PEAC issuer JWKS                     |
-| `/.well-known/agent-card.json`        | A2A Agent Card (with PEAC extension) |
+| Path                            | Content                              |
+| ------------------------------- | ------------------------------------ |
+| `/.well-known/peac.txt`         | PEAC discovery manifest              |
+| `/.well-known/peac-policy.yaml` | Policy document                      |
+| `/.well-known/peac-issuer.json` | PEAC issuer JWKS                     |
+| `/.well-known/agent-card.json`  | A2A Agent Card (with PEAC extension) |
 
 ## Purpose Tokens
 
