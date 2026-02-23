@@ -12,7 +12,7 @@
 
 This document defines the normative specification for PEAC Issuer Configuration, served at `/.well-known/peac-issuer.json`. Issuer configuration enables verifiers to discover cryptographic keys and verification endpoints for validating PEAC receipts.
 
-**Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+**Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 and RFC 8174 (when, and only when, they appear in all capitals).
 
 **Scope**: This specification covers issuer configuration only. For policy documents (access terms, purposes, receipts), see [PEAC-TXT.md](PEAC-TXT.md).
 
@@ -22,7 +22,7 @@ This document defines the normative specification for PEAC Issuer Configuration,
 
 ### 2.1 Canonical Location
 
-```
+```text
 https://{issuer}/.well-known/peac-issuer.json
 ```
 
@@ -30,7 +30,7 @@ Where `{issuer}` is the issuer URL from the receipt's `iss` claim.
 
 ### 2.2 Resolution Algorithm
 
-```
+```text
 Input: issuer URL (from receipt iss claim)
 Output: issuer configuration URL
 
@@ -219,7 +219,7 @@ This ensures that `https://api.example.com/`, `https://api.example.com/v1`, and 
 
 When verifying a receipt:
 
-```
+```text
 Input: receipt.iss, config.issuer
 Output: boolean
 
@@ -428,8 +428,10 @@ A verifier implementation MUST:
 
 ## 16. References
 
+- RFC 2119 - Key words for use in RFCs
 - RFC 7517 - JSON Web Key (JWK)
 - RFC 7518 - JSON Web Algorithms (JWA)
+- RFC 8174 - Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words
 - RFC 8259 - The JavaScript Object Notation (JSON) Data Interchange Format
 - RFC 8615 - Well-Known Uniform Resource Identifiers (URIs)
 - [PEAC-TXT.md](PEAC-TXT.md) - Policy Document Specification

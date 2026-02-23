@@ -12,7 +12,7 @@
 
 This document defines the normative specification for PEAC Policy Documents, served at `/.well-known/peac.txt`. Policy documents declare machine-readable terms for automated interactions: allowed purposes, receipt requirements, rate limits, and payment terms.
 
-**Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+**Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 and RFC 8174 (when, and only when, they appear in all capitals).
 
 **Scope**: This specification covers policy documents only. `peac.txt` is NOT a key discovery surface. Cryptographic key resolution MUST use the normative discovery chain: `iss` -> `peac-issuer.json` -> `jwks_uri` -> JWKS (see [PEAC-ISSUER.md](PEAC-ISSUER.md) Section 3.4).
 
@@ -22,7 +22,7 @@ This document defines the normative specification for PEAC Policy Documents, ser
 
 ### 2.1 Primary Location
 
-```
+```text
 https://{domain}/.well-known/peac.txt
 ```
 
@@ -30,7 +30,7 @@ Implementations MUST check this location first.
 
 ### 2.2 Fallback Location
 
-```
+```text
 https://{domain}/peac.txt
 ```
 
@@ -153,7 +153,7 @@ Servers SHOULD set appropriate Content-Type headers:
 
 ### 5.1 Format Detection Algorithm
 
-```
+```text
 Input: response (HTTP response with body)
 Output: parsed policy object or error
 
@@ -243,7 +243,7 @@ Implementations MUST reject documents that:
 
 ### 7.3 Rate Limit Grammar
 
-```
+```text
 rate_limit = "unlimited" | count "/" period
 count      = 1*DIGIT
 period     = "second" | "minute" | "hour" | "day"
@@ -298,6 +298,20 @@ All parsed fields MUST be validated before use. Never trust user-controlled inpu
 - URL construction (SSRF)
 - File path construction (path traversal)
 - Command construction (injection)
+
+### 9.4 Error Codes
+
+| Code                       | HTTP | Description                                           |
+| -------------------------- | ---- | ----------------------------------------------------- |
+| `E_POLICY_FETCH_FAILED`    | 502  | Policy document not fetchable (network error, 5xx)    |
+| `E_POLICY_NOT_FOUND`       | 404  | Policy document not found at primary or fallback path |
+| `E_POLICY_INVALID`         | 400  | Policy document not valid YAML/JSON or fails schema   |
+| `E_POLICY_TIMEOUT`         | 504  | Policy document fetch timed out                       |
+| `E_POLICY_TOO_LARGE`       | 413  | Policy document exceeds size limit                    |
+| `E_POLICY_SSRF_BLOCKED`    | 403  | SSRF protection blocked the fetch                     |
+| `E_POLICY_YAML_INJECTION`  | 400  | Rejected YAML anchors, aliases, merge keys, or tags   |
+| `E_POLICY_MULTI_DOCUMENT`  | 400  | Multi-document YAML not allowed                       |
+| `E_POLICY_INSECURE_SCHEME` | 403  | Non-HTTPS URL in production                           |
 
 ---
 
@@ -393,6 +407,8 @@ An L1-conformant implementation MUST also:
 ## 14. References
 
 - RFC 2119 - Key words for use in RFCs
+- RFC 8174 - Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words
 - RFC 8259 - The JavaScript Object Notation (JSON) Data Interchange Format
 - YAML 1.2 - YAML Ain't Markup Language
 - RFC 8615 - Well-Known Uniform Resource Identifiers (URIs)
+- [PEAC-ISSUER.md](PEAC-ISSUER.md) - Issuer Configuration Specification
