@@ -148,18 +148,28 @@ export function getJWKSCacheSize(): number {
  * Uses URL parsing for interop correctness: handles trailing slashes,
  * paths, default port elision, and IDN normalization.
  *
+ * Returns a discriminated result so callers can distinguish malformed URLs
+ * from valid non-HTTPS URLs (different error codes).
+ *
  * Examples:
- *   "https://api.example.com/"      -> "https://api.example.com"
- *   "https://api.example.com/v1"    -> "https://api.example.com"
- *   "https://api.example.com:443"   -> "https://api.example.com"
- *   "https://api.example.com:8443"  -> "https://api.example.com:8443"
+ *   "https://api.example.com/"      -> ok: "https://api.example.com"
+ *   "https://api.example.com/v1"    -> ok: "https://api.example.com"
+ *   "https://api.example.com:443"   -> ok: "https://api.example.com"
+ *   "https://api.example.com:8443"  -> ok: "https://api.example.com:8443"
+ *   "not-a-url"                     -> error
  */
-function canonicalizeIssuerOrigin(issuerUrl: string): string {
+function canonicalizeIssuerOrigin(
+  issuerUrl: string
+): { ok: true; origin: string } | { ok: false; message: string } {
   try {
-    return new URL(issuerUrl).origin;
+    const origin = new URL(issuerUrl).origin;
+    // Non-hierarchical URIs (data:, blob:) return "null" as origin
+    if (origin === 'null') {
+      return { ok: false, message: `Issuer URL has no valid origin: ${issuerUrl}` };
+    }
+    return { ok: true, origin };
   } catch {
-    // If URL parsing fails, return as-is; the HTTPS check will catch it
-    return issuerUrl;
+    return { ok: false, message: `Issuer URL is not a valid URL: ${issuerUrl}` };
   }
 }
 
@@ -235,7 +245,16 @@ export async function resolveJWKS(
   const noCache = options?.noCache ?? false;
 
   // Normalize issuer to origin via URL parsing (interop-correct)
-  const normalizedIssuer = canonicalizeIssuerOrigin(issuerUrl);
+  const normalized = canonicalizeIssuerOrigin(issuerUrl);
+  if (!normalized.ok) {
+    return {
+      ok: false,
+      code: 'E_VERIFY_INSECURE_SCHEME_BLOCKED',
+      message: normalized.message,
+      blockedUrl: issuerUrl,
+    };
+  }
+  const normalizedIssuer = normalized.origin;
   const now = Date.now();
 
   // Check cache first (unless bypassed)
@@ -287,7 +306,8 @@ export async function resolveJWKS(
   }
 
   // Step 4: Validate issuer match (both sides canonicalized to origin)
-  const configIssuer = canonicalizeIssuerOrigin(issuerConfig.issuer);
+  const configIssuerResult = canonicalizeIssuerOrigin(issuerConfig.issuer);
+  const configIssuer = configIssuerResult.ok ? configIssuerResult.origin : issuerConfig.issuer;
   if (configIssuer !== normalizedIssuer) {
     return {
       ok: false,

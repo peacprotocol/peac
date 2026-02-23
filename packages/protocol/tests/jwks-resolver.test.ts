@@ -203,6 +203,27 @@ describe('resolveJWKS (strict discovery)', () => {
     }
   });
 
+  it('rejects malformed issuer URL with descriptive message', async () => {
+    const result = await resolveJWKS('not-a-url');
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('E_VERIFY_INSECURE_SCHEME_BLOCKED');
+      expect(result.message).toContain('not a valid URL');
+      expect(result.blockedUrl).toBe('not-a-url');
+    }
+  });
+
+  it('rejects data: URI issuer (no valid origin)', async () => {
+    const result = await resolveJWKS('data:text/html,hello');
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('E_VERIFY_INSECURE_SCHEME_BLOCKED');
+      expect(result.message).toContain('no valid origin');
+    }
+  });
+
   // ------------------------------------------------------------------
   // E_VERIFY_ISSUER_CONFIG_MISSING
   // ------------------------------------------------------------------

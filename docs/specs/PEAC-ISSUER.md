@@ -205,7 +205,17 @@ Implementations MUST reject configurations that:
 - Have `issuer` not matching expected issuer
 - Have `jwks_uri` not HTTPS
 
-### 7.2 Issuer Matching
+### 7.2 Issuer Origin Canonicalization
+
+Implementations MUST canonicalize issuer URLs to their origin (scheme + host + port) using URL parsing (e.g., `new URL(issuer).origin`). Origin canonicalization is normative for three operations:
+
+1. **Discovery URL derivation**: `origin + "/.well-known/peac-issuer.json"`
+2. **Issuer equality comparison**: `canonical(receipt.iss) == canonical(config.issuer)`
+3. **Cache key derivation**: cache entries MUST be keyed by the canonical origin
+
+This ensures that `https://api.example.com/`, `https://api.example.com/v1`, and `https://api.example.com:443` all resolve to the same issuer identity `https://api.example.com`.
+
+### 7.3 Issuer Matching
 
 When verifying a receipt:
 
@@ -221,6 +231,8 @@ Output: boolean
 
 Mismatch MUST result in verification failure with error code `E_VERIFY_ISSUER_MISMATCH`.
 
+Implementations MUST compare canonical origins, not raw strings. Two issuer URLs that differ only in path, trailing slash, or default port MUST be treated as the same issuer.
+
 ---
 
 ## 8. Caching
@@ -229,11 +241,12 @@ Mismatch MUST result in verification failure with error code `E_VERIFY_ISSUER_MI
 
 Issuer configuration is verification-critical and frequently accessed. Implementations MUST:
 
-- Cache successful responses
+- Cache successful responses keyed by canonical origin (Section 7.2)
 - Honor `Cache-Control` headers
 - Implement conditional requests (`If-None-Match`, `If-Modified-Since`)
 - Use a minimum cache TTL of 5 minutes
 - Use a maximum cache TTL of 24 hours
+- Enforce bounded cache size (LRU eviction RECOMMENDED)
 
 ### 8.2 Server Headers
 
@@ -338,12 +351,15 @@ Verifiers SHOULD:
 
 ## 12. Dual-Role Origins
 
-When an origin is both a publisher (issues receipts) and a content provider (has access terms):
+When an origin is both a publisher (issues receipts) and a content provider (has access terms), it MUST host the canonical trio of discovery surfaces:
 
-- Publish `/.well-known/peac.txt` for policy/terms
-- Publish `/.well-known/peac-issuer.json` for issuer configuration
+| Surface                           | Purpose                           | Specification              |
+| --------------------------------- | --------------------------------- | -------------------------- |
+| `/.well-known/peac.txt`           | Policy: access terms and purposes | [PEAC-TXT.md](PEAC-TXT.md) |
+| `/.well-known/peac-issuer.json`   | Issuer: config and key discovery  | This document              |
+| `{jwks_uri}` (from issuer config) | Keys: JWKS for signature verify   | RFC 7517                   |
 
-These are independent documents serving different purposes.
+These are independent documents serving different purposes. `peac.txt` is for policy only; `peac-issuer.json` is for verification key discovery only. Implementations MUST NOT conflate the two.
 
 ---
 
