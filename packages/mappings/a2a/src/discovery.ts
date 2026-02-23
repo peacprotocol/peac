@@ -6,6 +6,9 @@
  * response size cap, content-type check, and redirect rejection.
  */
 
+import type { CarrierFormat } from '@peac/kernel';
+import { PEAC_RECEIPT_HEADER } from '@peac/kernel';
+
 import type { A2AAgentCard, AgentCardPeacExtension } from './types';
 import { PEAC_EXTENSION_URI } from './types';
 
@@ -58,11 +61,7 @@ function isPrivateIP(ip: string): boolean {
 }
 
 function isLocalhostAddress(hostname: string): boolean {
-  return (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname === '::1'
-  );
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
 /**
@@ -72,10 +71,7 @@ function isLocalhostAddress(hostname: string): boolean {
  * - HTTP allowed only for localhost when allowInsecureLocalhost is true
  * - Rejects private IP ranges
  */
-function validateUrlForDiscovery(
-  url: string,
-  options: DiscoveryOptions
-): void {
+function validateUrlForDiscovery(url: string, options: DiscoveryOptions): void {
   const parsed = new URL(url);
 
   // Scheme allowlist (Polish C item 6)
@@ -197,9 +193,7 @@ export function hasPeacExtension(card: A2AAgentCard): boolean {
  *
  * Returns the PEAC extension entry or null if not present.
  */
-export function getPeacExtension(
-  card: A2AAgentCard
-): AgentCardPeacExtension | null {
+export function getPeacExtension(card: A2AAgentCard): AgentCardPeacExtension | null {
   const extensions = card.capabilities?.extensions;
   if (!Array.isArray(extensions)) {
     return null;
@@ -208,4 +202,159 @@ export function getPeacExtension(
     (ext) => typeof ext === 'object' && ext !== null && ext.uri === PEAC_EXTENSION_URI
   );
   return (entry as AgentCardPeacExtension) ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// PEAC discovery result
+// ---------------------------------------------------------------------------
+
+/** Source of PEAC capability discovery */
+export type PeacDiscoverySource = 'agent_card' | 'well_known' | 'header_probe';
+
+/** Result of PEAC capability discovery */
+export interface PeacDiscoveryResult {
+  source: PeacDiscoverySource;
+  kinds: string[];
+  carrier_formats: CarrierFormat[];
+  jwks_uri?: string;
+}
+
+// ---------------------------------------------------------------------------
+// 3-step discovery (DD-110)
+// ---------------------------------------------------------------------------
+
+/**
+ * Discover PEAC capabilities from a base URL using a 3-step algorithm:
+ *
+ * 1. Agent Card: check `/.well-known/agent-card.json` for PEAC extension
+ * 2. Well-known: check `/.well-known/peac.json` (standalone PEAC discovery)
+ * 3. Header probe: HEAD request to base URL, check for `PEAC-Receipt` header
+ *
+ * Returns the first successful result or null if PEAC is not supported.
+ * All steps apply SSRF protections per Polish C.
+ */
+export async function discoverPeacCapabilities(
+  baseUrl: string,
+  options: DiscoveryOptions = {}
+): Promise<PeacDiscoveryResult | null> {
+  // Step 1: Agent Card
+  const card = await discoverAgentCard(baseUrl, options);
+  if (card) {
+    const ext = getPeacExtension(card);
+    if (ext) {
+      return {
+        source: 'agent_card',
+        kinds: ext.params?.supported_kinds ?? ['peac-receipt/0.1'],
+        carrier_formats: ext.params?.carrier_formats ?? ['embed'],
+        ...(ext.params?.jwks_uri && { jwks_uri: ext.params.jwks_uri }),
+      };
+    }
+  }
+
+  // Step 2: /.well-known/peac.json
+  const wellKnown = await discoverPeacWellKnown(baseUrl, options);
+  if (wellKnown) {
+    return wellKnown;
+  }
+
+  // Step 3: Header probe
+  const headerProbe = await discoverPeacViaHeaderProbe(baseUrl, options);
+  if (headerProbe) {
+    return headerProbe;
+  }
+
+  return null;
+}
+
+/**
+ * Step 2: Discover PEAC support via `/.well-known/peac.json`.
+ */
+async function discoverPeacWellKnown(
+  baseUrl: string,
+  options: DiscoveryOptions
+): Promise<PeacDiscoveryResult | null> {
+  const fetchFn = options.fetch ?? globalThis.fetch;
+  const url = new URL('/.well-known/peac.json', baseUrl).toString();
+
+  try {
+    validateUrlForDiscovery(url, options);
+
+    const response = await fetchFn(url, {
+      method: 'GET',
+      redirect: 'error',
+      signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
+    });
+
+    if (!response.ok) return null;
+
+    const contentType = response.headers.get('content-type') ?? '';
+    if (
+      !contentType.includes('application/json') &&
+      !contentType.match(/application\/[a-z0-9.+-]*\+json/)
+    ) {
+      return null;
+    }
+
+    const contentLength = response.headers.get('content-length');
+    if (contentLength && parseInt(contentLength, 10) > MAX_RESPONSE_SIZE) {
+      return null;
+    }
+
+    const text = await response.text();
+    if (text.length > MAX_RESPONSE_SIZE) return null;
+
+    const data = JSON.parse(text) as Record<string, unknown>;
+
+    return {
+      source: 'well_known',
+      kinds: Array.isArray(data.supported_kinds)
+        ? (data.supported_kinds as string[])
+        : ['peac-receipt/0.1'],
+      carrier_formats: Array.isArray(data.carrier_formats)
+        ? (data.carrier_formats as CarrierFormat[])
+        : ['embed'],
+      ...(typeof data.jwks_uri === 'string' && { jwks_uri: data.jwks_uri }),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Step 3: Discover PEAC support via header probe.
+ *
+ * Sends a HEAD request and checks for the presence of a PEAC-Receipt header.
+ * This is a lightweight probe; it indicates support but provides minimal detail.
+ */
+async function discoverPeacViaHeaderProbe(
+  baseUrl: string,
+  options: DiscoveryOptions
+): Promise<PeacDiscoveryResult | null> {
+  const fetchFn = options.fetch ?? globalThis.fetch;
+
+  try {
+    validateUrlForDiscovery(baseUrl, options);
+
+    const response = await fetchFn(baseUrl, {
+      method: 'HEAD',
+      redirect: 'error',
+      signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
+    });
+
+    const headerKey = [...response.headers.keys()].find(
+      (k) => k.toLowerCase() === PEAC_RECEIPT_HEADER.toLowerCase()
+    );
+
+    if (headerKey) {
+      return {
+        source: 'header_probe',
+        kinds: ['peac-receipt/0.1'],
+        carrier_formats: ['embed'],
+      };
+    }
+  } catch {
+    // Network errors, SSRF: no PEAC support detected
+  }
+
+  return null;
 }
