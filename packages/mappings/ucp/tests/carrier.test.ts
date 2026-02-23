@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
-import { computeReceiptRef, validateCarrierConstraints } from '@peac/schema';
+import { computeReceiptRef } from '@peac/schema';
 import {
   UCP_MAX_CARRIER_SIZE,
   UCP_LEGACY_EXTENSION_KEY,

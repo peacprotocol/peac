@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
 import { PEAC_RECEIPT_HEADER } from '@peac/kernel';
-import { computeReceiptRef, validateCarrierConstraints } from '@peac/schema';
+import { computeReceiptRef } from '@peac/schema';
 import {
   ACP_CARRIER_LIMITS,
   attachCarrierToACPHeaders,
