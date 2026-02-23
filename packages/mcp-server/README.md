@@ -137,19 +137,55 @@ npx -y @peac/mcp-server \
 
 Evidence bundles are self-contained directories with canonical manifests (sorted keys, SHA-256 receipt hashes, content-addressable `bundle_id`) and signed provenance (`manifest.jws`). The `bundle_id` is deterministic: same receipts and policy always produce the same ID regardless of when the bundle is created. Manifest content includes `created_at`, so the signature differs across runs. Bundles can be verified offline, diffed, cached, and used for audits, disputes, or SOC 2 evidence collection.
 
+## Transports
+
+### stdio (default)
+
+Standard MCP transport for local/CLI usage. JSON-RPC over stdin/stdout.
+
+```bash
+npx -y @peac/mcp-server
+```
+
+### Streamable HTTP (v0.11.0+)
+
+Remote transport for network-accessible MCP servers. Session-isolated with per-session `McpServer` + transport pairs (CVE-2026-25536 defense).
+
+```bash
+npx -y @peac/mcp-server --transport http --port 3000
+```
+
+Endpoints:
+
+- `POST /mcp`: JSON-RPC tool calls (requires `Mcp-Session-Id` after initialization)
+- `DELETE /mcp`: terminate session
+- `GET /health`: health check (no auth)
+- `GET /.well-known/oauth-protected-resource[/<path>]`: RFC 9728 PRM (when configured)
+
+Security defaults: localhost-only bind, CORS deny-all, 1MB request body limit, per-session + per-IP rate limiting (100 req/min), session TTL (30 min), max 100 concurrent sessions.
+
+See [HTTP Transport Security](../../docs/security/HTTP-TRANSPORT-SECURITY.md) for the full security model.
+
 ## CLI Options
 
 ```text
 peac-mcp-server [options]
 
 Options:
-  --issuer-key <ref>   Issuer signing key (env:VAR or file:/path to Ed25519 JWK)
-  --issuer-id <uri>    Issuer identifier URI (required with --issuer-key)
-  --bundle-dir <path>  Directory for evidence bundle output
-  --policy <path>      Policy configuration file (JSON)
-  --jwks-file <path>   JWKS file for verifier key resolution
-  -V, --version        Output version number
-  -h, --help           Display help
+  --issuer-key <ref>          Issuer signing key (env:VAR or file:/path to Ed25519 JWK)
+  --issuer-id <uri>           Issuer identifier URI (required with --issuer-key)
+  --bundle-dir <path>         Directory for evidence bundle output
+  --policy <path>             Policy configuration file (JSON)
+  --jwks-file <path>          JWKS file for verifier key resolution
+  --transport <type>          Transport: stdio (default) or http
+  --port <number>             HTTP port (default: 3000, http only)
+  --host <address>            HTTP bind address (default: 127.0.0.1)
+  --cors-origins <list>       Allowed CORS origins (comma-separated)
+  --authorization-servers <l> OAuth authorization server URIs (enables PRM)
+  --public-url <url>          Canonical public URL (required for PRM)
+  --trust-proxy <preset>      Trust X-Forwarded-For (off/loopback/linklocal/private/all)
+  -V, --version               Output version number
+  -h, --help                  Display help
 ```
 
 ## Policy Configuration
@@ -199,7 +235,7 @@ const result = await handleVerify({
   input: { jws: 'eyJ...', public_key_base64url: '...' },
   policy,
   context: {
-    version: '0.10.13',
+    version: '0.11.0',
     policyHash,
     protocolVersion: '2025-11-25',
   },
@@ -212,7 +248,7 @@ if (result.structured.ok) {
 
 ## MCP SDK Compatibility
 
-This package pins `@modelcontextprotocol/sdk` with a tilde range (patch-only updates). The SDK and workspace may use different Zod versions; schemas are structurally compatible at runtime. If upgrading the SDK, verify tool registration still works by running `pnpm --filter @peac/mcp-server test`. See `package.json` for actual pinned versions.
+This package pins `@modelcontextprotocol/sdk` at `~1.27.0` (>= 1.26.0 required for CVE-2026-25536 fix). The SDK peer dependency accepts Zod `^3.25 || ^4.0`; the workspace uses Zod 4. If upgrading the SDK, verify tool registration still works by running `pnpm --filter @peac/mcp-server test`. See `package.json` for actual pinned versions.
 
 ## Architecture
 
@@ -222,7 +258,9 @@ This package pins `@modelcontextprotocol/sdk` with a tilde range (patch-only upd
 - **DD-54**: Structured outputs (`structuredContent` + `text`) on every response
 - **DD-55**: No URLs resolved from tool inputs (SSRF prevention)
 - **DD-57**: Core modules (`handlers/`, `schemas/`, `infra/`) have zero MCP SDK imports
-- **DD-58**: Line-buffered stdout fence validates JSON-RPC 2.0 output
+- **DD-58**: Line-buffered stdout fence validates JSON-RPC 2.0 output (stdio only)
+- **DD-119**: Streamable HTTP as additive remote transport (session-isolated)
+- **DD-123**: HTTP security boundaries (CORS, rate limiting, Origin/Host validation)
 
 ## License
 

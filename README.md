@@ -148,7 +148,7 @@ PEAC is the evidence layer. It records what happened in a format that survives o
 
 - **Neutral by design:** Records what happened in a portable, verifiable format
 - **Offline-verifiable:** Verification is deterministic and can run without network access
-- **Interoperable:** Works alongside HTTP and MCP today; A2A and streaming bindings are specified/planned
+- **Interoperable:** Works alongside HTTP and MCP today (stdio and Streamable HTTP transports); A2A and streaming bindings are specified/planned
 - **Privacy-aware:** Receipts are structured for auditability while supporting minimization and selective disclosure via bundles
 - **Open source:** Apache-2.0 licensed, designed for multiple independent implementations
 
@@ -263,9 +263,11 @@ See [docs/specs/VERSIONING.md](docs/specs/VERSIONING.md) for the versioning doct
 
 - JWS signature verification required before trusting any receipt claim
 - Key discovery via `/.well-known/peac-issuer.json` JWKS endpoints with SSRF guards and timeouts
+- Kernel constraints enforce structural limits at issuance and verification (fail-closed)
 - No silent network fallback for offline verification (fail-closed)
 - Replay protection via nonce + timestamp validation
 - Errors mapped to RFC 9457 Problem Details (no internal details exposed)
+- OWASP Top 10 for Agentic Applications alignment: [OWASP-ASI-MAPPING.md](docs/security/OWASP-ASI-MAPPING.md)
 
 See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](docs/specs/PROTOCOL-BEHAVIOR.md).
 
@@ -273,15 +275,18 @@ See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](doc
 
 ## Documentation
 
-| Document                                               | Purpose                                           |
-| ------------------------------------------------------ | ------------------------------------------------- |
-| [Spec Index](docs/SPEC_INDEX.md)                       | Normative specifications                          |
-| [Architecture](docs/ARCHITECTURE.md)                   | Kernel-first design                               |
-| [Policy Kit Quickstart](docs/policy-kit/quickstart.md) | Policy authoring guide                            |
-| [Profiles](docs/profiles/)                             | Integration profiles (Stripe x402, etc.)          |
-| [Engineering Guide](docs/engineering-guide.md)         | Development patterns                              |
-| [CI Behavior](docs/CI_BEHAVIOR.md)                     | CI pipeline and gates                             |
-| [Extended README](docs/README_LONG.md)                 | Package catalog, integration examples, layer maps |
+| Document                                                            | Purpose                                           |
+| ------------------------------------------------------------------- | ------------------------------------------------- |
+| [Spec Index](docs/SPEC_INDEX.md)                                    | Normative specifications                          |
+| [Architecture](docs/ARCHITECTURE.md)                                | Kernel-first design                               |
+| [Kernel Constraints](docs/specs/KERNEL-CONSTRAINTS.md)              | Structural limits enforced at issue and verify    |
+| [Policy Kit Quickstart](docs/policy-kit/quickstart.md)              | Policy authoring guide                            |
+| [Profiles](docs/profiles/)                                          | Integration profiles (Stripe x402, etc.)          |
+| [HTTP Transport Security](docs/security/HTTP-TRANSPORT-SECURITY.md) | MCP Streamable HTTP security model                |
+| [Integrator Kits](integrator-kits/)                                 | Templates for ecosystem partners                  |
+| [Engineering Guide](docs/engineering-guide.md)                      | Development patterns                              |
+| [CI Behavior](docs/CI_BEHAVIOR.md)                                  | CI pipeline and gates                             |
+| [Extended README](docs/README_LONG.md)                              | Package catalog, integration examples, layer maps |
 
 ---
 
