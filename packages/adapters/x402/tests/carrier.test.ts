@@ -228,12 +228,23 @@ describe('X402CarrierAdapter', () => {
     );
   });
 
-  it('should validate constraints', async () => {
+  it('should throw when receipt_jws is absent (reference mode not supported)', () => {
+    const carrier: PeacEvidenceCarrier = {
+      receipt_ref:
+        'sha256:0000000000000000000000000000000000000000000000000000000000000000' as PeacEvidenceCarrier['receipt_ref'],
+    };
+
+    expect(() => adapter.attach({}, [carrier])).toThrow(
+      /x402 carrier requires receipt_jws/
+    );
+  });
+
+  it('should validate constraints with header-sized limits', async () => {
     const carrier = await makeCarrier();
     const meta: CarrierMeta = {
       transport: 'x402',
       format: 'embed',
-      max_size: X402_CARRIER_LIMITS.embed,
+      max_size: X402_CARRIER_LIMITS.headers,
     };
 
     const validation = adapter.validateConstraints(carrier, meta);

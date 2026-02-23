@@ -1,9 +1,10 @@
 /**
  * x402 carrier adapter for Evidence Carrier Contract (DD-124).
  *
- * Extracts PEAC evidence carriers from x402 HTTP 402 (offer) and
- * HTTP 200 (settlement) responses. Carriers are embedded in the
- * response body; the PEAC-Receipt header carries compact JWS when present.
+ * v0.11.1: header-only transport via PEAC-Receipt (compact JWS).
+ * Extracts from x402 HTTP 402 (offer) and HTTP 200 (settlement) responses.
+ * All size limits enforce the 8 KB header ceiling (x402_headers).
+ * Reference mode is not supported; receipt_jws is required.
  */
 
 import type {
@@ -57,11 +58,11 @@ export interface X402ExtractAsyncResult extends X402ExtractResult {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function defaultX402Meta(format: 'embed' | 'reference'): CarrierMeta {
+function defaultX402Meta(): CarrierMeta {
   return {
     transport: 'x402',
-    format,
-    max_size: format === 'embed' ? X402_CARRIER_LIMITS.embed : X402_CARRIER_LIMITS.headers,
+    format: 'embed',
+    max_size: X402_CARRIER_LIMITS.headers,
   };
 }
 
@@ -84,9 +85,7 @@ function extractJwsFromHeaders(headers: X402HeaderMap): string | null {
 /**
  * Extract carrier from x402 offer response (HTTP 402).
  *
- * Checks PEAC-Receipt header for compact JWS. In x402, the carrier
- * is typically in the body (offer/settlement), but the header provides
- * a lightweight transport for the receipt JWS.
+ * Reads PEAC-Receipt header for compact JWS (header-only in v0.11.1).
  */
 export function fromOfferResponse(
   headers: X402HeaderMap,
@@ -104,7 +103,7 @@ export function fromOfferResponse(
   return {
     receipts: [carrier],
     meta: {
-      ...defaultX402Meta('embed'),
+      ...defaultX402Meta(),
       redaction: ['receipt_ref_pending_async'],
     },
   };
@@ -130,7 +129,7 @@ export async function fromOfferResponseAsync(
 
   return {
     receipts: [carrier],
-    meta: defaultX402Meta('embed'),
+    meta: defaultX402Meta(),
     violations: [],
   };
 }
@@ -168,7 +167,8 @@ export async function fromSettlementResponseAsync(
 /**
  * CarrierAdapter implementation for x402 HTTP responses.
  *
- * Extracts from PEAC-Receipt header; attaches by setting the header.
+ * v0.11.1: header-only transport. Extracts from and attaches to
+ * PEAC-Receipt header. Requires receipt_jws for attachment.
  */
 export class X402CarrierAdapter
   implements CarrierAdapter<X402ResponseLike, X402ResponseLike>
@@ -188,7 +188,13 @@ export class X402CarrierAdapter
     if (carriers.length === 0) return output;
 
     const carrier = carriers[0];
-    const effectiveMeta = meta ?? defaultX402Meta(carrier.receipt_jws ? 'embed' : 'reference');
+    if (!carrier.receipt_jws) {
+      throw new Error(
+        'x402 carrier requires receipt_jws (embed format) in v0.11.1'
+      );
+    }
+
+    const effectiveMeta = meta ?? defaultX402Meta();
 
     const validation = validateCarrierConstraints(carrier, effectiveMeta);
     if (!validation.valid) {
@@ -201,9 +207,7 @@ export class X402CarrierAdapter
       output.headers = {};
     }
 
-    if (carrier.receipt_jws) {
-      output.headers[PEAC_RECEIPT_HEADER] = carrier.receipt_jws;
-    }
+    output.headers[PEAC_RECEIPT_HEADER] = carrier.receipt_jws;
 
     return output;
   }
