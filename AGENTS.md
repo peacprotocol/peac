@@ -6,8 +6,8 @@ Agent-readable metadata for PEAC Protocol.
 
 - **Protocol**: PEAC (wire format: `peac-receipt/0.1`)
 - **Specification**: https://www.peacprotocol.org/specs/agent-identity
-- **Key Directory**: Discovered via `/.well-known/jwks.json` or `Link` header with `rel="jwks"`
-- **Algorithms**: EdDSA (Ed25519)
+- **Key Directory**: Discovered via issuer config chain: `iss` -> `/.well-known/peac-issuer.json` -> `jwks_uri` -> JWKS (see [PEAC-ISSUER.md](docs/specs/PEAC-ISSUER.md) Section 3.4)
+- **Algorithms**: EdDSA (Ed25519), ES256 (ECDSA P-256)
 
 ## Capabilities
 
@@ -61,33 +61,34 @@ PEAC-Agent-Identity: eyJ0eXBlIjoicGVhYy9hZ2VudC1pZGVudGl0eSJ9...
 
 ## A2A Agent Card Extension
 
-For A2A (Agent-to-Agent) discovery via `/.well-known/agent.json`:
+For A2A (Agent-to-Agent Protocol, Linux Foundation) discovery via `/.well-known/agent-card.json` (v0.3.0):
+
+**Agent Card (`capabilities.extensions[]` array per A2A v0.3.0):**
 
 ```json
 {
   "name": "Example Agent",
   "url": "https://agent.example",
-  "capabilities": ["search", "inference"],
-  "extensions": {
-    "org.peacprotocol": {
-      "version": "0.1",
-      "discovery_url": "/.well-known/peac.txt",
-      "key_directory": "/.well-known/jwks.json",
-      "control_type": "operator",
-      "receipts_endpoint": "/api/receipts"
-    }
+  "capabilities": {
+    "extensions": [
+      {
+        "uri": "https://www.peacprotocol.org/ext/traceability/v1",
+        "description": "PEAC evidence traceability for agent interactions",
+        "required": false
+      }
+    ]
   }
 }
 ```
 
 ## Discovery
 
-| Path                            | Content                              |
-| ------------------------------- | ------------------------------------ |
-| `/.well-known/peac.txt`         | PEAC discovery manifest              |
-| `/.well-known/peac-policy.yaml` | Policy document                      |
-| `/.well-known/jwks.json`        | JWKS key directory                   |
-| `/.well-known/agent.json`       | A2A Agent Card (with PEAC extension) |
+| Path                            | Content                              | Specification                                           |
+| ------------------------------- | ------------------------------------ | ------------------------------------------------------- |
+| `/.well-known/peac.txt`         | Policy manifest                      | [PEAC-TXT.md](docs/specs/PEAC-TXT.md)                   |
+| `/.well-known/peac-policy.yaml` | Policy document (fallback)           | [PEAC-TXT.md](docs/specs/PEAC-TXT.md)                   |
+| `/.well-known/peac-issuer.json` | Issuer config and key discovery      | [PEAC-ISSUER.md](docs/specs/PEAC-ISSUER.md)             |
+| `/.well-known/agent-card.json`  | A2A Agent Card (with PEAC extension) | [DISCOVERY-PROFILE.md](docs/specs/DISCOVERY-PROFILE.md) |
 
 ## Purpose Tokens
 

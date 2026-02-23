@@ -133,10 +133,21 @@ The `aud` claim MUST contain the canonical form of the resource URL:
 - Reject receipts with duplicate `rid` values
 - Cache SHOULD be shared across service instances
 
+### Hosting Surfaces
+
+Issuers MUST host three discovery surfaces:
+
+- `/.well-known/peac.txt`: policy document (access terms, purposes, receipts)
+- `/.well-known/peac-issuer.json`: issuer configuration (contains `jwks_uri`)
+- `{jwks_uri}`: JWKS endpoint for public keys (typically `/.well-known/jwks.json`)
+
+See [PEAC-ISSUER.md](specs/PEAC-ISSUER.md) and [PEAC-TXT.md](specs/PEAC-TXT.md) for normative specifications.
+
 ### Key Management
 
 - Use Ed25519 keys with rotating `kid` format: `YYYY-MM-DD/nn`
-- Publish public keys via `/.well-known/jwks.json`
+- Publish issuer config at `/.well-known/peac-issuer.json` with `jwks_uri` pointing to JWKS
+- Verifiers resolve keys via the normative discovery chain: `iss` -> `peac-issuer.json` -> `jwks_uri` -> JWKS
 - Support key rotation with grace periods
 
 ### Validation Requirements

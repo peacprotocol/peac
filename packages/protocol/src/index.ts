@@ -8,6 +8,7 @@ export * from './verify';
 export * from './verify-local';
 export * from './headers';
 export * from './discovery';
+export * from './jwks-resolver';
 
 // Verifier core (v0.10.8+)
 export * from './verifier-types';

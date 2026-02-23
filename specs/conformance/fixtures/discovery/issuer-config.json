@@ -1,6 +1,6 @@
 {
   "$comment": "PEAC issuer configuration conformance vectors (v0.10.0+)",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "spec": "docs/specs/PEAC-ISSUER.md",
   "format": "peac-issuer/0.1",
   "location": "/.well-known/peac-issuer.json",
@@ -137,15 +137,17 @@
       {
         "id": "issuer-err-005",
         "name": "http-jwks-uri",
-        "description": "JWKS URI must be HTTPS",
+        "description": "JWKS URI with HTTP scheme parses successfully but MUST be rejected by the resolver with E_VERIFY_JWKS_URI_INVALID (HTTPS enforcement is a resolver concern, not a parser concern)",
         "input": {
           "version": "peac-issuer/0.1",
           "issuer": "https://api.example.com",
           "jwks_uri": "http://api.example.com/.well-known/jwks.json"
         },
         "expected": {
-          "valid": false,
-          "error": "jwks_uri must be an HTTPS URL"
+          "valid_parse": true,
+          "valid_resolve": false,
+          "error_code": "E_VERIFY_JWKS_URI_INVALID",
+          "error": "jwks_uri must be HTTPS"
         }
       },
       {
@@ -172,8 +174,92 @@
           "valid": false,
           "error_pattern": "not valid JSON"
         }
+      },
+      {
+        "id": "issuer-err-008",
+        "name": "issuer-mismatch-origin",
+        "description": "Issuer field in config does not match the expected issuer origin (after canonicalization). Verifier MUST reject with E_VERIFY_ISSUER_MISMATCH.",
+        "context": {
+          "receipt_iss": "https://api.example.com"
+        },
+        "input": {
+          "version": "peac-issuer/0.1",
+          "issuer": "https://different.example.com",
+          "jwks_uri": "https://different.example.com/.well-known/jwks.json"
+        },
+        "expected": {
+          "valid_parse": true,
+          "valid_resolve": false,
+          "error_code": "E_VERIFY_ISSUER_MISMATCH"
+        }
+      },
+      {
+        "id": "issuer-err-009",
+        "name": "malformed-issuer-url",
+        "description": "Receipt iss claim is not a valid URL. Verifier MUST reject with E_VERIFY_INSECURE_SCHEME_BLOCKED before attempting discovery.",
+        "context": {
+          "receipt_iss": "not-a-url"
+        },
+        "expected": {
+          "valid_resolve": false,
+          "error_code": "E_VERIFY_INSECURE_SCHEME_BLOCKED",
+          "error_pattern": "not a valid URL"
+        }
+      }
+    ],
+    "resolution": [
+      {
+        "id": "resolve-001",
+        "name": "iss-path-canonicalized-to-origin",
+        "description": "Issuer URL with path MUST be canonicalized to origin for discovery. https://api.example.com/v1 resolves to https://api.example.com/.well-known/peac-issuer.json",
+        "context": {
+          "receipt_iss": "https://api.example.com/v1/issuer"
+        },
+        "expected": {
+          "canonical_origin": "https://api.example.com",
+          "config_url": "https://api.example.com/.well-known/peac-issuer.json"
+        }
+      },
+      {
+        "id": "resolve-002",
+        "name": "default-port-elided",
+        "description": "Default port 443 MUST be elided from canonical origin. https://api.example.com:443 canonicalizes to https://api.example.com",
+        "context": {
+          "receipt_iss": "https://api.example.com:443"
+        },
+        "expected": {
+          "canonical_origin": "https://api.example.com",
+          "config_url": "https://api.example.com/.well-known/peac-issuer.json"
+        }
+      },
+      {
+        "id": "resolve-003",
+        "name": "ssrf-reason-preserved",
+        "description": "When SSRF protection blocks a fetch (e.g., private IP), the original SSRF reason MUST be preserved in the error for diagnostic fidelity.",
+        "context": {
+          "receipt_iss": "https://api.example.com",
+          "ssrf_block_reason": "private_ip"
+        },
+        "expected": {
+          "valid_resolve": false,
+          "error_code": "E_VERIFY_KEY_FETCH_BLOCKED",
+          "reason": "private_ip"
+        }
+      },
+      {
+        "id": "resolve-004",
+        "name": "path-variations-share-cache",
+        "description": "Two issuer URLs that differ only in path MUST share the same cache entry (cache keyed by canonical origin).",
+        "context": {
+          "receipt_iss_1": "https://api.example.com/v1",
+          "receipt_iss_2": "https://api.example.com/v2"
+        },
+        "expected": {
+          "same_cache_key": true,
+          "canonical_origin": "https://api.example.com"
+        }
       }
     ]
   },
-  "schema_version": "0.10.0"
+  "schema_version": "0.11.0"
 }

@@ -52,7 +52,7 @@ This specification covers:
 
 ### 1.4 Requirements Notation
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown here.
 
 ---
 
@@ -617,7 +617,7 @@ baggage: peac-agent-id=bot%3Acrawler-prod-001,peac-control-type=operator
 
 ## References
 
-- RFC 2119: Key words for use in RFCs
+- BCP 14 (RFC 2119, RFC 8174): Key words for use in RFCs
 - RFC 3339: Date and Time on the Internet
 - RFC 7638: JSON Web Key (JWK) Thumbprint
 - RFC 8705: OAuth 2.0 Mutual-TLS Client Authentication
