@@ -10,7 +10,6 @@ import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
 import {
   PeacEvidenceCarrierSchema,
   verifyReceiptRefConsistency,
-  CARRIER_TRANSPORT_LIMITS,
 } from '@peac/schema';
 
 import type {

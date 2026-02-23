@@ -7,7 +7,7 @@
  */
 
 import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
-import { validateCarrierConstraints, CARRIER_TRANSPORT_LIMITS } from '@peac/schema';
+import { validateCarrierConstraints } from '@peac/schema';
 
 import type {
   A2AMetadata,
