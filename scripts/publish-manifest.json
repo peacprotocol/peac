@@ -55,6 +55,7 @@
   "pendingTrustedPublishing": [
     "@peac/adapter-x402",
     "@peac/telemetry-otel",
+    "@peac/mappings-a2a",
     "@peac/mappings-acp",
     "@peac/mappings-aipref",
     "@peac/mappings-rsl",

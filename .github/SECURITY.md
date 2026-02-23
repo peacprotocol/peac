@@ -6,9 +6,9 @@ Currently supported versions for security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 0.11.x  | :white_check_mark: |
 | 0.10.x  | :white_check_mark: |
-| 0.9.x   | :x:                |
-| < 0.9   | :x:                |
+| < 0.10  | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -29,9 +29,9 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 
 ### Cryptographic Security
 
-- EdDSA (Ed25519) signatures only
+- EdDSA (Ed25519) signatures (recommended) and ES256 (ECDSA P-256)
 - JWS Compact Serialization
-- Key rotation every 30 days
+- Key rotation support via JWKS `kid` matching
 - Hardware security module support
 
 ### Input Validation

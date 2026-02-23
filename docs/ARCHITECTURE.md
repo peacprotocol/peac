@@ -269,12 +269,12 @@ interface PaymentEvidence {
 
 - Algorithm: Ed25519 (EdDSA with Curve25519)
 - Format: JWS Compact Serialization (RFC 7515)
-- Key discovery: JWKS at `/.well-known/jwks.json`
+- Key discovery: `/.well-known/peac-issuer.json` -> `jwks_uri` -> JWKS
 
 ### Verification
 
 1. Parse JWS and extract header/payload
-2. Fetch issuer's JWKS (with SSRF protection)
+2. Fetch issuer's `peac-issuer.json`, resolve `jwks_uri`, fetch JWKS (all SSRF-safe)
 3. Verify signature against public key identified by `kid`
 4. Validate claims (iss, aud, exp, iat)
 5. Validate payment evidence structure

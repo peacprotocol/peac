@@ -54,7 +54,7 @@ for (const p of pkgPaths) {
 console.log(pub.sort().join('\n'));
 ")
 
-# Expected packages (updated for v0.10.0 + net-node + mcp-server)
+# Expected packages (updated for v0.11.1 + mappings-a2a)
 EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/adapter-core
 @peac/adapter-openclaw
@@ -75,6 +75,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/http-signatures
 @peac/jwks-cache
 @peac/kernel
+@peac/mappings-a2a
 @peac/mappings-acp
 @peac/mappings-aipref
 @peac/mappings-mcp
@@ -114,7 +115,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 43 public packages match"
+  echo "OK: All 44 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -131,6 +132,7 @@ TESTED_PACKAGES="@peac/adapter-openclaw
 @peac/crypto
 @peac/http-signatures
 @peac/jwks-cache
+@peac/mappings-a2a
 @peac/mappings-acp
 @peac/mappings-aipref
 @peac/mappings-mcp
@@ -169,13 +171,13 @@ NO_TESTS_RATIONALE="@peac/adapter-core - shared adapter utilities, tested via ad
 @peac/sdk - re-exports only
 @peac/server - server wrapper, tested via integration"
 
-echo "Packages with tests (26):"
+echo "Packages with tests (27):"
 echo "$TESTED_PACKAGES" | sed 's/^/  /'
 echo ""
 echo "Packages without tests (17) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 43 packages accounted for (26 tested + 17 type/wrapper packages)"
+echo "OK: All 44 packages accounted for (27 tested + 17 type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="
