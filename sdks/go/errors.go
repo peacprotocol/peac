@@ -62,8 +62,8 @@ func (e *PEACError) WithDetail(key string, value interface{}) *PEACError {
 	return e
 }
 
-// IsRetriable returns true if the error is retriable.
-func (e *PEACError) IsRetriable() bool {
+// IsRetryable returns true if the error is retryable.
+func (e *PEACError) IsRetryable() bool {
 	switch e.Code {
 	case ErrNotYetValid, ErrJWKSFetchFailed, ErrIdentityNotYetValid,
 		ErrIdentityKeyUnknown, ErrIdentityBindingStale, ErrIdentityDirectoryUnavailable:

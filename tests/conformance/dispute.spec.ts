@@ -87,7 +87,7 @@ interface EdgeCaseFixture {
     remediation_types_count?: number;
     valid_transitions?: string[];
     note?: string;
-    retriable?: boolean;
+    retryable?: boolean;
     success?: boolean;
   };
 }

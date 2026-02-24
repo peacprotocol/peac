@@ -2,9 +2,9 @@
 
 **Status**: NORMATIVE
 
-**Version**: 0.11.1
+**Version**: 0.11.2
 
-**Design Decisions**: DD-124 (type placement), DD-127 (transport size limits), DD-129 (immutability), DD-131 (ASI-04 defense)
+**Design Decisions**: DD-124 (type placement), DD-127 (transport size limits), DD-129 (immutability), DD-131 (ASI-04 defense), DD-135 (receipt_url locator hint), DD-141 (schema validation-only)
 
 ---
 
@@ -56,6 +56,7 @@ The `PeacEvidenceCarrier` is the canonical carrier envelope. All protocol-specif
 | ------------------------- | -------------------- | -------------- | --------------------------------------------------------------------- |
 | `receipt_ref`             | `sha256:<hex64>`     | MUST           | Content-addressed receipt reference: SHA-256 of the compact JWS bytes |
 | `receipt_jws`             | string (compact JWS) | SHOULD (embed) | The signed receipt in compact JWS format (header.payload.signature)   |
+| `receipt_url`             | string (HTTPS URL)   | MAY            | Locator hint for detached receipt resolution (DD-135, v0.11.2+)       |
 | `policy_binding`          | string               | MAY            | Policy binding hash for verification                                  |
 | `actor_binding`           | string               | MAY            | Actor binding identifier                                              |
 | `request_nonce`           | string               | MAY            | Request nonce for replay protection                                   |
@@ -80,6 +81,45 @@ The `PeacEvidenceCarrier` is the canonical carrier envelope. All protocol-specif
 | `reference` | Receipt available via external resolution | MUST be absent; resolve via `receipt_ref` |
 
 When the carrier format is `embed`, the `receipt_jws` field SHOULD be present so recipients can verify the receipt without a network round-trip. When the format is `reference`, the `receipt_jws` field MUST be absent; consumers resolve the receipt via `receipt_ref` through a trusted registry or the issuer's well-known endpoint.
+
+### 2.4 Locator Hints (DD-135, v0.11.2+)
+
+The `receipt_url` field is an optional locator hint that points to a detached receipt JWS. It enables scenarios where the full receipt is too large for inline transport or where a publisher prefers to serve receipts from a dedicated endpoint.
+
+**Constraints:**
+
+1. `receipt_url` MUST use the HTTPS scheme. Non-HTTPS URLs MUST be rejected at schema validation.
+2. `receipt_url` MUST NOT exceed 2048 characters.
+3. `receipt_url` MUST NOT contain credentials (userinfo component).
+4. `receipt_url` is a locator hint only. Implementations MUST NOT trigger implicit fetch when a `receipt_url` is present (DD-55, no-implicit-fetch invariant).
+5. Resolution is always opt-in: callers who choose to fetch MUST use an SSRF-hardened HTTP client.
+
+**Post-fetch invariant:**
+
+If a caller resolves `receipt_url` and obtains a JWS string, it MUST verify:
+
+```text
+sha256(fetched_jws) == carrier.receipt_ref
+```
+
+This check ensures the fetched content matches the content-addressed reference. Failure to verify this invariant means the fetched JWS may not correspond to the carrier and MUST be discarded.
+
+**Resolution helper:**
+
+`@peac/net-node` (Layer 4) provides `resolveReceiptUrl()` as an opt-in, SSRF-hardened fetch helper. It rejects private IPs, enforces HTTPS, and applies timeout and size limits. The resolution helper does NOT perform the `receipt_ref` consistency check; that is the caller's responsibility.
+
+`@peac/schema` (Layer 1) does NOT provide any resolution or fetch helper (DD-141: schema layer is validation-only, no I/O).
+
+**Transport surface:**
+
+| Transport | `receipt_url` surface                           |
+| --------- | ----------------------------------------------- |
+| MCP       | `_meta["org.peacprotocol/receipt_url"]`         |
+| A2A       | `metadata[extensionURI].carriers[].receipt_url` |
+| ACP       | `PEAC-Receipt-URL` HTTP header                  |
+| UCP       | Passed through in carrier object                |
+| x402      | `PEAC-Receipt-URL` HTTP header                  |
+| HTTP      | `PEAC-Receipt-URL` HTTP header                  |
 
 ---
 

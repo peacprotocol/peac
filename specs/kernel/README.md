@@ -45,7 +45,8 @@ Each error includes:
 - `http_status`: HTTP status code for REST APIs
 - `title`: Human-readable title
 - `description`: Detailed explanation
-- `retriable`: Whether the error is transient and can be retried
+- `retryable`: Whether the error is transient and can be retried
+- `next_action`: Agent recovery hint (best-effort guidance, not a protocol promise)
 - `category`: Error classification (verification, validation, infrastructure, control)
 
 **Categories:**

@@ -12,6 +12,15 @@ pnpm add @peac/kernel
 
 See [peacprotocol.org](https://www.peacprotocol.org) for full documentation.
 
+## For Agent Developers
+
+If you are building an AI agent or MCP server that needs evidence receipts:
+
+- Start with [`@peac/mcp-server`](https://www.npmjs.com/package/@peac/mcp-server) for a ready-to-use MCP tool server
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview of all packages
+- Use `@peac/protocol` for programmatic receipt issuance and verification
+- Use `@peac/kernel` types (`PeacEvidenceCarrier`, `ErrorDefinition`) for type-safe integration
+
 ## License
 
 Apache-2.0

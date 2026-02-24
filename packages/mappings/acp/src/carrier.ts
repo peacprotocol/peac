@@ -12,7 +12,7 @@ import type {
   CarrierValidationResult,
   CarrierAdapter,
 } from '@peac/kernel';
-import { PEAC_RECEIPT_HEADER } from '@peac/kernel';
+import { PEAC_RECEIPT_HEADER, PEAC_RECEIPT_URL_HEADER } from '@peac/kernel';
 import {
   validateCarrierConstraints,
   computeReceiptRef,
@@ -72,6 +72,9 @@ export function attachCarrierToACPHeaders(
     throw new Error('ACP carrier requires receipt_jws (embed format) in v0.11.1');
   }
   headers[PEAC_RECEIPT_HEADER] = carrier.receipt_jws;
+  if (carrier.receipt_url) {
+    headers[PEAC_RECEIPT_URL_HEADER] = carrier.receipt_url;
+  }
   return headers;
 }
 
@@ -133,6 +136,14 @@ export function extractCarrierFromACPHeaders(headers: HeaderMap): AcpExtractResu
     receipt_jws: jws,
   };
 
+  // Extract receipt_url locator hint (DD-135)
+  const urlKey = Object.keys(headers).find(
+    (k) => k.toLowerCase() === PEAC_RECEIPT_URL_HEADER.toLowerCase()
+  );
+  if (urlKey && headers[urlKey]) {
+    carrier.receipt_url = headers[urlKey];
+  }
+
   return {
     receipts: [carrier],
     meta: {
@@ -166,6 +177,14 @@ export async function extractCarrierFromACPHeadersAsync(
     receipt_ref: ref,
     receipt_jws: jws,
   };
+
+  // Extract receipt_url locator hint (DD-135)
+  const urlKey = Object.keys(headers).find(
+    (k) => k.toLowerCase() === PEAC_RECEIPT_URL_HEADER.toLowerCase()
+  );
+  if (urlKey && headers[urlKey]) {
+    carrier.receipt_url = headers[urlKey];
+  }
 
   return {
     receipts: [carrier],

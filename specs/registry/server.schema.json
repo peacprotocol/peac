@@ -1,0 +1,247 @@
+{
+  "$comment": "Vendored snapshot of the MCP Registry server.json schema. Source: https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json. Pinned for offline CI validation (DD-140). Check for upstream drift via scheduled CI job.",
+  "$id": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "$ref": "#/definitions/ServerDetail",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Argument": {
+      "anyOf": [
+        { "$ref": "#/definitions/PositionalArgument" },
+        { "$ref": "#/definitions/NamedArgument" }
+      ],
+      "description": "Warning: Arguments construct command-line parameters that may contain user-provided input. This creates potential command injection risks if clients execute commands in a shell environment."
+    },
+    "Icon": {
+      "description": "An optionally-sized icon that can be displayed in a user interface.",
+      "properties": {
+        "mimeType": {
+          "enum": ["image/png", "image/jpeg", "image/jpg", "image/svg+xml", "image/webp"],
+          "type": "string"
+        },
+        "sizes": {
+          "items": { "pattern": "^(\\d+x\\d+|any)$", "type": "string" },
+          "type": "array"
+        },
+        "src": {
+          "format": "uri",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "theme": { "enum": ["light", "dark"], "type": "string" }
+      },
+      "required": ["src"],
+      "type": "object"
+    },
+    "Input": {
+      "properties": {
+        "choices": { "items": { "type": "string" }, "type": "array" },
+        "default": { "type": "string" },
+        "description": { "type": "string" },
+        "format": {
+          "default": "string",
+          "enum": ["string", "number", "boolean", "filepath"],
+          "type": "string"
+        },
+        "isRequired": { "default": false, "type": "boolean" },
+        "isSecret": { "default": false, "type": "boolean" },
+        "placeholder": { "type": "string" },
+        "value": { "type": "string" }
+      },
+      "type": "object"
+    },
+    "InputWithVariables": {
+      "allOf": [
+        { "$ref": "#/definitions/Input" },
+        {
+          "properties": {
+            "variables": {
+              "additionalProperties": { "$ref": "#/definitions/Input" },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "KeyValueInput": {
+      "allOf": [
+        { "$ref": "#/definitions/InputWithVariables" },
+        {
+          "properties": {
+            "name": { "type": "string" }
+          },
+          "required": ["name"],
+          "type": "object"
+        }
+      ]
+    },
+    "LocalTransport": {
+      "anyOf": [
+        { "$ref": "#/definitions/StdioTransport" },
+        { "$ref": "#/definitions/StreamableHttpTransport" },
+        { "$ref": "#/definitions/SseTransport" }
+      ]
+    },
+    "NamedArgument": {
+      "allOf": [
+        { "$ref": "#/definitions/InputWithVariables" },
+        {
+          "properties": {
+            "isRepeated": { "default": false, "type": "boolean" },
+            "name": { "type": "string" },
+            "type": { "enum": ["named"], "type": "string" }
+          },
+          "required": ["type", "name"],
+          "type": "object"
+        }
+      ]
+    },
+    "Package": {
+      "properties": {
+        "environmentVariables": {
+          "items": { "$ref": "#/definitions/KeyValueInput" },
+          "type": "array"
+        },
+        "fileSha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "identifier": { "type": "string" },
+        "packageArguments": {
+          "items": { "$ref": "#/definitions/Argument" },
+          "type": "array"
+        },
+        "registryBaseUrl": { "format": "uri", "type": "string" },
+        "registryType": { "type": "string" },
+        "runtimeArguments": {
+          "items": { "$ref": "#/definitions/Argument" },
+          "type": "array"
+        },
+        "runtimeHint": { "type": "string" },
+        "transport": { "$ref": "#/definitions/LocalTransport" },
+        "version": {
+          "minLength": 1,
+          "not": { "const": "latest" },
+          "type": "string"
+        }
+      },
+      "required": ["registryType", "identifier", "transport"],
+      "type": "object"
+    },
+    "PositionalArgument": {
+      "allOf": [
+        { "$ref": "#/definitions/InputWithVariables" },
+        {
+          "anyOf": [{ "required": ["valueHint"] }, { "required": ["value"] }],
+          "properties": {
+            "isRepeated": { "default": false, "type": "boolean" },
+            "type": { "enum": ["positional"], "type": "string" },
+            "valueHint": { "type": "string" }
+          },
+          "required": ["type"],
+          "type": "object"
+        }
+      ]
+    },
+    "RemoteTransport": {
+      "allOf": [
+        {
+          "anyOf": [
+            { "$ref": "#/definitions/StreamableHttpTransport" },
+            { "$ref": "#/definitions/SseTransport" }
+          ]
+        },
+        {
+          "properties": {
+            "variables": {
+              "additionalProperties": { "$ref": "#/definitions/Input" },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "Repository": {
+      "properties": {
+        "id": { "type": "string" },
+        "source": { "type": "string" },
+        "subfolder": { "type": "string" },
+        "url": { "format": "uri", "type": "string" }
+      },
+      "required": ["url", "source"],
+      "type": "object"
+    },
+    "ServerDetail": {
+      "properties": {
+        "$schema": { "format": "uri", "type": "string" },
+        "_meta": {
+          "properties": {
+            "io.modelcontextprotocol.registry/publisher-provided": {
+              "additionalProperties": true,
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "description": { "maxLength": 100, "minLength": 1, "type": "string" },
+        "icons": {
+          "items": { "$ref": "#/definitions/Icon" },
+          "type": "array"
+        },
+        "name": {
+          "maxLength": 200,
+          "minLength": 3,
+          "pattern": "^[a-zA-Z0-9.-]+/[a-zA-Z0-9._-]+$",
+          "type": "string"
+        },
+        "packages": {
+          "items": { "$ref": "#/definitions/Package" },
+          "type": "array"
+        },
+        "remotes": {
+          "items": { "$ref": "#/definitions/RemoteTransport" },
+          "type": "array"
+        },
+        "repository": { "$ref": "#/definitions/Repository" },
+        "title": { "maxLength": 100, "minLength": 1, "type": "string" },
+        "version": { "maxLength": 255, "type": "string" },
+        "websiteUrl": { "format": "uri", "type": "string" }
+      },
+      "required": ["name", "description", "version"],
+      "type": "object"
+    },
+    "SseTransport": {
+      "properties": {
+        "headers": {
+          "items": { "$ref": "#/definitions/KeyValueInput" },
+          "type": "array"
+        },
+        "type": { "enum": ["sse"], "type": "string" },
+        "url": { "pattern": "^https?://[^\\s]+$", "type": "string" }
+      },
+      "required": ["type", "url"],
+      "type": "object"
+    },
+    "StdioTransport": {
+      "properties": {
+        "type": { "enum": ["stdio"], "type": "string" }
+      },
+      "required": ["type"],
+      "type": "object"
+    },
+    "StreamableHttpTransport": {
+      "properties": {
+        "headers": {
+          "items": { "$ref": "#/definitions/KeyValueInput" },
+          "type": "array"
+        },
+        "type": { "enum": ["streamable-http"], "type": "string" },
+        "url": { "pattern": "^https?://[^\\s]+$", "type": "string" }
+      },
+      "required": ["type", "url"],
+      "type": "object"
+    }
+  },
+  "title": "server.json defining a Model Context Protocol (MCP) server"
+}

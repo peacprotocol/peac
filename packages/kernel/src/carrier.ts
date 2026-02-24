@@ -22,6 +22,14 @@
  */
 export const PEAC_RECEIPT_HEADER = 'PEAC-Receipt' as const;
 
+/**
+ * Canonical HTTP header name for receipt URL locator hint (DD-135).
+ *
+ * HTTPS-only, max 2048 chars, no credentials.
+ * MUST NOT trigger implicit fetch (DD-55).
+ */
+export const PEAC_RECEIPT_URL_HEADER = 'PEAC-Receipt-URL' as const;
+
 // ---------------------------------------------------------------------------
 // Primitives
 // ---------------------------------------------------------------------------
@@ -47,6 +55,13 @@ export interface PeacEvidenceCarrier {
   receipt_ref: ReceiptRef;
   /** Compact JWS of the signed receipt (SHOULD for embed format) */
   receipt_jws?: string;
+  /**
+   * Locator hint for detached receipt resolution (DD-135).
+   * HTTPS-only, max 2048 chars, no credentials.
+   * MUST NOT trigger implicit fetch (DD-55).
+   * If a caller fetches, it MUST verify sha256(receipt_jws) == receipt_ref.
+   */
+  receipt_url?: string;
   /** Policy binding hash for verification (MAY) */
   policy_binding?: string;
   /** Actor binding identifier (MAY) */

@@ -7,6 +7,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult, ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import { ERRORS } from '@peac/kernel';
 import { SERVER_NAME } from './infra/constants.js';
 import type { PolicyConfig } from './infra/policy.js';
 import type { ServerContext, HandlerResult } from './handlers/types.js';
@@ -87,9 +88,17 @@ function errorCallToolResult(
   code: string,
   message: string
 ): CallToolResult {
+  const errorDef = ERRORS[code];
   return {
     content: [{ type: 'text' as const, text: message }],
-    structuredContent: { _meta: meta, ok: false, code, message },
+    structuredContent: {
+      _meta: meta,
+      ok: false,
+      code,
+      message,
+      retryable: errorDef?.retryable ?? false,
+      next_action: errorDef?.next_action ?? 'none',
+    },
     isError: true,
   };
 }

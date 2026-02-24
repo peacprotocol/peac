@@ -8,6 +8,7 @@ import {
   McpCarrierAdapter,
   META_KEY_RECEIPT_REF,
   META_KEY_RECEIPT_JWS,
+  META_KEY_RECEIPT_URL,
   META_KEY_LEGACY_RECEIPT,
   META_KEY_AGENT_ID,
   META_KEY_VERIFIED_AT,
@@ -199,6 +200,25 @@ describe('McpCarrierAdapter', () => {
     const extracted = adapter.extract(result);
     expect(extracted).not.toBeNull();
     expect(extracted!.receipts[0].receipt_ref).toBe(VALID_REF);
+  });
+
+  it('round-trips receipt_url through attach and extract (DD-135)', () => {
+    const carrierWithUrl: PeacEvidenceCarrier = {
+      ...VALID_CARRIER,
+      receipt_url: 'https://receipts.example.com/abc123',
+    };
+    const result = {};
+    adapter.attach(result, [carrierWithUrl]);
+
+    // Verify _meta key is set
+    expect((result as Record<string, unknown>)._meta).toBeDefined();
+    const meta = (result as Record<string, unknown>)._meta as Record<string, unknown>;
+    expect(meta[META_KEY_RECEIPT_URL]).toBe('https://receipts.example.com/abc123');
+
+    // Verify round-trip extraction
+    const extracted = adapter.extract(result);
+    expect(extracted).not.toBeNull();
+    expect(extracted!.receipts[0].receipt_url).toBe('https://receipts.example.com/abc123');
   });
 
   it('extract returns null when no carrier', () => {

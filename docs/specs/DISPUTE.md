@@ -361,14 +361,14 @@ Beyond schema validation, implementations SHOULD check:
 
 | Code                      | Description                              |
 | ------------------------- | ---------------------------------------- |
-| `E_DISPUTE_NOT_YET_VALID` | `issued_at` is in the future (retriable) |
+| `E_DISPUTE_NOT_YET_VALID` | `issued_at` is in the future (retryable) |
 | `E_DISPUTE_EXPIRED`       | Attestation has expired                  |
 
 ### 8.3 Resource Errors (404/409)
 
 | Code                         | HTTP | Description                  |
 | ---------------------------- | ---- | ---------------------------- |
-| `E_DISPUTE_TARGET_NOT_FOUND` | 404  | Target not found (retriable) |
+| `E_DISPUTE_TARGET_NOT_FOUND` | 404  | Target not found (retryable) |
 | `E_DISPUTE_DUPLICATE`        | 409  | Duplicate dispute ID         |
 
 ### 8.4 WWW-Authenticate Header

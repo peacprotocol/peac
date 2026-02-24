@@ -325,6 +325,26 @@
       "expected_error": "E_PARSE_ATTESTATION_INVALID"
     }
   },
+  "errors": {
+    "next-action-hints.json": {
+      "description": "Agent recovery next_action hint table (DD-132, DD-133); best-effort guidance, not normative",
+      "version": "0.11.2",
+      "fixture_count": 146,
+      "expected_valid": true
+    }
+  },
+  "content-usage": {
+    "valid.json": {
+      "description": "Valid Content-Usage header parsing fixtures (AIPREF vocab-03, RFC 9651)",
+      "version": "0.11.2",
+      "fixture_count": 8
+    },
+    "edge-cases.json": {
+      "description": "Edge case Content-Usage header parsing fixtures (RFC 9651 value type handling)",
+      "version": "0.11.2",
+      "fixture_count": 8
+    }
+  },
   "carrier": {
     "valid-minimal.json": {
       "description": "Minimal carrier with only receipt_ref",
@@ -357,6 +377,22 @@
     "invalid-oversize.json": {
       "description": "Carrier exceeding transport max_size",
       "version": "0.11.1"
+    },
+    "valid-with-receipt-url.json": {
+      "description": "Valid carrier with receipt_url locator hint (DD-135)",
+      "version": "0.11.2"
+    },
+    "invalid-receipt-url-http.json": {
+      "description": "Invalid carrier: receipt_url uses HTTP instead of HTTPS (DD-135)",
+      "version": "0.11.2"
+    },
+    "invalid-receipt-url-credentials.json": {
+      "description": "Invalid carrier: receipt_url contains credentials (DD-135)",
+      "version": "0.11.2"
+    },
+    "invalid-receipt-url-too-long.json": {
+      "description": "Invalid carrier: receipt_url exceeds 2048 character limit (DD-135)",
+      "version": "0.11.2"
     }
   }
 }

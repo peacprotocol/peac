@@ -1,0 +1,36 @@
+# Smithery configuration for @peac/mcp-server
+# Docs: https://smithery.ai/docs/build/project-config
+# Transport: stdio (local install via npm). Streamable HTTP gateway path
+# planned for future release (server already supports --transport http).
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      issuerKey:
+        type: string
+        description: >
+          Ed25519 JWK for receipt issuance (optional; read-only tools
+          work without it). Pass as env:VAR or file:/path.
+      issuerId:
+        type: string
+        description: 'Issuer URI (e.g., https://your-service.example.com)'
+      bundleDir:
+        type: string
+        description: Directory for evidence bundle output (optional)
+      jwksFile:
+        type: string
+        description: JWKS file for verifier key resolution (optional)
+  commandFunction: |-
+    (config) => {
+      const args = ['-y', '@peac/mcp-server'];
+      if (config.issuerKey) { args.push('--issuer-key', config.issuerKey); }
+      if (config.issuerId) { args.push('--issuer-id', config.issuerId); }
+      if (config.bundleDir) { args.push('--bundle-dir', config.bundleDir); }
+      if (config.jwksFile) { args.push('--jwks-file', config.jwksFile); }
+      return { command: 'npx', args };
+    }
+  exampleConfig:
+    issuerKey: 'env:PEAC_ISSUER_KEY'
+    issuerId: 'https://your-service.example.com'

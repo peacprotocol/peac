@@ -13,7 +13,7 @@ import type {
   CarrierValidationResult,
   CarrierAdapter,
 } from '@peac/kernel';
-import { PEAC_RECEIPT_HEADER } from '@peac/kernel';
+import { PEAC_RECEIPT_HEADER, PEAC_RECEIPT_URL_HEADER } from '@peac/kernel';
 import {
   computeReceiptRef,
   validateCarrierConstraints,
@@ -78,6 +78,18 @@ function extractJwsFromHeaders(headers: X402HeaderMap): string | null {
   return value && value.length > 0 ? value : null;
 }
 
+/**
+ * Extract receipt URL from PEAC-Receipt-URL header (DD-135).
+ */
+function extractReceiptUrlFromHeaders(headers: X402HeaderMap): string | null {
+  const key = Object.keys(headers).find(
+    (k) => k.toLowerCase() === PEAC_RECEIPT_URL_HEADER.toLowerCase()
+  );
+  if (!key) return null;
+  const value = headers[key];
+  return value && value.length > 0 ? value : null;
+}
+
 // ---------------------------------------------------------------------------
 // Extract from Offer Response (HTTP 402)
 // ---------------------------------------------------------------------------
@@ -99,6 +111,12 @@ export function fromOfferResponse(
       'sha256:0000000000000000000000000000000000000000000000000000000000000000' as PeacEvidenceCarrier['receipt_ref'],
     receipt_jws: jws,
   };
+
+  // Extract receipt_url locator hint (DD-135)
+  const receiptUrl = extractReceiptUrlFromHeaders(headers);
+  if (receiptUrl) {
+    carrier.receipt_url = receiptUrl;
+  }
 
   return {
     receipts: [carrier],
@@ -126,6 +144,12 @@ export async function fromOfferResponseAsync(
     receipt_ref: ref,
     receipt_jws: jws,
   };
+
+  // Extract receipt_url locator hint (DD-135)
+  const receiptUrl = extractReceiptUrlFromHeaders(headers);
+  if (receiptUrl) {
+    carrier.receipt_url = receiptUrl;
+  }
 
   return {
     receipts: [carrier],
@@ -200,6 +224,10 @@ export class X402CarrierAdapter implements CarrierAdapter<X402ResponseLike, X402
     }
 
     output.headers[PEAC_RECEIPT_HEADER] = carrier.receipt_jws;
+
+    if (carrier.receipt_url) {
+      output.headers[PEAC_RECEIPT_URL_HEADER] = carrier.receipt_url;
+    }
 
     return output;
   }

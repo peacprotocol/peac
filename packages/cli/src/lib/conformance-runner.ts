@@ -172,10 +172,28 @@ export function runConformance(
           const f = pack.fixtures[i];
           const fixtureName = f.name ?? `fixture_${i}`;
           const testId = `${baseTestId}.${fixtureName.replace(/\s+/g, '_')}`;
-          // Use JCS for canonical input digest (returns {alg, value})
-          const inputDigest = computeCanonicalDigest(f.input);
 
           callbacks?.onTestStart?.(testId);
+
+          // Skip fixtures without standard expected format (domain-specific fixture packs
+          // like content-usage have their own test suites with expected_entries, not expected.valid)
+          if (!f.expected || typeof f.expected.valid !== 'boolean') {
+            skipped++;
+            const result: TestResult = {
+              id: testId,
+              category: profile,
+              status: 'skip',
+              diagnostics: {
+                skip_reason: 'Non-standard fixture format (domain-specific test suite)',
+              },
+            };
+            results.push(result);
+            callbacks?.onTestComplete?.(result);
+            continue;
+          }
+
+          // Use JCS for canonical input digest (returns {alg, value})
+          const inputDigest = computeCanonicalDigest(f.input);
 
           // Guard: fixture inputs must not have both "claims" and "payload".
           // Ambiguity is a test-harness concern -- precedence would silently

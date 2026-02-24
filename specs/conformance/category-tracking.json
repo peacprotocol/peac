@@ -1,6 +1,6 @@
 {
   "$comment": "Category tracking registry for conformance fixture directories. Keep arrays sorted alphabetically. Version consistency is enforced only for tracked categories.",
-  "tracked": ["agent-identity", "attribution", "interaction"],
+  "tracked": ["agent-identity", "attribution", "content-usage", "interaction"],
   "untracked": {
     "bundle": "Not yet migrated to tracked validation; fixture_count needs reconciliation",
     "carrier": "Single-carrier fixtures with per-file expected_valid/expected_violation; not fixture packs",
@@ -8,6 +8,7 @@
     "discovery": "Not yet migrated to tracked validation; needs fixture pack audit",
     "dispute": "Not yet migrated to tracked validation; fixture_count needs reconciliation",
     "edge": "Single-receipt fixtures, not fixture packs",
+    "errors": "Agent recovery hint table (DD-132, DD-133); not fixture packs",
     "invalid": "Single-receipt fixtures, not fixture packs",
     "issue": "Not yet migrated to tracked validation; needs fixture pack audit",
     "obligations": "Not yet migrated to tracked validation; duplicate fixture names need resolution",

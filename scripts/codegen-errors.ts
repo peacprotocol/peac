@@ -39,12 +39,24 @@ const VALID_HTTP_STATUSES = new Set([
 // Categories are derived from errors.json at runtime (single source of truth).
 // The codegen script validates these against the kernel types.ts union to prevent drift.
 
+// Valid next_action values (DD-132, DD-133)
+const VALID_NEXT_ACTIONS = new Set([
+  'retry_after_delay',
+  'retry_with_different_key',
+  'retry_with_different_input',
+  'refresh_attestation',
+  'contact_issuer',
+  'abort',
+  'none',
+]);
+
 interface ErrorSpec {
   code: string;
   http_status: number;
   title: string;
   description: string;
-  retriable: boolean;
+  retryable: boolean;
+  next_action: string;
   category: string;
 }
 
@@ -85,6 +97,13 @@ function main() {
     // Validate code format
     if (!/^E_[A-Z][A-Z0-9_]*$/.test(err.code)) {
       throw new Error(`Invalid error code format: ${err.code} (must match E_[A-Z][A-Z0-9_]*)`);
+    }
+
+    // Validate next_action (DD-132, DD-133)
+    if (!VALID_NEXT_ACTIONS.has(err.next_action)) {
+      throw new Error(
+        `Invalid next_action for ${err.code}: ${err.next_action} (must be one of: ${[...VALID_NEXT_ACTIONS].join(', ')})`
+      );
     }
   }
 
@@ -177,7 +196,8 @@ function main() {
       lines.push(`    http_status: ${err.http_status},`);
       lines.push(`    title: ${JSON.stringify(err.title)},`);
       lines.push(`    description: ${JSON.stringify(err.description)},`);
-      lines.push(`    retriable: ${err.retriable},`);
+      lines.push(`    retryable: ${err.retryable},`);
+      lines.push(`    next_action: ${JSON.stringify(err.next_action)},`);
       lines.push(`    category: ${JSON.stringify(err.category)},`);
       lines.push('  },');
     }
@@ -196,10 +216,10 @@ function main() {
   lines.push('');
 
   lines.push('/**');
-  lines.push(' * Check if error is retriable');
+  lines.push(' * Check if error is retryable');
   lines.push(' */');
-  lines.push('export function isRetriable(code: string): boolean {');
-  lines.push('  return ERRORS[code]?.retriable ?? false;');
+  lines.push('export function isRetryable(code: string): boolean {');
+  lines.push('  return ERRORS[code]?.retryable ?? false;');
   lines.push('}');
   lines.push('');
 

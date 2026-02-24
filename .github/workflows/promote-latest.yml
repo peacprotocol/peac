@@ -97,6 +97,21 @@ jobs:
           echo ""
           echo "No changes made (dry run)."
 
+      - name: Verify npm token health
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Checking npm token validity..."
+          WHOAMI=$(npm whoami 2>&1) || {
+            echo "ERROR: npm token is invalid or expired."
+            echo "Output: $WHOAMI"
+            echo ""
+            echo "To fix: rotate the NPM_TOKEN secret in the npm-production environment."
+            echo "See docs/RELEASING.md for token rotation instructions."
+            exit 1
+          }
+          echo "OK: Authenticated as '$WHOAMI'"
+
       - name: Promote to latest
         if: ${{ !inputs.dry_run }}
         env:

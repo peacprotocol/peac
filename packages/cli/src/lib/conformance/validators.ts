@@ -392,6 +392,90 @@ function validateIssueInput(input: unknown): ValidationResult {
 }
 
 /**
+ * Valid next_action values (DD-133 closed vocabulary)
+ */
+const VALID_NEXT_ACTIONS = new Set([
+  'retry_after_delay',
+  'retry_with_different_key',
+  'retry_with_different_input',
+  'refresh_attestation',
+  'contact_issuer',
+  'abort',
+  'none',
+]);
+
+/**
+ * Validate error hint table (DD-132, DD-133)
+ *
+ * Validates the shape of the next-action-hints.json fixture:
+ * - Must have a `hints` object
+ * - Each hint must have `next_action` from the closed vocabulary and `retryable` boolean
+ */
+function validateErrorHintsInput(input: unknown): ValidationResult {
+  if (typeof input !== 'object' || input === null) {
+    return {
+      valid: false,
+      error_code: 'E_INVALID_ERROR_HINTS',
+      error_message: 'Error hints input must be an object',
+    };
+  }
+
+  const obj = input as Record<string, unknown>;
+  if (!obj.hints || typeof obj.hints !== 'object') {
+    return {
+      valid: false,
+      error_code: 'E_MISSING_HINTS',
+      error_message: 'Error hints missing required hints object',
+    };
+  }
+
+  const hints = obj.hints as Record<string, unknown>;
+  for (const [code, hint] of Object.entries(hints)) {
+    if (typeof hint !== 'object' || hint === null) {
+      return {
+        valid: false,
+        error_code: 'E_INVALID_HINT',
+        error_message: `Hint for ${code} must be an object`,
+      };
+    }
+    const h = hint as Record<string, unknown>;
+    if (!VALID_NEXT_ACTIONS.has(h.next_action as string)) {
+      return {
+        valid: false,
+        error_code: 'E_INVALID_NEXT_ACTION',
+        error_message: `Hint for ${code} has invalid next_action: ${String(h.next_action)}`,
+      };
+    }
+    if (typeof h.retryable !== 'boolean') {
+      return {
+        valid: false,
+        error_code: 'E_INVALID_RETRYABLE',
+        error_message: `Hint for ${code} has non-boolean retryable: ${String(h.retryable)}`,
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate content-usage fixture input
+ *
+ * Content-usage fixtures are string inputs (HTTP header values).
+ * Validates that the input is a string.
+ */
+function validateContentUsageInput(input: unknown): ValidationResult {
+  if (typeof input === 'string') {
+    return { valid: true };
+  }
+  return {
+    valid: false,
+    error_code: 'E_INVALID_CONTENT_USAGE',
+    error_message: 'Content-Usage input must be a string (HTTP header value)',
+  };
+}
+
+/**
  * Category validator registry
  */
 export const CATEGORY_VALIDATORS: Record<string, CategoryValidator> = {
@@ -433,6 +517,8 @@ export const CATEGORY_VALIDATORS: Record<string, CategoryValidator> = {
   },
   workflow: validateWorkflowInput,
   x402: validateX402Input,
+  errors: validateErrorHintsInput,
+  'content-usage': validateContentUsageInput,
 };
 
 /**

@@ -52,11 +52,11 @@ FILED -> ACKNOWLEDGED -> UNDER_REVIEW -> RESOLVED
 | E_DISPUTE_INVALID_TRANSITION         | 400  | Invalid state transition                   |
 | E_DISPUTE_MISSING_RESOLUTION         | 400  | Resolution required for terminal state     |
 | E_DISPUTE_RESOLUTION_NOT_ALLOWED     | 400  | Resolution provided for non-terminal state |
-| E_DISPUTE_NOT_YET_VALID              | 401  | issued_at in future (retriable)            |
+| E_DISPUTE_NOT_YET_VALID              | 401  | issued_at in future (retryable)            |
 | E_DISPUTE_EXPIRED                    | 401  | Attestation expired                        |
 | E_DISPUTE_OTHER_REQUIRES_DESCRIPTION | 400  | 'other' type needs 50+ char description    |
 | E_DISPUTE_DUPLICATE                  | 409  | Duplicate dispute ID                       |
-| E_DISPUTE_TARGET_NOT_FOUND           | 404  | Target not found (retriable)               |
+| E_DISPUTE_TARGET_NOT_FOUND           | 404  | Target not found (retryable)               |
 
 ## ULID Format
 

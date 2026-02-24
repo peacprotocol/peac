@@ -54,9 +54,10 @@ for (const p of pkgPaths) {
 console.log(pub.sort().join('\n'));
 ")
 
-# Expected packages (updated for v0.11.1 + mappings-a2a)
+# Expected packages (updated for v0.11.2 + content-signals + openai-compatible)
 EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/adapter-core
+@peac/adapter-openai-compatible
 @peac/adapter-openclaw
 @peac/adapter-x402
 @peac/adapter-x402-daydreams
@@ -78,6 +79,7 @@ EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/mappings-a2a
 @peac/mappings-acp
 @peac/mappings-aipref
+@peac/mappings-content-signals
 @peac/mappings-mcp
 @peac/mappings-rsl
 @peac/mappings-tap
@@ -115,7 +117,7 @@ if [ -n "$DIFF" ]; then
   echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
   exit 1
 else
-  echo "OK: All 44 public packages match"
+  echo "OK: All 46 public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -124,6 +126,7 @@ echo "=== Checking test coverage ==="
 
 # Packages covered by test:core (from package.json)
 TESTED_PACKAGES="@peac/adapter-openclaw
+@peac/adapter-openai-compatible
 @peac/adapter-x402
 @peac/audit
 @peac/capture-node
@@ -135,6 +138,7 @@ TESTED_PACKAGES="@peac/adapter-openclaw
 @peac/mappings-a2a
 @peac/mappings-acp
 @peac/mappings-aipref
+@peac/mappings-content-signals
 @peac/mappings-mcp
 @peac/mappings-rsl
 @peac/mappings-tap
@@ -171,13 +175,13 @@ NO_TESTS_RATIONALE="@peac/adapter-core - shared adapter utilities, tested via ad
 @peac/sdk - re-exports only
 @peac/server - server wrapper, tested via integration"
 
-echo "Packages with tests (27):"
+echo "Packages with tests (29):"
 echo "$TESTED_PACKAGES" | sed 's/^/  /'
 echo ""
 echo "Packages without tests (17) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 44 packages accounted for (27 tested + 17 type/wrapper packages)"
+echo "OK: All 46 packages accounted for (29 tested + 17 type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="

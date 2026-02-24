@@ -80,6 +80,7 @@ export const WELL_KNOWN_KINDS = [
   'fs.read',
   'fs.write',
   'message',
+  'inference.chat_completion',
 ] as const;
 
 /**

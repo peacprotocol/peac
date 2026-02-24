@@ -1945,5 +1945,14 @@ export async function safeFetchJWKS(
   });
 }
 
+// Receipt URL resolver (DD-135, v0.11.2+)
+export { resolveReceiptUrl, verifyReceiptRef } from './receipt-resolver.js';
+export type {
+  ResolveReceiptUrlOptions,
+  ResolveReceiptUrlResult,
+  ResolveReceiptUrlSuccess,
+  ResolveReceiptUrlFailure,
+} from './receipt-resolver.js';
+
 // NOTE: Internal functions are now in impl.ts and NOT exported from main entry.
 // Access internal utilities via '@peac/net-node/testing' subpath only.

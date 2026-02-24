@@ -259,5 +259,17 @@ describe('X402CarrierAdapter', () => {
       expect(extracted).not.toBeNull();
       expect(extracted!.receipts[0].receipt_jws).toBe(carrier.receipt_jws);
     });
+
+    it('should preserve receipt_url through attach and extract (DD-135)', async () => {
+      const carrier = await makeCarrier();
+      carrier.receipt_url = 'https://receipts.example.com/abc123';
+      const response = {};
+
+      const attached = adapter.attach(response, [carrier]);
+      const extracted = adapter.extract(attached);
+
+      expect(extracted).not.toBeNull();
+      expect(extracted!.receipts[0].receipt_url).toBe('https://receipts.example.com/abc123');
+    });
   });
 });

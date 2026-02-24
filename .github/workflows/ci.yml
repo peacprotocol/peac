@@ -94,6 +94,9 @@ jobs:
       - name: Worker surface typechecks (ci:surface)
         run: bash scripts/ci/surface-validator.sh
 
+      - name: Distribution surface validation (DD-140)
+        run: bash scripts/check-distribution.sh
+
       - name: Package hygiene (drift, duplicates, private+publishConfig)
         run: bash scripts/check-publish-list.sh
 

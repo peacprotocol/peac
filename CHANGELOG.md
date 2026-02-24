@@ -7,6 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-02-25
+
+### Error Recovery Semantics + Evidence Locators + Content Signals + Distribution
+
+v0.11.2 adds agent-actionable error recovery hints, an optional receipt locator on
+evidence carriers, a new content signals observation package, an OpenAI-compatible
+inference adapter, and MCP Registry distribution surfaces.
+
+### Added
+
+- **Error recovery `next_action` hints** (DD-132, DD-133)
+  - Closed vocabulary of 7 agent-actionable recovery hints on every `ErrorDefinition`:
+    `retry_after_delay`, `retry_with_different_key`, `retry_with_different_input`,
+    `refresh_attestation`, `contact_issuer`, `abort`, `none`
+  - Hints are best-effort guidance, not protocol promises; servers may change
+    mappings between minor versions
+  - Conformance fixture: `specs/conformance/fixtures/errors/next-action-hints.json`
+  - MCP server error responses now include `retryable` and `next_action` fields
+- **`receipt_url` locator hint** (DD-135, DD-141)
+  - Optional HTTPS-only field on `PeacEvidenceCarrier` (max 2048 chars, no credentials)
+  - Schema validation in `@peac/schema` (Layer 1, validation-only per DD-141)
+  - SSRF-hardened resolver in `@peac/net-node` (Layer 4): private IP rejection,
+    timeout, redirect rejection, max response size
+  - Round-trip tests for all 5 carrier adapters (MCP, A2A, ACP, UCP, x402)
+  - Conformance fixtures: valid and invalid `receipt_url` vectors
+- **`@peac/mappings-content-signals`** (DD-136, DD-137, NEW package)
+  - Content use policy signal parsing: robots.txt (RFC 9309), Content-Usage
+    (AIPREF draft, RFC 9651 Structured Fields), tdmrep.json (EU Directive
+    2019/790 Art. 4)
+  - Observation-only model: signals record what was observed, never enforce
+    (DD-136, DD-95 rail neutrality)
+  - Source precedence: tdmrep.json > Content-Signal > Content-Usage > robots.txt
+    (DD-137)
+  - Three-state resolution: `allow`, `deny`, `unspecified` per purpose
+  - 16 conformance fixtures (8 valid + 8 edge-case Content-Usage, 4 carrier)
+- **`@peac/adapter-openai-compatible`** (DD-138, NEW package)
+  - Hash-first model: SHA-256 digests of messages and output; no raw prompt or
+    completion text in receipts
+  - Deterministic key-sorted JSON canonicalization (not RFC 8785 JCS) with
+    type-safe input constraints
+  - Self-contained types: works with any OpenAI-compatible provider without
+    importing vendor SDKs
+  - Streaming support explicitly deferred to v0.11.3
+- **Distribution surfaces** (DD-139, DD-140)
+  - MCP Registry manifest (`packages/mcp-server/server.json`) validated against
+    vendored schema in CI
+  - Smithery config (`packages/mcp-server/smithery.yaml`)
+  - `llms.txt` at repository root
+  - Plugin pack: Claude Code skill (`surfaces/plugin-pack/claude-code/peac/SKILL.md`)
+    and Cursor rules (`surfaces/plugin-pack/cursor/peac.mdc`)
+  - CI distribution gate (`scripts/check-distribution.sh`)
+  - MCP Registry publisher workflow (`.github/workflows/publish-mcp-registry.yml`)
+
+### Changed
+
+- **`retriable` renamed to `retryable`** (DD-134): clean rename across all error
+  definitions, types, codegen, and consuming code; zero live consumers
+- **Error codegen** (`scripts/codegen-errors.ts`): validates `next_action` from
+  closed vocabulary; emits both `retryable` and `next_action`
+- **Publish manifest**: 25 -> 27 packages (added `@peac/mappings-content-signals`,
+  `@peac/adapter-openai-compatible`)
+
+### Deferred
+
+- Content signals streaming/chunked parsing: deferred to v0.11.3
+- OpenAI adapter streaming (`fromChatCompletionStream`): deferred to v0.11.3
+- Reconciliation CLI: deferred to v0.11.3
+- Key rotation spec: deferred to v0.11.3
+- `receipt_url` auto-resolution in middleware: deferred to v0.12.0
+- Content signals enforcement mode: deferred to v0.12.0
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- Design decisions: DD-132 (error recovery next_action), DD-133 (next_action vocabulary),
+  DD-134 (retriable -> retryable rename), DD-135 (receipt_url locator hint),
+  DD-136 (content signals observation model), DD-137 (content signals source precedence),
+  DD-138 (inference receipt hash-first model), DD-139 (plugin pack distribution contract),
+  DD-140 (distribution surface validation), DD-141 (schema layer is validation-only)
+- `next_action` and `retryable` are error metadata fields, not wire format fields
+- `receipt_url` is a carrier metadata field, not a wire format field
+
 ## [0.11.1] - 2026-02-24
 
 ### Evidence Carrier Contract + A2A Mapping

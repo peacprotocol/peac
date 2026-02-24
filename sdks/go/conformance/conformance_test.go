@@ -148,8 +148,8 @@ func TestPEACErrorMethods(t *testing.T) {
 		t.Errorf("HTTPStatus() = %v, want 400", err.HTTPStatus())
 	}
 
-	if err.IsRetriable() {
-		t.Error("IsRetriable() should be false for ErrInvalidSignature")
+	if err.IsRetryable() {
+		t.Error("IsRetryable() should be false for ErrInvalidSignature")
 	}
 
 	err = err.WithDetail("key", "value")
@@ -158,9 +158,9 @@ func TestPEACErrorMethods(t *testing.T) {
 	}
 }
 
-// TestRetriableErrors tests which errors are retriable.
-func TestRetriableErrors(t *testing.T) {
-	retriable := []peac.ErrorCode{
+// TestRetryableErrors tests which errors are retryable.
+func TestRetryableErrors(t *testing.T) {
+	retryable := []peac.ErrorCode{
 		peac.ErrNotYetValid,
 		peac.ErrJWKSFetchFailed,
 		peac.ErrIdentityNotYetValid,
@@ -169,7 +169,7 @@ func TestRetriableErrors(t *testing.T) {
 		peac.ErrIdentityDirectoryUnavailable,
 	}
 
-	notRetriable := []peac.ErrorCode{
+	notRetryable := []peac.ErrorCode{
 		peac.ErrInvalidSignature,
 		peac.ErrInvalidFormat,
 		peac.ErrExpired,
@@ -178,17 +178,17 @@ func TestRetriableErrors(t *testing.T) {
 		peac.ErrIdentitySigInvalid,
 	}
 
-	for _, code := range retriable {
+	for _, code := range retryable {
 		err := peac.NewPEACError(code, "test")
-		if !err.IsRetriable() {
-			t.Errorf("%s should be retriable", code)
+		if !err.IsRetryable() {
+			t.Errorf("%s should be retryable", code)
 		}
 	}
 
-	for _, code := range notRetriable {
+	for _, code := range notRetryable {
 		err := peac.NewPEACError(code, "test")
-		if err.IsRetriable() {
-			t.Errorf("%s should not be retriable", code)
+		if err.IsRetryable() {
+			t.Errorf("%s should not be retryable", code)
 		}
 	}
 }

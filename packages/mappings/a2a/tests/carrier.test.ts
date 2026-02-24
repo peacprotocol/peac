@@ -21,6 +21,19 @@ describe('A2ACarrierAdapter', () => {
     expect(extracted!.receipts[0].receipt_ref).toBe(VALID_CARRIER.receipt_ref);
   });
 
+  it('round-trips receipt_url through attach and extract (DD-135)', () => {
+    const carrierWithUrl: PeacEvidenceCarrier = {
+      ...VALID_CARRIER,
+      receipt_url: 'https://receipts.example.com/abc123',
+    };
+    const status = { state: 'completed' };
+    const attached = adapter.attach(status, [carrierWithUrl]);
+
+    const extracted = adapter.extract(attached);
+    expect(extracted).not.toBeNull();
+    expect(extracted!.receipts[0].receipt_url).toBe('https://receipts.example.com/abc123');
+  });
+
   it('extract returns null when no carrier present', () => {
     expect(adapter.extract({ state: 'working' })).toBeNull();
   });

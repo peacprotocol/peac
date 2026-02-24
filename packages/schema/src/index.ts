@@ -394,6 +394,7 @@ export type {
 export {
   ReceiptRefSchema,
   CompactJwsSchema,
+  ReceiptUrlSchema,
   CarrierFormatSchema,
   PeacEvidenceCarrierSchema,
   CarrierMetaSchema,

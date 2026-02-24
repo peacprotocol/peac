@@ -1,46 +1,46 @@
 # PEAC Error Registry
 
-Normative error codes for PEAC Protocol v0.9.
+Normative error codes for PEAC Protocol v0.11.2+.
 
 ## Format
 
-| Code | Category | Severity | Retryable | HTTP | Description | Remediation |
-| ---- | -------- | -------- | --------- | ---- | ----------- | ----------- |
+| Code | Category | Severity | Retryable | Next Action | HTTP | Description | Remediation |
+| ---- | -------- | -------- | --------- | ----------- | ---- | ----------- | ----------- |
 
 ## Validation Errors (400)
 
-| Code                      | Category   | Severity | Retryable | HTTP | Description                                                                 | Remediation                                                                          |
-| ------------------------- | ---------- | -------- | --------- | ---- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `E_CONTROL_REQUIRED`      | validation | error    | false     | 400  | Control block required when payment present or enforcement.method==http-402 | Add control{} block to auth context                                                  |
-| `E_INVALID_ENVELOPE`      | validation | error    | false     | 400  | Receipt envelope structure is invalid                                       | Ensure envelope has auth, evidence, and meta blocks                                  |
-| `E_INVALID_CONTROL_CHAIN` | validation | error    | false     | 400  | Control chain is invalid or inconsistent                                    | Ensure chain is non-empty and decision matches chain results                         |
-| `E_INVALID_PAYMENT`       | validation | error    | false     | 400  | Payment evidence is malformed or incomplete                                 | Verify payment has required fields (scheme, reference, amount, currency, asset, env) |
-| `E_INVALID_POLICY_HASH`   | validation | error    | false     | 400  | Policy hash does not match policy content                                   | Recompute policy_hash as base64url(sha256(JCS(policy)))                              |
-| `E_EXPIRED_RECEIPT`       | validation | error    | false     | 401  | Receipt exp claim is in the past                                            | Use a current receipt                                                                |
+| Code                      | Category   | Severity | Retryable | Next Action                  | HTTP | Description                                                                 | Remediation                                                                          |
+| ------------------------- | ---------- | -------- | --------- | ---------------------------- | ---- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `E_CONTROL_REQUIRED`      | validation | error    | false     | `retry_with_different_input` | 400  | Control block required when payment present or enforcement.method==http-402 | Add control{} block to auth context                                                  |
+| `E_INVALID_ENVELOPE`      | validation | error    | false     | `retry_with_different_input` | 400  | Receipt envelope structure is invalid                                       | Ensure envelope has auth, evidence, and meta blocks                                  |
+| `E_INVALID_CONTROL_CHAIN` | validation | error    | false     | `retry_with_different_input` | 400  | Control chain is invalid or inconsistent                                    | Ensure chain is non-empty and decision matches chain results                         |
+| `E_INVALID_PAYMENT`       | validation | error    | false     | `retry_with_different_input` | 400  | Payment evidence is malformed or incomplete                                 | Verify payment has required fields (scheme, reference, amount, currency, asset, env) |
+| `E_INVALID_POLICY_HASH`   | validation | error    | false     | `retry_with_different_input` | 400  | Policy hash does not match policy content                                   | Recompute policy_hash as base64url(sha256(JCS(policy)))                              |
+| `E_EXPIRED_RECEIPT`       | validation | error    | false     | `retry_with_different_input` | 401  | Receipt exp claim is in the past                                            | Use a current receipt                                                                |
 
 ## Verification Errors (401)
 
-| Code                  | Category     | Severity | Retryable | HTTP | Description                                            | Remediation                                                     |
-| --------------------- | ------------ | -------- | --------- | ---- | ------------------------------------------------------ | --------------------------------------------------------------- |
-| `E_INVALID_SIGNATURE` | verification | error    | false     | 401  | JWS signature verification failed                      | Ensure receipt is signed with correct private key and alg=EdDSA |
-| `E_SSRF_BLOCKED`      | verification | error    | false     | 403  | SSRF protection blocked request to private/metadata IP | Use only public HTTPS URLs for JWKS/policy endpoints            |
-| `E_DPOP_REPLAY`       | verification | error    | false     | 403  | DPoP nonce has already been used                       | Generate a fresh DPoP proof with new nonce                      |
-| `E_DPOP_INVALID`      | verification | error    | false     | 403  | DPoP proof is invalid or malformed                     | Ensure DPoP JWT has correct claims (jkt, iat, htm, htu)         |
+| Code                  | Category     | Severity | Retryable | Next Action                  | HTTP | Description                                            | Remediation                                                     |
+| --------------------- | ------------ | -------- | --------- | ---------------------------- | ---- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| `E_INVALID_SIGNATURE` | verification | error    | false     | `abort`                      | 401  | JWS signature verification failed                      | Ensure receipt is signed with correct private key and alg=EdDSA |
+| `E_SSRF_BLOCKED`      | verification | error    | false     | `abort`                      | 403  | SSRF protection blocked request to private/metadata IP | Use only public HTTPS URLs for JWKS/policy endpoints            |
+| `E_DPOP_REPLAY`       | verification | error    | false     | `retry_with_different_input` | 403  | DPoP nonce has already been used                       | Generate a fresh DPoP proof with new nonce                      |
+| `E_DPOP_INVALID`      | verification | error    | false     | `retry_with_different_input` | 403  | DPoP proof is invalid or malformed                     | Ensure DPoP JWT has correct claims (jkt, iat, htm, htu)         |
 
 ## Control Errors (403)
 
-| Code               | Category | Severity | Retryable | HTTP | Description             | Remediation                    |
-| ------------------ | -------- | -------- | --------- | ---- | ----------------------- | ------------------------------ |
-| `E_CONTROL_DENIED` | control  | error    | false     | 403  | Control decision denied | Check control chain for reason |
+| Code               | Category | Severity | Retryable | Next Action      | HTTP | Description             | Remediation                    |
+| ------------------ | -------- | -------- | --------- | ---------------- | ---- | ----------------------- | ------------------------------ |
+| `E_CONTROL_DENIED` | control  | error    | false     | `contact_issuer` | 403  | Control decision denied | Check control chain for reason |
 
 ## Infrastructure Errors (429/502/503)
 
-| Code                    | Category       | Severity | Retryable | HTTP | Description                            | Remediation                                       |
-| ----------------------- | -------------- | -------- | --------- | ---- | -------------------------------------- | ------------------------------------------------- |
-| `E_JWKS_FETCH_FAILED`   | infrastructure | error    | true      | 502  | Failed to fetch JWKS from issuer       | Retry after delay; check JWKS URL is accessible   |
-| `E_POLICY_FETCH_FAILED` | infrastructure | error    | true      | 502  | Failed to fetch policy from policy_uri | Retry after delay; check policy URI is accessible |
-| `E_NETWORK_ERROR`       | infrastructure | error    | true      | 502  | Generic network/transport failure      | Retry after delay                                 |
-| `E_RATE_LIMITED`        | infrastructure | error    | true      | 429  | Rate limit exceeded                    | Retry after Retry-After header value              |
+| Code                    | Category       | Severity | Retryable | Next Action         | HTTP | Description                            | Remediation                                       |
+| ----------------------- | -------------- | -------- | --------- | ------------------- | ---- | -------------------------------------- | ------------------------------------------------- |
+| `E_JWKS_FETCH_FAILED`   | infrastructure | error    | true      | `retry_after_delay` | 502  | Failed to fetch JWKS from issuer       | Retry after delay; check JWKS URL is accessible   |
+| `E_POLICY_FETCH_FAILED` | infrastructure | error    | true      | `retry_after_delay` | 502  | Failed to fetch policy from policy_uri | Retry after delay; check policy URI is accessible |
+| `E_NETWORK_ERROR`       | infrastructure | error    | true      | `retry_after_delay` | 502  | Generic network/transport failure      | Retry after delay                                 |
+| `E_RATE_LIMITED`        | infrastructure | error    | true      | `retry_after_delay` | 429  | Rate limit exceeded                    | Retry after Retry-After header value              |
 
 ## HTTP Status Semantics (401 vs 403)
 
@@ -153,6 +153,7 @@ All errors MUST be returned in this JSON structure:
   "category": "validation",
   "severity": "error",
   "retryable": false,
+  "next_action": "retry_with_different_input",
   "http_status": 400,
   "pointer": "/auth/control",
   "remediation": "Add control{} block when payment{} is present",
@@ -169,6 +170,7 @@ All errors MUST be returned in this JSON structure:
 - **category** (string, required): `validation` | `verification` | `infrastructure` | `control` | `attribution` | `identity` | `dispute`
 - **severity** (string, required): `error` | `warning`
 - **retryable** (boolean, required): Whether client should retry
+- **next_action** (string, required): Agent recovery hint (see Section 3)
 - **http_status** (number, optional): Suggested HTTP status code
 - **pointer** (string, optional): RFC 6901 JSON Pointer to problematic field
 - **remediation** (string, optional): Human-readable fix guidance
@@ -250,7 +252,55 @@ errors use `E_INTERACTION_MISSING_*` codes.
 | `W_INTERACTION_KIND_UNREGISTERED` | Kind not in well-known registry             |
 | `W_INTERACTION_MISSING_TARGET`    | No tool or resource field (non-strict kind) |
 
+## Agent Recovery Hints (v0.11.2+, DD-132, DD-133)
+
+Every error definition includes a `next_action` field providing best-effort
+guidance for automated agents on how to recover from the error.
+
+### Vocabulary
+
+| Value                        | Semantics                                                         |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `retry_after_delay`          | Transient failure; retry the same request after a backoff period  |
+| `retry_with_different_key`   | Signing key not found; try an alternative key                     |
+| `retry_with_different_input` | Input validation failed; correct the request and retry            |
+| `refresh_attestation`        | Attestation expired or revoked; obtain a fresh attestation        |
+| `contact_issuer`             | Policy or control denial; contact the issuer for resolution       |
+| `abort`                      | Unrecoverable; do not retry (e.g., signature verification failed) |
+| `none`                       | No recovery hint available                                        |
+
+### Semantics and Stability
+
+These values are **best-effort guidance hints**, not normative protocol promises.
+
+- Servers MAY change the `next_action` mapping for any error code between minor
+  versions without breaking the protocol.
+- Agents SHOULD NOT build hard dependencies on specific `next_action` values for
+  specific error codes.
+- The `retryable` field remains the authoritative signal for whether a retry is
+  semantically valid. `next_action` provides additional context about _how_ to
+  retry, but `retryable: false` takes precedence.
+- The conformance fixture at `specs/conformance/fixtures/errors/next-action-hints.json`
+  documents the current mapping but is explicitly labeled as a hint table, not
+  a normative coupling.
+
+### MCP Surface
+
+In MCP tool responses, error structured content includes both fields:
+
+```json
+{
+  "_meta": { "serverVersion": "0.11.2" },
+  "ok": false,
+  "code": "E_JWKS_FETCH_FAILED",
+  "message": "Failed to fetch JWKS",
+  "retryable": true,
+  "next_action": "retry_after_delay"
+}
+```
+
 ## Version History
 
+- **v0.11.2**: Added `next_action` agent recovery hints (DD-132, DD-133); renamed `retriable` to `retryable` (DD-134)
 - **v0.10.7**: Added Interaction Evidence error codes and validation semantics
 - **v0.9.15**: Initial error registry with structured error model

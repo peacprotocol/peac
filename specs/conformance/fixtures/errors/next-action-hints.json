@@ -1,0 +1,592 @@
+{
+  "$comment": "AUTO-GENERATED hint table (DD-132, DD-133). These are best-effort guidance hints, not normative protocol promises. Servers MAY change mappings between minor versions without breaking the protocol. Agents SHOULD NOT build hard dependencies on specific next_action values for specific error codes.",
+  "version": "0.11.2",
+  "schema_version": "0.11.2",
+  "source_file": "specs/kernel/errors.json",
+  "hints": {
+    "E_INVALID_SIGNATURE": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_INVALID_FORMAT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_EXPIRED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_NOT_YET_VALID": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_INVALID_ISSUER": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INVALID_AUDIENCE": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_JWKS_FETCH_FAILED": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_KEY_NOT_FOUND": {
+      "next_action": "retry_with_different_key",
+      "retryable": false
+    },
+    "E_INVALID_AMOUNT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INVALID_CURRENCY": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INVALID_RAIL": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_MISSING_REQUIRED_CLAIM": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_RATE_LIMITED": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_CIRCUIT_BREAKER_OPEN": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_CONTROL_DENIED": {
+      "next_action": "contact_issuer",
+      "retryable": false
+    },
+    "E_CONTROL_REVIEW_REQUIRED": {
+      "next_action": "contact_issuer",
+      "retryable": true
+    },
+    "E_EVIDENCE_NOT_JSON": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INVALID_SUBJECT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INVALID_RECEIPT_ID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_MISSING_EXP": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERNAL": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_IDENTITY_MISSING": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_IDENTITY_INVALID_FORMAT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_IDENTITY_EXPIRED": {
+      "next_action": "refresh_attestation",
+      "retryable": false
+    },
+    "E_IDENTITY_NOT_YET_VALID": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_IDENTITY_SIG_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_IDENTITY_KEY_UNKNOWN": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_IDENTITY_KEY_EXPIRED": {
+      "next_action": "refresh_attestation",
+      "retryable": false
+    },
+    "E_IDENTITY_KEY_REVOKED": {
+      "next_action": "refresh_attestation",
+      "retryable": false
+    },
+    "E_IDENTITY_BINDING_MISMATCH": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_IDENTITY_BINDING_STALE": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_IDENTITY_BINDING_FUTURE": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_IDENTITY_PROOF_UNSUPPORTED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_IDENTITY_DIRECTORY_UNAVAILABLE": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_ATTRIBUTION_MISSING_SOURCES": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_INVALID_FORMAT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_INVALID_REF": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_HASH_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_UNKNOWN_USAGE": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_INVALID_WEIGHT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_CIRCULAR_CHAIN": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_CHAIN_TOO_DEEP": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_TOO_MANY_SOURCES": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_SIZE_EXCEEDED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_ATTRIBUTION_RESOLUTION_FAILED": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_ATTRIBUTION_RESOLUTION_TIMEOUT": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_ATTRIBUTION_NOT_YET_VALID": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_ATTRIBUTION_EXPIRED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_INVALID_FORMAT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_INVALID_ID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_INVALID_TYPE": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_INVALID_TARGET_TYPE": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_INVALID_GROUNDS": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_INVALID_STATE": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_INVALID_TRANSITION": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_MISSING_RESOLUTION": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_RESOLUTION_NOT_ALLOWED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_NOT_YET_VALID": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_DISPUTE_EXPIRED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_OTHER_REQUIRES_DESCRIPTION": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_DUPLICATE": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_DISPUTE_TARGET_NOT_FOUND": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_BUNDLE_INVALID_FORMAT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_MANIFEST_MISSING": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_MANIFEST_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_HASH_MISMATCH": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_SIGNATURE_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_RECEIPTS_UNORDERED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_POLICY_HASH_MISMATCH": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_KEY_MISSING": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_TIME_RANGE_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_MISSING_RECEIPTS": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_MISSING_KEYS": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_RECEIPT_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_DUPLICATE_RECEIPT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_PATH_TRAVERSAL": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_BUNDLE_SIZE_EXCEEDED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_SIGNATURE_MISSING": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_SIGNATURE_MALFORMED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_SIGNATURE_ALGORITHM_UNSUPPORTED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_SIGNATURE_B64_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_KEY_NOT_FOUND": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_UCP_KEY_ALGORITHM_MISMATCH": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_KEY_CURVE_MISMATCH": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_SIGNATURE_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_VERIFICATION_FAILED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_PROFILE_FETCH_FAILED": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_UCP_PROFILE_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_PROFILE_NO_SIGNING_KEYS": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_PAYLOAD_EMPTY": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_PAYLOAD_NOT_JSON": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_PAYLOAD_TOO_LARGE": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_ORDER_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_ORDER_MISSING_ID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_ORDER_MISSING_LINE_ITEMS": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_ORDER_MISSING_TOTALS": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_UCP_EVIDENCE_SERIALIZATION_FAILED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_WORKFLOW_CONTEXT_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_WORKFLOW_DAG_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_WORKFLOW_LIMIT_EXCEEDED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_WORKFLOW_ID_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_WORKFLOW_STEP_ID_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_WORKFLOW_PARENT_NOT_FOUND": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_WORKFLOW_SUMMARY_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_WORKFLOW_CYCLE_DETECTED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_INVALID_FORMAT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_MISSING_ID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_MISSING_KIND": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_INVALID_KIND_FORMAT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_KIND_RESERVED": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_MISSING_STARTED_AT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_MISSING_EXECUTOR": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_INVALID_DIGEST": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_INVALID_DIGEST_ALG": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_INVALID_TIMING": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_MISSING_RESULT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_MISSING_ERROR_DETAIL": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_MISSING_TARGET": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_INTERACTION_INVALID_EXTENSION_KEY": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_VERIFY_ISSUER_CONFIG_MISSING": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_VERIFY_ISSUER_CONFIG_INVALID": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_ISSUER_MISMATCH": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_JWKS_URI_INVALID": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_INSECURE_SCHEME_BLOCKED": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_JWKS_INVALID": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_RECEIPT_TOO_LARGE": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_MALFORMED_RECEIPT": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_ISSUER_NOT_ALLOWED": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_KEY_FETCH_BLOCKED": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_KEY_FETCH_FAILED": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_VERIFY_KEY_FETCH_TIMEOUT": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_VERIFY_POINTER_FETCH_BLOCKED": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_POINTER_FETCH_FAILED": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_VERIFY_POINTER_FETCH_TIMEOUT": {
+      "next_action": "retry_after_delay",
+      "retryable": true
+    },
+    "E_VERIFY_POINTER_FETCH_TOO_LARGE": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_POINTER_DIGEST_MISMATCH": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_JWKS_TOO_LARGE": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_JWKS_TOO_MANY_KEYS": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_SCHEMA_INVALID": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_POLICY_VIOLATION": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_INVALID_TRANSPORT": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_VERIFY_EXTENSION_TOO_LARGE": {
+      "next_action": "abort",
+      "retryable": false
+    },
+    "E_PARSE_INVALID_INPUT": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_PARSE_COMMERCE_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_PARSE_ATTESTATION_INVALID": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    },
+    "E_CONSTRAINT_VIOLATION": {
+      "next_action": "retry_with_different_input",
+      "retryable": false
+    }
+  }
+}

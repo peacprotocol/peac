@@ -250,6 +250,62 @@ if (result.structured.ok) {
 
 This package pins `@modelcontextprotocol/sdk` at `~1.27.0` (>= 1.26.0 required for CVE-2026-25536 fix). The SDK peer dependency accepts Zod `^3.25 || ^4.0`; the workspace uses Zod 4. If upgrading the SDK, verify tool registration still works by running `pnpm --filter @peac/mcp-server test`. See `package.json` for actual pinned versions.
 
+## How to Verify a Receipt
+
+1. Add the MCP server to your agent (see Quick Start above).
+2. Provide the receipt JWS and a public key (base64url-encoded Ed25519).
+3. Call `peac_verify` and check the `ok` field in the response.
+
+```text
+> "Verify this receipt: eyJhbGci... with public key MCowBQYDK2..."
+```
+
+The tool returns structured content with `ok: true/false`, claim details, and the verification report.
+
+## How to Issue a Receipt
+
+Issuance requires an Ed25519 signing key. Start the server with `--issuer-key` and `--issuer-id`:
+
+```bash
+npx -y @peac/mcp-server --issuer-key env:PEAC_KEY --issuer-id https://your-service.example.com
+```
+
+Then call `peac_issue` with the receipt claims (amount, currency, rail, reference, audience).
+
+## Use with Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "peac": {
+      "command": "npx",
+      "args": ["-y", "@peac/mcp-server"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop. The PEAC tools appear in the tool picker.
+
+## Use with Cursor
+
+Add to `.cursor/mcp.json` at your project root:
+
+```json
+{
+  "mcpServers": {
+    "peac": {
+      "command": "npx",
+      "args": ["-y", "@peac/mcp-server"]
+    }
+  }
+}
+```
+
+Restart Cursor. PEAC tools are available in chat.
+
 ## Architecture
 
 - **DD-51**: Pure handlers with no MCP SDK dependency
