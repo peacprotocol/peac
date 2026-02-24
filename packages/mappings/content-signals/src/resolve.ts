@@ -33,7 +33,7 @@ export function resolveSignals(entries: ContentSignalEntry[]): ContentSignalEntr
 
   const resolved: ContentSignalEntry[] = [];
 
-  for (const [purpose, purposeEntries] of byPurpose) {
+  for (const purposeEntries of byPurpose.values()) {
     // Sort by source precedence (lower index = higher priority)
     const sorted = [...purposeEntries].sort((a, b) => {
       const aIdx = SOURCE_PRECEDENCE.indexOf(a.source);
