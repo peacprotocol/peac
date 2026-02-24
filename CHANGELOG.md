@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.2] - 2026-02-25
 
-### Error Recovery Semantics + Evidence Locators + Content Signals + Distribution
+### Content Signals + Evidence Locators
 
 v0.11.2 adds agent-actionable error recovery hints, an optional receipt locator on
 evidence carriers, a new content signals observation package, an OpenAI-compatible
