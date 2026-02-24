@@ -159,6 +159,7 @@ describe('Constants', () => {
         'fs.read',
         'fs.write',
         'message',
+        'inference.chat_completion',
       ]);
     });
   });
