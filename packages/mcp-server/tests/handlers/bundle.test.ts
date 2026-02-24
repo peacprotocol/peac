@@ -21,7 +21,7 @@ async function makeIssuerContext(bundleDirPath: string) {
   const { privateKey, publicKey } = await generateKeypair();
   const kid = 'test-kid-' + Date.now();
   return {
-    version: '0.10.12',
+    version: '0.11.2',
     policyHash: 'testhash',
     protocolVersion: '2025-11-25',
     issuerKey: { privateKey, publicKey, kid },
@@ -229,7 +229,7 @@ describe('handlers/bundle', () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = 'test-kid-' + Date.now();
     const context = {
-      version: '0.10.12',
+      version: '0.11.2',
       policyHash: 'testhash',
       protocolVersion: '2025-11-25',
       issuerKey: { privateKey, publicKey, kid },
@@ -250,7 +250,7 @@ describe('handlers/bundle', () => {
 
   it('no issuerKey returns E_MCP_KEY_REQUIRED', async () => {
     const context = {
-      version: '0.10.12',
+      version: '0.11.2',
       policyHash: 'testhash',
       protocolVersion: '2025-11-25',
       issuerId: 'https://api.example.com',

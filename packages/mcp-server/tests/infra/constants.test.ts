@@ -14,7 +14,7 @@ describe('infra/constants', () => {
   });
 
   it('exports version matching package.json', () => {
-    expect(SERVER_VERSION).toBe('0.10.12');
+    expect(SERVER_VERSION).toBe('0.11.2');
   });
 
   it('exports MCP protocol version', () => {
