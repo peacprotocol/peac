@@ -3,12 +3,12 @@
 ## Hello Receipt - 10-Line Example
 
 ```javascript
-import { generateEdDSAKeyPair, signDetached, verifyDetached } from '@peac/core';
+import { generateKeypair, sign, verify } from '@peac/crypto';
 
 // 1. Generate Ed25519 key pair
-const { publicKey, privateKey } = await generateEdDSAKeyPair();
+const { publicKey, privateKey } = await generateKeypair();
 
-// 2. Create a simple receipt
+// 2. Create a simple receipt payload
 const receipt = {
   iss: 'https://peac-authority.example.com',
   sub: 'https://example.com/content',
@@ -20,8 +20,8 @@ const receipt = {
 };
 
 // 3. Sign and verify
-const jws = await signDetached(receipt, privateKey);
-const result = await verifyDetached(jws, publicKey);
+const jws = await sign(receipt, privateKey);
+const result = await verify(jws, publicKey);
 console.log('Receipt valid:', result.valid);
 ```
 
@@ -98,8 +98,8 @@ peac verify receipt.jws --resource https://example.com
 ## Installation
 
 ```bash
-# Install CLI tools
-pnpm add -g @peac/cli @peac/core
+# Install core packages
+pnpm add @peac/crypto @peac/protocol
 
 # Or for development
 git clone https://github.com/peacprotocol/peac.git
@@ -121,6 +121,6 @@ The verifier includes SSRF protection by default:
 ## Next Steps
 
 - Read [Policy Hash Algorithm](policy-hash.md) for canonicalization details
-- See [Error Handling](errors.md) for RFC 7807 Problem Details
+- See [Error Handling](errors.md) for RFC 9457 Problem Details
 - Review [Receipt Claims](receipts.md) for complete schema
 - Check [Examples](examples.md) for production deployment patterns
