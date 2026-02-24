@@ -1,6 +1,6 @@
 {
   "name": "@peac/worker-akamai",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "private": true,
   "description": "PEAC receipt verification worker for Akamai EdgeWorkers",
   "type": "module",
