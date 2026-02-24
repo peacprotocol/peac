@@ -52,7 +52,7 @@ export function createAttributionError(
     code,
     category: (errorDef?.category ?? 'validation') as ErrorCategory,
     severity: 'error' as ErrorSeverity,
-    retryable: errorDef?.retriable ?? false,
+    retryable: errorDef?.retryable ?? false,
     http_status: errorDef?.http_status ?? 400,
     remediation,
     details,

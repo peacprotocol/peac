@@ -12,6 +12,6 @@ export {
   BUNDLE_ERRORS,
   DISPUTE_ERRORS,
   getError,
-  isRetriable,
+  isRetryable,
   type ErrorCode,
 } from './errors.generated.js';

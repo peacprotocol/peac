@@ -312,7 +312,7 @@ if err != nil {
     if peacErr, ok := err.(*peac.PEACError); ok {
         fmt.Printf("Error Code: %s\n", peacErr.Code)
         fmt.Printf("HTTP Status: %d\n", peacErr.HTTPStatus())
-        fmt.Printf("Retriable: %v\n", peacErr.IsRetriable())
+        fmt.Printf("Retryable: %v\n", peacErr.IsRetryable())
     }
 }
 ```

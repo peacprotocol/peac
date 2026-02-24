@@ -13,6 +13,7 @@ export type {
   JsonArray,
   JsonObject,
   // Registry types
+  NextAction,
   ErrorDefinition,
   ErrorCategory,
   PaymentRailEntry,
@@ -58,7 +59,7 @@ export {
   BUNDLE_ERRORS,
   DISPUTE_ERRORS,
   getError,
-  isRetriable,
+  isRetryable,
   type ErrorCode,
 } from './errors.js';
 
@@ -79,7 +80,7 @@ export {
 export { VARY_HEADERS, applyPurposeVary, getPeacVaryHeaders, needsPurposeVary } from './http.js';
 
 // Evidence Carrier Contract types (v0.11.1+ DD-124)
-export { PEAC_RECEIPT_HEADER } from './carrier.js';
+export { PEAC_RECEIPT_HEADER, PEAC_RECEIPT_URL_HEADER } from './carrier.js';
 export type {
   ReceiptRef,
   CarrierFormat,

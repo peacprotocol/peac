@@ -620,7 +620,7 @@
         "runtime_valid": false,
         "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
         "note": "Runtime validation may verify target_ref exists; schema cannot",
-        "retriable": true
+        "retryable": true
       }
     },
     {
@@ -650,7 +650,7 @@
         "runtime_valid": false,
         "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
         "note": "Attribution URL returns 404, dispute cannot proceed",
-        "retriable": true
+        "retryable": true
       }
     },
     {
@@ -680,7 +680,7 @@
         "runtime_valid": false,
         "error_code": "E_DISPUTE_TARGET_NOT_FOUND",
         "note": "DID resolution fails, dispute target not found",
-        "retriable": true
+        "retryable": true
       }
     }
   ],

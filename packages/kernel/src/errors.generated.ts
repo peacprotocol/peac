@@ -3,7 +3,7 @@
  *
  * AUTO-GENERATED from specs/kernel/errors.json
  * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts
- * Spec version: 0.11.0
+ * Spec version: 0.11.2
  */
 
 import type { ErrorDefinition } from './types.js';
@@ -198,7 +198,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Chain Too Deep',
     description: 'Attribution chain exceeds maximum allowed depth (8)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_CIRCULAR_CHAIN: {
@@ -206,7 +207,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Circular Chain',
     description: 'Circular reference detected in attribution chain',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_EXPIRED: {
@@ -214,7 +216,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Attribution Expired',
     description: 'Attribution attestation has exceeded its expiration time',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_HASH_INVALID: {
@@ -222,7 +225,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Hash Invalid',
     description: 'Content hash structure is invalid (wrong algorithm, encoding, or value length)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_INVALID_FORMAT: {
@@ -230,7 +234,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Invalid Format',
     description: 'Attribution attestation does not conform to schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_INVALID_REF: {
@@ -238,7 +243,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Invalid Reference',
     description: 'Receipt reference format is invalid (must be jti:{id}, URL, or URN)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_INVALID_WEIGHT: {
@@ -246,7 +252,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Invalid Weight',
     description: 'Attribution weight is out of valid range (must be 0.0-1.0)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_MISSING_SOURCES: {
@@ -254,7 +261,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Missing Sources',
     description: 'Attribution attestation has empty sources array',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_NOT_YET_VALID: {
@@ -262,7 +270,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Attribution Not Yet Valid',
     description: 'Attribution attestation issued_at time is in the future',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'attribution',
   },
   E_ATTRIBUTION_RESOLUTION_FAILED: {
@@ -270,7 +279,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'Attribution Resolution Failed',
     description: 'Failed to resolve receipt reference in attribution chain',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'attribution',
   },
   E_ATTRIBUTION_RESOLUTION_TIMEOUT: {
@@ -278,7 +288,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 504,
     title: 'Attribution Resolution Timeout',
     description: 'Timeout while resolving receipt reference in attribution chain',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'attribution',
   },
   E_ATTRIBUTION_SIZE_EXCEEDED: {
@@ -286,7 +297,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Size Exceeded',
     description: 'Attribution attestation exceeds maximum size (64KB)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_TOO_MANY_SOURCES: {
@@ -294,7 +306,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Too Many Sources',
     description: 'Attribution has too many sources (maximum 100)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
   E_ATTRIBUTION_UNKNOWN_USAGE: {
@@ -302,7 +315,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attribution Unknown Usage',
     description: 'Attribution usage type is not recognized',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'attribution',
   },
 
@@ -312,7 +326,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Duplicate Receipt',
     description: 'Bundle contains multiple receipts with the same ID',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_HASH_MISMATCH: {
@@ -320,7 +335,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Hash Mismatch',
     description: 'File hash does not match value declared in manifest.json',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_INVALID_FORMAT: {
@@ -328,7 +344,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Invalid Format',
     description: 'Bundle archive structure is invalid (not a valid ZIP or missing required files)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_KEY_MISSING: {
@@ -336,7 +353,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Key Missing',
     description: 'Required signing key not found in bundle (offline verification mode)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_MANIFEST_INVALID: {
@@ -344,7 +362,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Manifest Invalid',
     description: 'manifest.json does not conform to schema or contains invalid values',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_MANIFEST_MISSING: {
@@ -352,7 +371,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Manifest Missing',
     description: 'manifest.json not found at bundle archive root',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_MISSING_KEYS: {
@@ -360,7 +380,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Missing Keys',
     description: 'No verification keys provided in bundle JWKS',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_MISSING_RECEIPTS: {
@@ -368,7 +389,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Missing Receipts',
     description: 'No receipts provided when creating bundle',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_PATH_TRAVERSAL: {
@@ -376,7 +398,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Path Traversal',
     description: 'Bundle contains path traversal attack (zip-slip vulnerability)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_POLICY_HASH_MISMATCH: {
@@ -384,7 +407,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Policy Hash Mismatch',
     description: 'Policy snapshot hash does not match policy used to evaluate receipts',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_RECEIPTS_UNORDERED: {
@@ -393,7 +417,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Bundle Receipts Unordered',
     description:
       'receipts.ndjson is not in deterministic order (issued_at, receipt_id, receipt_hash)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_RECEIPT_INVALID: {
@@ -401,7 +426,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Receipt Invalid',
     description: 'Receipt JWS in bundle is malformed or missing required claims',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_SIGNATURE_INVALID: {
@@ -409,7 +435,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Signature Invalid',
     description: 'bundle.sig JWS verification failed over manifest hash',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_SIZE_EXCEEDED: {
@@ -417,7 +444,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Size Exceeded',
     description: 'Bundle exceeds size limits (entry count, entry size, or total size)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
   E_BUNDLE_TIME_RANGE_INVALID: {
@@ -425,7 +453,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Bundle Time Range Invalid',
     description: 'Receipt issued_at is outside the bundle declared time_range',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'bundle',
   },
 
@@ -435,7 +464,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 403,
     title: 'Control Decision Denied',
     description: 'Control engine denied authorization',
-    retriable: false,
+    retryable: false,
+    next_action: 'contact_issuer',
     category: 'control',
   },
   E_CONTROL_REVIEW_REQUIRED: {
@@ -443,7 +473,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 202,
     title: 'Review Required',
     description: 'Control engine requires manual review',
-    retriable: true,
+    retryable: true,
+    next_action: 'contact_issuer',
     category: 'control',
   },
 
@@ -453,7 +484,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 409,
     title: 'Dispute Duplicate',
     description: 'A dispute with this ID already exists',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_EXPIRED: {
@@ -461,7 +493,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Dispute Expired',
     description: 'Dispute attestation has exceeded its expiration time',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_INVALID_FORMAT: {
@@ -469,7 +502,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Invalid Format',
     description: 'Dispute attestation does not conform to schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_INVALID_GROUNDS: {
@@ -477,7 +511,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Invalid Grounds',
     description: 'Dispute grounds code is not recognized',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_INVALID_ID: {
@@ -485,7 +520,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Invalid ID',
     description: 'Dispute ID is not a valid ULID format (26 uppercase alphanumeric characters)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_INVALID_STATE: {
@@ -493,7 +529,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Invalid State',
     description: 'Dispute state is not recognized',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_INVALID_TARGET_TYPE: {
@@ -502,7 +539,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Dispute Invalid Target Type',
     description:
       'Dispute target type is not recognized (must be receipt, attribution, identity, or policy)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_INVALID_TRANSITION: {
@@ -510,7 +548,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Invalid Transition',
     description: 'Invalid state transition for dispute lifecycle',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_INVALID_TYPE: {
@@ -518,7 +557,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Invalid Type',
     description: 'Dispute type is not recognized',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_MISSING_RESOLUTION: {
@@ -526,7 +566,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Missing Resolution',
     description: 'Resolution is required for terminal states (resolved, rejected, final)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_NOT_YET_VALID: {
@@ -534,7 +575,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Dispute Not Yet Valid',
     description: 'Dispute attestation issued_at time is in the future',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'dispute',
   },
   E_DISPUTE_OTHER_REQUIRES_DESCRIPTION: {
@@ -542,7 +584,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Other Requires Description',
     description: "Dispute type 'other' requires description of at least 50 characters",
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_RESOLUTION_NOT_ALLOWED: {
@@ -550,7 +593,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Dispute Resolution Not Allowed',
     description: 'Resolution is only valid for terminal states',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'dispute',
   },
   E_DISPUTE_TARGET_NOT_FOUND: {
@@ -558,7 +602,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 404,
     title: 'Dispute Target Not Found',
     description: 'The target receipt, attribution, or identity being disputed was not found',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'dispute',
   },
 
@@ -568,7 +613,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Identity Binding Future',
     description: 'Identity binding signed_at timestamp is in the future',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'identity',
   },
   E_IDENTITY_BINDING_MISMATCH: {
@@ -576,7 +622,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Identity Binding Mismatch',
     description: 'Identity binding does not match the request being verified',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'identity',
   },
   E_IDENTITY_BINDING_STALE: {
@@ -584,7 +631,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Identity Binding Stale',
     description: 'Identity binding is too old and requires fresh binding',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'identity',
   },
   E_IDENTITY_DIRECTORY_UNAVAILABLE: {
@@ -592,7 +640,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 503,
     title: 'Identity Directory Unavailable',
     description: 'Failed to fetch agent key directory',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'identity',
   },
   E_IDENTITY_EXPIRED: {
@@ -600,7 +649,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Identity Expired',
     description: 'Agent identity attestation has exceeded its expiration time',
-    retriable: false,
+    retryable: false,
+    next_action: 'refresh_attestation',
     category: 'identity',
   },
   E_IDENTITY_INVALID_FORMAT: {
@@ -608,7 +658,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Identity Invalid Format',
     description: 'Agent identity attestation does not conform to schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'identity',
   },
   E_IDENTITY_KEY_EXPIRED: {
@@ -616,7 +667,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Identity Key Expired',
     description: 'Agent signing key has expired per directory metadata',
-    retriable: false,
+    retryable: false,
+    next_action: 'refresh_attestation',
     category: 'identity',
   },
   E_IDENTITY_KEY_REVOKED: {
@@ -624,7 +676,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Identity Key Revoked',
     description: 'Agent signing key has been explicitly revoked',
-    retriable: false,
+    retryable: false,
+    next_action: 'refresh_attestation',
     category: 'identity',
   },
   E_IDENTITY_KEY_UNKNOWN: {
@@ -632,7 +685,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Identity Key Unknown',
     description: 'Key ID not found in agent key directory',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'identity',
   },
   E_IDENTITY_MISSING: {
@@ -640,7 +694,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Identity Missing',
     description: 'No agent identity attestation provided in request',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'identity',
   },
   E_IDENTITY_NOT_YET_VALID: {
@@ -648,7 +703,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Identity Not Yet Valid',
     description: 'Agent identity attestation issued_at time is in the future',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'identity',
   },
   E_IDENTITY_PROOF_UNSUPPORTED: {
@@ -656,7 +712,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Identity Proof Unsupported',
     description: 'Agent identity proof method is not supported',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'identity',
   },
   E_IDENTITY_SIG_INVALID: {
@@ -664,7 +721,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'Identity Signature Invalid',
     description: 'Agent identity proof signature verification failed',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'identity',
   },
 
@@ -674,7 +732,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 503,
     title: 'Circuit Breaker Open',
     description: 'Service temporarily unavailable due to circuit breaker',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'infrastructure',
   },
   E_INTERNAL: {
@@ -682,7 +741,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 500,
     title: 'Internal Error',
     description: 'An unexpected internal error occurred during verification',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'infrastructure',
   },
   E_JWKS_FETCH_FAILED: {
@@ -690,7 +750,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 503,
     title: 'JWKS Fetch Failed',
     description: 'Failed to fetch public keys from JWKS endpoint',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'infrastructure',
   },
   E_RATE_LIMITED: {
@@ -698,7 +759,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 429,
     title: 'Rate Limited',
     description: 'Too many requests, please retry later',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'infrastructure',
   },
 
@@ -708,7 +770,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Invalid Digest',
     description: 'Digest structure is invalid (wrong value format or missing bytes)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_INVALID_DIGEST_ALG: {
@@ -717,7 +780,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Interaction Invalid Digest Algorithm',
     description:
       'Digest algorithm is not in the canonical set (sha-256, sha-256:trunc-64k, sha-256:trunc-1m)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_INVALID_EXTENSION_KEY: {
@@ -725,7 +789,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Invalid Extension Key',
     description: 'Extension key does not match required format (reverse-DNS/name[@version])',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_INVALID_FORMAT: {
@@ -733,7 +798,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Invalid Format',
     description: 'Interaction evidence does not conform to InteractionEvidenceV01 schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_INVALID_KIND_FORMAT: {
@@ -742,7 +808,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Interaction Invalid Kind Format',
     description:
       'Interaction kind does not match required format (lowercase, 2-128 chars, starts with letter)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_INVALID_TIMING: {
@@ -751,7 +818,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Interaction Invalid Timing',
     description:
       'Timing constraint violated (completed_at < started_at or invalid datetime format)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_KIND_RESERVED: {
@@ -760,7 +828,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Interaction Kind Reserved',
     description:
       'Interaction kind uses reserved prefix (peac.*, org.peacprotocol.*) but is not in the well-known registry',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_MISSING_ERROR_DETAIL: {
@@ -768,7 +837,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Missing Error Detail',
     description: 'error_code or extensions required when result.status is error',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_MISSING_EXECUTOR: {
@@ -776,7 +846,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Missing Executor',
     description: 'Interaction evidence is missing required executor or executor.platform field',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_MISSING_ID: {
@@ -784,7 +855,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Missing ID',
     description: 'Interaction evidence is missing required interaction_id field',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_MISSING_KIND: {
@@ -792,7 +864,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Missing Kind',
     description: 'Interaction evidence is missing required kind field',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_MISSING_RESULT: {
@@ -800,7 +873,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Missing Result',
     description: 'result.status is required when output is present',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_MISSING_STARTED_AT: {
@@ -808,7 +882,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Interaction Missing Started At',
     description: 'Interaction evidence is missing required started_at field',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
   E_INTERACTION_MISSING_TARGET: {
@@ -817,7 +892,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Interaction Missing Target',
     description:
       'Kind prefix requires matching target field (tool.* needs tool, http.*/fs.* need resource)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'interaction',
   },
 
@@ -827,7 +903,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 500,
     title: 'UCP Evidence Serialization Failed',
     description: 'Failed to serialize UCP evidence to YAML format',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_KEY_ALGORITHM_MISMATCH: {
@@ -835,7 +912,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'UCP Key Algorithm Mismatch',
     description: 'Key type is not EC as required for ECDSA signatures',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_KEY_CURVE_MISMATCH: {
@@ -844,7 +922,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'UCP Key Curve Mismatch',
     description:
       'Key curve does not match signature algorithm (ES256=P-256, ES384=P-384, ES512=P-521)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_KEY_NOT_FOUND: {
@@ -852,7 +931,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'UCP Key Not Found',
     description: 'Key ID from signature not found in business UCP profile',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'ucp',
   },
   E_UCP_ORDER_INVALID: {
@@ -860,7 +940,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Order Invalid',
     description: 'UCP order object does not conform to expected schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_ORDER_MISSING_ID: {
@@ -868,7 +949,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Order Missing ID',
     description: 'UCP order is missing required id field',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_ORDER_MISSING_LINE_ITEMS: {
@@ -876,7 +958,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Order Missing Line Items',
     description: 'UCP order is missing required line_items array',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_ORDER_MISSING_TOTALS: {
@@ -884,7 +967,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Order Missing Totals',
     description: 'UCP order is missing required totals array or total entry',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_PAYLOAD_EMPTY: {
@@ -892,7 +976,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Payload Empty',
     description: 'Webhook request body is empty',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_PAYLOAD_NOT_JSON: {
@@ -900,7 +985,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Payload Not JSON',
     description: 'Webhook request body is not valid JSON',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_PAYLOAD_TOO_LARGE: {
@@ -908,7 +994,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Payload Too Large',
     description: 'Webhook request body exceeds maximum allowed size',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_PROFILE_FETCH_FAILED: {
@@ -916,7 +1003,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'UCP Profile Fetch Failed',
     description: 'Failed to fetch business UCP profile from /.well-known/ucp',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'ucp',
   },
   E_UCP_PROFILE_INVALID: {
@@ -924,7 +1012,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'UCP Profile Invalid',
     description: 'Business UCP profile does not conform to expected schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_PROFILE_NO_SIGNING_KEYS: {
@@ -932,7 +1021,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'UCP Profile No Signing Keys',
     description: 'Business UCP profile has empty or missing signing_keys array',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_SIGNATURE_ALGORITHM_UNSUPPORTED: {
@@ -940,7 +1030,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Signature Algorithm Unsupported',
     description: 'Signature algorithm is not ES256, ES384, or ES512',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_SIGNATURE_B64_INVALID: {
@@ -948,7 +1039,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Signature b64 Invalid',
     description: "b64=false requires 'b64' in 'crit' array per RFC 7797",
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_SIGNATURE_INVALID: {
@@ -956,7 +1048,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'UCP Signature Invalid',
     description: 'Webhook signature verification failed against payload',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_SIGNATURE_MALFORMED: {
@@ -964,7 +1057,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Signature Malformed',
     description: 'Request-Signature header is not a valid detached JWS (RFC 7797)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_SIGNATURE_MISSING: {
@@ -972,7 +1066,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'UCP Signature Missing',
     description: 'Request-Signature header is missing from UCP webhook request',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
   E_UCP_VERIFICATION_FAILED: {
@@ -980,7 +1075,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 401,
     title: 'UCP Verification Failed',
     description: 'All verification attempts failed (raw and JCS canonicalized)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'ucp',
   },
 
@@ -991,7 +1087,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Kernel Constraint Violation',
     description:
       'Receipt claims exceed a kernel constraint (max keys, max depth, max string length, max evidence bytes, or similar structural limit)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_EVIDENCE_NOT_JSON: {
@@ -1000,7 +1097,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Evidence Not JSON-Safe',
     description:
       'Evidence contains non-JSON-safe values (NaN, Infinity, undefined, BigInt, Date, Map, Set, functions, symbols, class instances, or cycles)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_EXPIRED: {
@@ -1008,7 +1106,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Receipt Expired',
     description: 'Receipt has exceeded its expiration time',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_INVALID_AMOUNT: {
@@ -1016,7 +1115,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Amount',
     description: 'Payment amount is invalid or out of allowed range',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_INVALID_AUDIENCE: {
@@ -1024,7 +1124,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Audience',
     description: 'Receipt audience claim does not match expected value',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_INVALID_CURRENCY: {
@@ -1032,7 +1133,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Currency',
     description: 'Currency code is not a valid ISO 4217 code',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_INVALID_FORMAT: {
@@ -1040,7 +1142,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Format',
     description: 'Receipt does not conform to JWS format',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_INVALID_ISSUER: {
@@ -1048,7 +1151,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Issuer',
     description: 'Receipt issuer claim is invalid or untrusted',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_INVALID_RAIL: {
@@ -1056,7 +1160,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Payment Rail',
     description: 'Payment rail identifier is not recognized',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_INVALID_RECEIPT_ID: {
@@ -1064,7 +1169,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Receipt ID',
     description: 'Receipt ID (rid) does not match expected value',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_INVALID_SUBJECT: {
@@ -1072,7 +1178,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Subject',
     description: 'Receipt subject claim does not match expected value',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_MISSING_EXP: {
@@ -1080,7 +1187,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Missing Expiration',
     description: 'Receipt is missing required exp claim',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_MISSING_REQUIRED_CLAIM: {
@@ -1088,7 +1196,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Missing Required Claim',
     description: 'Receipt is missing a required JWT claim',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_NOT_YET_VALID: {
@@ -1096,7 +1205,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Not Yet Valid',
     description: 'Receipt nbf (not before) time is in the future',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'validation',
   },
   E_PARSE_ATTESTATION_INVALID: {
@@ -1104,7 +1214,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Attestation Receipt Invalid',
     description: 'Receipt classified as attestation but fails attestation schema validation',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_PARSE_COMMERCE_INVALID: {
@@ -1113,7 +1224,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Commerce Receipt Invalid',
     description:
       'Receipt has commerce fields (amt/cur/payment) but fails commerce schema validation',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
   E_PARSE_INVALID_INPUT: {
@@ -1121,7 +1233,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Parse Invalid Input',
     description: 'Input to receipt parser is not a non-null object',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'validation',
   },
 
@@ -1131,7 +1244,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Signature',
     description: 'Receipt signature verification failed',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verification',
   },
   E_KEY_NOT_FOUND: {
@@ -1139,7 +1253,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Key Not Found',
     description: 'Public key with specified kid not found in JWKS',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_key',
     category: 'verification',
   },
 
@@ -1149,7 +1264,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Extension Too Large',
     description: 'Receipt extension data exceeds maximum size limit (64 KB)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_INSECURE_SCHEME_BLOCKED: {
@@ -1157,7 +1273,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 403,
     title: 'Insecure Scheme Blocked',
     description: 'Non-HTTPS URL encountered during issuer discovery (issuer URL or jwks_uri)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_INVALID_TRANSPORT: {
@@ -1166,7 +1283,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Invalid Transport',
     description:
       'Multiple PEAC-Receipt or PEAC-Receipt-Pointer headers detected (ambiguous transport)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_ISSUER_CONFIG_INVALID: {
@@ -1174,7 +1292,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'Issuer Config Invalid',
     description: 'peac-issuer.json is not valid JSON or does not conform to issuer config schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_ISSUER_CONFIG_MISSING: {
@@ -1182,7 +1301,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'Issuer Config Missing',
     description: 'peac-issuer.json not found or not fetchable at issuer origin',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'verifier',
   },
   E_VERIFY_ISSUER_MISMATCH: {
@@ -1190,7 +1310,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 403,
     title: 'Issuer Mismatch',
     description: 'issuer field in peac-issuer.json does not match the expected issuer origin',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_ISSUER_NOT_ALLOWED: {
@@ -1198,7 +1319,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 403,
     title: 'Issuer Not Allowed',
     description: 'Receipt issuer is not in the verifier policy allowlist',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_JWKS_INVALID: {
@@ -1206,7 +1328,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'JWKS Invalid',
     description: 'JWKS response is not valid JSON or missing required keys array',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_JWKS_TOO_LARGE: {
@@ -1214,7 +1337,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'JWKS Too Large',
     description: 'JWKS response exceeds maximum size limit (64 KB)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_JWKS_TOO_MANY_KEYS: {
@@ -1222,7 +1346,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'JWKS Too Many Keys',
     description: 'JWKS contains more than maximum allowed keys (20)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_JWKS_URI_INVALID: {
@@ -1230,7 +1355,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'JWKS URI Invalid',
     description: 'jwks_uri in peac-issuer.json is not a valid HTTPS URL',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_KEY_FETCH_BLOCKED: {
@@ -1239,7 +1365,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Key Fetch Blocked',
     description:
       'JWKS discovery blocked by SSRF protection (private IP, non-HTTPS, or blocked redirect)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_KEY_FETCH_FAILED: {
@@ -1247,7 +1374,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'Key Fetch Failed',
     description: 'Network error while fetching JWKS from issuer',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'verifier',
   },
   E_VERIFY_KEY_FETCH_TIMEOUT: {
@@ -1255,7 +1383,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 504,
     title: 'Key Fetch Timeout',
     description: 'JWKS discovery timed out (5 second limit)',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'verifier',
   },
   E_VERIFY_MALFORMED_RECEIPT: {
@@ -1263,7 +1392,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Malformed Receipt',
     description: 'Cannot parse receipt as JWS Compact Serialization',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_POINTER_DIGEST_MISMATCH: {
@@ -1271,7 +1401,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Pointer Digest Mismatch',
     description: 'Fetched receipt SHA-256 digest does not match pointer declaration',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_POINTER_FETCH_BLOCKED: {
@@ -1280,7 +1411,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Pointer Fetch Blocked',
     description:
       'Pointer URL fetch blocked by SSRF protection (private IP, non-HTTPS, or blocked redirect)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_POINTER_FETCH_FAILED: {
@@ -1288,7 +1420,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 502,
     title: 'Pointer Fetch Failed',
     description: 'Network error while fetching receipt from pointer URL',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'verifier',
   },
   E_VERIFY_POINTER_FETCH_TIMEOUT: {
@@ -1296,7 +1429,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 504,
     title: 'Pointer Fetch Timeout',
     description: 'Pointer URL fetch timed out (5 second limit)',
-    retriable: true,
+    retryable: true,
+    next_action: 'retry_after_delay',
     category: 'verifier',
   },
   E_VERIFY_POINTER_FETCH_TOO_LARGE: {
@@ -1304,7 +1438,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 413,
     title: 'Pointer Fetch Too Large',
     description: 'Pointer URL response exceeds maximum size limit (256 KB)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_POLICY_VIOLATION: {
@@ -1312,7 +1447,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 403,
     title: 'Policy Violation',
     description: 'Receipt violates verifier trust policy',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_RECEIPT_TOO_LARGE: {
@@ -1320,7 +1456,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 413,
     title: 'Receipt Too Large',
     description: 'Receipt exceeds maximum size limit (256 KB)',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
   E_VERIFY_SCHEMA_INVALID: {
@@ -1328,7 +1465,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Schema Invalid',
     description: 'Receipt claims do not conform to expected schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'abort',
     category: 'verifier',
   },
 
@@ -1338,7 +1476,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Workflow Context',
     description: 'Workflow context does not conform to WorkflowContextSchema',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'workflow',
   },
   E_WORKFLOW_CYCLE_DETECTED: {
@@ -1346,7 +1485,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Workflow Cycle Detected',
     description: 'Workflow DAG contains a cycle (not acyclic)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'workflow',
   },
   E_WORKFLOW_DAG_INVALID: {
@@ -1355,7 +1495,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     title: 'Invalid Workflow DAG',
     description:
       'Workflow DAG semantics violated (self-parent, duplicate parents, or cycle detected)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'workflow',
   },
   E_WORKFLOW_ID_INVALID: {
@@ -1363,7 +1504,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Workflow ID',
     description: 'Workflow ID does not match required format (wf_{ulid|uuid})',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'workflow',
   },
   E_WORKFLOW_LIMIT_EXCEEDED: {
@@ -1371,7 +1513,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Workflow Limit Exceeded',
     description: 'Workflow exceeds defined limits (parent count, ID length, etc.)',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'workflow',
   },
   E_WORKFLOW_PARENT_NOT_FOUND: {
@@ -1379,7 +1522,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Parent Step Not Found',
     description: 'Referenced parent step ID does not exist in the workflow',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'workflow',
   },
   E_WORKFLOW_STEP_ID_INVALID: {
@@ -1387,7 +1531,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Step ID',
     description: 'Step ID does not match required format (step_{ulid|uuid})',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'workflow',
   },
   E_WORKFLOW_SUMMARY_INVALID: {
@@ -1395,7 +1540,8 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Invalid Workflow Summary',
     description: 'Workflow summary attestation does not conform to schema',
-    retriable: false,
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'workflow',
   },
 };
@@ -1408,10 +1554,10 @@ export function getError(code: string): ErrorDefinition | undefined {
 }
 
 /**
- * Check if error is retriable
+ * Check if error is retryable
  */
-export function isRetriable(code: string): boolean {
-  return ERRORS[code]?.retriable ?? false;
+export function isRetryable(code: string): boolean {
+  return ERRORS[code]?.retryable ?? false;
 }
 
 /**

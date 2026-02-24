@@ -51,6 +51,22 @@ export { ERROR_CATEGORIES } from './error-categories.generated.js';
 export type { ErrorCategory } from './error-categories.generated.js';
 
 /**
+ * Agent-actionable recovery hint (DD-132, DD-133).
+ *
+ * Best-effort guidance for agents; servers MAY change mappings between versions
+ * without breaking the protocol. Agents SHOULD NOT build hard dependencies on
+ * specific next_action values for specific error codes.
+ */
+export type NextAction =
+  | 'retry_after_delay'
+  | 'retry_with_different_key'
+  | 'retry_with_different_input'
+  | 'refresh_attestation'
+  | 'contact_issuer'
+  | 'abort'
+  | 'none';
+
+/**
  * Error code definition
  *
  * The category type is generated from specs/kernel/errors.json by codegen-errors.ts.
@@ -61,7 +77,8 @@ export interface ErrorDefinition {
   http_status: number;
   title: string;
   description: string;
-  retriable: boolean;
+  retryable: boolean;
+  next_action: NextAction;
   category: import('./error-categories.generated.js').ErrorCategory;
 }
 

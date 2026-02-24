@@ -20,7 +20,8 @@ interface ErrorEntry {
   http_status: number;
   title: string;
   description: string;
-  retriable: boolean;
+  retryable: boolean;
+  next_action: string;
 }
 
 interface ErrorsRegistry {
