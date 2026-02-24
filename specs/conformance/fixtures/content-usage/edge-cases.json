@@ -1,0 +1,67 @@
+{
+  "description": "Edge case Content-Usage header parsing fixtures (RFC 9651 value type handling)",
+  "version": "0.11.2",
+  "fixture_count": 8,
+  "fixtures": [
+    {
+      "name": "bare-key-boolean",
+      "description": "Bare key is SF Boolean true, not Token y; produces no entry",
+      "input": "train-ai",
+      "expected_entries": [],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "string-value-not-token",
+      "description": "String value (quoted) is not Token; produces no entry",
+      "input": "train-ai=\"n\"",
+      "expected_entries": [],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "boolean-value-not-token",
+      "description": "Boolean ?0/?1 is not Token y/n; produces no entry",
+      "input": "train-ai=?1",
+      "expected_entries": [],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "unknown-token-value",
+      "description": "Unknown Token value (not y or n); produces no entry",
+      "input": "train-ai=maybe",
+      "expected_entries": [],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "unknown-keys-as-extensions",
+      "description": "Unknown dictionary keys are stored as extensions, not dropped",
+      "input": "train-ai=n, future-key=y, x-custom=n",
+      "expected_entries": [{ "purpose": "ai-training", "decision": "deny" }],
+      "expected_extension_count": 2,
+      "expected_extension_keys": ["future-key", "x-custom"]
+    },
+    {
+      "name": "duplicate-key-last-wins",
+      "description": "Per SF rules, last value wins for duplicate keys",
+      "input": "train-ai=y, train-ai=n",
+      "expected_entries": [{ "purpose": "ai-training", "decision": "deny" }],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "whitespace-handling",
+      "description": "Whitespace around keys and values is trimmed",
+      "input": "  train-ai = n ,  search = y  ",
+      "expected_entries": [
+        { "purpose": "ai-training", "decision": "deny" },
+        { "purpose": "ai-search", "decision": "allow" }
+      ],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "oversized-header-rejected",
+      "description": "Headers exceeding MAX_HEADER_SIZE (8KB) produce empty result",
+      "input_note": "Generate a string >8192 bytes",
+      "expected_entries": [],
+      "expected_extension_count": 0
+    }
+  ]
+}

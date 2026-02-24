@@ -1,0 +1,80 @@
+{
+  "description": "Valid Content-Usage header parsing fixtures (AIPREF vocab-03, RFC 9651)",
+  "version": "0.11.2",
+  "fixture_count": 8,
+  "fixtures": [
+    {
+      "name": "minimal-single-key",
+      "description": "Single AIPREF key with Token deny",
+      "input": "train-ai=n",
+      "expected_entries": [{ "purpose": "ai-training", "decision": "deny" }],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "single-key-allow",
+      "description": "Single AIPREF key with Token allow",
+      "input": "train-ai=y",
+      "expected_entries": [{ "purpose": "ai-training", "decision": "allow" }],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "multiple-keys",
+      "description": "Multiple AIPREF keys with different decisions",
+      "input": "train-ai=n, search=y",
+      "expected_entries": [
+        { "purpose": "ai-training", "decision": "deny" },
+        { "purpose": "ai-search", "decision": "allow" }
+      ],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "all-leaf-keys",
+      "description": "All three leaf AIPREF keys specified",
+      "input": "train-ai=n, train-genai=n, search=y",
+      "expected_entries": [
+        { "purpose": "ai-training", "decision": "deny" },
+        { "purpose": "ai-generative", "decision": "deny" },
+        { "purpose": "ai-search", "decision": "allow" }
+      ],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "hierarchy-bots-deny",
+      "description": "Parent bots=n propagates deny to all children",
+      "input": "bots=n",
+      "expected_entries": [
+        { "purpose": "ai-training", "decision": "deny" },
+        { "purpose": "ai-generative", "decision": "deny" },
+        { "purpose": "ai-search", "decision": "deny" }
+      ],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "hierarchy-child-override",
+      "description": "Child overrides parent: bots=y but train-ai=n",
+      "input": "bots=y, train-ai=n",
+      "expected_entries": [
+        { "purpose": "ai-training", "decision": "deny" },
+        { "purpose": "ai-search", "decision": "allow" }
+      ],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "hierarchy-train-ai-propagates",
+      "description": "train-ai=y propagates to train-genai",
+      "input": "train-ai=y",
+      "expected_entries": [
+        { "purpose": "ai-training", "decision": "allow" },
+        { "purpose": "ai-generative", "decision": "allow" }
+      ],
+      "expected_extension_count": 0
+    },
+    {
+      "name": "with-sf-parameters",
+      "description": "SF parameters are stripped from values",
+      "input": "train-ai=n;ext=1",
+      "expected_entries": [{ "purpose": "ai-training", "decision": "deny" }],
+      "expected_extension_count": 0
+    }
+  ]
+}
