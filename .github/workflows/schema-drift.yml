@@ -1,0 +1,44 @@
+name: Schema Drift Check
+
+# Weekly check for upstream MCP Registry schema changes (DD-140).
+# Compares vendored specs/registry/server.schema.json against upstream.
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 09:00 UTC
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  check-drift:
+    name: MCP Registry Schema Drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Fetch upstream schema
+        run: |
+          curl -sf -o /tmp/upstream-schema.json \
+            https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json
+
+      - name: Compare with vendored schema
+        run: |
+          # Strip $comment field (vendored copy has our comment, upstream has theirs)
+          node -e "
+            const fs = require('fs');
+            const strip = (obj) => { const {'\$comment': _, ...rest} = obj; return rest; };
+            const vendored = strip(JSON.parse(fs.readFileSync('specs/registry/server.schema.json', 'utf8')));
+            const upstream = strip(JSON.parse(fs.readFileSync('/tmp/upstream-schema.json', 'utf8')));
+            const vStr = JSON.stringify(vendored, null, 2);
+            const uStr = JSON.stringify(upstream, null, 2);
+            if (vStr === uStr) {
+              console.log('OK: Vendored schema matches upstream.');
+              process.exit(0);
+            } else {
+              console.error('DRIFT DETECTED: Vendored schema differs from upstream.');
+              console.error('Action: Update specs/registry/server.schema.json and re-validate server.json.');
+              process.exit(1);
+            }
+          "

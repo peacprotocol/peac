@@ -77,6 +77,7 @@ export default defineConfig({
       'tests/scripts/**/*.test.ts',
       'tests/perf/**/*.test.ts',
       'tests/smoke/**/*.test.ts',
+      'tests/distribution/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,

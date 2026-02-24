@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Single source of truth for PEAC Protocol npm publish order",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "lastUpdated": "2026-02-24",
-  "totalPackages": 25,
+  "totalPackages": 27,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -29,6 +29,8 @@
     "@peac/rails-x402",
     "@peac/adapter-x402",
     "@peac/adapter-openclaw",
+    "@peac/mappings-content-signals",
+    "@peac/adapter-openai-compatible",
     "@peac/cli"
   ],
   "layers": {
@@ -55,7 +57,9 @@
       "@peac/mappings-a2a",
       "@peac/rails-x402",
       "@peac/adapter-x402",
-      "@peac/adapter-openclaw"
+      "@peac/adapter-openclaw",
+      "@peac/mappings-content-signals",
+      "@peac/adapter-openai-compatible"
     ],
     "6-cli": ["@peac/cli"]
   },

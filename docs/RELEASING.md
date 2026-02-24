@@ -105,6 +105,50 @@ See `docs/maintainers/RELEASING.md` for manual publishing details and `docs/main
 - **Pre-1.0**: Breaking changes may occur in minor versions (0.9.x to 0.10.x)
 - **Post-1.0**: Breaking changes require major version bump
 
+## npm Token Lifecycle
+
+The publish pipeline uses two authentication mechanisms:
+
+1. **OIDC Trusted Publishing** (publish.yml): No long-lived token needed. GitHub OIDC provides ephemeral credentials. This is the primary publish path.
+
+2. **NPM_TOKEN automation token** (promote-latest.yml): Required for `npm dist-tag` operations, which OIDC does not support. Stored as a secret in the `npm-production` GitHub environment.
+
+### Token Health Check
+
+The promote-latest workflow runs `npm whoami` before any dist-tag operations. If the token is expired or revoked, the workflow fails early with instructions to rotate.
+
+### Rotating the NPM_TOKEN
+
+1. Log in to [npmjs.com](https://www.npmjs.com/) with the `@peac` org owner account
+2. Go to Access Tokens and generate a new **Automation** token
+3. Scope the token to the `@peac` organization (read and write)
+4. In the GitHub repo, go to Settings > Environments > `npm-production`
+5. Update the `NPM_TOKEN` secret with the new token value
+6. Verify by running the promote-latest workflow in dry-run mode
+
+### Pre-Release Token Verification
+
+Before tagging a release, verify the token is healthy:
+
+```bash
+# If you have local npm auth configured:
+npm whoami --registry https://registry.npmjs.org/
+
+# Or run promote-latest in dry-run mode (uses the CI token):
+# GitHub Actions > Promote to latest > Run workflow > dry_run: true
+```
+
+### New Package Bootstrap
+
+New packages require manual bootstrap before OIDC Trusted Publishing works:
+
+```bash
+pnpm pack --pack-destination /tmp/x
+npm publish /tmp/x/<tarball>.tgz --access public --tag next --provenance false
+```
+
+After the initial publish, configure Trusted Publishing on npmjs.com for the package (repository: `peacprotocol/peac`, workflow: `publish.yml`, environment: `npm-production`).
+
 ## Rollback
 
 If issues are found post-release:

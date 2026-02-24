@@ -1,0 +1,49 @@
+# PEAC Protocol
+
+> Open standard for portable, offline-verifiable evidence receipts across AI agent interactions, APIs, and organizational boundaries.
+
+## What is PEAC
+
+PEAC Protocol provides cryptographically signed, offline-verifiable receipts that record what happened during automated interactions. Each receipt is a compact JWS (JSON Web Signature) using Ed25519 signatures that can be verified offline given the issuer's public key (or a pinned JWKS). PEAC does not orchestrate protocols or enforce behavior; it provides neutral evidence of what terms applied and what happened.
+
+## Quick Start
+
+- Install the MCP server: `npm install -g @peac/mcp-server`
+- Verify a receipt: start the MCP server, then call `peac_verify` with a JWS and public key
+- Issue a receipt: use `@peac/protocol` with `issue()` and an Ed25519 signing key
+- GitHub: https://github.com/peacprotocol/peac
+- Website: https://www.peacprotocol.org
+
+## Key Packages
+
+- `@peac/kernel`: Normative constants, error codes, and type definitions (Layer 0)
+- `@peac/schema`: Zod validation schemas for receipts and evidence (Layer 1)
+- `@peac/crypto`: Ed25519 signing and verification (Layer 2)
+- `@peac/protocol`: High-level issue and verify API (Layer 3)
+- `@peac/mcp-server`: MCP server with 5 tools for receipt operations (Layer 5)
+
+## Agent Integration
+
+- MCP Server: 5-tool MCP server for Claude Desktop, Cursor, VS Code Copilot, and any MCP client
+- A2A Mapping: `@peac/mappings-a2a` for Google Agent-to-Agent protocol evidence
+- ACP Mapping: `@peac/mappings-acp` for Agentforce/ACP protocol evidence
+- UCP Mapping: `@peac/mappings-ucp` for Universal Commerce Protocol evidence
+- x402 Adapter: `@peac/adapter-x402` for payment-required HTTP evidence
+- HTTP: `PEAC-Receipt` response header carries compact JWS for any HTTP API
+- Evidence Carrier Contract: universal carry interface across MCP, A2A, ACP, UCP, x402, and HTTP
+
+## Documentation
+
+- Protocol Behavior: https://www.peacprotocol.org/docs/architecture/wire-format
+- Evidence Carrier Contract: https://github.com/peacprotocol/peac/blob/main/docs/specs/EVIDENCE-CARRIER-CONTRACT.md
+- Kernel Constraints: https://github.com/peacprotocol/peac/blob/main/docs/specs/KERNEL-CONSTRAINTS.md
+- Architecture: https://www.peacprotocol.org/docs/architecture/package-layering
+- Error Codes: https://www.peacprotocol.org/docs/reference/error-codes
+
+## Optional
+
+- Wire Format: `peac-receipt/0.1` (stable, frozen)
+- Signing Algorithm: Ed25519 (RFC 8032)
+- Error Format: RFC 9457 Problem Details
+- Discovery: `/.well-known/peac-issuer.json` with `jwks_uri` pointing to JWKS
+- License: Apache-2.0

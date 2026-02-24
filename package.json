@@ -1,6 +1,6 @@
 {
   "name": "@peac/monorepo",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "private": true,
   "description": "PEAC Protocol - Cryptographic receipts for agentic commerce",
   "repository": {
@@ -63,14 +63,16 @@
     "check:zod-major": "node scripts/check-zod-single-major.mjs"
   },
   "devDependencies": {
-    "@types/node": "^22.19.11",
     "@eslint/js": "^10.0.1",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.19.11",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "dependency-cruiser": "^17.3.0",
     "eslint": "^10.0.1",
-    "globals": "^17.0.0",
     "fast-check": "^4.5.3",
+    "globals": "^17.0.0",
+    "js-yaml": "^4.1.1",
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "turbo": "^2.8.10",

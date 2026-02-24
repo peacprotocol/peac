@@ -36,3 +36,11 @@ if [ "$failed" -eq 1 ]; then
 fi
 
 echo "OK: All worker surfaces typecheck clean."
+
+# ---------------------------------------------------------------------------
+# Distribution surface validation (DD-140)
+# ---------------------------------------------------------------------------
+echo ""
+echo "Checking distribution surfaces..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bash "$SCRIPT_DIR/../check-distribution.sh"
