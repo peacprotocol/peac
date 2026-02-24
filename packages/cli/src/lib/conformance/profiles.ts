@@ -99,6 +99,18 @@ export const PROFILE_CAPABILITIES: Record<string, ProfileDetail> = {
     validator: 'structural-check',
     notes: 'Structure-only; no offer/receipt verification or term matching',
   },
+  errors: {
+    profile: 'errors.hints',
+    level: 'semantic',
+    validator: 'validateErrorHintsInput',
+    notes: 'Validates next_action hint table shape and vocabulary (DD-132, DD-133)',
+  },
+  'content-usage': {
+    profile: 'content-usage.parse',
+    level: 'shape',
+    validator: 'validateContentUsageInput',
+    notes: 'Validates Content-Usage fixture input type; full parsing tested in dedicated suite',
+  },
 };
 
 /**

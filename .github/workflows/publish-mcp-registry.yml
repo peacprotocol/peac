@@ -64,11 +64,37 @@ jobs:
           fi
           echo "OK: name=$SERVER_NAME"
 
-      - name: Install mcp-publisher (pinned to v1.4.1)
+      - name: Install mcp-publisher (pinned to v1.4.1 with checksum verification)
         env:
           MCP_PUBLISHER_VERSION: v1.4.1
+          # SHA-256 checksums from https://github.com/modelcontextprotocol/registry/releases/tag/v1.4.1
+          CHECKSUM_LINUX_AMD64: '58ce7746a990288158868b9176dfe094f20cbd7467bc9f6cb9ebb8e210c0e0d4'
+          CHECKSUM_LINUX_ARM64: 'db15ee51f517ce79296b6b3329772d08ea7e7a2b6a3613166f4d666e34e40857'
         run: |
-          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+          TARBALL="mcp-publisher_linux_${ARCH}.tar.gz"
+          curl -fsSL -o "$TARBALL" "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/${TARBALL}"
+
+          # Verify checksum before extracting
+          if [ "$ARCH" = "amd64" ]; then
+            EXPECTED="$CHECKSUM_LINUX_AMD64"
+          elif [ "$ARCH" = "arm64" ]; then
+            EXPECTED="$CHECKSUM_LINUX_ARM64"
+          else
+            echo "ERROR: Unsupported architecture: $ARCH"
+            exit 1
+          fi
+          ACTUAL=$(sha256sum "$TARBALL" | awk '{print $1}')
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "ERROR: Checksum mismatch for $TARBALL"
+            echo "  Expected: $EXPECTED"
+            echo "  Actual:   $ACTUAL"
+            exit 1
+          fi
+          echo "OK: Checksum verified for $TARBALL ($ARCH)"
+
+          tar xzf "$TARBALL" mcp-publisher
+          rm -f "$TARBALL"
           chmod +x ./mcp-publisher
           ./mcp-publisher --help
 

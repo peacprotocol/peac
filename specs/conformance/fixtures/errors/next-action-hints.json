@@ -1,5 +1,6 @@
 {
   "$comment": "AUTO-GENERATED hint table (DD-132, DD-133). These are best-effort guidance hints, not normative protocol promises. Servers MAY change mappings between minor versions without breaking the protocol. Agents SHOULD NOT build hard dependencies on specific next_action values for specific error codes.",
+  "version": "0.11.2",
   "schema_version": "0.11.2",
   "source_file": "specs/kernel/errors.json",
   "hints": {

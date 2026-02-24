@@ -329,7 +329,8 @@
     "next-action-hints.json": {
       "description": "Agent recovery next_action hint table (DD-132, DD-133); best-effort guidance, not normative",
       "version": "0.11.2",
-      "fixture_count": 146
+      "fixture_count": 146,
+      "expected_valid": true
     }
   },
   "content-usage": {

@@ -52,8 +52,10 @@ export function computeCanonicalDigest(input: unknown): { alg: string; value: st
     return { alg: 'sha-256+jcs', value: sha256(canonical) };
   } catch {
     // Fallback to JSON.stringify if canonicalize fails (e.g., for non-JSON values)
-    // Use different alg to indicate fallback was used
-    return { alg: 'sha-256+json', value: sha256(JSON.stringify(input)) };
+    // Use different alg to indicate fallback was used.
+    // JSON.stringify(undefined) returns undefined, so coerce to 'null' for safety.
+    const serialized = JSON.stringify(input) ?? 'null';
+    return { alg: 'sha-256+json', value: sha256(serialized) };
   }
 }
 
