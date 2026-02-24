@@ -42,6 +42,9 @@ export const META_KEY_AGENT_ID = 'org.peacprotocol/agent_id' as const;
 /** _meta key for verification timestamp (v0.10.13+, unchanged) */
 export const META_KEY_VERIFIED_AT = 'org.peacprotocol/verified_at' as const;
 
+/** _meta key for receipt URL locator hint (v0.11.2+, DD-135) */
+export const META_KEY_RECEIPT_URL = 'org.peacprotocol/receipt_url' as const;
+
 /** Legacy _meta key for receipt JWS (v0.10.13, DD-125) */
 export const META_KEY_LEGACY_RECEIPT = 'org.peacprotocol/receipt' as const;
 
@@ -123,6 +126,9 @@ export function attachReceiptToMeta(
     if (carrier.receipt_jws) {
       result._meta[META_KEY_RECEIPT_JWS] = carrier.receipt_jws;
     }
+    if (carrier.receipt_url) {
+      result._meta[META_KEY_RECEIPT_URL] = carrier.receipt_url;
+    }
   }
 
   // Optional metadata fields (unchanged from v0.10.13)
@@ -168,6 +174,10 @@ export function extractReceiptFromMeta(result: McpResultLike): McpExtractResult 
     const receiptJws = result._meta[META_KEY_RECEIPT_JWS];
     if (typeof receiptJws === 'string') {
       carrier.receipt_jws = receiptJws;
+    }
+    const receiptUrl = result._meta[META_KEY_RECEIPT_URL];
+    if (typeof receiptUrl === 'string') {
+      carrier.receipt_url = receiptUrl;
     }
 
     const parsed = PeacEvidenceCarrierSchema.safeParse(carrier);
@@ -222,6 +232,10 @@ export async function extractReceiptFromMetaAsync(
     const receiptJws = result._meta[META_KEY_RECEIPT_JWS];
     if (typeof receiptJws === 'string') {
       carrier.receipt_jws = receiptJws;
+    }
+    const receiptUrl = result._meta[META_KEY_RECEIPT_URL];
+    if (typeof receiptUrl === 'string') {
+      carrier.receipt_url = receiptUrl;
     }
 
     const parsed = PeacEvidenceCarrierSchema.safeParse(carrier);

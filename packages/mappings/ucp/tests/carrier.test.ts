@@ -266,5 +266,17 @@ describe('UcpCarrierAdapter', () => {
       expect(extracted!.receipts[0].receipt_ref).toBe(carrier.receipt_ref);
       expect(extracted!.receipts[0].receipt_jws).toBe(carrier.receipt_jws);
     });
+
+    it('should preserve receipt_url through attach and extract (DD-135)', async () => {
+      const carrier = await makeCarrier();
+      carrier.receipt_url = 'https://receipts.example.com/abc123';
+      const payload: UcpWebhookPayload = { event_type: 'order.complete' };
+
+      const attached = adapter.attach(payload, [carrier]);
+      const extracted = adapter.extract(attached);
+
+      expect(extracted).not.toBeNull();
+      expect(extracted!.receipts[0].receipt_url).toBe('https://receipts.example.com/abc123');
+    });
   });
 });

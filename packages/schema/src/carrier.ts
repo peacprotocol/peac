@@ -59,10 +59,36 @@ export const CompactJwsSchema = z
 /** Carrier format schema */
 export const CarrierFormatSchema = z.enum(['embed', 'reference']);
 
+/**
+ * Validates receipt_url: HTTPS-only, max 2048 chars, no credentials (DD-135).
+ * Validation only (DD-141): no I/O, no fetch. Resolution lives in Layer 4.
+ */
+export const ReceiptUrlSchema = z
+  .string()
+  .url()
+  .max(2048)
+  .refine((url) => url.startsWith('https://'), {
+    message: 'receipt_url must use HTTPS scheme',
+  })
+  .refine(
+    (url) => {
+      try {
+        const parsed = new URL(url);
+        return !parsed.username && !parsed.password;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: 'receipt_url must not contain credentials',
+    }
+  );
+
 /** Schema for PeacEvidenceCarrier */
 export const PeacEvidenceCarrierSchema = z.object({
   receipt_ref: ReceiptRefSchema,
   receipt_jws: CompactJwsSchema.optional(),
+  receipt_url: ReceiptUrlSchema.optional(),
   policy_binding: z.string().max(KERNEL_CONSTRAINTS.MAX_STRING_LENGTH).optional(),
   actor_binding: z.string().max(KERNEL_CONSTRAINTS.MAX_STRING_LENGTH).optional(),
   request_nonce: z.string().max(KERNEL_CONSTRAINTS.MAX_STRING_LENGTH).optional(),
@@ -149,7 +175,17 @@ export function validateCarrierConstraints(
     );
   }
 
-  // 4. String field length checks
+  // 4. receipt_url validation (DD-135: HTTPS-only, max 2048, no credentials)
+  if (carrier.receipt_url !== undefined) {
+    const urlResult = ReceiptUrlSchema.safeParse(carrier.receipt_url);
+    if (!urlResult.success) {
+      for (const issue of urlResult.error.issues) {
+        violations.push(`invalid receipt_url: ${issue.message}`);
+      }
+    }
+  }
+
+  // 5. String field length checks
   const stringFields: Array<[string, string | undefined]> = [
     ['policy_binding', carrier.policy_binding],
     ['actor_binding', carrier.actor_binding],
