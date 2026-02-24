@@ -1,6 +1,6 @@
 {
   "description": "Edge case Content-Usage header parsing fixtures (RFC 9651 value type handling)",
-  "version": "0.11.2",
+  "schema_version": "0.11.2",
   "fixture_count": 8,
   "fixtures": [
     {

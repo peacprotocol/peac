@@ -325,6 +325,13 @@
       "expected_error": "E_PARSE_ATTESTATION_INVALID"
     }
   },
+  "errors": {
+    "next-action-hints.json": {
+      "description": "Agent recovery next_action hint table (DD-132, DD-133); best-effort guidance, not normative",
+      "version": "0.11.2",
+      "fixture_count": 146
+    }
+  },
   "content-usage": {
     "valid.json": {
       "description": "Valid Content-Usage header parsing fixtures (AIPREF vocab-03, RFC 9651)",
