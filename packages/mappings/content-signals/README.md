@@ -74,7 +74,7 @@ Unknown dictionary keys are stored in `extensions` (never dropped), enabling for
 1. **Observation only**: signals record what was observed, never enforce policy
 2. **No fetch**: all parsers receive pre-fetched content; callers handle SSRF-safe fetching
 3. **Three-state**: each purpose resolves to `allow`, `deny`, or `unspecified`
-4. **EU TDM ready**: includes tdmrep.json parser for EU AI Act compliance
+4. **EU TDM ready**: includes tdmrep.json parser for EU Directive 2019/790 Art. 4 (TDM reservation)
 5. **Forward-compatible**: unknown Content-Usage keys are preserved as extensions
 
 ## License

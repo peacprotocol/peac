@@ -64,9 +64,11 @@ jobs:
           fi
           echo "OK: name=$SERVER_NAME"
 
-      - name: Install mcp-publisher
+      - name: Install mcp-publisher (pinned to v1.4.1)
+        env:
+          MCP_PUBLISHER_VERSION: v1.4.1
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
           chmod +x ./mcp-publisher
           ./mcp-publisher --help
 
