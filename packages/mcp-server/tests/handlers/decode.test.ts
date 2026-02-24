@@ -11,7 +11,7 @@ function makeParams(input: DecodeInput): HandlerParams<DecodeInput> {
     input,
     policy: getDefaultPolicy(),
     context: {
-      version: '0.10.12',
+      version: '0.11.2',
       policyHash: 'testhash',
       protocolVersion: '2025-11-25',
     },

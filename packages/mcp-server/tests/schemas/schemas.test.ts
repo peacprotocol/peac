@@ -5,7 +5,7 @@ import { DecodeInputSchema, DecodeOutputSchema } from '../../src/schemas/decode.
 import { IssueInputSchema, IssueOutputSchema } from '../../src/schemas/issue.js';
 import { BundleInputSchema, BundleOutputSchema } from '../../src/schemas/bundle.js';
 
-const META = { serverVersion: '0.10.12', policyHash: 'abc123', protocolVersion: '2025-11-25' };
+const META = { serverVersion: '0.11.2', policyHash: 'abc123', protocolVersion: '2025-11-25' };
 
 describe('schemas', () => {
   describe('VerifyInputSchema', () => {
