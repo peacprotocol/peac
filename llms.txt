@@ -49,3 +49,4 @@ PEAC Protocol provides cryptographically signed, offline-verifiable receipts tha
 - Error Format: RFC 9457 Problem Details
 - Discovery: `/.well-known/peac-issuer.json` with `jwks_uri` pointing to JWKS
 - License: Apache-2.0
+- Built by Originary: https://www.originary.xyz

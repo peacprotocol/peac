@@ -318,6 +318,13 @@ Restart Cursor. PEAC tools are available in chat.
 - **DD-119**: Streamable HTTP as additive remote transport (session-isolated)
 - **DD-123**: HTTP security boundaries (CORS, rate limiting, Origin/Host validation)
 
+## Links
+
+- Protocol: [peacprotocol.org](https://www.peacprotocol.org)
+- GitHub: [peacprotocol/peac](https://github.com/peacprotocol/peac)
+- npm: [@peac/mcp-server](https://www.npmjs.com/package/@peac/mcp-server)
+- Built by [Originary](https://www.originary.xyz)
+
 ## License
 
 Apache-2.0
