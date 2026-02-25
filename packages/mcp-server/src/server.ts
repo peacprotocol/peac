@@ -283,7 +283,7 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
     {
       title: 'Verify PEAC Receipt',
       description:
-        'Verify a PEAC receipt JWS signature and validate claims. Returns structured check results.',
+        'Verify a PEAC receipt: check Ed25519 signature, validate claims, and return structured check results. Read-only, no side effects.',
       inputSchema: VerifyInputSchema,
       outputSchema: VerifyOutputSchema,
       annotations: PURE_TOOL_ANNOTATIONS,
@@ -303,7 +303,7 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
     {
       title: 'Inspect PEAC Receipt',
       description:
-        'Decode and inspect a PEAC receipt without verifying the signature. Shows header, payload metadata, and optionally full claims.',
+        'Inspect a PEAC receipt without verifying the signature. Returns decoded header, payload metadata, and timestamps. Read-only.',
       inputSchema: InspectInputSchema,
       outputSchema: InspectOutputSchema,
       annotations: PURE_TOOL_ANNOTATIONS,
@@ -323,7 +323,7 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
     {
       title: 'Decode PEAC Receipt',
       description:
-        'Raw decode of a PEAC receipt JWS. Returns header and payload without signature verification.',
+        'Raw-decode a PEAC receipt JWS into header and payload objects. No signature check. Use peac_verify for trusted results.',
       inputSchema: DecodeInputSchema,
       outputSchema: DecodeOutputSchema,
       annotations: PURE_TOOL_ANNOTATIONS,
@@ -346,7 +346,7 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
       {
         title: 'Issue PEAC Receipt',
         description:
-          'Sign and return a PEAC receipt JWS. Requires server to be configured with --issuer-key and --issuer-id.',
+          'Sign and return a new PEAC receipt JWS. Requires server configured with an Ed25519 issuer key (--issuer-key and --issuer-id).',
         inputSchema: IssueInputSchema,
         outputSchema: IssueOutputSchema,
         annotations: ISSUE_TOOL_ANNOTATIONS,
@@ -367,7 +367,7 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
         {
           title: 'Create Evidence Bundle',
           description:
-            'Create a signed evidence bundle directory from receipt JWS strings. Requires --issuer-key, --issuer-id, and --bundle-dir.',
+            'Create a signed evidence bundle directory from one or more receipt JWS strings. Writes files to disk. Requires --issuer-key, --issuer-id, and --bundle-dir.',
           inputSchema: BundleInputSchema,
           outputSchema: BundleOutputSchema,
           annotations: BUNDLE_TOOL_ANNOTATIONS,

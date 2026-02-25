@@ -46,3 +46,4 @@ The rules file provides import patterns, API usage examples, package layering gu
 - PEAC Protocol: https://www.peacprotocol.org
 - GitHub: https://github.com/peacprotocol/peac
 - MCP Server: `@peac/mcp-server` on npm
+- Built by [Originary](https://www.originary.xyz)

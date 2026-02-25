@@ -1,7 +1,7 @@
 {
   "name": "@peac/mcp-server",
   "version": "0.11.2",
-  "description": "PEAC receipt operations as MCP tools (verify, inspect, decode)",
+  "description": "PEAC receipt operations as MCP tools (verify, inspect, decode, issue, bundle)",
   "mcpName": "io.github.peacprotocol/peac",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
@@ -36,7 +36,9 @@
     "dist",
     "README.md",
     "server.json",
-    "smithery.yaml"
+    "smithery.yaml",
+    "manifest.json",
+    ".mcp.json"
   ],
   "publishConfig": {
     "access": "public",

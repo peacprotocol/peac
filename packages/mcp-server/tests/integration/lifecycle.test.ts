@@ -68,7 +68,14 @@ describe('integration/lifecycle', () => {
     const { readFile } = await import('node:fs/promises');
     const raw = await readFile(new URL('../../package.json', import.meta.url), 'utf-8');
     const pkg = JSON.parse(raw) as Record<string, unknown>;
-    expect(pkg.files).toEqual(['dist', 'README.md', 'server.json', 'smithery.yaml']);
+    expect(pkg.files).toEqual([
+      'dist',
+      'README.md',
+      'server.json',
+      'smithery.yaml',
+      'manifest.json',
+      '.mcp.json',
+    ]);
   });
 
   it('handler result matches expected shape', async () => {

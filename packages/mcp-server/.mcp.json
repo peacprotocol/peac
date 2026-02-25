@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "peac": {
+      "command": "npx",
+      "args": ["-y", "@peac/mcp-server"],
+      "env": {}
+    }
+  }
+}
