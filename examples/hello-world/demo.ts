@@ -31,5 +31,7 @@ console.log('Receipt JWS:', jws.slice(0, 50) + '...');
 const result = await verifyLocal(jws, publicKey);
 
 console.log('Valid:', result.valid);
-console.log('Issuer:', result.valid ? result.claims.iss : 'n/a');
-console.log('Amount:', result.valid ? `${result.claims.amt} ${result.claims.cur}` : 'n/a');
+if (result.valid && result.variant === 'commerce') {
+  console.log('Issuer:', result.claims.iss);
+  console.log('Amount:', `${result.claims.amt} ${result.claims.cur}`);
+}
