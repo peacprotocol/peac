@@ -166,7 +166,41 @@ if [ -f "$SERVER_JSON" ] && [ -f "$PKG_JSON" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 6. MCP server smoke test (npx @peac/mcp-server --help must exit 0)
+# 6. Manifest consistency: manifest.json version matches package.json version
+# ---------------------------------------------------------------------------
+MANIFEST_JSON="$REPO_ROOT/packages/mcp-server/manifest.json"
+
+if [ -f "$MANIFEST_JSON" ] && [ -f "$PKG_JSON" ]; then
+  MANIFEST_VER=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$MANIFEST_JSON','utf8')).version)")
+  PKG_VER_CHECK=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$PKG_JSON','utf8')).version)")
+
+  if [ "$MANIFEST_VER" = "$PKG_VER_CHECK" ]; then
+    pass "manifest.json version ($MANIFEST_VER) matches package.json version"
+  else
+    fail "manifest.json version ($MANIFEST_VER) does not match package.json version ($PKG_VER_CHECK)"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# 7. Publish manifest: mcp-server must be included in publish-manifest.json
+# ---------------------------------------------------------------------------
+PUBLISH_MANIFEST="$REPO_ROOT/scripts/publish-manifest.json"
+
+if [ -f "$PUBLISH_MANIFEST" ]; then
+  HAS_MCP=$(node -e "
+    const data = JSON.parse(require('fs').readFileSync('$PUBLISH_MANIFEST','utf8'));
+    console.log(data.packages.includes('@peac/mcp-server') ? 'yes' : 'no');
+  ")
+
+  if [ "$HAS_MCP" = "yes" ]; then
+    pass "@peac/mcp-server is in publish-manifest.json"
+  else
+    fail "@peac/mcp-server is NOT in publish-manifest.json (will not be published)"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# 8. MCP server smoke test (npx @peac/mcp-server --help must exit 0)
 # ---------------------------------------------------------------------------
 # Only runs if the package is built (skips gracefully in pre-build CI steps)
 MCP_CLI="$REPO_ROOT/packages/mcp-server/dist/cli.cjs"
