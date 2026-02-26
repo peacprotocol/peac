@@ -98,7 +98,7 @@ Encoding: JWS Compact Serialization (RFC 7515)
 
 ## Algorithm Requirements
 
-- Signing: Ed25519 (RFC 8032) is REQUIRED; ES256 MAY be supported for interoperability
+- Signing: Ed25519 (RFC 8032) is REQUIRED (EdDSA only)
 - Digest: SHA-256 is REQUIRED for pointer profiles and content hashing
 - Encoding: Base64url (RFC 4648) for JWS components
 - JWK Thumbprint: RFC 7638 with SHA-256, base64url (no padding)

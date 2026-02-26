@@ -27,7 +27,7 @@ The protocol works with generic HTTP 402 services, paywalls, routers, and data s
 **Web policy surfaces:**
 
 - `/.well-known/peac.txt` - PEAC policy surface
-- Compatibility with robots.txt, ai.txt, llm.txt, and AIPREF-style manifests
+- Content signal parsing: robots.txt (RFC 9309), Content-Usage (AIPREF), tdmrep.json (EU TDM Directive). Package: `@peac/mappings-content-signals`
 
 _Names above are illustrative examples for interoperability. PEAC is vendor-neutral and does not imply endorsement by, or affiliation with, these projects._
 
@@ -45,13 +45,13 @@ PEAC works as the receipts and verification layer for [x402](https://x402.org) p
 4. Server issues a signed `PEAC-Receipt` header proving payment
 5. Client can verify the receipt offline and reuse it within its validity window
 
-**Package:** `@peac/rails-x402` provides the adapter with full x402 v2 support (v1 fallback via `X402Dialect`).
+**Package:** `@peac/rails-x402` provides the payment rail integration with full x402 v2 support (v1 fallback via `X402Dialect`). `@peac/adapter-x402` provides the evidence carrier placement for x402 responses.
 
 See [examples/x402-node-server](../examples/x402-node-server) for a working implementation.
 
 ---
 
-**Package availability:** Some packages referenced below (CLI, middleware, adapters) may exist in this repo but not yet be published to npm. If so, run commands via `pnpm --filter <pkg> exec ...` from this repo root, or use the lower-level `@peac/protocol` APIs shown.
+**Package availability:** All packages listed below are published to npm at v0.11.2. Install via `pnpm add <package>` or run from this repo root via `pnpm --filter <pkg> exec ...`.
 
 ## Integration examples
 
@@ -89,8 +89,12 @@ app.get('/data', async (req, res) => {
   const body = { items: ['a', 'b', 'c'] };
   const { jws } = await issue({
     iss: 'https://api.example.com',
-    aud: req.headers['origin'] || 'https://client.example.com',
-    subject: '/data',
+    aud: 'https://client.example.com', // Use authenticated client identity, not Origin header
+    amt: 0,
+    cur: 'USD',
+    rail: 'free',
+    reference: `req_${Date.now()}`,
+    subject: 'https://api.example.com/data',
     privateKey,
     kid: 'key-2026-01',
   });
@@ -99,7 +103,7 @@ app.get('/data', async (req, res) => {
 });
 ```
 
-Clients retrieve the receipt from the `PEAC-Receipt` header and verify offline or store for audit.
+Clients retrieve the receipt from the `PEAC-Receipt` response header and verify offline or store for audit.
 
 ### Express middleware
 
@@ -137,6 +141,9 @@ PEAC is transport-agnostic. The most common binding is **HTTP/REST**, where rece
 | HTTP/REST (default) | Response header `PEAC-Receipt: <jws>`                   | Implemented |
 | MCP                 | Tool result `_meta` (carrier format)                    | Implemented |
 | A2A                 | Task/message/artifact metadata (extension URI)          | Implemented |
+| ACP                 | State transition metadata (carrier format)              | Implemented |
+| UCP                 | Webhook verification metadata (carrier format)          | Implemented |
+| x402                | Settlement response evidence                            | Implemented |
 | WebSocket/streaming | Periodic or terminal receipts for long-running sessions | Planned     |
 | Queues/batches      | NDJSON receipts verified offline via bundles            | Implemented |
 
@@ -178,7 +185,7 @@ A bundle contains receipts, policy snapshots, and a deterministic verification r
 peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
 peac bundle verify ./evidence.peacbundle --offline
 
-# From this repo root (always works when CLI is not published)
+# Or from this repo root
 pnpm --filter @peac/cli exec peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
 pnpm --filter @peac/cli exec peac bundle verify ./evidence.peacbundle --offline
 ```
@@ -208,7 +215,7 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 
 - Receipt type: `typ: "peac-receipt/0.1"` (frozen across v0.x)
 - Envelope structure: `PEACEnvelope` with auth, payment evidence, and metadata
-- Signature: EdDSA (Ed25519, RFC 8032) or ES256 (ECDSA P-256)
+- Signature: EdDSA (Ed25519, RFC 8032)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
 
 **HTTP:**
@@ -238,7 +245,7 @@ Declares allowed purposes, quotas, attribution requirements, payment terms, and 
 
 ```yaml
 # /.well-known/peac.txt
-version: '0.9'
+version: 'peac-policy/0.1'
 usage: open
 
 purposes: [crawl, index, search]
@@ -254,7 +261,7 @@ contact: docs@example.com
 **Example: Conditional API access**
 
 ```yaml
-version: '0.9'
+version: 'peac-policy/0.1'
 usage: conditional
 
 purposes: [inference, ai_input]
@@ -277,9 +284,10 @@ contact: api-support@example.com
 1. Agent fetches `/.well-known/peac.txt`
 2. Checks if purpose and volume comply with published policy
 3. If payment required, settles via rail (x402, Stripe, etc.)
-4. Obtains signed PEAC receipt
-5. Calls API with `PEAC-Receipt: <jws>` header
-6. Server verifies receipt and grants access
+4. Agent calls API; server returns `PEAC-Receipt: <jws>` response header as proof of the interaction
+5. Agent verifies receipt offline and stores for audit
+
+Optionally, if the service supports receipt-presented access, clients may present a previously obtained receipt on subsequent requests. This is not required by the protocol.
 
 For the complete peac.txt specification, see `docs/specs/PEAC-TXT.md`.
 
@@ -305,7 +313,7 @@ Enables verifiers to discover JWKS endpoints and verification configuration for 
   "jwks_uri": "https://api.example.com/.well-known/jwks.json",
   "verify_endpoint": "https://api.example.com/verify",
   "receipt_versions": ["peac-receipt/0.1"],
-  "algorithms": ["EdDSA", "ES256"],
+  "algorithms": ["EdDSA"],
   "payment_rails": ["x402", "stripe"],
   "security_contact": "security@example.com"
 }
@@ -328,7 +336,7 @@ For the complete specification, see `docs/specs/PEAC-ISSUER.md`.
 PEAC sits alongside existing policy mechanisms rather than replacing them. A PEAC-aware agent or enforcement service can:
 
 1. Read peac.txt for economic and receipt requirements.
-2. Read robots.txt, ai.txt, llm.txt, and AIPREF-style manifests for crawl and AI usage guidance.
+2. Read robots.txt (RFC 9309), Content-Usage headers (AIPREF), and tdmrep.json (EU TDM Directive) for crawl and AI usage guidance. The `@peac/mappings-content-signals` package parses all three with source precedence resolution.
 3. Combine these inputs into a single internal policy view before negotiating or sending a request.
 
 ---
@@ -465,7 +473,8 @@ peac/
 │  ├─ middleware-express/   # Express middleware
 │  ├─ adapters/
 │  │  ├─ openclaw/         # OpenClaw agent framework adapter
-│  │  └─ x402/             # x402 adapter (v1/v2 with dialect detection)
+│  │  ├─ x402/             # x402 adapter (v1/v2 with dialect detection)
+│  │  └─ openai-compatible/ # Hash-first inference receipt adapter
 │  ├─ rails/
 │  │  ├─ x402/             # HTTP 402 / x402 payment rail
 │  │  ├─ stripe/           # Stripe payment rail
@@ -475,7 +484,8 @@ peac/
 │  │  ├─ acp/              # Agentic Commerce Protocol mapping
 │  │  ├─ a2a/              # A2A Protocol mapping
 │  │  ├─ ucp/              # Universal Commerce Protocol mapping
-│  │  └─ rsl/              # RSL usage token mapping
+│  │  ├─ rsl/              # RSL usage token mapping
+│  │  └─ content-signals/  # Content use policy signal parsing
 │  ├─ policy-kit/          # Policy authoring and artifact generation
 │  ├─ transport/
 │  │  ├─ grpc/             # gRPC transport binding
@@ -486,6 +496,8 @@ peac/
 │  └─ ...                  # Additional packages
 ├─ sdks/
 │  └─ go/                  # Go SDK (verifier + middleware)
+├─ surfaces/               # Distribution artifacts (plugin-pack, analytics, workers)
+├─ integrator-kits/        # Integration checklists for ecosystem transports
 ├─ examples/               # Canonical flow examples
 └─ archive/                # Legacy pre-v0.9.15 materials (historical)
 ```
@@ -517,7 +529,7 @@ Dependencies flow DOWN only. Never import from a higher layer.
 | ---------------- | --------------------------------------------- |
 | `@peac/kernel`   | Zero-dependency constants and registries      |
 | `@peac/schema`   | TypeScript types, Zod validators, JSON Schema |
-| `@peac/crypto`   | EdDSA/ES256 JWS signing and verification      |
+| `@peac/crypto`   | EdDSA (Ed25519) JWS signing and verification  |
 | `@peac/protocol` | High-level issue() and verify() functions     |
 | `@peac/control`  | Constraint types and enforcement (CAL)        |
 
@@ -540,15 +552,16 @@ Dependencies flow DOWN only. Never import from a higher layer.
 
 **Mappings (stable):**
 
-| Package                 | Description                                                 |
-| ----------------------- | ----------------------------------------------------------- |
-| `@peac/mappings-mcp`    | Model Context Protocol integration with carrier format      |
-| `@peac/mappings-acp`    | Agentic Commerce Protocol integration with budget utilities |
-| `@peac/mappings-a2a`    | A2A Protocol mapping with agent card discovery              |
-| `@peac/mappings-rsl`    | RSL (Robots Standard Language) mapping to CAL purposes      |
-| `@peac/mappings-tap`    | Visa TAP mapping                                            |
-| `@peac/mappings-aipref` | IETF AIPREF vocabulary mapping                              |
-| `@peac/mappings-ucp`    | Universal Commerce Protocol webhook verification            |
+| Package                          | Description                                                         |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `@peac/mappings-mcp`             | Model Context Protocol integration with carrier format              |
+| `@peac/mappings-acp`             | Agentic Commerce Protocol integration with budget utilities         |
+| `@peac/mappings-a2a`             | A2A Protocol mapping with agent card discovery                      |
+| `@peac/mappings-rsl`             | RSL (Robots Standard Language) mapping to CAL purposes              |
+| `@peac/mappings-tap`             | Visa TAP mapping                                                    |
+| `@peac/mappings-aipref`          | IETF AIPREF vocabulary mapping                                      |
+| `@peac/mappings-ucp`             | Universal Commerce Protocol webhook verification                    |
+| `@peac/mappings-content-signals` | Content use policy signal parsing (robots.txt, AIPREF, tdmrep.json) |
 
 **Policy (stable):**
 
@@ -587,10 +600,11 @@ Dependencies flow DOWN only. Never import from a higher layer.
 
 **Adapters:**
 
-| Package                  | Description                                 |
-| ------------------------ | ------------------------------------------- |
-| `@peac/adapter-openclaw` | OpenClaw agent framework integration        |
-| `@peac/adapter-x402`     | x402 adapter (v1/v2 with dialect detection) |
+| Package                           | Description                                                     |
+| --------------------------------- | --------------------------------------------------------------- |
+| `@peac/adapter-openclaw`          | OpenClaw agent framework integration                            |
+| `@peac/adapter-x402`              | x402 adapter (v1/v2 with dialect detection)                     |
+| `@peac/adapter-openai-compatible` | Hash-first inference receipt adapter for OpenAI-compatible APIs |
 
 **Attestations:**
 
@@ -624,7 +638,11 @@ const stepId = generateStepId();
 const { jws } = await issue({
   iss: 'https://api.example.com',
   aud: 'https://client.example.com',
-  subject: '/tools/search',
+  amt: 10,
+  cur: 'USD',
+  rail: 'x402',
+  reference: 'tx_search_001',
+  subject: 'https://api.example.com/tools/search',
   privateKey,
   kid: 'key-2026-01',
   ext: {

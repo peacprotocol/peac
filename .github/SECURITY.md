@@ -29,7 +29,7 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 
 ### Cryptographic Security
 
-- EdDSA (Ed25519) signatures (recommended) and ES256 (ECDSA P-256)
+- EdDSA (Ed25519) signatures (RFC 8032)
 - JWS Compact Serialization
 - Key rotation support via JWKS `kid` matching
 - Hardware security module support
