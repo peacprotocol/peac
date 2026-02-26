@@ -337,7 +337,7 @@ aws s3 sync .peac/receipts s3://my-bucket/peac-receipts/
 
 1. Ensure JWKS includes the signing key
 2. Check `kid` matches between receipt and JWKS
-3. Verify algorithm compatibility (EdDSA, ES256, etc.)
+3. Verify algorithm compatibility (EdDSA/Ed25519 only)
 
 ### Performance issues
 

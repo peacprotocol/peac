@@ -42,7 +42,7 @@
 
 **PEAC's approach:** Standardize machine-readable policies and cryptographically signed receipts that create verifiable evidence at interaction time. Verification is offline and deterministic; it doesn't require trusting the issuer's live systems.
 
-**Result:** Security teams get verifiable evidence for incident response. Compliance teams can prove what terms applied. Billing disputes resolve with cryptographic proof. AI safety reviews have portable artifacts to analyze.
+**Enables:** Verifiable evidence for incident response and compliance. Billing disputes resolve with cryptographic proof. AI safety reviews have portable artifacts to analyze.
 
 ## The model
 
@@ -94,15 +94,12 @@ flowchart LR
 `/.well-known/peac.txt`: machine-readable terms (YAML):
 
 ```yaml
-version: 0.9.2
-protocol: peac
-peac:
-  consent:
-    ai_training: conditional
-  economics:
-    pricing: $0.01/gb
-  attribution:
-    required: true
+version: 'peac-policy/0.1'
+usage: conditional
+purposes: [crawl, index, inference]
+receipts: required
+attribution: required
+rate_limit: '100/hour'
 ```
 
 `PEAC-Receipt` header: signed proof returned on governed responses:
@@ -131,9 +128,9 @@ This repository contains the **reference TypeScript implementation** and a **Go 
 
 ---
 
-## PEAC vs. alternatives
+## Internal logs vs. portable receipts
 
-| Concern                    | Internal Logs             | PEAC Receipts                               |
+| Property                   | Internal Logs             | Portable Receipts                           |
 | -------------------------- | ------------------------- | ------------------------------------------- |
 | **Portability**            | Locked in vendor systems  | Portable across orgs                        |
 | **Verifiability**          | Trust the log owner       | Cryptographic proof (offline)               |
@@ -148,7 +145,7 @@ PEAC is the evidence layer. It records what happened in a format that survives o
 
 - **Neutral by design:** Records what happened in a portable, verifiable format
 - **Offline-verifiable:** Verification is deterministic and can run without network access
-- **Interoperable:** Works alongside HTTP and MCP today (stdio and Streamable HTTP transports); A2A and streaming bindings are specified/planned
+- **Interoperable:** Works alongside HTTP, MCP (stdio and Streamable HTTP), and A2A today; additional transport mappings for ACP, UCP, and x402
 - **Privacy-aware:** Receipts are structured for auditability while supporting minimization and selective disclosure via bundles
 - **Open source:** Apache-2.0 licensed, designed for multiple independent implementations
 
@@ -171,26 +168,27 @@ pnpm add @peac/protocol
 ```typescript
 import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
 
-// Generate a signing key
 const { privateKey, publicKey } = await generateKeypair();
 
-// Issue a receipt (minimal record)
 const { jws } = await issue({
   iss: 'https://api.example.com',
   aud: 'https://client.example.com',
+  amt: 100,
+  cur: 'USD',
+  rail: 'stripe',
+  reference: 'tx_abc123',
   subject: 'https://api.example.com/inference',
   privateKey,
-  kid: 'key-2026-01',
+  kid: 'key-2026-02-26',
 });
 
-// Verify with schema validation + binding checks
 const result = await verifyLocal(jws, publicKey, {
   issuer: 'https://api.example.com',
   audience: 'https://client.example.com',
 });
 
 if (result.valid) {
-  console.log('Verified:', result.claims.iss, result.claims.sub);
+  console.log(result.variant, result.claims.iss);
 }
 ```
 
@@ -218,7 +216,7 @@ See [examples/quickstart/](examples/quickstart/) for runnable code. For settleme
 
 ## CLI
 
-> **Note:** `@peac/cli` may not be published to npm yet. From this repo root: `pnpm install && pnpm --filter @peac/cli exec peac --help`.
+> Install: `pnpm add @peac/cli` or run from this repo: `pnpm --filter @peac/cli exec peac --help`.
 
 ```bash
 peac verify 'eyJhbGc...'                # Verify a receipt
@@ -311,7 +309,9 @@ Stewardship: [Originary](https://www.originary.xyz/) and the open source communi
 - **TypeScript** (this repo): `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
 - **Go**: [sdks/go/](sdks/go/) native implementation
 - **MCP**: [MCP server](packages/mcp-server/) (5 tools) and [MCP carrier mapping](packages/mappings/mcp/)
+- **A2A**: [A2A carrier mapping](packages/mappings/a2a/) for agent-to-agent evidence
 - **HTTP middleware**: [Express](packages/middleware-express/) automatic receipt issuance
+- **x402**: [x402 adapter](packages/adapters/x402/) for machine payment evidence
 
 Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new).
 

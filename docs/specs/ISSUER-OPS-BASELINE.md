@@ -15,11 +15,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ### 2.1 Algorithm
 
 - Issuers MUST support Ed25519 (EdDSA, RFC 8032) for signing
-- Issuers MAY additionally support ES256 (ECDSA with P-256) for interoperability
-- Issuers MUST NOT use RSA or other algorithms for PEAC receipts
+- Issuers MUST NOT use RSA, ES256, or other algorithms for PEAC receipts
 - Ed25519 key size: 256 bits (32 bytes) for private key, 256 bits for public key
-
-**Recommendation**: Use Ed25519 as the default. ES256 is permitted for environments where Ed25519 is not available (e.g., some HSMs, legacy integrations).
 
 ### 2.2 Key generation
 

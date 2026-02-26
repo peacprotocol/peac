@@ -5,22 +5,18 @@ Agent-readable metadata for PEAC Protocol.
 ## Identity
 
 - **Protocol**: PEAC (wire format: `peac-receipt/0.1`)
-- **Specification**: https://www.peacprotocol.org/specs/agent-identity
-- **Key Directory**: Discovered via issuer config chain: `iss` -> `/.well-known/peac-issuer.json` -> `jwks_uri` -> JWKS (see [PEAC-ISSUER.md](docs/specs/PEAC-ISSUER.md) Section 3.4)
-- **Algorithms**: EdDSA (Ed25519), ES256 (ECDSA P-256)
+- **Specification**: <https://www.peacprotocol.org>
+- **Key Discovery**: `iss` -> `/.well-known/peac-issuer.json` -> `jwks_uri` -> JWKS
+- **Algorithm**: EdDSA (Ed25519)
 
 ## Capabilities
 
-PEAC Protocol provides:
-
-- **Receipt Verification**: Cryptographic proof of access decisions
+- **Receipt Issuance and Verification**: Signed receipts (`peac-receipt/0.1` JWS) for verifiable interaction evidence
 - **Purpose Declaration**: Structured intent via `PEAC-Purpose` header
-- **Agent Identity**: Proof-of-control binding with `operator` and `user-delegated` control types
-- **Policy Evaluation**: Profile-based access control (strict/balanced/open)
+- **Agent Identity**: Proof-of-control binding (see [AGENT-IDENTITY.md](docs/specs/AGENT-IDENTITY.md))
+- **Policy Discovery**: Machine-readable terms at `/.well-known/peac.txt`
 
 ## Proof Methods
-
-Supported agent proof methods:
 
 | Method                   | Standard | Description                   |
 | ------------------------ | -------- | ----------------------------- |
@@ -31,12 +27,9 @@ Supported agent proof methods:
 
 ## MCP Integration
 
-PEAC receipts are attached to MCP (Model Context Protocol) messages via the Evidence Carrier Contract.
+PEAC receipts attach to MCP tool responses via the Evidence Carrier Contract.
 
-**JSON-RPC Response (`_meta` carrier, v0.11.1+):**
-
-Per MCP specification (2025-11-25), use reverse-DNS keys in `_meta` to avoid collisions.
-The `org.peacprotocol/` prefix is not reserved (second label is `peacprotocol`, not `modelcontextprotocol` or `mcp`).
+**JSON-RPC Response (`_meta` carrier):**
 
 ```json
 {
@@ -46,15 +39,11 @@ The `org.peacprotocol/` prefix is not reserved (second label is `peacprotocol`, 
     "content": [...],
     "_meta": {
       "org.peacprotocol/receipt_ref": "sha256:abc123...",
-      "org.peacprotocol/receipt_jws": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...",
-      "org.peacprotocol/agent_id": "assistant:example",
-      "org.peacprotocol/verified_at": "2026-01-30T12:00:00Z"
+      "org.peacprotocol/receipt_jws": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ..."
     }
   }
 }
 ```
-
-**Legacy format (v0.10.13):** The `org.peacprotocol/receipt` key (JWS string without `receipt_ref`) is still readable for backward compatibility. New integrations SHOULD use the carrier format above.
 
 **HTTP Transport:**
 
@@ -62,7 +51,7 @@ The `org.peacprotocol/` prefix is not reserved (second label is `peacprotocol`, 
 PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
 ```
 
-The `PEAC-Receipt` header always carries a compact JWS (never a bare `receipt_ref`).
+The `PEAC-Receipt` header carries a compact JWS (never a bare `receipt_ref`).
 
 ## A2A Agent Card Extension
 
@@ -107,12 +96,11 @@ The extension URI key maps to a nested object containing the carrier array. This
 
 ## Discovery
 
-| Path                            | Content                              | Specification                                           |
-| ------------------------------- | ------------------------------------ | ------------------------------------------------------- |
-| `/.well-known/peac.txt`         | Policy manifest                      | [PEAC-TXT.md](docs/specs/PEAC-TXT.md)                   |
-| `/.well-known/peac-policy.yaml` | Policy document (fallback)           | [PEAC-TXT.md](docs/specs/PEAC-TXT.md)                   |
-| `/.well-known/peac-issuer.json` | Issuer config and key discovery      | [PEAC-ISSUER.md](docs/specs/PEAC-ISSUER.md)             |
-| `/.well-known/agent-card.json`  | A2A Agent Card (with PEAC extension) | [DISCOVERY-PROFILE.md](docs/specs/DISCOVERY-PROFILE.md) |
+| Path                            | Content                         | Specification                                           |
+| ------------------------------- | ------------------------------- | ------------------------------------------------------- |
+| `/.well-known/peac.txt`         | Policy manifest                 | [PEAC-TXT.md](docs/specs/PEAC-TXT.md)                   |
+| `/.well-known/peac-issuer.json` | Issuer config and key discovery | [PEAC-ISSUER.md](docs/specs/PEAC-ISSUER.md)             |
+| `/.well-known/agent-card.json`  | A2A Agent Card (PEAC extension) | [DISCOVERY-PROFILE.md](docs/specs/DISCOVERY-PROFILE.md) |
 
 ## Purpose Tokens
 
@@ -128,6 +116,6 @@ Canonical PEAC purpose vocabulary:
 
 ## Contact
 
-- **Specification**: https://www.peacprotocol.org
-- **Repository**: https://github.com/peacprotocol/peac
-- **Issues**: https://github.com/peacprotocol/peac/issues
+- **Specification**: <https://www.peacprotocol.org>
+- **Repository**: <https://github.com/peacprotocol/peac>
+- **Issues**: <https://github.com/peacprotocol/peac/issues>

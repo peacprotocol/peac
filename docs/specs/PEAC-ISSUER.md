@@ -121,10 +121,9 @@ Default if not specified: `["EdDSA"]`
 
 Supported algorithms:
 
-| Algorithm | Description                  |
-| --------- | ---------------------------- |
-| `EdDSA`   | Ed25519 (recommended)        |
-| `ES256`   | ECDSA with P-256 and SHA-256 |
+| Algorithm | Description        |
+| --------- | ------------------ |
+| `EdDSA`   | Ed25519 (RFC 8032) |
 
 ---
 
@@ -410,7 +409,7 @@ A verifier implementation MUST:
   "jwks_uri": "https://api.example.com/.well-known/jwks.json",
   "verify_endpoint": "https://api.example.com/peac/verify",
   "receipt_versions": ["peac-receipt/0.1"],
-  "algorithms": ["EdDSA", "ES256"],
+  "algorithms": ["EdDSA"],
   "payment_rails": ["x402", "stripe", "razorpay"],
   "security_contact": "https://api.example.com/.well-known/security.txt"
 }
