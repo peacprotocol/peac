@@ -56,7 +56,7 @@ The `Payment-Required` header (v2) replaces the `X-PAYMENT` header from v1.
 
 ```json
 {
-  "typ": "peac.receipt/0.9",
+  "typ": "peac-receipt/0.1",
   "iss": "https://payment.example.com",
   "aud": "https://api.example.com/premium/data",
   "amt": 50,

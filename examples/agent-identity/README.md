@@ -1,6 +1,6 @@
 # Agent Identity Example
 
-This example demonstrates PEAC Agent Identity attestations (v0.9.25+).
+This example demonstrates PEAC Agent Identity attestations.
 
 ## Overview
 
@@ -35,7 +35,7 @@ pnpm start:publisher  # Show verification flow
 
 ```
 =============================================
-    PEAC Agent Identity Demo (v0.9.25)
+    PEAC Agent Identity Demo
 =============================================
 
 --- Scenario 1: Operator Bot ---

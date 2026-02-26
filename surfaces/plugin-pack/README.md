@@ -27,12 +27,42 @@ cp surfaces/plugin-pack/cursor/peac.mdc .cursor/rules/peac.mdc
 
 The rules file provides import patterns, API usage examples, package layering guidance, and coding conventions for PEAC Protocol development.
 
+## Continue.dev
+
+Add the PEAC MCP server to your Continue config (`~/.continue/config.json`):
+
+```json
+{
+  "mcpServers": [
+    {
+      "name": "peac",
+      "command": "npx",
+      "args": ["-y", "@peac/mcp-server"]
+    }
+  ]
+}
+```
+
+A config snippet is available at `continue/peac.json`.
+
+## Windsurf
+
+Copy the rules file to your project root:
+
+```bash
+cp surfaces/plugin-pack/windsurf/peac.windsurfrules .windsurfrules
+```
+
+The rules file provides import patterns, API usage examples, package layering guidance, and coding conventions for PEAC Protocol development.
+
 ## What's Included
 
-| File                        | Purpose                                                                        |
-| --------------------------- | ------------------------------------------------------------------------------ |
-| `claude-code/peac/SKILL.md` | Claude Code skill: receipt operations (verify, issue, inspect, decode, bundle) |
-| `cursor/peac.mdc`           | Cursor rules: import patterns, API examples, layering, conventions             |
+| File                          | Purpose                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| `claude-code/peac/SKILL.md`   | Claude Code skill: receipt operations (verify, issue, inspect, decode, bundle) |
+| `cursor/peac.mdc`             | Cursor rules: import patterns, API examples, layering, conventions             |
+| `continue/peac.json`          | Continue.dev MCP server config snippet                                         |
+| `windsurf/peac.windsurfrules` | Windsurf rules: import patterns, API examples, layering, conventions           |
 
 ## Security
 

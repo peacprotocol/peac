@@ -1,0 +1,101 @@
+## PEAC Protocol
+
+PEAC provides cryptographically signed, offline-verifiable receipts for automated interactions. Wire format: `peac-receipt/0.1` (frozen). Signing algorithm: Ed25519 (EdDSA).
+
+### Package Layering
+
+Dependencies flow DOWN only. Never import from a higher layer.
+
+- **Layer 0** `@peac/kernel`: Types, constants, error codes. Zero runtime.
+- **Layer 1** `@peac/schema`: Zod validation schemas, `computeReceiptRef()`, `assertJsonSafeIterative()`.
+- **Layer 2** `@peac/crypto`: Ed25519 signing, JWS encode/decode, `sha256Hex()`.
+- **Layer 3** `@peac/protocol`: `issue()`, `verifyLocal()`, `verifyReceipt()`.
+- **Layer 4** `@peac/mappings-*`, `@peac/adapter-*`: Protocol-specific adapters.
+- **Layer 5** `@peac/mcp-server`: MCP server with 5 tools.
+
+### Import Patterns
+
+```typescript
+// Types and constants (Layer 0)
+import { WIRE_TYPE, HEADERS, type PeacEvidenceCarrier, type CarrierAdapter } from '@peac/kernel';
+
+// Validation (Layer 1)
+import { computeReceiptRef, validateCarrierConstraints, assertJsonSafeIterative } from '@peac/schema';
+
+// Crypto (Layer 2)
+import { sign, verify, base64urlEncode, base64urlDecode } from '@peac/crypto';
+
+// High-level API (Layer 3)
+import { issue, verifyLocal, type IssueOptions, type VerifyLocalResult } from '@peac/protocol';
+```
+
+### Key APIs
+
+#### Verify a receipt (offline)
+
+```typescript
+import { verifyLocal } from '@peac/protocol';
+
+const result = await verifyLocal(jws, publicKey, {
+  issuer: 'https://issuer.example.com',
+  audience: 'https://consumer.example.com',
+});
+
+if (result.valid) {
+  console.log(result.variant, result.claims);
+} else {
+  console.log(result.code, result.message);
+}
+```
+
+#### Issue a receipt
+
+```typescript
+import { issue } from '@peac/protocol';
+
+const { jws } = await issue({
+  iss: 'https://issuer.example.com',
+  aud: 'https://consumer.example.com',
+  amt: 100,
+  cur: 'USD',
+  rail: 'stripe',
+  reference: 'pi_abc123',
+  privateKey,
+  kid: 'key-2026-02',
+});
+```
+
+#### Compute a receipt reference
+
+```typescript
+import { computeReceiptRef } from '@peac/schema';
+const ref = await computeReceiptRef(jws); // sha256:<hex64>
+```
+
+#### Evidence Carrier Contract
+
+```typescript
+import type { CarrierAdapter, PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
+
+class MyAdapter implements CarrierAdapter<MyInput, MyOutput> {
+  extract(input: MyInput) { /* ... */ }
+  attach(output: MyOutput, carriers: PeacEvidenceCarrier[]) { /* ... */ }
+  validateConstraints(carrier, meta) { /* ... */ }
+}
+```
+
+### Constants
+
+- Wire format: `peac-receipt/0.1` (frozen, do not change)
+- JWS header: `{ typ: 'PEAC/0.1', alg: 'EdDSA', kid: '<key-id>' }`
+- HTTP header: `PEAC-Receipt` (compact JWS)
+- Discovery: `/.well-known/peac-issuer.json` with `jwks_uri`
+- Policy: `/.well-known/peac.txt`
+
+### Rules
+
+- Always verify receipts before trusting claims.
+- Use `receipt_ref` (`sha256:<hex64>`) for content-addressed references.
+- Evidence must pass `assertJsonSafeIterative()` before signing.
+- No raw prompt/completion text in receipts (hash-first model for inference).
+- PEAC records evidence; it does not enforce behavior.
