@@ -95,6 +95,25 @@ Select the matching accept entry. Throws `X402Error` on failure.
 
 Map an x402 payment flow to a PEAC interaction record.
 
+## x402 Version Support
+
+This adapter supports x402 **Offer/Receipt extension version 1** (default).
+
+| Component               | Versions     | Details                                                   |
+| ----------------------- | ------------ | --------------------------------------------------------- |
+| Offer/Receipt extension | v1 (default) | Configurable via `supportedVersions` option               |
+| HTTP header dialect     | v1 + v2      | Auto-detected by `@peac/rails-x402` via `detectDialect()` |
+
+The version is configurable per call:
+
+```typescript
+const result = verifyOffer(offer, accepts, acceptIndex, {
+  supportedVersions: ['1', '2'],
+});
+```
+
+The adapter defines its own x402 types (no external x402 npm dependencies). If x402 v2 introduces new required payload fields, update the adapter types and add conformance vectors.
+
 ## Error handling
 
 All verification functions return structured results with error arrays.
