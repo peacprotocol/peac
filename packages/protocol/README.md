@@ -5,7 +5,7 @@ PEAC protocol implementation: receipt issuance, offline verification, and JWKS r
 ## Installation
 
 ```bash
-pnpm add @peac/protocol @peac/crypto
+pnpm add @peac/protocol
 ```
 
 ## What It Does
@@ -56,8 +56,10 @@ import { verifyReceipt } from '@peac/protocol';
 // Resolves issuer's /.well-known/peac-issuer.json -> jwks_uri -> public key
 const result = await verifyReceipt(jws);
 
-if (result.valid) {
-  console.log('Verified against issuer JWKS');
+if (result.ok) {
+  console.log('Issuer:', result.claims.iss);
+} else {
+  console.log(result.reason, result.details);
 }
 ```
 

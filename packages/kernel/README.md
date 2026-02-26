@@ -26,7 +26,7 @@ import type { PeacEvidenceCarrier, CarrierAdapter, CarrierMeta } from '@peac/ker
 import { WIRE_TYPE, HEADERS, ALGORITHMS } from '@peac/kernel';
 
 console.log(WIRE_TYPE); // 'peac-receipt/0.1'
-console.log(HEADERS.PEAC_RECEIPT); // 'PEAC-Receipt'
+console.log(HEADERS.receipt); // 'PEAC-Receipt'
 ```
 
 ### Access error definitions with recovery hints
@@ -34,10 +34,10 @@ console.log(HEADERS.PEAC_RECEIPT); // 'PEAC-Receipt'
 ```typescript
 import { ERRORS } from '@peac/kernel';
 
-const err = ERRORS.SIGNATURE_INVALID;
-console.log(err.code); // 'SIGNATURE_INVALID'
-console.log(err.retryable); // false
-console.log(err.next_action); // 'abort'
+const err = ERRORS.E_JWKS_FETCH_FAILED;
+console.log(err.code); // 'E_JWKS_FETCH_FAILED'
+console.log(err.retryable); // true
+console.log(err.next_action); // 'retry_after_delay'
 ```
 
 ### Use registry enums

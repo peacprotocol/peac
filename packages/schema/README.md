@@ -15,13 +15,13 @@ pnpm add @peac/schema
 ## How Do I Validate a Receipt?
 
 ```typescript
-import { parseReceipt, type ParseSuccess } from '@peac/schema';
+import { parseReceiptClaims } from '@peac/schema';
 
-const result = parseReceipt(decodedPayload);
+const result = parseReceiptClaims(decodedPayload);
 
-if (result.success) {
+if (result.ok) {
+  console.log(result.variant); // 'commerce' or 'attestation'
   console.log(result.claims.iss); // validated issuer
-  console.log(result.claims.amt); // validated amount
 }
 ```
 
@@ -48,15 +48,22 @@ if (!result.safe) {
 ## How Do I Validate an Evidence Carrier?
 
 ```typescript
-import { validateCarrierConstraints, type PeacEvidenceCarrier } from '@peac/schema';
+import { validateCarrierConstraints, CARRIER_TRANSPORT_LIMITS } from '@peac/schema';
+import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
 
 const carrier: PeacEvidenceCarrier = {
   receipt_jws: jws,
   receipt_ref: ref,
 };
 
-const issues = validateCarrierConstraints(carrier, { transport: 'mcp' });
-// [] if valid, or array of constraint violations
+const meta: CarrierMeta = {
+  transport: 'mcp',
+  format: 'embed',
+  max_size: CARRIER_TRANSPORT_LIMITS.mcp,
+};
+
+const result = validateCarrierConstraints(carrier, meta);
+// result.valid: boolean, result.violations: string[]
 ```
 
 ## Integrates With

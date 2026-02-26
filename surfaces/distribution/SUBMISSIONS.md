@@ -4,25 +4,25 @@ Copy-paste fields for submitting `@peac/mcp-server` to MCP directories.
 
 ## Common Fields
 
-| Field         | Value                                          |
-| ------------- | ---------------------------------------------- |
-| **Name**      | PEAC Protocol                                  |
-| **Package**   | `@peac/mcp-server`                             |
-| **npm**       | https://www.npmjs.com/package/@peac/mcp-server |
-| **GitHub**    | https://github.com/peacprotocol/peac           |
-| **Homepage**  | https://www.peacprotocol.org                   |
-| **License**   | Apache-2.0                                     |
-| **Install**   | `npx -y @peac/mcp-server`                      |
-| **Transport** | stdio (default), Streamable HTTP               |
-| **Node.js**   | >= 22.0.0                                      |
+| Field         | Value                                            |
+| ------------- | ------------------------------------------------ |
+| **Name**      | PEAC Protocol                                    |
+| **Package**   | `@peac/mcp-server`                               |
+| **npm**       | <https://www.npmjs.com/package/@peac/mcp-server> |
+| **GitHub**    | <https://github.com/peacprotocol/peac>           |
+| **Homepage**  | <https://www.peacprotocol.org>                   |
+| **License**   | Apache-2.0                                       |
+| **Install**   | `npx -y @peac/mcp-server`                        |
+| **Transport** | stdio (default), Streamable HTTP                 |
+| **Node.js**   | >= 22.0.0                                        |
 
 ## Short Description (1 line)
 
-Verify, issue, and bundle cryptographic evidence receipts for AI agent interactions: locally, offline, no API keys.
+MCP server providing 5 tools to verify, inspect, decode, issue, and bundle PEAC evidence receipts.
 
 ## Medium Description (2-3 sentences)
 
-PEAC Protocol MCP server provides 5 tools for cryptographic evidence receipts: verify signatures, inspect metadata, decode payloads, issue signed receipts, and create evidence bundles. Works offline with Ed25519 signatures. No API keys needed for read-only operations.
+PEAC Protocol MCP server provides 5 tools for cryptographic evidence receipts: verify Ed25519 signatures, inspect metadata, decode payloads, issue signed receipts, and create evidence bundles. Read-only operations (verify, inspect, decode) require no configuration. Issuance requires an Ed25519 key via `--issuer-key`.
 
 ## Tools
 
@@ -40,15 +40,15 @@ Evidence, Verification, Security, Cryptography, Audit, Compliance, Receipts
 
 ## Submission URLs
 
-| Directory               | URL                                                   | Status         |
-| ----------------------- | ----------------------------------------------------- | -------------- |
-| MCP Registry (Official) | Published via `mcp-publisher` CLI                     | Done           |
-| PulseMCP                | Auto-ingested from MCP Registry                       | Done           |
-| Smithery                | https://smithery.ai/new                               | Pending        |
-| mcpservers.org          | https://mcpservers.org/submit                         | Pending        |
-| mcp.so                  | https://mcp.so/submit                                 | Pending        |
-| awesome-mcp-servers     | PR to https://github.com/punkpeye/awesome-mcp-servers | Pending        |
-| Glama                   | Auto-indexed from GitHub                              | Verify listing |
+| Directory               | URL                                                     | Status         |
+| ----------------------- | ------------------------------------------------------- | -------------- |
+| MCP Registry (Official) | Published via `mcp-publisher` CLI                       | Done           |
+| PulseMCP                | Auto-ingested from MCP Registry                         | Done           |
+| Smithery                | <https://smithery.ai/new>                               | Pending        |
+| mcpservers.org          | <https://mcpservers.org/submit>                         | Pending        |
+| mcp.so                  | <https://mcp.so/submit>                                 | Pending        |
+| awesome-mcp-servers     | PR to <https://github.com/punkpeye/awesome-mcp-servers> | Pending        |
+| Glama                   | Auto-indexed from GitHub                                | Verify listing |
 
 ## awesome-mcp-servers PR Entry
 

@@ -1,12 +1,12 @@
-# PEAC Integrator Kit
+# PEAC Integration Checklist
 
-One-page overview for potential integration partners. Use this when reaching out to A2A, x402, MCP ecosystem, or agent platform teams.
+One-page technical overview for evaluating PEAC Protocol integration with agent transports and platforms.
 
 ## What PEAC Does
 
 PEAC Protocol is a portable, offline-verifiable evidence layer for AI agent interactions. It signs cryptographic receipts (Ed25519, JWS compact) that prove what terms applied and what happened, without requiring network calls to verify.
 
-## 10-Second Demo
+## Quick Start
 
 ```bash
 npx -y @peac/mcp-server --help
@@ -50,9 +50,9 @@ const { jws } = await issue({
 const result = await verifyLocal(jws, publicKey);
 ```
 
-## What We Ship
+## Packages
 
-| Package                          | What                          | npm                                                                                            |
+| Package                          | Description                   | npm                                                                                            |
 | -------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------- |
 | `@peac/protocol`                 | Issue + verify receipts       | [@peac/protocol](https://www.npmjs.com/package/@peac/protocol)                                 |
 | `@peac/mcp-server`               | MCP server (5 tools)          | [@peac/mcp-server](https://www.npmjs.com/package/@peac/mcp-server)                             |
@@ -72,19 +72,17 @@ const result = await verifyLocal(jws, publicKey);
 | x402      | Settlement response evidence         | `@peac/adapter-x402`                       |
 | ACP/UCP   | State transition metadata            | `@peac/mappings-acp`, `@peac/mappings-ucp` |
 
-## What We Need From You (Micro-Asks)
+## Compatibility Checks
 
-Pick one that takes less than 10 minutes:
-
-1. **"Does this carrier format work?"** Run our conformance harness against your test messages and tell us if the receipt placement feels right for your transport.
+1. **Carrier format verification:** Clone the repo and run the MCP server smoke test to confirm receipt placement works for your transport.
 
 ```bash
-npx @peac/conformance-harness --transport mcp
+git clone https://github.com/peacprotocol/peac.git
+cd peac && pnpm install && pnpm build
+pnpm test --filter @peac/mappings-mcp
 ```
 
-2. **"Is this extension URI correct?"** Check that `org.peacprotocol/receipt_ref` and `org.peacprotocol/receipt_jws` are reasonable extension key names for your metadata format.
-
-3. **"Would you link to us?"** Add PEAC to your integrations page or Agent Card extensions list. We provide the `server.json`, `smithery.yaml`, and README content.
+1. **Extension URI review:** Verify that `org.peacprotocol/receipt_ref` and `org.peacprotocol/receipt_jws` are compatible extension key names for your metadata format.
 
 ## Links
 

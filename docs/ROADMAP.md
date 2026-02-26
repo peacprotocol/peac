@@ -41,23 +41,20 @@
 | Identity Types  | `FingerprintRef`, `ActorBinding`           |
 | Conformance     | ~35 vectors (3 per kind + 5 cross-kind)    |
 
-Wire 0.2 will ship as a preview release (`next` npm tag) first, with Wire 0.1 remaining the stable default. Promotion to `latest` is adoption-gated (2+ ecosystems, performance SLOs, security review).
+Wire 0.2 will ship as a preview release (`next` npm tag) first, with Wire 0.1 remaining the stable default. Promotion criteria: 2+ independent ecosystem integrations, performance targets met, security review complete.
 
 ## Version History
 
 See [GitHub Releases](https://github.com/peacprotocol/peac/releases) for detailed release notes.
 
-| Version  | Date         | Highlights                                                                                              |
-| -------- | ------------ | ------------------------------------------------------------------------------------------------------- |
-| v0.11.2  | Feb 25, 2026 | Error recovery hints, content signals, OpenAI adapter, evidence locators, MCP server manifests          |
-| v0.11.1  | Feb 24, 2026 | Evidence Carrier Contract, A2A mapping, MCP/ACP/UCP/x402 carrier adoption, discovery profile            |
-| v0.11.0  | Feb 23, 2026 | Zod 4 migration, MCP Streamable HTTP transport, kernel constraints, integrator kit, OWASP ASI alignment |
-| v0.10.14 | Feb 22, 2026 | Fixture versioning, kernel constraints formalization, Zod 4 prep                                        |
-| v0.10.13 | Feb 19, 2026 | MCP server (5 tools), handler-transport separation, SSRF prevention                                     |
-| v0.10.12 | Feb 16, 2026 | Capture pipeline, OpenClaw activation, RFC 9421 proof capture                                           |
-| v0.10.11 | Feb 14, 2026 | Noble Ed25519 v3, registry v0.3.0, supply chain hardening                                               |
-| v0.10.x  | Feb 2026     | Dev toolchain modernization, foundation hardening                                                       |
-| v0.9.x   | 2025         | Core protocol, attestations, Go SDK, Policy Kit                                                         |
+| Version  | Date         | Highlights                                                                                     |
+| -------- | ------------ | ---------------------------------------------------------------------------------------------- |
+| v0.11.2  | Feb 24, 2026 | Error recovery hints, content signals, OpenAI adapter, evidence locators, MCP server manifests |
+| v0.11.1  |              | Evidence Carrier Contract, A2A/MCP/ACP/UCP/x402 carrier adoption, discovery profile            |
+| v0.11.0  |              | Zod 4 migration, MCP Streamable HTTP transport, kernel constraints, OWASP ASI alignment        |
+| v0.10.13 |              | MCP server (5 tools), handler-transport separation, SSRF prevention                            |
+| v0.10.x  |              | Capture pipeline, supply chain hardening, dev toolchain modernization                          |
+| v0.9.x   | 2025         | Core protocol, attestations, Go SDK, Policy Kit                                                |
 
 ## Design Principles
 

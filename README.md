@@ -310,8 +310,8 @@ Stewardship: [Originary](https://www.originary.xyz/) and the open source communi
 
 - **TypeScript** (this repo): `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
 - **Go**: [sdks/go/](sdks/go/) native implementation
-- **MCP**: [MCP adapter](packages/adapter-mcp/) for Model Context Protocol
-- **HTTP middleware**: [Express](packages/middleware/express/), [Hono](packages/middleware/hono/)
+- **MCP**: [MCP server](packages/mcp-server/) (5 tools) and [MCP carrier mapping](packages/mappings/mcp/)
+- **HTTP middleware**: [Express](packages/middleware-express/) automatic receipt issuance
 
 Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new).
 
