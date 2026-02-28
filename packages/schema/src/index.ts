@@ -114,6 +114,29 @@ export type {
   CreateAgentIdentityAttestationParams,
 } from './agent-identity';
 
+// ActorBinding + MVIS (v0.11.3+ DD-142, DD-143, DD-144)
+export {
+  ProofTypeSchema,
+  ActorBindingSchema,
+  MVISFieldsSchema,
+  MVISTimeBoundsSchema,
+  MVISReplayProtectionSchema,
+  // Constants
+  PROOF_TYPES,
+  ACTOR_BINDING_EXTENSION_KEY,
+  // Helpers
+  isOriginOnly,
+  validateActorBinding,
+  validateMVIS,
+} from './actor-binding';
+export type {
+  ProofType,
+  ActorBinding,
+  MVISFields,
+  MVISTimeBounds,
+  MVISReplayProtection,
+} from './actor-binding';
+
 // Attribution validators (v0.9.26+)
 export {
   HashAlgorithmSchema,

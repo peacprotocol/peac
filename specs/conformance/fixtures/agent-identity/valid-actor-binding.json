@@ -1,0 +1,120 @@
+{
+  "$comment": "Valid ActorBinding fixtures: one per proof_type (DD-142, DD-143, v0.11.3+)",
+  "version": "0.11.3",
+  "fixtures": [
+    {
+      "name": "ed25519-cert-chain",
+      "description": "ActorBinding with Ed25519 issuer-to-holder attestation chain (RFC 8032)",
+      "input": {
+        "id": "agent:crawler-prod-001",
+        "proof_type": "ed25519-cert-chain",
+        "proof_ref": "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+        "origin": "https://crawler.example.com",
+        "intent_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "expected": {
+        "valid": true,
+        "proof_type": "ed25519-cert-chain"
+      }
+    },
+    {
+      "name": "eat-passport",
+      "description": "ActorBinding with EAT Passport model (RFC 9711 RATS)",
+      "input": {
+        "id": "agent:attested-device-001",
+        "proof_type": "eat-passport",
+        "proof_ref": "urn:ietf:params:eat:profile:example-passport",
+        "origin": "https://attestation.example.com"
+      },
+      "expected": {
+        "valid": true,
+        "proof_type": "eat-passport"
+      }
+    },
+    {
+      "name": "eat-background-check",
+      "description": "ActorBinding with EAT Background-Check model (RFC 9711 RATS)",
+      "input": {
+        "id": "agent:background-verified-001",
+        "proof_type": "eat-background-check",
+        "proof_ref": "https://verifier.example.com/attestation-results/abc123",
+        "origin": "https://platform.example.com"
+      },
+      "expected": {
+        "valid": true,
+        "proof_type": "eat-background-check"
+      }
+    },
+    {
+      "name": "sigstore-oidc",
+      "description": "ActorBinding with Sigstore OIDC keyless signing (Fulcio + Rekor)",
+      "input": {
+        "id": "agent:ci-pipeline-runner",
+        "proof_type": "sigstore-oidc",
+        "proof_ref": "https://rekor.sigstore.dev/api/v1/log/entries/abc123def456",
+        "origin": "https://ci.example.com"
+      },
+      "expected": {
+        "valid": true,
+        "proof_type": "sigstore-oidc"
+      }
+    },
+    {
+      "name": "did",
+      "description": "ActorBinding with W3C Decentralized Identifier (DID)",
+      "input": {
+        "id": "did:web:agent.example.com",
+        "proof_type": "did",
+        "proof_ref": "did:web:agent.example.com#key-1",
+        "origin": "https://agent.example.com"
+      },
+      "expected": {
+        "valid": true,
+        "proof_type": "did"
+      }
+    },
+    {
+      "name": "spiffe",
+      "description": "ActorBinding with CNCF SPIFFE workload identity",
+      "input": {
+        "id": "spiffe://cluster.example.com/ns/prod/sa/agent",
+        "proof_type": "spiffe",
+        "proof_ref": "spiffe://cluster.example.com/ns/prod/sa/agent",
+        "origin": "https://cluster.example.com"
+      },
+      "expected": {
+        "valid": true,
+        "proof_type": "spiffe"
+      }
+    },
+    {
+      "name": "x509-pki",
+      "description": "ActorBinding with traditional X.509 PKI certificate chain (RFC 5280)",
+      "input": {
+        "id": "agent:tls-verified-001",
+        "proof_type": "x509-pki",
+        "proof_ref": "sha256:b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4",
+        "origin": "https://secure.example.com:8443"
+      },
+      "expected": {
+        "valid": true,
+        "proof_type": "x509-pki"
+      }
+    },
+    {
+      "name": "custom",
+      "description": "ActorBinding with vendor-defined proof type",
+      "input": {
+        "id": "agent:vendor-custom-001",
+        "proof_type": "custom",
+        "proof_ref": "https://vendor.example.com/proof/xyz789",
+        "origin": "https://vendor.example.com"
+      },
+      "expected": {
+        "valid": true,
+        "proof_type": "custom"
+      }
+    }
+  ],
+  "schema_version": "0.11.3"
+}
