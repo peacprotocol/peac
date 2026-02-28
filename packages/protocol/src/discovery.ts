@@ -18,6 +18,7 @@ import {
   PEAC_POLICY_PATH,
   PEAC_POLICY_FALLBACK_PATH,
   PEAC_POLICY_MAX_BYTES,
+  validateRevokedKeys,
 } from '@peac/schema';
 
 // ============================================================================
@@ -107,6 +108,19 @@ export function parseIssuerConfig(json: string | object): PEACIssuerConfig {
     }
   }
 
+  // Validate revoked_keys (DD-148, v0.11.3+)
+  let revokedKeys: PEACIssuerConfig['revoked_keys'];
+  if (obj.revoked_keys !== undefined) {
+    if (!Array.isArray(obj.revoked_keys)) {
+      throw new Error('revoked_keys must be an array');
+    }
+    const result = validateRevokedKeys(obj.revoked_keys);
+    if (!result.ok) {
+      throw new Error(`Invalid revoked_keys: ${result.error}`);
+    }
+    revokedKeys = result.value;
+  }
+
   return {
     version: obj.version,
     issuer: obj.issuer,
@@ -116,6 +130,7 @@ export function parseIssuerConfig(json: string | object): PEACIssuerConfig {
     algorithms: obj.algorithms as string[] | undefined,
     payment_rails: obj.payment_rails as string[] | undefined,
     security_contact: obj.security_contact as string | undefined,
+    revoked_keys: revokedKeys,
   };
 }
 

@@ -42,6 +42,15 @@ export interface JWKS {
 }
 
 /**
+ * Revoked key entry from issuer configuration (DD-148)
+ */
+export interface RevokedKeyInfo {
+  kid: string;
+  revoked_at: string;
+  reason?: string;
+}
+
+/**
  * Successful JWKS resolution
  */
 export interface JWKSResolveSuccess {
@@ -50,6 +59,8 @@ export interface JWKSResolveSuccess {
   fromCache: boolean;
   /** Raw JWKS bytes for digest computation (only present when not from cache) */
   rawBytes?: Uint8Array;
+  /** Revoked keys from issuer configuration (DD-148, v0.11.3+) */
+  revokedKeys?: RevokedKeyInfo[];
 }
 
 /**
@@ -88,11 +99,68 @@ export interface ResolveJWKSOptions {
 interface JWKSCacheEntry {
   jwks: JWKS;
   expiresAt: number;
+  revokedKeys?: RevokedKeyInfo[];
 }
 
 const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const DEFAULT_MAX_CACHE_ENTRIES = 1000;
 const jwksCache = new Map<string, JWKSCacheEntry>();
+
+// ---------------------------------------------------------------------------
+// Kid-to-Thumbprint Tracking (DD-148: kid reuse detection)
+// ---------------------------------------------------------------------------
+
+interface KidThumbprintEntry {
+  /** Base64url-encoded x coordinate (canonical key material identifier) */
+  thumbprint: string;
+  /** Timestamp when first observed */
+  firstSeen: number;
+}
+
+/**
+ * Retention window for kid-to-thumbprint mappings.
+ * Matches the normative overlap period (30 days).
+ */
+const KID_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+const kidThumbprints = new Map<string, KidThumbprintEntry>();
+
+/**
+ * Check for kid reuse: same (iss, kid) mapping to different key material.
+ * Returns error code string if reuse detected, null otherwise.
+ *
+ * Stateful resolvers MUST reject (DD-148 tiered enforcement).
+ */
+function checkKidReuse(issuer: string, jwks: JWKS, now: number): string | null {
+  for (const key of jwks.keys) {
+    if (!key.kid || !key.x) continue;
+    const mapKey = `${issuer}|${key.kid}`;
+    const existing = kidThumbprints.get(mapKey);
+
+    if (existing) {
+      // Check if within retention window
+      if (now - existing.firstSeen < KID_RETENTION_MS) {
+        if (existing.thumbprint !== key.x) {
+          return `Kid reuse detected: kid=${key.kid} for issuer ${issuer} maps to different key material`;
+        }
+      } else {
+        // Expired: update with new mapping
+        kidThumbprints.set(mapKey, { thumbprint: key.x, firstSeen: now });
+      }
+    } else {
+      // First time seeing this (iss, kid): record it
+      kidThumbprints.set(mapKey, { thumbprint: key.x, firstSeen: now });
+    }
+  }
+  return null;
+}
+
+/**
+ * Clear kid-to-thumbprint tracking (for testing)
+ * @internal
+ */
+export function clearKidThumbprints(): void {
+  kidThumbprints.clear();
+}
 
 /**
  * LRU cache get: promotes entry to most-recently-used position.
@@ -261,7 +329,7 @@ export async function resolveJWKS(
   if (!noCache) {
     const cached = cacheGet(normalizedIssuer, now);
     if (cached) {
-      return { ok: true, jwks: cached.jwks, fromCache: true };
+      return { ok: true, jwks: cached.jwks, fromCache: true, revokedKeys: cached.revokedKeys };
     }
   }
 
@@ -376,9 +444,26 @@ export async function resolveJWKS(
     };
   }
 
+  // Step 8: Kid reuse detection (DD-148, stateful MUST reject)
+  const kidReuseError = checkKidReuse(normalizedIssuer, jwks, now);
+  if (kidReuseError) {
+    return {
+      ok: false,
+      code: 'E_KID_REUSE_DETECTED',
+      message: kidReuseError,
+    };
+  }
+
+  // Extract revoked_keys from issuer config (DD-148)
+  const revokedKeys = issuerConfig.revoked_keys?.map((entry) => ({
+    kid: entry.kid,
+    revoked_at: entry.revoked_at,
+    reason: entry.reason,
+  }));
+
   // Cache and return (with LRU eviction)
   if (!noCache) {
-    cacheSet(normalizedIssuer, { jwks, expiresAt: now + cacheTtlMs }, maxCacheEntries);
+    cacheSet(normalizedIssuer, { jwks, expiresAt: now + cacheTtlMs, revokedKeys }, maxCacheEntries);
   }
 
   return {
@@ -386,5 +471,6 @@ export async function resolveJWKS(
     jwks,
     fromCache: false,
     rawBytes: jwksResult.rawBytes,
+    revokedKeys,
   };
 }

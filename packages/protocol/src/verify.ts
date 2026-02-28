@@ -154,6 +154,27 @@ export async function verifyReceipt(
       jwksFetchTime = performance.now() - jwksFetchStart;
     }
 
+    // Check if key is revoked (DD-148, v0.11.3+)
+    if (jwksResult.revokedKeys) {
+      const revokedEntry = jwksResult.revokedKeys.find((rk) => rk.kid === header.kid);
+      if (revokedEntry) {
+        const durationMs = performance.now() - startTime;
+        fireTelemetryHook(telemetry?.onReceiptVerified, {
+          receiptHash: hashReceipt(receiptJws),
+          valid: false,
+          reasonCode: 'key_revoked',
+          issuer: payload.iss,
+          kid: header.kid,
+          durationMs,
+        });
+        return {
+          ok: false,
+          reason: 'key_revoked',
+          details: `Key kid=${header.kid} was revoked at ${revokedEntry.revoked_at}${revokedEntry.reason ? ` (reason: ${revokedEntry.reason})` : ''}`,
+        };
+      }
+    }
+
     // Find key by kid
     const jwk = jwksResult.jwks.keys.find((k) => k.kid === header.kid);
     if (!jwk) {

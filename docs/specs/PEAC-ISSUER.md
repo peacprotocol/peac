@@ -71,6 +71,7 @@ A PEAC Issuer Configuration is a JSON object with the following fields:
 | `algorithms`       | string[] | No       | Supported signing algorithms                     |
 | `payment_rails`    | string[] | No       | Supported payment rails                          |
 | `security_contact` | string   | No       | Security contact email/URL                       |
+| `revoked_keys`     | array    | No       | Revoked signing keys (DD-148, v0.11.3+)          |
 
 ### 3.2 Version Field
 
@@ -329,16 +330,41 @@ Issuer configuration is trusted for key discovery only. It does not grant author
 
 ### 11.2 Key Rotation
 
+For the full normative key rotation lifecycle specification, see [KEY-ROTATION.md](KEY-ROTATION.md) (DD-148).
+
+Issuers MUST:
+
+- Maintain a minimum 30-day overlap between key deprecation and retirement
+- Publish compromised keys in the `revoked_keys[]` array (see Section 11.2.1)
+- Not reuse a `kid` for a different key
+
 Issuers SHOULD:
 
 - Include multiple keys in JWKS for rotation
 - Use key IDs (`kid`) to identify keys
-- Deprecate old keys gradually (grace period)
+- Deprecate old keys gradually (>= 30 days overlap)
+
+Verifiers MUST:
+
+- Check `revoked_keys[]` before accepting a receipt signature
+- Stateful resolvers: detect and reject kid reuse (`E_KID_REUSE_DETECTED`)
 
 Verifiers SHOULD:
 
 - Refresh JWKS on unknown `kid`
 - Cache keys by `kid` for efficiency
+
+#### 11.2.1 Revoked Keys
+
+The `revoked_keys` field is an optional array of objects with the following shape:
+
+| Field        | Type   | Required | Description                                                                                         |
+| ------------ | ------ | -------- | --------------------------------------------------------------------------------------------------- |
+| `kid`        | string | Yes      | Key ID that was revoked                                                                             |
+| `revoked_at` | string | Yes      | ISO 8601 revocation timestamp                                                                       |
+| `reason`     | string | No       | RFC 5280 CRLReason: `key_compromise`, `superseded`, `cessation_of_operation`, `privilege_withdrawn` |
+
+Maximum 100 entries. See [KEY-ROTATION.md](KEY-ROTATION.md) Section 6 for emergency revocation procedures.
 
 ### 11.3 TLS Requirements
 

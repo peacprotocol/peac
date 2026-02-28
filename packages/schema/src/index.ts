@@ -488,3 +488,17 @@ export type {
   ReceiptVariant,
   ParseReceiptOptions,
 } from './receipt-parser';
+
+// Issuer configuration schemas (v0.11.3+ DD-148)
+export {
+  RevokedKeyEntrySchema,
+  RevokedKeysArraySchema,
+  REVOCATION_REASONS,
+  validateRevokedKeys,
+  findRevokedKey,
+} from './issuer-config';
+export type {
+  RevokedKeyEntryInput,
+  RevokedKeyEntryOutput,
+  RevocationReason,
+} from './issuer-config';
