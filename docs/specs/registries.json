@@ -1,6 +1,6 @@
 {
   "$schema": "./registries.schema.json",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "payment_rails": [
     {
       "id": "x402",
@@ -122,7 +122,7 @@
     }
   ],
   "_governance": {
-    "_comment": "Governance metadata for each registry. See REGISTRIES.md Section 11.",
+    "_comment": "Governance metadata for each registry. See REGISTRIES.md Section 15.",
     "_entry_lifecycle": {
       "description": "Entries may include lifecycle fields for deprecation tracking",
       "fields": {
@@ -176,6 +176,16 @@
       "stability": "experimental",
       "owner": "peac-core",
       "change_policy": "additive"
+    },
+    "proof_types": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "additive"
+    },
+    "pillar_values": {
+      "stability": "stable",
+      "owner": "peac-core",
+      "change_policy": "breaking-requires-major"
     }
   },
   "orchestration_frameworks": [
@@ -256,6 +266,69 @@
       "category": "evidence",
       "description": "Interaction evidence for tool calls, API requests, and agent actions",
       "reference": "docs/specs/INTERACTION-EVIDENCE.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/actor_binding",
+      "category": "identity",
+      "description": "Actor identity binding with proof type and origin (DD-142)",
+      "reference": "docs/specs/AGENT-IDENTITY-PROFILE.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/credential_event",
+      "category": "zero-trust",
+      "description": "Credential lifecycle event (issued, leased, rotated, revoked, expired)",
+      "reference": "docs/specs/ZERO-TRUST-PROFILE-PACK.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/tool_registry",
+      "category": "zero-trust",
+      "description": "Tool registration and capability declaration",
+      "reference": "docs/specs/ZERO-TRUST-PROFILE-PACK.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/control_action",
+      "category": "zero-trust",
+      "description": "Access control action with trigger and scope",
+      "reference": "docs/specs/ZERO-TRUST-PROFILE-PACK.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/risk_signal",
+      "category": "zero-trust",
+      "description": "Anomaly detection and risk scoring signal",
+      "reference": "docs/specs/ZERO-TRUST-PROFILE-PACK.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/sync_checkpoint",
+      "category": "zero-trust",
+      "description": "State synchronization checkpoint",
+      "reference": "docs/specs/ZERO-TRUST-PROFILE-PACK.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/trace_context",
+      "category": "zero-trust",
+      "description": "Distributed tracing context (W3C Trace Context aligned)",
+      "reference": "docs/specs/ZERO-TRUST-PROFILE-PACK.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/treaty",
+      "category": "commitment",
+      "description": "Treaty commitment layer with binding levels (DD-147)",
+      "reference": "docs/specs/extensions/TREATY.md",
+      "status": "informational"
+    },
+    {
+      "id": "org.peacprotocol/tenant_ref",
+      "category": "multi-tenant",
+      "description": "Tenant identity reference for multi-tenant receipt isolation (DD-149)",
+      "reference": "docs/guides/multi-tenant.md",
       "status": "informational"
     }
   ],
@@ -369,6 +442,79 @@
         "description": "An external API endpoint",
         "status": "informational"
       }
+    ]
+  },
+  "proof_types": [
+    {
+      "id": "ed25519-cert-chain",
+      "category": "attestation-chain",
+      "description": "Ed25519 issuer-to-holder attestation chain (RFC 8032)",
+      "reference": "https://www.rfc-editor.org/rfc/rfc8032",
+      "status": "informational"
+    },
+    {
+      "id": "eat-passport",
+      "category": "rats",
+      "description": "Agent carries Entity Attestation Token in RATS Passport model (RFC 9711)",
+      "reference": "https://www.rfc-editor.org/rfc/rfc9711",
+      "status": "informational"
+    },
+    {
+      "id": "eat-background-check",
+      "category": "rats",
+      "description": "Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)",
+      "reference": "https://www.rfc-editor.org/rfc/rfc9711",
+      "status": "informational"
+    },
+    {
+      "id": "sigstore-oidc",
+      "category": "keyless-signing",
+      "description": "OIDC-bound keyless signing via Sigstore (Fulcio + Rekor transparency log)",
+      "reference": "https://docs.sigstore.dev/",
+      "status": "informational"
+    },
+    {
+      "id": "did",
+      "category": "decentralized-identity",
+      "description": "W3C Decentralized Identifier (DID) resolution and verification",
+      "reference": "https://www.w3.org/TR/did-core/",
+      "status": "informational"
+    },
+    {
+      "id": "spiffe",
+      "category": "workload-identity",
+      "description": "CNCF SPIFFE workload identity (spiffe:// URI scheme)",
+      "reference": "https://spiffe.io/docs/latest/spiffe-about/overview/",
+      "status": "informational"
+    },
+    {
+      "id": "x509-pki",
+      "category": "pki",
+      "description": "Traditional X.509 PKI certificate chain verification (RFC 5280)",
+      "reference": "https://www.rfc-editor.org/rfc/rfc5280",
+      "status": "informational"
+    },
+    {
+      "id": "custom",
+      "category": "vendor-defined",
+      "description": "Vendor-defined proof type; registered per-issuer in extension metadata",
+      "reference": null,
+      "status": "informational"
+    }
+  ],
+  "pillar_values": {
+    "_comment": "CLOSED vocabulary. Unknown values MUST be rejected with invalid_pillar_value. Values MUST be unique and alphabetically sorted in receipt arrays. This vocabulary is NOT extensible; new pillars require a protocol specification change.",
+    "values": [
+      "access",
+      "attribution",
+      "commerce",
+      "compliance",
+      "consent",
+      "identity",
+      "privacy",
+      "provenance",
+      "purpose",
+      "safety"
     ]
   }
 }

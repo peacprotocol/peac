@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "PEAC error codes - normative source of truth",
   "errors": [
     {
@@ -71,6 +71,24 @@
       "http_status": 400,
       "title": "Key Not Found",
       "description": "Public key with specified kid not found in JWKS",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "retry_with_different_key"
+    },
+    {
+      "code": "E_KID_REUSE_DETECTED",
+      "http_status": 400,
+      "title": "Kid Reuse Detected",
+      "description": "Same kid value used with different key material within the retention window",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_REVOKED_KEY_USED",
+      "http_status": 400,
+      "title": "Revoked Key Used",
+      "description": "Receipt signed with a key listed in the issuer revoked_keys set",
       "category": "verification",
       "retryable": false,
       "next_action": "retry_with_different_key"
@@ -308,6 +326,15 @@
       "category": "identity",
       "retryable": true,
       "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_MVIS_INCOMPLETE",
+      "http_status": 400,
+      "title": "MVIS Incomplete",
+      "description": "Identity receipt missing one or more Minimum Viable Identity Set required fields (issuer, subject, key_binding, time_bounds, replay_protection)",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
     },
     {
       "code": "E_ATTRIBUTION_MISSING_SOURCES",

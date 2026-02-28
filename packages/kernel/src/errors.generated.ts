@@ -3,7 +3,7 @@
  *
  * AUTO-GENERATED from specs/kernel/errors.json
  * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts
- * Spec version: 0.11.2
+ * Spec version: 0.11.3
  */
 
 import type { ErrorDefinition } from './types.js';
@@ -79,6 +79,7 @@ export const ERROR_CODES = {
   E_IDENTITY_NOT_YET_VALID: 'E_IDENTITY_NOT_YET_VALID',
   E_IDENTITY_PROOF_UNSUPPORTED: 'E_IDENTITY_PROOF_UNSUPPORTED',
   E_IDENTITY_SIG_INVALID: 'E_IDENTITY_SIG_INVALID',
+  E_MVIS_INCOMPLETE: 'E_MVIS_INCOMPLETE',
 
   // Infrastructure error codes
   E_CIRCUIT_BREAKER_OPEN: 'E_CIRCUIT_BREAKER_OPEN',
@@ -146,6 +147,8 @@ export const ERROR_CODES = {
   // Verification error codes
   E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
   E_KEY_NOT_FOUND: 'E_KEY_NOT_FOUND',
+  E_KID_REUSE_DETECTED: 'E_KID_REUSE_DETECTED',
+  E_REVOKED_KEY_USED: 'E_REVOKED_KEY_USED',
 
   // Verifier error codes
   E_VERIFY_EXTENSION_TOO_LARGE: 'E_VERIFY_EXTENSION_TOO_LARGE',
@@ -725,6 +728,16 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     next_action: 'retry_with_different_input',
     category: 'identity',
   },
+  E_MVIS_INCOMPLETE: {
+    code: 'E_MVIS_INCOMPLETE',
+    http_status: 400,
+    title: 'MVIS Incomplete',
+    description:
+      'Identity receipt missing one or more Minimum Viable Identity Set required fields (issuer, subject, key_binding, time_bounds, replay_protection)',
+    retryable: false,
+    next_action: 'retry_with_different_input',
+    category: 'identity',
+  },
 
   // Infrastructure error codes
   E_CIRCUIT_BREAKER_OPEN: {
@@ -1253,6 +1266,24 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'Key Not Found',
     description: 'Public key with specified kid not found in JWKS',
+    retryable: false,
+    next_action: 'retry_with_different_key',
+    category: 'verification',
+  },
+  E_KID_REUSE_DETECTED: {
+    code: 'E_KID_REUSE_DETECTED',
+    http_status: 400,
+    title: 'Kid Reuse Detected',
+    description: 'Same kid value used with different key material within the retention window',
+    retryable: false,
+    next_action: 'abort',
+    category: 'verification',
+  },
+  E_REVOKED_KEY_USED: {
+    code: 'E_REVOKED_KEY_USED',
+    http_status: 400,
+    title: 'Revoked Key Used',
+    description: 'Receipt signed with a key listed in the issuer revoked_keys set',
     retryable: false,
     next_action: 'retry_with_different_key',
     category: 'verification',

@@ -33,7 +33,7 @@ Located at: `docs/specs/registries.json`
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "payment_rails": [ ... ],
   "control_engines": [ ... ],
   "transport_methods": [ ... ],
@@ -278,7 +278,61 @@ Resource type identifiers MUST match: `/^[a-z][a-z0-9_.:-]*$/` (max 128 characte
 
 ---
 
-## 11. Stability and Versioning
+## 11. Proof Types Registry (v0.11.3+)
+
+### 11.1 Purpose
+
+The `proof_types` registry lists recognized proof methods for the `ActorBinding.proof_type` field (DD-142, DD-143). New types are added via `registries.json` without code changes. The `custom` escape hatch allows vendor-defined proof types.
+
+### 11.2 Current Entries
+
+| ID                     | Category               | Description                                              | Reference                                          |
+| ---------------------- | ---------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| `ed25519-cert-chain`   | attestation-chain      | Ed25519 issuer-to-holder attestation chain               | [RFC 8032](https://www.rfc-editor.org/rfc/rfc8032) |
+| `eat-passport`         | rats                   | Agent carries EAT in RATS Passport model                 | [RFC 9711](https://www.rfc-editor.org/rfc/rfc9711) |
+| `eat-background-check` | rats                   | Verifier fetches from registry in RATS Background-Check  | [RFC 9711](https://www.rfc-editor.org/rfc/rfc9711) |
+| `sigstore-oidc`        | keyless-signing        | OIDC-bound keyless signing via Sigstore (Fulcio + Rekor) | [Sigstore](https://docs.sigstore.dev/)             |
+| `did`                  | decentralized-identity | W3C Decentralized Identifier resolution and verification | [W3C DID](https://www.w3.org/TR/did-core/)         |
+| `spiffe`               | workload-identity      | CNCF SPIFFE workload identity (spiffe:// URI)            | [SPIFFE](https://spiffe.io/)                       |
+| `x509-pki`             | pki                    | Traditional X.509 PKI certificate chain (RFC 5280)       | [RFC 5280](https://www.rfc-editor.org/rfc/rfc5280) |
+| `custom`               | vendor-defined         | Vendor-defined proof type, registered per-issuer         | -                                                  |
+
+### 11.3 Adding New Proof Types
+
+Follow the standard registry submission process (Section 13). Proof types SHOULD reference a public standard or specification. The `custom` type is the escape hatch for proprietary methods.
+
+---
+
+## 12. Pillar Values Registry (v0.11.3+, CLOSED)
+
+### 12.1 Purpose
+
+The `pillar_values` registry defines the **closed vocabulary** for the 10-pillar taxonomy. Unlike other registries, this vocabulary is NOT extensible without a protocol specification change.
+
+### 12.2 Values
+
+| Value         | Description                                   |
+| ------------- | --------------------------------------------- |
+| `access`      | Authorization and access control decisions    |
+| `attribution` | Content provenance and usage credit           |
+| `commerce`    | Payment, billing, and financial evidence      |
+| `compliance`  | Regulatory and audit trail evidence           |
+| `consent`     | User consent grants and withdrawals           |
+| `identity`    | Agent and actor identity attestation          |
+| `privacy`     | Data protection and privacy evidence          |
+| `provenance`  | Supply chain and artifact origin evidence     |
+| `purpose`     | Declared purpose and usage intent             |
+| `safety`      | Content safety and content moderation signals |
+
+### 12.3 Constraints
+
+- **CLOSED vocabulary:** Unknown values MUST be rejected with `invalid_pillar_value` error.
+- **Array normalization:** When used in receipt arrays, values MUST be unique and alphabetically sorted. Verifiers MUST reject unsorted or duplicate values with `pillar_array_not_normalized`.
+- **Not an extensibility mechanism:** Pillars are structural tags, not open-ended classification. Use `type` (reverse-DNS or absolute URI) for open semantic classification.
+
+---
+
+## 13. Stability and Versioning
 
 ### 11.1 Entry Lifecycle
 
@@ -299,7 +353,7 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 12. Relationship to Core Protocol
+## 14. Relationship to Core Protocol
 
 **Core protocol** (JSON Schema, PROTOCOL-BEHAVIOR.md):
 
@@ -321,7 +375,7 @@ Registry version (e.g., "0.1.0") increments on:
 
 ---
 
-## 13. Registry Governance
+## 15. Registry Governance
 
 This file and `registries.json` serve as the authoritative registries for the PEAC ecosystem:
 
@@ -329,7 +383,7 @@ This file and `registries.json` serve as the authoritative registries for the PE
 - Standardized submission process via GitHub
 - Long-term stability through versioning
 
-### 13.1 Governance Metadata
+### 15.1 Governance Metadata
 
 Each registry in `registries.json` includes governance metadata:
 
@@ -344,7 +398,7 @@ Each registry in `registries.json` includes governance metadata:
 - **`additive`**: New entries can be added in minor versions. Existing IDs are never removed in minor versions.
 - **`breaking-requires-major`**: Removing or renaming an entry requires a major version bump.
 
-### 13.2 Entry Lifecycle Fields
+### 15.2 Entry Lifecycle Fields
 
 Each registry entry MAY include lifecycle fields for deprecation tracking:
 
@@ -355,7 +409,7 @@ Each registry entry MAY include lifecycle fields for deprecation tracking:
 | `deprecated_by`    | string | ID of the replacement entry (absent if no replacement) |
 | `sunset_version`   | string | Major version where the entry may be removed           |
 
-### 13.3 Entry Deprecation
+### 15.3 Entry Deprecation
 
 Entries may be deprecated but not removed in minor versions:
 
@@ -372,7 +426,7 @@ Entries may be deprecated but not removed in minor versions:
 - If `deprecated_by` is present, implementations SHOULD suggest the replacement in warnings
 - Deprecated entries remain valid identifiers until the `sunset_version` is reached
 
-### 13.4 Removal Semantics
+### 15.4 Removal Semantics
 
 Removal of a registry entry is a **major-version-only** operation with explicit constraints:
 
@@ -412,7 +466,7 @@ Each transition is a separate minor (deprecation) or major (removal) version bum
 - [ ] At least one minor version has passed since `deprecated_since` (grace period)
 - [ ] Entry JSON updated to `"status": "removed"` (not deleted from file)
 
-### 13.5 Governance Flow
+### 15.5 Governance Flow
 
 ```text
 1. Proposer opens GitHub issue with:
@@ -432,7 +486,7 @@ Each transition is a separate minor (deprecation) or major (removal) version bum
 
 ---
 
-## 14. Questions
+## 16. Questions
 
 For registry questions:
 
