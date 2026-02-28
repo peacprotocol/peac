@@ -1,0 +1,38 @@
+{
+  "$comment": "FingerprintRef round-trip golden vectors (v0.11.3+, DD-146)",
+  "version": "0.11.3",
+  "vectors": [
+    {
+      "name": "sha256-empty-input",
+      "string_form": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "object_form": {
+        "alg": "sha256",
+        "value": "47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU"
+      }
+    },
+    {
+      "name": "hmac-sha256-example",
+      "string_form": "hmac-sha256:f0e1d2c3b4a5968778695a4b3c2d1e0ff0e1d2c3b4a5968778695a4b3c2d1e0f",
+      "object_form": {
+        "alg": "hmac-sha256",
+        "value": "8OHSw7Sllod4aVpLPC0eD_Dh0sO0pZaHeGlaSzwtHg8"
+      }
+    },
+    {
+      "name": "sha256-all-zeros",
+      "string_form": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "object_form": {
+        "alg": "sha256",
+        "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "name": "sha256-all-ff",
+      "string_form": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "object_form": {
+        "alg": "sha256",
+        "value": "__________________________________________8"
+      }
+    }
+  ]
+}

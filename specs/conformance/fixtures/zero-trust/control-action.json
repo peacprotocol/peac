@@ -1,0 +1,54 @@
+{
+  "$comment": "Control Action extension conformance fixtures (v0.11.3+, DD-145)",
+  "version": "0.11.3",
+  "valid": [
+    {
+      "name": "grant-on-policy",
+      "input": {
+        "action": "grant",
+        "trigger": "policy_evaluation",
+        "resource": "https://api.example.com/data",
+        "policy_ref": "https://policies.example.com/access/read-only"
+      }
+    },
+    {
+      "name": "deny-on-anomaly",
+      "input": {
+        "action": "deny",
+        "trigger": "anomaly_detection",
+        "reason": "Request rate exceeded threshold"
+      }
+    },
+    {
+      "name": "escalate-manual",
+      "input": {
+        "action": "escalate",
+        "trigger": "manual_review",
+        "action_at": "2026-03-01T12:00:00Z"
+      }
+    },
+    {
+      "name": "minimal-audit",
+      "input": {
+        "action": "audit",
+        "trigger": "scheduled"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "unknown-action",
+      "input": {
+        "action": "delete",
+        "trigger": "policy_evaluation"
+      }
+    },
+    {
+      "name": "unknown-trigger",
+      "input": {
+        "action": "grant",
+        "trigger": "unknown_trigger"
+      }
+    }
+  ]
+}

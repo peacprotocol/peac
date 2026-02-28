@@ -137,6 +137,41 @@ export type {
   MVISReplayProtection,
 } from './actor-binding';
 
+// ZT Extension Schemas (v0.11.3+ DD-145, DD-146)
+export {
+  // Credential Event
+  CredentialEventTypeSchema,
+  CredentialRefSchema,
+  CredentialEventSchema,
+  CREDENTIAL_EVENT_EXTENSION_KEY,
+  CREDENTIAL_EVENTS,
+  validateCredentialEvent,
+  // Tool Registry
+  ToolRegistrySchema,
+  TOOL_REGISTRY_EXTENSION_KEY,
+  validateToolRegistry,
+  // Control Action
+  ControlActionTypeSchema,
+  ControlTriggerSchema,
+  ControlActionSchema,
+  CONTROL_ACTION_EXTENSION_KEY,
+  CONTROL_ACTIONS,
+  CONTROL_TRIGGERS,
+  validateControlAction,
+  // Fingerprint Reference Conversion (DD-146)
+  stringToFingerprintRef,
+  fingerprintRefToString,
+} from './extensions/index';
+export type {
+  CredentialEventType,
+  CredentialEvent,
+  ToolRegistry,
+  ControlActionType,
+  ControlTrigger,
+  ControlAction,
+  FingerprintRefObject,
+} from './extensions/index';
+
 // Attribution validators (v0.9.26+)
 export {
   HashAlgorithmSchema,
