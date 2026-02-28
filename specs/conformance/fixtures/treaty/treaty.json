@@ -1,0 +1,46 @@
+{
+  "$comment": "Treaty extension conformance fixtures (v0.11.3+, DD-147)",
+  "version": "0.11.3",
+  "valid": [
+    {
+      "name": "valid-informational",
+      "input": {
+        "commitment_class": "informational"
+      }
+    },
+    {
+      "name": "valid-legal-with-terms",
+      "input": {
+        "commitment_class": "legal",
+        "terms_ref": "https://legal.example.com/terms/v2",
+        "terms_hash": "sha256:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+        "counterparty": "org:partner-corp",
+        "effective_at": "2026-03-01T00:00:00Z",
+        "expires_at": "2027-03-01T00:00:00Z"
+      }
+    },
+    {
+      "name": "valid-financial",
+      "input": {
+        "commitment_class": "financial",
+        "terms_ref": "https://billing.example.com/agreement/123",
+        "counterparty": "org:vendor-abc"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "invalid-unknown-class",
+      "input": {
+        "commitment_class": "binding"
+      }
+    },
+    {
+      "name": "invalid-terms-hash-format",
+      "input": {
+        "commitment_class": "legal",
+        "terms_hash": "md5:abc123"
+      }
+    }
+  ]
+}

@@ -35,6 +35,16 @@ export {
 } from './control-action';
 export type { ControlActionType, ControlTrigger, ControlAction } from './control-action';
 
+// Treaty (org.peacprotocol/treaty, DD-147)
+export {
+  CommitmentClassSchema,
+  TreatySchema,
+  TREATY_EXTENSION_KEY,
+  COMMITMENT_CLASSES,
+  validateTreaty,
+} from './treaty';
+export type { CommitmentClass, Treaty } from './treaty';
+
 // Fingerprint Reference Conversion (DD-146)
 export {
   stringToFingerprintRef,
