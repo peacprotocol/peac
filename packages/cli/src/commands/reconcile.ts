@@ -1,5 +1,5 @@
 /**
- * PEAC Reconcile CLI Command (v0.11.3+, DD-148)
+ * PEAC Reconcile CLI Command (v0.11.3+)
  *
  * Merge two evidence bundles and detect conflicts.
  * Conflict key: composite (iss, jti) with 3-step fallback:
