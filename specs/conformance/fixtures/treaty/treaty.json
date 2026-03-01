@@ -42,6 +42,13 @@
         "commitment_class": "legal",
         "terms_hash": "md5:abc123"
       }
+    },
+    {
+      "name": "invalid-terms-hash-uppercase",
+      "input": {
+        "commitment_class": "legal",
+        "terms_hash": "sha256:A1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D6E7F8A9B0C1D2E3F4A5B6C7D8E9F0A1B2"
+      }
     }
   ]
 }

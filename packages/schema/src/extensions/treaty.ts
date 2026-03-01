@@ -3,6 +3,13 @@
  *
  * Records agreement commitment levels in ext["org.peacprotocol/treaty"].
  * 4-level commitment_class vocabulary: informational, operational, financial, legal.
+ *
+ * Governance: commitment_class is a CLOSED vocabulary. Adding new levels requires
+ * a registry update in registries.json and a minor version bump.
+ *
+ * Terms pairing: when terms_hash is provided alongside terms_ref, the hash
+ * SHOULD correspond to the content at terms_ref. Future enforcement may
+ * verify this binding at verification time.
  */
 import { z } from 'zod';
 
@@ -56,8 +63,18 @@ export function validateTreaty(
   data: unknown
 ): { ok: true; value: Treaty } | { ok: false; error: string } {
   const result = TreatySchema.safeParse(data);
-  if (result.success) {
-    return { ok: true, value: result.data };
+  if (!result.success) {
+    return { ok: false, error: result.error.message };
   }
-  return { ok: false, error: result.error.message };
+
+  // Semantic check: effective_at must be before or equal to expires_at
+  if (result.data.effective_at && result.data.expires_at) {
+    const effectiveMs = new Date(result.data.effective_at).getTime();
+    const expiresMs = new Date(result.data.expires_at).getTime();
+    if (effectiveMs > expiresMs) {
+      return { ok: false, error: 'effective_at must not be after expires_at' };
+    }
+  }
+
+  return { ok: true, value: result.data };
 }
