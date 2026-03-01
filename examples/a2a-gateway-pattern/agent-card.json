@@ -1,0 +1,29 @@
+{
+  "name": "PEAC Gateway Agent",
+  "description": "Demonstrates A2A receipt issuance per state transition",
+  "url": "https://gateway.example.com",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "extensions": [
+      {
+        "uri": "https://www.peacprotocol.org/ext/traceability/v1",
+        "description": "PEAC evidence carrier for agent-to-agent traceability",
+        "required": false,
+        "params": {
+          "supported_kinds": ["commerce", "attestation"],
+          "carrier_formats": ["embed"],
+          "issuer_config_url": "https://gateway.example.com/.well-known/peac-issuer.json"
+        }
+      }
+    ]
+  },
+  "skills": [
+    {
+      "id": "receipt-per-transition",
+      "name": "Receipt Per Transition",
+      "description": "Issues a PEAC receipt for each A2A task state transition"
+    }
+  ]
+}
