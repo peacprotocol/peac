@@ -153,6 +153,12 @@ jobs:
           fi
           echo "OK: Error codes, categories, and JSON artifact are in sync"
 
+      - name: Layer boundary enforcement
+        run: bash scripts/check-layer-boundaries.sh
+
+      - name: Version coherence check
+        run: bash scripts/check-version-coherence.sh
+
       - name: Bundle vectors sanity check
         run: |
           # Verify the vector generator runs without errors

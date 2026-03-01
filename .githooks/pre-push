@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# .githooks/pre-push
+# Repo-managed pre-push hook: full CI-parity gate.
+# Install: git config core.hooksPath .githooks
+# Or run: bash scripts/setup-hooks.sh
+
+set -euo pipefail
+
+echo "[pre-push] Running full gate checks..."
+
+# Skip if PEAC_SKIP_PRE_PUSH is set (for CI or emergency)
+if [ "${PEAC_SKIP_PRE_PUSH:-}" = "1" ]; then
+  echo "[pre-push] SKIP (PEAC_SKIP_PRE_PUSH=1)"
+  exit 0
+fi
+
+pnpm lint
+pnpm build
+pnpm typecheck:core
+pnpm test
+bash scripts/guard.sh
+bash scripts/check-planning-leak.sh
+pnpm format:check
+
+echo "[pre-push] All gates passed"

@@ -289,4 +289,22 @@ else
   echo "OK"
 fi
 
+echo "== layer boundary enforcement =="
+if bash scripts/check-layer-boundaries.sh >/dev/null 2>&1; then
+  echo "OK"
+else
+  echo "FAIL: Layer boundary violation detected"
+  bash scripts/check-layer-boundaries.sh 2>&1 | grep FAIL || true
+  bad=1
+fi
+
+echo "== version coherence check =="
+if bash scripts/check-version-coherence.sh >/dev/null 2>&1; then
+  echo "OK"
+else
+  echo "FAIL: Version coherence violation detected"
+  bash scripts/check-version-coherence.sh 2>&1 | grep FAIL || true
+  bad=1
+fi
+
 exit $bad
