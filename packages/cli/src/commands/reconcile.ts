@@ -70,18 +70,6 @@ function getGlobalOptions(cmd: Command): ReconcileGlobalOptions {
   return parent.opts() as ReconcileGlobalOptions;
 }
 
-function output(
-  data: Record<string, unknown>,
-  opts: ReconcileGlobalOptions,
-  humanMessage?: string
-): void {
-  if (opts.json) {
-    console.log(JSON.stringify(data, null, 2));
-  } else if (humanMessage) {
-    console.log(humanMessage);
-  }
-}
-
 function outputError(
   error: string,
   details: Record<string, unknown>,
