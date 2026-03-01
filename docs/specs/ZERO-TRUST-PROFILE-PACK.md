@@ -54,15 +54,15 @@ All seven sub-profiles operate within Wire 0.1 (`peac-receipt/0.1`). Zero trust 
 
 The Zero Trust Profile Pack consists of seven sub-profiles organized into three tiers:
 
-| Tier | Sub-Profile | Extension Key | Purpose |
-| ---- | ----------- | ------------- | ------- |
-| Core | Access | (uses existing receipt fields) | Access control decision recording |
-| Core | Toolcall | (uses existing receipt fields) | Tool invocation evidence |
-| Signal | Decision | `org.peacprotocol/control_action` | Policy evaluation outcomes |
-| Signal | Risk Signal | `org.peacprotocol/risk_signal` | Anomaly and threat observations |
-| Observability | Sync | `org.peacprotocol/sync_checkpoint` | Multi-agent state synchronization |
-| Observability | Tracing | `org.peacprotocol/trace_context` | Distributed trace correlation |
-| Extension | ZT Extensions | `org.peacprotocol/credential_event` | Credential lifecycle events |
+| Tier          | Sub-Profile   | Extension Key                       | Purpose                           |
+| ------------- | ------------- | ----------------------------------- | --------------------------------- |
+| Core          | Access        | (uses existing receipt fields)      | Access control decision recording |
+| Core          | Toolcall      | (uses existing receipt fields)      | Tool invocation evidence          |
+| Signal        | Decision      | `org.peacprotocol/control_action`   | Policy evaluation outcomes        |
+| Signal        | Risk Signal   | `org.peacprotocol/risk_signal`      | Anomaly and threat observations   |
+| Observability | Sync          | `org.peacprotocol/sync_checkpoint`  | Multi-agent state synchronization |
+| Observability | Tracing       | `org.peacprotocol/trace_context`    | Distributed trace correlation     |
+| Extension     | ZT Extensions | `org.peacprotocol/credential_event` | Credential lifecycle events       |
 
 ### 2.2 Design Principles
 
@@ -76,15 +76,15 @@ The Zero Trust Profile Pack consists of seven sub-profiles organized into three 
 
 The following extension keys are used by ZT sub-profiles. All keys are registered in `specs/kernel/registries.json`.
 
-| Extension Key | Sub-Profile | Schema Package |
-| ------------- | ----------- | -------------- |
-| `org.peacprotocol/credential_event` | ZT Extensions | `@peac/schema` |
-| `org.peacprotocol/tool_registry` | Toolcall | `@peac/schema` |
-| `org.peacprotocol/control_action` | Decision | `@peac/schema` |
-| `org.peacprotocol/risk_signal` | Risk Signal | (reserved, v0.11.4) |
-| `org.peacprotocol/sync_checkpoint` | Sync | (reserved, v0.11.4) |
-| `org.peacprotocol/trace_context` | Tracing | (reserved, v0.11.4) |
-| `org.peacprotocol/actor_binding` | (cross-cutting) | `@peac/schema` |
+| Extension Key                       | Sub-Profile     | Schema Package      |
+| ----------------------------------- | --------------- | ------------------- |
+| `org.peacprotocol/credential_event` | ZT Extensions   | `@peac/schema`      |
+| `org.peacprotocol/tool_registry`    | Toolcall        | `@peac/schema`      |
+| `org.peacprotocol/control_action`   | Decision        | `@peac/schema`      |
+| `org.peacprotocol/risk_signal`      | Risk Signal     | (reserved, v0.11.4) |
+| `org.peacprotocol/sync_checkpoint`  | Sync            | (reserved, v0.11.4) |
+| `org.peacprotocol/trace_context`    | Tracing         | (reserved, v0.11.4) |
+| `org.peacprotocol/actor_binding`    | (cross-cutting) | `@peac/schema`      |
 
 Extension keys marked "reserved" have registered names but no schema implementation yet. Implementations encountering reserved keys in `ext[]` MUST pass them through without validation errors.
 
@@ -98,21 +98,21 @@ Records evidence that an access control decision was made for an agent request. 
 
 ### 3.2 Field Requirements
 
-| Field | Requirement | Notes |
-| ----- | ----------- | ----- |
-| `iss` | REQUIRED | Issuer (gateway or resource server origin) |
-| `sub` | REQUIRED | Subject (agent identifier or token reference) |
-| `aud` | RECOMMENDED | Audience (resource being accessed) |
-| `iat` | REQUIRED | Issued-at timestamp |
-| `jti` | REQUIRED | Unique receipt identifier |
-| `exp` | RECOMMENDED | Expiration for receipt validity |
-| `peac.wire_type` | REQUIRED | `peac-receipt/0.1` |
-| `peac.wire_version` | REQUIRED | `0.1` |
-| `peac.purpose` | RECOMMENDED | Access purpose declaration |
-| `peac.auth.control` | REQUIRED | Control chain with access decision |
-| `peac.auth.control.decision` | REQUIRED | `allow`, `deny`, or `review` |
-| `peac.evidence` | RECOMMENDED | Evidence of the access event |
-| `peac.settlement` | PROHIBITED | Access receipts are non-financial |
+| Field                        | Requirement | Notes                                         |
+| ---------------------------- | ----------- | --------------------------------------------- |
+| `iss`                        | REQUIRED    | Issuer (gateway or resource server origin)    |
+| `sub`                        | REQUIRED    | Subject (agent identifier or token reference) |
+| `aud`                        | RECOMMENDED | Audience (resource being accessed)            |
+| `iat`                        | REQUIRED    | Issued-at timestamp                           |
+| `jti`                        | REQUIRED    | Unique receipt identifier                     |
+| `exp`                        | RECOMMENDED | Expiration for receipt validity               |
+| `peac.wire_type`             | REQUIRED    | `peac-receipt/0.1`                            |
+| `peac.wire_version`          | REQUIRED    | `0.1`                                         |
+| `peac.purpose`               | RECOMMENDED | Access purpose declaration                    |
+| `peac.auth.control`          | REQUIRED    | Control chain with access decision            |
+| `peac.auth.control.decision` | REQUIRED    | `allow`, `deny`, or `review`                  |
+| `peac.evidence`              | RECOMMENDED | Evidence of the access event                  |
+| `peac.settlement`            | PROHIBITED  | Access receipts are non-financial             |
 
 ### 3.3 Control Chain Semantics
 
@@ -163,18 +163,18 @@ Records evidence of a tool invocation by an agent. Applicable to MCP servers, fu
 
 ### 4.2 Field Requirements
 
-| Field | Requirement | Notes |
-| ----- | ----------- | ----- |
-| `iss` | REQUIRED | Issuer (tool host or MCP server) |
-| `sub` | REQUIRED | Subject (invoking agent identifier) |
-| `iat` | REQUIRED | Issued-at timestamp |
-| `jti` | REQUIRED | Unique receipt identifier |
-| `peac.wire_type` | REQUIRED | `peac-receipt/0.1` |
-| `peac.wire_version` | REQUIRED | `0.1` |
-| `peac.evidence` | REQUIRED | Interaction evidence |
-| `peac.auth.control` | RECOMMENDED | Control chain (if access decision was made) |
-| `ext[]` with `org.peacprotocol/tool_registry` | RECOMMENDED | Tool metadata (tool_id, registry_uri) |
-| `peac.settlement` | PROHIBITED | Toolcall receipts are non-financial by default |
+| Field                                         | Requirement | Notes                                          |
+| --------------------------------------------- | ----------- | ---------------------------------------------- |
+| `iss`                                         | REQUIRED    | Issuer (tool host or MCP server)               |
+| `sub`                                         | REQUIRED    | Subject (invoking agent identifier)            |
+| `iat`                                         | REQUIRED    | Issued-at timestamp                            |
+| `jti`                                         | REQUIRED    | Unique receipt identifier                      |
+| `peac.wire_type`                              | REQUIRED    | `peac-receipt/0.1`                             |
+| `peac.wire_version`                           | REQUIRED    | `0.1`                                          |
+| `peac.evidence`                               | REQUIRED    | Interaction evidence                           |
+| `peac.auth.control`                           | RECOMMENDED | Control chain (if access decision was made)    |
+| `ext[]` with `org.peacprotocol/tool_registry` | RECOMMENDED | Tool metadata (tool_id, registry_uri)          |
+| `peac.settlement`                             | PROHIBITED  | Toolcall receipts are non-financial by default |
 
 ### 4.3 Interaction Evidence
 
@@ -238,17 +238,17 @@ Records evidence of a policy evaluation outcome. Applicable to policy engines (O
 
 ### 5.2 Field Requirements
 
-| Field | Requirement | Notes |
-| ----- | ----------- | ----- |
-| `iss` | REQUIRED | Issuer (policy engine or authorization service) |
-| `sub` | REQUIRED | Subject (agent or principal being evaluated) |
-| `iat` | REQUIRED | Issued-at timestamp |
-| `jti` | REQUIRED | Unique receipt identifier |
-| `peac.wire_type` | REQUIRED | `peac-receipt/0.1` |
-| `peac.wire_version` | REQUIRED | `0.1` |
-| `peac.auth.control` | REQUIRED | Control chain with decision |
-| `ext[]` with `org.peacprotocol/control_action` | REQUIRED | Control action details |
-| `peac.settlement` | PROHIBITED | Decision receipts are non-financial |
+| Field                                          | Requirement | Notes                                           |
+| ---------------------------------------------- | ----------- | ----------------------------------------------- |
+| `iss`                                          | REQUIRED    | Issuer (policy engine or authorization service) |
+| `sub`                                          | REQUIRED    | Subject (agent or principal being evaluated)    |
+| `iat`                                          | REQUIRED    | Issued-at timestamp                             |
+| `jti`                                          | REQUIRED    | Unique receipt identifier                       |
+| `peac.wire_type`                               | REQUIRED    | `peac-receipt/0.1`                              |
+| `peac.wire_version`                            | REQUIRED    | `0.1`                                           |
+| `peac.auth.control`                            | REQUIRED    | Control chain with decision                     |
+| `ext[]` with `org.peacprotocol/control_action` | REQUIRED    | Control action details                          |
+| `peac.settlement`                              | PROHIBITED  | Decision receipts are non-financial             |
 
 ### 5.3 Control Action Extension
 
@@ -310,17 +310,17 @@ Records evidence of an anomaly or threat observation. Applicable to security mon
 
 ### 6.2 Field Requirements
 
-| Field | Requirement | Notes |
-| ----- | ----------- | ----- |
-| `iss` | REQUIRED | Issuer (monitoring system) |
-| `sub` | REQUIRED | Subject (observed agent) |
-| `iat` | REQUIRED | Issued-at timestamp |
-| `jti` | REQUIRED | Unique receipt identifier |
-| `peac.wire_type` | REQUIRED | `peac-receipt/0.1` |
-| `peac.wire_version` | REQUIRED | `0.1` |
-| `peac.evidence` | REQUIRED | Evidence of the observation |
-| `ext[]` with `org.peacprotocol/risk_signal` | REQUIRED | Risk signal details |
-| `peac.settlement` | PROHIBITED | Risk signals are non-financial |
+| Field                                       | Requirement | Notes                          |
+| ------------------------------------------- | ----------- | ------------------------------ |
+| `iss`                                       | REQUIRED    | Issuer (monitoring system)     |
+| `sub`                                       | REQUIRED    | Subject (observed agent)       |
+| `iat`                                       | REQUIRED    | Issued-at timestamp            |
+| `jti`                                       | REQUIRED    | Unique receipt identifier      |
+| `peac.wire_type`                            | REQUIRED    | `peac-receipt/0.1`             |
+| `peac.wire_version`                         | REQUIRED    | `0.1`                          |
+| `peac.evidence`                             | REQUIRED    | Evidence of the observation    |
+| `ext[]` with `org.peacprotocol/risk_signal` | REQUIRED    | Risk signal details            |
+| `peac.settlement`                           | PROHIBITED  | Risk signals are non-financial |
 
 ### 6.3 Observation Model
 
@@ -377,16 +377,16 @@ Records evidence of a state synchronization checkpoint between agents. Applicabl
 
 ### 7.2 Field Requirements
 
-| Field | Requirement | Notes |
-| ----- | ----------- | ----- |
-| `iss` | REQUIRED | Issuer (orchestrator or sync coordinator) |
-| `sub` | REQUIRED | Subject (participating agent) |
-| `iat` | REQUIRED | Issued-at timestamp |
-| `jti` | REQUIRED | Unique receipt identifier |
-| `peac.wire_type` | REQUIRED | `peac-receipt/0.1` |
-| `peac.wire_version` | REQUIRED | `0.1` |
-| `ext[]` with `org.peacprotocol/sync_checkpoint` | REQUIRED | Sync checkpoint details |
-| `peac.settlement` | PROHIBITED | Sync receipts are non-financial by default |
+| Field                                           | Requirement | Notes                                      |
+| ----------------------------------------------- | ----------- | ------------------------------------------ |
+| `iss`                                           | REQUIRED    | Issuer (orchestrator or sync coordinator)  |
+| `sub`                                           | REQUIRED    | Subject (participating agent)              |
+| `iat`                                           | REQUIRED    | Issued-at timestamp                        |
+| `jti`                                           | REQUIRED    | Unique receipt identifier                  |
+| `peac.wire_type`                                | REQUIRED    | `peac-receipt/0.1`                         |
+| `peac.wire_version`                             | REQUIRED    | `0.1`                                      |
+| `ext[]` with `org.peacprotocol/sync_checkpoint` | REQUIRED    | Sync checkpoint details                    |
+| `peac.settlement`                               | PROHIBITED  | Sync receipts are non-financial by default |
 
 ### 7.3 Sync Checkpoint Extension (Reserved)
 
@@ -436,15 +436,15 @@ Records trace context for distributed tracing correlation. Applicable to systems
 
 ### 8.2 Field Requirements
 
-| Field | Requirement | Notes |
-| ----- | ----------- | ----- |
-| `iss` | REQUIRED | Issuer (service producing the receipt) |
-| `sub` | REQUIRED | Subject (agent being traced) |
-| `iat` | REQUIRED | Issued-at timestamp |
-| `jti` | REQUIRED | Unique receipt identifier |
-| `peac.wire_type` | REQUIRED | `peac-receipt/0.1` |
-| `peac.wire_version` | REQUIRED | `0.1` |
-| `ext[]` with `org.peacprotocol/trace_context` | REQUIRED | Trace correlation data |
+| Field                                         | Requirement | Notes                                  |
+| --------------------------------------------- | ----------- | -------------------------------------- |
+| `iss`                                         | REQUIRED    | Issuer (service producing the receipt) |
+| `sub`                                         | REQUIRED    | Subject (agent being traced)           |
+| `iat`                                         | REQUIRED    | Issued-at timestamp                    |
+| `jti`                                         | REQUIRED    | Unique receipt identifier              |
+| `peac.wire_type`                              | REQUIRED    | `peac-receipt/0.1`                     |
+| `peac.wire_version`                           | REQUIRED    | `0.1`                                  |
+| `ext[]` with `org.peacprotocol/trace_context` | REQUIRED    | Trace correlation data                 |
 
 ### 8.3 Trace Context Extension (Reserved)
 
@@ -502,16 +502,16 @@ Records evidence of credential lifecycle events. Applicable to identity provider
 
 ### 9.2 Field Requirements
 
-| Field | Requirement | Notes |
-| ----- | ----------- | ----- |
-| `iss` | REQUIRED | Issuer (credential authority) |
-| `sub` | REQUIRED | Subject (credential holder or agent) |
-| `iat` | REQUIRED | Issued-at timestamp |
-| `jti` | REQUIRED | Unique receipt identifier |
-| `peac.wire_type` | REQUIRED | `peac-receipt/0.1` |
-| `peac.wire_version` | REQUIRED | `0.1` |
-| `ext[]` with `org.peacprotocol/credential_event` | REQUIRED | Credential event details |
-| `ext[]` with `org.peacprotocol/actor_binding` | RECOMMENDED | Actor identity binding |
+| Field                                            | Requirement | Notes                                |
+| ------------------------------------------------ | ----------- | ------------------------------------ |
+| `iss`                                            | REQUIRED    | Issuer (credential authority)        |
+| `sub`                                            | REQUIRED    | Subject (credential holder or agent) |
+| `iat`                                            | REQUIRED    | Issued-at timestamp                  |
+| `jti`                                            | REQUIRED    | Unique receipt identifier            |
+| `peac.wire_type`                                 | REQUIRED    | `peac-receipt/0.1`                   |
+| `peac.wire_version`                              | REQUIRED    | `0.1`                                |
+| `ext[]` with `org.peacprotocol/credential_event` | REQUIRED    | Credential event details             |
+| `ext[]` with `org.peacprotocol/actor_binding`    | RECOMMENDED | Actor identity binding               |
 
 ### 9.3 Credential Event Extension
 
@@ -601,11 +601,11 @@ Zero trust profiles are vendor-neutral:
 
 ### 11.1 Profile Conformance Levels
 
-| Level | Description |
-| ----- | ----------- |
-| **Minimal** | Receipt satisfies all REQUIRED fields for the sub-profile |
-| **Standard** | Receipt satisfies all REQUIRED and RECOMMENDED fields |
-| **Full** | Receipt satisfies all fields including cross-cutting concerns (actor binding, trace context) |
+| Level        | Description                                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| **Minimal**  | Receipt satisfies all REQUIRED fields for the sub-profile                                    |
+| **Standard** | Receipt satisfies all REQUIRED and RECOMMENDED fields                                        |
+| **Full**     | Receipt satisfies all fields including cross-cutting concerns (actor binding, trace context) |
 
 ### 11.2 Issuer Requirements
 
@@ -662,9 +662,9 @@ Verifiers SHOULD allow a clock skew tolerance of 30 seconds for `iat` and `exp` 
 
 ## 13. Version History
 
-| Version | Date | Changes |
-| ------- | ---- | ------- |
-| 0.1 | 2026-03-01 | Initial specification (DD-145) |
+| Version | Date       | Changes                        |
+| ------- | ---------- | ------------------------------ |
+| 0.1     | 2026-03-01 | Initial specification (DD-145) |
 
 ---
 

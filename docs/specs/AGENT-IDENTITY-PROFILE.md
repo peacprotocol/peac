@@ -46,13 +46,13 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ### 1.4 Terminology
 
-| Term | Definition |
-| ---- | ---------- |
-| **ActorBinding** | Structured object binding an actor identity to a receipt via `ext[]` |
-| **MVIS** | Minimum Viable Identity Set: 5 required fields for a complete identity receipt |
-| **Proof Type** | Method used to establish actor identity (8-value vocabulary) |
-| **Origin** | URL scheme + host + optional port, no path/query/fragment |
-| **Fingerprint Reference** | Opaque `sha256:<hex64>` or `hmac-sha256:<hex64>` format string |
+| Term                      | Definition                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| **ActorBinding**          | Structured object binding an actor identity to a receipt via `ext[]`           |
+| **MVIS**                  | Minimum Viable Identity Set: 5 required fields for a complete identity receipt |
+| **Proof Type**            | Method used to establish actor identity (8-value vocabulary)                   |
+| **Origin**                | URL scheme + host + optional port, no path/query/fragment                      |
+| **Fingerprint Reference** | Opaque `sha256:<hex64>` or `hmac-sha256:<hex64>` format string                 |
 
 ---
 
@@ -66,11 +66,11 @@ ActorBinding provides a structured way to bind a specific actor identity to a PE
 
 ```typescript
 interface ActorBinding {
-  id: string;            // REQUIRED: Stable actor identifier (1-256 chars, opaque, no PII)
+  id: string; // REQUIRED: Stable actor identifier (1-256 chars, opaque, no PII)
   proof_type: ProofType; // REQUIRED: Identity proof mechanism (from DD-143 vocabulary)
-  proof_ref?: string;    // OPTIONAL: URI or hash of external proof artifact (max 2048 chars)
-  origin: string;        // REQUIRED: Origin of the identity assertion (origin-only, max 2048 chars)
-  intent_hash?: string;  // OPTIONAL: SHA-256 digest of the actor's declared intent (sha256:<64 hex>)
+  proof_ref?: string; // OPTIONAL: URI or hash of external proof artifact (max 2048 chars)
+  origin: string; // REQUIRED: Origin of the identity assertion (origin-only, max 2048 chars)
+  intent_hash?: string; // OPTIONAL: SHA-256 digest of the actor's declared intent (sha256:<64 hex>)
 }
 ```
 
@@ -107,10 +107,12 @@ Examples:
 The `origin` field identifies where the identity assertion originates. It MUST be an **origin only**: scheme + host + optional port. No path, query, or fragment.
 
 Valid:
+
 - `https://idp.example.com`
 - `https://auth.example.com:8443`
 
 Invalid (implementations MUST reject):
+
 - `https://idp.example.com/api/v1` (contains path)
 - `https://idp.example.com?tenant=abc` (contains query)
 - `https://idp.example.com#section` (contains fragment)
@@ -147,13 +149,13 @@ In Wire 0.1, ActorBinding is placed in the `ext[]` array:
 
 ActorBinding and `AgentIdentityAttestation` (from [AGENT-IDENTITY.md](AGENT-IDENTITY.md)) serve complementary purposes:
 
-| Aspect | AgentIdentityAttestation | ActorBinding |
-| ------ | ------------------------ | ------------ |
-| Scope | Full attestation with proof-of-control | Lightweight identity binding |
-| Placement | Dedicated header or `_meta` | Receipt `ext[]` |
-| Proof detail | Full signature, binding message | Proof type + optional reference |
-| Use case | Real-time request authentication | Receipt-level identity audit trail |
-| Schema | `@peac/schema` AgentIdentitySchema | `@peac/schema` ActorBindingSchema |
+| Aspect       | AgentIdentityAttestation               | ActorBinding                       |
+| ------------ | -------------------------------------- | ---------------------------------- |
+| Scope        | Full attestation with proof-of-control | Lightweight identity binding       |
+| Placement    | Dedicated header or `_meta`            | Receipt `ext[]`                    |
+| Proof detail | Full signature, binding message        | Proof type + optional reference    |
+| Use case     | Real-time request authentication       | Receipt-level identity audit trail |
+| Schema       | `@peac/schema` AgentIdentitySchema     | `@peac/schema` ActorBindingSchema  |
 
 Both MAY be present simultaneously: an agent authenticates with a full attestation (real-time) and the issuer records an ActorBinding in the receipt (audit trail).
 
@@ -165,16 +167,16 @@ Both MAY be present simultaneously: an agent authenticates with a full attestati
 
 The `proof_type` field in ActorBinding uses a closed vocabulary of 8 values:
 
-| Proof Type | Standard | Description | Key Discovery |
-| ---------- | -------- | ----------- | ------------- |
-| `ed25519-cert-chain` | RFC 8032 | Ed25519 certificate chain with trust anchor | Certificate chain validation |
-| `eat-passport` | RFC 9711 | EAT Passport (no-fetch, self-contained) | Embedded in EAT |
-| `eat-background-check` | RFC 9711 | EAT Background Check (fetch from attester) | Attester endpoint |
-| `sigstore-oidc` | Sigstore (Fulcio/Rekor) | OIDC-based ephemeral signing via Sigstore | Rekor transparency log |
-| `did` | W3C DID 1.1 | Decentralized Identifier | DID Document resolution |
-| `spiffe` | CNCF SPIFFE | SPIFFE Verifiable Identity Document (SVID) | SPIFFE Workload API |
-| `x509-pki` | RFC 5280 | Traditional X.509 PKI certificate | Certificate path validation |
-| `custom` | (none) | Implementation-defined proof mechanism | Implementation-specific |
+| Proof Type             | Standard                | Description                                 | Key Discovery                |
+| ---------------------- | ----------------------- | ------------------------------------------- | ---------------------------- |
+| `ed25519-cert-chain`   | RFC 8032                | Ed25519 certificate chain with trust anchor | Certificate chain validation |
+| `eat-passport`         | RFC 9711                | EAT Passport (no-fetch, self-contained)     | Embedded in EAT              |
+| `eat-background-check` | RFC 9711                | EAT Background Check (fetch from attester)  | Attester endpoint            |
+| `sigstore-oidc`        | Sigstore (Fulcio/Rekor) | OIDC-based ephemeral signing via Sigstore   | Rekor transparency log       |
+| `did`                  | W3C DID 1.1             | Decentralized Identifier                    | DID Document resolution      |
+| `spiffe`               | CNCF SPIFFE             | SPIFFE Verifiable Identity Document (SVID)  | SPIFFE Workload API          |
+| `x509-pki`             | RFC 5280                | Traditional X.509 PKI certificate           | Certificate path validation  |
+| `custom`               | (none)                  | Implementation-defined proof mechanism      | Implementation-specific      |
 
 ### 3.2 Proof Type Descriptions
 
@@ -183,6 +185,7 @@ The `proof_type` field in ActorBinding uses a closed vocabulary of 8 values:
 Used when the actor's identity is established through an Ed25519 certificate chain rooted at a known trust anchor. The `proof_ref` SHOULD point to the certificate chain (PEM or DER).
 
 Verifiers validate by:
+
 1. Fetching the certificate chain from `proof_ref`
 2. Validating the chain to a trusted root
 3. Confirming the leaf certificate's public key matches the actor
@@ -210,6 +213,7 @@ Used when the actor's identity is established through Sigstore's OIDC-based ephe
 The `proof_ref` SHOULD be the Rekor log entry URL or UUID.
 
 Verifiers validate by:
+
 1. Fetching the Rekor entry from `proof_ref`
 2. Verifying the Fulcio certificate embedded in the entry
 3. Confirming the OIDC identity matches the actor
@@ -219,6 +223,7 @@ Verifiers validate by:
 Used when the actor's identity is established through a W3C Decentralized Identifier (DID 1.1). The `id` field MAY be the DID itself; the `proof_ref` SHOULD be the DID (e.g., `did:web:agent.example`).
 
 Verifiers validate by:
+
 1. Resolving the DID Document
 2. Extracting verification methods
 3. Verifying the signature against the resolved key
@@ -230,6 +235,7 @@ Used when the actor's identity is a SPIFFE Verifiable Identity Document (SVID) f
 The `proof_ref` SHOULD be the SPIFFE ID (e.g., `spiffe://cluster.example/ns/prod/sa/agent`).
 
 Verifiers validate by:
+
 1. Fetching the trust bundle from the SPIFFE Workload API
 2. Validating the SVID against the trust bundle
 3. Confirming the SPIFFE ID matches the actor
@@ -241,6 +247,7 @@ Used when the actor's identity is established through a traditional X.509 PKI ce
 The `proof_ref` SHOULD point to the certificate or certificate chain.
 
 Verifiers validate by:
+
 1. Fetching the certificate from `proof_ref`
 2. Validating the certificate path to a trusted CA
 3. Checking revocation status (CRL or OCSP)
@@ -251,6 +258,7 @@ Verifiers validate by:
 Used for implementation-defined proof mechanisms not covered by the standard vocabulary. The `proof_ref` semantics are implementation-specific.
 
 Implementations using `custom` SHOULD document:
+
 - The proof mechanism in their deployment documentation
 - How verifiers discover and validate the proof
 - Any interoperability limitations
@@ -267,10 +275,10 @@ The new `ProofType` vocabulary (8 types) describes the trust root mechanism for 
 
 These are **separate concerns**:
 
-| Concern | Type | Vocabulary | Schema |
-| ------- | ---- | ---------- | ------ |
-| Request-time proof of key control | `ProofMethod` | 4 methods | `AgentProof.method` |
-| Receipt-time identity trust root | `ProofType` | 8 types | `ActorBinding.proof_type` |
+| Concern                           | Type          | Vocabulary | Schema                    |
+| --------------------------------- | ------------- | ---------- | ------------------------- |
+| Request-time proof of key control | `ProofMethod` | 4 methods  | `AgentProof.method`       |
+| Receipt-time identity trust root  | `ProofType`   | 8 types    | `ActorBinding.proof_type` |
 
 Unification of `ProofMethod` and `ProofType` into a single taxonomy is deferred to v0.12.0 as it would be a breaking change to the existing API.
 
@@ -284,13 +292,13 @@ The Minimum Viable Identity Set (MVIS) defines the five fields that MUST be pres
 
 ### 4.2 Required Fields
 
-| Field | Source | Description |
-| ----- | ------ | ----------- |
-| **issuer** | Receipt `iss` claim | Who issued the identity receipt |
-| **subject** | Receipt `sub` claim or `ActorBinding.id` | Who the identity asserts |
-| **key_binding** | Receipt JWS header `kid` or `ActorBinding.proof_type` | How the identity is cryptographically bound |
-| **time_bounds** | Receipt `iat` (+ optional `exp`) | When the identity assertion is valid |
-| **replay_protection** | Receipt `jti` claim | Prevents receipt reuse |
+| Field                 | Source                                                | Description                                 |
+| --------------------- | ----------------------------------------------------- | ------------------------------------------- |
+| **issuer**            | Receipt `iss` claim                                   | Who issued the identity receipt             |
+| **subject**           | Receipt `sub` claim or `ActorBinding.id`              | Who the identity asserts                    |
+| **key_binding**       | Receipt JWS header `kid` or `ActorBinding.proof_type` | How the identity is cryptographically bound |
+| **time_bounds**       | Receipt `iat` (+ optional `exp`)                      | When the identity assertion is valid        |
+| **replay_protection** | Receipt `jti` claim                                   | Prevents receipt reuse                      |
 
 ### 4.3 Validation Algorithm
 
@@ -349,10 +357,10 @@ MVIS does NOT apply to receipts without identity extensions. A commerce receipt 
 
 PEAC ActorBinding supports both RATS attestation models:
 
-| RATS Model | PEAC Proof Type | Data Flow |
-| ---------- | --------------- | --------- |
-| Passport | `eat-passport` | Attester -> Agent -> Relying Party (self-contained token) |
-| Background Check | `eat-background-check` | Agent -> Relying Party -> Verifier (fetch from attester) |
+| RATS Model       | PEAC Proof Type        | Data Flow                                                 |
+| ---------------- | ---------------------- | --------------------------------------------------------- |
+| Passport         | `eat-passport`         | Attester -> Agent -> Relying Party (self-contained token) |
+| Background Check | `eat-background-check` | Agent -> Relying Party -> Verifier (fetch from attester)  |
 
 **EAT errata tracking**: RFC 9711 was published January 2025. Known errata affecting PEAC integration are tracked in the EAT adapter design (DD-154, deferred to v0.12.0-preview.1).
 
@@ -375,11 +383,11 @@ ActorBinding with `proof_type: "sigstore-oidc"` records this flow. The `proof_re
 
 PEAC MVIS fields map to NIST SP 800-63 identity assurance levels:
 
-| NIST Concept | MVIS Field | PEAC Implementation |
-| ------------ | ---------- | ------------------- |
-| Identity Proofing (IAL) | `key_binding` via `proof_type` | Proof type indicates assurance level |
-| Authentication (AAL) | `key_binding` + `time_bounds` | Cryptographic binding with temporal validity |
-| Federation (FAL) | `issuer` + `origin` | Issuer origin identifies the federation endpoint |
+| NIST Concept            | MVIS Field                     | PEAC Implementation                              |
+| ----------------------- | ------------------------------ | ------------------------------------------------ |
+| Identity Proofing (IAL) | `key_binding` via `proof_type` | Proof type indicates assurance level             |
+| Authentication (AAL)    | `key_binding` + `time_bounds`  | Cryptographic binding with temporal validity     |
+| Federation (FAL)        | `issuer` + `origin`            | Issuer origin identifies the federation endpoint |
 
 PEAC does not mandate specific IAL/AAL/FAL levels. Deployments choose proof types appropriate to their assurance requirements. Higher assurance deployments SHOULD prefer `x509-pki` or `ed25519-cert-chain` over `custom`.
 
@@ -393,11 +401,11 @@ SPIFFE (Secure Production Identity Framework for Everyone) provides workload ide
 
 ActorBinding with `proof_type: "spiffe"` maps directly:
 
-| SPIFFE Concept | ActorBinding Field |
-| -------------- | ------------------ |
-| SPIFFE ID | `id` or `proof_ref` |
-| Trust domain | Extracted from `origin` |
-| SVID type | Implicit in `proof_type: "spiffe"` |
+| SPIFFE Concept | ActorBinding Field                 |
+| -------------- | ---------------------------------- |
+| SPIFFE ID      | `id` or `proof_ref`                |
+| Trust domain   | Extracted from `origin`            |
+| SVID type      | Implicit in `proof_type: "spiffe"` |
 
 ### 5.5 W3C Decentralized Identifiers (DID 1.1)
 
@@ -485,23 +493,23 @@ The `ActorBindingSchema`, `ProofTypeSchema`, and `MVISFieldsSchema` in `@peac/sc
 
 Required fixtures (one per proof type):
 
-| Fixture | Proof Type |
-| ------- | ---------- |
-| `valid-ed25519-cert-chain.json` | `ed25519-cert-chain` |
-| `valid-eat-passport.json` | `eat-passport` |
+| Fixture                           | Proof Type             |
+| --------------------------------- | ---------------------- |
+| `valid-ed25519-cert-chain.json`   | `ed25519-cert-chain`   |
+| `valid-eat-passport.json`         | `eat-passport`         |
 | `valid-eat-background-check.json` | `eat-background-check` |
-| `valid-sigstore-oidc.json` | `sigstore-oidc` |
-| `valid-did.json` | `did` |
-| `valid-spiffe.json` | `spiffe` |
-| `valid-x509-pki.json` | `x509-pki` |
-| `valid-custom.json` | `custom` |
+| `valid-sigstore-oidc.json`        | `sigstore-oidc`        |
+| `valid-did.json`                  | `did`                  |
+| `valid-spiffe.json`               | `spiffe`               |
+| `valid-x509-pki.json`             | `x509-pki`             |
+| `valid-custom.json`               | `custom`               |
 
 Negative fixtures:
 
-| Fixture | Violation |
-| ------- | --------- |
+| Fixture                                 | Violation                      |
+| --------------------------------------- | ------------------------------ |
 | `invalid-mvis-missing-key-binding.json` | Missing key_binding MVIS field |
-| `invalid-origin-with-path.json` | Origin contains path component |
+| `invalid-origin-with-path.json`         | Origin contains path component |
 
 ---
 
@@ -600,6 +608,7 @@ Negative fixtures:
 ```
 
 MVIS check:
+
 - issuer: `iss` = `https://api.example.com`
 - subject: `sub` = `agent:assistant-v2`
 - key_binding: `proof_type` = `custom`
@@ -619,12 +628,12 @@ Existing systems using `AgentIdentityAttestation` (v0.9.25) can adopt ActorBindi
 1. **Phase 1**: Add `org.peacprotocol/actor_binding` to receipts alongside existing attestation headers
 2. **Phase 2**: Map existing `ProofMethod` to the closest `ProofType`:
 
-| ProofMethod (existing) | ProofType (new) |
-| ---------------------- | --------------- |
+| ProofMethod (existing)   | ProofType (new)                  |
+| ------------------------ | -------------------------------- |
 | `http-message-signature` | `ed25519-cert-chain` or `custom` |
-| `dpop` | `custom` |
-| `mtls` | `x509-pki` |
-| `jwk-thumbprint` | `ed25519-cert-chain` |
+| `dpop`                   | `custom`                         |
+| `mtls`                   | `x509-pki`                       |
+| `jwk-thumbprint`         | `ed25519-cert-chain`             |
 
 3. **Phase 3**: At v0.12.0, unified taxonomy replaces both vocabularies
 
@@ -640,9 +649,9 @@ Systems that do not currently include identity information in receipts can adopt
 
 ## 10. Version History
 
-| Version | Date | Changes |
-| ------- | ---- | ------- |
-| 0.1 | 2026-03-01 | Initial specification (DD-142, DD-143, DD-144) |
+| Version | Date       | Changes                                        |
+| ------- | ---------- | ---------------------------------------------- |
+| 0.1     | 2026-03-01 | Initial specification (DD-142, DD-143, DD-144) |
 
 ---
 
