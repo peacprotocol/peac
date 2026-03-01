@@ -122,15 +122,59 @@ interface KidThumbprintEntry {
  * Matches the normative overlap period (30 days).
  */
 const KID_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Maximum number of kid-to-thumbprint entries to prevent unbounded memory growth.
+ * Evicts oldest entries (by firstSeen) when exceeded.
+ */
+const MAX_KID_THUMBPRINT_ENTRIES = 10_000;
+
 const kidThumbprints = new Map<string, KidThumbprintEntry>();
+
+/**
+ * Prune expired entries from the kid-to-thumbprint map.
+ * Runs during checkKidReuse to bound memory growth.
+ */
+function pruneExpiredKidEntries(now: number): void {
+  for (const [key, entry] of kidThumbprints) {
+    if (now - entry.firstSeen >= KID_RETENTION_MS) {
+      kidThumbprints.delete(key);
+    }
+  }
+}
+
+/**
+ * Evict oldest entries when the map exceeds the maximum size.
+ * Uses firstSeen as the eviction criterion (oldest first).
+ */
+function evictOldestKidEntries(): void {
+  if (kidThumbprints.size <= MAX_KID_THUMBPRINT_ENTRIES) return;
+
+  // Collect entries sorted by firstSeen (oldest first)
+  const entries = Array.from(kidThumbprints.entries()).sort(
+    (a, b) => a[1].firstSeen - b[1].firstSeen,
+  );
+
+  // Remove oldest entries until within limit
+  const toRemove = kidThumbprints.size - MAX_KID_THUMBPRINT_ENTRIES;
+  for (let i = 0; i < toRemove; i++) {
+    kidThumbprints.delete(entries[i][0]);
+  }
+}
 
 /**
  * Check for kid reuse: same (iss, kid) mapping to different key material.
  * Returns error code string if reuse detected, null otherwise.
  *
+ * Also prunes expired entries and enforces max size to prevent
+ * unbounded memory growth in long-running processes.
+ *
  * Stateful resolvers MUST reject (DD-148 tiered enforcement).
  */
 function checkKidReuse(issuer: string, jwks: JWKS, now: number): string | null {
+  // Prune expired entries first (bounded memory)
+  pruneExpiredKidEntries(now);
+
   for (const key of jwks.keys) {
     if (!key.kid || !key.x) continue;
     const mapKey = `${issuer}|${key.kid}`;
@@ -151,6 +195,10 @@ function checkKidReuse(issuer: string, jwks: JWKS, now: number): string | null {
       kidThumbprints.set(mapKey, { thumbprint: key.x, firstSeen: now });
     }
   }
+
+  // Enforce max size after insertions
+  evictOldestKidEntries();
+
   return null;
 }
 
@@ -160,6 +208,14 @@ function checkKidReuse(issuer: string, jwks: JWKS, now: number): string | null {
  */
 export function clearKidThumbprints(): void {
   kidThumbprints.clear();
+}
+
+/**
+ * Get kid-to-thumbprint map size (for testing bounded growth)
+ * @internal
+ */
+export function getKidThumbprintSize(): number {
+  return kidThumbprints.size;
 }
 
 /**

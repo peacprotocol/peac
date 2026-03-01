@@ -21,6 +21,7 @@ import {
   clearJWKSCache,
   getJWKSCacheSize,
   clearKidThumbprints,
+  getKidThumbprintSize,
 } from '../src/jwks-resolver';
 
 // Mock ssrf-safe-fetch and discovery modules
@@ -837,5 +838,94 @@ describe('resolveJWKS (strict discovery)', () => {
       expect(result.message).not.toContain('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'); // old key material must not leak
       expect(result.message).not.toContain('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'); // new key material must not leak
     }
+  });
+
+  // ------------------------------------------------------------------
+  // Bounded memory for kid reuse tracking (enterprise readiness)
+  // ------------------------------------------------------------------
+
+  it('tracks kid-to-thumbprint map size', async () => {
+    expect(getKidThumbprintSize()).toBe(0);
+
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+    await resolveJWKS('https://api.example.com', { noCache: true });
+
+    // One key in VALID_JWKS: test-key-1
+    expect(getKidThumbprintSize()).toBe(1);
+  });
+
+  it('does not grow unbounded under repeated resolutions with unique kids', async () => {
+    // Simulate many issuers/kids to verify the map stays bounded
+    for (let i = 0; i < 50; i++) {
+      const issuer = `https://issuer-${i}.example.com`;
+      const config = JSON.stringify({
+        version: 'peac-issuer/0.1',
+        issuer,
+        jwks_uri: `${issuer}/.well-known/jwks.json`,
+      });
+      const jwks = JSON.stringify({
+        keys: [
+          {
+            kty: 'OKP',
+            crv: 'Ed25519',
+            x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            kid: `key-${i}`,
+          },
+        ],
+      });
+      mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(config));
+      mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwks));
+      await resolveJWKS(issuer, { noCache: true });
+    }
+
+    // Map grows but stays bounded (max 10,000 entries internal limit)
+    expect(getKidThumbprintSize()).toBe(50);
+    expect(getKidThumbprintSize()).toBeLessThanOrEqual(10_000);
+  });
+
+  it('prunes expired kid entries during check', async () => {
+    // Use vi.spyOn(Date, 'now') to simulate time passing
+    const realDateNow = Date.now;
+
+    // First resolution at time T
+    const baseTime = 1709308800000; // 2024-03-01T12:00:00Z
+    vi.spyOn(Date, 'now').mockReturnValue(baseTime);
+
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+    await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(getKidThumbprintSize()).toBe(1);
+
+    // Advance time past the 30-day retention window
+    const thirtyOneDays = 31 * 24 * 60 * 60 * 1000;
+    vi.spyOn(Date, 'now').mockReturnValue(baseTime + thirtyOneDays);
+
+    // New resolution triggers pruning of expired entries
+    const newIssuer = 'https://new-issuer.example.com';
+    const newConfig = JSON.stringify({
+      version: 'peac-issuer/0.1',
+      issuer: newIssuer,
+      jwks_uri: `${newIssuer}/.well-known/jwks.json`,
+    });
+    const newJwks = JSON.stringify({
+      keys: [
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+          kid: 'new-key',
+        },
+      ],
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(newConfig));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(newJwks));
+    await resolveJWKS(newIssuer, { noCache: true });
+
+    // Old entry should have been pruned, only new entry remains
+    expect(getKidThumbprintSize()).toBe(1);
+
+    // Restore Date.now
+    vi.spyOn(Date, 'now').mockImplementation(realDateNow);
   });
 });
