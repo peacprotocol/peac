@@ -26,7 +26,7 @@ PEAC registries provide **informational guidance** on common identifiers for:
 
 ### 2.1 Machine-Readable: registries.json
 
-Located at: `docs/specs/registries.json`
+Located at: `specs/kernel/registries.json`
 
 **Format**:
 
