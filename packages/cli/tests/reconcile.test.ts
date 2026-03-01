@@ -347,6 +347,71 @@ describe('Reconcile CLI', () => {
     expect(result.exitCode).toBe(1);
   });
 
+  it('should emit full report even with --fail-on-conflict exit code 1', async () => {
+    const receipt1 = await createTestReceipt(privateKey, kid, {
+      jti: 'r-full-report-001',
+      sub: 'https://version-a.example.com',
+    });
+    const receipt2 = await createTestReceipt(privateKey, kid, {
+      jti: 'r-full-report-001',
+      sub: 'https://version-b.example.com',
+    });
+
+    const bundle1 = await createTestBundle([receipt1], jwks, 'full-report-a');
+    const bundle2 = await createTestBundle([receipt2], jwks, 'full-report-b');
+
+    const path1 = join(TEST_DIR, 'full-report-a.zip');
+    const path2 = join(TEST_DIR, 'full-report-b.zip');
+    writeFileSync(path1, bundle1);
+    writeFileSync(path2, bundle2);
+
+    const result = runCli(['reconcile', path1, path2, '--format', 'json', '--fail-on-conflict']);
+    expect(result.exitCode).toBe(1);
+
+    // Full report MUST still be emitted
+    const report = JSON.parse(result.stdout);
+    expect(report.version).toBe('1.0');
+    expect(report.total_receipts).toBe(2);
+    expect(report.merged_receipts).toBe(1);
+    expect(report.conflicts).toHaveLength(1);
+    expect(report.conflicts[0].diff_fields).toContain('sub');
+  });
+
+  it('should sort conflicts deterministically by key', async () => {
+    // Create receipts with keys that should sort alphabetically
+    const receipt1a = await createTestReceipt(privateKey, kid, {
+      jti: 'r-sort-zzz',
+      sub: 'https://a.example.com',
+    });
+    const receipt1b = await createTestReceipt(privateKey, kid, {
+      jti: 'r-sort-zzz',
+      sub: 'https://b.example.com',
+    });
+    const receipt2a = await createTestReceipt(privateKey, kid, {
+      jti: 'r-sort-aaa',
+      sub: 'https://c.example.com',
+    });
+    const receipt2b = await createTestReceipt(privateKey, kid, {
+      jti: 'r-sort-aaa',
+      sub: 'https://d.example.com',
+    });
+
+    const bundle1 = await createTestBundle([receipt1a, receipt2a], jwks, 'sort-a');
+    const bundle2 = await createTestBundle([receipt1b, receipt2b], jwks, 'sort-b');
+
+    const path1 = join(TEST_DIR, 'sort-a.zip');
+    const path2 = join(TEST_DIR, 'sort-b.zip');
+    writeFileSync(path1, bundle1);
+    writeFileSync(path2, bundle2);
+
+    const result = runCli(['reconcile', path1, path2, '--format', 'json']);
+    const report = JSON.parse(result.stdout);
+    expect(report.conflicts).toHaveLength(2);
+    // 'aaa' should come before 'zzz' lexicographically
+    expect(report.conflicts[0].key).toContain('r-sort-aaa');
+    expect(report.conflicts[1].key).toContain('r-sort-zzz');
+  });
+
   it('should have valid ReconcileReport version field', async () => {
     const receipt = await createTestReceipt(privateKey, kid, { jti: 'r-version-001' });
 
