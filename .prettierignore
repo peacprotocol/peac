@@ -28,5 +28,8 @@ paper/
 # performance result snapshots (generated artifact)
 perf-results.json
 
+# generated evidence pack (canonical bytes must not be reformatted)
+docs/evidence-pack/
+
 # example generated outputs (canonical bytes must not be reformatted)
 examples/erc8004-feedback/generated/
