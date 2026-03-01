@@ -125,7 +125,10 @@ function extractConflictKey(jws: string, receiptRef: string): string {
  * Extract receipts from a bundle's contents into ReceiptRecords.
  * Uses canonical computeReceiptRef from @peac/schema (async, WebCrypto).
  */
-async function extractReceipts(contents: DisputeBundleContents, sourceLabel: string): Promise<ReceiptRecord[]> {
+async function extractReceipts(
+  contents: DisputeBundleContents,
+  sourceLabel: string
+): Promise<ReceiptRecord[]> {
   const records: ReceiptRecord[] = [];
   for (const [_id, jws] of contents.receipts) {
     const receiptRef = await computeReceiptRef(jws);
