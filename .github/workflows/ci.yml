@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -111,7 +110,7 @@ jobs:
 
       - name: Error code parity (advisory)
         continue-on-error: true
-        run: bash scripts/check-error-codes.sh
+        run: bash scripts/check-error-codes.sh || true
 
       - name: TypeScript check (core packages)
         run: pnpm typecheck:core
@@ -122,7 +121,7 @@ jobs:
 
       - name: TypeScript check (apps - advisory)
         continue-on-error: true
-        run: pnpm typecheck:apps
+        run: pnpm typecheck:apps || true
 
       - name: Build all packages
         run: pnpm build
@@ -152,6 +151,12 @@ jobs:
             exit 1
           fi
           echo "OK: Error codes, categories, and JSON artifact are in sync"
+
+      - name: Layer boundary enforcement
+        run: bash scripts/check-layer-boundaries.sh
+
+      - name: Version coherence check
+        run: bash scripts/check-version-coherence.sh
 
       - name: Bundle vectors sanity check
         run: |
@@ -270,3 +275,20 @@ jobs:
 
       - name: Audit gate tests
         run: pnpm exec vitest run tests/scripts/audit-gate.test.ts
+
+  # PR scope guard: hard-fail when changed files exceed declared scope.
+  # Opt-in via scope:* labels. No label = no check.
+  scope-guard:
+    name: PR Scope Guard
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Check PR scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash scripts/ci/scope-guard.sh

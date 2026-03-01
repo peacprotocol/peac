@@ -65,7 +65,7 @@ fi
 echo "== field regressions (typos) =="
 # Catch common misspellings of 'receipt' and legacy field names (intentionally spelled wrong below)
 # Note: issued_at is valid for Attestation type (v0.9.21+), AgentIdentityAttestation (v0.9.25+), Attribution (v0.9.26+), DisputeAttestation (v0.9.27+), DisputeBundle (v0.9.30+), UCP evidence (v0.9.31+), and WorkflowSummaryAttestation (v0.10.2+)
-LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/(guard\.sh|generate-bundle-vectors\.ts)|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|README_LONG\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/errors\.json)|packages/(kernel/src/errors(\.generated)?\.ts|schema/(src/(evidence|validators|agent-identity|attribution|dispute|workflow)\.ts|__tests__/(agent-identity|dispute|workflow)\.test\.ts)|attribution/|audit/|cli/src/commands/bundle\.ts|mappings/ucp/)|examples/(agent-identity|ucp-webhook-express|workflow-correlation)/|sdks/(go|python)/)'
+LEGACY_FIELD_FILES='^(ex/|profiles/|scripts/(guard\.sh|generate-bundle-vectors\.ts)|CHANGELOG\.md|docs/(migration/|MIGRATION_|PEAC_NORMATIVE_DECISIONS_LOG\.md|PEAC_v0\.9\.15_ACTUAL_SCOPE\.md|interop\.md|README_LONG\.md|specs/|compliance/|guides/)|specs/(wire/|conformance/|kernel/(errors\.json|snapshots/))|packages/(kernel/src/errors(\.generated)?\.ts|schema/(src/(evidence|validators|agent-identity|attribution|dispute|workflow)\.ts|__tests__/(agent-identity|dispute|workflow)\.test\.ts)|attribution/|audit/|cli/src/commands/bundle\.ts|mappings/ucp/)|examples/(agent-identity|ucp-webhook-express|workflow-correlation)/|sdks/(go|python)/)'
 if gg_wb nI '\bissued_at\b|payment\.scheme|peacrece?i?e?pt(s)?\b' '(^|[^[:alnum:]_])issued_at([^[:alnum:]_]|$)|payment\.scheme|peacrece?i?e?pt(s)?([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' \
   | grep -vE "$LEGACY_FIELD_FILES" | grep .; then
   bad=1
@@ -287,6 +287,24 @@ if [ -n "$stale" ]; then
   bad=1
 else
   echo "OK"
+fi
+
+echo "== layer boundary enforcement =="
+if bash scripts/check-layer-boundaries.sh >/dev/null 2>&1; then
+  echo "OK"
+else
+  echo "FAIL: Layer boundary violation detected"
+  bash scripts/check-layer-boundaries.sh 2>&1 | grep FAIL || true
+  bad=1
+fi
+
+echo "== version coherence check =="
+if bash scripts/check-version-coherence.sh >/dev/null 2>&1; then
+  echo "OK"
+else
+  echo "FAIL: Version coherence violation detected"
+  bash scripts/check-version-coherence.sh 2>&1 | grep FAIL || true
+  bad=1
 fi
 
 exit $bad

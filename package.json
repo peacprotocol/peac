@@ -20,6 +20,7 @@
     "examples/*"
   ],
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest --coverage",
@@ -60,7 +61,9 @@
     "sanitize:unicode": "node scripts/sanitize-unicode.mjs --fix",
     "version:check": "node scripts/check-version-sync.mjs",
     "version:bump": "node scripts/bump-version.mjs",
-    "check:zod-major": "node scripts/check-zod-single-major.mjs"
+    "check:zod-major": "node scripts/check-zod-single-major.mjs",
+    "gate": "bash scripts/gate.sh",
+    "gate:fast": "bash scripts/gate.sh --fast"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -73,6 +76,7 @@
     "fast-check": "^4.5.3",
     "globals": "^17.0.0",
     "js-yaml": "^4.1.1",
+    "lint-staged": "^16.3.1",
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "turbo": "^2.8.10",
@@ -98,5 +102,8 @@
       "zod": "Workspace-wide Zod 4 enforcement: prevents mixed Zod 3/4 which causes runtime TypeError (incompatible internal _parse API). All workspace packages must use Zod 4.",
       "rollup": "Override vulnerable 4.53.2 to >=4.59.0 (fixes GHSA-mw96-cpmx-2vgc path traversal). Dev-only via vitest/vite/tsup."
     }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,yml,yaml}": "prettier --write --ignore-unknown"
   }
 }

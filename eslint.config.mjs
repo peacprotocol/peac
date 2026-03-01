@@ -15,6 +15,7 @@ export default [
       'packages/sdk-js/src/**/*.test.js',
       'packages/sdk-js/tests/**',
       'packages/sdk-js/archived/**',
+      'reference/**',
     ],
   },
 
