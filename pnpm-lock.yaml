@@ -226,6 +226,31 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)
 
+  examples/a2a-gateway-pattern:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      '@peac/mappings-a2a':
+        specifier: workspace:*
+        version: link:../../packages/mappings/a2a
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/agent-identity:
     dependencies:
       '@peac/crypto':
