@@ -12,6 +12,7 @@ export default [
       'apps/api/src/**/*.test.js',
       'archive/**',
       'paper/**',
+      'reference/**',
       'packages/sdk-js/src/**/*.test.js',
       'packages/sdk-js/tests/**',
       'packages/sdk-js/archived/**',
