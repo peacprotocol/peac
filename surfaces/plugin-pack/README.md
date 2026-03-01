@@ -68,16 +68,16 @@ The config registers the PEAC MCP server and provides agent context for receipt 
 
 ## What's Included
 
-| File | Purpose |
-| --- | --- |
-| `claude-code/peac/SKILL.md` | Claude Code skill: receipt operations (verify, issue, inspect, decode, bundle) |
-| `claude-code/peac/verify-receipt.md` | Claude Code skill: dedicated receipt verification workflow |
-| `claude-code/peac/explain-receipt.md` | Claude Code skill: receipt decoding and explanation |
-| `cursor/peac.mdc` | Cursor rules: import patterns, API examples, layering, conventions |
-| `continue/peac.json` | Continue.dev MCP server config snippet |
-| `windsurf/peac.windsurfrules` | Windsurf rules: import patterns, API examples, layering, conventions |
-| `opencode/opencode.jsonc` | OpenCode config: MCP server and agent setup |
-| `opencode/AGENTS.md` | OpenCode agent context: package layering, APIs, MCP tools |
+| File                                  | Purpose                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| `claude-code/peac/SKILL.md`           | Claude Code skill: receipt operations (verify, issue, inspect, decode, bundle) |
+| `claude-code/peac/verify-receipt.md`  | Claude Code skill: dedicated receipt verification workflow                     |
+| `claude-code/peac/explain-receipt.md` | Claude Code skill: receipt decoding and explanation                            |
+| `cursor/peac.mdc`                     | Cursor rules: import patterns, API examples, layering, conventions             |
+| `continue/peac.json`                  | Continue.dev MCP server config snippet                                         |
+| `windsurf/peac.windsurfrules`         | Windsurf rules: import patterns, API examples, layering, conventions           |
+| `opencode/opencode.jsonc`             | OpenCode config: MCP server and agent setup                                    |
+| `opencode/AGENTS.md`                  | OpenCode agent context: package layering, APIs, MCP tools                      |
 
 ## Security
 

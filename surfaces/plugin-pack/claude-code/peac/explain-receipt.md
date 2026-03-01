@@ -28,8 +28,8 @@ import { decode } from '@peac/crypto';
 
 const { header, payload } = decode(jws);
 
-console.log('Type:', header.typ);       // peac-receipt/0.1
-console.log('Algorithm:', header.alg);  // EdDSA
+console.log('Type:', header.typ); // peac-receipt/0.1
+console.log('Algorithm:', header.alg); // EdDSA
 console.log('Key ID:', header.kid);
 console.log('Issuer:', payload.iss);
 console.log('Audience:', payload.aud);
@@ -40,22 +40,22 @@ console.log('Issued at:', new Date(payload.iat * 1000).toISOString());
 
 ### Header (JOSE)
 
-| Field | Value | Description |
-|-------|-------|-------------|
-| `typ` | `peac-receipt/0.1` | Wire format version (frozen) |
-| `alg` | `EdDSA` | Signature algorithm (Ed25519 only) |
-| `kid` | `<key-id>` | Issuer key identifier |
+| Field | Value              | Description                        |
+| ----- | ------------------ | ---------------------------------- |
+| `typ` | `peac-receipt/0.1` | Wire format version (frozen)       |
+| `alg` | `EdDSA`            | Signature algorithm (Ed25519 only) |
+| `kid` | `<key-id>`         | Issuer key identifier              |
 
 ### Payload (Claims)
 
-| Field | Description |
-|-------|-------------|
-| `iss` | Issuer URL (HTTPS) |
-| `aud` | Audience URL (resource owner) |
-| `iat` | Issued-at timestamp (Unix seconds) |
-| `rid` | Receipt identifier (unique per issuer) |
+| Field     | Description                                                |
+| --------- | ---------------------------------------------------------- |
+| `iss`     | Issuer URL (HTTPS)                                         |
+| `aud`     | Audience URL (resource owner)                              |
+| `iat`     | Issued-at timestamp (Unix seconds)                         |
+| `rid`     | Receipt identifier (unique per issuer)                     |
 | `payment` | Payment evidence block (rail, reference, amount, currency) |
-| `ext` | Extensions (reverse-DNS keys) |
+| `ext`     | Extensions (reverse-DNS keys)                              |
 
 ### Commerce vs Attestation
 

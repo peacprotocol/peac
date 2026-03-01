@@ -31,13 +31,13 @@ const result = await verifyLocal(jws, publicKey);
 
 ## MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `peac_verify` | Verify receipt signature and claims |
-| `peac_inspect` | Inspect receipt without full verification |
-| `peac_decode` | Decode raw JWS structure |
-| `peac_issue` | Issue a signed receipt (requires key) |
-| `peac_create_bundle` | Create evidence bundle |
+| Tool                 | Purpose                                   |
+| -------------------- | ----------------------------------------- |
+| `peac_verify`        | Verify receipt signature and claims       |
+| `peac_inspect`       | Inspect receipt without full verification |
+| `peac_decode`        | Decode raw JWS structure                  |
+| `peac_issue`         | Issue a signed receipt (requires key)     |
+| `peac_create_bundle` | Create evidence bundle                    |
 
 ## Rules
 
