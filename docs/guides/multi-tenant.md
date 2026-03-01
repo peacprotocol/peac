@@ -53,13 +53,13 @@ Tenant isolation relies on the `sub` claim or an extension:
 
 ### Characteristics
 
-| Property | Value |
-| -------- | ----- |
-| Key management | Single key to rotate |
-| Blast radius | All tenants affected by key compromise |
-| Cross-tenant correlation | Trivial (same `iss` and `kid`) |
-| Verifier setup | Single issuer config to discover |
-| Operational cost | Minimal |
+| Property                 | Value                                  |
+| ------------------------ | -------------------------------------- |
+| Key management           | Single key to rotate                   |
+| Blast radius             | All tenants affected by key compromise |
+| Cross-tenant correlation | Trivial (same `iss` and `kid`)         |
+| Verifier setup           | Single issuer config to discover       |
+| Operational cost         | Minimal                                |
 
 ### When to Use
 
@@ -116,19 +116,20 @@ Tenant-prefixed `kid` values use the format:
 ```
 
 Examples:
+
 - `tenant-abc/prod-2026-03`
 - `acme-corp/staging-2026-03`
 - `org-42/prod-2026-02` (deprecated key in grace period)
 
 ### Characteristics
 
-| Property | Value |
-| -------- | ----- |
-| Key management | One key per tenant (more keys, single JWKS) |
-| Blast radius | Single tenant affected by key compromise |
-| Cross-tenant correlation | Moderate (same `iss`, different `kid`) |
-| Verifier setup | Single issuer config; verifiers select key by `kid` |
-| Operational cost | Moderate (key rotation per tenant) |
+| Property                 | Value                                               |
+| ------------------------ | --------------------------------------------------- |
+| Key management           | One key per tenant (more keys, single JWKS)         |
+| Blast radius             | Single tenant affected by key compromise            |
+| Cross-tenant correlation | Moderate (same `iss`, different `kid`)              |
+| Verifier setup           | Single issuer config; verifiers select key by `kid` |
+| Operational cost         | Moderate (key rotation per tenant)                  |
 
 ### When to Use
 
@@ -188,13 +189,13 @@ Receipts carry the tenant-specific `iss`:
 
 ### Characteristics
 
-| Property | Value |
-| -------- | ----- |
-| Key management | Fully independent per tenant |
-| Blast radius | Single tenant only |
-| Cross-tenant correlation | Difficult (different `iss` origins) |
-| Verifier setup | Separate discovery per tenant |
-| Operational cost | High (per-tenant DNS, TLS certificates, JWKS hosting) |
+| Property                 | Value                                                 |
+| ------------------------ | ----------------------------------------------------- |
+| Key management           | Fully independent per tenant                          |
+| Blast radius             | Single tenant only                                    |
+| Cross-tenant correlation | Difficult (different `iss` origins)                   |
+| Verifier setup           | Separate discovery per tenant                         |
+| Operational cost         | High (per-tenant DNS, TLS certificates, JWKS hosting) |
 
 ### When to Use
 
@@ -206,17 +207,21 @@ Receipts carry the tenant-specific `iss`:
 ### Implementation Options
 
 **Subdomain model** (recommended):
+
 ```text
 https://{tenant}.platform.example
 ```
+
 - Wildcard TLS certificate simplifies provisioning
 - DNS-level isolation
 - Each subdomain hosts its own `/.well-known/peac-issuer.json`
 
 **Path-based model** (NOT recommended):
+
 ```text
 https://platform.example/tenants/{tenant}
 ```
+
 - Violates origin-only semantics (issuer `iss` should be an origin, not a path)
 - Breaks `peac-issuer.json` discovery (which derives from origin only)
 - Creates ambiguity in issuer matching
@@ -281,16 +286,16 @@ This extension is informational: it helps downstream systems route and filter re
 
 ## Decision Matrix
 
-| Factor | Tier 1 (Shared) | Tier 2 (Scoped) | Tier 3 (Isolated) |
-| ------ | ---------------- | ---------------- | ------------------ |
-| Setup complexity | Low | Medium | High |
-| Key compromise blast radius | All tenants | One tenant | One tenant |
-| Cross-tenant correlation risk | High | Medium | Low |
-| JWKS document size | Small (1 key) | Grows with tenants | Small (1 key each) |
-| Verifier configuration | One issuer | One issuer, many kids | Many issuers |
-| Key rotation independence | None | Per-tenant | Per-tenant |
-| Regulatory suitability | Low | Medium | High |
-| Max recommended tenants | Unlimited | ~20 (JWKS key limit) | Unlimited |
+| Factor                        | Tier 1 (Shared) | Tier 2 (Scoped)       | Tier 3 (Isolated)  |
+| ----------------------------- | --------------- | --------------------- | ------------------ |
+| Setup complexity              | Low             | Medium                | High               |
+| Key compromise blast radius   | All tenants     | One tenant            | One tenant         |
+| Cross-tenant correlation risk | High            | Medium                | Low                |
+| JWKS document size            | Small (1 key)   | Grows with tenants    | Small (1 key each) |
+| Verifier configuration        | One issuer      | One issuer, many kids | Many issuers       |
+| Key rotation independence     | None            | Per-tenant            | Per-tenant         |
+| Regulatory suitability        | Low             | Medium                | High               |
+| Max recommended tenants       | Unlimited       | ~20 (JWKS key limit)  | Unlimited          |
 
 ---
 
