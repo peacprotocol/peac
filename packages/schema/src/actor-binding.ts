@@ -25,6 +25,9 @@ import { z } from 'zod';
  * SEPARATE from ProofMethodSchema (4 transport-level methods in agent-identity.ts).
  * ProofMethodSchema covers how proof is transported (HTTP sig, DPoP, mTLS, JWK thumbprint).
  * ProofTypeSchema covers the trust root model used to establish identity.
+ *
+ * The 'custom' type: implementers MUST document their proof semantics externally.
+ * proof_ref SHOULD use a reverse-DNS namespace (e.g., 'com.example.vendor/proof-type-v1').
  */
 export const PROOF_TYPES = [
   'ed25519-cert-chain',
@@ -70,6 +73,23 @@ export function isOriginOnly(value: string): boolean {
     // No fragment: url.hash is '' for both no-fragment and bare '#',
     // so also check the raw string for a trailing '#'
     if (url.hash !== '' || value.includes('#')) {
+      return false;
+    }
+    // Reject userinfo (credentials in origins are a security risk)
+    if (url.username !== '' || url.password !== '') {
+      return false;
+    }
+    // Reject trailing dot in hostname (FQDN notation leaks DNS internals)
+    if (url.hostname.endsWith('.')) {
+      return false;
+    }
+    // URL API may normalize trailing dots; also check raw input
+    const hostPart = value.replace(/^https?:\/\//, '').split(/[/:]/)[0];
+    if (hostPart.endsWith('.')) {
+      return false;
+    }
+    // Reject IPv6 zone identifiers (link-local, not valid origins)
+    if (url.hostname.includes('%')) {
       return false;
     }
     return true;
@@ -231,6 +251,12 @@ export function validateMVIS(
   const notAfter = new Date(result.data.time_bounds.not_after).getTime();
   if (notBefore >= notAfter) {
     return { ok: false, error: 'not_before must be before not_after' };
+  }
+
+  // Reject absurd durations (>100 years)
+  const MAX_DURATION_MS = 100 * 365.25 * 24 * 60 * 60 * 1000;
+  if (notAfter - notBefore > MAX_DURATION_MS) {
+    return { ok: false, error: 'time_bounds duration must not exceed 100 years' };
   }
 
   return { ok: true, value: result.data };

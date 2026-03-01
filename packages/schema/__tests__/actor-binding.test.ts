@@ -101,6 +101,42 @@ describe('isOriginOnly', () => {
     expect(isOriginOnly('not-a-url')).toBe(false);
     expect(isOriginOnly('://missing-scheme')).toBe(false);
   });
+
+  // Origin canonicalization tests (RFC 3986 compliance)
+  it('should accept origin with default HTTPS port (URL API normalizes)', () => {
+    expect(isOriginOnly('https://example.com:443')).toBe(true);
+  });
+
+  it('should accept origin with default HTTP port (URL API normalizes)', () => {
+    expect(isOriginOnly('http://example.com:80')).toBe(true);
+  });
+
+  it('should accept uppercase host (URL API lowercases)', () => {
+    expect(isOriginOnly('https://EXAMPLE.COM')).toBe(true);
+  });
+
+  it('should accept mixed-case host (URL API lowercases)', () => {
+    expect(isOriginOnly('https://Example.Com')).toBe(true);
+  });
+
+  it('should reject trailing dot in hostname (FQDN notation)', () => {
+    expect(isOriginOnly('https://example.com.')).toBe(false);
+  });
+
+  it('should reject IPv6 zone identifier', () => {
+    // URL API typically throws on zone IDs, but we guard explicitly
+    expect(isOriginOnly('https://[fe80::1%25eth0]')).toBe(false);
+  });
+
+  it('should reject userinfo in origin (credential leak)', () => {
+    expect(isOriginOnly('https://user:pass@example.com')).toBe(false);
+    expect(isOriginOnly('https://user@example.com')).toBe(false);
+  });
+
+  it('should accept valid IPv6 origin without zone ID', () => {
+    expect(isOriginOnly('https://[::1]')).toBe(true);
+    expect(isOriginOnly('https://[::1]:8443')).toBe(true);
+  });
 });
 
 // =============================================================================
@@ -156,6 +192,33 @@ describe('ActorBindingSchema', () => {
       ActorBindingSchema.parse({ ...validBinding, intent_hash: 'sha256:tooshort' })
     ).toThrow();
     expect(() => ActorBindingSchema.parse({ ...validBinding, intent_hash: 'abc123' })).toThrow();
+  });
+
+  it('should reject uppercase hex in intent_hash', () => {
+    expect(() =>
+      ActorBindingSchema.parse({
+        ...validBinding,
+        intent_hash: 'sha256:E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855',
+      })
+    ).toThrow();
+  });
+
+  it('should reject mixed case hex in intent_hash', () => {
+    expect(() =>
+      ActorBindingSchema.parse({
+        ...validBinding,
+        intent_hash: 'sha256:e3b0c44298fc1c149afbf4c8996fb924A7ae41e4649b934ca495991b7852b855',
+      })
+    ).toThrow();
+  });
+
+  it('should reject intent_hash without sha256: prefix', () => {
+    expect(() =>
+      ActorBindingSchema.parse({
+        ...validBinding,
+        intent_hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      })
+    ).toThrow();
   });
 
   it('should reject extra fields (strict mode)', () => {
@@ -321,6 +384,42 @@ describe('validateMVIS', () => {
     expect(validateMVIS('string').ok).toBe(false);
     expect(validateMVIS(42).ok).toBe(false);
   });
+
+  it('should reject absurd time bounds duration (>100 years)', () => {
+    const result = validateMVIS({
+      ...validMVIS,
+      time_bounds: {
+        not_before: '2026-01-01T00:00:00Z',
+        not_after: '2200-01-01T00:00:00Z',
+      },
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain('100 years');
+    }
+  });
+
+  it('should accept reasonable time bounds (1 year)', () => {
+    const result = validateMVIS({
+      ...validMVIS,
+      time_bounds: {
+        not_before: '2026-01-01T00:00:00Z',
+        not_after: '2027-01-01T00:00:00Z',
+      },
+    });
+    expect(result.ok).toBe(true);
+  });
+
+  it('should accept time bounds just under 100 years', () => {
+    const result = validateMVIS({
+      ...validMVIS,
+      time_bounds: {
+        not_before: '2026-01-01T00:00:00Z',
+        not_after: '2125-12-31T00:00:00Z',
+      },
+    });
+    expect(result.ok).toBe(true);
+  });
 });
 
 // =============================================================================
@@ -379,5 +478,14 @@ describe('conformance fixtures', () => {
         });
       }
     }
+
+    it('should cover all expected negative cases', () => {
+      const names = invalidFixtures.fixtures.map((f: { name: string }) => f.name);
+      // Verify key edge cases are covered
+      expect(names).toContain('invalid-origin-trailing-dot');
+      expect(names).toContain('invalid-origin-userinfo');
+      expect(names).toContain('invalid-intent-hash-uppercase');
+      expect(names).toContain('invalid-mvis-absurd-duration');
+    });
   });
 });
