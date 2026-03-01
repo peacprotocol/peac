@@ -47,10 +47,11 @@ The `Content-Usage` header is a Structured Fields Dictionary (RFC 9651). Values 
 
 ### tdmrep.json (EU TDM Directive)
 
-The parser accepts both W3C-specified forms:
+The parser supports the single-object (site-wide) form:
 
-- Single-object (site-wide): `{"tdm-reservation": 0, "tdm-policy": "https://..."}`
-- Array (path-specific): `[{"location": "/articles", "tdm-reservation": 1}]`
+- `{"tdm-reservation": 0, "tdm-policy": "https://..."}`
+
+The W3C spec also defines an array form for path-specific rules (`[{"location": "/articles", "tdm-reservation": 1}]`); array support is reserved for future implementation.
 
 Values: `tdm-reservation: 0` (allow TDM), `tdm-reservation: 1` (deny TDM).
 

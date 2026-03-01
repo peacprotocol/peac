@@ -41,9 +41,8 @@ Allow: /public/
 const contentUsageHeader = 'train-ai=n, search=y';
 
 // tdmrep.json (EU TDM Directive 2019/790, Art. 4).
-// Single-object form: applies site-wide.
-// W3C spec also supports array form for path-specific rules:
-//   [{"location": "/articles", "tdm-reservation": 1, "tdm-policy": "https://..."}]
+// Single-object form supported; applies site-wide.
+// Array form (path-specific rules) reserved for future implementation.
 const tdmrepJson = JSON.stringify({
   'tdm-reservation': 0,
   'tdm-policy': 'https://publisher.example/terms',
