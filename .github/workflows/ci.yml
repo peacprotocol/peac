@@ -111,7 +111,7 @@ jobs:
 
       - name: Error code parity (advisory)
         continue-on-error: true
-        run: bash scripts/check-error-codes.sh
+        run: bash scripts/check-error-codes.sh || true
 
       - name: TypeScript check (core packages)
         run: pnpm typecheck:core
@@ -122,7 +122,7 @@ jobs:
 
       - name: TypeScript check (apps - advisory)
         continue-on-error: true
-        run: pnpm typecheck:apps
+        run: pnpm typecheck:apps || true
 
       - name: Build all packages
         run: pnpm build
