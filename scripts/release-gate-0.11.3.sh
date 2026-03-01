@@ -56,30 +56,10 @@ else
   FAILED=$((FAILED + 1))
 fi
 
-# Gate 5: No-network guard in observation examples (DD-55 SSRF hardening)
-# Content-signals and a2a-gateway examples must not use fetch();
-# all content must be pre-fetched. Server/webhook examples are exempt.
+# Gate 5: No-network guard (DD-55 SSRF hardening)
 echo ""
 echo "--- No-Network Guard ---"
-echo -n "  [examples-no-fetch] "
-NO_FETCH_EXAMPLES="examples/content-signals examples/a2a-gateway-pattern examples/hello-world"
-FETCH_VIOLATIONS=""
-for dir in $NO_FETCH_EXAMPLES; do
-  if [ -d "$dir" ]; then
-    FOUND=$(grep -rn '\bfetch\s*(' "$dir" --include='*.ts' 2>/dev/null || true)
-    if [ -n "$FOUND" ]; then
-      FETCH_VIOLATIONS="$FETCH_VIOLATIONS
-$FOUND"
-    fi
-  fi
-done
-if [ -n "$FETCH_VIOLATIONS" ]; then
-  echo "FAIL"
-  echo "    fetch() found in no-network examples (DD-55):$FETCH_VIOLATIONS"
-  FAILED=$((FAILED + 1))
-else
-  echo "PASS"
-fi
+run_gate "no-network" node scripts/check-no-network.mjs
 
 # Gate 6: Evidence pack builds
 echo ""
