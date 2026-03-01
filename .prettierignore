@@ -17,10 +17,14 @@ pnpm-lock.yaml
 
 # local development state (gitignored)
 **/.local/**
+.claude/
 
 # local planning docs (gitignored)
 CLAUDE.md
 reference/
+
+# local evidence pack outputs (gitignored)
+docs/evidence-pack/
 
 # paper artifacts (local only)
 paper/
