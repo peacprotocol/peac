@@ -17,13 +17,13 @@
             "kty": "OKP",
             "crv": "Ed25519",
             "kid": "key-2026-01",
-            "x": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa3f4a18446b7e7b3"
+            "x": "Vs4lWIf7XH3AvHIfPP_745a9s4_h7jLVoaiQumAAd0M"
           },
           {
             "kty": "OKP",
             "crv": "Ed25519",
             "kid": "key-2026-02",
-            "x": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12a"
+            "x": "tAf2n-7hkM466nQ_SyvwBNduYTIK3wJLGvCgVF5n5DU"
           }
         ]
       },
@@ -62,7 +62,7 @@
             "kty": "OKP",
             "crv": "Ed25519",
             "kid": "key-2026-emergency-replacement",
-            "x": "fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548"
+            "x": "bea9bC8kcezZ9m1VmnwOPzkGpyD940iKnkfENinwMIU"
           }
         ]
       },
@@ -115,7 +115,7 @@
             "kty": "OKP",
             "crv": "Ed25519",
             "kid": "reused-kid-001",
-            "x": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa3f4a18446b7e7b3"
+            "x": "Vs4lWIf7XH3AvHIfPP_745a9s4_h7jLVoaiQumAAd0M"
           }
         ]
       },
@@ -125,7 +125,7 @@
             "kty": "OKP",
             "crv": "Ed25519",
             "kid": "reused-kid-001",
-            "x": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12a"
+            "x": "tAf2n-7hkM466nQ_SyvwBNduYTIK3wJLGvCgVF5n5DU"
           }
         ]
       },
@@ -149,7 +149,7 @@
                 "kty": "OKP",
                 "crv": "Ed25519",
                 "kid": "cached-kid-001",
-                "x": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa3f4a18446b7e7b3"
+                "x": "Vs4lWIf7XH3AvHIfPP_745a9s4_h7jLVoaiQumAAd0M"
               }
             ]
           },
@@ -166,7 +166,7 @@
                 "kty": "OKP",
                 "crv": "Ed25519",
                 "kid": "cached-kid-001",
-                "x": "fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548"
+                "x": "VU2ECxL-QATqrJOwoOGIadLBC02yLXtsXXD1p3xeuII"
               }
             ]
           },
