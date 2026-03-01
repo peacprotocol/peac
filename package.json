@@ -63,7 +63,9 @@
     "version:bump": "node scripts/bump-version.mjs",
     "check:zod-major": "node scripts/check-zod-single-major.mjs",
     "gate": "bash scripts/gate.sh",
-    "gate:fast": "bash scripts/gate.sh --fast"
+    "gate:fast": "bash scripts/gate.sh --fast",
+    "evidence-pack": "node scripts/build-submission-pack.mjs",
+    "release:gate:0.11.3": "bash scripts/release-gate-0.11.3.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
