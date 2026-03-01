@@ -275,3 +275,20 @@ jobs:
 
       - name: Audit gate tests
         run: pnpm exec vitest run tests/scripts/audit-gate.test.ts
+
+  # PR scope guard: hard-fail when changed files exceed declared scope.
+  # Opt-in via scope:* labels. No label = no check.
+  scope-guard:
+    name: PR Scope Guard
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Check PR scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash scripts/ci/scope-guard.sh
