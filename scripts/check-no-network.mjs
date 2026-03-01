@@ -2,9 +2,13 @@
 /**
  * No-Network Guard (DD-55 SSRF hardening)
  *
- * Scans example source files and observation-layer mapping packages for
- * disallowed network I/O APIs. All content in these paths must be
- * pre-fetched; no runtime network calls are permitted.
+ * Scans ALLOWLISTED directories for disallowed network I/O APIs.
+ * All content in these paths must be pre-fetched; no runtime network
+ * calls are permitted.
+ *
+ * Allowlist-based: only directories explicitly listed in MUST_BE_OFFLINE
+ * are scanned. New examples or mapping packages that must be network-free
+ * should be added to the allowlist. Directories not listed are not checked.
  *
  * Usage:
  *   node scripts/check-no-network.mjs
@@ -21,13 +25,22 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
-// Directories to scan
-const SCAN_DIRS = [
-  'examples',
-  'packages/mappings',
+// -----------------------------------------------------------------------
+// ALLOWLIST: directories that MUST be network-free.
+// Add new observation examples and observation-layer mapping packages here.
+// -----------------------------------------------------------------------
+const MUST_BE_OFFLINE = [
+  // Observation examples (pre-fetched content only, DD-55)
+  'examples/content-signals',
+  'examples/a2a-gateway-pattern',
+  'examples/hello-world',
+
+  // Observation-layer mapping packages (parsers, no I/O per DD-141)
+  'packages/mappings/content-signals',
+  'packages/mappings/aipref',
 ];
 
-// Excluded directories (never scan these)
+// Excluded subdirectories (never scan these)
 const EXCLUDED = new Set([
   'node_modules',
   'dist',
@@ -56,14 +69,6 @@ const PATTERNS = [
   { regex: /\bky\s*\(/, desc: 'ky()' },
 ];
 
-// Directories explicitly exempt from the no-network rule.
-// Server examples and webhook demos legitimately need HTTP.
-// Layer 4 adapter/mapping packages that resolve external resources are exempt.
-const EXEMPT_DIRS = new Set([
-  'examples/ucp-webhook-express',
-  'packages/mappings/ucp',
-]);
-
 /**
  * Recursively collect source files from a directory.
  */
@@ -82,17 +87,6 @@ function collectFiles(dir, files = []) {
   return files;
 }
 
-/**
- * Check if a file path falls under an exempt directory.
- */
-function isExempt(filePath) {
-  const rel = relative(ROOT, filePath);
-  for (const exempt of EXEMPT_DIRS) {
-    if (rel.startsWith(exempt + '/') || rel === exempt) return true;
-  }
-  return false;
-}
-
 // --- Main ---
 
 console.log('PEAC Protocol - No-Network Guard (DD-55)');
@@ -100,14 +94,16 @@ console.log('=========================================');
 console.log('');
 
 const violations = [];
+const scanned = [];
 
-for (const scanDir of SCAN_DIRS) {
-  const absDir = join(ROOT, scanDir);
+for (const dir of MUST_BE_OFFLINE) {
+  const absDir = join(ROOT, dir);
+  if (!existsSync(absDir)) continue;
+
+  scanned.push(dir);
   const files = collectFiles(absDir);
 
   for (const file of files) {
-    if (isExempt(file)) continue;
-
     const content = readFileSync(file, 'utf-8');
     const lines = content.split('\n');
     const rel = relative(ROOT, file);
@@ -115,7 +111,7 @@ for (const scanDir of SCAN_DIRS) {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
-      // Skip comment lines (single-line and block comment continuations)
+      // Skip comment lines (single-line, block comment start, and continuations)
       const trimmed = line.trim();
       if (
         trimmed.startsWith('//') ||
@@ -133,9 +129,8 @@ for (const scanDir of SCAN_DIRS) {
 }
 
 if (violations.length === 0) {
-  console.log('OK: No network I/O APIs found in scanned paths.');
-  console.log(`Scanned: ${SCAN_DIRS.join(', ')}`);
-  console.log(`Exempt: ${[...EXEMPT_DIRS].join(', ')}`);
+  console.log('OK: No network I/O APIs found in allowlisted paths.');
+  console.log(`Scanned: ${scanned.join(', ')}`);
   process.exit(0);
 } else {
   console.log(`FAIL: ${violations.length} network I/O violation(s) found:`);
@@ -146,6 +141,6 @@ if (violations.length === 0) {
   }
   console.log('');
   console.log('All content must be pre-fetched per DD-55 (SSRF hardening).');
-  console.log('If a directory legitimately needs network, add it to EXEMPT_DIRS.');
+  console.log('To add a new directory to the allowlist, edit MUST_BE_OFFLINE in this script.');
   process.exit(1);
 }
