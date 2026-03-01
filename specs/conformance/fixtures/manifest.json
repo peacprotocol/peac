@@ -107,6 +107,16 @@
       "description": "Edge case AgentIdentityAttestation golden vectors (v0.9.25+)",
       "version": "0.9.25",
       "fixture_count": 10
+    },
+    "valid-actor-binding.json": {
+      "description": "Valid ActorBinding conformance fixtures (DD-142, DD-143, v0.11.3+)",
+      "version": "0.11.3",
+      "fixture_count": 8
+    },
+    "invalid-actor-binding.json": {
+      "description": "Invalid ActorBinding conformance fixtures (DD-142, DD-144, v0.11.3+)",
+      "version": "0.11.3",
+      "fixture_count": 8
     }
   },
   "obligations": {
