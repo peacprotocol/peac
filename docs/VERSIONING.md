@@ -4,11 +4,11 @@ PEAC protocol follows semantic versioning with protocol-specific constraints.
 
 ## Version Semantics
 
-| Version Component | Meaning |
-|-------------------|---------|
-| **Major** (X.0.0) | Breaking changes to wire format, removal of registry entries, removal of error codes |
+| Version Component | Meaning                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| **Major** (X.0.0) | Breaking changes to wire format, removal of registry entries, removal of error codes       |
 | **Minor** (0.X.0) | Additive changes: new registry entries, new error codes, new extension schemas, new fields |
-| **Patch** (0.0.X) | Bug fixes, documentation corrections, test improvements |
+| **Patch** (0.0.X) | Bug fixes, documentation corrections, test improvements                                    |
 
 ## Additive-Only Rule (Minor Versions)
 
