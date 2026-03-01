@@ -125,6 +125,66 @@
         "valid": false,
         "error_contains": "intent_hash"
       }
+    },
+    {
+      "name": "invalid-intent-hash-uppercase",
+      "description": "intent_hash hex MUST be lowercase; uppercase is rejected",
+      "input": {
+        "id": "agent:bad-hash-002",
+        "proof_type": "ed25519-cert-chain",
+        "origin": "https://example.com",
+        "intent_hash": "sha256:E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "intent_hash"
+      }
+    },
+    {
+      "name": "invalid-origin-trailing-dot",
+      "description": "Origin MUST NOT have trailing dot in hostname (FQDN notation)",
+      "input": {
+        "id": "agent:bad-origin-004",
+        "proof_type": "ed25519-cert-chain",
+        "origin": "https://example.com."
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "origin must be an origin-only URL"
+      }
+    },
+    {
+      "name": "invalid-origin-userinfo",
+      "description": "Origin MUST NOT contain userinfo (credential leak risk)",
+      "input": {
+        "id": "agent:bad-origin-005",
+        "proof_type": "ed25519-cert-chain",
+        "origin": "https://user:pass@example.com"
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "origin must be an origin-only URL"
+      }
+    },
+    {
+      "name": "invalid-mvis-absurd-duration",
+      "description": "MVIS time_bounds duration must not exceed 100 years",
+      "input_mvis": {
+        "issuer": "https://issuer.example.com",
+        "subject": "agent:test-003",
+        "key_binding": "kid:key-2026-01",
+        "time_bounds": {
+          "not_before": "2026-01-01T00:00:00Z",
+          "not_after": "2200-01-01T00:00:00Z"
+        },
+        "replay_protection": {
+          "jti": "unique-token-id-004"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_contains": "100 years"
+      }
     }
   ],
   "schema_version": "0.11.3"
