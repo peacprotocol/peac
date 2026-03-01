@@ -15,8 +15,9 @@
 
 import { Command } from 'commander';
 import * as fs from 'fs';
-import { createHash } from 'crypto';
 import { readDisputeBundle, type DisputeBundleContents } from '@peac/audit';
+import { computeReceiptRef } from '@peac/schema';
+import { decode } from '@peac/crypto';
 
 // =============================================================================
 // TYPES
@@ -94,26 +95,13 @@ function outputError(
 }
 
 /**
- * Compute SHA-256 receipt reference from JWS string.
- */
-function computeReceiptRef(jws: string): string {
-  return `sha256:${createHash('sha256').update(jws).digest('hex')}`;
-}
-
-/**
- * Decode JWS payload (base64url -> JSON).
+ * Decode JWS payload using @peac/crypto canonical decoder.
  * Returns null if decoding fails.
  */
 function decodeJwsPayload(jws: string): Record<string, unknown> | null {
   try {
-    const parts = jws.split('.');
-    if (parts.length !== 3) return null;
-    const payload = parts[1];
-    // base64url -> base64 -> buffer -> json
-    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-    const json = Buffer.from(padded, 'base64').toString('utf-8');
-    return JSON.parse(json);
+    const { payload } = decode<Record<string, unknown>>(jws);
+    return payload;
   } catch {
     return null;
   }
@@ -147,11 +135,12 @@ function extractConflictKey(jws: string, receiptRef: string): string {
 
 /**
  * Extract receipts from a bundle's contents into ReceiptRecords.
+ * Uses canonical computeReceiptRef from @peac/schema (async, WebCrypto).
  */
-function extractReceipts(contents: DisputeBundleContents, sourceLabel: string): ReceiptRecord[] {
+async function extractReceipts(contents: DisputeBundleContents, sourceLabel: string): Promise<ReceiptRecord[]> {
   const records: ReceiptRecord[] = [];
   for (const [_id, jws] of contents.receipts) {
-    const receiptRef = computeReceiptRef(jws);
+    const receiptRef = await computeReceiptRef(jws);
     const key = extractConflictKey(jws, receiptRef);
     records.push({ key, jws, receipt_ref: receiptRef, source: sourceLabel });
   }
@@ -286,8 +275,10 @@ export function reconcileCommand(): Command {
           }
 
           // Extract receipts
-          const receipts1 = extractReceipts(result1.value, bundle1Path);
-          const receipts2 = extractReceipts(result2.value, bundle2Path);
+          const [receipts1, receipts2] = await Promise.all([
+            extractReceipts(result1.value, bundle1Path),
+            extractReceipts(result2.value, bundle2Path),
+          ]);
 
           // Build index: key -> ReceiptRecord[]
           const index = new Map<string, ReceiptRecord[]>();
