@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.11.3",
-  "description": "PEAC protocol registries: payment rails, control engines, transport methods, agent protocols, proof types, extension keys, pillar values",
+  "version": "0.10.0",
+  "description": "PEAC protocol registries - payment rails, control engines, transport methods, agent protocols",
   "payment_rails": [
     {
       "id": "x402",
@@ -149,78 +149,5 @@
       "reference": "https://developer.visa.com/",
       "status": "informational"
     }
-  ],
-  "proof_types": [
-    {
-      "id": "ed25519-cert-chain",
-      "category": "attestation-chain",
-      "description": "Ed25519 issuer-to-holder attestation chain (RFC 8032)",
-      "reference": "https://www.rfc-editor.org/rfc/rfc8032",
-      "status": "informational"
-    },
-    {
-      "id": "eat-passport",
-      "category": "rats",
-      "description": "Agent carries Entity Attestation Token in RATS Passport model (RFC 9711)",
-      "reference": "https://www.rfc-editor.org/rfc/rfc9711",
-      "status": "informational"
-    },
-    {
-      "id": "eat-background-check",
-      "category": "rats",
-      "description": "Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)",
-      "reference": "https://www.rfc-editor.org/rfc/rfc9711",
-      "status": "informational"
-    },
-    {
-      "id": "sigstore-oidc",
-      "category": "keyless-signing",
-      "description": "OIDC-bound keyless signing via Sigstore (Fulcio + Rekor transparency log)",
-      "reference": "https://docs.sigstore.dev/",
-      "status": "informational"
-    },
-    {
-      "id": "did",
-      "category": "decentralized-identity",
-      "description": "W3C Decentralized Identifier (DID) resolution and verification",
-      "reference": "https://www.w3.org/TR/did-core/",
-      "status": "informational"
-    },
-    {
-      "id": "spiffe",
-      "category": "workload-identity",
-      "description": "CNCF SPIFFE workload identity (spiffe:// URI scheme)",
-      "reference": "https://spiffe.io/docs/latest/spiffe-about/overview/",
-      "status": "informational"
-    },
-    {
-      "id": "x509-pki",
-      "category": "pki",
-      "description": "Traditional X.509 PKI certificate chain verification (RFC 5280)",
-      "reference": "https://www.rfc-editor.org/rfc/rfc5280",
-      "status": "informational"
-    },
-    {
-      "id": "custom",
-      "category": "vendor-defined",
-      "description": "Vendor-defined proof type; registered per-issuer in extension metadata",
-      "reference": null,
-      "status": "informational"
-    }
-  ],
-  "pillar_values": {
-    "_comment": "CLOSED vocabulary. Unknown values MUST be rejected with invalid_pillar_value. Values MUST be unique and alphabetically sorted in receipt arrays.",
-    "values": [
-      "access",
-      "attribution",
-      "commerce",
-      "compliance",
-      "consent",
-      "identity",
-      "privacy",
-      "provenance",
-      "purpose",
-      "safety"
-    ]
-  }
+  ]
 }

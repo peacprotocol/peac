@@ -18,6 +18,8 @@
     "orchestration_frameworks": { "$ref": "#/$defs/registryArray" },
     "extension_keys": { "$ref": "#/$defs/registryArray" },
     "attestation_types": { "$ref": "#/$defs/registryArray" },
+    "proof_types": { "$ref": "#/$defs/registryArray" },
+    "pillar_values": { "$ref": "#/$defs/closedVocabulary" },
     "toolcall_op_types": { "$ref": "#/$defs/advisoryRegistry" },
     "toolcall_resource_types": { "$ref": "#/$defs/advisoryRegistry" },
     "_governance": {
@@ -60,6 +62,19 @@
     "registryArray": {
       "type": "array",
       "items": { "$ref": "#/$defs/registryEntry" }
+    },
+    "closedVocabulary": {
+      "type": "object",
+      "required": ["values"],
+      "properties": {
+        "_comment": { "type": "string" },
+        "values": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
     },
     "advisoryRegistry": {
       "type": "object",
