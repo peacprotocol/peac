@@ -41,14 +41,7 @@ const MUST_BE_OFFLINE = [
 ];
 
 // Excluded subdirectories (never scan these)
-const EXCLUDED = new Set([
-  'node_modules',
-  'dist',
-  '.turbo',
-  '.next',
-  'coverage',
-  '__snapshots__',
-]);
+const EXCLUDED = new Set(['node_modules', 'dist', '.turbo', '.next', 'coverage', '__snapshots__']);
 
 // File extensions to check
 const EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.mjs', '.cjs']);
@@ -113,11 +106,7 @@ for (const dir of MUST_BE_OFFLINE) {
 
       // Skip comment lines (single-line, block comment start, and continuations)
       const trimmed = line.trim();
-      if (
-        trimmed.startsWith('//') ||
-        trimmed.startsWith('*') ||
-        trimmed.startsWith('/*')
-      ) continue;
+      if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue;
 
       for (const { regex, desc } of PATTERNS) {
         if (regex.test(line)) {

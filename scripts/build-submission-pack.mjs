@@ -123,10 +123,10 @@ const zipName = 'peac-evidence-pack.zip';
 const zipPath = join(DIST, zipName);
 
 try {
-  execSync(
-    `cd "${PACK_DIR}" && zip -r "${zipPath}" . -x "*.DS_Store"`,
-    { encoding: 'utf-8', timeout: 30_000 }
-  );
+  execSync(`cd "${PACK_DIR}" && zip -r "${zipPath}" . -x "*.DS_Store"`, {
+    encoding: 'utf-8',
+    timeout: 30_000,
+  });
   console.log(`\n=== Evidence pack built: dist/${zipName} ===`);
 } catch (err) {
   console.error('Failed to build zip archive:', err.message);
