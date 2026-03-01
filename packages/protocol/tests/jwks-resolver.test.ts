@@ -689,7 +689,12 @@ describe('resolveJWKS (strict discovery)', () => {
     });
     const jwksA = JSON.stringify({
       keys: [
-        { kty: 'OKP', crv: 'Ed25519', x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', kid: 'shared-001' },
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+          kid: 'shared-001',
+        },
       ],
     });
     mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(configA));
@@ -705,7 +710,12 @@ describe('resolveJWKS (strict discovery)', () => {
     });
     const jwksB = JSON.stringify({
       keys: [
-        { kty: 'OKP', crv: 'Ed25519', x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', kid: 'shared-001' },
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+          kid: 'shared-001',
+        },
       ],
     });
     mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(configB));
@@ -769,9 +779,7 @@ describe('resolveJWKS (strict discovery)', () => {
       version: 'peac-issuer/0.1',
       issuer: 'https://api.example.com',
       jwks_uri: 'https://api.example.com/.well-known/jwks.json',
-      revoked_keys: [
-        { kid: 'cached-revoked-001', revoked_at: '2026-02-01T00:00:00Z' },
-      ],
+      revoked_keys: [{ kid: 'cached-revoked-001', revoked_at: '2026-02-01T00:00:00Z' }],
     });
     mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(configWithRevoked));
     mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
@@ -796,12 +804,22 @@ describe('resolveJWKS (strict discovery)', () => {
   it('kid reuse error message contains kid but not key material', async () => {
     const jwks1 = JSON.stringify({
       keys: [
-        { kty: 'OKP', crv: 'Ed25519', x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', kid: 'leak-test-001' },
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+          kid: 'leak-test-001',
+        },
       ],
     });
     const jwks2 = JSON.stringify({
       keys: [
-        { kty: 'OKP', crv: 'Ed25519', x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', kid: 'leak-test-001' },
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+          kid: 'leak-test-001',
+        },
       ],
     });
 
