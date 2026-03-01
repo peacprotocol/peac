@@ -50,6 +50,36 @@
       "verified_by": "pnpm audit --prod shows no MODERATE; direct ajv bumped to 8.18.0; remaining is eslint transitive",
       "owner": "jithinraj",
       "added_at": "2026-02-19"
+    },
+    {
+      "advisory_id": "GHSA-7r86-cg39-jmmj",
+      "package": "minimatch",
+      "reason": "minimatch ReDoS via matchOne() combinatorial backtracking (HIGH) -- dev-only via eslint@10 -> minimatch@10.2.2. Linting tool only.",
+      "why_not_exploitable": "minimatch is used internally by eslint and typescript-eslint for file pattern matching during linting. No user-supplied glob patterns reach minimatch in our usage. Dev-only tooling, not in published packages.",
+      "where_used": "Root devDependency chain: eslint@10.0.1 -> minimatch@10.2.2; typescript-eslint@8.56.0 -> minimatch@10.2.2",
+      "expires_at": "2026-05-30",
+      "remediation": "Wait for minimatch >= 10.2.3 patch or eslint to pin a patched version",
+      "issue_url": "https://github.com/advisories/GHSA-7r86-cg39-jmmj",
+      "scope": "dev",
+      "dependency_chain": ["eslint@10.0.1", "@eslint/config-array@0.23.2", "minimatch@10.2.2"],
+      "verified_by": "pnpm audit --prod shows no HIGH; pnpm why minimatch confirms eslint-only path",
+      "owner": "jithinraj",
+      "added_at": "2026-03-01"
+    },
+    {
+      "advisory_id": "GHSA-23c5-xmqv-rm74",
+      "package": "minimatch",
+      "reason": "minimatch ReDoS via nested *() extglobs (HIGH) -- dev-only via eslint@10 -> minimatch@10.2.2. Linting tool only.",
+      "why_not_exploitable": "minimatch is used internally by eslint and typescript-eslint for file pattern matching during linting. No user-supplied glob patterns reach minimatch in our usage. Dev-only tooling, not in published packages.",
+      "where_used": "Root devDependency chain: eslint@10.0.1 -> minimatch@10.2.2; typescript-eslint@8.56.0 -> minimatch@10.2.2",
+      "expires_at": "2026-05-30",
+      "remediation": "Wait for minimatch >= 10.2.3 patch or eslint to pin a patched version",
+      "issue_url": "https://github.com/advisories/GHSA-23c5-xmqv-rm74",
+      "scope": "dev",
+      "dependency_chain": ["eslint@10.0.1", "@eslint/config-array@0.23.2", "minimatch@10.2.2"],
+      "verified_by": "pnpm audit --prod shows no HIGH; pnpm why minimatch confirms eslint-only path",
+      "owner": "jithinraj",
+      "added_at": "2026-03-01"
     }
   ]
 }
