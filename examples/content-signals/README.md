@@ -1,6 +1,6 @@
 # Content Signals Observation Example
 
-Demonstrates the PEAC content signal observation model: parse robots.txt, Content-Usage headers, and tdmrep.json, resolve conflicts by source precedence, and issue a receipt recording the observation.
+Demonstrates the PEAC content signal observation model: parse robots.txt, Content-Usage headers (AIPREF, Structured Fields Dictionary per RFC 9651), and tdmrep.json (EU TDM Directive 2019/790), resolve conflicts by source precedence, and issue a receipt with the observation attached via `ext[]`.
 
 ## Quick Start
 
@@ -11,12 +11,12 @@ pnpm demo
 
 ## What It Does
 
-1. **Parses** content signals from three sources (pre-fetched, no network I/O)
-2. **Resolves** conflicts using DD-137 source precedence: tdmrep.json > Content-Usage > robots.txt
-3. **Issues** a PEAC receipt recording the observation
-4. **Verifies** the receipt offline
+1. **Parses** content signals from three sources (pre-fetched, no network I/O per DD-55)
+2. **Resolves** conflicts using DD-137 source precedence
+3. **Issues** a PEAC receipt with the observation attached via `ext["org.peacprotocol/content_signal"]`
+4. **Verifies** the receipt offline and confirms the observation is present in ext[]
 
-## Three-State Model
+## Three-State Model (DD-136)
 
 Each content purpose resolves to one of three states:
 
@@ -32,9 +32,31 @@ Signals record observations. They never enforce policy.
 
 When multiple sources have signals for the same purpose, the highest-priority source wins:
 
-1. `tdmrep.json` (highest)
-2. `Content-Usage` header (AIPREF)
-3. `robots.txt` (lowest)
+1. `tdmrep.json` (highest; EU TDM Directive 2019/790, Art. 4)
+2. `Content-Signal` header (reserved for future implementation)
+3. `Content-Usage` header (AIPREF; Structured Fields Dictionary per RFC 9651, token values)
+4. `robots.txt` (lowest; RFC 9309)
+
+Three of four sources are implemented in `@peac/mappings-content-signals` v0.11.2.
+
+## Signal Sources
+
+### Content-Usage (AIPREF)
+
+The `Content-Usage` header is a Structured Fields Dictionary (RFC 9651). Values are tokens per the AIPREF vocabulary: `y` (allow), `n` (deny). Example: `Content-Usage: train-ai=n, search=y`.
+
+### tdmrep.json (EU TDM Directive)
+
+The parser accepts both W3C-specified forms:
+
+- Single-object (site-wide): `{"tdm-reservation": 0, "tdm-policy": "https://..."}`
+- Array (path-specific): `[{"location": "/articles", "tdm-reservation": 1}]`
+
+Values: `tdm-reservation: 0` (allow TDM), `tdm-reservation: 1` (deny TDM).
+
+### robots.txt
+
+Parsed per RFC 9309. AI-relevant user-agents (GPTBot, ClaudeBot, etc.) are mapped to content purposes.
 
 ## References
 

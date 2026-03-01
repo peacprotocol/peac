@@ -1,17 +1,26 @@
 /**
  * Content Signals Observation Demo
  *
- * Demonstrates the three-state content signal observation model:
+ * Demonstrates the three-state content signal observation model (DD-136):
  * 1. Parse signals from robots.txt, Content-Usage header, and tdmrep.json
- * 2. Resolve conflicts using source precedence (tdmrep > Content-Usage > robots.txt)
- * 3. Issue a PEAC receipt recording the observation
+ * 2. Resolve conflicts using DD-137 source precedence:
+ *    tdmrep.json > Content-Signal > Content-Usage > robots.txt
+ *    (Content-Signal parser reserved for future; 3 of 4 sources implemented)
+ * 3. Issue a PEAC receipt with the observation attached via ext[]
  * 4. Verify the receipt offline
+ *
+ * All content is pre-fetched (no network I/O per DD-55).
  *
  * Run: pnpm demo
  */
 
 import { generateKeypair } from '@peac/crypto';
-import { createObservation, resolveSignals, parseRobotsTxt, type ContentSignalObservation } from '@peac/mappings-content-signals';
+import {
+  createObservation,
+  resolveSignals,
+  parseRobotsTxt,
+  type ContentSignalObservation,
+} from '@peac/mappings-content-signals';
 import { issue, verifyLocal } from '@peac/protocol';
 
 // --- Sample signal sources (pre-fetched; no network I/O per DD-55) ---
@@ -20,7 +29,6 @@ const robotsTxt = `
 User-agent: *
 Disallow: /private/
 
-# Content signal directives
 User-agent: GPTBot
 Disallow: /
 
@@ -28,8 +36,14 @@ User-agent: ClaudeBot
 Allow: /public/
 `;
 
+// Content-Usage header (AIPREF draft, Structured Fields Dictionary per RFC 9651).
+// Values are tokens: y = allow, n = deny.
 const contentUsageHeader = 'train-ai=n, search=y';
 
+// tdmrep.json (EU TDM Directive 2019/790, Art. 4).
+// Single-object form: applies site-wide.
+// W3C spec also supports array form for path-specific rules:
+//   [{"location": "/articles", "tdm-reservation": 1, "tdm-policy": "https://..."}]
 const tdmrepJson = JSON.stringify({
   'tdm-reservation': 0,
   'tdm-policy': 'https://publisher.example/terms',
@@ -69,7 +83,7 @@ for (const signal of resolved) {
   console.log(`  ${signal.purpose}: ${signal.decision} (winning source: ${signal.source})`);
 }
 
-// --- 4. Issue a receipt recording the observation ---
+// --- 4. Issue a receipt with observation attached via ext[] ---
 
 console.log('\n=== Receipt Issuance ===\n');
 
@@ -84,18 +98,39 @@ const { jws } = await issue({
   reference: 'content-signal-observation',
   privateKey,
   kid: 'demo-key-2026-03',
+  ext: {
+    'org.peacprotocol/content_signal': {
+      target_uri: observation.target_uri,
+      observed_at: observation.observed_at,
+      sources_checked: observation.sources_checked,
+      signals: observation.signals.map((s) => ({
+        purpose: s.purpose,
+        decision: s.decision,
+        source: s.source,
+      })),
+    },
+  },
 });
 
 console.log('Receipt JWS:', jws.slice(0, 60) + '...');
+console.log('Observation attached via ext["org.peacprotocol/content_signal"]');
 
 // --- 5. Verify the receipt offline ---
 
 const result = await verifyLocal(jws, publicKey);
 
-console.log('Valid:', result.valid);
+console.log('\nValid:', result.valid);
 if (result.valid) {
   console.log('Issuer:', result.claims.iss);
   console.log('Audience:', result.claims.aud);
+
+  // Confirm observation is present in ext[]
+  const ext = result.claims.ext as Record<string, unknown> | undefined;
+  const csExt = ext?.['org.peacprotocol/content_signal'] as Record<string, unknown> | undefined;
+  if (csExt) {
+    console.log('Content signal ext: target_uri =', csExt.target_uri);
+    console.log('Content signal ext: signals =', JSON.stringify(csExt.signals));
+  }
 }
 
 console.log('\n=== Three-State Summary ===\n');
