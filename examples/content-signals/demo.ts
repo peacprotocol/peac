@@ -83,6 +83,8 @@ for (const signal of resolved) {
 }
 
 // --- 4. Issue a receipt with observation attached via ext[] ---
+// Extension key follows reverse-DNS convention (singular underscore-separated).
+// Not yet registered in registries.json; this example demonstrates the pattern.
 
 console.log('\n=== Receipt Issuance ===\n');
 

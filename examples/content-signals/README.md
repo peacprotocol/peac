@@ -13,7 +13,7 @@ pnpm demo
 
 1. **Parses** content signals from three sources (pre-fetched, no network I/O per DD-55)
 2. **Resolves** conflicts using DD-137 source precedence
-3. **Issues** a PEAC receipt with the observation attached via `ext["org.peacprotocol/content_signal"]`
+3. **Issues** a PEAC receipt with the observation attached via `ext["org.peacprotocol/content_signal"]` (example extension key; not yet registered in registries.json)
 4. **Verifies** the receipt offline and confirms the observation is present in ext[]
 
 ## Three-State Model (DD-136)
