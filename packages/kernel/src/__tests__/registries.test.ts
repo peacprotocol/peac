@@ -259,8 +259,11 @@ describe('additive-only: errors (v0.11.2 baseline)', () => {
   });
 
   it('should not change existing error code semantics (category, retryable)', () => {
-    const currentMap = new Map(
-      errors.errors.map((e: { code: string; category: string; retryable: boolean }) => [e.code, e])
+    const currentMap = new Map<string, { code: string; category: string; retryable: boolean }>(
+      errors.errors.map(
+        (e: { code: string; category: string; retryable: boolean }) =>
+          [e.code, e] as [string, { code: string; category: string; retryable: boolean }]
+      )
     );
 
     for (const baseline of baselineErrors.errors) {
