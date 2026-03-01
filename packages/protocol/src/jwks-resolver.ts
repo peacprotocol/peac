@@ -152,7 +152,7 @@ function evictOldestKidEntries(): void {
 
   // Collect entries sorted by firstSeen (oldest first)
   const entries = Array.from(kidThumbprints.entries()).sort(
-    (a, b) => a[1].firstSeen - b[1].firstSeen,
+    (a, b) => a[1].firstSeen - b[1].firstSeen
   );
 
   // Remove oldest entries until within limit
