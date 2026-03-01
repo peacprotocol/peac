@@ -23,7 +23,7 @@
       "input": {
         "id": "agent:attested-device-001",
         "proof_type": "eat-passport",
-        "proof_ref": "urn:ietf:params:eat:profile:example-passport",
+        "proof_ref": "urn:example:eat:profile:passport-v1",
         "origin": "https://attestation.example.com"
       },
       "expected": {
