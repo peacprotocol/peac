@@ -1,0 +1,25 @@
+// OpenCode configuration for PEAC Protocol development
+// Copy this file to your project root as opencode.jsonc
+{
+  // MCP server configuration
+  "mcpServers": {
+    "peac": {
+      "command": "npx",
+      "args": ["@peac/mcp-server"],
+      "env": {}
+    }
+  },
+
+  // Agent configuration
+  "agents": {
+    "peac-verifier": {
+      "description": "Verify and inspect PEAC receipts",
+      "instructions": "Use the peac MCP server tools (peac_verify, peac_inspect, peac_decode) to verify and explain PEAC receipts. Always verify before trusting claims."
+    }
+  },
+
+  // Context files for PEAC development
+  "context": [
+    "AGENTS.md"
+  ]
+}
