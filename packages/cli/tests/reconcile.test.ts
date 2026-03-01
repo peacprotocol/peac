@@ -310,6 +310,21 @@ describe('Reconcile CLI', () => {
     expect(report.conflicts).toHaveLength(0);
   });
 
+  it('should reject bundle creation with zero receipts (API contract)', async () => {
+    // createDisputeBundle rejects empty receipts at the API level.
+    // This documents the contract: bundles with zero receipts cannot exist.
+    const result = await createDisputeBundle({
+      dispute_ref: 'test-empty',
+      created_by: 'test',
+      receipts: [],
+      keys: jwks,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.message).toContain('No receipts');
+    }
+  });
+
   it('should error gracefully on corrupt bundle file', () => {
     const corruptPath = join(TEST_DIR, 'corrupt.zip');
     writeFileSync(corruptPath, 'not a valid zip');
