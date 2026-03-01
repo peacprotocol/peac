@@ -1,23 +1,27 @@
 #!/usr/bin/env bash
 # .githooks/pre-commit
-# Repo-managed pre-commit hook: format staged files, check for planning leaks.
-# Install: git config core.hooksPath .githooks
-# Or run: bash scripts/setup-hooks.sh
+# Repo-managed pre-commit hook: lint-staged auto-format + planning leak check.
+# Install: bash scripts/setup-hooks.sh
+#
+# This hook is NOT optional. It runs lint-staged (Prettier --write on staged
+# files) so formatting issues are fixed before they reach CI. The planning
+# leak check prevents strategic content from leaking into commits.
+#
+# Bypass: PEAC_SKIP_PRE_COMMIT=1 git commit -m "..."
+# A bypass logs a warning and requires the env var to be set explicitly.
+# Treat bypass as exceptional; CI will still catch violations.
 
 set -euo pipefail
 
-echo "[pre-commit] Running staged file checks..."
-
-# Format staged files with Prettier (fix in place, re-stage)
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx|json|md|yml|yaml)$' || true)
-
-if [ -n "$STAGED_FILES" ]; then
-  echo "[pre-commit] Formatting staged files..."
-  echo "$STAGED_FILES" | xargs pnpm exec prettier --write --ignore-unknown 2>/dev/null || true
-  echo "$STAGED_FILES" | xargs git add
+if [ "${PEAC_SKIP_PRE_COMMIT:-}" = "1" ]; then
+  echo "[pre-commit] BYPASSED (PEAC_SKIP_PRE_COMMIT=1)"
+  echo "[pre-commit] WARNING: CI will still enforce formatting and planning leak checks."
+  exit 0
 fi
 
-# Check for planning leak in staged content
+echo "[pre-commit] Running lint-staged (auto-format)..."
+pnpm exec lint-staged --concurrent false
+
 echo "[pre-commit] Checking for planning leaks..."
 bash scripts/check-planning-leak.sh
 
