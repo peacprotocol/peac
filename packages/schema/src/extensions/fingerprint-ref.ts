@@ -78,6 +78,18 @@ const VALID_ALGS = ['sha256', 'hmac-sha256'] as const;
 const STRING_FORM_PATTERN = /^(sha256|hmac-sha256):([a-f0-9]{64})$/;
 
 /**
+ * Maximum length for fingerprint reference string form.
+ * "hmac-sha256:" (12) + 64 hex chars = 76 chars max.
+ */
+export const MAX_FINGERPRINT_REF_LENGTH = 76;
+
+/**
+ * Strict base64url character set (RFC 4648 section 5).
+ * Only A-Z, a-z, 0-9, '-', '_'. No padding ('='), no whitespace.
+ */
+const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/;
+
+/**
  * Parse a Wire 0.1 string form fingerprint reference ("alg:hex64")
  * into a Wire 0.2 object form ({ alg, value }).
  *
@@ -87,6 +99,9 @@ const STRING_FORM_PATTERN = /^(sha256|hmac-sha256):([a-f0-9]{64})$/;
  * @returns Object form with base64url value, or null if invalid
  */
 export function stringToFingerprintRef(s: string): FingerprintRefObject | null {
+  if (s.length > MAX_FINGERPRINT_REF_LENGTH) {
+    return null;
+  }
   const match = STRING_FORM_PATTERN.exec(s);
   if (!match) {
     return null;
@@ -110,6 +125,10 @@ export function stringToFingerprintRef(s: string): FingerprintRefObject | null {
  */
 export function fingerprintRefToString(obj: FingerprintRefObject): string | null {
   if (!VALID_ALGS.includes(obj.alg as (typeof VALID_ALGS)[number])) {
+    return null;
+  }
+  // Strict base64url validation (RFC 4648 section 5): no padding, no whitespace
+  if (!BASE64URL_PATTERN.test(obj.value)) {
     return null;
   }
   try {

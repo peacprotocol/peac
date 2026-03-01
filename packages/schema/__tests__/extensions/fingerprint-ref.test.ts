@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import {
   stringToFingerprintRef,
   fingerprintRefToString,
+  MAX_FINGERPRINT_REF_LENGTH,
   type FingerprintRefObject,
 } from '../../src/extensions/fingerprint-ref';
 
@@ -42,6 +43,23 @@ describe('stringToFingerprintRef', () => {
     expect(stringToFingerprintRef('')).toBeNull();
     expect(stringToFingerprintRef('just-a-string')).toBeNull();
     expect(stringToFingerprintRef('sha256:')).toBeNull();
+  });
+
+  it('should return null for uppercase hex', () => {
+    expect(
+      stringToFingerprintRef(
+        'sha256:E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855'
+      )
+    ).toBeNull();
+  });
+
+  it('should reject string exceeding max length', () => {
+    const overlong = 'sha256:' + 'a'.repeat(100);
+    expect(stringToFingerprintRef(overlong)).toBeNull();
+  });
+
+  it('should export MAX_FINGERPRINT_REF_LENGTH constant', () => {
+    expect(MAX_FINGERPRINT_REF_LENGTH).toBe(76);
   });
 });
 
@@ -89,6 +107,94 @@ describe('round-trip: string -> object -> string', () => {
       expect(obj).not.toBeNull();
       const output = fingerprintRefToString(obj!);
       expect(output).toBe(input);
+    });
+  }
+});
+
+describe('strict base64url validation (RFC 4648)', () => {
+  it('should reject padded base64 (= suffix)', () => {
+    const padded: FingerprintRefObject = {
+      alg: 'sha256',
+      value: '47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
+    };
+    expect(fingerprintRefToString(padded)).toBeNull();
+  });
+
+  it('should reject standard base64 characters (+ and /)', () => {
+    const stdBase64: FingerprintRefObject = {
+      alg: 'sha256',
+      value: '47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU',
+    };
+    expect(fingerprintRefToString(stdBase64)).toBeNull();
+  });
+
+  it('should reject whitespace in value', () => {
+    const withSpace: FingerprintRefObject = {
+      alg: 'sha256',
+      value: '47DEQpj8HBSa _TImW 5JCeuQeRkm5NMpJWZG3hSuFU',
+    };
+    expect(fingerprintRefToString(withSpace)).toBeNull();
+  });
+
+  it('should reject newline in value', () => {
+    const withNewline: FingerprintRefObject = {
+      alg: 'sha256',
+      value: '47DEQpj8HBSa\n_TImW-5JCeuQeRkm5NMpJWZG3hSuFU',
+    };
+    expect(fingerprintRefToString(withNewline)).toBeNull();
+  });
+
+  it('should reject tab in value', () => {
+    const withTab: FingerprintRefObject = {
+      alg: 'sha256',
+      value: '47DEQpj8HBSa\t_TImW-5JCeuQeRkm5NMpJWZG3hSuFU',
+    };
+    expect(fingerprintRefToString(withTab)).toBeNull();
+  });
+
+  it('should reject empty value', () => {
+    const empty: FingerprintRefObject = { alg: 'sha256', value: '' };
+    expect(fingerprintRefToString(empty)).toBeNull();
+  });
+});
+
+describe('fuzz-style malformed input tests', () => {
+  const malformedStrings = [
+    'sha256:',
+    ':e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85', // 63 chars
+    'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b8550', // 65 chars
+    'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85g', // 'g' not hex
+    'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 ', // trailing space
+    ' sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', // leading space
+    'sha256 :e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', // space before colon
+    'SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', // uppercase alg
+    'sha256:e3b0c442 98fc1c14 9afbf4c8 996fb924 27ae41e4 649b934c a495991b 7852b855', // spaces in hex
+    'null',
+    'undefined',
+    '{}',
+    '[]',
+  ];
+
+  for (const input of malformedStrings) {
+    it(`should reject malformed: ${JSON.stringify(input).substring(0, 50)}`, () => {
+      expect(stringToFingerprintRef(input)).toBeNull();
+    });
+  }
+
+  const malformedObjects: { desc: string; obj: FingerprintRefObject }[] = [
+    { desc: 'null alg', obj: { alg: null as unknown as string, value: 'AAAA' } },
+    { desc: 'numeric alg', obj: { alg: 123 as unknown as string, value: 'AAAA' } },
+    { desc: 'empty alg', obj: { alg: '', value: 'AAAA' } },
+    {
+      desc: 'unicode in value',
+      obj: { alg: 'sha256', value: '\u00e9\u00e8\u00ea' },
+    },
+  ];
+
+  for (const { desc, obj } of malformedObjects) {
+    it(`should reject malformed object: ${desc}`, () => {
+      expect(fingerprintRefToString(obj)).toBeNull();
     });
   }
 });

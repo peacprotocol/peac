@@ -12,7 +12,8 @@
       }
     },
     {
-      "name": "hmac-sha256-example",
+      "name": "opaque-hmac-sha256-example",
+      "$comment": "Opaque HMAC-SHA256 reference. Verifiers MUST NOT assume they can recompute this value. The issuer computed it externally; this is format validation only.",
       "string_form": "hmac-sha256:f0e1d2c3b4a5968778695a4b3c2d1e0ff0e1d2c3b4a5968778695a4b3c2d1e0f",
       "object_form": {
         "alg": "hmac-sha256",

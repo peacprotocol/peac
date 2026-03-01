@@ -36,5 +36,9 @@ export {
 export type { ControlActionType, ControlTrigger, ControlAction } from './control-action';
 
 // Fingerprint Reference Conversion (DD-146)
-export { stringToFingerprintRef, fingerprintRefToString } from './fingerprint-ref';
+export {
+  stringToFingerprintRef,
+  fingerprintRefToString,
+  MAX_FINGERPRINT_REF_LENGTH,
+} from './fingerprint-ref';
 export type { FingerprintRefObject } from './fingerprint-ref';
