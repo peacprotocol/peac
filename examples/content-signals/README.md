@@ -20,11 +20,11 @@ pnpm demo
 
 Each content purpose resolves to one of three states:
 
-| State | Meaning |
-| ----- | ------- |
-| `allow` | Source explicitly permits this use |
-| `deny` | Source explicitly prohibits this use |
-| `unspecified` | No signal found for this use |
+| State         | Meaning                              |
+| ------------- | ------------------------------------ |
+| `allow`       | Source explicitly permits this use   |
+| `deny`        | Source explicitly prohibits this use |
+| `unspecified` | No signal found for this use         |
 
 Signals record observations. They never enforce policy.
 
