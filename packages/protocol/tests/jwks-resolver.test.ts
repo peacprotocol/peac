@@ -16,7 +16,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { resolveJWKS, clearJWKSCache, getJWKSCacheSize } from '../src/jwks-resolver';
+import {
+  resolveJWKS,
+  clearJWKSCache,
+  getJWKSCacheSize,
+  clearKidThumbprints,
+} from '../src/jwks-resolver';
 
 // Mock ssrf-safe-fetch and discovery modules
 vi.mock('../src/ssrf-safe-fetch.js', () => ({
@@ -72,11 +77,13 @@ const VALID_JWKS = JSON.stringify({
 describe('resolveJWKS (strict discovery)', () => {
   beforeEach(() => {
     clearJWKSCache();
+    clearKidThumbprints();
     vi.resetAllMocks();
   });
 
   afterEach(() => {
     clearJWKSCache();
+    clearKidThumbprints();
   });
 
   // ------------------------------------------------------------------
@@ -602,5 +609,215 @@ describe('resolveJWKS (strict discovery)', () => {
     const cached = await resolveJWKS('https://issuer-1.example.com');
     expect(cached.ok).toBe(true);
     if (cached.ok) expect(cached.fromCache).toBe(true); // Still in cache
+  });
+
+  // ------------------------------------------------------------------
+  // Kid reuse detection (DD-148)
+  // ------------------------------------------------------------------
+
+  it('detects kid reuse when same kid maps to different key material', async () => {
+    // First resolution: kid=reuse-001 with key material A
+    const jwks1 = JSON.stringify({
+      keys: [
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+          kid: 'reuse-001',
+        },
+      ],
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwks1));
+
+    const result1 = await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(result1.ok).toBe(true);
+
+    // Second resolution: same kid with different key material B
+    const jwks2 = JSON.stringify({
+      keys: [
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+          kid: 'reuse-001',
+        },
+      ],
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwks2));
+
+    const result2 = await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(result2.ok).toBe(false);
+    if (!result2.ok) {
+      expect(result2.code).toBe('E_KID_REUSE_DETECTED');
+      expect(result2.message).toContain('reuse-001');
+    }
+  });
+
+  it('allows same kid with same key material (no reuse)', async () => {
+    const jwks = JSON.stringify({
+      keys: [
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+          kid: 'stable-001',
+        },
+      ],
+    });
+
+    // First resolution
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwks));
+    const result1 = await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(result1.ok).toBe(true);
+
+    // Second resolution with same key material: should succeed
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwks));
+    const result2 = await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(result2.ok).toBe(true);
+  });
+
+  it('isolates kid reuse detection per issuer', async () => {
+    // Issuer A uses kid=shared-001 with material A
+    const configA = JSON.stringify({
+      version: 'peac-issuer/0.1',
+      issuer: 'https://issuer-a.example.com',
+      jwks_uri: 'https://issuer-a.example.com/.well-known/jwks.json',
+    });
+    const jwksA = JSON.stringify({
+      keys: [
+        { kty: 'OKP', crv: 'Ed25519', x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', kid: 'shared-001' },
+      ],
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(configA));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwksA));
+    const resultA = await resolveJWKS('https://issuer-a.example.com', { noCache: true });
+    expect(resultA.ok).toBe(true);
+
+    // Issuer B uses same kid=shared-001 but with different material B (should succeed: different issuer)
+    const configB = JSON.stringify({
+      version: 'peac-issuer/0.1',
+      issuer: 'https://issuer-b.example.com',
+      jwks_uri: 'https://issuer-b.example.com/.well-known/jwks.json',
+    });
+    const jwksB = JSON.stringify({
+      keys: [
+        { kty: 'OKP', crv: 'Ed25519', x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', kid: 'shared-001' },
+      ],
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(configB));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwksB));
+    const resultB = await resolveJWKS('https://issuer-b.example.com', { noCache: true });
+    expect(resultB.ok).toBe(true);
+  });
+
+  it('skips kid reuse check for keys without kid or x', async () => {
+    const jwks = JSON.stringify({
+      keys: [
+        { kty: 'OKP', crv: 'Ed25519', kid: 'no-x-key' },
+        { kty: 'OKP', crv: 'Ed25519', x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' },
+      ],
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwks));
+
+    const result = await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(result.ok).toBe(true);
+  });
+
+  // ------------------------------------------------------------------
+  // Revoked keys passthrough (DD-148)
+  // ------------------------------------------------------------------
+
+  it('passes revoked_keys from issuer config to resolve result', async () => {
+    const configWithRevoked = JSON.stringify({
+      version: 'peac-issuer/0.1',
+      issuer: 'https://api.example.com',
+      jwks_uri: 'https://api.example.com/.well-known/jwks.json',
+      revoked_keys: [
+        { kid: 'old-key-001', revoked_at: '2026-01-15T00:00:00Z', reason: 'superseded' },
+      ],
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(configWithRevoked));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+
+    const result = await resolveJWKS('https://api.example.com');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.revokedKeys).toHaveLength(1);
+      expect(result.revokedKeys![0].kid).toBe('old-key-001');
+      expect(result.revokedKeys![0].reason).toBe('superseded');
+    }
+  });
+
+  it('returns undefined revokedKeys when issuer config has none', async () => {
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+
+    const result = await resolveJWKS('https://api.example.com');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.revokedKeys).toBeUndefined();
+    }
+  });
+
+  it('includes revokedKeys in cached results', async () => {
+    const configWithRevoked = JSON.stringify({
+      version: 'peac-issuer/0.1',
+      issuer: 'https://api.example.com',
+      jwks_uri: 'https://api.example.com/.well-known/jwks.json',
+      revoked_keys: [
+        { kid: 'cached-revoked-001', revoked_at: '2026-02-01T00:00:00Z' },
+      ],
+    });
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(configWithRevoked));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(VALID_JWKS));
+
+    // First call: populates cache
+    await resolveJWKS('https://api.example.com');
+
+    // Second call: from cache
+    const cached = await resolveJWKS('https://api.example.com');
+    expect(cached.ok).toBe(true);
+    if (cached.ok) {
+      expect(cached.fromCache).toBe(true);
+      expect(cached.revokedKeys).toHaveLength(1);
+      expect(cached.revokedKeys![0].kid).toBe('cached-revoked-001');
+    }
+  });
+
+  // ------------------------------------------------------------------
+  // No key material in error messages (security audit)
+  // ------------------------------------------------------------------
+
+  it('kid reuse error message contains kid but not key material', async () => {
+    const jwks1 = JSON.stringify({
+      keys: [
+        { kty: 'OKP', crv: 'Ed25519', x: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', kid: 'leak-test-001' },
+      ],
+    });
+    const jwks2 = JSON.stringify({
+      keys: [
+        { kty: 'OKP', crv: 'Ed25519', x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', kid: 'leak-test-001' },
+      ],
+    });
+
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwks1));
+    await resolveJWKS('https://api.example.com', { noCache: true });
+
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(jwks2));
+    const result = await resolveJWKS('https://api.example.com', { noCache: true });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.message).toContain('leak-test-001'); // kid is expected
+      expect(result.message).not.toContain('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'); // old key material must not leak
+      expect(result.message).not.toContain('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'); // new key material must not leak
+    }
   });
 });
