@@ -355,6 +355,30 @@
       "fixture_count": 8
     }
   },
+  "fingerprint-ref": {
+    "golden-vectors.json": {
+      "description": "FingerprintRef round-trip conversion golden vectors (DD-146, v0.11.3+)",
+      "version": "0.11.3",
+      "fixture_count": 4
+    }
+  },
+  "zero-trust": {
+    "credential-event.json": {
+      "description": "Credential event extension conformance fixtures (DD-145, v0.11.3+)",
+      "version": "0.11.3",
+      "fixture_count": 6
+    },
+    "tool-registry.json": {
+      "description": "Tool registry extension conformance fixtures (DD-145, v0.11.3+)",
+      "version": "0.11.3",
+      "fixture_count": 6
+    },
+    "control-action.json": {
+      "description": "Control action extension conformance fixtures (DD-145, v0.11.3+)",
+      "version": "0.11.3",
+      "fixture_count": 6
+    }
+  },
   "carrier": {
     "valid-minimal.json": {
       "description": "Minimal carrier with only receipt_ref",
