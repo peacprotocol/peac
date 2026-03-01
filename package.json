@@ -20,6 +20,7 @@
     "examples/*"
   ],
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest --coverage",

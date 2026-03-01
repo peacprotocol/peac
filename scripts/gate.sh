@@ -32,6 +32,22 @@ run_check() {
   fi
 }
 
+# --- Bidi/Unicode scan (early, before anything else) ---
+echo "== bidi/unicode scan =="
+if [ -f scripts/find-invisible-unicode.mjs ]; then
+  if git ls-files -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' '*.json' '*.md' '*.yaml' '*.yml' \
+    | grep -vE '^(archive/|node_modules/)' \
+    | node scripts/find-invisible-unicode.mjs --stdin 2>&1 | grep -v "No dangerous Unicode"; then
+    echo "FAIL: Found dangerous invisible/bidi Unicode characters"
+    bad=1
+  else
+    echo "OK"
+  fi
+else
+  echo "FAIL: scripts/find-invisible-unicode.mjs not found"
+  bad=1
+fi
+
 # --- Format ---
 run_check "format" pnpm format:check
 
