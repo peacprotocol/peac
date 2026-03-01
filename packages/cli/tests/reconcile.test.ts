@@ -287,6 +287,40 @@ describe('Reconcile CLI', () => {
     expect(result.stdout).toContain('No conflicts detected');
   });
 
+  it('should merge single-receipt bundles with identical content', async () => {
+    const receipt = await createTestReceipt(privateKey, kid, {
+      jti: 'r-single-001',
+      sub: 'https://single.example.com',
+    });
+
+    const bundle1 = await createTestBundle([receipt], jwks, 'single-a');
+    const bundle2 = await createTestBundle([receipt], jwks, 'single-b');
+
+    const path1 = join(TEST_DIR, 'single-a.zip');
+    const path2 = join(TEST_DIR, 'single-b.zip');
+    writeFileSync(path1, bundle1);
+    writeFileSync(path2, bundle2);
+
+    const result = runCli(['reconcile', path1, path2, '--format', 'json', '--fail-on-conflict']);
+    expect(result.exitCode).toBe(0);
+
+    const report = JSON.parse(result.stdout);
+    expect(report.total_receipts).toBe(2);
+    expect(report.merged_receipts).toBe(1);
+    expect(report.conflicts).toHaveLength(0);
+  });
+
+  it('should error gracefully on corrupt bundle file', () => {
+    const corruptPath = join(TEST_DIR, 'corrupt.zip');
+    writeFileSync(corruptPath, 'not a valid zip');
+
+    const validPath = join(TEST_DIR, 'disjoint-a.zip');
+    if (!existsSync(validPath)) return; // skip if prior test didn't run
+
+    const result = runCli(['reconcile', corruptPath, validPath, '--format', 'json']);
+    expect(result.exitCode).toBe(1);
+  });
+
   it('should error on non-existent bundle file', () => {
     const result = runCli([
       'reconcile',
