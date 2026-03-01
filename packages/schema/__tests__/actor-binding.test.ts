@@ -9,8 +9,6 @@ import {
   PROOF_TYPES,
   ActorBindingSchema,
   MVISFieldsSchema,
-  MVISTimeBoundsSchema,
-  MVISReplayProtectionSchema,
   ACTOR_BINDING_EXTENSION_KEY,
   isOriginOnly,
   validateActorBinding,
