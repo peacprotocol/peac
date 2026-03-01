@@ -1,0 +1,1321 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "0.11.2",
+  "description": "PEAC error codes - normative source of truth",
+  "errors": [
+    {
+      "code": "E_INVALID_SIGNATURE",
+      "http_status": 400,
+      "title": "Invalid Signature",
+      "description": "Receipt signature verification failed",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Invalid Format",
+      "description": "Receipt does not conform to JWS format",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_EXPIRED",
+      "http_status": 400,
+      "title": "Receipt Expired",
+      "description": "Receipt has exceeded its expiration time",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_NOT_YET_VALID",
+      "http_status": 400,
+      "title": "Not Yet Valid",
+      "description": "Receipt nbf (not before) time is in the future",
+      "category": "validation",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_INVALID_ISSUER",
+      "http_status": 400,
+      "title": "Invalid Issuer",
+      "description": "Receipt issuer claim is invalid or untrusted",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INVALID_AUDIENCE",
+      "http_status": 400,
+      "title": "Invalid Audience",
+      "description": "Receipt audience claim does not match expected value",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_JWKS_FETCH_FAILED",
+      "http_status": 503,
+      "title": "JWKS Fetch Failed",
+      "description": "Failed to fetch public keys from JWKS endpoint",
+      "category": "infrastructure",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_KEY_NOT_FOUND",
+      "http_status": 400,
+      "title": "Key Not Found",
+      "description": "Public key with specified kid not found in JWKS",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "retry_with_different_key"
+    },
+    {
+      "code": "E_INVALID_AMOUNT",
+      "http_status": 400,
+      "title": "Invalid Amount",
+      "description": "Payment amount is invalid or out of allowed range",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INVALID_CURRENCY",
+      "http_status": 400,
+      "title": "Invalid Currency",
+      "description": "Currency code is not a valid ISO 4217 code",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INVALID_RAIL",
+      "http_status": 400,
+      "title": "Invalid Payment Rail",
+      "description": "Payment rail identifier is not recognized",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_MISSING_REQUIRED_CLAIM",
+      "http_status": 400,
+      "title": "Missing Required Claim",
+      "description": "Receipt is missing a required JWT claim",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_RATE_LIMITED",
+      "http_status": 429,
+      "title": "Rate Limited",
+      "description": "Too many requests, please retry later",
+      "category": "infrastructure",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_CIRCUIT_BREAKER_OPEN",
+      "http_status": 503,
+      "title": "Circuit Breaker Open",
+      "description": "Service temporarily unavailable due to circuit breaker",
+      "category": "infrastructure",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_CONTROL_DENIED",
+      "http_status": 403,
+      "title": "Control Decision Denied",
+      "description": "Control engine denied authorization",
+      "category": "control",
+      "retryable": false,
+      "next_action": "contact_issuer"
+    },
+    {
+      "code": "E_CONTROL_REVIEW_REQUIRED",
+      "http_status": 202,
+      "title": "Review Required",
+      "description": "Control engine requires manual review",
+      "category": "control",
+      "retryable": true,
+      "next_action": "contact_issuer"
+    },
+    {
+      "code": "E_EVIDENCE_NOT_JSON",
+      "http_status": 400,
+      "title": "Evidence Not JSON-Safe",
+      "description": "Evidence contains non-JSON-safe values (NaN, Infinity, undefined, BigInt, Date, Map, Set, functions, symbols, class instances, or cycles)",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INVALID_SUBJECT",
+      "http_status": 400,
+      "title": "Invalid Subject",
+      "description": "Receipt subject claim does not match expected value",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INVALID_RECEIPT_ID",
+      "http_status": 400,
+      "title": "Invalid Receipt ID",
+      "description": "Receipt ID (rid) does not match expected value",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_MISSING_EXP",
+      "http_status": 400,
+      "title": "Missing Expiration",
+      "description": "Receipt is missing required exp claim",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERNAL",
+      "http_status": 500,
+      "title": "Internal Error",
+      "description": "An unexpected internal error occurred during verification",
+      "category": "infrastructure",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_IDENTITY_MISSING",
+      "http_status": 401,
+      "title": "Identity Missing",
+      "description": "No agent identity attestation provided in request",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IDENTITY_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Identity Invalid Format",
+      "description": "Agent identity attestation does not conform to schema",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IDENTITY_EXPIRED",
+      "http_status": 401,
+      "title": "Identity Expired",
+      "description": "Agent identity attestation has exceeded its expiration time",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "refresh_attestation"
+    },
+    {
+      "code": "E_IDENTITY_NOT_YET_VALID",
+      "http_status": 401,
+      "title": "Identity Not Yet Valid",
+      "description": "Agent identity attestation issued_at time is in the future",
+      "category": "identity",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_IDENTITY_SIG_INVALID",
+      "http_status": 401,
+      "title": "Identity Signature Invalid",
+      "description": "Agent identity proof signature verification failed",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IDENTITY_KEY_UNKNOWN",
+      "http_status": 401,
+      "title": "Identity Key Unknown",
+      "description": "Key ID not found in agent key directory",
+      "category": "identity",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_IDENTITY_KEY_EXPIRED",
+      "http_status": 401,
+      "title": "Identity Key Expired",
+      "description": "Agent signing key has expired per directory metadata",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "refresh_attestation"
+    },
+    {
+      "code": "E_IDENTITY_KEY_REVOKED",
+      "http_status": 401,
+      "title": "Identity Key Revoked",
+      "description": "Agent signing key has been explicitly revoked",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "refresh_attestation"
+    },
+    {
+      "code": "E_IDENTITY_BINDING_MISMATCH",
+      "http_status": 400,
+      "title": "Identity Binding Mismatch",
+      "description": "Identity binding does not match the request being verified",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IDENTITY_BINDING_STALE",
+      "http_status": 401,
+      "title": "Identity Binding Stale",
+      "description": "Identity binding is too old and requires fresh binding",
+      "category": "identity",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_IDENTITY_BINDING_FUTURE",
+      "http_status": 400,
+      "title": "Identity Binding Future",
+      "description": "Identity binding signed_at timestamp is in the future",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IDENTITY_PROOF_UNSUPPORTED",
+      "http_status": 400,
+      "title": "Identity Proof Unsupported",
+      "description": "Agent identity proof method is not supported",
+      "category": "identity",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IDENTITY_DIRECTORY_UNAVAILABLE",
+      "http_status": 503,
+      "title": "Identity Directory Unavailable",
+      "description": "Failed to fetch agent key directory",
+      "category": "identity",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_ATTRIBUTION_MISSING_SOURCES",
+      "http_status": 400,
+      "title": "Attribution Missing Sources",
+      "description": "Attribution attestation has empty sources array",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Attribution Invalid Format",
+      "description": "Attribution attestation does not conform to schema",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_REF",
+      "http_status": 400,
+      "title": "Attribution Invalid Reference",
+      "description": "Receipt reference format is invalid (must be jti:{id}, URL, or URN)",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_HASH_INVALID",
+      "http_status": 400,
+      "title": "Attribution Hash Invalid",
+      "description": "Content hash structure is invalid (wrong algorithm, encoding, or value length)",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_UNKNOWN_USAGE",
+      "http_status": 400,
+      "title": "Attribution Unknown Usage",
+      "description": "Attribution usage type is not recognized",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_WEIGHT",
+      "http_status": 400,
+      "title": "Attribution Invalid Weight",
+      "description": "Attribution weight is out of valid range (must be 0.0-1.0)",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_CIRCULAR_CHAIN",
+      "http_status": 400,
+      "title": "Attribution Circular Chain",
+      "description": "Circular reference detected in attribution chain",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_CHAIN_TOO_DEEP",
+      "http_status": 400,
+      "title": "Attribution Chain Too Deep",
+      "description": "Attribution chain exceeds maximum allowed depth (8)",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_TOO_MANY_SOURCES",
+      "http_status": 400,
+      "title": "Attribution Too Many Sources",
+      "description": "Attribution has too many sources (maximum 100)",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_SIZE_EXCEEDED",
+      "http_status": 400,
+      "title": "Attribution Size Exceeded",
+      "description": "Attribution attestation exceeds maximum size (64KB)",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_ATTRIBUTION_RESOLUTION_FAILED",
+      "http_status": 502,
+      "title": "Attribution Resolution Failed",
+      "description": "Failed to resolve receipt reference in attribution chain",
+      "category": "attribution",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_ATTRIBUTION_RESOLUTION_TIMEOUT",
+      "http_status": 504,
+      "title": "Attribution Resolution Timeout",
+      "description": "Timeout while resolving receipt reference in attribution chain",
+      "category": "attribution",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_ATTRIBUTION_NOT_YET_VALID",
+      "http_status": 401,
+      "title": "Attribution Not Yet Valid",
+      "description": "Attribution attestation issued_at time is in the future",
+      "category": "attribution",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_ATTRIBUTION_EXPIRED",
+      "http_status": 401,
+      "title": "Attribution Expired",
+      "description": "Attribution attestation has exceeded its expiration time",
+      "category": "attribution",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Dispute Invalid Format",
+      "description": "Dispute attestation does not conform to schema",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_ID",
+      "http_status": 400,
+      "title": "Dispute Invalid ID",
+      "description": "Dispute ID is not a valid ULID format (26 uppercase alphanumeric characters)",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TYPE",
+      "http_status": 400,
+      "title": "Dispute Invalid Type",
+      "description": "Dispute type is not recognized",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TARGET_TYPE",
+      "http_status": 400,
+      "title": "Dispute Invalid Target Type",
+      "description": "Dispute target type is not recognized (must be receipt, attribution, identity, or policy)",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_GROUNDS",
+      "http_status": 400,
+      "title": "Dispute Invalid Grounds",
+      "description": "Dispute grounds code is not recognized",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_STATE",
+      "http_status": 400,
+      "title": "Dispute Invalid State",
+      "description": "Dispute state is not recognized",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TRANSITION",
+      "http_status": 400,
+      "title": "Dispute Invalid Transition",
+      "description": "Invalid state transition for dispute lifecycle",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_MISSING_RESOLUTION",
+      "http_status": 400,
+      "title": "Dispute Missing Resolution",
+      "description": "Resolution is required for terminal states (resolved, rejected, final)",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_RESOLUTION_NOT_ALLOWED",
+      "http_status": 400,
+      "title": "Dispute Resolution Not Allowed",
+      "description": "Resolution is only valid for terminal states",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_NOT_YET_VALID",
+      "http_status": 401,
+      "title": "Dispute Not Yet Valid",
+      "description": "Dispute attestation issued_at time is in the future",
+      "category": "dispute",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_DISPUTE_EXPIRED",
+      "http_status": 401,
+      "title": "Dispute Expired",
+      "description": "Dispute attestation has exceeded its expiration time",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_OTHER_REQUIRES_DESCRIPTION",
+      "http_status": 400,
+      "title": "Dispute Other Requires Description",
+      "description": "Dispute type 'other' requires description of at least 50 characters",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_DUPLICATE",
+      "http_status": 409,
+      "title": "Dispute Duplicate",
+      "description": "A dispute with this ID already exists",
+      "category": "dispute",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DISPUTE_TARGET_NOT_FOUND",
+      "http_status": 404,
+      "title": "Dispute Target Not Found",
+      "description": "The target receipt, attribution, or identity being disputed was not found",
+      "category": "dispute",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_BUNDLE_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Bundle Invalid Format",
+      "description": "Bundle archive structure is invalid (not a valid ZIP or missing required files)",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_MANIFEST_MISSING",
+      "http_status": 400,
+      "title": "Bundle Manifest Missing",
+      "description": "manifest.json not found at bundle archive root",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_MANIFEST_INVALID",
+      "http_status": 400,
+      "title": "Bundle Manifest Invalid",
+      "description": "manifest.json does not conform to schema or contains invalid values",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_HASH_MISMATCH",
+      "http_status": 400,
+      "title": "Bundle Hash Mismatch",
+      "description": "File hash does not match value declared in manifest.json",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_SIGNATURE_INVALID",
+      "http_status": 400,
+      "title": "Bundle Signature Invalid",
+      "description": "bundle.sig JWS verification failed over manifest hash",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_RECEIPTS_UNORDERED",
+      "http_status": 400,
+      "title": "Bundle Receipts Unordered",
+      "description": "receipts.ndjson is not in deterministic order (issued_at, receipt_id, receipt_hash)",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_POLICY_HASH_MISMATCH",
+      "http_status": 400,
+      "title": "Bundle Policy Hash Mismatch",
+      "description": "Policy snapshot hash does not match policy used to evaluate receipts",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_KEY_MISSING",
+      "http_status": 400,
+      "title": "Bundle Key Missing",
+      "description": "Required signing key not found in bundle (offline verification mode)",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_TIME_RANGE_INVALID",
+      "http_status": 400,
+      "title": "Bundle Time Range Invalid",
+      "description": "Receipt issued_at is outside the bundle declared time_range",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_MISSING_RECEIPTS",
+      "http_status": 400,
+      "title": "Bundle Missing Receipts",
+      "description": "No receipts provided when creating bundle",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_MISSING_KEYS",
+      "http_status": 400,
+      "title": "Bundle Missing Keys",
+      "description": "No verification keys provided in bundle JWKS",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_RECEIPT_INVALID",
+      "http_status": 400,
+      "title": "Bundle Receipt Invalid",
+      "description": "Receipt JWS in bundle is malformed or missing required claims",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_DUPLICATE_RECEIPT",
+      "http_status": 400,
+      "title": "Bundle Duplicate Receipt",
+      "description": "Bundle contains multiple receipts with the same ID",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_PATH_TRAVERSAL",
+      "http_status": 400,
+      "title": "Bundle Path Traversal",
+      "description": "Bundle contains path traversal attack (zip-slip vulnerability)",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_BUNDLE_SIZE_EXCEEDED",
+      "http_status": 400,
+      "title": "Bundle Size Exceeded",
+      "description": "Bundle exceeds size limits (entry count, entry size, or total size)",
+      "category": "bundle",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_MISSING",
+      "http_status": 400,
+      "title": "UCP Signature Missing",
+      "description": "Request-Signature header is missing from UCP webhook request",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_MALFORMED",
+      "http_status": 400,
+      "title": "UCP Signature Malformed",
+      "description": "Request-Signature header is not a valid detached JWS (RFC 7797)",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_ALGORITHM_UNSUPPORTED",
+      "http_status": 400,
+      "title": "UCP Signature Algorithm Unsupported",
+      "description": "Signature algorithm is not ES256, ES384, or ES512",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_B64_INVALID",
+      "http_status": 400,
+      "title": "UCP Signature b64 Invalid",
+      "description": "b64=false requires 'b64' in 'crit' array per RFC 7797",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_KEY_NOT_FOUND",
+      "http_status": 401,
+      "title": "UCP Key Not Found",
+      "description": "Key ID from signature not found in business UCP profile",
+      "category": "ucp",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_UCP_KEY_ALGORITHM_MISMATCH",
+      "http_status": 401,
+      "title": "UCP Key Algorithm Mismatch",
+      "description": "Key type is not EC as required for ECDSA signatures",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_KEY_CURVE_MISMATCH",
+      "http_status": 401,
+      "title": "UCP Key Curve Mismatch",
+      "description": "Key curve does not match signature algorithm (ES256=P-256, ES384=P-384, ES512=P-521)",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_SIGNATURE_INVALID",
+      "http_status": 401,
+      "title": "UCP Signature Invalid",
+      "description": "Webhook signature verification failed against payload",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_VERIFICATION_FAILED",
+      "http_status": 401,
+      "title": "UCP Verification Failed",
+      "description": "All verification attempts failed (raw and JCS canonicalized)",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_PROFILE_FETCH_FAILED",
+      "http_status": 502,
+      "title": "UCP Profile Fetch Failed",
+      "description": "Failed to fetch business UCP profile from /.well-known/ucp",
+      "category": "ucp",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_UCP_PROFILE_INVALID",
+      "http_status": 502,
+      "title": "UCP Profile Invalid",
+      "description": "Business UCP profile does not conform to expected schema",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_PROFILE_NO_SIGNING_KEYS",
+      "http_status": 502,
+      "title": "UCP Profile No Signing Keys",
+      "description": "Business UCP profile has empty or missing signing_keys array",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_PAYLOAD_EMPTY",
+      "http_status": 400,
+      "title": "UCP Payload Empty",
+      "description": "Webhook request body is empty",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_PAYLOAD_NOT_JSON",
+      "http_status": 400,
+      "title": "UCP Payload Not JSON",
+      "description": "Webhook request body is not valid JSON",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_PAYLOAD_TOO_LARGE",
+      "http_status": 400,
+      "title": "UCP Payload Too Large",
+      "description": "Webhook request body exceeds maximum allowed size",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_ORDER_INVALID",
+      "http_status": 400,
+      "title": "UCP Order Invalid",
+      "description": "UCP order object does not conform to expected schema",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_ID",
+      "http_status": 400,
+      "title": "UCP Order Missing ID",
+      "description": "UCP order is missing required id field",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_LINE_ITEMS",
+      "http_status": 400,
+      "title": "UCP Order Missing Line Items",
+      "description": "UCP order is missing required line_items array",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_TOTALS",
+      "http_status": 400,
+      "title": "UCP Order Missing Totals",
+      "description": "UCP order is missing required totals array or total entry",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_UCP_EVIDENCE_SERIALIZATION_FAILED",
+      "http_status": 500,
+      "title": "UCP Evidence Serialization Failed",
+      "description": "Failed to serialize UCP evidence to YAML format",
+      "category": "ucp",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_WORKFLOW_CONTEXT_INVALID",
+      "http_status": 400,
+      "title": "Invalid Workflow Context",
+      "description": "Workflow context does not conform to WorkflowContextSchema",
+      "category": "workflow",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_WORKFLOW_DAG_INVALID",
+      "http_status": 400,
+      "title": "Invalid Workflow DAG",
+      "description": "Workflow DAG semantics violated (self-parent, duplicate parents, or cycle detected)",
+      "category": "workflow",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_WORKFLOW_LIMIT_EXCEEDED",
+      "http_status": 400,
+      "title": "Workflow Limit Exceeded",
+      "description": "Workflow exceeds defined limits (parent count, ID length, etc.)",
+      "category": "workflow",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_WORKFLOW_ID_INVALID",
+      "http_status": 400,
+      "title": "Invalid Workflow ID",
+      "description": "Workflow ID does not match required format (wf_{ulid|uuid})",
+      "category": "workflow",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_WORKFLOW_STEP_ID_INVALID",
+      "http_status": 400,
+      "title": "Invalid Step ID",
+      "description": "Step ID does not match required format (step_{ulid|uuid})",
+      "category": "workflow",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_WORKFLOW_PARENT_NOT_FOUND",
+      "http_status": 400,
+      "title": "Parent Step Not Found",
+      "description": "Referenced parent step ID does not exist in the workflow",
+      "category": "workflow",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_WORKFLOW_SUMMARY_INVALID",
+      "http_status": 400,
+      "title": "Invalid Workflow Summary",
+      "description": "Workflow summary attestation does not conform to schema",
+      "category": "workflow",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_WORKFLOW_CYCLE_DETECTED",
+      "http_status": 400,
+      "title": "Workflow Cycle Detected",
+      "description": "Workflow DAG contains a cycle (not acyclic)",
+      "category": "workflow",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Interaction Invalid Format",
+      "description": "Interaction evidence does not conform to InteractionEvidenceV01 schema",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_MISSING_ID",
+      "http_status": 400,
+      "title": "Interaction Missing ID",
+      "description": "Interaction evidence is missing required interaction_id field",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_MISSING_KIND",
+      "http_status": 400,
+      "title": "Interaction Missing Kind",
+      "description": "Interaction evidence is missing required kind field",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_INVALID_KIND_FORMAT",
+      "http_status": 400,
+      "title": "Interaction Invalid Kind Format",
+      "description": "Interaction kind does not match required format (lowercase, 2-128 chars, starts with letter)",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_KIND_RESERVED",
+      "http_status": 400,
+      "title": "Interaction Kind Reserved",
+      "description": "Interaction kind uses reserved prefix (peac.*, org.peacprotocol.*) but is not in the well-known registry",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_MISSING_STARTED_AT",
+      "http_status": 400,
+      "title": "Interaction Missing Started At",
+      "description": "Interaction evidence is missing required started_at field",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_MISSING_EXECUTOR",
+      "http_status": 400,
+      "title": "Interaction Missing Executor",
+      "description": "Interaction evidence is missing required executor or executor.platform field",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_INVALID_DIGEST",
+      "http_status": 400,
+      "title": "Interaction Invalid Digest",
+      "description": "Digest structure is invalid (wrong value format or missing bytes)",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_INVALID_DIGEST_ALG",
+      "http_status": 400,
+      "title": "Interaction Invalid Digest Algorithm",
+      "description": "Digest algorithm is not in the canonical set (sha-256, sha-256:trunc-64k, sha-256:trunc-1m)",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_INVALID_TIMING",
+      "http_status": 400,
+      "title": "Interaction Invalid Timing",
+      "description": "Timing constraint violated (completed_at < started_at or invalid datetime format)",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_MISSING_RESULT",
+      "http_status": 400,
+      "title": "Interaction Missing Result",
+      "description": "result.status is required when output is present",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_MISSING_ERROR_DETAIL",
+      "http_status": 400,
+      "title": "Interaction Missing Error Detail",
+      "description": "error_code or extensions required when result.status is error",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_MISSING_TARGET",
+      "http_status": 400,
+      "title": "Interaction Missing Target",
+      "description": "Kind prefix requires matching target field (tool.* needs tool, http.*/fs.* need resource)",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INTERACTION_INVALID_EXTENSION_KEY",
+      "http_status": 400,
+      "title": "Interaction Invalid Extension Key",
+      "description": "Extension key does not match required format (reverse-DNS/name[@version])",
+      "category": "interaction",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_VERIFY_ISSUER_CONFIG_MISSING",
+      "http_status": 502,
+      "title": "Issuer Config Missing",
+      "description": "peac-issuer.json not found or not fetchable at issuer origin",
+      "category": "verifier",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_VERIFY_ISSUER_CONFIG_INVALID",
+      "http_status": 502,
+      "title": "Issuer Config Invalid",
+      "description": "peac-issuer.json is not valid JSON or does not conform to issuer config schema",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_ISSUER_MISMATCH",
+      "http_status": 403,
+      "title": "Issuer Mismatch",
+      "description": "issuer field in peac-issuer.json does not match the expected issuer origin",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_JWKS_URI_INVALID",
+      "http_status": 502,
+      "title": "JWKS URI Invalid",
+      "description": "jwks_uri in peac-issuer.json is not a valid HTTPS URL",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_INSECURE_SCHEME_BLOCKED",
+      "http_status": 403,
+      "title": "Insecure Scheme Blocked",
+      "description": "Non-HTTPS URL encountered during issuer discovery (issuer URL or jwks_uri)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_JWKS_INVALID",
+      "http_status": 502,
+      "title": "JWKS Invalid",
+      "description": "JWKS response is not valid JSON or missing required keys array",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_RECEIPT_TOO_LARGE",
+      "http_status": 413,
+      "title": "Receipt Too Large",
+      "description": "Receipt exceeds maximum size limit (256 KB)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_MALFORMED_RECEIPT",
+      "http_status": 400,
+      "title": "Malformed Receipt",
+      "description": "Cannot parse receipt as JWS Compact Serialization",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_ISSUER_NOT_ALLOWED",
+      "http_status": 403,
+      "title": "Issuer Not Allowed",
+      "description": "Receipt issuer is not in the verifier policy allowlist",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_BLOCKED",
+      "http_status": 403,
+      "title": "Key Fetch Blocked",
+      "description": "JWKS discovery blocked by SSRF protection (private IP, non-HTTPS, or blocked redirect)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_FAILED",
+      "http_status": 502,
+      "title": "Key Fetch Failed",
+      "description": "Network error while fetching JWKS from issuer",
+      "category": "verifier",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_TIMEOUT",
+      "http_status": 504,
+      "title": "Key Fetch Timeout",
+      "description": "JWKS discovery timed out (5 second limit)",
+      "category": "verifier",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_BLOCKED",
+      "http_status": 403,
+      "title": "Pointer Fetch Blocked",
+      "description": "Pointer URL fetch blocked by SSRF protection (private IP, non-HTTPS, or blocked redirect)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_FAILED",
+      "http_status": 502,
+      "title": "Pointer Fetch Failed",
+      "description": "Network error while fetching receipt from pointer URL",
+      "category": "verifier",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_TIMEOUT",
+      "http_status": 504,
+      "title": "Pointer Fetch Timeout",
+      "description": "Pointer URL fetch timed out (5 second limit)",
+      "category": "verifier",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_TOO_LARGE",
+      "http_status": 413,
+      "title": "Pointer Fetch Too Large",
+      "description": "Pointer URL response exceeds maximum size limit (256 KB)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_POINTER_DIGEST_MISMATCH",
+      "http_status": 400,
+      "title": "Pointer Digest Mismatch",
+      "description": "Fetched receipt SHA-256 digest does not match pointer declaration",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_JWKS_TOO_LARGE",
+      "http_status": 400,
+      "title": "JWKS Too Large",
+      "description": "JWKS response exceeds maximum size limit (64 KB)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_JWKS_TOO_MANY_KEYS",
+      "http_status": 400,
+      "title": "JWKS Too Many Keys",
+      "description": "JWKS contains more than maximum allowed keys (20)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_SCHEMA_INVALID",
+      "http_status": 400,
+      "title": "Schema Invalid",
+      "description": "Receipt claims do not conform to expected schema",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_POLICY_VIOLATION",
+      "http_status": 403,
+      "title": "Policy Violation",
+      "description": "Receipt violates verifier trust policy",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_INVALID_TRANSPORT",
+      "http_status": 400,
+      "title": "Invalid Transport",
+      "description": "Multiple PEAC-Receipt or PEAC-Receipt-Pointer headers detected (ambiguous transport)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_VERIFY_EXTENSION_TOO_LARGE",
+      "http_status": 400,
+      "title": "Extension Too Large",
+      "description": "Receipt extension data exceeds maximum size limit (64 KB)",
+      "category": "verifier",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_PARSE_INVALID_INPUT",
+      "http_status": 400,
+      "title": "Parse Invalid Input",
+      "description": "Input to receipt parser is not a non-null object",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_PARSE_COMMERCE_INVALID",
+      "http_status": 400,
+      "title": "Commerce Receipt Invalid",
+      "description": "Receipt has commerce fields (amt/cur/payment) but fails commerce schema validation",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_PARSE_ATTESTATION_INVALID",
+      "http_status": 400,
+      "title": "Attestation Receipt Invalid",
+      "description": "Receipt classified as attestation but fails attestation schema validation",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_CONSTRAINT_VIOLATION",
+      "http_status": 400,
+      "title": "Kernel Constraint Violation",
+      "description": "Receipt claims exceed a kernel constraint (max keys, max depth, max string length, max evidence bytes, or similar structural limit)",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    }
+  ]
+}

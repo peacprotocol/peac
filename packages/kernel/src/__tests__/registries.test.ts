@@ -9,12 +9,22 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { ERROR_CODES } from '../errors.generated.js';
 
-// Load registry JSON
+// Load registry JSON (current + baseline)
 const REGISTRIES_PATH = resolve(__dirname, '../../../../specs/kernel/registries.json');
 const ERRORS_PATH = resolve(__dirname, '../../../../specs/kernel/errors.json');
+const BASELINE_REGISTRIES_PATH = resolve(
+  __dirname,
+  '../../../../specs/kernel/snapshots/registries.0.11.2.json'
+);
+const BASELINE_ERRORS_PATH = resolve(
+  __dirname,
+  '../../../../specs/kernel/snapshots/errors.0.11.2.json'
+);
 
 const registries = JSON.parse(readFileSync(REGISTRIES_PATH, 'utf-8'));
 const errors = JSON.parse(readFileSync(ERRORS_PATH, 'utf-8'));
+const baselineRegistries = JSON.parse(readFileSync(BASELINE_REGISTRIES_PATH, 'utf-8'));
+const baselineErrors = JSON.parse(readFileSync(BASELINE_ERRORS_PATH, 'utf-8'));
 
 // =============================================================================
 // REGISTRY STRUCTURE TESTS
@@ -187,5 +197,81 @@ describe('errors.json structure', () => {
     for (const entry of errors.errors) {
       expect(entry.code).toMatch(codePattern);
     }
+  });
+});
+
+// =============================================================================
+// ADDITIVE-ONLY ENFORCEMENT (v0.11.2 baseline)
+// =============================================================================
+
+describe('additive-only: registries (v0.11.2 baseline)', () => {
+  const ARRAY_SECTIONS = [
+    'payment_rails',
+    'control_engines',
+    'transport_methods',
+    'agent_protocols',
+    'attestation_types',
+    'toolcall_op_types',
+    'toolcall_resource_types',
+  ];
+
+  for (const section of ARRAY_SECTIONS) {
+    it(`should not remove any ${section} IDs from v0.11.2`, () => {
+      const baselineSection = baselineRegistries[section];
+      if (!baselineSection || !Array.isArray(baselineSection)) return;
+      const currentSection = registries[section];
+      expect(currentSection).toBeTruthy();
+
+      const currentIds = new Set(currentSection.map((e: { id: string }) => e.id));
+      for (const entry of baselineSection) {
+        expect(currentIds.has(entry.id)).toBe(true);
+      }
+    });
+  }
+
+  it('should not remove any pillar_values from v0.11.2', () => {
+    if (!baselineRegistries.pillar_values?.values) return;
+    const currentValues = new Set(registries.pillar_values.values);
+    for (const value of baselineRegistries.pillar_values.values) {
+      expect(currentValues.has(value)).toBe(true);
+    }
+  });
+
+  it('should be additive (current >= baseline entry count for each section)', () => {
+    for (const section of ARRAY_SECTIONS) {
+      const baselineSection = baselineRegistries[section];
+      const currentSection = registries[section];
+      if (!baselineSection || !Array.isArray(baselineSection)) continue;
+      if (!currentSection || !Array.isArray(currentSection)) continue;
+      expect(currentSection.length).toBeGreaterThanOrEqual(baselineSection.length);
+    }
+  });
+});
+
+describe('additive-only: errors (v0.11.2 baseline)', () => {
+  it('should not remove any error codes from v0.11.2', () => {
+    const baselineCodes = baselineErrors.errors.map((e: { code: string }) => e.code);
+    const currentCodes = new Set(errors.errors.map((e: { code: string }) => e.code));
+
+    for (const code of baselineCodes) {
+      expect(currentCodes.has(code)).toBe(true);
+    }
+  });
+
+  it('should not change existing error code semantics (category, retryable)', () => {
+    const currentMap = new Map(
+      errors.errors.map((e: { code: string; category: string; retryable: boolean }) => [e.code, e])
+    );
+
+    for (const baseline of baselineErrors.errors) {
+      const current = currentMap.get(baseline.code);
+      if (!current) continue; // covered by removal test above
+      expect(current.category).toBe(baseline.category);
+      expect(current.retryable).toBe(baseline.retryable);
+    }
+  });
+
+  it('should have more or equal error codes than v0.11.2', () => {
+    expect(errors.errors.length).toBeGreaterThanOrEqual(baselineErrors.errors.length);
   });
 });
