@@ -355,6 +355,13 @@
       "fixture_count": 8
     }
   },
+  "treaty": {
+    "treaty.json": {
+      "description": "Treaty extension conformance fixtures (DD-147, v0.11.3+)",
+      "version": "0.11.3",
+      "fixture_count": 5
+    }
+  },
   "fingerprint-ref": {
     "golden-vectors.json": {
       "description": "FingerprintRef round-trip conversion golden vectors (DD-146, v0.11.3+)",
