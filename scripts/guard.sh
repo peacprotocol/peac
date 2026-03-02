@@ -274,6 +274,18 @@ else
   echo "OK"
 fi
 
+echo "== no-network guard (DD-55) =="
+if [ -f scripts/check-no-network.mjs ]; then
+  if node scripts/check-no-network.mjs > /dev/null 2>&1; then
+    echo "OK"
+  else
+    node scripts/check-no-network.mjs 2>&1 | head -20
+    bad=1
+  fi
+else
+  echo "SKIP: scripts/check-no-network.mjs not found"
+fi
+
 echo "== forbid stale generated artifacts in src/ =="
 stale=$(find packages -path "*/src/*" \
   -not -path "*/dist/*" -not -path "*/node_modules/*" \( \
