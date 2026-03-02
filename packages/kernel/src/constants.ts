@@ -83,7 +83,8 @@ export const DISCOVERY = {
  */
 export const JWKS = {
   rotationDays: 90,
-  overlapDays: 7,
+  /** Normative minimum overlap period (DD-148, v0.11.3+) */
+  overlapDays: 30,
   emergencyRevocationHours: 24,
 } as const;
 

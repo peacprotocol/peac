@@ -1,0 +1,186 @@
+{
+  "$comment": "Key Rotation Lifecycle conformance fixtures (DD-148, v0.11.3+)",
+  "version": "0.11.3",
+  "fixtures": [
+    {
+      "name": "normal-rotation",
+      "description": "Standard key rotation with 30-day overlap: old key deprecated, new key active, both present in JWKS",
+      "issuer_config": {
+        "version": "peac-issuer/0.1",
+        "issuer": "https://issuer.example.com",
+        "jwks_uri": "https://issuer.example.com/.well-known/jwks.json",
+        "algorithms": ["EdDSA"]
+      },
+      "jwks": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "key-2026-01",
+            "x": "Vs4lWIf7XH3AvHIfPP_745a9s4_h7jLVoaiQumAAd0M"
+          },
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "key-2026-02",
+            "x": "tAf2n-7hkM466nQ_SyvwBNduYTIK3wJLGvCgVF5n5DU"
+          }
+        ]
+      },
+      "rotation_timeline": {
+        "old_key_activated": "2026-01-01T00:00:00Z",
+        "new_key_activated": "2026-02-15T00:00:00Z",
+        "old_key_deprecated": "2026-02-15T00:00:00Z",
+        "old_key_retired": "2026-03-17T00:00:00Z",
+        "overlap_days": 30
+      },
+      "expected": {
+        "valid": true,
+        "overlap_days_gte": 30,
+        "both_keys_present": true
+      }
+    },
+    {
+      "name": "emergency-revocation",
+      "description": "Emergency key revocation: key removed from JWKS and added to revoked_keys array",
+      "issuer_config": {
+        "version": "peac-issuer/0.1",
+        "issuer": "https://issuer.example.com",
+        "jwks_uri": "https://issuer.example.com/.well-known/jwks.json",
+        "algorithms": ["EdDSA"],
+        "revoked_keys": [
+          {
+            "kid": "key-compromised-001",
+            "revoked_at": "2026-02-28T12:00:00Z",
+            "reason": "key_compromise"
+          }
+        ]
+      },
+      "jwks": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "key-2026-emergency-replacement",
+            "x": "bea9bC8kcezZ9m1VmnwOPzkGpyD940iKnkfENinwMIU"
+          }
+        ]
+      },
+      "receipt_kid": "key-compromised-001",
+      "expected": {
+        "valid": false,
+        "error": "key_revoked",
+        "revoked_key_present_in_config": true,
+        "revoked_key_absent_from_jwks": true
+      }
+    },
+    {
+      "name": "overlap-validation",
+      "description": "Overlap period validation: rotation with exactly 30 days overlap (minimum normative requirement)",
+      "rotation_timeline": {
+        "old_key_activated": "2025-12-01T00:00:00Z",
+        "new_key_activated": "2026-01-15T00:00:00Z",
+        "old_key_deprecated": "2026-01-15T00:00:00Z",
+        "old_key_retired": "2026-02-14T00:00:00Z",
+        "overlap_days": 30
+      },
+      "expected": {
+        "valid": true,
+        "meets_minimum_overlap": true
+      }
+    },
+    {
+      "name": "stale-cache",
+      "description": "Cache-Control max-age coordination: JWKS response max-age must be <= rotation overlap period",
+      "jwks_response_headers": {
+        "Cache-Control": "max-age=2592000"
+      },
+      "rotation_timeline": {
+        "overlap_days": 30
+      },
+      "expected": {
+        "valid": true,
+        "max_age_seconds": 2592000,
+        "overlap_seconds": 2592000,
+        "cache_within_overlap": true
+      }
+    },
+    {
+      "name": "kid-reuse-rejection",
+      "description": "Kid reuse detection: same kid with different key material within retention window MUST be rejected by stateful resolvers",
+      "issuer": "https://issuer.example.com",
+      "first_resolution": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "reused-kid-001",
+            "x": "Vs4lWIf7XH3AvHIfPP_745a9s4_h7jLVoaiQumAAd0M"
+          }
+        ]
+      },
+      "second_resolution": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "reused-kid-001",
+            "x": "tAf2n-7hkM466nQ_SyvwBNduYTIK3wJLGvCgVF5n5DU"
+          }
+        ]
+      },
+      "expected": {
+        "valid": false,
+        "error": "E_KID_REUSE_DETECTED",
+        "description": "Same kid maps to different x coordinate (key material) within retention window"
+      }
+    },
+    {
+      "name": "cache-kid-reuse-detection",
+      "description": "Cache-based kid reuse: resolver cache saw kid with old material, then JWKS returns same kid with new material",
+      "issuer": "https://issuer.example.com",
+      "scenario": [
+        {
+          "step": 1,
+          "action": "resolve_jwks",
+          "jwks": {
+            "keys": [
+              {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "kid": "cached-kid-001",
+                "x": "Vs4lWIf7XH3AvHIfPP_745a9s4_h7jLVoaiQumAAd0M"
+              }
+            ]
+          },
+          "expected": {
+            "success": true
+          }
+        },
+        {
+          "step": 2,
+          "action": "resolve_jwks_after_cache_expiry",
+          "jwks": {
+            "keys": [
+              {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "kid": "cached-kid-001",
+                "x": "VU2ECxL-QATqrJOwoOGIadLBC02yLXtsXXD1p3xeuII"
+              }
+            ]
+          },
+          "expected": {
+            "success": false,
+            "error": "E_KID_REUSE_DETECTED"
+          }
+        }
+      ]
+    }
+  ],
+  "revocation_reasons": {
+    "$comment": "RFC 5280 CRLReason subset relevant to receipt signing keys",
+    "values": ["key_compromise", "superseded", "cessation_of_operation", "privilege_withdrawn"]
+  },
+  "schema_version": "0.11.3"
+}

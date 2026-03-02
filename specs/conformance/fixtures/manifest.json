@@ -386,6 +386,13 @@
       "fixture_count": 6
     }
   },
+  "key-rotation": {
+    "key-rotation.json": {
+      "description": "Key rotation lifecycle conformance fixtures (DD-148, v0.11.3+)",
+      "version": "0.11.3",
+      "fixture_count": 6
+    }
+  },
   "carrier": {
     "valid-minimal.json": {
       "description": "Minimal carrier with only receipt_ref",

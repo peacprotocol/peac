@@ -122,6 +122,10 @@ The discovery endpoint MUST return a JWKS (RFC 7517):
 
 ## 5. Key rotation
 
+> **Normative lifecycle specification:** See [KEY-ROTATION.md](KEY-ROTATION.md) (DD-148) for the
+> full normative key lifecycle FSM, kid reuse prevention, emergency revocation procedures,
+> and `revoked_keys[]` issuer config field.
+
 ### 5.1 Rotation cadence
 
 | Environment   | Recommended Rotation |

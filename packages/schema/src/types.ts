@@ -200,6 +200,27 @@ export interface PEACIssuerConfig {
 
   /** Security contact email or URL (optional) */
   security_contact?: string;
+
+  /** Revoked keys list (DD-148, v0.11.3+) */
+  revoked_keys?: RevokedKeyEntry[];
+}
+
+/**
+ * Entry in the revoked_keys array of issuer configuration.
+ * Reason values aligned with RFC 5280 CRLReason subset
+ * (only values meaningful for receipt signing keys).
+ *
+ * @see docs/specs/KEY-ROTATION.md
+ */
+export interface RevokedKeyEntry {
+  /** Key ID that was revoked */
+  kid: string;
+
+  /** ISO 8601 timestamp of revocation */
+  revoked_at: string;
+
+  /** Revocation reason (RFC 5280 CRLReason subset) */
+  reason?: 'key_compromise' | 'superseded' | 'cessation_of_operation' | 'privilege_withdrawn';
 }
 
 /**

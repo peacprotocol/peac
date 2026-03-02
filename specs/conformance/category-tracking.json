@@ -13,6 +13,7 @@
     "fingerprint-ref": "Deterministic golden vectors (DD-146); single fixture pack",
     "invalid": "Single-receipt fixtures, not fixture packs",
     "issue": "Not yet migrated to tracked validation; needs fixture pack audit",
+    "key-rotation": "Key rotation lifecycle fixtures (DD-148); scenario-based, not fixture packs",
     "obligations": "Not yet migrated to tracked validation; duplicate fixture names need resolution",
     "parse": "Single-receipt fixtures; uses expected_error/expected_variant, not fixture_count",
     "policy": "Not yet migrated to tracked validation; needs fixture pack audit",
