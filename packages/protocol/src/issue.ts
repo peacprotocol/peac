@@ -5,7 +5,7 @@
 
 import { uuidv7 } from 'uuidv7';
 import { sign, signWire02 } from '@peac/crypto';
-import type { JsonValue, EvidencePillar } from '@peac/kernel';
+import type { JsonValue, EvidencePillar, PolicyBlock } from '@peac/kernel';
 import { ZodError } from 'zod';
 import {
   PEACReceiptClaims,
@@ -416,6 +416,12 @@ export interface IssueWire02Options {
   /** Declared purpose string (max 256 chars, optional) */
   purpose_declared?: string;
 
+  /**
+   * Policy binding block (DD-151).
+   * digest must be 'sha256:<64 lowercase hex>' format (use computePolicyDigestJcs from @peac/protocol).
+   */
+  policy?: PolicyBlock;
+
   /** Extension groups (open; caller-provided, not validated here) */
   extensions?: Record<string, unknown>;
 }
@@ -456,6 +462,7 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
     ...(options.pillars !== undefined && { pillars: options.pillars }),
     ...(options.occurred_at !== undefined && { occurred_at: options.occurred_at }),
     ...(options.purpose_declared !== undefined && { purpose_declared: options.purpose_declared }),
+    ...(options.policy !== undefined && { policy: options.policy }),
     ...(options.extensions !== undefined && { extensions: options.extensions }),
   };
 

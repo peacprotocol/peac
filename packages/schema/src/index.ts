@@ -524,6 +524,9 @@ export {
   sortWarnings,
 } from './wire-02-warnings';
 
+// Policy binding comparison (v0.12.0-preview.1, DD-49, DD-151)
+export { verifyPolicyBinding } from './policy-binding';
+
 // Issuer configuration schemas (v0.11.3+ DD-148)
 export {
   RevokedKeyEntrySchema,
