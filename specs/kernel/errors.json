@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.11.3",
+  "version": "0.12.0-preview.1",
   "description": "PEAC error codes - normative source of truth",
   "errors": [
     {
@@ -1343,6 +1343,141 @@
       "category": "validation",
       "retryable": false,
       "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_INVALID_KIND",
+      "http_status": 400,
+      "title": "Invalid Kind",
+      "description": "Wire 0.2 receipt kind field is missing or not one of the accepted structural kinds (evidence, challenge)",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_INVALID_TYPE",
+      "http_status": 400,
+      "title": "Invalid Type",
+      "description": "Wire 0.2 receipt type field is missing or does not conform to the required grammar (reverse-DNS or absolute URI)",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_INVALID_PILLAR_VALUE",
+      "http_status": 400,
+      "title": "Invalid Pillar Value",
+      "description": "Wire 0.2 pillars array contains an unrecognized pillar value outside the closed 10-value taxonomy",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_PILLARS_NOT_SORTED",
+      "http_status": 400,
+      "title": "Pillars Not Sorted",
+      "description": "Wire 0.2 pillars array is not in ascending lexicographic order or contains duplicates",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_ISS_NOT_CANONICAL",
+      "http_status": 400,
+      "title": "Issuer Not Canonical",
+      "description": "Wire 0.2 iss claim does not conform to canonical form: must be an https:// ASCII origin (no default port, no path) or a did: identifier",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_OCCURRED_AT_ON_CHALLENGE",
+      "http_status": 400,
+      "title": "occurred_at on Challenge",
+      "description": "Wire 0.2 occurred_at field is present on a challenge-kind receipt; occurred_at is only permitted on evidence-kind receipts",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_OCCURRED_AT_FUTURE",
+      "http_status": 400,
+      "title": "occurred_at in Future",
+      "description": "Wire 0.2 occurred_at is more than the tolerance window ahead of the current time; the timestamp appears to be in the future",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_JWS_EMBEDDED_KEY",
+      "http_status": 400,
+      "title": "JWS Embedded Key Rejected",
+      "description": "JWS header contains an embedded key (jwk, x5c, x5u, or jku); embedded key material is rejected by the PEAC JOSE hardening rules",
+      "category": "cryptography",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_JWS_CRIT_REJECTED",
+      "http_status": 400,
+      "title": "JWS crit Header Rejected",
+      "description": "JWS header contains a crit field; critical header extensions are not supported and are rejected",
+      "category": "cryptography",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_JWS_MISSING_KID",
+      "http_status": 400,
+      "title": "JWS kid Missing or Invalid",
+      "description": "JWS header kid field is absent, empty, or exceeds the maximum allowed length (256 characters)",
+      "category": "cryptography",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_JWS_B64_REJECTED",
+      "http_status": 400,
+      "title": "JWS b64:false Rejected",
+      "description": "JWS header contains b64:false (RFC 7797 unencoded payload); unencoded payloads are not supported",
+      "category": "cryptography",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_JWS_ZIP_REJECTED",
+      "http_status": 400,
+      "title": "JWS zip Header Rejected",
+      "description": "JWS header contains a zip compression field; payload compression is not supported",
+      "category": "cryptography",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_UNSUPPORTED_WIRE_VERSION",
+      "http_status": 400,
+      "title": "Unsupported Wire Version",
+      "description": "Receipt peac_version field specifies a wire version that is not supported by this implementation",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_WIRE_VERSION_MISMATCH",
+      "http_status": 400,
+      "title": "Wire Version Mismatch",
+      "description": "JWS header typ value and peac_version payload claim indicate different wire versions; the receipt is incoherent",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_POLICY_BINDING_FAILED",
+      "http_status": 400,
+      "title": "Policy Binding Failed",
+      "description": "Wire 0.2 policy.digest does not match the computed digest of the provided policy document",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "none"
     }
   ]
 }

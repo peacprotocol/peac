@@ -52,13 +52,26 @@ export const Extensions = z
   })
   .catchall(z.unknown());
 
-export const JWSHeader = z
+/**
+ * Wire 0.1 JWS header Zod schema (canonical name, v0.12.0-preview.1+).
+ *
+ * Note: `@peac/crypto` exports a TypeScript discriminated-union type also
+ * named `JWSHeader` that covers Wire 0.1, Wire 0.2, and UnTyped variants.
+ * This schema validates the runtime shape of Wire 0.1 headers only.
+ */
+export const Wire01JWSHeaderSchema = z
   .object({
     typ: z.literal(PEAC_WIRE_TYP),
     alg: z.literal(PEAC_ALG),
     kid: z.string().min(8),
   })
   .strict();
+
+/**
+ * @deprecated Use `Wire01JWSHeaderSchema`. Kept for backward compatibility;
+ * will be removed at v1.0.
+ */
+export const JWSHeader = Wire01JWSHeaderSchema;
 
 // Forward-declare purpose validators used in ReceiptClaims
 // Full definitions are below

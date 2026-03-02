@@ -6,11 +6,16 @@
  */
 
 import { verify as jwsVerify } from '@peac/crypto';
+import { type VerificationStrictness, type VerificationWarning } from '@peac/kernel';
 import {
   parseReceiptClaims,
   validateKernelConstraints,
   type ReceiptClaimsType,
   type AttestationReceiptClaims,
+  type Wire02Claims,
+  checkOccurredAtSkew,
+  sortWarnings,
+  WARNING_TYP_MISSING,
 } from '@peac/schema';
 import type { PolicyBindingStatus } from './verifier-types';
 
@@ -45,7 +50,10 @@ function isCryptoError(err: unknown): err is CryptoErrorLike {
 /**
  * Canonical error codes for local verification
  *
- * These map to E_* codes in specs/kernel/errors.json
+ * These map to E_* codes in specs/kernel/errors.json.
+ * JOSE hardening codes (E_JWS_*) are distinct from generic E_INVALID_FORMAT
+ * so callers can distinguish key-injection, compression, and crit attacks from
+ * ordinary format errors (v0.12.0-preview.1, DD-156).
  */
 export type VerifyLocalErrorCode =
   | 'E_INVALID_SIGNATURE'
@@ -58,6 +66,15 @@ export type VerifyLocalErrorCode =
   | 'E_INVALID_SUBJECT'
   | 'E_INVALID_RECEIPT_ID'
   | 'E_MISSING_EXP'
+  | 'E_WIRE_VERSION_MISMATCH'
+  | 'E_UNSUPPORTED_WIRE_VERSION'
+  | 'E_OCCURRED_AT_FUTURE'
+  // JOSE hardening codes (Wire 0.2, v0.12.0-preview.1, DD-156)
+  | 'E_JWS_EMBEDDED_KEY'
+  | 'E_JWS_CRIT_REJECTED'
+  | 'E_JWS_MISSING_KID'
+  | 'E_JWS_B64_REJECTED'
+  | 'E_JWS_ZIP_REJECTED'
   | 'E_INTERNAL';
 
 /**
@@ -116,6 +133,16 @@ export interface VerifyLocalOptions {
    * Defaults to 300 (5 minutes).
    */
   maxClockSkew?: number;
+
+  /**
+   * Verification strictness profile (v0.12.0-preview.1, DD-156).
+   *
+   * - 'strict' (default): missing typ is a hard error before schema validation.
+   * - 'interop': missing typ emits a 'typ_missing' warning and routes by payload content.
+   *
+   * Strictness is EXCLUSIVELY controlled here (@peac/protocol). @peac/crypto has no strictness param.
+   */
+  strictness?: VerificationStrictness;
 }
 
 /**
@@ -123,39 +150,66 @@ export interface VerifyLocalOptions {
  *
  * Discriminated union on `variant` -- callers narrow claims type via variant check:
  *   if (result.valid && result.variant === 'commerce') { result.claims.amt }
+ *   if (result.valid && result.variant === 'wire-02') { result.claims.kind }
  */
 export type VerifyLocalSuccess =
   | {
       /** Verification succeeded */
       valid: true;
-      /** Receipt variant (commerce = payment receipt, attestation = non-payment) */
+      /** Receipt variant (commerce = payment receipt) */
       variant: 'commerce';
       /** Validated commerce receipt claims */
       claims: ReceiptClaimsType;
       /** Key ID from JWS header (for logging/indexing) */
       kid: string;
+      /** Wire format version */
+      wireVersion: '0.1';
+      /** Verification warnings (always empty for Wire 0.1) */
+      warnings: VerificationWarning[];
       /**
        * Policy binding status (DD-49).
        *
        * Always 'unavailable' for Wire 0.1 receipts (no policy digest on wire).
-       * Wire 0.2 receipts with `peac.policy.digest` will report 'verified' or 'failed'.
        */
       policy_binding: PolicyBindingStatus;
     }
   | {
       /** Verification succeeded */
       valid: true;
-      /** Receipt variant (commerce = payment receipt, attestation = non-payment) */
+      /** Receipt variant (attestation = non-payment) */
       variant: 'attestation';
       /** Validated attestation receipt claims */
       claims: AttestationReceiptClaims;
       /** Key ID from JWS header (for logging/indexing) */
       kid: string;
+      /** Wire format version */
+      wireVersion: '0.1';
+      /** Verification warnings (always empty for Wire 0.1) */
+      warnings: VerificationWarning[];
       /**
        * Policy binding status (DD-49).
        *
-       * Always 'unavailable' for Wire 0.1 receipts (no policy digest on wire).
-       * Wire 0.2 receipts with `peac.policy.digest` will report 'verified' or 'failed'.
+       * Always 'unavailable' for Wire 0.1 receipts.
+       */
+      policy_binding: PolicyBindingStatus;
+    }
+  | {
+      /** Verification succeeded */
+      valid: true;
+      /** Receipt variant (wire-02 = Wire 0.2 evidence or challenge) */
+      variant: 'wire-02';
+      /** Validated Wire 0.2 receipt claims */
+      claims: Wire02Claims;
+      /** Key ID from JWS header (for logging/indexing) */
+      kid: string;
+      /** Wire format version */
+      wireVersion: '0.2';
+      /** Verification warnings from schema parsing and strictness routing */
+      warnings: VerificationWarning[];
+      /**
+       * Policy binding status (DD-49).
+       *
+       * 'unavailable' until PR 14 (Policy Binding) adds full JCS+SHA-256 check.
        */
       policy_binding: PolicyBindingStatus;
     };
@@ -188,8 +242,8 @@ export interface VerifyLocalFailure {
 export type VerifyLocalResult = VerifyLocalSuccess | VerifyLocalFailure;
 
 /**
- * Crypto error codes that indicate format/validation issues
- * These are CRYPTO_* internal codes from @peac/crypto, mapped to canonical E_* codes
+ * Internal CRYPTO_* codes that map to generic E_INVALID_FORMAT.
+ * These are format/encoding errors not security-specific.
  */
 const FORMAT_ERROR_CODES = new Set([
   'CRYPTO_INVALID_JWS_FORMAT',
@@ -197,6 +251,21 @@ const FORMAT_ERROR_CODES = new Set([
   'CRYPTO_INVALID_ALG',
   'CRYPTO_INVALID_KEY_LENGTH',
 ]);
+
+/**
+ * JOSE hardening code mapping: CRYPTO_JWS_* → specific E_JWS_* (v0.12.0-preview.1, DD-156).
+ *
+ * Each JOSE hazard code maps to its specific public E_JWS_* counterpart rather than
+ * collapsing into the generic E_INVALID_FORMAT. This lets callers distinguish embedded-key
+ * injection, crit-header abuse, and unencoded-payload attacks from ordinary format errors.
+ */
+const JOSE_CODE_MAP: Record<string, VerifyLocalErrorCode> = {
+  CRYPTO_JWS_EMBEDDED_KEY: 'E_JWS_EMBEDDED_KEY',
+  CRYPTO_JWS_CRIT_REJECTED: 'E_JWS_CRIT_REJECTED',
+  CRYPTO_JWS_MISSING_KID: 'E_JWS_MISSING_KID',
+  CRYPTO_JWS_B64_REJECTED: 'E_JWS_B64_REJECTED',
+  CRYPTO_JWS_ZIP_REJECTED: 'E_JWS_ZIP_REJECTED',
+};
 
 /** Max parse issues to include in details (prevents log bloat) */
 const MAX_PARSE_ISSUES = 25;
@@ -220,31 +289,29 @@ function sanitizeParseIssues(
  *
  * This function:
  * 1. Verifies the Ed25519 signature and header (typ, alg)
- * 2. Validates the receipt schema with Zod
- * 3. Checks issuer/audience/subject binding (if options provided)
- * 4. Checks time validity (exp/iat with clock skew tolerance)
+ * 2. Applies strictness routing for missing typ (strict: hard error; interop: warning)
+ * 3. Validates the receipt schema with Zod (Wire 0.1 or Wire 0.2)
+ * 4. Checks issuer/audience/subject binding (if options provided)
+ * 5. Checks time validity (exp/iat with clock skew tolerance)
+ * 6. For Wire 0.2: checks occurred_at skew and collects parse warnings
  *
  * Use this when you have the issuer's public key and don't need JWKS discovery.
  * For JWKS-based verification, use `verifyReceipt()` instead.
  *
  * @param jws - JWS compact serialization
  * @param publicKey - Ed25519 public key (32 bytes)
- * @param options - Optional verification options (issuer, audience, subject, clock skew)
+ * @param options - Optional verification options (issuer, audience, subject, clock skew, strictness)
  * @returns Typed verification result
  *
  * @example
  * ```typescript
  * const result = await verifyLocal(jws, publicKey, {
  *   issuer: 'https://api.example.com',
- *   audience: 'https://client.example.com',
- *   subjectUri: 'https://api.example.com/inference/v1',
+ *   strictness: 'strict',
  * });
- * if (result.valid) {
- *   console.log('Issuer:', result.claims.iss);
- *   console.log('Amount:', result.claims.amt, result.claims.cur);
- *   console.log('Key ID:', result.kid);
- * } else {
- *   console.error('Verification failed:', result.code, result.message);
+ * if (result.valid && result.variant === 'wire-02') {
+ *   console.log('Kind:', result.claims.kind);
+ *   console.log('Warnings:', result.warnings);
  * }
  * ```
  */
@@ -253,7 +320,15 @@ export async function verifyLocal(
   publicKey: Uint8Array,
   options: VerifyLocalOptions = {}
 ): Promise<VerifyLocalResult> {
-  const { issuer, audience, subjectUri, rid, requireExp = false, maxClockSkew = 300 } = options;
+  const {
+    issuer,
+    audience,
+    subjectUri,
+    rid,
+    requireExp = false,
+    maxClockSkew = 300,
+    strictness = 'strict',
+  } = options;
   const now = options.now ?? Math.floor(Date.now() / 1000);
 
   try {
@@ -268,7 +343,26 @@ export async function verifyLocal(
       };
     }
 
-    // 2. Validate structural kernel constraints (DD-121, fail-closed)
+    // Accumulated warnings for Wire 0.2 path
+    const accumulatedWarnings: VerificationWarning[] = [];
+
+    // 2. Strictness routing for missing typ (Correction 1, DD-156)
+    if (result.header.typ === undefined) {
+      if (strictness === 'strict') {
+        return {
+          valid: false,
+          code: 'E_INVALID_FORMAT',
+          message: 'Missing JWS typ header: strict mode requires typ to be present',
+        };
+      }
+      // interop mode: emit warning and continue
+      accumulatedWarnings.push({
+        code: WARNING_TYP_MISSING,
+        message: 'JWS typ header is absent; accepted in interop mode',
+      });
+    }
+
+    // 3. Validate structural kernel constraints (DD-121, fail-closed)
     const constraintResult = validateKernelConstraints(result.payload);
     if (!constraintResult.valid) {
       const v = constraintResult.violations[0];
@@ -279,7 +373,7 @@ export async function verifyLocal(
       };
     }
 
-    // 3. Validate schema (unified parser supports both commerce and attestation)
+    // 4. Validate schema (unified parser supports Wire 0.1 and Wire 0.2)
     const pr = parseReceiptClaims(result.payload);
 
     if (!pr.ok) {
@@ -291,36 +385,101 @@ export async function verifyLocal(
       };
     }
 
+    // 5. Collect parser warnings (Wire 0.2 parser may emit type/extension warnings)
+    if (pr.wireVersion === '0.2') {
+      accumulatedWarnings.push(...pr.warnings);
+    }
+
+    // Wire 0.2 path
+    if (pr.wireVersion === '0.2') {
+      const claims = pr.claims as Wire02Claims;
+
+      // Issuer check
+      if (issuer !== undefined && claims.iss !== issuer) {
+        return {
+          valid: false,
+          code: 'E_INVALID_ISSUER',
+          message: `Issuer mismatch: expected "${issuer}", got "${claims.iss}"`,
+        };
+      }
+
+      // Subject check
+      if (subjectUri !== undefined && claims.sub !== subjectUri) {
+        return {
+          valid: false,
+          code: 'E_INVALID_SUBJECT',
+          message: `Subject mismatch: expected "${subjectUri}", got "${claims.sub ?? 'undefined'}"`,
+        };
+      }
+
+      // iat: not-yet-valid check (with clock skew)
+      if (claims.iat > now + maxClockSkew) {
+        return {
+          valid: false,
+          code: 'E_NOT_YET_VALID',
+          message: `Receipt not yet valid: issued at ${new Date(claims.iat * 1000).toISOString()}, now is ${new Date(now * 1000).toISOString()}`,
+        };
+      }
+
+      // occurred_at skew check (evidence kind only)
+      if (claims.kind === 'evidence') {
+        const skewResult = checkOccurredAtSkew(claims.occurred_at, claims.iat, now, maxClockSkew);
+        if (skewResult === 'future_error') {
+          return {
+            valid: false,
+            code: 'E_OCCURRED_AT_FUTURE',
+            message: `occurred_at is in the future beyond tolerance (${maxClockSkew}s)`,
+          };
+        }
+        if (skewResult !== null) {
+          accumulatedWarnings.push(skewResult);
+        }
+      }
+
+      return {
+        valid: true,
+        variant: 'wire-02',
+        claims,
+        kid: result.header.kid,
+        wireVersion: '0.2',
+        warnings: sortWarnings(accumulatedWarnings),
+        policy_binding: 'unavailable', // Full JCS+SHA-256 check deferred to PR 14
+      };
+    }
+
+    // Wire 0.1 path (commerce or attestation)
+    // Wire 0.2 receipts returned early above.
+    // Both ReceiptClaimsType and AttestationReceiptClaims have: iss, aud, rid, iat, exp
+    // TypeScript cannot narrow the union via wireVersion so we use a typed assertion.
+    type Wire01CommonClaims = { iss: string; aud: string; rid: string; iat: number; exp?: number };
+    const w01 = pr.claims as Wire01CommonClaims;
+
     // Shared binding checks (iss, aud, rid, iat, exp exist on both receipt types)
-    // 3. Check issuer binding
-    if (issuer !== undefined && pr.claims.iss !== issuer) {
+    if (issuer !== undefined && w01.iss !== issuer) {
       return {
         valid: false,
         code: 'E_INVALID_ISSUER',
-        message: `Issuer mismatch: expected "${issuer}", got "${pr.claims.iss}"`,
+        message: `Issuer mismatch: expected "${issuer}", got "${w01.iss}"`,
       };
     }
 
-    // 4. Check audience binding
-    if (audience !== undefined && pr.claims.aud !== audience) {
+    if (audience !== undefined && w01.aud !== audience) {
       return {
         valid: false,
         code: 'E_INVALID_AUDIENCE',
-        message: `Audience mismatch: expected "${audience}", got "${pr.claims.aud}"`,
+        message: `Audience mismatch: expected "${audience}", got "${w01.aud}"`,
       };
     }
 
-    // 5. Check receipt ID binding
-    if (rid !== undefined && pr.claims.rid !== rid) {
+    if (rid !== undefined && w01.rid !== rid) {
       return {
         valid: false,
         code: 'E_INVALID_RECEIPT_ID',
-        message: `Receipt ID mismatch: expected "${rid}", got "${pr.claims.rid}"`,
+        message: `Receipt ID mismatch: expected "${rid}", got "${w01.rid}"`,
       };
     }
 
-    // 6. Check requireExp
-    if (requireExp && pr.claims.exp === undefined) {
+    if (requireExp && w01.exp === undefined) {
       return {
         valid: false,
         code: 'E_MISSING_EXP',
@@ -328,25 +487,23 @@ export async function verifyLocal(
       };
     }
 
-    // 7. Check not-yet-valid (iat with clock skew)
-    if (pr.claims.iat > now + maxClockSkew) {
+    if (w01.iat > now + maxClockSkew) {
       return {
         valid: false,
         code: 'E_NOT_YET_VALID',
-        message: `Receipt not yet valid: issued at ${new Date(pr.claims.iat * 1000).toISOString()}, now is ${new Date(now * 1000).toISOString()}`,
+        message: `Receipt not yet valid: issued at ${new Date(w01.iat * 1000).toISOString()}, now is ${new Date(now * 1000).toISOString()}`,
       };
     }
 
-    // 8. Check expiry (with clock skew tolerance)
-    if (pr.claims.exp !== undefined && pr.claims.exp < now - maxClockSkew) {
+    if (w01.exp !== undefined && w01.exp < now - maxClockSkew) {
       return {
         valid: false,
         code: 'E_EXPIRED',
-        message: `Receipt expired at ${new Date(pr.claims.exp * 1000).toISOString()}`,
+        message: `Receipt expired at ${new Date(w01.exp * 1000).toISOString()}`,
       };
     }
 
-    // 9. Subject binding + typed return (variant-branched, no unsafe casts)
+    // Subject binding + typed return (variant-branched, no unsafe casts)
     if (pr.variant === 'commerce') {
       const claims = pr.claims as ReceiptClaimsType;
       if (subjectUri !== undefined && claims.subject?.uri !== subjectUri) {
@@ -356,12 +513,13 @@ export async function verifyLocal(
           message: `Subject mismatch: expected "${subjectUri}", got "${claims.subject?.uri ?? 'undefined'}"`,
         };
       }
-      // Wire 0.1: no policy digest on wire, always 'unavailable' (DD-49)
       return {
         valid: true,
         variant: 'commerce',
         claims,
         kid: result.header.kid,
+        wireVersion: '0.1',
+        warnings: [],
         policy_binding: 'unavailable',
       };
     } else {
@@ -373,20 +531,32 @@ export async function verifyLocal(
           message: `Subject mismatch: expected "${subjectUri}", got "${claims.sub ?? 'undefined'}"`,
         };
       }
-      // Wire 0.1: no policy digest on wire, always 'unavailable' (DD-49)
       return {
         valid: true,
         variant: 'attestation',
         claims,
         kid: result.header.kid,
+        wireVersion: '0.1',
+        warnings: [],
         policy_binding: 'unavailable',
       };
     }
   } catch (err) {
     // Handle typed CryptoError from @peac/crypto
     // Use structural check instead of instanceof for robustness across ESM/CJS boundaries
-    // Map internal CRYPTO_* codes to canonical E_* codes
+    // Map internal CRYPTO_* codes to canonical E_* codes.
+    // JOSE hardening codes get specific E_JWS_* (not generic E_INVALID_FORMAT) so callers
+    // can distinguish key-injection attacks from ordinary encoding errors.
     if (isCryptoError(err)) {
+      // 1. JOSE hardening: specific E_JWS_* codes (checked first)
+      if (Object.prototype.hasOwnProperty.call(JOSE_CODE_MAP, err.code)) {
+        return {
+          valid: false,
+          code: JOSE_CODE_MAP[err.code]!,
+          message: err.message,
+        };
+      }
+      // 2. Generic format errors
       if (FORMAT_ERROR_CODES.has(err.code)) {
         return {
           valid: false,
@@ -398,6 +568,13 @@ export async function verifyLocal(
         return {
           valid: false,
           code: 'E_INVALID_SIGNATURE',
+          message: err.message,
+        };
+      }
+      if (err.code === 'CRYPTO_WIRE_VERSION_MISMATCH') {
+        return {
+          valid: false,
+          code: 'E_WIRE_VERSION_MISMATCH',
           message: err.message,
         };
       }
@@ -455,4 +632,16 @@ export function isAttestationResult(
   r: VerifyLocalResult
 ): r is VerifyLocalSuccess & { variant: 'attestation' } {
   return r.valid === true && r.variant === 'attestation';
+}
+
+/**
+ * Type guard: narrows a VerifyLocalResult to a Wire 0.2 success (v0.12.0-preview.1).
+ *
+ * Use instead of manual `result.valid && result.variant === 'wire-02'` checks
+ * to get proper claims narrowing to Wire02Claims.
+ */
+export function isWire02Result(
+  r: VerifyLocalResult
+): r is VerifyLocalSuccess & { variant: 'wire-02' } {
+  return r.valid === true && r.variant === 'wire-02';
 }

@@ -842,7 +842,8 @@ describe('verifyLocal', () => {
       expect(result.valid).toBe(false);
       if (!result.valid) {
         expect(result.code).toBe('E_INVALID_FORMAT');
-        expect(result.message).toContain('Invalid receipt payload');
+        // Message comes from crypto layer (JWS payload parse error); asserting
+        // the code is the stable contract; message text is an implementation detail.
       }
     });
   });

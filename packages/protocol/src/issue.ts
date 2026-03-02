@@ -4,8 +4,8 @@
  */
 
 import { uuidv7 } from 'uuidv7';
-import { sign } from '@peac/crypto';
-import type { JsonValue } from '@peac/kernel';
+import { sign, signWire02 } from '@peac/crypto';
+import type { JsonValue, EvidencePillar } from '@peac/kernel';
 import { ZodError } from 'zod';
 import {
   PEACReceiptClaims,
@@ -29,6 +29,10 @@ import {
   isValidWorkflowContext,
   hasValidDagSemantics,
   WORKFLOW_EXTENSION_KEY,
+  // Wire 0.2 (v0.12.0-preview.1, DD-156)
+  isCanonicalIss,
+  Wire02ClaimsSchema,
+  type Wire02Claims,
 } from '@peac/schema';
 import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 
@@ -356,4 +360,116 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
 export async function issueJws(options: IssueOptions): Promise<string> {
   const result = await issue(options);
   return result.jws;
+}
+
+// ---------------------------------------------------------------------------
+// Wire 0.2 issuance (v0.12.0-preview.1, DD-156)
+// ---------------------------------------------------------------------------
+
+/**
+ * Options for issuing a Wire 0.2 receipt
+ */
+export interface IssueWire02Options {
+  /**
+   * Canonical issuer.
+   * Accepted: https:// ASCII origin or did: identifier.
+   * Non-canonical values produce an IssueError.
+   */
+  iss: string;
+
+  /** Structural kind: 'evidence' or 'challenge' */
+  kind: 'evidence' | 'challenge';
+
+  /**
+   * Open semantic type.
+   * Accepted: reverse-DNS notation (e.g., 'org.example/flow') or absolute URI.
+   */
+  type: string;
+
+  /** Ed25519 private key (32 bytes) */
+  privateKey: Uint8Array;
+
+  /** Key ID (max 256 chars per JOSE hardening rules) */
+  kid: string;
+
+  /**
+   * Unique receipt identifier.
+   * Generated via uuidv7 if not provided.
+   */
+  jti?: string;
+
+  /** Subject identifier (max 2048 chars, optional) */
+  sub?: string;
+
+  /**
+   * Evidence pillars (sorted ascending, closed 10-value taxonomy).
+   * Validated against Wire02ClaimsSchema before signing.
+   */
+  pillars?: EvidencePillar[];
+
+  /**
+   * ISO 8601 / RFC 3339 timestamp when the interaction occurred.
+   * Evidence kind only; rejected on challenge kind with E_OCCURRED_AT_ON_CHALLENGE.
+   */
+  occurred_at?: string;
+
+  /** Declared purpose string (max 256 chars, optional) */
+  purpose_declared?: string;
+
+  /** Extension groups (open; caller-provided, not validated here) */
+  extensions?: Record<string, unknown>;
+}
+
+/**
+ * Issue a Wire 0.2 receipt
+ *
+ * Validates the iss canonical form and Wire02ClaimsSchema before signing.
+ * Always sets typ to 'interaction-record+jwt' (WIRE_02_JWS_TYP).
+ *
+ * @param options - Wire 0.2 receipt options
+ * @returns Issue result with JWS
+ * @throws IssueError if iss is not canonical or schema validation fails
+ */
+export async function issueWire02(options: IssueWire02Options): Promise<IssueResult> {
+  // Validate canonical iss before signing
+  if (!isCanonicalIss(options.iss)) {
+    throw new Error(
+      `iss is not in canonical form: "${options.iss}". Use https:// origin or did: identifier.`
+    );
+  }
+
+  // Generate jti if not provided
+  const jti = options.jti ?? uuidv7();
+
+  // Get current timestamp
+  const iat = Math.floor(Date.now() / 1000);
+
+  // Build Wire 0.2 claims
+  const claims: Wire02Claims = {
+    peac_version: '0.2',
+    kind: options.kind,
+    type: options.type,
+    iss: options.iss,
+    iat,
+    jti,
+    ...(options.sub !== undefined && { sub: options.sub }),
+    ...(options.pillars !== undefined && { pillars: options.pillars }),
+    ...(options.occurred_at !== undefined && { occurred_at: options.occurred_at }),
+    ...(options.purpose_declared !== undefined && { purpose_declared: options.purpose_declared }),
+    ...(options.extensions !== undefined && { extensions: options.extensions }),
+  };
+
+  // Validate schema before signing (fail-closed)
+  const parseResult = Wire02ClaimsSchema.safeParse(claims);
+  if (!parseResult.success) {
+    const firstIssue = parseResult.error.issues[0];
+    throw new Error(
+      `Wire 0.2 claims schema validation failed: ${firstIssue?.message ?? 'unknown'}`
+    );
+  }
+
+  // Sign with Wire 0.2 (always sets typ: 'interaction-record+jwt')
+  const jws = await signWire02(claims, options.privateKey, options.kid);
+
+  return { jws };
 }

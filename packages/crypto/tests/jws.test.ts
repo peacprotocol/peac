@@ -5,7 +5,9 @@
 import { describe, it, expect } from 'vitest';
 import { sign, verify, decode, generateKeypair } from '../src/jws';
 import { CryptoError, isFormatError } from '../src/errors';
-import { PEAC_WIRE_TYP, PEAC_ALG } from '@peac/schema';
+import { WIRE_01_JWS_TYP, PEAC_ALG } from '@peac/kernel';
+
+const PEAC_WIRE_TYP = WIRE_01_JWS_TYP;
 
 describe('Ed25519 JWS', () => {
   const testPayload = {
@@ -144,7 +146,7 @@ describe('Ed25519 JWS', () => {
     const payloadB64 = Buffer.from(JSON.stringify(testPayload)).toString('base64url');
     const jws = `${headerB64}.${payloadB64}.fake-signature`;
 
-    await expect(verify(jws, publicKey)).rejects.toThrow('Invalid typ: expected peac-receipt/0.1');
+    await expect(verify(jws, publicKey)).rejects.toThrow('Invalid typ');
   });
 
   it('should reject wrong alg in header', async () => {

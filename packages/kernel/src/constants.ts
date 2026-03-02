@@ -1,20 +1,22 @@
 /**
  * PEAC Protocol Constants
- * Derived from specs/kernel/constants.json
- *
- * NOTE: This file is manually synced for v0.9.15.
- * From v0.9.16+, this will be auto-generated via codegen.
  */
 
 /**
- * Wire format type for PEAC receipts
- * Normalized to peac-receipt/0.1 per DEC-20260114-002
+ * Wire 0.1 JWS `typ` claim (legacy constant name).
+ *
+ * @deprecated Use `WIRE_01_JWS_TYP` for new code. `WIRE_TYPE` and
+ * `WIRE_01_JWS_TYP` resolve to the same string; `WIRE_01_JWS_TYP` is the
+ * canonical name at the JWS layer (v0.12.0-preview.1+, Wire 0.2 dual-stack).
  */
 export const WIRE_TYPE = 'peac-receipt/0.1' as const;
 
 /**
- * Wire format version (extracted from WIRE_TYPE)
- * Use this for wire_version fields in receipts
+ * Wire 0.1 version string (legacy constant name).
+ *
+ * @deprecated Use `WIRE_VERSIONS` or compare against `WIRE_02_VERSION` for
+ * dual-stack version detection. `WIRE_VERSION` remains valid for Wire 0.1
+ * but does not participate in the Wire 0.2 version model.
  */
 export const WIRE_VERSION = '0.1' as const;
 
@@ -247,6 +249,95 @@ export const VERIFICATION_MODES = {
   /** Allow network fetches for key discovery */
   networkAllowed: 'network_allowed' as const,
 } as const;
+
+// ---------------------------------------------------------------------------
+// Wire 0.2 constants (v0.12.0-preview.1, DD-156)
+// ---------------------------------------------------------------------------
+
+/**
+ * JWS header typ value for Wire 0.1 receipts.
+ * Canonical location: @peac/kernel (layer correction from @peac/schema).
+ * The existing WIRE_TYPE constant is unchanged; both resolve to the same string.
+ * @peac/schema re-exports this as PEAC_WIRE_TYP for backward compatibility.
+ */
+export const WIRE_01_JWS_TYP = 'peac-receipt/0.1' as const;
+
+/**
+ * JWS header typ value for Wire 0.2 receipts (compact form).
+ * Per RFC 7515 Section 4.1.9, the full media type form
+ * 'application/interaction-record+jwt' is also accepted by verifiers and
+ * normalized to this compact form before returning the header.
+ */
+export const WIRE_02_JWS_TYP = 'interaction-record+jwt' as const;
+
+/**
+ * All accepted typ values for Wire 0.2 (compact + full media type form).
+ * Used internally by @peac/crypto to fast-reject unrelated tokens.
+ * Verifiers normalize the full form to WIRE_02_JWS_TYP before returning.
+ */
+export const WIRE_02_JWS_TYP_ACCEPT = [
+  'interaction-record+jwt',
+  'application/interaction-record+jwt',
+] as const;
+
+/**
+ * Wire 0.2 peac_version payload claim value.
+ * Discriminates Wire 0.2 envelopes from Wire 0.1 (which have no peac_version field).
+ */
+export const WIRE_02_VERSION = '0.2' as const;
+
+/**
+ * All supported wire version strings for dual-stack implementations.
+ */
+export const WIRE_VERSIONS = ['0.1', '0.2'] as const;
+
+/**
+ * TypeScript union type for supported wire version values.
+ */
+export type WireVersion = (typeof WIRE_VERSIONS)[number];
+
+/**
+ * Canonical issuer (iss) constraints for Wire 0.2.
+ * Supported schemes: 'https' (RFC 3986 origin-only) and 'did' (DID Core).
+ * All other schemes produce E_ISS_NOT_CANONICAL.
+ */
+export const ISS_CANONICAL = {
+  maxLength: 2048,
+  supportedSchemes: ['https', 'did'] as const,
+  /** Default port for https (rejected if explicit in iss). */
+  defaultPorts: { https: 443 } as Record<string, number>,
+} as const;
+
+/**
+ * type claim grammar constraints (open vocabulary: reverse-DNS or absolute URI).
+ */
+export const TYPE_GRAMMAR = { maxLength: 256 } as const;
+
+/**
+ * Maximum tolerated skew between occurred_at and iat for evidence receipts (seconds).
+ * If occurred_at > iat within this tolerance, a 'occurred_at_skew' warning is emitted.
+ * If occurred_at > now + tolerance, E_OCCURRED_AT_FUTURE is a hard error.
+ */
+export const OCCURRED_AT_TOLERANCE_SECONDS = 300;
+
+/**
+ * Verification strictness profiles for Wire 0.2.
+ * Owned exclusively by @peac/protocol.verifyLocal(); @peac/crypto has no strictness parameter.
+ *
+ * - 'strict' (default): typ MUST be present and correct; missing typ is a hard error.
+ * - 'interop': tolerates missing typ; emits 'typ_missing' warning; routes by peac_version.
+ */
+export type VerificationStrictness = 'strict' | 'interop';
+
+/**
+ * JOSE signature algorithm (EdDSA / Ed25519). Re-exported from kernel for layer
+ * correctness: @peac/crypto imports all typ/alg constants from @peac/kernel only.
+ */
+export const PEAC_ALG = ALGORITHMS.default;
+
+// ---------------------------------------------------------------------------
+// Legacy aggregate export (unchanged)
+// ---------------------------------------------------------------------------
 
 /**
  * All constants export
