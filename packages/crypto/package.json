@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@noble/ed25519": "^3.0.0",
-    "@peac/schema": "workspace:*"
+    "@peac/kernel": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",

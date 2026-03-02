@@ -123,14 +123,16 @@ const result = await verifyLocal(jws, publicKey);
 console.log('\nValid:', result.valid);
 if (result.valid) {
   console.log('Issuer:', result.claims.iss);
-  console.log('Audience:', result.claims.aud);
+  if (result.variant === 'commerce') {
+    console.log('Audience:', result.claims.aud);
 
-  // Confirm observation is present in ext[]
-  const ext = result.claims.ext as Record<string, unknown> | undefined;
-  const csExt = ext?.['org.peacprotocol/content_signal'] as Record<string, unknown> | undefined;
-  if (csExt) {
-    console.log('Content signal ext: target_uri =', csExt.target_uri);
-    console.log('Content signal ext: signals =', JSON.stringify(csExt.signals));
+    // Confirm observation is present in ext[]
+    const ext = result.claims.ext as Record<string, unknown> | undefined;
+    const csExt = ext?.['org.peacprotocol/content_signal'] as Record<string, unknown> | undefined;
+    if (csExt) {
+      console.log('Content signal ext: target_uri =', csExt.target_uri);
+      console.log('Content signal ext: signals =', JSON.stringify(csExt.signals));
+    }
   }
 }
 

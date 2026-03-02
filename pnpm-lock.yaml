@@ -984,9 +984,9 @@ importers:
       '@noble/ed25519':
         specifier: ^3.0.0
         version: 3.0.0
-      '@peac/schema':
+      '@peac/kernel':
         specifier: workspace:*
-        version: link:../schema
+        version: link:../kernel
     devDependencies:
       '@types/node':
         specifier: ^22.19.11

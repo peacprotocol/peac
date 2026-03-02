@@ -224,7 +224,7 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
   // ---------------------------------------------------------------------------
   // Check 1: jws.parse - Parse JWS structure
   // ---------------------------------------------------------------------------
-  let header: { alg: string; typ: string; kid: string };
+  let header: { alg: string; typ?: string; kid: string };
   let payload: PEACReceiptClaims;
 
   try {
