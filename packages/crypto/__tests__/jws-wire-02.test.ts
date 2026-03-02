@@ -324,6 +324,138 @@ describe('validateWire02Header — JOSE hardening', () => {
 });
 
 // ---------------------------------------------------------------------------
+// JOSE hardening: verify() integration
+//
+// These tests prove that verify() itself enforces JOSE hardening — not just
+// validateWire02Header() in isolation. Each test crafts a validly-signed JWS
+// with a JOSE hazard and asserts that verify() rejects it.
+// ---------------------------------------------------------------------------
+
+describe('JOSE hardening: verify() rejects hazards in validly-signed JWS', () => {
+  // Helper: build and sign a JWS with a custom header object
+  async function signWithHeader(
+    header: Record<string, unknown>,
+    payload: unknown,
+    privateKey: Uint8Array
+  ): Promise<string> {
+    const headerB64 = Buffer.from(JSON.stringify(header)).toString('base64url');
+    const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    const sigInput = `${headerB64}.${payloadB64}`;
+    const { sign: ed25519Sign } = await import('../src/ed25519.js');
+    const sigBytes = await ed25519Sign(new TextEncoder().encode(sigInput), privateKey);
+    return `${sigInput}.${Buffer.from(sigBytes).toString('base64url')}`;
+  }
+
+  it('rejects Wire 0.2 JWS with b64:false — CRYPTO_JWS_B64_REJECTED', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await signWithHeader(
+      { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, b64: false },
+      wire02Payload,
+      privateKey
+    );
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_JWS_B64_REJECTED',
+    });
+  });
+
+  it('rejects Wire 0.2 JWS with zip header — CRYPTO_JWS_ZIP_REJECTED', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await signWithHeader(
+      { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, zip: 'DEF' },
+      wire02Payload,
+      privateKey
+    );
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_JWS_ZIP_REJECTED',
+    });
+  });
+
+  it('rejects Wire 0.2 JWS with crit header — CRYPTO_JWS_CRIT_REJECTED', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await signWithHeader(
+      { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, crit: ['b64'] },
+      wire02Payload,
+      privateKey
+    );
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_JWS_CRIT_REJECTED',
+    });
+  });
+
+  it('rejects Wire 0.2 JWS with embedded jwk — CRYPTO_JWS_EMBEDDED_KEY', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await signWithHeader(
+      { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, jwk: { kty: 'OKP' } },
+      wire02Payload,
+      privateKey
+    );
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_JWS_EMBEDDED_KEY',
+    });
+  });
+
+  it('rejects Wire 0.2 JWS with x5c — CRYPTO_JWS_EMBEDDED_KEY', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await signWithHeader(
+      { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, x5c: ['MIIBkTC...'] },
+      wire02Payload,
+      privateKey
+    );
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_JWS_EMBEDDED_KEY',
+    });
+  });
+
+  // Interop bypass guard: absent typ does NOT bypass JOSE hardening
+  it('rejects UnTyped JWS with b64:false — JOSE hardening applies regardless of absent typ', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await signWithHeader(
+      { alg: PEAC_ALG, kid: testKid, b64: false },
+      wire02Payload,
+      privateKey
+    );
+    // No typ: normally would pass to protocol layer, but JOSE hazard must still be caught
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_JWS_B64_REJECTED',
+    });
+  });
+
+  it('rejects UnTyped JWS with embedded jwk — JOSE hardening applies regardless of absent typ', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await signWithHeader(
+      { alg: PEAC_ALG, kid: testKid, jwk: { kty: 'OKP' } },
+      wire02Payload,
+      privateKey
+    );
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_JWS_EMBEDDED_KEY',
+    });
+  });
+
+  it('does NOT apply JOSE hardening to Wire 0.1 JWS (backwards compat)', async () => {
+    // Wire 0.1 predates JOSE hardening constraints; verify() must not break existing tokens.
+    // sign() only sets {typ, alg, kid} so this is an academic test but confirms no regression.
+    const { privateKey, publicKey } = await generateKeypair();
+    const wire01Payload = {
+      iss: 'https://api.example.com',
+      aud: 'https://app.example.com',
+      iat: 1736934600,
+      rid: 'test-rid-001',
+      amt: 100,
+      cur: 'USD',
+    };
+    const jws = await signWithHeader(
+      { typ: WIRE_01_JWS_TYP, alg: PEAC_ALG, kid: testKid },
+      wire01Payload,
+      privateKey
+    );
+    const result = await verify(jws, publicKey);
+    expect(result.valid).toBe(true);
+    expect(result.header.typ).toBe(WIRE_01_JWS_TYP);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Wire 0.1 regression: existing sign/verify still works
 // ---------------------------------------------------------------------------
 

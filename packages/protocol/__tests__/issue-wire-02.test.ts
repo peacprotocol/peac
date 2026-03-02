@@ -13,6 +13,45 @@ import { WARNING_TYP_MISSING, WARNING_OCCURRED_AT_SKEW } from '@peac/schema';
 import { issueWire02, issue, verifyLocal, isWire02Result } from '../src/index';
 
 // ---------------------------------------------------------------------------
+// Helper: create a valid-signature JWS with custom header fields (JOSE hazard injection)
+//
+// Used to test that verifyLocal() returns specific E_JWS_* codes for JOSE violations
+// (not the generic E_INVALID_FORMAT). Same PKCS8 encoding technique as createUntypedJWS.
+// ---------------------------------------------------------------------------
+async function createJWSWithHazard(
+  payload: unknown,
+  privateKeyBytes: Uint8Array,
+  kid: string,
+  headerExtra: Record<string, unknown>
+): Promise<string> {
+  const rawHeader = { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid, ...headerExtra };
+  const headerB64 = Buffer.from(JSON.stringify(rawHeader)).toString('base64url');
+  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signingInput = `${headerB64}.${payloadB64}`;
+
+  const pkcs8 = new Uint8Array(48);
+  pkcs8.set(
+    [
+      0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x04, 0x22, 0x04,
+      0x20,
+    ],
+    0
+  );
+  pkcs8.set(privateKeyBytes, 16);
+
+  const cryptoKey = await crypto.subtle.importKey('pkcs8', pkcs8, { name: 'Ed25519' }, false, [
+    'sign',
+  ]);
+  const sigBytes = await crypto.subtle.sign(
+    { name: 'Ed25519' },
+    cryptoKey,
+    new TextEncoder().encode(signingInput)
+  );
+
+  return `${signingInput}.${Buffer.from(sigBytes).toString('base64url')}`;
+}
+
+// ---------------------------------------------------------------------------
 // Helper: create a valid-signature JWS with no typ field
 //
 // Used to test strictness routing (strict mode: hard error; interop mode: warning).
@@ -914,6 +953,121 @@ describe('isWire02Result() type guard', () => {
       expect(result.kid).toBe(testKid);
     } else {
       throw new Error('Expected wire-02 result');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// JOSE error code mapping: verifyLocal() returns specific E_JWS_* codes
+//
+// Proves the CRYPTO_JWS_* → E_JWS_* mapping in verify-local.ts is wired correctly.
+// Each test crafts a validly-signed Wire 0.2 JWS with a JOSE hazard and asserts the
+// specific public error code (not the generic E_INVALID_FORMAT).
+// ---------------------------------------------------------------------------
+
+describe('verifyLocal() JOSE error code mapping (not generic E_INVALID_FORMAT)', () => {
+  const wire02JosePayload = {
+    peac_version: '0.2',
+    kind: 'evidence' as const,
+    type: testType,
+    iss: testIss,
+    iat: Math.floor(Date.now() / 1000),
+    jti: 'jose-mapping-test',
+  };
+
+  it('b64:false → E_JWS_B64_REJECTED', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await createJWSWithHazard(wire02JosePayload, privateKey, testKid, {
+      b64: false,
+    });
+    const result = await verifyLocal(jws, publicKey);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_JWS_B64_REJECTED');
+    }
+  });
+
+  it('zip → E_JWS_ZIP_REJECTED', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await createJWSWithHazard(wire02JosePayload, privateKey, testKid, {
+      zip: 'DEF',
+    });
+    const result = await verifyLocal(jws, publicKey);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_JWS_ZIP_REJECTED');
+    }
+  });
+
+  it('crit → E_JWS_CRIT_REJECTED', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await createJWSWithHazard(wire02JosePayload, privateKey, testKid, {
+      crit: ['b64'],
+    });
+    const result = await verifyLocal(jws, publicKey);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_JWS_CRIT_REJECTED');
+    }
+  });
+
+  it('jwk embedded key → E_JWS_EMBEDDED_KEY', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await createJWSWithHazard(wire02JosePayload, privateKey, testKid, {
+      jwk: { kty: 'OKP', crv: 'Ed25519' },
+    });
+    const result = await verifyLocal(jws, publicKey);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_JWS_EMBEDDED_KEY');
+    }
+  });
+
+  it('x5c embedded key → E_JWS_EMBEDDED_KEY', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const jws = await createJWSWithHazard(wire02JosePayload, privateKey, testKid, {
+      x5c: ['MIIBkTC...'],
+    });
+    const result = await verifyLocal(jws, publicKey);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_JWS_EMBEDDED_KEY');
+    }
+  });
+
+  it('interop mode: missing typ + JOSE hazard (b64:false) still returns E_JWS_B64_REJECTED', async () => {
+    // Interop mode exempts missing typ from hard error but MUST NOT bypass JOSE hardening.
+    // A token with no typ and b64:false must still be rejected with E_JWS_B64_REJECTED.
+    const { privateKey, publicKey } = await generateKeypair();
+
+    // Build untyped JWS (no typ field) with b64:false hazard in header
+    const rawHeader = { alg: PEAC_ALG, kid: testKid, b64: false };
+    const headerB64 = Buffer.from(JSON.stringify(rawHeader)).toString('base64url');
+    const payloadB64 = Buffer.from(JSON.stringify(wire02JosePayload)).toString('base64url');
+    const signingInput = `${headerB64}.${payloadB64}`;
+    const pkcs8 = new Uint8Array(48);
+    pkcs8.set(
+      [
+        0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x04, 0x22, 0x04,
+        0x20,
+      ],
+      0
+    );
+    pkcs8.set(privateKey, 16);
+    const cryptoKey = await crypto.subtle.importKey('pkcs8', pkcs8, { name: 'Ed25519' }, false, [
+      'sign',
+    ]);
+    const sigBytes = await crypto.subtle.sign(
+      { name: 'Ed25519' },
+      cryptoKey,
+      new TextEncoder().encode(signingInput)
+    );
+    const jws = `${signingInput}.${Buffer.from(sigBytes).toString('base64url')}`;
+
+    const result = await verifyLocal(jws, publicKey, { strictness: 'interop' });
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_JWS_B64_REJECTED');
     }
   });
 });

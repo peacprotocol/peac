@@ -50,7 +50,10 @@ function isCryptoError(err: unknown): err is CryptoErrorLike {
 /**
  * Canonical error codes for local verification
  *
- * These map to E_* codes in specs/kernel/errors.json
+ * These map to E_* codes in specs/kernel/errors.json.
+ * JOSE hardening codes (E_JWS_*) are distinct from generic E_INVALID_FORMAT
+ * so callers can distinguish key-injection, compression, and crit attacks from
+ * ordinary format errors (v0.12.0-preview.1, DD-156).
  */
 export type VerifyLocalErrorCode =
   | 'E_INVALID_SIGNATURE'
@@ -66,6 +69,12 @@ export type VerifyLocalErrorCode =
   | 'E_WIRE_VERSION_MISMATCH'
   | 'E_UNSUPPORTED_WIRE_VERSION'
   | 'E_OCCURRED_AT_FUTURE'
+  // JOSE hardening codes (Wire 0.2, v0.12.0-preview.1, DD-156)
+  | 'E_JWS_EMBEDDED_KEY'
+  | 'E_JWS_CRIT_REJECTED'
+  | 'E_JWS_MISSING_KID'
+  | 'E_JWS_B64_REJECTED'
+  | 'E_JWS_ZIP_REJECTED'
   | 'E_INTERNAL';
 
 /**
@@ -233,22 +242,30 @@ export interface VerifyLocalFailure {
 export type VerifyLocalResult = VerifyLocalSuccess | VerifyLocalFailure;
 
 /**
- * Crypto error codes that indicate format/validation issues
- * These are CRYPTO_* internal codes from @peac/crypto, mapped to canonical E_* codes.
- * Includes Wire 0.2 JOSE hardening codes (v0.12.0-preview.1, DD-156).
+ * Internal CRYPTO_* codes that map to generic E_INVALID_FORMAT.
+ * These are format/encoding errors not security-specific.
  */
 const FORMAT_ERROR_CODES = new Set([
   'CRYPTO_INVALID_JWS_FORMAT',
   'CRYPTO_INVALID_TYP',
   'CRYPTO_INVALID_ALG',
   'CRYPTO_INVALID_KEY_LENGTH',
-  // Wire 0.2 JOSE hardening
-  'CRYPTO_JWS_EMBEDDED_KEY',
-  'CRYPTO_JWS_CRIT_REJECTED',
-  'CRYPTO_JWS_MISSING_KID',
-  'CRYPTO_JWS_B64_REJECTED',
-  'CRYPTO_JWS_ZIP_REJECTED',
 ]);
+
+/**
+ * JOSE hardening code mapping: CRYPTO_JWS_* → specific E_JWS_* (v0.12.0-preview.1, DD-156).
+ *
+ * Each JOSE hazard code maps to its specific public E_JWS_* counterpart rather than
+ * collapsing into the generic E_INVALID_FORMAT. This lets callers distinguish embedded-key
+ * injection, crit-header abuse, and unencoded-payload attacks from ordinary format errors.
+ */
+const JOSE_CODE_MAP: Record<string, VerifyLocalErrorCode> = {
+  CRYPTO_JWS_EMBEDDED_KEY: 'E_JWS_EMBEDDED_KEY',
+  CRYPTO_JWS_CRIT_REJECTED: 'E_JWS_CRIT_REJECTED',
+  CRYPTO_JWS_MISSING_KID: 'E_JWS_MISSING_KID',
+  CRYPTO_JWS_B64_REJECTED: 'E_JWS_B64_REJECTED',
+  CRYPTO_JWS_ZIP_REJECTED: 'E_JWS_ZIP_REJECTED',
+};
 
 /** Max parse issues to include in details (prevents log bloat) */
 const MAX_PARSE_ISSUES = 25;
@@ -527,8 +544,19 @@ export async function verifyLocal(
   } catch (err) {
     // Handle typed CryptoError from @peac/crypto
     // Use structural check instead of instanceof for robustness across ESM/CJS boundaries
-    // Map internal CRYPTO_* codes to canonical E_* codes
+    // Map internal CRYPTO_* codes to canonical E_* codes.
+    // JOSE hardening codes get specific E_JWS_* (not generic E_INVALID_FORMAT) so callers
+    // can distinguish key-injection attacks from ordinary encoding errors.
     if (isCryptoError(err)) {
+      // 1. JOSE hardening: specific E_JWS_* codes (checked first)
+      if (Object.prototype.hasOwnProperty.call(JOSE_CODE_MAP, err.code)) {
+        return {
+          valid: false,
+          code: JOSE_CODE_MAP[err.code]!,
+          message: err.message,
+        };
+      }
+      // 2. Generic format errors
       if (FORMAT_ERROR_CODES.has(err.code)) {
         return {
           valid: false,

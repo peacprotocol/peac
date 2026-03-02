@@ -326,6 +326,15 @@ export async function verify<T = unknown>(
   const rawHeader = JSON.parse(headerJson) as Record<string, unknown>;
   const header = buildHeader(rawHeader);
 
+  // Apply JOSE hardening for Wire 0.2 and UnTyped tokens (Correction 1, DD-156).
+  // JOSE security invariants (embedded key material, crit, b64:false, zip) MUST be
+  // enforced regardless of whether typ is present. Interop mode controls routing only;
+  // it does not exempt tokens from key-injection or unencoded-payload attacks.
+  // Wire 0.1 tokens are excluded: the legacy format predates these constraints.
+  if (header.typ === WIRE_02_JWS_TYP || header.typ === undefined) {
+    validateWire02Header(rawHeader);
+  }
+
   // Decode payload
   const payloadJson = base64urlDecodeString(payloadB64);
   const payload = JSON.parse(payloadJson) as T;
@@ -361,13 +370,20 @@ export async function verify<T = unknown>(
 // ---------------------------------------------------------------------------
 
 /**
- * Decode JWS without verifying signature (use with caution!)
+ * Decode JWS without verifying signature
+ *
+ * UNSAFE: This function is for debugging and diagnostic inspection only.
+ * It does NOT verify the Ed25519 signature and does NOT apply JOSE hardening
+ * (embedded-key rejection, b64/zip/crit checks). Tokens returned by decode()
+ * must never be trusted for authorization decisions.
+ *
+ * For secure verification use verify() instead.
  *
  * Applies the same typ normalization and header typing as verify().
  * Unrecognized typ values still throw CryptoError.
  *
  * @param jws - JWS compact serialization
- * @returns Decoded header and payload (unverified)
+ * @returns Decoded header and payload (unverified, no JOSE hardening applied)
  */
 export function decode<T = unknown>(jws: string): { header: JWSHeader; payload: T } {
   const parts = jws.split('.');
