@@ -18,6 +18,7 @@
     "policy": "Not yet migrated to tracked validation; needs fixture pack audit",
     "purpose": "Legacy category; no fixture_count tracking",
     "stripe-crypto": "Per-category manifest; uses profile-scoped manifest.json, not global fixture_count",
+    "treaty": "Treaty extension fixtures (DD-147); single fixture pack",
     "valid": "Single-receipt fixtures, not fixture packs",
     "verifier": "Fixtures span multiple releases (v0.10.8 + v0.10.10 DD-49); version consistency not enforced",
     "workflow": "Not yet migrated to tracked validation; fixture_count needs reconciliation",

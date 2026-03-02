@@ -158,6 +158,12 @@ export {
   CONTROL_ACTIONS,
   CONTROL_TRIGGERS,
   validateControlAction,
+  // Treaty (DD-147)
+  CommitmentClassSchema,
+  TreatySchema,
+  TREATY_EXTENSION_KEY,
+  COMMITMENT_CLASSES,
+  validateTreaty,
   // Fingerprint Reference Conversion (DD-146)
   stringToFingerprintRef,
   fingerprintRefToString,
@@ -169,6 +175,8 @@ export type {
   ControlActionType,
   ControlTrigger,
   ControlAction,
+  CommitmentClass,
+  Treaty,
   FingerprintRefObject,
 } from './extensions/index';
 
