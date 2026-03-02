@@ -1,0 +1,53 @@
+{
+  "$comment": "Tool Registry extension conformance fixtures (v0.11.3+, DD-145)",
+  "version": "0.11.3",
+  "schema_version": "0.11.3",
+  "valid": [
+    {
+      "name": "https-registry",
+      "input": {
+        "tool_id": "tool:web-search",
+        "registry_uri": "https://registry.example.com/tools/web-search",
+        "version": "1.2.0",
+        "capabilities": ["search", "crawl"]
+      }
+    },
+    {
+      "name": "urn-registry",
+      "input": {
+        "tool_id": "tool:calculator",
+        "registry_uri": "urn:peac:tools:calculator:v1"
+      }
+    },
+    {
+      "name": "minimal",
+      "input": {
+        "tool_id": "tool:basic",
+        "registry_uri": "https://tools.example.com/basic"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "file-uri-ssrf",
+      "input": {
+        "tool_id": "tool:exploit",
+        "registry_uri": "file:///etc/passwd"
+      }
+    },
+    {
+      "name": "data-uri-ssrf",
+      "input": {
+        "tool_id": "tool:exploit",
+        "registry_uri": "data:text/plain,malicious"
+      }
+    },
+    {
+      "name": "http-not-https",
+      "input": {
+        "tool_id": "tool:insecure",
+        "registry_uri": "http://registry.example.com/tools"
+      }
+    }
+  ]
+}
