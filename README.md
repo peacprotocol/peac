@@ -222,6 +222,7 @@ See [examples/quickstart/](examples/quickstart/) for runnable code. For settleme
 peac verify 'eyJhbGc...'                # Verify a receipt
 peac conformance run                     # Run conformance tests
 peac conformance run --level full        # Full conformance suite
+peac reconcile a.bundle b.bundle         # Merge and diff evidence bundles
 peac samples list                        # List sample receipts
 peac policy init                         # Create peac-policy.yaml
 peac policy validate policy.yaml         # Validate policy syntax

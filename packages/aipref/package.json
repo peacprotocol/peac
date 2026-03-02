@@ -1,6 +1,6 @@
 {
   "name": "@peac/pref",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "AIPREF resolver with robots.txt bridge",
   "type": "module",
   "main": "dist/index.js",

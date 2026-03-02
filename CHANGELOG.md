@@ -7,6 +7,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-03-02
+
+### Identity, Zero Trust, and Enterprise Readiness
+
+v0.11.3 adds Zero Trust profile documentation overlays, expanded agent identity with 8 proof
+types, normative key rotation lifecycle management, a reconciliation CLI for evidence bundle
+merge, and governance framework alignment mappings.
+
+### Added
+
+- **Zero Trust Profile Pack** (DD-145)
+  - 7 sub-profiles as documentation overlays: Access, Toolcall, Decision, Risk Signal, Sync,
+    Tracing, ZT Extensions
+  - Each specifies REQUIRED/RECOMMENDED/PROHIBITED receipt fields per PROFILE_RULES.md
+  - No new wire fields; all ZT data flows through `ext[]` with reverse-DNS keys
+- **Agent Identity Profile** (DD-142, DD-143, DD-144)
+  - `ActorBindingSchema` with 8 proof types: `ed25519-cert-chain`, `eat-passport`,
+    `eat-background-check`, `sigstore-oidc`, `did`, `spiffe`, `x509-pki`, `custom`
+  - `MVISFieldsSchema` with 5 required identity fields (issuer, subject, key_binding,
+    time_bounds, replay_protection)
+  - `isOriginOnly()` validator enforcing origin-only URLs (no path/query/fragment)
+  - 8 valid fixtures (one per proof type) + 2 negative fixtures
+  - Standards alignment: RFC 8032, RFC 9711 (EAT), RFC 5280, W3C DID 1.1, CNCF SPIFFE,
+    NIST SP 800-63, Sigstore
+- **ZT Extension Schemas** (DD-145, DD-146)
+  - `credential-event`, `tool-registry`, `control-action` schemas in `@peac/schema`
+  - `FingerprintRef` conversion utilities (opaque reference format, Layer 1 string manipulation)
+  - URL scheme allowlist on `tool_registry.registry_uri` (HTTPS + URN only, SSRF prevention)
+  - 10 conformance fixtures
+- **Treaty Extension** (DD-147)
+  - 4-level `commitment_class` vocabulary: `informational`, `operational`, `financial`, `legal`
+  - Extension key: `org.peacprotocol/treaty`
+  - 3 conformance fixtures
+- **Key Rotation Lifecycle** (DD-148)
+  - Normative spec: lifecycle FSM (PENDING, ACTIVE, DEPRECATED, RETIRED, REVOKED)
+  - 30-day overlap normative (upgraded from 7-day RECOMMENDED)
+  - Cache-Control coordination: JWKS `max-age` MUST be <= overlap period
+  - Emergency revocation via `revoked_keys[]` in `peac-issuer.json` (RFC 5280 CRLReason subset)
+  - Kid reuse detection in JWKS resolver (tiered: stateful MUST reject, stateless SHOULD warn)
+  - NIST SP 800-57 key management lifecycle alignment
+  - 6 conformance fixtures including cache-based kid reuse detection
+- **Reconciliation CLI**
+  - `peac reconcile <bundle1> <bundle2>` for evidence bundle merge and conflict detection
+  - Conflict key: composite `(iss, jti)` with 3-step fallback
+  - `--format json|text` with deterministic ordering (CI-friendly, diffable)
+  - `--fail-on-conflict` exit code 1 for CI gate usage
+  - 16 MB bundle size limit, path traversal prevention
+- **Content Signals Example**
+  - `examples/content-signals/` demonstrating DD-136/DD-137 observation model
+  - Parses robots.txt and tdmrep.json, maps to `CanonicalPurpose`, issues receipt
+- **A2A Gateway Pattern Example**
+  - `examples/a2a-gateway-pattern/` demonstrating receipt per state transition
+  - Agent Card declaration, task submission, working/completion state receipts
+- **Governance Framework Mappings** (8 documents in `docs/governance/`)
+  - NIST AI RMF, EU AI Act, OWASP ASI, ISO 42001, IEEE 7001, OECD AI Principles,
+    Singapore MGFAA, AWS RAI compliance
+- **Multi-Tenant Guide** (DD-149)
+  - 3-tier isolation guidance: Shared, Scoped (kid prefix), Isolated (per-tenant JWKS)
+  - Migration path between tiers, security tradeoffs per tier
+- **Plugin Pack Enhancements**
+  - `verify-receipt.md` and `explain-receipt.md` skills for Claude Code
+  - OpenCode configuration template and agent template
+- **CI Improvements**
+  - PR scope guard with label-driven path allowlist (`scripts/ci/scope-guard.sh`)
+  - Unified gate script (`scripts/gate.sh`) called by both CI and hooks
+  - Repo-managed hooks (`.githooks/`) auto-installed via `pnpm prepare`
+  - lint-staged auto-format at commit time
+  - No-network guard (`scripts/check-no-network.mjs`) for DD-55 enforcement
+  - Release gate (`scripts/release-gate-0.11.3.sh`) with 10 checks
+- **Registry Additions**
+  - `proof_types` section: 8 entries for multi-root identity verification
+  - `extension_keys` section: ZT and treaty extension keys
+  - `pillar_values` section: 10-value closed vocabulary
+- **Error Codes**
+  - `E_KID_REUSE_DETECTED`: same kid with different key material within retention window
+  - `E_MVIS_INCOMPLETE`: identity receipt missing MVIS required fields
+  - `E_REVOKED_KEY_USED`: receipt signed with a revoked key
+
+### Changed
+
+- **`JWKS.overlapDays`** constant updated from 7 to 30 (normative upgrade)
+- **Publish manifest**: 28 packages (unchanged count, version bumped)
+
+### Notes
+
+- Wire format `peac-receipt/0.1` remains FROZEN
+- Design decisions: DD-142 (ActorBinding), DD-143 (multi-root proof types),
+  DD-144 (MVIS), DD-145 (ZT Pack composition), DD-146 (FingerprintRef),
+  DD-147 (Treaty extension), DD-148 (Key Rotation lifecycle), DD-149 (Multi-Tenant)
+- All ZT data flows through `ext[]` with reverse-DNS keys per PROFILE_RULES.md
+- `ProofTypeSchema` (8 types for ActorBinding) is separate from existing
+  `ProofMethodSchema` (4 methods for AgentProof); unification deferred to v0.12.0
+
+### Deferred
+
+- EAT adapter (passport + background-check): deferred to v0.12.0-preview.1 (CBOR dependency)
+- Wire 0.2 kernel envelope: deferred to v0.12.0-preview.1
+- Content signals streaming: deferred to v0.12.1
+- OpenAI adapter streaming: deferred to v0.12.1
+- ActorBinding/ProofMethod schema unification: deferred to v0.12.0
+
 ## [0.11.2] - 2026-02-25
 
 ### Content Signals + Evidence Locators

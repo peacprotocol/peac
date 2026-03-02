@@ -49,6 +49,7 @@ run_gate "version-sync" node scripts/check-version-sync.mjs
 echo ""
 echo "--- Codegen Freshness ---"
 pnpm exec tsx scripts/codegen-errors.ts > /dev/null 2>&1
+pnpm exec prettier --write packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts > /dev/null 2>&1
 CODEGEN_FILES="packages/kernel/src/errors.generated.ts packages/kernel/src/error-categories.generated.ts"
 CODEGEN_STALE=0
 for gf in $CODEGEN_FILES; do
