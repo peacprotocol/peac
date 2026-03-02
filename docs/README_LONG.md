@@ -51,7 +51,7 @@ See [examples/x402-node-server](../examples/x402-node-server) for a working impl
 
 ---
 
-**Package availability:** All packages listed below are published to npm at v0.11.2. Install via `pnpm add <package>` or run from this repo root via `pnpm --filter <pkg> exec ...`.
+**Package availability:** All packages listed below are published to npm at v0.11.3. Install via `pnpm add <package>` or run from this repo root via `pnpm --filter <pkg> exec ...`.
 
 ## Integration examples
 

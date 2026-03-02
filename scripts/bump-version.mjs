@@ -146,6 +146,45 @@ if (existsSync(manifestPath)) {
   }
 }
 
+// 4. Bump MCP server distribution surface files (server.json, manifest.json)
+const mcpSurfaceFiles = [
+  join(ROOT, 'packages/mcp-server/server.json'),
+  join(ROOT, 'packages/mcp-server/manifest.json'),
+];
+
+for (const surfacePath of mcpSurfaceFiles) {
+  if (!existsSync(surfacePath)) continue;
+
+  const raw = readFileSync(surfacePath, 'utf-8');
+  const surface = JSON.parse(raw);
+  const fileName = relative(ROOT, surfacePath);
+  let changed = false;
+
+  // Top-level version
+  if (surface.version && surface.version !== version) {
+    surface.version = version;
+    changed = true;
+  }
+
+  // server.json has packages[].version
+  if (Array.isArray(surface.packages)) {
+    for (const entry of surface.packages) {
+      if (entry.version && entry.version !== version) {
+        entry.version = version;
+        changed = true;
+      }
+    }
+  }
+
+  if (changed) {
+    const indent = raw.match(/^(\s+)"/m)?.[1] || '  ';
+    if (!dryRun) {
+      writeFileSync(surfacePath, JSON.stringify(surface, null, indent) + '\n');
+    }
+    console.log(`  ${fileName}: bumped to ${version}`);
+  }
+}
+
 console.log('');
 console.log(`Bumped: ${bumped} packages`);
 console.log(`Already current: ${alreadyCurrent}`);

@@ -1,6 +1,6 @@
 # PEAC Error Registry
 
-Normative error codes for PEAC Protocol v0.11.2+.
+Normative error codes for PEAC Protocol v0.11.3+.
 
 ## Format
 
