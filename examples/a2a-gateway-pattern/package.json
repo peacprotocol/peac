@@ -1,0 +1,23 @@
+{
+  "name": "@peac/example-a2a-gateway-pattern",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A2A gateway pattern: receipt per state transition with carrier attachment and verification",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/kernel": "workspace:*",
+    "@peac/mappings-a2a": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
