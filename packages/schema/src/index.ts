@@ -478,8 +478,8 @@ export type {
   CarrierAdapter,
 } from './carrier';
 
-// Unified receipt parser (v0.10.9+)
-export { parseReceiptClaims } from './receipt-parser';
+// Unified receipt parser (v0.10.9+; v0.12.0-preview.1: dual-stack Wire 0.1 + Wire 0.2)
+export { parseReceiptClaims, detectWireVersion } from './receipt-parser';
 export type {
   ParseReceiptResult,
   ParseSuccess,
@@ -488,6 +488,30 @@ export type {
   ReceiptVariant,
   ParseReceiptOptions,
 } from './receipt-parser';
+
+// Wire 0.2 schemas and types (v0.12.0-preview.1, DD-156)
+export {
+  EvidencePillarSchema,
+  PillarsSchema,
+  Wire02KindSchema,
+  ReceiptTypeSchema,
+  CanonicalIssSchema,
+  PolicyBlockSchema,
+  Wire02ClaimsSchema,
+  isCanonicalIss,
+  isValidReceiptType,
+  checkOccurredAtSkew,
+} from './wire-02-envelope';
+export type { Wire02Claims } from './wire-02-envelope';
+
+// Wire 0.2 warning constants and utilities (v0.12.0-preview.1, DD-155)
+export {
+  WARNING_TYPE_UNREGISTERED,
+  WARNING_UNKNOWN_EXTENSION,
+  WARNING_OCCURRED_AT_SKEW,
+  WARNING_TYP_MISSING,
+  sortWarnings,
+} from './wire-02-warnings';
 
 // Issuer configuration schemas (v0.11.3+ DD-148)
 export {
