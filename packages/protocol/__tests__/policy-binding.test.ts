@@ -116,6 +116,12 @@ describe('computePolicyDigestJcs(): JCS+SHA-256 canonicalization', () => {
     const digest = await computePolicyDigestJcs(policy);
     expect(digest).toMatch(/^sha256:[0-9a-f]{64}$/);
   });
+
+  it('throws for non-finite number values (RFC 8785 rejects NaN)', async () => {
+    // RFC 8785 (JCS) section 3.2.2: IEEE 754 infinity and NaN are not permitted.
+    // canonicalize() throws "Cannot canonicalize non-finite number" for NaN values.
+    await expect(computePolicyDigestJcs({ x: NaN } as unknown as JsonValue)).rejects.toThrow();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -262,6 +268,46 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
     expect(result.valid).toBe(true);
     if (result.valid && result.variant === 'wire-02') {
       expect(result.policy_binding).toBe('verified');
+    }
+  });
+
+  it('returns E_INVALID_FORMAT when policyDigest option is malformed', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: testType,
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey, {
+      policyDigest: 'not-a-valid-digest',
+    });
+
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_INVALID_FORMAT');
+    }
+  });
+
+  it('returns E_INVALID_FORMAT for policyDigest with uppercase hex (not lowercase)', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: testType,
+      privateKey,
+      kid: testKid,
+    });
+
+    // uppercase hex is not valid per HASH.pattern (/^sha256:[0-9a-f]{64}$/)
+    const upperCaseDigest = 'sha256:' + 'A'.repeat(64);
+    const result = await verifyLocal(jws, publicKey, { policyDigest: upperCaseDigest });
+
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_INVALID_FORMAT');
     }
   });
 
