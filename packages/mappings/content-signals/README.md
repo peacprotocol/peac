@@ -14,7 +14,7 @@ Parses signals from multiple sources and resolves them using priority precedence
 
 Content-Signal header support is reserved for a future version.
 
-### Scope (v0.11.2)
+### Scope (v0.11.3)
 
 This package provides **header and file parsing only**. Each parser receives pre-fetched content as a string; there is no network I/O. The Content-Usage parser handles the HTTP header exclusively; it does not parse robots.txt directives or any other signal source.
 

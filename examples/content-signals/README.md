@@ -37,7 +37,7 @@ When multiple sources have signals for the same purpose, the highest-priority so
 3. `Content-Usage` header (AIPREF; Structured Fields Dictionary per RFC 9651, token values)
 4. `robots.txt` (lowest; RFC 9309)
 
-Three of four sources are implemented in `@peac/mappings-content-signals` v0.11.2.
+Three of four sources are implemented in `@peac/mappings-content-signals` v0.11.3.
 
 ## Signal Sources
 

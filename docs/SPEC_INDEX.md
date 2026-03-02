@@ -26,6 +26,12 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 
 - **[Zero Trust Profile Pack](specs/ZERO-TRUST-PROFILE-PACK.md)** - 7 sub-profiles as documentation overlays (Access, Toolcall, Decision, Risk Signal, Sync, Tracing, ZT Extensions)
 
+### Infrastructure
+
+- **[Evidence Carrier Contract](specs/EVIDENCE-CARRIER-CONTRACT.md)** - Transport-neutral receipt placement: carrier types, size limits, extraction rules
+- **[Kernel Constraints](specs/KERNEL-CONSTRAINTS.md)** - Structural limits enforced at issuance and verification (fail-closed)
+- **[Issuer Operations Baseline](specs/ISSUER-OPS-BASELINE.md)** - Operational requirements for receipt issuers
+
 ### Attestations and Extensions
 
 - **[Attribution](specs/ATTRIBUTION.md)** - Content provenance and attribution chain semantics
@@ -58,6 +64,14 @@ External protocol integrations and identity anchors.
 ## Guides
 
 - **[Multi-Tenant Receipt Isolation](guides/multi-tenant.md)** - 3-tier isolation guidance (Shared, Scoped, Isolated)
+- **[x402 Integration](guides/x402-peac.md)** - PEAC receipts with x402 payment flows
+- **[Go Middleware](guides/go-middleware.md)** - Go SDK middleware integration
+
+### Edge Computing
+
+- [Cloudflare Workers](guides/edge/cloudflare-workers.md)
+- [Fastly Compute](guides/edge/fastly-compute.md)
+- [Akamai EdgeWorkers](guides/edge/akamai-edgeworkers.md)
 
 ## Governance Framework Mappings
 
@@ -68,6 +82,7 @@ External protocol integrations and identity anchors.
 - [IEEE 7001 Mapping](governance/IEEE-7001-MAPPING.md)
 - [OECD AI Principles Mapping](governance/OECD-AI-PRINCIPLES-MAPPING.md)
 - [Singapore MGFAA Alignment](governance/SINGAPORE-MGFAA-ALIGNMENT.md)
+- [AWS RAI Compliance Mapping](governance/AWS-RAI-COMPLIANCE-MAPPING.md)
 
 ## Related Documentation
 

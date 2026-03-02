@@ -4,7 +4,7 @@ Integration guide for adding PEAC receipts to Content Signals (C2PA adjacent) wo
 
 ## Status
 
-Scaffold: full integration guide planned for v0.11.2 with `@peac/mappings-content-signals`.
+Scaffold: full integration guide planned for v0.11.3 with `@peac/mappings-content-signals`.
 
 ## Reference
 
