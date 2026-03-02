@@ -212,6 +212,21 @@ describe('isValidReceiptType()', () => {
   it('rejects type exceeding maxLength', () => {
     expect(isValidReceiptType('o'.repeat(257))).toBe(false);
   });
+
+  it('rejects reverse-DNS type with extra slash in segment (use absolute URI form instead)', () => {
+    // 'org.example/foo/bar' is not valid: segment must not contain '/'
+    // Multi-segment paths belong in absolute URI form: 'https://example.com/foo/bar'
+    expect(isValidReceiptType('org.example/foo/bar')).toBe(false);
+  });
+
+  it('accepts absolute URI type with multiple path segments', () => {
+    // Absolute URI form: slashes are fine (handled by ABS_URI_PATTERN)
+    expect(isValidReceiptType('https://example.com/types/commerce/v2')).toBe(true);
+  });
+
+  it('accepts reverse-DNS type with hyphens and underscores in segment', () => {
+    expect(isValidReceiptType('com.example/my_custom-type')).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -294,11 +309,11 @@ describe('PillarsSchema', () => {
 describe('PolicyBlockSchema', () => {
   const validDigest = 'sha256:' + 'a'.repeat(64);
 
-  it('accepts valid policy block', () => {
+  it('accepts valid policy block with digest only', () => {
     expect(PolicyBlockSchema.safeParse({ digest: validDigest }).success).toBe(true);
   });
 
-  it('accepts with optional uri and version', () => {
+  it('accepts with optional https:// uri and version', () => {
     expect(
       PolicyBlockSchema.safeParse({
         digest: validDigest,
@@ -306,6 +321,33 @@ describe('PolicyBlockSchema', () => {
         version: '1.0.0',
       }).success
     ).toBe(true);
+  });
+
+  it('accepts https:// uri with non-standard port', () => {
+    expect(
+      PolicyBlockSchema.safeParse({ digest: validDigest, uri: 'https://example.com:8443/p.json' })
+        .success
+    ).toBe(true);
+  });
+
+  it('rejects http:// uri (must be https)', () => {
+    expect(
+      PolicyBlockSchema.safeParse({ digest: validDigest, uri: 'http://example.com/policy.json' })
+        .success
+    ).toBe(false);
+  });
+
+  it('rejects non-URL uri string', () => {
+    expect(PolicyBlockSchema.safeParse({ digest: validDigest, uri: 'not-a-url' }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects ftp:// uri', () => {
+    expect(
+      PolicyBlockSchema.safeParse({ digest: validDigest, uri: 'ftp://example.com/policy.json' })
+        .success
+    ).toBe(false);
   });
 
   it('rejects invalid digest format', () => {

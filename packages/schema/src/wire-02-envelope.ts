@@ -130,8 +130,10 @@ export function isValidReceiptType(value: string): boolean {
   // Domain: letters, digits, dots, hyphens; must start with alphanumeric
   if (!/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/.test(domain)) return false;
 
-  // Segment: letters, digits, hyphens, underscores, dots, forward slashes
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._/-]*$/.test(segment)) return false;
+  // Segment: letters, digits, hyphens, underscores, dots.
+  // Additional slashes are NOT permitted in the reverse-DNS form; use an
+  // absolute URI (handled by ABS_URI_PATTERN above) for multi-segment paths.
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(segment)) return false;
 
   return true;
 }
@@ -203,8 +205,17 @@ export const CanonicalIssSchema = z.string().max(ISS_CANONICAL.maxLength).refine
 export const PolicyBlockSchema = z.object({
   /** JCS+SHA-256 digest: 'sha256:<64 lowercase hex>' */
   digest: z.string().regex(HASH.pattern, 'digest must be sha256:<64 lowercase hex>'),
-  /** HTTPS locator hint; MUST NOT trigger auto-fetch (DD-55) */
-  uri: z.string().optional(),
+  /**
+   * HTTPS locator hint for the policy document.
+   * MUST be an https:// URL (max 2048 chars).
+   * MUST NOT trigger auto-fetch; callers use this as a hint only (DD-55).
+   */
+  uri: z
+    .string()
+    .max(ISS_CANONICAL.maxLength)
+    .url()
+    .refine((u) => u.startsWith('https://'), 'policy.uri must be an https:// URL')
+    .optional(),
   /** Caller-assigned version label */
   version: z.string().optional(),
 });

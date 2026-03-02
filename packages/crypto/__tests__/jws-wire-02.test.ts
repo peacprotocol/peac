@@ -5,7 +5,7 @@
  * typ normalization, coherence checks, JOSE hardening, validateWire02Header().
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import {
   sign,
   signWire02,
@@ -18,7 +18,7 @@ import {
   type UnTypedJWSHeader,
 } from '../src/jws';
 import { CryptoError } from '../src/errors';
-import { WIRE_01_JWS_TYP, WIRE_02_JWS_TYP, PEAC_ALG } from '@peac/kernel';
+import { WIRE_01_JWS_TYP, WIRE_02_JWS_TYP, PEAC_ALG, VERIFIER_LIMITS } from '@peac/kernel';
 
 // Shared test fixture
 const wire02Payload = {
@@ -501,5 +501,56 @@ describe('Wire 0.1 regression', () => {
     expect(result.header.typ).toBe(WIRE_01_JWS_TYP);
     const h = result.header as Wire01JWSHeader;
     expect(h.typ).toBe(WIRE_01_JWS_TYP);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// verify(): stable error codes for malformed input (DoS safety + parse errors)
+// ---------------------------------------------------------------------------
+
+describe('verify(): stable error codes for malformed input', () => {
+  let publicKey: Uint8Array;
+  beforeAll(async () => {
+    ({ publicKey } = await generateKeypair());
+  });
+
+  it('rejects token with fewer than 3 parts: CRYPTO_INVALID_JWS_FORMAT', async () => {
+    await expect(verify('only.two', publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_INVALID_JWS_FORMAT',
+    });
+  });
+
+  it('rejects oversized JWS before any parsing: CRYPTO_INVALID_JWS_FORMAT', async () => {
+    const oversized = 'a'.repeat(VERIFIER_LIMITS.maxReceiptBytes + 1);
+    await expect(verify(oversized, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_INVALID_JWS_FORMAT',
+    });
+  });
+
+  it('rejects token with invalid base64url in header: CRYPTO_INVALID_JWS_FORMAT', async () => {
+    // '!!!' is not valid base64url
+    const jws = '!!!invalid_base64!!!.e30.fakesig';
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_INVALID_JWS_FORMAT',
+    });
+  });
+
+  it('rejects token with valid base64url header containing non-JSON: CRYPTO_INVALID_JWS_FORMAT', async () => {
+    const nonJsonB64 = Buffer.from('not valid json {{{').toString('base64url');
+    const jws = `${nonJsonB64}.e30.fakesig`;
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_INVALID_JWS_FORMAT',
+    });
+  });
+
+  it('rejects token with valid header but non-JSON payload: CRYPTO_INVALID_JWS_FORMAT', async () => {
+    const validHeaderB64 = Buffer.from(
+      JSON.stringify({ typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid })
+    ).toString('base64url');
+    const nonJsonPayloadB64 = Buffer.from('{{not json}}').toString('base64url');
+    const jws = `${validHeaderB64}.${nonJsonPayloadB64}.fakesig`;
+    await expect(verify(jws, publicKey)).rejects.toMatchObject({
+      code: 'CRYPTO_INVALID_JWS_FORMAT',
+    });
   });
 });

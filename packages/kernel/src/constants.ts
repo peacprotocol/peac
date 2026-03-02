@@ -1,20 +1,22 @@
 /**
  * PEAC Protocol Constants
- * Derived from specs/kernel/constants.json
- *
- * NOTE: This file is manually synced for v0.9.15.
- * From v0.9.16+, this will be auto-generated via codegen.
  */
 
 /**
- * Wire format type for PEAC receipts
- * Normalized to peac-receipt/0.1 per DEC-20260114-002
+ * Wire 0.1 JWS `typ` claim (legacy constant name).
+ *
+ * @deprecated Use `WIRE_01_JWS_TYP` for new code. `WIRE_TYPE` and
+ * `WIRE_01_JWS_TYP` resolve to the same string; `WIRE_01_JWS_TYP` is the
+ * canonical name at the JWS layer (v0.12.0-preview.1+, Wire 0.2 dual-stack).
  */
 export const WIRE_TYPE = 'peac-receipt/0.1' as const;
 
 /**
- * Wire format version (extracted from WIRE_TYPE)
- * Use this for wire_version fields in receipts
+ * Wire 0.1 version string (legacy constant name).
+ *
+ * @deprecated Use `WIRE_VERSIONS` or compare against `WIRE_02_VERSION` for
+ * dual-stack version detection. `WIRE_VERSION` remains valid for Wire 0.1
+ * but does not participate in the Wire 0.2 version model.
  */
 export const WIRE_VERSION = '0.1' as const;
 

@@ -9,7 +9,13 @@ import {
   getPublicKey,
   randomSecretKey,
 } from './ed25519.js';
-import { WIRE_01_JWS_TYP, WIRE_02_JWS_TYP, WIRE_02_JWS_TYP_ACCEPT, PEAC_ALG } from '@peac/kernel';
+import {
+  WIRE_01_JWS_TYP,
+  WIRE_02_JWS_TYP,
+  WIRE_02_JWS_TYP_ACCEPT,
+  PEAC_ALG,
+  VERIFIER_LIMITS,
+} from '@peac/kernel';
 import {
   base64urlEncode,
   base64urlDecode,
@@ -311,6 +317,15 @@ export async function verify<T = unknown>(
     throw new CryptoError('CRYPTO_INVALID_KEY_LENGTH', 'Ed25519 public key must be 32 bytes');
   }
 
+  // Fast-reject oversized tokens before any parsing (DoS safety).
+  // Uses VERIFIER_LIMITS.maxReceiptBytes (256 KB) as the upper bound.
+  if (jws.length > VERIFIER_LIMITS.maxReceiptBytes) {
+    throw new CryptoError(
+      'CRYPTO_INVALID_JWS_FORMAT',
+      `JWS exceeds maximum size of ${VERIFIER_LIMITS.maxReceiptBytes} bytes`
+    );
+  }
+
   const parts = jws.split('.');
   if (parts.length !== 3) {
     throw new CryptoError(
@@ -321,9 +336,16 @@ export async function verify<T = unknown>(
 
   const [headerB64, payloadB64, signatureB64] = parts;
 
-  // Decode and build typed header
-  const headerJson = base64urlDecodeString(headerB64);
-  const rawHeader = JSON.parse(headerJson) as Record<string, unknown>;
+  // Decode and build typed header.
+  // Wrap in try/catch to translate SyntaxError / decode failures into stable
+  // CryptoError codes; callers depend on CRYPTO_INVALID_JWS_FORMAT for error
+  // classification and must never receive a raw SyntaxError at the boundary.
+  let rawHeader: Record<string, unknown>;
+  try {
+    rawHeader = JSON.parse(base64urlDecodeString(headerB64)) as Record<string, unknown>;
+  } catch {
+    throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS header: invalid base64url or JSON');
+  }
   const header = buildHeader(rawHeader);
 
   // Apply JOSE hardening for Wire 0.2 and UnTyped tokens (Correction 1, DD-156).
@@ -335,9 +357,13 @@ export async function verify<T = unknown>(
     validateWire02Header(rawHeader);
   }
 
-  // Decode payload
-  const payloadJson = base64urlDecodeString(payloadB64);
-  const payload = JSON.parse(payloadJson) as T;
+  // Decode payload; same stable-error contract as header decode above.
+  let payload: T;
+  try {
+    payload = JSON.parse(base64urlDecodeString(payloadB64)) as T;
+  } catch {
+    throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS payload: invalid base64url or JSON');
+  }
 
   // Coherence check: wire version consistency (only when typ is present)
   if (header.typ !== undefined) {
@@ -396,12 +422,20 @@ export function decode<T = unknown>(jws: string): { header: JWSHeader; payload: 
 
   const [headerB64, payloadB64] = parts;
 
-  const headerJson = base64urlDecodeString(headerB64);
-  const rawHeader = JSON.parse(headerJson) as Record<string, unknown>;
+  let rawHeader: Record<string, unknown>;
+  try {
+    rawHeader = JSON.parse(base64urlDecodeString(headerB64)) as Record<string, unknown>;
+  } catch {
+    throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS header: invalid base64url or JSON');
+  }
   const header = buildHeader(rawHeader);
 
-  const payloadJson = base64urlDecodeString(payloadB64);
-  const payload = JSON.parse(payloadJson) as T;
+  let payload: T;
+  try {
+    payload = JSON.parse(base64urlDecodeString(payloadB64)) as T;
+  } catch {
+    throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS payload: invalid base64url or JSON');
+  }
 
   return { header, payload };
 }

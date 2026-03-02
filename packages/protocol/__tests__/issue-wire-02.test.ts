@@ -1071,3 +1071,40 @@ describe('verifyLocal() JOSE error code mapping (not generic E_INVALID_FORMAT)',
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// verifyLocal(): stable E_INVALID_FORMAT for malformed / oversized JWS
+// ---------------------------------------------------------------------------
+
+describe('verifyLocal(): E_INVALID_FORMAT for malformed input', () => {
+  it('returns E_INVALID_FORMAT for garbage JWS (wrong number of parts)', async () => {
+    const { publicKey } = await generateKeypair();
+    const result = await verifyLocal('not.a.valid.jws.token', publicKey);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_INVALID_FORMAT');
+    }
+  });
+
+  it('returns E_INVALID_FORMAT for oversized JWS', async () => {
+    const { publicKey } = await generateKeypair();
+    // Construct a JWS larger than VERIFIER_LIMITS.maxReceiptBytes (262144 bytes)
+    const oversized = 'a'.repeat(262145);
+    const result = await verifyLocal(oversized, publicKey);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_INVALID_FORMAT');
+    }
+  });
+
+  it('returns E_INVALID_FORMAT for non-JSON header', async () => {
+    const { publicKey } = await generateKeypair();
+    const nonJsonB64 = Buffer.from('not-json').toString('base64url');
+    const jws = `${nonJsonB64}.e30.fakesig`;
+    const result = await verifyLocal(jws, publicKey);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_INVALID_FORMAT');
+    }
+  });
+});

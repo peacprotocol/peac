@@ -1,6 +1,12 @@
 /**
  * PEAC Protocol Schema Package
- * Wire format frozen at peac-receipt/0.1 with v1.0-equivalent semantics
+ *
+ * Dual-stack: Wire 0.1 (peac-receipt/0.1, stable) + Wire 0.2 preview
+ * (interaction-record+jwt, v0.12.0-preview.1+, next tag).
+ *
+ * Wire 0.1 remains fully supported and stable. All existing Wire 0.1 schemas,
+ * validators, and helpers are unchanged. Wire 0.2 types are additive exports
+ * and do not affect Wire 0.1 parsing or validation.
  */
 
 // Core envelope and types
@@ -46,6 +52,11 @@ export * from './types';
 export {
   NormalizedPayment,
   Extensions,
+  // Wire 0.1 JWS header Zod schema.
+  // Canonical name: Wire01JWSHeaderSchema (v0.12.0-preview.1+).
+  // JWSHeader is kept as a deprecated alias for backward compatibility.
+  Wire01JWSHeaderSchema,
+  // @deprecated Use Wire01JWSHeaderSchema. Will be removed at v1.0.
   JWSHeader,
   ReceiptClaimsSchema,
   ReceiptClaims, // @deprecated - use ReceiptClaimsSchema
