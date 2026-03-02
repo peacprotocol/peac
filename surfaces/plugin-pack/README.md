@@ -55,14 +55,29 @@ cp surfaces/plugin-pack/windsurf/peac.windsurfrules .windsurfrules
 
 The rules file provides import patterns, API usage examples, package layering guidance, and coding conventions for PEAC Protocol development.
 
+## OpenCode
+
+Copy the config files to your project root:
+
+```bash
+cp surfaces/plugin-pack/opencode/opencode.jsonc opencode.jsonc
+cp surfaces/plugin-pack/opencode/AGENTS.md AGENTS.md
+```
+
+The config registers the PEAC MCP server and provides agent context for receipt operations.
+
 ## What's Included
 
-| File                          | Purpose                                                                        |
-| ----------------------------- | ------------------------------------------------------------------------------ |
-| `claude-code/peac/SKILL.md`   | Claude Code skill: receipt operations (verify, issue, inspect, decode, bundle) |
-| `cursor/peac.mdc`             | Cursor rules: import patterns, API examples, layering, conventions             |
-| `continue/peac.json`          | Continue.dev MCP server config snippet                                         |
-| `windsurf/peac.windsurfrules` | Windsurf rules: import patterns, API examples, layering, conventions           |
+| File                                  | Purpose                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| `claude-code/peac/SKILL.md`           | Claude Code skill: receipt operations (verify, issue, inspect, decode, bundle) |
+| `claude-code/peac/verify-receipt.md`  | Claude Code skill: dedicated receipt verification workflow                     |
+| `claude-code/peac/explain-receipt.md` | Claude Code skill: receipt decoding and explanation                            |
+| `cursor/peac.mdc`                     | Cursor rules: import patterns, API examples, layering, conventions             |
+| `continue/peac.json`                  | Continue.dev MCP server config snippet                                         |
+| `windsurf/peac.windsurfrules`         | Windsurf rules: import patterns, API examples, layering, conventions           |
+| `opencode/opencode.jsonc`             | OpenCode config: MCP server and agent setup                                    |
+| `opencode/AGENTS.md`                  | OpenCode agent context: package layering, APIs, MCP tools                      |
 
 ## Security
 
