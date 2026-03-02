@@ -3,7 +3,7 @@
   "manifest_version": "0.4",
   "name": "peac-mcp-server",
   "display_name": "PEAC Protocol",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "Verify, inspect, decode, issue, and bundle PEAC receipts. Portable, offline-verifiable evidence for AI agent interactions.",
   "long_description": "PEAC Protocol provides cryptographically signed, offline-verifiable receipts that record what happened during automated interactions. Each receipt is a compact JWS (JSON Web Signature) using Ed25519 signatures. This MCP server exposes 5 tools for receipt operations: verify (signature + claims), inspect (metadata without verification), decode (raw JWS structure), issue (sign new receipts), and create_bundle (portable evidence directories).",
   "author": {
