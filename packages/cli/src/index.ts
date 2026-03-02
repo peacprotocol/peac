@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { policy } from './commands/policy.js';
 import { conformance } from './commands/conformance.js';
 import { samples } from './commands/samples.js';
+import { reconcileCommand } from './commands/reconcile.js';
 import { getVersion } from './lib/version.js';
 
 const program = new Command();
@@ -215,6 +216,9 @@ program.addCommand(conformance);
 
 // Sample receipts commands (v0.10.8+)
 program.addCommand(samples);
+
+// Reconcile evidence bundles (v0.11.3+)
+program.addCommand(reconcileCommand());
 
 // Parse and handle Commander errors (exitOverride causes CommanderError on --help, --version, etc.)
 try {
