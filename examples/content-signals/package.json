@@ -1,0 +1,21 @@
+{
+  "name": "@peac/example-content-signals",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Content signal observation: parse robots.txt, Content-Usage, and tdmrep.json, then issue a receipt",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/mappings-content-signals": "workspace:*",
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
