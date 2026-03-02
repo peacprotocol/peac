@@ -3,7 +3,7 @@
  *
  * AUTO-GENERATED from specs/kernel/errors.json
  * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts
- * Spec version: 0.11.3
+ * Spec version: 0.12.0-preview.1
  */
 
 import type { ErrorDefinition } from './types.js';
@@ -48,6 +48,13 @@ export const ERROR_CODES = {
   // Control error codes
   E_CONTROL_DENIED: 'E_CONTROL_DENIED',
   E_CONTROL_REVIEW_REQUIRED: 'E_CONTROL_REVIEW_REQUIRED',
+
+  // Cryptography error codes
+  E_JWS_B64_REJECTED: 'E_JWS_B64_REJECTED',
+  E_JWS_CRIT_REJECTED: 'E_JWS_CRIT_REJECTED',
+  E_JWS_EMBEDDED_KEY: 'E_JWS_EMBEDDED_KEY',
+  E_JWS_MISSING_KID: 'E_JWS_MISSING_KID',
+  E_JWS_ZIP_REJECTED: 'E_JWS_ZIP_REJECTED',
 
   // Dispute error codes
   E_DISPUTE_DUPLICATE: 'E_DISPUTE_DUPLICATE',
@@ -134,15 +141,25 @@ export const ERROR_CODES = {
   E_INVALID_CURRENCY: 'E_INVALID_CURRENCY',
   E_INVALID_FORMAT: 'E_INVALID_FORMAT',
   E_INVALID_ISSUER: 'E_INVALID_ISSUER',
+  E_INVALID_KIND: 'E_INVALID_KIND',
+  E_INVALID_PILLAR_VALUE: 'E_INVALID_PILLAR_VALUE',
   E_INVALID_RAIL: 'E_INVALID_RAIL',
   E_INVALID_RECEIPT_ID: 'E_INVALID_RECEIPT_ID',
   E_INVALID_SUBJECT: 'E_INVALID_SUBJECT',
+  E_INVALID_TYPE: 'E_INVALID_TYPE',
+  E_ISS_NOT_CANONICAL: 'E_ISS_NOT_CANONICAL',
   E_MISSING_EXP: 'E_MISSING_EXP',
   E_MISSING_REQUIRED_CLAIM: 'E_MISSING_REQUIRED_CLAIM',
   E_NOT_YET_VALID: 'E_NOT_YET_VALID',
+  E_OCCURRED_AT_FUTURE: 'E_OCCURRED_AT_FUTURE',
+  E_OCCURRED_AT_ON_CHALLENGE: 'E_OCCURRED_AT_ON_CHALLENGE',
   E_PARSE_ATTESTATION_INVALID: 'E_PARSE_ATTESTATION_INVALID',
   E_PARSE_COMMERCE_INVALID: 'E_PARSE_COMMERCE_INVALID',
   E_PARSE_INVALID_INPUT: 'E_PARSE_INVALID_INPUT',
+  E_PILLARS_NOT_SORTED: 'E_PILLARS_NOT_SORTED',
+  E_POLICY_BINDING_FAILED: 'E_POLICY_BINDING_FAILED',
+  E_UNSUPPORTED_WIRE_VERSION: 'E_UNSUPPORTED_WIRE_VERSION',
+  E_WIRE_VERSION_MISMATCH: 'E_WIRE_VERSION_MISMATCH',
 
   // Verification error codes
   E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
@@ -479,6 +496,58 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     retryable: true,
     next_action: 'contact_issuer',
     category: 'control',
+  },
+
+  // Cryptography error codes
+  E_JWS_B64_REJECTED: {
+    code: 'E_JWS_B64_REJECTED',
+    http_status: 400,
+    title: 'JWS b64:false Rejected',
+    description:
+      'JWS header contains b64:false (RFC 7797 unencoded payload); unencoded payloads are not supported',
+    retryable: false,
+    next_action: 'abort',
+    category: 'cryptography',
+  },
+  E_JWS_CRIT_REJECTED: {
+    code: 'E_JWS_CRIT_REJECTED',
+    http_status: 400,
+    title: 'JWS crit Header Rejected',
+    description:
+      'JWS header contains a crit field; critical header extensions are not supported and are rejected',
+    retryable: false,
+    next_action: 'abort',
+    category: 'cryptography',
+  },
+  E_JWS_EMBEDDED_KEY: {
+    code: 'E_JWS_EMBEDDED_KEY',
+    http_status: 400,
+    title: 'JWS Embedded Key Rejected',
+    description:
+      'JWS header contains an embedded key (jwk, x5c, x5u, or jku); embedded key material is rejected by the PEAC JOSE hardening rules',
+    retryable: false,
+    next_action: 'abort',
+    category: 'cryptography',
+  },
+  E_JWS_MISSING_KID: {
+    code: 'E_JWS_MISSING_KID',
+    http_status: 400,
+    title: 'JWS kid Missing or Invalid',
+    description:
+      'JWS header kid field is absent, empty, or exceeds the maximum allowed length (256 characters)',
+    retryable: false,
+    next_action: 'abort',
+    category: 'cryptography',
+  },
+  E_JWS_ZIP_REJECTED: {
+    code: 'E_JWS_ZIP_REJECTED',
+    http_status: 400,
+    title: 'JWS zip Header Rejected',
+    description:
+      'JWS header contains a zip compression field; payload compression is not supported',
+    retryable: false,
+    next_action: 'abort',
+    category: 'cryptography',
   },
 
   // Dispute error codes
@@ -1168,6 +1237,26 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     next_action: 'retry_with_different_input',
     category: 'validation',
   },
+  E_INVALID_KIND: {
+    code: 'E_INVALID_KIND',
+    http_status: 400,
+    title: 'Invalid Kind',
+    description:
+      'Wire 0.2 receipt kind field is missing or not one of the accepted structural kinds (evidence, challenge)',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
+  E_INVALID_PILLAR_VALUE: {
+    code: 'E_INVALID_PILLAR_VALUE',
+    http_status: 400,
+    title: 'Invalid Pillar Value',
+    description:
+      'Wire 0.2 pillars array contains an unrecognized pillar value outside the closed 10-value taxonomy',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
   E_INVALID_RAIL: {
     code: 'E_INVALID_RAIL',
     http_status: 400,
@@ -1193,6 +1282,26 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     description: 'Receipt subject claim does not match expected value',
     retryable: false,
     next_action: 'retry_with_different_input',
+    category: 'validation',
+  },
+  E_INVALID_TYPE: {
+    code: 'E_INVALID_TYPE',
+    http_status: 400,
+    title: 'Invalid Type',
+    description:
+      'Wire 0.2 receipt type field is missing or does not conform to the required grammar (reverse-DNS or absolute URI)',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
+  E_ISS_NOT_CANONICAL: {
+    code: 'E_ISS_NOT_CANONICAL',
+    http_status: 400,
+    title: 'Issuer Not Canonical',
+    description:
+      'Wire 0.2 iss claim does not conform to canonical form: must be an https:// ASCII origin (no default port, no path) or a did: identifier',
+    retryable: false,
+    next_action: 'abort',
     category: 'validation',
   },
   E_MISSING_EXP: {
@@ -1222,6 +1331,26 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     next_action: 'retry_after_delay',
     category: 'validation',
   },
+  E_OCCURRED_AT_FUTURE: {
+    code: 'E_OCCURRED_AT_FUTURE',
+    http_status: 400,
+    title: 'occurred_at in Future',
+    description:
+      'Wire 0.2 occurred_at is more than the tolerance window ahead of the current time; the timestamp appears to be in the future',
+    retryable: false,
+    next_action: 'retry_after_delay',
+    category: 'validation',
+  },
+  E_OCCURRED_AT_ON_CHALLENGE: {
+    code: 'E_OCCURRED_AT_ON_CHALLENGE',
+    http_status: 400,
+    title: 'occurred_at on Challenge',
+    description:
+      'Wire 0.2 occurred_at field is present on a challenge-kind receipt; occurred_at is only permitted on evidence-kind receipts',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
   E_PARSE_ATTESTATION_INVALID: {
     code: 'E_PARSE_ATTESTATION_INVALID',
     http_status: 400,
@@ -1248,6 +1377,46 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     description: 'Input to receipt parser is not a non-null object',
     retryable: false,
     next_action: 'retry_with_different_input',
+    category: 'validation',
+  },
+  E_PILLARS_NOT_SORTED: {
+    code: 'E_PILLARS_NOT_SORTED',
+    http_status: 400,
+    title: 'Pillars Not Sorted',
+    description:
+      'Wire 0.2 pillars array is not in ascending lexicographic order or contains duplicates',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
+  E_POLICY_BINDING_FAILED: {
+    code: 'E_POLICY_BINDING_FAILED',
+    http_status: 400,
+    title: 'Policy Binding Failed',
+    description:
+      'Wire 0.2 policy.digest does not match the computed digest of the provided policy document',
+    retryable: false,
+    next_action: 'none',
+    category: 'validation',
+  },
+  E_UNSUPPORTED_WIRE_VERSION: {
+    code: 'E_UNSUPPORTED_WIRE_VERSION',
+    http_status: 400,
+    title: 'Unsupported Wire Version',
+    description:
+      'Receipt peac_version field specifies a wire version that is not supported by this implementation',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
+  E_WIRE_VERSION_MISMATCH: {
+    code: 'E_WIRE_VERSION_MISMATCH',
+    http_status: 400,
+    title: 'Wire Version Mismatch',
+    description:
+      'JWS header typ value and peac_version payload claim indicate different wire versions; the receipt is incoherent',
+    retryable: false,
+    next_action: 'abort',
     category: 'validation',
   },
 

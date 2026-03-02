@@ -20,6 +20,9 @@ export type {
   ControlEngineEntry,
   TransportMethodEntry,
   AgentProtocolEntry,
+  // Wire 0.2 types (v0.12.0-preview.1, DD-156)
+  Wire02Kind,
+  EvidencePillar,
 } from './types.js';
 
 // Export error categories (generated from specs/kernel/errors.json)
@@ -50,7 +53,23 @@ export {
   VERIFIER_POLICY_VERSION,
   VERIFICATION_MODES,
   CONSTANTS,
+  // Wire 0.2 constants (v0.12.0-preview.1, DD-156)
+  WIRE_01_JWS_TYP,
+  WIRE_02_JWS_TYP,
+  WIRE_02_JWS_TYP_ACCEPT,
+  WIRE_02_VERSION,
+  WIRE_VERSIONS,
+  ISS_CANONICAL,
+  TYPE_GRAMMAR,
+  OCCURRED_AT_TOLERANCE_SECONDS,
+  PEAC_ALG,
 } from './constants.js';
+
+// Wire 0.2 constant types (v0.12.0-preview.1, DD-156)
+export type { WireVersion, VerificationStrictness } from './constants.js';
+
+// Wire 0.2 primitive types (v0.12.0-preview.1, DD-156)
+export type { PolicyBlock, RepresentationFields, VerificationWarning } from './wire-02-types.js';
 
 // Export errors
 export {

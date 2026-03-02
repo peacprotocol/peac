@@ -71,7 +71,7 @@ describe('Error Category Parity', () => {
   });
 
   it('registry version is valid semver', () => {
-    // Future-proof: accepts any semver version
-    expect(registry.version).toMatch(/^\d+\.\d+\.\d+$/);
+    // Accepts semver with optional pre-release suffix (e.g. 0.12.0-preview.1)
+    expect(registry.version).toMatch(/^\d+\.\d+\.\d+(-[a-z0-9.]+)?$/);
   });
 });

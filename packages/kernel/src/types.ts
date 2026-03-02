@@ -125,3 +125,29 @@ export interface AgentProtocolEntry {
   reference: string | null;
   status: string;
 }
+
+// ---------------------------------------------------------------------------
+// Wire 0.2 structural types (v0.12.0-preview.1, DD-156)
+// ---------------------------------------------------------------------------
+
+/**
+ * The two structural kind values for Wire 0.2 envelopes (closed forever).
+ * Open semantic meaning is expressed via the 'type' field (reverse-DNS or URI).
+ */
+export type Wire02Kind = 'evidence' | 'challenge';
+
+/**
+ * The 10 closed pillar values (positioning and compliance-mapping frame).
+ * When present in a receipt, pillars MUST be sorted alphabetically and unique.
+ */
+export type EvidencePillar =
+  | 'access'
+  | 'attribution'
+  | 'commerce'
+  | 'compliance'
+  | 'consent'
+  | 'identity'
+  | 'privacy'
+  | 'provenance'
+  | 'purpose'
+  | 'safety';

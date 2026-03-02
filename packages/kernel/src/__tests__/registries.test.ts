@@ -153,7 +153,8 @@ describe('error code stability', () => {
 describe('errors.json structure', () => {
   it('should have a valid version', () => {
     expect(errors.version).toBeTruthy();
-    expect(errors.version).toMatch(/^\d+\.\d+\.\d+$/);
+    // Accept semver with optional pre-release suffix (e.g. 0.12.0-preview.1)
+    expect(errors.version).toMatch(/^\d+\.\d+\.\d+(-[a-z0-9.]+)?$/);
   });
 
   it('should have an errors array', () => {
