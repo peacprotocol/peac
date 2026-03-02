@@ -58,7 +58,7 @@ export function isCanonicalIss(iss: string): boolean {
     return false;
   }
 
-  // did: branch — check before URL parsing (did: is a valid URL scheme in some parsers)
+  // did: branch: check before URL parsing (did: is a valid URL scheme in some parsers)
   if (iss.startsWith('did:')) {
     // did:<method>:<method-specific-id>
     // Method: lowercase letters and digits only ([a-z0-9]+)
@@ -66,7 +66,7 @@ export function isCanonicalIss(iss: string): boolean {
     return /^did:[a-z0-9]+:[^#?/]+$/.test(iss);
   }
 
-  // https:// branch — try URL constructor for comprehensive validation
+  // https:// branch: try URL constructor for comprehensive validation
   try {
     const url = new URL(iss);
 

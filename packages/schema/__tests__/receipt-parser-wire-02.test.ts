@@ -53,10 +53,10 @@ describe('detectWireVersion()', () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseReceiptClaims() — Wire 0.2 success path
+// parseReceiptClaims(): Wire 0.2 success path
 // ---------------------------------------------------------------------------
 
-describe('parseReceiptClaims() — Wire 0.2 success', () => {
+describe('parseReceiptClaims(): Wire 0.2 success', () => {
   it('returns ok:true with wireVersion "0.2" for valid Wire 0.2 envelope', () => {
     const result = parseReceiptClaims(wire02Evidence());
     expect(result.ok).toBe(true);
@@ -116,10 +116,10 @@ describe('parseReceiptClaims() — Wire 0.2 success', () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseReceiptClaims() — Wire 0.2 failure path
+// parseReceiptClaims(): Wire 0.2 failure path
 // ---------------------------------------------------------------------------
 
-describe('parseReceiptClaims() — Wire 0.2 validation errors', () => {
+describe('parseReceiptClaims(): Wire 0.2 validation errors', () => {
   it('returns E_INVALID_FORMAT for invalid kind', () => {
     const result = parseReceiptClaims(wire02Evidence({ kind: 'bad-kind' }));
     expect(result.ok).toBe(false);
@@ -168,10 +168,10 @@ describe('parseReceiptClaims() — Wire 0.2 validation errors', () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseReceiptClaims() — Wire 0.1 regression (existing behavior unchanged)
+// parseReceiptClaims(): Wire 0.1 regression (existing behavior unchanged)
 // ---------------------------------------------------------------------------
 
-describe('parseReceiptClaims() — Wire 0.1 regression', () => {
+describe('parseReceiptClaims(): Wire 0.1 regression', () => {
   it('returns wireVersion "0.1" and empty warnings for Wire 0.1 commerce receipt', () => {
     const result = parseReceiptClaims({
       iss: 'https://issuer.example.com',
@@ -212,10 +212,10 @@ describe('parseReceiptClaims() — Wire 0.1 regression', () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseReceiptClaims() — invalid input guard
+// parseReceiptClaims(): invalid input guard
 // ---------------------------------------------------------------------------
 
-describe('parseReceiptClaims() — invalid input guard', () => {
+describe('parseReceiptClaims(): invalid input guard', () => {
   it('returns E_PARSE_INVALID_INPUT for null', () => {
     const result = parseReceiptClaims(null);
     expect(result.ok).toBe(false);

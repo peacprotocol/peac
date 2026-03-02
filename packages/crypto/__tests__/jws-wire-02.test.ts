@@ -49,7 +49,7 @@ describe('signWire02 and round-trip verification', () => {
     expect(result.payload).toEqual(wire02Payload);
   });
 
-  it('always sets typ — no code path omits it', async () => {
+  it('always sets typ: no code path omits it', async () => {
     const { privateKey } = await generateKeypair();
     const jws = await signWire02(wire02Payload, privateKey, testKid);
     const parts = jws.split('.');
@@ -131,11 +131,11 @@ describe('typ normalization', () => {
 });
 
 // ---------------------------------------------------------------------------
-// UnTypedJWSHeader — absent typ pass-through (Correction 1)
+// UnTypedJWSHeader: absent typ pass-through (Correction 1)
 // ---------------------------------------------------------------------------
 
 describe('UnTypedJWSHeader: absent typ pass-through', () => {
-  it('verify() returns UnTypedJWSHeader when typ is absent — no error from crypto', async () => {
+  it('verify() returns UnTypedJWSHeader when typ is absent: no error from crypto', async () => {
     const { privateKey, publicKey } = await generateKeypair();
 
     // Craft JWS with no typ field
@@ -219,7 +219,7 @@ describe('wire version coherence check', () => {
     const sigBytes = await ed25519Sign(new TextEncoder().encode(sigInput), privateKey);
     const jws = `${sigInput}.${Buffer.from(sigBytes).toString('base64url')}`;
 
-    // Crypto layer must NOT throw — protocol layer handles this
+    // Crypto layer must NOT throw: protocol layer handles this
     const result = await verify(jws, publicKey);
     expect(result.valid).toBe(true);
     expect(result.header.typ).toBeUndefined();
@@ -230,7 +230,7 @@ describe('wire version coherence check', () => {
 // JOSE hardening (validateWire02Header)
 // ---------------------------------------------------------------------------
 
-describe('validateWire02Header — JOSE hardening', () => {
+describe('validateWire02Header: JOSE hardening', () => {
   it('accepts a valid Wire 0.2 header', () => {
     expect(() =>
       validateWire02Header({ typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid })
@@ -326,7 +326,7 @@ describe('validateWire02Header — JOSE hardening', () => {
 // ---------------------------------------------------------------------------
 // JOSE hardening: verify() integration
 //
-// These tests prove that verify() itself enforces JOSE hardening — not just
+// These tests prove that verify() itself enforces JOSE hardening: not just
 // validateWire02Header() in isolation. Each test crafts a validly-signed JWS
 // with a JOSE hazard and asserts that verify() rejects it.
 // ---------------------------------------------------------------------------
@@ -346,7 +346,7 @@ describe('JOSE hardening: verify() rejects hazards in validly-signed JWS', () =>
     return `${sigInput}.${Buffer.from(sigBytes).toString('base64url')}`;
   }
 
-  it('rejects Wire 0.2 JWS with b64:false — CRYPTO_JWS_B64_REJECTED', async () => {
+  it('rejects Wire 0.2 JWS with b64:false: CRYPTO_JWS_B64_REJECTED', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const jws = await signWithHeader(
       { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, b64: false },
@@ -358,7 +358,7 @@ describe('JOSE hardening: verify() rejects hazards in validly-signed JWS', () =>
     });
   });
 
-  it('rejects Wire 0.2 JWS with zip header — CRYPTO_JWS_ZIP_REJECTED', async () => {
+  it('rejects Wire 0.2 JWS with zip header: CRYPTO_JWS_ZIP_REJECTED', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const jws = await signWithHeader(
       { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, zip: 'DEF' },
@@ -370,7 +370,7 @@ describe('JOSE hardening: verify() rejects hazards in validly-signed JWS', () =>
     });
   });
 
-  it('rejects Wire 0.2 JWS with crit header — CRYPTO_JWS_CRIT_REJECTED', async () => {
+  it('rejects Wire 0.2 JWS with crit header: CRYPTO_JWS_CRIT_REJECTED', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const jws = await signWithHeader(
       { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, crit: ['b64'] },
@@ -382,7 +382,7 @@ describe('JOSE hardening: verify() rejects hazards in validly-signed JWS', () =>
     });
   });
 
-  it('rejects Wire 0.2 JWS with embedded jwk — CRYPTO_JWS_EMBEDDED_KEY', async () => {
+  it('rejects Wire 0.2 JWS with embedded jwk: CRYPTO_JWS_EMBEDDED_KEY', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const jws = await signWithHeader(
       { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, jwk: { kty: 'OKP' } },
@@ -394,7 +394,7 @@ describe('JOSE hardening: verify() rejects hazards in validly-signed JWS', () =>
     });
   });
 
-  it('rejects Wire 0.2 JWS with x5c — CRYPTO_JWS_EMBEDDED_KEY', async () => {
+  it('rejects Wire 0.2 JWS with x5c: CRYPTO_JWS_EMBEDDED_KEY', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const jws = await signWithHeader(
       { typ: WIRE_02_JWS_TYP, alg: PEAC_ALG, kid: testKid, x5c: ['MIIBkTC...'] },
@@ -407,7 +407,7 @@ describe('JOSE hardening: verify() rejects hazards in validly-signed JWS', () =>
   });
 
   // Interop bypass guard: absent typ does NOT bypass JOSE hardening
-  it('rejects UnTyped JWS with b64:false — JOSE hardening applies regardless of absent typ', async () => {
+  it('rejects UnTyped JWS with b64:false: JOSE hardening applies regardless of absent typ', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const jws = await signWithHeader(
       { alg: PEAC_ALG, kid: testKid, b64: false },
@@ -420,7 +420,7 @@ describe('JOSE hardening: verify() rejects hazards in validly-signed JWS', () =>
     });
   });
 
-  it('rejects UnTyped JWS with embedded jwk — JOSE hardening applies regardless of absent typ', async () => {
+  it('rejects UnTyped JWS with embedded jwk: JOSE hardening applies regardless of absent typ', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const jws = await signWithHeader(
       { alg: PEAC_ALG, kid: testKid, jwk: { kty: 'OKP' } },

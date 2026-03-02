@@ -16,8 +16,6 @@ import {
   EvidencePillarSchema,
   PillarsSchema,
   Wire02KindSchema,
-  ReceiptTypeSchema,
-  CanonicalIssSchema,
   PolicyBlockSchema,
   isCanonicalIss,
   isValidReceiptType,
@@ -54,10 +52,10 @@ function minimalChallenge(overrides?: Partial<Wire02Claims>): object {
 }
 
 // ---------------------------------------------------------------------------
-// isCanonicalIss() — https:// branch
+// isCanonicalIss(): https:// branch
 // ---------------------------------------------------------------------------
 
-describe('isCanonicalIss() — https:// branch', () => {
+describe('isCanonicalIss(): https:// branch', () => {
   it('accepts plain https:// origin', () => {
     expect(isCanonicalIss('https://example.com')).toBe(true);
   });
@@ -104,7 +102,7 @@ describe('isCanonicalIss() — https:// branch', () => {
   });
 
   it('rejects raw Unicode host', () => {
-    // Raw Unicode domain: münchen.de — the URL constructor normalizes to punycode,
+    // Raw Unicode domain: münchen.de: the URL constructor normalizes to punycode,
     // so the reconstructed origin differs from the raw input.
     expect(isCanonicalIss('https://münchen.de')).toBe(false);
   });
@@ -123,10 +121,10 @@ describe('isCanonicalIss() — https:// branch', () => {
 });
 
 // ---------------------------------------------------------------------------
-// isCanonicalIss() — did: branch
+// isCanonicalIss(): did: branch
 // ---------------------------------------------------------------------------
 
-describe('isCanonicalIss() — did: branch', () => {
+describe('isCanonicalIss(): did: branch', () => {
   it('accepts did:web:example.com', () => {
     expect(isCanonicalIss('did:web:example.com')).toBe(true);
   });
@@ -161,10 +159,10 @@ describe('isCanonicalIss() — did: branch', () => {
 });
 
 // ---------------------------------------------------------------------------
-// isCanonicalIss() — other schemes
+// isCanonicalIss(): other schemes
 // ---------------------------------------------------------------------------
 
-describe('isCanonicalIss() — other schemes rejected', () => {
+describe('isCanonicalIss(): other schemes rejected', () => {
   it('rejects spiffe://', () => {
     expect(isCanonicalIss('spiffe://cluster.local/ns/default')).toBe(false);
   });
@@ -320,10 +318,10 @@ describe('PolicyBlockSchema', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Wire02ClaimsSchema — valid cases
+// Wire02ClaimsSchema: valid cases
 // ---------------------------------------------------------------------------
 
-describe('Wire02ClaimsSchema — valid', () => {
+describe('Wire02ClaimsSchema: valid', () => {
   it('accepts minimal evidence receipt', () => {
     const result = Wire02ClaimsSchema.safeParse(minimalEvidence());
     expect(result.success).toBe(true);
@@ -377,10 +375,10 @@ describe('Wire02ClaimsSchema — valid', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Wire02ClaimsSchema — invalid cases
+// Wire02ClaimsSchema: invalid cases
 // ---------------------------------------------------------------------------
 
-describe('Wire02ClaimsSchema — invalid', () => {
+describe('Wire02ClaimsSchema: invalid', () => {
   it('rejects missing peac_version', () => {
     const obj = {
       kind: 'evidence',
@@ -455,7 +453,7 @@ describe('Wire02ClaimsSchema — invalid', () => {
 });
 
 // ---------------------------------------------------------------------------
-// checkOccurredAtSkew() — Correction 5 skew rules
+// checkOccurredAtSkew(): Correction 5 skew rules
 // ---------------------------------------------------------------------------
 
 describe('checkOccurredAtSkew()', () => {

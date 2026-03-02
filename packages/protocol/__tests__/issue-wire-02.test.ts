@@ -131,7 +131,7 @@ describe('issueWire02() basic output', () => {
     expect(header.typ).toBe(WIRE_02_JWS_TYP);
   });
 
-  it('always sets typ — no code path omits it (MUST per spec)', async () => {
+  it('always sets typ: no code path omits it (MUST per spec)', async () => {
     const { privateKey } = await generateKeypair();
     const { jws } = await issueWire02({
       iss: testIss,
@@ -522,7 +522,7 @@ describe('did: iss acceptance (no DID auto-resolution)', () => {
       })
     ).jws;
 
-    // Same call signature: verifyLocal(jws, publicKey) — no special DID parameter
+    // Same call signature: verifyLocal(jws, publicKey): no special DID parameter
     const httpsResult = await verifyLocal(httpsJws, publicKey);
     const didResult = await verifyLocal(didJws, publicKey);
 
@@ -552,7 +552,7 @@ describe('strictness: strict mode (default)', () => {
     };
     const jws = await createUntypedJWS(wire02Payload, privateKey, testKid);
 
-    // strict mode (default) — should reject missing typ
+    // strict mode (default): should reject missing typ
     const result = await verifyLocal(jws, publicKey);
 
     expect(result.valid).toBe(false);
@@ -583,7 +583,7 @@ describe('strictness: strict mode (default)', () => {
   });
 
   it('unrecognized typ present → hard error even in strict mode (crypto layer rejects)', async () => {
-    const { privateKey, publicKey } = await generateKeypair();
+    const { publicKey } = await generateKeypair();
     // Manually create JWS with unrecognized typ (not Wire 0.1 or Wire 0.2)
     const badHeader = { typ: 'com.other/unknown-format', alg: PEAC_ALG, kid: testKid };
     const wire02Payload = {
@@ -633,7 +633,7 @@ describe('strictness: interop mode', () => {
   });
 
   it('interop mode: unrecognized typ present → hard error (crypto layer rejects, not strictness)', async () => {
-    const { privateKey, publicKey } = await generateKeypair();
+    const { publicKey } = await generateKeypair();
     const badHeader = { typ: 'com.other/unknown-format', alg: PEAC_ALG, kid: testKid };
     const wire02Payload = {
       peac_version: '0.2',

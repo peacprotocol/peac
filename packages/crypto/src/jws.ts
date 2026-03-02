@@ -131,7 +131,7 @@ export function validateWire02Header(header: Record<string, unknown>): void {
     throw new CryptoError('CRYPTO_JWS_CRIT_REJECTED', 'crit header is not permitted');
   }
 
-  // b64: false — RFC 7797 unencoded payload rejected
+  // b64: false: RFC 7797 unencoded payload rejected
   if (header.b64 === false) {
     throw new CryptoError(
       'CRYPTO_JWS_B64_REJECTED',
@@ -259,7 +259,7 @@ export async function signWire02(
     );
   }
 
-  // Always set typ: WIRE_02_JWS_TYP — no code path may omit it
+  // Always set typ: WIRE_02_JWS_TYP: no code path may omit it
   const header: Wire02JWSHeader = {
     typ: WIRE_02_JWS_TYP,
     alg: PEAC_ALG,
