@@ -32,6 +32,7 @@ import {
   CORRELATION_EXTENSION_KEY,
   CHALLENGE_TYPES,
   EXTENSION_LIMITS,
+  ERROR_CODES,
   // Grammar validator
   isValidExtensionKey,
   // Typed accessors
@@ -153,6 +154,31 @@ describe('isValidExtensionKey(): grammar validation', () => {
       expect(isValidExtensionKey(key)).toBe(false);
     });
   }
+
+  // DNS length bounds (RFC 1035)
+  it('rejects DNS label exceeding 63 chars', () => {
+    const longLabel = 'a'.repeat(64);
+    expect(isValidExtensionKey(`${longLabel}.example/ext`)).toBe(false);
+  });
+
+  it('accepts DNS label at exactly 63 chars', () => {
+    const label63 = 'a'.repeat(63);
+    expect(isValidExtensionKey(`${label63}.example/ext`)).toBe(true);
+  });
+
+  it('rejects domain exceeding 253 chars', () => {
+    // Build a domain longer than 253 chars from valid 63-char labels
+    // 4 labels of 63 chars + 3 dots = 255, which exceeds 253
+    const label = 'a'.repeat(63);
+    const domain = `${label}.${label}.${label}.${label}`;
+    expect(domain.length).toBeGreaterThan(253);
+    expect(isValidExtensionKey(`${domain}/ext`)).toBe(false);
+  });
+
+  it('rejects overall key exceeding maxExtensionKeyLength', () => {
+    const longSegment = 'a'.repeat(EXTENSION_LIMITS.maxExtensionKeyLength);
+    expect(isValidExtensionKey(`org.example/${longSegment}`)).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -843,7 +869,9 @@ describe('Wire02ClaimsSchema: extension validation', () => {
     );
     expect(result.success).toBe(false);
     if (!result.success) {
-      const issue = result.error.issues.find((i) => i.message === 'E_INVALID_EXTENSION_KEY');
+      const issue = result.error.issues.find(
+        (i) => i.message === ERROR_CODES.E_INVALID_EXTENSION_KEY
+      );
       expect(issue).toBeDefined();
     }
   });
@@ -948,6 +976,18 @@ describe('EXTENSION_LIMITS constants', () => {
 
   it('exports maxProblemTypeLength as 2048', () => {
     expect(EXTENSION_LIMITS.maxProblemTypeLength).toBe(2048);
+  });
+
+  it('exports maxExtensionKeyLength as 512', () => {
+    expect(EXTENSION_LIMITS.maxExtensionKeyLength).toBe(512);
+  });
+
+  it('exports maxDnsLabelLength as 63', () => {
+    expect(EXTENSION_LIMITS.maxDnsLabelLength).toBe(63);
+  });
+
+  it('exports maxDnsDomainLength as 253', () => {
+    expect(EXTENSION_LIMITS.maxDnsDomainLength).toBe(253);
   });
 });
 

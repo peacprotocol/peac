@@ -154,6 +154,9 @@ export const ERROR_CODES = {
 
   // Constraint errors (400, DD-121)
   E_CONSTRAINT_VIOLATION: 'E_CONSTRAINT_VIOLATION',
+
+  // Wire 0.2 extension errors (400, DD-153/DD-156)
+  E_INVALID_EXTENSION_KEY: 'E_INVALID_EXTENSION_KEY',
 } as const;
 
 /**

@@ -24,7 +24,6 @@
 
 import { z } from 'zod';
 import { createPEACError, ERROR_CODES } from './errors.js';
-import type { PEACError } from './errors.js';
 
 // ---------------------------------------------------------------------------
 // EXTENSION_LIMITS (P1-9: centralized bounds)
@@ -37,6 +36,10 @@ import type { PEACError } from './errors.js';
  * Follows repo _LIMITS convention.
  */
 export const EXTENSION_LIMITS = {
+  // Extension key grammar
+  maxExtensionKeyLength: 512,
+  maxDnsLabelLength: 63,
+  maxDnsDomainLength: 253,
   // Commerce
   maxPaymentRailLength: 128,
   maxCurrencyLength: 16,
@@ -94,23 +97,27 @@ const SEGMENT_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
  * @returns true if valid extension key grammar; false otherwise
  */
 export function isValidExtensionKey(key: string): boolean {
+  // Overall key length bound (DoS protection)
+  if (key.length === 0 || key.length > EXTENSION_LIMITS.maxExtensionKeyLength) return false;
+
   const slashIdx = key.indexOf('/');
   if (slashIdx <= 0) return false;
 
   const domain = key.slice(0, slashIdx);
   const segment = key.slice(slashIdx + 1);
 
-  // Domain must have at least one dot
+  // Domain: must have at least one dot, max 253 chars (RFC 1035)
   if (!domain.includes('.')) return false;
+  if (domain.length > EXTENSION_LIMITS.maxDnsDomainLength) return false;
 
   // Segment must be non-empty and match pattern
   if (segment.length === 0) return false;
   if (!SEGMENT_PATTERN.test(segment)) return false;
 
-  // Each DNS label must be valid
+  // Each DNS label must be valid and max 63 chars (RFC 1035)
   const labels = domain.split('.');
   for (const label of labels) {
-    if (label.length === 0) return false;
+    if (label.length === 0 || label.length > EXTENSION_LIMITS.maxDnsLabelLength) return false;
     if (!DNS_LABEL.test(label)) return false;
   }
 
@@ -346,7 +353,7 @@ function getExtension<T>(
   schema: z.ZodType<T>
 ): T | undefined {
   if (extensions === undefined) return undefined;
-  if (!(key in extensions)) return undefined;
+  if (!Object.prototype.hasOwnProperty.call(extensions, key)) return undefined;
 
   const value = extensions[key];
   const result = schema.safeParse(value);
@@ -444,7 +451,7 @@ export function getCorrelationExtension(
  *
  * For each key in the extensions record:
  *   1. Check key grammar via isValidExtensionKey(): if malformed,
- *      add hard Zod issue E_INVALID_EXTENSION_KEY
+ *      add hard Zod issue (ERROR_CODES.E_INVALID_EXTENSION_KEY)
  *   2. If key matches a known group, validate value against its schema;
  *      if invalid, add Zod issue with message from first schema error
  *
@@ -465,7 +472,7 @@ export function validateKnownExtensions(
     if (!isValidExtensionKey(key)) {
       ctx.addIssue({
         code: 'custom',
-        message: 'E_INVALID_EXTENSION_KEY',
+        message: ERROR_CODES.E_INVALID_EXTENSION_KEY,
         path: ['extensions', key],
       });
       continue;
