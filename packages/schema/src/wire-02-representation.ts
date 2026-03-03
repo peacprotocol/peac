@@ -52,6 +52,22 @@ function isValidMimeType(s: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Bounds constants (follows repo _LIMITS convention)
+// ---------------------------------------------------------------------------
+
+/**
+ * Normative bounds for Wire 0.2 representation fields.
+ *
+ * Centralised to prevent magic numbers and allow external reference.
+ */
+export const REPRESENTATION_LIMITS = {
+  /** Max content_hash string length (sha256:<64 hex> = 71 chars, capped at FingerprintRef max) */
+  maxContentHashLength: MAX_FINGERPRINT_REF_LENGTH,
+  /** Max content_type string length */
+  maxContentTypeLength: 256,
+} as const;
+
+// ---------------------------------------------------------------------------
 // Wire02RepresentationFieldsSchema
 // ---------------------------------------------------------------------------
 
@@ -75,7 +91,7 @@ export const Wire02RepresentationFieldsSchema = z
      */
     content_hash: z
       .string()
-      .max(MAX_FINGERPRINT_REF_LENGTH)
+      .max(REPRESENTATION_LIMITS.maxContentHashLength)
       .refine(isValidContentHash, {
         message: 'content_hash must be a valid sha256 FingerprintRef (sha256:<64 lowercase hex>)',
       })
@@ -86,7 +102,7 @@ export const Wire02RepresentationFieldsSchema = z
      */
     content_type: z
       .string()
-      .max(256)
+      .max(REPRESENTATION_LIMITS.maxContentTypeLength)
       .refine(isValidMimeType, {
         message: 'content_type must be a valid MIME type (type/subtype with optional parameters)',
       })

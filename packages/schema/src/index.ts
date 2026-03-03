@@ -528,6 +528,7 @@ export {
 export {
   Wire02RepresentationFieldsSchema,
   RepresentationFieldsSchema,
+  REPRESENTATION_LIMITS,
 } from './wire-02-representation';
 export type { Wire02RepresentationFields } from './wire-02-representation';
 

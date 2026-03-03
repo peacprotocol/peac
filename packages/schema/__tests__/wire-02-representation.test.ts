@@ -18,6 +18,7 @@ import {
   Wire02ClaimsSchema,
   ActorBindingSchema,
   stringToFingerprintRef,
+  REPRESENTATION_LIMITS,
   type Wire02Claims,
 } from '../src/index.js';
 
@@ -446,5 +447,60 @@ describe('Actor promotion: Wire 0.2 top-level actor', () => {
   it('is optional (absent actor is valid)', () => {
     const result = Wire02ClaimsSchema.safeParse(minimalEvidence());
     expect(result.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Frozen golden vectors: MIME pattern intent (prevents accidental loosening)
+// ---------------------------------------------------------------------------
+
+describe('Frozen golden vectors: MIME pattern', () => {
+  const MUST_ACCEPT = [
+    'application/json',
+    'application/json; charset=utf-8',
+    'text/plain',
+    'text/html',
+    'image/png',
+    'application/octet-stream',
+    'application/vnd.api+json',
+    'multipart/form-data; boundary=something',
+  ];
+
+  const MUST_REJECT = [
+    'text/',
+    'text',
+    '',
+    '  text/plain',
+    'text/plain  ',
+    '/json',
+    'application/ json',
+  ];
+
+  for (const mime of MUST_ACCEPT) {
+    it(`accepts: ${mime}`, () => {
+      const result = RepresentationFieldsSchema.safeParse({ content_type: mime });
+      expect(result.success).toBe(true);
+    });
+  }
+
+  for (const mime of MUST_REJECT) {
+    it(`rejects: ${JSON.stringify(mime)}`, () => {
+      const result = RepresentationFieldsSchema.safeParse({ content_type: mime });
+      expect(result.success).toBe(false);
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// REPRESENTATION_LIMITS export
+// ---------------------------------------------------------------------------
+
+describe('REPRESENTATION_LIMITS constants', () => {
+  it('exports maxContentHashLength matching MAX_FINGERPRINT_REF_LENGTH (76)', () => {
+    expect(REPRESENTATION_LIMITS.maxContentHashLength).toBe(76);
+  });
+
+  it('exports maxContentTypeLength as 256', () => {
+    expect(REPRESENTATION_LIMITS.maxContentTypeLength).toBe(256);
   });
 });
