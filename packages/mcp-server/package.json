@@ -1,6 +1,6 @@
 {
   "name": "@peac/mcp-server",
-  "version": "0.11.3",
+  "version": "0.12.0-preview.1",
   "description": "PEAC receipt operations as MCP tools (verify, inspect, decode, issue, bundle)",
   "mcpName": "io.github.peacprotocol/peac",
   "main": "dist/index.cjs",

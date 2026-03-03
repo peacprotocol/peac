@@ -1,6 +1,6 @@
 {
   "name": "@peac/contracts",
-  "version": "0.11.3",
+  "version": "0.12.0-preview.1",
   "description": "PEAC canonical error codes and verification mode contracts",
   "type": "module",
   "main": "dist/index.cjs",
