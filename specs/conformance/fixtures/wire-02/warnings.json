@@ -1,0 +1,106 @@
+{
+  "$comment": "Wire 0.2 warning emission vectors (v0.12.0-preview.1, DD-155)",
+  "schema_version": "0.12.0-preview.1",
+  "version": "0.12.0-preview.1",
+  "fixtures": [
+    {
+      "name": "unknown-type-preserved",
+      "description": "Unregistered type value is valid but emits type_unregistered warning",
+      "type": "warning",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "com.example/custom-flow",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-warn-001"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [{ "code": "type_unregistered", "pointer": "/type" }]
+      }
+    },
+    {
+      "name": "unknown-extension-preserved",
+      "description": "Unknown but well-formed extension key is preserved with warning",
+      "type": "warning",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-warn-002",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "x402",
+              "amount_minor": "1000",
+              "currency": "USD"
+            },
+            "com.example/custom-data": {
+              "foo": "bar"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [
+          {
+            "code": "unknown_extension_preserved",
+            "pointer": "/extensions/com.example~1custom-data"
+          }
+        ]
+      }
+    },
+    {
+      "name": "typ-missing-interop",
+      "description": "Missing typ header in interop mode emits typ_missing warning",
+      "type": "warning",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-warn-003"
+        },
+        "options": {
+          "strictness": "interop"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [{ "code": "typ_missing" }]
+      }
+    },
+    {
+      "name": "occurred-at-skew",
+      "description": "occurred_at deviates from iat beyond tolerance: valid but warns",
+      "type": "warning",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-warn-004",
+          "occurred_at": "2024-03-03T21:10:00Z"
+        },
+        "options": {
+          "now": 1709500400
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [{ "code": "occurred_at_skew", "pointer": "/occurred_at" }]
+      }
+    }
+  ]
+}

@@ -1,0 +1,569 @@
+{
+  "$comment": "Wire 0.2 invalid receipt rejection vectors (v0.12.0-preview.1, DD-156)",
+  "schema_version": "0.12.0-preview.1",
+  "version": "0.12.0-preview.1",
+  "fixtures": [
+    {
+      "name": "reject-jwk",
+      "description": "JWS header with embedded JWK must be rejected (JOSE hardening)",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "jwk": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "abc123"
+          }
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-001"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_EMBEDDED_KEY"
+      }
+    },
+    {
+      "name": "reject-x5c",
+      "description": "JWS header with x5c certificate chain must be rejected (JOSE hardening)",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "x5c": ["MIICpDCCAYwCCQ..."]
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-002"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_EMBEDDED_KEY"
+      }
+    },
+    {
+      "name": "reject-x5u",
+      "description": "JWS header with x5u certificate URL must be rejected (JOSE hardening)",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "x5u": "https://example.com/certs"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-003"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_EMBEDDED_KEY"
+      }
+    },
+    {
+      "name": "reject-jku",
+      "description": "JWS header with jku JWKS URL must be rejected (JOSE hardening)",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "jku": "https://example.com/jwks"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-004"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_EMBEDDED_KEY"
+      }
+    },
+    {
+      "name": "reject-crit",
+      "description": "JWS header with crit array must be rejected (JOSE hardening)",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "crit": ["exp"]
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-005"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_CRIT_REJECTED"
+      }
+    },
+    {
+      "name": "reject-missing-kid",
+      "description": "JWS header with no kid must be rejected (kid is required in Wire 0.2)",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "kid": null
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-006"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_MISSING_KID"
+      }
+    },
+    {
+      "name": "reject-kid-too-long",
+      "description": "JWS header with kid exceeding 256 characters must be rejected",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "kid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-007"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_MISSING_KID"
+      }
+    },
+    {
+      "name": "reject-b64-false",
+      "description": "JWS header with b64:false must be rejected (unencoded payload not permitted)",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "b64": false
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-008"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_B64_REJECTED"
+      }
+    },
+    {
+      "name": "reject-zip",
+      "description": "JWS header with zip compression must be rejected",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "zip": "DEF"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-009"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_ZIP_REJECTED"
+      }
+    },
+    {
+      "name": "reject-uppercase-host",
+      "description": "iss with uppercase characters in hostname must be rejected",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://API.Example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-010"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-default-port-443",
+      "description": "iss with explicit default port :443 must be rejected (not canonical)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com:443",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-011"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-trailing-slash",
+      "description": "iss with trailing slash must be rejected (origin-only, no path)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com/",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-012"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-with-path",
+      "description": "iss with path component must be rejected (origin-only)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com/v1",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-013"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-http-scheme",
+      "description": "iss with http:// scheme must be rejected (https:// required)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "http://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-014"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-spiffe-scheme",
+      "description": "iss with spiffe:// scheme must be rejected (only https:// and did: accepted)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "spiffe://cluster.local/workload",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-015"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-did-with-fragment",
+      "description": "did: iss with fragment (#key-1) must be rejected",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "did:web:example.com#key-1",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-016"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-did-with-path",
+      "description": "did: iss with path component must be rejected (bare DIDs only)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "did:web:example.com/issuer/1",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-017"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-empty-type",
+      "description": "Empty type string must be rejected",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-018"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "must_fail": true,
+        "path": "type"
+      }
+    },
+    {
+      "name": "reject-invalid-dns-type",
+      "description": "Type with uppercase DNS label must be rejected (not valid reverse-DNS or URI)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "INVALID/type",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-019"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "must_fail": true,
+        "path": "type"
+      }
+    },
+    {
+      "name": "reject-unknown-kind",
+      "description": "Unknown kind value must be rejected (only evidence and challenge allowed)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "attestation",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-020"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "must_fail": true,
+        "path": "kind"
+      }
+    },
+    {
+      "name": "reject-unknown-pillar",
+      "description": "Unknown pillar value must be rejected (closed 10-value taxonomy)",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-021",
+          "pillars": ["commerce", "unknown"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "must_fail": true,
+        "path": "pillars"
+      }
+    },
+    {
+      "name": "reject-unsorted-pillars",
+      "description": "Pillars array not in ascending alphabetical order must be rejected",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-022",
+          "pillars": ["identity", "commerce"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_PILLARS_NOT_SORTED"
+      }
+    },
+    {
+      "name": "reject-duplicate-pillars",
+      "description": "Pillars array with duplicate values must be rejected",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-023",
+          "pillars": ["commerce", "commerce"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_PILLARS_NOT_SORTED"
+      }
+    },
+    {
+      "name": "reject-occurred-at-on-challenge",
+      "description": "Challenge-kind receipt with occurred_at field must be rejected",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-024",
+          "occurred_at": "2024-03-04T00:00:00Z",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "payment_required",
+              "problem": {
+                "type": "https://peacprotocol.org/errors/payment-required",
+                "status": 402,
+                "title": "Payment Required"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "issue_contains": "E_OCCURRED_AT_ON_CHALLENGE"
+      }
+    },
+    {
+      "name": "reject-missing-peac-version",
+      "description": "Claims without peac_version field must be rejected",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-025"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "must_fail": true,
+        "path": "peac_version"
+      }
+    },
+    {
+      "name": "reject-wrong-peac-version",
+      "description": "Claims with peac_version 0.1 (not 0.2) must be rejected by Wire 0.2 schema",
+      "type": "schema",
+      "input": {
+        "claims": {
+          "peac_version": "0.1",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-026"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "must_fail": true,
+        "path": "peac_version"
+      }
+    },
+    {
+      "name": "reject-wire-version-mismatch",
+      "description": "Wire 0.2 JWS typ header with Wire 0.1 style claims (no peac_version, no kind) must be rejected",
+      "type": "coherence",
+      "input": {
+        "header_overrides": {},
+        "claims": {
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "sub": "user:alice",
+          "jti": "wire02-invalid-027"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_WIRE_VERSION_MISMATCH"
+      }
+    }
+  ]
+}

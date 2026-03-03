@@ -1,0 +1,647 @@
+{
+  "$comment": "Wire 0.2 valid receipt golden vectors (v0.12.0-preview.1, DD-156)",
+  "version": "0.12.0-preview.1",
+  "fixtures": [
+    {
+      "name": "evidence-commerce-minimal",
+      "description": "Minimal evidence receipt with commerce extension (payment_rail, amount_minor, currency)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-001",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "x402",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-commerce-full",
+      "description": "Full evidence receipt with all commerce extension fields populated",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-002",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "2500",
+              "currency": "USD",
+              "reference": "pi_3Qx1234567890",
+              "asset": "tok_visa_debit",
+              "env": "live"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-access-minimal",
+      "description": "Minimal evidence receipt with access extension (resource, action, decision)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/access-decision",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-003",
+          "pillars": ["access"],
+          "extensions": {
+            "org.peacprotocol/access": {
+              "resource": "https://api.example.com/v1/documents/123",
+              "action": "read",
+              "decision": "allow"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-identity-minimal",
+      "description": "Minimal evidence receipt with identity extension (proof_ref only)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/identity-attestation",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-004",
+          "pillars": ["identity"],
+          "extensions": {
+            "org.peacprotocol/identity": {
+              "proof_ref": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "challenge-payment-required",
+      "description": "Challenge receipt for payment_required with RFC 9457 problem details",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-005",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "payment_required",
+              "problem": {
+                "status": 402,
+                "type": "https://www.peacprotocol.org/problems/payment-required",
+                "title": "Payment required"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "challenge-identity-required",
+      "description": "Challenge receipt for identity_required with RFC 9457 problem details",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/identity-attestation",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-006",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "identity_required",
+              "problem": {
+                "status": 401,
+                "type": "https://www.peacprotocol.org/problems/identity-required",
+                "title": "Identity required"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "challenge-purpose-disallowed",
+      "description": "Challenge receipt for purpose_disallowed with RFC 9457 problem details",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-007",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "purpose_disallowed",
+              "problem": {
+                "status": 403,
+                "type": "https://www.peacprotocol.org/problems/purpose-disallowed",
+                "title": "Purpose not allowed"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-multi-pillar",
+      "description": "Evidence receipt with multiple pillars (sorted alphabetically)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-008",
+          "pillars": ["commerce", "identity"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-all-pillars",
+      "description": "Evidence receipt with all 10 pillars in ascending alphabetical order",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-009",
+          "pillars": [
+            "access",
+            "attribution",
+            "commerce",
+            "compliance",
+            "consent",
+            "identity",
+            "privacy",
+            "provenance",
+            "purpose",
+            "safety"
+          ]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-with-policy-binding",
+      "description": "Evidence receipt with policy block (digest, uri, version)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-010",
+          "pillars": ["commerce"],
+          "policy": {
+            "digest": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+            "uri": "https://publisher.example.com/.well-known/peac.txt",
+            "version": "1.0"
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-with-actor",
+      "description": "Evidence receipt with top-level actor binding (DD-142)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-011",
+          "pillars": ["commerce"],
+          "actor": {
+            "id": "agent:crawler-prod-001",
+            "proof_type": "ed25519-cert-chain",
+            "origin": "https://crawler.example.com"
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-with-representation",
+      "description": "Evidence receipt with representation fields (content_hash, content_type, content_length)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-012",
+          "pillars": ["commerce"],
+          "representation": {
+            "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "content_type": "application/json",
+            "content_length": 1024
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-custom-type",
+      "description": "Evidence receipt with custom reverse-DNS type (triggers type_unregistered warning)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "com.example/custom-flow",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-013"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warns_type_unregistered": true
+      }
+    },
+    {
+      "name": "evidence-uri-type",
+      "description": "Evidence receipt with absolute URI type (triggers type_unregistered warning)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "https://example.com/types/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-014"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warns_type_unregistered": true
+      }
+    },
+    {
+      "name": "evidence-max-extensions",
+      "description": "Evidence receipt with both commerce and correlation extension groups",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-015",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "x402",
+              "amount_minor": "5000",
+              "currency": "EUR"
+            },
+            "org.peacprotocol/correlation": {
+              "trace_id": "0123456789abcdef0123456789abcdef",
+              "span_id": "fedcba9876543210"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "challenge-custom-requirements",
+      "description": "Challenge receipt with requirements field for caller-defined resolution criteria",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-016",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "payment_required",
+              "problem": {
+                "status": 402,
+                "type": "https://www.peacprotocol.org/problems/payment-required",
+                "title": "Payment required"
+              },
+              "requirements": {
+                "min_amount": "1000",
+                "accepted_rails": ["stripe", "x402"]
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid-https-origin",
+      "description": "Evidence receipt with standard HTTPS origin as iss",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-017"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid-https-nonstandard-port",
+      "description": "Evidence receipt with HTTPS origin on non-standard port",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com:8443",
+          "iat": 1709500000,
+          "jti": "wire02-valid-018"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid-did-web",
+      "description": "Evidence receipt with did:web issuer identifier",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "did:web:example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-019"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid-did-key",
+      "description": "Evidence receipt with did:key issuer identifier",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+          "iat": 1709500000,
+          "jti": "wire02-valid-020"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-consent-type-only",
+      "description": "Evidence receipt with consent type and pillar (no extension group)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-021",
+          "pillars": ["consent"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-compliance-type-only",
+      "description": "Evidence receipt with compliance type and pillar (no extension group)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-022",
+          "pillars": ["compliance"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-privacy-type-only",
+      "description": "Evidence receipt with privacy type and pillar (no extension group)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/privacy-signal",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-023",
+          "pillars": ["privacy"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-safety-type-only",
+      "description": "Evidence receipt with safety type and pillar (no extension group)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-024",
+          "pillars": ["safety"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-provenance-type-only",
+      "description": "Evidence receipt with provenance type and pillar (no extension group)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-025",
+          "pillars": ["provenance"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-attribution-type-only",
+      "description": "Evidence receipt with attribution type and pillar (no extension group)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-026",
+          "pillars": ["attribution"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-purpose-type-only",
+      "description": "Evidence receipt with purpose type and pillar (no extension group)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-027",
+          "pillars": ["purpose"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "evidence-correlation",
+      "description": "Evidence receipt with correlation extension (trace_id and span_id)",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-valid-028",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/correlation": {
+              "trace_id": "abcdef0123456789abcdef0123456789",
+              "span_id": "0123456789abcdef"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    }
+  ],
+  "schema_version": "0.12.0-preview.1"
+}

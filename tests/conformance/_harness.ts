@@ -148,7 +148,7 @@ export function assertValidDigests(fixtures: BaseFixture[], includeInvalid = fal
 // Version Validation
 // ---------------------------------------------------------------------------
 
-const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/;
+const SEMVER_PATTERN = /^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$/;
 
 /**
  * Assert fixture file versions are valid semver

@@ -26,7 +26,7 @@ import {
 // Shared test constants
 const testKid = '2026-01-15T10:30:00Z';
 const testIss = 'https://api.example.com';
-const testType = 'org.peacprotocol/commerce';
+const testType = 'org.peacprotocol/payment';
 
 // ---------------------------------------------------------------------------
 // verifyPolicyBinding() (Layer 1 pure comparison)
@@ -389,7 +389,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
     const { jws } = await issueWire02({
       iss: testIss,
       kind: 'challenge',
-      type: 'org.peacprotocol/challenge',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid: testKid,
       policy: { digest: policyDigest },

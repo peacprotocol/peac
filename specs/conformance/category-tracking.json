@@ -1,6 +1,6 @@
 {
   "$comment": "Category tracking registry for conformance fixture directories. Keep arrays sorted alphabetically. Version consistency is enforced only for tracked categories.",
-  "tracked": ["attribution", "content-usage", "interaction"],
+  "tracked": ["attribution", "content-usage", "interaction", "wire-02"],
   "untracked": {
     "agent-identity": "Fixtures span multiple releases (v0.9.25 + v0.11.3 DD-142); version consistency not enforced",
     "bundle": "Not yet migrated to tracked validation; fixture_count needs reconciliation",

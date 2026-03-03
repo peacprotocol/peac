@@ -519,6 +519,22 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/wire-02-minimal:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+    devDependencies:
+      tsx:
+        specifier: ^4.19.0
+        version: 4.21.0
+
   examples/workflow-correlation:
     dependencies:
       '@peac/crypto':
