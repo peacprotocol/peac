@@ -320,8 +320,9 @@ else
 fi
 
 echo "== Wire 0.2 isolation (DD-156) =="
-# Wire02 types must NOT appear in Wire 0.1 validators or attestation-receipt
-if git grep -nE 'Wire02|peac_version|WIRE_02' -- 'packages/schema/src/validators.ts' 'packages/schema/src/attestation-receipt.ts' | grep .; then
+# Wire02 types/constants must NOT appear in Wire 0.1 validators or attestation-receipt.
+# Patterns anchored to imports, type references, and constant usage (not comments/docs).
+if git grep -nE '(import.*Wire02|Wire02Claims|Wire02Kind|WIRE_02_|peac_version)' -- 'packages/schema/src/validators.ts' 'packages/schema/src/attestation-receipt.ts' | grep -v '^\S*:\s*//' | grep -v '^\S*:\s*\*' | grep .; then
   echo "FAIL: Wire 0.2 types leaked into Wire 0.1 code"
   bad=1
 else
@@ -329,8 +330,9 @@ else
 fi
 
 echo "== forbid draft typ (DD-156) =="
-# peac-receipt+jwt was never shipped; must not appear anywhere
-if git grep -n 'peac-receipt+jwt' -- '**/*.ts' ':!node_modules' ':!archive/**' | grep .; then
+# peac-receipt+jwt was never shipped; must not appear in code or string literals.
+# Exclude comment-only lines to avoid false positives from historical context.
+if git grep -n 'peac-receipt+jwt' -- '**/*.ts' ':!node_modules' ':!archive/**' | grep -v '^\S*:\s*//' | grep -v '^\S*:\s*\*' | grep .; then
   echo "FAIL: Draft typ peac-receipt+jwt found (use interaction-record+jwt)"
   bad=1
 else

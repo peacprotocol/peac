@@ -7,7 +7,11 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
-import { WARNING_TYPE_UNREGISTERED, WARNING_UNKNOWN_EXTENSION } from '@peac/schema';
+import {
+  WARNING_TYPE_UNREGISTERED,
+  WARNING_UNKNOWN_EXTENSION,
+  REGISTERED_RECEIPT_TYPES,
+} from '@peac/schema';
 import { issueWire02, verifyLocal } from '../src/index';
 
 // Shared test constants
@@ -58,23 +62,10 @@ describe('verifyLocal(): type_unregistered warning', () => {
     }
   });
 
-  it('does NOT emit type_unregistered for all 10 registered types', async () => {
-    const registeredTypes = [
-      'org.peacprotocol/payment',
-      'org.peacprotocol/access-decision',
-      'org.peacprotocol/identity-attestation',
-      'org.peacprotocol/consent-record',
-      'org.peacprotocol/compliance-check',
-      'org.peacprotocol/privacy-signal',
-      'org.peacprotocol/safety-review',
-      'org.peacprotocol/provenance-record',
-      'org.peacprotocol/attribution-event',
-      'org.peacprotocol/purpose-declaration',
-    ];
-
+  it('does NOT emit type_unregistered for all registered types', async () => {
     const { privateKey, publicKey } = await generateKeypair();
 
-    for (const type of registeredTypes) {
+    for (const type of REGISTERED_RECEIPT_TYPES) {
       const { jws } = await issueWire02({
         iss: testIss,
         kind: 'evidence',

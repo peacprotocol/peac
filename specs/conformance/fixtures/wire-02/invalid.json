@@ -1,5 +1,6 @@
 {
   "$comment": "Wire 0.2 invalid receipt rejection vectors (v0.12.0-preview.1, DD-156)",
+  "schema_version": "0.12.0-preview.1",
   "version": "0.12.0-preview.1",
   "fixtures": [
     {

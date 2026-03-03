@@ -397,19 +397,20 @@ describe('Global Conformance Manifest Hygiene', () => {
     });
 
     it('documents untracked categories with reasons (non-failing visibility)', () => {
-      // This test always passes but logs untracked categories for visibility
-      const untrackedList = Object.entries(UNTRACKED_CATEGORIES)
-        .map(([cat, reason]) => `  ${cat}: ${reason}`)
-        .join('\n');
-
-      // Log to console for CI visibility (non-failing)
-      if (Object.keys(UNTRACKED_CATEGORIES).length > 0) {
+      // This test always passes but logs untracked categories for debug visibility
+      if (
+        process.env.PEAC_DEBUG_CONFORMANCE === '1' &&
+        Object.keys(UNTRACKED_CATEGORIES).length > 0
+      ) {
+        const untrackedList = Object.entries(UNTRACKED_CATEGORIES)
+          .map(([cat, reason]) => `  ${cat}: ${reason}`)
+          .join('\n');
         console.log(
           `\n[DEBT] Untracked fixture categories (${Object.keys(UNTRACKED_CATEGORIES).length}):\n${untrackedList}\n`
         );
       }
 
-      // Always passes - this is for visibility only
+      // Always passes: visibility only (set PEAC_DEBUG_CONFORMANCE=1 for details)
       expect(true).toBe(true);
     });
 
