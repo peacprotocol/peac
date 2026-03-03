@@ -224,9 +224,14 @@ export type VerifyLocalSuccess =
       /** Verification warnings from schema parsing and strictness routing */
       warnings: VerificationWarning[];
       /**
-       * Policy binding status (DD-49).
+       * Policy binding status (DD-49, DD-151).
        *
-       * 'unavailable' until PR 14 (Policy Binding) adds full JCS+SHA-256 check.
+       * Three-state result:
+       *   - 'unavailable': either the receipt contains no policy block, or the
+       *     caller did not pass a policyDigest option to verifyLocal(). No check.
+       *   - 'verified': both digests present and match exactly.
+       *   - 'failed': not returned on success; verifyLocal() returns
+       *     E_POLICY_BINDING_FAILED (valid: false) before reaching this field.
        */
       policy_binding: PolicyBindingStatus;
     };
@@ -248,8 +253,17 @@ export interface VerifyLocalFailure {
   details?: {
     /** Precise parse error code from unified parser (e.g. E_PARSE_COMMERCE_INVALID) */
     parse_code?: string;
-    /** Zod validation issues (bounded, stable shape -- non-normative, may change) */
+    /** Zod validation issues (bounded, stable shape; non-normative, may change) */
     issues?: ReadonlyArray<{ path: string; message: string }>;
+    /**
+     * Policy digest from the receipt (present when code is E_POLICY_BINDING_FAILED).
+     * Both are SHA-256 hashes; safe to log without leaking policy content.
+     */
+    receipt_policy_digest?: string;
+    /** Caller-supplied policy digest (present when code is E_POLICY_BINDING_FAILED). */
+    local_policy_digest?: string;
+    /** policy.uri hint from the receipt (present when code is E_POLICY_BINDING_FAILED and uri set). */
+    policy_uri?: string;
   };
 }
 
@@ -476,6 +490,11 @@ export async function verifyLocal(
           valid: false,
           code: 'E_POLICY_BINDING_FAILED',
           message: 'Policy binding check failed: receipt policy digest does not match local policy',
+          details: {
+            receipt_policy_digest: receiptPolicyDigest,
+            local_policy_digest: policyDigest,
+            ...(claims.policy?.uri !== undefined && { policy_uri: claims.policy.uri }),
+          },
         };
       }
 

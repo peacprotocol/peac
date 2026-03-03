@@ -439,9 +439,16 @@ export interface IssueWire02Options {
 export async function issueWire02(options: IssueWire02Options): Promise<IssueResult> {
   // Validate canonical iss before signing
   if (!isCanonicalIss(options.iss)) {
-    throw new Error(
-      `iss is not in canonical form: "${options.iss}". Use https:// origin or did: identifier.`
-    );
+    throw new IssueError({
+      code: 'E_ISS_NOT_CANONICAL',
+      category: 'validation',
+      severity: 'error',
+      retryable: false,
+      http_status: 400,
+      details: {
+        message: `iss is not in canonical form: "${options.iss}". Use https:// origin or did: identifier.`,
+      },
+    } as PEACError);
   }
 
   // Generate jti if not provided
@@ -470,9 +477,16 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
   const parseResult = Wire02ClaimsSchema.safeParse(claims);
   if (!parseResult.success) {
     const firstIssue = parseResult.error.issues[0];
-    throw new Error(
-      `Wire 0.2 claims schema validation failed: ${firstIssue?.message ?? 'unknown'}`
-    );
+    throw new IssueError({
+      code: 'E_INVALID_FORMAT',
+      category: 'validation',
+      severity: 'error',
+      retryable: false,
+      http_status: 400,
+      details: {
+        message: `Wire 0.2 claims schema validation failed: ${firstIssue?.message ?? 'unknown'}`,
+      },
+    } as PEACError);
   }
 
   // Sign with Wire 0.2 (always sets typ: 'interaction-record+jwt')

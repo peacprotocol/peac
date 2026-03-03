@@ -61,6 +61,7 @@ export {
   WIRE_VERSIONS,
   ISS_CANONICAL,
   TYPE_GRAMMAR,
+  POLICY_BLOCK,
   OCCURRED_AT_TOLERANCE_SECONDS,
   PEAC_ALG,
 } from './constants.js';

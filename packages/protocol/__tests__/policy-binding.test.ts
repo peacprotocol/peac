@@ -117,6 +117,21 @@ describe('computePolicyDigestJcs(): JCS+SHA-256 canonicalization', () => {
     expect(digest).toMatch(/^sha256:[0-9a-f]{64}$/);
   });
 
+  it('golden vector: {b:2,a:1} sorts to {"a":1,"b":2} under JCS', async () => {
+    // Frozen cross-language test vector.
+    // JCS of {b:2,a:1} -> '{"a":1,"b":2}' -> sha256(UTF-8 bytes) = value below.
+    // If this fails, the JCS canonicalization or SHA-256 pipeline changed.
+    const digest = await computePolicyDigestJcs({ b: 2, a: 1 } as JsonValue);
+    expect(digest).toBe('sha256:43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777');
+  });
+
+  it('golden vector: {version:"1.0",allow:true} sorts to {"allow":true,"version":"1.0"}', async () => {
+    // Frozen: key order in source is irrelevant; JCS always sorts lexicographically.
+    // '{"allow":true,"version":"1.0"}' -> sha256(UTF-8) = value below.
+    const digest = await computePolicyDigestJcs({ version: '1.0', allow: true } as JsonValue);
+    expect(digest).toBe('sha256:432a29aa96491286bbc4039e7c8650a264eafd4746aab497de454baf9be1b70a');
+  });
+
   it('throws for non-finite number values (RFC 8785 rejects NaN)', async () => {
     // RFC 8785 (JCS) section 3.2.2: IEEE 754 infinity and NaN are not permitted.
     // canonicalize() throws "Cannot canonicalize non-finite number" for NaN values.

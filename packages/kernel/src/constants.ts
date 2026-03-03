@@ -314,6 +314,17 @@ export const ISS_CANONICAL = {
 export const TYPE_GRAMMAR = { maxLength: 256 } as const;
 
 /**
+ * policy block field constraints (Wire 0.2, DD-151).
+ * Separate from ISS_CANONICAL to allow independent evolution of each limit.
+ */
+export const POLICY_BLOCK = {
+  /** Maximum length of the policy.uri HTTPS hint (chars). */
+  uriMaxLength: 2048,
+  /** Maximum length of the policy.version label (chars). */
+  versionMaxLength: 256,
+} as const;
+
+/**
  * Maximum tolerated skew between occurred_at and iat for evidence receipts (seconds).
  * If occurred_at > iat within this tolerance, a 'occurred_at_skew' warning is emitted.
  * If occurred_at > now + tolerance, E_OCCURRED_AT_FUTURE is a hard error.
