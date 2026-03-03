@@ -409,7 +409,13 @@ describe('Wire02ClaimsSchema: valid', () => {
   it('accepts evidence with extensions', () => {
     const result = Wire02ClaimsSchema.safeParse(
       minimalEvidence({
-        extensions: { 'org.peacprotocol/commerce': { amount_minor: '1000', currency: 'USD' } },
+        extensions: {
+          'org.peacprotocol/commerce': {
+            payment_rail: 'stripe',
+            amount_minor: '1000',
+            currency: 'USD',
+          },
+        },
       })
     );
     expect(result.success).toBe(true);

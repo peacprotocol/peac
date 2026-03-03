@@ -532,6 +532,44 @@ export {
 } from './wire-02-representation';
 export type { Wire02RepresentationFields } from './wire-02-representation';
 
+// Wire 0.2 extension group schemas and accessors (v0.12.0-preview.1, DD-153)
+export {
+  // Schemas
+  CommerceExtensionSchema,
+  AccessExtensionSchema,
+  ChallengeExtensionSchema,
+  ChallengeTypeSchema,
+  ProblemDetailsSchema,
+  IdentityExtensionSchema,
+  CorrelationExtensionSchema,
+  // Constants
+  COMMERCE_EXTENSION_KEY,
+  ACCESS_EXTENSION_KEY,
+  CHALLENGE_EXTENSION_KEY,
+  IDENTITY_EXTENSION_KEY,
+  CORRELATION_EXTENSION_KEY,
+  CHALLENGE_TYPES,
+  EXTENSION_LIMITS,
+  // Grammar validator
+  isValidExtensionKey,
+  // Typed accessors
+  getCommerceExtension,
+  getAccessExtension,
+  getChallengeExtension,
+  getIdentityExtension,
+  getCorrelationExtension,
+  // Envelope validation helper (used internally by Wire02ClaimsSchema)
+  validateKnownExtensions,
+} from './wire-02-extensions';
+export type {
+  CommerceExtension,
+  AccessExtension,
+  ChallengeExtension,
+  ChallengeType,
+  IdentityExtension,
+  CorrelationExtension,
+} from './wire-02-extensions';
+
 // Policy binding comparison (v0.12.0-preview.1, DD-49, DD-151)
 export { verifyPolicyBinding } from './policy-binding';
 

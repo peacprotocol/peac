@@ -25,6 +25,7 @@ import {
 import type { EvidencePillar, VerificationWarning } from '@peac/kernel';
 import { ActorBindingSchema } from './actor-binding.js';
 import { Wire02RepresentationFieldsSchema } from './wire-02-representation.js';
+import { validateKnownExtensions } from './wire-02-extensions.js';
 
 // ---------------------------------------------------------------------------
 // Private helpers
@@ -272,6 +273,8 @@ export const Wire02ClaimsSchema = z
         message: 'E_OCCURRED_AT_ON_CHALLENGE',
       });
     }
+    // Validate known extension groups + reject malformed key grammar (DD-153)
+    validateKnownExtensions(data.extensions, ctx);
   })
   .strict();
 
