@@ -51,7 +51,7 @@ See [examples/x402-node-server](../examples/x402-node-server) for a working impl
 
 ---
 
-**Package availability:** All packages listed below are published to npm at v0.11.3. Install via `pnpm add <package>` or run from this repo root via `pnpm --filter <pkg> exec ...`.
+**Package availability:** All packages listed below are published to npm on two dist-tags: `latest` (stable) and `next` (Wire 0.2 preview). Install via `pnpm add <package>` (stable) or `pnpm add <package>@next` (preview). See [Releases](https://github.com/peacprotocol/peac/releases) for current versions.
 
 ## Integration examples
 
@@ -211,16 +211,28 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 
 ## Wire format and HTTP integration
 
-**Receipts:**
+**Wire 0.1 (stable):**
 
-- Receipt type: `typ: "peac-receipt/0.1"` (frozen across v0.x)
+- JWS type: `typ: "peac-receipt/0.1"`
 - Envelope structure: `PEACEnvelope` with auth, payment evidence, and metadata
 - Signature: EdDSA (Ed25519, RFC 8032)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
 
+**Wire 0.2 (preview on `next` dist-tag):**
+
+- JWS type: `typ: "interaction-record+jwt"`
+- Two structural kinds: `evidence` (records what happened) and `challenge` (records what is required)
+- Open semantic `type` field (reverse-DNS or absolute URI): `org.peacprotocol/payment`, `org.peacprotocol/access-decision`, etc.
+- Multi-valued `pillars` from a 10-value closed taxonomy (commerce, access, identity, consent, compliance, privacy, safety, provenance, attribution, purpose)
+- 5 typed extension groups: commerce, access, challenge, identity, correlation
+- Policy binding: JCS (RFC 8785) + SHA-256 digest comparison (3-state: verified/failed/unavailable)
+- JOSE hardening: embedded keys rejected, `crit`/`b64:false`/`zip` rejected, `kid` required
+- `verifyLocal()` auto-detects wire version and returns `wireVersion: '0.1'` or `wireVersion: '0.2'`
+- Normative spec: [WIRE-0.2.md](specs/WIRE-0.2.md)
+
 **HTTP:**
 
-- Single `PEAC-Receipt` response header
+- Single `PEAC-Receipt` response header (both wire versions)
 - HTTP 402 Payment Required support
 - Errors via `application/problem+json` (RFC 9457)
 - DPoP proof-of-possession binding (RFC 9449)
@@ -312,7 +324,7 @@ Enables verifiers to discover JWKS endpoints and verification configuration for 
   "issuer": "https://api.example.com",
   "jwks_uri": "https://api.example.com/.well-known/jwks.json",
   "verify_endpoint": "https://api.example.com/verify",
-  "receipt_versions": ["peac-receipt/0.1"],
+  "receipt_versions": ["peac-receipt/0.1", "interaction-record+jwt"],
   "algorithms": ["EdDSA"],
   "payment_rails": ["x402", "stripe"],
   "security_contact": "security@example.com"
@@ -748,10 +760,11 @@ These are optional higher-layer helpers built on top of the core receipt/kernel 
 
 ## Stability and versioning
 
-**Wire format:**
+**Wire formats:**
 
-- `peac-receipt/0.1` is frozen throughout the v0.x series
-- Libraries may evolve APIs but must emit/accept `peac-receipt/0.1`
+- `peac-receipt/0.1` (Wire 0.1): the stable receipt format on the `latest` dist-tag
+- `interaction-record+jwt` (Wire 0.2): preview on the `next` dist-tag (`v0.12.0-preview.1`); envelope structure is stable but subject to feedback before promotion to `latest`
+- Both wire versions coexist: `verifyLocal()` auto-detects and validates accordingly
 
 **Library surface:**
 
