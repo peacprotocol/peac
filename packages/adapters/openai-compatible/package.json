@@ -1,6 +1,6 @@
 {
   "name": "@peac/adapter-openai-compatible",
-  "version": "0.11.3",
+  "version": "0.12.0-preview.1",
   "description": "OpenAI-compatible chat completion adapter for PEAC interaction evidence (hash-first)",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

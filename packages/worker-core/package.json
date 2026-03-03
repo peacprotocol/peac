@@ -1,6 +1,6 @@
 {
   "name": "@peac/worker-core",
-  "version": "0.11.3",
+  "version": "0.12.0-preview.1",
   "description": "Runtime-neutral TAP verification handler for edge workers",
   "type": "module",
   "main": "./dist/index.js",
