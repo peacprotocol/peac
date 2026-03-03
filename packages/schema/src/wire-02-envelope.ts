@@ -24,6 +24,7 @@ import {
 } from '@peac/kernel';
 import type { EvidencePillar, VerificationWarning } from '@peac/kernel';
 import { ActorBindingSchema } from './actor-binding.js';
+import { Wire02RepresentationFieldsSchema } from './wire-02-representation.js';
 
 // ---------------------------------------------------------------------------
 // Private helpers
@@ -226,18 +227,7 @@ export const PolicyBlockSchema = z.object({
   version: z.string().max(POLICY_BLOCK.versionMaxLength).optional(),
 });
 
-// ---------------------------------------------------------------------------
-// RepresentationFieldsSchema (basic; PR 15 adds FingerprintRef validation)
-// ---------------------------------------------------------------------------
-
-const RepresentationFieldsSchemaBasic = z.object({
-  /** FingerprintRef string form: sha256:<64 lowercase hex> */
-  content_hash: z.string().regex(HASH.pattern).optional(),
-  /** MIME type (e.g., 'text/markdown') */
-  content_type: z.string().max(256).optional(),
-  /** Size of the served content in bytes */
-  content_length: z.number().int().nonnegative().optional(),
-});
+// RepresentationFieldsSchema: see wire-02-representation.ts (DD-152, PR 15)
 
 // ---------------------------------------------------------------------------
 // Wire02ClaimsSchema (DD-156)
@@ -265,8 +255,8 @@ export const Wire02ClaimsSchema = z
     actor: ActorBindingSchema.optional(),
     /** Policy binding block (DD-151) */
     policy: PolicyBlockSchema.optional(),
-    /** Representation fields (DD-152); PR 15 upgrades to full FingerprintRef validation */
-    representation: RepresentationFieldsSchemaBasic.optional(),
+    /** Representation fields (DD-152): FingerprintRef validation, sha256-only, strict */
+    representation: Wire02RepresentationFieldsSchema.optional(),
     /** ISO 8601 / RFC 3339 timestamp when the interaction occurred; evidence kind only */
     occurred_at: z.string().datetime({ offset: true }).optional(),
     /** Declared purpose string; max 256 chars */

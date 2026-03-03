@@ -524,6 +524,14 @@ export {
   sortWarnings,
 } from './wire-02-warnings';
 
+// Wire 0.2 representation fields (v0.12.0-preview.1, DD-152)
+export {
+  Wire02RepresentationFieldsSchema,
+  RepresentationFieldsSchema,
+  REPRESENTATION_LIMITS,
+} from './wire-02-representation';
+export type { Wire02RepresentationFields } from './wire-02-representation';
+
 // Policy binding comparison (v0.12.0-preview.1, DD-49, DD-151)
 export { verifyPolicyBinding } from './policy-binding';
 
