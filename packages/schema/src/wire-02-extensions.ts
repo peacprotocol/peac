@@ -126,16 +126,6 @@ export const ACCESS_EXTENSION_KEY = 'org.peacprotocol/access' as const;
 export const CHALLENGE_EXTENSION_KEY = 'org.peacprotocol/challenge' as const;
 export const IDENTITY_EXTENSION_KEY = 'org.peacprotocol/identity' as const;
 export const CORRELATION_EXTENSION_KEY = 'org.peacprotocol/correlation' as const;
-
-/** All known Wire 0.2 extension group keys (for superRefine lookup) */
-const KNOWN_EXTENSION_KEYS = new Set([
-  COMMERCE_EXTENSION_KEY,
-  ACCESS_EXTENSION_KEY,
-  CHALLENGE_EXTENSION_KEY,
-  IDENTITY_EXTENSION_KEY,
-  CORRELATION_EXTENSION_KEY,
-]);
-
 // ---------------------------------------------------------------------------
 // RFC 6901 pointer helpers (P0-3)
 // ---------------------------------------------------------------------------
