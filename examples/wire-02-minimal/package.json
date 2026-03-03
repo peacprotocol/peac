@@ -1,0 +1,16 @@
+{
+  "name": "@peac/example-wire-02-minimal",
+  "version": "0.12.0-preview.1",
+  "private": true,
+  "scripts": {
+    "demo": "tsx demo.ts"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

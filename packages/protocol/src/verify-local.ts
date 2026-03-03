@@ -16,6 +16,11 @@ import {
   checkOccurredAtSkew,
   sortWarnings,
   WARNING_TYP_MISSING,
+  WARNING_TYPE_UNREGISTERED,
+  WARNING_UNKNOWN_EXTENSION,
+  REGISTERED_RECEIPT_TYPES,
+  REGISTERED_EXTENSION_GROUP_KEYS,
+  isValidExtensionKey,
   verifyPolicyBinding,
 } from '@peac/schema';
 import type { PolicyBindingStatus } from './verifier-types';
@@ -465,6 +470,31 @@ export async function verifyLocal(
         }
         if (skewResult !== null) {
           accumulatedWarnings.push(skewResult);
+        }
+      }
+
+      // Emit type_unregistered warning for valid-but-unregistered type values (DD-155)
+      if (!REGISTERED_RECEIPT_TYPES.has(claims.type)) {
+        accumulatedWarnings.push({
+          code: WARNING_TYPE_UNREGISTERED,
+          message: 'Receipt type is not in the recommended type registry',
+          pointer: '/type',
+        });
+      }
+
+      // Emit unknown_extension_preserved warnings for unrecognized-but-well-formed keys (DD-155)
+      // Malformed keys are already hard errors (E_INVALID_EXTENSION_KEY) at schema layer.
+      if (claims.extensions !== undefined) {
+        for (const key of Object.keys(claims.extensions)) {
+          if (!REGISTERED_EXTENSION_GROUP_KEYS.has(key) && isValidExtensionKey(key)) {
+            // RFC 6901: '~' -> '~0', '/' -> '~1'
+            const escapedKey = key.replace(/~/g, '~0').replace(/\//g, '~1');
+            accumulatedWarnings.push({
+              code: WARNING_UNKNOWN_EXTENSION,
+              message: 'Unknown extension key preserved without schema validation',
+              pointer: `/extensions/${escapedKey}`,
+            });
+          }
         }
       }
 

@@ -319,4 +319,63 @@ else
   bad=1
 fi
 
+echo "== Wire 0.2 isolation (DD-156) =="
+# Wire02 types must NOT appear in Wire 0.1 validators or attestation-receipt
+if git grep -nE 'Wire02|peac_version|WIRE_02' -- 'packages/schema/src/validators.ts' 'packages/schema/src/attestation-receipt.ts' | grep .; then
+  echo "FAIL: Wire 0.2 types leaked into Wire 0.1 code"
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== forbid draft typ (DD-156) =="
+# peac-receipt+jwt was never shipped; must not appear anywhere
+if git grep -n 'peac-receipt+jwt' -- '**/*.ts' ':!node_modules' ':!archive/**' | grep .; then
+  echo "FAIL: Draft typ peac-receipt+jwt found (use interaction-record+jwt)"
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== forbid stale warning constant =="
+# unknown_type_unvalidated_extensions was replaced by type_unregistered
+if git grep -n 'unknown_type_unvalidated_extensions' -- '**/*.ts' ':!node_modules' ':!archive/**' | grep .; then
+  echo "FAIL: Stale constant unknown_type_unvalidated_extensions found"
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== no strictness in crypto (DD-156) =="
+# Strictness belongs exclusively in @peac/protocol.verifyLocal()
+# Exclude JSDoc/comment lines (lines starting with * or //)
+if git grep -n 'strictness' -- 'packages/crypto/src/**' ':!node_modules' | grep -v '^\S*:\s*//' | grep -v '^\S*:\s*\*' | grep .; then
+  echo "FAIL: strictness found in @peac/crypto (belongs in @peac/protocol only)"
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== JOSE hardening present (DD-156) =="
+# b64 and zip rejection must be present in jws.ts
+if ! git grep -q 'b64' -- 'packages/crypto/src/jws.ts'; then
+  echo "FAIL: b64 rejection not found in jws.ts"
+  bad=1
+elif ! git grep -q 'zip' -- 'packages/crypto/src/jws.ts'; then
+  echo "FAIL: zip rejection not found in jws.ts"
+  bad=1
+else
+  echo "OK"
+fi
+
+echo "== WIRE_01_JWS_TYP uniqueness =="
+# WIRE_01_JWS_TYP must be defined (export const) exactly once in kernel constants
+WIRE01_DEF_COUNT=$(git grep -c 'export const WIRE_01_JWS_TYP' -- 'packages/kernel/src/constants.ts' | cut -d: -f2)
+if [ "${WIRE01_DEF_COUNT:-0}" -ne 1 ]; then
+  echo "FAIL: WIRE_01_JWS_TYP defined ${WIRE01_DEF_COUNT:-0} times in kernel constants (expected exactly 1)"
+  bad=1
+else
+  echo "OK"
+fi
+
 exit $bad

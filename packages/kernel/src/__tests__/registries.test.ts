@@ -45,6 +45,8 @@ describe('registries.json structure', () => {
     'attestation_types',
     'toolcall_op_types',
     'toolcall_resource_types',
+    'receipt_types',
+    'extension_groups',
   ];
 
   it('should have a valid version string', () => {

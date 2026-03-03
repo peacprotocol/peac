@@ -98,7 +98,7 @@ async function createUntypedJWS(
 // Shared test constants
 const testKid = '2026-01-15T10:30:00Z';
 const testIss = 'https://api.example.com';
-const testType = 'org.peacprotocol/commerce';
+const testType = 'org.peacprotocol/payment';
 
 // ---------------------------------------------------------------------------
 // issueWire02(): basic output shape
@@ -136,7 +136,7 @@ describe('issueWire02() basic output', () => {
     const { jws } = await issueWire02({
       iss: testIss,
       kind: 'challenge',
-      type: 'org.peacprotocol/challenge',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid: testKid,
     });
@@ -386,7 +386,7 @@ describe('issueWire02 → verifyLocal round-trip', () => {
     const { jws } = await issueWire02({
       iss: testIss,
       kind: 'challenge',
-      type: 'org.peacprotocol/challenge',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid: testKid,
     });
@@ -764,7 +764,7 @@ describe('occurred_at skew rules', () => {
       issueWire02({
         iss: testIss,
         kind: 'challenge',
-        type: 'org.peacprotocol/challenge',
+        type: 'org.peacprotocol/payment',
         occurred_at: occurredAt,
         privateKey,
         kid: testKid,
@@ -798,7 +798,7 @@ describe('occurred_at skew rules', () => {
     const { jws } = await issueWire02({
       iss: testIss,
       kind: 'challenge',
-      type: 'org.peacprotocol/challenge',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid: testKid,
     });

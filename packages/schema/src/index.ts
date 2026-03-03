@@ -570,6 +570,9 @@ export type {
   CorrelationExtension,
 } from './wire-02-extensions';
 
+// Wire 0.2 registry constants (v0.12.0-preview.1, DD-155)
+export { REGISTERED_RECEIPT_TYPES, REGISTERED_EXTENSION_GROUP_KEYS } from './wire-02-registries';
+
 // Policy binding comparison (v0.12.0-preview.1, DD-49, DD-151)
 export { verifyPolicyBinding } from './policy-binding';
 

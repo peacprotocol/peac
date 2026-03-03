@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.11.3",
+  "version": "0.5.0",
   "description": "PEAC protocol registries: payment rails, control engines, transport methods, agent protocols, proof types, extension keys, pillar values",
   "payment_rails": [
     {
@@ -221,6 +221,111 @@
       "provenance",
       "purpose",
       "safety"
+    ]
+  },
+  "receipt_types": {
+    "_comment": "Recommended receipt type values for Wire 0.2 type field. 10 pillar-aligned types. Custom types are valid but trigger type_unregistered warning.",
+    "values": [
+      {
+        "id": "org.peacprotocol/payment",
+        "pillar": "commerce",
+        "description": "Commerce transaction evidence (payment, authorization, settlement)",
+        "extension_group": "org.peacprotocol/commerce",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/access-decision",
+        "pillar": "access",
+        "description": "Access control decision evidence (allow, deny, review)",
+        "extension_group": "org.peacprotocol/access",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/identity-attestation",
+        "pillar": "identity",
+        "description": "Identity verification or attestation evidence",
+        "extension_group": "org.peacprotocol/identity",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/consent-record",
+        "pillar": "consent",
+        "description": "Consent collection or withdrawal evidence",
+        "extension_group": null,
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/compliance-check",
+        "pillar": "compliance",
+        "description": "Regulatory compliance check evidence",
+        "extension_group": null,
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/privacy-signal",
+        "pillar": "privacy",
+        "description": "Privacy signal observation or enforcement evidence",
+        "extension_group": null,
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/safety-review",
+        "pillar": "safety",
+        "description": "Content or agent safety review evidence",
+        "extension_group": null,
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/provenance-record",
+        "pillar": "provenance",
+        "description": "Data or content provenance tracking evidence",
+        "extension_group": null,
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/attribution-event",
+        "pillar": "attribution",
+        "description": "Content or action attribution evidence",
+        "extension_group": null,
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/purpose-declaration",
+        "pillar": "purpose",
+        "description": "Purpose declaration or limitation evidence",
+        "extension_group": null,
+        "status": "informational"
+      }
+    ]
+  },
+  "extension_groups": {
+    "_comment": "Core extension group keys with typed schemas in @peac/schema. Unknown keys with valid grammar trigger unknown_extension_preserved warning.",
+    "values": [
+      {
+        "id": "org.peacprotocol/commerce",
+        "description": "Commerce extension: payment_rail, amount_minor, currency, reference, asset, env",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/access",
+        "description": "Access extension: resource, action, decision (allow/deny/review)",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/challenge",
+        "description": "Challenge extension: challenge_type, problem (RFC 9457), requirements",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/identity",
+        "description": "Identity extension: proof_ref",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/correlation",
+        "description": "Correlation extension: trace_id, span_id, workflow_id, parent_jti, depends_on",
+        "status": "informational"
+      }
     ]
   }
 }
