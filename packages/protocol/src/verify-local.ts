@@ -6,7 +6,7 @@
  */
 
 import { verify as jwsVerify } from '@peac/crypto';
-import { type VerificationStrictness, type VerificationWarning } from '@peac/kernel';
+import { type VerificationStrictness, type VerificationWarning, HASH } from '@peac/kernel';
 import {
   parseReceiptClaims,
   validateKernelConstraints,
@@ -16,6 +16,7 @@ import {
   checkOccurredAtSkew,
   sortWarnings,
   WARNING_TYP_MISSING,
+  verifyPolicyBinding,
 } from '@peac/schema';
 import type { PolicyBindingStatus } from './verifier-types';
 
@@ -75,6 +76,8 @@ export type VerifyLocalErrorCode =
   | 'E_JWS_MISSING_KID'
   | 'E_JWS_B64_REJECTED'
   | 'E_JWS_ZIP_REJECTED'
+  // Policy binding (Wire 0.2, v0.12.0-preview.1, DD-151)
+  | 'E_POLICY_BINDING_FAILED'
   | 'E_INTERNAL';
 
 /**
@@ -143,6 +146,20 @@ export interface VerifyLocalOptions {
    * Strictness is EXCLUSIVELY controlled here (@peac/protocol). @peac/crypto has no strictness param.
    */
   strictness?: VerificationStrictness;
+
+  /**
+   * Pre-computed local policy digest for policy binding (Wire 0.2, v0.12.0-preview.1, DD-151).
+   *
+   * Must be in 'sha256:<64 lowercase hex>' format, computed via computePolicyDigestJcs()
+   * from @peac/protocol. When provided alongside a receipt that contains a policy block
+   * (policy.digest), the binding check is performed:
+   *   - Match: policy_binding = 'verified'
+   *   - Mismatch: hard fail with E_POLICY_BINDING_FAILED
+   *   - Either absent: policy_binding = 'unavailable'
+   *
+   * Always 'unavailable' for Wire 0.1 receipts regardless of this option.
+   */
+  policyDigest?: string;
 }
 
 /**
@@ -207,9 +224,14 @@ export type VerifyLocalSuccess =
       /** Verification warnings from schema parsing and strictness routing */
       warnings: VerificationWarning[];
       /**
-       * Policy binding status (DD-49).
+       * Policy binding status (DD-49, DD-151).
        *
-       * 'unavailable' until PR 14 (Policy Binding) adds full JCS+SHA-256 check.
+       * Three-state result:
+       *   - 'unavailable': either the receipt contains no policy block, or the
+       *     caller did not pass a policyDigest option to verifyLocal(). No check.
+       *   - 'verified': both digests present and match exactly.
+       *   - 'failed': not returned on success; verifyLocal() returns
+       *     E_POLICY_BINDING_FAILED (valid: false) before reaching this field.
        */
       policy_binding: PolicyBindingStatus;
     };
@@ -231,8 +253,17 @@ export interface VerifyLocalFailure {
   details?: {
     /** Precise parse error code from unified parser (e.g. E_PARSE_COMMERCE_INVALID) */
     parse_code?: string;
-    /** Zod validation issues (bounded, stable shape -- non-normative, may change) */
+    /** Zod validation issues (bounded, stable shape; non-normative, may change) */
     issues?: ReadonlyArray<{ path: string; message: string }>;
+    /**
+     * Policy digest from the receipt (present when code is E_POLICY_BINDING_FAILED).
+     * Both are SHA-256 hashes; safe to log without leaking policy content.
+     */
+    receipt_policy_digest?: string;
+    /** Caller-supplied policy digest (present when code is E_POLICY_BINDING_FAILED). */
+    local_policy_digest?: string;
+    /** policy.uri hint from the receipt (present when code is E_POLICY_BINDING_FAILED and uri set). */
+    policy_uri?: string;
   };
 }
 
@@ -328,6 +359,7 @@ export async function verifyLocal(
     requireExp = false,
     maxClockSkew = 300,
     strictness = 'strict',
+    policyDigest,
   } = options;
   const now = options.now ?? Math.floor(Date.now() / 1000);
 
@@ -436,6 +468,36 @@ export async function verifyLocal(
         }
       }
 
+      // Validate policyDigest option format (DD-151): must be sha256:<64 lowercase hex> if provided.
+      if (policyDigest !== undefined && !HASH.pattern.test(policyDigest)) {
+        return {
+          valid: false,
+          code: 'E_INVALID_FORMAT',
+          message: 'policyDigest option must be in sha256:<64 lowercase hex> format',
+        };
+      }
+
+      // Policy binding check (DD-151): 3-state result.
+      // 'unavailable' when either receipt has no policy block or caller omitted policyDigest.
+      // 'verified' / 'failed' when both are present; 'failed' is a hard verification error.
+      const receiptPolicyDigest = claims.policy?.digest;
+      const bindingStatus: PolicyBindingStatus =
+        receiptPolicyDigest === undefined || policyDigest === undefined
+          ? 'unavailable'
+          : verifyPolicyBinding(receiptPolicyDigest, policyDigest);
+      if (bindingStatus === 'failed') {
+        return {
+          valid: false,
+          code: 'E_POLICY_BINDING_FAILED',
+          message: 'Policy binding check failed: receipt policy digest does not match local policy',
+          details: {
+            receipt_policy_digest: receiptPolicyDigest,
+            local_policy_digest: policyDigest,
+            ...(claims.policy?.uri !== undefined && { policy_uri: claims.policy.uri }),
+          },
+        };
+      }
+
       return {
         valid: true,
         variant: 'wire-02',
@@ -443,7 +505,7 @@ export async function verifyLocal(
         kid: result.header.kid,
         wireVersion: '0.2',
         warnings: sortWarnings(accumulatedWarnings),
-        policy_binding: 'unavailable', // Full JCS+SHA-256 check deferred to PR 14
+        policy_binding: bindingStatus,
       };
     }
 

@@ -15,7 +15,13 @@
  */
 
 import { z } from 'zod';
-import { ISS_CANONICAL, TYPE_GRAMMAR, OCCURRED_AT_TOLERANCE_SECONDS, HASH } from '@peac/kernel';
+import {
+  ISS_CANONICAL,
+  TYPE_GRAMMAR,
+  POLICY_BLOCK,
+  OCCURRED_AT_TOLERANCE_SECONDS,
+  HASH,
+} from '@peac/kernel';
 import type { EvidencePillar, VerificationWarning } from '@peac/kernel';
 import { ActorBindingSchema } from './actor-binding.js';
 
@@ -212,12 +218,12 @@ export const PolicyBlockSchema = z.object({
    */
   uri: z
     .string()
-    .max(ISS_CANONICAL.maxLength)
+    .max(POLICY_BLOCK.uriMaxLength)
     .url()
     .refine((u) => u.startsWith('https://'), 'policy.uri must be an https:// URL')
     .optional(),
-  /** Caller-assigned version label */
-  version: z.string().optional(),
+  /** Caller-assigned version label (max 256 chars) */
+  version: z.string().max(POLICY_BLOCK.versionMaxLength).optional(),
 });
 
 // ---------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 
 import { uuidv7 } from 'uuidv7';
 import { sign, signWire02 } from '@peac/crypto';
-import type { JsonValue, EvidencePillar } from '@peac/kernel';
+import type { JsonValue, EvidencePillar, PolicyBlock } from '@peac/kernel';
 import { ZodError } from 'zod';
 import {
   PEACReceiptClaims,
@@ -416,6 +416,12 @@ export interface IssueWire02Options {
   /** Declared purpose string (max 256 chars, optional) */
   purpose_declared?: string;
 
+  /**
+   * Policy binding block (DD-151).
+   * digest must be 'sha256:<64 lowercase hex>' format (use computePolicyDigestJcs from @peac/protocol).
+   */
+  policy?: PolicyBlock;
+
   /** Extension groups (open; caller-provided, not validated here) */
   extensions?: Record<string, unknown>;
 }
@@ -433,9 +439,16 @@ export interface IssueWire02Options {
 export async function issueWire02(options: IssueWire02Options): Promise<IssueResult> {
   // Validate canonical iss before signing
   if (!isCanonicalIss(options.iss)) {
-    throw new Error(
-      `iss is not in canonical form: "${options.iss}". Use https:// origin or did: identifier.`
-    );
+    throw new IssueError({
+      code: 'E_ISS_NOT_CANONICAL',
+      category: 'validation',
+      severity: 'error',
+      retryable: false,
+      http_status: 400,
+      details: {
+        message: `iss is not in canonical form: "${options.iss}". Use https:// origin or did: identifier.`,
+      },
+    } as PEACError);
   }
 
   // Generate jti if not provided
@@ -456,6 +469,7 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
     ...(options.pillars !== undefined && { pillars: options.pillars }),
     ...(options.occurred_at !== undefined && { occurred_at: options.occurred_at }),
     ...(options.purpose_declared !== undefined && { purpose_declared: options.purpose_declared }),
+    ...(options.policy !== undefined && { policy: options.policy }),
     ...(options.extensions !== undefined && { extensions: options.extensions }),
   };
 
@@ -463,9 +477,16 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
   const parseResult = Wire02ClaimsSchema.safeParse(claims);
   if (!parseResult.success) {
     const firstIssue = parseResult.error.issues[0];
-    throw new Error(
-      `Wire 0.2 claims schema validation failed: ${firstIssue?.message ?? 'unknown'}`
-    );
+    throw new IssueError({
+      code: 'E_INVALID_FORMAT',
+      category: 'validation',
+      severity: 'error',
+      retryable: false,
+      http_status: 400,
+      details: {
+        message: `Wire 0.2 claims schema validation failed: ${firstIssue?.message ?? 'unknown'}`,
+      },
+    } as PEACError);
   }
 
   // Sign with Wire 0.2 (always sets typ: 'interaction-record+jwt')
