@@ -20,7 +20,7 @@ async function main() {
   const { jws } = await issueWire02({
     iss: 'https://api.example.com',
     kind: 'evidence',
-    type: 'org.peacprotocol.receipt.commerce',
+    type: 'org.peacprotocol/payment',
     sub: 'https://api.example.com/inference/v1',
     privateKey,
     kid: 'key-2026-01',

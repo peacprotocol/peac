@@ -61,7 +61,7 @@ for (const transition of transitions) {
   const { jws } = await issueWire02({
     iss: gateway,
     kind: 'evidence',
-    type: 'org.peacprotocol.receipt.commerce',
+    type: 'org.peacprotocol/payment',
     privateKey,
     kid: 'gateway-key-2026-03',
   });

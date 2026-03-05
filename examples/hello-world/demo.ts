@@ -17,7 +17,7 @@ const { publicKey, privateKey } = await generateKeypair();
 const { jws } = await issueWire02({
   iss: 'https://api.example.com',
   kind: 'evidence',
-  type: 'org.peacprotocol.receipt.commerce',
+  type: 'org.peacprotocol/payment',
   privateKey,
   kid: 'demo-key',
 });

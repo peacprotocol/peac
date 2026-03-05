@@ -91,7 +91,7 @@ const { publicKey, privateKey } = await generateKeypair();
 const { jws } = await issueWire02({
   iss: 'https://gateway.example.com',
   kind: 'evidence',
-  type: 'org.peacprotocol.receipt.content_signal',
+  type: 'org.peacprotocol/content_signal',
   privateKey,
   kid: 'demo-key-2026-03',
   extensions: {
