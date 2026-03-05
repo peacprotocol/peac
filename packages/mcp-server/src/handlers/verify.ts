@@ -172,17 +172,15 @@ export async function handleVerify(params: HandlerParams<VerifyInput>): Promise<
     const claims = result.claims as Record<string, unknown>;
     const claimsSummary: Record<string, unknown> = {
       iss: claims.iss,
-      aud: claims.aud,
-      rid: claims.rid,
+      kind: claims.kind,
+      type: claims.type,
+      jti: claims.jti,
       variant: result.variant,
+      wireVersion: result.wireVersion,
     };
-    if (result.variant === 'commerce') {
-      claimsSummary.amt = claims.amt;
-      claimsSummary.cur = claims.cur;
-    }
 
     const tr = truncateResponse(
-      `Verification PASSED (${result.variant} receipt, kid=${result.kid})`,
+      `Verification PASSED (${result.variant} receipt, kind=${claims.kind ?? 'unknown'}, kid=${result.kid})`,
       policy
     );
     return {

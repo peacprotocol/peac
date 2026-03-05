@@ -120,72 +120,62 @@ describe('schemas', () => {
   describe('IssueInputSchema', () => {
     it('accepts minimal input', () => {
       const result = IssueInputSchema.safeParse({
-        aud: 'https://client.example.com',
-        amt: 100,
-        cur: 'USD',
-        rail: 'stripe',
-        reference: 'tx_123',
+        kind: 'evidence',
+        type: 'org.peacprotocol/payment',
       });
       expect(result.success).toBe(true);
     });
 
-    it('defaults env to test', () => {
-      const result = IssueInputSchema.parse({
-        aud: 'https://client.example.com',
-        amt: 100,
-        cur: 'USD',
-        rail: 'stripe',
-        reference: 'tx_123',
+    it('accepts evidence with pillars and extensions', () => {
+      const result = IssueInputSchema.safeParse({
+        kind: 'evidence',
+        type: 'org.peacprotocol/payment',
+        pillars: ['commerce'],
+        extensions: {
+          'org.peacprotocol/commerce': {
+            payment_rail: 'stripe',
+            amount_minor: '1000',
+            currency: 'USD',
+          },
+        },
       });
-      expect(result.env).toBe('test');
+      expect(result.success).toBe(true);
     });
 
-    it('rejects non-URL aud', () => {
+    it('accepts challenge kind', () => {
       const result = IssueInputSchema.safeParse({
-        aud: 'not-a-url',
-        amt: 100,
-        cur: 'USD',
-        rail: 'stripe',
-        reference: 'tx_123',
+        kind: 'challenge',
+        type: 'org.peacprotocol/payment_required',
       });
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
 
-    it('rejects lowercase currency', () => {
+    it('rejects missing kind', () => {
       const result = IssueInputSchema.safeParse({
-        aud: 'https://client.example.com',
-        amt: 100,
-        cur: 'usd',
-        rail: 'stripe',
-        reference: 'tx_123',
+        type: 'org.peacprotocol/payment',
       });
       expect(result.success).toBe(false);
     });
 
-    it('rejects negative amount', () => {
+    it('rejects missing type', () => {
       const result = IssueInputSchema.safeParse({
-        aud: 'https://client.example.com',
-        amt: -1,
-        cur: 'USD',
-        rail: 'stripe',
-        reference: 'tx_123',
+        kind: 'evidence',
       });
       expect(result.success).toBe(false);
     });
 
     it('accepts optional fields', () => {
       const result = IssueInputSchema.safeParse({
-        aud: 'https://client.example.com',
-        amt: 100,
-        cur: 'USD',
-        rail: 'stripe',
-        reference: 'tx_123',
-        asset: 'USDC',
-        env: 'live',
-        network: 'ethereum',
-        subject: 'https://user.example.com',
-        ttl_seconds: 3600,
-        kind: 'payment',
+        kind: 'evidence',
+        type: 'org.peacprotocol/payment',
+        sub: 'https://resource.example.com',
+        pillars: ['commerce', 'access'],
+        occurred_at: '2026-03-05T12:00:00Z',
+        policy: {
+          uri: 'https://example.com/.well-known/peac.txt',
+          version: '1.0.0',
+          digest: 'sha256:' + 'a'.repeat(64),
+        },
       });
       expect(result.success).toBe(true);
     });
@@ -199,29 +189,27 @@ describe('schemas', () => {
         jws: 'eyJ.eyJ.sig',
         claimsSummary: {
           iss: 'https://api.example.com',
-          aud: 'https://client.example.com',
+          kind: 'evidence',
+          type: 'org.peacprotocol/payment',
           iat: 1700000000,
-          rid: 'abc-123',
-          amt: 100,
-          cur: 'USD',
+          jti: 'test-jti-001',
         },
       });
       expect(result.success).toBe(true);
     });
 
-    it('accepts output with exp', () => {
+    it('accepts output with pillars', () => {
       const result = IssueOutputSchema.safeParse({
         _meta: META,
         ok: true,
         jws: 'eyJ.eyJ.sig',
         claimsSummary: {
           iss: 'https://api.example.com',
-          aud: 'https://client.example.com',
+          kind: 'evidence',
+          type: 'org.peacprotocol/payment',
           iat: 1700000000,
-          exp: 1700003600,
-          rid: 'abc-123',
-          amt: 100,
-          cur: 'USD',
+          jti: 'test-jti-002',
+          pillars: ['commerce'],
         },
       });
       expect(result.success).toBe(true);
