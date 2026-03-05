@@ -380,4 +380,52 @@ else
   echo "OK"
 fi
 
+echo "== release-state-coherence (committed artifacts) =="
+# Verify committed release manifest agrees with committed source-of-truth files.
+# This section checks ONLY committed artifacts (CI-visible), not gitignored reference docs.
+RELEASE_MANIFEST="docs/releases/current.json"
+if [ -f "$RELEASE_MANIFEST" ]; then
+  MANIFEST_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').version)")
+  ROOT_VER=$(node -e "console.log(require('./package.json').version)")
+  REG_VER=$(node -e "console.log(require('./specs/kernel/registries.json').version)")
+  ERR_VER=$(node -e "console.log(require('./specs/kernel/errors.json').version)")
+  MANIFEST_REG_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').registries_version)")
+  MANIFEST_ERR_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').errors_version)")
+  MANIFEST_WIRE_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').wire_format_version)")
+  MANIFEST_DIST_TAG=$(node -e "console.log(require('./$RELEASE_MANIFEST').dist_tag)")
+
+  coh_bad=0
+  if [ "$MANIFEST_VER" != "$ROOT_VER" ]; then
+    echo "  FAIL: manifest version ($MANIFEST_VER) != package.json ($ROOT_VER)"
+    coh_bad=1
+  fi
+  if [ "$MANIFEST_REG_VER" != "$REG_VER" ]; then
+    echo "  FAIL: manifest registries_version ($MANIFEST_REG_VER) != registries.json ($REG_VER)"
+    coh_bad=1
+  fi
+  if [ "$MANIFEST_ERR_VER" != "$ERR_VER" ]; then
+    echo "  FAIL: manifest errors_version ($MANIFEST_ERR_VER) != errors.json ($ERR_VER)"
+    coh_bad=1
+  fi
+  # wire_format_version must be 0.1 or 0.2
+  case "$MANIFEST_WIRE_VER" in
+    0.1|0.2) ;;
+    *) echo "  FAIL: manifest wire_format_version ($MANIFEST_WIRE_VER) not a known value (0.1, 0.2)"
+       coh_bad=1 ;;
+  esac
+  # dist_tag must be a known npm dist-tag
+  case "$MANIFEST_DIST_TAG" in
+    latest|next|beta|alpha|rc) ;;
+    *) echo "  FAIL: manifest dist_tag ($MANIFEST_DIST_TAG) not a known value (latest, next, beta, alpha, rc)"
+       coh_bad=1 ;;
+  esac
+  if [ "$coh_bad" -eq 0 ]; then
+    echo "OK"
+  else
+    bad=1
+  fi
+else
+  echo "SKIP: $RELEASE_MANIFEST not found"
+fi
+
 exit $bad
