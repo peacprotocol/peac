@@ -391,6 +391,8 @@ if [ -f "$RELEASE_MANIFEST" ]; then
   ERR_VER=$(node -e "console.log(require('./specs/kernel/errors.json').version)")
   MANIFEST_REG_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').registries_version)")
   MANIFEST_ERR_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').errors_version)")
+  MANIFEST_WIRE_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').wire_format_version)")
+  MANIFEST_DIST_TAG=$(node -e "console.log(require('./$RELEASE_MANIFEST').dist_tag)")
 
   coh_bad=0
   if [ "$MANIFEST_VER" != "$ROOT_VER" ]; then
@@ -405,6 +407,18 @@ if [ -f "$RELEASE_MANIFEST" ]; then
     echo "  FAIL: manifest errors_version ($MANIFEST_ERR_VER) != errors.json ($ERR_VER)"
     coh_bad=1
   fi
+  # wire_format_version must be 0.1 or 0.2
+  case "$MANIFEST_WIRE_VER" in
+    0.1|0.2) ;;
+    *) echo "  FAIL: manifest wire_format_version ($MANIFEST_WIRE_VER) not a known value (0.1, 0.2)"
+       coh_bad=1 ;;
+  esac
+  # dist_tag must be a known npm dist-tag
+  case "$MANIFEST_DIST_TAG" in
+    latest|next|beta|alpha|rc) ;;
+    *) echo "  FAIL: manifest dist_tag ($MANIFEST_DIST_TAG) not a known value (latest, next, beta, alpha, rc)"
+       coh_bad=1 ;;
+  esac
   if [ "$coh_bad" -eq 0 ]; then
     echo "OK"
   else
