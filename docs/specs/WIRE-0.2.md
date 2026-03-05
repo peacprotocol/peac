@@ -924,7 +924,7 @@ Per RFC 7515 Section 4.1.9, the `typ` header parameter accepts both the compact 
 - Compact form: `interaction-record+jwt` (canonical; issuers MUST emit this form)
 - Media-type form: `application/interaction-record+jwt` (verifiers MUST accept)
 
-Comparison is case-insensitive ASCII string equality after stripping the `application/` prefix if present. Implementations MUST NOT perform content-type parameter parsing (no `;charset=` handling, no whitespace normalization). The media-type form is normalized to the compact form before returning the decoded header.
+Comparison is case-insensitive ASCII string equality after stripping the `application/` prefix if present. Implementations MUST NOT perform content-type parameter parsing (no `;charset=` handling, no whitespace normalization). This is a deliberate hardening choice: content-type parameter parsing opens attack surface for bypassing type checks with crafted `typ` values (e.g., `interaction-record+jwt; malicious=true`). The media-type form is normalized to the compact form before returning the decoded header.
 
 ### 18.4 Coherence Enforcement
 
@@ -1008,7 +1008,7 @@ Parse the payload using the unified receipt parser (`parseReceiptClaims()`). The
 If the parser emitted warnings (type-level or extension-level), accumulate them for the final result.
 
 **Step 6: Check wire version.**
-If the parsed wire version is `0.1`, return `E_UNSUPPORTED_WIRE_VERSION`. `verifyLocal()` is Wire 0.2 only. Wire 0.1 receipts MUST be re-issued as Wire 0.2 using `issueWire02()`.
+If the parsed wire version is `0.1`, return `E_UNSUPPORTED_WIRE_VERSION`. On Wire-0.2-only surfaces (such as `verifyLocal()` on the `next` dist-tag and the MCP server), Wire 0.1 receipts are rejected at this step. Wire 0.1 remains verifiable via the stable release line (`latest` dist-tag) or dedicated Wire 0.1 verification tooling.
 
 **Step 7: Check issuer binding.**
 If an `issuer` option was provided, compare it to the `iss` claim using exact string equality. Mismatch produces `E_INVALID_ISSUER`.
@@ -1177,5 +1177,5 @@ Centralized bounds for Wire 0.2 extension fields, defined in `EXTENSION_LIMITS`:
 
 ## Version History
 
-- **0.12.0-preview.2**: Sections 18-20 added: Identifier Stack and Token Confusion (4-layer identifier table, dispatch rules, typ acceptance form matching, token confusion prevention per RFC 8725, provisional media type, peac_version formalization, version disambiguation), Verifier Validation Algorithm (13-step normative procedure with 10a/10b jti split, RFC 9068-style strict profile, error code mapping table), Replay Prevention (issuer-MUST jti uniqueness, verifier-SHOULD conditional replay detection, cache guidance, no-expiration rationale). RFC 9068 added to standards references. Conformance fixture for jti boundary length.
+- **0.12.0-preview.2** (pending release): Sections 18-20 added: Identifier Stack and Token Confusion (4-layer identifier table, dispatch rules, typ acceptance form matching, token confusion prevention per RFC 8725, provisional media type, peac_version formalization, version disambiguation), Verifier Validation Algorithm (13-step normative procedure with 10a/10b jti split, RFC 9068-style strict profile, error code mapping table), Replay Prevention (issuer-MUST jti uniqueness, verifier-SHOULD conditional replay detection, cache guidance, no-expiration rationale). RFC 9068 added to standards references. Conformance fixture for jti boundary length.
 - **0.12.0-preview.1**: Initial Wire 0.2 specification (NORMATIVE PREVIEW). Two structural kinds, open semantic type, 10-pillar taxonomy, canonical issuer form, JOSE hardening, policy binding (JCS + SHA-256, three-state), 5 typed extension groups, RFC 9457 challenge body, 4 warning codes, dual-stack compatibility, strictness profiles.
