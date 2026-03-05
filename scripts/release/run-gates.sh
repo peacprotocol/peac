@@ -169,22 +169,32 @@ echo ""
 echo "--- Wire 0.1 Frozen ---"
 TOTAL=$((TOTAL + 1))
 echo -n "  [wire-01-frozen] "
-WIRE01_DIFF=$(git diff origin/main -- packages/schema/src/validators.ts packages/schema/src/attestation-receipt.ts 2>/dev/null || true)
-if [ -z "$WIRE01_DIFF" ]; then
-  echo "PASS"
-  GATES_JSON=$(echo "$GATES_JSON" | node -e "
-    const g = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-    g.push({name:'wire-01-frozen',status:'passed',duration_ms:0});
-    process.stdout.write(JSON.stringify(g));
-  ")
-else
-  echo "FAIL (Wire 0.1 files modified)"
+if ! git rev-parse origin/main >/dev/null 2>&1; then
+  echo "FAIL (origin/main not available; run 'git fetch origin' first)"
   FAILED=$((FAILED + 1))
   GATES_JSON=$(echo "$GATES_JSON" | node -e "
     const g = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
     g.push({name:'wire-01-frozen',status:'failed',duration_ms:0});
     process.stdout.write(JSON.stringify(g));
   ")
+else
+  WIRE01_DIFF=$(git diff origin/main -- packages/schema/src/validators.ts packages/schema/src/attestation-receipt.ts)
+  if [ -z "$WIRE01_DIFF" ]; then
+    echo "PASS"
+    GATES_JSON=$(echo "$GATES_JSON" | node -e "
+      const g = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+      g.push({name:'wire-01-frozen',status:'passed',duration_ms:0});
+      process.stdout.write(JSON.stringify(g));
+    ")
+  else
+    echo "FAIL (Wire 0.1 files modified)"
+    FAILED=$((FAILED + 1))
+    GATES_JSON=$(echo "$GATES_JSON" | node -e "
+      const g = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+      g.push({name:'wire-01-frozen',status:'failed',duration_ms:0});
+      process.stdout.write(JSON.stringify(g));
+    ")
+  fi
 fi
 
 # --- Wire 0.2 Conformance ---
