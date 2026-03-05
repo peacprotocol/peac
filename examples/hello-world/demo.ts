@@ -8,19 +8,16 @@
  */
 
 import { generateKeypair } from '@peac/crypto';
-import { issue, verifyLocal } from '@peac/protocol';
+import { issueWire02, verifyLocal } from '@peac/protocol';
 
 // 1. Generate Ed25519 keypair
 const { publicKey, privateKey } = await generateKeypair();
 
-// 2. Issue a signed receipt
-const { jws } = await issue({
+// 2. Issue a signed Wire 0.2 receipt
+const { jws } = await issueWire02({
   iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 100,
-  cur: 'USD',
-  rail: 'stripe',
-  reference: 'tx_hello_world',
+  kind: 'evidence',
+  type: 'org.peacprotocol.receipt.commerce',
   privateKey,
   kid: 'demo-key',
 });
@@ -31,7 +28,8 @@ console.log('Receipt JWS:', jws.slice(0, 50) + '...');
 const result = await verifyLocal(jws, publicKey);
 
 console.log('Valid:', result.valid);
-if (result.valid && result.variant === 'commerce') {
+if (result.valid) {
   console.log('Issuer:', result.claims.iss);
-  console.log('Amount:', `${result.claims.amt} ${result.claims.cur}`);
+  console.log('Kind:', result.claims.kind);
+  console.log('Type:', result.claims.type);
 }

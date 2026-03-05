@@ -264,7 +264,9 @@ describe('handlers/issue', () => {
     expect(JSON.stringify(result.structured)).not.toContain(encodedPrivateKey);
   });
 
-  it('round-trip: issued receipt passes verification', async () => {
+  it('round-trip: issued Wire 0.1 receipt rejected by Wire 0.2-only verifyLocal', async () => {
+    // The MCP issue handler still uses Wire 0.1 issue() (will change in PR-18a).
+    // verifyLocal() is now Wire 0.2 only and rejects Wire 0.1 JWS.
     const context = await makeIssuerContext();
     const input: IssueInput = {
       aud: 'https://client.example.com',
@@ -298,6 +300,8 @@ describe('handlers/issue', () => {
     };
 
     const verifyResult = await handleVerify(verifyParams);
-    expect(verifyResult.structured.ok).toBe(true);
+    // Wire 0.1 JWS is rejected by Wire 0.2-only verifyLocal
+    expect(verifyResult.structured.ok).toBe(false);
+    expect(verifyResult.structured.code).toBe('E_UNSUPPORTED_WIRE_VERSION');
   });
 });

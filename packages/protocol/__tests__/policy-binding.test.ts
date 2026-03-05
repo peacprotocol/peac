@@ -22,6 +22,7 @@ import {
   issue,
   verifyLocal,
 } from '../src/index';
+import { verifyLocalWire01 } from '../src/verify-local-wire01';
 
 // Shared test constants
 const testKid = '2026-01-15T10:30:00Z';
@@ -453,7 +454,7 @@ describe('Wire 0.1 regression: policy_binding is always unavailable', () => {
     const { privateKey, publicKey } = await generateKeypair();
     const { jws } = await issue({ ...issueOpts, privateKey, kid: testKid });
 
-    const result = await verifyLocal(jws, publicKey);
+    const result = await verifyLocalWire01(jws, publicKey);
 
     expect(result.valid).toBe(true);
     if (result.valid) {
@@ -469,7 +470,7 @@ describe('Wire 0.1 regression: policy_binding is always unavailable', () => {
     const localPolicy: JsonValue = { version: '1.0' };
     const policyDigest = await computePolicyDigestJcs(localPolicy);
 
-    const result = await verifyLocal(jws, publicKey, { policyDigest });
+    const result = await verifyLocalWire01(jws, publicKey, { policyDigest });
 
     expect(result.valid).toBe(true);
     if (result.valid) {

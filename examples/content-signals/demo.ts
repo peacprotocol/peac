@@ -6,7 +6,7 @@
  * 2. Resolve conflicts using DD-137 source precedence:
  *    tdmrep.json > Content-Signal > Content-Usage > robots.txt
  *    (Content-Signal parser reserved for future; 3 of 4 sources implemented)
- * 3. Issue a PEAC receipt with the observation attached via ext[]
+ * 3. Issue a PEAC receipt with the observation attached via extensions
  * 4. Verify the receipt offline
  *
  * All content is pre-fetched (no network I/O per DD-55).
@@ -21,7 +21,7 @@ import {
   parseRobotsTxt,
   type ContentSignalObservation,
 } from '@peac/mappings-content-signals';
-import { issue, verifyLocal } from '@peac/protocol';
+import { issueWire02, verifyLocal } from '@peac/protocol';
 
 // --- Sample signal sources (pre-fetched; no network I/O per DD-55) ---
 
@@ -82,24 +82,19 @@ for (const signal of resolved) {
   console.log(`  ${signal.purpose}: ${signal.decision} (winning source: ${signal.source})`);
 }
 
-// --- 4. Issue a receipt with observation attached via ext[] ---
-// Extension key follows reverse-DNS convention (singular underscore-separated).
-// Not yet registered in registries.json; this example demonstrates the pattern.
+// --- 4. Issue a Wire 0.2 receipt with observation attached via extensions ---
 
 console.log('\n=== Receipt Issuance ===\n');
 
 const { publicKey, privateKey } = await generateKeypair();
 
-const { jws } = await issue({
+const { jws } = await issueWire02({
   iss: 'https://gateway.example.com',
-  aud: 'https://publisher.example',
-  amt: 0,
-  cur: 'USD',
-  rail: 'none',
-  reference: 'content-signal-observation',
+  kind: 'evidence',
+  type: 'org.peacprotocol.receipt.content_signal',
   privateKey,
   kid: 'demo-key-2026-03',
-  ext: {
+  extensions: {
     'org.peacprotocol/content_signal': {
       target_uri: observation.target_uri,
       observed_at: observation.observed_at,
@@ -114,7 +109,7 @@ const { jws } = await issue({
 });
 
 console.log('Receipt JWS:', jws.slice(0, 60) + '...');
-console.log('Observation attached via ext["org.peacprotocol/content_signal"]');
+console.log('Observation attached via extensions["org.peacprotocol/content_signal"]');
 
 // --- 5. Verify the receipt offline ---
 
@@ -123,16 +118,16 @@ const result = await verifyLocal(jws, publicKey);
 console.log('\nValid:', result.valid);
 if (result.valid) {
   console.log('Issuer:', result.claims.iss);
-  if (result.variant === 'commerce') {
-    console.log('Audience:', result.claims.aud);
+  console.log('Kind:', result.claims.kind);
+  console.log('Type:', result.claims.type);
 
-    // Confirm observation is present in ext[]
-    const ext = result.claims.ext as Record<string, unknown> | undefined;
-    const csExt = ext?.['org.peacprotocol/content_signal'] as Record<string, unknown> | undefined;
-    if (csExt) {
-      console.log('Content signal ext: target_uri =', csExt.target_uri);
-      console.log('Content signal ext: signals =', JSON.stringify(csExt.signals));
-    }
+  // Confirm observation is present in extensions
+  const csExt = result.claims.extensions?.['org.peacprotocol/content_signal'] as
+    | Record<string, unknown>
+    | undefined;
+  if (csExt) {
+    console.log('Content signal ext: target_uri =', csExt.target_uri);
+    console.log('Content signal ext: signals =', JSON.stringify(csExt.signals));
   }
 }
 

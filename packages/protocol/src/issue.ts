@@ -161,7 +161,10 @@ export class IssueError extends Error {
 }
 
 /**
- * Issue a PEAC receipt
+ * Issue a Wire 0.1 PEAC receipt.
+ *
+ * @deprecated Use {@link issueWire02} for Wire 0.2 receipts. Wire 0.1 issuance is deprecated
+ * and will be removed in a future major version.
  *
  * @param options - Receipt options
  * @returns Issue result with JWS and optional subject_snapshot

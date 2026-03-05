@@ -3,7 +3,7 @@
  *
  * Demonstrates receipt issuance per A2A task state transition:
  * 1. Declare PEAC support in Agent Card
- * 2. Issue a receipt at each state transition (submitted, working, completed)
+ * 2. Issue a Wire 0.2 receipt at each state transition (submitted, working, completed)
  * 3. Attach receipts to A2A TaskStatus metadata via carrier contract
  * 4. Extract and verify the full receipt chain
  *
@@ -18,7 +18,7 @@ import {
   hasPeacExtension,
   type A2ATaskStatusLike,
 } from '@peac/mappings-a2a';
-import { issue, verifyLocal } from '@peac/protocol';
+import { issueWire02, verifyLocal } from '@peac/protocol';
 import { computeReceiptRef } from '@peac/schema';
 
 import agentCard from './agent-card.json' with { type: 'json' };
@@ -37,7 +37,6 @@ const { publicKey, privateKey } = await generateKeypair();
 
 const taskId = 'task-2026-03-001';
 const gateway = 'https://gateway.example.com';
-const consumer = 'https://consumer.example.com';
 
 const transitions: Array<{ state: string; reference: string }> = [
   { state: 'submitted', reference: `${taskId}/submitted` },
@@ -58,14 +57,11 @@ const allCarriers: PeacEvidenceCarrier[] = [];
 for (const transition of transitions) {
   taskStatus.state = transition.state;
 
-  // Issue receipt for this transition
-  const { jws } = await issue({
+  // Issue Wire 0.2 receipt for this transition
+  const { jws } = await issueWire02({
     iss: gateway,
-    aud: consumer,
-    amt: 0,
-    cur: 'USD',
-    rail: 'none',
-    reference: transition.reference,
+    kind: 'evidence',
+    type: 'org.peacprotocol.receipt.commerce',
     privateKey,
     kid: 'gateway-key-2026-03',
   });
@@ -99,9 +95,7 @@ if (!extracted) {
     if (result.valid) {
       console.log(`  Verified: ref=${carrier.receipt_ref.slice(0, 30)}...`);
       console.log(`    issuer=${result.claims.iss}`);
-      if (result.variant === 'commerce') {
-        console.log(`    reference=${result.claims.payment.reference}`);
-      }
+      console.log(`    kind=${result.claims.kind}`);
     } else {
       console.log(`  Failed: ${result.code} ${result.message}`);
     }
