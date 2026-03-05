@@ -1,0 +1,24 @@
+{
+  "$comment": "Wire 0.2 replay prevention: jti at maximum length boundary (v0.12.0-preview.2)",
+  "version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "jti-at-max-length-256",
+      "description": "jti at exactly 256 characters (maximum allowed length); MUST be accepted",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    }
+  ]
+}

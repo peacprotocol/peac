@@ -861,22 +861,253 @@ Callers narrow the variant by checking `header.typ`.
 
 ## 17. Standards References
 
-| Standard                                       | Identifier         | Usage in Wire 0.2                                        |
-| ---------------------------------------------- | ------------------ | -------------------------------------------------------- |
-| JSON Web Signature                             | RFC 7515           | Compact JWS serialization, `typ` header parameter        |
-| JSON Web Key                                   | RFC 7517           | Key representation in JWKS                               |
-| JWS Unencoded Payload Option                   | RFC 7797           | Explicitly rejected (`b64: false`)                       |
-| Edwards-Curve Digital Signature Algorithm      | RFC 8032           | EdDSA (Ed25519) signing and verification                 |
-| JWT Best Current Practices                     | RFC 8725           | Embedded key rejection rationale (Section 3.10)          |
-| JSON Canonicalization Scheme                   | RFC 8785           | Policy binding digest computation                        |
-| Problem Details for HTTP APIs                  | RFC 9457           | Challenge body problem field                             |
-| Uniform Resource Identifier                    | RFC 3986           | Issuer canonical form, type grammar (absolute URI)       |
-| JSON Pointer                                   | RFC 6901           | Warning pointer field, extension accessor error pointers |
-| Media Type Registration                        | RFC 6838           | `interaction-record+jwt` media type structure            |
-| Domain Names: Implementation and Specification | RFC 1035           | Extension key DNS label and domain length constraints    |
-| UUIDs                                          | RFC 9562           | JTI generation (informational)                           |
-| BCP 14 (Key Words)                             | RFC 2119, RFC 8174 | Requirement level language                               |
-| Decentralized Identifiers                      | W3C DID Core       | DID-scheme issuer acceptance                             |
+| Standard                                                 | Identifier         | Usage in Wire 0.2                                        |
+| -------------------------------------------------------- | ------------------ | -------------------------------------------------------- |
+| JSON Web Signature                                       | RFC 7515           | Compact JWS serialization, `typ` header parameter        |
+| JSON Web Key                                             | RFC 7517           | Key representation in JWKS                               |
+| JWS Unencoded Payload Option                             | RFC 7797           | Explicitly rejected (`b64: false`)                       |
+| Edwards-Curve Digital Signature Algorithm                | RFC 8032           | EdDSA (Ed25519) signing and verification                 |
+| JWT Best Current Practices                               | RFC 8725           | Embedded key rejection rationale (Section 3.10)          |
+| JSON Canonicalization Scheme                             | RFC 8785           | Policy binding digest computation                        |
+| Problem Details for HTTP APIs                            | RFC 9457           | Challenge body problem field                             |
+| Uniform Resource Identifier                              | RFC 3986           | Issuer canonical form, type grammar (absolute URI)       |
+| JSON Pointer                                             | RFC 6901           | Warning pointer field, extension accessor error pointers |
+| Media Type Registration                                  | RFC 6838           | `interaction-record+jwt` media type structure            |
+| Domain Names: Implementation and Specification           | RFC 1035           | Extension key DNS label and domain length constraints    |
+| UUIDs                                                    | RFC 9562           | JTI generation (informational)                           |
+| BCP 14 (Key Words)                                       | RFC 2119, RFC 8174 | Requirement level language                               |
+| Decentralized Identifiers                                | W3C DID Core       | DID-scheme issuer acceptance                             |
+| JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens | RFC 9068           | Strict verification profile model (Section 4)            |
+
+---
+
+## 18. Identifier Stack and Token Confusion
+
+Wire 0.2 uses a layered identifier stack to distinguish interaction records from other JWS-based token types. Each layer serves a distinct purpose; together they prevent token confusion across protocol boundaries.
+
+### 18.1 Identifier Layers
+
+| Layer     | Identifier                           | Location         | Purpose                                         |
+| --------- | ------------------------------------ | ---------------- | ----------------------------------------------- |
+| JWS `typ` | `interaction-record+jwt`             | Protected header | Token type discrimination (JOSE layer)          |
+| HTTP      | `application/interaction-record+jwt` | `Content-Type`   | Media type identification (transport layer)     |
+| Payload   | `peac_version: "0.2"`                | Claims JSON      | Wire format version (semantic layer)            |
+| Transport | `PEAC-Receipt` header                | HTTP response    | Carrier identification (evidence carrier layer) |
+
+The JWS `typ` value is necessary but not sufficient for dispatch. Final verification dispatch is determined by the triple `{typ, peac_version, schema}`: `typ` selects the JOSE path, `peac_version` identifies the wire format version, and schema validation confirms structural conformance.
+
+### 18.2 Dispatch Rules
+
+1. **`typ` present and recognized**: Route directly to the corresponding wire version path.
+2. **`typ` present and unrecognized**: Hard error (`E_INVALID_FORMAT`).
+3. **`typ` absent, strict mode**: Hard error (`E_INVALID_FORMAT`); see Section 16.1.
+4. **`typ` absent, interop mode**: Emit `typ_missing` warning; detect wire version from `peac_version` payload field; see Section 16.2.
+
+### 18.3 `typ` Acceptance Form Matching
+
+Per RFC 7515 Section 4.1.9, the `typ` header parameter accepts both the compact form and the media-type form:
+
+- Compact form: `interaction-record+jwt` (canonical; issuers MUST emit this form)
+- Media-type form: `application/interaction-record+jwt` (verifiers MUST accept)
+
+Comparison is case-insensitive ASCII string equality after stripping the `application/` prefix if present. Implementations MUST NOT perform content-type parameter parsing (no `;charset=` handling, no whitespace normalization). The media-type form is normalized to the compact form before returning the decoded header.
+
+### 18.4 Coherence Enforcement
+
+The `typ` header and `peac_version` payload claim MUST agree. A mismatch produces `E_WIRE_VERSION_MISMATCH`. See Section 2.2 for the coherence truth table.
+
+### 18.5 Token Confusion Prevention
+
+**Threat model (RFC 8725 Section 3.11):** Without a distinct `typ` value, a signed Wire 0.2 receipt could be substituted for another JWS-based token (OAuth access token, OIDC ID token, Verifiable Credential) in a cross-protocol attack. The attacker presents a valid receipt where the relying party expects a different token type; if the relying party does not check `typ`, it may accept the receipt as a valid authorization.
+
+**Mitigations:**
+
+1. **Distinct `typ` value**: `interaction-record+jwt` is not used by any other specification.
+2. **Strict mode default**: Production deployments SHOULD use strict mode, which rejects missing `typ`. This prevents untyped JWS tokens from being misinterpreted as receipts.
+3. **Interop mode is not permissive-by-default**: Even in interop mode, an incorrect `typ` value (present but not matching any recognized value) is a hard error. Interop mode tolerates only the absence of `typ`, never an alternate value.
+
+### 18.6 Provisional Media Type
+
+The media type `application/interaction-record+jwt` is used provisionally pending formal IANA registration per RFC 6838. Registration will be pursued when the specification reaches v1.0 maturity.
+
+### 18.7 `peac_version` Formalization
+
+The `peac_version` field uses major.minor versioning (CloudEvents-style):
+
+- **Known version** (`"0.2"`): Process normally.
+- **Unknown major version** (e.g., `"1.0"`, `"2.0"`): Hard error `E_UNSUPPORTED_WIRE_VERSION`. A new major version implies incompatible structural changes.
+- **Unknown minor version** (e.g., `"0.3"`): Hard error `E_UNSUPPORTED_WIRE_VERSION` in the current implementation. Future implementations MAY relax this to process unknown minor versions with a warning, provided the major version is recognized.
+
+The field name `peac_version` (rather than generic `version`) is chosen for namespace safety: it prevents collisions when receipts are embedded in containers that define their own `version` field.
+
+### 18.8 Version Disambiguation
+
+| Concept             | Example              | Description                                     |
+| ------------------- | -------------------- | ----------------------------------------------- |
+| Package SemVer      | `0.12.0-preview.1`   | npm package version (implementation release)    |
+| Wire format version | `0.2`                | `peac_version` payload claim (protocol version) |
+| Spec revision       | Sections 18-20 added | Document revision (this specification)          |
+
+Package SemVer tracks implementation changes. Wire format version tracks the protocol contract. Multiple package versions MAY implement the same wire format version. A wire format version bump (e.g., `0.2` to `0.3`) always requires a package SemVer bump, but not vice versa.
+
+---
+
+## 19. Verifier Validation Algorithm
+
+This section defines the normative validation algorithm for Wire 0.2 receipts. The algorithm follows the profile-based approach of RFC 9068 Section 4 (JWT Access Token Profile): it defines a closed set of checks that a conformant verifier MUST execute, in order, with specified failure modes.
+
+Implementations MUST perform steps in the order specified. A step that produces a hard error MUST terminate validation immediately; the verifier MUST NOT continue to subsequent steps.
+
+### 19.1 Inputs
+
+| Input          | Type       | Required | Description                                               |
+| -------------- | ---------- | -------- | --------------------------------------------------------- |
+| `jws`          | string     | REQUIRED | Compact JWS serialization (header.payload.signature)      |
+| `publicKey`    | Uint8Array | REQUIRED | Ed25519 public key (32 bytes)                             |
+| `issuer`       | string     | OPTIONAL | Expected issuer identifier (exact match)                  |
+| `subjectUri`   | string     | OPTIONAL | Expected subject identifier (exact match)                 |
+| `strictness`   | enum       | OPTIONAL | `'strict'` (default) or `'interop'`                       |
+| `policyDigest` | string     | OPTIONAL | Pre-computed local policy digest (`sha256:<64 hex>`)      |
+| `maxClockSkew` | integer    | OPTIONAL | Clock skew tolerance in seconds (default: 300)            |
+| `now`          | integer    | OPTIONAL | Current Unix timestamp in seconds (default: system clock) |
+
+### 19.2 Validation Steps
+
+**Step 1: Verify JWS signature.**
+Decode the compact JWS and verify the Ed25519 signature against the provided `publicKey`. The `alg` header parameter MUST be `EdDSA`. JOSE hardening checks are applied at this step: reject embedded keys (`jwk`, `x5c`, `x5u`, `jku`), reject `crit`, reject `b64: false`, reject `zip`, require `kid` (1 to 256 characters). Failure produces the corresponding `E_JWS_*` or `E_INVALID_SIGNATURE` error code.
+
+**Step 2: Apply strictness routing.**
+Examine the decoded `typ` header parameter:
+
+- If `typ` is present and recognized: continue.
+- If `typ` is absent and strictness is `strict`: return `E_INVALID_FORMAT` ("Missing JWS typ header: strict mode requires typ to be present").
+- If `typ` is absent and strictness is `interop`: accumulate a `typ_missing` warning and continue.
+- If `typ` is present but not a recognized value: this is caught by the JOSE layer in Step 1 as `E_INVALID_FORMAT`.
+
+**Step 3: Validate kernel constraints.**
+Execute `validateKernelConstraints()` (DD-60, DD-121) against the decoded payload. Kernel constraints are structural limits (field lengths, array sizes) enforced before schema parsing. Failure is fail-closed: return `E_CONSTRAINT_VIOLATION`.
+
+**Step 4: Parse and validate schema.**
+Parse the payload using the unified receipt parser (`parseReceiptClaims()`). The parser detects the wire version from the payload structure, validates against `Wire02ClaimsSchema`, and returns typed claims. Failure produces `E_INVALID_FORMAT` with a `parse_code` detail indicating the specific parse error.
+
+**Step 5: Collect parser warnings.**
+If the parser emitted warnings (type-level or extension-level), accumulate them for the final result.
+
+**Step 6: Check wire version.**
+If the parsed wire version is `0.1`, return `E_UNSUPPORTED_WIRE_VERSION`. `verifyLocal()` is Wire 0.2 only. Wire 0.1 receipts MUST be re-issued as Wire 0.2 using `issueWire02()`.
+
+**Step 7: Check issuer binding.**
+If an `issuer` option was provided, compare it to the `iss` claim using exact string equality. Mismatch produces `E_INVALID_ISSUER`.
+
+**Step 8: Check subject binding.**
+If a `subjectUri` option was provided, compare it to the `sub` claim using exact string equality. Mismatch produces `E_INVALID_SUBJECT`.
+
+**Step 9: Check temporal validity.**
+Verify that the `iat` claim is not in the future beyond the clock skew tolerance: `iat` MUST NOT exceed `now + maxClockSkew`. Violation produces `E_NOT_YET_VALID`.
+
+For `evidence`-kind receipts, additionally check `occurred_at` skew via `checkOccurredAtSkew()`. If `occurred_at` is in the future beyond tolerance, return `E_OCCURRED_AT_FUTURE`. Near-boundary values MAY produce an `occurred_at_skewed` warning.
+
+**Step 10a: Check `jti` presence and format.**
+The `jti` claim is REQUIRED (enforced by schema validation in Step 4). It MUST be a non-empty string of 1 to 256 characters. Format violations are caught by schema validation.
+
+**Step 10b: Check `jti` replay (conditional).**
+Verifiers that maintain a replay cache SHOULD reject duplicate `jti` from the same `iss` within the cache window. Verifiers without a replay cache MAY skip this step; see Section 20 for replay prevention semantics.
+
+**Step 11: Emit type and extension warnings.**
+If the `type` value is not in the registered type registry (`REGISTERED_RECEIPT_TYPES`), accumulate a `type_unregistered` warning with pointer `/type`. For each key in `extensions` that is not in the registered extension group keys (`REGISTERED_EXTENSION_GROUP_KEYS`) but passes the `<domain>/<segment>` grammar check, accumulate an `unknown_extension_preserved` warning with an RFC 6901 pointer (`/extensions/<escaped_key>`, where `~` is escaped as `~0` and `/` is escaped as `~1`).
+
+**Step 12: Check policy binding.**
+If a `policyDigest` option was provided and the receipt contains a `policy.digest` field, perform the policy binding check (see Section 11). Three-state result:
+
+- Both present and matching: `policy_binding = 'verified'`.
+- Both present and mismatching: return `E_POLICY_BINDING_FAILED` with `receipt_policy_digest`, `local_policy_digest`, and `policy_uri` (if present) in the error details.
+- Either absent: `policy_binding = 'unavailable'`.
+
+**Step 13: Return success.**
+Sort accumulated warnings by `(pointer, code)` (RFC 6901 ordering). Return the validated claims, `kid`, wire version, sorted warnings, and policy binding status.
+
+### 19.3 Strict Mode as RFC 9068-Style Profile
+
+Strict mode defines a closed verification profile analogous to RFC 9068 Section 4 (JWT Access Token Profile). The profile constrains the token space:
+
+- `typ` MUST be present.
+- All JOSE protections MUST be enforced (no relaxations).
+- Missing `typ` is a hard error, not a warning.
+
+Interop mode relaxes only `typ` presence (missing is tolerated; alternate values are still rejected). This two-profile approach prevents "permissive by default" drift while allowing migration from untyped JWS producers.
+
+Production deployments SHOULD use strict mode. Interop mode is intended for testing, migration, and environments where JWS producers cannot yet emit `typ`.
+
+### 19.4 Error Code Mapping
+
+Errors thrown by the `@peac/crypto` layer are mapped to canonical `E_*` codes at the protocol layer:
+
+| Crypto Code                    | Protocol Code             | Category       |
+| ------------------------------ | ------------------------- | -------------- |
+| `CRYPTO_INVALID_SIGNATURE`     | `E_INVALID_SIGNATURE`     | Signature      |
+| `CRYPTO_INVALID_JWS_FORMAT`    | `E_INVALID_FORMAT`        | Format         |
+| `CRYPTO_INVALID_TYP`           | `E_INVALID_FORMAT`        | Format         |
+| `CRYPTO_INVALID_ALG`           | `E_INVALID_FORMAT`        | Format         |
+| `CRYPTO_INVALID_KEY_LENGTH`    | `E_INVALID_FORMAT`        | Format         |
+| `CRYPTO_JWS_EMBEDDED_KEY`      | `E_JWS_EMBEDDED_KEY`      | JOSE hardening |
+| `CRYPTO_JWS_CRIT_REJECTED`     | `E_JWS_CRIT_REJECTED`     | JOSE hardening |
+| `CRYPTO_JWS_MISSING_KID`       | `E_JWS_MISSING_KID`       | JOSE hardening |
+| `CRYPTO_JWS_B64_REJECTED`      | `E_JWS_B64_REJECTED`      | JOSE hardening |
+| `CRYPTO_JWS_ZIP_REJECTED`      | `E_JWS_ZIP_REJECTED`      | JOSE hardening |
+| `CRYPTO_WIRE_VERSION_MISMATCH` | `E_WIRE_VERSION_MISMATCH` | Version        |
+
+JOSE hardening codes receive specific `E_JWS_*` counterparts rather than collapsing into generic `E_INVALID_FORMAT`. This allows callers to distinguish embedded-key injection, crit-header abuse, and unencoded-payload attacks from ordinary format errors.
+
+---
+
+## 20. Replay Prevention
+
+This section defines the replay prevention model for Wire 0.2. The model uses an issuer-MUST / verifier-SHOULD split: issuers bear the obligation to produce unique identifiers, while verifiers enforce replay detection only when infrastructure supports it.
+
+### 20.1 Issuer Obligations (MUST)
+
+The `jti` claim is REQUIRED on all Wire 0.2 receipts. Issuers MUST ensure `jti` uniqueness across all receipts they produce. The `jti` value MUST be a non-empty string of 1 to 256 characters.
+
+**Recommended generation strategies:**
+
+| Strategy             | Format           | Properties                     |
+| -------------------- | ---------------- | ------------------------------ |
+| UUIDv4 (RFC 9562)    | Hyphenated (36)  | Random, 122 bits of entropy    |
+| UUIDv7 (RFC 9562)    | Hyphenated (36)  | Time-ordered, 48-bit timestamp |
+| Cryptographic random | Hex or base64url | Min 128 bits, variable length  |
+
+Duplicate `jti` from the same `iss` constitutes a protocol violation by the issuer. Implementations SHOULD use at least 128 bits of entropy to make `jti` collisions negligibly probable.
+
+### 20.2 Verifier Obligations (SHOULD, Conditional)
+
+Verifiers that maintain a replay cache SHOULD reject duplicate `jti` from the same `iss` within the cache window. The duplicate check is keyed on the pair `(iss, jti)`: the same `jti` value from different issuers is not a replay.
+
+Verifiers without a replay cache (stateless deployments, edge functions, serverless) MAY skip replay detection. This is an explicit design choice, not a conformance violation. The issuer-MUST / verifier-SHOULD split ensures the specification does not force statefulness on lightweight verifiers while providing replay protection where infrastructure supports it.
+
+### 20.3 Replay Cache Guidance
+
+When implemented, replay caches SHOULD observe the following:
+
+1. **Expiry window**: Use `iat`-based expiry. A RECOMMENDED window is 2x `OCCURRED_AT_TOLERANCE_SECONDS` (600 seconds). Entries older than the window are safe to evict.
+2. **Per-issuer scoping**: Caches SHOULD be scoped per `iss` to prevent cross-issuer `jti` collisions from causing false positives.
+3. **Probabilistic structures**: Implementations MAY use bloom filters or probabilistic data structures for high-throughput scenarios. False positives (rejecting a legitimate receipt) are preferable to false negatives (accepting a replay) in replay detection.
+4. **Distributed caches**: In multi-node deployments, replay caches MAY be shared (e.g., Redis, DynamoDB) or node-local. Node-local caches provide weaker replay protection but are acceptable for stateless-first architectures.
+
+### 20.4 Audience Binding (`aud`)
+
+The `aud` claim is OPTIONAL in Wire 0.2. When present, it binds the receipt to a specific audience (resource server, API endpoint). Verifiers that check `aud` SHOULD reject receipts not addressed to them. Audience binding is orthogonal to replay prevention: a receipt replayed to the correct audience is still a replay.
+
+### 20.5 Evidence Bundles
+
+Each receipt in an evidence bundle MUST have a unique `jti`. The `jti` uniqueness requirement applies per-receipt, not per-bundle. Correlation between receipts in a bundle is expressed through the `org.peacprotocol/correlation` extension group (`parent_jti`, `depends_on`), not through shared `jti` values.
+
+### 20.6 No Expiration by Design
+
+Wire 0.2 receipts do not include an `exp` (expiration) claim. Receipts are permanent evidence: they record that an interaction occurred, and that fact does not expire. This is a deliberate design choice:
+
+- **Receipts are not access tokens.** Access tokens (RFC 9068) expire because they grant ongoing authorization. Receipts record a past event.
+- **Temporal validity is `iat`-relative.** The `iat` claim establishes when the receipt was issued. Clock skew checks (Step 9 in Section 19.2) prevent acceptance of future-dated receipts.
+- **Revocation is out of scope.** If an issuer needs to retract a receipt, that is a higher-level concern (e.g., key rotation, revocation lists) not modeled in the wire format.
 
 ---
 
@@ -932,4 +1163,5 @@ Centralized bounds for Wire 0.2 extension fields, defined in `EXTENSION_LIMITS`:
 
 ## Version History
 
+- **0.12.0-preview.2**: Sections 18-20 added: Identifier Stack and Token Confusion (4-layer identifier table, dispatch rules, typ acceptance form matching, token confusion prevention per RFC 8725, provisional media type, peac_version formalization, version disambiguation), Verifier Validation Algorithm (13-step normative procedure with 10a/10b jti split, RFC 9068-style strict profile, error code mapping table), Replay Prevention (issuer-MUST jti uniqueness, verifier-SHOULD conditional replay detection, cache guidance, no-expiration rationale). RFC 9068 added to standards references. Conformance fixture for jti boundary length.
 - **0.12.0-preview.1**: Initial Wire 0.2 specification (NORMATIVE PREVIEW). Two structural kinds, open semantic type, 10-pillar taxonomy, canonical issuer form, JOSE hardening, policy binding (JCS + SHA-256, three-state), 5 typed extension groups, RFC 9457 challenge body, 4 warning codes, dual-stack compatibility, strictness profiles.
