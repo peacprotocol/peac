@@ -41,6 +41,18 @@ This specification MUST be read in conjunction with:
 - Receipt parser: `packages/schema/src/receipt-parser.ts`
 - JWS signing and verification: `packages/crypto/src/jws.ts`
 
+### 1.2 Terminology and Naming
+
+| Context                                               | Term                          | Example                               |
+| ----------------------------------------------------- | ----------------------------- | ------------------------------------- |
+| Specifications, website, standards submissions        | Interaction Record Format 0.2 | This document title                   |
+| Repository code, filenames, internal identifiers      | `wire02` or `wire-02`         | `wire-02-envelope.ts`, `Wire02Claims` |
+| Informal developer documentation (README, changelogs) | Wire 0.2                      | "Wire 0.2 adds structured kinds"      |
+
+The canonical filename for this specification is `WIRE-0.2.md`. A future churn PR may rename it to align with the external name; until then, the filename is stable and used in cross-references.
+
+Internal code tokens use `wire02` (no separator) for identifiers and `wire-02` (hyphen) for filenames. Other forms (`wire_02`, `wire 0.2`, `wire0.2`) are not permitted in new code.
+
 ---
 
 ## 2. Media Type
