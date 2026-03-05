@@ -80,6 +80,7 @@
     "@peac/attribution",
     "@peac/rails-stripe",
     "@peac/rails-card",
+    "@peac/adapter-eat",
     "@peac/adapter-x402-daydreams",
     "@peac/adapter-x402-fluora",
     "@peac/adapter-x402-pinata",

@@ -57,6 +57,7 @@ console.log(pub.sort().join('\n'));
 # Expected packages (updated for v0.11.2 + content-signals + openai-compatible)
 EXPECTED_PACKAGES=$(cat <<'EOF'
 @peac/adapter-core
+@peac/adapter-eat
 @peac/adapter-openai-compatible
 @peac/adapter-openclaw
 @peac/adapter-x402
