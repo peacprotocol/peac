@@ -14,7 +14,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { generateKeypair, sign } from '@peac/crypto';
 import { parseReceiptClaims, toCoreClaims } from '@peac/schema';
-import { issue, verifyLocal } from '../../src/index';
+import { issue } from '../../src/index';
+import { verifyLocalWire01 } from '../../src/verify-local-wire01';
 
 /** Fixed timestamp for all time-dependent tests */
 const FIXED_NOW = 1_700_000_000; // 2023-11-14T22:13:20Z
@@ -46,7 +47,7 @@ describe('round-trip integration', () => {
       kid: 'key-2026-01',
     });
 
-    const result = await verifyLocal(jws, publicKey, { now: FIXED_NOW });
+    const result = await verifyLocalWire01(jws, publicKey, { now: FIXED_NOW });
 
     expect(result.valid).toBe(true);
     if (!result.valid) return;
@@ -81,7 +82,7 @@ describe('round-trip integration', () => {
 
     const jws = await sign(attestationPayload, privateKey, 'attest-key-01');
 
-    const result = await verifyLocal(jws, publicKey, { now: FIXED_NOW });
+    const result = await verifyLocalWire01(jws, publicKey, { now: FIXED_NOW });
 
     expect(result.valid).toBe(true);
     if (!result.valid) return;
@@ -119,7 +120,7 @@ describe('round-trip integration', () => {
     });
 
     // Step 1: Verify
-    const verified = await verifyLocal(jws, publicKey, { now: FIXED_NOW });
+    const verified = await verifyLocalWire01(jws, publicKey, { now: FIXED_NOW });
     expect(verified.valid).toBe(true);
     if (!verified.valid) return;
 
@@ -162,7 +163,7 @@ describe('round-trip integration', () => {
 
     const jws = await sign(payload, privateKey, 'attest-key-02');
 
-    const verified = await verifyLocal(jws, publicKey, { now: FIXED_NOW });
+    const verified = await verifyLocalWire01(jws, publicKey, { now: FIXED_NOW });
     expect(verified.valid).toBe(true);
     if (!verified.valid) return;
     expect(verified.variant).toBe('attestation');
@@ -209,7 +210,7 @@ describe('round-trip integration', () => {
 
     const jws = await sign(payload, privateKey, 'key-expired');
 
-    const result = await verifyLocal(jws, publicKey, {
+    const result = await verifyLocalWire01(jws, publicKey, {
       now: FIXED_NOW,
       maxClockSkew: 0,
     });
@@ -222,7 +223,7 @@ describe('round-trip integration', () => {
   it('malformed JWS -> E_INVALID_FORMAT', async () => {
     const { publicKey } = await generateKeypair();
 
-    const result = await verifyLocal('not.a.valid-jws', publicKey, {
+    const result = await verifyLocalWire01('not.a.valid-jws', publicKey, {
       now: FIXED_NOW,
     });
 
@@ -252,7 +253,7 @@ describe('round-trip integration', () => {
       kid: 'key-wrong',
     });
 
-    const result = await verifyLocal(jws, wrongKey, { now: FIXED_NOW });
+    const result = await verifyLocalWire01(jws, wrongKey, { now: FIXED_NOW });
 
     expect(result.valid).toBe(false);
     if (result.valid) return;
@@ -279,7 +280,7 @@ describe('round-trip integration', () => {
       kid: 'key-iss',
     });
 
-    const result = await verifyLocal(jws, publicKey, {
+    const result = await verifyLocalWire01(jws, publicKey, {
       now: FIXED_NOW,
       issuer: 'https://other.example.com',
     });
@@ -312,7 +313,7 @@ describe('round-trip integration', () => {
       kid: 'key-stable',
     });
 
-    const commerceResult = await verifyLocal(commerceJws, publicKey, { now: FIXED_NOW });
+    const commerceResult = await verifyLocalWire01(commerceJws, publicKey, { now: FIXED_NOW });
     expect(commerceResult.valid).toBe(true);
     if (!commerceResult.valid) return;
 
@@ -331,7 +332,7 @@ describe('round-trip integration', () => {
     };
 
     const attestJws = await sign(attestPayload, privateKey, 'key-stable');
-    const attestResult = await verifyLocal(attestJws, publicKey, { now: FIXED_NOW });
+    const attestResult = await verifyLocalWire01(attestJws, publicKey, { now: FIXED_NOW });
     expect(attestResult.valid).toBe(true);
     if (!attestResult.valid) return;
 
