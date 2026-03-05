@@ -95,33 +95,28 @@ export interface VerifyLocalOptions {
   issuer?: string;
 
   /**
-   * Expected audience URL
-   *
-   * If provided, verification fails if receipt.aud does not match.
+   * @deprecated Wire 0.2 does not have an `aud` claim. This option is ignored.
+   * Retained for source compatibility during migration; will be removed in v1.0.
    */
   audience?: string;
 
   /**
    * Expected subject URI
    *
-   * If provided, verification fails if receipt.subject.uri does not match.
+   * If provided, verification fails if receipt.sub does not match.
    * Binds the receipt to a specific resource/interaction target.
    */
   subjectUri?: string;
 
   /**
-   * Expected receipt ID (rid)
-   *
-   * If provided, verification fails if receipt.rid does not match.
-   * Useful for idempotency checks or correlating with prior receipts.
+   * @deprecated Wire 0.2 does not have a `rid` claim. Use `jti` for receipt identification.
+   * This option is ignored. Retained for source compatibility; will be removed in v1.0.
    */
   rid?: string;
 
   /**
-   * Require expiration claim
-   *
-   * If true, receipts without exp claim are rejected.
-   * Defaults to false.
+   * @deprecated Wire 0.2 receipts do not expire (permanent evidence by design).
+   * This option is ignored. Retained for source compatibility; will be removed in v1.0.
    */
   requireExp?: boolean;
 
@@ -169,8 +164,7 @@ export interface VerifyLocalOptions {
  * Result of successful local verification (Wire 0.2 only)
  *
  * Wire 0.1 receipts are no longer accepted by verifyLocal() and return
- * E_UNSUPPORTED_WIRE_VERSION. For Wire 0.1 migration tooling, import
- * verifyLocalWire01() directly from './verify-local-wire01'.
+ * E_UNSUPPORTED_WIRE_VERSION. Re-issue as Wire 0.2 using issueWire02().
  */
 export interface VerifyLocalSuccess {
   /** Verification succeeded */
@@ -281,19 +275,19 @@ function sanitizeParseIssues(
  * Verify a Wire 0.2 PEAC receipt locally with a known public key.
  *
  * Wire 0.2 only: Wire 0.1 receipts return E_UNSUPPORTED_WIRE_VERSION.
- * For Wire 0.1 migration tooling, use verifyLocalWire01() from './verify-local-wire01'.
+ * Re-issue Wire 0.1 receipts as Wire 0.2 using issueWire02().
  *
  * This function:
  * 1. Verifies the Ed25519 signature and header (typ, alg)
  * 2. Applies strictness routing for missing typ (strict: hard error; interop: warning)
  * 3. Validates the receipt schema with Zod (Wire 0.2 only)
- * 4. Checks issuer/audience/subject binding (if options provided)
+ * 4. Checks issuer/subject binding (if options provided)
  * 5. Checks time validity (iat with clock skew tolerance)
  * 6. Checks occurred_at skew and collects parse warnings
  *
  * @param jws - JWS compact serialization
  * @param publicKey - Ed25519 public key (32 bytes)
- * @param options - Optional verification options (issuer, audience, subject, clock skew, strictness)
+ * @param options - Optional verification options (issuer, subject, clock skew, strictness, policyDigest)
  * @returns Typed verification result
  *
  * @example
@@ -488,12 +482,10 @@ export async function verifyLocal(
     }
 
     // Wire 0.1 receipts: reject with E_UNSUPPORTED_WIRE_VERSION.
-    // Use verifyLocalWire01() from verify-local-wire01.ts for migration tooling.
     return {
       valid: false,
       code: 'E_UNSUPPORTED_WIRE_VERSION',
-      message:
-        'Wire 0.1 receipts are not supported by verifyLocal(). Use verifyLocalWire01() for Wire 0.1 verification.',
+      message: 'Wire 0.1 receipts are not supported. Re-issue as Wire 0.2 using issueWire02().',
     };
   } catch (err) {
     // Handle typed CryptoError from @peac/crypto
@@ -565,23 +557,25 @@ export async function verifyLocal(
 }
 
 /**
- * @deprecated verifyLocal() no longer returns commerce variants (Wire 0.2 only).
- * Use verifyLocalWire01() from './verify-local-wire01' for Wire 0.1 receipts.
+ * @deprecated Removed: verifyLocal() is Wire 0.2 only and always returns variant 'wire-02'.
+ * This guard always returns false. Remove usage and use isWire02Result() instead.
  */
 export function isCommerceResult(
   r: VerifyLocalResult
-): r is VerifyLocalSuccess & { variant: 'commerce' } {
-  return r.valid === true && (r as { variant: string }).variant === 'commerce';
+): r is VerifyLocalSuccess & { variant: 'wire-02' } {
+  // Always false: verifyLocal() only returns variant 'wire-02'
+  return false;
 }
 
 /**
- * @deprecated verifyLocal() no longer returns attestation variants (Wire 0.2 only).
- * Use verifyLocalWire01() from './verify-local-wire01' for Wire 0.1 receipts.
+ * @deprecated Removed: verifyLocal() is Wire 0.2 only and always returns variant 'wire-02'.
+ * This guard always returns false. Remove usage and use isWire02Result() instead.
  */
 export function isAttestationResult(
   r: VerifyLocalResult
-): r is VerifyLocalSuccess & { variant: 'attestation' } {
-  return r.valid === true && (r as { variant: string }).variant === 'attestation';
+): r is VerifyLocalSuccess & { variant: 'wire-02' } {
+  // Always false: verifyLocal() only returns variant 'wire-02'
+  return false;
 }
 
 /**

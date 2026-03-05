@@ -174,6 +174,8 @@ export async function handleVerify(params: HandlerParams<VerifyInput>): Promise<
       iss: claims.iss,
       kind: claims.kind,
       type: claims.type,
+      jti: claims.jti,
+      ...(claims.sub !== undefined && { sub: claims.sub }),
       variant: result.variant,
     };
 
