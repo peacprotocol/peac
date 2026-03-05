@@ -380,4 +380,38 @@ else
   echo "OK"
 fi
 
+echo "== release-state-coherence (committed artifacts) =="
+# Verify committed release manifest agrees with committed source-of-truth files.
+# This section checks ONLY committed artifacts (CI-visible), not gitignored reference docs.
+RELEASE_MANIFEST="docs/releases/current.json"
+if [ -f "$RELEASE_MANIFEST" ]; then
+  MANIFEST_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').version)")
+  ROOT_VER=$(node -e "console.log(require('./package.json').version)")
+  REG_VER=$(node -e "console.log(require('./specs/kernel/registries.json').version)")
+  ERR_VER=$(node -e "console.log(require('./specs/kernel/errors.json').version)")
+  MANIFEST_REG_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').registries_version)")
+  MANIFEST_ERR_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').errors_version)")
+
+  coh_bad=0
+  if [ "$MANIFEST_VER" != "$ROOT_VER" ]; then
+    echo "  FAIL: manifest version ($MANIFEST_VER) != package.json ($ROOT_VER)"
+    coh_bad=1
+  fi
+  if [ "$MANIFEST_REG_VER" != "$REG_VER" ]; then
+    echo "  FAIL: manifest registries_version ($MANIFEST_REG_VER) != registries.json ($REG_VER)"
+    coh_bad=1
+  fi
+  if [ "$MANIFEST_ERR_VER" != "$ERR_VER" ]; then
+    echo "  FAIL: manifest errors_version ($MANIFEST_ERR_VER) != errors.json ($ERR_VER)"
+    coh_bad=1
+  fi
+  if [ "$coh_bad" -eq 0 ]; then
+    echo "OK"
+  else
+    bad=1
+  fi
+else
+  echo "SKIP: $RELEASE_MANIFEST not found"
+fi
+
 exit $bad
