@@ -15,7 +15,6 @@ import {
   validateKernelConstraints,
   type ReceiptClaimsType,
   type AttestationReceiptClaims,
-  WARNING_TYP_MISSING,
 } from '@peac/schema';
 import type { PolicyBindingStatus } from './verifier-types';
 import type { VerifyLocalErrorCode, VerifyLocalFailure, VerifyLocalOptions } from './verify-local';

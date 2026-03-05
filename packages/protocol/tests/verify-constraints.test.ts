@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair, sign } from '@peac/crypto';
 import { KERNEL_CONSTRAINTS } from '@peac/schema';
-import { issue, issueWire02 } from '../src/issue';
+import { issueWire02 } from '../src/issue';
 import { verifyLocal } from '../src/verify-local';
 
 /**
