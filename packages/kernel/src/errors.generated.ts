@@ -134,6 +134,10 @@ export const ERROR_CODES = {
 
   // Validation error codes
   E_CONSTRAINT_VIOLATION: 'E_CONSTRAINT_VIOLATION',
+  E_EAT_INVALID_CBOR: 'E_EAT_INVALID_CBOR',
+  E_EAT_INVALID_COSE: 'E_EAT_INVALID_COSE',
+  E_EAT_SIZE_EXCEEDED: 'E_EAT_SIZE_EXCEEDED',
+  E_EAT_UNSUPPORTED_ALG: 'E_EAT_UNSUPPORTED_ALG',
   E_EVIDENCE_NOT_JSON: 'E_EVIDENCE_NOT_JSON',
   E_EXPIRED: 'E_EXPIRED',
   E_INVALID_AMOUNT: 'E_INVALID_AMOUNT',
@@ -162,6 +166,7 @@ export const ERROR_CODES = {
   E_WIRE_VERSION_MISMATCH: 'E_WIRE_VERSION_MISMATCH',
 
   // Verification error codes
+  E_EAT_SIGNATURE_FAILED: 'E_EAT_SIGNATURE_FAILED',
   E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
   E_KEY_NOT_FOUND: 'E_KEY_NOT_FOUND',
   E_KID_REUSE_DETECTED: 'E_KID_REUSE_DETECTED',
@@ -1173,6 +1178,42 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     next_action: 'retry_with_different_input',
     category: 'validation',
   },
+  E_EAT_INVALID_CBOR: {
+    code: 'E_EAT_INVALID_CBOR',
+    http_status: 400,
+    title: 'EAT Invalid CBOR',
+    description: 'EAT token is not valid CBOR or the payload is not a CBOR map',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
+  E_EAT_INVALID_COSE: {
+    code: 'E_EAT_INVALID_COSE',
+    http_status: 400,
+    title: 'EAT Invalid COSE',
+    description: 'EAT token is not a valid COSE_Sign1 structure per RFC 9052 Section 4.2',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
+  E_EAT_SIZE_EXCEEDED: {
+    code: 'E_EAT_SIZE_EXCEEDED',
+    http_status: 400,
+    title: 'EAT Size Exceeded',
+    description: 'EAT token exceeds the 64 KB size limit enforced before CBOR decode',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
+  E_EAT_UNSUPPORTED_ALG: {
+    code: 'E_EAT_UNSUPPORTED_ALG',
+    http_status: 400,
+    title: 'EAT Unsupported Algorithm',
+    description: 'COSE_Sign1 uses an unsupported algorithm; only EdDSA (alg: -8) is supported',
+    retryable: false,
+    next_action: 'abort',
+    category: 'validation',
+  },
   E_EVIDENCE_NOT_JSON: {
     code: 'E_EVIDENCE_NOT_JSON',
     http_status: 400,
@@ -1421,6 +1462,15 @@ export const ERRORS: Record<string, ErrorDefinition> = {
   },
 
   // Verification error codes
+  E_EAT_SIGNATURE_FAILED: {
+    code: 'E_EAT_SIGNATURE_FAILED',
+    http_status: 401,
+    title: 'EAT Signature Failed',
+    description: 'COSE_Sign1 Ed25519 signature verification failed over the Sig_structure',
+    retryable: false,
+    next_action: 'retry_with_different_key',
+    category: 'verification',
+  },
   E_INVALID_SIGNATURE: {
     code: 'E_INVALID_SIGNATURE',
     http_status: 400,
