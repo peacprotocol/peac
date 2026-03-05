@@ -13,6 +13,14 @@ set -euo pipefail
 # Flags:
 #   --target preview|stable   Gate profile (required)
 #   --write-release-artifacts  Write JSON report to docs/releases/gate-report.json
+#                              (committed artifact; omit flag for dry-run / local checks)
+#
+# Behavior:
+#   Without --write-release-artifacts: runs all gates, prints results to stdout,
+#   exits 0/1. No files written (safe for local dry-runs).
+#
+#   With --write-release-artifacts: additionally writes the JSON gate report to
+#   docs/releases/gate-report.json (a committed artifact tracked in CI).
 #
 # Exit codes:
 #   0  All gates passed
