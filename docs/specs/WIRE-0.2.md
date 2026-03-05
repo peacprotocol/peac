@@ -1,4 +1,4 @@
-# PEAC Protocol Wire 0.2 Format Specification
+# PEAC Interaction Record Format 0.2 (Preview)
 
 **Status**: NORMATIVE PREVIEW
 
@@ -16,9 +16,9 @@
 
 ## 1. Introduction
 
-This document defines the normative structure, semantics, and validation rules for PEAC Wire 0.2, the next-generation wire format for interaction records. Wire 0.2 introduces two structural kinds (`evidence` and `challenge`), an open semantic type field with reverse-DNS grammar, a multi-valued pillar taxonomy, canonical issuer form, typed extension groups, and a structured warning system.
+This document defines the normative structure, semantics, and validation rules for the PEAC Interaction Record Format 0.2 (historically referred to as "Wire 0.2" in repository code and internal identifiers). The format introduces two structural kinds (`evidence` and `challenge`), an open semantic type field with reverse-DNS grammar, a multi-valued pillar taxonomy, canonical issuer form, typed extension groups, and a structured warning system.
 
-Wire 0.1 (`peac-receipt/0.1`) remains FROZEN and fully supported. Existing Wire 0.1 receipts, schemas, test fixtures, and verification paths are unchanged. Wire 0.2 adds capabilities without modifying Wire 0.1 semantics. Both wire versions coexist in a dual-stack model (Section 15).
+Wire 0.1 (`peac-receipt/0.1`) remains FROZEN. Existing Wire 0.1 receipts remain verifiable using the stable release line or dedicated Wire 0.1 verification tooling. Wire 0.2 is the forward default: forward-looking surfaces such as `verifyLocal()` on the `next` dist-tag and the MCP server are Wire 0.2 only and return `E_UNSUPPORTED_WIRE_VERSION` for Wire 0.1 receipts. Wire 0.1 semantics, schemas, and test fixtures are unchanged (Section 15).
 
 **Implementation requirement**: A conformant Wire 0.2 implementation MUST enforce all rules defined in this document procedurally, even if the underlying schema validation library does not fully support the conditional constraints described here.
 
@@ -245,6 +245,8 @@ Output: boolean (true if valid type grammar)
 **Domain**: Letters, digits, dots, and hyphens. MUST start with an alphanumeric character. MUST contain at least one dot (distinguishes from single-label paths).
 
 **Segment**: Letters, digits, hyphens, underscores, and dots. MUST start with an alphanumeric character. Underscores are permitted (for type names such as `access-decision`). Additional slashes are NOT permitted; use the absolute URI form for multi-segment paths.
+
+**Casing**: Reverse-DNS `type` values SHOULD be lowercase ASCII. Registries treat `type` values as case-sensitive strings (no silent normalization). Verifiers MAY emit a warning when a reverse-DNS form `type` contains uppercase characters. Extension keys (Section 12) enforce lowercase-only as a MUST; `type` uses SHOULD to avoid breaking absolute URI forms where scheme and authority are case-insensitive per RFC 3986.
 
 **Examples**: `org.peacprotocol/commerce`, `com.example/custom-flow`, `https://example.com/types/custom`
 
@@ -620,7 +622,7 @@ Records payment and transaction metadata.
 | `asset`        | string               | OPTIONAL | 256        | Asset identifier for non-fiat (e.g., token address)                              |
 | `env`          | `"live"` or `"test"` | OPTIONAL | N/A        | Environment discriminant                                                         |
 
-The `amount_minor` field MUST be a base-10 integer string. Decimal values and empty strings are rejected. String representation is used for arbitrary precision without floating-point loss.
+The `amount_minor` field MUST be a base-10 integer string. Decimal values and empty strings are rejected. String representation is used for arbitrary precision without floating-point loss. Negative values (prefixed with `-`) are permitted and represent refunds, chargebacks, or credit adjustments; positive values represent charges. Issuers SHOULD use a distinct receipt `type` (e.g., `org.peacprotocol/refund`) when issuing negative-amount receipts to enable clear filtering by verifiers.
 
 ### 12.5 Access Extension
 
@@ -1113,7 +1115,7 @@ Wire 0.2 receipts do not include an `exp` (expiration) claim. Receipts are perma
 
 ## Appendix A. Error Codes
 
-Wire 0.2 introduces the following error codes (in addition to existing Wire 0.1 codes). All produce HTTP status 400.
+Wire 0.2 introduces the following error codes (in addition to existing Wire 0.1 codes). When surfaced over HTTP verification endpoints, implementations SHOULD map these to HTTP 400 Bad Request. The error codes themselves are transport-independent.
 
 | Code                         | Title                      | Description                                                                                    |
 | ---------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------- |
