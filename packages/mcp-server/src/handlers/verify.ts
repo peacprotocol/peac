@@ -177,10 +177,11 @@ export async function handleVerify(params: HandlerParams<VerifyInput>): Promise<
       jti: claims.jti,
       ...(claims.sub !== undefined && { sub: claims.sub }),
       variant: result.variant,
+      wireVersion: result.wireVersion,
     };
 
     const tr = truncateResponse(
-      `Verification PASSED (${result.variant} receipt, kid=${result.kid})`,
+      `Verification PASSED (${result.variant} receipt, kind=${claims.kind ?? 'unknown'}, kid=${result.kid})`,
       policy
     );
     return {
