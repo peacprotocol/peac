@@ -22,6 +22,14 @@ fi
 echo "[pre-commit] Running lint-staged (auto-format)..."
 pnpm exec lint-staged --concurrent false
 
+# Auto-sync error codegen when errors.json is staged
+if git diff --cached --name-only | grep -q 'specs/kernel/errors.json'; then
+  echo "[pre-commit] Detected staged errors.json: running codegen:errors..."
+  pnpm codegen:errors
+  git add packages/kernel/src/errors.generated.ts
+  echo "[pre-commit] errors.generated.ts updated and staged"
+fi
+
 echo "[pre-commit] Checking for planning leaks..."
 bash scripts/check-planning-leak.sh
 
