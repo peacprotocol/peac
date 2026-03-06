@@ -1,12 +1,11 @@
 /**
- * Issue handler -- ZERO MCP SDK imports (DD-57)
+ * Issue handler -- Wire 0.2 only, ZERO MCP SDK imports (DD-57)
  *
- * Signs and returns a PEAC receipt JWS (in-memory only, no side-effects).
+ * Signs and returns a Wire 0.2 PEAC receipt JWS (in-memory only, no side-effects).
  * Requires issuerKey + issuerId on ServerContext.
  */
 
-import { issue, IssueError } from '@peac/protocol';
-import type { IssueOptions } from '@peac/protocol';
+import { issueWire02, IssueError } from '@peac/protocol';
 import { decode, base64urlEncode } from '@peac/crypto';
 import type { HandlerParams, HandlerResult } from './types.js';
 import type { IssueInput } from '../schemas/issue.js';
@@ -61,40 +60,38 @@ export async function handleIssue(params: HandlerParams<IssueInput>): Promise<Ha
     };
   }
 
-  // Guard: TTL cap enforcement
-  if (input.ttl_seconds !== undefined && input.ttl_seconds > policy.limits.max_ttl_seconds) {
-    return {
-      text: `Input rejected: ttl_seconds ${input.ttl_seconds} exceeds max_ttl_seconds ${policy.limits.max_ttl_seconds}`,
-      structured: {
-        ok: false,
-        code: 'E_MCP_INVALID_INPUT',
-        message: `ttl_seconds ${input.ttl_seconds} exceeds policy max of ${policy.limits.max_ttl_seconds}`,
-      },
-      isError: true,
-    };
-  }
-
   // Build Trust Gate 1 patterns from actual key
   const keyPatterns = buildKeyPatterns(context.issuerKey.privateKey, context.issuerKey.publicKey);
 
-  // Compute exp from ttl_seconds if provided
-  const now = Math.floor(Date.now() / 1000);
-  const exp = input.ttl_seconds !== undefined ? now + input.ttl_seconds : undefined;
-
   try {
-    const result = await issue({
+    // Build policy block: PolicyBlock requires digest (non-optional per kernel type).
+    // If caller provides policy without digest, return a clear error rather than
+    // silently discarding the policy metadata.
+    if (input.policy && !input.policy.digest) {
+      return {
+        text: 'Issue failed: policy.digest is required when policy block is provided',
+        structured: {
+          ok: false,
+          code: 'E_MCP_ISSUE_FAILED',
+          message:
+            'policy.digest is required when policy block is provided (uri/version alone is insufficient for binding)',
+        },
+        isError: true,
+      };
+    }
+    const policyBlock = input.policy?.digest
+      ? { digest: input.policy.digest, uri: input.policy.uri, version: input.policy.version }
+      : undefined;
+
+    const result = await issueWire02({
       iss: context.issuerId,
-      aud: input.aud,
-      amt: input.amt,
-      cur: input.cur,
-      rail: input.rail,
-      reference: input.reference,
-      asset: input.asset,
-      env: input.env,
-      network: input.network,
-      evidence: input.evidence as IssueOptions['evidence'],
-      subject: input.subject,
-      exp,
+      kind: input.kind,
+      type: input.type,
+      sub: input.sub,
+      pillars: input.pillars,
+      occurred_at: input.occurred_at,
+      extensions: input.extensions,
+      policy: policyBlock,
       privateKey: context.issuerKey.privateKey,
       kid: context.issuerKey.kid,
     });
@@ -103,17 +100,17 @@ export async function handleIssue(params: HandlerParams<IssueInput>): Promise<Ha
     const { payload } = decode<Record<string, unknown>>(result.jws);
     const claimsSummary = {
       iss: payload.iss as string,
-      aud: payload.aud as string,
+      kind: payload.kind as string,
+      type: payload.type as string,
       iat: payload.iat as number,
-      ...(payload.exp !== undefined ? { exp: payload.exp as number } : {}),
-      rid: payload.rid as string,
-      amt: payload.amt as number,
-      cur: payload.cur as string,
+      jti: payload.jti as string,
+      ...(payload.sub !== undefined ? { sub: payload.sub as string } : {}),
+      ...(payload.pillars !== undefined ? { pillars: payload.pillars as string[] } : {}),
     };
 
     // Trust Gate 1: scan output for key bytes
     const tr = truncateResponse(
-      `Receipt issued: rid=${claimsSummary.rid}, ${claimsSummary.amt} ${claimsSummary.cur}`,
+      `Receipt issued: jti=${claimsSummary.jti}, kind=${claimsSummary.kind}, type=${claimsSummary.type}`,
       policy
     );
     const safeText = sanitizeOutput(tr.text, keyPatterns);

@@ -10,8 +10,6 @@ import { type VerificationStrictness, type VerificationWarning, HASH } from '@pe
 import {
   parseReceiptClaims,
   validateKernelConstraints,
-  type ReceiptClaimsType,
-  type AttestationReceiptClaims,
   type Wire02Claims,
   checkOccurredAtSkew,
   sortWarnings,
@@ -97,33 +95,28 @@ export interface VerifyLocalOptions {
   issuer?: string;
 
   /**
-   * Expected audience URL
-   *
-   * If provided, verification fails if receipt.aud does not match.
+   * @deprecated Wire 0.2 does not have an `aud` claim. This option is ignored.
+   * Retained for source compatibility during migration; will be removed in v1.0.
    */
   audience?: string;
 
   /**
    * Expected subject URI
    *
-   * If provided, verification fails if receipt.subject.uri does not match.
+   * If provided, verification fails if receipt.sub does not match.
    * Binds the receipt to a specific resource/interaction target.
    */
   subjectUri?: string;
 
   /**
-   * Expected receipt ID (rid)
-   *
-   * If provided, verification fails if receipt.rid does not match.
-   * Useful for idempotency checks or correlating with prior receipts.
+   * @deprecated Wire 0.2 does not have a `rid` claim. Use `jti` for receipt identification.
+   * This option is ignored. Retained for source compatibility; will be removed in v1.0.
    */
   rid?: string;
 
   /**
-   * Require expiration claim
-   *
-   * If true, receipts without exp claim are rejected.
-   * Defaults to false.
+   * @deprecated Wire 0.2 receipts do not expire (permanent evidence by design).
+   * This option is ignored. Retained for source compatibility; will be removed in v1.0.
    */
   requireExp?: boolean;
 
@@ -168,78 +161,36 @@ export interface VerifyLocalOptions {
 }
 
 /**
- * Result of successful local verification
+ * Result of successful local verification (Wire 0.2 only)
  *
- * Discriminated union on `variant` -- callers narrow claims type via variant check:
- *   if (result.valid && result.variant === 'commerce') { result.claims.amt }
- *   if (result.valid && result.variant === 'wire-02') { result.claims.kind }
+ * Wire 0.1 receipts are no longer accepted by verifyLocal() and return
+ * E_UNSUPPORTED_WIRE_VERSION. Re-issue as Wire 0.2 using issueWire02().
  */
-export type VerifyLocalSuccess =
-  | {
-      /** Verification succeeded */
-      valid: true;
-      /** Receipt variant (commerce = payment receipt) */
-      variant: 'commerce';
-      /** Validated commerce receipt claims */
-      claims: ReceiptClaimsType;
-      /** Key ID from JWS header (for logging/indexing) */
-      kid: string;
-      /** Wire format version */
-      wireVersion: '0.1';
-      /** Verification warnings (always empty for Wire 0.1) */
-      warnings: VerificationWarning[];
-      /**
-       * Policy binding status (DD-49).
-       *
-       * Always 'unavailable' for Wire 0.1 receipts (no policy digest on wire).
-       */
-      policy_binding: PolicyBindingStatus;
-    }
-  | {
-      /** Verification succeeded */
-      valid: true;
-      /** Receipt variant (attestation = non-payment) */
-      variant: 'attestation';
-      /** Validated attestation receipt claims */
-      claims: AttestationReceiptClaims;
-      /** Key ID from JWS header (for logging/indexing) */
-      kid: string;
-      /** Wire format version */
-      wireVersion: '0.1';
-      /** Verification warnings (always empty for Wire 0.1) */
-      warnings: VerificationWarning[];
-      /**
-       * Policy binding status (DD-49).
-       *
-       * Always 'unavailable' for Wire 0.1 receipts.
-       */
-      policy_binding: PolicyBindingStatus;
-    }
-  | {
-      /** Verification succeeded */
-      valid: true;
-      /** Receipt variant (wire-02 = Wire 0.2 evidence or challenge) */
-      variant: 'wire-02';
-      /** Validated Wire 0.2 receipt claims */
-      claims: Wire02Claims;
-      /** Key ID from JWS header (for logging/indexing) */
-      kid: string;
-      /** Wire format version */
-      wireVersion: '0.2';
-      /** Verification warnings from schema parsing and strictness routing */
-      warnings: VerificationWarning[];
-      /**
-       * Policy binding status (DD-49, DD-151).
-       *
-       * Three-state result:
-       *   - 'unavailable': either the receipt contains no policy block, or the
-       *     caller did not pass a policyDigest option to verifyLocal(). No check.
-       *   - 'verified': both digests present and match exactly.
-       *   - 'failed': not returned on success; verifyLocal() returns
-       *     E_POLICY_BINDING_FAILED (valid: false) before reaching this field.
-       */
-      policy_binding: PolicyBindingStatus;
-    };
+export interface VerifyLocalSuccess {
+  /** Verification succeeded */
+  valid: true;
+  /** Receipt variant (always 'wire-02') */
+  variant: 'wire-02';
+  /** Validated Wire 0.2 receipt claims */
+  claims: Wire02Claims;
+  /** Key ID from JWS header (for logging/indexing) */
+  kid: string;
+  /** Wire format version */
+  wireVersion: '0.2';
+  /** Verification warnings from schema parsing and strictness routing */
+  warnings: VerificationWarning[];
+  /**
+   * Policy binding status (DD-49, DD-151).
+   *
+   * Three-state result:
+   *   - 'unavailable': either the receipt contains no policy block, or the
+   *     caller did not pass a policyDigest option to verifyLocal(). No check.
+   *   - 'verified': both digests present and match exactly.
+   *   - 'failed': not returned on success; verifyLocal() returns
+   *     E_POLICY_BINDING_FAILED (valid: false) before reaching this field.
+   */
+  policy_binding: PolicyBindingStatus;
+}
 
 /**
  * Result of failed local verification
@@ -321,22 +272,22 @@ function sanitizeParseIssues(
 }
 
 /**
- * Verify a PEAC receipt locally with a known public key
+ * Verify a Wire 0.2 PEAC receipt locally with a known public key.
+ *
+ * Wire 0.2 only: Wire 0.1 receipts return E_UNSUPPORTED_WIRE_VERSION.
+ * Re-issue Wire 0.1 receipts as Wire 0.2 using issueWire02().
  *
  * This function:
  * 1. Verifies the Ed25519 signature and header (typ, alg)
  * 2. Applies strictness routing for missing typ (strict: hard error; interop: warning)
- * 3. Validates the receipt schema with Zod (Wire 0.1 or Wire 0.2)
- * 4. Checks issuer/audience/subject binding (if options provided)
- * 5. Checks time validity (exp/iat with clock skew tolerance)
- * 6. For Wire 0.2: checks occurred_at skew and collects parse warnings
- *
- * Use this when you have the issuer's public key and don't need JWKS discovery.
- * For JWKS-based verification, use `verifyReceipt()` instead.
+ * 3. Validates the receipt schema with Zod (Wire 0.2 only)
+ * 4. Checks issuer/subject binding (if options provided)
+ * 5. Checks time validity (iat with clock skew tolerance)
+ * 6. Checks occurred_at skew and collects parse warnings
  *
  * @param jws - JWS compact serialization
  * @param publicKey - Ed25519 public key (32 bytes)
- * @param options - Optional verification options (issuer, audience, subject, clock skew, strictness)
+ * @param options - Optional verification options (issuer, subject, clock skew, strictness, policyDigest)
  * @returns Typed verification result
  *
  * @example
@@ -345,7 +296,7 @@ function sanitizeParseIssues(
  *   issuer: 'https://api.example.com',
  *   strictness: 'strict',
  * });
- * if (result.valid && result.variant === 'wire-02') {
+ * if (result.valid) {
  *   console.log('Kind:', result.claims.kind);
  *   console.log('Warnings:', result.warnings);
  * }
@@ -356,16 +307,7 @@ export async function verifyLocal(
   publicKey: Uint8Array,
   options: VerifyLocalOptions = {}
 ): Promise<VerifyLocalResult> {
-  const {
-    issuer,
-    audience,
-    subjectUri,
-    rid,
-    requireExp = false,
-    maxClockSkew = 300,
-    strictness = 'strict',
-    policyDigest,
-  } = options;
+  const { issuer, subjectUri, maxClockSkew = 300, strictness = 'strict', policyDigest } = options;
   const now = options.now ?? Math.floor(Date.now() / 1000);
 
   try {
@@ -539,100 +481,12 @@ export async function verifyLocal(
       };
     }
 
-    // Wire 0.1 path (commerce or attestation)
-    // Wire 0.2 receipts returned early above.
-    // Both ReceiptClaimsType and AttestationReceiptClaims have: iss, aud, rid, iat, exp
-    // TypeScript cannot narrow the union via wireVersion so we use a typed assertion.
-    type Wire01CommonClaims = { iss: string; aud: string; rid: string; iat: number; exp?: number };
-    const w01 = pr.claims as Wire01CommonClaims;
-
-    // Shared binding checks (iss, aud, rid, iat, exp exist on both receipt types)
-    if (issuer !== undefined && w01.iss !== issuer) {
-      return {
-        valid: false,
-        code: 'E_INVALID_ISSUER',
-        message: `Issuer mismatch: expected "${issuer}", got "${w01.iss}"`,
-      };
-    }
-
-    if (audience !== undefined && w01.aud !== audience) {
-      return {
-        valid: false,
-        code: 'E_INVALID_AUDIENCE',
-        message: `Audience mismatch: expected "${audience}", got "${w01.aud}"`,
-      };
-    }
-
-    if (rid !== undefined && w01.rid !== rid) {
-      return {
-        valid: false,
-        code: 'E_INVALID_RECEIPT_ID',
-        message: `Receipt ID mismatch: expected "${rid}", got "${w01.rid}"`,
-      };
-    }
-
-    if (requireExp && w01.exp === undefined) {
-      return {
-        valid: false,
-        code: 'E_MISSING_EXP',
-        message: 'Receipt missing required exp claim',
-      };
-    }
-
-    if (w01.iat > now + maxClockSkew) {
-      return {
-        valid: false,
-        code: 'E_NOT_YET_VALID',
-        message: `Receipt not yet valid: issued at ${new Date(w01.iat * 1000).toISOString()}, now is ${new Date(now * 1000).toISOString()}`,
-      };
-    }
-
-    if (w01.exp !== undefined && w01.exp < now - maxClockSkew) {
-      return {
-        valid: false,
-        code: 'E_EXPIRED',
-        message: `Receipt expired at ${new Date(w01.exp * 1000).toISOString()}`,
-      };
-    }
-
-    // Subject binding + typed return (variant-branched, no unsafe casts)
-    if (pr.variant === 'commerce') {
-      const claims = pr.claims as ReceiptClaimsType;
-      if (subjectUri !== undefined && claims.subject?.uri !== subjectUri) {
-        return {
-          valid: false,
-          code: 'E_INVALID_SUBJECT',
-          message: `Subject mismatch: expected "${subjectUri}", got "${claims.subject?.uri ?? 'undefined'}"`,
-        };
-      }
-      return {
-        valid: true,
-        variant: 'commerce',
-        claims,
-        kid: result.header.kid,
-        wireVersion: '0.1',
-        warnings: [],
-        policy_binding: 'unavailable',
-      };
-    } else {
-      const claims = pr.claims as AttestationReceiptClaims;
-      if (subjectUri !== undefined && claims.sub !== subjectUri) {
-        return {
-          valid: false,
-          code: 'E_INVALID_SUBJECT',
-          message: `Subject mismatch: expected "${subjectUri}", got "${claims.sub ?? 'undefined'}"`,
-        };
-      }
-      return {
-        valid: true,
-        variant: 'attestation',
-        claims,
-        kid: result.header.kid,
-        wireVersion: '0.1',
-        warnings: [],
-        policy_binding: 'unavailable',
-      };
-    }
+    // Wire 0.1 receipts: reject with E_UNSUPPORTED_WIRE_VERSION.
+    return {
+      valid: false,
+      code: 'E_UNSUPPORTED_WIRE_VERSION',
+      message: 'Wire 0.1 receipts are not supported. Re-issue as Wire 0.2 using issueWire02().',
+    };
   } catch (err) {
     // Handle typed CryptoError from @peac/crypto
     // Use structural check instead of instanceof for robustness across ESM/CJS boundaries
@@ -703,27 +557,25 @@ export async function verifyLocal(
 }
 
 /**
- * Type guard: narrows a VerifyLocalResult to a commerce success.
- *
- * Use instead of manual `result.valid && result.variant === 'commerce'` checks
- * to get proper claims narrowing to ReceiptClaimsType.
+ * @deprecated Removed: verifyLocal() is Wire 0.2 only and always returns variant 'wire-02'.
+ * This guard always returns false. Remove usage and use isWire02Result() instead.
  */
 export function isCommerceResult(
   r: VerifyLocalResult
-): r is VerifyLocalSuccess & { variant: 'commerce' } {
-  return r.valid === true && r.variant === 'commerce';
+): r is VerifyLocalSuccess & { variant: 'wire-02' } {
+  // Always false: verifyLocal() only returns variant 'wire-02'
+  return false;
 }
 
 /**
- * Type guard: narrows a VerifyLocalResult to an attestation success.
- *
- * Use instead of manual `result.valid && result.variant === 'attestation'` checks
- * to get proper claims narrowing to AttestationReceiptClaims.
+ * @deprecated Removed: verifyLocal() is Wire 0.2 only and always returns variant 'wire-02'.
+ * This guard always returns false. Remove usage and use isWire02Result() instead.
  */
 export function isAttestationResult(
   r: VerifyLocalResult
-): r is VerifyLocalSuccess & { variant: 'attestation' } {
-  return r.valid === true && r.variant === 'attestation';
+): r is VerifyLocalSuccess & { variant: 'wire-02' } {
+  // Always false: verifyLocal() only returns variant 'wire-02'
+  return false;
 }
 
 /**

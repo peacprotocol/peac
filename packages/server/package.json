@@ -34,10 +34,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@peac/schema": "workspace:*",
+    "@hono/node-server": "^1.19.11",
     "@peac/protocol": "workspace:*",
-    "@hono/node-server": "^1.19.9",
-    "hono": "^4.12.2"
+    "@peac/schema": "workspace:*",
+    "hono": "^4.12.5"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",

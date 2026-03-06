@@ -458,6 +458,11 @@
       "description": "Wire 0.2 warning emission vectors (DD-155)",
       "version": "0.12.0-preview.1",
       "fixture_count": 4
+    },
+    "replay-prevention/boundary-jti-length.json": {
+      "description": "Wire 0.2 replay prevention: jti at maximum length boundary",
+      "version": "0.12.0-preview.1",
+      "fixture_count": 1
     }
   }
 }

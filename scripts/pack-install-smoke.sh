@@ -112,23 +112,17 @@ echo "   OK: No unresolved workspace dependencies"
 echo ""
 echo "5. Running import smoke test..."
 cat > test.mjs << 'EOF'
-import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
+import { issueWire02, verifyLocal, generateKeypair } from '@peac/protocol';
 
 const EXPECTED_KID = 'test-key-2026';
 
-// Basic smoke test
+// Basic smoke test (Wire 0.2)
 const { privateKey, publicKey } = await generateKeypair();
 
-const { jws } = await issue({
+const { jws } = await issueWire02({
   iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 1000,
-  cur: 'USD',
-  rail: 'x402',
-  reference: 'tx_test',
-  asset: 'USD',
-  env: 'test',
-  evidence: {},
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
   privateKey,
   kid: EXPECTED_KID,
 });
@@ -147,7 +141,8 @@ if (result.kid !== EXPECTED_KID) {
 }
 
 console.log('   Issuer:', result.claims.iss);
-console.log('   Amount:', result.claims.amt, result.claims.cur);
+console.log('   Kind:', result.claims.kind);
+console.log('   Type:', result.claims.type);
 console.log('   Key ID:', result.kid);
 console.log('   OK: Issue and verifyLocal work correctly');
 EOF

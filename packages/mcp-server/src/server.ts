@@ -42,6 +42,7 @@ function makeMeta(ctx: ServerContext, serverName: string): Record<string, unknow
     serverVersion: ctx.version,
     policyHash: ctx.policyHash,
     protocolVersion: ctx.protocolVersion,
+    wireFormatVersion: '0.2',
   };
 }
 
@@ -344,9 +345,9 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
     register(
       'peac_issue',
       {
-        title: 'Issue PEAC Receipt',
+        title: 'Issue Wire 0.2 PEAC Receipt',
         description:
-          'Sign and return a new PEAC receipt JWS. Requires server configured with an Ed25519 issuer key (--issuer-key and --issuer-id).',
+          'Sign and return a Wire 0.2 PEAC receipt JWS. Accepts kind, type, pillars, extensions, and policy fields. Wire 0.2 only: Wire 0.1 fields are not accepted. Requires server configured with an Ed25519 issuer key (--issuer-key and --issuer-id).',
         inputSchema: IssueInputSchema,
         outputSchema: IssueOutputSchema,
         annotations: ISSUE_TOOL_ANNOTATIONS,
