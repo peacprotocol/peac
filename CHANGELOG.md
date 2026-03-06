@@ -7,6 +7,154 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0-preview.2] - 2026-03-06
+
+### Interaction Record Format 0.2 Preview (Hardening)
+
+v0.12.0-preview.2 hardens the Wire 0.2 preview with release integrity gates,
+Wire 0.1 isolation, spec completeness (sections 18-20), ecosystem integration
+(MCP and A2A), and the EAT passport adapter (DD-154).
+
+This is the second preview release on the `next` dist-tag. Wire 0.2
+(`interaction-record+jwt`) is feature-complete; this release focuses on
+correctness, integration proof, and quality gate infrastructure ahead of
+stable promotion.
+
+### Added
+
+- **Release State Coherence Gate** (#467)
+  - Committed `docs/releases/current.json` manifest (CI-enforceable source of truth)
+  - `scripts/check-release-state-coherence.sh` validates manifest against committed artifacts
+  - Extended `scripts/guard.sh` with release-state-coherence section
+- **Spec Sections 18-20** (#470, DD-156)
+  - Section 18: Identifier Stack (4-layer dispatch model, token confusion prevention per RFC 8725)
+  - Section 19: Validation Algorithm (12-step RFC 9068-style verification procedure)
+  - Section 20: Replay Prevention (issuer-MUST jti uniqueness, verifier-SHOULD cache)
+  - Updated terminology and editorial review across all 20 sections
+- **MCP Server Wire 0.2 Issuance** (#472)
+  - `peac_issue` tool accepts Wire 0.2 fields: `kind`, `type`, `pillars`, `extensions`, `policy`
+  - Wire 0.2 only (no `wire_version` discriminator); unlocks DD-90 gate 1
+- **A2A Wire 0.2 Integration Tests** (#473)
+  - Wire 0.2 round-trip through A2A metadata carrier
+  - Validates embed, extract, verify cycle; unlocks DD-90 gate 2
+- **EAT Passport Adapter** (#474, DD-154)
+  - `@peac/adapter-eat`: COSE_Sign1 (RFC 9052/9053) + Ed25519 via `@peac/crypto`
+  - Privacy-first claim mapping (EAT/RFC 9711)
+  - 5 error codes: `E_EAT_SIZE_EXCEEDED`, `E_EAT_INVALID_CBOR`, `E_EAT_INVALID_COSE`,
+    `E_EAT_SIGNATURE_FAILED`, `E_EAT_UNSUPPORTED_ALG`
+  - Detached COSE payload rejection, 32-byte Ed25519 key validation, 64 KB size limit
+- **Consolidated Release Gate Runner** (#471)
+  - `scripts/release/run-gates.sh`: unified gate runner with `--target preview|stable`
+  - JSON gate report output, DD-90 stable gate stubs
+- **Quality Gates Hardening** (#475)
+  - `check-publish-list.sh` reads from `publish-manifest.json` (single source of truth)
+  - Pre-commit auto-syncs `errors.generated.ts`
+  - `pnpm fixtures:new` scaffold helper
+  - `guard.sh` MCP distribution gates
+
+### Changed
+
+- **Wire 0.1 Isolation** (#468)
+  - `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` for Wire 0.1 receipts
+  - `verifyLocalWire01()` internal-only (NOT barrel-exported from `@peac/protocol`)
+  - MCP server: Wire 0.2 only (no Wire 0.1 issuance or verification)
+  - `issue()` deprecated in favor of `issueWire02()`
+- **Hono Audit Fix** (#469)
+  - Bumped `hono` and `@hono/node-server` for CVE remediation
+
+### Fixed (pre-existing, included in release prep)
+
+- **MCP Server Test Alignment** (post-#472 repair)
+  - `schemas.test.ts`: fixed unsorted pillars array in optional fields test
+    (`['commerce', 'access']` corrected to `['access', 'commerce']`)
+  - `privileged-e2e.test.ts`: updated Wire 0.1 rejection test to expect Wire 0.2
+    success (MCP now issues Wire 0.2 per #472; test predated that change)
+  - Both failures were pre-existing on main, not introduced by release prep
+
+### Infrastructure
+
+- **Release Gate Runner Rewrite** (`scripts/release/run-gates.sh`)
+  - Portable `now_ms()` via Node (fixes macOS `date +%3N` arithmetic errors)
+  - `--write-release-artifacts` is now the authoritative gate path; dry-run mode
+    never claims "ready to tag"
+  - Versioned gate report: `docs/releases/<version>-gate-report.json`
+  - Stable gate stubs now include `api-surface-lock` and `pack-install-smoke`
+- **Atomic Version Bump** (`scripts/bump-version.mjs`)
+  - Version bump now atomically bumps spec JSON files, regenerates codegen,
+    and formats all bumped files in a single script invocation
+- **Machine-Derived Release Facts** (`docs/releases/current.json`)
+  - Removed `_informational` block (approximate test counts, DD counts)
+  - Manifest contains only CI-enforceable fields; informational data derived
+    at check time by scripts
+- **Deterministic Doc-Sync** (`scripts/sync-release-state.mjs`)
+  - Reads `current.json` + machine-derived facts, rewrites `<!-- release-state -->`
+    blocks in all 7 reference docs deterministically
+  - `--check` mode for CI verification of doc drift
+- **CHANGELOG Coverage Gate**
+  - `run-gates.sh` now verifies CHANGELOG has entry for current version
+- **Conformance Fixture Correction**
+  - Wire 0.2 fixtures: `wire_format` corrected from `peac-receipt/0.2` to
+    `interaction-record+jwt` (2 files, 8 occurrences)
+- **Source-of-Truth Purge**
+  - `@peac/compat-wire01`: annotated as resolved (internal `verifyLocalWire01()`)
+  - `peac-receipt/0.2`: corrected to `interaction-record+jwt` across reference docs
+
+### Deferred
+
+- Property/fuzz tests: deferred to v0.12.0 stable
+- Performance benchmarks: deferred to v0.12.0 stable
+- SSRF test expansion: deferred to v0.12.0 stable
+- Public API surface lock: deferred to v0.12.0 stable
+- Migration guide: deferred to v0.12.0 stable
+
+## [0.12.0-preview.1] - 2026-03-03
+
+### Interaction Record Format 0.2 Preview
+
+v0.12.0-preview.1 introduces Wire 0.2 (`interaction-record+jwt`), the next
+generation of the PEAC receipt format. This is a preview release on the `next`
+dist-tag for early adoption testing.
+
+### Added
+
+- **Wire 0.2 Format** (DD-150 through DD-156)
+  - 2 structural kinds (`evidence`, `challenge`), forever fixed
+  - Open semantic `type` (reverse-DNS or URI) + multi-valued `pillars` (10-pillar closed taxonomy)
+  - `typ: interaction-record+jwt` (MUST; `application/interaction-record+jwt` accepted per RFC 7515)
+  - `iss` canonical: `https://` (ASCII origin, RFC 3986) and `did:` (DID Core) only
+  - 5 typed extension groups: Commerce, Access, Challenge, Identity, Correlation
+  - Policy binding: JCS (RFC 8785) + SHA-256, 3-state result (`verified`/`failed`/`unavailable`)
+  - JOSE hardening: reject embedded keys (`jwk`, `x5c`), `crit`, `b64: false`, `zip`
+  - Strictness profiles: `strict` (default) and `interop` (explicit opt-in only)
+  - 16 error codes, 4 warning codes (append-only), RFC 6901 pointers
+  - 59+ conformance fixtures
+- **Wire 0.2 Issuance and Verification**
+  - `issueWire02()` in `@peac/protocol`
+  - `verifyLocal()` dual-stack with strict/interop profiles
+  - `signWire02()` and `validateWire02Header()` in `@peac/crypto`
+  - `Wire02ClaimsSchema` in `@peac/schema`
+- **Policy Binding**
+  - `verifyPolicyBinding()` in `@peac/schema` (L1 pure string comparison, DD-141)
+  - `computePolicyDigestJcs()` in `@peac/protocol` (JCS RFC 8785 + SHA-256)
+  - `checkPolicyBinding()` 3-state logic
+  - 33 policy binding tests with golden JCS vectors
+- **Wire 0.2 Conformance Suite**
+  - 59+ conformance fixtures across kinds, types, pillars, extensions, JOSE
+  - Normative spec: `docs/specs/WIRE-0.2.md` (17 sections at preview.1, 20 at preview.2)
+- **Typed Extension Accessors**
+  - 5 accessor helpers: `getCommerceExtension()`, `getAccessExtension()`,
+    `getChallengeExtension()`, `getIdentityExtension()`, `getCorrelationExtension()`
+  - Return `undefined` if absent; throw `SchemaError` with RFC 6901 pointer if invalid-present
+- **JWS Header Discrimination**
+  - 3-variant discriminated union: `Wire01JWSHeader | Wire02JWSHeader | UnTypedJWSHeader`
+  - Callers narrow by `header.typ`
+
+### Changed
+
+- **Wire 0.1 is FROZEN:** `peac-receipt/0.1` receives no further changes
+- **Deprecated:** `WIRE_TYPE` and `WIRE_VERSION` constants in `@peac/kernel`
+- **Deprecated:** `JWSHeader` Zod schema alias (use `Wire01JWSHeaderSchema`)
+
 ## [0.11.3] - 2026-03-02
 
 ### Identity, Zero Trust, and Enterprise Readiness

@@ -57,5 +57,5 @@ All examples are verified in CI:
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22+
 - pnpm 8+

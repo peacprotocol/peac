@@ -27,7 +27,7 @@
 - Streamable HTTP transport with session isolation
 - Kernel constraint enforcement (fail-closed)
 - 8 governance framework mappings (NIST AI RMF, EU AI Act, OWASP ASI, ISO 42001, IEEE 7001, OECD, Singapore MGFAA)
-- 149 design decisions, 4927 tests, 28 packages on npm
+- 156 design decisions, 5400+ tests across 28+ packages on npm
 
 ## Next: v0.12.0-preview.1 (Wire Format 0.2 Preview)
 

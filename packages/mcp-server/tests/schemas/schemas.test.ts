@@ -169,7 +169,7 @@ describe('schemas', () => {
         kind: 'evidence',
         type: 'org.peacprotocol/payment',
         sub: 'https://resource.example.com',
-        pillars: ['commerce', 'access'],
+        pillars: ['access', 'commerce'],
         occurred_at: '2026-03-05T12:00:00Z',
         policy: {
           uri: 'https://example.com/.well-known/peac.txt',

@@ -147,7 +147,18 @@ pnpm pack --pack-destination /tmp/x
 npm publish /tmp/x/<tarball>.tgz --access public --tag next --provenance false
 ```
 
-After the initial publish, configure Trusted Publishing on npmjs.com for the package (repository: `peacprotocol/peac`, workflow: `publish.yml`, environment: `npm-production`).
+After the initial publish, configure Trusted Publishing via `npm trust` CLI:
+
+```bash
+npm trust add --registry https://registry.npmjs.org/ \
+  --provider github \
+  --repository peacprotocol/peac \
+  --workflow publish.yml \
+  --environment npm-production \
+  @peac/<package-name>
+```
+
+See `scripts/setup-trusted-publishing.sh` for batch configuration.
 
 ## Rollback
 
