@@ -430,7 +430,8 @@ describe('generated artifact structure', () => {
     expect(matrix).toContain('## Wire 0.2 Protocol Requirements');
     expect(matrix).toContain('## Carrier Contract Requirements');
     expect(matrix).toContain('## Summary');
-    expect(matrix).toContain('| Metric | Count |');
+    // Prettier pads table columns; match header words, not exact spacing
+    expect(matrix).toMatch(/\|\s*Metric\s*\|\s*Count\s*\|/);
   });
 
   it('test-mappings.json has valid structure', () => {
