@@ -54,56 +54,15 @@ for (const p of pkgPaths) {
 console.log(pub.sort().join('\n'));
 ")
 
-# Expected packages (updated for v0.11.2 + content-signals + openai-compatible)
-EXPECTED_PACKAGES=$(cat <<'EOF'
-@peac/adapter-core
-@peac/adapter-openai-compatible
-@peac/adapter-openclaw
-@peac/adapter-x402
-@peac/adapter-x402-daydreams
-@peac/adapter-x402-fluora
-@peac/adapter-x402-pinata
-@peac/attribution
-@peac/audit
-@peac/capture-core
-@peac/capture-node
-@peac/cli
-@peac/contracts
-@peac/control
-@peac/core
-@peac/crypto
-@peac/disc
-@peac/http-signatures
-@peac/jwks-cache
-@peac/kernel
-@peac/mappings-a2a
-@peac/mappings-acp
-@peac/mappings-aipref
-@peac/mappings-content-signals
-@peac/mappings-mcp
-@peac/mappings-rsl
-@peac/mappings-tap
-@peac/mappings-ucp
-@peac/mcp-server
-@peac/middleware-core
-@peac/middleware-express
-@peac/net-node
-@peac/pay402
-@peac/policy-kit
-@peac/pref
-@peac/protocol
-@peac/rails-card
-@peac/rails-stripe
-@peac/rails-x402
-@peac/receipts
-@peac/schema
-@peac/sdk
-@peac/server
-@peac/telemetry
-@peac/telemetry-otel
-@peac/worker-core
-EOF
-)
+# Expected packages: derived from publish-manifest.json (single source of truth).
+# Combines packages[] (published) + pendingTrustedPublishing[] (pending).
+# When adding a new public package, update publish-manifest.json only.
+EXPECTED_PACKAGES=$(node -e "
+const manifest = require('./scripts/publish-manifest.json');
+const all = [...(manifest.packages || []), ...(manifest.pendingTrustedPublishing || [])];
+const sorted = [...new Set(all)].sort();
+console.log(sorted.join('\n'));
+")
 
 # Compare
 DIFF=$(diff <(echo "$EXPECTED_PACKAGES") <(echo "$ACTUAL_PACKAGES") || true)
@@ -114,10 +73,11 @@ if [ -n "$DIFF" ]; then
   echo "Difference (expected vs actual):"
   echo "$DIFF"
   echo ""
-  echo "Update the EXPECTED_PACKAGES list in this script or fix package.json files."
+  echo "Update scripts/publish-manifest.json (packages[] or pendingTrustedPublishing[]) or fix package.json files."
   exit 1
 else
-  echo "OK: All 46 public packages match"
+  TOTAL=$(echo "$ACTUAL_PACKAGES" | wc -l | tr -d ' ')
+  echo "OK: All $TOTAL public packages match"
   echo "$ACTUAL_PACKAGES" | wc -l | xargs -I{} echo "Total: {} packages"
 fi
 
@@ -181,7 +141,9 @@ echo ""
 echo "Packages without tests (17) - rationale:"
 echo "$NO_TESTS_RATIONALE" | sed 's/^/  /'
 echo ""
-echo "OK: All 46 packages accounted for (29 tested + 17 type/wrapper packages)"
+TESTED_COUNT=$(echo "$TESTED_PACKAGES" | wc -l | tr -d ' ')
+UNTESTED_COUNT=$(echo "$NO_TESTS_RATIONALE" | wc -l | tr -d ' ')
+echo "OK: All $((TESTED_COUNT + UNTESTED_COUNT)) packages accounted for ($TESTED_COUNT tested + $UNTESTED_COUNT type/wrapper packages)"
 
 echo ""
 echo "=== Checking for duplicate package names ==="
