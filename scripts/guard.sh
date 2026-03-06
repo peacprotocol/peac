@@ -274,6 +274,39 @@ else
   echo "OK"
 fi
 
+echo "== MCP distribution surfaces =="
+# Validate server.json (MCP Registry schema), smithery.yaml, llms.txt existence
+MCP_DIST_OK=1
+if [ ! -f packages/mcp-server/server.json ]; then
+  echo "FAIL: packages/mcp-server/server.json missing"
+  MCP_DIST_OK=0
+elif ! node -e "JSON.parse(require('fs').readFileSync('packages/mcp-server/server.json','utf8'))" 2>/dev/null; then
+  echo "FAIL: packages/mcp-server/server.json is not valid JSON"
+  MCP_DIST_OK=0
+fi
+if [ ! -f packages/mcp-server/smithery.yaml ]; then
+  echo "FAIL: packages/mcp-server/smithery.yaml missing"
+  MCP_DIST_OK=0
+fi
+if [ ! -f llms.txt ]; then
+  echo "FAIL: llms.txt missing (repo root)"
+  MCP_DIST_OK=0
+fi
+# Verify server.json version matches monorepo version
+if [ -f packages/mcp-server/server.json ]; then
+  SERVER_VER=$(node -e "console.log(JSON.parse(require('fs').readFileSync('packages/mcp-server/server.json','utf8')).version)")
+  MONO_VER=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)")
+  if [ "$SERVER_VER" != "$MONO_VER" ]; then
+    echo "FAIL: server.json version ($SERVER_VER) != monorepo version ($MONO_VER)"
+    MCP_DIST_OK=0
+  fi
+fi
+if [ "$MCP_DIST_OK" = "1" ]; then
+  echo "OK"
+else
+  bad=1
+fi
+
 echo "== no-network guard (DD-55) =="
 if [ -f scripts/check-no-network.mjs ]; then
   if node scripts/check-no-network.mjs > /dev/null 2>&1; then
@@ -378,6 +411,54 @@ if [ "${WIRE01_DEF_COUNT:-0}" -ne 1 ]; then
   bad=1
 else
   echo "OK"
+fi
+
+echo "== release-state-coherence (committed artifacts) =="
+# Verify committed release manifest agrees with committed source-of-truth files.
+# This section checks ONLY committed artifacts (CI-visible), not gitignored reference docs.
+RELEASE_MANIFEST="docs/releases/current.json"
+if [ -f "$RELEASE_MANIFEST" ]; then
+  MANIFEST_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').version)")
+  ROOT_VER=$(node -e "console.log(require('./package.json').version)")
+  REG_VER=$(node -e "console.log(require('./specs/kernel/registries.json').version)")
+  ERR_VER=$(node -e "console.log(require('./specs/kernel/errors.json').version)")
+  MANIFEST_REG_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').registries_version)")
+  MANIFEST_ERR_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').errors_version)")
+  MANIFEST_WIRE_VER=$(node -e "console.log(require('./$RELEASE_MANIFEST').wire_format_version)")
+  MANIFEST_DIST_TAG=$(node -e "console.log(require('./$RELEASE_MANIFEST').dist_tag)")
+
+  coh_bad=0
+  if [ "$MANIFEST_VER" != "$ROOT_VER" ]; then
+    echo "  FAIL: manifest version ($MANIFEST_VER) != package.json ($ROOT_VER)"
+    coh_bad=1
+  fi
+  if [ "$MANIFEST_REG_VER" != "$REG_VER" ]; then
+    echo "  FAIL: manifest registries_version ($MANIFEST_REG_VER) != registries.json ($REG_VER)"
+    coh_bad=1
+  fi
+  if [ "$MANIFEST_ERR_VER" != "$ERR_VER" ]; then
+    echo "  FAIL: manifest errors_version ($MANIFEST_ERR_VER) != errors.json ($ERR_VER)"
+    coh_bad=1
+  fi
+  # wire_format_version must be 0.1 or 0.2
+  case "$MANIFEST_WIRE_VER" in
+    0.1|0.2) ;;
+    *) echo "  FAIL: manifest wire_format_version ($MANIFEST_WIRE_VER) not a known value (0.1, 0.2)"
+       coh_bad=1 ;;
+  esac
+  # dist_tag must be a known npm dist-tag
+  case "$MANIFEST_DIST_TAG" in
+    latest|next|beta|alpha|rc) ;;
+    *) echo "  FAIL: manifest dist_tag ($MANIFEST_DIST_TAG) not a known value (latest, next, beta, alpha, rc)"
+       coh_bad=1 ;;
+  esac
+  if [ "$coh_bad" -eq 0 ]; then
+    echo "OK"
+  else
+    bad=1
+  fi
+else
+  echo "SKIP: $RELEASE_MANIFEST not found"
 fi
 
 exit $bad

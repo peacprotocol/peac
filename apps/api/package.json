@@ -29,26 +29,26 @@
     "perf": "node scripts/perf-test.js"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.11",
     "@peac/core": "workspace:*",
     "@peac/crypto": "workspace:*",
     "@peac/disc": "workspace:*",
     "@peac/jwks-cache": "workspace:*",
     "@peac/middleware-core": "workspace:*",
+    "@peac/pay402": "workspace:*",
     "@peac/protocol": "workspace:*",
     "@peac/receipts": "workspace:*",
-    "@peac/pay402": "workspace:*",
-    "hono": "^4.12.2",
-    "@hono/node-server": "^1.19.9",
+    "hono": "^4.12.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^22.19.11",
-    "typescript": "^5.0.0",
-    "jest": "^30.2.0",
     "@types/jest": "^30.0.0",
+    "@types/node": "^22.19.11",
+    "jest": "^30.2.0",
     "ts-jest": "^29.0.0",
+    "tsup": "^8.0.0",
     "tsx": "^4.21.0",
-    "tsup": "^8.0.0"
+    "typescript": "^5.0.0"
   },
   "keywords": [
     "peac",

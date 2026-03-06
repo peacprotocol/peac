@@ -15,18 +15,18 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.11",
     "@peac/crypto": "workspace:*",
     "@peac/middleware-core": "workspace:*",
     "@peac/schema": "workspace:*",
-    "hono": "^4.12.2",
-    "@hono/node-server": "^1.19.9",
+    "hono": "^4.12.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",
-    "typescript": "^5.3.3",
-    "tsx": "^4.21.0",
     "tsup": "^8.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3",
     "vitest": "^4.0.0"
   },
   "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",

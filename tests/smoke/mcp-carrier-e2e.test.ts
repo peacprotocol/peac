@@ -11,7 +11,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
-import { issue, verifyLocal } from '@peac/protocol';
+import { issueWire02, verifyLocal } from '@peac/protocol';
 import { computeReceiptRef } from '@peac/schema';
 import type { PeacEvidenceCarrier } from '@peac/kernel';
 import {
@@ -31,13 +31,10 @@ async function issueTestReceipt(opts?: { reference?: string }) {
   const { privateKey, publicKey } = await generateKeypair();
   const kid = '2026-02-24T00:00:00.000Z';
 
-  const { jws } = await issue({
+  const { jws } = await issueWire02({
     iss: 'https://api.example.com',
-    aud: 'https://client.example.com',
-    amt: 100,
-    cur: 'USD',
-    rail: 'stripe',
-    reference: opts?.reference ?? 'tx_e2e_smoke',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
     privateKey,
     kid,
   });
@@ -83,12 +80,8 @@ describe('MCP carrier e2e round-trip', () => {
 
     expect(result.valid).toBe(true);
     if (result.valid) {
-      expect(result.variant).toBe('commerce');
+      expect(result.variant).toBe('wire-02');
       expect(result.kid).toBe(kid);
-      if (result.variant === 'commerce') {
-        expect(result.claims.amt).toBe(100);
-        expect(result.claims.cur).toBe('USD');
-      }
     }
   });
 

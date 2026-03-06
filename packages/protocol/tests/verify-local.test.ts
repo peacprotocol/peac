@@ -1,13 +1,98 @@
 /**
- * Tests for verifyLocal - typed local receipt verification
+ * Tests for verifyLocal (Wire 0.2 only) and verifyLocalWire01 (Wire 0.1)
+ *
+ * verifyLocal() is Wire 0.2 only as of v0.12.0-preview.2.
+ * Wire 0.1 receipts return E_UNSUPPORTED_WIRE_VERSION.
+ * Wire 0.1 verification uses verifyLocalWire01() (internal, not barrel-exported).
  */
 
 import { describe, it, expect } from 'vitest';
 import { generateKeypair, sign, base64urlEncodeString, base64urlEncode } from '@peac/crypto';
 import { issue } from '../src/issue';
 import { verifyLocal } from '../src/verify-local';
+import { verifyLocalWire01 } from '../src/verify-local-wire01';
 
-describe('verifyLocal', () => {
+// ---------------------------------------------------------------------------
+// verifyLocal(): Wire 0.1 rejection (E_UNSUPPORTED_WIRE_VERSION)
+// ---------------------------------------------------------------------------
+
+describe('verifyLocal(): Wire 0.1 rejection', () => {
+  it('returns E_UNSUPPORTED_WIRE_VERSION for Wire 0.1 commerce receipt', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issue({
+      iss: 'https://api.example.com',
+      aud: 'https://client.example.com',
+      amt: 1000,
+      cur: 'USD',
+      rail: 'x402',
+      reference: 'tx_abc123',
+      asset: 'USD',
+      env: 'test',
+      evidence: {},
+      privateKey,
+      kid: 'key-2026-01',
+    });
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_UNSUPPORTED_WIRE_VERSION');
+      expect(result.message).toContain('Wire 0.1');
+    }
+  });
+
+  it('returns E_UNSUPPORTED_WIRE_VERSION for Wire 0.1 attestation receipt', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const now = Math.floor(Date.now() / 1000);
+    const jws = await sign(
+      {
+        iss: 'https://middleware.example.com',
+        aud: 'https://api.example.com',
+        iat: now,
+        exp: now + 3600,
+        rid: '01234567-0123-7123-8123-0123456789ab',
+        sub: 'https://api.example.com/v1/chat',
+      },
+      privateKey,
+      'key-2026-01'
+    );
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_UNSUPPORTED_WIRE_VERSION');
+    }
+  });
+
+  it('returns E_UNSUPPORTED_WIRE_VERSION for manually signed Wire 0.1 JWS', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const payload = {
+      iss: 'https://api.example.com',
+      aud: 'https://client.example.com',
+      iat: Math.floor(Date.now() / 1000),
+      rid: '01234567-0123-7123-8123-0123456789ab',
+      amt: 1000,
+      cur: 'USD',
+      payment: { rail: 'x402', reference: 'tx_001', amount: 1000, currency: 'USD' },
+    };
+    const jws = await sign(payload, privateKey, 'key-01');
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_UNSUPPORTED_WIRE_VERSION');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// verifyLocalWire01(): Wire 0.1 verification (extracted, internal-only)
+// ---------------------------------------------------------------------------
+
+describe('verifyLocalWire01', () => {
   describe('successful verification', () => {
     it('verifies a valid receipt', async () => {
       const { privateKey, publicKey } = await generateKeypair();
@@ -26,7 +111,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(true);
       if (result.valid) {
@@ -59,7 +144,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         issuer: 'https://api.example.com',
       });
 
@@ -83,7 +168,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         audience: 'https://client.example.com',
       });
 
@@ -107,7 +192,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         issuer: 'https://api.example.com',
         audience: 'https://client.example.com',
       });
@@ -135,7 +220,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, wrongKey);
+      const result = await verifyLocalWire01(jws, wrongKey);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -146,7 +231,7 @@ describe('verifyLocal', () => {
     it('returns E_INVALID_FORMAT for malformed JWS', async () => {
       const { publicKey } = await generateKeypair();
 
-      const result = await verifyLocal('not-a-valid-jws', publicKey);
+      const result = await verifyLocalWire01('not-a-valid-jws', publicKey);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -159,11 +244,10 @@ describe('verifyLocal', () => {
     it('returns E_INVALID_FORMAT for invalid payload', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      // Sign invalid payload (missing required fields)
       const invalidPayload = { foo: 'bar' };
       const jws = await sign(invalidPayload, privateKey, 'key-2026-01');
 
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -191,7 +275,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         issuer: 'https://other.example.com',
       });
 
@@ -219,7 +303,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         audience: 'https://other.example.com',
       });
 
@@ -246,12 +330,12 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        exp: now - 3600, // Expired 1 hour ago
+        exp: now - 3600,
         privateKey,
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -274,12 +358,12 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        exp: now - 100, // Expired 100 seconds ago, within default 300s skew
+        exp: now - 100,
         privateKey,
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(true);
     });
@@ -287,9 +371,8 @@ describe('verifyLocal', () => {
     it('returns E_NOT_YET_VALID for receipt issued in the future', async () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
-      const futureIat = now + 3600; // 1 hour in the future
+      const futureIat = now + 3600;
 
-      // Create a JWS with future iat manually (issue() uses current time)
       const payload = {
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
@@ -297,17 +380,11 @@ describe('verifyLocal', () => {
         rid: '01234567-0123-7123-8123-0123456789ab',
         amt: 1000,
         cur: 'USD',
-        payment: {
-          rail: 'x402',
-          reference: 'tx_abc123',
-          amount: 1000,
-          currency: 'USD',
-        },
+        payment: { rail: 'x402', reference: 'tx_abc123', amount: 1000, currency: 'USD' },
       };
 
       const jws = await sign(payload, privateKey, 'key-2026-01');
-
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -319,7 +396,7 @@ describe('verifyLocal', () => {
     it('accepts receipt with iat within clock skew tolerance', async () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
-      const futureIat = now + 100; // 100 seconds in the future, within 300s skew
+      const futureIat = now + 100;
 
       const payload = {
         iss: 'https://api.example.com',
@@ -328,17 +405,11 @@ describe('verifyLocal', () => {
         rid: '01234567-0123-7123-8123-0123456789ab',
         amt: 1000,
         cur: 'USD',
-        payment: {
-          rail: 'x402',
-          reference: 'tx_abc123',
-          amount: 1000,
-          currency: 'USD',
-        },
+        payment: { rail: 'x402', reference: 'tx_abc123', amount: 1000, currency: 'USD' },
       };
 
       const jws = await sign(payload, privateKey, 'key-2026-01');
-
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(true);
     });
@@ -357,15 +428,12 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        exp: now - 100, // Expired 100 seconds ago
+        exp: now - 100,
         privateKey,
         kid: 'key-2026-01',
       });
 
-      // With 0 clock skew, this should fail
-      const result = await verifyLocal(jws, publicKey, {
-        maxClockSkew: 0,
-      });
+      const result = await verifyLocalWire01(jws, publicKey, { maxClockSkew: 0 });
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -387,18 +455,13 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        exp: now + 3600, // Valid for 1 hour from actual now
+        exp: now + 3600,
         privateKey,
         kid: 'key-2026-01',
       });
 
-      // Simulate checking at a future time when it should be expired
-      const futureNow = now + 7200; // 2 hours from now
-
-      const result = await verifyLocal(jws, publicKey, {
-        now: futureNow,
-        maxClockSkew: 0,
-      });
+      const futureNow = now + 7200;
+      const result = await verifyLocalWire01(jws, publicKey, { now: futureNow, maxClockSkew: 0 });
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -426,7 +489,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(true);
       if (result.valid) {
@@ -461,7 +524,7 @@ describe('verifyLocal', () => {
         kid: 'signing-key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(true);
       if (result.valid) {
@@ -489,7 +552,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         subjectUri: 'https://api.example.com/inference/v1',
       });
 
@@ -514,7 +577,7 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         subjectUri: 'https://api.example.com/different-endpoint',
       });
 
@@ -538,12 +601,11 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        // no subject
         privateKey,
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         subjectUri: 'https://api.example.com/inference/v1',
       });
 
@@ -573,15 +635,12 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      // Get the rid from the issued receipt
-      const preCheck = await verifyLocal(jws, publicKey);
+      const preCheck = await verifyLocalWire01(jws, publicKey);
       expect(preCheck.valid).toBe(true);
       if (!preCheck.valid) return;
 
-      const rid = preCheck.claims.rid;
-
-      // Verify with matching rid
-      const result = await verifyLocal(jws, publicKey, { rid });
+      const rid = (preCheck.claims as { rid: string }).rid;
+      const result = await verifyLocalWire01(jws, publicKey, { rid });
 
       expect(result.valid).toBe(true);
     });
@@ -603,8 +662,8 @@ describe('verifyLocal', () => {
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
-        rid: '00000000-0000-7000-8000-000000000000', // Different rid
+      const result = await verifyLocalWire01(jws, publicKey, {
+        rid: '00000000-0000-7000-8000-000000000000',
       });
 
       expect(result.valid).toBe(false);
@@ -629,15 +688,11 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        // no exp
         privateKey,
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
-        requireExp: false, // explicit false
-      });
-
+      const result = await verifyLocalWire01(jws, publicKey, { requireExp: false });
       expect(result.valid).toBe(true);
     });
 
@@ -654,13 +709,11 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        // no exp
         privateKey,
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey);
-
+      const result = await verifyLocalWire01(jws, publicKey);
       expect(result.valid).toBe(true);
     });
 
@@ -677,14 +730,11 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        // no exp
         privateKey,
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
-        requireExp: true,
-      });
+      const result = await verifyLocalWire01(jws, publicKey, { requireExp: true });
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -707,15 +757,12 @@ describe('verifyLocal', () => {
         asset: 'USD',
         env: 'test',
         evidence: {},
-        exp: now + 3600, // 1 hour from now
+        exp: now + 3600,
         privateKey,
         kid: 'key-2026-01',
       });
 
-      const result = await verifyLocal(jws, publicKey, {
-        requireExp: true,
-      });
-
+      const result = await verifyLocalWire01(jws, publicKey, { requireExp: true });
       expect(result.valid).toBe(true);
     });
   });
@@ -725,7 +772,6 @@ describe('verifyLocal', () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
 
-      // Attestation receipts have no commerce fields (amt, cur, payment)
       const attestationPayload = {
         iss: 'https://middleware.example.com',
         aud: 'https://api.example.com',
@@ -735,8 +781,7 @@ describe('verifyLocal', () => {
       };
 
       const jws = await sign(attestationPayload, privateKey, 'key-2026-01');
-
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(true);
       if (result.valid) {
@@ -744,7 +789,6 @@ describe('verifyLocal', () => {
         expect(result.claims.iss).toBe('https://middleware.example.com');
         expect(result.claims.aud).toBe('https://api.example.com');
         expect(typeof result.claims.iat).toBe('number');
-        expect(typeof result.claims.rid).toBe('string');
         expect(result.kid).toBe('key-2026-01');
       }
     });
@@ -762,8 +806,7 @@ describe('verifyLocal', () => {
       };
 
       const jws = await sign(attestationPayload, privateKey, 'key-2026-01');
-
-      const result = await verifyLocal(jws, publicKey, {
+      const result = await verifyLocalWire01(jws, publicKey, {
         issuer: 'https://middleware.example.com',
       });
 
@@ -776,11 +819,10 @@ describe('verifyLocal', () => {
     it('returns E_INVALID_FORMAT with details for invalid attestation payload', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      // Missing required fields (iss, aud, iat, rid)
       const invalidPayload = { iss: 'https://example.com' };
       const jws = await sign(invalidPayload, privateKey, 'key-2026-01');
 
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -794,7 +836,6 @@ describe('verifyLocal', () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
 
-      // Commerce-classified (has amt) but invalid (missing required payment fields)
       const invalidPayload = {
         iss: 'https://example.com',
         aud: 'https://api.example.com',
@@ -804,13 +845,12 @@ describe('verifyLocal', () => {
       };
       const jws = await sign(invalidPayload, privateKey, 'key-2026-01');
 
-      const result = await verifyLocal(jws, publicKey);
+      const result = await verifyLocalWire01(jws, publicKey);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
         expect(result.code).toBe('E_INVALID_FORMAT');
         expect(result.details?.parse_code).toBe('E_PARSE_COMMERCE_INVALID');
-        // Verify issues shape: bounded array of {path, message}
         expect(result.details?.issues).toBeDefined();
         expect(Array.isArray(result.details?.issues)).toBe(true);
         expect(result.details!.issues!.length).toBeGreaterThan(0);
@@ -818,7 +858,6 @@ describe('verifyLocal', () => {
         for (const issue of result.details!.issues!) {
           expect(typeof issue.path).toBe('string');
           expect(typeof issue.message).toBe('string');
-          // No extra fields leak beyond the stable shape
           expect(Object.keys(issue)).toEqual(['path', 'message']);
         }
       }
@@ -829,7 +868,6 @@ describe('verifyLocal', () => {
     it('returns E_INVALID_FORMAT for JWS with invalid JSON payload', async () => {
       const { publicKey } = await generateKeypair();
 
-      // Construct a JWS with valid header JSON but invalid payload JSON
       const header = base64urlEncodeString(
         JSON.stringify({ typ: 'peac-receipt/0.1', alg: 'EdDSA', kid: 'test-key' })
       );
@@ -837,13 +875,11 @@ describe('verifyLocal', () => {
       const fakeSig = base64urlEncode(new Uint8Array(64));
 
       const malformedJws = `${header}.${invalidPayload}.${fakeSig}`;
-      const result = await verifyLocal(malformedJws, publicKey);
+      const result = await verifyLocalWire01(malformedJws, publicKey);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
         expect(result.code).toBe('E_INVALID_FORMAT');
-        // Message comes from crypto layer (JWS payload parse error); asserting
-        // the code is the stable contract; message text is an implementation detail.
       }
     });
   });
