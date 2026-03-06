@@ -48,6 +48,7 @@
     "verify:spec-drift": "node scripts/verify-spec-drift.mjs",
     "verify:bundle-drift": "node scripts/verify-bundle-drift.mjs",
     "codegen:errors": "tsx scripts/codegen-errors.ts",
+    "fixtures:new": "node scripts/fixtures-new.mjs",
     "conformance:regen:bundle": "tsx scripts/generate-bundle-vectors.ts",
     "bench": "pnpm --filter @peac/crypto bench && pnpm --filter @peac/schema bench && pnpm --filter @peac/protocol bench",
     "bench:capture": "node scripts/bench-capture.mjs",

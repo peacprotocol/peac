@@ -294,9 +294,9 @@ See [packages/cli/README.md](packages/cli/README.md) for the full command refere
 Two wire formats coexist:
 
 - **Wire 0.1** (`peac-receipt/0.1`): the stable receipt format on the `latest` dist-tag.
-- **Wire 0.2** (`interaction-record+jwt`): preview on the `next` dist-tag (`v0.12.0-preview.1`). Adds structured kinds (`evidence`/`challenge`), open semantic types, multi-valued pillars, typed extension groups, and policy binding.
+- **Wire 0.2** (`interaction-record+jwt`): preview on the `next` dist-tag. Adds structured kinds (`evidence`/`challenge`), open semantic types, multi-valued pillars, typed extension groups, and policy binding.
 
-`verifyLocal()` auto-detects wire version and returns `wireVersion: '0.1'` or `wireVersion: '0.2'`. Both formats use Ed25519 JWS signatures and the `PEAC-Receipt` header.
+On the `next` dist-tag (`@peac/protocol@next`), `verifyLocal()` is **Wire 0.2 only**: Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`. Use `issueWire02()` to create Wire 0.2 receipts. On the `latest` dist-tag, `verifyLocal()` verifies Wire 0.1 receipts. Both formats use Ed25519 JWS signatures and the `PEAC-Receipt` header.
 
 Wire format identifiers are independent of npm package versions. Protocol surfaces (`PEAC-Receipt` header, `/.well-known/peac.txt`, `/.well-known/peac-issuer.json`) are stable. Implementation APIs (`@peac/protocol`, `@peac/cli`) aim for stability; internal packages may change between releases.
 

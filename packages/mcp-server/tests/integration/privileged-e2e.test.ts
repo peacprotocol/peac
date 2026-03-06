@@ -441,11 +441,9 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/privileged-e2e', () => {
         params: {
           name: 'peac_issue',
           arguments: {
-            aud: 'https://client.example.com',
-            amt: 100,
-            cur: 'USD',
-            rail: 'stripe',
-            reference: 'tx_e2e_priv',
+            kind: 'evidence',
+            type: 'org.peacprotocol/payment',
+            pillars: ['commerce'],
           },
         },
       });
@@ -521,11 +519,8 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/privileged-e2e', () => {
         params: {
           name: 'peac_issue',
           arguments: {
-            aud: 'https://client.example.com',
-            amt: 50,
-            cur: 'USD',
-            rail: 'stripe',
-            reference: 'tx_e2e_meta',
+            kind: 'evidence',
+            type: 'org.peacprotocol/payment',
           },
         },
       });
