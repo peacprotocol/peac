@@ -11,6 +11,7 @@ import { generateKeypair, sign } from '@peac/crypto';
 import { WIRE_02_JWS_TYP, PEAC_ALG } from '@peac/kernel';
 import { WARNING_TYP_MISSING, WARNING_OCCURRED_AT_SKEW } from '@peac/schema';
 import { issueWire02, issue, verifyLocal, isWire02Result } from '../src/index';
+import { verifyLocalWire01 } from '../src/verify-local-wire01';
 
 // ---------------------------------------------------------------------------
 // Helper: create a valid-signature JWS with custom header fields (JOSE hazard injection)
@@ -816,7 +817,7 @@ describe('occurred_at skew rules', () => {
 // Wire 0.1 regression: existing receipts have wireVersion: '0.1' and warnings: []
 // ---------------------------------------------------------------------------
 
-describe('Wire 0.1 regression', () => {
+describe('Wire 0.1 isolation', () => {
   const issueOpts = {
     iss: 'https://api.example.com',
     aud: 'https://client.example.com',
@@ -829,11 +830,24 @@ describe('Wire 0.1 regression', () => {
     evidence: {},
   };
 
-  it('commerce receipt: wireVersion is 0.1 and warnings is empty array', async () => {
+  it('verifyLocal() rejects Wire 0.1 with E_UNSUPPORTED_WIRE_VERSION', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const { jws } = await issue({ ...issueOpts, privateKey, kid: testKid });
 
     const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.code).toBe('E_UNSUPPORTED_WIRE_VERSION');
+      expect(result.message).toContain('Wire 0.1');
+    }
+  });
+
+  it('verifyLocalWire01(): commerce receipt verifies with wireVersion 0.1', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issue({ ...issueOpts, privateKey, kid: testKid });
+
+    const result = await verifyLocalWire01(jws, publicKey);
 
     expect(result.valid).toBe(true);
     if (result.valid) {
@@ -844,7 +858,7 @@ describe('Wire 0.1 regression', () => {
     }
   });
 
-  it('commerce receipt: manually signed Wire 0.1 JWS still verifies', async () => {
+  it('verifyLocalWire01(): manually signed Wire 0.1 JWS verifies', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const payload = {
       iss: 'https://api.example.com',
@@ -857,7 +871,7 @@ describe('Wire 0.1 regression', () => {
     };
     const jws = await sign(payload, privateKey, testKid);
 
-    const result = await verifyLocal(jws, publicKey);
+    const result = await verifyLocalWire01(jws, publicKey);
 
     expect(result.valid).toBe(true);
     if (result.valid) {
@@ -867,7 +881,7 @@ describe('Wire 0.1 regression', () => {
     }
   });
 
-  it('Wire 0.2 and Wire 0.1 tokens verified by same verifyLocal() function', async () => {
+  it('verifyLocal() accepts Wire 0.2, rejects Wire 0.1', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const { jws: jws01 } = await issue({ ...issueOpts, privateKey, kid: testKid });
     const { jws: jws02 } = await issueWire02({
@@ -881,10 +895,12 @@ describe('Wire 0.1 regression', () => {
     const result01 = await verifyLocal(jws01, publicKey);
     const result02 = await verifyLocal(jws02, publicKey);
 
-    expect(result01.valid).toBe(true);
+    expect(result01.valid).toBe(false);
+    if (!result01.valid) {
+      expect(result01.code).toBe('E_UNSUPPORTED_WIRE_VERSION');
+    }
     expect(result02.valid).toBe(true);
-    if (result01.valid && result02.valid) {
-      expect(result01.wireVersion).toBe('0.1');
+    if (result02.valid) {
       expect(result02.wireVersion).toBe('0.2');
     }
   });

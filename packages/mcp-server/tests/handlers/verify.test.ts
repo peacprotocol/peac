@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair, base64urlEncode } from '@peac/crypto';
-import { issue } from '@peac/protocol';
+import { issueWire02 } from '@peac/protocol';
 import { handleVerify } from '../../src/handlers/verify.js';
 import type { HandlerParams } from '../../src/handlers/types.js';
 import type { VerifyInput } from '../../src/schemas/verify.js';
@@ -26,13 +26,10 @@ describe('handlers/verify', () => {
   it('verifies a valid commerce receipt', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -46,7 +43,7 @@ describe('handlers/verify', () => {
 
     expect(result.isError).toBeUndefined();
     expect(result.structured.ok).toBe(true);
-    expect(result.structured.variant).toBe('commerce');
+    expect(result.structured.variant).toBe('wire-02');
     expect(result.structured.keySource).toBe('inline');
     expect(result.text).toContain('PASSED');
   });
@@ -54,13 +51,10 @@ describe('handlers/verify', () => {
   it('rejects tampered receipt', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -83,13 +77,10 @@ describe('handlers/verify', () => {
   it('verifies with issuer binding', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -108,13 +99,10 @@ describe('handlers/verify', () => {
   it('fails with wrong issuer', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -131,16 +119,14 @@ describe('handlers/verify', () => {
     expect(result.structured.code).toBe('E_INVALID_ISSUER');
   });
 
-  it('fails with wrong audience', async () => {
+  it('audience option is ignored for Wire 0.2 receipts (no aud claim)', async () => {
+    // Wire 0.2 does not include aud in claims; audience binding is not checked.
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -153,21 +139,18 @@ describe('handlers/verify', () => {
       })
     );
 
-    expect(result.structured.ok).toBe(false);
-    expect(result.structured.code).toBe('E_INVALID_AUDIENCE');
+    // Wire 0.2 verifyLocal does not check audience; verification passes
+    expect(result.structured.ok).toBe(true);
   });
 
   it('fails with wrong public key', async () => {
     const issuerPair = await generateKeypair();
     const wrongPair = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey: issuerPair.privateKey,
       kid,
     });
@@ -186,13 +169,10 @@ describe('handlers/verify', () => {
   it('fails when no key is provided', async () => {
     const { privateKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -207,13 +187,10 @@ describe('handlers/verify', () => {
   it('resolves key from inline JWKS', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = 'inline-jwks-key';
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -230,13 +207,10 @@ describe('handlers/verify', () => {
   it('resolves key from server JWKS context', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = 'server-jwks-key';
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -263,13 +237,10 @@ describe('handlers/verify', () => {
   it('includes checks array in output', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -289,13 +260,10 @@ describe('handlers/verify', () => {
   it('returns tool disabled error when verify is disabled by policy', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -314,13 +282,10 @@ describe('handlers/verify', () => {
   it('returns input too large error when JWS exceeds limit', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -339,13 +304,10 @@ describe('handlers/verify', () => {
   it('rejects inline JWKS keys with non-EdDSA alg', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = 'alg-test-key';
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });
@@ -371,13 +333,10 @@ describe('handlers/verify', () => {
   it('check names are stable (append-only contract snapshot)', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = new Date().toISOString();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'stripe',
-      reference: 'tx_test123',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid,
     });

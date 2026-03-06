@@ -418,7 +418,9 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/privileged-e2e', () => {
     }
   }, 15_000);
 
-  it('issue then verify round-trip via stdio', async () => {
+  it('issue then verify round-trip via stdio: Wire 0.1 JWS rejected by Wire 0.2-only verifyLocal', async () => {
+    // The MCP issue handler still uses Wire 0.1 issue() (will change in PR-18a).
+    // verifyLocal() is now Wire 0.2 only and rejects Wire 0.1 JWS with E_UNSUPPORTED_WIRE_VERSION.
     const client = createStdioClient([
       '--issuer-key',
       `file:${keyPath}`,
@@ -431,7 +433,7 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/privileged-e2e', () => {
     try {
       await initClient(client);
 
-      // Call peac_issue
+      // Call peac_issue (produces Wire 0.1 JWS)
       client.send({
         jsonrpc: '2.0',
         id: 2,
@@ -458,7 +460,7 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/privileged-e2e', () => {
       expect(typeof jws).toBe('string');
       expect(jws.length).toBeGreaterThan(0);
 
-      // Call peac_verify with the issued JWS
+      // Call peac_verify with the issued Wire 0.1 JWS
       client.send({
         jsonrpc: '2.0',
         id: 3,
@@ -478,7 +480,9 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/privileged-e2e', () => {
 
       const verifyResult = verifyResponse.result as Record<string, unknown>;
       const verifyStructured = verifyResult.structuredContent as Record<string, unknown>;
-      expect(verifyStructured.ok).toBe(true);
+      // Wire 0.1 JWS rejected by Wire 0.2-only verifyLocal
+      expect(verifyStructured.ok).toBe(false);
+      expect(verifyStructured.code).toBe('E_UNSUPPORTED_WIRE_VERSION');
     } catch (err) {
       const stderr = client.getStderr();
       if (stderr) {

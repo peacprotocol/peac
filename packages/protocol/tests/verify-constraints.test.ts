@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair, sign } from '@peac/crypto';
 import { KERNEL_CONSTRAINTS } from '@peac/schema';
-import { issue } from '../src/issue';
+import { issueWire02 } from '../src/issue';
 import { verifyLocal } from '../src/verify-local';
 
 /**
@@ -120,16 +120,10 @@ describe('verifyLocal() kernel constraints (DD-121)', () => {
 
   it('passes valid receipts without constraint violations', async () => {
     const { privateKey, publicKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire02({
       iss: 'https://api.example.com',
-      aud: 'https://client.example.com',
-      amt: 100,
-      cur: 'USD',
-      rail: 'x402',
-      reference: 'tx_test',
-      asset: 'USD',
-      env: 'test',
-      evidence: { txId: 'tx_123' },
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
       privateKey,
       kid: 'k1',
     });

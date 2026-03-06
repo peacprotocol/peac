@@ -5,7 +5,7 @@
  * Run with: pnpm demo
  */
 
-import { issue, verifyLocal, isCommerceResult, generateKeypair } from '@peac/protocol';
+import { issueWire02, verifyLocal, isWire02Result, generateKeypair } from '@peac/protocol';
 
 async function main() {
   console.log('PEAC Quickstart Demo\n');
@@ -15,16 +15,13 @@ async function main() {
   const { privateKey, publicKey } = await generateKeypair();
   console.log('   Done.\n');
 
-  // 2. Issue a receipt
+  // 2. Issue a Wire 0.2 receipt
   console.log('2. Issuing receipt...');
-  const { jws } = await issue({
+  const { jws } = await issueWire02({
     iss: 'https://api.example.com',
-    aud: 'https://client.example.com',
-    amt: 1000,
-    cur: 'USD',
-    rail: 'x402',
-    reference: 'tx_abc123',
-    subject: 'https://api.example.com/inference/v1',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    sub: 'https://api.example.com/inference/v1',
     privateKey,
     kid: 'key-2026-01',
   });
@@ -34,24 +31,18 @@ async function main() {
   console.log('3. Verifying receipt...');
   const result = await verifyLocal(jws, publicKey, {
     issuer: 'https://api.example.com',
-    audience: 'https://client.example.com',
   });
 
-  if (isCommerceResult(result)) {
-    // After isCommerceResult(), claims is typed as ReceiptClaimsType
+  if (isWire02Result(result)) {
     const { claims } = result;
     console.log('   Signature + schema valid!\n');
     console.log('   Claims:');
     console.log('   - Issuer:', claims.iss);
-    console.log('   - Audience:', claims.aud);
-    console.log('   - Receipt ID:', claims.rid);
+    console.log('   - Kind:', claims.kind);
+    console.log('   - Type:', claims.type);
     console.log('   - Issued at:', new Date(claims.iat * 1000).toISOString());
-    console.log('   - Amount:', claims.amt, claims.cur);
-    console.log('   - Rail:', claims.payment.rail);
-    console.log('   - Reference:', claims.payment.reference);
-  } else if (result.valid) {
-    console.log('   Signature + schema valid (attestation receipt)');
-  } else {
+    console.log('   - JTI:', claims.jti);
+  } else if (!result.valid) {
     console.error('   Verification failed:', result.code, result.message);
     process.exit(1);
   }

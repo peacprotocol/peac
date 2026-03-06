@@ -30,20 +30,20 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.11",
     "@peac/core": "workspace:*",
     "@peac/disc": "workspace:*",
-    "@peac/receipts": "workspace:*",
     "@peac/pay402": "workspace:*",
-    "hono": "^4.12.2",
-    "@hono/node-server": "^1.19.9",
+    "@peac/receipts": "workspace:*",
+    "hono": "^4.12.5",
     "jose": "^5.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",
-    "typescript": "^5.0.0",
+    "tsup": "^8.0.0",
     "tsx": "^4.21.0",
-    "tsup": "^8.0.0"
+    "typescript": "^5.0.0"
   },
   "keywords": [
     "peac",

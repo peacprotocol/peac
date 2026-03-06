@@ -161,7 +161,10 @@ export class IssueError extends Error {
 }
 
 /**
- * Issue a PEAC receipt
+ * Issue a Wire 0.1 PEAC receipt.
+ *
+ * @deprecated Use {@link issueWire02} for Wire 0.2 receipts. Wire 0.1 issuance is deprecated
+ * and will be removed in a future major version.
  *
  * @param options - Receipt options
  * @returns Issue result with JWS and optional subject_snapshot
@@ -446,7 +449,7 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
       retryable: false,
       http_status: 400,
       details: {
-        message: `iss is not in canonical form: "${options.iss}". Use https:// origin or did: identifier.`,
+        message: `iss is not in canonical form: "${options.iss}". Use an https://<origin> or did:<method> identifier.`,
       },
     } as PEACError);
   }
