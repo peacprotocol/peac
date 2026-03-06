@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 Type Grammar conformance vectors (Section 6, DD-156)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "reverse-dns-valid",
@@ -19,7 +20,9 @@
           "jti": "type-valid-001"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "absolute-uri-valid",
@@ -40,7 +43,12 @@
       },
       "expected": {
         "valid": true,
-        "warnings": [{ "code": "type_unregistered", "pointer": "/type" }]
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
       }
     },
     {
@@ -60,7 +68,10 @@
           "jti": "type-invalid-001"
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-empty-segment",
@@ -79,7 +90,10 @@
           "jti": "type-invalid-002"
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-empty-type",
@@ -98,7 +112,10 @@
           "jti": "type-invalid-003"
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "type-with-underscore-valid",
@@ -119,7 +136,12 @@
       },
       "expected": {
         "valid": true,
-        "warnings": [{ "code": "type_unregistered", "pointer": "/type" }]
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
       }
     },
     {
@@ -141,7 +163,12 @@
       },
       "expected": {
         "valid": true,
-        "warnings": [{ "code": "type_unregistered", "pointer": "/type" }]
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
       }
     },
     {
@@ -163,7 +190,12 @@
       },
       "expected": {
         "valid": true,
-        "warnings": [{ "code": "type_unregistered", "pointer": "/type" }]
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
       }
     },
     {
@@ -183,7 +215,10 @@
           "jti": "type-invalid-004"
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-domain-starts-with-hyphen",
@@ -202,7 +237,10 @@
           "jti": "type-invalid-005"
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-segment-starts-with-hyphen",
@@ -221,7 +259,10 @@
           "jti": "type-invalid-006"
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "registered-type-no-warning",
@@ -248,7 +289,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     }
   ]
 }

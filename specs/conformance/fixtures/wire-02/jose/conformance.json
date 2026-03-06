@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 JWS Header Constraints conformance vectors (Section 10, DD-156)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "eddsa-alg-valid",
@@ -19,7 +20,9 @@
           "jti": "jose-valid-001"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-embedded-jwk",
@@ -29,7 +32,13 @@
       "requirement_ids": ["WIRE02-JOSE-003"],
       "status": "negative",
       "input": {
-        "header_overrides": { "jwk": { "kty": "OKP", "crv": "Ed25519", "x": "abc123" } },
+        "header_overrides": {
+          "jwk": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "abc123"
+          }
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -39,7 +48,10 @@
           "jti": "jose-invalid-001"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_EMBEDDED_KEY" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_EMBEDDED_KEY"
+      }
     },
     {
       "name": "reject-x5c-chain",
@@ -49,7 +61,9 @@
       "requirement_ids": ["WIRE02-JOSE-003"],
       "status": "negative",
       "input": {
-        "header_overrides": { "x5c": ["MIICpDCCAYwCCQ..."] },
+        "header_overrides": {
+          "x5c": ["MIICpDCCAYwCCQ..."]
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -59,7 +73,10 @@
           "jti": "jose-invalid-002"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_EMBEDDED_KEY" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_EMBEDDED_KEY"
+      }
     },
     {
       "name": "reject-crit-header",
@@ -69,7 +86,9 @@
       "requirement_ids": ["WIRE02-JOSE-004"],
       "status": "negative",
       "input": {
-        "header_overrides": { "crit": ["exp"] },
+        "header_overrides": {
+          "crit": ["exp"]
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -79,7 +98,10 @@
           "jti": "jose-invalid-003"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_CRIT_REJECTED" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_CRIT_REJECTED"
+      }
     },
     {
       "name": "reject-b64-false",
@@ -89,7 +111,9 @@
       "requirement_ids": ["WIRE02-JOSE-005"],
       "status": "negative",
       "input": {
-        "header_overrides": { "b64": false },
+        "header_overrides": {
+          "b64": false
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -99,7 +123,10 @@
           "jti": "jose-invalid-004"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_B64_REJECTED" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_B64_REJECTED"
+      }
     },
     {
       "name": "reject-zip-header",
@@ -109,7 +136,9 @@
       "requirement_ids": ["WIRE02-JOSE-006"],
       "status": "negative",
       "input": {
-        "header_overrides": { "zip": "DEF" },
+        "header_overrides": {
+          "zip": "DEF"
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -119,7 +148,10 @@
           "jti": "jose-invalid-005"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_ZIP_REJECTED" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_ZIP_REJECTED"
+      }
     },
     {
       "name": "reject-missing-kid",
@@ -129,7 +161,9 @@
       "requirement_ids": ["WIRE02-JOSE-007"],
       "status": "negative",
       "input": {
-        "header_overrides": { "kid": null },
+        "header_overrides": {
+          "kid": null
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -139,7 +173,10 @@
           "jti": "jose-invalid-006"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_MISSING_KID" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_MISSING_KID"
+      }
     },
     {
       "name": "reject-empty-kid",
@@ -149,7 +186,9 @@
       "requirement_ids": ["WIRE02-JOSE-007"],
       "status": "negative",
       "input": {
-        "header_overrides": { "kid": "" },
+        "header_overrides": {
+          "kid": ""
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -159,7 +198,10 @@
           "jti": "jose-invalid-007"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_MISSING_KID" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_MISSING_KID"
+      }
     },
     {
       "name": "boundary-kid-256-chars",
@@ -181,7 +223,9 @@
           "jti": "jose-boundary-001"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-kid-over-256",
@@ -203,7 +247,10 @@
           "jti": "jose-invalid-008"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_MISSING_KID" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_MISSING_KID"
+      }
     },
     {
       "name": "reject-jws-exceeds-256kb",
@@ -224,7 +271,10 @@
         "jws_size_exceeds_bytes": 262145,
         "_audit_note": "Test harness must construct a JWS exceeding 262144 bytes total"
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-x5u-url",
@@ -234,7 +284,9 @@
       "requirement_ids": ["WIRE02-JOSE-003"],
       "status": "negative",
       "input": {
-        "header_overrides": { "x5u": "https://example.com/certs" },
+        "header_overrides": {
+          "x5u": "https://example.com/certs"
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -244,7 +296,10 @@
           "jti": "jose-invalid-009"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_EMBEDDED_KEY" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_EMBEDDED_KEY"
+      }
     },
     {
       "name": "reject-jku-url",
@@ -254,7 +309,9 @@
       "requirement_ids": ["WIRE02-JOSE-003"],
       "status": "negative",
       "input": {
-        "header_overrides": { "jku": "https://example.com/.well-known/jwks.json" },
+        "header_overrides": {
+          "jku": "https://example.com/.well-known/jwks.json"
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -264,7 +321,10 @@
           "jti": "jose-invalid-010"
         }
       },
-      "expected": { "valid": false, "error_code": "E_JWS_EMBEDDED_KEY" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_EMBEDDED_KEY"
+      }
     }
   ]
 }

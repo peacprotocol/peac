@@ -1,9 +1,11 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-03-06T17:15:26.616Z",
+  "generated_at": "2026-03-06T17:56:48.348Z",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "total_fixtures": 609,
   "total_with_requirements": 164,
+  "total_unmapped": 445,
   "wire02_requirement_links": 421,
   "carrier_requirement_links": 11,
   "entries": [

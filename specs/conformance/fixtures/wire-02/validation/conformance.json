@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 Verifier Validation Algorithm conformance vectors (Section 19)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "full-validation-pass",
@@ -27,7 +28,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "step1-reject-invalid-signature",
@@ -47,7 +50,10 @@
         },
         "use_wrong_key": true
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_SIGNATURE" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_SIGNATURE"
+      }
     },
     {
       "name": "step3-reject-constraint-violation",
@@ -67,7 +73,10 @@
           "sub": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         }
       },
-      "expected": { "valid": false, "error_code": "E_CONSTRAINT_VIOLATION" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_CONSTRAINT_VIOLATION"
+      }
     },
     {
       "name": "step7-reject-issuer-mismatch",
@@ -89,7 +98,10 @@
           "issuer": "https://different.example.com"
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_ISSUER" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_ISSUER"
+      }
     },
     {
       "name": "step9-reject-future-iat",
@@ -111,7 +123,10 @@
           "now": 1709500000
         }
       },
-      "expected": { "valid": false, "error_code": "E_NOT_YET_VALID" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_NOT_YET_VALID"
+      }
     },
     {
       "name": "reject-missing-jws-input",
@@ -124,7 +139,10 @@
         "jws": null,
         "claims": null
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-missing-public-key",
@@ -144,7 +162,10 @@
         },
         "public_key": null
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-missing-jti-claim",
@@ -162,7 +183,10 @@
           "iat": 1709500000
         }
       },
-      "expected": { "valid": false, "error_code": "E_MISSING_REQUIRED_CLAIM" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_MISSING_REQUIRED_CLAIM"
+      }
     },
     {
       "name": "step12-policy-binding-check",

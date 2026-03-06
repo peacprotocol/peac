@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 Extension Groups conformance vectors (Section 12, DD-156)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "commerce-extension-valid",
@@ -27,7 +28,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "commerce-negative-amount-valid",
@@ -54,7 +57,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "access-extension-valid",
@@ -81,7 +86,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "correlation-extension-valid",
@@ -112,7 +119,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-invalid-extension-key",
@@ -130,11 +139,16 @@
           "iat": 1709500000,
           "jti": "ext-invalid-001",
           "extensions": {
-            "invalid/key": { "data": "test" }
+            "invalid/key": {
+              "data": "test"
+            }
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_KEY" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_KEY"
+      }
     },
     {
       "name": "reject-commerce-decimal-amount",
@@ -161,7 +175,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-commerce-missing-currency",
@@ -187,7 +204,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-invalid-trace-id",
@@ -211,7 +231,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "unknown-extension-preserved-with-warning",
@@ -229,14 +252,19 @@
           "iat": 1709500000,
           "jti": "ext-warn-001",
           "extensions": {
-            "com.example/custom-data": { "key": "value" }
+            "com.example/custom-data": {
+              "key": "value"
+            }
           }
         }
       },
       "expected": {
         "valid": true,
         "warnings": [
-          { "code": "type_unregistered", "pointer": "/type" },
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          },
           {
             "code": "unknown_extension_preserved",
             "pointer": "/extensions/com.example~1custom-data"
@@ -267,7 +295,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-domain-label-over-63-chars",
@@ -291,7 +321,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_KEY" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_KEY"
+      }
     },
     {
       "name": "reject-empty-extension-segment",
@@ -309,11 +342,16 @@
           "iat": 1709500000,
           "jti": "ext-invalid-007",
           "extensions": {
-            "org.example/": { "key": "value" }
+            "org.example/": {
+              "key": "value"
+            }
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_KEY" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_KEY"
+      }
     },
     {
       "name": "reject-uppercase-extension-key",
@@ -331,11 +369,16 @@
           "iat": 1709500000,
           "jti": "ext-invalid-005",
           "extensions": {
-            "Com.Example/data": { "key": "value" }
+            "Com.Example/data": {
+              "key": "value"
+            }
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_KEY" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_KEY"
+      }
     }
   ]
 }

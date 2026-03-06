@@ -24,10 +24,20 @@
       "minimum": 0,
       "description": "Total number of fixture entries"
     },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$",
+      "description": "Schema version (must match version)"
+    },
     "total_with_requirements": {
       "type": "integer",
       "minimum": 0,
       "description": "Fixtures that have requirement mappings"
+    },
+    "total_unmapped": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Fixtures without requirement mappings (legacy or unmapped)"
     },
     "wire02_requirement_links": {
       "type": "integer",

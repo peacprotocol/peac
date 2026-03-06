@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 Kind Semantics conformance vectors (Section 5, DD-156)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "evidence-kind-valid",
@@ -19,7 +20,9 @@
           "jti": "kind-valid-001"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "challenge-kind-valid",
@@ -38,7 +41,9 @@
           "jti": "kind-valid-002"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-unknown-kind",
@@ -57,7 +62,10 @@
           "jti": "kind-invalid-001"
         }
       },
-      "expected": { "valid": false, "error_code": "E_KIND_UNSUPPORTED" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_KIND_UNSUPPORTED"
+      }
     },
     {
       "name": "reject-occurred-at-on-challenge",
@@ -77,7 +85,10 @@
           "occurred_at": "2026-03-03T12:00:00Z"
         }
       },
-      "expected": { "valid": false, "error_code": "E_OCCURRED_AT_ON_CHALLENGE" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_OCCURRED_AT_ON_CHALLENGE"
+      }
     },
     {
       "name": "evidence-with-occurred-at-valid",
@@ -97,7 +108,9 @@
           "occurred_at": "2026-03-03T12:00:00Z"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "same-type-both-kinds",
@@ -116,7 +129,9 @@
           "jti": "kind-valid-004"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     }
   ]
 }

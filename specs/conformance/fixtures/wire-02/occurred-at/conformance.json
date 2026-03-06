@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 Occurred-at Semantics conformance vectors (Section 9, DD-156)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "occurred-at-valid-utc",
@@ -20,7 +21,9 @@
           "occurred_at": "2026-03-03T12:00:00Z"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "occurred-at-valid-offset",
@@ -40,7 +43,9 @@
           "occurred_at": "2026-03-03T17:30:00+05:30"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "occurred-at-before-iat-valid",
@@ -60,7 +65,9 @@
           "occurred_at": "2024-03-03T23:53:20Z"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "occurred-at-after-iat-warning",
@@ -82,7 +89,12 @@
       },
       "expected": {
         "valid": true,
-        "warnings": [{ "code": "occurred_at_skew", "pointer": "/occurred_at" }]
+        "warnings": [
+          {
+            "code": "occurred_at_skew",
+            "pointer": "/occurred_at"
+          }
+        ]
       }
     },
     {
@@ -102,7 +114,9 @@
           "jti": "occ-valid-004"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-occurred-at-on-challenge",
@@ -122,7 +136,10 @@
           "occurred_at": "2026-03-03T12:00:00Z"
         }
       },
-      "expected": { "valid": false, "error_code": "E_OCCURRED_AT_ON_CHALLENGE" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_OCCURRED_AT_ON_CHALLENGE"
+      }
     }
   ]
 }

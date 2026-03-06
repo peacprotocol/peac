@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 Issuer Canonical Form conformance vectors (Section 8, DD-156)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "https-issuer-valid",
@@ -19,7 +20,9 @@
           "jti": "iss-valid-001"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "did-key-issuer-valid",
@@ -38,7 +41,9 @@
           "jti": "iss-valid-002"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "did-web-issuer-valid",
@@ -57,7 +62,9 @@
           "jti": "iss-valid-003"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-http-issuer",
@@ -76,7 +83,10 @@
           "jti": "iss-invalid-001"
         }
       },
-      "expected": { "valid": false, "error_code": "E_ISS_NOT_CANONICAL" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
     },
     {
       "name": "reject-uppercase-host",
@@ -95,7 +105,10 @@
           "jti": "iss-invalid-002"
         }
       },
-      "expected": { "valid": false, "error_code": "E_ISS_NOT_CANONICAL" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
     },
     {
       "name": "reject-trailing-slash",
@@ -114,7 +127,10 @@
           "jti": "iss-invalid-003"
         }
       },
-      "expected": { "valid": false, "error_code": "E_ISS_NOT_CANONICAL" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
     },
     {
       "name": "reject-default-port",
@@ -133,7 +149,10 @@
           "jti": "iss-invalid-004"
         }
       },
-      "expected": { "valid": false, "error_code": "E_ISS_NOT_CANONICAL" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
     },
     {
       "name": "reject-userinfo-in-issuer",
@@ -152,7 +171,10 @@
           "jti": "iss-invalid-005"
         }
       },
-      "expected": { "valid": false, "error_code": "E_ISS_NOT_CANONICAL" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
     },
     {
       "name": "reject-urn-scheme",
@@ -171,7 +193,10 @@
           "jti": "iss-invalid-006"
         }
       },
-      "expected": { "valid": false, "error_code": "E_ISS_NOT_CANONICAL" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
     },
     {
       "name": "reject-did-path-in-id",
@@ -190,7 +215,10 @@
           "jti": "iss-invalid-007"
         }
       },
-      "expected": { "valid": false, "error_code": "E_ISS_NOT_CANONICAL" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
     }
   ]
 }

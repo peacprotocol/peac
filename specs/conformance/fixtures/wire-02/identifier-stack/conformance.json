@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 Identifier Stack and Token Confusion conformance vectors (Section 18)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "compact-typ-valid",
@@ -19,7 +20,9 @@
           "jti": "ident-valid-001"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "media-type-form-accepted",
@@ -29,7 +32,9 @@
       "requirement_ids": ["WIRE02-IDENT-002", "WIRE02-MEDIA-002"],
       "status": "positive",
       "input": {
-        "header_overrides": { "typ": "application/interaction-record+jwt" },
+        "header_overrides": {
+          "typ": "application/interaction-record+jwt"
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -39,7 +44,9 @@
           "jti": "ident-valid-002"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-typ-with-parameters",
@@ -49,7 +56,9 @@
       "requirement_ids": ["WIRE02-IDENT-003"],
       "status": "negative",
       "input": {
-        "header_overrides": { "typ": "interaction-record+jwt; charset=utf-8" },
+        "header_overrides": {
+          "typ": "interaction-record+jwt; charset=utf-8"
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -59,7 +68,10 @@
           "jti": "ident-invalid-001"
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-typ-peac-version-mismatch",
@@ -69,7 +81,9 @@
       "requirement_ids": ["WIRE02-IDENT-004", "WIRE02-MEDIA-005"],
       "status": "negative",
       "input": {
-        "header_overrides": { "typ": "peac-receipt/0.1" },
+        "header_overrides": {
+          "typ": "peac-receipt/0.1"
+        },
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
@@ -79,7 +93,10 @@
           "jti": "ident-invalid-002"
         }
       },
-      "expected": { "valid": false, "error_code": "E_WIRE_VERSION_MISMATCH" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_WIRE_VERSION_MISMATCH"
+      }
     },
     {
       "name": "reject-unknown-peac-version",
@@ -98,7 +115,10 @@
           "jti": "ident-invalid-003"
         }
       },
-      "expected": { "valid": false, "error_code": "E_UNSUPPORTED_WIRE_VERSION" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_UNSUPPORTED_WIRE_VERSION"
+      }
     }
   ]
 }

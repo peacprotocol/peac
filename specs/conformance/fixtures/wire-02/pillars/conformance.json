@@ -1,6 +1,7 @@
 {
   "$comment": "Wire 0.2 Pillar Taxonomy conformance vectors (Section 7, DD-156)",
   "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
   "fixtures": [
     {
       "name": "single-pillar-valid",
@@ -20,7 +21,9 @@
           "pillars": ["commerce"]
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "multi-pillar-sorted-valid",
@@ -40,7 +43,9 @@
           "pillars": ["commerce", "compliance"]
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "all-pillars-sorted-valid",
@@ -71,7 +76,9 @@
           ]
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-unknown-pillar",
@@ -91,7 +98,10 @@
           "pillars": ["finance"]
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     },
     {
       "name": "reject-unsorted-pillars",
@@ -111,7 +121,10 @@
           "pillars": ["compliance", "commerce"]
         }
       },
-      "expected": { "valid": false, "error_code": "E_PILLARS_NOT_SORTED" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_PILLARS_NOT_SORTED"
+      }
     },
     {
       "name": "reject-duplicate-pillars",
@@ -131,7 +144,10 @@
           "pillars": ["commerce", "commerce"]
         }
       },
-      "expected": { "valid": false, "error_code": "E_PILLARS_NOT_SORTED" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_PILLARS_NOT_SORTED"
+      }
     },
     {
       "name": "reject-empty-pillars-array",
@@ -151,7 +167,10 @@
           "pillars": []
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
     }
   ]
 }

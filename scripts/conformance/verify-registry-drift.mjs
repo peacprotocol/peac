@@ -24,6 +24,7 @@ import { isValidRequirementId } from './core.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
+const strictMode = process.argv.includes('--strict');
 
 function computeHash(fragment) {
   return 'sha256:' + createHash('sha256').update(fragment, 'utf-8').digest('hex');
@@ -99,11 +100,16 @@ for (const id of [...registryIds].sort()) {
 }
 
 if (annotationDrift > 0) {
-  // Annotation mismatches are informational until inline [WIRE02-*] annotations
-  // are added to WIRE-0.2.md. They do not block the gate.
-  console.log(
-    `\nINFO: ${annotationDrift} annotation mismatch(es) between spec and registry (advisory; not gating)`
-  );
+  if (strictMode) {
+    console.error(
+      `\nFAIL: ${annotationDrift} annotation mismatch(es) between spec and registry (--strict mode)`
+    );
+    driftCount += annotationDrift;
+  } else {
+    console.log(
+      `\nINFO: ${annotationDrift} annotation mismatch(es) between spec and registry (use --strict to gate)`
+    );
+  }
 }
 
 // --- Summary ---

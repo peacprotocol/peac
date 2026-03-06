@@ -91,12 +91,16 @@ for (const entry of inventoryEntries) {
   }
 }
 
+const unmapped = inventoryEntries.length - withReqs;
+
 const inventory = {
   $schema: 'https://www.peacprotocol.org/schemas/conformance/inventory.schema.json',
   generated_at: new Date().toISOString(),
   version: PKG.version,
+  schema_version: PKG.version,
   total_fixtures: inventoryEntries.length,
   total_with_requirements: withReqs,
+  total_unmapped: unmapped,
   wire02_requirement_links: namespaceCounts.wire02,
   carrier_requirement_links: namespaceCounts.carrier,
   entries: inventoryEntries,

@@ -152,10 +152,51 @@ if (existsSync(inventoryPath)) {
         }
       }
     }
+    // Duplicate fixture names within same file
+    const fixtureKeys = new Map();
+    for (const entry of inventory.entries) {
+      const key = `${entry.directory}/${entry.file}/${entry.fixture_name}`;
+      if (fixtureKeys.has(key)) {
+        fail('inventory', `Duplicate fixture: "${key}"`);
+      }
+      fixtureKeys.set(key, true);
+    }
+
     ok(`inventory.json (${inventory.entries.length} entries)`);
   }
 } else {
   console.log('SKIP: inventory.json not found (will be generated)');
+}
+
+// --- Validate test-mappings.json (if present) ---
+const mappingsPath = join(ROOT, 'specs/conformance/test-mappings.json');
+if (existsSync(mappingsPath)) {
+  const testMappings = JSON.parse(readFileSync(mappingsPath, 'utf-8'));
+
+  if (!Array.isArray(testMappings.mappings)) {
+    fail('test-mappings', 'Missing mappings array');
+  } else {
+    // Validate requirement IDs
+    for (const m of testMappings.mappings) {
+      if (!REQUIREMENT_ID_PATTERN.test(m.requirement_id)) {
+        fail('test-mappings', `Invalid requirement ID: ${m.requirement_id}`);
+      }
+    }
+
+    // Duplicate test_file + test_name for same requirement_id
+    const mappingKeys = new Set();
+    for (const m of testMappings.mappings) {
+      const key = `${m.requirement_id}|${m.test_file}|${m.test_name || ''}`;
+      if (mappingKeys.has(key)) {
+        fail('test-mappings', `Duplicate mapping: ${key}`);
+      }
+      mappingKeys.add(key);
+    }
+
+    ok(`test-mappings.json (${testMappings.mappings.length} mappings)`);
+  }
+} else {
+  console.log('SKIP: test-mappings.json not found');
 }
 
 // --- Summary ---

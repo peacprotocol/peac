@@ -463,6 +463,68 @@
       "description": "Wire 0.2 replay prevention: jti at maximum length boundary",
       "version": "0.12.0-preview.2",
       "fixture_count": 1
+    },
+    "kinds/conformance.json": {
+      "description": "Wire 0.2 kind semantics conformance vectors (Section 5, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 6
+    },
+    "types/conformance.json": {
+      "description": "Wire 0.2 type grammar conformance vectors (Section 6, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 12
+    },
+    "pillars/conformance.json": {
+      "description": "Wire 0.2 pillar taxonomy conformance vectors (Section 7, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 7
+    },
+    "issuers/conformance.json": {
+      "description": "Wire 0.2 issuer canonical form conformance vectors (Section 8, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 10
+    },
+    "occurred-at/conformance.json": {
+      "description": "Wire 0.2 occurred-at semantics conformance vectors (Section 9, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 6
+    },
+    "jose/conformance.json": {
+      "description": "Wire 0.2 JWS header constraints conformance vectors (Section 10, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 13
+    },
+    "policy-binding/conformance.json": {
+      "description": "Wire 0.2 policy binding conformance vectors (Section 11, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 6
+    },
+    "extensions/conformance.json": {
+      "description": "Wire 0.2 extension groups conformance vectors (Section 12, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 13
+    },
+    "identifier-stack/conformance.json": {
+      "description": "Wire 0.2 identifier stack conformance vectors (Section 18, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 5
+    },
+    "validation/conformance.json": {
+      "description": "Wire 0.2 validation algorithm conformance vectors (Section 19, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 9
+    },
+    "replay/conformance.json": {
+      "description": "Wire 0.2 replay prevention conformance vectors (Section 20, DD-164)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 6
+    }
+  },
+  "carrier-boundary": {
+    "conformance.json": {
+      "description": "Transport boundary conformance vectors (CARRIER-* namespace, DD-124 through DD-131)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 11
     }
   }
 }
