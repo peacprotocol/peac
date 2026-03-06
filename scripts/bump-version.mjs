@@ -130,7 +130,7 @@ for (const pkg of workspacePackages) {
 
 // 3. Bump publish-manifest.json
 const manifestPath = join(__dirname, 'publish-manifest.json');
-if (existsSync(manifestPath)) {
+try {
   const raw = readFileSync(manifestPath, 'utf-8');
   const manifest = JSON.parse(raw);
   const oldManifestVersion = manifest.version;
@@ -144,6 +144,8 @@ if (existsSync(manifestPath)) {
   if (oldManifestVersion !== version) {
     console.log(`  publish-manifest.json: ${oldManifestVersion} -> ${version}`);
   }
+} catch {
+  // publish-manifest.json not found; skip
 }
 
 // 4. Bump MCP server distribution surface files (server.json, manifest.json)
@@ -153,9 +155,12 @@ const mcpSurfaceFiles = [
 ];
 
 for (const surfacePath of mcpSurfaceFiles) {
-  if (!existsSync(surfacePath)) continue;
-
-  const raw = readFileSync(surfacePath, 'utf-8');
+  let raw;
+  try {
+    raw = readFileSync(surfacePath, 'utf-8');
+  } catch {
+    continue;
+  }
   const surface = JSON.parse(raw);
   const fileName = relative(ROOT, surfacePath);
   let changed = false;
@@ -217,9 +222,12 @@ const fixtureGlobs = [
 ];
 
 for (const specPath of [...specVersionFiles, ...fixtureGlobs]) {
-  if (!existsSync(specPath)) continue;
-
-  const raw = readFileSync(specPath, 'utf-8');
+  let raw;
+  try {
+    raw = readFileSync(specPath, 'utf-8');
+  } catch {
+    continue;
+  }
   const data = JSON.parse(raw);
   const relName = relative(ROOT, specPath);
   let changed = false;

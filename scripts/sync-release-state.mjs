@@ -107,12 +107,13 @@ let drifted = 0;
 
 for (const fileName of targetFiles) {
   const filePath = join(refDir, fileName);
-  if (!existsSync(filePath)) {
+  let content;
+  try {
+    content = readFileSync(filePath, 'utf-8');
+  } catch {
     console.log(`  SKIP: ${fileName} (not found)`);
     continue;
   }
-
-  const content = readFileSync(filePath, 'utf-8');
   const startIdx = content.indexOf(START_MARKER);
   const endIdx = content.indexOf(END_MARKER);
 
