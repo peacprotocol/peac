@@ -274,6 +274,39 @@ else
   echo "OK"
 fi
 
+echo "== MCP distribution surfaces =="
+# Validate server.json (MCP Registry schema), smithery.yaml, llms.txt existence
+MCP_DIST_OK=1
+if [ ! -f packages/mcp-server/server.json ]; then
+  echo "FAIL: packages/mcp-server/server.json missing"
+  MCP_DIST_OK=0
+elif ! node -e "JSON.parse(require('fs').readFileSync('packages/mcp-server/server.json','utf8'))" 2>/dev/null; then
+  echo "FAIL: packages/mcp-server/server.json is not valid JSON"
+  MCP_DIST_OK=0
+fi
+if [ ! -f packages/mcp-server/smithery.yaml ]; then
+  echo "FAIL: packages/mcp-server/smithery.yaml missing"
+  MCP_DIST_OK=0
+fi
+if [ ! -f llms.txt ]; then
+  echo "FAIL: llms.txt missing (repo root)"
+  MCP_DIST_OK=0
+fi
+# Verify server.json version matches monorepo version
+if [ -f packages/mcp-server/server.json ]; then
+  SERVER_VER=$(node -e "console.log(JSON.parse(require('fs').readFileSync('packages/mcp-server/server.json','utf8')).version)")
+  MONO_VER=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)")
+  if [ "$SERVER_VER" != "$MONO_VER" ]; then
+    echo "FAIL: server.json version ($SERVER_VER) != monorepo version ($MONO_VER)"
+    MCP_DIST_OK=0
+  fi
+fi
+if [ "$MCP_DIST_OK" = "1" ]; then
+  echo "OK"
+else
+  bad=1
+fi
+
 echo "== no-network guard (DD-55) =="
 if [ -f scripts/check-no-network.mjs ]; then
   if node scripts/check-no-network.mjs > /dev/null 2>&1; then
