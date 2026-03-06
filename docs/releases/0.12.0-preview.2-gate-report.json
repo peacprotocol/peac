@@ -1,89 +1,102 @@
 {
+  "report_schema_version": "1.0.0",
   "target": "preview",
-  "timestamp": "2026-03-06T11:50:58Z",
+  "timestamp": "2026-03-06T12:25:00Z",
   "version": "0.12.0-preview.2",
-  "commit": "f20e0f6183e01e544d37b2a4d06317c703ba5459",
+  "commit": "00e3b56e930f3facc3d5a0e637d5fcc0eb57a4cd",
   "node_version": "v24.13.0",
+  "runner": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "cpus": 10,
+    "platform": "darwin",
+    "ci_run_id": null,
+    "ci_run_attempt": null
+  },
+  "hashes": {
+    "publish_manifest": "3c342722982be37c3f5748ae5f3aed9897fc36b7e06b7f0662a7ead2221ce2a8",
+    "conformance_fixtures": "174fc4060792eb977b73347b12fac5bf368060abc5f653e65e5f2d8f4afb2c74"
+  },
   "gates": [
     {
       "name": "build",
       "status": "passed",
-      "duration_ms": 2559
+      "duration_ms": 2537
     },
     {
       "name": "lint",
       "status": "passed",
-      "duration_ms": 4407
+      "duration_ms": 5034
     },
     {
       "name": "typecheck",
       "status": "passed",
-      "duration_ms": 2950
+      "duration_ms": 3387
     },
     {
       "name": "test",
       "status": "passed",
-      "duration_ms": 9710
+      "duration_ms": 9422
     },
     {
       "name": "guard",
       "status": "passed",
-      "duration_ms": 10787
+      "duration_ms": 9677
     },
     {
       "name": "planning-leak",
       "status": "passed",
-      "duration_ms": 234
+      "duration_ms": 238
     },
     {
       "name": "format",
       "status": "passed",
-      "duration_ms": 8438
+      "duration_ms": 8145
     },
     {
       "name": "layer-boundary",
       "status": "passed",
-      "duration_ms": 79
+      "duration_ms": 71
     },
     {
       "name": "version-coherence",
       "status": "passed",
-      "duration_ms": 506
+      "duration_ms": 460
     },
     {
       "name": "codegen-fresh",
-      "status": "failed",
-      "duration_ms": 1599
+      "status": "passed",
+      "duration_ms": 1331
     },
     {
       "name": "no-network",
       "status": "passed",
-      "duration_ms": 78
+      "duration_ms": 69
     },
     {
       "name": "wire-01-frozen",
       "status": "passed",
-      "duration_ms": 50
+      "duration_ms": 44
     },
     {
       "name": "wire-02-conformance",
       "status": "passed",
-      "duration_ms": 1699
+      "duration_ms": 1409
     },
     {
       "name": "release-state-coherence",
       "status": "passed",
-      "duration_ms": 8072
+      "duration_ms": 8114
     },
     {
       "name": "changelog-coverage",
       "status": "passed",
-      "duration_ms": 58
+      "duration_ms": 64
     }
   ],
   "summary": {
     "total": 15,
-    "passed": 14,
-    "failed": 1
+    "passed": 15,
+    "failed": 0
   }
 }
