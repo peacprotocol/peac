@@ -1,0 +1,51 @@
+{
+  "name": "@peac/adapter-eat",
+  "version": "0.12.0-preview.1",
+  "description": "EAT (Entity Attestation Token, RFC 9711) passport decoder and PEAC claim mapper",
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peacprotocol/peac.git",
+    "directory": "packages/adapters/eat"
+  },
+  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "license": "Apache-2.0",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "pnpm run build:js && pnpm run build:types",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo"
+  },
+  "dependencies": {
+    "@peac/kernel": "workspace:*",
+    "@peac/schema": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "cbor": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.11",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.0"
+  }
+}
