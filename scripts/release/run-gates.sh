@@ -77,12 +77,16 @@ run_gate() {
   start_ms=$(date +%s%3N 2>/dev/null || python3 -c 'import time; print(int(time.time()*1000))')
   TOTAL=$((TOTAL + 1))
 
+  local gate_output
+  gate_output=$(mktemp)
+
   echo -n "  [$name] "
-  if "$@" > /dev/null 2>&1; then
+  if "$@" > "$gate_output" 2>&1; then
     local end_ms
     end_ms=$(date +%s%3N 2>/dev/null || python3 -c 'import time; print(int(time.time()*1000))')
     local duration=$((end_ms - start_ms))
     echo "PASS (${duration}ms)"
+    rm -f "$gate_output"
     GATES_JSON=$(echo "$GATES_JSON" | node -e "
       const g = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
       g.push({name:'$name',status:'passed',duration_ms:$duration});
@@ -93,6 +97,13 @@ run_gate() {
     end_ms=$(date +%s%3N 2>/dev/null || python3 -c 'import time; print(int(time.time()*1000))')
     local duration=$((end_ms - start_ms))
     echo "FAIL (${duration}ms)"
+    # Print captured output for debugging (last 30 lines)
+    if [ -s "$gate_output" ]; then
+      echo "    --- output (last 30 lines) ---"
+      tail -30 "$gate_output" | sed 's/^/    /'
+      echo "    --- end output ---"
+    fi
+    rm -f "$gate_output"
     FAILED=$((FAILED + 1))
     GATES_JSON=$(echo "$GATES_JSON" | node -e "
       const g = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
@@ -169,15 +180,21 @@ echo ""
 echo "--- Wire 0.1 Frozen ---"
 TOTAL=$((TOTAL + 1))
 echo -n "  [wire-01-frozen] "
+# Ensure origin/main is available (auto-fetch in CI where checkout may be shallow)
 if ! git rev-parse origin/main >/dev/null 2>&1; then
-  echo "FAIL (origin/main not available; run 'git fetch origin' first)"
-  FAILED=$((FAILED + 1))
-  GATES_JSON=$(echo "$GATES_JSON" | node -e "
-    const g = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-    g.push({name:'wire-01-frozen',status:'failed',duration_ms:0});
-    process.stdout.write(JSON.stringify(g));
-  ")
-else
+  echo -n "(auto-fetching origin/main) "
+  if ! git fetch origin main --depth=1 >/dev/null 2>&1; then
+    echo "FAIL (origin/main not available and auto-fetch failed)"
+    FAILED=$((FAILED + 1))
+    GATES_JSON=$(echo "$GATES_JSON" | node -e "
+      const g = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+      g.push({name:'wire-01-frozen',status:'failed',duration_ms:0});
+      process.stdout.write(JSON.stringify(g));
+    ")
+  fi
+fi
+# Only run diff if origin/main is now available (skip if fetch failed above)
+if git rev-parse origin/main >/dev/null 2>&1; then
   WIRE01_DIFF=$(git diff origin/main -- packages/schema/src/validators.ts packages/schema/src/attestation-receipt.ts)
   if [ -z "$WIRE01_DIFF" ]; then
     echo "PASS"
