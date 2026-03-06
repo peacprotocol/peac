@@ -112,7 +112,11 @@ describe('A2A Wire 0.2 round-trip', () => {
       kid: 'test-kid-003',
     });
 
-    // Issue a child receipt that correlates to the parent
+    // Decode parent to extract its jti for correlation
+    const parentResult = await verifyLocal(parentJws, publicKey);
+    expect(parentResult.valid).toBe(true);
+    const parentJti = parentResult.valid ? parentResult.claims.jti : '';
+
     const parentRef = await computeReceiptRef(parentJws);
     const { jws: childJws } = await issueWire02({
       iss: 'https://api.example.com',
@@ -122,7 +126,7 @@ describe('A2A Wire 0.2 round-trip', () => {
       extensions: {
         'org.peacprotocol/correlation': {
           workflow_id: 'workflow-xyz',
-          parent_jti: 'parent-jti-value',
+          parent_jti: parentJti,
         },
       },
       privateKey,
@@ -150,7 +154,7 @@ describe('A2A Wire 0.2 round-trip', () => {
     }
   });
 
-  it('carrier handles both wire versions transparently (Wire 0.2 only verified)', async () => {
+  it('carrier preserves Wire 0.2 JWS byte-for-byte through A2A transport', async () => {
     const { privateKey, publicKey } = await generateKeypair();
 
     // Issue Wire 0.2 receipt
