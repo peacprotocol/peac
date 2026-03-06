@@ -16,6 +16,15 @@ export const IssueInputSchema = z.object({
     .string()
     .min(1)
     .max(256)
+    .refine(
+      (v) =>
+        /^https?:\/\//.test(v) ||
+        /^[a-zA-Z0-9][a-zA-Z0-9._-]*\.[a-zA-Z0-9._-]+\/[a-zA-Z0-9]/.test(v),
+      {
+        message:
+          'type must be reverse-DNS (e.g. org.peacprotocol/payment) or absolute URI (https://...)',
+      }
+    )
     .describe('Semantic type in reverse-DNS or absolute URI form (e.g. org.peacprotocol/payment)'),
   sub: z
     .string()
@@ -38,10 +47,18 @@ export const IssueInputSchema = z.object({
       ])
     )
     .optional()
+    .refine(
+      (arr) =>
+        !arr || (new Set(arr).size === arr.length && [...arr].sort().every((v, i) => v === arr[i])),
+      { message: 'pillars must be unique and sorted ascending' }
+    )
     .describe('Evidence pillars from closed 10-value taxonomy (sorted ascending)'),
   occurred_at: z
     .string()
     .optional()
+    .refine((v) => !v || !isNaN(Date.parse(v)), {
+      message: 'occurred_at must be a valid ISO 8601 timestamp',
+    })
     .describe('ISO 8601 timestamp when interaction occurred (evidence kind only)'),
   extensions: z
     .record(z.string(), z.unknown())
@@ -49,7 +66,12 @@ export const IssueInputSchema = z.object({
     .describe('Extension groups keyed by reverse-DNS identifier'),
   policy: z
     .object({
-      uri: z.string().url().max(2048).describe('Policy document URI (HTTPS only)'),
+      uri: z
+        .string()
+        .url()
+        .max(2048)
+        .refine((v) => v.startsWith('https://'), { message: 'policy.uri must use HTTPS' })
+        .describe('Policy document URI (HTTPS only)'),
       version: z.string().max(256).optional().describe('Policy version'),
       digest: z
         .string()

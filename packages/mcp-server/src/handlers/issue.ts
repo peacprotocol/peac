@@ -64,11 +64,24 @@ export async function handleIssue(params: HandlerParams<IssueInput>): Promise<Ha
   const keyPatterns = buildKeyPatterns(context.issuerKey.privateKey, context.issuerKey.publicKey);
 
   try {
-    // Build policy block: PolicyBlock requires digest (non-optional)
-    const policyBlock =
-      input.policy?.digest !== undefined
-        ? { digest: input.policy.digest, uri: input.policy.uri, version: input.policy.version }
-        : undefined;
+    // Build policy block: PolicyBlock requires digest (non-optional per kernel type).
+    // If caller provides policy without digest, return a clear error rather than
+    // silently discarding the policy metadata.
+    if (input.policy && !input.policy.digest) {
+      return {
+        text: 'Issue failed: policy.digest is required when policy block is provided',
+        structured: {
+          ok: false,
+          code: 'E_MCP_ISSUE_FAILED',
+          message:
+            'policy.digest is required when policy block is provided (uri/version alone is insufficient for binding)',
+        },
+        isError: true,
+      };
+    }
+    const policyBlock = input.policy?.digest
+      ? { digest: input.policy.digest, uri: input.policy.uri, version: input.policy.version }
+      : undefined;
 
     const result = await issueWire02({
       iss: context.issuerId,
