@@ -1464,7 +1464,7 @@ export const ERRORS: Record<string, ErrorDefinition> = {
   // Verification error codes
   E_EAT_SIGNATURE_FAILED: {
     code: 'E_EAT_SIGNATURE_FAILED',
-    http_status: 401,
+    http_status: 400,
     title: 'EAT Signature Failed',
     description: 'COSE_Sign1 Ed25519 signature verification failed over the Sig_structure',
     retryable: false,
