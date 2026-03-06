@@ -1,0 +1,89 @@
+{
+  "target": "preview",
+  "timestamp": "2026-03-06T11:50:58Z",
+  "version": "0.12.0-preview.2",
+  "commit": "f20e0f6183e01e544d37b2a4d06317c703ba5459",
+  "node_version": "v24.13.0",
+  "gates": [
+    {
+      "name": "build",
+      "status": "passed",
+      "duration_ms": 2559
+    },
+    {
+      "name": "lint",
+      "status": "passed",
+      "duration_ms": 4407
+    },
+    {
+      "name": "typecheck",
+      "status": "passed",
+      "duration_ms": 2950
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "duration_ms": 9710
+    },
+    {
+      "name": "guard",
+      "status": "passed",
+      "duration_ms": 10787
+    },
+    {
+      "name": "planning-leak",
+      "status": "passed",
+      "duration_ms": 234
+    },
+    {
+      "name": "format",
+      "status": "passed",
+      "duration_ms": 8438
+    },
+    {
+      "name": "layer-boundary",
+      "status": "passed",
+      "duration_ms": 79
+    },
+    {
+      "name": "version-coherence",
+      "status": "passed",
+      "duration_ms": 506
+    },
+    {
+      "name": "codegen-fresh",
+      "status": "failed",
+      "duration_ms": 1599
+    },
+    {
+      "name": "no-network",
+      "status": "passed",
+      "duration_ms": 78
+    },
+    {
+      "name": "wire-01-frozen",
+      "status": "passed",
+      "duration_ms": 50
+    },
+    {
+      "name": "wire-02-conformance",
+      "status": "passed",
+      "duration_ms": 1699
+    },
+    {
+      "name": "release-state-coherence",
+      "status": "passed",
+      "duration_ms": 8072
+    },
+    {
+      "name": "changelog-coverage",
+      "status": "passed",
+      "duration_ms": 58
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "passed": 14,
+    "failed": 1
+  }
+}

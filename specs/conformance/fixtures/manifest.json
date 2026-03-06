@@ -446,22 +446,22 @@
   "wire-02": {
     "valid.json": {
       "description": "Wire 0.2 valid receipt golden vectors (DD-156)",
-      "version": "0.12.0-preview.1",
+      "version": "0.12.0-preview.2",
       "fixture_count": 28
     },
     "invalid.json": {
       "description": "Wire 0.2 invalid receipt rejection vectors (DD-156)",
-      "version": "0.12.0-preview.1",
+      "version": "0.12.0-preview.2",
       "fixture_count": 27
     },
     "warnings.json": {
       "description": "Wire 0.2 warning emission vectors (DD-155)",
-      "version": "0.12.0-preview.1",
+      "version": "0.12.0-preview.2",
       "fixture_count": 4
     },
     "replay-prevention/boundary-jti-length.json": {
       "description": "Wire 0.2 replay prevention: jti at maximum length boundary",
-      "version": "0.12.0-preview.1",
+      "version": "0.12.0-preview.2",
       "fixture_count": 1
     }
   }

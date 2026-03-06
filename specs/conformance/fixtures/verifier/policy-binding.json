@@ -22,7 +22,7 @@
     {
       "id": "policy-binding-wire-02-verified",
       "description": "Wire 0.2 receipt with peac.policy.digest matching local policy bytes MUST report 'verified'",
-      "wire_format": "peac-receipt/0.2",
+      "wire_format": "interaction-record+jwt",
       "deferred_until": "v0.12.0",
       "executable": false,
       "input": {
@@ -51,7 +51,7 @@
     {
       "id": "policy-binding-wire-02-failed",
       "description": "Wire 0.2 receipt with peac.policy.digest NOT matching local policy bytes MUST report 'failed'",
-      "wire_format": "peac-receipt/0.2",
+      "wire_format": "interaction-record+jwt",
       "deferred_until": "v0.12.0",
       "executable": false,
       "input": {
@@ -82,7 +82,7 @@
     {
       "id": "policy-binding-wire-02-no-digest-unavailable",
       "description": "Wire 0.2 receipt WITHOUT peac.policy.digest MUST report 'unavailable' (issuer opted out)",
-      "wire_format": "peac-receipt/0.2",
+      "wire_format": "interaction-record+jwt",
       "deferred_until": "v0.12.0",
       "executable": false,
       "input": {
@@ -105,7 +105,7 @@
     {
       "id": "policy-binding-wire-02-no-local-bytes-unavailable",
       "description": "Wire 0.2 receipt with digest but NO local policy bytes MUST report 'unavailable' (verifier has no policy to compare)",
-      "wire_format": "peac-receipt/0.2",
+      "wire_format": "interaction-record+jwt",
       "deferred_until": "v0.12.0",
       "executable": false,
       "input": {

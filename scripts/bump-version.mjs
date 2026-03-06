@@ -200,6 +200,113 @@ if (dryRun) {
   console.log('(dry run -- no files written)');
 }
 
+// 5. Bump spec JSON files that embed a version field
+const specVersionFiles = [
+  join(ROOT, 'specs/kernel/errors.json'),
+  join(ROOT, 'specs/kernel/error-categories.json'),
+  join(ROOT, 'docs/releases/current.json'),
+];
+
+// Also bump version and schema_version in conformance fixture files
+const fixtureGlobs = [
+  join(ROOT, 'specs/conformance/fixtures/manifest.json'),
+  join(ROOT, 'specs/conformance/fixtures/wire-02/valid.json'),
+  join(ROOT, 'specs/conformance/fixtures/wire-02/invalid.json'),
+  join(ROOT, 'specs/conformance/fixtures/wire-02/warnings.json'),
+  join(ROOT, 'specs/conformance/fixtures/wire-02/replay-prevention/boundary-jti-length.json'),
+];
+
+for (const specPath of [...specVersionFiles, ...fixtureGlobs]) {
+  if (!existsSync(specPath)) continue;
+
+  const raw = readFileSync(specPath, 'utf-8');
+  const data = JSON.parse(raw);
+  const relName = relative(ROOT, specPath);
+  let changed = false;
+
+  if (data.version && data.version !== version) {
+    data.version = version;
+    changed = true;
+  }
+  if (data.schema_version && data.schema_version !== version) {
+    data.schema_version = version;
+    changed = true;
+  }
+  if (data.errors_version && data.errors_version !== version) {
+    data.errors_version = version;
+    changed = true;
+  }
+
+  if (changed && !dryRun) {
+    const indent = raw.match(/^(\s+)"/m)?.[1] || '  ';
+    writeFileSync(specPath, JSON.stringify(data, null, indent) + '\n');
+    console.log(`  ${relName}: bumped to ${version}`);
+  }
+}
+
+// 6. Regenerate codegen from updated specs (atomic: version bump + codegen are one step)
+if (!dryRun) {
+  console.log('');
+  console.log('Regenerating codegen from updated specs...');
+  try {
+    execFileSync('pnpm', ['exec', 'tsx', 'scripts/codegen-errors.ts'], {
+      cwd: ROOT,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    execFileSync(
+      'pnpm',
+      [
+        'exec',
+        'prettier',
+        '--write',
+        'packages/kernel/src/errors.generated.ts',
+        'packages/kernel/src/error-categories.generated.ts',
+      ],
+      { cwd: ROOT, encoding: 'utf-8', stdio: 'pipe' }
+    );
+    console.log('  Codegen regenerated and formatted.');
+  } catch (_err) {
+    console.error('  WARNING: Codegen regeneration failed. Run manually:');
+    console.error('    pnpm exec tsx scripts/codegen-errors.ts');
+  }
+
+  // 7. Format version-bumped JSON files
+  console.log('Formatting bumped JSON files...');
+  try {
+    execFileSync(
+      'pnpm',
+      [
+        'exec',
+        'prettier',
+        '--write',
+        'packages/mcp-server/manifest.json',
+        'scripts/publish-manifest.json',
+        'docs/releases/current.json',
+      ],
+      { cwd: ROOT, encoding: 'utf-8', stdio: 'pipe' }
+    );
+    console.log('  Formatted.');
+  } catch {
+    console.error('  WARNING: Prettier format failed. Run manually: pnpm format');
+  }
+}
+
+console.log('');
+console.log(`Bumped: ${bumped} packages`);
+console.log(`Already current: ${alreadyCurrent}`);
+console.log(`Skipped examples (0.0.0): ${skippedExamples}`);
+
+if (exampleErrors > 0) {
+  console.log('');
+  console.error(`FAIL: ${exampleErrors} example(s) have non-0.0.0 versions`);
+}
+
+if (dryRun) {
+  console.log('');
+  console.log('(dry run -- no files written)');
+}
+
 console.log('');
 console.log('Next: verify with node scripts/check-version-sync.mjs');
 

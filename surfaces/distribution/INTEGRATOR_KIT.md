@@ -60,7 +60,7 @@ const result = await verifyLocal(jws, publicKey);
 | `@peac/adapter-x402`             | x402 evidence adapter         | [@peac/adapter-x402](https://www.npmjs.com/package/@peac/adapter-x402)                         |
 | `@peac/mappings-content-signals` | robots.txt/AIPREF/TDM parsing | [@peac/mappings-content-signals](https://www.npmjs.com/package/@peac/mappings-content-signals) |
 
-28 packages total on npm. Full list: [GitHub](https://github.com/peacprotocol/peac).
+Full package list: see `scripts/publish-manifest.json` or [GitHub](https://github.com/peacprotocol/peac).
 
 ## Transport Mappings
 
