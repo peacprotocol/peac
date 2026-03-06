@@ -24,6 +24,10 @@ export default defineConfig({
         find: '@peac/capture-core',
         replacement: resolve(__dirname, 'packages/capture/core/src/index.ts'),
       },
+      {
+        find: '@peac/mappings-a2a',
+        replacement: resolve(__dirname, 'packages/mappings/a2a/src/index.ts'),
+      },
     ],
   },
   server: {
@@ -78,6 +82,7 @@ export default defineConfig({
       'tests/perf/**/*.test.ts',
       'tests/smoke/**/*.test.ts',
       'tests/distribution/**/*.test.ts',
+      'tests/integration/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,
