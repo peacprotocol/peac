@@ -69,11 +69,15 @@ function decodeCoseSign1(data: Uint8Array): CoseSign1 {
     );
   }
 
-  if (!(payload instanceof Uint8Array) && payload !== null) {
+  if (payload === null) {
     throw new EatAdapterError(
-      'COSE_Sign1 payload must be a byte string or null',
+      'Detached COSE_Sign1 payload (null) is not supported; EAT tokens require an attached payload',
       'E_EAT_INVALID_COSE'
     );
+  }
+
+  if (!(payload instanceof Uint8Array)) {
+    throw new EatAdapterError('COSE_Sign1 payload must be a byte string', 'E_EAT_INVALID_COSE');
   }
 
   if (!(signature instanceof Uint8Array)) {
@@ -91,7 +95,7 @@ function decodeCoseSign1(data: Uint8Array): CoseSign1 {
   return {
     protected: protectedBytes,
     unprotected: unprotectedMap instanceof Map ? unprotectedMap : new Map<number, unknown>(),
-    payload: payload ?? new Uint8Array(0),
+    payload,
     signature,
   };
 }
@@ -251,6 +255,13 @@ export async function decodeEatPassport(
   // Step 4: Optionally verify Ed25519 signature
   let signatureValid: boolean | undefined;
   if (publicKey !== undefined) {
+    if (publicKey.length !== 32) {
+      throw new EatAdapterError(
+        `Ed25519 public key must be 32 bytes, got ${publicKey.length}`,
+        'E_EAT_SIGNATURE_FAILED'
+      );
+    }
+
     const sigStructureBytes = buildSigStructure(coseSign1.protected, coseSign1.payload);
 
     try {
