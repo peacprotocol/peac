@@ -1,0 +1,341 @@
+{
+  "$comment": "Wire 0.2 Extension Groups conformance vectors (Section 12, DD-156)",
+  "version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "commerce-extension-valid",
+      "description": "Valid commerce extension with all required fields",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": ["WIRE02-EXT-006", "WIRE02-EXT-007", "WIRE02-EXT-008", "WIRE02-EXT-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-valid-001",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "commerce-negative-amount-valid",
+      "description": "Negative amount_minor (refund) is permitted",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-009",
+      "requirement_ids": ["WIRE02-EXT-009"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-valid-002",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "-500",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "access-extension-valid",
+      "description": "Valid access extension with resource, action, decision",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-011",
+      "requirement_ids": ["WIRE02-EXT-011", "WIRE02-EXT-012", "WIRE02-EXT-013"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/access-decision",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-valid-003",
+          "pillars": ["access"],
+          "extensions": {
+            "org.peacprotocol/access": {
+              "resource": "https://api.example.com/v1/docs/123",
+              "action": "read",
+              "decision": "allow"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "correlation-extension-valid",
+      "description": "Valid correlation extension with trace_id and span_id",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-014",
+      "requirement_ids": ["WIRE02-EXT-014", "WIRE02-EXT-015"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-valid-004",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "x402",
+              "amount_minor": "100",
+              "currency": "USD"
+            },
+            "org.peacprotocol/correlation": {
+              "trace_id": "0123456789abcdef0123456789abcdef",
+              "span_id": "0123456789abcdef"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-invalid-extension-key",
+      "description": "Extension key without dot in domain is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-002",
+      "requirement_ids": ["WIRE02-EXT-002", "WIRE02-EXT-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-invalid-001",
+          "extensions": {
+            "invalid/key": { "data": "test" }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_KEY" }
+    },
+    {
+      "name": "reject-commerce-decimal-amount",
+      "description": "Decimal amount_minor is rejected (must be integer string)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-009",
+      "requirement_ids": ["WIRE02-EXT-009"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-invalid-002",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "10.50",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-commerce-missing-currency",
+      "description": "Missing required currency field is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-008",
+      "requirement_ids": ["WIRE02-EXT-008"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-invalid-003",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-invalid-trace-id",
+      "description": "trace_id not matching 32 hex chars is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-014",
+      "requirement_ids": ["WIRE02-EXT-014"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-invalid-004",
+          "extensions": {
+            "org.peacprotocol/correlation": {
+              "trace_id": "not-a-valid-trace-id"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "unknown-extension-preserved-with-warning",
+      "description": "Unknown but well-formed extension key preserved with warning",
+      "type": "warning",
+      "primary_requirement_id": "WIRE02-EXT-017",
+      "requirement_ids": ["WIRE02-EXT-016", "WIRE02-EXT-017", "WIRE02-EXT-018"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-warn-001",
+          "extensions": {
+            "com.example/custom-data": { "key": "value" }
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [
+          { "code": "type_unregistered", "pointer": "/type" },
+          {
+            "code": "unknown_extension_preserved",
+            "pointer": "/extensions/com.example~1custom-data"
+          }
+        ]
+      }
+    },
+    {
+      "name": "identity-extension-valid",
+      "description": "Valid identity extension with optional proof_ref",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-001",
+      "requirement_ids": ["WIRE02-EXT-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/identity-attestation",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-valid-005",
+          "pillars": ["identity"],
+          "extensions": {
+            "org.peacprotocol/identity": {
+              "proof_ref": "prf_abc123"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-domain-label-over-63-chars",
+      "description": "Extension key domain label exceeding 63 characters MUST be rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-003",
+      "requirement_ids": ["WIRE02-EXT-003"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-invalid-006",
+          "extensions": {
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example/data": {
+              "key": "value"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_KEY" }
+    },
+    {
+      "name": "reject-empty-extension-segment",
+      "description": "Extension key with empty segment (trailing slash) MUST be rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-004",
+      "requirement_ids": ["WIRE02-EXT-004"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-invalid-007",
+          "extensions": {
+            "org.example/": { "key": "value" }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_KEY" }
+    },
+    {
+      "name": "reject-uppercase-extension-key",
+      "description": "Extension key with uppercase domain is rejected (lowercase only)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-005",
+      "requirement_ids": ["WIRE02-EXT-005", "WIRE02-EXT-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-invalid-005",
+          "extensions": {
+            "Com.Example/data": { "key": "value" }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_KEY" }
+    }
+  ]
+}

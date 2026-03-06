@@ -1,0 +1,122 @@
+{
+  "$comment": "Wire 0.2 Kind Semantics conformance vectors (Section 5, DD-156)",
+  "version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "evidence-kind-valid",
+      "description": "Evidence kind is accepted as a valid structural kind",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-ENV-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "kind-valid-001"
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "challenge-kind-valid",
+      "description": "Challenge kind is accepted as a valid structural kind",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-ENV-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "kind-valid-002"
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-unknown-kind",
+      "description": "Unknown kind value is rejected (closed vocabulary)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "attestation",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "kind-invalid-001"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_KIND_UNSUPPORTED" }
+    },
+    {
+      "name": "reject-occurred-at-on-challenge",
+      "description": "occurred_at MUST NOT appear on challenge receipts (Section 5.2)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "kind-invalid-002",
+          "occurred_at": "2026-03-03T12:00:00Z"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_OCCURRED_AT_ON_CHALLENGE" }
+    },
+    {
+      "name": "evidence-with-occurred-at-valid",
+      "description": "occurred_at is permitted on evidence receipts (Section 5.1)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-KIND-003",
+      "requirement_ids": ["WIRE02-KIND-003", "WIRE02-OCC-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "kind-valid-003",
+          "occurred_at": "2026-03-03T12:00:00Z"
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "same-type-both-kinds",
+      "description": "Same type MAY appear with either kind (Section 5.3)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-KIND-003",
+      "requirement_ids": ["WIRE02-KIND-003"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "kind-valid-004"
+        }
+      },
+      "expected": { "valid": true }
+    }
+  ]
+}

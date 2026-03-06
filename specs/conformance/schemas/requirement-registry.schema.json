@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json",
+  "title": "PEAC Conformance Requirement Registry",
+  "description": "Machine-readable registry of normative BCP 14 requirement IDs for WIRE-0.2.md",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$",
+      "description": "PEAC protocol version this registry tracks"
+    },
+    "spec_file": {
+      "type": "string",
+      "const": "docs/specs/WIRE-0.2.md",
+      "description": "Relative path to the normative spec"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last generation"
+    },
+    "sections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/section" },
+      "description": "Sections sorted by section number"
+    }
+  },
+  "required": ["$schema", "version", "spec_file", "sections"],
+  "additionalProperties": false,
+  "$defs": {
+    "section": {
+      "type": "object",
+      "properties": {
+        "section_number": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Spec section number"
+        },
+        "section_title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable section title"
+        },
+        "section_anchor": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Markdown anchor slug for the section heading"
+        },
+        "requirements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/requirement" },
+          "description": "Requirements sorted by ID"
+        }
+      },
+      "required": ["section_number", "section_title", "section_anchor", "requirements"],
+      "additionalProperties": false
+    },
+    "requirement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$",
+          "description": "Immutable requirement ID"
+        },
+        "keyword": {
+          "type": "string",
+          "enum": [
+            "MUST",
+            "MUST NOT",
+            "REQUIRED",
+            "SHALL",
+            "SHALL NOT",
+            "SHOULD",
+            "SHOULD NOT",
+            "RECOMMENDED",
+            "MAY",
+            "OPTIONAL"
+          ],
+          "description": "BCP 14 keyword (RFC 2119 + RFC 8174)"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "One-line summary of the requirement"
+        },
+        "source_fragment": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exact normative text fragment from the spec"
+        },
+        "source_fragment_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "SHA-256 hash of source_fragment for drift detection"
+        },
+        "enforcement_class": {
+          "type": "string",
+          "enum": ["hard_fail", "warning_only", "routing", "issuance", "advisory"],
+          "description": "How this requirement is enforced"
+        },
+        "error_code": {
+          "type": "string",
+          "pattern": "^E_[A-Z0-9_]+$",
+          "description": "Error code produced on violation (hard_fail class only)"
+        },
+        "warning_code": {
+          "type": "string",
+          "description": "Warning code produced (warning_only class only)"
+        },
+        "introduced_in": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$",
+          "description": "Version when this requirement was introduced"
+        },
+        "last_reviewed_in": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$",
+          "description": "Version when this requirement was last reviewed"
+        },
+        "superseded_by": {
+          "type": "string",
+          "pattern": "^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$",
+          "description": "Requirement ID that supersedes this one (if any)"
+        }
+      },
+      "required": [
+        "id",
+        "keyword",
+        "summary",
+        "source_fragment",
+        "source_fragment_hash",
+        "enforcement_class",
+        "introduced_in",
+        "last_reviewed_in"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "enforcement_class": { "const": "hard_fail" } }
+          },
+          "then": {
+            "required": ["error_code"]
+          }
+        }
+      ]
+    }
+  }
+}

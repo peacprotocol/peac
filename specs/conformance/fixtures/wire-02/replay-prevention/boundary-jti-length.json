@@ -19,7 +19,16 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     }
   ]
 }

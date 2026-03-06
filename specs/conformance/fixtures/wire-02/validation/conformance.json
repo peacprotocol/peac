@@ -1,0 +1,196 @@
+{
+  "$comment": "Wire 0.2 Verifier Validation Algorithm conformance vectors (Section 19)",
+  "version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "full-validation-pass",
+      "description": "Receipt passes all 13 validation steps",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-001",
+      "requirement_ids": ["WIRE02-VALID-001", "WIRE02-VALID-006"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "valid-alg-001",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "step1-reject-invalid-signature",
+      "description": "Step 1: invalid signature terminates validation immediately",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-002",
+      "requirement_ids": ["WIRE02-VALID-002", "WIRE02-VALID-003"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "valid-sig-001"
+        },
+        "use_wrong_key": true
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_SIGNATURE" }
+    },
+    {
+      "name": "step3-reject-constraint-violation",
+      "description": "Step 3: kernel constraint violation terminates before schema parse",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-007",
+      "requirement_ids": ["WIRE02-VALID-007", "WIRE02-VALID-002"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "valid-constraint-001",
+          "sub": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_CONSTRAINT_VIOLATION" }
+    },
+    {
+      "name": "step7-reject-issuer-mismatch",
+      "description": "Step 7: issuer binding mismatch produces E_INVALID_ISSUER",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-001",
+      "requirement_ids": ["WIRE02-VALID-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "valid-iss-001"
+        },
+        "verify_options": {
+          "issuer": "https://different.example.com"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_ISSUER" }
+    },
+    {
+      "name": "step9-reject-future-iat",
+      "description": "Step 9: iat beyond clock skew tolerance produces E_NOT_YET_VALID",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-008",
+      "requirement_ids": ["WIRE02-VALID-008"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 4102444800,
+          "jti": "valid-time-001"
+        },
+        "verify_options": {
+          "now": 1709500000
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_NOT_YET_VALID" }
+    },
+    {
+      "name": "reject-missing-jws-input",
+      "description": "Missing jws input is REQUIRED and produces E_INVALID_FORMAT",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-004",
+      "requirement_ids": ["WIRE02-VALID-004"],
+      "status": "negative",
+      "input": {
+        "jws": null,
+        "claims": null
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+    },
+    {
+      "name": "reject-missing-public-key",
+      "description": "Missing publicKey input is REQUIRED and produces E_INVALID_FORMAT",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-005",
+      "requirement_ids": ["WIRE02-VALID-005"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "valid-nokey-001"
+        },
+        "public_key": null
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+    },
+    {
+      "name": "reject-missing-jti-claim",
+      "description": "Step 10a: missing jti claim is REQUIRED (schema enforced)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-009",
+      "requirement_ids": ["WIRE02-VALID-009", "WIRE02-REPLAY-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_MISSING_REQUIRED_CLAIM" }
+    },
+    {
+      "name": "step12-policy-binding-check",
+      "description": "Step 12: policy binding verified when both digests present and match",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-VALID-001",
+      "requirement_ids": ["WIRE02-VALID-001", "WIRE02-POLICY-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "valid-policy-001",
+          "policy": {
+            "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "verify_options": {
+          "policyDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "policy_binding": "verified"
+      }
+    }
+  ]
+}

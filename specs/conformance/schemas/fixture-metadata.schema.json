@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.peacprotocol.org/schemas/conformance/fixture-metadata.schema.json",
+  "title": "PEAC Conformance Fixture Metadata",
+  "description": "Extended fixture entry schema with requirement traceability fields",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Kebab-case fixture name"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable description"
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Fixture type category"
+    },
+    "primary_requirement_id": {
+      "type": "string",
+      "pattern": "^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$",
+      "description": "Most specific requirement being tested"
+    },
+    "requirement_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "All requirements exercised by this fixture"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["positive", "negative", "boundary"],
+      "description": "Test vector classification"
+    },
+    "_audit_note": {
+      "type": "string",
+      "description": "Mapping rationale for ambiguous backfills"
+    },
+    "input": {
+      "type": "object",
+      "description": "Test input data"
+    },
+    "expected": {
+      "type": "object",
+      "description": "Expected outcome",
+      "properties": {
+        "valid": { "type": "boolean" },
+        "error_code": {
+          "type": "string",
+          "pattern": "^E_[A-Z0-9_]+$"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string" },
+              "pointer": { "type": "string" }
+            },
+            "required": ["code"]
+          }
+        },
+        "encoded_byte_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "For carrier boundary fixtures: expected encoded byte length"
+        }
+      },
+      "required": ["valid"]
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "type",
+    "primary_requirement_id",
+    "requirement_ids",
+    "status",
+    "input",
+    "expected"
+  ],
+  "additionalProperties": false
+}

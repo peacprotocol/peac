@@ -1,0 +1,270 @@
+{
+  "$comment": "Wire 0.2 JWS Header Constraints conformance vectors (Section 10, DD-156)",
+  "version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "eddsa-alg-valid",
+      "description": "EdDSA algorithm is the only accepted algorithm",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-JOSE-001",
+      "requirement_ids": ["WIRE02-JOSE-001", "WIRE02-JOSE-002"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-valid-001"
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-embedded-jwk",
+      "description": "JWS header with embedded jwk MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": ["WIRE02-JOSE-003"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "jwk": { "kty": "OKP", "crv": "Ed25519", "x": "abc123" } },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-001"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_EMBEDDED_KEY" }
+    },
+    {
+      "name": "reject-x5c-chain",
+      "description": "JWS header with x5c certificate chain MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": ["WIRE02-JOSE-003"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "x5c": ["MIICpDCCAYwCCQ..."] },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-002"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_EMBEDDED_KEY" }
+    },
+    {
+      "name": "reject-crit-header",
+      "description": "crit header parameter MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-004",
+      "requirement_ids": ["WIRE02-JOSE-004"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "crit": ["exp"] },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-003"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_CRIT_REJECTED" }
+    },
+    {
+      "name": "reject-b64-false",
+      "description": "b64:false (unencoded payload) MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-005",
+      "requirement_ids": ["WIRE02-JOSE-005"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "b64": false },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-004"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_B64_REJECTED" }
+    },
+    {
+      "name": "reject-zip-header",
+      "description": "zip compression header MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-006",
+      "requirement_ids": ["WIRE02-JOSE-006"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "zip": "DEF" },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-005"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_ZIP_REJECTED" }
+    },
+    {
+      "name": "reject-missing-kid",
+      "description": "Missing kid MUST produce E_JWS_MISSING_KID",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": ["WIRE02-JOSE-007"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "kid": null },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-006"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_MISSING_KID" }
+    },
+    {
+      "name": "reject-empty-kid",
+      "description": "Empty string kid MUST produce E_JWS_MISSING_KID",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": ["WIRE02-JOSE-007"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "kid": "" },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-007"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_MISSING_KID" }
+    },
+    {
+      "name": "boundary-kid-256-chars",
+      "description": "kid at exactly 256 characters is accepted (boundary)",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-008",
+      "requirement_ids": ["WIRE02-JOSE-008", "WIRE02-JOSE-007"],
+      "status": "boundary",
+      "input": {
+        "header_overrides": {
+          "kid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-boundary-001"
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-kid-over-256",
+      "description": "kid exceeding 256 characters MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-008",
+      "requirement_ids": ["WIRE02-JOSE-008"],
+      "status": "negative",
+      "input": {
+        "header_overrides": {
+          "kid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-008"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_MISSING_KID" }
+    },
+    {
+      "name": "reject-jws-exceeds-256kb",
+      "description": "JWS compact serialization exceeding 256 KB MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-009",
+      "requirement_ids": ["WIRE02-JOSE-009"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-011"
+        },
+        "jws_size_exceeds_bytes": 262145,
+        "_audit_note": "Test harness must construct a JWS exceeding 262144 bytes total"
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_FORMAT" }
+    },
+    {
+      "name": "reject-x5u-url",
+      "description": "x5u remote certificate URL MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": ["WIRE02-JOSE-003"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "x5u": "https://example.com/certs" },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-009"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_EMBEDDED_KEY" }
+    },
+    {
+      "name": "reject-jku-url",
+      "description": "jku JWK Set URL MUST be rejected",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": ["WIRE02-JOSE-003"],
+      "status": "negative",
+      "input": {
+        "header_overrides": { "jku": "https://example.com/.well-known/jwks.json" },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-010"
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_JWS_EMBEDDED_KEY" }
+    }
+  ]
+}

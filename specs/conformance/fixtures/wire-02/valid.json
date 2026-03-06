@@ -26,7 +26,20 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-006",
+        "WIRE02-EXT-007",
+        "WIRE02-EXT-008",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-commerce-full",
@@ -55,7 +68,20 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-006",
+        "WIRE02-EXT-007",
+        "WIRE02-EXT-008",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-access-minimal",
@@ -81,7 +107,20 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-EXT-011",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-011",
+        "WIRE02-EXT-012",
+        "WIRE02-EXT-013",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-identity-minimal",
@@ -105,7 +144,18 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-EXT-001",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-001",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "challenge-payment-required",
@@ -133,7 +183,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "challenge-identity-required",
@@ -161,7 +221,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "challenge-purpose-disallowed",
@@ -189,7 +259,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-multi-pillar",
@@ -208,7 +288,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-all-pillars",
@@ -238,7 +328,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-with-policy-binding",
@@ -262,7 +362,18 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003",
+        "WIRE02-POLICY-001"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-with-actor",
@@ -286,7 +397,18 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-017",
+      "requirement_ids": [
+        "WIRE02-ENV-017",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-with-representation",
@@ -310,7 +432,18 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-019",
+      "requirement_ids": [
+        "WIRE02-ENV-019",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-custom-type",
@@ -329,7 +462,16 @@
       "expected": {
         "valid": true,
         "warns_type_unregistered": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-uri-type",
@@ -348,7 +490,16 @@
       "expected": {
         "valid": true,
         "warns_type_unregistered": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-max-extensions",
@@ -378,7 +529,22 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-006",
+        "WIRE02-EXT-007",
+        "WIRE02-EXT-008",
+        "WIRE02-EXT-014",
+        "WIRE02-EXT-015",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "challenge-custom-requirements",
@@ -410,7 +576,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "valid-https-origin",
@@ -428,7 +604,16 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "valid-https-nonstandard-port",
@@ -446,7 +631,16 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "valid-did-web",
@@ -464,7 +658,16 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "valid-did-key",
@@ -482,7 +685,16 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-consent-type-only",
@@ -501,7 +713,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-compliance-type-only",
@@ -520,7 +742,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-privacy-type-only",
@@ -539,7 +771,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-safety-type-only",
@@ -558,7 +800,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-provenance-type-only",
@@ -577,7 +829,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-attribution-type-only",
@@ -596,7 +858,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-purpose-type-only",
@@ -615,7 +887,17 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "evidence-correlation",
@@ -640,7 +922,19 @@
       },
       "expected": {
         "valid": true
-      }
+      },
+      "primary_requirement_id": "WIRE02-EXT-014",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-014",
+        "WIRE02-EXT-015",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     }
   ],
   "schema_version": "0.12.0-preview.2"

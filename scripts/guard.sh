@@ -461,4 +461,43 @@ else
   echo "SKIP: $RELEASE_MANIFEST not found"
 fi
 
+# ---------- Conformance coverage ----------
+printf "%-50s" "Conformance coverage..."
+if [ -f "scripts/conformance/check-matrix.mjs" ]; then
+  if node scripts/conformance/check-matrix.mjs > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    node scripts/conformance/check-matrix.mjs 2>&1 || true
+    bad=1
+  fi
+else
+  echo "SKIP: check-matrix.mjs not found"
+fi
+
+printf "%-50s" "Fixture inventory freshness..."
+if [ -f "scripts/conformance/generate-inventory.mjs" ]; then
+  if node scripts/conformance/generate-inventory.mjs --check > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL: inventory.json is stale (run: node scripts/conformance/generate-inventory.mjs)"
+    bad=1
+  fi
+else
+  echo "SKIP: generate-inventory.mjs not found"
+fi
+
+printf "%-50s" "Requirement registry drift..."
+if [ -f "scripts/conformance/verify-registry-drift.mjs" ]; then
+  if node scripts/conformance/verify-registry-drift.mjs > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    node scripts/conformance/verify-registry-drift.mjs 2>&1 || true
+    bad=1
+  fi
+else
+  echo "SKIP: verify-registry-drift.mjs not found"
+fi
+
 exit $bad

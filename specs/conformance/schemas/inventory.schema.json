@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
+  "title": "PEAC Conformance Fixture Inventory",
+  "description": "Generated inventory of all conformance fixtures with requirement mappings",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of generation"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$",
+      "description": "PEAC protocol version"
+    },
+    "total_fixtures": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of fixture entries"
+    },
+    "total_with_requirements": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Fixtures that have requirement mappings"
+    },
+    "wire02_requirement_links": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total WIRE02-* requirement ID links across all fixtures"
+    },
+    "carrier_requirement_links": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total CARRIER-* requirement ID links across all fixtures"
+    },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/inventory_entry" },
+      "description": "Entries sorted by (directory, file, fixture_name)"
+    }
+  },
+  "required": [
+    "$schema",
+    "generated_at",
+    "version",
+    "total_fixtures",
+    "total_with_requirements",
+    "entries"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "inventory_entry": {
+      "type": "object",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Fixture subdirectory relative to specs/conformance/fixtures/"
+        },
+        "file": {
+          "type": "string",
+          "description": "Fixture filename"
+        },
+        "fixture_name": {
+          "type": "string",
+          "description": "Name field from the fixture entry"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description from the fixture entry"
+        },
+        "primary_requirement_id": {
+          "type": "string",
+          "pattern": "^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$"
+        },
+        "requirement_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$"
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["positive", "negative", "boundary"]
+        },
+        "has_requirements": {
+          "type": "boolean",
+          "description": "Whether this fixture has requirement mappings"
+        }
+      },
+      "required": ["directory", "file", "fixture_name", "has_requirements"],
+      "additionalProperties": false
+    }
+  }
+}
