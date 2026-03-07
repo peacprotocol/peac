@@ -1,12 +1,13 @@
 /**
- * Performance benchmarks for PEAC receipt verification
- * CRITICAL CI GATE: verify p95 MUST be ≤ 10ms
+ * Performance benchmarks: Wire 0.1 and Wire 0.2 verification and issuance
  *
- * Target SLOs:
- * - p50: ≤5ms
- * - p95: ≤10ms
- * - p99: ≤20ms
- * - Edge (future): p95 ≤5ms
+ * NOTE: This file is a SUPPORT harness for development profiling, NOT the CI gate.
+ * The canonical SLO gate is tests/perf/wire02-slo.test.ts, which is wired into
+ * scripts/release/run-gates.sh as the "perf-benchmarks" gate.
+ *
+ * SLO targets (enforced by wire02-slo.test.ts):
+ * - verifyLocal p95: <= 10ms (hard gate)
+ * - issueWire02 p95: <= 50ms (soft gate)
  */
 
 import { describe, it, expect } from 'vitest';
