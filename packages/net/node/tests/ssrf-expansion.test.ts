@@ -143,7 +143,6 @@ describe('SSRF expansion: IPv6 private ranges', () => {
 
 describe('SSRF expansion: redirect chains to private', () => {
   it('blocks redirect from public to private IP (302 chain)', async () => {
-    const dns = createMockDnsResolver(['93.184.216.34']);
     let callCount = 0;
 
     const httpClient: HttpClient = {
