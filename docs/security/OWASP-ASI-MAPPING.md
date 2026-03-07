@@ -2,6 +2,8 @@
 
 > Anchored to [OWASP Top 10 for Agentic Applications](https://owasp.org/www-project-top-10-for-agentic-applications/) (ASI01-ASI10).
 > Canonical risk names from the OWASP project page.
+> **Updated:** v0.12.0 (Wire 0.2, `interaction-record+jwt`)
+> **Cross-reference:** `docs/specs/SECURITY-CONSIDERATIONS.md` (protocol-level security)
 
 ## ASI-01: Agentic Prompt Injection
 
@@ -41,8 +43,8 @@
 
 ## ASI-07: Vulnerable Third-Party Agents
 
-- **Mitigation:** PEAC receipts are signed with Ed25519 and bound to specific issuers. Verifiers validate signatures against issuer JWKS. MCP SDK pinned to `~1.27.0` (>= 1.26.0 for CVE-2026-25536 fix). Supply chain hardening via audit-gate.mjs.
-- **Test coverage:** `packages/protocol/tests/verify-local.test.ts`, `packages/crypto/__tests__/sign-verify.test.ts`
+- **Mitigation:** PEAC receipts are signed with Ed25519 and bound to specific issuers. Verifiers validate signatures against issuer JWKS. MCP SDK pinned to `~1.26.0` (>= 1.26.0 for CVE-2026-25536 fix). Supply chain hardening via audit-gate.mjs. Wire 0.2 JOSE hardening rejects embedded keys, `crit`, `b64:false`, `zip` (DD-156).
+- **Test coverage:** `packages/protocol/tests/verify-local.test.ts`, `packages/crypto/__tests__/sign-verify.test.ts`, `packages/crypto/__tests__/jws.property.test.ts` (property-based JOSE fuzz)
 - **Status:** Covered
 
 ## ASI-08: Lack of Agentic System Monitoring
@@ -53,8 +55,8 @@
 
 ## ASI-09: Inadequate Failure Handling
 
-- **Mitigation:** Fail-closed design: kernel constraint violations, schema validation failures, and signature verification failures all produce typed error codes. No silent failures. Error taxonomy documented in `docs/specs/ERRORS.md`.
-- **Test coverage:** `packages/protocol/tests/verify-local.test.ts` (error code coverage), `packages/protocol/tests/issue-constraints.test.ts` (constraint violation handling)
+- **Mitigation:** Fail-closed design: kernel constraint violations, schema validation failures, and signature verification failures all produce typed error codes. No silent failures. Error taxonomy documented in `docs/specs/ERRORS.md`. Wire 0.2 adds 16 error codes and 4 warning codes with RFC 6901 pointers. Property tests verify zero unhandled exceptions across random inputs (DD-158).
+- **Test coverage:** `packages/protocol/tests/verify-local.test.ts` (error code coverage), `packages/protocol/tests/issue-constraints.test.ts` (constraint violation handling), `tests/property/` (property-based fuzz), `packages/schema/__tests__/constraints.fuzz.test.ts` (boundary fuzz)
 - **Status:** Covered
 
 ## ASI-10: Uncontrolled Agentic Autonomy
