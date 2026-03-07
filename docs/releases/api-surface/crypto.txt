@@ -1,0 +1,4 @@
+ed25519GetPublicKey
+ed25519RandomSecretKey
+ed25519Sign
+ed25519Verify

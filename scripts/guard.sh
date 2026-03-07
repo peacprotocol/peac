@@ -538,6 +538,15 @@ else
   echo "SKIP: verify-registry-drift.mjs not found"
 fi
 
+printf "%-50s" "No-fetch audit (DD-55, DD-141)..."
+if pnpm exec vitest run tests/security/no-fetch-audit.test.ts --reporter=dot > /dev/null 2>&1; then
+  echo "OK"
+else
+  echo "FAIL"
+  pnpm exec vitest run tests/security/no-fetch-audit.test.ts --reporter=verbose 2>&1 | tail -10
+  bad=1
+fi
+
 echo ""
 echo -n "== doc-example validation == "
 if [ -f scripts/validate-doc-examples.mjs ]; then
