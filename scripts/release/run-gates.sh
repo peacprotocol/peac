@@ -246,8 +246,11 @@ if [[ "$TARGET" == "stable" ]]; then
   # Implemented gates (PR 4: performance benchmarks)
   run_gate "perf-benchmarks" pnpm exec vitest run tests/perf/wire02-slo.test.ts --reporter=dot
 
+  # Implemented gates (PR 5: security hardening)
+  run_gate "ssrf-suite" pnpm exec vitest run packages/net/node/tests/ssrf-expansion.test.ts tests/security/no-fetch-audit.test.ts --reporter=dot
+
   # These stubs hard-fail until real implementations land in later PRs.
-  for stub_gate in "adoption-evidence" "fuzz-suite" "ssrf-suite"; do
+  for stub_gate in "adoption-evidence" "fuzz-suite"; do
     TOTAL=$((TOTAL + 1))
     echo "  [$stub_gate] FAIL (not implemented: DD-90 requires implementation before stable release)"
     FAILED=$((FAILED + 1))
