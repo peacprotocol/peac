@@ -518,6 +518,16 @@
       "description": "Wire 0.2 replay prevention conformance vectors (Section 20, DD-164)",
       "version": "0.12.0-preview.2",
       "fixture_count": 6
+    },
+    "challenge.json": {
+      "description": "Wire 0.2 challenge body conformance vectors (Section 13, DD-158)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 5
+    },
+    "dual-stack.json": {
+      "description": "Wire 0.2 dual-stack compatibility conformance vectors (Section 15, DD-158)",
+      "version": "0.12.0-preview.2",
+      "fixture_count": 4
     }
   },
   "carrier-boundary": {

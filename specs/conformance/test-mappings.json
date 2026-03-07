@@ -43,6 +43,42 @@
       "test_file": "packages/protocol/__tests__/verify-local-wire-02-warnings.test.ts",
       "test_description": "Warnings MUST be sorted by (pointer, code)",
       "notes": "Warning sort order verified in existing warning test suite"
+    },
+    {
+      "requirement_id": "WIRE02-WARN-001",
+      "test_file": "packages/protocol/__tests__/verify-local-wire-02-warnings.test.ts",
+      "test_description": "Warning code is REQUIRED on every VerificationWarning object",
+      "notes": "All warning emissions include code field; property tests confirm structure"
+    },
+    {
+      "requirement_id": "WIRE02-WARN-002",
+      "test_file": "packages/protocol/__tests__/verify-local-wire-02-warnings.test.ts",
+      "test_description": "Warning message is REQUIRED on every VerificationWarning object",
+      "notes": "All warning emissions include message field; property tests confirm structure"
+    },
+    {
+      "requirement_id": "WIRE02-DUAL-001",
+      "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
+      "test_description": "typ/peac_version coherence enforced after routing",
+      "notes": "Property test: JOSE hardening applies regardless of strictness; coherence checked in crypto layer"
+    },
+    {
+      "requirement_id": "WIRE02-DUAL-002",
+      "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
+      "test_description": "Wire 0.1 route MUST NOT contain peac_version 0.2",
+      "notes": "Crypto layer rejects typ=peac-receipt/0.1 with peac_version=0.2 (E_WIRE_VERSION_MISMATCH)"
+    },
+    {
+      "requirement_id": "WIRE02-DUAL-003",
+      "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
+      "test_description": "Wire 0.2 route MUST contain peac_version 0.2",
+      "notes": "Crypto layer rejects typ=interaction-record+jwt without peac_version=0.2 (E_WIRE_VERSION_MISMATCH)"
+    },
+    {
+      "requirement_id": "WIRE02-CHAL-002",
+      "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
+      "test_description": "Challenge problem.type is REQUIRED (RFC 9457)",
+      "notes": "Schema validation rejects challenge extension without problem.type; confirmed by fixture and property test"
     }
   ]
 }

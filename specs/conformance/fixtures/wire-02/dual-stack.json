@@ -1,0 +1,123 @@
+{
+  "$comment": "Wire 0.2 dual-stack compatibility vectors (v0.12.0 stable, section 15, DD-158)",
+  "schema_version": "0.12.0-preview.2",
+  "version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "wire02-typ-coherent",
+      "description": "Wire 0.2 route: typ is interaction-record+jwt AND peac_version is 0.2 (coherent)",
+      "type": "full-pipeline",
+      "input": {
+        "header": {
+          "typ": "interaction-record+jwt",
+          "alg": "EdDSA",
+          "kid": "2026-03-07T00:00:00Z"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "dual-001"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "variant": "wire-02"
+      },
+      "primary_requirement_id": "WIRE02-DUAL-003",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-003"],
+      "status": "positive"
+    },
+    {
+      "name": "reject-wire01-typ-with-wire02-payload",
+      "description": "Wire 0.1 typ (peac-receipt/0.1) with peac_version 0.2 payload: MUST be rejected (version mismatch)",
+      "type": "full-pipeline",
+      "input": {
+        "header": {
+          "typ": "peac-receipt/0.1",
+          "alg": "EdDSA",
+          "kid": "2026-03-07T00:00:00Z"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "dual-002"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_WIRE_VERSION_MISMATCH"
+      },
+      "primary_requirement_id": "WIRE02-DUAL-002",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-002"],
+      "status": "negative"
+    },
+    {
+      "name": "reject-wire02-typ-without-peac-version",
+      "description": "Wire 0.2 typ (interaction-record+jwt) without peac_version 0.2 payload: MUST be rejected",
+      "type": "full-pipeline",
+      "input": {
+        "header": {
+          "typ": "interaction-record+jwt",
+          "alg": "EdDSA",
+          "kid": "2026-03-07T00:00:00Z"
+        },
+        "claims": {
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "dual-003"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_WIRE_VERSION_MISMATCH"
+      },
+      "primary_requirement_id": "WIRE02-DUAL-003",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-003"],
+      "status": "negative"
+    },
+    {
+      "name": "wire01-receipt-rejected-by-verifyLocal",
+      "description": "verifyLocal() returns E_UNSUPPORTED_WIRE_VERSION for Wire 0.1 receipts",
+      "type": "full-pipeline",
+      "input": {
+        "header": {
+          "typ": "peac-receipt/0.1",
+          "alg": "EdDSA",
+          "kid": "2026-03-07T00:00:00Z"
+        },
+        "claims": {
+          "iss": "https://api.example.com",
+          "aud": "https://publisher.example.com",
+          "iat": 1709500000,
+          "rid": "r_legacy_001",
+          "amt": 100,
+          "cur": "USD",
+          "payment": {
+            "rail": "stripe",
+            "reference": "pi_123",
+            "amount": 100,
+            "currency": "USD",
+            "asset": "USD",
+            "env": "test",
+            "evidence": {}
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_UNSUPPORTED_WIRE_VERSION"
+      },
+      "primary_requirement_id": "WIRE02-DUAL-001",
+      "requirement_ids": ["WIRE02-DUAL-001"],
+      "status": "negative"
+    }
+  ]
+}

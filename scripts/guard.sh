@@ -413,6 +413,19 @@ else
   echo "OK"
 fi
 
+echo "== interop-strictness-audit =="
+# Production code must not reach interop mode without explicit opt-in.
+# Test files using strictness: 'interop' must be marked with @interop-test in a comment.
+printf "%-50s" "Interop strictness audit..."
+INTEROP_PROD=$(git grep -rn "strictness.*interop\|interop.*strictness" -- 'packages/*/src/' --include='*.ts' 2>/dev/null | grep -v 'type\|interface\|VerificationStrictness\|@deprecated\|comment\|doc\|/\*\|//\|\.d\.ts' || true)
+if [ -n "$INTEROP_PROD" ]; then
+  echo "FAIL: production code references interop strictness without type guard:"
+  echo "$INTEROP_PROD"
+  bad=1
+else
+  echo "OK"
+fi
+
 echo "== release-state-coherence (committed artifacts) =="
 # Verify committed release manifest agrees with committed source-of-truth files.
 # This section checks ONLY committed artifacts (CI-visible), not gitignored reference docs.
@@ -485,6 +498,31 @@ if [ -f "scripts/conformance/generate-inventory.mjs" ]; then
   fi
 else
   echo "SKIP: generate-inventory.mjs not found"
+fi
+
+printf "%-50s" "Test-mapping path existence..."
+if [ -f "specs/conformance/test-mappings.json" ]; then
+  tm_bad=0
+  while IFS= read -r tf; do
+    if [ ! -f "$tf" ]; then
+      echo ""
+      echo "  FAIL: test_file not found: $tf"
+      tm_bad=1
+    fi
+  done < <(node -e "
+    const m = require('./specs/conformance/test-mappings.json');
+    const seen = new Set();
+    for (const e of m.mappings) {
+      if (!seen.has(e.test_file)) { seen.add(e.test_file); console.log(e.test_file); }
+    }
+  ")
+  if [ "$tm_bad" -eq 0 ]; then
+    echo "OK"
+  else
+    bad=1
+  fi
+else
+  echo "SKIP: test-mappings.json not found"
 fi
 
 printf "%-50s" "Requirement registry drift..."

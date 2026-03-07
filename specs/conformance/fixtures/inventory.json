@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-03-06T17:56:48.348Z",
+  "generated_at": "2026-03-07T09:49:46.680Z",
   "version": "0.12.0-preview.2",
   "schema_version": "0.12.0-preview.2",
-  "total_fixtures": 609,
-  "total_with_requirements": 164,
+  "total_fixtures": 618,
+  "total_with_requirements": 173,
   "total_unmapped": 445,
-  "wire02_requirement_links": 421,
+  "wire02_requirement_links": 439,
   "carrier_requirement_links": 11,
   "entries": [
     {
@@ -2904,6 +2904,102 @@
       "fixture_name": "success-report-example",
       "description": "Example successful verification report",
       "has_requirements": false
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-all-7-types",
+      "description": "All 7 challenge_type enum values are accepted",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": ["WIRE02-CHAL-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-problem-with-rfc9457-passthrough",
+      "description": "RFC 9457 problem object allows passthrough of extension members (Section 6.2)",
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-CHAL-002",
+        "WIRE02-CHAL-003",
+        "WIRE02-CHAL-004",
+        "WIRE02-CHAL-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-reject-missing-problem-type",
+      "description": "Challenge problem.type is REQUIRED: omitting it MUST fail validation",
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": ["WIRE02-CHAL-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-reject-unknown-challenge-type",
+      "description": "Unknown challenge_type values MUST be rejected",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": ["WIRE02-CHAL-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-with-problem-type-required",
+      "description": "Challenge extension MUST include problem.type (RFC 9457): valid receipt with all required fields",
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": ["WIRE02-CHAL-001", "WIRE02-CHAL-002", "WIRE02-CHAL-003"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "dual-stack.json",
+      "fixture_name": "reject-wire01-typ-with-wire02-payload",
+      "description": "Wire 0.1 typ (peac-receipt/0.1) with peac_version 0.2 payload: MUST be rejected (version mismatch)",
+      "primary_requirement_id": "WIRE02-DUAL-002",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "dual-stack.json",
+      "fixture_name": "reject-wire02-typ-without-peac-version",
+      "description": "Wire 0.2 typ (interaction-record+jwt) without peac_version 0.2 payload: MUST be rejected",
+      "primary_requirement_id": "WIRE02-DUAL-003",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "dual-stack.json",
+      "fixture_name": "wire01-receipt-rejected-by-verifyLocal",
+      "description": "verifyLocal() returns E_UNSUPPORTED_WIRE_VERSION for Wire 0.1 receipts",
+      "primary_requirement_id": "WIRE02-DUAL-001",
+      "requirement_ids": ["WIRE02-DUAL-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "dual-stack.json",
+      "fixture_name": "wire02-typ-coherent",
+      "description": "Wire 0.2 route: typ is interaction-record+jwt AND peac_version is 0.2 (coherent)",
+      "primary_requirement_id": "WIRE02-DUAL-003",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-003"],
+      "status": "positive",
+      "has_requirements": true
     },
     {
       "directory": "wire-02/extensions",
