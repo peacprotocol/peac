@@ -117,21 +117,19 @@ describe('SSRF expansion: IPv6 private ranges', () => {
 
   for (const { ip, label } of privateIpv6Addresses) {
     it(`blocks DNS resolving to ${label}`, async () => {
-      const dns = createMockDnsResolver([], [ip.replace(/%.*$/, '')]);
+      const resolvedIp = ip.replace(/%.*$/, '');
+      const dns = createMockDnsResolver([], [resolvedIp]);
       const result = await safeFetch('https://example.com/api', {
         dnsResolver: dns,
         httpClient,
       });
+      // Primary invariant: all private/reserved IPv6 addresses are rejected
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect([
-          SAFE_FETCH_ERROR_CODES.E_SSRF_DNS_RESOLVED_PRIVATE,
-          SAFE_FETCH_ERROR_CODES.E_SSRF_ALL_IPS_BLOCKED,
-          SAFE_FETCH_ERROR_CODES.E_SSRF_URL_REJECTED,
-          SAFE_FETCH_ERROR_CODES.E_SSRF_IPV6_ZONE_ID,
-          SAFE_FETCH_ERROR_CODES.E_NETWORK_ERROR,
-          SAFE_FETCH_ERROR_CODES.E_SSRF_INVALID_HOST,
-        ]).toContain(result.code);
+        // The DNS validation catches private IPs via isPrivateIP(). The error
+        // surfaces as E_NETWORK_ERROR through the safeFetchJson error-wrapping
+        // path. The defense layer that blocked it is recorded in evidence.
+        expect(result.code).toBe(SAFE_FETCH_ERROR_CODES.E_NETWORK_ERROR);
       }
     });
   }
@@ -273,19 +271,58 @@ describe('SSRF expansion: URL parsing edge cases', () => {
 // -------------------------------------------------------------------------
 
 describe('SSRF expansion: response size enforcement', () => {
-  it('rejects response exceeding max bytes', async () => {
+  it('rejects response via Content-Length header before reading body', async () => {
     const dns = createMockDnsResolver(['93.184.216.34']);
-    const largeBody = 'x'.repeat(20_000_000); // 20 MB
+    // Declare a large Content-Length without allocating the body in memory.
+    // The implementation checks Content-Length first (optimization path),
+    // so a small mock body is sufficient to prove the gate.
     const httpClient = createMockHttpClient({
       status: 200,
-      headers: new Headers({ 'Content-Length': String(largeBody.length) }),
-      body: createMockBody(largeBody),
+      headers: new Headers({ 'Content-Length': '20000000' }),
+      body: createMockBody('small'),
     });
 
     const result = await safeFetch('https://example.com/large', {
       dnsResolver: dns,
       httpClient,
       maxResponseBytes: 1_000_000, // 1 MB limit
+    });
+
+    expect(result.ok).toBe(false);
+  });
+
+  it('rejects streamed response that exceeds limit during read', async () => {
+    const dns = createMockDnsResolver(['93.184.216.34']);
+    // No Content-Length header: forces the streaming body reader path.
+    // Generate a body that exceeds the limit via multiple small chunks.
+    const chunkSize = 100_000; // 100 KB per chunk
+    const totalChunks = 15; // 1.5 MB total (exceeds 1 MB limit)
+    const chunk = new Uint8Array(chunkSize);
+    let sent = 0;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (sent < totalChunks) {
+          controller.enqueue(chunk);
+          sent++;
+        } else {
+          controller.close();
+        }
+      },
+    });
+
+    const mockResponse = {
+      status: 200,
+      headers: new Headers(), // No Content-Length
+      body,
+    } as unknown as Response;
+    const httpClient: HttpClient = {
+      fetch: vi.fn().mockResolvedValue({ response: mockResponse, close: vi.fn() }),
+    };
+
+    const result = await safeFetch('https://example.com/stream', {
+      dnsResolver: dns,
+      httpClient,
+      maxResponseBytes: 1_000_000,
     });
 
     expect(result.ok).toBe(false);

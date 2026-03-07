@@ -1,7 +1,7 @@
 /**
  * Static no-fetch audit (DD-55, DD-141)
  *
- * Verifies that core packages (@peac/core, @peac/schema, @peac/crypto,
+ * Verifies that core packages (@peac/kernel, @peac/schema, @peac/crypto,
  * @peac/adapter-eat) contain zero network I/O paths in their source.
  *
  * These packages are validation-only (DD-141) and must never perform
@@ -18,8 +18,11 @@ import { join, extname } from 'node:path';
 // -------------------------------------------------------------------------
 
 const FORBIDDEN_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
+  // Direct fetch
   { pattern: /\bfetch\s*\(/, label: 'fetch() call' },
   { pattern: /\bglobalThis\.fetch\b/, label: 'globalThis.fetch reference' },
+
+  // node:http / node:https (require and import)
   { pattern: /\brequire\s*\(\s*['"]node:http['"]/, label: "require('node:http')" },
   { pattern: /\brequire\s*\(\s*['"]node:https['"]/, label: "require('node:https')" },
   { pattern: /\brequire\s*\(\s*['"]http['"]/, label: "require('http')" },
@@ -28,14 +31,52 @@ const FORBIDDEN_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
   { pattern: /\bimport\b.*from\s+['"]node:https['"]/, label: "import from 'node:https'" },
   { pattern: /\bimport\b.*from\s+['"]http['"]/, label: "import from 'http'" },
   { pattern: /\bimport\b.*from\s+['"]https['"]/, label: "import from 'https'" },
+
+  // node:net, node:tls, node:dgram, node:http2: hidden network paths
+  { pattern: /\bimport\b.*from\s+['"]node:net['"]/, label: "import from 'node:net'" },
+  { pattern: /\brequire\s*\(\s*['"]node:net['"]/, label: "require('node:net')" },
+  { pattern: /\brequire\s*\(\s*['"]net['"]/, label: "require('net')" },
+  { pattern: /\bimport\b.*from\s+['"]node:tls['"]/, label: "import from 'node:tls'" },
+  { pattern: /\brequire\s*\(\s*['"]node:tls['"]/, label: "require('node:tls')" },
+  { pattern: /\brequire\s*\(\s*['"]tls['"]/, label: "require('tls')" },
+  { pattern: /\bimport\b.*from\s+['"]node:dgram['"]/, label: "import from 'node:dgram'" },
+  { pattern: /\brequire\s*\(\s*['"]node:dgram['"]/, label: "require('node:dgram')" },
+  { pattern: /\brequire\s*\(\s*['"]dgram['"]/, label: "require('dgram')" },
+  { pattern: /\bimport\b.*from\s+['"]node:http2['"]/, label: "import from 'node:http2'" },
+  { pattern: /\brequire\s*\(\s*['"]node:http2['"]/, label: "require('node:http2')" },
+  { pattern: /\brequire\s*\(\s*['"]http2['"]/, label: "require('http2')" },
+
+  // Third-party HTTP clients
   { pattern: /\bimport\b.*from\s+['"]undici['"]/, label: "import from 'undici'" },
   { pattern: /\brequire\s*\(\s*['"]undici['"]/, label: "require('undici')" },
   { pattern: /\bimport\b.*from\s+['"]node-fetch['"]/, label: "import from 'node-fetch'" },
   { pattern: /\brequire\s*\(\s*['"]node-fetch['"]/, label: "require('node-fetch')" },
+  { pattern: /\bimport\b.*from\s+['"]axios['"]/, label: "import from 'axios'" },
+  { pattern: /\brequire\s*\(\s*['"]axios['"]/, label: "require('axios')" },
+  { pattern: /\bimport\b.*from\s+['"]got['"]/, label: "import from 'got'" },
+  { pattern: /\brequire\s*\(\s*['"]got['"]/, label: "require('got')" },
+
+  // Browser/runtime network APIs
   { pattern: /\bXMLHttpRequest\b/, label: 'XMLHttpRequest reference' },
   { pattern: /\bnew\s+WebSocket\b/, label: 'WebSocket constructor' },
+
+  // Server binding
   { pattern: /\.listen\s*\(/, label: '.listen() (server binding)' },
   { pattern: /\bcreateServer\b/, label: 'createServer (server creation)' },
+
+  // Shell-outs that can create hidden network paths
+  { pattern: /\bexecSync\s*\(/, label: 'execSync() (shell-out)' },
+  { pattern: /\bexecFileSync\s*\(/, label: 'execFileSync() (shell-out)' },
+  { pattern: /\bspawnSync\s*\(/, label: 'spawnSync() (shell-out)' },
+  {
+    pattern: /\bimport\b.*from\s+['"]node:child_process['"]/,
+    label: "import from 'node:child_process'",
+  },
+  {
+    pattern: /\brequire\s*\(\s*['"]node:child_process['"]/,
+    label: "require('node:child_process')",
+  },
+  { pattern: /\brequire\s*\(\s*['"]child_process['"]/, label: "require('child_process')" },
 ];
 
 // -------------------------------------------------------------------------
