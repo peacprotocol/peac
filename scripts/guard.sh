@@ -538,4 +538,18 @@ else
   echo "SKIP: verify-registry-drift.mjs not found"
 fi
 
+echo ""
+echo -n "== doc-example validation == "
+if [ -f scripts/validate-doc-examples.mjs ]; then
+  if node scripts/validate-doc-examples.mjs > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    node scripts/validate-doc-examples.mjs 2>&1 || true
+    bad=1
+  fi
+else
+  echo "SKIP: validate-doc-examples.mjs not found"
+fi
+
 exit $bad

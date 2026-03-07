@@ -66,6 +66,8 @@ On violation: returns `VerifyFailure` with:
 
 ## Validation Function
 
+<!-- peac:validate skip -->
+
 ```typescript
 import { validateKernelConstraints } from '@peac/schema';
 
@@ -85,6 +87,8 @@ if (!result.valid) {
 - Every value (primitives, arrays, objects) is counted toward total nodes
 
 ## Types
+
+<!-- peac:validate typescript -->
 
 ```typescript
 interface ConstraintViolation {
