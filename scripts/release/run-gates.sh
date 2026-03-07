@@ -243,8 +243,11 @@ if [[ "$TARGET" == "stable" ]]; then
   run_gate "pack-install-smoke" bash scripts/release/pack-install-smoke.sh
   run_gate "api-surface-lock" bash scripts/release/api-surface-lock.sh
 
+  # Implemented gates (PR 5: security hardening)
+  run_gate "ssrf-suite" pnpm exec vitest run packages/net/node/tests/ssrf-expansion.test.ts tests/security/no-fetch-audit.test.ts --reporter=dot
+
   # These stubs hard-fail until real implementations land in later PRs.
-  for stub_gate in "adoption-evidence" "perf-benchmarks" "fuzz-suite" "ssrf-suite"; do
+  for stub_gate in "adoption-evidence" "perf-benchmarks" "fuzz-suite"; do
     TOTAL=$((TOTAL + 1))
     echo "  [$stub_gate] FAIL (not implemented: DD-90 requires implementation before stable release)"
     FAILED=$((FAILED + 1))

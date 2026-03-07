@@ -83,6 +83,7 @@ export default defineConfig({
       'tests/smoke/**/*.test.ts',
       'tests/distribution/**/*.test.ts',
       'tests/integration/**/*.test.ts',
+      'tests/security/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,
