@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 /**
- * Doc-Example Validation Gate (DD-165)
+ * Doc-Example Validation Gate (DD-163)
  *
  * Extracts annotated code blocks from spec documents and validates them:
- *   - json: JSON.parse() correctness
- *   - typescript: tsc --noEmit compilation check
- *   - text: structural checks (valid JWS header format, etc.)
+ *   - json: schema-aware JSON validation (JSON.parse + structural checks for
+ *           Wire 0.2 payloads, MCP _meta keys, A2A carrier metadata)
+ *   - typescript/ts: tsc --noEmit compilation check
+ *   - bash/sh/shell: bash -n syntax check (no execution)
+ *   - text: structural pass (block is accounted for)
  *
  * Annotation system:
  *   <!-- peac:validate -->        opts the next fenced block into CI
  *   <!-- peac:validate json -->   explicit language override
  *   <!-- peac:validate skip -->   explicitly skips validation
+ *
+ * A blank line between the annotation comment and the code fence is tolerated.
  *
  * Usage:
  *   node scripts/validate-doc-examples.mjs
@@ -39,6 +43,8 @@ const DEFAULT_DOCS = [
   'docs/specs/WIRE-0.2.md',
   'docs/specs/EVIDENCE-CARRIER-CONTRACT.md',
   'docs/specs/KERNEL-CONSTRAINTS.md',
+  'docs/specs/VERIFIER-SECURITY-MODEL.md',
+  'docs/specs/TRUST-PINNING-POLICY.md',
 ];
 
 // ---------------------------------------------------------------------------

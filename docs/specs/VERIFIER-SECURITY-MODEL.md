@@ -100,6 +100,8 @@ Verifiers that perform network fetches MUST implement SSRF protections.
 
 ### 4.3 Implementation guidance
 
+<!-- peac:validate -->
+
 ```
 Algorithm: SSRF-safe fetch
 1. Parse URL; reject if not https://
@@ -175,6 +177,8 @@ Verifiers MUST perform these checks in order (reflecting the real dependency cha
 12. `policy.binding` - Verify policy binding (DD-49; always `skip` for Wire 0.1)
 
 ### 6.2 Check dependencies
+
+<!-- peac:validate -->
 
 ```
 jws.parse

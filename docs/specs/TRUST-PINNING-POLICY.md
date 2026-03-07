@@ -65,6 +65,8 @@ A verifier policy is a JSON object.
 
 ### 4.2 Minimal policy example
 
+<!-- peac:validate json -->
+
 ```json
 {
   "policy_version": "peac-verifier-policy/0.1",
@@ -130,6 +132,8 @@ Restrict which issuers are trusted for verification.
 
 Allowlist entries are **issuer origins** (scheme + host + optional port), NOT host-only:
 
+<!-- peac:validate json -->
+
 ```json
 {
   "issuer_allowlist": [
@@ -170,6 +174,8 @@ Accept only specific keys for specific issuers.
 
 ### 7.2 Pin format
 
+<!-- peac:validate json -->
+
 ```json
 {
   "pinned_keys": [
@@ -208,6 +214,8 @@ The thumbprint MUST be computed exactly per RFC 7638:
 
 **IMPORTANT**: Use an RFC 7638 library. Do NOT hand-roll thumbprint computation.
 
+<!-- peac:validate skip -->
+
 ```javascript
 // Use a standard library - example with jose
 import { calculateJwkThumbprint } from 'jose';
@@ -215,6 +223,8 @@ import { calculateJwkThumbprint } from 'jose';
 const thumbprint = await calculateJwkThumbprint(jwk, 'sha256');
 // Returns base64url string like "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs"
 ```
+
+<!-- peac:validate skip -->
 
 ```go
 // Go example
@@ -315,6 +325,8 @@ Policy packs SHOULD be signed by the enterprise.
 
 ### 11.1 Strict enterprise policy
 
+<!-- peac:validate json -->
+
 ```json
 {
   "policy_version": "peac-verifier-policy/0.1",
@@ -349,6 +361,8 @@ Policy packs SHOULD be signed by the enterprise.
 ```
 
 ### 11.2 Open verification policy
+
+<!-- peac:validate json -->
 
 ```json
 {
