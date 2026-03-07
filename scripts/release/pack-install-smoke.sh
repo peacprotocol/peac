@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Pack-Install Smoke Test
+# Pack-Install Smoke Test (Representative)
 #
 # Packs representative packages into tarballs, installs them in isolated
-# temp directories, and verifies: ESM import, CJS require (where dual),
+# temp directories, and verifies: ESM import, CJS require (for dual packages),
 # TypeScript types resolution, and CLI bin execution.
+#
+# This is a representative install smoke test covering packages that can
+# install standalone from tarball. Packages with unresolved workspace:* deps
+# are excluded (see Known exclusions below). Full install-surface proof
+# requires all workspace deps published to a registry first.
 #
 # This gate catches packaging errors that unit tests cannot: missing files
 # in the `files` array, broken exports map, missing bin entries, etc.
@@ -96,6 +101,15 @@ pack_and_test() {
     }
   }
 
+  # Test CJS require (all smoke packages are dual ESM/CJS)
+  local cjs_ok=true
+  node -e "
+    const m = require('$pkg_name');
+    if (typeof m === 'undefined' || (typeof m === 'object' && Object.keys(m).length === 0)) throw new Error('empty');
+  " > /dev/null 2>&1 || {
+    cjs_ok=false
+  }
+
   # Test types existence (check if .d.ts files are in the package)
   local types_ok=true
   if ! find "node_modules/$pkg_name" -name '*.d.ts' -print -quit 2>/dev/null | grep -q .; then
@@ -117,15 +131,16 @@ pack_and_test() {
 
   cd "$REPO_ROOT"
 
-  if $esm_ok && $types_ok; then
+  if $esm_ok && $cjs_ok && $types_ok; then
     local extras=""
     if [ "$has_bin" != "null" ] && $bin_ok; then
       extras=" +bin"
     fi
-    echo "PASS (esm +types${extras})"
+    echo "PASS (esm +cjs +types${extras})"
   else
     local failures=""
     $esm_ok || failures="${failures} esm"
+    $cjs_ok || failures="${failures} cjs"
     $types_ok || failures="${failures} types"
     echo "FAIL (${failures# })"
     FAILED=$((FAILED + 1))
