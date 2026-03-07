@@ -12,7 +12,7 @@
 import { describe, it, expect } from 'vitest';
 import { issue, issueWire02 } from '../../packages/protocol/src/issue';
 import { verify as jwsVerify, generateKeypair } from '../../packages/crypto/src/jws';
-import { verifyLocal } from '../../packages/protocol/src/verify';
+import { verifyLocal } from '../../packages/protocol/src/verify-local';
 import * as fs from 'fs';
 import * as path from 'path';
 
