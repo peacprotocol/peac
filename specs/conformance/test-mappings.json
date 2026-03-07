@@ -1,0 +1,48 @@
+{
+  "$comment": "Protocol-level test mappings for requirements not provable by fixtures alone",
+  "version": "0.12.0-preview.2",
+  "mappings": [
+    {
+      "requirement_id": "WIRE02-VALID-001",
+      "test_file": "packages/protocol/__tests__/verify-local-order.test.ts",
+      "test_description": "Steps MUST be performed in specified order",
+      "notes": "Validation order proven by step-precedence assertions"
+    },
+    {
+      "requirement_id": "WIRE02-VALID-002",
+      "test_file": "packages/protocol/__tests__/verify-local-order.test.ts",
+      "test_description": "Hard error MUST terminate validation immediately",
+      "notes": "Step 1 signature fail before Step 4 schema parse"
+    },
+    {
+      "requirement_id": "WIRE02-VALID-003",
+      "test_file": "packages/protocol/__tests__/verify-local-order.test.ts",
+      "test_description": "Verifier MUST NOT continue after hard error",
+      "notes": "No subsequent step effects observable after hard error"
+    },
+    {
+      "requirement_id": "WIRE02-VALID-007",
+      "test_file": "packages/protocol/__tests__/verify-local-order.test.ts",
+      "test_description": "Step 3 kernel constraints fail before Step 7 issuer binding",
+      "notes": "Constraint violation takes precedence over issuer mismatch"
+    },
+    {
+      "requirement_id": "WIRE02-STRICT-001",
+      "test_file": "packages/protocol/tests/verify-local.test.ts",
+      "test_description": "Strict profile enforces typ presence",
+      "notes": "Existing test coverage in verify-local.test.ts"
+    },
+    {
+      "requirement_id": "WIRE02-STRICT-002",
+      "test_file": "packages/protocol/tests/verify-local.test.ts",
+      "test_description": "Strict profile enforces recognized typ value",
+      "notes": "Existing test coverage in verify-local.test.ts"
+    },
+    {
+      "requirement_id": "WIRE02-WARN-007",
+      "test_file": "packages/protocol/__tests__/verify-local-wire-02-warnings.test.ts",
+      "test_description": "Warnings MUST be sorted by (pointer, code)",
+      "notes": "Warning sort order verified in existing warning test suite"
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "$comment": "Transport Boundary conformance vectors (CARRIER-* namespace, DD-124 through DD-131)",
+  "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "mcp-embed-under-limit",
+      "description": "MCP embed carrier within 64 KB limit",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "positive",
+      "input": {
+        "transport": "mcp",
+        "format": "embed",
+        "jws_byte_length": 1024
+      },
+      "expected": {
+        "valid": true,
+        "encoded_byte_length": 1024
+      }
+    },
+    {
+      "name": "mcp-embed-at-limit",
+      "description": "MCP embed carrier at exactly 64 KB (65536 bytes)",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "boundary",
+      "input": {
+        "transport": "mcp",
+        "format": "embed",
+        "jws_byte_length": 65536
+      },
+      "expected": {
+        "valid": true,
+        "encoded_byte_length": 65536
+      }
+    },
+    {
+      "name": "mcp-embed-over-limit",
+      "description": "MCP embed carrier one byte over 64 KB limit is rejected",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "negative",
+      "input": {
+        "transport": "mcp",
+        "format": "embed",
+        "jws_byte_length": 65537
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_CARRIER_SIZE_EXCEEDED"
+      }
+    },
+    {
+      "name": "a2a-embed-at-limit",
+      "description": "A2A embed carrier at exactly 64 KB (65536 bytes)",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-A2A-001",
+      "requirement_ids": ["CARRIER-A2A-001"],
+      "status": "boundary",
+      "input": {
+        "transport": "a2a",
+        "format": "embed",
+        "jws_byte_length": 65536
+      },
+      "expected": {
+        "valid": true,
+        "encoded_byte_length": 65536
+      }
+    },
+    {
+      "name": "a2a-embed-over-limit",
+      "description": "A2A embed carrier over 64 KB limit is rejected",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-A2A-001",
+      "requirement_ids": ["CARRIER-A2A-001"],
+      "status": "negative",
+      "input": {
+        "transport": "a2a",
+        "format": "embed",
+        "jws_byte_length": 65537
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_CARRIER_SIZE_EXCEEDED"
+      }
+    },
+    {
+      "name": "http-header-under-limit",
+      "description": "HTTP header carrier within 8 KB limit",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-HTTP-001",
+      "requirement_ids": ["CARRIER-HTTP-001"],
+      "status": "positive",
+      "input": {
+        "transport": "http",
+        "format": "reference",
+        "jws_byte_length": 4096
+      },
+      "expected": {
+        "valid": true,
+        "encoded_byte_length": 4096
+      }
+    },
+    {
+      "name": "http-header-at-limit",
+      "description": "HTTP header carrier at exactly 8 KB (8192 bytes)",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-HTTP-001",
+      "requirement_ids": ["CARRIER-HTTP-001"],
+      "status": "boundary",
+      "input": {
+        "transport": "http",
+        "format": "reference",
+        "jws_byte_length": 8192
+      },
+      "expected": {
+        "valid": true,
+        "encoded_byte_length": 8192
+      }
+    },
+    {
+      "name": "http-header-over-limit",
+      "description": "HTTP header carrier over 8 KB limit is rejected",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-HTTP-001",
+      "requirement_ids": ["CARRIER-HTTP-001"],
+      "status": "negative",
+      "input": {
+        "transport": "http",
+        "format": "reference",
+        "jws_byte_length": 8193
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_CARRIER_SIZE_EXCEEDED"
+      }
+    },
+    {
+      "name": "x402-header-at-limit",
+      "description": "x402 header carrier at exactly 8 KB (8192 bytes)",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-HTTP-001",
+      "requirement_ids": ["CARRIER-HTTP-001"],
+      "status": "boundary",
+      "input": {
+        "transport": "x402",
+        "format": "reference",
+        "jws_byte_length": 8192
+      },
+      "expected": {
+        "valid": true,
+        "encoded_byte_length": 8192
+      }
+    },
+    {
+      "name": "ucp-embed-at-limit",
+      "description": "UCP embed carrier at exactly 64 KB (65536 bytes)",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "boundary",
+      "input": {
+        "transport": "ucp",
+        "format": "embed",
+        "jws_byte_length": 65536
+      },
+      "expected": {
+        "valid": true,
+        "encoded_byte_length": 65536
+      }
+    },
+    {
+      "name": "utf8-multibyte-at-boundary",
+      "description": "UTF-8 multi-byte characters at boundary do not cause off-by-one",
+      "type": "carrier-boundary",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "boundary",
+      "input": {
+        "transport": "mcp",
+        "format": "embed",
+        "jws_byte_length": 65534,
+        "note": "2 bytes under limit to verify byte-level (not char-level) measurement"
+      },
+      "expected": {
+        "valid": true,
+        "encoded_byte_length": 65534
+      }
+    }
+  ]
+}

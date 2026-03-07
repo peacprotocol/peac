@@ -5,6 +5,7 @@
     "agent-identity": "Fixtures span multiple releases (v0.9.25 + v0.11.3 DD-142); version consistency not enforced",
     "bundle": "Not yet migrated to tracked validation; fixture_count needs reconciliation",
     "carrier": "Single-carrier fixtures with per-file expected_valid/expected_violation; not fixture packs",
+    "carrier-boundary": "Transport boundary conformance vectors (DD-124 through DD-131); size limit tests, not fixture packs",
     "crypto": "Deterministic golden vectors (Ed25519 sign/verify); not fixture packs",
     "discovery": "Not yet migrated to tracked validation; needs fixture pack audit",
     "dispute": "Not yet migrated to tracked validation; fixture_count needs reconciliation",

@@ -1,0 +1,148 @@
+{
+  "$comment": "Wire 0.2 Replay Prevention conformance vectors (Section 20)",
+  "version": "0.12.0-preview.2",
+  "schema_version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "jti-present-valid",
+      "description": "jti claim present satisfies REQUIRED constraint",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-REPLAY-001",
+      "requirement_ids": ["WIRE02-REPLAY-001", "WIRE02-REPLAY-003"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "550e8400-e29b-41d4-a716-446655440000"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "jti-uuid-v7-valid",
+      "description": "UUIDv7 format jti is accepted",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-REPLAY-003",
+      "requirement_ids": ["WIRE02-REPLAY-003", "WIRE02-REPLAY-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "019550a0-7a41-7000-8000-000000000001"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "jti-crypto-random-valid",
+      "description": "Cryptographic random hex jti is accepted",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-REPLAY-003",
+      "requirement_ids": ["WIRE02-REPLAY-003"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "boundary-jti-single-char",
+      "description": "Single character jti is at minimum length boundary (1 char)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-REPLAY-003",
+      "requirement_ids": ["WIRE02-REPLAY-003"],
+      "status": "boundary",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "x"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "reject-duplicate-jti-in-bundle",
+      "description": "Each receipt in evidence bundle MUST have unique jti",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-REPLAY-013",
+      "requirement_ids": ["WIRE02-REPLAY-013"],
+      "status": "negative",
+      "input": {
+        "bundle": [
+          {
+            "claims": {
+              "peac_version": "0.2",
+              "kind": "evidence",
+              "type": "org.peacprotocol/payment",
+              "iss": "https://api.example.com",
+              "iat": 1709500000,
+              "jti": "duplicate-jti-001"
+            }
+          },
+          {
+            "claims": {
+              "peac_version": "0.2",
+              "kind": "evidence",
+              "type": "org.peacprotocol/payment",
+              "iss": "https://api.example.com",
+              "iat": 1709500001,
+              "jti": "duplicate-jti-001"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_MISSING_REQUIRED_CLAIM"
+      }
+    },
+    {
+      "name": "boundary-jti-256-chars",
+      "description": "jti at exactly 256 characters is at maximum length boundary",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-REPLAY-003",
+      "requirement_ids": ["WIRE02-REPLAY-003"],
+      "status": "boundary",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    }
+  ]
+}
