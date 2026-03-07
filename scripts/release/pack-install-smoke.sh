@@ -33,12 +33,20 @@ echo ""
 # Packages with workspace:* deps are resolved by pnpm pack, but npm install
 # from tarball needs the deps published. Only include packages that can install
 # standalone or have few external deps.
+#
+# Known exclusions:
+#   @peac/cli: has workspace:* deps on @peac/kernel, @peac/schema, @peac/crypto,
+#     @peac/protocol, @peac/control. npm install from tarball fails because
+#     workspace: protocol is not resolved. Tracked for v0.12.0 stable (PR 6b scope).
+#   @peac/sdk: same workspace:* dep issue.
+#   @peac/middleware-express: same workspace:* dep issue.
 SMOKE_PACKAGES=(
   "packages/kernel"
   "packages/schema"
   "packages/crypto"
   "packages/protocol"
   "packages/mcp-server"
+  "packages/adapters/eat"
 )
 
 pack_and_test() {

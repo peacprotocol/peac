@@ -26,7 +26,9 @@ fi
 
 mkdir -p "$SURFACE_DIR"
 
-# Representative packages whose public API surface we track
+# Representative packages whose public API surface we track.
+# Covers all layers: L0 kernel, L1 schema, L2 crypto, L3 protocol/control,
+# L3.5 middleware, L4 adapter-eat, L5 mcp-server/sdk.
 TRACKED_PACKAGES=(
   "@peac/kernel"
   "@peac/schema"
@@ -34,6 +36,9 @@ TRACKED_PACKAGES=(
   "@peac/protocol"
   "@peac/control"
   "@peac/middleware-core"
+  "@peac/adapter-eat"
+  "@peac/mcp-server"
+  "@peac/sdk"
 )
 
 FAILED=0
