@@ -13,7 +13,7 @@
  *   <!-- peac:validate skip -->   explicitly skips validation
  *
  * Usage:
- *   node scripts/validate-doc-examples.mjs [--fix]
+ *   node scripts/validate-doc-examples.mjs
  *   node scripts/validate-doc-examples.mjs docs/specs/WIRE-0.2.md
  *
  * Exit codes:
@@ -87,6 +87,10 @@ function extractCodeBlocks(filePath) {
         override = directive;
       }
       i++;
+      // Skip optional blank line between annotation and fence
+      if (lines[i]?.trim() === '') {
+        i++;
+      }
     }
 
     // Detect opening fence
@@ -201,6 +205,86 @@ function validateTypeScript(block) {
   }
 }
 
+/**
+ * Validate a bash/shell code block via bash -n (syntax check only, no execution).
+ * @param {CodeBlock} block
+ * @returns {{ok: boolean, error?: string}}
+ */
+function validateBash(block) {
+  const tmpDir = mkdtempSync(join(tmpdir(), 'peac-doc-validate-'));
+  const tmpFile = join(tmpDir, 'snippet.sh');
+  writeFileSync(tmpFile, block.code);
+
+  try {
+    execSync(`bash -n "${tmpFile}"`, { stdio: 'pipe', timeout: 10_000 });
+    return { ok: true };
+  } catch (err) {
+    const stderr = err.stderr?.toString() || 'Unknown bash syntax error';
+    return { ok: false, error: `bash syntax error: ${stderr.trim().split('\n').slice(0, 3).join('\n')}` };
+  } finally {
+    try {
+      rmSync(tmpDir, { recursive: true, force: true });
+    } catch {
+      // Cleanup best-effort
+    }
+  }
+}
+
+/**
+ * Schema-aware JSON validation.
+ * Beyond JSON.parse, checks known structures against expected fields.
+ * @param {CodeBlock} block
+ * @returns {{ok: boolean, error?: string}}
+ */
+function validateJsonSchema(block) {
+  let parsed;
+  try {
+    parsed = JSON.parse(block.code);
+  } catch (err) {
+    return { ok: false, error: `JSON parse error: ${err.message}` };
+  }
+
+  // Structural checks for known PEAC JSON shapes
+  const errors = [];
+
+  // Wire 0.2 receipt payload: must have peac_version if it has kind
+  if (parsed.peac_version === '0.2' || parsed.kind) {
+    if (parsed.kind && !['evidence', 'challenge'].includes(parsed.kind)) {
+      errors.push(`kind must be "evidence" or "challenge", got "${parsed.kind}"`);
+    }
+    if (parsed.peac_version && parsed.peac_version !== '0.2') {
+      errors.push(`peac_version must be "0.2" for Wire 0.2 examples`);
+    }
+  }
+
+  // MCP tool result with _meta: check org.peacprotocol/ keys
+  if (parsed._meta) {
+    const peacKeys = Object.keys(parsed._meta).filter(k => k.startsWith('org.peacprotocol/'));
+    for (const key of peacKeys) {
+      if (!['org.peacprotocol/receipt_ref', 'org.peacprotocol/receipt_jws'].includes(key)) {
+        errors.push(`unknown org.peacprotocol/ _meta key: "${key}"`);
+      }
+    }
+  }
+
+  // A2A carrier metadata: check structure
+  if (parsed.carriers && Array.isArray(parsed.carriers)) {
+    for (let i = 0; i < parsed.carriers.length; i++) {
+      const c = parsed.carriers[i];
+      if (c && typeof c === 'object') {
+        if (c.receipt_jws && !c.receipt_ref) {
+          errors.push(`carriers[${i}]: has receipt_jws but missing receipt_ref`);
+        }
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, error: `JSON schema issues: ${errors.join('; ')}` };
+  }
+  return { ok: true };
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -260,14 +344,19 @@ function main() {
 
       switch (effectiveLang) {
         case 'json':
-          result = validateJson(block);
+          result = validateJsonSchema(block);
           break;
         case 'typescript':
         case 'ts':
           result = validateTypeScript(block);
           break;
+        case 'bash':
+        case 'sh':
+        case 'shell':
+          result = validateBash(block);
+          break;
         default:
-          // text, bash, etc. - no validation (structural only)
+          // text, pseudocode, etc. - structural pass (block is accounted for)
           result = { ok: true };
           break;
       }
