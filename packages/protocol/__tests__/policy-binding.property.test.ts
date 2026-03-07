@@ -35,6 +35,24 @@ const simpleJsonObject = fc.dictionary(fc.stringMatching(/^[a-z][a-z0-9_]{0,15}$
   maxKeys: 10,
 });
 
+/** Nested JSON objects for deeper JCS determinism testing */
+const nestedJsonObject = fc
+  .record({
+    outer_key: fc.stringMatching(/^[a-z][a-z0-9_]{0,10}$/),
+    inner: simpleJsonObject,
+    array_field: fc.array(jsonPrimitive, { minLength: 0, maxLength: 5 }),
+    nested_obj: fc.dictionary(
+      fc.stringMatching(/^[a-z][a-z0-9_]{0,8}$/),
+      fc.oneof(jsonPrimitive, simpleJsonObject),
+      { minKeys: 0, maxKeys: 3 }
+    ),
+  })
+  .map(({ outer_key, inner, array_field, nested_obj }) => ({
+    [outer_key]: inner,
+    items: array_field,
+    ...nested_obj,
+  }));
+
 /** Generate a sha256 digest string */
 const sha256Digest = fc.stringMatching(/^[0-9a-f]{64}$/).map((hex) => `sha256:${hex}`);
 
@@ -73,46 +91,63 @@ function rotateKeys(obj: Record<string, unknown>): Record<string, unknown> {
 // ---------------------------------------------------------------------------
 
 describe('Property: JCS policy digest determinism', () => {
-  it('same object, reversed key order -> same digest', async () => {
-    const objects = fc.sample(simpleJsonObject, 200);
-    for (const obj of objects) {
-      const digest1 = await computePolicyDigestJcs(obj);
-      const digest2 = await computePolicyDigestJcs(reorderKeys(obj));
-      expect(digest1).toBe(digest2);
-    }
+  it('same object, reversed key order produces same digest', async () => {
+    await fc.assert(
+      fc.asyncProperty(simpleJsonObject, async (obj) => {
+        const digest1 = await computePolicyDigestJcs(obj);
+        const digest2 = await computePolicyDigestJcs(reorderKeys(obj));
+        expect(digest1).toBe(digest2);
+      }),
+      { numRuns: 200 }
+    );
   });
 
-  it('same object, rotated key order -> same digest', async () => {
-    const objects = fc.sample(simpleJsonObject, 200);
-    for (const obj of objects) {
-      const digest1 = await computePolicyDigestJcs(obj);
-      const digest2 = await computePolicyDigestJcs(rotateKeys(obj));
-      expect(digest1).toBe(digest2);
-    }
+  it('same object, rotated key order produces same digest', async () => {
+    await fc.assert(
+      fc.asyncProperty(simpleJsonObject, async (obj) => {
+        const digest1 = await computePolicyDigestJcs(obj);
+        const digest2 = await computePolicyDigestJcs(rotateKeys(obj));
+        expect(digest1).toBe(digest2);
+      }),
+      { numRuns: 200 }
+    );
+  });
+
+  it('nested objects: key order invariance holds at depth', async () => {
+    await fc.assert(
+      fc.asyncProperty(nestedJsonObject, async (obj) => {
+        const digest1 = await computePolicyDigestJcs(obj);
+        const digest2 = await computePolicyDigestJcs(reorderKeys(obj));
+        expect(digest1).toBe(digest2);
+      }),
+      { numRuns: 100 }
+    );
   });
 
   it('digest is always in sha256:<64 hex> format', async () => {
-    const objects = fc.sample(simpleJsonObject, 200);
-    for (const obj of objects) {
-      const digest = await computePolicyDigestJcs(obj);
-      expect(digest).toMatch(/^sha256:[0-9a-f]{64}$/);
-    }
+    await fc.assert(
+      fc.asyncProperty(simpleJsonObject, async (obj) => {
+        const digest = await computePolicyDigestJcs(obj);
+        expect(digest).toMatch(/^sha256:[0-9a-f]{64}$/);
+      }),
+      { numRuns: 200 }
+    );
   });
 
-  it('different objects produce different digests (collision resistance)', async () => {
-    const pairs = fc.sample(
-      fc.tuple(simpleJsonObject, simpleJsonObject).filter(([a, b]) => {
-        return JSON.stringify(a) !== JSON.stringify(b);
-      }),
-      100
+  it('sampled uniqueness smoke test: distinct objects produce distinct digests', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        simpleJsonObject,
+        simpleJsonObject.filter((_) => true),
+        async (a, b) => {
+          if (JSON.stringify(a) === JSON.stringify(b)) return; // skip equal pairs
+          const d1 = await computePolicyDigestJcs(a);
+          const d2 = await computePolicyDigestJcs(b);
+          expect(d1).not.toBe(d2);
+        }
+      ),
+      { numRuns: 100 }
     );
-    let collisions = 0;
-    for (const [a, b] of pairs) {
-      const d1 = await computePolicyDigestJcs(a);
-      const d2 = await computePolicyDigestJcs(b);
-      if (d1 === d2) collisions++;
-    }
-    expect(collisions).toBe(0);
   });
 });
 
@@ -134,7 +169,6 @@ describe('Property: checkPolicyBinding 3-state invariant', () => {
   it('undefined input always produces unavailable', () => {
     fc.assert(
       fc.property(optionalDigest, (digest) => {
-        // At least one undefined -> unavailable
         expect(checkPolicyBinding(undefined, digest)).toBe('unavailable');
         expect(checkPolicyBinding(digest, undefined)).toBe('unavailable');
       }),
@@ -142,7 +176,7 @@ describe('Property: checkPolicyBinding 3-state invariant', () => {
     );
   });
 
-  it('both defined and equal -> verified', () => {
+  it('both defined and equal produces verified', () => {
     fc.assert(
       fc.property(sha256Digest, (digest) => {
         expect(checkPolicyBinding(digest, digest)).toBe('verified');
@@ -151,11 +185,11 @@ describe('Property: checkPolicyBinding 3-state invariant', () => {
     );
   });
 
-  it('both defined and unequal -> failed', () => {
+  it('both defined and unequal produces failed', () => {
     fc.assert(
       fc.property(
         sha256Digest,
-        sha256Digest.filter((d) => true),
+        sha256Digest.filter((_) => true),
         (a, b) => {
           if (a !== b) {
             expect(checkPolicyBinding(a, b)).toBe('failed');

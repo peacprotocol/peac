@@ -5,12 +5,24 @@
  * 1. Malformed JWS never crashes decode(): always throws CryptoError with stable code
  * 2. validateWire02Header: any header object returns void or throws CryptoError
  * 3. Random JWS strings never crash verify(): always throws or returns typed result
+ *
+ * All async tests use fc.asyncProperty() for proper shrinking (DD-158 review).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import * as fc from 'fast-check';
 import { decode, verify, validateWire02Header, generateKeypair } from '../src/index';
 import { CryptoError } from '../src/errors';
+
+// ---------------------------------------------------------------------------
+// Shared keypair (generated once per suite)
+// ---------------------------------------------------------------------------
+
+let testKeypair: { privateKey: Uint8Array; publicKey: Uint8Array };
+
+beforeAll(async () => {
+  testKeypair = await generateKeypair();
+});
 
 // ---------------------------------------------------------------------------
 // Arbitraries
@@ -50,6 +62,18 @@ const randomHeader = fc.record(
 );
 
 // ---------------------------------------------------------------------------
+// Structural check for CryptoError (cross ESM/CJS boundary robustness)
+// ---------------------------------------------------------------------------
+
+function isCryptoErrorLike(err: unknown): boolean {
+  if (err instanceof CryptoError) return true;
+  if (err && typeof err === 'object' && 'code' in err) {
+    return typeof (err as { code: unknown }).code === 'string';
+  }
+  return false;
+}
+
+// ---------------------------------------------------------------------------
 // Property 1: decode() never crashes on any string input
 // ---------------------------------------------------------------------------
 
@@ -59,11 +83,9 @@ describe('Property: decode() robustness', () => {
       fc.property(randomString, (input) => {
         try {
           decode(input);
-          // If it succeeds, it must return a valid structure
           return true;
         } catch (err) {
-          // Must be a CryptoError, not an unhandled exception
-          expect(err).toBeInstanceOf(CryptoError);
+          expect(isCryptoErrorLike(err)).toBe(true);
           expect((err as CryptoError).code).toMatch(/^CRYPTO_/);
           return true;
         }
@@ -77,13 +99,12 @@ describe('Property: decode() robustness', () => {
       fc.property(jwsLikeString, (input) => {
         try {
           const result = decode(input);
-          // If decode succeeds, structure must be typed
           expect(result).toHaveProperty('header');
           expect(result).toHaveProperty('payload');
           expect(result.header).toHaveProperty('alg', 'EdDSA');
           return true;
         } catch (err) {
-          expect(err).toBeInstanceOf(CryptoError);
+          expect(isCryptoErrorLike(err)).toBe(true);
           return true;
         }
       }),
@@ -102,22 +123,19 @@ describe('Property: validateWire02Header JOSE hardening', () => {
       fc.property(randomHeader, (header) => {
         try {
           validateWire02Header(header as Record<string, unknown>);
-          // If it succeeds, the header must have a valid kid
           expect(typeof header.kid).toBe('string');
           expect((header.kid as string).length).toBeGreaterThan(0);
           expect((header.kid as string).length).toBeLessThanOrEqual(256);
-          // No embedded keys
           expect(header.jwk).toBeUndefined();
           expect(header.x5c).toBeUndefined();
           expect(header.x5u).toBeUndefined();
           expect(header.jku).toBeUndefined();
-          // No crit, b64:false, zip
           expect(header.crit).toBeUndefined();
           expect(header.b64).not.toBe(false);
           expect(header.zip).toBeUndefined();
           return true;
         } catch (err) {
-          expect(err).toBeInstanceOf(CryptoError);
+          expect(isCryptoErrorLike(err)).toBe(true);
           expect((err as CryptoError).code).toMatch(/^CRYPTO_JWS_/);
           return true;
         }
@@ -147,34 +165,31 @@ describe('Property: validateWire02Header JOSE hardening', () => {
 
 describe('Property: verify() robustness', () => {
   it('random JWS strings never throw unhandled exceptions', async () => {
-    const { publicKey } = await generateKeypair();
-
-    // Test with a sample of random strings (async properties need manual loop)
-    const values = fc.sample(randomString, 200);
-    for (const input of values) {
-      try {
-        await verify(input, publicKey);
-      } catch (err) {
-        // Must be a CryptoError, not an unhandled exception
-        expect(err).toBeInstanceOf(CryptoError);
-        expect((err as CryptoError).code).toMatch(/^CRYPTO_/);
-      }
-    }
+    await fc.assert(
+      fc.asyncProperty(randomString, async (input) => {
+        try {
+          await verify(input, testKeypair.publicKey);
+        } catch (err) {
+          expect(isCryptoErrorLike(err)).toBe(true);
+          expect((err as CryptoError).code).toMatch(/^CRYPTO_/);
+        }
+      }),
+      { numRuns: 200 }
+    );
   });
 
   it('JWS-like strings never throw unhandled exceptions in verify()', async () => {
-    const { publicKey } = await generateKeypair();
-
-    const values = fc.sample(jwsLikeString, 200);
-    for (const input of values) {
-      try {
-        const result = await verify(input, publicKey);
-        // If verify returns, result must have valid shape
-        expect(typeof result.valid).toBe('boolean');
-        expect(result.header).toHaveProperty('alg', 'EdDSA');
-      } catch (err) {
-        expect(err).toBeInstanceOf(CryptoError);
-      }
-    }
+    await fc.assert(
+      fc.asyncProperty(jwsLikeString, async (input) => {
+        try {
+          const result = await verify(input, testKeypair.publicKey);
+          expect(typeof result.valid).toBe('boolean');
+          expect(result.header).toHaveProperty('alg', 'EdDSA');
+        } catch (err) {
+          expect(isCryptoErrorLike(err)).toBe(true);
+        }
+      }),
+      { numRuns: 200 }
+    );
   });
 });

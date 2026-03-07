@@ -500,6 +500,31 @@ else
   echo "SKIP: generate-inventory.mjs not found"
 fi
 
+printf "%-50s" "Test-mapping path existence..."
+if [ -f "specs/conformance/test-mappings.json" ]; then
+  tm_bad=0
+  while IFS= read -r tf; do
+    if [ ! -f "$tf" ]; then
+      echo ""
+      echo "  FAIL: test_file not found: $tf"
+      tm_bad=1
+    fi
+  done < <(node -e "
+    const m = require('./specs/conformance/test-mappings.json');
+    const seen = new Set();
+    for (const e of m.mappings) {
+      if (!seen.has(e.test_file)) { seen.add(e.test_file); console.log(e.test_file); }
+    }
+  ")
+  if [ "$tm_bad" -eq 0 ]; then
+    echo "OK"
+  else
+    bad=1
+  fi
+else
+  echo "SKIP: test-mappings.json not found"
+fi
+
 printf "%-50s" "Requirement registry drift..."
 if [ -f "scripts/conformance/verify-registry-drift.mjs" ]; then
   if node scripts/conformance/verify-registry-drift.mjs > /dev/null 2>&1; then

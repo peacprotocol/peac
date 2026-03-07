@@ -5,9 +5,12 @@
  * 1. verifyLocal() never throws for any JWS input: always returns VerifyLocalResult
  * 2. Valid receipts always verify: issue+verify roundtrip succeeds
  * 3. Result structure: valid === true iff variant/claims/warnings present
+ * 4. Wrong key always fails verification
+ *
+ * All async tests use fc.asyncProperty() for proper shrinking (DD-158 review).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import * as fc from 'fast-check';
 import { generateKeypair } from '@peac/crypto';
 import { issueWire02, verifyLocal } from '../src/index';
@@ -43,8 +46,6 @@ const validIss = fc
 // Setup
 // ---------------------------------------------------------------------------
 
-import { beforeAll } from 'vitest';
-
 beforeAll(async () => {
   testKeypair = await generateKeypair();
 });
@@ -55,16 +56,18 @@ beforeAll(async () => {
 
 describe('Property: verifyLocal() never throws', () => {
   it('random strings always return VerifyLocalResult', async () => {
-    const values = fc.sample(fc.string({ maxLength: 500 }), 200);
-    for (const jws of values) {
-      const result = await verifyLocal(jws, testKeypair.publicKey);
-      expect(typeof result.valid).toBe('boolean');
-      if (!result.valid) {
-        expect(typeof result.code).toBe('string');
-        expect(result.code).toMatch(/^E_/);
-        expect(typeof result.message).toBe('string');
-      }
-    }
+    await fc.assert(
+      fc.asyncProperty(fc.string({ maxLength: 500 }), async (jws) => {
+        const result = await verifyLocal(jws, testKeypair.publicKey);
+        expect(typeof result.valid).toBe('boolean');
+        if (!result.valid) {
+          expect(typeof result.code).toBe('string');
+          expect(result.code).toMatch(/^E_/);
+          expect(typeof result.message).toBe('string');
+        }
+      }),
+      { numRuns: 200 }
+    );
   });
 
   it('random bytes as publicKey never cause unhandled errors', async () => {
@@ -76,11 +79,13 @@ describe('Property: verifyLocal() never throws', () => {
       kid: testKid,
     });
 
-    const keys = fc.sample(fc.uint8Array({ minLength: 32, maxLength: 32 }), 50);
-    for (const key of keys) {
-      const result = await verifyLocal(jws, key);
-      expect(typeof result.valid).toBe('boolean');
-    }
+    await fc.assert(
+      fc.asyncProperty(fc.uint8Array({ minLength: 32, maxLength: 32 }), async (key) => {
+        const result = await verifyLocal(jws, key);
+        expect(typeof result.valid).toBe('boolean');
+      }),
+      { numRuns: 50 }
+    );
   });
 });
 
@@ -90,31 +95,29 @@ describe('Property: verifyLocal() never throws', () => {
 
 describe('Property: issue+verify roundtrip', () => {
   it('valid Wire 0.2 receipts always verify with matching key', async () => {
-    // Generate multiple receipts with varying parameters
-    const kinds = fc.sample(validKind, 50);
-    const types = fc.sample(validType, 50);
-    const issuers = fc.sample(validIss, 50);
+    await fc.assert(
+      fc.asyncProperty(validKind, validType, validIss, async (kind, type, iss) => {
+        const keypair = await generateKeypair();
+        const { jws } = await issueWire02({
+          iss,
+          kind,
+          type,
+          privateKey: keypair.privateKey,
+          kid: testKid,
+        });
 
-    for (let i = 0; i < 50; i++) {
-      const keypair = await generateKeypair();
-      const { jws } = await issueWire02({
-        iss: issuers[i],
-        kind: kinds[i],
-        type: types[i],
-        privateKey: keypair.privateKey,
-        kid: testKid,
-      });
-
-      const result = await verifyLocal(jws, keypair.publicKey);
-      expect(result.valid).toBe(true);
-      if (result.valid) {
-        expect(result.variant).toBe('wire-02');
-        expect(result.wireVersion).toBe('0.2');
-        expect(result.claims.kind).toBe(kinds[i]);
-        expect(result.claims.iss).toBe(issuers[i]);
-        expect(Array.isArray(result.warnings)).toBe(true);
-      }
-    }
+        const result = await verifyLocal(jws, keypair.publicKey);
+        expect(result.valid).toBe(true);
+        if (result.valid) {
+          expect(result.variant).toBe('wire-02');
+          expect(result.wireVersion).toBe('0.2');
+          expect(result.claims.kind).toBe(kind);
+          expect(result.claims.iss).toBe(iss);
+          expect(Array.isArray(result.warnings)).toBe(true);
+        }
+      }),
+      { numRuns: 50 }
+    );
   });
 });
 
@@ -124,39 +127,44 @@ describe('Property: issue+verify roundtrip', () => {
 
 describe('Property: VerifyLocalResult structure', () => {
   it('valid=true always has variant, claims, warnings, policy_binding', async () => {
-    for (let i = 0; i < 20; i++) {
-      const keypair = await generateKeypair();
-      const { jws } = await issueWire02({
-        iss: testIss,
-        kind: 'evidence',
-        type: testType,
-        privateKey: keypair.privateKey,
-        kid: testKid,
-      });
+    await fc.assert(
+      fc.asyncProperty(fc.constant(null), async () => {
+        const keypair = await generateKeypair();
+        const { jws } = await issueWire02({
+          iss: testIss,
+          kind: 'evidence',
+          type: testType,
+          privateKey: keypair.privateKey,
+          kid: testKid,
+        });
 
-      const result = await verifyLocal(jws, keypair.publicKey);
-      if (result.valid) {
-        expect(result).toHaveProperty('variant', 'wire-02');
-        expect(result).toHaveProperty('claims');
-        expect(result).toHaveProperty('warnings');
-        expect(result).toHaveProperty('policy_binding');
-        expect(result).toHaveProperty('kid');
-        expect(result).toHaveProperty('wireVersion', '0.2');
-      }
-    }
+        const result = await verifyLocal(jws, keypair.publicKey);
+        if (result.valid) {
+          expect(result).toHaveProperty('variant', 'wire-02');
+          expect(result).toHaveProperty('claims');
+          expect(result).toHaveProperty('warnings');
+          expect(result).toHaveProperty('policy_binding');
+          expect(result).toHaveProperty('kid');
+          expect(result).toHaveProperty('wireVersion', '0.2');
+        }
+      }),
+      { numRuns: 20 }
+    );
   });
 
   it('valid=false always has code and message', async () => {
-    const values = fc.sample(fc.string({ maxLength: 200 }), 100);
-    for (const jws of values) {
-      const result = await verifyLocal(jws, testKeypair.publicKey);
-      if (!result.valid) {
-        expect(typeof result.code).toBe('string');
-        expect(result.code).toMatch(/^E_/);
-        expect(typeof result.message).toBe('string');
-        expect(result.message.length).toBeGreaterThan(0);
-      }
-    }
+    await fc.assert(
+      fc.asyncProperty(fc.string({ maxLength: 200 }), async (jws) => {
+        const result = await verifyLocal(jws, testKeypair.publicKey);
+        if (!result.valid) {
+          expect(typeof result.code).toBe('string');
+          expect(result.code).toMatch(/^E_/);
+          expect(typeof result.message).toBe('string');
+          expect(result.message.length).toBeGreaterThan(0);
+        }
+      }),
+      { numRuns: 100 }
+    );
   });
 });
 
@@ -174,10 +182,13 @@ describe('Property: wrong key always fails', () => {
       kid: testKid,
     });
 
-    for (let i = 0; i < 30; i++) {
-      const wrongKeypair = await generateKeypair();
-      const result = await verifyLocal(jws, wrongKeypair.publicKey);
-      expect(result.valid).toBe(false);
-    }
+    await fc.assert(
+      fc.asyncProperty(fc.constant(null), async () => {
+        const wrongKeypair = await generateKeypair();
+        const result = await verifyLocal(jws, wrongKeypair.publicKey);
+        expect(result.valid).toBe(false);
+      }),
+      { numRuns: 30 }
+    );
   });
 });
