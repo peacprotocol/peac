@@ -1,0 +1,163 @@
+{
+  "$comment": "Wire 0.2 challenge body conformance vectors (v0.12.0 stable, sections 13, DD-158)",
+  "schema_version": "0.12.0-preview.2",
+  "version": "0.12.0-preview.2",
+  "fixtures": [
+    {
+      "name": "challenge-with-problem-type-required",
+      "description": "Challenge extension MUST include problem.type (RFC 9457): valid receipt with all required fields",
+      "type": "full-pipeline",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/access",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "chal-001",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "payment_required",
+              "problem": {
+                "status": 402,
+                "type": "https://api.example.com/problems/payment-required",
+                "title": "Payment Required"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      },
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": ["WIRE02-CHAL-001", "WIRE02-CHAL-002", "WIRE02-CHAL-003"],
+      "status": "positive"
+    },
+    {
+      "name": "challenge-reject-missing-problem-type",
+      "description": "Challenge problem.type is REQUIRED: omitting it MUST fail validation",
+      "type": "schema-validation",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/access",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "chal-002",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "payment_required",
+              "problem": {
+                "status": 402,
+                "title": "Payment Required"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      },
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": ["WIRE02-CHAL-002"],
+      "status": "negative"
+    },
+    {
+      "name": "challenge-all-7-types",
+      "description": "All 7 challenge_type enum values are accepted",
+      "type": "schema-validation",
+      "input": {
+        "challenge_types": [
+          "payment_required",
+          "identity_required",
+          "consent_required",
+          "attestation_required",
+          "rate_limited",
+          "purpose_disallowed",
+          "custom"
+        ]
+      },
+      "expected": {
+        "all_valid": true,
+        "count": 7
+      },
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": ["WIRE02-CHAL-001"],
+      "status": "positive"
+    },
+    {
+      "name": "challenge-reject-unknown-challenge-type",
+      "description": "Unknown challenge_type values MUST be rejected",
+      "type": "schema-validation",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/access",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "chal-003",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "unknown_type",
+              "problem": {
+                "status": 403,
+                "type": "https://api.example.com/problems/unknown"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      },
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": ["WIRE02-CHAL-001"],
+      "status": "negative"
+    },
+    {
+      "name": "challenge-problem-with-rfc9457-passthrough",
+      "description": "RFC 9457 problem object allows passthrough of extension members (Section 6.2)",
+      "type": "schema-validation",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/access",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "chal-004",
+          "extensions": {
+            "org.peacprotocol/challenge": {
+              "challenge_type": "rate_limited",
+              "problem": {
+                "status": 429,
+                "type": "https://api.example.com/problems/rate-limited",
+                "title": "Too Many Requests",
+                "detail": "Rate limit exceeded. Retry after 60 seconds.",
+                "instance": "https://api.example.com/problems/rate-limited/abc123",
+                "retry_after": 60
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      },
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-CHAL-002",
+        "WIRE02-CHAL-003",
+        "WIRE02-CHAL-004",
+        "WIRE02-CHAL-005"
+      ],
+      "status": "positive"
+    }
+  ]
+}

@@ -413,6 +413,19 @@ else
   echo "OK"
 fi
 
+echo "== interop-strictness-audit =="
+# Production code must not reach interop mode without explicit opt-in.
+# Test files using strictness: 'interop' must be marked with @interop-test in a comment.
+printf "%-50s" "Interop strictness audit..."
+INTEROP_PROD=$(git grep -rn "strictness.*interop\|interop.*strictness" -- 'packages/*/src/' --include='*.ts' 2>/dev/null | grep -v 'type\|interface\|VerificationStrictness\|@deprecated\|comment\|doc\|/\*\|//\|\.d\.ts' || true)
+if [ -n "$INTEROP_PROD" ]; then
+  echo "FAIL: production code references interop strictness without type guard:"
+  echo "$INTEROP_PROD"
+  bad=1
+else
+  echo "OK"
+fi
+
 echo "== release-state-coherence (committed artifacts) =="
 # Verify committed release manifest agrees with committed source-of-truth files.
 # This section checks ONLY committed artifacts (CI-visible), not gitignored reference docs.
