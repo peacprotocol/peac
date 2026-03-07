@@ -10,8 +10,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { issue } from '../../packages/protocol/src/issue';
+import { issue, issueWire02 } from '../../packages/protocol/src/issue';
 import { verify as jwsVerify, generateKeypair } from '../../packages/crypto/src/jws';
+import { verifyLocal } from '../../packages/protocol/src/verify';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -182,6 +183,116 @@ describe('Performance Benchmarks', () => {
       console.warn(`[WARN]  Issue p95 (${metrics.p95_ms.toFixed(2)}ms) > 50ms (target)`);
     } else {
       console.log(`[OK] Issue p95 (${metrics.p95_ms.toFixed(2)}ms) <= 50ms`);
+    }
+  });
+
+  it('Wire 0.2 verify p95 MUST be <= 10ms (CI GATE)', async () => {
+    console.log('\nStarting Wire 0.2 verification benchmark...\n');
+
+    const { privateKey, publicKey } = await generateKeypair();
+    const kid = '2026-03-07T00:00:00Z';
+
+    const wire02Result = await issueWire02({
+      iss: 'https://api.example.com',
+      kind: 'evidence',
+      type: 'org.peacprotocol/commerce',
+      privateKey,
+      kid,
+      pillars: ['commerce'],
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '5000',
+          currency: 'USD',
+        },
+      },
+    });
+
+    // Warmup
+    console.log('Warmup: 10 iterations...');
+    for (let i = 0; i < 10; i++) {
+      await verifyLocal(wire02Result.jws, publicKey);
+    }
+
+    // Benchmark
+    console.log('Benchmark: 1000 iterations...\n');
+    const timings: number[] = [];
+
+    for (let i = 0; i < 1000; i++) {
+      const start = performance.now();
+      const result = await verifyLocal(wire02Result.jws, publicKey);
+      const elapsed = performance.now() - start;
+      expect(result.valid).toBe(true);
+      timings.push(elapsed);
+    }
+
+    const metrics = calculateMetrics(timings);
+
+    console.log('Wire 0.2 Verify Performance:');
+    console.log(`   Min:  ${metrics.min_ms.toFixed(2)}ms`);
+    console.log(`   Mean: ${metrics.mean_ms.toFixed(2)}ms`);
+    console.log(`   p50:  ${metrics.p50_ms.toFixed(2)}ms`);
+    console.log(`   p95:  ${metrics.p95_ms.toFixed(2)}ms (GATE: <=10ms)`);
+    console.log(`   p99:  ${metrics.p99_ms.toFixed(2)}ms\n`);
+
+    if (metrics.p95_ms > 10) {
+      console.error(
+        `[FAIL] Wire 0.2 VERIFY GATE FAILED: p95 (${metrics.p95_ms.toFixed(2)}ms) > 10ms`
+      );
+      expect(metrics.p95_ms).toBeLessThanOrEqual(10);
+    } else {
+      console.log(`[OK] Wire 0.2 VERIFY GATE PASSED: p95 (${metrics.p95_ms.toFixed(2)}ms) <= 10ms`);
+    }
+  });
+
+  it('Wire 0.2 issue p95 SHOULD be <= 50ms', async () => {
+    console.log('\nStarting Wire 0.2 issuance benchmark...\n');
+
+    const { privateKey } = await generateKeypair();
+    const kid = '2026-03-07T00:00:00Z';
+
+    // Warmup
+    console.log('Warmup: 10 iterations...');
+    for (let i = 0; i < 10; i++) {
+      await issueWire02({
+        iss: 'https://api.example.com',
+        kind: 'evidence',
+        type: 'org.peacprotocol/commerce',
+        privateKey,
+        kid,
+      });
+    }
+
+    // Benchmark
+    console.log('Benchmark: 1000 iterations...\n');
+    const timings: number[] = [];
+
+    for (let i = 0; i < 1000; i++) {
+      const start = performance.now();
+      await issueWire02({
+        iss: 'https://api.example.com',
+        kind: 'evidence',
+        type: 'org.peacprotocol/commerce',
+        privateKey,
+        kid,
+      });
+      const elapsed = performance.now() - start;
+      timings.push(elapsed);
+    }
+
+    const metrics = calculateMetrics(timings);
+
+    console.log('Wire 0.2 Issue Performance:');
+    console.log(`   Min:  ${metrics.min_ms.toFixed(2)}ms`);
+    console.log(`   Mean: ${metrics.mean_ms.toFixed(2)}ms`);
+    console.log(`   p50:  ${metrics.p50_ms.toFixed(2)}ms`);
+    console.log(`   p95:  ${metrics.p95_ms.toFixed(2)}ms (target: <=50ms)`);
+    console.log(`   p99:  ${metrics.p99_ms.toFixed(2)}ms\n`);
+
+    if (metrics.p95_ms > 50) {
+      console.warn(`[WARN]  Wire 0.2 Issue p95 (${metrics.p95_ms.toFixed(2)}ms) > 50ms (target)`);
+    } else {
+      console.log(`[OK] Wire 0.2 Issue p95 (${metrics.p95_ms.toFixed(2)}ms) <= 50ms`);
     }
   });
 
