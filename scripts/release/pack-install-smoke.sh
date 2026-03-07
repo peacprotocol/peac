@@ -29,14 +29,16 @@ echo "=== Pack-Install Smoke Test ==="
 echo "  Pack dir: $PACK_DIR"
 echo ""
 
-# Representative packages across layers (not all 28; these cover the critical paths)
+# Representative packages across layers (not all 28; these cover the critical paths).
+# Packages with workspace:* deps are resolved by pnpm pack, but npm install
+# from tarball needs the deps published. Only include packages that can install
+# standalone or have few external deps.
 SMOKE_PACKAGES=(
   "packages/kernel"
   "packages/schema"
   "packages/crypto"
   "packages/protocol"
   "packages/mcp-server"
-  "packages/cli"
 )
 
 pack_and_test() {
