@@ -14,17 +14,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import * as fc from 'fast-check';
 import { generateKeypair } from '@peac/crypto';
-import { WIRE_02_JWS_TYP } from '@peac/kernel';
 import { verifyLocal } from '../src/index';
-import {
-  signRawJWS,
-  buildWire02Header,
-  buildWire02Payload,
-  FIXED_IAT,
-  TEST_KID,
-  TEST_ISS,
-  TEST_TYPE,
-} from './_helpers';
+import { signRawJWS, buildWire02Header, buildWire02Payload, TEST_KID } from './_helpers';
 
 // ---------------------------------------------------------------------------
 // Shared keypair
