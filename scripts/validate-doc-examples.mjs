@@ -21,7 +21,7 @@
  *   1  One or more blocks failed validation
  */
 
-import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -147,8 +147,7 @@ function validateJson(block) {
  * @returns {{ok: boolean, error?: string}}
  */
 function validateTypeScript(block) {
-  const tmpDir = join(tmpdir(), `peac-doc-validate-${Date.now()}`);
-  mkdirSync(tmpDir, { recursive: true });
+  const tmpDir = mkdtempSync(join(tmpdir(), 'peac-doc-validate-'));
 
   const tmpFile = join(tmpDir, 'snippet.ts');
 
