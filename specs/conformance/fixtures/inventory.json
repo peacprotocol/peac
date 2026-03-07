@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-03-07T09:47:00.093Z",
+  "generated_at": "2026-03-07T09:49:46.680Z",
   "version": "0.12.0-preview.2",
   "schema_version": "0.12.0-preview.2",
   "total_fixtures": 618,
@@ -939,9 +939,7 @@
       "fixture_name": "a2a-embed-at-limit",
       "description": "A2A embed carrier at exactly 64 KB (65536 bytes)",
       "primary_requirement_id": "CARRIER-A2A-001",
-      "requirement_ids": [
-        "CARRIER-A2A-001"
-      ],
+      "requirement_ids": ["CARRIER-A2A-001"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -951,9 +949,7 @@
       "fixture_name": "a2a-embed-over-limit",
       "description": "A2A embed carrier over 64 KB limit is rejected",
       "primary_requirement_id": "CARRIER-A2A-001",
-      "requirement_ids": [
-        "CARRIER-A2A-001"
-      ],
+      "requirement_ids": ["CARRIER-A2A-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -963,9 +959,7 @@
       "fixture_name": "http-header-at-limit",
       "description": "HTTP header carrier at exactly 8 KB (8192 bytes)",
       "primary_requirement_id": "CARRIER-HTTP-001",
-      "requirement_ids": [
-        "CARRIER-HTTP-001"
-      ],
+      "requirement_ids": ["CARRIER-HTTP-001"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -975,9 +969,7 @@
       "fixture_name": "http-header-over-limit",
       "description": "HTTP header carrier over 8 KB limit is rejected",
       "primary_requirement_id": "CARRIER-HTTP-001",
-      "requirement_ids": [
-        "CARRIER-HTTP-001"
-      ],
+      "requirement_ids": ["CARRIER-HTTP-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -987,9 +979,7 @@
       "fixture_name": "http-header-under-limit",
       "description": "HTTP header carrier within 8 KB limit",
       "primary_requirement_id": "CARRIER-HTTP-001",
-      "requirement_ids": [
-        "CARRIER-HTTP-001"
-      ],
+      "requirement_ids": ["CARRIER-HTTP-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -999,9 +989,7 @@
       "fixture_name": "mcp-embed-at-limit",
       "description": "MCP embed carrier at exactly 64 KB (65536 bytes)",
       "primary_requirement_id": "CARRIER-MCP-001",
-      "requirement_ids": [
-        "CARRIER-MCP-001"
-      ],
+      "requirement_ids": ["CARRIER-MCP-001"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -1011,9 +999,7 @@
       "fixture_name": "mcp-embed-over-limit",
       "description": "MCP embed carrier one byte over 64 KB limit is rejected",
       "primary_requirement_id": "CARRIER-MCP-001",
-      "requirement_ids": [
-        "CARRIER-MCP-001"
-      ],
+      "requirement_ids": ["CARRIER-MCP-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -1023,9 +1009,7 @@
       "fixture_name": "mcp-embed-under-limit",
       "description": "MCP embed carrier within 64 KB limit",
       "primary_requirement_id": "CARRIER-MCP-001",
-      "requirement_ids": [
-        "CARRIER-MCP-001"
-      ],
+      "requirement_ids": ["CARRIER-MCP-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -1035,9 +1019,7 @@
       "fixture_name": "ucp-embed-at-limit",
       "description": "UCP embed carrier at exactly 64 KB (65536 bytes)",
       "primary_requirement_id": "CARRIER-MCP-001",
-      "requirement_ids": [
-        "CARRIER-MCP-001"
-      ],
+      "requirement_ids": ["CARRIER-MCP-001"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -1047,9 +1029,7 @@
       "fixture_name": "utf8-multibyte-at-boundary",
       "description": "UTF-8 multi-byte characters at boundary do not cause off-by-one",
       "primary_requirement_id": "CARRIER-MCP-001",
-      "requirement_ids": [
-        "CARRIER-MCP-001"
-      ],
+      "requirement_ids": ["CARRIER-MCP-001"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -1059,9 +1039,7 @@
       "fixture_name": "x402-header-at-limit",
       "description": "x402 header carrier at exactly 8 KB (8192 bytes)",
       "primary_requirement_id": "CARRIER-HTTP-001",
-      "requirement_ids": [
-        "CARRIER-HTTP-001"
-      ],
+      "requirement_ids": ["CARRIER-HTTP-001"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -2933,9 +2911,7 @@
       "fixture_name": "challenge-all-7-types",
       "description": "All 7 challenge_type enum values are accepted",
       "primary_requirement_id": "WIRE02-CHAL-001",
-      "requirement_ids": [
-        "WIRE02-CHAL-001"
-      ],
+      "requirement_ids": ["WIRE02-CHAL-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -2961,9 +2937,7 @@
       "fixture_name": "challenge-reject-missing-problem-type",
       "description": "Challenge problem.type is REQUIRED: omitting it MUST fail validation",
       "primary_requirement_id": "WIRE02-CHAL-002",
-      "requirement_ids": [
-        "WIRE02-CHAL-002"
-      ],
+      "requirement_ids": ["WIRE02-CHAL-002"],
       "status": "negative",
       "has_requirements": true
     },
@@ -2973,9 +2947,7 @@
       "fixture_name": "challenge-reject-unknown-challenge-type",
       "description": "Unknown challenge_type values MUST be rejected",
       "primary_requirement_id": "WIRE02-CHAL-001",
-      "requirement_ids": [
-        "WIRE02-CHAL-001"
-      ],
+      "requirement_ids": ["WIRE02-CHAL-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -2985,11 +2957,7 @@
       "fixture_name": "challenge-with-problem-type-required",
       "description": "Challenge extension MUST include problem.type (RFC 9457): valid receipt with all required fields",
       "primary_requirement_id": "WIRE02-CHAL-002",
-      "requirement_ids": [
-        "WIRE02-CHAL-001",
-        "WIRE02-CHAL-002",
-        "WIRE02-CHAL-003"
-      ],
+      "requirement_ids": ["WIRE02-CHAL-001", "WIRE02-CHAL-002", "WIRE02-CHAL-003"],
       "status": "positive",
       "has_requirements": true
     },
@@ -2999,10 +2967,7 @@
       "fixture_name": "reject-wire01-typ-with-wire02-payload",
       "description": "Wire 0.1 typ (peac-receipt/0.1) with peac_version 0.2 payload: MUST be rejected (version mismatch)",
       "primary_requirement_id": "WIRE02-DUAL-002",
-      "requirement_ids": [
-        "WIRE02-DUAL-001",
-        "WIRE02-DUAL-002"
-      ],
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-002"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3012,10 +2977,7 @@
       "fixture_name": "reject-wire02-typ-without-peac-version",
       "description": "Wire 0.2 typ (interaction-record+jwt) without peac_version 0.2 payload: MUST be rejected",
       "primary_requirement_id": "WIRE02-DUAL-003",
-      "requirement_ids": [
-        "WIRE02-DUAL-001",
-        "WIRE02-DUAL-003"
-      ],
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3025,9 +2987,7 @@
       "fixture_name": "wire01-receipt-rejected-by-verifyLocal",
       "description": "verifyLocal() returns E_UNSUPPORTED_WIRE_VERSION for Wire 0.1 receipts",
       "primary_requirement_id": "WIRE02-DUAL-001",
-      "requirement_ids": [
-        "WIRE02-DUAL-001"
-      ],
+      "requirement_ids": ["WIRE02-DUAL-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3037,10 +2997,7 @@
       "fixture_name": "wire02-typ-coherent",
       "description": "Wire 0.2 route: typ is interaction-record+jwt AND peac_version is 0.2 (coherent)",
       "primary_requirement_id": "WIRE02-DUAL-003",
-      "requirement_ids": [
-        "WIRE02-DUAL-001",
-        "WIRE02-DUAL-003"
-      ],
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-003"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3050,11 +3007,7 @@
       "fixture_name": "access-extension-valid",
       "description": "Valid access extension with resource, action, decision",
       "primary_requirement_id": "WIRE02-EXT-011",
-      "requirement_ids": [
-        "WIRE02-EXT-011",
-        "WIRE02-EXT-012",
-        "WIRE02-EXT-013"
-      ],
+      "requirement_ids": ["WIRE02-EXT-011", "WIRE02-EXT-012", "WIRE02-EXT-013"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3064,12 +3017,7 @@
       "fixture_name": "commerce-extension-valid",
       "description": "Valid commerce extension with all required fields",
       "primary_requirement_id": "WIRE02-EXT-006",
-      "requirement_ids": [
-        "WIRE02-EXT-006",
-        "WIRE02-EXT-007",
-        "WIRE02-EXT-008",
-        "WIRE02-EXT-001"
-      ],
+      "requirement_ids": ["WIRE02-EXT-006", "WIRE02-EXT-007", "WIRE02-EXT-008", "WIRE02-EXT-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3079,9 +3027,7 @@
       "fixture_name": "commerce-negative-amount-valid",
       "description": "Negative amount_minor (refund) is permitted",
       "primary_requirement_id": "WIRE02-EXT-009",
-      "requirement_ids": [
-        "WIRE02-EXT-009"
-      ],
+      "requirement_ids": ["WIRE02-EXT-009"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3091,10 +3037,7 @@
       "fixture_name": "correlation-extension-valid",
       "description": "Valid correlation extension with trace_id and span_id",
       "primary_requirement_id": "WIRE02-EXT-014",
-      "requirement_ids": [
-        "WIRE02-EXT-014",
-        "WIRE02-EXT-015"
-      ],
+      "requirement_ids": ["WIRE02-EXT-014", "WIRE02-EXT-015"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3104,9 +3047,7 @@
       "fixture_name": "identity-extension-valid",
       "description": "Valid identity extension with optional proof_ref",
       "primary_requirement_id": "WIRE02-EXT-001",
-      "requirement_ids": [
-        "WIRE02-EXT-001"
-      ],
+      "requirement_ids": ["WIRE02-EXT-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3116,9 +3057,7 @@
       "fixture_name": "reject-commerce-decimal-amount",
       "description": "Decimal amount_minor is rejected (must be integer string)",
       "primary_requirement_id": "WIRE02-EXT-009",
-      "requirement_ids": [
-        "WIRE02-EXT-009"
-      ],
+      "requirement_ids": ["WIRE02-EXT-009"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3128,9 +3067,7 @@
       "fixture_name": "reject-commerce-missing-currency",
       "description": "Missing required currency field is rejected",
       "primary_requirement_id": "WIRE02-EXT-008",
-      "requirement_ids": [
-        "WIRE02-EXT-008"
-      ],
+      "requirement_ids": ["WIRE02-EXT-008"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3140,9 +3077,7 @@
       "fixture_name": "reject-domain-label-over-63-chars",
       "description": "Extension key domain label exceeding 63 characters MUST be rejected",
       "primary_requirement_id": "WIRE02-EXT-003",
-      "requirement_ids": [
-        "WIRE02-EXT-003"
-      ],
+      "requirement_ids": ["WIRE02-EXT-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3152,9 +3087,7 @@
       "fixture_name": "reject-empty-extension-segment",
       "description": "Extension key with empty segment (trailing slash) MUST be rejected",
       "primary_requirement_id": "WIRE02-EXT-004",
-      "requirement_ids": [
-        "WIRE02-EXT-004"
-      ],
+      "requirement_ids": ["WIRE02-EXT-004"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3164,10 +3097,7 @@
       "fixture_name": "reject-invalid-extension-key",
       "description": "Extension key without dot in domain is rejected",
       "primary_requirement_id": "WIRE02-EXT-002",
-      "requirement_ids": [
-        "WIRE02-EXT-002",
-        "WIRE02-EXT-001"
-      ],
+      "requirement_ids": ["WIRE02-EXT-002", "WIRE02-EXT-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3177,9 +3107,7 @@
       "fixture_name": "reject-invalid-trace-id",
       "description": "trace_id not matching 32 hex chars is rejected",
       "primary_requirement_id": "WIRE02-EXT-014",
-      "requirement_ids": [
-        "WIRE02-EXT-014"
-      ],
+      "requirement_ids": ["WIRE02-EXT-014"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3189,10 +3117,7 @@
       "fixture_name": "reject-uppercase-extension-key",
       "description": "Extension key with uppercase domain is rejected (lowercase only)",
       "primary_requirement_id": "WIRE02-EXT-005",
-      "requirement_ids": [
-        "WIRE02-EXT-005",
-        "WIRE02-EXT-001"
-      ],
+      "requirement_ids": ["WIRE02-EXT-005", "WIRE02-EXT-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3202,11 +3127,7 @@
       "fixture_name": "unknown-extension-preserved-with-warning",
       "description": "Unknown but well-formed extension key preserved with warning",
       "primary_requirement_id": "WIRE02-EXT-017",
-      "requirement_ids": [
-        "WIRE02-EXT-016",
-        "WIRE02-EXT-017",
-        "WIRE02-EXT-018"
-      ],
+      "requirement_ids": ["WIRE02-EXT-016", "WIRE02-EXT-017", "WIRE02-EXT-018"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3216,10 +3137,7 @@
       "fixture_name": "compact-typ-valid",
       "description": "Compact form typ interaction-record+jwt is accepted",
       "primary_requirement_id": "WIRE02-IDENT-001",
-      "requirement_ids": [
-        "WIRE02-IDENT-001",
-        "WIRE02-MEDIA-001"
-      ],
+      "requirement_ids": ["WIRE02-IDENT-001", "WIRE02-MEDIA-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3229,10 +3147,7 @@
       "fixture_name": "media-type-form-accepted",
       "description": "Full media-type form application/interaction-record+jwt is accepted",
       "primary_requirement_id": "WIRE02-IDENT-002",
-      "requirement_ids": [
-        "WIRE02-IDENT-002",
-        "WIRE02-MEDIA-002"
-      ],
+      "requirement_ids": ["WIRE02-IDENT-002", "WIRE02-MEDIA-002"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3242,10 +3157,7 @@
       "fixture_name": "reject-typ-peac-version-mismatch",
       "description": "typ/peac_version mismatch produces E_WIRE_VERSION_MISMATCH",
       "primary_requirement_id": "WIRE02-IDENT-004",
-      "requirement_ids": [
-        "WIRE02-IDENT-004",
-        "WIRE02-MEDIA-005"
-      ],
+      "requirement_ids": ["WIRE02-IDENT-004", "WIRE02-MEDIA-005"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3255,9 +3167,7 @@
       "fixture_name": "reject-typ-with-parameters",
       "description": "typ with content-type parameters MUST NOT be parsed",
       "primary_requirement_id": "WIRE02-IDENT-003",
-      "requirement_ids": [
-        "WIRE02-IDENT-003"
-      ],
+      "requirement_ids": ["WIRE02-IDENT-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3267,9 +3177,7 @@
       "fixture_name": "reject-unknown-peac-version",
       "description": "Unknown peac_version value is rejected",
       "primary_requirement_id": "WIRE02-IDENT-004",
-      "requirement_ids": [
-        "WIRE02-IDENT-004"
-      ],
+      "requirement_ids": ["WIRE02-IDENT-004"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3387,11 +3295,7 @@
       "fixture_name": "reject-http-scheme",
       "description": "iss with http:// scheme must be rejected (https:// required)",
       "primary_requirement_id": "WIRE02-ENV-023",
-      "requirement_ids": [
-        "WIRE02-ENV-023",
-        "WIRE02-KIND-001",
-        "WIRE02-MEDIA-005"
-      ],
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-KIND-001", "WIRE02-MEDIA-005"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3480,11 +3384,7 @@
       "fixture_name": "reject-missing-peac-version",
       "description": "Claims without peac_version field must be rejected",
       "primary_requirement_id": "WIRE02-ENV-023",
-      "requirement_ids": [
-        "WIRE02-ENV-023",
-        "WIRE02-ISS-001",
-        "WIRE02-KIND-001"
-      ],
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-KIND-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3511,11 +3411,7 @@
       "fixture_name": "reject-spiffe-scheme",
       "description": "iss with spiffe:// scheme must be rejected (only https:// and did: accepted)",
       "primary_requirement_id": "WIRE02-ENV-023",
-      "requirement_ids": [
-        "WIRE02-ENV-023",
-        "WIRE02-KIND-001",
-        "WIRE02-MEDIA-005"
-      ],
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-KIND-001", "WIRE02-MEDIA-005"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3540,11 +3436,7 @@
       "fixture_name": "reject-unknown-kind",
       "description": "Unknown kind value must be rejected (only evidence and challenge allowed)",
       "primary_requirement_id": "WIRE02-ENV-023",
-      "requirement_ids": [
-        "WIRE02-ENV-023",
-        "WIRE02-ISS-001",
-        "WIRE02-MEDIA-005"
-      ],
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-MEDIA-005"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3601,11 +3493,7 @@
       "fixture_name": "reject-wire-version-mismatch",
       "description": "Wire 0.2 JWS typ header with Wire 0.1 style claims (no peac_version, no kind) must be rejected",
       "primary_requirement_id": "WIRE02-MEDIA-005",
-      "requirement_ids": [
-        "WIRE02-ENV-023",
-        "WIRE02-ISS-001",
-        "WIRE02-MEDIA-005"
-      ],
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-MEDIA-005"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3630,11 +3518,7 @@
       "fixture_name": "reject-wrong-peac-version",
       "description": "Claims with peac_version 0.1 (not 0.2) must be rejected by Wire 0.2 schema",
       "primary_requirement_id": "WIRE02-ENV-023",
-      "requirement_ids": [
-        "WIRE02-ENV-023",
-        "WIRE02-ISS-001",
-        "WIRE02-KIND-001"
-      ],
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-KIND-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3692,9 +3576,7 @@
       "fixture_name": "did-key-issuer-valid",
       "description": "Valid DID issuer: did:key method",
       "primary_requirement_id": "WIRE02-ISS-005",
-      "requirement_ids": [
-        "WIRE02-ISS-005"
-      ],
+      "requirement_ids": ["WIRE02-ISS-005"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3704,9 +3586,7 @@
       "fixture_name": "did-web-issuer-valid",
       "description": "Valid DID issuer: did:web method",
       "primary_requirement_id": "WIRE02-ISS-005",
-      "requirement_ids": [
-        "WIRE02-ISS-005"
-      ],
+      "requirement_ids": ["WIRE02-ISS-005"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3716,10 +3596,7 @@
       "fixture_name": "https-issuer-valid",
       "description": "Valid HTTPS issuer: lowercase origin-only",
       "primary_requirement_id": "WIRE02-ISS-001",
-      "requirement_ids": [
-        "WIRE02-ISS-001",
-        "WIRE02-ISS-004"
-      ],
+      "requirement_ids": ["WIRE02-ISS-001", "WIRE02-ISS-004"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3729,9 +3606,7 @@
       "fixture_name": "reject-default-port",
       "description": "Explicit default port :443 is rejected",
       "primary_requirement_id": "WIRE02-ISS-003",
-      "requirement_ids": [
-        "WIRE02-ISS-003"
-      ],
+      "requirement_ids": ["WIRE02-ISS-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3741,9 +3616,7 @@
       "fixture_name": "reject-did-path-in-id",
       "description": "DID method-specific-id with path separator is rejected",
       "primary_requirement_id": "WIRE02-ISS-006",
-      "requirement_ids": [
-        "WIRE02-ISS-006"
-      ],
+      "requirement_ids": ["WIRE02-ISS-006"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3753,10 +3626,7 @@
       "fixture_name": "reject-http-issuer",
       "description": "HTTP scheme is rejected (must be HTTPS)",
       "primary_requirement_id": "WIRE02-ISS-007",
-      "requirement_ids": [
-        "WIRE02-ISS-007",
-        "WIRE02-ISS-001"
-      ],
+      "requirement_ids": ["WIRE02-ISS-007", "WIRE02-ISS-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3766,9 +3636,7 @@
       "fixture_name": "reject-trailing-slash",
       "description": "Trailing slash is rejected (origin-only, no path)",
       "primary_requirement_id": "WIRE02-ISS-004",
-      "requirement_ids": [
-        "WIRE02-ISS-004"
-      ],
+      "requirement_ids": ["WIRE02-ISS-004"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3778,9 +3646,7 @@
       "fixture_name": "reject-uppercase-host",
       "description": "Uppercase hostname is rejected (must be lowercase ASCII)",
       "primary_requirement_id": "WIRE02-ISS-002",
-      "requirement_ids": [
-        "WIRE02-ISS-002"
-      ],
+      "requirement_ids": ["WIRE02-ISS-002"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3790,9 +3656,7 @@
       "fixture_name": "reject-urn-scheme",
       "description": "URN scheme is rejected (only https and did accepted)",
       "primary_requirement_id": "WIRE02-ISS-007",
-      "requirement_ids": [
-        "WIRE02-ISS-007"
-      ],
+      "requirement_ids": ["WIRE02-ISS-007"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3802,9 +3666,7 @@
       "fixture_name": "reject-userinfo-in-issuer",
       "description": "Userinfo component is rejected",
       "primary_requirement_id": "WIRE02-ISS-004",
-      "requirement_ids": [
-        "WIRE02-ISS-004"
-      ],
+      "requirement_ids": ["WIRE02-ISS-004"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3814,10 +3676,7 @@
       "fixture_name": "boundary-kid-256-chars",
       "description": "kid at exactly 256 characters is accepted (boundary)",
       "primary_requirement_id": "WIRE02-JOSE-008",
-      "requirement_ids": [
-        "WIRE02-JOSE-008",
-        "WIRE02-JOSE-007"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-008", "WIRE02-JOSE-007"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -3827,10 +3686,7 @@
       "fixture_name": "eddsa-alg-valid",
       "description": "EdDSA algorithm is the only accepted algorithm",
       "primary_requirement_id": "WIRE02-JOSE-001",
-      "requirement_ids": [
-        "WIRE02-JOSE-001",
-        "WIRE02-JOSE-002"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-001", "WIRE02-JOSE-002"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3840,9 +3696,7 @@
       "fixture_name": "reject-b64-false",
       "description": "b64:false (unencoded payload) MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-005",
-      "requirement_ids": [
-        "WIRE02-JOSE-005"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-005"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3852,9 +3706,7 @@
       "fixture_name": "reject-crit-header",
       "description": "crit header parameter MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-004",
-      "requirement_ids": [
-        "WIRE02-JOSE-004"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-004"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3864,9 +3716,7 @@
       "fixture_name": "reject-embedded-jwk",
       "description": "JWS header with embedded jwk MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-003",
-      "requirement_ids": [
-        "WIRE02-JOSE-003"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3876,9 +3726,7 @@
       "fixture_name": "reject-empty-kid",
       "description": "Empty string kid MUST produce E_JWS_MISSING_KID",
       "primary_requirement_id": "WIRE02-JOSE-007",
-      "requirement_ids": [
-        "WIRE02-JOSE-007"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-007"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3888,9 +3736,7 @@
       "fixture_name": "reject-jku-url",
       "description": "jku JWK Set URL MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-003",
-      "requirement_ids": [
-        "WIRE02-JOSE-003"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3900,9 +3746,7 @@
       "fixture_name": "reject-jws-exceeds-256kb",
       "description": "JWS compact serialization exceeding 256 KB MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-009",
-      "requirement_ids": [
-        "WIRE02-JOSE-009"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-009"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3912,9 +3756,7 @@
       "fixture_name": "reject-kid-over-256",
       "description": "kid exceeding 256 characters MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-008",
-      "requirement_ids": [
-        "WIRE02-JOSE-008"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-008"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3924,9 +3766,7 @@
       "fixture_name": "reject-missing-kid",
       "description": "Missing kid MUST produce E_JWS_MISSING_KID",
       "primary_requirement_id": "WIRE02-JOSE-007",
-      "requirement_ids": [
-        "WIRE02-JOSE-007"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-007"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3936,9 +3776,7 @@
       "fixture_name": "reject-x5c-chain",
       "description": "JWS header with x5c certificate chain MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-003",
-      "requirement_ids": [
-        "WIRE02-JOSE-003"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3948,9 +3786,7 @@
       "fixture_name": "reject-x5u-url",
       "description": "x5u remote certificate URL MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-003",
-      "requirement_ids": [
-        "WIRE02-JOSE-003"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3960,9 +3796,7 @@
       "fixture_name": "reject-zip-header",
       "description": "zip compression header MUST be rejected",
       "primary_requirement_id": "WIRE02-JOSE-006",
-      "requirement_ids": [
-        "WIRE02-JOSE-006"
-      ],
+      "requirement_ids": ["WIRE02-JOSE-006"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3972,10 +3806,7 @@
       "fixture_name": "challenge-kind-valid",
       "description": "Challenge kind is accepted as a valid structural kind",
       "primary_requirement_id": "WIRE02-KIND-001",
-      "requirement_ids": [
-        "WIRE02-KIND-001",
-        "WIRE02-ENV-001"
-      ],
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-ENV-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3985,10 +3816,7 @@
       "fixture_name": "evidence-kind-valid",
       "description": "Evidence kind is accepted as a valid structural kind",
       "primary_requirement_id": "WIRE02-KIND-001",
-      "requirement_ids": [
-        "WIRE02-KIND-001",
-        "WIRE02-ENV-001"
-      ],
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-ENV-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -3998,10 +3826,7 @@
       "fixture_name": "evidence-with-occurred-at-valid",
       "description": "occurred_at is permitted on evidence receipts (Section 5.1)",
       "primary_requirement_id": "WIRE02-KIND-003",
-      "requirement_ids": [
-        "WIRE02-KIND-003",
-        "WIRE02-OCC-001"
-      ],
+      "requirement_ids": ["WIRE02-KIND-003", "WIRE02-OCC-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4011,9 +3836,7 @@
       "fixture_name": "reject-occurred-at-on-challenge",
       "description": "occurred_at MUST NOT appear on challenge receipts (Section 5.2)",
       "primary_requirement_id": "WIRE02-KIND-001",
-      "requirement_ids": [
-        "WIRE02-KIND-001"
-      ],
+      "requirement_ids": ["WIRE02-KIND-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4023,9 +3846,7 @@
       "fixture_name": "reject-unknown-kind",
       "description": "Unknown kind value is rejected (closed vocabulary)",
       "primary_requirement_id": "WIRE02-KIND-001",
-      "requirement_ids": [
-        "WIRE02-KIND-001"
-      ],
+      "requirement_ids": ["WIRE02-KIND-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4035,9 +3856,7 @@
       "fixture_name": "same-type-both-kinds",
       "description": "Same type MAY appear with either kind (Section 5.3)",
       "primary_requirement_id": "WIRE02-KIND-003",
-      "requirement_ids": [
-        "WIRE02-KIND-003"
-      ],
+      "requirement_ids": ["WIRE02-KIND-003"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4047,9 +3866,7 @@
       "fixture_name": "absent-occurred-at-valid",
       "description": "Absent occurred_at is valid (field is OPTIONAL)",
       "primary_requirement_id": "WIRE02-OCC-001",
-      "requirement_ids": [
-        "WIRE02-OCC-001"
-      ],
+      "requirement_ids": ["WIRE02-OCC-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4059,9 +3876,7 @@
       "fixture_name": "occurred-at-after-iat-warning",
       "description": "occurred_at after iat emits skew warning",
       "primary_requirement_id": "WIRE02-OCC-001",
-      "requirement_ids": [
-        "WIRE02-OCC-001"
-      ],
+      "requirement_ids": ["WIRE02-OCC-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4071,9 +3886,7 @@
       "fixture_name": "occurred-at-before-iat-valid",
       "description": "occurred_at before iat is normal (no warning)",
       "primary_requirement_id": "WIRE02-OCC-001",
-      "requirement_ids": [
-        "WIRE02-OCC-001"
-      ],
+      "requirement_ids": ["WIRE02-OCC-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4083,9 +3896,7 @@
       "fixture_name": "occurred-at-valid-offset",
       "description": "Valid occurred_at with non-UTC timezone offset",
       "primary_requirement_id": "WIRE02-OCC-001",
-      "requirement_ids": [
-        "WIRE02-OCC-001"
-      ],
+      "requirement_ids": ["WIRE02-OCC-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4095,9 +3906,7 @@
       "fixture_name": "occurred-at-valid-utc",
       "description": "Valid occurred_at with UTC timezone offset",
       "primary_requirement_id": "WIRE02-OCC-001",
-      "requirement_ids": [
-        "WIRE02-OCC-001"
-      ],
+      "requirement_ids": ["WIRE02-OCC-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4107,10 +3916,7 @@
       "fixture_name": "reject-occurred-at-on-challenge",
       "description": "occurred_at on challenge kind produces hard error",
       "primary_requirement_id": "WIRE02-KIND-001",
-      "requirement_ids": [
-        "WIRE02-KIND-001",
-        "WIRE02-OCC-001"
-      ],
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-OCC-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4120,10 +3926,7 @@
       "fixture_name": "all-pillars-sorted-valid",
       "description": "All 10 pillars in ascending lexicographic order are valid",
       "primary_requirement_id": "WIRE02-PILLAR-003",
-      "requirement_ids": [
-        "WIRE02-PILLAR-003",
-        "WIRE02-PILLAR-002"
-      ],
+      "requirement_ids": ["WIRE02-PILLAR-003", "WIRE02-PILLAR-002"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -4133,10 +3936,7 @@
       "fixture_name": "multi-pillar-sorted-valid",
       "description": "Multiple pillars in ascending order are valid",
       "primary_requirement_id": "WIRE02-PILLAR-003",
-      "requirement_ids": [
-        "WIRE02-PILLAR-003",
-        "WIRE02-PILLAR-002"
-      ],
+      "requirement_ids": ["WIRE02-PILLAR-003", "WIRE02-PILLAR-002"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4146,10 +3946,7 @@
       "fixture_name": "reject-duplicate-pillars",
       "description": "Duplicate pillar values are rejected",
       "primary_requirement_id": "WIRE02-PILLAR-004",
-      "requirement_ids": [
-        "WIRE02-PILLAR-004",
-        "WIRE02-PILLAR-003"
-      ],
+      "requirement_ids": ["WIRE02-PILLAR-004", "WIRE02-PILLAR-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4159,9 +3956,7 @@
       "fixture_name": "reject-empty-pillars-array",
       "description": "Empty pillars array is rejected (must have at least one element)",
       "primary_requirement_id": "WIRE02-PILLAR-002",
-      "requirement_ids": [
-        "WIRE02-PILLAR-002"
-      ],
+      "requirement_ids": ["WIRE02-PILLAR-002"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4171,9 +3966,7 @@
       "fixture_name": "reject-unknown-pillar",
       "description": "Unknown pillar value is rejected (closed vocabulary)",
       "primary_requirement_id": "WIRE02-PILLAR-001",
-      "requirement_ids": [
-        "WIRE02-PILLAR-001"
-      ],
+      "requirement_ids": ["WIRE02-PILLAR-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4183,9 +3976,7 @@
       "fixture_name": "reject-unsorted-pillars",
       "description": "Pillars not in ascending order are rejected",
       "primary_requirement_id": "WIRE02-PILLAR-003",
-      "requirement_ids": [
-        "WIRE02-PILLAR-003"
-      ],
+      "requirement_ids": ["WIRE02-PILLAR-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4195,9 +3986,7 @@
       "fixture_name": "single-pillar-valid",
       "description": "Single pillar value is valid",
       "primary_requirement_id": "WIRE02-PILLAR-002",
-      "requirement_ids": [
-        "WIRE02-PILLAR-002"
-      ],
+      "requirement_ids": ["WIRE02-PILLAR-002"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4207,9 +3996,7 @@
       "fixture_name": "policy-binding-failed",
       "description": "Mismatching digests produce E_POLICY_BINDING_FAILED",
       "primary_requirement_id": "WIRE02-POLICY-001",
-      "requirement_ids": [
-        "WIRE02-POLICY-001"
-      ],
+      "requirement_ids": ["WIRE02-POLICY-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4219,9 +4006,7 @@
       "fixture_name": "policy-binding-unavailable-no-local-digest",
       "description": "Absent local digest produces unavailable state",
       "primary_requirement_id": "WIRE02-POLICY-001",
-      "requirement_ids": [
-        "WIRE02-POLICY-001"
-      ],
+      "requirement_ids": ["WIRE02-POLICY-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4231,9 +4016,7 @@
       "fixture_name": "policy-binding-unavailable-no-receipt-digest",
       "description": "Absent receipt digest produces unavailable state",
       "primary_requirement_id": "WIRE02-POLICY-001",
-      "requirement_ids": [
-        "WIRE02-POLICY-001"
-      ],
+      "requirement_ids": ["WIRE02-POLICY-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4243,9 +4026,7 @@
       "fixture_name": "policy-binding-verified",
       "description": "Matching receipt and local policy digests produce verified state",
       "primary_requirement_id": "WIRE02-POLICY-001",
-      "requirement_ids": [
-        "WIRE02-POLICY-001"
-      ],
+      "requirement_ids": ["WIRE02-POLICY-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4255,9 +4036,7 @@
       "fixture_name": "policy-uri-https-valid",
       "description": "policy.uri with https:// is accepted",
       "primary_requirement_id": "WIRE02-POLICY-002",
-      "requirement_ids": [
-        "WIRE02-POLICY-002"
-      ],
+      "requirement_ids": ["WIRE02-POLICY-002"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4267,9 +4046,7 @@
       "fixture_name": "policy-with-version-valid",
       "description": "policy block with optional version label is accepted",
       "primary_requirement_id": "WIRE02-POLICY-002",
-      "requirement_ids": [
-        "WIRE02-POLICY-002"
-      ],
+      "requirement_ids": ["WIRE02-POLICY-002"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4294,9 +4071,7 @@
       "fixture_name": "boundary-jti-256-chars",
       "description": "jti at exactly 256 characters is at maximum length boundary",
       "primary_requirement_id": "WIRE02-REPLAY-003",
-      "requirement_ids": [
-        "WIRE02-REPLAY-003"
-      ],
+      "requirement_ids": ["WIRE02-REPLAY-003"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -4306,9 +4081,7 @@
       "fixture_name": "boundary-jti-single-char",
       "description": "Single character jti is at minimum length boundary (1 char)",
       "primary_requirement_id": "WIRE02-REPLAY-003",
-      "requirement_ids": [
-        "WIRE02-REPLAY-003"
-      ],
+      "requirement_ids": ["WIRE02-REPLAY-003"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -4318,9 +4091,7 @@
       "fixture_name": "jti-crypto-random-valid",
       "description": "Cryptographic random hex jti is accepted",
       "primary_requirement_id": "WIRE02-REPLAY-003",
-      "requirement_ids": [
-        "WIRE02-REPLAY-003"
-      ],
+      "requirement_ids": ["WIRE02-REPLAY-003"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4330,10 +4101,7 @@
       "fixture_name": "jti-present-valid",
       "description": "jti claim present satisfies REQUIRED constraint",
       "primary_requirement_id": "WIRE02-REPLAY-001",
-      "requirement_ids": [
-        "WIRE02-REPLAY-001",
-        "WIRE02-REPLAY-003"
-      ],
+      "requirement_ids": ["WIRE02-REPLAY-001", "WIRE02-REPLAY-003"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4343,10 +4111,7 @@
       "fixture_name": "jti-uuid-v7-valid",
       "description": "UUIDv7 format jti is accepted",
       "primary_requirement_id": "WIRE02-REPLAY-003",
-      "requirement_ids": [
-        "WIRE02-REPLAY-003",
-        "WIRE02-REPLAY-001"
-      ],
+      "requirement_ids": ["WIRE02-REPLAY-003", "WIRE02-REPLAY-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4356,9 +4121,7 @@
       "fixture_name": "reject-duplicate-jti-in-bundle",
       "description": "Each receipt in evidence bundle MUST have unique jti",
       "primary_requirement_id": "WIRE02-REPLAY-013",
-      "requirement_ids": [
-        "WIRE02-REPLAY-013"
-      ],
+      "requirement_ids": ["WIRE02-REPLAY-013"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4368,9 +4131,7 @@
       "fixture_name": "absolute-uri-valid",
       "description": "Valid absolute URI type: starts with scheme://",
       "primary_requirement_id": "WIRE02-TYPE-001",
-      "requirement_ids": [
-        "WIRE02-TYPE-001"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4380,9 +4141,7 @@
       "fixture_name": "boundary-type-max-length",
       "description": "Type at exactly 256 characters is accepted (boundary)",
       "primary_requirement_id": "WIRE02-TYPE-001",
-      "requirement_ids": [
-        "WIRE02-TYPE-001"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-001"],
       "status": "boundary",
       "has_requirements": true
     },
@@ -4392,9 +4151,7 @@
       "fixture_name": "registered-type-no-warning",
       "description": "Registered type does not trigger type_unregistered warning",
       "primary_requirement_id": "WIRE02-TYPE-007",
-      "requirement_ids": [
-        "WIRE02-TYPE-007"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-007"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4404,9 +4161,7 @@
       "fixture_name": "reject-domain-special-chars",
       "description": "Domain with special characters violates MUST match pattern",
       "primary_requirement_id": "WIRE02-TYPE-002",
-      "requirement_ids": [
-        "WIRE02-TYPE-002"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-002"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4416,10 +4171,7 @@
       "fixture_name": "reject-domain-starts-with-hyphen",
       "description": "Domain starting with hyphen violates MUST start with alphanumeric",
       "primary_requirement_id": "WIRE02-TYPE-005",
-      "requirement_ids": [
-        "WIRE02-TYPE-005",
-        "WIRE02-TYPE-002"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-005", "WIRE02-TYPE-002"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4429,9 +4181,7 @@
       "fixture_name": "reject-empty-segment",
       "description": "Empty segment after slash is rejected",
       "primary_requirement_id": "WIRE02-TYPE-003",
-      "requirement_ids": [
-        "WIRE02-TYPE-003"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4441,9 +4191,7 @@
       "fixture_name": "reject-empty-type",
       "description": "Empty string is rejected",
       "primary_requirement_id": "WIRE02-TYPE-001",
-      "requirement_ids": [
-        "WIRE02-TYPE-001"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4453,9 +4201,7 @@
       "fixture_name": "reject-no-dot-in-domain",
       "description": "Domain without dot is rejected (single-label path)",
       "primary_requirement_id": "WIRE02-TYPE-001",
-      "requirement_ids": [
-        "WIRE02-TYPE-001"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4465,9 +4211,7 @@
       "fixture_name": "reject-segment-starts-with-hyphen",
       "description": "Segment starting with hyphen violates MUST start with alphanumeric",
       "primary_requirement_id": "WIRE02-TYPE-006",
-      "requirement_ids": [
-        "WIRE02-TYPE-006"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-006"],
       "status": "negative",
       "has_requirements": true
     },
@@ -4477,10 +4221,7 @@
       "fixture_name": "reverse-dns-valid",
       "description": "Valid reverse-DNS type: domain with dot and non-empty segment",
       "primary_requirement_id": "WIRE02-TYPE-001",
-      "requirement_ids": [
-        "WIRE02-TYPE-001",
-        "WIRE02-TYPE-003"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-001", "WIRE02-TYPE-003"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4490,9 +4231,7 @@
       "fixture_name": "type-with-underscore-valid",
       "description": "Underscores permitted in segment: access_decision is valid",
       "primary_requirement_id": "WIRE02-TYPE-004",
-      "requirement_ids": [
-        "WIRE02-TYPE-004"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-004"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4502,9 +4241,7 @@
       "fixture_name": "unregistered-type-warning",
       "description": "Unregistered type triggers type_unregistered warning (not error)",
       "primary_requirement_id": "WIRE02-TYPE-007",
-      "requirement_ids": [
-        "WIRE02-TYPE-007"
-      ],
+      "requirement_ids": ["WIRE02-TYPE-007"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4976,10 +4713,7 @@
       "fixture_name": "full-validation-pass",
       "description": "Receipt passes all 13 validation steps",
       "primary_requirement_id": "WIRE02-VALID-001",
-      "requirement_ids": [
-        "WIRE02-VALID-001",
-        "WIRE02-VALID-006"
-      ],
+      "requirement_ids": ["WIRE02-VALID-001", "WIRE02-VALID-006"],
       "status": "positive",
       "has_requirements": true
     },
@@ -4989,10 +4723,7 @@
       "fixture_name": "reject-missing-jti-claim",
       "description": "Step 10a: missing jti claim is REQUIRED (schema enforced)",
       "primary_requirement_id": "WIRE02-VALID-009",
-      "requirement_ids": [
-        "WIRE02-VALID-009",
-        "WIRE02-REPLAY-001"
-      ],
+      "requirement_ids": ["WIRE02-VALID-009", "WIRE02-REPLAY-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -5002,9 +4733,7 @@
       "fixture_name": "reject-missing-jws-input",
       "description": "Missing jws input is REQUIRED and produces E_INVALID_FORMAT",
       "primary_requirement_id": "WIRE02-VALID-004",
-      "requirement_ids": [
-        "WIRE02-VALID-004"
-      ],
+      "requirement_ids": ["WIRE02-VALID-004"],
       "status": "negative",
       "has_requirements": true
     },
@@ -5014,9 +4743,7 @@
       "fixture_name": "reject-missing-public-key",
       "description": "Missing publicKey input is REQUIRED and produces E_INVALID_FORMAT",
       "primary_requirement_id": "WIRE02-VALID-005",
-      "requirement_ids": [
-        "WIRE02-VALID-005"
-      ],
+      "requirement_ids": ["WIRE02-VALID-005"],
       "status": "negative",
       "has_requirements": true
     },
@@ -5026,10 +4753,7 @@
       "fixture_name": "step1-reject-invalid-signature",
       "description": "Step 1: invalid signature terminates validation immediately",
       "primary_requirement_id": "WIRE02-VALID-002",
-      "requirement_ids": [
-        "WIRE02-VALID-002",
-        "WIRE02-VALID-003"
-      ],
+      "requirement_ids": ["WIRE02-VALID-002", "WIRE02-VALID-003"],
       "status": "negative",
       "has_requirements": true
     },
@@ -5039,10 +4763,7 @@
       "fixture_name": "step12-policy-binding-check",
       "description": "Step 12: policy binding verified when both digests present and match",
       "primary_requirement_id": "WIRE02-VALID-001",
-      "requirement_ids": [
-        "WIRE02-VALID-001",
-        "WIRE02-POLICY-001"
-      ],
+      "requirement_ids": ["WIRE02-VALID-001", "WIRE02-POLICY-001"],
       "status": "positive",
       "has_requirements": true
     },
@@ -5052,10 +4773,7 @@
       "fixture_name": "step3-reject-constraint-violation",
       "description": "Step 3: kernel constraint violation terminates before schema parse",
       "primary_requirement_id": "WIRE02-VALID-007",
-      "requirement_ids": [
-        "WIRE02-VALID-007",
-        "WIRE02-VALID-002"
-      ],
+      "requirement_ids": ["WIRE02-VALID-007", "WIRE02-VALID-002"],
       "status": "negative",
       "has_requirements": true
     },
@@ -5065,9 +4783,7 @@
       "fixture_name": "step7-reject-issuer-mismatch",
       "description": "Step 7: issuer binding mismatch produces E_INVALID_ISSUER",
       "primary_requirement_id": "WIRE02-VALID-001",
-      "requirement_ids": [
-        "WIRE02-VALID-001"
-      ],
+      "requirement_ids": ["WIRE02-VALID-001"],
       "status": "negative",
       "has_requirements": true
     },
@@ -5077,9 +4793,7 @@
       "fixture_name": "step9-reject-future-iat",
       "description": "Step 9: iat beyond clock skew tolerance produces E_NOT_YET_VALID",
       "primary_requirement_id": "WIRE02-VALID-008",
-      "requirement_ids": [
-        "WIRE02-VALID-008"
-      ],
+      "requirement_ids": ["WIRE02-VALID-008"],
       "status": "negative",
       "has_requirements": true
     },
