@@ -1,0 +1,12 @@
+COSE_ALG
+ClaimMapperOptions
+CoseProtectedHeaders
+CoseSign1
+EAT_CLAIM_KEY
+EAT_SIZE_LIMIT
+EatAdapterError
+EatClaims
+EatPassportResult
+MappedEatClaims
+decodeEatPassport
+mapEatClaims

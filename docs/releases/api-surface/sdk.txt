@@ -1,0 +1,13 @@
+ClientConfig
+ClientError
+DiscoverOptions
+DiscoveryResult
+PeacClient
+PublicKeyMap
+VerificationResult
+VerifyLocalOptions
+VerifyRemoteOptions
+discover
+verify
+verifyLocal
+verifyRemote
