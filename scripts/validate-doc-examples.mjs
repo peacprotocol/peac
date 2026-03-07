@@ -131,20 +131,6 @@ function extractCodeBlocks(filePath) {
 // ---------------------------------------------------------------------------
 
 /**
- * Validate a JSON code block.
- * @param {CodeBlock} block
- * @returns {{ok: boolean, error?: string}}
- */
-function validateJson(block) {
-  try {
-    JSON.parse(block.code);
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: `JSON parse error: ${err.message}` };
-  }
-}
-
-/**
  * Validate a TypeScript code block via tsc --noEmit.
  * Creates a temp file, runs tsc, reports errors.
  * @param {CodeBlock} block
