@@ -37,9 +37,9 @@ describe('Negative Test Vectors', () => {
 
       // Attempt verification (should fail)
       const { publicKey } = await generateKeypair();
-      const result = await jwsVerify(tamperedJWS, publicKey);
+      const verifyResult = await jwsVerify(tamperedJWS, publicKey);
 
-      expect(result.valid).toBe(false);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Tampered signature correctly rejected');
     });
@@ -97,8 +97,8 @@ describe('Negative Test Vectors', () => {
       const tamperedJWS = `${parts[0]}.${tamperedPayloadB64}.${parts[2]}`;
 
       // Verification MUST fail
-      const result = await jwsVerify(tamperedJWS, publicKey);
-      expect(result.valid).toBe(false);
+      const verifyResult = await jwsVerify(tamperedJWS, publicKey);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Modified amount correctly rejected');
     });
@@ -126,8 +126,8 @@ describe('Negative Test Vectors', () => {
       const tamperedPayloadB64 = Buffer.from(JSON.stringify(tamperedPayload)).toString('base64url');
       const tamperedJWS = `${parts[0]}.${tamperedPayloadB64}.${parts[2]}`;
 
-      const result = await jwsVerify(tamperedJWS, publicKey);
-      expect(result.valid).toBe(false);
+      const verifyResult = await jwsVerify(tamperedJWS, publicKey);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Modified audience correctly rejected');
     });
@@ -158,8 +158,8 @@ describe('Negative Test Vectors', () => {
       const tamperedPayloadB64 = Buffer.from(JSON.stringify(tamperedPayload)).toString('base64url');
       const tamperedJWS = `${parts[0]}.${tamperedPayloadB64}.${parts[2]}`;
 
-      const result = await jwsVerify(tamperedJWS, publicKey);
-      expect(result.valid).toBe(false);
+      const verifyResult = await jwsVerify(tamperedJWS, publicKey);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Modified payment scheme correctly rejected');
     });

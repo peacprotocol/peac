@@ -2,15 +2,19 @@
  * Parity tests: issue() and issueWire02() produce equivalent outputs.
  *
  * issue() is the canonical public issuance API (thin alias over issueWire02).
- * These tests verify structural equivalence for the same input.
+ * These tests verify both structural equivalence and exact byte-level equality.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
 import { issue, issueWire02 } from '../src/issue';
 import { verifyLocal } from '../src/verify-local';
 
 describe('issue() and issueWire02() parity', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('issue() produces a valid Wire 0.2 receipt', async () => {
     const { publicKey, privateKey } = await generateKeypair();
 
@@ -39,15 +43,19 @@ describe('issue() and issueWire02() parity', () => {
     }
   });
 
-  it('issue() and issueWire02() produce structurally equivalent receipts', async () => {
+  it('issue() and issueWire02() produce exact same JWS bytes under fixed time and JTI', async () => {
     const { publicKey, privateKey } = await generateKeypair();
+
+    // Fix Date.now so iat is deterministic
+    const fixedNow = 1741500000000; // 2025-03-09T...
+    vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
 
     const opts = {
       iss: 'https://api.example.com',
       kind: 'evidence' as const,
       type: 'org.peacprotocol/access-decision',
       pillars: ['access' as const],
-      jti: 'fixed-jti-for-parity',
+      jti: 'fixed-jti-for-parity-test',
       privateKey,
       kid: 'parity-key',
     };
@@ -55,23 +63,16 @@ describe('issue() and issueWire02() parity', () => {
     const resultA = await issue(opts);
     const resultB = await issueWire02(opts);
 
-    // Both produce valid JWS strings
-    expect(typeof resultA.jws).toBe('string');
-    expect(typeof resultB.jws).toBe('string');
+    // Exact same JWS output (byte-level equality)
+    expect(resultA.jws).toBe(resultB.jws);
 
     // Both verify successfully as Wire 0.2
-    const verifyA = await verifyLocal(resultA.jws, publicKey);
-    const verifyB = await verifyLocal(resultB.jws, publicKey);
-    expect(verifyA.valid).toBe(true);
-    expect(verifyB.valid).toBe(true);
-
-    if (verifyA.valid && verifyB.valid) {
-      // Same structural claims (iat differs due to timing, but kind/type/iss match)
-      expect(verifyA.claims.kind).toBe(verifyB.claims.kind);
-      expect(verifyA.claims.type).toBe(verifyB.claims.type);
-      expect(verifyA.claims.iss).toBe(verifyB.claims.iss);
-      expect(verifyA.claims.jti).toBe(verifyB.claims.jti);
-      expect(verifyA.wireVersion).toBe(verifyB.wireVersion);
+    const verified = await verifyLocal(resultA.jws, publicKey);
+    expect(verified.valid).toBe(true);
+    if (verified.valid) {
+      expect(verified.wireVersion).toBe('0.2');
+      expect(verified.claims.iat).toBe(Math.floor(fixedNow / 1000));
+      expect(verified.claims.jti).toBe('fixed-jti-for-parity-test');
     }
   });
 

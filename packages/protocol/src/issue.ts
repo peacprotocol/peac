@@ -37,9 +37,12 @@ import {
 import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 
 /**
- * Options for issuing a receipt
+ * Wire 0.1 receipt options (frozen legacy).
+ *
+ * @deprecated Use {@link IssueWire02Options} (or the {@link IssueOptions} alias)
+ * for current stable issuance.
  */
-export interface IssueOptions {
+export interface IssueWire01Options {
   /** Issuer URL (https://) */
   iss: string;
 
@@ -170,7 +173,7 @@ export class IssueError extends Error {
  * @returns Issue result with JWS and optional subject_snapshot
  * @throws IssueError if evidence contains non-JSON-safe values
  */
-export async function issueWire01(options: IssueOptions): Promise<IssueResult> {
+export async function issueWire01(options: IssueWire01Options): Promise<IssueResult> {
   // Validate URLs
   if (!options.iss.startsWith('https://')) {
     throw new Error('Issuer URL must start with https://');
@@ -359,7 +362,7 @@ export async function issueWire01(options: IssueOptions): Promise<IssueResult> {
  * @param options - Wire 0.1 receipt options
  * @returns JWS compact serialization
  */
-export async function issueJws(options: IssueOptions): Promise<string> {
+export async function issueJws(options: IssueWire01Options): Promise<string> {
   const result = await issueWire01(options);
   return result.jws;
 }
@@ -442,6 +445,13 @@ export interface IssueWire02Options {
   /** Extension groups (open; caller-provided, not validated here) */
   extensions?: Record<string, unknown>;
 }
+
+/**
+ * Canonical issuance options type.
+ *
+ * Alias for {@link IssueWire02Options}: the current stable receipt format.
+ */
+export type IssueOptions = IssueWire02Options;
 
 /**
  * Issue a Wire 0.2 receipt (explicit wire-pinned API).
