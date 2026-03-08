@@ -90,11 +90,7 @@ if [ -n "$MERGE_BASE" ]; then
   done < <(
     git diff "$MERGE_BASE"...HEAD --name-only 2>/dev/null \
       | grep '^packages/' \
-      | sed -E '
-          s|^(packages/(rails|mappings|transport)/[^/]+)/.*|\1|
-          s|^(packages/adapters/[^/]+/[^/]+)/.*|\1|
-          s|^(packages/[^/]+)/.*|\1|
-        ' \
+      | sed -E -e 's#^(packages/(rails|mappings|transport)/[^/]+)/.*#\1#' -e t -e 's#^(packages/adapters/[^/]+/[^/]+)/.*#\1#' -e t -e 's#^(packages/[^/]+)/.*#\1#' \
       | sort -u
   )
 
