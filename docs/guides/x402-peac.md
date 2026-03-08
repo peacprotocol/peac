@@ -32,27 +32,31 @@ pnpm add @peac/protocol @peac/crypto @peac/rails-x402
 ```typescript
 import { issue } from '@peac/protocol';
 
-const result = await issue({
+const { jws } = await issue({
   iss: 'https://your-api.com',
-  aud: 'https://your-api.com/resource',
-  amt: 100, // cents
-  cur: 'USD',
-  rail: 'x402',
-  reference: `x402_${paymentId}`,
-  asset: 'USDC',
-  env: 'live',
-  evidence: {
-    network: 'eip155:8453', // Base mainnet
-    tx_hash: txHash,
-    recipient: recipientAddress,
-    x402_version: 'v2',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'x402',
+      amount_minor: '10000',
+      currency: 'USD',
+      asset: 'USDC',
+      env: 'live',
+      network: 'eip155:8453', // Base mainnet
+      tx_hash: txHash,
+      recipient: recipientAddress,
+      x402_version: 'v2',
+      reference: `x402_${paymentId}`,
+    },
   },
   privateKey,
   kid: 'your-key-id',
 });
 
 // Set the PEAC-Receipt header in your response
-response.setHeader('PEAC-Receipt', result.jws);
+response.setHeader('PEAC-Receipt', jws);
 ```
 
 ### 3. Verify a Receipt
@@ -290,21 +294,29 @@ app.get('/premium', async (req, res) => {
 app.post('/issue-receipt', async (req, res) => {
   const { resource, txHash, network } = req.body;
 
-  const result = await issue({
+  const { jws } = await issue({
     iss: 'https://your-api.com',
-    aud: resource,
-    amt: 100,
-    cur: 'USD',
-    rail: 'x402',
-    reference: `x402_${txHash}`,
-    asset: 'USDC',
-    env: 'live',
-    evidence: { network, tx_hash: txHash, x402_version: 'v2' },
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'x402',
+        amount_minor: '10000',
+        currency: 'USD',
+        asset: 'USDC',
+        env: 'live',
+        network,
+        tx_hash: txHash,
+        x402_version: 'v2',
+        reference: `x402_${txHash}`,
+      },
+    },
     privateKey,
     kid: 'key-2025',
   });
 
-  res.json({ receipt: result.jws });
+  res.json({ receipt: jws });
 });
 ```
 

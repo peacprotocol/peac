@@ -8,13 +8,13 @@
  */
 
 import { generateKeypair } from '@peac/crypto';
-import { issueWire02, verifyLocal } from '@peac/protocol';
+import { issue, verifyLocal } from '@peac/protocol';
 
 // 1. Generate Ed25519 keypair
 const { publicKey, privateKey } = await generateKeypair();
 
-// 2. Issue a signed Wire 0.2 receipt
-const { jws } = await issueWire02({
+// 2. Issue a signed receipt
+const { jws } = await issue({
   iss: 'https://api.example.com',
   kind: 'evidence',
   type: 'org.peacprotocol/payment',

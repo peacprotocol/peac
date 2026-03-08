@@ -8,12 +8,12 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
 import { KERNEL_CONSTRAINTS } from '@peac/schema';
-import { issue, IssueError } from '../src/issue';
+import { issueWire01, IssueError } from '../src/issue';
 
 describe('issue() kernel constraints (DD-121)', () => {
   it('issues a valid receipt without constraint violations', async () => {
     const { privateKey } = await generateKeypair();
-    const result = await issue({
+    const result = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 1000,
@@ -34,7 +34,7 @@ describe('issue() kernel constraints (DD-121)', () => {
     const bigArray = new Array(KERNEL_CONSTRAINTS.MAX_ARRAY_LENGTH + 1).fill(0);
 
     await expect(
-      issue({
+      issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 100,
@@ -58,7 +58,7 @@ describe('issue() kernel constraints (DD-121)', () => {
     }
 
     await expect(
-      issue({
+      issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 100,
@@ -79,7 +79,7 @@ describe('issue() kernel constraints (DD-121)', () => {
     const longString = 'x'.repeat(KERNEL_CONSTRAINTS.MAX_STRING_LENGTH + 1);
 
     await expect(
-      issue({
+      issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 100,
@@ -100,7 +100,7 @@ describe('issue() kernel constraints (DD-121)', () => {
     const bigArray = new Array(KERNEL_CONSTRAINTS.MAX_ARRAY_LENGTH + 1).fill(0);
 
     try {
-      await issue({
+      await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 100,
@@ -130,7 +130,7 @@ describe('issue() kernel constraints (DD-121)', () => {
     // (100,000) when combined with the rest of the claims object. Use a smaller
     // array that validates cleanly through both constraint and Zod layers.
     const items = new Array(100).fill('ok');
-    const result = await issue({
+    const result = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,

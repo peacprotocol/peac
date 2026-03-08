@@ -7,14 +7,14 @@
 
 import { bench, describe } from 'vitest';
 import { generateKeypair, sign } from '@peac/crypto';
-import { issue, verifyLocal } from '../../src/index';
+import { issueWire01, verifyLocal } from '../../src/index';
 
 const NOW = 1700000000;
 
 describe('protocol hot paths', async () => {
   const { privateKey, publicKey } = await generateKeypair();
 
-  const { jws: commerceJws } = await issue({
+  const { jws: commerceJws } = await issueWire01({
     iss: 'https://api.example.com',
     aud: 'https://client.example.com',
     amt: 5000,
@@ -49,7 +49,7 @@ describe('protocol hot paths', async () => {
   });
 
   bench('issue (commerce)', async () => {
-    await issue({
+    await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 5000,

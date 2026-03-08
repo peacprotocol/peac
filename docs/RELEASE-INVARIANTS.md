@@ -66,9 +66,17 @@ import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
 const { privateKey, publicKey } = await generateKeypair();
 const { jws } = await issue({
   iss: 'https://test.example.com',
-  aud: 'https://consumer.example.com',
-  subject: 'https://test.example.com/api/v1',
-  amt: 100, cur: 'USD', rail: 'x402', reference: 'tx_test',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'x402',
+      amount_minor: '10000',
+      currency: 'USD',
+      reference: 'tx_test',
+    },
+  },
   privateKey, kid: 'test-key',
 });
 const result = await verifyLocal(jws, publicKey, {

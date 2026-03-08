@@ -25,7 +25,7 @@ import { issue, verifyLocal } from '@peac/protocol';
 import { generateKeypair } from '@peac/crypto';
 
 const { publicKey, privateKey } = await generateKeypair();
-const { jws } = await issue({ iss, aud, amt, cur, rail, reference, privateKey, kid });
+const { jws } = await issue({ iss, kind: 'evidence', type, pillars, extensions, privateKey, kid });
 const result = await verifyLocal(jws, publicKey);
 ```
 

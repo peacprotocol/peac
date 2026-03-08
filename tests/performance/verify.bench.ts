@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { issue, issueWire02 } from '../../packages/protocol/src/issue';
+import { issueWire01, issueWire02 } from '../../packages/protocol/src/issue';
 import { verify as jwsVerify, generateKeypair } from '../../packages/crypto/src/jws';
 import { verifyLocal } from '../../packages/protocol/src/verify-local';
 import * as fs from 'fs';
@@ -61,7 +61,7 @@ describe('Performance Benchmarks', () => {
     const kid = '2025-01-26T12:00:00Z';
 
     // Generate test receipt
-    const testResult = await issue({
+    const testResult = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 9999,
@@ -138,7 +138,7 @@ describe('Performance Benchmarks', () => {
     // Warmup
     console.log('Warmup: 10 iterations...');
     for (let i = 0; i < 10; i++) {
-      await issue({
+      await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -156,7 +156,7 @@ describe('Performance Benchmarks', () => {
 
     for (let i = 0; i < 1000; i++) {
       const start = performance.now();
-      await issue({
+      await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,

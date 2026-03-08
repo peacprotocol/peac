@@ -10,7 +10,7 @@
  */
 
 import { fromCryptoPaymentIntent } from '@peac/rails-stripe';
-import { issue, verify } from '@peac/protocol';
+import { issueWire01, verify } from '@peac/protocol';
 import { generateKeypair, derivePublicKey } from '@peac/crypto';
 
 interface ReceiptPayload {
@@ -69,7 +69,7 @@ async function main(): Promise<void> {
   const { privateKey } = await generateKeypair();
   const publicKey = await derivePublicKey(privateKey);
 
-  const result = await issue({
+  const result = await issueWire01({
     iss: 'https://api.weather.example.com',
     aud: 'https://agent.example.com',
     amt: payment.amount,

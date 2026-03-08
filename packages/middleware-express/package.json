@@ -1,6 +1,6 @@
 {
   "name": "@peac/middleware-express",
-  "version": "0.12.0-preview.2",
+  "version": "0.12.0",
   "description": "Express.js middleware for automatic PEAC receipt issuance",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

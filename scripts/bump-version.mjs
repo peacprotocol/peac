@@ -16,7 +16,7 @@
  *   1 - Error or missing argument
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -212,16 +212,28 @@ const specVersionFiles = [
   join(ROOT, 'docs/releases/current.json'),
 ];
 
-// Also bump version and schema_version in conformance fixture files
-const fixtureGlobs = [
-  join(ROOT, 'specs/conformance/fixtures/manifest.json'),
-  join(ROOT, 'specs/conformance/fixtures/wire-02/valid.json'),
-  join(ROOT, 'specs/conformance/fixtures/wire-02/invalid.json'),
-  join(ROOT, 'specs/conformance/fixtures/wire-02/warnings.json'),
-  join(ROOT, 'specs/conformance/fixtures/wire-02/replay-prevention/boundary-jti-length.json'),
-];
+// Recursively find all JSON files in a directory
+function findJsonFiles(dir) {
+  const results = [];
+  try {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        results.push(...findJsonFiles(fullPath));
+      } else if (entry.name.endsWith('.json')) {
+        results.push(fullPath);
+      }
+    }
+  } catch {
+    // dir not found
+  }
+  return results;
+}
 
-for (const specPath of [...specVersionFiles, ...fixtureGlobs]) {
+// Glob all JSON files in specs/conformance/ (fixtures, registry, test-mappings, etc.)
+const conformanceJsonFiles = findJsonFiles(join(ROOT, 'specs/conformance'));
+
+for (const specPath of [...specVersionFiles, ...conformanceJsonFiles]) {
   let raw;
   try {
     raw = readFileSync(specPath, 'utf-8');
@@ -252,7 +264,23 @@ for (const specPath of [...specVersionFiles, ...fixtureGlobs]) {
   }
 }
 
-// 6. Regenerate codegen from updated specs (atomic: version bump + codegen are one step)
+// 6. Bump VERSION constant in conformance tooling scripts
+const buildRegistryPath = join(ROOT, 'scripts/conformance/build-registry.mjs');
+try {
+  const raw = readFileSync(buildRegistryPath, 'utf-8');
+  const updated = raw.replace(
+    /^(const VERSION = ')[^']+(';\s*)$/m,
+    `$1${version}$2`
+  );
+  if (raw !== updated) {
+    if (!dryRun) writeFileSync(buildRegistryPath, updated);
+    console.log(`  scripts/conformance/build-registry.mjs: VERSION bumped to ${version}`);
+  }
+} catch {
+  // script not found
+}
+
+// 7. Regenerate codegen from updated specs (atomic: version bump + codegen are one step)
 if (!dryRun) {
   console.log('');
   console.log('Regenerating codegen from updated specs...');
@@ -279,7 +307,28 @@ if (!dryRun) {
     console.error('    pnpm exec tsx scripts/codegen-errors.ts');
   }
 
-  // 7. Format version-bumped JSON files
+  // 8. Regenerate conformance tooling (registry, inventory, matrix)
+  console.log('Regenerating conformance tooling...');
+  const conformanceScripts = [
+    join(ROOT, 'scripts/conformance/build-registry.mjs'),
+    join(ROOT, 'scripts/conformance/generate-inventory.mjs'),
+    join(ROOT, 'scripts/conformance/generate-matrix.mjs'),
+  ];
+  for (const script of conformanceScripts) {
+    try {
+      execFileSync('node', [script], {
+        cwd: ROOT,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      });
+    } catch {
+      const name = script.split('/').pop();
+      console.error(`  WARNING: ${name} failed. Run manually: node ${relative(ROOT, script)}`);
+    }
+  }
+  console.log('  Conformance tooling regenerated.');
+
+  // 9. Format version-bumped JSON files
   console.log('Formatting bumped JSON files...');
   try {
     execFileSync(

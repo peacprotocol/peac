@@ -5,7 +5,7 @@
  * Run with: pnpm demo
  */
 
-import { issueWire02, verifyLocal, isWire02Result, generateKeypair } from '@peac/protocol';
+import { issue, verifyLocal, isWire02Result, generateKeypair } from '@peac/protocol';
 
 async function main() {
   console.log('PEAC Quickstart Demo\n');
@@ -15,9 +15,9 @@ async function main() {
   const { privateKey, publicKey } = await generateKeypair();
   console.log('   Done.\n');
 
-  // 2. Issue a Wire 0.2 receipt
+  // 2. Issue a receipt
   console.log('2. Issuing receipt...');
-  const { jws } = await issueWire02({
+  const { jws } = await issue({
     iss: 'https://api.example.com',
     kind: 'evidence',
     type: 'org.peacprotocol/payment',

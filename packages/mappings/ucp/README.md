@@ -51,7 +51,22 @@ const claims = mapUcpOrderToReceipt({
 });
 
 // Sign with @peac/protocol
-const receipt = await issue(claims, privateKey, kid);
+const { jws } = await issue({
+  iss: 'https://platform.example.com',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'ucp',
+      amount_minor: String(claims.amount),
+      currency: claims.currency,
+      reference: claims.reference,
+    },
+  },
+  privateKey,
+  kid,
+});
 ```
 
 ### Create Dispute Evidence

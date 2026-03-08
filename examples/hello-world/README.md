@@ -27,11 +27,16 @@ const { publicKey, privateKey } = await generateKeypair();
 
 const { jws } = await issue({
   iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 100,
-  cur: 'USD',
-  rail: 'stripe',
-  reference: 'tx_hello_world',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '10000',
+      currency: 'USD',
+    },
+  },
   privateKey,
   kid: 'demo-key',
 });
@@ -49,10 +54,10 @@ npx tsx demo.ts
 Expected output:
 
 ```text
-Receipt JWS: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8...
+Receipt JWS: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJl...
 Valid: true
 Issuer: https://api.example.com
-Amount: 100 USD
+Kind: evidence
 ```
 
 ## With MCP Server

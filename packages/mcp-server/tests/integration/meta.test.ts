@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { getDefaultPolicy, computePolicyHash } from '../../src/infra/policy.js';
 import { SERVER_VERSION, MCP_PROTOCOL_VERSION } from '../../src/infra/constants.js';
 
@@ -10,7 +10,7 @@ describe('integration/meta', () => {
     const policyHash = await computePolicyHash(JSON.stringify(policy));
     const { handleDecode } = await import('../../src/handlers/decode.js');
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,

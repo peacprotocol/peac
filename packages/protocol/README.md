@@ -22,11 +22,16 @@ const { publicKey, privateKey } = await generateKeypair();
 
 const { jws } = await issue({
   iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 100,
-  cur: 'USD',
-  rail: 'stripe',
-  reference: 'pi_abc123',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '10000',
+      currency: 'USD',
+    },
+  },
   privateKey,
   kid: 'key-2026-02',
 });
@@ -39,10 +44,10 @@ import { verifyLocal } from '@peac/protocol';
 
 const result = await verifyLocal(jws, publicKey);
 
-if (result.valid && result.variant === 'commerce') {
+if (result.valid && result.wireVersion === '0.2') {
   console.log(result.claims.iss); // issuer
-  console.log(result.claims.amt); // amount
-  console.log(result.claims.cur); // currency
+  console.log(result.claims.kind); // evidence
+  console.log(result.claims.type); // org.peacprotocol/payment
 } else if (!result.valid) {
   console.log(result.code, result.message);
 }

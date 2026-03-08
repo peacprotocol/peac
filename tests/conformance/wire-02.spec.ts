@@ -395,10 +395,10 @@ describe('Wire 0.2 Conformance: dual-stack regression', () => {
   it('Wire 0.1 receipt verifies with wireVersion 0.1 via verifyLocalWire01', async () => {
     // Wire 0.1 issue() produces Wire 0.1 JWS; verifyLocal() is now Wire 0.2 only.
     // Use verifyLocalWire01() (internal, not barrel-exported) for Wire 0.1 verification.
-    const { issue } = await import('@peac/protocol');
+    const { issueWire01 } = await import('@peac/protocol');
     const { verifyLocalWire01 } = await import('../../packages/protocol/src/verify-local-wire01');
 
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://verifier.example.com',
       sub: 'user:alice',
