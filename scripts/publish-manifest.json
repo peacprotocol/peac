@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.12.0-preview.2",
-  "lastUpdated": "2026-03-06",
-  "totalPackages": 28,
+  "lastUpdated": "2026-03-08",
+  "totalPackages": 45,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -32,7 +32,24 @@
     "@peac/mappings-content-signals",
     "@peac/adapter-openai-compatible",
     "@peac/mcp-server",
-    "@peac/cli"
+    "@peac/cli",
+    "@peac/telemetry-otel",
+    "@peac/mappings-aipref",
+    "@peac/mappings-rsl",
+    "@peac/mappings-tap",
+    "@peac/worker-core",
+    "@peac/attribution",
+    "@peac/rails-stripe",
+    "@peac/rails-card",
+    "@peac/adapter-x402-daydreams",
+    "@peac/adapter-x402-fluora",
+    "@peac/adapter-x402-pinata",
+    "@peac/pref",
+    "@peac/receipts",
+    "@peac/pay402",
+    "@peac/server",
+    "@peac/core",
+    "@peac/sdk"
   ],
   "layers": {
     "0-kernel": ["@peac/kernel"],
@@ -70,25 +87,6 @@
     "workflow": "publish.yml",
     "environment": "npm-production"
   },
-  "pendingTrustedPublishing": [
-    "@peac/telemetry-otel",
-    "@peac/mappings-aipref",
-    "@peac/mappings-rsl",
-    "@peac/mappings-tap",
-    "@peac/worker-core",
-    "@peac/net-node",
-    "@peac/attribution",
-    "@peac/rails-stripe",
-    "@peac/rails-card",
-    "@peac/adapter-eat",
-    "@peac/adapter-x402-daydreams",
-    "@peac/adapter-x402-fluora",
-    "@peac/adapter-x402-pinata",
-    "@peac/pref",
-    "@peac/receipts",
-    "@peac/pay402",
-    "@peac/server",
-    "@peac/core",
-    "@peac/sdk"
-  ]
+  "pendingTrustedPublishing": ["@peac/net-node", "@peac/adapter-eat"],
+  "pendingTrustedPublishingNote": "These packages are not yet published to npm (404). Configure trust after first publish."
 }
