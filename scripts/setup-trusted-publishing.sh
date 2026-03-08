@@ -74,9 +74,9 @@ if [ "$(printf '%s\n' "$REQUIRED_VER" "$NPM_VER" | sort -V | head -n1)" != "$REQ
   exit 1
 fi
 
-# Check npm trust command exists
-if ! npm trust --help >/dev/null 2>&1; then
-  echo "ERROR: npm trust command not available (requires npm >= 11.10.0)" >&2
+# Check npm trust github subcommand exists
+if ! npm trust github --help >/dev/null 2>&1; then
+  echo "ERROR: npm trust github command not available (requires npm >= 11.10.0)" >&2
   echo "  Fix: npm install -g npm@latest" >&2
   exit 1
 fi
@@ -108,10 +108,10 @@ LAST_STATUS=""
 
 configure_package() {
   local pkg="$1"
-  local cmd="npm trust github $pkg --file $WORKFLOW --repository $REPO --environment $ENVIRONMENT --yes"
+  local cmd=(npm trust github "$pkg" --file "$WORKFLOW" --repository "$REPO" --environment "$ENVIRONMENT" --yes)
 
   if $DRY_RUN; then
-    echo "  [dry-run] $cmd"
+    echo "  [dry-run] ${cmd[*]}"
     LAST_STATUS="configured"
     return 0
   fi
@@ -119,7 +119,7 @@ configure_package() {
   echo "  Configuring $pkg..."
   local output
   local exit_code=0
-  output=$($cmd 2>&1) || exit_code=$?
+  output=$("${cmd[@]}" 2>&1) || exit_code=$?
 
   if [ "$exit_code" -eq 0 ]; then
     echo "  CONFIGURED: $pkg"

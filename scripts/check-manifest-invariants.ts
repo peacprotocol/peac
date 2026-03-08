@@ -7,15 +7,16 @@
  *   3. Every packages[] entry must be in oidcConfigured[]
  *   4. pendingTrustedPublishing must not overlap oidcConfigured
  *   5. deferredTrustedPublishing must not overlap packages[]
- *   6. Every packages[] entry resolves to a real workspace package
+ *   6. Every entry in all arrays resolves to a real workspace package
+ *   7. pendingTrustedPublishing must be empty for stable scope
  *
  * Run: npx tsx scripts/check-manifest-invariants.ts
  *
  * Exits 0 if all invariants hold, 1 if not.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const ROOT = path.resolve(__dirname, '..');
 const MANIFEST_PATH = path.join(ROOT, 'scripts/publish-manifest.json');
@@ -91,16 +92,16 @@ if (manifest.oidcConfigured) {
   }
 }
 
-// --- 4. Every packages[] entry resolves to a workspace package ---
+// --- 4. Every entry in all arrays resolves to a workspace package ---
 
 // Nested layout mappings (same as check-publish-closure.ts)
 const nestedMappings: Record<string, string> = {
   'adapter-core': 'packages/adapters/core',
   'adapter-openclaw': 'packages/adapters/openclaw',
   'adapter-x402': 'packages/adapters/x402',
-  'adapter-x402-daydreams': 'packages/adapters/x402-daydreams',
-  'adapter-x402-fluora': 'packages/adapters/x402-fluora',
-  'adapter-x402-pinata': 'packages/adapters/x402-pinata',
+  'adapter-x402-daydreams': 'packages/adapters/x402/daydreams',
+  'adapter-x402-fluora': 'packages/adapters/x402/fluora',
+  'adapter-x402-pinata': 'packages/adapters/x402/pinata',
   'adapter-openai-compatible': 'packages/adapters/openai-compatible',
   'adapter-eat': 'packages/adapters/eat',
   'rails-x402': 'packages/rails/x402',
@@ -118,6 +119,8 @@ const nestedMappings: Record<string, string> = {
   'capture-core': 'packages/capture/core',
   'capture-node': 'packages/capture/node',
   'sdk-js': 'packages/sdk-js',
+  pref: 'packages/aipref',
+  sdk: 'packages/sdk-js',
   'net-node': 'packages/net/node',
   disc: 'packages/discovery',
 };
@@ -134,22 +137,34 @@ function resolvePackageDir(npmName: string): string {
   return flatDir;
 }
 
-for (const pkg of manifest.packages) {
-  const dir = resolvePackageDir(pkg);
-  const pkgJson = path.join(dir, 'package.json');
-  if (!fs.existsSync(pkgJson)) {
-    errors.push(`MISSING_WORKSPACE: ${pkg} has no package.json at ${dir}`);
+function checkWorkspaceResolution(name: string, arr: string[]): void {
+  for (const pkg of arr) {
+    const dir = resolvePackageDir(pkg);
+    const pkgJson = path.join(dir, 'package.json');
+    if (!fs.existsSync(pkgJson)) {
+      errors.push(
+        `MISSING_WORKSPACE: ${pkg} (in ${name}) has no package.json at ${path.relative(ROOT, dir)}`
+      );
+    }
   }
 }
 
+checkWorkspaceResolution('packages', manifest.packages);
+checkWorkspaceResolution('oidcConfigured', manifest.oidcConfigured ?? []);
+checkWorkspaceResolution('pendingTrustedPublishing', manifest.pendingTrustedPublishing ?? []);
+checkWorkspaceResolution('deferredTrustedPublishing', manifest.deferredTrustedPublishing ?? []);
+
 // --- Summary ---
+
+const pending = manifest.pendingTrustedPublishing ?? [];
+const deferred = manifest.deferredTrustedPublishing ?? [];
 
 console.log(`Manifest invariant check: ${manifest.packages.length} packages`);
 if (manifest.oidcConfigured) {
   console.log(`  oidcConfigured: ${manifest.oidcConfigured.length}`);
 }
-console.log(`  pendingTrustedPublishing: ${(manifest.pendingTrustedPublishing ?? []).length}`);
-console.log(`  deferredTrustedPublishing: ${(manifest.deferredTrustedPublishing ?? []).length}`);
+console.log(`  pendingTrustedPublishing: ${pending.length}`);
+console.log(`  deferredTrustedPublishing: ${deferred.length}`);
 
 if (errors.length > 0) {
   console.log('');
@@ -158,7 +173,13 @@ if (errors.length > 0) {
     console.log(`  ${err}`);
   }
   process.exit(1);
+}
+
+console.log('');
+if (pending.length === 0) {
+  console.log('OK: All manifest invariants hold. Stable scope fully covered.');
 } else {
-  console.log('');
-  console.log('OK: All manifest invariants hold.');
+  console.log(
+    `OK: All manifest invariants hold. ${pending.length} package(s) pending trust configuration.`
+  );
 }
