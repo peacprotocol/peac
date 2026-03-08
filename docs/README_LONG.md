@@ -180,7 +180,7 @@ A bundle contains receipts, policy snapshots, and a deterministic verification r
 
 - ZIP archive with deterministic structure (RFC 8785 canonical JSON)
 - Offline verification fails if keys are missing (no silent network fallback)
-- Cross-language parity: TypeScript and Go produce identical verification reports
+- Cross-language verification: TypeScript and Go SDKs verify the same receipt format
 
 ```bash
 # If peac is on PATH
@@ -220,7 +220,7 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 - Signature: EdDSA (Ed25519, RFC 8032)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
 
-**Wire 0.2 (stable on `latest` dist-tag, v0.12.0+):**
+**Interaction Record format (stable on `latest` dist-tag, v0.12.0+):**
 
 - JWS type: `typ: "interaction-record+jwt"`
 - Two structural kinds: `evidence` (records what happened) and `challenge` (records what is required)
@@ -229,7 +229,7 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 - 5 typed extension groups: commerce, access, challenge, identity, correlation
 - Policy binding: JCS (RFC 8785) + SHA-256 digest comparison (3-state: verified/failed/unavailable)
 - JOSE hardening: embedded keys rejected, `crit`/`b64:false`/`zip` rejected, `kid` required
-- `verifyLocal()` verifies Wire 0.2 receipts only; Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`
+- `verifyLocal()` verifies the current stable format only; Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`
 - Normative spec: [WIRE-0.2.md](specs/WIRE-0.2.md)
 
 **HTTP:**
@@ -718,18 +718,18 @@ PEAC addresses ten capability areas for AI and API infrastructure. These are pro
 
 | Pillar          | Protocol role                               | Status                                                          |
 | --------------- | ------------------------------------------- | --------------------------------------------------------------- |
-| **Access**      | Access control and policy evaluation        | Wire 0.2 extension group implemented                            |
+| **Access**      | Access control and policy evaluation        | Extension group implemented                                     |
 | **Attribution** | Attribution and revenue-share records       | `@peac/attribution` implemented                                 |
-| **Commerce**    | Payment evidence and settlement proof       | Wire 0.2 extension group implemented; `@peac/rails-*` adapters  |
-| **Consent**     | Consent lifecycle records                   | Wire 0.2 type registered; extension group planned (v0.12.1+)    |
-| **Compliance**  | Regulatory and audit records                | Wire 0.2 type registered; extension group planned (v0.12.1+)    |
+| **Commerce**    | Payment evidence and settlement proof       | Extension group implemented; `@peac/rails-*` adapters           |
+| **Consent**     | Consent lifecycle records                   | Receipt type registered; extension group planned (v0.12.1+)     |
+| **Compliance**  | Regulatory and audit records                | Receipt type registered; extension group planned (v0.12.1+)     |
 | **Privacy**     | Privacy-preserving hashing and retention    | `@peac/privacy` implemented; extension group planned (v0.12.1+) |
-| **Provenance**  | Content provenance and C2PA integration     | Wire 0.2 type registered; extension group planned (v0.12.1+)    |
+| **Provenance**  | Content provenance and C2PA integration     | Receipt type registered; extension group planned (v0.12.1+)     |
 | **Safety**      | Constraint enforcement and safety controls  | `@peac/control` implemented; extension group planned (v0.12.1+) |
-| **Identity**    | Agent identity and proof-of-control binding | Wire 0.2 extension group implemented                            |
-| **Purpose**     | Structured purpose declaration vocabulary   | Wire 0.2 type registered; extension group planned (v0.12.1+)    |
+| **Identity**    | Agent identity and proof-of-control binding | Extension group implemented                                     |
+| **Purpose**     | Structured purpose declaration vocabulary   | Receipt type registered; extension group planned (v0.12.1+)     |
 
-All 10 pillars have registered `type` values in Wire 0.2. Five have typed extension groups in v0.12.0 (commerce, access, challenge, identity, correlation). Remaining extension groups are planned for v0.12.1+.
+All 10 pillars have registered `type` values. Five have typed extension groups in v0.12.0 (commerce, access, challenge, identity, correlation). Remaining extension groups are planned for v0.12.1+.
 
 ---
 
@@ -750,7 +750,7 @@ All 10 pillars have registered `type` values in Wire 0.2. Five have typed extens
 **Spec-first:**
 
 - Normative JSON specs drive all implementations
-- TypeScript is the reference implementation; Go SDK provides receipt verification
+- TypeScript is the reference implementation; Go SDK provides Wire 0.1 issuance, verification, and policy evaluation
 - Additional implementations can follow the same specs
 
 **Defense in depth:**
@@ -766,7 +766,7 @@ All 10 pillars have registered `type` values in Wire 0.2. Five have typed extens
 
 **Wire formats:**
 
-- `interaction-record+jwt` (Wire 0.2): the current stable receipt format on the `latest` dist-tag (v0.12.0+)
+- `interaction-record+jwt` (Interaction Record format): the current stable receipt format on the `latest` dist-tag (v0.12.0+)
 - `peac-receipt/0.1` (Wire 0.1): frozen legacy format; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` for Wire 0.1 receipts
 - Use `issue()` for all new receipt issuance
 
@@ -814,7 +814,7 @@ pnpm -r test
 
 ## Go SDK
 
-The Go SDK in `sdks/go/` provides receipt verification with Ed25519 + JWS + JWKS support.
+The Go SDK in `sdks/go/` provides Wire 0.1 receipt issuance, verification, and policy evaluation with Ed25519 + JWS + JWKS support. Wire 0.2 (Interaction Record format) support is planned.
 
 ```go
 import "github.com/peacprotocol/peac/sdks/go/peac"

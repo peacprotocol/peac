@@ -24,7 +24,7 @@
   <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
 </p>
 
-**What:** PEAC standardizes three artifacts: a discoverable policy file (`/.well-known/peac.txt`), a signed receipt format (Ed25519 JWS), and a portable evidence bundle for offline verification. Wire 0.2 (`interaction-record+jwt`) is the current stable format on `latest`. Wire 0.1 (`peac-receipt/0.1`) remains frozen for backward compatibility.
+**What:** PEAC standardizes three artifacts: a discoverable policy file (`/.well-known/peac.txt`), a signed receipt format (Ed25519 JWS), and a portable evidence bundle for offline verification. The Interaction Record format (`interaction-record+jwt`) is the current stable receipt format on `latest`. Wire 0.1 (`peac-receipt/0.1`) remains frozen for backward compatibility.
 
 **Who:** AI agents and agent platforms, APIs, gateways, tool servers, and compliance/security teams operating automated traffic across org boundaries.
 
@@ -203,7 +203,7 @@ peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...'
 
 > **Legacy:** Wire 0.1 (`peac-receipt/0.1`) is frozen. See [examples/quickstart/](examples/quickstart/) for Wire 0.1 code.
 
-See [examples/wire-02-minimal/](examples/wire-02-minimal/) for runnable Wire 0.2 code. For settlement, HTTP/REST, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
+See [examples/wire-02-minimal/](examples/wire-02-minimal/) for a runnable example. For settlement, HTTP/REST, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
 
 ---
 
@@ -211,7 +211,7 @@ See [examples/wire-02-minimal/](examples/wire-02-minimal/) for runnable Wire 0.2
 
 - **Agent developer**: [Quick start](#quick-start): issue and verify receipts in 5 lines
 - **API operator**: [Express middleware](docs/README_LONG.md#express-middleware): add PEAC in 3 lines
-- **Go developer**: [Go SDK](sdks/go/): verify receipts with `peac.Verify()`
+- **Go developer**: [Go SDK](sdks/go/): issue, verify, and evaluate policy (Wire 0.1)
 - **x402 / crypto payments**: [Stripe x402 profile](docs/profiles/stripe-x402-machine-payments.md): normalize + receipt + verify
 - **Policy author**: [Policy Kit](docs/policy-kit/quickstart.md): author and validate terms
 - **Auditor / compliance**: [Dispute Bundles](#core-primitives): portable evidence format
@@ -260,14 +260,14 @@ See [packages/cli/README.md](packages/cli/README.md) for the full command refere
 
 Two wire formats coexist:
 
-- **Wire 0.2** (`interaction-record+jwt`): the current stable receipt format on the `latest` dist-tag (v0.12.0+). Adds structured kinds (`evidence`/`challenge`), open semantic types, multi-valued pillars, typed extension groups, and policy binding.
+- **Interaction Record format** (`interaction-record+jwt`, Wire 0.2): the current stable receipt format on the `latest` dist-tag (v0.12.0+). Adds structured kinds (`evidence`/`challenge`), open semantic types, multi-valued pillars, typed extension groups, and policy binding.
 - **Wire 0.1** (`peac-receipt/0.1`): frozen legacy format. Supported for verification via internal `verifyLocalWire01()` but not exported from `@peac/protocol`.
 
-`verifyLocal()` is **Wire 0.2 only**: Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`. Use `issue()` to create Wire 0.2 receipts. Both formats use Ed25519 JWS signatures and the `PEAC-Receipt` header.
+`verifyLocal()` verifies the current stable format only: Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`. Use `issue()` to create receipts. Both formats use Ed25519 JWS signatures and the `PEAC-Receipt` header.
 
 Wire format identifiers are independent of npm package versions. Protocol surfaces (`PEAC-Receipt` header, `/.well-known/peac.txt`, `/.well-known/peac-issuer.json`) are stable. Implementation APIs (`@peac/protocol`, `@peac/cli`) aim for stability; internal packages may change between releases.
 
-See [docs/specs/VERSIONING.md](docs/specs/VERSIONING.md) for the versioning doctrine and [docs/specs/WIRE-0.2.md](docs/specs/WIRE-0.2.md) for the Wire 0.2 specification.
+See [docs/specs/VERSIONING.md](docs/specs/VERSIONING.md) for the versioning doctrine and [docs/specs/WIRE-0.2.md](docs/specs/WIRE-0.2.md) for the Interaction Record format specification.
 
 ---
 
@@ -290,7 +290,7 @@ See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](doc
 | Document                                                            | Purpose                                           |
 | ------------------------------------------------------------------- | ------------------------------------------------- |
 | [Spec Index](docs/SPEC_INDEX.md)                                    | Normative specifications                          |
-| [Wire 0.2 Spec](docs/specs/WIRE-0.2.md)                             | Wire 0.2 envelope, kinds, extensions              |
+| [Interaction Record Spec](docs/specs/WIRE-0.2.md)                   | Receipt envelope, kinds, extensions               |
 | [Architecture](docs/ARCHITECTURE.md)                                | Kernel-first design                               |
 | [Kernel Constraints](docs/specs/KERNEL-CONSTRAINTS.md)              | Structural limits enforced at issue and verify    |
 | [Policy Kit Quickstart](docs/policy-kit/quickstart.md)              | Policy authoring guide                            |
@@ -322,7 +322,7 @@ Stewardship: [Originary](https://www.originary.xyz/) and the open source communi
 ## Implementations
 
 - **TypeScript** (this repo): `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
-- **Go**: [sdks/go/](sdks/go/) native implementation
+- **Go**: [sdks/go/](sdks/go/) issuance, verification, and policy evaluation (Wire 0.1)
 - **MCP**: [MCP server](packages/mcp-server/) (5 tools) and [MCP carrier mapping](packages/mappings/mcp/)
 - **A2A**: [A2A carrier mapping](packages/mappings/a2a/) for agent-to-agent evidence
 - **HTTP middleware**: [Express](packages/middleware-express/) automatic receipt issuance
