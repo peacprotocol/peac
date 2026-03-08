@@ -250,6 +250,8 @@ fi
 
 echo ""
 echo "All packages configured. Next steps:"
-echo "  1. Move configured packages to oidcConfigured in scripts/publish-manifest.json"
-echo "  2. Empty pendingTrustedPublishing (or leave only unpublished packages)"
-echo "  3. Verify: node -e \"const m=require('./scripts/publish-manifest.json'); console.log('pending:', m.pendingTrustedPublishing.length)\""
+echo "  1. Add configured packages to oidcConfigured in scripts/publish-manifest.json"
+echo "  2. Empty pendingTrustedPublishing (move unpublished to deferredTrustedPublishing)"
+echo "  3. Verify manifest: node -e \"const m=require('./scripts/publish-manifest.json'); console.assert(m.pendingTrustedPublishing.length===0, 'pending must be zero')\""
+echo "  4. Validate invariants: npx tsx scripts/check-manifest-invariants.ts"
+echo "  5. Run authoritative release gate: bash scripts/release/run-gates.sh --target stable --write-release-artifacts"

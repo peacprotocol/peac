@@ -107,6 +107,9 @@ jobs:
       - name: Publish-manifest closure check
         run: npx tsx scripts/check-publish-closure.ts
 
+      - name: Publish-manifest invariants (no overlaps, no duplicates, OIDC coverage)
+        run: npx tsx scripts/check-manifest-invariants.ts
+
       - name: Protocol string verification (forbidden patterns)
         run: pnpm verify:protocol-strings
 
