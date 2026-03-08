@@ -1,7 +1,6 @@
 # External Integration Confirmations
 
-> **Purpose:** DD-90 stable gate requires at least one external confirmation meeting the quality bar below.
-> **Gate:** `run-gates.sh --target stable` checks this file has >= 1 valid entry.
+> Independent third-party validation of PEAC protocol integration. When entries are present, they must meet the 6-field quality bar below.
 
 ## Quality Bar (6 Required Fields)
 

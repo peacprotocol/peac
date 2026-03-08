@@ -77,11 +77,9 @@ function runValidator(args: string[] = []): { stdout: string; stderr: string; ex
 describe('validate-adoption-evidence.mjs (live repo)', () => {
   it('runs against real repo files without crashing', () => {
     const result = runValidator();
-    // Will fail on confirmations (expected) but should not crash
     const combined = result.stdout + result.stderr;
     expect(combined).toContain('Integration evidence');
-    // The exit code is 1 because no external confirmations exist yet
-    expect(result.exitCode).toBe(1);
+    expect(result.exitCode).toBe(0);
   });
 
   it('reports correct DD-90 ecosystem count from real JSON', () => {
@@ -97,19 +95,25 @@ describe('validate-adoption-evidence.mjs (live repo)', () => {
     expect(combined).toContain('Markdown parity: OK');
   });
 
-  it('correctly identifies external confirmation blocker', () => {
+  it('validates reference integrations file', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('0 valid entries');
-    expect(combined).toContain('6-field quality bar');
+    expect(combined).toContain('Reference integrations:');
+    expect(combined).toContain('validated surfaces');
+    expect(combined).toContain('maintainer attestation present');
+  });
+
+  it('reports zero external confirmations when none exist', () => {
+    const result = runValidator();
+    const combined = result.stdout + result.stderr;
+    expect(combined).toContain('External confirmations: 0 entries');
   });
 
   it('generates markdown without error', () => {
     const result = runValidator(['--generate']);
     const combined = result.stdout + result.stderr;
     expect(combined).toContain('Generated');
-    // Still fails on confirmations, which is expected
-    expect(combined).toContain('0 valid entries');
+    expect(combined).toContain('0 entries');
   });
 });
 
@@ -209,18 +213,16 @@ describe('confirmation markdown parsing', () => {
   // These test the validator's live parsing by inspecting its output
   // when run against the real repo (which has 0 confirmations)
 
-  it('reports missing required fields for malformed entries', () => {
-    // The current repo has 0 entries, so we verify the validator
-    // output describes what is needed
+  it('reports zero external confirmations', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('6-field quality bar');
+    expect(combined).toContain('External confirmations: 0 entries');
   });
 
   it('handles the placeholder line correctly', () => {
     // The placeholder "No confirmations yet" should not count as an entry
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('0 valid entries');
+    expect(combined).toContain('0 entries');
   });
 });

@@ -98,3 +98,7 @@ JSON is the machine-verifiable release evidence.
 | Conformance         | wire-02-conformance                                                                              | All targets |
 | CHANGELOG           | changelog-coverage                                                                               | All targets |
 | DD-90 (stable only) | adoption-evidence, perf-benchmarks, fuzz-suite, ssrf-suite, api-surface-lock, pack-install-smoke | Stable only |
+
+### Adoption Evidence
+
+The `adoption-evidence` gate validates `docs/adoption/integration-evidence.json` against schema, checks immutable pointers (test files, spec refs, commit SHAs), and requires >= 2 DD-90 ecosystem integrations. Maintainer reference validations are in `docs/maintainers/reference-integrations.md`. External confirmations in `docs/adoption/confirmations.md` are validated for format when present.
