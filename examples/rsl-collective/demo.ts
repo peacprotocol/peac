@@ -9,7 +9,7 @@
  * This example shows what is NORMATIVE (spec-required) vs ILLUSTRATIVE (example-only).
  */
 
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { generateKeypair, canonicalize } from '@peac/crypto';
 import { toCoreClaims, type ControlBlock } from '@peac/schema';
 import {
@@ -66,7 +66,7 @@ async function demonstrateRslReceipt() {
   };
 
   // Issue receipt with control block
-  const result = await issue({
+  const result = await issueWire01({
     iss: 'https://publisher.example.com',
     aud: 'https://api.example.com/content/article-123',
     amt: 500,
@@ -109,7 +109,7 @@ async function demonstrateParity() {
   };
   const acpInput = fromACPCheckoutSuccess(acpEvent);
 
-  const resultA = await issue({
+  const resultA = await issueWire01({
     iss: 'https://issuer.example.com',
     aud: RESOURCE,
     amt: acpInput.amt,
@@ -124,7 +124,7 @@ async function demonstrateParity() {
   });
 
   // Receipt B: Direct issuance (same semantic content, different evidence)
-  const resultB = await issue({
+  const resultB = await issueWire01({
     iss: 'https://issuer.example.com',
     aud: RESOURCE,
     amt: AMOUNT,

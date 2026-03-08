@@ -51,25 +51,30 @@ See [examples/x402-node-server](../examples/x402-node-server) for a working impl
 
 ---
 
-**Package availability:** All packages listed below are published to npm on two dist-tags: `latest` (stable) and `next` (Wire 0.2 preview). Install via `pnpm add <package>` (stable) or `pnpm add <package>@next` (preview). See [Releases](https://github.com/peacprotocol/peac/releases) for current versions.
+**Package availability:** Publication status varies by package. Core, runtime, and adapter packages are published to npm; see [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases) for current versions. Install via `pnpm add <package>`.
 
 ## Integration examples
 
 ### Settlement fields
 
-If an interaction includes payment, add settlement fields to the receipt:
+If an interaction includes payment, add settlement fields via the commerce extension:
 
 ```typescript
 import { issue } from '@peac/protocol';
 
 const { jws } = await issue({
   iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  subject: 'https://api.example.com/inference',
-  amt: 1000, // Amount in minor units (e.g., cents)
-  cur: 'USD', // Currency code
-  rail: 'x402', // Payment rail
-  reference: 'tx_abc123', // Rail-specific reference
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'x402',
+      amount_minor: '100000', // Amount in minor units (e.g., cents)
+      currency: 'USD',
+      settlement_ref: 'tx_abc123',
+    },
+  },
   privateKey,
   kid: 'key-2026-01',
 });
@@ -89,12 +94,9 @@ app.get('/data', async (req, res) => {
   const body = { items: ['a', 'b', 'c'] };
   const { jws } = await issue({
     iss: 'https://api.example.com',
-    aud: 'https://client.example.com', // Use authenticated client identity, not Origin header
-    amt: 0,
-    cur: 'USD',
-    rail: 'free',
-    reference: `req_${Date.now()}`,
-    subject: 'https://api.example.com/data',
+    kind: 'evidence',
+    type: 'org.peacprotocol/access-decision',
+    pillars: ['access'],
     privateKey,
     kid: 'key-2026-01',
   });
@@ -211,14 +213,14 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 
 ## Wire format and HTTP integration
 
-**Wire 0.1 (stable):**
+**Wire 0.1 (frozen legacy):**
 
 - JWS type: `typ: "peac-receipt/0.1"`
 - Envelope structure: `PEACEnvelope` with auth, payment evidence, and metadata
 - Signature: EdDSA (Ed25519, RFC 8032)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
 
-**Wire 0.2 (preview on `next` dist-tag):**
+**Wire 0.2 (stable on `latest` dist-tag, v0.12.0+):**
 
 - JWS type: `typ: "interaction-record+jwt"`
 - Two structural kinds: `evidence` (records what happened) and `challenge` (records what is required)
@@ -227,7 +229,7 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 - 5 typed extension groups: commerce, access, challenge, identity, correlation
 - Policy binding: JCS (RFC 8785) + SHA-256 digest comparison (3-state: verified/failed/unavailable)
 - JOSE hardening: embedded keys rejected, `crit`/`b64:false`/`zip` rejected, `kid` required
-- `verifyLocal()` auto-detects wire version and returns `wireVersion: '0.1'` or `wireVersion: '0.2'`
+- `verifyLocal()` verifies Wire 0.2 receipts only; Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`
 - Normative spec: [WIRE-0.2.md](specs/WIRE-0.2.md)
 
 **HTTP:**
@@ -638,7 +640,7 @@ Multi-step agentic workflows (MCP tool chains, A2A exchanges, CrewAI crews, Lang
 | `WorkflowContext`            | Per-receipt extension for DAG reconstruction          |
 | `WorkflowSummaryAttestation` | Proof-of-run artifact committing the full receipt set |
 
-**WorkflowContext** is attached as a receipt extension (`ext['org.peacprotocol/workflow']`):
+**WorkflowContext** is attached via the correlation extension group:
 
 ```typescript
 import { issue } from '@peac/protocol';
@@ -649,23 +651,25 @@ const stepId = generateStepId();
 
 const { jws } = await issue({
   iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 10,
-  cur: 'USD',
-  rail: 'x402',
-  reference: 'tx_search_001',
-  subject: 'https://api.example.com/tools/search',
-  privateKey,
-  kid: 'key-2026-01',
-  ext: {
-    'org.peacprotocol/workflow': {
+  kind: 'evidence',
+  type: 'org.peacprotocol/tool-call',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'x402',
+      amount_minor: '1000',
+      currency: 'USD',
+      settlement_ref: 'tx_search_001',
+    },
+    'org.peacprotocol/correlation': {
       workflow_id: workflowId,
       step_id: stepId,
       parent_step_ids: [], // root step
       tool_name: 'web_search',
-      framework: { name: 'mcp', version: '1.0' },
     },
   },
+  privateKey,
+  kid: 'key-2026-01',
 });
 ```
 
@@ -710,22 +714,22 @@ See [docs/specs/WORKFLOW-CORRELATION.md](specs/WORKFLOW-CORRELATION.md) for the 
 
 ## Ten pillars
 
-PEAC addresses ten protocol capabilities for AI and API infrastructure:
+PEAC addresses ten capability areas for AI and API infrastructure. These are protocol capabilities, not package deliverables; implementation status varies.
 
-| Pillar          | Package             | Description                                  |
-| --------------- | ------------------- | -------------------------------------------- |
-| **Access**      | `@peac/access`      | Access control and policy evaluation         |
-| **Attribution** | `@peac/attribution` | Attribution and revenue-share hooks          |
-| **Commerce**    | `@peac/rails-*`     | Payment rails and receipt issuance           |
-| **Consent**     | `@peac/consent`     | Consent lifecycle types and helpers          |
-| **Compliance**  | `@peac/compliance`  | Regulatory and audit helpers                 |
-| **Privacy**     | `@peac/privacy`     | Privacy budgeting and retention policy hooks |
-| **Provenance**  | `@peac/provenance`  | Content provenance and C2PA integration      |
-| **Safety**      | `@peac/control`     | Constraint enforcement and safety controls   |
-| **Identity**    | `@peac/protocol`    | Agent identity proof-of-control binding      |
-| **Purpose**     | `@peac/schema`      | Structured purpose declaration vocabulary    |
+| Pillar          | Protocol role                               | Status                                                          |
+| --------------- | ------------------------------------------- | --------------------------------------------------------------- |
+| **Access**      | Access control and policy evaluation        | Wire 0.2 extension group implemented                            |
+| **Attribution** | Attribution and revenue-share records       | `@peac/attribution` implemented                                 |
+| **Commerce**    | Payment evidence and settlement proof       | Wire 0.2 extension group implemented; `@peac/rails-*` adapters  |
+| **Consent**     | Consent lifecycle records                   | Wire 0.2 type registered; extension group planned (v0.12.1+)    |
+| **Compliance**  | Regulatory and audit records                | Wire 0.2 type registered; extension group planned (v0.12.1+)    |
+| **Privacy**     | Privacy-preserving hashing and retention    | `@peac/privacy` implemented; extension group planned (v0.12.1+) |
+| **Provenance**  | Content provenance and C2PA integration     | Wire 0.2 type registered; extension group planned (v0.12.1+)    |
+| **Safety**      | Constraint enforcement and safety controls  | `@peac/control` implemented; extension group planned (v0.12.1+) |
+| **Identity**    | Agent identity and proof-of-control binding | Wire 0.2 extension group implemented                            |
+| **Purpose**     | Structured purpose declaration vocabulary   | Wire 0.2 type registered; extension group planned (v0.12.1+)    |
 
-These are optional higher-layer helpers built on top of the core receipt/kernel stack.
+All 10 pillars have registered `type` values in Wire 0.2. Five have typed extension groups in v0.12.0 (commerce, access, challenge, identity, correlation). Remaining extension groups are planned for v0.12.1+.
 
 ---
 
@@ -746,8 +750,8 @@ These are optional higher-layer helpers built on top of the core receipt/kernel 
 **Spec-first:**
 
 - Normative JSON specs drive all implementations
-- TypeScript is one of multiple independent implementations
-- SDKs for Go, Rust, Python follow same specs
+- TypeScript is the reference implementation; Go SDK provides receipt verification
+- Additional implementations can follow the same specs
 
 **Defense in depth:**
 
@@ -762,9 +766,9 @@ These are optional higher-layer helpers built on top of the core receipt/kernel 
 
 **Wire formats:**
 
-- `peac-receipt/0.1` (Wire 0.1): the stable receipt format on the `latest` dist-tag
-- `interaction-record+jwt` (Wire 0.2): preview on the `next` dist-tag (`v0.12.0-preview.1`); envelope structure is stable but subject to feedback before promotion to `latest`
-- Both wire versions coexist: `verifyLocal()` auto-detects and validates accordingly
+- `interaction-record+jwt` (Wire 0.2): the current stable receipt format on the `latest` dist-tag (v0.12.0+)
+- `peac-receipt/0.1` (Wire 0.1): frozen legacy format; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` for Wire 0.1 receipts
+- Use `issue()` for all new receipt issuance
 
 **Library surface:**
 
@@ -793,7 +797,7 @@ Test vectors: `tests/vectors/` and `docs/specs/TEST_VECTORS.md`.
 
 **Prerequisites:**
 
-- Node.js 22+
+- Node.js 24 (tested); Node.js 22+ (compatible)
 - pnpm >= 9
 
 **Setup:**

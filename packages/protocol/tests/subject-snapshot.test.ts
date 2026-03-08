@@ -6,7 +6,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
-import { issue } from '../src/issue';
+import { issueWire01 } from '../src/issue';
 import { SubjectProfileSnapshot } from '@peac/schema';
 
 describe('Subject Snapshot', () => {
@@ -27,7 +27,7 @@ describe('Subject Snapshot', () => {
     it('should issue receipt without subject_snapshot (existing behavior)', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -61,7 +61,7 @@ describe('Subject Snapshot', () => {
         source: 'idp:auth0',
       };
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -95,7 +95,7 @@ describe('Subject Snapshot', () => {
         captured_at: '2025-01-15T10:30:00Z',
       };
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -127,7 +127,7 @@ describe('Subject Snapshot', () => {
         version: '1.0',
       };
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -157,7 +157,7 @@ describe('Subject Snapshot', () => {
       };
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: 9999,
@@ -186,7 +186,7 @@ describe('Subject Snapshot', () => {
       };
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: 9999,
@@ -214,7 +214,7 @@ describe('Subject Snapshot', () => {
         captured_at: '2025-01-15T10:30:00Z',
       };
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -248,7 +248,7 @@ describe('Subject Snapshot', () => {
       };
 
       // Issue twice with the same PII-like id
-      await issue({
+      await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -263,7 +263,7 @@ describe('Subject Snapshot', () => {
         kid: '2025-01-15T10:30:00Z',
       });
 
-      await issue({
+      await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,

@@ -16,12 +16,12 @@ Language-specific client libraries for PEAC protocol integration.
 
 ## Architecture
 
-SDKs provide high-level client interfaces built on top of `packages/protocol`:
+SDKs provide client interfaces for receipt verification:
 
-- Receipt issuance and verification
+- Go SDK: verify receipts with `peac.Verify()`
+- TypeScript: use `@peac/protocol` for issuance and verification
 - Discovery manifest parsing
 - JWKS caching and rotation
-- Transport bindings (HTTP, gRPC, WebSocket)
 - Error handling with retry logic
 
 See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for full architecture.

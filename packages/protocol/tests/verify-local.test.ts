@@ -8,7 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateKeypair, sign, base64urlEncodeString, base64urlEncode } from '@peac/crypto';
-import { issue } from '../src/issue';
+import { issueWire01 } from '../src/issue';
 import { verifyLocal } from '../src/verify-local';
 import { verifyLocalWire01 } from '../src/verify-local-wire01';
 
@@ -19,7 +19,7 @@ import { verifyLocalWire01 } from '../src/verify-local-wire01';
 describe('verifyLocal(): Wire 0.1 rejection', () => {
   it('returns E_UNSUPPORTED_WIRE_VERSION for Wire 0.1 commerce receipt', async () => {
     const { privateKey, publicKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 1000,
@@ -97,7 +97,7 @@ describe('verifyLocalWire01', () => {
     it('verifies a valid receipt', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -130,7 +130,7 @@ describe('verifyLocalWire01', () => {
     it('verifies with issuer binding', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -154,7 +154,7 @@ describe('verifyLocalWire01', () => {
     it('verifies with audience binding', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -178,7 +178,7 @@ describe('verifyLocalWire01', () => {
     it('verifies with both issuer and audience binding', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -206,7 +206,7 @@ describe('verifyLocalWire01', () => {
       const { privateKey } = await generateKeypair();
       const { publicKey: wrongKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -261,7 +261,7 @@ describe('verifyLocalWire01', () => {
     it('returns E_INVALID_ISSUER for issuer mismatch', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -289,7 +289,7 @@ describe('verifyLocalWire01', () => {
     it('returns E_INVALID_AUDIENCE for audience mismatch', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -320,7 +320,7 @@ describe('verifyLocalWire01', () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -348,7 +348,7 @@ describe('verifyLocalWire01', () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -418,7 +418,7 @@ describe('verifyLocalWire01', () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -445,7 +445,7 @@ describe('verifyLocalWire01', () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -474,7 +474,7 @@ describe('verifyLocalWire01', () => {
     it('returns schema-derived type for claims', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -510,7 +510,7 @@ describe('verifyLocalWire01', () => {
     it('includes kid in success response', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -537,7 +537,7 @@ describe('verifyLocalWire01', () => {
     it('verifies with subject binding', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -562,7 +562,7 @@ describe('verifyLocalWire01', () => {
     it('returns E_INVALID_SUBJECT for subject mismatch', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -591,7 +591,7 @@ describe('verifyLocalWire01', () => {
     it('returns E_INVALID_SUBJECT when subject expected but missing', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -621,7 +621,7 @@ describe('verifyLocalWire01', () => {
     it('verifies with rid binding', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -648,7 +648,7 @@ describe('verifyLocalWire01', () => {
     it('returns E_INVALID_RECEIPT_ID for rid mismatch', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -678,7 +678,7 @@ describe('verifyLocalWire01', () => {
     it('accepts receipt without exp when requireExp is false', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -699,7 +699,7 @@ describe('verifyLocalWire01', () => {
     it('accepts receipt without exp by default', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -720,7 +720,7 @@ describe('verifyLocalWire01', () => {
     it('rejects receipt without exp when requireExp is true', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,
@@ -747,7 +747,7 @@ describe('verifyLocalWire01', () => {
       const { privateKey, publicKey } = await generateKeypair();
       const now = Math.floor(Date.now() / 1000);
 
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 1000,

@@ -20,7 +20,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
 import { generateKeypair } from '@peac/crypto';
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { SERVER_VERSION, MCP_PROTOCOL_VERSION } from '../../src/infra/constants.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -208,7 +208,7 @@ describe.skipIf(!CLI_EXISTS && !IS_CI)('integration/e2e-smoke', () => {
 
       // 3. Call peac_decode with a real receipt
       const { privateKey } = await generateKeypair();
-      const { jws } = await issue({
+      const { jws } = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://client.example.com',
         amt: 100,

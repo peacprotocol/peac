@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 Replay Prevention conformance vectors (Section 20)",
-  "version": "0.12.0-preview.2",
-  "schema_version": "0.12.0-preview.2",
+  "version": "0.12.0",
+  "schema_version": "0.12.0",
   "fixtures": [
     {
       "name": "jti-present-valid",

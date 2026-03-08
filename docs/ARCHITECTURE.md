@@ -48,9 +48,9 @@ Layer 6: pillars         (depends on protocol, control)
 
 ### 4. Spec-First Development
 
-- Wire format `peac-receipt/0.1` is the canonical wire format identifier (v0.10.0+)
-- JSON Schema at `specs/wire/peac-receipt-0.1.schema.json` is normative
-- TypeScript is one implementation; Go, Rust, Python SDKs follow same specs
+- Wire format `peac-receipt/0.1` is the frozen legacy wire format identifier (v0.10.0+); Wire 0.2 (`interaction-record+jwt`) is current
+- JSON Schema at `specs/wire/peac-receipt-0.1.schema.json` is normative for Wire 0.1
+- Go SDK provides receipt verification; additional implementations can follow the same specs
 
 ---
 

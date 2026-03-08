@@ -1,7 +1,7 @@
 {
   "$comment": "Transport Boundary conformance vectors (CARRIER-* namespace, DD-124 through DD-131)",
-  "version": "0.12.0-preview.2",
-  "schema_version": "0.12.0-preview.2",
+  "version": "0.12.0",
+  "schema_version": "0.12.0",
   "fixtures": [
     {
       "name": "mcp-embed-under-limit",

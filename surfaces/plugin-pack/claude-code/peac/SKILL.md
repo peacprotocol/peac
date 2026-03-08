@@ -41,11 +41,17 @@ Call `peac_issue` with receipt parameters:
 ```json
 {
   "iss": "https://your-service.example.com",
-  "aud": "https://consumer.example.com",
-  "amt": 100,
-  "cur": "USD",
-  "rail": "stripe",
-  "reference": "pi_abc123"
+  "kind": "evidence",
+  "type": "org.peacprotocol/payment",
+  "pillars": ["commerce"],
+  "extensions": {
+    "org.peacprotocol/commerce": {
+      "payment_rail": "stripe",
+      "amount_minor": "10000",
+      "currency": "USD",
+      "reference": "pi_abc123"
+    }
+  }
 }
 ```
 

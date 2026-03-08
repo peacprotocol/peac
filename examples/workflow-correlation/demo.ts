@@ -7,7 +7,7 @@
  * Run with: pnpm demo
  */
 
-import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
+import { issueWire01, verifyLocal, generateKeypair } from '@peac/protocol';
 import {
   type WorkflowContext,
   type WorkflowId,
@@ -66,7 +66,7 @@ async function main() {
     orchestrator_id: 'agent:demo-orchestrator',
   };
 
-  const rootReceipt = await issue({
+  const rootReceipt = await issueWire01({
     iss: 'https://orchestrator.example.com',
     aud: 'https://workflow.example.com',
     amt: 100,
@@ -95,7 +95,7 @@ async function main() {
     framework: 'mcp',
   };
 
-  const branchAReceipt = await issue({
+  const branchAReceipt = await issueWire01({
     iss: 'https://research-agent.example.com',
     aud: 'https://workflow.example.com',
     amt: 500,
@@ -125,7 +125,7 @@ async function main() {
     framework: 'a2a',
   };
 
-  const branchBReceipt = await issue({
+  const branchBReceipt = await issueWire01({
     iss: 'https://analysis-agent.example.com',
     aud: 'https://workflow.example.com',
     amt: 300,
@@ -154,7 +154,7 @@ async function main() {
     orchestrator_id: 'agent:demo-orchestrator',
   };
 
-  const joinReceipt = await issue({
+  const joinReceipt = await issueWire01({
     iss: 'https://orchestrator.example.com',
     aud: 'https://workflow.example.com',
     amt: 200,

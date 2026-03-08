@@ -24,7 +24,7 @@
   <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
 </p>
 
-**What:** PEAC standardizes three artifacts: a discoverable policy file (`/.well-known/peac.txt`), a signed receipt format (Ed25519 JWS), and a portable evidence bundle for offline verification. Wire 0.1 (`peac-receipt/0.1`) is stable on `latest`. Wire 0.2 (`interaction-record+jwt`) is available as a preview on `next`.
+**What:** PEAC standardizes three artifacts: a discoverable policy file (`/.well-known/peac.txt`), a signed receipt format (Ed25519 JWS), and a portable evidence bundle for offline verification. Wire 0.2 (`interaction-record+jwt`) is the current stable format on `latest`. Wire 0.1 (`peac-receipt/0.1`) remains frozen for backward compatibility.
 
 **Who:** AI agents and agent platforms, APIs, gateways, tool servers, and compliance/security teams operating automated traffic across org boundaries.
 
@@ -105,7 +105,7 @@ rate_limit: '100/hour'
 `PEAC-Receipt` header: signed proof returned on governed responses:
 
 ```text
-PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
+PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...
 ```
 
 The receipt is a standard JWS (Ed25519) that can be verified offline using the issuer's published keys. Full specification: [Spec Index](docs/SPEC_INDEX.md).
@@ -157,57 +157,22 @@ PEAC produces portable, verifiable evidence that can feed AI safety reviews, inc
 
 ## Quick start
 
-**Requirements:** Node >= 22
+**Requirements:** Tested on Node 24; compatible with Node 22+
 
 ```bash
-# Stable (Wire 0.1)
-pnpm add @peac/protocol
-
-# Preview (Wire 0.2)
-pnpm add @peac/protocol@next
+pnpm add @peac/protocol @peac/crypto @peac/schema
 ```
 
 ### Issue and verify a receipt
 
 ```typescript
-import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
-
-const { privateKey, publicKey } = await generateKeypair();
-
-const { jws } = await issue({
-  iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 100,
-  cur: 'USD',
-  rail: 'stripe',
-  reference: 'tx_abc123',
-  subject: 'https://api.example.com/inference',
-  privateKey,
-  kid: 'key-2026-02-26',
-});
-
-const result = await verifyLocal(jws, publicKey, {
-  issuer: 'https://api.example.com',
-  audience: 'https://client.example.com',
-});
-
-if (result.valid) {
-  console.log(result.variant, result.claims.iss);
-}
-```
-
-### Issue a Wire 0.2 receipt (preview)
-
-Wire 0.2 (`v0.12.0-preview.1`, `next` dist-tag) adds structured kinds, typed extensions, and policy binding:
-
-```typescript
 import { generateKeypair } from '@peac/crypto';
-import { issueWire02, verifyLocal } from '@peac/protocol';
+import { issue, verifyLocal } from '@peac/protocol';
 import { getCommerceExtension } from '@peac/schema';
 
 const { privateKey, publicKey } = await generateKeypair();
 
-const { jws } = await issueWire02({
+const { jws } = await issue({
   iss: 'https://api.example.com',
   kind: 'evidence',
   type: 'org.peacprotocol/payment',
@@ -233,10 +198,12 @@ if (result.valid && result.wireVersion === '0.2') {
 ### Verify an existing receipt (CLI)
 
 ```bash
-peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...'
+peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...'
 ```
 
-See [examples/quickstart/](examples/quickstart/) for Wire 0.1 and [examples/wire-02-minimal/](examples/wire-02-minimal/) for Wire 0.2 runnable code. For settlement fields, HTTP/REST integration, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
+> **Legacy:** Wire 0.1 (`peac-receipt/0.1`) is frozen. See [examples/quickstart/](examples/quickstart/) for Wire 0.1 code.
+
+See [examples/wire-02-minimal/](examples/wire-02-minimal/) for runnable Wire 0.2 code. For settlement, HTTP/REST, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
 
 ---
 
@@ -244,7 +211,7 @@ See [examples/quickstart/](examples/quickstart/) for Wire 0.1 and [examples/wire
 
 - **Agent developer**: [Quick start](#quick-start): issue and verify receipts in 5 lines
 - **API operator**: [Express middleware](docs/README_LONG.md#express-middleware): add PEAC in 3 lines
-- **Go developer**: [Go SDK](sdks/go/): `peac.Issue()` + `peac.Verify()`
+- **Go developer**: [Go SDK](sdks/go/): verify receipts with `peac.Verify()`
 - **x402 / crypto payments**: [Stripe x402 profile](docs/profiles/stripe-x402-machine-payments.md): normalize + receipt + verify
 - **Policy author**: [Policy Kit](docs/policy-kit/quickstart.md): author and validate terms
 - **Auditor / compliance**: [Dispute Bundles](#core-primitives): portable evidence format
@@ -275,17 +242,17 @@ See [packages/cli/README.md](packages/cli/README.md) for the full command refere
 
 **Stable** = wire identifiers and spec are stable and conformance-gated; implementations may evolve.
 
-| Primitive              | Stable  | Description                                                              |
-| ---------------------- | ------- | ------------------------------------------------------------------------ |
-| Receipt envelope (0.1) | Yes     | `typ: peac-receipt/0.1`, Ed25519 JWS signature                           |
-| Receipt envelope (0.2) | Preview | `typ: interaction-record+jwt`, 2 kinds, typed extensions, policy binding |
-| Receipt header         | Yes     | `PEAC-Receipt: <jws>`                                                    |
-| Policy surface         | Yes     | `/.well-known/peac.txt` access terms for agents                          |
-| Issuer config          | Yes     | `/.well-known/peac-issuer.json` JWKS discovery                           |
-| Verification report    | Yes     | Deterministic JSON output from verify operations                         |
-| Dispute Bundle         | Yes     | ZIP with receipts + policy + report for offline audit                    |
-| Workflow context       | Yes     | DAG correlation for multi-step agentic workflows                         |
-| Conformance vectors    | Yes     | Golden inputs/outputs in `specs/conformance/`                            |
+| Primitive              | Stable | Description                                                              |
+| ---------------------- | ------ | ------------------------------------------------------------------------ |
+| Receipt envelope (0.1) | Frozen | `typ: peac-receipt/0.1`, Ed25519 JWS signature (legacy)                  |
+| Receipt envelope (0.2) | Yes    | `typ: interaction-record+jwt`, 2 kinds, typed extensions, policy binding |
+| Receipt header         | Yes    | `PEAC-Receipt: <jws>`                                                    |
+| Policy surface         | Yes    | `/.well-known/peac.txt` access terms for agents                          |
+| Issuer config          | Yes    | `/.well-known/peac-issuer.json` JWKS discovery                           |
+| Verification report    | Yes    | Deterministic JSON output from verify operations                         |
+| Dispute Bundle         | Yes    | ZIP with receipts + policy + report for offline audit                    |
+| Workflow context       | Yes    | DAG correlation for multi-step agentic workflows                         |
+| Conformance vectors    | Yes    | Golden inputs/outputs in `specs/conformance/`                            |
 
 ---
 
@@ -293,10 +260,10 @@ See [packages/cli/README.md](packages/cli/README.md) for the full command refere
 
 Two wire formats coexist:
 
-- **Wire 0.1** (`peac-receipt/0.1`): the stable receipt format on the `latest` dist-tag.
-- **Wire 0.2** (`interaction-record+jwt`): preview on the `next` dist-tag. Adds structured kinds (`evidence`/`challenge`), open semantic types, multi-valued pillars, typed extension groups, and policy binding.
+- **Wire 0.2** (`interaction-record+jwt`): the current stable receipt format on the `latest` dist-tag (v0.12.0+). Adds structured kinds (`evidence`/`challenge`), open semantic types, multi-valued pillars, typed extension groups, and policy binding.
+- **Wire 0.1** (`peac-receipt/0.1`): frozen legacy format. Supported for verification via internal `verifyLocalWire01()` but not exported from `@peac/protocol`.
 
-On the `next` dist-tag (`@peac/protocol@next`), `verifyLocal()` is **Wire 0.2 only**: Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`. Use `issueWire02()` to create Wire 0.2 receipts. On the `latest` dist-tag, `verifyLocal()` verifies Wire 0.1 receipts. Both formats use Ed25519 JWS signatures and the `PEAC-Receipt` header.
+`verifyLocal()` is **Wire 0.2 only**: Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`. Use `issue()` to create Wire 0.2 receipts. Both formats use Ed25519 JWS signatures and the `PEAC-Receipt` header.
 
 Wire format identifiers are independent of npm package versions. Protocol surfaces (`PEAC-Receipt` header, `/.well-known/peac.txt`, `/.well-known/peac-issuer.json`) are stable. Implementation APIs (`@peac/protocol`, `@peac/cli`) aim for stability; internal packages may change between releases.
 
@@ -323,7 +290,7 @@ See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](doc
 | Document                                                            | Purpose                                           |
 | ------------------------------------------------------------------- | ------------------------------------------------- |
 | [Spec Index](docs/SPEC_INDEX.md)                                    | Normative specifications                          |
-| [Wire 0.2 Spec](docs/specs/WIRE-0.2.md)                             | Wire 0.2 envelope, kinds, extensions (preview)    |
+| [Wire 0.2 Spec](docs/specs/WIRE-0.2.md)                             | Wire 0.2 envelope, kinds, extensions              |
 | [Architecture](docs/ARCHITECTURE.md)                                | Kernel-first design                               |
 | [Kernel Constraints](docs/specs/KERNEL-CONSTRAINTS.md)              | Structural limits enforced at issue and verify    |
 | [Policy Kit Quickstart](docs/policy-kit/quickstart.md)              | Policy authoring guide                            |

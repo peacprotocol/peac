@@ -11,7 +11,7 @@ pnpm demo
 
 ## What it demonstrates
 
-- `issueWire02()` to create a Wire 0.2 evidence receipt
-- `verifyLocal()` with dual-stack auto-detection (returns `wireVersion: '0.2'`)
+- `issue()` to create a Wire 0.2 evidence receipt
+- `verifyLocal()` verifies Wire 0.2 receipts (returns `wireVersion: '0.2'`)
 - `getCommerceExtension()` typed accessor from `@peac/schema`
 - Warning plumbing (empty for registered types; try changing `type` to `com.example/custom-flow` to see `type_unregistered`)

@@ -4,7 +4,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { parse, emit, validate } from '../dist/parser.js';
+import { parse, emit, validate } from '../dist/index.js';
 
 test('parse - minimal valid peac.txt', () => {
   const content = `verify: https://example.com/peac/verify`;

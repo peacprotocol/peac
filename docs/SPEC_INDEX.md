@@ -96,7 +96,7 @@ External protocol integrations and identity anchors.
 
 - **[Versioning Doctrine](specs/VERSIONING.md)** - Wire version vs repo version, artifact identifiers, compatibility guarantees
 
-Current wire formats: `peac-receipt/0.1` (stable), `interaction-record+jwt` (Wire 0.2 preview)
+Current wire formats: `peac-receipt/0.1` (frozen legacy), `interaction-record+jwt` (Wire 0.2, current)
 
 ## Release Artifacts
 

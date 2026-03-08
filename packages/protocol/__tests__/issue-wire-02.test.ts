@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest';
 import { generateKeypair, sign } from '@peac/crypto';
 import { WIRE_02_JWS_TYP, PEAC_ALG } from '@peac/kernel';
 import { WARNING_TYP_MISSING, WARNING_OCCURRED_AT_SKEW } from '@peac/schema';
-import { issueWire02, issue, verifyLocal, isWire02Result } from '../src/index';
+import { issueWire02, issueWire01, verifyLocal, isWire02Result } from '../src/index';
 import { verifyLocalWire01 } from '../src/verify-local-wire01';
 
 // ---------------------------------------------------------------------------
@@ -832,7 +832,7 @@ describe('Wire 0.1 isolation', () => {
 
   it('verifyLocal() rejects Wire 0.1 with E_UNSUPPORTED_WIRE_VERSION', async () => {
     const { privateKey, publicKey } = await generateKeypair();
-    const { jws } = await issue({ ...issueOpts, privateKey, kid: testKid });
+    const { jws } = await issueWire01({ ...issueOpts, privateKey, kid: testKid });
 
     const result = await verifyLocal(jws, publicKey);
 
@@ -845,7 +845,7 @@ describe('Wire 0.1 isolation', () => {
 
   it('verifyLocalWire01(): commerce receipt verifies with wireVersion 0.1', async () => {
     const { privateKey, publicKey } = await generateKeypair();
-    const { jws } = await issue({ ...issueOpts, privateKey, kid: testKid });
+    const { jws } = await issueWire01({ ...issueOpts, privateKey, kid: testKid });
 
     const result = await verifyLocalWire01(jws, publicKey);
 
@@ -883,7 +883,7 @@ describe('Wire 0.1 isolation', () => {
 
   it('verifyLocal() accepts Wire 0.2, rejects Wire 0.1', async () => {
     const { privateKey, publicKey } = await generateKeypair();
-    const { jws: jws01 } = await issue({ ...issueOpts, privateKey, kid: testKid });
+    const { jws: jws01 } = await issueWire01({ ...issueOpts, privateKey, kid: testKid });
     const { jws: jws02 } = await issueWire02({
       iss: testIss,
       kind: 'evidence',
@@ -927,7 +927,7 @@ describe('isWire02Result() type guard', () => {
 
   it('returns false for a commerce result', async () => {
     const { privateKey, publicKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,

@@ -44,7 +44,7 @@ PEAC Protocol provides cryptographically signed, offline-verifiable receipts tha
 
 ## Optional
 
-- Wire Format: `peac-receipt/0.1` (stable, frozen)
+- Wire Format: `peac-receipt/0.1` (frozen legacy; Wire 0.2 `interaction-record+jwt` is current)
 - Signing Algorithm: Ed25519 (RFC 8032)
 - Error Format: RFC 9457 Problem Details
 - Discovery: `/.well-known/peac-issuer.json` with `jwks_uri` pointing to JWKS

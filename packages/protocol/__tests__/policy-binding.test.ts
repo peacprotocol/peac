@@ -19,7 +19,7 @@ import {
   computePolicyDigestJcs,
   checkPolicyBinding,
   issueWire02,
-  issue,
+  issueWire01,
   verifyLocal,
 } from '../src/index';
 import { verifyLocalWire01 } from '../src/verify-local-wire01';
@@ -452,7 +452,7 @@ describe('Wire 0.1 regression: policy_binding is always unavailable', () => {
 
   it('commerce receipt without policyDigest option: policy_binding is unavailable', async () => {
     const { privateKey, publicKey } = await generateKeypair();
-    const { jws } = await issue({ ...issueOpts, privateKey, kid: testKid });
+    const { jws } = await issueWire01({ ...issueOpts, privateKey, kid: testKid });
 
     const result = await verifyLocalWire01(jws, publicKey);
 
@@ -465,7 +465,7 @@ describe('Wire 0.1 regression: policy_binding is always unavailable', () => {
 
   it('commerce receipt with policyDigest option: policy_binding still unavailable (Wire 0.1 ignores option)', async () => {
     const { privateKey, publicKey } = await generateKeypair();
-    const { jws } = await issue({ ...issueOpts, privateKey, kid: testKid });
+    const { jws } = await issueWire01({ ...issueOpts, privateKey, kid: testKid });
 
     const localPolicy: JsonValue = { version: '1.0' };
     const policyDigest = await computePolicyDigestJcs(localPolicy);

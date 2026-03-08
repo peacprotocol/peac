@@ -635,18 +635,22 @@ require (
 ```typescript
 import { issue } from '@peac/protocol';
 
-const result = await issue(
-  {
-    iss: 'https://publisher.example',
-    aud: 'https://agent.example',
-    amt: 1000,
-    cur: 'USD',
-    rail: 'stripe',
-    reference: 'ch_abc123',
+const { jws } = await issue({
+  iss: 'https://publisher.example',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '1000',
+      currency: 'USD',
+      reference: 'ch_abc123',
+    },
   },
   privateKey,
-  keyID
-);
+  kid: keyID,
+});
 ```
 
 **Go:**
