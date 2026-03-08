@@ -77,6 +77,7 @@ export default defineConfig({
       // Workers have their own vitest configs with custom paths
       // Run them via pnpm --filter @peac/worker-* test
       'tests/conformance/**/*.spec.ts',
+      'tests/vectors/**/*.spec.ts',
       'tests/parity/**/*.test.ts',
       'tests/scripts/**/*.test.ts',
       'tests/perf/**/*.test.ts',

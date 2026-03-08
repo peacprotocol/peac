@@ -15,7 +15,7 @@
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import { validateEvidence, assertJsonSafeIterative, JSON_EVIDENCE_LIMITS } from '@peac/schema';
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { verify, decode, generateKeypair } from '@peac/crypto';
 
 describe('Protocol Conformance', () => {
@@ -383,7 +383,7 @@ describe('Protocol Conformance', () => {
 
     it('should issue and verify a valid receipt', async () => {
       // Issue receipt
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://merchant.example.com',
         amt: 1000,
@@ -405,7 +405,7 @@ describe('Protocol Conformance', () => {
 
     it('should reject verification with wrong public key', async () => {
       // Issue receipt with one key
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://merchant.example.com',
         amt: 500,
@@ -423,7 +423,7 @@ describe('Protocol Conformance', () => {
 
     it('should detect tampered payload', async () => {
       // Issue valid receipt
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://merchant.example.com',
         amt: 2000,
@@ -452,7 +452,7 @@ describe('Protocol Conformance', () => {
     it('should include correct claims in issued receipt', async () => {
       const issueTime = Math.floor(Date.now() / 1000);
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://merchant.example.com',
         amt: 5000,
@@ -493,7 +493,7 @@ describe('Protocol Conformance', () => {
 
       // Issue 10 receipts and collect rids
       for (let i = 0; i < 10; i++) {
-        const result = await issue({
+        const result = await issueWire01({
           iss: 'https://issuer.example.com',
           aud: 'https://merchant.example.com',
           amt: 100 + i,
@@ -515,7 +515,7 @@ describe('Protocol Conformance', () => {
 
     it('should validate issuer URL format', async () => {
       await expect(
-        issue({
+        issueWire01({
           iss: 'http://insecure.example.com', // HTTP not HTTPS
           aud: 'https://merchant.example.com',
           amt: 100,
@@ -530,7 +530,7 @@ describe('Protocol Conformance', () => {
 
     it('should validate audience URL format', async () => {
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://issuer.example.com',
           aud: 'http://insecure.example.com', // HTTP not HTTPS
           amt: 100,
@@ -545,7 +545,7 @@ describe('Protocol Conformance', () => {
 
     it('should validate currency code format', async () => {
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://issuer.example.com',
           aud: 'https://merchant.example.com',
           amt: 100,
@@ -560,7 +560,7 @@ describe('Protocol Conformance', () => {
 
     it('should validate amount is non-negative integer', async () => {
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://issuer.example.com',
           aud: 'https://merchant.example.com',
           amt: -100, // Negative not allowed
@@ -573,7 +573,7 @@ describe('Protocol Conformance', () => {
       ).rejects.toThrow('Amount must be a non-negative integer');
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://issuer.example.com',
           aud: 'https://merchant.example.com',
           amt: 10.5, // Non-integer not allowed
@@ -596,7 +596,7 @@ describe('Protocol Conformance', () => {
         captured_at: '2025-01-01T00:00:00Z',
       };
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://merchant.example.com',
         amt: 1000,
@@ -616,7 +616,7 @@ describe('Protocol Conformance', () => {
     it('should support optional expiry field', async () => {
       const futureExp = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://merchant.example.com',
         amt: 1000,

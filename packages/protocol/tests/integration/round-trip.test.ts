@@ -14,7 +14,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { generateKeypair, sign } from '@peac/crypto';
 import { parseReceiptClaims, toCoreClaims } from '@peac/schema';
-import { issue } from '../../src/index';
+import { issueWire01 } from '../../src/index';
 import { verifyLocalWire01 } from '../../src/verify-local-wire01';
 
 /** Fixed timestamp for all time-dependent tests */
@@ -31,7 +31,7 @@ describe('round-trip integration', () => {
 
     const { privateKey, publicKey } = await generateKeypair();
 
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 5000,
@@ -103,7 +103,7 @@ describe('round-trip integration', () => {
 
     const { privateKey, publicKey } = await generateKeypair();
 
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 2500,
@@ -239,7 +239,7 @@ describe('round-trip integration', () => {
     const { privateKey } = await generateKeypair();
     const { publicKey: wrongKey } = await generateKeypair();
 
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 1000,
@@ -266,7 +266,7 @@ describe('round-trip integration', () => {
 
     const { privateKey, publicKey } = await generateKeypair();
 
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 1000,
@@ -297,7 +297,7 @@ describe('round-trip integration', () => {
     const { privateKey, publicKey } = await generateKeypair();
 
     // Commerce receipt
-    const { jws: commerceJws } = await issue({
+    const { jws: commerceJws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 3000,

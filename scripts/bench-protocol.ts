@@ -81,7 +81,7 @@ function tryGC(): void {
 async function benchmarkVerify(attempt: number = 1): Promise<BenchmarkResult> {
   console.log(`Loading modules... (attempt ${attempt})`);
   const { protocol, crypto } = await loadModules();
-  const { issue, verifyReceipt } = protocol;
+  const { issueWire01, verifyReceipt } = protocol;
   const { generateKeypair } = crypto;
 
   // GC before setup
@@ -92,7 +92,7 @@ async function benchmarkVerify(attempt: number = 1): Promise<BenchmarkResult> {
 
   console.log('Creating test receipt...');
   // Deterministic reference for reproducibility
-  const result = await issue({
+  const result = await issueWire01({
     iss: 'https://publisher.example',
     aud: 'https://agent.example',
     amt: 100,
@@ -144,7 +144,7 @@ async function benchmarkVerify(attempt: number = 1): Promise<BenchmarkResult> {
 async function benchmarkIssue(attempt: number = 1): Promise<BenchmarkResult> {
   console.log(`Loading modules... (attempt ${attempt})`);
   const { protocol, crypto } = await loadModules();
-  const { issue } = protocol;
+  const { issueWire01 } = protocol;
   const { generateKeypair } = crypto;
 
   // GC before setup
@@ -156,7 +156,7 @@ async function benchmarkIssue(attempt: number = 1): Promise<BenchmarkResult> {
   // Warmup phase
   console.log(`Warming up (${WARMUP_ITERATIONS} iterations)...`);
   for (let i = 0; i < WARMUP_ITERATIONS; i++) {
-    await issue({
+    await issueWire01({
       iss: 'https://publisher.example',
       aud: 'https://agent.example',
       amt: 100,
@@ -177,7 +177,7 @@ async function benchmarkIssue(attempt: number = 1): Promise<BenchmarkResult> {
 
   for (let i = 0; i < ITERATIONS; i++) {
     const start = performance.now();
-    await issue({
+    await issueWire01({
       iss: 'https://publisher.example',
       aud: 'https://agent.example',
       amt: 100,

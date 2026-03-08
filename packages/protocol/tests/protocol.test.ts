@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
-import { issue } from '../src/issue';
+import { issueWire01 } from '../src/issue';
 import { decode } from '@peac/crypto';
 import {
   PEACReceiptClaims,
@@ -19,7 +19,7 @@ describe('PEAC Protocol', () => {
     it('should issue a valid receipt with UUIDv7 rid', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -67,7 +67,7 @@ describe('PEAC Protocol', () => {
     it('should include subject if provided', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -93,7 +93,7 @@ describe('PEAC Protocol', () => {
       const { privateKey } = await generateKeypair();
       const exp = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -117,7 +117,7 @@ describe('PEAC Protocol', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'http://api.example.com', // HTTP not allowed
           aud: 'https://app.example.com',
           amt: 9999,
@@ -137,7 +137,7 @@ describe('PEAC Protocol', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://api.example.com',
           aud: 'http://app.example.com', // HTTP not allowed
           amt: 9999,
@@ -157,7 +157,7 @@ describe('PEAC Protocol', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: 9999,
@@ -177,7 +177,7 @@ describe('PEAC Protocol', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: -100, // Negative not allowed
@@ -197,7 +197,7 @@ describe('PEAC Protocol', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: 99.99, // Must be integer
@@ -216,7 +216,7 @@ describe('PEAC Protocol', () => {
     it('should generate unique UUIDv7 for each receipt', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result1 = await issue({
+      const result1 = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -230,7 +230,7 @@ describe('PEAC Protocol', () => {
         kid: '2025-01-15T10:30:00Z',
       });
 
-      const result2 = await issue({
+      const result2 = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -262,7 +262,7 @@ describe('PEAC Protocol', () => {
           parent_step_ids: [],
         };
 
-        const result = await issue({
+        const result = await issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: 9999,
@@ -298,7 +298,7 @@ describe('PEAC Protocol', () => {
           step_total: 5,
         };
 
-        const result = await issue({
+        const result = await issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: 9999,
@@ -332,7 +332,7 @@ describe('PEAC Protocol', () => {
           parent_step_ids: [],
         };
 
-        const result = await issue({
+        const result = await issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: 9999,
@@ -365,7 +365,7 @@ describe('PEAC Protocol', () => {
         };
 
         await expect(
-          issue({
+          issueWire01({
             iss: 'https://api.example.com',
             aud: 'https://app.example.com',
             amt: 9999,
@@ -395,7 +395,7 @@ describe('PEAC Protocol', () => {
         };
 
         await expect(
-          issue({
+          issueWire01({
             iss: 'https://api.example.com',
             aud: 'https://app.example.com',
             amt: 9999,
@@ -422,7 +422,7 @@ describe('PEAC Protocol', () => {
         } as unknown as WorkflowContext;
 
         await expect(
-          issue({
+          issueWire01({
             iss: 'https://api.example.com',
             aud: 'https://app.example.com',
             amt: 9999,

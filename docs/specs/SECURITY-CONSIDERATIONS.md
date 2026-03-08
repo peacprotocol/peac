@@ -108,7 +108,7 @@ Verifiers SHOULD implement replay detection using a sliding-window cache keyed
 by `(iss, jti)`. Cache entries MAY be evicted after a configurable TTL (default:
 24 hours).
 
-**Implementation:** `issueWire02()` generates `jti` via `uuidv7()`.
+**Implementation:** `issue()` generates `jti` via `uuidv7()`.
 `verifyLocal()` does not enforce replay detection (that is a verifier-side
 concern at Layer 4+).
 

@@ -245,14 +245,23 @@ Configure your publisher to issue PEAC receipts:
 ```typescript
 import { issue } from '@peac/protocol';
 
-const receipt = await issue({
-  issuer: 'https://publisher.example',
-  subject: agent.id,
-  audience: agent.origin,
-  purpose: request.headers.get('PEAC-Purpose'),
+const { jws } = await issue({
+  iss: 'https://publisher.example',
+  kind: 'evidence',
+  type: 'org.peacprotocol/access',
+  pillars: ['access', 'compliance'],
+  extensions: {
+    'org.peacprotocol/access': {
+      subject: agent.id,
+      audience: agent.origin,
+      purpose: request.headers.get('PEAC-Purpose'),
+    },
+  },
+  privateKey,
+  kid: 'key-2026-01',
 });
 
-response.headers.set('PEAC-Receipt', receipt.jws);
+response.headers.set('PEAC-Receipt', jws);
 ```
 
 ### Step 2: Generate Attribution Attestations

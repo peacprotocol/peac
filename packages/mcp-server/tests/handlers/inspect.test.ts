@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { handleInspect } from '../../src/handlers/inspect.js';
 import type { HandlerParams } from '../../src/handlers/types.js';
 import type { InspectInput } from '../../src/schemas/inspect.js';
@@ -21,7 +21,7 @@ function makeParams(input: InspectInput): HandlerParams<InspectInput> {
 describe('handlers/inspect', () => {
   it('inspects a valid commerce receipt', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -46,7 +46,7 @@ describe('handlers/inspect', () => {
 
   it('includes full payload when requested and policy permits', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 500,
@@ -69,7 +69,7 @@ describe('handlers/inspect', () => {
 
   it('ignores full_claims when policy inspect_full_claims is false (default)', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -87,7 +87,7 @@ describe('handlers/inspect', () => {
 
   it('omits full payload when not requested', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -104,7 +104,7 @@ describe('handlers/inspect', () => {
 
   it('redacts payment when policy requires it', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -137,7 +137,7 @@ describe('handlers/inspect', () => {
 
   it('extracts timestamp metadata', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -156,7 +156,7 @@ describe('handlers/inspect', () => {
 
   it('shows header information', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -185,7 +185,7 @@ describe('handlers/inspect', () => {
 
   it('returns tool disabled error when inspect is disabled by policy', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -206,7 +206,7 @@ describe('handlers/inspect', () => {
 
   it('returns input too large error when JWS exceeds limit', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,

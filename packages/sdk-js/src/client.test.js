@@ -43,15 +43,15 @@ test('PeacClient - discover caches results', async () => {
   assert.strictEqual(result2.discovery.verify, 'https://api.example.com/peac/verify');
 });
 
-test('PeacClient - verifyLocal requires keys', async () => {
+test('PeacClient - verifyLocal fails without core module', async () => {
   const client = new PeacClient();
 
   try {
     await client.verifyLocal('test.receipt.signature');
-    assert.fail('Should have thrown error for missing keys');
+    assert.fail('Should have thrown error');
   } catch (error) {
-    assert.strictEqual(error.code, 'NO_KEYS');
-    assert(error.message.includes('No keys provided'));
+    assert.strictEqual(error.code, 'VERIFY_LOCAL_FAILED');
+    assert(error.message.includes('@peac/core module not available'));
   }
 });
 

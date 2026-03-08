@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { issue } from '../../packages/protocol/src/issue';
+import { issueWire01 } from '../../packages/protocol/src/issue';
 import { generateKeypair } from '../../packages/crypto/src/jws';
 import { decode } from '../../packages/crypto/src/jws';
 import { fromCheckoutSession } from '../../packages/rails/stripe/src/index';
@@ -34,7 +34,7 @@ describe('Rail Parity Conformance', () => {
       currency: 'usd', // Stripe uses lowercase
     });
 
-    const stripeResult = await issue({
+    const stripeResult = await issueWire01({
       iss: ISS,
       aud: AUD,
       amt: AMOUNT,
@@ -56,7 +56,7 @@ describe('Rail Parity Conformance', () => {
       currency: CURRENCY, // x402 uses uppercase
     });
 
-    const x402Result = await issue({
+    const x402Result = await issueWire01({
       iss: ISS,
       aud: AUD,
       amt: AMOUNT,
@@ -158,7 +158,7 @@ describe('Rail Parity Conformance', () => {
       currency: 'usd',
     });
 
-    const stripeResult = await issue({
+    const stripeResult = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 9999,
@@ -179,7 +179,7 @@ describe('Rail Parity Conformance', () => {
       currency: 'USD',
     });
 
-    const x402Result = await issue({
+    const x402Result = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 8888, // Different!
@@ -224,7 +224,7 @@ describe('Rail Parity Conformance', () => {
     expect(x402Payment.currency).toBe('EUR');
 
     // Issue receipts
-    const stripeResult = await issue({
+    const stripeResult = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 1000,
@@ -238,7 +238,7 @@ describe('Rail Parity Conformance', () => {
       kid,
     });
 
-    const x402Result = await issue({
+    const x402Result = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://app.example.com',
       amt: 1000,

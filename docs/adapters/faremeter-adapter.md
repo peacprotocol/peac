@@ -149,21 +149,25 @@ app.post('/webhooks/faremeter', async (req, res) => {
   const evidence = result.value;
 
   // Issue PEAC receipt
-  const receipt = await issue(
-    {
-      iss: 'https://api.example.com',
-      aud: 'https://agent.example.com',
-      amt: evidence.amount,
-      cur: evidence.currency,
-      rail: evidence.rail,
-      reference: evidence.reference,
-      evidence: evidence.evidence,
+  const { jws } = await issue({
+    iss: 'https://api.example.com',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: evidence.rail,
+        amount_minor: String(evidence.amount),
+        currency: evidence.currency,
+        reference: evidence.reference,
+        ...evidence.evidence,
+      },
     },
     privateKey,
-    keyID
-  );
+    kid: keyID,
+  });
 
-  res.json({ receipt: receipt.jws });
+  res.json({ receipt: jws });
 });
 ```
 
@@ -322,22 +326,26 @@ app.post('/webhooks/faremeter', express.raw({ type: 'application/json' }), async
   }
 
   // Issue receipt
-  const receipt = await issue(
-    {
-      iss: 'https://api.example.com',
-      aud: 'https://agent.example.com',
-      amt: result.value.amount,
-      cur: result.value.currency,
-      rail: result.value.rail,
-      reference: result.value.reference,
-      evidence: result.value.evidence,
+  const { jws } = await issue({
+    iss: 'https://api.example.com',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: result.value.rail,
+        amount_minor: String(result.value.amount),
+        currency: result.value.currency,
+        reference: result.value.reference,
+        ...result.value.evidence,
+      },
     },
     privateKey,
-    keyID
-  );
+    kid: keyID,
+  });
 
   // Acknowledge webhook
-  res.json({ received: true, receipt: receipt.jws });
+  res.json({ received: true, receipt: jws });
 });
 ```
 

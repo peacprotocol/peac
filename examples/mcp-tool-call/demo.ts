@@ -9,7 +9,7 @@
  * This example uses local stubs - no external services required.
  */
 
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { generateKeypair, verify } from '@peac/crypto';
 import { type PEACReceiptClaims } from '@peac/schema';
 import {
@@ -48,7 +48,7 @@ async function mcpToolHandler(params: {
   const toolResult = await webSearchTool(query);
 
   // Issue receipt
-  const receiptResult = await issue({
+  const receiptResult = await issueWire01({
     iss: ISSUER_URL,
     aud: `mcp:${params.tool}`,
     amt: COST_PER_CALL_CENTS,

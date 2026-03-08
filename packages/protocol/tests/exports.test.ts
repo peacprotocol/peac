@@ -34,6 +34,16 @@ describe('@peac/protocol export surface', () => {
     expect(typeof protocol.verifyReceipt).toBe('function');
   });
 
+  it('exports issueWire01 for Wire 0.1 receipt creation', () => {
+    expect(protocol.issueWire01).toBeDefined();
+    expect(typeof protocol.issueWire01).toBe('function');
+  });
+
+  it('exports issueWire02 for explicit wire-pinned issuance', () => {
+    expect(protocol.issueWire02).toBeDefined();
+    expect(typeof protocol.issueWire02).toBe('function');
+  });
+
   it('exports issueJws for header-centric flows', () => {
     expect(protocol.issueJws).toBeDefined();
     expect(typeof protocol.issueJws).toBe('function');

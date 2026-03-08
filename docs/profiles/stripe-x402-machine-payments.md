@@ -223,17 +223,25 @@ const payment = fromCryptoPaymentIntent({
 
 // Issue a PEAC receipt with the payment evidence
 const { privateKey } = await generateKeypair();
-const receipt = await issue({
+const { jws } = await issue({
   iss: 'https://api.example.com',
-  aud: 'https://agent.example.com',
-  amt: payment.amount,
-  cur: payment.currency,
-  rail: payment.rail,
-  reference: payment.reference,
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: payment.rail,
+      amount_minor: String(payment.amount),
+      currency: payment.currency,
+      reference: payment.reference,
+      asset: payment.asset,
+      network: payment.network,
+    },
+  },
   privateKey,
   kid: '2026-02-13',
 });
 
-console.log('Receipt JWS:', receipt.jws);
+console.log('Receipt JWS:', jws);
 // Verify offline with receipt.jws + public key
 ```

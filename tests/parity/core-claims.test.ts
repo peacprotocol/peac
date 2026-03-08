@@ -18,7 +18,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { issue } from '../../packages/protocol/src/issue';
+import { issueWire01 } from '../../packages/protocol/src/issue';
 import { generateKeypair } from '../../packages/crypto/src/jws';
 import { canonicalize } from '../../packages/crypto/src/jcs';
 import { toCoreClaims } from '../../packages/schema/src/normalize';
@@ -74,7 +74,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
       const x402Input = fromACPCheckoutSuccess(acpX402Event);
 
       // Issue receipts using the mapped inputs
-      const stripeResult = await issue({
+      const stripeResult = await issueWire01({
         iss: ISS,
         aud: AUD,
         amt: stripeInput.amt,
@@ -89,7 +89,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
         kid,
       });
 
-      const x402Result = await issue({
+      const x402Result = await issueWire01({
         iss: ISS,
         aud: AUD,
         amt: x402Input.amt,
@@ -216,7 +216,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
       };
 
       // Issue receipts with these control blocks
-      const result1 = await issue({
+      const result1 = await issueWire01({
         iss: 'https://publisher.example.com',
         aud: 'https://api.example.com',
         amt: 1000,
@@ -231,7 +231,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
         ext: { control: control1 },
       });
 
-      const result2 = await issue({
+      const result2 = await issueWire01({
         iss: 'https://publisher.example.com',
         aud: 'https://api.example.com',
         amt: 1000,
@@ -326,7 +326,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
       };
 
       // Issue receipts
-      const result1 = await issue({
+      const result1 = await issueWire01({
         iss: 'https://trusted-agent.example.com',
         aud: 'https://api.example.com',
         amt: 2500,
@@ -341,7 +341,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
         ext: { control: tapControl1 },
       });
 
-      const result2 = await issue({
+      const result2 = await issueWire01({
         iss: 'https://trusted-agent.example.com',
         aud: 'https://api.example.com',
         amt: 2500,
@@ -402,7 +402,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
       const kid = '2025-field-order';
 
       // Issue a receipt
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://resource.example.com',
         amt: 1500,
@@ -453,7 +453,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
       const kid = '2025-evidence';
 
       // Same semantic receipt with different evidence
-      const result1 = await issue({
+      const result1 = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://resource.example.com',
         amt: 3000,
@@ -471,7 +471,7 @@ describe('Cross-Mapping Core Claims Parity', () => {
         kid,
       });
 
-      const result2 = await issue({
+      const result2 = await issueWire01({
         iss: 'https://issuer.example.com',
         aud: 'https://resource.example.com',
         amt: 3000,

@@ -48,9 +48,9 @@ Layer 6: pillars         (depends on protocol, control)
 
 ### 4. Spec-First Development
 
-- Wire format `peac-receipt/0.1` is the canonical wire format identifier (v0.10.0+)
-- JSON Schema at `specs/wire/peac-receipt-0.1.schema.json` is normative
-- TypeScript is one implementation; Go, Rust, Python SDKs follow same specs
+- Wire format `peac-receipt/0.1` is the frozen legacy wire format identifier (v0.10.0+); the Interaction Record format (`interaction-record+jwt`) is current
+- JSON Schema at `specs/wire/peac-receipt-0.1.schema.json` is normative for Wire 0.1
+- Go SDK provides Wire 0.1 issuance, verification, and policy evaluation; additional implementations can follow the same specs
 
 ---
 
@@ -226,7 +226,37 @@ peac/
 
 ## Wire Format
 
-The PEAC receipt envelope follows this structure:
+Two wire formats exist. The Interaction Record format is the current stable format; Wire 0.1 is frozen legacy.
+
+### Interaction Record format (current)
+
+```typescript
+// JWS protected header
+interface Wire02Header {
+  typ: 'interaction-record+jwt';
+  alg: 'EdDSA';
+  kid: string;
+}
+
+// JWS payload (Wire02Claims)
+interface Wire02Claims {
+  iss: string; // Issuer URL (https:// or did:)
+  iat: number; // Issued at (Unix timestamp)
+  exp?: number; // Expiration (Unix timestamp)
+  jti: string; // Unique receipt ID
+  peac_version: '0.2'; // Wire version
+  kind: 'evidence' | 'challenge';
+  type: string; // Reverse-DNS or URI (e.g., org.peacprotocol/payment)
+  pillars?: string[]; // 10-value closed taxonomy
+  extensions?: Record<string, unknown>; // Typed extension groups
+  policy?: PolicyBlock; // JCS + SHA-256 policy binding
+  actor?: ActorBlock; // Agent identity
+}
+```
+
+See [docs/specs/WIRE-0.2.md](specs/WIRE-0.2.md) for the normative specification.
+
+### Wire 0.1 (frozen legacy)
 
 ```typescript
 interface PEACEnvelope {

@@ -21,7 +21,7 @@ import {
   parseRobotsTxt,
   type ContentSignalObservation,
 } from '@peac/mappings-content-signals';
-import { issueWire02, verifyLocal } from '@peac/protocol';
+import { issue, verifyLocal } from '@peac/protocol';
 
 // --- Sample signal sources (pre-fetched; no network I/O per DD-55) ---
 
@@ -82,13 +82,13 @@ for (const signal of resolved) {
   console.log(`  ${signal.purpose}: ${signal.decision} (winning source: ${signal.source})`);
 }
 
-// --- 4. Issue a Wire 0.2 receipt with observation attached via extensions ---
+// --- 4. Issue a receipt with observation attached via extensions ---
 
 console.log('\n=== Receipt Issuance ===\n');
 
 const { publicKey, privateKey } = await generateKeypair();
 
-const { jws } = await issueWire02({
+const { jws } = await issue({
   iss: 'https://gateway.example.com',
   kind: 'evidence',
   type: 'org.peacprotocol/content_signal',
