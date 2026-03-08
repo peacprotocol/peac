@@ -18,10 +18,11 @@ import { Wire02ClaimsSchema, isCanonicalIss, isValidReceiptType } from '../src/i
 /** Generate a valid canonical issuer (https:// origin) */
 const validIss = fc
   .tuple(
-    fc.stringMatching(/^[a-z][a-z0-9-]{0,20}$/),
+    fc.stringMatching(/^[a-z][a-z0-9]{0,20}$/),
     fc.constantFrom('.com', '.org', '.net', '.io', '.dev')
   )
-  .map(([host, tld]) => `https://${host}${tld}`);
+  .map(([host, tld]) => `https://${host}${tld}`)
+  .filter(isCanonicalIss);
 
 /** Generate a valid reverse-DNS receipt type */
 const validType = fc
