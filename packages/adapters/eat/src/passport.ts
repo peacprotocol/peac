@@ -18,7 +18,10 @@
  *   - No network I/O (DD-55)
  */
 
-import { decode as cborDecode, encode as cborEncode } from 'cbor';
+import cbor from 'cbor';
+
+const cborDecode = cbor.decode;
+const cborEncode = cbor.encode;
 import { ed25519Verify } from '@peac/crypto';
 import type { CoseSign1, CoseProtectedHeaders, EatClaims, EatPassportResult } from './types.js';
 import { COSE_ALG, EAT_SIZE_LIMIT } from './types.js';
