@@ -1,26 +1,151 @@
 #!/usr/bin/env bash
 # .githooks/pre-push
-# Repo-managed pre-push hook: full CI-parity gate via scripts/gate.sh.
+# Two-tier pre-push gate.
+#
+# Tier 1 (mandatory, ~10-60s): guard fast mode, format, changed-package checks
+# Tier 2 (optional): full CI-parity gate (build, lint, typecheck, test, full guard)
+#
 # Install: bash scripts/setup-hooks.sh
 #
-# This hook calls the SAME gate script that CI runs. If it passes here,
-# CI will pass (modulo platform differences like Windows audit).
+# Skip Tier 2 only:  PEAC_SKIP_FULL_PRE_PUSH=1 git push
+# Skip everything:   PEAC_FORCE_SKIP_ALL=1 git push (loud warning, exceptional)
 #
-# Bypass: PEAC_SKIP_PRE_PUSH=1 git push
-# A bypass requires the env var AND logs a visible warning.
-# Treat bypass as exceptional; document the reason in your commit or PR.
+# The old PEAC_SKIP_PRE_PUSH=1 is treated as PEAC_SKIP_FULL_PRE_PUSH=1 for
+# backwards compatibility. Tier 1 still runs.
 
 set -euo pipefail
 
-if [ "${PEAC_SKIP_PRE_PUSH:-}" = "1" ]; then
-  echo "[pre-push] BYPASSED (PEAC_SKIP_PRE_PUSH=1)"
-  echo "[pre-push] WARNING: You are pushing without running quality gates."
-  echo "[pre-push] CI will still run all checks. If CI fails, you will need to fix and force-push."
+# --- Total bypass (exceptional) ---
+if [ "${PEAC_FORCE_SKIP_ALL:-}" = "1" ]; then
+  echo ""
+  echo "========================================================"
+  echo "[pre-push] ALL CHECKS BYPASSED (PEAC_FORCE_SKIP_ALL=1)"
+  echo "[pre-push] WARNING: No local validation was run."
+  echo "[pre-push] CI will still run all checks."
+  echo "========================================================"
+  echo ""
   exit 0
 fi
 
-echo "[pre-push] Running full gate (CI parity)..."
-echo "[pre-push] This may take a few minutes. To skip: PEAC_SKIP_PRE_PUSH=1 git push"
+# Backwards compat: old env var skips Tier 2 only
+SKIP_FULL="${PEAC_SKIP_FULL_PRE_PUSH:-${PEAC_SKIP_PRE_PUSH:-0}}"
+
+bad=0
+
+# run_phase <label> <command...>
+# Runs a check, prints OK/FAIL, and on failure prints the rerun command.
+run_phase() {
+  local label="$1"; shift
+  local tmpout
+  tmpout=$(mktemp)
+  printf "[pre-push]   %-44s" "$label"
+  if "$@" > "$tmpout" 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    echo ""
+    # Show last 20 lines of output for context
+    tail -20 "$tmpout" | sed 's/^/    /'
+    echo ""
+    echo "    Rerun: $*"
+    echo ""
+    bad=1
+  fi
+  rm -f "$tmpout"
+}
+
+# ============================================================
+# TIER 1: Mandatory fast checks (~10-60s)
+# Always runs. Cannot be skipped without PEAC_FORCE_SKIP_ALL.
+# ============================================================
+echo ""
+echo "[pre-push] Tier 1: fast mandatory checks"
+echo ""
+
+# 1. Guard in fast mode (skips audit + lockfile drift)
+run_phase "Guard (safety invariants)" env PEAC_FAST=1 bash scripts/guard.sh
+
+# 2. Format check
+run_phase "Format (Prettier)" pnpm format:check
+
+# 3. Planning leak check (conditional: local-only script)
+if [ -f scripts/check-planning-leak.sh ]; then
+  run_phase "Planning leak" bash scripts/check-planning-leak.sh
+fi
+
+# 4. Changed-package build + test
+#    Detects which packages have changes vs the upstream branch,
+#    then runs build and test for only those packages via turbo.
+UPSTREAM=$(git rev-parse --abbrev-ref "@{u}" 2>/dev/null || echo "origin/main")
+MERGE_BASE=$(git merge-base "$UPSTREAM" HEAD 2>/dev/null || echo "")
+
+if [ -n "$MERGE_BASE" ]; then
+  # Extract unique package directories from changed files.
+  # Handles nested workspaces: packages/rails/x402, packages/adapters/eat/passport, etc.
+  CHANGED_PKG_DIRS=()
+  while IFS= read -r pkg_dir; do
+    [ -z "$pkg_dir" ] && continue
+    [ ! -f "$pkg_dir/package.json" ] && continue
+    CHANGED_PKG_DIRS+=("$pkg_dir")
+  done < <(
+    git diff "$MERGE_BASE"...HEAD --name-only 2>/dev/null \
+      | grep '^packages/' \
+      | sed -E '
+          s|^(packages/(rails|mappings|transport)/[^/]+)/.*|\1|
+          s|^(packages/adapters/[^/]+/[^/]+)/.*|\1|
+          s|^(packages/[^/]+)/.*|\1|
+        ' \
+      | sort -u
+  )
+
+  if [ ${#CHANGED_PKG_DIRS[@]} -gt 0 ]; then
+    # Build turbo filter args from package names
+    FILTER_ARGS=()
+    PKG_NAMES=""
+    for pkg_dir in "${CHANGED_PKG_DIRS[@]}"; do
+      pkg_name=$(node -e "console.log(require('./$pkg_dir/package.json').name)" 2>/dev/null || true)
+      [ -z "$pkg_name" ] && continue
+      FILTER_ARGS+=("--filter=$pkg_name")
+      PKG_NAMES="$PKG_NAMES $pkg_name"
+    done
+
+    if [ ${#FILTER_ARGS[@]} -gt 0 ]; then
+      echo "[pre-push]   Changed packages:$PKG_NAMES"
+      run_phase "Changed-package build" pnpm exec turbo run build "${FILTER_ARGS[@]}"
+      run_phase "Changed-package test" pnpm exec turbo run test "${FILTER_ARGS[@]}"
+    fi
+  else
+    echo "[pre-push]   No package changes detected"
+  fi
+else
+  echo "[pre-push]   Could not determine merge base; skipping changed-package checks"
+fi
+
+# --- Tier 1 result ---
+if [ "$bad" -ne 0 ]; then
+  echo ""
+  echo "[pre-push] Tier 1 FAILED. Fix issues before pushing."
+  echo "[pre-push] To bypass ALL checks: PEAC_FORCE_SKIP_ALL=1 git push"
+  exit 1
+fi
+
+echo ""
+echo "[pre-push] Tier 1: OK"
+
+# ============================================================
+# TIER 2: Full CI-parity gate (optional)
+# Skippable with PEAC_SKIP_FULL_PRE_PUSH=1 or PEAC_SKIP_PRE_PUSH=1.
+# ============================================================
+if [ "$SKIP_FULL" = "1" ]; then
+  echo ""
+  echo "[pre-push] Tier 2: SKIPPED (fast push)"
+  echo "[pre-push] CI will run full checks. Push proceeding."
+  exit 0
+fi
+
+echo ""
+echo "[pre-push] Tier 2: full CI-parity gate"
+echo "[pre-push] To skip Tier 2: PEAC_SKIP_FULL_PRE_PUSH=1 git push"
 echo ""
 
 bash scripts/gate.sh
