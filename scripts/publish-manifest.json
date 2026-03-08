@@ -3,8 +3,74 @@
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.12.0-preview.2",
   "lastUpdated": "2026-03-08",
-  "totalPackages": 45,
+  "totalPackages": 28,
   "packages": [
+    "@peac/kernel",
+    "@peac/schema",
+    "@peac/crypto",
+    "@peac/telemetry",
+    "@peac/capture-core",
+    "@peac/capture-node",
+    "@peac/protocol",
+    "@peac/control",
+    "@peac/disc",
+    "@peac/audit",
+    "@peac/middleware-core",
+    "@peac/middleware-express",
+    "@peac/contracts",
+    "@peac/http-signatures",
+    "@peac/jwks-cache",
+    "@peac/policy-kit",
+    "@peac/adapter-core",
+    "@peac/mappings-mcp",
+    "@peac/mappings-acp",
+    "@peac/mappings-ucp",
+    "@peac/mappings-a2a",
+    "@peac/rails-x402",
+    "@peac/adapter-x402",
+    "@peac/adapter-openclaw",
+    "@peac/mappings-content-signals",
+    "@peac/adapter-openai-compatible",
+    "@peac/mcp-server",
+    "@peac/cli"
+  ],
+  "layers": {
+    "0-kernel": ["@peac/kernel"],
+    "1-schema": ["@peac/schema"],
+    "2-crypto": ["@peac/crypto"],
+    "2.5-telemetry": ["@peac/telemetry"],
+    "2.5-capture": ["@peac/capture-core", "@peac/capture-node"],
+    "3-protocol": ["@peac/protocol", "@peac/control"],
+    "3-disc": ["@peac/disc"],
+    "3-audit": ["@peac/audit"],
+    "3.5-middleware": ["@peac/middleware-core", "@peac/middleware-express"],
+    "4-infra": [
+      "@peac/contracts",
+      "@peac/http-signatures",
+      "@peac/jwks-cache",
+      "@peac/policy-kit",
+      "@peac/adapter-core"
+    ],
+    "5-adapters": [
+      "@peac/mappings-mcp",
+      "@peac/mappings-acp",
+      "@peac/mappings-ucp",
+      "@peac/mappings-a2a",
+      "@peac/rails-x402",
+      "@peac/adapter-x402",
+      "@peac/adapter-openclaw",
+      "@peac/mappings-content-signals",
+      "@peac/adapter-openai-compatible"
+    ],
+    "5-server": ["@peac/mcp-server"],
+    "6-cli": ["@peac/cli"]
+  },
+  "trustedPublisher": {
+    "repository": "peacprotocol/peac",
+    "workflow": "publish.yml",
+    "environment": "npm-production"
+  },
+  "oidcConfigured": [
     "@peac/kernel",
     "@peac/schema",
     "@peac/crypto",
@@ -51,42 +117,6 @@
     "@peac/core",
     "@peac/sdk"
   ],
-  "layers": {
-    "0-kernel": ["@peac/kernel"],
-    "1-schema": ["@peac/schema"],
-    "2-crypto": ["@peac/crypto"],
-    "2.5-telemetry": ["@peac/telemetry"],
-    "2.5-capture": ["@peac/capture-core", "@peac/capture-node"],
-    "3-protocol": ["@peac/protocol", "@peac/control"],
-    "3-disc": ["@peac/disc"],
-    "3-audit": ["@peac/audit"],
-    "3.5-middleware": ["@peac/middleware-core", "@peac/middleware-express"],
-    "4-infra": [
-      "@peac/contracts",
-      "@peac/http-signatures",
-      "@peac/jwks-cache",
-      "@peac/policy-kit",
-      "@peac/adapter-core"
-    ],
-    "5-adapters": [
-      "@peac/mappings-mcp",
-      "@peac/mappings-acp",
-      "@peac/mappings-ucp",
-      "@peac/mappings-a2a",
-      "@peac/rails-x402",
-      "@peac/adapter-x402",
-      "@peac/adapter-openclaw",
-      "@peac/mappings-content-signals",
-      "@peac/adapter-openai-compatible"
-    ],
-    "5-server": ["@peac/mcp-server"],
-    "6-cli": ["@peac/cli"]
-  },
-  "trustedPublisher": {
-    "repository": "peacprotocol/peac",
-    "workflow": "publish.yml",
-    "environment": "npm-production"
-  },
   "pendingTrustedPublishing": ["@peac/net-node", "@peac/adapter-eat"],
-  "pendingTrustedPublishingNote": "These packages are not yet published to npm (404). Configure trust after first publish."
+  "pendingTrustedPublishingNote": "Not yet published to npm (404). Configure trust after first publish."
 }

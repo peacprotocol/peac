@@ -19,10 +19,14 @@ set -euo pipefail
 # relationship already exists, use `npm trust list <pkg>` to inspect it
 # and `npm trust revoke` to remove it before re-creating.
 #
+# Exit codes:
+#   0 - all packages configured (or already configured)
+#   1 - one or more hard failures (not 409 or 404)
+#
 # Usage:
 #   bash scripts/setup-trusted-publishing.sh              # configure all pending
 #   bash scripts/setup-trusted-publishing.sh --dry-run     # show what would run
-#   bash scripts/setup-trusted-publishing.sh --start-from @peac/receipts  # resume from a package
+#   bash scripts/setup-trusted-publishing.sh --start-from @peac/receipts  # resume
 #   bash scripts/setup-trusted-publishing.sh @peac/kernel  # configure one package
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -97,24 +101,51 @@ REPO=$(node -p "require('$MANIFEST').trustedPublisher.repository")
 WORKFLOW=$(node -p "require('$MANIFEST').trustedPublisher.workflow")
 ENVIRONMENT=$(node -p "require('$MANIFEST').trustedPublisher.environment")
 
+# configure_package <pkg>
+# Returns: 0 = configured, 1 = hard failure
+# Sets: LAST_STATUS to "configured", "already_configured", "not_on_npm", or "failed"
+LAST_STATUS=""
+
 configure_package() {
   local pkg="$1"
   local cmd="npm trust github $pkg --file $WORKFLOW --repository $REPO --environment $ENVIRONMENT --yes"
 
   if $DRY_RUN; then
     echo "  [dry-run] $cmd"
-  else
-    echo "  Configuring $pkg..."
-    if $cmd; then
-      echo "  OK: $pkg"
-    else
-      local exit_code=$?
-      echo "  FAIL: $pkg (exit $exit_code)" >&2
-      echo "    If trust already exists, check: npm trust list $pkg" >&2
-      echo "    To replace: npm trust revoke <id>, then re-run" >&2
-      return 1
-    fi
+    LAST_STATUS="configured"
+    return 0
   fi
+
+  echo "  Configuring $pkg..."
+  local output
+  local exit_code=0
+  output=$($cmd 2>&1) || exit_code=$?
+
+  if [ "$exit_code" -eq 0 ]; then
+    echo "  CONFIGURED: $pkg"
+    LAST_STATUS="configured"
+    return 0
+  fi
+
+  # 409 Conflict: trust already exists (not an error)
+  if echo "$output" | grep -q "E409\|409 Conflict"; then
+    echo "  ALREADY_CONFIGURED: $pkg (trust relationship exists)"
+    LAST_STATUS="already_configured"
+    return 0
+  fi
+
+  # 404 Not Found: package not yet published to npm
+  if echo "$output" | grep -q "E404\|404 Not Found"; then
+    echo "  NOT_ON_NPM: $pkg (publish the package first, then re-run)" >&2
+    LAST_STATUS="not_on_npm"
+    return 1
+  fi
+
+  # Hard failure
+  echo "  FAILED: $pkg" >&2
+  echo "$output" | sed 's/^/    /' >&2
+  LAST_STATUS="failed"
+  return 1
 }
 
 # --- Single package mode ---
@@ -157,6 +188,8 @@ if ! $DRY_RUN; then
 fi
 
 ok=0
+already=0
+not_on_npm=0
 fail=0
 skipping=true
 if [ -z "$START_FROM" ]; then
@@ -177,9 +210,15 @@ while IFS= read -r pkg; do
   fi
 
   if configure_package "$pkg"; then
-    ok=$((ok + 1))
+    case "$LAST_STATUS" in
+      already_configured) already=$((already + 1)) ;;
+      *) ok=$((ok + 1)) ;;
+    esac
   else
-    fail=$((fail + 1))
+    case "$LAST_STATUS" in
+      not_on_npm) not_on_npm=$((not_on_npm + 1)) ;;
+      *) fail=$((fail + 1)) ;;
+    esac
   fi
 
   # Sleep between calls to avoid rate limiting (npm docs recommend 2s)
@@ -189,17 +228,28 @@ while IFS= read -r pkg; do
 done <<< "$PENDING"
 
 echo ""
-echo "Results: $ok configured, $fail failed (of $COUNT total)"
+echo "Results (of $COUNT total):"
+echo "  configured:         $ok"
+echo "  already_configured: $already"
+echo "  not_on_npm:         $not_on_npm"
+echo "  failed:             $fail"
 
 if [ "$fail" -gt 0 ]; then
   echo ""
-  echo "Some packages failed. If the 5-minute 2FA window expired, re-run with:"
+  echo "Some packages had hard failures. If the 5-minute 2FA window expired, re-run with:"
   echo "  bash scripts/setup-trusted-publishing.sh --start-from <first-failed-package>"
+  exit 1
+fi
+
+if [ "$not_on_npm" -gt 0 ]; then
+  echo ""
+  echo "Some packages are not yet published to npm."
+  echo "Publish them first, then re-run this script to configure trust."
   exit 1
 fi
 
 echo ""
 echo "All packages configured. Next steps:"
-echo "  1. Update scripts/publish-manifest.json: move packages from pendingTrustedPublishing to packages"
-echo "  2. Verify: node -e \"const m=require('./scripts/publish-manifest.json'); console.assert(m.pendingTrustedPublishing.length===0, 'OIDC incomplete')\""
-echo "  3. Run stable gates: bash scripts/release/run-gates.sh"
+echo "  1. Move configured packages to oidcConfigured in scripts/publish-manifest.json"
+echo "  2. Empty pendingTrustedPublishing (or leave only unpublished packages)"
+echo "  3. Verify: node -e \"const m=require('./scripts/publish-manifest.json'); console.log('pending:', m.pendingTrustedPublishing.length)\""
