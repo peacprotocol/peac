@@ -141,7 +141,11 @@ run_gate "test" pnpm test
 echo ""
 echo "--- Guards ---"
 run_gate "guard" bash scripts/guard.sh
-run_gate "planning-leak" bash scripts/check-planning-leak.sh
+if [ -f scripts/check-planning-leak.sh ]; then
+  run_gate "planning-leak" bash scripts/check-planning-leak.sh
+else
+  echo "  [planning-leak] SKIP (local-only script not present)"
+fi
 run_gate "format" pnpm format:check
 
 # --- Architecture ---
@@ -249,13 +253,14 @@ if [[ "$TARGET" == "stable" ]]; then
   # Implemented gates (PR 5: security hardening)
   run_gate "ssrf-suite" pnpm exec vitest run packages/net/node/tests/ssrf-expansion.test.ts tests/security/no-fetch-audit.test.ts --reporter=dot
 
-  # These stubs hard-fail until real implementations land in later PRs.
-  for stub_gate in "adoption-evidence" "fuzz-suite"; do
-    TOTAL=$((TOTAL + 1))
-    echo "  [$stub_gate] FAIL (not implemented: DD-90 requires implementation before stable release)"
-    FAILED=$((FAILED + 1))
-    append_gate "$stub_gate" "failed" 0
-  done
+  # Implemented gates (PR 3: property/fuzz tests)
+  run_gate "fuzz-suite" pnpm run test:property
+
+  # Implemented gate (PR 8: adoption evidence)
+  # Uses Node validator that enforces the 6-field quality bar structurally,
+  # validates ISO dates and URL formats, and reads ecosystem count from
+  # docs/adoption/integration-evidence.json (not markdown prose).
+  run_gate "adoption-evidence" node scripts/release/validate-adoption-evidence.mjs
 fi
 
 # --- Summary ---

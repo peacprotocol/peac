@@ -1,0 +1,54 @@
+name: PR Metadata Lint
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  lint-metadata:
+    name: Check PR title and body
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Lint PR metadata
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          FAILED=0
+
+          # Write PR content to temp files for safe grep
+          echo "$PR_TITLE" > /tmp/pr-title.txt
+          echo "$PR_BODY" > /tmp/pr-body.txt
+
+          # Check for reference path leaks
+          if grep -iE 'reference/.*_LOCAL\.' /tmp/pr-title.txt /tmp/pr-body.txt 2>/dev/null; then
+            echo "::error::PR metadata contains reference to local-only files"
+            FAILED=1
+          fi
+
+          # Check for x403 typo
+          if grep -q 'x403' /tmp/pr-title.txt /tmp/pr-body.txt 2>/dev/null; then
+            echo "::error::PR metadata contains x403 typo (should be x402)"
+            FAILED=1
+          fi
+
+          # Check for internal planning markers
+          if grep -iE '(NEXT_STEPS|ROADMAP_LOCAL|STRATEGY_LOCAL|SCOPE_LEDGER|MASTER_PLAN_LOCAL)' /tmp/pr-title.txt /tmp/pr-body.txt 2>/dev/null; then
+            echo "::error::PR metadata contains internal planning markers"
+            FAILED=1
+          fi
+
+          rm -f /tmp/pr-title.txt /tmp/pr-body.txt
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo ""
+            echo "PR metadata lint failed. Remove non-technical language from PR title/body."
+            exit 1
+          fi
+
+          echo "PR metadata lint: OK"
