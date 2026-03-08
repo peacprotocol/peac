@@ -1,0 +1,56 @@
+{
+  "$schema": "./integration-evidence.schema.json",
+  "$comment": "Canonical source for DD-90 integration evidence. docs/adoption/integration-evidence.md is generated from this file.",
+  "version": "1.0.0",
+  "integrations": [
+    {
+      "ecosystem": "MCP",
+      "full_name": "Model Context Protocol",
+      "pr": 472,
+      "pr_commit": "9e5c5dea",
+      "dd90_gate": true,
+      "surface": "peac_issue tool produces Wire 0.2 receipts; peac_verify tool verifies them",
+      "evidence": "Round-trip issuance and verification via MCP tool calls",
+      "wire_version": "0.2",
+      "test_files": [
+        "packages/mcp-server/tests/handlers/issue.test.ts",
+        "packages/mcp-server/tests/handlers/verify.test.ts"
+      ],
+      "spec_refs": ["docs/specs/EVIDENCE-CARRIER-CONTRACT.md"]
+    },
+    {
+      "ecosystem": "A2A",
+      "full_name": "Agent-to-Agent Protocol",
+      "pr": 473,
+      "pr_commit": "56fd7047",
+      "dd90_gate": true,
+      "surface": "Wire 0.2 receipts carried in A2A metadata[extensionURI] per Evidence Carrier Contract",
+      "evidence": "Round-trip through A2A metadata carrier (issue, embed, extract, verify)",
+      "wire_version": "0.2",
+      "test_files": ["tests/integration/a2a/wire02-roundtrip.test.ts"],
+      "spec_refs": ["docs/specs/EVIDENCE-CARRIER-CONTRACT.md"]
+    },
+    {
+      "ecosystem": "EAT",
+      "full_name": "Entity Attestation Token",
+      "pr": 474,
+      "pr_commit": "f20e0f61",
+      "dd90_gate": false,
+      "dd_reference": "DD-154",
+      "surface": "COSE_Sign1 (RFC 9052) identity adapter; maps EAT claims to PEAC actor binding",
+      "evidence": "Passport-style identity input; does not produce Wire 0.2 receipts in the EAT ecosystem",
+      "wire_version": null,
+      "rationale": "EAT is an identity input surface. It enriches PEAC receipts with external attestations but does not constitute a distinct ecosystem producing Wire 0.2 evidence.",
+      "test_files": [
+        "packages/adapters/eat/tests/passport.test.ts",
+        "packages/adapters/eat/tests/claim-mapper.test.ts"
+      ],
+      "spec_refs": ["docs/specs/EVIDENCE-CARRIER-CONTRACT.md"]
+    }
+  ],
+  "classification_rules": [
+    "An integration counts toward DD-90 if it produces or consumes Wire 0.2 receipts (interaction-record+jwt) in a distinct protocol ecosystem.",
+    "Identity adapters, claim mappers, and format converters that feed into PEAC but do not themselves produce receipts are classified under their own DDs.",
+    "Do not inflate the ecosystem count by reclassifying adapters as integrations."
+  ]
+}

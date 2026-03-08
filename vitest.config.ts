@@ -84,6 +84,7 @@ export default defineConfig({
       'tests/distribution/**/*.test.ts',
       'tests/integration/**/*.test.ts',
       'tests/security/**/*.test.ts',
+      'tests/release/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,

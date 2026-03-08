@@ -71,8 +71,13 @@ else
   run_check "guard" bash scripts/guard.sh
 fi
 
-# --- Planning leak ---
-run_check "planning leak" bash scripts/check-planning-leak.sh
+# --- Planning leak (local-only script; skipped on fresh clones/CI) ---
+if [ -f scripts/check-planning-leak.sh ]; then
+  run_check "planning leak" bash scripts/check-planning-leak.sh
+else
+  echo "== planning leak =="
+  echo "SKIP: check-planning-leak.sh not present (local-only)"
+fi
 
 # --- Summary ---
 echo ""

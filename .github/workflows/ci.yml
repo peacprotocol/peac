@@ -85,7 +85,12 @@ jobs:
         run: bash -euxo pipefail scripts/guard.sh
 
       - name: Planning leak check
-        run: bash scripts/check-planning-leak.sh
+        run: |
+          if [ -f scripts/check-planning-leak.sh ]; then
+            bash scripts/check-planning-leak.sh
+          else
+            echo "SKIP: check-planning-leak.sh not present (local-only script)"
+          fi
 
       - name: Forbidden strings check (ci:guards)
         run: bash scripts/ci/forbid-strings.sh

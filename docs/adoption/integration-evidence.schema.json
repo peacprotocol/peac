@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "integration-evidence.schema.json",
+  "title": "PEAC Integration Evidence",
+  "description": "Schema for docs/adoption/integration-evidence.json. Validated in CI by the adoption-evidence gate.",
+  "type": "object",
+  "required": ["version", "integrations", "classification_rules"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "$comment": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "integrations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Integration"
+      }
+    },
+    "classification_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "Integration": {
+      "type": "object",
+      "required": [
+        "ecosystem",
+        "full_name",
+        "pr",
+        "pr_commit",
+        "dd90_gate",
+        "surface",
+        "evidence",
+        "wire_version",
+        "test_files",
+        "spec_refs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ecosystem": {
+          "type": "string",
+          "minLength": 1
+        },
+        "full_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pr_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8,40}$",
+          "description": "Short or full commit SHA (hex, 8-40 chars)"
+        },
+        "dd90_gate": {
+          "type": "boolean"
+        },
+        "dd_reference": {
+          "type": "string",
+          "pattern": "^DD-\\d+$",
+          "description": "For non-DD-90 integrations, the DD that tracks this work"
+        },
+        "surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "wire_version": {
+          "type": ["string", "null"],
+          "description": "Wire format version (e.g. '0.2') or null for non-receipt integrations"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required for non-DD-90 integrations to explain classification"
+        },
+        "test_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "spec_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
