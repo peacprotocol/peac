@@ -1,12 +1,12 @@
-# PEAC Interaction Record Format 0.2 (Preview)
+# PEAC Interaction Record Format 0.2
 
-**Status**: NORMATIVE PREVIEW
+**Status**: NORMATIVE
 
-**Version**: 0.12.0-preview.1
+**Version**: 0.12.0
 
 **Wire Format**: `interaction-record+jwt`
 
-**Design Decisions**: DD-150, DD-151, DD-152, DD-153, DD-155, DD-156
+**Design Decisions**: DD-150, DD-151, DD-152, DD-153, DD-155, DD-156, DD-157, DD-158, DD-159, DD-160, DD-161, DD-162, DD-163, DD-164, DD-167, DD-168
 
 ---
 

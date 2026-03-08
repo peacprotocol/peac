@@ -68,7 +68,8 @@ full Wire 0.2 feature set.
 
 ### Changed
 
-- **dist-tag:** `latest` now points to v0.12.0 (previously v0.11.3)
+- **dist-tag:** promotes v0.12.0 to `latest` (from v0.11.3)
+- **API:** `issue()` restored as canonical issuance entry point (thin alias over `issueWire02()`); the preview.2 deprecation is reversed
 - **Node.js baseline:** Node 24 Active LTS canonical for benchmarks and CI (DD-161); Node 22 Maintenance LTS compat lane; `engines.node` remains `>=22.0.0`
 
 ### Infrastructure
@@ -153,7 +154,7 @@ stable promotion.
   - `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` for Wire 0.1 receipts
   - `verifyLocalWire01()` internal-only (NOT barrel-exported from `@peac/protocol`)
   - MCP server: Wire 0.2 only (no Wire 0.1 issuance or verification)
-  - `issue()` deprecated in favor of `issueWire02()`
+  - `issue()` deprecated in favor of `issueWire02()` (reversed in v0.12.0 stable)
 - **Hono Audit Fix** (#469)
   - Bumped `hono` and `@hono/node-server` for CVE remediation
 
