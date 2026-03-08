@@ -7,6 +7,101 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-03-08
+
+### Interaction Record Format 0.2 (Stable)
+
+v0.12.0 promotes Wire 0.2 (`interaction-record+jwt`) from preview to stable on
+the `latest` dist-tag. This release contains no new protocol features beyond
+preview.2; it adds proof of correctness, security, and performance through
+conformance expansion, property-based testing, fuzzing, benchmarks, SSRF
+hardening, API surface locking, and adoption evidence.
+
+Wire 0.2 is the next generation of the PEAC receipt format: 2 structural kinds
+(`evidence`, `challenge`), open semantic `type` with 10-pillar taxonomy, 5 typed
+extension groups, JCS policy binding, JOSE hardening, and dual-stack
+strict/interop verification. See preview.1 and preview.2 entries below for the
+full Wire 0.2 feature set.
+
+### Added (Stable-Only)
+
+- **Conformance Expansion** (#477, DD-164, DD-167)
+  - 146 normative requirement IDs (BCP 14, RFC 8174) across 18 spec sections
+  - Machine-readable registry `specs/conformance/requirement-ids.json` with source fragment hashing for drift detection
+  - Per-requirement `enforcement_class`: `hard_fail`, `warning_only`, `routing`, `issuance`, `advisory`
+  - 618+ conformance fixtures (173 with requirement metadata)
+  - Generated `CONFORMANCE-MATRIX.md` from registry, fixtures, and test-mappings
+  - Section 19 validation-order tests proving step precedence
+  - 7 conformance scripts (core, registry, inventory, matrix, schemas, drift, backfill)
+  - Guard script integration (coverage, inventory freshness, registry drift)
+- **Property and Fuzz Tests** (#478, DD-158)
+  - 12+ property tests across schema, crypto, protocol, policy, strictness (fast-check 4.5.3)
+  - Zero-crash guarantee on 1000 iterations per property
+  - `verifyLocal()` default-strict proven by property test
+  - Deferred conformance fixtures for sections 13-16 (challenge, warnings, dual-stack, strictness)
+  - `fuzz-suite` gate wired in `run-gates.sh`
+- **Performance Benchmarks** (#480, DD-159)
+  - Vitest bench suite for Wire 0.2 issuance, verification, and policy binding
+  - Baseline results with Node 24.13.0
+  - `perf-benchmarks` gate wired in `run-gates.sh`
+- **SSRF and Security Hardening** (#479, DD-160)
+  - Expanded SSRF test vectors for `@peac/net-node` `safeFetch()`
+  - Security posture documentation
+  - `ssrf-suite` gate wired in `run-gates.sh`
+- **Package Surface Audit** (#482, DD-162, DD-163)
+  - API surface lock for 9 critical packages (snapshot-based contract tests)
+  - Pack-install smoke tests for 6 packages (ESM + CJS + types resolution)
+  - `api-surface-lock` and `pack-install-smoke` gates wired
+- **Doc-Example Execution Gate** (#481, DD-163)
+  - Automated validation of code examples in 5 spec documents (25 blocks, 19 validated)
+  - 10 unit tests for doc-example validator
+- **DD-90 Stable Gates and Adoption Evidence** (#489)
+  - All 6 DD-90 gates wired (zero stubs): `perf-benchmarks`, `ssrf-suite`, `fuzz-suite`, `adoption-evidence`, `pack-install-smoke`, `api-surface-lock`
+  - Adoption evidence catalog: `docs/adoption/integration-evidence.json` with JSON Schema validation
+  - Integration evidence validator (`scripts/release/validate-adoption-evidence.mjs`)
+  - Markdown parity check for `integration-evidence.md`
+  - 3 integrations cataloged: MCP (DD-90), A2A (DD-90), EAT (non-DD-90, DD-154)
+- **OIDC Trusted Publishing** (#490)
+  - 45 packages configured for OIDC trusted publishing via `npm trust`
+  - `publish-manifest.json` restructured: `oidcConfigured` (45), `deferredTrustedPublishing` (2: net-node, adapter-eat)
+  - Invariant checker CI gate for OIDC configuration
+
+### Changed
+
+- **dist-tag:** `latest` now points to v0.12.0 (previously v0.11.3)
+- **Node.js baseline:** Node 24 Active LTS canonical for benchmarks and CI (DD-161); Node 22 Maintenance LTS compat lane; `engines.node` remains `>=22.0.0`
+
+### Infrastructure
+
+- **Release Gate Runner** (`scripts/release/run-gates.sh`): `--target stable` runs all 6 DD-90 gates plus standard gates; `--write-release-artifacts` produces versioned gate report
+- **Conformance Tooling:** 7 Node scripts for registry management, inventory generation, matrix generation, schema validation, drift detection
+- **Guard Script:** Extended with conformance coverage, inventory freshness, registry drift checks
+
+### Design Decisions
+
+- DD-157: Release integrity gate (committed manifest, coherence checks)
+- DD-158: Property/fuzz testing gate (fast-check, zero-crash invariant)
+- DD-159: Performance benchmark gate (Vitest bench, baseline tracking)
+- DD-160: SSRF/security hardening gate (expanded vectors, posture doc)
+- DD-161: Node 24 canonical baseline (Active LTS primary, Node 22 compat)
+- DD-162: Publisher trust and OIDC migration (45 packages, invariant checker)
+- DD-163: Package surface audit (API lock, pack-install, doc-example gate)
+- DD-164: Full BCP 14 requirement coverage (146 IDs, drift detection)
+- DD-167: Conformance fixture inventory system (machine-readable tracking)
+- DD-168: Stable promotion (version bump, dist-tag flip, 28 packages)
+
+### Deferred
+
+- AST-based no-network audit for DD-55 enforcement: deferred to v0.12.1 (#484)
+- SSRF-specific error preservation in safeFetch: deferred to v0.12.1 (#483)
+- Repeated-run and Linux benchmark artifacts: deferred to v0.12.1 (#485)
+- Stronger API contract extraction for critical packages: deferred to v0.12.1 (#486)
+- Full install-surface proof for workspace-dep packages: deferred to v0.12.1 (#487)
+- Conformance fixtures for sections 2-4 (media type, envelope, compatibility): deferred to v0.12.1
+- ProofTypeSchema and ProofMethodSchema unification: deferred to v0.12.1
+- Remaining 5 pillar extension groups (consent, compliance, privacy, safety, provenance): deferred to v0.12.1+
+- Go SDK: deferred to v0.13.0+
+
 ## [0.12.0-preview.2] - 2026-03-06
 
 ### Interaction Record Format 0.2 Preview (Hardening)

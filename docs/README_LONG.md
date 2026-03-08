@@ -51,7 +51,7 @@ See [examples/x402-node-server](../examples/x402-node-server) for a working impl
 
 ---
 
-**Package availability:** All packages listed below are published to npm on two dist-tags: `latest` (stable) and `next` (Wire 0.2 preview). Install via `pnpm add <package>` (stable) or `pnpm add <package>@next` (preview). See [Releases](https://github.com/peacprotocol/peac/releases) for current versions.
+**Package availability:** All packages listed below are published to npm on the `latest` dist-tag (v0.12.0, Wire 0.2 stable). Install via `pnpm add <package>`. See [Releases](https://github.com/peacprotocol/peac/releases) for current versions.
 
 ## Integration examples
 
@@ -218,7 +218,7 @@ PEAC is not a paywall, billing engine, or storage system. It is the records laye
 - Signature: EdDSA (Ed25519, RFC 8032)
 - Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
 
-**Wire 0.2 (preview on `next` dist-tag):**
+**Wire 0.2 (stable on `latest` dist-tag, v0.12.0+):**
 
 - JWS type: `typ: "interaction-record+jwt"`
 - Two structural kinds: `evidence` (records what happened) and `challenge` (records what is required)
@@ -762,9 +762,9 @@ These are optional higher-layer helpers built on top of the core receipt/kernel 
 
 **Wire formats:**
 
-- `peac-receipt/0.1` (Wire 0.1): the stable receipt format on the `latest` dist-tag
-- `interaction-record+jwt` (Wire 0.2): preview on the `next` dist-tag (`v0.12.0-preview.1`); envelope structure is stable but subject to feedback before promotion to `latest`
-- Both wire versions coexist: `verifyLocal()` auto-detects and validates accordingly
+- `interaction-record+jwt` (Wire 0.2): the current stable receipt format on the `latest` dist-tag (v0.12.0+)
+- `peac-receipt/0.1` (Wire 0.1): frozen legacy format; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` for Wire 0.1 receipts
+- Use `issueWire02()` for all new receipt issuance
 
 **Library surface:**
 

@@ -11,7 +11,7 @@ async function makeIssuerContext() {
   const { privateKey, publicKey } = await generateKeypair();
   const kid = 'test-kid-' + Date.now();
   return {
-    version: '0.12.0-preview.2',
+    version: '0.12.0',
     policyHash: 'testhash',
     protocolVersion: '2025-11-25',
     issuerKey: { privateKey, publicKey, kid },
@@ -150,7 +150,7 @@ describe('handlers/issue (Wire 0.2)', () => {
 
   it('returns E_MCP_KEY_REQUIRED when issuerKey is missing', async () => {
     const context = {
-      version: '0.12.0-preview.2',
+      version: '0.12.0',
       policyHash: 'testhash',
       protocolVersion: '2025-11-25',
     };
@@ -176,7 +176,7 @@ describe('handlers/issue (Wire 0.2)', () => {
     const { privateKey, publicKey } = await generateKeypair();
     const kid = 'test-kid-' + Date.now();
     const context = {
-      version: '0.12.0-preview.2',
+      version: '0.12.0',
       policyHash: 'testhash',
       protocolVersion: '2025-11-25',
       issuerKey: { privateKey, publicKey, kid },
