@@ -105,7 +105,7 @@ rate_limit: '100/hour'
 `PEAC-Receipt` header: signed proof returned on governed responses:
 
 ```text
-PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
+PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...
 ```
 
 The receipt is a standard JWS (Ed25519) that can be verified offline using the issuer's published keys. Full specification: [Spec Index](docs/SPEC_INDEX.md).
@@ -157,44 +157,13 @@ PEAC produces portable, verifiable evidence that can feed AI safety reviews, inc
 
 ## Quick start
 
-**Requirements:** Node >= 22
+**Requirements:** Tested on Node 24; compatible with Node 22+
 
 ```bash
-pnpm add @peac/protocol
+pnpm add @peac/protocol @peac/crypto @peac/schema
 ```
 
 ### Issue and verify a receipt
-
-```typescript
-import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
-
-const { privateKey, publicKey } = await generateKeypair();
-
-const { jws } = await issue({
-  iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 100,
-  cur: 'USD',
-  rail: 'stripe',
-  reference: 'tx_abc123',
-  subject: 'https://api.example.com/inference',
-  privateKey,
-  kid: 'key-2026-02-26',
-});
-
-const result = await verifyLocal(jws, publicKey, {
-  issuer: 'https://api.example.com',
-  audience: 'https://client.example.com',
-});
-
-if (result.valid) {
-  console.log(result.variant, result.claims.iss);
-}
-```
-
-### Issue a Wire 0.2 receipt
-
-Wire 0.2 (v0.12.0, `latest` dist-tag) adds structured kinds, typed extensions, and policy binding:
 
 ```typescript
 import { generateKeypair } from '@peac/crypto';
@@ -229,10 +198,12 @@ if (result.valid && result.wireVersion === '0.2') {
 ### Verify an existing receipt (CLI)
 
 ```bash
-peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...'
+peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...'
 ```
 
-See [examples/quickstart/](examples/quickstart/) for Wire 0.1 and [examples/wire-02-minimal/](examples/wire-02-minimal/) for Wire 0.2 runnable code. For settlement fields, HTTP/REST integration, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
+> **Legacy:** Wire 0.1 (`peac-receipt/0.1`) is frozen. See [examples/quickstart/](examples/quickstart/) for Wire 0.1 code.
+
+See [examples/wire-02-minimal/](examples/wire-02-minimal/) for runnable Wire 0.2 code. For settlement, HTTP/REST, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
 
 ---
 
@@ -240,7 +211,7 @@ See [examples/quickstart/](examples/quickstart/) for Wire 0.1 and [examples/wire
 
 - **Agent developer**: [Quick start](#quick-start): issue and verify receipts in 5 lines
 - **API operator**: [Express middleware](docs/README_LONG.md#express-middleware): add PEAC in 3 lines
-- **Go developer**: [Go SDK](sdks/go/): `peac.Issue()` + `peac.Verify()`
+- **Go developer**: [Go SDK](sdks/go/): verify receipts with `peac.Verify()`
 - **x402 / crypto payments**: [Stripe x402 profile](docs/profiles/stripe-x402-machine-payments.md): normalize + receipt + verify
 - **Policy author**: [Policy Kit](docs/policy-kit/quickstart.md): author and validate terms
 - **Auditor / compliance**: [Dispute Bundles](#core-primitives): portable evidence format
