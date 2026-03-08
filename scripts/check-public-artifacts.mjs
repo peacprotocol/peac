@@ -33,6 +33,8 @@ const DENYLIST_PATH = resolve(REPO_ROOT, 'reference/guard-denylist.txt');
 const BUILTIN_PATTERNS = [
   /reference\/.*_LOCAL\./i,
   /x403/,
+  /[\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/, // hidden/bidi Unicode
+  /MEMORY\.md/,
 ];
 
 /**

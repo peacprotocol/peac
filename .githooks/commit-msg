@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# .githooks/commit-msg
+# Repo-managed commit-msg hook: checks commit message against local denylist.
+# Install: bash scripts/setup-hooks.sh (or: git config core.hooksPath .githooks)
+#
+# Reads patterns from reference/guard-denylist.txt (local-only, gitignored).
+# Also checks for objective issues (internal markers, hidden Unicode).
+#
+# Bypass: PEAC_SKIP_COMMIT_MSG=1 git commit -m "..."
+
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+
+if [ "${PEAC_SKIP_COMMIT_MSG:-}" = "1" ]; then
+  echo "[commit-msg] BYPASSED (PEAC_SKIP_COMMIT_MSG=1)"
+  echo "[commit-msg] WARNING: Commit message was not checked for non-technical language."
+  exit 0
+fi
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+DENYLIST="$REPO_ROOT/reference/guard-denylist.txt"
+FAILED=0
+
+# Built-in checks (always active, safe for tracked script)
+if grep -iE 'reference/.*_LOCAL\.' "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
+  echo "[commit-msg] FAIL: Commit message references local-only files"
+  FAILED=1
+fi
+
+if grep -q 'x403' "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
+  echo "[commit-msg] FAIL: Commit message contains x403 typo"
+  FAILED=1
+fi
+
+if grep -iE '(NEXT_STEPS|ROADMAP_LOCAL|STRATEGY_LOCAL|SCOPE_LEDGER|MASTER_PLAN_LOCAL)' "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
+  echo "[commit-msg] FAIL: Commit message contains internal planning markers"
+  FAILED=1
+fi
+
+# Local denylist check (if denylist exists)
+if [ -f "$DENYLIST" ]; then
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Skip comments and blank lines
+    trimmed=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    [ -z "$trimmed" ] && continue
+    echo "$trimmed" | grep -q '^#' && continue
+
+    if grep -iE "$trimmed" "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
+      echo "[commit-msg] FAIL: Commit message matches denylist pattern: $trimmed"
+      FAILED=1
+    fi
+  done < "$DENYLIST"
+fi
+
+if [ "$FAILED" -eq 1 ]; then
+  echo ""
+  echo "[commit-msg] Commit message contains non-technical language."
+  echo "[commit-msg] Rewrite the message to be technical and implementation-focused."
+  echo "[commit-msg] Bypass: PEAC_SKIP_COMMIT_MSG=1 git commit ..."
+  exit 1
+fi
+
+echo "[commit-msg] OK"
