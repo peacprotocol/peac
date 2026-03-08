@@ -1,0 +1,51 @@
+name: PR Metadata Lint
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  lint-metadata:
+    name: Check PR title and body
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Lint PR metadata
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          FAILED=0
+
+          # Write PR content to temp files for safe grep
+          printf '%s' "$PR_TITLE" > /tmp/pr-title.txt
+          printf '%s' "$PR_BODY" > /tmp/pr-body.txt
+
+          # Check for reference path leaks (local-only file references)
+          if grep -iE 'reference/.*_LOCAL\.' /tmp/pr-title.txt /tmp/pr-body.txt 2>/dev/null; then
+            echo "::error::PR metadata contains reference to local-only files"
+            FAILED=1
+          fi
+
+          # Check for internal planning markers
+          if grep -iE '(NEXT_STEPS|ROADMAP_LOCAL|STRATEGY_LOCAL|SCOPE_LEDGER|MASTER_PLAN_LOCAL|MEMORY\.md)' /tmp/pr-title.txt /tmp/pr-body.txt 2>/dev/null; then
+            echo "::error::PR metadata contains internal planning markers"
+            FAILED=1
+          fi
+
+          # Check for hidden/bidirectional Unicode
+          if grep -P '[\x{200B}-\x{200F}\x{2028}-\x{202F}\x{2060}-\x{206F}\x{FEFF}]' /tmp/pr-title.txt /tmp/pr-body.txt 2>/dev/null; then
+            echo "::error::PR metadata contains hidden or bidirectional Unicode characters"
+            FAILED=1
+          fi
+
+          rm -f /tmp/pr-title.txt /tmp/pr-body.txt
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo ""
+            echo "PR metadata lint failed. Remove non-technical language from PR title/body."
+            exit 1
+          fi
+
+          echo "PR metadata lint: OK"

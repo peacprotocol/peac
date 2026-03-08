@@ -66,7 +66,8 @@
     "gate": "bash scripts/gate.sh",
     "gate:fast": "bash scripts/gate.sh --fast",
     "evidence-pack": "node scripts/build-submission-pack.mjs",
-    "release:gate:0.11.3": "bash scripts/release-gate-0.11.3.sh"
+    "release:gate:0.11.3": "bash scripts/release-gate-0.11.3.sh",
+    "test:property": "vitest run packages/schema/__tests__/json.property.test.ts packages/schema/__tests__/workflow.property.test.ts packages/schema/__tests__/constraints.property.test.ts packages/schema/__tests__/constraints.fuzz.test.ts packages/schema/__tests__/wire02-claims.property.test.ts packages/crypto/__tests__/jws.property.test.ts packages/protocol/__tests__/jti-collision.property.test.ts packages/protocol/__tests__/policy-binding.property.test.ts packages/protocol/__tests__/strictness.property.test.ts packages/protocol/__tests__/verify-local.property.test.ts packages/net/node/tests/jcs-property.test.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

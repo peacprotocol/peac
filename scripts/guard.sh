@@ -138,7 +138,7 @@ echo "== forbid npm invocations =="
 # net-node test-pack-install (tests published package in clean npm project),
 # capture-core test-exports (tests consumer exports resolution),
 # publish workflow (npm install for OIDC), docs/release (npm publish docs), publish-manifest (description)
-NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|packages/.*/README\.md|(docs/)?RELEASING\.md|CHANGELOG\.md|docs/ROADMAP\.md|docs/maintainers/(RELEASING|NPM_PUBLISH|RELEASE-INTEGRITY).*\.md|docs/guides/edge/|docs/release/|scripts/(guard\.sh|pack-smoke\.mjs|pack-.*\.sh|otel-smoke\.sh|check-readme-consistency\.sh|publish-manifest\.json|setup-trusted-publishing\.sh|release/pack-install-smoke\.sh)|packages/net/node/scripts/test-pack-install\.mjs|packages/capture/core/scripts/test-exports\.mjs|\.github/workflows/(publish|promote-latest|publish-mcp-registry)\.yml|integrator-kits/|surfaces/distribution/|llms\.txt|examples/hello-world/)'
+NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|packages/.*/README\.md|(docs/)?RELEASING\.md|CHANGELOG\.md|docs/ROADMAP\.md|docs/maintainers/(RELEASING|NPM_PUBLISH|RELEASE-INTEGRITY|SECURITY-POSTURE).*\.md|docs/(VERIFY-RELEASE|guides/edge/|release/)|scripts/(guard\.sh|pack-smoke\.mjs|pack-.*\.sh|otel-smoke\.sh|check-readme-consistency\.sh|publish-manifest\.json|setup-trusted-publishing\.sh|release/pack-install-smoke\.sh)|packages/net/node/scripts/test-pack-install\.mjs|packages/capture/core/scripts/test-exports\.mjs|\.github/workflows/(publish|promote-latest|publish-mcp-registry)\.yml|integrator-kits/|surfaces/distribution/|llms\.txt|examples/hello-world/)'
 if gg_wb n '\bnpm (run|ci|install|pack|publish)\b' '(^|[^[:alnum:]_])npm (run|ci|install|pack|publish)([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else
@@ -243,14 +243,8 @@ else
   echo "SKIP: scripts/check-json-dupes.mjs not found"
 fi
 
-echo "== forbid x403 typo (must be x402) =="
-# x403 is a common typo for x402; catch it before it leaks into code or docs
-if git grep -n 'x403' -- ':!node_modules' ':!archive/**' ':!scripts/guard.sh' ':!scripts/check-planning-leak.sh' ':!CHANGELOG.md' | grep .; then
-  echo "FAIL: Found 'x403' -- did you mean 'x402'?"
-  bad=1
-else
-  echo "OK"
-fi
+# x403 typo check moved to local-only scripts (check-planning-leak.sh, commit-msg hook)
+# to avoid circular exclusion lists in tracked guard scripts
 
 echo "== discovery surface drift =="
 # Prevent protocol verifier code from bypassing peac-issuer.json and fetching JWKS directly.

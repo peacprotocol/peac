@@ -140,7 +140,7 @@ tests/vectors/
 **Purpose**:
 
 - Shows HTTP 402 as enforcement method (not baked into core)
-- Demonstrates x402 rail with Base/USDC (primary GTM path)
+- Demonstrates x402 rail with Base/USDC (HTTP 402 payment flow)
 - Shows how control requirement applies to enforcement.method=="http-402"
 
 ---

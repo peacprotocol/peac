@@ -30,7 +30,10 @@ if git diff --cached --name-only | grep -q 'specs/kernel/errors.json'; then
   echo "[pre-commit] errors.generated.ts updated and staged"
 fi
 
-echo "[pre-commit] Checking for planning leaks..."
-bash scripts/check-planning-leak.sh
+# Planning leak check (local-only script; skipped on fresh clones)
+if [ -f scripts/check-planning-leak.sh ]; then
+  echo "[pre-commit] Checking for planning leaks..."
+  bash scripts/check-planning-leak.sh
+fi
 
 echo "[pre-commit] OK"
