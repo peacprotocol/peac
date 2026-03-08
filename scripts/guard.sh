@@ -245,7 +245,7 @@ fi
 
 echo "== forbid x403 typo (must be x402) =="
 # x403 is a common typo for x402; catch it before it leaks into code or docs
-if git grep -n 'x403' -- ':!node_modules' ':!archive/**' ':!scripts/guard.sh' ':!scripts/check-planning-leak.sh' ':!CHANGELOG.md' | grep .; then
+if git grep -n 'x403' -- ':!node_modules' ':!archive/**' ':!scripts/guard.sh' ':!scripts/check-planning-leak.sh' ':!scripts/check-public-artifacts.mjs' ':!.github/workflows/pr-metadata-lint.yml' ':!.githooks/commit-msg' ':!CHANGELOG.md' | grep .; then
   echo "FAIL: Found 'x403' -- did you mean 'x402'?"
   bad=1
 else
