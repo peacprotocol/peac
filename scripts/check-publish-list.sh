@@ -55,11 +55,17 @@ console.log(pub.sort().join('\n'));
 ")
 
 # Expected packages: derived from publish-manifest.json (single source of truth).
-# Combines packages[] (published) + pendingTrustedPublishing[] (pending).
+# Union of packages[] (publish-order) + oidcConfigured[] (trust configured) +
+# pendingTrustedPublishing[] (not yet on npm). Deduplicated.
 # When adding a new public package, update publish-manifest.json only.
 EXPECTED_PACKAGES=$(node -e "
 const manifest = require('./scripts/publish-manifest.json');
-const all = [...(manifest.packages || []), ...(manifest.pendingTrustedPublishing || [])];
+const all = [
+  ...(manifest.packages || []),
+  ...(manifest.oidcConfigured || []),
+  ...(manifest.pendingTrustedPublishing || []),
+  ...(manifest.deferredTrustedPublishing || []),
+];
 const sorted = [...new Set(all)].sort();
 console.log(sorted.join('\n'));
 ")
