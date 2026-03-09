@@ -55,16 +55,23 @@ if (result.valid && result.wireVersion === '0.2') {
 
 ## How Do I Verify with JWKS Discovery?
 
+> **Note:** `verifyReceipt()` is deprecated (Wire 0.1 only). For Wire 0.2 receipts,
+> resolve the issuer's JWKS manually and pass the public key to `verifyLocal()`.
+> Automated JWKS discovery for Wire 0.2 is planned for a future release.
+
 ```typescript
-import { verifyReceipt } from '@peac/protocol';
+import { verifyLocal } from '@peac/protocol';
 
-// Resolves issuer's /.well-known/peac-issuer.json -> jwks_uri -> public key
-const result = await verifyReceipt(jws);
+// 1. Resolve issuer's /.well-known/peac-issuer.json -> jwks_uri -> public key
+// 2. Pass the resolved key to verifyLocal()
+const result = await verifyLocal(jws, resolvedPublicKey, {
+  issuer: 'https://api.example.com',
+});
 
-if (result.ok) {
+if (result.valid) {
   console.log('Issuer:', result.claims.iss);
 } else {
-  console.log(result.reason, result.details);
+  console.log(result.code, result.message);
 }
 ```
 

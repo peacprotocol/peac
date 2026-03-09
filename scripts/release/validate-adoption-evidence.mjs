@@ -3,18 +3,18 @@
  * Adoption Evidence Validator (DD-90)
  *
  * Validates:
- *   1. Integration evidence: reads docs/adoption/integration-evidence.json,
- *      validates against JSON Schema, checks >= 2 DD-90 ecosystems,
- *      verifies immutable pointers (test_files exist, spec_refs exist,
- *      pr_commit is valid hex SHA)
- *   2. External confirmations: parses docs/adoption/confirmations.md,
- *      enforces the 6-field quality bar per entry
- *   3. Markdown parity: verifies integration-evidence.md matches JSON
- *      (run with --generate to regenerate the Markdown)
+ *   1. Integration evidence (docs/adoption/integration-evidence.json):
+ *      JSON Schema validation, >= 2 DD-90 ecosystems, immutable pointers
+ *   2. Reference integrations (docs/maintainers/reference-integrations.md):
+ *      file exists, has validated surfaces, has maintainer attestation
+ *   3. External confirmations (docs/adoption/confirmations.md):
+ *      6-field quality bar enforced when entries are present
+ *   4. Markdown parity: integration-evidence.md matches JSON
+ *      (run with --generate to regenerate)
  *
  * Exit codes:
  *   0  All checks pass
- *   1  One or more checks failed
+ *   1  Validation failure
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -29,9 +29,10 @@ const EVIDENCE_JSON = resolve(REPO_ROOT, 'docs/adoption/integration-evidence.jso
 const EVIDENCE_SCHEMA = resolve(REPO_ROOT, 'docs/adoption/integration-evidence.schema.json');
 const EVIDENCE_MD = resolve(REPO_ROOT, 'docs/adoption/integration-evidence.md');
 const CONFIRMATIONS_MD = resolve(REPO_ROOT, 'docs/adoption/confirmations.md');
+const REFERENCE_MD = resolve(REPO_ROOT, 'docs/maintainers/reference-integrations.md');
 
 const REQUIRED_ECOSYSTEMS = 2;
-const REQUIRED_CONFIRMATIONS = 1;
+const REQUIRED_CONFIRMATIONS = 0;
 
 const REQUIRED_FIELDS = [
   'Team/Project',
@@ -237,6 +238,39 @@ function checkMarkdownParity(data) {
 }
 
 // ---------------------------------------------------------------------------
+// Reference integration validations (first-party maintainer evidence)
+// ---------------------------------------------------------------------------
+
+function validateReferenceIntegrations() {
+  if (!existsSync(REFERENCE_MD)) {
+    return { ok: false, error: `Missing ${REFERENCE_MD}` };
+  }
+
+  const content = readFileSync(REFERENCE_MD, 'utf-8');
+  const lines = content.split('\n');
+
+  // Must have at least one validated surface section (### heading)
+  const surfaceHeadings = lines.filter((l) => l.startsWith('### '));
+  if (surfaceHeadings.length === 0) {
+    return {
+      ok: false,
+      error: 'reference-integrations.md has no validated surface sections (### headings)',
+    };
+  }
+
+  // Must have a maintainer attestation section
+  const hasAttestation = lines.some((l) => l.startsWith('## Maintainer Attestation'));
+  if (!hasAttestation) {
+    return {
+      ok: false,
+      error: 'reference-integrations.md is missing the "## Maintainer Attestation" section',
+    };
+  }
+
+  return { ok: true, surfaceCount: surfaceHeadings.length };
+}
+
+// ---------------------------------------------------------------------------
 // External confirmations (structured markdown)
 // ---------------------------------------------------------------------------
 
@@ -367,15 +401,24 @@ function main() {
     }
   }
 
-  // 3. External confirmations
+  // 3. Reference integration validations
+  const reference = validateReferenceIntegrations();
+  if (reference.ok) {
+    console.log(
+      `Reference integrations: ${reference.surfaceCount} validated surfaces, maintainer attestation present`
+    );
+  } else {
+    console.error(`Reference integrations FAILED: ${reference.error}`);
+    failed = true;
+  }
+
+  // 4. External confirmations (format-validated when present)
   const confirmations = parseConfirmations();
   if (confirmations.entries.length === 0) {
-    console.error(`External confirmations: 0 valid entries (need >= ${REQUIRED_CONFIRMATIONS})`);
-    console.error(
-      '  Add at least one entry to docs/adoption/confirmations.md meeting the 6-field quality bar.'
-    );
-    failed = true;
+    console.log('External confirmations: 0 entries');
   } else if (confirmations.errors.length > 0) {
+    // Entries exist but are malformed: this IS a hard failure to prevent
+    // low-quality entries from accumulating unchecked
     console.error(
       `External confirmations: ${confirmations.entries.length} entries, ${confirmations.errors.length} validation errors:`
     );

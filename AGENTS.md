@@ -4,14 +4,14 @@ Agent-readable metadata for PEAC Protocol.
 
 ## Identity
 
-- **Protocol**: PEAC (wire format: `peac-receipt/0.1`)
+- **Protocol**: PEAC (wire formats: `interaction-record+jwt` (current), `peac-receipt/0.1` (frozen legacy))
 - **Specification**: <https://www.peacprotocol.org>
 - **Key Discovery**: `iss` -> `/.well-known/peac-issuer.json` -> `jwks_uri` -> JWKS
 - **Algorithm**: EdDSA (Ed25519)
 
 ## Capabilities
 
-- **Receipt Issuance and Verification**: Signed receipts (`peac-receipt/0.1` JWS) for verifiable interaction evidence
+- **Receipt Issuance and Verification**: Signed receipts (`interaction-record+jwt` JWS) for verifiable interaction evidence
 - **Purpose Declaration**: Structured intent via `PEAC-Purpose` header
 - **Agent Identity**: Proof-of-control binding (see [AGENT-IDENTITY.md](docs/specs/AGENT-IDENTITY.md))
 - **Policy Discovery**: Machine-readable terms at `/.well-known/peac.txt`
@@ -39,7 +39,7 @@ PEAC receipts attach to MCP tool responses via the Evidence Carrier Contract.
     "content": [...],
     "_meta": {
       "org.peacprotocol/receipt_ref": "sha256:abc123...",
-      "org.peacprotocol/receipt_jws": "eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ..."
+      "org.peacprotocol/receipt_jws": "eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QiLC..."
     }
   }
 }
@@ -48,7 +48,7 @@ PEAC receipts attach to MCP tool responses via the Evidence Carrier Contract.
 **HTTP Transport:**
 
 ```http
-PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEifQ...
+PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QiLC...
 ```
 
 The `PEAC-Receipt` header carries a compact JWS (never a bare `receipt_ref`).
