@@ -66,8 +66,8 @@ describe('SSRF expansion: scheme blocking', () => {
     const scheme = url.split(':')[0];
     it(`rejects ${scheme}:// scheme`, async () => {
       const result = await safeFetch(url, {
-        dnsResolver: publicDns,
-        httpClient,
+        _dnsResolver: publicDns,
+        _httpClient: httpClient,
       });
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -78,16 +78,16 @@ describe('SSRF expansion: scheme blocking', () => {
 
   it('rejects uppercase scheme bypass attempt (FILE://)', async () => {
     const result = await safeFetch('FILE:///etc/passwd', {
-      dnsResolver: publicDns,
-      httpClient,
+      _dnsResolver: publicDns,
+      _httpClient: httpClient,
     });
     expect(result.ok).toBe(false);
   });
 
   it('rejects mixed-case scheme (FiLe://)', async () => {
     const result = await safeFetch('FiLe:///etc/shadow', {
-      dnsResolver: publicDns,
-      httpClient,
+      _dnsResolver: publicDns,
+      _httpClient: httpClient,
     });
     expect(result.ok).toBe(false);
   });
@@ -120,16 +120,15 @@ describe('SSRF expansion: IPv6 private ranges', () => {
       const resolvedIp = ip.replace(/%.*$/, '');
       const dns = createMockDnsResolver([], [resolvedIp]);
       const result = await safeFetch('https://example.com/api', {
-        dnsResolver: dns,
-        httpClient,
+        _dnsResolver: dns,
+        _httpClient: httpClient,
       });
       // Primary invariant: all private/reserved IPv6 addresses are rejected
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        // The DNS validation catches private IPs via isPrivateIP(). The error
-        // surfaces as E_NETWORK_ERROR through the safeFetchJson error-wrapping
-        // path. The defense layer that blocked it is recorded in evidence.
-        expect(result.code).toBe(SAFE_FETCH_ERROR_CODES.E_NETWORK_ERROR);
+        // DNS validation catches private IPs via isPrivateIP(): the specific
+        // SSRF error code is preserved through the full call chain.
+        expect(result.code).toBe(SAFE_FETCH_ERROR_CODES.E_SSRF_DNS_RESOLVED_PRIVATE);
       }
     });
   }
@@ -171,8 +170,8 @@ describe('SSRF expansion: redirect chains to private', () => {
     // which would resolve to a private IP if the DNS resolver returns one
     const privateDns = createMockDnsResolver(['192.168.1.100']);
     const result = await safeFetch('https://public.example.com/start', {
-      dnsResolver: privateDns,
-      httpClient,
+      _dnsResolver: privateDns,
+      _httpClient: httpClient,
       redirectPolicy: 'allowlist',
       allowRedirectHosts: ['internal.example.com'],
     });
@@ -195,8 +194,8 @@ describe('SSRF expansion: redirect chains to private', () => {
     };
 
     const result = await safeFetch('https://example.com/secure', {
-      dnsResolver: dns,
-      httpClient,
+      _dnsResolver: dns,
+      _httpClient: httpClient,
     });
 
     // Default policy requires HTTPS; redirect to HTTP should fail
@@ -214,33 +213,37 @@ describe('SSRF expansion: URL parsing edge cases', () => {
 
   it('rejects URL with credentials (user:pass@host)', async () => {
     const result = await safeFetch('https://admin:secret@example.com/api', {
-      dnsResolver: dns,
-      httpClient,
+      _dnsResolver: dns,
+      _httpClient: httpClient,
     });
     expect(result.ok).toBe(false);
   });
 
   it('rejects URL with only username (user@host)', async () => {
     const result = await safeFetch('https://admin@example.com/api', {
-      dnsResolver: dns,
-      httpClient,
+      _dnsResolver: dns,
+      _httpClient: httpClient,
     });
     expect(result.ok).toBe(false);
   });
 
   it('rejects empty hostname', async () => {
-    const result = await safeFetch('https:///path', {
-      dnsResolver: dns,
-      httpClient,
+    // https:// with no hostname is an invalid URL (URL constructor throws)
+    const result = await safeFetch('https://', {
+      _dnsResolver: dns,
+      _httpClient: httpClient,
     });
     expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe(SAFE_FETCH_ERROR_CODES.E_SSRF_URL_REJECTED);
+    }
   });
 
   it('rejects localhost variants', async () => {
     for (const host of ['localhost', 'LOCALHOST', 'Localhost', '127.0.0.1', '0.0.0.0']) {
       const result = await safeFetch(`https://${host}/api`, {
-        dnsResolver: dns,
-        httpClient,
+        _dnsResolver: dns,
+        _httpClient: httpClient,
       });
       expect(result.ok, `should reject ${host}`).toBe(false);
     }
@@ -249,8 +252,8 @@ describe('SSRF expansion: URL parsing edge cases', () => {
   it('rejects decimal IP notation for loopback (2130706433 = 127.0.0.1)', async () => {
     // Some URL parsers convert decimal notation to IP
     const result = await safeFetch('https://2130706433/admin', {
-      dnsResolver: dns,
-      httpClient,
+      _dnsResolver: dns,
+      _httpClient: httpClient,
     });
     // This may parse as a hostname (not an IP), which is fine
     // The key is that DNS resolution to private must still be caught
@@ -259,8 +262,8 @@ describe('SSRF expansion: URL parsing edge cases', () => {
 
   it('rejects octal IP notation for loopback (0177.0.0.1 = 127.0.0.1)', async () => {
     const result = await safeFetch('https://0177.0.0.1/admin', {
-      dnsResolver: dns,
-      httpClient,
+      _dnsResolver: dns,
+      _httpClient: httpClient,
     });
     expect(result.ok).toBe(false);
   });
@@ -283,8 +286,8 @@ describe('SSRF expansion: response size enforcement', () => {
     });
 
     const result = await safeFetch('https://example.com/large', {
-      dnsResolver: dns,
-      httpClient,
+      _dnsResolver: dns,
+      _httpClient: httpClient,
       maxResponseBytes: 1_000_000, // 1 MB limit
     });
 
@@ -320,8 +323,8 @@ describe('SSRF expansion: response size enforcement', () => {
     };
 
     const result = await safeFetch('https://example.com/stream', {
-      dnsResolver: dns,
-      httpClient,
+      _dnsResolver: dns,
+      _httpClient: httpClient,
       maxResponseBytes: 1_000_000,
     });
 
