@@ -240,15 +240,20 @@ jobs:
           fi
           echo "OK: Working tree is clean after tests"
 
-      - name: Performance gate (advisory)
+      - name: Performance SLO gate (advisory)
         continue-on-error: true
         run: |
-          # Advisory benchmark for verify performance. Can be tightened once bench harness is updated.
-          if ! pnpm exec tsx --help >/dev/null 2>&1; then
-            echo "Skipping performance bench: tsx not available or not installed correctly."
-            exit 0
-          fi
-          pnpm exec tsx scripts/bench-verify.ts
+          PEAC_BENCH_JSON="tests/perf/ci-bench-result.json" \
+            pnpm exec vitest run tests/perf/wire02-slo.test.ts --reporter=dot
+
+      - name: Upload benchmark artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: benchmark-results-${{ github.sha }}
+          path: tests/perf/ci-bench-result.json
+          if-no-files-found: ignore
+          retention-days: 90
 
   # Windows smoke test for audit gate (validates pnpm.cmd, ENOENT handling,
   # cwd pinning, and noisy-stdout parsing work cross-platform)

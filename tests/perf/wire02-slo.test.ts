@@ -6,12 +6,17 @@
  *
  * This test uses the same percentile approach as verify.bench.ts
  * but targets Wire 0.2 via issueWire02() and verifyLocal().
+ *
+ * Set PEAC_BENCH_JSON to a file path to write structured metrics
+ * (used by scripts/bench-repeated.sh for multi-run aggregation).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterAll } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
 import { issueWire02 } from '@peac/protocol';
 import { verifyLocal } from '@peac/protocol';
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 function percentile(sorted: number[], p: number): number {
   const index = Math.ceil((sorted.length * p) / 100) - 1;
@@ -31,7 +36,22 @@ function calculateMetrics(timings: number[]) {
   };
 }
 
+// Collected metrics for optional JSON output
+const collectedMetrics: Record<string, ReturnType<typeof calculateMetrics>> = {};
+
 describe('Wire 0.2 performance SLO (DD-159)', () => {
+  afterAll(() => {
+    const jsonPath = process.env.PEAC_BENCH_JSON;
+    if (!jsonPath) return;
+    const output = {
+      timestamp: new Date().toISOString(),
+      node_version: process.version,
+      platform: `${process.platform}-${process.arch}`,
+      metrics: collectedMetrics,
+    };
+    writeFileSync(resolve(jsonPath), JSON.stringify(output, null, 2) + '\n');
+  });
+
   it('verifyLocal p95 MUST be <= 10ms', async () => {
     const { privateKey, publicKey } = await generateKeypair();
 
@@ -67,6 +87,7 @@ describe('Wire 0.2 performance SLO (DD-159)', () => {
     }
 
     const metrics = calculateMetrics(timings);
+    collectedMetrics['verifyLocal'] = metrics;
 
     // CI gate: p95 <= 10ms
     expect(metrics.p95_ms).toBeLessThanOrEqual(10);
@@ -102,6 +123,7 @@ describe('Wire 0.2 performance SLO (DD-159)', () => {
     }
 
     const metrics = calculateMetrics(timings);
+    collectedMetrics['issueWire02'] = metrics;
 
     // Soft target: p95 <= 50ms
     expect(metrics.p95_ms).toBeLessThanOrEqual(50);

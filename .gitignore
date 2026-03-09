@@ -23,6 +23,8 @@ test-results/
 .test-output/
 playwright-report/
 perf-results.json
+tests/perf/ci-bench-result.json
+tests/perf/repeated-results.json
 
 # Environment
 .env
