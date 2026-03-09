@@ -1,0 +1,5195 @@
+{
+  "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
+  "generated_at": "2026-03-08T10:21:03.200Z",
+  "version": "0.12.0",
+  "schema_version": "0.12.0",
+  "total_fixtures": 618,
+  "total_with_requirements": 173,
+  "total_unmapped": 445,
+  "wire02_requirement_links": 439,
+  "carrier_requirement_links": 11,
+  "entries": [
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "all-proof-fields",
+      "description": "Proof with all optional fields populated",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "empty-capabilities",
+      "description": "Empty capabilities array (valid)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "empty-delegation-chain",
+      "description": "Empty delegation chain (valid for user-delegated)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "expiry-in-past",
+      "description": "Attestation with past expiry (structurally valid, semantically expired)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "issued-at-future",
+      "description": "Attestation with future issued_at (structurally valid, semantically not yet valid)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "long-agent-id",
+      "description": "Agent ID at maximum length (256 chars)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "max-capabilities",
+      "description": "Maximum allowed capabilities (32)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "max-delegation-chain",
+      "description": "Maximum allowed delegation chain (8)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "minimal-binding",
+      "description": "Binding with only required fields",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "edge-cases.json",
+      "fixture_name": "unicode-agent-id",
+      "description": "Unicode characters in agent_id",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-intent-hash-format",
+      "description": "intent_hash must match sha256:<64 hex chars>",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-intent-hash-uppercase",
+      "description": "intent_hash hex MUST be lowercase; uppercase is rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-mvis-absurd-duration",
+      "description": "MVIS time_bounds duration must not exceed 100 years",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-mvis-missing-key-binding",
+      "description": "MVIS requires all 5 fields; missing key_binding is rejected (E_MVIS_INCOMPLETE)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-mvis-missing-subject",
+      "description": "MVIS requires subject field",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-mvis-time-bounds-reversed",
+      "description": "MVIS time_bounds: not_before must be before not_after",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-origin-trailing-dot",
+      "description": "Origin MUST NOT have trailing dot in hostname (FQDN notation)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-origin-userinfo",
+      "description": "Origin MUST NOT contain userinfo (credential leak risk)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-origin-with-fragment",
+      "description": "Origin MUST NOT contain fragment",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-origin-with-path",
+      "description": "Origin MUST be origin-only (scheme + host + optional port); path is rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-origin-with-query",
+      "description": "Origin MUST NOT contain query parameters",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid-actor-binding.json",
+      "fixture_name": "invalid-unknown-proof-type",
+      "description": "Unknown proof_type is rejected (not in DD-143 vocabulary)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "empty-agent-id",
+      "description": "Empty string for agent_id (min length violation)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "extra-field-strict",
+      "description": "Extra field not allowed (strict mode)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "invalid-binding-datetime",
+      "description": "Invalid datetime format in binding details",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "invalid-control-type",
+      "description": "Invalid control_type value (not in enum)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "invalid-datetime-format",
+      "description": "Invalid datetime format for issued_at",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "invalid-key-directory-url",
+      "description": "Invalid URL format for key_directory_url",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "invalid-proof-method",
+      "description": "Invalid proof method value",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "missing-agent-id",
+      "description": "Missing required agent_id field",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "missing-control-type",
+      "description": "Missing required control_type field",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "missing-issuer",
+      "description": "Missing required issuer field",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "missing-proof-key-id",
+      "description": "Missing required key_id in proof",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "invalid.json",
+      "fixture_name": "wrong-attestation-type",
+      "description": "Wrong attestation type literal",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid-actor-binding.json",
+      "fixture_name": "custom",
+      "description": "ActorBinding with vendor-defined proof type",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid-actor-binding.json",
+      "fixture_name": "did",
+      "description": "ActorBinding with W3C Decentralized Identifier (DID)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid-actor-binding.json",
+      "fixture_name": "eat-background-check",
+      "description": "ActorBinding with EAT Background-Check model (RFC 9711 RATS)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid-actor-binding.json",
+      "fixture_name": "eat-passport",
+      "description": "ActorBinding with EAT Passport model (RFC 9711 RATS)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid-actor-binding.json",
+      "fixture_name": "ed25519-cert-chain",
+      "description": "ActorBinding with Ed25519 issuer-to-holder attestation chain (RFC 8032)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid-actor-binding.json",
+      "fixture_name": "sigstore-oidc",
+      "description": "ActorBinding with Sigstore OIDC keyless signing (Fulcio + Rekor)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid-actor-binding.json",
+      "fixture_name": "spiffe",
+      "description": "ActorBinding with CNCF SPIFFE workload identity",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid-actor-binding.json",
+      "fixture_name": "x509-pki",
+      "description": "ActorBinding with traditional X.509 PKI certificate chain (RFC 5280)",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "minimal-attestation",
+      "description": "Minimal attestation with only required fields",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "operator-bot",
+      "description": "Operator-verified bot attestation with full evidence",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "user-delegated-agent",
+      "description": "User-delegated agent attestation with delegation chain",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "with-capabilities",
+      "description": "Agent with multiple capability scopes",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "with-dpop-proof",
+      "description": "Agent with DPoP token binding proof",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "with-http-signature-proof",
+      "description": "Agent with HTTP message signature proof and binding details",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "with-metadata",
+      "description": "Agent with additional metadata",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "with-mtls-proof",
+      "description": "Agent with mutual TLS certificate proof",
+      "has_requirements": false
+    },
+    {
+      "directory": "agent-identity",
+      "file": "valid.json",
+      "fixture_name": "with-ref-url",
+      "description": "Attestation with external verification reference",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "all-derivation-types",
+      "description": "Test all derivation types are valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "all-usage-types",
+      "description": "Test all usage types are valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "content-hash-and-excerpt-hash",
+      "description": "Source with both content_hash and excerpt_hash",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "empty-metadata-object",
+      "description": "Attribution with empty metadata object",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "fractional-weights",
+      "description": "Sources with precise fractional weights",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "http-receipt-ref",
+      "description": "Receipt reference using HTTP (not HTTPS)",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "long-receipt-ref",
+      "description": "Receipt reference at maximum length (2048 chars)",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "max-sources",
+      "description": "Attribution with maximum allowed sources (100)",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "minimal-valid-attestation",
+      "description": "Absolute minimum valid attribution attestation",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "mixed-ref-formats",
+      "description": "Sources with different receipt reference formats",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "nested-metadata",
+      "description": "Attribution with nested metadata structure",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "same-source-multiple-usages",
+      "description": "Same receipt referenced multiple times with different usages",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "timestamp-milliseconds",
+      "description": "Timestamps with millisecond precision",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "unicode-model-id",
+      "description": "Model ID with unicode characters",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "weight-one",
+      "description": "Single source with weight exactly 1.0",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "edge-cases.json",
+      "fixture_name": "weight-zero",
+      "description": "Source with weight exactly 0.0 (valid, indicates minimal contribution)",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "extra-unknown-field",
+      "description": "Attribution with unknown extra field (strict mode)",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-content-hash-algorithm",
+      "description": "Content hash with unsupported algorithm",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-content-hash-chars",
+      "description": "Content hash with invalid base64url characters",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-content-hash-encoding",
+      "description": "Content hash with unsupported encoding",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-content-hash-value-length",
+      "description": "Content hash with wrong value length",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-derivation-type",
+      "description": "Attribution with unknown derivation type",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-inference-provider-url",
+      "description": "Attribution with non-URL inference_provider",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-issued-at-format",
+      "description": "Attribution with non-RFC3339 issued_at",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-receipt-ref-format",
+      "description": "Attribution with invalid receipt reference format",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-ref-url",
+      "description": "Attribution with non-URL ref field",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "invalid-usage",
+      "description": "Source with unknown usage type",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "missing-derivation-type",
+      "description": "Attribution missing derivation_type field",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "missing-issued-at",
+      "description": "Attribution missing issued_at field",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "missing-issuer",
+      "description": "Attribution missing issuer field",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "missing-receipt-ref",
+      "description": "Source missing receipt_ref field",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "missing-sources",
+      "description": "Attribution with empty sources array",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "missing-type",
+      "description": "Attribution missing type field",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "missing-usage",
+      "description": "Source missing usage field",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "weight-too-high",
+      "description": "Source with weight above 1.0",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "weight-too-low",
+      "description": "Source with weight below 0",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "invalid.json",
+      "fixture_name": "wrong-type",
+      "description": "Attribution with wrong type value",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "embedding-source",
+      "description": "Embedding generation attribution",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "full-attribution",
+      "description": "Attribution with all optional fields populated",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "mixed-usage-types",
+      "description": "Multiple sources with different usage types",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "multiple-sources-synthesis",
+      "description": "Multiple sources combined for synthesis",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "single-source-rag",
+      "description": "Single source RAG context attribution",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "training-input",
+      "description": "Training data attribution with model ID",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "url-receipt-refs",
+      "description": "Sources using URL-based receipt references",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "urn-receipt-refs",
+      "description": "Sources using URN-based receipt references",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "with-content-hashes",
+      "description": "Attribution with content hash verification",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "with-excerpt-hash",
+      "description": "Privacy-preserving attribution with excerpt hash",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "with-expiration",
+      "description": "Attribution with expiration timestamp",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "with-inference-provider",
+      "description": "Attribution with inference provider URL",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "with-metadata",
+      "description": "Attribution with additional metadata",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "with-output-hash",
+      "description": "Attribution with derived output hash",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "with-ref-url",
+      "description": "Attribution with external verification reference",
+      "has_requirements": false
+    },
+    {
+      "directory": "attribution",
+      "file": "valid.json",
+      "fixture_name": "with-session-id",
+      "description": "Attribution with session correlation",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "determinism.json",
+      "fixture_name": "key-order-invariant",
+      "description": "Key order in JWKS input should not affect manifest",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "determinism.json",
+      "fixture_name": "receipt-order-invariant",
+      "description": "Receipt order in input should not affect content_hash",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "determinism.json",
+      "fixture_name": "same-inputs-same-hash",
+      "description": "Same bundle inputs must produce same content_hash",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "determinism.json",
+      "fixture_name": "same-verification-same-report-hash",
+      "description": "Same bundle verified at same time must produce same report_hash",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "determinism.json",
+      "fixture_name": "verification-report-format",
+      "description": "Expected report structure for cross-language parity",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "corrupted-zip",
+      "description": "Invalid ZIP file (corrupted or not a ZIP)",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "duplicate-receipt-id",
+      "description": "Bundle contains two receipts with the same jti",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "hash-mismatch-content",
+      "description": "Bundle where content_hash does not match computed JCS hash",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "hash-mismatch-file",
+      "description": "Bundle where a file hash does not match",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "invalid-bundle-sig-content-hash",
+      "description": "bundle.sig payload.content_hash does not match manifest.content_hash",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "invalid-bundle-sig-key-not-found",
+      "description": "bundle.sig references key not in bundle JWKS",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "invalid-bundle-sig-signature",
+      "description": "bundle.sig has invalid Ed25519 signature",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "invalid-manifest-json",
+      "description": "Bundle with malformed manifest.json (not valid JSON)",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "invalid-receipt-jws",
+      "description": "Bundle with malformed JWS receipt",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "key-not-found",
+      "description": "Verification with receipt referencing unknown key",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "missing-keys",
+      "description": "Bundle creation with empty keys array",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "missing-manifest",
+      "description": "Bundle ZIP without manifest.json",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "missing-receipts",
+      "description": "Bundle creation with empty receipts array",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "path-traversal-backslash",
+      "description": "ZIP entry with backslash path separator (zip-slip variant)",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "path-traversal-dotdot",
+      "description": "ZIP entry with path traversal via ..",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "receipt-missing-iat",
+      "description": "Receipt JWS without required iat claim",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "receipt-missing-jti",
+      "description": "Receipt JWS without required jti claim",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "receipts-unordered",
+      "description": "receipts.ndjson not in deterministic order (issued_at, receipt_id, receipt_hash)",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "size-exceeded-entries",
+      "description": "ZIP with more than 10000 entries (DoS protection)",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "invalid.json",
+      "fixture_name": "unsupported-version",
+      "description": "Bundle with unsupported version string",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "valid.json",
+      "fixture_name": "full-bundle-with-policy-and-signature",
+      "description": "Full bundle with multiple receipts, keys, policy, and bundle.sig",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "valid.json",
+      "fixture_name": "minimal-bundle",
+      "description": "Minimal valid bundle with single receipt and key",
+      "has_requirements": false
+    },
+    {
+      "directory": "bundle",
+      "file": "valid.json",
+      "fixture_name": "receipt-verification-semantics",
+      "description": "Demonstrates real Ed25519 signature verification for receipts",
+      "has_requirements": false
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "a2a-embed-at-limit",
+      "description": "A2A embed carrier at exactly 64 KB (65536 bytes)",
+      "primary_requirement_id": "CARRIER-A2A-001",
+      "requirement_ids": ["CARRIER-A2A-001"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "a2a-embed-over-limit",
+      "description": "A2A embed carrier over 64 KB limit is rejected",
+      "primary_requirement_id": "CARRIER-A2A-001",
+      "requirement_ids": ["CARRIER-A2A-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "http-header-at-limit",
+      "description": "HTTP header carrier at exactly 8 KB (8192 bytes)",
+      "primary_requirement_id": "CARRIER-HTTP-001",
+      "requirement_ids": ["CARRIER-HTTP-001"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "http-header-over-limit",
+      "description": "HTTP header carrier over 8 KB limit is rejected",
+      "primary_requirement_id": "CARRIER-HTTP-001",
+      "requirement_ids": ["CARRIER-HTTP-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "http-header-under-limit",
+      "description": "HTTP header carrier within 8 KB limit",
+      "primary_requirement_id": "CARRIER-HTTP-001",
+      "requirement_ids": ["CARRIER-HTTP-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "mcp-embed-at-limit",
+      "description": "MCP embed carrier at exactly 64 KB (65536 bytes)",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "mcp-embed-over-limit",
+      "description": "MCP embed carrier one byte over 64 KB limit is rejected",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "mcp-embed-under-limit",
+      "description": "MCP embed carrier within 64 KB limit",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "ucp-embed-at-limit",
+      "description": "UCP embed carrier at exactly 64 KB (65536 bytes)",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "utf8-multibyte-at-boundary",
+      "description": "UTF-8 multi-byte characters at boundary do not cause off-by-one",
+      "primary_requirement_id": "CARRIER-MCP-001",
+      "requirement_ids": ["CARRIER-MCP-001"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "carrier-boundary",
+      "file": "conformance.json",
+      "fixture_name": "x402-header-at-limit",
+      "description": "x402 header carrier at exactly 8 KB (8192 bytes)",
+      "primary_requirement_id": "CARRIER-HTTP-001",
+      "requirement_ids": ["CARRIER-HTTP-001"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "content-usage",
+      "file": "edge-cases.json",
+      "fixture_name": "bare-key-boolean",
+      "description": "Bare key is SF Boolean true, not Token y; produces no entry",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "edge-cases.json",
+      "fixture_name": "boolean-value-not-token",
+      "description": "Boolean ?0/?1 is not Token y/n; produces no entry",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "edge-cases.json",
+      "fixture_name": "duplicate-key-last-wins",
+      "description": "Per SF rules, last value wins for duplicate keys",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "edge-cases.json",
+      "fixture_name": "oversized-header-rejected",
+      "description": "Headers exceeding MAX_HEADER_SIZE (8KB) produce empty result",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "edge-cases.json",
+      "fixture_name": "string-value-not-token",
+      "description": "String value (quoted) is not Token; produces no entry",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "edge-cases.json",
+      "fixture_name": "unknown-keys-as-extensions",
+      "description": "Unknown dictionary keys are stored as extensions, not dropped",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "edge-cases.json",
+      "fixture_name": "unknown-token-value",
+      "description": "Unknown Token value (not y or n); produces no entry",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "edge-cases.json",
+      "fixture_name": "whitespace-handling",
+      "description": "Whitespace around keys and values is trimmed",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "valid.json",
+      "fixture_name": "all-leaf-keys",
+      "description": "All three leaf AIPREF keys specified",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "valid.json",
+      "fixture_name": "hierarchy-bots-deny",
+      "description": "Parent bots=n propagates deny to all children",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "valid.json",
+      "fixture_name": "hierarchy-child-override",
+      "description": "Child overrides parent: bots=y but train-ai=n",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "valid.json",
+      "fixture_name": "hierarchy-train-ai-propagates",
+      "description": "train-ai=y propagates to train-genai",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "valid.json",
+      "fixture_name": "minimal-single-key",
+      "description": "Single AIPREF key with Token deny",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "valid.json",
+      "fixture_name": "multiple-keys",
+      "description": "Multiple AIPREF keys with different decisions",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "valid.json",
+      "fixture_name": "single-key-allow",
+      "description": "Single AIPREF key with Token allow",
+      "has_requirements": false
+    },
+    {
+      "directory": "content-usage",
+      "file": "valid.json",
+      "fixture_name": "with-sf-parameters",
+      "description": "SF parameters are stripped from values",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "all-dispute-types",
+      "description": "Verify all dispute types are valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "all-grounds-codes",
+      "description": "Verify all grounds codes are valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "all-outcomes",
+      "description": "Verify all resolution outcomes are valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "all-remediation-types",
+      "description": "Verify all remediation types are valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "all-target-types",
+      "description": "Verify all target types are valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "escalated-state",
+      "description": "Dispute in escalated state (only transitions to resolved)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "max-grounds",
+      "description": "Dispute with exactly 10 grounds (maximum allowed)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "other-type-exactly-50-chars",
+      "description": "Dispute type 'other' with exactly 50 character description",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "runtime-duplicate-dispute",
+      "description": "Submitting a dispute with an ID that already exists",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "runtime-target-not-found-attribution",
+      "description": "Dispute referencing an attribution that does not exist",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "runtime-target-not-found-identity",
+      "description": "Dispute referencing an identity that cannot be resolved",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "runtime-target-not-found-receipt",
+      "description": "Dispute referencing a receipt that does not exist",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "time-validation-expired",
+      "description": "Dispute with expires_at in the past (validation behavior)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "time-validation-future-issued-at",
+      "description": "Dispute with issued_at in the future (validation behavior)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "transition-filed-to-acknowledged",
+      "description": "Valid transition from filed to acknowledged",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "transition-filed-to-rejected",
+      "description": "Valid transition from filed to rejected (requires resolution)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "transition-final-no-exit",
+      "description": "No transitions allowed from final state",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "transition-invalid-filed-to-resolved",
+      "description": "Invalid transition from filed directly to resolved",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "transition-resolved-to-appealed",
+      "description": "Valid transition from resolved to appealed (resolution cleared)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "edge-cases.json",
+      "fixture_name": "ulid-boundary-chars",
+      "description": "ULID with boundary characters (0-9, A-H, J, K, M, N, P-T, V-Z)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "empty-grounds",
+      "description": "Dispute with empty grounds array",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-did-contact",
+      "description": "Dispute with invalid DID in contact (missing did: prefix)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-dispute-type",
+      "description": "Dispute with unknown dispute_type",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-email-contact",
+      "description": "Dispute with invalid email in contact",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-grounds-code",
+      "description": "Dispute with unknown grounds code",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-outcome",
+      "description": "Resolution with invalid outcome",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-remediation-type",
+      "description": "Resolution with invalid remediation type",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-state",
+      "description": "Dispute with unknown state",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-target-type",
+      "description": "Dispute with unknown target_type",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-ulid-invalid-chars",
+      "description": "Dispute ref with invalid characters (I, L, O, U not allowed in Crockford Base32)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-ulid-lowercase",
+      "description": "Dispute ref with lowercase ULID (PEAC requires uppercase)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-ulid-too-short",
+      "description": "Dispute ref with too short ULID",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "invalid-url-contact",
+      "description": "Dispute with invalid URL in contact",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "missing-issued-at",
+      "description": "Dispute missing issued_at field",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "missing-issuer",
+      "description": "Dispute missing issuer field",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "missing-resolution-final",
+      "description": "Final state without resolution",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "missing-resolution-rejected",
+      "description": "Rejected state without resolution",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "missing-resolution-resolved",
+      "description": "Resolved state without resolution",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "missing-type",
+      "description": "Dispute missing type field",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "other-type-short-description",
+      "description": "Dispute type 'other' with description less than 50 chars",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "resolution-not-allowed-appealed",
+      "description": "Appealed state with resolution (not allowed)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "resolution-not-allowed-filed",
+      "description": "Filed state with resolution (not allowed)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "resolution-not-allowed-under-review",
+      "description": "Under review state with resolution (not allowed)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "too-many-grounds",
+      "description": "Dispute exceeding max grounds limit (10)",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "invalid.json",
+      "fixture_name": "wrong-type",
+      "description": "Dispute with wrong type value",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "acknowledged-state",
+      "description": "Dispute in acknowledged state",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "appealed-state",
+      "description": "Dispute that was appealed after rejection",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "attribution-dispute",
+      "description": "Dispute about incorrect attribution",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "did-contact-method",
+      "description": "Dispute with DID contact method",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "final-state",
+      "description": "Dispute in final state after appeal resolution",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "identity-dispute-with-contact",
+      "description": "Identity spoofing dispute with contact info",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "minimal-filed",
+      "description": "Minimal dispute in filed state",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "other-type-with-long-description",
+      "description": "Dispute of type 'other' with required long description",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "rejected-dismissed",
+      "description": "Rejected dispute with dismissed outcome",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "resolved-upheld",
+      "description": "Resolved dispute with upheld outcome and remediation",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "settled-outcome",
+      "description": "Resolved dispute with settled outcome",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "under-review-state",
+      "description": "Dispute under review with supporting docs",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "url-contact-method",
+      "description": "Dispute with URL contact method",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "with-expiry",
+      "description": "Dispute with expiration time",
+      "has_requirements": false
+    },
+    {
+      "directory": "dispute",
+      "file": "valid.json",
+      "fixture_name": "with-supporting-receipts-and-attributions",
+      "description": "Dispute with supporting receipts and attributions",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "all-registry-kinds-fs-read",
+      "description": "Registry kind fs.read produces no warnings",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "all-registry-kinds-fs-write",
+      "description": "Registry kind fs.write produces no warnings",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "all-registry-kinds-http-request",
+      "description": "Registry kind http.request produces no warnings",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "all-registry-kinds-message",
+      "description": "Registry kind message (no target required, but warns)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "all-registry-kinds-tool-call",
+      "description": "Registry kind tool.call produces no warnings",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "bytes-zero",
+      "description": "Digest bytes field at zero (empty payload)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "completed-at-equals-started-at",
+      "description": "completed_at equals started_at (instant completion)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "duration-ms-zero",
+      "description": "duration_ms at minimum value (0)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "error-with-extensions-detail",
+      "description": "Error status with extensions providing detail (no error_code)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "executor-platform-at-max-length",
+      "description": "executor.platform at maximum length (64 characters)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "extension-key-multi-segment-dns",
+      "description": "Extension key with multi-segment reverse DNS",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "extension-key-with-version",
+      "description": "Extension key with version suffix",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "http-stream-kind-future",
+      "description": "http.stream kind (future registry expansion) requires resource field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "interaction-id-at-max-length",
+      "description": "interaction_id at maximum length (256 characters)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "kind-at-max-length",
+      "description": "Kind at maximum length (128 characters)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "kind-at-min-length",
+      "description": "Kind at minimum length (2 characters)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "message-kind-warns-missing-target",
+      "description": "Message kind without tool or resource warns but is valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "policy-deny-decision",
+      "description": "Policy with deny decision (action was denied)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "resource-uri-at-max-length",
+      "description": "resource.uri at maximum length (2048 characters)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "tool-invoke-kind-future",
+      "description": "tool.invoke kind (future registry expansion) requires tool field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "tool-name-at-max-length",
+      "description": "tool.name at maximum length (256 characters)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "edge-cases.json",
+      "fixture_name": "unregistered-kind-warns",
+      "description": "Unknown kind not in registry produces warning but is valid",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "array-input",
+      "description": "Input is an array (ORDERING LOCK: arrays must yield INVALID_FORMAT, not MISSING_ID)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "completed-at-before-started-at",
+      "description": "completed_at timestamp before started_at (ORDERING LOCK: relational constraint = INVALID_TIMING)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "empty-interaction-id",
+      "description": "Empty string for interaction_id",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "empty-kind",
+      "description": "Empty string for kind (ORDERING LOCK: empty string = missing, not invalid format)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "error-status-with-empty-extensions",
+      "description": "Error status with empty extensions object (not valid detail)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "error-status-without-detail",
+      "description": "Error status without error_code or extensions",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "executor-missing-platform",
+      "description": "Executor without required platform field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "extra-unknown-field",
+      "description": "Unknown field in strict schema",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "fs-kind-with-empty-resource",
+      "description": "fs.read kind with empty resource object (no uri)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "fs-kind-with-method-only-resource",
+      "description": "fs.write kind with resource having only method (no uri)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "fs-kind-without-resource-field",
+      "description": "fs.read kind without resource field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "http-kind-with-empty-resource",
+      "description": "http.request kind with empty resource object (ORDERING LOCK: empty resource = missing target)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "http-kind-without-resource-field",
+      "description": "http.request kind without resource field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "invalid-digest-alg-case",
+      "description": "Digest algorithm with wrong case (SHA-256 instead of sha-256)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "invalid-digest-algorithm",
+      "description": "Invalid digest algorithm not in canonical set",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "invalid-digest-not-64-hex",
+      "description": "Digest value not 64 lowercase hex characters",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "invalid-digest-uppercase",
+      "description": "Digest value with uppercase characters",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "invalid-extension-key-no-slash",
+      "description": "Extension key missing slash separator",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "invalid-extension-key-not-namespaced",
+      "description": "Extension key not properly namespaced",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "invalid-started-at-format",
+      "description": "Invalid datetime format for started_at (ORDERING LOCK: unparseable = missing, not invalid timing)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "kind-reserved-peac-prefix",
+      "description": "Kind using reserved peac.* prefix not in registry",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "kind-reserved-peacprotocol-prefix",
+      "description": "Kind using reserved org.peacprotocol.* prefix not in registry",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "kind-starts-with-number",
+      "description": "Kind starting with a number",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "kind-too-short",
+      "description": "Kind is too short (less than 2 characters)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "kind-uppercase",
+      "description": "Kind with uppercase characters",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "missing-executor",
+      "description": "Missing required executor field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "missing-interaction-id",
+      "description": "Missing required interaction_id field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "missing-kind",
+      "description": "Missing required kind field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "missing-started-at",
+      "description": "Missing required started_at field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "multi-failure-bad-kind-and-bad-timing",
+      "description": "Multi-failure: invalid kind format AND invalid timing. Per validation order, kind format is checked first.",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "multi-failure-missing-id-and-kind",
+      "description": "Multi-failure: missing interaction_id AND kind. Per validation order, interaction_id is checked first.",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "multi-failure-reserved-kind-and-missing-target",
+      "description": "Multi-failure: reserved kind prefix AND missing tool target. Per validation order, reserved prefix is checked first.",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "not-an-object",
+      "description": "Input is not an object",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "null-input",
+      "description": "Input is null",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "output-without-result",
+      "description": "Output present but result.status missing",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "invalid.json",
+      "fixture_name": "tool-kind-without-tool-field",
+      "description": "tool.call kind without tool field",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "rfc9421-proof.json",
+      "fixture_name": "rfc9421-base-mismatch",
+      "description": "Signature base reconstruction did not match (tampered body)",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "rfc9421-proof.json",
+      "fixture_name": "rfc9421-expired-signature",
+      "description": "Signature expires timestamp is in the past",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "rfc9421-proof.json",
+      "fixture_name": "rfc9421-key-not-found",
+      "description": "Key referenced by keyid could not be resolved",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "rfc9421-proof.json",
+      "fixture_name": "rfc9421-verified-full-metadata",
+      "description": "Verified signature with all optional fields populated",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "rfc9421-proof.json",
+      "fixture_name": "rfc9421-verified-signature",
+      "description": "Happy path: RFC 9421 signature verified successfully",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "canceled-result",
+      "description": "Interaction that was canceled",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "complete-tool-call-with-digests",
+      "description": "Complete tool call with input/output digests and all fields",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "custom-kind-reverse-dns",
+      "description": "Custom kind with reverse-DNS format",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "error-result-with-details",
+      "description": "Failed interaction with error code",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "fs-read-operation",
+      "description": "File system read operation",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "fs-write-operation",
+      "description": "File system write operation",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "http-request",
+      "description": "HTTP request interaction with resource target",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "message-interaction",
+      "description": "Message/chat interaction kind",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "minimal-tool-call",
+      "description": "Minimal valid interaction evidence for a tool call",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "namespaced-extensions",
+      "description": "Interaction with properly namespaced platform extensions",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "policy-constrained",
+      "description": "Interaction with constrained policy decision",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "redaction-plaintext-allowlisted",
+      "description": "Interaction with allowlisted plaintext redaction",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "redaction-redacted",
+      "description": "Interaction with redacted content",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "timeout-result",
+      "description": "Interaction that timed out",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "truncated-digest-1m",
+      "description": "Interaction with truncated 1MB digest",
+      "has_requirements": false
+    },
+    {
+      "directory": "interaction",
+      "file": "valid.json",
+      "fixture_name": "truncated-digest-64k",
+      "description": "Interaction with truncated 64KB digest",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "empty-issuer",
+      "description": "Empty string issuer is invalid",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "float-amount",
+      "description": "Amount must be integer (minor units) - runner passes decoded float64 to Issue()",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "http-audience",
+      "description": "HTTP audience URL not allowed (must be HTTPS)",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "http-issuer",
+      "description": "HTTP issuer URL not allowed (must be HTTPS)",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "lowercase-currency",
+      "description": "Currency must be uppercase",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "missing-audience",
+      "description": "Missing required audience field",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "missing-issuer",
+      "description": "Missing required issuer field",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "missing-rail",
+      "description": "Missing required rail field",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "missing-reference",
+      "description": "Missing required reference field",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "invalid.json",
+      "fixture_name": "negative-amount",
+      "description": "Amount must be non-negative",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "valid.json",
+      "fixture_name": "crypto-rail-usdc",
+      "description": "Cryptocurrency payment rail with USDC asset code",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "valid.json",
+      "fixture_name": "full-receipt",
+      "description": "Full issue options with all optional fields",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "valid.json",
+      "fixture_name": "large-amount",
+      "description": "Large amount within int64 range",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "valid.json",
+      "fixture_name": "minimal-receipt",
+      "description": "Minimal valid issue options - only required fields",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "valid.json",
+      "fixture_name": "with-expiry",
+      "description": "Receipt with explicit expiry timestamp",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "valid.json",
+      "fixture_name": "with-purpose",
+      "description": "Receipt with purpose tracking (v0.9.24+)",
+      "has_requirements": false
+    },
+    {
+      "directory": "issue",
+      "file": "valid.json",
+      "fixture_name": "zero-amount",
+      "description": "Zero amount receipt (valid for free tier)",
+      "has_requirements": false
+    },
+    {
+      "directory": "key-rotation",
+      "file": "key-rotation.json",
+      "fixture_name": "cache-kid-reuse-detection",
+      "description": "Cache-based kid reuse: resolver cache saw kid with old material, then JWKS returns same kid with new material",
+      "has_requirements": false
+    },
+    {
+      "directory": "key-rotation",
+      "file": "key-rotation.json",
+      "fixture_name": "emergency-revocation",
+      "description": "Emergency key revocation: key removed from JWKS and added to revoked_keys array",
+      "has_requirements": false
+    },
+    {
+      "directory": "key-rotation",
+      "file": "key-rotation.json",
+      "fixture_name": "kid-reuse-rejection",
+      "description": "Kid reuse detection: same kid with different key material within retention window MUST be rejected by stateful resolvers",
+      "has_requirements": false
+    },
+    {
+      "directory": "key-rotation",
+      "file": "key-rotation.json",
+      "fixture_name": "normal-rotation",
+      "description": "Standard key rotation with 30-day overlap: old key deprecated, new key active, both present in JWKS",
+      "has_requirements": false
+    },
+    {
+      "directory": "key-rotation",
+      "file": "key-rotation.json",
+      "fixture_name": "overlap-validation",
+      "description": "Overlap period validation: rotation with exactly 30 days overlap (minimum normative requirement)",
+      "has_requirements": false
+    },
+    {
+      "directory": "key-rotation",
+      "file": "key-rotation.json",
+      "fixture_name": "stale-cache",
+      "description": "Cache-Control max-age coordination: JWKS response max-age must be <= rotation overlap period",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "invalid.json",
+      "fixture_name": "credit-required-no-details",
+      "description": "Credit required=true but missing citation_url, credit_text, and method",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "invalid.json",
+      "fixture_name": "currency-too-short",
+      "description": "Currency with less than 3 characters",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "invalid.json",
+      "fixture_name": "direct-contribution-no-destination",
+      "description": "Direct contribution type without destination",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "invalid.json",
+      "fixture_name": "ecosystem-contribution-no-destination",
+      "description": "Ecosystem contribution type without destination",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "invalid.json",
+      "fixture_name": "invalid-currency-format",
+      "description": "Currency with invalid format (lowercase)",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "invalid.json",
+      "fixture_name": "min-amount-without-currency",
+      "description": "min_amount specified without currency",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "valid.json",
+      "fixture_name": "credit-only-with-text",
+      "description": "Credit obligation with just credit_text (no URL)",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "valid.json",
+      "fixture_name": "credit-with-citation-and-ecosystem",
+      "description": "Full credit obligation with citation URL and ecosystem contribution",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "valid.json",
+      "fixture_name": "direct-with-crypto-currency",
+      "description": "Direct contribution with USDC cryptocurrency",
+      "has_requirements": false
+    },
+    {
+      "directory": "obligations",
+      "file": "valid.json",
+      "fixture_name": "open-contribution-with-optional-credit",
+      "description": "Open contribution type with credit not required",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "enforcement.json",
+      "fixture_name": "allow-200",
+      "description": "Allow decision maps to 200 OK",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "enforcement.json",
+      "fixture_name": "allow-with-receipt-200",
+      "description": "Allow with receipt still 200 (receipt is bonus)",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "enforcement.json",
+      "fixture_name": "deny-403",
+      "description": "Deny decision maps to 403 Forbidden",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "enforcement.json",
+      "fixture_name": "deny-with-receipt-403",
+      "description": "Deny with receipt still 403 (receipt doesn't override deny)",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "enforcement.json",
+      "fixture_name": "review-no-receipt-402",
+      "description": "Review decision without receipt maps to 402 with WWW-Authenticate",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "enforcement.json",
+      "fixture_name": "review-with-receipt-200",
+      "description": "Review decision with verified receipt maps to 200 OK",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "all-labels-required",
+      "description": "All specified labels must be present",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "array-purpose-match",
+      "description": "Rule with array of purposes matches any",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "default-on-no-match",
+      "description": "Default applies when no rules match",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "empty-context",
+      "description": "Empty context matches no rules",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "first-match-wins",
+      "description": "When multiple rules match, first rule wins",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "id-prefix-match",
+      "description": "Wildcard pattern matches ID prefix",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "id-prefix-no-match",
+      "description": "Non-matching ID prefix falls through",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "no-purpose-constraint",
+      "description": "Rule without purpose constraint matches any purpose",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "no-subject-constraint",
+      "description": "Rule without subject constraint matches any subject",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "only-purpose",
+      "description": "Context with only purpose",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "only-subject",
+      "description": "Context with only subject",
+      "has_requirements": false
+    },
+    {
+      "directory": "policy",
+      "file": "evaluation.json",
+      "fixture_name": "org-index-allow",
+      "description": "Org type can index",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "policy-binding.json",
+      "fixture_name": "policy-binding-bundle-path-convention",
+      "description": "Bundle path convention for policy artifacts is locked: policy/policy.yaml for policy, policy/peac.txt for discovery manifest",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "policy-binding.json",
+      "fixture_name": "policy-binding-bundle-peac-txt",
+      "description": "Evidence bundles MAY include peac.txt as policy/peac.txt with peac_txt_hash in manifest",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "policy-binding.json",
+      "fixture_name": "policy-binding-digest-algorithm",
+      "description": "Policy digest MUST use raw-bytes SHA-256, base64url-encoded (not parsed/re-serialized)",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "policy-binding.json",
+      "fixture_name": "policy-binding-wire-01-unavailable",
+      "description": "Wire 0.1 receipts MUST always report policy_binding as 'unavailable' (no policy digest on wire)",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "policy-binding.json",
+      "fixture_name": "policy-binding-wire-02-failed",
+      "description": "Wire 0.2 receipt with peac.policy.digest NOT matching local policy bytes MUST report 'failed'",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "policy-binding.json",
+      "fixture_name": "policy-binding-wire-02-no-digest-unavailable",
+      "description": "Wire 0.2 receipt WITHOUT peac.policy.digest MUST report 'unavailable' (issuer opted out)",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "policy-binding.json",
+      "fixture_name": "policy-binding-wire-02-no-local-bytes-unavailable",
+      "description": "Wire 0.2 receipt with digest but NO local policy bytes MUST report 'unavailable' (verifier has no policy to compare)",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "policy-binding.json",
+      "fixture_name": "policy-binding-wire-02-verified",
+      "description": "Wire 0.2 receipt with peac.policy.digest matching local policy bytes MUST report 'verified'",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "extension-size-at-limit",
+      "description": "Extension at exactly 64 KB MUST be accepted",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "extension-size-over-limit",
+      "description": "Extension over 64 KB MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "jwks-keys-at-limit",
+      "description": "JWKS with exactly 20 keys MUST be accepted",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "jwks-keys-over-limit",
+      "description": "JWKS with more than 20 keys MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "jwks-size-at-limit",
+      "description": "JWKS at exactly 64 KB MUST be accepted",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "jwks-size-over-limit",
+      "description": "JWKS over 64 KB MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "pointer-response-at-limit",
+      "description": "Pointer response at exactly 256 KB MUST be accepted",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "pointer-response-over-limit",
+      "description": "Pointer response over 256 KB MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "receipt-size-at-limit",
+      "description": "Receipt at exactly 256 KB MUST be accepted",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "security-limits.json",
+      "fixture_name": "receipt-size-over-limit",
+      "description": "Receipt over 256 KB MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "https-required",
+      "description": "JWKS URL MUST be HTTPS",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "ipv6-link-local-blocked",
+      "description": "IPv6 link-local fe80::/10 MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "ipv6-loopback-blocked",
+      "description": "IPv6 loopback ::1 MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "link-local-blocked",
+      "description": "Link-local 169.254.0.0/16 MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "loopback-blocked",
+      "description": "Loopback 127.0.0.0/8 MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "pointer-private-ip-blocked",
+      "description": "Pointer URL to private IP MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "private-ip-10.x-blocked",
+      "description": "Private IP 10.0.0.0/8 MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "private-ip-172.16.x-blocked",
+      "description": "Private IP 172.16.0.0/12 MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "private-ip-192.168.x-blocked",
+      "description": "Private IP 192.168.0.0/16 MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "public-ip-allowed",
+      "description": "Public IP addresses MUST be allowed",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "redirect-scheme-downgrade-blocked",
+      "description": "HTTPS to HTTP redirect MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "ssrf-protection.json",
+      "fixture_name": "redirect-to-private-ip-blocked",
+      "description": "Redirect to private IP MUST be blocked",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "body-valid-multiple",
+      "description": "Valid body profile with multiple receipts",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "body-valid-single",
+      "description": "Valid body profile with single receipt",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "header-comma-separated-invalid",
+      "description": "Comma-separated PEAC-Receipt values MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "header-jws-two-segments-invalid",
+      "description": "JWS with only two segments is invalid",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "header-multiple-invalid",
+      "description": "Multiple PEAC-Receipt headers MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "header-not-jws-compact",
+      "description": "Header value MUST be JWS compact serialization (three segments)",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "header-valid",
+      "description": "Valid PEAC-Receipt header with JWS compact serialization",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "pointer-http-rejected",
+      "description": "Pointer URL MUST be HTTPS",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "pointer-multiple-invalid",
+      "description": "Multiple PEAC-Receipt-Pointer headers MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "transport-profiles.json",
+      "fixture_name": "pointer-valid",
+      "description": "Valid PEAC-Receipt-Pointer with RFC 9651 dictionary format",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "issuer-empty-allowlist-all-allowed",
+      "description": "Empty allowlist allows all issuers",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "issuer-in-allowlist",
+      "description": "Issuer in allowlist MUST be accepted",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "issuer-no-allowlist-all-allowed",
+      "description": "No allowlist allows all issuers",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "issuer-non-standard-port",
+      "description": "Non-standard port MUST be included in origin",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "issuer-not-in-allowlist",
+      "description": "Issuer not in allowlist MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "issuer-origin-normalization",
+      "description": "Issuer origins are normalized (port 443 omitted for https)",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "offline-mode-requires-pinned-keys",
+      "description": "Offline mode with no pinned key MUST fail",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "pinned-key-thumbprint-match",
+      "description": "Pinned key with matching RFC 7638 thumbprint (base64url) MUST be accepted",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "pinned-key-thumbprint-mismatch",
+      "description": "Pinned key with mismatched thumbprint MUST be rejected",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "pinned-key-wrong-kid",
+      "description": "Pinned key with wrong kid falls back to discovery",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "trust-pinning.json",
+      "fixture_name": "thumbprint-encoding-base64url",
+      "description": "Thumbprint MUST be base64url encoded (43 chars for SHA-256), not hex",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "check-list-append-only-contract",
+      "description": "Check list is APPEND-ONLY: new checks MUST only be appended. Existing entries MUST NOT be removed, reordered, or renamed.",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "check-order-stable",
+      "description": "Checks MUST be in stable, documented order",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "determinism-no-meta",
+      "description": "Deterministic mode MUST exclude meta field",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "failure-report-ssrf-blocked",
+      "description": "Example SSRF blocked verification report",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "input-digest-format",
+      "description": "Receipt digest MUST be SHA-256 lowercase hex",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "reason-codes-complete",
+      "description": "All reason codes from VERIFIER-SECURITY-MODEL.md",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "report-structure-required-fields",
+      "description": "Report MUST include all required top-level fields",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "short-circuit-behavior",
+      "description": "Failed check SHOULD short-circuit subsequent checks",
+      "has_requirements": false
+    },
+    {
+      "directory": "verifier",
+      "file": "verification-report.json",
+      "fixture_name": "success-report-example",
+      "description": "Example successful verification report",
+      "has_requirements": false
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-all-7-types",
+      "description": "All 7 challenge_type enum values are accepted",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": ["WIRE02-CHAL-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-problem-with-rfc9457-passthrough",
+      "description": "RFC 9457 problem object allows passthrough of extension members (Section 6.2)",
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-CHAL-002",
+        "WIRE02-CHAL-003",
+        "WIRE02-CHAL-004",
+        "WIRE02-CHAL-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-reject-missing-problem-type",
+      "description": "Challenge problem.type is REQUIRED: omitting it MUST fail validation",
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": ["WIRE02-CHAL-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-reject-unknown-challenge-type",
+      "description": "Unknown challenge_type values MUST be rejected",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": ["WIRE02-CHAL-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "challenge.json",
+      "fixture_name": "challenge-with-problem-type-required",
+      "description": "Challenge extension MUST include problem.type (RFC 9457): valid receipt with all required fields",
+      "primary_requirement_id": "WIRE02-CHAL-002",
+      "requirement_ids": ["WIRE02-CHAL-001", "WIRE02-CHAL-002", "WIRE02-CHAL-003"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "dual-stack.json",
+      "fixture_name": "reject-wire01-typ-with-wire02-payload",
+      "description": "Wire 0.1 typ (peac-receipt/0.1) with peac_version 0.2 payload: MUST be rejected (version mismatch)",
+      "primary_requirement_id": "WIRE02-DUAL-002",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "dual-stack.json",
+      "fixture_name": "reject-wire02-typ-without-peac-version",
+      "description": "Wire 0.2 typ (interaction-record+jwt) without peac_version 0.2 payload: MUST be rejected",
+      "primary_requirement_id": "WIRE02-DUAL-003",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "dual-stack.json",
+      "fixture_name": "wire01-receipt-rejected-by-verifyLocal",
+      "description": "verifyLocal() returns E_UNSUPPORTED_WIRE_VERSION for Wire 0.1 receipts",
+      "primary_requirement_id": "WIRE02-DUAL-001",
+      "requirement_ids": ["WIRE02-DUAL-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "dual-stack.json",
+      "fixture_name": "wire02-typ-coherent",
+      "description": "Wire 0.2 route: typ is interaction-record+jwt AND peac_version is 0.2 (coherent)",
+      "primary_requirement_id": "WIRE02-DUAL-003",
+      "requirement_ids": ["WIRE02-DUAL-001", "WIRE02-DUAL-003"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "access-extension-valid",
+      "description": "Valid access extension with resource, action, decision",
+      "primary_requirement_id": "WIRE02-EXT-011",
+      "requirement_ids": ["WIRE02-EXT-011", "WIRE02-EXT-012", "WIRE02-EXT-013"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "commerce-extension-valid",
+      "description": "Valid commerce extension with all required fields",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": ["WIRE02-EXT-006", "WIRE02-EXT-007", "WIRE02-EXT-008", "WIRE02-EXT-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "commerce-negative-amount-valid",
+      "description": "Negative amount_minor (refund) is permitted",
+      "primary_requirement_id": "WIRE02-EXT-009",
+      "requirement_ids": ["WIRE02-EXT-009"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "correlation-extension-valid",
+      "description": "Valid correlation extension with trace_id and span_id",
+      "primary_requirement_id": "WIRE02-EXT-014",
+      "requirement_ids": ["WIRE02-EXT-014", "WIRE02-EXT-015"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "identity-extension-valid",
+      "description": "Valid identity extension with optional proof_ref",
+      "primary_requirement_id": "WIRE02-EXT-001",
+      "requirement_ids": ["WIRE02-EXT-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-commerce-decimal-amount",
+      "description": "Decimal amount_minor is rejected (must be integer string)",
+      "primary_requirement_id": "WIRE02-EXT-009",
+      "requirement_ids": ["WIRE02-EXT-009"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-commerce-missing-currency",
+      "description": "Missing required currency field is rejected",
+      "primary_requirement_id": "WIRE02-EXT-008",
+      "requirement_ids": ["WIRE02-EXT-008"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-domain-label-over-63-chars",
+      "description": "Extension key domain label exceeding 63 characters MUST be rejected",
+      "primary_requirement_id": "WIRE02-EXT-003",
+      "requirement_ids": ["WIRE02-EXT-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-empty-extension-segment",
+      "description": "Extension key with empty segment (trailing slash) MUST be rejected",
+      "primary_requirement_id": "WIRE02-EXT-004",
+      "requirement_ids": ["WIRE02-EXT-004"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-invalid-extension-key",
+      "description": "Extension key without dot in domain is rejected",
+      "primary_requirement_id": "WIRE02-EXT-002",
+      "requirement_ids": ["WIRE02-EXT-002", "WIRE02-EXT-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-invalid-trace-id",
+      "description": "trace_id not matching 32 hex chars is rejected",
+      "primary_requirement_id": "WIRE02-EXT-014",
+      "requirement_ids": ["WIRE02-EXT-014"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-uppercase-extension-key",
+      "description": "Extension key with uppercase domain is rejected (lowercase only)",
+      "primary_requirement_id": "WIRE02-EXT-005",
+      "requirement_ids": ["WIRE02-EXT-005", "WIRE02-EXT-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "unknown-extension-preserved-with-warning",
+      "description": "Unknown but well-formed extension key preserved with warning",
+      "primary_requirement_id": "WIRE02-EXT-017",
+      "requirement_ids": ["WIRE02-EXT-016", "WIRE02-EXT-017", "WIRE02-EXT-018"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/identifier-stack",
+      "file": "conformance.json",
+      "fixture_name": "compact-typ-valid",
+      "description": "Compact form typ interaction-record+jwt is accepted",
+      "primary_requirement_id": "WIRE02-IDENT-001",
+      "requirement_ids": ["WIRE02-IDENT-001", "WIRE02-MEDIA-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/identifier-stack",
+      "file": "conformance.json",
+      "fixture_name": "media-type-form-accepted",
+      "description": "Full media-type form application/interaction-record+jwt is accepted",
+      "primary_requirement_id": "WIRE02-IDENT-002",
+      "requirement_ids": ["WIRE02-IDENT-002", "WIRE02-MEDIA-002"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/identifier-stack",
+      "file": "conformance.json",
+      "fixture_name": "reject-typ-peac-version-mismatch",
+      "description": "typ/peac_version mismatch produces E_WIRE_VERSION_MISMATCH",
+      "primary_requirement_id": "WIRE02-IDENT-004",
+      "requirement_ids": ["WIRE02-IDENT-004", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/identifier-stack",
+      "file": "conformance.json",
+      "fixture_name": "reject-typ-with-parameters",
+      "description": "typ with content-type parameters MUST NOT be parsed",
+      "primary_requirement_id": "WIRE02-IDENT-003",
+      "requirement_ids": ["WIRE02-IDENT-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/identifier-stack",
+      "file": "conformance.json",
+      "fixture_name": "reject-unknown-peac-version",
+      "description": "Unknown peac_version value is rejected",
+      "primary_requirement_id": "WIRE02-IDENT-004",
+      "requirement_ids": ["WIRE02-IDENT-004"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-b64-false",
+      "description": "JWS header with b64:false must be rejected (unencoded payload not permitted)",
+      "primary_requirement_id": "WIRE02-JOSE-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-crit",
+      "description": "JWS header with crit array must be rejected (JOSE hardening)",
+      "primary_requirement_id": "WIRE02-JOSE-004",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-004",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-default-port-443",
+      "description": "iss with explicit default port :443 must be rejected (not canonical)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-did-with-fragment",
+      "description": "did: iss with fragment (#key-1) must be rejected",
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-did-with-path",
+      "description": "did: iss with path component must be rejected (bare DIDs only)",
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-duplicate-pillars",
+      "description": "Pillars array with duplicate values must be rejected",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-empty-type",
+      "description": "Empty type string must be rejected",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-http-scheme",
+      "description": "iss with http:// scheme must be rejected (https:// required)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-KIND-001", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-invalid-dns-type",
+      "description": "Type with uppercase DNS label must be rejected (not valid reverse-DNS or URI)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-jku",
+      "description": "JWS header with jku JWKS URL must be rejected (JOSE hardening)",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-003",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-jwk",
+      "description": "JWS header with embedded JWK must be rejected (JOSE hardening)",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-003",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-kid-too-long",
+      "description": "JWS header with kid exceeding 256 characters must be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-007",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-missing-kid",
+      "description": "JWS header with no kid must be rejected (kid is required in Wire 0.2)",
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-007",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-missing-peac-version",
+      "description": "Claims without peac_version field must be rejected",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-KIND-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-occurred-at-on-challenge",
+      "description": "Challenge-kind receipt with occurred_at field must be rejected",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-OCC-001"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-spiffe-scheme",
+      "description": "iss with spiffe:// scheme must be rejected (only https:// and did: accepted)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-KIND-001", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-trailing-slash",
+      "description": "iss with trailing slash must be rejected (origin-only, no path)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-unknown-kind",
+      "description": "Unknown kind value must be rejected (only evidence and challenge allowed)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-unknown-pillar",
+      "description": "Unknown pillar value must be rejected (closed 10-value taxonomy)",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-unsorted-pillars",
+      "description": "Pillars array not in ascending alphabetical order must be rejected",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-uppercase-host",
+      "description": "iss with uppercase characters in hostname must be rejected",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-wire-version-mismatch",
+      "description": "Wire 0.2 JWS typ header with Wire 0.1 style claims (no peac_version, no kind) must be rejected",
+      "primary_requirement_id": "WIRE02-MEDIA-005",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-with-path",
+      "description": "iss with path component must be rejected (origin-only)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-wrong-peac-version",
+      "description": "Claims with peac_version 0.1 (not 0.2) must be rejected by Wire 0.2 schema",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-KIND-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-x5c",
+      "description": "JWS header with x5c certificate chain must be rejected (JOSE hardening)",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-003",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-x5u",
+      "description": "JWS header with x5u certificate URL must be rejected (JOSE hardening)",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-003",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
+      "fixture_name": "reject-zip",
+      "description": "JWS header with zip compression must be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-006",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "did-key-issuer-valid",
+      "description": "Valid DID issuer: did:key method",
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": ["WIRE02-ISS-005"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "did-web-issuer-valid",
+      "description": "Valid DID issuer: did:web method",
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": ["WIRE02-ISS-005"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "https-issuer-valid",
+      "description": "Valid HTTPS issuer: lowercase origin-only",
+      "primary_requirement_id": "WIRE02-ISS-001",
+      "requirement_ids": ["WIRE02-ISS-001", "WIRE02-ISS-004"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "reject-default-port",
+      "description": "Explicit default port :443 is rejected",
+      "primary_requirement_id": "WIRE02-ISS-003",
+      "requirement_ids": ["WIRE02-ISS-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "reject-did-path-in-id",
+      "description": "DID method-specific-id with path separator is rejected",
+      "primary_requirement_id": "WIRE02-ISS-006",
+      "requirement_ids": ["WIRE02-ISS-006"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "reject-http-issuer",
+      "description": "HTTP scheme is rejected (must be HTTPS)",
+      "primary_requirement_id": "WIRE02-ISS-007",
+      "requirement_ids": ["WIRE02-ISS-007", "WIRE02-ISS-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "reject-trailing-slash",
+      "description": "Trailing slash is rejected (origin-only, no path)",
+      "primary_requirement_id": "WIRE02-ISS-004",
+      "requirement_ids": ["WIRE02-ISS-004"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "reject-uppercase-host",
+      "description": "Uppercase hostname is rejected (must be lowercase ASCII)",
+      "primary_requirement_id": "WIRE02-ISS-002",
+      "requirement_ids": ["WIRE02-ISS-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "reject-urn-scheme",
+      "description": "URN scheme is rejected (only https and did accepted)",
+      "primary_requirement_id": "WIRE02-ISS-007",
+      "requirement_ids": ["WIRE02-ISS-007"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/issuers",
+      "file": "conformance.json",
+      "fixture_name": "reject-userinfo-in-issuer",
+      "description": "Userinfo component is rejected",
+      "primary_requirement_id": "WIRE02-ISS-004",
+      "requirement_ids": ["WIRE02-ISS-004"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "boundary-kid-256-chars",
+      "description": "kid at exactly 256 characters is accepted (boundary)",
+      "primary_requirement_id": "WIRE02-JOSE-008",
+      "requirement_ids": ["WIRE02-JOSE-008", "WIRE02-JOSE-007"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "eddsa-alg-valid",
+      "description": "EdDSA algorithm is the only accepted algorithm",
+      "primary_requirement_id": "WIRE02-JOSE-001",
+      "requirement_ids": ["WIRE02-JOSE-001", "WIRE02-JOSE-002"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-b64-false",
+      "description": "b64:false (unencoded payload) MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-005",
+      "requirement_ids": ["WIRE02-JOSE-005"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-crit-header",
+      "description": "crit header parameter MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-004",
+      "requirement_ids": ["WIRE02-JOSE-004"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-embedded-jwk",
+      "description": "JWS header with embedded jwk MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": ["WIRE02-JOSE-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-empty-kid",
+      "description": "Empty string kid MUST produce E_JWS_MISSING_KID",
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": ["WIRE02-JOSE-007"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-jku-url",
+      "description": "jku JWK Set URL MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": ["WIRE02-JOSE-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-jws-exceeds-256kb",
+      "description": "JWS compact serialization exceeding 256 KB MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-009",
+      "requirement_ids": ["WIRE02-JOSE-009"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-kid-over-256",
+      "description": "kid exceeding 256 characters MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-008",
+      "requirement_ids": ["WIRE02-JOSE-008"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-missing-kid",
+      "description": "Missing kid MUST produce E_JWS_MISSING_KID",
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": ["WIRE02-JOSE-007"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-x5c-chain",
+      "description": "JWS header with x5c certificate chain MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": ["WIRE02-JOSE-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-x5u-url",
+      "description": "x5u remote certificate URL MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": ["WIRE02-JOSE-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "reject-zip-header",
+      "description": "zip compression header MUST be rejected",
+      "primary_requirement_id": "WIRE02-JOSE-006",
+      "requirement_ids": ["WIRE02-JOSE-006"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/kinds",
+      "file": "conformance.json",
+      "fixture_name": "challenge-kind-valid",
+      "description": "Challenge kind is accepted as a valid structural kind",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-ENV-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/kinds",
+      "file": "conformance.json",
+      "fixture_name": "evidence-kind-valid",
+      "description": "Evidence kind is accepted as a valid structural kind",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-ENV-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/kinds",
+      "file": "conformance.json",
+      "fixture_name": "evidence-with-occurred-at-valid",
+      "description": "occurred_at is permitted on evidence receipts (Section 5.1)",
+      "primary_requirement_id": "WIRE02-KIND-003",
+      "requirement_ids": ["WIRE02-KIND-003", "WIRE02-OCC-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/kinds",
+      "file": "conformance.json",
+      "fixture_name": "reject-occurred-at-on-challenge",
+      "description": "occurred_at MUST NOT appear on challenge receipts (Section 5.2)",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/kinds",
+      "file": "conformance.json",
+      "fixture_name": "reject-unknown-kind",
+      "description": "Unknown kind value is rejected (closed vocabulary)",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/kinds",
+      "file": "conformance.json",
+      "fixture_name": "same-type-both-kinds",
+      "description": "Same type MAY appear with either kind (Section 5.3)",
+      "primary_requirement_id": "WIRE02-KIND-003",
+      "requirement_ids": ["WIRE02-KIND-003"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/occurred-at",
+      "file": "conformance.json",
+      "fixture_name": "absent-occurred-at-valid",
+      "description": "Absent occurred_at is valid (field is OPTIONAL)",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/occurred-at",
+      "file": "conformance.json",
+      "fixture_name": "occurred-at-after-iat-warning",
+      "description": "occurred_at after iat emits skew warning",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/occurred-at",
+      "file": "conformance.json",
+      "fixture_name": "occurred-at-before-iat-valid",
+      "description": "occurred_at before iat is normal (no warning)",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/occurred-at",
+      "file": "conformance.json",
+      "fixture_name": "occurred-at-valid-offset",
+      "description": "Valid occurred_at with non-UTC timezone offset",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/occurred-at",
+      "file": "conformance.json",
+      "fixture_name": "occurred-at-valid-utc",
+      "description": "Valid occurred_at with UTC timezone offset",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/occurred-at",
+      "file": "conformance.json",
+      "fixture_name": "reject-occurred-at-on-challenge",
+      "description": "occurred_at on challenge kind produces hard error",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-OCC-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/pillars",
+      "file": "conformance.json",
+      "fixture_name": "all-pillars-sorted-valid",
+      "description": "All 10 pillars in ascending lexicographic order are valid",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": ["WIRE02-PILLAR-003", "WIRE02-PILLAR-002"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/pillars",
+      "file": "conformance.json",
+      "fixture_name": "multi-pillar-sorted-valid",
+      "description": "Multiple pillars in ascending order are valid",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": ["WIRE02-PILLAR-003", "WIRE02-PILLAR-002"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/pillars",
+      "file": "conformance.json",
+      "fixture_name": "reject-duplicate-pillars",
+      "description": "Duplicate pillar values are rejected",
+      "primary_requirement_id": "WIRE02-PILLAR-004",
+      "requirement_ids": ["WIRE02-PILLAR-004", "WIRE02-PILLAR-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/pillars",
+      "file": "conformance.json",
+      "fixture_name": "reject-empty-pillars-array",
+      "description": "Empty pillars array is rejected (must have at least one element)",
+      "primary_requirement_id": "WIRE02-PILLAR-002",
+      "requirement_ids": ["WIRE02-PILLAR-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/pillars",
+      "file": "conformance.json",
+      "fixture_name": "reject-unknown-pillar",
+      "description": "Unknown pillar value is rejected (closed vocabulary)",
+      "primary_requirement_id": "WIRE02-PILLAR-001",
+      "requirement_ids": ["WIRE02-PILLAR-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/pillars",
+      "file": "conformance.json",
+      "fixture_name": "reject-unsorted-pillars",
+      "description": "Pillars not in ascending order are rejected",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": ["WIRE02-PILLAR-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/pillars",
+      "file": "conformance.json",
+      "fixture_name": "single-pillar-valid",
+      "description": "Single pillar value is valid",
+      "primary_requirement_id": "WIRE02-PILLAR-002",
+      "requirement_ids": ["WIRE02-PILLAR-002"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/policy-binding",
+      "file": "conformance.json",
+      "fixture_name": "policy-binding-failed",
+      "description": "Mismatching digests produce E_POLICY_BINDING_FAILED",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": ["WIRE02-POLICY-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/policy-binding",
+      "file": "conformance.json",
+      "fixture_name": "policy-binding-unavailable-no-local-digest",
+      "description": "Absent local digest produces unavailable state",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": ["WIRE02-POLICY-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/policy-binding",
+      "file": "conformance.json",
+      "fixture_name": "policy-binding-unavailable-no-receipt-digest",
+      "description": "Absent receipt digest produces unavailable state",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": ["WIRE02-POLICY-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/policy-binding",
+      "file": "conformance.json",
+      "fixture_name": "policy-binding-verified",
+      "description": "Matching receipt and local policy digests produce verified state",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": ["WIRE02-POLICY-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/policy-binding",
+      "file": "conformance.json",
+      "fixture_name": "policy-uri-https-valid",
+      "description": "policy.uri with https:// is accepted",
+      "primary_requirement_id": "WIRE02-POLICY-002",
+      "requirement_ids": ["WIRE02-POLICY-002"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/policy-binding",
+      "file": "conformance.json",
+      "fixture_name": "policy-with-version-valid",
+      "description": "policy block with optional version label is accepted",
+      "primary_requirement_id": "WIRE02-POLICY-002",
+      "requirement_ids": ["WIRE02-POLICY-002"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/replay-prevention",
+      "file": "boundary-jti-length.json",
+      "fixture_name": "jti-at-max-length-256",
+      "description": "jti at exactly 256 characters (maximum allowed length); MUST be accepted",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/replay",
+      "file": "conformance.json",
+      "fixture_name": "boundary-jti-256-chars",
+      "description": "jti at exactly 256 characters is at maximum length boundary",
+      "primary_requirement_id": "WIRE02-REPLAY-003",
+      "requirement_ids": ["WIRE02-REPLAY-003"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/replay",
+      "file": "conformance.json",
+      "fixture_name": "boundary-jti-single-char",
+      "description": "Single character jti is at minimum length boundary (1 char)",
+      "primary_requirement_id": "WIRE02-REPLAY-003",
+      "requirement_ids": ["WIRE02-REPLAY-003"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/replay",
+      "file": "conformance.json",
+      "fixture_name": "jti-crypto-random-valid",
+      "description": "Cryptographic random hex jti is accepted",
+      "primary_requirement_id": "WIRE02-REPLAY-003",
+      "requirement_ids": ["WIRE02-REPLAY-003"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/replay",
+      "file": "conformance.json",
+      "fixture_name": "jti-present-valid",
+      "description": "jti claim present satisfies REQUIRED constraint",
+      "primary_requirement_id": "WIRE02-REPLAY-001",
+      "requirement_ids": ["WIRE02-REPLAY-001", "WIRE02-REPLAY-003"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/replay",
+      "file": "conformance.json",
+      "fixture_name": "jti-uuid-v7-valid",
+      "description": "UUIDv7 format jti is accepted",
+      "primary_requirement_id": "WIRE02-REPLAY-003",
+      "requirement_ids": ["WIRE02-REPLAY-003", "WIRE02-REPLAY-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/replay",
+      "file": "conformance.json",
+      "fixture_name": "reject-duplicate-jti-in-bundle",
+      "description": "Each receipt in evidence bundle MUST have unique jti",
+      "primary_requirement_id": "WIRE02-REPLAY-013",
+      "requirement_ids": ["WIRE02-REPLAY-013"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "absolute-uri-valid",
+      "description": "Valid absolute URI type: starts with scheme://",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "boundary-type-max-length",
+      "description": "Type at exactly 256 characters is accepted (boundary)",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "registered-type-no-warning",
+      "description": "Registered type does not trigger type_unregistered warning",
+      "primary_requirement_id": "WIRE02-TYPE-007",
+      "requirement_ids": ["WIRE02-TYPE-007"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "reject-domain-special-chars",
+      "description": "Domain with special characters violates MUST match pattern",
+      "primary_requirement_id": "WIRE02-TYPE-002",
+      "requirement_ids": ["WIRE02-TYPE-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "reject-domain-starts-with-hyphen",
+      "description": "Domain starting with hyphen violates MUST start with alphanumeric",
+      "primary_requirement_id": "WIRE02-TYPE-005",
+      "requirement_ids": ["WIRE02-TYPE-005", "WIRE02-TYPE-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "reject-empty-segment",
+      "description": "Empty segment after slash is rejected",
+      "primary_requirement_id": "WIRE02-TYPE-003",
+      "requirement_ids": ["WIRE02-TYPE-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "reject-empty-type",
+      "description": "Empty string is rejected",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "reject-no-dot-in-domain",
+      "description": "Domain without dot is rejected (single-label path)",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "reject-segment-starts-with-hyphen",
+      "description": "Segment starting with hyphen violates MUST start with alphanumeric",
+      "primary_requirement_id": "WIRE02-TYPE-006",
+      "requirement_ids": ["WIRE02-TYPE-006"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "reverse-dns-valid",
+      "description": "Valid reverse-DNS type: domain with dot and non-empty segment",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001", "WIRE02-TYPE-003"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "type-with-underscore-valid",
+      "description": "Underscores permitted in segment: access_decision is valid",
+      "primary_requirement_id": "WIRE02-TYPE-004",
+      "requirement_ids": ["WIRE02-TYPE-004"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/types",
+      "file": "conformance.json",
+      "fixture_name": "unregistered-type-warning",
+      "description": "Unregistered type triggers type_unregistered warning (not error)",
+      "primary_requirement_id": "WIRE02-TYPE-007",
+      "requirement_ids": ["WIRE02-TYPE-007"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "challenge-custom-requirements",
+      "description": "Challenge receipt with requirements field for caller-defined resolution criteria",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "challenge-identity-required",
+      "description": "Challenge receipt for identity_required with RFC 9457 problem details",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "challenge-payment-required",
+      "description": "Challenge receipt for payment_required with RFC 9457 problem details",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "challenge-purpose-disallowed",
+      "description": "Challenge receipt for purpose_disallowed with RFC 9457 problem details",
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-access-minimal",
+      "description": "Minimal evidence receipt with access extension (resource, action, decision)",
+      "primary_requirement_id": "WIRE02-EXT-011",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-011",
+        "WIRE02-EXT-012",
+        "WIRE02-EXT-013",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-all-pillars",
+      "description": "Evidence receipt with all 10 pillars in ascending alphabetical order",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-attribution-type-only",
+      "description": "Evidence receipt with attribution type and pillar (no extension group)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-commerce-full",
+      "description": "Full evidence receipt with all commerce extension fields populated",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-006",
+        "WIRE02-EXT-007",
+        "WIRE02-EXT-008",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-commerce-minimal",
+      "description": "Minimal evidence receipt with commerce extension (payment_rail, amount_minor, currency)",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-006",
+        "WIRE02-EXT-007",
+        "WIRE02-EXT-008",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-compliance-type-only",
+      "description": "Evidence receipt with compliance type and pillar (no extension group)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-consent-type-only",
+      "description": "Evidence receipt with consent type and pillar (no extension group)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-correlation",
+      "description": "Evidence receipt with correlation extension (trace_id and span_id)",
+      "primary_requirement_id": "WIRE02-EXT-014",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-014",
+        "WIRE02-EXT-015",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-custom-type",
+      "description": "Evidence receipt with custom reverse-DNS type (triggers type_unregistered warning)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-identity-minimal",
+      "description": "Minimal evidence receipt with identity extension (proof_ref only)",
+      "primary_requirement_id": "WIRE02-EXT-001",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-001",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-max-extensions",
+      "description": "Evidence receipt with both commerce and correlation extension groups",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-006",
+        "WIRE02-EXT-007",
+        "WIRE02-EXT-008",
+        "WIRE02-EXT-014",
+        "WIRE02-EXT-015",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-multi-pillar",
+      "description": "Evidence receipt with multiple pillars (sorted alphabetically)",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-privacy-type-only",
+      "description": "Evidence receipt with privacy type and pillar (no extension group)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-provenance-type-only",
+      "description": "Evidence receipt with provenance type and pillar (no extension group)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-purpose-type-only",
+      "description": "Evidence receipt with purpose type and pillar (no extension group)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-safety-type-only",
+      "description": "Evidence receipt with safety type and pillar (no extension group)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-uri-type",
+      "description": "Evidence receipt with absolute URI type (triggers type_unregistered warning)",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-with-actor",
+      "description": "Evidence receipt with top-level actor binding (DD-142)",
+      "primary_requirement_id": "WIRE02-ENV-017",
+      "requirement_ids": [
+        "WIRE02-ENV-017",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-with-policy-binding",
+      "description": "Evidence receipt with policy block (digest, uri, version)",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003",
+        "WIRE02-POLICY-001"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "evidence-with-representation",
+      "description": "Evidence receipt with representation fields (content_hash, content_type, content_length)",
+      "primary_requirement_id": "WIRE02-ENV-019",
+      "requirement_ids": [
+        "WIRE02-ENV-019",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "valid-did-key",
+      "description": "Evidence receipt with did:key issuer identifier",
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "valid-did-web",
+      "description": "Evidence receipt with did:web issuer identifier",
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "valid-https-nonstandard-port",
+      "description": "Evidence receipt with HTTPS origin on non-standard port",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "valid.json",
+      "fixture_name": "valid-https-origin",
+      "description": "Evidence receipt with standard HTTPS origin as iss",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "full-validation-pass",
+      "description": "Receipt passes all 13 validation steps",
+      "primary_requirement_id": "WIRE02-VALID-001",
+      "requirement_ids": ["WIRE02-VALID-001", "WIRE02-VALID-006"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "reject-missing-jti-claim",
+      "description": "Step 10a: missing jti claim is REQUIRED (schema enforced)",
+      "primary_requirement_id": "WIRE02-VALID-009",
+      "requirement_ids": ["WIRE02-VALID-009", "WIRE02-REPLAY-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "reject-missing-jws-input",
+      "description": "Missing jws input is REQUIRED and produces E_INVALID_FORMAT",
+      "primary_requirement_id": "WIRE02-VALID-004",
+      "requirement_ids": ["WIRE02-VALID-004"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "reject-missing-public-key",
+      "description": "Missing publicKey input is REQUIRED and produces E_INVALID_FORMAT",
+      "primary_requirement_id": "WIRE02-VALID-005",
+      "requirement_ids": ["WIRE02-VALID-005"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "step1-reject-invalid-signature",
+      "description": "Step 1: invalid signature terminates validation immediately",
+      "primary_requirement_id": "WIRE02-VALID-002",
+      "requirement_ids": ["WIRE02-VALID-002", "WIRE02-VALID-003"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "step12-policy-binding-check",
+      "description": "Step 12: policy binding verified when both digests present and match",
+      "primary_requirement_id": "WIRE02-VALID-001",
+      "requirement_ids": ["WIRE02-VALID-001", "WIRE02-POLICY-001"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "step3-reject-constraint-violation",
+      "description": "Step 3: kernel constraint violation terminates before schema parse",
+      "primary_requirement_id": "WIRE02-VALID-007",
+      "requirement_ids": ["WIRE02-VALID-007", "WIRE02-VALID-002"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "step7-reject-issuer-mismatch",
+      "description": "Step 7: issuer binding mismatch produces E_INVALID_ISSUER",
+      "primary_requirement_id": "WIRE02-VALID-001",
+      "requirement_ids": ["WIRE02-VALID-001"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/validation",
+      "file": "conformance.json",
+      "fixture_name": "step9-reject-future-iat",
+      "description": "Step 9: iat beyond clock skew tolerance produces E_NOT_YET_VALID",
+      "primary_requirement_id": "WIRE02-VALID-008",
+      "requirement_ids": ["WIRE02-VALID-008"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "warnings.json",
+      "fixture_name": "occurred-at-skew",
+      "description": "occurred_at deviates from iat beyond tolerance: valid but warns",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-OCC-001"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "warnings.json",
+      "fixture_name": "typ-missing-interop",
+      "description": "Missing typ header in interop mode emits typ_missing warning",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "warnings.json",
+      "fixture_name": "unknown-extension-preserved",
+      "description": "Unknown but well-formed extension key is preserved with warning",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-006",
+        "WIRE02-EXT-007",
+        "WIRE02-EXT-008",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "warnings.json",
+      "fixture_name": "unknown-type-preserved",
+      "description": "Unregistered type value is valid but emits type_unregistered warning",
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "autogen-framework",
+      "description": "AutoGen orchestration framework",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "custom-framework",
+      "description": "Custom orchestration framework",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "error-context-boundary",
+      "description": "Error message at exactly maxErrorMessageLength (1024)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "framework-at-max-length",
+      "description": "Framework identifier at exactly 64 characters (valid boundary)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "langgraph-framework",
+      "description": "LangGraph orchestration framework",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "long-tool-name",
+      "description": "Tool name at maximum length (256)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "max-parents-allowed",
+      "description": "Maximum allowed parent steps (16)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "step-index-zero",
+      "description": "First step with step_index 0",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "summary-both-refs-and-merkle",
+      "description": "Summary with both receipt_refs and merkle_root",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "summary-empty-receipt-refs",
+      "description": "Summary with empty receipt_refs array",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "summary-max-agents",
+      "description": "Summary at maximum agents_involved limit (100)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "unknown-framework-accepted",
+      "description": "Unknown framework identifier that passes grammar (registry is advisory)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "edge-cases.json",
+      "fixture_name": "uuid-format-ids",
+      "description": "Workflow and step IDs using UUID format",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "duplicate-parents",
+      "description": "Duplicate parent step IDs",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "error-message-too-long",
+      "description": "Error message exceeds maxErrorMessageLength",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "extra-unknown-field",
+      "description": "Unknown field in strict schema",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "framework-over-max-length",
+      "description": "Framework identifier exceeding 64 character limit (65 chars)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "framework-with-dot",
+      "description": "Framework identifier containing a dot (invalid character)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "framework-with-slash",
+      "description": "Framework identifier containing a slash (invalid character)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "invalid-framework-grammar",
+      "description": "Framework identifier with invalid grammar (uppercase)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "invalid-hash-format",
+      "description": "Invalid prev_receipt_hash format",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "invalid-step-id-format",
+      "description": "Step ID without step_ prefix",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "invalid-workflow-id-format",
+      "description": "Workflow ID without wf_ prefix",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "multi-failure-bad-framework-and-self-parent",
+      "description": "Multi-failure: invalid framework grammar AND self-parent cycle. Per Section 6.5.1, framework grammar (rule 6) is checked before DAG semantics (rule 1).",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "multi-failure-bad-stepid-and-too-many-parents",
+      "description": "Multi-failure: invalid step_id format AND exceeds parent limit. Per Section 6.5.1, step_id format (rule 5) is checked first.",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "multi-failure-bad-wfid-and-bad-framework",
+      "description": "Multi-failure: invalid workflow_id format AND invalid framework grammar. Per Section 6.5.1, workflow_id format (rule 4) is checked first.",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "multi-failure-too-many-parents-and-bad-hash",
+      "description": "Multi-failure: exceeds parent limit AND invalid hash format. Per Section 6.5.1, structural constraint (rule 3) is checked before optional field format (rule 7).",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "self-parent-cycle",
+      "description": "Step is its own parent (cycle)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "summary-http-issuer",
+      "description": "Non-HTTPS issuer URL",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "summary-invalid-status",
+      "description": "Invalid workflow status",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "summary-merkle-without-count",
+      "description": "Merkle root without receipt_count",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "summary-no-receipts-or-merkle",
+      "description": "Summary without receipt_refs or receipt_merkle_root",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "summary-wrong-type",
+      "description": "Wrong attestation type for workflow summary",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "invalid.json",
+      "fixture_name": "too-many-parents",
+      "description": "Exceeds maxParentSteps limit (16)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "a2a-skill-step",
+      "description": "Step with A2A framework and skill metadata",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "complete-context-all-fields",
+      "description": "Workflow context with all optional fields populated",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "fork-join-step",
+      "description": "Join step with multiple parents (fork-join pattern)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "hash-chained-step",
+      "description": "Step with previous receipt hash for streaming",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "linear-workflow-step",
+      "description": "Step in a linear workflow with single parent",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "mcp-tool-step",
+      "description": "Step with MCP framework and tool metadata",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "minimal-root-step",
+      "description": "Minimal workflow context for root step (no parents)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "summary-cancelled",
+      "description": "Cancelled workflow summary",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "summary-completed-with-merkle",
+      "description": "Completed workflow summary with Merkle root for large workflows",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "summary-completed-with-refs",
+      "description": "Completed workflow summary with receipt refs",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "summary-failed-with-error",
+      "description": "Failed workflow summary with error context",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "summary-in-progress",
+      "description": "In-progress workflow summary (streaming)",
+      "has_requirements": false
+    },
+    {
+      "directory": "workflow",
+      "file": "valid.json",
+      "fixture_name": "unknown-framework-open-string",
+      "description": "Non-well-known framework accepted (open string field)",
+      "has_requirements": false
+    }
+  ]
+}

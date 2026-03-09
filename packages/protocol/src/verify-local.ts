@@ -164,7 +164,7 @@ export interface VerifyLocalOptions {
  * Result of successful local verification (Wire 0.2 only)
  *
  * Wire 0.1 receipts are no longer accepted by verifyLocal() and return
- * E_UNSUPPORTED_WIRE_VERSION. Re-issue as Wire 0.2 using issueWire02().
+ * E_UNSUPPORTED_WIRE_VERSION. Re-issue as Wire 0.2 using issue().
  */
 export interface VerifyLocalSuccess {
   /** Verification succeeded */
@@ -485,7 +485,7 @@ export async function verifyLocal(
     return {
       valid: false,
       code: 'E_UNSUPPORTED_WIRE_VERSION',
-      message: 'Wire 0.1 receipts are not supported. Re-issue as Wire 0.2 using issueWire02().',
+      message: 'Wire 0.1 receipts are not supported. Re-issue as Wire 0.2 using issue().',
     };
   } catch (err) {
     // Handle typed CryptoError from @peac/crypto

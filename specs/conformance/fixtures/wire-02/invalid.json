@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 invalid receipt rejection vectors (v0.12.0-preview.1, DD-156)",
-  "schema_version": "0.12.0-preview.1",
-  "version": "0.12.0-preview.1",
+  "schema_version": "0.12.0",
+  "version": "0.12.0",
   "fixtures": [
     {
       "name": "reject-jwk",
@@ -27,7 +27,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_EMBEDDED_KEY"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-003",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-x5c",
@@ -49,7 +59,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_EMBEDDED_KEY"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-003",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-x5u",
@@ -71,7 +91,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_EMBEDDED_KEY"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-003",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-jku",
@@ -93,7 +123,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_EMBEDDED_KEY"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-003",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-crit",
@@ -115,7 +155,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_CRIT_REJECTED"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-004",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-004",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-missing-kid",
@@ -137,7 +187,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_MISSING_KID"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-007",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-kid-too-long",
@@ -159,7 +219,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_MISSING_KID"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-007",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-b64-false",
@@ -181,7 +251,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_B64_REJECTED"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-zip",
@@ -203,7 +283,17 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_ZIP_REJECTED"
-      }
+      },
+      "primary_requirement_id": "WIRE02-JOSE-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-006",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-uppercase-host",
@@ -222,7 +312,16 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_ISS_NOT_CANONICAL"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-default-port-443",
@@ -241,7 +340,16 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_ISS_NOT_CANONICAL"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-trailing-slash",
@@ -260,7 +368,16 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_ISS_NOT_CANONICAL"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-with-path",
@@ -279,7 +396,16 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_ISS_NOT_CANONICAL"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-http-scheme",
@@ -298,7 +424,11 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_ISS_NOT_CANONICAL"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-KIND-001", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-spiffe-scheme",
@@ -317,7 +447,11 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_ISS_NOT_CANONICAL"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-KIND-001", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-did-with-fragment",
@@ -336,7 +470,16 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_ISS_NOT_CANONICAL"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-did-with-path",
@@ -355,7 +498,16 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_ISS_NOT_CANONICAL"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-005",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-empty-type",
@@ -375,7 +527,16 @@
         "valid": false,
         "must_fail": true,
         "path": "type"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-invalid-dns-type",
@@ -395,7 +556,16 @@
         "valid": false,
         "must_fail": true,
         "path": "type"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-unknown-kind",
@@ -415,7 +585,11 @@
         "valid": false,
         "must_fail": true,
         "path": "kind"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-unknown-pillar",
@@ -436,7 +610,17 @@
         "valid": false,
         "must_fail": true,
         "path": "pillars"
-      }
+      },
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-unsorted-pillars",
@@ -456,7 +640,17 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_PILLARS_NOT_SORTED"
-      }
+      },
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-duplicate-pillars",
@@ -476,7 +670,17 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_PILLARS_NOT_SORTED"
-      }
+      },
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-occurred-at-on-challenge",
@@ -506,7 +710,18 @@
       "expected": {
         "valid": false,
         "issue_contains": "E_OCCURRED_AT_ON_CHALLENGE"
-      }
+      },
+      "primary_requirement_id": "WIRE02-CHAL-001",
+      "requirement_ids": [
+        "WIRE02-CHAL-001",
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-OCC-001"
+      ],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-missing-peac-version",
@@ -525,7 +740,11 @@
         "valid": false,
         "must_fail": true,
         "path": "peac_version"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-KIND-001"],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-wrong-peac-version",
@@ -545,7 +764,11 @@
         "valid": false,
         "must_fail": true,
         "path": "peac_version"
-      }
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-KIND-001"],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "reject-wire-version-mismatch",
@@ -563,7 +786,11 @@
       "expected": {
         "valid": false,
         "error_code": "E_WIRE_VERSION_MISMATCH"
-      }
+      },
+      "primary_requirement_id": "WIRE02-MEDIA-005",
+      "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-MEDIA-005"],
+      "status": "negative",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     }
   ]
 }

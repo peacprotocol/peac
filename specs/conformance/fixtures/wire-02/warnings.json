@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 warning emission vectors (v0.12.0-preview.1, DD-155)",
-  "schema_version": "0.12.0-preview.1",
-  "version": "0.12.0-preview.1",
+  "schema_version": "0.12.0",
+  "version": "0.12.0",
   "fixtures": [
     {
       "name": "unknown-type-preserved",
@@ -19,8 +19,22 @@
       },
       "expected": {
         "valid": true,
-        "warnings": [{ "code": "type_unregistered", "pointer": "/type" }]
-      }
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "unknown-extension-preserved",
@@ -55,7 +69,20 @@
             "pointer": "/extensions/com.example~1custom-data"
           }
         ]
-      }
+      },
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-EXT-006",
+        "WIRE02-EXT-007",
+        "WIRE02-EXT-008",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-PILLAR-003"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "typ-missing-interop",
@@ -76,8 +103,21 @@
       },
       "expected": {
         "valid": true,
-        "warnings": [{ "code": "typ_missing" }]
-      }
+        "warnings": [
+          {
+            "code": "typ_missing"
+          }
+        ]
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     },
     {
       "name": "occurred-at-skew",
@@ -99,8 +139,23 @@
       },
       "expected": {
         "valid": true,
-        "warnings": [{ "code": "occurred_at_skew", "pointer": "/occurred_at" }]
-      }
+        "warnings": [
+          {
+            "code": "occurred_at_skew",
+            "pointer": "/occurred_at"
+          }
+        ]
+      },
+      "primary_requirement_id": "WIRE02-ENV-023",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005",
+        "WIRE02-OCC-001"
+      ],
+      "status": "positive",
+      "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     }
   ]
 }

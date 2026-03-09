@@ -1,19 +1,10 @@
 ## Summary
 
-<!-- Brief description of what this PR does -->
+<!-- Technical summary of what this PR changes. Keep factual and implementation-focused. -->
 
-## Type of Change
+## Scope
 
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Refactoring (no functional changes)
-- [ ] CI/Build changes
-
-## Related Issues
-
-<!-- Link to related issues, e.g., Fixes #123 -->
+<!-- What this PR changes and what it does not change. -->
 
 ## Changes
 
@@ -23,28 +14,24 @@
 -
 -
 
-## Testing
+## Test plan
 
-<!-- Describe how you tested these changes -->
+<!-- How these changes were verified -->
 
-- [ ] Unit tests pass (`pnpm test`)
-- [ ] Lint passes (`pnpm run lint`)
-- [ ] Type check passes (`pnpm run typecheck`)
-- [ ] Manual testing performed
+- [ ] `pnpm test` passes
+- [ ] `pnpm lint` passes
+- [ ] `pnpm typecheck:core` passes
+- [ ] `bash scripts/guard.sh` passes
 
 ## Checklist
 
-- [ ] My code follows the project's coding standards
-- [ ] I have updated documentation as needed
-- [ ] I have added tests for new functionality
-- [ ] All existing tests pass
-- [ ] My commit messages follow conventional commits format
-- [ ] I have checked for breaking changes and documented them
+- [ ] Code follows project coding standards
+- [ ] Documentation updated as needed
+- [ ] Tests added for new functionality
+- [ ] Commit messages use conventional format
+- [ ] PR title is technical and under 70 chars
+- [ ] PR body contains only technical content (no internal planning, sequencing, or process language)
 
-## Breaking Changes
+## Follow-ups
 
-<!-- If this is a breaking change, describe the impact and migration path -->
-
-## Additional Notes
-
-<!-- Any additional context or screenshots -->
+<!-- Technical follow-ups only. Leave empty if none. -->

@@ -7,7 +7,7 @@ Canonical entry point for PEAC Protocol implementers and integrators.
 ### Core Protocol
 
 - **[Receipt Schema (JSON)](specs/PEAC-RECEIPT-SCHEMA-v0.1.json)** - JSON Schema for PEAC receipts (peac-receipt/0.1 wire format)
-- **[Wire 0.2 Specification](specs/WIRE-0.2.md)** - Wire 0.2 envelope, kinds, typed extensions, policy binding (preview)
+- **[Wire 0.2 Specification](specs/WIRE-0.2.md)** - Wire 0.2 envelope, kinds, typed extensions, policy binding
 - **[Protocol Behavior](specs/PROTOCOL-BEHAVIOR.md)** - Issuance, verification, and discovery flows
 - **[Errors](specs/ERRORS.md)** - Error codes, HTTP status mappings, and retry semantics
 - **[Registries](specs/REGISTRIES.md)** - Payment rails, control engines, and transport methods
@@ -96,7 +96,7 @@ External protocol integrations and identity anchors.
 
 - **[Versioning Doctrine](specs/VERSIONING.md)** - Wire version vs repo version, artifact identifiers, compatibility guarantees
 
-Current wire formats: `peac-receipt/0.1` (stable), `interaction-record+jwt` (Wire 0.2 preview)
+Current wire formats: `peac-receipt/0.1` (frozen legacy), `interaction-record+jwt` (Wire 0.2, current)
 
 ## Release Artifacts
 

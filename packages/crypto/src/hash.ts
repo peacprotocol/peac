@@ -20,7 +20,7 @@ import { base64urlDecode, base64urlEncode } from './base64url.js';
 export async function sha256Hex(data: Uint8Array | string): Promise<string> {
   const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
 
-  // Try Web Crypto API first (works in browser, edge, and Node 20+)
+  // Try Web Crypto API first (works in browser, edge, and Node 22+)
   if (typeof globalThis.crypto?.subtle?.digest === 'function') {
     const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', bytes);
     const hashArray = Array.from(new Uint8Array(hashBuffer));

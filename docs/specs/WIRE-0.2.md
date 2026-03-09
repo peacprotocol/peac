@@ -1,12 +1,12 @@
-# PEAC Interaction Record Format 0.2 (Preview)
+# PEAC Interaction Record Format 0.2
 
-**Status**: NORMATIVE PREVIEW
+**Status**: NORMATIVE
 
-**Version**: 0.12.0-preview.1
+**Version**: 0.12.0
 
 **Wire Format**: `interaction-record+jwt`
 
-**Design Decisions**: DD-150, DD-151, DD-152, DD-153, DD-155, DD-156
+**Design Decisions**: DD-150, DD-151, DD-152, DD-153, DD-155, DD-156, DD-157, DD-158, DD-159, DD-160, DD-161, DD-162, DD-163, DD-164, DD-167, DD-168
 
 ---
 
@@ -223,6 +223,8 @@ Two forms are accepted:
 
 ### 6.2 Validation Algorithm
 
+<!-- peac:validate -->
+
 ```text
 Input: value (string)
 Output: boolean (true if valid type grammar)
@@ -346,6 +348,8 @@ Valid examples: `did:key:z6Mkf5rG`, `did:web:example.com`
 
 ### 8.3 Validation Algorithm
 
+<!-- peac:validate -->
+
 ```text
 Input: iss (string)
 Output: boolean (true if canonical form)
@@ -396,6 +400,8 @@ The value MUST be a valid ISO 8601 / RFC 3339 datetime string with a timezone of
 Valid examples: `2026-03-03T12:00:00Z`, `2026-03-03T17:30:00+05:30`
 
 ### 9.3 Temporal Consistency Algorithm
+
+<!-- peac:validate -->
 
 ```text
 Input: occurred_at (string or undefined), iat (integer, Unix seconds),
@@ -489,6 +495,8 @@ Example: `sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85
 
 ### 11.2 Digest Computation Algorithm
 
+<!-- peac:validate -->
+
 ```text
 Input: policy (JSON value)
 Output: digest (string)
@@ -519,6 +527,8 @@ Policy binding produces a three-state result:
 | `unavailable` | Either the receipt digest or the local digest (or both) is absent  | No assertion (informational)          |
 
 ### 11.4 Binding Algorithm
+
+<!-- peac:validate -->
 
 ```text
 Input: receipt_policy_digest (string or undefined),
@@ -580,6 +590,8 @@ Extension keys MUST conform to the grammar: `<domain>/<segment>`.
 Keys that do not match this grammar produce `E_INVALID_EXTENSION_KEY` (hard error). The `isValidExtensionKey()` function implements the grammar check.
 
 ### 12.2 Key Validation Algorithm
+
+<!-- peac:validate -->
 
 ```text
 Input: key (string)
@@ -793,6 +805,8 @@ Wire 0.1 and Wire 0.2 coexist in the same implementation. The verification pipel
 
 ### 15.2 Routing Algorithm
 
+<!-- peac:validate -->
+
 ```text
 1. Decode the JWS header (base64url decode + JSON parse).
 2. Read the typ header parameter.
@@ -821,6 +835,8 @@ Wire 0.1 (`peac-receipt/0.1`) is FROZEN. All Wire 0.1 schemas, test fixtures, an
 ### 15.5 Receipt Reference
 
 The receipt reference (`receipt_ref`) computation is unchanged across wire versions:
+
+<!-- peac:validate -->
 
 ```text
 receipt_ref = "sha256:" + hex(SHA-256(compact_jws_bytes))

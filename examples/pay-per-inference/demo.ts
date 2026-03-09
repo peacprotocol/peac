@@ -11,7 +11,7 @@
  * This example uses local stubs - no external services required.
  */
 
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { generateKeypair, verify, canonicalize } from '@peac/crypto';
 import { toCoreClaims, PEACReceiptClaims } from '@peac/schema';
 
@@ -92,7 +92,7 @@ async function paymentService(params: {
   privateKey: Uint8Array;
   publicKey: Uint8Array;
 }): Promise<string> {
-  const result = await issue({
+  const result = await issueWire01({
     iss: ISSUER_URL,
     aud: params.resource,
     amt: params.amount,

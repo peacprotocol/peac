@@ -1,0 +1,145 @@
+{
+  "$comment": "Wire 0.2 Occurred-at Semantics conformance vectors (Section 9, DD-156)",
+  "version": "0.12.0",
+  "schema_version": "0.12.0",
+  "fixtures": [
+    {
+      "name": "occurred-at-valid-utc",
+      "description": "Valid occurred_at with UTC timezone offset",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "occ-valid-001",
+          "occurred_at": "2026-03-03T12:00:00Z"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "occurred-at-valid-offset",
+      "description": "Valid occurred_at with non-UTC timezone offset",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "occ-valid-002",
+          "occurred_at": "2026-03-03T17:30:00+05:30"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "occurred-at-before-iat-valid",
+      "description": "occurred_at before iat is normal (no warning)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500300,
+          "jti": "occ-valid-003",
+          "occurred_at": "2024-03-03T23:53:20Z"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "occurred-at-after-iat-warning",
+      "description": "occurred_at after iat emits skew warning",
+      "type": "warning",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "occ-warn-001",
+          "occurred_at": "2024-03-04T00:00:01Z"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [
+          {
+            "code": "occurred_at_skew",
+            "pointer": "/occurred_at"
+          }
+        ]
+      }
+    },
+    {
+      "name": "absent-occurred-at-valid",
+      "description": "Absent occurred_at is valid (field is OPTIONAL)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-OCC-001",
+      "requirement_ids": ["WIRE02-OCC-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "occ-valid-004"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "reject-occurred-at-on-challenge",
+      "description": "occurred_at on challenge kind produces hard error",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-KIND-001",
+      "requirement_ids": ["WIRE02-KIND-001", "WIRE02-OCC-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "occ-invalid-001",
+          "occurred_at": "2026-03-03T12:00:00Z"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_OCCURRED_AT_ON_CHALLENGE"
+      }
+    }
+  ]
+}

@@ -17,8 +17,8 @@ pnpm demo
 ## What it does
 
 1. Generates an Ed25519 keypair
-2. Issues a receipt with payment evidence
-3. Verifies the receipt signature
+2. Issues an Interaction Record (Wire 0.2) receipt with payment evidence
+3. Verifies the receipt signature and schema
 4. Prints the verified claims
 
 ## Expected output
@@ -30,19 +30,17 @@ PEAC Quickstart Demo
    Done.
 
 2. Issuing receipt...
-   JWS: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEiLC...
+   JWS: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZC...
 
 3. Verifying receipt...
-   Signature valid!
+   Signature + schema valid!
 
    Claims:
    - Issuer: https://api.example.com
-   - Audience: https://client.example.com
-   - Amount: 1000 USD
-   - Rail: stripe
-   - Reference: pi_1234567890
-   - Receipt ID: <uuidv7>
+   - Kind: evidence
+   - Type: org.peacprotocol/payment
    - Issued at: <timestamp>
+   - JTI: <uuidv7>
 
 Done.
 ```

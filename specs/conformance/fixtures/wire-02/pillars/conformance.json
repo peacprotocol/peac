@@ -1,0 +1,176 @@
+{
+  "$comment": "Wire 0.2 Pillar Taxonomy conformance vectors (Section 7, DD-156)",
+  "version": "0.12.0",
+  "schema_version": "0.12.0",
+  "fixtures": [
+    {
+      "name": "single-pillar-valid",
+      "description": "Single pillar value is valid",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-PILLAR-002",
+      "requirement_ids": ["WIRE02-PILLAR-002"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "pillar-valid-001",
+          "pillars": ["commerce"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "multi-pillar-sorted-valid",
+      "description": "Multiple pillars in ascending order are valid",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": ["WIRE02-PILLAR-003", "WIRE02-PILLAR-002"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "pillar-valid-002",
+          "pillars": ["commerce", "compliance"]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "all-pillars-sorted-valid",
+      "description": "All 10 pillars in ascending lexicographic order are valid",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": ["WIRE02-PILLAR-003", "WIRE02-PILLAR-002"],
+      "status": "boundary",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "pillar-valid-003",
+          "pillars": [
+            "access",
+            "attribution",
+            "commerce",
+            "compliance",
+            "consent",
+            "identity",
+            "privacy",
+            "provenance",
+            "purpose",
+            "safety"
+          ]
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "reject-unknown-pillar",
+      "description": "Unknown pillar value is rejected (closed vocabulary)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-PILLAR-001",
+      "requirement_ids": ["WIRE02-PILLAR-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "pillar-invalid-001",
+          "pillars": ["finance"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "reject-unsorted-pillars",
+      "description": "Pillars not in ascending order are rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-PILLAR-003",
+      "requirement_ids": ["WIRE02-PILLAR-003"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "pillar-invalid-002",
+          "pillars": ["compliance", "commerce"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_PILLARS_NOT_SORTED"
+      }
+    },
+    {
+      "name": "reject-duplicate-pillars",
+      "description": "Duplicate pillar values are rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-PILLAR-004",
+      "requirement_ids": ["WIRE02-PILLAR-004", "WIRE02-PILLAR-003"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "pillar-invalid-003",
+          "pillars": ["commerce", "commerce"]
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_PILLARS_NOT_SORTED"
+      }
+    },
+    {
+      "name": "reject-empty-pillars-array",
+      "description": "Empty pillars array is rejected (must have at least one element)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-PILLAR-002",
+      "requirement_ids": ["WIRE02-PILLAR-002"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "pillar-invalid-004",
+          "pillars": []
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
+    }
+  ]
+}

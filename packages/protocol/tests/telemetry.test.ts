@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { issue } from '../src/issue.js';
+import { issueWire01 } from '../src/issue.js';
 import { generateKeypair } from '@peac/crypto';
 import type { TelemetryHook } from '../src/telemetry.js';
 
@@ -19,7 +19,7 @@ describe('Protocol Telemetry Hooks', () => {
       const onReceiptIssued = vi.fn();
       const telemetry: TelemetryHook = { onReceiptIssued };
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://resource.example.com',
         amt: 100,
@@ -44,7 +44,7 @@ describe('Protocol Telemetry Hooks', () => {
     it('should not emit telemetry when hook is not provided', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://resource.example.com',
         amt: 100,
@@ -66,7 +66,7 @@ describe('Protocol Telemetry Hooks', () => {
       });
       const telemetry: TelemetryHook = { onReceiptIssued };
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://resource.example.com',
         amt: 100,
@@ -86,7 +86,7 @@ describe('Protocol Telemetry Hooks', () => {
       const onReceiptIssued = vi.fn(() => Promise.reject(new Error('Telemetry async error')));
       const telemetry: TelemetryHook = { onReceiptIssued };
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://resource.example.com',
         amt: 100,
@@ -108,7 +108,7 @@ describe('Protocol Telemetry Hooks', () => {
       const onReceiptIssued = vi.fn();
       const telemetry: TelemetryHook = { onReceiptIssued };
 
-      await issue({
+      await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://resource.example.com',
         amt: 100,
@@ -131,7 +131,7 @@ describe('Protocol Telemetry Hooks', () => {
       const onReceiptIssued = vi.fn();
       const telemetry: TelemetryHook = { onReceiptIssued };
 
-      await issue({
+      await issueWire01({
         iss: 'https://api1.example.com',
         aud: 'https://resource.example.com',
         amt: 100,
@@ -143,7 +143,7 @@ describe('Protocol Telemetry Hooks', () => {
         telemetry,
       });
 
-      await issue({
+      await issueWire01({
         iss: 'https://api2.example.com',
         aud: 'https://resource.example.com',
         amt: 200,

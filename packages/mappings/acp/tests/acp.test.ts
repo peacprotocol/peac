@@ -9,7 +9,7 @@ import {
   extractReceiptFromACPResponse,
   type ACPCheckoutSuccess,
 } from '../src/index';
-import { issue } from '../../../protocol/src/issue';
+import { issueWire01 } from '../../../protocol/src/issue';
 import { generateKeypair } from '../../../crypto/src/jws';
 
 describe('ACP integration', () => {
@@ -127,7 +127,7 @@ describe('ACP integration', () => {
       const { privateKey } = await generateKeypair();
 
       // Issue PEAC receipt
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://merchant.example.com',
         aud: 'https://api.example.com',
         amt: receiptInput.amt,
@@ -174,7 +174,7 @@ describe('ACP integration', () => {
       const { privateKey } = await generateKeypair();
 
       // Issue PEAC receipt
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://merchant.example.com',
         aud: 'https://api.example.com',
         amt: receiptInput.amt,

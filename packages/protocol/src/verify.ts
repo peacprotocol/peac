@@ -35,7 +35,9 @@ function jwkToPublicKey(jwk: JWK): Uint8Array {
 }
 
 /**
- * Verification result
+ * Wire 0.1 verification result.
+ * @deprecated Wire 0.1 is frozen legacy. Use {@link verifyLocal} (from `verify-local.ts`)
+ * for the current stable format.
  */
 export interface VerifyResult {
   /** Verification succeeded */
@@ -55,7 +57,8 @@ export interface VerifyResult {
 }
 
 /**
- * Verification failure
+ * Wire 0.1 verification failure.
+ * @deprecated Wire 0.1 is frozen legacy. Use {@link verifyLocal} for the current stable format.
  */
 export interface VerifyFailure {
   /** Verification failed */
@@ -69,7 +72,8 @@ export interface VerifyFailure {
 }
 
 /**
- * Options for verifying a receipt
+ * Wire 0.1 verification options.
+ * @deprecated Wire 0.1 is frozen legacy. Use {@link verifyLocal} for the current stable format.
  */
 export interface VerifyOptions {
   /** JWS compact serialization */
@@ -83,10 +87,13 @@ export interface VerifyOptions {
 }
 
 /**
- * Verify a PEAC receipt JWS
+ * Verify a Wire 0.1 PEAC receipt JWS via issuer-config discovery.
  *
  * Uses strict issuer-config discovery: peac-issuer.json -> jwks_uri -> JWKS.
  * No fallback to peac.txt or direct JWKS endpoints.
+ *
+ * @deprecated Wire 0.1 is frozen legacy. Use {@link verifyLocal} for the current stable
+ * format (Interaction Record format, `interaction-record+jwt`).
  *
  * @param optionsOrJws - Verify options or JWS compact serialization (for backwards compatibility)
  * @returns Verification result or failure

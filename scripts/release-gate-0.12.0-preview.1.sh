@@ -36,7 +36,11 @@ run_gate "test" pnpm test
 echo ""
 echo "--- Guards ---"
 run_gate "guard" bash scripts/guard.sh
-run_gate "planning-leak" bash scripts/check-planning-leak.sh
+if [ -f scripts/check-planning-leak.sh ]; then
+  run_gate "planning-leak" bash scripts/check-planning-leak.sh
+else
+  echo "  SKIP planning-leak (local-only script)"
+fi
 run_gate "format" pnpm format:check
 
 # Gate 8: Layer boundary

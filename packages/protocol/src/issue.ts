@@ -37,9 +37,12 @@ import {
 import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 
 /**
- * Options for issuing a receipt
+ * Wire 0.1 receipt options (frozen legacy).
+ *
+ * @deprecated Use {@link IssueWire02Options} (or the {@link IssueOptions} alias)
+ * for current stable issuance.
  */
-export interface IssueOptions {
+export interface IssueWire01Options {
   /** Issuer URL (https://) */
   iss: string;
 
@@ -163,14 +166,14 @@ export class IssueError extends Error {
 /**
  * Issue a Wire 0.1 PEAC receipt.
  *
- * @deprecated Use {@link issueWire02} for Wire 0.2 receipts. Wire 0.1 issuance is deprecated
- * and will be removed in a future major version.
+ * @deprecated Wire 0.1 issuance is frozen legacy. Use {@link issue} (current stable format)
+ * or {@link issueWire02} (explicit wire-pinned API) for Wire 0.2 receipts.
  *
- * @param options - Receipt options
+ * @param options - Wire 0.1 receipt options
  * @returns Issue result with JWS and optional subject_snapshot
  * @throws IssueError if evidence contains non-JSON-safe values
  */
-export async function issue(options: IssueOptions): Promise<IssueResult> {
+export async function issueWire01(options: IssueWire01Options): Promise<IssueResult> {
   // Validate URLs
   if (!options.iss.startsWith('https://')) {
     throw new Error('Issuer URL must start with https://');
@@ -352,17 +355,31 @@ export async function issue(options: IssueOptions): Promise<IssueResult> {
 }
 
 /**
- * Issue a PEAC receipt and return just the JWS string
+ * Issue a Wire 0.1 PEAC receipt and return just the JWS string
  *
- * Convenience wrapper for common header-centric flows where only the JWS is needed.
- * For access to validated subject_snapshot, use issue() instead.
+ * @deprecated Wire 0.1 issuance is frozen legacy. Use {@link issue} for the current stable format.
  *
- * @param options - Receipt options
+ * @param options - Wire 0.1 receipt options
  * @returns JWS compact serialization
  */
-export async function issueJws(options: IssueOptions): Promise<string> {
-  const result = await issue(options);
+export async function issueJws(options: IssueWire01Options): Promise<string> {
+  const result = await issueWire01(options);
   return result.jws;
+}
+
+/**
+ * Issue a PEAC receipt in the current stable public format.
+ *
+ * This is the canonical public issuance API. It issues Wire 0.2 receipts
+ * (`typ: interaction-record+jwt`). For an explicit wire-pinned API, use
+ * {@link issueWire02} directly.
+ *
+ * @param options - Receipt options (same as {@link IssueWire02Options})
+ * @returns Issue result with JWS
+ * @throws IssueError if iss is not canonical or schema validation fails
+ */
+export async function issue(options: IssueWire02Options): Promise<IssueResult> {
+  return issueWire02(options);
 }
 
 // ---------------------------------------------------------------------------
@@ -430,7 +447,18 @@ export interface IssueWire02Options {
 }
 
 /**
- * Issue a Wire 0.2 receipt
+ * Canonical issuance options type.
+ *
+ * Alias for {@link IssueWire02Options}: the current stable receipt format.
+ */
+export type IssueOptions = IssueWire02Options;
+
+/**
+ * Issue a Wire 0.2 receipt (explicit wire-pinned API).
+ *
+ * Most callers should use {@link issue} instead, which delegates here.
+ * Use `issueWire02` directly for conformance tests, benchmarks, and
+ * callers that need explicit wire version pinning.
  *
  * Validates the iss canonical form and Wire02ClaimsSchema before signing.
  * Always sets typ to 'interaction-record+jwt' (WIRE_02_JWS_TYP).

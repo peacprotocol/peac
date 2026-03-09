@@ -1,0 +1,84 @@
+{
+  "$comment": "Protocol-level test mappings for requirements not provable by fixtures alone",
+  "version": "0.12.0",
+  "mappings": [
+    {
+      "requirement_id": "WIRE02-VALID-001",
+      "test_file": "packages/protocol/__tests__/verify-local-order.test.ts",
+      "test_description": "Steps MUST be performed in specified order",
+      "notes": "Validation order proven by step-precedence assertions"
+    },
+    {
+      "requirement_id": "WIRE02-VALID-002",
+      "test_file": "packages/protocol/__tests__/verify-local-order.test.ts",
+      "test_description": "Hard error MUST terminate validation immediately",
+      "notes": "Step 1 signature fail before Step 4 schema parse"
+    },
+    {
+      "requirement_id": "WIRE02-VALID-003",
+      "test_file": "packages/protocol/__tests__/verify-local-order.test.ts",
+      "test_description": "Verifier MUST NOT continue after hard error",
+      "notes": "No subsequent step effects observable after hard error"
+    },
+    {
+      "requirement_id": "WIRE02-VALID-007",
+      "test_file": "packages/protocol/__tests__/verify-local-order.test.ts",
+      "test_description": "Step 3 kernel constraints fail before Step 7 issuer binding",
+      "notes": "Constraint violation takes precedence over issuer mismatch"
+    },
+    {
+      "requirement_id": "WIRE02-STRICT-001",
+      "test_file": "packages/protocol/tests/verify-local.test.ts",
+      "test_description": "Strict profile enforces typ presence",
+      "notes": "Existing test coverage in verify-local.test.ts"
+    },
+    {
+      "requirement_id": "WIRE02-STRICT-002",
+      "test_file": "packages/protocol/tests/verify-local.test.ts",
+      "test_description": "Strict profile enforces recognized typ value",
+      "notes": "Existing test coverage in verify-local.test.ts"
+    },
+    {
+      "requirement_id": "WIRE02-WARN-007",
+      "test_file": "packages/protocol/__tests__/verify-local-wire-02-warnings.test.ts",
+      "test_description": "Warnings MUST be sorted by (pointer, code)",
+      "notes": "Warning sort order verified in existing warning test suite"
+    },
+    {
+      "requirement_id": "WIRE02-WARN-001",
+      "test_file": "packages/protocol/__tests__/verify-local-wire-02-warnings.test.ts",
+      "test_description": "Warning code is REQUIRED on every VerificationWarning object",
+      "notes": "All warning emissions include code field; property tests confirm structure"
+    },
+    {
+      "requirement_id": "WIRE02-WARN-002",
+      "test_file": "packages/protocol/__tests__/verify-local-wire-02-warnings.test.ts",
+      "test_description": "Warning message is REQUIRED on every VerificationWarning object",
+      "notes": "All warning emissions include message field; property tests confirm structure"
+    },
+    {
+      "requirement_id": "WIRE02-DUAL-001",
+      "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
+      "test_description": "typ/peac_version coherence enforced after routing",
+      "notes": "Property test: JOSE hardening applies regardless of strictness; coherence checked in crypto layer"
+    },
+    {
+      "requirement_id": "WIRE02-DUAL-002",
+      "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
+      "test_description": "Wire 0.1 route MUST NOT contain peac_version 0.2",
+      "notes": "Crypto layer rejects typ=peac-receipt/0.1 with peac_version=0.2 (E_WIRE_VERSION_MISMATCH)"
+    },
+    {
+      "requirement_id": "WIRE02-DUAL-003",
+      "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
+      "test_description": "Wire 0.2 route MUST contain peac_version 0.2",
+      "notes": "Crypto layer rejects typ=interaction-record+jwt without peac_version=0.2 (E_WIRE_VERSION_MISMATCH)"
+    },
+    {
+      "requirement_id": "WIRE02-CHAL-002",
+      "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
+      "test_description": "Challenge problem.type is REQUIRED (RFC 9457)",
+      "notes": "Schema validation rejects challenge extension without problem.type; confirmed by fixture and property test"
+    }
+  ]
+}

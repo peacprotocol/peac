@@ -81,10 +81,10 @@ describe('integration/lifecycle', () => {
   it('handler result matches expected shape', async () => {
     const { handleDecode } = await import('../../src/handlers/decode.js');
     const { generateKeypair } = await import('@peac/crypto');
-    const { issue } = await import('@peac/protocol');
+    const { issueWire01 } = await import('@peac/protocol');
 
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,

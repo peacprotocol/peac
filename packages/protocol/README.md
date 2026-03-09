@@ -22,11 +22,16 @@ const { publicKey, privateKey } = await generateKeypair();
 
 const { jws } = await issue({
   iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 100,
-  cur: 'USD',
-  rail: 'stripe',
-  reference: 'pi_abc123',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '10000',
+      currency: 'USD',
+    },
+  },
   privateKey,
   kid: 'key-2026-02',
 });
@@ -39,10 +44,10 @@ import { verifyLocal } from '@peac/protocol';
 
 const result = await verifyLocal(jws, publicKey);
 
-if (result.valid && result.variant === 'commerce') {
+if (result.valid && result.wireVersion === '0.2') {
   console.log(result.claims.iss); // issuer
-  console.log(result.claims.amt); // amount
-  console.log(result.claims.cur); // currency
+  console.log(result.claims.kind); // evidence
+  console.log(result.claims.type); // org.peacprotocol/payment
 } else if (!result.valid) {
   console.log(result.code, result.message);
 }
@@ -50,16 +55,23 @@ if (result.valid && result.variant === 'commerce') {
 
 ## How Do I Verify with JWKS Discovery?
 
+> **Note:** `verifyReceipt()` is deprecated (Wire 0.1 only). For Wire 0.2 receipts,
+> resolve the issuer's JWKS manually and pass the public key to `verifyLocal()`.
+> Automated JWKS discovery for Wire 0.2 is planned for a future release.
+
 ```typescript
-import { verifyReceipt } from '@peac/protocol';
+import { verifyLocal } from '@peac/protocol';
 
-// Resolves issuer's /.well-known/peac-issuer.json -> jwks_uri -> public key
-const result = await verifyReceipt(jws);
+// 1. Resolve issuer's /.well-known/peac-issuer.json -> jwks_uri -> public key
+// 2. Pass the resolved key to verifyLocal()
+const result = await verifyLocal(jws, resolvedPublicKey, {
+  issuer: 'https://api.example.com',
+});
 
-if (result.ok) {
+if (result.valid) {
   console.log('Issuer:', result.claims.iss);
 } else {
-  console.log(result.reason, result.details);
+  console.log(result.code, result.message);
 }
 ```
 

@@ -114,16 +114,22 @@ Create a PEAC receipt, attestation, or dispute bundle for the agent interaction.
 ```typescript
 import { issue } from '@peac/protocol';
 
-const receipt = await issue({
-  issuer: 'https://api.example.com',
-  audience: 'https://agent.example.com',
-  subject: 'https://api.example.com/v1/weather',
-  payment: {
-    rail: 'x402',
-    asset: 'USDC',
-    amount: '100',
-    reference: '0xTransactionHash...',
+const { jws } = await issue({
+  iss: 'https://api.example.com',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'x402',
+      amount_minor: '10000',
+      currency: 'USD',
+      asset: 'USDC',
+      reference: '0xTransactionHash...',
+    },
   },
+  privateKey,
+  kid: 'key-2026-01',
 });
 ```
 

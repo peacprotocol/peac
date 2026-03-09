@@ -16,7 +16,7 @@
  *   1 - Error or missing argument
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -130,7 +130,7 @@ for (const pkg of workspacePackages) {
 
 // 3. Bump publish-manifest.json
 const manifestPath = join(__dirname, 'publish-manifest.json');
-if (existsSync(manifestPath)) {
+try {
   const raw = readFileSync(manifestPath, 'utf-8');
   const manifest = JSON.parse(raw);
   const oldManifestVersion = manifest.version;
@@ -144,6 +144,8 @@ if (existsSync(manifestPath)) {
   if (oldManifestVersion !== version) {
     console.log(`  publish-manifest.json: ${oldManifestVersion} -> ${version}`);
   }
+} catch {
+  // publish-manifest.json not found; skip
 }
 
 // 4. Bump MCP server distribution surface files (server.json, manifest.json)
@@ -153,9 +155,12 @@ const mcpSurfaceFiles = [
 ];
 
 for (const surfacePath of mcpSurfaceFiles) {
-  if (!existsSync(surfacePath)) continue;
-
-  const raw = readFileSync(surfacePath, 'utf-8');
+  let raw;
+  try {
+    raw = readFileSync(surfacePath, 'utf-8');
+  } catch {
+    continue;
+  }
   const surface = JSON.parse(raw);
   const fileName = relative(ROOT, surfacePath);
   let changed = false;
@@ -182,6 +187,165 @@ for (const surfacePath of mcpSurfaceFiles) {
       writeFileSync(surfacePath, JSON.stringify(surface, null, indent) + '\n');
     }
     console.log(`  ${fileName}: bumped to ${version}`);
+  }
+}
+
+console.log('');
+console.log(`Bumped: ${bumped} packages`);
+console.log(`Already current: ${alreadyCurrent}`);
+console.log(`Skipped examples (0.0.0): ${skippedExamples}`);
+
+if (exampleErrors > 0) {
+  console.log('');
+  console.error(`FAIL: ${exampleErrors} example(s) have non-0.0.0 versions`);
+}
+
+if (dryRun) {
+  console.log('');
+  console.log('(dry run -- no files written)');
+}
+
+// 5. Bump spec JSON files that embed a version field
+const specVersionFiles = [
+  join(ROOT, 'specs/kernel/errors.json'),
+  join(ROOT, 'specs/kernel/error-categories.json'),
+  join(ROOT, 'docs/releases/current.json'),
+];
+
+// Recursively find all JSON files in a directory
+function findJsonFiles(dir) {
+  const results = [];
+  try {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        results.push(...findJsonFiles(fullPath));
+      } else if (entry.name.endsWith('.json')) {
+        results.push(fullPath);
+      }
+    }
+  } catch {
+    // dir not found
+  }
+  return results;
+}
+
+// Glob all JSON files in specs/conformance/ (fixtures, registry, test-mappings, etc.)
+const conformanceJsonFiles = findJsonFiles(join(ROOT, 'specs/conformance'));
+
+for (const specPath of [...specVersionFiles, ...conformanceJsonFiles]) {
+  let raw;
+  try {
+    raw = readFileSync(specPath, 'utf-8');
+  } catch {
+    continue;
+  }
+  const data = JSON.parse(raw);
+  const relName = relative(ROOT, specPath);
+  let changed = false;
+
+  if (data.version && data.version !== version) {
+    data.version = version;
+    changed = true;
+  }
+  if (data.schema_version && data.schema_version !== version) {
+    data.schema_version = version;
+    changed = true;
+  }
+  if (data.errors_version && data.errors_version !== version) {
+    data.errors_version = version;
+    changed = true;
+  }
+
+  if (changed && !dryRun) {
+    const indent = raw.match(/^(\s+)"/m)?.[1] || '  ';
+    writeFileSync(specPath, JSON.stringify(data, null, indent) + '\n');
+    console.log(`  ${relName}: bumped to ${version}`);
+  }
+}
+
+// 6. Bump VERSION constant in conformance tooling scripts
+const buildRegistryPath = join(ROOT, 'scripts/conformance/build-registry.mjs');
+try {
+  const raw = readFileSync(buildRegistryPath, 'utf-8');
+  const updated = raw.replace(
+    /^(const VERSION = ')[^']+(';\s*)$/m,
+    `$1${version}$2`
+  );
+  if (raw !== updated) {
+    if (!dryRun) writeFileSync(buildRegistryPath, updated);
+    console.log(`  scripts/conformance/build-registry.mjs: VERSION bumped to ${version}`);
+  }
+} catch {
+  // script not found
+}
+
+// 7. Regenerate codegen from updated specs (atomic: version bump + codegen are one step)
+if (!dryRun) {
+  console.log('');
+  console.log('Regenerating codegen from updated specs...');
+  try {
+    execFileSync('pnpm', ['exec', 'tsx', 'scripts/codegen-errors.ts'], {
+      cwd: ROOT,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    execFileSync(
+      'pnpm',
+      [
+        'exec',
+        'prettier',
+        '--write',
+        'packages/kernel/src/errors.generated.ts',
+        'packages/kernel/src/error-categories.generated.ts',
+      ],
+      { cwd: ROOT, encoding: 'utf-8', stdio: 'pipe' }
+    );
+    console.log('  Codegen regenerated and formatted.');
+  } catch (_err) {
+    console.error('  WARNING: Codegen regeneration failed. Run manually:');
+    console.error('    pnpm exec tsx scripts/codegen-errors.ts');
+  }
+
+  // 8. Regenerate conformance tooling (registry, inventory, matrix)
+  console.log('Regenerating conformance tooling...');
+  const conformanceScripts = [
+    join(ROOT, 'scripts/conformance/build-registry.mjs'),
+    join(ROOT, 'scripts/conformance/generate-inventory.mjs'),
+    join(ROOT, 'scripts/conformance/generate-matrix.mjs'),
+  ];
+  for (const script of conformanceScripts) {
+    try {
+      execFileSync('node', [script], {
+        cwd: ROOT,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      });
+    } catch {
+      const name = script.split('/').pop();
+      console.error(`  WARNING: ${name} failed. Run manually: node ${relative(ROOT, script)}`);
+    }
+  }
+  console.log('  Conformance tooling regenerated.');
+
+  // 9. Format version-bumped JSON files
+  console.log('Formatting bumped JSON files...');
+  try {
+    execFileSync(
+      'pnpm',
+      [
+        'exec',
+        'prettier',
+        '--write',
+        'packages/mcp-server/manifest.json',
+        'scripts/publish-manifest.json',
+        'docs/releases/current.json',
+      ],
+      { cwd: ROOT, encoding: 'utf-8', stdio: 'pipe' }
+    );
+    console.log('  Formatted.');
+  } catch {
+    console.error('  WARNING: Prettier format failed. Run manually: pnpm format');
   }
 }
 

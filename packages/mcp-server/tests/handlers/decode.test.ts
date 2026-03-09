@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { handleDecode } from '../../src/handlers/decode.js';
 import type { HandlerParams } from '../../src/handlers/types.js';
 import type { DecodeInput } from '../../src/schemas/decode.js';
@@ -21,7 +21,7 @@ function makeParams(input: DecodeInput): HandlerParams<DecodeInput> {
 describe('handlers/decode', () => {
   it('decodes a valid JWS', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -64,7 +64,7 @@ describe('handlers/decode', () => {
 
   it('always sets verified to false', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -81,7 +81,7 @@ describe('handlers/decode', () => {
 
   it('includes formatted text output', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -99,7 +99,7 @@ describe('handlers/decode', () => {
 
   it('returns tool disabled error when decode is disabled by policy', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,
@@ -120,7 +120,7 @@ describe('handlers/decode', () => {
 
   it('returns input too large error when JWS exceeds limit', async () => {
     const { privateKey } = await generateKeypair();
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100,

@@ -13,7 +13,7 @@
  * For production, see: https://x402.peacprotocol.org
  */
 
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { generateKeypair, verify } from '@peac/crypto';
 import { PEACReceiptClaims } from '@peac/schema';
 
@@ -136,7 +136,7 @@ async function simulateX402Payment(
   const paymentTxHash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
 
   // Issue PEAC receipt with x402 evidence
-  const result = await issue({
+  const result = await issueWire01({
     iss: CONFIG.issuerUrl,
     aud: paymentRequest.resource,
     amt: parseInt(paymentRequest.amount),

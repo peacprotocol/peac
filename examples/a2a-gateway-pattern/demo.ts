@@ -3,7 +3,7 @@
  *
  * Demonstrates receipt issuance per A2A task state transition:
  * 1. Declare PEAC support in Agent Card
- * 2. Issue a Wire 0.2 receipt at each state transition (submitted, working, completed)
+ * 2. Issue a receipt at each state transition (submitted, working, completed)
  * 3. Attach receipts to A2A TaskStatus metadata via carrier contract
  * 4. Extract and verify the full receipt chain
  *
@@ -18,7 +18,7 @@ import {
   hasPeacExtension,
   type A2ATaskStatusLike,
 } from '@peac/mappings-a2a';
-import { issueWire02, verifyLocal } from '@peac/protocol';
+import { issue, verifyLocal } from '@peac/protocol';
 import { computeReceiptRef } from '@peac/schema';
 
 import agentCard from './agent-card.json' with { type: 'json' };
@@ -57,8 +57,8 @@ const allCarriers: PeacEvidenceCarrier[] = [];
 for (const transition of transitions) {
   taskStatus.state = transition.state;
 
-  // Issue Wire 0.2 receipt for this transition
-  const { jws } = await issueWire02({
+  // Issue receipt for this transition
+  const { jws } = await issue({
     iss: gateway,
     kind: 'evidence',
     type: 'org.peacprotocol/payment',

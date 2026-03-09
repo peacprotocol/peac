@@ -13,7 +13,7 @@ import {
   SimpleSpanProcessor,
   ConsoleSpanExporter,
 } from '@opentelemetry/sdk-trace-base';
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { generateKeypair } from '@peac/crypto';
 import { setTelemetryProvider } from '@peac/telemetry';
 import { createOtelProvider } from '@peac/telemetry-otel';
@@ -61,7 +61,7 @@ async function issueReceiptWithTracing(): Promise<void> {
     try {
       console.log('[Demo] Issuing receipt...');
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://shop.example.com',
         amt: 1999, // $19.99 in cents

@@ -19,7 +19,7 @@ import {
   type PolicyDocument,
   type EvaluationContext,
 } from '@peac/policy-kit';
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { generateKeypair, verify } from '@peac/crypto';
 import { toCoreClaims, PEACReceiptClaims } from '@peac/schema';
 
@@ -177,7 +177,7 @@ async function demonstrateReceiptFlow() {
   const { privateKey, publicKey } = await generateKeypair();
 
   // Crawler issues receipt (in real scenario, this comes from payment provider)
-  const receiptResult = await issue({
+  const receiptResult = await issueWire01({
     iss: 'https://payment.example.com',
     aud: 'https://publisher.example.com/content/article-123',
     amt: 100, // $1.00

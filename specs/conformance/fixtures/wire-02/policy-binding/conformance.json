@@ -1,0 +1,164 @@
+{
+  "$comment": "Wire 0.2 Policy Binding conformance vectors (Section 11, DD-49/DD-156)",
+  "version": "0.12.0",
+  "schema_version": "0.12.0",
+  "fixtures": [
+    {
+      "name": "policy-binding-verified",
+      "description": "Matching receipt and local policy digests produce verified state",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": ["WIRE02-POLICY-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "policy-valid-001",
+          "policy": {
+            "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "verify_options": {
+          "policyDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "policy_binding": "verified"
+      }
+    },
+    {
+      "name": "policy-binding-failed",
+      "description": "Mismatching digests produce E_POLICY_BINDING_FAILED",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": ["WIRE02-POLICY-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "policy-invalid-001",
+          "policy": {
+            "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "verify_options": {
+          "policyDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_POLICY_BINDING_FAILED"
+      }
+    },
+    {
+      "name": "policy-binding-unavailable-no-receipt-digest",
+      "description": "Absent receipt digest produces unavailable state",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": ["WIRE02-POLICY-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "policy-valid-002"
+        },
+        "verify_options": {
+          "policyDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "policy_binding": "unavailable"
+      }
+    },
+    {
+      "name": "policy-binding-unavailable-no-local-digest",
+      "description": "Absent local digest produces unavailable state",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-POLICY-001",
+      "requirement_ids": ["WIRE02-POLICY-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "policy-valid-003",
+          "policy": {
+            "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "expected": {
+        "valid": true,
+        "policy_binding": "unavailable"
+      }
+    },
+    {
+      "name": "policy-uri-https-valid",
+      "description": "policy.uri with https:// is accepted",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-POLICY-002",
+      "requirement_ids": ["WIRE02-POLICY-002"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "policy-valid-004",
+          "policy": {
+            "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "uri": "https://example.com/policies/v1"
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "policy-with-version-valid",
+      "description": "policy block with optional version label is accepted",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-POLICY-002",
+      "requirement_ids": ["WIRE02-POLICY-002"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "policy-valid-005",
+          "policy": {
+            "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "uri": "https://example.com/policies/v2",
+            "version": "2.0.0"
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    }
+  ]
+}

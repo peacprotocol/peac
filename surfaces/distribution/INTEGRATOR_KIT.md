@@ -23,11 +23,11 @@ npx tsx demo.ts
 
 Expected output:
 
-```
-Receipt JWS: eyJ0eXAiOiJwZWFjLXJlY2VpcHQvMC4x...
+```text
+Receipt JWS: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJl...
 Valid: true
 Issuer: https://api.example.com
-Amount: 100 USD
+Kind: evidence
 ```
 
 ## 5-Line Integration
@@ -39,11 +39,16 @@ import { issue, verifyLocal } from '@peac/protocol';
 const { publicKey, privateKey } = await generateKeypair();
 const { jws } = await issue({
   iss: 'https://api.example.com',
-  aud: 'https://client.example.com',
-  amt: 100,
-  cur: 'USD',
-  rail: 'stripe',
-  reference: 'tx_123',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '10000',
+      currency: 'USD',
+    },
+  },
   privateKey,
   kid: 'k1',
 });
@@ -60,7 +65,7 @@ const result = await verifyLocal(jws, publicKey);
 | `@peac/adapter-x402`             | x402 evidence adapter         | [@peac/adapter-x402](https://www.npmjs.com/package/@peac/adapter-x402)                         |
 | `@peac/mappings-content-signals` | robots.txt/AIPREF/TDM parsing | [@peac/mappings-content-signals](https://www.npmjs.com/package/@peac/mappings-content-signals) |
 
-28 packages total on npm. Full list: [GitHub](https://github.com/peacprotocol/peac).
+Full package list: see `scripts/publish-manifest.json` or [GitHub](https://github.com/peacprotocol/peac).
 
 ## Transport Mappings
 

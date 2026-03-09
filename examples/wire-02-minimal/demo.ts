@@ -1,12 +1,12 @@
 /**
- * Wire 0.2 Minimal Example
+ * Minimal Issuance Example
  *
- * Issues a Wire 0.2 evidence receipt with commerce extension,
+ * Issues an evidence receipt with commerce extension,
  * verifies it locally, and prints the result.
  */
 
 import { generateKeypair } from '@peac/crypto';
-import { issueWire02, verifyLocal } from '@peac/protocol';
+import { issue, verifyLocal } from '@peac/protocol';
 import { getCommerceExtension } from '@peac/schema';
 
 async function main() {
@@ -14,8 +14,8 @@ async function main() {
   const { privateKey, publicKey } = await generateKeypair();
   const kid = new Date().toISOString();
 
-  // Issue a Wire 0.2 evidence receipt
-  const { jws } = await issueWire02({
+  // Issue an evidence receipt
+  const { jws } = await issue({
     iss: 'https://api.example.com',
     kind: 'evidence',
     type: 'org.peacprotocol/payment',
@@ -31,7 +31,7 @@ async function main() {
     kid,
   });
 
-  console.log('Issued Wire 0.2 receipt');
+  console.log('Issued receipt');
   console.log('JWS length:', jws.length);
 
   // Verify locally

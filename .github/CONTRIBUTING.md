@@ -10,7 +10,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ### Prerequisites
 
-- Node.js >= 22.0.0 (pinned in `.node-version`; Node 20 EOL is 2026-04-30)
+- Node.js >= 22.0.0 (pinned in `.node-version`; Node 24 is primary CI target per DD-161)
 - pnpm >= 8.0.0
 - Git with proper configuration
 

@@ -40,6 +40,7 @@ function findJsonFiles(dir) {
     } else if (
       entry.name.endsWith('.json') &&
       entry.name !== 'manifest.json' &&
+      entry.name !== 'inventory.json' &&
       !entry.name.endsWith('.schema.json')
     ) {
       results.push(fullPath);

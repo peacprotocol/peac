@@ -127,6 +127,8 @@ This check ensures the fetched content matches the content-addressed reference. 
 
 Protocol-specific mapping packages implement `CarrierAdapter<TInput, TOutput>` to bridge between the carrier envelope and the protocol's native message format.
 
+<!-- peac:validate typescript -->
+
 ```typescript
 interface CarrierAdapter<TInput, TOutput> {
   extract(input: TInput): { receipts: PeacEvidenceCarrier[]; meta: CarrierMeta } | null;
@@ -246,6 +248,8 @@ Each transport has a maximum carrier size. These limits are defined in `CARRIER_
 
 Carriers are placed in the `_meta` object of JSON-RPC responses using reverse-DNS keys:
 
+<!-- peac:validate json -->
+
 ```json
 {
   "_meta": {
@@ -267,6 +271,8 @@ New `attachReceiptToMeta()` defaults to the v0.11.1 `_meta` carrier format with 
 ### 7.2 A2A
 
 Carriers are placed in the `metadata` map of A2A messages using the PEAC extension URI as the key:
+
+<!-- peac:validate json -->
 
 ```json
 {

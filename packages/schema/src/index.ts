@@ -1,12 +1,12 @@
 /**
  * PEAC Protocol Schema Package
  *
- * Dual-stack: Wire 0.1 (peac-receipt/0.1, stable) + Wire 0.2 preview
- * (interaction-record+jwt, v0.12.0-preview.1+, next tag).
+ * Dual-stack: Wire 0.1 (peac-receipt/0.1, frozen legacy) + Interaction Record
+ * format (interaction-record+jwt, current stable on `latest`).
  *
- * Wire 0.1 remains fully supported and stable. All existing Wire 0.1 schemas,
- * validators, and helpers are unchanged. Wire 0.2 types are additive exports
- * and do not affect Wire 0.1 parsing or validation.
+ * Wire 0.1 schemas, validators, and helpers are preserved for backward
+ * compatibility. The Interaction Record format types are the current stable
+ * public surface.
  */
 
 // Core envelope and types

@@ -138,7 +138,7 @@ echo "== forbid npm invocations =="
 # net-node test-pack-install (tests published package in clean npm project),
 # capture-core test-exports (tests consumer exports resolution),
 # publish workflow (npm install for OIDC), docs/release (npm publish docs), publish-manifest (description)
-NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|packages/.*/README\.md|(docs/)?RELEASING\.md|CHANGELOG\.md|docs/ROADMAP\.md|docs/maintainers/(RELEASING|NPM_PUBLISH).*\.md|docs/guides/edge/|docs/release/|scripts/(guard\.sh|pack-smoke\.mjs|pack-.*\.sh|otel-smoke\.sh|check-readme-consistency\.sh|publish-manifest\.json)|packages/net/node/scripts/test-pack-install\.mjs|packages/capture/core/scripts/test-exports\.mjs|\.github/workflows/(publish|promote-latest|publish-mcp-registry)\.yml|integrator-kits/|surfaces/distribution/|llms\.txt|examples/hello-world/)'
+NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|packages/.*/README\.md|(docs/)?RELEASING\.md|CHANGELOG\.md|docs/ROADMAP\.md|docs/maintainers/(RELEASING|NPM_PUBLISH|RELEASE-INTEGRITY|SECURITY-POSTURE).*\.md|docs/(VERIFY-RELEASE|guides/edge/|release/)|scripts/(guard\.sh|pack-smoke\.mjs|pack-.*\.sh|otel-smoke\.sh|check-readme-consistency\.sh|publish-manifest\.json|setup-trusted-publishing\.sh|release/pack-install-smoke(-registry)?\.sh)|packages/net/node/scripts/test-pack-install\.mjs|packages/capture/core/scripts/test-exports\.mjs|\.github/workflows/(publish|promote-latest|publish-mcp-registry)\.yml|integrator-kits/|surfaces/distribution/|llms\.txt|examples/hello-world/)'
 if gg_wb n '\bnpm (run|ci|install|pack|publish)\b' '(^|[^[:alnum:]_])npm (run|ci|install|pack|publish)([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else
@@ -243,14 +243,8 @@ else
   echo "SKIP: scripts/check-json-dupes.mjs not found"
 fi
 
-echo "== forbid x403 typo (must be x402) =="
-# x403 is a common typo for x402; catch it before it leaks into code or docs
-if git grep -n 'x403' -- ':!node_modules' ':!archive/**' ':!scripts/guard.sh' ':!scripts/check-planning-leak.sh' ':!CHANGELOG.md' | grep .; then
-  echo "FAIL: Found 'x403' -- did you mean 'x402'?"
-  bad=1
-else
-  echo "OK"
-fi
+# x403 typo check moved to local-only scripts (check-planning-leak.sh, commit-msg hook)
+# to avoid circular exclusion lists in tracked guard scripts
 
 echo "== discovery surface drift =="
 # Prevent protocol verifier code from bypassing peac-issuer.json and fetching JWKS directly.
@@ -413,6 +407,19 @@ else
   echo "OK"
 fi
 
+echo "== interop-strictness-audit =="
+# Production code must not reach interop mode without explicit opt-in.
+# Test files using strictness: 'interop' must be marked with @interop-test in a comment.
+printf "%-50s" "Interop strictness audit..."
+INTEROP_PROD=$(git grep -rn "strictness.*interop\|interop.*strictness" -- 'packages/*/src/' --include='*.ts' 2>/dev/null | grep -v 'type\|interface\|VerificationStrictness\|@deprecated\|comment\|doc\|/\*\|//\|\.d\.ts' || true)
+if [ -n "$INTEROP_PROD" ]; then
+  echo "FAIL: production code references interop strictness without type guard:"
+  echo "$INTEROP_PROD"
+  bad=1
+else
+  echo "OK"
+fi
+
 echo "== release-state-coherence (committed artifacts) =="
 # Verify committed release manifest agrees with committed source-of-truth files.
 # This section checks ONLY committed artifacts (CI-visible), not gitignored reference docs.
@@ -459,6 +466,93 @@ if [ -f "$RELEASE_MANIFEST" ]; then
   fi
 else
   echo "SKIP: $RELEASE_MANIFEST not found"
+fi
+
+# ---------- Conformance coverage ----------
+printf "%-50s" "Conformance coverage..."
+if [ -f "scripts/conformance/check-matrix.mjs" ]; then
+  if node scripts/conformance/check-matrix.mjs > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    node scripts/conformance/check-matrix.mjs 2>&1 || true
+    bad=1
+  fi
+else
+  echo "SKIP: check-matrix.mjs not found"
+fi
+
+printf "%-50s" "Fixture inventory freshness..."
+if [ -f "scripts/conformance/generate-inventory.mjs" ]; then
+  if node scripts/conformance/generate-inventory.mjs --check > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL: inventory.json is stale (run: node scripts/conformance/generate-inventory.mjs)"
+    bad=1
+  fi
+else
+  echo "SKIP: generate-inventory.mjs not found"
+fi
+
+printf "%-50s" "Test-mapping path existence..."
+if [ -f "specs/conformance/test-mappings.json" ]; then
+  tm_bad=0
+  while IFS= read -r tf; do
+    if [ ! -f "$tf" ]; then
+      echo ""
+      echo "  FAIL: test_file not found: $tf"
+      tm_bad=1
+    fi
+  done < <(node -e "
+    const m = require('./specs/conformance/test-mappings.json');
+    const seen = new Set();
+    for (const e of m.mappings) {
+      if (!seen.has(e.test_file)) { seen.add(e.test_file); console.log(e.test_file); }
+    }
+  ")
+  if [ "$tm_bad" -eq 0 ]; then
+    echo "OK"
+  else
+    bad=1
+  fi
+else
+  echo "SKIP: test-mappings.json not found"
+fi
+
+printf "%-50s" "Requirement registry drift..."
+if [ -f "scripts/conformance/verify-registry-drift.mjs" ]; then
+  if node scripts/conformance/verify-registry-drift.mjs > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    node scripts/conformance/verify-registry-drift.mjs 2>&1 || true
+    bad=1
+  fi
+else
+  echo "SKIP: verify-registry-drift.mjs not found"
+fi
+
+printf "%-50s" "No-fetch audit (DD-55, DD-141)..."
+if pnpm exec vitest run tests/security/no-fetch-audit.test.ts --reporter=dot > /dev/null 2>&1; then
+  echo "OK"
+else
+  echo "FAIL"
+  pnpm exec vitest run tests/security/no-fetch-audit.test.ts --reporter=verbose 2>&1 | tail -10
+  bad=1
+fi
+
+echo ""
+echo -n "== doc-example validation == "
+if [ -f scripts/validate-doc-examples.mjs ]; then
+  if node scripts/validate-doc-examples.mjs > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    node scripts/validate-doc-examples.mjs 2>&1 || true
+    bad=1
+  fi
+else
+  echo "SKIP: validate-doc-examples.mjs not found"
 fi
 
 exit $bad

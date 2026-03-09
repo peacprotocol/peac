@@ -3,7 +3,7 @@ import { mkdtemp, rm, readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { generateKeypair, base64urlDecodeString, verify, sha256Hex } from '@peac/crypto';
-import { issue } from '@peac/protocol';
+import { issueWire01 } from '@peac/protocol';
 import { handleCreateBundle } from '../../src/handlers/bundle.js';
 import type { HandlerParams } from '../../src/handlers/types.js';
 import type { BundleInput } from '../../src/schemas/bundle.js';
@@ -34,7 +34,7 @@ async function createTestReceipts(count: number): Promise<string[]> {
   const { privateKey } = await generateKeypair();
   const receipts: string[] = [];
   for (let i = 0; i < count; i++) {
-    const { jws } = await issue({
+    const { jws } = await issueWire01({
       iss: 'https://api.example.com',
       aud: 'https://client.example.com',
       amt: 100 + i,

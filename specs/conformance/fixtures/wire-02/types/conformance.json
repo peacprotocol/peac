@@ -1,0 +1,297 @@
+{
+  "$comment": "Wire 0.2 Type Grammar conformance vectors (Section 6, DD-156)",
+  "version": "0.12.0",
+  "schema_version": "0.12.0",
+  "fixtures": [
+    {
+      "name": "reverse-dns-valid",
+      "description": "Valid reverse-DNS type: domain with dot and non-empty segment",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001", "WIRE02-TYPE-003"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-valid-001"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "absolute-uri-valid",
+      "description": "Valid absolute URI type: starts with scheme://",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "https://example.com/types/custom",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-valid-002"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reject-no-dot-in-domain",
+      "description": "Domain without dot is rejected (single-label path)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "localhost/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-invalid-001"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "reject-empty-segment",
+      "description": "Empty segment after slash is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-003",
+      "requirement_ids": ["WIRE02-TYPE-003"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.example/",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-invalid-002"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "reject-empty-type",
+      "description": "Empty string is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-invalid-003"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "type-with-underscore-valid",
+      "description": "Underscores permitted in segment: access_decision is valid",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-004",
+      "requirement_ids": ["WIRE02-TYPE-004"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/access_decision",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-valid-003"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unregistered-type-warning",
+      "description": "Unregistered type triggers type_unregistered warning (not error)",
+      "type": "warning",
+      "primary_requirement_id": "WIRE02-TYPE-007",
+      "requirement_ids": ["WIRE02-TYPE-007"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "com.example/custom-flow",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-warn-001"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
+      }
+    },
+    {
+      "name": "boundary-type-max-length",
+      "description": "Type at exactly 256 characters is accepted (boundary)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-001",
+      "requirement_ids": ["WIRE02-TYPE-001"],
+      "status": "boundary",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.example/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-boundary-001"
+        }
+      },
+      "expected": {
+        "valid": true,
+        "warnings": [
+          {
+            "code": "type_unregistered",
+            "pointer": "/type"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reject-domain-special-chars",
+      "description": "Domain with special characters violates MUST match pattern",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-002",
+      "requirement_ids": ["WIRE02-TYPE-002"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.exam!ple/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-invalid-004"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "reject-domain-starts-with-hyphen",
+      "description": "Domain starting with hyphen violates MUST start with alphanumeric",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-005",
+      "requirement_ids": ["WIRE02-TYPE-005", "WIRE02-TYPE-002"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "-org.example/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-invalid-005"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "reject-segment-starts-with-hyphen",
+      "description": "Segment starting with hyphen violates MUST start with alphanumeric",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-006",
+      "requirement_ids": ["WIRE02-TYPE-006"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.example/-payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-invalid-006"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "registered-type-no-warning",
+      "description": "Registered type does not trigger type_unregistered warning",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-TYPE-007",
+      "requirement_ids": ["WIRE02-TYPE-007"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "type-valid-004",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "100",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    }
+  ]
+}

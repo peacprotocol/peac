@@ -140,7 +140,7 @@ jobs:
           node --input-type=module -e "
             const m = await import('./packages/core/dist/index.js');
             const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
-            console.log('Testing with Node.js 20...');
+            console.log('Testing with Node.js...');
             const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
             console.log('[OK] Key generation works');
 

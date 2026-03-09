@@ -1,0 +1,224 @@
+{
+  "$comment": "Wire 0.2 Issuer Canonical Form conformance vectors (Section 8, DD-156)",
+  "version": "0.12.0",
+  "schema_version": "0.12.0",
+  "fixtures": [
+    {
+      "name": "https-issuer-valid",
+      "description": "Valid HTTPS issuer: lowercase origin-only",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-001",
+      "requirement_ids": ["WIRE02-ISS-001", "WIRE02-ISS-004"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "iss-valid-001"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "did-key-issuer-valid",
+      "description": "Valid DID issuer: did:key method",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": ["WIRE02-ISS-005"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "did:key:z6Mkf5rGNPCBq3nT",
+          "iat": 1709500000,
+          "jti": "iss-valid-002"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "did-web-issuer-valid",
+      "description": "Valid DID issuer: did:web method",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-005",
+      "requirement_ids": ["WIRE02-ISS-005"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "did:web:example.com",
+          "iat": 1709500000,
+          "jti": "iss-valid-003"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "reject-http-issuer",
+      "description": "HTTP scheme is rejected (must be HTTPS)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-007",
+      "requirement_ids": ["WIRE02-ISS-007", "WIRE02-ISS-001"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "http://api.example.com",
+          "iat": 1709500000,
+          "jti": "iss-invalid-001"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-uppercase-host",
+      "description": "Uppercase hostname is rejected (must be lowercase ASCII)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-002",
+      "requirement_ids": ["WIRE02-ISS-002"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://Example.com",
+          "iat": 1709500000,
+          "jti": "iss-invalid-002"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-trailing-slash",
+      "description": "Trailing slash is rejected (origin-only, no path)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-004",
+      "requirement_ids": ["WIRE02-ISS-004"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://example.com/",
+          "iat": 1709500000,
+          "jti": "iss-invalid-003"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-default-port",
+      "description": "Explicit default port :443 is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-003",
+      "requirement_ids": ["WIRE02-ISS-003"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://example.com:443",
+          "iat": 1709500000,
+          "jti": "iss-invalid-004"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-userinfo-in-issuer",
+      "description": "Userinfo component is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-004",
+      "requirement_ids": ["WIRE02-ISS-004"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://user@example.com",
+          "iat": 1709500000,
+          "jti": "iss-invalid-005"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-urn-scheme",
+      "description": "URN scheme is rejected (only https and did accepted)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-007",
+      "requirement_ids": ["WIRE02-ISS-007"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "urn:example:receipt",
+          "iat": 1709500000,
+          "jti": "iss-invalid-006"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
+    },
+    {
+      "name": "reject-did-path-in-id",
+      "description": "DID method-specific-id with path separator is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-ISS-006",
+      "requirement_ids": ["WIRE02-ISS-006"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "did:key:z6Mkf5/subpath",
+          "iat": 1709500000,
+          "jti": "iss-invalid-007"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_ISS_NOT_CANONICAL"
+      }
+    }
+  ]
+}

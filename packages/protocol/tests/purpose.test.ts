@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
 import { decode } from '@peac/crypto';
-import { issue } from '../src/issue';
+import { issueWire01 } from '../src/issue';
 import {
   getPurposeHeader,
   setPurposeAppliedHeader,
@@ -32,7 +32,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should include purpose_declared as array for single purpose', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
         purpose: 'train',
@@ -45,7 +45,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should include purpose_declared as array for multiple purposes', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
         purpose: ['train', 'search', 'inference'],
@@ -58,7 +58,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should accept vendor-prefixed purpose tokens', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
         purpose: ['train', 'cf:ai_crawler'],
@@ -71,7 +71,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should omit purpose_declared if not provided', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
       });
@@ -84,7 +84,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           ...baseOptions,
           privateKey,
           purpose: 'TRAIN', // uppercase not allowed
@@ -96,7 +96,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           ...baseOptions,
           privateKey,
           purpose: ['train', 'BAD!', '123invalid'],
@@ -108,7 +108,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           ...baseOptions,
           privateKey,
           purpose: 'undeclared',
@@ -120,7 +120,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           ...baseOptions,
           privateKey,
           purpose: ['train', 'undeclared'],
@@ -133,7 +133,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should include purpose_enforced when provided', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
         purpose: ['train', 'search'],
@@ -149,7 +149,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       const canonical = ['train', 'search', 'user_action', 'inference', 'index'] as const;
 
       for (const purpose of canonical) {
-        const result = await issue({
+        const result = await issueWire01({
           ...baseOptions,
           privateKey,
           purpose: purpose,
@@ -165,7 +165,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           ...baseOptions,
           privateKey,
           purpose: 'cf:ai_crawler',
@@ -178,7 +178,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           ...baseOptions,
           privateKey,
           purpose: 'crawl',
@@ -192,7 +192,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should include purpose_reason when provided', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
         purpose: 'train',
@@ -216,7 +216,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       ] as const;
 
       for (const reason of reasons) {
-        const result = await issue({
+        const result = await issueWire01({
           ...baseOptions,
           privateKey,
           purpose: 'train',
@@ -233,7 +233,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           ...baseOptions,
           privateKey,
           purpose: 'train',
@@ -248,7 +248,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should include all purpose fields when provided', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
         purpose: ['train', 'search'],
@@ -265,7 +265,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should handle user_action purpose correctly', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
         purpose: 'user_action',
@@ -281,7 +281,7 @@ describe('Purpose in issue() (v0.9.24+)', () => {
     it('should preserve unknown vendor tokens in purpose_declared', async () => {
       const { privateKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         ...baseOptions,
         privateKey,
         purpose: ['train', 'acme:custom_purpose', 'vendor:x'],

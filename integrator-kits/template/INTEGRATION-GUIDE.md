@@ -29,15 +29,15 @@ import { issue } from '@peac/protocol';
 
 const { jws } = await issue({
   iss: 'https://your-service.example.com',
-  aud: 'https://consumer.example.com',
-  amt: 1000,
-  cur: 'USD',
-  rail: 'x402',
-  reference: 'tx_abc123',
-  asset: 'USD',
-  env: 'production',
-  evidence: {
-    /* your evidence data */
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'x402',
+      amount_minor: '100000',
+      currency: 'USD',
+    },
   },
   privateKey,
   kid: 'key-2026-01',

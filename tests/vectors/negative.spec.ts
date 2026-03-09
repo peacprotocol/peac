@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { issue } from '../../packages/protocol/src/issue';
+import { issueWire01 } from '../../packages/protocol/src/issue';
 import { verify as jwsVerify, decode, generateKeypair } from '../../packages/crypto/src/jws';
 import { verifyReceipt } from '../../packages/protocol/src/verify';
 import type { PEACReceiptClaims } from '../../packages/schema/src/types';
@@ -17,7 +17,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey } = await generateKeypair();
 
       // Issue valid receipt
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -37,9 +37,9 @@ describe('Negative Test Vectors', () => {
 
       // Attempt verification (should fail)
       const { publicKey } = await generateKeypair();
-      const result = await jwsVerify(tamperedJWS, publicKey);
+      const verifyResult = await jwsVerify(tamperedJWS, publicKey);
 
-      expect(result.valid).toBe(false);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Tampered signature correctly rejected');
     });
@@ -47,7 +47,7 @@ describe('Negative Test Vectors', () => {
     it('MUST reject receipt with completely invalid signature', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -75,7 +75,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey, publicKey } = await generateKeypair();
 
       // Issue receipt for 9999
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -97,8 +97,8 @@ describe('Negative Test Vectors', () => {
       const tamperedJWS = `${parts[0]}.${tamperedPayloadB64}.${parts[2]}`;
 
       // Verification MUST fail
-      const result = await jwsVerify(tamperedJWS, publicKey);
-      expect(result.valid).toBe(false);
+      const verifyResult = await jwsVerify(tamperedJWS, publicKey);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Modified amount correctly rejected');
     });
@@ -106,7 +106,7 @@ describe('Negative Test Vectors', () => {
     it('MUST reject receipt with modified recipient (aud)', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://legitimate.example.com',
         amt: 9999,
@@ -126,8 +126,8 @@ describe('Negative Test Vectors', () => {
       const tamperedPayloadB64 = Buffer.from(JSON.stringify(tamperedPayload)).toString('base64url');
       const tamperedJWS = `${parts[0]}.${tamperedPayloadB64}.${parts[2]}`;
 
-      const result = await jwsVerify(tamperedJWS, publicKey);
-      expect(result.valid).toBe(false);
+      const verifyResult = await jwsVerify(tamperedJWS, publicKey);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Modified audience correctly rejected');
     });
@@ -135,7 +135,7 @@ describe('Negative Test Vectors', () => {
     it('MUST reject receipt with modified payment scheme', async () => {
       const { privateKey, publicKey } = await generateKeypair();
 
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -158,8 +158,8 @@ describe('Negative Test Vectors', () => {
       const tamperedPayloadB64 = Buffer.from(JSON.stringify(tamperedPayload)).toString('base64url');
       const tamperedJWS = `${parts[0]}.${tamperedPayloadB64}.${parts[2]}`;
 
-      const result = await jwsVerify(tamperedJWS, publicKey);
-      expect(result.valid).toBe(false);
+      const verifyResult = await jwsVerify(tamperedJWS, publicKey);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Modified payment scheme correctly rejected');
     });
@@ -266,7 +266,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey } = await generateKeypair();
 
       // Issue receipt that expired 1 hour ago
-      const result = await issue({
+      const result = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,
@@ -293,7 +293,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: -9999, // Negative!
@@ -312,7 +312,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'https://api.example.com',
           aud: 'https://app.example.com',
           amt: 9999,
@@ -331,7 +331,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey } = await generateKeypair();
 
       await expect(
-        issue({
+        issueWire01({
           iss: 'http://api.example.com', // HTTP!
           aud: 'https://app.example.com',
           amt: 9999,
@@ -352,7 +352,7 @@ describe('Negative Test Vectors', () => {
       const { privateKey: privKey1 } = await generateKeypair();
       const { publicKey: pubKey2 } = await generateKeypair(); // Different keypair!
 
-      const issueResult = await issue({
+      const issueResult = await issueWire01({
         iss: 'https://api.example.com',
         aud: 'https://app.example.com',
         amt: 9999,

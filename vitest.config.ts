@@ -77,12 +77,15 @@ export default defineConfig({
       // Workers have their own vitest configs with custom paths
       // Run them via pnpm --filter @peac/worker-* test
       'tests/conformance/**/*.spec.ts',
+      'tests/vectors/**/*.spec.ts',
       'tests/parity/**/*.test.ts',
       'tests/scripts/**/*.test.ts',
       'tests/perf/**/*.test.ts',
       'tests/smoke/**/*.test.ts',
       'tests/distribution/**/*.test.ts',
       'tests/integration/**/*.test.ts',
+      'tests/security/**/*.test.ts',
+      'tests/release/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,
