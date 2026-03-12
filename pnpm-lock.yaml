@@ -704,6 +704,9 @@ importers:
       '@peac/adapter-core':
         specifier: workspace:*
         version: link:../core
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../crypto
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel

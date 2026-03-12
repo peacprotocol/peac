@@ -1,32 +1,49 @@
 /**
  * @peac/adapter-x402
  *
- * x402 Offer/Receipt extension verification, term-matching, and PEAC record mapping.
+ * Verification, term-matching, and evidence mapping for the
+ * x402 Offer/Receipt extension (compatible with upstream coinbase/x402).
  *
- * NOTE: This adapter targets the x402 Offer/Receipt EXTENSION,
- * NOT the baseline x402 header flow. The profile identifier reflects this:
- * `peac-x402-offer-receipt/0.1` (extension) vs `peac-x402/0.1` (baseline, reserved).
- *
- * Key capabilities:
- * - Structural validation of x402 offers and receipts
- * - Term-matching: verify signed payload against accept entries
- * - Accept selection with acceptIndex as untrusted hint
- * - Mapping to canonical PEAC interaction records
- * - DoS protection: limits on accepts array size
- * - Amount/network validation: CAIP-2 format, integer strings
- *
- * IMPORTANT: This package does NOT perform cryptographic signature verification
- * (EIP-712 recovery, JWS validation). That is the caller's responsibility.
- * `valid: true` does NOT imply cryptographic signature validity unless
- * a CryptoVerifier is supplied and `verification.cryptographic.verified` is true.
- *
- * The focus is on term-matching and record mapping -- the verification
- * layer that makes unsigned acceptIndex irrelevant for security.
+ * Architecture:
+ * - Layer A (raw.ts): Exact upstream wire types and extraction
+ * - Layer B (normalize.ts): Semantic normalization (EIP-712 placeholders)
+ * - Layer C (map.ts): PEAC evidence mapping
+ * - Verification (verify.ts): Layered verification API
  *
  * @packageDocumentation
  */
 
-// Types
+// Raw wire types and extraction (Layer A)
+export type {
+  RawOfferPayload,
+  RawReceiptPayload,
+  RawJWSSignedOffer,
+  RawEIP712SignedOffer,
+  RawSignedOffer,
+  RawJWSSignedReceipt,
+  RawEIP712SignedReceipt,
+  RawSignedReceipt,
+  RawX402ExtensionInfo,
+  ParsedCompactJWS,
+} from './raw.js';
+
+export {
+  OFFER_RECEIPT,
+  MAX_COMPACT_JWS_BYTES,
+  X402_RECEIPT_HEADERS,
+  parseCompactJWS,
+  extractOfferPayload,
+  extractReceiptPayload,
+  extractExtensionInfo,
+  extractReceiptFromHeaders,
+} from './raw.js';
+
+// Normalized types and functions (Layer B)
+export type { NormalizedOfferPayload, NormalizedReceiptPayload } from './normalize.js';
+
+export { normalizeOfferPayload, normalizeReceiptPayload } from './normalize.js';
+
+// Public types (Layer B aliases + adapter-specific)
 export type {
   SignatureFormat,
   OfferPayload,
@@ -34,23 +51,34 @@ export type {
   ReceiptPayload,
   SignedReceipt,
   AcceptEntry,
-  X402PaymentRequired,
+  X402OfferReceiptChallenge,
   X402SettlementResponse,
+  WireVerification,
   OfferVerification,
   ReceiptVerification,
+  ConsistencyVerification,
+  ConsistencyOptions,
   VerificationError,
   VerificationStatus,
   X402PeacRecord,
   X402AdapterConfig,
   MismatchPolicy,
+  AddressComparator,
+  CryptoResult,
+  CryptoVerifier,
+  EIP712Domain,
+  SignerAuthorizer,
+  AuthorizationContext,
+  AuthorizationResult,
 } from './types.js';
 
-// Constants
+// Constants and functions from types
 export {
   X402_OFFER_RECEIPT_PROFILE,
   MAX_ACCEPT_ENTRIES,
   MAX_TOTAL_ACCEPTS_BYTES,
   MAX_AMOUNT_LENGTH,
+  defaultAddressComparator,
 } from './types.js';
 
 // Re-export shared types
@@ -61,7 +89,15 @@ export { X402Error } from './errors.js';
 export type { X402ErrorCode } from './errors.js';
 
 // Verification
-export { verifyOffer, verifyReceipt, matchAcceptTerms, selectAccept } from './verify.js';
+export {
+  verifyOffer,
+  verifyReceipt,
+  verifyOfferWire,
+  verifyReceiptWire,
+  verifyOfferReceiptConsistency,
+  matchAcceptTerms,
+  selectAccept,
+} from './verify.js';
 
 // Mapping
 export { toPeacRecord, toPeacCarrier } from './map.js';

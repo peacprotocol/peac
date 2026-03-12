@@ -1,58 +1,66 @@
 /**
  * x402 Offer/Receipt verification
  *
- * Verification rules (PEAC-first):
- * 1. Structural validation (format, required fields)
- * 2. DoS guards (accepts array limits)
- * 3. Amount validation (non-negative integer string)
- * 4. Network validation (CAIP-2 format)
- * 5. Expiry check (validUntil vs current time)
- * 6. Version check (supported versions)
- * 7. Signature format validation (EIP-712 or JWS structure)
- * 8. Term-matching (offer payload vs accept entry)
+ * Verification layers:
+ * 1. Wire validation (verifyWire): structural shape, format tags, required fields
+ * 2. Offer term verification (verifyOfferTerms): version, expiry, amount, network, term-matching
+ * 3. Receipt semantic verification (verifyReceiptSemantics): required fields, recency
+ * 4. Offer-receipt consistency (verifyOfferReceiptConsistency): resourceUrl, network, freshness
+ * 5. Opt-in crypto + authorization: CryptoVerifier and SignerAuthorizer interfaces (types only)
  *
- * IMPORTANT: Cryptographic signature verification (EIP-712 recovery, JWS validation)
- * is NOT performed here. That requires a crypto provider (viem, ethers, etc.)
- * and should be done by the caller before passing artifacts to this adapter.
+ * Each layer is separately callable and separately reportable.
  *
- * `valid: true` does NOT imply cryptographic signature validity unless a
- * CryptoVerifier is supplied and `verification.cryptographic.verified` is true.
- *
- * The focus of this module is TERM-MATCHING: ensuring the signed payload
- * fields match the declared accept terms. This is the binding mechanism
- * that makes unsigned acceptIndex irrelevant for security.
+ * IMPORTANT: Cryptographic signature verification is NOT performed here.
+ * That requires injecting a CryptoVerifier implementation.
  */
 
 import { X402Error } from './errors.js';
 import type {
-  OfferPayload,
-  SignedOffer,
-  SignedReceipt,
+  RawSignedOffer,
+  RawEIP712SignedOffer,
+  RawSignedReceipt,
+  RawEIP712SignedReceipt,
+  RawOfferPayload,
+  RawReceiptPayload,
+} from './raw.js';
+import { extractOfferPayload, extractReceiptPayload } from './raw.js';
+import type { NormalizedOfferPayload, NormalizedReceiptPayload } from './normalize.js';
+import { normalizeOfferPayload, normalizeReceiptPayload } from './normalize.js';
+import type {
   AcceptEntry,
   OfferVerification,
   ReceiptVerification,
+  ConsistencyVerification,
+  ConsistencyOptions,
+  WireVerification,
   VerificationError,
   X402AdapterConfig,
   MismatchPolicy,
+  AddressComparator,
 } from './types.js';
-import { MAX_ACCEPT_ENTRIES, MAX_AMOUNT_LENGTH, MAX_TOTAL_ACCEPTS_BYTES } from './types.js';
+import {
+  MAX_ACCEPT_ENTRIES,
+  MAX_AMOUNT_LENGTH,
+  MAX_TOTAL_ACCEPTS_BYTES,
+  defaultAddressComparator,
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const DEFAULT_SUPPORTED_VERSIONS = ['1'];
+const DEFAULT_SUPPORTED_VERSIONS = [1];
 const DEFAULT_CLOCK_SKEW_SECONDS = 60;
+// Upstream x402 client helper uses 3600s (1 hour) default
+const DEFAULT_RECEIPT_RECENCY_SECONDS = 3600;
 
 // Per-field DoS limits (prevent giant strings in individual fields)
-// These are BYTE limits, not character counts, to handle UTF-8 multibyte strings
-const MAX_FIELD_BYTES = 256; // Generous limit for network/asset/payTo/scheme
+const MAX_FIELD_BYTES = 256;
 
 // Per-entry total size limit (bounds settlement objects + all fields)
-// With 128 entries max, 2KB each = 256KB total (matches MAX_TOTAL_ACCEPTS_BYTES)
 const MAX_ENTRY_BYTES = 2048;
 
-// Portable byte length calculation (works in Node.js and edge runtimes)
+// Portable byte length calculation
 const textEncoder = new TextEncoder();
 function getByteLength(str: string): number {
   return textEncoder.encode(str).length;
@@ -62,46 +70,31 @@ function getByteLength(str: string): number {
 // Shape Validation (Runtime Type Guards)
 // ---------------------------------------------------------------------------
 
-/**
- * Check if a value is a plain object (not null, not array, not class instance)
- */
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (value === null || typeof value !== 'object') return false;
   if (Array.isArray(value)) return false;
-  // Check for plain object prototype (not class instance)
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
 }
 
 /**
  * Count bytes in a JSON value without allocating the full JSON string.
- *
  * Uses bounded traversal that stops early when limit is exceeded.
- * This is allocation-safe: we never build the full JSON string.
- *
- * @param value - The value to measure
- * @param limit - The byte limit (stop counting once exceeded)
- * @returns The byte count (may be >= limit if exceeded), or -1 if cycle detected
  */
 function countJsonBytes(value: unknown, limit: number): number {
-  // Use a stack-based traversal to avoid recursion stack overflow
-  // Each stack item: [value, state] where state tracks position in object/array
   const stack: Array<{ val: unknown; keys?: string[]; idx: number; isObj: boolean }> = [];
   const seen = new WeakSet<object>();
   let bytes = 0;
 
   const addStringBytes = (str: string): void => {
-    // JSON string encoding: quotes + content + escape overhead
-    // For simplicity, we use a conservative estimate: 2 (quotes) + UTF-8 bytes * 1.5 (escape overhead)
-    // More accurate: encode and count, but that's expensive
     bytes += 2 + getByteLength(str);
   };
 
   const countPrimitive = (val: unknown): void => {
     if (val === null) {
-      bytes += 4; // "null"
+      bytes += 4;
     } else if (typeof val === 'boolean') {
-      bytes += val ? 4 : 5; // "true" or "false"
+      bytes += val ? 4 : 5;
     } else if (typeof val === 'number') {
       bytes += String(val).length;
     } else if (typeof val === 'string') {
@@ -109,20 +102,19 @@ function countJsonBytes(value: unknown, limit: number): number {
     }
   };
 
-  // Initialize with root value
   if (value === null || typeof value !== 'object') {
     countPrimitive(value);
     return bytes;
   }
 
-  if (seen.has(value as object)) return -1; // Cycle
+  if (seen.has(value as object)) return -1;
   seen.add(value as object);
 
   if (Array.isArray(value)) {
-    bytes += 2; // [ and ]
+    bytes += 2;
     stack.push({ val: value, idx: 0, isObj: false });
   } else {
-    bytes += 2; // { and }
+    bytes += 2;
     const keys = Object.keys(value as object);
     stack.push({ val: value, keys, idx: 0, isObj: true });
   }
@@ -143,20 +135,15 @@ function countJsonBytes(value: unknown, limit: number): number {
       const childVal = obj[key];
       frame.idx++;
 
-      // Add comma if not first
       if (frame.idx > 1) bytes += 1;
-
-      // Add key
       addStringBytes(key);
-      bytes += 1; // colon
+      bytes += 1;
 
-      // Handle child value
       if (childVal === null || typeof childVal !== 'object') {
         countPrimitive(childVal);
       } else {
-        if (seen.has(childVal)) return -1; // Cycle
+        if (seen.has(childVal)) return -1;
         seen.add(childVal);
-
         if (Array.isArray(childVal)) {
           bytes += 2;
           stack.push({ val: childVal, idx: 0, isObj: false });
@@ -177,16 +164,13 @@ function countJsonBytes(value: unknown, limit: number): number {
       const childVal = arr[frame.idx];
       frame.idx++;
 
-      // Add comma if not first
       if (frame.idx > 1) bytes += 1;
 
-      // Handle child value
       if (childVal === null || typeof childVal !== 'object') {
         countPrimitive(childVal);
       } else {
-        if (seen.has(childVal)) return -1; // Cycle
+        if (seen.has(childVal)) return -1;
         seen.add(childVal);
-
         if (Array.isArray(childVal)) {
           bytes += 2;
           stack.push({ val: childVal, idx: 0, isObj: false });
@@ -202,16 +186,6 @@ function countJsonBytes(value: unknown, limit: number): number {
   return bytes;
 }
 
-/**
- * Validate accept entry shape (runtime type guard)
- *
- * Ensures all fields are the expected types before byte validation.
- * This prevents crashes when untrusted JSON contains non-string values.
- *
- * @param entry - The entry to validate (typed as unknown since from untrusted input)
- * @param index - The index for error reporting
- * @returns VerificationError if shape is invalid, null otherwise
- */
 function validateAcceptEntryShape(entry: unknown, index: number): VerificationError | null {
   if (!isPlainObject(entry)) {
     return {
@@ -221,8 +195,7 @@ function validateAcceptEntryShape(entry: unknown, index: number): VerificationEr
     };
   }
 
-  // Required string fields
-  const requiredStringFields = ['network', 'asset', 'payTo', 'amount'] as const;
+  const requiredStringFields = ['network', 'asset', 'payTo', 'amount', 'scheme'] as const;
   for (const field of requiredStringFields) {
     const value = entry[field];
     if (value === undefined || value === null) {
@@ -241,71 +214,171 @@ function validateAcceptEntryShape(entry: unknown, index: number): VerificationEr
     }
   }
 
-  // Optional string field
-  if (entry.scheme !== undefined && entry.scheme !== null && typeof entry.scheme !== 'string') {
-    return {
-      code: 'accept_entry_invalid',
-      message: `accepts[${index}].scheme must be a string, got ${typeof entry.scheme}`,
-      field: `accepts[${index}].scheme`,
-    };
-  }
-
-  // settlement is optional and can be any plain object
-  if (entry.settlement !== undefined && entry.settlement !== null) {
-    if (!isPlainObject(entry.settlement)) {
-      return {
-        code: 'accept_entry_invalid',
-        message: `accepts[${index}].settlement must be a plain object`,
-        field: `accepts[${index}].settlement`,
-      };
-    }
-  }
-
   return null;
 }
 
 // ---------------------------------------------------------------------------
-// Constants
+// Regex Constants
 // ---------------------------------------------------------------------------
 
-// Regex for JWS compact serialization: header.payload.signature
-const JWS_COMPACT_RE = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
-
-// Regex for EIP-712 hex signature: 0x + 130 hex chars (65 bytes: r + s + v)
+// EIP-712 hex signature: 0x + 130 hex chars (65 bytes: r + s + v)
 const EIP712_SIG_RE = /^0x[0-9a-fA-F]{130}$/;
 
-// Regex for amount: non-negative integer string (no decimals, no leading zeros except "0")
+// Amount: non-negative integer string
 const AMOUNT_RE = /^(0|[1-9][0-9]*)$/;
 
-// CAIP-2 network format: namespace:reference
-// Per CAIP-2 spec: https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md
-// namespace: 3-8 chars (lowercase letters, digits, hyphens)
-// reference: 1-64 chars (letters, digits, hyphens, underscores)
-// Examples: eip155:1, eip155:8453, cosmos:cosmoshub-4, solana:mainnet
+// CAIP-2 network format
 const CAIP2_NAMESPACE_RE = /^[a-z][a-z0-9-]{2,7}$/;
 const CAIP2_REFERENCE_RE = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/;
 
 // ---------------------------------------------------------------------------
-// Offer Verification
+// Layer 1: Wire Validation
+// ---------------------------------------------------------------------------
+
+/**
+ * Validate raw wire structure of a signed offer
+ *
+ * Checks discriminated union shape, format tag, required fields.
+ * No semantic interpretation, no payload extraction.
+ */
+export function verifyOfferWire(offer: RawSignedOffer): WireVerification {
+  const errors: VerificationError[] = [];
+
+  if (!offer || typeof offer !== 'object') {
+    return {
+      valid: false,
+      errors: [{ code: 'offer_invalid_format', message: 'Offer must be an object' }],
+    };
+  }
+
+  if (offer.format !== 'eip712' && offer.format !== 'jws') {
+    errors.push({
+      code: 'offer_invalid_format',
+      message: `Invalid signature format: ${String((offer as Record<string, unknown>).format)}`,
+      field: 'format',
+    });
+    return { valid: false, errors };
+  }
+
+  if (!offer.signature || typeof offer.signature !== 'string') {
+    errors.push({
+      code: 'offer_invalid_format',
+      message: 'Offer signature is required',
+      field: 'signature',
+    });
+  }
+
+  if (offer.format === 'eip712') {
+    const eip = offer as RawEIP712SignedOffer;
+    if (!eip.payload || typeof eip.payload !== 'object') {
+      errors.push({
+        code: 'offer_invalid_format',
+        message: 'EIP-712 offer must have a payload object',
+        field: 'payload',
+      });
+    }
+    // Validate EIP-712 signature format
+    if (eip.signature && !EIP712_SIG_RE.test(eip.signature)) {
+      errors.push({
+        code: 'offer_signature_invalid',
+        message: 'EIP-712 signature must be 0x-prefixed 65-byte hex string',
+        field: 'signature',
+      });
+    }
+  }
+
+  // JWS format: no payload field expected, signature is compact JWS
+  // JWS structural validation is deferred to extraction (parseCompactJWS)
+
+  if (offer.acceptIndex !== undefined) {
+    if (
+      typeof offer.acceptIndex !== 'number' ||
+      !Number.isInteger(offer.acceptIndex) ||
+      offer.acceptIndex < 0
+    ) {
+      errors.push({
+        code: 'offer_invalid_format',
+        message: 'acceptIndex must be a non-negative integer',
+        field: 'acceptIndex',
+      });
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Validate raw wire structure of a signed receipt
+ */
+export function verifyReceiptWire(receipt: RawSignedReceipt): WireVerification {
+  const errors: VerificationError[] = [];
+
+  if (!receipt || typeof receipt !== 'object') {
+    return {
+      valid: false,
+      errors: [{ code: 'receipt_invalid_format', message: 'Receipt must be an object' }],
+    };
+  }
+
+  if (receipt.format !== 'eip712' && receipt.format !== 'jws') {
+    errors.push({
+      code: 'receipt_invalid_format',
+      message: `Invalid signature format: ${String((receipt as Record<string, unknown>).format)}`,
+      field: 'format',
+    });
+    return { valid: false, errors };
+  }
+
+  if (!receipt.signature || typeof receipt.signature !== 'string') {
+    errors.push({
+      code: 'receipt_invalid_format',
+      message: 'Receipt signature is required',
+      field: 'signature',
+    });
+  }
+
+  if (receipt.format === 'eip712') {
+    const eip = receipt as RawEIP712SignedReceipt;
+    if (!eip.payload || typeof eip.payload !== 'object') {
+      errors.push({
+        code: 'receipt_invalid_format',
+        message: 'EIP-712 receipt must have a payload object',
+        field: 'payload',
+      });
+    }
+    if (eip.signature && !EIP712_SIG_RE.test(eip.signature)) {
+      errors.push({
+        code: 'receipt_signature_invalid',
+        message: 'EIP-712 signature must be 0x-prefixed 65-byte hex string',
+        field: 'signature',
+      });
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+// ---------------------------------------------------------------------------
+// Layer 2: Offer Term Verification
 // ---------------------------------------------------------------------------
 
 /**
  * Verify an x402 signed offer against accept terms
  *
- * This performs structural validation, expiry/version checks, and
- * term-matching against the provided accept entries. It does NOT verify
- * the cryptographic signature (that is the caller's responsibility).
+ * Extracts and normalizes payload, then performs:
+ * - Version check
+ * - Expiry check (with offerExpiryPolicy)
+ * - Amount/network validation
+ * - Term-matching against accept entries
  *
  * @param offer - The signed offer to verify
  * @param accepts - The list of acceptable payment terms
- * @param acceptIndex - Optional hint index (unsigned, treat as advisory)
  * @param config - Optional adapter configuration
  * @returns Verification result with matched accept entry or errors
  */
 export function verifyOffer(
-  offer: SignedOffer,
+  offer: RawSignedOffer,
   accepts: AcceptEntry[],
-  acceptIndex?: number,
   config?: X402AdapterConfig
 ): OfferVerification {
   const errors: VerificationError[] = [];
@@ -316,8 +389,12 @@ export function verifyOffer(
   const mismatchPolicy = config?.mismatchPolicy ?? 'fail';
   const strictAmount = config?.strictAmountValidation ?? true;
   const strictNetwork = config?.strictNetworkValidation ?? true;
+  // Default matches upstream: validUntil is optional
+  const offerExpiryPolicy = config?.offerExpiryPolicy ?? 'allow_missing';
+  const addressComparator = config?.addressComparator ?? defaultAddressComparator;
+  const maxJwsBytes = config?.maxCompactJwsBytes;
 
-  // Pre-term-matching default: we know if hint was provided, but haven't checked for mismatch yet
+  const acceptIndex = offer.acceptIndex;
   const hintProvided = acceptIndex !== undefined;
   const preMatchTermMatching = {
     method: 'scan' as const,
@@ -325,20 +402,35 @@ export function verifyOffer(
     hintMismatchDetected: false,
   };
 
-  // 1. Structural validation
-  const structErrors = validateOfferStructure(offer);
-  if (structErrors.length > 0) {
+  // 1. Wire validation
+  const wireResult = verifyOfferWire(offer);
+  if (!wireResult.valid) {
     return {
       valid: false,
       usedHint: false,
-      errors: structErrors,
+      errors: wireResult.errors,
       termMatching: preMatchTermMatching,
     };
   }
 
-  const payload = offer.payload;
+  // 2. Extract and normalize payload
+  let rawPayload: RawOfferPayload;
+  try {
+    rawPayload = extractOfferPayload(offer, maxJwsBytes);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    const code = e instanceof X402Error ? e.code : 'offer_invalid_format';
+    return {
+      valid: false,
+      usedHint: false,
+      errors: [{ code, message: msg }],
+      termMatching: preMatchTermMatching,
+    };
+  }
 
-  // 2. DoS guard: check accepts array count
+  const payload = normalizeOfferPayload(rawPayload);
+
+  // 3. DoS guard: check accepts array count
   if (accepts.length > maxAccepts) {
     errors.push({
       code: 'accept_too_many_entries',
@@ -347,27 +439,22 @@ export function verifyOffer(
     return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
   }
 
-  // 2b. DoS guard: validate entry shape first (prevents crashes from malformed JSON)
-  // Then validate per-entry size (including settlement) BEFORE aggregate operations
-  // This bounds memory cost and rejects oversized nested objects early
+  // 3b. Validate accept entry shapes and sizes
   for (let i = 0; i < accepts.length; i++) {
     const entry = accepts[i];
 
-    // First: validate shape (runtime type guard for untrusted input)
     const shapeError = validateAcceptEntryShape(entry, i);
     if (shapeError) {
       errors.push(shapeError);
       return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
     }
 
-    // Second: check per-entry total size (bounds settlement + all fields)
     const entryError = validateAcceptEntrySize(entry as AcceptEntry, i);
     if (entryError) {
       errors.push(entryError);
       return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
     }
 
-    // Third: check individual string field sizes for clearer error messages
     const fieldError = validateAcceptFieldBytes(entry as AcceptEntry, i);
     if (fieldError) {
       errors.push(fieldError);
@@ -375,8 +462,7 @@ export function verifyOffer(
     }
   }
 
-  // 2c. DoS guard: check total accepts byte size using bounded traversal
-  // NOTE: With per-entry bounds (128 * 2KB = 256KB), this is a redundant safety check
+  // 3c. DoS guard: total accepts byte size
   const maxBytes = config?.maxTotalAcceptsBytes ?? MAX_TOTAL_ACCEPTS_BYTES;
   const acceptsBytes = countJsonBytes(accepts, maxBytes + 1);
   if (acceptsBytes === -1 || acceptsBytes > maxBytes) {
@@ -387,7 +473,18 @@ export function verifyOffer(
     return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
   }
 
-  // 3. Amount validation (if enabled)
+  // 4. Validate offer payload required fields
+  const payloadErrors = validateOfferPayloadFields(rawPayload);
+  if (payloadErrors.length > 0) {
+    return {
+      valid: false,
+      usedHint: false,
+      errors: payloadErrors,
+      termMatching: preMatchTermMatching,
+    };
+  }
+
+  // 5. Amount validation
   if (strictAmount) {
     const amountError = validateAmount(payload.amount, 'offer');
     if (amountError) {
@@ -396,7 +493,7 @@ export function verifyOffer(
     }
   }
 
-  // 4. Network validation (if enabled)
+  // 6. Network validation
   if (strictNetwork && payload.network) {
     const networkError = validateNetwork(payload.network, 'offer');
     if (networkError) {
@@ -405,34 +502,42 @@ export function verifyOffer(
     }
   }
 
-  // 5. Version check
+  // 7. Version check
   if (!supportedVersions.includes(payload.version)) {
     errors.push({
       code: 'offer_version_unsupported',
-      message: `Offer version "${payload.version}" is not supported. Supported: ${supportedVersions.join(', ')}`,
+      message: `Offer version ${payload.version} is not supported. Supported: ${supportedVersions.join(', ')}`,
       field: 'payload.version',
     });
     return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
   }
 
-  // 6. Expiry check (with clock skew tolerance)
-  if (payload.validUntil <= now - clockSkew) {
-    errors.push({
-      code: 'offer_expired',
-      message: `Offer expired at ${payload.validUntil}, current time is ${now} (skew: ${clockSkew}s)`,
-      field: 'payload.validUntil',
-    });
-    return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
+  // 8. Expiry check (with offerExpiryPolicy)
+  if (payload.validUntil !== undefined) {
+    // Expiry is present: check if expired
+    if (payload.validUntil <= now - clockSkew) {
+      errors.push({
+        code: 'offer_expired',
+        message: `Offer expired at ${payload.validUntil}, current time is ${now} (skew: ${clockSkew}s)`,
+        field: 'payload.validUntil',
+      });
+      return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
+    }
+  } else {
+    // No expiry: check policy
+    if (offerExpiryPolicy === 'require') {
+      errors.push({
+        code: 'offer_no_expiry',
+        message:
+          'Offer has no expiry (validUntil absent or zero); offerExpiryPolicy requires expiry',
+        field: 'payload.validUntil',
+      });
+      return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
+    }
+    // 'allow_missing': continue without expiry
   }
 
-  // 7. Signature format validation (structural only, not cryptographic)
-  const sigError = validateSignatureFormat(offer.signature, offer.format, 'offer');
-  if (sigError) {
-    errors.push(sigError);
-    return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
-  }
-
-  // 8. Accept selection via term-matching with mismatchPolicy support
+  // 9. Accept selection via term-matching
   if (accepts.length === 0) {
     errors.push({
       code: 'accept_no_match',
@@ -441,70 +546,192 @@ export function verifyOffer(
     return { valid: false, usedHint: false, errors, termMatching: preMatchTermMatching };
   }
 
-  return verifyWithMismatchPolicy(payload, accepts, acceptIndex, mismatchPolicy, errors);
+  return verifyWithMismatchPolicy(
+    payload,
+    accepts,
+    acceptIndex,
+    mismatchPolicy,
+    errors,
+    addressComparator
+  );
 }
+
+// ---------------------------------------------------------------------------
+// Layer 3: Receipt Semantic Verification
+// ---------------------------------------------------------------------------
 
 /**
  * Verify an x402 signed receipt
  *
- * Performs structural validation on the receipt. Does NOT verify
- * the cryptographic signature.
- *
- * @param receipt - The signed receipt to verify
- * @param config - Optional adapter configuration
- * @returns Verification result with errors if invalid
+ * Extracts and normalizes payload, then performs:
+ * - Required field validation (version, network, resourceUrl, payer, issuedAt)
+ * - Version check
+ * - Payer format check
+ * - issuedAt recency check
+ * - Network validation
  */
 export function verifyReceipt(
-  receipt: SignedReceipt,
+  receipt: RawSignedReceipt,
   config?: X402AdapterConfig
 ): ReceiptVerification {
   const errors: VerificationError[] = [];
-  const strictAmount = config?.strictAmountValidation ?? true;
-  const strictNetwork = config?.strictNetworkValidation ?? true;
   const supportedVersions = config?.supportedVersions ?? DEFAULT_SUPPORTED_VERSIONS;
+  const strictNetwork = config?.strictNetworkValidation ?? true;
+  const recencySeconds = config?.receiptRecencySeconds ?? DEFAULT_RECEIPT_RECENCY_SECONDS;
+  const now = config?.nowSeconds ?? Math.floor(Date.now() / 1000);
+  const clockSkew = config?.clockSkewSeconds ?? DEFAULT_CLOCK_SKEW_SECONDS;
+  const maxJwsBytes = config?.maxCompactJwsBytes;
 
-  // 1. Structural validation (format, required fields)
-  const structErrors = validateReceiptStructure(receipt);
-  if (structErrors.length > 0) {
-    return { valid: false, errors: structErrors };
+  // 1. Wire validation
+  const wireResult = verifyReceiptWire(receipt);
+  if (!wireResult.valid) {
+    return { valid: false, errors: wireResult.errors };
   }
 
-  // 2. Version check (before semantic validation)
-  if (!supportedVersions.includes(receipt.payload.version)) {
+  // 2. Extract and normalize payload
+  let rawPayload: RawReceiptPayload;
+  try {
+    rawPayload = extractReceiptPayload(receipt, maxJwsBytes);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    const code = e instanceof X402Error ? e.code : 'receipt_invalid_format';
+    return { valid: false, errors: [{ code, message: msg }] };
+  }
+
+  const payload = normalizeReceiptPayload(rawPayload);
+
+  // 3. Validate required fields
+  const fieldErrors = validateReceiptPayloadFields(rawPayload);
+  if (fieldErrors.length > 0) {
+    return { valid: false, errors: fieldErrors };
+  }
+
+  // 4. Version check
+  if (!supportedVersions.includes(payload.version)) {
     errors.push({
       code: 'receipt_version_unsupported',
-      message: `Receipt version "${receipt.payload.version}" is not supported. Supported: ${supportedVersions.join(', ')}`,
+      message: `Receipt version ${payload.version} is not supported. Supported: ${supportedVersions.join(', ')}`,
       field: 'payload.version',
     });
     return { valid: false, errors };
   }
 
-  // 3. Signature format validation (structural, not cryptographic)
-  const sigError = validateSignatureFormat(receipt.signature, receipt.format, 'receipt');
-  if (sigError) {
-    errors.push(sigError);
-    return { valid: false, errors };
-  }
-
-  // 4. Amount validation (if present and enabled)
-  if (strictAmount && receipt.payload.amount) {
-    const amountError = validateAmount(receipt.payload.amount, 'receipt');
-    if (amountError) {
-      errors.push(amountError);
-      return { valid: false, errors };
-    }
-  }
-
-  // 5. Network validation (if enabled)
-  if (strictNetwork && receipt.payload.network) {
-    const networkError = validateNetwork(receipt.payload.network, 'receipt');
+  // 5. Network validation
+  if (strictNetwork && payload.network) {
+    const networkError = validateNetwork(payload.network, 'receipt');
     if (networkError) {
       errors.push(networkError);
       return { valid: false, errors };
     }
   }
 
+  // 6. Payer validation (non-empty string)
+  if (!payload.payer || typeof payload.payer !== 'string' || payload.payer.trim() === '') {
+    errors.push({
+      code: 'receipt_payer_invalid',
+      message: 'Receipt payer must be a non-empty string',
+      field: 'payload.payer',
+    });
+    return { valid: false, errors };
+  }
+
+  // 7. issuedAt recency check
+  if (payload.issuedAt < now - recencySeconds - clockSkew) {
+    errors.push({
+      code: 'receipt_issuedAt_stale',
+      message: `Receipt issuedAt ${payload.issuedAt} is too old (current: ${now}, recency window: ${recencySeconds}s, skew: ${clockSkew}s)`,
+      field: 'payload.issuedAt',
+    });
+    return { valid: false, errors };
+  }
+
+  // 8. Transaction validation (if present, must be non-empty string)
+  if (
+    payload.transaction !== undefined &&
+    (typeof payload.transaction !== 'string' || payload.transaction.trim() === '')
+  ) {
+    errors.push({
+      code: 'receipt_invalid_format',
+      message: 'Receipt transaction, if present, must be a non-empty string',
+      field: 'payload.transaction',
+    });
+    return { valid: false, errors };
+  }
+
   return { valid: true, errors: [] };
+}
+
+// ---------------------------------------------------------------------------
+// Layer 4: Offer-Receipt Consistency
+// ---------------------------------------------------------------------------
+
+/**
+ * Verify consistency between an offer and a receipt
+ *
+ * Checks:
+ * - resourceUrl must match (exact string comparison)
+ * - network must match
+ * - issuedAt freshness relative to offer validity window
+ * - payer must match one of payerCandidates (if provided, network-aware)
+ */
+export function verifyOfferReceiptConsistency(
+  offerPayload: NormalizedOfferPayload,
+  receiptPayload: NormalizedReceiptPayload,
+  config?: X402AdapterConfig,
+  options?: ConsistencyOptions
+): ConsistencyVerification {
+  const errors: VerificationError[] = [];
+  const clockSkew = config?.clockSkewSeconds ?? DEFAULT_CLOCK_SKEW_SECONDS;
+  const addressComparator =
+    options?.addressComparator ?? config?.addressComparator ?? defaultAddressComparator;
+
+  // 1. resourceUrl must match
+  if (offerPayload.resourceUrl !== receiptPayload.resourceUrl) {
+    errors.push({
+      code: 'receipt_resource_mismatch',
+      message: `Receipt resourceUrl "${receiptPayload.resourceUrl}" does not match offer resourceUrl "${offerPayload.resourceUrl}"`,
+      field: 'payload.resourceUrl',
+    });
+  }
+
+  // 2. network must match
+  if (offerPayload.network !== receiptPayload.network) {
+    errors.push({
+      code: 'receipt_network_mismatch',
+      message: `Receipt network "${receiptPayload.network}" does not match offer network "${offerPayload.network}"`,
+      field: 'payload.network',
+    });
+  }
+
+  // 3. issuedAt freshness: receipt must be issued within the offer's validity window
+  if (
+    offerPayload.validUntil !== undefined &&
+    receiptPayload.issuedAt > offerPayload.validUntil + clockSkew
+  ) {
+    errors.push({
+      code: 'receipt_issuedAt_stale',
+      message: `Receipt issuedAt ${receiptPayload.issuedAt} is after offer validUntil ${offerPayload.validUntil}`,
+      field: 'payload.issuedAt',
+    });
+  }
+
+  // 4. Payer candidate check
+  if (options?.payerCandidates && options.payerCandidates.length > 0) {
+    const network = receiptPayload.network;
+    const payer = receiptPayload.payer;
+    const matched = options.payerCandidates.some((candidate) =>
+      addressComparator(payer, candidate, network)
+    );
+    if (!matched) {
+      errors.push({
+        code: 'receipt_payer_not_in_candidates',
+        message: `Receipt payer "${payer}" does not match any expected payer candidate`,
+        field: 'payload.payer',
+      });
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
 }
 
 // ---------------------------------------------------------------------------
@@ -512,15 +739,18 @@ export function verifyReceipt(
 // ---------------------------------------------------------------------------
 
 /**
- * Match offer payload fields against a single accept entry
+ * Match normalized offer payload fields against a single accept entry
  *
- * Compares: network, asset, payTo, amount, scheme, settlement
- * All present fields must match exactly. Amount comparison is string-based
- * (minor units) to avoid floating-point issues.
- *
+ * Compares: network, asset, payTo, amount, scheme
+ * All fields must match. Amount comparison is string-based.
+ * payTo comparison uses the address comparator (network-aware).
  * @returns Array of mismatched field names (empty = match)
  */
-export function matchAcceptTerms(payload: OfferPayload, accept: AcceptEntry): string[] {
+export function matchAcceptTerms(
+  payload: NormalizedOfferPayload,
+  accept: AcceptEntry,
+  addressComparator: AddressComparator = defaultAddressComparator
+): string[] {
   const mismatches: string[] = [];
 
   if (payload.network !== accept.network) {
@@ -529,18 +759,16 @@ export function matchAcceptTerms(payload: OfferPayload, accept: AcceptEntry): st
   if (payload.asset !== accept.asset) {
     mismatches.push('asset');
   }
-  if (payload.payTo !== accept.payTo) {
+  // Network-aware address comparison
+  if (!addressComparator(payload.payTo, accept.payTo, payload.network)) {
     mismatches.push('payTo');
   }
   if (payload.amount !== accept.amount) {
     mismatches.push('amount');
   }
-
-  // Optional fields: only compare if both are present
-  if (payload.scheme !== undefined && accept.scheme !== undefined) {
-    if (payload.scheme !== accept.scheme) {
-      mismatches.push('scheme');
-    }
+  // scheme is always compared (required per upstream)
+  if (payload.scheme !== accept.scheme) {
+    mismatches.push('scheme');
   }
 
   return mismatches;
@@ -558,23 +786,18 @@ export function matchAcceptTerms(payload: OfferPayload, accept: AcceptEntry): st
  * - If absent: scan all entries for a unique match
  * - If multiple matches: fail closed (ambiguous)
  * - If no matches: fail closed
- *
- * @param payload - Offer payload to match
- * @param accepts - List of accept entries
- * @param acceptIndex - Optional hint (unsigned, untrusted)
- * @returns The matched entry and its index, or throws X402Error
  */
 export function selectAccept(
-  payload: OfferPayload,
+  payload: NormalizedOfferPayload,
   accepts: AcceptEntry[],
-  acceptIndex?: number
+  acceptIndex?: number,
+  addressComparator: AddressComparator = defaultAddressComparator
 ): { entry: AcceptEntry; index: number; usedHint: boolean } {
   if (accepts.length === 0) {
     throw new X402Error('accept_no_match', 'No accept entries provided');
   }
 
   if (acceptIndex !== undefined) {
-    // Bounds check
     if (acceptIndex < 0 || acceptIndex >= accepts.length) {
       throw new X402Error(
         'accept_index_out_of_range',
@@ -586,9 +809,8 @@ export function selectAccept(
       );
     }
 
-    // Term-match the hinted entry
     const entry = accepts[acceptIndex];
-    const mismatches = matchAcceptTerms(payload, entry);
+    const mismatches = matchAcceptTerms(payload, entry, addressComparator);
     if (mismatches.length > 0) {
       throw new X402Error(
         'accept_term_mismatch',
@@ -603,11 +825,10 @@ export function selectAccept(
     return { entry, index: acceptIndex, usedHint: true };
   }
 
-  // Full scan: find all matching entries
   const matches: Array<{ entry: AcceptEntry; index: number }> = [];
 
   for (let i = 0; i < accepts.length; i++) {
-    const mismatches = matchAcceptTerms(payload, accepts[i]);
+    const mismatches = matchAcceptTerms(payload, accepts[i], addressComparator);
     if (mismatches.length === 0) {
       matches.push({ entry: accepts[i], index: i });
     }
@@ -635,49 +856,19 @@ export function selectAccept(
 // ---------------------------------------------------------------------------
 
 /**
- * Validate offer structural requirements (fail-closed)
+ * Validate raw offer payload required fields
  */
-function validateOfferStructure(offer: SignedOffer): VerificationError[] {
+function validateOfferPayloadFields(p: RawOfferPayload): VerificationError[] {
   const errors: VerificationError[] = [];
 
-  if (!offer || typeof offer !== 'object') {
-    return [{ code: 'offer_invalid_format', message: 'Offer must be an object' }];
-  }
-
-  if (!offer.payload || typeof offer.payload !== 'object') {
-    errors.push({
-      code: 'offer_invalid_format',
-      message: 'Offer payload is required',
-      field: 'payload',
-    });
-    return errors;
-  }
-
-  if (!offer.signature || typeof offer.signature !== 'string') {
-    errors.push({
-      code: 'offer_invalid_format',
-      message: 'Offer signature is required',
-      field: 'signature',
-    });
-  }
-
-  if (offer.format !== 'eip712' && offer.format !== 'jws') {
-    errors.push({
-      code: 'offer_invalid_format',
-      message: `Invalid signature format: ${String(offer.format)}`,
-      field: 'format',
-    });
-  }
-
-  // Payload field validation
-  const p = offer.payload;
   const requiredFields: Array<[string, unknown, string]> = [
-    ['version', p.version, 'string'],
-    ['validUntil', p.validUntil, 'number'],
+    ['version', p.version, 'number'],
     ['network', p.network, 'string'],
     ['asset', p.asset, 'string'],
     ['amount', p.amount, 'string'],
     ['payTo', p.payTo, 'string'],
+    ['resourceUrl', p.resourceUrl, 'string'],
+    ['scheme', p.scheme, 'string'],
   ];
 
   for (const [name, value, expectedType] of requiredFields) {
@@ -696,49 +887,30 @@ function validateOfferStructure(offer: SignedOffer): VerificationError[] {
     }
   }
 
+  // resourceUrl must be non-empty
+  if (typeof p.resourceUrl === 'string' && p.resourceUrl.trim() === '') {
+    errors.push({
+      code: 'offer_invalid_format',
+      message: 'Offer payload.resourceUrl must be a non-empty string',
+      field: 'payload.resourceUrl',
+    });
+  }
+
   return errors;
 }
 
 /**
- * Validate receipt structural requirements (fail-closed)
+ * Validate raw receipt payload required fields
  */
-function validateReceiptStructure(receipt: SignedReceipt): VerificationError[] {
+function validateReceiptPayloadFields(p: RawReceiptPayload): VerificationError[] {
   const errors: VerificationError[] = [];
 
-  if (!receipt || typeof receipt !== 'object') {
-    return [{ code: 'receipt_invalid_format', message: 'Receipt must be an object' }];
-  }
-
-  if (!receipt.payload || typeof receipt.payload !== 'object') {
-    errors.push({
-      code: 'receipt_invalid_format',
-      message: 'Receipt payload is required',
-      field: 'payload',
-    });
-    return errors;
-  }
-
-  if (!receipt.signature || typeof receipt.signature !== 'string') {
-    errors.push({
-      code: 'receipt_invalid_format',
-      message: 'Receipt signature is required',
-      field: 'signature',
-    });
-  }
-
-  if (receipt.format !== 'eip712' && receipt.format !== 'jws') {
-    errors.push({
-      code: 'receipt_invalid_format',
-      message: `Invalid signature format: ${String(receipt.format)}`,
-      field: 'format',
-    });
-  }
-
-  const p = receipt.payload;
   const requiredFields: Array<[string, unknown, string]> = [
-    ['version', p.version, 'string'],
+    ['version', p.version, 'number'],
     ['network', p.network, 'string'],
-    ['txHash', p.txHash, 'string'],
+    ['resourceUrl', p.resourceUrl, 'string'],
+    ['payer', p.payer, 'string'],
+    ['issuedAt', p.issuedAt, 'number'],
   ];
 
   for (const [name, value, expectedType] of requiredFields) {
@@ -760,49 +932,7 @@ function validateReceiptStructure(receipt: SignedReceipt): VerificationError[] {
   return errors;
 }
 
-/**
- * Validate signature format (structural, not cryptographic)
- *
- * @param signature - The signature string to validate
- * @param format - The declared signature format
- * @param kind - 'offer' or 'receipt' for correct error code
- */
-function validateSignatureFormat(
-  signature: string,
-  format: 'eip712' | 'jws',
-  kind: 'offer' | 'receipt'
-): VerificationError | null {
-  const errorCode = kind === 'offer' ? 'offer_signature_invalid' : 'receipt_signature_invalid';
-
-  if (format === 'jws') {
-    if (!JWS_COMPACT_RE.test(signature)) {
-      return {
-        code: errorCode,
-        message:
-          'JWS signature does not match compact serialization format (header.payload.signature)',
-        field: 'signature',
-      };
-    }
-  } else if (format === 'eip712') {
-    if (!EIP712_SIG_RE.test(signature)) {
-      return {
-        code: errorCode,
-        message: 'EIP-712 signature must be 0x-prefixed 65-byte hex string',
-        field: 'signature',
-      };
-    }
-  }
-  return null;
-}
-
-/**
- * Validate amount is a non-negative integer string
- *
- * @param amount - The amount string to validate
- * @param kind - 'offer' or 'receipt' for context in error message
- */
 function validateAmount(amount: string, kind: 'offer' | 'receipt'): VerificationError | null {
-  // Check length first (DoS protection)
   if (amount.length > MAX_AMOUNT_LENGTH) {
     return {
       code: 'amount_invalid',
@@ -810,8 +940,6 @@ function validateAmount(amount: string, kind: 'offer' | 'receipt'): Verification
       field: 'payload.amount',
     };
   }
-
-  // Check format: non-negative integer string
   if (!AMOUNT_RE.test(amount)) {
     return {
       code: 'amount_invalid',
@@ -819,24 +947,11 @@ function validateAmount(amount: string, kind: 'offer' | 'receipt'): Verification
       field: 'payload.amount',
     };
   }
-
   return null;
 }
 
-/**
- * Validate accept entry total size (DoS protection)
- *
- * Bounds the total serialized size of each entry, including settlement objects.
- * Uses bounded traversal that stops early when limit is exceeded, avoiding
- * full JSON string allocation.
- *
- * Rejects entries where small string fields hide oversized nested objects.
- */
 function validateAcceptEntrySize(entry: AcceptEntry, index: number): VerificationError | null {
-  // Use bounded traversal instead of JSON.stringify to avoid allocating full string
   const entryBytes = countJsonBytes(entry, MAX_ENTRY_BYTES + 1);
-
-  // -1 means cycle detected
   if (entryBytes === -1) {
     return {
       code: 'accept_entry_invalid',
@@ -844,7 +959,6 @@ function validateAcceptEntrySize(entry: AcceptEntry, index: number): Verificatio
       field: `accepts[${index}]`,
     };
   }
-
   if (entryBytes > MAX_ENTRY_BYTES) {
     return {
       code: 'accept_entry_invalid',
@@ -852,16 +966,9 @@ function validateAcceptEntrySize(entry: AcceptEntry, index: number): Verificatio
       field: `accepts[${index}]`,
     };
   }
-
   return null;
 }
 
-/**
- * Validate accept entry field byte lengths (DoS protection)
- *
- * Prevents memory exhaustion from individual giant strings within accept entries.
- * Uses getByteLength (TextEncoder) to handle UTF-8 multibyte characters correctly.
- */
 function validateAcceptFieldBytes(entry: AcceptEntry, index: number): VerificationError | null {
   const fields: Array<[string, string | undefined]> = [
     ['network', entry.network],
@@ -880,7 +987,6 @@ function validateAcceptFieldBytes(entry: AcceptEntry, index: number): Verificati
     }
   }
 
-  // Amount has its own limit (MAX_AMOUNT_LENGTH = 78 chars, but amount is ASCII-only digits)
   if (entry.amount && entry.amount.length > MAX_AMOUNT_LENGTH) {
     return {
       code: 'amount_invalid',
@@ -892,20 +998,8 @@ function validateAcceptFieldBytes(entry: AcceptEntry, index: number): Verificati
   return null;
 }
 
-/**
- * Validate network matches CAIP-2 format
- *
- * Uses split-based parsing for clarity and debuggability:
- * - Must have exactly one colon separator
- * - namespace: 3-8 chars, starts with letter, lowercase letters/digits/hyphens
- * - reference: 1-64 chars, starts with alphanumeric, letters/digits/hyphens/underscores
- *
- * @param network - The network string to validate
- * @param kind - 'offer' or 'receipt' for context in error message
- */
 function validateNetwork(network: string, kind: 'offer' | 'receipt'): VerificationError | null {
   const parts = network.split(':');
-
   if (parts.length !== 2) {
     return {
       code: 'network_invalid',
@@ -913,9 +1007,7 @@ function validateNetwork(network: string, kind: 'offer' | 'receipt'): Verificati
       field: 'payload.network',
     };
   }
-
   const [namespace, reference] = parts;
-
   if (!CAIP2_NAMESPACE_RE.test(namespace)) {
     return {
       code: 'network_invalid',
@@ -923,7 +1015,6 @@ function validateNetwork(network: string, kind: 'offer' | 'receipt'): Verificati
       field: 'payload.network',
     };
   }
-
   if (!CAIP2_REFERENCE_RE.test(reference)) {
     return {
       code: 'network_invalid',
@@ -931,44 +1022,34 @@ function validateNetwork(network: string, kind: 'offer' | 'receipt'): Verificati
       field: 'payload.network',
     };
   }
-
   return null;
 }
 
 /**
  * Verify offer with mismatchPolicy support
- *
- * Implements the three mismatch policies:
- * - 'fail': Reject on mismatch (default)
- * - 'warn_and_scan': If hint mismatches, scan for match, record mismatch
- * - 'ignore_and_scan': Always scan, ignore hint for matching
  */
 function verifyWithMismatchPolicy(
-  payload: OfferPayload,
+  payload: NormalizedOfferPayload,
   accepts: AcceptEntry[],
   acceptIndex: number | undefined,
   mismatchPolicy: MismatchPolicy,
-  errors: VerificationError[]
+  errors: VerificationError[],
+  addressComparator: AddressComparator
 ): OfferVerification {
   const hintProvided = acceptIndex !== undefined;
 
-  // ignore_and_scan: always scan, ignore acceptIndex for matching
   if (mismatchPolicy === 'ignore_and_scan') {
-    return verifyWithScan(payload, accepts, errors, hintProvided, false);
+    return verifyWithScan(payload, accepts, errors, hintProvided, false, addressComparator);
   }
 
-  // No hint provided: scan
   if (acceptIndex === undefined) {
-    return verifyWithScan(payload, accepts, errors, false, false);
+    return verifyWithScan(payload, accepts, errors, false, false, addressComparator);
   }
 
-  // Bounds check
   if (acceptIndex < 0 || acceptIndex >= accepts.length) {
     if (mismatchPolicy === 'warn_and_scan') {
-      // Out of range counts as mismatch, fallback to scan
-      return verifyWithScan(payload, accepts, errors, true, true);
+      return verifyWithScan(payload, accepts, errors, true, true, addressComparator);
     }
-    // fail policy: reject
     errors.push({
       code: 'accept_index_out_of_range',
       message: `acceptIndex ${acceptIndex} is out of range [0, ${accepts.length - 1}]`,
@@ -982,12 +1063,10 @@ function verifyWithMismatchPolicy(
     };
   }
 
-  // Term-match the hinted entry
   const entry = accepts[acceptIndex];
-  const mismatches = matchAcceptTerms(payload, entry);
+  const mismatches = matchAcceptTerms(payload, entry, addressComparator);
 
   if (mismatches.length === 0) {
-    // Hint matched: success
     return {
       valid: true,
       matchedAccept: entry,
@@ -998,7 +1077,6 @@ function verifyWithMismatchPolicy(
     };
   }
 
-  // Hint didn't match
   if (mismatchPolicy === 'fail') {
     errors.push({
       code: 'accept_term_mismatch',
@@ -1013,33 +1091,26 @@ function verifyWithMismatchPolicy(
     };
   }
 
-  // warn_and_scan: fallback to scan, record mismatch
-  return verifyWithScan(payload, accepts, errors, true, true);
+  return verifyWithScan(payload, accepts, errors, true, true, addressComparator);
 }
 
-/**
- * Verify offer by scanning all accept entries
- *
- * @param hintProvided - Whether acceptIndex was provided (for termMatching metadata)
- * @param hintMismatchDetected - Whether the hint was tried and failed (for termMatching metadata)
- */
 function verifyWithScan(
-  payload: OfferPayload,
+  payload: NormalizedOfferPayload,
   accepts: AcceptEntry[],
   errors: VerificationError[],
   hintProvided: boolean,
-  hintMismatchDetected: boolean
+  hintMismatchDetected: boolean,
+  addressComparator: AddressComparator
 ): OfferVerification {
   const matches: Array<{ entry: AcceptEntry; index: number }> = [];
 
   for (let i = 0; i < accepts.length; i++) {
-    const mismatches = matchAcceptTerms(payload, accepts[i]);
+    const mismatches = matchAcceptTerms(payload, accepts[i], addressComparator);
     if (mismatches.length === 0) {
       matches.push({ entry: accepts[i], index: i });
     }
   }
 
-  // termMatching is always fully populated (no optional booleans for deterministic output)
   const termMatching = {
     method: 'scan' as const,
     hintProvided,
