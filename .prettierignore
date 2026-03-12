@@ -29,8 +29,9 @@ docs/evidence-pack/
 # paper artifacts (local only)
 paper/
 
-# performance result snapshots (generated artifact)
+# performance result snapshots (generated artifacts)
 perf-results.json
+repeated-results.json
 
 # generated evidence pack (canonical bytes must not be reformatted)
 docs/evidence-pack/
