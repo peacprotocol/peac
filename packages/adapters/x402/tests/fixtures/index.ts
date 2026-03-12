@@ -1,21 +1,25 @@
 /**
- * Test fixtures for x402 adapter conformance tests
+ * Test fixtures for x402 adapter conformance tests (v0.12.1)
  *
- * These fixtures cover the risky edges:
- * - acceptIndex out-of-range
- * - acceptIndex points to non-matching accept terms
- * - acceptIndex omitted, unique match exists
- * - acceptIndex omitted, multiple matches (reject)
- * - validUntil expired
- * - payload version unsupported
- * - replay/tamper: modified acceptIndex (must not matter), modified payload
+ * Updated for upstream wire sync (DD-169 through DD-172):
+ * - version: number (was string)
+ * - Offer: resourceUrl/scheme required, settlement removed
+ * - Receipt: resourceUrl/payer/issuedAt/transaction? (was txHash/asset/amount/payTo)
+ * - SignedOffer: discriminated union (EIP-712 has payload, JWS has compact JWS in signature)
+ * - offers[]: array (was single offer)
+ * - acceptIndex: per-offer (was top-level)
+ * - AcceptEntry: scheme required, settlement removed
  */
 
 import type {
-  SignedOffer,
-  SignedReceipt,
+  RawEIP712SignedOffer,
+  RawEIP712SignedReceipt,
+  RawSignedOffer,
+  RawSignedReceipt,
+  RawOfferPayload,
+  RawReceiptPayload,
   AcceptEntry,
-  X402PaymentRequired,
+  X402OfferReceiptChallenge,
   X402SettlementResponse,
 } from '../../src/types.js';
 
@@ -28,6 +32,7 @@ export const ACCEPT_BASE: AcceptEntry = {
   asset: 'USDC',
   payTo: '0x1234567890abcdef1234567890abcdef12345678',
   amount: '1000000',
+  scheme: 'exact',
 };
 
 export const ACCEPT_ETH: AcceptEntry = {
@@ -35,6 +40,7 @@ export const ACCEPT_ETH: AcceptEntry = {
   asset: 'ETH',
   payTo: '0x1234567890abcdef1234567890abcdef12345678',
   amount: '500000000000000000',
+  scheme: 'exact',
 };
 
 export const ACCEPT_SOLANA: AcceptEntry = {
@@ -42,6 +48,7 @@ export const ACCEPT_SOLANA: AcceptEntry = {
   asset: 'USDC',
   payTo: '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV',
   amount: '1000000',
+  scheme: 'exact',
 };
 
 export const ACCEPTS_SINGLE = [ACCEPT_BASE];
@@ -49,135 +56,131 @@ export const ACCEPTS_MULTI = [ACCEPT_BASE, ACCEPT_ETH, ACCEPT_SOLANA];
 export const ACCEPTS_DUPLICATE = [ACCEPT_BASE, { ...ACCEPT_BASE }];
 
 // ---------------------------------------------------------------------------
-// Valid Offer Payloads
+// Valid Offer Payloads (Raw, Layer A2)
 // ---------------------------------------------------------------------------
 
 /** Matching the BASE accept entry */
-export const OFFER_PAYLOAD_VALID = {
-  version: '1',
+export const OFFER_PAYLOAD_VALID: RawOfferPayload = {
+  version: 1,
   validUntil: Math.floor(Date.now() / 1000) + 3600,
   network: 'eip155:8453',
   asset: 'USDC',
   amount: '1000000',
   payTo: '0x1234567890abcdef1234567890abcdef12345678',
-} as const;
+  resourceUrl: 'https://api.example.com/weather/london',
+  scheme: 'exact',
+};
 
 /** Expired offer (validUntil in the past) */
-export const OFFER_PAYLOAD_EXPIRED = {
+export const OFFER_PAYLOAD_EXPIRED: RawOfferPayload = {
   ...OFFER_PAYLOAD_VALID,
   validUntil: Math.floor(Date.now() / 1000) - 3600,
-} as const;
+};
 
 /** Unsupported version */
-export const OFFER_PAYLOAD_BAD_VERSION = {
+export const OFFER_PAYLOAD_BAD_VERSION: RawOfferPayload = {
   ...OFFER_PAYLOAD_VALID,
-  version: '99',
-} as const;
+  version: 99,
+};
 
 /** Mismatched network (doesn't match any accept entry) */
-export const OFFER_PAYLOAD_WRONG_NETWORK = {
+export const OFFER_PAYLOAD_WRONG_NETWORK: RawOfferPayload = {
   ...OFFER_PAYLOAD_VALID,
   network: 'eip155:1',
-} as const;
+};
 
 /** Mismatched amount */
-export const OFFER_PAYLOAD_WRONG_AMOUNT = {
+export const OFFER_PAYLOAD_WRONG_AMOUNT: RawOfferPayload = {
   ...OFFER_PAYLOAD_VALID,
   amount: '9999999',
-} as const;
+};
 
 // ---------------------------------------------------------------------------
-// Valid Signatures (structural only -- NOT cryptographically valid)
+// Valid Signatures (structural only; NOT cryptographically valid)
 // ---------------------------------------------------------------------------
 
 /** Dummy EIP-712 signature (65 bytes hex) */
 export const SIG_EIP712 = '0x' + 'ab'.repeat(32) + 'cd'.repeat(32) + '1b';
 
-/** Dummy JWS compact signature (header.payload.signature) */
-export const SIG_JWS =
-  'eyJhbGciOiJFUzI1NiJ9.eyJ0ZXN0IjoiZGF0YSJ9.MEUCIQC_signature_placeholder_base64url';
-
-// Manually construct a valid JWS-like string
-export const SIG_JWS_VALID = 'eyJhbGciOiJFUzI1NiJ9.eyJ0ZXN0IjoiZGF0YSJ9.dGVzdHNpZ25hdHVyZQ';
-
 // ---------------------------------------------------------------------------
-// Signed Offers
+// Signed Offers (EIP-712 format; discriminated union)
 // ---------------------------------------------------------------------------
 
-export const SIGNED_OFFER_VALID: SignedOffer = {
+export const SIGNED_OFFER_VALID: RawEIP712SignedOffer = {
+  format: 'eip712',
   payload: { ...OFFER_PAYLOAD_VALID },
   signature: SIG_EIP712,
+  acceptIndex: 0,
+};
+
+export const SIGNED_OFFER_NO_INDEX: RawEIP712SignedOffer = {
   format: 'eip712',
-};
-
-export const SIGNED_OFFER_JWS: SignedOffer = {
   payload: { ...OFFER_PAYLOAD_VALID },
-  signature: SIG_JWS_VALID,
-  format: 'jws',
+  signature: SIG_EIP712,
 };
 
-export const SIGNED_OFFER_EXPIRED: SignedOffer = {
+export const SIGNED_OFFER_EXPIRED: RawEIP712SignedOffer = {
+  format: 'eip712',
   payload: { ...OFFER_PAYLOAD_EXPIRED },
   signature: SIG_EIP712,
-  format: 'eip712',
 };
 
-export const SIGNED_OFFER_BAD_VERSION: SignedOffer = {
+export const SIGNED_OFFER_BAD_VERSION: RawEIP712SignedOffer = {
+  format: 'eip712',
   payload: { ...OFFER_PAYLOAD_BAD_VERSION },
   signature: SIG_EIP712,
-  format: 'eip712',
 };
 
-export const SIGNED_OFFER_WRONG_NETWORK: SignedOffer = {
+export const SIGNED_OFFER_WRONG_NETWORK: RawEIP712SignedOffer = {
+  format: 'eip712',
   payload: { ...OFFER_PAYLOAD_WRONG_NETWORK },
   signature: SIG_EIP712,
-  format: 'eip712',
 };
 
-export const SIGNED_OFFER_WRONG_AMOUNT: SignedOffer = {
+export const SIGNED_OFFER_WRONG_AMOUNT: RawEIP712SignedOffer = {
+  format: 'eip712',
   payload: { ...OFFER_PAYLOAD_WRONG_AMOUNT },
   signature: SIG_EIP712,
-  format: 'eip712',
 };
 
 // ---------------------------------------------------------------------------
-// Signed Receipts
+// Signed Receipts (EIP-712 format)
 // ---------------------------------------------------------------------------
 
-export const SIGNED_RECEIPT_VALID: SignedReceipt = {
-  payload: {
-    version: '1',
-    network: 'eip155:8453',
-    txHash: '0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678',
-    asset: 'USDC',
-    amount: '1000000',
-    payTo: '0x1234567890abcdef1234567890abcdef12345678',
-  },
-  signature: SIG_EIP712,
+export const RECEIPT_PAYLOAD_VALID: RawReceiptPayload = {
+  version: 1,
+  network: 'eip155:8453',
+  resourceUrl: 'https://api.example.com/weather/london',
+  payer: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+  issuedAt: Math.floor(Date.now() / 1000),
+  transaction: '0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678',
+};
+
+export const SIGNED_RECEIPT_VALID: RawEIP712SignedReceipt = {
   format: 'eip712',
+  payload: { ...RECEIPT_PAYLOAD_VALID },
+  signature: SIG_EIP712,
 };
 
 // ---------------------------------------------------------------------------
 // Full Flow Fixtures
 // ---------------------------------------------------------------------------
 
-export const PAYMENT_REQUIRED_VALID: X402PaymentRequired = {
+export const PAYMENT_REQUIRED_VALID: X402OfferReceiptChallenge = {
   accepts: ACCEPTS_SINGLE,
-  acceptIndex: 0,
-  offer: SIGNED_OFFER_VALID,
+  offers: [SIGNED_OFFER_VALID],
   resourceUrl: 'https://api.example.com/weather/london',
 };
 
-export const PAYMENT_REQUIRED_NO_INDEX: X402PaymentRequired = {
+export const PAYMENT_REQUIRED_NO_INDEX: X402OfferReceiptChallenge = {
   accepts: ACCEPTS_SINGLE,
-  offer: SIGNED_OFFER_VALID,
+  offers: [SIGNED_OFFER_NO_INDEX],
   resourceUrl: 'https://api.example.com/weather/london',
 };
 
-export const PAYMENT_REQUIRED_MULTI_ACCEPTS: X402PaymentRequired = {
+export const PAYMENT_REQUIRED_MULTI_ACCEPTS: X402OfferReceiptChallenge = {
   accepts: ACCEPTS_MULTI,
-  acceptIndex: 0,
-  offer: SIGNED_OFFER_VALID,
+  offers: [SIGNED_OFFER_VALID],
 };
 
 export const SETTLEMENT_RESPONSE_VALID: X402SettlementResponse = {

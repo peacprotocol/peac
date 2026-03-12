@@ -6,6 +6,10 @@
  *
  * Fixtures are in specs/conformance/fixtures/x402/
  *
+ * NOTE: Fixtures are v0.12.0 format (version: string, no resourceUrl/scheme).
+ * This test bridges them to the v0.12.1 API by adapting fixture data at test time.
+ * PR 3 will rewrite all fixtures to v0.12.1 format.
+ *
  * Conformance layers:
  * - Structural: Format validation, expiry, version checks
  * - Term-matching: Accept entry binding (NOT acceptIndex)
@@ -21,7 +25,9 @@ import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import {
   verifyOffer,
-  type X402PaymentRequired,
+  type RawEIP712SignedOffer,
+  type RawSignedOffer,
+  type AcceptEntry,
   type X402AdapterConfig,
   type OfferVerification,
 } from '../../packages/adapters/x402/src';
@@ -29,7 +35,7 @@ import {
 const FIXTURES_DIR = join(__dirname, '..', '..', 'specs', 'conformance', 'fixtures', 'x402');
 
 // ---------------------------------------------------------------------------
-// Fixture Types
+// Fixture Types (v0.12.0 format; will be updated in PR 3)
 // ---------------------------------------------------------------------------
 
 interface VerificationFixtureInput {
@@ -76,7 +82,7 @@ interface VerificationFixture {
   input: VerificationFixtureInput;
   expected: VerificationFixtureExpected;
   notes?: string;
-  config?: Partial<X402AdapterConfig>;
+  config?: Record<string, unknown>;
 }
 
 interface ManifestFile {
@@ -109,13 +115,107 @@ function loadFixture(filename: string): VerificationFixture {
   return JSON.parse(content) as VerificationFixture;
 }
 
-function toPaymentRequired(input: VerificationFixtureInput): X402PaymentRequired {
-  return {
-    offer: input.offer,
-    accepts: input.accepts,
-    acceptIndex: input.acceptIndex,
-    resourceUrl: input.resourceUrl,
+/**
+ * Encode a value as base64url (no padding, per RFC 7515).
+ */
+function base64urlEncode(input: string): string {
+  return Buffer.from(input, 'utf-8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+/**
+ * Bridge v0.12.0 fixture format to v0.12.1 API types.
+ *
+ * Adapts old fixture data:
+ * - version: string -> number
+ * - Adds resourceUrl and scheme to offer payload
+ * - Adds scheme to accept entries
+ * - Creates RawSignedOffer with per-offer acceptIndex
+ * - For JWS format: creates a compact JWS with the adapted payload inside
+ */
+function adaptFixtureToV0121(input: VerificationFixtureInput): {
+  offer: RawSignedOffer;
+  accepts: AcceptEntry[];
+} {
+  const scheme = input.offer.payload.scheme ?? 'exact';
+  const resourceUrl = input.resourceUrl ?? 'https://fixture.example.com/resource';
+
+  const adaptedPayload = {
+    version: Number(input.offer.payload.version),
+    validUntil: input.offer.payload.validUntil,
+    network: input.offer.payload.network,
+    asset: input.offer.payload.asset,
+    amount: input.offer.payload.amount,
+    payTo: input.offer.payload.payTo,
+    resourceUrl,
+    scheme,
   };
+
+  let offer: RawSignedOffer;
+
+  if (input.offer.format === 'jws') {
+    // For JWS: create a compact JWS with the adapted payload encoded inside
+    const header = base64urlEncode(JSON.stringify({ alg: 'ES256' }));
+    const payload = base64urlEncode(JSON.stringify(adaptedPayload));
+    const sig = base64urlEncode('test-signature');
+    const compactJws = `${header}.${payload}.${sig}`;
+
+    offer = {
+      format: 'jws',
+      signature: compactJws,
+      ...(input.acceptIndex !== undefined && { acceptIndex: input.acceptIndex }),
+    };
+  } else {
+    offer = {
+      format: 'eip712',
+      payload: adaptedPayload,
+      signature: input.offer.signature,
+      ...(input.acceptIndex !== undefined && { acceptIndex: input.acceptIndex }),
+    } as RawEIP712SignedOffer;
+  }
+
+  const accepts: AcceptEntry[] = input.accepts.map((a) => ({
+    network: a.network,
+    asset: a.asset,
+    payTo: a.payTo,
+    amount: a.amount,
+    scheme: a.scheme ?? 'exact',
+  }));
+
+  return { offer, accepts };
+}
+
+/**
+ * Adapt fixture config to v0.12.1 format.
+ * Converts supportedVersions from string[] to number[].
+ */
+function adaptConfig(fixtureConfig?: Record<string, unknown>): X402AdapterConfig {
+  const config: X402AdapterConfig = {
+    supportedVersions: [1],
+    clockSkewSeconds: 60,
+  };
+
+  if (fixtureConfig) {
+    if (fixtureConfig.clockSkewSeconds !== undefined) {
+      config.clockSkewSeconds = fixtureConfig.clockSkewSeconds as number;
+    }
+    if (fixtureConfig.mismatchPolicy !== undefined) {
+      config.mismatchPolicy = fixtureConfig.mismatchPolicy as X402AdapterConfig['mismatchPolicy'];
+    }
+    if (fixtureConfig.supportedVersions !== undefined) {
+      // Convert string[] to number[]
+      const versions = fixtureConfig.supportedVersions as (string | number)[];
+      config.supportedVersions = versions.map((v) => Number(v));
+    }
+    if (fixtureConfig.maxAcceptEntries !== undefined) {
+      config.maxAcceptEntries = fixtureConfig.maxAcceptEntries as number;
+    }
+  }
+
+  return config;
 }
 
 // ---------------------------------------------------------------------------
@@ -130,7 +230,6 @@ function assertVerification(
   expect(result.valid, `${fixtureName}: validity mismatch`).toBe(expected.valid);
 
   if (expected.valid) {
-    // For valid results, check matched index and hint usage
     if (expected.matchedIndex !== undefined) {
       expect(result.matchedIndex, `${fixtureName}: matchedIndex mismatch`).toBe(
         expected.matchedIndex
@@ -141,7 +240,6 @@ function assertVerification(
     }
     expect(result.errors, `${fixtureName}: should have no errors`).toHaveLength(0);
   } else {
-    // For invalid results, check error codes
     expect(result.errors.length, `${fixtureName}: should have errors`).toBeGreaterThan(0);
     if (expected.errors && expected.errors.length > 0) {
       const expectedCodes = expected.errors.map((e) => e.code);
@@ -187,14 +285,10 @@ describe('x402 Adapter Conformance', () => {
       const fixture = loadFixture(filename);
       expect(fixture.category).toBe('valid');
 
-      const input = toPaymentRequired(fixture.input);
-      const config: X402AdapterConfig = {
-        supportedVersions: ['1'],
-        clockSkewSeconds: 60,
-        ...fixture.config,
-      };
+      const { offer, accepts } = adaptFixtureToV0121(fixture.input);
+      const config = adaptConfig(fixture.config);
 
-      const result = verifyOffer(input.offer, input.accepts, input.acceptIndex, config);
+      const result = verifyOffer(offer, accepts, config);
 
       assertVerification(result, fixture.expected, fixture.id);
     });
@@ -207,22 +301,16 @@ describe('x402 Adapter Conformance', () => {
       const fixture = loadFixture(filename);
       expect(fixture.category).toBe('invalid');
 
-      const input = toPaymentRequired(fixture.input);
-      const config: X402AdapterConfig = {
-        supportedVersions: ['1'],
-        clockSkewSeconds: 60,
-        ...fixture.config,
-      };
+      const { offer, accepts } = adaptFixtureToV0121(fixture.input);
+      const config = adaptConfig(fixture.config);
 
-      const result = verifyOffer(input.offer, input.accepts, input.acceptIndex, config);
+      const result = verifyOffer(offer, accepts, config);
 
       assertVerification(result, fixture.expected, fixture.id);
     });
   });
 
   describe('Edge Cases', () => {
-    // Filter out fixtures that require dynamic computation
-    // (e.g., clock-skew-tolerance uses __NOW_MINUS_30__ placeholder)
     const DYNAMIC_FIXTURES = ['clock-skew-tolerance.json'];
     const edgeCaseVectors = manifest.categories['edge-cases'].vectors.filter(
       (f) => !DYNAMIC_FIXTURES.includes(f)
@@ -232,26 +320,20 @@ describe('x402 Adapter Conformance', () => {
       const fixture = loadFixture(filename);
       expect(fixture.category).toBe('edge-cases');
 
-      const input = toPaymentRequired(fixture.input);
-      const config: X402AdapterConfig = {
-        supportedVersions: ['1'],
-        clockSkewSeconds: 60,
-        ...fixture.config,
-      };
+      const { offer, accepts } = adaptFixtureToV0121(fixture.input);
+      const config = adaptConfig(fixture.config);
 
-      const result = verifyOffer(input.offer, input.accepts, input.acceptIndex, config);
+      const result = verifyOffer(offer, accepts, config);
 
       assertVerification(result, fixture.expected, fixture.id);
     });
 
-    // Dynamic fixtures that need special handling
     it('clock-skew-tolerance: should accept offer within skew tolerance', () => {
-      // This test uses dynamic timestamps - compute now minus 30 seconds
       const now = Math.floor(Date.now() / 1000);
       const fixture = loadFixture('clock-skew-tolerance.json');
 
       // Override the placeholder with actual timestamp
-      const input = toPaymentRequired({
+      const modifiedInput = {
         ...fixture.input,
         offer: {
           ...fixture.input.offer,
@@ -260,12 +342,13 @@ describe('x402 Adapter Conformance', () => {
             validUntil: now - 30, // 30 seconds in the past
           },
         },
-      });
+      };
 
-      const result = verifyOffer(input.offer, input.accepts, input.acceptIndex, {
-        supportedVersions: ['1'],
-        clockSkewSeconds: 60, // 60 second tolerance
-      });
+      const { offer, accepts } = adaptFixtureToV0121(modifiedInput);
+      const config = adaptConfig(fixture.config);
+      config.clockSkewSeconds = 60; // 60 second tolerance
+
+      const result = verifyOffer(offer, accepts, config);
 
       expect(result.valid).toBe(true);
       expect(result.matchedIndex).toBe(0);
@@ -274,14 +357,13 @@ describe('x402 Adapter Conformance', () => {
 
   describe('Security Invariants', () => {
     it('acceptIndex tampering MUST be detected via term-matching', () => {
-      // This is the core security property - load the term-mismatch fixture
       const fixture = loadFixture('accept-term-mismatch.json');
 
-      const input = toPaymentRequired(fixture.input);
-      const result = verifyOffer(input.offer, input.accepts, input.acceptIndex, {
-        supportedVersions: ['1'],
-        mismatchPolicy: 'fail', // Default and recommended
-      });
+      const { offer, accepts } = adaptFixtureToV0121(fixture.input);
+      const config = adaptConfig(fixture.config);
+      config.mismatchPolicy = 'fail';
+
+      const result = verifyOffer(offer, accepts, config);
 
       expect(result.valid).toBe(false);
       expect(result.errors.some((e) => e.code === 'accept_term_mismatch')).toBe(true);
@@ -290,10 +372,10 @@ describe('x402 Adapter Conformance', () => {
     it('expired offers MUST be rejected', () => {
       const fixture = loadFixture('expired-offer.json');
 
-      const input = toPaymentRequired(fixture.input);
-      const result = verifyOffer(input.offer, input.accepts, input.acceptIndex, {
-        supportedVersions: ['1'],
-      });
+      const { offer, accepts } = adaptFixtureToV0121(fixture.input);
+      const config = adaptConfig(fixture.config);
+
+      const result = verifyOffer(offer, accepts, config);
 
       expect(result.valid).toBe(false);
       expect(result.errors.some((e) => e.code === 'offer_expired')).toBe(true);
@@ -302,10 +384,16 @@ describe('x402 Adapter Conformance', () => {
     it('ambiguous matches without acceptIndex MUST fail', () => {
       const fixture = loadFixture('accept-ambiguous.json');
 
-      const input = toPaymentRequired(fixture.input);
-      const result = verifyOffer(input.offer, input.accepts, undefined, {
-        supportedVersions: ['1'],
-      });
+      // Remove acceptIndex for this test
+      const modifiedInput = {
+        ...fixture.input,
+        acceptIndex: undefined,
+      };
+
+      const { offer, accepts } = adaptFixtureToV0121(modifiedInput);
+      const config = adaptConfig(fixture.config);
+
+      const result = verifyOffer(offer, accepts, config);
 
       expect(result.valid).toBe(false);
       expect(result.errors.some((e) => e.code === 'accept_ambiguous')).toBe(true);
@@ -319,7 +407,6 @@ describe('x402 Adapter Conformance', () => {
         manifest.categories.invalid.vectors.length +
         manifest.categories['edge-cases'].vectors.length;
 
-      // Current fixture count: 3 valid + 13 invalid + 3 edge-cases = 19
       expect(totalFixtures).toBeGreaterThanOrEqual(19);
     });
 
@@ -336,19 +423,16 @@ describe('x402 Adapter Conformance', () => {
     });
 
     it('no orphan fixture files (all .json files must be in manifest)', () => {
-      // Get all .json files in fixtures directory (excluding manifest.json and schema files)
       const allFiles = readdirSync(FIXTURES_DIR).filter(
         (f) => f.endsWith('.json') && f !== 'manifest.json' && !f.endsWith('.schema.json')
       );
 
-      // Get all vectors listed in manifest
       const manifestVectors = new Set([
         ...manifest.categories.valid.vectors,
         ...manifest.categories.invalid.vectors,
         ...manifest.categories['edge-cases'].vectors,
       ]);
 
-      // Find orphan files (in directory but not in manifest)
       const orphans = allFiles.filter((f) => !manifestVectors.has(f));
 
       expect(orphans, `Orphan fixture files found: ${orphans.join(', ')}`).toHaveLength(0);
