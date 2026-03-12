@@ -1,14 +1,5 @@
 /**
- * Test fixtures for x402 adapter conformance tests (v0.12.1)
- *
- * Updated for upstream wire sync (DD-169 through DD-172):
- * - version: number (was string)
- * - Offer: resourceUrl/scheme required, settlement removed
- * - Receipt: resourceUrl/payer/issuedAt/transaction? (was txHash/asset/amount/payTo)
- * - SignedOffer: discriminated union (EIP-712 has payload, JWS has compact JWS in signature)
- * - offers[]: array (was single offer)
- * - acceptIndex: per-offer (was top-level)
- * - AcceptEntry: scheme required, settlement removed
+ * Test fixtures for x402 adapter tests
  */
 
 import type {
