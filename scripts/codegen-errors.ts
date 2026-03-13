@@ -9,6 +9,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 
 const SPEC_PATH = path.join(__dirname, '../specs/kernel/errors.json');
 const OUTPUT_PATH = path.join(__dirname, '../packages/kernel/src/errors.generated.ts');
@@ -258,6 +259,14 @@ function main() {
     const count = byCategory.get(category)!.length;
     console.log(`  ${category}: ${count} codes`);
   }
+
+  // Format generated output to prevent format:check drift during release bumps
+  const filesToFormat = [OUTPUT_PATH, CATEGORIES_OUTPUT_PATH];
+  console.log('Formatting generated files with prettier...');
+  execSync(`pnpm exec prettier --write ${filesToFormat.map((f) => JSON.stringify(f)).join(' ')}`, {
+    stdio: 'inherit',
+    cwd: path.join(__dirname, '..'),
+  });
 }
 
 const CATEGORIES_JSON_PATH = path.join(__dirname, '../specs/kernel/error-categories.json');

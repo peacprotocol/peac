@@ -1,0 +1,127 @@
+{
+  "report_schema_version": "1.0.0",
+  "target": "stable",
+  "timestamp": "2026-03-13T16:03:48Z",
+  "version": "0.12.1",
+  "commit": "c05c43be6fc503e66ea1f26c0755793201b7a416",
+  "node_version": "v24.13.0",
+  "runner": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "cpus": 10,
+    "platform": "darwin",
+    "ci_run_id": null,
+    "ci_run_attempt": null
+  },
+  "hashes": {
+    "publish_manifest": "018bfc87a7b74a152b274fb002852c66cdf23ebcbf5faf93d1afa35371530322",
+    "conformance_fixtures": "4609d7dcc52c92ce8aef55e91b34b4dbd05beb6f1485e0a9a36b905350817000"
+  },
+  "gates": [
+    {
+      "name": "build",
+      "status": "passed",
+      "duration_ms": 2777
+    },
+    {
+      "name": "lint",
+      "status": "passed",
+      "duration_ms": 4851
+    },
+    {
+      "name": "typecheck",
+      "status": "passed",
+      "duration_ms": 2312
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "duration_ms": 9510
+    },
+    {
+      "name": "guard",
+      "status": "passed",
+      "duration_ms": 13777
+    },
+    {
+      "name": "format",
+      "status": "passed",
+      "duration_ms": 8848
+    },
+    {
+      "name": "layer-boundary",
+      "status": "passed",
+      "duration_ms": 76
+    },
+    {
+      "name": "version-coherence",
+      "status": "passed",
+      "duration_ms": 487
+    },
+    {
+      "name": "codegen-fresh",
+      "status": "passed",
+      "duration_ms": 2015
+    },
+    {
+      "name": "no-network",
+      "status": "passed",
+      "duration_ms": 72
+    },
+    {
+      "name": "wire-01-frozen",
+      "status": "passed",
+      "duration_ms": 47
+    },
+    {
+      "name": "wire-02-conformance",
+      "status": "passed",
+      "duration_ms": 1220
+    },
+    {
+      "name": "release-state-coherence",
+      "status": "passed",
+      "duration_ms": 9448
+    },
+    {
+      "name": "changelog-coverage",
+      "status": "passed",
+      "duration_ms": 62
+    },
+    {
+      "name": "pack-install-smoke",
+      "status": "passed",
+      "duration_ms": 11445
+    },
+    {
+      "name": "api-surface-lock",
+      "status": "passed",
+      "duration_ms": 821
+    },
+    {
+      "name": "perf-benchmarks",
+      "status": "passed",
+      "duration_ms": 2033
+    },
+    {
+      "name": "ssrf-suite",
+      "status": "passed",
+      "duration_ms": 897
+    },
+    {
+      "name": "fuzz-suite",
+      "status": "passed",
+      "duration_ms": 4004
+    },
+    {
+      "name": "adoption-evidence",
+      "status": "passed",
+      "duration_ms": 109
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "passed": 20,
+    "failed": 0
+  }
+}
