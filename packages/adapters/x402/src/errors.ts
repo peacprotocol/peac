@@ -21,9 +21,15 @@ export type X402ErrorCode =
   | 'offer_expired'
   | 'offer_version_unsupported'
   | 'offer_signature_invalid'
+  | 'offer_no_expiry'
   | 'receipt_invalid_format'
   | 'receipt_signature_invalid'
   | 'receipt_version_unsupported'
+  | 'receipt_resource_mismatch'
+  | 'receipt_network_mismatch'
+  | 'receipt_issuedAt_stale'
+  | 'receipt_payer_invalid'
+  | 'receipt_payer_not_in_candidates'
   | 'accept_index_out_of_range'
   | 'accept_no_match'
   | 'accept_ambiguous'
@@ -32,7 +38,11 @@ export type X402ErrorCode =
   | 'payload_missing_field'
   | 'payload_tampered'
   | 'amount_invalid'
-  | 'network_invalid';
+  | 'network_invalid'
+  | 'jws_too_large'
+  | 'jws_malformed'
+  | 'jws_padded_base64url'
+  | 'jws_payload_not_object';
 
 /**
  * HTTP status mapping for error codes
@@ -42,9 +52,15 @@ const ERROR_HTTP_STATUS: Record<X402ErrorCode, number> = {
   offer_expired: 400,
   offer_version_unsupported: 400,
   offer_signature_invalid: 401,
+  offer_no_expiry: 400,
   receipt_invalid_format: 400,
   receipt_signature_invalid: 401,
   receipt_version_unsupported: 400,
+  receipt_resource_mismatch: 400,
+  receipt_network_mismatch: 400,
+  receipt_issuedAt_stale: 400,
+  receipt_payer_invalid: 400,
+  receipt_payer_not_in_candidates: 400,
   accept_index_out_of_range: 400,
   accept_no_match: 400,
   accept_ambiguous: 400,
@@ -54,6 +70,10 @@ const ERROR_HTTP_STATUS: Record<X402ErrorCode, number> = {
   payload_tampered: 401,
   amount_invalid: 400,
   network_invalid: 400,
+  jws_too_large: 400,
+  jws_malformed: 400,
+  jws_padded_base64url: 400,
+  jws_payload_not_object: 400,
 };
 
 /**

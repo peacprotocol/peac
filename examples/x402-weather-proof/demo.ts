@@ -3,14 +3,12 @@
  *
  * Demonstrates the full x402 offer/receipt verification flow using @peac/adapter-x402:
  *
- * 1. Receive sample x402 PaymentRequired (with signed offer)
- * 2. Receive sample x402 SettlementResponse (with signed receipt)
+ * 1. Receive sample x402 challenge (with signed offers)
+ * 2. Receive sample x402 settlement response (with signed receipt)
  * 3. Verify the offer against accept terms (term-matching, not just acceptIndex)
  * 4. Verify the receipt structure
  * 5. Produce a PEAC interaction record
  * 6. Compute a stable digest for audit/dispute workflows
- *
- * This demo shows how PEAC becomes the verification and evidence layer above x402.
  *
  * Key insight: acceptIndex is UNSIGNED and cannot be trusted as a binding mechanism.
  * PEAC treats it as a hint only and performs full term-matching verification.
@@ -24,7 +22,7 @@ import {
   type SignedOffer,
   type SignedReceipt,
   type AcceptEntry,
-  type X402PaymentRequired,
+  type X402OfferReceiptChallenge,
   type X402SettlementResponse,
 } from '@peac/adapter-x402';
 import { jcsHash } from '@peac/crypto';
@@ -36,15 +34,19 @@ import { jcsHash } from '@peac/crypto';
 // Current timestamp for valid offers
 const NOW = Math.floor(Date.now() / 1000);
 
+const RESOURCE_URL = 'https://api.weather.example/v1/forecast/london';
+
 // Accept entries advertised by the resource server
 const WEATHER_API_ACCEPTS: AcceptEntry[] = [
   {
+    scheme: 'exact',
     network: 'eip155:8453', // Base mainnet
     asset: 'USDC',
     payTo: '0x742d35Cc6634C0532925a3b844Bc9e7595f1e123',
     amount: '100000', // $0.10 in minor units (6 decimals)
   },
   {
+    scheme: 'exact',
     network: 'eip155:8453',
     asset: 'ETH',
     payTo: '0x742d35Cc6634C0532925a3b844Bc9e7595f1e123',
@@ -56,43 +58,46 @@ const WEATHER_API_ACCEPTS: AcceptEntry[] = [
 // In production, this would be cryptographically signed by the server's key
 const WEATHER_OFFER: SignedOffer = {
   payload: {
-    version: '1',
+    version: 1,
+    resourceUrl: RESOURCE_URL,
+    scheme: 'exact',
     validUntil: NOW + 3600, // Valid for 1 hour
     network: 'eip155:8453',
     asset: 'USDC',
     amount: '100000',
     payTo: '0x742d35Cc6634C0532925a3b844Bc9e7595f1e123',
   },
-  // Dummy signature (65 bytes EIP-712 format) - in production this would be real
+  // Dummy signature (65 bytes EIP-712 format): in production this would be real
   signature: '0x' + 'ab'.repeat(32) + 'cd'.repeat(32) + '1b',
   format: 'eip712',
+  acceptIndex: 0, // Per-offer hint (unsigned, verified via term-matching)
 };
 
 // Signed receipt from settlement (after payment confirmed on-chain)
 const WEATHER_RECEIPT: SignedReceipt = {
   payload: {
-    version: '1',
+    version: 1,
     network: 'eip155:8453',
-    txHash: '0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678',
-    // Receipt intentionally minimal per x402 spec (privacy)
-    // Amount, asset, payTo are NOT in receipt - they're proven by term-matching
+    resourceUrl: RESOURCE_URL,
+    payer: '0xabc1234567890abcdef1234567890abcdef123456',
+    issuedAt: NOW,
+    transaction: '0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678',
   },
   signature: '0x' + 'ef'.repeat(32) + '12'.repeat(32) + '1c',
   format: 'eip712',
 };
 
-// Full x402 PaymentRequired response (what client receives on 402)
-const PAYMENT_REQUIRED: X402PaymentRequired = {
+// Full x402 challenge (what client receives on 402)
+const PAYMENT_REQUIRED: X402OfferReceiptChallenge = {
   accepts: WEATHER_API_ACCEPTS,
-  acceptIndex: 0, // UNSIGNED hint - PEAC verifies via term-matching
-  offer: WEATHER_OFFER,
-  resourceUrl: 'https://api.weather.example/v1/forecast/london',
+  offers: [WEATHER_OFFER],
+  resourceUrl: RESOURCE_URL,
 };
 
-// Full x402 SettlementResponse (what client receives after payment)
+// Full x402 settlement response (what client receives after payment)
 const SETTLEMENT_RESPONSE: X402SettlementResponse = {
   receipt: WEATHER_RECEIPT,
-  resourceUrl: 'https://api.weather.example/v1/forecast/london',
+  resourceUrl: RESOURCE_URL,
 };
 
 // ---------------------------------------------------------------------------
@@ -101,14 +106,14 @@ const SETTLEMENT_RESPONSE: X402SettlementResponse = {
 
 async function main() {
   console.log('=== x402 Weather Proof Demo ===\n');
-  console.log('Resource: https://api.weather.example/v1/forecast/london');
+  console.log('Resource: ' + RESOURCE_URL);
   console.log('Network:  eip155:8453 (Base)');
   console.log('Asset:    USDC');
   console.log('Amount:   $0.10 (100000 minor units)\n');
 
   // Step 1: Verify the signed offer
   console.log('1. Verifying signed offer against accept terms...');
-  const offerResult = verifyOffer(WEATHER_OFFER, WEATHER_API_ACCEPTS, PAYMENT_REQUIRED.acceptIndex);
+  const offerResult = verifyOffer(WEATHER_OFFER, WEATHER_API_ACCEPTS);
 
   if (!offerResult.valid) {
     console.log('   FAILED: Offer verification failed');
@@ -137,14 +142,13 @@ async function main() {
   }
 
   console.log('   OK: Receipt structure verified');
-  console.log(`   - Network: ${WEATHER_RECEIPT.payload.network}`);
-  console.log(`   - txHash: ${WEATHER_RECEIPT.payload.txHash?.slice(0, 20)}...`);
 
   // Step 3: Demonstrate acceptIndex-as-hint behavior
   console.log('\n3. Testing acceptIndex as UNTRUSTED hint...');
 
-  // Try with wrong acceptIndex - should fail on term-match
-  const wrongIndexResult = verifyOffer(WEATHER_OFFER, WEATHER_API_ACCEPTS, 1);
+  // Create an offer with wrong acceptIndex: should fail on term-match
+  const wrongOffer: SignedOffer = { ...WEATHER_OFFER, acceptIndex: 1 };
+  const wrongIndexResult = verifyOffer(wrongOffer, WEATHER_API_ACCEPTS);
   if (!wrongIndexResult.valid) {
     const termMismatch = wrongIndexResult.errors.find((e) => e.code === 'accept_term_mismatch');
     if (termMismatch) {
@@ -153,8 +157,10 @@ async function main() {
     }
   }
 
-  // Try without acceptIndex - should find match via scan
-  const scanResult = verifyOffer(WEATHER_OFFER, WEATHER_API_ACCEPTS);
+  // Try without acceptIndex: should find match via scan
+  const noHintOffer: SignedOffer = { ...WEATHER_OFFER };
+  delete noHintOffer.acceptIndex;
+  const scanResult = verifyOffer(noHintOffer, WEATHER_API_ACCEPTS);
   if (scanResult.valid) {
     console.log('   OK: Offer verified without acceptIndex (full scan)');
     console.log(`   - Found match at index: ${scanResult.matchedIndex}`);
@@ -166,11 +172,15 @@ async function main() {
 
   console.log('   Record version:', peacRecord.version);
   console.log('   Evidence fields (from signed payloads):');
+  console.log(`   - resourceUrl: ${peacRecord.evidence.resourceUrl}`);
   console.log(`   - network: ${peacRecord.evidence.network}`);
   console.log(`   - asset: ${peacRecord.evidence.asset}`);
   console.log(`   - amount: ${peacRecord.evidence.amount}`);
   console.log(`   - payee: ${peacRecord.evidence.payee?.slice(0, 20)}...`);
-  console.log(`   - txHash: ${peacRecord.evidence.txHash?.slice(0, 20)}...`);
+  console.log(`   - payer: ${peacRecord.evidence.payer?.slice(0, 20)}...`);
+  if (peacRecord.evidence.transaction) {
+    console.log(`   - transaction: ${peacRecord.evidence.transaction.slice(0, 20)}...`);
+  }
   console.log('   Hints (unsigned, untrusted):');
   if (peacRecord.hints.acceptIndex) {
     console.log(`   - acceptIndex: ${peacRecord.hints.acceptIndex.value}`);
@@ -181,7 +191,7 @@ async function main() {
   console.log('\n5. Computing stable digest (JCS+SHA-256)...');
   const digest = await jcsHash(peacRecord);
   console.log(`   Digest: 0x${digest}`);
-  console.log('   (Deterministic - same inputs always produce same hash)');
+  console.log('   (Deterministic: same inputs always produce same hash)');
 
   // Output full record as JSON
   console.log('\n6. Full PEAC Record JSON:');

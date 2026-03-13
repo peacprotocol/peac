@@ -1,24 +1,28 @@
 /**
  * x402 Offer/Receipt extension types
  *
- * Models the x402 offer/receipt flow:
- * - SignedOffer: EIP-712 or JWS signed payment terms
- * - SignedReceipt: Settlement proof binding offer to on-chain transaction
- * - AcceptEntry: Terms an offer can match against
- * - acceptIndex: Unsigned envelope field (hint only, not binding)
+ * Public API types for the x402 adapter. Uses raw wire types (Layer A)
+ * and normalized types (Layer B) from their respective modules.
  *
- * Key design choices:
- * - validUntil: epoch seconds in signed payload
- * - version: in signed payload
- * - acceptIndex: unsigned envelope field (outside signature)
- * - metadata: deferred to v2
- *
- * NOTE: This adapter targets the x402 Offer/Receipt EXTENSION,
- * NOT the baseline x402 header flow. The profile identifier reflects this:
- * `peac-x402-offer-receipt/0.1` (extension) vs `peac-x402/0.1` (baseline, reserved).
+ * @packageDocumentation
  */
 
-import type { JsonObject } from '@peac/kernel';
+// Re-export raw wire types (Layer A) for wire-compatibility consumers
+export type {
+  RawOfferPayload,
+  RawReceiptPayload,
+  RawJWSSignedOffer,
+  RawEIP712SignedOffer,
+  RawSignedOffer,
+  RawJWSSignedReceipt,
+  RawEIP712SignedReceipt,
+  RawSignedReceipt,
+  RawX402ExtensionInfo,
+  ParsedCompactJWS,
+} from './raw.js';
+
+// Re-export normalized types (Layer B)
+export type { NormalizedOfferPayload, NormalizedReceiptPayload } from './normalize.js';
 
 // Re-export shared types from adapter-core
 export type { Result, AdapterError, AdapterErrorCode, JsonObject } from '@peac/adapter-core';
@@ -65,7 +69,7 @@ export const MAX_TOTAL_ACCEPTS_BYTES = 256 * 1024; // 256 KiB
 export const MAX_AMOUNT_LENGTH = 78;
 
 // ---------------------------------------------------------------------------
-// x402 Signed Artifacts
+// Signature Format
 // ---------------------------------------------------------------------------
 
 /**
@@ -76,77 +80,43 @@ export const MAX_AMOUNT_LENGTH = 78;
  */
 export type SignatureFormat = 'eip712' | 'jws';
 
+// ---------------------------------------------------------------------------
+// Public Payload Type Aliases
+// ---------------------------------------------------------------------------
+
+// Public types are aliases for normalized types (Layer B output).
+// Wire consumers should use RawOfferPayload/RawReceiptPayload directly.
+
+import type { NormalizedOfferPayload, NormalizedReceiptPayload } from './normalize.js';
+import type { RawSignedOffer, RawSignedReceipt } from './raw.js';
+
 /**
- * x402 Offer payload (inside the signed envelope)
+ * x402 Offer payload (normalized, semantically clean)
  *
- * These fields are cryptographically bound by the signature.
- * Any modification invalidates the signature.
+ * This is the public-facing offer payload type. EIP-712 placeholders
+ * have been normalized to semantic absence.
  */
-export interface OfferPayload {
-  /** Schema version (in signed payload) */
-  version: string;
-  /** Offer expiry as epoch seconds (in signed payload) */
-  validUntil: number;
-  /** CAIP-2 network identifier (e.g., "eip155:8453") */
-  network: string;
-  /** Payment asset identifier (e.g., "USDC", "ETH") */
-  asset: string;
-  /** Payment amount in minor units */
-  amount: string;
-  /** Payment recipient address */
-  payTo: string;
-  /** Settlement scheme (e.g., "exact", "flexible") */
-  scheme?: string;
-  /** Settlement parameters (scheme-specific) */
-  settlement?: JsonObject;
-}
+export type OfferPayload = NormalizedOfferPayload;
 
 /**
- * x402 Signed Offer (envelope)
+ * x402 Receipt payload (normalized, semantically clean)
  *
- * The offer envelope contains:
- * - payload: signed content (cryptographically bound)
- * - signature: EIP-712 or JWS signature over the payload
- * - format: which signature scheme was used
+ * Privacy-minimal: transaction is optional enrichable evidence.
  */
-export interface SignedOffer {
-  /** The signed payload */
-  payload: OfferPayload;
-  /** Signature over the payload */
-  signature: string;
-  /** Signature format */
-  format: SignatureFormat;
-}
+export type ReceiptPayload = NormalizedReceiptPayload;
 
 /**
- * x402 Receipt payload (inside the signed envelope)
+ * x402 Signed Offer (discriminated union)
+ *
+ * JWS format: `{ format: 'jws', signature: string }` (payload inside compact JWS)
+ * EIP-712: `{ format: 'eip712', payload, signature }` (payload is separate field)
  */
-export interface ReceiptPayload {
-  /** Schema version */
-  version: string;
-  /** CAIP-2 network identifier */
-  network: string;
-  /** On-chain transaction hash */
-  txHash: string;
-  /** Payment asset */
-  asset?: string;
-  /** Payment amount in minor units */
-  amount?: string;
-  /** Payment recipient */
-  payTo?: string;
-}
+export type SignedOffer = RawSignedOffer;
 
 /**
- * x402 Signed Receipt (envelope)
+ * x402 Signed Receipt (discriminated union)
  */
-export interface SignedReceipt {
-  /** The signed payload */
-  payload: ReceiptPayload;
-  /** Signature over the payload */
-  signature: string;
-  /** Signature format */
-  format: SignatureFormat;
-}
+export type SignedReceipt = RawSignedReceipt;
 
 // ---------------------------------------------------------------------------
 // Accept Terms
@@ -167,10 +137,8 @@ export interface AcceptEntry {
   payTo: string;
   /** Maximum amount in minor units */
   amount: string;
-  /** Settlement scheme */
-  scheme?: string;
-  /** Settlement parameters */
-  settlement?: JsonObject;
+  /** Settlement scheme (required per upstream) */
+  scheme: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -178,24 +146,27 @@ export interface AcceptEntry {
 // ---------------------------------------------------------------------------
 
 /**
- * x402 PaymentRequired response with offer/receipt extension
+ * PEAC's post-extraction convenience type for x402 offer/receipt challenge
  *
- * This is the 402 response sent by the resource server.
- * The extension data lives under extensions["offer-receipt"].
+ * This is NOT the upstream `PaymentRequired` message type. Upstream's
+ * `PaymentRequired` nests extension data under `extensions["offer-receipt"].info`.
+ * This type represents the PEAC-side extracted and flattened shape, combining
+ * the offers from the extension info with the accepts from the top-level
+ * `PaymentRequired`.
+ *
+ * To convert from upstream wire format:
+ * 1. Use `extractExtensionInfo(body)` to pull offers from the raw response
+ * 2. Read `accepts` from the top-level `PaymentRequired` message
+ * 3. Combine into this convenience type
+ *
+ * @see extractExtensionInfo - Extracts from upstream `extensions["offer-receipt"].info`
+ * @see extractReceiptFromHeaders - Extracts receipt from settlement response headers
  */
-export interface X402PaymentRequired {
+export interface X402OfferReceiptChallenge {
   /** List of acceptable payment terms */
   accepts: AcceptEntry[];
-  /**
-   * Index into accepts[] that the offer targets.
-   *
-   * IMPORTANT: This field is OUTSIDE the signed payload (unsigned envelope).
-   * Verifiers MUST NOT rely on it as binding.
-   * Treat as advisory hint only; always verify via term-matching.
-   */
-  acceptIndex?: number;
-  /** Signed offer */
-  offer: SignedOffer;
+  /** Signed offers */
+  offers: RawSignedOffer[];
   /** Resource URL being accessed */
   resourceUrl?: string;
 }
@@ -205,7 +176,7 @@ export interface X402PaymentRequired {
  */
 export interface X402SettlementResponse {
   /** Signed receipt proving settlement */
-  receipt: SignedReceipt;
+  receipt: RawSignedReceipt;
   /** Resource URL that was accessed */
   resourceUrl?: string;
   /** Reference back to the offer */
@@ -213,8 +184,6 @@ export interface X402SettlementResponse {
   /**
    * Forward-compatibility: unknown extension fields from x402 evolution
    *
-   * This allows the adapter to tolerate additions from upstream PRs
-   * (e.g., #1004 TXID, #1015 fee extensions) without breaking.
    * Unknown fields are preserved in proofs but NOT copied to evidence.
    */
   extensions?: Record<string, unknown>;
@@ -225,7 +194,17 @@ export interface X402SettlementResponse {
 // ---------------------------------------------------------------------------
 
 /**
- * Result of offer verification
+ * Result of wire-level validation
+ */
+export interface WireVerification {
+  /** Whether the wire structure is valid */
+  valid: boolean;
+  /** Verification errors (if invalid) */
+  errors: VerificationError[];
+}
+
+/**
+ * Result of offer term verification
  */
 export interface OfferVerification {
   /** Whether the offer is valid */
@@ -240,11 +219,6 @@ export interface OfferVerification {
   errors: VerificationError[];
   /**
    * Term-matching details (always populated for deterministic output)
-   *
-   * This makes mismatchDetected first-class in the verification output,
-   * rather than requiring callers to pass it externally.
-   *
-   * All fields are required booleans for predictable downstream processing.
    */
   termMatching: {
     /** Method used: 'hint' (acceptIndex) or 'scan' (full array scan) */
@@ -257,12 +231,40 @@ export interface OfferVerification {
 }
 
 /**
- * Result of receipt verification
+ * Result of receipt semantic verification
  */
 export interface ReceiptVerification {
   /** Whether the receipt is valid */
   valid: boolean;
   /** Verification errors (if invalid) */
+  errors: VerificationError[];
+}
+
+/**
+ * Options for offer-receipt consistency verification
+ */
+export interface ConsistencyOptions {
+  /**
+   * Candidate payer addresses to verify against receipt.payer
+   *
+   * If provided, receipt.payer must match one of these addresses
+   * (using the network-aware address comparator).
+   * Upstream client verification checks payer against wallet addresses.
+   */
+  payerCandidates?: string[];
+  /**
+   * Address comparator for payer matching (default: defaultAddressComparator)
+   */
+  addressComparator?: AddressComparator;
+}
+
+/**
+ * Result of offer-receipt consistency verification
+ */
+export interface ConsistencyVerification {
+  /** Whether offer and receipt are consistent */
+  valid: boolean;
+  /** Consistency errors (if inconsistent) */
   errors: VerificationError[];
 }
 
@@ -279,18 +281,18 @@ export interface VerificationError {
 }
 
 // ---------------------------------------------------------------------------
-// PEAC Record (output of mapping)
+// Verification Status Metadata
 // ---------------------------------------------------------------------------
 
 /**
  * Verification status metadata
  *
- * Records what verification was performed and how.
- * CRITICAL: `valid: true` from verifyOffer/verifyReceipt does NOT imply
- * cryptographic signature validity unless a crypto verifier was supplied.
+ * Records what verification was performed and how across all layers.
+ * CRITICAL: `valid: true` does NOT imply cryptographic signature validity
+ * unless a crypto verifier was supplied.
  */
 export interface VerificationStatus {
-  /** Structural validation always performed by this adapter */
+  /** Wire-level structural validation (always performed) */
   structural: true;
   /** Cryptographic signature verification status */
   cryptographic: {
@@ -311,34 +313,59 @@ export interface VerificationStatus {
     method: 'hint' | 'scan';
     /** Index of matched accept entry */
     matchedIndex?: number;
-    /** Why term-matching wasn't performed (if matched is false and no verification was done) */
+    /** Why term-matching wasn't performed */
     reason?: 'not_verified';
   };
+  /** Offer-receipt consistency status */
+  consistency?: {
+    /** Whether consistency was checked */
+    checked: boolean;
+    /** Whether offer and receipt are consistent */
+    valid?: boolean;
+  };
+  /** Signer authorization status */
+  signerAuthorization?: {
+    /** Whether authorization was checked */
+    checked: boolean;
+    /** Whether the signer is authorized */
+    authorized?: boolean;
+    /** Authorization method used */
+    method?: string;
+  };
 }
+
+// ---------------------------------------------------------------------------
+// PEAC Record (output of mapping, Layer C)
+// ---------------------------------------------------------------------------
 
 /**
  * PEAC interaction record for an x402 Offer/Receipt extension flow
  *
- * This is the canonical record produced by mapping x402 proofs
- * into the PEAC evidence layer.
- *
- * NOTE: This profile targets the x402 Offer/Receipt EXTENSION,
- * NOT the baseline x402 header flow.
+ * Produced by mapping x402 proofs into the PEAC evidence layer.
+ * Evidence fields are derived from normalized payloads (Layer B).
+ * Raw upstream artifacts are preserved as-is in proofs.
  */
 export interface X402PeacRecord {
   /** Record format version (extension profile, not baseline) */
   version: typeof X402_OFFER_RECEIPT_PROFILE;
-  /** Raw x402 proofs (preserved for audit) */
+  /**
+   * Raw x402 proofs (preserved for audit)
+   *
+   * These are the exact wire artifacts, never mutated or reconstructed.
+   * Proof preservation discipline: raw artifacts in, raw artifacts stored.
+   */
   proofs: {
     x402: {
-      offer: SignedOffer;
-      receipt: SignedReceipt;
+      offer: RawSignedOffer;
+      receipt: RawSignedReceipt;
     };
   };
-  /** Normalized evidence fields (extracted from signed payloads) */
+  /** Normalized evidence fields (extracted from signed payloads via Layer B) */
   evidence: {
-    /** Offer expiry (epoch seconds, from signed payload) */
-    validUntil: number;
+    /** Resource URL (from offer, signed) */
+    resourceUrl: string;
+    /** Offer expiry (epoch seconds, from offer; undefined = no expiry) */
+    validUntil?: number;
     /** CAIP-2 network */
     network: string;
     /** Payment recipient (neutral naming; x402 calls this "payTo") */
@@ -347,21 +374,25 @@ export interface X402PeacRecord {
     asset: string;
     /** Payment amount in minor units */
     amount: string;
-    /** On-chain transaction hash (from receipt) */
-    txHash: string;
-    /** Schema version (from offer) */
-    offerVersion: string;
+    /** Schema version (from offer, number) */
+    offerVersion: number;
+    /** Payer address (from receipt) */
+    payer?: string;
+    /** Receipt issuance timestamp (from receipt, epoch seconds) */
+    issuedAt?: number;
+    /** On-chain transaction reference (from receipt, optional; privacy-minimal) */
+    transaction?: string;
     /** Schema version (from receipt, if present) */
-    receiptVersion?: string;
+    receiptVersion?: number;
   };
   /** Unsigned metadata and verification status */
   hints: {
     acceptIndex?: {
-      /** The acceptIndex value from the envelope */
+      /** The acceptIndex value from the offer envelope */
       value: number;
-      /** Always true -- acceptIndex is outside the signature */
+      /** Always true: acceptIndex is outside the signature */
       untrusted: true;
-      /** True if acceptIndex pointed to a non-matching entry (when mismatchPolicy != 'fail') */
+      /** True if acceptIndex pointed to a non-matching entry */
       mismatchDetected?: boolean;
     };
     resourceUrl?: string;
@@ -396,50 +427,217 @@ export interface X402PeacRecord {
 export type MismatchPolicy = 'fail' | 'warn_and_scan' | 'ignore_and_scan';
 
 /**
+ * Network-aware address comparison function
+ *
+ * Default behavior:
+ * - EVM networks (eip155:*): case-insensitive (EIP-55 mixed-case is cosmetic)
+ * - All other networks: exact string comparison (fail-closed for unknown formats)
+ *
+ * Override via `X402AdapterConfig.addressComparator` or
+ * `ConsistencyOptions.addressComparator` for specific network requirements.
+ *
+ * @param a - First address
+ * @param b - Second address
+ * @param network - CAIP-2 network identifier
+ * @returns True if addresses are equivalent for the given network
+ */
+export type AddressComparator = (a: string, b: string, network: string) => boolean;
+
+/**
+ * Default network-aware address comparator
+ *
+ * EVM networks (eip155:*): case-insensitive (EIP-55 checksums are cosmetic encoding).
+ * All other networks: exact string comparison (fail-closed for unknown formats).
+ */
+export function defaultAddressComparator(a: string, b: string, network: string): boolean {
+  if (network.startsWith('eip155:')) {
+    return a.toLowerCase() === b.toLowerCase();
+  }
+  return a === b;
+}
+
+/**
  * Adapter configuration
  *
- * This adapter implements the PaymentProofAdapter interface from @peac/adapter-core.
- * See docs/specs/X402-PROFILE.md for the normative specification.
+ * Defaults match upstream x402 behavior:
+ * - `offerExpiryPolicy: 'allow_missing'` (upstream treats validUntil as optional)
+ * - `receiptRecencySeconds: 3600` (upstream client default)
+ *
+ * Stricter options available via opt-in:
+ * - `offerExpiryPolicy: 'require'` rejects offers without expiry
+ * - `receiptRecencySeconds: 300` tightens freshness window
+ * - `signatureVerificationPolicy: 'require'` mandates crypto verification
  */
 export interface X402AdapterConfig {
-  /** Supported offer versions (default: ["1"]) */
-  supportedVersions?: string[];
+  /** Supported offer/receipt versions (default: [1]) */
+  supportedVersions?: number[];
   /** Clock skew tolerance in seconds for validUntil (default: 60) */
   clockSkewSeconds?: number;
   /** Current time override for testing (epoch seconds) */
   nowSeconds?: number;
   /**
    * How to handle acceptIndex mismatch (default: "fail")
-   *
-   * When "warn_and_scan" or "ignore_and_scan", the adapter will:
-   * 1. Record the mismatch in hints.acceptIndex.mismatchDetected
-   * 2. Continue verification via full scan
-   * 3. Succeed if scan finds a unique match
    */
   mismatchPolicy?: MismatchPolicy;
   /**
    * Maximum number of accept entries allowed (default: 128)
-   *
-   * DoS protection: prevents CPU exhaustion from large accepts arrays.
    */
   maxAcceptEntries?: number;
   /**
    * Maximum total bytes for accepts array JSON (default: 256 KiB)
-   *
-   * DoS protection: prevents memory exhaustion from large payloads.
-   * Note: This requires caller to pass raw JSON size if available.
    */
   maxTotalAcceptsBytes?: number;
   /**
    * Enable strict CAIP-2 network format validation (default: true)
-   *
-   * When enabled, validates network strings match CAIP-2 format (namespace:reference).
    */
   strictNetworkValidation?: boolean;
   /**
    * Enable strict amount validation (default: true)
-   *
-   * When enabled, validates amount is a non-negative integer string.
    */
   strictAmountValidation?: boolean;
+  /**
+   * Offer expiry policy (default: 'allow_missing')
+   *
+   * Upstream x402 treats validUntil as optional (EIP-712 encodes
+   * unused values as `0`). The default matches upstream behavior.
+   *
+   * - 'allow_missing': accept offers without expiry (default)
+   * - 'require': reject offers without expiry
+   */
+  offerExpiryPolicy?: 'require' | 'allow_missing';
+  /**
+   * Signature verification policy (default: 'none')
+   *
+   * - 'none': no crypto verification (structural only)
+   * - 'verify_if_configured': verify if CryptoVerifier is supplied
+   * - 'require': fail if CryptoVerifier is not supplied
+   */
+  signatureVerificationPolicy?: 'none' | 'verify_if_configured' | 'require';
+  /**
+   * Signer authorization policy (default: 'none')
+   *
+   * - 'none': no signer authorization
+   * - 'verify_if_configured': authorize if SignerAuthorizer is supplied
+   * - 'require': fail if SignerAuthorizer is not supplied
+   */
+  signerAuthorizationPolicy?: 'none' | 'verify_if_configured' | 'require';
+  /**
+   * Address comparator for payTo/payer matching (default: defaultAddressComparator)
+   *
+   * Network-aware: EVM is case-insensitive, others exact.
+   */
+  addressComparator?: AddressComparator;
+  /**
+   * Maximum compact JWS byte length (default: 64 KB)
+   */
+  maxCompactJwsBytes?: number;
+  /**
+   * Receipt recency window in seconds (default: 3600)
+   *
+   * Default matches upstream x402 client (1 hour).
+   * Receipts with issuedAt older than this are rejected.
+   */
+  receiptRecencySeconds?: number;
+}
+
+// ---------------------------------------------------------------------------
+// Opt-in Crypto Verification Interfaces
+// ---------------------------------------------------------------------------
+
+/**
+ * Result of cryptographic verification
+ */
+export interface CryptoResult {
+  /** Whether the signature is valid */
+  valid: boolean;
+  /** Recovered/resolved signer identity */
+  signer?: string;
+  /** JWS algorithm used (from header, e.g., 'ES256', 'EdDSA') */
+  alg?: string;
+  /** JWS key ID (from header) */
+  kid?: string;
+  /** Error message if verification failed */
+  error?: string;
+}
+
+/**
+ * Opt-in cryptographic verifier interface
+ *
+ * Callers inject an implementation to enable signature verification.
+ * The adapter core has no crypto dependencies.
+ *
+ * Implementation constraints:
+ * - MUST NOT perform live network I/O (no key fetching, no DID resolution)
+ * - Key material MUST be provided via injection or pre-fetched
+ * - MUST enforce algorithm allowlists (no implicit algorithm trust)
+ * - MUST preserve `kid` and `alg` from JWS headers in CryptoResult
+ * - If DID-based: use pluggable resolver with caching, allowlists,
+ *   timeouts, offline mode, and SSRF controls
+ */
+export interface CryptoVerifier {
+  /** Verify a JWS compact serialization */
+  verifyJWS(compactJws: string): Promise<CryptoResult>;
+  /** Verify an EIP-712 typed data signature */
+  verifyEIP712(payload: unknown, signature: string, domain: EIP712Domain): Promise<CryptoResult>;
+}
+
+/**
+ * EIP-712 domain parameters for signature verification
+ */
+export interface EIP712Domain {
+  name?: string;
+  version?: string;
+  chainId?: number;
+  verifyingContract?: string;
+  salt?: string;
+}
+
+/**
+ * Opt-in signer authorization interface
+ *
+ * Determines whether a recovered signer is authorized for a given resource.
+ * This is verifier policy, not payload data (per upstream PR #935 conclusion).
+ *
+ * Implementation constraints:
+ * - MUST NOT perform live network I/O in core verification path
+ * - Resolver injection only: callers provide pre-fetched or cached material
+ * - For `did:web` resolution: require explicit timeout (default 5s),
+ *   caching (default 5min), allowlist, and SSRF controls
+ * - Results are stored separately from signature verification in record metadata
+ */
+export interface SignerAuthorizer {
+  /** Check if a signer is authorized for a resource */
+  authorize(
+    signer: string,
+    resourceUrl: string,
+    context: AuthorizationContext
+  ): Promise<AuthorizationResult>;
+}
+
+/**
+ * Context provided to the signer authorizer
+ *
+ * Preserves `kid` and `alg` from JWS headers for authorization decisions.
+ */
+export interface AuthorizationContext {
+  /** CAIP-2 network identifier */
+  network: string;
+  /** Signature format */
+  format: 'jws' | 'eip712';
+  /** JWS kid header value (if JWS format) */
+  kid?: string;
+  /** JWS algorithm (from header, e.g., 'ES256', 'EdDSA') */
+  alg?: string;
+}
+
+/**
+ * Result of signer authorization
+ */
+export interface AuthorizationResult {
+  /** Whether the signer is authorized */
+  authorized: boolean;
+  /** Authorization method used (e.g., 'dns-txt', 'did-web', 'erc-8004', 'manual') */
+  method?: string;
+  /** Reason for authorization decision */
+  reason?: string;
 }
