@@ -25,7 +25,7 @@
  * - JWS hardening: segment count, padding, payload type, size limits
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import {
@@ -45,9 +45,12 @@ import {
   type ConsistencyVerification,
   type X402OfferReceiptChallenge,
   type X402SettlementResponse,
+  type RawOfferPayload,
+  type RawReceiptPayload,
 } from '../../packages/adapters/x402/src';
 
 const FIXTURES_DIR = join(__dirname, '..', '..', 'specs', 'conformance', 'fixtures', 'x402');
+const UPSTREAM_DIR = join(__dirname, '..', '..', 'specs', 'upstream', 'x402');
 
 // ---------------------------------------------------------------------------
 // Fixture Types (v0.12.1 native format with explicit kind routing)
@@ -298,7 +301,7 @@ describe('x402 Adapter Conformance', () => {
   describe('Manifest Integrity', () => {
     it('should have valid manifest structure', () => {
       expect(manifest.name).toBe('x402-adapter');
-      expect(manifest.version).toBe('0.3.0');
+      expect(manifest.version).toBe('0.12.1');
       expect(manifest.profile).toBe('peac-x402-offer-receipt/0.2');
       expect(manifest.categories.valid.vectors.length).toBeGreaterThan(0);
       expect(manifest.categories.invalid.vectors.length).toBeGreaterThan(0);
@@ -764,6 +767,102 @@ describe('x402 Adapter Conformance', () => {
 
     it('profile identifier matches code constant', () => {
       expect(manifest.profile).toBe(X402_OFFER_RECEIPT_PROFILE);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Upstream Type Parity (Lane 1: pinned at commit f2bbb5c)
+  // -------------------------------------------------------------------------
+
+  describe('Upstream Type Parity', () => {
+    interface FieldSpec {
+      type: string;
+      required: boolean | string;
+    }
+
+    interface TypeSnapshot {
+      upstream: { commit: string; spec_version: string };
+      offer_payload: { fields: Record<string, FieldSpec> };
+      receipt_payload: { fields: Record<string, FieldSpec> };
+      signed_artifact: { fields: Record<string, FieldSpec> };
+      extension_nesting: { path: string; fields: Record<string, FieldSpec> };
+    }
+
+    let snapshot: TypeSnapshot;
+
+    beforeAll(() => {
+      snapshot = JSON.parse(readFileSync(join(UPSTREAM_DIR, 'type-snapshot.json'), 'utf8'));
+    });
+
+    it('snapshot is pinned to upstream commit f2bbb5c', () => {
+      expect(snapshot.upstream.commit).toBe('f2bbb5c');
+    });
+
+    it('RawOfferPayload fields match upstream offer payload', () => {
+      // Structural parity: verify our RawOfferPayload has exactly the fields
+      // documented in the upstream spec at the pinned commit.
+      const upstreamFields = Object.keys(snapshot.offer_payload.fields).sort();
+      const sample: RawOfferPayload = {
+        version: 1,
+        resourceUrl: '',
+        scheme: '',
+        network: '',
+        asset: '',
+        payTo: '',
+        amount: '',
+        validUntil: 0,
+      };
+      const ourFields = Object.keys(sample).sort();
+      expect(ourFields).toEqual(upstreamFields);
+    });
+
+    it('RawReceiptPayload fields match upstream receipt payload', () => {
+      const upstreamFields = Object.keys(snapshot.receipt_payload.fields).sort();
+      const sample: RawReceiptPayload = {
+        version: 1,
+        network: '',
+        resourceUrl: '',
+        payer: '',
+        issuedAt: 0,
+        transaction: '',
+      };
+      const ourFields = Object.keys(sample).sort();
+      expect(ourFields).toEqual(upstreamFields);
+    });
+
+    it('signed artifact envelope fields match upstream', () => {
+      const expected = Object.keys(snapshot.signed_artifact.fields).sort();
+      // Our RawEIP712SignedOffer has: format, payload, signature, acceptIndex
+      // Our RawJWSSignedOffer has: format, signature, acceptIndex
+      // Union covers all: format, payload, signature, acceptIndex
+      expect(expected).toEqual(['acceptIndex', 'format', 'payload', 'signature']);
+    });
+
+    it('extension nesting path matches upstream', () => {
+      expect(snapshot.extension_nesting.path).toBe('extensions["offer-receipt"].info');
+    });
+
+    it('offer payload field types match upstream spec', () => {
+      const fields = snapshot.offer_payload.fields;
+      expect(fields.version.type).toBe('number');
+      expect(fields.resourceUrl.type).toBe('string');
+      expect(fields.scheme.type).toBe('string');
+      expect(fields.network.type).toBe('string');
+      expect(fields.asset.type).toBe('string');
+      expect(fields.payTo.type).toBe('string');
+      expect(fields.amount.type).toBe('string');
+      expect(fields.validUntil.type).toBe('number');
+    });
+
+    it('receipt payload field types match upstream spec', () => {
+      const fields = snapshot.receipt_payload.fields;
+      expect(fields.version.type).toBe('number');
+      expect(fields.network.type).toBe('string');
+      expect(fields.resourceUrl.type).toBe('string');
+      expect(fields.payer.type).toBe('string');
+      expect(fields.issuedAt.type).toBe('number');
+      expect(fields.transaction.type).toBe('string');
+      expect(fields.transaction.required).toBe(false);
     });
   });
 });
