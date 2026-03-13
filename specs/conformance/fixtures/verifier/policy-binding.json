@@ -1,6 +1,6 @@
 {
   "description": "Policy binding conformance fixtures (DD-49)",
-  "version": "0.10.10",
+  "version": "0.12.1",
   "design_decision": "DD-49",
   "deferred_convention": "Test cases with 'deferred_until' and 'executable: false' describe future Wire 0.2 behavior. They are non-executable placeholders -- input values use angle-bracket pseudocode (e.g. '<base64url of SHA-256>'). They become executable when the deferred_until version ships.",
   "test_cases": [
@@ -169,5 +169,5 @@
       }
     }
   ],
-  "schema_version": "0.10.10"
+  "schema_version": "0.12.1"
 }

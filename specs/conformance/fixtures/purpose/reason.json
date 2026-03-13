@@ -1,7 +1,7 @@
 {
   "$schema": "../../schema.json",
   "description": "Purpose reason derivation golden vectors (v0.9.24+)",
-  "version": "0.9.24",
+  "version": "0.12.1",
   "vectors": [
     {
       "id": "undeclared-default",
@@ -101,5 +101,5 @@
       }
     }
   ],
-  "schema_version": "0.9.24"
+  "schema_version": "0.12.1"
 }

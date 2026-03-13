@@ -1,7 +1,7 @@
 {
   "$schema": "../manifest.schema.json",
   "name": "x402-adapter",
-  "version": "0.3.0",
+  "version": "0.12.1",
   "description": "Conformance vectors for @peac/adapter-x402 verification and record mapping (v0.12.1 upstream sync)",
   "profile": "peac-x402-offer-receipt/0.2",
   "fixture_kinds": ["offer_verification", "receipt_verification", "consistency_verification"],

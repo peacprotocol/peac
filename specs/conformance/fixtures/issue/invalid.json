@@ -1,6 +1,6 @@
 {
   "$comment": "Invalid Issue() input golden vectors for cross-language conformance (v0.9.29+)",
-  "version": "0.9.29",
+  "version": "0.12.1",
   "runner_contract": {
     "input_format": "untyped JSON values passed to Issue()",
     "float_handling": "runner decodes amt as any/interface{}, Issue() validates integer constraint",
@@ -185,5 +185,5 @@
       }
     }
   ],
-  "schema_version": "0.9.29"
+  "schema_version": "0.12.1"
 }

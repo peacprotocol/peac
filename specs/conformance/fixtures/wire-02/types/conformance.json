@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 Type Grammar conformance vectors (Section 6, DD-156)",
-  "version": "0.12.0",
-  "schema_version": "0.12.0",
+  "version": "0.12.1",
+  "schema_version": "0.12.1",
   "fixtures": [
     {
       "name": "reverse-dns-valid",

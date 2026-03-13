@@ -1,6 +1,6 @@
 {
   "description": "Verification report conformance fixtures per VERIFICATION-REPORT-FORMAT.md",
-  "version": "0.10.8",
+  "version": "0.12.1",
   "report_version": "peac-verification-report/0.1",
   "test_cases": [
     {
@@ -298,5 +298,5 @@
       }
     }
   ],
-  "schema_version": "0.10.8"
+  "schema_version": "0.12.1"
 }

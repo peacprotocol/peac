@@ -1,6 +1,6 @@
 {
   "$comment": "Edge case AgentIdentityAttestation golden vectors (v0.9.25+)",
-  "version": "0.9.25",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "unicode-agent-id",
@@ -245,5 +245,5 @@
       }
     }
   ],
-  "schema_version": "0.9.25"
+  "schema_version": "0.12.1"
 }

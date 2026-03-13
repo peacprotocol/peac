@@ -1,6 +1,6 @@
 {
   "name": "@peac/monorepo",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "private": true,
   "description": "PEAC Protocol - Cryptographic receipts for agentic commerce",
   "repository": {

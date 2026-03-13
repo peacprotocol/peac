@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/workflow-fixtures.schema.json",
   "$comment": "Invalid WorkflowContext and WorkflowSummaryAttestation vectors (v0.10.2+)",
-  "version": "0.10.2",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "invalid-workflow-id-format",
@@ -446,5 +446,5 @@
       }
     }
   ],
-  "schema_version": "0.10.2"
+  "schema_version": "0.12.1"
 }

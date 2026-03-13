@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 Policy Binding conformance vectors (Section 11, DD-49/DD-156)",
-  "version": "0.12.0",
-  "schema_version": "0.12.0",
+  "version": "0.12.1",
+  "schema_version": "0.12.1",
   "fixtures": [
     {
       "name": "policy-binding-verified",

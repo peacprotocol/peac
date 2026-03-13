@@ -1,6 +1,6 @@
 {
   "description": "Security limits conformance fixtures per VERIFIER-SECURITY-MODEL.md",
-  "version": "0.10.8",
+  "version": "0.12.1",
   "limits": {
     "max_receipt_bytes": 262144,
     "max_jwks_bytes": 65536,
@@ -139,5 +139,5 @@
       }
     }
   ],
-  "schema_version": "0.10.8"
+  "schema_version": "0.12.1"
 }

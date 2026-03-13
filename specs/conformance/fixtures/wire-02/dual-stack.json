@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 dual-stack compatibility vectors (v0.12.0 stable, section 15, DD-158)",
-  "schema_version": "0.12.0",
-  "version": "0.12.0",
+  "schema_version": "0.12.1",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "wire02-typ-coherent",

@@ -1,6 +1,6 @@
 {
   "$comment": "Valid Issue() input golden vectors for cross-language conformance (v0.9.29+)",
-  "version": "0.9.29",
+  "version": "0.12.1",
   "runner_contract": {
     "input_format": "untyped JSON values passed to Issue()",
     "assertion_mode": "invariant-based (subset checking, not exact equality)",
@@ -177,5 +177,5 @@
       }
     }
   ],
-  "schema_version": "0.9.29"
+  "schema_version": "0.12.1"
 }

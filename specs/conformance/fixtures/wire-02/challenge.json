@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 challenge body conformance vectors (v0.12.0 stable, sections 13, DD-158)",
-  "schema_version": "0.12.0",
-  "version": "0.12.0",
+  "schema_version": "0.12.1",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "challenge-with-problem-type-required",
