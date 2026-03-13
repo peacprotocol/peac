@@ -1,0 +1,32 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-jws-wrong-segment-count",
+  "kind": "offer_verification",
+  "description": "JWS offer with wrong segment count (2 instead of 3)",
+  "category": "invalid",
+  "threat_model": "Malformed compact JWS: exactly 3 dot-separated segments are required per RFC 7515",
+  "input": {
+    "offer": {
+      "format": "jws",
+      "signature": "eyJhbGciOiJFUzI1NiJ9.eyJ2ZXJzaW9uIjoxfQ"
+    },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ]
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "jws_malformed"
+      }
+    ]
+  },
+  "notes": "Compact JWS has only 2 segments (header.payload). Must be rejected: RFC 7515 requires exactly 3 segments (header.payload.signature)."
+}

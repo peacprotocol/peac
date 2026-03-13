@@ -1,14 +1,14 @@
 {
   "$schema": "../vector.schema.json",
-  "id": "x402-expired-offer",
+  "id": "x402-valid-eip712-union",
   "kind": "offer_verification",
-  "description": "Offer with validUntil in the past must fail",
-  "category": "invalid",
+  "description": "Valid EIP-712 discriminated union variant with explicit payload field",
+  "category": "valid",
   "input": {
     "offer": {
       "payload": {
         "version": 1,
-        "validUntil": 1000000000,
+        "validUntil": 9999999999,
         "network": "eip155:8453",
         "asset": "USDC",
         "amount": "100000",
@@ -31,13 +31,10 @@
     ]
   },
   "expected": {
-    "valid": false,
-    "errors": [
-      {
-        "code": "offer_expired",
-        "field": "payload.validUntil"
-      }
-    ]
+    "valid": true,
+    "matchedIndex": 0,
+    "usedHint": true,
+    "errors": []
   },
-  "notes": "validUntil 1000000000 (Sep 2001) is in the past. Offer must be rejected."
+  "notes": "EIP-712 variant: payload is a separate field on the signed offer. Signature is hex-encoded ECDSA. This validates the EIP-712 branch of the discriminated union."
 }

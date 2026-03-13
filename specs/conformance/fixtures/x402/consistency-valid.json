@@ -1,0 +1,31 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-consistency-valid",
+  "kind": "consistency_verification",
+  "description": "Valid offer-receipt consistency: matching resourceUrl and network",
+  "category": "consistency",
+  "input": {
+    "offerPayload": {
+      "version": 1,
+      "resourceUrl": "https://api.example.com/weather/london",
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "USDC",
+      "amount": "100000",
+      "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+      "validUntil": 9999999999
+    },
+    "receiptPayload": {
+      "version": 1,
+      "network": "eip155:8453",
+      "resourceUrl": "https://api.example.com/weather/london",
+      "payer": "0xabc1234567890abcdef1234567890abcdef123456",
+      "issuedAt": 1741900000
+    }
+  },
+  "expected": {
+    "valid": true,
+    "errors": []
+  },
+  "notes": "Offer and receipt share matching resourceUrl and network. Consistency check passes."
+}

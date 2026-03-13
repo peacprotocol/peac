@@ -1,0 +1,33 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-receipt-invalid-payer",
+  "kind": "receipt_verification",
+  "description": "Receipt with empty payer field",
+  "category": "invalid",
+  "input": {
+    "receipt": {
+      "format": "eip712",
+      "payload": {
+        "version": 1,
+        "network": "eip155:8453",
+        "resourceUrl": "https://api.example.com/weather/london",
+        "payer": "",
+        "issuedAt": 1741900000,
+        "transaction": "0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b"
+    }
+  },
+  "config": {
+    "nowSeconds": 1741900060
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "receipt_payer_invalid"
+      }
+    ]
+  },
+  "notes": "Payer is an empty string. Must be rejected as invalid."
+}

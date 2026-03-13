@@ -1,0 +1,35 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-consistency-network-mismatch",
+  "kind": "consistency_verification",
+  "description": "Receipt network does not match offer network",
+  "category": "consistency",
+  "input": {
+    "offerPayload": {
+      "version": 1,
+      "resourceUrl": "https://api.example.com/weather/london",
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "USDC",
+      "amount": "100000",
+      "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+      "validUntil": 9999999999
+    },
+    "receiptPayload": {
+      "version": 1,
+      "network": "eip155:1",
+      "resourceUrl": "https://api.example.com/weather/london",
+      "payer": "0xabc1234567890abcdef1234567890abcdef123456",
+      "issuedAt": 1741900000
+    }
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "receipt_network_mismatch"
+      }
+    ]
+  },
+  "notes": "Offer targets eip155:8453 (Base) but receipt claims eip155:1 (Ethereum mainnet). Network mismatch must be rejected."
+}

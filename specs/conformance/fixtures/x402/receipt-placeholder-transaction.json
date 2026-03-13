@@ -1,0 +1,29 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-receipt-placeholder-transaction",
+  "kind": "receipt_verification",
+  "description": "Receipt with EIP-712 transaction placeholder (empty string) normalized to absent",
+  "category": "edge-cases",
+  "input": {
+    "receipt": {
+      "format": "eip712",
+      "payload": {
+        "version": 1,
+        "network": "eip155:8453",
+        "resourceUrl": "https://api.example.com/weather/london",
+        "payer": "0xabc1234567890abcdef1234567890abcdef123456",
+        "issuedAt": 1741900000,
+        "transaction": ""
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b"
+    }
+  },
+  "config": {
+    "nowSeconds": 1741900060
+  },
+  "expected": {
+    "valid": true,
+    "errors": []
+  },
+  "notes": "EIP-712 uses empty string as 'no transaction' placeholder. Normalization converts to semantic absence. Receipt is valid because transaction is optional."
+}

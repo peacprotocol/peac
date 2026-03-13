@@ -1,13 +1,21 @@
 {
   "$schema": "../manifest.schema.json",
   "name": "x402-adapter",
-  "version": "0.2.0",
-  "description": "Conformance vectors for @peac/adapter-x402 verification and record mapping",
-  "profile": "peac-x402-offer-receipt/0.1",
+  "version": "0.3.0",
+  "description": "Conformance vectors for @peac/adapter-x402 verification and record mapping (v0.12.1 upstream sync)",
+  "profile": "peac-x402-offer-receipt/0.2",
+  "fixture_kinds": ["offer_verification", "receipt_verification", "consistency_verification"],
   "categories": {
     "valid": {
       "description": "Valid verification scenarios",
-      "vectors": ["valid-with-hint.json", "valid-scan.json", "valid-jws.json"]
+      "vectors": [
+        "valid-with-hint.json",
+        "valid-scan.json",
+        "valid-jws.json",
+        "valid-eip712-union.json",
+        "valid-jws-union.json",
+        "receipt-valid.json"
+      ]
     },
     "invalid": {
       "description": "Invalid verification scenarios that must fail",
@@ -24,7 +32,15 @@
         "invalid-amount-decimal.json",
         "invalid-amount-leading-zero.json",
         "invalid-network-format.json",
-        "dos-too-many-accepts.json"
+        "dos-too-many-accepts.json",
+        "eip712-no-expiry-rejected.json",
+        "receipt-stale-issuedat.json",
+        "receipt-invalid-payer.json",
+        "receipt-unsupported-version.json",
+        "jws-wrong-segment-count.json",
+        "jws-padded-base64url.json",
+        "jws-non-object-payload.json",
+        "jws-oversize.json"
       ]
     },
     "edge-cases": {
@@ -32,7 +48,17 @@
       "vectors": [
         "clock-skew-tolerance.json",
         "acceptindex-ignored-scan.json",
-        "mismatch-warn-and-scan.json"
+        "mismatch-warn-and-scan.json",
+        "eip712-no-expiry.json",
+        "receipt-placeholder-transaction.json"
+      ]
+    },
+    "consistency": {
+      "description": "Offer-receipt consistency verification",
+      "vectors": [
+        "consistency-valid.json",
+        "consistency-resource-mismatch.json",
+        "consistency-network-mismatch.json"
       ]
     }
   },
@@ -40,6 +66,7 @@
     "description": "Term-matching is the binding mechanism, not acceptIndex",
     "invariants": [
       "acceptIndex is UNSIGNED and MUST be treated as a hint only",
+      "acceptIndex is per-offer (not per-challenge envelope)",
       "Verifiers MUST compare accepts[acceptIndex] terms against signed payload",
       "Mismatch between acceptIndex entry and signed payload MUST fail",
       "Absent acceptIndex requires unique match via full scan",
@@ -53,7 +80,36 @@
       "Amount MUST NOT exceed 78 characters (uint256 max)",
       "Network MUST match CAIP-2 format (namespace:reference)",
       "Accepts array MUST NOT exceed 128 entries (DoS protection)",
-      "Accepts array JSON MUST NOT exceed 256 KiB (memory protection)"
+      "Accepts array JSON MUST NOT exceed 256 KiB (memory protection)",
+      "version MUST be a number (not string)",
+      "resourceUrl MUST be present and non-empty on offer payload",
+      "scheme MUST be present and non-empty on offer payload and accept entries"
+    ]
+  },
+  "placeholder_normalization": {
+    "description": "EIP-712 placeholder value normalization rules",
+    "invariants": [
+      "validUntil: 0 in EIP-712 payloads is a 'no expiry' placeholder, normalized to semantic absence",
+      "transaction: '' (empty string) in EIP-712 receipt payloads is a 'no transaction' placeholder, normalized to semantic absence",
+      "offerExpiryPolicy 'require' rejects offers without expiry (validUntil absent or zero)",
+      "offerExpiryPolicy 'allow_missing' (default) accepts offers without expiry"
+    ]
+  },
+  "consistency_rules": {
+    "description": "Offer-receipt consistency verification rules",
+    "invariants": [
+      "Receipt resourceUrl MUST match offer resourceUrl (exact string comparison)",
+      "Receipt network MUST match offer network",
+      "Receipt issuedAt MUST be within offer validity window (with clock skew tolerance)"
+    ]
+  },
+  "jws_hardening_rules": {
+    "description": "JWS compact serialization parsing hardening rules",
+    "invariants": [
+      "Compact JWS MUST have exactly 3 dot-separated segments",
+      "Base64url segments MUST NOT contain padding characters (=)",
+      "JWS payload MUST decode to a JSON object (not array, primitive, or null)",
+      "Compact JWS MUST NOT exceed maxCompactJwsBytes (default 64 KiB) before decoding"
     ]
   }
 }

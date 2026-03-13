@@ -1,0 +1,35 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-jws-oversize",
+  "kind": "offer_verification",
+  "description": "JWS offer that exceeds the compact JWS size limit",
+  "category": "invalid",
+  "threat_model": "Memory amplification DoS: size limits are enforced before base64url decoding",
+  "input": {
+    "offer": {
+      "format": "jws",
+      "signature": "eyJhbGciOiJFUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJyZXNvdXJjZVVybCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2RhdGEiLCJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MyIsImFzc2V0IjoiVVNEQyIsImFtb3VudCI6IjEwMDAwMCIsInBheVRvIjoiMHg3NDJkMzVDYzY2MzRDMDUzMjkyNWEzYjg0NEJjOWU3NTk1ZjFlMTIzIiwidmFsaWRVbnRpbCI6OTk5OTk5OTk5OX0.ZHVtbXlzaWduYXR1cmUxMjM0NQ"
+    },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ]
+  },
+  "config": {
+    "maxCompactJwsBytes": 100
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "jws_too_large"
+      }
+    ]
+  },
+  "notes": "The compact JWS exceeds the configured maxCompactJwsBytes limit (100 bytes). Size limits are enforced before any decoding to prevent memory amplification attacks."
+}

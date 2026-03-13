@@ -1,14 +1,14 @@
 {
   "$schema": "../vector.schema.json",
-  "id": "x402-expired-offer",
+  "id": "x402-eip712-no-expiry",
   "kind": "offer_verification",
-  "description": "Offer with validUntil in the past must fail",
-  "category": "invalid",
+  "description": "EIP-712 placeholder: validUntil 0 means no expiry; accepted with allow_missing policy",
+  "category": "edge-cases",
   "input": {
     "offer": {
       "payload": {
         "version": 1,
-        "validUntil": 1000000000,
+        "validUntil": 0,
         "network": "eip155:8453",
         "asset": "USDC",
         "amount": "100000",
@@ -30,14 +30,14 @@
       }
     ]
   },
-  "expected": {
-    "valid": false,
-    "errors": [
-      {
-        "code": "offer_expired",
-        "field": "payload.validUntil"
-      }
-    ]
+  "config": {
+    "offerExpiryPolicy": "allow_missing"
   },
-  "notes": "validUntil 1000000000 (Sep 2001) is in the past. Offer must be rejected."
+  "expected": {
+    "valid": true,
+    "matchedIndex": 0,
+    "usedHint": true,
+    "errors": []
+  },
+  "notes": "EIP-712 uses validUntil: 0 as a placeholder meaning 'no expiry' (fixed schema requires the field). With offerExpiryPolicy 'allow_missing', this is accepted. Layer B normalization converts 0 to semantic absence."
 }

@@ -1,0 +1,32 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-jws-non-object-payload",
+  "kind": "offer_verification",
+  "description": "JWS offer whose payload decodes to a JSON array instead of an object",
+  "category": "invalid",
+  "threat_model": "Type confusion: JWS payload must be a JSON object, not an array or primitive",
+  "input": {
+    "offer": {
+      "format": "jws",
+      "signature": "eyJhbGciOiJFUzI1NiJ9.WzEsMiwzXQ.ZHVtbXlzaWduYXR1cmUxMjM0NQ"
+    },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ]
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "jws_payload_not_object"
+      }
+    ]
+  },
+  "notes": "Payload segment decodes to [1,2,3] (JSON array). JWS payload must be a plain JSON object to prevent type confusion in downstream consumers."
+}

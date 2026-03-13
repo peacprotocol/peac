@@ -1,0 +1,32 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-jws-padded-base64url",
+  "kind": "offer_verification",
+  "description": "JWS offer with padded base64url (= padding characters)",
+  "category": "invalid",
+  "threat_model": "Padded base64url injection: RFC 7515 specifies unpadded base64url encoding",
+  "input": {
+    "offer": {
+      "format": "jws",
+      "signature": "eyJhbGciOiJFUzI1NiJ9.eyJ2ZXJzaW9uIjoxfQ==.ZHVtbXlzaWduYXR1cmUxMjM0NQ"
+    },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000"
+      }
+    ]
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "jws_padded_base64url"
+      }
+    ]
+  },
+  "notes": "Payload segment contains '=' padding. Per RFC 7515, compact JWS uses base64url WITHOUT padding. Must be rejected to prevent injection."
+}

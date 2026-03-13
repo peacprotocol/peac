@@ -1,14 +1,14 @@
 {
   "$schema": "../vector.schema.json",
-  "id": "x402-expired-offer",
+  "id": "x402-eip712-no-expiry-rejected",
   "kind": "offer_verification",
-  "description": "Offer with validUntil in the past must fail",
+  "description": "EIP-712 placeholder: validUntil 0 rejected when offerExpiryPolicy is 'require'",
   "category": "invalid",
   "input": {
     "offer": {
       "payload": {
         "version": 1,
-        "validUntil": 1000000000,
+        "validUntil": 0,
         "network": "eip155:8453",
         "asset": "USDC",
         "amount": "100000",
@@ -30,14 +30,17 @@
       }
     ]
   },
+  "config": {
+    "offerExpiryPolicy": "require"
+  },
   "expected": {
     "valid": false,
     "errors": [
       {
-        "code": "offer_expired",
+        "code": "offer_no_expiry",
         "field": "payload.validUntil"
       }
     ]
   },
-  "notes": "validUntil 1000000000 (Sep 2001) is in the past. Offer must be rejected."
+  "notes": "EIP-712 validUntil: 0 is the 'no expiry' placeholder. With offerExpiryPolicy 'require', PEAC rejects offers without expiry (unbounded replay window). This is a deliberate PEAC strictness policy."
 }

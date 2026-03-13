@@ -1,0 +1,35 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-receipt-stale-issuedat",
+  "kind": "receipt_verification",
+  "description": "Receipt with issuedAt too far in the past (stale)",
+  "category": "invalid",
+  "input": {
+    "receipt": {
+      "format": "eip712",
+      "payload": {
+        "version": 1,
+        "network": "eip155:8453",
+        "resourceUrl": "https://api.example.com/weather/london",
+        "payer": "0xabc1234567890abcdef1234567890abcdef123456",
+        "issuedAt": 1741800000,
+        "transaction": "0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b"
+    }
+  },
+  "config": {
+    "nowSeconds": 1741900000,
+    "receiptRecencySeconds": 300,
+    "clockSkewSeconds": 60
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "receipt_issuedAt_stale"
+      }
+    ]
+  },
+  "notes": "issuedAt is 100000 seconds before now, well outside the 300s recency window + 60s clock skew."
+}
