@@ -1,36 +1,41 @@
 {
   "$schema": "../vector.schema.json",
   "id": "x402-mismatch-warn-and-scan",
+  "kind": "offer_verification",
   "description": "With warn_and_scan policy, acceptIndex mismatch logs warning but continues with scan",
   "category": "edge-cases",
   "input": {
     "offer": {
       "payload": {
-        "version": "1",
+        "version": 1,
         "validUntil": 9999999999,
         "network": "eip155:8453",
         "asset": "USDC",
         "amount": "100000",
-        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "resourceUrl": "https://fixture.example.com/resource",
+        "scheme": "exact"
       },
       "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
-      "format": "eip712"
+      "format": "eip712",
+      "acceptIndex": 1
     },
     "accepts": [
       {
         "network": "eip155:8453",
         "asset": "USDC",
         "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
-        "amount": "100000"
+        "amount": "100000",
+        "scheme": "exact"
       },
       {
         "network": "eip155:8453",
         "asset": "ETH",
         "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
-        "amount": "50000000000000"
+        "amount": "50000000000000",
+        "scheme": "exact"
       }
-    ],
-    "acceptIndex": 1
+    ]
   },
   "config": {
     "mismatchPolicy": "warn_and_scan"

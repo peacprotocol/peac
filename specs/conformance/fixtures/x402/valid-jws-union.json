@@ -1,8 +1,8 @@
 {
   "$schema": "../vector.schema.json",
-  "id": "x402-valid-jws",
+  "id": "x402-valid-jws-union",
   "kind": "offer_verification",
-  "description": "Valid offer verification with JWS signature format",
+  "description": "Valid JWS discriminated union variant with payload encoded inside compact JWS",
   "category": "valid",
   "input": {
     "offer": {
@@ -26,5 +26,5 @@
     "usedHint": true,
     "errors": []
   },
-  "notes": "JWS compact serialization format (header.payload.signature) is structurally valid."
+  "notes": "JWS variant: no payload field on the signed offer. Payload is base64url-encoded inside the compact JWS signature string (header.payload.signature). This validates the JWS branch of the discriminated union."
 }

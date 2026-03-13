@@ -1,33 +1,31 @@
 {
   "$schema": "../vector.schema.json",
   "id": "x402-missing-payload-fields",
+  "kind": "offer_verification",
   "description": "Missing required payload fields must fail",
   "category": "invalid",
   "input": {
     "offer": {
       "payload": {
-        "version": "1"
+        "version": 1
       },
       "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
-      "format": "eip712"
+      "format": "eip712",
+      "acceptIndex": 0
     },
     "accepts": [
       {
         "network": "eip155:8453",
         "asset": "USDC",
         "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
-        "amount": "100000"
+        "amount": "100000",
+        "scheme": "exact"
       }
-    ],
-    "acceptIndex": 0
+    ]
   },
   "expected": {
     "valid": false,
     "errors": [
-      {
-        "code": "payload_missing_field",
-        "field": "payload.validUntil"
-      },
       {
         "code": "payload_missing_field",
         "field": "payload.network"
@@ -43,8 +41,16 @@
       {
         "code": "payload_missing_field",
         "field": "payload.payTo"
+      },
+      {
+        "code": "payload_missing_field",
+        "field": "payload.resourceUrl"
+      },
+      {
+        "code": "payload_missing_field",
+        "field": "payload.scheme"
       }
     ]
   },
-  "notes": "Required payload fields: version, validUntil, network, asset, amount, payTo. Missing fields cause fail-closed validation."
+  "notes": "Required payload fields: version, network, asset, amount, payTo, resourceUrl, scheme. validUntil is handled by offerExpiryPolicy (allow_missing by default). Missing fields cause fail-closed validation."
 }

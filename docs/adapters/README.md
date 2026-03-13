@@ -87,7 +87,7 @@ peac-{profile}/{version}
 
 Examples:
 
-- `peac-x402-offer-receipt/0.1` - x402 signed offer/receipt extension records
+- `peac-x402-offer-receipt/0.2` - x402 signed offer/receipt extension records
 - `peac-x402/0.1` - Reserved for baseline x402 header-only mapping
 - `peac-eas/0.1` - EAS attestation records
 

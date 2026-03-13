@@ -1,17 +1,20 @@
 {
   "$schema": "../vector.schema.json",
   "id": "x402-valid-scan",
+  "kind": "offer_verification",
   "description": "Valid offer verification via full scan (no acceptIndex)",
   "category": "valid",
   "input": {
     "offer": {
       "payload": {
-        "version": "1",
+        "version": 1,
         "validUntil": 9999999999,
         "network": "eip155:8453",
         "asset": "USDC",
         "amount": "100000",
-        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123"
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "resourceUrl": "https://fixture.example.com/resource",
+        "scheme": "exact"
       },
       "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
       "format": "eip712"
@@ -21,7 +24,8 @@
         "network": "eip155:8453",
         "asset": "USDC",
         "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
-        "amount": "100000"
+        "amount": "100000",
+        "scheme": "exact"
       }
     ]
   },

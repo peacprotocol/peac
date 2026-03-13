@@ -1,0 +1,33 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-receipt-unsupported-version",
+  "kind": "receipt_verification",
+  "description": "Receipt with unsupported version number",
+  "category": "invalid",
+  "input": {
+    "receipt": {
+      "format": "eip712",
+      "payload": {
+        "version": 99,
+        "network": "eip155:8453",
+        "resourceUrl": "https://api.example.com/weather/london",
+        "payer": "0xabc1234567890abcdef1234567890abcdef123456",
+        "issuedAt": 1741900000,
+        "transaction": "0xdeadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b"
+    }
+  },
+  "config": {
+    "nowSeconds": 1741900060
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "receipt_version_unsupported"
+      }
+    ]
+  },
+  "notes": "Version 99 is not in the supported versions list [1]."
+}
