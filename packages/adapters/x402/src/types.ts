@@ -39,7 +39,7 @@ export type { Result, AdapterError, AdapterErrorCode, JsonObject } from '@peac/a
  *
  * `peac-x402/0.1` is RESERVED for future baseline header flow support.
  */
-export const X402_OFFER_RECEIPT_PROFILE = 'peac-x402-offer-receipt/0.1' as const;
+export const X402_OFFER_RECEIPT_PROFILE = 'peac-x402-offer-receipt/0.2' as const;
 
 // ---------------------------------------------------------------------------
 // DoS Protection Limits
