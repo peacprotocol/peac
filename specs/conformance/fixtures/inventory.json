@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-03-13T11:59:52.424Z",
+  "generated_at": "2026-03-14T21:29:35.877Z",
   "version": "0.12.1",
   "schema_version": "0.12.1",
-  "total_fixtures": 618,
-  "total_with_requirements": 173,
+  "total_fixtures": 638,
+  "total_with_requirements": 193,
   "total_unmapped": 445,
-  "wire02_requirement_links": 439,
+  "wire02_requirement_links": 476,
   "carrier_requirement_links": 11,
   "entries": [
     {
@@ -3034,6 +3034,56 @@
     {
       "directory": "wire-02/extensions",
       "file": "conformance.json",
+      "fixture_name": "consent-denied-valid",
+      "description": "Valid consent denial record",
+      "primary_requirement_id": "WIRE02-EXT-020",
+      "requirement_ids": ["WIRE02-EXT-020"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "consent-expired-valid",
+      "description": "Valid consent expiry record",
+      "primary_requirement_id": "WIRE02-EXT-020",
+      "requirement_ids": ["WIRE02-EXT-020"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "consent-extension-all-fields-valid",
+      "description": "Valid consent extension with all optional fields populated",
+      "primary_requirement_id": "WIRE02-EXT-019",
+      "requirement_ids": ["WIRE02-EXT-019", "WIRE02-EXT-020", "WIRE02-EXT-021", "WIRE02-EXT-022"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "consent-extension-valid",
+      "description": "Valid consent extension with required fields and optional data_categories",
+      "primary_requirement_id": "WIRE02-EXT-019",
+      "requirement_ids": ["WIRE02-EXT-019", "WIRE02-EXT-020", "WIRE02-EXT-021"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "consent-withdrawn-valid",
+      "description": "Valid consent withdrawal record",
+      "primary_requirement_id": "WIRE02-EXT-020",
+      "requirement_ids": ["WIRE02-EXT-020"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
       "fixture_name": "correlation-extension-valid",
       "description": "Valid correlation extension with trace_id and span_id",
       "primary_requirement_id": "WIRE02-EXT-014",
@@ -3054,6 +3104,33 @@
     {
       "directory": "wire-02/extensions",
       "file": "conformance.json",
+      "fixture_name": "privacy-extension-all-fields-valid",
+      "description": "Valid privacy extension with all optional fields populated",
+      "primary_requirement_id": "WIRE02-EXT-031",
+      "requirement_ids": [
+        "WIRE02-EXT-031",
+        "WIRE02-EXT-032",
+        "WIRE02-EXT-033",
+        "WIRE02-EXT-034",
+        "WIRE02-EXT-035",
+        "WIRE02-EXT-036"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "privacy-extension-valid",
+      "description": "Valid privacy extension with required data_classification",
+      "primary_requirement_id": "WIRE02-EXT-031",
+      "requirement_ids": ["WIRE02-EXT-031", "WIRE02-EXT-032"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
       "fixture_name": "reject-commerce-decimal-amount",
       "description": "Decimal amount_minor is rejected (must be integer string)",
       "primary_requirement_id": "WIRE02-EXT-009",
@@ -3068,6 +3145,36 @@
       "description": "Missing required currency field is rejected",
       "primary_requirement_id": "WIRE02-EXT-008",
       "requirement_ids": ["WIRE02-EXT-008"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-consent-extra-field",
+      "description": "Extra unrecognized field in consent extension is rejected (.strict())",
+      "primary_requirement_id": "WIRE02-EXT-024",
+      "requirement_ids": ["WIRE02-EXT-024"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-consent-invalid-status",
+      "description": "Invalid consent_status value is rejected (closed enum)",
+      "primary_requirement_id": "WIRE02-EXT-020",
+      "requirement_ids": ["WIRE02-EXT-020"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-consent-missing-consent-basis",
+      "description": "Missing required consent_basis field is rejected",
+      "primary_requirement_id": "WIRE02-EXT-019",
+      "requirement_ids": ["WIRE02-EXT-019"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3114,11 +3221,118 @@
     {
       "directory": "wire-02/extensions",
       "file": "conformance.json",
+      "fixture_name": "reject-privacy-invalid-recipient-scope",
+      "description": "Invalid recipient_scope value is rejected (closed enum)",
+      "primary_requirement_id": "WIRE02-EXT-034",
+      "requirement_ids": ["WIRE02-EXT-034"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-privacy-invalid-retention-mode",
+      "description": "Invalid retention_mode value is rejected (closed enum)",
+      "primary_requirement_id": "WIRE02-EXT-033",
+      "requirement_ids": ["WIRE02-EXT-033"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-privacy-missing-classification",
+      "description": "Missing required data_classification field is rejected",
+      "primary_requirement_id": "WIRE02-EXT-031",
+      "requirement_ids": ["WIRE02-EXT-031"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-safety-invalid-review-status",
+      "description": "Invalid review_status value is rejected (closed enum)",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-safety-invalid-risk-level",
+      "description": "Invalid risk_level value is rejected (closed enum)",
+      "primary_requirement_id": "WIRE02-EXT-038",
+      "requirement_ids": ["WIRE02-EXT-038"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-safety-missing-review-status",
+      "description": "Missing required review_status field is rejected",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
       "fixture_name": "reject-uppercase-extension-key",
       "description": "Extension key with uppercase domain is rejected (lowercase only)",
       "primary_requirement_id": "WIRE02-EXT-005",
       "requirement_ids": ["WIRE02-EXT-005", "WIRE02-EXT-001"],
       "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "safety-extension-all-fields-valid",
+      "description": "Valid safety extension with all optional fields including risk_level",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": [
+        "WIRE02-EXT-037",
+        "WIRE02-EXT-038",
+        "WIRE02-EXT-039",
+        "WIRE02-EXT-040",
+        "WIRE02-EXT-041",
+        "WIRE02-EXT-042"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "safety-extension-valid",
+      "description": "Valid safety extension with required review_status",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037", "WIRE02-EXT-038"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "safety-not-applicable-valid",
+      "description": "Valid safety extension with review_status not_applicable",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "safety-pending-valid",
+      "description": "Valid safety extension with review_status pending",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037"],
+      "status": "positive",
       "has_requirements": true
     },
     {

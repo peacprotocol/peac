@@ -532,7 +532,7 @@ export {
 } from './wire-02-representation';
 export type { Wire02RepresentationFields } from './wire-02-representation';
 
-// Wire 0.2 extension group schemas and accessors (v0.12.0-preview.1, DD-153; v0.12.2 DD-173 restructure)
+// Wire 0.2 extension group schemas and accessors
 export {
   // Schemas
   CommerceExtensionSchema,
@@ -559,9 +559,28 @@ export {
   getChallengeExtension,
   getIdentityExtension,
   getCorrelationExtension,
+  getConsentExtension,
+  getPrivacyExtension,
+  getSafetyExtension,
   // Envelope validation helper (used internally by Wire02ClaimsSchema)
   validateKnownExtensions,
-  // Shared validators (v0.12.2, DD-173.2)
+  CONSENT_EXTENSION_KEY,
+  CONSENT_STATUSES,
+  ConsentStatusSchema,
+  ConsentExtensionSchema,
+  PRIVACY_EXTENSION_KEY,
+  RETENTION_MODES,
+  RetentionModeSchema,
+  RECIPIENT_SCOPES,
+  RecipientScopeSchema,
+  PrivacyExtensionSchema,
+  SAFETY_EXTENSION_KEY,
+  REVIEW_STATUSES,
+  ReviewStatusSchema,
+  RISK_LEVELS,
+  RiskLevelSchema,
+  SafetyExtensionSchema,
+  // Shared validators
   Sha256DigestSchema,
   HttpsUriHintSchema,
   Iso8601DurationSchema,
@@ -579,6 +598,14 @@ export type {
   ChallengeType,
   IdentityExtension,
   CorrelationExtension,
+  ConsentStatus,
+  ConsentExtension,
+  RetentionMode,
+  RecipientScope,
+  PrivacyExtension,
+  ReviewStatus,
+  RiskLevel,
+  SafetyExtension,
 } from './wire-02-extensions';
 
 // Wire 0.2 registry constants (v0.12.0-preview.1, DD-155)

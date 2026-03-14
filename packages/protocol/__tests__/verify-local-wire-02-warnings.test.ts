@@ -186,6 +186,55 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
     }
   });
 
+  it('does not emit warning for newly registered consent extension key', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: 'org.peacprotocol/consent-record',
+      pillars: ['consent'],
+      extensions: {
+        'org.peacprotocol/consent': {
+          consent_basis: 'explicit',
+          consent_status: 'granted',
+        },
+      },
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(true);
+    if (result.valid && result.variant === 'wire-02') {
+      expect(result.warnings.some((w) => w.code === WARNING_UNKNOWN_EXTENSION)).toBe(false);
+    }
+  });
+
+  it('does not emit warning for newly registered safety extension key', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: 'org.peacprotocol/safety-review',
+      pillars: ['safety'],
+      extensions: {
+        'org.peacprotocol/safety': {
+          review_status: 'reviewed',
+        },
+      },
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(true);
+    if (result.valid && result.variant === 'wire-02') {
+      expect(result.warnings.some((w) => w.code === WARNING_UNKNOWN_EXTENSION)).toBe(false);
+    }
+  });
+
   it('does not emit warning when extensions is absent', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const { jws } = await issueWire02({
