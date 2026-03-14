@@ -347,6 +347,44 @@ export type VerificationStrictness = 'strict' | 'interop';
 export const PEAC_ALG = ALGORITHMS.default;
 
 // ---------------------------------------------------------------------------
+// Extension byte-budget constants (v0.12.2, DD-173.4)
+// ---------------------------------------------------------------------------
+
+/**
+ * Normative resource-budget limits for Wire 0.2 extension groups.
+ *
+ * These limits prevent DoS via formally valid but enormous multi-extension
+ * receipts. Enforcement is unconditional in @peac/schema's
+ * validateKnownExtensions() superRefine callback.
+ *
+ * MEASUREMENT BASIS (normative): Byte budgets are measured as the UTF-8
+ * byte length of the ECMAScript `JSON.stringify()` output on the plain
+ * JSON data value. This means:
+ *   - Object key ordering affects byte count (implementation-defined).
+ *   - Objects with `toJSON()` methods produce their toJSON output.
+ *   - Circular references cause serialization failure (treated as over-budget).
+ *   - `undefined` values are omitted (not counted).
+ *   - Multi-byte UTF-8 characters (emoji, CJK, etc.) count their full
+ *     UTF-8 encoding, not JS string length.
+ *
+ * This is explicitly NOT canonical JSON (JCS/RFC 8785) or raw wire octets.
+ * The choice of JSON.stringify is pragmatic: it matches the serialization
+ * path used by all major JSON-based transports (MCP, A2A, HTTP). If
+ * interop requires canonical measurement, a future DD can narrow this
+ * to JCS; the current rule is a safe superset.
+ */
+export const EXTENSION_BUDGET = {
+  /** Max UTF-8 bytes per extension group after JSON.stringify (64 KB) */
+  maxGroupBytes: 65_536,
+
+  /** Max total UTF-8 bytes across all extensions after JSON.stringify (256 KB) */
+  maxTotalBytes: 262_144,
+
+  /** Max UTF-8 bytes for any single string array field (32 KB) */
+  maxArrayPayloadBytes: 32_768,
+} as const;
+
+// ---------------------------------------------------------------------------
 // Legacy aggregate export (unchanged)
 // ---------------------------------------------------------------------------
 

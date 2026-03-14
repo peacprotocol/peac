@@ -532,7 +532,7 @@ export {
 } from './wire-02-representation';
 export type { Wire02RepresentationFields } from './wire-02-representation';
 
-// Wire 0.2 extension group schemas and accessors (v0.12.0-preview.1, DD-153)
+// Wire 0.2 extension group schemas and accessors (v0.12.0-preview.1, DD-153; v0.12.2 DD-173 restructure)
 export {
   // Schemas
   CommerceExtensionSchema,
@@ -550,6 +550,7 @@ export {
   CORRELATION_EXTENSION_KEY,
   CHALLENGE_TYPES,
   EXTENSION_LIMITS,
+  EXTENSION_BUDGET,
   // Grammar validator
   isValidExtensionKey,
   // Typed accessors
@@ -560,6 +561,16 @@ export {
   getCorrelationExtension,
   // Envelope validation helper (used internally by Wire02ClaimsSchema)
   validateKnownExtensions,
+  // Shared validators (v0.12.2, DD-173.2)
+  Sha256DigestSchema,
+  HttpsUriHintSchema,
+  Iso8601DurationSchema,
+  Iso8601DateStringSchema,
+  Iso8601DateSchema,
+  Iso8601OffsetDateTimeSchema,
+  Rfc3339DateTimeSchema,
+  Rfc3339TimestampSchema,
+  SpdxExpressionSchema,
 } from './wire-02-extensions';
 export type {
   CommerceExtension,

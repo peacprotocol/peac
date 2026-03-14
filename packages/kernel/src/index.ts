@@ -64,6 +64,8 @@ export {
   POLICY_BLOCK,
   OCCURRED_AT_TOLERANCE_SECONDS,
   PEAC_ALG,
+  // Extension byte-budget constants (v0.12.2, DD-173.4)
+  EXTENSION_BUDGET,
 } from './constants.js';
 
 // Wire 0.2 constant types (v0.12.0-preview.1, DD-156)
@@ -83,18 +85,33 @@ export {
   type ErrorCode,
 } from './errors.js';
 
-// Export registries
+// Export registries (auto-generated from specs/kernel/registries.json, v0.12.2 DD-183)
+// The generated file supersedes the manual registries.ts; legacy registries.ts
+// is kept but no longer re-exported from the barrel.
 export {
   PAYMENT_RAILS,
   CONTROL_ENGINES,
   TRANSPORT_METHODS,
   AGENT_PROTOCOLS,
+  PROOF_TYPES,
+  RECEIPT_TYPES,
+  EXTENSION_GROUPS,
+  PILLAR_VALUES,
+  TYPE_TO_EXTENSION_MAP,
   REGISTRIES,
   findPaymentRail,
   findControlEngine,
   findTransportMethod,
   findAgentProtocol,
-} from './registries.js';
+  findProofType,
+  findReceiptType,
+  findExtensionGroup,
+} from './registries.generated.js';
+export type {
+  ProofTypeEntry,
+  ReceiptTypeEntry,
+  ExtensionGroupEntry,
+} from './registries.generated.js';
 
 // Export HTTP utilities (cache safety, header management)
 export { VARY_HEADERS, applyPurposeVary, getPeacVaryHeaders, needsPurposeVary } from './http.js';

@@ -1523,6 +1523,24 @@
       "category": "validation",
       "retryable": false,
       "next_action": "abort"
+    },
+    {
+      "code": "E_EXTENSION_SIZE_EXCEEDED",
+      "http_status": 400,
+      "title": "Extension Size Exceeded",
+      "description": "Extension group or total extensions record exceeds the normative byte-budget limit (EXTENSION_BUDGET)",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_EXTENSION_NON_JSON_VALUE",
+      "http_status": 400,
+      "title": "Extension Non-JSON Value",
+      "description": "Extension group value is not a plain JSON value; functions, Symbols, BigInt, Date, RegExp, Map, Set, objects with toJSON(), and other non-JSON types are rejected",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
     }
   ]
 }
