@@ -61,6 +61,9 @@ const total = raw.total;
 const summary = {
   generated_at: new Date().toISOString(),
   version: JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')).version,
+  coverage_provider: '@vitest/coverage-v8',
+  scope: 'non-perf',
+  excluded_suites: ['tests/perf/**'],
   statements: { pct: total.statements.pct },
   branches: { pct: total.branches.pct },
   functions: { pct: total.functions.pct },

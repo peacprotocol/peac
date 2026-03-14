@@ -1,11 +1,14 @@
 {
-  "generated_at": "2026-03-14T04:23:49.607Z",
+  "generated_at": "2026-03-14T04:35:16.221Z",
   "version": "0.12.1",
+  "coverage_provider": "@vitest/coverage-v8",
+  "scope": "non-perf",
+  "excluded_suites": ["tests/perf/**"],
   "statements": {
-    "pct": 80.45
+    "pct": 80.43
   },
   "branches": {
-    "pct": 74.29
+    "pct": 74.27
   },
   "functions": {
     "pct": 83.17
