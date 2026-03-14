@@ -83,7 +83,7 @@
     "ajv-formats": "^3.0.1",
     "dependency-cruiser": "^17.3.0",
     "eslint": "^10.0.1",
-    "fast-check": "^4.5.3",
+    "fast-check": "^4.6.0",
     "globals": "^17.4.0",
     "js-yaml": "^4.1.1",
     "lint-staged": "^16.3.1",
