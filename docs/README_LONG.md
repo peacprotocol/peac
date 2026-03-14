@@ -1,63 +1,47 @@
-# PEAC Protocol - Extended Reference
+# PEAC Protocol Developer Guide
 
-This document contains detailed package catalogs, layer maps, ecosystem fit, and architecture details for the PEAC Protocol. For a concise overview, see the [main README](../README.md).
-
----
-
-## Ecosystem fit
-
-PEAC does not replace existing protocols. It is the receipts and verification layer that works alongside them for APIs, applications, and agentic workflows.
-
-**Payment rails:**
-
-- [x402](https://github.com/coinbase/x402) - HTTP 402 payment flows. Adapter: `@peac/rails-x402`
-
-The protocol works with generic HTTP 402 services, paywalls, routers, and data stores. Receipts do not depend on any single provider.
-
-**Agent protocols:**
-
-- [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) - Tool context for language models. Mapping: `@peac/mappings-mcp`
-- [Agentic Commerce Protocol (ACP)](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) - Agent-driven commerce. Mapping: `@peac/mappings-acp`
-- [Agent2Agent Protocol (A2A)](https://a2a-protocol.org/) - Agent-to-agent coordination (Linux Foundation). Mapping: `@peac/mappings-a2a`
-
-**Agent frameworks/runtimes:**
-
-- [OpenClaw](https://github.com/anthropics/claude-code) - Agent execution framework. Adapter: `@peac/adapter-openclaw`
-
-**Web policy surfaces:**
-
-- `/.well-known/peac.txt` - PEAC policy surface
-- Content signal parsing: robots.txt (RFC 9309), Content-Usage (AIPREF), tdmrep.json (EU TDM Directive). Package: `@peac/mappings-content-signals`
-
-_Names above are illustrative examples for interoperability. PEAC is vendor-neutral and does not imply endorsement by, or affiliation with, these projects._
-
-### x402 Integration
-
-PEAC works as the receipts and verification layer for [x402](https://x402.org) payment flows. x402 handles the payment; PEAC proves it happened.
-
-**Live demo:** [x402.peacprotocol.org](https://x402.peacprotocol.org) | [Visual demo repo](https://github.com/peacprotocol/peac-x402-receipts-demo)
-
-**How it works:**
-
-1. Client requests a protected resource
-2. Server returns `402 Payment Required` with x402 payment details
-3. Client pays via x402 (Base/USDC or other supported networks)
-4. Server issues a signed `PEAC-Receipt` header proving payment
-5. Client can verify the receipt offline and reuse it within its validity window
-
-**Package:** `@peac/rails-x402` provides the payment rail integration with full x402 v2 support (v1 fallback via `X402Dialect`). `@peac/adapter-x402` provides the evidence carrier placement for x402 responses.
-
-See [examples/x402-node-server](../examples/x402-node-server) for a working implementation.
+Integration examples, package catalog, protocol surfaces, and repo navigation. For a concise overview, see the [main README](../README.md).
 
 ---
 
-**Package availability:** Publication status varies by package. Core, runtime, and adapter packages are published to npm; see [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases) for current versions. Install via `pnpm add <package>`.
+## Getting oriented
 
-## Integration examples
+PEAC is a kernel-first monorepo. Dependencies flow down only; higher layers never import from lower layers.
+
+```text
+Layer 0: @peac/kernel         -- zero-dependency constants and registries
+Layer 1: @peac/schema         -- types, Zod validators, JSON Schema
+Layer 2: @peac/crypto         -- Ed25519 JWS, JCS, base64url
+Layer 3: @peac/protocol       -- issue(), verifyLocal(), discovery
+Layer 3.5: @peac/middleware-*  -- transport-neutral and Express middleware
+Layer 4: @peac/rails-*, @peac/mappings-*, @peac/adapter-*
+Layer 5: @peac/server, @peac/cli, @peac/mcp-server
+Layer 6: @peac/sdk-js
+```
+
+**Repository layout:**
+
+```text
+peac/
+├─ specs/                 # Normative JSON: constants, errors, registries, conformance
+├─ docs/                  # Specifications, API reference, guides
+├─ packages/              # Published packages (see catalog below)
+├─ sdks/go/               # Go SDK (verifier + middleware)
+├─ surfaces/              # Distribution artifacts (plugin-pack, workers)
+├─ integrator-kits/       # Integration checklists for ecosystem transports
+├─ examples/              # Canonical flow examples
+└─ archive/               # Legacy pre-v0.9.15 materials (historical)
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for full design rationale.
+
+---
+
+## Integration paths
 
 ### Settlement fields
 
-If an interaction includes payment, add settlement fields via the commerce extension:
+Add payment evidence via the commerce extension:
 
 ```typescript
 import { issue } from '@peac/protocol';
@@ -70,7 +54,7 @@ const { jws } = await issue({
   extensions: {
     'org.peacprotocol/commerce': {
       payment_rail: 'x402',
-      amount_minor: '100000', // Amount in minor units (e.g., cents)
+      amount_minor: '100000',
       currency: 'USD',
       settlement_ref: 'tx_abc123',
     },
@@ -105,11 +89,9 @@ app.get('/data', async (req, res) => {
 });
 ```
 
-Clients retrieve the receipt from the `PEAC-Receipt` response header and verify offline or store for audit.
-
 ### Express middleware
 
-`@peac/middleware-express` provides automatic receipt issuance as Express middleware:
+`@peac/middleware-express` provides automatic receipt issuance:
 
 ```typescript
 import express from 'express';
@@ -132,689 +114,36 @@ app.get('/data', (req, res) => {
 
 See [packages/middleware-core/README.md](../packages/middleware-core/README.md) and [packages/middleware-express/README.md](../packages/middleware-express/README.md).
 
----
+### x402 integration
 
-## Transports and bindings
+PEAC works as the receipts and verification layer for [x402](https://x402.org) payment flows. x402 handles the payment; PEAC proves it happened.
 
-PEAC is transport-agnostic. The most common binding is **HTTP/REST**, where receipts travel as a response header and policies are discovered via `/.well-known/peac.txt`.
+1. Client requests a protected resource
+2. Server returns `402 Payment Required` with x402 payment details
+3. Client pays via x402 (Base/USDC or other supported networks)
+4. Server issues a signed `PEAC-Receipt` header proving payment
+5. Client verifies the receipt offline
 
-| Binding             | How receipts travel                                     | Status      |
-| ------------------- | ------------------------------------------------------- | ----------- |
-| HTTP/REST (default) | Response header `PEAC-Receipt: <jws>`                   | Implemented |
-| MCP                 | Tool result `_meta` (carrier format)                    | Implemented |
-| A2A                 | Task/message/artifact metadata (extension URI)          | Implemented |
-| ACP                 | State transition metadata (carrier format)              | Implemented |
-| UCP                 | Webhook verification metadata (carrier format)          | Implemented |
-| x402                | Settlement response evidence                            | Implemented |
-| WebSocket/streaming | Periodic or terminal receipts for long-running sessions | Planned     |
-| Queues/batches      | NDJSON receipts verified offline via bundles            | Implemented |
+**Package:** `@peac/rails-x402` (payment rail) and `@peac/adapter-x402` (evidence carrier).
 
----
+See [examples/x402-node-server](../examples/x402-node-server) for a working implementation.
 
-## Interoperability and mappings
-
-PEAC records can be carried through other interaction standards via mappings:
-
-| Standard / Rail  | PEAC role                                | Status                             |
-| ---------------- | ---------------------------------------- | ---------------------------------- |
-| MCP              | Records in tool response metadata        | Implemented (`@peac/mappings-mcp`) |
-| ACP              | Agentic Commerce Protocol integration    | Implemented (`@peac/mappings-acp`) |
-| A2A              | Agent-to-Agent metadata extensions       | Implemented (`@peac/mappings-a2a`) |
-| AP2              | Evidence for payment authorization flows | Specified                          |
-| UCP              | Webhook verification + dispute evidence  | Implemented (`@peac/mappings-ucp`) |
-| ERC-8004         | Reputation signals for Trustless Agents  | Specified (docs + example)         |
-| x402             | Settlement evidence in receipt claims    | Implemented (`@peac/rails-x402`)   |
-| Payment gateways | Payment intent evidence                  | Implemented (`@peac/rails-stripe`) |
-
-PEAC does not orchestrate these protocols. It provides portable proof of what terms applied and what happened.
-
----
-
-## Dispute Bundle
+### Dispute bundle
 
 Portable, offline-verifiable evidence packages for disputes, audits, and cross-org handoffs.
 
 A bundle contains receipts, policy snapshots, and a deterministic verification report: everything needed to prove what happened without trusting either party's internal logs.
 
-**Design constraints:**
-
-- ZIP archive with deterministic structure (RFC 8785 canonical JSON)
-- Offline verification fails if keys are missing (no silent network fallback)
-- Cross-language verification: TypeScript and Go SDKs verify the same receipt format
-
 ```bash
-# If peac is on PATH
 peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
 peac bundle verify ./evidence.peacbundle --offline
-
-# Or from this repo root
-pnpm --filter @peac/cli exec peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
-pnpm --filter @peac/cli exec peac bundle verify ./evidence.peacbundle --offline
 ```
 
-See [specs/DISPUTE.md](specs/DISPUTE.md) for the specification.
+Design: ZIP archive with deterministic structure (RFC 8785 canonical JSON). Verification fails if keys are missing (no silent network fallback). See [specs/DISPUTE.md](specs/DISPUTE.md).
 
----
+### Go SDK
 
-## Use cases
-
-| Use case                   | How PEAC helps                                                          |
-| -------------------------- | ----------------------------------------------------------------------- |
-| **HTTP 402 micropayments** | Rails settle funds; receipts prove settlement offline.                  |
-| **Agent-to-API calls**     | Every call carries signed proof of who, what, when, under which terms.  |
-| **Priced datasets**        | Records capture which object or window was paid for.                    |
-| **AI training access**     | Policy surfaces describe terms; records prove compliance.               |
-| **Audit trails**           | Signed receipts form evidence for internal and external investigations. |
-| **Rate limiting**          | Records tie usage to identity and payment for quota enforcement.        |
-
-PEAC is not a paywall, billing engine, or storage system. It is the records layer that sits beside your payment rails and policy files.
-
----
-
-## Wire format and HTTP integration
-
-**Wire 0.1 (frozen legacy):**
-
-- JWS type: `typ: "peac-receipt/0.1"`
-- Envelope structure: `PEACEnvelope` with auth, payment evidence, and metadata
-- Signature: EdDSA (Ed25519, RFC 8032)
-- Evidence model: `PaymentEvidence` captures rail, asset, environment, and rail-specific proof
-
-**Interaction Record format (stable on `latest` dist-tag, v0.12.0+):**
-
-- JWS type: `typ: "interaction-record+jwt"`
-- Two structural kinds: `evidence` (records what happened) and `challenge` (records what is required)
-- Open semantic `type` field (reverse-DNS or absolute URI): `org.peacprotocol/payment`, `org.peacprotocol/access-decision`, etc.
-- Multi-valued `pillars` from a 10-value closed taxonomy (commerce, access, identity, consent, compliance, privacy, safety, provenance, attribution, purpose)
-- 5 typed extension groups: commerce, access, challenge, identity, correlation
-- Policy binding: JCS (RFC 8785) + SHA-256 digest comparison (3-state: verified/failed/unavailable)
-- JOSE hardening: embedded keys rejected, `crit`/`b64:false`/`zip` rejected, `kid` required
-- `verifyLocal()` verifies the current stable format only; Wire 0.1 receipts return `E_UNSUPPORTED_WIRE_VERSION`
-- Normative spec: [WIRE-0.2.md](specs/WIRE-0.2.md)
-
-**HTTP:**
-
-- Single `PEAC-Receipt` response header (both wire versions)
-- HTTP 402 Payment Required support
-- Errors via `application/problem+json` (RFC 9457)
-- DPoP proof-of-possession binding (RFC 9449)
-
-For normative specifications, see [`SPEC_INDEX.md`](SPEC_INDEX.md).
-
----
-
-## Web policy surface: peac.txt
-
-`/.well-known/peac.txt` is the recommended policy surface for publishing machine-readable terms.
-
-**Location:**
-
-- Primary: `https://your-domain/.well-known/peac.txt`
-- Fallback: `https://your-domain/peac.txt`
-
-**Purpose:**
-Declares allowed purposes, quotas, attribution requirements, payment terms, and whether receipts are required.
-
-**Example: Open documentation**
-
-```yaml
-# /.well-known/peac.txt
-version: 'peac-policy/0.1'
-usage: open
-
-purposes: [crawl, index, search]
-attribution: optional
-
-receipts: optional
-rate_limit: unlimited
-
-license: Apache-2.0
-contact: docs@example.com
-```
-
-**Example: Conditional API access**
-
-```yaml
-version: 'peac-policy/0.1'
-usage: conditional
-
-purposes: [inference, ai_input]
-receipts: required
-
-rate_limit: 100/hour
-daily_limit: 1000
-
-price: 10
-currency: USD
-payment_methods: [x402, stripe]
-payment_endpoint: https://api.example.com/pay
-
-negotiate: https://api.example.com/negotiate
-contact: api-support@example.com
-```
-
-**Protocol flow:**
-
-1. Agent fetches `/.well-known/peac.txt`
-2. Checks if purpose and volume comply with published policy
-3. If payment required, settles via rail (x402, Stripe, etc.)
-4. Agent calls API; server returns `PEAC-Receipt: <jws>` response header as proof of the interaction
-5. Agent verifies receipt offline and stores for audit
-
-Optionally, if the service supports receipt-presented access, clients may present a previously obtained receipt on subsequent requests. This is not required by the protocol.
-
-For the complete peac.txt specification, see `docs/specs/PEAC-TXT.md`.
-
----
-
-## Issuer configuration: peac-issuer.json
-
-`/.well-known/peac-issuer.json` is the issuer configuration file for PEAC receipt verification.
-
-**Location:**
-
-- `https://issuer-domain/.well-known/peac-issuer.json`
-
-**Purpose:**
-Enables verifiers to discover JWKS endpoints and verification configuration for validating PEAC receipts.
-
-**Example:**
-
-```json
-{
-  "version": "peac-issuer/0.1",
-  "issuer": "https://api.example.com",
-  "jwks_uri": "https://api.example.com/.well-known/jwks.json",
-  "verify_endpoint": "https://api.example.com/verify",
-  "receipt_versions": ["peac-receipt/0.1", "interaction-record+jwt"],
-  "algorithms": ["EdDSA"],
-  "payment_rails": ["x402", "stripe"],
-  "security_contact": "security@example.com"
-}
-```
-
-**Key fields:**
-
-| Field             | Required | Description                           |
-| ----------------- | -------- | ------------------------------------- |
-| `version`         | Yes      | Configuration format version          |
-| `issuer`          | Yes      | Issuer URL (must match receipt `iss`) |
-| `jwks_uri`        | Yes      | JWKS endpoint for key discovery       |
-| `verify_endpoint` | No       | Verification endpoint URL             |
-| `algorithms`      | No       | Supported signing algorithms          |
-
-For the complete specification, see `docs/specs/PEAC-ISSUER.md`.
-
-### Policy discovery and other signals
-
-PEAC sits alongside existing policy mechanisms rather than replacing them. A PEAC-aware agent or enforcement service can:
-
-1. Read peac.txt for economic and receipt requirements.
-2. Read robots.txt (RFC 9309), Content-Usage headers (AIPREF), and tdmrep.json (EU TDM Directive) for crawl and AI usage guidance. The `@peac/mappings-content-signals` package parses all three with source precedence resolution.
-3. Combine these inputs into a single internal policy view before negotiating or sending a request.
-
----
-
-## Policy Kit
-
-> **Start here:** [policy-kit/quickstart.md](policy-kit/quickstart.md) | **Profiles:** [policy-kit/profiles.md](policy-kit/profiles.md)
-
-The `@peac/policy-kit` package provides a file-based policy format for authoring policies once and compiling them to multiple deployment surfaces.
-
-**Policy Profiles:**
-
-| Profile ID     | Default | Receipt | Use Case                       |
-| -------------- | ------- | ------- | ------------------------------ |
-| `news-media`   | deny    | yes     | News sites, journalism         |
-| `api-provider` | deny    | yes     | Developer docs, API references |
-| `open-source`  | allow   | no      | OSS documentation, wikis       |
-| `saas-docs`    | allow   | no      | Product docs, help centers     |
-
-```bash
-peac policy list-profiles           # List available profiles
-peac policy init --profile news-media  # Initialize from profile
-peac policy show-profile api-provider  # View profile details
-```
-
-**Create a policy file:**
-
-```yaml
-# peac-policy.yaml
-version: peac-policy/0.1
-name: My API Policy
-
-defaults:
-  decision: deny
-  reason: Requires subscription or verified access
-
-rules:
-  - name: allow-subscribed-crawl
-    subject:
-      type: human
-      labels: [subscribed]
-    purpose: crawl
-    licensing_mode: subscription
-    decision: allow
-
-  - name: allow-verified-train
-    subject:
-      type: org
-      labels: [verified]
-    purpose: [train, inference]
-    decision: allow
-
-  - name: deny-agents-train
-    subject:
-      type: agent
-    purpose: train
-    decision: deny
-    reason: Agents cannot train on this content
-```
-
-**Generate deployment artifacts:**
-
-```bash
-peac policy validate peac-policy.yaml   # Validate policy syntax
-peac policy generate peac-policy.yaml --out dist --well-known  # Generate artifacts
-peac policy generate peac-policy.yaml --dry-run  # Preview without writing
-peac policy explain peac-policy.yaml --type agent --purpose train  # Debug rule matching
-```
-
-**Generated artifacts:**
-
-| File                    | Description                                               |
-| ----------------------- | --------------------------------------------------------- |
-| `.well-known/peac.txt`  | PEAC discovery file with usage, purposes, receipts config |
-| `robots-ai-snippet.txt` | AI crawler directives for robots.txt                      |
-| `aipref-headers.json`   | Compatibility header templates                            |
-| `ai-policy.md`          | Human-readable policy documentation                       |
-
-**Programmatic usage:**
-
-```typescript
-import { loadPolicy, evaluate, compilePeacTxt } from '@peac/policy-kit';
-
-const policy = loadPolicy('peac-policy.yaml');
-
-const result = evaluate(policy, {
-  subject: { type: 'agent', labels: ['verified'] },
-  purpose: 'inference',
-  licensing_mode: 'subscription',
-});
-
-console.log(result.decision); // 'allow' | 'deny' | 'review'
-console.log(result.matched_rule); // 'allow-verified-train'
-
-const peacTxt = compilePeacTxt(policy, {
-  contact: 'policy@example.com',
-  receipts: 'required',
-  rateLimit: '100/hour',
-});
-```
-
-**Key features:**
-
-- First-match-wins rule semantics (like firewall rules)
-- CAL purposes: `crawl`, `index`, `train`, `inference`, `ai_input`, `ai_index`, `search`
-- Deterministic, auditable, side-effect free evaluation
-
----
-
-## Repository layout
-
-Kernel-first monorepo:
-
-```text
-peac/
-├─ specs/
-│  └─ kernel/              # Normative JSON: constants, errors, registries
-├─ docs/
-│  ├─ specs/               # Receipt schema, protocol behavior, test vectors
-│  ├─ api/                 # API reference
-│  └─ guides/              # Integration guides
-├─ packages/
-│  ├─ kernel/              # Zero-dependency constants from specs/kernel
-│  ├─ schema/              # Types, Zod validators, JSON Schema
-│  ├─ crypto/              # Ed25519 JWS, JCS, base64url
-│  ├─ protocol/            # issue(), verify(), discovery
-│  ├─ server/              # HTTP verification server
-│  ├─ cli/                 # Command-line tools
-│  ├─ mcp-server/           # MCP server (5 tools: verify, inspect, decode, issue, bundle)
-│  ├─ capture/
-│  │  ├─ core/             # Runtime-neutral capture pipeline
-│  │  └─ node/             # Node.js capture runtime
-│  ├─ middleware-core/      # Transport-neutral middleware
-│  ├─ middleware-express/   # Express middleware
-│  ├─ adapters/
-│  │  ├─ openclaw/         # OpenClaw agent framework adapter
-│  │  ├─ x402/             # x402 adapter (v1/v2 with dialect detection)
-│  │  └─ openai-compatible/ # Hash-first inference receipt adapter
-│  ├─ rails/
-│  │  ├─ x402/             # HTTP 402 / x402 payment rail
-│  │  ├─ stripe/           # Stripe payment rail
-│  │  └─ razorpay/         # Razorpay payment rail
-│  ├─ mappings/
-│  │  ├─ mcp/              # Model Context Protocol mapping
-│  │  ├─ acp/              # Agentic Commerce Protocol mapping
-│  │  ├─ a2a/              # A2A Protocol mapping
-│  │  ├─ ucp/              # Universal Commerce Protocol mapping
-│  │  ├─ rsl/              # RSL usage token mapping
-│  │  └─ content-signals/  # Content use policy signal parsing
-│  ├─ policy-kit/          # Policy authoring and artifact generation
-│  ├─ transport/
-│  │  ├─ grpc/             # gRPC transport binding
-│  │  └─ ws/               # WebSocket transport binding (scaffolding)
-│  ├─ control/             # Constraint types and enforcement (CAL)
-│  ├─ attribution/         # Attribution attestations
-│  ├─ audit/               # Audit log and bundle generation
-│  └─ ...                  # Additional packages
-├─ sdks/
-│  └─ go/                  # Go SDK (verifier + middleware)
-├─ surfaces/               # Distribution artifacts (plugin-pack, analytics, workers)
-├─ integrator-kits/        # Integration checklists for ecosystem transports
-├─ examples/               # Canonical flow examples
-└─ archive/                # Legacy pre-v0.9.15 materials (historical)
-```
-
----
-
-## Layer map
-
-```text
-Layer 0: @peac/kernel
-Layer 1: @peac/schema
-Layer 2: @peac/crypto
-Layer 3: @peac/protocol, @peac/control
-Layer 3.5: @peac/middleware-core, @peac/middleware-express
-Layer 4: @peac/rails-*, @peac/mappings-*, @peac/adapter-*, @peac/transport-*
-Layer 5: @peac/server, @peac/cli, @peac/mcp-server
-Layer 6: @peac/sdk-js
-```
-
-Dependencies flow DOWN only. Never import from a higher layer.
-
----
-
-## Full package catalog
-
-**Core (stable):**
-
-| Package          | Description                                   |
-| ---------------- | --------------------------------------------- |
-| `@peac/kernel`   | Zero-dependency constants and registries      |
-| `@peac/schema`   | TypeScript types, Zod validators, JSON Schema |
-| `@peac/crypto`   | EdDSA (Ed25519) JWS signing and verification  |
-| `@peac/protocol` | High-level issue() and verify() functions     |
-| `@peac/control`  | Constraint types and enforcement (CAL)        |
-
-**Runtime (stable):**
-
-| Package            | Description                                               |
-| ------------------ | --------------------------------------------------------- |
-| `@peac/server`     | HTTP verification server with 402 support                 |
-| `@peac/cli`        | Command-line tools for receipts and policy                |
-| `@peac/mcp-server` | MCP server (verify, inspect, decode, issue, bundle tools) |
-
-**Rails (stable):**
-
-| Package                | Description                                             |
-| ---------------------- | ------------------------------------------------------- |
-| `@peac/rails-x402`     | x402 payment rail adapter with payment header detection |
-| `@peac/rails-stripe`   | Stripe payment rail adapter                             |
-| `@peac/rails-razorpay` | Razorpay payment rail adapter                           |
-| `@peac/rails-card`     | Card billing bridge                                     |
-
-**Mappings (stable):**
-
-| Package                          | Description                                                         |
-| -------------------------------- | ------------------------------------------------------------------- |
-| `@peac/mappings-mcp`             | Model Context Protocol integration with carrier format              |
-| `@peac/mappings-acp`             | Agentic Commerce Protocol integration with budget utilities         |
-| `@peac/mappings-a2a`             | A2A Protocol mapping with agent card discovery                      |
-| `@peac/mappings-rsl`             | RSL (Robots Standard Language) mapping to CAL purposes              |
-| `@peac/mappings-tap`             | Visa TAP mapping                                                    |
-| `@peac/mappings-aipref`          | IETF AIPREF vocabulary mapping                                      |
-| `@peac/mappings-ucp`             | Universal Commerce Protocol webhook verification                    |
-| `@peac/mappings-content-signals` | Content use policy signal parsing (robots.txt, AIPREF, tdmrep.json) |
-
-**Policy (stable):**
-
-| Package            | Description                                                               |
-| ------------------ | ------------------------------------------------------------------------- |
-| `@peac/policy-kit` | Policy authoring, evaluation, artifact generation, and pre-built profiles |
-
-**Infrastructure:**
-
-| Package                 | Description                                      |
-| ----------------------- | ------------------------------------------------ |
-| `@peac/contracts`       | Canonical error codes and verification contracts |
-| `@peac/http-signatures` | RFC 9421 HTTP Message Signatures                 |
-| `@peac/jwks-cache`      | Edge-safe JWKS fetch with SSRF protection        |
-| `@peac/net-node`        | SSRF-safe network utilities with DNS pinning     |
-| `@peac/adapter-core`    | Shared utilities for payment rail adapters       |
-| `@peac/worker-core`     | Runtime-neutral TAP verification handler         |
-| `@peac/telemetry`       | Core telemetry interfaces                        |
-| `@peac/telemetry-otel`  | OpenTelemetry adapter with privacy modes         |
-| `@peac/privacy`         | Privacy-preserving hashing                       |
-| `@peac/transport-grpc`  | gRPC transport binding                           |
-
-**Middleware:**
-
-| Package                    | Description                          |
-| -------------------------- | ------------------------------------ |
-| `@peac/middleware-core`    | Transport-neutral middleware logic   |
-| `@peac/middleware-express` | Express middleware for auto-issuance |
-
-**Capture:**
-
-| Package              | Description                                          |
-| -------------------- | ---------------------------------------------------- |
-| `@peac/capture-core` | Runtime-neutral capture pipeline for agent platforms |
-| `@peac/capture-node` | Node.js capture runtime with RFC 9421 proof capture  |
-
-**Adapters:**
-
-| Package                           | Description                                                     |
-| --------------------------------- | --------------------------------------------------------------- |
-| `@peac/adapter-openclaw`          | OpenClaw agent framework integration                            |
-| `@peac/adapter-x402`              | x402 adapter (v1/v2 with dialect detection)                     |
-| `@peac/adapter-openai-compatible` | Hash-first inference receipt adapter for OpenAI-compatible APIs |
-
-**Attestations:**
-
-| Package             | Description                          |
-| ------------------- | ------------------------------------ |
-| `@peac/attribution` | Attribution attestation verification |
-| `@peac/audit`       | Audit log and bundle generation      |
-
----
-
-## Workflow correlation
-
-Multi-step agentic workflows (MCP tool chains, A2A exchanges, CrewAI crews, LangGraph graphs) produce multiple receipts. Workflow correlation links those receipts into a verifiable DAG so that auditors and downstream systems can reconstruct what happened, in what order, and under which terms.
-
-**Two types:**
-
-| Type                         | Purpose                                               |
-| ---------------------------- | ----------------------------------------------------- |
-| `WorkflowContext`            | Per-receipt extension for DAG reconstruction          |
-| `WorkflowSummaryAttestation` | Proof-of-run artifact committing the full receipt set |
-
-**WorkflowContext** is attached via the correlation extension group:
-
-```typescript
-import { issue } from '@peac/protocol';
-import { generateWorkflowId, generateStepId } from '@peac/schema';
-
-const workflowId = generateWorkflowId();
-const stepId = generateStepId();
-
-const { jws } = await issue({
-  iss: 'https://api.example.com',
-  kind: 'evidence',
-  type: 'org.peacprotocol/tool-call',
-  pillars: ['commerce'],
-  extensions: {
-    'org.peacprotocol/commerce': {
-      payment_rail: 'x402',
-      amount_minor: '1000',
-      currency: 'USD',
-      settlement_ref: 'tx_search_001',
-    },
-    'org.peacprotocol/correlation': {
-      workflow_id: workflowId,
-      step_id: stepId,
-      parent_step_ids: [], // root step
-      tool_name: 'web_search',
-    },
-  },
-  privateKey,
-  kid: 'key-2026-01',
-});
-```
-
-**WorkflowSummaryAttestation** commits the receipt set at workflow completion:
-
-```typescript
-import { WorkflowSummaryAttestationSchema } from '@peac/schema';
-
-const summary = WorkflowSummaryAttestationSchema.parse({
-  type: 'peac/workflow-summary',
-  issuer: 'https://orchestrator.example.com',
-  issued_at: new Date().toISOString(),
-  evidence: {
-    workflow_id: workflowId,
-    status: 'completed',
-    receipt_refs: ['sha256:abc...', 'sha256:def...'],
-    agents_involved: ['search-agent', 'synthesis-agent'],
-    started_at: '2026-01-27T10:00:00Z',
-    completed_at: '2026-01-27T10:00:05Z',
-  },
-});
-```
-
-**Key invariants:**
-
-- Workflow IDs: `wf_[a-zA-Z0-9_-]{20,48}`
-- Step IDs: `step_[a-zA-Z0-9_-]{20,48}`
-- A step cannot be its own parent (no self-loops)
-- No duplicate parent step IDs
-- Hash chaining via `prev_receipt_hash` (`sha256:[a-f0-9]{64}`)
-- Max 16 parent steps, max 256-char tool names
-
-**External ID interop:**
-
-Bi-directional correlation with OTel trace IDs, Temporal workflow/run IDs, Airflow dag/run/task IDs, Prefect flow/run IDs, Dagster run/step IDs, and Argo workflow/node IDs via the `external_ids` array.
-
-**Conformance vectors:** `specs/conformance/fixtures/workflow/` (valid, invalid, edge-cases)
-
-See [docs/specs/WORKFLOW-CORRELATION.md](specs/WORKFLOW-CORRELATION.md) for the normative specification and [examples/workflow-correlation/](../examples/workflow-correlation/) for a working demo.
-
----
-
-## Ten pillars
-
-PEAC addresses ten capability areas for AI and API infrastructure. These are protocol capabilities, not package deliverables; implementation status varies.
-
-| Pillar          | Protocol role                               | Status                                                          |
-| --------------- | ------------------------------------------- | --------------------------------------------------------------- |
-| **Access**      | Access control and policy evaluation        | Extension group implemented                                     |
-| **Attribution** | Attribution and revenue-share records       | `@peac/attribution` implemented                                 |
-| **Commerce**    | Payment evidence and settlement proof       | Extension group implemented; `@peac/rails-*` adapters           |
-| **Consent**     | Consent lifecycle records                   | Receipt type registered; extension group planned (v0.12.1+)     |
-| **Compliance**  | Regulatory and audit records                | Receipt type registered; extension group planned (v0.12.1+)     |
-| **Privacy**     | Privacy-preserving hashing and retention    | `@peac/privacy` implemented; extension group planned (v0.12.1+) |
-| **Provenance**  | Content provenance and C2PA integration     | Receipt type registered; extension group planned (v0.12.1+)     |
-| **Safety**      | Constraint enforcement and safety controls  | `@peac/control` implemented; extension group planned (v0.12.1+) |
-| **Identity**    | Agent identity and proof-of-control binding | Extension group implemented                                     |
-| **Purpose**     | Structured purpose declaration vocabulary   | Receipt type registered; extension group planned (v0.12.1+)     |
-
-All 10 pillars have registered `type` values. Five have typed extension groups in v0.12.0 (commerce, access, challenge, identity, correlation). Remaining extension groups are planned for v0.12.1+.
-
----
-
-## Architecture principles
-
-**Layered:**
-
-- Crypto primitives isolated from protocol logic
-- Protocol logic isolated from rails, mappings, and transports
-- Policy surfaces built on top, not baked into core
-
-**Vendor neutral:**
-
-- No hard-coded lists of specific rails or agent protocols
-- All vendors share the same `PaymentEvidence` shape
-- Extensions via adapters and PEIPs
-
-**Spec-first:**
-
-- Normative JSON specs drive all implementations
-- TypeScript is the reference implementation; Go SDK provides Wire 0.1 issuance, verification, and policy evaluation
-- Additional implementations can follow the same specs
-
-**Defense in depth:**
-
-- SSRF protection and strict URL validation
-- DPoP proof-of-possession for tokens
-- JWKS rotation and emergency revocation plans
-- Rate limiting and circuit breakers
-
----
-
-## Stability and versioning
-
-**Wire formats:**
-
-- `interaction-record+jwt` (Interaction Record format): the current stable receipt format on the `latest` dist-tag (v0.12.0+)
-- `peac-receipt/0.1` (Wire 0.1): frozen legacy format; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` for Wire 0.1 receipts
-- Use `issue()` for all new receipt issuance
-
-**Library surface:**
-
-- TypeScript APIs are pre-1.0 and may have breaking changes between minor releases
-- Core packages (kernel, schema, crypto, protocol) are stable
-
-**HTTP semantics:**
-
-- `PEAC-Receipt` is the canonical header
-- RFC 9457 Problem Details for errors
-- HTTP 402 Payment Required for missing or invalid payment
-
-**Conformance levels:**
-
-- L0: Parse peac.txt discovery manifests
-- L1: HTTP semantics and Problem Details
-- L2: Policy enforcement (purposes, quotas, retention)
-- L3: Negotiation, payment, and receipts
-- L4: Provenance, attestation, and audit trails
-
-Test vectors: `tests/vectors/` and `docs/specs/TEST_VECTORS.md`.
-
----
-
-## Development
-
-**Prerequisites:**
-
-- Node.js 24 (tested); Node.js 22+ (compatible)
-- pnpm >= 9
-
-**Setup:**
-
-```bash
-git clone https://github.com/peacprotocol/peac
-cd peac
-pnpm install
-pnpm -r build
-pnpm -r test
-```
-
----
-
-## Go SDK
-
-The Go SDK in `sdks/go/` provides Wire 0.1 receipt issuance, verification, and policy evaluation with Ed25519 + JWS + JWKS support. Wire 0.2 (Interaction Record format) support is planned.
+Wire 0.1 receipt issuance, verification, and policy evaluation with Ed25519 + JWS + JWKS support.
 
 ```go
 import "github.com/peacprotocol/peac/sdks/go/peac"
@@ -828,32 +157,272 @@ if err != nil {
 fmt.Println("Issuer:", result.Claims.Iss)
 ```
 
-See [guides/go-middleware.md](guides/go-middleware.md) for net/http middleware integration.
+See [guides/go-middleware.md](guides/go-middleware.md) for net/http middleware.
 
 ---
 
-## Contributing
+## Protocol surfaces
 
-Contributions are welcome. For substantial changes, please open an issue first to discuss the approach.
+### peac.txt
 
-See `docs/SPEC_INDEX.md` for normative specifications and `docs/CI_BEHAVIOR.md` for CI guidelines.
+`/.well-known/peac.txt` declares machine-readable terms: allowed purposes, quotas, attribution requirements, payment terms, and whether receipts are required.
+
+**Open documentation example:**
+
+```yaml
+version: 'peac-policy/0.1'
+usage: open
+purposes: [crawl, index, search]
+attribution: optional
+receipts: optional
+rate_limit: unlimited
+```
+
+**Conditional API example:**
+
+```yaml
+version: 'peac-policy/0.1'
+usage: conditional
+purposes: [inference, ai_input]
+receipts: required
+rate_limit: 100/hour
+price: 10
+currency: USD
+payment_methods: [x402, stripe]
+```
+
+See [docs/specs/PEAC-TXT.md](specs/PEAC-TXT.md) for the full specification.
+
+### peac-issuer.json
+
+`/.well-known/peac-issuer.json` enables verifiers to discover JWKS endpoints for validating receipts.
+
+```json
+{
+  "version": "peac-issuer/0.1",
+  "issuer": "https://api.example.com",
+  "jwks_uri": "https://api.example.com/.well-known/jwks.json",
+  "algorithms": ["EdDSA"]
+}
+```
+
+| Field             | Required | Description                           |
+| ----------------- | -------- | ------------------------------------- |
+| `version`         | Yes      | Configuration format version          |
+| `issuer`          | Yes      | Issuer URL (must match receipt `iss`) |
+| `jwks_uri`        | Yes      | JWKS endpoint for key discovery       |
+| `verify_endpoint` | No       | Verification endpoint URL             |
+| `algorithms`      | No       | Supported signing algorithms          |
+
+See [docs/specs/PEAC-ISSUER.md](specs/PEAC-ISSUER.md).
+
+### Wire formats
+
+**Interaction Record format** (`interaction-record+jwt`, stable on `latest`, v0.12.0+):
+
+- Two structural kinds: `evidence` and `challenge`
+- Open semantic `type` (reverse-DNS or absolute URI)
+- Multi-valued `pillars` from 10-value closed taxonomy
+- 5 typed extension groups: commerce, access, challenge, identity, correlation
+- Policy binding: JCS (RFC 8785) + SHA-256 digest comparison
+- JOSE hardening: embedded keys rejected, `kid` required
+
+**Wire 0.1** (`peac-receipt/0.1`): frozen legacy format. `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION`.
+
+Normative spec: [WIRE-0.2.md](specs/WIRE-0.2.md). Versioning doctrine: [VERSIONING.md](specs/VERSIONING.md).
+
+### Receipt header
+
+Single `PEAC-Receipt` response header carries the signed JWS for both wire versions. Errors use `application/problem+json` (RFC 9457).
 
 ---
 
-## License
+## Transports and mappings
 
-PEAC Protocol - Apache 2.0 License - Stewarded by contributors from [Originary](https://www.originary.xyz) and the community.
+PEAC is transport-agnostic. Receipts travel via the binding appropriate to each protocol:
 
-See [LICENSE](LICENSE) for full details.
+| Binding        | How receipts travel                          | Status      |
+| -------------- | -------------------------------------------- | ----------- |
+| HTTP/REST      | Response header `PEAC-Receipt: <jws>`        | Implemented |
+| MCP            | Tool result `_meta` (carrier format)         | Implemented |
+| A2A            | Task/message metadata (extension URI)        | Implemented |
+| ACP            | State transition metadata                    | Implemented |
+| UCP            | Webhook verification metadata                | Implemented |
+| x402           | Settlement response evidence                 | Implemented |
+| Queues/batches | NDJSON receipts verified offline via bundles | Implemented |
+
+**Mapping packages:**
+
+| Package                          | Protocol                        |
+| -------------------------------- | ------------------------------- |
+| `@peac/mappings-mcp`             | Model Context Protocol          |
+| `@peac/mappings-a2a`             | Agent-to-Agent Protocol         |
+| `@peac/mappings-acp`             | Agentic Commerce Protocol       |
+| `@peac/mappings-ucp`             | Universal Commerce Protocol     |
+| `@peac/mappings-content-signals` | robots.txt, AIPREF, tdmrep.json |
+| `@peac/mappings-rsl`             | RSL usage token mapping         |
+| `@peac/mappings-aipref`          | IETF AIPREF vocabulary          |
+| `@peac/mappings-tap`             | Visa TAP mapping                |
 
 ---
 
-## Community
+## Policy Kit
 
-- **Source:** [https://github.com/peacprotocol/peac](https://github.com/peacprotocol/peac)
-- **Website:** [https://www.peacprotocol.org](https://www.peacprotocol.org)
-- **Issues:** Bug reports and feature requests via GitHub Issues
-- **Discussions:** Design questions and ecosystem proposals via GitHub Discussions
-- **Contact:** See [https://www.peacprotocol.org](https://www.peacprotocol.org) for working group and contact information
+> **Start here:** [policy-kit/quickstart.md](policy-kit/quickstart.md) | **Profiles:** [policy-kit/profiles.md](policy-kit/profiles.md)
 
-PEAC is designed for multiple independent implementations across languages and platforms. If you are building an implementation, SDK, or rail adapter, please open an issue so it can be linked from ecosystem documentation.
+Author policies once, compile to multiple deployment surfaces.
+
+```yaml
+# peac-policy.yaml
+version: peac-policy/0.1
+name: My API Policy
+defaults:
+  decision: deny
+rules:
+  - name: allow-subscribed-crawl
+    subject: { type: human, labels: [subscribed] }
+    purpose: crawl
+    decision: allow
+  - name: deny-agents-train
+    subject: { type: agent }
+    purpose: train
+    decision: deny
+```
+
+```bash
+peac policy validate peac-policy.yaml
+peac policy generate peac-policy.yaml --out dist --well-known
+```
+
+**Generated artifacts:** `/.well-known/peac.txt`, `robots-ai-snippet.txt`, `aipref-headers.json`, `ai-policy.md`.
+
+**Profiles:** `news-media`, `api-provider`, `open-source`, `saas-docs`. Run `peac policy list-profiles`.
+
+---
+
+## Package catalog
+
+**Core:**
+
+| Package          | Description                                  |
+| ---------------- | -------------------------------------------- |
+| `@peac/kernel`   | Zero-dependency constants and registries     |
+| `@peac/schema`   | Types, Zod validators, JSON Schema           |
+| `@peac/crypto`   | EdDSA (Ed25519) JWS signing and verification |
+| `@peac/protocol` | High-level `issue()` and `verifyLocal()`     |
+| `@peac/control`  | Constraint types and enforcement (CAL)       |
+
+**Runtime:**
+
+| Package                    | Description                                                  |
+| -------------------------- | ------------------------------------------------------------ |
+| `@peac/server`             | HTTP verification server with 402 support                    |
+| `@peac/cli`                | Command-line tools for receipts and policy                   |
+| `@peac/mcp-server`         | MCP server (5 tools: verify, inspect, decode, issue, bundle) |
+| `@peac/middleware-core`    | Transport-neutral middleware logic                           |
+| `@peac/middleware-express` | Express middleware for auto-issuance                         |
+
+**Rails:**
+
+| Package                | Description           |
+| ---------------------- | --------------------- |
+| `@peac/rails-x402`     | x402 payment rail     |
+| `@peac/rails-stripe`   | Stripe payment rail   |
+| `@peac/rails-razorpay` | Razorpay payment rail |
+| `@peac/rails-card`     | Card billing bridge   |
+
+**Adapters:**
+
+| Package                           | Description                                |
+| --------------------------------- | ------------------------------------------ |
+| `@peac/adapter-x402`              | x402 evidence carrier (upstream wire sync) |
+| `@peac/adapter-openclaw`          | OpenClaw agent framework                   |
+| `@peac/adapter-openai-compatible` | Hash-first inference receipt adapter       |
+
+**Infrastructure:** `@peac/contracts`, `@peac/http-signatures`, `@peac/jwks-cache`, `@peac/net-node`, `@peac/adapter-core`, `@peac/privacy`, `@peac/telemetry`, `@peac/telemetry-otel`, `@peac/transport-grpc`, `@peac/capture-core`, `@peac/capture-node`, `@peac/attribution`, `@peac/audit`, `@peac/policy-kit`, `@peac/sdk-js`.
+
+**Publication status:** Core, runtime, and adapter packages are published to npm. See [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases). Install via `pnpm add <package>`.
+
+---
+
+## Advanced topics
+
+### Workflow correlation
+
+Multi-step agentic workflows produce multiple receipts. Workflow correlation links them into a verifiable DAG for reconstruction and audit.
+
+```typescript
+import { issue } from '@peac/protocol';
+import { generateWorkflowId, generateStepId } from '@peac/schema';
+
+const { jws } = await issue({
+  iss: 'https://api.example.com',
+  kind: 'evidence',
+  type: 'org.peacprotocol/tool-call',
+  pillars: ['commerce'],
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'x402',
+      amount_minor: '1000',
+      currency: 'USD',
+    },
+    'org.peacprotocol/correlation': {
+      workflow_id: generateWorkflowId(),
+      step_id: generateStepId(),
+      parent_step_ids: [],
+      tool_name: 'web_search',
+    },
+  },
+  privateKey,
+  kid: 'key-2026-01',
+});
+```
+
+**Key invariants:** Workflow IDs match `wf_[a-zA-Z0-9_-]{20,48}`, step IDs match `step_[a-zA-Z0-9_-]{20,48}`, no self-loops, max 16 parent steps, hash chaining via `prev_receipt_hash`.
+
+Normative spec: [WORKFLOW-CORRELATION.md](specs/WORKFLOW-CORRELATION.md). Example: [examples/workflow-correlation/](../examples/workflow-correlation/).
+
+### Content signal parsing
+
+`@peac/mappings-content-signals` parses robots.txt (RFC 9309), Content-Usage headers (AIPREF), and tdmrep.json (EU TDM Directive) with source precedence resolution: `tdmrep.json` > `Content-Signal` > `Content-Usage` > `robots.txt`.
+
+### Security model
+
+- SSRF protection and strict URL validation in all network paths
+- JWKS rotation and emergency revocation support
+- DPoP proof-of-possession binding (RFC 9449)
+- Kernel constraints enforced at issuance and verification (fail-closed)
+- No silent network fallback for offline verification
+
+See [SECURITY.md](../.github/SECURITY.md), [PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md), and [HTTP-TRANSPORT-SECURITY.md](security/HTTP-TRANSPORT-SECURITY.md).
+
+---
+
+## Development
+
+**Prerequisites:** Node.js 24 (tested); Node.js 22+ (compatible). pnpm >= 9.
+
+```bash
+git clone https://github.com/peacprotocol/peac
+cd peac
+pnpm install
+pnpm build
+pnpm test
+```
+
+**Common commands:**
+
+```bash
+pnpm lint                    # ESLint
+pnpm typecheck:core          # TypeScript strict
+pnpm test                    # Vitest (all packages)
+pnpm ci:all                  # Full CI simulation
+./scripts/guard.sh           # Safety invariants
+pnpm format:check            # Prettier
+```
+
+See [CI_BEHAVIOR.md](CI_BEHAVIOR.md) for pipeline details and [engineering-guide.md](engineering-guide.md) for development patterns.
+
+---
+
+Apache-2.0. See [LICENSE](../LICENSE). Stewardship: [Originary](https://www.originary.xyz/) and the open source community.
