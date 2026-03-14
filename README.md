@@ -11,10 +11,11 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0" /></a>
-  <a href="https://github.com/peacprotocol/peac/releases"><img src="https://img.shields.io/github/v/release/peacprotocol/peac" alt="Latest Release" /></a>
-  <a href="https://www.npmjs.com/package/@peac/protocol"><img src="https://img.shields.io/npm/dm/@peac/protocol?style=flat" alt="npm downloads" /></a>
-  <a href="https://github.com/peacprotocol/peac/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=tests%20%2B%20lint" alt="CI Status" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg" alt="License: Apache 2.0" /></a>
+  <a href="https://github.com/peacprotocol/peac/releases"><img src="https://img.shields.io/github/v/release/peacprotocol/peac?color=brightgreen" alt="Latest Release" /></a>
+  <a href="https://www.npmjs.com/package/@peac/protocol"><img src="https://img.shields.io/npm/dm/@peac/protocol?style=flat&color=brightgreen" alt="npm downloads" /></a>
+  <a href="https://github.com/peacprotocol/peac/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=CI&color=brightgreen" alt="CI Status" /></a>
+  <a href="docs/releases/coverage-summary.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpeacprotocol%2Fpeac%2Fmain%2Fdocs%2Freleases%2Fcoverage-summary.json&query=%24.lines.pct&label=coverage&suffix=%25&color=brightgreen" alt="Coverage" /></a>
 </p>
 
 <p align="center">
