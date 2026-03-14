@@ -1,7 +1,14 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/constants.ts', 'src/errors.ts', 'src/registries.ts', 'src/types.ts'],
+  entry: [
+    'src/index.ts',
+    'src/constants.ts',
+    'src/errors.ts',
+    'src/registries.ts',
+    'src/registries.generated.ts',
+    'src/types.ts',
+  ],
   format: ['cjs', 'esm'],
   dts: false,
   outDir: 'dist',

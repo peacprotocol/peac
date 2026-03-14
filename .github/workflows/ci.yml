@@ -81,6 +81,9 @@ jobs:
             echo "SKIP: none of the flagged files exist (renamed or removed)"
           fi
 
+      - name: Codegen drift check
+        run: pnpm verify:codegen-drift
+
       - name: Domain guard
         run: bash -euxo pipefail scripts/guard.sh
 
@@ -288,6 +291,49 @@ jobs:
 
       - name: Audit gate tests
         run: pnpm exec vitest run tests/scripts/audit-gate.test.ts
+
+  # Node.js compatibility matrix (v0.12.2, DD-161)
+  # Primary CI job tests Node 24 (Active LTS, pinned via .node-version).
+  # This job tests:
+  #   - Node 25 (Current): forward-compat, catches upcoming breakage early
+  #   - Node 22 (Maintenance LTS): backward-compat, declared in engines.node >=22.0.0
+  # Support policy: Node 24 is the canonical production target; Node 22 is the
+  # Maintenance LTS compat lane per engines.node; Node 25 is forward-compat only.
+  node-compat:
+    name: Node Compat (${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['22', '25']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Corepack
+        run: |
+          PM="$(node -p "require(require('path').join(process.env.GITHUB_WORKSPACE||process.cwd(),'package.json')).packageManager")"
+          corepack prepare "$PM" --activate
+          pnpm --version
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build core packages
+        run: pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/protocol build
+
+      - name: Test core packages
+        run: pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/protocol test
 
   # PR scope guard: hard-fail when changed files exceed declared scope.
   # Opt-in via scope:* labels. No label = no check.

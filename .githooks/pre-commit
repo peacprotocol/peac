@@ -30,6 +30,14 @@ if git diff --cached --name-only | grep -q 'specs/kernel/errors.json'; then
   echo "[pre-commit] errors.generated.ts updated and staged"
 fi
 
+# Auto-sync registry codegen when registries.json is staged
+if git diff --cached --name-only | grep -q 'specs/kernel/registries.json'; then
+  echo "[pre-commit] Detected staged registries.json: running codegen:registries..."
+  pnpm codegen:registries
+  git add packages/kernel/src/registries.generated.ts
+  echo "[pre-commit] registries.generated.ts updated and staged"
+fi
+
 # Planning leak check (local-only script; skipped on fresh clones)
 if [ -f scripts/check-planning-leak.sh ]; then
   echo "[pre-commit] Checking for planning leaks..."

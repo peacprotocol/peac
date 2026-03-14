@@ -1,8 +1,15 @@
 /**
- * PEAC Subject Profile Types
+ * PEAC Subject Record Types
  *
- * Subject profiles for identity and authorization context.
+ * Subject records for identity and authorization context.
  * Used in conjunction with receipts and control decisions.
+ *
+ * Terminology (v0.12.2, DD-173.5): "Subject record" is the canonical name
+ * for identity/classification data structures. "Profile" is reserved for
+ * usage overlay documents in docs/profiles/ (PROFILE_RULES.md).
+ *
+ * The legacy names SubjectProfile and SubjectProfileSnapshot are preserved
+ * as deprecated aliases for backward compatibility. Remove-not-before: v0.13.0.
  */
 
 /**
@@ -25,10 +32,10 @@ export type SubjectId = string;
 export type SubjectType = 'human' | 'org' | 'agent';
 
 /**
- * Subject profile - identity and classification
+ * Subject record: identity and classification
  *
- * Minimal profile structure for subjects in the PEAC ecosystem.
- * Profiles are intentionally lightweight; detailed identity
+ * Minimal record structure for subjects in the PEAC ecosystem.
+ * Records are intentionally lightweight; detailed identity
  * attributes belong in external identity systems.
  *
  * Invariants:
@@ -69,9 +76,9 @@ export interface SubjectProfile {
 }
 
 /**
- * Subject profile snapshot - point-in-time capture
+ * Subject record snapshot: point-in-time capture
  *
- * Captures the state of a subject profile at a specific moment.
+ * Captures the state of a subject record at a specific moment.
  * Used for audit trails, policy evaluation records, and receipts.
  *
  * Invariants:
@@ -80,9 +87,9 @@ export interface SubjectProfile {
  */
 export interface SubjectProfileSnapshot {
   /**
-   * Subject profile (REQUIRED)
+   * Subject record (REQUIRED)
    *
-   * The captured profile state.
+   * The captured record state.
    */
   subject: SubjectProfile;
 
@@ -111,10 +118,30 @@ export interface SubjectProfileSnapshot {
   source?: string;
 
   /**
-   * Profile version (OPTIONAL)
+   * Record version (OPTIONAL)
    *
-   * Version tag for the profile schema or data.
-   * Useful for tracking profile format changes over time.
+   * Version tag for the record schema or data.
+   * Useful for tracking record format changes over time.
    */
   version?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Canonical type aliases (v0.12.2, DD-173.5)
+// ---------------------------------------------------------------------------
+
+/**
+ * Canonical name for subject identity/classification data.
+ *
+ * "SubjectRecord" replaces "SubjectProfile" to avoid confusion with
+ * usage profile documents (docs/profiles/). See PROFILE_RULES.md.
+ */
+export type SubjectRecord = SubjectProfile;
+
+/**
+ * Canonical name for subject identity/classification snapshot.
+ *
+ * "SubjectRecordSnapshot" replaces "SubjectProfileSnapshot" to avoid
+ * confusion with usage profile documents. See PROFILE_RULES.md.
+ */
+export type SubjectRecordSnapshot = SubjectProfileSnapshot;

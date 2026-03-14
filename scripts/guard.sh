@@ -519,6 +519,19 @@ else
   echo "SKIP: test-mappings.json not found"
 fi
 
+printf "%-50s" "Registries JSON Schema validation..."
+if [ -f "scripts/validate-registries-schema.mjs" ]; then
+  if node scripts/validate-registries-schema.mjs > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    node scripts/validate-registries-schema.mjs 2>&1 || true
+    bad=1
+  fi
+else
+  echo "SKIP: validate-registries-schema.mjs not found"
+fi
+
 printf "%-50s" "Requirement registry drift..."
 if [ -f "scripts/conformance/verify-registry-drift.mjs" ]; then
   if node scripts/conformance/verify-registry-drift.mjs > /dev/null 2>&1; then

@@ -78,6 +78,7 @@ desktop.ini
 # Exception: track kernel codegen (CI verifies sync with spec)
 !packages/kernel/src/errors.generated.ts
 !packages/kernel/src/error-categories.generated.ts
+!packages/kernel/src/registries.generated.ts
 
 # Example generated outputs (canonical bytes, hashes)
 examples/*/generated/

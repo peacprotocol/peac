@@ -21,6 +21,8 @@ packages/kernel/src/*.ts    ← TypeScript implementation
 packages/{schema,protocol,control,crypto}  ← Core packages import from @peac/kernel
 ```
 
+**Schema source-of-truth policy:** `specs/kernel/*.json` files are the normative source for constants, error codes, and registries. Codegen scripts generate TypeScript from these specs. Runtime validation schemas (Zod) in `@peac/schema` are hand-maintained but must stay consistent with the JSON specs. JSON Schema files in `specs/kernel/` (e.g., `registries.schema.json`, JSON Schema 2020-12) validate the spec files themselves. Future evaluation: Zod 4 supports native JSON Schema conversion, which could reduce dual-maintenance risk by generating JSON Schema from Zod or vice versa.
+
 ### 2. Layered Dependencies
 
 Packages follow a strict layering model to prevent circular dependencies and ensure clear separation of concerns:
@@ -46,7 +48,17 @@ Layer 6: pillars         (depends on protocol, control)
 - PaymentEvidence uses generic fields; rail-specific data goes in `evidence` object
 - Agent protocol specifics isolated in `packages/mappings/*`
 
-### 4. Spec-First Development
+### 4. Runtime Support Policy
+
+PEAC packages declare `engines.node: ">=22.0.0"` and follow this support policy:
+
+- **Canonical production target:** Node 24 (Active LTS). `.node-version` pins to the latest 24.x LTS patch.
+- **Compatibility floor:** Node 22 (Maintenance LTS). Supported because it is declared in `engines.node`. CI exercises Node 22 in a compatibility lane.
+- **Forward-compatibility lane:** Node 25 (Current release line). CI exercises Node 25 to catch upcoming breakage early. Not a production support target.
+
+CI runs the full test suite on Node 24 (primary) and Node 22 + 25 (compatibility matrix). Packages must pass all three.
+
+### 5. Spec-First Development
 
 - Wire format `peac-receipt/0.1` is the frozen legacy wire format identifier (v0.10.0+); the Interaction Record format (`interaction-record+jwt`) is current
 - JSON Schema at `specs/wire/peac-receipt-0.1.schema.json` is normative for Wire 0.1

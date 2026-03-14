@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/kernel/registries.schema.json",
+  "title": "PEAC Protocol Registries",
+  "description": "Schema for specs/kernel/registries.json. Validated in CI (guard.sh) using Ajv 2020-12.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "version",
+    "description",
+    "payment_rails",
+    "control_engines",
+    "transport_methods",
+    "agent_protocols",
+    "proof_types",
+    "pillar_values",
+    "receipt_types",
+    "extension_groups"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "description": { "type": "string" },
+    "payment_rails": { "type": "array", "items": { "$ref": "#/$defs/registryEntry" } },
+    "control_engines": { "type": "array", "items": { "$ref": "#/$defs/registryEntry" } },
+    "transport_methods": { "type": "array", "items": { "$ref": "#/$defs/registryEntry" } },
+    "agent_protocols": { "type": "array", "items": { "$ref": "#/$defs/registryEntry" } },
+    "proof_types": { "type": "array", "items": { "$ref": "#/$defs/registryEntry" } },
+    "pillar_values": {
+      "type": "object",
+      "required": ["_comment", "values"],
+      "properties": {
+        "_comment": { "type": "string" },
+        "values": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 10,
+          "maxItems": 10,
+          "uniqueItems": true
+        }
+      }
+    },
+    "receipt_types": {
+      "type": "object",
+      "required": ["_comment", "values"],
+      "properties": {
+        "_comment": { "type": "string" },
+        "values": { "type": "array", "items": { "$ref": "#/$defs/receiptTypeEntry" } }
+      }
+    },
+    "extension_groups": {
+      "type": "object",
+      "required": ["_comment", "values"],
+      "properties": {
+        "_comment": { "type": "string" },
+        "values": { "type": "array", "items": { "$ref": "#/$defs/extensionGroupEntry" } }
+      }
+    }
+  },
+  "$defs": {
+    "registryEntry": {
+      "type": "object",
+      "required": ["id", "category", "description", "reference", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "reference": { "type": ["string", "null"] },
+        "status": { "type": "string", "enum": ["informational", "normative", "deprecated"] }
+      }
+    },
+    "receiptTypeEntry": {
+      "type": "object",
+      "required": ["id", "pillar", "description", "extension_group", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "pillar": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "extension_group": { "type": ["string", "null"] },
+        "status": { "type": "string", "enum": ["informational", "normative", "deprecated"] }
+      }
+    },
+    "extensionGroupEntry": {
+      "type": "object",
+      "required": ["id", "description", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["informational", "normative", "deprecated"] }
+      }
+    }
+  }
+}
