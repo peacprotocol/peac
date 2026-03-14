@@ -9,8 +9,6 @@
  * (EXTENSION_BUDGET). Re-exported here for schema-layer convenience.
  */
 
-import { EXTENSION_BUDGET } from '@peac/kernel';
-
 // Re-export kernel byte-budget constants for schema-layer consumers
 export { EXTENSION_BUDGET } from '@peac/kernel';
 
