@@ -1,6 +1,6 @@
 {
   "$comment": "Key Rotation Lifecycle conformance fixtures (DD-148, v0.11.3+)",
-  "version": "0.11.3",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "normal-rotation",
@@ -182,5 +182,5 @@
     "$comment": "RFC 5280 CRLReason subset relevant to receipt signing keys",
     "values": ["key_compromise", "superseded", "cessation_of_operation", "privilege_withdrawn"]
   },
-  "schema_version": "0.11.3"
+  "schema_version": "0.12.1"
 }

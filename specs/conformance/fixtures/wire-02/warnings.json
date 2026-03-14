@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 warning emission vectors (v0.12.0-preview.1, DD-155)",
-  "schema_version": "0.12.0",
-  "version": "0.12.0",
+  "schema_version": "0.12.1",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "unknown-type-preserved",

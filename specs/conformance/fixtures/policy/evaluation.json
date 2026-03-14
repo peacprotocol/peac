@@ -1,6 +1,6 @@
 {
   "$comment": "Policy evaluation golden vectors for cross-language conformance (v0.9.29+)",
-  "version": "0.9.29",
+  "version": "0.12.1",
   "runner_contract": {
     "semantics": "first-match-wins",
     "empty_rules": "valid, falls back to defaults.decision",
@@ -259,5 +259,5 @@
       }
     }
   ],
-  "schema_version": "0.9.29"
+  "schema_version": "0.12.1"
 }

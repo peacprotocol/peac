@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-03-13
+
+### x402 Upstream Wire Sync
+
+Aligns `@peac/adapter-x402` with the current x402 offer-receipt extension wire shapes (upstream PR #935, commit `f2bbb5c`).
+
+### Added
+
+- **Upstream wire types and extraction** (#511, DD-169, DD-170, DD-171)
+  - `raw.ts`: exact upstream wire mirror (Layer A) with discriminated JWS/EIP-712 unions
+  - `normalize.ts`: EIP-712 placeholder normalization (Layer B): `validUntil: 0` to undefined, `transaction: ""` to undefined
+  - Hardened JWS compact serialization parser: 3-segment check, no padding, size limit (64 KiB), object root only
+  - `extractOfferPayload()` / `extractReceiptPayload()` / `extractExtensionInfo()` helpers
+- **Verification layering** (#511, DD-172)
+  - `verifyReceipt()`: receipt semantic verification (version, payer, issuedAt recency, network)
+  - `verifyOfferReceiptConsistency()`: offer-receipt consistency (resourceUrl, network matching)
+  - Closed-policy enums: `offerExpiryPolicy`, `signatureVerificationPolicy`, `signerAuthorizationPolicy`
+  - `CryptoVerifier` and `SignerAuthorizer` opt-in interfaces
+  - Network-aware address comparison via `AddressComparator` (EVM case-insensitive, exact otherwise)
+- **Conformance expansion** (#512)
+  - 35 conformance vectors (was 19): offer, receipt, consistency, JWS hardening, EIP-712 placeholder
+  - Explicit fixture `kind` routing and metadata validation
+  - 8 direct mapping and proof-preservation tests
+- **Upstream compatibility CI**
+  - Vendored type snapshot pinned to upstream commit `f2bbb5c`
+  - Lane 1: parity tests in conformance suite (runs on every PR)
+  - Lane 2: weekly drift detection workflow against upstream HEAD
+
+### Changed
+
+- **Profile identifier**: `peac-x402-offer-receipt/0.2` (was `0.1`)
+- **`OfferPayload.version`**: `number` (was `string`)
+- **`OfferPayload.resourceUrl`**: added (required)
+- **`OfferPayload.scheme`**: required (was optional)
+- **`OfferPayload.settlement`**: removed
+- **`ReceiptPayload`**: restructured to `resourceUrl/payer/issuedAt/transaction?` (was `txHash` with optional `asset/amount/payTo`)
+- **`SignedOffer`/`SignedReceipt`**: discriminated union by `format` (JWS: no `payload` field; EIP-712: has `payload`)
+- **`X402PaymentRequired`**: renamed to `X402OfferReceiptChallenge`, single `offer` became `offers[]`
+- **`acceptIndex`**: moved from top-level to per-offer on `SignedOffer`
+- **`X402AdapterConfig.supportedVersions`**: `number[]` (was `string[]`)
+- **Evidence model**: `txHash` replaced by optional `transaction`; added `resourceUrl`, `payer`, `issuedAt`
+- **Verification API**: `verifyOffer` + `verifyReceipt` + `verifyOfferReceiptConsistency` (was `verifyOffer` only)
+
+### Design Decisions
+
+- DD-169: Upstream payment extension wire alignment (exact field names and types at wire layer)
+- DD-170: Discriminated signed artifact unions (JWS/EIP-712 format dispatch)
+- DD-171: Four-layer adapter architecture (raw wire, encoded payload, semantic, mapped)
+- DD-172: Verification layering with opt-in crypto (5-layer API, closed-policy enums)
+
+### Migration
+
+See `docs/guides/x402-migration-0.12.1.md` for field-by-field migration guidance.
+
 ## [0.12.0] - 2026-03-08
 
 ### Interaction Record Format 0.2 (Stable)

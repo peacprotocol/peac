@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/interaction-fixtures.schema.json",
   "$comment": "RFC 9421 proof capture extension vectors (v0.10.12+). All vectors are valid InteractionEvidenceV01 with the org.peacprotocol/rfc9421-proof@0.1 extension.",
-  "version": "0.10.7",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "rfc9421-verified-signature",
@@ -231,5 +231,5 @@
       }
     }
   ],
-  "schema_version": "0.10.7"
+  "schema_version": "0.12.1"
 }

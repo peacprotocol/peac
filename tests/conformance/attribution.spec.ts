@@ -105,7 +105,7 @@ describe('Attribution Conformance', () => {
   describe('Valid Fixtures', () => {
     it('should have fixtures to test', () => {
       expect(validFixtures.fixtures.length).toBeGreaterThan(0);
-      expect(validFixtures.version).toBe('0.9.26');
+      expect(validFixtures.version).toBe('0.12.1');
     });
 
     // We'll use a loop to generate tests for each fixture
@@ -224,7 +224,7 @@ describe('Attribution Conformance', () => {
   describe('Invalid Fixtures', () => {
     it('should have fixtures to test', () => {
       expect(invalidFixtures.fixtures.length).toBeGreaterThan(0);
-      expect(invalidFixtures.version).toBe('0.9.26');
+      expect(invalidFixtures.version).toBe('0.12.1');
     });
 
     describe('Schema Validation', () => {
@@ -277,7 +277,7 @@ describe('Attribution Conformance', () => {
   describe('Edge Case Fixtures', () => {
     it('should have fixtures to test', () => {
       expect(edgeCaseFixtures.fixtures.length).toBeGreaterThan(0);
-      expect(edgeCaseFixtures.version).toBe('0.9.26');
+      expect(edgeCaseFixtures.version).toBe('0.12.1');
     });
 
     describe('Schema Validation', () => {
@@ -365,9 +365,9 @@ describe('Attribution Conformance', () => {
 
   describe('Cross-Language Parity', () => {
     it('should have consistent fixture version across all files', () => {
-      expect(validFixtures.version).toBe('0.9.26');
-      expect(invalidFixtures.version).toBe('0.9.26');
-      expect(edgeCaseFixtures.version).toBe('0.9.26');
+      expect(validFixtures.version).toBe('0.12.1');
+      expect(invalidFixtures.version).toBe('0.12.1');
+      expect(edgeCaseFixtures.version).toBe('0.12.1');
     });
 
     it('should have comprehensive fixture coverage', () => {

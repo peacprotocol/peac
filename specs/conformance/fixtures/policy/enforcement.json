@@ -1,6 +1,6 @@
 {
   "$comment": "Policy enforcement HTTP mapping golden vectors for cross-language conformance (v0.9.29+)",
-  "version": "0.9.29",
+  "version": "0.12.1",
   "runner_contract": {
     "api_shape": "EnforceDecision(decision Decision, receiptVerified bool) (int, http.Header)",
     "402_semantics": "Only when decision=review AND receiptVerified=false",
@@ -88,5 +88,5 @@
       }
     }
   ],
-  "schema_version": "0.9.29"
+  "schema_version": "0.12.1"
 }

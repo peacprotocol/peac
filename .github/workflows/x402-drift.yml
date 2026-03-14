@@ -1,0 +1,136 @@
+name: x402 Upstream Drift Check
+
+# Weekly check for upstream x402 offer-receipt extension changes.
+# Compares vendored type snapshot against upstream spec at HEAD.
+# Lane 1 (pinned parity) runs in CI via conformance tests.
+# Lane 2 (drift detection) runs here on schedule.
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 09:00 UTC
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  check-drift:
+    name: x402 Offer-Receipt Type Drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Fetch upstream spec at HEAD
+        run: |
+          curl -sf -o /tmp/upstream-spec.md \
+            "https://raw.githubusercontent.com/coinbase/x402/main/specs/extensions/extension-offer-and-receipt.md"
+
+      - name: Extract upstream field tables
+        run: |
+          node -e "
+            const fs = require('fs');
+            const spec = fs.readFileSync('/tmp/upstream-spec.md', 'utf8');
+
+            // Extract offer payload fields from Section 4.2 table
+            const offerMatch = spec.match(/4\.2 Offer Payload Fields[\s\S]*?\n\n/);
+            const offerTable = offerMatch ? offerMatch[0] : '';
+
+            // Extract receipt payload fields from Section 5.2 table
+            const receiptMatch = spec.match(/5\.2 Receipt Payload Fields[\s\S]*?\n\n/);
+            const receiptTable = receiptMatch ? receiptMatch[0] : '';
+
+            // Extract field names from markdown tables
+            function extractFields(table) {
+              const fields = {};
+              const rows = table.split('\n').filter(l => l.startsWith('|') && !l.includes('---'));
+              for (const row of rows.slice(1)) { // skip header
+                const cells = row.split('|').map(c => c.trim()).filter(Boolean);
+                if (cells.length >= 3) {
+                  const name = cells[0].replace(/\x60/g, '');
+                  const type = cells[1].toLowerCase();
+                  const required = cells[2].toLowerCase().includes('yes');
+                  fields[name] = { type, required };
+                }
+              }
+              return fields;
+            }
+
+            const result = {
+              extracted_at: new Date().toISOString().slice(0, 10),
+              offer_fields: extractFields(offerTable),
+              receipt_fields: extractFields(receiptTable)
+            };
+
+            fs.writeFileSync('/tmp/upstream-extracted.json', JSON.stringify(result, null, 2));
+            console.log('Extracted upstream fields:');
+            console.log(JSON.stringify(result, null, 2));
+          "
+
+      - name: Compare with vendored snapshot
+        run: |
+          node -e "
+            const fs = require('fs');
+
+            const snapshot = JSON.parse(fs.readFileSync('specs/upstream/x402/type-snapshot.json', 'utf8'));
+            const extracted = JSON.parse(fs.readFileSync('/tmp/upstream-extracted.json', 'utf8'));
+
+            const errors = [];
+
+            function compareFields(label, vendored, upstream) {
+              const vKeys = Object.keys(vendored);
+              const uKeys = Object.keys(upstream);
+
+              // Check for added fields
+              for (const k of uKeys) {
+                if (!vKeys.includes(k)) {
+                  errors.push(label + ': upstream added field \"' + k + '\"');
+                }
+              }
+
+              // Check for removed fields
+              for (const k of vKeys) {
+                if (!uKeys.includes(k)) {
+                  errors.push(label + ': upstream removed field \"' + k + '\"');
+                }
+              }
+
+              // Check for type changes
+              for (const k of uKeys) {
+                if (vendored[k] && upstream[k]) {
+                  const vType = vendored[k].type;
+                  const uType = upstream[k].type;
+                  if (vType !== uType) {
+                    errors.push(label + ': field \"' + k + '\" type changed from \"' + vType + '\" to \"' + uType + '\"');
+                  }
+                }
+              }
+            }
+
+            if (Object.keys(extracted.offer_fields).length > 0) {
+              compareFields('offer_payload', snapshot.offer_payload.fields, extracted.offer_fields);
+            } else {
+              errors.push('offer_payload: failed to extract fields from upstream spec (table format may have changed)');
+            }
+
+            if (Object.keys(extracted.receipt_fields).length > 0) {
+              compareFields('receipt_payload', snapshot.receipt_payload.fields, extracted.receipt_fields);
+            } else {
+              errors.push('receipt_payload: failed to extract fields from upstream spec (table format may have changed)');
+            }
+
+            if (errors.length === 0) {
+              console.log('OK: Vendored x402 type snapshot matches upstream HEAD.');
+              process.exit(0);
+            } else {
+              console.error('DRIFT DETECTED in x402 offer-receipt extension:');
+              for (const e of errors) {
+                console.error('  - ' + e);
+              }
+              console.error('');
+              console.error('Action: Review upstream changes and update:');
+              console.error('  1. specs/upstream/x402/type-snapshot.json');
+              console.error('  2. packages/adapters/x402/src/raw.ts');
+              console.error('  3. Conformance fixtures in specs/conformance/fixtures/x402/');
+              process.exit(1);
+            }
+          "

@@ -1,6 +1,6 @@
 {
   "$comment": "PEAC issuer configuration conformance vectors (v0.10.0+)",
-  "version": "0.11.0",
+  "version": "0.12.1",
   "spec": "docs/specs/PEAC-ISSUER.md",
   "format": "peac-issuer/0.1",
   "location": "/.well-known/peac-issuer.json",
@@ -261,5 +261,5 @@
       }
     ]
   },
-  "schema_version": "0.11.0"
+  "schema_version": "0.12.1"
 }

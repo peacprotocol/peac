@@ -1,6 +1,6 @@
 {
   "$comment": "Wire 0.2 valid receipt golden vectors (v0.12.0-preview.1, DD-156)",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "evidence-commerce-minimal",
@@ -937,5 +937,5 @@
       "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
     }
   ],
-  "schema_version": "0.12.0"
+  "schema_version": "0.12.1"
 }

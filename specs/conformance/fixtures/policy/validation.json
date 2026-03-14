@@ -1,6 +1,6 @@
 {
   "$comment": "Policy document validation golden vectors for cross-language conformance (v0.9.29+)",
-  "version": "0.9.29",
+  "version": "0.12.1",
   "runner_contract": {
     "parsing": "strict",
     "unknown_fields": "reject",
@@ -222,5 +222,5 @@
       }
     }
   ],
-  "schema_version": "0.9.29"
+  "schema_version": "0.12.1"
 }

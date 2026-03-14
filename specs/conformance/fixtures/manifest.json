@@ -81,82 +81,82 @@
   "purpose": {
     "normalization.json": {
       "description": "Purpose header normalization golden vectors (v0.9.24+)",
-      "version": "0.9.24"
+      "version": "0.12.1"
     },
     "validation.json": {
       "description": "Purpose token validation golden vectors (v0.9.24+)",
-      "version": "0.9.24"
+      "version": "0.12.1"
     },
     "reason.json": {
       "description": "Purpose reason derivation golden vectors (v0.9.24+)",
-      "version": "0.9.24"
+      "version": "0.12.1"
     }
   },
   "agent-identity": {
     "valid.json": {
       "description": "Valid AgentIdentityAttestation golden vectors (v0.9.25+)",
-      "version": "0.9.25",
+      "version": "0.12.1",
       "fixture_count": 9
     },
     "invalid.json": {
       "description": "Invalid AgentIdentityAttestation golden vectors (v0.9.25+)",
-      "version": "0.9.25",
+      "version": "0.12.1",
       "fixture_count": 12
     },
     "edge-cases.json": {
       "description": "Edge case AgentIdentityAttestation golden vectors (v0.9.25+)",
-      "version": "0.9.25",
+      "version": "0.12.1",
       "fixture_count": 10
     },
     "valid-actor-binding.json": {
       "description": "Valid ActorBinding conformance fixtures (DD-142, DD-143, v0.11.3+)",
-      "version": "0.11.3",
+      "version": "0.12.1",
       "fixture_count": 8
     },
     "invalid-actor-binding.json": {
       "description": "Invalid ActorBinding conformance fixtures (DD-142, DD-144, v0.11.3+)",
-      "version": "0.11.3",
+      "version": "0.12.1",
       "fixture_count": 8
     }
   },
   "obligations": {
     "valid.json": {
       "description": "Valid obligations extension golden vectors (v0.9.26+)",
-      "version": "0.9.26",
+      "version": "0.12.1",
       "fixture_count": 4
     },
     "invalid.json": {
       "description": "Invalid obligations extension golden vectors (v0.9.26+)",
-      "version": "0.9.26",
+      "version": "0.12.1",
       "fixture_count": 6
     }
   },
   "dispute": {
     "valid.json": {
       "description": "Valid DisputeAttestation golden vectors (v0.9.27+)",
-      "version": "0.9.27",
+      "version": "0.12.1",
       "fixture_count": 15
     },
     "invalid.json": {
       "description": "Invalid DisputeAttestation golden vectors (v0.9.27+)",
-      "version": "0.9.27",
+      "version": "0.12.1",
       "fixture_count": 25
     },
     "edge-cases.json": {
       "description": "Edge case DisputeAttestation golden vectors including runtime tests (v0.9.27+)",
-      "version": "0.9.27",
+      "version": "0.12.1",
       "fixture_count": 22
     }
   },
   "issue": {
     "valid.json": {
       "description": "Valid Issue() input golden vectors with invariant-based assertions (v0.9.29+)",
-      "version": "0.9.29",
+      "version": "0.12.1",
       "fixture_count": 7
     },
     "invalid.json": {
       "description": "Invalid Issue() input golden vectors (v0.9.29+)",
-      "version": "0.9.29",
+      "version": "0.12.1",
       "fixture_count": 10,
       "note": "Evidence non-finite/depth tests are language-specific unit tests, not cross-language fixtures"
     }
@@ -164,43 +164,43 @@
   "policy": {
     "evaluation.json": {
       "description": "Policy evaluation golden vectors with first-match-wins semantics (v0.9.29+)",
-      "version": "0.9.29",
+      "version": "0.12.1",
       "fixture_count": 12
     },
     "validation.json": {
       "description": "Policy document validation golden vectors including empty-rules-valid case (v0.9.29+)",
-      "version": "0.9.29",
+      "version": "0.12.1",
       "fixture_count": 11,
       "valid_count": 4,
       "invalid_count": 7
     },
     "enforcement.json": {
       "description": "Policy enforcement HTTP mapping golden vectors using locked API (v0.9.29+)",
-      "version": "0.9.29",
+      "version": "0.12.1",
       "fixture_count": 6
     }
   },
   "bundle": {
     "valid.json": {
       "description": "Valid DisputeBundle manifest golden vectors (v0.9.30+)",
-      "version": "0.9.30",
+      "version": "0.12.1",
       "fixture_count": 2
     },
     "invalid.json": {
       "description": "Invalid DisputeBundle golden vectors with error codes (v0.9.30+)",
-      "version": "0.9.30",
+      "version": "0.12.1",
       "fixture_count": 12
     },
     "determinism.json": {
       "description": "Determinism tests for cross-language parity of report_hash (v0.9.30+)",
-      "version": "0.9.30",
+      "version": "0.12.1",
       "fixture_count": 5
     }
   },
   "discovery": {
     "issuer-config.json": {
       "description": "PEAC issuer configuration parsing and validation vectors (v0.10.0+)",
-      "version": "0.10.0",
+      "version": "0.12.1",
       "format": "peac-issuer/0.1",
       "location": "/.well-known/peac-issuer.json",
       "valid_count": 4,
@@ -208,7 +208,7 @@
     },
     "policy-manifest.json": {
       "description": "PEAC policy manifest parsing and validation vectors (v0.10.0+)",
-      "version": "0.10.0",
+      "version": "0.12.1",
       "format": "peac-policy/0.1",
       "location": "/.well-known/peac.txt",
       "valid_count": 9,
@@ -218,127 +218,127 @@
   "workflow": {
     "valid.json": {
       "description": "Valid WorkflowContext and WorkflowSummaryAttestation golden vectors (v0.10.2+)",
-      "version": "0.10.2",
+      "version": "0.12.1",
       "fixture_count": 12
     },
     "invalid.json": {
       "description": "Invalid WorkflowContext and WorkflowSummaryAttestation vectors (v0.10.2+)",
-      "version": "0.10.2",
+      "version": "0.12.1",
       "fixture_count": 14
     },
     "edge-cases.json": {
       "description": "Edge case workflow correlation vectors including limits testing (v0.10.2+)",
-      "version": "0.10.2",
+      "version": "0.12.1",
       "fixture_count": 11
     }
   },
   "interaction": {
     "valid.json": {
       "description": "Valid InteractionEvidenceV01 golden vectors (v0.10.7+)",
-      "version": "0.10.7",
+      "version": "0.12.1",
       "fixture_count": 16
     },
     "invalid.json": {
       "description": "Invalid InteractionEvidenceV01 vectors with expected error codes (v0.10.7+)",
-      "version": "0.10.7",
+      "version": "0.12.1",
       "fixture_count": 36
     },
     "edge-cases.json": {
       "description": "Edge case InteractionEvidenceV01 vectors with warnings (v0.10.7+)",
-      "version": "0.10.7",
+      "version": "0.12.1",
       "fixture_count": 22
     },
     "rfc9421-proof.json": {
       "description": "RFC 9421 proof capture extension vectors with org.peacprotocol/rfc9421-proof@0.1 extension",
-      "version": "0.10.7",
+      "version": "0.12.1",
       "fixture_count": 5
     }
   },
   "attribution": {
     "valid.json": {
       "description": "Valid AttributionAttestation golden vectors (v0.9.26+)",
-      "version": "0.9.26",
+      "version": "0.12.1",
       "fixture_count": 16
     },
     "invalid.json": {
       "description": "Invalid AttributionAttestation golden vectors (v0.9.26+)",
-      "version": "0.9.26",
+      "version": "0.12.1",
       "fixture_count": 21
     },
     "edge-cases.json": {
       "description": "Edge case AttributionAttestation golden vectors (v0.9.26+)",
-      "version": "0.9.26",
+      "version": "0.12.1",
       "fixture_count": 16
     }
   },
   "verifier": {
     "policy-binding.json": {
       "description": "Policy binding conformance fixtures (DD-49, v0.10.10+)",
-      "version": "0.10.10",
+      "version": "0.12.1",
       "fixture_count": 8
     },
     "security-limits.json": {
       "description": "Security limits conformance fixtures (v0.10.8+)",
-      "version": "0.10.8",
+      "version": "0.12.1",
       "fixture_count": 10
     },
     "ssrf-protection.json": {
       "description": "SSRF protection conformance fixtures (v0.10.8+)",
-      "version": "0.10.8",
+      "version": "0.12.1",
       "fixture_count": 12
     },
     "transport-profiles.json": {
       "description": "Transport profile conformance fixtures (v0.10.8+)",
-      "version": "0.10.8",
+      "version": "0.12.1",
       "fixture_count": 10
     },
     "trust-pinning.json": {
       "description": "Trust pinning conformance fixtures (v0.10.8+)",
-      "version": "0.10.8",
+      "version": "0.12.1",
       "fixture_count": 11
     },
     "verification-report.json": {
       "description": "Verification report conformance fixtures (v0.10.8+)",
-      "version": "0.10.8",
+      "version": "0.12.1",
       "fixture_count": 9
     }
   },
   "parse": {
     "valid-commerce-receipt.json": {
       "description": "Valid commerce receipt for parseReceiptClaims (v0.10.9+)",
-      "version": "0.10.9",
+      "version": "0.12.1",
       "expected_variant": "commerce"
     },
     "valid-attestation-receipt.json": {
       "description": "Valid attestation receipt for parseReceiptClaims (v0.10.9+)",
-      "version": "0.10.9",
+      "version": "0.12.1",
       "expected_variant": "attestation"
     },
     "invalid-partial-commerce-amt-only.json": {
       "description": "Has amt but missing payment -- must fail as E_PARSE_COMMERCE_INVALID",
-      "version": "0.10.9",
+      "version": "0.12.1",
       "expected_error": "E_PARSE_COMMERCE_INVALID"
     },
     "invalid-commerce-wrong-types.json": {
       "description": "Commerce receipt with amt as string -- must fail as E_PARSE_COMMERCE_INVALID",
-      "version": "0.10.9",
+      "version": "0.12.1",
       "expected_error": "E_PARSE_COMMERCE_INVALID"
     },
     "edge-attestation-with-accidental-amt.json": {
       "description": "Attestation-shaped but has amt key -- classified as commerce, fails as E_PARSE_COMMERCE_INVALID",
-      "version": "0.10.9",
+      "version": "0.12.1",
       "expected_error": "E_PARSE_COMMERCE_INVALID"
     },
     "edge-unknown-top-level-keys.json": {
       "description": "Extra keys beyond schema -- rejected by strict schemas",
-      "version": "0.10.9",
+      "version": "0.12.1",
       "expected_error": "E_PARSE_ATTESTATION_INVALID"
     }
   },
   "errors": {
     "next-action-hints.json": {
       "description": "Agent recovery next_action hint table (DD-132, DD-133); best-effort guidance, not normative",
-      "version": "0.11.2",
+      "version": "0.12.1",
       "fixture_count": 146,
       "expected_valid": true
     }
@@ -346,194 +346,194 @@
   "content-usage": {
     "valid.json": {
       "description": "Valid Content-Usage header parsing fixtures (AIPREF vocab-03, RFC 9651)",
-      "version": "0.11.2",
+      "version": "0.12.1",
       "fixture_count": 8
     },
     "edge-cases.json": {
       "description": "Edge case Content-Usage header parsing fixtures (RFC 9651 value type handling)",
-      "version": "0.11.2",
+      "version": "0.12.1",
       "fixture_count": 8
     }
   },
   "treaty": {
     "treaty.json": {
       "description": "Treaty extension conformance fixtures (DD-147, v0.11.3+)",
-      "version": "0.11.3",
+      "version": "0.12.1",
       "fixture_count": 5
     }
   },
   "fingerprint-ref": {
     "golden-vectors.json": {
       "description": "FingerprintRef round-trip conversion golden vectors (DD-146, v0.11.3+)",
-      "version": "0.11.3",
+      "version": "0.12.1",
       "fixture_count": 4
     }
   },
   "zero-trust": {
     "credential-event.json": {
       "description": "Credential event extension conformance fixtures (DD-145, v0.11.3+)",
-      "version": "0.11.3",
+      "version": "0.12.1",
       "fixture_count": 6
     },
     "tool-registry.json": {
       "description": "Tool registry extension conformance fixtures (DD-145, v0.11.3+)",
-      "version": "0.11.3",
+      "version": "0.12.1",
       "fixture_count": 6
     },
     "control-action.json": {
       "description": "Control action extension conformance fixtures (DD-145, v0.11.3+)",
-      "version": "0.11.3",
+      "version": "0.12.1",
       "fixture_count": 6
     }
   },
   "key-rotation": {
     "key-rotation.json": {
       "description": "Key rotation lifecycle conformance fixtures (DD-148, v0.11.3+)",
-      "version": "0.11.3",
+      "version": "0.12.1",
       "fixture_count": 6
     }
   },
   "carrier": {
     "valid-minimal.json": {
       "description": "Minimal carrier with only receipt_ref",
-      "version": "0.11.1"
+      "version": "0.12.1"
     },
     "valid-full.json": {
       "description": "Full carrier with all optional fields",
-      "version": "0.11.1"
+      "version": "0.12.1"
     },
     "valid-embed-no-optional.json": {
       "description": "Embed carrier with receipt_jws but no other optional fields",
-      "version": "0.11.1"
+      "version": "0.12.1"
     },
     "valid-http-reference.json": {
       "description": "HTTP reference-only carrier within 8KB header limit",
-      "version": "0.11.1"
+      "version": "0.12.1"
     },
     "valid-with-redaction.json": {
       "description": "Carrier with redaction metadata",
-      "version": "0.11.1"
+      "version": "0.12.1"
     },
     "invalid-receipt-ref.json": {
       "description": "Carrier with malformed receipt_ref",
-      "version": "0.11.1"
+      "version": "0.12.1"
     },
     "invalid-jws-format.json": {
       "description": "Carrier with invalid receipt_jws format",
-      "version": "0.11.1"
+      "version": "0.12.1"
     },
     "invalid-oversize.json": {
       "description": "Carrier exceeding transport max_size",
-      "version": "0.11.1"
+      "version": "0.12.1"
     },
     "valid-with-receipt-url.json": {
       "description": "Valid carrier with receipt_url locator hint (DD-135)",
-      "version": "0.11.2"
+      "version": "0.12.1"
     },
     "invalid-receipt-url-http.json": {
       "description": "Invalid carrier: receipt_url uses HTTP instead of HTTPS (DD-135)",
-      "version": "0.11.2"
+      "version": "0.12.1"
     },
     "invalid-receipt-url-credentials.json": {
       "description": "Invalid carrier: receipt_url contains credentials (DD-135)",
-      "version": "0.11.2"
+      "version": "0.12.1"
     },
     "invalid-receipt-url-too-long.json": {
       "description": "Invalid carrier: receipt_url exceeds 2048 character limit (DD-135)",
-      "version": "0.11.2"
+      "version": "0.12.1"
     }
   },
   "wire-02": {
     "valid.json": {
       "description": "Wire 0.2 valid receipt golden vectors (DD-156)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 28
     },
     "invalid.json": {
       "description": "Wire 0.2 invalid receipt rejection vectors (DD-156)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 27
     },
     "warnings.json": {
       "description": "Wire 0.2 warning emission vectors (DD-155)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 4
     },
     "replay-prevention/boundary-jti-length.json": {
       "description": "Wire 0.2 replay prevention: jti at maximum length boundary",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 1
     },
     "kinds/conformance.json": {
       "description": "Wire 0.2 kind semantics conformance vectors (Section 5, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 6
     },
     "types/conformance.json": {
       "description": "Wire 0.2 type grammar conformance vectors (Section 6, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 12
     },
     "pillars/conformance.json": {
       "description": "Wire 0.2 pillar taxonomy conformance vectors (Section 7, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 7
     },
     "issuers/conformance.json": {
       "description": "Wire 0.2 issuer canonical form conformance vectors (Section 8, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 10
     },
     "occurred-at/conformance.json": {
       "description": "Wire 0.2 occurred-at semantics conformance vectors (Section 9, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 6
     },
     "jose/conformance.json": {
       "description": "Wire 0.2 JWS header constraints conformance vectors (Section 10, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 13
     },
     "policy-binding/conformance.json": {
       "description": "Wire 0.2 policy binding conformance vectors (Section 11, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 6
     },
     "extensions/conformance.json": {
       "description": "Wire 0.2 extension groups conformance vectors (Section 12, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 13
     },
     "identifier-stack/conformance.json": {
       "description": "Wire 0.2 identifier stack conformance vectors (Section 18, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 5
     },
     "validation/conformance.json": {
       "description": "Wire 0.2 validation algorithm conformance vectors (Section 19, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 9
     },
     "replay/conformance.json": {
       "description": "Wire 0.2 replay prevention conformance vectors (Section 20, DD-164)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 6
     },
     "challenge.json": {
       "description": "Wire 0.2 challenge body conformance vectors (Section 13, DD-158)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 5
     },
     "dual-stack.json": {
       "description": "Wire 0.2 dual-stack compatibility conformance vectors (Section 15, DD-158)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 4
     }
   },
   "carrier-boundary": {
     "conformance.json": {
       "description": "Transport boundary conformance vectors (CARRIER-* namespace, DD-124 through DD-131)",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "fixture_count": 11
     }
   }

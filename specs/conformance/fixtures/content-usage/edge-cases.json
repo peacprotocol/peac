@@ -1,7 +1,7 @@
 {
   "description": "Edge case Content-Usage header parsing fixtures (RFC 9651 value type handling)",
-  "version": "0.11.2",
-  "schema_version": "0.11.2",
+  "version": "0.12.1",
+  "schema_version": "0.12.1",
   "fixture_count": 8,
   "fixtures": [
     {
@@ -36,7 +36,12 @@
       "name": "unknown-keys-as-extensions",
       "description": "Unknown dictionary keys are stored as extensions, not dropped",
       "input": "train-ai=n, future-key=y, x-custom=n",
-      "expected_entries": [{ "purpose": "ai-training", "decision": "deny" }],
+      "expected_entries": [
+        {
+          "purpose": "ai-training",
+          "decision": "deny"
+        }
+      ],
       "expected_extension_count": 2,
       "expected_extension_keys": ["future-key", "x-custom"]
     },
@@ -44,7 +49,12 @@
       "name": "duplicate-key-last-wins",
       "description": "Per SF rules, last value wins for duplicate keys",
       "input": "train-ai=y, train-ai=n",
-      "expected_entries": [{ "purpose": "ai-training", "decision": "deny" }],
+      "expected_entries": [
+        {
+          "purpose": "ai-training",
+          "decision": "deny"
+        }
+      ],
       "expected_extension_count": 0
     },
     {
@@ -52,8 +62,14 @@
       "description": "Whitespace around keys and values is trimmed",
       "input": "  train-ai = n ,  search = y  ",
       "expected_entries": [
-        { "purpose": "ai-training", "decision": "deny" },
-        { "purpose": "ai-search", "decision": "allow" }
+        {
+          "purpose": "ai-training",
+          "decision": "deny"
+        },
+        {
+          "purpose": "ai-search",
+          "decision": "allow"
+        }
       ],
       "expected_extension_count": 0
     },

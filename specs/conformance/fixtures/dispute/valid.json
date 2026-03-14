@@ -1,6 +1,6 @@
 {
   "$comment": "Valid DisputeAttestation golden vectors (v0.9.27+)",
-  "version": "0.9.27",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "minimal-filed",
@@ -491,5 +491,5 @@
       }
     }
   ],
-  "schema_version": "0.9.27"
+  "schema_version": "0.12.1"
 }

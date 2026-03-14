@@ -2,7 +2,7 @@
   "$schema": "../common/conformance-vector.schema.json",
   "name": "erc8004-feedback-hash",
   "description": "ERC-8004 feedbackHash computation from PEAC receipt via JCS canonicalization",
-  "version": "0.1",
+  "version": "0.12.1",
   "input": {
     "file": "golden-receipt.json",
     "description": "PEAC receipt in peac-receipt/0.1 wire format"

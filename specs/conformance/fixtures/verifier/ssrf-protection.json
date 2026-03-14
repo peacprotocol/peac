@@ -1,6 +1,6 @@
 {
   "description": "SSRF protection conformance fixtures per VERIFIER-SECURITY-MODEL.md",
-  "version": "0.10.8",
+  "version": "0.12.1",
   "test_cases": [
     {
       "id": "https-required",
@@ -169,5 +169,5 @@
       }
     }
   ],
-  "schema_version": "0.10.8"
+  "schema_version": "0.12.1"
 }

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "spec_file": "docs/specs/WIRE-0.2.md",
-  "generated_at": "2026-03-08T10:20:59.780Z",
+  "generated_at": "2026-03-13T11:59:52.376Z",
   "sections": [
     {
       "section_number": 2,
@@ -16,8 +16,8 @@
           "source_fragment": "Issuers MUST emit this form",
           "source_fragment_hash": "sha256:0ad5b045ab78f4e9109ba8037bc1f1279ceac8a58fe748136751984969ffbbef",
           "enforcement_class": "issuance",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-MEDIA-002",
@@ -26,8 +26,8 @@
           "source_fragment": "Verifiers MUST accept; normalized to compact form",
           "source_fragment_hash": "sha256:2192ce1ab3f1ba59c7488f2aff9fba90fd7c08e68c7bc636ada4606da7d049a7",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -37,8 +37,8 @@
           "source_fragment": "The full media type form `application/interaction-record+jwt` is accepted by verifiers and MUST be normalized to the compact form `interaction-record+jwt` before returning the decoded header.",
           "source_fragment_hash": "sha256:536c2b007a3b8591d4bff457718ff298d28fa896762b1392affa342a07d29ae1",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -48,8 +48,8 @@
           "source_fragment": "Issuers MUST NOT emit the full media type form.",
           "source_fragment_hash": "sha256:c5251f9b638b45a73e848b71c5121e797cd7dd4f5fa43720d0aa47ec10f1f117",
           "enforcement_class": "issuance",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-MEDIA-005",
@@ -58,8 +58,8 @@
           "source_fragment": "Verifiers MUST enforce coherence between the JWS `typ` header and the `peac_version` payload claim",
           "source_fragment_hash": "sha256:b00235eb16c6c6a0db81c566721b4d1271c741923e2f69b30a880c11ea380652",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         },
         {
@@ -69,8 +69,8 @@
           "source_fragment": "**Strict** (default): `typ` MUST be present and MUST match `interaction-record+jwt`",
           "source_fragment_hash": "sha256:feea1d7debb179f57fa31ebcb0853a4bbf1118989b05b69bcbcd187e6a101d12",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -80,8 +80,8 @@
           "source_fragment": "`typ` MUST be present and MUST match `interaction-record+jwt` (or its full media type form)",
           "source_fragment_hash": "sha256:5f3a5b55d3012cef50a6cc2699a13ed3e7c1c4d827d2e7da7d292ccdde202a62",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -98,8 +98,8 @@
           "source_fragment": "unknown top-level fields MUST be rejected",
           "source_fragment_hash": "sha256:0a219ef551e19ac56debd23c4e58fb3585a277c6b8105a879d34dea9f25c947c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -109,8 +109,8 @@
           "source_fragment": "`peac_version`     | `\"0.2\"` (literal)             | REQUIRED",
           "source_fragment_hash": "sha256:7bdfc7c71a0079dd9be6c98c8291a9ffa977cca29b6b8838a60878b51c107b92",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -120,8 +120,8 @@
           "source_fragment": "`kind`             | `\"evidence\"` or `\"challenge\"` | REQUIRED",
           "source_fragment_hash": "sha256:6eb7afd03f82e66ffa5dd05154f3d0228d33c328943720a06108d3a9cac74d8e",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -131,8 +131,8 @@
           "source_fragment": "`type`             | string                        | REQUIRED",
           "source_fragment_hash": "sha256:04573792998fc65838c8c6fc9aef4666f58911e5cff321bac00e0aec0b668902",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -142,8 +142,8 @@
           "source_fragment": "`iss`              | string                        | REQUIRED",
           "source_fragment_hash": "sha256:3b33b4c628f84218b3f3e8dd580a836a3c24100c33180a7d894dad1042631694",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -153,8 +153,8 @@
           "source_fragment": "`iat`              | integer                       | REQUIRED",
           "source_fragment_hash": "sha256:3e51ea5e7d687be0295340ff1a9dd984de20e63a61df2a585950bd783b2ec310",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -164,8 +164,8 @@
           "source_fragment": "`jti`              | string (1 to 256 chars)       | REQUIRED",
           "source_fragment_hash": "sha256:f3da034768ff8233af700a8b83e1313bbca770d99cc6c9dafd17ea9f8d647016",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -175,8 +175,8 @@
           "source_fragment": "`sub`              | string                        | OPTIONAL",
           "source_fragment_hash": "sha256:368037b5dd9d9d45debe0a28810244010f647c080e2a87cef3976872e8b70110",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-009",
@@ -185,8 +185,8 @@
           "source_fragment": "`pillars`          | array of EvidencePillar       | OPTIONAL",
           "source_fragment_hash": "sha256:3c1fb8b3d1405472cdc66d347203e9949eb7706e07a0d903dac2cfb45b5d6bf8",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-010",
@@ -195,8 +195,8 @@
           "source_fragment": "`actor`            | ActorBinding                  | OPTIONAL",
           "source_fragment_hash": "sha256:82aadd69066785dd8f44acf578fc2686a1eb5359e96065c46d848ed587871ba7",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-011",
@@ -205,8 +205,8 @@
           "source_fragment": "`policy`           | PolicyBlock                   | OPTIONAL",
           "source_fragment_hash": "sha256:93901a0cd62d30b95f49a9d0eb0d6d3d78f49abc35917291f9e42fa29014fa2d",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-012",
@@ -215,8 +215,8 @@
           "source_fragment": "`representation`   | RepresentationFields          | OPTIONAL",
           "source_fragment_hash": "sha256:6c21b884daef697f596d1265e5f0999ebf30c663d83827b4f67e7669c4910f00",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-013",
@@ -225,8 +225,8 @@
           "source_fragment": "`occurred_at`      | string (ISO 8601 / RFC 3339)  | OPTIONAL",
           "source_fragment_hash": "sha256:09c416e1f615c62bb03424221e6e49fdb76bff6dcd054246b39be359b1bbc0dc",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-014",
@@ -235,8 +235,8 @@
           "source_fragment": "`purpose_declared` | string                        | OPTIONAL",
           "source_fragment_hash": "sha256:6eaa35ce74a62fb8287bc7bac0555baadf18e1c1539561f8e65410c88376b37d",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-015",
@@ -245,8 +245,8 @@
           "source_fragment": "`extensions`       | `Record<string, unknown>`     | OPTIONAL",
           "source_fragment_hash": "sha256:357a034ff5acf71dcf7e5e8fe4f9fdaf855c6bf05daa76a6e38b3e4ed2581b3a",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-016",
@@ -255,8 +255,8 @@
           "source_fragment": "Every Wire 0.2 receipt MUST include `peac_version`, `kind`, `type`, `iss`, `iat`, and `jti`.",
           "source_fragment_hash": "sha256:0b6a7094c1677c40ed1ba6e0062d68e7292dcd6676cc994fbc78f6ff1b667acd",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -266,8 +266,8 @@
           "source_fragment": "`digest`  | string       | REQUIRED",
           "source_fragment_hash": "sha256:f7fadd5e4ff154c09df1e7c997f3803c05e6cef1636627d589ec4004c8a9f359",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -277,8 +277,8 @@
           "source_fragment": "`uri`     | string (URL) | OPTIONAL",
           "source_fragment_hash": "sha256:7d3200d8cbdda3ad2ae9ead49df440e01aee4693ba47544472aad9b246887ccb",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-019",
@@ -287,8 +287,8 @@
           "source_fragment": "`version` | string       | OPTIONAL",
           "source_fragment_hash": "sha256:847a8b8d08050a0821bac204dc0bbf29a2231edce770275418c00b91a99a2983",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-020",
@@ -297,8 +297,8 @@
           "source_fragment": "MUST start with `https://`",
           "source_fragment_hash": "sha256:b00cc865588cf7afea2762339afffbe7f4d1c2b3e6c6d4111e36e236a86d7c82",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -308,8 +308,8 @@
           "source_fragment": "Implementations MUST NOT trigger automatic fetch on encountering this URL (DD-55: no implicit network I/O).",
           "source_fragment_hash": "sha256:b9b373c3855d77993558e4f640698b8787d0e60280fadd1dde24a15960d15489",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-022",
@@ -318,8 +318,8 @@
           "source_fragment": "`content_hash`   | string  | OPTIONAL",
           "source_fragment_hash": "sha256:ffc021c0e538456d445d8e0fd7907844f984bd3b2412383fdeb4571b818c2ce2",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-023",
@@ -328,8 +328,8 @@
           "source_fragment": "`content_type`   | string  | OPTIONAL",
           "source_fragment_hash": "sha256:8f93a5c91e507880fcc45133dfa7e96bff9c4f8c510111b1f8c3c6874093fb08",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-024",
@@ -338,8 +338,8 @@
           "source_fragment": "`content_length` | integer | OPTIONAL",
           "source_fragment_hash": "sha256:63efd3cc5bed5ce343e37a669cc8180be7fe1c50120e344dd4530ade9e75cfb2",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-ENV-025",
@@ -348,8 +348,8 @@
           "source_fragment": "`id`          | string       | REQUIRED",
           "source_fragment_hash": "sha256:7af6f0226cae75167152cdf21cde68c2404c4426144560742442a95657425fa8",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -359,8 +359,8 @@
           "source_fragment": "`proof_type`  | string       | REQUIRED",
           "source_fragment_hash": "sha256:d5411eee9d574e04dee5f6e9aedb0b0180b61b166072ae80872f18da4e4a365b",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -370,8 +370,8 @@
           "source_fragment": "`origin`      | string (URL) | REQUIRED",
           "source_fragment_hash": "sha256:86b8b2cc2bdf87a2a388173218f0d12c91b64d6798610263e0cdcf6af59f226e",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -388,8 +388,8 @@
           "source_fragment": "Implementations MUST preserve unrecognized but well-formed values.",
           "source_fragment_hash": "sha256:d5fcf9d57516607b494f8bd3c95ce1ddfe19e3d6e0b8d250ccc863843945c30c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -399,8 +399,8 @@
           "source_fragment": "The `pillars` array MUST be sorted in ascending lexicographic order with no duplicates.",
           "source_fragment_hash": "sha256:df1dc0586b45fe1fe15460c398be50de688f5e41581c36d568d49dd69e0c48e4",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_PILLARS_NOT_SORTED"
         }
       ]
@@ -417,8 +417,8 @@
           "source_fragment": "The `occurred_at` field MUST NOT appear on challenge receipts. Its presence produces `E_OCCURRED_AT_ON_CHALLENGE`.",
           "source_fragment_hash": "sha256:0c9326365380c0f36b9dbfb09cdc93fee3b912350e093ca74646b8e9297c6d01",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_OCCURRED_AT_ON_CHALLENGE"
         },
         {
@@ -428,8 +428,8 @@
           "source_fragment": "Challenges SHOULD include the challenge extension group (Section 13) with a `challenge_type` and an RFC 9457 `problem` body.",
           "source_fragment_hash": "sha256:5932bba9c1814ecb065c9d21064f3cb22737da09cc45c0ef7e878f632a4ed11e",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-KIND-003",
@@ -438,8 +438,8 @@
           "source_fragment": "A single `type` MAY appear with either kind.",
           "source_fragment_hash": "sha256:3419f8b63d75f9019a180b672532ecc9c75f5cbf783c2dda671bcad4428a727d",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -455,8 +455,8 @@
           "source_fragment": "MUST contain at least one dot",
           "source_fragment_hash": "sha256:76c4e2721d93d12ee6f41526c906ec4b87f0288ded040b6135890fe9057a8d47",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -466,8 +466,8 @@
           "source_fragment": "MUST match /^[a-zA-Z0-9][a-zA-Z0-9.-]*$/",
           "source_fragment_hash": "sha256:791b7ed1eb8a412789e76442c9f37863918e9e151b0eff64644a282e4cd9917c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -477,8 +477,8 @@
           "source_fragment": "MUST be non-empty",
           "source_fragment_hash": "sha256:527c9881eabc05d1d7e6260f1a1b8664ebe0d6d40fd4088eebf1dff57daf3b3c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -488,8 +488,8 @@
           "source_fragment": "MUST match /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/",
           "source_fragment_hash": "sha256:bf6b1041585078132fc5c48276049653c2b301bd459438fb8e7a7feab4d1e78b",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -499,8 +499,8 @@
           "source_fragment": "MUST start with an alphanumeric character. MUST contain at least one dot",
           "source_fragment_hash": "sha256:397207842eeab8e97d7cf1b12b08bb5aecad68f329df64948541b1ad6cb37375",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -510,8 +510,8 @@
           "source_fragment": "MUST start with an alphanumeric character. Underscores are permitted",
           "source_fragment_hash": "sha256:e40d853063da5b3e4419a41096ee14abe7c0914d68adb9d7d5e6188a04ae7a52",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -521,8 +521,8 @@
           "source_fragment": "Reverse-DNS `type` values SHOULD be lowercase ASCII.",
           "source_fragment_hash": "sha256:f509acdb0fc7873553b33fc2146ef92ef1e68947699affd6d429f552b515c822",
           "enforcement_class": "warning_only",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "warning_code": "type_casing"
         },
         {
@@ -532,8 +532,8 @@
           "source_fragment": "Verifiers MAY emit a warning when a reverse-DNS form `type` contains uppercase characters.",
           "source_fragment_hash": "sha256:82f3f63095402c90f7253a7b44800a15443cd8b746fcf0b46d54111a5489e0ed",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -549,8 +549,8 @@
           "source_fragment": "Unknown values MUST be rejected.",
           "source_fragment_hash": "sha256:8c52f393b3c95e4454171c4e23e5be62de76cd7bd5bf31d8ec15f37c78d32b3f",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -560,8 +560,8 @@
           "source_fragment": "When present, the array MUST contain at least one element.",
           "source_fragment_hash": "sha256:e162bdea04ccd79484ed4fb48f2165473212dce60525430aa4b68bbd260f50f0",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -571,8 +571,8 @@
           "source_fragment": "Values MUST be in ascending lexicographic order. Implementations MUST verify that each element is strictly greater than the preceding element.",
           "source_fragment_hash": "sha256:86f1129e192559d435a3a5a8370255aa8965646ea999041d5fb9b70727bd6bb3",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_PILLARS_NOT_SORTED"
         },
         {
@@ -582,8 +582,8 @@
           "source_fragment": "Duplicate values MUST be rejected.",
           "source_fragment_hash": "sha256:b7c4d9c9ae2146ab351623faced439570bac1f7f98521b9b5579c293f4e120c2",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_PILLARS_NOT_SORTED"
         },
         {
@@ -593,8 +593,8 @@
           "source_fragment": "A receipt MAY have a type that does not directly correspond to any single pillar",
           "source_fragment_hash": "sha256:a56684bbc8a9ff7a9bfa42261f273539d268b5477f3d6635c7bec6be19959005",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-PILLAR-006",
@@ -603,8 +603,8 @@
           "source_fragment": "MAY have multiple pillars for a single type",
           "source_fragment_hash": "sha256:04d1aa09ef34f8a86458ad894f71768f3af04849c95174a90415f13c7eddddbc",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -620,8 +620,8 @@
           "source_fragment": "Scheme MUST be lowercase `https`.",
           "source_fragment_hash": "sha256:340af1900036f5018284f6a081f4dc3a36e211d166a762191023180ee44b22d7",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -631,8 +631,8 @@
           "source_fragment": "Host MUST be lowercase ASCII. Raw Unicode hostnames are rejected; punycode (`xn--` labels) is accepted.",
           "source_fragment_hash": "sha256:1c9b58031d3b52cce215f86f64bec955fd14c32c7e5d74b05220b431192b2542",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -642,8 +642,8 @@
           "source_fragment": "The default port 443 MUST NOT appear explicitly (`:443` is rejected).",
           "source_fragment_hash": "sha256:3fae3e5b2c05757490af983cbe35e0f6160b7f75b74ee1500f3cf2be0b79d341",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -653,8 +653,8 @@
           "source_fragment": "iss MUST equal the reconstructed origin exactly",
           "source_fragment_hash": "sha256:c25ef0d3c0299bf0f76e958e401ed2d599885b7d9d09de11537da46b8235361d",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -664,8 +664,8 @@
           "source_fragment": "Method: lowercase letters and digits only (`[a-z0-9]+`).",
           "source_fragment_hash": "sha256:58fedf785aee680dd1324e3a9db760e0aa065cdc231520306e2911dfa2aeee63",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -675,8 +675,8 @@
           "source_fragment": "Method-specific-id: non-empty, MUST NOT contain `/`, `?`, or `#`.",
           "source_fragment_hash": "sha256:51c1ff570c935c7f8caaf500bc17d030d7ad7be72f353afe7f210b55b352ee4e",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -686,8 +686,8 @@
           "source_fragment": "All schemes other than `https` and `did` produce `E_ISS_NOT_CANONICAL`.",
           "source_fragment_hash": "sha256:ca4f7e9f5736e15df7917a6edb6966b1d8146d70375f77e40046330a81fb7371",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -697,8 +697,8 @@
           "source_fragment": "callers MUST always provide the `publicKey: Uint8Array` parameter directly.",
           "source_fragment_hash": "sha256:3436a530fe006ecff1bf43c79a68c1e040d107240271776d47662981b1bfe93c",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -714,8 +714,8 @@
           "source_fragment": "The value MUST be a valid ISO 8601 / RFC 3339 datetime string with a timezone offset.",
           "source_fragment_hash": "sha256:df73c9e7fca543026e966859413423de0442bd96c8ed261b15f43bd5ae021b42",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -732,8 +732,8 @@
           "source_fragment": "Ed25519 only (RFC 8032); all other algorithms MUST be rejected",
           "source_fragment_hash": "sha256:02add0106196163c312ea724c73b8a398b70e16c846a31998383155df9ebfc8e",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -743,8 +743,8 @@
           "source_fragment": "REQUIRED; identifies the signing key in the issuer JWKS",
           "source_fragment_hash": "sha256:b01833bfb4f89976769b4795b7f3c70ceda6ecbeef7f97a1b6bec82dc3567574",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_JWS_MISSING_KID"
         },
         {
@@ -754,8 +754,8 @@
           "source_fragment": "Presence of any of the following MUST cause a hard error:",
           "source_fragment_hash": "sha256:e82c8ed352530ef59384ee45ddff7bb287ce4ad2fb9665312e36e8259db5adf3",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_JWS_EMBEDDED_KEY"
         },
         {
@@ -765,8 +765,8 @@
           "source_fragment": "`crit`                | `E_JWS_CRIT_REJECTED`",
           "source_fragment_hash": "sha256:0f2c91b9be324183d7aafcf21b012b2f08f2657b9b74e63ab0e2825bd2f181ec",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_JWS_CRIT_REJECTED"
         },
         {
@@ -776,8 +776,8 @@
           "source_fragment": "`b64` (value `false`) | `E_JWS_B64_REJECTED`",
           "source_fragment_hash": "sha256:624cf60abbefea8de74cf653a1ef02edf889c0c038140d8ff8847143230d2b10",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_JWS_B64_REJECTED"
         },
         {
@@ -787,8 +787,8 @@
           "source_fragment": "`zip`                 | `E_JWS_ZIP_REJECTED`",
           "source_fragment_hash": "sha256:0f0bf8574d920ff36ed3109b49c75595078687eccdca3543b5ba3683bee24f6c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_JWS_ZIP_REJECTED"
         },
         {
@@ -798,8 +798,8 @@
           "source_fragment": "`kid` MUST be present and non-empty. Absent or empty `kid` produces `E_JWS_MISSING_KID`.",
           "source_fragment_hash": "sha256:23e75820922e5b31ecfb9de61623529017fb72e27752185e52a0a80ab277f28d",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_JWS_MISSING_KID"
         },
         {
@@ -809,8 +809,8 @@
           "source_fragment": "`kid` MUST NOT exceed 256 characters (DoS safety).",
           "source_fragment_hash": "sha256:0a2329aa89c09f8af6403f20ea63645a1f1d5de6a1f708f8540bcc1c54dcf42c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_JWS_MISSING_KID"
         },
         {
@@ -820,8 +820,8 @@
           "source_fragment": "The total JWS compact serialization MUST NOT exceed 262,144 bytes (256 KB).",
           "source_fragment_hash": "sha256:558f335146dd4be605f9581b69c18e275ea5812034503e4da4d59d8435180527",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -838,8 +838,8 @@
           "source_fragment": "The option value MUST match the format `sha256:<64 lowercase hex>` or it is rejected with `E_INVALID_FORMAT`.",
           "source_fragment_hash": "sha256:8f97e7abf39967076fc9e9dc85f2b59d85db134c90dea3a8e36f32a8864716ea",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -849,8 +849,8 @@
           "source_fragment": "The `policy.uri` field MUST be an `https://` URL.",
           "source_fragment_hash": "sha256:861ad1d8e8729d7ff1e5840f90440935e51724249bd86643763a50fc0f44700d",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -860,8 +860,8 @@
           "source_fragment": "Implementations MUST NOT auto-fetch the policy document based on this URI",
           "source_fragment_hash": "sha256:4e5d22e97c5488174832969f3fd8ea56357488f0028ad7c99699ddac2739bde4",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -877,8 +877,8 @@
           "source_fragment": "Extension keys MUST conform to the grammar: `<domain>/<segment>`.",
           "source_fragment_hash": "sha256:6059e4a23465efe86be0170f488cd7bbb6b973fa1a3e56ba147609d1ce4023bf",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -888,8 +888,8 @@
           "source_fragment": "At least one dot (single-label domains are rejected).",
           "source_fragment_hash": "sha256:f6d1ef132993d981e99022245e0d295b21b18c4e9513521abd2a6740c42d9a87",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -899,8 +899,8 @@
           "source_fragment": "MUST NOT exceed 63 characters",
           "source_fragment_hash": "sha256:7b1caa3cff16e013a5b9ede5e158d7b623430b36ccafdbe415446822164682d6",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -910,8 +910,8 @@
           "source_fragment": "The segment MUST be non-empty.",
           "source_fragment_hash": "sha256:e0d5a69e348a4b316aea039d986d7bd08e7605a4b0f80b2370f905e9c49c2a9e",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -921,8 +921,8 @@
           "source_fragment": "Matches `[a-z0-9][a-z0-9_-]*` (lowercase only).",
           "source_fragment_hash": "sha256:37dda7eeb76fd63c660ec12322002e352f8f422f633ce6ea98d4e88baa9ce698",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -932,8 +932,8 @@
           "source_fragment": "`payment_rail` | string               | REQUIRED",
           "source_fragment_hash": "sha256:cb93b7f439091e27e960dfab0b6178ce0cfa5010f7d036f79359e46a3e0fadcb",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -943,8 +943,8 @@
           "source_fragment": "`amount_minor` | string               | REQUIRED",
           "source_fragment_hash": "sha256:db534995c289d608c465db4564a34c9083599923da128ea2a7f8cc912c0e8c77",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -954,8 +954,8 @@
           "source_fragment": "`currency`     | string               | REQUIRED",
           "source_fragment_hash": "sha256:6b9b56a826a282b4feb4d525a53787c82cd021581544500866faaf811e692d97",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -965,8 +965,8 @@
           "source_fragment": "The `amount_minor` field MUST be a base-10 integer string.",
           "source_fragment_hash": "sha256:60d7724ef11256b4581a89df925ebf7053dd181bd58d69e63af99c44c702a8d1",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -976,8 +976,8 @@
           "source_fragment": "Issuers SHOULD use a distinct receipt `type`",
           "source_fragment_hash": "sha256:3bfc0a15f74f0a378f2e93041895f67ebad51cd15f57265bcf90821b88c2f3c9",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-EXT-011",
@@ -986,8 +986,8 @@
           "source_fragment": "`resource` | string                             | REQUIRED",
           "source_fragment_hash": "sha256:973a53405252385d13f9245cbebaccc8d01c99d007d7fcb09038a7cd07a81b9c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -997,8 +997,8 @@
           "source_fragment": "`action`   | string                             | REQUIRED",
           "source_fragment_hash": "sha256:c7ba9eff8c89184e97601edd690d45c431a43d584834d3c8b27e45f74fb6b840",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1008,8 +1008,8 @@
           "source_fragment": "`decision` | `\"allow\"`, `\"deny\"`, or `\"review\"` | REQUIRED",
           "source_fragment_hash": "sha256:bef10f106f2bac40c8141b22dda5bb136abd20498637ce2dd068ddc8ce503f94",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1019,8 +1019,8 @@
           "source_fragment": "`trace_id` MUST match `/^[0-9a-f]{32}$/` (exactly 32 lowercase hex characters).",
           "source_fragment_hash": "sha256:4fe34442550458f59fada0230ed5e6db557d1addbe027a4415ed530b506a722f",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1030,8 +1030,8 @@
           "source_fragment": "`span_id` MUST match `/^[0-9a-f]{16}$/` (exactly 16 lowercase hex characters).",
           "source_fragment_hash": "sha256:b3c1e979b846dfcd3c6a31537274ef7a007917397abe3c126eb799819014563f",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1041,8 +1041,8 @@
           "source_fragment": "MUST be preserved (not silently dropped).",
           "source_fragment_hash": "sha256:069778ce9d7309fcd0c5bc56292cffa09146e9c1958084db5eea737e6c7fe1fc",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1052,8 +1052,8 @@
           "source_fragment": "MUST trigger an `unknown_extension_preserved` warning at the protocol layer",
           "source_fragment_hash": "sha256:7218b5a436c7bbde6657707d94d0ce89c320fd83fda5e243418138f331ffeb78",
           "enforcement_class": "warning_only",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "warning_code": "unknown_extension_preserved"
         },
         {
@@ -1063,8 +1063,8 @@
           "source_fragment": "MUST NOT cause a validation error.",
           "source_fragment_hash": "sha256:7df9acd0d60c081513e8caa9c952e64e310407fca9496a4f840fa6571fb281a5",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -1081,8 +1081,8 @@
           "source_fragment": "`status`   | integer      | REQUIRED",
           "source_fragment_hash": "sha256:b4218e7ac57b5bf9763b94b4cbc7edcd1e360cf1162d9c083e6c3d29d9ad70d4",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1092,8 +1092,8 @@
           "source_fragment": "`type`     | string (URL) | REQUIRED",
           "source_fragment_hash": "sha256:336fe7122380cfb8ee818e73689d3a9f676b9a135dc07246969ffcee570861f0",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1103,8 +1103,8 @@
           "source_fragment": "`title`    | string       | OPTIONAL",
           "source_fragment_hash": "sha256:0fdb18e80464e208d1e2bd5151107bb006e4d64a7fbda704d8e647dd5f275768",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-CHAL-004",
@@ -1113,8 +1113,8 @@
           "source_fragment": "`detail`   | string       | OPTIONAL",
           "source_fragment_hash": "sha256:3d2883122fa49b9184bb9d9556f984fd3cfbd6edde0bd91ed606e35c334d1f69",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-CHAL-005",
@@ -1123,8 +1123,8 @@
           "source_fragment": "`instance` | string       | OPTIONAL",
           "source_fragment_hash": "sha256:c91561a806f53774e3288522c42a21211f2af4e043dff9d66bccaa0dc7cdbe4a",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-CHAL-006",
@@ -1133,8 +1133,8 @@
           "source_fragment": "`resource`     | string                    | OPTIONAL",
           "source_fragment_hash": "sha256:8ec538f2f5c8884e2a91e5cfd0276438d1a7b5832a8aa99cb8e749a13e68efab",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-CHAL-007",
@@ -1143,8 +1143,8 @@
           "source_fragment": "`action`       | string                    | OPTIONAL",
           "source_fragment_hash": "sha256:4cd10b5a9f3e5524e6f5bec0b44bbd5df2d03415afc905ba00fa78ed3147800b",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -1160,8 +1160,8 @@
           "source_fragment": "`code`    | string | REQUIRED | Stable warning code identifier",
           "source_fragment_hash": "sha256:aeae61c3e1f194cf11323fafd2810f55704efde214f3d7c2895911d4851100ae",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1171,8 +1171,8 @@
           "source_fragment": "`message` | string | REQUIRED | Human-readable description",
           "source_fragment_hash": "sha256:4ce4086f3c8535c97df31bdb2619e257c8349eeab809b32cd9c6ffee8226c01a",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1182,8 +1182,8 @@
           "source_fragment": "MUST NOT be used for conformance testing",
           "source_fragment_hash": "sha256:da9dc2e53c59e715f0c547855d47f703c8a27d41d9de01b2bfa62a13eb341792",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-WARN-004",
@@ -1192,8 +1192,8 @@
           "source_fragment": "New warning codes MAY be added in future versions.",
           "source_fragment_hash": "sha256:0abcd88cb76eec7c1920c54a8b350da9c165499ba7d77dea426811d852460e5a",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-WARN-005",
@@ -1202,8 +1202,8 @@
           "source_fragment": "Existing warning codes MUST NOT be removed or renamed.",
           "source_fragment_hash": "sha256:a20c727a06711424cf334d4735243ff0646b3c9da8613fe76369144eb60ece23",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-WARN-006",
@@ -1212,8 +1212,8 @@
           "source_fragment": "Consumers MUST tolerate unknown warning codes gracefully.",
           "source_fragment_hash": "sha256:533c1b7fd85aeed77615120ec8ab044c2d2f742d0cfdf302e3194045ba3b2cf9",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-WARN-007",
@@ -1222,8 +1222,8 @@
           "source_fragment": "Warnings MUST be sorted by `(pointer ascending, code ascending)`.",
           "source_fragment_hash": "sha256:09e1408513af162bf1c74da14026aa9195460703a39d6b2889080f705a248215",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1233,8 +1233,8 @@
           "source_fragment": "Conformance implementations MUST assert on `code` and `pointer` fields only.",
           "source_fragment_hash": "sha256:049af55e0fc391c97d96e42c7e44fc9675fde9145a696fd279e0ec74b9f3c9ac",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-WARN-009",
@@ -1243,8 +1243,8 @@
           "source_fragment": "The `message` field is implementation-defined and MUST NOT be used for conformance testing.",
           "source_fragment_hash": "sha256:168e30636fc4164b370eae96e9570de0f11cf64457f5cd35ed4a2107af978cc8",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -1260,8 +1260,8 @@
           "source_fragment": "implementations MUST verify coherence between the JWS `typ` and the payload `peac_version` field",
           "source_fragment_hash": "sha256:21ef041cd2efe1ca1429cddbf3043f1c4b302b05586285af26b5de63d72ae21f",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         },
         {
@@ -1271,8 +1271,8 @@
           "source_fragment": "Wire 0.1 route: payload MUST NOT contain `peac_version: \"0.2\"`.",
           "source_fragment_hash": "sha256:b45a1c576245f248194b3ce73626b45523725356900db2a5c87e03a5f63f54f0",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         },
         {
@@ -1282,8 +1282,8 @@
           "source_fragment": "Wire 0.2 route: payload MUST contain `peac_version: \"0.2\"`.",
           "source_fragment_hash": "sha256:7131653b896b21b5c8805bec85fc1a2cdc940de336c16a31dfe98ea4b98f34cd",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         }
       ]
@@ -1300,8 +1300,8 @@
           "source_fragment": "JWS `typ` MUST be present.",
           "source_fragment_hash": "sha256:5106f5d60d9724a46f15f75d921552e6e0f2fe0358b4cbda541d107e1b90df6d",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1311,8 +1311,8 @@
           "source_fragment": "`typ` MUST be a recognized value",
           "source_fragment_hash": "sha256:a73c3888ee9f366fdf3d620e23336b4e804bf6755a223267343b0d6e1beef229",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1322,8 +1322,8 @@
           "source_fragment": "Production deployments SHOULD use strict mode.",
           "source_fragment_hash": "sha256:2ce27e3de73b934a758c88791dacb2726042377fa19dfcb253f0b3fb98c0964d",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -1339,8 +1339,8 @@
           "source_fragment": "Compact form: `interaction-record+jwt` (canonical; issuers MUST emit this form)",
           "source_fragment_hash": "sha256:66b3df3e98ef9e64b3479b15dbe8ba55de1e91d01a931cee8b0c5ee1ac27b5fa",
           "enforcement_class": "issuance",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-IDENT-002",
@@ -1349,8 +1349,8 @@
           "source_fragment": "Media-type form: `application/interaction-record+jwt` (verifiers MUST accept)",
           "source_fragment_hash": "sha256:0d694b4d700e7214b23c88b889d9f0cb47badf2cde00470cc04515ac54a9f69f",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1360,8 +1360,8 @@
           "source_fragment": "Implementations MUST NOT perform content-type parameter parsing",
           "source_fragment_hash": "sha256:79a9b6f7133f4ed3a663776297d1072b174115329d47ebffcde917ea063745a6",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1371,8 +1371,8 @@
           "source_fragment": "The `typ` header and `peac_version` payload claim MUST agree.",
           "source_fragment_hash": "sha256:c459e15f3358ed1350da5e97be4206679a06689aed5dbd988deaec86fb233528",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         },
         {
@@ -1382,8 +1382,8 @@
           "source_fragment": "Production deployments SHOULD use strict mode, which rejects missing `typ`.",
           "source_fragment_hash": "sha256:ce03eb555707e7b685b512790116727b730bcbba9ac8220308cfeb701ff5ab20",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-IDENT-006",
@@ -1392,8 +1392,8 @@
           "source_fragment": "Future implementations MAY relax this to process unknown minor versions with a warning",
           "source_fragment_hash": "sha256:444f26b04d129b0690a5e2fc9674c470e655e45e0dae0497d89aa7728cd9e66f",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-IDENT-007",
@@ -1402,8 +1402,8 @@
           "source_fragment": "Multiple package versions MAY implement the same wire format version.",
           "source_fragment_hash": "sha256:b96a8e527c40171cb1d81ee42cce33e854ae56ba37aa1c66db9bf0a90c15b497",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -1419,8 +1419,8 @@
           "source_fragment": "Implementations MUST perform steps in the order specified.",
           "source_fragment_hash": "sha256:4128f7475c53d98a4e70cac0671afc8a247bb7d0ec1b3798f66f60c3c661a9b8",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1430,8 +1430,8 @@
           "source_fragment": "A step that produces a hard error MUST terminate validation immediately",
           "source_fragment_hash": "sha256:1d89cea8c8aa48ad9023d83847f3f73ea95b63949aaf2d90c2c11afc3da7c74e",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1441,8 +1441,8 @@
           "source_fragment": "the verifier MUST NOT continue to subsequent steps.",
           "source_fragment_hash": "sha256:1e88d48481f5bc56e8231cdf4abc77fb1842aa24a31235c1a741bba223bc8271",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1452,8 +1452,8 @@
           "source_fragment": "`jws`          | string     | REQUIRED",
           "source_fragment_hash": "sha256:e91cc74e34001e7eea4cb856b9ff1aa6fa8973759561339aef88b0d983d76a30",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1463,8 +1463,8 @@
           "source_fragment": "`publicKey`    | Uint8Array | REQUIRED",
           "source_fragment_hash": "sha256:bb3957aeaab5c3d3acb727ca1df11272d2e8c190786fe3b6d57c683bad55173c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1474,8 +1474,8 @@
           "source_fragment": "The `alg` header parameter MUST be `EdDSA`.",
           "source_fragment_hash": "sha256:a9a566b439e97cd88451d44f3c2cf0ae54e377b595daf3b548218c0c398137ab",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1485,8 +1485,8 @@
           "source_fragment": "Kernel constraints are structural limits (field lengths, array sizes) enforced before schema parsing. Failure is fail-closed: return `E_CONSTRAINT_VIOLATION`.",
           "source_fragment_hash": "sha256:154b58e4f819d531f2e3ea87fb4a29e9c518407f07625328d820374d7e20b563",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_CONSTRAINT_VIOLATION"
         },
         {
@@ -1496,8 +1496,8 @@
           "source_fragment": "`iat` MUST NOT exceed `now + maxClockSkew`.",
           "source_fragment_hash": "sha256:07dec89d4303bb400bb8d20b5185c70755e217e255dd530fb107cdda1408cfd1",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_NOT_YET_VALID"
         },
         {
@@ -1507,8 +1507,8 @@
           "source_fragment": "The `jti` claim is REQUIRED (enforced by schema validation in Step 4).",
           "source_fragment_hash": "sha256:5494a3e5cde868771a2f1061c7394739dff025ab45c9b5ac6a42f49067529cad",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -1518,8 +1518,8 @@
           "source_fragment": "Verifiers that maintain a replay cache SHOULD reject duplicate `jti`",
           "source_fragment_hash": "sha256:ae1e18480bea50183b3c9407bb7ba5d2264fc03a2bbbb4ba6d91a2c536953a97",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-VALID-011",
@@ -1528,8 +1528,8 @@
           "source_fragment": "Verifiers without a replay cache MAY skip this step",
           "source_fragment_hash": "sha256:9193f11f66a913d2032a76e80cdfd063863a8a803bde92c629d18b19d9dd91d1",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-VALID-012",
@@ -1538,8 +1538,8 @@
           "source_fragment": "implementations SHOULD map these to HTTP 400 Bad Request",
           "source_fragment_hash": "sha256:0b01c93a0a54fcdcb2d5f1d293a568b7f40233d53c6fad7dfb51ed57552fd7e5",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         }
       ]
     },
@@ -1555,8 +1555,8 @@
           "source_fragment": "The `jti` claim is REQUIRED on all Wire 0.2 receipts.",
           "source_fragment_hash": "sha256:460780907183f76a99ef33f4a22f6c3e81c94dbb02afb3cd91cbf9202bba9ba2",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -1566,8 +1566,8 @@
           "source_fragment": "Issuers MUST ensure `jti` uniqueness across all receipts they produce.",
           "source_fragment_hash": "sha256:39a87e0be4d2b781f4888a8b30d69ec44a56dda023f22ef24599c53c63d6eb9b",
           "enforcement_class": "issuance",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-003",
@@ -1576,8 +1576,8 @@
           "source_fragment": "The `jti` value MUST be a non-empty string of 1 to 256 characters.",
           "source_fragment_hash": "sha256:1203bf2bc4c86cd5b41cd8ee3985f2654464f314fcf697cc889b8d578a495c90",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -1587,8 +1587,8 @@
           "source_fragment": "Implementations SHOULD use at least 128 bits of entropy",
           "source_fragment_hash": "sha256:72a3f6caea40dfa3ede2d547c652e206824ee5172b34fb3e630ab2fec1267663",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-005",
@@ -1597,8 +1597,8 @@
           "source_fragment": "Verifiers that maintain a replay cache SHOULD reject duplicate `jti` from the same `iss`",
           "source_fragment_hash": "sha256:25f08ecd322bde687e84eae8066045c8a7be4c01d95dda79973bc2007b63a3b1",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-006",
@@ -1607,8 +1607,8 @@
           "source_fragment": "Verifiers without a replay cache (stateless deployments, edge functions, serverless) MAY skip replay detection.",
           "source_fragment_hash": "sha256:d9673740aa9379ad1afaafb490dfb31b976b32fb737baad7fd92c3ba41e9865a",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-007",
@@ -1617,8 +1617,8 @@
           "source_fragment": "Use `iat`-based expiry.",
           "source_fragment_hash": "sha256:0e012acf04d5dfb402653c296f4b8f6b88a3b9add432952abfb10006b85c31ca",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-008",
@@ -1627,8 +1627,8 @@
           "source_fragment": "A RECOMMENDED window is 2x `OCCURRED_AT_TOLERANCE_SECONDS` (600 seconds).",
           "source_fragment_hash": "sha256:0e48a4e3a328cdf6b91bc9cca1f544f447e8091e594c9df2690d8273400e89e3",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-009",
@@ -1637,8 +1637,8 @@
           "source_fragment": "Caches SHOULD be scoped per `iss`",
           "source_fragment_hash": "sha256:fa37f432cdec2c3e57e684d9b9fd170e7bad898a2d11fa18b94b5870f6655d72",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-010",
@@ -1647,8 +1647,8 @@
           "source_fragment": "Implementations MAY use bloom filters or probabilistic data structures",
           "source_fragment_hash": "sha256:9f49f49451d5a5b0feb62354f4737c44d041aa1dfa007d1fb86f708b50d41fa9",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-011",
@@ -1657,8 +1657,8 @@
           "source_fragment": "The `aud` claim is OPTIONAL in Wire 0.2.",
           "source_fragment_hash": "sha256:f4954bc439f94c9203e5eb67291f9e4a55b87ae3e3d924c4d78e311668ff5249",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-012",
@@ -1667,8 +1667,8 @@
           "source_fragment": "Verifiers that check `aud` SHOULD reject receipts not addressed to them.",
           "source_fragment_hash": "sha256:21689600c2bb21482e756b96ebb569b450e355b25156c70847e0a48bd55119be",
           "enforcement_class": "advisory",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0"
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1"
         },
         {
           "id": "WIRE02-REPLAY-013",
@@ -1677,8 +1677,8 @@
           "source_fragment": "Each receipt in an evidence bundle MUST have a unique `jti`.",
           "source_fragment_hash": "sha256:36cbe5e5b9a462edadfc673c9f3df0ea4a61d4608cf1392bdd7025bebb3f1d57",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.12.0",
-          "last_reviewed_in": "0.12.0",
+          "introduced_in": "0.12.1",
+          "last_reviewed_in": "0.12.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         }
       ]

@@ -1,0 +1,53 @@
+{
+  "$schema": "type-snapshot.schema.json",
+  "description": "Machine-comparable snapshot of upstream x402 offer-receipt extension types at pinned commit",
+  "upstream": {
+    "repository": "coinbase/x402",
+    "commit": "f2bbb5c",
+    "spec": "specs/extensions/extension-offer-and-receipt.md",
+    "types_path": "typescript/packages/core/src/types/",
+    "spec_version": "0.6",
+    "captured_at": "2026-03-13"
+  },
+  "offer_payload": {
+    "description": "Offer payload fields (Section 4.2)",
+    "fields": {
+      "version": { "type": "number", "required": true },
+      "resourceUrl": { "type": "string", "required": true },
+      "scheme": { "type": "string", "required": true },
+      "network": { "type": "string", "required": true },
+      "asset": { "type": "string", "required": true },
+      "payTo": { "type": "string", "required": true },
+      "amount": { "type": "string", "required": true },
+      "validUntil": { "type": "number", "required": true }
+    }
+  },
+  "receipt_payload": {
+    "description": "Receipt payload fields (Section 5.2)",
+    "fields": {
+      "version": { "type": "number", "required": true },
+      "network": { "type": "string", "required": true },
+      "resourceUrl": { "type": "string", "required": true },
+      "payer": { "type": "string", "required": true },
+      "issuedAt": { "type": "number", "required": true },
+      "transaction": { "type": "string", "required": false }
+    }
+  },
+  "signed_artifact": {
+    "description": "Common signed artifact envelope (Section 3.1)",
+    "fields": {
+      "format": { "type": "string", "required": true, "enum": ["eip712", "jws"] },
+      "payload": { "type": "object", "required": "eip712_only" },
+      "signature": { "type": "string", "required": true },
+      "acceptIndex": { "type": "number", "required": false, "scope": "offers_only" }
+    }
+  },
+  "extension_nesting": {
+    "description": "Extension placement (Section 4.1)",
+    "path": "extensions[\"offer-receipt\"].info",
+    "fields": {
+      "offers": { "type": "array", "required": true },
+      "receipt": { "type": "object", "required": false }
+    }
+  }
+}

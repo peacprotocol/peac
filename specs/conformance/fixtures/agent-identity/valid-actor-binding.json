@@ -1,6 +1,6 @@
 {
   "$comment": "Valid ActorBinding fixtures: one per proof_type (DD-142, DD-143, v0.11.3+)",
-  "version": "0.11.3",
+  "version": "0.12.1",
   "fixtures": [
     {
       "name": "ed25519-cert-chain",
@@ -116,5 +116,5 @@
       }
     }
   ],
-  "schema_version": "0.11.3"
+  "schema_version": "0.12.1"
 }
