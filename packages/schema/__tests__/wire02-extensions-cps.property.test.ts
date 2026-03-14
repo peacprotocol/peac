@@ -114,20 +114,48 @@ const validDuration = fc.constantFrom(
 );
 
 /** Generate a valid consent extension (field-aware) */
-const validConsent = fc.record({
-  consent_basis: legalBasis,
-  consent_status: consentStatus,
-});
+const validConsent = fc
+  .record({
+    consent_basis: legalBasis,
+    consent_status: consentStatus,
+    data_categories: fc.option(fc.array(dataCategory, { minLength: 1, maxLength: 5 }), {
+      nil: undefined,
+    }),
+    retention_period: fc.option(validDuration, { nil: undefined }),
+  })
+  .map(({ data_categories, retention_period, ...rest }) => ({
+    ...rest,
+    ...(data_categories !== undefined ? { data_categories } : {}),
+    ...(retention_period !== undefined ? { retention_period } : {}),
+  }));
 
 /** Generate a valid privacy extension (field-aware) */
-const validPrivacy = fc.record({
-  data_classification: classificationLevel,
-});
+const validPrivacy = fc
+  .record({
+    data_classification: classificationLevel,
+    retention_mode: fc.option(retentionMode, { nil: undefined }),
+    recipient_scope: fc.option(recipientScope, { nil: undefined }),
+  })
+  .map(({ retention_mode, recipient_scope, ...rest }) => ({
+    ...rest,
+    ...(retention_mode !== undefined ? { retention_mode } : {}),
+    ...(recipient_scope !== undefined ? { recipient_scope } : {}),
+  }));
 
-/** Generate a valid safety extension */
-const validSafety = fc.record({
-  review_status: reviewStatus,
-});
+/** Generate a valid safety extension (field-aware) */
+const validSafety = fc
+  .record({
+    review_status: reviewStatus,
+    risk_level: fc.option(riskLevel, { nil: undefined }),
+    assessment_method: fc.option(assessmentMethod, { nil: undefined }),
+    category: fc.option(safetyCategory, { nil: undefined }),
+  })
+  .map(({ risk_level, assessment_method, category, ...rest }) => ({
+    ...rest,
+    ...(risk_level !== undefined ? { risk_level } : {}),
+    ...(assessment_method !== undefined ? { assessment_method } : {}),
+    ...(category !== undefined ? { category } : {}),
+  }));
 
 // ---------------------------------------------------------------------------
 // Consent: roundtrip + rejection properties
