@@ -1,7 +1,7 @@
 {
-  "$comment": "Wire 0.2 Extension Groups conformance vectors (Section 12, DD-156)",
-  "version": "0.12.1",
-  "schema_version": "0.12.1",
+  "$comment": "Wire 0.2 Extension Groups conformance vectors (Sections 12.4-12.12)",
+  "version": "0.12.2",
+  "schema_version": "0.12.2",
   "fixtures": [
     {
       "name": "commerce-extension-valid",
@@ -378,6 +378,602 @@
       "expected": {
         "valid": false,
         "error_code": "E_INVALID_EXTENSION_KEY"
+      }
+    },
+    {
+      "name": "consent-extension-valid",
+      "description": "Valid consent extension with required fields and optional data_categories",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-019",
+      "requirement_ids": ["WIRE02-EXT-019", "WIRE02-EXT-020", "WIRE02-EXT-021"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-consent-001",
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "granted",
+              "data_categories": ["personal", "biometric"],
+              "jurisdiction": "EU"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "consent-extension-all-fields-valid",
+      "description": "Valid consent extension with all optional fields populated",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-019",
+      "requirement_ids": ["WIRE02-EXT-019", "WIRE02-EXT-020", "WIRE02-EXT-021", "WIRE02-EXT-022"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-consent-002",
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "granted",
+              "data_categories": ["personal"],
+              "retention_period": "P1Y",
+              "consent_method": "double_opt_in",
+              "withdrawal_uri": "https://example.com/consent/withdraw",
+              "scope": "marketing communications",
+              "jurisdiction": "US-CA"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "consent-withdrawn-valid",
+      "description": "Valid consent withdrawal record",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-020",
+      "requirement_ids": ["WIRE02-EXT-020"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-consent-003",
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "withdrawn"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "consent-denied-valid",
+      "description": "Valid consent denial record",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-020",
+      "requirement_ids": ["WIRE02-EXT-020"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-consent-007",
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "implied",
+              "consent_status": "denied"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "consent-expired-valid",
+      "description": "Valid consent expiry record",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-020",
+      "requirement_ids": ["WIRE02-EXT-020"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-consent-008",
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "expired",
+              "retention_period": "P1Y"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "reject-consent-missing-consent-basis",
+      "description": "Missing required consent_basis field is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-019",
+      "requirement_ids": ["WIRE02-EXT-019"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-consent-004",
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_status": "granted"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-consent-invalid-status",
+      "description": "Invalid consent_status value is rejected (closed enum)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-020",
+      "requirement_ids": ["WIRE02-EXT-020"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-consent-005",
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "revoked"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-consent-extra-field",
+      "description": "Extra unrecognized field in consent extension is rejected (.strict())",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-024",
+      "requirement_ids": ["WIRE02-EXT-024"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-consent-006",
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "granted",
+              "unknown_field": "should be rejected"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "privacy-extension-valid",
+      "description": "Valid privacy extension with required data_classification",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-031",
+      "requirement_ids": ["WIRE02-EXT-031", "WIRE02-EXT-032"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/privacy-signal",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-privacy-001",
+          "pillars": ["privacy"],
+          "extensions": {
+            "org.peacprotocol/privacy": {
+              "data_classification": "confidential"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "privacy-extension-all-fields-valid",
+      "description": "Valid privacy extension with all optional fields populated",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-031",
+      "requirement_ids": [
+        "WIRE02-EXT-031",
+        "WIRE02-EXT-032",
+        "WIRE02-EXT-033",
+        "WIRE02-EXT-034",
+        "WIRE02-EXT-035",
+        "WIRE02-EXT-036"
+      ],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/privacy-signal",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-privacy-002",
+          "pillars": ["privacy"],
+          "extensions": {
+            "org.peacprotocol/privacy": {
+              "data_classification": "pii",
+              "processing_basis": "consent",
+              "retention_period": "P2Y",
+              "retention_mode": "time_bound",
+              "recipient_scope": "processor",
+              "anonymization_method": "k_anonymity",
+              "data_subject_category": "customer",
+              "transfer_mechanism": "scc"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "reject-privacy-missing-classification",
+      "description": "Missing required data_classification field is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-031",
+      "requirement_ids": ["WIRE02-EXT-031"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/privacy-signal",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-privacy-003",
+          "pillars": ["privacy"],
+          "extensions": {
+            "org.peacprotocol/privacy": {
+              "processing_basis": "consent"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-privacy-invalid-retention-mode",
+      "description": "Invalid retention_mode value is rejected (closed enum)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-033",
+      "requirement_ids": ["WIRE02-EXT-033"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/privacy-signal",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-privacy-004",
+          "pillars": ["privacy"],
+          "extensions": {
+            "org.peacprotocol/privacy": {
+              "data_classification": "confidential",
+              "retention_mode": "forever"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-privacy-invalid-recipient-scope",
+      "description": "Invalid recipient_scope value is rejected (closed enum)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-034",
+      "requirement_ids": ["WIRE02-EXT-034"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/privacy-signal",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-privacy-005",
+          "pillars": ["privacy"],
+          "extensions": {
+            "org.peacprotocol/privacy": {
+              "data_classification": "confidential",
+              "recipient_scope": "everyone"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "safety-extension-valid",
+      "description": "Valid safety extension with required review_status",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037", "WIRE02-EXT-038"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-safety-001",
+          "pillars": ["safety"],
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "review_status": "reviewed"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "safety-extension-all-fields-valid",
+      "description": "Valid safety extension with all optional fields including risk_level",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": [
+        "WIRE02-EXT-037",
+        "WIRE02-EXT-038",
+        "WIRE02-EXT-039",
+        "WIRE02-EXT-040",
+        "WIRE02-EXT-041",
+        "WIRE02-EXT-042"
+      ],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-safety-002",
+          "pillars": ["safety"],
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "review_status": "flagged",
+              "risk_level": "high",
+              "assessment_method": "red_team",
+              "safety_measures": ["content_filter", "human_oversight", "rate_limiting"],
+              "incident_ref": "INC-2026-001",
+              "model_ref": "model-v2.3",
+              "category": "content_safety"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "safety-pending-valid",
+      "description": "Valid safety extension with review_status pending",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-safety-006",
+          "pillars": ["safety"],
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "review_status": "pending"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "safety-not-applicable-valid",
+      "description": "Valid safety extension with review_status not_applicable",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-safety-007",
+          "pillars": ["safety"],
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "review_status": "not_applicable"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "reject-safety-missing-review-status",
+      "description": "Missing required review_status field is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-safety-003",
+          "pillars": ["safety"],
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "risk_level": "high"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-safety-invalid-risk-level",
+      "description": "Invalid risk_level value is rejected (closed enum)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-038",
+      "requirement_ids": ["WIRE02-EXT-038"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-safety-004",
+          "pillars": ["safety"],
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "review_status": "reviewed",
+              "risk_level": "critical"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-safety-invalid-review-status",
+      "description": "Invalid review_status value is rejected (closed enum)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-037",
+      "requirement_ids": ["WIRE02-EXT-037"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-safety-005",
+          "pillars": ["safety"],
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "review_status": "approved"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
       }
     }
   ]

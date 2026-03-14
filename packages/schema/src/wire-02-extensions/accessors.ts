@@ -20,6 +20,12 @@ import { IDENTITY_EXTENSION_KEY, IdentityExtensionSchema } from './identity.js';
 import type { IdentityExtension } from './identity.js';
 import { CORRELATION_EXTENSION_KEY, CorrelationExtensionSchema } from './correlation.js';
 import type { CorrelationExtension } from './correlation.js';
+import { CONSENT_EXTENSION_KEY, ConsentExtensionSchema } from './consent.js';
+import type { ConsentExtension } from './consent.js';
+import { PRIVACY_EXTENSION_KEY, PrivacyExtensionSchema } from './privacy.js';
+import type { PrivacyExtension } from './privacy.js';
+import { SAFETY_EXTENSION_KEY, SafetyExtensionSchema } from './safety.js';
+import type { SafetyExtension } from './safety.js';
 
 // ---------------------------------------------------------------------------
 // Internal helper
@@ -98,4 +104,25 @@ export function getCorrelationExtension(
   extensions?: Record<string, unknown>
 ): CorrelationExtension | undefined {
   return getExtension(extensions, CORRELATION_EXTENSION_KEY, CorrelationExtensionSchema);
+}
+
+/** @throws PEACError with RFC 6901 pointer if present but invalid */
+export function getConsentExtension(
+  extensions?: Record<string, unknown>
+): ConsentExtension | undefined {
+  return getExtension(extensions, CONSENT_EXTENSION_KEY, ConsentExtensionSchema);
+}
+
+/** @throws PEACError with RFC 6901 pointer if present but invalid */
+export function getPrivacyExtension(
+  extensions?: Record<string, unknown>
+): PrivacyExtension | undefined {
+  return getExtension(extensions, PRIVACY_EXTENSION_KEY, PrivacyExtensionSchema);
+}
+
+/** @throws PEACError with RFC 6901 pointer if present but invalid */
+export function getSafetyExtension(
+  extensions?: Record<string, unknown>
+): SafetyExtension | undefined {
+  return getExtension(extensions, SAFETY_EXTENSION_KEY, SafetyExtensionSchema);
 }

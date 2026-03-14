@@ -213,8 +213,7 @@ export const PROOF_TYPES: readonly ProofTypeEntry[] = [
   {
     id: 'eat-background-check',
     category: 'rats',
-    description:
-      'Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)',
+    description: 'Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)',
     reference: 'https://www.rfc-editor.org/rfc/rfc9711',
     status: 'informational',
   },
@@ -282,7 +281,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     id: 'org.peacprotocol/consent-record',
     pillar: 'consent',
     description: 'Consent collection or withdrawal evidence',
-    extension_group: null,
+    extension_group: 'org.peacprotocol/consent',
     status: 'informational',
   },
   {
@@ -303,7 +302,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     id: 'org.peacprotocol/privacy-signal',
     pillar: 'privacy',
     description: 'Privacy signal observation or enforcement evidence',
-    extension_group: null,
+    extension_group: 'org.peacprotocol/privacy',
     status: 'informational',
   },
   {
@@ -324,7 +323,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     id: 'org.peacprotocol/safety-review',
     pillar: 'safety',
     description: 'Content or agent safety review evidence',
-    extension_group: null,
+    extension_group: 'org.peacprotocol/safety',
     status: 'informational',
   },
 ];
@@ -347,6 +346,11 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/consent',
+    description: 'Consent extension: consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/correlation',
     description: 'Correlation extension: trace_id, span_id, workflow_id, parent_jti, depends_on',
     status: 'informational',
@@ -354,6 +358,16 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   {
     id: 'org.peacprotocol/identity',
     description: 'Identity extension: proof_ref',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/privacy',
+    description: 'Privacy extension: data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/safety',
+    description: 'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
     status: 'informational',
   },
 ];
@@ -365,8 +379,11 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
  */
 export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/access-decision', 'org.peacprotocol/access'],
+  ['org.peacprotocol/consent-record', 'org.peacprotocol/consent'],
   ['org.peacprotocol/identity-attestation', 'org.peacprotocol/identity'],
   ['org.peacprotocol/payment', 'org.peacprotocol/commerce'],
+  ['org.peacprotocol/privacy-signal', 'org.peacprotocol/privacy'],
+  ['org.peacprotocol/safety-review', 'org.peacprotocol/safety'],
 ]);
 
 /** Closed pillar vocabulary (10 values, sorted alphabetically) */

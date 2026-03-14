@@ -1066,6 +1066,176 @@
           "introduced_in": "0.12.1",
           "last_reviewed_in": "0.12.1",
           "error_code": "E_INVALID_FORMAT"
+        },
+        {
+          "id": "WIRE02-EXT-019",
+          "keyword": "REQUIRED",
+          "summary": "Consent extension: consent_basis is REQUIRED",
+          "source_fragment": "`consent_basis` string REQUIRED:",
+          "source_fragment_hash": "sha256:1b92fc262301d19cb3b3234d38d04b549374b5b8c3981ba8191dbd138bfe5931",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-020",
+          "keyword": "REQUIRED",
+          "summary": "Consent extension: consent_status is REQUIRED and closed enum",
+          "source_fragment": "`consent_status` enum REQUIRED: granted, withdrawn, denied, expired.",
+          "source_fragment_hash": "sha256:0e8149e310a1aec19d7ee48c683afce8c76860d844f6a483eefa096733990a0e",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-021",
+          "keyword": "SHOULD",
+          "summary": "Consent extension: data_categories SHOULD be populated for GDPR evidence",
+          "source_fragment": "`data_categories` string[] optional:",
+          "source_fragment_hash": "sha256:e2734eff02ca07f94980c18cb916b3d9272a9aa460aa9ef3e71a4918478b305a",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-022",
+          "keyword": "SHOULD",
+          "summary": "Consent extension: retention_period uses ISO 8601 duration",
+          "source_fragment": "`retention_period` Iso8601DurationSchema optional:",
+          "source_fragment_hash": "sha256:d4e0be8a05c6dd21c767cc4ab5dffe884b7c7cd8013f95308e7011712b3e3e2b",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-024",
+          "keyword": "MUST",
+          "summary": "Consent extension uses .strict(): unrecognized fields MUST be rejected",
+          "source_fragment": "`.strict()` rejects unknown properties:",
+          "source_fragment_hash": "sha256:1cd18ae3d3d8ccbb9f140ee7ca4e53c79d1126542f98ce98acdb79dbcd8d111a",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-031",
+          "keyword": "REQUIRED",
+          "summary": "Privacy extension: data_classification is REQUIRED",
+          "source_fragment": "`data_classification` string REQUIRED:",
+          "source_fragment_hash": "sha256:d19f91cec5561115d863b0abb6f230214f0eecce7bd83606aec4ffc395c9c0f4",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-032",
+          "keyword": "SHOULD",
+          "summary": "Privacy extension: processing_basis SHOULD be populated",
+          "source_fragment": "`processing_basis` string optional:",
+          "source_fragment_hash": "sha256:506a27fb462ab438a8634fd479d999842d43014b46bbe385cd049103f6c5e5ec",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-033",
+          "keyword": "MUST",
+          "summary": "Privacy extension: retention_mode is closed enum (time_bound, indefinite, session_only)",
+          "source_fragment": "`retention_mode` enum optional: time_bound, indefinite, session_only.",
+          "source_fragment_hash": "sha256:3cbf29cbc11839404cab2d998b3048e60576fa01f67912c68cf25ad70ab246be",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-034",
+          "keyword": "MUST",
+          "summary": "Privacy extension: recipient_scope is closed enum (internal, processor, third_party, public)",
+          "source_fragment": "`recipient_scope` enum optional: internal, processor, third_party, public.",
+          "source_fragment_hash": "sha256:e6d3ca15130c834f7fe34fa81a01914e4f8625d7cb9c7fd753edb6f3c1ab6de8",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-035",
+          "keyword": "SHOULD",
+          "summary": "Privacy extension: anonymization_method SHOULD be populated when data is de-identified",
+          "source_fragment": "`anonymization_method` string optional:",
+          "source_fragment_hash": "sha256:f4865428f4f999d2688730ed5958619a0832c871a50364a8aac0e90e33de89ec",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-036",
+          "keyword": "SHOULD",
+          "summary": "Privacy extension: transfer_mechanism SHOULD be populated for cross-border transfers",
+          "source_fragment": "`transfer_mechanism` string optional:",
+          "source_fragment_hash": "sha256:05c4c7392fdc6bb541d4aca48c58074534565a77db95cef33d24c945b142d2c9",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-037",
+          "keyword": "REQUIRED",
+          "summary": "Safety extension: review_status is REQUIRED and closed enum",
+          "source_fragment": "`review_status` enum REQUIRED: reviewed, pending, flagged, not_applicable.",
+          "source_fragment_hash": "sha256:bbb4ea179df8a616d537805b0f5dab41eb5e952484a4210a6695112e8a5daedf",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-038",
+          "keyword": "MUST",
+          "summary": "Safety extension: risk_level is closed enum (unacceptable, high, limited, minimal)",
+          "source_fragment": "`risk_level` enum optional: unacceptable, high, limited, minimal.",
+          "source_fragment_hash": "sha256:81e8c421221f1011ccf56f564f9d333314fa94705325d4ea18d094f1de2166e8",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-039",
+          "keyword": "SHOULD",
+          "summary": "Safety extension: assessment_method SHOULD describe the review methodology",
+          "source_fragment": "`assessment_method` string optional:",
+          "source_fragment_hash": "sha256:c129dff545bca3203e1b74f1f7a26e9db888472ee5eed961e6bad63c4da32e8e",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-040",
+          "keyword": "MUST",
+          "summary": "Safety extension: safety_measures array bounded by maxSafetyMeasuresCount",
+          "source_fragment": "`safety_measures` string[] optional max 32 items:",
+          "source_fragment_hash": "sha256:d18584f983ae5f3f48538bbf9cd21e4de5f91c9a2f412921654a8543e8d7f1f4",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-041",
+          "keyword": "SHOULD",
+          "summary": "Safety extension: incident_ref SHOULD use digest or opaque identifier format",
+          "source_fragment": "`incident_ref` string optional:",
+          "source_fragment_hash": "sha256:332bdb9ae3dc63be0df17f32c0b79d32ff3586a1b88ee54223645b47a9cf37dc",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-042",
+          "keyword": "SHOULD",
+          "summary": "Safety extension: model_ref identifies the AI model under review",
+          "source_fragment": "`model_ref` string optional:",
+          "source_fragment_hash": "sha256:9e5f84193ac91f32c8d6789bef4398bbfd89f8fa8ee2a246b8f20eb80ee5137c",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
         }
       ]
     },

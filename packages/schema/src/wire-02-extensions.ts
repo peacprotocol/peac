@@ -5,9 +5,6 @@
  * the per-group module directory `wire-02-extensions/`. All import paths
  * that previously resolved to this file continue to work.
  *
- * v0.12.2 (DD-173): restructured from monolithic file to per-group modules
- * to reduce merge conflicts and improve maintainability.
- *
  * @see wire-02-extensions/index.ts for the canonical module barrel
  */
 
@@ -40,9 +37,31 @@ export {
   CORRELATION_EXTENSION_KEY,
   CorrelationExtensionSchema,
   getCorrelationExtension,
+  // Consent
+  CONSENT_EXTENSION_KEY,
+  CONSENT_STATUSES,
+  ConsentStatusSchema,
+  ConsentExtensionSchema,
+  getConsentExtension,
+  // Privacy
+  PRIVACY_EXTENSION_KEY,
+  RETENTION_MODES,
+  RetentionModeSchema,
+  RECIPIENT_SCOPES,
+  RecipientScopeSchema,
+  PrivacyExtensionSchema,
+  getPrivacyExtension,
+  // Safety
+  SAFETY_EXTENSION_KEY,
+  REVIEW_STATUSES,
+  ReviewStatusSchema,
+  RISK_LEVELS,
+  RiskLevelSchema,
+  SafetyExtensionSchema,
+  getSafetyExtension,
   // Envelope validation helper
   validateKnownExtensions,
-  // Shared validators (DD-173.2)
+  // Shared validators
   Sha256DigestSchema,
   HttpsUriHintSchema,
   Iso8601DurationSchema,
@@ -61,4 +80,12 @@ export type {
   ChallengeExtension,
   IdentityExtension,
   CorrelationExtension,
+  ConsentStatus,
+  ConsentExtension,
+  RetentionMode,
+  RecipientScope,
+  PrivacyExtension,
+  ReviewStatus,
+  RiskLevel,
+  SafetyExtension,
 } from './wire-02-extensions/index.js';

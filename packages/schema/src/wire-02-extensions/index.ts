@@ -4,9 +4,7 @@
  * Thin barrel module: re-exports from per-group and shared modules.
  * All logic lives in dedicated files; this file contains no implementation.
  *
- * v0.12.2 (DD-173): restructured from monolithic file to per-group modules.
- *
- * Layer 1 (@peac/schema): pure Zod validation, zero I/O (DD-141).
+ * Layer 1 (@peac/schema): pure Zod validation, zero I/O.
  */
 
 // Limits and byte-budget
@@ -37,6 +35,34 @@ export type { IdentityExtension } from './identity.js';
 export { CORRELATION_EXTENSION_KEY, CorrelationExtensionSchema } from './correlation.js';
 export type { CorrelationExtension } from './correlation.js';
 
+export {
+  CONSENT_EXTENSION_KEY,
+  CONSENT_STATUSES,
+  ConsentStatusSchema,
+  ConsentExtensionSchema,
+} from './consent.js';
+export type { ConsentStatus, ConsentExtension } from './consent.js';
+
+export {
+  PRIVACY_EXTENSION_KEY,
+  RETENTION_MODES,
+  RetentionModeSchema,
+  RECIPIENT_SCOPES,
+  RecipientScopeSchema,
+  PrivacyExtensionSchema,
+} from './privacy.js';
+export type { RetentionMode, RecipientScope, PrivacyExtension } from './privacy.js';
+
+export {
+  SAFETY_EXTENSION_KEY,
+  REVIEW_STATUSES,
+  ReviewStatusSchema,
+  RISK_LEVELS,
+  RiskLevelSchema,
+  SafetyExtensionSchema,
+} from './safety.js';
+export type { ReviewStatus, RiskLevel, SafetyExtension } from './safety.js';
+
 // Typed accessors
 export {
   getCommerceExtension,
@@ -44,12 +70,15 @@ export {
   getChallengeExtension,
   getIdentityExtension,
   getCorrelationExtension,
+  getConsentExtension,
+  getPrivacyExtension,
+  getSafetyExtension,
 } from './accessors.js';
 
 // Envelope validation helper (used by Wire02ClaimsSchema.superRefine)
 export { validateKnownExtensions } from './validation.js';
 
-// Shared validators (DD-173.2)
+// Shared validators
 export {
   Sha256DigestSchema,
   HttpsUriHintSchema,

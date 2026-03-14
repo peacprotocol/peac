@@ -623,7 +623,7 @@ Output: boolean (true if valid extension key grammar)
 
 ### 12.3 Core Extension Groups
 
-Five core extension groups have typed schemas in `@peac/schema`. All use `.strict()` mode (unknown keys within a group are rejected).
+Eight core extension groups have typed schemas in `@peac/schema`. All use `.strict()` mode (unknown keys within a group are rejected).
 
 | Key                            | Group       | Section |
 | ------------------------------ | ----------- | ------- |
@@ -632,6 +632,9 @@ Five core extension groups have typed schemas in `@peac/schema`. All use `.stric
 | `org.peacprotocol/challenge`   | Challenge   | 13      |
 | `org.peacprotocol/identity`    | Identity    | 12.6    |
 | `org.peacprotocol/correlation` | Correlation | 12.7    |
+| `org.peacprotocol/consent`     | Consent     | 12.10   |
+| `org.peacprotocol/privacy`     | Privacy     | 12.11   |
+| `org.peacprotocol/safety`      | Safety      | 12.12   |
 
 ### 12.4 Commerce Extension
 
@@ -694,15 +697,96 @@ This ensures forward compatibility: new extension groups can be defined without 
 
 ### 12.9 Typed Accessor Helpers
 
-Five typed accessor functions are provided by `@peac/schema`:
+Eight typed accessor functions are provided by `@peac/schema`:
 
 - `getCommerceExtension(extensions)`
 - `getAccessExtension(extensions)`
 - `getChallengeExtension(extensions)`
 - `getIdentityExtension(extensions)`
 - `getCorrelationExtension(extensions)`
+- `getConsentExtension(extensions)`
+- `getPrivacyExtension(extensions)`
+- `getSafetyExtension(extensions)`
 
 Each returns `undefined` if the key is absent from the extensions record. If the key is present but the value fails schema validation, the accessor throws a `PEACError` with a leaf-precise RFC 6901 JSON Pointer identifying the invalid field (e.g., `/extensions/org.peacprotocol~1commerce/amount_minor`). Accessors use `Object.prototype.hasOwnProperty.call()` to prevent prototype pollution.
+
+### 12.10 Consent Extension [WIRE02-EXT-019] [WIRE02-EXT-020] [WIRE02-EXT-021] [WIRE02-EXT-022] [WIRE02-EXT-024]
+
+Records consent collection or withdrawal as an observation. Jurisdiction-neutral; aligned with ISO/IEC 29184:2020 concepts.
+
+| Field              | Type              | Required | Max Length | Description                                               |
+| ------------------ | ----------------- | -------- | ---------- | --------------------------------------------------------- |
+| `consent_basis`    | string            | REQUIRED | 128        | Legal basis identifier (e.g., explicit, implied, opt_out) |
+| `consent_status`   | enum              | REQUIRED | N/A        | Lifecycle state: granted, withdrawn, denied, expired      |
+| `data_categories`  | array of string   | OPTIONAL | 64 items   | Data categories covered (e.g., personal, biometric)       |
+| `retention_period` | ISO 8601 duration | OPTIONAL | 64         | Retention period as ISO 8601 duration                     |
+| `consent_method`   | string            | OPTIONAL | 128        | How consent was collected (e.g., click_through)           |
+| `withdrawal_uri`   | HTTPS URI hint    | OPTIONAL | 2048       | URI hint for consent withdrawal; locator hint only        |
+| `scope`            | string            | OPTIONAL | 256        | Free-text scope description                               |
+| `jurisdiction`     | string            | OPTIONAL | 16         | ISO 3166-1 alpha-2 or composite (e.g., EU, US-CA)         |
+
+`consent_basis` string REQUIRED: identifies the legal basis for consent. Open vocabulary to accommodate jurisdiction-specific bases.
+
+`consent_status` enum REQUIRED: granted, withdrawn, denied, expired. Closed vocabulary covering universal consent lifecycle states across GDPR Art 7, CCPA Sec 1798.120, LGPD Art 8, and ISO/IEC 29184.
+
+`data_categories` string[] optional: data categories covered by the consent record. Each category string has min length 1 and max 128 chars.
+
+`retention_period` Iso8601DurationSchema optional: uses the parser-grade ISO 8601 duration validator.
+
+`.strict()` rejects unknown properties: the consent extension uses `.strict()` mode; unrecognized fields are rejected.
+
+### 12.11 Privacy Extension [WIRE02-EXT-031] [WIRE02-EXT-032] [WIRE02-EXT-033] [WIRE02-EXT-034] [WIRE02-EXT-035] [WIRE02-EXT-036]
+
+Records data classification and handling observations. Aligned with ISO/IEC 27701 concepts.
+
+| Field                   | Type              | Required | Max Length | Description                                                             |
+| ----------------------- | ----------------- | -------- | ---------- | ----------------------------------------------------------------------- |
+| `data_classification`   | string            | REQUIRED | 128        | Data classification level (e.g., public, confidential, pii)             |
+| `processing_basis`      | string            | OPTIONAL | 128        | Legal basis for data processing                                         |
+| `retention_period`      | ISO 8601 duration | OPTIONAL | 64         | Retention period as ISO 8601 duration                                   |
+| `retention_mode`        | enum              | OPTIONAL | N/A        | Non-duration retention semantics: time_bound, indefinite, session_only  |
+| `recipient_scope`       | enum              | OPTIONAL | N/A        | Data recipient classification: internal, processor, third_party, public |
+| `anonymization_method`  | string            | OPTIONAL | 128        | Anonymization method applied (e.g., k_anonymity)                        |
+| `data_subject_category` | string            | OPTIONAL | 128        | Data subject category (e.g., customer, employee, minor)                 |
+| `transfer_mechanism`    | string            | OPTIONAL | 128        | Cross-border transfer mechanism (e.g., adequacy_decision, scc)          |
+
+`data_classification` string REQUIRED: identifies the classification level of the data. Open taxonomy.
+
+`processing_basis` string optional: legal basis for data processing. Shares domain vocabulary with consent `consent_basis`.
+
+`retention_mode` enum optional: time_bound, indefinite, session_only. Closed enum for non-duration retention semantics. Split from `retention_period` to avoid mixed-grammar fields.
+
+`recipient_scope` enum optional: internal, processor, third_party, public. Closed enum aligned with GDPR Art 13-14 disclosure categories.
+
+`anonymization_method` string optional: method applied for de-identification.
+
+`transfer_mechanism` string optional: cross-border data transfer mechanism.
+
+### 12.12 Safety Extension [WIRE02-EXT-037] [WIRE02-EXT-038] [WIRE02-EXT-039] [WIRE02-EXT-040] [WIRE02-EXT-041] [WIRE02-EXT-042]
+
+Records safety assessment evidence. Jurisdiction-neutral design; usage profiles decide when regulatory-specific fields become required.
+
+| Field               | Type            | Required | Max Length | Description                                                       |
+| ------------------- | --------------- | -------- | ---------- | ----------------------------------------------------------------- |
+| `review_status`     | enum            | REQUIRED | N/A        | Assessment lifecycle: reviewed, pending, flagged, not_applicable  |
+| `risk_level`        | enum            | OPTIONAL | N/A        | Risk tier: unacceptable, high, limited, minimal                   |
+| `assessment_method` | string          | OPTIONAL | 256        | Review methodology (e.g., automated_scan, human_review, red_team) |
+| `safety_measures`   | array of string | OPTIONAL | 32 items   | Safety measures applied (each string max 256 chars)               |
+| `incident_ref`      | string          | OPTIONAL | 256        | Incident report reference (opaque identifier or digest)           |
+| `model_ref`         | string          | OPTIONAL | 256        | AI model reference (opaque identifier)                            |
+| `category`          | string          | OPTIONAL | 128        | Safety category (e.g., content_safety, bias, hallucination)       |
+
+`review_status` enum REQUIRED: reviewed, pending, flagged, not_applicable. Closed vocabulary covering the universal safety assessment lifecycle across EU AI Act, NIST AI RMF, and ISO 23894.
+
+`risk_level` enum optional: unacceptable, high, limited, minimal. Closed vocabulary converging across EU AI Act Art 6, NIST AI RMF, and ISO 23894. Optional at schema level to maintain jurisdiction neutrality; the EU AI Act safety usage profile REQUIRES this field for Article 6/9 evidence workflows.
+
+`assessment_method` string optional: describes the review methodology used.
+
+`safety_measures` string[] optional max 32 items: safety measures applied. Each measure string has min length 1 and max 256 chars. Array bounded by EXTENSION_LIMITS.maxSafetyMeasuresCount.
+
+`incident_ref` string optional: reference to an incident report. Accepts opaque identifiers or SHA-256 digests.
+
+`model_ref` string optional: identifies the AI model under review.
 
 ---
 
