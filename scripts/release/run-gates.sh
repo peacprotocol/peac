@@ -183,6 +183,11 @@ check_codegen_fresh() {
 }
 run_gate "codegen-fresh" check_codegen_fresh
 
+# --- Production Dependency Audit ---
+echo ""
+echo "--- Production Dependency Audit ---"
+run_gate "prod-audit" node scripts/audit-gate.mjs
+
 # --- No-Network Guard ---
 echo ""
 echo "--- No-Network Guard ---"

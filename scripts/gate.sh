@@ -71,6 +71,16 @@ else
   run_check "guard" bash scripts/guard.sh
 fi
 
+# --- Production dependency audit ---
+# Blocks on HIGH/CRITICAL in prod deps. This must run in the same gate path
+# as CI to prevent audit-only CI failures after local gates pass.
+if [ "$FAST" = "1" ]; then
+  echo "== prod audit =="
+  echo "SKIP (fast mode)"
+else
+  run_check "prod audit" node scripts/audit-gate.mjs
+fi
+
 # --- Planning leak (local-only script; skipped on fresh clones/CI) ---
 if [ -f scripts/check-planning-leak.sh ]; then
   run_check "planning leak" bash scripts/check-planning-leak.sh
