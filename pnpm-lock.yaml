@@ -1374,8 +1374,8 @@ importers:
         specifier: ^6.1.86
         version: 6.1.86
       undici:
-        specifier: ^6.24.0
-        version: 6.24.0
+        specifier: ^7.24.3
+        version: 7.24.3
     devDependencies:
       '@arethetypeswrong/cli':
         specifier: ^0.18.2
@@ -10527,9 +10527,9 @@ packages:
       '@fastify/busboy': 2.1.1
     dev: true
 
-  /undici@6.24.0:
-    resolution: {integrity: sha512-lVLNosgqo5EkGqh5XUDhGfsMSoO8K0BAN0TyJLvwNRSl4xWGZlCVYsAIpa/OpA3TvmnM01GWcoKmc3ZWo5wKKA==}
-    engines: {node: '>=18.17'}
+  /undici@7.24.3:
+    resolution: {integrity: sha512-eJdUmK/Wrx2d+mnWWmwwLRyA7OQCkLap60sk3dOK4ViZR7DKwwptwuIvFBg2HaiP9ESaEdhtpSymQPvytpmkCA==}
+    engines: {node: '>=20.18.1'}
     dev: false
 
   /unenv@2.0.0-rc.14:
