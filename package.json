@@ -101,14 +101,16 @@
       "qs@>=6.7.0 <=6.14.1": "6.14.2",
       "zod": "^4.3.6",
       "rollup": ">=4.59.0",
-      "express-rate-limit": ">=8.2.2"
+      "express-rate-limit": ">=8.2.2",
+      "flatted": ">=3.4.1"
     },
     "overridesComments": {
       "minimatch": "Cross-major pin: typescript-estree requires ^9.0.4 but 9.x has no patch for GHSA-3ppc-4f35-3m26. minimatch 10.x is API-compatible (same globbing interface). Drops Node 18 (fine: repo baseline is >=22.0.0). Lint verified clean.",
       "qs": "Range-scoped: only overrides vulnerable 6.7.0-6.14.1 to 6.14.2 (fixes GHSA-w7fw-mjwx-w883 arrayLimit bypass). Minimal blast radius.",
       "zod": "Workspace-wide Zod 4 enforcement: prevents mixed Zod 3/4 which causes runtime TypeError (incompatible internal _parse API). All workspace packages must use Zod 4.",
       "rollup": "Override vulnerable 4.53.2 to >=4.59.0 (fixes GHSA-mw96-cpmx-2vgc path traversal). Dev-only via vitest/vite/tsup.",
-      "express-rate-limit": "Override 8.2.1 to >=8.2.2 (fixes GHSA-46wh-pxpv-q5gq IPv4-mapped IPv6 bypass). Prod dep via @modelcontextprotocol/sdk."
+      "express-rate-limit": "Override 8.2.1 to >=8.2.2 (fixes GHSA-46wh-pxpv-q5gq IPv4-mapped IPv6 bypass). Prod dep via @modelcontextprotocol/sdk.",
+      "flatted": "Override 3.3.3 to >=3.4.1 (fixes GHSA-25h7-pfq9-p65f unbounded recursion DoS in parse()). Dev-only via eslint -> file-entry-cache -> flat-cache."
     }
   },
   "lint-staged": {

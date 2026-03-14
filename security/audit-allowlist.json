@@ -80,6 +80,36 @@
       "verified_by": "pnpm audit --prod shows no HIGH; pnpm why minimatch confirms eslint-only path",
       "owner": "jithinraj",
       "added_at": "2026-03-01"
+    },
+    {
+      "advisory_id": "GHSA-vrm6-8vpv-qv8q",
+      "package": "undici",
+      "reason": "undici WebSocket permessage-deflate memory consumption (HIGH) -- dev-only via wrangler@3.114.17 -> miniflare -> undici@5.29.0. Local dev tool only.",
+      "why_not_exploitable": "undici 5.29.0 is used by miniflare (local Cloudflare Workers simulator). Not in published packages. Production uses undici 6.24.0 (patched). No WebSocket connections in the miniflare dev path reach external servers.",
+      "where_used": "surfaces/workers/cloudflare devDependency: wrangler@3.114.17 -> miniflare@3.x -> undici@5.29.0",
+      "expires_at": "2026-05-30",
+      "remediation": "Evaluate wrangler 4.x migration or wait for 3.x backport",
+      "issue_url": "https://github.com/advisories/GHSA-vrm6-8vpv-qv8q",
+      "scope": "dev",
+      "dependency_chain": ["wrangler@3.114.17", "miniflare", "undici@5.29.0"],
+      "verified_by": "pnpm audit --prod shows no HIGH for undici; pnpm ls undici -r confirms 6.24.0 in prod, 5.29.0 only in wrangler dev path",
+      "owner": "jithinraj",
+      "added_at": "2026-03-14"
+    },
+    {
+      "advisory_id": "GHSA-v9p9-hfj2-hcw8",
+      "package": "undici",
+      "reason": "undici WebSocket server_max_window_bits validation (HIGH) -- dev-only via wrangler@3.114.17 -> miniflare -> undici@5.29.0. Local dev tool only.",
+      "why_not_exploitable": "undici 5.29.0 is used by miniflare (local Cloudflare Workers simulator). Not in published packages. Production uses undici 6.24.0 (patched). No WebSocket connections in the miniflare dev path reach external servers.",
+      "where_used": "surfaces/workers/cloudflare devDependency: wrangler@3.114.17 -> miniflare@3.x -> undici@5.29.0",
+      "expires_at": "2026-05-30",
+      "remediation": "Evaluate wrangler 4.x migration or wait for 3.x backport",
+      "issue_url": "https://github.com/advisories/GHSA-v9p9-hfj2-hcw8",
+      "scope": "dev",
+      "dependency_chain": ["wrangler@3.114.17", "miniflare", "undici@5.29.0"],
+      "verified_by": "pnpm audit --prod shows no HIGH for undici; pnpm ls undici -r confirms 6.24.0 in prod, 5.29.0 only in wrangler dev path",
+      "owner": "jithinraj",
+      "added_at": "2026-03-14"
     }
   ]
 }
