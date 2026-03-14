@@ -55,7 +55,7 @@
   "dependencies": {
     "@peac/schema": "workspace:*",
     "ipaddr.js": "^2.3.0",
-    "tldts": "^6.1.86",
+    "tldts": "^7.0.25",
     "undici": "^6.24.0"
   },
   "devDependencies": {
