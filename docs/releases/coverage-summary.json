@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-03-14T04:23:49.607Z",
+  "version": "0.12.1",
+  "statements": {
+    "pct": 80.45
+  },
+  "branches": {
+    "pct": 74.29
+  },
+  "functions": {
+    "pct": 83.17
+  },
+  "lines": {
+    "pct": 80.98
+  }
+}
