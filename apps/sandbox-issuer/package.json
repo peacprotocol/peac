@@ -19,7 +19,7 @@
     "@peac/crypto": "workspace:*",
     "@peac/middleware-core": "workspace:*",
     "@peac/schema": "workspace:*",
-    "hono": "^4.12.5",
+    "hono": "^4.12.7",
     "zod": "^4.3.6"
   },
   "devDependencies": {
