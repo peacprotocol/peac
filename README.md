@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <strong>Verifiable interaction records for AI agents, APIs, and automated systems</strong>
+  <strong>Portable signed proof for agent, API, and MCP interactions</strong>
   <br />
-  Publish machine-readable terms, return signed receipts, verify outcomes offline.
+  Publish machine-readable terms, return signed interaction records, and verify them offline.
 </p>
 
 <p align="center">
@@ -24,56 +24,60 @@
   <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
 </p>
 
-**Use PEAC when:**
+PEAC is an open standard for publishing machine-readable terms, returning signed interaction records, and verifying them offline. It is the evidence layer: portable proof across organizational boundaries, without replacing auth, payment rails, or observability.
 
-- you need proof of interactions across organizational boundaries
-- you need machine-readable access, payment, or usage terms
-- you need portable evidence for audits, disputes, or incident review
+**For** API providers, MCP tool hosts, agent operators, platforms, and auditors who need proof that crosses boundaries.
 
 ## How it works
 
 ```text
-1. Service publishes policy    -->  /.well-known/peac.txt (machine-readable terms)
-2. Agent makes request         -->  Service returns PEAC-Receipt: <jws> (signed proof)
-3. Anyone verifies offline     -->  Check signature + claims using issuer's public keys
+1. Publish terms at /.well-known/peac.txt
+2. Return PEAC-Receipt with signed proof
+3. Verify offline with the issuer's public key
 ```
 
-**Setup (out of band):** Service publishes policy at `/.well-known/peac.txt` and verification keys at `/.well-known/peac-issuer.json`.
-
-### What the artifacts look like
-
-`/.well-known/peac.txt`: machine-readable terms (YAML):
-
-```yaml
-version: 'peac-policy/0.1'
-usage: conditional
-purposes: [crawl, index, inference]
-receipts: required
-attribution: required
-rate_limit: '100/hour'
-```
-
-`PEAC-Receipt` header: signed proof returned on governed responses:
+What a governed HTTP response looks like:
 
 ```text
+HTTP/1.1 200 OK
 PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...
+Link: </.well-known/peac-issuer.json>; rel="issuer"
 ```
-
-The receipt is a standard JWS (Ed25519) that can be verified offline using the issuer's published keys. Full specification: [Spec Index](docs/SPEC_INDEX.md).
-
----
 
 ## Quick start
 
 **Requirements:** Node 24 (tested); Node 22+ (compatible)
+
+### Verify a receipt
 
 ```bash
 pnpm add @peac/protocol @peac/crypto
 ```
 
 ```typescript
+import { verifyLocal } from '@peac/protocol';
+
+const receipt = response.headers.get('PEAC-Receipt');
+const result = await verifyLocal(receipt, publicKey, {
+  issuer: 'https://api.example.com',
+});
+
+if (result.valid) {
+  console.log(result.claims.iss, result.claims.kind, result.claims.type);
+}
+```
+
+Or from the CLI:
+
+```bash
+peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...'
+```
+
+### Issue a receipt
+
+```typescript
 import { generateKeypair } from '@peac/crypto';
-import { issue, verifyLocal } from '@peac/protocol';
+import { issue } from '@peac/protocol';
 
 const { privateKey, publicKey } = await generateKeypair();
 
@@ -86,49 +90,55 @@ const { jws } = await issue({
   kid: 'key-2026-03',
 });
 
-const result = await verifyLocal(jws, publicKey);
-console.log(result.valid, result.claims.type);
-// true org.peacprotocol/access-decision
+// Return jws in the PEAC-Receipt header
 ```
+
+### Run the example
 
 ```bash
-peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...'
+pnpm install && pnpm build
+pnpm --filter @peac/example-wire-02-minimal demo
 ```
 
-> **Legacy:** Wire 0.1 (`peac-receipt/0.1`) is frozen. See [examples/quickstart/](examples/quickstart/) for Wire 0.1 code.
-
-See [examples/wire-02-minimal/](examples/wire-02-minimal/) for a runnable example. For settlement, HTTP/REST, Express middleware, and Go SDK examples, see [docs/README_LONG.md](docs/README_LONG.md).
+See [examples/wire-02-minimal/](examples/wire-02-minimal/) for the full source. For HTTP/REST, Express middleware, and Go examples, see [docs/README_LONG.md](docs/README_LONG.md).
 
 ---
 
-## Choose your path
+## Start with the outcome you want
 
-- **Issue and verify receipts**: [Quick start](#quick-start) above
-- **Add receipts to an HTTP API**: [HTTP integration](docs/README_LONG.md#httprest-integration)
-- **Add middleware to Express**: [Express middleware](docs/README_LONG.md#express-middleware)
-- **Use x402 payments**: [x402 adapter](packages/adapters/x402/) and [Stripe x402 profile](docs/profiles/stripe-x402-machine-payments.md)
-- **Author policies**: [Policy Kit](docs/policy-kit/quickstart.md)
-- **Verify or bundle evidence**: [Dispute Bundles](docs/README_LONG.md#dispute-bundle)
-- **Build in Go**: [Go SDK](sdks/go/) (Wire 0.1)
-- **Read the spec**: [Spec Index](docs/SPEC_INDEX.md)
+- **Add signed proof to an HTTP API**: [Quickstart](docs/README_LONG.md#httprest-integration) or [Express middleware](docs/README_LONG.md#express-middleware)
+- **Add evidence to an MCP server**: [MCP server](packages/mcp-server/)
+- **Carry proof through A2A**: [A2A carrier mapping](packages/mappings/a2a/)
+- **Author machine-readable terms**: [Policy Kit](docs/policy-kit/quickstart.md)
+- **Verify a receipt locally**: [Quick start](#verify-a-receipt) above or [CLI](#cli)
+- **Create an evidence bundle**: [Dispute Bundles](docs/README_LONG.md#dispute-bundle)
+- **Build in Go**: [Go SDK](sdks/go/)
 
 ---
 
 ## Where it fits
 
-PEAC is the evidence layer. It does not replace auth, payment rails, or observability. It complements them with portable, verifiable proof.
+| Existing system     | What PEAC adds                                         |
+| ------------------- | ------------------------------------------------------ |
+| **Logs**            | Portable proof that survives organizational boundaries |
+| **OpenTelemetry**   | Signed evidence that correlates to traces              |
+| **MCP / A2A**       | Proof carried alongside tool calls and agent exchanges |
+| **AP2 / ACP / UCP** | Proof of terms and outcomes                            |
+| **x402**            | Settlement proof mapping with offline verification     |
+| **Payment rails**   | Settlement references made verifiable offline          |
 
-| Existing system     | What PEAC adds                                                      |
-| ------------------- | ------------------------------------------------------------------- |
-| **Internal logs**   | Portable proof that survives organizational boundaries              |
-| **OpenTelemetry**   | Cryptographic evidence that correlates to traces                    |
-| **MCP / A2A**       | Verifiable records carried alongside tool calls and agent exchanges |
-| **AP2 / ACP / UCP** | Proof of outcomes for commerce authorization and orchestration      |
-| **Payment rails**   | Settlement references made verifiable offline                       |
+**What changes in your stack:** keep auth, keep payments, keep observability. Add `/.well-known/peac.txt` and return `PEAC-Receipt` on governed responses.
 
-**Use cases:** HTTP APIs (paid or permissioned), agent-to-API calls, dataset downloads, AI training access, cross-org audit evidence, safety and incident response workflows.
+---
 
-This repository contains the **reference TypeScript implementation** and a **Go SDK** ([sdks/go/](sdks/go/)).
+## What the artifacts look like
+
+| Artifact                | Description                                               |
+| ----------------------- | --------------------------------------------------------- |
+| `/.well-known/peac.txt` | Machine-readable terms                                    |
+| `PEAC-Receipt`          | Signed interaction proof in headers or transport metadata |
+| `verifyLocal()`         | Local verification once keys are available                |
+| `peac-bundle/0.1`       | Portable audit/dispute package                            |
 
 ---
 
@@ -149,18 +159,9 @@ See [packages/cli/README.md](packages/cli/README.md) for the full command refere
 
 ---
 
-## Protocol primitives
-
-| Primitive      | Description                                           |
-| -------------- | ----------------------------------------------------- |
-| Policy file    | `/.well-known/peac.txt` machine-readable terms        |
-| Receipt        | `PEAC-Receipt: <jws>` signed proof (Ed25519)          |
-| Issuer config  | `/.well-known/peac-issuer.json` JWKS discovery        |
-| Dispute bundle | ZIP with receipts + policy + report for offline audit |
-
 ## Versioning
 
-- **Current stable:** Interaction Record format (`interaction-record+jwt`, v0.12.0+)
+- **Current stable:** Interaction Record format (`interaction-record+jwt`, v0.12.1+)
 - **Legacy:** Wire 0.1 (`peac-receipt/0.1`) is frozen; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION`
 
 See [docs/specs/VERSIONING.md](docs/specs/VERSIONING.md) for the full versioning doctrine.
@@ -195,12 +196,12 @@ See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](doc
 
 ## Implementations
 
-- **TypeScript** (this repo): `@peac/protocol`, `@peac/cli`, `@peac/sdk-js`
-- **Go**: [sdks/go/](sdks/go/) issuance, verification, and policy evaluation (Wire 0.1)
-- **MCP**: [MCP server](packages/mcp-server/) (5 tools) and [MCP carrier mapping](packages/mappings/mcp/)
-- **A2A**: [A2A carrier mapping](packages/mappings/a2a/) for agent-to-agent evidence
-- **HTTP middleware**: [Express](packages/middleware-express/) automatic receipt issuance
-- **x402**: [x402 adapter](packages/adapters/x402/) for machine payment evidence
+- **TypeScript** (this repo): issuance, verification, CLI, middleware
+- **Go**: [sdks/go/](sdks/go/) issuance and verification
+- **MCP**: [MCP server](packages/mcp-server/) evidence emission and verification tools
+- **A2A**: [A2A carrier mapping](packages/mappings/a2a/) metadata carrier mapping
+- **Express**: [Express middleware](packages/middleware-express/) receipt middleware
+- **x402**: [x402 adapter](packages/adapters/x402/) payment evidence adapter
 
 Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new).
 
