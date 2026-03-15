@@ -287,6 +287,50 @@ describe('CommerceExtensionSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  // event field tests
+  const VALID_EVENT_VALUES = [
+    'authorization',
+    'capture',
+    'settlement',
+    'refund',
+    'void',
+    'chargeback',
+  ] as const;
+
+  for (const event of VALID_EVENT_VALUES) {
+    it(`accepts event: ${event}`, () => {
+      const result = CommerceExtensionSchema.safeParse({
+        ...VALID_COMMERCE,
+        event,
+      });
+      expect(result.success).toBe(true);
+    });
+  }
+
+  it('accepts commerce without event (backward compatibility)', () => {
+    const result = CommerceExtensionSchema.safeParse(VALID_COMMERCE);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.event).toBeUndefined();
+    }
+  });
+
+  it('rejects invalid event value', () => {
+    const result = CommerceExtensionSchema.safeParse({
+      ...VALID_COMMERCE,
+      event: 'pending',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects numeric event value', () => {
+    const result = CommerceExtensionSchema.safeParse({
+      ...VALID_COMMERCE,
+      event: 1,
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------

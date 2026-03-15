@@ -156,5 +156,70 @@ EOF
 
 node test.mjs
 
+# Schema package-edge import smoke (deprecated alias stability)
+echo ""
+echo "6. Running @peac/schema package-edge import smoke..."
+cat > schema-smoke.mjs << 'EOF'
+import {
+  ProofMethodSchema,
+  PROOF_METHODS,
+  ProofTypeSchema,
+  CommerceExtensionSchema,
+} from '@peac/schema';
+
+// Verify deprecated ProofMethodSchema is importable and functional
+if (!ProofMethodSchema) {
+  console.error('FAIL: ProofMethodSchema not exported from @peac/schema');
+  process.exit(1);
+}
+const parsed = ProofMethodSchema.parse('dpop');
+if (parsed !== 'dpop') {
+  console.error('FAIL: ProofMethodSchema.parse("dpop") returned:', parsed);
+  process.exit(1);
+}
+
+// Verify PROOF_METHODS array
+if (!Array.isArray(PROOF_METHODS) || PROOF_METHODS.length !== 4) {
+  console.error('FAIL: PROOF_METHODS not exported or wrong length:', PROOF_METHODS);
+  process.exit(1);
+}
+
+// Verify ProofTypeSchema (canonical, non-deprecated)
+if (!ProofTypeSchema) {
+  console.error('FAIL: ProofTypeSchema not exported from @peac/schema');
+  process.exit(1);
+}
+
+// Verify CommerceExtensionSchema accepts optional event field
+const commerce = CommerceExtensionSchema.parse({
+  payment_rail: 'stripe',
+  amount_minor: '1000',
+  currency: 'USD',
+  event: 'authorization',
+});
+if (commerce.event !== 'authorization') {
+  console.error('FAIL: commerce event field not preserved:', commerce);
+  process.exit(1);
+}
+
+// Verify commerce without event still valid (backward compat)
+const noEvent = CommerceExtensionSchema.parse({
+  payment_rail: 'stripe',
+  amount_minor: '500',
+  currency: 'USD',
+});
+if (noEvent.event !== undefined) {
+  console.error('FAIL: absent event should be undefined:', noEvent);
+  process.exit(1);
+}
+
+console.log('   ProofMethodSchema: importable, parse works (deprecated alias stable)');
+console.log('   PROOF_METHODS:', PROOF_METHODS.join(', '));
+console.log('   CommerceExtensionSchema: event field accepted and absent-event valid');
+console.log('   OK: @peac/schema package-edge imports verified');
+EOF
+
+node schema-smoke.mjs
+
 echo ""
 echo "=== Pack Install Smoke Test PASSED ==="

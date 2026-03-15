@@ -38,6 +38,10 @@ export const CommerceExtensionSchema = z
     asset: z.string().max(EXTENSION_LIMITS.maxAssetLength).optional(),
     /** Environment discriminant */
     env: z.enum(['live', 'test']).optional(),
+    /** Commerce lifecycle phase. Observational metadata only: does not encode settlement finality or protocol state transitions */
+    event: z
+      .enum(['authorization', 'capture', 'settlement', 'refund', 'void', 'chargeback'])
+      .optional(),
   })
   .strict();
 

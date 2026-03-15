@@ -644,14 +644,17 @@ Twelve core extension groups have typed schemas in `@peac/schema`. All use `.str
 
 Records payment and transaction metadata.
 
-| Field          | Type                 | Required | Max Length | Description                                                                      |
-| -------------- | -------------------- | -------- | ---------- | -------------------------------------------------------------------------------- |
-| `payment_rail` | string               | REQUIRED | 128        | Payment rail identifier (e.g., `stripe`, `x402`, `lightning`)                    |
-| `amount_minor` | string               | REQUIRED | 64         | Amount in smallest currency unit; base-10 integer string matching `/^-?[0-9]+$/` |
-| `currency`     | string               | REQUIRED | 16         | ISO 4217 currency code or asset identifier                                       |
-| `reference`    | string               | OPTIONAL | 256        | Caller-assigned payment reference                                                |
-| `asset`        | string               | OPTIONAL | 256        | Asset identifier for non-fiat (e.g., token address)                              |
-| `env`          | `"live"` or `"test"` | OPTIONAL | N/A        | Environment discriminant                                                         |
+| Field          | Type                                                                                      | Required | Max Length | Description                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------- | -------- | ---------- | -------------------------------------------------------------------------------- |
+| `payment_rail` | string                                                                                    | REQUIRED | 128        | Payment rail identifier (e.g., `stripe`, `x402`, `lightning`)                    |
+| `amount_minor` | string                                                                                    | REQUIRED | 64         | Amount in smallest currency unit; base-10 integer string matching `/^-?[0-9]+$/` |
+| `currency`     | string                                                                                    | REQUIRED | 16         | ISO 4217 currency code or asset identifier                                       |
+| `reference`    | string                                                                                    | OPTIONAL | 256        | Caller-assigned payment reference                                                |
+| `asset`        | string                                                                                    | OPTIONAL | 256        | Asset identifier for non-fiat (e.g., token address)                              |
+| `env`          | `"live"` or `"test"`                                                                      | OPTIONAL | N/A        | Environment discriminant                                                         |
+| `event`        | `"authorization"` / `"capture"` / `"settlement"` / `"refund"` / `"void"` / `"chargeback"` | OPTIONAL | N/A        | Commerce lifecycle phase (observational only)                                    |
+
+The `event` field records the commerce lifecycle phase as observational metadata. It does not encode settlement finality, enforce lifecycle ordering, or imply protocol state transitions. Typical lifecycle flows include `authorization` then `capture` then `settlement`; `authorization` then `void`; `settlement` then `refund`; `settlement` then `chargeback`. These flows are informational; no ordering is enforced by the protocol.
 
 The `amount_minor` field MUST be a base-10 integer string. Decimal values and empty strings are rejected. String representation is used for arbitrary precision without floating-point loss. Negative values (prefixed with `-`) are permitted and represent refunds, chargebacks, or credit adjustments; positive values represent charges. Issuers SHOULD use a distinct receipt `type` (e.g., `org.peacprotocol/refund`) when issuing negative-amount receipts to enable clear filtering by verifiers.
 
@@ -1397,6 +1400,7 @@ Centralized bounds for Wire 0.2 extension fields, defined in `EXTENSION_LIMITS`:
 | `maxAmountMinorLength`     | 64    | Commerce: amount string                            |
 | `maxReferenceLength`       | 256   | Commerce: payment reference                        |
 | `maxAssetLength`           | 256   | Commerce: asset identifier                         |
+| `maxCommerceEventLength`   | 64    | Commerce: event lifecycle phase                    |
 | `maxResourceLength`        | 2048  | Access/Challenge: resource identifier              |
 | `maxActionLength`          | 256   | Access/Challenge: action identifier                |
 | `maxProblemTypeLength`     | 2048  | Challenge: RFC 9457 problem type URI               |

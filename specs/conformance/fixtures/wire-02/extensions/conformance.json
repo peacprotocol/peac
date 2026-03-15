@@ -62,6 +62,95 @@
       }
     },
     {
+      "name": "commerce-event-authorization",
+      "description": "Valid commerce extension with event field set to authorization",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": ["WIRE02-EXT-006"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-valid-event-auth",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD",
+              "event": "authorization"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "commerce-event-absent",
+      "description": "Valid commerce extension without event field (backward compatibility)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": ["WIRE02-EXT-006"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-valid-event-absent",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "2000",
+              "currency": "EUR"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "commerce-event-invalid",
+      "description": "Commerce extension with invalid event value must be rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": ["WIRE02-EXT-006"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-invalid-event",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "500",
+              "currency": "USD",
+              "event": "pending"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false
+      }
+    },
+    {
       "name": "access-extension-valid",
       "description": "Valid access extension with resource, action, decision",
       "type": "full-pipeline",
