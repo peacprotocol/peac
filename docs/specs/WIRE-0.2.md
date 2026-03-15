@@ -623,7 +623,7 @@ Output: boolean (true if valid extension key grammar)
 
 ### 12.3 Core Extension Groups
 
-Eight core extension groups have typed schemas in `@peac/schema`. All use `.strict()` mode (unknown keys within a group are rejected).
+Twelve core extension groups have typed schemas in `@peac/schema`. All use `.strict()` mode (unknown keys within a group are rejected). Registered first-party receipt types with a mapped extension group are enforced in `verifyLocal()`: strict mode requires the mapped group; interop mode downgrades absence or mismatch to warnings (see section 12.17).
 
 | Key                            | Group       | Section |
 | ------------------------------ | ----------- | ------- |
@@ -635,6 +635,10 @@ Eight core extension groups have typed schemas in `@peac/schema`. All use `.stri
 | `org.peacprotocol/consent`     | Consent     | 12.10   |
 | `org.peacprotocol/privacy`     | Privacy     | 12.11   |
 | `org.peacprotocol/safety`      | Safety      | 12.12   |
+| `org.peacprotocol/compliance`  | Compliance  | 12.13   |
+| `org.peacprotocol/provenance`  | Provenance  | 12.14   |
+| `org.peacprotocol/attribution` | Attribution | 12.15   |
+| `org.peacprotocol/purpose`     | Purpose     | 12.16   |
 
 ### 12.4 Commerce Extension
 

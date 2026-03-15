@@ -86,6 +86,13 @@ const { jws } = await issue({
   kind: 'evidence',
   type: 'org.peacprotocol/access-decision',
   pillars: ['access'],
+  extensions: {
+    'org.peacprotocol/access': {
+      resource: 'https://api.example.com/inference/v1',
+      action: 'execute',
+      decision: 'allow',
+    },
+  },
   privateKey,
   kid: 'key-2026-03',
 });

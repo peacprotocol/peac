@@ -56,7 +56,7 @@ const { jws } = await issue({
       payment_rail: 'x402',
       amount_minor: '100000',
       currency: 'USD',
-      settlement_ref: 'tx_abc123',
+      reference: 'tx_abc123',
     },
   },
   privateKey,
@@ -81,6 +81,13 @@ app.get('/data', async (req, res) => {
     kind: 'evidence',
     type: 'org.peacprotocol/access-decision',
     pillars: ['access'],
+    extensions: {
+      'org.peacprotocol/access': {
+        resource: '/data',
+        action: 'read',
+        decision: 'allow',
+      },
+    },
     privateKey,
     kid: 'key-2026-01',
   });
@@ -223,7 +230,7 @@ See [docs/specs/PEAC-ISSUER.md](specs/PEAC-ISSUER.md).
 - Two structural kinds: `evidence` and `challenge`
 - Open semantic `type` (reverse-DNS or absolute URI)
 - Multi-valued `pillars` from 10-value closed taxonomy
-- 5 typed extension groups: commerce, access, challenge, identity, correlation
+- 12 typed extension groups with type-to-extension enforcement
 - Policy binding: JCS (RFC 8785) + SHA-256 digest comparison
 - JOSE hardening: embedded keys rejected, `kid` required
 
