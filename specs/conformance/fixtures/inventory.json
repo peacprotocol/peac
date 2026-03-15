@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-03-15T10:53:22.739Z",
+  "generated_at": "2026-03-15T16:42:45.655Z",
   "version": "0.12.1",
   "schema_version": "0.12.1",
-  "total_fixtures": 685,
-  "total_with_requirements": 240,
+  "total_fixtures": 688,
+  "total_with_requirements": 243,
   "total_unmapped": 445,
-  "wire02_requirement_links": 550,
+  "wire02_requirement_links": 553,
   "carrier_requirement_links": 11,
   "entries": [
     {
@@ -3079,6 +3079,36 @@
       "primary_requirement_id": "WIRE02-EXT-057",
       "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
       "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "commerce-event-absent",
+      "description": "Valid commerce extension without event field (backward compatibility)",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": ["WIRE02-EXT-006"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "commerce-event-authorization",
+      "description": "Valid commerce extension with event field set to authorization",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": ["WIRE02-EXT-006"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "commerce-event-invalid",
+      "description": "Commerce extension with invalid event value must be rejected",
+      "primary_requirement_id": "WIRE02-EXT-006",
+      "requirement_ids": ["WIRE02-EXT-006"],
+      "status": "negative",
       "has_requirements": true
     },
     {

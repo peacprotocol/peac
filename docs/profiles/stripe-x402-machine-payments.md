@@ -59,6 +59,15 @@ Agent -> Stripe (x402) -> Provider API -> PEAC Receipt
 | `customer_id`       | `intent.customer`            | If provided |
 | `metadata`          | `intent.metadata`            | If provided |
 
+### Commerce Event (Optional)
+
+When issuing a Wire 0.2 receipt with the `org.peacprotocol/commerce` extension,
+the commerce extension supports an optional `event` field that records the
+commerce lifecycle phase: `authorization`, `capture`, `settlement`, `refund`,
+`void`, or `chargeback`. This field is observational metadata only; it does not
+encode settlement finality or enforce lifecycle ordering. Omitting `event` is
+valid and preserves backward compatibility.
+
 ## Key Distinction: Fiat vs Crypto
 
 |            | `fromPaymentIntent()` (fiat)       | `fromCryptoPaymentIntent()` (crypto)            |

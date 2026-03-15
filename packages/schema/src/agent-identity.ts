@@ -33,12 +33,14 @@ export const CONTROL_TYPES = ['operator', 'user-delegated'] as const;
 // =============================================================================
 
 /**
- * Proof method used to establish agent identity.
+ * @deprecated ProofMethodSchema is deprecated as of v0.12.2.
+ * Transport-level binding methods (HTTP signatures, DPoP, mTLS, JWK thumbprint)
+ * are semantically distinct from trust-root models (ProofTypeSchema).
+ * This alias remains functional through v0.12.x. No consumer action required now.
+ * In v0.13.0, AgentProofSchema.method will migrate to either an inline enum
+ * or a dedicated TransportBindingMethodSchema. Remove-not-before: v0.13.0.
  *
- * - 'http-message-signature': RFC 9421 HTTP Message Signatures
- * - 'dpop': RFC 9449 DPoP token binding
- * - 'mtls': Mutual TLS client certificate
- * - 'jwk-thumbprint': JWK Thumbprint confirmation (RFC 7638)
+ * @see ProofTypeSchema for the canonical trust-root model schema
  */
 export const ProofMethodSchema = z.enum([
   'http-message-signature',
@@ -49,7 +51,7 @@ export const ProofMethodSchema = z.enum([
 export type ProofMethod = z.infer<typeof ProofMethodSchema>;
 
 /**
- * Array of valid proof methods for runtime checks
+ * @deprecated See ProofMethodSchema deprecation note.
  */
 export const PROOF_METHODS = ['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint'] as const;
 
@@ -91,7 +93,10 @@ export type BindingDetails = z.infer<typeof BindingDetailsSchema>;
  */
 export const AgentProofSchema = z
   .object({
-    /** Proof method used */
+    /**
+     * Proof method used.
+     * @see ProofMethodSchema - deprecated in v0.12.2; will migrate in v0.13.0
+     */
     method: ProofMethodSchema,
 
     /** Key ID (matches kid in JWS header or JWKS) */

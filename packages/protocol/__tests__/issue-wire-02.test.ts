@@ -485,6 +485,108 @@ describe('issueWire02 → verifyLocal round-trip', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Commerce event field: issue → verifyLocal preservation
+// ---------------------------------------------------------------------------
+
+describe('commerce event field preservation (issue → verifyLocal)', () => {
+  it('event field survives round-trip in strict mode', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: testType,
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+          event: 'authorization',
+        },
+      },
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey, { strictness: 'strict' });
+
+    expect(result.valid).toBe(true);
+    if (result.valid && result.variant === 'wire-02') {
+      const commerce = result.claims.extensions?.['org.peacprotocol/commerce'] as
+        | Record<string, unknown>
+        | undefined;
+      expect(commerce).toBeDefined();
+      expect(commerce?.event).toBe('authorization');
+      expect(commerce?.payment_rail).toBe('stripe');
+      expect(commerce?.amount_minor).toBe('1000');
+      expect(commerce?.currency).toBe('USD');
+    }
+  });
+
+  it('all 6 event values survive round-trip', async () => {
+    const events = ['authorization', 'capture', 'settlement', 'refund', 'void', 'chargeback'];
+    const { privateKey, publicKey } = await generateKeypair();
+
+    for (const event of events) {
+      const { jws } = await issueWire02({
+        iss: testIss,
+        kind: 'evidence',
+        type: testType,
+        extensions: {
+          'org.peacprotocol/commerce': {
+            payment_rail: 'stripe',
+            amount_minor: '500',
+            currency: 'EUR',
+            event,
+          },
+        },
+        privateKey,
+        kid: testKid,
+      });
+
+      const result = await verifyLocal(jws, publicKey, { strictness: 'strict' });
+
+      expect(result.valid).toBe(true);
+      if (result.valid && result.variant === 'wire-02') {
+        const commerce = result.claims.extensions?.['org.peacprotocol/commerce'] as
+          | Record<string, unknown>
+          | undefined;
+        expect(commerce?.event).toBe(event);
+      }
+    }
+  });
+
+  it('commerce receipt without event still verifies (backward compatibility)', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: testType,
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '2000',
+          currency: 'GBP',
+        },
+      },
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey, { strictness: 'strict' });
+
+    expect(result.valid).toBe(true);
+    if (result.valid && result.variant === 'wire-02') {
+      const commerce = result.claims.extensions?.['org.peacprotocol/commerce'] as
+        | Record<string, unknown>
+        | undefined;
+      expect(commerce).toBeDefined();
+      expect(commerce?.event).toBeUndefined();
+      expect(commerce?.payment_rail).toBe('stripe');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // did: iss: verifyLocal accepts same publicKey: Uint8Array (no DID auto-resolution)
 // ---------------------------------------------------------------------------
 
