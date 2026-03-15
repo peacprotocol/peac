@@ -1476,6 +1476,59 @@
           "enforcement_class": "hard_fail",
           "introduced_in": "0.12.2",
           "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-067",
+          "keyword": "MUST",
+          "summary": "Type-to-extension enforcement: expected extension group MUST be present in strict mode",
+          "source_fragment": "the expected extension group MUST be present in the extensions record in strict verification mode.",
+          "source_fragment_hash": "sha256:003a2a08d3a25910733772e67d31234b1fcf65440bbb1077be8c5f79c8adac63",
+          "enforcement_class": "hard_fail",
+          "error_code": "E_EXTENSION_GROUP_REQUIRED",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-068",
+          "keyword": "SHOULD",
+          "summary": "Type-to-extension enforcement: absent extension emits warning in interop mode",
+          "source_fragment": "In interop mode, its absence is a warning.",
+          "source_fragment_hash": "sha256:003d4dde216ce42def198af46128132ef770cd831acf18b756055e87f3b66350",
+          "enforcement_class": "warning_only",
+          "warning_code": "extension_group_missing",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-069",
+          "keyword": "MUST",
+          "summary": "Type-to-extension enforcement: mismatch is a hard error in strict mode",
+          "source_fragment": "verifiers MUST report a mismatch in strict mode. In interop mode, this is a mismatch warning.",
+          "source_fragment_hash": "sha256:91a146f0aec1422d106dc147206be0840524da04db3626be66ea26210f1b00fb",
+          "enforcement_class": "hard_fail",
+          "error_code": "E_EXTENSION_GROUP_MISMATCH",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-070",
+          "keyword": "MUST",
+          "summary": "Type-to-extension enforcement: custom/unmapped types and challenge-kind receipts are exempt",
+          "source_fragment": "Custom or unmapped types are not subject to this check. Challenge-kind receipts are also exempt: they indicate requirements, not evidence.",
+          "source_fragment_hash": "sha256:49486fbafb19db50c5b0c3e48dd5ed9a3fff1bbee34fbef0d6a0b35b5dbdf265",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-071",
+          "keyword": "MUST",
+          "summary": "Purpose extension: compatible_purposes items MUST match machine-safe token grammar and be unique",
+          "source_fragment": "`compatible_purposes` string[] optional max 32 items: each item MUST match the machine-safe lowercase token grammar and items MUST be unique within the array.",
+          "source_fragment_hash": "sha256:e7bc1dc712ff834e1bc20f285e8a203baff09363440d716573c15447a71c019d",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
         }
       ]
     },

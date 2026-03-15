@@ -28,6 +28,12 @@ export const WARNING_OCCURRED_AT_SKEW = 'occurred_at_skew' as const;
 /** JWS typ header was absent; interop mode accepted the token without typ */
 export const WARNING_TYP_MISSING = 'typ_missing' as const;
 
+/** Registered type has a mapped extension group, but that group is absent from extensions */
+export const WARNING_EXTENSION_GROUP_MISSING = 'extension_group_missing' as const;
+
+/** Registered type has a mapped extension group, but a different registered group is present instead */
+export const WARNING_EXTENSION_GROUP_MISMATCH = 'extension_group_mismatch' as const;
+
 // ---------------------------------------------------------------------------
 // Warning sorting
 // ---------------------------------------------------------------------------

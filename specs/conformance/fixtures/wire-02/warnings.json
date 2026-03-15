@@ -95,7 +95,14 @@
           "type": "org.peacprotocol/payment",
           "iss": "https://api.example.com",
           "iat": 1709500000,
-          "jti": "wire02-warn-003"
+          "jti": "wire02-warn-003",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
         },
         "options": {
           "strictness": "interop"
@@ -131,7 +138,14 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-warn-004",
-          "occurred_at": "2024-03-03T21:10:00Z"
+          "occurred_at": "2024-03-03T21:10:00Z",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
         },
         "options": {
           "now": 1709500400

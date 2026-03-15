@@ -16,11 +16,15 @@ import {
   WARNING_TYP_MISSING,
   WARNING_TYPE_UNREGISTERED,
   WARNING_UNKNOWN_EXTENSION,
+  WARNING_EXTENSION_GROUP_MISSING,
+  WARNING_EXTENSION_GROUP_MISMATCH,
   REGISTERED_RECEIPT_TYPES,
   REGISTERED_EXTENSION_GROUP_KEYS,
   isValidExtensionKey,
   verifyPolicyBinding,
 } from '@peac/schema';
+import { TYPE_TO_EXTENSION_MAP } from '@peac/kernel';
+import { checkTypeExtensionMapping } from './type-extension-check';
 import type { PolicyBindingStatus } from './verifier-types';
 
 /**
@@ -81,6 +85,9 @@ export type VerifyLocalErrorCode =
   | 'E_JWS_ZIP_REJECTED'
   // Policy binding (Wire 0.2, v0.12.0-preview.1, DD-151)
   | 'E_POLICY_BINDING_FAILED'
+  // Type-to-extension enforcement (Wire 0.2, v0.12.2)
+  | 'E_EXTENSION_GROUP_REQUIRED'
+  | 'E_EXTENSION_GROUP_MISMATCH'
   | 'E_INTERNAL';
 
 /**
@@ -220,6 +227,12 @@ export interface VerifyLocalFailure {
     local_policy_digest?: string;
     /** policy.uri hint from the receipt (present when code is E_POLICY_BINDING_FAILED and uri set). */
     policy_uri?: string;
+    /** Receipt type value (present when code is E_EXTENSION_GROUP_REQUIRED or E_EXTENSION_GROUP_MISMATCH). */
+    type?: string;
+    /** Expected extension group key for the receipt type. */
+    expected_extension_group?: string;
+    /** Registered extension groups actually present in extensions. */
+    present_registered_extension_groups?: string[];
   };
 }
 
@@ -438,6 +451,46 @@ export async function verifyLocal(
             });
           }
         }
+      }
+
+      // Type-to-extension enforcement: check that the expected extension group is present
+      const typeExtCheck = checkTypeExtensionMapping(
+        claims.kind,
+        claims.type,
+        claims.extensions,
+        TYPE_TO_EXTENSION_MAP,
+        REGISTERED_EXTENSION_GROUP_KEYS
+      );
+
+      if (typeExtCheck.status === 'missing' || typeExtCheck.status === 'mismatch') {
+        const warningCode =
+          typeExtCheck.status === 'missing'
+            ? WARNING_EXTENSION_GROUP_MISSING
+            : WARNING_EXTENSION_GROUP_MISMATCH;
+        const errorCode =
+          typeExtCheck.status === 'missing'
+            ? 'E_EXTENSION_GROUP_REQUIRED'
+            : 'E_EXTENSION_GROUP_MISMATCH';
+
+        if (strictness === 'strict') {
+          return {
+            valid: false,
+            code: errorCode,
+            message: `Type "${claims.type}" expects extension group "${typeExtCheck.expected_extension_group}" but it is ${typeExtCheck.status === 'mismatch' ? 'replaced by a different registered group' : 'absent'}`,
+            details: {
+              type: claims.type,
+              expected_extension_group: typeExtCheck.expected_extension_group,
+              present_registered_extension_groups: typeExtCheck.present_registered_extension_groups,
+            },
+          };
+        }
+
+        // Interop mode: emit warning, continue verification
+        accumulatedWarnings.push({
+          code: warningCode,
+          message: `Type "${claims.type}" expects extension group "${typeExtCheck.expected_extension_group}"`,
+          pointer: '/type',
+        });
       }
 
       // Validate policyDigest option format (DD-151): must be sha256:<64 lowercase hex> if provided.

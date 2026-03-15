@@ -28,6 +28,13 @@ import { verifyLocalWire01 } from '../src/verify-local-wire01';
 const testKid = '2026-01-15T10:30:00Z';
 const testIss = 'https://api.example.com';
 const testType = 'org.peacprotocol/payment';
+const testExtensions = {
+  'org.peacprotocol/commerce': {
+    payment_rail: 'stripe',
+    amount_minor: '1000',
+    currency: 'USD',
+  },
+};
 
 // ---------------------------------------------------------------------------
 // verifyPolicyBinding() (Layer 1 pure comparison)
@@ -180,6 +187,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -198,6 +206,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
       // no policy block
@@ -224,6 +233,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
       policy: { digest: policyDigest },
@@ -247,6 +257,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
       policy: { digest: policyDigest },
@@ -270,6 +281,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
       policy: { digest: policyDigestAtIssue },
@@ -293,6 +305,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -313,6 +326,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -336,6 +350,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
       policy: { digest: policyDigestInReceipt },
@@ -365,6 +380,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       pillars: ['access', 'commerce'],
       privateKey,
       kid: testKid,
@@ -414,6 +430,7 @@ describe('verifyLocal(): Wire 0.2 policy binding', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
       policy: {

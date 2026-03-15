@@ -12,11 +12,45 @@ import {
   WARNING_UNKNOWN_EXTENSION,
   REGISTERED_RECEIPT_TYPES,
 } from '@peac/schema';
+import { TYPE_TO_EXTENSION_MAP } from '@peac/kernel';
 import { issueWire02, verifyLocal } from '../src/index';
 
 // Shared test constants
 const testKid = '2026-03-03T00:00:00Z';
 const testIss = 'https://api.example.com';
+const commerceExtensions = {
+  'org.peacprotocol/commerce': {
+    payment_rail: 'stripe',
+    amount_minor: '1000',
+    currency: 'USD',
+  },
+};
+
+/** Minimal valid extension for each registered group key */
+const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
+  'org.peacprotocol/commerce': { payment_rail: 'stripe', amount_minor: '1000', currency: 'USD' },
+  'org.peacprotocol/access': {
+    resource: 'https://example.com/api',
+    action: 'read',
+    decision: 'allow',
+  },
+  'org.peacprotocol/challenge': { challenge_type: 'payment_required' },
+  'org.peacprotocol/identity': { proof_ref: 'proof-001' },
+  'org.peacprotocol/correlation': { trace_id: 'a'.repeat(32) },
+  'org.peacprotocol/consent': { consent_basis: 'explicit', consent_status: 'granted' },
+  'org.peacprotocol/privacy': { data_classification: 'confidential' },
+  'org.peacprotocol/safety': { review_status: 'reviewed' },
+  'org.peacprotocol/compliance': { framework: 'soc2-type2', compliance_status: 'compliant' },
+  'org.peacprotocol/provenance': { source_type: 'original' },
+  'org.peacprotocol/attribution': { creator_ref: 'acme-corp' },
+  'org.peacprotocol/purpose': { external_purposes: ['ai_training'] },
+};
+
+function extensionsForType(type: string): Record<string, Record<string, unknown>> | undefined {
+  const group = TYPE_TO_EXTENSION_MAP.get(type);
+  if (!group || !MINIMAL_EXT[group]) return undefined;
+  return { [group]: MINIMAL_EXT[group] };
+}
 
 // ---------------------------------------------------------------------------
 // type_unregistered warning
@@ -50,6 +84,7 @@ describe('verifyLocal(): type_unregistered warning', () => {
       iss: testIss,
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: commerceExtensions,
       privateKey,
       kid: testKid,
     });
@@ -70,6 +105,7 @@ describe('verifyLocal(): type_unregistered warning', () => {
         iss: testIss,
         kind: 'evidence',
         type,
+        ...(extensionsForType(type) ? { extensions: extensionsForType(type) } : {}),
         privateKey,
         kid: testKid,
       });
@@ -119,6 +155,7 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
       extensions: {
+        ...commerceExtensions,
         'com.example/custom-data': { foo: 'bar' },
       },
       privateKey,
@@ -143,6 +180,7 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
       extensions: {
+        ...commerceExtensions,
         'io.vendor/my-ext': { value: 1 },
       },
       privateKey,
@@ -332,12 +370,13 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
     }
   });
 
-  it('does not emit warning when extensions is absent', async () => {
+  it('does not emit unknown_extension warning when extensions contains only expected group', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const { jws } = await issueWire02({
       iss: testIss,
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: commerceExtensions,
       privateKey,
       kid: testKid,
     });
@@ -350,7 +389,7 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
     }
   });
 
-  it('does not emit warning when extensions is empty', async () => {
+  it('does not emit unknown_extension warning when extensions is empty (interop)', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const { jws } = await issueWire02({
       iss: testIss,
@@ -361,7 +400,7 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
       kid: testKid,
     });
 
-    const result = await verifyLocal(jws, publicKey);
+    const result = await verifyLocal(jws, publicKey, { strictness: 'interop' });
 
     expect(result.valid).toBe(true);
     if (result.valid && result.variant === 'wire-02') {
@@ -376,6 +415,7 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
       extensions: {
+        ...commerceExtensions,
         'com.alpha/ext-a': { a: 1 },
         'com.beta/ext-b': { b: 2 },
       },
@@ -402,6 +442,7 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
       extensions: {
+        ...commerceExtensions,
         'com.example/custom_data': { value: 'test' },
       },
       privateKey,

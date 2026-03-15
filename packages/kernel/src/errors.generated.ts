@@ -169,6 +169,8 @@ export const ERROR_CODES = {
 
   // Verification error codes
   E_EAT_SIGNATURE_FAILED: 'E_EAT_SIGNATURE_FAILED',
+  E_EXTENSION_GROUP_MISMATCH: 'E_EXTENSION_GROUP_MISMATCH',
+  E_EXTENSION_GROUP_REQUIRED: 'E_EXTENSION_GROUP_REQUIRED',
   E_INVALID_SIGNATURE: 'E_INVALID_SIGNATURE',
   E_KEY_NOT_FOUND: 'E_KEY_NOT_FOUND',
   E_KID_REUSE_DETECTED: 'E_KID_REUSE_DETECTED',
@@ -1491,6 +1493,26 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     description: 'COSE_Sign1 Ed25519 signature verification failed over the Sig_structure',
     retryable: false,
     next_action: 'retry_with_different_key',
+    category: 'verification',
+  },
+  E_EXTENSION_GROUP_MISMATCH: {
+    code: 'E_EXTENSION_GROUP_MISMATCH',
+    http_status: 400,
+    title: 'Extension Group Mismatch',
+    description:
+      'Registered receipt type has a mapped extension group, but a different registered first-party extension group is present while the expected one is absent',
+    retryable: false,
+    next_action: 'retry_with_different_input',
+    category: 'verification',
+  },
+  E_EXTENSION_GROUP_REQUIRED: {
+    code: 'E_EXTENSION_GROUP_REQUIRED',
+    http_status: 400,
+    title: 'Extension Group Required',
+    description:
+      'Registered receipt type has a mapped extension group, but that group is absent from the extensions record',
+    retryable: false,
+    next_action: 'retry_with_different_input',
     category: 'verification',
   },
   E_INVALID_SIGNATURE: {

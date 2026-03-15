@@ -55,6 +55,13 @@ describe('issue() and issueWire02() parity', () => {
       kind: 'evidence' as const,
       type: 'org.peacprotocol/access-decision',
       pillars: ['access' as const],
+      extensions: {
+        'org.peacprotocol/access': {
+          resource: 'https://example.com/api',
+          action: 'read',
+          decision: 'allow',
+        },
+      },
       jti: 'fixed-jti-for-parity-test',
       privateKey,
       kid: 'parity-key',

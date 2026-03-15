@@ -123,6 +123,13 @@ const { jws } = await issueWire02({
   iss: 'https://api.example.com',
   kind: 'evidence',
   type: 'org.peacprotocol/payment',
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '1000',
+      currency: 'USD',
+    },
+  },
   privateKey,
   kid: EXPECTED_KID,
 });
