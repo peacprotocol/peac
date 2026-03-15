@@ -697,7 +697,7 @@ This ensures forward compatibility: new extension groups can be defined without 
 
 ### 12.9 Typed Accessor Helpers
 
-Eight typed accessor functions are provided by `@peac/schema`:
+Ten typed accessor functions are provided by `@peac/schema`:
 
 - `getCommerceExtension(extensions)`
 - `getAccessExtension(extensions)`
@@ -707,6 +707,8 @@ Eight typed accessor functions are provided by `@peac/schema`:
 - `getConsentExtension(extensions)`
 - `getPrivacyExtension(extensions)`
 - `getSafetyExtension(extensions)`
+- `getComplianceExtension(extensions)`
+- `getProvenanceExtension(extensions)`
 
 Each returns `undefined` if the key is absent from the extensions record. If the key is present but the value fails schema validation, the accessor throws a `PEACError` with a leaf-precise RFC 6901 JSON Pointer identifying the invalid field (e.g., `/extensions/org.peacprotocol~1commerce/amount_minor`). Accessors use `Object.prototype.hasOwnProperty.call()` to prevent prototype pollution.
 
@@ -787,6 +789,73 @@ Records safety assessment evidence. Jurisdiction-neutral design; usage profiles 
 `incident_ref` string optional: reference to an incident report. Accepts opaque identifiers or SHA-256 digests.
 
 `model_ref` string optional: identifies the AI model under review.
+
+### 12.13 Compliance Extension [WIRE02-EXT-043] [WIRE02-EXT-044] [WIRE02-EXT-045] [WIRE02-EXT-046] [WIRE02-EXT-047] [WIRE02-EXT-048]
+
+Records regulatory compliance check evidence as an observation. Framework-neutral. Does not assert or certify compliance; records that a check occurred.
+
+| Field               | Type              | Required | Max Length | Description                                                              |
+| ------------------- | ----------------- | -------- | ---------- | ------------------------------------------------------------------------ |
+| `framework`         | string            | REQUIRED | 256        | Framework identifier (e.g., eu-ai-act, soc2-type2, iso-27001)            |
+| `compliance_status` | enum              | REQUIRED | N/A        | Observed status: compliant, non_compliant, partial, under_review, exempt |
+| `audit_ref`         | string            | OPTIONAL | 256        | Opaque reference to audit report (e.g., report ID, ticket number)        |
+| `auditor`           | string            | OPTIONAL | 256        | Auditor identifier (organization name or DID)                            |
+| `audit_date`        | ISO 8601 date     | OPTIONAL | 10         | Date the check was performed (YYYY-MM-DD)                                |
+| `scope`             | string            | OPTIONAL | 512        | Scope of the compliance check                                            |
+| `validity_period`   | ISO 8601 duration | OPTIONAL | 64         | How long this finding remains valid                                      |
+| `evidence_ref`      | SHA-256 digest    | OPTIONAL | 71         | SHA-256 digest of supporting evidence document                           |
+
+`framework` string REQUIRED: identifies the regulatory or standards framework evaluated. Open vocabulary; preferred grammar is lowercase slugs with hyphens.
+
+`compliance_status` enum REQUIRED: compliant, non_compliant, partial, under_review, exempt. Closed vocabulary mapping to ISO 19011 audit conclusion categories.
+
+`audit_date` ISO 8601 date optional: structural date validation (YYYY-MM-DD).
+
+`validity_period` ISO 8601 duration optional: uses the parser-grade ISO 8601 duration validator.
+
+`evidence_ref` SHA-256 digest optional: uses `Sha256DigestSchema` for typed digest validation.
+
+`.strict()` rejects unknown properties: the compliance extension uses `.strict()` mode; unrecognized fields are rejected.
+
+### 12.14 Provenance Extension [WIRE02-EXT-049] [WIRE02-EXT-050] [WIRE02-EXT-051] [WIRE02-EXT-052] [WIRE02-EXT-053] [WIRE02-EXT-054]
+
+Records origin tracking and chain of custody as observations.
+
+| Field                  | Type                  | Required | Max Length | Description                                              |
+| ---------------------- | --------------------- | -------- | ---------- | -------------------------------------------------------- |
+| `source_type`          | string                | REQUIRED | 128        | Derivation type (e.g., original, derived, synthetic)     |
+| `source_ref`           | string                | OPTIONAL | 256        | Opaque source reference (e.g., commit hash, artifact ID) |
+| `source_uri`           | HTTPS URI hint        | OPTIONAL | 2048       | HTTPS URI hint for source artifact; locator hint only    |
+| `build_provenance_uri` | HTTPS URI hint        | OPTIONAL | 2048       | HTTPS URI hint for build provenance; locator hint only   |
+| `verification_method`  | string                | OPTIONAL | 128        | How provenance was verified (e.g., signature_check)      |
+| `custody_chain`        | array of CustodyEntry | OPTIONAL | 16 items   | Ordered custody chain entries                            |
+| `slsa`                 | SlsaLevel object      | OPTIONAL | N/A        | Structured SLSA-aligned provenance metadata              |
+
+**CustodyEntry** (nested, `.strict()`):
+
+| Field       | Type              | Required | Max Length | Description                                 |
+| ----------- | ----------------- | -------- | ---------- | ------------------------------------------- |
+| `custodian` | string            | REQUIRED | 256        | Custodian identifier                        |
+| `action`    | string            | REQUIRED | 128        | Action performed (e.g., received, verified) |
+| `timestamp` | RFC 3339 datetime | REQUIRED | N/A        | When the custody event occurred             |
+
+**SlsaLevel** (nested, `.strict()`):
+
+| Field     | Type    | Required | Max Length | Description                                 |
+| --------- | ------- | -------- | ---------- | ------------------------------------------- |
+| `track`   | string  | REQUIRED | 64         | SLSA track identifier (e.g., build, source) |
+| `level`   | integer | REQUIRED | 0-4        | SLSA level within the track                 |
+| `version` | string  | REQUIRED | 16         | SLSA spec version referenced (e.g., 1.2)    |
+
+`source_type` string REQUIRED: identifies the derivation type. Open vocabulary.
+
+`source_ref` string optional: opaque source reference identifier.
+
+`custody_chain` CustodyEntry[] optional max 16 items: ordered chain of custody events. Each entry is `.strict()` with custodian, action, and RFC 3339 timestamp.
+
+`slsa` SlsaLevel optional: structured SLSA-aligned metadata. Uses a track-based model; records metadata, does not certify compliance.
+
+`.strict()` rejects unknown properties: the provenance extension and all nested schemas use `.strict()` mode.
 
 ---
 

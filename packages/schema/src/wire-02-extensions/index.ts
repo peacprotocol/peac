@@ -63,6 +63,22 @@ export {
 } from './safety.js';
 export type { ReviewStatus, RiskLevel, SafetyExtension } from './safety.js';
 
+export {
+  COMPLIANCE_EXTENSION_KEY,
+  COMPLIANCE_STATUSES,
+  ComplianceStatusSchema,
+  ComplianceExtensionSchema,
+} from './compliance.js';
+export type { ComplianceStatus, ComplianceExtension } from './compliance.js';
+
+export {
+  PROVENANCE_EXTENSION_KEY,
+  CustodyEntrySchema,
+  SlsaLevelSchema,
+  ProvenanceExtensionSchema,
+} from './provenance.js';
+export type { CustodyEntry, SlsaLevel, ProvenanceExtension } from './provenance.js';
+
 // Typed accessors
 export {
   getCommerceExtension,
@@ -73,6 +89,8 @@ export {
   getConsentExtension,
   getPrivacyExtension,
   getSafetyExtension,
+  getComplianceExtension,
+  getProvenanceExtension,
 } from './accessors.js';
 
 // Envelope validation helper (used by Wire02ClaimsSchema.superRefine)

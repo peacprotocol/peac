@@ -258,7 +258,7 @@
         "id": "org.peacprotocol/compliance-check",
         "pillar": "compliance",
         "description": "Regulatory compliance check evidence",
-        "extension_group": null,
+        "extension_group": "org.peacprotocol/compliance",
         "status": "informational"
       },
       {
@@ -279,7 +279,7 @@
         "id": "org.peacprotocol/provenance-record",
         "pillar": "provenance",
         "description": "Data or content provenance tracking evidence",
-        "extension_group": null,
+        "extension_group": "org.peacprotocol/provenance",
         "status": "informational"
       },
       {
@@ -339,6 +339,16 @@
       {
         "id": "org.peacprotocol/safety",
         "description": "Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/compliance",
+        "description": "Compliance extension: framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/provenance",
+        "description": "Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa",
         "status": "informational"
       }
     ]

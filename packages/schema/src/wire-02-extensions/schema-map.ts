@@ -18,6 +18,8 @@ import { CORRELATION_EXTENSION_KEY, CorrelationExtensionSchema } from './correla
 import { CONSENT_EXTENSION_KEY, ConsentExtensionSchema } from './consent.js';
 import { PRIVACY_EXTENSION_KEY, PrivacyExtensionSchema } from './privacy.js';
 import { SAFETY_EXTENSION_KEY, SafetyExtensionSchema } from './safety.js';
+import { COMPLIANCE_EXTENSION_KEY, ComplianceExtensionSchema } from './compliance.js';
+import { PROVENANCE_EXTENSION_KEY, ProvenanceExtensionSchema } from './provenance.js';
 
 /** Map from known extension key to its Zod schema */
 export const EXTENSION_SCHEMA_MAP = new Map<string, z.ZodTypeAny>();
@@ -29,3 +31,5 @@ EXTENSION_SCHEMA_MAP.set(CORRELATION_EXTENSION_KEY, CorrelationExtensionSchema);
 EXTENSION_SCHEMA_MAP.set(CONSENT_EXTENSION_KEY, ConsentExtensionSchema);
 EXTENSION_SCHEMA_MAP.set(PRIVACY_EXTENSION_KEY, PrivacyExtensionSchema);
 EXTENSION_SCHEMA_MAP.set(SAFETY_EXTENSION_KEY, SafetyExtensionSchema);
+EXTENSION_SCHEMA_MAP.set(COMPLIANCE_EXTENSION_KEY, ComplianceExtensionSchema);
+EXTENSION_SCHEMA_MAP.set(PROVENANCE_EXTENSION_KEY, ProvenanceExtensionSchema);

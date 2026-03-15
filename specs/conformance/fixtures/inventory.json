@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-03-14T21:29:35.877Z",
+  "generated_at": "2026-03-15T06:59:00.663Z",
   "version": "0.12.1",
   "schema_version": "0.12.1",
-  "total_fixtures": 638,
-  "total_with_requirements": 193,
+  "total_fixtures": 657,
+  "total_with_requirements": 212,
   "total_unmapped": 445,
-  "wire02_requirement_links": 476,
+  "wire02_requirement_links": 510,
   "carrier_requirement_links": 11,
   "entries": [
     {
@@ -3034,6 +3034,72 @@
     {
       "directory": "wire-02/extensions",
       "file": "conformance.json",
+      "fixture_name": "compliance-exempt-valid",
+      "description": "Valid compliance extension with exempt status",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "compliance-extension-all-fields-valid",
+      "description": "Valid compliance extension with all optional fields present",
+      "primary_requirement_id": "WIRE02-EXT-043",
+      "requirement_ids": [
+        "WIRE02-EXT-043",
+        "WIRE02-EXT-044",
+        "WIRE02-EXT-045",
+        "WIRE02-EXT-046",
+        "WIRE02-EXT-047"
+      ],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "compliance-extension-valid",
+      "description": "Valid compliance extension with required fields",
+      "primary_requirement_id": "WIRE02-EXT-043",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "compliance-non-compliant-valid",
+      "description": "Valid compliance extension with non_compliant status",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "compliance-partial-valid",
+      "description": "Valid compliance extension with partial status",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "compliance-under-review-valid",
+      "description": "Valid compliance extension with under_review status",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
       "fixture_name": "consent-denied-valid",
       "description": "Valid consent denial record",
       "primary_requirement_id": "WIRE02-EXT-020",
@@ -3131,6 +3197,46 @@
     {
       "directory": "wire-02/extensions",
       "file": "conformance.json",
+      "fixture_name": "provenance-extension-all-fields-valid",
+      "description": "Valid provenance extension with custody chain and SLSA metadata",
+      "primary_requirement_id": "WIRE02-EXT-049",
+      "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-050", "WIRE02-EXT-051", "WIRE02-EXT-052"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "provenance-extension-valid",
+      "description": "Valid provenance extension with required fields",
+      "primary_requirement_id": "WIRE02-EXT-049",
+      "requirement_ids": ["WIRE02-EXT-049"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "provenance-slsa-level-four-valid",
+      "description": "Valid provenance with SLSA level 4 (maximum boundary)",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-052"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "provenance-slsa-level-zero-valid",
+      "description": "Valid provenance with SLSA level 0 (minimum boundary)",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-052"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
       "fixture_name": "reject-commerce-decimal-amount",
       "description": "Decimal amount_minor is rejected (must be integer string)",
       "primary_requirement_id": "WIRE02-EXT-009",
@@ -3145,6 +3251,36 @@
       "description": "Missing required currency field is rejected",
       "primary_requirement_id": "WIRE02-EXT-008",
       "requirement_ids": ["WIRE02-EXT-008"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-compliance-extra-field",
+      "description": "Unknown field in compliance extension rejected by .strict()",
+      "primary_requirement_id": "WIRE02-EXT-048",
+      "requirement_ids": ["WIRE02-EXT-048"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-compliance-invalid-status",
+      "description": "Invalid compliance_status value is rejected (closed enum)",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-044"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-compliance-missing-framework",
+      "description": "Missing required framework field is rejected",
+      "primary_requirement_id": "WIRE02-EXT-043",
+      "requirement_ids": ["WIRE02-EXT-043"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3245,6 +3381,66 @@
       "description": "Missing required data_classification field is rejected",
       "primary_requirement_id": "WIRE02-EXT-031",
       "requirement_ids": ["WIRE02-EXT-031"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-provenance-custody-entry-extra-field",
+      "description": "Extra field in custody_chain entry rejected by nested .strict()",
+      "primary_requirement_id": "WIRE02-EXT-053",
+      "requirement_ids": ["WIRE02-EXT-051", "WIRE02-EXT-053"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-provenance-extra-field",
+      "description": "Unknown field in provenance extension rejected by .strict()",
+      "primary_requirement_id": "WIRE02-EXT-053",
+      "requirement_ids": ["WIRE02-EXT-053"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-provenance-invalid-slsa-level",
+      "description": "SLSA level outside 0-4 range is rejected",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-052"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-provenance-missing-source-type",
+      "description": "Missing required source_type field is rejected",
+      "primary_requirement_id": "WIRE02-EXT-049",
+      "requirement_ids": ["WIRE02-EXT-049"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-provenance-slsa-level-negative",
+      "description": "SLSA level -1 is rejected (below minimum boundary)",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-052"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-provenance-slsa-non-integer",
+      "description": "Non-integer SLSA level is rejected",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-052"],
       "status": "negative",
       "has_requirements": true
     },

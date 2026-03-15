@@ -235,6 +235,55 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
     }
   });
 
+  it('does not emit warning for registered compliance extension key', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: 'org.peacprotocol/compliance-check',
+      pillars: ['compliance'],
+      extensions: {
+        'org.peacprotocol/compliance': {
+          framework: 'soc2-type2',
+          compliance_status: 'compliant',
+        },
+      },
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(true);
+    if (result.valid && result.variant === 'wire-02') {
+      expect(result.warnings.some((w) => w.code === WARNING_UNKNOWN_EXTENSION)).toBe(false);
+    }
+  });
+
+  it('does not emit warning for registered provenance extension key', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: 'org.peacprotocol/provenance-record',
+      pillars: ['provenance'],
+      extensions: {
+        'org.peacprotocol/provenance': {
+          source_type: 'original',
+        },
+      },
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(true);
+    if (result.valid && result.variant === 'wire-02') {
+      expect(result.warnings.some((w) => w.code === WARNING_UNKNOWN_EXTENSION)).toBe(false);
+    }
+  });
+
   it('does not emit warning when extensions is absent', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const { jws } = await issueWire02({
