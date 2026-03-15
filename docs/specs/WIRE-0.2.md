@@ -884,7 +884,7 @@ Records credit, obligations, and content signal observations. Not an identity at
 
 `.strict()` rejects unknown properties: the attribution extension uses `.strict()` mode; unrecognized fields are rejected.
 
-### 12.16 Purpose Extension [WIRE02-EXT-061] [WIRE02-EXT-062] [WIRE02-EXT-063] [WIRE02-EXT-064] [WIRE02-EXT-065] [WIRE02-EXT-066]
+### 12.16 Purpose Extension [WIRE02-EXT-061] [WIRE02-EXT-062] [WIRE02-EXT-063] [WIRE02-EXT-064] [WIRE02-EXT-065] [WIRE02-EXT-066] [WIRE02-EXT-071]
 
 Records external/legal/business purpose declarations as observations. Explicitly separated from PEAC operational purpose tokens.
 
@@ -899,11 +899,27 @@ Records external/legal/business purpose declarations as observations. Explicitly
 
 `external_purposes` string[] REQUIRED min 1 max 32 items: external/legal/business purpose labels. Each item MUST match the machine-safe token grammar and items MUST be unique. Not PEAC operational tokens.
 
+`compatible_purposes` string[] optional max 32 items: each item MUST match the machine-safe lowercase token grammar and items MUST be unique within the array.
+
 `purpose_basis` string optional: legal or policy basis for the declared purposes. Open vocabulary.
 
 `peac_purpose_mapping` string optional: explicit bridge to a PEAC operational CanonicalPurpose token. Validated against PURPOSE_TOKEN_REGEX.
 
 `.strict()` rejects unknown properties: the purpose extension uses `.strict()` mode; unrecognized fields are rejected.
+
+### 12.17 Type-to-Extension Enforcement [WIRE02-EXT-067] [WIRE02-EXT-068] [WIRE02-EXT-069] [WIRE02-EXT-070]
+
+Registered first-party receipt types have a mapped extension group in the type-to-extension registry. Verification enforces this mapping.
+
+When a receipt has a registered type with a mapped extension group, the expected extension group MUST be present in the extensions record in strict verification mode. In interop mode, its absence is a warning.
+
+If the expected extension group is absent and a different registered first-party extension group is present, verifiers MUST report a mismatch in strict mode. In interop mode, this is a mismatch warning.
+
+Custom or unmapped types are not subject to this check. Challenge-kind receipts are also exempt: they indicate requirements, not evidence.
+
+Unknown third-party extension keys do not count as mismatch; they are handled by the existing unknown_extension_preserved warning path.
+
+If the expected extension group is present, additional registered extension groups may also be present without triggering enforcement.
 
 ---
 

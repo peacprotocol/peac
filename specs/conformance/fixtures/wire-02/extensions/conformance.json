@@ -1,5 +1,5 @@
 {
-  "$comment": "Wire 0.2 Extension Groups conformance vectors (Sections 12.4-12.12)",
+  "$comment": "Wire 0.2 Extension Groups conformance vectors (Sections 12.4-12.17)",
   "version": "0.12.2",
   "schema_version": "0.12.2",
   "fixtures": [
@@ -2023,6 +2023,224 @@
           "extensions": {
             "org.peacprotocol/purpose": {
               "external_purposes": ["ai_training", "ai_training"]
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "type-extension-match-passes-strict",
+      "description": "Registered type with correct mapped extension group passes in strict mode",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-067",
+      "requirement_ids": ["WIRE02-EXT-067"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-enforce-001",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "type-extension-missing-strict-error",
+      "description": "Registered type with absent mapped extension group fails in strict mode",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-067",
+      "requirement_ids": ["WIRE02-EXT-067"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-enforce-002",
+          "pillars": ["commerce"]
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_EXTENSION_GROUP_REQUIRED" }
+    },
+    {
+      "name": "type-extension-mismatch-strict-error",
+      "description": "Registered type with wrong registered extension group fails in strict mode",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-069",
+      "requirement_ids": ["WIRE02-EXT-069"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-enforce-003",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "granted"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_EXTENSION_GROUP_MISMATCH" }
+    },
+    {
+      "name": "type-extension-missing-interop-warning",
+      "description": "Registered type with absent mapped extension group emits warning in interop mode",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-068",
+      "requirement_ids": ["WIRE02-EXT-068"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-enforce-004",
+          "pillars": ["consent"]
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "type-extension-custom-type-no-check",
+      "description": "Custom/unmapped type is not subject to type-to-extension enforcement",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-070",
+      "requirement_ids": ["WIRE02-EXT-070"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "com.example/custom-flow",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-enforce-005"
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "type-extension-match-plus-extra-registered",
+      "description": "Expected extension present alongside additional registered extensions passes",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-067",
+      "requirement_ids": ["WIRE02-EXT-067"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-enforce-006",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            },
+            "org.peacprotocol/correlation": {
+              "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-purpose-slash-token",
+      "description": "Slash-containing token in external_purposes rejected by machine-safe grammar",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-065",
+      "requirement_ids": ["WIRE02-EXT-065"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-020",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai/training"]
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-purpose-trailing-separator-token",
+      "description": "Trailing-separator token in external_purposes rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-065",
+      "requirement_ids": ["WIRE02-EXT-065"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-021",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai_training-"]
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-purpose-compatible-duplicate-tokens",
+      "description": "Duplicate tokens in compatible_purposes rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-071",
+      "requirement_ids": ["WIRE02-EXT-071"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-022",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai_training"],
+              "compatible_purposes": ["analytics", "analytics"]
             }
           }
         }

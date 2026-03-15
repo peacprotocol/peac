@@ -1541,6 +1541,24 @@
       "category": "validation",
       "retryable": false,
       "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_EXTENSION_GROUP_REQUIRED",
+      "http_status": 400,
+      "title": "Extension Group Required",
+      "description": "Registered receipt type has a mapped extension group, but that group is absent from the extensions record",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_EXTENSION_GROUP_MISMATCH",
+      "http_status": 400,
+      "title": "Extension Group Mismatch",
+      "description": "Registered receipt type has a mapped extension group, but a different registered first-party extension group is present while the expected one is absent",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
     }
   ]
 }

@@ -283,7 +283,14 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-valid-008",
-          "pillars": ["commerce", "identity"]
+          "pillars": ["commerce", "identity"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
         }
       },
       "expected": {
@@ -323,7 +330,14 @@
             "provenance",
             "purpose",
             "safety"
-          ]
+          ],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
         }
       },
       "expected": {
@@ -357,6 +371,13 @@
             "digest": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
             "uri": "https://publisher.example.com/.well-known/peac.txt",
             "version": "1.0"
+          },
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
           }
         }
       },
@@ -392,6 +413,13 @@
             "id": "agent:crawler-prod-001",
             "proof_type": "ed25519-cert-chain",
             "origin": "https://crawler.example.com"
+          },
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
           }
         }
       },
@@ -427,6 +455,13 @@
             "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             "content_type": "application/json",
             "content_length": 1024
+          },
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
           }
         }
       },
@@ -599,7 +634,14 @@
           "type": "org.peacprotocol/payment",
           "iss": "https://api.example.com",
           "iat": 1709500000,
-          "jti": "wire02-valid-017"
+          "jti": "wire02-valid-017",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
         }
       },
       "expected": {
@@ -626,7 +668,14 @@
           "type": "org.peacprotocol/payment",
           "iss": "https://api.example.com:8443",
           "iat": 1709500000,
-          "jti": "wire02-valid-018"
+          "jti": "wire02-valid-018",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
         }
       },
       "expected": {
@@ -653,7 +702,14 @@
           "type": "org.peacprotocol/payment",
           "iss": "did:web:example.com",
           "iat": 1709500000,
-          "jti": "wire02-valid-019"
+          "jti": "wire02-valid-019",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
         }
       },
       "expected": {
@@ -680,7 +736,14 @@
           "type": "org.peacprotocol/payment",
           "iss": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
           "iat": 1709500000,
-          "jti": "wire02-valid-020"
+          "jti": "wire02-valid-020",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
         }
       },
       "expected": {
@@ -708,7 +771,13 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-valid-021",
-          "pillars": ["consent"]
+          "pillars": ["consent"],
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "granted"
+            }
+          }
         }
       },
       "expected": {
@@ -737,7 +806,13 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-valid-022",
-          "pillars": ["compliance"]
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "soc2-type2",
+              "compliance_status": "compliant"
+            }
+          }
         }
       },
       "expected": {
@@ -766,7 +841,12 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-valid-023",
-          "pillars": ["privacy"]
+          "pillars": ["privacy"],
+          "extensions": {
+            "org.peacprotocol/privacy": {
+              "data_classification": "confidential"
+            }
+          }
         }
       },
       "expected": {
@@ -795,7 +875,12 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-valid-024",
-          "pillars": ["safety"]
+          "pillars": ["safety"],
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "review_status": "reviewed"
+            }
+          }
         }
       },
       "expected": {
@@ -824,7 +909,12 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-valid-025",
-          "pillars": ["provenance"]
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original"
+            }
+          }
         }
       },
       "expected": {
@@ -853,7 +943,12 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-valid-026",
-          "pillars": ["attribution"]
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "acme-corp"
+            }
+          }
         }
       },
       "expected": {
@@ -882,7 +977,12 @@
           "iss": "https://api.example.com",
           "iat": 1709500000,
           "jti": "wire02-valid-027",
-          "pillars": ["purpose"]
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai_training"]
+            }
+          }
         }
       },
       "expected": {
@@ -913,6 +1013,11 @@
           "jti": "wire02-valid-028",
           "pillars": ["commerce"],
           "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            },
             "org.peacprotocol/correlation": {
               "trace_id": "abcdef0123456789abcdef0123456789",
               "span_id": "0123456789abcdef"

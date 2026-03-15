@@ -30,6 +30,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -55,6 +62,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -81,6 +95,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -103,6 +124,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -127,6 +155,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -151,6 +186,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey: issuerPair.privateKey,
       kid,
     });
@@ -173,6 +215,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -191,6 +240,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -211,6 +267,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -241,6 +304,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -264,6 +334,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -286,6 +363,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -308,6 +392,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });
@@ -337,6 +428,13 @@ describe('handlers/verify', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid,
     });

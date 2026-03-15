@@ -16,12 +16,21 @@ async function main() {
   console.log('   Done.\n');
 
   // 2. Issue a receipt
+  // First-party evidence types require their mapped extension group
+  // in strict verification (e.g., payment requires commerce extension).
   console.log('2. Issuing receipt...');
   const { jws } = await issue({
     iss: 'https://api.example.com',
     kind: 'evidence',
     type: 'org.peacprotocol/payment',
     sub: 'https://api.example.com/inference/v1',
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'stripe',
+        amount_minor: '1000',
+        currency: 'USD',
+      },
+    },
     privateKey,
     kid: 'key-2026-01',
   });

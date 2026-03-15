@@ -69,7 +69,7 @@ describe('A2A Wire 0.2 round-trip', () => {
     const { jws } = await issueWire02({
       iss: 'https://api.example.com',
       kind: 'evidence',
-      type: 'org.peacprotocol/identity_verified',
+      type: 'org.peacprotocol/identity-attestation',
       pillars: ['identity'],
       extensions: {
         'org.peacprotocol/identity': {
@@ -97,7 +97,7 @@ describe('A2A Wire 0.2 round-trip', () => {
     expect(result.valid).toBe(true);
     if (result.valid) {
       expect(result.variant).toBe('wire-02');
-      expect(result.claims.type).toBe('org.peacprotocol/identity_verified');
+      expect(result.claims.type).toBe('org.peacprotocol/identity-attestation');
     }
   });
 
@@ -108,6 +108,13 @@ describe('A2A Wire 0.2 round-trip', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid: 'test-kid-003',
     });
@@ -121,9 +128,13 @@ describe('A2A Wire 0.2 round-trip', () => {
     const { jws: childJws } = await issueWire02({
       iss: 'https://api.example.com',
       kind: 'evidence',
-      type: 'org.peacprotocol/consent',
+      type: 'org.peacprotocol/consent-record',
       pillars: ['consent'],
       extensions: {
+        'org.peacprotocol/consent': {
+          consent_basis: 'explicit',
+          consent_status: 'granted',
+        },
         'org.peacprotocol/correlation': {
           workflow_id: 'workflow-xyz',
           parent_jti: parentJti,
@@ -162,6 +173,13 @@ describe('A2A Wire 0.2 round-trip', () => {
       iss: 'https://api.example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
+      },
       privateKey,
       kid: 'test-kid-004',
     });

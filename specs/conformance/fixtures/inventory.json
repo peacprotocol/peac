@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-03-15T09:03:30.472Z",
+  "generated_at": "2026-03-15T10:53:22.739Z",
   "version": "0.12.1",
   "schema_version": "0.12.1",
-  "total_fixtures": 676,
-  "total_with_requirements": 231,
+  "total_fixtures": 685,
+  "total_with_requirements": 240,
   "total_unmapped": 445,
-  "wire02_requirement_links": 541,
+  "wire02_requirement_links": 550,
   "carrier_requirement_links": 11,
   "entries": [
     {
@@ -3573,6 +3573,16 @@
     {
       "directory": "wire-02/extensions",
       "file": "conformance.json",
+      "fixture_name": "reject-purpose-compatible-duplicate-tokens",
+      "description": "Duplicate tokens in compatible_purposes rejected",
+      "primary_requirement_id": "WIRE02-EXT-071",
+      "requirement_ids": ["WIRE02-EXT-071"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
       "fixture_name": "reject-purpose-duplicate-tokens",
       "description": "Duplicate tokens in external_purposes rejected",
       "primary_requirement_id": "WIRE02-EXT-061",
@@ -3617,6 +3627,26 @@
       "description": "Missing required external_purposes field is rejected",
       "primary_requirement_id": "WIRE02-EXT-061",
       "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-slash-token",
+      "description": "Slash-containing token in external_purposes rejected by machine-safe grammar",
+      "primary_requirement_id": "WIRE02-EXT-065",
+      "requirement_ids": ["WIRE02-EXT-065"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-trailing-separator-token",
+      "description": "Trailing-separator token in external_purposes rejected",
+      "primary_requirement_id": "WIRE02-EXT-065",
+      "requirement_ids": ["WIRE02-EXT-065"],
       "status": "negative",
       "has_requirements": true
     },
@@ -3725,6 +3755,66 @@
       "primary_requirement_id": "WIRE02-EXT-037",
       "requirement_ids": ["WIRE02-EXT-037"],
       "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "type-extension-custom-type-no-check",
+      "description": "Custom/unmapped type is not subject to type-to-extension enforcement",
+      "primary_requirement_id": "WIRE02-EXT-070",
+      "requirement_ids": ["WIRE02-EXT-070"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "type-extension-match-passes-strict",
+      "description": "Registered type with correct mapped extension group passes in strict mode",
+      "primary_requirement_id": "WIRE02-EXT-067",
+      "requirement_ids": ["WIRE02-EXT-067"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "type-extension-match-plus-extra-registered",
+      "description": "Expected extension present alongside additional registered extensions passes",
+      "primary_requirement_id": "WIRE02-EXT-067",
+      "requirement_ids": ["WIRE02-EXT-067"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "type-extension-mismatch-strict-error",
+      "description": "Registered type with wrong registered extension group fails in strict mode",
+      "primary_requirement_id": "WIRE02-EXT-069",
+      "requirement_ids": ["WIRE02-EXT-069"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "type-extension-missing-interop-warning",
+      "description": "Registered type with absent mapped extension group emits warning in interop mode",
+      "primary_requirement_id": "WIRE02-EXT-068",
+      "requirement_ids": ["WIRE02-EXT-068"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "type-extension-missing-strict-error",
+      "description": "Registered type with absent mapped extension group fails in strict mode",
+      "primary_requirement_id": "WIRE02-EXT-067",
+      "requirement_ids": ["WIRE02-EXT-067"],
+      "status": "negative",
       "has_requirements": true
     },
     {

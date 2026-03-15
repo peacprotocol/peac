@@ -100,6 +100,13 @@ async function createUntypedJWS(
 const testKid = '2026-01-15T10:30:00Z';
 const testIss = 'https://api.example.com';
 const testType = 'org.peacprotocol/payment';
+const testExtensions = {
+  'org.peacprotocol/commerce': {
+    payment_rail: 'stripe',
+    amount_minor: '1000',
+    currency: 'USD',
+  },
+};
 
 // ---------------------------------------------------------------------------
 // issueWire02(): basic output shape
@@ -112,6 +119,7 @@ describe('issueWire02() basic output', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -124,6 +132,7 @@ describe('issueWire02() basic output', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -153,6 +162,7 @@ describe('issueWire02() basic output', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -167,6 +177,7 @@ describe('issueWire02() basic output', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -183,6 +194,7 @@ describe('issueWire02() basic output', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
       jti: customJti,
@@ -205,6 +217,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'https://api.example.com',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -218,6 +231,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'https://api.example.com:8443',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -231,6 +245,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'did:web:example.com',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -244,6 +259,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -257,6 +273,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'http://api.example.com',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -270,6 +287,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'https://api.example.com:443',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -283,6 +301,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'https://api.example.com/',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -296,6 +315,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'https://api.example.com/v1',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -309,6 +329,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'did:web:example.com#key-1',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -322,6 +343,7 @@ describe('issueWire02() iss canonical validation', () => {
         iss: 'example.com',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -340,6 +362,7 @@ describe('issueWire02 → verifyLocal round-trip', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -362,6 +385,7 @@ describe('issueWire02 → verifyLocal round-trip', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       jti: customJti,
       sub: 'https://resource.example.com/item/1',
       privateKey,
@@ -406,6 +430,7 @@ describe('issueWire02 → verifyLocal round-trip', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       pillars: ['access', 'commerce'],
       privateKey,
       kid: testKid,
@@ -425,6 +450,7 @@ describe('issueWire02 → verifyLocal round-trip', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -444,6 +470,7 @@ describe('issueWire02 → verifyLocal round-trip', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -469,6 +496,7 @@ describe('did: iss acceptance (no DID auto-resolution)', () => {
       iss: didIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -490,6 +518,7 @@ describe('did: iss acceptance (no DID auto-resolution)', () => {
       iss: didIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -509,6 +538,7 @@ describe('did: iss acceptance (no DID auto-resolution)', () => {
         iss: testIss,
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -518,6 +548,7 @@ describe('did: iss acceptance (no DID auto-resolution)', () => {
         iss: 'did:web:example.com',
         kind: 'evidence',
         type: testType,
+        extensions: testExtensions,
         privateKey,
         kid: testKid,
       })
@@ -547,6 +578,7 @@ describe('strictness: strict mode (default)', () => {
       peac_version: '0.2',
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       iss: testIss,
       iat: Math.floor(Date.now() / 1000),
       jti: 'strictness-test-001',
@@ -569,6 +601,7 @@ describe('strictness: strict mode (default)', () => {
       peac_version: '0.2',
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       iss: testIss,
       iat: Math.floor(Date.now() / 1000),
       jti: 'strictness-test-002',
@@ -591,6 +624,7 @@ describe('strictness: strict mode (default)', () => {
       peac_version: '0.2',
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       iss: testIss,
       iat: Math.floor(Date.now() / 1000),
       jti: 'strictness-test-003',
@@ -615,6 +649,7 @@ describe('strictness: interop mode', () => {
       peac_version: '0.2',
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       iss: testIss,
       iat: Math.floor(Date.now() / 1000),
       jti: 'interop-test-001',
@@ -640,6 +675,7 @@ describe('strictness: interop mode', () => {
       peac_version: '0.2',
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       iss: testIss,
       iat: Math.floor(Date.now() / 1000),
       jti: 'interop-test-002',
@@ -663,6 +699,7 @@ describe('strictness: interop mode', () => {
       peac_version: '0.2',
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       iss: testIss,
       iat: Math.floor(Date.now() / 1000),
       jti: customJti,
@@ -695,6 +732,7 @@ describe('occurred_at skew rules', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       occurred_at: occurredAt,
       privateKey,
       kid: testKid,
@@ -718,6 +756,7 @@ describe('occurred_at skew rules', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       occurred_at: occurredAt,
       privateKey,
       kid: testKid,
@@ -744,6 +783,7 @@ describe('occurred_at skew rules', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       occurred_at: occurredAt,
       privateKey,
       kid: testKid,
@@ -779,6 +819,7 @@ describe('occurred_at skew rules', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       // no occurred_at
       privateKey,
       kid: testKid,
@@ -888,6 +929,7 @@ describe('Wire 0.1 isolation', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -917,6 +959,7 @@ describe('isWire02Result() type guard', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       privateKey,
       kid: testKid,
     });
@@ -955,6 +998,7 @@ describe('isWire02Result() type guard', () => {
       iss: testIss,
       kind: 'evidence',
       type: testType,
+      extensions: testExtensions,
       pillars: ['access', 'commerce'],
       privateKey,
       kid: testKid,

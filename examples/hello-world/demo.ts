@@ -18,6 +18,13 @@ const { jws } = await issue({
   iss: 'https://api.example.com',
   kind: 'evidence',
   type: 'org.peacprotocol/payment',
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '1000',
+      currency: 'USD',
+    },
+  },
   privateKey,
   kid: 'demo-key',
 });
