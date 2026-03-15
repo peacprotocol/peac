@@ -71,6 +71,16 @@ export {
   SlsaLevelSchema,
   ProvenanceExtensionSchema,
   getProvenanceExtension,
+  // Attribution
+  ATTRIBUTION_EXTENSION_KEY,
+  CONTENT_SIGNAL_SOURCES,
+  ContentSignalSourceSchema,
+  AttributionExtensionSchema,
+  getAttributionExtension,
+  // Purpose
+  PURPOSE_EXTENSION_KEY,
+  PurposeExtensionSchema,
+  getPurposeExtension,
   // Envelope validation helper
   validateKnownExtensions,
   // Shared validators
@@ -105,4 +115,7 @@ export type {
   CustodyEntry,
   SlsaLevel,
   ProvenanceExtension,
+  ContentSignalSource,
+  AttributionExtension,
+  PurposeExtension,
 } from './wire-02-extensions/index.js';

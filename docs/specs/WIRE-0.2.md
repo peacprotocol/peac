@@ -697,7 +697,7 @@ This ensures forward compatibility: new extension groups can be defined without 
 
 ### 12.9 Typed Accessor Helpers
 
-Ten typed accessor functions are provided by `@peac/schema`:
+Twelve typed accessor functions are provided by `@peac/schema`:
 
 - `getCommerceExtension(extensions)`
 - `getAccessExtension(extensions)`
@@ -709,6 +709,8 @@ Ten typed accessor functions are provided by `@peac/schema`:
 - `getSafetyExtension(extensions)`
 - `getComplianceExtension(extensions)`
 - `getProvenanceExtension(extensions)`
+- `getAttributionExtension(extensions)`
+- `getPurposeExtension(extensions)`
 
 Each returns `undefined` if the key is absent from the extensions record. If the key is present but the value fails schema validation, the accessor throws a `PEACError` with a leaf-precise RFC 6901 JSON Pointer identifying the invalid field (e.g., `/extensions/org.peacprotocol~1commerce/amount_minor`). Accessors use `Object.prototype.hasOwnProperty.call()` to prevent prototype pollution.
 
@@ -851,11 +853,57 @@ Records origin tracking and chain of custody as observations.
 
 `source_ref` string optional: opaque source reference identifier.
 
+`source_uri` and `build_provenance_uri` HTTPS URI hint optional: locator hints only; callers MUST NOT auto-fetch. Validated by HttpsUriHintSchema.
+
 `custody_chain` CustodyEntry[] optional max 16 items: ordered chain of custody events. Each entry is `.strict()` with custodian, action, and RFC 3339 timestamp.
 
 `slsa` SlsaLevel optional: structured SLSA-aligned metadata. Uses a track-based model; records metadata, does not certify compliance.
 
 `.strict()` rejects unknown properties: the provenance extension and all nested schemas use `.strict()` mode.
+
+### 12.15 Attribution Extension [WIRE02-EXT-055] [WIRE02-EXT-056] [WIRE02-EXT-057] [WIRE02-EXT-058] [WIRE02-EXT-059] [WIRE02-EXT-060]
+
+Records credit, obligations, and content signal observations. Not an identity attestation; records observed attribution metadata.
+
+| Field                   | Type           | Required | Max Length | Description                                                                                 |
+| ----------------------- | -------------- | -------- | ---------- | ------------------------------------------------------------------------------------------- |
+| `creator_ref`           | string         | REQUIRED | 256        | Creator identifier (DID, URI, or opaque ID)                                                 |
+| `license_spdx`          | SPDX expr      | OPTIONAL | 128        | SPDX license expression (parser-grade structural validator)                                 |
+| `obligation_type`       | string         | OPTIONAL | 128        | Obligation type (e.g., attribution_required, share_alike)                                   |
+| `attribution_text`      | string         | OPTIONAL | 1024       | Required attribution text                                                                   |
+| `content_signal_source` | enum           | OPTIONAL | N/A        | Signal source: tdmrep_json, content_signal_header, content_usage_header, robots_txt, custom |
+| `content_digest`        | SHA-256 digest | OPTIONAL | 71         | SHA-256 digest of the attributed content                                                    |
+
+`creator_ref` string REQUIRED: identifies the creator. Accepts DIDs, URIs, or opaque identifiers. Not an identity attestation.
+
+`license_spdx` SPDX expression optional: uses the parser-grade SPDX license expression validator.
+
+`content_signal_source` enum optional: tdmrep_json, content_signal_header, content_usage_header, robots_txt, custom. Closed vocabulary mapping to known content signal observation sources.
+
+`content_digest` SHA-256 digest optional: uses `Sha256DigestSchema` for typed digest validation.
+
+`.strict()` rejects unknown properties: the attribution extension uses `.strict()` mode; unrecognized fields are rejected.
+
+### 12.16 Purpose Extension [WIRE02-EXT-061] [WIRE02-EXT-062] [WIRE02-EXT-063] [WIRE02-EXT-064] [WIRE02-EXT-065] [WIRE02-EXT-066]
+
+Records external/legal/business purpose declarations as observations. Explicitly separated from PEAC operational purpose tokens.
+
+| Field                  | Type            | Required | Max Length | Description                                                |
+| ---------------------- | --------------- | -------- | ---------- | ---------------------------------------------------------- |
+| `external_purposes`    | array of string | REQUIRED | 32 items   | External purpose labels (token-based, machine-safe)        |
+| `purpose_basis`        | string          | OPTIONAL | 128        | Legal or policy basis (e.g., consent, legitimate_interest) |
+| `purpose_limitation`   | boolean         | OPTIONAL | N/A        | Whether purpose limitation applies                         |
+| `data_minimization`    | boolean         | OPTIONAL | N/A        | Whether data minimization was applied                      |
+| `compatible_purposes`  | array of string | OPTIONAL | 32 items   | Compatible purposes for secondary use (token-based)        |
+| `peac_purpose_mapping` | string          | OPTIONAL | 64         | Mapping to PEAC operational CanonicalPurpose token         |
+
+`external_purposes` string[] REQUIRED min 1 max 32 items: external/legal/business purpose labels. Each item MUST match the machine-safe token grammar and items MUST be unique. Not PEAC operational tokens.
+
+`purpose_basis` string optional: legal or policy basis for the declared purposes. Open vocabulary.
+
+`peac_purpose_mapping` string optional: explicit bridge to a PEAC operational CanonicalPurpose token. Validated against PURPOSE_TOKEN_REGEX.
+
+`.strict()` rejects unknown properties: the purpose extension uses `.strict()` mode; unrecognized fields are rejected.
 
 ---
 

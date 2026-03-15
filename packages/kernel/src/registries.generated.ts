@@ -268,7 +268,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     id: 'org.peacprotocol/attribution-event',
     pillar: 'attribution',
     description: 'Content or action attribution evidence',
-    extension_group: null,
+    extension_group: 'org.peacprotocol/attribution',
     status: 'informational',
   },
   {
@@ -317,7 +317,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     id: 'org.peacprotocol/purpose-declaration',
     pillar: 'purpose',
     description: 'Purpose declaration or limitation evidence',
-    extension_group: null,
+    extension_group: 'org.peacprotocol/purpose',
     status: 'informational',
   },
   {
@@ -334,6 +334,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   {
     id: 'org.peacprotocol/access',
     description: 'Access extension: resource, action, decision (allow/deny/review)',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/attribution',
+    description:
+      'Attribution extension: creator_ref, license_spdx, obligation_type, attribution_text, content_signal_source, content_digest',
     status: 'informational',
   },
   {
@@ -381,6 +387,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/purpose',
+    description:
+      'Purpose extension: external_purposes, purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/safety',
     description:
       'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
@@ -395,12 +407,14 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
  */
 export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/access-decision', 'org.peacprotocol/access'],
+  ['org.peacprotocol/attribution-event', 'org.peacprotocol/attribution'],
   ['org.peacprotocol/compliance-check', 'org.peacprotocol/compliance'],
   ['org.peacprotocol/consent-record', 'org.peacprotocol/consent'],
   ['org.peacprotocol/identity-attestation', 'org.peacprotocol/identity'],
   ['org.peacprotocol/payment', 'org.peacprotocol/commerce'],
   ['org.peacprotocol/privacy-signal', 'org.peacprotocol/privacy'],
   ['org.peacprotocol/provenance-record', 'org.peacprotocol/provenance'],
+  ['org.peacprotocol/purpose-declaration', 'org.peacprotocol/purpose'],
   ['org.peacprotocol/safety-review', 'org.peacprotocol/safety'],
 ]);
 

@@ -260,6 +260,54 @@ describe('verifyLocal(): unknown_extension_preserved warning', () => {
     }
   });
 
+  it('does not emit warning for registered attribution extension key', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: 'org.peacprotocol/attribution-event',
+      pillars: ['attribution'],
+      extensions: {
+        'org.peacprotocol/attribution': {
+          creator_ref: 'did:web:example.com',
+        },
+      },
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(true);
+    if (result.valid && result.variant === 'wire-02') {
+      expect(result.warnings.some((w) => w.code === WARNING_UNKNOWN_EXTENSION)).toBe(false);
+    }
+  });
+
+  it('does not emit warning for registered purpose extension key', async () => {
+    const { privateKey, publicKey } = await generateKeypair();
+    const { jws } = await issueWire02({
+      iss: testIss,
+      kind: 'evidence',
+      type: 'org.peacprotocol/purpose-declaration',
+      pillars: ['purpose'],
+      extensions: {
+        'org.peacprotocol/purpose': {
+          external_purposes: ['ai_training'],
+        },
+      },
+      privateKey,
+      kid: testKid,
+    });
+
+    const result = await verifyLocal(jws, publicKey);
+
+    expect(result.valid).toBe(true);
+    if (result.valid && result.variant === 'wire-02') {
+      expect(result.warnings.some((w) => w.code === WARNING_UNKNOWN_EXTENSION)).toBe(false);
+    }
+  });
+
   it('does not emit warning for registered provenance extension key', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const { jws } = await issueWire02({
