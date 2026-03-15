@@ -568,4 +568,55 @@ else
   echo "SKIP: validate-doc-examples.mjs not found"
 fi
 
+# == doc-truth: stale extension-group counts ==
+# Prevents public docs from claiming a stale extension-group count.
+# Excludes version-history sections (historically accurate references).
+echo "== doc-truth: stale extension-group counts =="
+_doc_stale=0
+_stale_5=$(git grep -n 'Five typed extension group\|5 typed extension group' -- 'docs/**' 'README.md' ':!node_modules' 2>/dev/null | grep -vi 'version history\|changelog\|preview\.1\|preview\.2' || true)
+if [ -n "$_stale_5" ]; then
+  echo "FAIL: public docs still say '5 typed extension groups'"
+  echo "$_stale_5"
+  _doc_stale=1
+fi
+_stale_8=$(git grep -n 'Eight core extension group\|8 core extension group' -- 'docs/**' 'README.md' ':!node_modules' 2>/dev/null | grep -vi 'version history\|changelog\|preview\.1\|preview\.2' || true)
+if [ -n "$_stale_8" ]; then
+  echo "FAIL: public docs still say '8 core extension groups'"
+  echo "$_stale_8"
+  _doc_stale=1
+fi
+if [ "$_doc_stale" = 1 ]; then
+  bad=1
+else
+  echo "OK"
+fi
+
+# == doc-truth: profile naming vs registry parity ==
+# Ensures profile filenames in docs/profiles/README.md match pillar names in registries.json.
+echo "== doc-truth: profile naming parity =="
+_naming_ok=1
+if [ -f specs/kernel/registries.json ] && [ -f docs/profiles/README.md ]; then
+  # Extract pillar names from registry receipt_types that have extension_groups
+  _pillars=$(node -e "
+    const r = require('./specs/kernel/registries.json');
+    const skip = new Set(['commerce','access','identity']); // adapter profiles, not pillar profiles
+    r.receipt_types.values
+      .filter(v => v.extension_group && !skip.has(v.pillar))
+      .forEach(v => console.log(v.pillar));
+  " 2>/dev/null || true)
+  for _p in $_pillars; do
+    if ! grep -qi "(${_p}.md)" docs/profiles/README.md 2>/dev/null; then
+      echo "FAIL: pillar '$_p' has no matching profile link (${_p}.md) in docs/profiles/README.md"
+      _naming_ok=0
+    fi
+  done
+  if [ "$_naming_ok" = 0 ]; then
+    bad=1
+  else
+    echo "OK"
+  fi
+else
+  echo "SKIP: registries.json or profiles/README.md not found"
+fi
+
 exit $bad
