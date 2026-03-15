@@ -975,6 +975,559 @@
         "valid": false,
         "error_code": "E_INVALID_EXTENSION_FORMAT"
       }
+    },
+    {
+      "name": "compliance-extension-valid",
+      "description": "Valid compliance extension with required fields",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-043",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-001",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "soc2-type2",
+              "compliance_status": "compliant"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "compliance-extension-all-fields-valid",
+      "description": "Valid compliance extension with all optional fields present",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-043",
+      "requirement_ids": [
+        "WIRE02-EXT-043",
+        "WIRE02-EXT-044",
+        "WIRE02-EXT-045",
+        "WIRE02-EXT-046",
+        "WIRE02-EXT-047"
+      ],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-002",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "eu-ai-act",
+              "compliance_status": "partial",
+              "audit_ref": "AUD-2026-001",
+              "auditor": "Acme Audit Corp",
+              "audit_date": "2026-03-14",
+              "scope": "AI model deployment risk assessment",
+              "validity_period": "P1Y",
+              "evidence_ref": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "compliance-non-compliant-valid",
+      "description": "Valid compliance extension with non_compliant status",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-010",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "gdpr",
+              "compliance_status": "non_compliant"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "compliance-partial-valid",
+      "description": "Valid compliance extension with partial status",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-011",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "iso-27001",
+              "compliance_status": "partial"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "compliance-under-review-valid",
+      "description": "Valid compliance extension with under_review status",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-012",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "hipaa",
+              "compliance_status": "under_review"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "compliance-exempt-valid",
+      "description": "Valid compliance extension with exempt status",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-043", "WIRE02-EXT-044"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-013",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "nist-ai-rmf",
+              "compliance_status": "exempt"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "provenance-slsa-level-zero-valid",
+      "description": "Valid provenance with SLSA level 0 (minimum boundary)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-052"],
+      "status": "boundary",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-010",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original",
+              "slsa": { "track": "build", "level": 0, "version": "1.0" }
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "provenance-slsa-level-four-valid",
+      "description": "Valid provenance with SLSA level 4 (maximum boundary)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-052"],
+      "status": "boundary",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-011",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original",
+              "slsa": { "track": "source", "level": 4, "version": "1.2" }
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-provenance-slsa-level-negative",
+      "description": "SLSA level -1 is rejected (below minimum boundary)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-052"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-012",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original",
+              "slsa": { "track": "build", "level": -1, "version": "1.2" }
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-provenance-slsa-non-integer",
+      "description": "Non-integer SLSA level is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-052"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-013",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original",
+              "slsa": { "track": "build", "level": 2.5, "version": "1.2" }
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-provenance-custody-entry-extra-field",
+      "description": "Extra field in custody_chain entry rejected by nested .strict()",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-053",
+      "requirement_ids": ["WIRE02-EXT-051", "WIRE02-EXT-053"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-014",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original",
+              "custody_chain": [
+                {
+                  "custodian": "Acme",
+                  "action": "received",
+                  "timestamp": "2026-03-01T10:00:00Z",
+                  "extra_field": "should reject"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-compliance-missing-framework",
+      "description": "Missing required framework field is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-043",
+      "requirement_ids": ["WIRE02-EXT-043"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-003",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "compliance_status": "compliant"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-compliance-invalid-status",
+      "description": "Invalid compliance_status value is rejected (closed enum)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-044",
+      "requirement_ids": ["WIRE02-EXT-044"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-004",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "iso-27001",
+              "compliance_status": "certified"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-compliance-extra-field",
+      "description": "Unknown field in compliance extension rejected by .strict()",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-048",
+      "requirement_ids": ["WIRE02-EXT-048"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/compliance-check",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-compliance-005",
+          "pillars": ["compliance"],
+          "extensions": {
+            "org.peacprotocol/compliance": {
+              "framework": "soc2-type2",
+              "compliance_status": "compliant",
+              "unknown_field": "should reject"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "provenance-extension-valid",
+      "description": "Valid provenance extension with required fields",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-049",
+      "requirement_ids": ["WIRE02-EXT-049"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-001",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "provenance-extension-all-fields-valid",
+      "description": "Valid provenance extension with custody chain and SLSA metadata",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-049",
+      "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-050", "WIRE02-EXT-051", "WIRE02-EXT-052"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-002",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "derived",
+              "source_ref": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "source_uri": "https://example.com/artifacts/v1.0.0",
+              "build_provenance_uri": "https://example.com/provenance/build-123",
+              "verification_method": "signature_check",
+              "custody_chain": [
+                {
+                  "custodian": "Acme Data Corp",
+                  "action": "received",
+                  "timestamp": "2026-03-01T10:00:00Z"
+                },
+                {
+                  "custodian": "Acme ML Pipeline",
+                  "action": "transformed",
+                  "timestamp": "2026-03-02T14:30:00Z"
+                }
+              ],
+              "slsa": {
+                "track": "build",
+                "level": 3,
+                "version": "1.2"
+              }
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-provenance-missing-source-type",
+      "description": "Missing required source_type field is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-049",
+      "requirement_ids": ["WIRE02-EXT-049"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-003",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_ref": "some-ref"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-provenance-extra-field",
+      "description": "Unknown field in provenance extension rejected by .strict()",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-053",
+      "requirement_ids": ["WIRE02-EXT-053"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-004",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original",
+              "unknown_field": "should reject"
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
+    },
+    {
+      "name": "reject-provenance-invalid-slsa-level",
+      "description": "SLSA level outside 0-4 range is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-052",
+      "requirement_ids": ["WIRE02-EXT-052"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/provenance-record",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-provenance-005",
+          "pillars": ["provenance"],
+          "extensions": {
+            "org.peacprotocol/provenance": {
+              "source_type": "original",
+              "slsa": {
+                "track": "build",
+                "level": 5,
+                "version": "1.2"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     }
   ]
 }

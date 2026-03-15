@@ -59,6 +59,18 @@ export {
   RiskLevelSchema,
   SafetyExtensionSchema,
   getSafetyExtension,
+  // Compliance
+  COMPLIANCE_EXTENSION_KEY,
+  COMPLIANCE_STATUSES,
+  ComplianceStatusSchema,
+  ComplianceExtensionSchema,
+  getComplianceExtension,
+  // Provenance
+  PROVENANCE_EXTENSION_KEY,
+  CustodyEntrySchema,
+  SlsaLevelSchema,
+  ProvenanceExtensionSchema,
+  getProvenanceExtension,
   // Envelope validation helper
   validateKnownExtensions,
   // Shared validators
@@ -88,4 +100,9 @@ export type {
   ReviewStatus,
   RiskLevel,
   SafetyExtension,
+  ComplianceStatus,
+  ComplianceExtension,
+  CustodyEntry,
+  SlsaLevel,
+  ProvenanceExtension,
 } from './wire-02-extensions/index.js';

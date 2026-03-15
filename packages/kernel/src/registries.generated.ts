@@ -275,7 +275,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     id: 'org.peacprotocol/compliance-check',
     pillar: 'compliance',
     description: 'Regulatory compliance check evidence',
-    extension_group: null,
+    extension_group: 'org.peacprotocol/compliance',
     status: 'informational',
   },
   {
@@ -310,7 +310,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     id: 'org.peacprotocol/provenance-record',
     pillar: 'provenance',
     description: 'Data or content provenance tracking evidence',
-    extension_group: null,
+    extension_group: 'org.peacprotocol/provenance',
     status: 'informational',
   },
   {
@@ -347,6 +347,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/compliance',
+    description:
+      'Compliance extension: framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/consent',
     description:
       'Consent extension: consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction',
@@ -369,6 +375,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/provenance',
+    description:
+      'Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/safety',
     description:
       'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
@@ -383,10 +395,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
  */
 export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/access-decision', 'org.peacprotocol/access'],
+  ['org.peacprotocol/compliance-check', 'org.peacprotocol/compliance'],
   ['org.peacprotocol/consent-record', 'org.peacprotocol/consent'],
   ['org.peacprotocol/identity-attestation', 'org.peacprotocol/identity'],
   ['org.peacprotocol/payment', 'org.peacprotocol/commerce'],
   ['org.peacprotocol/privacy-signal', 'org.peacprotocol/privacy'],
+  ['org.peacprotocol/provenance-record', 'org.peacprotocol/provenance'],
   ['org.peacprotocol/safety-review', 'org.peacprotocol/safety'],
 ]);
 

@@ -26,6 +26,10 @@ import { PRIVACY_EXTENSION_KEY, PrivacyExtensionSchema } from './privacy.js';
 import type { PrivacyExtension } from './privacy.js';
 import { SAFETY_EXTENSION_KEY, SafetyExtensionSchema } from './safety.js';
 import type { SafetyExtension } from './safety.js';
+import { COMPLIANCE_EXTENSION_KEY, ComplianceExtensionSchema } from './compliance.js';
+import type { ComplianceExtension } from './compliance.js';
+import { PROVENANCE_EXTENSION_KEY, ProvenanceExtensionSchema } from './provenance.js';
+import type { ProvenanceExtension } from './provenance.js';
 
 // ---------------------------------------------------------------------------
 // Internal helper
@@ -125,4 +129,18 @@ export function getSafetyExtension(
   extensions?: Record<string, unknown>
 ): SafetyExtension | undefined {
   return getExtension(extensions, SAFETY_EXTENSION_KEY, SafetyExtensionSchema);
+}
+
+/** @throws PEACError with RFC 6901 pointer if present but invalid */
+export function getComplianceExtension(
+  extensions?: Record<string, unknown>
+): ComplianceExtension | undefined {
+  return getExtension(extensions, COMPLIANCE_EXTENSION_KEY, ComplianceExtensionSchema);
+}
+
+/** @throws PEACError with RFC 6901 pointer if present but invalid */
+export function getProvenanceExtension(
+  extensions?: Record<string, unknown>
+): ProvenanceExtension | undefined {
+  return getExtension(extensions, PROVENANCE_EXTENSION_KEY, ProvenanceExtensionSchema);
 }

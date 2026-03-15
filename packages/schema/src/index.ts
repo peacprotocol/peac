@@ -580,6 +580,18 @@ export {
   RISK_LEVELS,
   RiskLevelSchema,
   SafetyExtensionSchema,
+  // Compliance
+  COMPLIANCE_EXTENSION_KEY,
+  COMPLIANCE_STATUSES,
+  ComplianceStatusSchema,
+  ComplianceExtensionSchema,
+  getComplianceExtension,
+  // Provenance
+  PROVENANCE_EXTENSION_KEY,
+  CustodyEntrySchema,
+  SlsaLevelSchema,
+  ProvenanceExtensionSchema,
+  getProvenanceExtension,
   // Shared validators
   Sha256DigestSchema,
   HttpsUriHintSchema,
@@ -606,6 +618,11 @@ export type {
   ReviewStatus,
   RiskLevel,
   SafetyExtension,
+  ComplianceStatus,
+  ComplianceExtension,
+  CustodyEntry,
+  SlsaLevel,
+  ProvenanceExtension,
 } from './wire-02-extensions';
 
 // Wire 0.2 registry constants (v0.12.0-preview.1, DD-155)

@@ -62,7 +62,6 @@ export const EXTENSION_LIMITS = {
   maxAuditRefLength: 256,
   maxAuditorLength: 256,
   maxComplianceScopeLength: 512,
-  maxEvidenceRefLength: 256,
 
   // Privacy (DD-176)
   maxDataClassificationLength: 128,
@@ -82,9 +81,12 @@ export const EXTENSION_LIMITS = {
   // Provenance (DD-178)
   maxSourceTypeLength: 128,
   maxSourceRefLength: 256,
-  maxCustodyEntriesCount: 16,
+  maxVerificationMethodLength: 128,
+  maxCustodyChainCount: 16,
   maxCustodianLength: 256,
   maxCustodyActionLength: 128,
+  maxSlsaTrackLength: 64,
+  maxSlsaVersionLength: 16,
 
   // Attribution (DD-179)
   maxCreatorRefLength: 256,

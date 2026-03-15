@@ -1236,6 +1236,116 @@
           "enforcement_class": "advisory",
           "introduced_in": "0.12.2",
           "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-043",
+          "keyword": "REQUIRED",
+          "summary": "Compliance extension: framework is REQUIRED",
+          "source_fragment": "`framework` string REQUIRED: identifies the regulatory or standards framework evaluated.",
+          "source_fragment_hash": "sha256:84a1e8f85d718faae95fff55d60b823fe507b09e2e9812699e5cf9ef51718997",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-044",
+          "keyword": "REQUIRED",
+          "summary": "Compliance extension: compliance_status is REQUIRED and closed enum",
+          "source_fragment": "`compliance_status` enum REQUIRED: compliant, non_compliant, partial, under_review, exempt.",
+          "source_fragment_hash": "sha256:9ef31d79e0a23985bf608a81be4b609ffcb6aa8a53b48ace54e19a7b6ad6612d",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-045",
+          "keyword": "SHOULD",
+          "summary": "Compliance extension: audit_date uses structural date validation",
+          "source_fragment": "`audit_date` ISO 8601 date optional: structural date validation (YYYY-MM-DD).",
+          "source_fragment_hash": "sha256:493767e96d33aca475e6d6745e30087f76a774dbd84c07df8d5919a5259137ce",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-046",
+          "keyword": "SHOULD",
+          "summary": "Compliance extension: validity_period uses parser-grade duration validator",
+          "source_fragment": "`validity_period` ISO 8601 duration optional: uses the parser-grade ISO 8601 duration validator.",
+          "source_fragment_hash": "sha256:7e24cb7558329bf4fddb184bfc7c6c4b80a92759aa19f1e799a7ca16ee99aa92",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-047",
+          "keyword": "SHOULD",
+          "summary": "Compliance extension: evidence_ref uses typed SHA-256 digest validation",
+          "source_fragment": "`evidence_ref` SHA-256 digest optional: uses `Sha256DigestSchema` for typed digest validation.",
+          "source_fragment_hash": "sha256:8e2d1ecc65139b8cb02d4824511714220bff8fde072a3848d163201249e704e6",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-048",
+          "keyword": "MUST",
+          "summary": "Compliance extension: .strict() rejects unknown properties",
+          "source_fragment": "`.strict()` rejects unknown properties: the compliance extension uses `.strict()` mode; unrecognized fields are rejected.",
+          "source_fragment_hash": "sha256:122f818833eeb49b4977c5f3e76e68f9a03a079e16404b56f180dadbf1a350c9",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-049",
+          "keyword": "REQUIRED",
+          "summary": "Provenance extension: source_type is REQUIRED",
+          "source_fragment": "`source_type` string REQUIRED: identifies the derivation type.",
+          "source_fragment_hash": "sha256:311e9b372eb9f8fe50cf91784fe1e345870a95771918ad6895e2d9303cca5f3b",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-050",
+          "keyword": "SHOULD",
+          "summary": "Provenance extension: source_ref is an opaque reference",
+          "source_fragment": "`source_ref` string optional: opaque source reference identifier.",
+          "source_fragment_hash": "sha256:7130696c116901b704490060724bb144fb692416f7f16c371ec7dab8cd0d67b9",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-051",
+          "keyword": "SHOULD",
+          "summary": "Provenance extension: custody_chain is an ordered array of strict entries",
+          "source_fragment": "`custody_chain` CustodyEntry[] optional max 16 items: ordered chain of custody events.",
+          "source_fragment_hash": "sha256:663e68e061ff0ee03650b86702694c298439ee9fc2e7654ef8acae1c0943490b",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-052",
+          "keyword": "SHOULD",
+          "summary": "Provenance extension: slsa records SLSA-aligned metadata",
+          "source_fragment": "`slsa` SlsaLevel optional: structured SLSA-aligned metadata.",
+          "source_fragment_hash": "sha256:1aecd99b250f6194ef512c5a699e31ae26e2d5a454ee9918e72d4340e847e288",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-053",
+          "keyword": "MUST",
+          "summary": "Provenance extension: .strict() rejects unknown properties on all nested schemas",
+          "source_fragment": "`.strict()` rejects unknown properties: the provenance extension and all nested schemas use `.strict()` mode.",
+          "source_fragment_hash": "sha256:32aec8d80ca7ce4426709dd18089bfb2d2df6cac0a883de2f932be4cc8c08352",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
         }
       ]
     },
