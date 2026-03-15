@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-03-15T06:59:00.663Z",
+  "generated_at": "2026-03-15T09:03:30.472Z",
   "version": "0.12.1",
   "schema_version": "0.12.1",
-  "total_fixtures": 657,
-  "total_with_requirements": 212,
+  "total_fixtures": 676,
+  "total_with_requirements": 231,
   "total_unmapped": 445,
-  "wire02_requirement_links": 510,
+  "wire02_requirement_links": 541,
   "carrier_requirement_links": 11,
   "entries": [
     {
@@ -3014,6 +3014,76 @@
     {
       "directory": "wire-02/extensions",
       "file": "conformance.json",
+      "fixture_name": "attribution-content-signal-header-valid",
+      "description": "Valid attribution with content_signal_header source",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "attribution-content-usage-header-valid",
+      "description": "Valid attribution with content_usage_header source",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "attribution-custom-source-valid",
+      "description": "Valid attribution with custom content signal source",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "attribution-extension-all-fields-valid",
+      "description": "Valid attribution extension with all optional fields present",
+      "primary_requirement_id": "WIRE02-EXT-055",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-056", "WIRE02-EXT-057", "WIRE02-EXT-058"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "attribution-extension-valid",
+      "description": "Valid attribution extension with required fields",
+      "primary_requirement_id": "WIRE02-EXT-055",
+      "requirement_ids": ["WIRE02-EXT-055"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "attribution-robots-txt-valid",
+      "description": "Valid attribution with robots_txt source",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "attribution-tdmrep-json-valid",
+      "description": "Valid attribution with tdmrep_json content signal source",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
       "fixture_name": "commerce-extension-valid",
       "description": "Valid commerce extension with all required fields",
       "primary_requirement_id": "WIRE02-EXT-006",
@@ -3200,7 +3270,13 @@
       "fixture_name": "provenance-extension-all-fields-valid",
       "description": "Valid provenance extension with custody chain and SLSA metadata",
       "primary_requirement_id": "WIRE02-EXT-049",
-      "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-050", "WIRE02-EXT-051", "WIRE02-EXT-052"],
+      "requirement_ids": [
+        "WIRE02-EXT-049",
+        "WIRE02-EXT-050",
+        "WIRE02-EXT-051",
+        "WIRE02-EXT-052",
+        "WIRE02-EXT-054"
+      ],
       "status": "positive",
       "has_requirements": true
     },
@@ -3232,6 +3308,56 @@
       "primary_requirement_id": "WIRE02-EXT-052",
       "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-052"],
       "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "purpose-extension-all-fields-valid",
+      "description": "Valid purpose extension with all optional fields and purpose mapping",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061", "WIRE02-EXT-062", "WIRE02-EXT-063", "WIRE02-EXT-066"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "purpose-extension-valid",
+      "description": "Valid purpose extension with required fields",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "positive",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-attribution-extra-field",
+      "description": "Unknown field in attribution extension rejected by .strict()",
+      "primary_requirement_id": "WIRE02-EXT-059",
+      "requirement_ids": ["WIRE02-EXT-059"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-attribution-invalid-signal-source",
+      "description": "Invalid content_signal_source value is rejected (closed enum)",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-057"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-attribution-missing-creator-ref",
+      "description": "Missing required creator_ref field is rejected",
+      "primary_requirement_id": "WIRE02-EXT-055",
+      "requirement_ids": ["WIRE02-EXT-055"],
+      "status": "negative",
       "has_requirements": true
     },
     {
@@ -3441,6 +3567,76 @@
       "description": "Non-integer SLSA level is rejected",
       "primary_requirement_id": "WIRE02-EXT-052",
       "requirement_ids": ["WIRE02-EXT-052"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-duplicate-tokens",
+      "description": "Duplicate tokens in external_purposes rejected",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-empty-external-purposes",
+      "description": "Empty external_purposes array is rejected (min 1)",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-extra-field",
+      "description": "Unknown field in purpose extension rejected by .strict()",
+      "primary_requirement_id": "WIRE02-EXT-064",
+      "requirement_ids": ["WIRE02-EXT-064"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-invalid-peac-mapping",
+      "description": "Invalid peac_purpose_mapping token is rejected",
+      "primary_requirement_id": "WIRE02-EXT-066",
+      "requirement_ids": ["WIRE02-EXT-066"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-missing-external-purposes",
+      "description": "Missing required external_purposes field is rejected",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-uppercase-token",
+      "description": "Uppercase token in external_purposes rejected by machine-safe grammar",
+      "primary_requirement_id": "WIRE02-EXT-065",
+      "requirement_ids": ["WIRE02-EXT-065"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/extensions",
+      "file": "conformance.json",
+      "fixture_name": "reject-purpose-whitespace-token",
+      "description": "Whitespace-containing token in external_purposes rejected",
+      "primary_requirement_id": "WIRE02-EXT-065",
+      "requirement_ids": ["WIRE02-EXT-065"],
       "status": "negative",
       "has_requirements": true
     },

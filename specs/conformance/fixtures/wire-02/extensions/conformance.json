@@ -1398,7 +1398,13 @@
       "description": "Valid provenance extension with custody chain and SLSA metadata",
       "type": "full-pipeline",
       "primary_requirement_id": "WIRE02-EXT-049",
-      "requirement_ids": ["WIRE02-EXT-049", "WIRE02-EXT-050", "WIRE02-EXT-051", "WIRE02-EXT-052"],
+      "requirement_ids": [
+        "WIRE02-EXT-049",
+        "WIRE02-EXT-050",
+        "WIRE02-EXT-051",
+        "WIRE02-EXT-052",
+        "WIRE02-EXT-054"
+      ],
       "status": "positive",
       "input": {
         "claims": {
@@ -1528,6 +1534,500 @@
         "valid": false,
         "error_code": "E_INVALID_EXTENSION_FORMAT"
       }
+    },
+    {
+      "name": "attribution-extension-valid",
+      "description": "Valid attribution extension with required fields",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-055",
+      "requirement_ids": ["WIRE02-EXT-055"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-001",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "did:web:example.com"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "attribution-extension-all-fields-valid",
+      "description": "Valid attribution extension with all optional fields present",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-055",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-056", "WIRE02-EXT-057", "WIRE02-EXT-058"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-002",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "did:web:example.com",
+              "license_spdx": "MIT",
+              "obligation_type": "attribution_required",
+              "attribution_text": "Created by Example Corp",
+              "content_signal_source": "tdmrep_json",
+              "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "attribution-tdmrep-json-valid",
+      "description": "Valid attribution with tdmrep_json content signal source",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-010",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "acme-corp",
+              "content_signal_source": "tdmrep_json"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "attribution-content-signal-header-valid",
+      "description": "Valid attribution with content_signal_header source",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-011",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "acme-corp",
+              "content_signal_source": "content_signal_header"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "attribution-content-usage-header-valid",
+      "description": "Valid attribution with content_usage_header source",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-012",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "acme-corp",
+              "content_signal_source": "content_usage_header"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "attribution-robots-txt-valid",
+      "description": "Valid attribution with robots_txt source",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-013",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "acme-corp",
+              "content_signal_source": "robots_txt"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "attribution-custom-source-valid",
+      "description": "Valid attribution with custom content signal source",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-055", "WIRE02-EXT-057"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-014",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "acme-corp",
+              "content_signal_source": "custom"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-attribution-missing-creator-ref",
+      "description": "Missing required creator_ref field is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-055",
+      "requirement_ids": ["WIRE02-EXT-055"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-003",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "license_spdx": "MIT"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-attribution-invalid-signal-source",
+      "description": "Invalid content_signal_source value is rejected (closed enum)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-057",
+      "requirement_ids": ["WIRE02-EXT-057"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-004",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "acme-corp",
+              "content_signal_source": "unknown_source"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-attribution-extra-field",
+      "description": "Unknown field in attribution extension rejected by .strict()",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-059",
+      "requirement_ids": ["WIRE02-EXT-059"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-attribution-005",
+          "pillars": ["attribution"],
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "acme-corp",
+              "unknown_field": "should reject"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "purpose-extension-valid",
+      "description": "Valid purpose extension with required fields",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-001",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai_training"]
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "purpose-extension-all-fields-valid",
+      "description": "Valid purpose extension with all optional fields and purpose mapping",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061", "WIRE02-EXT-062", "WIRE02-EXT-063", "WIRE02-EXT-066"],
+      "status": "positive",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-002",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai_training", "research"],
+              "purpose_basis": "consent",
+              "purpose_limitation": true,
+              "data_minimization": true,
+              "compatible_purposes": ["analytics"],
+              "peac_purpose_mapping": "train"
+            }
+          }
+        }
+      },
+      "expected": { "valid": true }
+    },
+    {
+      "name": "reject-purpose-missing-external-purposes",
+      "description": "Missing required external_purposes field is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-003",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "purpose_basis": "consent"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-purpose-empty-external-purposes",
+      "description": "Empty external_purposes array is rejected (min 1)",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-004",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": []
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-purpose-invalid-peac-mapping",
+      "description": "Invalid peac_purpose_mapping token is rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-066",
+      "requirement_ids": ["WIRE02-EXT-066"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-005",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai_training"],
+              "peac_purpose_mapping": "INVALID-Token"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-purpose-extra-field",
+      "description": "Unknown field in purpose extension rejected by .strict()",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-064",
+      "requirement_ids": ["WIRE02-EXT-064"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-006",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["analytics"],
+              "unknown_field": "should reject"
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-purpose-uppercase-token",
+      "description": "Uppercase token in external_purposes rejected by machine-safe grammar",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-065",
+      "requirement_ids": ["WIRE02-EXT-065"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-010",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["AI_TRAINING"]
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-purpose-whitespace-token",
+      "description": "Whitespace-containing token in external_purposes rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-065",
+      "requirement_ids": ["WIRE02-EXT-065"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-011",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai training"]
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+    },
+    {
+      "name": "reject-purpose-duplicate-tokens",
+      "description": "Duplicate tokens in external_purposes rejected",
+      "type": "full-pipeline",
+      "primary_requirement_id": "WIRE02-EXT-061",
+      "requirement_ids": ["WIRE02-EXT-061"],
+      "status": "negative",
+      "input": {
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "ext-purpose-012",
+          "pillars": ["purpose"],
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["ai_training", "ai_training"]
+            }
+          }
+        }
+      },
+      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
     }
   ]
 }

@@ -592,6 +592,16 @@ export {
   SlsaLevelSchema,
   ProvenanceExtensionSchema,
   getProvenanceExtension,
+  // Attribution
+  ATTRIBUTION_EXTENSION_KEY,
+  CONTENT_SIGNAL_SOURCES,
+  ContentSignalSourceSchema,
+  AttributionExtensionSchema,
+  getAttributionExtension,
+  // Purpose
+  PURPOSE_EXTENSION_KEY,
+  PurposeExtensionSchema,
+  getPurposeExtension,
   // Shared validators
   Sha256DigestSchema,
   HttpsUriHintSchema,
@@ -623,6 +633,9 @@ export type {
   CustodyEntry,
   SlsaLevel,
   ProvenanceExtension,
+  ContentSignalSource,
+  AttributionExtension,
+  PurposeExtension,
 } from './wire-02-extensions';
 
 // Wire 0.2 registry constants (v0.12.0-preview.1, DD-155)

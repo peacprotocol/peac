@@ -286,14 +286,14 @@
         "id": "org.peacprotocol/attribution-event",
         "pillar": "attribution",
         "description": "Content or action attribution evidence",
-        "extension_group": null,
+        "extension_group": "org.peacprotocol/attribution",
         "status": "informational"
       },
       {
         "id": "org.peacprotocol/purpose-declaration",
         "pillar": "purpose",
         "description": "Purpose declaration or limitation evidence",
-        "extension_group": null,
+        "extension_group": "org.peacprotocol/purpose",
         "status": "informational"
       }
     ]
@@ -349,6 +349,16 @@
       {
         "id": "org.peacprotocol/provenance",
         "description": "Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/attribution",
+        "description": "Attribution extension: creator_ref, license_spdx, obligation_type, attribution_text, content_signal_source, content_digest",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/purpose",
+        "description": "Purpose extension: external_purposes, purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping",
         "status": "informational"
       }
     ]

@@ -20,6 +20,8 @@ import { PRIVACY_EXTENSION_KEY, PrivacyExtensionSchema } from './privacy.js';
 import { SAFETY_EXTENSION_KEY, SafetyExtensionSchema } from './safety.js';
 import { COMPLIANCE_EXTENSION_KEY, ComplianceExtensionSchema } from './compliance.js';
 import { PROVENANCE_EXTENSION_KEY, ProvenanceExtensionSchema } from './provenance.js';
+import { ATTRIBUTION_EXTENSION_KEY, AttributionExtensionSchema } from './attribution.js';
+import { PURPOSE_EXTENSION_KEY, PurposeExtensionSchema } from './purpose-extension.js';
 
 /** Map from known extension key to its Zod schema */
 export const EXTENSION_SCHEMA_MAP = new Map<string, z.ZodTypeAny>();
@@ -33,3 +35,5 @@ EXTENSION_SCHEMA_MAP.set(PRIVACY_EXTENSION_KEY, PrivacyExtensionSchema);
 EXTENSION_SCHEMA_MAP.set(SAFETY_EXTENSION_KEY, SafetyExtensionSchema);
 EXTENSION_SCHEMA_MAP.set(COMPLIANCE_EXTENSION_KEY, ComplianceExtensionSchema);
 EXTENSION_SCHEMA_MAP.set(PROVENANCE_EXTENSION_KEY, ProvenanceExtensionSchema);
+EXTENSION_SCHEMA_MAP.set(ATTRIBUTION_EXTENSION_KEY, AttributionExtensionSchema);
+EXTENSION_SCHEMA_MAP.set(PURPOSE_EXTENSION_KEY, PurposeExtensionSchema);

@@ -30,6 +30,10 @@ import { COMPLIANCE_EXTENSION_KEY, ComplianceExtensionSchema } from './complianc
 import type { ComplianceExtension } from './compliance.js';
 import { PROVENANCE_EXTENSION_KEY, ProvenanceExtensionSchema } from './provenance.js';
 import type { ProvenanceExtension } from './provenance.js';
+import { ATTRIBUTION_EXTENSION_KEY, AttributionExtensionSchema } from './attribution.js';
+import type { AttributionExtension } from './attribution.js';
+import { PURPOSE_EXTENSION_KEY, PurposeExtensionSchema } from './purpose-extension.js';
+import type { PurposeExtension } from './purpose-extension.js';
 
 // ---------------------------------------------------------------------------
 // Internal helper
@@ -143,4 +147,18 @@ export function getProvenanceExtension(
   extensions?: Record<string, unknown>
 ): ProvenanceExtension | undefined {
   return getExtension(extensions, PROVENANCE_EXTENSION_KEY, ProvenanceExtensionSchema);
+}
+
+/** @throws PEACError with RFC 6901 pointer if present but invalid */
+export function getAttributionExtension(
+  extensions?: Record<string, unknown>
+): AttributionExtension | undefined {
+  return getExtension(extensions, ATTRIBUTION_EXTENSION_KEY, AttributionExtensionSchema);
+}
+
+/** @throws PEACError with RFC 6901 pointer if present but invalid */
+export function getPurposeExtension(
+  extensions?: Record<string, unknown>
+): PurposeExtension | undefined {
+  return getExtension(extensions, PURPOSE_EXTENSION_KEY, PurposeExtensionSchema);
 }

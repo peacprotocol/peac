@@ -79,6 +79,17 @@ export {
 } from './provenance.js';
 export type { CustodyEntry, SlsaLevel, ProvenanceExtension } from './provenance.js';
 
+export {
+  ATTRIBUTION_EXTENSION_KEY,
+  CONTENT_SIGNAL_SOURCES,
+  ContentSignalSourceSchema,
+  AttributionExtensionSchema,
+} from './attribution.js';
+export type { ContentSignalSource, AttributionExtension } from './attribution.js';
+
+export { PURPOSE_EXTENSION_KEY, PurposeExtensionSchema } from './purpose-extension.js';
+export type { PurposeExtension } from './purpose-extension.js';
+
 // Typed accessors
 export {
   getCommerceExtension,
@@ -91,6 +102,8 @@ export {
   getSafetyExtension,
   getComplianceExtension,
   getProvenanceExtension,
+  getAttributionExtension,
+  getPurposeExtension,
 } from './accessors.js';
 
 // Envelope validation helper (used by Wire02ClaimsSchema.superRefine)

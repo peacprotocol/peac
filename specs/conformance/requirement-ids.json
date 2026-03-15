@@ -1346,6 +1346,136 @@
           "enforcement_class": "hard_fail",
           "introduced_in": "0.12.2",
           "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-054",
+          "keyword": "MUST",
+          "summary": "Provenance extension: source_uri and build_provenance_uri are HTTPS locator hints only",
+          "source_fragment": "`source_uri` and `build_provenance_uri` HTTPS URI hint optional: locator hints only; callers MUST NOT auto-fetch.",
+          "source_fragment_hash": "sha256:369e48a0cbe003e4290b8817948023d341744cc3445ef5e0b5f8ab8eed06f68c",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-055",
+          "keyword": "REQUIRED",
+          "summary": "Attribution extension: creator_ref is REQUIRED",
+          "source_fragment": "`creator_ref` string REQUIRED: identifies the creator.",
+          "source_fragment_hash": "sha256:97a506548e347b92f202d916486f02f081581f73b7229f22d8729ac163cd6018",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-056",
+          "keyword": "SHOULD",
+          "summary": "Attribution extension: license_spdx uses parser-grade SPDX validator",
+          "source_fragment": "`license_spdx` SPDX expression optional: uses the parser-grade SPDX license expression validator.",
+          "source_fragment_hash": "sha256:f897ef7cc16f279befa9d50e2ab61608cae47987a83f1d58ad397c26b1322c08",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-057",
+          "keyword": "MUST",
+          "summary": "Attribution extension: content_signal_source is closed enum",
+          "source_fragment": "`content_signal_source` enum optional: tdmrep_json, content_signal_header, content_usage_header, robots_txt, custom.",
+          "source_fragment_hash": "sha256:9eb9c06f5aa56fb2ec8867e4947fe4956c996a700abd68ff197b5e8636ce50f6",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-058",
+          "keyword": "SHOULD",
+          "summary": "Attribution extension: content_digest uses typed SHA-256 digest validation",
+          "source_fragment": "`content_digest` SHA-256 digest optional: uses `Sha256DigestSchema` for typed digest validation.",
+          "source_fragment_hash": "sha256:f9df2fb27b768f7990151d341035a40494d3f42f9a7ccfaaf62d8955d5a06636",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-059",
+          "keyword": "MUST",
+          "summary": "Attribution extension: .strict() rejects unknown properties",
+          "source_fragment": "`.strict()` rejects unknown properties: the attribution extension uses `.strict()` mode; unrecognized fields are rejected.",
+          "source_fragment_hash": "sha256:47003ad9870adb66488f4a3f28327ae249487ff2b91493cc970fd5999a484757",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-060",
+          "keyword": "SHOULD",
+          "summary": "Attribution extension: records observed metadata, not identity attestation (design guidance)",
+          "source_fragment": "Not an identity attestation; records observed attribution metadata.",
+          "source_fragment_hash": "sha256:f2ed1b90e528aceb625c676ba9908b997b7f433ed921d9b580a8e5b859c6c2c9",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-061",
+          "keyword": "REQUIRED",
+          "summary": "Purpose extension: external_purposes is REQUIRED, min 1, max 32 items",
+          "source_fragment": "`external_purposes` string[] REQUIRED min 1 max 32 items: external/legal/business purpose labels.",
+          "source_fragment_hash": "sha256:d11d9ae832701052b15c6ef52a73b3d48589b26cdf80209c83e16b24ee6d54dc",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-062",
+          "keyword": "SHOULD",
+          "summary": "Purpose extension: purpose_basis is open vocabulary",
+          "source_fragment": "`purpose_basis` string optional: legal or policy basis for the declared purposes.",
+          "source_fragment_hash": "sha256:4d53de5af04b137171e9cedb767934d1cf8bd98206c1951bbd9f225e31b2b727",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-063",
+          "keyword": "SHOULD",
+          "summary": "Purpose extension: peac_purpose_mapping bridges to operational tokens",
+          "source_fragment": "`peac_purpose_mapping` string optional: explicit bridge to a PEAC operational CanonicalPurpose token.",
+          "source_fragment_hash": "sha256:82831a0e370e06ea44d5b13c3d87bc9c8a98ed0cbdaf3900a091e006bc70be5e",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-064",
+          "keyword": "MUST",
+          "summary": "Purpose extension: .strict() rejects unknown properties",
+          "source_fragment": "`.strict()` rejects unknown properties: the purpose extension uses `.strict()` mode; unrecognized fields are rejected.",
+          "source_fragment_hash": "sha256:371bb62d235b518b0148847fc7b77a04af8a5c5853ee92a7bc36da63e6afd86a",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-065",
+          "keyword": "MUST",
+          "summary": "Purpose extension: external_purposes and compatible_purposes enforce machine-safe token grammar and uniqueness",
+          "source_fragment": "Each item MUST match the machine-safe token grammar and items MUST be unique.",
+          "source_fragment_hash": "sha256:4c0eaebcdbfa11fb123d581db002ef228de34c92b047ef7602c464097fa328c4",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
+        },
+        {
+          "id": "WIRE02-EXT-066",
+          "keyword": "MUST",
+          "summary": "Purpose extension: peac_purpose_mapping validated against PURPOSE_TOKEN_REGEX",
+          "source_fragment": "Validated against PURPOSE_TOKEN_REGEX.",
+          "source_fragment_hash": "sha256:85cc89fb485a60a1c6e8f8423d51ac25f3c9ed34cf34e8805616f99604217cf3",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.2",
+          "last_reviewed_in": "0.12.2"
         }
       ]
     },
