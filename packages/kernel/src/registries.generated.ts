@@ -213,7 +213,8 @@ export const PROOF_TYPES: readonly ProofTypeEntry[] = [
   {
     id: 'eat-background-check',
     category: 'rats',
-    description: 'Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)',
+    description:
+      'Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)',
     reference: 'https://www.rfc-editor.org/rfc/rfc9711',
     status: 'informational',
   },
@@ -347,12 +348,14 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   },
   {
     id: 'org.peacprotocol/compliance',
-    description: 'Compliance extension: framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref',
+    description:
+      'Compliance extension: framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/consent',
-    description: 'Consent extension: consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction',
+    description:
+      'Consent extension: consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction',
     status: 'informational',
   },
   {
@@ -367,17 +370,20 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   },
   {
     id: 'org.peacprotocol/privacy',
-    description: 'Privacy extension: data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism',
+    description:
+      'Privacy extension: data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/provenance',
-    description: 'Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa',
+    description:
+      'Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/safety',
-    description: 'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
+    description:
+      'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
     status: 'informational',
   },
 ];
