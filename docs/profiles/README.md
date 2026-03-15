@@ -9,7 +9,8 @@ enforces field structure; `verifyLocal()` enforces protocol behavior including
 type-to-extension enforcement. Profiles document recommended usage patterns on
 top of those layers.
 
-See `reference/PROFILE_RULES.md` for the architectural boundary between profiles and schemas.
+Profiles constrain existing schema fields; they never add new wire format fields.
+See `docs/specs/WIRE-0.2.md` section 12 for the normative extension group specification.
 
 ## Available Profiles
 
@@ -20,6 +21,8 @@ regulatory, operational, or evidence workflow.
 
 | Profile                       | Extension Group                | Since   | Status |
 | ----------------------------- | ------------------------------ | ------- | ------ |
+| [Access](access.md)           | `org.peacprotocol/access`      | v0.12.2 | Draft  |
+| [Identity](identity.md)       | `org.peacprotocol/identity`    | v0.12.2 | Draft  |
 | [Consent](consent.md)         | `org.peacprotocol/consent`     | v0.12.2 | Draft  |
 | [Privacy](privacy.md)         | `org.peacprotocol/privacy`     | v0.12.2 | Draft  |
 | [Safety](safety.md)           | `org.peacprotocol/safety`      | v0.12.2 | Draft  |
@@ -79,7 +82,7 @@ receipts for a specific integration. Requires a backing package.
 3. **Package / Function**: the backing `@peac/rails-*` or `@peac/adapter-*` package
 4. **Mapping**: input/output field mapping tables
 5. **Validation rules**: numbered, testable invariants
-6. **Conformance vectors**: link to `specs/conformance/fixtures/<category>/`
+6. **Conformance vectors**: link to fixtures in `specs/conformance/fixtures/` under the relevant category
 7. **Quick demo**: a runnable command a stranger can execute in under 5 minutes
 8. **Example**: inline code showing the happy path
 
