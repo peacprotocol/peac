@@ -2,7 +2,7 @@
   "$schema": "https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json",
   "version": "0.12.2",
   "spec_file": "docs/specs/WIRE-0.2.md",
-  "generated_at": "2026-03-16T07:33:22.568Z",
+  "generated_at": "2026-03-16T07:37:38.550Z",
   "sections": [
     {
       "section_number": 2,
