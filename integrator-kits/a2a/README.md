@@ -1,21 +1,121 @@
 # PEAC Integration Kit: Agent-to-Agent Protocol (A2A)
 
-Integration guide for adding PEAC receipt metadata to A2A agent cards and task flows.
+Carry signed receipts across A2A agent flows: declare PEAC support in your Agent Card, attach receipts to task metadata, and extract/verify them on the receiving side.
 
-## Status
+## Overview
 
-Integration kit: expanding to full guide with working code examples (v0.12.3). The `@peac/mappings-a2a` package is published and stable since v0.11.1; A2A v1.0.0 dual-version support is planned for v0.12.3.
+PEAC integrates with A2A at the metadata layer. Receipts travel as Evidence Carriers inside A2A TaskStatus metadata, using the reverse-DNS extension URI `org.peacprotocol`. No A2A protocol changes are required; PEAC uses the standard metadata extension mechanism.
 
-## Quick Start
+## Prerequisites
+
+- Node.js >= 22.0.0
+- `@peac/mappings-a2a`, `@peac/protocol`, `@peac/crypto`
 
 ```bash
-npm install @peac/mappings-a2a @peac/crypto @peac/protocol
+pnpm add @peac/mappings-a2a @peac/protocol @peac/crypto
 ```
 
-See [examples/a2a-gateway-pattern](../../examples/a2a-gateway-pattern/) for a working A2A carrier mapping example.
+## Quick Start: Attach a Receipt to a Task
 
-## Reference
+```typescript
+import { generateKeypair } from '@peac/crypto';
+import { issue } from '@peac/protocol';
+import { attachReceiptToTaskStatus, type A2ATaskStatusLike } from '@peac/mappings-a2a';
+import { computeReceiptRef } from '@peac/schema';
 
-- `@peac/mappings-a2a`: A2A carrier adapter (attach, extract, discover)
-- A2A specification: https://a2a-protocol.org
-- A2A v1.0 announcement: https://a2a-protocol.org/latest/announcing-1.0/
+const { publicKey, privateKey } = await generateKeypair();
+
+// Issue a receipt
+const { jws } = await issue({
+  iss: 'https://gateway.example.com',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '5000',
+      currency: 'USD',
+    },
+  },
+  privateKey,
+  kid: 'gateway-key',
+});
+
+// Attach to A2A TaskStatus
+const taskStatus: A2ATaskStatusLike = { state: 'completed', metadata: {} };
+const ref = await computeReceiptRef(jws);
+attachReceiptToTaskStatus(taskStatus, [{ receipt_ref: ref, receipt_jws: jws }]);
+// taskStatus.metadata now contains the PEAC carrier
+```
+
+## Use Case 1: Gateway Issues Receipts per State Transition
+
+A gateway agent issues one receipt per A2A task state transition (submitted, working, completed), building a verifiable chain.
+
+See [examples/a2a-gateway-pattern](../../examples/a2a-gateway-pattern/) for the full runnable demo.
+
+## Use Case 2: Consumer Extracts and Verifies Receipts
+
+```typescript
+import { extractReceiptFromTaskStatusAsync } from '@peac/mappings-a2a';
+import { verifyLocal } from '@peac/protocol';
+
+const extracted = await extractReceiptFromTaskStatusAsync(taskStatus);
+if (extracted) {
+  for (const carrier of extracted.receipts) {
+    if (!carrier.receipt_jws) continue;
+    const result = await verifyLocal(carrier.receipt_jws, publicKey);
+    console.log(result.valid ? 'Verified' : `Failed: ${result.code}`);
+  }
+}
+```
+
+## Use Case 3: Declare PEAC in Your Agent Card
+
+Add the PEAC extension to your A2A Agent Card so peers know you support receipts:
+
+```json
+{
+  "name": "My Agent",
+  "url": "https://agent.example.com",
+  "capabilities": {
+    "extensions": [
+      {
+        "uri": "org.peacprotocol",
+        "required": false,
+        "description": "PEAC evidence receipts for verifiable interaction records"
+      }
+    ]
+  }
+}
+```
+
+Check for PEAC support: `hasPeacExtension(agentCard)` returns `true` if declared.
+
+## Configuration
+
+| Option        | Type     | Required | Description                                             |
+| ------------- | -------- | -------- | ------------------------------------------------------- |
+| `receipt_ref` | `string` | Yes      | SHA-256 hash of the compact JWS (`computeReceiptRef()`) |
+| `receipt_jws` | `string` | Yes      | The compact JWS receipt                                 |
+| `receipt_url` | `string` | No       | Optional HTTPS locator hint (not auto-fetched)          |
+
+Transport size limit: 64 KB for MCP/A2A/UCP embed.
+
+## Troubleshooting
+
+**No receipts found after extraction:**
+Verify the metadata key is `org.peacprotocol` (not `org.peacprotocol/receipt`). Check `hasPeacExtension()` on the agent card.
+
+**Receipt ref mismatch:**
+The `receipt_ref` must equal `sha256(receipt_jws)`. Use `computeReceiptRef()` from `@peac/schema`.
+
+**Verification fails with E_ISS_NOT_CANONICAL:**
+The `iss` field must be `https://` (ASCII, RFC 3986) or `did:` (DID Core). No other schemes are accepted.
+
+## Next Steps
+
+- [Agent Identity](../../examples/agent-identity/) for ActorBinding and proof types
+- [Workflow Correlation](../../examples/workflow-correlation/) for multi-step DAG linking
+- [Evidence Carrier Contract](../../docs/specs/EVIDENCE-CARRIER-CONTRACT.md) for transport details
+- [A2A Protocol](https://a2a-protocol.org) for the upstream specification

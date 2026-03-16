@@ -111,14 +111,16 @@ See [examples/wire-02-minimal/](examples/wire-02-minimal/) for the full source. 
 
 ---
 
-## Start with the outcome you want
+## Start here
 
-- **Add signed proof to an HTTP API**: [Quickstart](docs/README_LONG.md#httprest-integration) or [Express middleware](docs/README_LONG.md#express-middleware)
-- **Add evidence to an MCP server**: [MCP server](packages/mcp-server/)
-- **Carry proof through A2A**: [A2A carrier mapping](packages/mappings/a2a/)
-- **Author machine-readable terms**: [Policy Kit](docs/policy-kit/quickstart.md)
-- **Verify a receipt locally**: [Quick start](#verify-a-receipt) above or [CLI](#cli)
-- **Create an evidence bundle**: [Dispute Bundles](docs/README_LONG.md#dispute-bundle)
+**[Full decision tree with quickstarts and integration kits](docs/START_HERE.md)**
+
+- **I run an API**: [API Provider Quickstart](docs/guides/quickstart-api-provider.md) (5 minutes, Express middleware)
+- **I run an MCP server**: [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`
+- **I want to verify a receipt**: [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md) (5 minutes)
+- **I build A2A agents**: [A2A Integration Kit](integrator-kits/a2a/README.md)
+- **I integrate x402 payments**: [x402 Integration Kit](integrator-kits/x402/README.md)
+- **I need compliance/audit evidence**: [Governance Mappings](docs/governance/)
 - **Build in Go**: [Go SDK](sdks/go/)
 
 ---
