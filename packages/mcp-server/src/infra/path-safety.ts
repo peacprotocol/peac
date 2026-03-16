@@ -2,7 +2,7 @@
  * TOCTOU-hardened filesystem utilities for bundle creation
  *
  * All path operations validate against symlink injection and traversal.
- * Zero MCP SDK imports (DD-57).
+ * Zero MCP SDK imports.
  */
 
 import { lstat, mkdir, rename, rm, mkdtemp } from 'node:fs/promises';

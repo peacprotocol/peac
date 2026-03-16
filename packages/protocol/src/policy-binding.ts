@@ -1,12 +1,12 @@
 /**
- * Policy binding utilities (Layer 3, DD-49, DD-151)
+ * Policy binding utilities (Layer 3)
  *
  * JCS (RFC 8785) canonicalization + SHA-256 for policy digest computation,
  * and the 3-state binding check that combines receipt and local digests.
  *
  * The JCS + hash computation lives in Layer 3 (@peac/protocol) rather than
  * Layer 1 (@peac/schema) to avoid introducing crypto dependencies into the
- * schema package (DD-141: @peac/schema is validation-only).
+ * schema package (@peac/schema is validation-only).
  *
  * The pure string comparison (verifyPolicyBinding) lives in Layer 1
  * (@peac/schema) so that consumers who only need to check pre-computed
@@ -27,7 +27,7 @@ import { verifyPolicyBinding } from '@peac/schema';
  * the PEAC self-describing hash format: 'sha256:<64 lowercase hex>'.
  *
  * This is the normative digest format for the policy.digest field in Wire 0.2
- * receipts (DD-151). The format is stable and identical across implementations.
+ * receipts. The format is stable and identical across implementations.
  *
  * Callers MUST pass the same JSON structure that was embedded in the receipt's
  * policy block when issuing. Key order is irrelevant; JCS normalizes it.
@@ -45,7 +45,7 @@ export async function computePolicyDigestJcs(policy: JsonValue): Promise<string>
 /**
  * Compute the 3-state policy binding result.
  *
- * Three-state semantics (DD-151):
+ * Three-state semantics:
  *   - 'unavailable': either digest is absent (receipt has no policy block, or
  *     caller did not provide a local digest). No binding check performed.
  *   - 'verified': both digests present and match exactly.

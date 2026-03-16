@@ -1,5 +1,5 @@
 /**
- * MCP Streamable HTTP transport (DD-119, DD-123)
+ * MCP Streamable HTTP transport
  *
  * Adds HTTP transport alongside stdio. Unprotected mode only (v0.11.0).
  * Each session gets its own McpServer + transport (CVE-2026-25536 defense).

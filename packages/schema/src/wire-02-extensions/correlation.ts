@@ -3,7 +3,7 @@
  *
  * Records workflow correlation and traceability metadata.
  * OpenTelemetry-compatible trace and span IDs.
- * Shipped in v0.12.0-preview.1 (DD-153).
+ * Shipped in v0.12.0-preview.1.
  */
 
 import { z } from 'zod';

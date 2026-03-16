@@ -20,7 +20,7 @@ export type {
   ControlEngineEntry,
   TransportMethodEntry,
   AgentProtocolEntry,
-  // Wire 0.2 types (v0.12.0-preview.1, DD-156)
+  // Wire 0.2 types (v0.12.0-preview.1)
   Wire02Kind,
   EvidencePillar,
 } from './types.js';
@@ -53,7 +53,7 @@ export {
   VERIFIER_POLICY_VERSION,
   VERIFICATION_MODES,
   CONSTANTS,
-  // Wire 0.2 constants (v0.12.0-preview.1, DD-156)
+  // Wire 0.2 constants (v0.12.0-preview.1)
   WIRE_01_JWS_TYP,
   WIRE_02_JWS_TYP,
   WIRE_02_JWS_TYP_ACCEPT,
@@ -64,14 +64,14 @@ export {
   POLICY_BLOCK,
   OCCURRED_AT_TOLERANCE_SECONDS,
   PEAC_ALG,
-  // Extension byte-budget constants (v0.12.2, DD-173.4)
+  // Extension byte-budget constants (v0.12.2)
   EXTENSION_BUDGET,
 } from './constants.js';
 
-// Wire 0.2 constant types (v0.12.0-preview.1, DD-156)
+// Wire 0.2 constant types (v0.12.0-preview.1)
 export type { WireVersion, VerificationStrictness } from './constants.js';
 
-// Wire 0.2 primitive types (v0.12.0-preview.1, DD-156)
+// Wire 0.2 primitive types (v0.12.0-preview.1)
 export type { PolicyBlock, RepresentationFields, VerificationWarning } from './wire-02-types.js';
 
 // Export errors
@@ -85,7 +85,7 @@ export {
   type ErrorCode,
 } from './errors.js';
 
-// Export registries (auto-generated from specs/kernel/registries.json, v0.12.2 DD-183)
+// Export registries (auto-generated from specs/kernel/registries.json, v0.12.2 )
 // The generated file supersedes the manual registries.ts; legacy registries.ts
 // is kept but no longer re-exported from the barrel.
 export {
@@ -116,7 +116,7 @@ export type {
 // Export HTTP utilities (cache safety, header management)
 export { VARY_HEADERS, applyPurposeVary, getPeacVaryHeaders, needsPurposeVary } from './http.js';
 
-// Evidence Carrier Contract types (v0.11.1+ DD-124)
+// Evidence Carrier Contract types (v0.11.1+ )
 export { PEAC_RECEIPT_HEADER, PEAC_RECEIPT_URL_HEADER } from './carrier.js';
 export type {
   ReceiptRef,

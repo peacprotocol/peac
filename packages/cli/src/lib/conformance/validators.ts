@@ -392,7 +392,7 @@ function validateIssueInput(input: unknown): ValidationResult {
 }
 
 /**
- * Valid next_action values (DD-133 closed vocabulary)
+ * Valid next_action values (closed vocabulary)
  */
 const VALID_NEXT_ACTIONS = new Set([
   'retry_after_delay',
@@ -405,7 +405,7 @@ const VALID_NEXT_ACTIONS = new Set([
 ]);
 
 /**
- * Validate error hint table (DD-132, DD-133)
+ * Validate error hint table
  *
  * Validates the shape of the next-action-hints.json fixture:
  * - Must have a `hints` object

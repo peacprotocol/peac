@@ -1,5 +1,5 @@
 /**
- * Issuer Configuration Schema Tests (v0.11.3+, DD-148)
+ * Issuer Configuration Schema Tests (v0.11.3+)
  */
 import { describe, it, expect } from 'vitest';
 import {

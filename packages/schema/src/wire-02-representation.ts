@@ -1,10 +1,10 @@
 /**
- * Wire 0.2 RepresentationFields schema (DD-152)
+ * Wire 0.2 RepresentationFields schema
  *
  * Records metadata about the content representation that was observed or served,
  * enabling reproducible content drift detection.
  *
- * Layer 1 (@peac/schema): pure Zod validation, zero I/O (DD-141).
+ * Layer 1 (@peac/schema): pure Zod validation, zero I/O.
  *
  * content_hash validation uses stringToFingerprintRef() as the parser gate
  * and additionally requires alg === 'sha256'. The hmac-sha256 algorithm is
@@ -72,7 +72,7 @@ export const REPRESENTATION_LIMITS = {
 // ---------------------------------------------------------------------------
 
 /**
- * Zod schema for Wire 0.2 representation fields (DD-152).
+ * Zod schema for Wire 0.2 representation fields.
  *
  * All fields are optional; an empty object is valid.
  * Unknown keys are rejected (.strict()).

@@ -6,8 +6,8 @@
  *          select transport -> create server -> connect
  *
  * Transports:
- *   stdio (default): stdin/stdout JSON-RPC, stdout fence (DD-58)
- *   http: Streamable HTTP on configurable port, session-isolated (DD-119)
+ *   stdio (default): stdin/stdout JSON-RPC, stdout fence
+ *   http: Streamable HTTP on configurable port, session-isolated
  */
 
 import { stat as fsStat, realpath } from 'node:fs/promises';
@@ -152,7 +152,7 @@ program
     process.stderr.write(`  Policy hash: ${policyHash.slice(0, 16)}...\n`);
 
     if (transportType === 'http') {
-      // --- HTTP transport (DD-119) ---
+      // --- HTTP transport ---
       const { createHttpTransport } = await import('./http-transport.js');
 
       const corsOrigins = opts.corsOrigins
@@ -185,7 +185,7 @@ program
       // --- stdio transport (default, unchanged) ---
       const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
 
-      // Install stdout fence BEFORE connecting transport (DD-58)
+      // Install stdout fence BEFORE connecting transport
       const teardownFence = installStdoutFence();
 
       const server = createPeacMcpServer(serverOptions);

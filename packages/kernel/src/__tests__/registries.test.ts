@@ -94,7 +94,7 @@ describe('registries.json structure', () => {
     }
   });
 
-  it('should have all proof types (DD-143)', () => {
+  it('should have all proof types', () => {
     expect(registries.proof_types).toBeTruthy();
     const proofTypeIds = registries.proof_types.map((e: { id: string }) => e.id);
     expect(proofTypeIds).toContain('ed25519-cert-chain');

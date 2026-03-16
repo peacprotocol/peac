@@ -1,5 +1,5 @@
 /**
- * Verify handler -- ZERO MCP SDK imports (DD-57)
+ * Verify handler -- ZERO MCP SDK imports
  *
  * Resolves key from input or context, delegates to verifyLocal.
  *

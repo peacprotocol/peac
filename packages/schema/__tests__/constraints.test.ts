@@ -1,5 +1,5 @@
 /**
- * Unit tests for kernel constraints (DD-60)
+ * Unit tests for kernel constraints
  *
  * Tests the KERNEL_CONSTRAINTS constants and validateKernelConstraints()
  * function that provides iterative, stack-safe structural validation.

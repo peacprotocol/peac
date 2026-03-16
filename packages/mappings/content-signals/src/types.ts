@@ -1,8 +1,8 @@
 /**
- * Content Signal Types (DD-136, DD-137)
+ * Content Signal Types
  *
  * Types for content use policy signal observation.
- * Signals RECORD observations, never enforce (DD-95 rail neutrality).
+ * Signals RECORD observations, never enforce (rail neutrality).
  */
 
 // ---------------------------------------------------------------------------
@@ -10,14 +10,14 @@
 // ---------------------------------------------------------------------------
 
 /**
- * Signal source identifier (DD-137 precedence order).
+ * Signal source identifier (precedence order).
  *
  * Note: Content-Signal header is reserved for a future version when a parser
  * is implemented. Only sources with shipped parsers are included here.
  */
 export type SignalSource = 'tdmrep-json' | 'content-usage-header' | 'robots-txt';
 
-/** Three-state signal decision (DD-136) */
+/** Three-state signal decision */
 export type SignalDecision = 'allow' | 'deny' | 'unspecified';
 
 /**
@@ -137,7 +137,7 @@ export const AI_USER_AGENTS: Record<string, ContentPurpose[]> = {
 };
 
 /**
- * Signal source precedence (DD-137).
+ * Signal source precedence.
  * Lower index = higher priority.
  *
  * Note: Content-Signal header is reserved for a future version.

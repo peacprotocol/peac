@@ -1,5 +1,5 @@
 /**
- * Fuzz boundary tests for kernel constraints (DD-60, DD-118)
+ * Fuzz boundary tests for kernel constraints
  *
  * Tests boundary conditions at exact constraint limits:
  * - Depth: 31 (valid, leaf at 32), 32 (violation, leaf at 33), 33+ (violation)

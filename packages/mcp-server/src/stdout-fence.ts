@@ -1,5 +1,5 @@
 /**
- * Stdout fence (DD-58: line-buffered JSON-RPC validator)
+ * Stdout fence (line-buffered JSON-RPC validator)
  *
  * Monkey-patches process.stdout.write at startup.
  * Buffers bytes, splits on newline, validates each complete line

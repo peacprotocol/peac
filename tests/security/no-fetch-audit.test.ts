@@ -1,11 +1,11 @@
 /**
- * Static no-fetch audit (DD-55, DD-141)
+ * Static no-fetch audit
  *
  * Verifies that core packages (@peac/kernel, @peac/schema, @peac/crypto,
  * @peac/adapter-eat) contain zero network I/O paths in their source.
  *
- * These packages are validation-only (DD-141) and must never perform
- * implicit fetch (DD-55). Any receipt resolution or network access
+ * These packages are validation-only and must never perform
+ * implicit fetch. Any receipt resolution or network access
  * belongs in Layer 4+ (@peac/net-node).
  */
 

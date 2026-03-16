@@ -613,7 +613,7 @@ describe('resolveJWKS (strict discovery)', () => {
   });
 
   // ------------------------------------------------------------------
-  // Kid reuse detection (DD-148)
+  // Kid reuse detection
   // ------------------------------------------------------------------
 
   it('detects kid reuse when same kid maps to different key material', async () => {
@@ -740,7 +740,7 @@ describe('resolveJWKS (strict discovery)', () => {
   });
 
   // ------------------------------------------------------------------
-  // Revoked keys passthrough (DD-148)
+  // Revoked keys passthrough
   // ------------------------------------------------------------------
 
   it('passes revoked_keys from issuer config to resolve result', async () => {

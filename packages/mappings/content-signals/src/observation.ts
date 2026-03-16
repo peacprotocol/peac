@@ -40,8 +40,8 @@ export interface CreateObservationInput {
 /**
  * Create a ContentSignalObservation from pre-fetched signal sources.
  *
- * All inputs are pre-fetched content (no network I/O, DD-55).
- * Signals are parsed from each source and resolved using DD-137 precedence.
+ * All inputs are pre-fetched content (no network I/O).
+ * Signals are parsed from each source and resolved using precedence.
  *
  * @param input - Pre-fetched signal sources
  * @returns ContentSignalObservation with resolved signals
@@ -69,7 +69,7 @@ export function createObservation(input: CreateObservationInput): ContentSignalO
     allEntries.push(...entries);
   }
 
-  // Resolve signals using DD-137 precedence
+  // Resolve signals using precedence
   const resolved = resolveSignals(allEntries);
 
   return {

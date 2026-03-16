@@ -1,5 +1,5 @@
 /**
- * UCP carrier adapter for Evidence Carrier Contract (DD-124).
+ * UCP carrier adapter for Evidence Carrier Contract.
  *
  * Normalizes UCP webhook evidence to PeacEvidenceCarrier format
  * and attaches carriers to webhook payloads via peac_evidence field.
@@ -21,7 +21,7 @@ import {
 // Constants
 // ---------------------------------------------------------------------------
 
-/** UCP carrier max size (64 KB, DD-127) */
+/** UCP carrier max size (64 KB) */
 export const UCP_MAX_CARRIER_SIZE = 65_536;
 
 /** Legacy extension key for interaction evidence */
@@ -125,7 +125,7 @@ export function extractCarrierFromWebhookPayload(
 }
 
 /**
- * Extract carrier from UCP webhook payload (async, DD-129).
+ * Extract carrier from UCP webhook payload (async).
  *
  * Performs structural validation AND receipt_ref consistency check.
  */

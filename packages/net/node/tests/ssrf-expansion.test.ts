@@ -1,5 +1,5 @@
 /**
- * SSRF Expansion Tests (PR 5: Security Hardening, DD-90 Gate 9)
+ * SSRF Expansion Tests (PR 5: Security Hardening Gate 9)
  *
  * Targeted vectors that complement the existing 283-test safe-fetch suite.
  * Focus areas: scheme blocking, redirect-to-private chains, IPv6 edge cases,

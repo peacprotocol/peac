@@ -113,7 +113,7 @@ export async function verifyReceipt(
     // Decode JWS to get issuer
     const { header, payload } = decode<PEACReceiptClaims>(receiptJws);
 
-    // Validate structural kernel constraints (DD-121, fail-closed)
+    // Validate structural kernel constraints (fail-closed)
     const constraintResult = validateKernelConstraints(payload);
     if (!constraintResult.valid) {
       const v = constraintResult.violations[0];
@@ -161,7 +161,7 @@ export async function verifyReceipt(
       jwksFetchTime = performance.now() - jwksFetchStart;
     }
 
-    // Check if key is revoked (DD-148, v0.11.3+)
+    // Check if key is revoked (v0.11.3+)
     if (jwksResult.revokedKeys) {
       const revokedEntry = jwksResult.revokedKeys.find((rk) => rk.kid === header.kid);
       if (revokedEntry) {

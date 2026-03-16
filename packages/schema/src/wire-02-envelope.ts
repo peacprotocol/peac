@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 Zod schemas and types (v0.12.0-preview.1, DD-156)
+ * Wire 0.2 Zod schemas and types (v0.12.0-preview.1)
  *
  * This file contains:
  *   - Wire02ClaimsSchema: the canonical Zod schema for Wire 0.2 envelopes
@@ -11,7 +11,7 @@
  *   - checkOccurredAtSkew(): cross-field skew check helper
  *
  * Wire02Claims does NOT live in @peac/kernel (layer violation);
- * it lives here because it references schema-layer types (Correction 4, DD-156).
+ * it lives here because it references schema-layer types (Correction 4).
  */
 
 import { z } from 'zod';
@@ -43,7 +43,7 @@ function isSortedAndUnique(arr: readonly string[]): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// isCanonicalIss (DD-156, exported helper)
+// isCanonicalIss (exported helper)
 // ---------------------------------------------------------------------------
 
 /**
@@ -207,7 +207,7 @@ export const CanonicalIssSchema = z.string().max(ISS_CANONICAL.maxLength).refine
 });
 
 // ---------------------------------------------------------------------------
-// PolicyBlockSchema (DD-151)
+// PolicyBlockSchema
 // ---------------------------------------------------------------------------
 
 export const PolicyBlockSchema = z.object({
@@ -216,7 +216,7 @@ export const PolicyBlockSchema = z.object({
   /**
    * HTTPS locator hint for the policy document.
    * MUST be an https:// URL (max 2048 chars).
-   * MUST NOT trigger auto-fetch; callers use this as a hint only (DD-55).
+   * MUST NOT trigger auto-fetch; callers use this as a hint only.
    */
   uri: z
     .string()
@@ -228,10 +228,10 @@ export const PolicyBlockSchema = z.object({
   version: z.string().max(POLICY_BLOCK.versionMaxLength).optional(),
 });
 
-// RepresentationFieldsSchema: see wire-02-representation.ts (DD-152, PR 15)
+// RepresentationFieldsSchema: see wire-02-representation.ts (PR 15)
 
 // ---------------------------------------------------------------------------
-// Wire02ClaimsSchema (DD-156)
+// Wire02ClaimsSchema
 // ---------------------------------------------------------------------------
 
 export const Wire02ClaimsSchema = z
@@ -254,9 +254,9 @@ export const Wire02ClaimsSchema = z
     pillars: PillarsSchema.optional(),
     /** Top-level actor binding (sole location for ActorBinding in Wire 0.2) */
     actor: ActorBindingSchema.optional(),
-    /** Policy binding block (DD-151) */
+    /** Policy binding block */
     policy: PolicyBlockSchema.optional(),
-    /** Representation fields (DD-152): FingerprintRef validation, sha256-only, strict */
+    /** Representation fields: FingerprintRef validation, sha256-only, strict */
     representation: Wire02RepresentationFieldsSchema.optional(),
     /** ISO 8601 / RFC 3339 timestamp when the interaction occurred; evidence kind only */
     occurred_at: z.string().datetime({ offset: true }).optional(),
@@ -273,7 +273,7 @@ export const Wire02ClaimsSchema = z
         message: 'E_OCCURRED_AT_ON_CHALLENGE',
       });
     }
-    // Validate known extension groups + reject malformed key grammar (DD-153)
+    // Validate known extension groups + reject malformed key grammar
     validateKnownExtensions(data.extensions, ctx);
   })
   .strict();
@@ -282,7 +282,7 @@ export const Wire02ClaimsSchema = z
 export type Wire02Claims = z.infer<typeof Wire02ClaimsSchema>;
 
 // ---------------------------------------------------------------------------
-// checkOccurredAtSkew (DD-156, Correction 5)
+// checkOccurredAtSkew (Correction 5)
 // ---------------------------------------------------------------------------
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 Conformance Tests (v0.12.0-preview.1, DD-156)
+ * Wire 0.2 Conformance Tests (v0.12.0-preview.1)
  *
  * Validates Wire 0.2 conformance fixtures against the schemas and protocol.
  *

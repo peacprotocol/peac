@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 verification warning codes and collector (v0.12.0-preview.1, DD-155)
+ * Wire 0.2 verification warning codes and collector (v0.12.0-preview.1)
  *
  * Warning codes are append-only stable string literals. Warnings do NOT affect
  * the allow/deny decision unless caller policy requires it.

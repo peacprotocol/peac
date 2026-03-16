@@ -21,7 +21,7 @@ describe('A2ACarrierAdapter', () => {
     expect(extracted!.receipts[0].receipt_ref).toBe(VALID_CARRIER.receipt_ref);
   });
 
-  it('round-trips receipt_url through attach and extract (DD-135)', () => {
+  it('round-trips receipt_url through attach and extract', () => {
     const carrierWithUrl: PeacEvidenceCarrier = {
       ...VALID_CARRIER,
       receipt_url: 'https://receipts.example.com/abc123',

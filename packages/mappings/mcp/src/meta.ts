@@ -1,5 +1,5 @@
 /**
- * MCP _meta carrier format (DD-125).
+ * MCP _meta carrier format.
  *
  * Attach and extract PEAC evidence carriers using MCP _meta keys.
  * Uses reverse-DNS keys under "org.peacprotocol/" prefix.
@@ -42,13 +42,13 @@ export const META_KEY_AGENT_ID = 'org.peacprotocol/agent_id' as const;
 /** _meta key for verification timestamp (v0.10.13+, unchanged) */
 export const META_KEY_VERIFIED_AT = 'org.peacprotocol/verified_at' as const;
 
-/** _meta key for receipt URL locator hint (v0.11.2+, DD-135) */
+/** _meta key for receipt URL locator hint (v0.11.2+) */
 export const META_KEY_RECEIPT_URL = 'org.peacprotocol/receipt_url' as const;
 
-/** Legacy _meta key for receipt JWS (v0.10.13, DD-125) */
+/** Legacy _meta key for receipt JWS (v0.10.13) */
 export const META_KEY_LEGACY_RECEIPT = 'org.peacprotocol/receipt' as const;
 
-/** Maximum carrier size for MCP _meta (64 KB, DD-127) */
+/** Maximum carrier size for MCP _meta (64 KB) */
 export const MCP_MAX_CARRIER_SIZE = CARRIER_TRANSPORT_LIMITS.mcp;
 
 // ---------------------------------------------------------------------------
@@ -93,7 +93,7 @@ export interface McpExtractAsyncResult extends McpExtractResult {
  * Attach PEAC evidence carrier to MCP _meta.
  *
  * Default format (v0.11.1+): writes receipt_ref and receipt_jws as separate keys.
- * Legacy format (opts.legacyFormat): writes single "receipt" key (DD-125 phase 1).
+ * Legacy format (opts.legacyFormat): writes single "receipt" key (phase 1).
  */
 export function attachReceiptToMeta(
   result: McpResultLike,
@@ -116,7 +116,7 @@ export function attachReceiptToMeta(
   }
 
   if (opts?.legacyFormat) {
-    // DD-125 legacy format: single JWS string
+    // legacy format: single JWS string
     if (carrier.receipt_jws) {
       result._meta[META_KEY_LEGACY_RECEIPT] = carrier.receipt_jws;
     }
@@ -149,7 +149,7 @@ export function attachReceiptToMeta(
 /**
  * Extract PEAC evidence carrier from MCP _meta (sync).
  *
- * Reads in order (DD-125):
+ * Reads in order:
  * 1. New carrier keys (receipt_ref + receipt_jws)
  * 2. Legacy key (org.peacprotocol/receipt, v0.10.13)
  *
@@ -186,7 +186,7 @@ export function extractReceiptFromMeta(result: McpResultLike): McpExtractResult 
     }
   }
 
-  // 2. Try legacy format (v0.10.13, DD-125 + Polish B)
+  // 2. Try legacy format (v0.10.13 + Polish B)
   const legacyReceipt = result._meta[META_KEY_LEGACY_RECEIPT];
   if (typeof legacyReceipt === 'string' && legacyReceipt.length > 0) {
     // Legacy format has JWS only; we can't compute receipt_ref synchronously.
@@ -209,7 +209,7 @@ export function extractReceiptFromMeta(result: McpResultLike): McpExtractResult 
 }
 
 /**
- * Extract PEAC evidence carrier from MCP _meta (async, DD-129).
+ * Extract PEAC evidence carrier from MCP _meta (async).
  *
  * Performs structural validation AND receipt_ref consistency check.
  * For legacy format (v0.10.13), computes receipt_ref from JWS (Polish B).
@@ -251,7 +251,7 @@ export async function extractReceiptFromMetaAsync(
     }
   }
 
-  // 2. Try legacy format (v0.10.13, DD-125 + Polish B)
+  // 2. Try legacy format (v0.10.13 + Polish B)
   const legacyReceipt = result._meta[META_KEY_LEGACY_RECEIPT];
   if (typeof legacyReceipt === 'string' && legacyReceipt.length > 0) {
     // Compute receipt_ref from legacy JWS

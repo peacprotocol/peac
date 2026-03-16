@@ -2,7 +2,7 @@
  * Challenge Extension Group (org.peacprotocol/challenge)
  *
  * Records challenge issuance with RFC 9457 Problem Details.
- * Shipped in v0.12.0-preview.1 (DD-153).
+ * Shipped in v0.12.0-preview.1.
  */
 
 import { z } from 'zod';

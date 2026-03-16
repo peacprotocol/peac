@@ -1,5 +1,5 @@
 /**
- * Property-based tests for policy binding (DD-49, DD-151, DD-158)
+ * Property-based tests for policy binding
  *
  * Uses fast-check to verify invariants:
  * 1. JCS determinism: same object with different key order produces same digest

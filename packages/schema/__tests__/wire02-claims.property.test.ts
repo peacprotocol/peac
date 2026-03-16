@@ -1,5 +1,5 @@
 /**
- * Property-based tests for Wire02ClaimsSchema (DD-156, DD-158)
+ * Property-based tests for Wire02ClaimsSchema
  *
  * Uses fast-check to verify invariants across generated inputs:
  * 1. Valid Wire 0.2 claims always parse successfully (roundtrip)

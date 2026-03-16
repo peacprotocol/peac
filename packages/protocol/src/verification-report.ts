@@ -167,7 +167,7 @@ export class VerificationReportBuilder {
       reason,
       severity: reasonCodeToSeverity(reason),
       receipt_type: options?.receiptType ?? WIRE_TYPE,
-      // Wire 0.1: always 'unavailable' (DD-49). Wire 0.2 will set this via options.
+      // Wire 0.1: always 'unavailable'. Wire 0.2 will set this via options.
       policy_binding: 'unavailable',
       ...(options?.issuer && { issuer: options.issuer }),
       ...(options?.kid && { kid: options.kid }),
@@ -254,7 +254,7 @@ export class VerificationReportBuilder {
         if (checkId === 'transport.profile_binding') {
           checks.push({ id: checkId, status: 'skip', detail: { reason: 'not_applicable' } });
         } else if (checkId === 'policy.binding') {
-          // Wire 0.1: always skip (DD-49). Wire 0.2 will produce pass/fail.
+          // Wire 0.1: always skip. Wire 0.2 will produce pass/fail.
           checks.push({
             id: checkId,
             status: 'skip',
@@ -423,7 +423,7 @@ export async function buildSuccessReport(
       continue;
     }
 
-    // policy.binding: Wire 0.1 always skip (DD-49)
+    // policy.binding: Wire 0.1 always skip
     if (checkId === 'policy.binding') {
       // Will be marked as skip with wire_01_no_policy_digest by build()
       continue;

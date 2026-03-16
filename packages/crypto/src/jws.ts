@@ -25,7 +25,7 @@ import {
 import { CryptoError } from './errors';
 
 // ---------------------------------------------------------------------------
-// JWS header types: 3-variant discriminated union (Correction 1, DD-156)
+// JWS header types: 3-variant discriminated union (Correction 1)
 // ---------------------------------------------------------------------------
 
 /**
@@ -54,7 +54,7 @@ export interface Wire02JWSHeader {
  *
  * Crypto layer passes these through without error.
  * The strictness decision (hard error vs. warning) belongs exclusively
- * in @peac/protocol.verifyLocal() (Correction 1, DD-156).
+ * in @peac/protocol.verifyLocal() (Correction 1).
  */
 export interface UnTypedJWSHeader {
   typ?: undefined;
@@ -89,7 +89,7 @@ export interface VerifyResult<T = unknown> {
 const ACCEPTED_TYP_VALUES = new Set<string>([WIRE_01_JWS_TYP, ...WIRE_02_JWS_TYP_ACCEPT]);
 
 // ---------------------------------------------------------------------------
-// validateWire02Header (exported, JOSE hardening, Correction 9, DD-156)
+// validateWire02Header (exported, JOSE hardening, Correction 9)
 // ---------------------------------------------------------------------------
 
 /**
@@ -157,7 +157,7 @@ export function validateWire02Header(header: Record<string, unknown>): void {
 
 /**
  * Build a typed JWSHeader from a raw parsed header object, applying typ
- * normalization (Correction 2, DD-156): 'application/interaction-record+jwt'
+ * normalization (Correction 2): 'application/interaction-record+jwt'
  * is normalized to 'interaction-record+jwt' before returning.
  *
  * @param raw - Raw header object from JSON.parse
@@ -348,7 +348,7 @@ export async function verify<T = unknown>(
   }
   const header = buildHeader(rawHeader);
 
-  // Apply JOSE hardening for Wire 0.2 and UnTyped tokens (Correction 1, DD-156).
+  // Apply JOSE hardening for Wire 0.2 and UnTyped tokens (Correction 1).
   // JOSE security invariants (embedded key material, crit, b64:false, zip) MUST be
   // enforced regardless of whether typ is present. Interop mode controls routing only;
   // it does not exempt tokens from key-injection or unencoded-payload attacks.

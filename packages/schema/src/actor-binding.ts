@@ -1,8 +1,8 @@
 /**
  * ActorBinding and MVIS (Minimum Viable Identity Set) Schemas (v0.11.3+)
  *
- * Implements DD-142 (ActorBinding), DD-143 (Multi-Root Proof Types),
- * and DD-144 (MVIS) for the Agent Identity Profile.
+ * Implements (ActorBinding) (Multi-Root Proof Types),
+ * and (MVIS) for the Agent Identity Profile.
  *
  * ActorBinding lives in ext["org.peacprotocol/actor_binding"] in Wire 0.1.
  * ProofTypeSchema is SEPARATE from ProofMethodSchema (agent-identity.ts)
@@ -13,11 +13,11 @@
 import { z } from 'zod';
 
 // =============================================================================
-// PROOF TYPES (DD-143: Multi-Root Proof Types)
+// PROOF TYPES (Multi-Root Proof Types)
 // =============================================================================
 
 /**
- * Proof types for ActorBinding (DD-143).
+ * Proof types for ActorBinding.
  *
  * 8 methods covering attestation chains, RATS, keyless signing,
  * decentralized identity, workload identity, PKI, and vendor-defined.
@@ -99,7 +99,7 @@ export function isOriginOnly(value: string): boolean {
 }
 
 // =============================================================================
-// ACTOR BINDING (DD-142)
+// ACTOR BINDING
 // =============================================================================
 
 /**
@@ -108,23 +108,23 @@ export function isOriginOnly(value: string): boolean {
 export const ACTOR_BINDING_EXTENSION_KEY = 'org.peacprotocol/actor_binding' as const;
 
 /**
- * ActorBinding schema (DD-142).
+ * ActorBinding schema.
  *
  * Binds an actor identity to a receipt via ext["org.peacprotocol/actor_binding"].
  * Wire 0.2 moves this to a kernel field.
  *
  * - id: Stable actor identifier (opaque, no PII)
- * - proof_type: Trust root model from DD-143 vocabulary
+ * - proof_type: Trust root model from vocabulary
  * - proof_ref: Optional URI or hash of external proof artifact
  * - origin: Origin-only URL (scheme + host + optional port; no path/query/fragment)
- * - intent_hash: Optional SHA-256 hash of the intent (hash-first per DD-138)
+ * - intent_hash: Optional SHA-256 hash of the intent (hash-first per )
  */
 export const ActorBindingSchema = z
   .object({
     /** Stable actor identifier (opaque, no PII) */
     id: z.string().min(1).max(256),
 
-    /** Proof type from DD-143 multi-root vocabulary */
+    /** Proof type from multi-root vocabulary */
     proof_type: ProofTypeSchema,
 
     /** URI or hash of external proof artifact */
@@ -136,7 +136,7 @@ export const ActorBindingSchema = z
         'origin must be an origin-only URL (scheme + host + optional port; no path, query, or fragment)',
     }),
 
-    /** SHA-256 hash of the intent (hash-first per DD-138) */
+    /** SHA-256 hash of the intent (hash-first per ) */
     intent_hash: z
       .string()
       .regex(/^sha256:[a-f0-9]{64}$/, {
@@ -149,14 +149,14 @@ export const ActorBindingSchema = z
 export type ActorBinding = z.infer<typeof ActorBindingSchema>;
 
 // =============================================================================
-// MVIS: Minimum Viable Identity Set (DD-144)
+// MVIS: Minimum Viable Identity Set
 // =============================================================================
 
 /**
- * MVIS (Minimum Viable Identity Set) fields (DD-144).
+ * MVIS (Minimum Viable Identity Set) fields.
  *
  * 5 required fields for any identity receipt to be considered complete.
- * validateMVIS() is a pure validation function with zero I/O (DD-141).
+ * validateMVIS() is a pure validation function with zero I/O.
  *
  * Fields:
  * - issuer: Who issued the identity assertion
@@ -229,9 +229,9 @@ export function validateActorBinding(
 }
 
 /**
- * Validate MVIS fields (DD-144).
+ * Validate MVIS fields.
  *
- * Pure validation function with zero I/O (DD-141).
+ * Pure validation function with zero I/O.
  * Checks that all 5 required fields are present and valid.
  * Also validates that time_bounds.not_before < time_bounds.not_after.
  *

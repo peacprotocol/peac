@@ -61,7 +61,7 @@ function isCryptoError(err: unknown): err is CryptoErrorLike {
  * These map to E_* codes in specs/kernel/errors.json.
  * JOSE hardening codes (E_JWS_*) are distinct from generic E_INVALID_FORMAT
  * so callers can distinguish key-injection, compression, and crit attacks from
- * ordinary format errors (v0.12.0-preview.1, DD-156).
+ * ordinary format errors (v0.12.0-preview.1).
  */
 export type VerifyLocalErrorCode =
   | 'E_INVALID_SIGNATURE'
@@ -77,13 +77,13 @@ export type VerifyLocalErrorCode =
   | 'E_WIRE_VERSION_MISMATCH'
   | 'E_UNSUPPORTED_WIRE_VERSION'
   | 'E_OCCURRED_AT_FUTURE'
-  // JOSE hardening codes (Wire 0.2, v0.12.0-preview.1, DD-156)
+  // JOSE hardening codes (Wire 0.2, v0.12.0-preview.1)
   | 'E_JWS_EMBEDDED_KEY'
   | 'E_JWS_CRIT_REJECTED'
   | 'E_JWS_MISSING_KID'
   | 'E_JWS_B64_REJECTED'
   | 'E_JWS_ZIP_REJECTED'
-  // Policy binding (Wire 0.2, v0.12.0-preview.1, DD-151)
+  // Policy binding (Wire 0.2, v0.12.0-preview.1)
   | 'E_POLICY_BINDING_FAILED'
   // Type-to-extension enforcement (Wire 0.2, v0.12.2)
   | 'E_EXTENSION_GROUP_REQUIRED'
@@ -143,7 +143,7 @@ export interface VerifyLocalOptions {
   maxClockSkew?: number;
 
   /**
-   * Verification strictness profile (v0.12.0-preview.1, DD-156).
+   * Verification strictness profile (v0.12.0-preview.1).
    *
    * - 'strict' (default): missing typ is a hard error before schema validation.
    * - 'interop': missing typ emits a 'typ_missing' warning and routes by payload content.
@@ -153,7 +153,7 @@ export interface VerifyLocalOptions {
   strictness?: VerificationStrictness;
 
   /**
-   * Pre-computed local policy digest for policy binding (Wire 0.2, v0.12.0-preview.1, DD-151).
+   * Pre-computed local policy digest for policy binding (Wire 0.2, v0.12.0-preview.1).
    *
    * Must be in 'sha256:<64 lowercase hex>' format, computed via computePolicyDigestJcs()
    * from @peac/protocol. When provided alongside a receipt that contains a policy block
@@ -187,7 +187,7 @@ export interface VerifyLocalSuccess {
   /** Verification warnings from schema parsing and strictness routing */
   warnings: VerificationWarning[];
   /**
-   * Policy binding status (DD-49, DD-151).
+   * Policy binding status.
    *
    * Three-state result:
    *   - 'unavailable': either the receipt contains no policy block, or the
@@ -253,7 +253,7 @@ const FORMAT_ERROR_CODES = new Set([
 ]);
 
 /**
- * JOSE hardening code mapping: CRYPTO_JWS_* → specific E_JWS_* (v0.12.0-preview.1, DD-156).
+ * JOSE hardening code mapping: CRYPTO_JWS_* → specific E_JWS_* (v0.12.0-preview.1).
  *
  * Each JOSE hazard code maps to its specific public E_JWS_* counterpart rather than
  * collapsing into the generic E_INVALID_FORMAT. This lets callers distinguish embedded-key
@@ -338,7 +338,7 @@ export async function verifyLocal(
     // Accumulated warnings for Wire 0.2 path
     const accumulatedWarnings: VerificationWarning[] = [];
 
-    // 2. Strictness routing for missing typ (Correction 1, DD-156)
+    // 2. Strictness routing for missing typ (Correction 1)
     if (result.header.typ === undefined) {
       if (strictness === 'strict') {
         return {
@@ -354,7 +354,7 @@ export async function verifyLocal(
       });
     }
 
-    // 3. Validate structural kernel constraints (DD-121, fail-closed)
+    // 3. Validate structural kernel constraints (fail-closed)
     const constraintResult = validateKernelConstraints(result.payload);
     if (!constraintResult.valid) {
       const v = constraintResult.violations[0];
@@ -428,7 +428,7 @@ export async function verifyLocal(
         }
       }
 
-      // Emit type_unregistered warning for valid-but-unregistered type values (DD-155)
+      // Emit type_unregistered warning for valid-but-unregistered type values
       if (!REGISTERED_RECEIPT_TYPES.has(claims.type)) {
         accumulatedWarnings.push({
           code: WARNING_TYPE_UNREGISTERED,
@@ -437,7 +437,7 @@ export async function verifyLocal(
         });
       }
 
-      // Emit unknown_extension_preserved warnings for unrecognized-but-well-formed keys (DD-155)
+      // Emit unknown_extension_preserved warnings for unrecognized-but-well-formed keys
       // Malformed keys are already hard errors (E_INVALID_EXTENSION_KEY) at schema layer.
       if (claims.extensions !== undefined) {
         for (const key of Object.keys(claims.extensions)) {
@@ -493,7 +493,7 @@ export async function verifyLocal(
         });
       }
 
-      // Validate policyDigest option format (DD-151): must be sha256:<64 lowercase hex> if provided.
+      // Validate policyDigest option format: must be sha256:<64 lowercase hex> if provided.
       if (policyDigest !== undefined && !HASH.pattern.test(policyDigest)) {
         return {
           valid: false,
@@ -502,7 +502,7 @@ export async function verifyLocal(
         };
       }
 
-      // Policy binding check (DD-151): 3-state result.
+      // Policy binding check: 3-state result.
       // 'unavailable' when either receipt has no policy block or caller omitted policyDigest.
       // 'verified' / 'failed' when both are present; 'failed' is a hard verification error.
       const receiptPolicyDigest = claims.policy?.digest;

@@ -1,5 +1,5 @@
 /**
- * Evidence Carrier Contract types (DD-124)
+ * Evidence Carrier Contract types
  *
  * Pure TypeScript types for the universal evidence carry interface.
  * Zero runtime dependencies: this module exports only types.
@@ -13,7 +13,7 @@
 // ---------------------------------------------------------------------------
 
 /**
- * Canonical HTTP header name for PEAC receipts (DD-127).
+ * Canonical HTTP header name for PEAC receipts.
  *
  * The wire token is exactly "PEAC-Receipt" (mixed-case, hyphenated).
  * This is the only valid spelling in conformance fixtures and attach() output.
@@ -23,10 +23,10 @@
 export const PEAC_RECEIPT_HEADER = 'PEAC-Receipt' as const;
 
 /**
- * Canonical HTTP header name for receipt URL locator hint (DD-135).
+ * Canonical HTTP header name for receipt URL locator hint.
  *
  * HTTPS-only, max 2048 chars, no credentials.
- * MUST NOT trigger implicit fetch (DD-55).
+ * MUST NOT trigger implicit fetch.
  */
 export const PEAC_RECEIPT_URL_HEADER = 'PEAC-Receipt-URL' as const;
 
@@ -56,9 +56,9 @@ export interface PeacEvidenceCarrier {
   /** Compact JWS of the signed receipt (SHOULD for embed format) */
   receipt_jws?: string;
   /**
-   * Locator hint for detached receipt resolution (DD-135).
+   * Locator hint for detached receipt resolution.
    * HTTPS-only, max 2048 chars, no credentials.
-   * MUST NOT trigger implicit fetch (DD-55).
+   * MUST NOT trigger implicit fetch.
    * If a caller fetches, it MUST verify sha256(receipt_jws) == receipt_ref.
    */
   receipt_url?: string;
@@ -86,7 +86,7 @@ export interface PeacEvidenceCarrier {
  * Transport-level metadata describing how a carrier is placed.
  *
  * Used by validateConstraints() to enforce transport-specific size limits
- * and format requirements (DD-127).
+ * and format requirements.
  */
 export interface CarrierMeta {
   /** Transport identifier (e.g. 'mcp', 'a2a', 'acp', 'ucp', 'x402', 'http') */
@@ -114,7 +114,7 @@ export interface CarrierValidationResult {
 // ---------------------------------------------------------------------------
 
 /**
- * Protocol-specific carrier adapter (DD-124).
+ * Protocol-specific carrier adapter.
  *
  * Each protocol mapping implements this interface to attach/extract
  * PEAC evidence carriers in the protocol's native format.
@@ -136,7 +136,7 @@ export interface CarrierAdapter<TInput, TOutput> {
   attach(output: TOutput, carriers: PeacEvidenceCarrier[], meta?: CarrierMeta): TOutput;
 
   /**
-   * Validate a carrier against transport-specific constraints (DD-127, DD-129).
+   * Validate a carrier against transport-specific constraints.
    * Takes CarrierMeta for transport-aware size and format validation.
    */
   validateConstraints(carrier: PeacEvidenceCarrier, meta: CarrierMeta): CarrierValidationResult;

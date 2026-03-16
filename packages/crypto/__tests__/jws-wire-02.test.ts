@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 JWS tests (v0.12.0-preview.1, DD-156)
+ * Wire 0.2 JWS tests (v0.12.0-preview.1)
  *
  * Tests: 3-variant JWSHeader union, signWire02(), dual-stack verify/decode,
  * typ normalization, coherence checks, JOSE hardening, validateWire02Header().

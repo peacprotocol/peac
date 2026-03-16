@@ -15,7 +15,7 @@
  * Security:
  *   - 64 KB size limit enforced BEFORE CBOR decode (DoS prevention)
  *   - Only Ed25519 (COSE alg -8) supported; all others rejected
- *   - No network I/O (DD-55)
+ *   - No network I/O
  */
 
 import cbor from 'cbor';

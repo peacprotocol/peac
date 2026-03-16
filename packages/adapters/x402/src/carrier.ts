@@ -1,5 +1,5 @@
 /**
- * x402 carrier adapter for Evidence Carrier Contract (DD-124).
+ * x402 carrier adapter for Evidence Carrier Contract.
  *
  * v0.11.1: header-only transport via PEAC-Receipt (compact JWS).
  * Extracts from x402 HTTP 402 (offer) and HTTP 200 (settlement) responses.
@@ -24,7 +24,7 @@ import {
 // Constants
 // ---------------------------------------------------------------------------
 
-/** x402 carrier size limits (DD-127) */
+/** x402 carrier size limits */
 export const X402_CARRIER_LIMITS = {
   embed: CARRIER_TRANSPORT_LIMITS.x402_embed,
   headers: CARRIER_TRANSPORT_LIMITS.x402_headers,
@@ -79,7 +79,7 @@ function extractJwsFromHeaders(headers: X402HeaderMap): string | null {
 }
 
 /**
- * Extract receipt URL from PEAC-Receipt-URL header (DD-135).
+ * Extract receipt URL from PEAC-Receipt-URL header.
  */
 function extractReceiptUrlFromHeaders(headers: X402HeaderMap): string | null {
   const key = Object.keys(headers).find(
@@ -112,7 +112,7 @@ export function fromOfferResponse(
     receipt_jws: jws,
   };
 
-  // Extract receipt_url locator hint (DD-135)
+  // Extract receipt_url locator hint
   const receiptUrl = extractReceiptUrlFromHeaders(headers);
   if (receiptUrl) {
     carrier.receipt_url = receiptUrl;
@@ -128,7 +128,7 @@ export function fromOfferResponse(
 }
 
 /**
- * Extract carrier from x402 offer response (async, DD-129).
+ * Extract carrier from x402 offer response (async).
  *
  * Computes receipt_ref from the JWS.
  */
@@ -145,7 +145,7 @@ export async function fromOfferResponseAsync(
     receipt_jws: jws,
   };
 
-  // Extract receipt_url locator hint (DD-135)
+  // Extract receipt_url locator hint
   const receiptUrl = extractReceiptUrlFromHeaders(headers);
   if (receiptUrl) {
     carrier.receipt_url = receiptUrl;
@@ -175,7 +175,7 @@ export function fromSettlementResponse(
 }
 
 /**
- * Extract carrier from x402 settlement response (async, DD-129).
+ * Extract carrier from x402 settlement response (async).
  */
 export async function fromSettlementResponseAsync(
   headers: X402HeaderMap,

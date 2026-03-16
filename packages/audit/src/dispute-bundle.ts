@@ -430,7 +430,7 @@ export async function createDisputeBundle(
     });
   }
 
-  // Include peac.txt if provided (DD-49)
+  // Include peac.txt if provided
   // Bundle path: policy/peac.txt (locked convention)
   let peacTxtBytes: Buffer | undefined;
   let peacTxtHash: string | undefined;
@@ -508,7 +508,7 @@ export async function createDisputeBundle(
     zipfile.addBuffer(policyBytes, 'policy/policy.yaml', zipOptions);
   }
 
-  // Add peac.txt if present (DD-49)
+  // Add peac.txt if present
   if (peacTxtBytes) {
     zipfile.addBuffer(peacTxtBytes, 'policy/peac.txt', zipOptions);
   }
@@ -955,7 +955,7 @@ function processExtractedFiles(
     }
   }
 
-  // Extract peac.txt if present (DD-49)
+  // Extract peac.txt if present
   let peacTxtContent: string | undefined;
   const peacTxtBuffer = files.get('policy/peac.txt');
   if (peacTxtBuffer) {

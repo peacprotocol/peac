@@ -1,5 +1,5 @@
 /**
- * Conformance harness core (DD-122)
+ * Conformance harness core
  *
  * Validates conformance fixtures against adapter-specific validators.
  * Distinguishes between FAIL (claimed support, actual failure) and

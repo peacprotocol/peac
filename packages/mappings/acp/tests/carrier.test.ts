@@ -1,5 +1,5 @@
 /**
- * Tests for ACP carrier adapter (Evidence Carrier Contract, DD-124).
+ * Tests for ACP carrier adapter (Evidence Carrier Contract).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -235,7 +235,7 @@ describe('AcpCarrierAdapter', () => {
       expect(extracted!.receipts[0].receipt_jws).toBe(carrier.receipt_jws);
     });
 
-    it('should preserve receipt_url through attach and extract (DD-135)', async () => {
+    it('should preserve receipt_url through attach and extract', async () => {
       const carrier = await makeCarrier();
       carrier.receipt_url = 'https://receipts.example.com/abc123';
       const msg = {};

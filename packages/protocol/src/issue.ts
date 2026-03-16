@@ -29,7 +29,7 @@ import {
   isValidWorkflowContext,
   hasValidDagSemantics,
   WORKFLOW_EXTENSION_KEY,
-  // Wire 0.2 (v0.12.0-preview.1, DD-156)
+  // Wire 0.2 (v0.12.0-preview.1)
   isCanonicalIss,
   Wire02ClaimsSchema,
   type Wire02Claims,
@@ -304,7 +304,7 @@ export async function issueWire01(options: IssueWire01Options): Promise<IssueRes
     ...(options.purpose_reason && { purpose_reason: options.purpose_reason }),
   };
 
-  // Validate structural kernel constraints before signing (DD-121, fail-closed)
+  // Validate structural kernel constraints before signing (fail-closed)
   const constraintResult = validateKernelConstraints(claims);
   if (!constraintResult.valid) {
     throw new IssueError(createConstraintViolationError(constraintResult.violations));
@@ -383,7 +383,7 @@ export async function issue(options: IssueWire02Options): Promise<IssueResult> {
 }
 
 // ---------------------------------------------------------------------------
-// Wire 0.2 issuance (v0.12.0-preview.1, DD-156)
+// Wire 0.2 issuance (v0.12.0-preview.1)
 // ---------------------------------------------------------------------------
 
 /**
@@ -437,7 +437,7 @@ export interface IssueWire02Options {
   purpose_declared?: string;
 
   /**
-   * Policy binding block (DD-151).
+   * Policy binding block.
    * digest must be 'sha256:<64 lowercase hex>' format (use computePolicyDigestJcs from @peac/protocol).
    */
   policy?: PolicyBlock;

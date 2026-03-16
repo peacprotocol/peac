@@ -1,5 +1,5 @@
 /**
- * Inspect tool schemas -- ZERO MCP SDK imports (DD-57)
+ * Inspect tool schemas -- ZERO MCP SDK imports
  */
 
 import { z } from 'zod';
