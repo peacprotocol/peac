@@ -198,7 +198,7 @@ A `ControlBlock` MUST be present in `auth.control` when:
 
 1. **Payment present**: `evidence.payment` is defined, OR
 2. **HTTP 402 enforcement**: `auth.enforcement.method == "http-402"`, OR
-3. **Future protocols**: Certain AP2/TAP/ACP enforcement profiles (to be specified)
+3. **Future protocols**: Certain AP2/TAP/Agentic Commerce Protocol enforcement profiles (to be specified)
 
 **Algorithm**: Control Requirement Check
 

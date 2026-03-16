@@ -14,7 +14,7 @@
  * Normalized challenge types across protocols.
  *
  * This taxonomy enables cross-protocol comparison of access challenges:
- * - payment: Resource requires payment (x402, ACP checkout)
+ * - payment: Resource requires payment (x402, Agentic Commerce Protocol checkout)
  * - auth: Resource requires authentication
  * - consent: Resource requires user consent
  * - rate_limit: Access throttled

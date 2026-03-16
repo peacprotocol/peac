@@ -9,7 +9,7 @@ Parses signals from multiple sources and resolves them using priority precedence
 | Source        | Standard                                                                              | Priority |
 | ------------- | ------------------------------------------------------------------------------------- | -------- |
 | tdmrep.json   | EU Directive 2019/790, Art. 4                                                         | Highest  |
-| Content-Usage | AIPREF attach draft (draft-ietf-aipref-attach-04), vocab (draft-ietf-aipref-vocab-03) | 2        |
+| Content-Usage | AIPREF attach draft (draft-ietf-aipref-attach-04), vocab (draft-ietf-aipref-vocab-05) | 2        |
 | robots.txt    | RFC 9309                                                                              | Lowest   |
 
 Content-Signal header support is reserved for a future version.
@@ -61,7 +61,7 @@ The Content-Usage header is parsed as an RFC 9651 Structured Fields Dictionary w
 | `train-genai` | `ai-generative` | Leaf           | `y`=allow, `n`=deny |
 | `search`      | `ai-search`     | Leaf           | `y`=allow, `n`=deny |
 
-`bots` is a parent-only key used for hierarchy propagation (Section 5.2 of vocab-03). It does not produce its own output entry; its preference propagates to child keys when they have no explicit value.
+`bots` is a parent-only key used for hierarchy propagation (Section 5.2 of vocab-05). It does not produce its own output entry; its preference propagates to child keys when they have no explicit value.
 
 Values are SF Tokens (not Booleans). Bare keys (`train-ai` without `=y`/`=n`), String values (`"n"`), and Boolean values (`?1`/`?0`) all produce `unspecified`.
 

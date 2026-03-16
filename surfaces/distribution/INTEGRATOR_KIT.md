@@ -69,13 +69,13 @@ Full package list: see `scripts/publish-manifest.json` or [GitHub](https://githu
 
 ## Transport Mappings
 
-| Transport | Receipt Placement                    | Adapter                                    |
-| --------- | ------------------------------------ | ------------------------------------------ |
-| HTTP/REST | `PEAC-Receipt` response header       | Built-in                                   |
-| MCP       | `_meta.org.peacprotocol/receipt_jws` | `@peac/mappings-mcp`                       |
-| A2A       | `metadata[extensionURI].carriers[]`  | `@peac/mappings-a2a`                       |
-| x402      | Settlement response evidence         | `@peac/adapter-x402`                       |
-| ACP/UCP   | State transition metadata            | `@peac/mappings-acp`, `@peac/mappings-ucp` |
+| Transport                    | Receipt Placement                    | Adapter                                    |
+| ---------------------------- | ------------------------------------ | ------------------------------------------ |
+| HTTP/REST                    | `PEAC-Receipt` response header       | Built-in                                   |
+| MCP                          | `_meta.org.peacprotocol/receipt_jws` | `@peac/mappings-mcp`                       |
+| A2A                          | `metadata[extensionURI].carriers[]`  | `@peac/mappings-a2a`                       |
+| x402                         | Settlement response evidence         | `@peac/adapter-x402`                       |
+| ACP (Agentic Commerce) / UCP | State transition metadata            | `@peac/mappings-acp`, `@peac/mappings-ucp` |
 
 ## Compatibility Checks
 
@@ -94,5 +94,5 @@ pnpm test --filter @peac/mappings-mcp
 - Protocol: [peacprotocol.org](https://www.peacprotocol.org)
 - GitHub: [github.com/peacprotocol/peac](https://github.com/peacprotocol/peac)
 - npm: [@peac/mcp-server](https://www.npmjs.com/package/@peac/mcp-server)
-- MCP Registry: published
+- MCP Registry: submission prepared (schema validated; awaiting mcp-publisher CLI submission)
 - llms.txt: [github.com/peacprotocol/peac/blob/main/llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt)

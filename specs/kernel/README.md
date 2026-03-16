@@ -87,7 +87,7 @@ Each error includes:
 
 #### Agent Protocols
 
-- Agentic protocol integrations (MCP, ACP, AP2, TAP)
+- Agentic protocol integrations (MCP, ACP (Agentic Commerce Protocol), AP2, TAP)
 - Categories: tool-protocol, commerce-protocol, agent-protocol, card-protocol
 - Reference URLs to protocol specifications
 

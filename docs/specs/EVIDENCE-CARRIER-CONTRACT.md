@@ -24,7 +24,7 @@ The Evidence Carrier Contract covers:
 4. `computeReceiptRef()`: canonical receipt reference computation
 5. `validateCarrierConstraints()`: transport-aware structural validation
 6. `verifyReceiptRefConsistency()`: tamper detection for attached carriers
-7. Per-transport placement rules: how carriers map to MCP, A2A, ACP, UCP, x402, and HTTP
+7. Per-transport placement rules: how carriers map to MCP, A2A, ACP (Agentic Commerce Protocol), UCP, x402, and HTTP
 
 The contract does NOT define:
 
@@ -291,7 +291,7 @@ Carriers are placed in the `metadata` map of A2A messages using the PEAC extensi
 
 The extension URI (`https://www.peacprotocol.org/ext/traceability/v1`) is registered in the A2A Agent Card's `capabilities.extensions[]` array per A2A spec v0.3.0.
 
-### 7.3 ACP
+### 7.3 ACP (Agentic Commerce Protocol)
 
 Carriers are attached via the `PEAC-Receipt` HTTP header, which carries a compact JWS. The header surface enforces an 8 KB size limit. The `receipt_jws` field is required; carriers without a JWS are rejected at `attach()` time.
 

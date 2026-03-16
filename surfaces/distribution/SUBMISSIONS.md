@@ -42,8 +42,8 @@ Evidence, Verification, Security, Cryptography, Audit, Compliance, Receipts
 
 | Directory               | URL                                                     | Status         |
 | ----------------------- | ------------------------------------------------------- | -------------- |
-| MCP Registry (Official) | Published via `mcp-publisher` CLI                       | Done           |
-| PulseMCP                | Auto-ingested from MCP Registry                         | Done           |
+| MCP Registry (Official) | Submit via `mcp-publisher` CLI (schema validated)       | Pending        |
+| PulseMCP                | Auto-ingested from MCP Registry (depends on submission) | Pending        |
 | Smithery                | <https://smithery.ai/new>                               | Pending        |
 | mcpservers.org          | <https://mcpservers.org/submit>                         | Pending        |
 | mcp.so                  | <https://mcp.so/submit>                                 | Pending        |

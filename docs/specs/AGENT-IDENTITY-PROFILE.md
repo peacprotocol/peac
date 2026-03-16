@@ -362,7 +362,7 @@ PEAC ActorBinding supports both RATS attestation models:
 | Passport         | `eat-passport`         | Attester -> Agent -> Relying Party (self-contained token) |
 | Background Check | `eat-background-check` | Agent -> Relying Party -> Verifier (fetch from attester)  |
 
-**EAT errata tracking**: RFC 9711 was published January 2025. Known errata affecting PEAC integration are tracked in the EAT adapter design (DD-154, deferred to v0.12.0-preview.1).
+**EAT errata tracking**: RFC 9711 was published April 2025. Known errata affecting PEAC integration are tracked in the EAT adapter design (DD-154, deferred to v0.12.0-preview.1).
 
 **CBOR dependency**: EAT tokens use CBOR Wire format (RFC 8949) and COSE signing (RFC 9052). The EAT adapter will add `@peac/adapter-eat` with CBOR dependencies at v0.12.0-preview.1.
 

@@ -1,5 +1,5 @@
 {
-  "description": "Valid Content-Usage header parsing fixtures (AIPREF vocab-03, RFC 9651)",
+  "description": "Valid Content-Usage header parsing fixtures (AIPREF vocab-05, RFC 9651)",
   "version": "0.12.2",
   "schema_version": "0.12.2",
   "fixture_count": 8,

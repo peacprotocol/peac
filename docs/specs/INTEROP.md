@@ -2,7 +2,7 @@
 
 **Status**: INFORMATIVE
 
-**Version**: 0.9.24
+**Version**: 0.12.2
 
 ---
 
@@ -149,7 +149,7 @@ const issueOptions = mcpContextToIssueOptions(mcpRequest);
 
 ### 5.3 Package
 
-`@peac/mappings-acp` provides mapping utilities (ACP is the umbrella for A2A-compatible protocols).
+`@peac/mappings-acp` provides mapping utilities for the Agentic Commerce Protocol (ACP).
 
 ---
 

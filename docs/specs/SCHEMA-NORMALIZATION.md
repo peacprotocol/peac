@@ -10,7 +10,7 @@
 
 ## 1. Introduction
 
-This document defines the normative schema normalization semantics for PEAC receipts. Schema normalization enables byte-identical comparison of receipts regardless of how they were created (via x402, TAP, RSL, ACP, or direct issuance).
+This document defines the normative schema normalization semantics for PEAC receipts. Schema normalization enables byte-identical comparison of receipts regardless of how they were created (via x402, TAP, RSL, Agentic Commerce Protocol, or direct issuance).
 
 **Key words**: The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown here.
 
@@ -213,7 +213,7 @@ Where `canonicalize` is a conformant RFC 8785 implementation.
 The normalization algorithm guarantees:
 
 1. **Determinism**: The same receipt always produces the same core claims
-2. **Source Independence**: Receipts created from different sources (x402, TAP, RSL, ACP) with the same semantic content produce identical core claims
+2. **Source Independence**: Receipts created from different sources (x402, TAP, RSL, Agentic Commerce Protocol) with the same semantic content produce identical core claims
 3. **Evidence Isolation**: Rail-specific evidence does not affect comparison
 4. **Optional Field Handling**: Undefined optional fields are omitted (not null)
 
@@ -241,7 +241,7 @@ Implementations that create receipts from different sources MUST ensure that sem
 
 ### 6.2 Example
 
-Given an ACP checkout event and an x402 payment that represent the same transaction:
+Given an Agentic Commerce Protocol (ACP) checkout event and an x402 payment that represent the same transaction:
 
 ```typescript
 // ACP-derived receipt
@@ -304,7 +304,7 @@ Implementations MUST include parity tests that verify:
 
 1. Receipts with different field ordering produce identical canonical output
 2. Receipts with different rail-specific evidence produce identical core claims
-3. Receipts from different mapping sources (ACP, TAP, RSL) produce consistent normalization
+3. Receipts from different mapping sources (Agentic Commerce Protocol, TAP, RSL) produce consistent normalization
 
 ---
 

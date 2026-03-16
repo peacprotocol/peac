@@ -1,116 +1,87 @@
 # PEAC Protocol Quickstart
 
-## Hello Receipt - 10-Line Example
+## Issue and Verify a Receipt
 
-```javascript
-import { generateKeypair, sign, verify } from '@peac/crypto';
+```typescript
+import { generateKeypair } from '@peac/crypto';
+import { issue, verifyLocal } from '@peac/protocol';
 
-// 1. Generate Ed25519 key pair
+// 1. Generate Ed25519 keypair
 const { publicKey, privateKey } = await generateKeypair();
 
-// 2. Create a simple receipt payload
-const receipt = {
-  iss: 'https://peac-authority.example.com',
-  sub: 'https://example.com/content',
-  aud: 'https://example.com/content',
-  iat: Math.floor(Date.now() / 1000),
-  exp: Math.floor(Date.now() / 1000) + 300, // 5 minutes
-  rid: '01HVQK7Z8TD6QTGNT4ANPK7XXQ', // UUIDv7
-  policy_hash: 'YkNBV_ZjNGVhNGU4ZTIxMzlkZjcyYWQ3NDJjOGY0YTM4',
-};
+// 2. Issue a signed receipt (Interaction Record format)
+const { jws } = await issue({
+  iss: 'https://api.example.com',
+  kind: 'evidence',
+  type: 'org.peacprotocol/payment',
+  extensions: {
+    'org.peacprotocol/commerce': {
+      payment_rail: 'stripe',
+      amount_minor: '1000',
+      currency: 'USD',
+    },
+  },
+  privateKey,
+  kid: 'demo-key',
+});
 
-// 3. Sign and verify
-const jws = await sign(receipt, privateKey);
-const result = await verify(jws, publicKey);
-console.log('Receipt valid:', result.valid);
+// 3. Verify the receipt offline (no network calls)
+const result = await verifyLocal(jws, publicKey);
+console.log('Valid:', result.valid);
 ```
 
-## Testing with curl
-
-### 1. Verify API Endpoint
+## Run the Hello-World Example
 
 ```bash
-# Test /verify endpoint with sample receipt
-curl -X POST http://localhost:3000/verify \
-  -H "Content-Type: application/json" \
-  -d '{
-    "receipt": "eyJhbGciOiJFZERTQSIsInR5cCI6ImFwcGxpY2F0aW9uL3BlYWMtcmVjZWlwdCtqd3MifQ..signature",
-    "resource": "https://example.com/content"
-  }'
+git clone https://github.com/peacprotocol/peac.git
+cd peac/examples/hello-world
+npm install @peac/crypto @peac/protocol tsx typescript
+npx tsx demo.ts
 ```
 
-Expected response:
+Expected output:
 
-```json
-{
-  "valid": true,
-  "claims": {
-    "iss": "https://peac-authority.example.com",
-    "sub": "https://example.com/content",
-    "aud": "https://example.com/content",
-    "iat": 1704067200,
-    "exp": 1704067500,
-    "rid": "01HVQK7Z8TD6QTGNT4ANPK7XXQ",
-    "policy_hash": "YkNBV_ZjNGVhNGU4ZTIxMzlkZjcyYWQ3NDJjOGY0YTM4"
-  },
-  "reconstructed": {
-    "hash": "YkNBV_ZjNGVhNGU4ZTIxMzlkZjcyYWQ3NDJjOGY0YTM4",
-    "matches": true
-  },
-  "inputs": [
-    {
-      "type": "peac.txt",
-      "url": "https://example.com/.well-known/peac.txt",
-      "status": "not_found"
-    },
-    {
-      "type": "aipref",
-      "url": "https://example.com/content",
-      "status": "not_found"
-    },
-    {
-      "type": "agent-permissions",
-      "url": "https://example.com/content",
-      "status": "not_found"
-    }
-  ],
-  "timing": {
-    "started": 1704067200000,
-    "completed": 1704067200123,
-    "duration": 123
-  }
-}
+```text
+Receipt JWS: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJl...
+Valid: true
+Issuer: https://api.example.com
+Kind: evidence
+Type: org.peacprotocol/payment
 ```
 
-### 2. CLI Usage Examples
+## MCP Server
+
+Run the MCP server to verify, inspect, decode, issue, and bundle receipts:
 
 ```bash
-# Discover policy sources
-peac discover https://example.com
-
-# Hash a policy file
-echo '{"resource": "https://example.com", "purpose": "training"}' | peac hash
-
-# Verify a receipt file
-peac verify receipt.jws --resource https://example.com
+npx -y @peac/mcp-server --help
 ```
+
+Read-only operations (verify, inspect, decode) require no configuration. Issuance requires an Ed25519 key via `--issuer-key`.
 
 ## Installation
 
 ```bash
 # Install core packages
-pnpm add @peac/crypto @peac/protocol
+npm install @peac/crypto @peac/protocol
 
-# Or for development
+# Or clone the monorepo for all examples
 git clone https://github.com/peacprotocol/peac.git
 cd peac
-pnpm install
-pnpm build
+pnpm install && pnpm build
 ```
+
+## Key Concepts
+
+- **Receipt:** A signed JWS (`interaction-record+jwt`) proving what terms applied and what happened
+- **Kind:** `evidence` (records what happened) or `challenge` (requests proof from a peer)
+- **Type:** Reverse-DNS identifier for what the receipt represents (e.g., `org.peacprotocol/payment`)
+- **Extensions:** Typed data groups (commerce, access, identity, etc.) carrying domain-specific evidence
+- **Offline verification:** Receipts verify with just the public key; no network calls required
 
 ## SSRF Protection
 
-The verifier includes SSRF protection by default:
+The verifier and networking layer include SSRF protection by default:
 
 - **HTTPS only** (http allowed only for localhost/127.0.0.1)
 - **Private IP blocking** (unless `PEAC_ALLOW_PRIVATE_NET=true`)
@@ -120,7 +91,8 @@ The verifier includes SSRF protection by default:
 
 ## Next Steps
 
-- Read [Policy Hash Algorithm](policy-hash.md) for canonicalization details
+- See [examples/](https://github.com/peacprotocol/peac/tree/main/examples) for 18 runnable examples
+- Read [PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md) for normative protocol specification
+- Read [WIRE-0.2.md](specs/WIRE-0.2.md) for the current Interaction Record format specification
 - See [Error Handling](errors.md) for RFC 9457 Problem Details
-- Review [Receipt Claims](receipts.md) for complete schema
-- Check [Examples](examples.md) for production deployment patterns
+- Review [Architecture](ARCHITECTURE.md) for package layering

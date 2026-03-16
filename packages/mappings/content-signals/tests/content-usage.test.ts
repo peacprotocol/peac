@@ -80,7 +80,7 @@ describe('parseContentUsage', () => {
   });
 
   // -------------------------------------------------------------------------
-  // AIPREF vocab-03 Token values: y = allow, n = disallow
+  // AIPREF vocab-05 Token values: y = allow, n = disallow
   // -------------------------------------------------------------------------
 
   it('parses train-ai=n as deny', () => {
@@ -121,7 +121,7 @@ describe('parseContentUsage', () => {
   });
 
   // -------------------------------------------------------------------------
-  // Hierarchy propagation (Section 5.2 of vocab-03)
+  // Hierarchy propagation (Section 5.2 of vocab-05)
   // -------------------------------------------------------------------------
 
   it('propagates bots=n to child purposes (train-ai, search, train-genai)', () => {
@@ -181,7 +181,7 @@ describe('parseContentUsage', () => {
   });
 
   // -------------------------------------------------------------------------
-  // SF parameters (ignored per vocab-03)
+  // SF parameters (ignored per vocab-05)
   // -------------------------------------------------------------------------
 
   it('strips SF parameters from values', () => {

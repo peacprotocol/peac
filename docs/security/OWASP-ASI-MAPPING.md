@@ -43,7 +43,7 @@
 
 ## ASI-07: Vulnerable Third-Party Agents
 
-- **Mitigation:** PEAC receipts are signed with Ed25519 and bound to specific issuers. Verifiers validate signatures against issuer JWKS. MCP SDK pinned to `~1.26.0` (>= 1.26.0 for CVE-2026-25536 fix). Supply chain hardening via audit-gate.mjs. Wire 0.2 JOSE hardening rejects embedded keys, `crit`, `b64:false`, `zip` (DD-156).
+- **Mitigation:** PEAC receipts are signed with Ed25519 and bound to specific issuers. Verifiers validate signatures against issuer JWKS. MCP SDK pinned to `~1.27.0` (>= 1.26.0 for CVE-2026-25536 fix). Supply chain hardening via audit-gate.mjs. Wire 0.2 JOSE hardening rejects embedded keys, `crit`, `b64:false`, `zip` (DD-156).
 - **Test coverage:** `packages/protocol/tests/verify-local.test.ts`, `packages/crypto/__tests__/sign-verify.test.ts`, `packages/crypto/__tests__/jws.property.test.ts` (property-based JOSE fuzz)
 - **Status:** Covered
 
