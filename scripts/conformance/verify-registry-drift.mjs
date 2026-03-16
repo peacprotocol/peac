@@ -13,8 +13,8 @@
  * Uses shared core for requirement ID parsing.
  *
  * Usage: node scripts/conformance/verify-registry-drift.mjs
- * Exit 0: all checks pass
- * Exit 1: drift or annotation mismatch detected
+ * Exit 0: all checks pass (annotation mismatches are advisory, not blocking)
+ * Exit 1: source fragment drift detected (hash mismatch or fragment not in spec)
  */
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
