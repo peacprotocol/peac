@@ -2,14 +2,14 @@
  * Content-Usage Header Parser (AIPREF attach draft, draft-ietf-aipref-attach-04)
  *
  * Parses Content-Usage HTTP header values as Structured Fields Dictionaries
- * per RFC 9651. Maps AIPREF vocabulary keys (draft-ietf-aipref-vocab-03)
+ * per RFC 9651. Maps AIPREF vocabulary keys (draft-ietf-aipref-vocab-05)
  * to PEAC ContentPurpose values.
  *
  * Scope: HTTP header parsing only. Does NOT parse robots.txt directives
  * or any other signal source. Receives pre-fetched header value (no network
  * I/O).
  *
- * AIPREF vocabulary keys (draft-ietf-aipref-vocab-03, Table 1):
+ * AIPREF vocabulary keys (draft-ietf-aipref-vocab-05, Table 1):
  *   - bots: Automated processing (parent of train-ai and search)
  *   - train-ai: AI training (parent of train-genai)
  *   - train-genai: Generative AI training
@@ -18,7 +18,7 @@
  * Values are SF Tokens: y = allow, n = disallow, anything else = unknown.
  * Bare keys (Boolean true per SF rules) are NOT y and produce unknown.
  *
- * Hierarchy propagation (Section 5.2 of vocab-03):
+ * Hierarchy propagation (Section 5.2 of vocab-05):
  *   bots -> train-ai -> train-genai
  *   bots -> search
  * When a specific key has no explicit preference, inherit from parent.
@@ -39,14 +39,14 @@ import { MAX_HEADER_SIZE } from './types.js';
 // ---------------------------------------------------------------------------
 
 /**
- * All recognized AIPREF vocabulary keys (draft-ietf-aipref-vocab-03, Table 1).
+ * All recognized AIPREF vocabulary keys (draft-ietf-aipref-vocab-05, Table 1).
  * Used for parsing; includes parent-only keys that do not produce output entries.
  */
 const AIPREF_KNOWN_KEYS = new Set(['bots', 'train-ai', 'train-genai', 'search']);
 
 /**
  * AIPREF leaf/child vocabulary keys mapped to PEAC ContentPurpose.
- * Per draft-ietf-aipref-vocab-03, Table 1.
+ * Per draft-ietf-aipref-vocab-05, Table 1.
  *
  * Note: `bots` is a parent-only key used solely for hierarchy propagation
  * (Section 5.2). It does not produce its own output entry.
@@ -58,7 +58,7 @@ const AIPREF_KEY_MAP: Record<string, ContentPurpose> = {
 };
 
 /**
- * Hierarchy for AIPREF propagation (Section 5.2 of vocab-03).
+ * Hierarchy for AIPREF propagation (Section 5.2 of vocab-05).
  * Maps each key to its parent key. Root keys have no parent.
  */
 const AIPREF_PARENT: Record<string, string | undefined> = {
@@ -150,7 +150,7 @@ function stripParams(s: string): string {
  * Parse Content-Usage header value and extract signal entries.
  *
  * Implements the AIPREF attach draft (draft-ietf-aipref-attach-04) with
- * vocabulary from draft-ietf-aipref-vocab-03. Header is parsed as an
+ * vocabulary from draft-ietf-aipref-vocab-05. Header is parsed as an
  * SF Dictionary (RFC 9651). Values must be Tokens: y = allow, n = disallow.
  *
  * Returns a structured result preserving all parse pipeline stages:
@@ -206,7 +206,7 @@ export function parseContentUsage(value: string): ContentUsageParseResult {
     rawPrefs.set(member.key, { decision, raw: member.raw });
   }
 
-  // Step 3: Apply hierarchy propagation (Section 5.2 of vocab-03)
+  // Step 3: Apply hierarchy propagation (Section 5.2 of vocab-05)
   // For each leaf AIPREF key, if preference is missing or unspecified,
   // inherit from parent.
   const resolvedPrefs = new Map<string, { decision: SignalDecision; raw: string }>();

@@ -248,15 +248,15 @@ Single `PEAC-Receipt` response header carries the signed JWS for both wire versi
 
 PEAC is transport-agnostic. Receipts travel via the binding appropriate to each protocol:
 
-| Binding        | How receipts travel                          | Status      |
-| -------------- | -------------------------------------------- | ----------- |
-| HTTP/REST      | Response header `PEAC-Receipt: <jws>`        | Implemented |
-| MCP            | Tool result `_meta` (carrier format)         | Implemented |
-| A2A            | Task/message metadata (extension URI)        | Implemented |
-| ACP            | State transition metadata                    | Implemented |
-| UCP            | Webhook verification metadata                | Implemented |
-| x402           | Settlement response evidence                 | Implemented |
-| Queues/batches | NDJSON receipts verified offline via bundles | Implemented |
+| Binding                | How receipts travel                          | Status      |
+| ---------------------- | -------------------------------------------- | ----------- |
+| HTTP/REST              | Response header `PEAC-Receipt: <jws>`        | Implemented |
+| MCP                    | Tool result `_meta` (carrier format)         | Implemented |
+| A2A                    | Task/message metadata (extension URI)        | Implemented |
+| ACP (Agentic Commerce) | State transition metadata                    | Implemented |
+| UCP                    | Webhook verification metadata                | Implemented |
+| x402                   | Settlement response evidence                 | Implemented |
+| Queues/batches         | NDJSON receipts verified offline via bundles | Implemented |
 
 **Mapping packages:**
 

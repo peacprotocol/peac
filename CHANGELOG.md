@@ -40,7 +40,7 @@ profiles, and introduces shared protocol-grade validators.
 ### Deferred
 
 - `@peac/adapter-did` (DID resolution): v0.12.3
-- Wire 0.2 adoption across A2A/ACP/UCP mappings: v0.12.3
+- Wire 0.2 adoption across A2A/ACP (Agentic Commerce Protocol)/UCP mappings: v0.12.3
 - Commerce events vocabulary expansion: v0.12.3+
 - Profile capability signaling: v0.12.3+
 
@@ -530,7 +530,7 @@ inference adapter, and MCP Registry distribution surfaces.
 ### Evidence Carrier Contract + A2A Mapping
 
 v0.11.1 formalizes the Evidence Carrier Contract: the universal interface that
-lets any protocol (MCP, A2A, ACP, UCP, x402, HTTP) carry PEAC receipts without
+lets any protocol (MCP, A2A, ACP (Agentic Commerce Protocol), UCP, x402, HTTP) carry PEAC receipts without
 kernel changes. This is the first release with A2A (Agent-to-Agent Protocol)
 support and content-addressed receipt references.
 
@@ -565,7 +565,7 @@ support and content-addressed receipt references.
     (checks second label in dot-separated prefix)
   - Backward compat: reads legacy `org.peacprotocol/receipt` key (v0.10.13),
     auto-computes `receipt_ref` from JWS
-- **ACP carrier adoption** in `@peac/mappings-acp`
+- **Agentic Commerce Protocol (ACP) carrier adoption** in `@peac/mappings-acp`
   - `attachCarrierToACPHeaders()` / `extractCarrierFromACPHeaders()`
   - Header-only transport: `PEAC-Receipt` = compact JWS (8 KB limit)
   - ACP state transition helpers (create/update/complete/cancel)

@@ -4,8 +4,9 @@
  * Pure TypeScript types for the universal evidence carry interface.
  * Zero runtime dependencies: this module exports only types.
  *
- * The Evidence Carrier Contract defines how any protocol (MCP, A2A, ACP,
- * UCP, x402, HTTP) carries PEAC receipts without kernel changes.
+ * The Evidence Carrier Contract defines how any protocol (MCP, A2A,
+ * Agentic Commerce Protocol (ACP), UCP, x402, HTTP) carries PEAC
+ * receipts without kernel changes.
  */
 
 // ---------------------------------------------------------------------------

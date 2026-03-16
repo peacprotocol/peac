@@ -4,9 +4,18 @@ Integration guide for adding PEAC receipts to x402 payment flows.
 
 ## Status
 
-Scaffold: full integration guide coming in v0.11.1+. See `@peac/rails-stripe` for existing Stripe x402 adapter.
+Integration kit: full guide planned for v0.12.4. The `@peac/adapter-x402` package is published and upstream-synced (x402 PR #935, merged Mar 12, 2026).
+
+## Quick Start
+
+```bash
+npm install @peac/adapter-x402
+```
+
+See [examples/x402-node-server](../../examples/x402-node-server/) for a working x402 payment evidence example.
 
 ## Reference
 
+- `@peac/adapter-x402`: x402 offer/receipt verification adapter (synced with upstream)
 - x402 specification: https://github.com/coinbase/x402
-- `@peac/rails-stripe`: Stripe payment rail adapter with x402 support
+- x402 Foundation: https://x402.org

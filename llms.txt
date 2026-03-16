@@ -26,13 +26,13 @@ PEAC Protocol provides cryptographically signed, offline-verifiable receipts tha
 
 - MCP Server: 5-tool MCP server for Claude Desktop, Cursor, VS Code Copilot, and any MCP client
 - A2A Mapping: `@peac/mappings-a2a` for Google Agent-to-Agent protocol evidence
-- ACP Mapping: `@peac/mappings-acp` for Agentforce/ACP protocol evidence
+- ACP Mapping: `@peac/mappings-acp` for Agentic Commerce Protocol (ACP) evidence
 - UCP Mapping: `@peac/mappings-ucp` for Universal Commerce Protocol evidence
 - x402 Adapter: `@peac/adapter-x402` for payment-required HTTP evidence
 - Content Signals: `@peac/mappings-content-signals` for robots.txt, Content-Usage (AIPREF), and tdmrep.json signal parsing
 - OpenAI Adapter: `@peac/adapter-openai-compatible` for hash-first inference receipts from any OpenAI-compatible provider
 - HTTP: `PEAC-Receipt` response header carries compact JWS for any HTTP API
-- Evidence Carrier Contract: universal carry interface across MCP, A2A, ACP, UCP, x402, and HTTP
+- Evidence Carrier Contract: universal carry interface across MCP, A2A, Agentic Commerce Protocol (ACP), UCP, x402, and HTTP
 
 ## Documentation
 

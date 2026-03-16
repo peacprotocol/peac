@@ -4,8 +4,18 @@ Integration guide for adding PEAC receipt metadata to A2A agent cards and task f
 
 ## Status
 
-Scaffold: full integration guide coming in v0.11.1 with `@peac/mappings-a2a`.
+Integration kit: expanding to full guide with working code examples (v0.12.3). The `@peac/mappings-a2a` package is published and stable since v0.11.1; A2A v1.0.0 dual-version support is planned for v0.12.3.
+
+## Quick Start
+
+```bash
+npm install @peac/mappings-a2a @peac/crypto @peac/protocol
+```
+
+See [examples/a2a-gateway-pattern](../../examples/a2a-gateway-pattern/) for a working A2A carrier mapping example.
 
 ## Reference
 
-- A2A specification: https://github.com/google/A2A
+- `@peac/mappings-a2a`: A2A carrier adapter (attach, extract, discover)
+- A2A specification: https://a2a-protocol.org
+- A2A v1.0 announcement: https://a2a-protocol.org/latest/announcing-1.0/

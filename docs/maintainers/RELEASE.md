@@ -94,7 +94,7 @@ If issues are discovered post-release:
 - Kernel-first monorepo with layered package architecture
 - Core packages: kernel, schema, crypto, protocol
 - Payment rails: x402, Stripe adapters
-- Agent mappings: MCP, ACP integrations
+- Agent mappings: MCP, ACP (Agentic Commerce Protocol) integrations
 - Performance SLOs: sign p95 <=3ms, verify p95 <=1ms
 
 **Security**:

@@ -125,14 +125,14 @@ See [examples/wire-02-minimal/](examples/wire-02-minimal/) for the full source. 
 
 ## Where it fits
 
-| Existing system     | What PEAC adds                                         |
-| ------------------- | ------------------------------------------------------ |
-| **Logs**            | Portable proof that survives organizational boundaries |
-| **OpenTelemetry**   | Signed evidence that correlates to traces              |
-| **MCP / A2A**       | Proof carried alongside tool calls and agent exchanges |
-| **AP2 / ACP / UCP** | Proof of terms and outcomes                            |
-| **x402**            | Settlement proof mapping with offline verification     |
-| **Payment rails**   | Settlement references made verifiable offline          |
+| Existing system                        | What PEAC adds                                         |
+| -------------------------------------- | ------------------------------------------------------ |
+| **Logs**                               | Portable proof that survives organizational boundaries |
+| **OpenTelemetry**                      | Signed evidence that correlates to traces              |
+| **MCP / A2A**                          | Proof carried alongside tool calls and agent exchanges |
+| **AP2 / ACP (Agentic Commerce) / UCP** | Proof of terms and outcomes                            |
+| **x402**                               | Settlement proof mapping with offline verification     |
+| **Payment rails**                      | Settlement references made verifiable offline          |
 
 **What changes in your stack:** keep auth, keep payments, keep observability. Add `/.well-known/peac.txt` and return `PEAC-Receipt` on governed responses.
 
