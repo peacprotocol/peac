@@ -108,7 +108,7 @@ export function parseIssuerConfig(json: string | object): PEACIssuerConfig {
     }
   }
 
-  // Validate revoked_keys (DD-148, v0.11.3+)
+  // Validate revoked_keys (v0.11.3+)
   let revokedKeys: PEACIssuerConfig['revoked_keys'];
   if (obj.revoked_keys !== undefined) {
     if (!Array.isArray(obj.revoked_keys)) {

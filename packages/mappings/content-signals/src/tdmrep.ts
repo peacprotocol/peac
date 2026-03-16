@@ -2,7 +2,7 @@
  * tdmrep.json Parser (EU TDM Directive 2019/790, Art. 4)
  *
  * Parses tdmrep.json content for EU Text and Data Mining reservation signals.
- * Receives pre-fetched JSON content (no network I/O, DD-55).
+ * Receives pre-fetched JSON content (no network I/O).
  */
 
 import type { ContentSignalEntry, SignalDecision } from './types.js';

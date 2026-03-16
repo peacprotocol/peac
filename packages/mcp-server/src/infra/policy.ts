@@ -1,5 +1,5 @@
 /**
- * Static policy loader (DD-53: load once, hash, never reload)
+ * Static policy loader (load once, hash, never reload)
  */
 
 import { readFile, stat } from 'node:fs/promises';

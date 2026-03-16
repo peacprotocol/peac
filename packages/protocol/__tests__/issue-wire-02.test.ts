@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 issuance + verification tests (v0.12.0-preview.1, DD-156)
+ * Wire 0.2 issuance + verification tests (v0.12.0-preview.1)
  *
  * Tests: issueWire02(), verifyLocal() Wire 0.2 path, strictness profiles (strict/interop),
  * iss canonical validation, did: iss acceptance, occurred_at skew rules,
@@ -820,7 +820,7 @@ describe('strictness: interop mode', () => {
 });
 
 // ---------------------------------------------------------------------------
-// occurred_at skew rules (evidence kind only, Correction 5, DD-156)
+// occurred_at skew rules (evidence kind only, Correction 5)
 // ---------------------------------------------------------------------------
 
 describe('occurred_at skew rules', () => {

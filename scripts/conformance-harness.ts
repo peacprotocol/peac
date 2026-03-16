@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Conformance harness CLI (DD-122)
+ * Conformance harness CLI
  *
  * This script delegates to @peac/conformance-harness (packages/conformance-harness/).
  * Use the workspace package directly for proper dependency resolution:

@@ -1,5 +1,5 @@
 /**
- * Registry codegen parity and idempotence tests (DD-183)
+ * Registry codegen parity and idempotence tests
  *
  * Ensures:
  * 1. registries.ts re-exports match registries.generated.ts (no drift)

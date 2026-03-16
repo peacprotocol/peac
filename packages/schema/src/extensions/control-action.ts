@@ -1,5 +1,5 @@
 /**
- * Control Action Extension Schema (v0.11.3+, DD-145 ZT Pack)
+ * Control Action Extension Schema (v0.11.3+ ZT Pack)
  *
  * Records access control decisions in ext["org.peacprotocol/control_action"].
  * Actions: grant, deny, escalate, delegate, audit.

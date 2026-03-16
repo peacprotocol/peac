@@ -1,5 +1,5 @@
 /**
- * Treaty Extension Tests (v0.11.3+, DD-147)
+ * Treaty Extension Tests (v0.11.3+)
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';

@@ -1,5 +1,5 @@
 /**
- * Tests for kernel constraint enforcement in verifyLocal() pipeline (DD-121)
+ * Tests for kernel constraint enforcement in verifyLocal() pipeline
  *
  * Validates that verifyLocal() rejects constraint-violating JWS payloads
  * with E_CONSTRAINT_VIOLATION error code. Tests use hand-crafted JWS
@@ -21,7 +21,7 @@ async function signClaims(claims: unknown, privateKey: Uint8Array, kid: string):
   return sign(claims, privateKey, kid);
 }
 
-describe('verifyLocal() kernel constraints (DD-121)', () => {
+describe('verifyLocal() kernel constraints', () => {
   it('rejects JWS with oversized array in payload', async () => {
     const { privateKey, publicKey } = await generateKeypair();
     const bigArray = new Array(KERNEL_CONSTRAINTS.MAX_ARRAY_LENGTH + 1).fill(0);

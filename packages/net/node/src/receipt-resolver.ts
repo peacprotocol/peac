@@ -1,5 +1,5 @@
 /**
- * Receipt URL Resolver (DD-135, DD-141)
+ * Receipt URL Resolver
  *
  * Opt-in SSRF-hardened fetch for resolving receipt_url locator hints.
  * Lives in Layer 4 (@peac/net-node), NOT in @peac/schema (Layer 1).
@@ -65,7 +65,7 @@ export type ResolveReceiptUrlResult = ResolveReceiptUrlSuccess | ResolveReceiptU
 // ---------------------------------------------------------------------------
 
 /**
- * Resolve a receipt URL to its JWS content (DD-135).
+ * Resolve a receipt URL to its JWS content.
  *
  * SSRF-hardened: rejects private IPs, non-HTTPS, credentials, redirects.
  * Enforces timeout and response size limits.
@@ -175,7 +175,7 @@ export async function resolveReceiptUrl(
 /**
  * Verify that a fetched JWS matches the expected receipt_ref.
  *
- * This enforces the post-fetch invariant (DD-135):
+ * This enforces the post-fetch invariant:
  *   sha256(fetched_jws) == carrier.receipt_ref
  *
  * @param jws - The fetched compact JWS string

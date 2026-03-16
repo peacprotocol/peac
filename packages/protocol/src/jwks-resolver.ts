@@ -42,7 +42,7 @@ export interface JWKS {
 }
 
 /**
- * Revoked key entry from issuer configuration (DD-148)
+ * Revoked key entry from issuer configuration
  */
 export interface RevokedKeyInfo {
   kid: string;
@@ -59,7 +59,7 @@ export interface JWKSResolveSuccess {
   fromCache: boolean;
   /** Raw JWKS bytes for digest computation (only present when not from cache) */
   rawBytes?: Uint8Array;
-  /** Revoked keys from issuer configuration (DD-148, v0.11.3+) */
+  /** Revoked keys from issuer configuration (v0.11.3+) */
   revokedKeys?: RevokedKeyInfo[];
 }
 
@@ -107,7 +107,7 @@ const DEFAULT_MAX_CACHE_ENTRIES = 1000;
 const jwksCache = new Map<string, JWKSCacheEntry>();
 
 // ---------------------------------------------------------------------------
-// Kid-to-Thumbprint Tracking (DD-148: kid reuse detection)
+// Kid-to-Thumbprint Tracking (kid reuse detection)
 // ---------------------------------------------------------------------------
 
 interface KidThumbprintEntry {
@@ -169,7 +169,7 @@ function evictOldestKidEntries(): void {
  * Also prunes expired entries and enforces max size to prevent
  * unbounded memory growth in long-running processes.
  *
- * Stateful resolvers MUST reject (DD-148 tiered enforcement).
+ * Stateful resolvers MUST reject (tiered enforcement).
  */
 function checkKidReuse(issuer: string, jwks: JWKS, now: number): string | null {
   // Prune expired entries first (bounded memory)
@@ -500,7 +500,7 @@ export async function resolveJWKS(
     };
   }
 
-  // Step 8: Kid reuse detection (DD-148, stateful MUST reject)
+  // Step 8: Kid reuse detection (stateful MUST reject)
   const kidReuseError = checkKidReuse(normalizedIssuer, jwks, now);
   if (kidReuseError) {
     return {
@@ -510,7 +510,7 @@ export async function resolveJWKS(
     };
   }
 
-  // Extract revoked_keys from issuer config (DD-148)
+  // Extract revoked_keys from issuer config
   const revokedKeys = issuerConfig.revoked_keys?.map((entry) => ({
     kid: entry.kid,
     revoked_at: entry.revoked_at,

@@ -4,7 +4,7 @@
  * Subject records for identity and authorization context.
  * Used in conjunction with receipts and control decisions.
  *
- * Terminology (v0.12.2, DD-173.5): "Subject record" is the canonical name
+ * Terminology (v0.12.2): "Subject record" is the canonical name
  * for identity/classification data structures. "Profile" is reserved for
  * usage overlay documents in docs/profiles/ (PROFILE_RULES.md).
  *
@@ -127,7 +127,7 @@ export interface SubjectProfileSnapshot {
 }
 
 // ---------------------------------------------------------------------------
-// Canonical type aliases (v0.12.2, DD-173.5)
+// Canonical type aliases (v0.12.2)
 // ---------------------------------------------------------------------------
 
 /**

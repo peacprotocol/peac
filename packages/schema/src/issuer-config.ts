@@ -1,5 +1,5 @@
 /**
- * Issuer Configuration Schema Extensions (v0.11.3+, DD-148)
+ * Issuer Configuration Schema Extensions (v0.11.3+)
  *
  * Zod schemas for revoked_keys field in peac-issuer.json.
  * Reason values aligned with RFC 5280 CRLReason subset

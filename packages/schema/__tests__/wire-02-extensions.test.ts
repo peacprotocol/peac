@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 Typed Extension Group tests (DD-153 revised)
+ * Wire 0.2 Typed Extension Group tests (revised)
  *
  * Covers:
  *   - isValidExtensionKey(): grammar validation (DNS labels, lowercase, dots, segments)

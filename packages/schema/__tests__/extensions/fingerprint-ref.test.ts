@@ -1,5 +1,5 @@
 /**
- * Fingerprint Reference Conversion Tests (v0.11.3+, DD-146)
+ * Fingerprint Reference Conversion Tests (v0.11.3+)
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';

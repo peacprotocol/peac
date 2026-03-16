@@ -1,5 +1,5 @@
 /**
- * Policy binding tests (v0.12.0-preview.1, DD-49, DD-151)
+ * Policy binding tests (v0.12.0-preview.1)
  *
  * Tests for:
  *   - verifyPolicyBinding() (Layer 1 pure comparison, from @peac/schema)

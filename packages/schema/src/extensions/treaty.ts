@@ -1,5 +1,5 @@
 /**
- * Treaty Extension Schema (v0.11.3+, DD-147)
+ * Treaty Extension Schema (v0.11.3+)
  *
  * Records agreement commitment levels in ext["org.peacprotocol/treaty"].
  * 4-level commitment_class vocabulary: informational, operational, financial, legal.
@@ -16,7 +16,7 @@ import { z } from 'zod';
 export const TREATY_EXTENSION_KEY = 'org.peacprotocol/treaty' as const;
 
 /**
- * Commitment class vocabulary (DD-147).
+ * Commitment class vocabulary.
  * Ascending levels of binding commitment.
  */
 export const COMMITMENT_CLASSES = ['informational', 'operational', 'financial', 'legal'] as const;

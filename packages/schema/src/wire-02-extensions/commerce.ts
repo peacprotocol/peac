@@ -2,7 +2,7 @@
  * Commerce Extension Group (org.peacprotocol/commerce)
  *
  * Records payment transaction evidence.
- * Shipped in v0.12.0-preview.1 (DD-153).
+ * Shipped in v0.12.0-preview.1.
  */
 
 import { z } from 'zod';

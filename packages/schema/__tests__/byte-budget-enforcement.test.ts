@@ -1,5 +1,5 @@
 /**
- * Byte-budget enforcement tests (DD-173.4)
+ * Byte-budget enforcement tests
  *
  * Tests the actual enforcement path in validateKnownExtensions() via
  * Wire02ClaimsSchema.superRefine. Exercises per-group and total budget

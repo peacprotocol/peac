@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 warning emission tests for verifyLocal() (v0.12.0-preview.1, DD-155)
+ * Wire 0.2 warning emission tests for verifyLocal() (v0.12.0-preview.1)
  *
  * Tests: type_unregistered and unknown_extension_preserved warning emission,
  * RFC 6901 pointer construction, conformance-safe assertion (code + pointer only).

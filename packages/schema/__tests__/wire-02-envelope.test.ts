@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 envelope schema tests (v0.12.0-preview.1, DD-156)
+ * Wire 0.2 envelope schema tests (v0.12.0-preview.1)
  *
  * Covers:
  *   - isCanonicalIss() full attacker-grade test matrix

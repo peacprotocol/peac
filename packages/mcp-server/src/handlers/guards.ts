@@ -1,7 +1,7 @@
 /**
  * Handler guards -- enforces policy limits and tool enablement
  *
- * ZERO MCP SDK imports (DD-57).
+ * ZERO MCP SDK imports.
  */
 
 import type { PolicyConfig } from '../infra/policy.js';

@@ -1,11 +1,11 @@
 /**
- * Wire 0.2 Shared Validator Schemas (DD-173.2)
+ * Wire 0.2 Shared Validator Schemas
  *
  * Protocol-grade Zod validators for common field patterns reused across
  * multiple extension groups. Consolidated to prevent drift, improve interop,
  * and keep Layer 1 clean.
  *
- * All validators are pure Zod schemas with zero I/O (DD-141).
+ * All validators are pure Zod schemas with zero I/O.
  *
  * @see HASH.pattern from @peac/kernel for SHA-256 digest grammar
  * @see PolicyBlockSchema.uri for HTTPS URI hint pattern origin
@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { HASH } from '@peac/kernel';
 
 // ---------------------------------------------------------------------------
-// SHA-256 Digest (DD-138: hash-first content references)
+// SHA-256 Digest (hash-first content references)
 // ---------------------------------------------------------------------------
 
 /**
@@ -42,7 +42,7 @@ export const Sha256DigestSchema = z
   .regex(HASH.pattern, 'must be a valid SHA-256 digest (sha256:<64 lowercase hex>)');
 
 // ---------------------------------------------------------------------------
-// HTTPS URI Hint (DD-55, DD-135: locator hints only, SSRF prevention)
+// HTTPS URI Hint (locator hints only, SSRF prevention)
 // ---------------------------------------------------------------------------
 
 /**
@@ -61,14 +61,14 @@ const CONTROL_CHAR_PATTERN = /[\x00-\x1f\x7f]/;
  * - MUST NOT contain ASCII control characters (U+0000-U+001F, U+007F)
  * - Max 2048 chars (aligned with POLICY_BLOCK.uriMaxLength)
  *
- * These are locator hints only: callers MUST NOT auto-fetch (DD-55).
+ * These are locator hints only: callers MUST NOT auto-fetch.
  *
  * NORMATIVE: Localhost and private-network hosts (e.g., 10.x, 192.168.x,
  * localhost) are intentionally accepted at Layer 1 (schema). URI hints
  * are metadata, not fetch targets; restricting to public hosts would
  * break enterprise/internal deployments without improving security at
  * this layer. SSRF prevention is enforced by the non-fetch invariant
- * (DD-55), not by host filtering in schema validation.
+ *, not by host filtering in schema validation.
  *
  * Test suite covers: IDN/punycode, IPv6 literals, localhost-style
  * hosts, percent-encoded confusion, and parser ambiguity cases.

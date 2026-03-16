@@ -402,7 +402,7 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
 
 /**
  * Type-to-extension group mapping for first-party receipt types.
- * Used by @peac/protocol.verifyLocal() for type-to-extension enforcement (DD-173.3).
+ * Used by @peac/protocol.verifyLocal() for type-to-extension enforcement.
  * Entries with extension_group === null are excluded (no enforcement yet).
  */
 export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([

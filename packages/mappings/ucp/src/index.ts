@@ -39,7 +39,7 @@
  * ```
  */
 
-// Evidence Carrier Contract (v0.11.1+ DD-124)
+// Evidence Carrier Contract (v0.11.1+ )
 export type { UcpWebhookPayload, UcpExtractResult, UcpExtractAsyncResult } from './carrier.js';
 
 export {

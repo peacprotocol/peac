@@ -1,10 +1,10 @@
 /**
- * Credential Event Extension Schema (v0.11.3+, DD-145 ZT Pack)
+ * Credential Event Extension Schema (v0.11.3+ ZT Pack)
  *
  * Records credential lifecycle events in ext["org.peacprotocol/credential_event"].
  * Events: issued, leased, rotated, revoked, expired.
  *
- * credential_ref is an opaque fingerprint reference (DD-146): schema validates
+ * credential_ref is an opaque fingerprint reference: schema validates
  * format only (prefix + hex). Issuers compute values externally; verifiers
  * MUST NOT assume they can recompute the reference.
  */
@@ -21,7 +21,7 @@ export const CredentialEventTypeSchema = z.enum(CREDENTIAL_EVENTS);
 export type CredentialEventType = z.infer<typeof CredentialEventTypeSchema>;
 
 /**
- * Opaque fingerprint reference format (DD-146).
+ * Opaque fingerprint reference format.
  * Validates prefix (sha256: or hmac-sha256:) + 64 hex chars.
  * Schema does NOT compute or derive this value.
  */
