@@ -168,7 +168,7 @@ See [packages/cli/README.md](packages/cli/README.md) for the full command refere
 
 ## Versioning
 
-- **Current stable:** Interaction Record format (`interaction-record+jwt`, v0.12.1+)
+- **Current stable:** Interaction Record format (`interaction-record+jwt`, v0.12.2+)
 - **Legacy:** Wire 0.1 (`peac-receipt/0.1`) is frozen; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION`
 
 See [docs/specs/VERSIONING.md](docs/specs/VERSIONING.md) for the full versioning doctrine.

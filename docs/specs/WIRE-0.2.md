@@ -2,7 +2,7 @@
 
 **Status**: NORMATIVE
 
-**Version**: 0.12.0
+**Version**: 0.12.2
 
 **Wire Format**: `interaction-record+jwt`
 
@@ -1418,5 +1418,6 @@ Centralized bounds for Wire 0.2 extension fields, defined in `EXTENSION_LIMITS`:
 
 ## Version History
 
-- **0.12.0-preview.2** (pending release): Sections 18-20 added: Identifier Stack and Token Confusion (4-layer identifier table, dispatch rules, typ acceptance form matching, token confusion prevention per RFC 8725, provisional media type, peac_version formalization, version disambiguation), Verifier Validation Algorithm (13-step normative procedure with 10a/10b jti split, RFC 9068-style strict profile, error code mapping table), Replay Prevention (issuer-MUST jti uniqueness, verifier-SHOULD conditional replay detection, cache guidance, no-expiration rationale). RFC 9068 added to standards references. Conformance fixture for jti boundary length.
+- **0.12.2**: Profile-Defined Types and Extension Groups. Twelve typed extension groups with per-group schemas (Commerce, Access, Challenge, Identity, Correlation, Consent, Privacy, Safety, Compliance, Provenance, Attribution, Purpose). Type-to-extension enforcement in strict mode. Shared protocol-grade validators (SHA-256, HTTPS URI, ISO 8601, SPDX 3.0.1). Byte-budget controls for extensions. Nine pillar usage profiles. Commerce event field (6-value observational enum). ProofMethodSchema deprecated. 6 warning codes (was 4). SubjectRecord terminology.
+- **0.12.0-preview.2**: Sections 18-20 added: Identifier Stack and Token Confusion (4-layer identifier table, dispatch rules, typ acceptance form matching, token confusion prevention per RFC 8725, provisional media type, peac_version formalization, version disambiguation), Verifier Validation Algorithm (13-step normative procedure with 10a/10b jti split, RFC 9068-style strict profile, error code mapping table), Replay Prevention (issuer-MUST jti uniqueness, verifier-SHOULD conditional replay detection, cache guidance, no-expiration rationale). RFC 9068 added to standards references. Conformance fixture for jti boundary length.
 - **0.12.0-preview.1**: Initial Wire 0.2 specification (NORMATIVE PREVIEW). Two structural kinds, open semantic type, 10-pillar taxonomy, canonical issuer form, JOSE hardening, policy binding (JCS + SHA-256, three-state), 5 typed extension groups, RFC 9457 challenge body, 4 warning codes, dual-stack compatibility, strictness profiles.

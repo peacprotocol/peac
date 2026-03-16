@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 Pillar Taxonomy conformance vectors (Section 7, DD-156)",
-  "version": "0.12.1",
-  "schema_version": "0.12.1",
+  "version": "0.12.2",
+  "schema_version": "0.12.2",
   "fixtures": [
     {
       "name": "single-pillar-valid",

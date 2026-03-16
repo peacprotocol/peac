@@ -7,6 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-03-16
+
+### Profile-Defined Types and Extension Groups
+
+Completes the 12-group typed extension surface for Wire 0.2 interaction records,
+adds type-to-extension enforcement at verification time, ships 9 pillar usage
+profiles, and introduces shared protocol-grade validators.
+
+### Added
+
+- **7 new extension groups** (#519, #520, #521)
+  - Consent (`org.peacprotocol/consent`): consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction
+  - Compliance (`org.peacprotocol/compliance`): framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref
+  - Privacy (`org.peacprotocol/privacy`): data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism
+  - Safety (`org.peacprotocol/safety`): review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category
+  - Provenance (`org.peacprotocol/provenance`): source_type, source_ref, source_uri, verification_method, custody_entries (CustodyEntry[]), slsa (SlsaLevel)
+  - Attribution (`org.peacprotocol/attribution`): creator_ref, license_spdx (SPDX 3.0.1), obligation_type, attribution_text, content_signal_source (5-value closed enum), content_digest
+  - Purpose (`org.peacprotocol/purpose`): external_purposes (duplicate-rejecting), purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping
+- **Shared validator helpers** (#518)
+  - `Sha256DigestSchema`: SHA-256 digest validation (`sha256:<64 hex>`)
+  - `HttpsUriHintSchema`: HTTPS locator-hint validation with SSRF hardening (rejects credentials, fragments, control chars, dangerous schemes)
+  - `Iso8601DurationSchema`: parser-grade ISO 8601 duration validation
+  - `Iso8601DateSchema`: calendar date validation (YYYY-MM-DD)
+  - `SpdxExpressionSchema`: SPDX 3.0.1 license expression parser (AND/OR/WITH/+, LicenseRef, parentheses)
+- **Type-to-extension enforcement** (#522)
+  - `checkTypeExtensionMapping()` pure helper with 5-state decision tree
+  - Strict mode: registered types require their mapped extension group (`E_EXTENSION_GROUP_REQUIRED`, `E_EXTENSION_GROUP_MISMATCH`)
+  - Interop mode: downgrades missing/mismatch to warnings (`extension_group_missing`, `extension_group_mismatch`)
+  - Challenge-kind and custom types exempt from enforcement
+- **Byte-budget controls** (#518)
+  - `MAX_EXTENSION_GROUP_BYTES` (64 KB), `MAX_TOTAL_EXTENSIONS_BYTES` (256 KB), `MAX_ARRAY_PAYLOAD_BYTES` (32 KB)
+  - `E_EXTENSION_SIZE_EXCEEDED` and `E_EXTENSION_NON_JSON_VALUE` error codes
+  - Browser-safe UTF-8 measurement via `TextEncoder`
+- **9 pillar usage profiles** (#525)
+  - access, identity, consent, privacy, safety, compliance, provenance, attribution, purpose
+  - Schema-vs-profile field tables, Non-goals sections, strict-mode-valid quick demos
+  - Companion-profile guidance: consent+purpose, privacy+consent, safety+compliance, provenance+attribution
+- **Commerce event field** (#526)
+  - Optional `event` on `CommerceExtensionSchema`: 6-value closed enum (`authorization`, `capture`, `settlement`, `refund`, `void`, `chargeback`)
+  - Observational metadata only: does not encode settlement finality or lifecycle enforcement
+- **ProofMethodSchema deprecation** (#526)
+  - `@deprecated` annotation on `ProofMethodSchema` (4 transport-binding methods) and `PROOF_METHODS` array
+  - Compatibility alias preserved through v0.12.x; remove-not-before v0.13.0
+  - `ProofTypeSchema` (8 trust-root values) remains canonical
+- **AST no-network audit** (#527)
+  - Static analysis confirming `@peac/schema` has zero I/O call sites
+  - Recursive star-export resolution for transitive dependency analysis
+- **API contract extraction** (#527)
+  - Extracted API surface artifacts for critical packages at `contracts/api/`
+  - Accessor snapshot diffs for new extension group accessors
+- **Extension regression benchmarks** (#528)
+  - Strict-mode extension regression benchmarks for all registered types
+  - Byte-budget exact-boundary coverage (multibyte UTF-8)
+  - Baseline-regression test methodology
+- **Extension module restructure** (#518)
+  - `packages/schema/src/wire-02-extensions/` per-group module directory (was monolithic file)
+  - Backward-compatible re-export barrel
+- **Registry codegen** (#518)
+  - `packages/kernel/src/registries.generated.ts` from `specs/kernel/registries.json`
+  - Deterministic codegen gate; CI fails if stale
+  - Type-to-extension mapping constant for enforcement
+- **Subject record terminology** (#518)
+  - `SubjectRecord` / `SubjectRecordSnapshot` as canonical names
+  - `SubjectProfile` / `SubjectProfileSnapshot` kept as `@deprecated` aliases (remove-not-before v0.13.0)
+
+### Changed
+
+- `registries.json` receipt types: all 10 now have non-null `extension_group` (was 5 null, 5 mapped)
+- `REGISTERED_EXTENSION_GROUP_KEYS`: 12 entries (was 5), derived from generated kernel constants
+- Warning codes: 6 total (was 4): added `extension_group_missing`, `extension_group_mismatch`
+- Error codes: 4 new (`E_EXTENSION_SIZE_EXCEEDED`, `E_EXTENSION_NON_JSON_VALUE`, `E_EXTENSION_GROUP_REQUIRED`, `E_EXTENSION_GROUP_MISMATCH`)
+- Node CI matrix: Node 24 (canonical) + Node 22 (compat) + Node 25 (forward-compat)
+
+### Deferred
+
+- Content-signals streaming: v0.12.3+ (no demand signal)
+- `@peac/adapter-did` (DID resolution): v0.12.3
+- Wire 0.2 adoption across A2A/ACP/UCP mappings: v0.12.3 (Ecosystem Mappings)
+- Commerce events vocabulary expansion beyond 6 values: v0.12.3+
+- Profile capability signaling: v0.12.3+
+- Runtime profile validation engine: v0.12.3+
+
 ## [0.12.1] - 2026-03-13
 
 ### x402 Upstream Wire Sync
