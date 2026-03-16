@@ -111,6 +111,15 @@ See [examples/wire-02-minimal/](examples/wire-02-minimal/) for the full source. 
 
 ---
 
+## Common use cases
+
+PEAC is most useful where logs are not enough: payments, cross-boundary verification, audit, dispute review, and multi-agent workflows.
+
+- **Agentic commerce and payments:** Prove what was offered, challenged, paid, or settled across x402 and machine-to-machine commerce flows. See [x402 Integration Kit](integrator-kits/x402/README.md).
+- **Audit and dispute review:** Keep signed evidence that survives organizational boundaries, not just local logs. See [Governance Mappings](docs/governance/).
+- **MCP tools and APIs:** Verify, issue, and carry signed receipts for tool calls, API responses, and automated actions. See [MCP Integration Kit](integrator-kits/mcp/README.md).
+- **Agent-to-agent workflows:** Carry verifiable receipts across A2A task/state transitions and multi-agent chains. See [A2A Integration Kit](integrator-kits/a2a/README.md).
+
 ## Start here
 
 **[Full decision tree with quickstarts and integration kits](docs/START_HERE.md)**
@@ -119,8 +128,6 @@ See [examples/wire-02-minimal/](examples/wire-02-minimal/) for the full source. 
 - **I run an MCP server**: [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`
 - **I want to verify a receipt**: [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md) (5 minutes)
 - **I build A2A agents**: [A2A Integration Kit](integrator-kits/a2a/README.md)
-- **I integrate x402 payments**: [x402 Integration Kit](integrator-kits/x402/README.md)
-- **I need compliance/audit evidence**: [Governance Mappings](docs/governance/)
 - **Build in Go**: [Go SDK](sdks/go/)
 
 ---

@@ -1,12 +1,14 @@
 # Start Here
 
+PEAC is most useful where logs are not enough: payments, cross-boundary verification, audit, dispute review, and multi-agent workflows.
+
 Pick the path that matches what you are building.
 
 ## I run an API or HTTP service
 
 You want to issue signed receipts proving what terms applied and what happened.
 
-1. Install: `pnpm add @peac/middleware-express @peac/crypto`
+1. Install: `pnpm add @peac/middleware-express @peac/crypto @peac/protocol`
 2. Follow the [API Provider Quickstart](guides/quickstart-api-provider.md) (5 minutes)
 3. See [examples/hello-world](../examples/hello-world/) for the minimal standalone version
 
@@ -26,7 +28,7 @@ Key packages: `@peac/mcp-server`, `@peac/mappings-mcp`
 
 You have a receipt (JWS string) and want to verify it offline with a public key.
 
-1. Install: `pnpm add @peac/protocol`
+1. Install: `pnpm add @peac/protocol @peac/crypto`
 2. Follow the [Agent Operator Quickstart](guides/quickstart-agent-operator.md) (5 minutes)
 3. See [examples/wire-02-minimal](../examples/wire-02-minimal/) for typed accessor helpers
 
@@ -42,9 +44,11 @@ You want to carry receipts across Agent-to-Agent Protocol flows.
 
 Key packages: `@peac/mappings-a2a`, `@peac/protocol`
 
-## I integrate with x402 payment flows
+## Strategic wedges
 
-You want to verify or produce settlement evidence for x402 interactions.
+### x402 and payment proofs
+
+You want verifiable payment and settlement evidence for x402 and machine-to-machine commerce. Prove what was offered, challenged, paid, or settled across organizational boundaries.
 
 1. Install: `pnpm add @peac/adapter-x402`
 2. Read the [x402 Integration Kit](../integrator-kits/x402/README.md)
@@ -52,9 +56,9 @@ You want to verify or produce settlement evidence for x402 interactions.
 
 Key packages: `@peac/adapter-x402`
 
-## I need compliance or audit evidence
+### Audit, dispute, and governance evidence
 
-You want to use receipts for governance, dispute review, or regulatory compliance.
+You need signed evidence for audit, dispute review, or governance workflows. Evidence that survives organizational boundaries, not just local logs.
 
 1. Start with the [API Provider Quickstart](guides/quickstart-api-provider.md) to understand issuance
 2. See [Evidence Bundles](specs/EVIDENCE-CARRIER-CONTRACT.md) for offline verification bundles
@@ -72,7 +76,7 @@ Key packages: `@peac/protocol`, `@peac/audit`
 
 ## Package layering
 
-```
+```text
 Layer 0: @peac/kernel       (types, constants)
 Layer 1: @peac/schema       (Zod validation)
 Layer 2: @peac/crypto       (Ed25519 signing)

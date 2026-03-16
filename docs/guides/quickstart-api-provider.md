@@ -10,7 +10,7 @@ Add signed receipts to your Express.js API in under 5 minutes. Every response wi
 ## 1. Install
 
 ```bash
-pnpm add @peac/middleware-express @peac/crypto express
+pnpm add @peac/middleware-express @peac/protocol @peac/crypto express
 ```
 
 ## 2. Generate a signing key
@@ -63,10 +63,20 @@ You should see a `PEAC-Receipt` header in the response containing a compact JWS.
 
 ## 5. Verify the receipt offline
 
+In a separate script or on the consumer side, verify the receipt using the issuer's public key:
+
 ```typescript
 import { verifyLocal } from '@peac/protocol';
+import { importPublicKey } from '@peac/crypto';
 
-const receiptJws = '<the PEAC-Receipt header value>';
+// The issuer's public key (from the JWK saved in step 2, public part only)
+const publicKey = await importPublicKey({
+  kty: 'OKP',
+  crv: 'Ed25519',
+  x: '<base64url public key from step 2>',
+});
+
+const receiptJws = '<the PEAC-Receipt header value from the curl response>';
 const result = await verifyLocal(receiptJws, publicKey);
 console.log('Valid:', result.valid);
 if (result.valid) {
