@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-03-16
+
+### Profile-Defined Types and Extension Groups
+
+Completes the 12-group typed extension surface for Wire 0.2 interaction records,
+adds type-to-extension enforcement at verification time, ships 9 pillar usage
+profiles, and introduces shared protocol-grade validators.
+
+### Added
+
+- **7 new extension groups** (#519, #520, #521): consent, compliance, privacy, safety, provenance, attribution, purpose
+- **Shared validator helpers** (#518): SHA-256 digest, HTTPS URI hint (SSRF-hardened), ISO 8601 duration (parser-grade), ISO 8601 date, SPDX 3.0.1 license expression parser
+- **Type-to-extension enforcement** (#522): strict mode requires mapped extension group for registered types; interop mode downgrades to warnings
+- **Byte-budget controls** (#518): per-group 64 KB, total 256 KB, per-array 32 KB limits with browser-safe UTF-8 measurement
+- **9 pillar usage profiles** (#525): access, identity, consent, privacy, safety, compliance, provenance, attribution, purpose
+- **Commerce event field** (#526): 6-value closed enum (observational metadata only)
+- **ProofMethodSchema deprecation** (#526): transport-binding alias preserved through v0.12.x; remove-not-before v0.13.0
+- **AST no-network audit** (#527): static analysis confirming `@peac/schema` has zero I/O call sites
+- **API contract extraction** (#527): extracted API surface artifacts at `contracts/api/`
+- **Extension regression benchmarks** (#528): strict-mode enforcement benchmarks and byte-budget boundary coverage
+- **Registry codegen** (#518): `registries.generated.ts` from `registries.json` with deterministic output
+- **Subject record terminology** (#518): `SubjectRecord` canonical; `SubjectProfile` kept as deprecated alias
+
+### Changed
+
+- Extension groups: 12 total (was 5); all 10 receipt types now have non-null `extension_group`
+- Warning codes: 6 total (was 4): added `extension_group_missing`, `extension_group_mismatch`
+- Error codes: 4 new (`E_EXTENSION_SIZE_EXCEEDED`, `E_EXTENSION_NON_JSON_VALUE`, `E_EXTENSION_GROUP_REQUIRED`, `E_EXTENSION_GROUP_MISMATCH`)
+- Node CI matrix: Node 24 (canonical) + Node 22 (compat) + Node 25 (forward-compat)
+
+### Deferred
+
+- `@peac/adapter-did` (DID resolution): v0.12.3
+- Wire 0.2 adoption across A2A/ACP/UCP mappings: v0.12.3
+- Commerce events vocabulary expansion: v0.12.3+
+- Profile capability signaling: v0.12.3+
+
 ## [0.12.1] - 2026-03-13
 
 ### x402 Upstream Wire Sync
