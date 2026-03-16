@@ -94,5 +94,5 @@ pnpm test --filter @peac/mappings-mcp
 - Protocol: [peacprotocol.org](https://www.peacprotocol.org)
 - GitHub: [github.com/peacprotocol/peac](https://github.com/peacprotocol/peac)
 - npm: [@peac/mcp-server](https://www.npmjs.com/package/@peac/mcp-server)
-- MCP Registry: submission prepared (schema validated; awaiting mcp-publisher CLI submission)
+- MCP Registry: published
 - llms.txt: [github.com/peacprotocol/peac/blob/main/llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt)
