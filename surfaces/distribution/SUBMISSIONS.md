@@ -16,13 +16,17 @@ Copy-paste fields for submitting `@peac/mcp-server` to MCP directories.
 | **Transport** | stdio (default), Streamable HTTP                 |
 | **Node.js**   | >= 22.0.0                                        |
 
+## Title (for registry listings)
+
+PEAC Protocol: Signed interaction receipts
+
 ## Short Description (1 line)
 
-MCP server providing 5 tools to verify, inspect, decode, issue, and bundle PEAC evidence receipts.
+Verify, inspect, decode, issue, and bundle signed receipts for agent, API, and MCP interactions. Portable and offline-verifiable.
 
 ## Medium Description (2-3 sentences)
 
-PEAC Protocol MCP server provides 5 tools for cryptographic evidence receipts: verify Ed25519 signatures, inspect metadata, decode payloads, issue signed receipts, and create evidence bundles. Read-only operations (verify, inspect, decode) require no configuration. Issuance requires an Ed25519 key via `--issuer-key`.
+PEAC Protocol MCP server provides 5 tools for signed interaction receipts: verify Ed25519 signatures, inspect metadata, decode payloads, issue signed receipts, and create evidence bundles. Read-only operations (verify, inspect, decode) require no configuration. Issuance requires an Ed25519 key via `--issuer-key`.
 
 ## Tools
 
@@ -40,22 +44,22 @@ Evidence, Verification, Security, Cryptography, Audit, Compliance, Receipts
 
 ## Submission URLs
 
-| Directory               | URL                                                     | Status         |
-| ----------------------- | ------------------------------------------------------- | -------------- |
-| MCP Registry (Official) | Submit via `mcp-publisher` CLI (schema validated)       | Pending        |
-| PulseMCP                | Auto-ingested from MCP Registry (depends on submission) | Pending        |
-| Smithery                | <https://smithery.ai/new>                               | Pending        |
-| mcpservers.org          | <https://mcpservers.org/submit>                         | Pending        |
-| mcp.so                  | <https://mcp.so/submit>                                 | Pending        |
-| awesome-mcp-servers     | PR to <https://github.com/punkpeye/awesome-mcp-servers> | Pending        |
-| Glama                   | Auto-indexed from GitHub                                | Verify listing |
+| Directory               | URL                                                     | Status              |
+| ----------------------- | ------------------------------------------------------- | ------------------- |
+| MCP Registry (Official) | Published via `mcp-publisher` CLI                       | Published (v0.12.2) |
+| PulseMCP                | Auto-ingested from MCP Registry                         | Verify listing      |
+| Smithery                | <https://smithery.ai/new>                               | Not submitted       |
+| mcpservers.org          | <https://mcpservers.org/submit>                         | Not submitted       |
+| mcp.so                  | <https://mcp.so/submit>                                 | Not submitted       |
+| awesome-mcp-servers     | PR to <https://github.com/punkpeye/awesome-mcp-servers> | Not submitted       |
+| Glama                   | Auto-indexed from GitHub                                | Verify listing      |
 
 ## awesome-mcp-servers PR Entry
 
 For the PR to `punkpeye/awesome-mcp-servers`, add under the appropriate category:
 
 ```markdown
-- [PEAC Protocol](https://github.com/peacprotocol/peac) - Verify, issue, and bundle cryptographic evidence receipts for AI agent interactions. Offline, Ed25519 signatures, no API keys.
+- [PEAC Protocol](https://github.com/peacprotocol/peac) - Verify, inspect, issue, and bundle cryptographic evidence receipts for AI agent and API interactions. Portable, offline-verifiable JWS records with Ed25519 signatures.
 ```
 
 ## Smithery Notes
