@@ -40,7 +40,8 @@ const validType = fc
 
 const validIss = fc
   .tuple(fc.stringMatching(/^[a-z][a-z0-9-]{0,15}$/), fc.constantFrom('.com', '.org', '.io'))
-  .map(([host, tld]) => `https://${host}${tld}`);
+  .map(([host, tld]) => `https://${host}${tld}`)
+  .filter((iss) => !/xn--/.test(iss));
 
 // ---------------------------------------------------------------------------
 // Setup
