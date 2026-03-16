@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.peacprotocol/peac",
   "title": "PEAC Protocol: Signed interaction receipts",
-  "description": "Verify, inspect, decode, issue, and bundle signed receipts for agent, API, and MCP interactions. Portable and offline-verifiable.",
+  "description": "Signed receipts for agent, API, and MCP interactions. Portable and offline-verifiable.",
   "repository": {
     "url": "https://github.com/peacprotocol/peac",
     "source": "github",
