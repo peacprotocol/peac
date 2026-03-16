@@ -243,18 +243,28 @@ jobs:
           fi
           echo "OK: Working tree is clean after tests"
 
-      - name: Performance SLO gate (advisory)
+      # Performance gates: ADVISORY in PR CI; release/nightly lane is fail-closed.
+      # Captures baseline-regression artifacts for cross-version comparison.
+      - name: Performance SLO gate (advisory, Node 24 canonical)
         continue-on-error: true
         run: |
           PEAC_BENCH_JSON="tests/perf/ci-bench-result.json" \
             pnpm exec vitest run tests/perf/wire02-slo.test.ts --reporter=dot
+
+      - name: Extension regression gate (advisory, strict mode, Node 24 canonical)
+        continue-on-error: true
+        run: |
+          PEAC_BENCH_JSON="tests/perf/ci-ext-bench-result.json" \
+            pnpm exec vitest run tests/perf/extension-regression.test.ts --reporter=dot
 
       - name: Upload benchmark artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: benchmark-results-${{ github.sha }}
-          path: tests/perf/ci-bench-result.json
+          path: |
+            tests/perf/ci-bench-result.json
+            tests/perf/ci-ext-bench-result.json
           if-no-files-found: ignore
           retention-days: 90
 
@@ -293,14 +303,14 @@ jobs:
         run: pnpm exec vitest run tests/scripts/audit-gate.test.ts
 
   # Node.js compatibility matrix (v0.12.2, DD-161)
-  # Primary CI job tests Node 24 (Active LTS, pinned via .node-version).
-  # This job tests:
-  #   - Node 25 (Current): forward-compat, catches upcoming breakage early
-  #   - Node 22 (Maintenance LTS): backward-compat, declared in engines.node >=22.0.0
-  # Support policy: Node 24 is the canonical production target; Node 22 is the
-  # Maintenance LTS compat lane per engines.node; Node 25 is forward-compat only.
+  # Release contract: Node 24.x LTS (canonical) + Node 22.x Maintenance LTS must both pass.
+  # Primary CI job uses Node 24 (Active LTS, pinned via .node-version).
+  # This job explicitly satisfies the required 24+22 contract:
+  #   - Node 22 (Maintenance LTS): REQUIRED compat, declared in engines.node >=22.0.0
+  #   - Node 25 (Current): NON-BLOCKING forward-compat only, catches upcoming breakage
+  # Node 25 does NOT substitute for the required 24+22 gate.
   node-compat:
-    name: Node Compat (${{ matrix.node-version }})
+    name: Node ${{ matrix.node-version }} (compat)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -328,6 +338,22 @@ jobs:
 
       - name: Test core packages
         run: pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/protocol test
+
+      # Extension regression: advisory on compat lanes, captures cross-version artifacts
+      - name: Extension regression (Node ${{ matrix.node-version }}, advisory)
+        continue-on-error: true
+        run: |
+          PEAC_BENCH_JSON="tests/perf/ci-compat-${{ matrix.node-version }}.json" \
+            pnpm exec vitest run tests/perf/extension-regression.test.ts --reporter=dot
+
+      - name: Upload compat benchmark artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: compat-bench-node-${{ matrix.node-version }}-${{ github.sha }}
+          path: tests/perf/ci-compat-*.json
+          if-no-files-found: ignore
+          retention-days: 90
 
   # PR scope guard: hard-fail when changed files exceed declared scope.
   # Opt-in via scope:* labels. No label = no check.

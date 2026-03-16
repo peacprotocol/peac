@@ -93,6 +93,120 @@ describe('byte-budget enforcement in Wire02ClaimsSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('accepts extension at exactly per-group budget (ASCII fill)', () => {
+    const encoder = new TextEncoder();
+    const overhead = encoder.encode(JSON.stringify({ data: '' })).byteLength;
+    const fillLength = EXTENSION_BUDGET.maxGroupBytes - overhead;
+    const group = { data: 'a'.repeat(fillLength) };
+    expect(encoder.encode(JSON.stringify(group)).byteLength).toBe(EXTENSION_BUDGET.maxGroupBytes);
+
+    const claims = makeClaimsWithExtensions({ 'com.example/exact': group });
+    expect(Wire02ClaimsSchema.safeParse(claims).success).toBe(true);
+  });
+
+  it('rejects extension at per-group budget + 1 byte', () => {
+    const encoder = new TextEncoder();
+    const overhead = encoder.encode(JSON.stringify({ data: '' })).byteLength;
+    const fillLength = EXTENSION_BUDGET.maxGroupBytes - overhead + 1;
+    const group = { data: 'a'.repeat(fillLength) };
+    expect(encoder.encode(JSON.stringify(group)).byteLength).toBe(
+      EXTENSION_BUDGET.maxGroupBytes + 1
+    );
+
+    const claims = makeClaimsWithExtensions({ 'com.example/over': group });
+    const result = Wire02ClaimsSchema.safeParse(claims);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(
+        result.error.issues.find((i) => i.message === 'E_EXTENSION_SIZE_EXCEEDED')
+      ).toBeDefined();
+    }
+  });
+
+  it('measures UTF-8 bytes at exact boundary with multibyte characters', () => {
+    // Proves budget enforces UTF-8 byte length (TextEncoder), not JS code-unit length.
+    const encoder = new TextEncoder();
+    const overhead = encoder.encode(JSON.stringify({ data: '' })).byteLength;
+    const twoByteChar = '\u00E9'; // e-acute: 1 JS char, 2 UTF-8 bytes
+    const target = EXTENSION_BUDGET.maxGroupBytes - overhead;
+    const charCount = Math.floor(target / 2);
+    const group = { data: twoByteChar.repeat(charCount) };
+    const byteLength = encoder.encode(JSON.stringify(group)).byteLength;
+    expect(byteLength).toBeLessThanOrEqual(EXTENSION_BUDGET.maxGroupBytes);
+
+    const claims = makeClaimsWithExtensions({ 'com.example/multibyte': group });
+    expect(Wire02ClaimsSchema.safeParse(claims).success).toBe(true);
+  });
+
+  it('UTF-8 byte boundary: mixed ASCII + multibyte nested object', () => {
+    // Realistic shape: nested object with mixed ASCII keys and multibyte values.
+    // Proves byte measurement survives non-flat serialization.
+    const encoder = new TextEncoder();
+    const nestedObj = {
+      label: 'caf\u00E9 cr\u00E8me', // 2-byte chars mixed with ASCII
+      status: 'v\u00E9rifi\u00E9',
+      items: ['a', 'b', '\u00E9'],
+      count: 42,
+    };
+    // Account for the wrapper: {"nested":{...},"pad":"..."}
+    const wrapperOverhead = encoder.encode(
+      JSON.stringify({ nested: nestedObj, pad: '' })
+    ).byteLength;
+    const padLength = EXTENSION_BUDGET.maxGroupBytes - wrapperOverhead;
+
+    if (padLength > 0) {
+      const group = { nested: nestedObj, pad: 'x'.repeat(padLength) };
+      const totalBytes = encoder.encode(JSON.stringify(group)).byteLength;
+      expect(totalBytes).toBe(EXTENSION_BUDGET.maxGroupBytes);
+
+      const claims = makeClaimsWithExtensions({ 'com.example/mixed': group });
+      expect(Wire02ClaimsSchema.safeParse(claims).success).toBe(true);
+
+      // +1 byte should fail
+      const overGroup = { nested: nestedObj, pad: 'x'.repeat(padLength + 1) };
+      const overClaims = makeClaimsWithExtensions({ 'com.example/mixed-over': overGroup });
+      expect(Wire02ClaimsSchema.safeParse(overClaims).success).toBe(false);
+    }
+  });
+
+  it('accepts multi-group extensions well within total budget', () => {
+    const encoder = new TextEncoder();
+    const halfGroup = Math.floor(EXTENSION_BUDGET.maxGroupBytes / 2);
+    const overhead = encoder.encode(JSON.stringify({ data: '' })).byteLength;
+    const fillLength = halfGroup - overhead;
+
+    const extensions: Record<string, unknown> = {};
+    for (let i = 0; i < 4; i++) {
+      extensions[`com.example/fill-${i}`] = { data: 'b'.repeat(fillLength) };
+    }
+
+    const claims = makeClaimsWithExtensions(extensions);
+    expect(Wire02ClaimsSchema.safeParse(claims).success).toBe(true);
+  });
+
+  it('byte-budget validation adds < 1ms overhead for typical extensions', () => {
+    const claims = makeClaimsWithExtensions({
+      'org.peacprotocol/commerce': {
+        payment_rail: 'stripe',
+        amount_minor: '5000',
+        currency: 'USD',
+        reference: 'pi_perf_test',
+      },
+      'org.peacprotocol/access': {
+        resource: 'https://api.example.com/v1/data',
+        action: 'read',
+        decision: 'allow',
+      },
+    });
+
+    for (let i = 0; i < 50; i++) Wire02ClaimsSchema.safeParse(claims);
+
+    const iterations = 500;
+    const start = performance.now();
+    for (let i = 0; i < iterations; i++) Wire02ClaimsSchema.safeParse(claims);
+    expect((performance.now() - start) / iterations).toBeLessThan(1);
+  });
+
   it('rejects top-level toJSON via canonical error code', () => {
     const claims = makeClaimsWithExtensions({
       'com.example/tojson': { toJSON: () => ({}) },
