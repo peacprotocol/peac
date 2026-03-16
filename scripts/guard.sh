@@ -554,6 +554,28 @@ else
   bad=1
 fi
 
+printf "%-50s" "AST no-network audit..."
+if pnpm exec tsx scripts/ast-no-network-audit.ts > /dev/null 2>&1; then
+  echo "OK"
+else
+  echo "FAIL"
+  pnpm exec tsx scripts/ast-no-network-audit.ts 2>&1 | head -30
+  bad=1
+fi
+
+printf "%-50s" "API contract drift check (#486)..."
+if [ -f scripts/extract-api-contract.ts ] && [ -d contracts/api ]; then
+  if pnpm exec tsx scripts/extract-api-contract.ts --check > /dev/null 2>&1; then
+    echo "OK"
+  else
+    echo "FAIL"
+    pnpm exec tsx scripts/extract-api-contract.ts --check 2>&1 | head -20
+    bad=1
+  fi
+else
+  echo "SKIP: extract-api-contract.ts or contracts/api/ not found"
+fi
+
 echo ""
 echo -n "== doc-example validation == "
 if [ -f scripts/validate-doc-examples.mjs ]; then
