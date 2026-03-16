@@ -34,9 +34,9 @@ console.log('Valid:', result.valid);
 
 ```bash
 git clone https://github.com/peacprotocol/peac.git
-cd peac/examples/hello-world
-npm install @peac/crypto @peac/protocol tsx typescript
-npx tsx demo.ts
+cd peac && pnpm install && pnpm build
+cd examples/hello-world
+pnpm exec tsx demo.ts
 ```
 
 Expected output:
@@ -63,7 +63,7 @@ Read-only operations (verify, inspect, decode) require no configuration. Issuanc
 
 ```bash
 # Install core packages
-npm install @peac/crypto @peac/protocol
+pnpm add @peac/crypto @peac/protocol
 
 # Or clone the monorepo for all examples
 git clone https://github.com/peacprotocol/peac.git
