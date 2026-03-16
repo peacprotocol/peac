@@ -1,5 +1,5 @@
 /**
- * Evidence mapping for OpenAI-compatible chat completions (DD-138).
+ * Evidence mapping for OpenAI-compatible chat completions.
  *
  * Maps a ChatCompletion into InteractionEvidenceV01 using the hash-first
  * model: SHA-256 digests of messages and output, plaintext metadata only.
@@ -77,7 +77,7 @@ function primaryFinishReason(completion: ChatCompletion): string | null {
 /**
  * Create interaction evidence from an OpenAI-compatible chat completion.
  *
- * Hash-first model (DD-138): no raw prompt or completion text is stored.
+ * Hash-first model: no raw prompt or completion text is stored.
  * Only SHA-256 digests, model ID, token counts, and timing are recorded.
  *
  * @param params - Messages, completion response, and optional provider

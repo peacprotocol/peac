@@ -2,7 +2,7 @@
  * @peac/adapter-openai-compatible
  *
  * OpenAI-compatible chat completion adapter for PEAC interaction evidence.
- * Hash-first model (DD-138): no raw prompt or completion text in receipts.
+ * Hash-first model: no raw prompt or completion text in receipts.
  *
  * Works with any OpenAI-compatible provider (OpenAI, Anthropic via adapter,
  * Ollama, vLLM, Together, etc.) without importing their SDKs.

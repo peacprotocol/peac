@@ -1,5 +1,5 @@
 /**
- * Handler types -- DD-51: ZERO MCP SDK imports
+ * Handler types -- ZERO MCP SDK imports
  *
  * Pure handler interface that is transport-agnostic.
  * MCP SDK types are only used in server.ts.

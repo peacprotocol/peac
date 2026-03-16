@@ -51,7 +51,7 @@ export { ERROR_CATEGORIES } from './error-categories.generated.js';
 export type { ErrorCategory } from './error-categories.generated.js';
 
 /**
- * Agent-actionable recovery hint (DD-132, DD-133).
+ * Agent-actionable recovery hint.
  *
  * Best-effort guidance for agents; servers MAY change mappings between versions
  * without breaking the protocol. Agents SHOULD NOT build hard dependencies on
@@ -127,7 +127,7 @@ export interface AgentProtocolEntry {
 }
 
 // ---------------------------------------------------------------------------
-// Wire 0.2 structural types (v0.12.0-preview.1, DD-156)
+// Wire 0.2 structural types (v0.12.0-preview.1)
 // ---------------------------------------------------------------------------
 
 /**

@@ -469,7 +469,7 @@ describe('manifest structure', () => {
   });
 });
 
-describe('Bundle Path Convention (DD-49)', () => {
+describe('Bundle Path Convention', () => {
   it('should store peac_txt at locked path policy/peac.txt', async () => {
     const receipts = [createMockJws('receipt-001', 1704067200)];
     const peacTxt = `issuer: https://api.example.com

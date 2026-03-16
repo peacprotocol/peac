@@ -152,10 +152,10 @@ export const ERROR_CODES = {
   E_WORKFLOW_SUMMARY_INVALID: 'E_WORKFLOW_SUMMARY_INVALID',
   E_WORKFLOW_CYCLE_DETECTED: 'E_WORKFLOW_CYCLE_DETECTED',
 
-  // Constraint errors (400, DD-121)
+  // Constraint errors (400)
   E_CONSTRAINT_VIOLATION: 'E_CONSTRAINT_VIOLATION',
 
-  // Wire 0.2 extension errors (400, DD-153/DD-156)
+  // Wire 0.2 extension errors (400/)
   E_INVALID_EXTENSION_KEY: 'E_INVALID_EXTENSION_KEY',
 } as const;
 
@@ -244,7 +244,7 @@ export function createWorkflowDagInvalidError(
 }
 
 // ============================================================================
-// Constraint Error Helpers (v0.11.0+, DD-121)
+// Constraint Error Helpers (v0.11.0+)
 // ============================================================================
 
 /**

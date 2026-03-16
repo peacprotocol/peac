@@ -40,7 +40,7 @@ const VALID_HTTP_STATUSES = new Set([
 // Categories are derived from errors.json at runtime (single source of truth).
 // The codegen script validates these against the kernel types.ts union to prevent drift.
 
-// Valid next_action values (DD-132, DD-133)
+// Valid next_action values
 const VALID_NEXT_ACTIONS = new Set([
   'retry_after_delay',
   'retry_with_different_key',
@@ -100,7 +100,7 @@ function main() {
       throw new Error(`Invalid error code format: ${err.code} (must match E_[A-Z][A-Z0-9_]*)`);
     }
 
-    // Validate next_action (DD-132, DD-133)
+    // Validate next_action
     if (!VALID_NEXT_ACTIONS.has(err.next_action)) {
       throw new Error(
         `Invalid next_action for ${err.code}: ${err.next_action} (must be one of: ${[...VALID_NEXT_ACTIONS].join(', ')})`

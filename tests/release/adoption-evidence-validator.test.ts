@@ -82,10 +82,10 @@ describe('validate-adoption-evidence.mjs (live repo)', () => {
     expect(result.exitCode).toBe(0);
   });
 
-  it('reports correct DD-90 ecosystem count from real JSON', () => {
+  it('reports correct ecosystem count from real JSON', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('2 DD-90 ecosystems');
+    expect(combined).toContain('2 qualifying ecosystems');
     expect(combined).toContain('3 total integrations');
   });
 

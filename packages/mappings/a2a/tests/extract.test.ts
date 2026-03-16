@@ -53,7 +53,7 @@ describe('extractReceiptFromMetadata (sync)', () => {
     expect(extractReceiptFromMetadata(metadata)).toBeNull();
   });
 
-  it('skips carriers that fail schema validation (DD-131)', () => {
+  it('skips carriers that fail schema validation', () => {
     const metadata = {
       [PEAC_EXTENSION_URI]: {
         carriers: [
@@ -80,7 +80,7 @@ describe('extractReceiptFromMetadata (sync)', () => {
   });
 });
 
-describe('extractReceiptFromMetadataAsync (DD-129)', () => {
+describe('extractReceiptFromMetadataAsync', () => {
   it('passes with consistent receipt_ref and receipt_jws', async () => {
     const jws = VALID_JWS;
     const ref = await computeReceiptRef(jws);

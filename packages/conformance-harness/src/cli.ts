@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Conformance harness CLI (DD-122)
+ * Conformance harness CLI
  *
  * Usage:
  *   pnpm --filter @peac/conformance-harness conformance -- --adapter core

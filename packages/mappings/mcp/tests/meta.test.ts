@@ -145,7 +145,7 @@ describe('extractReceiptFromMeta', () => {
 });
 
 // ---------------------------------------------------------------------------
-// extractReceiptFromMetaAsync (DD-129)
+// extractReceiptFromMetaAsync
 // ---------------------------------------------------------------------------
 
 describe('extractReceiptFromMetaAsync', () => {
@@ -202,7 +202,7 @@ describe('McpCarrierAdapter', () => {
     expect(extracted!.receipts[0].receipt_ref).toBe(VALID_REF);
   });
 
-  it('round-trips receipt_url through attach and extract (DD-135)', () => {
+  it('round-trips receipt_url through attach and extract', () => {
     const carrierWithUrl: PeacEvidenceCarrier = {
       ...VALID_CARRIER,
       receipt_url: 'https://receipts.example.com/abc123',

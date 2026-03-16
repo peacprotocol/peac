@@ -1,5 +1,5 @@
 /**
- * Performance baseline (DD-118 Polish Bucket)
+ * Performance baseline (Polish Bucket)
  *
  * Records machine-readable performance measurements to baseline-results.json.
  * In v0.10.14 this was informational only. In v0.11.0+ (post Zod 4), this
@@ -90,7 +90,7 @@ function atomicWriteFileSync(path: string, content: string): void {
   renameSync(tmpPath, path);
 }
 
-describe('Performance baseline (DD-118)', () => {
+describe('Performance baseline', () => {
   const claims = makeRealisticClaims();
 
   it('validateKernelConstraints produces finite positive ops/sec', () => {

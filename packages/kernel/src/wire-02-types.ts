@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 pure primitive types (v0.12.0-preview.1, DD-156)
+ * Wire 0.2 pure primitive types (v0.12.0-preview.1)
  *
  * This file contains ONLY types whose fields are built-in TypeScript primitives
  * (string, number). No imports from @peac/schema or any other package.
@@ -10,7 +10,7 @@
  */
 
 /**
- * Policy binding block for Wire 0.2 envelopes (DD-151).
+ * Policy binding block for Wire 0.2 envelopes.
  *
  * Records a cryptographic reference to the policy document that governed
  * this interaction. The digest MUST be the JCS+SHA-256 of the policy JSON
@@ -19,18 +19,18 @@
 export interface PolicyBlock {
   /** JCS+SHA-256 digest of the policy document: 'sha256:<64 lowercase hex>' */
   digest: string;
-  /** HTTPS locator hint for the policy document. MUST NOT trigger auto-fetch (DD-55). */
+  /** HTTPS locator hint for the policy document. MUST NOT trigger auto-fetch. */
   uri?: string;
   /** Caller-assigned version label for the policy. */
   version?: string;
 }
 
 /**
- * Representation fields for Wire 0.2 envelopes (DD-152).
+ * Representation fields for Wire 0.2 envelopes.
  *
  * Records metadata about the content representation that was observed or served,
  * enabling reproducible content drift detection.
- * Maps to RepresentationObservation (DD-103) at the schema layer.
+ * Maps to RepresentationObservation at the schema layer.
  */
 export interface RepresentationFields {
   /** FingerprintRef of the served content body: 'sha256:<64 lowercase hex>' */
@@ -42,7 +42,7 @@ export interface RepresentationFields {
 }
 
 /**
- * A verification warning emitted during Wire 0.2 parsing or verification (DD-155).
+ * A verification warning emitted during Wire 0.2 parsing or verification.
  *
  * Warnings do NOT affect the allow/deny decision unless caller policy requires it.
  * Warning codes are append-only stable string literals.

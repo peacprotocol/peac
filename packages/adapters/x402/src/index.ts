@@ -102,7 +102,7 @@ export {
 // Mapping
 export { toPeacRecord, toPeacCarrier } from './map.js';
 
-// Evidence Carrier Contract (v0.11.1+ DD-124)
+// Evidence Carrier Contract (v0.11.1+ )
 export type {
   X402HeaderMap,
   X402ResponseLike,

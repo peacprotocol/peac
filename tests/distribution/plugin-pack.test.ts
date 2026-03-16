@@ -181,7 +181,7 @@ describe('plugin-pack README', () => {
 });
 
 // ---------------------------------------------------------------------------
-// No package.json (DD-139: distribution surface, not a package)
+// No package.json (distribution surface, not a package)
 // ---------------------------------------------------------------------------
 describe('plugin-pack structure', () => {
   it('does not have a package.json (not an npm package)', () => {

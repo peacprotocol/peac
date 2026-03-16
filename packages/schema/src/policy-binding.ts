@@ -1,7 +1,7 @@
 /**
- * Policy binding comparison (Layer 1, DD-49, DD-151)
+ * Policy binding comparison (Layer 1)
  *
- * Pure string comparison with no I/O and no crypto imports (DD-141).
+ * Pure string comparison with no I/O and no crypto imports.
  * The digest format is 'sha256:<64 lowercase hex>'.
  *
  * This function handles only the binary match/mismatch decision. The full

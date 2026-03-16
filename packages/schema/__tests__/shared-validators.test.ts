@@ -1,5 +1,5 @@
 /**
- * Tests for Wire 0.2 shared validator schemas (DD-173.2)
+ * Tests for Wire 0.2 shared validator schemas
  */
 
 import { describe, it, expect } from 'vitest';
@@ -137,7 +137,7 @@ describe('HttpsUriHintSchema', () => {
     );
   });
 
-  // Layer 1 neutral: localhost/private hosts are accepted (DD-55 non-fetch semantics)
+  // Layer 1 neutral: localhost/private hosts are accepted (non-fetch semantics)
   it('accepts localhost-style hosts (neutral at Layer 1)', () => {
     expect(HttpsUriHintSchema.safeParse('https://localhost:8443/api').success).toBe(true);
   });

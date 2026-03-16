@@ -1,5 +1,5 @@
 /**
- * Hash-first evidence model for OpenAI-compatible completions (DD-138).
+ * Hash-first evidence model for OpenAI-compatible completions.
  *
  * SHA-256 digests of messages and output.
  * No raw prompt or completion text is stored in receipts.

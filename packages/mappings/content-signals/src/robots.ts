@@ -2,7 +2,7 @@
  * robots.txt Parser (RFC 9309)
  *
  * Parses robots.txt content and extracts AI-relevant signals.
- * Receives pre-fetched text content (no network I/O, DD-55).
+ * Receives pre-fetched text content (no network I/O).
  */
 
 import type { ContentSignalEntry, ContentPurpose, SignalDecision } from './types.js';

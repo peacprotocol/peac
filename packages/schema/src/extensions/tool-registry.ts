@@ -1,5 +1,5 @@
 /**
- * Tool Registry Extension Schema (v0.11.3+, DD-145 ZT Pack)
+ * Tool Registry Extension Schema (v0.11.3+ ZT Pack)
  *
  * Records tool registration and capability declarations in
  * ext["org.peacprotocol/tool_registry"].

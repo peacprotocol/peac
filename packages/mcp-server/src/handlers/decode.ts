@@ -1,5 +1,5 @@
 /**
- * Decode handler -- ZERO MCP SDK imports (DD-57)
+ * Decode handler -- ZERO MCP SDK imports
  *
  * Raw JWS decode. Returns header and payload without verification.
  * Text output is bounded by policy limits.

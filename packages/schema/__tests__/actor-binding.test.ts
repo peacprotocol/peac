@@ -1,5 +1,5 @@
 /**
- * ActorBinding and MVIS Schema Tests (v0.11.3+, DD-142, DD-143, DD-144)
+ * ActorBinding and MVIS Schema Tests (v0.11.3+)
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -19,7 +19,7 @@ import {
 } from '../src/actor-binding';
 
 // =============================================================================
-// PROOF TYPE SCHEMA (DD-143)
+// PROOF TYPE SCHEMA
 // =============================================================================
 
 describe('ProofTypeSchema', () => {
@@ -140,7 +140,7 @@ describe('isOriginOnly', () => {
 });
 
 // =============================================================================
-// ACTOR BINDING SCHEMA (DD-142)
+// ACTOR BINDING SCHEMA
 // =============================================================================
 
 describe('ActorBindingSchema', () => {
@@ -231,7 +231,7 @@ describe('ActorBindingSchema', () => {
 });
 
 // =============================================================================
-// MVIS FIELDS SCHEMA (DD-144)
+// MVIS FIELDS SCHEMA
 // =============================================================================
 
 describe('MVISFieldsSchema', () => {

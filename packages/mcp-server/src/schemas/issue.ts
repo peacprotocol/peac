@@ -1,5 +1,5 @@
 /**
- * Issue tool schemas -- Wire 0.2 only (DD-57, DD-156)
+ * Issue tool schemas -- Wire 0.2 only
  *
  * The MCP peac_issue tool accepts Wire 0.2 fields exclusively.
  * No wire_version discriminator: the MCP server is a forward-looking

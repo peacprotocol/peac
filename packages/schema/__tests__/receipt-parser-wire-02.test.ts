@@ -1,5 +1,5 @@
 /**
- * Dual-stack receipt parser tests for Wire 0.2 (v0.12.0-preview.1, DD-156)
+ * Dual-stack receipt parser tests for Wire 0.2 (v0.12.0-preview.1)
  *
  * Covers:
  *   - detectWireVersion() with valid/invalid/missing peac_version

@@ -201,7 +201,7 @@ export interface PEACIssuerConfig {
   /** Security contact email or URL (optional) */
   security_contact?: string;
 
-  /** Revoked keys list (DD-148, v0.11.3+) */
+  /** Revoked keys list (v0.11.3+) */
   revoked_keys?: RevokedKeyEntry[];
 }
 

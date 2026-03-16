@@ -2,7 +2,7 @@
  * A2A extension header utilities.
  *
  * Handles the A2A-Extensions header for advertising supported extensions
- * per DD-86 (no X- prefix headers).
+ * per (no X- prefix headers).
  */
 
 /**

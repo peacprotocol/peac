@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 RepresentationFields + Actor promotion tests (DD-152, DD-146)
+ * Wire 0.2 RepresentationFields + Actor promotion tests
  *
  * Covers:
  *   - RepresentationFieldsSchema: valid/invalid content_hash, content_type, content_length

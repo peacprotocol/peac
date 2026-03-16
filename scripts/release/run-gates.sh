@@ -219,6 +219,11 @@ echo ""
 echo "--- Wire 0.2 Conformance ---"
 run_gate "wire-02-conformance" pnpm test -- tests/conformance/wire-02.spec.ts
 
+# Strict annotation coverage: blocks release if spec annotations diverge from registry
+if [ -f scripts/conformance/verify-registry-drift.mjs ]; then
+  run_gate "registry-drift-strict" node scripts/conformance/verify-registry-drift.mjs --strict
+fi
+
 # --- Release State Coherence ---
 echo ""
 echo "--- Release State Coherence ---"

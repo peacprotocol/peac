@@ -1,5 +1,5 @@
 /**
- * Fingerprint Reference Conversion Functions (v0.11.3+, DD-146)
+ * Fingerprint Reference Conversion Functions (v0.11.3+)
  *
  * Pure string manipulation functions for converting between Wire 0.1
  * string form ("alg:hex64") and Wire 0.2 object form ({ alg, value, key_id? }).

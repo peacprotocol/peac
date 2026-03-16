@@ -1,15 +1,15 @@
 /**
  * Content Signals Observation Demo
  *
- * Demonstrates the three-state content signal observation model (DD-136):
+ * Demonstrates the three-state content signal observation model:
  * 1. Parse signals from robots.txt, Content-Usage header, and tdmrep.json
- * 2. Resolve conflicts using DD-137 source precedence:
+ * 2. Resolve conflicts using source precedence:
  *    tdmrep.json > Content-Signal > Content-Usage > robots.txt
  *    (Content-Signal parser reserved for future; 3 of 4 sources implemented)
  * 3. Issue a PEAC receipt with the observation attached via extensions
  * 4. Verify the receipt offline
  *
- * All content is pre-fetched (no network I/O per DD-55).
+ * All content is pre-fetched (no network I/O per ).
  *
  * Run: pnpm demo
  */
@@ -23,7 +23,7 @@ import {
 } from '@peac/mappings-content-signals';
 import { issue, verifyLocal } from '@peac/protocol';
 
-// --- Sample signal sources (pre-fetched; no network I/O per DD-55) ---
+// --- Sample signal sources (pre-fetched; no network I/O per ) ---
 
 const robotsTxt = `
 User-agent: *

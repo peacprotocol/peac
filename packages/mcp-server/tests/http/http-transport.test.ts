@@ -1,5 +1,5 @@
 /**
- * HTTP transport integration tests (DD-119, DD-123)
+ * HTTP transport integration tests
  */
 
 import { describe, it, expect, afterEach } from 'vitest';

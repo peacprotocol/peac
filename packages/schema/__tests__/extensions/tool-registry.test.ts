@@ -1,5 +1,5 @@
 /**
- * Tool Registry Extension Tests (v0.11.3+, DD-145)
+ * Tool Registry Extension Tests (v0.11.3+)
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';

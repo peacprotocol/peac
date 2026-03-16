@@ -1,5 +1,5 @@
 /**
- * Bundle handler -- ZERO MCP SDK imports (DD-57)
+ * Bundle handler -- ZERO MCP SDK imports
  *
  * Creates a signed evidence bundle directory from receipt JWS strings.
  * Requires issuerKey + issuerId + bundleDir on ServerContext.

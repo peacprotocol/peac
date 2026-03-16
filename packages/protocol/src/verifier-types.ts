@@ -16,11 +16,11 @@ import {
 } from '@peac/kernel';
 
 // ---------------------------------------------------------------------------
-// Policy Binding (DD-49)
+// Policy Binding
 // ---------------------------------------------------------------------------
 
 /**
- * Three-state policy binding status (DD-49)
+ * Three-state policy binding status
  *
  * - 'verified': Policy digest in receipt matches local policy bytes (Wire 0.2+)
  * - 'failed': Policy digest mismatch (Wire 0.2+)
@@ -356,7 +356,7 @@ export interface VerificationResult {
   /** Key ID used for verification (optional) */
   kid?: string;
   /**
-   * Policy binding status (DD-49).
+   * Policy binding status.
    *
    * Always 'unavailable' for Wire 0.1 receipts.
    * Wire 0.2+ receipts with `peac.policy.digest` will report 'verified' or 'failed'.

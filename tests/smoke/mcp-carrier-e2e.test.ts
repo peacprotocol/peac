@@ -70,7 +70,7 @@ describe('MCP carrier e2e round-trip', () => {
     expect(meta[META_KEY_RECEIPT_REF]).toBe(receiptRef);
     expect(meta[META_KEY_RECEIPT_JWS]).toBe(jws);
 
-    // Extract with async validation (DD-129 consistency check)
+    // Extract with async validation (consistency check)
     const extracted = await extractReceiptFromMetaAsync(mcpResult);
     expect(extracted).not.toBeNull();
     expect(extracted!.violations).toHaveLength(0);
@@ -92,7 +92,7 @@ describe('MCP carrier e2e round-trip', () => {
     }
   });
 
-  it('rejects tampered receipt_ref with specific violation (DD-129)', async () => {
+  it('rejects tampered receipt_ref with specific violation', async () => {
     const { jws } = await issueTestReceipt({ reference: 'tx_tamper' });
 
     // Attach with intentionally wrong receipt_ref

@@ -1,5 +1,5 @@
 /**
- * Signal Priority Resolution (DD-137)
+ * Signal Priority Resolution
  *
  * Resolves signals from multiple sources using precedence rules.
  * tdmrep.json > Content-Usage > robots.txt
@@ -13,9 +13,9 @@ import { SOURCE_PRECEDENCE } from './types.js';
 // ---------------------------------------------------------------------------
 
 /**
- * Resolve signals from multiple sources using DD-137 precedence.
+ * Resolve signals from multiple sources using precedence.
  *
- * Per DD-137, when multiple sources provide signals for the same purpose,
+ * Per when multiple sources provide signals for the same purpose,
  * the highest-priority source with a definitive signal (allow or deny) wins.
  * If all sources return unspecified, the resolved signal is unspecified.
  *

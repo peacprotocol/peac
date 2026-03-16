@@ -1,5 +1,5 @@
 /**
- * PEAC Protocol Extension Schemas (v0.11.3+, DD-145 ZT Pack)
+ * PEAC Protocol Extension Schemas (v0.11.3+ ZT Pack)
  *
  * Zero Trust extension schemas for use in ext[] with reverse-DNS keys.
  */
@@ -35,7 +35,7 @@ export {
 } from './control-action';
 export type { ControlActionType, ControlTrigger, ControlAction } from './control-action';
 
-// Treaty (org.peacprotocol/treaty, DD-147)
+// Treaty (org.peacprotocol/treaty)
 export {
   CommitmentClassSchema,
   TreatySchema,
@@ -45,7 +45,7 @@ export {
 } from './treaty';
 export type { CommitmentClass, Treaty } from './treaty';
 
-// Fingerprint Reference Conversion (DD-146)
+// Fingerprint Reference Conversion
 export {
   stringToFingerprintRef,
   fingerprintRefToString,

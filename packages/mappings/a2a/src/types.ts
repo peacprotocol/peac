@@ -1,5 +1,5 @@
 /**
- * Minimal A2A types from spec v0.3.0 (DD-126).
+ * Minimal A2A types from spec v0.3.0.
  *
  * These types are defined locally rather than importing @a2a-js/sdk,
  * which brings protobuf + gRPC + express peer dependencies that are
@@ -15,7 +15,7 @@ import type { CarrierFormat, PeacEvidenceCarrier, CarrierMeta } from '@peac/kern
 /** PEAC traceability extension URI for A2A metadata */
 export const PEAC_EXTENSION_URI = 'https://www.peacprotocol.org/ext/traceability/v1' as const;
 
-/** Maximum carrier size for A2A metadata (64 KB, DD-127) */
+/** Maximum carrier size for A2A metadata (64 KB) */
 export const A2A_MAX_CARRIER_SIZE = 65_536;
 
 // ---------------------------------------------------------------------------
