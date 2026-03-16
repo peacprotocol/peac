@@ -169,9 +169,9 @@ const REQUIREMENTS = [
   { section: 12, keyword: 'MUST NOT', summary: 'Extension key domain label MUST NOT exceed 63 chars', source_fragment: 'MUST NOT exceed 63 characters', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_KEY' },
   { section: 12, keyword: 'MUST', summary: 'Extension key segment MUST be non-empty', source_fragment: 'The segment MUST be non-empty.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_KEY' },
   { section: 12, keyword: 'MUST', summary: 'Extension key segment MUST match lowercase pattern', source_fragment: 'Matches `[a-z0-9][a-z0-9_-]*` (lowercase only).', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_KEY' },
-  { section: 12, keyword: 'REQUIRED', summary: 'Commerce: payment_rail is REQUIRED', source_fragment: '`payment_rail` | string               | REQUIRED', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
-  { section: 12, keyword: 'REQUIRED', summary: 'Commerce: amount_minor is REQUIRED', source_fragment: '`amount_minor` | string               | REQUIRED', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
-  { section: 12, keyword: 'REQUIRED', summary: 'Commerce: currency is REQUIRED', source_fragment: '`currency`     | string               | REQUIRED', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'REQUIRED', summary: 'Commerce: payment_rail is REQUIRED', source_fragment: '`payment_rail` | string                                                                                    | REQUIRED', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'REQUIRED', summary: 'Commerce: amount_minor is REQUIRED', source_fragment: '`amount_minor` | string                                                                                    | REQUIRED', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'REQUIRED', summary: 'Commerce: currency is REQUIRED', source_fragment: '`currency`     | string                                                                                    | REQUIRED', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
   { section: 12, keyword: 'MUST', summary: 'amount_minor MUST be base-10 integer string', source_fragment: 'The `amount_minor` field MUST be a base-10 integer string.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
   { section: 12, keyword: 'SHOULD', summary: 'Issuers SHOULD use distinct type for negative amounts', source_fragment: 'Issuers SHOULD use a distinct receipt `type`', enforcement_class: 'advisory' },
   { section: 12, keyword: 'REQUIRED', summary: 'Access: resource is REQUIRED', source_fragment: '`resource` | string                             | REQUIRED', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
@@ -182,6 +182,77 @@ const REQUIREMENTS = [
   { section: 12, keyword: 'MUST', summary: 'Unknown extension keys MUST be preserved', source_fragment: 'MUST be preserved (not silently dropped).', enforcement_class: 'hard_fail', error_code: 'E_INVALID_FORMAT' },
   { section: 12, keyword: 'MUST', summary: 'Unknown extension keys MUST trigger warning', source_fragment: 'MUST trigger an `unknown_extension_preserved` warning at the protocol layer', enforcement_class: 'warning_only', warning_code: 'unknown_extension_preserved' },
   { section: 12, keyword: 'MUST NOT', summary: 'Unknown extension keys MUST NOT cause validation error', source_fragment: 'MUST NOT cause a validation error.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_FORMAT' },
+
+  // ===== Section 12.10: Consent Extension =====
+  { section: 12, keyword: 'REQUIRED', summary: 'Consent: consent_basis is REQUIRED', source_fragment: '`consent_basis` string REQUIRED: identifies the legal basis for consent.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'REQUIRED', summary: 'Consent: consent_status is REQUIRED (closed enum)', source_fragment: '`consent_status` enum REQUIRED: granted, withdrawn, denied, expired.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Consent: data_categories is OPTIONAL', source_fragment: '`data_categories` string[] optional: data categories covered by the consent record.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Consent: retention_period is OPTIONAL (ISO 8601 duration)', source_fragment: '`retention_period` Iso8601DurationSchema optional: uses the parser-grade ISO 8601 duration validator.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Consent: consent_method is OPTIONAL', source_fragment: 'How consent was collected (e.g., click_through)', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'MUST', summary: 'Consent: .strict() rejects unknown properties', source_fragment: 'the consent extension uses `.strict()` mode; unrecognized fields are rejected.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Consent: withdrawal_uri is OPTIONAL (HTTPS URI hint)', source_fragment: 'URI hint for consent withdrawal; locator hint only', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Consent: scope is OPTIONAL', source_fragment: 'Free-text scope description', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Consent: jurisdiction is OPTIONAL', source_fragment: 'ISO 3166-1 alpha-2 or composite (e.g., EU, US-CA)', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'MUST', summary: 'Consent: data_categories items min 1 max 128 chars', source_fragment: 'Each category string has min length 1 and max 128 chars.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'MUST', summary: 'Consent: consent_status closed vocabulary', source_fragment: 'Closed vocabulary covering universal consent lifecycle states across GDPR Art 7, CCPA Sec 1798.120, LGPD Art 8, and ISO/IEC 29184.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'MAY', summary: 'Consent: consent_basis open vocabulary', source_fragment: 'Open vocabulary to accommodate jurisdiction-specific bases.', enforcement_class: 'advisory' },
+
+  // ===== Section 12.11: Privacy Extension =====
+  { section: 12, keyword: 'REQUIRED', summary: 'Privacy: data_classification is REQUIRED', source_fragment: '`data_classification` string REQUIRED: identifies the classification level of the data.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Privacy: processing_basis is OPTIONAL', source_fragment: '`processing_basis` string optional: legal basis for data processing.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Privacy: retention_mode is OPTIONAL (closed enum)', source_fragment: '`retention_mode` enum optional: time_bound, indefinite, session_only.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Privacy: recipient_scope is OPTIONAL (closed enum)', source_fragment: '`recipient_scope` enum optional: internal, processor, third_party, public.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Privacy: anonymization_method is OPTIONAL', source_fragment: '`anonymization_method` string optional: method applied for de-identification.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Privacy: transfer_mechanism is OPTIONAL', source_fragment: '`transfer_mechanism` string optional: cross-border data transfer mechanism.', enforcement_class: 'advisory' },
+
+  // ===== Section 12.12: Safety Extension =====
+  { section: 12, keyword: 'REQUIRED', summary: 'Safety: review_status is REQUIRED (closed enum)', source_fragment: '`review_status` enum REQUIRED: reviewed, pending, flagged, not_applicable.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Safety: risk_level is OPTIONAL (closed enum)', source_fragment: '`risk_level` enum optional: unacceptable, high, limited, minimal.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Safety: assessment_method is OPTIONAL', source_fragment: '`assessment_method` string optional: describes the review methodology used.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Safety: safety_measures is OPTIONAL (max 32 items)', source_fragment: '`safety_measures` string[] optional max 32 items: safety measures applied.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Safety: incident_ref is OPTIONAL', source_fragment: '`incident_ref` string optional: reference to an incident report.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Safety: model_ref is OPTIONAL', source_fragment: '`model_ref` string optional: identifies the AI model under review.', enforcement_class: 'advisory' },
+
+  // ===== Section 12.13: Compliance Extension =====
+  { section: 12, keyword: 'REQUIRED', summary: 'Compliance: framework is REQUIRED', source_fragment: '`framework` string REQUIRED: identifies the regulatory or standards framework evaluated.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'REQUIRED', summary: 'Compliance: compliance_status is REQUIRED (closed enum)', source_fragment: '`compliance_status` enum REQUIRED: compliant, non_compliant, partial, under_review, exempt.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Compliance: audit_date is OPTIONAL (ISO 8601 date)', source_fragment: '`audit_date` ISO 8601 date optional: structural date validation (YYYY-MM-DD).', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Compliance: validity_period is OPTIONAL (ISO 8601 duration)', source_fragment: '`validity_period` ISO 8601 duration optional: uses the parser-grade ISO 8601 duration validator.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Compliance: evidence_ref is OPTIONAL (SHA-256 digest)', source_fragment: '`evidence_ref` SHA-256 digest optional: uses `Sha256DigestSchema` for typed digest validation.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'MUST', summary: 'Compliance: .strict() rejects unknown properties', source_fragment: 'the compliance extension uses `.strict()` mode; unrecognized fields are rejected.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+
+  // ===== Section 12.14: Provenance Extension =====
+  { section: 12, keyword: 'REQUIRED', summary: 'Provenance: source_type is REQUIRED', source_fragment: '`source_type` string REQUIRED: identifies the derivation type.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Provenance: source_ref is OPTIONAL', source_fragment: '`source_ref` string optional: opaque source reference identifier.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Provenance: custody_chain is OPTIONAL (max 16 items, nested .strict())', source_fragment: '`custody_chain` CustodyEntry[] optional max 16 items: ordered chain of custody events.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Provenance: slsa is OPTIONAL (nested .strict())', source_fragment: '`slsa` SlsaLevel optional: structured SLSA-aligned metadata.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'MUST', summary: 'Provenance: .strict() on extension and all nested schemas', source_fragment: 'the provenance extension and all nested schemas use `.strict()` mode.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'MUST NOT', summary: 'Provenance: source_uri and build_provenance_uri MUST NOT auto-fetch', source_fragment: '`source_uri` and `build_provenance_uri` HTTPS URI hint optional: locator hints only; callers MUST NOT auto-fetch.', enforcement_class: 'advisory' },
+
+  // ===== Section 12.15: Attribution Extension =====
+  { section: 12, keyword: 'REQUIRED', summary: 'Attribution: creator_ref is REQUIRED', source_fragment: '`creator_ref` string REQUIRED: identifies the creator.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Attribution: license_spdx is OPTIONAL (SPDX expression)', source_fragment: '`license_spdx` SPDX expression optional: uses the parser-grade SPDX license expression validator.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Attribution: content_signal_source is OPTIONAL (closed enum)', source_fragment: '`content_signal_source` enum optional: tdmrep_json, content_signal_header, content_usage_header, robots_txt, custom.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Attribution: content_digest is OPTIONAL (SHA-256 digest)', source_fragment: '`content_digest` SHA-256 digest optional: uses `Sha256DigestSchema` for typed digest validation.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'MUST', summary: 'Attribution: .strict() rejects unknown properties', source_fragment: 'the attribution extension uses `.strict()` mode; unrecognized fields are rejected.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'MAY', summary: 'Attribution: not an identity attestation', source_fragment: 'Not an identity attestation; records observed attribution metadata.', enforcement_class: 'advisory' },
+
+  // ===== Section 12.16: Purpose Extension =====
+  { section: 12, keyword: 'REQUIRED', summary: 'Purpose: external_purposes is REQUIRED (min 1, max 32, unique)', source_fragment: '`external_purposes` string[] REQUIRED min 1 max 32 items: external/legal/business purpose labels.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Purpose: purpose_basis is OPTIONAL', source_fragment: '`purpose_basis` string optional: legal or policy basis for the declared purposes.', enforcement_class: 'advisory' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Purpose: compatible_purposes is OPTIONAL (max 32, unique tokens)', source_fragment: '`compatible_purposes` string[] optional max 32 items: each item MUST match the machine-safe lowercase token grammar and items MUST be unique within the array.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'MUST', summary: 'Purpose: .strict() rejects unknown properties', source_fragment: 'the purpose extension uses `.strict()` mode; unrecognized fields are rejected.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'MUST', summary: 'Purpose: external_purposes items MUST match machine-safe token grammar', source_fragment: 'Each item MUST match the machine-safe token grammar and items MUST be unique.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'OPTIONAL', summary: 'Purpose: peac_purpose_mapping is OPTIONAL (validated token)', source_fragment: '`peac_purpose_mapping` string optional: explicit bridge to a PEAC operational CanonicalPurpose token.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+
+  // ===== Section 12.17: Type-to-Extension Enforcement =====
+  { section: 12, keyword: 'MUST', summary: 'Type-to-extension: expected extension group MUST be present in strict mode', source_fragment: 'the expected extension group MUST be present in the extensions record in strict verification mode.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'SHOULD', summary: 'Type-to-extension: absent expected group is warning in interop mode', source_fragment: 'In interop mode, its absence is a warning.', enforcement_class: 'warning_only', warning_code: 'extension_group_missing' },
+  { section: 12, keyword: 'MUST', summary: 'Type-to-extension: mismatch MUST be reported in strict mode', source_fragment: 'verifiers MUST report a mismatch in strict mode.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
+  { section: 12, keyword: 'MAY', summary: 'Type-to-extension: custom/unmapped types exempt from enforcement', source_fragment: 'Custom or unmapped types are not subject to this check.', enforcement_class: 'advisory' },
+
+  // ===== Section 12.16 (continued): Purpose compatible_purposes uniqueness =====
+  { section: 12, keyword: 'MUST', summary: 'Purpose: compatible_purposes items MUST be unique', source_fragment: 'each item MUST match the machine-safe lowercase token grammar and items MUST be unique within the array.', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
 
   // ===== Section 13: Challenge Body =====
   { section: 13, keyword: 'REQUIRED', summary: 'Challenge problem.status is REQUIRED', source_fragment: '`status`   | integer      | REQUIRED', enforcement_class: 'hard_fail', error_code: 'E_INVALID_EXTENSION_FORMAT' },
@@ -327,5 +398,7 @@ console.log(`Registry written: ${outPath}`);
 console.log(`Total requirements: ${totalReqs}`);
 console.log(`Sections: ${sections.length}`);
 for (const s of sections) {
-  console.log(`  Section ${s.section_number} (${s.section_title}): ${s.requirements.length} requirements`);
+  console.log(
+    `  Section ${s.section_number} (${s.section_title}): ${s.requirements.length} requirements`
+  );
 }
