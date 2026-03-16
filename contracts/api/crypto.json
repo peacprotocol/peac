@@ -1,0 +1,145 @@
+{
+  "package": "@peac/crypto",
+  "version": "0.12.1",
+  "extracted_at": "2026-03-16",
+  "node_version": "v24.13.0",
+  "value_exports": [
+    {
+      "name": "CryptoError",
+      "typeof": "static"
+    },
+    {
+      "name": "base64urlDecode",
+      "typeof": "static"
+    },
+    {
+      "name": "base64urlDecodeString",
+      "typeof": "static"
+    },
+    {
+      "name": "base64urlEncode",
+      "typeof": "static"
+    },
+    {
+      "name": "base64urlEncodeString",
+      "typeof": "static"
+    },
+    {
+      "name": "base64urlToHex",
+      "typeof": "static"
+    },
+    {
+      "name": "bytesToHex",
+      "typeof": "static"
+    },
+    {
+      "name": "canonicalize",
+      "typeof": "static"
+    },
+    {
+      "name": "canonicalizeBytes",
+      "typeof": "static"
+    },
+    {
+      "name": "computeJwkThumbprint",
+      "typeof": "static"
+    },
+    {
+      "name": "decode",
+      "typeof": "static"
+    },
+    {
+      "name": "derivePublicKey",
+      "typeof": "static"
+    },
+    {
+      "name": "ed25519GetPublicKey",
+      "typeof": "static"
+    },
+    {
+      "name": "ed25519RandomSecretKey",
+      "typeof": "static"
+    },
+    {
+      "name": "ed25519Sign",
+      "typeof": "static"
+    },
+    {
+      "name": "ed25519Verify",
+      "typeof": "static"
+    },
+    {
+      "name": "generateKeypair",
+      "typeof": "static"
+    },
+    {
+      "name": "hexToBase64url",
+      "typeof": "static"
+    },
+    {
+      "name": "hexToBytes",
+      "typeof": "static"
+    },
+    {
+      "name": "isFormatError",
+      "typeof": "static"
+    },
+    {
+      "name": "jcsHash",
+      "typeof": "static"
+    },
+    {
+      "name": "jwkToPublicKeyBytes",
+      "typeof": "static"
+    },
+    {
+      "name": "sha256Base64url",
+      "typeof": "static"
+    },
+    {
+      "name": "sha256Bytes",
+      "typeof": "static"
+    },
+    {
+      "name": "sha256Hex",
+      "typeof": "static"
+    },
+    {
+      "name": "sign",
+      "typeof": "static"
+    },
+    {
+      "name": "signWire02",
+      "typeof": "static"
+    },
+    {
+      "name": "validateKeypair",
+      "typeof": "static"
+    },
+    {
+      "name": "validateWire02Header",
+      "typeof": "static"
+    },
+    {
+      "name": "verify",
+      "typeof": "static"
+    }
+  ],
+  "type_exports": [
+    "CryptoErrorCode",
+    "Ed25519PrivateJwk",
+    "JWKThumbprintInput",
+    "JWSHeader",
+    "UnTypedJWSHeader",
+    "VerifyResult",
+    "Wire01JWSHeader",
+    "Wire02JWSHeader"
+  ],
+  "star_exports": [],
+  "accessors": [],
+  "wire02_extension_keys": [],
+  "legacy_extension_keys": [],
+  "extension_schemas": [],
+  "total_value_exports": 30,
+  "total_type_exports": 8
+}

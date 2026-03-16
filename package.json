@@ -51,6 +51,8 @@
     "codegen:registries": "tsx scripts/codegen-registries.ts",
     "verify:registries-schema": "node scripts/validate-registries-schema.mjs",
     "verify:codegen-drift": "bash scripts/verify-codegen-drift.sh",
+    "api-contract:extract": "tsx scripts/extract-api-contract.ts",
+    "api-contract:check": "tsx scripts/extract-api-contract.ts --check",
     "fixtures:new": "node scripts/fixtures-new.mjs",
     "conformance:regen:bundle": "tsx scripts/generate-bundle-vectors.ts",
     "bench": "pnpm --filter @peac/crypto bench && pnpm --filter @peac/schema bench && pnpm --filter @peac/protocol bench",
