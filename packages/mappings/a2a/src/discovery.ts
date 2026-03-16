@@ -12,6 +12,7 @@ import { PEAC_RECEIPT_HEADER } from '@peac/kernel';
 
 import type { A2AAgentCard, AgentCardPeacExtension } from './types';
 import { PEAC_EXTENSION_URI } from './types';
+import { normalizeAgentCard } from './normalizers';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -185,8 +186,12 @@ export async function discoverAgentCard(
 
       const card = JSON.parse(text) as A2AAgentCard;
 
-      // Basic validation: must have name and url
-      if (typeof card.name !== 'string' || typeof card.url !== 'string') {
+      // Dual-version validation (DD-186): accept v0.3.0 (url) or v1.0.0 (supportedInterfaces)
+      if (typeof card.name !== 'string') {
+        continue;
+      }
+      const normalized = normalizeAgentCard(card);
+      if (!normalized) {
         continue;
       }
 

@@ -9,6 +9,16 @@
  */
 
 import type { CanonicalPurpose, PurposeToken } from '@peac/schema';
+
+// ---------------------------------------------------------------------------
+// AIPREF version constants (DD-189)
+// ---------------------------------------------------------------------------
+
+/** Pinned AIPREF vocabulary draft version */
+export const AIPREF_VOCAB_VERSION = 'draft-ietf-aipref-vocab-05' as const;
+
+/** Pinned AIPREF attach draft version */
+export const AIPREF_ATTACH_VERSION = 'draft-ietf-aipref-attach-04' as const;
 import type {
   AiprefKey,
   AiprefKnownKey,
