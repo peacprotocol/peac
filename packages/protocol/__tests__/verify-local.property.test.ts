@@ -38,9 +38,23 @@ const validType = fc
   )
   .map(([domain, seg]) => `${domain}/${seg}`);
 
-const validIss = fc
-  .tuple(fc.stringMatching(/^[a-z][a-z0-9-]{0,15}$/), fc.constantFrom('.com', '.org', '.io'))
+// Constructive issuer generator: plain ASCII labels plus known-valid punycode issuers.
+// Plain labels avoid hyphens entirely to prevent accidental xn-- prefix (which triggers
+// IDNA 2008 punycode validation in URL parsing; most random xn-- strings are invalid).
+// IDN coverage is provided by a constant pool of real punycode-encoded domains.
+const plainLabel = fc.stringMatching(/^[a-z][a-z0-9]{0,14}$/);
+const knownPunycode = fc.constantFrom(
+  'https://xn--nxasmq6b.com', // valid punycode (Greek)
+  'https://xn--80akhbyknj4f.com', // valid punycode (Cyrillic)
+  'https://xn--e1afmapc.com' // valid punycode (Cyrillic short)
+);
+const generatedIss = fc
+  .tuple(plainLabel, fc.constantFrom('.com', '.org', '.io'))
   .map(([host, tld]) => `https://${host}${tld}`);
+const validIss = fc.oneof(
+  { weight: 9, arbitrary: generatedIss },
+  { weight: 1, arbitrary: knownPunycode }
+);
 
 // ---------------------------------------------------------------------------
 // Setup
