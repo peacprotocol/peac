@@ -20,7 +20,11 @@ Copy-paste fields for submitting `@peac/mcp-server` to MCP directories.
 
 PEAC Protocol: Signed interaction receipts
 
-## Short Description (1 line)
+## Short Description (1 line, under 100 chars for MCP Registry schema)
+
+Signed receipts for agent, API, and MCP interactions. Portable and offline-verifiable.
+
+## Longer Description (for secondary listings)
 
 Verify, inspect, decode, issue, and bundle signed receipts for agent, API, and MCP interactions. Portable and offline-verifiable.
 
