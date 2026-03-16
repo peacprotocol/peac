@@ -1,0 +1,297 @@
+{
+  "package": "@peac/kernel",
+  "version": "0.12.1",
+  "extracted_at": "2026-03-16",
+  "node_version": "v24.13.0",
+  "value_exports": [
+    {
+      "name": "AGENT_PROTOCOLS",
+      "typeof": "static"
+    },
+    {
+      "name": "ALGORITHMS",
+      "typeof": "static"
+    },
+    {
+      "name": "BUNDLE_ERRORS",
+      "typeof": "static"
+    },
+    {
+      "name": "BUNDLE_VERSION",
+      "typeof": "static"
+    },
+    {
+      "name": "CONSTANTS",
+      "typeof": "static"
+    },
+    {
+      "name": "CONTROL_ENGINES",
+      "typeof": "static"
+    },
+    {
+      "name": "DISCOVERY",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_ERRORS",
+      "typeof": "static"
+    },
+    {
+      "name": "ERRORS",
+      "typeof": "static"
+    },
+    {
+      "name": "ERROR_CATEGORIES",
+      "typeof": "static"
+    },
+    {
+      "name": "ERROR_CODES",
+      "typeof": "static"
+    },
+    {
+      "name": "EXTENSION_BUDGET",
+      "typeof": "static"
+    },
+    {
+      "name": "EXTENSION_GROUPS",
+      "typeof": "static"
+    },
+    {
+      "name": "HASH",
+      "typeof": "static"
+    },
+    {
+      "name": "HEADERS",
+      "typeof": "static"
+    },
+    {
+      "name": "ISSUER_CONFIG",
+      "typeof": "static"
+    },
+    {
+      "name": "ISS_CANONICAL",
+      "typeof": "static"
+    },
+    {
+      "name": "JWKS",
+      "typeof": "static"
+    },
+    {
+      "name": "LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "OCCURRED_AT_TOLERANCE_SECONDS",
+      "typeof": "static"
+    },
+    {
+      "name": "PAYMENT_RAILS",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_ALG",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_RECEIPT_HEADER",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_RECEIPT_URL_HEADER",
+      "typeof": "static"
+    },
+    {
+      "name": "PILLAR_VALUES",
+      "typeof": "static"
+    },
+    {
+      "name": "POLICY",
+      "typeof": "static"
+    },
+    {
+      "name": "POLICY_BLOCK",
+      "typeof": "static"
+    },
+    {
+      "name": "PRIVATE_IP_RANGES",
+      "typeof": "static"
+    },
+    {
+      "name": "PROOF_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "RECEIPT",
+      "typeof": "static"
+    },
+    {
+      "name": "RECEIPT_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "REGISTRIES",
+      "typeof": "static"
+    },
+    {
+      "name": "TRANSPORT_METHODS",
+      "typeof": "static"
+    },
+    {
+      "name": "TYPE_GRAMMAR",
+      "typeof": "static"
+    },
+    {
+      "name": "TYPE_TO_EXTENSION_MAP",
+      "typeof": "static"
+    },
+    {
+      "name": "VARY_HEADERS",
+      "typeof": "static"
+    },
+    {
+      "name": "VERIFICATION_MODES",
+      "typeof": "static"
+    },
+    {
+      "name": "VERIFICATION_REPORT_VERSION",
+      "typeof": "static"
+    },
+    {
+      "name": "VERIFIER_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "VERIFIER_NETWORK",
+      "typeof": "static"
+    },
+    {
+      "name": "VERIFIER_POLICY_VERSION",
+      "typeof": "static"
+    },
+    {
+      "name": "WIRE_01_JWS_TYP",
+      "typeof": "static"
+    },
+    {
+      "name": "WIRE_02_JWS_TYP",
+      "typeof": "static"
+    },
+    {
+      "name": "WIRE_02_JWS_TYP_ACCEPT",
+      "typeof": "static"
+    },
+    {
+      "name": "WIRE_02_VERSION",
+      "typeof": "static"
+    },
+    {
+      "name": "WIRE_TYPE",
+      "typeof": "static"
+    },
+    {
+      "name": "WIRE_VERSION",
+      "typeof": "static"
+    },
+    {
+      "name": "WIRE_VERSIONS",
+      "typeof": "static"
+    },
+    {
+      "name": "applyPurposeVary",
+      "typeof": "static"
+    },
+    {
+      "name": "findAgentProtocol",
+      "typeof": "static"
+    },
+    {
+      "name": "findControlEngine",
+      "typeof": "static"
+    },
+    {
+      "name": "findExtensionGroup",
+      "typeof": "static"
+    },
+    {
+      "name": "findPaymentRail",
+      "typeof": "static"
+    },
+    {
+      "name": "findProofType",
+      "typeof": "static"
+    },
+    {
+      "name": "findReceiptType",
+      "typeof": "static"
+    },
+    {
+      "name": "findTransportMethod",
+      "typeof": "static"
+    },
+    {
+      "name": "formatHash",
+      "typeof": "static"
+    },
+    {
+      "name": "getError",
+      "typeof": "static"
+    },
+    {
+      "name": "getPeacVaryHeaders",
+      "typeof": "static"
+    },
+    {
+      "name": "isRetryable",
+      "typeof": "static"
+    },
+    {
+      "name": "isValidHash",
+      "typeof": "static"
+    },
+    {
+      "name": "needsPurposeVary",
+      "typeof": "static"
+    },
+    {
+      "name": "parseHash",
+      "typeof": "static"
+    }
+  ],
+  "type_exports": [
+    "AgentProtocolEntry",
+    "CarrierAdapter",
+    "CarrierFormat",
+    "CarrierMeta",
+    "CarrierValidationResult",
+    "ControlEngineEntry",
+    "ErrorCategory",
+    "ErrorCode",
+    "ErrorDefinition",
+    "EvidencePillar",
+    "ExtensionGroupEntry",
+    "JsonArray",
+    "JsonObject",
+    "JsonPrimitive",
+    "JsonValue",
+    "NextAction",
+    "PaymentRailEntry",
+    "PeacEvidenceCarrier",
+    "PolicyBlock",
+    "ProofTypeEntry",
+    "ReceiptRef",
+    "ReceiptTypeEntry",
+    "RepresentationFields",
+    "TransportMethodEntry",
+    "VerificationStrictness",
+    "VerificationWarning",
+    "Wire02Kind",
+    "WireVersion"
+  ],
+  "star_exports": [],
+  "accessors": [],
+  "wire02_extension_keys": [],
+  "legacy_extension_keys": [],
+  "extension_schemas": [],
+  "total_value_exports": 63,
+  "total_type_exports": 28
+}

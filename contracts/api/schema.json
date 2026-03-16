@@ -1,0 +1,1792 @@
+{
+  "package": "@peac/schema",
+  "version": "0.12.1",
+  "extracted_at": "2026-03-16",
+  "node_version": "v24.13.0",
+  "value_exports": [
+    {
+      "name": "ACCESS_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "ACTOR_BINDING_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "AGENT_IDENTITY_TYPE",
+      "typeof": "static"
+    },
+    {
+      "name": "AIPREFSnapshotSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ATTESTATION_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "ATTESTATION_RECEIPT_TYPE",
+      "typeof": "static"
+    },
+    {
+      "name": "ATTRIBUTION_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "ATTRIBUTION_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "ATTRIBUTION_TYPE",
+      "typeof": "static"
+    },
+    {
+      "name": "ATTRIBUTION_USAGES",
+      "typeof": "static"
+    },
+    {
+      "name": "AccessExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ActorBindingSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AgentIdentityAttestationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AgentIdentityEvidenceSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AgentIdentityVerifiedSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AgentProofSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AttestationExtensionsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AttestationReceiptClaimsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AttestationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AttributionAttestationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AttributionEvidenceSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AttributionExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AttributionSourceSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AttributionUsageSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "BindingDetailsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CANONICAL_DIGEST_ALGS",
+      "typeof": "static"
+    },
+    {
+      "name": "CANONICAL_PURPOSES",
+      "typeof": "static"
+    },
+    {
+      "name": "CARRIER_TRANSPORT_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "CHALLENGE_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "CHALLENGE_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "COMMERCE_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "COMMITMENT_CLASSES",
+      "typeof": "static"
+    },
+    {
+      "name": "COMPLIANCE_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "COMPLIANCE_STATUSES",
+      "typeof": "static"
+    },
+    {
+      "name": "CONSENT_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "CONSENT_STATUSES",
+      "typeof": "static"
+    },
+    {
+      "name": "CONTENT_SIGNAL_SOURCES",
+      "typeof": "static"
+    },
+    {
+      "name": "CONTRIBUTION_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "CONTROL_ACTIONS",
+      "typeof": "static"
+    },
+    {
+      "name": "CONTROL_ACTION_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "CONTROL_TRIGGERS",
+      "typeof": "static"
+    },
+    {
+      "name": "CONTROL_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "CORRELATION_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "CREDENTIAL_EVENTS",
+      "typeof": "static"
+    },
+    {
+      "name": "CREDENTIAL_EVENT_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "CREDIT_METHODS",
+      "typeof": "static"
+    },
+    {
+      "name": "CanonicalIssSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CanonicalPurposeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CarrierFormatSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CarrierMetaSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ChallengeExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ChallengeTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CommerceExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CommitmentClassSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CompactJwsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ComplianceExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ComplianceStatusSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ConsentExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ConsentStatusSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ContactMethodSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ContentHashSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ContentSignalSourceSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ContributionObligationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ContributionTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlActionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlActionTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlBlockSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlDecisionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlLicensingModeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlPurposeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlStepSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlTriggerSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ControlTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CorrelationExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CredentialEventSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CredentialEventTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CredentialRefSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CreditMethodSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CreditObligationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CustodyEntrySchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DERIVATION_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "DIGEST_SIZE_CONSTANTS",
+      "typeof": "static"
+    },
+    {
+      "name": "DIGEST_VALUE_PATTERN",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_GROUNDS_CODES",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_OUTCOMES",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_STATES",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_TARGET_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_TRANSITIONS",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_TYPE",
+      "typeof": "static"
+    },
+    {
+      "name": "DISPUTE_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "DerivationTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DigestAlgSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DigestSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeAttestationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeContactSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeEvidenceSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeGroundsCodeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeGroundsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeIdSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeOutcomeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeResolutionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeStateSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeTargetTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DisputeTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "DocumentRefSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ERROR_CATEGORIES_CANONICAL",
+      "typeof": "static"
+    },
+    {
+      "name": "ERROR_CODES",
+      "typeof": "static"
+    },
+    {
+      "name": "EXTENSION_BUDGET",
+      "typeof": "static"
+    },
+    {
+      "name": "EXTENSION_KEY_PATTERN",
+      "typeof": "static"
+    },
+    {
+      "name": "EXTENSION_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "EvidencePillarSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ExecutorSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Extensions",
+      "typeof": "static"
+    },
+    {
+      "name": "ExtensionsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "HashAlgorithmSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "HashEncodingSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "HttpsUriHintSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "IDENTITY_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "INTERACTION_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "INTERACTION_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "INTERNAL_PURPOSE_UNDECLARED",
+      "typeof": "static"
+    },
+    {
+      "name": "IdentityBindingSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "IdentityExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "InteractionEvidenceV01Schema",
+      "typeof": "static"
+    },
+    {
+      "name": "Iso8601DateSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Iso8601DateStringSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Iso8601DurationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Iso8601OffsetDateTimeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "JSON_EVIDENCE_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "JWSHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "JsonArraySchema",
+      "typeof": "static"
+    },
+    {
+      "name": "JsonObjectSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "JsonPrimitiveSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "JsonValueSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "KERNEL_CONSTRAINTS",
+      "typeof": "static"
+    },
+    {
+      "name": "KIND_FORMAT_PATTERN",
+      "typeof": "static"
+    },
+    {
+      "name": "KindSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "MAX_PURPOSE_TOKENS_PER_REQUEST",
+      "typeof": "static"
+    },
+    {
+      "name": "MAX_PURPOSE_TOKEN_LENGTH",
+      "typeof": "static"
+    },
+    {
+      "name": "MIDDLEWARE_INTERACTION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "MVISFieldsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "MVISReplayProtectionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "MVISTimeBoundsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "MinimalInteractionBindingSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "NormalizedPayment",
+      "typeof": "static"
+    },
+    {
+      "name": "OBLIGATIONS_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "ORCHESTRATION_FRAMEWORKS",
+      "typeof": "static"
+    },
+    {
+      "name": "ObligationsExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "OrchestrationFrameworkSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_ALG",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_DISCOVERY_MAX_BYTES",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_DISCOVERY_PATH",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_ISSUER_CONFIG_MAX_BYTES",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_ISSUER_CONFIG_PATH",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_ISSUER_CONFIG_VERSION",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_POLICY_FALLBACK_PATH",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_POLICY_MAX_BYTES",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_POLICY_PATH",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_PURPOSE_APPLIED_HEADER",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_PURPOSE_HEADER",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_PURPOSE_REASON_HEADER",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_RECEIPT_HEADER",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_RECEIPT_SCHEMA_URL",
+      "typeof": "static"
+    },
+    {
+      "name": "PEAC_WIRE_TYP",
+      "typeof": "static"
+    },
+    {
+      "name": "POLICY_DECISIONS",
+      "typeof": "static"
+    },
+    {
+      "name": "PRIVACY_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "PROOF_METHODS",
+      "typeof": "static"
+    },
+    {
+      "name": "PROOF_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "PROVENANCE_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "PURPOSE_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "PURPOSE_REASONS",
+      "typeof": "static"
+    },
+    {
+      "name": "PURPOSE_TOKEN_REGEX",
+      "typeof": "static"
+    },
+    {
+      "name": "PayloadRefSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PaymentEvidenceSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PaymentRoutingSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PaymentSplitSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PeacEvidenceCarrierSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PillarsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PolicyBlockSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PolicyContextSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PrivacyExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ProblemDetailsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ProofMethodSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ProofTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ProvenanceExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PurposeExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PurposeReasonSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "PurposeTokenSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RECIPIENT_SCOPES",
+      "typeof": "static"
+    },
+    {
+      "name": "REDACTION_MODES",
+      "typeof": "static"
+    },
+    {
+      "name": "REGISTERED_EXTENSION_GROUP_KEYS",
+      "typeof": "static"
+    },
+    {
+      "name": "REGISTERED_RECEIPT_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "REMEDIATION_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "REPRESENTATION_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "RESERVED_KIND_PREFIXES",
+      "typeof": "static"
+    },
+    {
+      "name": "RESULT_STATUSES",
+      "typeof": "static"
+    },
+    {
+      "name": "RETENTION_MODES",
+      "typeof": "static"
+    },
+    {
+      "name": "REVIEW_STATUSES",
+      "typeof": "static"
+    },
+    {
+      "name": "REVOCATION_REASONS",
+      "typeof": "static"
+    },
+    {
+      "name": "RISK_LEVELS",
+      "typeof": "static"
+    },
+    {
+      "name": "ReceiptClaims",
+      "typeof": "static"
+    },
+    {
+      "name": "ReceiptClaimsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ReceiptRefSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ReceiptTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ReceiptUrlSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RecipientScopeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RefsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RemediationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RemediationTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RepresentationFieldsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ResourceTargetSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ResultSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RetentionModeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ReviewStatusSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RevokedKeyEntrySchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RevokedKeysArraySchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Rfc3339DateTimeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Rfc3339TimestampSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "RiskLevelSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "SAFETY_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "STEP_ID_PATTERN",
+      "typeof": "static"
+    },
+    {
+      "name": "SafetyExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Sha256DigestSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "SlsaLevelSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "SpdxExpressionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "StepIdSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "SubjectProfileSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "SubjectProfileSnapshotSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "SubjectSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "SubjectTypeSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "TERMINAL_STATES",
+      "typeof": "static"
+    },
+    {
+      "name": "TOOL_REGISTRY_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "TREATY_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "ToolRegistrySchema",
+      "typeof": "static"
+    },
+    {
+      "name": "ToolTargetSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "TreatySchema",
+      "typeof": "static"
+    },
+    {
+      "name": "VerifyRequestSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "WARNING_EXTENSION_GROUP_MISMATCH",
+      "typeof": "static"
+    },
+    {
+      "name": "WARNING_EXTENSION_GROUP_MISSING",
+      "typeof": "static"
+    },
+    {
+      "name": "WARNING_OCCURRED_AT_SKEW",
+      "typeof": "static"
+    },
+    {
+      "name": "WARNING_TYPE_UNREGISTERED",
+      "typeof": "static"
+    },
+    {
+      "name": "WARNING_TYP_MISSING",
+      "typeof": "static"
+    },
+    {
+      "name": "WARNING_UNKNOWN_EXTENSION",
+      "typeof": "static"
+    },
+    {
+      "name": "WELL_KNOWN_KINDS",
+      "typeof": "static"
+    },
+    {
+      "name": "WORKFLOW_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "WORKFLOW_ID_PATTERN",
+      "typeof": "static"
+    },
+    {
+      "name": "WORKFLOW_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "WORKFLOW_STATUSES",
+      "typeof": "static"
+    },
+    {
+      "name": "WORKFLOW_SUMMARY_TYPE",
+      "typeof": "static"
+    },
+    {
+      "name": "Wire01JWSHeaderSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Wire02ClaimsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Wire02KindSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "Wire02RepresentationFieldsSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "WorkflowContextSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "WorkflowErrorContextSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "WorkflowIdSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "WorkflowStatusSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "WorkflowSummaryAttestationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "WorkflowSummaryEvidenceSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "assertJsonSafeIterative",
+      "typeof": "static"
+    },
+    {
+      "name": "canTransitionTo",
+      "typeof": "static"
+    },
+    {
+      "name": "checkOccurredAtSkew",
+      "typeof": "static"
+    },
+    {
+      "name": "computeReceiptRef",
+      "typeof": "static"
+    },
+    {
+      "name": "computeTotalWeight",
+      "typeof": "static"
+    },
+    {
+      "name": "createAgentIdentityAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "createAttestationReceiptClaims",
+      "typeof": "static"
+    },
+    {
+      "name": "createAttributionAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "createConstraintViolationError",
+      "typeof": "static"
+    },
+    {
+      "name": "createContributionObligation",
+      "typeof": "static"
+    },
+    {
+      "name": "createCreditObligation",
+      "typeof": "static"
+    },
+    {
+      "name": "createDisputeAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "createEvidenceNotJsonError",
+      "typeof": "static"
+    },
+    {
+      "name": "createInteractionEvidence",
+      "typeof": "static"
+    },
+    {
+      "name": "createObligationsExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "createPEACError",
+      "typeof": "static"
+    },
+    {
+      "name": "createReceiptView",
+      "typeof": "static"
+    },
+    {
+      "name": "createStepId",
+      "typeof": "static"
+    },
+    {
+      "name": "createWorkflowContext",
+      "typeof": "static"
+    },
+    {
+      "name": "createWorkflowContextInvalidError",
+      "typeof": "static"
+    },
+    {
+      "name": "createWorkflowDagInvalidError",
+      "typeof": "static"
+    },
+    {
+      "name": "createWorkflowId",
+      "typeof": "static"
+    },
+    {
+      "name": "createWorkflowSummaryAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "deriveKnownPurposes",
+      "typeof": "static"
+    },
+    {
+      "name": "detectCycleInSources",
+      "typeof": "static"
+    },
+    {
+      "name": "detectWireVersion",
+      "typeof": "static"
+    },
+    {
+      "name": "determinePurposeReason",
+      "typeof": "static"
+    },
+    {
+      "name": "extractObligationsExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "findRevokedKey",
+      "typeof": "static"
+    },
+    {
+      "name": "fingerprintRefToString",
+      "typeof": "static"
+    },
+    {
+      "name": "getAccessExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getAttributionExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getChallengeExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getCommerceExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getComplianceExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getConsentExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getCorrelationExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getIdentityExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getInteraction",
+      "typeof": "static"
+    },
+    {
+      "name": "getPrivacyExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getProvenanceExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getPurposeExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getSafetyExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "getValidTransitions",
+      "typeof": "static"
+    },
+    {
+      "name": "hasInteraction",
+      "typeof": "static"
+    },
+    {
+      "name": "hasUnknownPurposeTokens",
+      "typeof": "static"
+    },
+    {
+      "name": "hasValidDagSemantics",
+      "typeof": "static"
+    },
+    {
+      "name": "isAgentIdentityAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "isAttestationExpired",
+      "typeof": "static"
+    },
+    {
+      "name": "isAttestationNotYetValid",
+      "typeof": "static"
+    },
+    {
+      "name": "isAttestationOnly",
+      "typeof": "static"
+    },
+    {
+      "name": "isAttestationReceiptClaims",
+      "typeof": "static"
+    },
+    {
+      "name": "isAttributionAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "isAttributionExpired",
+      "typeof": "static"
+    },
+    {
+      "name": "isAttributionNotYetValid",
+      "typeof": "static"
+    },
+    {
+      "name": "isCanonicalIss",
+      "typeof": "static"
+    },
+    {
+      "name": "isCanonicalPurpose",
+      "typeof": "static"
+    },
+    {
+      "name": "isContributionRequired",
+      "typeof": "static"
+    },
+    {
+      "name": "isCreditRequired",
+      "typeof": "static"
+    },
+    {
+      "name": "isDigestTruncated",
+      "typeof": "static"
+    },
+    {
+      "name": "isDisputeAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "isDisputeExpired",
+      "typeof": "static"
+    },
+    {
+      "name": "isDisputeNotYetValid",
+      "typeof": "static"
+    },
+    {
+      "name": "isLegacyPurpose",
+      "typeof": "static"
+    },
+    {
+      "name": "isMinimalInteractionBinding",
+      "typeof": "static"
+    },
+    {
+      "name": "isOriginOnly",
+      "typeof": "static"
+    },
+    {
+      "name": "isPaymentReceipt",
+      "typeof": "static"
+    },
+    {
+      "name": "isReservedKindPrefix",
+      "typeof": "static"
+    },
+    {
+      "name": "isTerminalState",
+      "typeof": "static"
+    },
+    {
+      "name": "isTerminalWorkflowStatus",
+      "typeof": "static"
+    },
+    {
+      "name": "isUndeclaredPurpose",
+      "typeof": "static"
+    },
+    {
+      "name": "isValidDisputeAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "isValidExtensionKey",
+      "typeof": "static"
+    },
+    {
+      "name": "isValidInteractionEvidence",
+      "typeof": "static"
+    },
+    {
+      "name": "isValidPurposeReason",
+      "typeof": "static"
+    },
+    {
+      "name": "isValidPurposeToken",
+      "typeof": "static"
+    },
+    {
+      "name": "isValidReceiptType",
+      "typeof": "static"
+    },
+    {
+      "name": "isValidWorkflowContext",
+      "typeof": "static"
+    },
+    {
+      "name": "isWellKnownKind",
+      "typeof": "static"
+    },
+    {
+      "name": "isWorkflowSummaryAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "mapLegacyToCanonical",
+      "typeof": "static"
+    },
+    {
+      "name": "normalizePurposeToken",
+      "typeof": "static"
+    },
+    {
+      "name": "normalizeToCanonicalOrPreserve",
+      "typeof": "static"
+    },
+    {
+      "name": "parsePurposeHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "parseReceiptClaims",
+      "typeof": "static"
+    },
+    {
+      "name": "setInteraction",
+      "typeof": "static"
+    },
+    {
+      "name": "sortWarnings",
+      "typeof": "static"
+    },
+    {
+      "name": "stringToFingerprintRef",
+      "typeof": "static"
+    },
+    {
+      "name": "toCoreClaims",
+      "typeof": "static"
+    },
+    {
+      "name": "transitionDisputeState",
+      "typeof": "static"
+    },
+    {
+      "name": "validateActorBinding",
+      "typeof": "static"
+    },
+    {
+      "name": "validateAgentIdentityAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "validateAttestationReceiptClaims",
+      "typeof": "static"
+    },
+    {
+      "name": "validateAttributionAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "validateAttributionSource",
+      "typeof": "static"
+    },
+    {
+      "name": "validateCarrierConstraints",
+      "typeof": "static"
+    },
+    {
+      "name": "validateContentHash",
+      "typeof": "static"
+    },
+    {
+      "name": "validateContributionObligation",
+      "typeof": "static"
+    },
+    {
+      "name": "validateControlAction",
+      "typeof": "static"
+    },
+    {
+      "name": "validateCredentialEvent",
+      "typeof": "static"
+    },
+    {
+      "name": "validateCreditObligation",
+      "typeof": "static"
+    },
+    {
+      "name": "validateDisputeAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "validateDisputeContact",
+      "typeof": "static"
+    },
+    {
+      "name": "validateDisputeResolution",
+      "typeof": "static"
+    },
+    {
+      "name": "validateEvidence",
+      "typeof": "static"
+    },
+    {
+      "name": "validateIdentityBinding",
+      "typeof": "static"
+    },
+    {
+      "name": "validateInteraction",
+      "typeof": "static"
+    },
+    {
+      "name": "validateInteractionEvidence",
+      "typeof": "static"
+    },
+    {
+      "name": "validateInteractionOrdered",
+      "typeof": "static"
+    },
+    {
+      "name": "validateKernelConstraints",
+      "typeof": "static"
+    },
+    {
+      "name": "validateKnownExtensions",
+      "typeof": "static"
+    },
+    {
+      "name": "validateMVIS",
+      "typeof": "static"
+    },
+    {
+      "name": "validateMinimalInteractionBinding",
+      "typeof": "static"
+    },
+    {
+      "name": "validateObligationsExtension",
+      "typeof": "static"
+    },
+    {
+      "name": "validatePurposeTokens",
+      "typeof": "static"
+    },
+    {
+      "name": "validateRevokedKeys",
+      "typeof": "static"
+    },
+    {
+      "name": "validateSubjectSnapshot",
+      "typeof": "static"
+    },
+    {
+      "name": "validateToolRegistry",
+      "typeof": "static"
+    },
+    {
+      "name": "validateTreaty",
+      "typeof": "static"
+    },
+    {
+      "name": "validateWorkflowContext",
+      "typeof": "static"
+    },
+    {
+      "name": "validateWorkflowContextOrdered",
+      "typeof": "static"
+    },
+    {
+      "name": "validateWorkflowSummaryAttestation",
+      "typeof": "static"
+    },
+    {
+      "name": "verifyPolicyBinding",
+      "typeof": "static"
+    },
+    {
+      "name": "verifyReceiptRefConsistency",
+      "typeof": "static"
+    }
+  ],
+  "type_exports": [
+    "AIPREFSnapshot",
+    "AccessExtension",
+    "ActorBinding",
+    "AgentIdentityAttestation",
+    "AgentIdentityEvidence",
+    "AgentIdentityVerified",
+    "AgentProof",
+    "Attestation",
+    "AttestationEvidence",
+    "AttestationExtensions",
+    "AttestationReceiptClaims",
+    "AttestationValidationResult",
+    "AttributionAttestation",
+    "AttributionEvidence",
+    "AttributionExtension",
+    "AttributionSource",
+    "AttributionUsage",
+    "AuthContext",
+    "BindingDetails",
+    "CanonicalPurpose",
+    "CarrierAdapter",
+    "CarrierFormat",
+    "CarrierMeta",
+    "CarrierValidationResult",
+    "ChainVerificationResult",
+    "ChallengeExtension",
+    "ChallengeType",
+    "CommerceExtension",
+    "CommitmentClass",
+    "ComplianceExtension",
+    "ComplianceStatus",
+    "ConsentExtension",
+    "ConsentStatus",
+    "ConstraintValidationResult",
+    "ConstraintViolation",
+    "ContactMethod",
+    "ContentHash",
+    "ContentSignalSource",
+    "ContextMetadata",
+    "ContributionObligation",
+    "ContributionType",
+    "ControlAction",
+    "ControlActionType",
+    "ControlBlock",
+    "ControlDecision",
+    "ControlLicensingMode",
+    "ControlPurpose",
+    "ControlStep",
+    "ControlTrigger",
+    "ControlType",
+    "ControlValidationResult",
+    "CoreClaims",
+    "CorrelationExtension",
+    "CreateAgentIdentityAttestationParams",
+    "CreateAttestationReceiptParams",
+    "CreateAttributionAttestationParams",
+    "CreateDisputeAttestationParams",
+    "CreateInteractionParams",
+    "CreateWorkflowSummaryParams",
+    "CredentialEvent",
+    "CredentialEventType",
+    "CreditMethod",
+    "CreditObligation",
+    "CustodyEntry",
+    "DerivationType",
+    "Digest",
+    "DigestAlg",
+    "DisputeAttestation",
+    "DisputeContact",
+    "DisputeEvidence",
+    "DisputeGrounds",
+    "DisputeGroundsCode",
+    "DisputeId",
+    "DisputeOutcome",
+    "DisputeResolution",
+    "DisputeState",
+    "DisputeTargetType",
+    "DisputeType",
+    "DocumentRef",
+    "EnforcementContext",
+    "ErrorCategory",
+    "ErrorCode",
+    "ErrorSeverity",
+    "EvidenceBlock",
+    "EvidenceValidationResult",
+    "Executor",
+    "Extensions",
+    "FingerprintRefObject",
+    "HashAlgorithm",
+    "HashEncoding",
+    "IdentityBinding",
+    "IdentityExtension",
+    "InteractionEvidenceV01",
+    "InteractionValidationResult",
+    "InternalPurpose",
+    "JsonSafetyResult",
+    "KernelConstraintKey",
+    "LegacyMappingResult",
+    "LegacyPurpose",
+    "MVISFields",
+    "MVISReplayProtection",
+    "MVISTimeBounds",
+    "MetadataBlock",
+    "MinimalInteractionBinding",
+    "NormalizedControl",
+    "NormalizedControlStep",
+    "NormalizedPayment",
+    "ObligationsExtension",
+    "OrchestrationFramework",
+    "PEACDiscovery",
+    "PEACEnvelope",
+    "PEACError",
+    "PEACIssuerConfig",
+    "PEACParseError",
+    "PEACPolicyManifest",
+    "PEACReceipt",
+    "PEACReceiptClaims",
+    "PEACReceiptHeader",
+    "ParseFailure",
+    "ParseReceiptOptions",
+    "ParseReceiptResult",
+    "ParseSuccess",
+    "PayloadRef",
+    "PaymentEvidence",
+    "PaymentRailId",
+    "PaymentScheme",
+    "PaymentSplit",
+    "PeacEvidenceCarrier",
+    "PolicyContext",
+    "PolicyDecision",
+    "PrivacyExtension",
+    "ProofMethod",
+    "ProofType",
+    "ProvenanceExtension",
+    "PurposeDecision",
+    "PurposeExtension",
+    "PurposeReason",
+    "PurposeReasonContext",
+    "PurposeToken",
+    "PurposeValidationResult",
+    "ReceiptClaimsType",
+    "ReceiptExtensions",
+    "ReceiptRef",
+    "ReceiptVariant",
+    "ReceiptView",
+    "RecipientScope",
+    "Refs",
+    "Remediation",
+    "RemediationType",
+    "ResourceTarget",
+    "Result",
+    "ResultStatus",
+    "RetentionMode",
+    "ReviewStatus",
+    "RevocationReason",
+    "RevokedKeyEntry",
+    "RevokedKeyEntryInput",
+    "RevokedKeyEntryOutput",
+    "RiskLevel",
+    "SafetyExtension",
+    "SimpleValidationResult",
+    "SlsaLevel",
+    "StepId",
+    "Subject",
+    "SubjectId",
+    "SubjectProfile",
+    "SubjectProfileSnapshot",
+    "SubjectRecord",
+    "SubjectRecordSnapshot",
+    "SubjectType",
+    "ToolRegistry",
+    "ToolTarget",
+    "TransportBinding",
+    "Treaty",
+    "UNSAFE_JsonEvidenceLimits",
+    "ValidationError",
+    "ValidationWarning",
+    "VerifyRequest",
+    "VerifyResponse",
+    "VerifyResponseFailure",
+    "VerifyResponseSuccess",
+    "Wire02Claims",
+    "Wire02RepresentationFields",
+    "WorkflowContext",
+    "WorkflowErrorContext",
+    "WorkflowId",
+    "WorkflowStatus",
+    "WorkflowSummaryAttestation",
+    "WorkflowSummaryEvidence",
+    "WorkflowValidationResult"
+  ],
+  "star_exports": [],
+  "accessors": [
+    "getAccessExtension",
+    "getAttributionExtension",
+    "getChallengeExtension",
+    "getCommerceExtension",
+    "getComplianceExtension",
+    "getConsentExtension",
+    "getCorrelationExtension",
+    "getIdentityExtension",
+    "getPrivacyExtension",
+    "getProvenanceExtension",
+    "getPurposeExtension",
+    "getSafetyExtension"
+  ],
+  "wire02_extension_keys": [
+    "ACCESS_EXTENSION_KEY",
+    "ATTRIBUTION_EXTENSION_KEY",
+    "CHALLENGE_EXTENSION_KEY",
+    "COMMERCE_EXTENSION_KEY",
+    "COMPLIANCE_EXTENSION_KEY",
+    "CONSENT_EXTENSION_KEY",
+    "CORRELATION_EXTENSION_KEY",
+    "IDENTITY_EXTENSION_KEY",
+    "PRIVACY_EXTENSION_KEY",
+    "PROVENANCE_EXTENSION_KEY",
+    "PURPOSE_EXTENSION_KEY",
+    "SAFETY_EXTENSION_KEY"
+  ],
+  "legacy_extension_keys": [
+    "ACTOR_BINDING_EXTENSION_KEY",
+    "CONTROL_ACTION_EXTENSION_KEY",
+    "CREDENTIAL_EVENT_EXTENSION_KEY",
+    "INTERACTION_EXTENSION_KEY",
+    "OBLIGATIONS_EXTENSION_KEY",
+    "TOOL_REGISTRY_EXTENSION_KEY",
+    "TREATY_EXTENSION_KEY",
+    "WORKFLOW_EXTENSION_KEY"
+  ],
+  "extension_schemas": [
+    "AccessExtensionSchema",
+    "AttributionExtensionSchema",
+    "ChallengeExtensionSchema",
+    "CommerceExtensionSchema",
+    "ComplianceExtensionSchema",
+    "ConsentExtensionSchema",
+    "CorrelationExtensionSchema",
+    "IdentityExtensionSchema",
+    "ObligationsExtensionSchema",
+    "PrivacyExtensionSchema",
+    "ProvenanceExtensionSchema",
+    "PurposeExtensionSchema",
+    "SafetyExtensionSchema"
+  ],
+  "total_value_exports": 384,
+  "total_type_exports": 190
+}

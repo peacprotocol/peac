@@ -1,0 +1,342 @@
+{
+  "package": "@peac/protocol",
+  "version": "0.12.1",
+  "extracted_at": "2026-03-16",
+  "node_version": "v24.13.0",
+  "value_exports": [
+    {
+      "name": "CHECK_IDS",
+      "typeof": "static"
+    },
+    {
+      "name": "DEFAULT_NETWORK_SECURITY",
+      "typeof": "static"
+    },
+    {
+      "name": "DEFAULT_VERIFIER_LIMITS",
+      "typeof": "static"
+    },
+    {
+      "name": "IssueError",
+      "typeof": "static"
+    },
+    {
+      "name": "NON_DETERMINISTIC_ARTIFACT_KEYS",
+      "typeof": "static"
+    },
+    {
+      "name": "VerificationReportBuilder",
+      "typeof": "static"
+    },
+    {
+      "name": "base64urlDecode",
+      "typeof": "static"
+    },
+    {
+      "name": "base64urlEncode",
+      "typeof": "static"
+    },
+    {
+      "name": "buildFailureReport",
+      "typeof": "static"
+    },
+    {
+      "name": "buildSuccessReport",
+      "typeof": "static"
+    },
+    {
+      "name": "checkPolicyBinding",
+      "typeof": "static"
+    },
+    {
+      "name": "clearJWKSCache",
+      "typeof": "static"
+    },
+    {
+      "name": "clearKidThumbprints",
+      "typeof": "static"
+    },
+    {
+      "name": "computeJwkThumbprint",
+      "typeof": "static"
+    },
+    {
+      "name": "computePolicyDigestJcs",
+      "typeof": "static"
+    },
+    {
+      "name": "computeReceiptDigest",
+      "typeof": "static"
+    },
+    {
+      "name": "createDefaultPolicy",
+      "typeof": "static"
+    },
+    {
+      "name": "createDigest",
+      "typeof": "static"
+    },
+    {
+      "name": "createEmptyReport",
+      "typeof": "static"
+    },
+    {
+      "name": "createReportBuilder",
+      "typeof": "static"
+    },
+    {
+      "name": "fetchDiscovery",
+      "typeof": "static"
+    },
+    {
+      "name": "fetchIssuerConfig",
+      "typeof": "static"
+    },
+    {
+      "name": "fetchJWKSSafe",
+      "typeof": "static"
+    },
+    {
+      "name": "fetchPointerSafe",
+      "typeof": "static"
+    },
+    {
+      "name": "fetchPointerWithDigest",
+      "typeof": "static"
+    },
+    {
+      "name": "fetchPolicyManifest",
+      "typeof": "static"
+    },
+    {
+      "name": "generateKeypair",
+      "typeof": "static"
+    },
+    {
+      "name": "getJWKSCacheSize",
+      "typeof": "static"
+    },
+    {
+      "name": "getKidThumbprintSize",
+      "typeof": "static"
+    },
+    {
+      "name": "getPurposeHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "getReceiptHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "getSSRFCapabilities",
+      "typeof": "static"
+    },
+    {
+      "name": "isAttestationResult",
+      "typeof": "static"
+    },
+    {
+      "name": "isBlockedIP",
+      "typeof": "static"
+    },
+    {
+      "name": "isCommerceResult",
+      "typeof": "static"
+    },
+    {
+      "name": "isWire02Result",
+      "typeof": "static"
+    },
+    {
+      "name": "issue",
+      "typeof": "static"
+    },
+    {
+      "name": "issueJws",
+      "typeof": "static"
+    },
+    {
+      "name": "issueWire01",
+      "typeof": "static"
+    },
+    {
+      "name": "issueWire02",
+      "typeof": "static"
+    },
+    {
+      "name": "jwkToPublicKeyBytes",
+      "typeof": "static"
+    },
+    {
+      "name": "parseBodyProfile",
+      "typeof": "static"
+    },
+    {
+      "name": "parseDiscovery",
+      "typeof": "static"
+    },
+    {
+      "name": "parseHeaderProfile",
+      "typeof": "static"
+    },
+    {
+      "name": "parseIssuerConfig",
+      "typeof": "static"
+    },
+    {
+      "name": "parsePointerProfile",
+      "typeof": "static"
+    },
+    {
+      "name": "parsePolicyManifest",
+      "typeof": "static"
+    },
+    {
+      "name": "parseTransportProfile",
+      "typeof": "static"
+    },
+    {
+      "name": "reasonCodeToErrorCode",
+      "typeof": "static"
+    },
+    {
+      "name": "reasonCodeToSeverity",
+      "typeof": "static"
+    },
+    {
+      "name": "resetSSRFCapabilitiesCache",
+      "typeof": "static"
+    },
+    {
+      "name": "resolveJWKS",
+      "typeof": "static"
+    },
+    {
+      "name": "setPurposeAppliedHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "setPurposeReasonHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "setReceiptHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "setVaryHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "setVaryPurposeHeader",
+      "typeof": "static"
+    },
+    {
+      "name": "sha256Bytes",
+      "typeof": "static"
+    },
+    {
+      "name": "sha256Hex",
+      "typeof": "static"
+    },
+    {
+      "name": "ssrfErrorToReasonCode",
+      "typeof": "static"
+    },
+    {
+      "name": "ssrfSafeFetch",
+      "typeof": "static"
+    },
+    {
+      "name": "verify",
+      "typeof": "static"
+    },
+    {
+      "name": "verifyAndFetchPointer",
+      "typeof": "static"
+    },
+    {
+      "name": "verifyLocal",
+      "typeof": "static"
+    },
+    {
+      "name": "verifyReceipt",
+      "typeof": "static"
+    },
+    {
+      "name": "verifyReceiptCore",
+      "typeof": "static"
+    }
+  ],
+  "type_exports": [
+    "BodyProfileResult",
+    "BundleContext",
+    "CheckId",
+    "CheckResult",
+    "CheckStatus",
+    "DigestObject",
+    "HeaderProfileResult",
+    "InputType",
+    "IssueOptions",
+    "IssueResult",
+    "IssueWire01Options",
+    "IssueWire02Options",
+    "IssuerOrigin",
+    "JWK",
+    "JWKS",
+    "JWKSResolveError",
+    "JWKSResolveResult",
+    "JWKSResolveSuccess",
+    "KeySource",
+    "NetworkSecurity",
+    "ParsedTransportProfile",
+    "PinnedKey",
+    "PointerArtifact",
+    "PointerFetchError",
+    "PointerFetchOptions",
+    "PointerFetchResult",
+    "PointerFetchSuccess",
+    "PointerProfileResult",
+    "PolicyBindingStatus",
+    "ReasonCode",
+    "ResolveJWKSOptions",
+    "ResultSeverity",
+    "RevokedKeyInfo",
+    "SSRFCapabilities",
+    "SSRFFetchError",
+    "SSRFFetchOptions",
+    "SSRFFetchResult",
+    "SSRFRuntime",
+    "TransportProfile",
+    "TransportProfileError",
+    "TransportProfileParseResult",
+    "TransportProfileSuccess",
+    "VerificationArtifacts",
+    "VerificationInput",
+    "VerificationMeta",
+    "VerificationMode",
+    "VerificationReport",
+    "VerificationResult",
+    "VerifierInfo",
+    "VerifierLimits",
+    "VerifierPolicy",
+    "VerifyCoreOptions",
+    "VerifyCoreResult",
+    "VerifyFailure",
+    "VerifyLocalErrorCode",
+    "VerifyLocalFailure",
+    "VerifyLocalOptions",
+    "VerifyLocalResult",
+    "VerifyLocalSuccess",
+    "VerifyOptions",
+    "VerifyResult"
+  ],
+  "star_exports": [],
+  "accessors": [],
+  "wire02_extension_keys": [],
+  "legacy_extension_keys": [],
+  "extension_schemas": [],
+  "total_value_exports": 66,
+  "total_type_exports": 61
+}
