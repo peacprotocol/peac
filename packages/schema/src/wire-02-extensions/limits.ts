@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 Extension Group Limits (DD-173.1)
+ * Wire 0.2 Extension Group Limits
  *
  * Centralized per-field bounds for all Wire 0.2 extension group fields.
  * Prevents magic numbers and allows external reference.
@@ -49,7 +49,7 @@ export const EXTENSION_LIMITS = {
   maxParentJtiLength: 256,
   maxDependsOnLength: 64,
 
-  // Consent (DD-174)
+  // Consent
   maxConsentBasisLength: 128,
   maxConsentMethodLength: 128,
   maxDataCategoriesCount: 64,
@@ -57,20 +57,20 @@ export const EXTENSION_LIMITS = {
   maxConsentScopeLength: 256,
   maxJurisdictionLength: 16,
 
-  // Compliance (DD-175)
+  // Compliance
   maxFrameworkLength: 256,
   maxAuditRefLength: 256,
   maxAuditorLength: 256,
   maxComplianceScopeLength: 512,
 
-  // Privacy (DD-176)
+  // Privacy
   maxDataClassificationLength: 128,
   maxProcessingBasisLength: 128,
   maxAnonymizationMethodLength: 128,
   maxDataSubjectCategoryLength: 128,
   maxTransferMechanismLength: 128,
 
-  // Safety (DD-177)
+  // Safety
   maxAssessmentMethodLength: 256,
   maxSafetyMeasuresCount: 32,
   maxSafetyMeasureLength: 256,
@@ -78,7 +78,7 @@ export const EXTENSION_LIMITS = {
   maxModelRefLength: 256,
   maxSafetyCategoryLength: 128,
 
-  // Provenance (DD-178)
+  // Provenance
   maxSourceTypeLength: 128,
   maxSourceRefLength: 256,
   maxVerificationMethodLength: 128,
@@ -88,13 +88,13 @@ export const EXTENSION_LIMITS = {
   maxSlsaTrackLength: 64,
   maxSlsaVersionLength: 16,
 
-  // Attribution (DD-179)
+  // Attribution
   maxCreatorRefLength: 256,
   maxObligationTypeLength: 128,
   maxAttributionTextLength: 1024,
   maxContentSignalSourceLength: 128,
 
-  // Purpose (DD-180)
+  // Purpose
   maxExternalPurposesCount: 32,
   maxExternalPurposeLength: 128,
   maxPurposeBasisLength: 128,

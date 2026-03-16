@@ -1,5 +1,5 @@
 /**
- * Wire 0.2 Performance SLO Gate (DD-159)
+ * Wire 0.2 Performance SLO Gate
  *
  * CI gate: verifyLocal p95 MUST be <= 10ms for Wire 0.2 receipts.
  * Soft target: issueWire02 p95 SHOULD be <= 50ms.
@@ -39,7 +39,7 @@ function calculateMetrics(timings: number[]) {
 // Collected metrics for optional JSON output
 const collectedMetrics: Record<string, ReturnType<typeof calculateMetrics>> = {};
 
-describe('Wire 0.2 performance SLO (DD-159)', () => {
+describe('Wire 0.2 performance SLO', () => {
   afterAll(() => {
     const jsonPath = process.env.PEAC_BENCH_JSON;
     if (!jsonPath) return;

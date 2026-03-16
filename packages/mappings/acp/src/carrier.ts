@@ -1,5 +1,5 @@
 /**
- * ACP carrier adapter for Evidence Carrier Contract (DD-124).
+ * ACP carrier adapter for Evidence Carrier Contract.
  *
  * v0.11.1: header-only embed transport via PEAC-Receipt (compact JWS).
  * All size limits enforce the 8 KB header ceiling (acp_headers).
@@ -136,7 +136,7 @@ export function extractCarrierFromACPHeaders(headers: HeaderMap): AcpExtractResu
     receipt_jws: jws,
   };
 
-  // Extract receipt_url locator hint (DD-135)
+  // Extract receipt_url locator hint
   const urlKey = Object.keys(headers).find(
     (k) => k.toLowerCase() === PEAC_RECEIPT_URL_HEADER.toLowerCase()
   );
@@ -156,7 +156,7 @@ export function extractCarrierFromACPHeaders(headers: HeaderMap): AcpExtractResu
 }
 
 /**
- * Extract carrier from ACP headers (async, DD-129).
+ * Extract carrier from ACP headers (async).
  *
  * Computes receipt_ref from the JWS and validates consistency.
  */
@@ -178,7 +178,7 @@ export async function extractCarrierFromACPHeadersAsync(
     receipt_jws: jws,
   };
 
-  // Extract receipt_url locator hint (DD-135)
+  // Extract receipt_url locator hint
   const urlKey = Object.keys(headers).find(
     (k) => k.toLowerCase() === PEAC_RECEIPT_URL_HEADER.toLowerCase()
   );

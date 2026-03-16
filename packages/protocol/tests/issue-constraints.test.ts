@@ -1,5 +1,5 @@
 /**
- * Tests for kernel constraint enforcement in issue() pipeline (DD-121)
+ * Tests for kernel constraint enforcement in issue() pipeline
  *
  * Validates that issue() rejects claims exceeding structural kernel constraints
  * BEFORE signing. Valid receipts are unaffected (constraints match existing limits).
@@ -10,7 +10,7 @@ import { generateKeypair } from '@peac/crypto';
 import { KERNEL_CONSTRAINTS } from '@peac/schema';
 import { issueWire01, IssueError } from '../src/issue';
 
-describe('issue() kernel constraints (DD-121)', () => {
+describe('issue() kernel constraints', () => {
   it('issues a valid receipt without constraint violations', async () => {
     const { privateKey } = await generateKeypair();
     const result = await issueWire01({

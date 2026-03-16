@@ -20,7 +20,7 @@ export * from './purpose';
 export * from './agent-identity';
 export * from './attribution';
 
-// Kernel constraints (v0.10.14+ formalized limits, DD-60)
+// Kernel constraints (v0.10.14+ formalized limits)
 export { KERNEL_CONSTRAINTS, validateKernelConstraints } from './constraints';
 export type {
   KernelConstraintKey,
@@ -125,7 +125,7 @@ export type {
   CreateAgentIdentityAttestationParams,
 } from './agent-identity';
 
-// ActorBinding + MVIS (v0.11.3+ DD-142, DD-143, DD-144)
+// ActorBinding + MVIS (v0.11.3+ )
 export {
   ProofTypeSchema,
   ActorBindingSchema,
@@ -148,7 +148,7 @@ export type {
   MVISReplayProtection,
 } from './actor-binding';
 
-// ZT Extension Schemas (v0.11.3+ DD-145, DD-146)
+// ZT Extension Schemas (v0.11.3+ )
 export {
   // Credential Event
   CredentialEventTypeSchema,
@@ -169,13 +169,13 @@ export {
   CONTROL_ACTIONS,
   CONTROL_TRIGGERS,
   validateControlAction,
-  // Treaty (DD-147)
+  // Treaty
   CommitmentClassSchema,
   TreatySchema,
   TREATY_EXTENSION_KEY,
   COMMITMENT_CLASSES,
   validateTreaty,
-  // Fingerprint Reference Conversion (DD-146)
+  // Fingerprint Reference Conversion
   stringToFingerprintRef,
   fingerprintRefToString,
 } from './extensions/index';
@@ -467,7 +467,7 @@ export type {
   CreateAttestationReceiptParams,
 } from './attestation-receipt';
 
-// Evidence Carrier Contract schemas + helpers (v0.11.1+ DD-124)
+// Evidence Carrier Contract schemas + helpers (v0.11.1+ )
 export {
   ReceiptRefSchema,
   CompactJwsSchema,
@@ -500,7 +500,7 @@ export type {
   ParseReceiptOptions,
 } from './receipt-parser';
 
-// Wire 0.2 schemas and types (v0.12.0-preview.1, DD-156)
+// Wire 0.2 schemas and types (v0.12.0-preview.1)
 export {
   EvidencePillarSchema,
   PillarsSchema,
@@ -515,7 +515,7 @@ export {
 } from './wire-02-envelope';
 export type { Wire02Claims } from './wire-02-envelope';
 
-// Wire 0.2 warning constants and utilities (v0.12.0-preview.1, DD-155)
+// Wire 0.2 warning constants and utilities (v0.12.0-preview.1)
 export {
   WARNING_TYPE_UNREGISTERED,
   WARNING_UNKNOWN_EXTENSION,
@@ -526,7 +526,7 @@ export {
   sortWarnings,
 } from './wire-02-warnings';
 
-// Wire 0.2 representation fields (v0.12.0-preview.1, DD-152)
+// Wire 0.2 representation fields (v0.12.0-preview.1)
 export {
   Wire02RepresentationFieldsSchema,
   RepresentationFieldsSchema,
@@ -640,13 +640,13 @@ export type {
   PurposeExtension,
 } from './wire-02-extensions';
 
-// Wire 0.2 registry constants (v0.12.0-preview.1, DD-155)
+// Wire 0.2 registry constants (v0.12.0-preview.1)
 export { REGISTERED_RECEIPT_TYPES, REGISTERED_EXTENSION_GROUP_KEYS } from './wire-02-registries';
 
-// Policy binding comparison (v0.12.0-preview.1, DD-49, DD-151)
+// Policy binding comparison (v0.12.0-preview.1)
 export { verifyPolicyBinding } from './policy-binding';
 
-// Issuer configuration schemas (v0.11.3+ DD-148)
+// Issuer configuration schemas (v0.11.3+ )
 export {
   RevokedKeyEntrySchema,
   RevokedKeysArraySchema,

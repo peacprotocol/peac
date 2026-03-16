@@ -4,13 +4,13 @@
  * These limits are formalized from existing ad-hoc limits already
  * enforced in the codebase:
  * - JSON_EVIDENCE_LIMITS (json.ts): depth, array, keys, string, nodes
- * - CLOCK_SKEW_SECONDS (DD-8): temporal validity tolerance
+ * - CLOCK_SKEW_SECONDS: temporal validity tolerance
  *
  * String length is measured in code units (.length), matching the semantics
  * of assertJsonSafeIterative(). UTF-8 byte-length caps may be introduced
  * as an explicit tightening in a future version.
  *
- * Payment/rail-specific limits (DD-16 x402 DoS guards) are intentionally
+ * Payment/rail-specific limits (x402 DoS guards) are intentionally
  * NOT included here -- they belong in the rail/adapter layer.
  */
 
@@ -24,7 +24,7 @@
  *
  * Provenance:
  * - MAX_NESTED_DEPTH..MAX_TOTAL_NODES: from JSON_EVIDENCE_LIMITS (json.ts)
- * - CLOCK_SKEW_SECONDS: from DD-8 temporal validity
+ * - CLOCK_SKEW_SECONDS: from temporal validity
  */
 export const KERNEL_CONSTRAINTS = {
   /** Maximum nesting depth for JSON evidence */
@@ -37,7 +37,7 @@ export const KERNEL_CONSTRAINTS = {
   MAX_STRING_LENGTH: 65_536,
   /** Maximum total nodes to visit during traversal */
   MAX_TOTAL_NODES: 100_000,
-  /** Temporal validity clock skew tolerance in seconds (DD-8) */
+  /** Temporal validity clock skew tolerance in seconds */
   CLOCK_SKEW_SECONDS: 60,
 } as const;
 

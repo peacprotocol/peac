@@ -1,5 +1,5 @@
 /**
- * Evidence Carrier Contract schemas and helpers (DD-124)
+ * Evidence Carrier Contract schemas and helpers
  *
  * Zod validation schemas for PeacEvidenceCarrier and CarrierMeta,
  * plus the canonical computeReceiptRef() and validateCarrierConstraints()
@@ -21,7 +21,7 @@ import { KERNEL_CONSTRAINTS } from './constraints';
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Maximum carrier size per transport (DD-127) */
+/** Maximum carrier size per transport */
 export const CARRIER_TRANSPORT_LIMITS = {
   /** MCP _meta: 64 KB */
   mcp: 65_536,
@@ -60,8 +60,8 @@ export const CompactJwsSchema = z
 export const CarrierFormatSchema = z.enum(['embed', 'reference']);
 
 /**
- * Validates receipt_url: HTTPS-only, max 2048 chars, no credentials (DD-135).
- * Validation only (DD-141): no I/O, no fetch. Resolution lives in Layer 4.
+ * Validates receipt_url: HTTPS-only, max 2048 chars, no credentials.
+ * Validation only: no I/O, no fetch. Resolution lives in Layer 4.
  */
 export const ReceiptUrlSchema = z
   .string()
@@ -133,7 +133,7 @@ export async function computeReceiptRef(jws: string): Promise<ReceiptRef> {
 }
 
 /**
- * Canonical carrier constraint validator (DD-127, DD-129, DD-131).
+ * Canonical carrier constraint validator.
  *
  * Validates a carrier against transport-specific constraints using
  * the provided CarrierMeta. This is the single validation function
@@ -143,7 +143,7 @@ export async function computeReceiptRef(jws: string): Promise<ReceiptRef> {
  * 1. receipt_ref format (sha256:<hex64>)
  * 2. receipt_jws format (if present): valid compact JWS
  * 3. Total serialized size within meta.max_size
- * 4. If receipt_jws present: receipt_ref consistency (DD-129)
+ * 4. If receipt_jws present: receipt_ref consistency
  * 5. All string fields within MAX_STRING_LENGTH
  */
 export function validateCarrierConstraints(
@@ -175,7 +175,7 @@ export function validateCarrierConstraints(
     );
   }
 
-  // 4. receipt_url validation (DD-135: HTTPS-only, max 2048, no credentials)
+  // 4. receipt_url validation (HTTPS-only, max 2048, no credentials)
   if (carrier.receipt_url !== undefined) {
     const urlResult = ReceiptUrlSchema.safeParse(carrier.receipt_url);
     if (!urlResult.success) {
@@ -208,7 +208,7 @@ export function validateCarrierConstraints(
 }
 
 /**
- * Verify receipt_ref consistency with receipt_jws (DD-129).
+ * Verify receipt_ref consistency with receipt_jws.
  *
  * If both receipt_ref and receipt_jws are present, verifies that
  * sha256(receipt_jws) equals receipt_ref. This prevents carrier

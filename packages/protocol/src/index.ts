@@ -10,7 +10,7 @@ export * from './headers';
 export * from './discovery';
 export * from './jwks-resolver';
 
-// Policy binding utilities (v0.12.0-preview.1, DD-49, DD-151)
+// Policy binding utilities (v0.12.0-preview.1)
 export { computePolicyDigestJcs, checkPolicyBinding } from './policy-binding';
 
 // Verifier core (v0.10.8+)

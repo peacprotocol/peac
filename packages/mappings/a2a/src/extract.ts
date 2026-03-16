@@ -2,8 +2,8 @@
  * Extract PEAC evidence carriers from A2A metadata.
  *
  * Reads carrier data from metadata[PEAC_EXTENSION_URI] and validates
- * against PeacEvidenceCarrierSchema (DD-131). Provides both sync (structural)
- * and async (receipt_ref consistency) extraction paths per DD-129.
+ * against PeacEvidenceCarrierSchema. Provides both sync (structural)
+ * and async (receipt_ref consistency) extraction paths per .
  */
 
 import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
@@ -41,7 +41,7 @@ export interface A2AExtractAsyncResult extends A2AExtractResult {
 /**
  * Extract PEAC evidence carriers from A2A metadata (sync).
  *
- * Performs structural validation only (schema check, DD-131).
+ * Performs structural validation only (schema check).
  * Returns null if no PEAC extension data is present.
  * Silently skips carriers that fail schema validation.
  */
@@ -61,7 +61,7 @@ export function extractReceiptFromMetadata(metadata: A2AMetadata): A2AExtractRes
     return null;
   }
 
-  // Validate each carrier against schema (DD-131: validate at extraction)
+  // Validate each carrier against schema (validate at extraction)
   const validCarriers: PeacEvidenceCarrier[] = [];
   for (const carrier of payload.carriers) {
     const result = PeacEvidenceCarrierSchema.safeParse(carrier);
@@ -84,7 +84,7 @@ export function extractReceiptFromMetadata(metadata: A2AMetadata): A2AExtractRes
 }
 
 /**
- * Extract PEAC evidence carriers from A2A metadata (async, DD-129).
+ * Extract PEAC evidence carriers from A2A metadata (async).
  *
  * Performs structural validation AND receipt_ref consistency check.
  * When receipt_jws is present, verifies sha256(receipt_jws) === receipt_ref.
@@ -127,7 +127,7 @@ export function extractReceiptFromTaskStatus(status: A2ATaskStatusLike): A2AExtr
   return extractReceiptFromMetadata(status.metadata);
 }
 
-/** Extract carriers from A2A TaskStatus (async, DD-129) */
+/** Extract carriers from A2A TaskStatus (async) */
 export async function extractReceiptFromTaskStatusAsync(
   status: A2ATaskStatusLike
 ): Promise<A2AExtractAsyncResult | null> {
@@ -141,7 +141,7 @@ export function extractReceiptFromMessage(msg: A2AMessageLike): A2AExtractResult
   return extractReceiptFromMetadata(msg.metadata);
 }
 
-/** Extract carriers from A2A Message (async, DD-129) */
+/** Extract carriers from A2A Message (async) */
 export async function extractReceiptFromMessageAsync(
   msg: A2AMessageLike
 ): Promise<A2AExtractAsyncResult | null> {
@@ -155,7 +155,7 @@ export function extractReceiptFromArtifact(artifact: A2AArtifactLike): A2AExtrac
   return extractReceiptFromMetadata(artifact.metadata);
 }
 
-/** Extract carriers from A2A Artifact (async, DD-129) */
+/** Extract carriers from A2A Artifact (async) */
 export async function extractReceiptFromArtifactAsync(
   artifact: A2AArtifactLike
 ): Promise<A2AExtractAsyncResult | null> {

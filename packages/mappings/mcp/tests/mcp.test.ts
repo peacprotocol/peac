@@ -183,7 +183,7 @@ describe('MCP integration', () => {
     });
   });
 
-  describe('extractReceipt _meta support (DD-125)', () => {
+  describe('extractReceipt _meta support', () => {
     it('should extract receipt from _meta receipt_jws key (v0.11.1+)', () => {
       const response = {
         tool: 'test',

@@ -5,7 +5,7 @@
  *   1. Extension key grammar validation
  *   2. Recursive plain-JSON-value guard (rejects non-JSON-safe values)
  *   3. Known extension group schema validation
- *   4. Byte-budget enforcement (DD-173.4)
+ *   4. Byte-budget enforcement
  *
  * NORMATIVE: Extension group values MUST be plain JSON values all the
  * way down (objects, arrays, strings, finite numbers, booleans, null).
@@ -27,7 +27,7 @@
  * Schema does NOT emit warnings (unknown_extension_preserved belongs
  * in @peac/protocol.verifyLocal(), Layer 3).
  *
- * Layer 1 (@peac/schema): pure Zod validation, zero I/O (DD-141).
+ * Layer 1 (@peac/schema): pure Zod validation, zero I/O.
  */
 
 import { z } from 'zod';
@@ -167,7 +167,7 @@ function isPlainJsonValue(value: unknown): boolean {
  *   1. Validate extension key grammar
  *   2. Recursive guard: reject non-plain-JSON values (E_EXTENSION_NON_JSON_VALUE)
  *   3. Validate known extension groups against their Zod schemas
- *   4. Unconditional byte-budget enforcement (DD-173.4)
+ *   4. Unconditional byte-budget enforcement
  *
  * @param extensions - The extensions record from Wire 0.2 claims
  * @param ctx - Zod refinement context
@@ -217,7 +217,7 @@ export function validateKnownExtensions(
     }
   }
 
-  // Step 4: Byte-budget enforcement (DD-173.4, unconditional)
+  // Step 4: Byte-budget enforcement (unconditional)
   const totalBytes = jsonUtf8ByteLength(extensions);
   if (totalBytes > EXTENSION_BUDGET.maxTotalBytes) {
     ctx.addIssue({

@@ -1,12 +1,12 @@
 /**
- * Property-based tests for jti uniqueness and replay detection (DD-158)
+ * Property-based tests for jti uniqueness and replay detection
  *
  * Verifies:
  * 1. issueWire02() generates unique jti values across many issuances
  * 2. Duplicate jti detection: replay cache correctly identifies re-seen values
  * 3. Sliding-window replay cache eviction semantics
  *
- * Tests the internal PEAC JTI path via issueWire02() (DD-158 review).
+ * Tests the internal PEAC JTI path via issueWire02() (review).
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';

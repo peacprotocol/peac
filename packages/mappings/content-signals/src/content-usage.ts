@@ -7,7 +7,7 @@
  *
  * Scope: HTTP header parsing only. Does NOT parse robots.txt directives
  * or any other signal source. Receives pre-fetched header value (no network
- * I/O, DD-55).
+ * I/O).
  *
  * AIPREF vocabulary keys (draft-ietf-aipref-vocab-03, Table 1):
  *   - bots: Automated processing (parent of train-ai and search)

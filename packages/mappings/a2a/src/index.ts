@@ -3,7 +3,7 @@
  *
  * Agent-to-Agent Protocol (A2A) integration for PEAC.
  * Maps PEAC evidence carriers to A2A metadata (TaskStatus, Message, Artifact)
- * per A2A spec v0.3.0 (DD-126, DD-128).
+ * per A2A spec v0.3.0.
  */
 
 // Types

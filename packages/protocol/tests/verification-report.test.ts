@@ -201,7 +201,7 @@ describe('VerificationReportBuilder', () => {
 
       const report = builder.build();
 
-      // All checks present (12 checks total: 11 original + policy.binding DD-49)
+      // All checks present (12 checks total: 11 original + policy.binding )
       expect(report.checks.length).toBe(12);
 
       // Check IDs in expected order
@@ -238,7 +238,7 @@ describe('VerificationReportBuilder', () => {
      * New entries MUST only be appended to the end.
      */
 
-    // Frozen prefix: the 10 original check IDs (pre-DD-49, v0.10.9)
+    // Frozen prefix: the 10 original check IDs (pre-v0.10.9)
     const V0_10_9_PREFIX = [
       'jws.parse',
       'limits.receipt_bytes',
@@ -252,7 +252,7 @@ describe('VerificationReportBuilder', () => {
       'extensions.limits',
     ] as const;
 
-    // Frozen prefix: check IDs added in v0.10.10 (DD-49)
+    // Frozen prefix: check IDs added in v0.10.10
     const V0_10_10_SUFFIX = ['transport.profile_binding', 'policy.binding'] as const;
 
     it('should preserve v0.10.9 prefix (first 10 check IDs are frozen)', () => {
@@ -297,7 +297,7 @@ describe('VerificationReportBuilder', () => {
     });
   });
 
-  describe('Policy Binding (DD-49)', () => {
+  describe('Policy Binding', () => {
     it('should set policy_binding to unavailable on failure reports', async () => {
       const receipt = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJ0ZXN0In0.signature';
 

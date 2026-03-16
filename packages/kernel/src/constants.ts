@@ -85,7 +85,7 @@ export const DISCOVERY = {
  */
 export const JWKS = {
   rotationDays: 90,
-  /** Normative minimum overlap period (DD-148, v0.11.3+) */
+  /** Normative minimum overlap period (v0.11.3+) */
   overlapDays: 30,
   emergencyRevocationHours: 24,
 } as const;
@@ -251,7 +251,7 @@ export const VERIFICATION_MODES = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Wire 0.2 constants (v0.12.0-preview.1, DD-156)
+// Wire 0.2 constants (v0.12.0-preview.1)
 // ---------------------------------------------------------------------------
 
 /**
@@ -314,7 +314,7 @@ export const ISS_CANONICAL = {
 export const TYPE_GRAMMAR = { maxLength: 256 } as const;
 
 /**
- * policy block field constraints (Wire 0.2, DD-151).
+ * policy block field constraints (Wire 0.2).
  * Separate from ISS_CANONICAL to allow independent evolution of each limit.
  */
 export const POLICY_BLOCK = {
@@ -347,7 +347,7 @@ export type VerificationStrictness = 'strict' | 'interop';
 export const PEAC_ALG = ALGORITHMS.default;
 
 // ---------------------------------------------------------------------------
-// Extension byte-budget constants (v0.12.2, DD-173.4)
+// Extension byte-budget constants (v0.12.2)
 // ---------------------------------------------------------------------------
 
 /**

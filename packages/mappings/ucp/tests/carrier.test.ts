@@ -1,5 +1,5 @@
 /**
- * Tests for UCP carrier adapter (Evidence Carrier Contract, DD-124).
+ * Tests for UCP carrier adapter (Evidence Carrier Contract).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -167,7 +167,7 @@ describe('extractCarrierFromWebhookPayload', () => {
 });
 
 // ---------------------------------------------------------------------------
-// extractCarrierFromWebhookPayloadAsync (DD-129)
+// extractCarrierFromWebhookPayloadAsync
 // ---------------------------------------------------------------------------
 
 describe('extractCarrierFromWebhookPayloadAsync', () => {
@@ -267,7 +267,7 @@ describe('UcpCarrierAdapter', () => {
       expect(extracted!.receipts[0].receipt_jws).toBe(carrier.receipt_jws);
     });
 
-    it('should preserve receipt_url through attach and extract (DD-135)', async () => {
+    it('should preserve receipt_url through attach and extract', async () => {
       const carrier = await makeCarrier();
       carrier.receipt_url = 'https://receipts.example.com/abc123';
       const payload: UcpWebhookPayload = { event_type: 'order.complete' };

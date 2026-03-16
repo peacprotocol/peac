@@ -2,7 +2,7 @@
  * Identity Extension Group (org.peacprotocol/identity)
  *
  * Records identity verification or attestation evidence.
- * Shipped in v0.12.0-preview.1 (DD-153).
+ * Shipped in v0.12.0-preview.1.
  */
 
 import { z } from 'zod';

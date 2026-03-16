@@ -1,5 +1,5 @@
 /**
- * Property-based tests for strictness profiles (DD-156, DD-158)
+ * Property-based tests for strictness profiles
  *
  * Verifies:
  * 1. Default is always strict: verifyLocal() with no options uses strict mode
@@ -7,8 +7,8 @@
  * 3. Interop requires explicit opt-in
  * 4. JOSE hardening applies regardless of strictness mode
  *
- * Uses shared _helpers.ts for signRawJWS/importEd25519 (DD-158 review).
- * Uses FIXED_IAT for deterministic tests (DD-158 review).
+ * Uses shared _helpers.ts for signRawJWS/importEd25519 (review).
+ * Uses FIXED_IAT for deterministic tests (review).
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';

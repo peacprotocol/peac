@@ -1,5 +1,5 @@
 /**
- * Decode tool schemas -- ZERO MCP SDK imports (DD-57)
+ * Decode tool schemas -- ZERO MCP SDK imports
  */
 
 import { z } from 'zod';

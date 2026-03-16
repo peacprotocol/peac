@@ -21,7 +21,7 @@ export type CryptoErrorCode =
   | 'CRYPTO_INVALID_TYP'
   | 'CRYPTO_INVALID_ALG'
   | 'CRYPTO_INVALID_SIGNATURE'
-  // Wire 0.2 JOSE hardening (v0.12.0-preview.1, DD-156)
+  // Wire 0.2 JOSE hardening (v0.12.0-preview.1)
   | 'CRYPTO_WIRE_VERSION_MISMATCH'
   | 'CRYPTO_JWS_EMBEDDED_KEY'
   | 'CRYPTO_JWS_CRIT_REJECTED'

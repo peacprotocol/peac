@@ -7,7 +7,7 @@
  * This file exists solely for the ./registries subpath export in package.json.
  * All registry data, types, and finder functions come from the generated file.
  *
- * v0.12.2 (DD-183): migrated from manual sync to codegen.
+ * v0.12.2: migrated from manual sync to codegen.
  */
 
 // Re-export everything from the generated file

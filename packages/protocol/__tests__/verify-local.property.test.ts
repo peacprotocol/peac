@@ -1,5 +1,5 @@
 /**
- * Property-based tests for verifyLocal() (DD-156, DD-158)
+ * Property-based tests for verifyLocal()
  *
  * Uses fast-check to verify invariants across generated inputs:
  * 1. verifyLocal() never throws for any JWS input: always returns VerifyLocalResult
@@ -7,7 +7,7 @@
  * 3. Result structure: valid === true iff variant/claims/warnings present
  * 4. Wrong key always fails verification
  *
- * All async tests use fc.asyncProperty() for proper shrinking (DD-158 review).
+ * All async tests use fc.asyncProperty() for proper shrinking (review).
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';

@@ -1,12 +1,12 @@
 /**
- * Property-based tests for JWS decode, verify, and JOSE hardening (DD-156, DD-158)
+ * Property-based tests for JWS decode, verify, and JOSE hardening
  *
  * Uses fast-check to verify invariants across generated inputs:
  * 1. Malformed JWS never crashes decode(): always throws CryptoError with stable code
  * 2. validateWire02Header: any header object returns void or throws CryptoError
  * 3. Random JWS strings never crash verify(): always throws or returns typed result
  *
- * All async tests use fc.asyncProperty() for proper shrinking (DD-158 review).
+ * All async tests use fc.asyncProperty() for proper shrinking (review).
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';

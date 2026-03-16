@@ -2,7 +2,7 @@
  * @peac/mappings-mcp
  *
  * Model Context Protocol (MCP) integration for PEAC.
- * Attach and extract PEAC evidence carriers via MCP _meta keys (DD-125).
+ * Attach and extract PEAC evidence carriers via MCP _meta keys.
  */
 
 // Budget enforcement
@@ -59,7 +59,7 @@ export interface MCPToolResponseWithReceipt extends MCPToolResponse {
  * Attach PEAC receipt to MCP tool response (legacy format).
  *
  * Uses `peac_receipt` top-level key. For new integrations, prefer
- * `attachReceiptToMeta()` which uses the _meta carrier format (DD-125).
+ * `attachReceiptToMeta()` which uses the _meta carrier format.
  *
  * @param response - MCP tool response
  * @param receiptJWS - PEAC receipt JWS
@@ -78,7 +78,7 @@ export function attachReceipt(
 /**
  * Extract PEAC receipt from MCP tool response.
  *
- * Reads BOTH legacy `peac_receipt` field AND `_meta` carrier format (DD-125).
+ * Reads BOTH legacy `peac_receipt` field AND `_meta` carrier format.
  * Prefers _meta format when both are present.
  *
  * @param response - MCP tool response (possibly with receipt)

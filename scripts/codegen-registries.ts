@@ -273,12 +273,10 @@ function main() {
   lines.push('];');
   lines.push('');
 
-  // Type-to-extension mapping (DD-173.3)
+  // Type-to-extension mapping
   lines.push('/**');
   lines.push(' * Type-to-extension group mapping for first-party receipt types.');
-  lines.push(
-    ' * Used by @peac/protocol.verifyLocal() for type-to-extension enforcement (DD-173.3).'
-  );
+  lines.push(' * Used by @peac/protocol.verifyLocal() for type-to-extension enforcement.');
   lines.push(' * Entries with extension_group === null are excluded (no enforcement yet).');
   lines.push(' */');
   lines.push('export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([');

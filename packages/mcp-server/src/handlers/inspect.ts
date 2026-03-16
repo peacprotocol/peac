@@ -1,5 +1,5 @@
 /**
- * Inspect handler -- ZERO MCP SDK imports (DD-57)
+ * Inspect handler -- ZERO MCP SDK imports
  *
  * Decodes JWS (without verifying) and extracts metadata.
  * Respects policy redaction settings.

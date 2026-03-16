@@ -1945,7 +1945,7 @@ export async function safeFetchJWKS(
   });
 }
 
-// Receipt URL resolver (DD-135, v0.11.2+)
+// Receipt URL resolver (v0.11.2+)
 export { resolveReceiptUrl, verifyReceiptRef } from './receipt-resolver.js';
 export type {
   ResolveReceiptUrlOptions,

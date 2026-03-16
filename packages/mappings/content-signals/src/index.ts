@@ -1,7 +1,7 @@
 /**
  * @peac/mappings-content-signals
  *
- * Content use policy signal parsing for PEAC Protocol (DD-136, DD-137).
+ * Content use policy signal parsing for PEAC Protocol.
  *
  * Parses content use signals from multiple sources and resolves them
  * using priority precedence. Signals RECORD observations, never enforce.
@@ -11,7 +11,7 @@
  * - tdmrep.json (EU TDM Directive 2019/790, Art. 4)
  * - Content-Usage header (AIPREF draft, RFC 9651)
  *
- * All parsers receive pre-fetched content (no network I/O, DD-55).
+ * All parsers receive pre-fetched content (no network I/O).
  */
 
 // Types

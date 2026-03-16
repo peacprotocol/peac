@@ -1,7 +1,7 @@
 /**
  * A2A carrier adapter implementing CarrierAdapter<A2ATaskStatusLike, A2ATaskStatusLike>.
  *
- * Bridges PeacEvidenceCarrier to A2A TaskStatus metadata per DD-124.
+ * Bridges PeacEvidenceCarrier to A2A TaskStatus metadata per .
  */
 
 import type {

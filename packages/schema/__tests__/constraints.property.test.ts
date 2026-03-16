@@ -1,5 +1,5 @@
 /**
- * Property-based tests for kernel constraints (DD-60, DD-118)
+ * Property-based tests for kernel constraints
  *
  * Uses fast-check to verify invariants across generated inputs:
  * 1. validateKernelConstraints() never throws for any input

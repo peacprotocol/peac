@@ -1,5 +1,5 @@
 /**
- * WebCrypto utility for SHA-256 hashing (DD-138).
+ * WebCrypto utility for SHA-256 hashing.
  *
  * Portable: uses globalThis.crypto.subtle (Node 19+, browsers, Deno, Bun)
  * with fallback to node:crypto webcrypto for Node >=16.

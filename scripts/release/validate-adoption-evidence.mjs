@@ -374,7 +374,7 @@ function main() {
   const evidence = validateIntegrationEvidence();
   if (evidence.ok) {
     console.log(
-      `Integration evidence: ${evidence.ecosystemCount} DD-90 ecosystems, ${evidence.totalIntegrations} total integrations`
+      `Integration evidence: ${evidence.ecosystemCount} qualifying ecosystems, ${evidence.totalIntegrations} total integrations`
     );
   } else {
     console.error('Integration evidence FAILED:');

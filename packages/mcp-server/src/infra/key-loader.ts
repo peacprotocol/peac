@@ -1,5 +1,5 @@
 /**
- * Issuer key loader (DD-52: no ambient key discovery)
+ * Issuer key loader (no ambient key discovery)
  *
  * Supports `env:VAR_NAME` and `file:/path` schemes.
  * Reads JWK JSON, validates Ed25519, derives public key.

@@ -1,5 +1,5 @@
 /**
- * OpenAI-compatible Chat Completion Types (DD-138)
+ * OpenAI-compatible Chat Completion Types
  *
  * Self-contained minimal types matching the OpenAI chat completion API shape.
  * Works with any OpenAI-compatible provider (OpenAI, Anthropic via adapter,

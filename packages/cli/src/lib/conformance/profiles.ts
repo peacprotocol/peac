@@ -103,7 +103,7 @@ export const PROFILE_CAPABILITIES: Record<string, ProfileDetail> = {
     profile: 'errors.hints',
     level: 'semantic',
     validator: 'validateErrorHintsInput',
-    notes: 'Validates next_action hint table shape and vocabulary (DD-132, DD-133)',
+    notes: 'Validates next_action hint table shape and vocabulary',
   },
   'content-usage': {
     profile: 'content-usage.parse',
