@@ -7,7 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.12.2] - 2026-03-16
+## [0.12.3] - 2026-03-17
+
+### Added
+
+- A2A v1 compatibility helpers for agent cards and task states
+- AIPREF version constants
+- Start Here guide and evaluator quickstarts (API Provider, Agent Operator)
+- Common use cases section in README
+
+### Changed
+
+- Expanded A2A and MCP integration guides
+- Updated registry-facing metadata and listing copy
+- Synced workspace and conformance metadata to 0.12.3
+- Expanded bare "ACP" to "Agentic Commerce Protocol (ACP)" across docs and fixtures
+- Updated AIPREF draft references from vocab-03 to vocab-05
+
+### Deferred
+
+- UCP order-vs-payment semantic separation: v0.12.4
+- ACP checkout-vs-payment split: v0.12.4
+- x402 V2 delta audit: v0.12.4
+- A2A v0.3.0 type removal: v0.13.0
+
+## [0.12.2]
 
 ### Profile-Defined Types and Extension Groups
 
