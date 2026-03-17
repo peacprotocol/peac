@@ -14,10 +14,10 @@
     "@peac/audit": "workspace:*",
     "@peac/crypto": "workspace:*",
     "@peac/mappings-ucp": "workspace:*",
-    "express": "^4.22.1"
+    "express": "^5.2.1"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.19.11",
     "tsx": "^4.21.0",
     "typescript": "^5.3.3"
