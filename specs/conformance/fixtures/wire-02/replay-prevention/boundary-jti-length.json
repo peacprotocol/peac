@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 replay prevention: jti at maximum length boundary",
-  "schema_version": "0.12.2",
-  "version": "0.12.2",
+  "schema_version": "0.12.3",
+  "version": "0.12.3",
   "fixtures": [
     {
       "name": "jti-at-max-length-256",

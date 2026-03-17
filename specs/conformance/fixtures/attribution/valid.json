@@ -1,6 +1,6 @@
 {
   "$comment": "Valid AttributionAttestation golden vectors (v0.9.26+)",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "fixtures": [
     {
       "name": "single-source-rag",
@@ -438,5 +438,5 @@
       }
     }
   ],
-  "schema_version": "0.12.2"
+  "schema_version": "0.12.3"
 }

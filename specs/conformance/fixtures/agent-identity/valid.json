@@ -1,6 +1,6 @@
 {
   "$comment": "Valid AgentIdentityAttestation golden vectors (v0.9.25+)",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "fixtures": [
     {
       "name": "operator-bot",
@@ -200,5 +200,5 @@
       }
     }
   ],
-  "schema_version": "0.12.2"
+  "schema_version": "0.12.3"
 }

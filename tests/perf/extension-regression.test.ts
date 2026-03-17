@@ -301,7 +301,7 @@ describe('Wire 0.2 extension regression (strict mode, registered types)', () => 
     if (UPDATE_BASELINE) {
       atomicWriteFileSync(BASELINE_PATH, JSON.stringify(baseline, null, 2) + '\n');
       const written = JSON.parse(readFileSync(BASELINE_PATH, 'utf-8'));
-      expect(written.peac_version).toBe('0.12.2');
+      expect(written.peac_version).toBe('0.12.3');
     }
 
     for (const [name, entry] of Object.entries(collectedMetrics)) {

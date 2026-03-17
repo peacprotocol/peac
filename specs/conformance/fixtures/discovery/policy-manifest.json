@@ -1,6 +1,6 @@
 {
   "$comment": "PEAC policy manifest conformance vectors (v0.10.0+)",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "spec": "docs/specs/PEAC-TXT.md",
   "format": "peac-policy/0.1",
   "location": "/.well-known/peac.txt",
@@ -232,5 +232,5 @@
       }
     ]
   },
-  "schema_version": "0.12.2"
+  "schema_version": "0.12.3"
 }

@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 JWS Header Constraints conformance vectors (Section 10, DD-156)",
-  "version": "0.12.2",
-  "schema_version": "0.12.2",
+  "version": "0.12.3",
+  "schema_version": "0.12.3",
   "fixtures": [
     {
       "name": "eddsa-alg-valid",

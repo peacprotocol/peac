@@ -1,7 +1,7 @@
 {
   "$comment": "Wire 0.2 Extension Groups conformance vectors (Sections 12.4-12.17)",
-  "version": "0.12.2",
-  "schema_version": "0.12.2",
+  "version": "0.12.3",
+  "schema_version": "0.12.3",
   "fixtures": [
     {
       "name": "commerce-extension-valid",
@@ -1089,7 +1089,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "compliance-extension-all-fields-valid",
@@ -1127,7 +1129,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "compliance-non-compliant-valid",
@@ -1153,7 +1157,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "compliance-partial-valid",
@@ -1179,7 +1185,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "compliance-under-review-valid",
@@ -1205,7 +1213,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "compliance-exempt-valid",
@@ -1231,7 +1241,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "provenance-slsa-level-zero-valid",
@@ -1252,12 +1264,18 @@
           "extensions": {
             "org.peacprotocol/provenance": {
               "source_type": "original",
-              "slsa": { "track": "build", "level": 0, "version": "1.0" }
+              "slsa": {
+                "track": "build",
+                "level": 0,
+                "version": "1.0"
+              }
             }
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "provenance-slsa-level-four-valid",
@@ -1278,12 +1296,18 @@
           "extensions": {
             "org.peacprotocol/provenance": {
               "source_type": "original",
-              "slsa": { "track": "source", "level": 4, "version": "1.2" }
+              "slsa": {
+                "track": "source",
+                "level": 4,
+                "version": "1.2"
+              }
             }
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-provenance-slsa-level-negative",
@@ -1304,12 +1328,19 @@
           "extensions": {
             "org.peacprotocol/provenance": {
               "source_type": "original",
-              "slsa": { "track": "build", "level": -1, "version": "1.2" }
+              "slsa": {
+                "track": "build",
+                "level": -1,
+                "version": "1.2"
+              }
             }
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-provenance-slsa-non-integer",
@@ -1330,12 +1361,19 @@
           "extensions": {
             "org.peacprotocol/provenance": {
               "source_type": "original",
-              "slsa": { "track": "build", "level": 2.5, "version": "1.2" }
+              "slsa": {
+                "track": "build",
+                "level": 2.5,
+                "version": "1.2"
+              }
             }
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-provenance-custody-entry-extra-field",
@@ -1368,7 +1406,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-compliance-missing-framework",
@@ -1480,7 +1521,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "provenance-extension-all-fields-valid",
@@ -1532,7 +1575,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-provenance-missing-source-type",
@@ -1647,7 +1692,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "attribution-extension-all-fields-valid",
@@ -1677,7 +1724,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "attribution-tdmrep-json-valid",
@@ -1703,7 +1752,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "attribution-content-signal-header-valid",
@@ -1729,7 +1780,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "attribution-content-usage-header-valid",
@@ -1755,7 +1808,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "attribution-robots-txt-valid",
@@ -1781,7 +1836,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "attribution-custom-source-valid",
@@ -1807,7 +1864,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-attribution-missing-creator-ref",
@@ -1832,7 +1891,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-attribution-invalid-signal-source",
@@ -1858,7 +1920,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-attribution-extra-field",
@@ -1884,7 +1949,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "purpose-extension-valid",
@@ -1909,7 +1977,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "purpose-extension-all-fields-valid",
@@ -1939,7 +2009,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-purpose-missing-external-purposes",
@@ -1964,7 +2036,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-purpose-empty-external-purposes",
@@ -1989,7 +2064,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-purpose-invalid-peac-mapping",
@@ -2015,7 +2093,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-purpose-extra-field",
@@ -2041,7 +2122,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-purpose-uppercase-token",
@@ -2066,7 +2150,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-purpose-whitespace-token",
@@ -2091,7 +2178,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-purpose-duplicate-tokens",
@@ -2116,7 +2206,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "type-extension-match-passes-strict",
@@ -2143,7 +2236,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "type-extension-missing-strict-error",
@@ -2163,7 +2258,10 @@
           "pillars": ["commerce"]
         }
       },
-      "expected": { "valid": false, "error_code": "E_EXTENSION_GROUP_REQUIRED" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_EXTENSION_GROUP_REQUIRED"
+      }
     },
     {
       "name": "type-extension-mismatch-strict-error",
@@ -2189,7 +2287,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_EXTENSION_GROUP_MISMATCH" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_EXTENSION_GROUP_MISMATCH"
+      }
     },
     {
       "name": "type-extension-missing-interop-warning",
@@ -2209,7 +2310,9 @@
           "pillars": ["consent"]
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "type-extension-custom-type-no-check",
@@ -2228,7 +2331,9 @@
           "jti": "ext-enforce-005"
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "type-extension-match-plus-extra-registered",
@@ -2258,7 +2363,9 @@
           }
         }
       },
-      "expected": { "valid": true }
+      "expected": {
+        "valid": true
+      }
     },
     {
       "name": "reject-purpose-slash-token",
@@ -2283,7 +2390,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-purpose-trailing-separator-token",
@@ -2308,7 +2418,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     },
     {
       "name": "reject-purpose-compatible-duplicate-tokens",
@@ -2334,7 +2447,10 @@
           }
         }
       },
-      "expected": { "valid": false, "error_code": "E_INVALID_EXTENSION_FORMAT" }
+      "expected": {
+        "valid": false,
+        "error_code": "E_INVALID_EXTENSION_FORMAT"
+      }
     }
   ]
 }

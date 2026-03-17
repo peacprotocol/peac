@@ -128,7 +128,8 @@ PEAC is most useful where logs are not enough: payments, cross-boundary verifica
 - **I run an MCP server**: [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`
 - **I want to verify a receipt**: [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md) (5 minutes)
 - **I build A2A agents**: [A2A Integration Kit](integrator-kits/a2a/README.md)
-- **Build in Go**: [Go SDK](sdks/go/)
+
+More paths: [Go SDK](sdks/go/) | [x402 Integration Kit](integrator-kits/x402/README.md) | [Governance Mappings](docs/governance/)
 
 ---
 
