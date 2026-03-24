@@ -224,7 +224,7 @@ describe('fromOfferResponse', () => {
 
     const result = fromOfferResponse(headers);
 
-    expect((result!.meta as Record<string, unknown>).artifactSource).toBe('peac');
+    expect((result!.meta as unknown as Record<string, unknown>).artifactSource).toBe('peac');
   });
 
   it('should fall back to x402 v2 header when PEAC-Receipt absent', () => {
@@ -239,7 +239,7 @@ describe('fromOfferResponse', () => {
     expect(result!.upstreamArtifact).toBeDefined();
     expect(result!.upstreamArtifact!.source).toBe('x402_v2');
     expect(result!.upstreamArtifact!.rawArtifact).toBe(SAMPLE_X402_RECEIPT_JSON);
-    expect((result!.meta as Record<string, unknown>).artifactSource).toBe('x402_v2');
+    expect((result!.meta as unknown as Record<string, unknown>).artifactSource).toBe('x402_v2');
   });
 
   it('should fall back to x402 v1 header when PEAC-Receipt and v2 absent', () => {
@@ -253,7 +253,7 @@ describe('fromOfferResponse', () => {
     expect(result!.upstreamArtifact).toBeDefined();
     expect(result!.upstreamArtifact!.source).toBe('x402_v1');
     expect(result!.upstreamArtifact!.rawArtifact).toBe(SAMPLE_X402_RECEIPT_JSON);
-    expect((result!.meta as Record<string, unknown>).artifactSource).toBe('x402_v1');
+    expect((result!.meta as unknown as Record<string, unknown>).artifactSource).toBe('x402_v1');
   });
 
   it('should not set upstreamArtifact when source is PEAC', () => {
@@ -301,7 +301,7 @@ describe('fromOfferResponseAsync', () => {
 
     const result = await fromOfferResponseAsync(headers);
 
-    expect((result!.meta as Record<string, unknown>).artifactSource).toBe('peac');
+    expect((result!.meta as unknown as Record<string, unknown>).artifactSource).toBe('peac');
   });
 
   it('should compute receipt_ref from x402 v2 artifact without populating receipt_jws', async () => {
@@ -315,7 +315,7 @@ describe('fromOfferResponseAsync', () => {
     expect(result!.receipts[0].receipt_jws).toBeUndefined();
     expect(result!.upstreamArtifact).toBeDefined();
     expect(result!.upstreamArtifact!.rawArtifact).toBe(SAMPLE_X402_RECEIPT_JSON);
-    expect((result!.meta as Record<string, unknown>).artifactSource).toBe('x402_v2');
+    expect((result!.meta as unknown as Record<string, unknown>).artifactSource).toBe('x402_v2');
   });
 });
 
@@ -343,7 +343,7 @@ describe('fromSettlementResponse', () => {
     const result = fromSettlementResponse(headers);
 
     expect(result).not.toBeNull();
-    expect((result!.meta as Record<string, unknown>).artifactSource).toBe('x402_v1');
+    expect((result!.meta as unknown as Record<string, unknown>).artifactSource).toBe('x402_v1');
   });
 });
 
@@ -424,7 +424,7 @@ describe('X402CarrierAdapter', () => {
 
     expect(result).not.toBeNull();
     expect(result!.receipts).toHaveLength(1);
-    expect((result!.meta as Record<string, unknown>).artifactSource).toBe('x402_v2');
+    expect((result!.meta as unknown as Record<string, unknown>).artifactSource).toBe('x402_v2');
   });
 
   it('should attach carrier to response headers', async () => {
