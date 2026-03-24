@@ -69,3 +69,22 @@ export {
   extractReceiptFromMcpMeta,
   extractPaymentauthCapability,
 } from './mcp.js';
+
+// Evidence mapping
+export { fromPaymentauthReceipt, toCommerceExtensionFields } from './map.js';
+
+// Evidence Carrier Contract
+export type {
+  PaymentauthHeaderMap,
+  PaymentauthResponseLike,
+  PaymentauthExtractResult,
+  PaymentauthExtractAsyncResult,
+} from './carrier.js';
+
+export {
+  PAYMENTAUTH_CARRIER_LIMITS,
+  attachCarrierToPaymentauthHeaders,
+  extractCarrierFromPaymentauthHeaders,
+  extractCarrierFromPaymentauthHeadersAsync,
+  PaymentauthCarrierAdapter,
+} from './carrier.js';
