@@ -110,6 +110,7 @@ export type {
   X402ExtractAsyncResult,
   ReceiptArtifactSource,
   ReceiptArtifactKind,
+  ReceiptArtifactFormat,
   ReceiptArtifactResult,
 } from './carrier.js';
 

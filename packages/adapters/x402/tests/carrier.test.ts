@@ -53,9 +53,11 @@ describe('extractReceiptArtifactFromHeaders', () => {
     expect(result!.headerName).toBe(PEAC_RECEIPT_HEADER);
     expect(result!.rawArtifact).toBe(SAMPLE_JWS);
     expect(result!.artifactKind).toBe('receipt');
+    expect(result!.artifactFormat).toBe('jws');
+    expect(result!.isPeacReceipt).toBe(true);
   });
 
-  it('should return x402 v2 header with source "x402_v2"', () => {
+  it('should return x402 v2 header with source "x402_v2" and isPeacReceipt false', () => {
     const result = extractReceiptArtifactFromHeaders({
       'Payment-Response': SAMPLE_X402_RECEIPT_JSON,
     });
@@ -65,9 +67,11 @@ describe('extractReceiptArtifactFromHeaders', () => {
     expect(result!.headerName).toBe('payment-response');
     expect(result!.rawArtifact).toBe(SAMPLE_X402_RECEIPT_JSON);
     expect(result!.artifactKind).toBe('receipt');
+    expect(result!.artifactFormat).toBe('json');
+    expect(result!.isPeacReceipt).toBe(false);
   });
 
-  it('should return x402 v1 header with source "x402_v1"', () => {
+  it('should return x402 v1 header with source "x402_v1" and isPeacReceipt false', () => {
     const result = extractReceiptArtifactFromHeaders({
       'X-Payment-Response': SAMPLE_X402_RECEIPT_JSON,
     });
@@ -77,6 +81,8 @@ describe('extractReceiptArtifactFromHeaders', () => {
     expect(result!.headerName).toBe('x-payment-response');
     expect(result!.rawArtifact).toBe(SAMPLE_X402_RECEIPT_JSON);
     expect(result!.artifactKind).toBe('receipt');
+    expect(result!.artifactFormat).toBe('json');
+    expect(result!.isPeacReceipt).toBe(false);
   });
 
   it('should prefer PEAC-Receipt over x402 v2', () => {
@@ -147,13 +153,15 @@ describe('extractReceiptArtifactFromHeaders', () => {
     expect(result!.parsedForm).toEqual(JSON.parse(SAMPLE_X402_RECEIPT_JSON));
   });
 
-  it('should set parsedForm to undefined for non-JSON x402 artifacts', () => {
+  it('should set parsedForm to undefined and artifactFormat to unknown for non-JSON x402 artifacts', () => {
     const result = extractReceiptArtifactFromHeaders({
       'Payment-Response': 'not-json',
     });
 
     expect(result!.rawArtifact).toBe('not-json');
     expect(result!.parsedForm).toBeUndefined();
+    expect(result!.artifactFormat).toBe('unknown');
+    expect(result!.isPeacReceipt).toBe(false);
   });
 
   it('should NOT include PAYMENT-REQUIRED in receipt extraction path', () => {

@@ -70,6 +70,9 @@ export type ReceiptArtifactSource = 'peac' | 'x402_v2' | 'x402_v1';
 /** Artifact kind discriminant for receipt extraction */
 export type ReceiptArtifactKind = 'receipt' | 'unknown';
 
+/** Format hint for the extracted artifact */
+export type ReceiptArtifactFormat = 'jws' | 'json' | 'unknown';
+
 /** Result of extracting a receipt artifact from headers */
 export interface ReceiptArtifactResult {
   source: ReceiptArtifactSource;
@@ -77,6 +80,19 @@ export interface ReceiptArtifactResult {
   rawArtifact: string;
   parsedForm?: unknown;
   artifactKind: ReceiptArtifactKind;
+  /**
+   * Format of the extracted artifact.
+   * - 'jws': PEAC compact JWS receipt (from PEAC-Receipt header)
+   * - 'json': upstream x402 response data (from PAYMENT-RESPONSE / X-PAYMENT-RESPONSE)
+   * - 'unknown': could not determine format
+   */
+  artifactFormat: ReceiptArtifactFormat;
+  /**
+   * Whether this artifact is a PEAC signed receipt (true) or an upstream
+   * observational artifact (false). Downstream callers should not treat
+   * upstream x402 response data as PEAC receipts.
+   */
+  isPeacReceipt: boolean;
 }
 
 /** Extraction result */
@@ -138,7 +154,7 @@ function findHeader(headers: X402HeaderMap, target: string): string | null {
 export function extractReceiptArtifactFromHeaders(
   headers: X402HeaderMap
 ): ReceiptArtifactResult | null {
-  // Priority 1: PEAC-Receipt (always preferred)
+  // Priority 1: PEAC-Receipt (always preferred; this IS a PEAC signed receipt)
   const peacValue = findHeader(headers, PEAC_RECEIPT_HEADER);
   if (peacValue) {
     return {
@@ -146,10 +162,14 @@ export function extractReceiptArtifactFromHeaders(
       headerName: PEAC_RECEIPT_HEADER,
       rawArtifact: peacValue,
       artifactKind: 'receipt',
+      artifactFormat: 'jws',
+      isPeacReceipt: true,
     };
   }
 
   // Priority 2: PAYMENT-RESPONSE (x402 v2)
+  // This is an upstream observational artifact, NOT a PEAC receipt.
+  // Contains x402 response data (typically JSON with format+signature).
   const v2Value = findHeader(headers, X402_V2_RECEIPT_HEADER);
   if (v2Value) {
     return {
@@ -158,10 +178,13 @@ export function extractReceiptArtifactFromHeaders(
       rawArtifact: v2Value,
       parsedForm: tryParseJson(v2Value),
       artifactKind: 'receipt',
+      artifactFormat: tryParseJson(v2Value) !== undefined ? 'json' : 'unknown',
+      isPeacReceipt: false,
     };
   }
 
   // Priority 3: X-PAYMENT-RESPONSE (x402 v1)
+  // Same as v2: upstream observational artifact, not a PEAC receipt.
   const v1Value = findHeader(headers, X402_V1_RECEIPT_HEADER);
   if (v1Value) {
     return {
@@ -170,6 +193,8 @@ export function extractReceiptArtifactFromHeaders(
       rawArtifact: v1Value,
       parsedForm: tryParseJson(v1Value),
       artifactKind: 'receipt',
+      artifactFormat: tryParseJson(v1Value) !== undefined ? 'json' : 'unknown',
+      isPeacReceipt: false,
     };
   }
 
