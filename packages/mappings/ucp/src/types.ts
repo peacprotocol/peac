@@ -401,6 +401,22 @@ export interface UcpOrder {
   adjustments?: unknown[];
 }
 
+// ---------------------------------------------------------------------------
+// DD-187: Order-vs-payment semantic separation (v0.12.4+)
+// ---------------------------------------------------------------------------
+
+/** UCP order lifecycle state (distinct from payment state) */
+export type UcpOrderState = 'processing' | 'partial' | 'completed';
+
+/** UCP payment lifecycle state (requires explicit payment evidence) */
+export type UcpPaymentState =
+  | 'pending'
+  | 'authorized'
+  | 'captured'
+  | 'settled'
+  | 'failed'
+  | 'refunded';
+
 /**
  * Options for mapping UCP order to PEAC receipt claims.
  */
@@ -422,6 +438,18 @@ export interface MapUcpOrderOptions {
 
   /** Optional issued_at (for deterministic fixtures) */
   issued_at?: string;
+
+  /**
+   * Explicit payment state (DD-187, v0.12.4+).
+   *
+   * When provided, the commerce extension `event` field is derived from
+   * this payment state, NOT from the order status. When absent, the
+   * mapper produces order-lifecycle evidence only (no commerce event).
+   *
+   * This enforces the semantic boundary: order completion does not
+   * prove payment settlement.
+   */
+  payment_state?: UcpPaymentState;
 }
 
 /**
@@ -451,6 +479,10 @@ export interface MappedReceiptClaims {
       checkout_id?: string;
       line_items: number;
       totals: Record<string, MinorUnits>;
+      /** DD-187: order lifecycle state (distinct from payment state) */
+      order_state?: string;
+      /** DD-187: explicit payment state when provided */
+      payment_state?: string;
     };
   };
 
@@ -459,6 +491,8 @@ export interface MappedReceiptClaims {
     'dev.ucp/order_id': string;
     'dev.ucp/checkout_id'?: string;
     'dev.ucp/order_status': string;
+    /** DD-187: explicit payment state when provided */
+    'dev.ucp/payment_state'?: string;
     'dev.ucp/permalink'?: string;
   };
 }
