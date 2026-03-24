@@ -87,6 +87,15 @@ describe('extractCarrierFromPaymentauthHeaders', () => {
     expect(extractCarrierFromPaymentauthHeaders({ 'Content-Type': 'text/plain' })).toBeNull();
   });
 
+  it('should return null when only Payment-Receipt is present (no PEAC carrier)', () => {
+    // Payment-Receipt alone is an upstream artifact, not a PEAC carrier
+    const headers = { [PAYMENT_RECEIPT_HEADER]: SAMPLE_PAYMENT_RECEIPT };
+
+    const result = extractCarrierFromPaymentauthHeaders(headers);
+
+    expect(result).toBeNull();
+  });
+
   it('should return null for empty header', () => {
     expect(extractCarrierFromPaymentauthHeaders({ [PEAC_RECEIPT_HEADER]: '' })).toBeNull();
   });

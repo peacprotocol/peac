@@ -56,7 +56,11 @@ export interface PaymentauthResponseLike {
 export interface PaymentauthExtractResult {
   receipts: PeacEvidenceCarrier[];
   meta: CarrierMeta;
-  /** Raw Payment-Receipt header value if present (upstream artifact) */
+  /**
+   * Raw Payment-Receipt header value if present (upstream artifact).
+   * This is observational upstream material and is NEVER part of
+   * receipt_jws. It is captured separately for audit/traceability only.
+   */
   rawPaymentReceipt?: string;
 }
 
