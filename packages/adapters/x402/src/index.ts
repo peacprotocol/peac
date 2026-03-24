@@ -102,16 +102,20 @@ export {
 // Mapping
 export { toPeacRecord, toPeacCarrier } from './map.js';
 
-// Evidence Carrier Contract (v0.11.1+ )
+// Evidence Carrier Contract (v0.11.1+, dual-header read v0.12.4+ DD-193)
 export type {
   X402HeaderMap,
   X402ResponseLike,
   X402ExtractResult,
   X402ExtractAsyncResult,
+  ReceiptArtifactSource,
+  ReceiptArtifactKind,
+  ReceiptArtifactResult,
 } from './carrier.js';
 
 export {
   X402_CARRIER_LIMITS,
+  extractReceiptArtifactFromHeaders,
   fromOfferResponse,
   fromOfferResponseAsync,
   fromSettlementResponse,

@@ -2,9 +2,20 @@
  * x402 carrier adapter for Evidence Carrier Contract.
  *
  * v0.11.1: header-only transport via PEAC-Receipt (compact JWS).
+ * v0.12.4: dual-header read for x402 v1/v2 upstream receipt artifacts (DD-193).
+ *
  * Extracts from x402 HTTP 402 (offer) and HTTP 200 (settlement) responses.
  * All size limits enforce the 8 KB header ceiling (x402_headers).
- * Reference mode is not supported; receipt_jws is required.
+ * Reference mode is not supported; receipt_jws is required for attach.
+ *
+ * Receipt artifact extraction priority:
+ *   1. PEAC-Receipt (PEAC carrier contract, always preferred)
+ *   2. PAYMENT-RESPONSE (x402 v2 upstream response header)
+ *   3. X-PAYMENT-RESPONSE (x402 v1 upstream response header)
+ *
+ * PAYMENT-REQUIRED is NOT handled here; it is payment-requirement/challenge
+ * material, not a receipt artifact. A future extractChallengeArtifactFromHeaders()
+ * seam may be added for challenge-side extraction if needed.
  */
 
 import type {
@@ -30,6 +41,16 @@ export const X402_CARRIER_LIMITS = {
   headers: CARRIER_TRANSPORT_LIMITS.x402_headers,
 } as const;
 
+/**
+ * x402 upstream receipt response header names (lowercase for case-insensitive matching).
+ *
+ * v2 uses PAYMENT-RESPONSE; v1 uses X-PAYMENT-RESPONSE.
+ * Both carry the upstream receipt artifact (typically JSON with signed receipt data).
+ * Priority: v2 first, then v1 fallback.
+ */
+const X402_V2_RECEIPT_HEADER = 'payment-response' as const;
+const X402_V1_RECEIPT_HEADER = 'x-payment-response' as const;
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -43,10 +64,36 @@ export interface X402ResponseLike {
   body?: Record<string, unknown>;
 }
 
+/** Source of the extracted receipt artifact */
+export type ReceiptArtifactSource = 'peac' | 'x402_v2' | 'x402_v1';
+
+/** Artifact kind discriminant for receipt extraction */
+export type ReceiptArtifactKind = 'receipt' | 'unknown';
+
+/** Result of extracting a receipt artifact from headers */
+export interface ReceiptArtifactResult {
+  source: ReceiptArtifactSource;
+  headerName: string;
+  rawArtifact: string;
+  parsedForm?: unknown;
+  artifactKind: ReceiptArtifactKind;
+}
+
 /** Extraction result */
 export interface X402ExtractResult {
   receipts: PeacEvidenceCarrier[];
   meta: CarrierMeta;
+  /**
+   * Raw upstream artifact when extracted from x402 v1/v2 headers
+   * (not a PEAC JWS receipt). Present only when artifactSource is
+   * 'x402_v1' or 'x402_v2'. Consumers use extractReceiptFromHeaders()
+   * in raw.ts for typed access to upstream receipt structures.
+   *
+   * This field exists because upstream x402 response artifacts (JSON with
+   * format+signature) must NOT be stored in receipt_jws, which is
+   * semantically reserved for PEAC compact JWS receipts.
+   */
+  upstreamArtifact?: ReceiptArtifactResult;
 }
 
 /** Async extraction result */
@@ -67,27 +114,77 @@ function defaultX402Meta(): CarrierMeta {
 }
 
 /**
- * Extract JWS from PEAC-Receipt header (case-insensitive per RFC 9110).
+ * Case-insensitive header lookup (RFC 9110 field name matching).
  */
-function extractJwsFromHeaders(headers: X402HeaderMap): string | null {
-  const key = Object.keys(headers).find(
-    (k) => k.toLowerCase() === PEAC_RECEIPT_HEADER.toLowerCase()
-  );
+function findHeader(headers: X402HeaderMap, target: string): string | null {
+  const targetLower = target.toLowerCase();
+  const key = Object.keys(headers).find((k) => k.toLowerCase() === targetLower);
   if (!key) return null;
   const value = headers[key];
   return value && value.length > 0 ? value : null;
 }
 
 /**
- * Extract receipt URL from PEAC-Receipt-URL header.
+ * Extract receipt artifact from headers with priority fallback (DD-193).
+ *
+ * Priority:
+ *   1. PEAC-Receipt (PEAC carrier contract)
+ *   2. PAYMENT-RESPONSE (x402 v2)
+ *   3. X-PAYMENT-RESPONSE (x402 v1)
+ *
+ * Only receipt/response artifacts are handled here.
+ * PAYMENT-REQUIRED (challenge material) is NOT included in this path.
  */
-function extractReceiptUrlFromHeaders(headers: X402HeaderMap): string | null {
-  const key = Object.keys(headers).find(
-    (k) => k.toLowerCase() === PEAC_RECEIPT_URL_HEADER.toLowerCase()
-  );
-  if (!key) return null;
-  const value = headers[key];
-  return value && value.length > 0 ? value : null;
+export function extractReceiptArtifactFromHeaders(
+  headers: X402HeaderMap
+): ReceiptArtifactResult | null {
+  // Priority 1: PEAC-Receipt (always preferred)
+  const peacValue = findHeader(headers, PEAC_RECEIPT_HEADER);
+  if (peacValue) {
+    return {
+      source: 'peac',
+      headerName: PEAC_RECEIPT_HEADER,
+      rawArtifact: peacValue,
+      artifactKind: 'receipt',
+    };
+  }
+
+  // Priority 2: PAYMENT-RESPONSE (x402 v2)
+  const v2Value = findHeader(headers, X402_V2_RECEIPT_HEADER);
+  if (v2Value) {
+    return {
+      source: 'x402_v2',
+      headerName: X402_V2_RECEIPT_HEADER,
+      rawArtifact: v2Value,
+      parsedForm: tryParseJson(v2Value),
+      artifactKind: 'receipt',
+    };
+  }
+
+  // Priority 3: X-PAYMENT-RESPONSE (x402 v1)
+  const v1Value = findHeader(headers, X402_V1_RECEIPT_HEADER);
+  if (v1Value) {
+    return {
+      source: 'x402_v1',
+      headerName: X402_V1_RECEIPT_HEADER,
+      rawArtifact: v1Value,
+      parsedForm: tryParseJson(v1Value),
+      artifactKind: 'receipt',
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Best-effort JSON parse; returns undefined on failure.
+ */
+function tryParseJson(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -95,66 +192,96 @@ function extractReceiptUrlFromHeaders(headers: X402HeaderMap): string | null {
 // ---------------------------------------------------------------------------
 
 /**
+ * Build a PeacEvidenceCarrier from an extracted artifact.
+ *
+ * receipt_jws is ONLY populated when the source is 'peac' (actual JWS).
+ * For x402 upstream artifacts (JSON with format+signature), receipt_jws
+ * is left undefined; the raw upstream artifact is returned separately
+ * via upstreamArtifact on the extraction result. This preserves the
+ * semantic contract that receipt_jws holds a PEAC compact JWS receipt.
+ */
+function buildCarrierFromArtifact(
+  artifact: ReceiptArtifactResult,
+  receiptRef: PeacEvidenceCarrier['receipt_ref'],
+  headers: X402HeaderMap
+): { carrier: PeacEvidenceCarrier; isUpstream: boolean } {
+  const carrier: PeacEvidenceCarrier = { receipt_ref: receiptRef };
+
+  if (artifact.source === 'peac') {
+    // PEAC-Receipt IS a compact JWS; safe to store in receipt_jws
+    carrier.receipt_jws = artifact.rawArtifact;
+  }
+  // For x402 upstream: receipt_jws intentionally left undefined.
+  // Upstream artifact is carried via upstreamArtifact on the result.
+
+  // receipt_url locator hint (PEAC-specific; not present in x402 upstream)
+  const receiptUrl = findHeader(headers, PEAC_RECEIPT_URL_HEADER);
+  if (receiptUrl) {
+    carrier.receipt_url = receiptUrl;
+  }
+
+  return { carrier, isUpstream: artifact.source !== 'peac' };
+}
+
+/**
  * Extract carrier from x402 offer response (HTTP 402).
  *
- * Reads PEAC-Receipt header for compact JWS (header-only in v0.11.1).
+ * v0.12.4: reads PEAC-Receipt first, then falls back to x402 v2/v1 upstream
+ * receipt headers (DD-193 dual-header read compatibility).
+ *
+ * When the artifact is from an upstream x402 header (v1 or v2), receipt_jws
+ * is NOT populated on the carrier. The raw upstream artifact is available
+ * via the upstreamArtifact field on the result. Consumers should use
+ * extractReceiptFromHeaders() in raw.ts for typed access.
  */
 export function fromOfferResponse(
   headers: X402HeaderMap,
   _body?: Record<string, unknown>
 ): X402ExtractResult | null {
-  const jws = extractJwsFromHeaders(headers);
-  if (!jws) return null;
+  const artifact = extractReceiptArtifactFromHeaders(headers);
+  if (!artifact) return null;
 
-  const carrier: PeacEvidenceCarrier = {
-    receipt_ref:
-      'sha256:0000000000000000000000000000000000000000000000000000000000000000' as PeacEvidenceCarrier['receipt_ref'],
-    receipt_jws: jws,
-  };
+  const placeholderRef =
+    'sha256:0000000000000000000000000000000000000000000000000000000000000000' as PeacEvidenceCarrier['receipt_ref'];
 
-  // Extract receipt_url locator hint
-  const receiptUrl = extractReceiptUrlFromHeaders(headers);
-  if (receiptUrl) {
-    carrier.receipt_url = receiptUrl;
-  }
+  const { carrier, isUpstream } = buildCarrierFromArtifact(artifact, placeholderRef, headers);
 
   return {
     receipts: [carrier],
     meta: {
       ...defaultX402Meta(),
+      artifactSource: artifact.source,
       redaction: ['receipt_ref_pending_async'],
-    },
+    } as CarrierMeta,
+    upstreamArtifact: isUpstream ? artifact : undefined,
   };
 }
 
 /**
  * Extract carrier from x402 offer response (async).
  *
- * Computes receipt_ref from the JWS.
+ * Computes receipt_ref from the raw artifact. For PEAC sources, hashes the
+ * JWS. For upstream x402 sources, hashes the raw upstream header value.
  */
 export async function fromOfferResponseAsync(
   headers: X402HeaderMap,
   _body?: Record<string, unknown>
 ): Promise<X402ExtractAsyncResult | null> {
-  const jws = extractJwsFromHeaders(headers);
-  if (!jws) return null;
+  const artifact = extractReceiptArtifactFromHeaders(headers);
+  if (!artifact) return null;
 
-  const ref = await computeReceiptRef(jws);
-  const carrier: PeacEvidenceCarrier = {
-    receipt_ref: ref,
-    receipt_jws: jws,
-  };
+  const ref = await computeReceiptRef(artifact.rawArtifact);
 
-  // Extract receipt_url locator hint
-  const receiptUrl = extractReceiptUrlFromHeaders(headers);
-  if (receiptUrl) {
-    carrier.receipt_url = receiptUrl;
-  }
+  const { carrier, isUpstream } = buildCarrierFromArtifact(artifact, ref, headers);
 
   return {
     receipts: [carrier],
-    meta: defaultX402Meta(),
+    meta: {
+      ...defaultX402Meta(),
+      artifactSource: artifact.source,
+    } as CarrierMeta,
     violations: [],
+    upstreamArtifact: isUpstream ? artifact : undefined,
   };
 }
 
