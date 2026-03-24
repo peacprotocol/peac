@@ -144,6 +144,7 @@ export type {
   ACPPaymentArtifact,
   ACPCapabilityNegotiation,
   ACPIntervention,
+  SessionReceiptInput,
 } from './session.js';
 
 export {

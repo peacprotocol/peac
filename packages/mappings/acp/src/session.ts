@@ -15,7 +15,17 @@
 import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
 
-import type { PEACReceiptInput } from './index.js';
+/**
+ * PEAC Receipt Input (for issue()).
+ * Locally defined to avoid circular import with index.ts.
+ * Structurally identical to PEACReceiptInput in index.ts.
+ */
+export interface SessionReceiptInput {
+  subject_uri: string;
+  amt: number;
+  cur: string;
+  payment: PaymentEvidence;
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -102,7 +112,7 @@ const PAYMENT_STATE_TO_COMMERCE_EVENT: Record<string, string | undefined> = {
  * "completed" means "checkout session completed", NOT "payment settled".
  * "canceled" means "session canceled", NOT "payment voided".
  */
-export function fromACPSessionLifecycleEvent(event: ACPSessionEvent): PEACReceiptInput {
+export function fromACPSessionLifecycleEvent(event: ACPSessionEvent): SessionReceiptInput {
   if (!event.session_id) {
     throw new Error('ACP session event missing session_id');
   }
@@ -157,7 +167,7 @@ export function fromACPSessionLifecycleEvent(event: ACPSessionEvent): PEACReceip
 export function fromACPPaymentObservation(
   event: ACPSessionEvent,
   paymentArtifact: ACPPaymentArtifact
-): PEACReceiptInput {
+): SessionReceiptInput {
   if (!event.session_id) {
     throw new Error('ACP session event missing session_id');
   }
@@ -234,7 +244,7 @@ export function fromACPCapabilitySnapshot(
 /**
  * Map an ACP intervention requirement to PEAC challenge-kind evidence.
  */
-export function fromACPInterventionRequired(intervention: ACPIntervention): PEACReceiptInput {
+export function fromACPInterventionRequired(intervention: ACPIntervention): SessionReceiptInput {
   if (!intervention.session_id) {
     throw new Error('ACP intervention missing session_id');
   }
