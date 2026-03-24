@@ -371,6 +371,58 @@ describe('DD-187: order-vs-payment semantic separation', () => {
     expect(claims.ext['dev.ucp/payment_state']).toBeUndefined();
   });
 
+  it('should mark derived payment state source when payment_state absent', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+    });
+
+    expect(claims.payment.evidence.payment_state_source).toBe('derived_order_fallback');
+  });
+
+  it('should mark explicit payment state source when payment_state provided', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+      payment_state: 'settled',
+    });
+
+    expect(claims.payment.evidence.payment_state_source).toBe('explicit');
+  });
+
+  it('should let explicit payment_state override conflicting completed order state', () => {
+    // Order is completed (all fulfilled) but payment actually failed
+    const allFulfilled = createMockOrder({
+      line_items: [
+        {
+          id: 'li_1',
+          item: { id: 'p1', title: 'Item', price: 100 },
+          quantity: { total: 1, fulfilled: 1 },
+          status: 'fulfilled',
+        },
+      ],
+    });
+    const claims = mapUcpOrderToReceipt({
+      order: allFulfilled,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+      payment_state: 'failed',
+    });
+
+    // Order completed but payment failed: explicit payment state wins
+    expect(claims.payment.evidence.order_state).toBe('completed');
+    expect(claims.payment.evidence.payment_state).toBe('failed');
+    expect(claims.payment.status).toBe('pending'); // failed -> pending, not completed
+    expect(claims.payment.evidence.payment_state_source).toBe('explicit');
+  });
+
   it('should preserve all existing claim fields (regression)', () => {
     const order = createMockOrder();
     const claims = mapUcpOrderToReceipt({

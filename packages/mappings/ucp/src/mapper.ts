@@ -157,6 +157,7 @@ export function mapUcpOrderToReceipt(options: MapUcpOrderOptions): MappedReceipt
         // DD-187: explicit order vs payment state separation
         order_state: orderStatus,
         ...(options.payment_state && { payment_state: options.payment_state }),
+        payment_state_source: options.payment_state ? 'explicit' : 'derived_order_fallback',
       },
     },
     ext: {

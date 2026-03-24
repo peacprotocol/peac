@@ -483,6 +483,8 @@ export interface MappedReceiptClaims {
       order_state?: string;
       /** DD-187: explicit payment state when provided */
       payment_state?: string;
+      /** DD-187: source of payment status derivation */
+      payment_state_source?: 'explicit' | 'derived_order_fallback';
     };
   };
 
