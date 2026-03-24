@@ -6,11 +6,11 @@ Envelope-first parsing of paymentauth wire artifacts with raw + normalized types
 
 ## Status
 
-Experimental. The paymentauth core spec (`draft-ryan-httpauth-payment-01`) is an active IETF Internet-Draft (individual submission, not WG-adopted). Discovery and JSON-RPC/MCP transport drafts are at draft-00.
+Experimental. The paymentauth core spec (`draft-ryan-httpauth-payment-01`) is an active individual draft (not standards-track). Discovery and JSON-RPC/MCP transport drafts are at draft-00.
 
 ## Features
 
-- Parse `WWW-Authenticate: Payment` challenges (multi-challenge support)
+- Parse `WWW-Authenticate: Payment` challenges (first challenge; separate header lines recommended for multiple challenges)
 - Parse `Authorization: Payment` credentials (base64url-encoded JSON)
 - Parse `Payment-Receipt` headers (base64url-encoded JSON)
 - Normalize to stable PEAC-facing types with `_raw` back-references
