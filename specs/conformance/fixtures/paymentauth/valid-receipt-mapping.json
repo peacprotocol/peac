@@ -1,0 +1,30 @@
+{
+  "description": "Valid paymentauth receipt mapped to PEAC PaymentEvidence",
+  "input": {
+    "receipt": {
+      "status": "success",
+      "method": "example",
+      "timestamp": "2025-01-15T12:00:00Z",
+      "reference": "inv_12345"
+    },
+    "challenge": {
+      "id": "x7Tg2pLqR9mKvNwY3hBcZa",
+      "realm": "api.example.com",
+      "method": "example",
+      "intent": "charge",
+      "request": {
+        "amount": "1000",
+        "currency": "usd",
+        "recipient": "acct_123"
+      }
+    }
+  },
+  "expected": {
+    "rail": "paymentauth",
+    "reference": "inv_12345",
+    "amount": 1000,
+    "currency": "USD",
+    "asset": "USD",
+    "env": "live"
+  }
+}
