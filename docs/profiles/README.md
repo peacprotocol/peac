@@ -30,6 +30,7 @@ regulatory, operational, or evidence workflow.
 | [Provenance](provenance.md)   | `org.peacprotocol/provenance`  | v0.12.2 | Draft  |
 | [Attribution](attribution.md) | `org.peacprotocol/attribution` | v0.12.2 | Draft  |
 | [Purpose](purpose.md)         | `org.peacprotocol/purpose`     | v0.12.2 | Draft  |
+| [Commerce](commerce.md)       | `org.peacprotocol/commerce`    | v0.12.4 | Draft  |
 
 ### Adapter Profiles
 

@@ -78,6 +78,8 @@ Located at: `specs/kernel/registries.json`
 | `card-network` | card               | Generic card network (Visa/MC/etc.)       | -                                                             |
 | `upi`          | account-to-account | Unified Payments Interface (India)        | https://www.npci.org.in/                                      |
 | `razorpay`     | payment-gateway    | Razorpay gateway (UPI, cards, netbanking) | https://razorpay.com/docs/                                    |
+| `stripe`       | payment-gateway    | Stripe payment processing                 | https://stripe.com/docs                                       |
+| `paymentauth`  | agentic-payment    | The "Payment" HTTP authentication scheme  | https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment/ |
 
 ### 3.2 Adding New Rails
 
