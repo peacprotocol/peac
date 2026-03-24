@@ -44,6 +44,13 @@
       "description": "Stripe payment processing",
       "reference": "https://stripe.com/docs",
       "status": "informational"
+    },
+    {
+      "id": "paymentauth",
+      "category": "agentic-payment",
+      "description": "The \"Payment\" HTTP authentication scheme (draft-ryan-httpauth-payment)",
+      "reference": "https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment/",
+      "status": "informational"
     }
   ],
   "control_engines": [
