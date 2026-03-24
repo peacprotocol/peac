@@ -144,3 +144,24 @@ export {
 
 // Verification report (v0.9.30+)
 export { verifyBundle, serializeReport, formatReportText } from './verification-report.js';
+
+// Commerce evidence bundle (experimental, DD-192, v0.12.4+)
+export type {
+  CommerceEvidenceBundle,
+  CommerceSummary,
+  CreateCommerceBundleOptions,
+  ProtocolEvidence,
+  TimelineEntry,
+  ObservedAmount,
+} from './commerce-bundle-types.js';
+
+export { COMMERCE_BUNDLE_VERSION } from './commerce-bundle-types.js';
+
+export {
+  createCommerceEvidenceBundle,
+  addProtocolEvidence,
+  addTimelineEntry,
+  addReceiptRef,
+  computeCommerceSummary,
+  serializeCommerceBundle,
+} from './commerce-bundle.js';
