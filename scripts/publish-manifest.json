@@ -3,7 +3,7 @@
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.12.3",
   "lastUpdated": "2026-03-17",
-  "totalPackages": 28,
+  "totalPackages": 29,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -24,6 +24,7 @@
     "@peac/adapter-core",
     "@peac/mappings-mcp",
     "@peac/mappings-acp",
+    "@peac/mappings-paymentauth",
     "@peac/mappings-ucp",
     "@peac/mappings-a2a",
     "@peac/rails-x402",
@@ -54,6 +55,7 @@
     "5-adapters": [
       "@peac/mappings-mcp",
       "@peac/mappings-acp",
+      "@peac/mappings-paymentauth",
       "@peac/mappings-ucp",
       "@peac/mappings-a2a",
       "@peac/rails-x402",
@@ -90,6 +92,7 @@
     "@peac/adapter-core",
     "@peac/mappings-mcp",
     "@peac/mappings-acp",
+    "@peac/mappings-paymentauth",
     "@peac/mappings-ucp",
     "@peac/mappings-a2a",
     "@peac/rails-x402",
