@@ -55,6 +55,13 @@ export const PAYMENT_RAILS: readonly PaymentRailEntry[] = [
     status: 'informational',
   },
   {
+    id: 'paymentauth',
+    category: 'agentic-payment',
+    description: 'HTTP Payment authentication scheme (draft-ryan-httpauth-payment)',
+    reference: 'https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment/',
+    status: 'informational',
+  },
+  {
     id: 'razorpay',
     category: 'payment-gateway',
     description: 'Razorpay payment gateway (UPI, cards, netbanking, wallets)',
