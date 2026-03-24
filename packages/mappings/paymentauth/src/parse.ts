@@ -67,16 +67,26 @@ function decodeBase64url(input: string): Uint8Array {
     throw new PaymentauthError('PARSE_INVALID_BASE64URL', 'Invalid base64url characters');
   }
 
-  // Add padding
-  const padded = input + '==='.slice(0, (4 - (input.length % 4)) % 4);
-  const standard = padded.replace(/-/g, '+').replace(/_/g, '/');
+  try {
+    // Add padding
+    const padded = input + '==='.slice(0, (4 - (input.length % 4)) % 4);
+    const standard = padded.replace(/-/g, '+').replace(/_/g, '/');
 
-  const binaryStr = atob(standard);
-  const bytes = new Uint8Array(binaryStr.length);
-  for (let i = 0; i < binaryStr.length; i++) {
-    bytes[i] = binaryStr.charCodeAt(i);
+    // Use Buffer in Node.js for predictable server-side behavior
+    if (typeof Buffer !== 'undefined') {
+      return new Uint8Array(Buffer.from(standard, 'base64'));
+    }
+
+    // Fallback to atob for non-Node environments
+    const binaryStr = atob(standard);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    return bytes;
+  } catch {
+    throw new PaymentauthError('PARSE_INVALID_BASE64URL', 'Failed to decode base64url value');
   }
-  return bytes;
 }
 
 /**
@@ -204,8 +214,17 @@ function parseAuthParams(paramStr: string): Record<string, string> {
 /**
  * Parse paymentauth challenges from WWW-Authenticate header value.
  *
- * A single header may contain multiple Payment challenges (Section 7.3).
- * Returns one RawPaymentauthChallenge per challenge found.
+ * Parses the FIRST Payment challenge from a WWW-Authenticate header value.
+ *
+ * NOTE: RFC 9110 allows multiple challenges per header line (Section 7.3),
+ * but robust multi-challenge splitting requires a full quote-aware tokenizer.
+ * This parser extracts the first Payment challenge reliably. For headers
+ * with multiple Payment challenges, use separate WWW-Authenticate header
+ * lines (one challenge per line) which is the recommended interoperability
+ * approach per RFC 9110.
+ *
+ * Returns an array for forward compatibility; currently contains at most
+ * one challenge.
  */
 export function parsePaymentauthChallenges(wwwAuthenticate: string): RawPaymentauthChallenge[] {
   const headerBytes = new TextEncoder().encode(wwwAuthenticate);
@@ -216,40 +235,23 @@ export function parsePaymentauthChallenges(wwwAuthenticate: string): RawPaymenta
     );
   }
 
-  const results: RawPaymentauthChallenge[] = [];
+  // Find the first "Payment " occurrence (case-insensitive per RFC 9110)
+  const schemePattern = new RegExp(`\\b${PAYMENTAUTH_SCHEME}\\s+`, 'i');
+  const match = schemePattern.exec(wwwAuthenticate);
+  if (!match) return [];
 
-  // Split on scheme boundary: find all "Payment " occurrences
-  const schemePattern = new RegExp(`\\b${PAYMENTAUTH_SCHEME}\\s+`, 'gi');
-  let match: RegExpExecArray | null;
-  const starts: number[] = [];
+  const paramStart = match.index + match[0].length;
+  const paramStr = wwwAuthenticate.substring(paramStart).trim();
 
-  while ((match = schemePattern.exec(wwwAuthenticate)) !== null) {
-    starts.push(match.index + match[0].length);
-  }
+  const params = parseAuthParams(paramStr);
 
-  if (starts.length === 0) return results;
-
-  for (let i = 0; i < starts.length; i++) {
-    const start = starts[i];
-    const end = i + 1 < starts.length ? starts[i + 1] : wwwAuthenticate.length;
-
-    // Find where the next scheme boundary might be
-    let paramStr = wwwAuthenticate.substring(start, end);
-    // Trim trailing scheme name if it bleeds into next challenge
-    const nextSchemeIdx = paramStr.search(new RegExp(`\\b${PAYMENTAUTH_SCHEME}\\s`, 'i'));
-    if (nextSchemeIdx > 0) {
-      paramStr = paramStr.substring(0, nextSchemeIdx);
-    }
-
-    const params = parseAuthParams(paramStr.trim());
-
-    results.push({
+  return [
+    {
       rawHeader: wwwAuthenticate,
+      rawSegment: wwwAuthenticate.substring(match.index),
       params,
-    });
-  }
-
-  return results;
+    },
+  ];
 }
 
 /**
@@ -266,15 +268,17 @@ export function parsePaymentauthCredential(authorization: string): RawPaymentaut
     );
   }
 
-  const prefix = `${PAYMENTAUTH_SCHEME} `;
-  if (!authorization.startsWith(prefix)) {
+  // RFC 9110: authentication scheme tokens are case-insensitive
+  const schemePrefixLen = PAYMENTAUTH_SCHEME.length + 1; // "Payment "
+  const headerPrefix = authorization.substring(0, schemePrefixLen);
+  if (headerPrefix.toLowerCase() !== `${PAYMENTAUTH_SCHEME.toLowerCase()} `) {
     throw new PaymentauthError(
       'PARSE_MISSING_SCHEME',
-      `Expected "${PAYMENTAUTH_SCHEME}" scheme prefix`
+      `Expected "${PAYMENTAUTH_SCHEME}" scheme prefix (case-insensitive)`
     );
   }
 
-  const rawValue = authorization.substring(prefix.length).trim();
+  const rawValue = authorization.substring(schemePrefixLen).trim();
   if (!rawValue) {
     throw new PaymentauthError('PARSE_INVALID_BASE64URL', 'Empty credential value');
   }
@@ -404,10 +408,21 @@ export function normalizeCredential(
     throw new PaymentauthError('NORMALIZE_MISSING_FIELD', 'Credential missing challenge object');
   }
 
+  // Require essential envelope fields; do not coerce missing to empty string
+  if (typeof challenge.id !== 'string' || !challenge.id) {
+    throw new PaymentauthError('NORMALIZE_MISSING_FIELD', 'Credential challenge.id is missing');
+  }
+  if (typeof challenge.method !== 'string' || !challenge.method) {
+    throw new PaymentauthError('NORMALIZE_MISSING_FIELD', 'Credential challenge.method is missing');
+  }
+  if (typeof challenge.intent !== 'string' || !challenge.intent) {
+    throw new PaymentauthError('NORMALIZE_MISSING_FIELD', 'Credential challenge.intent is missing');
+  }
+
   return {
-    challengeId: String(challenge.id ?? ''),
-    method: String(challenge.method ?? ''),
-    intent: String(challenge.intent ?? ''),
+    challengeId: challenge.id,
+    method: challenge.method,
+    intent: challenge.intent,
     source: typeof cred.source === 'string' ? cred.source : undefined,
     payload: cred.payload,
     _raw: raw,
@@ -436,9 +451,17 @@ export function normalizeReceipt(raw: RawPaymentauthReceipt): NormalizedPaymenta
     }
   }
 
+  // Require essential receipt envelope fields
+  if (typeof receipt.status !== 'string' || !receipt.status) {
+    throw new PaymentauthError('NORMALIZE_MISSING_FIELD', 'Receipt status is missing');
+  }
+  if (typeof receipt.method !== 'string' || !receipt.method) {
+    throw new PaymentauthError('NORMALIZE_MISSING_FIELD', 'Receipt method is missing');
+  }
+
   return {
-    status: String(receipt.status ?? ''),
-    method: String(receipt.method ?? ''),
+    status: receipt.status,
+    method: receipt.method,
     timestamp: typeof receipt.timestamp === 'string' ? receipt.timestamp : undefined,
     reference: typeof receipt.reference === 'string' ? receipt.reference : undefined,
     extras,

@@ -128,12 +128,21 @@ describe('parsePaymentauthChallenges', () => {
     expect(challenges).toHaveLength(0);
   });
 
-  it('should parse multiple challenges', () => {
+  it('should parse first challenge from header (multi-challenge not fully supported)', () => {
+    // Current parser extracts the first Payment challenge only.
+    // For multiple challenges, use separate WWW-Authenticate lines.
     const header =
       'Payment id="abc", realm="a.com", method="m1", intent="charge", request="ewo"' +
       ', Payment id="def", realm="b.com", method="m2", intent="authorize", request="ewo"';
     const challenges = parsePaymentauthChallenges(header);
-    expect(challenges.length).toBeGreaterThanOrEqual(1);
+    expect(challenges).toHaveLength(1);
+    expect(challenges[0].params.id).toBe('abc');
+  });
+
+  it('should preserve rawSegment for the parsed challenge', () => {
+    const challenges = parsePaymentauthChallenges(SAMPLE_CHALLENGE_HEADER);
+    expect(challenges[0].rawSegment).toBeTruthy();
+    expect(challenges[0].rawSegment).toContain('x7Tg2pLqR9mKvNwY3hBcZa');
   });
 
   it('should parse quoted-string values with escaping', () => {
@@ -195,6 +204,17 @@ describe('parsePaymentauthCredential', () => {
   it('should preserve decoded bytes', () => {
     const raw = parsePaymentauthCredential(`Payment ${SAMPLE_CREDENTIAL_B64}`);
     expect(raw.decodedBytes.length).toBeGreaterThan(0);
+  });
+
+  it('should accept case-insensitive scheme per RFC 9110', () => {
+    const lower = parsePaymentauthCredential(`payment ${SAMPLE_CREDENTIAL_B64}`);
+    expect(lower.parsedJson).toEqual(SAMPLE_CREDENTIAL_JSON);
+
+    const upper = parsePaymentauthCredential(`PAYMENT ${SAMPLE_CREDENTIAL_B64}`);
+    expect(upper.parsedJson).toEqual(SAMPLE_CREDENTIAL_JSON);
+
+    const mixed = parsePaymentauthCredential(`pAyMeNt ${SAMPLE_CREDENTIAL_B64}`);
+    expect(mixed.parsedJson).toEqual(SAMPLE_CREDENTIAL_JSON);
   });
 
   it('should reject missing scheme prefix', () => {
@@ -272,13 +292,14 @@ describe('normalizeChallenge', () => {
   });
 
   it('should reject missing required fields', () => {
-    const raw = { rawHeader: 'test', params: { id: 'x' } };
+    const raw = { rawHeader: 'test', rawSegment: 'test', params: { id: 'x' } };
     expect(() => normalizeChallenge(raw)).toThrow(/Missing required/);
   });
 
   it('should handle invalid base64url in request gracefully', () => {
     const raw = {
       rawHeader: 'test',
+      rawSegment: 'test',
       params: { id: 'x', realm: 'y', method: 'm', intent: 'i', request: '!!invalid!!' },
     };
     const normalized = normalizeChallenge(raw);
@@ -289,6 +310,7 @@ describe('normalizeChallenge', () => {
   it('should preserve optional fields', () => {
     const raw = {
       rawHeader: 'test',
+      rawSegment: 'test',
       params: {
         id: 'x',
         realm: 'y',
@@ -334,6 +356,26 @@ describe('normalizeCredential', () => {
     const raw = parsePaymentauthCredential(`Payment ${b64}`);
     expect(() => normalizeCredential(raw)).toThrow(/not an object/);
   });
+
+  it('should reject credential with missing challenge.id', () => {
+    const credJson = {
+      challenge: { method: 'x', intent: 'charge', request: 'r' },
+      payload: {},
+    };
+    const b64 = toBase64url(credJson);
+    const raw = parsePaymentauthCredential(`Payment ${b64}`);
+    expect(() => normalizeCredential(raw)).toThrow(/challenge.id/);
+  });
+
+  it('should reject credential with missing challenge.method', () => {
+    const credJson = {
+      challenge: { id: 'x', intent: 'charge', request: 'r' },
+      payload: {},
+    };
+    const b64 = toBase64url(credJson);
+    const raw = parsePaymentauthCredential(`Payment ${b64}`);
+    expect(() => normalizeCredential(raw)).toThrow(/challenge.method/);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -361,5 +403,19 @@ describe('normalizeReceipt', () => {
 
     expect(normalized.extras.custom_field).toBe('val');
     expect(normalized.extras.tx_hash).toBe('0xabc');
+  });
+
+  it('should reject receipt with missing status', () => {
+    const receiptJson = { method: 'example', timestamp: '2025-01-15T12:00:00Z' };
+    const b64 = toBase64url(receiptJson);
+    const raw = parsePaymentauthReceipt(b64);
+    expect(() => normalizeReceipt(raw)).toThrow(/status/);
+  });
+
+  it('should reject receipt with missing method', () => {
+    const receiptJson = { status: 'success', timestamp: '2025-01-15T12:00:00Z' };
+    const b64 = toBase64url(receiptJson);
+    const raw = parsePaymentauthReceipt(b64);
+    expect(() => normalizeReceipt(raw)).toThrow(/method/);
   });
 });

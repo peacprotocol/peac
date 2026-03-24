@@ -56,7 +56,8 @@ export function parsePaymentauthFromJsonRpcError(error: {
       for (const [key, value] of Object.entries(data)) {
         if (typeof value === 'string') params[key] = value;
       }
-      return { rawHeader: JSON.stringify(error.data), params };
+      const serialized = JSON.stringify(error.data);
+      return { rawHeader: serialized, rawSegment: serialized, params };
     }
   }
 

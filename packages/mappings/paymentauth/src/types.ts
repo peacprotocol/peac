@@ -23,8 +23,10 @@
  * The `request` field is kept as raw base64url (not decoded).
  */
 export interface RawPaymentauthChallenge {
-  /** Original header string (for redaction and traceability) */
+  /** Original full header string (for redaction and traceability) */
   rawHeader: string;
+  /** Raw segment of the header corresponding to this challenge (for precise tracing) */
+  rawSegment: string;
   /** Parsed auth-param key-value pairs */
   params: Record<string, string>;
 }
