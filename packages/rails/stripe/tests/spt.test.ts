@@ -95,6 +95,29 @@ describe('fromSPTGrant', () => {
     expect(evidence.metadata).toBeUndefined();
   });
 
+  it('should filter metadata with allowlist policy', () => {
+    const result = fromSPTGrant(makeGrant({ metadata: { allowed_key: 'yes', secret_key: 'no' } }), {
+      metadataPolicy: 'allowlist',
+      metadataAllowedKeys: ['allowed_key'],
+    });
+
+    const evidence = result.evidence as Record<string, unknown>;
+    const meta = evidence.metadata as Record<string, string>;
+    expect(meta.allowed_key).toBe('yes');
+    expect(meta.secret_key).toBeUndefined();
+  });
+
+  it('should strip invisible Unicode characters from metadata', () => {
+    const result = fromSPTGrant(makeGrant({ metadata: { 'clean\u200Bkey': 'val\u200Bue' } }), {
+      metadataPolicy: 'passthrough',
+    });
+
+    const evidence = result.evidence as Record<string, unknown>;
+    const meta = evidence.metadata as Record<string, string>;
+    expect(meta['cleankey']).toBe('value');
+    expect(meta['clean\u200Bkey']).toBeUndefined();
+  });
+
   it('should include metadata with passthrough policy', () => {
     const result = fromSPTGrant(makeGrant({ metadata: { key: 'val' } }), {
       metadataPolicy: 'passthrough',

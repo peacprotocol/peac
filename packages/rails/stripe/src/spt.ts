@@ -17,43 +17,8 @@
 import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
 
-// Reuse sanitizeMetadata pattern from the main module
-type MetadataPolicy = 'omit' | 'passthrough' | 'allowlist';
-
-const METADATA_MAX_KEYS = 20;
-const METADATA_MAX_KEY_LENGTH = 40;
-const METADATA_MAX_VALUE_LENGTH = 500;
-const INVISIBLE_RE = /[\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g;
-
-function stripInvisible(s: string): string {
-  return s.replace(INVISIBLE_RE, '');
-}
-
-function sanitizeMetadata(
-  raw: Record<string, string>,
-  policy: MetadataPolicy,
-  allowedKeys?: string[]
-): Record<string, string> | undefined {
-  if (policy === 'omit') return undefined;
-
-  let entries = Object.entries(raw);
-  if (policy === 'allowlist') {
-    const allowed = new Set(allowedKeys ?? []);
-    entries = entries.filter(([key]) => allowed.has(key));
-  }
-  entries = entries.slice(0, METADATA_MAX_KEYS);
-
-  const result: Record<string, string> = {};
-  for (const [key, value] of entries) {
-    const cleanKey = stripInvisible(key).slice(0, METADATA_MAX_KEY_LENGTH);
-    const cleanValue = stripInvisible(String(value)).slice(0, METADATA_MAX_VALUE_LENGTH);
-    if (cleanKey.length > 0) {
-      result[cleanKey] = cleanValue;
-    }
-  }
-
-  return Object.keys(result).length > 0 ? result : undefined;
-}
+import { sanitizeMetadata } from './metadata.js';
+import type { MetadataPolicy } from './metadata.js';
 
 // ---------------------------------------------------------------------------
 // SPT Types
