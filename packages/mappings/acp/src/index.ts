@@ -135,3 +135,20 @@ export function extractReceiptFromACPResponse(response: Record<string, unknown>)
   }
   return null;
 }
+
+// Session lifecycle evidence (DD-188, v0.12.4+)
+export type {
+  ACPSessionState,
+  ACPSessionEvent,
+  ObservedPaymentState,
+  ACPPaymentArtifact,
+  ACPCapabilityNegotiation,
+  ACPIntervention,
+} from './session.js';
+
+export {
+  fromACPSessionLifecycleEvent,
+  fromACPPaymentObservation,
+  fromACPCapabilitySnapshot,
+  fromACPInterventionRequired,
+} from './session.js';
