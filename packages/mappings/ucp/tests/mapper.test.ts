@@ -271,3 +271,173 @@ describe('calculateOrderStats', () => {
     expect(stats.fulfilled_quantity).toBe(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// DD-187: Order-vs-payment semantic separation (v0.12.4+)
+// ---------------------------------------------------------------------------
+
+describe('DD-187: order-vs-payment semantic separation', () => {
+  it('should include order_state in evidence', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+    });
+
+    expect(claims.payment.evidence.order_state).toBe('partial');
+  });
+
+  it('should derive payment status from explicit payment_state when provided', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+      payment_state: 'settled',
+    });
+
+    expect(claims.payment.status).toBe('completed');
+    expect(claims.payment.evidence.payment_state).toBe('settled');
+    expect(claims.ext['dev.ucp/payment_state']).toBe('settled');
+  });
+
+  it('should set pending status for non-final payment states', () => {
+    const order = createMockOrder();
+
+    for (const state of ['pending', 'authorized', 'failed'] as const) {
+      const claims = mapUcpOrderToReceipt({
+        order,
+        issuer: 'https://merchant.com',
+        subject: 'agent:bot',
+        currency: 'USD',
+        payment_state: state,
+      });
+
+      expect(claims.payment.status).toBe('pending');
+      expect(claims.payment.evidence.payment_state).toBe(state);
+    }
+  });
+
+  it('should set completed status for captured payment state', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+      payment_state: 'captured',
+    });
+
+    expect(claims.payment.status).toBe('completed');
+  });
+
+  it('should use order-derived status when payment_state is absent (backward compat)', () => {
+    // All fulfilled -> completed order -> payment status 'completed'
+    const allFulfilled = createMockOrder({
+      line_items: [
+        {
+          id: 'li_1',
+          item: { id: 'p1', title: 'Item', price: 100 },
+          quantity: { total: 1, fulfilled: 1 },
+          status: 'fulfilled',
+        },
+      ],
+    });
+    const claims = mapUcpOrderToReceipt({
+      order: allFulfilled,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+    });
+
+    expect(claims.payment.status).toBe('completed');
+    // No explicit payment_state
+    expect(claims.payment.evidence.payment_state).toBeUndefined();
+    expect(claims.ext['dev.ucp/payment_state']).toBeUndefined();
+  });
+
+  it('should not include payment_state in ext when not provided', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+    });
+
+    expect(claims.ext['dev.ucp/payment_state']).toBeUndefined();
+  });
+
+  it('should mark derived payment state source when payment_state absent', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+    });
+
+    expect(claims.payment.evidence.payment_state_source).toBe('derived_order_fallback');
+  });
+
+  it('should mark explicit payment state source when payment_state provided', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+      payment_state: 'settled',
+    });
+
+    expect(claims.payment.evidence.payment_state_source).toBe('explicit');
+  });
+
+  it('should let explicit payment_state override conflicting completed order state', () => {
+    // Order is completed (all fulfilled) but payment actually failed
+    const allFulfilled = createMockOrder({
+      line_items: [
+        {
+          id: 'li_1',
+          item: { id: 'p1', title: 'Item', price: 100 },
+          quantity: { total: 1, fulfilled: 1 },
+          status: 'fulfilled',
+        },
+      ],
+    });
+    const claims = mapUcpOrderToReceipt({
+      order: allFulfilled,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+      payment_state: 'failed',
+    });
+
+    // Order completed but payment failed: explicit payment state wins
+    expect(claims.payment.evidence.order_state).toBe('completed');
+    expect(claims.payment.evidence.payment_state).toBe('failed');
+    expect(claims.payment.status).toBe('pending'); // failed -> pending, not completed
+    expect(claims.payment.evidence.payment_state_source).toBe('explicit');
+  });
+
+  it('should preserve all existing claim fields (regression)', () => {
+    const order = createMockOrder();
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://merchant.com',
+      subject: 'agent:bot',
+      currency: 'USD',
+    });
+
+    expect(claims.jti).toBeTruthy();
+    expect(claims.iss).toBe('https://merchant.com');
+    expect(claims.sub).toBe('agent:bot');
+    expect(claims.payment.rail).toBe('ucp');
+    expect(claims.payment.currency).toBe('USD');
+    expect(claims.payment.evidence.order_id).toBe('order_abc123');
+    expect(claims.ext['dev.ucp/order_id']).toBe('order_abc123');
+  });
+});

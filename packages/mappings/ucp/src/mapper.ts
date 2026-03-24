@@ -5,7 +5,13 @@
  * Amounts are in minor units (cents), NOT micros.
  */
 
-import type { UcpOrder, MapUcpOrderOptions, MappedReceiptClaims, MinorUnits } from './types.js';
+import type {
+  UcpOrder,
+  MapUcpOrderOptions,
+  MappedReceiptClaims,
+  MinorUnits,
+  UcpPaymentState,
+} from './types.js';
 import { ErrorCodes, ucpError } from './errors.js';
 
 /**
@@ -79,6 +85,15 @@ function validateOrder(order: UcpOrder): void {
 }
 
 /**
+ * Map UcpPaymentState to receipt payment status.
+ * Only 'settled' and 'captured' prove payment completion.
+ */
+function paymentStateToStatus(state: UcpPaymentState): 'completed' | 'pending' {
+  if (state === 'settled' || state === 'captured') return 'completed';
+  return 'pending';
+}
+
+/**
  * Map a UCP order to PEAC receipt claims.
  *
  * @param options - Mapping options
@@ -107,11 +122,16 @@ export function mapUcpOrderToReceipt(options: MapUcpOrderOptions): MappedReceipt
   const totalEntry = order.totals.find((t) => t.type === 'total')!;
   const amount = totalEntry.amount;
 
-  // Derive status
+  // Derive order status (always order-level, not payment-level)
   const orderStatus = deriveOrderStatus(order);
 
-  // Map to payment status
-  const paymentStatus = orderStatus === 'processing' ? 'pending' : 'completed';
+  // DD-187: payment status from explicit payment_state when provided;
+  // fall back to order-derived status for backward compatibility
+  const paymentStatus: 'completed' | 'pending' = options.payment_state
+    ? paymentStateToStatus(options.payment_state)
+    : orderStatus === 'processing'
+      ? 'pending'
+      : 'completed';
 
   // Extract all totals
   const totals = extractTotals(order);
@@ -134,12 +154,17 @@ export function mapUcpOrderToReceipt(options: MapUcpOrderOptions): MappedReceipt
         ...(order.checkout_id && { checkout_id: order.checkout_id }),
         line_items: order.line_items.length,
         totals,
+        // DD-187: explicit order vs payment state separation
+        order_state: orderStatus,
+        ...(options.payment_state && { payment_state: options.payment_state }),
+        payment_state_source: options.payment_state ? 'explicit' : 'derived_order_fallback',
       },
     },
     ext: {
       'dev.ucp/order_id': order.id,
       ...(order.checkout_id && { 'dev.ucp/checkout_id': order.checkout_id }),
       'dev.ucp/order_status': orderStatus,
+      ...(options.payment_state && { 'dev.ucp/payment_state': options.payment_state }),
       ...(order.permalink_url && { 'dev.ucp/permalink': order.permalink_url }),
     },
   };

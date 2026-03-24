@@ -81,6 +81,9 @@ export type {
   UcpOrder,
   MapUcpOrderOptions,
   MappedReceiptClaims,
+  // DD-187: Order-vs-payment semantic separation (v0.12.4+)
+  UcpOrderState,
+  UcpPaymentState,
 } from './types.js';
 
 export { UCP_EVIDENCE_VERSION } from './types.js';
