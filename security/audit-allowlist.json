@@ -19,7 +19,8 @@
       ],
       "verified_by": "pnpm audit --prod shows no MODERATE; pnpm why esbuild confirms wrangler-only path",
       "owner": "jithinraj",
-      "added_at": "2026-02-19"
+      "added_at": "2026-02-19",
+      "reviewed_at": "2026-03-24"
     },
     {
       "advisory_id": "GHSA-g9mf-h72j-4rw9",
@@ -34,7 +35,8 @@
       "dependency_chain": ["wrangler@3.114.17", "miniflare", "undici@5.29.0"],
       "verified_by": "pnpm audit --prod shows no MODERATE; pnpm why undici confirms wrangler-only path",
       "owner": "jithinraj",
-      "added_at": "2026-02-19"
+      "added_at": "2026-02-19",
+      "reviewed_at": "2026-03-24"
     },
     {
       "advisory_id": "GHSA-2g4f-4pwh-qvx6",
@@ -49,7 +51,8 @@
       "dependency_chain": ["eslint@10.0.1", "ajv@6.12.6"],
       "verified_by": "pnpm audit --prod shows no MODERATE; direct ajv bumped to 8.18.0; remaining is eslint transitive",
       "owner": "jithinraj",
-      "added_at": "2026-02-19"
+      "added_at": "2026-02-19",
+      "reviewed_at": "2026-03-24"
     },
     {
       "advisory_id": "GHSA-7r86-cg39-jmmj",
