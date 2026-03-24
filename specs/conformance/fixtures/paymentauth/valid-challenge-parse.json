@@ -1,0 +1,18 @@
+{
+  "description": "Valid paymentauth challenge parsed from WWW-Authenticate header",
+  "input": {
+    "header": "Payment id=\"x7Tg2pLqR9mKvNwY3hBcZa\", realm=\"api.example.com\", method=\"example\", intent=\"charge\", expires=\"2025-01-15T12:05:00Z\", request=\"eyJhbW91bnQiOiIxMDAwIiwiY3VycmVuY3kiOiJ1c2QiLCJyZWNpcGllbnQiOiJhY2N0XzEyMyJ9\""
+  },
+  "expected": {
+    "id": "x7Tg2pLqR9mKvNwY3hBcZa",
+    "realm": "api.example.com",
+    "method": "example",
+    "intent": "charge",
+    "expires": "2025-01-15T12:05:00Z",
+    "decodedRequest": {
+      "amount": "1000",
+      "currency": "usd",
+      "recipient": "acct_123"
+    }
+  }
+}

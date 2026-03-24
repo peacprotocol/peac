@@ -17,6 +17,7 @@
     "key-rotation": "Key rotation lifecycle fixtures (DD-148); scenario-based, not fixture packs",
     "obligations": "Not yet migrated to tracked validation; duplicate fixture names need resolution",
     "parse": "Single-receipt fixtures; uses expected_error/expected_variant, not fixture_count",
+    "paymentauth": "Paymentauth evidence mapping fixtures (DD-191); receipt mapping and challenge parse vectors",
     "policy": "Not yet migrated to tracked validation; needs fixture pack audit",
     "purpose": "Legacy category; no fixture_count tracking",
     "stripe-crypto": "Per-category manifest; uses profile-scoped manifest.json, not global fixture_count",

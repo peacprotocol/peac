@@ -1,6 +1,8 @@
 /**
  * Stripe payment rail adapter
  * Normalizes Stripe webhooks/checkout sessions to PEAC PaymentEvidence
+ *
+ * v0.12.4: SPT (Shared Payment Token) delegation evidence via spt.ts
  */
 
 import type { JsonObject } from '@peac/kernel';
@@ -363,3 +365,22 @@ export function fromWebhookEvent(
 
   throw new Error(`Unsupported Stripe webhook event type: ${event.type}`);
 }
+
+// ---------------------------------------------------------------------------
+// SPT (Shared Payment Token) delegation evidence (v0.12.4+)
+// ---------------------------------------------------------------------------
+
+export type {
+  StripeSPTGrant,
+  StripeSPTUse,
+  StripeSPTDeactivate,
+  StripePaymentIntentObservation,
+  SPTOptions,
+} from './spt.js';
+
+export {
+  fromSPTGrant,
+  fromSPTUse,
+  fromSPTDeactivate,
+  fromStripePaymentIntentObservation,
+} from './spt.js';
