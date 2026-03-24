@@ -128,6 +128,39 @@ describe('fromACPSessionLifecycleEvent', () => {
 });
 
 // ---------------------------------------------------------------------------
+// A/B Regression Pair: session completed with/without payment artifact
+// ---------------------------------------------------------------------------
+
+describe('session completed: A/B semantic boundary', () => {
+  it('A: session completed WITHOUT payment artifact remains access/session evidence', () => {
+    const event = makeSessionEvent('completed');
+    const result = fromACPSessionLifecycleEvent(event);
+
+    expect(result.payment.rail).toBe('acp');
+    expect(result.amt).toBe(0);
+    expect(result.cur).toBe('NONE');
+    const evidence = result.payment.evidence as Record<string, unknown>;
+    expect(evidence.acp_session_state).toBe('completed');
+    expect(evidence.commerce_event).toBeUndefined();
+    expect(evidence.observed_payment_state).toBeUndefined();
+  });
+
+  it('B: session completed WITH payment artifact produces commerce evidence from observed_payment_state', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ observed_payment_state: 'settled' });
+    const result = fromACPPaymentObservation(event, artifact);
+
+    expect(result.payment.rail).toBe('stripe');
+    expect(result.amt).toBe(1000);
+    expect(result.cur).toBe('USD');
+    const evidence = result.payment.evidence as Record<string, unknown>;
+    expect(evidence.commerce_event).toBe('settlement');
+    expect(evidence.observed_payment_state).toBe('settled');
+    expect(evidence.acp_session_state).toBe('completed');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // fromACPPaymentObservation
 // ---------------------------------------------------------------------------
 
