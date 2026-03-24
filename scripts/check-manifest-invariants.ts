@@ -116,6 +116,7 @@ const nestedMappings: Record<string, string> = {
   'mappings-tap': 'packages/mappings/tap',
   'mappings-ucp': 'packages/mappings/ucp',
   'mappings-content-signals': 'packages/mappings/content-signals',
+  'mappings-paymentauth': 'packages/mappings/paymentauth',
   'capture-core': 'packages/capture/core',
   'capture-node': 'packages/capture/node',
   'sdk-js': 'packages/sdk-js',
