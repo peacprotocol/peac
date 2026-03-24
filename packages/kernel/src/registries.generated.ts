@@ -57,7 +57,7 @@ export const PAYMENT_RAILS: readonly PaymentRailEntry[] = [
   {
     id: 'paymentauth',
     category: 'agentic-payment',
-    description: 'HTTP Payment authentication scheme (draft-ryan-httpauth-payment)',
+    description: 'The "Payment" HTTP authentication scheme (draft-ryan-httpauth-payment)',
     reference: 'https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment/',
     status: 'informational',
   },
