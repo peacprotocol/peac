@@ -38,7 +38,7 @@ export function createCommerceEvidenceBundle(
     timeline: sortTimeline(timeline),
     receipts,
     summary: computeCommerceSummary(evidence),
-    created_at: new Date().toISOString(),
+    created_at: options.created_at ?? new Date().toISOString(),
   };
 
   return bundle;
@@ -144,25 +144,46 @@ export function computeCommerceSummary(evidence: ProtocolEvidence[]): CommerceSu
 }
 
 /**
- * Serialize a commerce bundle to deterministic JSON (sorted keys).
+ * Serialize a commerce bundle to deterministic JSON.
+ *
+ * Uses recursive key sorting so nested objects (protocol evidence,
+ * timeline metadata, summary) are also serialized deterministically.
+ * Arrays are preserved in-order. No nested fields are omitted.
  */
 export function serializeCommerceBundle(bundle: CommerceEvidenceBundle): string {
-  return JSON.stringify(bundle, Object.keys(bundle).sort(), 2);
+  return JSON.stringify(stableSort(bundle), null, 2);
+}
+
+/**
+ * Recursively sort object keys for deterministic serialization.
+ * Arrays preserved in-order; primitives pass through unchanged.
+ */
+function stableSort(value: unknown): unknown {
+  if (value === null || value === undefined) return value;
+  if (typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map(stableSort);
+
+  const sorted: Record<string, unknown> = {};
+  for (const key of Object.keys(value as Record<string, unknown>).sort()) {
+    sorted[key] = stableSort((value as Record<string, unknown>)[key]);
+  }
+  return sorted;
 }
 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Extract payment rails from evidence.
+ * Only uses explicit payment_rail from evidence data.
+ * Does NOT infer rails from source names to avoid semantic drift.
+ */
 function extractRails(evidence: ProtocolEvidence[]): string[] {
   const rails = new Set<string>();
   for (const ev of evidence) {
     if (typeof ev.data.payment_rail === 'string') {
       rails.add(ev.data.payment_rail);
-    }
-    // Also check source as a fallback rail indicator
-    if (ev.source && !ev.source.includes('/')) {
-      rails.add(ev.source);
     }
   }
   return [...rails].sort();

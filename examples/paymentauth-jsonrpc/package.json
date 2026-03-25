@@ -1,0 +1,17 @@
+{
+  "name": "@peac/example-paymentauth-jsonrpc",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo: paymentauth JSON-RPC/MCP transport semantics",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/mappings-paymentauth": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}

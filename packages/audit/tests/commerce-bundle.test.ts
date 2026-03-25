@@ -47,12 +47,22 @@ describe('createCommerceEvidenceBundle', () => {
   it('should create a bundle with version and transaction_ref', () => {
     const bundle = createCommerceEvidenceBundle({
       transaction_ref: 'txn_abc123',
+      created_at: '2025-06-01T12:00:00Z',
     });
 
     expect(bundle.version).toBe(COMMERCE_BUNDLE_VERSION);
     expect(bundle.version).toContain('-experimental');
     expect(bundle.transaction_ref).toBe('txn_abc123');
+    expect(bundle.created_at).toBe('2025-06-01T12:00:00Z');
+  });
+
+  it('should default created_at to current time when not provided', () => {
+    const bundle = createCommerceEvidenceBundle({
+      transaction_ref: 'txn_default_time',
+    });
+
     expect(bundle.created_at).toBeTruthy();
+    expect(new Date(bundle.created_at).getTime()).toBeGreaterThan(0);
   });
 
   it('should create empty bundle when no evidence provided', () => {
@@ -263,5 +273,85 @@ describe('serializeCommerceBundle', () => {
 
     expect(parsed.version).toBe(COMMERCE_BUNDLE_VERSION);
     expect(parsed.transaction_ref).toBe('txn_valid');
+  });
+
+  it('should recursively sort nested object keys', () => {
+    const bundle = createCommerceEvidenceBundle({
+      transaction_ref: 'txn_nested',
+      created_at: '2025-06-01T12:00:00Z',
+      evidence: [
+        {
+          source: 'stripe',
+          captured_at: '2025-06-01T12:00:00Z',
+          data: {
+            zebra_field: 'last',
+            alpha_field: 'first',
+            nested: { zz_inner: 'z', aa_inner: 'a' },
+            payment_rail: 'stripe',
+            amount_minor: '100',
+            currency: 'USD',
+          },
+        },
+      ],
+    });
+
+    const json = serializeCommerceBundle(bundle);
+    const parsed = JSON.parse(json);
+
+    // Top-level keys sorted
+    const topKeys = Object.keys(parsed);
+    expect(topKeys).toEqual([...topKeys].sort());
+
+    // Nested evidence data keys sorted
+    const evidenceData = parsed.protocol_evidence[0].data;
+    const dataKeys = Object.keys(evidenceData);
+    expect(dataKeys).toEqual([...dataKeys].sort());
+
+    // Deeply nested keys sorted
+    const nestedKeys = Object.keys(evidenceData.nested);
+    expect(nestedKeys).toEqual(['aa_inner', 'zz_inner']);
+
+    // No nested fields dropped
+    expect(evidenceData.zebra_field).toBe('last');
+    expect(evidenceData.alpha_field).toBe('first');
+    expect(evidenceData.nested.aa_inner).toBe('a');
+    expect(evidenceData.nested.zz_inner).toBe('z');
+  });
+
+  it('should preserve arrays in order (not sort array elements)', () => {
+    const bundle = createCommerceEvidenceBundle({
+      transaction_ref: 'txn_array',
+      created_at: '2025-06-01T12:00:00Z',
+      receipts: ['sha256:ccc', 'sha256:aaa', 'sha256:bbb'],
+    });
+
+    const json = serializeCommerceBundle(bundle);
+    const parsed = JSON.parse(json);
+
+    // Array order preserved (not alphabetically sorted)
+    expect(parsed.receipts).toEqual(['sha256:ccc', 'sha256:aaa', 'sha256:bbb']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// extractRails: explicit payment_rail only
+// ---------------------------------------------------------------------------
+
+describe('extractRails behavior', () => {
+  it('should only use explicit payment_rail, not infer from source', () => {
+    const bundle = createCommerceEvidenceBundle({
+      transaction_ref: 'txn_rails',
+      created_at: '2025-06-01T12:00:00Z',
+      evidence: [
+        {
+          source: 'some-arbitrary-source',
+          captured_at: '2025-06-01T12:00:00Z',
+          data: { amount_minor: '100', currency: 'USD' },
+        },
+      ],
+    });
+
+    // No payment_rail in data, so rails_observed should be empty
+    expect(bundle.rails_observed).toEqual([]);
   });
 });
