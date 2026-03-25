@@ -444,6 +444,19 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/paymentauth-jsonrpc:
+    dependencies:
+      '@peac/mappings-paymentauth':
+        specifier: workspace:*
+        version: link:../../packages/mappings/paymentauth
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/quickstart:
     dependencies:
       '@peac/protocol':
@@ -603,6 +616,19 @@ importers:
       '@peac/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  examples/x402-dual-header-read:
+    dependencies:
+      '@peac/adapter-x402':
+        specifier: workspace:*
+        version: link:../../packages/adapters/x402
     devDependencies:
       tsx:
         specifier: ^4.21.0

@@ -1,0 +1,17 @@
+{
+  "name": "@peac/example-x402-dual-header-read",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo: x402 v1/v2 dual-header read priority and artifact metadata",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/adapter-x402": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
