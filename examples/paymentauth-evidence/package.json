@@ -1,0 +1,17 @@
+{
+  "name": "@peac/example-paymentauth-evidence",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo: paymentauth 402 challenge -> receipt -> PEAC evidence",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/mappings-paymentauth": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
