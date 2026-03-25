@@ -19,6 +19,21 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.0.1)
+      '@peac/adapter-x402':
+        specifier: workspace:*
+        version: link:packages/adapters/x402
+      '@peac/mappings-acp':
+        specifier: workspace:*
+        version: link:packages/mappings/acp
+      '@peac/mappings-paymentauth':
+        specifier: workspace:*
+        version: link:packages/mappings/paymentauth
+      '@peac/mappings-ucp':
+        specifier: workspace:*
+        version: link:packages/mappings/ucp
+      '@peac/rails-stripe':
+        specifier: workspace:*
+        version: link:packages/rails/stripe
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
