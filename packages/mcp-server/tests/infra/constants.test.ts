@@ -14,7 +14,9 @@ describe('infra/constants', () => {
   });
 
   it('exports version matching package.json', () => {
-    expect(SERVER_VERSION).toBe('0.11.2');
+    // Dynamic: read from package.json so version bumps don't break this test
+    const pkg = require('../../package.json');
+    expect(SERVER_VERSION).toBe(pkg.version);
   });
 
   it('exports MCP protocol version', () => {

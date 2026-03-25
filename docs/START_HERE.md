@@ -46,15 +46,18 @@ Key packages: `@peac/mappings-a2a`, `@peac/protocol`
 
 ## Strategic wedges
 
-### x402 and payment proofs
+### Commerce and payment evidence
 
-You want verifiable payment and settlement evidence for x402 and machine-to-machine commerce. Prove what was offered, challenged, paid, or settled across organizational boundaries.
+You want verifiable evidence from commerce and payment flows across paymentauth/MPP, ACP, Stripe SPT, x402, or UCP. Prove what was offered, challenged, paid, or settled across organizational boundaries.
 
-1. Install: `pnpm add @peac/adapter-x402`
-2. Read the [x402 Integration Kit](../integrator-kits/x402/README.md)
-3. See [examples/x402-node-server](../examples/x402-node-server/) for a payment evidence example
+1. Choose your protocol:
+   - **paymentauth/MPP**: [paymentauth Integration Kit](../integrator-kits/paymentauth/README.md)
+   - **ACP**: [ACP Integration Kit](../integrator-kits/acp/README.md)
+   - **x402**: [x402 Integration Kit](../integrator-kits/x402/README.md)
+2. See [Commerce Evidence Spec](specs/COMMERCE-EVIDENCE.md) for boundary rules
+3. See [examples/](../examples/) for runnable demos
 
-Key packages: `@peac/adapter-x402`
+Key packages: `@peac/mappings-paymentauth`, `@peac/mappings-acp`, `@peac/rails-stripe`, `@peac/adapter-x402`, `@peac/mappings-ucp`
 
 ### Audit, dispute, and governance evidence
 

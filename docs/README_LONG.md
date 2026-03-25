@@ -39,6 +39,20 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full design rationale.
 
 ## Integration paths
 
+### Commerce evidence integrations (v0.12.4+)
+
+PEAC records evidence from commerce protocols without executing payments:
+
+| Protocol          | Package                      | What it records                                    |
+| ----------------- | ---------------------------- | -------------------------------------------------- |
+| paymentauth / MPP | `@peac/mappings-paymentauth` | HTTP 402 challenges, receipts, carrier coexistence |
+| ACP               | `@peac/mappings-acp`         | Session lifecycle, payment observations            |
+| Stripe SPT        | `@peac/rails-stripe`         | Delegation grants, PI observations                 |
+| x402              | `@peac/adapter-x402`         | Offer/receipt verification, v1/v2 read             |
+| UCP               | `@peac/mappings-ucp`         | Order-vs-payment separation                        |
+
+See [Commerce Evidence Spec](specs/COMMERCE-EVIDENCE.md) and [Commerce Semantics](specs/COMMERCE-SEMANTICS.md) for boundary rules.
+
 ### Settlement fields
 
 Add payment evidence via the commerce extension:
