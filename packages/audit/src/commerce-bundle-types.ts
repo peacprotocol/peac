@@ -89,4 +89,6 @@ export interface CreateCommerceBundleOptions {
   timeline?: TimelineEntry[];
   /** Optional initial receipt references */
   receipts?: string[];
+  /** Optional creation timestamp (for deterministic output; defaults to now) */
+  created_at?: string;
 }
