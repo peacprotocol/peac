@@ -1,10 +1,16 @@
 # PEAC Integration Kit: x402 (HTTP 402 Payment Protocol)
 
-Integration guide for adding PEAC receipts to x402 payment flows.
+Integration guide for recording PEAC evidence from x402 payment flows.
 
-## Status
+## What You Need
 
-Integration kit: full guide planned for v0.12.4. The `@peac/adapter-x402` package is published and upstream-synced (x402 PR #935, merged Mar 12, 2026).
+- `@peac/adapter-x402`: offer/receipt verification, evidence mapping, carrier adapter
+
+## What You Get
+
+- x402 offer and receipt verification (4-layer architecture)
+- PEAC interaction records from x402 payment flows
+- v1/v2 dual-header read compatibility (v0.12.4+)
 
 ## Quick Start
 
@@ -12,10 +18,64 @@ Integration kit: full guide planned for v0.12.4. The `@peac/adapter-x402` packag
 npm install @peac/adapter-x402
 ```
 
-See [examples/x402-node-server](../../examples/x402-node-server/) for a working x402 payment evidence example.
+### Extract Receipt Evidence
+
+```typescript
+import { extractReceiptArtifactFromHeaders, fromOfferResponse } from '@peac/adapter-x402';
+
+// Extract from HTTP response headers (priority: PEAC-Receipt > v2 > v1)
+const artifact = extractReceiptArtifactFromHeaders(responseHeaders);
+
+if (artifact) {
+  console.log(artifact.source); // 'peac' | 'x402_v2' | 'x402_v1'
+  console.log(artifact.isPeacReceipt); // true only for PEAC-Receipt
+  console.log(artifact.artifactFormat); // 'jws' | 'json' | 'unknown'
+}
+
+// Full carrier extraction
+const result = fromOfferResponse(responseHeaders);
+if (result) {
+  // result.receipts[0].receipt_jws: only set for PEAC source
+  // result.upstreamArtifact: raw x402 artifact when source is v1/v2
+}
+```
+
+### v1/v2 Dual-Header Read
+
+The adapter reads both x402 header generations for backward compatibility:
+
+| Priority | Header               | Version | Format      |
+| -------- | -------------------- | ------- | ----------- |
+| 1        | `PEAC-Receipt`       | PEAC    | Compact JWS |
+| 2        | `PAYMENT-RESPONSE`   | x402 v2 | JSON        |
+| 3        | `X-PAYMENT-RESPONSE` | x402 v1 | JSON        |
+
+`PAYMENT-REQUIRED` is NOT read in the receipt path (it is challenge material).
+
+### Verify Offer/Receipt
+
+```typescript
+import { verifyOffer, verifyReceipt } from '@peac/adapter-x402';
+
+const offerResult = verifyOffer(signedOffer);
+const receiptResult = verifyReceipt(signedReceipt);
+```
+
+### Map to PEAC Record
+
+```typescript
+import { toPeacRecord, toPeacCarrier } from '@peac/adapter-x402';
+
+const record = toPeacRecord(offer, receipt, config);
+const carrier = await toPeacCarrier(receiptJws);
+```
+
+## Attach Path
+
+PEAC writes `PEAC-Receipt` only. No v2 write support in v0.12.4. Full v2 adapter (plugin arch, CAIP, multi-facilitator, wallet sessions) deferred to v0.12.5.
 
 ## Reference
 
-- `@peac/adapter-x402`: x402 offer/receipt verification adapter (synced with upstream)
-- x402 specification: https://github.com/coinbase/x402
+- `@peac/adapter-x402`: verification, mapping, carrier adapter
+- x402 V2: https://github.com/coinbase/x402
 - x402 Foundation: https://x402.org

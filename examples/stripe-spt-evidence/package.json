@@ -1,0 +1,17 @@
+{
+  "name": "@peac/example-stripe-spt-evidence",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo: Stripe SPT delegation lifecycle -> PEAC evidence",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/rails-stripe": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
