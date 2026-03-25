@@ -5,6 +5,52 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.4] - 2026-03-25
+
+### Theme: Commerce Evidence + Integration Depth
+
+PEAC as the neutral portable evidence layer across paymentauth/MPP, ACP, x402, Stripe SPT, and UCP.
+
+### Added
+
+- `@peac/mappings-paymentauth` (DD-191): new Layer 4 package for HTTP Payment authentication scheme envelope parsing, evidence mapping, and carrier adapter
+- `paymentauth` payment rail registration (DD-190): informational registry entry for `draft-ryan-httpauth-payment`
+- x402 v2 dual-header read compatibility (DD-193): PEAC-Receipt > PAYMENT-RESPONSE (v2) > X-PAYMENT-RESPONSE (v1)
+- ACP session lifecycle evidence (DD-188): session states produce access evidence; commerce evidence only from explicit payment artifacts with `observed_payment_state`
+- Stripe SPT delegated payment evidence: delegation-specific vocabulary (`delegated_payment_granted/presented/deactivated`); `fromStripePaymentIntentObservation()` for commerce events
+- UCP order-vs-payment semantic separation (DD-187): `UcpPaymentState`, `payment_state_source` marker for derived vs explicit
+- Experimental commerce evidence bundle (DD-192) in `@peac/audit`: non-aggregating cross-ecosystem correlation
+- Commerce pillar profile (`docs/profiles/commerce.md`)
+- Commerce evidence boundary spec (`docs/specs/COMMERCE-EVIDENCE.md`)
+- Commerce semantics spec (`docs/specs/COMMERCE-SEMANTICS.md`): canonical vocabulary for observed vs derived payment state, delegation vs finality, carrier vs upstream artifacts
+- Integration kits: paymentauth, ACP, x402 (populated from placeholders)
+- 6 runnable commerce examples with deterministic output
+- `pnpm verify:examples-commerce` smoke target
+- 21 cross-package commerce boundary conformance tests
+- Shared Stripe metadata sanitization helper (`metadata.ts`)
+
+### Fixed
+
+- flatted prototype pollution (GHSA-rf6f-7fwh-wjgh): pin to 3.4.2
+- Dynamic error category derivation from generated file (no more hardcoded list)
+- Recursive stable serialization for commerce bundles
+- Injectable `created_at` for deterministic bundle output
+
+### Changed
+
+- MCP server version constant updated from 0.11.2 to 0.12.4
+- 91 build targets (was 84)
+- 6664 tests (was 6443)
+- 361 conformance tests (was 340)
+- 29 packages in publish manifest (was 28)
+
+### Deferred
+
+- `@peac/adapter-did`: deferred to v0.12.5
+- x402 V2 full adapter rewrite: deferred to v0.12.5
+- Go/Python SDK: deferred to v0.12.5 (gated on external signal)
+- A2A v1.0 OAuth PKCE, A2A v1.0 gRPC binding: deferred to v0.12.5
+
 ## [Unreleased]
 
 ## [0.12.3] - 2026-03-17
