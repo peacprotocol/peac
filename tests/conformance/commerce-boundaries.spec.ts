@@ -231,3 +231,130 @@ describe('UCP: observed vs derived boundary', () => {
     expect(claims.payment.status).toBe('pending'); // failed -> pending
   });
 });
+
+// ---------------------------------------------------------------------------
+// x402: attach path invariant (v0.12.4 writes PEAC-Receipt only)
+// ---------------------------------------------------------------------------
+
+describe('x402: attach path invariant', () => {
+  it('X402CarrierAdapter.attach writes only PEAC-Receipt, never v2 headers', async () => {
+    const { X402CarrierAdapter } = await import('@peac/adapter-x402');
+    const { computeReceiptRef } = await import('@peac/schema');
+
+    const adapter = new X402CarrierAdapter();
+    const jws = 'eyJhbGciOiJFZERTQSJ9.payload.sig';
+    const ref = await computeReceiptRef(jws);
+    const carrier = { receipt_ref: ref, receipt_jws: jws };
+
+    const response = adapter.attach({}, [carrier]);
+
+    expect(response.headers!['PEAC-Receipt']).toBe(jws);
+    // Must NOT write v2 headers
+    expect(response.headers!['Payment-Response']).toBeUndefined();
+    expect(response.headers!['PAYMENT-RESPONSE']).toBeUndefined();
+    expect(response.headers!['X-Payment-Response']).toBeUndefined();
+    expect(response.headers!['X-PAYMENT-RESPONSE']).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Stripe: manual capture regression (requires_capture -> succeeded)
+// ---------------------------------------------------------------------------
+
+describe('Stripe: manual capture lifecycle', () => {
+  it('requires_capture maps to authorization, not settlement', () => {
+    const authResult = fromStripePaymentIntentObservation({
+      payment_intent_id: 'pi_manual',
+      status: 'requires_capture',
+      amount: '3000',
+      currency: 'usd',
+    });
+
+    const authEv = authResult.evidence as Record<string, unknown>;
+    expect(authEv.commerce_event).toBe('authorization');
+  });
+
+  it('same PI with succeeded maps to settlement after capture', () => {
+    const settleResult = fromStripePaymentIntentObservation({
+      payment_intent_id: 'pi_manual',
+      status: 'succeeded',
+      amount: '3000',
+      currency: 'usd',
+    });
+
+    const settleEv = settleResult.evidence as Record<string, unknown>;
+    expect(settleEv.commerce_event).toBe('settlement');
+  });
+
+  it('authorization and settlement remain separate evidence objects', () => {
+    const auth = fromStripePaymentIntentObservation({
+      payment_intent_id: 'pi_manual',
+      status: 'requires_capture',
+    });
+    const settle = fromStripePaymentIntentObservation({
+      payment_intent_id: 'pi_manual',
+      status: 'succeeded',
+    });
+
+    const authEv = auth.evidence as Record<string, unknown>;
+    const settleEv = settle.evidence as Record<string, unknown>;
+    expect(authEv.commerce_event).toBe('authorization');
+    expect(settleEv.commerce_event).toBe('settlement');
+    // Different evidence objects
+    expect(authEv).not.toBe(settleEv);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// paymentauth: no sensitive data in errors
+// ---------------------------------------------------------------------------
+
+describe('paymentauth: no-sensitive-leak', () => {
+  it('invalid credential does not leak raw header in error', async () => {
+    const { parsePaymentauthCredential, PaymentauthError } =
+      await import('@peac/mappings-paymentauth');
+
+    const sensitiveHeader = 'Payment eyJzZWNyZXQiOiJ0b3Bfc2VjcmV0X3ZhbHVlIn0';
+
+    try {
+      parsePaymentauthCredential(sensitiveHeader);
+    } catch (e: unknown) {
+      expect(e).toBeInstanceOf(PaymentauthError);
+      // Error message must NOT contain the base64url credential payload
+      expect((e as Error).message).not.toContain('eyJzZWNyZXQi');
+      expect((e as Error).message).not.toContain('top_secret_value');
+    }
+  });
+
+  it('oversized header does not leak content in error', async () => {
+    const { parsePaymentauthChallenges, PaymentauthError } =
+      await import('@peac/mappings-paymentauth');
+
+    const huge = 'Payment id="x", realm="' + 'a'.repeat(10000) + '"';
+
+    try {
+      parsePaymentauthChallenges(huge);
+    } catch (e: unknown) {
+      expect(e).toBeInstanceOf(PaymentauthError);
+      expect((e as Error).message).not.toContain('aaaa');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// #549: dynamic category derivation regression
+// ---------------------------------------------------------------------------
+
+describe('#549: dynamic error category derivation', () => {
+  it('error-categories.json includes cryptography (no hardcoded list)', async () => {
+    const { readFileSync } = await import('fs');
+    const { join } = await import('path');
+
+    const categoriesPath = join(process.cwd(), 'specs/kernel/error-categories.json');
+    const categories = JSON.parse(readFileSync(categoriesPath, 'utf-8'));
+
+    expect(categories.categories).toContain('cryptography');
+    // Validate it is derived from errors.json, not hardcoded
+    expect(categories.$comment).toContain('AUTO-GENERATED');
+  });
+});

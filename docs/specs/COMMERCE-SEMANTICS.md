@@ -54,4 +54,25 @@ SPT grant, use, and deactivation are delegation lifecycle events. They do NOT pr
 
 ## Registry Lifecycle
 
-Registry entries sourced from active drafts (e.g., `paymentauth` from `draft-ryan-httpauth-payment`) carry `status: "informational"`. When the upstream draft revises or becomes an RFC, update the registry reference URL. No separate registry entry is needed per draft revision.
+Registry entries sourced from active drafts (e.g., `paymentauth` from `draft-ryan-httpauth-payment`) carry `status: "informational"`. Rules:
+
+- When the upstream draft revises, update the reference URL in `registries.json`
+- When the draft becomes an RFC, update the reference to the RFC URL and consider changing status
+- No separate registry entry is needed per draft revision
+- Draft-backed entries should be reviewed when the draft expires or is replaced
+- The `paymentauth` entry references the datatracker landing page, which always resolves to the latest revision
+
+## ACP Payment State Vocabulary
+
+The `observed_payment_state` vocabulary used by `fromACPPaymentObservation()` is the canonical source for payment-state evidence across ACP integrations:
+
+| State        | Commerce Event  | Meaning                                  |
+| ------------ | --------------- | ---------------------------------------- |
+| `attempted`  | None            | Payment attempted but not yet authorized |
+| `authorized` | `authorization` | Payment authorized, capture pending      |
+| `captured`   | `capture`       | Payment captured                         |
+| `settled`    | `settlement`    | Payment settled (funds transferred)      |
+| `failed`     | None            | Payment failed                           |
+| `refunded`   | `refund`        | Payment refunded                         |
+
+This vocabulary is exported from `@peac/mappings-acp` as the `ObservedPaymentState` type. Use it in examples, kits, and downstream integrations to prevent string drift.
