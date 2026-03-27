@@ -22,15 +22,15 @@ Do NOT use this profile for:
 
 ## 3. Required / Recommended / Prohibited Fields
 
-| Field          | Level                  | Guidance                                                                                             |
-| -------------- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| `payment_rail` | REQUIRED               | Must identify the payment rail or protocol                                                           |
-| `amount_minor` | REQUIRED               | Base-10 integer string in smallest currency unit                                                     |
-| `currency`     | REQUIRED               | ISO 4217 code or asset identifier, uppercase                                                         |
-| `reference`    | RECOMMENDED            | Payment reference from the upstream system                                                           |
-| `env`          | RECOMMENDED            | `live` or `test`; defaults to `live` if omitted                                                      |
-| `event`        | CONDITIONAL            | Only set when the upstream artifact explicitly proves the payment state; observational only (DD-184) |
-| `asset`        | RECOMMENDED for crypto | Token address or ticker for non-fiat assets                                                          |
+| Field          | Level                  | Guidance                                                                                    |
+| -------------- | ---------------------- | ------------------------------------------------------------------------------------------- |
+| `payment_rail` | REQUIRED               | Must identify the payment rail or protocol                                                  |
+| `amount_minor` | REQUIRED               | Base-10 integer string in smallest currency unit                                            |
+| `currency`     | REQUIRED               | ISO 4217 code or asset identifier, uppercase                                                |
+| `reference`    | RECOMMENDED            | Payment reference from the upstream system                                                  |
+| `env`          | RECOMMENDED            | `live` or `test`; defaults to `live` if omitted                                             |
+| `event`        | CONDITIONAL            | Only set when the upstream artifact explicitly proves the payment state; observational only |
+| `asset`        | RECOMMENDED for crypto | Token address or ticker for non-fiat assets                                                 |
 
 ## 4. Minimal Valid Receipt
 
@@ -138,7 +138,7 @@ This profile:
 
 ## 10. Notes / Caveats
 
-- The `event` field is observational metadata only (DD-184). It records what the upstream system reported; it does not enforce or guarantee that state.
+- The `event` field is observational metadata only. It records what the upstream system reported; it does not enforce or guarantee that state.
 - Commerce evidence from different sources (paymentauth, ACP, Stripe, x402, UCP) uses the same extension group but follows source-specific extraction patterns documented in `docs/specs/COMMERCE-EVIDENCE.md`.
 - `amount_minor` is a string (not a number) for arbitrary precision. Use base-10 integer representation in smallest currency units.
 - In strict verification mode, registered commerce receipt types require the commerce extension group to be present.

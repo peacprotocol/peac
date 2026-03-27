@@ -19,7 +19,7 @@ Commerce extension `event` fields (`authorization`, `capture`, `settlement`, `re
 
 ## Rail Neutrality
 
-Per DD-95, PEAC core packages never mandate a specific payment rail. The commerce extension `payment_rail` field is a free string (max 128 chars). Registered rails are informational; unregistered values are accepted.
+PEAC core packages never mandate a specific payment rail. The commerce extension `payment_rail` field is a free string (max 128 chars). Registered rails are informational; unregistered values are accepted.
 
 ## Commerce Extension
 
@@ -35,13 +35,13 @@ The `org.peacprotocol/commerce` extension group carries observational payment me
 | `env`          | enum   | No       | `live` or `test`                             |
 | `event`        | enum   | No       | Observational lifecycle phase                |
 
-The `event` field values: `authorization`, `capture`, `settlement`, `refund`, `void`, `chargeback`. This field is observational metadata only (DD-184): it does not encode settlement finality, protocol state transitions, or lifecycle enforcement.
+The `event` field values: `authorization`, `capture`, `settlement`, `refund`, `void`, `chargeback`. This field is observational metadata only: it does not encode settlement finality, protocol state transitions, or lifecycle enforcement.
 
 ## Evidence Extraction Patterns
 
-### paymentauth / MPP
+### paymentauth
 
-HTTP `Payment` authentication scheme (`draft-ryan-httpauth-payment`), commonly referred to in the MPP ecosystem.
+HTTP `Payment` authentication scheme, aligned with the active Internet-Draft `draft-ryan-httpauth-payment-01`. The term `paymentauth` is the code and registry identifier used in PEAC packages, schema enums, and fixture paths. MPP is an ecosystem prose term and must not appear in code identifiers, package names, fixture paths, or schema enums.
 
 - **Approach**: envelope-first; method-specific payloads treated as `unknown`
 - **Package**: `@peac/mappings-paymentauth`
@@ -64,15 +64,30 @@ HTTP `Payment` authentication scheme (`draft-ryan-httpauth-payment`), commonly r
 
 - **Approach**: verification-first; 4-layer architecture (A1/A2/B/C)
 - **Package**: `@peac/adapter-x402`
-- **v0.12.4**: dual-header read compatibility (DD-193); reads PEAC-Receipt, PAYMENT-RESPONSE (v2), X-PAYMENT-RESPONSE (v1)
-- **v0.12.5**: full v2 adapter (plugin arch, CAIP, multi-facilitator, wallet sessions)
+- **Header read order**: PEAC-Receipt, PAYMENT-RESPONSE (v2), X-PAYMENT-RESPONSE (v1)
 
 ### UCP (Universal Commerce Protocol)
 
-- **Approach**: order-vs-payment separation (DD-187); order state distinct from payment state
+- **Approach**: order-vs-payment separation; order state distinct from payment state
 - **Package**: `@peac/mappings-ucp`
 - **Boundary**: `payment_state_source` marker distinguishes `explicit` from `derived_order_fallback`
 
 ## Cross-Ecosystem Evidence
 
 PEAC can normalize evidence from multiple commerce protocols into a single audit bundle. The experimental `CommerceEvidenceBundle` in `@peac/audit` correlates receipts across payment rails without aggregating or asserting settlement totals.
+
+## Naming Conventions
+
+### paymentauth vs MPP
+
+`paymentauth` is the canonical code and registry term, aligned with the active Internet-Draft `draft-ryan-httpauth-payment-01`. It appears in package names (`@peac/mappings-paymentauth`), registry entries, fixture paths, and schema values. MPP is an ecosystem prose term; it must not appear in code identifiers, package names, fixture paths, or schema enums.
+
+### ACP
+
+ACP refers to the Agentic Commerce Protocol (maintained by OpenAI and Stripe). It must not be confused with Agent Communication Protocol (IBM/BeeAI, now merged into A2A). On first mention in each document, expand to "Agentic Commerce Protocol (ACP)".
+
+## Related Specifications
+
+- [Commerce Integration Matrix](COMMERCE-INTEGRATION-MATRIX.md): summary table of all commerce rails
+- [Commerce Semantics](COMMERCE-SEMANTICS.md): mapping rules and payment state vocabulary
+- [Evidence Carrier Contract](EVIDENCE-CARRIER-CONTRACT.md): transport placement rules
