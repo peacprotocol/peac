@@ -52,6 +52,25 @@ SPT grant, use, and deactivation are delegation lifecycle events. They do NOT pr
 | UCP order completed                         | Order evidence                      | No (unless explicit payment_state) |
 | UCP order + payment_state=settled           | Commerce evidence                   | Yes                                |
 
+## Cross-Rail Invariants
+
+### Commerce Event Equivalence
+
+Same-payment receipts across different rails MUST produce semantically equivalent settlement outcomes when describing the same payment observation. Rails that emit `commerce.event` directly (Stripe, ACP) MUST agree on the event value. Rails that use alternative representations (UCP `payment_state: 'settled'` with `payment.status: 'completed'`; paymentauth attestation-based evidence; x402 receipt-content-based evidence) MUST be semantically equivalent to settlement even when the representation differs. Disagreement in either direct events or semantic equivalence indicates a mapping defect.
+
+x402 and paymentauth use an attestation/verification-first model: the settlement semantic is carried inside the receipt content (claims payload), not emitted by the mapping function as a `commerce.event` field. Cross-rail equivalence for these rails is derived from receipt content rather than direct function output.
+
+### Asymmetric Safety
+
+Functions that observe delegation, lifecycle, or provisioning events MUST NOT emit settlement-like `commerce.event` values unless the function explicitly receives a payment-bearing observation input:
+
+- `fromACPSessionLifecycleEvent()`: access evidence only; no `commerce.event`
+- `fromSPTGrant()`, `fromSPTUse()`, `fromSPTDeactivate()`: delegation evidence only; no `commerce.event`
+- `fromStripePaymentIntentObservation()` with `processing` or `canceled`: observation metadata only; no `commerce.event`
+- `mapUcpOrderToReceipt()` without explicit `payment_state`: `payment_state_source: 'derived_order_fallback'`
+
+Only functions that receive an explicit payment-bearing artifact or observation status (`succeeded`, `requires_capture`, `settled`, `authorized`, `captured`, `refunded`) may emit `commerce.event`.
+
 ## Registry Lifecycle
 
 Registry entries sourced from active drafts (e.g., `paymentauth` from `draft-ryan-httpauth-payment`) carry `status: "informational"`. Rules:
