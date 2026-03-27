@@ -1,0 +1,44 @@
+{
+  "ok": true,
+  "command": "projects llm-context",
+  "version": "0.1",
+  "data": {
+    "fetch": false,
+    "header": "Additional provider guidance:",
+    "last_updated": "2026-03-27T01:24:22.456Z",
+    "provider_filter": null,
+    "providers": [
+      {
+        "active": true,
+        "content": null,
+        "extra_skill_sync": null,
+        "fetch_error": null,
+        "id": "prvdr_SANITIZED_PROVIDER_ID",
+        "llm_context": "https://neon.com/agentic-provisioning-llm-context.md",
+        "name": "Neon",
+        "source_url": "https://neon.com/agentic-provisioning-llm-context.md",
+        "skill_sync": {
+          "claude_link": {
+            "path": ".claude/skills/sp-neon",
+            "status": "updated"
+          },
+          "error": null,
+          "skill_file": {
+            "path": ".agents/skills/sp-neon/SKILL.md",
+            "status": "skipped"
+          },
+          "skill_name": "sp-neon",
+          "warnings": []
+        },
+        "truncated": false
+      }
+    ],
+    "source": "cache"
+  },
+  "warnings": [],
+  "next_steps": [],
+  "meta": {
+    "authenticated": true,
+    "project_initialized": true
+  }
+}

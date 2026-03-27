@@ -1,0 +1,10 @@
+{
+  "captured": "2026-03-27",
+  "stripe_cli_version": "1.39.0",
+  "projects_plugin_version": "0.0.53",
+  "providers_tested": ["neon", "posthog"],
+  "provider_generality": "multi-provider-confirmed",
+  "commands_observed": ["init", "add", "rotate", "llm-context"],
+  "artifact_scope": "sanitized local CLI captures; no provider-side API confirmation",
+  "note": "Shapes reflect two preview captures. JSON envelope is consistent across providers. May drift with Stripe CLI or plugin updates."
+}
