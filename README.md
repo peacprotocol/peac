@@ -115,7 +115,7 @@ See [examples/wire-02-minimal/](examples/wire-02-minimal/) for the full source. 
 
 PEAC is most useful where logs are not enough: payments, cross-boundary verification, audit, dispute review, and multi-agent workflows.
 
-- **Agentic commerce and payments:** Prove what was offered, challenged, paid, or settled across paymentauth/MPP, x402, ACP, Stripe SPT, and other commerce flows. See [paymentauth Kit](integrator-kits/paymentauth/README.md), [ACP Kit](integrator-kits/acp/README.md), [x402 Kit](integrator-kits/x402/README.md).
+- **Agentic commerce and payments:** Prove what was offered, challenged, paid, or settled across paymentauth, x402, Agentic Commerce Protocol (ACP), Stripe SPT, and other commerce flows. See [paymentauth Kit](integrator-kits/paymentauth/README.md), [ACP Kit](integrator-kits/acp/README.md), [x402 Kit](integrator-kits/x402/README.md).
 - **Audit and dispute review:** Keep signed evidence that survives organizational boundaries, not just local logs. See [Governance Mappings](docs/governance/).
 - **MCP tools and APIs:** Verify, issue, and carry signed receipts for tool calls, API responses, and automated actions. See [MCP Integration Kit](integrator-kits/mcp/README.md).
 - **Agent-to-agent workflows:** Carry verifiable receipts across A2A task/state transitions and multi-agent chains. See [A2A Integration Kit](integrator-kits/a2a/README.md).
@@ -135,15 +135,15 @@ More paths: [Go SDK](sdks/go/) | [paymentauth Kit](integrator-kits/paymentauth/R
 
 ## Where it fits
 
-| Existing system                        | What PEAC adds                                         |
-| -------------------------------------- | ------------------------------------------------------ |
-| **Logs**                               | Portable proof that survives organizational boundaries |
-| **OpenTelemetry**                      | Signed evidence that correlates to traces              |
-| **MCP / A2A**                          | Proof carried alongside tool calls and agent exchanges |
-| **AP2 / ACP (Agentic Commerce) / UCP** | Proof of terms and outcomes                            |
-| **paymentauth / MPP**                  | Evidence from HTTP 402 payment challenges and receipts |
-| **x402**                               | Settlement proof mapping with offline verification     |
-| **Stripe SPT / Payment rails**         | Delegation and settlement references made verifiable   |
+| Existing system                                 | What PEAC adds                                                    |
+| ----------------------------------------------- | ----------------------------------------------------------------- |
+| **Logs**                                        | Portable proof that survives organizational boundaries            |
+| **OpenTelemetry**                               | Signed evidence that correlates to traces                         |
+| **MCP / A2A**                                   | Proof carried alongside tool calls and agent exchanges            |
+| **AP2 / ACP (Agentic Commerce Protocol) / UCP** | Proof of terms and outcomes across commerce protocols             |
+| **paymentauth**                                 | Evidence from HTTP Payment authentication challenges and receipts |
+| **x402**                                        | Settlement proof mapping with offline verification                |
+| **Stripe SPT / Payment rails**                  | Delegation and settlement references made verifiable              |
 
 **What changes in your stack:** keep auth, keep payments, keep observability. Add `/.well-known/peac.txt` and return `PEAC-Receipt` on governed responses.
 
