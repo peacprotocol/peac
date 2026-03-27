@@ -1,6 +1,6 @@
 # PEAC Protocol Architecture
 
-**Version:** 0.12.2
+**Version:** 0.12.5
 **Status:** Authoritative
 
 This document describes the kernel-first architecture of the PEAC Protocol monorepo.

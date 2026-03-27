@@ -46,10 +46,48 @@ PEAC as the neutral portable evidence layer across paymentauth/MPP, ACP, x402, S
 
 ### Deferred
 
-- `@peac/adapter-did`: deferred to v0.12.5
-- x402 V2 full adapter rewrite: deferred to v0.12.5
-- Go/Python SDK: deferred to v0.12.5 (gated on external signal)
-- A2A v1.0 OAuth PKCE, A2A v1.0 gRPC binding: deferred to v0.12.5
+- `@peac/adapter-did`: deferred to v0.12.6
+- x402 V2 full adapter rewrite: deferred to v0.12.6
+- Go/Python SDK: deferred to v0.12.6 (gated on external signal)
+- A2A v1.0 OAuth PKCE, A2A v1.0 gRPC binding: deferred to v0.12.6
+
+## [0.12.5] - 2026-03-27
+
+### Theme: Commerce Hardening + Interop Proofs
+
+Cross-rail conformance parity, settlement semantic equivalence, and naming truth cleanup.
+
+### Added
+
+- Execution-backed commerce rail conformance fixtures: 40 vectors across paymentauth, ACP, Stripe SPT, and UCP (3 valid, 4 invalid, 2 edge, 1 security per rail)
+- Registry-derived commerce coverage gate (`check-commerce-coverage.mjs`): enforces minimum vector floor per rail, derived from `registries.json`
+- Cross-rail settlement semantic equivalence test: one deterministic payment scenario ($25.00 USD settled) mapped through all 5 commerce rails
+- Asymmetric safety invariant: delegation/lifecycle/provisioning functions must not emit settlement-like commerce events
+- `isValidAmountMinor()` and `AmountMinorStringSchema` in `@peac/schema`: validate-and-reject utility with shared source of truth
+- Commerce integration matrix (`docs/specs/COMMERCE-INTEGRATION-MATRIX.md`) with upstream compatibility table
+- Paymentauth carrier roundtrip conformance test (attach, extract, coexistence)
+- Stripe out-of-order observation race test (authorization vs settlement ordering)
+- `verify:commerce-coverage` script in root package.json
+- Commerce coverage check wired into `gate.sh`
+
+### Changed
+
+- README: `paymentauth/MPP` to `paymentauth`; Agentic Commerce Protocol (ACP) expanded on first mention
+- Commerce evidence spec: paymentauth naming clarification (code/registry term vs ecosystem prose)
+- Commerce semantics spec: added cross-rail invariants section with equivalence and asymmetric safety prose
+- Commerce profile: removed internal shorthand from event field description
+- 6915 tests (was 6664)
+- 92 build targets (was 91)
+
+### Fixed
+
+- Fixture `spec_revision` pinned to `draft-ryan-httpauth-payment-01` (active Internet-Draft)
+- `intent_spec_revision` marked provisional (not publicly listed on datatracker.ietf.org)
+
+### Deferred
+
+- `@peac/adapter-did`: deferred to v0.12.6
+- x402 V2 full adapter rewrite: deferred to v0.12.6
 
 ## [Unreleased]
 
