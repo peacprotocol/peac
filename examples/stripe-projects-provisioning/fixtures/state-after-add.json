@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "providers": {
+    "neon": {
+      "name": "Neon"
+    },
+    "posthog": {
+      "name": "PostHog"
+    }
+  },
+  "resources": {
+    "primary-db": {
+      "name": "primary-db",
+      "providerName": "Neon",
+      "serviceId": "postgres"
+    },
+    "analytics": {
+      "name": "analytics",
+      "providerName": "PostHog",
+      "serviceId": "analytics"
+    }
+  }
+}

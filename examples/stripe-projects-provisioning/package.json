@@ -1,0 +1,18 @@
+{
+  "name": "@peac/example-stripe-projects-provisioning",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo: Stripe Projects provisioning workflow -> PEAC evidence audit trail",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -510,6 +510,22 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/stripe-projects-provisioning:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/stripe-spt-evidence:
     dependencies:
       '@peac/rails-stripe':

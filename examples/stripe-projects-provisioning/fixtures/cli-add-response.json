@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "command": "projects add",
+  "version": "0.1",
+  "data": {
+    "combined_file": ".env",
+    "files_modified": [".projects/vault/vault.json", ".env"],
+    "service": {
+      "key": "fres_SANITIZED_RESOURCE_KEY",
+      "name": "primary-db",
+      "provider": "Neon",
+      "provider_id": "prvdr_SANITIZED_PROVIDER_ID",
+      "service_id": "postgres",
+      "status": "complete"
+    },
+    "unmapped_entries": [],
+    "vault_file": ".projects/vault/vault.json"
+  },
+  "warnings": [],
+  "next_steps": ["stripe projects status", "stripe projects env", "stripe projects open neon"],
+  "meta": {
+    "authenticated": true,
+    "project_initialized": true
+  }
+}
