@@ -1,0 +1,17 @@
+{
+  "id": "acp-invalid-missing-session-id",
+  "description": "Session event without session_id is rejected",
+  "category": "invalid",
+  "input": {
+    "type": "session_lifecycle",
+    "event": {
+      "state": "completed",
+      "resource_uri": "https://shop.example.com/checkout/missing"
+    }
+  },
+  "expected": {
+    "valid": false,
+    "error_reason": "missing_session_id"
+  },
+  "notes": "session_id is required for all ACP session lifecycle events."
+}

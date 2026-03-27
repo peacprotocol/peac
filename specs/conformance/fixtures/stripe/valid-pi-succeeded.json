@@ -1,0 +1,20 @@
+{
+  "id": "stripe-valid-pi-succeeded",
+  "description": "PaymentIntent observation with succeeded status produces settlement event",
+  "category": "valid",
+  "input": {
+    "type": "pi_observation",
+    "data": {
+      "payment_intent_id": "pi_conf_01",
+      "status": "succeeded",
+      "amount": "5000",
+      "currency": "usd"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "has_commerce_event": true,
+    "commerce_event": "settlement"
+  },
+  "notes": "PaymentIntent 'succeeded' is the only Stripe status that proves payment completion."
+}

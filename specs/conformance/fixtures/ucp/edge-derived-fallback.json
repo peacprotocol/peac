@@ -1,0 +1,35 @@
+{
+  "id": "ucp-edge-derived-fallback",
+  "description": "Completed order without payment_state: payment_state_source is derived_order_fallback",
+  "category": "edge",
+  "input": {
+    "type": "order_mapping",
+    "order": {
+      "id": "order_edge_01",
+      "line_items": [
+        {
+          "id": "li_01",
+          "item": { "id": "p1", "title": "Widget", "price": 500 },
+          "quantity": { "total": 1, "fulfilled": 1 },
+          "status": "fulfilled"
+        }
+      ],
+      "totals": [
+        { "type": "subtotal", "amount": 500 },
+        { "type": "total", "amount": 500 }
+      ]
+    },
+    "options": {
+      "issuer": "https://merchant.example.com",
+      "subject": "agent:edge_01",
+      "currency": "USD"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "payment_state_source": "derived_order_fallback",
+    "order_state": "completed",
+    "has_payment_state": false
+  },
+  "notes": "Asymmetric safety: order 'completed' does not prove payment. payment_state_source marks the derivation path."
+}

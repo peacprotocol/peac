@@ -1,0 +1,20 @@
+{
+  "id": "stripe-invalid-spt-missing-token",
+  "description": "SPT grant without token_id produces evidence with undefined reference",
+  "category": "invalid",
+  "input": {
+    "type": "spt_grant",
+    "data": {
+      "id": "grant_inv_01",
+      "seller_scope": { "merchant_id": "merch_01" },
+      "amount_limit": "10000",
+      "currency": "usd"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "degraded": true,
+    "reference_undefined": true
+  },
+  "notes": "Stripe SPT functions do not throw on missing fields. Missing token_id produces undefined reference (downstream signing would fail)."
+}

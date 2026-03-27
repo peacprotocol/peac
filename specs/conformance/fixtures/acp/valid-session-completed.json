@@ -1,0 +1,21 @@
+{
+  "id": "acp-valid-session-completed",
+  "description": "Completed ACP session maps to access evidence without commerce event",
+  "category": "valid",
+  "input": {
+    "type": "session_lifecycle",
+    "event": {
+      "session_id": "sess_conf_01",
+      "state": "completed",
+      "resource_uri": "https://shop.example.com/checkout/01"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "rail": "acp",
+    "amt": 0,
+    "cur": "NONE",
+    "has_commerce_event": false
+  },
+  "notes": "Completed session without payment artifact is access evidence only. No commerce event emitted."
+}

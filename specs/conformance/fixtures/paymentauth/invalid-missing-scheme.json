@@ -1,0 +1,14 @@
+{
+  "id": "paymentauth-invalid-missing-scheme",
+  "description": "Credential header without Payment scheme prefix",
+  "category": "invalid",
+  "input": {
+    "type": "credential",
+    "header": "Bearer eyJhbGciOiJIUzI1NiJ9"
+  },
+  "expected": {
+    "valid": false,
+    "error_code": "PARSE_MISSING_SCHEME"
+  },
+  "notes": "Authorization header must start with 'Payment ' prefix (case-insensitive)."
+}

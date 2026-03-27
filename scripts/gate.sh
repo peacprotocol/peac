@@ -81,6 +81,9 @@ else
   run_check "prod audit" node scripts/audit-gate.mjs
 fi
 
+# --- Commerce conformance coverage ---
+run_check "commerce coverage" node scripts/conformance/check-commerce-coverage.mjs
+
 # --- Planning leak (local-only script; skipped on fresh clones/CI) ---
 if [ -f scripts/check-planning-leak.sh ]; then
   run_check "planning leak" bash scripts/check-planning-leak.sh

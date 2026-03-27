@@ -1,0 +1,29 @@
+{
+  "id": "stripe-security-metadata-sanitization",
+  "description": "Metadata with sensitive keys is sanitized per metadata policy",
+  "category": "security",
+  "input": {
+    "type": "pi_observation",
+    "data": {
+      "payment_intent_id": "pi_sec_01",
+      "status": "succeeded",
+      "amount": "1000",
+      "currency": "usd",
+      "metadata": {
+        "customer_email": "secret@example.com",
+        "internal_ref": "private_123",
+        "order_id": "ord_public"
+      }
+    },
+    "options": {
+      "metadataPolicy": "allowlist",
+      "metadataAllowedKeys": ["order_id"]
+    }
+  },
+  "expected": {
+    "valid": true,
+    "metadata_keys_present": ["order_id"],
+    "metadata_keys_absent": ["customer_email", "internal_ref"]
+  },
+  "notes": "Metadata allowlist policy: only explicitly allowed keys pass through. Prevents PII leakage into evidence receipts."
+}

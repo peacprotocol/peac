@@ -1,0 +1,14 @@
+{
+  "id": "paymentauth-invalid-receipt-not-json",
+  "description": "Receipt decodes to non-JSON content",
+  "category": "invalid",
+  "input": {
+    "type": "receipt_normalize",
+    "header": "bm90LWpzb24tdGV4dA"
+  },
+  "expected": {
+    "valid": false,
+    "error_code": "NORMALIZE_MISSING_FIELD"
+  },
+  "notes": "Decoded receipt is 'not-json-text'. Normalization requires object-shaped JSON."
+}

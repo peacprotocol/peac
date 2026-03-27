@@ -1,0 +1,14 @@
+{
+  "id": "paymentauth-invalid-truncated-base64",
+  "description": "Credential with corrupted base64url payload",
+  "category": "invalid",
+  "input": {
+    "type": "credential",
+    "header": "Payment !!!not-valid-base64url!!!"
+  },
+  "expected": {
+    "valid": false,
+    "error_code": "PARSE_INVALID_BASE64URL"
+  },
+  "notes": "Base64url must contain only [A-Za-z0-9_-] characters per RFC 4648 Section 5."
+}

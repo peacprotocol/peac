@@ -1,0 +1,18 @@
+{
+  "id": "stripe-invalid-pi-unknown-status",
+  "description": "PI observation with unrecognized status produces no commerce event",
+  "category": "invalid",
+  "input": {
+    "type": "pi_observation",
+    "data": {
+      "payment_intent_id": "pi_inv_03",
+      "status": "requires_payment_method"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "degraded": true,
+    "has_commerce_event": false
+  },
+  "notes": "Stripe PI functions do not throw. Statuses other than succeeded and requires_capture produce no commerce event."
+}

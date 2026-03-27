@@ -1,0 +1,22 @@
+{
+  "id": "stripe-edge-spt-use-with-pi",
+  "description": "SPT use referencing a PaymentIntent does not upgrade to commerce event",
+  "category": "edge",
+  "input": {
+    "type": "spt_use",
+    "data": {
+      "id": "use_edge_01",
+      "token_id": "tok_edge_01",
+      "amount": "5000",
+      "currency": "usd",
+      "merchant_id": "merch_01",
+      "payment_intent_id": "pi_exists"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "has_commerce_event": false,
+    "spt_action": "delegated_payment_presented"
+  },
+  "notes": "SPT use is delegation evidence. The presence of payment_intent_id is a correlation hint, not a proof of settlement. Commerce events require explicit PI observation via fromStripePaymentIntentObservation()."
+}

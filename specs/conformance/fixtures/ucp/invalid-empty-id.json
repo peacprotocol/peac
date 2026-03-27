@@ -1,0 +1,30 @@
+{
+  "id": "ucp-invalid-empty-id",
+  "description": "Order with empty id is rejected",
+  "category": "invalid",
+  "input": {
+    "type": "order_mapping",
+    "order": {
+      "id": "",
+      "line_items": [
+        {
+          "id": "li_01",
+          "item": { "id": "p1", "title": "Widget", "price": 100 },
+          "quantity": { "total": 1, "fulfilled": 1 },
+          "status": "fulfilled"
+        }
+      ],
+      "totals": [{ "type": "total", "amount": 100 }]
+    },
+    "options": {
+      "issuer": "https://merchant.example.com",
+      "subject": "agent:inv_02",
+      "currency": "USD"
+    }
+  },
+  "expected": {
+    "valid": false,
+    "error_reason": "empty_order_id"
+  },
+  "notes": "Order id must be a non-empty string."
+}

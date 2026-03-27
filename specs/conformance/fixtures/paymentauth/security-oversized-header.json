@@ -1,0 +1,15 @@
+{
+  "id": "paymentauth-security-oversized-header",
+  "description": "Header exceeding MAX_HEADER_BYTES (8192) is rejected",
+  "category": "security",
+  "input": {
+    "type": "challenge",
+    "construct": "oversized_header",
+    "min_bytes": 9000
+  },
+  "expected": {
+    "valid": false,
+    "error_code": "PARSE_HEADER_TOO_LARGE"
+  },
+  "notes": "MAX_HEADER_BYTES (8192) enforced at parse entry point. Test constructs header exceeding limit."
+}

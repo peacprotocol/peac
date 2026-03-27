@@ -1,0 +1,24 @@
+{
+  "id": "acp-invalid-payment-missing-rail",
+  "description": "Payment artifact without rail field is rejected",
+  "category": "invalid",
+  "input": {
+    "type": "payment_observation",
+    "event": {
+      "session_id": "sess_conf_04",
+      "state": "completed",
+      "resource_uri": "https://shop.example.com/checkout/04"
+    },
+    "payment_artifact": {
+      "reference": "pi_conf_04",
+      "amount": 1000,
+      "currency": "USD",
+      "observed_payment_state": "settled"
+    }
+  },
+  "expected": {
+    "valid": false,
+    "error_reason": "missing_rail"
+  },
+  "notes": "Payment artifact must declare which rail the payment was observed on."
+}

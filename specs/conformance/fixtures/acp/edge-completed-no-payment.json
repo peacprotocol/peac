@@ -1,0 +1,22 @@
+{
+  "id": "acp-edge-completed-no-payment",
+  "description": "Completed session without payment artifact: access evidence only, no commerce event",
+  "category": "edge",
+  "input": {
+    "type": "session_lifecycle",
+    "event": {
+      "session_id": "sess_edge_01",
+      "state": "completed",
+      "resource_uri": "https://shop.example.com/free-trial"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "rail": "acp",
+    "amt": 0,
+    "cur": "NONE",
+    "has_commerce_event": false,
+    "has_observed_payment_state": false
+  },
+  "notes": "An ACP session 'completed' does not prove payment settlement. This is the asymmetric safety boundary: session lifecycle must not emit settlement-like commerce events."
+}

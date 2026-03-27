@@ -1,0 +1,34 @@
+{
+  "id": "ucp-edge-zero-amount",
+  "description": "Order with zero total amount is valid",
+  "category": "edge",
+  "input": {
+    "type": "order_mapping",
+    "order": {
+      "id": "order_edge_02",
+      "line_items": [
+        {
+          "id": "li_01",
+          "item": { "id": "free_trial", "title": "Free Trial", "price": 0 },
+          "quantity": { "total": 1, "fulfilled": 1 },
+          "status": "fulfilled"
+        }
+      ],
+      "totals": [
+        { "type": "subtotal", "amount": 0 },
+        { "type": "total", "amount": 0 }
+      ]
+    },
+    "options": {
+      "issuer": "https://merchant.example.com",
+      "subject": "agent:edge_02",
+      "currency": "USD"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "order_state": "completed",
+    "total_amount": 0
+  },
+  "notes": "Zero-amount orders are valid: free trials, demos, promotional access."
+}

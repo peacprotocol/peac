@@ -1,0 +1,40 @@
+{
+  "id": "ucp-valid-partial-fulfillment",
+  "description": "Partially fulfilled order maps correctly",
+  "category": "valid",
+  "input": {
+    "type": "order_mapping",
+    "order": {
+      "id": "order_conf_03",
+      "line_items": [
+        {
+          "id": "li_01",
+          "item": { "id": "p1", "title": "Alpha", "price": 500 },
+          "quantity": { "total": 2, "fulfilled": 1 },
+          "status": "partial"
+        },
+        {
+          "id": "li_02",
+          "item": { "id": "p2", "title": "Beta", "price": 300 },
+          "quantity": { "total": 1, "fulfilled": 0 },
+          "status": "pending"
+        }
+      ],
+      "totals": [
+        { "type": "subtotal", "amount": 1300 },
+        { "type": "total", "amount": 1300 }
+      ]
+    },
+    "options": {
+      "issuer": "https://merchant.example.com",
+      "subject": "agent:conf_03",
+      "currency": "USD"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "order_state": "partial",
+    "payment_state_source": "derived_order_fallback"
+  },
+  "notes": "Partial fulfillment: 1 of 2 fulfilled in first item, 0 of 1 in second."
+}

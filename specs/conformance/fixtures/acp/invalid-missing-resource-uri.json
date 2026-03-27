@@ -1,0 +1,17 @@
+{
+  "id": "acp-invalid-missing-resource-uri",
+  "description": "Session event without resource_uri is rejected",
+  "category": "invalid",
+  "input": {
+    "type": "session_lifecycle",
+    "event": {
+      "session_id": "sess_conf_06",
+      "state": "completed"
+    }
+  },
+  "expected": {
+    "valid": false,
+    "error_reason": "missing_resource_uri"
+  },
+  "notes": "resource_uri is required to identify the commerce context."
+}

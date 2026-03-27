@@ -1,0 +1,18 @@
+{
+  "id": "acp-security-xss-resource-uri",
+  "description": "Resource URI with script injection attempt is preserved as-is but not executed",
+  "category": "security",
+  "input": {
+    "type": "session_lifecycle",
+    "event": {
+      "session_id": "sess_sec_01",
+      "state": "completed",
+      "resource_uri": "https://shop.example.com/<script>alert(1)</script>"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "resource_uri_preserved": true
+  },
+  "notes": "PEAC is an evidence layer: it records what happened. URI is stored as-is. Consumers must sanitize for display contexts. No implicit fetch (SSRF-hardened)."
+}
