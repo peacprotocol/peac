@@ -538,6 +538,9 @@ export type { Wire02RepresentationFields } from './wire-02-representation';
 export {
   // Schemas
   CommerceExtensionSchema,
+  // Commerce validators
+  AmountMinorStringSchema,
+  isValidAmountMinor,
   AccessExtensionSchema,
   ChallengeExtensionSchema,
   ChallengeTypeSchema,

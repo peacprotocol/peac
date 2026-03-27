@@ -14,7 +14,12 @@ export { EXTENSION_LIMITS, EXTENSION_BUDGET } from './limits.js';
 export { isValidExtensionKey } from './grammar.js';
 
 // Per-group schemas, types, and constants
-export { COMMERCE_EXTENSION_KEY, CommerceExtensionSchema } from './commerce.js';
+export {
+  COMMERCE_EXTENSION_KEY,
+  CommerceExtensionSchema,
+  AmountMinorStringSchema,
+  isValidAmountMinor,
+} from './commerce.js';
 export type { CommerceExtension } from './commerce.js';
 
 export { ACCESS_EXTENSION_KEY, AccessExtensionSchema } from './access.js';
