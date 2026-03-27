@@ -2,7 +2,7 @@
 
 **Status**: NORMATIVE
 
-**Version**: 0.12.2
+**Version**: 0.12.5
 
 **Wire Format**: `interaction-record+jwt`
 

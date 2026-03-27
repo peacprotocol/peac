@@ -1,6 +1,6 @@
 # PEAC Protocol Roadmap
 
-## Current Release: v0.12.2
+## Current Release: v0.12.5
 
 **Wire Format:** Interaction Record format (`interaction-record+jwt`, Wire 0.2, stable since v0.12.0). Legacy `peac-receipt/0.1` (Wire 0.1) frozen until v1.0.
 
