@@ -1,0 +1,20 @@
+{
+  "id": "stripe-valid-pi-requires-capture",
+  "description": "PaymentIntent observation with requires_capture produces authorization event",
+  "category": "valid",
+  "input": {
+    "type": "pi_observation",
+    "data": {
+      "payment_intent_id": "pi_conf_02",
+      "status": "requires_capture",
+      "amount": "3000",
+      "currency": "usd"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "has_commerce_event": true,
+    "commerce_event": "authorization"
+  },
+  "notes": "requires_capture means funds are held but not yet captured: authorization, not settlement."
+}

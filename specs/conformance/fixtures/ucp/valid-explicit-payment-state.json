@@ -1,0 +1,36 @@
+{
+  "id": "ucp-valid-explicit-payment-state",
+  "description": "Order with explicit payment_state overrides derived state",
+  "category": "valid",
+  "input": {
+    "type": "order_mapping",
+    "order": {
+      "id": "order_conf_02",
+      "line_items": [
+        {
+          "id": "li_01",
+          "item": { "id": "p1", "title": "Widget", "price": 1000 },
+          "quantity": { "total": 1, "fulfilled": 1 },
+          "status": "fulfilled"
+        }
+      ],
+      "totals": [
+        { "type": "subtotal", "amount": 1000 },
+        { "type": "total", "amount": 1000 }
+      ]
+    },
+    "options": {
+      "issuer": "https://merchant.example.com",
+      "subject": "agent:conf_02",
+      "currency": "USD",
+      "payment_state": "settled"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "payment_state_source": "explicit",
+    "payment_state": "settled",
+    "order_state": "completed"
+  },
+  "notes": "Explicit payment_state wins over derived order state."
+}

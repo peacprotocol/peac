@@ -1,0 +1,40 @@
+{
+  "name": "ucp",
+  "version": "0.12.5",
+  "description": "Conformance vectors for @peac/mappings-ucp: Universal Commerce Protocol order-to-receipt mapping with order-vs-payment state separation",
+  "commerce_rail": "ucp",
+  "categories": {
+    "valid": {
+      "description": "Valid order mapping scenarios",
+      "vectors": [
+        "valid-order-completed.json",
+        "valid-explicit-payment-state.json",
+        "valid-partial-fulfillment.json"
+      ]
+    },
+    "invalid": {
+      "description": "Invalid inputs that must be rejected",
+      "vectors": [
+        "invalid-missing-line-items.json",
+        "invalid-empty-id.json",
+        "invalid-missing-totals.json",
+        "invalid-missing-total-entry.json"
+      ]
+    },
+    "edge": {
+      "description": "Order-vs-payment state boundary conditions",
+      "vectors": ["edge-derived-fallback.json", "edge-zero-amount.json"]
+    },
+    "security": {
+      "description": "Resource bounding and evidence size limits",
+      "vectors": ["security-oversized-line-items.json"]
+    }
+  },
+  "invariants": [
+    "Order state is distinct from payment state; completed order does not prove payment settlement",
+    "payment_state_source marks derivation path: explicit vs derived_order_fallback",
+    "Explicit payment_state overrides derived order status",
+    "Zero-amount orders are valid (free trials, demos, promotions)",
+    "Line item summary extraction provides bounded evidence projection"
+  ]
+}

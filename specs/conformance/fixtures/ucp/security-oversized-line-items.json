@@ -1,0 +1,16 @@
+{
+  "id": "ucp-security-oversized-line-items",
+  "description": "Order with many line items: evidence uses count, not full objects",
+  "category": "security",
+  "input": {
+    "type": "order_mapping",
+    "construct": "oversized_order",
+    "line_items_count": 500
+  },
+  "expected": {
+    "valid": true,
+    "bounded": true,
+    "evidence_uses_count": true
+  },
+  "notes": "Evidence receipt stores line_items as a count (number), not full objects. Proves bounded evidence projection regardless of order size."
+}

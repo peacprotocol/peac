@@ -1,0 +1,40 @@
+{
+  "name": "acp",
+  "version": "0.12.5",
+  "description": "Conformance vectors for @peac/mappings-acp: Agentic Commerce Protocol session lifecycle and payment observation evidence mapping",
+  "commerce_rail": "acp",
+  "categories": {
+    "valid": {
+      "description": "Valid session lifecycle and payment observation scenarios",
+      "vectors": [
+        "valid-session-completed.json",
+        "valid-payment-settled.json",
+        "valid-session-created.json"
+      ]
+    },
+    "invalid": {
+      "description": "Invalid inputs that must be rejected",
+      "vectors": [
+        "invalid-missing-session-id.json",
+        "invalid-payment-missing-rail.json",
+        "invalid-payment-missing-reference.json",
+        "invalid-missing-resource-uri.json"
+      ]
+    },
+    "edge": {
+      "description": "Boundary conditions between access and commerce evidence",
+      "vectors": ["edge-completed-no-payment.json", "edge-payment-authorized.json"]
+    },
+    "security": {
+      "description": "Security boundary enforcement",
+      "vectors": ["security-xss-resource-uri.json"]
+    }
+  },
+  "invariants": [
+    "Session lifecycle events produce access evidence only; commerce evidence requires explicit payment artifact",
+    "ACP session 'completed' does not prove payment settlement",
+    "Payment artifact must declare rail, reference, amount, currency, and observed_payment_state",
+    "observed_payment_state maps to commerce.event per the ACP payment state vocabulary",
+    "No implicit fetch from resource_uri (SSRF-hardened)"
+  ]
+}

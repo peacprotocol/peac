@@ -1,0 +1,40 @@
+{
+  "name": "stripe",
+  "version": "0.12.5",
+  "description": "Conformance vectors for @peac/rails-stripe: SPT delegation lifecycle and PaymentIntent observation evidence mapping",
+  "commerce_rail": "stripe",
+  "categories": {
+    "valid": {
+      "description": "Valid SPT and PaymentIntent observation scenarios",
+      "vectors": [
+        "valid-spt-grant.json",
+        "valid-pi-succeeded.json",
+        "valid-pi-requires-capture.json"
+      ]
+    },
+    "invalid": {
+      "description": "Invalid inputs that must be rejected",
+      "vectors": [
+        "invalid-spt-missing-token.json",
+        "invalid-pi-missing-id.json",
+        "invalid-spt-negative-amount.json",
+        "invalid-pi-unknown-status.json"
+      ]
+    },
+    "edge": {
+      "description": "Delegation vs commerce finality boundaries",
+      "vectors": ["edge-spt-use-with-pi.json", "edge-pi-processing.json"]
+    },
+    "security": {
+      "description": "Metadata sanitization enforcement",
+      "vectors": ["security-metadata-sanitization.json"]
+    }
+  },
+  "invariants": [
+    "SPT grant/use/deactivate produce delegation evidence only; no commerce event",
+    "Only fromStripePaymentIntentObservation() may emit commerce events",
+    "succeeded -> settlement; requires_capture -> authorization",
+    "processing and canceled produce observation metadata only (no commerce event)",
+    "Metadata policy (omit/passthrough/allowlist) enforced; sensitive keys filtered"
+  ]
+}

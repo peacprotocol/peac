@@ -45,6 +45,7 @@
     "ci:all": "pnpm run ci:guards && pnpm run ci:surface && pnpm run lint && pnpm run check:unicode && pnpm run typecheck && pnpm test",
     "examples:check": "pnpm --filter './examples/*' exec tsc --noEmit",
     "verify:examples-commerce": "pnpm --filter @peac/example-paymentauth-evidence build && pnpm --filter @peac/example-paymentauth-jsonrpc build && pnpm --filter @peac/example-acp-session-lifecycle build && pnpm --filter @peac/example-stripe-spt-evidence build && pnpm --filter @peac/example-commerce-evidence-bundle build && pnpm --filter @peac/example-x402-dual-header-read build && pnpm --filter @peac/example-paymentauth-evidence demo && pnpm --filter @peac/example-paymentauth-jsonrpc demo && pnpm --filter @peac/example-acp-session-lifecycle demo && pnpm --filter @peac/example-stripe-spt-evidence demo && pnpm --filter @peac/example-commerce-evidence-bundle demo && pnpm --filter @peac/example-x402-dual-header-read demo",
+    "verify:commerce-coverage": "node scripts/conformance/check-commerce-coverage.mjs",
     "verify:protocol-strings": "node scripts/verify-protocol-strings.mjs",
     "verify:spec-drift": "node scripts/verify-spec-drift.mjs",
     "verify:bundle-drift": "node scripts/verify-bundle-drift.mjs",

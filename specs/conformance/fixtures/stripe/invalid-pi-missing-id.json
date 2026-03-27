@@ -1,0 +1,21 @@
+{
+  "id": "stripe-invalid-pi-missing-id",
+  "description": "PI observation without payment_intent_id produces evidence with undefined reference",
+  "category": "invalid",
+  "input": {
+    "type": "pi_observation",
+    "data": {
+      "status": "succeeded",
+      "amount": "5000",
+      "currency": "usd"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "degraded": true,
+    "reference_undefined": true,
+    "has_commerce_event": true,
+    "commerce_event": "settlement"
+  },
+  "notes": "Stripe PI functions do not throw on missing fields. Missing payment_intent_id produces undefined reference but still maps commerce event from status."
+}

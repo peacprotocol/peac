@@ -1,0 +1,17 @@
+{
+  "id": "stripe-edge-pi-processing",
+  "description": "PI observation with processing status produces no commerce event",
+  "category": "edge",
+  "input": {
+    "type": "pi_observation",
+    "data": {
+      "payment_intent_id": "pi_edge_02",
+      "status": "processing"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "has_commerce_event": false
+  },
+  "notes": "Processing is an intermediate state. No commerce event until terminal status (succeeded or requires_capture)."
+}

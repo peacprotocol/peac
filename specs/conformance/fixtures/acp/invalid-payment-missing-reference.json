@@ -1,0 +1,24 @@
+{
+  "id": "acp-invalid-payment-missing-reference",
+  "description": "Payment artifact without reference field is rejected",
+  "category": "invalid",
+  "input": {
+    "type": "payment_observation",
+    "event": {
+      "session_id": "sess_conf_05",
+      "state": "completed",
+      "resource_uri": "https://shop.example.com/checkout/05"
+    },
+    "payment_artifact": {
+      "rail": "stripe",
+      "amount": 500,
+      "currency": "USD",
+      "observed_payment_state": "settled"
+    }
+  },
+  "expected": {
+    "valid": false,
+    "throws": true
+  },
+  "notes": "Payment artifact must declare reference to identify the upstream payment."
+}

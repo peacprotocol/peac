@@ -1,0 +1,15 @@
+{
+  "id": "paymentauth-edge-unknown-method",
+  "description": "Challenge with unrecognized payment method parses successfully",
+  "category": "edge",
+  "input": {
+    "type": "challenge",
+    "header": "Payment id=\"edge_method\", realm=\"api.example.com\", method=\"future-crypto-v9\", intent=\"charge\", request=\"eyJhbW91bnQiOiIxMDAwIn0\""
+  },
+  "expected": {
+    "valid": true,
+    "method": "future-crypto-v9",
+    "intent": "charge"
+  },
+  "notes": "Envelope-first design: parser accepts any method string. Method-specific payloads are typed unknown."
+}

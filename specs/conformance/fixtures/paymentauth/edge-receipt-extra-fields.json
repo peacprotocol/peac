@@ -1,0 +1,17 @@
+{
+  "id": "paymentauth-edge-receipt-extra-fields",
+  "description": "Receipt with unknown fields collected in extras",
+  "category": "edge",
+  "input": {
+    "type": "receipt_normalize",
+    "header": "eyJzdGF0dXMiOiJzdWNjZXNzIiwibWV0aG9kIjoiZXhhbXBsZSIsInRpbWVzdGFtcCI6IjIwMjUtMDEtMTVUMTI6MDA6MDBaIiwiY3VzdG9tX2ZpZWxkIjoiY3VzdG9tX3ZhbHVlIiwiZGV0YWlscyI6eyJuZXN0ZWQiOnRydWV9fQ"
+  },
+  "expected": {
+    "valid": true,
+    "status": "success",
+    "method": "example",
+    "has_extras": true,
+    "extra_keys": ["custom_field", "details"]
+  },
+  "notes": "Unknown receipt fields go into extras map. Proves forward-compatibility with method-specific extensions."
+}

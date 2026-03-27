@@ -1,0 +1,34 @@
+{
+  "id": "ucp-valid-order-completed",
+  "description": "Completed UCP order maps to receipt claims with derived payment state",
+  "category": "valid",
+  "input": {
+    "type": "order_mapping",
+    "order": {
+      "id": "order_conf_01",
+      "line_items": [
+        {
+          "id": "li_01",
+          "item": { "id": "p1", "title": "Widget", "price": 2500 },
+          "quantity": { "total": 1, "fulfilled": 1 },
+          "status": "fulfilled"
+        }
+      ],
+      "totals": [
+        { "type": "subtotal", "amount": 2500 },
+        { "type": "total", "amount": 2500 }
+      ]
+    },
+    "options": {
+      "issuer": "https://merchant.example.com",
+      "subject": "agent:conf_01",
+      "currency": "USD"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "payment_state_source": "derived_order_fallback",
+    "order_state": "completed"
+  },
+  "notes": "Completed order without explicit payment_state uses derived_order_fallback."
+}

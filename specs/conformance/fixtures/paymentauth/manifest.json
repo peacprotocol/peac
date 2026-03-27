@@ -1,0 +1,42 @@
+{
+  "name": "paymentauth",
+  "version": "0.12.5",
+  "description": "Conformance vectors for @peac/mappings-paymentauth: envelope-first header parsing, normalization, and evidence mapping per draft-ryan-httpauth-payment-01",
+  "commerce_rail": "paymentauth",
+  "spec_revision": "draft-ryan-httpauth-payment-01",
+  "intent_spec_revision": "draft-ryan-payment-intents-charge-00 (provisional; not publicly listed on datatracker.ietf.org as of 2026-03-27)",
+  "categories": {
+    "valid": {
+      "description": "Valid parsing and mapping scenarios",
+      "vectors": [
+        "valid-receipt-mapping.json",
+        "valid-challenge-parse.json",
+        "valid-credential-parse.json"
+      ]
+    },
+    "invalid": {
+      "description": "Invalid inputs that must produce specific error codes",
+      "vectors": [
+        "invalid-missing-scheme.json",
+        "invalid-missing-challenge-id.json",
+        "invalid-truncated-base64.json",
+        "invalid-receipt-not-json.json"
+      ]
+    },
+    "edge": {
+      "description": "Edge cases and forward-compatibility scenarios",
+      "vectors": ["edge-unknown-method.json", "edge-receipt-extra-fields.json"]
+    },
+    "security": {
+      "description": "Security boundary enforcement",
+      "vectors": ["security-oversized-header.json"]
+    }
+  },
+  "invariants": [
+    "Raw header values MUST NOT appear in thrown errors or debug output",
+    "Parser limits enforced: header size (8 KiB), param count (32), payload size (64 KiB), JSON depth (10)",
+    "Decoded bytes preserved alongside strings for non-UTF-8 safety",
+    "Method-specific payloads typed as unknown; no eager interpretation",
+    "Envelope-first: challenge id, realm, method, intent, request are required; all else is optional"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "ucp-invalid-missing-total-entry",
+  "description": "Order with totals array but no 'total' entry throws UcpError",
+  "category": "invalid",
+  "input": {
+    "type": "order_mapping",
+    "order": {
+      "id": "order_inv_04",
+      "line_items": [
+        {
+          "id": "li_01",
+          "item": { "id": "p1", "title": "Widget", "price": 100 },
+          "quantity": { "total": 1, "fulfilled": 1 },
+          "status": "fulfilled"
+        }
+      ],
+      "totals": [{ "type": "subtotal", "amount": 100 }]
+    },
+    "options": {
+      "issuer": "https://merchant.example.com",
+      "subject": "agent:inv_04",
+      "currency": "USD"
+    }
+  },
+  "expected": {
+    "valid": false,
+    "throws": true,
+    "error_code": "E_UCP_ORDER_MISSING_TOTALS"
+  },
+  "notes": "totals array must include a 'total' entry. Having only 'subtotal' is not sufficient."
+}

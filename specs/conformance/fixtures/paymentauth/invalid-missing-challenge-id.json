@@ -1,0 +1,14 @@
+{
+  "id": "paymentauth-invalid-missing-challenge-id",
+  "description": "Challenge header missing required id parameter",
+  "category": "invalid",
+  "input": {
+    "type": "challenge",
+    "header": "Payment realm=\"api.example.com\", method=\"example\", intent=\"charge\", request=\"eyJhbW91bnQiOiIxMDAwIn0\""
+  },
+  "expected": {
+    "valid": false,
+    "error_code": "NORMALIZE_MISSING_FIELD"
+  },
+  "notes": "The id param is required per draft-ryan-httpauth-payment-01 Section 5.1."
+}

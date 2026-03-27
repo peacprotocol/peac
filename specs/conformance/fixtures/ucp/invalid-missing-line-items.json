@@ -1,0 +1,22 @@
+{
+  "id": "ucp-invalid-missing-line-items",
+  "description": "Order without line_items is rejected",
+  "category": "invalid",
+  "input": {
+    "type": "order_mapping",
+    "order": {
+      "id": "order_inv_01",
+      "totals": [{ "type": "total", "amount": 0 }]
+    },
+    "options": {
+      "issuer": "https://merchant.example.com",
+      "subject": "agent:inv_01",
+      "currency": "USD"
+    }
+  },
+  "expected": {
+    "valid": false,
+    "error_reason": "missing_line_items"
+  },
+  "notes": "line_items is required for UCP order mapping."
+}

@@ -1,0 +1,24 @@
+{
+  "id": "stripe-valid-spt-grant",
+  "description": "SPT grant maps to delegation evidence without commerce event",
+  "category": "valid",
+  "input": {
+    "type": "spt_grant",
+    "data": {
+      "id": "grant_conf_01",
+      "token_id": "tok_conf_01",
+      "seller_scope": {
+        "merchant_id": "merch_01",
+        "restrictions": {}
+      },
+      "amount_limit": "10000",
+      "currency": "usd"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "has_commerce_event": false,
+    "spt_action": "delegated_payment_granted"
+  },
+  "notes": "SPT grant is delegation evidence. No commerce event. The grant proves delegation scope, not payment finality."
+}

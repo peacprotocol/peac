@@ -1,0 +1,21 @@
+{
+  "id": "stripe-invalid-spt-negative-amount",
+  "description": "SPT use with negative amount string falls back to zero",
+  "category": "invalid",
+  "input": {
+    "type": "spt_use",
+    "data": {
+      "id": "use_inv_01",
+      "token_id": "tok_inv_01",
+      "amount": "-500",
+      "currency": "usd",
+      "merchant_id": "merch_01"
+    }
+  },
+  "expected": {
+    "valid": true,
+    "degraded": true,
+    "amount": 0
+  },
+  "notes": "Stripe SPT functions do not throw. Negative amount fails /^[0-9]+$/ regex and falls back to 0."
+}
