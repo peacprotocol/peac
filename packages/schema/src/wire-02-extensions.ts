@@ -17,6 +17,8 @@ export {
   // Commerce
   COMMERCE_EXTENSION_KEY,
   CommerceExtensionSchema,
+  AmountMinorStringSchema,
+  isValidAmountMinor,
   getCommerceExtension,
   // Access
   ACCESS_EXTENSION_KEY,

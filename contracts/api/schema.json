@@ -1,7 +1,7 @@
 {
   "package": "@peac/schema",
-  "version": "0.12.1",
-  "extracted_at": "2026-03-16",
+  "version": "0.12.4",
+  "extracted_at": "2026-03-27",
   "node_version": "v24.13.0",
   "value_exports": [
     {
@@ -66,6 +66,10 @@
     },
     {
       "name": "AgentProofSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AmountMinorStringSchema",
       "typeof": "static"
     },
     {
@@ -1329,6 +1333,10 @@
       "typeof": "static"
     },
     {
+      "name": "isValidAmountMinor",
+      "typeof": "static"
+    },
+    {
       "name": "isValidDisputeAttestation",
       "typeof": "static"
     },
@@ -1787,6 +1795,6 @@
     "PurposeExtensionSchema",
     "SafetyExtensionSchema"
   ],
-  "total_value_exports": 384,
+  "total_value_exports": 386,
   "total_type_exports": 190
 }
