@@ -20,14 +20,29 @@
   },
   "keywords": [
     "peac",
-    "transport",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "transport-grpc",
     "grpc",
-    "status-codes"
+    "protobuf",
+    "rpc"
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "devDependencies": {
     "typescript": "^5.6.2",
     "vitest": "^4.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "packages/transport/grpc"
   }
 }

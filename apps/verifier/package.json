@@ -24,9 +24,29 @@
     "vite": "^6.0.0",
     "vitest": "^4.0.0"
   },
-  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "app",
+    "verifier",
+    "verification"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "apps/verifier"
   }
 }

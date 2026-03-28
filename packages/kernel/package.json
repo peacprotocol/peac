@@ -43,7 +43,11 @@
   },
   "keywords": [
     "peac",
-    "protocol",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "kernel",
     "constants",
     "errors",
@@ -53,7 +57,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/kernel"
   },
   "bugs": {

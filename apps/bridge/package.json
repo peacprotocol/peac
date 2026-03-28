@@ -47,14 +47,27 @@
   },
   "keywords": [
     "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "app",
     "bridge",
-    "sidecar",
-    "adapter",
-    "local-development"
+    "gateway"
   ],
-  "author": "PEAC Protocol",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "apps/bridge"
   }
 }

@@ -28,21 +28,30 @@
   },
   "keywords": [
     "peac",
-    "protocol",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "contracts",
     "errors",
     "rfc9457",
-    "http"
+    "problem-details"
   ],
-  "author": "PEAC Protocol contributors",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/contracts"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
     "vitest": "^4.0.0",
     "tsup": "^8.0.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme"
 }

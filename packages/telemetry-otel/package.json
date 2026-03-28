@@ -4,11 +4,17 @@
   "description": "OpenTelemetry adapter for PEAC telemetry",
   "keywords": [
     "peac",
-    "telemetry",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "opentelemetry",
-    "observability"
+    "otel",
+    "tracing",
+    "spans"
   ],
-  "author": "PEAC Protocol contributors",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -52,12 +58,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/telemetry-otel"
   },
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
-  "homepage": "https://www.peacprotocol.org",
+  "homepage": "https://github.com/peacprotocol/peac#readme",
   "sideEffects": false
 }

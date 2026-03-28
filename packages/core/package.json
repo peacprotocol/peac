@@ -3,13 +3,13 @@
   "version": "0.12.5",
   "description": "DEPRECATED - Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead",
   "type": "module",
-  "homepage": "https://www.peacprotocol.org",
+  "homepage": "https://github.com/peacprotocol/peac#readme",
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/core"
   },
   "main": "dist/index.js",
@@ -63,12 +63,17 @@
   },
   "keywords": [
     "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "core",
     "jws",
     "security",
-    "observability"
+    "legacy"
   ],
-  "author": "PEAC Protocol",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=22.0.0"

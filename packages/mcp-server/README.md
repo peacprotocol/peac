@@ -1,278 +1,26 @@
 # @peac/mcp-server
 
-Verify, issue, and bundle PEAC receipts in any MCP client (Claude Desktop, Cursor, Windsurf): locally, offline, no API keys.
+MCP tool server for signed interaction receipt operations: verify, inspect, decode, issue, and bundle.
 
-## Quick Start
-
-### 1. Add to your AI tool (read-only tools)
-
-**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
-
-```json
-{
-  "mcpServers": {
-    "peac": {
-      "command": "npx",
-      "args": ["-y", "@peac/mcp-server"]
-    }
-  }
-}
-```
-
-**Cursor / Windsurf** (`.mcp.json` at project root):
-
-```json
-{
-  "mcpServers": {
-    "peac": {
-      "command": "npx",
-      "args": ["-y", "@peac/mcp-server"]
-    }
-  }
-}
-```
-
-### 1b. Full configuration (with issuing and bundles)
-
-**Claude Desktop** with all tools enabled:
-
-```json
-{
-  "mcpServers": {
-    "peac": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@peac/mcp-server",
-        "--issuer-key",
-        "env:PEAC_ISSUER_KEY",
-        "--issuer-id",
-        "https://your-service.example.com",
-        "--bundle-dir",
-        "/tmp/peac-bundles",
-        "--jwks-file",
-        "./keys/jwks.json"
-      ],
-      "env": {
-        "PEAC_ISSUER_KEY": "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"d\":\"...\",\"x\":\"...\"}"
-      }
-    }
-  }
-}
-```
-
-**Cursor / Windsurf** (`.mcp.json` at project root):
-
-```json
-{
-  "mcpServers": {
-    "peac": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@peac/mcp-server",
-        "--issuer-key",
-        "file:./keys/issuer.jwk",
-        "--issuer-id",
-        "https://your-service.example.com",
-        "--bundle-dir",
-        "./bundles"
-      ]
-    }
-  }
-}
-```
-
-### 2. Try it (15 seconds)
-
-Decode a demo receipt from the command line:
+## Installation
 
 ```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"demo","version":"1.0"}}}
-{"jsonrpc":"2.0","method":"notifications/initialized"}
-{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"peac_decode","arguments":{"jws":"eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMtcmVjZWlwdC8wLjEiLCJraWQiOiJkZW1vIn0.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vY2xpZW50LmV4YW1wbGUuY29tIiwiYW10IjoxMDAsImN1ciI6IlVTRCIsInJhaWwiOiJzdHJpcGUiLCJyZWYiOiJ0eF9kZW1vIiwiaWF0IjoxNzM5MDAwMDAwfQ.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}}}' | npx -y @peac/mcp-server 2>/dev/null | tail -1 | node -e "process.stdin.on('data',d=>{const r=JSON.parse(d).result;console.log(JSON.stringify(r.structuredContent,null,2))})"
+pnpm add @peac/mcp-server
 ```
 
-Or ask your agent directly:
-
-> "Decode this PEAC receipt: eyJhbGciOiJFZERTQSIsInR5cCI6InBlYWMt..."
-
-The agent will use `peac_verify` (with a public key), `peac_inspect` (metadata only), or `peac_decode` (raw header + payload) depending on context.
-
-## Tools
-
-| Tool                 | What it does                                            | Needs key? | Needs bundle-dir? |
-| -------------------- | ------------------------------------------------------- | ---------- | ----------------- |
-| `peac_verify`        | Cryptographic signature verification + claim validation | No\*       | No                |
-| `peac_inspect`       | Decode metadata without verifying signature             | No         | No                |
-| `peac_decode`        | Raw JWS header + payload dump                           | No         | No                |
-| `peac_issue`         | Sign and return a PEAC receipt JWS                      | Yes        | No                |
-| `peac_create_bundle` | Create a signed evidence bundle directory               | Yes        | Yes               |
-
-\* `peac_verify` needs a public key (inline, via JWKS, or `--jwks-file`) but not an issuer key.
-
-Privileged tools (`peac_issue`, `peac_create_bundle`) only appear in `tools/list` when the server is started with `--issuer-key` and `--issuer-id`. The bundle tool additionally requires `--bundle-dir`.
-
-Note: stdout is reserved for JSON-RPC messages. All diagnostics, banners, and errors go to stderr.
-
-## Two Operating Modes
-
-**Pure mode** (default): verify, inspect, and decode receipts anywhere. No keys, no filesystem writes, no configuration needed. Safe for any environment.
+Or run directly:
 
 ```bash
-npx -y @peac/mcp-server
+npx @peac/mcp-server
 ```
 
-**Issuer mode**: additionally issue receipts and create signed evidence bundles. Requires explicit operator opt-in via CLI flags. Privileged tools are only visible and callable when their prerequisites are configured:
+## What It Does
 
-- `--issuer-key` + `--issuer-id` enables `peac_issue`
-- `--bundle-dir` additionally enables `peac_create_bundle`
+`@peac/mcp-server` exposes PEAC receipt operations as Model Context Protocol (MCP) tools that AI agents and LLM-based applications can call. It supports both stdio and Streamable HTTP transports, with static policy enforcement, concurrency limits, input size guards, and structured error responses with recovery hints.
 
-```bash
-npx -y @peac/mcp-server \
-  --issuer-key env:PEAC_KEY \
-  --issuer-id https://your-service.example.com \
-  --bundle-dir ./bundles
-```
+## How Do I Use It?
 
-Evidence bundles are self-contained directories with canonical manifests (sorted keys, SHA-256 receipt hashes, content-addressable `bundle_id`) and signed provenance (`manifest.jws`). The `bundle_id` is deterministic: same receipts and policy always produce the same ID regardless of when the bundle is created. Manifest content includes `created_at`, so the signature differs across runs. Bundles can be verified offline, diffed, cached, and used for audits, disputes, or SOC 2 evidence collection.
-
-## Transports
-
-### stdio (default)
-
-Standard MCP transport for local/CLI usage. JSON-RPC over stdin/stdout.
-
-```bash
-npx -y @peac/mcp-server
-```
-
-### Streamable HTTP (v0.11.0+)
-
-Remote transport for network-accessible MCP servers. Session-isolated with per-session `McpServer` + transport pairs (CVE-2026-25536 defense).
-
-```bash
-npx -y @peac/mcp-server --transport http --port 3000
-```
-
-Endpoints:
-
-- `POST /mcp`: JSON-RPC tool calls (requires `Mcp-Session-Id` after initialization)
-- `DELETE /mcp`: terminate session
-- `GET /health`: health check (no auth)
-- `GET /.well-known/oauth-protected-resource[/<path>]`: RFC 9728 PRM (when configured)
-
-Security defaults: localhost-only bind, CORS deny-all, 1MB request body limit, per-session + per-IP rate limiting (100 req/min), session TTL (30 min), max 100 concurrent sessions.
-
-See [HTTP Transport Security](../../docs/security/HTTP-TRANSPORT-SECURITY.md) for the full security model.
-
-## CLI Options
-
-```text
-peac-mcp-server [options]
-
-Options:
-  --issuer-key <ref>          Issuer signing key (env:VAR or file:/path to Ed25519 JWK)
-  --issuer-id <uri>           Issuer identifier URI (required with --issuer-key)
-  --bundle-dir <path>         Directory for evidence bundle output
-  --policy <path>             Policy configuration file (JSON)
-  --jwks-file <path>          JWKS file for verifier key resolution
-  --transport <type>          Transport: stdio (default) or http
-  --port <number>             HTTP port (default: 3000, http only)
-  --host <address>            HTTP bind address (default: 127.0.0.1)
-  --cors-origins <list>       Allowed CORS origins (comma-separated)
-  --authorization-servers <l> OAuth authorization server URIs (enables PRM)
-  --public-url <url>          Canonical public URL (required for PRM)
-  --trust-proxy <preset>      Trust X-Forwarded-For (off/loopback/linklocal/private/all)
-  -V, --version               Output version number
-  -h, --help                  Display help
-```
-
-## Policy Configuration
-
-Optional JSON file to customize behavior:
-
-```json
-{
-  "version": "1",
-  "allow_network": false,
-  "redaction": {
-    "strip_evidence": false,
-    "strip_payment": false,
-    "inspect_full_claims": false
-  },
-  "tools": {
-    "peac_verify": { "enabled": true },
-    "peac_inspect": { "enabled": true },
-    "peac_decode": { "enabled": true },
-    "peac_issue": { "enabled": true },
-    "peac_create_bundle": { "enabled": true }
-  },
-  "limits": {
-    "max_jws_bytes": 16384,
-    "max_response_bytes": 65536,
-    "tool_timeout_ms": 30000,
-    "max_concurrency": 10,
-    "max_claims_bytes": 262144,
-    "max_bundle_receipts": 256,
-    "max_bundle_bytes": 16777216,
-    "max_ttl_seconds": 86400
-  }
-}
-```
-
-## Library Usage
-
-Handlers can be used directly without the MCP server:
-
-```typescript
-import { handleVerify, getDefaultPolicy, computePolicyHash } from '@peac/mcp-server';
-
-const policy = getDefaultPolicy();
-const policyHash = await computePolicyHash(JSON.stringify(policy));
-
-const result = await handleVerify({
-  input: { jws: 'eyJ...', public_key_base64url: '...' },
-  policy,
-  context: {
-    version: '0.11.0',
-    policyHash,
-    protocolVersion: '2025-11-25',
-  },
-});
-
-if (result.structured.ok) {
-  // Signature valid, claims verified
-}
-```
-
-## MCP SDK Compatibility
-
-This package pins `@modelcontextprotocol/sdk` at `~1.27.0` (>= 1.26.0 required for CVE-2026-25536 fix). The SDK peer dependency accepts Zod `^3.25 || ^4.0`; the workspace uses Zod 4. If upgrading the SDK, verify tool registration still works by running `pnpm --filter @peac/mcp-server test`. See `package.json` for actual pinned versions.
-
-## How to Verify a Receipt
-
-1. Add the MCP server to your agent (see Quick Start above).
-2. Provide the receipt JWS and a public key (base64url-encoded Ed25519).
-3. Call `peac_verify` and check the `ok` field in the response.
-
-```text
-> "Verify this receipt: eyJhbGci... with public key MCowBQYDK2..."
-```
-
-The tool returns structured content with `ok: true/false`, claim details, and the verification report.
-
-## How to Issue a Receipt
-
-Issuance requires an Ed25519 signing key. Start the server with `--issuer-key` and `--issuer-id`:
-
-```bash
-npx -y @peac/mcp-server --issuer-key env:PEAC_KEY --issuer-id https://your-service.example.com
-```
-
-Then call `peac_issue` with the receipt claims (amount, currency, rail, reference, audience).
-
-## Use with Claude Desktop
+### Add to Claude Desktop
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
@@ -287,11 +35,9 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop. The PEAC tools appear in the tool picker.
+### Add to Cursor or Windsurf
 
-## Use with Cursor
-
-Add to `.cursor/mcp.json` at your project root:
+Add to `.mcp.json` at your project root:
 
 ```json
 {
@@ -304,27 +50,95 @@ Add to `.cursor/mcp.json` at your project root:
 }
 ```
 
-Restart Cursor. PEAC tools are available in chat.
+### Enable receipt issuance
 
-## Architecture
+```bash
+npx @peac/mcp-server \
+  --issuer-key env:PEAC_ISSUER_KEY \
+  --issuer-id https://example.com
+```
 
-- **DD-51**: Pure handlers with no MCP SDK dependency
-- **DD-52**: No ambient key discovery: explicit `--issuer-key` only
-- **DD-53**: Static policy loaded once at startup with SHA-256 hash
-- **DD-54**: Structured outputs (`structuredContent` + `text`) on every response
-- **DD-55**: No URLs resolved from tool inputs (SSRF prevention)
-- **DD-57**: Core modules (`handlers/`, `schemas/`, `infra/`) have zero MCP SDK imports
-- **DD-58**: Line-buffered stdout fence validates JSON-RPC 2.0 output (stdio only)
-- **DD-119**: Streamable HTTP as additive remote transport (session-isolated)
-- **DD-123**: HTTP security boundaries (CORS, rate limiting, Origin/Host validation)
+### Start with HTTP transport
 
-## Links
+```bash
+npx @peac/mcp-server --transport http --port 3000
+```
 
-- Protocol: [peacprotocol.org](https://www.peacprotocol.org)
-- GitHub: [peacprotocol/peac](https://github.com/peacprotocol/peac)
-- npm: [@peac/mcp-server](https://www.npmjs.com/package/@peac/mcp-server)
-- Built by [Originary](https://www.originary.xyz)
+### MCP tools
+
+| Tool                 | Description                               | Availability                                               |
+| -------------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| `peac_verify`        | Verify a receipt JWS signature and claims | Always                                                     |
+| `peac_inspect`       | Inspect receipt structure and metadata    | Always                                                     |
+| `peac_decode`        | Decode a receipt JWS without verification | Always                                                     |
+| `peac_issue`         | Sign and return a new receipt JWS         | Requires `--issuer-key` and `--issuer-id`                  |
+| `peac_create_bundle` | Create a signed evidence bundle directory | Requires `--issuer-key`, `--issuer-id`, and `--bundle-dir` |
+
+All tool responses include `_meta` with `serverVersion`, `policyHash`, `protocolVersion`, and `registeredTools`.
+
+### CLI options
+
+| Flag                    | Description                                            | Default          |
+| ----------------------- | ------------------------------------------------------ | ---------------- |
+| `--transport <type>`    | Transport: `stdio` or `http`                           | `stdio`          |
+| `--port <number>`       | HTTP port                                              | `3000`           |
+| `--host <address>`      | HTTP bind address                                      | `127.0.0.1`      |
+| `--issuer-key <ref>`    | Issuer key reference (`env:VAR` or `file:/path`)       | None             |
+| `--issuer-id <uri>`     | Issuer identifier URI                                  | None             |
+| `--policy <path>`       | Policy configuration file path                         | Built-in default |
+| `--jwks-file <path>`    | JWKS file for verifier key resolution                  | None             |
+| `--bundle-dir <path>`   | Directory for evidence bundle output                   | None             |
+| `--cors-origins <list>` | Allowed CORS origins (comma-separated, HTTP only)      | None             |
+| `--trust-proxy <value>` | Trust `X-Forwarded-For` (`off`, `loopback`, `private`) | `off`            |
+
+### Programmatic usage
+
+Handlers can be used directly without the MCP server binding:
+
+```typescript
+import { createPeacMcpServer, handleVerify } from '@peac/mcp-server';
+import { getDefaultPolicy, computePolicyHash } from '@peac/mcp-server';
+
+const policy = getDefaultPolicy();
+const policyHash = await computePolicyHash(JSON.stringify(policy));
+
+const result = await handleVerify({
+  input: { jws: 'eyJ...', public_key_base64url: '...' },
+  policy,
+  context: {
+    version: '0.12.4',
+    policyHash,
+    protocolVersion: '0.2',
+  },
+});
+```
+
+## Integrates With
+
+- `@peac/protocol` (Layer 3): Receipt issuance and verification
+- `@peac/crypto` (Layer 2): JWS signing and decoding
+- `@peac/schema` (Layer 1): Receipt schema validation
+- `@peac/kernel` (Layer 0): Error codes and constants
+- `@modelcontextprotocol/sdk`: MCP server and transport bindings
+
+## For Agent Developers
+
+Connect your agent to this server over stdio or HTTP to gain receipt verification, decoding, and issuance capabilities. The tools use structured outputs with error codes and `next_action` recovery hints so your agent can handle failures programmatically. Every response includes `_meta` for audit and traceability.
+
+Read-only tools (`peac_verify`, `peac_inspect`, `peac_decode`) are available with no configuration. To enable issuance, provide an Ed25519 signing key via `--issuer-key` and `--issuer-id`.
+
+## For Operators
+
+The server enforces static policy with configurable concurrency limits, input size bounds, JWS size caps, and tool timeouts. HTTP transport binds to localhost by default with CORS deny-all. The stdout fence prevents non-JSON-RPC output from corrupting the stdio transport.
+
+Security properties: no ambient key discovery (keys must be explicitly provided), no implicit network fetches from tool handlers, path traversal prevention on bundle output, and session isolation on HTTP transport.
 
 ## License
 
 Apache-2.0
+
+---
+
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)

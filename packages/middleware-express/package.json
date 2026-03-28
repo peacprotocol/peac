@@ -15,10 +15,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/middleware-express"
   },
-  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
@@ -57,5 +57,17 @@
     "typescript": "^5.3.3",
     "vitest": "^4.0.0",
     "tsup": "^8.0.0"
-  }
+  },
+  "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "express",
+    "middleware",
+    "receipt-header",
+    "node-http"
+  ]
 }

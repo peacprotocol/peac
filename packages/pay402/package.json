@@ -45,17 +45,21 @@
   },
   "keywords": [
     "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "http-402",
-    "payment",
+    "payment-negotiation",
     "x402",
-    "l402",
-    "stripe"
+    "l402"
   ],
-  "author": "PEAC Protocol",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/pay402"
   },
   "bugs": {

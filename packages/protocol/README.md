@@ -1,6 +1,6 @@
 # @peac/protocol
 
-PEAC protocol implementation: receipt issuance, offline verification, and JWKS resolution.
+Receipt issuance and verification for the PEAC protocol.
 
 ## Installation
 
@@ -10,54 +10,77 @@ pnpm add @peac/protocol
 
 ## What It Does
 
-`@peac/protocol` is Layer 3 of the PEAC stack. It provides `issue()` for signing receipts and `verifyLocal()` for offline verification with Ed25519 public keys. No network calls needed for verification.
+`@peac/protocol` is Layer 3 of the PEAC protocol stack. It provides the high-level `issue()` and `verifyLocal()` APIs for creating and verifying signed interaction receipts in the Interaction Record format. It handles schema validation, kernel constraint enforcement, JOSE hardening, strictness profiles, policy binding, and structured error reporting.
 
-## How Do I Issue a Receipt?
+## How Do I Use It?
+
+### Issue a signed receipt
 
 ```typescript
-import { generateKeypair } from '@peac/crypto';
-import { issue } from '@peac/protocol';
+import { issue, generateKeypair } from '@peac/protocol';
 
-const { publicKey, privateKey } = await generateKeypair();
+const { privateKey, publicKey } = await generateKeypair();
 
-const { jws } = await issue({
-  iss: 'https://api.example.com',
+const result = await issue({
+  iss: 'https://example.com',
   kind: 'evidence',
-  type: 'org.peacprotocol/payment',
+  type: 'org.peacprotocol/commerce',
+  privateKey,
+  kid: 'key-1',
   pillars: ['commerce'],
   extensions: {
     'org.peacprotocol/commerce': {
-      payment_rail: 'stripe',
-      amount_minor: '10000',
+      rail: 'stripe',
+      amount_minor: '1000',
       currency: 'USD',
+      event: 'authorization',
     },
   },
-  privateKey,
-  kid: 'key-2026-02',
 });
+
+console.log(result.jws); // compact JWS string
 ```
 
-## How Do I Verify a Receipt?
+### Verify a receipt locally
 
 ```typescript
 import { verifyLocal } from '@peac/protocol';
 
-const result = await verifyLocal(jws, publicKey);
+const result = await verifyLocal(jws, publicKey, {
+  issuer: 'https://example.com',
+  strictness: 'strict',
+});
 
-if (result.valid && result.wireVersion === '0.2') {
-  console.log(result.claims.iss); // issuer
-  console.log(result.claims.kind); // evidence
-  console.log(result.claims.type); // org.peacprotocol/payment
-} else if (!result.valid) {
-  console.log(result.code, result.message);
+if (result.valid) {
+  console.log(result.claims.type); // 'org.peacprotocol/commerce'
+  console.log(result.claims.kind); // 'evidence'
+  console.log(result.kid); // 'key-1'
+  console.log(result.warnings); // VerificationWarning[]
+  console.log(result.policy_binding); // 'unavailable' | 'verified'
+} else {
+  console.log(result.code); // e.g., 'E_INVALID_SIGNATURE'
+  console.log(result.message);
 }
 ```
 
-## How Do I Verify with JWKS Discovery?
+### Verify with policy binding
 
-> **Note:** `verifyReceipt()` is deprecated (Wire 0.1 only). For Wire 0.2 receipts,
-> resolve the issuer's JWKS manually and pass the public key to `verifyLocal()`.
-> Automated JWKS discovery for Wire 0.2 is planned for a future release.
+```typescript
+import { verifyLocal, computePolicyDigestJcs } from '@peac/protocol';
+
+const policyDoc = { rules: [{ action: 'allow', resource: '/api/*' }] };
+const digest = await computePolicyDigestJcs(policyDoc);
+
+const result = await verifyLocal(jws, publicKey, {
+  policyDigest: digest,
+});
+
+if (result.valid) {
+  console.log(result.policy_binding); // 'verified' if receipt policy matches
+}
+```
+
+### Verify with JWKS discovery
 
 ```typescript
 import { verifyLocal } from '@peac/protocol';
@@ -69,25 +92,26 @@ const result = await verifyLocal(jws, resolvedPublicKey, {
 });
 
 if (result.valid) {
-  console.log('Issuer:', result.claims.iss);
-} else {
-  console.log(result.code, result.message);
+  console.log(result.claims.iss);
 }
 ```
 
 ## Integrates With
 
-- `@peac/crypto` (Layer 2): Ed25519 key generation and JWS encoding
-- `@peac/kernel` (Layer 0): Error codes and wire format constants
-- `@peac/schema` (Layer 1): Receipt claim validation
-- `@peac/mcp-server` (Layer 5): MCP tool server using protocol functions
-- `@peac/middleware-express` (Layer 3.5): Express middleware for automatic receipt issuance
+- `@peac/kernel` (Layer 0): Constants, types, and error codes
+- `@peac/schema` (Layer 1): Zod schemas and claim validation
+- `@peac/crypto` (Layer 2): Ed25519 signing and JWS creation (re-exported for convenience)
+- `@peac/mcp-server` (Layer 5): MCP tool server built on this package
+- All `@peac/adapter-*` and `@peac/mappings-*` packages (Layer 4)
 
-## Security
+## For Agent Developers
 
-- Verification is offline and deterministic: no network calls for `verifyLocal()`
-- Fail-closed: invalid or missing evidence always produces a verification failure
-- JWKS resolution (when used) is SSRF-hardened with HTTPS-only, private IP denial
+If you are building an AI agent or MCP server that needs signed interaction receipts:
+
+- Start with [`@peac/mcp-server`](https://www.npmjs.com/package/@peac/mcp-server) for a ready-to-use MCP tool server
+- Use `issue()` to create receipts and `verifyLocal()` to verify them when you have the public key
+- Common crypto utilities (`generateKeypair`, `base64urlEncode`, `sha256Hex`, `verify`) are re-exported from `@peac/crypto` so a single import is sufficient for most workflows
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview
 
 ## License
 
