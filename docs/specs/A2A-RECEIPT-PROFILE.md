@@ -1,46 +1,44 @@
 # A2A Receipt Profile
 
-**Version:** 0.1
+**Version:** 0.2
 **Status:** Normative
 **Package:** `@peac/mappings-a2a`
-**A2A Spec Version:** v0.3.0 (stable)
+**A2A Spec Version:** v1.0.0 (stable); v0.3.0 (deprecated, supported via normalizer)
 **Extension URI:** `https://www.peacprotocol.org/ext/traceability/v1`
-**Depends on:** Evidence Carrier Contract (DD-124)
+**Depends on:** Evidence Carrier Contract (DD-124), A2A v1.0 transition normalizer (DD-186)
 
-This document specifies how PEAC evidence carriers are placed within A2A (Agent-to-Agent Protocol) messages and metadata. It covers Agent Card declaration, metadata layout, header conventions, and security considerations.
+This document specifies how PEAC evidence carriers are placed within A2A (Agent-to-Agent Protocol) messages and metadata. It covers Agent Card declaration, metadata layout, header conventions, and security considerations. Both A2A v1.0.0 and v0.3.0 (deprecated) wire formats are supported via the dual-version normalizer (DD-186).
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown here.
 
 ## 1. Overview
 
-A2A (Linux Foundation) defines a protocol for agent-to-agent communication. PEAC provides an evidence layer that agents can use to carry payment receipts, consent records, and other traceability data alongside A2A messages.
+A2A (Linux Foundation) defines a protocol for agent-to-agent communication. PEAC provides an evidence layer that agents can use to carry signed interaction receipts, consent records, and other traceability data alongside A2A messages.
 
-PEAC evidence is carried as an A2A extension, registered via the Agent Card and transmitted in metadata maps on TaskStatus, Message, and Artifact objects.
+PEAC evidence is carried as an A2A extension, registered via the Agent Card and transmitted in metadata maps on TaskStatus, Message, and Artifact objects. This profile supports both HTTP/SSE and gRPC transports as defined in A2A v1.0.
 
 ## 2. Extension Registration
 
 ### 2.1 Agent Card Declaration
 
-Agents that support PEAC evidence MUST declare the extension in their Agent Card's `capabilities.extensions` array (A2A v0.3.0):
+Agents that support PEAC evidence MUST declare the extension in their Agent Card's `extensions` array (A2A v1.0.0):
 
 ```json
 {
   "name": "ExampleAgent",
   "url": "https://agent.example.com",
-  "capabilities": {
-    "extensions": [
-      {
-        "uri": "https://www.peacprotocol.org/ext/traceability/v1",
-        "description": "PEAC receipt evidence for agent interactions",
-        "required": false,
-        "params": {
-          "supported_kinds": ["peac-receipt/0.1"],
-          "carrier_formats": ["embed", "reference"],
-          "issuer_config_url": "https://agent.example.com/.well-known/peac-issuer.json"
-        }
+  "extensions": [
+    {
+      "uri": "https://www.peacprotocol.org/ext/traceability/v1",
+      "description": "PEAC signed interaction receipt evidence",
+      "required": false,
+      "params": {
+        "supported_kinds": ["interaction-record+jwt", "peac-receipt/0.1"],
+        "carrier_formats": ["embed", "reference"],
+        "issuer_config_url": "https://agent.example.com/.well-known/peac-issuer.json"
       }
-    ]
-  }
+    }
+  ]
 }
 ```
 
@@ -55,21 +53,21 @@ Agents that support PEAC evidence MUST declare the extension in their Agent Card
 
 **Params schema:**
 
-| Field               | Type       | Description                                       |
-| ------------------- | ---------- | ------------------------------------------------- |
-| `supported_kinds`   | `string[]` | Wire format versions (e.g., `peac-receipt/0.1`)   |
-| `carrier_formats`   | `string[]` | Supported carrier formats: `embed`, `reference`   |
-| `issuer_config_url` | `string`   | URI for issuer configuration (`peac-issuer.json`) |
+| Field               | Type       | Description                                                                                                 |
+| ------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| `supported_kinds`   | `string[]` | Wire format versions: `interaction-record+jwt` (Wire 0.2, preferred), `peac-receipt/0.1` (Wire 0.1, legacy) |
+| `carrier_formats`   | `string[]` | Supported carrier formats: `embed`, `reference`                                                             |
+| `issuer_config_url` | `string`   | URI for issuer configuration (`peac-issuer.json`)                                                           |
 
 ### 2.2 Discovery
 
-The Agent Card is discoverable at `/.well-known/agent-card.json` (A2A v0.3.0 canonical path). Implementations SHOULD also check `/.well-known/agent.json` as a fallback for pre-v0.3.0 agents.
+The Agent Card is discoverable at `/.well-known/agent.json` (A2A v1.0.0 canonical path). Implementations SHOULD also check `/.well-known/agent-card.json` as a fallback for pre-v1.0 agents.
 
 ## 3. Metadata Layout
 
 ### 3.1 Placement Convention
 
-Per A2A spec v0.3.0, extension data is placed as a value under the extension URI key in a `metadata` map:
+Per A2A spec v1.0.0, extension data is placed as a value under the extension URI key in a `metadata` map:
 
 ```
 metadata[EXTENSION_URI] = { ...extension_payload }

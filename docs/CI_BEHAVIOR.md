@@ -1,6 +1,6 @@
 # PEAC Protocol CI Behavior
 
-**Version:** 0.9.15
+**Version:** 0.12.6
 **Status:** Authoritative
 
 This document describes the Continuous Integration pipeline behavior for the PEAC Protocol monorepo.
@@ -9,117 +9,155 @@ This document describes the Continuous Integration pipeline behavior for the PEA
 
 ## Overview
 
-CI runs on GitHub Actions for all pushes to `main` and `feat/*` branches, and for all pull requests targeting `main`.
+CI runs on GitHub Actions for all pushes to `main` and for all pull requests. The primary workflow (`.github/workflows/ci.yml`) uses concurrency groups (`ci-${{ github.ref }}`) with cancel-in-progress to avoid redundant runs.
+
+**Node.js:** Version determined by `.node-version` file (currently 24.x Active LTS). Engine requirement: `>=22.0.0`. CI also tests Node 22 (Maintenance LTS) and Node 25 (forward-compat, non-blocking).
+
+**Package manager:** pnpm (version from `packageManager` field in root `package.json`). All CI jobs use `--frozen-lockfile`.
 
 ---
 
-## Jobs
+## Primary Workflow Jobs
 
-### 1. Security Guards (Blocking)
+The primary CI workflow has four jobs:
 
-**Purpose:** Enforce repository-wide security and consistency rules.
+### 1. `ci` (Blocking, ~15 min timeout)
 
-| Check             | Description                                                     | Blocking |
-| ----------------- | --------------------------------------------------------------- | -------- |
-| Forbidden Strings | Prevents secrets, vendor lock-in patterns, and prohibited terms | Yes      |
-| Surface Validator | Validates well-known surfaces and policy files                  | Yes      |
+**Runner:** ubuntu-latest
 
-**Script:** `scripts/ci/forbid-strings.sh`, `scripts/ci/surface-validator.sh`
+The main build, lint, test, and verification job. Runs ~55 sequential checks covering the full quality surface:
 
-### 2. Lint (Blocking)
+**Format and Lint:**
 
-**Purpose:** Enforce code style and quality.
+- Prettier format check
+- ESLint lint
+- Dependency architecture check (dep-cruiser, `NODE_OPTIONS: --max-old-space-size=4096`)
 
-| Check  | Description                  | Blocking |
-| ------ | ---------------------------- | -------- |
-| ESLint | Code style and quality rules | Yes      |
+**Security and Unicode:**
 
-**Commands:**
+- Trojan Source detection (CVE-2021-42574): scans `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.json`, `.md`, `.yaml`, `.yml` files
+- Targeted Unicode scan on previously-flagged files
 
-```bash
-pnpm run lint
-```
+**Codegen and Guards:**
 
-### 3. TypeScript (Advisory)
+- Codegen drift check (`verify:codegen-drift`)
+- Domain guard (`scripts/guard.sh`): 30+ safety invariants including forbidden imports, domain checks, field regression detection, header casing, wire format isolation, and no-network guard
+- Forbidden strings (`scripts/ci/forbid-strings.sh`): RFC/IETF aspiration patterns, emojis, em dashes, vendor names
+- Worker surface typechecks and distribution surface validation
 
-**Purpose:** Type checking across the monorepo.
+**Package and Manifest:**
 
-| Check      | Description                      | Blocking      |
-| ---------- | -------------------------------- | ------------- |
-| TypeScript | Type checking via `tsc --noEmit` | No (advisory) |
+- Package hygiene (drift, duplicates, private + publishConfig)
+- Publish-manifest closure check
+- Publish-manifest invariants (no overlaps, no duplicates, OIDC coverage)
 
-**Note:** TypeScript errors in `archive/`, `examples/`, `scripts/`, and `tests/` are tracked but do not block merges. Published packages (`packages/*`) must be error-free.
+**Protocol Verification:**
 
-**Commands:**
+- Protocol string verification (forbidden patterns)
+- Spec drift verification (constants parity)
+- Error code parity (advisory)
 
-```bash
-pnpm run typecheck
-```
+**TypeScript:**
 
-### 4. Test (Blocking)
+- TypeScript check (core packages, blocking)
+- TypeScript check (legacy packages, advisory)
+- TypeScript check (apps, advisory)
 
-**Purpose:** Run unit and integration tests.
+**Build and Export:**
 
-| Check    | Description         | Blocking      |
-| -------- | ------------------- | ------------- |
-| Vitest   | All test suites     | Yes           |
-| Coverage | Uploaded to Codecov | No (advisory) |
+- Build all packages (`turbo run build`)
+- Capture-core exports verification
 
-**Commands:**
+**Integration Smoke:**
 
-```bash
-pnpm test -- --run
-```
+- Pack-install gate (`scripts/pack-and-install.sh`)
+- OTel pack-and-import smoke (`scripts/otel-smoke.sh`)
 
-### 5. Rail Parity (Critical, Blocking)
+**Generated Files:**
 
-**Purpose:** Ensure all payment rails produce structurally identical receipts.
+- Generated profiles drift check
+- Error codes codegen drift check
 
-This is a **critical** gate. Rail adapters must produce receipts that:
+**Architecture:**
 
-- Have identical envelope structure
-- Differ only in rail-specific `evidence` field
-- Pass cross-rail verification
+- Layer boundary enforcement (`scripts/check-layer-boundaries.sh`)
+- Version coherence check (`scripts/check-version-coherence.sh`)
 
-**Commands:**
+**Conformance:**
 
-```bash
-pnpm test -- tests/conformance/parity.spec.ts --run
-```
+- Bundle vectors sanity check
+- Core tests (`pnpm test:core`)
+- Schema meta-validation
+- Fixture integrity (per-fixture versioning)
+- Conformance tests (all suites)
 
-### 6. Performance Gate (Advisory)
+**Examples and Apps:**
 
-**Purpose:** Enforce verification latency budget.
+- Examples typecheck
+- Quickstart demo (issue + verify)
+- ERC-8004 mapping conformance
+- No X-PEAC headers check
+- App builds and tests (sandbox-issuer, verifier, api)
+- Sandbox issuer health smoke test
 
-| Metric             | Threshold | Blocking      |
-| ------------------ | --------- | ------------- |
-| p95 verify latency | ≤ 10ms    | No (advisory) |
+**Post-Test:**
 
-**Note:** Performance gate is advisory during 0.9.x development phase to track regressions without blocking development velocity.
+- Working tree cleanliness check (no untracked changes after tests)
 
-**Commands:**
+**Performance (Advisory):**
 
-```bash
-pnpm test -- tests/performance/verify.bench.ts --run
-```
+- Performance SLO gate (p95 verify latency, advisory on PRs, blocking on release tags)
+- Extension regression gate (advisory)
+- Benchmark artifact upload (90-day retention)
 
-### 7. Negative Test Vectors (Blocking)
+### 2. `ci-windows` (Blocking, ~10 min timeout)
 
-**Purpose:** Ensure malformed inputs are correctly rejected.
+**Runner:** windows-latest
 
-Tests cover:
+Cross-platform audit gate validation:
 
-- Invalid signatures
-- Expired receipts
-- Malformed JWS
-- Schema violations
-- Missing required fields
+- Audit gate (default mode)
+- Audit gate (strict mode with `AUDIT_STRICT=1`)
+- Audit gate vitest tests
 
-**Commands:**
+### 3. `node-compat` (Blocking, ~15 min timeout)
 
-```bash
-pnpm test -- tests/vectors/negative.spec.ts --run
-```
+**Runner:** ubuntu-latest
+**Strategy:** Matrix `[22, 25]`, fail-fast: false
+
+Node.js compatibility validation:
+
+- Build core packages (kernel, schema, crypto, protocol)
+- Test core packages
+- Extension regression (advisory)
+- Compat benchmark artifact upload
+
+**Release contract:** Node 24.x LTS (canonical) and Node 22.x Maintenance LTS must both pass. Node 25 is NON-BLOCKING.
+
+### 4. `scope-guard` (Blocking, ~2 min timeout, PR-only)
+
+**Runner:** ubuntu-latest
+**Condition:** `github.event_name == 'pull_request'`
+
+PR scope validation: hard-fail when changed files exceed declared scope (opt-in via `scope:*` labels).
+
+---
+
+## Other Workflows
+
+| Workflow                   | Trigger                               | Purpose                                          |
+| -------------------------- | ------------------------------------- | ------------------------------------------------ |
+| `codeql.yml`               | Push (main, release/\*), PR, schedule | Security analysis (CodeQL)                       |
+| `dependency-review.yml`    | PR                                    | Dependency audit review                          |
+| `docs-quality.yml`         | PR (paths: docs/\*\*)                 | Doc linting, forbidden headers, RFC refs         |
+| `go-sdk.yml`               | Push/PR (paths: sdks/go/\*\*)         | Go SDK format, lint, test                        |
+| `nightly.yml`              | Schedule (daily 3 UTC), tags, manual  | Full test suite, integrations, perf              |
+| `pr-metadata-lint.yml`     | PR (opened, edited, synchronize)      | PR title/body security checks                    |
+| `promote-latest.yml`       | Manual                                | npm dist-tag promotion (next to latest)          |
+| `publish.yml`              | Tags (v\*), manual                    | Package publication with OIDC Trusted Publishing |
+| `publish-mcp-registry.yml` | Manual                                | MCP Registry publication                         |
+| `schema-drift.yml`         | Schedule (Mon 9 UTC), manual          | MCP Registry schema drift                        |
+| `x402-drift.yml`           | Schedule (Mon 9 UTC), manual          | x402 upstream spec drift                         |
 
 ---
 
@@ -132,109 +170,65 @@ pnpm test -- tests/vectors/negative.spec.ts --run
 
 Current advisory checks:
 
-- TypeScript (tracking legacy debt in archive/examples/scripts/tests)
-- Performance gate (tracking regressions)
-- Coverage upload
+- TypeScript (legacy and apps)
+- Performance SLO gate (on PRs; blocking on release tags)
+- Extension regression gate
+- Error code parity
+
+---
+
+## Pre-Push Hook (Two-Tier Gate)
+
+**Tier 1 (mandatory, ~10-60s):** Always runs.
+
+- `guard.sh` fast mode
+- `format:check`
+- Planning leak check (if exists locally)
+- Changed-package build + test via turbo filter
+
+**Tier 2 (optional, full CI-parity):** Runs `gate.sh`. Skippable with `PEAC_SKIP_FULL_PRE_PUSH=1`.
 
 ---
 
 ## Local Verification
 
-Run the full CI suite locally before pushing:
-
 ```bash
-# Install dependencies
 pnpm install
-
-# Run all checks
-pnpm run lint
-pnpm run build
-pnpm test:core
-pnpm run typecheck:core
+pnpm lint && pnpm build && pnpm typecheck:core && pnpm test
+./scripts/guard.sh
+pnpm format:check
 ```
+
+Full CI parity: `pnpm ci:local-parity` (runs `gate.sh`).
+
+Fast pre-push check: `pnpm ci:prepush-fast`.
 
 ---
 
-## Performance Metrics
+## Performance Budgets
 
-Performance benchmarks output to `perf-metrics.json`:
+| Metric               | Threshold        | Status                              |
+| -------------------- | ---------------- | ----------------------------------- |
+| p95 verify latency   | <=10 ms          | Advisory (blocking on release tags) |
+| Extension regression | <=5% degradation | Advisory                            |
 
-```json
-{
-  "p50_ms": 0.5,
-  "p95_ms": 1.2,
-  "p99_ms": 2.8,
-  "mean_ms": 0.6,
-  "iterations": 1000
-}
-```
-
-**Budgets:**
-
-- p95 ≤ 10ms (advisory)
-- p99 ≤ 50ms (advisory)
+Benchmark artifacts uploaded to GitHub Actions with 90-day retention.
 
 ---
 
 ## Test Categories
 
-| Category    | Location             | Purpose                           |
-| ----------- | -------------------- | --------------------------------- |
-| Unit        | `packages/*/tests/`  | Package-level unit tests          |
-| Conformance | `tests/conformance/` | Cross-package behavior tests      |
-| Performance | `tests/performance/` | Latency and throughput benchmarks |
-| Vectors     | `tests/vectors/`     | Golden and negative test cases    |
-| E2E         | `tests/e2e/`         | End-to-end integration tests      |
-
----
-
-## Troubleshooting
-
-### TypeScript Errors
-
-If typecheck fails, first ensure all packages are built:
-
-```bash
-pnpm -r build
-pnpm run typecheck
-```
-
-TypeScript errors in published packages (`packages/*` excluding `archive/`) must be fixed. Errors in `archive/`, `examples/`, `scripts/`, and `tests/` are tracked but advisory.
-
-### Performance Gate Failures
-
-1. Check if benchmark ran with cold cache
-2. Verify no expensive operations in hot path
-3. Profile with `--inspect` flag
-4. Check for regression in recent commits
-
-### Forbidden Strings
-
-The guard script checks for:
-
-- API keys and secrets
-- Hardcoded vendor names in core packages
-- Prohibited URL patterns
-- Debug code that shouldn't be committed
-
-To see what's blocked:
-
-```bash
-bash scripts/ci/forbid-strings.sh
-```
-
----
-
-## CI Configuration
-
-**File:** `.github/workflows/ci.yml`
-
-**Node version:** 18 (LTS)
-**Package manager:** pnpm (version from `packageManager` field in package.json)
+| Category    | Location                                   | Purpose                                |
+| ----------- | ------------------------------------------ | -------------------------------------- |
+| Unit        | `packages/*/tests/`                        | Package-level unit tests               |
+| Conformance | `tests/conformance/`, `specs/conformance/` | Cross-package behavior, golden vectors |
+| Performance | `tests/perf/`                              | Latency and throughput benchmarks      |
+| Property    | `packages/*/tests/` (fast-check)           | Property-based testing                 |
 
 ---
 
 ## Related Documentation
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Package structure and dependencies
-- [specs/TEST_VECTORS.md](specs/TEST_VECTORS.md) - Test vector format
+- [ARCHITECTURE.md](ARCHITECTURE.md): Package structure and dependencies
+- [specs/TEST_VECTORS.md](specs/TEST_VECTORS.md): Test vector format
+- [specs/CONFORMANCE-MATRIX.md](specs/CONFORMANCE-MATRIX.md): Conformance coverage
