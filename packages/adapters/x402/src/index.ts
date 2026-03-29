@@ -57,10 +57,14 @@ export { X402_V2_HEADERS } from './raw-v2.js';
 export type { X402WireVersion, X402WireVersionDetection } from './version.js';
 export { detectX402Version, detectX402VersionFromSource } from './version.js';
 
-// Normalized types and functions (Layer B)
+// Normalized types and functions (Layer B, V1)
 export type { NormalizedOfferPayload, NormalizedReceiptPayload } from './normalize.js';
 
 export { normalizeOfferPayload, normalizeReceiptPayload } from './normalize.js';
+
+// Normalized types and functions (Layer B, V2)
+export type { NormalizedV2Offer, NormalizedV2Receipt } from './normalize-v2.js';
+export { normalizeV2Offer, normalizeV2Offers, normalizeV2Receipt } from './normalize-v2.js';
 
 // Public types (Layer B aliases + adapter-specific)
 export type {

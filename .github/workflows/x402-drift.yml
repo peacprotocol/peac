@@ -134,3 +134,16 @@ jobs:
               process.exit(1);
             }
           "
+
+      - name: Check V2 transport spec presence
+        run: |
+          # Verify the V2 HTTP transport spec still exists at the expected path.
+          # If the file moves or is restructured, this fails and alerts maintainers.
+          HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+            "https://raw.githubusercontent.com/coinbase/x402/main/specs/transports-v2/http.md")
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "WARNING: x402 V2 transport spec not found at expected path (HTTP $HTTP_STATUS)"
+            echo "The upstream spec may have moved. Review and update raw-v2.ts if needed."
+            exit 1
+          fi
+          echo "OK: V2 transport spec still at expected upstream path"
