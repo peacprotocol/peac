@@ -76,6 +76,13 @@ export type ReceiptArtifactFormat = 'jws' | 'json' | 'unknown';
 /** Result of extracting a receipt artifact from headers */
 export interface ReceiptArtifactResult {
   source: ReceiptArtifactSource;
+  /**
+   * Detected x402 wire version (1 or 2) based on transport evidence.
+   * For 'x402_v2' source: always 2. For 'x402_v1': always 1.
+   * For 'peac' source: inferred from adjacent x402 headers if present,
+   * otherwise undefined (version-neutral).
+   */
+  wireVersion: 1 | 2 | undefined;
   headerName: string;
   rawArtifact: string;
   parsedForm?: unknown;
@@ -159,6 +166,11 @@ export function extractReceiptArtifactFromHeaders(
   if (peacValue) {
     return {
       source: 'peac',
+      wireVersion: findHeader(headers, X402_V2_RECEIPT_HEADER)
+        ? 2
+        : findHeader(headers, X402_V1_RECEIPT_HEADER)
+          ? 1
+          : undefined,
       headerName: PEAC_RECEIPT_HEADER,
       rawArtifact: peacValue,
       artifactKind: 'receipt',
@@ -174,6 +186,7 @@ export function extractReceiptArtifactFromHeaders(
   if (v2Value) {
     return {
       source: 'x402_v2',
+      wireVersion: 2,
       headerName: X402_V2_RECEIPT_HEADER,
       rawArtifact: v2Value,
       parsedForm: tryParseJson(v2Value),
@@ -189,6 +202,7 @@ export function extractReceiptArtifactFromHeaders(
   if (v1Value) {
     return {
       source: 'x402_v1',
+      wireVersion: 1,
       headerName: X402_V1_RECEIPT_HEADER,
       rawArtifact: v1Value,
       parsedForm: tryParseJson(v1Value),
