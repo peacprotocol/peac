@@ -13,7 +13,7 @@
  * @packageDocumentation
  */
 
-// Raw wire types and extraction (Layer A)
+// Raw wire types and extraction (Layer A, V1)
 export type {
   RawOfferPayload,
   RawReceiptPayload,
@@ -37,6 +37,25 @@ export {
   extractExtensionInfo,
   extractReceiptFromHeaders,
 } from './raw.js';
+
+// Raw wire types (Layer A, V2 transport)
+export type {
+  RawV2Resource,
+  RawV2PaymentRequiredAccept,
+  RawV2PaymentRequired,
+  RawV2PaymentAuthorization,
+  RawV2PaymentProofBody,
+  RawV2PaymentPayload,
+  RawV2SettlementResponseSuccess,
+  RawV2SettlementResponseFailure,
+  RawV2SettlementResponse,
+} from './raw-v2.js';
+
+export { X402_V2_HEADERS } from './raw-v2.js';
+
+// Version detection
+export type { X402WireVersion, X402WireVersionDetection } from './version.js';
+export { detectX402Version, detectX402VersionFromSource } from './version.js';
 
 // Normalized types and functions (Layer B)
 export type { NormalizedOfferPayload, NormalizedReceiptPayload } from './normalize.js';
