@@ -9,7 +9,7 @@ This document describes the Continuous Integration pipeline behavior for the PEA
 
 ## Overview
 
-CI runs on GitHub Actions for all pushes to `main` and for all pull requests. The primary workflow (`.github/workflows/ci.yml`) uses concurrency groups (`ci-${{ github.ref }}`) with cancel-in-progress to avoid redundant runs.
+CI runs on GitHub Actions for all pushes to `main` and for all pull requests. Release validation (tag builds, publication) is handled by separate workflows (`publish.yml`, `nightly.yml`), not the primary CI workflow. The primary workflow (`.github/workflows/ci.yml`) uses concurrency groups (`ci-${{ github.ref }}`) with cancel-in-progress to avoid redundant runs.
 
 **Node.js:** Version determined by `.node-version` file (currently 24.x Active LTS). Engine requirement: `>=22.0.0`. CI also tests Node 22 (Maintenance LTS) and Node 25 (forward-compat, non-blocking).
 
@@ -19,79 +19,77 @@ CI runs on GitHub Actions for all pushes to `main` and for all pull requests. Th
 
 ## Primary Workflow Jobs
 
-The primary CI workflow has four jobs:
+The primary CI workflow uses a `detect-changes` job to classify changed files, then runs up to five parallel lanes. A `ci` aggregator job evaluates all lane results and is the stable required check for branch protection. Three satellite jobs run independently.
 
-### 1. `ci` (Blocking, ~15 min timeout)
+**Gating behavior:** `fast-guards` always runs. `type-build` and `tests-core` run on `main` or when source/CI/root-config files changed (skipped for docs-only PRs). `examples-apps` runs when examples, apps, core, adapters, or root config changed, or on `main`. `pack-smoke` runs when published package surfaces or root config changed, or on `main`. Skipped jobs report `success` (not `pending`) because gating uses job-level `if:`, not workflow-level path filters. Release validation (tags, publication) is handled by separate workflows.
+
+### Change Detection
+
+The `detect-changes` job (ubuntu-latest, ~2 min) uses `dorny/paths-filter` to classify changed files into categories: `core`, `adapters`, `examples`, `apps`, `published`, `ci`, `root_config`, `any_src`. The `root_config` category covers `.node-version`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, `tsconfig*.json`, `vitest*.config.*`, and ESLint/Prettier config, ensuring root build/runtime changes always trigger heavy lanes. Downstream lanes use job-level `if:` conditions (not workflow-level path filters) so that skipped jobs report `success` instead of staying `pending`.
+
+### 0. `workflow-lint` (Always runs, ~2 min)
 
 **Runner:** ubuntu-latest
 
-The main build, lint, test, and verification job. Runs ~55 sequential checks covering the full quality surface:
+Standalone workflow validation using a pinned actionlint binary (v1.7.11) with SHA-256 checksum verification. Does not use the local composite action; validates CI workflow files independently of the setup it is checking.
 
-**Format and Lint:**
+### 1. `fast-guards` (Always runs, ~5 min)
+
+**Runner:** ubuntu-latest
+
+Format, lint, security scans, forbidden strings, distribution and manifest checks, protocol verification:
 
 - Prettier format check
 - ESLint lint
-- Dependency architecture check (dep-cruiser, `NODE_OPTIONS: --max-old-space-size=4096`)
-
-**Security and Unicode:**
-
-- Trojan Source detection (CVE-2021-42574): scans `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.json`, `.md`, `.yaml`, `.yml` files
-- Targeted Unicode scan on previously-flagged files
-
-**Codegen and Guards:**
-
-- Codegen drift check (`verify:codegen-drift`)
-- Domain guard (`scripts/guard.sh`): 30+ safety invariants including forbidden imports, domain checks, field regression detection, header casing, wire format isolation, and no-network guard
-- Forbidden strings (`scripts/ci/forbid-strings.sh`): RFC/IETF aspiration patterns, emojis, em dashes, vendor names
+- Dependency architecture check (dep-cruiser)
+- Trojan Source detection (CVE-2021-42574) and targeted Unicode scan
+- Domain guard (`scripts/guard.sh`): 30+ safety invariants
+- Planning leak check (local-only)
+- Forbidden strings (`scripts/ci/forbid-strings.sh`)
 - Worker surface typechecks and distribution surface validation
-
-**Package and Manifest:**
-
 - Package hygiene (drift, duplicates, private + publishConfig)
-- Publish-manifest closure check
-- Publish-manifest invariants (no overlaps, no duplicates, OIDC coverage)
-
-**Protocol Verification:**
-
+- Publish-manifest closure and invariants checks
 - Protocol string verification (forbidden patterns)
 - Spec drift verification (constants parity)
 - Error code parity (advisory)
 
-**TypeScript:**
+### 2. `type-build` (Gated, ~10 min)
 
-- TypeScript check (core packages, blocking)
-- TypeScript check (legacy packages, advisory)
-- TypeScript check (apps, advisory)
+**Runner:** ubuntu-latest
+**Condition:** Runs on `main` or when core/adapters/any_src/ci/root_config changed. Skipped for docs-only PRs.
 
-**Build and Export:**
+TypeScript checks, build, codegen drift, architecture enforcement:
 
-- Build all packages (`turbo run build`)
+- TypeScript check (core packages, blocking; legacy and apps advisory)
+- Build all packages
 - Capture-core exports verification
-
-**Integration Smoke:**
-
-- Pack-install gate (`scripts/pack-and-install.sh`)
-- OTel pack-and-import smoke (`scripts/otel-smoke.sh`)
-
-**Generated Files:**
-
-- Generated profiles drift check
+- Codegen drift check
 - Error codes codegen drift check
+- Generated profiles drift check
+- Layer boundary enforcement
+- Version coherence check
 
-**Architecture:**
+### 3. `tests-core` (Gated, ~10 min)
 
-- Layer boundary enforcement (`scripts/check-layer-boundaries.sh`)
-- Version coherence check (`scripts/check-version-coherence.sh`)
+**Runner:** ubuntu-latest
+**Condition:** Same as `type-build`: runs on `main` or when core/adapters/any_src/ci/root_config changed.
 
-**Conformance:**
+Core tests, conformance, performance:
 
-- Bundle vectors sanity check
 - Core tests (`pnpm test:core`)
 - Schema meta-validation
 - Fixture integrity (per-fixture versioning)
 - Conformance tests (all suites)
+- Bundle vectors sanity check
+- Working tree cleanliness check
+- Performance SLO gate (advisory in this workflow; blocking in nightly/release workflows)
+- Extension regression gate (advisory)
+- Benchmark artifact upload (90-day retention)
 
-**Examples and Apps:**
+### 4. `examples-apps` (Conditional, ~10 min)
+
+**Runner:** ubuntu-latest
+**Condition:** Runs when examples, apps, core, adapters, or root config changed, or on `main`.
 
 - Examples typecheck
 - Quickstart demo (issue + verify)
@@ -100,17 +98,25 @@ The main build, lint, test, and verification job. Runs ~55 sequential checks cov
 - App builds and tests (sandbox-issuer, verifier, api)
 - Sandbox issuer health smoke test
 
-**Post-Test:**
+### 5. `pack-smoke` (Conditional, ~8 min)
 
-- Working tree cleanliness check (no untracked changes after tests)
+**Runner:** ubuntu-latest
+**Condition:** Runs when published package surfaces or root config changed, or on `main`.
 
-**Performance (Advisory):**
+- Pack and install gate
+- OTel pack-and-import smoke test
 
-- Performance SLO gate (p95 verify latency, advisory on PRs, blocking on release tags)
-- Extension regression gate (advisory)
-- Benchmark artifact upload (90-day retention)
+### 6. `ci` (Aggregator, Blocking, ~1 min)
 
-### 2. `ci-windows` (Blocking, ~10 min timeout)
+**Runner:** ubuntu-latest
+
+Evaluates all lane results. Required lanes (`workflow-lint`, `fast-guards`, `type-build`, `tests-core`) must succeed. Optional lanes (`examples-apps`, `pack-smoke`) may be skipped. Uses `if: always()` so it always runs. This is the stable required check for branch protection.
+
+### Branch-Protection Continuity
+
+The required check name `Build, Lint, Test` (job id: `ci`) is preserved. The old single serial job is replaced internally by the aggregator over parallel lanes. No branch-protection configuration change is needed for this check. `ci-windows`, `node-compat`, and `scope-guard` remain as separate jobs; whether they are required in branch protection depends on repository configuration.
+
+### 7. `ci-windows` (Blocking, ~10 min timeout)
 
 **Runner:** windows-latest
 
@@ -120,7 +126,7 @@ Cross-platform audit gate validation:
 - Audit gate (strict mode with `AUDIT_STRICT=1`)
 - Audit gate vitest tests
 
-### 3. `node-compat` (Blocking, ~15 min timeout)
+### 8. `node-compat` (Blocking, ~15 min timeout)
 
 **Runner:** ubuntu-latest
 **Strategy:** Matrix `[22, 25]`, fail-fast: false
@@ -134,7 +140,7 @@ Node.js compatibility validation:
 
 **Release contract:** Node 24.x LTS (canonical) and Node 22.x Maintenance LTS must both pass. Node 25 is NON-BLOCKING.
 
-### 4. `scope-guard` (Blocking, ~2 min timeout, PR-only)
+### 9. `scope-guard` (Blocking, ~2 min timeout, PR-only)
 
 **Runner:** ubuntu-latest
 **Condition:** `github.event_name == 'pull_request'`
@@ -207,10 +213,10 @@ Fast pre-push check: `pnpm ci:prepush-fast`.
 
 ## Performance Budgets
 
-| Metric               | Threshold        | Status                              |
-| -------------------- | ---------------- | ----------------------------------- |
-| p95 verify latency   | <=10 ms          | Advisory (blocking on release tags) |
-| Extension regression | <=5% degradation | Advisory                            |
+| Metric               | Threshold        | Status                                           |
+| -------------------- | ---------------- | ------------------------------------------------ |
+| p95 verify latency   | <=10 ms          | Advisory (blocking in nightly/release workflows) |
+| Extension regression | <=5% degradation | Advisory                                         |
 
 Benchmark artifacts uploaded to GitHub Actions with 90-day retention.
 

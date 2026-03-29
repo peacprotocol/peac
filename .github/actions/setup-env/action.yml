@@ -1,0 +1,42 @@
+name: Setup Environment
+description: Shared setup for CI jobs (checkout, Node.js, Corepack, pnpm, install)
+
+# Callers MUST run actions/checkout BEFORE using this action.
+# GitHub Actions needs the repo checked out to find local action.yml files.
+#
+# Step order is intentional and must not be rearranged:
+#   1. corepack enable (uses runner's preinstalled Node to parse packageManager)
+#   2. pnpm/action-setup (makes pnpm binary available for cache key resolution)
+#   3. setup-node with cache: pnpm (requires pnpm to already exist for cache path)
+#   4. install
+# This matches the repo's proven setup sequence. setup-node's pnpm cache
+# integration requires pnpm to be on PATH before it runs, so pnpm/action-setup
+# must come first. Changing this order will break the pnpm store cache.
+
+runs:
+  using: composite
+  steps:
+    # Note: checkout is NOT included here. Callers MUST run
+    # actions/checkout before using this composite action, because
+    # GitHub Actions needs the repo checked out to find the action.yml.
+
+    - name: Enable Corepack
+      shell: bash
+      run: |
+        corepack enable
+        PM="$(node -p "require(require('path').join(process.env.GITHUB_WORKSPACE||process.cwd(),'package.json')).packageManager")"
+        corepack prepare "$PM" --activate
+        pnpm --version
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      with:
+        node-version-file: '.node-version'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
