@@ -3,6 +3,6 @@
   "version": "0.12.5",
   "wire_format_version": "0.2",
   "dist_tag": "latest",
-  "registries_version": "0.5.0",
+  "registries_version": "0.6.0",
   "errors_version": "0.12.5"
 }

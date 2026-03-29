@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "PEAC protocol registries: payment rails, control engines, transport methods, agent protocols, proof types, extension keys, pillar values",
   "payment_rails": [
     {
@@ -111,6 +111,13 @@
       "description": "No transport binding",
       "reference": null,
       "status": "informational"
+    },
+    {
+      "id": "grpc",
+      "category": "rpc",
+      "description": "gRPC transport with metadata-based receipt carrier",
+      "reference": "https://grpc.io/",
+      "status": "informational"
     }
   ],
   "agent_protocols": [
@@ -212,6 +219,20 @@
       "category": "vendor-defined",
       "description": "Vendor-defined proof type; registered per-issuer in extension metadata",
       "reference": null,
+      "status": "informational"
+    },
+    {
+      "id": "intoto-v1",
+      "category": "supply-chain",
+      "description": "in-toto Attestation Framework v1.0 predicate mapping",
+      "reference": "https://github.com/in-toto/attestation/tree/main/spec/v1",
+      "status": "informational"
+    },
+    {
+      "id": "slsa-v1.2",
+      "category": "supply-chain",
+      "description": "SLSA v1.2 provenance predicate mapping",
+      "reference": "https://slsa.dev/spec/v1.0/",
       "status": "informational"
     }
   ],
