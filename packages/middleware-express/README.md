@@ -1,6 +1,6 @@
 # @peac/middleware-express
 
-Express.js middleware for automatic PEAC receipt issuance.
+Express.js middleware for automatic PEAC receipt issuance. Adds signed receipts to HTTP responses with zero application code changes.
 
 ## Installation
 
@@ -10,7 +10,13 @@ pnpm add @peac/middleware-express
 
 Requires Express as a peer dependency (`^4.18.0 || ^5.0.0`).
 
-## Quick Start
+## What It Does
+
+`@peac/middleware-express` is an Express.js middleware that automatically attaches signed PEAC receipts to HTTP responses. It wraps `@peac/middleware-core` with Express-specific request/response handling, route skipping, and error isolation. Receipt generation failures never break the HTTP response.
+
+## How Do I Use It?
+
+### Add receipt issuance to an Express app
 
 ```typescript
 import express from 'express';
@@ -28,6 +34,7 @@ app.use(
       d: '<base64url private key>',
     },
     keyId: 'prod-2026-02',
+    skip: (req) => req.path === '/health',
   })
 );
 
@@ -37,45 +44,60 @@ app.get('/api/data', (req, res) => {
 });
 ```
 
-## API
-
-### `peacMiddleware(config)`
-
-Returns Express middleware that automatically adds PEAC receipts to responses.
+### Check receipt context on a request
 
 ```typescript
-interface ExpressMiddlewareConfig extends MiddlewareConfig {
-  skip?: (req: Request) => boolean;
-  audienceExtractor?: (req: Request) => string;
-  subjectExtractor?: (req: Request) => string | undefined;
-  onError?: (error: Error, req: Request, res: Response) => void;
+import { hasPeacContext, getReceiptFromResponse } from '@peac/middleware-express';
+import type { RequestWithPeacContext } from '@peac/middleware-express';
+
+if (hasPeacContext(req)) {
+  // Request has PEAC context attached by middleware
 }
+
+// Extract receipt from response (useful for testing)
+const receipt = getReceiptFromResponse(res);
 ```
 
-### `peacMiddlewareSync(config)`
+### Use the synchronous variant
 
-Synchronous variant for simpler setups where async signing is not needed.
+```typescript
+import { peacMiddlewareSync } from '@peac/middleware-express';
 
-### `getReceiptFromResponse(res)`
+app.use(
+  peacMiddlewareSync({
+    issuer: 'https://api.example.com',
+    signingKey: privateJwk,
+    keyId: 'prod-2026-02',
+  })
+);
+```
 
-Extract the PEAC receipt from a response (for testing/debugging).
+## Integrates With
 
-### `hasPeacContext(req)`
+- `@peac/middleware-core`: Framework-agnostic primitives (signing, transport, config validation)
+- `@peac/kernel` (Layer 0): Types and constants (via middleware-core)
+- `@peac/schema` (Layer 1): Zod validators (via middleware-core)
+- `@peac/crypto` (Layer 2): Ed25519 signing (via middleware-core)
 
-Type guard checking if the request has PEAC context attached.
+## For Agent Developers
 
-## Configuration Options
+If you are building an AI agent or service that issues receipts:
 
-- **`skip`**: Skip receipt generation for certain routes (e.g., health checks)
-- **`audienceExtractor`**: Custom audience extraction from request (default: request origin)
-- **`subjectExtractor`**: Custom subject extraction from request
-- **`onError`**: Error handler for receipt generation failures (failures never break the response)
+- Add `peacMiddleware()` to your Express app and receipts are issued automatically
+- Use `@peac/middleware-core` directly for non-Express frameworks
+- Use `@peac/protocol` for lower-level receipt issuance without HTTP middleware
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview
 
-All options from `@peac/middleware-core` `MiddlewareConfig` are also supported (issuer, signingKey, keyId, expiresIn, transport, maxHeaderSize).
+## For Operators
 
-## Error Handling
+All `@peac/middleware-core` configuration options are supported (issuer, signingKey, keyId, expiresIn, transport, maxHeaderSize). Additional Express-specific options:
 
-Receipt generation failures are isolated: they never break the HTTP response. By default, errors are logged to console. Provide an `onError` callback for custom handling.
+- **`skip`**: predicate function to skip receipt generation for certain routes (such as health checks)
+- **`audienceExtractor`**: custom audience extraction from the request (default: request origin)
+- **`subjectExtractor`**: custom subject extraction from the request
+- **`onError`**: custom error handler for receipt generation failures (default: console logging)
+
+Receipt generation failures are isolated and never break the HTTP response.
 
 ## License
 

@@ -1,19 +1,20 @@
 # @peac/worker-fastly
 
-PEAC receipt verification worker for Fastly Compute.
+PEAC receipt verification worker for Fastly Compute. Fail-closed TAP verification with KV Store replay protection.
 
-> **PRIVATE**: This package is not published to npm.
+## Installation
 
-## Features
+```bash
+pnpm add @peac/worker-fastly
+```
 
-- TAP (Trusted Agent Protocol) verification
-- PEAC receipt verification
-- Pluggable replay protection (KV Store)
-- RFC 9457 problem+json error responses
-- Configurable issuer allowlist
-- Path-based bypass
+## What It Does
 
-## Quick Start
+`@peac/worker-fastly` is a Fastly Compute worker that verifies TAP (Trusted Agent Protocol) signatures and PEAC receipts at the edge. It reads configuration from Fastly Edge Dictionaries, validates requests against an issuer allowlist, enforces nonce replay protection via KV Store, and forwards verified requests to your origin backend. Unverified requests receive RFC 9457 `application/problem+json` error responses or 402 Payment Required challenges.
+
+## How Do I Use It?
+
+### Create a handler with custom backend configuration
 
 ```typescript
 import { createHandler } from '@peac/worker-fastly';
@@ -29,110 +30,60 @@ addEventListener('fetch', (event) => {
 });
 ```
 
-## Configuration
-
-### Edge Dictionary (`peac_config`)
-
-| Key                         | Required | Description                                    |
-| --------------------------- | -------- | ---------------------------------------------- |
-| `issuer_allowlist`          | Yes\*    | Comma-separated list of allowed issuer origins |
-| `bypass_paths`              | No       | Comma-separated list of paths to bypass        |
-| `unsafe_allow_any_issuer`   | No       | Set to "true" to allow any issuer (UNSAFE)     |
-| `unsafe_allow_unknown_tags` | No       | Set to "true" to allow unknown TAP tags        |
-| `unsafe_allow_no_replay`    | No       | Set to "true" to skip replay protection        |
-
-\*Required unless `unsafe_allow_any_issuer=true`
-
-### Example fastly.toml
-
-```toml
-manifest_version = 3
-name = "peac-verifier"
-language = "javascript"
-
-[scripts]
-build = "pnpm run build"
-
-[local_server]
-[local_server.backends]
-[local_server.backends.origin]
-url = "https://your-origin.example.com"
-
-[local_server.dictionaries]
-[local_server.dictionaries.peac_config]
-format = "inline-toml"
-[local_server.dictionaries.peac_config.contents]
-issuer_allowlist = "https://trusted-issuer.example.com"
-bypass_paths = "/health,/ready"
-
-[local_server.kv_stores]
-[local_server.kv_stores.peac_replay]
-```
-
-## Security
-
-### Fail-Closed Defaults
-
-All security features default to fail-closed:
-
-- **ISSUER_ALLOWLIST**: Required. Returns 500 if not configured.
-- **Unknown TAP tags**: Rejected with 400. Set `unsafe_allow_unknown_tags=true` to allow.
-- **Replay protection**: Required when nonce present. Set `unsafe_allow_no_replay=true` to skip.
-
-### Replay Protection
-
-For production, configure a KV Store for replay protection:
+### Use the default handler for simple deployments
 
 ```typescript
-const handler = createHandler({
-  originBackend: 'origin',
-  replayKvStore: 'peac_replay', // KV Store name
+import { defaultHandler } from '@peac/worker-fastly';
+
+addEventListener('fetch', (event) => {
+  event.respondWith(defaultHandler(event.request));
 });
 ```
 
-### HTTP Status Codes
+### Use replay protection stores and configuration utilities
 
-| Status | Meaning                    |
-| ------ | -------------------------- |
-| 400    | Malformed request          |
-| 401    | Authentication failed      |
-| 402    | Payment/receipt required   |
-| 403    | Issuer not in allowlist    |
-| 409    | Replay detected            |
-| 500    | Server/configuration error |
+```typescript
+import {
+  createReplayStore,
+  KVStoreReplayStore,
+  InMemoryReplayStore,
+  NoOpReplayStore,
+  parseConfig,
+  matchesBypassPath,
+  isIssuerAllowed,
+  ErrorCodes,
+} from '@peac/worker-fastly';
 
-## Response Headers
-
-On successful verification:
-
-| Header        | Description                     |
-| ------------- | ------------------------------- |
-| PEAC-Verified | Always "true"                   |
-| PEAC-Engine   | Always "tap"                    |
-| PEAC-TAP-Tag  | TAP usage tag (if present)      |
-| PEAC-Warning  | Warning message (if applicable) |
-
-## Architecture
-
-Uses shared worker core from `surfaces/workers/_shared/core/` for runtime-neutral verification logic. Fastly-specific code is minimal:
-
-- `config.ts` - Edge Dictionary parsing
-- `errors.ts` - Response creation
-- `replay-store.ts` - KV Store replay protection
-- `index.ts` - Entry point and handler
-
-## Development
-
-```bash
-# Install dependencies
-pnpm install
-
-# Run tests
-pnpm test
-
-# Type check
-pnpm typecheck
+const replayStore = createReplayStore('peac_replay');
+const config = parseConfig('peac_config');
 ```
+
+## Integrates With
+
+- `@peac/worker-shared`: Runtime-neutral verification logic shared across edge surfaces
+- `@peac/http-signatures`: HTTP message signature verification
+- `@peac/jwks-cache`: JWKS key resolution and caching
+- `@peac/mappings-tap`: TAP-to-PEAC receipt mapping
+- `@peac/worker-cloudflare`: Cloudflare Workers surface (behavioral parity)
+
+## For Agent Developers
+
+If you are building an AI agent that accesses APIs fronted by this worker:
+
+- Your agent must include valid TAP signatures or PEAC receipts in requests
+- Use [`@peac/mcp-server`](https://www.npmjs.com/package/@peac/mcp-server) for receipt issuance via MCP
+- Use `@peac/protocol` for programmatic receipt creation
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview
+
+## For Operators
+
+Configuration is read from a Fastly Edge Dictionary (default name: `peac_config`). Set `issuer_allowlist` as a comma-separated list of allowed issuer origins. Security defaults are fail-closed:
+
+- **`issuer_allowlist` is required**: returns 500 if not configured (set `unsafe_allow_any_issuer=true` only for development)
+- **Unknown TAP tags are rejected**: returns 400 (set `unsafe_allow_unknown_tags=true` only for development)
+- **Replay protection is required**: returns 401 when nonce is present but no store is configured (set `unsafe_allow_no_replay=true` only for development)
+
+Configure a KV Store (default name: `peac_replay`) for replay protection. Define your origin backend in `fastly.toml` and pass its name as `originBackend` when creating the handler.
 
 ## License
 
@@ -140,4 +91,6 @@ Apache-2.0
 
 ---
 
-Part of [PEAC Protocol](https://www.peacprotocol.org)
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)

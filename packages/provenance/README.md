@@ -1,22 +1,61 @@
 # @peac/provenance
 
-Provenance pillar for PEAC protocol.
+Provenance pillar package for PEAC protocol: content origin tracking, supply chain evidence, and verifiable chain-of-custody.
 
-## Purpose
+## Installation
 
-Provides content provenance tracking, C2PA integration, and verifiable chain-of-custody for PEAC receipts and AI-generated content.
+```bash
+pnpm add @peac/provenance
+```
 
-## Planned Features
+## What It Does
 
-- C2PA manifest integration for content credentials
-- Content authenticity and integrity verification
-- Chain-of-custody tracking for AI-generated assets
-- Provenance receipts linking creation, modification, and usage
-- Integration with content credential standards
+`@peac/provenance` provides the provenance pillar for the PEAC protocol stack. It supports content provenance tracking, supply chain evidence, and verifiable chain-of-custody for receipts and AI-generated content.
 
-## Status
+## How Do I Use It?
 
-Scaffold package for v1.0+. Will be implemented after core protocol stabilizes and C2PA integration requirements are finalized.
+### Issue a provenance-tagged receipt
+
+```typescript
+import { issueWire02 } from '@peac/protocol';
+
+const receipt = await issueWire02({
+  iss: 'https://issuer.example.com',
+  kind: 'evidence',
+  type: 'org.peacprotocol/provenance',
+  privateKey,
+  kid: 'key-01',
+  pillars: ['provenance'],
+  extensions: {
+    'org.peacprotocol/provenance': {
+      source_uri: 'https://data.example.com/dataset-v3',
+      hash_algorithm: 'sha-256',
+      content_hash: 'abc123...',
+    },
+  },
+});
+```
+
+### Validate provenance extension fields
+
+```typescript
+import { getProvenanceExtension } from '@peac/schema';
+
+const provExt = getProvenanceExtension(claims);
+if (provExt) {
+  console.log(provExt.source_uri);
+}
+```
+
+## Integrates With
+
+- `@peac/schema` (Layer 1): Provenance extension group schema and accessor
+- `@peac/protocol` (Layer 3): Receipt issuance with provenance pillar
+- `@peac/attribution`: Content attribution and licensing
+
+## For Agent Developers
+
+If you are building agents that process, transform, or generate content, use the provenance pillar to record origin and chain-of-custody evidence alongside your interaction receipts.
 
 ## License
 

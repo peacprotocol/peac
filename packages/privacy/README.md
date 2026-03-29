@@ -1,22 +1,60 @@
 # @peac/privacy
 
-Privacy pillar for PEAC protocol.
+Privacy pillar package for PEAC protocol: data protection, retention policies, and privacy-preserving receipt mechanisms.
 
-## Purpose
+## Installation
 
-Provides privacy-preserving receipt mechanisms, data protection utilities, and privacy budget management for PEAC-enabled systems.
+```bash
+pnpm add @peac/privacy
+```
 
-## Planned Features
+## What It Does
 
-- Privacy budget tracking and enforcement
-- Data minimization and selective disclosure
-- GDPR, CCPA, and privacy regulation helpers
-- K-anonymity and differential privacy utilities
-- Privacy-preserving analytics
+`@peac/privacy` provides the privacy pillar for the PEAC protocol stack. It defines privacy-preserving receipt mechanisms, data retention policies, and privacy budget management for systems that handle evidence receipts containing potentially sensitive data.
 
-## Status
+## How Do I Use It?
 
-Scaffold package for v0.9.16+. Core privacy primitives will be implemented alongside compliance and consent pillars.
+### Issue a privacy-tagged receipt
+
+```typescript
+import { issueWire02 } from '@peac/protocol';
+
+const receipt = await issueWire02({
+  iss: 'https://issuer.example.com',
+  kind: 'evidence',
+  type: 'org.peacprotocol/privacy',
+  privateKey,
+  kid: 'key-01',
+  pillars: ['privacy'],
+  extensions: {
+    'org.peacprotocol/privacy': {
+      retention_days: 90,
+      purpose_limitation: 'fraud-prevention',
+    },
+  },
+});
+```
+
+### Validate privacy extension fields
+
+```typescript
+import { getPrivacyExtension } from '@peac/schema';
+
+const privacyExt = getPrivacyExtension(claims);
+if (privacyExt) {
+  console.log(privacyExt.retention_days);
+}
+```
+
+## Integrates With
+
+- `@peac/schema` (Layer 1): Privacy extension group schema and accessor
+- `@peac/protocol` (Layer 3): Receipt issuance with privacy pillar
+- `@peac/compliance`: Governance and regulatory compliance
+
+## For Agent Developers
+
+If you are building agents that handle personal data or operate under GDPR, use the privacy pillar to record data protection evidence alongside your interaction receipts.
 
 ## License
 
