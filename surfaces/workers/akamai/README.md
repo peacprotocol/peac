@@ -1,32 +1,32 @@
 # @peac/worker-akamai
 
-PEAC receipt verification worker for Akamai EdgeWorkers.
+PEAC receipt verification worker for Akamai EdgeWorkers. Fail-closed TAP verification with EdgeKV replay protection.
 
-> **PRIVATE**: This package is not published to npm.
+## Installation
 
-## Features
+```bash
+pnpm add @peac/worker-akamai
+```
 
-- TAP (Trusted Agent Protocol) verification
-- PEAC receipt verification
-- Pluggable replay protection (EdgeKV)
-- RFC 9457 problem+json error responses
-- Configurable issuer allowlist
-- Path-based bypass
+## What It Does
 
-## Quick Start
+`@peac/worker-akamai` is an Akamai EdgeWorker that verifies TAP (Trusted Agent Protocol) signatures and PEAC receipts at the edge. It reads configuration from Property Manager variables (`PMUSER_*`), validates requests against an issuer allowlist, enforces nonce replay protection via EdgeKV, and integrates with Akamai's `onClientRequest`/`onClientResponse` lifecycle. Unverified requests receive RFC 9457 `application/problem+json` error responses or 402 Payment Required challenges.
+
+## How Do I Use It?
+
+### Use the default handlers
 
 ```typescript
 // main.js
-import { onClientRequest, onClientResponse } from './index.js';
+import { onClientRequest, onClientResponse } from '@peac/worker-akamai';
 
 export { onClientRequest, onClientResponse };
 ```
 
-Or with custom configuration:
+### Create handlers with custom EdgeKV configuration
 
 ```typescript
-// main.js
-import { createOnClientRequest, createOnClientResponse } from './index.js';
+import { createOnClientRequest, createOnClientResponse } from '@peac/worker-akamai';
 
 export const onClientRequest = createOnClientRequest({
   edgeKV: {
@@ -38,123 +38,51 @@ export const onClientRequest = createOnClientRequest({
 export const onClientResponse = createOnClientResponse();
 ```
 
-## Configuration
-
-### Property Manager Variables
-
-| Variable                           | Required | Description                                    |
-| ---------------------------------- | -------- | ---------------------------------------------- |
-| `PMUSER_ISSUER_ALLOWLIST`          | Yes\*    | Comma-separated list of allowed issuer origins |
-| `PMUSER_BYPASS_PATHS`              | No       | Comma-separated list of paths to bypass        |
-| `PMUSER_UNSAFE_ALLOW_ANY_ISSUER`   | No       | Set to "true" to allow any issuer (UNSAFE)     |
-| `PMUSER_UNSAFE_ALLOW_UNKNOWN_TAGS` | No       | Set to "true" to allow unknown TAP tags        |
-| `PMUSER_UNSAFE_ALLOW_NO_REPLAY`    | No       | Set to "true" to skip replay protection        |
-
-\*Required unless `PMUSER_UNSAFE_ALLOW_ANY_ISSUER=true`
-
-### Property Manager Configuration
-
-1. Go to your property in Akamai Control Center
-2. Add a new behavior: Advanced > EdgeWorkers
-3. Select your EdgeWorker bundle
-4. Add user-defined variables:
-
-```
-PMUSER_ISSUER_ALLOWLIST = https://trusted-issuer.example.com
-PMUSER_BYPASS_PATHS = /health,/ready,/metrics
-```
-
-### EdgeKV Setup
-
-For replay protection, create an EdgeKV namespace:
-
-1. Go to EdgeKV in Akamai Control Center
-2. Create a namespace called `peac`
-3. Create a group called `replay`
-4. Initialize the EdgeKV token in your EdgeWorker bundle
-
-## Security
-
-### Fail-Closed Defaults
-
-All security features default to fail-closed:
-
-- **ISSUER_ALLOWLIST**: Required. Returns 500 if not configured.
-- **Unknown TAP tags**: Rejected with 400. Set `PMUSER_UNSAFE_ALLOW_UNKNOWN_TAGS=true` to allow.
-- **Replay protection**: Required when nonce present. Set `PMUSER_UNSAFE_ALLOW_NO_REPLAY=true` to skip.
-
-### Replay Protection
-
-For production, configure EdgeKV for replay protection:
+### Use configuration and error utilities
 
 ```typescript
-const onClientRequest = createOnClientRequest({
-  edgeKV: {
-    namespace: 'peac',
-    group: 'replay',
-  },
-});
+import {
+  parseConfig,
+  parseConfigFromRecord,
+  matchesBypassPath,
+  isIssuerAllowed,
+  ErrorCodes,
+  respondWithError,
+  respondWithChallenge,
+  createErrorResponse,
+  createReplayStore,
+  EdgeKVReplayStore,
+} from '@peac/worker-akamai';
+
+import type { EWRequest, EWResponse, EWRequestHandler } from '@peac/worker-akamai';
 ```
 
-Note: EdgeKV is eventually consistent. For stronger guarantees, consider using a shorter TTL or implementing additional validation at origin.
+## Integrates With
 
-### HTTP Status Codes
+- `@peac/worker-shared`: Runtime-neutral verification logic shared across edge surfaces
+- `@peac/http-signatures`: HTTP message signature verification
+- `@peac/jwks-cache`: JWKS key resolution and caching
+- `@peac/mappings-tap`: TAP-to-PEAC receipt mapping
+- `@peac/worker-cloudflare`: Cloudflare Workers surface (behavioral parity)
 
-| Status | Meaning                    |
-| ------ | -------------------------- |
-| 400    | Malformed request          |
-| 401    | Authentication failed      |
-| 402    | Payment/receipt required   |
-| 403    | Issuer not in allowlist    |
-| 409    | Replay detected            |
-| 500    | Server/configuration error |
+## For Agent Developers
 
-## Response Headers
+If you are building an AI agent that accesses APIs fronted by this EdgeWorker:
 
-On successful verification:
+- Your agent must include valid TAP signatures or PEAC receipts in requests
+- Use [`@peac/mcp-server`](https://www.npmjs.com/package/@peac/mcp-server) for receipt issuance via MCP
+- Use `@peac/protocol` for programmatic receipt creation
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview
 
-| Header      | Description  |
-| ----------- | ------------ |
-| PEAC-Engine | Always "tap" |
+## For Operators
 
-Note: Due to EdgeWorkers limitations, verification metadata is primarily
-handled via response headers in `onClientResponse` or at origin.
+Configuration is read from Akamai Property Manager user-defined variables. Set `PMUSER_ISSUER_ALLOWLIST` as a comma-separated list of allowed issuer origins. Security defaults are fail-closed:
 
-## Architecture
+- **`PMUSER_ISSUER_ALLOWLIST` is required**: returns 500 if not configured (set `PMUSER_UNSAFE_ALLOW_ANY_ISSUER=true` only for development)
+- **Unknown TAP tags are rejected**: returns 400 (set `PMUSER_UNSAFE_ALLOW_UNKNOWN_TAGS=true` only for development)
+- **Replay protection is required**: returns 401 when nonce is present but no store is configured (set `PMUSER_UNSAFE_ALLOW_NO_REPLAY=true` only for development)
 
-Uses shared worker core from `surfaces/workers/_shared/core/` for runtime-neutral verification logic. Akamai-specific code is minimal:
-
-- `config.ts` - Property Manager variable parsing
-- `errors.ts` - Response creation
-- `replay-store.ts` - EdgeKV replay protection
-- `index.ts` - Entry point and handlers
-
-## EdgeWorker Lifecycle
-
-The PEAC verifier integrates with Akamai's EdgeWorker lifecycle:
-
-1. **onClientRequest**: Verify TAP headers, return 4xx if invalid
-2. **onClientResponse**: Add verification headers to response
-
-## Development
-
-```bash
-# Install dependencies
-pnpm install
-
-# Run tests
-pnpm test
-
-# Type check
-pnpm typecheck
-```
-
-## Deployment
-
-1. Bundle the EdgeWorker code
-2. Upload to Akamai Control Center
-3. Configure Property Manager variables
-4. Activate on staging, then production
+For replay protection, create an EdgeKV namespace and group in Akamai Control Center (defaults: namespace `peac`, group `replay`). EdgeKV is eventually consistent; for stronger guarantees, consider a shorter TTL or additional validation at origin. Verification metadata is added via the `onClientResponse` handler.
 
 ## License
 
@@ -162,4 +90,6 @@ Apache-2.0
 
 ---
 
-Part of [PEAC Protocol](https://www.peacprotocol.org)
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)

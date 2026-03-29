@@ -1,14 +1,20 @@
 # @peac/capture-node
 
-Node.js durable storage for the PEAC capture pipeline. Provides filesystem-backed implementations of the `SpoolStore` and `DedupeIndex` interfaces from `@peac/capture-core`.
+Node.js durable storage for the PEAC capture pipeline. Filesystem-backed spool store and dedupe index.
 
-## Install
+## Installation
 
 ```bash
-npm install @peac/capture-node @peac/capture-core
+pnpm add @peac/capture-node
 ```
 
-## Usage
+## What It Does
+
+`@peac/capture-node` provides filesystem-backed implementations of the `SpoolStore` and `DedupeIndex` interfaces from `@peac/capture-core`. It handles durable JSONL spool files with fsync-based commit semantics, lockfile-based single-writer guards, corruption detection with read-only fallback, and hard-cap size limits.
+
+## How Do I Use It?
+
+### Create durable storage for a capture session
 
 ```typescript
 import { createFsSpoolStore, createFsDedupeIndex } from '@peac/capture-node';
@@ -30,68 +36,48 @@ const session = createCaptureSession({
 });
 ```
 
-## Durability Contract
-
-- **`append()`** writes to the OS page cache (no fsync). Fast, but not crash-safe on its own.
-- **`commit()`** calls fsync: the explicit durability point. Entries written before the last `commit()` survive crashes. Entries after may be lost.
-- **Auto-commit timer** (default 5s) calls `commit()` periodically when dirty. Prevents long unflushed windows. Set `autoCommitIntervalMs: 0` to disable.
-
-### Commit Ordering
-
-When used with a dedupe index:
-
-1. Spool `commit()` first (authoritative evidence log)
-2. Dedupe `commit()` second (best-effort optimization index)
-
-If dedupe commit fails after spool commit, worst case is re-emitting some receipts after restart. No evidence is lost. The dedupe index is disposable: it can be deleted and rebuilt from the spool.
-
-## Corruption Boundaries
-
-- **Incomplete last line** (crash artifact): automatically truncated on startup. `onWarning` callback fired.
-- **Malformed JSON mid-file**: spool marked corrupt. No auto-repair: mid-file corruption could indicate tampering.
-- **Chain linkage broken**: spool marked corrupt. `prev_entry_digest` chain failed verification.
-- **Oversized line** (exceeds `maxLineBytes`): spool marked corrupt. Line was never materialized as a JS string.
-
-When corrupt, the spool enters **read-only mode**: new captures are blocked, but export/verify/query tools still operate so the operator can recover salvageable data.
-
-### Pre-Materialization Line Guard
-
-The streaming line parser enforces `maxLineBytes` (default 4MB) at the Buffer level, BEFORE converting to a JS string. A single giant line in a spool file cannot cause an OOM crash.
-
-## Diagnostics
+### Check spool diagnostics
 
 ```typescript
 import { getFsSpoolDiagnostics } from '@peac/capture-node';
 
 const diag = getFsSpoolDiagnostics(store);
-// {
-//   mode: 'active' | 'read_only',
-//   spoolFull: boolean,
-//   spoolCorrupt: boolean,
-//   corruptReason?: 'CHAIN_BROKEN' | 'MALFORMED_JSON' | 'LINE_TOO_LARGE',
-//   corruptAtSequence?: number,
-//   entryCount, fileBytes, maxEntries, maxFileBytes, filePath
-// }
+console.log(diag.mode); // 'active' or 'read_only'
+console.log(diag.entryCount, diag.fileBytes);
 ```
 
-## Hard-Cap Limits
+### Acquire an explicit lockfile
 
-- `maxEntries` (default: 100,000)
-- `maxFileBytes` (default: 100MB)
+```typescript
+import { acquireLock } from '@peac/capture-node';
 
-When exceeded, `append()` throws `SpoolFullError`. The session returns `E_CAPTURE_STORE_FAILED` with a clear message. The adapter stays running (hooks, tools): only new captures are blocked.
+const lock = await acquireLock('/var/peac/spool.jsonl.lock', {
+  allowStaleLockBreak: true,
+});
+// ... perform exclusive work ...
+await lock.release();
+```
 
-## Reset Procedure
+## Integrates With
 
-1. Export the evidence bundle (if any salvageable data)
-2. Stop the plugin/adapter
-3. Delete: `spool.jsonl`, `spool.jsonl.meta.json`, `dedupe.idx`, `*.lock`
-4. Restart
+- `@peac/capture-core`: Core capture pipeline types and session orchestration
+- `@peac/schema` (Layer 1): Interaction evidence schemas
+- `@peac/mcp-server` (Layer 5): MCP tool server that uses capture for evidence recording
 
-## Single-Writer Guard
+## For Agent Developers
 
-A lockfile (`spool.jsonl.lock`) prevents concurrent writers. Default: fail loudly if lock exists. Stale lock break is opt-in via `lockOptions.allowStaleLockBreak`.
+If you are building an AI agent or MCP server that needs evidence receipts:
+
+- Start with [`@peac/mcp-server`](https://www.npmjs.com/package/@peac/mcp-server) for a ready-to-use MCP tool server
+- Use `@peac/protocol` for programmatic receipt issuance and verification
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview
 
 ## License
 
 Apache-2.0
+
+---
+
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)

@@ -1,17 +1,22 @@
 # @peac/middleware-nextjs
 
-> PEAC TAP verifier and 402 access gate for Next.js Edge Runtime
+PEAC TAP verifier and 402 access gate for Next.js Edge Runtime. Fail-closed security defaults with pluggable replay protection.
 
-## Features
+## Installation
 
-- **TAP Verification**: Verify Visa Trusted Agent Protocol signatures at the edge
-- **402 Access Gate**: Return payment challenges for unauthenticated requests
-- **Replay Protection**: Pluggable nonce deduplication with LRU fallback
-- **RFC 9457 Errors**: Structured problem+json error responses
-- **Issuer Allowlist**: Restrict which TAP issuers are accepted
-- **Path Bypass**: Skip verification for specific paths
+```bash
+pnpm add @peac/middleware-nextjs
+```
 
-## Quick Start
+Requires Next.js as a peer dependency (`>=13.0.0`).
+
+## What It Does
+
+`@peac/middleware-nextjs` verifies TAP (Trusted Agent Protocol) signatures and PEAC receipts at the edge in Next.js middleware. It returns 402 Payment Required challenges for unauthenticated requests, enforces issuer allowlists, and provides pluggable nonce replay protection. All error responses use RFC 9457 `application/problem+json` format.
+
+## How Do I Use It?
+
+### Create middleware with `createPeacMiddleware`
 
 ```typescript
 // middleware.ts
@@ -20,7 +25,7 @@ import { createPeacMiddleware, LRUReplayStore } from '@peac/middleware-nextjs';
 export const middleware = createPeacMiddleware({
   issuerAllowlist: ['https://trusted-agent.example.com'],
   bypassPaths: ['/api/health', '/public/**'],
-  replayStore: new LRUReplayStore(), // Best-effort, per-isolate
+  replayStore: new LRUReplayStore(),
 });
 
 export const config = {
@@ -28,120 +33,71 @@ export const config = {
 };
 ```
 
-## Configuration
-
-| Option                   | Type                               | Default            | Description                    |
-| ------------------------ | ---------------------------------- | ------------------ | ------------------------------ |
-| `mode`                   | `"receipt_or_tap"` \| `"tap_only"` | `"receipt_or_tap"` | Verification mode              |
-| `issuerAllowlist`        | `string[]`                         | **REQUIRED**       | Allowed issuer origins         |
-| `bypassPaths`            | `string[]`                         | `[]`               | Paths to skip verification     |
-| `replayStore`            | `ReplayStore`                      | `undefined`        | Nonce replay protection        |
-| `unsafeAllowAnyIssuer`   | `boolean`                          | `false`            | UNSAFE: Skip issuer check      |
-| `unsafeAllowUnknownTags` | `boolean`                          | `false`            | UNSAFE: Allow unknown TAP tags |
-| `unsafeAllowNoReplay`    | `boolean`                          | `false`            | UNSAFE: Skip replay protection |
-
-## Verification Modes
-
-### `receipt_or_tap` (default)
-
-- TAP headers present + valid: Forward to origin (200)
-- TAP headers present + invalid: Error response (4xx)
-- **No TAP headers: 402 Payment Required**
-
-### `tap_only`
-
-- TAP headers present + valid: Forward to origin (200)
-- TAP headers present + invalid: Error response (4xx)
-- **No TAP headers: 401 Signature Missing**
-
-## Security Defaults (Fail-Closed)
-
-| Invariant                  | Default                   | Override                      |
-| -------------------------- | ------------------------- | ----------------------------- |
-| Issuer allowlist required  | 500 error if empty        | `unsafeAllowAnyIssuer=true`   |
-| Unknown TAP tags rejected  | 400 error                 | `unsafeAllowUnknownTags=true` |
-| Replay protection required | 401 if nonce but no store | `unsafeAllowNoReplay=true`    |
-| Max window                 | 400 if > 480s (8 min)     | None (per Visa spec)          |
-
-## Error Codes
-
-| Code                                 | Status | Meaning                              |
-| ------------------------------------ | ------ | ------------------------------------ |
-| `E_RECEIPT_MISSING`                  | 402    | No TAP headers (receipt_or_tap mode) |
-| `E_TAP_SIGNATURE_MISSING`            | 401    | No TAP headers (tap_only mode)       |
-| `E_TAP_SIGNATURE_INVALID`            | 401    | Signature verification failed        |
-| `E_TAP_TIME_INVALID`                 | 401    | Timestamp validation failed          |
-| `E_TAP_WINDOW_TOO_LARGE`             | 400    | Window > 8 minutes                   |
-| `E_TAP_TAG_UNKNOWN`                  | 400    | Unknown TAP tag                      |
-| `E_TAP_ALGORITHM_INVALID`            | 400    | Wrong algorithm (must be ed25519)    |
-| `E_TAP_KEY_NOT_FOUND`                | 401    | Key not found at JWKS endpoint       |
-| `E_TAP_NONCE_REPLAY`                 | 409    | Nonce replay detected                |
-| `E_TAP_REPLAY_PROTECTION_REQUIRED`   | 401    | Nonce present but no replay store    |
-| `E_ISSUER_NOT_ALLOWED`               | 403    | Issuer not in allowlist              |
-| `E_CONFIG_ISSUER_ALLOWLIST_REQUIRED` | 500    | Empty allowlist (misconfiguration)   |
-
-## Replay Protection
-
-### Option 1: LRU Store (Best-Effort)
+### Use `withPeacVerification` for custom middleware flows
 
 ```typescript
-import { createPeacMiddleware, LRUReplayStore } from '@peac/middleware-nextjs';
+import { NextResponse } from 'next/server';
+import { withPeacVerification, LRUReplayStore } from '@peac/middleware-nextjs';
 
-export const middleware = createPeacMiddleware({
-  issuerAllowlist: ['https://issuer.example.com'],
-  replayStore: new LRUReplayStore({ maxEntries: 1000 }),
-});
-```
+const peacConfig = {
+  issuerAllowlist: ['https://trusted-agent.example.com'],
+  replayStore: new LRUReplayStore(),
+};
 
-**WARNING**: LRU store is per-isolate only. Different edge instances have separate caches.
-This provides best-effort protection but is NOT globally consistent.
-A warning header `PEAC-Warning: replay-best-effort` is added to responses.
-
-### Option 2: External Store (Recommended for Production)
-
-Implement the `ReplayStore` interface with Redis, database, or other distributed store:
-
-```typescript
-interface ReplayStore {
-  seen(ctx: ReplayContext): Promise<boolean>;
+export async function middleware(request: NextRequest) {
+  const errorResponse = await withPeacVerification(request, peacConfig);
+  if (errorResponse) {
+    return errorResponse;
+  }
+  return NextResponse.next();
 }
 ```
 
-### Option 3: No Replay Protection (UNSAFE)
+### Use lower-level utilities for custom verification
 
 ```typescript
-export const middleware = createPeacMiddleware({
-  issuerAllowlist: ['https://issuer.example.com'],
-  unsafeAllowNoReplay: true, // NOT recommended for production
-});
+import { handleRequest, getVerificationHeaders, ErrorCodes } from '@peac/middleware-nextjs';
+import type { HandlerRequest, MiddlewareConfig } from '@peac/middleware-nextjs';
+
+const result = await handleRequest(handlerRequest, config);
+if (result !== null) {
+  // Handle error or challenge response
+  console.log(result.status, result.body);
+}
 ```
 
-## Parity with Cloudflare Worker
+## Integrates With
 
-This middleware maintains exact behavioral parity with `@peac/worker-cloudflare`:
+- `@peac/http-signatures`: HTTP message signature verification
+- `@peac/jwks-cache`: JWKS key resolution and caching
+- `@peac/mappings-tap`: TAP-to-PEAC receipt mapping
+- `@peac/worker-cloudflare`: Cloudflare Workers surface (behavioral parity)
 
-- Same error codes and status mappings
-- Same fail-closed security defaults
-- Same replay protection semantics
-- Same TAP validation rules (8-min window, ed25519 only, tag allowlist)
+## For Agent Developers
 
-## Response Headers
+If you are building an AI agent that accesses PEAC-gated APIs:
 
-On successful verification:
+- Your agent must include valid TAP signatures or PEAC receipts in requests
+- Use [`@peac/mcp-server`](https://www.npmjs.com/package/@peac/mcp-server) for receipt issuance via MCP
+- Use `@peac/protocol` for programmatic receipt creation
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview
 
-```
-PEAC-Verified: true
-PEAC-Engine: tap
-PEAC-TAP-Tag: agent-browser-auth
-```
+## For Operators
 
-Warnings (if applicable):
+This middleware runs in the Next.js Edge Runtime. Security defaults are fail-closed:
 
-```
-PEAC-Warning: replay-best-effort     # LRU store in use
-PEAC-Warning: replay-protection-disabled  # unsafeAllowNoReplay=true
-```
+- **Issuer allowlist is required**: returns 500 if empty (set `unsafeAllowAnyIssuer` only for development)
+- **Unknown TAP tags are rejected**: returns 400 (set `unsafeAllowUnknownTags` only for development)
+- **Replay protection is required**: returns 401 when nonce is present but no store is configured (set `unsafeAllowNoReplay` only for development)
+
+The `LRUReplayStore` is per-isolate only and provides best-effort protection. For production, implement the `ReplayStore` interface with a distributed backend such as Redis or a database.
 
 ## License
 
 Apache-2.0
+
+---
+
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)

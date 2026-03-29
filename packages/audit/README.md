@@ -1,13 +1,6 @@
 # @peac/audit
 
-Audit logging and case bundle generation for PEAC protocol (v0.9.27+).
-
-## Features
-
-- **JSONL Audit Logs** - Normative format for PEAC audit trails
-- **Case Bundles** - Collect related entries for dispute resolution
-- **Trace Correlation** - Link events via W3C Trace Context
-- **Privacy-Safe** - Designed for privacy-preserving logging
+Audit logging, case bundle generation, and commerce evidence bundling for PEAC protocol disputes and observability.
 
 ## Installation
 
@@ -15,114 +8,72 @@ Audit logging and case bundle generation for PEAC protocol (v0.9.27+).
 pnpm add @peac/audit
 ```
 
-## Usage
+## What It Does
 
-### Creating Audit Entries
+`@peac/audit` provides structured audit logging in JSONL format, case bundle generation for dispute resolution, and commerce evidence bundling for multi-protocol payment observations. It includes trace correlation via W3C Trace Context, dispute bundle creation with cryptographic integrity verification, and privacy-safe logging patterns.
+
+## How Do I Use It?
+
+### Create and format audit entries
 
 ```typescript
 import { createAuditEntry, formatJsonl } from '@peac/audit';
 
-// Create an audit entry
 const entry = createAuditEntry({
   event_type: 'receipt_issued',
   actor: { type: 'system', id: 'peac-issuer' },
   resource: { type: 'receipt', id: 'jti:rec_abc123' },
   outcome: { success: true, result: 'issued' },
-  trace: {
-    trace_id: 'abc123def456789012345678901234ab',
-    span_id: '1234567890123456',
-  },
 });
 
-// Format to JSONL for logging
-const line = formatJsonl([entry], { trailingNewline: true });
+const jsonl = formatJsonl([entry]);
 ```
 
-### Parsing Audit Logs
+### Build a dispute bundle with integrity verification
 
 ```typescript
-import { parseJsonl } from '@peac/audit';
+import { createDisputeBundle, verifyBundle } from '@peac/audit';
 
-const logContent = `
-{"version":"peac.audit/0.9","id":"01ARZ...","event_type":"receipt_issued",...}
-{"version":"peac.audit/0.9","id":"01ARZ...","event_type":"access_decision",...}
-`;
-
-const result = parseJsonl(logContent, { skipInvalid: true });
-console.log(`Parsed ${result.successCount}/${result.totalLines} entries`);
-```
-
-### Creating Case Bundles for Disputes
-
-```typescript
-import { createCaseBundle, filterByDispute } from '@peac/audit';
-
-// Filter entries related to a dispute
-const disputeEntries = filterByDispute(allEntries, '01ARZ3NDEKTSV4RRFFQ69G5FAV');
-
-// Create a case bundle
-const bundle = createCaseBundle({
-  dispute_ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
-  generated_by: 'https://platform.example.com/disputes',
-  entries: disputeEntries,
+const bundle = await createDisputeBundle({
+  kind: 'dispute',
+  receipts: [{ jws: compactJws, ref: receiptRef }],
+  jwks: { keys: [publicJwk] },
 });
 
-console.log(`Bundle contains ${bundle.summary.entry_count} entries`);
-console.log(`Time span: ${bundle.summary.first_event} to ${bundle.summary.last_event}`);
+const report = await verifyBundle({ bundle });
+console.log(report.summary);
 ```
 
-### Trace Correlation
+### Correlate entries by trace
 
 ```typescript
-import { correlateByTrace } from '@peac/audit';
+import { correlateByTrace, filterByTimeRange } from '@peac/audit';
 
-const correlations = correlateByTrace(entries);
+const recent = filterByTimeRange(entries, {
+  start: '2026-03-01T00:00:00Z',
+  end: '2026-03-29T00:00:00Z',
+});
 
-for (const trace of correlations) {
-  console.log(`Trace ${trace.trace_id}:`);
-  console.log(`  - ${trace.entries.length} events`);
-  console.log(`  - ${trace.span_ids.length} spans`);
-  console.log(`  - Duration: ${trace.duration_ms}ms`);
+const traces = correlateByTrace(recent);
+for (const t of traces) {
+  console.log(`Trace ${t.trace_id}: ${t.entries.length} events`);
 }
 ```
 
-## Audit Entry Format
+## Integrates With
 
-Each audit entry follows this structure:
+- `@peac/kernel` (Layer 0): Error codes and type definitions
+- `@peac/schema` (Layer 1): Receipt validation schemas
+- `@peac/crypto` (Layer 2): Signature verification for dispute bundles
+- `@peac/protocol` (Layer 3): Receipt issuance and verification
 
-```typescript
-interface AuditEntry {
-  version: 'peac.audit/0.9';
-  id: string; // ULID format
-  event_type: AuditEventType;
-  timestamp: string; // ISO 8601
-  severity: 'info' | 'warn' | 'error' | 'critical';
-  trace?: TraceContext;
-  actor: AuditActor;
-  resource: AuditResource;
-  outcome: AuditOutcome;
-  context?: Record<string, unknown>;
-  dispute_ref?: string; // ULID if related to dispute
-}
-```
+## For Agent Developers
 
-## Event Types
+If you are building an AI agent or MCP server that needs evidence receipts:
 
-- `receipt_issued` - Receipt was created
-- `receipt_verified` - Receipt was verified
-- `receipt_denied` - Receipt verification failed
-- `access_decision` - Access control decision made
-- `dispute_filed` - Dispute was filed
-- `dispute_acknowledged` - Dispute acknowledged
-- `dispute_resolved` - Dispute resolved
-- `dispute_rejected` - Dispute rejected
-- `dispute_appealed` - Dispute appealed
-- `dispute_final` - Final dispute decision
-- `attribution_created` - Attribution created
-- `attribution_verified` - Attribution verified
-- `identity_verified` - Identity verified
-- `identity_rejected` - Identity rejected
-- `policy_evaluated` - Policy evaluated
+- Start with [`@peac/mcp-server`](https://www.npmjs.com/package/@peac/mcp-server) for a ready-to-use MCP tool server
+- Use `@peac/protocol` for programmatic receipt issuance and verification
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview
 
 ## License
 
@@ -130,4 +81,6 @@ Apache-2.0
 
 ---
 
-Part of the [PEAC Protocol](https://github.com/peacprotocol/peac).
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)

@@ -1,8 +1,6 @@
 # @peac/rails-razorpay
 
-Razorpay payment rail adapter for [PEAC Protocol](https://github.com/peacprotocol/peac).
-
-Supports UPI, cards, netbanking, and wallets for India-focused payment flows.
+Razorpay payment rail adapter for PEAC protocol: normalizes UPI, card, netbanking, and wallet payments to signed evidence receipts with webhook signature verification and VPA privacy.
 
 ## Installation
 
@@ -10,14 +8,13 @@ Supports UPI, cards, netbanking, and wallets for India-focused payment flows.
 pnpm add @peac/rails-razorpay
 ```
 
-## Features
+## What It Does
 
-- Webhook signature verification (raw bytes + constant-time compare)
-- Payment normalization to PEAC PaymentEvidence
-- VPA privacy (HMAC hashing by default)
-- Safe integer amount handling (no float math)
+`@peac/rails-razorpay` verifies Razorpay webhook signatures and maps payment events to PEAC `PaymentEvidence` for inclusion in signed interaction receipts. It supports UPI, card, netbanking, and wallet payment methods. VPA addresses are HMAC-hashed by default for privacy, amounts are kept as safe integer minor units (paise for INR), and webhook verification uses raw bytes with constant-time comparison.
 
-## Quick Start
+## How Do I Use It?
+
+### Verify webhook signature and normalize payment
 
 ```typescript
 import {
@@ -30,252 +27,88 @@ const config: RazorpayConfig = {
   webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET!,
 };
 
-// In your webhook handler (see Raw Body section below):
 // 1. Get raw body (NOT parsed JSON)
-const rawBody = req.body as Buffer; // Buffer when using express.raw()
-const signature = req.headers['x-razorpay-signature'];
+const rawBody: Uint8Array = req.rawBody;
+const signature = req.headers['x-razorpay-signature'] as string;
 
-// 2. Verify signature FIRST (before parsing)
+// 2. Verify signature (throws on failure)
 verifyWebhookSignature(rawBody, signature, config.webhookSecret);
 
-// 3. Parse and normalize (only after verification succeeds)
+// 3. Parse and normalize (after verification)
 const event = JSON.parse(Buffer.from(rawBody).toString('utf-8'));
 const evidence = normalizeRazorpayPayment(event, config);
-
-// 4. Use evidence in PEAC receipt
-console.log(evidence);
-// {
-//   rail: 'razorpay',
-//   reference: 'pay_123456789',
-//   amount: 50000,       // Minor units (paise)
-//   currency: 'INR',
-//   asset: 'INR',
-//   env: 'live',
-//   evidence: { ... }
-// }
+// evidence.rail === 'razorpay'
+// evidence.currency === 'INR'
+// evidence.evidence.method === 'upi' | 'card' | 'netbanking' | 'wallet'
 ```
 
-## Raw Body Requirement (CRITICAL)
-
-Webhook signature verification MUST use the raw request body. If you parse the JSON before verification, an attacker could modify the payload.
-
-### Express
+### Non-throwing signature check
 
 ```typescript
-import express from 'express';
+import { isWebhookSignatureValid } from '@peac/rails-razorpay';
 
-const app = express();
-
-// Use raw body parser for webhook endpoint
-app.use('/webhook/razorpay', express.raw({ type: 'application/json' }));
-
-app.post('/webhook/razorpay', (req, res) => {
-  const rawBody = req.body as Buffer; // Uint8Array
-  const signature = req.headers['x-razorpay-signature'] as string;
-
-  try {
-    verifyWebhookSignature(rawBody, signature, config.webhookSecret);
-    const event = JSON.parse(rawBody.toString('utf-8'));
-    const evidence = normalizeRazorpayPayment(event, config);
-    // Process evidence...
-    res.status(200).send('OK');
-  } catch (err) {
-    console.error('Webhook verification failed:', err);
-    res.status(401).send('Invalid signature');
-  }
-});
-```
-
-### Fastify
-
-```typescript
-import Fastify from 'fastify';
-
-const fastify = Fastify();
-
-// Add raw body parser
-fastify.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
-  done(null, body);
-});
-
-fastify.post('/webhook/razorpay', async (request, reply) => {
-  const rawBody = request.body as Buffer;
-  const signature = request.headers['x-razorpay-signature'] as string;
-
-  try {
-    verifyWebhookSignature(rawBody, signature, config.webhookSecret);
-    const event = JSON.parse(rawBody.toString('utf-8'));
-    const evidence = normalizeRazorpayPayment(event, config);
-    // Process evidence...
-    return { status: 'ok' };
-  } catch (err) {
-    reply.code(401);
-    return { error: 'Invalid signature' };
-  }
-});
-```
-
-### Next.js API Route
-
-```typescript
-// app/api/webhook/razorpay/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-
-export async function POST(req: NextRequest) {
-  const rawBody = new Uint8Array(await req.arrayBuffer());
-  const signature = req.headers.get('x-razorpay-signature') || '';
-
-  try {
-    verifyWebhookSignature(rawBody, signature, config.webhookSecret);
-    const event = JSON.parse(Buffer.from(rawBody).toString('utf-8'));
-    const evidence = normalizeRazorpayPayment(event, config);
-    // Process evidence...
-    return NextResponse.json({ status: 'ok' });
-  } catch (err) {
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-  }
+const valid = isWebhookSignatureValid(rawBody, signature, webhookSecret);
+if (!valid) {
+  res.status(401).send('Invalid signature');
+  return;
 }
 ```
 
-## Configuration
+### Normalize a payment entity directly
 
 ```typescript
-interface RazorpayConfig {
-  // Required: Webhook secret for signature verification
-  // Found in Razorpay Dashboard > Webhooks > Secret
-  webhookSecret: string;
+import { normalizePaymentEntity, type RazorpayConfig } from '@peac/rails-razorpay';
 
-  // Optional: Key ID for observability (included in evidence)
-  keyId?: string;
-
-  // Optional: Key Secret for API calls (not needed for webhooks)
-  keySecret?: string;
-
-  // Optional: Privacy settings
-  privacy?: {
-    // Store raw VPA instead of hash (default: false)
-    // WARNING: Setting to true stores PII in receipts
-    storeRawVpa?: boolean;
-
-    // Custom HMAC key for VPA hashing (default: use webhookSecret)
-    // Changing this changes all VPA hashes (affects audit trails)
-    hashKey?: string;
-  };
-}
-```
-
-## VPA Privacy
-
-By default, VPA addresses (e.g., `user@paytm`) are hashed using HMAC-SHA256 before being stored in the PaymentEvidence. This prevents dictionary attacks that would be possible with plain SHA256.
-
-### Default Behavior (Hash)
-
-```typescript
 const config: RazorpayConfig = {
-  webhookSecret: 'your_secret',
+  webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET!,
+  keyId: 'rzp_live_abc',
 };
 
-const evidence = normalizeRazorpayPayment(event, config);
-// evidence.evidence.vpa_hash = "a1b2c3..." (HMAC-SHA256 of VPA)
-// evidence.evidence.vpa = undefined (not stored)
-```
-
-### Custom Hash Key
-
-```typescript
-const config: RazorpayConfig = {
-  webhookSecret: 'your_secret',
-  privacy: {
-    hashKey: 'custom_vpa_hash_key', // Separate key for VPA hashing
+const evidence = normalizePaymentEntity(
+  {
+    id: 'pay_abc123',
+    entity: 'payment',
+    amount: 50000,
+    currency: 'INR',
+    status: 'captured',
+    method: 'upi',
+    vpa: 'user@bank',
+    international: false,
+    amount_refunded: 0,
+    captured: true,
+    created_at: 1711900000,
   },
-};
+  config
+);
+// evidence.amount === 50000 (paise, no division)
+// evidence.evidence.vpa_hash === '<hmac-sha256 hex>'
 ```
 
-### UNSAFE: Store Raw VPA
-
-Only use this if you have explicit consent and a legitimate business need for storing raw VPA addresses.
+### Hash a VPA address
 
 ```typescript
-const config: RazorpayConfig = {
-  webhookSecret: 'your_secret',
-  privacy: {
-    storeRawVpa: true, // WARNING: Stores PII
-  },
-};
+import { hashVpa } from '@peac/rails-razorpay';
 
-const evidence = normalizeRazorpayPayment(event, config);
-// evidence.evidence.vpa = "user@paytm" (raw VPA stored)
-// evidence.evidence.vpa_hash = undefined
+const hash = hashVpa('user@oksbi', 'your-hmac-key');
+// Hex-encoded HMAC-SHA256 hash for privacy-safe storage
 ```
 
-## Amount Handling
+## Integrates With
 
-Razorpay amounts are in the smallest currency sub-unit (paise for INR). This adapter keeps them as-is without division:
+- `@peac/kernel` (Layer 0): Types and constants
+- `@peac/schema` (Layer 1): `PaymentEvidence` schema validation
+- `@peac/protocol` (Layer 3): Receipt issuance using normalized evidence
 
-```typescript
-// Razorpay sends: amount: 50000 (500.00 INR in paise)
-// PEAC stores:    amount: 50000 (integer minor units)
-// NO division by 100 is performed
-```
+## For Agent Developers
 
-The adapter enforces:
+If you are building an AI agent that processes Razorpay payments:
 
-- Amounts must be integers (throws on decimal)
-- Amounts must be non-negative
-- Amounts must be safe integers (`Number.isSafeInteger`)
-
-## Supported Events
-
-- `payment.authorized` - Payment authorized by bank
-- `payment.captured` - Payment captured (funds transferred)
-- `payment.failed` - Payment failed
-
-Other Razorpay events (e.g., `order.paid`, `refund.created`) are not currently supported.
-
-## Error Handling
-
-All errors are instances of `RazorpayError` with structured error codes:
-
-```typescript
-import { RazorpayError } from '@peac/rails-razorpay';
-
-try {
-  verifyWebhookSignature(rawBody, signature, secret);
-} catch (err) {
-  if (err instanceof RazorpayError) {
-    console.log(err.code); // 'signature_invalid'
-    console.log(err.statusCode); // 401
-    console.log(err.toProblemJson()); // RFC 9457 format
-  }
-}
-```
-
-Error codes:
-
-- `signature_invalid` - Signature verification failed
-- `signature_malformed` - Signature format is invalid
-- `signature_length_mismatch` - Signature has wrong length
-- `amount_out_of_range` - Amount exceeds safe integer
-- `amount_invalid` - Amount is not a valid integer
-- `currency_invalid` - Currency is not uppercase ISO 4217
-- `event_type_unsupported` - Webhook event type not supported
-- `payload_invalid` - Webhook payload format is invalid
-- `payment_missing` - No payment entity in payload
-
-## Threat Model
-
-This adapter protects against:
-
-1. **Signature bypass** - Always verify signature before parsing JSON
-2. **Timing attacks** - Uses constant-time comparison (`timingSafeEqual`)
-3. **VPA dictionary attacks** - HMAC hashing prevents rainbow table attacks
-4. **Integer overflow** - Validates amounts are safe integers
-
-The adapter does NOT protect against:
-
-- Razorpay account compromise (use MFA, audit logs)
-- Replay attacks (implement idempotency in your application)
-- Network interception (Razorpay uses HTTPS)
+- Always verify webhook signatures using raw bytes before parsing JSON
+- VPA addresses are HMAC-hashed by default; opt in to raw storage only with explicit consent via `privacy.storeRawVpa: true`
+- Amounts are in minor units (paise for INR); the adapter enforces `Number.isSafeInteger` and never divides
+- Supported events: `payment.authorized`, `payment.captured`, `payment.failed`
+- Use `RazorpayError` codes for structured error handling in your webhook handler
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise overview
 
 ## License
 
@@ -283,4 +116,6 @@ Apache-2.0
 
 ---
 
-Built by [PEAC Protocol](https://www.peacprotocol.org) contributors.
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)
