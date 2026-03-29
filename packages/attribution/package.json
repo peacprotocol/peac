@@ -31,15 +31,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/attribution"
   },
   "keywords": [
     "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "attribution",
-    "content-derivation",
-    "usage-proof",
+    "content-licensing",
     "ai-training",
-    "rag"
-  ]
+    "provenance"
+  ],
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme"
 }

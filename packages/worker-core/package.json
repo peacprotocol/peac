@@ -24,21 +24,24 @@
     "test:watch": "vitest"
   },
   "keywords": [
-    "tap",
-    "verification",
-    "edge",
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "worker",
+    "edge",
     "cloudflare",
     "fastly",
-    "akamai",
-    "peac"
+    "akamai"
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
-  "homepage": "https://www.peacprotocol.org",
+  "homepage": "https://github.com/peacprotocol/peac#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/peacprotocol/peac.git",

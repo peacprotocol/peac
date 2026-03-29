@@ -26,19 +26,23 @@
     "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo"
   },
   "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "jwks",
+    "key-resolution",
     "cache",
-    "ed25519",
-    "ssrf",
-    "edge",
-    "peac"
+    "ssrf-safe"
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
-  "homepage": "https://www.peacprotocol.org",
+  "homepage": "https://github.com/peacprotocol/peac#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/peacprotocol/peac.git",

@@ -13,9 +13,15 @@
   },
   "keywords": [
     "peac",
-    "transport",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "transport-http",
     "http",
-    "dpop"
+    "rest",
+    "api"
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
@@ -24,5 +30,14 @@
   },
   "devDependencies": {
     "typescript": "^5.6.2"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "packages/transport/http"
   }
 }

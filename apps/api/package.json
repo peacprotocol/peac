@@ -52,15 +52,27 @@
   },
   "keywords": [
     "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "app",
     "api",
-    "openapi",
-    "rfc9457",
-    "problem-details",
-    "hono"
+    "server"
   ],
-  "author": "PEAC Protocol",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "apps/api"
   }
 }

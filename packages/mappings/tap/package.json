@@ -20,18 +20,23 @@
     "test:watch": "vitest"
   },
   "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "tap",
     "visa",
     "trusted-agent",
-    "http-signatures",
-    "peac"
+    "card-payments"
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
-  "homepage": "https://www.peacprotocol.org",
+  "homepage": "https://github.com/peacprotocol/peac#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/peacprotocol/peac.git",

@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/worker-shared"
   },
   "author": "PEAC Protocol Contributors",
@@ -29,5 +29,21 @@
     "@peac/contracts": "workspace:*",
     "@peac/mappings-tap": "workspace:*"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "worker",
+    "edge",
+    "shared",
+    "utilities"
+  ]
 }

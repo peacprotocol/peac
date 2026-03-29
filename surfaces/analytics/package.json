@@ -30,5 +30,28 @@
     "typescript": "^5.3.3",
     "vitest": "^4.0.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "author": "PEAC Protocol Contributors",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "analytics",
+    "telemetry",
+    "dashboard",
+    "metrics"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "surfaces/analytics"
+  }
 }

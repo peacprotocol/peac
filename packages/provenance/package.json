@@ -7,10 +7,10 @@
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/provenance"
   },
-  "author": "jithinraj <7850727+jithinraj@users.noreply.github.com>",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
@@ -24,5 +24,21 @@
     "@types/node": "^22.19.11",
     "typescript": "^5.3.3"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "homepage": "https://github.com/peacprotocol/peac#readme",
+  "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
+    "provenance",
+    "supply-chain",
+    "slsa",
+    "in-toto"
+  ]
 }

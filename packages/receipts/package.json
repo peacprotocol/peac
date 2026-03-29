@@ -52,16 +52,21 @@
   },
   "keywords": [
     "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
     "receipts",
-    "validation",
-    "cbor",
-    "json-schema"
+    "originary",
+    "receipt-validation",
+    "receipt-parsing",
+    "signed-receipts",
+    "cbor"
   ],
-  "author": "PEAC Protocol",
+  "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/peacprotocol/peac.git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/receipts"
   },
   "bugs": {

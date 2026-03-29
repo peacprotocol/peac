@@ -20,19 +20,23 @@
     "test:watch": "vitest"
   },
   "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "receipts",
+    "originary",
     "ucp",
-    "google",
-    "commerce",
-    "webhooks",
-    "ap2",
-    "peac"
+    "universal-commerce",
+    "order-management",
+    "payment-evidence"
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
   },
-  "homepage": "https://www.peacprotocol.org",
+  "homepage": "https://github.com/peacprotocol/peac#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/peacprotocol/peac.git",
