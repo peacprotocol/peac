@@ -1,13 +1,6 @@
 # @peac/mappings-ucp
 
-Universal Commerce Protocol (UCP) mapping to PEAC receipts and dispute evidence.
-
-## Features
-
-- **Webhook signature verification** - Detached JWS (RFC 7797) with ES256/ES384/ES512
-- **Raw-first, JCS fallback** - Handles UCP's ambiguous canonicalization spec
-- **UCP order to PEAC receipt mapping** - Amounts in minor units (cents)
-- **Dispute evidence generation** - Hardened YAML schema for @peac/audit bundles
+Universal Commerce Protocol (UCP) order mapping to PEAC signed receipts, webhook signature verification, and dispute evidence generation.
 
 ## Installation
 
@@ -15,163 +8,93 @@ Universal Commerce Protocol (UCP) mapping to PEAC receipts and dispute evidence.
 pnpm add @peac/mappings-ucp
 ```
 
-## Usage
+## What It Does
 
-### Verify Webhook Signature
+`@peac/mappings-ucp` maps UCP order data to PEAC receipt claims, verifies UCP webhook signatures using detached JWS (RFC 7797), and generates structured dispute evidence bundles. Order state is kept distinct from payment state: the `payment_state_source` field marks whether payment status was explicitly provided or derived from order fulfillment, so downstream consumers can distinguish observed payment evidence from inferred status.
+
+## How Do I Use It?
+
+### Map a UCP order to receipt claims
+
+```typescript
+import { mapUcpOrderToReceipt } from '@peac/mappings-ucp';
+
+const claims = mapUcpOrderToReceipt({
+  order: ucpOrder,
+  issuer: 'https://merchant.example.com',
+  subject: 'agent:shopper-bot-123',
+  currency: 'USD',
+});
+
+// Sign with @peac/protocol
+const receipt = await issue(claims, privateKey, kid);
+```
+
+### Verify a UCP webhook signature
 
 ```typescript
 import { verifyUcpWebhookSignature } from '@peac/mappings-ucp';
 
 const result = await verifyUcpWebhookSignature({
   signature_header: req.headers['request-signature'],
-  body_bytes: rawBody, // Uint8Array
+  body_bytes: rawBody,
   profile_url: 'https://business.example.com/.well-known/ucp',
 });
 
 if (result.valid) {
-  console.log(`Verified using ${result.mode_used} mode`);
-  console.log(`Key: ${result.key?.kid}`);
-} else {
-  console.error(`Verification failed: ${result.error_code}`);
-  console.log('Attempts:', result.attempts);
+  // Signature verified; proceed with order mapping
 }
 ```
 
-### Map UCP Order to PEAC Receipt
+### Extract line item summaries and order statistics
 
 ```typescript
-import { mapUcpOrderToReceipt } from '@peac/mappings-ucp';
-import { issue } from '@peac/protocol';
+import { extractLineItemSummary, calculateOrderStats } from '@peac/mappings-ucp';
 
-const claims = mapUcpOrderToReceipt({
-  order: webhookBody.order,
-  issuer: 'https://platform.example.com',
-  subject: 'buyer:123',
-  currency: 'USD',
-});
+const summary = extractLineItemSummary(ucpOrder);
+const stats = calculateOrderStats(ucpOrder);
 
-// Sign with @peac/protocol
-const { jws } = await issue({
-  iss: 'https://platform.example.com',
-  kind: 'evidence',
-  type: 'org.peacprotocol/payment',
-  pillars: ['commerce'],
-  extensions: {
-    'org.peacprotocol/commerce': {
-      payment_rail: 'ucp',
-      amount_minor: String(claims.amount),
-      currency: claims.currency,
-      reference: claims.reference,
-    },
-  },
-  privateKey,
-  kid,
-});
+console.log(stats.total_items); // number of line items
+console.log(stats.fulfilled_items); // items marked fulfilled
 ```
 
-### Create Dispute Evidence
+### Attach and extract evidence carriers on webhook payloads
 
 ```typescript
-import { createUcpDisputeEvidence } from '@peac/mappings-ucp';
-import { createDisputeBundle } from '@peac/audit';
+import {
+  UcpCarrierAdapter,
+  attachCarrierToWebhookPayload,
+  extractCarrierFromWebhookPayload,
+} from '@peac/mappings-ucp';
 
-// Create evidence from webhook
-const evidence = await createUcpDisputeEvidence({
-  signature_header: req.headers['request-signature'],
-  body_bytes: rawBody,
-  method: 'POST',
-  path: '/webhooks/ucp/orders',
-  received_at: new Date().toISOString(),
-  profile_url: 'https://business.example.com/.well-known/ucp',
-  profile_fetched_at: new Date().toISOString(),
-});
+// Attach a signed receipt carrier to a UCP webhook payload
+attachCarrierToWebhookPayload(webhookPayload, carrier);
 
-// Create dispute bundle with evidence
-const bundle = await createDisputeBundle({
-  dispute_ref: 'dispute_123',
-  created_by: 'platform:example.com',
-  receipts: [receiptJws],
-  keys: jwks,
-  policy: evidence.evidence_yaml, // UCP evidence stored here
-});
+// Extract carrier from an incoming webhook payload
+const result = extractCarrierFromWebhookPayload(webhookPayload);
+if (result) {
+  console.log(result.receipts[0].receipt_ref);
+}
+
+// Or use the adapter interface
+const adapter = new UcpCarrierAdapter();
+const extracted = adapter.extract(webhookPayload);
 ```
 
-## Verification Strategy
+## Integrates With
 
-UCP's webhook spec says "detached JWT over the request body" but doesn't specify canonicalization (unlike AP2 which requires JCS). This package uses:
+- `@peac/kernel` (Layer 0): Evidence carrier types and constants
+- `@peac/schema` (Layer 1): Receipt schemas and carrier validation
+- `@peac/protocol` (Layer 3): Sign mapped claims into receipts with `issue()`
 
-1. **Try raw body bytes first** - Most likely what implementers expect
-2. **Fallback to JCS-canonicalized body** - If raw fails and body is valid JSON
-3. **Record all attempts** - For debugging and dispute evidence
+## For Agent Developers
 
-Both b64=true (standard) and b64=false (RFC 7797 unencoded payload) are supported.
+If you are building an AI agent that interacts with UCP-based commerce platforms:
 
-## Security and Correctness Notes
-
-This verifier implements strict JOSE semantics for audit-grade correctness:
-
-- **RFC 7797 b64=false**: Unencoded payloads are passed as raw bytes to the verification library (not ASCII-decoded strings). This ensures binary payloads and UTF-8 content verify correctly.
-- **JOSE crit semantics**: If the `crit` header is present, ALL entries must be understood by this implementation. Unknown critical parameters cause immediate rejection with a clear error.
-- **Strict header typing**: `crit` must be an array of strings (no objects, numbers, or duplicates). `b64` must be a boolean (not string `"false"` or number `0`).
-- **Single profile fetch**: The verifier returns both the parsed profile and raw JSON, eliminating race conditions and enabling deterministic evidence hashing.
-- **Deterministic evidence**: YAML output uses UTF-8 encoding, LF line endings, and exactly one trailing newline for byte-stable hashing across platforms.
-- **JWS signature format**: Demo/test code uses IEEE P1363 ECDSA signatures (raw R||S) as required by JWS, not DER encoding.
-
-The verification result includes `profile` and `profile_raw` fields, allowing callers to capture evidence without re-fetching.
-
-## Evidence Schema
-
-The evidence YAML uses a hardened schema that cannot be misinterpreted as executable policy:
-
-```yaml
-peac_bundle_metadata_version: 'org.peacprotocol.ucp/0.1'
-kind: 'evidence_attachment'
-scope: 'ucp_webhook'
-
-request:
-  method: 'POST'
-  path: '/webhooks/ucp/orders'
-  received_at: '2026-01-13T12:00:00Z'
-
-payload:
-  raw_sha256_hex: 'abc123...'
-  raw_bytes_b64url: 'eyJ...' # Optional, for bodies <= 256KB
-  jcs_sha256_hex: 'def456...' # If JSON parseable
-  json_parseable: true
-
-signature:
-  header_value: 'eyJhbGc...' # Full Request-Signature header
-  kid: 'business-key-001'
-  alg: 'ES256'
-  b64: null
-  verified: true
-  verification_mode_used: 'raw'
-  verification_attempts:
-    - mode: 'raw'
-      success: true
-
-profile:
-  url: 'https://business.example.com/.well-known/ucp'
-  fetched_at: '2026-01-13T11:59:30Z'
-  profile_jcs_sha256_hex: 'ghi789...'
-  key_jwk:
-    kty: 'EC'
-    crv: 'P-256'
-    kid: 'business-key-001'
-    x: '...'
-    y: '...'
-```
-
-## Error Codes
-
-| Code                                  | HTTP | Description                      |
-| ------------------------------------- | ---- | -------------------------------- |
-| E_UCP_SIGNATURE_MISSING               | 400  | Request-Signature header missing |
-| E_UCP_SIGNATURE_MALFORMED             | 400  | Invalid detached JWS format      |
-| E_UCP_SIGNATURE_ALGORITHM_UNSUPPORTED | 400  | Algorithm not ES256/ES384/ES512  |
-| E_UCP_KEY_NOT_FOUND                   | 401  | Key ID not in profile            |
-| E_UCP_SIGNATURE_INVALID               | 401  | Signature verification failed    |
-| E_UCP_PROFILE_FETCH_FAILED            | 502  | Failed to fetch UCP profile      |
+- Use `mapUcpOrderToReceipt()` to produce signed evidence of order observations
+- Use `verifyUcpWebhookSignature()` to validate incoming webhook authenticity before mapping
+- Order status reflects fulfillment state; payment status requires explicit `payment_state` when the upstream source provides it
+- See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise protocol overview
 
 ## License
 

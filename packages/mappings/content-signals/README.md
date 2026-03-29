@@ -1,82 +1,122 @@
 # @peac/mappings-content-signals
 
-Content use policy signal parsing for PEAC Protocol.
+Content use policy signal parsing for PEAC: maps robots.txt, tdmrep.json, and Content-Usage (AIPREF) headers to observable content signals with source precedence resolution.
 
-Parses signals from multiple sources and resolves them using priority precedence (DD-137). Signals record observations; they never enforce (DD-136, DD-95).
+## Installation
 
-## Supported Sources
+```bash
+pnpm add @peac/mappings-content-signals
+```
 
-| Source        | Standard                                                                              | Priority |
-| ------------- | ------------------------------------------------------------------------------------- | -------- |
-| tdmrep.json   | EU Directive 2019/790, Art. 4                                                         | Highest  |
-| Content-Usage | AIPREF attach draft (draft-ietf-aipref-attach-04), vocab (draft-ietf-aipref-vocab-05) | 2        |
-| robots.txt    | RFC 9309                                                                              | Lowest   |
+## What It Does
 
-Content-Signal header support is reserved for a future version.
+`@peac/mappings-content-signals` parses content use policy signals from multiple sources and resolves them using a defined source precedence chain: `tdmrep.json` > `Content-Usage` header (AIPREF) > `robots.txt`. Signals record observations, never enforce; every signal has a three-state decision of `allow`, `deny`, or `unspecified`. All parsers receive pre-fetched content and perform no network I/O.
 
-### Scope (v0.11.3)
+## How Do I Use It?
 
-This package provides **header and file parsing only**. Each parser receives pre-fetched content as a string; there is no network I/O. The Content-Usage parser handles the HTTP header exclusively; it does not parse robots.txt directives or any other signal source.
-
-## Usage
+### Create a complete observation from all available sources
 
 ```typescript
 import { createObservation } from '@peac/mappings-content-signals';
 
 const observation = createObservation({
   target_uri: 'https://example.com/article',
-  robots_txt: robotsTxtContent,
-  tdmrep_json: tdmrepContent,
+  robots_txt: 'User-agent: GPTBot\nDisallow: /',
   content_usage: 'train-ai=n, search=y',
+  tdmrep_json: JSON.stringify({ 'tdm-reservation': 0 }),
 });
 
 for (const signal of observation.signals) {
   console.log(`${signal.purpose}: ${signal.decision} (from ${signal.source})`);
 }
+
+console.log(observation.sources_checked);
+// ['tdmrep-json', 'content-usage-header', 'robots-txt']
 ```
 
-### Detailed Content-Usage Parse Result
+### Parse robots.txt for AI-relevant signals
 
-The `parseContentUsage()` function returns a structured result preserving all parse pipeline stages:
+```typescript
+import { parseRobotsTxt } from '@peac/mappings-content-signals';
+
+const entries = parseRobotsTxt('User-agent: GPTBot\nDisallow: /\n');
+for (const entry of entries) {
+  console.log(entry.purpose, entry.decision);
+  // 'ai-training' 'deny'
+  // 'ai-inference' 'deny'
+}
+```
+
+### Parse a Content-Usage header (AIPREF)
 
 ```typescript
 import { parseContentUsage } from '@peac/mappings-content-signals';
 
-const result = parseContentUsage('train-ai=n, search=y, x-custom=y');
-
-result.raw; // original header string
-result.parsed; // all SF Dictionary members (SfDictionaryMember[])
-result.entries; // mapped ContentSignalEntry[] for known AIPREF keys
-result.extensions; // unrecognized dictionary members (forward-compatible)
+const result = parseContentUsage('train-ai=n, search=y');
+for (const entry of result.entries) {
+  console.log(entry.purpose, entry.decision);
+  // 'ai-training' 'deny'
+  // 'ai-search' 'allow'
+}
+// Unrecognized keys are preserved as extensions
+console.log(result.extensions);
 ```
 
-## Content-Usage Parsing (AIPREF)
+### Resolve signals from multiple sources using precedence
 
-The Content-Usage header is parsed as an RFC 9651 Structured Fields Dictionary with AIPREF vocabulary keys:
+```typescript
+import {
+  parseRobotsTxt,
+  parseContentUsage,
+  resolveSignals,
+  getDecisionForPurpose,
+} from '@peac/mappings-content-signals';
 
-| AIPREF Key    | PEAC Purpose    | Role           | Values              |
-| ------------- | --------------- | -------------- | ------------------- |
-| `bots`        | (parent only)   | Hierarchy root | `y`=allow, `n`=deny |
-| `train-ai`    | `ai-training`   | Leaf           | `y`=allow, `n`=deny |
-| `train-genai` | `ai-generative` | Leaf           | `y`=allow, `n`=deny |
-| `search`      | `ai-search`     | Leaf           | `y`=allow, `n`=deny |
+const robotsEntries = parseRobotsTxt('User-agent: GPTBot\nDisallow: /');
+const aiprefResult = parseContentUsage('train-ai=y');
 
-`bots` is a parent-only key used for hierarchy propagation (Section 5.2 of vocab-05). It does not produce its own output entry; its preference propagates to child keys when they have no explicit value.
+const resolved = resolveSignals([...robotsEntries, ...aiprefResult.entries]);
 
-Values are SF Tokens (not Booleans). Bare keys (`train-ai` without `=y`/`=n`), String values (`"n"`), and Boolean values (`?1`/`?0`) all produce `unspecified`.
+// Content-Usage has higher precedence than robots.txt
+const decision = getDecisionForPurpose(resolved, 'ai-training');
+console.log(decision); // 'allow' (Content-Usage wins over robots.txt)
+```
 
-Hierarchy propagation: `bots` -> `train-ai` -> `train-genai`, `bots` -> `search`. When a child key has no explicit preference, it inherits from its parent.
+### Parse tdmrep.json for EU TDM reservation signals
 
-Unknown dictionary keys are stored in `extensions` (never dropped), enabling forward-compatible parsing as the AIPREF vocabulary evolves.
+```typescript
+import { parseTdmrep } from '@peac/mappings-content-signals';
 
-## Design Principles
+const entries = parseTdmrep(JSON.stringify({ 'tdm-reservation': 1 }));
+for (const entry of entries) {
+  console.log(entry.purpose, entry.decision);
+  // 'tdm' 'deny'
+  // 'ai-training' 'deny'
+}
+```
 
-1. **Observation only**: signals record what was observed, never enforce policy
-2. **No fetch**: all parsers receive pre-fetched content; callers handle SSRF-safe fetching
-3. **Three-state**: each purpose resolves to `allow`, `deny`, or `unspecified`
-4. **EU TDM ready**: includes tdmrep.json parser for EU Directive 2019/790 Art. 4 (TDM reservation)
-5. **Forward-compatible**: unknown Content-Usage keys are preserved as extensions
+## Integrates With
+
+- `@peac/kernel` (Layer 0): Content signal types and purpose tokens
+- `@peac/schema` (Layer 1): Signal schema validation
+- `@peac/protocol` (Layer 3): Receipt issuance with content signal evidence
+
+## For Agent Developers
+
+If you are building an AI agent that needs to observe and record content use policies:
+
+- Use `createObservation()` for a one-call workflow that parses all available sources and resolves precedence automatically
+- Use individual parsers (`parseRobotsTxt`, `parseTdmrep`, `parseContentUsage`) when you need fine-grained control
+- Use `resolveSignals()` to combine entries from multiple sources; the highest-priority source with a definitive signal wins
+- Use `getDecisionForPurpose()` to query the resolved decision for a specific purpose such as `ai-training` or `ai-search`
+- All functions accept pre-fetched content; the package performs no network I/O
 
 ## License
 
 Apache-2.0
+
+---
+
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz)

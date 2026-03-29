@@ -80,6 +80,6 @@
     "model-context-protocol",
     "agent-tools",
     "receipt-verification",
-    "llm-tools"
+    "mcp-tools"
   ]
 }
