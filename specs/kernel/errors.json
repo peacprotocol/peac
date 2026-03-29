@@ -1559,6 +1559,114 @@
       "category": "verification",
       "retryable": false,
       "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DID_RESOLUTION_FAILED",
+      "http_status": 502,
+      "title": "DID Resolution Failed",
+      "description": "Failed to resolve DID document for key discovery",
+      "category": "infrastructure",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_DID_DOCUMENT_INVALID",
+      "http_status": 400,
+      "title": "Invalid DID Document",
+      "description": "DID document does not conform to W3C DID Core v1.0",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DID_KEY_NOT_FOUND",
+      "http_status": 400,
+      "title": "DID Verification Key Not Found",
+      "description": "No suitable Ed25519 verification key found in DID document",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "retry_with_different_key"
+    },
+    {
+      "code": "E_DID_UNSUPPORTED_METHOD",
+      "http_status": 400,
+      "title": "Unsupported DID Method",
+      "description": "DID method is not supported by the configured resolver",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_DID_DEACTIVATED",
+      "http_status": 400,
+      "title": "DID Deactivated",
+      "description": "DID document has been deactivated",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "abort"
+    },
+    {
+      "code": "E_DID_KEY_AMBIGUOUS",
+      "http_status": 400,
+      "title": "DID Key Ambiguous",
+      "description": "Multiple eligible Ed25519 verification keys found without explicit key selection",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_PKCE_INVALID_VERIFIER",
+      "http_status": 400,
+      "title": "Invalid PKCE Verifier",
+      "description": "PKCE code verifier does not meet RFC 7636 requirements",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_PKCE_CHALLENGE_MISMATCH",
+      "http_status": 400,
+      "title": "PKCE Challenge Mismatch",
+      "description": "PKCE code challenge does not match the code verifier",
+      "category": "verification",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_X402_V2_INVALID_FORMAT",
+      "http_status": 400,
+      "title": "Invalid x402 V2 Format",
+      "description": "x402 V2 payload does not conform to expected V2 schema",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_X402_VERSION_UNSUPPORTED",
+      "http_status": 400,
+      "title": "x402 Version Unsupported",
+      "description": "x402 protocol version is not supported by this adapter",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_RECEIPT_URL_RESOLUTION_FAILED",
+      "http_status": 502,
+      "title": "Receipt URL Resolution Failed",
+      "description": "Failed to resolve receipt from receipt_url locator hint",
+      "category": "infrastructure",
+      "retryable": true,
+      "next_action": "retry_after_delay"
+    },
+    {
+      "code": "E_GRPC_METADATA_TOO_LARGE",
+      "http_status": 400,
+      "title": "gRPC Metadata Too Large",
+      "description": "gRPC metadata value exceeds the per-key or aggregate size limit",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
     }
   ]
 }

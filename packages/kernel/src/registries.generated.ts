@@ -3,7 +3,7 @@
  *
  * AUTO-GENERATED from specs/kernel/registries.json
  * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-registries.ts
- * Spec version: 0.5.0
+ * Spec version: 0.6.0
  */
 
 import type {
@@ -140,6 +140,13 @@ export const TRANSPORT_METHODS: readonly TransportMethodEntry[] = [
     status: 'informational',
   },
   {
+    id: 'grpc',
+    category: 'rpc',
+    description: 'gRPC transport with metadata-based receipt carrier',
+    reference: 'https://grpc.io/',
+    status: 'informational',
+  },
+  {
     id: 'http-signature',
     category: 'message-signature',
     description: 'HTTP Message Signatures',
@@ -240,10 +247,24 @@ export const PROOF_TYPES: readonly ProofTypeEntry[] = [
     status: 'informational',
   },
   {
+    id: 'intoto-v1',
+    category: 'supply-chain',
+    description: 'in-toto Attestation Framework v1.0 predicate mapping',
+    reference: 'https://github.com/in-toto/attestation/tree/main/spec/v1',
+    status: 'informational',
+  },
+  {
     id: 'sigstore-oidc',
     category: 'keyless-signing',
     description: 'OIDC-bound keyless signing via Sigstore (Fulcio + Rekor transparency log)',
     reference: 'https://docs.sigstore.dev/',
+    status: 'informational',
+  },
+  {
+    id: 'slsa-v1.2',
+    category: 'supply-chain',
+    description: 'SLSA v1.2 provenance predicate mapping',
+    reference: 'https://slsa.dev/spec/v1.0/',
     status: 'informational',
   },
   {
