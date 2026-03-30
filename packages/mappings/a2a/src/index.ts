@@ -75,3 +75,36 @@ export {
   getPeacExtension,
   discoverPeacCapabilities,
 } from './discovery';
+
+// Auth (A2A v1.0 OAuth surface)
+export {
+  generatePKCEChallenge,
+  computeS256Challenge,
+  validatePKCEVerifier,
+  buildAuthorizationRequest,
+  exchangeAuthorizationCode,
+  fromA2AAuthEvent,
+  GrpcStatusCode,
+  createA2AAuthStatus,
+} from './auth/index';
+
+export type {
+  PKCEChallenge,
+  A2AOAuthConfig,
+  AuthorizationRequest,
+  TokenResponse,
+  FetchFn,
+  A2ADeviceCodeFlowConfig,
+  DeviceCodeRequest,
+  DeviceCodeResponse,
+  DeviceCodePollingError,
+  DeviceCodeErrorResponse,
+  DeviceCodeTokenResponse,
+  A2AAuthMethod,
+  A2AAuthEvent,
+  A2AAuthEvidenceResult,
+  GrpcStatusCodeValue,
+  GrpcErrorInfo,
+  GrpcStatus,
+  A2AAuthErrorCode,
+} from './auth/index';
