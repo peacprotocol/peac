@@ -104,6 +104,7 @@ const nestedMappings: Record<string, string> = {
   'adapter-x402-pinata': 'packages/adapters/x402/pinata',
   'adapter-openai-compatible': 'packages/adapters/openai-compatible',
   'adapter-eat': 'packages/adapters/eat',
+  'adapter-did': 'packages/adapters/did',
   'rails-x402': 'packages/rails/x402',
   'rails-stripe': 'packages/rails/stripe',
   'rails-card': 'packages/rails/card',
