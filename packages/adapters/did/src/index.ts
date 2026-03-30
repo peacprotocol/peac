@@ -28,6 +28,10 @@ export { createCompositeResolver } from './resolver.js';
 // did:key resolver
 export { DidKeyResolver } from './did-key.js';
 
+// did:web resolver (caller-provided hardened fetch)
+export type { DidWebResolverOptions, HardenedFetchResult, HardenedFetchFn } from './did-web.js';
+export { DidWebResolver } from './did-web.js';
+
 // Key extraction (DD-202 selection policy)
 export type { ExtractKeyOptions } from './extract-key.js';
 export { extractVerificationKey } from './extract-key.js';
