@@ -1,0 +1,16 @@
+{
+  "name": "@peac/example-did-verification",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "tsx index.ts",
+    "verify": "tsx index.ts"
+  },
+  "dependencies": {
+    "@peac/adapter-did": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}

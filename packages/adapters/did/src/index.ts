@@ -39,6 +39,10 @@ export { extractVerificationKey } from './extract-key.js';
 // Multicodec utilities
 export { extractEd25519FromMultibase } from './multicodec.js';
 
+// Caching
+export type { CachingResolverOptions } from './cache.js';
+export { CachingResolver } from './cache.js';
+
 // Errors
 export { DIDError } from './errors.js';
 export type { DIDErrorCode } from './errors.js';
