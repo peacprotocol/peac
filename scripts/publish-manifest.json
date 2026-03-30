@@ -121,6 +121,6 @@
     "@peac/sdk"
   ],
   "pendingTrustedPublishing": [],
-  "deferredTrustedPublishing": ["@peac/net-node", "@peac/adapter-eat"],
+  "deferredTrustedPublishing": ["@peac/net-node", "@peac/adapter-eat", "@peac/adapter-did"],
   "deferredTrustedPublishingNote": "Not yet published to npm (404). Not in v0.12.0 stable scope. Configure trust after first publish."
 }
