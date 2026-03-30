@@ -12,7 +12,7 @@ pnpm add @peac/adapter-did
 
 `@peac/adapter-did` is a Layer 4 adapter that resolves W3C Decentralized Identifiers (DIDs) to Ed25519 public keys for use with `verifyLocal()`. It implements the DID Verification Method Selection Policy (DD-202) for deterministic key extraction.
 
-Currently supports `did:key` (Ed25519, zero network I/O). `did:web` (SSRF-hardened HTTPS) and caching are follow-up work.
+Supports `did:key` (Ed25519, zero network I/O) and `did:web` (caller-provided SSRF-hardened HTTPS fetch). Includes TTL-based caching and composite resolver for multi-method support.
 
 ## How Do I Use It?
 
@@ -58,7 +58,7 @@ Only Ed25519 keys are extracted. Other key types are silently skipped to prevent
 
 - W3C DID Core v1.0 (Recommendation 2022): baseline type model
 - did:key (W3C CCG v0.9): method-specific resolution as interoperability adapter
-- did:web (W3C CCG draft): planned in follow-up, not a normative dependency
+- did:web (W3C CCG draft): HTTPS resolution as interoperability adapter, not a normative dependency
 
 ## License
 
