@@ -1,0 +1,25 @@
+{
+  "_description": "Receipt-to-signature binding verification for ERC-8128",
+  "binding": {
+    "headerName": "peac-receipt",
+    "headerIncludedInSignature": true,
+    "signatureAlgorithm": "ed25519",
+    "keyIdMatchesReceiptKid": true,
+    "_note": "The peac-receipt header MUST be a covered component. The key ID used for the HTTP signature SHOULD match the kid in the receipt JWS header."
+  },
+  "verification": {
+    "steps": [
+      "Parse Signature-Input header to extract covered components",
+      "Verify peac-receipt is in the covered components list",
+      "Reconstruct signature base per RFC 9421 Section 2.5",
+      "Verify the signature using the public key identified by keyid",
+      "Extract and verify the PEAC receipt from the peac-receipt header independently"
+    ],
+    "failConditions": [
+      "peac-receipt not in covered components",
+      "Signature verification failure",
+      "Receipt verification failure (separate from HTTP signature)",
+      "keyid mismatch between HTTP signature and receipt JWS kid"
+    ]
+  }
+}

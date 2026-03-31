@@ -1,0 +1,26 @@
+{
+  "_description": "Expected RFC 9421 signature base and coverage for ERC-8128",
+  "signatureBase": {
+    "_note": "Signature base string per RFC 9421 Section 2.5",
+    "components": [
+      { "id": "@method", "value": "POST" },
+      { "id": "@target-uri", "value": "https://feedback.example.com/api/v1/submit" },
+      {
+        "id": "peac-receipt",
+        "value": "eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QiLCJraWQiOiJ0ZXN0LWtleS0yMDI2In0.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImp0aSI6InRlc3QtanRpLTAwMSIsImlhdCI6MTcxMTkwMDAwMCwia2luZCI6ImV2aWRlbmNlIiwidHlwZSI6Im9yZy5wZWFjcHJvdG9jb2wvcGF5bWVudCJ9.dGVzdC1zaWduYXR1cmU"
+      }
+    ],
+    "params": {
+      "created": 1711900000,
+      "expires": 1711903600,
+      "keyid": "test-key-2026",
+      "alg": "ed25519"
+    }
+  },
+  "coverage": {
+    "receiptHeaderCovered": true,
+    "methodCovered": true,
+    "targetUriCovered": true,
+    "minimumComponents": ["@method", "@target-uri", "peac-receipt"]
+  }
+}

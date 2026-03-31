@@ -79,7 +79,7 @@ describe('createReceiptUrlResolver()', () => {
       expect(result).not.toHaveProperty('_retrieval');
     });
 
-    it('delivers retrieval metadata via onResolved callback (DD-207)', async () => {
+    it('delivers retrieval metadata via onResolved callback', async () => {
       mockResolve.mockResolvedValue({ ok: true, jws: TEST_JWS });
       mockVerifyRef.mockReturnValue(true);
 
