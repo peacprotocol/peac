@@ -124,6 +124,7 @@ const nestedMappings: Record<string, string> = {
   pref: 'packages/aipref',
   sdk: 'packages/sdk-js',
   'net-node': 'packages/net/node',
+  'transport-grpc': 'packages/transport/grpc',
   disc: 'packages/discovery',
 };
 
