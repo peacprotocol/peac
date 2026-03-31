@@ -7,7 +7,6 @@ import {
   GRPC_MAX_CARRIER_SIZE,
   GrpcMetadataKeys,
   addReceiptToMetadata,
-  extractReceiptFromMetadata,
   extractReceiptTypeFromMetadata,
   GRPC_TRANSPORT_VERSION,
 } from '../src/index.js';
