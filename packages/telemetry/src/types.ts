@@ -49,6 +49,9 @@ export interface ReceiptIssuedInput {
   /** Hash of the receipt (never raw content) */
   receiptHash: string;
 
+  /** Content-addressed receipt reference (sha256:<hex64>) */
+  receiptRef?: string;
+
   /** Hash of the policy used */
   policyHash?: string;
 
@@ -71,6 +74,9 @@ export interface ReceiptIssuedInput {
 export interface ReceiptVerifiedInput {
   /** Hash of the receipt */
   receiptHash: string;
+
+  /** Content-addressed receipt reference (sha256:<hex64>) */
+  receiptRef?: string;
 
   /** Issuer identifier */
   issuer?: string;

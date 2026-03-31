@@ -13,6 +13,7 @@ export const PEAC_ATTRS = {
   VERSION: 'peac.version',
   EVENT: 'peac.event',
   RECEIPT_HASH: 'peac.receipt.hash',
+  RECEIPT_REF: 'peac.receipt.ref',
   POLICY_HASH: 'peac.policy.hash',
   DECISION: 'peac.decision',
   REASON_CODE: 'peac.reason_code',

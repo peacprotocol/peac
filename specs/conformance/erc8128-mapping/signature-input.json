@@ -1,0 +1,18 @@
+{
+  "_description": "ERC-8128 RFC 9421 signature input parameters",
+  "request": {
+    "method": "POST",
+    "targetUri": "https://feedback.example.com/api/v1/submit",
+    "headers": {
+      "peac-receipt": "eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QiLCJraWQiOiJ0ZXN0LWtleS0yMDI2In0.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImp0aSI6InRlc3QtanRpLTAwMSIsImlhdCI6MTcxMTkwMDAwMCwia2luZCI6ImV2aWRlbmNlIiwidHlwZSI6Im9yZy5wZWFjcHJvdG9jb2wvcGF5bWVudCJ9.dGVzdC1zaWduYXR1cmU",
+      "content-type": "application/json"
+    }
+  },
+  "signatureParams": {
+    "coveredComponents": ["@method", "@target-uri", "peac-receipt"],
+    "algorithm": "ed25519",
+    "keyId": "test-key-2026",
+    "created": 1711900000,
+    "expires": 1711903600
+  }
+}

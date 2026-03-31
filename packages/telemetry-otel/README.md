@@ -143,6 +143,10 @@ const extensions = createTraceContextExtensions(req.headers);
 - The OTel exporter in `examples/telemetry-otel/` uses `@opentelemetry/exporter-trace-otlp-http@^0.200.0`.
   This version is coupled to SDK v2: OTel uses a `0.{MAJOR}xx.x` scheme for experimental packages.
 
+## OTel Profiles
+
+OpenTelemetry Profiles entered public alpha in March 2026. PEAC does not currently integrate with OTel Profiles. If Profiles stabilizes, future versions may add profiling signal correlation alongside the existing traces and metrics support.
+
 ## Related Packages
 
 - `@peac/telemetry` - Core interfaces and no-op provider

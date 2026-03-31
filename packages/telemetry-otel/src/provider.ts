@@ -144,6 +144,10 @@ function buildReceiptIssuedAttributes(
     [PEAC_ATTRS.RECEIPT_HASH]: input.receiptHash,
   };
 
+  if (input.receiptRef) {
+    attrs[PEAC_ATTRS.RECEIPT_REF] = input.receiptRef;
+  }
+
   if (input.policyHash) {
     attrs[PEAC_ATTRS.POLICY_HASH] = input.policyHash;
   }
@@ -197,6 +201,10 @@ function buildReceiptVerifiedAttributes(
     [PEAC_ATTRS.RECEIPT_HASH]: input.receiptHash,
     [PEAC_ATTRS.VALID]: input.valid,
   };
+
+  if (input.receiptRef) {
+    attrs[PEAC_ATTRS.RECEIPT_REF] = input.receiptRef;
+  }
 
   if (input.reasonCode) {
     attrs[PEAC_ATTRS.REASON_CODE] = input.reasonCode;

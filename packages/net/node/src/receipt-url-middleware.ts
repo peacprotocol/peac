@@ -5,7 +5,7 @@
  * with receipt_jws populated (if receipt_url was present and resolvable).
  *
  * The returned carrier is a pure PeacEvidenceCarrier with no extra fields.
- * Retrieval metadata (DD-207) is exposed via an optional onResolved callback.
+ * Retrieval metadata (retrieval metadata) is exposed via an optional onResolved callback.
  *
  * Wraps resolveReceiptUrl() and verifyReceiptRef() with concurrency
  * control and strict/non-strict modes.
@@ -23,7 +23,7 @@ import { resolveReceiptUrl, verifyReceiptRef } from './receipt-resolver.js';
 // ---------------------------------------------------------------------------
 
 /**
- * Retrieval metadata recorded on successful resolution (DD-207).
+ * Retrieval metadata recorded on successful resolution (retrieval metadata).
  *
  * Delivered via the onResolved callback, not on the carrier itself.
  */
@@ -55,7 +55,7 @@ export interface ReceiptUrlResolverOptions {
    */
   strict?: boolean;
   /**
-   * Callback invoked on successful resolution with retrieval metadata (DD-207).
+   * Callback invoked on successful resolution with retrieval metadata (retrieval metadata).
    * Use this to record audit data without widening the carrier type.
    */
   onResolved?: (metadata: RetrievalMetadata) => void;
@@ -111,7 +111,7 @@ class Semaphore {
  * `sha256(jws) == receipt_ref` and populates `receipt_jws` on success.
  *
  * The returned carrier is always a pure PeacEvidenceCarrier.
- * Retrieval metadata (DD-207) is delivered via the onResolved callback.
+ * Retrieval metadata (retrieval metadata) is delivered via the onResolved callback.
  *
  * Behavior:
  * - Carrier already has `receipt_jws` or lacks `receipt_url`: returned unchanged

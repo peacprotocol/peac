@@ -112,6 +112,16 @@ describe('createOtelProvider', () => {
         })
       ).not.toThrow();
     });
+
+    it('should accept receiptRef as span attribute', () => {
+      const provider = createOtelProvider({ serviceName: 'test' });
+      expect(() =>
+        provider.onReceiptIssued({
+          receiptHash: 'sha256:abc123',
+          receiptRef: 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        })
+      ).not.toThrow();
+    });
   });
 
   describe('onReceiptVerified', () => {
@@ -120,6 +130,17 @@ describe('createOtelProvider', () => {
       expect(() =>
         provider.onReceiptVerified({
           receiptHash: 'sha256:test',
+          valid: true,
+        })
+      ).not.toThrow();
+    });
+
+    it('should accept receiptRef as span attribute', () => {
+      const provider = createOtelProvider({ serviceName: 'test' });
+      expect(() =>
+        provider.onReceiptVerified({
+          receiptHash: 'sha256:test',
+          receiptRef: 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
           valid: true,
         })
       ).not.toThrow();

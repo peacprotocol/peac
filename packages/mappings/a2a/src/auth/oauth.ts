@@ -2,7 +2,7 @@
  * OAuth 2.0 authorization code flow utilities for A2A v1.0.
  *
  * A2A v1.0 specifies OAuth 2.0 with PKCE as the preferred auth model.
- * All network calls accept a `fetchFn` parameter (no global fetch per DD-55).
+ * All network calls accept a `fetchFn` parameter (no global fetch).
  *
  * Config field names mirror the A2A spec OAuth flow object:
  * authorizationUrl, tokenUrl, refreshUrl, scopes, pkceRequired.
@@ -164,7 +164,7 @@ export function buildAuthorizationRequest(
  * @param code - Authorization code from the redirect callback
  * @param verifier - PKCE code verifier from the authorization request
  * @param config - A2A OAuth server configuration
- * @param fetchFn - Fetch implementation (no global fetch per DD-55)
+ * @param fetchFn - Fetch implementation (no global fetch)
  * @returns Token response from the authorization server
  * @throws Error if the token endpoint returns an error response
  */
