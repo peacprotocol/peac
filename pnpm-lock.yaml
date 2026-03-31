@@ -1337,6 +1337,25 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)
 
+  packages/mappings/intoto:
+    dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../schema
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.11
+        version: 22.19.11
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.0(@types/node@22.19.11)(vite@6.4.1)
+
   packages/mappings/mcp:
     dependencies:
       '@peac/kernel':
@@ -1393,6 +1412,25 @@ importers:
       vitest:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)
+
+  packages/mappings/slsa:
+    dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../schema
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.11
+        version: 22.19.11
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.0(@types/node@22.19.11)(vite@6.4.1)
 
   packages/mappings/tap:
     dependencies:

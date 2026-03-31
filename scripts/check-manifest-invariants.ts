@@ -118,6 +118,8 @@ const nestedMappings: Record<string, string> = {
   'mappings-ucp': 'packages/mappings/ucp',
   'mappings-content-signals': 'packages/mappings/content-signals',
   'mappings-paymentauth': 'packages/mappings/paymentauth',
+  'mappings-intoto': 'packages/mappings/intoto',
+  'mappings-slsa': 'packages/mappings/slsa',
   'capture-core': 'packages/capture/core',
   'capture-node': 'packages/capture/node',
   'sdk-js': 'packages/sdk-js',
