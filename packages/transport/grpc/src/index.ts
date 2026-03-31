@@ -14,7 +14,9 @@
  * @packageDocumentation
  */
 
-export const GRPC_TRANSPORT_VERSION = '0.9.20' as const;
+import { WIRE_02_JWS_TYP } from '@peac/kernel';
+
+export const GRPC_TRANSPORT_VERSION = '0.12.6' as const;
 
 /**
  * gRPC status codes.
@@ -244,12 +246,13 @@ export const GrpcMetadataKeys = {
   REQUEST_ID: 'peac-request-id',
 } as const;
 
+/** gRPC metadata shape for PEAC carrier operations */
+export type GrpcMetadataLike = Record<string, string | string[] | undefined>;
+
 /**
  * Extract PEAC receipt from gRPC metadata.
  */
-export function extractReceiptFromMetadata(
-  metadata: Record<string, string | string[] | undefined>
-): string | null {
+export function extractReceiptFromMetadata(metadata: GrpcMetadataLike): string | null {
   const receipt = metadata[GrpcMetadataKeys.RECEIPT];
   if (typeof receipt === 'string') {
     return receipt;
@@ -261,14 +264,33 @@ export function extractReceiptFromMetadata(
 }
 
 /**
+ * Extract receipt type from gRPC metadata.
+ */
+export function extractReceiptTypeFromMetadata(metadata: GrpcMetadataLike): string | null {
+  const typ = metadata[GrpcMetadataKeys.RECEIPT_TYPE];
+  if (typeof typ === 'string') {
+    return typ;
+  }
+  if (Array.isArray(typ) && typ.length > 0) {
+    return typ[0];
+  }
+  return null;
+}
+
+/**
  * Add PEAC receipt to gRPC metadata.
+ *
+ * @param metadata - gRPC metadata object to modify
+ * @param receiptJws - Compact JWS of the signed receipt
+ * @param receiptType - Receipt typ value (defaults to Wire 0.2 `interaction-record+jwt`)
  */
 export function addReceiptToMetadata(
   metadata: Record<string, string | string[]>,
-  receiptJws: string
+  receiptJws: string,
+  receiptType: string = WIRE_02_JWS_TYP
 ): void {
   metadata[GrpcMetadataKeys.RECEIPT] = receiptJws;
-  metadata[GrpcMetadataKeys.RECEIPT_TYPE] = 'peac-receipt/0.1';
+  metadata[GrpcMetadataKeys.RECEIPT_TYPE] = receiptType;
 }
 
 /**
@@ -336,3 +358,14 @@ export const GrpcStatusName: Record<GrpcStatusCode, string> = {
 export function getStatusName(code: GrpcStatusCode): string {
   return GrpcStatusName[code] ?? 'UNKNOWN';
 }
+
+// ---------------------------------------------------------------------------
+// Carrier adapter re-exports
+// ---------------------------------------------------------------------------
+
+export {
+  A2AGrpcCarrierAdapter,
+  createGrpcCarrierMeta,
+  validateOwnMetadataKeys,
+  GRPC_MAX_CARRIER_SIZE,
+} from './a2a-carrier.js';

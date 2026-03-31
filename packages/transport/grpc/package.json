@@ -1,19 +1,25 @@
 {
   "name": "@peac/transport-grpc",
   "version": "0.12.5",
-  "private": true,
-  "description": "PEAC gRPC transport layer with HTTP StatusCode parity",
+  "description": "PEAC gRPC transport layer with carrier adapter and HTTP StatusCode parity",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo",
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
@@ -28,11 +34,17 @@
     "transport-grpc",
     "grpc",
     "protobuf",
-    "rpc"
+    "rpc",
+    "carrier-adapter"
   ],
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
+  "dependencies": {
+    "@peac/kernel": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
   "devDependencies": {
+    "tsup": "^8.5.1",
     "typescript": "^5.6.2",
     "vitest": "^4.0.0"
   },
