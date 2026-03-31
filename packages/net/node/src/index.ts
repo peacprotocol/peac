@@ -1954,5 +1954,13 @@ export type {
   ResolveReceiptUrlFailure,
 } from './receipt-resolver.js';
 
+// Receipt URL resolution middleware (v0.12.6+, DD-207)
+export { createReceiptUrlResolver } from './receipt-url-middleware.js';
+export type {
+  ReceiptUrlResolverOptions,
+  RetrievalMetadata,
+  ReceiptUrlMiddleware,
+} from './receipt-url-middleware.js';
+
 // NOTE: Internal functions are now in impl.ts and NOT exported from main entry.
 // Access internal utilities via '@peac/net-node/testing' subpath only.
