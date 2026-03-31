@@ -14,7 +14,8 @@
     "@peac/kernel": "workspace:*",
     "@peac/mappings-a2a": "workspace:*",
     "@peac/protocol": "workspace:*",
-    "@peac/schema": "workspace:*"
+    "@peac/schema": "workspace:*",
+    "@peac/transport-grpc": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.21.0",

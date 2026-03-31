@@ -28,6 +28,10 @@ export default defineConfig({
         find: '@peac/mappings-a2a',
         replacement: resolve(__dirname, 'packages/mappings/a2a/src/index.ts'),
       },
+      {
+        find: '@peac/transport-grpc',
+        replacement: resolve(__dirname, 'packages/transport/grpc/src/index.ts'),
+      },
     ],
   },
   server: {

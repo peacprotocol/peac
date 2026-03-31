@@ -20,6 +20,7 @@ import {
 } from '@peac/mappings-a2a';
 import { issue, verifyLocal } from '@peac/protocol';
 import { computeReceiptRef } from '@peac/schema';
+import { A2AGrpcCarrierAdapter, GrpcMetadataKeys } from '@peac/transport-grpc';
 
 import agentCard from './agent-card.json' with { type: 'json' };
 
@@ -109,7 +110,41 @@ if (!extracted) {
   }
 }
 
+// --- 5. gRPC metadata-carrier transport: same receipt, different carrier ---
+// This demonstrates metadata-carrier usage, not a full gRPC server/client.
+// The same receipt attached via A2A metadata or gRPC metadata produces
+// identical receipt_ref, proving transport-independent verification.
+
+console.log('\n=== gRPC Metadata-Carrier Parity ===\n');
+
+const grpcAdapter = new A2AGrpcCarrierAdapter();
+const lastCarrier = allCarriers[allCarriers.length - 1];
+
+// Attach the last receipt to gRPC metadata (metadata-carrier transport)
+const grpcMetadata: Record<string, string | string[] | undefined> = {};
+grpcAdapter.attach(grpcMetadata, [lastCarrier]);
+console.log('gRPC metadata key:', GrpcMetadataKeys.RECEIPT);
+console.log('gRPC receipt type:', grpcMetadata[GrpcMetadataKeys.RECEIPT_TYPE]);
+
+// Extract from gRPC and verify identical receipt_ref
+const grpcExtracted = grpcAdapter.extract(grpcMetadata);
+if (grpcExtracted) {
+  console.log(`gRPC receipt_ref: ${grpcExtracted.receipts[0].receipt_ref.slice(0, 30)}...`);
+  console.log(`A2A  receipt_ref: ${lastCarrier.receipt_ref.slice(0, 30)}...`);
+  console.log(
+    'Cross-transport parity:',
+    grpcExtracted.receipts[0].receipt_ref === lastCarrier.receipt_ref ? 'PASS' : 'FAIL'
+  );
+
+  // Verify the gRPC-extracted receipt
+  const grpcResult = await verifyLocal(grpcExtracted.receipts[0].receipt_jws!, publicKey);
+  console.log('gRPC-extracted receipt valid:', grpcResult.valid);
+}
+
 console.log('\n=== Summary ===\n');
 console.log('The gateway pattern issues one receipt per state transition.');
 console.log('Each receipt is attached to A2A TaskStatus metadata via the carrier contract.');
+console.log(
+  'The same receipt produces identical receipt_ref through both A2A and gRPC transports.'
+);
 console.log('Consumers extract and verify the full chain for end-to-end traceability.');
