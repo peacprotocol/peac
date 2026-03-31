@@ -22,8 +22,8 @@ import type {
 } from '@peac/kernel';
 import { validateCarrierConstraints } from '@peac/schema';
 
-import { GrpcMetadataKeys, extractReceiptFromMetadata, addReceiptToMetadata } from './index.js';
-import type { GrpcMetadataLike } from './index.js';
+import { GrpcMetadataKeys, extractReceiptFromMetadata, addReceiptToMetadata } from './metadata.js';
+import type { GrpcMetadataLike } from './metadata.js';
 
 // ---------------------------------------------------------------------------
 // Constants
