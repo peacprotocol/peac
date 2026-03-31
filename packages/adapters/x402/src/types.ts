@@ -384,6 +384,10 @@ export interface X402PeacRecord {
     transaction?: string;
     /** Schema version (from receipt, if present) */
     receiptVersion?: number;
+    /** V2: maximum settlement timeout in seconds (duration, not epoch) */
+    maxTimeoutSeconds?: number;
+    /** V2: settlement scheme identifier */
+    scheme?: string;
   };
   /** Unsigned metadata and verification status */
   hints: {
@@ -471,6 +475,11 @@ export function defaultAddressComparator(a: string, b: string, network: string):
 export interface X402AdapterConfig {
   /** Supported offer/receipt versions (default: [1]) */
   supportedVersions?: number[];
+  /**
+   * Wire version for the current flow (default: 1).
+   * When set to 2, public entrypoints dispatch to V2 verification/mapping.
+   */
+  wireVersion?: 1 | 2;
   /** Clock skew tolerance in seconds for validUntil (default: 60) */
   clockSkewSeconds?: number;
   /** Current time override for testing (epoch seconds) */

@@ -26,6 +26,7 @@ import type {
 import { extractOfferPayload, extractReceiptPayload } from './raw.js';
 import type { NormalizedOfferPayload, NormalizedReceiptPayload } from './normalize.js';
 import { normalizeOfferPayload, normalizeReceiptPayload } from './normalize.js';
+import type { NormalizedV2Offer, NormalizedV2Receipt } from './normalize-v2.js';
 import type {
   AcceptEntry,
   OfferVerification,
@@ -1141,4 +1142,253 @@ function verifyWithScan(
     errors: [],
     termMatching,
   };
+}
+
+// ---------------------------------------------------------------------------
+// V2 Verification
+// ---------------------------------------------------------------------------
+
+/**
+ * V2 offer verification result
+ */
+export interface V2OfferVerification {
+  valid: boolean;
+  errors: VerificationError[];
+}
+
+/**
+ * V2 receipt verification result
+ */
+export interface V2ReceiptVerification {
+  valid: boolean;
+  errors: VerificationError[];
+}
+
+/**
+ * Verify a normalized V2 offer.
+ *
+ * V2 uses maxTimeoutSeconds (duration) instead of validUntil (epoch).
+ * In strict mode, unknown V2 shapes are rejected (fail-closed).
+ *
+ * @param offer - Normalized V2 offer
+ * @param config - Adapter config (supportedVersions must include 2)
+ * @returns Verification result
+ */
+export function verifyOfferV2(
+  offer: NormalizedV2Offer,
+  config?: X402AdapterConfig
+): V2OfferVerification {
+  const errors: VerificationError[] = [];
+  const supportedVersions = config?.supportedVersions ?? DEFAULT_SUPPORTED_VERSIONS;
+  const strictNetwork = config?.strictNetworkValidation ?? true;
+  const strictAmount = config?.strictAmountValidation ?? true;
+
+  // Version gate
+  if (!supportedVersions.includes(2)) {
+    errors.push({
+      code: 'offer_version_unsupported',
+      message: `V2 offers require supportedVersions to include 2 (current: [${supportedVersions.join(', ')}])`,
+      field: 'version',
+    });
+    return { valid: false, errors };
+  }
+
+  // Required fields
+  if (!offer.network) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 offer missing required field: network',
+      field: 'network',
+    });
+  }
+  if (!offer.asset) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 offer missing required field: asset',
+      field: 'asset',
+    });
+  }
+  if (!offer.payTo) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 offer missing required field: payTo',
+      field: 'payTo',
+    });
+  }
+  if (!offer.amount) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 offer missing required field: amount',
+      field: 'amount',
+    });
+  }
+  if (!offer.scheme) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 offer missing required field: scheme',
+      field: 'scheme',
+    });
+  }
+  if (!offer.resource?.url) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 offer missing required field: resource.url',
+      field: 'resource.url',
+    });
+  }
+
+  if (errors.length > 0) return { valid: false, errors };
+
+  // maxTimeoutSeconds must be positive
+  if (typeof offer.maxTimeoutSeconds !== 'number' || offer.maxTimeoutSeconds <= 0) {
+    errors.push({
+      code: 'offer_invalid_format',
+      message: `V2 offer maxTimeoutSeconds must be a positive number (got: ${offer.maxTimeoutSeconds})`,
+      field: 'maxTimeoutSeconds',
+    });
+  }
+
+  // Network validation
+  if (strictNetwork) {
+    const networkError = validateNetwork(offer.network, 'offer');
+    if (networkError) errors.push(networkError);
+  }
+
+  // Amount validation
+  if (strictAmount && offer.amount) {
+    const amountError = validateAmount(offer.amount, 'offer');
+    if (amountError) errors.push(amountError);
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Verify a normalized V2 receipt.
+ *
+ * V2 receipts require caller-supplied resourceUrl and issuedAt.
+ * In strict mode, unknown V2 shapes are rejected (fail-closed).
+ *
+ * @param receipt - Normalized V2 receipt
+ * @param config - Adapter config (supportedVersions must include 2)
+ * @returns Verification result
+ */
+export function verifyReceiptV2(
+  receipt: NormalizedV2Receipt,
+  config?: X402AdapterConfig
+): V2ReceiptVerification {
+  const errors: VerificationError[] = [];
+  const supportedVersions = config?.supportedVersions ?? DEFAULT_SUPPORTED_VERSIONS;
+  const strictNetwork = config?.strictNetworkValidation ?? true;
+  const recencySeconds = config?.receiptRecencySeconds ?? DEFAULT_RECEIPT_RECENCY_SECONDS;
+  const now = config?.nowSeconds ?? Math.floor(Date.now() / 1000);
+  const clockSkew = config?.clockSkewSeconds ?? DEFAULT_CLOCK_SKEW_SECONDS;
+
+  // Version gate
+  if (!supportedVersions.includes(2)) {
+    errors.push({
+      code: 'receipt_version_unsupported',
+      message: `V2 receipts require supportedVersions to include 2 (current: [${supportedVersions.join(', ')}])`,
+      field: 'version',
+    });
+    return { valid: false, errors };
+  }
+
+  // Required fields
+  if (!receipt.network) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 receipt missing required field: network',
+      field: 'network',
+    });
+  }
+  if (!receipt.payer) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 receipt missing required field: payer',
+      field: 'payer',
+    });
+  }
+  if (!receipt.resourceUrl) {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 receipt missing required field: resourceUrl',
+      field: 'resourceUrl',
+    });
+  }
+  if (typeof receipt.issuedAt !== 'number') {
+    errors.push({
+      code: 'payload_missing_field',
+      message: 'V2 receipt missing required field: issuedAt',
+      field: 'issuedAt',
+    });
+  }
+
+  if (errors.length > 0) return { valid: false, errors };
+
+  // Network validation
+  if (strictNetwork) {
+    const networkError = validateNetwork(receipt.network, 'receipt');
+    if (networkError) errors.push(networkError);
+  }
+
+  // Recency check
+  const age = now - receipt.issuedAt;
+  if (age > recencySeconds + clockSkew) {
+    errors.push({
+      code: 'receipt_too_old',
+      message: `V2 receipt issuedAt is ${age}s old, exceeds recency window of ${recencySeconds}s`,
+      field: 'issuedAt',
+    });
+  }
+  if (receipt.issuedAt > now + clockSkew) {
+    errors.push({
+      code: 'receipt_invalid_format',
+      message: `V2 receipt issuedAt is ${receipt.issuedAt - now}s in the future (clock skew tolerance: ${clockSkew}s)`,
+      field: 'issuedAt',
+    });
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+// ---------------------------------------------------------------------------
+// Unified dispatchers
+// ---------------------------------------------------------------------------
+
+/**
+ * Unified offer verification: dispatches to V1 or V2 based on config.wireVersion.
+ *
+ * When wireVersion is 2, accepts a NormalizedV2Offer and routes to verifyOfferV2().
+ * When wireVersion is 1 (default), accepts a RawSignedOffer and routes to verifyOffer().
+ *
+ * This is the canonical public entrypoint for version-aware verification.
+ */
+export function verifyOfferUnified(
+  offer: RawSignedOffer | NormalizedV2Offer,
+  accepts: AcceptEntry[],
+  config?: X402AdapterConfig
+): OfferVerification | V2OfferVerification {
+  if (config?.wireVersion === 2) {
+    return verifyOfferV2(offer as NormalizedV2Offer, config);
+  }
+  return verifyOffer(offer as RawSignedOffer, accepts, config);
+}
+
+/**
+ * Unified receipt verification: dispatches to V1 or V2 based on config.wireVersion.
+ *
+ * When wireVersion is 2, accepts a NormalizedV2Receipt and routes to verifyReceiptV2().
+ * When wireVersion is 1 (default), accepts a RawSignedReceipt and routes to verifyReceipt().
+ *
+ * This is the canonical public entrypoint for version-aware verification.
+ */
+export function verifyReceiptUnified(
+  receipt: RawSignedReceipt | NormalizedV2Receipt,
+  config?: X402AdapterConfig
+): ReceiptVerification | V2ReceiptVerification {
+  if (config?.wireVersion === 2) {
+    return verifyReceiptV2(receipt as NormalizedV2Receipt, config);
+  }
+  return verifyReceipt(receipt as RawSignedReceipt, config);
 }

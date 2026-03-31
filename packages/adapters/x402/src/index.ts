@@ -115,15 +115,21 @@ export type { X402ErrorCode } from './errors.js';
 export {
   verifyOffer,
   verifyReceipt,
+  verifyOfferV2,
+  verifyReceiptV2,
+  verifyOfferUnified,
+  verifyReceiptUnified,
   verifyOfferWire,
   verifyReceiptWire,
   verifyOfferReceiptConsistency,
   matchAcceptTerms,
   selectAccept,
 } from './verify.js';
+export type { V2OfferVerification, V2ReceiptVerification } from './verify.js';
 
 // Mapping
-export { toPeacRecord, toPeacCarrier } from './map.js';
+export { toPeacRecord, toPeacRecordV2, toPeacCarrier } from './map.js';
+export type { ToPeacRecordV2Options } from './map.js';
 
 // Evidence Carrier Contract (v0.11.1+, dual-header read v0.12.4+ DD-193)
 export type {
