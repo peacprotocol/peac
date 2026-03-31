@@ -132,20 +132,25 @@ export function createGrpcCarrierMeta(overrides?: Partial<CarrierMeta>): Carrier
 }
 
 /**
- * Validate that the package's own PEAC metadata key constants are ASCII-safe.
+ * Validate that the package's own PEAC metadata key constants are ASCII-safe
+ * and do not use the reserved `grpc-` prefix.
  *
  * This is a repo-level invariant check, not an inbound metadata validator.
  * It verifies that all keys defined in `GrpcMetadataKeys` use only
  * lowercase ASCII letters, digits, hyphens, and underscores per
- * gRPC metadata key requirements.
+ * gRPC metadata key requirements, and that none start with the
+ * reserved `grpc-` prefix.
  *
  * @returns Array of invalid keys (empty if all valid)
  */
 export function validateOwnMetadataKeys(): string[] {
   const ASCII_KEY_REGEX = /^[a-z0-9_-]+$/;
+  const RESERVED_PREFIX = 'grpc-';
   const invalid: string[] = [];
   for (const key of Object.values(GrpcMetadataKeys)) {
     if (!ASCII_KEY_REGEX.test(key)) {
+      invalid.push(key);
+    } else if (key.startsWith(RESERVED_PREFIX)) {
       invalid.push(key);
     }
   }

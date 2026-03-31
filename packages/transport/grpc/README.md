@@ -10,7 +10,7 @@ pnpm add @peac/transport-grpc
 
 ## What It Does
 
-`@peac/transport-grpc` provides gRPC transport bindings for PEAC evidence carriers. It maps receipts to gRPC metadata keys, translates between HTTP and gRPC status codes, and implements the `CarrierAdapter` interface for gRPC-based A2A deployments. Pure TypeScript with no `@grpc/grpc-js` dependency; consumers bring their own gRPC runtime.
+`@peac/transport-grpc` provides gRPC transport bindings for PEAC evidence carriers using embedded metadata. It maps receipts to gRPC metadata keys, translates between HTTP and gRPC status codes, and implements the `CarrierAdapter` interface for gRPC-based A2A deployments. This package handles embedded metadata carriers only; for larger receipts that exceed the metadata budget, use reference-based patterns (`receipt_url`) handled by `@peac/net-node`. Pure TypeScript with no `@grpc/grpc-js` dependency; consumers bring their own gRPC runtime.
 
 ## How Do I Use It?
 
