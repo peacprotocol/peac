@@ -15,6 +15,7 @@ import { X402Error } from './errors.js';
 import type { RawSignedOffer, RawSignedReceipt } from './raw.js';
 import { extractOfferPayload, extractReceiptPayload } from './raw.js';
 import { normalizeOfferPayload, normalizeReceiptPayload } from './normalize.js';
+import type { NormalizedV2Offer, NormalizedV2Receipt } from './normalize-v2.js';
 import type {
   X402OfferReceiptChallenge,
   X402SettlementResponse,
@@ -201,6 +202,118 @@ export function toPeacRecord(
       ...(receiptPayload.issuedAt && { issuedAt: receiptPayload.issuedAt }),
       ...(receiptPayload.transaction && { transaction: receiptPayload.transaction }),
       ...(receiptPayload.version !== undefined && { receiptVersion: receiptPayload.version }),
+    },
+    hints,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// V2 record mapping
+// ---------------------------------------------------------------------------
+
+/**
+ * Options for V2 record mapping
+ */
+export interface ToPeacRecordV2Options {
+  /** Offer verification result */
+  offerVerification?: OfferVerification;
+  /** Consistency verification result */
+  consistencyVerification?: ConsistencyVerification;
+  /** Whether cryptographic verification was performed */
+  cryptoVerified?: boolean;
+  /** Crypto verification result */
+  cryptoResult?: CryptoResult;
+  /** Signer authorization result */
+  authorizationResult?: AuthorizationResult;
+}
+
+/**
+ * Map V2 x402 payment flow to a PEAC interaction record.
+ *
+ * V2 uses per-accept-entry offers with different semantics:
+ * maxTimeoutSeconds (duration) instead of validUntil (epoch),
+ * resource metadata, and scheme-specific extra data.
+ *
+ * @param offer - Normalized V2 offer (single accept entry)
+ * @param receipt - Normalized V2 receipt (caller supplies resourceUrl and issuedAt)
+ * @param rawOffer - Raw upstream offer artifact (preserved in proofs)
+ * @param rawReceipt - Raw upstream receipt artifact (preserved in proofs)
+ * @param options - Optional verification results for hints
+ * @returns Canonical PEAC interaction record
+ */
+export function toPeacRecordV2(
+  offer: NormalizedV2Offer,
+  receipt: NormalizedV2Receipt,
+  rawOffer: RawSignedOffer,
+  rawReceipt: RawSignedReceipt,
+  options?: ToPeacRecordV2Options
+): X402PeacRecord {
+  const hints: X402PeacRecord['hints'] = {};
+
+  if (receipt.resourceUrl) {
+    hints.resourceUrl = receipt.resourceUrl;
+  }
+
+  // Build verification status
+  const offerVerification = options?.offerVerification;
+  const cryptoResult = options?.cryptoResult;
+  const authResult = options?.authorizationResult;
+
+  const verification: VerificationStatus = {
+    structural: true,
+    cryptographic: {
+      verified: options?.cryptoVerified ?? false,
+      ...(!(options?.cryptoVerified ?? false) && { reason: 'not_checked' }),
+      format: rawOffer.format,
+      ...(cryptoResult?.signer && { signer: cryptoResult.signer }),
+    },
+    termMatching: {
+      matched: offerVerification?.valid ?? false,
+      method: offerVerification?.usedHint ? 'hint' : 'scan',
+      ...(offerVerification?.matchedIndex !== undefined && {
+        matchedIndex: offerVerification.matchedIndex,
+      }),
+      ...(!offerVerification && { reason: 'not_verified' }),
+    },
+    ...(options?.consistencyVerification && {
+      consistency: {
+        checked: true,
+        valid: options.consistencyVerification.valid,
+      },
+    }),
+    ...(authResult && {
+      signerAuthorization: {
+        checked: true,
+        authorized: authResult.authorized,
+        ...(authResult.method && { method: authResult.method }),
+      },
+    }),
+  };
+
+  hints.verification = verification;
+
+  return {
+    version: X402_OFFER_RECEIPT_PROFILE,
+    proofs: {
+      x402: {
+        offer: rawOffer,
+        receipt: rawReceipt,
+      },
+    },
+    evidence: {
+      resourceUrl: offer.resource.url,
+      network: offer.network,
+      payee: offer.payTo,
+      asset: offer.asset,
+      amount: offer.amount,
+      offerVersion: offer.version,
+      maxTimeoutSeconds: offer.maxTimeoutSeconds,
+      scheme: offer.scheme,
+      ...(receipt.payer && { payer: receipt.payer }),
+      ...(receipt.issuedAt && { issuedAt: receipt.issuedAt }),
+      ...(receipt.transaction && { transaction: receipt.transaction }),
+      receiptVersion: receipt.version,
     },
     hints,
     createdAt: new Date().toISOString(),
