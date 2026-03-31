@@ -24,7 +24,7 @@ import {
 describe('gRPC Transport', () => {
   describe('version', () => {
     it('should export correct version', () => {
-      expect(GRPC_TRANSPORT_VERSION).toBe('0.9.20');
+      expect(GRPC_TRANSPORT_VERSION).toBe('0.12.6');
     });
   });
 
@@ -299,7 +299,7 @@ describe('gRPC Transport', () => {
         const metadata: Record<string, string | string[]> = {};
         addReceiptToMetadata(metadata, 'eyJ...');
         expect(metadata[GrpcMetadataKeys.RECEIPT]).toBe('eyJ...');
-        expect(metadata[GrpcMetadataKeys.RECEIPT_TYPE]).toBe('peac-receipt/0.1');
+        expect(metadata[GrpcMetadataKeys.RECEIPT_TYPE]).toBe('interaction-record+jwt');
       });
     });
   });

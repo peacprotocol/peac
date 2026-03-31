@@ -25,15 +25,16 @@ echo "=== Pack Install Smoke Test ==="
 echo "Root: $ROOT_DIR"
 echo "Temp: $TEMP_DIR"
 
-# Read package list from manifest
+# Read package list from manifest (packages + deferred)
 PACKAGES=()
 while IFS= read -r line; do
   PACKAGES+=("$line")
 done < <(node -e "
   const m = JSON.parse(require('fs').readFileSync('$MANIFEST', 'utf-8'));
   m.packages.forEach(p => console.log(p));
+  (m.deferredTrustedPublishing || []).forEach(p => console.log(p));
 ")
-echo "Manifest: ${#PACKAGES[@]} packages"
+echo "Manifest: ${#PACKAGES[@]} packages (including deferred)"
 
 # Build manifest packages
 echo ""
@@ -220,6 +221,57 @@ console.log('   OK: @peac/schema package-edge imports verified');
 EOF
 
 node schema-smoke.mjs
+
+# Transport-grpc import smoke (deferred package, installed from sibling tarball)
+echo ""
+echo "7. Running @peac/transport-grpc import smoke..."
+cat > grpc-smoke.mjs << 'EOF'
+import {
+  A2AGrpcCarrierAdapter,
+  GrpcMetadataKeys,
+  GrpcStatus,
+  addReceiptToMetadata,
+  extractReceiptFromMetadata,
+  createGrpcCarrierMeta,
+  GRPC_MAX_CARRIER_SIZE,
+  GRPC_TRANSPORT_VERSION,
+} from '@peac/transport-grpc';
+
+// Verify key exports exist
+if (!A2AGrpcCarrierAdapter) {
+  console.error('FAIL: A2AGrpcCarrierAdapter not exported');
+  process.exit(1);
+}
+
+// Verify metadata keys
+if (GrpcMetadataKeys.RECEIPT !== 'peac-receipt') {
+  console.error('FAIL: GrpcMetadataKeys.RECEIPT wrong:', GrpcMetadataKeys.RECEIPT);
+  process.exit(1);
+}
+
+// Verify 8 KiB default
+if (GRPC_MAX_CARRIER_SIZE !== 8192) {
+  console.error('FAIL: GRPC_MAX_CARRIER_SIZE not 8192:', GRPC_MAX_CARRIER_SIZE);
+  process.exit(1);
+}
+
+// Verify addReceiptToMetadata defaults to Wire 0.2
+const meta = {};
+addReceiptToMetadata(meta, 'test-jws');
+if (meta[GrpcMetadataKeys.RECEIPT_TYPE] !== 'interaction-record+jwt') {
+  console.error('FAIL: default receipt type wrong:', meta[GrpcMetadataKeys.RECEIPT_TYPE]);
+  process.exit(1);
+}
+
+console.log('   A2AGrpcCarrierAdapter: importable');
+console.log('   GrpcMetadataKeys.RECEIPT:', GrpcMetadataKeys.RECEIPT);
+console.log('   GRPC_MAX_CARRIER_SIZE:', GRPC_MAX_CARRIER_SIZE);
+console.log('   Wire 0.2 default: confirmed');
+console.log('   Version:', GRPC_TRANSPORT_VERSION);
+console.log('   OK: @peac/transport-grpc import smoke verified');
+EOF
+
+node grpc-smoke.mjs
 
 echo ""
 echo "=== Pack Install Smoke Test PASSED ==="

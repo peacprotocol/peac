@@ -14,7 +14,16 @@
  * @packageDocumentation
  */
 
-export const GRPC_TRANSPORT_VERSION = '0.9.20' as const;
+export const GRPC_TRANSPORT_VERSION = '0.12.6' as const;
+
+// Metadata keys, types, and helpers (shared with a2a-carrier.ts)
+export {
+  GrpcMetadataKeys,
+  extractReceiptFromMetadata,
+  extractReceiptTypeFromMetadata,
+  addReceiptToMetadata,
+} from './metadata.js';
+export type { GrpcMetadataLike } from './metadata.js';
 
 /**
  * gRPC status codes.
@@ -227,51 +236,6 @@ export function createGrpcError(peacCode: string, message: string, details?: unk
 }
 
 /**
- * gRPC metadata keys for PEAC transport.
- */
-export const GrpcMetadataKeys = {
-  /** PEAC receipt in metadata */
-  RECEIPT: 'peac-receipt',
-  /** PEAC receipt type */
-  RECEIPT_TYPE: 'peac-receipt-type',
-  /** TAP signature */
-  TAP_SIGNATURE: 'peac-tap-signature',
-  /** TAP signature input */
-  TAP_SIGNATURE_INPUT: 'peac-tap-signature-input',
-  /** PEAC error code in trailer */
-  ERROR_CODE: 'peac-error-code',
-  /** Request ID for tracing */
-  REQUEST_ID: 'peac-request-id',
-} as const;
-
-/**
- * Extract PEAC receipt from gRPC metadata.
- */
-export function extractReceiptFromMetadata(
-  metadata: Record<string, string | string[] | undefined>
-): string | null {
-  const receipt = metadata[GrpcMetadataKeys.RECEIPT];
-  if (typeof receipt === 'string') {
-    return receipt;
-  }
-  if (Array.isArray(receipt) && receipt.length > 0) {
-    return receipt[0];
-  }
-  return null;
-}
-
-/**
- * Add PEAC receipt to gRPC metadata.
- */
-export function addReceiptToMetadata(
-  metadata: Record<string, string | string[]>,
-  receiptJws: string
-): void {
-  metadata[GrpcMetadataKeys.RECEIPT] = receiptJws;
-  metadata[GrpcMetadataKeys.RECEIPT_TYPE] = 'peac-receipt/0.1';
-}
-
-/**
  * gRPC verification result.
  */
 export interface GrpcVerificationResult {
@@ -336,3 +300,14 @@ export const GrpcStatusName: Record<GrpcStatusCode, string> = {
 export function getStatusName(code: GrpcStatusCode): string {
   return GrpcStatusName[code] ?? 'UNKNOWN';
 }
+
+// ---------------------------------------------------------------------------
+// Carrier adapter re-exports
+// ---------------------------------------------------------------------------
+
+export {
+  A2AGrpcCarrierAdapter,
+  createGrpcCarrierMeta,
+  validateOwnMetadataKeys,
+  GRPC_MAX_CARRIER_SIZE,
+} from './a2a-carrier.js';
