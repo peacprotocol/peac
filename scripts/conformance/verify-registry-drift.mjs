@@ -44,8 +44,12 @@ const registryIds = new Set();
 
 for (const section of registry.sections) {
   for (const req of section.requirements) {
-    totalChecked++;
     registryIds.add(req.id);
+
+    // Skip entries without source_fragment (requirements from other spec files)
+    if (!req.source_fragment) continue;
+
+    totalChecked++;
 
     const expectedHash = computeHash(req.source_fragment);
 

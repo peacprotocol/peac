@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json",
-  "version": "0.12.3",
+  "version": "0.12.6",
   "spec_file": "docs/specs/WIRE-0.2.md",
   "sections": [
     {
@@ -2164,6 +2164,273 @@
           "introduced_in": "0.12.3",
           "last_reviewed_in": "0.12.3",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
+        }
+      ]
+    },
+    {
+      "section_number": 19,
+      "section_title": "x402 V2 Transport",
+      "section_anchor": "x402-v2-transport",
+      "spec_file": "docs/specs/X402-V2-PROFILE.md",
+      "requirements": [
+        {
+          "id": "X402V2-001",
+          "keyword": "MUST",
+          "summary": "V2 offers MUST include maxTimeoutSeconds as a positive number",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "X402V2-002",
+          "keyword": "MUST",
+          "summary": "V2 verification MUST reject offers when supportedVersions excludes 2",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "X402V2-003",
+          "keyword": "MUST",
+          "summary": "Unknown V2 shapes MUST be rejected in strict mode (fail-closed)",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "X402V2-004",
+          "keyword": "MUST NOT",
+          "summary": "Default supportedVersions MUST NOT include 2 (V2 is opt-in only)",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        }
+      ]
+    },
+    {
+      "section_number": 20,
+      "section_title": "DID Resolution",
+      "section_anchor": "did-resolution",
+      "spec_file": "docs/specs/DID-RESOLUTION-PROFILE.md",
+      "requirements": [
+        {
+          "id": "DID-RES-001",
+          "keyword": "MUST",
+          "summary": "did:key resolver MUST support z (base58btc) multibase prefix",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "DID-RES-002",
+          "keyword": "MUST",
+          "summary": "did:key resolver MUST support u (base64url) multibase prefix",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "DID-RES-003",
+          "keyword": "MUST",
+          "summary": "did:key resolver MUST reject non-Ed25519 keys without timing oracle",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6",
+          "error_code": "E_DID_KEY_EXTRACTION_FAILED"
+        },
+        {
+          "id": "DID-RES-004",
+          "keyword": "MUST",
+          "summary": "did:web resolver MUST transform path segments to URL path components",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "DID-RES-005",
+          "keyword": "MUST",
+          "summary": "did:web resolver MUST handle percent-encoded port in DID",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "DID-RES-006",
+          "keyword": "MUST",
+          "summary": "did:web resolver MUST reject IP literal hostnames",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6",
+          "error_code": "E_DID_RESOLUTION_FAILED"
+        },
+        {
+          "id": "DID-RES-007",
+          "keyword": "MUST",
+          "summary": "Resolved document id MUST exactly match the input DID",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6",
+          "error_code": "E_DID_RESOLUTION_FAILED"
+        }
+      ]
+    },
+    {
+      "section_number": 21,
+      "section_title": "PKCE Authentication",
+      "section_anchor": "pkce-authentication",
+      "spec_file": "docs/specs/A2A-AUTH-PROFILE.md",
+      "requirements": [
+        {
+          "id": "PKCE-001",
+          "keyword": "MUST",
+          "summary": "PKCE verifier MUST be 43-128 chars from RFC 7636 unreserved set",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6",
+          "error_code": "E_PKCE_INVALID_VERIFIER"
+        },
+        {
+          "id": "PKCE-002",
+          "keyword": "MUST",
+          "summary": "S256 MUST be the only supported challenge method",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "PKCE-003",
+          "keyword": "MUST NOT",
+          "summary": "Auth observation MUST NOT produce allow or deny decision",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "PKCE-004",
+          "keyword": "MUST NOT",
+          "summary": "Token material MUST NOT appear in auth evidence output",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        }
+      ]
+    },
+    {
+      "section_number": 22,
+      "section_title": "gRPC Transport",
+      "section_anchor": "grpc-transport",
+      "spec_file": "docs/specs/GRPC-TRANSPORT-PROFILE.md",
+      "requirements": [
+        {
+          "id": "GRPC-META-001",
+          "keyword": "MUST",
+          "summary": "gRPC carrier MUST compute real SHA-256 receipt_ref from JWS bytes",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "GRPC-META-002",
+          "keyword": "MUST",
+          "summary": "gRPC carrier MUST reject binary metadata keys for receipt data",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "GRPC-META-003",
+          "keyword": "MUST",
+          "summary": "Default receipt type MUST be interaction-record+jwt (Wire 0.2)",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "GRPC-META-004",
+          "keyword": "SHOULD",
+          "summary": "Default carrier size SHOULD be 8 KiB for HTTP/2 header interoperability",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        }
+      ]
+    },
+    {
+      "section_number": 23,
+      "section_title": "Receipt URL Resolution",
+      "section_anchor": "receipt-url-resolution",
+      "spec_file": "docs/specs/EVIDENCE-CARRIER-CONTRACT.md",
+      "requirements": [
+        {
+          "id": "RURL-001",
+          "keyword": "MUST",
+          "summary": "Resolver MUST verify sha256(fetched_jws) equals carrier receipt_ref",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "RURL-002",
+          "keyword": "MUST",
+          "summary": "Carrier middleware MUST return pure PeacEvidenceCarrier (no extra fields)",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "RURL-003",
+          "keyword": "MUST NOT",
+          "summary": "Resolver MUST NOT cache failed resolutions (no negative caching)",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "RURL-004",
+          "keyword": "MUST",
+          "summary": "Non-strict mode MUST return carrier unchanged on any failure",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        }
+      ]
+    },
+    {
+      "section_number": 24,
+      "section_title": "Supply-Chain Mappings",
+      "section_anchor": "supply-chain-mappings",
+      "requirements": [
+        {
+          "id": "SC-001",
+          "keyword": "MUST",
+          "summary": "in-toto mapping MUST use first subject for source_ref (first-subject-wins)",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "SC-002",
+          "keyword": "SHOULD",
+          "summary": "Digest selection SHOULD prefer sha256 over other algorithms",
+          "enforcement_class": "advisory",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "SC-003",
+          "keyword": "MUST",
+          "summary": "SLSA mapping MUST set slsa.version to 1.2",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
+        },
+        {
+          "id": "SC-004",
+          "keyword": "MUST",
+          "summary": "in-toto mapping MUST target v1.0 Statement type only",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.6",
+          "last_reviewed_in": "0.12.6"
         }
       ]
     }
