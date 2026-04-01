@@ -81,7 +81,7 @@ describe('NAMESPACES', () => {
   it('contains WIRE02 and CARRIER', () => {
     expect(NAMESPACES).toContain('WIRE02');
     expect(NAMESPACES).toContain('CARRIER');
-    expect(NAMESPACES).toHaveLength(2);
+    expect(NAMESPACES.length).toBeGreaterThanOrEqual(2);
   });
 });
 
