@@ -44,8 +44,15 @@ const registryIds = new Set();
 
 for (const section of registry.sections) {
   for (const req of section.requirements) {
-    totalChecked++;
     registryIds.add(req.id);
+
+    // Skip entries without source_fragment. The requirement registry supports
+    // entries from multiple spec files (x402 V2, DID resolution, gRPC, etc.).
+    // Only Wire 0.2 entries carry source_fragment for hash-based drift detection.
+    // Non-Wire entries are validated by their test mappings instead.
+    if (!req.source_fragment) continue;
+
+    totalChecked++;
 
     const expectedHash = computeHash(req.source_fragment);
 

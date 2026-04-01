@@ -231,14 +231,15 @@ Output: null (consistent) | error string (inconsistent)
 
 Each transport has a maximum carrier size. These limits are defined in `CARRIER_TRANSPORT_LIMITS`:
 
-| Transport           | Max Size | Default Format | Rationale                         |
-| ------------------- | -------- | -------------- | --------------------------------- |
-| MCP (`_meta`)       | 64 KB    | embed          | JSON in memory                    |
-| A2A (`metadata`)    | 64 KB    | embed          | Metadata map                      |
-| ACP (headers)       | 8 KB     | embed          | PEAC-Receipt header (compact JWS) |
-| UCP (webhook)       | 64 KB    | embed          | Webhook body                      |
-| x402 (headers)      | 8 KB     | embed          | PEAC-Receipt header (compact JWS) |
-| HTTP (headers only) | 8 KB     | embed          | Generic header transport          |
+| Transport           | Max Size | Default Format | Rationale                                   |
+| ------------------- | -------- | -------------- | ------------------------------------------- |
+| MCP (`_meta`)       | 64 KB    | embed          | JSON in memory                              |
+| A2A (`metadata`)    | 64 KB    | embed          | Metadata map                                |
+| ACP (headers)       | 8 KB     | embed          | PEAC-Receipt header (compact JWS)           |
+| UCP (webhook)       | 64 KB    | embed          | Webhook body                                |
+| x402 (headers)      | 8 KB     | embed          | PEAC-Receipt header (compact JWS)           |
+| HTTP (headers only) | 8 KB     | embed          | Generic header transport                    |
+| gRPC (metadata)     | 8 KB     | embed          | HTTP/2 header budget (conservative default) |
 
 ---
 
@@ -303,7 +304,20 @@ Carriers are placed in the `peac_evidence` field of webhook payloads. Backward c
 
 Carriers are attached via the `PEAC-Receipt` HTTP header on x402 offer (HTTP 402) and settlement (HTTP 200) responses. The header carries a compact JWS and enforces an 8 KB size limit. The `receipt_jws` field is required; carriers without a JWS are rejected at `attach()` time.
 
-### 7.6 HTTP (generic)
+### 7.6 gRPC
+
+Carriers are attached via gRPC metadata keys:
+
+- `peac-receipt`: compact JWS of the signed receipt
+- `peac-receipt-type`: receipt typ value (default: `interaction-record+jwt`)
+
+gRPC metadata rides in HTTP/2 headers. The default maximum carrier size is 8 KB (conservative interoperability-safe default). Environments with known larger server limits can override via `createGrpcCarrierMeta({ max_size: ... })`.
+
+Binary metadata (keys with `-bin` suffix) is rejected for PEAC receipt data. The `A2AGrpcCarrierAdapter` computes a real SHA-256 `receipt_ref` from the JWS bytes at extraction time using `node:crypto`.
+
+For receipts exceeding the metadata budget, prefer reference mode (`receipt_url`) instead of embedding the full JWS.
+
+### 7.7 HTTP (generic)
 
 For generic HTTP transport where only headers are available:
 

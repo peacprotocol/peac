@@ -1,6 +1,6 @@
 {
   "$comment": "Protocol-level test mappings for requirements not provable by fixtures alone",
-  "version": "0.12.3",
+  "version": "0.12.6",
   "mappings": [
     {
       "requirement_id": "WIRE02-VALID-001",
@@ -79,6 +79,156 @@
       "test_file": "packages/protocol/__tests__/strictness.property.test.ts",
       "test_description": "Challenge problem.type is REQUIRED (RFC 9457)",
       "notes": "Schema validation rejects challenge extension without problem.type; confirmed by fixture and property test"
+    },
+    {
+      "requirement_id": "X402V2-001",
+      "test_file": "packages/adapters/x402/tests/verify-v2.test.ts",
+      "test_description": "V2 offers must include maxTimeoutSeconds as a positive number",
+      "notes": "verifyOfferV2 rejects zero and negative maxTimeoutSeconds"
+    },
+    {
+      "requirement_id": "X402V2-002",
+      "test_file": "packages/adapters/x402/tests/verify-v2.test.ts",
+      "test_description": "V2 verification rejects offers when supportedVersions excludes 2",
+      "notes": "Default config rejects V2 offers"
+    },
+    {
+      "requirement_id": "X402V2-003",
+      "test_file": "packages/adapters/x402/tests/verify-v2.test.ts",
+      "test_description": "Unknown V2 shapes rejected in strict mode",
+      "notes": "Missing required fields and malformed shapes produce errors"
+    },
+    {
+      "requirement_id": "X402V2-004",
+      "test_file": "packages/adapters/x402/tests/verify-v2.test.ts",
+      "test_description": "Default supportedVersions does not include 2",
+      "notes": "V1 regression test confirms default config rejects V2"
+    },
+    {
+      "requirement_id": "DID-RES-001",
+      "test_file": "packages/adapters/did/tests/did-key.test.ts",
+      "test_description": "did:key resolves z (base58btc) multibase prefix",
+      "notes": "Golden vector test with z-prefixed Ed25519 key"
+    },
+    {
+      "requirement_id": "DID-RES-002",
+      "test_file": "packages/adapters/did/tests/did-key.test.ts",
+      "test_description": "did:key resolves u (base64url) multibase prefix",
+      "notes": "Golden vector test with u-prefixed Ed25519 key"
+    },
+    {
+      "requirement_id": "DID-RES-003",
+      "test_file": "packages/adapters/did/tests/did-key.test.ts",
+      "test_description": "did:key rejects non-Ed25519 keys without timing oracle",
+      "notes": "Iterates all methods regardless of match"
+    },
+    {
+      "requirement_id": "DID-RES-004",
+      "test_file": "packages/adapters/did/tests/did-web.test.ts",
+      "test_description": "did:web transforms path segments to URL path components",
+      "notes": "Path transformation per W3C CCG did:web method spec"
+    },
+    {
+      "requirement_id": "DID-RES-005",
+      "test_file": "packages/adapters/did/tests/did-web.test.ts",
+      "test_description": "did:web handles percent-encoded port in DID",
+      "notes": "Port decoding from %3A to : in URL"
+    },
+    {
+      "requirement_id": "DID-RES-006",
+      "test_file": "packages/adapters/did/tests/did-web.test.ts",
+      "test_description": "did:web rejects IP literal hostnames",
+      "notes": "IP rejection for SSRF protection"
+    },
+    {
+      "requirement_id": "DID-RES-007",
+      "test_file": "packages/adapters/did/tests/did-web.test.ts",
+      "test_description": "Resolved document id matches input DID exactly",
+      "notes": "Exact id match enforcement"
+    },
+    {
+      "requirement_id": "PKCE-001",
+      "test_file": "packages/mappings/a2a/tests/auth/pkce.test.ts",
+      "test_description": "PKCE verifier is 43-128 chars from unreserved set",
+      "notes": "validatePKCEVerifier rejects out-of-range and invalid chars"
+    },
+    {
+      "requirement_id": "PKCE-002",
+      "test_file": "packages/mappings/a2a/tests/auth/pkce.test.ts",
+      "test_description": "S256 is the only supported challenge method",
+      "notes": "generatePKCEChallenge always returns method S256"
+    },
+    {
+      "requirement_id": "PKCE-003",
+      "test_file": "packages/mappings/a2a/tests/auth/evidence.test.ts",
+      "test_description": "Auth observation never produces allow or deny decision",
+      "notes": "Decision immutability test across all auth methods"
+    },
+    {
+      "requirement_id": "PKCE-004",
+      "test_file": "packages/mappings/a2a/tests/auth/evidence.test.ts",
+      "test_description": "Token material never appears in auth evidence output",
+      "notes": "Token omission test checks all token-shaped field names"
+    },
+    {
+      "requirement_id": "GRPC-META-001",
+      "test_file": "packages/transport/grpc/tests/a2a-carrier.test.ts",
+      "test_description": "gRPC carrier computes real SHA-256 receipt_ref",
+      "notes": "Receipt ref is not a placeholder; matches sha256 pattern"
+    },
+    {
+      "requirement_id": "GRPC-META-002",
+      "test_file": "packages/transport/grpc/tests/a2a-carrier.test.ts",
+      "test_description": "gRPC carrier rejects binary metadata keys",
+      "notes": "peac-receipt-bin key causes extract to return null"
+    },
+    {
+      "requirement_id": "GRPC-META-003",
+      "test_file": "packages/transport/grpc/tests/a2a-carrier.test.ts",
+      "test_description": "Default receipt type is interaction-record+jwt",
+      "notes": "Wire 0.2 default verified in attach and addReceiptToMetadata"
+    },
+    {
+      "requirement_id": "RURL-001",
+      "test_file": "packages/net/node/tests/receipt-url-middleware.test.ts",
+      "test_description": "Resolver verifies sha256(jws) equals receipt_ref",
+      "notes": "Carrier middleware delegates to verifyReceiptRef after fetch"
+    },
+    {
+      "requirement_id": "RURL-002",
+      "test_file": "packages/net/node/tests/receipt-url-middleware.test.ts",
+      "test_description": "Carrier middleware returns pure PeacEvidenceCarrier",
+      "notes": "No _retrieval field on returned carrier"
+    },
+    {
+      "requirement_id": "RURL-003",
+      "test_file": "packages/net/node/tests/receipt-url-middleware.test.ts",
+      "test_description": "Resolver does not cache failed resolutions",
+      "notes": "Second call after failure still calls resolveReceiptUrl"
+    },
+    {
+      "requirement_id": "RURL-004",
+      "test_file": "packages/net/node/tests/receipt-url-middleware.test.ts",
+      "test_description": "Non-strict mode returns carrier unchanged on failure",
+      "notes": "Resolution failure, ref mismatch, and thrown errors all return original carrier"
+    },
+    {
+      "requirement_id": "SC-001",
+      "test_file": "packages/mappings/intoto/tests/intoto.test.ts",
+      "test_description": "in-toto mapping uses first subject for source_ref",
+      "notes": "Multi-subject test confirms first-subject-wins"
+    },
+    {
+      "requirement_id": "SC-003",
+      "test_file": "packages/mappings/slsa/tests/slsa.test.ts",
+      "test_description": "SLSA mapping sets slsa.version to 1.2",
+      "notes": "toPeacFromSlsa always produces version 1.2"
+    },
+    {
+      "requirement_id": "SC-004",
+      "test_file": "packages/mappings/intoto/tests/intoto.test.ts",
+      "test_description": "in-toto mapping targets v1.0 Statement type only",
+      "notes": "toPeacFromInToto throws for non-v1.0 _type"
     }
   ]
 }
