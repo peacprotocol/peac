@@ -200,15 +200,16 @@ See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](doc
 
 ## Documentation
 
-| Document                                               | Purpose                                           |
-| ------------------------------------------------------ | ------------------------------------------------- |
-| [Spec Index](docs/SPEC_INDEX.md)                       | Normative specifications                          |
-| [Interaction Record Spec](docs/specs/WIRE-0.2.md)      | Receipt envelope, kinds, extensions               |
-| [Architecture](docs/ARCHITECTURE.md)                   | Kernel-first design                               |
-| [Kernel Constraints](docs/specs/KERNEL-CONSTRAINTS.md) | Structural limits enforced at issue and verify    |
-| [Policy Kit Quickstart](docs/policy-kit/quickstart.md) | Policy authoring guide                            |
-| [Profiles](docs/profiles/)                             | Integration profiles (Stripe x402, etc.)          |
-| [Developer Guide](docs/README_LONG.md)                 | Package catalog, integration examples, layer maps |
+| Document                                                             | Purpose                                           |
+| -------------------------------------------------------------------- | ------------------------------------------------- |
+| [Spec Index](docs/SPEC_INDEX.md)                                     | Normative specifications                          |
+| [Interaction Record Spec](docs/specs/WIRE-0.2.md)                    | Receipt envelope, kinds, extensions               |
+| [Architecture](docs/ARCHITECTURE.md)                                 | Kernel-first design                               |
+| [Kernel Constraints](docs/specs/KERNEL-CONSTRAINTS.md)               | Structural limits enforced at issue and verify    |
+| [Policy Kit Quickstart](docs/policy-kit/quickstart.md)               | Policy authoring guide                            |
+| [Profiles](docs/profiles/)                                           | Integration profiles (Stripe x402, etc.)          |
+| [Evidence Carrier Contract](docs/specs/EVIDENCE-CARRIER-CONTRACT.md) | Transport-neutral carrier placement rules         |
+| [Developer Guide](docs/README_LONG.md)                               | Package catalog, integration examples, layer maps |
 
 ---
 
@@ -217,9 +218,12 @@ See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](doc
 - **TypeScript** (this repo): issuance, verification, CLI, middleware
 - **Go**: [sdks/go/](sdks/go/) issuance and verification
 - **MCP**: [MCP server](packages/mcp-server/) evidence emission and verification tools
-- **A2A**: [A2A carrier mapping](packages/mappings/a2a/) metadata carrier mapping
+- **A2A**: [A2A carrier mapping](packages/mappings/a2a/) metadata carrier, OAuth PKCE auth surface
+- **gRPC**: [gRPC transport](packages/transport/grpc/) carrier adapter with HTTP/2 metadata binding
+- **DID**: [DID resolution](packages/adapters/did/) did:key and did:web resolver with caching
 - **Express**: [Express middleware](packages/middleware-express/) receipt middleware
-- **x402**: [x402 adapter](packages/adapters/x402/) payment evidence adapter
+- **x402**: [x402 adapter](packages/adapters/x402/) payment evidence adapter (V1 + V2)
+- **Supply chain**: [in-toto](packages/mappings/intoto/) and [SLSA](packages/mappings/slsa/) provenance mappings
 
 Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new).
 

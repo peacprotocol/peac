@@ -5,6 +5,38 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.6] - 2026-04-01
+
+x402 V2 support, DID resolution, A2A OAuth, gRPC transport, receipt URL middleware, and supply-chain provenance mappings.
+
+### Added
+
+- `@peac/adapter-did`: did:key and did:web resolution with caching
+- `@peac/transport-grpc`: gRPC carrier adapter (8 KiB metadata default)
+- `@peac/mappings-intoto`: in-toto v1.0 provenance mapping
+- `@peac/mappings-slsa`: SLSA v1.2 provenance mapping
+- A2A v1.0 OAuth surface: PKCE S256, Device Code types, auth evidence mapping
+- x402 V2 transport: version detection, normalization, mapping, verification
+- Receipt URL resolution middleware in `@peac/net-node`
+- `receipt_ref` span attribute in `@peac/telemetry-otel`
+- ERC-8128 conformance fixtures (RFC 9421)
+- Spec profiles: x402 V2, DID resolution, A2A auth, gRPC transport
+- Evidence carrier contract: gRPC transport section
+- Registries v0.6.0: error codes, gRPC transport, supply-chain proof types
+
+### Fixed
+
+- gRPC `addReceiptToMetadata()` defaults to Wire 0.2 receipt type
+- Registry drift checker supports multi-spec requirement entries
+
+### Changed
+
+- x402 V2 opt-in only (`supportedVersions` defaults to `[1]`)
+- gRPC carrier size: 8 KiB default (HTTP/2 header budget)
+- CI: 5 parallel lanes, Node 24.14.1, MCP SDK 1.28.0
+
+---
+
 ## [0.12.4] - 2026-03-25
 
 ### Theme: Commerce Evidence + Integration Depth

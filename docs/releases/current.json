@@ -1,6 +1,6 @@
 {
   "description": "PEAC release manifest: CI-enforceable source of truth for release state",
-  "version": "0.12.5",
+  "version": "0.12.6",
   "wire_format_version": "0.2",
   "dist_tag": "latest",
   "registries_version": "0.6.0",
