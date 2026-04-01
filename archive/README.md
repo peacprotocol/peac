@@ -1,6 +1,7 @@
 # Archive
 
 Legacy materials from PEAC Protocol versions prior to v0.9.15.
+Last reviewed: 2026-04-01
 
 Contents are preserved for historical reference only. They are not normative
 and should not be imported or used in active code.

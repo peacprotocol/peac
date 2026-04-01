@@ -1,6 +1,7 @@
 # AGENTS.md
 
 Agent-readable metadata for PEAC Protocol.
+Last reviewed: 2026-04-01
 
 ## Identity
 

@@ -1,6 +1,7 @@
 # PEAC Protocol
 
 > Open standard for portable, offline-verifiable evidence receipts across AI agent interactions, APIs, and organizational boundaries.
+> Last reviewed: 2026-04-01
 
 ## What is PEAC
 
