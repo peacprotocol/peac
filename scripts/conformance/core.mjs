@@ -19,17 +19,26 @@
 
 /**
  * Canonical requirement ID pattern.
- * Accepts WIRE02-{SECTION}-{NNN} and CARRIER-{TRANSPORT}-{NNN}.
+ * Accepts namespace-prefixed IDs: WIRE02, CARRIER, X402V2, DID-RES,
+ * PKCE, GRPC-META, RURL, SC.
  * Section/transport part allows uppercase letters and digits (e.g., A2A).
  */
-export const REQUIREMENT_ID_PATTERN = /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$/;
+export const REQUIREMENT_ID_PATTERN =
+  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC)-[0-9]{3}$/;
 
 /**
  * Requirement ID namespaces.
- * WIRE02: Wire 0.2 protocol requirements (from WIRE-0.2.md)
- * CARRIER: Evidence Carrier Contract requirements (from EVIDENCE-CARRIER-CONTRACT.md)
  */
-export const NAMESPACES = /** @type {const} */ (['WIRE02', 'CARRIER']);
+export const NAMESPACES = /** @type {const} */ ([
+  'WIRE02',
+  'CARRIER',
+  'X402V2',
+  'DID-RES',
+  'PKCE',
+  'GRPC-META',
+  'RURL',
+  'SC',
+]);
 
 /**
  * Parse a requirement ID into its components.
