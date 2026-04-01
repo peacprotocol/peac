@@ -62,6 +62,9 @@ function packageDir(npmName: string): string {
     'capture-node': 'packages/capture/node',
     'sdk-js': 'packages/sdk-js',
     'net-node': 'packages/net/node',
+    'transport-grpc': 'packages/transport/grpc',
+    'mappings-intoto': 'packages/mappings/intoto',
+    'mappings-slsa': 'packages/mappings/slsa',
     disc: 'packages/discovery',
   };
 
