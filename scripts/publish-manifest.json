@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Single source of truth for PEAC Protocol npm publish order",
-  "version": "0.12.5",
-  "lastUpdated": "2026-03-27",
-  "totalPackages": 29,
+  "version": "0.12.6",
+  "lastUpdated": "2026-04-01",
+  "totalPackages": 35,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -33,7 +33,13 @@
     "@peac/mappings-content-signals",
     "@peac/adapter-openai-compatible",
     "@peac/mcp-server",
-    "@peac/cli"
+    "@peac/cli",
+    "@peac/net-node",
+    "@peac/adapter-eat",
+    "@peac/adapter-did",
+    "@peac/transport-grpc",
+    "@peac/mappings-intoto",
+    "@peac/mappings-slsa"
   ],
   "layers": {
     "0-kernel": ["@peac/kernel"],
@@ -118,10 +124,7 @@
     "@peac/pay402",
     "@peac/server",
     "@peac/core",
-    "@peac/sdk"
-  ],
-  "pendingTrustedPublishing": [],
-  "deferredTrustedPublishing": [
+    "@peac/sdk",
     "@peac/net-node",
     "@peac/adapter-eat",
     "@peac/adapter-did",
@@ -129,5 +132,7 @@
     "@peac/mappings-intoto",
     "@peac/mappings-slsa"
   ],
-  "deferredTrustedPublishingNote": "Not yet published to npm (404). Not in v0.12.0 stable scope. Configure trust after first publish."
+  "pendingTrustedPublishing": [],
+  "deferredTrustedPublishing": [],
+  "deferredTrustedPublishingNote": "All packages bootstrapped as of v0.12.6. Configure OIDC trusted publishing for new packages before next release."
 }
