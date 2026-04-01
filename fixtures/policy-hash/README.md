@@ -1,6 +1,7 @@
 # Policy Hash Test Vectors
 
 Deterministic test vectors for policy-hash canonicalization.
+Last reviewed: 2026-04-01
 
 Each vector contains an `input` object, an `expected_hash` (SHA-256, base64url),
 and `notes` explaining the normalization rules exercised.

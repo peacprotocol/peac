@@ -53,6 +53,16 @@ PEAC records evidence from commerce protocols without executing payments:
 
 See [Commerce Evidence Spec](specs/COMMERCE-EVIDENCE.md) and [Commerce Semantics](specs/COMMERCE-SEMANTICS.md) for boundary rules.
 
+### Identity and transport integrations (v0.12.6+)
+
+| Integration    | Package                                        | What it provides                                  |
+| -------------- | ---------------------------------------------- | ------------------------------------------------- |
+| DID resolution | `@peac/adapter-did`                            | did:key and did:web resolver with caching         |
+| gRPC transport | `@peac/transport-grpc`                         | Carrier adapter for gRPC metadata (8 KiB default) |
+| A2A OAuth      | `@peac/mappings-a2a`                           | PKCE S256, Device Code types, auth evidence       |
+| in-toto / SLSA | `@peac/mappings-intoto`, `@peac/mappings-slsa` | Supply-chain provenance mapping                   |
+| receipt_url    | `@peac/net-node`                               | Carrier-shaped receipt URL resolution middleware  |
+
 ### Settlement fields
 
 Add payment evidence via the commerce extension:
@@ -356,9 +366,22 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 | Package                           | Description                                |
 | --------------------------------- | ------------------------------------------ |
-| `@peac/adapter-x402`              | x402 evidence carrier (upstream wire sync) |
+| `@peac/adapter-x402`              | x402 evidence carrier (V1 + V2)            |
+| `@peac/adapter-did`               | DID resolution (did:key, did:web, caching) |
 | `@peac/adapter-openclaw`          | OpenClaw agent framework                   |
 | `@peac/adapter-openai-compatible` | Hash-first inference receipt adapter       |
+
+**Mappings:**
+
+| Package                          | Description                                         |
+| -------------------------------- | --------------------------------------------------- |
+| `@peac/mappings-a2a`             | A2A carrier, normalizer, discovery, OAuth PKCE auth |
+| `@peac/mappings-mcp`             | MCP metadata carrier and budget management          |
+| `@peac/mappings-intoto`          | in-toto v1.0 attestation provenance mapping         |
+| `@peac/mappings-slsa`            | SLSA v1.2 provenance predicate mapping              |
+| `@peac/mappings-paymentauth`     | HTTP Payment auth evidence mapping                  |
+| `@peac/mappings-acp`             | Agentic Commerce Protocol session mapping           |
+| `@peac/mappings-content-signals` | Content signal observation mapping                  |
 
 **Infrastructure:** `@peac/contracts`, `@peac/http-signatures`, `@peac/jwks-cache`, `@peac/net-node`, `@peac/adapter-core`, `@peac/privacy`, `@peac/telemetry`, `@peac/telemetry-otel`, `@peac/transport-grpc`, `@peac/capture-core`, `@peac/capture-node`, `@peac/attribution`, `@peac/audit`, `@peac/policy-kit`, `@peac/sdk-js`.
 

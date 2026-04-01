@@ -1,5 +1,7 @@
 # Security Policy
 
+Last reviewed: 2026-04-01
+
 For vulnerability reporting, supported versions, and security practices, see the full security policy:
 
 [`.github/SECURITY.md`](.github/SECURITY.md)
