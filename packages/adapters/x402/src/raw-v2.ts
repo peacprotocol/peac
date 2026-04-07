@@ -1,7 +1,7 @@
 /**
  * x402 V2 raw HTTP transport types (Layer A)
  *
- * Exact mirror of upstream coinbase/x402 V2 HTTP transport spec at
+ * Exact mirror of upstream x402-foundation/x402 V2 HTTP transport spec at
  * specs/transports-v2/http.md.
  *
  * V2 moves all protocol data to HTTP headers (Base64-encoded JSON):
@@ -16,7 +16,7 @@
  * Do NOT rename fields, add PEAC-specific fields, or change types.
  * Normalization belongs in Layer B (normalize-v2.ts, PR5).
  *
- * Upstream pin: coinbase/x402 specs/transports-v2/http.md
+ * Upstream pin: x402-foundation/x402 specs/transports-v2/http.md
  * Weekly drift CI: .github/workflows/x402-drift.yml
  */
 

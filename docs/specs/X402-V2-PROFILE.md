@@ -2,7 +2,7 @@
 
 **Status:** Normative
 **Package:** `@peac/adapter-x402`
-**Upstream:** coinbase/x402 `specs/transports-v2/http.md`
+**Upstream:** x402-foundation/x402 `specs/transports-v2/http.md`
 
 This document specifies the x402 V2 transport profile for PEAC. V2 moves protocol data to HTTP headers (`PAYMENT-REQUIRED`, `PAYMENT-SIGNATURE`, `PAYMENT-RESPONSE`) with Base64-encoded JSON payloads.
 

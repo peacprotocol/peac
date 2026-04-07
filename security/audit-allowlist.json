@@ -158,6 +158,36 @@
       "verified_by": "pnpm audit --prod shows no HIGH for handlebars",
       "owner": "jithinraj",
       "added_at": "2026-03-28"
+    },
+    {
+      "advisory_id": "GHSA-p9ff-h696-f583",
+      "package": "vite",
+      "reason": "Vite dev server arbitrary file read (HIGH): dev-only via vitest@4.1.0 -> vite@6.4.1. Not exposed in production.",
+      "why_not_exploitable": "Vite dev server is only used during local test runs via vitest. Not in published packages or production deployments.",
+      "where_used": "root devDependency: @vitest/coverage-v8@4.1.0 -> vitest@4.1.0 -> vite@6.4.1",
+      "expires_at": "2026-07-06",
+      "remediation": "Update vite when vitest ships a fix or vite patches the dev server vulnerability",
+      "issue_url": "https://github.com/advisories/GHSA-p9ff-h696-f583",
+      "scope": "dev",
+      "dependency_chain": ["@vitest/coverage-v8@4.1.0", "vitest@4.1.0", "vite@6.4.1"],
+      "verified_by": "pnpm audit --prod shows no HIGH for vite; pnpm why vite confirms vitest-only path",
+      "owner": "jithinraj",
+      "added_at": "2026-04-07"
+    },
+    {
+      "advisory_id": "GHSA-737v-mqg7-c878",
+      "package": "defu",
+      "reason": "defu prototype pollution via __proto__ key (HIGH): dev-only transitive dependency. Not in published packages.",
+      "why_not_exploitable": "defu is a transitive dev dependency used in build/test tooling. Not in published packages. No user-controlled input reaches defu in production.",
+      "where_used": "transitive devDependency via build/test tooling",
+      "expires_at": "2026-07-06",
+      "remediation": "Update when upstream patches or when the consuming tool updates its dependency",
+      "issue_url": "https://github.com/advisories/GHSA-737v-mqg7-c878",
+      "scope": "dev",
+      "dependency_chain": ["transitive dev dependency"],
+      "verified_by": "pnpm audit --prod shows no HIGH for defu",
+      "owner": "jithinraj",
+      "added_at": "2026-04-07"
     }
   ]
 }
