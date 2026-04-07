@@ -1,15 +1,15 @@
 /**
- * @peac/core - DEPRECATED
+ * @peac/core - DEPRECATED. Removal scheduled for v0.13.0.
  *
- * This package is deprecated. Please migrate to kernel-first packages:
- * - Constants: @peac/kernel (WIRE_VERSION, WIRE_TYPE, etc.)
- * - Types: @peac/schema
- * - Crypto: @peac/crypto
- * - Protocol: @peac/protocol
+ * This package is deprecated. Migrate to kernel-first packages:
+ * - Constants: @peac/kernel
+ * - Types and validation: @peac/schema
+ * - Signing and verification: @peac/crypto
+ * - Issue and verify: @peac/protocol
  *
- * Migration deadline: v0.9.17
+ * See docs/MIGRATION_CURRENT.md for migration guide.
  *
- * @deprecated Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead
+ * @deprecated Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead. Removal: v0.13.0.
  * @packageDocumentation
  */
 

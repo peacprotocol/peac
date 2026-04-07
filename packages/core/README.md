@@ -1,6 +1,8 @@
 # @peac/core
 
-**Deprecated.** Use `@peac/kernel`, `@peac/schema`, `@peac/crypto`, and `@peac/protocol` instead.
+> **DEPRECATED. Removal scheduled for v0.13.0.**
+> Use `@peac/kernel`, `@peac/schema`, `@peac/crypto`, and `@peac/protocol` instead.
+> See `docs/MIGRATION_CURRENT.md` for migration guide.
 
 ## Installation
 

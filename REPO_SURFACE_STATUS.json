@@ -1,0 +1,551 @@
+{
+  "description": "Machine-readable surface classification for PEAC Protocol workspace. CI fails if any workspace member is missing. See docs/PACKAGE_STATUS.md for human-readable view.",
+  "version": "0.12.7",
+  "updated": "2026-04-06",
+  "states": {
+    "default": "Current recommended path. Actively maintained, Wire 0.2 native.",
+    "supported": "Actively maintained, published, production-ready. May not be on default quickstart path.",
+    "compat-only": "Security and correctness fixes only. No new features. Wire 0.1 or partial.",
+    "deprecated": "Marked for removal. Available for at least 2 minor releases or 60 days.",
+    "archived": "Non-default, non-marketed. May be removed in any future minor.",
+    "experimental": "Not yet stable. API may change without notice."
+  },
+  "surfaces": {
+    "packages/kernel": {
+      "npm": "@peac/kernel",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 0,
+      "published": true
+    },
+    "packages/schema": {
+      "npm": "@peac/schema",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 1,
+      "published": true
+    },
+    "packages/crypto": {
+      "npm": "@peac/crypto",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 2,
+      "published": true
+    },
+    "packages/protocol": {
+      "npm": "@peac/protocol",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 3,
+      "published": true
+    },
+    "packages/control": {
+      "npm": "@peac/control",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 3,
+      "published": true
+    },
+    "packages/discovery": {
+      "npm": "@peac/disc",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 3,
+      "published": true
+    },
+    "packages/audit": {
+      "npm": "@peac/audit",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 3,
+      "published": true
+    },
+    "packages/policy-kit": {
+      "npm": "@peac/policy-kit",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 3,
+      "published": true
+    },
+    "packages/telemetry": {
+      "npm": "@peac/telemetry",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 2.5,
+      "published": true
+    },
+    "packages/telemetry-otel": {
+      "npm": "@peac/telemetry-otel",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 2.5,
+      "published": true
+    },
+    "packages/capture/core": {
+      "npm": "@peac/capture-core",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 2.5,
+      "published": true
+    },
+    "packages/capture/node": {
+      "npm": "@peac/capture-node",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 2.5,
+      "published": true
+    },
+    "packages/middleware-core": {
+      "npm": "@peac/middleware-core",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 3.5,
+      "published": true
+    },
+    "packages/middleware-express": {
+      "npm": "@peac/middleware-express",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 3.5,
+      "published": true
+    },
+    "packages/contracts": {
+      "npm": "@peac/contracts",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/http-signatures": {
+      "npm": "@peac/http-signatures",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/jwks-cache": {
+      "npm": "@peac/jwks-cache",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/core": {
+      "npm": "@peac/adapter-core",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/x402": {
+      "npm": "@peac/adapter-x402",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/x402/daydreams": {
+      "npm": "@peac/adapter-x402-daydreams",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/x402/fluora": {
+      "npm": "@peac/adapter-x402-fluora",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/x402/pinata": {
+      "npm": "@peac/adapter-x402-pinata",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/did": {
+      "npm": "@peac/adapter-did",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/eat": {
+      "npm": "@peac/adapter-eat",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/openai-compatible": {
+      "npm": "@peac/adapter-openai-compatible",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/openclaw": {
+      "npm": "@peac/adapter-openclaw",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/adapters/eas": {
+      "npm": null,
+      "state": "experimental",
+      "wire": "0.2",
+      "layer": 4,
+      "published": false,
+      "note": "EAS anchoring paused (ERC-8004 PR #20 closed)"
+    },
+    "packages/mappings/mcp": {
+      "npm": "@peac/mappings-mcp",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/a2a": {
+      "npm": "@peac/mappings-a2a",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/acp": {
+      "npm": "@peac/mappings-acp",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/ucp": {
+      "npm": "@peac/mappings-ucp",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/paymentauth": {
+      "npm": "@peac/mappings-paymentauth",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/content-signals": {
+      "npm": "@peac/mappings-content-signals",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/aipref": {
+      "npm": "@peac/mappings-aipref",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/rsl": {
+      "npm": "@peac/mappings-rsl",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/tap": {
+      "npm": "@peac/mappings-tap",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/intoto": {
+      "npm": "@peac/mappings-intoto",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mappings/slsa": {
+      "npm": "@peac/mappings-slsa",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/rails/x402": {
+      "npm": "@peac/rails-x402",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/rails/stripe": {
+      "npm": "@peac/rails-stripe",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/rails/card": {
+      "npm": "@peac/rails-card",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/rails/razorpay": {
+      "npm": "@peac/rails-razorpay",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/transport/grpc": {
+      "npm": "@peac/transport-grpc",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/transport/http": {
+      "npm": null,
+      "state": "experimental",
+      "wire": "0.2",
+      "layer": 4,
+      "published": false
+    },
+    "packages/transport/ws": {
+      "npm": null,
+      "state": "experimental",
+      "wire": "0.2",
+      "layer": 4,
+      "published": false,
+      "note": "WebSocket transport deferred"
+    },
+    "packages/net/node": {
+      "npm": "@peac/net-node",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/mcp-server": {
+      "npm": "@peac/mcp-server",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 5,
+      "published": true
+    },
+    "packages/cli": {
+      "npm": "@peac/cli",
+      "state": "default",
+      "wire": "0.2",
+      "layer": 5,
+      "published": true
+    },
+    "packages/server": {
+      "npm": "@peac/server",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": true
+    },
+    "packages/pay402": {
+      "npm": "@peac/pay402",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/receipts": {
+      "npm": "@peac/receipts",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/aipref": {
+      "npm": "@peac/pref",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true
+    },
+    "packages/access": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 6,
+      "published": false,
+      "note": "Pillar package"
+    },
+    "packages/attribution": {
+      "npm": "@peac/attribution",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 6,
+      "published": true
+    },
+    "packages/compliance": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 6,
+      "published": false,
+      "note": "Pillar package"
+    },
+    "packages/consent": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 6,
+      "published": false,
+      "note": "Pillar package"
+    },
+    "packages/intelligence": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 6,
+      "published": false,
+      "note": "Pillar package"
+    },
+    "packages/privacy": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 6,
+      "published": false,
+      "note": "Pillar package"
+    },
+    "packages/provenance": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 6,
+      "published": false,
+      "note": "Pillar package"
+    },
+    "packages/conformance-harness": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false,
+      "note": "Internal test infrastructure"
+    },
+    "packages/worker-core": {
+      "npm": "@peac/worker-core",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": true
+    },
+    "packages/worker-shared": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false
+    },
+    "packages/core": {
+      "npm": "@peac/core",
+      "state": "deprecated",
+      "wire": "0.9",
+      "layer": "legacy",
+      "published": true,
+      "removal": "v0.13.0",
+      "note": "Monolithic pre-v0.10.0 package. Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead."
+    },
+    "packages/sdk-js": {
+      "npm": "@peac/sdk",
+      "state": "archived",
+      "wire": "0.1",
+      "layer": "legacy",
+      "published": false,
+      "note": "Moved to archive/sdk-js/. Uses deprecated @peac/core. Replaced by @peac/protocol."
+    },
+    "apps/api": {
+      "npm": null,
+      "state": "default",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false,
+      "note": "Legacy /verify endpoint deprecated (Sunset: Nov 1, 2026). Current: /api/v1/verify."
+    },
+    "apps/verifier": {
+      "npm": null,
+      "state": "default",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false
+    },
+    "apps/sandbox-issuer": {
+      "npm": null,
+      "state": "compat-only",
+      "wire": "0.1",
+      "layer": 5,
+      "published": false,
+      "note": "Wire 0.1 test fixture generator. Kept for legacy integration tests."
+    },
+    "apps/bridge": {
+      "npm": null,
+      "state": "archived",
+      "wire": "0.9.13",
+      "layer": "legacy",
+      "published": false,
+      "note": "Moved to archive/bridge/. Unused dev sidecar. Imports deprecated @peac/core."
+    },
+    "sdks/go": {
+      "npm": null,
+      "state": "compat-only",
+      "wire": "0.1",
+      "layer": "sdk",
+      "published": false,
+      "note": "Go SDK. Wire 0.1 only. Wire 0.2 parity planned for v0.12.8."
+    },
+    "surfaces/analytics": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false,
+      "note": "Analytics integration surface"
+    },
+    "surfaces/workers/akamai": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false
+    },
+    "surfaces/workers/cloudflare": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false
+    },
+    "surfaces/workers/fastly": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false
+    },
+    "surfaces/nextjs/middleware": {
+      "npm": null,
+      "state": "experimental",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false,
+      "note": "One test quarantined due to @peac/contracts workspace linking issue"
+    }
+  }
+}
