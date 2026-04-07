@@ -2,7 +2,7 @@
   "$schema": "type-snapshot.schema.json",
   "description": "Machine-comparable snapshot of upstream x402 offer-receipt extension types at pinned commit",
   "upstream": {
-    "repository": "coinbase/x402",
+    "repository": "x402-foundation/x402",
     "commit": "f2bbb5c",
     "spec": "specs/extensions/extension-offer-and-receipt.md",
     "types_path": "typescript/packages/core/src/types/",

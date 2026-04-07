@@ -16,7 +16,7 @@
  * If no V2-specific header is found, falls back to V1.
  * Ambiguous cases (mixed V1+V2 headers) resolve to V2.
  *
- * Upstream: coinbase/x402 specs/transports-v2/http.md
+ * Upstream: x402-foundation/x402 specs/transports-v2/http.md
  */
 
 import { X402_V2_HEADERS } from './raw-v2.js';

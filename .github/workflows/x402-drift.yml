@@ -23,7 +23,7 @@ jobs:
       - name: Fetch upstream spec at HEAD
         run: |
           curl -sf -o /tmp/upstream-spec.md \
-            "https://raw.githubusercontent.com/coinbase/x402/main/specs/extensions/extension-offer-and-receipt.md"
+            "https://raw.githubusercontent.com/x402-foundation/x402/main/specs/extensions/extension-offer-and-receipt.md"
 
       - name: Extract upstream field tables
         run: |
@@ -140,7 +140,7 @@ jobs:
           # Verify the V2 HTTP transport spec still exists at the expected path.
           # If the file moves or is restructured, this fails and alerts maintainers.
           HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
-            "https://raw.githubusercontent.com/coinbase/x402/main/specs/transports-v2/http.md")
+            "https://raw.githubusercontent.com/x402-foundation/x402/main/specs/transports-v2/http.md")
           if [ "$HTTP_STATUS" != "200" ]; then
             echo "WARNING: x402 V2 transport spec not found at expected path (HTTP $HTTP_STATUS)"
             echo "The upstream spec may have moved. Review and update raw-v2.ts if needed."

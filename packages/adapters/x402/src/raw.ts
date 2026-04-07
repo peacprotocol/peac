@@ -1,7 +1,7 @@
 /**
  * x402 raw wire types and extraction (Layer A)
  *
- * Exact mirror of upstream coinbase/x402 TypeScript types and field shapes
+ * Exact mirror of upstream x402-foundation/x402 TypeScript types and field shapes
  * after PR #935 (Offer/Receipt Extension) merged at commit f2bbb5c.
  *
  * This layer exists to:
@@ -41,7 +41,7 @@ export const OFFER_RECEIPT = 'offer-receipt' as const;
 /**
  * Exact upstream x402 offer payload (encoded, Layer A2)
  *
- * Field names and types match coinbase/x402 PR #935 TS interface exactly.
+ * Field names and types match x402-foundation/x402 PR #935 TS interface exactly.
  * All fields are always present in the encoded payload.
  * EIP-712 uses `0` for unused `validUntil` (encoding placeholder, not semantic absence).
  * Conversion to semantic optionality happens exclusively in Layer B (normalize.ts).
@@ -78,7 +78,7 @@ export interface RawOfferPayload {
 /**
  * Exact upstream x402 receipt payload (encoded, Layer A2)
  *
- * Field names and types match coinbase/x402 PR #935 TS interface exactly.
+ * Field names and types match x402-foundation/x402 PR #935 TS interface exactly.
  * All fields are always present in the encoded payload.
  * EIP-712 uses `""` for unused `transaction` (encoding placeholder, not semantic absence).
  * Conversion to semantic optionality happens exclusively in Layer B (normalize.ts).

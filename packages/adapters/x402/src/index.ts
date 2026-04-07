@@ -2,7 +2,7 @@
  * @peac/adapter-x402
  *
  * Verification, term-matching, and evidence mapping for the
- * x402 Offer/Receipt extension (compatible with upstream coinbase/x402).
+ * x402 Offer/Receipt extension (compatible with upstream x402-foundation/x402).
  *
  * Architecture:
  * - Layer A (raw.ts): Exact upstream wire types and extraction

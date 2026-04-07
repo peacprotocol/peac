@@ -77,5 +77,5 @@ PEAC writes `PEAC-Receipt` only. No v2 write support in v0.12.4. Full v2 adapter
 ## Reference
 
 - `@peac/adapter-x402`: verification, mapping, carrier adapter
-- x402 V2: https://github.com/coinbase/x402
+- x402 V2: https://github.com/x402-foundation/x402
 - x402 Foundation: https://x402.org
