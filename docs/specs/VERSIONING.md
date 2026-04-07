@@ -65,7 +65,8 @@ All wire artifacts use the pattern: `peac-<artifact>/<major>.<minor>`
 
 | Artifact            | Identifier                     | Location                        |
 | ------------------- | ------------------------------ | ------------------------------- |
-| Receipt             | `peac-receipt/0.1`             | JWS header `typ` field          |
+| Receipt (current)   | `interaction-record+jwt`       | JWS header `typ` field          |
+| Receipt (legacy)    | `peac-receipt/0.1`             | JWS header `typ` field (frozen) |
 | Bundle              | `peac-bundle/0.1`              | Manifest `version` field        |
 | Policy              | `peac-policy/0.1`              | Policy document `version` field |
 | Verification Report | `peac-verification-report/0.1` | Report `version` field          |

@@ -524,7 +524,7 @@ Negative fixtures:
   "iat": 1709000000,
   "jti": "id_01HQXYZ123456789",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1",
     "auth": {
       "control": {
@@ -564,7 +564,7 @@ Negative fixtures:
   "iat": 1709000000,
   "jti": "id_01HQABC987654321",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1"
   },
   "ext": [
@@ -591,7 +591,7 @@ Negative fixtures:
   "iat": 1709000000,
   "jti": "id_01HQDEF456789012",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1"
   },
   "ext": [

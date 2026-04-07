@@ -4,7 +4,7 @@
 
 **Version**: 0.9.18
 
-**Wire Format**: `peac-receipt/0.1`
+**Wire Format**: `interaction-record+jwt` (Wire 0.2, current stable). `peac-receipt/0.1` (Wire 0.1, frozen legacy).
 
 ---
 

@@ -40,7 +40,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ### 1.4 Relationship to Wire Format
 
-All seven sub-profiles operate within Wire 0.1 (`peac-receipt/0.1`). Zero trust data is carried in `ext[]` entries using `org.peacprotocol/` reverse-DNS keys. This approach:
+All seven sub-profiles operate within the Interaction Record format (`interaction-record+jwt`). Zero trust data is carried in typed extension groups using `org.peacprotocol/` reverse-DNS keys. This approach:
 
 - Preserves wire format stability (no schema migration required)
 - Allows incremental adoption (deploy one sub-profile at a time)
@@ -132,7 +132,7 @@ For access receipts, the control chain SHOULD contain at least one step recordin
   "iat": 1709000000,
   "jti": "acc_01HQXYZ123456789",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1",
     "purpose": "access",
     "auth": {
@@ -202,7 +202,7 @@ When the `org.peacprotocol/tool_registry` extension is present in `ext[]`, it pr
   "iat": 1709000000,
   "jti": "tool_01HQXYZ123456789",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1",
     "evidence": {
       "interaction": {
@@ -269,7 +269,7 @@ The `org.peacprotocol/control_action` extension captures the control action deta
   "iat": 1709000000,
   "jti": "dec_01HQXYZ123456789",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1",
     "auth": {
       "control": {
@@ -347,7 +347,7 @@ Anticipated fields (non-normative, subject to change):
   "iat": 1709000000,
   "jti": "risk_01HQXYZ123456789",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1",
     "evidence": {
       "observation": "API call frequency 3x above baseline for trailing 5-minute window"
@@ -409,7 +409,7 @@ Anticipated fields (non-normative, subject to change):
   "iat": 1709000000,
   "jti": "sync_01HQXYZ123456789",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1"
   },
   "ext": [
@@ -475,7 +475,7 @@ When interoperating with W3C Trace Context (https://www.w3.org/TR/trace-context/
   "iat": 1709000000,
   "jti": "trace_01HQXYZ123456789",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1"
   },
   "ext": [
@@ -536,7 +536,7 @@ ZT extension receipts SHOULD include an `org.peacprotocol/actor_binding` extensi
   "iat": 1709000000,
   "jti": "cred_01HQXYZ123456789",
   "peac": {
-    "wire_type": "peac-receipt/0.1",
+    "wire_type": "interaction-record+jwt",
     "wire_version": "0.1"
   },
   "ext": [

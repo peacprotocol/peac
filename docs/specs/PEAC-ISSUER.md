@@ -108,13 +108,14 @@ The `jwks_uri` field provides the location of the issuer's JSON Web Key Set:
 
 ### 3.5 Receipt Versions
 
-Default if not specified: `["peac-receipt/0.1"]`
+Default if not specified: `["interaction-record+jwt"]`
 
 Well-known receipt versions:
 
-| Version            | Description                |
-| ------------------ | -------------------------- |
-| `peac-receipt/0.1` | Current stable wire format |
+| Version                  | Description                           |
+| ------------------------ | ------------------------------------- |
+| `interaction-record+jwt` | Current stable wire format (Wire 0.2) |
+| `peac-receipt/0.1`       | Frozen legacy wire format (Wire 0.1)  |
 
 ### 3.6 Algorithms
 
@@ -140,7 +141,7 @@ Issuer configuration MUST be JSON. YAML is not supported.
   "issuer": "https://api.example.com",
   "jwks_uri": "https://api.example.com/.well-known/jwks.json",
   "verify_endpoint": "https://api.example.com/verify",
-  "receipt_versions": ["peac-receipt/0.1"],
+  "receipt_versions": ["interaction-record+jwt"],
   "algorithms": ["EdDSA"],
   "payment_rails": ["x402", "stripe"],
   "security_contact": "security@example.com"
@@ -434,7 +435,7 @@ A verifier implementation MUST:
   "issuer": "https://api.example.com",
   "jwks_uri": "https://api.example.com/.well-known/jwks.json",
   "verify_endpoint": "https://api.example.com/peac/verify",
-  "receipt_versions": ["peac-receipt/0.1"],
+  "receipt_versions": ["interaction-record+jwt"],
   "algorithms": ["EdDSA"],
   "payment_rails": ["x402", "stripe", "razorpay"],
   "security_contact": "https://api.example.com/.well-known/security.txt"

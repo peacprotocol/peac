@@ -289,7 +289,7 @@ samples
             $comment: sample.description,
             header: {
               alg: 'EdDSA',
-              typ: 'peac-receipt/0.1',
+              typ: 'interaction-record+jwt',
               kid,
             },
             payload: adjustedClaims,

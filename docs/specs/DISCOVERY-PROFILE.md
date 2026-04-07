@@ -45,17 +45,17 @@ This step supports endpoints that implement PEAC but do not publish A2A Agent Ca
 
 ```json
 {
-  "supported_kinds": ["peac-receipt/0.1"],
+  "supported_kinds": ["interaction-record+jwt"],
   "carrier_formats": ["embed", "reference"],
   "issuer_config_url": "https://issuer.example.com/.well-known/peac-issuer.json"
 }
 ```
 
-| Field               | Type       | Required | Description                                        |
-| ------------------- | ---------- | -------- | -------------------------------------------------- |
-| `supported_kinds`   | `string[]` | SHOULD   | Wire format versions (default: `peac-receipt/0.1`) |
-| `carrier_formats`   | `string[]` | SHOULD   | Supported formats: `embed`, `reference`            |
-| `issuer_config_url` | `string`   | MAY      | URI for issuer configuration (`peac-issuer.json`)  |
+| Field               | Type       | Required | Description                                              |
+| ------------------- | ---------- | -------- | -------------------------------------------------------- |
+| `supported_kinds`   | `string[]` | SHOULD   | Wire format versions (default: `interaction-record+jwt`) |
+| `carrier_formats`   | `string[]` | SHOULD   | Supported formats: `embed`, `reference`                  |
+| `issuer_config_url` | `string`   | MAY      | URI for issuer configuration (`peac-issuer.json`)        |
 
 ### Step 3: Header Probe
 
