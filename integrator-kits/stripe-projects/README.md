@@ -170,6 +170,6 @@ Audit trail reconstruction: collect all receipts with `org.peacprotocol.stripe-p
 - Example: `examples/stripe-projects-provisioning/demo.ts`
 - SPT delegation: `examples/stripe-spt-evidence/demo.ts`
 - Commerce semantics: `docs/specs/COMMERCE-SEMANTICS.md`
-- Wire 0.2 minimal: `examples/wire-02-minimal/demo.ts`
+- Minimal example: `examples/minimal/demo.ts`
 - Packages: `@peac/crypto` (JCS, signing), `@peac/protocol` (issue, verify)
 - RFC 8785: JSON Canonicalization Scheme
