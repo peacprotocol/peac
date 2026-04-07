@@ -1,7 +1,7 @@
 {
   "name": "@peac/core",
   "version": "0.12.6",
-  "description": "DEPRECATED - Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead",
+  "description": "DEPRECATED (removal: v0.13.0) - Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead",
   "type": "module",
   "homepage": "https://github.com/peacprotocol/peac#readme",
   "bugs": {

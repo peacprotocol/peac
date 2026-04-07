@@ -124,7 +124,6 @@
     "@peac/pay402",
     "@peac/server",
     "@peac/core",
-    "@peac/sdk",
     "@peac/net-node",
     "@peac/adapter-eat",
     "@peac/adapter-did",
