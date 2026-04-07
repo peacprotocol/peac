@@ -2,7 +2,7 @@
 
 Test receipt issuer for local development and integration testing.
 
-Issues PEAC receipts (`peac-receipt/0.1`) signed with Ed25519 stable keys.
+Issues signed interaction records with Ed25519 stable keys. Supports `interaction-record+jwt` (Wire 0.2) and `peac-receipt/0.1` (Wire 0.1 legacy).
 Not for production use.
 
 ## Quick start
