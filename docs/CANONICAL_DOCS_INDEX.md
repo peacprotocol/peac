@@ -38,12 +38,15 @@ This document defines which documentation files are the canonical, up-to-date re
 
 ### Architecture & Process
 
-| Document                           | Status            | Purpose                    |
-| ---------------------------------- | ----------------- | -------------------------- |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | **Authoritative** | Kernel-first DAG, layering |
-| [CI_BEHAVIOR.md](CI_BEHAVIOR.md)   | **Authoritative** | CI pipeline behavior       |
-| [QA.md](QA.md)                     | **Reference**     | Manual QA checklist        |
-| [deps-policy.md](deps-policy.md)   | **Reference**     | Dependency update policy   |
+| Document                                           | Status            | Purpose                               |
+| -------------------------------------------------- | ----------------- | ------------------------------------- |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                 | **Authoritative** | Kernel-first DAG, layering            |
+| [CI_BEHAVIOR.md](CI_BEHAVIOR.md)                   | **Authoritative** | CI pipeline behavior                  |
+| [COMPATIBILITY_MATRIX.md](COMPATIBILITY_MATRIX.md) | **Authoritative** | Wire format, runtime, SDK parity      |
+| [MIGRATION_CURRENT.md](MIGRATION_CURRENT.md)       | **Authoritative** | Upgrade paths and code migration      |
+| [DEPRECATION_POLICY.md](DEPRECATION_POLICY.md)     | **Authoritative** | Surface lifecycle and removal windows |
+| [QA.md](QA.md)                                     | **Reference**     | Manual QA checklist                   |
+| [deps-policy.md](deps-policy.md)                   | **Reference**     | Dependency update policy              |
 
 ### Policy Kit
 

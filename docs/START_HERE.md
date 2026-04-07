@@ -89,3 +89,9 @@ Layer 5: @peac/mcp-server   (MCP server)
 ```
 
 Dependencies flow down only. Start at the highest layer you need.
+
+## Reference
+
+- [Compatibility Matrix](COMPATIBILITY_MATRIX.md): wire format support, runtime environments, deprecation schedule
+- [Migration Guide](MIGRATION_CURRENT.md): upgrade paths from Wire 0.1, `@peac/core`, legacy API
+- [Deprecation Policy](DEPRECATION_POLICY.md): surface lifecycle, removal windows, HTTP deprecation headers
