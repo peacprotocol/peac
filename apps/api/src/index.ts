@@ -84,7 +84,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Health check endpoint
   app.get('/health', (c) => c.json({ ok: true }));
 
-  // Legacy verify endpoint (deprecated -- will be removed in a future version)
+  // Legacy verify endpoint (deprecated: removal target v0.13.0; see Sunset header)
   app.post('/verify', createV13HonoHandler());
 
   // v1 verify endpoint
