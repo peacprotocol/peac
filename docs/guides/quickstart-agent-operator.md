@@ -97,7 +97,7 @@ console.log('Valid:', result.valid);
 
 ## Next steps
 
-- See [examples/wire-02-minimal](../../examples/wire-02-minimal/) for typed accessor helpers
+- See [examples/minimal](../../examples/minimal/) for typed accessor helpers
 - See [examples/workflow-correlation](../../examples/workflow-correlation/) for multi-step verification
 - Read [PROTOCOL-BEHAVIOR](../specs/PROTOCOL-BEHAVIOR.md) for normative verification rules
 - Read [Architecture](../ARCHITECTURE.md) for package layering

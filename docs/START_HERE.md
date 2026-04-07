@@ -30,7 +30,7 @@ You have a receipt (JWS string) and want to verify it offline with a public key.
 
 1. Install: `pnpm add @peac/protocol @peac/crypto`
 2. Follow the [Agent Operator Quickstart](guides/quickstart-agent-operator.md) (5 minutes)
-3. See [examples/wire-02-minimal](../examples/wire-02-minimal/) for typed accessor helpers
+3. See [examples/minimal](../examples/minimal/) for typed accessor helpers
 
 Key packages: `@peac/protocol`, `@peac/crypto`
 

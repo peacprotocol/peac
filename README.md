@@ -104,10 +104,10 @@ const { jws } = await issue({
 
 ```bash
 pnpm install && pnpm build
-pnpm --filter @peac/example-wire-02-minimal demo
+pnpm --filter @peac/example-minimal demo
 ```
 
-See [examples/wire-02-minimal/](examples/wire-02-minimal/) for the full source. For HTTP/REST, Express middleware, and Go examples, see [docs/README_LONG.md](docs/README_LONG.md).
+See [examples/minimal/](examples/minimal/) for the full source. For HTTP/REST, Express middleware, and Go examples, see [docs/README_LONG.md](docs/README_LONG.md).
 
 ---
 
