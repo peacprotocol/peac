@@ -3,7 +3,7 @@
  */
 
 export const SERVER_NAME = 'peac-mcp-server';
-export const SERVER_VERSION = '0.12.6';
+export const SERVER_VERSION = '0.12.7';
 export const MCP_PROTOCOL_VERSION = '2025-11-25';
 export const DEFAULT_MAX_JWS_BYTES = 16_384; // 16 KB
 export const DEFAULT_MAX_RESPONSE_BYTES = 65_536; // 64 KB

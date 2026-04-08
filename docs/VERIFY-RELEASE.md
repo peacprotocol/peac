@@ -66,7 +66,7 @@ Public API exports are snapshot-locked. Any unreviewed change to the public API 
 bash scripts/release/api-surface-lock.sh
 ```
 
-Snapshots are stored in `scripts/release/api-snapshots/` and cover the primary packages (`kernel`, `schema`, `crypto`, `protocol`, `control`, `mcp-server`, `middleware-core`, `middleware-express`, `sdk-js`).
+Snapshots are stored in `scripts/release/api-snapshots/` and cover the primary packages (`kernel`, `schema`, `crypto`, `protocol`, `control`, `mcp-server`, `middleware-core`, `middleware-express`).
 
 ## 5. Pack-Install Smoke
 

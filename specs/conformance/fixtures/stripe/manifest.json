@@ -1,6 +1,6 @@
 {
   "name": "stripe",
-  "version": "0.12.5",
+  "version": "0.12.7",
   "description": "Conformance vectors for @peac/rails-stripe: SPT delegation lifecycle and PaymentIntent observation evidence mapping",
   "commerce_rail": "stripe",
   "categories": {

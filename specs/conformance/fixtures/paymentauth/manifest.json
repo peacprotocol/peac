@@ -1,6 +1,6 @@
 {
   "name": "paymentauth",
-  "version": "0.12.5",
+  "version": "0.12.7",
   "description": "Conformance vectors for @peac/mappings-paymentauth: envelope-first header parsing, normalization, and evidence mapping per draft-ryan-httpauth-payment-01",
   "commerce_rail": "paymentauth",
   "spec_revision": "draft-ryan-httpauth-payment-01",

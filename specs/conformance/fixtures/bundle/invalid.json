@@ -1,6 +1,6 @@
 {
   "$comment": "Invalid DisputeBundle golden vectors (v0.9.30+)",
-  "version": "0.12.3",
+  "version": "0.12.7",
   "fixtures": [
     {
       "name": "missing-manifest",
@@ -214,5 +214,5 @@
       }
     }
   ],
-  "schema_version": "0.12.3"
+  "schema_version": "0.12.7"
 }

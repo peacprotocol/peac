@@ -1,7 +1,7 @@
 # PEAC Conformance Matrix
 
 > **Generated**: Do not edit manually. Source: `node scripts/conformance/generate-matrix.mjs`
-> **Version**: 0.12.5
+> **Version**: 0.12.7
 
 ## Wire 0.2 Protocol Requirements
 

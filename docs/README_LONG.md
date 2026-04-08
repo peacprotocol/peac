@@ -16,7 +16,6 @@ Layer 3: @peac/protocol       -- issue(), verifyLocal(), discovery
 Layer 3.5: @peac/middleware-*  -- transport-neutral and Express middleware
 Layer 4: @peac/rails-*, @peac/mappings-*, @peac/adapter-*
 Layer 5: @peac/server, @peac/cli, @peac/mcp-server
-Layer 6: @peac/sdk-js
 ```
 
 **Repository layout:**
@@ -383,7 +382,7 @@ peac policy generate peac-policy.yaml --out dist --well-known
 | `@peac/mappings-acp`             | Agentic Commerce Protocol session mapping           |
 | `@peac/mappings-content-signals` | Content signal observation mapping                  |
 
-**Infrastructure:** `@peac/contracts`, `@peac/http-signatures`, `@peac/jwks-cache`, `@peac/net-node`, `@peac/adapter-core`, `@peac/privacy`, `@peac/telemetry`, `@peac/telemetry-otel`, `@peac/transport-grpc`, `@peac/capture-core`, `@peac/capture-node`, `@peac/attribution`, `@peac/audit`, `@peac/policy-kit`, `@peac/sdk-js`.
+**Infrastructure:** `@peac/contracts`, `@peac/http-signatures`, `@peac/jwks-cache`, `@peac/net-node`, `@peac/adapter-core`, `@peac/privacy`, `@peac/telemetry`, `@peac/telemetry-otel`, `@peac/transport-grpc`, `@peac/capture-core`, `@peac/capture-node`, `@peac/attribution`, `@peac/audit`, `@peac/policy-kit`.
 
 **Publication status:** Core, runtime, and adapter packages are published to npm. See [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases). Install via `pnpm add <package>`.
 

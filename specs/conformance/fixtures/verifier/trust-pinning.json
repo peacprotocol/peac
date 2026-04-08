@@ -1,6 +1,6 @@
 {
   "description": "Trust pinning conformance fixtures per TRUST-PINNING-POLICY.md",
-  "version": "0.12.3",
+  "version": "0.12.7",
   "test_cases": [
     {
       "id": "issuer-in-allowlist",
@@ -211,5 +211,5 @@
       }
     }
   ],
-  "schema_version": "0.12.3"
+  "schema_version": "0.12.7"
 }
