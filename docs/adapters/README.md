@@ -52,8 +52,7 @@ Layer 1: @peac/schema (Zod schemas, validation)
 Layer 2: @peac/crypto (signing, verification)
 Layer 3: @peac/protocol, @peac/control (high-level APIs)
 Layer 4: @peac/adapter-* (proof source adapters)  <-- adapters here
-Layer 5: @peac/server, @peac/cli (applications)
-Layer 6: @peac/sdk-js (consumer SDK)
+Layer 5: @peac/server, @peac/cli, @peac/mcp-server (applications)
 ```
 
 ### Shared Core

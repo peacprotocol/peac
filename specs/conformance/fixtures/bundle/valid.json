@@ -1,6 +1,6 @@
 {
   "$comment": "Valid DisputeBundle golden vectors (v0.9.30+)",
-  "version": "0.12.3",
+  "version": "0.12.7",
   "description": "Specification of valid bundle manifest structure and verification semantics",
   "fixtures": [
     {
@@ -174,5 +174,5 @@
       }
     }
   ],
-  "schema_version": "0.12.3"
+  "schema_version": "0.12.7"
 }

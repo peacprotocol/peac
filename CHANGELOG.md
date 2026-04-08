@@ -5,6 +5,48 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.7] - 2026-04-08
+
+Coherence, trust, and installability release. No new protocol surface.
+
+### Added
+
+- `pnpm verify:distribution`: distribution surface verification gate with tarball packaging smoke (44 checks)
+- `pnpm verify:release`: release facts verification gate (22 checks)
+- `pnpm verify:docs-examples`: documentation code block type-checking
+- `docs/releases/facts.json`: canonical source of truth for release metrics
+- `docs/ENTERPRISE_TRUST_POSTURE.md`: key custody, tenancy, procurement posture
+- `docs/SECURITY_POSTURE.md`: support windows, provenance, logging boundaries, tenant isolation
+- `docs/REFERENCE_ARCHITECTURES.md`: API gateway, MCP tool-call, and A2A handoff evidence flows
+- `docs/WHEN_NOT_TO_USE_PEAC.md`: guidance on when PEAC is the wrong tool
+- `docs/COMPATIBILITY_MATRIX.md`: wire format, runtime, and SDK support matrix
+- `docs/MIGRATION_CURRENT.md`: Wire 0.1 to 0.2 migration guide
+- `docs/DEPRECATION_POLICY.md`: surface lifecycle, support windows, HTTP deprecation headers
+- `docs/STANDARDS_COMPLIANCE.md`: 16 standards mapped to PEAC surfaces
+- `docs/SUPPORTED_ENVIRONMENTS.md`: Node.js, Go, Python, browser support status
+- `docs/HOSTED_VERIFY_CONTRACT.md`: Hosted Verify API design artifact (DD-210)
+- `REPO_SURFACE_STATUS.json`: machine-readable surface classification (74 surfaces)
+- Coherence gate: 9 blocking checks in `verify:spec-drift`
+
+### Changed
+
+- Legacy Wire 0.1 defaults quarantined across 12 spec and guide files
+- `@peac/sdk` (`sdk-js`) and `apps/bridge` archived
+- Legacy `/verify` endpoint: RFC 8594 Sunset and Deprecation headers added
+- `examples/wire-02-minimal` renamed to `examples/minimal`
+- x402 upstream references migrated to `x402-foundation/x402`
+- GitHub Actions: all tracked workflows pinned to immutable commit SHAs
+- Security policy: supported versions updated to 0.12.x only
+
+### Status transitions
+
+- `@peac/sdk` (`sdk-js`): supported -> archived
+- `apps/bridge`: supported -> archived
+- `@peac/core`: supported -> deprecated (removal: v0.13.0)
+- `/verify` API endpoint: supported -> deprecated (removal: v0.13.0 or Nov 1 2026)
+
+---
+
 ## [0.12.6] - 2026-04-01
 
 x402 V2 support, DID resolution, A2A OAuth, gRPC transport, receipt URL middleware, and supply-chain provenance mappings.

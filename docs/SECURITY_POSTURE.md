@@ -52,7 +52,7 @@ npm audit signatures @peac/protocol
 
 ### OIDC trusted publishing
 
-52 packages are configured for OIDC trusted publishing through the `peacprotocol/peac` repository's `publish.yml` workflow. The publish manifest (`scripts/publish-manifest.json`) tracks the authoritative package list.
+All published packages are configured for OIDC trusted publishing through the `peacprotocol/peac` repository's `publish.yml` workflow. The publish manifest (`scripts/publish-manifest.json`) tracks the authoritative package list and OIDC configuration status.
 
 ### CI security tooling
 
