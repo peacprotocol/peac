@@ -1,0 +1,33 @@
+{
+  "description": "Canonical source of truth for PEAC Protocol release metrics. Website, docs, and release notes consume this file. CI validates it matches actual build output.",
+  "schema_version": "1.0.0",
+  "version": "0.12.6",
+  "wire_format_version": "0.2",
+  "dist_tag": "latest",
+  "release_date": "2026-04-01",
+  "metrics": {
+    "tests": 7241,
+    "test_files": 281,
+    "published_packages": 35,
+    "build_targets": 96,
+    "conformance_requirement_ids": 219,
+    "conformance_sections": 24
+  },
+  "runtime": {
+    "node_canonical": "24.14.1",
+    "node_minimum": ">=22.0.0",
+    "node_compat": "22",
+    "node_forward_compat": "25+"
+  },
+  "sdks": {
+    "typescript": "default",
+    "go": "compat-only",
+    "python": "not_started"
+  },
+  "provenance": {
+    "npm_provenance": true,
+    "oidc_trusted_publishing": true,
+    "codeql_enabled": true,
+    "dependency_review_enabled": true
+  }
+}

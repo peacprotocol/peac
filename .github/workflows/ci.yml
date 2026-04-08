@@ -206,6 +206,9 @@ jobs:
       - name: Spec drift verification (constants parity)
         run: pnpm verify:spec-drift
 
+      - name: Release facts verification
+        run: pnpm verify:release
+
       - name: Error code parity (advisory)
         continue-on-error: true
         run: bash scripts/check-error-codes.sh || true
