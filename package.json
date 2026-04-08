@@ -54,6 +54,7 @@
     "codegen:registries": "tsx scripts/codegen-registries.ts",
     "verify:registries-schema": "node scripts/validate-registries-schema.mjs",
     "verify:codegen-drift": "bash scripts/verify-codegen-drift.sh",
+    "verify:distribution": "node scripts/verify-distribution.mjs",
     "api-contract:extract": "tsx scripts/extract-api-contract.ts",
     "api-contract:check": "tsx scripts/extract-api-contract.ts --check",
     "fixtures:new": "node scripts/fixtures-new.mjs",

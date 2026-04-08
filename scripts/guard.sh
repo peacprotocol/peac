@@ -269,7 +269,9 @@ else
 fi
 
 echo "== MCP distribution surfaces =="
-# Validate server.json (MCP Registry schema), smithery.yaml, llms.txt existence
+# Canonical implementation: scripts/verify-distribution.mjs
+# guard.sh runs a fast subset (file existence + version sync) to avoid
+# the full tarball pack during pre-push. Full validation via pnpm verify:distribution.
 MCP_DIST_OK=1
 if [ ! -f packages/mcp-server/server.json ]; then
   echo "FAIL: packages/mcp-server/server.json missing"
@@ -280,6 +282,10 @@ elif ! node -e "JSON.parse(require('fs').readFileSync('packages/mcp-server/serve
 fi
 if [ ! -f packages/mcp-server/smithery.yaml ]; then
   echo "FAIL: packages/mcp-server/smithery.yaml missing"
+  MCP_DIST_OK=0
+fi
+if [ ! -f packages/mcp-server/manifest.json ]; then
+  echo "FAIL: packages/mcp-server/manifest.json missing"
   MCP_DIST_OK=0
 fi
 if [ ! -f llms.txt ]; then
