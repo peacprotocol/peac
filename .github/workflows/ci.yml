@@ -189,7 +189,7 @@ jobs:
         run: bash scripts/ci/surface-validator.sh
 
       - name: Distribution surface validation (DD-140)
-        run: bash scripts/check-distribution.sh
+        run: node scripts/verify-distribution.mjs
 
       - name: Package hygiene (drift, duplicates, private+publishConfig)
         run: bash scripts/check-publish-list.sh
