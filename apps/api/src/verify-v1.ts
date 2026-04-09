@@ -14,12 +14,13 @@
 
 import type { Context } from 'hono';
 import { z } from 'zod';
-import { verifyLocal } from '@peac/protocol';
+import { verifyLocal, computePolicyDigestJcs } from '@peac/protocol';
 import { decode, base64urlDecode, jwkToPublicKeyBytes } from '@peac/crypto';
 import { computeReceiptRef } from '@peac/schema';
 import { MemoryRateLimitStore } from '@peac/middleware-core';
 import { InMemoryCache, resolveKey, type CacheBackend } from '@peac/jwks-cache';
 import { toProblemDetails, getCatalogEntry, type HostedProblemDetails } from './error-catalog.js';
+import { loadDiscoveryConfig, discoverAndResolveKey } from './issuer-discovery.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
@@ -156,6 +157,7 @@ const jwksCache: CacheBackend = new InMemoryCache();
 
 export function createVerifyV1Handler() {
   const trustedIssuers = loadTrustedIssuers();
+  const discoveryConfig = loadDiscoveryConfig();
 
   return async (c: Context) => {
     // Security headers on all responses
@@ -250,41 +252,65 @@ export function createVerifyV1Handler() {
       }
 
       const trustedEntry = trustedIssuers.find((t) => t.issuer === iss);
-      if (!trustedEntry) {
+
+      if (!trustedEntry && discoveryConfig.enabled) {
+        // Opt-in issuer discovery: attempt SSRF-safe resolution
+        const discovery = await discoverAndResolveKey(iss, kid, discoveryConfig);
+        if (!discovery.ok) {
+          return problemResponse(
+            c,
+            toProblemDetails(discovery.code, {
+              issuer: iss,
+              kid,
+              url: `${iss}/.well-known/peac-issuer.json`,
+              reason: discovery.detail,
+            })
+          );
+        }
+        publicKeyBytes = discovery.publicKeyBytes;
+      } else if (!trustedEntry) {
+        // Discovery disabled: reject unknown issuers
         return problemResponse(
           c,
           toProblemDetails('E_VERIFY_ISSUER_CONFIG_MISSING', {
             url: `${iss}/.well-known/peac-issuer.json`,
           })
         );
-      }
-
-      try {
-        const resolved = await resolveKey(iss, kid, {
-          cache: jwksCache,
-          defaultTtlSeconds: 300,
-          maxTtlSeconds: 86400,
-          minTtlSeconds: 60,
-          timeoutMs: 5000,
-          maxResponseBytes: 1024 * 1024,
-          maxKeys: 100,
-          allowLocalhost: false,
-          allowStale: true,
-          maxStaleAgeSeconds: 172800,
-        });
-        if (!resolved) {
-          return problemResponse(c, toProblemDetails('E_KEY_NOT_FOUND', { kid, issuer: iss }));
+      } else {
+        // Allowlisted issuer: resolve via JWKS cache
+        try {
+          const resolved = await resolveKey(iss, kid, {
+            cache: jwksCache,
+            defaultTtlSeconds: 300,
+            maxTtlSeconds: 86400,
+            minTtlSeconds: 60,
+            timeoutMs: 5000,
+            maxResponseBytes: 1024 * 1024,
+            maxKeys: 100,
+            allowLocalhost: false,
+            allowStale: true,
+            maxStaleAgeSeconds: 172800,
+          });
+          if (!resolved) {
+            return problemResponse(c, toProblemDetails('E_KEY_NOT_FOUND', { kid, issuer: iss }));
+          }
+          publicKeyBytes = jwkToPublicKeyBytes(resolved.jwk);
+        } catch (err) {
+          return problemResponse(
+            c,
+            toProblemDetails('E_JWKS_FETCH_FAILED', {
+              issuer: iss,
+              reason: err instanceof Error ? err.message : String(err),
+            })
+          );
         }
-        publicKeyBytes = jwkToPublicKeyBytes(resolved.jwk);
-      } catch (err) {
-        return problemResponse(
-          c,
-          toProblemDetails('E_JWKS_FETCH_FAILED', {
-            issuer: iss,
-            reason: err instanceof Error ? err.message : String(err),
-          })
-        );
       }
+    }
+
+    // Compute local policy digest if policy provided in request
+    let policyDigest: string | undefined;
+    if (policy) {
+      policyDigest = await computePolicyDigestJcs(policy);
     }
 
     // Verify using canonical verifyLocal() from @peac/protocol
@@ -292,6 +318,7 @@ export function createVerifyV1Handler() {
       issuer: options?.issuer,
       maxClockSkew: options?.max_clock_skew,
       strictness: options?.strictness,
+      policyDigest,
     });
 
     // Compute receipt_ref (canonical: sha256 of compact JWS bytes)

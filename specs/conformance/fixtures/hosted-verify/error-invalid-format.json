@@ -1,0 +1,18 @@
+{
+  "id": "HOSTED-VERIFY-003",
+  "description": "Malformed JWS returns E_INVALID_FORMAT with RFC 9457 Problem Details",
+  "category": "error",
+  "input": {
+    "receipt": "not-a-valid-jws"
+  },
+  "expected_response": {
+    "status": 400,
+    "content_type": "application/problem+json",
+    "body_shape": {
+      "type": "https://www.peacprotocol.org/problems/invalid-format",
+      "title": "Invalid Format",
+      "status": 400,
+      "peac_error_code": "E_INVALID_FORMAT"
+    }
+  }
+}

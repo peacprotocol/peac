@@ -1,0 +1,21 @@
+{
+  "id": "HOSTED-VERIFY-005",
+  "description": "Rate-limited request returns E_RATE_LIMITED (429) with Retry-After and RFC 9333 headers",
+  "category": "error",
+  "expected_response": {
+    "status": 429,
+    "content_type": "application/problem+json",
+    "body_shape": {
+      "type": "https://www.peacprotocol.org/problems/rate-limited",
+      "title": "Rate Limited",
+      "status": 429,
+      "peac_error_code": "E_RATE_LIMITED"
+    },
+    "headers": {
+      "retry-after": "<number>",
+      "ratelimit-limit": "<number>",
+      "ratelimit-remaining": "0",
+      "ratelimit-reset": "<number>"
+    }
+  }
+}

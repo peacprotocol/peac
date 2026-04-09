@@ -1,0 +1,28 @@
+{
+  "id": "HOSTED-VERIFY-001",
+  "description": "Valid receipt with caller-provided public key returns DD-210 deterministic report",
+  "category": "valid",
+  "expected_response": {
+    "status": 200,
+    "content_type": "application/json",
+    "body_shape": {
+      "verified": true,
+      "receipt_ref": "sha256:<64 hex chars>",
+      "claims": {},
+      "warnings": [],
+      "policy_binding": "unavailable",
+      "issuer": "<string>",
+      "kid": "<string>",
+      "wire_version": "0.2"
+    },
+    "deterministic": true,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "cache-control": "no-store",
+      "ratelimit-limit": "<number>",
+      "ratelimit-remaining": "<number>",
+      "ratelimit-reset": "<number>"
+    }
+  },
+  "notes": "Same input must produce byte-identical response body (deterministic JSON with sorted keys)"
+}

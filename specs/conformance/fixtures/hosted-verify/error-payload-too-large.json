@@ -1,0 +1,18 @@
+{
+  "id": "HOSTED-VERIFY-004",
+  "description": "Oversized body returns E_PAYLOAD_TOO_LARGE (413)",
+  "category": "error",
+  "input": {
+    "content_length": 999999
+  },
+  "expected_response": {
+    "status": 413,
+    "content_type": "application/problem+json",
+    "body_shape": {
+      "type": "https://www.peacprotocol.org/problems/payload-too-large",
+      "title": "Payload Too Large",
+      "status": 413,
+      "peac_error_code": "E_PAYLOAD_TOO_LARGE"
+    }
+  }
+}
