@@ -40,6 +40,10 @@ export type { V13VerifyRequest, V13VerifyResponse, VerifierOptions } from './ver
 // v1 verify endpoint
 export { createVerifyV1Handler, resetVerifyV1RateLimit } from './verify-v1.js';
 
+// Error catalog (for testing and external consumption)
+export { HOSTED_ERROR_CODES, toProblemDetails, getCatalogEntry } from './error-catalog.js';
+export type { CatalogEntry, HostedProblemDetails } from './error-catalog.js';
+
 // RFC 9457 Problem Details media type
 export const PROBLEM_MEDIA_TYPE = 'application/problem+json';
 
@@ -87,8 +91,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Legacy verify endpoint (deprecated: removal target v0.13.0; see Sunset header)
   app.post('/verify', createV13HonoHandler());
 
-  // v1 verify endpoint
-  app.post('/api/v1/verify', createVerifyV1Handler());
+  // Canonical v1 verify endpoint
+  const verifyV1 = createVerifyV1Handler();
+  app.post('/v1/verify', verifyV1);
+
+  // Deprecated alias (Sunset: Nov 1 2026)
+  app.post('/api/v1/verify', (c) => {
+    c.header('Sunset', 'Sat, 01 Nov 2026 00:00:00 GMT');
+    c.header('Deprecation', 'true');
+    c.header('Link', '<https://www.peacprotocol.org/docs/migration>; rel="deprecation"');
+    return verifyV1(c);
+  });
 
   // Start server
   const port = parseInt(process.env.PORT || '3000');

@@ -1,0 +1,214 @@
+openapi: 3.1.0
+info:
+  title: PEAC Hosted Verify API
+  version: 0.12.8
+  description: >
+    Hosted verification service for signed interaction records.
+    Returns deterministic DD-210 verification reports with RFC 9457 errors.
+  contact:
+    url: https://www.peacprotocol.org
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+paths:
+  /v1/verify:
+    post:
+      operationId: verifyReceipt
+      summary: Verify a signed interaction record
+      description: >
+        Verify a compact JWS interaction record. Returns a deterministic
+        verification report (DD-210 shape). Supports caller-provided public
+        key or allowlisted issuer JWKS resolution.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+      responses:
+        '200':
+          description: Verification completed (may be verified or failed)
+          headers:
+            RateLimit-Limit:
+              schema: { type: string }
+              description: Maximum requests per window (RFC 9333)
+            RateLimit-Remaining:
+              schema: { type: string }
+              description: Remaining requests in current window
+            RateLimit-Reset:
+              schema: { type: string }
+              description: Seconds until rate limit window resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifySuccessResponse'
+        '400':
+          description: Invalid request format
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '413':
+          description: Request body too large
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Verification or validation failure
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema: { type: string }
+              description: Seconds to wait before retrying
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '502':
+          description: Upstream resolution failure (JWKS, issuer config)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+components:
+  schemas:
+    VerifyRequest:
+      type: object
+      required: [receipt]
+      additionalProperties: false
+      properties:
+        receipt:
+          type: string
+          minLength: 1
+          maxLength: 262144
+          description: Compact JWS string (interaction-record+jwt)
+        public_key:
+          type: string
+          minLength: 1
+          description: Base64url-encoded Ed25519 public key (32 bytes). If omitted, JWKS resolution is used.
+        policy:
+          type: object
+          additionalProperties: false
+          properties:
+            uri:
+              type: string
+              format: uri
+            version:
+              type: string
+        options:
+          type: object
+          additionalProperties: false
+          properties:
+            issuer:
+              type: string
+              format: uri
+              description: Expected issuer URI for binding check
+            max_clock_skew:
+              type: integer
+              minimum: 1
+              maximum: 3600
+              description: Clock skew tolerance in seconds (default 300)
+            strictness:
+              type: string
+              enum: [strict, interop]
+              description: Verification strictness mode (default strict)
+
+    VerifySuccessResponse:
+      type: object
+      required: [verified, receipt_ref, claims, warnings, policy_binding, issuer, kid, wire_version]
+      properties:
+        verified:
+          type: boolean
+          description: Whether the receipt passed all verification checks
+        receipt_ref:
+          type: string
+          pattern: '^sha256:[a-f0-9]{64}$'
+          description: Receipt reference (SHA-256 of compact JWS bytes)
+        claims:
+          type: object
+          description: Validated interaction record claims
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationWarning'
+          description: Non-fatal verification warnings
+        policy_binding:
+          type: string
+          enum: [unavailable, verified, failed]
+          description: Three-state policy binding result
+        issuer:
+          type: string
+          description: Issuer URI from the receipt
+        kid:
+          type: string
+          description: Key ID from JWS header
+        wire_version:
+          type: string
+          description: Wire format version (e.g. "0.2")
+
+    VerificationWarning:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Warning code (e.g. W_UNREGISTERED_TYPE)
+        message:
+          type: string
+          description: Human-readable warning message
+        pointer:
+          type: string
+          description: RFC 6901 JSON Pointer to the problematic field
+
+    ProblemDetails:
+      type: object
+      required: [type, title, status, detail, peac_error_code]
+      description: RFC 9457 Problem Details with PEAC extensions
+      properties:
+        type:
+          type: string
+          format: uri
+          description: Problem type URI (under https://www.peacprotocol.org/problems/)
+        title:
+          type: string
+          description: Short human-readable summary
+        status:
+          type: integer
+          description: HTTP status code
+        detail:
+          type: string
+          description: Human-readable explanation with interpolated context
+        instance:
+          type: string
+          description: URI reference to the specific occurrence
+        peac_error_code:
+          type: string
+          description: Kernel-canonical error code (e.g. E_INVALID_FORMAT)
+        peac_trace_id:
+          type: string
+          description: Request trace identifier
+        errors:
+          type: array
+          items:
+            type: object
+            required: [pointer, detail]
+            properties:
+              pointer:
+                type: string
+                description: RFC 6901 JSON Pointer
+              detail:
+                type: string
+                description: Field-level error detail
+          description: Multi-error details (for validation failures)

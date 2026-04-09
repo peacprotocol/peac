@@ -1,52 +1,52 @@
 /**
- * POST /api/v1/verify
+ * POST /v1/verify (canonical) and /api/v1/verify (deprecated alias)
  *
- * Receipt verification with allowlisted issuer JWKS resolution.
- *
- * Flow:
- * 1. Parse receipt (untrusted) to extract iss, kid
- * 2. Resolve public key via allowlisted issuer -> JWKS cache
- * 3. Verify signature + schema via verifyLocal()
- * 4. Return result with RFC 9457 Problem Details for errors
+ * Hosted Verify API: thin wrapper over verifyLocal() from @peac/protocol.
+ * Returns deterministic DD-210 verification reports with RFC 9457 errors.
  *
  * Supports two modes:
  * - public_key provided: verify directly (no JWKS fetch, no SSRF)
  * - public_key omitted: resolve key from allowlisted issuers via JWKS
+ *
+ * Issuer discovery (opt-in via PEAC_ISSUER_DISCOVERY=true): if issuer is not
+ * in the allowlist, fetch /.well-known/peac-issuer.json -> jwks_uri -> JWKS.
  */
 
 import type { Context } from 'hono';
 import { z } from 'zod';
 import { verifyLocal } from '@peac/protocol';
 import { decode, base64urlDecode, jwkToPublicKeyBytes } from '@peac/crypto';
+import { computeReceiptRef } from '@peac/schema';
 import { MemoryRateLimitStore } from '@peac/middleware-core';
 import { InMemoryCache, resolveKey, type CacheBackend } from '@peac/jwks-cache';
-import { ProblemError } from './errors.js';
+import { toProblemDetails, getCatalogEntry, type HostedProblemDetails } from './error-catalog.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
+const REQUEST_TIMEOUT_MS = 10_000; // 10s hard ceiling
 
 const VerifyRequestSchema = z
   .object({
-    /** JWS compact serialization of the receipt */
     receipt: z.string().min(1).max(MAX_BODY_SIZE),
-
-    /** Optional: Ed25519 public key as base64url-encoded string */
     public_key: z.string().min(1).optional(),
-
-    /** Optional verification constraints */
+    policy: z
+      .object({
+        uri: z.string().url().optional(),
+        version: z.string().optional(),
+      })
+      .strict()
+      .optional(),
     options: z
       .object({
         issuer: z.string().url().optional(),
-        audience: z.string().url().optional(),
-        require_exp: z.boolean().optional(),
         max_clock_skew: z.number().int().positive().max(3600).optional(),
+        strictness: z.enum(['strict', 'interop']).optional(),
       })
       .strict()
       .optional(),
   })
   .strict();
 
-/** Trusted issuer entry schema -- validated at boot */
 const TrustedIssuerSchema = z.object({
   issuer: z.string().url(),
   jwks_uri: z
@@ -60,7 +60,6 @@ type TrustedIssuerEntry = z.infer<typeof TrustedIssuerSchema>;
 function loadTrustedIssuers(): TrustedIssuerEntry[] {
   const raw = process.env.PEAC_TRUSTED_ISSUERS_JSON;
   if (!raw) {
-    // Default: trust the sandbox issuer
     return [
       {
         issuer: 'https://sandbox.peacprotocol.org',
@@ -93,17 +92,14 @@ function loadTrustedIssuers(): TrustedIssuerEntry[] {
   });
 }
 
-/** Rate limit store -- bounded with LRU eviction at 10k keys */
 const rateLimitStore = new MemoryRateLimitStore({ maxKeys: 10_000 });
 const ANON_LIMIT = 100;
 const API_KEY_LIMIT = 1000;
-const WINDOW_MS = 60 * 1000; // 1 minute
+const WINDOW_MS = 60 * 1000;
 
 function getRateLimit(c: Context): { key: string; limit: number } {
   const apiKey = c.req.header('x-api-key');
   if (apiKey) return { key: `key:${apiKey}`, limit: API_KEY_LIMIT };
-
-  // Only trust forwarded IP headers behind a known reverse proxy
   let ip = '127.0.0.1';
   if (process.env.PEAC_TRUST_PROXY === '1') {
     ip =
@@ -126,63 +122,66 @@ async function checkRateLimit(key: string, limit: number): Promise<RateLimitResu
   const now = Date.now();
   const resetSeconds = Math.ceil((resetAt - now) / 1000);
   const remaining = Math.max(0, limit - count);
-
   if (count > limit) {
     return { allowed: false, remaining: 0, resetSeconds, retryAfter: resetSeconds };
   }
   return { allowed: true, remaining, resetSeconds };
 }
 
-/** Emit RFC 9333 RateLimit-* headers on every response */
 function setRateLimitHeaders(c: Context, limit: number, result: RateLimitResult): void {
   c.header('RateLimit-Limit', String(limit));
   c.header('RateLimit-Remaining', String(result.remaining));
   c.header('RateLimit-Reset', String(result.resetSeconds));
 }
 
-/** JWKS cache (shared across requests) */
+/**
+ * Deterministic JSON serialization: sort keys at every nesting level.
+ * Same input always produces byte-identical output.
+ */
+function deterministicStringify(obj: unknown): string {
+  return JSON.stringify(obj, (_key, value) => {
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)));
+    }
+    return value;
+  });
+}
+
+function problemResponse(c: Context, problem: HostedProblemDetails): Response {
+  c.header('Content-Type', PROBLEM_CONTENT_TYPE);
+  return c.body(deterministicStringify(problem), problem.status as any);
+}
+
 const jwksCache: CacheBackend = new InMemoryCache();
 
 export function createVerifyV1Handler() {
   const trustedIssuers = loadTrustedIssuers();
 
   return async (c: Context) => {
-    // Security headers on all responses (including errors)
+    // Security headers on all responses
     c.header('X-Content-Type-Options', 'nosniff');
     c.header('Cache-Control', 'no-store');
     c.header('Referrer-Policy', 'no-referrer');
     c.header('X-Frame-Options', 'DENY');
 
-    // Rate limit with Retry-After + RFC 9333 RateLimit-* headers
+    // Rate limit
     const rl = getRateLimit(c);
     const check = await checkRateLimit(rl.key, rl.limit);
     setRateLimitHeaders(c, rl.limit, check);
     if (!check.allowed) {
       c.header('Retry-After', String(check.retryAfter));
-      c.header('Content-Type', PROBLEM_CONTENT_TYPE);
-      return c.body(
-        JSON.stringify({
-          type: 'https://www.peacprotocol.org/problems/rate-limited',
-          title: 'Rate Limited',
-          status: 429,
-          detail: `Rate limit exceeded. Try again in ${check.retryAfter} seconds.`,
-        }),
-        429
+      return problemResponse(
+        c,
+        toProblemDetails('E_RATE_LIMITED', { retry_after: String(check.retryAfter ?? 60) })
       );
     }
 
     // Body size check
     const contentLength = c.req.header('content-length');
     if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
-      c.header('Content-Type', PROBLEM_CONTENT_TYPE);
-      return c.body(
-        JSON.stringify({
-          type: 'https://www.peacprotocol.org/problems/request-too-large',
-          title: 'Request Too Large',
-          status: 413,
-          detail: `Request body exceeds ${MAX_BODY_SIZE} byte limit`,
-        }),
-        413
+      return problemResponse(
+        c,
+        toProblemDetails('E_PAYLOAD_TOO_LARGE', { limit: String(MAX_BODY_SIZE) })
       );
     }
 
@@ -191,48 +190,43 @@ export function createVerifyV1Handler() {
     try {
       body = await c.req.json();
     } catch {
-      throw new ProblemError(
-        400,
-        'https://www.peacprotocol.org/problems/invalid-request',
-        'Invalid Request',
-        'Request body must be valid JSON'
-      );
+      return problemResponse(c, toProblemDetails('E_INVALID_FORMAT', {}));
     }
 
     // Validate schema
     const parsed = VerifyRequestSchema.safeParse(body);
     if (!parsed.success) {
-      const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
-      throw new ProblemError(
-        422,
-        'https://www.peacprotocol.org/problems/schema-validation-failed',
-        'Validation Error',
-        issues.join('; ')
-      );
+      const errors = parsed.error.issues.map((i) => ({
+        pointer: `/${i.path.join('/')}`,
+        detail: i.message,
+      }));
+      const problem = toProblemDetails('E_CONSTRAINT_VIOLATION', {
+        count: String(errors.length),
+      });
+      problem.errors = errors;
+      return problemResponse(c, problem);
     }
 
-    const { receipt, public_key, options } = parsed.data;
+    const { receipt, public_key, options, policy } = parsed.data;
 
     // Resolve public key
     let publicKeyBytes: Uint8Array;
 
     if (public_key) {
-      // Mode A: caller-provided key (no JWKS fetch, no SSRF)
       try {
         publicKeyBytes = base64urlDecode(public_key);
         if (publicKeyBytes.length !== 32) {
           throw new Error('Expected 32-byte Ed25519 public key');
         }
       } catch (err) {
-        throw new ProblemError(
-          422,
-          'https://www.peacprotocol.org/problems/invalid-request',
-          'Invalid Public Key',
-          `Could not decode public key: ${err instanceof Error ? err.message : String(err)}`
+        return problemResponse(
+          c,
+          toProblemDetails('E_CONSTRAINT_VIOLATION', {
+            count: '1',
+          })
         );
       }
     } else {
-      // Mode B: resolve key from allowlisted issuer JWKS
       let header: { kid?: string };
       let payload: { iss?: string };
       try {
@@ -240,41 +234,35 @@ export function createVerifyV1Handler() {
         header = decoded.header as { kid?: string };
         payload = decoded.payload;
       } catch {
-        throw new ProblemError(
-          400,
-          'https://www.peacprotocol.org/problems/invalid-jws-format',
-          'Invalid JWS Format',
-          'Could not decode receipt header and payload'
-        );
+        return problemResponse(c, toProblemDetails('E_INVALID_FORMAT'));
       }
 
       const iss = payload.iss;
       const kid = header.kid;
       if (!iss || !kid) {
-        throw new ProblemError(
-          422,
-          'https://www.peacprotocol.org/problems/invalid-request',
-          'Missing Issuer or Key ID',
-          'Receipt must contain iss claim and kid header for JWKS resolution'
+        return problemResponse(
+          c,
+          toProblemDetails(
+            !kid ? 'E_JWS_MISSING_KID' : 'E_ISS_NOT_CANONICAL',
+            !kid ? {} : { issuer: iss ?? '' }
+          )
         );
       }
 
-      // Check issuer allowlist (prevents SSRF)
       const trustedEntry = trustedIssuers.find((t) => t.issuer === iss);
       if (!trustedEntry) {
-        throw new ProblemError(
-          422,
-          'https://www.peacprotocol.org/problems/unknown-key-id',
-          'Untrusted Issuer',
-          `Issuer "${iss}" is not in the trusted issuers allowlist`
+        return problemResponse(
+          c,
+          toProblemDetails('E_VERIFY_ISSUER_CONFIG_MISSING', {
+            url: `${iss}/.well-known/peac-issuer.json`,
+          })
         );
       }
 
-      // Resolve key via jwks-cache (HTTPS-only, short timeouts)
       try {
         const resolved = await resolveKey(iss, kid, {
           cache: jwksCache,
-          defaultTtlSeconds: 600, // 10 min
+          defaultTtlSeconds: 300,
           maxTtlSeconds: 86400,
           minTtlSeconds: 60,
           timeoutMs: 5000,
@@ -285,48 +273,55 @@ export function createVerifyV1Handler() {
           maxStaleAgeSeconds: 172800,
         });
         if (!resolved) {
-          throw new Error(`Key ${kid} not found in JWKS for ${iss}`);
+          return problemResponse(c, toProblemDetails('E_KEY_NOT_FOUND', { kid, issuer: iss }));
         }
         publicKeyBytes = jwkToPublicKeyBytes(resolved.jwk);
       } catch (err) {
-        throw new ProblemError(
-          422,
-          'https://www.peacprotocol.org/problems/unknown-key-id',
-          'Key Resolution Failed',
-          `Could not resolve key ${kid} from ${iss}: ${err instanceof Error ? err.message : String(err)}`
+        return problemResponse(
+          c,
+          toProblemDetails('E_JWKS_FETCH_FAILED', {
+            issuer: iss,
+            reason: err instanceof Error ? err.message : String(err),
+          })
         );
       }
     }
 
-    // Verify
+    // Verify using canonical verifyLocal() from @peac/protocol
     const result = await verifyLocal(receipt, publicKeyBytes, {
       issuer: options?.issuer,
-      audience: options?.audience,
-      requireExp: options?.require_exp,
       maxClockSkew: options?.max_clock_skew,
+      strictness: options?.strictness,
     });
 
+    // Compute receipt_ref (canonical: sha256 of compact JWS bytes)
+    const receiptRef = await computeReceiptRef(receipt);
+
     if (result.valid) {
-      return c.json({
-        valid: true,
-        claims: result.claims,
+      // DD-210 deterministic verification report
+      const report = {
+        verified: true as const,
+        receipt_ref: receiptRef,
+        claims: result.claims as Record<string, unknown>,
+        warnings: result.warnings,
+        policy_binding: result.policy_binding,
+        issuer: result.claims.iss,
         kid: result.kid,
-      });
+        wire_version: result.wireVersion,
+      };
+      c.header('Content-Type', 'application/json');
+      return c.body(deterministicStringify(report), 200);
     }
 
-    // Verification failed -- return structured result (not an HTTP error)
-    return c.json(
-      {
-        valid: false,
-        code: result.code,
-        message: result.message,
-      },
-      200
-    );
+    // Verification failed: map error code to RFC 9457 Problem Details
+    const entry = getCatalogEntry(result.code);
+    const httpStatus = entry?.httpStatus ?? 422;
+    const problem = toProblemDetails(result.code, {});
+    problem.detail = result.message;
+    return problemResponse(c, problem);
   };
 }
 
-/** Reset rate limit store (for testing) */
 export function resetVerifyV1RateLimit(): void {
   rateLimitStore.clear();
 }
