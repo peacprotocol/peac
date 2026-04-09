@@ -7,6 +7,7 @@ import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { createV13HonoHandler } from './routes.js';
 import { createVerifyV1Handler } from './verify-v1.js';
+import { createIssueV1Handler } from './hosted-issue.js';
 import { isProblemError } from './errors.js';
 
 // Legacy handlers (deprecated -- use createVerifyV1Handler instead)
@@ -39,6 +40,9 @@ export type { V13VerifyRequest, V13VerifyResponse, VerifierOptions } from './ver
 
 // v1 verify endpoint
 export { createVerifyV1Handler, resetVerifyV1RateLimit } from './verify-v1.js';
+
+// v1 issue endpoint (provisional)
+export { createIssueV1Handler } from './hosted-issue.js';
 
 // Error catalog (for testing and external consumption)
 export { HOSTED_ERROR_CODES, toProblemDetails, getCatalogEntry } from './error-catalog.js';
@@ -102,6 +106,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     c.header('Link', '<https://www.peacprotocol.org/docs/migration>; rel="deprecation"');
     return verifyV1(c);
   });
+
+  // Provisional v1 issue endpoint (BYO-key, disable via PEAC_HOSTED_ISSUE=false)
+  app.post('/v1/issue', createIssueV1Handler());
 
   // Start server
   const port = parseInt(process.env.PORT || '3000');
