@@ -3,83 +3,133 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parse as parseYaml } from 'yaml';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * OpenAPI contract-sync test.
  *
- * Validates that openapi.yaml contains the expected DD-210 surface
- * by checking structural markers in the raw YAML text. This avoids
- * a YAML parser dependency; if a full schema-level sync is needed
- * later, add the yaml package to devDependencies.
+ * Parses openapi.yaml as structured YAML and validates the DD-210
+ * surface contract: request/response schemas, error codes, rate limit
+ * headers, and required fields. Uses real structural validation via
+ * the yaml package, not text-marker checks.
  */
 describe('openapi-sync', () => {
-  const raw = readFileSync(join(__dirname, '..', 'openapi.yaml'), 'utf-8');
+  const spec = parseYaml(readFileSync(join(__dirname, '..', 'openapi.yaml'), 'utf-8'));
 
-  test('openapi.yaml exists and declares OpenAPI 3.1.0', () => {
-    assert.ok(raw.includes('openapi: 3.1.0'), 'Must declare openapi: 3.1.0');
+  test('declares OpenAPI 3.1.0', () => {
+    assert.strictEqual(spec.openapi, '3.1.0');
   });
 
-  test('POST /v1/verify path is defined', () => {
-    assert.ok(raw.includes('/v1/verify:'), 'Must define /v1/verify path');
-    assert.ok(raw.includes('operationId: verifyReceipt'), 'Must have operationId: verifyReceipt');
+  test('POST /v1/verify path exists with operationId', () => {
+    assert.ok(spec.paths['/v1/verify'], '/v1/verify path must exist');
+    assert.strictEqual(spec.paths['/v1/verify'].post.operationId, 'verifyReceipt');
   });
 
-  test('request schema references VerifyRequest with required receipt field', () => {
-    assert.ok(raw.includes('VerifyRequest'), 'Must reference VerifyRequest schema');
-    assert.ok(raw.includes('required: [receipt]'), 'receipt must be required');
+  test('request schema requires receipt and has all expected fields', () => {
+    const ref = spec.paths['/v1/verify'].post.requestBody.content['application/json'].schema;
+    const schemaName = ref.$ref?.split('/').pop();
+    const reqSchema = schemaName ? spec.components.schemas[schemaName] : ref;
+
+    assert.ok(reqSchema, 'VerifyRequest schema must exist');
+    assert.deepStrictEqual(reqSchema.required, ['receipt']);
+    assert.ok(reqSchema.properties.receipt, 'receipt field');
+    assert.ok(reqSchema.properties.public_key, 'public_key field');
+    assert.ok(reqSchema.properties.policy, 'policy field');
+    assert.ok(reqSchema.properties.options, 'options field');
+    assert.strictEqual(reqSchema.additionalProperties, false, 'strict schema');
   });
 
-  test('request schema includes policy and options fields', () => {
-    assert.ok(raw.includes('policy:'), 'Must include policy field');
-    assert.ok(raw.includes('public_key:'), 'Must include public_key field');
-    assert.ok(raw.includes('strictness:'), 'Must include strictness option');
-  });
+  test('success response schema has all DD-210 required fields', () => {
+    const ref = spec.paths['/v1/verify'].post.responses['200'].content['application/json'].schema;
+    const schemaName = ref.$ref?.split('/').pop();
+    const schema = schemaName ? spec.components.schemas[schemaName] : ref;
 
-  test('success response includes all DD-210 required fields', () => {
-    assert.ok(
-      raw.includes(
-        'required: [verified, receipt_ref, claims, warnings, policy_binding, issuer, kid, wire_version]'
-      ),
-      'Success response must require all DD-210 fields'
-    );
-  });
-
-  test('receipt_ref has sha256 pattern', () => {
-    assert.ok(raw.includes("'^sha256:[a-f0-9]{64}$'"), 'receipt_ref must have sha256 pattern');
-  });
-
-  test('policy_binding enum includes all three states', () => {
-    assert.ok(
-      raw.includes('enum: [unavailable, verified, failed]'),
-      'Must have 3-state policy_binding enum'
-    );
-  });
-
-  test('error responses define application/problem+json for 400, 413, 422, 429, 502', () => {
-    for (const status of ['400', '413', '422', '429', '502']) {
-      assert.ok(raw.includes(`'${status}':`), `Must define ${status} response`);
+    const required = schema.required;
+    for (const field of [
+      'verified',
+      'receipt_ref',
+      'claims',
+      'warnings',
+      'policy_binding',
+      'issuer',
+      'kid',
+      'wire_version',
+    ]) {
+      assert.ok(required.includes(field), `${field} must be required`);
     }
-    // Count problem+json occurrences (should be at least 5 for error responses)
-    const problemJsonCount = (raw.match(/application\/problem\+json/g) || []).length;
+  });
+
+  test('receipt_ref has sha256 pattern constraint', () => {
+    const ref = spec.paths['/v1/verify'].post.responses['200'].content['application/json'].schema;
+    const schemaName = ref.$ref?.split('/').pop();
+    const schema = schemaName ? spec.components.schemas[schemaName] : ref;
+
+    assert.ok(schema.properties.receipt_ref.pattern, 'receipt_ref must have pattern');
     assert.ok(
-      problemJsonCount >= 5,
-      `Expected >= 5 problem+json references, got ${problemJsonCount}`
+      schema.properties.receipt_ref.pattern.includes('sha256'),
+      'pattern must reference sha256'
     );
   });
 
-  test('ProblemDetails schema includes peac_error_code as required', () => {
-    assert.ok(raw.includes('peac_error_code'), 'Must define peac_error_code field');
-    assert.ok(
-      raw.includes('required: [type, title, status, detail, peac_error_code]'),
-      'peac_error_code must be in ProblemDetails required fields'
-    );
+  test('policy_binding enum has three states', () => {
+    const ref = spec.paths['/v1/verify'].post.responses['200'].content['application/json'].schema;
+    const schemaName = ref.$ref?.split('/').pop();
+    const schema = schemaName ? spec.components.schemas[schemaName] : ref;
+
+    assert.deepStrictEqual(schema.properties.policy_binding.enum, [
+      'unavailable',
+      'verified',
+      'failed',
+    ]);
   });
 
-  test('RFC 9333 rate limit headers documented on success response', () => {
-    assert.ok(raw.includes('RateLimit-Limit'), 'Must document RateLimit-Limit header');
-    assert.ok(raw.includes('RateLimit-Remaining'), 'Must document RateLimit-Remaining header');
-    assert.ok(raw.includes('RateLimit-Reset'), 'Must document RateLimit-Reset header');
+  test('error responses use application/problem+json for 400, 413, 422, 429, 502', () => {
+    const responses = spec.paths['/v1/verify'].post.responses;
+    for (const status of ['400', '413', '422', '429', '502']) {
+      assert.ok(responses[status], `${status} response must exist`);
+      assert.ok(
+        responses[status].content['application/problem+json'],
+        `${status} must use application/problem+json`
+      );
+    }
+  });
+
+  test('ProblemDetails schema has peac_error_code as required', () => {
+    const pd = spec.components.schemas.ProblemDetails;
+    assert.ok(pd, 'ProblemDetails schema must exist');
+    assert.ok(pd.properties.peac_error_code, 'peac_error_code property must exist');
+    assert.ok(pd.required.includes('peac_error_code'), 'peac_error_code must be required');
+  });
+
+  test('ProblemDetails has errors array for multi-error responses', () => {
+    const pd = spec.components.schemas.ProblemDetails;
+    assert.ok(pd.properties.errors, 'errors array must exist');
+    assert.strictEqual(pd.properties.errors.type, 'array');
+  });
+
+  test('200 response documents RFC 9333 rate limit headers', () => {
+    const headers = spec.paths['/v1/verify'].post.responses['200'].headers;
+    assert.ok(headers, '200 response must have headers');
+    assert.ok(headers['RateLimit-Limit'], 'RateLimit-Limit header');
+    assert.ok(headers['RateLimit-Remaining'], 'RateLimit-Remaining header');
+    assert.ok(headers['RateLimit-Reset'], 'RateLimit-Reset header');
+  });
+
+  test('429 response documents Retry-After header', () => {
+    const headers = spec.paths['/v1/verify'].post.responses['429'].headers;
+    assert.ok(headers, '429 response must have headers');
+    assert.ok(headers['Retry-After'], 'Retry-After header');
+  });
+
+  test('options schema includes strictness enum', () => {
+    const ref = spec.paths['/v1/verify'].post.requestBody.content['application/json'].schema;
+    const schemaName = ref.$ref?.split('/').pop();
+    const reqSchema = schemaName ? spec.components.schemas[schemaName] : ref;
+
+    const strictness = reqSchema.properties.options.properties.strictness;
+    assert.ok(strictness, 'strictness option must exist');
+    assert.deepStrictEqual(strictness.enum, ['strict', 'interop']);
   });
 });

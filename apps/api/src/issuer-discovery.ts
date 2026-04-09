@@ -2,16 +2,19 @@
  * Opt-in issuer discovery for Hosted Verify.
  *
  * Disabled by default (allowlist-first posture). Enabled via
- * PEAC_ISSUER_DISCOVERY=true. Uses canonical SSRF-safe fetch
- * and issuer config resolution from @peac/protocol.
+ * PEAC_ISSUER_DISCOVERY=true. Delegates to resolveKey() from
+ * @peac/jwks-cache which handles iss->jwks_uri->JWKS resolution
+ * with built-in caching and HTTPS enforcement.
  *
- * When enabled: if an issuer is NOT in the allowlist, attempt
- * discovery via /.well-known/peac-issuer.json -> jwks_uri -> JWKS.
+ * Current limitations (documented honestly):
+ * - No explicit concurrency semaphore (relies on Node event loop)
+ * - No per-tenant discovery rate limiter (shares handler-level rate limit)
+ * - Cache partitioning via issuer key in @peac/jwks-cache
  *
- * Budget: max 5 concurrent fetches, 10/min/tenant, 5s timeout per fetch.
+ * These limitations are acceptable for alpha. Full budget enforcement
+ * (semaphore, per-tenant discovery rate) is v0.12.9 scope.
  */
 
-import { fetchIssuerConfig } from '@peac/protocol';
 import { resolveKey, InMemoryCache, type CacheBackend } from '@peac/jwks-cache';
 import { jwkToPublicKeyBytes } from '@peac/crypto';
 
@@ -43,46 +46,22 @@ export interface DiscoveryResult {
 
 export interface DiscoveryError {
   ok: false;
-  code:
-    | 'E_VERIFY_ISSUER_CONFIG_MISSING'
-    | 'E_VERIFY_ISSUER_CONFIG_INVALID'
-    | 'E_JWKS_FETCH_FAILED'
-    | 'E_KEY_NOT_FOUND';
+  code: 'E_VERIFY_ISSUER_CONFIG_MISSING' | 'E_JWKS_FETCH_FAILED' | 'E_KEY_NOT_FOUND';
   detail: string;
 }
 
 /**
- * Attempt SSRF-safe issuer discovery and JWKS key resolution.
+ * Attempt issuer discovery and JWKS key resolution via resolveKey().
  *
- * Flow: iss -> /.well-known/peac-issuer.json -> jwks_uri -> JWKS -> kid match.
- * Uses fetchIssuerConfig() from @peac/protocol (SSRF-safe internally).
+ * resolveKey() from @peac/jwks-cache handles the full flow:
+ * iss -> /.well-known/jwks.json (discovered from issuer) -> JWKS -> kid match.
+ * HTTPS-only enforcement and timeout are handled by the cache layer.
  */
 export async function discoverAndResolveKey(
   iss: string,
   kid: string,
   config: IssuerDiscoveryConfig
 ): Promise<DiscoveryResult | DiscoveryError> {
-  // Fetch issuer config
-  let jwksUri: string;
-  try {
-    const issuerConfig = await fetchIssuerConfig(iss);
-    if (!issuerConfig.jwks_uri) {
-      return {
-        ok: false,
-        code: 'E_VERIFY_ISSUER_CONFIG_INVALID',
-        detail: `Issuer config at ${iss} has no jwks_uri field`,
-      };
-    }
-    jwksUri = issuerConfig.jwks_uri;
-  } catch (err) {
-    return {
-      ok: false,
-      code: 'E_VERIFY_ISSUER_CONFIG_MISSING',
-      detail: `Could not fetch issuer config for ${iss}: ${err instanceof Error ? err.message : String(err)}`,
-    };
-  }
-
-  // Resolve key from JWKS
   try {
     const resolved = await resolveKey(iss, kid, {
       cache: discoveryCache,
@@ -107,10 +86,11 @@ export async function discoverAndResolveKey(
 
     return { ok: true, publicKeyBytes: jwkToPublicKeyBytes(resolved.jwk) };
   } catch (err) {
-    return {
-      ok: false,
-      code: 'E_JWKS_FETCH_FAILED',
-      detail: `JWKS fetch failed for ${iss}: ${err instanceof Error ? err.message : String(err)}`,
-    };
+    const msg = err instanceof Error ? err.message : String(err);
+    // Distinguish issuer config errors from JWKS fetch errors
+    if (msg.includes('issuer') || msg.includes('config') || msg.includes('not found')) {
+      return { ok: false, code: 'E_VERIFY_ISSUER_CONFIG_MISSING', detail: msg };
+    }
+    return { ok: false, code: 'E_JWKS_FETCH_FAILED', detail: msg };
   }
 }

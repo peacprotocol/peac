@@ -142,7 +142,9 @@ function setRateLimitHeaders(c: Context, limit: number, result: RateLimitResult)
 function deterministicStringify(obj: unknown): string {
   return JSON.stringify(obj, (_key, value) => {
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)));
+      return Object.fromEntries(
+        Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      );
     }
     return value;
   });
