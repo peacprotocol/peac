@@ -2,7 +2,6 @@ package peac
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -10,213 +9,151 @@ import (
 	"github.com/peacprotocol/peac/sdks/go/jws"
 )
 
-// VerifyOptions configures receipt verification.
+// VerifyOptions contains options for receipt verification.
+//
+// Deprecated: This type supports Wire 0.1 verification only.
+// Use VerifyLocal() (shipping in v0.12.8 PR3) for Interaction Record verification.
 type VerifyOptions struct {
-	// Issuer is the expected issuer (REQUIRED).
-	Issuer string
-
-	// Audience is the expected audience (REQUIRED).
-	Audience string
-
-	// MaxAge is the maximum age of the receipt (default: 1 hour).
-	MaxAge time.Duration
-
-	// ClockSkew is the tolerance for clock differences (default: 30 seconds).
+	Issuer    string
+	Audience  string
+	MaxAge    time.Duration
 	ClockSkew time.Duration
-
-	// JWKSURL is the explicit JWKS endpoint URL (optional).
-	// If not set, it will be discovered from the issuer.
-	JWKSURL string
-
-	// KeySet is a custom key set to use (optional).
-	// If set, JWKS discovery is skipped.
-	KeySet *jwks.KeySet
-
-	// JWKSCache is a JWKS cache to use for key resolution.
+	JWKSURL   string
+	KeySet    *jwks.KeySet
 	JWKSCache *jwks.Cache
-
-	// Context is the context for the operation.
-	Context context.Context
+	Context   context.Context
 }
 
-// Verify verifies a PEAC receipt JWS and returns the claims.
+// VerifyResult contains the result of receipt verification.
 //
-// Example:
+// Deprecated: This type supports Wire 0.1 verification only.
+type VerifyResult struct {
+	Claims    *PEACReceiptClaims
+	KeyID     string
+	Algorithm string
+	Perf      *VerifyPerf
+}
+
+// VerifyPerf contains timing information for verification.
+type VerifyPerf struct {
+	VerifyMs    float64 `json:"verify_ms"`
+	JWKSFetchMs float64 `json:"jwks_fetch_ms,omitempty"`
+}
+
+// PEACReceiptClaims represents Wire 0.1 receipt claims.
 //
-//	result, err := peac.Verify(receiptJWS, peac.VerifyOptions{
-//	    Issuer:   "https://publisher.example",
-//	    Audience: "https://agent.example",
-//	    MaxAge:   time.Hour,
-//	})
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Printf("Receipt ID: %s\n", result.Claims.ReceiptID)
+// Deprecated: Use InteractionRecordClaims for the current stable format.
+type PEACReceiptClaims struct {
+	Issuer    string `json:"iss"`
+	Subject   string `json:"sub,omitempty"`
+	IssuedAt  int64  `json:"iat"`
+	ExpiresAt int64  `json:"exp,omitempty"`
+	ReceiptID string `json:"receipt_id"`
+}
+
+// ErrorCode represents a PEAC error code.
+//
+// Deprecated: Use sentinel errors (ErrIssNotCanonical, etc.) for Interaction Record errors.
+type ErrorCode string
+
+// Legacy error codes preserved for middleware compilation.
+//
+// Deprecated: Use sentinel errors for new code.
+const (
+	ErrInvalidSignature ErrorCode = "E_INVALID_SIGNATURE"
+	ErrInvalidFormat    ErrorCode = "E_INVALID_FORMAT"
+	ErrExpired          ErrorCode = "E_EXPIRED"
+	ErrNotYetValid      ErrorCode = "E_NOT_YET_VALID"
+	ErrInvalidIssuer    ErrorCode = "E_INVALID_ISSUER"
+	ErrInvalidAudience  ErrorCode = "E_INVALID_AUDIENCE"
+	ErrJWKSFetchFailed  ErrorCode = "E_JWKS_FETCH_FAILED"
+	ErrKeyNotFound      ErrorCode = "E_KEY_NOT_FOUND"
+
+	ErrIdentityMissing              ErrorCode = "E_IDENTITY_MISSING"
+	ErrIdentityInvalidFormat        ErrorCode = "E_IDENTITY_INVALID_FORMAT"
+	ErrIdentityExpired              ErrorCode = "E_IDENTITY_EXPIRED"
+	ErrIdentityNotYetValid          ErrorCode = "E_IDENTITY_NOT_YET_VALID"
+	ErrIdentitySigInvalid           ErrorCode = "E_IDENTITY_SIG_INVALID"
+	ErrIdentityKeyUnknown           ErrorCode = "E_IDENTITY_KEY_UNKNOWN"
+	ErrIdentityKeyExpired           ErrorCode = "E_IDENTITY_KEY_EXPIRED"
+	ErrIdentityKeyRevoked           ErrorCode = "E_IDENTITY_KEY_REVOKED"
+	ErrIdentityBindingMismatch      ErrorCode = "E_IDENTITY_BINDING_MISMATCH"
+	ErrIdentityBindingStale         ErrorCode = "E_IDENTITY_BINDING_STALE"
+	ErrIdentityBindingFuture        ErrorCode = "E_IDENTITY_BINDING_FUTURE"
+	ErrIdentityProofUnsupported     ErrorCode = "E_IDENTITY_PROOF_UNSUPPORTED"
+	ErrIdentityDirectoryUnavailable ErrorCode = "E_IDENTITY_DIRECTORY_UNAVAILABLE"
+)
+
+// PEACError represents an error from PEAC operations.
+//
+// Deprecated: Use IssueError for issuance errors; verification errors
+// will use a new type in PR3.
+type PEACError struct {
+	Code    ErrorCode
+	Message string
+	Details map[string]interface{}
+}
+
+func (e *PEACError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Code, e.Message)
+}
+
+// NewPEACError creates a new PEAC error.
+func NewPEACError(code ErrorCode, message string) *PEACError {
+	return &PEACError{Code: code, Message: message, Details: make(map[string]interface{})}
+}
+
+func (e *PEACError) WithDetail(key string, value interface{}) *PEACError {
+	e.Details[key] = value
+	return e
+}
+
+func (e *PEACError) IsRetryable() bool {
+	switch e.Code {
+	case ErrNotYetValid, ErrJWKSFetchFailed, ErrIdentityNotYetValid,
+		ErrIdentityKeyUnknown, ErrIdentityBindingStale, ErrIdentityDirectoryUnavailable:
+		return true
+	default:
+		return false
+	}
+}
+
+func (e *PEACError) HTTPStatus() int {
+	switch e.Code {
+	case ErrInvalidSignature, ErrInvalidFormat, ErrInvalidIssuer, ErrInvalidAudience,
+		ErrKeyNotFound, ErrIdentityInvalidFormat, ErrIdentityBindingMismatch,
+		ErrIdentityBindingFuture, ErrIdentityProofUnsupported:
+		return 400
+	case ErrExpired, ErrNotYetValid, ErrIdentityMissing, ErrIdentityExpired,
+		ErrIdentityNotYetValid, ErrIdentitySigInvalid, ErrIdentityKeyUnknown,
+		ErrIdentityKeyExpired, ErrIdentityKeyRevoked, ErrIdentityBindingStale:
+		return 401
+	case ErrJWKSFetchFailed, ErrIdentityDirectoryUnavailable:
+		return 503
+	default:
+		return 500
+	}
+}
+
+// Verify verifies a receipt using JWKS resolution.
+//
+// Deprecated: This function supports Wire 0.1 only.
+// VerifyLocal() for the current stable format ships in v0.12.8 PR3.
 func Verify(receiptJWS string, opts VerifyOptions) (*VerifyResult, error) {
-	startTime := time.Now()
-	perf := &VerifyPerf{}
-
-	// Apply defaults
-	if opts.MaxAge == 0 {
-		opts.MaxAge = time.Hour
-	}
-	if opts.ClockSkew == 0 {
-		opts.ClockSkew = 30 * time.Second
-	}
-	if opts.Context == nil {
-		opts.Context = context.Background()
-	}
-
-	// Parse JWS
 	parsed, err := jws.Parse(receiptJWS)
 	if err != nil {
 		return nil, NewPEACError(ErrInvalidFormat, err.Error())
 	}
-
-	// Validate header
 	if err := jws.ValidateHeader(parsed.Header); err != nil {
 		return nil, NewPEACError(ErrInvalidFormat, err.Error())
 	}
-
-	// Parse claims
-	var claims PEACReceiptClaims
-	if err := json.Unmarshal(parsed.Payload, &claims); err != nil {
-		return nil, NewPEACError(ErrInvalidFormat, fmt.Sprintf("failed to parse claims: %v", err))
-	}
-
-	// Validate issuer
-	if opts.Issuer != "" && claims.Issuer != opts.Issuer {
-		return nil, NewPEACError(ErrInvalidIssuer, fmt.Sprintf("expected %s, got %s", opts.Issuer, claims.Issuer)).
-			WithDetail("expected", opts.Issuer).
-			WithDetail("actual", claims.Issuer)
-	}
-
-	// Validate audience
-	if opts.Audience != "" && !containsAudience(claims.Audience, opts.Audience) {
-		return nil, NewPEACError(ErrInvalidAudience, fmt.Sprintf("expected %s in audience", opts.Audience)).
-			WithDetail("expected", opts.Audience).
-			WithDetail("actual", claims.Audience)
-	}
-
-	// Validate time claims
-	now := time.Now()
-
-	// Check iat (issued at)
-	iat := time.Unix(claims.IssuedAt, 0)
-	if iat.After(now.Add(opts.ClockSkew)) {
-		return nil, NewPEACError(ErrNotYetValid, "issued_at is in the future").
-			WithDetail("iat", claims.IssuedAt).
-			WithDetail("now", now.Unix())
-	}
-
-	// Check exp (expires at)
-	if claims.ExpiresAt > 0 {
-		exp := time.Unix(claims.ExpiresAt, 0)
-		if exp.Before(now.Add(-opts.ClockSkew)) {
-			return nil, NewPEACError(ErrExpired, "receipt has expired").
-				WithDetail("exp", claims.ExpiresAt).
-				WithDetail("now", now.Unix())
-		}
-	}
-
-	// Check nbf (not before)
-	if claims.NotBefore > 0 {
-		nbf := time.Unix(claims.NotBefore, 0)
-		if nbf.After(now.Add(opts.ClockSkew)) {
-			return nil, NewPEACError(ErrNotYetValid, "receipt is not yet valid").
-				WithDetail("nbf", claims.NotBefore).
-				WithDetail("now", now.Unix())
-		}
-	}
-
-	// Check max age
-	if time.Since(iat) > opts.MaxAge+opts.ClockSkew {
-		return nil, NewPEACError(ErrExpired, "receipt exceeds max age").
-			WithDetail("iat", claims.IssuedAt).
-			WithDetail("max_age_seconds", opts.MaxAge.Seconds())
-	}
-
-	// Resolve public key
-	keyStartTime := time.Now()
-	publicKey, err := resolveKey(opts, parsed.Header.KeyID, claims.Issuer)
-	perf.JWKSFetchMs = float64(time.Since(keyStartTime).Microseconds()) / 1000
-
-	if err != nil {
-		return nil, err
-	}
-
-	// Verify signature
-	if err := jws.VerifyJWS(parsed, publicKey); err != nil {
-		return nil, NewPEACError(ErrInvalidSignature, err.Error())
-	}
-
-	perf.VerifyMs = float64(time.Since(startTime).Microseconds()) / 1000
-
-	return &VerifyResult{
-		Claims:    &claims,
-		KeyID:     parsed.Header.KeyID,
-		Algorithm: parsed.Header.Algorithm,
-		Perf:      perf,
-	}, nil
+	return nil, NewPEACError(ErrInvalidFormat,
+		"Wire 0.1 Verify() is deprecated; use VerifyLocal() for Interaction Record format")
 }
 
-// VerifyWithContext is like Verify but explicitly takes a context.
+// VerifyWithContext is the context-aware variant of Verify.
+//
+// Deprecated: Use VerifyLocal() instead.
 func VerifyWithContext(ctx context.Context, receiptJWS string, opts VerifyOptions) (*VerifyResult, error) {
-	opts.Context = ctx
 	return Verify(receiptJWS, opts)
-}
-
-func resolveKey(opts VerifyOptions, keyID, issuer string) ([]byte, error) {
-	// Use provided KeySet if available
-	if opts.KeySet != nil {
-		key, ok := opts.KeySet.Get(keyID)
-		if !ok {
-			return nil, NewPEACError(ErrKeyNotFound, fmt.Sprintf("key %s not found in provided key set", keyID)).
-				WithDetail("kid", keyID)
-		}
-		return key, nil
-	}
-
-	// Determine JWKS URL
-	jwksURL := opts.JWKSURL
-	if jwksURL == "" {
-		jwksURL = jwks.DiscoverJWKS(issuer)
-	}
-
-	// Use cache if available
-	var keySet *jwks.KeySet
-	var err error
-
-	if opts.JWKSCache != nil {
-		keySet, err = opts.JWKSCache.Get(opts.Context, jwksURL)
-	} else {
-		var jwksData *jwks.JWKS
-		jwksData, err = jwks.Fetch(opts.Context, jwksURL, jwks.DefaultFetchOptions())
-		if err == nil {
-			keySet, err = jwksData.ToKeySet()
-		}
-	}
-
-	if err != nil {
-		return nil, NewPEACError(ErrJWKSFetchFailed, err.Error()).
-			WithDetail("url", jwksURL)
-	}
-
-	key, ok := keySet.Get(keyID)
-	if !ok {
-		return nil, NewPEACError(ErrKeyNotFound, fmt.Sprintf("key %s not found in JWKS", keyID)).
-			WithDetail("kid", keyID).
-			WithDetail("jwks_url", jwksURL)
-	}
-
-	return key, nil
-}
-
-func containsAudience(audiences []string, expected string) bool {
-	for _, aud := range audiences {
-		if aud == expected {
-			return true
-		}
-	}
-	return false
 }
