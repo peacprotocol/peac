@@ -98,6 +98,7 @@ Do not edit manually.
 | `packages/worker-shared`       | -                   | supported    | 0.2  |
 | `surfaces/analytics`           | -                   | supported    | 0.2  |
 | `surfaces/nextjs/middleware`   | -                   | experimental | 0.2  |
+| `surfaces/plugin-pack/codex`   | -                   | supported    | 0.2  |
 | `surfaces/workers/akamai`      | -                   | supported    | 0.2  |
 | `surfaces/workers/cloudflare`  | -                   | supported    | 0.2  |
 | `surfaces/workers/fastly`      | -                   | supported    | 0.2  |

@@ -510,6 +510,14 @@
       "published": false,
       "note": "Go SDK. Wire 0.1 only. Wire 0.2 parity planned for v0.12.8."
     },
+    "surfaces/plugin-pack/codex": {
+      "npm": null,
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 5,
+      "published": false,
+      "note": "Codex MCP server configuration (secondary install channel)"
+    },
     "surfaces/analytics": {
       "npm": null,
       "state": "supported",
