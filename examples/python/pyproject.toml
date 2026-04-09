@@ -1,0 +1,9 @@
+[project]
+name = "peac-python-examples"
+version = "0.0.0"
+description = "Python API-first consumer examples for PEAC Hosted Verify"
+requires-python = ">=3.12"
+dependencies = ["httpx>=0.27"]
+
+[project.urls]
+Homepage = "https://github.com/peacprotocol/peac"
