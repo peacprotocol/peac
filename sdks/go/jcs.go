@@ -172,11 +172,8 @@ func formatECMANumber(f float64) string {
 		negative = true
 		mantissa = mantissa[1:]
 	}
-	dotIdx := strings.IndexByte(mantissa, '.')
-	if dotIdx >= 0 {
+	if dotIdx := strings.IndexByte(mantissa, '.'); dotIdx >= 0 {
 		mantissa = mantissa[:dotIdx] + mantissa[dotIdx+1:]
-	} else {
-		dotIdx = len(mantissa)
 	}
 	// Number of digits after the leading digit
 	fracDigits := len(mantissa) - 1
