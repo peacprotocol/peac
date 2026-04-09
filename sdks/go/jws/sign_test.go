@@ -440,7 +440,13 @@ func TestValidateHeader_ValidPeacType(t *testing.T) {
 }
 
 func TestDefaultReceiptTyp_Constant(t *testing.T) {
-	if DefaultReceiptTyp != "peac-receipt/0.1" {
-		t.Errorf("DefaultReceiptTyp = %s, want peac-receipt/0.1", DefaultReceiptTyp)
+	if DefaultReceiptTyp != InteractionRecordTyp {
+		t.Errorf("DefaultReceiptTyp = %s, want %s", DefaultReceiptTyp, InteractionRecordTyp)
+	}
+}
+
+func TestInteractionRecordTyp_Value(t *testing.T) {
+	if InteractionRecordTyp != "interaction-record+jwt" {
+		t.Errorf("InteractionRecordTyp = %s, want interaction-record+jwt", InteractionRecordTyp)
 	}
 }

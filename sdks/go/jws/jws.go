@@ -65,19 +65,23 @@ func Parse(compact string) (*ParsedJWS, error) {
 	}, nil
 }
 
-// ValidateHeader validates the JWS header for PEAC receipts.
+// ValidateHeader validates the JWS header at the low level.
+//
+// This function is typ-agnostic: it accepts both interaction-record+jwt (current)
+// and peac-receipt/0.1 (legacy). Format enforcement (requiring a specific typ)
+// belongs in the protocol layer (VerifyLocal), not in the generic JWS helper.
 func ValidateHeader(header Header) error {
-	// Check algorithm
 	if header.Algorithm != "EdDSA" {
 		return fmt.Errorf("unsupported algorithm: %s (expected EdDSA)", header.Algorithm)
 	}
 
-	// Check type if present (peac-receipt/0.1 format as of v0.10.0)
-	if header.Type != "" && !strings.HasPrefix(header.Type, "peac-receipt/") {
-		return fmt.Errorf("invalid type: %s (expected peac-receipt/*)", header.Type)
+	// Accept known typ values or empty (typ-agnostic)
+	if header.Type != "" &&
+		header.Type != InteractionRecordTyp &&
+		!strings.HasPrefix(header.Type, "peac-receipt/") {
+		return fmt.Errorf("unsupported type: %s", header.Type)
 	}
 
-	// Key ID should be present
 	if header.KeyID == "" {
 		return fmt.Errorf("missing key ID (kid) in header")
 	}

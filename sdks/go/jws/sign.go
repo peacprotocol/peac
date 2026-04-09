@@ -7,9 +7,16 @@ import (
 	"io"
 )
 
-// DefaultReceiptTyp is the default JWS type header for PEAC receipts.
-// Normalized in v0.10.0 to peac-<artifact>/<major>.<minor> pattern.
-const DefaultReceiptTyp = "peac-receipt/0.1"
+// InteractionRecordTyp is the JWS typ for the current stable Interaction Record format.
+const InteractionRecordTyp = "interaction-record+jwt"
+
+// LegacyReceiptTyp is the JWS typ for the frozen Wire 0.1 format.
+// Deprecated: Use InteractionRecordTyp for new issuance.
+const LegacyReceiptTyp = "peac-receipt/0.1"
+
+// DefaultReceiptTyp is the default JWS typ for new issuance.
+// Points to the current stable format (interaction-record+jwt).
+const DefaultReceiptTyp = InteractionRecordTyp
 
 // SigningKey represents an Ed25519 private key for signing JWS.
 // This type clearly indicates a key used for signing (private key),

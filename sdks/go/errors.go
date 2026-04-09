@@ -1,92 +1,27 @@
-// Package peac provides a Go client for PEAC protocol receipt verification.
 package peac
 
-import (
-	"fmt"
+import "errors"
+
+// Sentinel errors for Interaction Record issuance and verification.
+var (
+	ErrIssNotCanonical    = errors.New("iss must start with https:// or did: scheme")
+	ErrInvalidKind        = errors.New("kind must be evidence or challenge")
+	ErrInvalidType        = errors.New("type must be non-empty reverse-DNS or URI")
+	ErrMissingRequired    = errors.New("missing required field")
+	ErrUnsupportedVersion = errors.New("unsupported wire version")
 )
 
-// ErrorCode represents a PEAC error code.
-type ErrorCode string
-
-// Error codes for PEAC operations.
+// Error code constants for issuance validation.
 const (
-	ErrInvalidSignature ErrorCode = "E_INVALID_SIGNATURE"
-	ErrInvalidFormat    ErrorCode = "E_INVALID_FORMAT"
-	ErrExpired          ErrorCode = "E_EXPIRED"
-	ErrNotYetValid      ErrorCode = "E_NOT_YET_VALID"
-	ErrInvalidIssuer    ErrorCode = "E_INVALID_ISSUER"
-	ErrInvalidAudience  ErrorCode = "E_INVALID_AUDIENCE"
-	ErrJWKSFetchFailed  ErrorCode = "E_JWKS_FETCH_FAILED"
-	ErrKeyNotFound      ErrorCode = "E_KEY_NOT_FOUND"
-
-	// Identity error codes (v0.9.25+)
-	ErrIdentityMissing              ErrorCode = "E_IDENTITY_MISSING"
-	ErrIdentityInvalidFormat        ErrorCode = "E_IDENTITY_INVALID_FORMAT"
-	ErrIdentityExpired              ErrorCode = "E_IDENTITY_EXPIRED"
-	ErrIdentityNotYetValid          ErrorCode = "E_IDENTITY_NOT_YET_VALID"
-	ErrIdentitySigInvalid           ErrorCode = "E_IDENTITY_SIG_INVALID"
-	ErrIdentityKeyUnknown           ErrorCode = "E_IDENTITY_KEY_UNKNOWN"
-	ErrIdentityKeyExpired           ErrorCode = "E_IDENTITY_KEY_EXPIRED"
-	ErrIdentityKeyRevoked           ErrorCode = "E_IDENTITY_KEY_REVOKED"
-	ErrIdentityBindingMismatch      ErrorCode = "E_IDENTITY_BINDING_MISMATCH"
-	ErrIdentityBindingStale         ErrorCode = "E_IDENTITY_BINDING_STALE"
-	ErrIdentityBindingFuture        ErrorCode = "E_IDENTITY_BINDING_FUTURE"
-	ErrIdentityProofUnsupported     ErrorCode = "E_IDENTITY_PROOF_UNSUPPORTED"
-	ErrIdentityDirectoryUnavailable ErrorCode = "E_IDENTITY_DIRECTORY_UNAVAILABLE"
+	ErrCodeMissingIssuer = "MISSING_ISSUER"
+	ErrCodeMissingKind   = "MISSING_KIND"
+	ErrCodeMissingType   = "MISSING_TYPE"
+	ErrCodeMissingKey    = "MISSING_SIGNING_KEY"
+	ErrCodeMissingKid    = "MISSING_KEY_ID"
+	ErrCodeInvalidIss    = "INVALID_ISSUER"
+	ErrCodeInvalidKind   = "INVALID_KIND"
+	ErrCodeInvalidType   = "INVALID_TYPE"
+	ErrCodeInvalidPillar = "INVALID_PILLAR"
+	ErrCodeSignFailed    = "SIGN_FAILED"
+	ErrCodeIDGenFailed   = "ID_GEN_FAILED"
 )
-
-// PEACError represents an error from PEAC operations.
-type PEACError struct {
-	Code    ErrorCode
-	Message string
-	Details map[string]interface{}
-}
-
-// Error implements the error interface.
-func (e *PEACError) Error() string {
-	return fmt.Sprintf("%s: %s", e.Code, e.Message)
-}
-
-// NewPEACError creates a new PEAC error.
-func NewPEACError(code ErrorCode, message string) *PEACError {
-	return &PEACError{
-		Code:    code,
-		Message: message,
-		Details: make(map[string]interface{}),
-	}
-}
-
-// WithDetail adds a detail to the error.
-func (e *PEACError) WithDetail(key string, value interface{}) *PEACError {
-	e.Details[key] = value
-	return e
-}
-
-// IsRetryable returns true if the error is retryable.
-func (e *PEACError) IsRetryable() bool {
-	switch e.Code {
-	case ErrNotYetValid, ErrJWKSFetchFailed, ErrIdentityNotYetValid,
-		ErrIdentityKeyUnknown, ErrIdentityBindingStale, ErrIdentityDirectoryUnavailable:
-		return true
-	default:
-		return false
-	}
-}
-
-// HTTPStatus returns the appropriate HTTP status code for the error.
-func (e *PEACError) HTTPStatus() int {
-	switch e.Code {
-	case ErrInvalidSignature, ErrInvalidFormat, ErrInvalidIssuer, ErrInvalidAudience,
-		ErrKeyNotFound, ErrIdentityInvalidFormat, ErrIdentityBindingMismatch,
-		ErrIdentityBindingFuture, ErrIdentityProofUnsupported:
-		return 400
-	case ErrExpired, ErrNotYetValid, ErrIdentityMissing, ErrIdentityExpired,
-		ErrIdentityNotYetValid, ErrIdentitySigInvalid, ErrIdentityKeyUnknown,
-		ErrIdentityKeyExpired, ErrIdentityKeyRevoked, ErrIdentityBindingStale:
-		return 401
-	case ErrJWKSFetchFailed, ErrIdentityDirectoryUnavailable:
-		return 503
-	default:
-		return 500
-	}
-}
