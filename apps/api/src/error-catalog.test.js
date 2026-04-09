@@ -51,8 +51,10 @@ describe('error-catalog completeness', () => {
       issuer: 'https://test.example.com',
       reason: 'connection timeout',
     });
-    assert.ok(pd.detail.includes('https://test.example.com'));
-    assert.ok(pd.detail.includes('connection timeout'));
+    assert.strictEqual(
+      pd.detail,
+      'Could not resolve JWKS for issuer `https://test.example.com`. connection timeout'
+    );
     assert.ok(!pd.detail.includes('{issuer}'), 'unreplaced placeholder');
     assert.ok(!pd.detail.includes('{reason}'), 'unreplaced placeholder');
   });

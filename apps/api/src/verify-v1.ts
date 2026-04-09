@@ -19,12 +19,11 @@ import { decode, base64urlDecode, jwkToPublicKeyBytes } from '@peac/crypto';
 import { computeReceiptRef } from '@peac/schema';
 import { MemoryRateLimitStore } from '@peac/middleware-core';
 import { InMemoryCache, resolveKey, type CacheBackend } from '@peac/jwks-cache';
-import { toProblemDetails, getCatalogEntry, type HostedProblemDetails } from './error-catalog.js';
+import { toProblemDetails, type HostedProblemDetails } from './error-catalog.js';
 import { loadDiscoveryConfig, discoverAndResolveKey } from './issuer-discovery.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
-const REQUEST_TIMEOUT_MS = 10_000; // 10s hard ceiling
 
 const VerifyRequestSchema = z
   .object({
@@ -343,8 +342,6 @@ export function createVerifyV1Handler() {
     }
 
     // Verification failed: map error code to RFC 9457 Problem Details
-    const entry = getCatalogEntry(result.code);
-    const httpStatus = entry?.httpStatus ?? 422;
     const problem = toProblemDetails(result.code, {});
     problem.detail = result.message;
     return problemResponse(c, problem);
