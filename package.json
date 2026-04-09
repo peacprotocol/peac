@@ -83,6 +83,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@peac/adapter-x402": "workspace:*",
+    "@peac/mappings-acp": "workspace:*",
+    "@peac/mappings-paymentauth": "workspace:*",
+    "@peac/mappings-ucp": "workspace:*",
+    "@peac/rails-stripe": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.19.11",
     "@vitest/coverage-v8": "^4.1.0",
@@ -100,11 +105,7 @@
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.56.0",
     "vitest": "^4.1.0",
-    "@peac/adapter-x402": "workspace:*",
-    "@peac/mappings-paymentauth": "workspace:*",
-    "@peac/mappings-acp": "workspace:*",
-    "@peac/rails-stripe": "workspace:*",
-    "@peac/mappings-ucp": "workspace:*"
+    "yaml": "^2.3.4"
   },
   "engines": {
     "node": ">=22.0.0",
