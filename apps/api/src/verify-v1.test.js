@@ -55,9 +55,9 @@ test('rejects receipt with unknown issuer before JWKS fetch', async () => {
   const res = await app.fetch(verifyReq({ receipt: jws }));
   const data = await res.json();
 
-  assert.strictEqual(res.status, 422);
-  assert.strictEqual(data.title, 'Untrusted Issuer');
-  assert.ok(data.detail.includes('not in the trusted issuers allowlist'));
+  assert.strictEqual(res.status, 502);
+  assert.strictEqual(data.title, 'Issuer Config Missing');
+  assert.ok(data.detail.includes('peac-issuer.json'));
 });
 
 test('rejects receipt missing iss claim for JWKS mode', async () => {
@@ -68,7 +68,7 @@ test('rejects receipt missing iss claim for JWKS mode', async () => {
   const data = await res.json();
 
   assert.strictEqual(res.status, 422);
-  assert.strictEqual(data.title, 'Missing Issuer or Key ID');
+  assert.strictEqual(data.title, 'Issuer Not Canonical');
 });
 
 test('rejects receipt missing kid header for JWKS mode', async () => {
@@ -81,8 +81,8 @@ test('rejects receipt missing kid header for JWKS mode', async () => {
   const res = await app.fetch(verifyReq({ receipt: jws }));
   const data = await res.json();
 
-  assert.strictEqual(res.status, 422);
-  assert.strictEqual(data.title, 'Missing Issuer or Key ID');
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(data.title, 'Missing Key ID');
 });
 
 test('anonymous rate limit (100/min) enforced', async () => {
@@ -125,9 +125,9 @@ test('error responses include security headers', async () => {
   const app = buildApp();
   const jws = fakeJws({ alg: 'EdDSA', kid: 'k1' }, { iss: 'https://evil.example.com' });
 
-  // Error responses (thrown ProblemError) must include security headers
+  // Error responses must include security headers
   const res = await app.fetch(verifyReq({ receipt: jws }));
-  assert.strictEqual(res.status, 422);
+  assert.strictEqual(res.status, 502);
   assert.strictEqual(res.headers.get('x-content-type-options'), 'nosniff');
   assert.strictEqual(res.headers.get('cache-control'), 'no-store');
   assert.strictEqual(res.headers.get('referrer-policy'), 'no-referrer');
@@ -141,9 +141,9 @@ test('thrown ProblemError returns application/problem+json Content-Type', async 
     { iss: 'https://evil.example.com', aud: 'https://example.com' }
   );
 
-  // Thrown ProblemError (untrusted issuer) caught by onError
+  // Untrusted issuer returns kernel-canonical error
   const res = await app.fetch(verifyReq({ receipt: jws }));
-  assert.strictEqual(res.status, 422);
+  assert.strictEqual(res.status, 502);
   assert.ok(
     res.headers.get('content-type')?.includes('application/problem+json'),
     `Expected application/problem+json, got: ${res.headers.get('content-type')}`
@@ -190,7 +190,7 @@ test('rejects invalid public_key length', async () => {
   );
   assert.strictEqual(res.status, 422);
   const data = await res.json();
-  assert.strictEqual(data.title, 'Invalid Public Key');
+  assert.strictEqual(data.title, 'Constraint Violation');
 });
 
 test('rate limit includes RateLimit-* headers (RFC 9333)', async () => {

@@ -245,12 +245,8 @@ jobs:
       - name: Build all packages
         run: pnpm build
 
-      - name: TypeScript check (apps - sandbox-issuer, verifier)
-        run: pnpm --filter @peac/app-sandbox-issuer typecheck && pnpm --filter @peac/app-verifier typecheck
-
-      - name: TypeScript check (apps - api)
-        continue-on-error: true
-        run: pnpm --filter @peac/app-api typecheck
+      - name: TypeScript check (apps)
+        run: pnpm typecheck:apps
 
       - name: Capture-core exports verification
         run: |

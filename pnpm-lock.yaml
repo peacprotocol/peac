@@ -118,6 +118,9 @@ importers:
       '@peac/receipts':
         specifier: workspace:*
         version: link:../../packages/receipts
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
       hono:
         specifier: ^4.12.7
         version: 4.12.7
@@ -146,46 +149,9 @@ importers:
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
-
-  apps/bridge:
-    dependencies:
-      '@hono/node-server':
-        specifier: ^1.19.11
-        version: 1.19.11(hono@4.12.7)
-      '@peac/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@peac/disc':
-        specifier: workspace:*
-        version: link:../../packages/discovery
-      '@peac/pay402':
-        specifier: workspace:*
-        version: link:../../packages/pay402
-      '@peac/receipts':
-        specifier: workspace:*
-        version: link:../../packages/receipts
-      hono:
-        specifier: ^4.12.7
-        version: 4.12.7
-      jose:
-        specifier: ^5.0.0
-        version: 5.10.0
-      zod:
-        specifier: ^4.3.6
-        version: 4.3.6
-    devDependencies:
-      '@types/node':
-        specifier: ^22.19.11
-        version: 22.19.11
-      tsup:
-        specifier: ^8.0.0
-        version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
-      tsx:
-        specifier: ^4.21.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.3
+      yaml:
+        specifier: 2.8.3
+        version: 2.8.3
 
   apps/sandbox-issuer:
     dependencies:
@@ -1839,15 +1805,6 @@ importers:
       vitest:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)
-
-  packages/sdk-js:
-    devDependencies:
-      '@peac/disc':
-        specifier: workspace:*
-        version: link:../discovery
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.3
 
   packages/server:
     dependencies:

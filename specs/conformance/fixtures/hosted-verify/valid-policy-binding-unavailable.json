@@ -1,0 +1,12 @@
+{
+  "id": "HOSTED-VERIFY-002",
+  "description": "Valid receipt without policy in request returns policy_binding: unavailable",
+  "category": "valid",
+  "expected_response": {
+    "status": 200,
+    "body_shape": {
+      "verified": true,
+      "policy_binding": "unavailable"
+    }
+  }
+}

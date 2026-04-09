@@ -1,0 +1,19 @@
+{
+  "name": "hosted-verify",
+  "version": "0.12.8",
+  "description": "Conformance vectors for Hosted Verify API (DD-210, DD-211): deterministic reports, RFC 9457 errors, rate limiting",
+  "categories": {
+    "valid": {
+      "description": "Valid verification scenarios producing DD-210 reports",
+      "vectors": ["valid-with-public-key.json", "valid-policy-binding-unavailable.json"]
+    },
+    "error": {
+      "description": "Error scenarios returning RFC 9457 Problem Details",
+      "vectors": [
+        "error-invalid-format.json",
+        "error-payload-too-large.json",
+        "error-rate-limited.json"
+      ]
+    }
+  }
+}

@@ -13,6 +13,7 @@
     "edge": "Single-receipt fixtures, not fixture packs",
     "errors": "Agent recovery hint table (DD-132, DD-133); not fixture packs",
     "fingerprint-ref": "Deterministic golden vectors (DD-146); single fixture pack",
+    "hosted-verify": "Hosted Verify API conformance vectors (DD-210, DD-211); response shape and error taxonomy",
     "invalid": "Single-receipt fixtures, not fixture packs",
     "issue": "Not yet migrated to tracked validation; needs fixture pack audit",
     "key-rotation": "Key rotation lifecycle fixtures (DD-148); scenario-based, not fixture packs",
