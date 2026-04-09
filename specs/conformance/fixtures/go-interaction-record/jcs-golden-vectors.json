@@ -1,0 +1,192 @@
+{
+  "description": "JCS (RFC 8785) golden vectors from TypeScript",
+  "vectors": [
+    {
+      "id": "sorted-object",
+      "description": "Simple key sorting",
+      "input": {
+        "b": 1,
+        "a": 2
+      },
+      "canonical": "{\"a\":2,\"b\":1}"
+    },
+    {
+      "id": "nested-object",
+      "description": "Nested key sorting",
+      "input": {
+        "z": {
+          "b": 1,
+          "a": 2
+        },
+        "a": 3
+      },
+      "canonical": "{\"a\":3,\"z\":{\"a\":2,\"b\":1}}"
+    },
+    {
+      "id": "mixed-array",
+      "description": "Array preserves order",
+      "input": [3, 1, "b", "a", true, null],
+      "canonical": "[3,1,\"b\",\"a\",true,null]"
+    },
+    {
+      "id": "empty-structures",
+      "description": "Empty object and array",
+      "input": {
+        "a": {},
+        "b": []
+      },
+      "canonical": "{\"a\":{},\"b\":[]}"
+    },
+    {
+      "id": "number-integer",
+      "description": "Integer 1",
+      "input": {
+        "n": 1
+      },
+      "canonical": "{\"n\":1}"
+    },
+    {
+      "id": "number-float",
+      "description": "Float 0.5",
+      "input": {
+        "n": 0.5
+      },
+      "canonical": "{\"n\":0.5}"
+    },
+    {
+      "id": "number-negative",
+      "description": "Negative integer",
+      "input": {
+        "n": -1
+      },
+      "canonical": "{\"n\":-1}"
+    },
+    {
+      "id": "number-zero",
+      "description": "Zero",
+      "input": {
+        "n": 0
+      },
+      "canonical": "{\"n\":0}"
+    },
+    {
+      "id": "number-large",
+      "description": "MAX_SAFE_INTEGER",
+      "input": {
+        "n": 9007199254740991
+      },
+      "canonical": "{\"n\":9007199254740991}"
+    },
+    {
+      "id": "boolean-values",
+      "description": "Booleans",
+      "input": {
+        "t": true,
+        "f": false
+      },
+      "canonical": "{\"f\":false,\"t\":true}"
+    },
+    {
+      "id": "null-value",
+      "description": "Null",
+      "input": {
+        "v": null
+      },
+      "canonical": "{\"v\":null}"
+    },
+    {
+      "id": "string-escaping",
+      "description": "String escaping",
+      "input": {
+        "s": "hello\nworld\ttab\"quote\\backslash"
+      },
+      "canonical": "{\"s\":\"hello\\nworld\\ttab\\\"quote\\\\backslash\"}"
+    },
+    {
+      "id": "unicode",
+      "description": "Unicode characters",
+      "input": {
+        "emoji": "é",
+        "ascii": "abc"
+      },
+      "canonical": "{\"ascii\":\"abc\",\"emoji\":\"é\"}"
+    },
+    {
+      "id": "real-policy",
+      "description": "Real policy document shape",
+      "input": {
+        "rule": "allow",
+        "scope": ["read", "write"],
+        "version": "1.0"
+      },
+      "canonical": "{\"rule\":\"allow\",\"scope\":[\"read\",\"write\"],\"version\":\"1.0\"}"
+    },
+    {
+      "id": "number-negative-zero",
+      "description": "-0 must serialize as 0",
+      "input": {
+        "n": 0
+      },
+      "canonical": "{\"n\":0}"
+    },
+    {
+      "id": "number-small-exp",
+      "description": "Small exponent 1e-7",
+      "input": {
+        "n": 1e-7
+      },
+      "canonical": "{\"n\":1e-7}"
+    },
+    {
+      "id": "number-large-exp",
+      "description": "Large exponent 1e+30",
+      "input": {
+        "n": 1e30
+      },
+      "canonical": "{\"n\":1e+30}"
+    },
+    {
+      "id": "number-precision",
+      "description": "Precision boundary",
+      "input": {
+        "n": 333333333.3333333
+      },
+      "canonical": "{\"n\":333333333.3333333}"
+    },
+    {
+      "id": "number-small-frac",
+      "description": "Small fraction 2e-3",
+      "input": {
+        "n": 0.002
+      },
+      "canonical": "{\"n\":0.002}"
+    },
+    {
+      "id": "number-trailing-zero",
+      "description": "4.50 -> 4.5",
+      "input": {
+        "n": 4.5
+      },
+      "canonical": "{\"n\":4.5}"
+    },
+    {
+      "id": "number-large-float",
+      "description": "Large float near precision boundary",
+      "input": {
+        "n": 1.2345678901234568e21
+      },
+      "canonical": "{\"n\":1.2345678901234568e+21}"
+    },
+    {
+      "id": "unicode-key-ordering",
+      "description": "Unicode key ordering (non-ASCII keys sorted by code point)",
+      "input": {
+        "é": 1,
+        "a": 2,
+        "À": 3,
+        "z": 4
+      },
+      "canonical": "{\"a\":2,\"z\":4,\"À\":3,\"é\":1}"
+    }
+  ]
+}

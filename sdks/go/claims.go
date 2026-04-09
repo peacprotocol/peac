@@ -14,7 +14,7 @@ type InteractionRecordClaims struct {
 	Pillars     []string       `json:"pillars,omitempty"`
 	Actor       *ActorBinding  `json:"actor,omitempty"`
 	Ext         map[string]any `json:"ext,omitempty"`
-	Peac        *PolicyBlock   `json:"peac,omitempty"`
+	Peac        *PolicyBlock   `json:"policy,omitempty"`
 }
 
 // ActorBinding represents the top-level actor field.

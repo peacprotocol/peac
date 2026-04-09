@@ -1,0 +1,8 @@
+{
+  "description": "Policy binding cross-language vector",
+  "jws": "eyJ0eXAiOiJpbnRlcmFjdGlvbi1yZWNvcmQrand0IiwiYWxnIjoiRWREU0EiLCJraWQiOiJjcm9zc2xhbmcta2V5LTEifQ.eyJwZWFjX3ZlcnNpb24iOiIwLjIiLCJraW5kIjoiZXZpZGVuY2UiLCJ0eXBlIjoib3JnLnBlYWNwcm90b2NvbC9wb2xpY3ktYmluZGluZy10ZXN0IiwiaXNzIjoiaHR0cHM6Ly9jcm9zc2xhbmctdGVzdC5leGFtcGxlLmNvbSIsImlhdCI6MTc3NTc1MTk1NCwianRpIjoiMDE5ZDczMTAtODE1Zi03ZTQ4LThkZDEtOTRhYjYxMTc5NjM5IiwicG9saWN5Ijp7ImRpZ2VzdCI6InNoYTI1Njo4NjBhZThmMGZiMDQyYWE5ZDEwYjg1NTE4NzI0MGYyNTEzOGE5NzVkNmNlM2EwMGIzM2ZhZDQyNjc5MjJkNzVhIn19.-RZea5ZL7hty7vY8a3p5W3ysJ3y-HX4INT_JxL2Zfa6czlHn6kDZi-woEcqs9z63TNXo4B9YHZa2x4PCNJuRAQ",
+  "public_key_b64url": "XE4UMrZKvBpFfb9ADaWFhP1v4n9RM-WJz0vKYNeZ9nk",
+  "policy_json": "{\"rule\":\"allow\",\"scope\":[\"read\"]}",
+  "expected_digest": "sha256:860ae8f0fb042aa9d10b855187240f25138a975d6ce3a00b33fad4267922d75a",
+  "expected_binding": "verified"
+}

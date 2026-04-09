@@ -1,0 +1,13 @@
+{
+  "description": "Interaction record issued by TypeScript, for Go VerifyLocal consumption",
+  "jws": "eyJ0eXAiOiJpbnRlcmFjdGlvbi1yZWNvcmQrand0IiwiYWxnIjoiRWREU0EiLCJraWQiOiJjcm9zc2xhbmcta2V5LTEifQ.eyJwZWFjX3ZlcnNpb24iOiIwLjIiLCJraW5kIjoiZXZpZGVuY2UiLCJ0eXBlIjoib3JnLnBlYWNwcm90b2NvbC9jcm9zcy1sYW5ndWFnZS10ZXN0IiwiaXNzIjoiaHR0cHM6Ly9jcm9zc2xhbmctdGVzdC5leGFtcGxlLmNvbSIsImlhdCI6MTc3NTc1MTk1NCwianRpIjoiMDE5ZDczMTAtODE1YS03OGJlLWI5ZWYtZDI3NTg3MTI5MWE5In0.bxwzJM7tJHwx_yH7z4aBd5YsxgyviNj-ivL7vTbnL6o1Rfqnk5rhGRZ1HrobL187y8yifzkoM6X7lD8rDJfcBg",
+  "public_key_b64url": "XE4UMrZKvBpFfb9ADaWFhP1v4n9RM-WJz0vKYNeZ9nk",
+  "expected": {
+    "valid": true,
+    "iss": "https://crosslang-test.example.com",
+    "kind": "evidence",
+    "type": "org.peacprotocol/cross-language-test",
+    "kid": "crosslang-key-1",
+    "wire_version": "0.2"
+  }
+}
