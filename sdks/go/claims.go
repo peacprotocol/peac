@@ -30,4 +30,3 @@ type PolicyBlock struct {
 	URI     string `json:"uri,omitempty"`
 	Version string `json:"version,omitempty"`
 }
-
