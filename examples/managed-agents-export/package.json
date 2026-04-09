@@ -1,0 +1,19 @@
+{
+  "name": "@peac/example-managed-agents-export",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Managed Agents Evidence Export demo - PEAC as portable evidence layer for managed runtimes",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
