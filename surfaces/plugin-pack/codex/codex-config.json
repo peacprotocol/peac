@@ -1,0 +1,10 @@
+{
+  "$comment": "Codex MCP server configuration for PEAC. Add this to your Codex MCP settings.",
+  "mcpServers": {
+    "peac": {
+      "command": "npx",
+      "args": ["-y", "@peac/mcp-server"],
+      "env": {}
+    }
+  }
+}

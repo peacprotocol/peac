@@ -66,6 +66,7 @@ Do not edit manually.
 | `packages/conformance-harness`        | -                                 | 0.2  | 5     |
 | `packages/worker-core`                | `@peac/worker-core`               | 0.2  | 5     |
 | `packages/worker-shared`              | -                                 | 0.2  | 5     |
+| `surfaces/plugin-pack/codex`          | -                                 | 0.2  | 5     |
 | `surfaces/analytics`                  | -                                 | 0.2  | 5     |
 | `surfaces/workers/akamai`             | -                                 | 0.2  | 5     |
 | `surfaces/workers/cloudflare`         | -                                 | 0.2  | 5     |
