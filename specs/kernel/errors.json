@@ -139,6 +139,15 @@
       "next_action": "retry_after_delay"
     },
     {
+      "code": "E_PAYLOAD_TOO_LARGE",
+      "http_status": 413,
+      "title": "Payload Too Large",
+      "description": "Request body exceeds the maximum allowed size for this transport surface",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
       "code": "E_CIRCUIT_BREAKER_OPEN",
       "http_status": 503,
       "title": "Circuit Breaker Open",

@@ -43,11 +43,13 @@ Verify a signed interaction record.
 
 **Error responses:** RFC 9457 Problem Details.
 
-### POST /v1/issue (provisional)
+### POST /v1/issue (provisional, superseded)
 
 Issue a signed interaction record. This endpoint is provisional and may ship in a later release than `/v1/verify`.
 
-**Request:**
+**Note:** The request model below is superseded. If `/v1/issue` ships in v0.12.8, it will use a BYO-key model (caller provides Ed25519 private key seed) defined in a separate `HOSTED_ISSUE_CONTRACT.md` (DD-212). The `key_id` server-selection model below is deferred to v0.13.0+ if demand materializes.
+
+**Request (superseded):**
 
 ```json
 {
@@ -69,21 +71,36 @@ Issue a signed interaction record. This endpoint is provisional and may ship in 
 
 All errors use RFC 9457 Problem Details with `type` URIs under `https://www.peacprotocol.org/problems/`.
 
-| Code                         | HTTP | Type URI suffix            | Detail                                                                                     |
-| ---------------------------- | ---- | -------------------------- | ------------------------------------------------------------------------------------------ |
-| `E_INVALID_JWS_FORMAT`       | 400  | `invalid-jws-format`       | Input is not a valid compact JWS. Expected three base64url segments separated by dots.     |
-| `E_JWS_MISSING_KID`          | 400  | `missing-kid`              | JWS header is missing a `kid` field. Add a key identifier to the signing key.              |
-| `E_JWS_MISSING_TYP`          | 400  | `missing-typ`              | JWS header is missing a `typ` field.                                                       |
-| `E_UNSUPPORTED_WIRE_VERSION` | 400  | `unsupported-wire-version` | Wire version is not supported by this endpoint.                                            |
-| `E_SIGNATURE_INVALID`        | 422  | `invalid-signature`        | Ed25519 signature does not match the payload and key.                                      |
-| `E_ISS_NOT_CANONICAL`        | 422  | `iss-not-canonical`        | The `iss` field must start with `https://` or `did:`.                                      |
-| `E_CLAIMS_VALIDATION_FAILED` | 422  | `claims-validation-failed` | Claims do not conform to the expected schema.                                              |
-| `E_POLICY_BINDING_FAILED`    | 422  | `policy-binding-failed`    | Policy digest does not match the local policy.                                             |
-| `E_JWKS_RESOLUTION_FAILED`   | 502  | `jwks-resolution-failed`   | Could not resolve JWKS for the issuer. Check the issuer's `/.well-known/peac-issuer.json`. |
-| `E_ISSUER_DISCOVERY_FAILED`  | 502  | `issuer-discovery-failed`  | Could not fetch issuer configuration.                                                      |
-| `E_KEY_NOT_FOUND`            | 404  | `key-not-found`            | No key matching the `kid` was found in the issuer's JWKS.                                  |
-| `E_RATE_LIMITED`             | 429  | `rate-limited`             | Request rate exceeded. See `RateLimit-*` headers.                                          |
-| `E_PAYLOAD_TOO_LARGE`        | 413  | `payload-too-large`        | JWS exceeds the maximum size for this surface.                                             |
+All error codes below are kernel-canonical (from `specs/kernel/errors.json`). Hosted error catalog implementations MUST use these exact codes.
+
+| Code                             | HTTP | Type URI suffix            | Detail                                                                                     |
+| -------------------------------- | ---- | -------------------------- | ------------------------------------------------------------------------------------------ |
+| `E_INVALID_FORMAT`               | 400  | `invalid-format`           | Input is not a valid compact JWS. Expected three base64url segments separated by dots.     |
+| `E_JWS_MISSING_KID`              | 400  | `missing-kid`              | JWS header is missing a `kid` field. Add a key identifier to the signing key.              |
+| `E_UNSUPPORTED_WIRE_VERSION`     | 400  | `unsupported-wire-version` | Wire version is not supported by this endpoint. Accepts `interaction-record+jwt`.          |
+| `E_INVALID_SIGNATURE`            | 422  | `invalid-signature`        | Ed25519 signature does not match the payload and key.                                      |
+| `E_ISS_NOT_CANONICAL`            | 422  | `iss-not-canonical`        | The `iss` field must start with `https://` or `did:`.                                      |
+| `E_CONSTRAINT_VIOLATION`         | 422  | `constraint-violation`     | Claims do not conform to the expected schema or kernel constraints.                        |
+| `E_POLICY_BINDING_FAILED`        | 422  | `policy-binding-failed`    | Policy digest does not match the local policy.                                             |
+| `E_EXPIRED`                      | 422  | `expired`                  | Receipt has exceeded its expiration time.                                                  |
+| `E_NOT_YET_VALID`                | 422  | `not-yet-valid`            | Receipt `nbf` or `iat` time is in the future.                                              |
+| `E_JWKS_FETCH_FAILED`            | 502  | `jwks-fetch-failed`        | Could not resolve JWKS for the issuer. Check the issuer's `/.well-known/peac-issuer.json`. |
+| `E_VERIFY_ISSUER_CONFIG_MISSING` | 502  | `issuer-config-missing`    | Issuer configuration not found at discovery URL.                                           |
+| `E_VERIFY_ISSUER_CONFIG_INVALID` | 502  | `issuer-config-invalid`    | Issuer configuration is malformed.                                                         |
+| `E_KEY_NOT_FOUND`                | 400  | `key-not-found`            | No key matching the `kid` was found in the issuer's JWKS.                                  |
+| `E_RATE_LIMITED`                 | 429  | `rate-limited`             | Request rate exceeded. See `RateLimit-*` headers.                                          |
+| `E_PAYLOAD_TOO_LARGE`            | 413  | `payload-too-large`        | Request body exceeds the maximum size for this surface.                                    |
+
+**Notes:**
+
+- `E_INVALID_JWS_FORMAT` (from DD-210 draft) replaced with kernel-canonical `E_INVALID_FORMAT`.
+- `E_SIGNATURE_INVALID` replaced with `E_INVALID_SIGNATURE` (kernel naming).
+- `E_JWKS_RESOLUTION_FAILED` replaced with `E_JWKS_FETCH_FAILED` (kernel naming).
+- `E_ISSUER_DISCOVERY_FAILED` replaced with existing `E_VERIFY_ISSUER_CONFIG_MISSING` / `E_VERIFY_ISSUER_CONFIG_INVALID` (no new umbrella code).
+- `E_CLAIMS_VALIDATION_FAILED` replaced with `E_CONSTRAINT_VIOLATION` (kernel naming).
+- `E_JWS_MISSING_TYP` removed; covered by `E_UNSUPPORTED_WIRE_VERSION` (missing typ = unsupported version).
+- `E_PAYLOAD_TOO_LARGE` is new; added to `specs/kernel/errors.json` in v0.12.8.
+- `E_EXPIRED` and `E_NOT_YET_VALID` added (existed in kernel, missing from original contract).
 
 ## Issuer and JWKS Handling
 
@@ -94,7 +111,7 @@ Resolution path: `iss` -> `/.well-known/peac-issuer.json` -> `jwks_uri` -> JWKS 
 | Cache TTL       | 5 minutes (default), configurable per tenant                          |
 | SSRF protection | Private IP rejection, no redirects to private ranges, SSRF-safe fetch |
 | Timeout         | 5 seconds per upstream request                                        |
-| Failure mode    | `E_JWKS_RESOLUTION_FAILED` with issuer URI in `detail`                |
+| Failure mode    | `E_JWKS_FETCH_FAILED` with issuer URI in `detail`                     |
 
 ## Authentication and Tenancy
 
