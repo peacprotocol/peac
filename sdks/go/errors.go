@@ -4,7 +4,7 @@ import "errors"
 
 // Sentinel errors for Interaction Record issuance and verification.
 var (
-	ErrIssNotCanonical    = errors.New("iss must start with https:// or did:")
+	ErrIssNotCanonical    = errors.New("iss must start with https:// or did: scheme")
 	ErrInvalidKind        = errors.New("kind must be evidence or challenge")
 	ErrInvalidType        = errors.New("type must be non-empty reverse-DNS or URI")
 	ErrMissingRequired    = errors.New("missing required field")
