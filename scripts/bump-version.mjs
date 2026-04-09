@@ -17,7 +17,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
@@ -230,8 +230,11 @@ function findJsonFiles(dir) {
   return results;
 }
 
-// Glob all JSON files in specs/conformance/ (fixtures, registry, test-mappings, etc.)
-const conformanceJsonFiles = findJsonFiles(join(ROOT, 'specs/conformance'));
+// Glob all JSON files in specs/conformance/ EXCEPT fixtures/ (fixtures have semantic
+// versions describing the fixture's spec revision, not the release version -- see #516).
+const conformanceJsonFiles = findJsonFiles(join(ROOT, 'specs/conformance')).filter(
+  (f) => !f.includes(`${sep}fixtures${sep}`) && !f.includes('/fixtures/')
+);
 
 for (const specPath of [...specVersionFiles, ...conformanceJsonFiles]) {
   let raw;
