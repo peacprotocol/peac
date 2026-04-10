@@ -38,7 +38,7 @@ pnpm demo
 MCP Streamable HTTP Quickstart
 
 1. Issuing a receipt...
-   Receipt issued (XXX chars)
+   Receipt issued (432 chars)
 
 2. Verifying via MCP server (HTTP)...
    MCP session initialized
