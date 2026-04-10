@@ -2,14 +2,51 @@
 /**
  * Extension Registry Builder: non-WIRE02 conformance requirements.
  *
- * Owns the 25 non-WIRE02 requirement IDs across 6 namespaces:
- * DID-RES, GRPC-META, PKCE, RURL, SC, X402V2.
+ * ============================================================================
+ * CANONICAL SOURCE OF TRUTH for non-WIRE02 requirement IDs.
+ * ============================================================================
  *
- * These IDs reference governing specs outside WIRE-0.2.md, so they
- * cannot be managed by build-registry.mjs (which is WIRE02-specific).
+ * The conformance registry has two canonical sources:
  *
- * Output: JSON sections array that gets composed into requirement-ids.json
- * by the main build-registry.mjs composition step.
+ *   1. scripts/conformance/build-registry.mjs
+ *      - Owns WIRE02-* requirements
+ *      - Source: inline REQUIREMENTS array
+ *      - Governing spec: docs/specs/WIRE-0.2.md
+ *
+ *   2. scripts/conformance/build-extension-registry.mjs (THIS FILE)
+ *      - Owns non-WIRE02 requirements (25 IDs across 6 namespaces)
+ *      - Source: inline EXTENSION_REQUIREMENTS array below
+ *      - Per-section governing_spec field
+ *      - Namespaces: DID-RES, GRPC-META, PKCE, RURL, SC, X402V2
+ *
+ * The main builder composes both sources into the final requirement-ids.json.
+ * Regeneration order:
+ *   1. node scripts/conformance/build-extension-registry.mjs
+ *   2. node scripts/conformance/build-registry.mjs
+ *
+ * ============================================================================
+ * ANNOTATION LEDGER (spec-presence follow-up)
+ * ============================================================================
+ *
+ * Source fragments for the 25 non-WIRE02 IDs below are derived from
+ * implementation contracts and normative profile docs. Hash integrity is
+ * verified by verify-registry-drift.mjs (blocking for all IDs).
+ *
+ * Governing spec presence is currently advisory (not blocking) because the
+ * governing spec docs below do not yet contain exact inline annotations
+ * matching the source fragments verbatim. Each governing spec may need
+ * either inline annotations or a normative section quoting the fragments.
+ *
+ * Governing spec files by section:
+ *   - docs/specs/X402-V2-PROFILE.md      : X402V2-001, 002, 003, 004
+ *   - docs/specs/DID-RESOLUTION-PROFILE.md: DID-RES-001..007
+ *   - docs/specs/GRPC-TRANSPORT-PROFILE.md: GRPC-META-001, 002, 003
+ *   - docs/specs/A2A-AUTH-PROFILE.md     : PKCE-001, 002, 003, 004
+ *   - docs/specs/EVIDENCE-CARRIER-CONTRACT.md: RURL-001, 002, 003, 004
+ *   - docs/specs/SUPPLY-CHAIN-PROFILE.md : SC-001, 003, 004
+ *
+ * Until these annotations are added, non-WIRE02 spec-presence checks are
+ * advisory in verify-registry-drift.mjs (hash integrity remains blocking).
  *
  * Usage: node scripts/conformance/build-extension-registry.mjs
  */
