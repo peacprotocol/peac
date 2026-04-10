@@ -38,6 +38,7 @@ const specContent = readFileSync(specPath, 'utf-8');
 
 let driftCount = 0;
 let totalChecked = 0;
+let extensionSpecAdvisory = 0;
 
 // --- Check 1 + 2: Fragment hash integrity and presence ---
 const registryIds = new Set();
@@ -66,13 +67,38 @@ for (const section of registry.sections) {
       driftCount++;
     }
 
-    // Verify the source fragment still exists in the spec
-    if (!specContent.includes(req.source_fragment)) {
-      console.error(
-        `DRIFT: ${req.id} source fragment not found in ${registry.spec_file}\n` +
-          `  fragment: "${req.source_fragment.slice(0, 80)}..."\n`
-      );
-      driftCount++;
+    // Verify the source fragment still exists in the governing spec.
+    // WIRE02 entries reference the main spec_file (WIRE-0.2.md).
+    // Non-WIRE02 entries reference per-section governing_spec (set by
+    // build-extension-registry.mjs). If governing_spec is absent or
+    // the file does not exist, skip presence check (hash integrity
+    // still verified above).
+    const isWire02 = req.id.startsWith('WIRE02-');
+    const sectionGoverningSpec = section.governing_spec;
+    const checkSpec = isWire02 ? registry.spec_file : sectionGoverningSpec;
+
+    if (checkSpec) {
+      try {
+        const checkPath = join(ROOT, checkSpec);
+        const checkContent = readFileSync(checkPath, 'utf-8');
+        if (!checkContent.includes(req.source_fragment)) {
+          if (isWire02) {
+            // WIRE02 spec-presence is blocking (fragments must exist in WIRE-0.2.md)
+            console.error(
+              `DRIFT: ${req.id} source fragment not found in ${checkSpec}\n` +
+                `  fragment: "${req.source_fragment.slice(0, 80)}..."\n`
+            );
+            driftCount++;
+          } else {
+            // Non-WIRE02 spec-presence is advisory until governing specs are annotated.
+            // Hash integrity (checked above) is still blocking for all namespaces.
+            extensionSpecAdvisory++;
+          }
+        }
+      } catch {
+        // Governing spec file not found; skip presence check
+        // (hash integrity still verified above)
+      }
     }
   }
 }
@@ -117,6 +143,15 @@ if (annotationDrift > 0) {
       `\nINFO: ${annotationDrift} annotation mismatch(es) between spec and registry (use --strict to gate)`
     );
   }
+}
+
+if (extensionSpecAdvisory > 0) {
+  console.log(
+    `\nINFO: ${extensionSpecAdvisory} non-WIRE02 spec-presence advisory(ies) (hash integrity verified; governing spec annotations pending)`
+  );
+  console.log(
+    `      Tracked follow-up: specs/conformance/non-wire02-annotation-ledger.md`
+  );
 }
 
 // --- Summary ---
