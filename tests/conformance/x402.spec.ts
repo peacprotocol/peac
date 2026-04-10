@@ -301,7 +301,7 @@ describe('x402 Adapter Conformance', () => {
   describe('Manifest Integrity', () => {
     it('should have valid manifest structure', () => {
       expect(manifest.name).toBe('x402-adapter');
-      expect(manifest.version).toBe('0.12.9');
+      expect(manifest.version).toBe('0.12.7');
       expect(manifest.profile).toBe('peac-x402-offer-receipt/0.2');
       expect(manifest.categories.valid.vectors.length).toBeGreaterThan(0);
       expect(manifest.categories.invalid.vectors.length).toBeGreaterThan(0);

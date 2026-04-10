@@ -1,32 +1,41 @@
 # x402 Scheme Coverage in PEAC
 
-**Frozen at:** PEAC v0.12.9 / upstream x402 state as of April 10, 2026.
-For current upstream status, see
-[x402-foundation/x402](https://github.com/x402-foundation/x402).
+**Snapshot date:** upstream x402 state as of April 10, 2026. For current
+upstream status, see
+[x402-foundation/x402](https://github.com/x402-foundation/x402) and the
+per-facilitator docs linked below.
 
 This document distinguishes three truth surfaces so readers can reason about
 where a given capability lives.
 
-1. **Upstream x402 protocol truth** — what the x402 specification and the
-   reference SDKs document as stable.
-2. **CDP facilitator truth** — what Coinbase Developer Platform's facilitator
-   documents as supported. Narrower than upstream.
-3. **PEAC-tested truth** — what PEAC verifies and documents end-to-end in this
-   repo. Narrower than both.
+1. **Upstream x402 protocol truth** — what the x402 specification documents
+   as stable across schemes and SDKs.
+2. **Upstream facilitator surfaces** — what individual facilitators document
+   as supported in their own docs. Narrower than upstream protocol truth and
+   varies per operator (for example, Coinbase Developer Platform's production
+   facilitator, the community testnet facilitator at x402.org, and others).
+3. **PEAC-tested truth** — what PEAC verifies and documents end-to-end in
+   this repo. Narrower than both.
 
 Collapsing these into one blended "supported" statement leads to drift and
 overclaim. PEAC deliberately keeps them separate.
 
-## Payment schemes
+## Payment schemes (upstream protocol truth)
 
-| Scheme  | Upstream protocol                                   | CDP facilitator                                       | PEAC-tested (v0.12.9)                                     |
-| ------- | --------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------- |
-| `exact` | Stable; EVM, SVM, and other networks (see upstream) | Supported on Base / Base Sepolia / Polygon / Solana   | Covered end-to-end by the adapter, fixtures, and examples |
-| `upto`  | Stable on EVM; SVM unresolved ([#1642][rfc-1642])   | Supported on Base / Base Sepolia / Polygon (EVM only) | Scheme-agnostic pass-through; fixture-backed              |
+| Scheme  | Upstream protocol status                             | PEAC-tested (this repo)                                             |
+| ------- | ---------------------------------------------------- | ------------------------------------------------------------------- |
+| `exact` | Stable; multiple networks (see upstream spec folder) | Covered end-to-end by the adapter and conformance fixtures          |
+| `upto`  | Stable on EVM; SVM unresolved ([#1642][rfc-1642])    | Scheme-agnostic pass-through; fixture-backed (overclaim-guard test) |
 
 [rfc-1642]: https://github.com/x402-foundation/x402/issues/1642
 
-## SDK coverage (upstream)
+PEAC does not publish a blanket "supported networks" claim for `exact` or
+`upto`. The adapter is scheme-agnostic, so any network an upstream
+facilitator surfaces works at the PEAC evidence layer provided the signed
+artifacts carry valid `network`, `asset`, `payTo`, `amount`, and `scheme`
+values.
+
+## SDK coverage (upstream protocol truth)
 
 | SDK        | `exact` | `upto`                     |
 | ---------- | ------- | -------------------------- |
@@ -39,19 +48,25 @@ migrated to `github.com/x402-foundation/x402`. Some external code snippets
 still reference the older `github.com/coinbase/x402` path. PEAC docs use the
 current canonical path.
 
-## Network coverage (upstream facilitator reality)
+## Facilitator surfaces (per-operator, check upstream sources)
 
-| Network         | `exact` | `upto`           |
-| --------------- | ------- | ---------------- |
-| Base mainnet    | Yes     | Yes              |
-| Base Sepolia    | Yes     | Yes              |
-| Polygon mainnet | Yes     | Yes              |
-| Solana mainnet  | Yes     | Upstream-pending |
-| Solana devnet   | Yes     | Upstream-pending |
+Facilitator support is per-operator and changes outside PEAC's release
+cadence. PEAC does not republish a live facilitator matrix because it would
+drift fast and is not PEAC's source of truth. For current facilitator
+support — scheme, network, asset, and operational constraints — consult the
+relevant operator directly. Examples at the snapshot date above:
 
-Other networks documented upstream for `exact` (for example Avalanche and
-additional EVM chains) are flagged here as "upstream supported; not
-explicitly tested by PEAC in this release."
+- **Coinbase Developer Platform production facilitator** —
+  [docs.cdp.coinbase.com/x402/network-support](https://docs.cdp.coinbase.com/x402/network-support)
+  (check this page for current EVM network list, Solana status, and whether
+  `upto` is exposed on a given network).
+- **x402.org testnet facilitator** — [x402.org](https://x402.org) for the
+  community testnet endpoints.
+- **Any self-hosted facilitator** — operator documentation.
+
+PEAC's scheme-agnostic pass-through means the PEAC evidence layer works with
+any operator that emits valid x402 signed offers and receipts, independent
+of which networks or schemes that operator exposes at a given moment.
 
 ## PEAC's role, stated precisely
 
