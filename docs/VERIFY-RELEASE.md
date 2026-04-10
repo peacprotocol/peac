@@ -20,14 +20,14 @@ The `--write-release-artifacts` flag is the authoritative gate path. Without it,
 
 PEAC packages published via GitHub Actions OIDC include npm provenance attestations. This cryptographically links each package version to the specific workflow run that produced it.
 
-**Current state (v0.12.0-preview.2):** All 28 publishable packages are configured for OIDC trusted publishing (PR #490). Two packages (`@peac/net-node`, `@peac/adapter-eat`) are deferred because they are not yet published to npm. All packages published through the CI workflow receive `--provenance` attestations.
+All publishable packages are configured for OIDC trusted publishing. Packages published through the CI workflow receive `--provenance` attestations. The canonical list is tracked in `scripts/publish-manifest.json`.
 
 ```bash
 # Verify provenance for published packages
 # Use a temp project to avoid workspace interference:
 mkdir /tmp/peac-verify && cd /tmp/peac-verify
 npm init -y
-npm install @peac/protocol@next
+npm install @peac/protocol
 npm audit signatures
 cd - && rm -rf /tmp/peac-verify
 ```

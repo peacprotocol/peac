@@ -44,7 +44,7 @@ You want to carry receipts across Agent-to-Agent Protocol flows.
 
 Key packages: `@peac/mappings-a2a`, `@peac/protocol`
 
-## Strategic wedges
+## Integration areas
 
 ### Commerce and payment evidence
 

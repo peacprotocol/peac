@@ -105,7 +105,7 @@ The `TelemetryConfig` supports three privacy modes:
 
 ## Related Packages
 
-- `@peac/telemetry-otel` - OpenTelemetry adapter (coming soon)
+- `@peac/telemetry-otel` - OpenTelemetry adapter
 
 ## License
 
