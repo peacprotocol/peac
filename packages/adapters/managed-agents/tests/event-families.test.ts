@@ -22,7 +22,7 @@ describe('event-families', () => {
 
   it('should use consistent type prefix for all families', () => {
     for (const entry of Object.values(EVENT_FAMILIES)) {
-      expect(entry.type).toMatch(new RegExp(`^${TYPE_PREFIX.replace(/[/]/g, '\\/')}`));
+      expect(entry.type.startsWith(TYPE_PREFIX)).toBe(true);
     }
   });
 

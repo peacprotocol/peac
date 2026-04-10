@@ -42,6 +42,7 @@ function packageDir(npmName: string): string {
     'adapter-x402-daydreams': 'packages/adapters/x402/daydreams',
     'adapter-x402-fluora': 'packages/adapters/x402/fluora',
     'adapter-x402-pinata': 'packages/adapters/x402/pinata',
+    'adapter-managed-agents': 'packages/adapters/managed-agents',
     'adapter-openai-compatible': 'packages/adapters/openai-compatible',
     'adapter-did': 'packages/adapters/did',
     'adapter-eat': 'packages/adapters/eat',
