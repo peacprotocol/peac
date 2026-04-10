@@ -50,6 +50,14 @@ Add to `.mcp.json` at your project root:
 }
 ```
 
+### Streamable HTTP transport
+
+```bash
+npx @peac/mcp-server --transport http --port 3000
+```
+
+HTTP transport provides per-session isolation, rate limiting, and RFC 9728 PRM discovery. Binds to `127.0.0.1` by default. See `examples/mcp-http-quickstart/` for an end-to-end demo.
+
 ### Enable receipt issuance
 
 ```bash

@@ -59,13 +59,27 @@ describe('server.json', () => {
     expect(repo.source).toBe('github');
   });
 
-  it('packages[0] is an npm package with stdio transport', () => {
+  it('declares both stdio and streamable-http transports', () => {
     const packages = serverJson.packages as Array<Record<string, unknown>>;
-    expect(packages).toHaveLength(1);
-    expect(packages[0].registryType).toBe('npm');
-    expect(packages[0].identifier).toBe('@peac/mcp-server');
-    const transport = packages[0].transport as Record<string, unknown>;
-    expect(transport.type).toBe('stdio');
+    expect(packages).toHaveLength(2);
+    for (const pkg of packages) {
+      expect(pkg.registryType).toBe('npm');
+      expect(pkg.identifier).toBe('@peac/mcp-server');
+    }
+    const transportTypes = packages.map((p) => (p.transport as Record<string, unknown>).type);
+    expect(transportTypes).toContain('stdio');
+    expect(transportTypes).toContain('streamable-http');
+  });
+
+  it('streamable-http entry declares required url field', () => {
+    const packages = serverJson.packages as Array<Record<string, unknown>>;
+    const httpEntry = packages.find(
+      (p) => (p.transport as Record<string, unknown>).type === 'streamable-http'
+    );
+    expect(httpEntry).toBeDefined();
+    const transport = httpEntry!.transport as Record<string, unknown>;
+    expect(typeof transport.url).toBe('string');
+    expect(transport.url).toMatch(/^https?:\/\//);
   });
 
   it('version matches package.json version', () => {
@@ -73,10 +87,12 @@ describe('server.json', () => {
     expect(serverJson.version).toBe(pkgJson.version);
   });
 
-  it('packages[0].version matches package.json version', () => {
+  it('all package entries match package.json version', () => {
     const pkgJson = readJson('packages/mcp-server/package.json') as Record<string, unknown>;
     const packages = serverJson.packages as Array<Record<string, unknown>>;
-    expect(packages[0].version).toBe(pkgJson.version);
+    for (const pkg of packages) {
+      expect(pkg.version).toBe(pkgJson.version);
+    }
   });
 
   it('mcpName in package.json matches server.json name', () => {

@@ -13,7 +13,7 @@ PEAC integrates with MCP in two ways:
 
 - Node.js >= 22.0.0
 
-## Quick Start: Run the MCP Server
+## Quick Start: stdio (default)
 
 ```bash
 npx -y @peac/mcp-server
@@ -24,6 +24,32 @@ This starts the MCP server with 5 tools over stdio. Read-only tools (verify, ins
 ```bash
 npx -y @peac/mcp-server --issuer-key env:PEAC_ISSUER_KEY --issuer-id https://api.example.com
 ```
+
+## Quick Start: Streamable HTTP
+
+Start the MCP server over HTTP with session isolation and RFC 9728 PRM:
+
+```bash
+npx -y @peac/mcp-server --transport http --port 3000
+```
+
+With issuance enabled:
+
+```bash
+npx -y @peac/mcp-server --transport http --port 3000 \
+  --issuer-key env:PEAC_ISSUER_KEY --issuer-id https://api.example.com
+```
+
+The HTTP transport provides:
+
+- Streamable HTTP per MCP specification
+- Per-session isolation (CVE-2026-25536 defense)
+- RFC 9728 Protected Resource Metadata (with `--public-url` and `--authorization-servers`)
+- Rate limiting (100 req/min per session, configurable)
+- CORS origin validation (deny-all by default)
+- Binds to `127.0.0.1` by default (use `--host 0.0.0.0` only behind TLS)
+
+See `examples/mcp-http-quickstart/` for a complete end-to-end demo.
 
 ## Tools
 

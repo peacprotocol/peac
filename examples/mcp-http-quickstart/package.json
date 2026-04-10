@@ -1,0 +1,16 @@
+{
+  "name": "@peac/example-mcp-http-quickstart",
+  "version": "0.0.0",
+  "private": true,
+  "description": "MCP Streamable HTTP quickstart: issue and verify a receipt in under 10 minutes",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx quickstart.ts"
+  },
+  "dependencies": {
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}
