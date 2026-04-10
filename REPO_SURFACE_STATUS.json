@@ -1,7 +1,7 @@
 {
   "description": "Machine-readable surface classification for PEAC Protocol workspace. CI fails if any workspace member is missing. See docs/PACKAGE_STATUS.md for human-readable view.",
-  "version": "0.12.7",
-  "updated": "2026-04-08",
+  "version": "0.12.8",
+  "updated": "2026-04-10",
   "states": {
     "default": "Current recommended path. Actively maintained, Wire 0.2 native.",
     "supported": "Actively maintained, published, production-ready. May not be on default quickstart path.",
@@ -512,11 +512,11 @@
     },
     "sdks/go": {
       "npm": null,
-      "state": "compat-only",
-      "wire": "0.1",
+      "state": "supported",
+      "wire": "0.2",
       "layer": "sdk",
       "published": false,
-      "note": "Go SDK. Wire 0.1 only. Wire 0.2 parity planned for v0.12.8."
+      "note": "Go SDK. Wire 0.2 core parity shipped in v0.12.8 (Issue, VerifyLocal, JCS, 22 cross-language vectors). Middleware (chi, gin) experimental."
     },
     "surfaces/plugin-pack/codex": {
       "npm": null,

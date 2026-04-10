@@ -79,13 +79,13 @@ Do not edit manually.
 | `packages/intelligence`               | -                                 | 0.2  | 6     |
 | `packages/privacy`                    | -                                 | 0.2  | 6     |
 | `packages/provenance`                 | -                                 | 0.2  | 6     |
+| `sdks/go`                             | -                                 | 0.2  | sdk   |
 
 ## Compat-only (security/correctness fixes only)
 
 | Surface               | Wire | Note                                                                |
 | --------------------- | ---- | ------------------------------------------------------------------- |
 | `apps/sandbox-issuer` | 0.1  | Wire 0.1 test fixture generator. Kept for legacy integration tests. |
-| `sdks/go`             | 0.1  | Go SDK. Wire 0.1 only. Wire 0.2 parity planned for v0.12.8.         |
 
 ## Deprecated (removal scheduled)
 

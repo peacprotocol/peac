@@ -21,7 +21,7 @@
   },
   "sdks": {
     "typescript": "default",
-    "go": "default (core issue/verify only); middleware experimental",
+    "go": "supported (core issue/verify Wire 0.2); middleware experimental",
     "python": "examples_only"
   },
   "provenance": {

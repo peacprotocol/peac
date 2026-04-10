@@ -29,7 +29,7 @@
     "perf": "node scripts/perf-test.js"
   },
   "dependencies": {
-    "@hono/node-server": "^1.19.11",
+    "@hono/node-server": "^1.19.13",
     "@peac/core": "workspace:*",
     "@peac/crypto": "workspace:*",
     "@peac/disc": "workspace:*",
@@ -39,7 +39,7 @@
     "@peac/protocol": "workspace:*",
     "@peac/receipts": "workspace:*",
     "@peac/schema": "workspace:*",
-    "hono": "^4.12.7",
+    "hono": "^4.12.12",
     "zod": "^4.3.6"
   },
   "devDependencies": {

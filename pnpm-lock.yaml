@@ -14,6 +14,8 @@ overrides:
   flatted: 3.4.2
   path-to-regexp@>=8.0.0: '>=8.4.0'
   yaml: 2.8.3
+  '@hono/node-server': '>=1.19.13'
+  hono: '>=4.12.12'
 
 importers:
 
@@ -95,8 +97,8 @@ importers:
   apps/api:
     dependencies:
       '@hono/node-server':
-        specifier: ^1.19.11
-        version: 1.19.11(hono@4.12.7)
+        specifier: '>=1.19.13'
+        version: 1.19.13(hono@4.12.12)
       '@peac/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -125,8 +127,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/schema
       hono:
-        specifier: ^4.12.7
-        version: 4.12.7
+        specifier: '>=4.12.12'
+        version: 4.12.12
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -159,8 +161,8 @@ importers:
   apps/sandbox-issuer:
     dependencies:
       '@hono/node-server':
-        specifier: ^1.19.11
-        version: 1.19.11(hono@4.12.7)
+        specifier: '>=1.19.13'
+        version: 1.19.13(hono@4.12.12)
       '@peac/crypto':
         specifier: workspace:*
         version: link:../../packages/crypto
@@ -171,8 +173,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/schema
       hono:
-        specifier: ^4.12.7
-        version: 4.12.7
+        specifier: '>=4.12.12'
+        version: 4.12.12
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -1856,8 +1858,8 @@ importers:
   packages/server:
     dependencies:
       '@hono/node-server':
-        specifier: ^1.19.11
-        version: 1.19.11(hono@4.12.7)
+        specifier: '>=1.19.13'
+        version: 1.19.13(hono@4.12.12)
       '@peac/protocol':
         specifier: workspace:*
         version: link:../protocol
@@ -1865,8 +1867,8 @@ importers:
         specifier: workspace:*
         version: link:../schema
       hono:
-        specifier: ^4.12.7
-        version: 4.12.7
+        specifier: '>=4.12.12'
+        version: 4.12.12
     devDependencies:
       '@types/node':
         specifier: ^22.19.11
@@ -3769,13 +3771,13 @@ packages:
       typescript: 5.9.3
     dev: true
 
-  /@hono/node-server@1.19.11(hono@4.12.7):
-    resolution: {integrity: sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==}
+  /@hono/node-server@1.19.13(hono@4.12.12):
+    resolution: {integrity: sha512-TsQLe4i2gvoTtrHje625ngThGBySOgSK3Xo2XRYOdqGN1teR8+I7vchQC46uLJi8OF62YTYA3AhSpumtkhsaKQ==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
-      hono: ^4
+      hono: '>=4.12.12'
     dependencies:
-      hono: 4.12.7
+      hono: 4.12.12
     dev: false
 
   /@humanfs/core@0.19.1:
@@ -4546,7 +4548,7 @@ packages:
       '@cfworker/json-schema':
         optional: true
     dependencies:
-      '@hono/node-server': 1.19.11(hono@4.12.7)
+      '@hono/node-server': 1.19.13(hono@4.12.12)
       ajv: 8.18.0
       ajv-formats: 3.0.1(ajv@8.18.0)
       content-type: 1.0.5
@@ -4556,7 +4558,7 @@ packages:
       eventsource-parser: 3.0.6
       express: 5.2.1
       express-rate-limit: 8.3.0(express@5.2.1)
-      hono: 4.12.7
+      hono: 4.12.12
       jose: 6.1.3
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -7926,8 +7928,8 @@ packages:
     resolution: {integrity: sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==}
     dev: true
 
-  /hono@4.12.7:
-    resolution: {integrity: sha512-jq9l1DM0zVIvsm3lv9Nw9nlJnMNPOcAtsbsgiUhWcFzPE99Gvo6yRTlszSLLYacMeQ6quHD6hMfId8crVHvexw==}
+  /hono@4.12.12:
+    resolution: {integrity: sha512-p1JfQMKaceuCbpJKAPKVqyqviZdS0eUxH9v82oWo1kb9xjQ5wA6iP3FNVAPDFlz5/p7d45lO+BpSk1tuSZMF4Q==}
     engines: {node: '>=16.9.0'}
     dev: false
 
