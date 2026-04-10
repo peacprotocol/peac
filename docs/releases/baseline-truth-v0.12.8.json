@@ -1,0 +1,45 @@
+{
+  "description": "Baseline truth report for v0.12.8. Generated as PR 0 artifact for v0.12.9 release planning.",
+  "generated": "2026-04-10",
+  "version": "0.12.8",
+  "wire_format_version": "0.2",
+  "metrics": {
+    "tests": 7241,
+    "test_files": 281,
+    "published_packages": 35,
+    "build_targets": 97,
+    "conformance_requirement_ids": 192,
+    "conformance_sections": 18,
+    "pending_conformance_ids": 25,
+    "oidc_configured": 51,
+    "total_surfaces": 75,
+    "design_decisions": 212
+  },
+  "sdks": {
+    "typescript": "default",
+    "go": "supported (core issue/verify Wire 0.2); middleware experimental",
+    "python": "examples_only (API-first via reference verifier)"
+  },
+  "sources_verified": {
+    "facts.json": "consistent",
+    "current.json": "consistent",
+    "REPO_SURFACE_STATUS.json": "updated to 0.12.8 (was 0.12.7)",
+    "publish-manifest.json": "consistent (35 packages, 51 oidc)",
+    "requirement-ids.json": "consistent (192 IDs, 18 sections)",
+    "COMPATIBILITY_MATRIX.md": "updated to 0.12.8 (was 0.12.7)",
+    "PACKAGE_STATUS.md": "regenerated from updated REPO_SURFACE_STATUS.json",
+    "SURFACE_STATUS.md": "regenerated from updated REPO_SURFACE_STATUS.json"
+  },
+  "discrepancies_resolved": [
+    "REPO_SURFACE_STATUS.json version: 0.12.7 -> 0.12.8",
+    "REPO_SURFACE_STATUS.json Go SDK: compat-only Wire 0.1 -> supported Wire 0.2",
+    "COMPATIBILITY_MATRIX.md version header: v0.12.7 -> v0.12.8",
+    "COMPATIBILITY_MATRIX.md Go SDK: added Wire 0.2 capabilities",
+    "COMPATIBILITY_MATRIX.md Hosted Services: Planned -> Operational/Alpha",
+    "facts.json Go SDK: default -> supported (more precise)",
+    "Build targets confirmed: 97 (via turbo dry run)"
+  ],
+  "known_stale_surfaces": [
+    "docs/ROADMAP.md still shows v0.12.5 as current (tracked file, update deferred to separate PR per user instruction)"
+  ]
+}

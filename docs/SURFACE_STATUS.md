@@ -3,7 +3,7 @@
 Generated from `REPO_SURFACE_STATUS.json` by `scripts/generate-surface-status.mjs`.
 Do not edit manually.
 
-**Version:** 0.12.7 | **Updated:** 2026-04-08
+**Version:** 0.12.8 | **Updated:** 2026-04-10
 
 ## Layer 1
 
@@ -131,6 +131,6 @@ Do not edit manually.
 
 ## Layer sdk
 
-| Surface   | npm | State       | Wire |
-| --------- | --- | ----------- | ---- |
-| `sdks/go` | -   | compat-only | 0.1  |
+| Surface   | npm | State     | Wire |
+| --------- | --- | --------- | ---- |
+| `sdks/go` | -   | supported | 0.2  |
