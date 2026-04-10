@@ -5,6 +5,17 @@
 # artifact against a formal JSON Schema, verifies the golden snapshot,
 # and checks for private key material leakage.
 #
+# Schema draft: JSON Schema draft-07 (ajv 8 default meta-schema; no extra
+#   addMetaSchema call needed). draft 2020-12 is not used because this
+#   schema has no $dynamicRef or unevaluatedProperties requirements.
+# Validator: ajv 8 with ajv-formats (uri, date-time). strict:false allows
+#   draft-07 keywords through ajv 8 without warnings; allErrors:true so
+#   multiple failures surface in a single run.
+# Golden artifact: examples/external-pilot/golden-artifact.json carries a
+#   non-schema `description` field for human readers; this script deletes
+#   it in memory before validating the golden artifact so the schema's
+#   additionalProperties:false does not trip on documentation.
+#
 # Exit 0: pilot artifact valid
 # Exit 1: validation failed
 
