@@ -24,8 +24,8 @@
       "identifier": "@peac/mcp-server",
       "version": "0.12.8",
       "transport": {
-        "type": "streamableHttp",
-        "port": 3000
+        "type": "streamable-http",
+        "url": "http://localhost:3000/mcp"
       }
     }
   ]

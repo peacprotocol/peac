@@ -25,7 +25,7 @@ echo "=== MCP HTTP Quickstart Gate ==="
 
 # Step 1: Start MCP server in HTTP mode
 echo "1. Starting MCP server on port $PORT..."
-npx -y @peac/mcp-server --transport http --port "$PORT" &
+pnpm dlx @peac/mcp-server --transport http --port "$PORT" &
 SERVER_PID=$!
 
 # Wait for readiness (max 10s)
