@@ -49,7 +49,9 @@ export default defineConfig({
       'archive/**',
       'ex/**',
       'sdks/**',
-      'apps/api/**',
+      // apps/api has legacy .test.js files run via node --test (not vitest).
+      // The new .test.ts files under apps/api/tests/ run via the root include list.
+      'apps/api/src/**/*.test.js',
       'packages/core/src/**/*.test.js',
       'packages/sdk-js/tests/**',
       // tests/smoke re-enabled for v0.11.1 (MCP carrier e2e is a release gate)
@@ -91,6 +93,8 @@ export default defineConfig({
       'tests/security/**/*.test.ts',
       'tests/release/**/*.test.ts',
       'tests/tooling/**/*.test.ts',
+      // apps/api new .test.ts files (vitest); legacy .test.js files use node --test
+      'apps/api/tests/**/*.test.ts',
     ],
     // Timeout for tests
     testTimeout: 10000,

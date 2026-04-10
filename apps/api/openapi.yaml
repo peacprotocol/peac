@@ -23,7 +23,24 @@ paths:
       description: >
         Verify a compact JWS interaction record. Returns a deterministic
         verification report (DD-210 shape). Supports caller-provided public
-        key or allowlisted issuer JWKS resolution.
+        key or allowlisted issuer JWKS resolution. Supports Accept header
+        content negotiation for three output formats.
+      parameters:
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            enum:
+              - application/json
+              - application/peac-report+json
+              - text/plain
+            default: application/json
+          description: >
+            Response format negotiation. application/json returns the
+            byte-identical v0.12.8 report shape. application/peac-report+json
+            returns an extended report with timing, report_id, key_resolution,
+            and failure_reasons. text/plain returns a human-readable summary.
       requestBody:
         required: true
         content:
@@ -34,6 +51,9 @@ paths:
         '200':
           description: Verification completed (may be verified or failed)
           headers:
+            PEAC-Report-Id:
+              schema: { type: string, format: uuid }
+              description: UUID v4 report identifier unique per response
             RateLimit-Limit:
               schema: { type: string }
               description: Maximum requests per window (RFC 9333)
@@ -47,6 +67,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VerifySuccessResponse'
+            application/peac-report+json:
+              schema:
+                $ref: '#/components/schemas/ExtendedVerifyReport'
+            text/plain:
+              schema:
+                type: string
+                description: Human-readable verification summary
         '400':
           description: Invalid request format
           content:
@@ -171,6 +198,68 @@ components:
         pointer:
           type: string
           description: RFC 6901 JSON Pointer to the problematic field
+
+    FailureReason:
+      type: object
+      required: [code, detail]
+      properties:
+        code:
+          type: string
+          description: Kernel error code (e.g. E_INVALID_SIGNATURE)
+        detail:
+          type: string
+          description: Human-readable failure reason
+
+    ExtendedVerifyReport:
+      type: object
+      required:
+        - report_id
+        - verified
+        - verified_at
+        - duration_ms
+        - receipt_ref
+        - key_resolution
+        - failure_reasons
+      description: >
+        Extended verification report with timing, report ID, key resolution
+        method, and failure reasons. Returned when Accept header contains
+        application/peac-report+json.
+      properties:
+        report_id:
+          type: string
+          format: uuid
+        verified:
+          type: boolean
+        verified_at:
+          type: string
+          format: date-time
+        duration_ms:
+          type: number
+        receipt_ref:
+          type: string
+          pattern: '^sha256:[a-f0-9]{64}$'
+        claims:
+          type: object
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationWarning'
+        policy_binding:
+          type: string
+          enum: [unavailable, verified, failed]
+        issuer:
+          type: string
+        kid:
+          type: string
+        wire_version:
+          type: string
+        key_resolution:
+          type: string
+          enum: [provided, allowlist, discovery]
+        failure_reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/FailureReason'
 
     ProblemDetails:
       type: object
