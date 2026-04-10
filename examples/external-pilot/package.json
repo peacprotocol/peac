@@ -1,0 +1,16 @@
+{
+  "name": "@peac/example-external-pilot",
+  "version": "0.0.0",
+  "private": true,
+  "description": "External pilot kit: issue and verify a PEAC receipt through a self-hostable reference verifier",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx pilot.ts"
+  },
+  "dependencies": {
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}
