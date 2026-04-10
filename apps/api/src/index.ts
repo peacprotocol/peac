@@ -8,6 +8,7 @@ import { serve } from '@hono/node-server';
 import { createV13HonoHandler } from './routes.js';
 import { createVerifyV1Handler } from './verify-v1.js';
 import { createIssueV1Handler } from './hosted-issue.js';
+import { createIssuerHealthHandler } from './issuer-health.js';
 import { isProblemError } from './errors.js';
 
 // Legacy handlers (deprecated -- use createVerifyV1Handler instead)
@@ -43,6 +44,9 @@ export { createVerifyV1Handler, resetVerifyV1RateLimit } from './verify-v1.js';
 
 // v1 issue endpoint (provisional)
 export { createIssueV1Handler } from './hosted-issue.js';
+
+// v1 issuer health probe (reference, self-hostable)
+export { createIssuerHealthHandler } from './issuer-health.js';
 
 // Error catalog (for testing and external consumption)
 export { HOSTED_ERROR_CODES, toProblemDetails, getCatalogEntry } from './error-catalog.js';
@@ -109,6 +113,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   // Provisional v1 issue endpoint (BYO-key, disable via PEAC_HOSTED_ISSUE=false)
   app.post('/v1/issue', createIssueV1Handler());
+
+  // Reference issuer health probe (query-param API, SSRF-safe, self-hostable)
+  app.get('/v1/issuer-health', createIssuerHealthHandler());
 
   // Start server
   const port = parseInt(process.env.PORT || '3000');
