@@ -122,7 +122,9 @@
       "express-rate-limit": ">=8.2.2",
       "flatted": "3.4.2",
       "path-to-regexp@>=8.0.0": ">=8.4.0",
-      "yaml": "2.8.3"
+      "yaml": "2.8.3",
+      "@hono/node-server": ">=1.19.13",
+      "hono": ">=4.12.12"
     },
     "overridesComments": {
       "minimatch": "Cross-major pin to 10.2.4: typescript-estree requires ^9.0.4 but 9.x has no patch for GHSA-3ppc-4f35-3m26. minimatch 10.x is API-compatible (same globbing interface). 10.2.4 patches GHSA-7r86-cg39-jmmj and GHSA-23c5-xmqv-rm74 (ReDoS). Drops Node 18 (fine: repo baseline is >=22.0.0). Lint verified clean.",
