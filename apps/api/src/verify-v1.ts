@@ -24,10 +24,8 @@ import { loadDiscoveryConfig, discoverAndResolveKey } from './issuer-discovery.j
 import {
   generateReportId,
   buildExtendedReport,
-  buildFailureReasons,
   formatPlainText,
   negotiateFormat,
-  type AcceptFormat,
 } from './report-format.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
