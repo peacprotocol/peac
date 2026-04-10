@@ -1,21 +1,21 @@
 # Compatibility Matrix
 
-Current as of v0.12.7.
+Current as of v0.12.8.
 
 ## Wire Format Support
 
-| Surface                    | Wire 0.2 (`interaction-record+jwt`)                            | Wire 0.1 (`peac-receipt/0.1`)                                        | Status                                                       |
-| -------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `@peac/protocol` (TS/Node) | Full: `issue()` + `verifyLocal()`                              | Legacy verify only (`verifyLocalWire01()`, not exported from barrel) | **default**                                                  |
-| `@peac/crypto` (TS/Node)   | Full: dual-stack sign/verify/decode                            | Decode and verify only                                               | **default**                                                  |
-| `@peac/schema` (TS/Node)   | Full: `Wire02ClaimsSchema`, extension groups, type enforcement | Legacy `ReceiptClaimsSchema`                                         | **default**                                                  |
-| `@peac/cli`                | Full                                                           | -                                                                    | **default**                                                  |
-| `@peac/mcp-server`         | Full (5 tools)                                                 | -                                                                    | **default**                                                  |
-| `@peac/middleware-express` | Full                                                           | -                                                                    | **default**                                                  |
-| Go SDK (`sdks/go/`)        | -                                                              | Issue + VerifyLocal (Interaction Record format)                      | **default** (core issue/verify); middleware **experimental** |
-| Python                     | -                                                              | httpx examples (`>=3.12`)                                            | **examples only** (API-first via Hosted Verify)              |
-| `@peac/core`               | -                                                              | Full (Wire 0.9 locked)                                               | **deprecated** (removal: v0.13.0)                            |
-| `@peac/sdk`                | -                                                              | Full (Wire 0.1)                                                      | **archived** (use `@peac/protocol`)                          |
+| Surface                    | Wire 0.2 (`interaction-record+jwt`)                                 | Wire 0.1 (`peac-receipt/0.1`)                                        | Status                                                         |
+| -------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `@peac/protocol` (TS/Node) | Full: `issue()` + `verifyLocal()`                                   | Legacy verify only (`verifyLocalWire01()`, not exported from barrel) | **default**                                                    |
+| `@peac/crypto` (TS/Node)   | Full: dual-stack sign/verify/decode                                 | Decode and verify only                                               | **default**                                                    |
+| `@peac/schema` (TS/Node)   | Full: `Wire02ClaimsSchema`, extension groups, type enforcement      | Legacy `ReceiptClaimsSchema`                                         | **default**                                                    |
+| `@peac/cli`                | Full                                                                | -                                                                    | **default**                                                    |
+| `@peac/mcp-server`         | Full (5 tools)                                                      | -                                                                    | **default**                                                    |
+| `@peac/middleware-express` | Full                                                                | -                                                                    | **default**                                                    |
+| Go SDK (`sdks/go/`)        | Full: `Issue()` + `VerifyLocal()` + JCS (22 cross-language vectors) | Legacy verify only                                                   | **supported** (core issue/verify); middleware **experimental** |
+| Python                     | API-first via reference verifier (httpx examples, `>=3.12`)         | -                                                                    | **examples only**                                              |
+| `@peac/core`               | -                                                                   | Full (Wire 0.9 locked)                                               | **deprecated** (removal: v0.13.0)                              |
+| `@peac/sdk`                | -                                                                   | Full (Wire 0.1)                                                      | **archived** (use `@peac/protocol`)                            |
 
 ## Runtime Environments
 
@@ -29,10 +29,10 @@ Current as of v0.12.7.
 
 ## Hosted Services
 
-| Service                           | Status                | Endpoint |
-| --------------------------------- | --------------------- | -------- |
-| Hosted Verify (`POST /v1/verify`) | **Planned** (v0.12.8) | -        |
-| Hosted Issue (`POST /v1/issue`)   | **Planned** (v0.12.8) | -        |
+| Service                                | Status                    | Endpoint                                  |
+| -------------------------------------- | ------------------------- | ----------------------------------------- |
+| Reference Verifier (`POST /v1/verify`) | **Operational** (v0.12.8) | `POST /v1/verify` (RFC 9457, OpenAPI 3.1) |
+| Hosted Issue (`POST /v1/issue`)        | **Alpha** (v0.12.8)       | Disabled by default; BYO-key, provisional |
 
 ## Adapters and Mappings
 
