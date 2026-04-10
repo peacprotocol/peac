@@ -25,7 +25,11 @@ const TYPE_TO_FAMILY: Record<string, EventFamily> = {
  * Decodes each JWS (does NOT verify signatures; caller should verify first).
  * Extracts session ID, event families, and issuer from claims and extensions.
  *
- * @param receipts - Array of compact JWS strings
+ * Accepts previously verified compact JWS receipts.
+ * Does NOT perform signature verification; callers should verify first.
+ * Throws on malformed compact JWS input (invalid base64url segments).
+ *
+ * @param receipts - Array of compact JWS strings (must be valid JWS format)
  * @returns Session summary with receipt count, families, and issuer
  */
 export function buildSessionSummary(receipts: string[]): SessionSummary {

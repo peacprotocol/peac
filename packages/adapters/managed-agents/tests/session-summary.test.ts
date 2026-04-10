@@ -88,4 +88,12 @@ describe('session-summary', () => {
     expect(summary.families).toHaveLength(1);
     expect(summary.families).toContain(EventFamily.Session);
   });
+
+  it('should throw on malformed JWS input', () => {
+    expect(() => buildSessionSummary(['not-a-valid-jws'])).toThrow();
+  });
+
+  it('should throw on empty string input', () => {
+    expect(() => buildSessionSummary([''])).toThrow();
+  });
 });

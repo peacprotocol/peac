@@ -4,9 +4,11 @@ Guides for integrating PEAC with agent frameworks and platforms.
 
 ## Available Integrations
 
-| Integration               | Package                  | Status       | Description              |
-| ------------------------- | ------------------------ | ------------ | ------------------------ |
-| [OpenClaw](./openclaw.md) | `@peac/adapter-openclaw` | Experimental | OpenClaw agent framework |
+| Integration                                               | Package                        | Status    | Description                                              |
+| --------------------------------------------------------- | ------------------------------ | --------- | -------------------------------------------------------- |
+| [Managed Runtime Events](./managed-runtime-events.md)     | `@peac/adapter-managed-agents` | Supported | Vendor-neutral managed agent runtime events (6 families) |
+| [Anthropic Managed Agents](./anthropic-managed-agents.md) | `@peac/adapter-managed-agents` | Supported | Anthropic-specific guide for managed agent events        |
+| [OpenClaw](./openclaw.md)                                 | `@peac/adapter-openclaw`       | Supported | OpenClaw agent framework                                 |
 
 ## Integration Architecture
 
