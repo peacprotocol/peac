@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Hosted Verify API** (`POST /v1/verify`): deterministic DD-210 verification reports, RFC 9457 buyer-grade error details, OpenAPI 3.1 spec, threat-to-test traceability matrix, opt-in issuer discovery (DD-211)
+- **Hosted Verify API** (`POST /v1/verify`): deterministic DD-210 verification reports, RFC 9457 problem-detail error reporting, OpenAPI 3.1 spec, threat-to-test traceability matrix, opt-in issuer discovery (DD-211)
 - **Hosted Issue alpha** (`POST /v1/issue`): provisional BYO-key endpoint, disabled by default (sensitive-key transit model), canonical pillar validation, byte-level size enforcement (DD-212)
 - **Go SDK Interaction Record parity**: `Issue()` and `VerifyLocal()` for current stable format, RFC 8785 JCS with byte-identical cross-language parity (22 golden vectors), JOSE hardening, policy binding, trailing-input rejection (DD-209)
 - **Cursor and Codex installability packaging**: `@peac/kernel` tarball hygiene fix, shared install validation script, Codex MCP config

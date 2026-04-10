@@ -1,15 +1,9 @@
 # PEAC Architecture
 
-High-level architecture documentation for PEAC Protocol, including wire format design, protocol layering, performance characteristics, and the six-pillar framework.
+The authoritative architecture document is [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md).
+It covers the layered package model, wire format, protocol boundaries, and the
+10-pillar framework.
 
-**Status:** Content will be populated from the master plan over v0.9.16+
+Architecture Decision Records live in this directory:
 
-## Planned Coverage
-
-- Wire format and envelope design
-- Protocol layering (kernel, transport, control, rails)
-- Performance targets and trade-offs
-- Six-pillar architecture (Access, Attribution, Compliance, Consent, Intelligence, Infrastructure)
-- Vendor neutrality principles
-
-See [ARCHITECTURE.md](../ARCHITECTURE.md) for current implementation.
+- [ADR-001: Telemetry Package Taxonomy](ADR-001-telemetry-package-taxonomy.md)

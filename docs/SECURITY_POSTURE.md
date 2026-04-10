@@ -19,13 +19,13 @@ The current deprecation schedule is in [Deprecation Policy](DEPRECATION_POLICY.m
 
 ### Runtime support commitment
 
-| Runtime                      | Status        | Policy                                                    |
-| ---------------------------- | ------------- | --------------------------------------------------------- |
-| Node.js 24 (Active LTS)      | Required      | Primary CI and development target                         |
-| Node.js 22 (Maintenance LTS) | Compatibility | `engines.node >= 22.0.0` floor; security fixes backported |
-| Node.js 25+                  | Advisory      | Forward-compat CI lane; no support guarantee              |
-| Go                           | Partial       | Wire 0.1 only; Wire 0.2 parity planned for v0.12.8        |
-| Python                       | Not started   | API-first via Hosted Verify; full SDK pending demand      |
+| Runtime                      | Status        | Policy                                                          |
+| ---------------------------- | ------------- | --------------------------------------------------------------- |
+| Node.js 24 (Active LTS)      | Required      | Primary CI and development target                               |
+| Node.js 22 (Maintenance LTS) | Compatibility | `engines.node >= 22.0.0` floor; security fixes backported       |
+| Node.js 25+                  | Advisory      | Forward-compat CI lane; no support guarantee                    |
+| Go                           | Supported     | Wire 0.2 core (issue and local verify); middleware experimental |
+| Python                       | Not started   | API-first via the reference verifier HTTP API                   |
 
 ## Incident Disclosure
 
@@ -107,7 +107,7 @@ See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the full isolation d
 
 PEAC Protocol is a client-side library and does not transmit data to external services during signing or local verification. Network I/O occurs only during JWKS resolution (fetching issuer public keys) and only when using hosted or network-enabled verification modes.
 
-For Hosted Verify (planned): data residency and jurisdictional controls are not yet offered. Initial deployment region will be documented at launch. Organizations with strict data residency requirements should use self-hosted `verifyLocal()` with caller-provided public keys, which requires no network I/O.
+The reference verifier HTTP API is self-hostable. Organizations with strict data residency requirements should run `verifyLocal()` or the self-hosted reference verifier with caller-provided public keys; both paths require no external network I/O.
 
 ## Deprecation Commitment
 

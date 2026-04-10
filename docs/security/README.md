@@ -1,16 +1,15 @@
 # PEAC Security
 
-Security documentation for PEAC Protocol, covering threat models, security controls, and audit procedures.
+The top-level security posture is documented in
+[`docs/SECURITY_POSTURE.md`](../SECURITY_POSTURE.md) and the security policy in
+[`SECURITY.md`](../../.github/SECURITY.md).
 
-**Status:** Content will be populated from security analysis over v0.9.16+
+This directory contains transport- and surface-specific security notes:
 
-## Planned Coverage
+- [HTTP Transport Security](HTTP-TRANSPORT-SECURITY.md)
+- [MCP Compliance Matrix](MCP-COMPLIANCE-MATRIX.md)
+- [OWASP ASI Mapping](OWASP-ASI-MAPPING.md)
 
-- Threat model and attack surface analysis
-- DPoP L3/L4 implementation (RFC 9449)
-- SSRF protection mechanisms
-- JWKS rotation and key management
-- Rate limiting and DoS protection
-- Security audit reports and findings
-
-See [../specs/ERRORS.md](../specs/ERRORS.md) for error handling security considerations.
+For normative security considerations on the protocol itself, see
+[`docs/specs/SECURITY-CONSIDERATIONS.md`](../specs/SECURITY-CONSIDERATIONS.md)
+and [`docs/specs/VERIFIER-SECURITY-MODEL.md`](../specs/VERIFIER-SECURITY-MODEL.md).

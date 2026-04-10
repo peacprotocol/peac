@@ -87,10 +87,10 @@ External protocol integrations and identity anchors.
 
 ## Related Documentation
 
-- [API Reference](api/) - Endpoint documentation (v0.9.16+)
-- [User Guides](guides/) - Integration patterns and best practices (v0.9.16+)
-- [Architecture](architecture/) - High-level design and principles
-- [Security](security/) - Threat models and security controls
+- [API Reference](api/) - Error catalog and HTTP API surface
+- [User Guides](guides/) - Integration quickstarts and patterns
+- [Architecture](architecture/) - High-level design and ADRs
+- [Security](security/) - Transport and surface security notes
 
 ## Versioning
 

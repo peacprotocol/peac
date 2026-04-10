@@ -1,8 +1,8 @@
 # Hosted Verify API Contract
 
-**Status:** Design artifact (DD-210). Implementation ships separately.
+**Status:** Stable contract. Implemented by `apps/api` (reference verifier).
 
-This document defines the API contract for the hosted verification service. Implementations MUST conform to this contract.
+This document defines the HTTP API contract for the reference verifier. Implementations MUST conform to this contract.
 
 ## Endpoints
 
@@ -43,11 +43,9 @@ Verify a signed interaction record.
 
 **Error responses:** RFC 9457 Problem Details.
 
-### POST /v1/issue (provisional, superseded)
+### POST /v1/issue (provisional)
 
-Issue a signed interaction record. This endpoint is provisional and may ship in a later release than `/v1/verify`.
-
-**Note:** The request model below is superseded. If `/v1/issue` ships in v0.12.8, it will use a BYO-key model (caller provides Ed25519 private key seed) defined in a separate `HOSTED_ISSUE_CONTRACT.md` (DD-212). The `key_id` server-selection model below is deferred to v0.13.0+ if demand materializes.
+Issue a signed interaction record. This endpoint is provisional and uses a BYO-key model (caller provides an Ed25519 private key seed). The contract is defined in [`HOSTED_ISSUE_CONTRACT.md`](HOSTED_ISSUE_CONTRACT.md). The legacy request model shown below is retained for archival purposes only.
 
 **Request (superseded):**
 
