@@ -1,0 +1,13 @@
+{
+  "description": "Golden pilot artifact snapshot. Used by verify-pilot-output.sh for schema validation reference. Field names and types must match exactly.",
+  "pilot_id": "00000000-0000-0000-0000-000000000000",
+  "pilot_organization": "example-org",
+  "issuer": "https://example.com",
+  "kid": "example-key-1",
+  "receipt_ref": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "verified": true,
+  "verified_at": "2026-01-01T00:00:00.000Z",
+  "wire_version": "0.2",
+  "reference_verifier_url": "http://localhost:3000",
+  "verification_method": "local"
+}
