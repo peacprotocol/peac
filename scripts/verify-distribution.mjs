@@ -149,6 +149,14 @@ function checkParseValidity() {
     } catch (e) {
       fail(`smithery.yaml is not valid YAML: ${e.message}`);
     }
+
+    // Run full Smithery structural validation (YAML parse + sandboxed function eval)
+    try {
+      execSync('node scripts/validate-smithery.mjs', { cwd: ROOT, stdio: 'pipe', timeout: 15_000 });
+      pass('smithery.yaml full structural validation');
+    } catch (e) {
+      fail(`smithery.yaml structural validation failed: ${e.stderr?.toString().trim() || e.message}`);
+    }
   }
 }
 
