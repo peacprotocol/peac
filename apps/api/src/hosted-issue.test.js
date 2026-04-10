@@ -1,13 +1,15 @@
-import { describe, test, beforeEach } from 'node:test';
+import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Hono } from 'hono';
 
-// Import from built dist
 const { createIssueV1Handler } = await import('../dist/index.js');
 
-function buildApp() {
+// Valid 32-byte seed as base64url (all zeros)
+const VALID_SEED = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+
+function buildApp(opts) {
   const app = new Hono();
-  app.post('/v1/issue', createIssueV1Handler());
+  app.post('/v1/issue', createIssueV1Handler(opts));
   return app;
 }
 
@@ -15,42 +17,52 @@ function issueReq(body, headers = {}) {
   return new Request('http://localhost/v1/issue', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify(body),
+    body: typeof body === 'string' ? body : JSON.stringify(body),
   });
 }
 
-// Valid 32-byte seed as base64url (all zeros for testing)
-const VALID_SEED = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-
 describe('hosted-issue', () => {
-  beforeEach(() => {
-    // Enable hosted issue for tests
-    process.env.PEAC_HOSTED_ISSUE = 'true';
-  });
-
-  test('disabled by default when env not set', async () => {
-    delete process.env.PEAC_HOSTED_ISSUE;
-    // Need a fresh handler since the flag is read at creation time
-    const freshApp = new Hono();
-    // Re-import would be complex; test the principle: the default check is '=== true'
-    assert.ok(true, 'default-off behavior verified by code review: enabled = env === "true"');
-  });
-
-  test('returns 404 when explicitly disabled', async () => {
-    process.env.PEAC_HOSTED_ISSUE = 'false';
-    const app = buildApp();
+  test('disabled by default: returns 404 when enabled option is false', async () => {
+    const app = buildApp({ enabled: false });
     const res = await app.fetch(
       issueReq({
-        claims: { iss: 'https://x.com', kind: 'evidence', type: 'test' },
-        key_id: 'k',
+        claims: { iss: 'https://example.com', kind: 'evidence', type: 'org.peacprotocol/test' },
+        key_id: 'k1',
         private_key_seed: VALID_SEED,
       })
     );
     assert.strictEqual(res.status, 404);
+    const data = await res.json();
+    assert.ok(data.detail.includes('disabled'));
+  });
+
+  test('disabled by default when env unset and opts omitted', async () => {
+    delete process.env.PEAC_HOSTED_ISSUE;
+    const app = buildApp(undefined);
+    const res = await app.fetch(
+      issueReq({
+        claims: { iss: 'https://example.com', kind: 'evidence', type: 'org.peacprotocol/test' },
+        key_id: 'k1',
+        private_key_seed: VALID_SEED,
+      })
+    );
+    assert.strictEqual(res.status, 404, 'must be 404 when env is unset and no opts');
+  });
+
+  test('enabled explicitly: does not return 404', async () => {
+    const app = buildApp({ enabled: true });
+    const res = await app.fetch(
+      issueReq({
+        claims: { iss: 'https://example.com', kind: 'evidence', type: 'org.peacprotocol/test' },
+        key_id: 'k1',
+        private_key_seed: VALID_SEED,
+      })
+    );
+    assert.notStrictEqual(res.status, 404);
   });
 
   test('rejects invalid JSON', async () => {
-    const app = buildApp();
+    const app = buildApp({ enabled: true });
     const res = await app.fetch(
       new Request('http://localhost/v1/issue', {
         method: 'POST',
@@ -62,7 +74,7 @@ describe('hosted-issue', () => {
   });
 
   test('rejects missing claims', async () => {
-    const app = buildApp();
+    const app = buildApp({ enabled: true });
     const res = await app.fetch(issueReq({ key_id: 'k', private_key_seed: VALID_SEED }));
     assert.strictEqual(res.status, 422);
     const data = await res.json();
@@ -70,44 +82,62 @@ describe('hosted-issue', () => {
   });
 
   test('rejects invalid seed (wrong length)', async () => {
-    const app = buildApp();
+    const app = buildApp({ enabled: true });
     const res = await app.fetch(
       issueReq({
         claims: { iss: 'https://example.com', kind: 'evidence', type: 'org.peacprotocol/test' },
         key_id: 'k1',
-        private_key_seed: 'dG9vc2hvcnQ', // "tooshort"
+        private_key_seed: 'dG9vc2hvcnQ',
       })
     );
     assert.strictEqual(res.status, 422);
   });
 
-  test('rejects oversized body', async () => {
-    const app = buildApp();
+  test('rejects invalid pillar value', async () => {
+    const app = buildApp({ enabled: true });
     const res = await app.fetch(
-      issueReq(
-        {
-          claims: { iss: 'https://x.com', kind: 'evidence', type: 'test' },
-          key_id: 'k',
-          private_key_seed: VALID_SEED,
+      issueReq({
+        claims: {
+          iss: 'https://example.com',
+          kind: 'evidence',
+          type: 'org.peacprotocol/test',
+          pillars: ['invalid-pillar'],
         },
-        { 'content-length': '999999' }
-      )
+        key_id: 'k1',
+        private_key_seed: VALID_SEED,
+      })
+    );
+    assert.strictEqual(res.status, 422);
+  });
+
+  test('rejects oversized body (actual bytes, not just header)', async () => {
+    const app = buildApp({ enabled: true });
+    const bigBody =
+      '{"claims":{"iss":"x","kind":"evidence","type":"t"},"key_id":"k","private_key_seed":"' +
+      'A'.repeat(300000) +
+      '"}';
+    const res = await app.fetch(
+      new Request('http://localhost/v1/issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: bigBody,
+      })
     );
     assert.strictEqual(res.status, 413);
   });
 
   test('security headers on all responses', async () => {
-    const app = buildApp();
+    const app = buildApp({ enabled: true });
     const res = await app.fetch(issueReq({}));
     assert.strictEqual(res.headers.get('x-content-type-options'), 'nosniff');
     assert.strictEqual(res.headers.get('cache-control'), 'no-store');
   });
 
-  test('error responses never contain key material', async () => {
-    const app = buildApp();
+  test('error responses never contain key seed material', async () => {
+    const app = buildApp({ enabled: true });
     const res = await app.fetch(
       issueReq({
-        claims: { iss: 'http://bad', kind: 'evidence', type: 'test' },
+        claims: { iss: 'http://bad-scheme', kind: 'evidence', type: 'test' },
         key_id: 'k',
         private_key_seed: VALID_SEED,
       })
@@ -117,11 +147,37 @@ describe('hosted-issue', () => {
   });
 
   test('uses application/problem+json for errors', async () => {
-    const app = buildApp();
+    const app = buildApp({ enabled: true });
     const res = await app.fetch(issueReq({}));
     assert.ok(
       res.headers.get('content-type')?.includes('application/problem+json'),
       'errors must use problem+json'
     );
+  });
+
+  test('no key seed material in console output during error path', async () => {
+    const app = buildApp({ enabled: true });
+    const captured = [];
+    const origError = console.error;
+    const origLog = console.log;
+    const origWarn = console.warn;
+    console.error = (...args) => captured.push(args.join(' '));
+    console.log = (...args) => captured.push(args.join(' '));
+    console.warn = (...args) => captured.push(args.join(' '));
+    try {
+      await app.fetch(
+        issueReq({
+          claims: { iss: 'http://bad', kind: 'evidence', type: 'test' },
+          key_id: 'k',
+          private_key_seed: VALID_SEED,
+        })
+      );
+      const allOutput = captured.join('\n');
+      assert.ok(!allOutput.includes(VALID_SEED), 'console output must not contain key seed');
+    } finally {
+      console.error = origError;
+      console.log = origLog;
+      console.warn = origWarn;
+    }
   });
 });
