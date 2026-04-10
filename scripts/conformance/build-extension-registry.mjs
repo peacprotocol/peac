@@ -34,19 +34,15 @@
  *
  * Governing spec presence is currently advisory (not blocking) because the
  * governing spec docs below do not yet contain exact inline annotations
- * matching the source fragments verbatim. Each governing spec may need
- * either inline annotations or a normative section quoting the fragments.
+ * matching the source fragments verbatim.
  *
- * Governing spec files by section:
- *   - docs/specs/X402-V2-PROFILE.md      : X402V2-001, 002, 003, 004
- *   - docs/specs/DID-RESOLUTION-PROFILE.md: DID-RES-001..007
- *   - docs/specs/GRPC-TRANSPORT-PROFILE.md: GRPC-META-001, 002, 003
- *   - docs/specs/A2A-AUTH-PROFILE.md     : PKCE-001, 002, 003, 004
- *   - docs/specs/EVIDENCE-CARRIER-CONTRACT.md: RURL-001, 002, 003, 004
- *   - docs/specs/SUPPLY-CHAIN-PROFILE.md : SC-001, 003, 004
+ * The bounded follow-up list lives at:
+ *   specs/conformance/non-wire02-annotation-ledger.md
  *
- * Until these annotations are added, non-WIRE02 spec-presence checks are
- * advisory in verify-registry-drift.mjs (hash integrity remains blocking).
+ * That ledger is the single tracked artifact for promoting spec-presence from
+ * advisory to blocking. No new non-WIRE02 requirement IDs may be added here
+ * without either (a) shipping the governing-spec annotation in the same
+ * change, or (b) appending a row to the ledger in the same PR.
  *
  * Usage: node scripts/conformance/build-extension-registry.mjs
  */

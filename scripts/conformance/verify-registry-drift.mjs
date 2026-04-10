@@ -149,6 +149,9 @@ if (extensionSpecAdvisory > 0) {
   console.log(
     `\nINFO: ${extensionSpecAdvisory} non-WIRE02 spec-presence advisory(ies) (hash integrity verified; governing spec annotations pending)`
   );
+  console.log(
+    `      Tracked follow-up: specs/conformance/non-wire02-annotation-ledger.md`
+  );
 }
 
 // --- Summary ---
