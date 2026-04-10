@@ -492,6 +492,99 @@ describe('HTTP Transport', () => {
     expect(status).toBe(404);
   });
 
+  // --- RFC 9728 PRM strict compliance ---
+
+  it('should set Content-Type: application/json on PRM response', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth.example.com'],
+      publicUrl: 'https://peac.example.com',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { headers } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource`
+    );
+    expect(headers.get('content-type')).toBe('application/json');
+  });
+
+  it('should return only resource and authorization_servers in PRM (no extra fields)', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth.example.com'],
+      publicUrl: 'https://peac.example.com/mcp',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { body } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource/mcp`
+    );
+    const keys = Object.keys(body as Record<string, unknown>);
+    expect(keys).toEqual(expect.arrayContaining(['resource', 'authorization_servers']));
+    expect(keys).toHaveLength(2);
+  });
+
+  it('should accept multiple authorization servers in PRM', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth1.example.com', 'https://auth2.example.com'],
+      publicUrl: 'https://peac.example.com',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { body } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource`
+    );
+    expect((body as { authorization_servers: string[] }).authorization_servers).toEqual([
+      'https://auth1.example.com',
+      'https://auth2.example.com',
+    ]);
+  });
+
+  it('should disable PRM when public-url is non-HTTPS on non-loopback', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth.example.com'],
+      publicUrl: 'http://peac.example.com/mcp',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { status } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource/mcp`
+    );
+    expect(status).toBe(404);
+  });
+
+  it('should allow http public-url on loopback for dev ergonomics', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      authorizationServers: ['https://auth.example.com'],
+      publicUrl: `http://localhost:${port}/mcp`,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { status, body } = await fetchJson(
+      `http://127.0.0.1:${port}/.well-known/oauth-protected-resource/mcp`
+    );
+    expect(status).toBe(200);
+    expect((body as { resource: string }).resource).toMatch(/^http:\/\/localhost/);
+  });
+
   // --- Trust-proxy behavior ---
 
   it('should not trust X-Forwarded-For by default', async () => {
