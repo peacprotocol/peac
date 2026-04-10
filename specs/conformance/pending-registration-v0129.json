@@ -1,0 +1,41 @@
+{
+  "description": "Deterministic reconciliation of pending conformance ID registration. Generated from check-matrix.mjs PENDING_REGISTRATION set.",
+  "generated_at": "2026-04-10T16:13:03.899Z",
+  "current_registered": 192,
+  "pending_count": 25,
+  "target_post_registration": 217,
+  "namespaces": {
+    "DID-RES": {
+      "count": 7,
+      "ids": [
+        "DID-RES-001",
+        "DID-RES-002",
+        "DID-RES-003",
+        "DID-RES-004",
+        "DID-RES-005",
+        "DID-RES-006",
+        "DID-RES-007"
+      ]
+    },
+    "GRPC-META": {
+      "count": 3,
+      "ids": ["GRPC-META-001", "GRPC-META-002", "GRPC-META-003"]
+    },
+    "PKCE": {
+      "count": 4,
+      "ids": ["PKCE-001", "PKCE-002", "PKCE-003", "PKCE-004"]
+    },
+    "RURL": {
+      "count": 4,
+      "ids": ["RURL-001", "RURL-002", "RURL-003", "RURL-004"]
+    },
+    "SC": {
+      "count": 3,
+      "ids": ["SC-001", "SC-003", "SC-004"]
+    },
+    "X402V2": {
+      "count": 4,
+      "ids": ["X402V2-001", "X402V2-002", "X402V2-003", "X402V2-004"]
+    }
+  }
+}
