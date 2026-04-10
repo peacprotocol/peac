@@ -21,6 +21,14 @@ import { MemoryRateLimitStore } from '@peac/middleware-core';
 import { InMemoryCache, resolveKey, type CacheBackend } from '@peac/jwks-cache';
 import { toProblemDetails, type HostedProblemDetails } from './error-catalog.js';
 import { loadDiscoveryConfig, discoverAndResolveKey } from './issuer-discovery.js';
+import {
+  generateReportId,
+  buildExtendedReport,
+  buildFailureReasons,
+  formatPlainText,
+  negotiateFormat,
+  type AcceptFormat,
+} from './report-format.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
@@ -161,11 +169,16 @@ export function createVerifyV1Handler() {
   const discoveryConfig = loadDiscoveryConfig();
 
   return async (c: Context) => {
+    const startTime = performance.now();
+    const reportId = generateReportId();
+    const acceptFormat = negotiateFormat(c.req.header('accept'));
+
     // Security headers on all responses
     c.header('X-Content-Type-Options', 'nosniff');
     c.header('Cache-Control', 'no-store');
     c.header('Referrer-Policy', 'no-referrer');
     c.header('X-Frame-Options', 'DENY');
+    c.header('PEAC-Report-Id', reportId);
 
     // Rate limit
     const rl = getRateLimit(c);
@@ -214,6 +227,7 @@ export function createVerifyV1Handler() {
 
     // Resolve public key
     let publicKeyBytes: Uint8Array;
+    let keyResolution: 'provided' | 'allowlist' | 'discovery' = 'provided';
 
     if (public_key) {
       try {
@@ -255,6 +269,7 @@ export function createVerifyV1Handler() {
       const trustedEntry = trustedIssuers.find((t) => t.issuer === iss);
 
       if (!trustedEntry && discoveryConfig.enabled) {
+        keyResolution = 'discovery';
         // Opt-in issuer discovery: attempt SSRF-safe resolution
         const discovery = await discoverAndResolveKey(iss, kid, discoveryConfig);
         if (!discovery.ok) {
@@ -278,6 +293,7 @@ export function createVerifyV1Handler() {
           })
         );
       } else {
+        keyResolution = 'allowlist';
         // Allowlisted issuer: resolve via JWKS cache
         try {
           const resolved = await resolveKey(iss, kid, {
@@ -325,9 +341,11 @@ export function createVerifyV1Handler() {
     // Compute receipt_ref (canonical: sha256 of compact JWS bytes)
     const receiptRef = await computeReceiptRef(receipt);
 
+    const durationMs = performance.now() - startTime;
+
     if (result.valid) {
       // DD-210 deterministic verification report
-      const report = {
+      const standardReport = {
         verified: true as const,
         receipt_ref: receiptRef,
         claims: result.claims as Record<string, unknown>,
@@ -337,13 +355,73 @@ export function createVerifyV1Handler() {
         kid: result.kid,
         wire_version: result.wireVersion,
       };
+
+      if (acceptFormat === 'extended') {
+        const extended = buildExtendedReport(
+          {
+            verified: true,
+            receipt_ref: receiptRef,
+            claims: standardReport.claims,
+            warnings: result.warnings,
+            policy_binding: result.policy_binding,
+            issuer: result.claims.iss,
+            kid: result.kid,
+            wire_version: result.wireVersion,
+          },
+          reportId,
+          durationMs,
+          keyResolution
+        );
+        c.header('Content-Type', 'application/peac-report+json');
+        return c.body(deterministicStringify(extended), 200);
+      }
+
+      if (acceptFormat === 'plain') {
+        const extended = buildExtendedReport(
+          {
+            verified: true,
+            receipt_ref: receiptRef,
+            claims: standardReport.claims,
+            warnings: result.warnings,
+            policy_binding: result.policy_binding,
+            issuer: result.claims.iss,
+            kid: result.kid,
+            wire_version: result.wireVersion,
+          },
+          reportId,
+          durationMs,
+          keyResolution
+        );
+        c.header('Content-Type', 'text/plain');
+        return c.body(formatPlainText(extended), 200);
+      }
+
+      // Default: standard JSON (byte-identical to v0.12.8 response body)
       c.header('Content-Type', 'application/json');
-      return c.body(deterministicStringify(report), 200);
+      return c.body(deterministicStringify(standardReport), 200);
     }
 
     // Verification failed: map error code to RFC 9457 Problem Details
+    // Include failure_reasons in extended and plain formats
     const problem = toProblemDetails(result.code, {});
     problem.detail = result.message;
+
+    if (acceptFormat === 'extended') {
+      const extended = buildExtendedReport(
+        {
+          verified: false,
+          receipt_ref: receiptRef,
+          error_code: result.code,
+          error_message: result.message,
+        },
+        reportId,
+        durationMs,
+        keyResolution
+      );
+      c.header('Content-Type', 'application/peac-report+json');
+      return c.body(deterministicStringify(extended), 200);
+    }
+
     return problemResponse(c, problem);
   };
 }
