@@ -7,19 +7,24 @@
  * Uses query parameter for issuer input (not path-encoded URL) to avoid
  * double-decoding, proxy normalization, and SSRF-adjacent parsing issues.
  *
- * SSRF protection: reuses @peac/jwks-cache HTTPS-only enforcement.
+ * SSRF protection: uses @peac/jwks-cache validateUrl() for HTTPS enforcement,
+ * literal IP blocking, localhost blocking, and metadata IP detection.
+ * Does NOT create a second fetch stack; uses validateUrl as the security
+ * boundary, then makes minimal fetches with redirect: 'error' and timeouts.
+ *
  * Rate limited independently (10 req/min per IP).
  */
 
 import type { Context } from 'hono';
 import { z } from 'zod';
-import { InMemoryCache, resolveKey, type CacheBackend } from '@peac/jwks-cache';
+import { validateUrl, isMetadataIp } from '@peac/jwks-cache';
 import { MemoryRateLimitStore } from '@peac/middleware-core';
 import { toProblemDetails } from './error-catalog.js';
 
 const HEALTH_RATE_LIMIT = 10;
 const HEALTH_WINDOW_MS = 60 * 1000;
 const CACHE_TTL_SECONDS = 60;
+const FETCH_TIMEOUT_MS = 5000;
 
 const IssuerParamSchema = z
   .string()
@@ -27,9 +32,8 @@ const IssuerParamSchema = z
   .refine((u) => u.startsWith('https://'), { message: 'issuer must use HTTPS' });
 
 const healthRateLimitStore = new MemoryRateLimitStore({ maxKeys: 1_000 });
-const healthJwksCache: CacheBackend = new InMemoryCache();
 
-// Canonicalize issuer URL for cache key: lowercase scheme+host, strip trailing slash
+/** Canonicalize issuer URL for cache key: lowercase scheme+host, strip trailing slash. */
 function canonicalizeIssuer(url: string): string {
   const u = new URL(url);
   return `${u.protocol}//${u.host}${u.pathname.replace(/\/+$/, '')}`;
@@ -50,6 +54,34 @@ interface HealthResult {
 
 const healthCache = new Map<string, { result: HealthResult; expiresAt: number }>();
 
+/**
+ * SSRF-safe fetch: validates URL through @peac/jwks-cache security layer,
+ * then fetches with redirect: 'error' and timeout. No redirects followed.
+ */
+async function ssrfSafeFetch(url: string): Promise<Response | null> {
+  // Validate through shared SSRF protection (HTTPS, no literal IPs, no localhost)
+  try {
+    validateUrl(url, { allowLocalhost: false });
+  } catch {
+    return null;
+  }
+
+  // Additional metadata IP check
+  const parsed = new URL(url);
+  if (isMetadataIp(parsed.hostname)) {
+    return null;
+  }
+
+  try {
+    return await fetch(url, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      redirect: 'error', // No redirects (prevents redirect-to-private-IP)
+    });
+  } catch {
+    return null;
+  }
+}
+
 async function probeIssuer(issuer: string): Promise<HealthResult> {
   const canonical = canonicalizeIssuer(issuer);
 
@@ -67,40 +99,43 @@ async function probeIssuer(issuer: string): Promise<HealthResult> {
 
   // Probe discovery: /.well-known/peac-issuer.json
   let jwksUri: string | undefined;
-  try {
-    const discoveryUrl = `${canonical}/.well-known/peac-issuer.json`;
-    const res = await fetch(discoveryUrl, {
-      signal: AbortSignal.timeout(5000),
-      redirect: 'error',
-    });
-    if (res.ok) {
-      const doc = (await res.json()) as { jwks_uri?: string };
-      checks.discovery = 'ok';
-      jwksUri = doc.jwks_uri;
+  const discoveryUrl = `${canonical}/.well-known/peac-issuer.json`;
+  const discoveryRes = await ssrfSafeFetch(discoveryUrl);
+
+  if (discoveryRes) {
+    if (discoveryRes.ok) {
+      try {
+        const doc = (await discoveryRes.json()) as { jwks_uri?: string };
+        checks.discovery = 'ok';
+        jwksUri = doc.jwks_uri;
+      } catch {
+        checks.discovery = 'fail';
+      }
     } else {
-      checks.discovery = res.status === 404 ? 'not_found' : 'fail';
+      checks.discovery = discoveryRes.status === 404 ? 'not_found' : 'fail';
     }
-  } catch {
+  } else {
     checks.discovery = 'fail';
   }
 
-  // Probe JWKS if we have a URI
+  // Probe JWKS if we have a URI (also SSRF-validated)
   if (jwksUri) {
-    try {
-      const res = await fetch(jwksUri, {
-        signal: AbortSignal.timeout(5000),
-        redirect: 'error',
-      });
-      if (res.ok) {
-        const jwks = (await res.json()) as { keys?: Array<{ kty?: string; crv?: string }> };
-        checks.jwks = 'ok';
-        checks.ed25519_keys = (jwks.keys ?? []).filter(
-          (k) => k.kty === 'OKP' && k.crv === 'Ed25519'
-        ).length;
+    const jwksRes = await ssrfSafeFetch(jwksUri);
+    if (jwksRes) {
+      if (jwksRes.ok) {
+        try {
+          const jwks = (await jwksRes.json()) as { keys?: Array<{ kty?: string; crv?: string }> };
+          checks.jwks = 'ok';
+          checks.ed25519_keys = (jwks.keys ?? []).filter(
+            (k) => k.kty === 'OKP' && k.crv === 'Ed25519'
+          ).length;
+        } catch {
+          checks.jwks = 'fail';
+        }
       } else {
-        checks.jwks = res.status === 404 ? 'not_found' : 'fail';
+        checks.jwks = jwksRes.status === 404 ? 'not_found' : 'fail';
       }
-    } catch {
+    } else {
       checks.jwks = 'fail';
     }
   }
@@ -116,7 +151,6 @@ async function probeIssuer(issuer: string): Promise<HealthResult> {
     cache_ttl_seconds: CACHE_TTL_SECONDS,
   };
 
-  // Cache result
   healthCache.set(canonical, {
     result,
     expiresAt: Date.now() + CACHE_TTL_SECONDS * 1000,
