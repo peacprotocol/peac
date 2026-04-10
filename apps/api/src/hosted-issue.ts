@@ -17,6 +17,7 @@ import { issueWire02, IssueError } from '@peac/protocol';
 import { base64urlDecode } from '@peac/crypto';
 import { computeReceiptRef, EvidencePillarSchema } from '@peac/schema';
 import { toProblemDetails, type HostedProblemDetails } from './error-catalog.js';
+import { deterministicStringify } from './utils.js';
 
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
@@ -42,16 +43,7 @@ const IssueRequestSchema = z
   })
   .strict();
 
-function deterministicStringify(obj: unknown): string {
-  return JSON.stringify(obj, (_key, value) => {
-    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      return Object.fromEntries(
-        Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-      );
-    }
-    return value;
-  });
-}
+// deterministicStringify imported from ./utils.js
 
 function problemResponse(c: Context, problem: HostedProblemDetails): Response {
   c.header('Content-Type', PROBLEM_CONTENT_TYPE);

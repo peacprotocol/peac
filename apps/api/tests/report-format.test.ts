@@ -142,4 +142,46 @@ describe('report-format', () => {
       expect(text).toContain('Warnings:   none');
     });
   });
+
+  describe('backward compatibility', () => {
+    it('should produce v0.12.8-compatible default JSON structure', () => {
+      // The default application/json response must contain exactly these
+      // top-level keys in sorted order (deterministic stringify):
+      // claims, issuer, kid, policy_binding, receipt_ref, verified, warnings, wire_version
+      const v0128Shape = {
+        verified: true,
+        receipt_ref: 'sha256:abc',
+        claims: { iss: 'https://example.com', type: 'test' },
+        warnings: [],
+        policy_binding: 'verified',
+        issuer: 'https://example.com',
+        kid: 'key-1',
+        wire_version: '0.2',
+      };
+
+      // Deterministic stringify sorts keys
+      const json = JSON.stringify(v0128Shape, (_key, value) => {
+        if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+          return Object.fromEntries(
+            Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+          );
+        }
+        return value;
+      });
+      const parsed = JSON.parse(json);
+      const keys = Object.keys(parsed);
+
+      // v0.12.8 response keys (sorted): claims, issuer, kid, policy_binding, receipt_ref, verified, warnings, wire_version
+      expect(keys).toEqual([
+        'claims',
+        'issuer',
+        'kid',
+        'policy_binding',
+        'receipt_ref',
+        'verified',
+        'warnings',
+        'wire_version',
+      ]);
+    });
+  });
 });

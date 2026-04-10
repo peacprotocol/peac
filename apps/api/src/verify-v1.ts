@@ -27,6 +27,7 @@ import {
   formatPlainText,
   negotiateFormat,
 } from './report-format.js';
+import { deterministicStringify } from './utils.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
@@ -140,20 +141,7 @@ function setRateLimitHeaders(c: Context, limit: number, result: RateLimitResult)
   c.header('RateLimit-Reset', String(result.resetSeconds));
 }
 
-/**
- * Deterministic JSON serialization: sort keys at every nesting level.
- * Same input always produces byte-identical output.
- */
-function deterministicStringify(obj: unknown): string {
-  return JSON.stringify(obj, (_key, value) => {
-    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      return Object.fromEntries(
-        Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-      );
-    }
-    return value;
-  });
-}
+// deterministicStringify imported from ./utils.js
 
 function problemResponse(c: Context, problem: HostedProblemDetails): Response {
   c.header('Content-Type', PROBLEM_CONTENT_TYPE);
