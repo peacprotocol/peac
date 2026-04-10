@@ -8,8 +8,8 @@
   "metrics": {
     "tests": 7241,
     "test_files": 281,
-    "published_packages": 35,
-    "build_targets": 97,
+    "published_packages": 36,
+    "build_targets": 98,
     "conformance_requirement_ids": 192,
     "conformance_sections": 18
   },

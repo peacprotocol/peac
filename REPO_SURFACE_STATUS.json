@@ -193,6 +193,14 @@
       "layer": 4,
       "published": true
     },
+    "packages/adapters/managed-agents": {
+      "npm": "@peac/adapter-managed-agents",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true,
+      "note": "Vendor-neutral managed agent runtime event adapter. 6 event families."
+    },
     "packages/adapters/eas": {
       "npm": null,
       "state": "experimental",

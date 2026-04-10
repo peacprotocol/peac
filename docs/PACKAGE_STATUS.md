@@ -44,6 +44,7 @@ Do not edit manually.
 | `packages/adapters/eat`               | `@peac/adapter-eat`               | 0.2  | 4     |
 | `packages/adapters/openai-compatible` | `@peac/adapter-openai-compatible` | 0.2  | 4     |
 | `packages/adapters/openclaw`          | `@peac/adapter-openclaw`          | 0.2  | 4     |
+| `packages/adapters/managed-agents`    | `@peac/adapter-managed-agents`    | 0.2  | 4     |
 | `packages/mappings/acp`               | `@peac/mappings-acp`              | 0.2  | 4     |
 | `packages/mappings/ucp`               | `@peac/mappings-ucp`              | 0.2  | 4     |
 | `packages/mappings/paymentauth`       | `@peac/mappings-paymentauth`      | 0.2  | 4     |

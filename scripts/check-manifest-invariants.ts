@@ -17,6 +17,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { resolvePackagePath } from './lib/resolve-package-path.js';
 
 const ROOT = path.resolve(__dirname, '..');
 const MANIFEST_PATH = path.join(ROOT, 'scripts/publish-manifest.json');
@@ -93,58 +94,11 @@ if (manifest.oidcConfigured) {
 }
 
 // --- 4. Every entry in all arrays resolves to a workspace package ---
-
-// Nested layout mappings (same as check-publish-closure.ts)
-const nestedMappings: Record<string, string> = {
-  'adapter-core': 'packages/adapters/core',
-  'adapter-openclaw': 'packages/adapters/openclaw',
-  'adapter-x402': 'packages/adapters/x402',
-  'adapter-x402-daydreams': 'packages/adapters/x402/daydreams',
-  'adapter-x402-fluora': 'packages/adapters/x402/fluora',
-  'adapter-x402-pinata': 'packages/adapters/x402/pinata',
-  'adapter-openai-compatible': 'packages/adapters/openai-compatible',
-  'adapter-eat': 'packages/adapters/eat',
-  'adapter-did': 'packages/adapters/did',
-  'rails-x402': 'packages/rails/x402',
-  'rails-stripe': 'packages/rails/stripe',
-  'rails-card': 'packages/rails/card',
-  'rails-razorpay': 'packages/rails/razorpay',
-  'mappings-mcp': 'packages/mappings/mcp',
-  'mappings-a2a': 'packages/mappings/a2a',
-  'mappings-acp': 'packages/mappings/acp',
-  'mappings-aipref': 'packages/mappings/aipref',
-  'mappings-rsl': 'packages/mappings/rsl',
-  'mappings-tap': 'packages/mappings/tap',
-  'mappings-ucp': 'packages/mappings/ucp',
-  'mappings-content-signals': 'packages/mappings/content-signals',
-  'mappings-paymentauth': 'packages/mappings/paymentauth',
-  'mappings-intoto': 'packages/mappings/intoto',
-  'mappings-slsa': 'packages/mappings/slsa',
-  'capture-core': 'packages/capture/core',
-  'capture-node': 'packages/capture/node',
-  'sdk-js': 'packages/sdk-js',
-  pref: 'packages/aipref',
-  sdk: 'packages/sdk-js',
-  'net-node': 'packages/net/node',
-  'transport-grpc': 'packages/transport/grpc',
-  disc: 'packages/discovery',
-};
-
-function resolvePackageDir(npmName: string): string {
-  const shortName = npmName.replace('@peac/', '');
-  const flatDir = path.join(ROOT, 'packages', shortName);
-  if (fs.existsSync(path.join(flatDir, 'package.json'))) {
-    return flatDir;
-  }
-  if (nestedMappings[shortName]) {
-    return path.join(ROOT, nestedMappings[shortName]);
-  }
-  return flatDir;
-}
+// Uses shared resolver from scripts/lib/resolve-package-path.ts
 
 function checkWorkspaceResolution(name: string, arr: string[]): void {
   for (const pkg of arr) {
-    const dir = resolvePackageDir(pkg);
+    const dir = resolvePackagePath(pkg);
     const pkgJson = path.join(dir, 'package.json');
     if (!fs.existsSync(pkgJson)) {
       errors.push(
