@@ -188,6 +188,21 @@
       "verified_by": "pnpm audit --prod shows no HIGH for defu",
       "owner": "jithinraj",
       "added_at": "2026-04-07"
+    },
+    {
+      "advisory_id": "GHSA-q4gf-8mx6-v5v3",
+      "package": "next",
+      "reason": "Next.js Server Components DoS (HIGH): dev-only dependency in surfaces/nextjs. Not in published packages or production paths.",
+      "why_not_exploitable": "next.js is a devDependency used only in the surfaces/nextjs experimental middleware. Not included in any published @peac/* package. No production server runs Next.js.",
+      "where_used": "surfaces/nextjs devDependency",
+      "expires_at": "2026-07-09",
+      "remediation": "Update next to >=15.5.15 when surfaces/nextjs middleware is actively maintained",
+      "issue_url": "https://github.com/advisories/GHSA-q4gf-8mx6-v5v3",
+      "scope": "dev",
+      "dependency_chain": ["surfaces/nextjs/middleware", "next@15.3.3"],
+      "verified_by": "pnpm audit --prod shows no next.js vulnerabilities",
+      "owner": "jithinraj",
+      "added_at": "2026-04-11"
     }
   ]
 }
