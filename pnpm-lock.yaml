@@ -716,6 +716,19 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/x402-upto-evidence:
+    dependencies:
+      '@peac/adapter-x402':
+        specifier: workspace:*
+        version: link:../../packages/adapters/x402
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/x402-weather-proof:
     dependencies:
       '@peac/adapter-x402':

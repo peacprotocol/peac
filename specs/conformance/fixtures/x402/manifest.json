@@ -1,8 +1,8 @@
 {
   "$schema": "../manifest.schema.json",
   "name": "x402-adapter",
-  "version": "0.12.7",
-  "description": "Conformance vectors for @peac/adapter-x402 verification and record mapping (v0.12.1 upstream sync)",
+  "version": "0.12.9",
+  "description": "Conformance vectors for @peac/adapter-x402 verification and record mapping (v0.12.1 upstream sync; v0.12.9 scheme coverage clarification)",
   "profile": "peac-x402-offer-receipt/0.2",
   "fixture_kinds": ["offer_verification", "receipt_verification", "consistency_verification"],
   "categories": {
@@ -14,7 +14,8 @@
         "valid-jws.json",
         "valid-eip712-union.json",
         "valid-jws-union.json",
-        "receipt-valid.json"
+        "receipt-valid.json",
+        "upto-valid-evm-eip712.json"
       ]
     },
     "invalid": {
@@ -40,7 +41,8 @@
         "jws-wrong-segment-count.json",
         "jws-padded-base64url.json",
         "jws-non-object-payload.json",
-        "jws-oversize.json"
+        "jws-oversize.json",
+        "upto-scheme-mismatch.json"
       ]
     },
     "edge-cases": {
@@ -111,5 +113,11 @@
       "JWS payload MUST decode to a JSON object (not array, primitive, or null)",
       "Compact JWS MUST NOT exceed maxCompactJwsBytes (default 64 KiB) before decoding"
     ]
+  },
+  "scheme_coverage": {
+    "description": "PEAC's posture on x402 payment schemes. PEAC preserves and term-matches the scheme identifier as a required string and does not interpret scheme-specific invariants. See docs/specs/X402-PROFILE.md § 3.0 and docs/compatibility/x402-scheme-coverage.md.",
+    "exact": "covered (end-to-end: adapter, fixtures, examples)",
+    "upto_evm": "covered (evidence-preservation only; PEAC does not enforce single-use, time bounds, recipient binding, facilitator binding, max-vs-actual settlement correctness)",
+    "upto_svm": "not claimed (upstream RFC https://github.com/x402-foundation/x402/issues/1642 unresolved)"
   }
 }

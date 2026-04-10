@@ -1,0 +1,44 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-upto-scheme-mismatch",
+  "kind": "offer_verification",
+  "description": "Scheme mismatch between signed offer (upto) and accept entry (exact) - MUST fail with accept_term_mismatch",
+  "category": "invalid",
+  "threat_model": "scheme is a required term-matched field. A tampered or misconfigured accept entry claiming a different scheme than the signed offer MUST be rejected. This guards against silent scheme coercion where a relay or proxy swaps exact and upto accept entries while leaving the signed payload intact.",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": 1,
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "resourceUrl": "https://fixture.example.com/resource",
+        "scheme": "upto"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712",
+      "acceptIndex": 0
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000",
+        "scheme": "exact"
+      }
+    ]
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "accept_term_mismatch",
+        "field": "acceptIndex"
+      }
+    ]
+  },
+  "notes": "Overclaim-guard vector. The signed offer carries scheme: upto but the accept entry advertises scheme: exact. matchAcceptTerms detects the mismatch and returns scheme in the mismatches list, causing verification to fail. This regression test prevents any future change that would accidentally normalize or drop scheme from the term-matching set."
+}

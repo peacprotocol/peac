@@ -145,6 +145,40 @@ const v2Adapter = new X402Adapter({ dialect: 'v2' });
 | Solana Mainnet    | `solana:mainnet` |
 | Solana Devnet     | `solana:devnet`  |
 
+## Payment schemes
+
+Upstream x402 distinguishes two payment schemes today: `exact` (single-shot
+fixed amount) and `upto` (usage-based with an authorized maximum). PEAC is
+scheme-agnostic: the adapter preserves the `scheme` identifier verbatim and
+term-matches it alongside `network`, `asset`, `payTo`, and `amount` without
+interpreting scheme-specific semantics.
+
+Three distinct states to keep separate:
+
+| Truth surface                  | `exact`                                                                | `upto`                                                                                                                                            |
+| ------------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Upstream x402 protocol         | Stable; documented in `specs/schemes/exact/scheme_exact.md`            | Stable on EVM; documented in `specs/schemes/upto/scheme_upto.md`; Solana RFC open at [#1642](https://github.com/x402-foundation/x402/issues/1642) |
+| Upstream TS / Go / Python SDKs | Available across TS, Go, and Python                                    | Available in TS and Go; Python not yet                                                                                                            |
+| PEAC-tested (v0.12.9)          | Covered end-to-end by the adapter, fixtures, and examples in this repo | Evidence capture works via the same scheme-agnostic code path; fixture-backed, but PEAC does not enforce scheme-specific invariants               |
+
+PEAC's role for `upto` specifically:
+
+- **Preserves and surfaces** the `scheme: "upto"` string identifier in the
+  interaction record (available at `proofs.x402.offer` for both v1 and v2, and
+  at `evidence.scheme` for v2)
+- **Term-matches** required fields already present in the signed artifact
+- **Does NOT enforce** scheme-specific invariants such as single-use
+  authorization, time bounds, recipient binding, facilitator binding, or
+  max-vs-actual settlement correctness
+
+Those invariants are the x402 scheme layer's responsibility and are enforced
+on-chain or by the facilitator, not by PEAC.
+
+See [`docs/specs/X402-PROFILE.md § 3.0`](../specs/X402-PROFILE.md) for the
+normative specification and
+[`docs/compatibility/x402-scheme-coverage.md`](../compatibility/x402-scheme-coverage.md)
+for the current compatibility matrix.
+
 ## Discovery with peac.txt
 
 Publish payment terms at `/.well-known/peac.txt`:

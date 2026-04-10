@@ -10,7 +10,36 @@ pnpm add @peac/adapter-x402
 
 ## What It Does
 
-`@peac/adapter-x402` is a Layer 4 adapter that verifies x402 offer and receipt artifacts, extracts receipt data from HTTP response headers, and maps the results into canonical PEAC interaction records. It implements a verification-first architecture with layered checks: wire validation, term-matching, offer-receipt consistency, and opt-in cryptographic verification. The adapter reads both PEAC-Receipt and upstream x402 response headers (v1 and v2) with priority-based fallback.
+`@peac/adapter-x402` is a Layer 4 adapter that verifies x402 offer and receipt artifacts, extracts receipt data from HTTP response headers, and maps the results into canonical PEAC interaction records. It implements a verification-first architecture with layered checks: wire validation, term-matching (including the `scheme` identifier), offer-receipt consistency, and opt-in cryptographic verification. The adapter reads both PEAC-Receipt and upstream x402 response headers (v1 and v2) with priority-based fallback.
+
+## Scheme scope
+
+The adapter is **scheme-agnostic at the verification layer**. It preserves and
+term-matches the x402 `scheme` identifier (`exact`, `upto`, or any future
+upstream scheme) as a required string alongside `network`, `asset`, `payTo`,
+and `amount`. The raw signed artifact is stored verbatim at
+`proofs.x402.offer`, so downstream auditors retain the full scheme-level
+payload for review.
+
+The adapter **does not enforce scheme-specific invariants**. In particular,
+for `upto` it does not enforce:
+
+- Single-use authorization
+- Time bounds (`validAfter` / `validBefore`)
+- Recipient binding to a specific payee
+- Facilitator binding
+- Max-amount enforcement on-chain
+- Phase-dependent amount semantics (verify returns authorized maximum; settle
+  returns actual charged amount)
+
+Those invariants are the x402 scheme layer's responsibility and are enforced
+on-chain or by the facilitator, not by PEAC. PEAC captures and surfaces the
+scheme identifier so downstream auditors can reason about phase semantics at
+review time.
+
+For current upstream truth and the PEAC-tested compatibility matrix, see
+[`docs/compatibility/x402-scheme-coverage.md`](../../../docs/compatibility/x402-scheme-coverage.md)
+and [`docs/specs/X402-PROFILE.md § 3.0`](../../../docs/specs/X402-PROFILE.md).
 
 ## How Do I Use It?
 

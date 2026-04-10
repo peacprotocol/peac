@@ -44,6 +44,55 @@ The distinction is critical:
 
 The adapter expects two signed artifacts from the x402 Offer/Receipt flow:
 
+### 3.0 Payment Schemes
+
+Upstream x402 defines `scheme` as an open string identifier for the payment
+handshake semantics that a given offer uses. As of April 10, 2026, the
+upstream repository at [`x402-foundation/x402`](https://github.com/x402-foundation/x402)
+documents two schemes under `specs/schemes/`:
+
+| Scheme  | Upstream spec                         | Summary                                                                                                                                                             |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exact` | `specs/schemes/exact/scheme_exact.md` | Single-shot payment for a fixed amount; payer authorizes and settles the exact amount                                                                               |
+| `upto`  | `specs/schemes/upto/scheme_upto.md`   | Usage-based pricing with a payer-authorized maximum; actual charged amount at settlement may be less than the authorized maximum (phase-dependent amount semantics) |
+
+**PEAC's scheme posture is scheme-agnostic pass-through.** The adapter:
+
+- **Preserves** the `scheme` string verbatim in the raw artifact stored at
+  `proofs.x402.offer` (and in the V2 `evidence.scheme` field via
+  [`toPeacRecordV2`](../../packages/adapters/x402/src/map.ts))
+- **Term-matches** `scheme` as a required string alongside `network`, `asset`,
+  `payTo`, and `amount` (see
+  [`matchAcceptTerms`](../../packages/adapters/x402/src/verify.ts) at
+  `verify.ts:750-776`)
+- **Does NOT interpret** scheme-specific semantics
+
+**PEAC does NOT enforce any of the following** `upto`-specific MUST properties
+from the upstream scheme spec:
+
+- Single-use authorization (same authorization cannot be redeemed twice)
+- Time-bound validity (`validAfter` / `validBefore`)
+- Recipient binding to a specific payee
+- Facilitator binding to a specific on-chain settlement actor
+- Max-amount enforcement (authorized maximum as an on-chain cap)
+- Phase-dependent amount semantics (verify returns the authorized maximum;
+  settle returns the actual charged amount, which may be less)
+
+Those invariants are the **x402 scheme layer's responsibility** and are
+enforced on-chain or by the facilitator, not by PEAC. PEAC captures and
+surfaces the scheme identifier in interaction records so downstream auditors
+can reason about phase semantics at review time.
+
+**SVM `upto` is upstream-pending.** The RFC for `upto` on Solana is tracked at
+[x402-foundation/x402#1642](https://github.com/x402-foundation/x402/issues/1642)
+and is unresolved at the time of this writing. PEAC does not claim support for
+`upto` on Solana. On EVM, PEAC's pass-through behavior works today for `upto`
+evidence capture because the adapter does not interpret scheme-specific fields.
+
+See also: [x402 Scheme Coverage in PEAC](../compatibility/x402-scheme-coverage.md)
+for the current compatibility matrix (upstream protocol / facilitator /
+PEAC-tested).
+
 ### 3.1 Signed Offer (Discriminated Union)
 
 Upstream uses discriminated unions keyed by `format` (DD-170):
@@ -69,7 +118,7 @@ type SignedOffer = RawEIP712SignedOffer | RawJWSSignedOffer;
 interface OfferPayload {
   version: number; // Schema version (e.g., 1)
   resourceUrl: string; // Resource this offer is for (required)
-  scheme: string; // Payment scheme (e.g., "exact") (required)
+  scheme: string; // Payment scheme (e.g., "exact", "upto") (required; see § 3.0)
   validUntil: number; // Expiry as Unix epoch seconds (0 = no expiry in EIP-712)
   network: string; // CAIP-2 identifier (e.g., "eip155:8453")
   asset: string; // Payment asset (e.g., "USDC")
