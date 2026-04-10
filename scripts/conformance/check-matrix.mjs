@@ -10,12 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  CoverageStatus,
-  COVERAGE_LABELS,
-  classifyCoverage,
-  buildCoveredIds,
-} from './core.mjs';
+import { CoverageStatus, COVERAGE_LABELS, classifyCoverage, buildCoveredIds } from './core.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
@@ -63,17 +58,9 @@ for (const section of registry.sections) {
 
 const orphanIds = [];
 for (const id of coveredIds) {
-  // Exempt IDs from v0.12.6/v0.12.7 features not yet formally registered
-  // (DID resolution, gRPC, PKCE, receipt-url, supply-chain, x402-v2)
-  const PENDING_REGISTRATION = new Set([
-    'DID-RES-001','DID-RES-002','DID-RES-003','DID-RES-004','DID-RES-005','DID-RES-006','DID-RES-007',
-    'GRPC-META-001','GRPC-META-002','GRPC-META-003',
-    'PKCE-001','PKCE-002','PKCE-003','PKCE-004',
-    'RURL-001','RURL-002','RURL-003','RURL-004',
-    'SC-001','SC-003','SC-004',
-    'X402V2-001','X402V2-002','X402V2-003','X402V2-004',
-  ]);
-  if (!registryIds.has(id) && !id.startsWith('CARRIER-') && !PENDING_REGISTRATION.has(id)) {
+  // All previously pending IDs are now formally registered (v0.12.9 PR 6).
+  // Zero temporary exemptions remain.
+  if (!registryIds.has(id) && !id.startsWith('CARRIER-')) {
     orphanIds.push(id);
   }
 }

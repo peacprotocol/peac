@@ -66,8 +66,12 @@ for (const section of registry.sections) {
       driftCount++;
     }
 
-    // Verify the source fragment still exists in the spec
-    if (!specContent.includes(req.source_fragment)) {
+    // Verify the source fragment still exists in the spec.
+    // Non-WIRE02 IDs (X402V2, DID-RES, PKCE, GRPC-META, RURL, SC) reference
+    // different governing specs, so the spec-presence check only applies to
+    // WIRE02 entries. Hash integrity is still verified for all entries above.
+    const isWire02 = req.id.startsWith('WIRE02-');
+    if (isWire02 && !specContent.includes(req.source_fragment)) {
       console.error(
         `DRIFT: ${req.id} source fragment not found in ${registry.spec_file}\n` +
           `  fragment: "${req.source_fragment.slice(0, 80)}..."\n`
