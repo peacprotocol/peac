@@ -46,7 +46,7 @@ Link: </.well-known/peac-issuer.json>; rel="issuer"
 
 ## Quick start
 
-**Requirements:** Node 24 (tested); Node 22+ (compatible)
+**Requirements:** Node 24 (tested); Node 22+ (compatible). [Go 1.26+](sdks/go/) and [Python 3.12+](examples/python/) also supported.
 
 ### Verify a receipt
 
@@ -129,7 +129,7 @@ PEAC is most useful where logs are not enough: payments, cross-boundary verifica
 - **I want to verify a receipt**: [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md) (5 minutes)
 - **I build A2A agents**: [A2A Integration Kit](integrator-kits/a2a/README.md)
 
-More paths: [Go SDK](sdks/go/) | [paymentauth Kit](integrator-kits/paymentauth/README.md) | [ACP Kit](integrator-kits/acp/README.md) | [x402 Kit](integrator-kits/x402/README.md) | [Governance Mappings](docs/governance/)
+More paths: [Go SDK](sdks/go/) | [Python examples](examples/python/) | [paymentauth Kit](integrator-kits/paymentauth/README.md) | [ACP Kit](integrator-kits/acp/README.md) | [x402 Kit](integrator-kits/x402/README.md) | [Governance Mappings](docs/governance/)
 
 ---
 
