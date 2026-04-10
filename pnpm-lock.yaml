@@ -352,6 +352,19 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/managed-agents-export:
+    dependencies:
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/mcp-tool-call:
     dependencies:
       '@peac/crypto':
