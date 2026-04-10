@@ -4,28 +4,28 @@ Current as of v0.12.7.
 
 ## Wire Format Support
 
-| Surface                    | Wire 0.2 (`interaction-record+jwt`)                            | Wire 0.1 (`peac-receipt/0.1`)                                        | Status                                        |
-| -------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------- |
-| `@peac/protocol` (TS/Node) | Full: `issue()` + `verifyLocal()`                              | Legacy verify only (`verifyLocalWire01()`, not exported from barrel) | **default**                                   |
-| `@peac/crypto` (TS/Node)   | Full: dual-stack sign/verify/decode                            | Decode and verify only                                               | **default**                                   |
-| `@peac/schema` (TS/Node)   | Full: `Wire02ClaimsSchema`, extension groups, type enforcement | Legacy `ReceiptClaimsSchema`                                         | **default**                                   |
-| `@peac/cli`                | Full                                                           | -                                                                    | **default**                                   |
-| `@peac/mcp-server`         | Full (5 tools)                                                 | -                                                                    | **default**                                   |
-| `@peac/middleware-express` | Full                                                           | -                                                                    | **default**                                   |
-| Go SDK (`sdks/go/`)        | -                                                              | Issue + verify                                                       | **compat-only** (Wire 0.2 in v0.12.8)         |
-| Python                     | -                                                              | -                                                                    | **not started** (API-first via Hosted Verify) |
-| `@peac/core`               | -                                                              | Full (Wire 0.9 locked)                                               | **deprecated** (removal: v0.13.0)             |
-| `@peac/sdk`                | -                                                              | Full (Wire 0.1)                                                      | **archived** (use `@peac/protocol`)           |
+| Surface                    | Wire 0.2 (`interaction-record+jwt`)                            | Wire 0.1 (`peac-receipt/0.1`)                                        | Status                                                       |
+| -------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `@peac/protocol` (TS/Node) | Full: `issue()` + `verifyLocal()`                              | Legacy verify only (`verifyLocalWire01()`, not exported from barrel) | **default**                                                  |
+| `@peac/crypto` (TS/Node)   | Full: dual-stack sign/verify/decode                            | Decode and verify only                                               | **default**                                                  |
+| `@peac/schema` (TS/Node)   | Full: `Wire02ClaimsSchema`, extension groups, type enforcement | Legacy `ReceiptClaimsSchema`                                         | **default**                                                  |
+| `@peac/cli`                | Full                                                           | -                                                                    | **default**                                                  |
+| `@peac/mcp-server`         | Full (5 tools)                                                 | -                                                                    | **default**                                                  |
+| `@peac/middleware-express` | Full                                                           | -                                                                    | **default**                                                  |
+| Go SDK (`sdks/go/`)        | -                                                              | Issue + VerifyLocal (Interaction Record format)                      | **default** (core issue/verify); middleware **experimental** |
+| Python                     | -                                                              | httpx examples (`>=3.12`)                                            | **examples only** (API-first via Hosted Verify)              |
+| `@peac/core`               | -                                                              | Full (Wire 0.9 locked)                                               | **deprecated** (removal: v0.13.0)                            |
+| `@peac/sdk`                | -                                                              | Full (Wire 0.1)                                                      | **archived** (use `@peac/protocol`)                          |
 
 ## Runtime Environments
 
-| Environment                  | Status            | Notes                                                     |
-| ---------------------------- | ----------------- | --------------------------------------------------------- |
-| Node.js 24 (Active LTS)      | **Required**      | Canonical development and CI lane                         |
-| Node.js 22 (Maintenance LTS) | **Compatibility** | `engines.node >= 22.0.0` floor                            |
-| Node.js 25+                  | **Advisory**      | Forward-compat CI lane                                    |
-| Go 1.22+                     | **Partial**       | Wire 0.1 only; Wire 0.2 in v0.12.8                        |
-| Browser / Edge runtime       | **Partial**       | `@peac/schema` (no-network), verifier UI, worker surfaces |
+| Environment                  | Status            | Notes                                                                  |
+| ---------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| Node.js 24 (Active LTS)      | **Required**      | Canonical development and CI lane                                      |
+| Node.js 22 (Maintenance LTS) | **Compatibility** | `engines.node >= 22.0.0` floor                                         |
+| Node.js 25+                  | **Advisory**      | Forward-compat CI lane                                                 |
+| Go 1.26+                     | **Default**       | Interaction Record format (core issue/verify); middleware experimental |
+| Browser / Edge runtime       | **Partial**       | `@peac/schema` (no-network), verifier UI, worker surfaces              |
 
 ## Hosted Services
 

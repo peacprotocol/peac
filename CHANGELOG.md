@@ -5,6 +5,48 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.8] - 2026-04-10
+
+### Added
+
+- **Hosted Verify API** (`POST /v1/verify`): deterministic DD-210 verification reports, RFC 9457 buyer-grade error details, OpenAPI 3.1 spec, threat-to-test traceability matrix, opt-in issuer discovery (DD-211)
+- **Hosted Issue alpha** (`POST /v1/issue`): provisional BYO-key endpoint, disabled by default (sensitive-key transit model), canonical pillar validation, byte-level size enforcement (DD-212)
+- **Go SDK Interaction Record parity**: `Issue()` and `VerifyLocal()` for current stable format, RFC 8785 JCS with byte-identical cross-language parity (22 golden vectors), JOSE hardening, policy binding, trailing-input rejection (DD-209)
+- **Cursor and Codex installability packaging**: `@peac/kernel` tarball hygiene fix, shared install validation script, Codex MCP config
+- **Smithery packaging validation**: real YAML parsing, sandboxed commandFunction evaluation, wired into `verify:distribution`
+- **Python API-first examples**: httpx-based verification (Python 3.12+), Express middleware quickstart
+- **Managed Agents session evidence summary demo**: 6 event families mapped to Interaction Record types
+
+### Changed
+
+- Go SDK rewritten for Interaction Record format (`interaction-record+jwt`); Wire 0.1 types removed
+- Go modules upgraded: `go 1.26`, `gin v1.12.0`, `golang.org/x/crypto v0.48.0`, `golangci-lint v2.9.0`
+- `typecheck:apps` now fully blocking in CI (ambient `@peac/core` declarations)
+- `bump-version.mjs` no longer overwrites conformance fixture version fields
+- Contract error codes aligned with kernel-canonical names
+- `E_PAYLOAD_TOO_LARGE` added to kernel error taxonomy
+- `DefaultReceiptTyp` in Go JWS now points to `interaction-record+jwt`
+- Perf SLO threshold relaxed to 15ms p95 for CI stability (10ms production target)
+
+### Breaking (Go SDK)
+
+The Go SDK core types and functions have been rewritten for the Interaction Record format. Wire 0.1 types (`PEACReceiptClaims`, `PaymentEvidence`) and functions (legacy `Issue()`, `Verify()`) have been replaced. The `jwks`, `evidence`, and `jws` packages are preserved. The `policy` package is deprecated.
+
+### Known Limitations
+
+- Conformance coverage gate passes with a temporary pending-registration exemption for 25 historical requirement IDs from v0.12.6/v0.12.7 features (DID resolution, gRPC, PKCE, receipt-url, supply-chain, x402-v2); formal registry registration is deferred to a follow-up cleanup
+- Perf CI gate stabilized: verifyLocal warmup increased to 50 iterations and CI p95 threshold relaxed from 10ms to 15ms for CI variance stability; 10ms remains the production profiling target
+- Hosted Issue is a sensitive-key transit model; disabled by default; provisional surface
+
+### Deferred
+
+- Full Python SDK: v0.12.9+ decision gate
+- Go middleware hardening: v0.12.9
+- `@peac/adapter-anthropic-managed-agents`: v0.12.9 (productized from v0.12.8 sidecar demo)
+- `@peac/mappings-opa`: v0.12.9
+- Hosted Issue GA (non-provisional): v0.13.0
+- Formal conformance registry registration for 25 pending IDs: v0.12.9
+
 ## [0.12.7] - 2026-04-08
 
 Coherence, trust, and installability release. No new protocol surface.
