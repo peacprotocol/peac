@@ -1,0 +1,40 @@
+{
+  "$schema": "../vector.schema.json",
+  "id": "x402-upto-valid-evm-eip712",
+  "kind": "offer_verification",
+  "description": "Valid EIP-712 offer with scheme: upto on EVM - PEAC preserves and term-matches the scheme identifier without interpreting upto-specific invariants",
+  "category": "valid",
+  "input": {
+    "offer": {
+      "payload": {
+        "version": 1,
+        "validUntil": 9999999999,
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "amount": "100000",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "resourceUrl": "https://fixture.example.com/resource",
+        "scheme": "upto"
+      },
+      "signature": "0xababababababababababababababababababababababababababababababababcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd1b",
+      "format": "eip712",
+      "acceptIndex": 0
+    },
+    "accepts": [
+      {
+        "network": "eip155:8453",
+        "asset": "USDC",
+        "payTo": "0x742d35Cc6634C0532925a3b844Bc9e7595f1e123",
+        "amount": "100000",
+        "scheme": "upto"
+      }
+    ]
+  },
+  "expected": {
+    "valid": true,
+    "matchedIndex": 0,
+    "usedHint": true,
+    "errors": []
+  },
+  "notes": "Scheme-agnostic pass-through: PEAC term-matches scheme: upto as a required string alongside network, asset, payTo, and amount. PEAC does NOT enforce upto-specific invariants (single-use authorization, time bounds, recipient binding, facilitator binding, max-amount enforcement, phase-dependent amount). Those are the x402 scheme layer's responsibility. This fixture documents the evidence-preservation contract. See docs/specs/X402-PROFILE.md § 3.0 for the normative statement."
+}

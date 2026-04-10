@@ -134,16 +134,53 @@ const v2Adapter = new X402Adapter({ dialect: 'v2' });
 | `X-PAYMENT`          | `Payment-Required` |
 | `X-PAYMENT-RESPONSE` | `Payment-Response` |
 
-## Supported Networks (CAIP-2)
+## Common CAIP-2 identifiers
 
-| Network           | CAIP-2 ID        |
-| ----------------- | ---------------- |
-| Base Mainnet      | `eip155:8453`    |
-| Base Sepolia      | `eip155:84532`   |
-| Avalanche Mainnet | `eip155:43114`   |
-| Avalanche Fuji    | `eip155:43113`   |
-| Solana Mainnet    | `solana:mainnet` |
-| Solana Devnet     | `solana:devnet`  |
+These are the CAIP-2 network identifiers commonly seen in x402 offers. PEAC
+term-matches `network` as an opaque string and does not maintain a closed
+allowlist of networks.
+
+| Network           | CAIP-2 ID                                 |
+| ----------------- | ----------------------------------------- |
+| Base Mainnet      | `eip155:8453`                             |
+| Base Sepolia      | `eip155:84532`                            |
+| Polygon Mainnet   | `eip155:137`                              |
+| Avalanche Mainnet | `eip155:43114`                            |
+| Avalanche Fuji    | `eip155:43113`                            |
+| Solana Mainnet    | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| Solana Devnet     | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
+
+Solana CAIP-2 identifiers use the genesis-block hash prefix per
+[CAIP-2](https://chainagnostic.org/CAIPs/caip-2); the plain-label forms
+`solana:mainnet` and `solana:devnet` are not canonical.
+
+## Payment schemes
+
+Upstream x402 distinguishes two payment schemes today: `exact` (single-shot
+fixed amount) and `upto` (usage-based with an authorized maximum). PEAC is
+scheme-agnostic: the adapter preserves the `scheme` identifier verbatim and
+term-matches it alongside `network`, `asset`, `payTo`, and `amount` without
+interpreting scheme-specific semantics.
+
+PEAC's role for any x402 scheme, stated precisely:
+
+- **Preserves and surfaces** the `scheme` string identifier in the
+  interaction record (available at `proofs.x402.offer` for both v1 and v2, and
+  at `evidence.scheme` for v2)
+- **Term-matches** required fields already present in the signed artifact
+- **Does NOT enforce** scheme-specific invariants such as single-use
+  authorization, time bounds, recipient binding, facilitator binding, or
+  max-vs-actual settlement correctness
+
+Those invariants are the x402 scheme layer's responsibility and are enforced
+on-chain or by the facilitator, not by PEAC.
+
+For the authoritative compatibility matrix that distinguishes three truth
+surfaces — upstream x402 protocol, upstream facilitator and SDK state, and
+PEAC-tested behavior — see
+[`docs/compatibility/x402-scheme-coverage.md`](../compatibility/x402-scheme-coverage.md).
+The normative specification is
+[`docs/specs/X402-PROFILE.md § 3.0`](../specs/X402-PROFILE.md).
 
 ## Discovery with peac.txt
 
