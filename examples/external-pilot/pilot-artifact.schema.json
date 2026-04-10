@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://www.peacprotocol.org/schemas/pilot-artifact.schema.json",
   "title": "PEAC Pilot Artifact",
-  "description": "Buyer-readable pilot artifact schema. Emitted by examples/external-pilot/pilot.ts and validated by scripts/verify-pilot-output.sh. Draft choice: JSON Schema draft-07. Rationale: draft-07 is the default supported by ajv 8 without additional meta-schema registration; draft 2020-12 would require ajv/dist/2020 and an extra addMetaSchema call for negligible benefit here (no $dynamicRef, no unevaluatedProperties). Validator: ajv 8 with ajv-formats for uri and date-time. Golden artifact shape: examples/external-pilot/golden-artifact.json carries a non-schema description field that the gate script strips before validation; all other fields match this schema exactly.",
+  "description": "Inspectable pilot artifact schema. Emitted by examples/external-pilot/pilot.ts and validated by scripts/verify-pilot-output.sh. Draft choice: JSON Schema draft-07. Rationale: draft-07 is the default supported by ajv 8 without additional meta-schema registration; draft 2020-12 would require ajv/dist/2020 and an extra addMetaSchema call for negligible benefit here (no $dynamicRef, no unevaluatedProperties). Validator: ajv 8 with ajv-formats for uri and date-time. Golden artifact shape: examples/external-pilot/golden-artifact.json carries a non-schema description field that the gate script strips before validation; all other fields match this schema exactly.",
   "type": "object",
   "required": [
     "pilot_id",

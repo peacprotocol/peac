@@ -1,6 +1,6 @@
 # External Pilot Kit
 
-Self-contained pilot kit for a non-Originary entity to issue a PEAC Interaction Record and verify it through a self-hostable reference verifier API.
+Self-contained pilot kit for an independent external entity to issue a PEAC Interaction Record and verify it through a self-hostable reference verifier API.
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ pnpm demo --verifier-url=https://verify.example.com
 2. Issues a signed Interaction Record with your issuer URL
 3. Verifies locally (always works, no network needed)
 4. Optionally verifies via a reference verifier API
-5. Produces a buyer-readable JSON artifact
+5. Writes a deterministic, inspectable JSON artifact that passes the schema gate
 
 ## Pilot Artifact
 

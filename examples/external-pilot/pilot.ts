@@ -1,9 +1,10 @@
 /**
  * External Pilot Kit
  *
- * Self-contained script for a non-Originary entity to issue a PEAC
- * Interaction Record and verify it through a self-hostable reference
- * verifier API. Produces a buyer-readable proof artifact.
+ * Self-contained script for an independent external entity to issue a PEAC
+ * Interaction Record and verify it through a self-hostable reference verifier
+ * API. Produces a deterministic, inspectable JSON artifact that passes the
+ * schema gate.
  *
  * Supports both local and deployed reference verifier paths:
  *   --verifier-url http://localhost:3000 (default: local self-hosted)
