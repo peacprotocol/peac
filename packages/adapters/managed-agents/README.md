@@ -38,6 +38,8 @@ const summary = buildSessionSummary([result1.jws, result2.jws, result3.jws]);
 // { sessionId, receipts: 3, families: ['session', 'task', ...], issuer }
 ```
 
+`buildSessionSummary()` decodes JWS payloads to extract metadata but does **not** verify signatures. Callers must verify receipts first (e.g., via `verifyLocal()` from `@peac/protocol`). Throws on malformed JWS input.
+
 ## Design
 
 - **Vendor-neutral:** No vendor SDK dependencies. The `provider` field is always caller-supplied.

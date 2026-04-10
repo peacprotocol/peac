@@ -52,6 +52,8 @@ const summary = buildSessionSummary(receipts);
 // { sessionId, receipts: 6, families: [...], issuer }
 ```
 
+`buildSessionSummary()` decodes JWS payloads to extract metadata but does **not** verify signatures. Callers must verify receipts first (e.g., via `verifyLocal()`). Throws on malformed JWS input.
+
 ## Provider Neutrality
 
 The `provider` field is always caller-supplied. No vendor SDK dependencies exist. The package produces identical Interaction Record shapes regardless of which provider string is passed.

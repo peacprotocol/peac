@@ -34,7 +34,12 @@ function packageDir(npmName: string): string {
     return flatDir;
   }
 
-  // Check nested layouts
+  // Check nested layouts.
+  // INVARIANT: Every new nested package (packages/adapters/*, packages/mappings/*,
+  // packages/rails/*, packages/capture/*, packages/transport/*, packages/net/*)
+  // must be added here. The flat-path fallback only works for top-level packages
+  // like packages/kernel. Failure to add an entry causes the publish-manifest
+  // closure check to fail in CI with "package.json not found."
   const nestedMappings: Record<string, string> = {
     'adapter-core': 'packages/adapters/core',
     'adapter-openclaw': 'packages/adapters/openclaw',
