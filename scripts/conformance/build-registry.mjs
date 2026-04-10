@@ -10,7 +10,7 @@
  * and writes specs/conformance/requirement-ids.json.
  */
 import { createHash } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -375,21 +375,39 @@ for (const [sectionNum, reqs] of [...sectionMap.entries()].sort((a, b) => a[0] -
   });
 }
 
+// --- Compose with extension registry (non-WIRE02 namespaces) ---
+// Extension requirements are managed by build-extension-registry.mjs and
+// stored in specs/conformance/extension-requirement-ids.json. This composition
+// step merges them into the final registry output.
+const extensionPath = join(ROOT, 'specs/conformance/extension-requirement-ids.json');
+let extensionSections = [];
+try {
+  const ext = JSON.parse(readFileSync(extensionPath, 'utf-8'));
+  extensionSections = ext.sections || [];
+  console.log(
+    `Extension registry: ${ext.total_requirements} requirements across ${extensionSections.length} sections`
+  );
+} catch {
+  console.log('No extension registry found (extension-requirement-ids.json absent or invalid)');
+}
+
+const allSections = [...sections, ...extensionSections];
+
 const registry = {
   $schema: 'https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json',
   version: VERSION,
   spec_file: 'docs/specs/WIRE-0.2.md',
-  sections,
+  sections: allSections,
 };
 
 const outPath = join(ROOT, 'specs/conformance/requirement-ids.json');
 writeFileSync(outPath, JSON.stringify(registry, null, 2) + '\n');
 
-const totalReqs = sections.reduce((sum, s) => sum + s.requirements.length, 0);
+const totalReqs = allSections.reduce((sum, s) => sum + s.requirements.length, 0);
 console.log(`Registry written: ${outPath}`);
 console.log(`Total requirements: ${totalReqs}`);
-console.log(`Sections: ${sections.length}`);
-for (const s of sections) {
+console.log(`Sections: ${allSections.length}`);
+for (const s of allSections) {
   console.log(
     `  Section ${s.section_number} (${s.section_title}): ${s.requirements.length} requirements`
   );

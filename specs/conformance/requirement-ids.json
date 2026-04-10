@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json",
-  "version": "0.12.9",
+  "version": "0.12.8",
   "spec_file": "docs/specs/WIRE-0.2.md",
   "sections": [
     {
@@ -2171,14 +2171,15 @@
       "section_number": 21,
       "section_title": "x402 V2 Wire Extensions",
       "section_anchor": "x402-v2-wire-extensions",
+      "governing_spec": "docs/specs/X402-V2-PROFILE.md",
       "requirements": [
         {
           "id": "X402V2-001",
           "keyword": "MUST",
           "summary": "V2 offers must include maxTimeoutSeconds as a positive number",
           "source_fragment": "maxTimeoutSeconds: must be a positive number (duration, not epoch)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:41664ac39ee87a9673a5c40bce4e9e8451906a1537fd2df4405da8412d73ccd5",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2187,8 +2188,8 @@
           "keyword": "MUST",
           "summary": "V2 verification rejects offers when supportedVersions excludes 2",
           "source_fragment": "V2 offers require supportedVersions to include 2",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:0a0ba267065f46dfd7403bd2f25a091fdea1fe4942a5720bb4ba8ddba15d9488",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2197,8 +2198,8 @@
           "keyword": "MUST",
           "summary": "Unknown V2 shapes rejected in strict mode",
           "source_fragment": "Unknown V2 shapes are rejected in strict mode (fail-closed)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:d670f693c84d4ae7b680a8c30d3ce8426611fcf729f3f5d1fb3be8b037d2ab4e",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2207,8 +2208,8 @@
           "keyword": "MUST",
           "summary": "Default supportedVersions does not include 2",
           "source_fragment": "Default: [1] (V2 rejected unless explicitly enabled)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:cad723f65f1128a1444d551ad2c290419b7dacb8b315bb6cfa57a9432b6531bc",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         }
@@ -2218,14 +2219,15 @@
       "section_number": 22,
       "section_title": "DID Resolution",
       "section_anchor": "did-resolution",
+      "governing_spec": "docs/specs/DID-RESOLUTION-PROFILE.md",
       "requirements": [
         {
           "id": "DID-RES-001",
           "keyword": "MUST",
           "summary": "did:key resolves z (base58btc) multibase prefix",
           "source_fragment": "Supports both multibase forms: z (base58btc) and u (base64url)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:4db96bbc44ae26a61f19d6200c043166512dd922e77aea1721c5f15cb4a8ef38",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2234,8 +2236,8 @@
           "keyword": "MUST",
           "summary": "did:key resolves u (base64url) multibase prefix",
           "source_fragment": "u prefix: base64url encoding (multibase)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:cd3bcc42a44bac82ef1dc06d492f33ef731c1a957ddf9378090206a62f6127b7",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2244,8 +2246,8 @@
           "keyword": "MUST",
           "summary": "did:key rejects non-Ed25519 keys without timing oracle",
           "source_fragment": "Non-Ed25519 keys are rejected without oracle (no early-return, prevents timing side-channels)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:4347a0d7736d8e7d209cf6b5512433ae6495c10431ad0f4f455ee5cea552d23a",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2254,8 +2256,8 @@
           "keyword": "MUST",
           "summary": "did:web transforms path segments to URL path components",
           "source_fragment": "URL transformation: did:web:example.com:path:to transforms to https://example.com/path/to/did.json",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:72b34d5684525bcef1f6f9cb8ee22981b03a089753163f2669e29bb5c0273212",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2264,8 +2266,8 @@
           "keyword": "MUST",
           "summary": "did:web handles percent-encoded port in DID",
           "source_fragment": "Percent-encoded port: did:web:example.com%3A8443 transforms to https://example.com:8443/.well-known/did.json",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:1ae86b0ec77975dad92cf03ace04dc48c46419fc1b7c538da9bc0fb51dbb5149",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2274,8 +2276,8 @@
           "keyword": "MUST",
           "summary": "did:web rejects IP literal hostnames",
           "source_fragment": "IP literal rejection: did:web with IP literal hostname is rejected",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:3a3a2c112066356c8f455d5af72b2ca89f73078b1f956971e9398bdf22692654",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2284,8 +2286,8 @@
           "keyword": "MUST",
           "summary": "Resolved document id matches input DID exactly",
           "source_fragment": "Exact id match: resolved document id must match the input DID",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:90d10d838e8b5cfd918a9694e3935f571953e1db5f3937de51451733b199d322",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         }
@@ -2295,14 +2297,15 @@
       "section_number": 23,
       "section_title": "gRPC Transport",
       "section_anchor": "grpc-transport",
+      "governing_spec": "docs/specs/GRPC-TRANSPORT-PROFILE.md",
       "requirements": [
         {
           "id": "GRPC-META-001",
           "keyword": "MUST",
           "summary": "gRPC carrier computes real SHA-256 receipt_ref",
           "source_fragment": "extract(): reads receipt from metadata, computes real SHA-256 receipt_ref via node:crypto",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:344ada379533227cc3b8dd2e1f53d4bf1f7c939cb40816ea5f0429a5d94adb5d",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2311,8 +2314,8 @@
           "keyword": "MUST",
           "summary": "gRPC carrier rejects binary metadata keys",
           "source_fragment": "Binary metadata (gRPC -bin suffix convention) is rejected for PEAC receipt data",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:1eb320a0b73c27eb7959f31a5095816499c6e790f3d1018b5f6ceee45a9b4b7b",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2321,8 +2324,8 @@
           "keyword": "MUST",
           "summary": "Default receipt type is interaction-record+jwt",
           "source_fragment": "Default receipt type: interaction-record+jwt (Wire 0.2)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:4213d777ca4f7c330f8bc35cbfdaa46bf21f3627847a1291f57df0d657b0b50e",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         }
@@ -2332,14 +2335,15 @@
       "section_number": 24,
       "section_title": "PKCE for OAuth MCP",
       "section_anchor": "pkce-oauth-mcp",
+      "governing_spec": "docs/specs/A2A-AUTH-PROFILE.md",
       "requirements": [
         {
           "id": "PKCE-001",
           "keyword": "MUST",
           "summary": "PKCE verifier is 43-128 chars from unreserved set",
           "source_fragment": "Verifier: 43-128 chars from RFC 7636 unreserved set",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:c20dd7dabd6abb7961e83ff8bc9eac9f8fee7e83bb82192f80cf0091c096c5c7",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2348,8 +2352,8 @@
           "keyword": "MUST",
           "summary": "S256 is the only supported challenge method",
           "source_fragment": "S256 only; plain method is rejected",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:2fed9e07548af196b9708d14d1acd6870a1043137af413539e8877e909804e3f",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2358,8 +2362,8 @@
           "keyword": "MUST",
           "summary": "Auth observation never produces allow or deny decision",
           "source_fragment": "decision: always review (never allow or deny)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:9361ae3cb6b92bc449cfec893d6a4a067e6c46fcf9a08e121457fd72cab2c2cf",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2368,8 +2372,8 @@
           "keyword": "MUST",
           "summary": "Token material never appears in auth evidence output",
           "source_fragment": "Token material never included in evidence output",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:2e2342b40685efa0525afb14414f4521b4908922978a1cd590972b4279dcad33",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         }
@@ -2379,14 +2383,15 @@
       "section_number": 25,
       "section_title": "Receipt URL Resolution",
       "section_anchor": "receipt-url-resolution",
+      "governing_spec": "docs/specs/EVIDENCE-CARRIER-CONTRACT.md",
       "requirements": [
         {
           "id": "RURL-001",
           "keyword": "MUST",
           "summary": "Resolver verifies sha256(jws) equals receipt_ref",
           "source_fragment": "Caller MUST verify: sha256(fetched_jws) == carrier.receipt_ref",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:2ac217c8a7952343a9ed21781c4f6c4673f0183595491eb0c4dd4054eacbbe0f",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2395,8 +2400,8 @@
           "keyword": "MUST",
           "summary": "Carrier middleware returns pure PeacEvidenceCarrier",
           "source_fragment": "The returned carrier is always a pure PeacEvidenceCarrier",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:d5966c3934192a96dacfe30564c1bc5a6f3afae8157cb4da9c577e75e73a0518",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2405,8 +2410,8 @@
           "keyword": "MUST",
           "summary": "Resolver does not cache failed resolutions",
           "source_fragment": "No negative caching: failed resolutions are never cached",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:e8cbfaae6b27fcff756f16048f7e202b18402edcaa09f0b6af7137012ff812e2",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2415,8 +2420,8 @@
           "keyword": "MUST",
           "summary": "Non-strict mode returns carrier unchanged on failure",
           "source_fragment": "Resolution fails or ref mismatch: strict false (default) returned unchanged",
-          "enforcement_class": "advisory",
           "source_fragment_hash": "sha256:ba985e828fd53fd2cee305e9d2177a9acfbae5399cc2881c142cca170a95ada3",
+          "enforcement_class": "advisory",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         }
@@ -2426,14 +2431,15 @@
       "section_number": 26,
       "section_title": "Supply Chain Mappings",
       "section_anchor": "supply-chain-mappings",
+      "governing_spec": "docs/specs/SUPPLY-CHAIN-PROFILE.md",
       "requirements": [
         {
           "id": "SC-001",
           "keyword": "MUST",
           "summary": "in-toto mapping uses first subject for source_ref",
           "source_fragment": "subject[0].uri -> source_ref (first subject; multi-subject uses first)",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:080ac059dca90ac0d21a258ffe20d45c5c4a5e4abaf79c373964645f7db5df17",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2442,8 +2448,8 @@
           "keyword": "MUST",
           "summary": "SLSA mapping sets slsa.version to 1.2",
           "source_fragment": "Maps SLSA v1.2 provenance: slsa track/level/version fields",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:bbd925c511ec996102f68d3baeeba6b991dd12c9c7580d9ac24bc34a6c4201d6",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         },
@@ -2452,8 +2458,8 @@
           "keyword": "MUST",
           "summary": "in-toto mapping targets v1.0 Statement type only",
           "source_fragment": "Throws Error if statement._type is not in-toto v1.0",
-          "enforcement_class": "hard_fail",
           "source_fragment_hash": "sha256:8ddd2f35a1ef2b12461f0ef488aea6e74a3d0e1aa7fc4d8ec87fd269dd3ccb42",
+          "enforcement_class": "hard_fail",
           "introduced_in": "0.12.9",
           "last_reviewed_in": "0.12.9"
         }
