@@ -354,6 +354,9 @@ importers:
 
   examples/managed-agents-export:
     dependencies:
+      '@peac/adapter-managed-agents':
+        specifier: workspace:*
+        version: link:../../packages/adapters/managed-agents
       '@peac/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
