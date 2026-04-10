@@ -18,7 +18,6 @@ import {
   issuePermissionEvent,
   issueOutcomeEvent,
   buildSessionSummary,
-  EventFamily,
 } from '@peac/adapter-managed-agents';
 
 async function main() {
