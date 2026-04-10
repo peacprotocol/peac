@@ -173,19 +173,33 @@ Design: ZIP archive with deterministic structure (RFC 8785 canonical JSON). Veri
 
 ### Go SDK
 
-Wire 0.1 receipt issuance, verification, and policy evaluation with Ed25519 + JWS + JWKS support.
+Interaction Record issuance and local verification with Ed25519, RFC 8785 JCS, and JOSE hardening. Requires Go 1.26+.
 
 ```go
-import "github.com/peacprotocol/peac/sdks/go/peac"
+import peac "github.com/peacprotocol/peac/sdks/go"
 
-result, err := peac.Verify(receiptJWS, &peac.VerifyOptions{
-    IssuerAllowlist: []string{"https://api.example.com"},
+// Issue
+result, _ := peac.Issue(peac.IssueOptions{
+    Iss: "https://api.example.com", Kind: peac.KindEvidence,
+    Type: "org.peacprotocol/access-decision", SigningKey: key,
 })
-if err != nil {
-    log.Fatal(err)
-}
-fmt.Println("Issuer:", result.Claims.Iss)
+
+// Verify locally
+vr := peac.VerifyLocal(result.JWS, peac.VerifyLocalOptions{PublicKey: pubKey})
+fmt.Println("Valid:", vr.Valid, "Issuer:", vr.Claims.Iss)
 ```
+
+### Python (API-first examples)
+
+Verify receipts against the Hosted Verify API using httpx. Requires Python 3.12+. Examples only, not an SDK.
+
+```python
+import httpx
+resp = httpx.post("http://localhost:3000/v1/verify", json={"receipt": jws})
+print(resp.json()["verified"])
+```
+
+See [examples/python/](../examples/python/) for the full example.
 
 See [guides/go-middleware.md](guides/go-middleware.md) for net/http middleware.
 
