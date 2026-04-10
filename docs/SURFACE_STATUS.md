@@ -51,6 +51,7 @@ Do not edit manually.
 | `packages/adapters/did`               | `@peac/adapter-did`               | supported    | 0.2  |
 | `packages/adapters/eas`               | -                                 | experimental | 0.2  |
 | `packages/adapters/eat`               | `@peac/adapter-eat`               | supported    | 0.2  |
+| `packages/adapters/managed-agents`    | `@peac/adapter-managed-agents`    | supported    | 0.2  |
 | `packages/adapters/openai-compatible` | `@peac/adapter-openai-compatible` | supported    | 0.2  |
 | `packages/adapters/openclaw`          | `@peac/adapter-openclaw`          | supported    | 0.2  |
 | `packages/adapters/x402`              | `@peac/adapter-x402`              | supported    | 0.2  |

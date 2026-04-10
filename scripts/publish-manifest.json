@@ -3,7 +3,7 @@
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.12.8",
   "lastUpdated": "2026-04-10",
-  "totalPackages": 35,
+  "totalPackages": 36,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -30,6 +30,7 @@
     "@peac/rails-x402",
     "@peac/adapter-x402",
     "@peac/adapter-openclaw",
+    "@peac/adapter-managed-agents",
     "@peac/mappings-content-signals",
     "@peac/adapter-openai-compatible",
     "@peac/mcp-server",
@@ -67,6 +68,7 @@
       "@peac/rails-x402",
       "@peac/adapter-x402",
       "@peac/adapter-openclaw",
+      "@peac/adapter-managed-agents",
       "@peac/mappings-content-signals",
       "@peac/adapter-openai-compatible"
     ],
@@ -104,6 +106,7 @@
     "@peac/rails-x402",
     "@peac/adapter-x402",
     "@peac/adapter-openclaw",
+    "@peac/adapter-managed-agents",
     "@peac/mappings-content-signals",
     "@peac/adapter-openai-compatible",
     "@peac/mcp-server",
