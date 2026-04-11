@@ -3,8 +3,8 @@
   "schema_version": "1.0.0",
   "version": "0.12.9",
   "wire_format_version": "0.2",
-  "dist_tag": "latest",
-  "release_date": "2026-04-11",
+  "dist_tag": "next",
+  "release_date": "2026-04-10",
   "metrics": {
     "tests": 7323,
     "test_files": 289,

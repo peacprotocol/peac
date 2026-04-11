@@ -3,7 +3,7 @@
 Generated from `REPO_SURFACE_STATUS.json` by `scripts/generate-surface-status.mjs`.
 Do not edit manually.
 
-**Version:** 0.12.9 | **Updated:** 2026-04-11
+**Version:** 0.12.9 | **Updated:** 2026-04-10
 
 ## Layer 1
 
