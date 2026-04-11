@@ -108,12 +108,15 @@ See `docs/maintainers/RELEASING.md` for manual publishing details and `docs/main
 After publish succeeds, stamp `release_date` in `docs/releases/facts.json`
 and `updated` in `REPO_SURFACE_STATUS.json` to the actual tag date.
 
+Branch naming convention: **`release-state/vX.Y.Z-publish`** (for example,
+`release-state/v0.12.9-publish`).
+
 ```bash
 git checkout main && git pull --ff-only origin main
 git checkout -b release-state/vX.Y.Z-publish
 
 # Defaults to today in UTC; pass an explicit YYYY-MM-DD to match the tag date
-node scripts/stamp-release-state.mjs --publish
+pnpm release:stamp:publish
 
 git add docs/releases/facts.json REPO_SURFACE_STATUS.json
 node scripts/generate-surface-status.mjs  # regenerate derived status docs
@@ -126,7 +129,7 @@ gh pr create --title "chore: stamp vX.Y.Z release date" --body "Stamps release_d
 Verify before merge:
 
 ```bash
-node scripts/stamp-release-state.mjs --check --mode publish <YYYY-MM-DD>
+pnpm release:stamp:check:publish <YYYY-MM-DD>
 ```
 
 Merge the micro-PR.
@@ -149,12 +152,15 @@ After `promote-latest.yml` reports success, stamp `dist_tag` in
 `docs/releases/facts.json` and `docs/releases/current.json` to the promoted
 value.
 
+Branch naming convention: **`release-state/vX.Y.Z-promote`** (for example,
+`release-state/v0.12.9-promote`).
+
 ```bash
 git checkout main && git pull --ff-only origin main
 git checkout -b release-state/vX.Y.Z-promote
 
 # Defaults to "latest"; pass an explicit tag to override
-node scripts/stamp-release-state.mjs --promote
+pnpm release:stamp:promote
 
 git add docs/releases/facts.json docs/releases/current.json
 git commit -m "chore: stamp vX.Y.Z dist_tag latest"
@@ -165,7 +171,7 @@ gh pr create --title "chore: stamp vX.Y.Z dist_tag latest" --body "Stamps dist_t
 Verify before merge:
 
 ```bash
-node scripts/stamp-release-state.mjs --check --mode promote latest
+pnpm release:stamp:check:promote latest
 ```
 
 Merge the micro-PR. After this, all truth surfaces agree with the live npm

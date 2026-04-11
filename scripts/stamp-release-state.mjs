@@ -39,15 +39,11 @@
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, '..');
-
-const FACTS_PATH = join(ROOT, 'docs/releases/facts.json');
-const CURRENT_PATH = join(ROOT, 'docs/releases/current.json');
-const SURFACE_PATH = join(ROOT, 'REPO_SURFACE_STATUS.json');
+const DEFAULT_ROOT = join(__dirname, '..');
 
 // ---------------------------------------------------------------------------
 // Argument parsing
@@ -55,10 +51,39 @@ const SURFACE_PATH = join(ROOT, 'REPO_SURFACE_STATUS.json');
 
 const args = process.argv.slice(2);
 const flags = new Set(args.filter((a) => a.startsWith('--')));
-const positional = args.filter((a) => !a.startsWith('--'));
 
 const dryRun = flags.has('--dry-run');
 const check = flags.has('--check');
+
+// --root <path> overrides the default repo root. Primarily for test isolation
+// so smoke tests can point the script at a fake repo without mutating the
+// real workspace. Paths are resolved against process.cwd() so relative roots
+// work naturally in test fixtures.
+function extractRoot() {
+  const idx = args.indexOf('--root');
+  if (idx !== -1 && args[idx + 1]) {
+    return resolve(process.cwd(), args[idx + 1]);
+  }
+  return DEFAULT_ROOT;
+}
+const ROOT = extractRoot();
+
+const FACTS_PATH = join(ROOT, 'docs/releases/facts.json');
+const CURRENT_PATH = join(ROOT, 'docs/releases/current.json');
+const SURFACE_PATH = join(ROOT, 'REPO_SURFACE_STATUS.json');
+
+const positional = (() => {
+  const filtered = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--root' || args[i] === '--mode') {
+      i++;
+      continue;
+    }
+    if (args[i].startsWith('--')) continue;
+    filtered.push(args[i]);
+  }
+  return filtered;
+})();
 
 let mode;
 if (flags.has('--publish')) mode = 'publish';
@@ -84,22 +109,10 @@ if (!mode || (mode !== 'publish' && mode !== 'promote')) {
   process.exit(1);
 }
 
-// Extract positional value (date or tag), skipping --mode and its argument
-function positionalValue() {
-  const filtered = [];
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--mode') {
-      i++;
-      continue;
-    }
-    if (args[i].startsWith('--')) continue;
-    if (args[i] === 'publish' || args[i] === 'promote') continue;
-    filtered.push(args[i]);
-  }
-  return filtered[0];
-}
-
-const positionalArg = positionalValue();
+// Extract the positional value (date or tag). `positional` already excludes
+// --root / --mode arguments above; drop the mode label when --check is used
+// without --publish / --promote flags.
+const positionalArg = positional.filter((a) => a !== 'publish' && a !== 'promote')[0];
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 function todayUtc() {
