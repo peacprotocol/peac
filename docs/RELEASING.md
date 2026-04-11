@@ -68,6 +68,15 @@ pnpm version:check
 
 ### 5. Commit and PR
 
+Mutable release-state fields (`release_date`, `updated`, `dist_tag` in
+`docs/releases/facts.json`, `docs/releases/current.json`, and
+`REPO_SURFACE_STATUS.json`) are **intentionally left at pre-release placeholder
+values** in this PR. They are stamped post-tag and post-promotion via
+`scripts/stamp-release-state.mjs` (see steps 8 and 10 below).
+
+This avoids pre-release truth drift if merge or tag slips, and keeps
+release-state stamping deterministic, idempotent, and checkable.
+
 ```bash
 git add -A
 git commit -m "chore(release): vX.Y.Z"
@@ -93,6 +102,74 @@ git push origin vX.Y.Z
 4. Verify: `npm view @peac/kernel@X.Y.Z`
 
 See `docs/maintainers/RELEASING.md` for manual publishing details and `docs/maintainers/NPM_PUBLISH_POLICY.md` for dist-tag policy.
+
+### 8. Stamp release date (post-publish)
+
+After publish succeeds, stamp `release_date` in `docs/releases/facts.json`
+and `updated` in `REPO_SURFACE_STATUS.json` to the actual tag date.
+
+```bash
+git checkout main && git pull --ff-only origin main
+git checkout -b release-state/vX.Y.Z-publish
+
+# Defaults to today in UTC; pass an explicit YYYY-MM-DD to match the tag date
+node scripts/stamp-release-state.mjs --publish
+
+git add docs/releases/facts.json REPO_SURFACE_STATUS.json
+node scripts/generate-surface-status.mjs  # regenerate derived status docs
+git add docs/PACKAGE_STATUS.md docs/SURFACE_STATUS.md
+git commit -m "chore: stamp vX.Y.Z release date"
+git push -u origin release-state/vX.Y.Z-publish
+gh pr create --title "chore: stamp vX.Y.Z release date" --body "Stamps release_date and updated post-tag per release checklist."
+```
+
+Verify before merge:
+
+```bash
+node scripts/stamp-release-state.mjs --check --mode publish <YYYY-MM-DD>
+```
+
+Merge the micro-PR.
+
+### 9. Promote `next` to `latest` (optional, two-step releases only)
+
+Two-step releases ship to the `next` dist-tag first and promote to `latest`
+only after soak / verification. Single-step releases publish directly to
+`latest` and can skip this entirely.
+
+1. Go to GitHub Actions
+2. Run the "Promote to latest" workflow with `version: X.Y.Z`, `dry_run: true`
+3. Review dry-run output
+4. Re-run with `dry_run: false`
+5. Verify: `npm dist-tag ls @peac/protocol`
+
+### 10. Stamp `dist_tag: latest` (post-promotion)
+
+After `promote-latest.yml` reports success, stamp `dist_tag` in
+`docs/releases/facts.json` and `docs/releases/current.json` to the promoted
+value.
+
+```bash
+git checkout main && git pull --ff-only origin main
+git checkout -b release-state/vX.Y.Z-promote
+
+# Defaults to "latest"; pass an explicit tag to override
+node scripts/stamp-release-state.mjs --promote
+
+git add docs/releases/facts.json docs/releases/current.json
+git commit -m "chore: stamp vX.Y.Z dist_tag latest"
+git push -u origin release-state/vX.Y.Z-promote
+gh pr create --title "chore: stamp vX.Y.Z dist_tag latest" --body "Stamps dist_tag post-promotion per release checklist."
+```
+
+Verify before merge:
+
+```bash
+node scripts/stamp-release-state.mjs --check --mode promote latest
+```
+
+Merge the micro-PR. After this, all truth surfaces agree with the live npm
+registry state.
 
 ## Conventions
 
