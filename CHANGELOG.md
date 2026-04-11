@@ -5,6 +5,42 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.9] - 2026-04-11
+
+### Added
+
+- **`@peac/adapter-managed-agents`**: new Layer 4 adapter for managed agent runtime event export. Six event families (session lifecycle, task submission, tool use, MCP invocation, permission confirmation, outcome evaluation), reverse-DNS type URIs under `org.peacprotocol/managed-agent-*`, vendor-neutral (caller-supplied `provider` string), zero runtime vendor SDK dependencies, decode-only `buildSessionSummary()`
+- **Reference verifier content negotiation** (`POST /v1/verify`): three response formats via `Accept` header: `application/json` (byte-identical to v0.12.8 default), `application/peac-report+json` (extended report with `report_id`, `verified_at`, `duration_ms`, `key_resolution`, `failure_reasons`), and `text/plain` (human-readable summary). `PEAC-Report-Id` header (UUID v4) on every response. OpenAPI 3.1 spec updated with `ExtendedVerifyReport` and `FailureReason` schemas. Shared `deterministicStringify` extracted from `verify-v1.ts` and `hosted-issue.ts`. Drift test gate prevents spec/code divergence
+- **Reference issuer health probe** (`GET /v1/issuer-health`): query-parameter API (`?issuer=<url>`), SSRF-safe via shared `@peac/jwks-cache` `validateUrl()` and `isMetadataIp()`, independent rate limiter (10 req/min per IP, isolated from verify limiter), cache key canonicalization (lowercase scheme/host, trailing-slash normalization, port preservation), 60-second cache TTL, probes `/.well-known/peac-issuer.json` reachability, `jwks_uri` from discovery, and Ed25519 key count; never returns 5xx for reachable probe targets
+- **MCP Streamable HTTP quickstart** (`examples/mcp-http-quickstart/`): end-to-end `stdio` and `streamable-http` transport example with merge-blocking gate script (`scripts/verify-mcp-quickstart.sh`) that boots the local workspace `@peac/mcp-server` on HTTP, initializes a JSON-RPC session, propagates `Mcp-Session-Id`, and asserts `peac_verify` over HTTP succeeds. Local fallback is not accepted as proof. `packages/mcp-server/server.json` now declares both `stdio` and `streamable-http` transports with the required `url` field per MCP Registry schema 2025-12-11
+- **RFC 9728 Protected Resource Metadata strict compliance tests**: 5 new tests under `packages/mcp-server/tests/http/` verifying `Content-Type: application/json`, exact field-count (only `resource` and `authorization_servers`), multiple authorization server serialization, non-HTTPS non-loopback rejection (404), and HTTP loopback allowance for development ergonomics
+- **External pilot kit** (`examples/external-pilot/`, `docs/pilots/PILOT_KIT.md`): self-contained pilot kit for independent external organizations, runtime-generated Ed25519 keypair, signed Interaction Record, local and reference-verifier verification paths via `--verifier-url`, deterministic inspectable JSON artifact, formal JSON Schema (draft-07) validation via ajv + ajv-formats, golden snapshot, and merge-blocking engineering gate (`scripts/verify-pilot-output.sh`) that fails on schema drift or private-key leakage
+- **Builder-first conformance registration**: formally register 25 previously pending requirement IDs (6 namespaces: `X402V2-*`, `DID-RES-*`, `GRPC-META-*`, `PKCE-*`, `RURL-*`, `SC-*`). Total requirement IDs: 192 → **217** across 18 → **24** sections. New `scripts/conformance/build-extension-registry.mjs` as the formal canonical source of truth for all non-WIRE02 requirements. Main builder composes WIRE02 and extension sources into `requirement-ids.json`. Zero temporary registration exemptions remain. `tests/conformance/registry-composition.spec.ts` enforces composition parity
+- **Non-WIRE02 annotation ledger**: `specs/conformance/non-wire02-annotation-ledger.md` tracks each remaining governing-spec annotation on a per-ID basis. Hash integrity is blocking for all 217 IDs; non-WIRE02 spec-presence is advisory and bounded by the ledger
+- **x402 scheme coverage clarification**: `§ 3.0 Payment Schemes` added to `docs/specs/X402-PROFILE.md` stating the adapter's scheme-agnostic posture for both `exact` and `upto`. New `docs/compatibility/x402-scheme-coverage.md` compatibility doc keeping three truth surfaces explicitly distinct (upstream x402 protocol, upstream facilitator surfaces, PEAC-tested). Two new conformance fixtures (`upto-valid-evm-eip712.json`, `upto-scheme-mismatch.json`) plus 8 new overclaim-guard tests in `packages/adapters/x402/tests/upto-scope.test.ts` asserting scheme is term-matched as a byte-equal required string and never interpreted for scheme-specific invariants (single-use, time bounds, recipient binding, facilitator binding, max-vs-actual settlement correctness). Guide section renamed from `Supported Networks (CAIP-2)` to `Common CAIP-2 identifiers`; non-canonical `solana:mainnet` / `solana:devnet` labels replaced with canonical CAIP-2 genesis-hash identifiers (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`, `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`); Polygon Mainnet added
+- **Public doc wording sweep**: removed stale stubs, marketing phrasing, and forward-looking planning language from public docs. `docs/ROADMAP.md` rewritten to a minimal meta surface. `docs/api/README.md`, `docs/guides/README.md`, `docs/architecture/README.md`, `docs/security/README.md` collapsed to real-content indexes. `docs/HOSTED_VERIFY_CONTRACT.md` status updated from design artifact to stable contract. `docs/VERIFY-RELEASE.md` stale preview references removed
+
+### Changed
+
+- `REPO_SURFACE_STATUS.json` version 0.12.8 → 0.12.9; `published_packages: 35 → 36` (new `@peac/adapter-managed-agents`)
+- Conformance matrix regenerated with 217 requirement IDs across 24 sections
+- x402 conformance fixture manifest version 0.12.7 → 0.12.9
+- Security audit allowlist: added `GHSA-q4gf-8mx6-v5v3` (next.js Server Components DoS, dev-only via `surfaces/nextjs`, 90-day expiry)
+
+### Security
+
+- **hono 4.12.12 and @hono/node-server 1.19.13** (from 4.12.7 / 1.19.11): covers 5 moderate hono CVEs plus `GHSA-92pp-h63x-v22m`. `pnpm.overrides` enforces the minimums across transitive paths
+- Issuer health probe uses `fetch` with `redirect: 'error'` to prevent SSRF via redirect chains to private IPs or cloud-metadata endpoints
+
+### Deferred
+
+- Reference verifier exporter scheme-label additions for x402: deferred to a future release to avoid touching PR #628's freshly-merged content-negotiation schema
+- SVM `upto` scheme support: upstream RFC [x402-foundation/x402#1642](https://github.com/x402-foundation/x402/issues/1642) unresolved
+- Commerce-lifecycle mapping, max-vs-actual delta audit, reserve/lock evidence: tracked for a future release
+- Facilitator attestation handling: upstream RFC [#1921](https://github.com/x402-foundation/x402/issues/1921) open
+- Payment Identifier extension, gas sponsoring, Bazaar discovery, SIWX: tracked for a future release
+- Runnable `x402-upto-evidence` example: deferred to a follow-up PR to avoid pre-release truth-surface drift
+
 ## [0.12.8] - 2026-04-10
 
 ### Added

@@ -1,6 +1,6 @@
 # Compatibility Matrix
 
-Current as of v0.12.8.
+Current as of v0.12.9.
 
 ## Wire Format Support
 
@@ -29,10 +29,11 @@ Current as of v0.12.8.
 
 ## Hosted Services
 
-| Service                                | Status                    | Endpoint                                  |
-| -------------------------------------- | ------------------------- | ----------------------------------------- |
-| Reference Verifier (`POST /v1/verify`) | **Operational** (v0.12.8) | `POST /v1/verify` (RFC 9457, OpenAPI 3.1) |
-| Hosted Issue (`POST /v1/issue`)        | **Alpha** (v0.12.8)       | Disabled by default; BYO-key, provisional |
+| Service                                           | Status                    | Endpoint                                                                                                                                                  |
+| ------------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Reference Verifier (`POST /v1/verify`)            | **Operational** (v0.12.9) | `POST /v1/verify` (RFC 9457, OpenAPI 3.1, content negotiation: `application/json`, `application/peac-report+json`, `text/plain`; `PEAC-Report-Id` header) |
+| Reference Issuer Health (`GET /v1/issuer-health`) | **Operational** (v0.12.9) | `GET /v1/issuer-health?issuer=<url>` (SSRF-safe, independent rate limit, cached)                                                                          |
+| Hosted Issue (`POST /v1/issue`)                   | **Alpha** (v0.12.8)       | Disabled by default; BYO-key, provisional                                                                                                                 |
 
 ## Adapters and Mappings
 

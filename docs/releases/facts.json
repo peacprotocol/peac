@@ -1,13 +1,13 @@
 {
   "description": "Canonical source of truth for PEAC Protocol release metrics. Website, docs, and release notes consume this file. CI validates it matches actual build output.",
   "schema_version": "1.0.0",
-  "version": "0.12.8",
+  "version": "0.12.9",
   "wire_format_version": "0.2",
   "dist_tag": "latest",
-  "release_date": "2026-04-10",
+  "release_date": "2026-04-11",
   "metrics": {
-    "tests": 7241,
-    "test_files": 281,
+    "tests": 7323,
+    "test_files": 289,
     "published_packages": 36,
     "build_targets": 100,
     "conformance_requirement_ids": 217,
