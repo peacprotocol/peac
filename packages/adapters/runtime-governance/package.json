@@ -1,0 +1,71 @@
+{
+  "name": "@peac/adapter-runtime-governance",
+  "version": "0.12.9",
+  "description": "Runtime governance adapter for PEAC interaction records with AGT mapper",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peacprotocol/peac.git",
+    "directory": "packages/adapters/runtime-governance"
+  },
+  "author": "PEAC Protocol Contributors",
+  "license": "Apache-2.0",
+  "homepage": "https://peacprotocol.org",
+  "bugs": {
+    "url": "https://github.com/peacprotocol/peac/issues"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.0"
+  },
+  "keywords": [
+    "peac",
+    "peacprotocol",
+    "interaction-records",
+    "signed-records",
+    "runtime-governance",
+    "agent-records",
+    "agent-governance",
+    "mcp",
+    "a2a"
+  ]
+}

@@ -44,6 +44,8 @@ export interface ExtendedReport {
   wire_version?: string;
   key_resolution: 'provided' | 'allowlist' | 'discovery';
   failure_reasons: FailureReason[];
+  /** Recognized record profile, if the receipt type matches a known adapter prefix. */
+  record_profile?: { profile: string; family: string };
 }
 
 export function generateReportId(): string {
@@ -65,7 +67,8 @@ export function buildExtendedReport(
   result: VerifyResult,
   reportId: string,
   durationMs: number,
-  keyResolution: 'provided' | 'allowlist' | 'discovery'
+  keyResolution: 'provided' | 'allowlist' | 'discovery',
+  recordProfile?: { profile: string; family: string }
 ): ExtendedReport {
   return {
     report_id: reportId,
@@ -81,6 +84,7 @@ export function buildExtendedReport(
     ...(result.wire_version && { wire_version: result.wire_version }),
     key_resolution: keyResolution,
     failure_reasons: buildFailureReasons(result),
+    ...(recordProfile && { record_profile: recordProfile }),
   };
 }
 

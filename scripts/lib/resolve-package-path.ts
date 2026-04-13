@@ -22,6 +22,7 @@ const NESTED_MAPPINGS: Record<string, string> = {
   'adapter-core': 'packages/adapters/core',
   'adapter-openclaw': 'packages/adapters/openclaw',
   'adapter-managed-agents': 'packages/adapters/managed-agents',
+  'adapter-runtime-governance': 'packages/adapters/runtime-governance',
   'adapter-x402': 'packages/adapters/x402',
   'adapter-x402-daydreams': 'packages/adapters/x402/daydreams',
   'adapter-x402-fluora': 'packages/adapters/x402/fluora',

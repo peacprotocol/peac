@@ -86,9 +86,13 @@ checkNoOverlap(
 
 if (manifest.oidcConfigured) {
   const oidcSet = new Set(manifest.oidcConfigured);
+  const pendingSet = new Set(manifest.pendingTrustedPublishing ?? []);
+  const deferredSet = new Set(manifest.deferredTrustedPublishing ?? []);
   for (const pkg of manifest.packages) {
-    if (!oidcSet.has(pkg)) {
-      errors.push(`MISSING_OIDC: ${pkg} is in packages[] but not in oidcConfigured[]`);
+    if (!oidcSet.has(pkg) && !pendingSet.has(pkg) && !deferredSet.has(pkg)) {
+      errors.push(
+        `MISSING_OIDC: ${pkg} is in packages[] but not in oidcConfigured[], pendingTrustedPublishing[], or deferredTrustedPublishing[]`
+      );
     }
   }
 }
