@@ -6,7 +6,7 @@ Carry signed receipts across A2A agent flows: declare PEAC support in your Agent
 
 PEAC integrates with A2A at the metadata layer. Receipts travel as Evidence Carriers inside A2A TaskStatus metadata, using the reverse-DNS extension URI `org.peacprotocol`. No A2A protocol changes are required; PEAC uses the standard metadata extension mechanism.
 
-**Compatibility:** The current `@peac/mappings-a2a` package targets A2A v0.3.0. A2A v1.0.0 dual-version transition support (Agent Card, enums, parts model) is landing in the next release.
+**Compatibility:** `@peac/mappings-a2a` targets A2A v1.0.0 (shipped in v0.12.3). A2A v0.3.0 compat shim is retained through v0.12.x; removal scheduled for v0.13.0.
 
 ## Prerequisites
 

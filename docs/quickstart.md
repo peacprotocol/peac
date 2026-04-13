@@ -91,7 +91,7 @@ The verifier and networking layer include SSRF protection by default:
 
 ## Next Steps
 
-- See [examples/](https://github.com/peacprotocol/peac/tree/main/examples) for 18 runnable examples
+- See [examples/](https://github.com/peacprotocol/peac/tree/main/examples) for 30 runnable examples
 - Read [PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md) for normative protocol specification
 - Read [WIRE-0.2.md](specs/WIRE-0.2.md) for the current Interaction Record format specification
 - See [Error Handling](errors.md) for RFC 9457 Problem Details
