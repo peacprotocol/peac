@@ -72,7 +72,7 @@ const carrier = await toPeacCarrier(receiptJws);
 
 ## Attach Path
 
-PEAC writes `PEAC-Receipt` only. No v2 write support in v0.12.4. Full v2 adapter (plugin arch, CAIP, multi-facilitator, wallet sessions) deferred to v0.12.5.
+PEAC writes `PEAC-Receipt` only. x402 V2 full adapter (mapping, verification, unified dispatchers) shipped in v0.12.6. Dual-header read (v1 + v2) shipped in v0.12.4. Scheme-agnostic posture (`exact`, `upto`, and future schemes) verified in v0.12.9.
 
 ## Reference
 

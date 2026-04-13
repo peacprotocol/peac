@@ -1,6 +1,6 @@
 # PEAC Protocol Architecture
 
-**Version:** 0.12.7
+**Version:** 0.12.9
 **Status:** Authoritative
 
 This document describes the kernel-first architecture of the PEAC Protocol monorepo.
@@ -128,38 +128,45 @@ peac/
 │   ├── architecture/       # Architecture deep-dives
 │   └── security/           # Threat models and security controls
 ├── packages/
-│   ├── kernel/             # Layer 0: Zero-dependency constants
-│   ├── schema/             # Layer 1: Types, Zod validators, JSON Schema
-│   ├── crypto/             # Layer 2: Ed25519 JWS, JCS, base64url
-│   ├── protocol/           # Layer 3: issue(), verify(), discovery
+│   ├── kernel/             # Layer 0: Zero-dependency constants, types, errors
+│   ├── schema/             # Layer 1: Zod validators, Wire 0.2 extension groups
+│   ├── crypto/             # Layer 2: Ed25519 JWS, JCS (RFC 8785), base64url
+│   ├── protocol/           # Layer 3: issue(), verifyLocal(), discovery
 │   ├── control/            # Layer 3: Constraint types and enforcement
-│   ├── policy-kit/         # Layer 3: YAML/JSON policy evaluation
+│   ├── middleware-core/    # Layer 3.5: Framework-agnostic receipt middleware
+│   ├── middleware-express/  # Layer 3.5: Express.js receipt middleware
 │   ├── server/             # Layer 5: HTTP verification server
+│   ├── mcp-server/         # Layer 5: MCP server (8 tools, stdio + HTTP)
 │   ├── cli/                # Layer 5: Command-line tools
-│   ├── http-signatures/    # Layer 4: RFC 9421 HTTP Message Signatures
-│   ├── jwks-cache/         # Layer 4: Edge-safe JWKS fetch
+│   ├── adapters/           # Layer 4: Evidence adapters
+│   │   ├── x402/           # x402 v1+v2 (Linux Foundation)
+│   │   ├── did/            # DID resolution (did:key, did:web)
+│   │   ├── eat/            # EAT passport (COSE_Sign1, RFC 9052)
+│   │   ├── managed-agents/ # Vendor-neutral managed runtime evidence
+│   │   └── openclaw/       # OpenClaw agent framework
+│   ├── mappings/           # Layer 4: Protocol mappings
+│   │   ├── a2a/            # A2A v1.0.0 (Linux Foundation)
+│   │   ├── acp/            # Agentic Commerce Protocol (OpenAI/Stripe)
+│   │   ├── paymentauth/    # MPP/paymentauth (Stripe/Tempo)
+│   │   ├── ucp/            # Unified Commerce Protocol (Google)
+│   │   ├── content-signals/ # Content signals observation
+│   │   ├── intoto/         # in-toto v1.0 provenance
+│   │   └── slsa/           # SLSA v1.2 provenance
 │   ├── rails/              # Layer 4: Payment rail adapters
-│   │   ├── x402/
-│   │   └── stripe/
-│   ├── mappings/           # Layer 4: Agent protocol mappings
-│   │   ├── mcp/
-│   │   ├── acp/
-│   │   ├── rsl/            # Robots Specification Layer (RSL 1.0)
-│   │   └── tap/            # Trusted Agent Protocol
-│   ├── access/             # Layer 6: Access control
-│   ├── attribution/        # Layer 6: Attribution and revenue sharing
-│   ├── compliance/         # Layer 6: Regulatory compliance
-│   ├── consent/            # Layer 6: Consent lifecycle
-│   ├── intelligence/       # Layer 6: Analytics
-│   ├── privacy/            # Layer 6: Privacy budgeting
-│   └── provenance/         # Layer 6: Content provenance, C2PA
-├── surfaces/               # Platform integration surfaces
-│   ├── workers/cloudflare/ # Cloudflare Worker TAP verifier
-│   └── nextjs/middleware/  # Next.js Edge middleware
-├── examples/               # Canonical flow examples
-│   ├── pay-per-inference/  # 402 flow: agent obtains receipt, retries
-│   ├── pay-per-crawl/      # Policy Kit + receipt flow for AI crawlers
-│   └── rsl-collective/     # RSL token mapping + core claims parity
+│   │   ├── x402/           # x402 payment rail
+│   │   └── stripe/         # Stripe payment rail
+│   ├── transport-grpc/     # Layer 4: gRPC carrier binding
+│   ├── net-node/           # Layer 4: SSRF-safe network utilities
+│   ├── http-signatures/    # Layer 4: RFC 9421 HTTP Message Signatures
+│   └── jwks-cache/         # Layer 4: Edge-safe JWKS fetch
+├── apps/                   # Internal applications (not published)
+│   ├── api/                # Reference verifier (self-hostable, tenantless)
+│   └── sandbox-issuer/     # Sandbox receipt issuer
+├── examples/               # 30 canonical flow examples
+│   ├── minimal/            # Minimal issue + verify
+│   ├── mcp-http-quickstart/ # MCP Streamable HTTP quickstart
+│   ├── external-pilot/     # External pilot kit with JSON Schema gate
+│   └── ...                 # (27 more; see examples/ directory)
 ├── tests/                  # Global test harness
 │   ├── conformance/
 │   ├── performance/
@@ -172,67 +179,66 @@ peac/
 
 ---
 
-## Package Inventory
+## Package Inventory (36 published packages as of v0.12.9)
 
-### Core (Normative)
+### Core (Normative, Layers 0-3)
 
-| Package            | Layer | Description                                   |
-| ------------------ | ----- | --------------------------------------------- |
-| `@peac/kernel`     | 0     | Zero-dependency constants from specs/kernel   |
-| `@peac/schema`     | 1     | TypeScript types, Zod validators, JSON Schema |
-| `@peac/crypto`     | 2     | Ed25519 JWS, JCS canonicalization (RFC 8785)  |
-| `@peac/protocol`   | 3     | High-level issue() and verify() functions     |
-| `@peac/control`    | 3     | Constraint types and enforcement              |
-| `@peac/policy-kit` | 3     | YAML/JSON policy evaluation for CAL semantics |
+| Package          | Layer | Description                                                                          |
+| ---------------- | ----- | ------------------------------------------------------------------------------------ |
+| `@peac/kernel`   | 0     | Zero-dependency constants, types, errors                                             |
+| `@peac/schema`   | 1     | Zod validators, Wire 0.2 extension groups (12 groups), type-to-extension enforcement |
+| `@peac/crypto`   | 2     | Ed25519 JWS, JCS canonicalization (RFC 8785), JOSE hardening                         |
+| `@peac/protocol` | 3     | `issue()`, `issueWire02()`, `verifyLocal()` with strict/interop profiles             |
+| `@peac/control`  | 3     | Constraint types and kernel constraint enforcement                                   |
 
-### Runtime
+### Middleware (Layer 3.5)
 
-| Package        | Layer | Description                                |
-| -------------- | ----- | ------------------------------------------ |
-| `@peac/server` | 5     | HTTP verification server with 402 support  |
-| `@peac/cli`    | 5     | Command-line tools for receipts and policy |
+| Package                    | Layer | Description                           |
+| -------------------------- | ----- | ------------------------------------- |
+| `@peac/middleware-core`    | 3.5   | Framework-agnostic receipt middleware |
+| `@peac/middleware-express` | 3.5   | Express.js receipt middleware         |
 
-### Rails (Payment Adapters)
+### Adapters (Layer 4)
 
-| Package              | Layer | Description                 |
-| -------------------- | ----- | --------------------------- |
-| `@peac/rails-x402`   | 4     | x402 payment rail adapter   |
-| `@peac/rails-stripe` | 4     | Stripe payment rail adapter |
+| Package                           | Layer | Description                                                      |
+| --------------------------------- | ----- | ---------------------------------------------------------------- |
+| `@peac/adapter-x402`              | 4     | x402 v1+v2 evidence (4-layer architecture, scheme-agnostic)      |
+| `@peac/adapter-did`               | 4     | DID resolution (did:key Ed25519 zero-I/O, did:web SSRF-hardened) |
+| `@peac/adapter-eat`               | 4     | EAT passport (COSE_Sign1, RFC 9052/9053, Ed25519)                |
+| `@peac/adapter-managed-agents`    | 4     | Vendor-neutral managed runtime evidence (6 event families)       |
+| `@peac/adapter-openclaw`          | 4     | OpenClaw agent framework integration                             |
+| `@peac/adapter-openai-compatible` | 4     | Hash-first inference receipts (OpenAI-compatible APIs)           |
 
-### Mappings (Agent Protocol Adapters)
+### Mappings (Layer 4)
 
-| Package              | Layer | Description                           |
-| -------------------- | ----- | ------------------------------------- |
-| `@peac/mappings-mcp` | 4     | Model Context Protocol integration    |
-| `@peac/mappings-acp` | 4     | Agentic Commerce Protocol integration |
-| `@peac/mappings-rsl` | 4     | Robots Specification Layer (RSL 1.0)  |
-| `@peac/mappings-tap` | 4     | Trusted Agent Protocol (Visa TAP)     |
+| Package                          | Layer | Description                                                       |
+| -------------------------------- | ----- | ----------------------------------------------------------------- |
+| `@peac/mappings-a2a`             | 4     | A2A v1.0.0 artifact embedding + Agent Card discovery              |
+| `@peac/mappings-acp`             | 4     | Agentic Commerce Protocol session lifecycle + payment observation |
+| `@peac/mappings-paymentauth`     | 4     | MPP/paymentauth envelope-first HTTP Payment scheme parsing        |
+| `@peac/mappings-ucp`             | 4     | Unified Commerce Protocol order-vs-payment separation             |
+| `@peac/mappings-content-signals` | 4     | Content signals observation (3-state, source precedence)          |
+| `@peac/mappings-intoto`          | 4     | in-toto v1.0 provenance mapping                                   |
+| `@peac/mappings-slsa`            | 4     | SLSA v1.2 provenance mapping                                      |
 
-### Infrastructure
+### Infrastructure (Layer 4)
 
-| Package                 | Layer | Description                               |
-| ----------------------- | ----- | ----------------------------------------- |
-| `@peac/http-signatures` | 4     | RFC 9421 HTTP Message Signatures          |
-| `@peac/jwks-cache`      | 4     | Edge-safe JWKS fetch with SSRF protection |
+| Package                 | Layer | Description                                                |
+| ----------------------- | ----- | ---------------------------------------------------------- |
+| `@peac/net-node`        | 4     | SSRF-safe network utilities with DNS pinning               |
+| `@peac/transport-grpc`  | 4     | gRPC carrier binding (metadata interceptor, status parity) |
+| `@peac/http-signatures` | 4     | RFC 9421 HTTP Message Signatures                           |
+| `@peac/jwks-cache`      | 4     | Edge-safe JWKS fetch with SSRF protection                  |
 
-### Surfaces (Platform Integrations)
+### Applications (Layer 5)
 
-| Package                   | Layer | Description                          |
-| ------------------------- | ----- | ------------------------------------ |
-| `@peac/worker-cloudflare` | 5     | Cloudflare Worker TAP verifier       |
-| `@peac/middleware-nextjs` | 5     | Next.js Edge middleware TAP verifier |
+| Package            | Layer | Description                                                 |
+| ------------------ | ----- | ----------------------------------------------------------- |
+| `@peac/server`     | 5     | HTTP verification server                                    |
+| `@peac/mcp-server` | 5     | MCP server (8 tools, stdio + Streamable HTTP, RFC 9728 PRM) |
+| `@peac/cli`        | 5     | Command-line tools for receipts, policy, reconciliation     |
 
-### Pillars
-
-| Package              | Layer | Description                             |
-| -------------------- | ----- | --------------------------------------- |
-| `@peac/access`       | 6     | Access control and policy evaluation    |
-| `@peac/attribution`  | 6     | Attribution and revenue sharing         |
-| `@peac/compliance`   | 6     | Regulatory compliance helpers           |
-| `@peac/consent`      | 6     | Consent lifecycle management            |
-| `@peac/intelligence` | 6     | Analytics and insights                  |
-| `@peac/privacy`      | 6     | Privacy budgeting and data protection   |
-| `@peac/provenance`   | 6     | Content provenance and C2PA integration |
+See `scripts/publish-manifest.json` and `REPO_SURFACE_STATUS.json` for the full authoritative package list. Additional published packages (rails, telemetry, audit, pillar-specific) are listed there.
 
 ---
 

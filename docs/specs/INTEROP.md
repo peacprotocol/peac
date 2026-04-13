@@ -2,15 +2,15 @@
 
 **Status**: INFORMATIVE
 
-**Version**: 0.12.5
+**Version**: 0.12.9
 
 ---
 
 ## 1. Introduction
 
-This document describes how PEAC interoperates with adjacent protocols and standards. PEAC is designed as the **enforcement and receipts layer** that complements existing systems rather than replacing them.
+This document describes how PEAC interoperates with adjacent protocols and standards. PEAC is the **portable signed evidence layer** that complements existing systems rather than replacing them.
 
-**Positioning**: PEAC provides verifiable receipts for access control decisions. It works alongside preference signals, payment rails, and agent protocols.
+**Positioning**: PEAC records signed interaction evidence across agent, API, MCP, commerce, and cross-runtime workflows. It works alongside preference signals, payment rails, agent protocols, and runtime governance systems.
 
 ---
 
@@ -75,7 +75,7 @@ const scope = controlPurposeToAiprefScope('inference');
 ### 3.2 Integration Pattern
 
 1. **Publisher declares** RSL directives in `robots.txt` or RSL manifest
-2. **PEAC parses** RSL via `@peac/pref` (includes RSL parsing)
+2. **PEAC parses** RSL via `@peac/mappings-rsl`
 3. **Policy Kit** generates policy rules from RSL declarations
 4. **Receipt** captures which RSL-derived purpose was enforced
 
@@ -115,73 +115,76 @@ const result = rslToControlPurposes(['ai-all', 'search']);
 
 ### 4.3 Package
 
-`@peac/mappings-mcp` provides MCP context to PEAC receipt mapping:
+`@peac/mcp-server` provides 8 tools for issuing and verifying receipts over MCP (stdio and Streamable HTTP transports). Evidence is carried in MCP `_meta` keys `org.peacprotocol/receipt_ref` and `org.peacprotocol/receipt_jws`:
 
 ```typescript
-import { mcpContextToIssueOptions } from '@peac/mappings-mcp';
-
-const issueOptions = mcpContextToIssueOptions(mcpRequest);
-// Maps MCP budget to PEAC constraints, tool to purpose, etc.
+// MCP server issues and verifies receipts as tool responses.
+// See integrator-kits/mcp/README.md for full quickstart.
+// Install: npx -y @peac/mcp-server --transport http
 ```
 
 ---
 
 ## 5. A2A (Agent-to-Agent)
 
-**Standard**: Google A2A (Agent-to-Agent Protocol)
+**Standard**: A2A Protocol v1.0.0 (Linux Foundation, 150+ organizations). Official SDKs: Python, Go, Java, JavaScript, C#/.NET, Rust.
 
-**Relationship**: A2A defines agent communication patterns. PEAC receipts can be carried in A2A messages as proof of access rights.
+**Relationship**: A2A defines agent-to-agent communication patterns. PEAC receipts travel as Evidence Carriers inside A2A TaskStatus metadata using the `org.peacprotocol` extension URI.
 
 ### 5.1 Integration Points
 
-| A2A Concept    | PEAC Integration                   |
-| -------------- | ---------------------------------- |
-| Agent Card     | Can advertise PEAC policy endpoint |
-| Task execution | Receipt proves execution authority |
-| Delegation     | Receipt chain proves delegation    |
+| A2A Concept   | PEAC Integration                                        |
+| ------------- | ------------------------------------------------------- |
+| Agent Card    | Advertises PEAC evidence support via extension URI      |
+| Task metadata | Receipts carried in `metadata[extensionURI].carriers[]` |
+| Delegation    | Receipt chain proves delegation authority               |
 
 ### 5.2 Integration Pattern
 
-1. **Agent Card** includes PEAC policy URI and capabilities
-2. **A2A task request** includes `PEAC-Purpose` header
-3. **Receiving agent** evaluates policy and issues receipt
-4. **Receipt returned** in A2A response
+1. **Agent Card** declares PEAC evidence capability
+2. **A2A task execution** produces signed Interaction Record
+3. **Receipt embedded** in A2A TaskStatus metadata
+4. **Receiving agent** extracts and verifies offline
 
 ### 5.3 Package
 
-`@peac/mappings-acp` provides mapping utilities for the Agentic Commerce Protocol (ACP).
+`@peac/mappings-a2a` provides A2A v1.0.0 artifact embedding, Agent Card discovery, and carrier extraction. A2A v0.3.0 compat shim retained through v0.12.x; removal in v0.13.0.
 
 ---
 
-## 6. Payment Rails
+## 6. Commerce and Payment Evidence
 
-PEAC integrates with payment rails through adapter packages. Receipts capture payment evidence without coupling to specific vendors.
+PEAC integrates with commerce and payment protocols through adapter and mapping packages. Evidence is captured in the `org.peacprotocol/commerce` extension group using the Interaction Record format (Wire 0.2).
 
-### 6.1 Supported Rails
+### 6.1 Supported Protocols
 
-| Rail     | Package                | Notes             |
-| -------- | ---------------------- | ----------------- |
-| x402     | `@peac/rails-x402`     | HTTP 402 payments |
-| Stripe   | `@peac/rails-stripe`   | Card payments     |
-| Razorpay | `@peac/rails-razorpay` | India payments    |
+| Protocol                       | Package                      | Notes                                                                 |
+| ------------------------------ | ---------------------------- | --------------------------------------------------------------------- |
+| x402 (Linux Foundation)        | `@peac/adapter-x402`         | v1+v2 dual-header read, scheme-agnostic (exact, upto, future schemes) |
+| MPP/paymentauth (Stripe/Tempo) | `@peac/mappings-paymentauth` | Envelope-first HTTP Payment scheme parsing                            |
+| ACP (OpenAI/Stripe)            | `@peac/mappings-acp`         | Session lifecycle + payment observation (two-function boundary)       |
+| UCP (Google)                   | `@peac/mappings-ucp`         | Order-vs-payment separation with `payment_state_source` marker        |
+| Stripe SPT                     | `@peac/rails-stripe`         | Delegation vocabulary, PaymentIntent observation                      |
 
-### 6.2 Receipt Pattern
+### 6.2 Evidence Pattern (Wire 0.2)
 
-Payment evidence is captured in `evidence.payment`:
+Commerce evidence uses the `org.peacprotocol/commerce` extension group with `amount_minor` as a string:
 
 ```json
 {
-  "evidence": {
-    "payment": {
-      "rail": "x402",
-      "facilitator": "daydreams",
-      "amount_cents": 100,
+  "kind": "evidence",
+  "type": "org.peacprotocol/commerce.payment",
+  "extensions": {
+    "org.peacprotocol/commerce": {
+      "amount_minor": "10000",
       "currency": "USD",
-      "evidence": { ... }
+      "event": "authorization"
     }
   }
 }
 ```
+
+Commerce evidence mappings MUST preserve raw upstream artifacts and MUST NOT synthesize payment finality from non-payment artifacts.
 
 ---
 
@@ -272,15 +275,19 @@ Vendor-specific details live in adapter packages:
 
 ---
 
-## 10. Future Interoperability
+## 10. Additional Interoperability Surfaces
 
-The following are under consideration for future versions:
-
-| Standard                  | Status                | Target Version |
-| ------------------------- | --------------------- | -------------- |
-| C2PA (Content Provenance) | ISO standard expected | v0.10.0+       |
-| CC Signals                | Stabilizing           | v0.10.0+       |
-| EU AI Act traceability    | Aug 2026              | v0.9.26+       |
+| Standard                               | PEAC Status                            | Package                                                          |
+| -------------------------------------- | -------------------------------------- | ---------------------------------------------------------------- |
+| in-toto v1.0 (supply-chain provenance) | Shipped (v0.12.6)                      | `@peac/mappings-intoto`                                          |
+| SLSA v1.2 (build provenance)           | Shipped (v0.12.6)                      | `@peac/mappings-slsa`                                            |
+| ERC-8128 (on-chain agent trust)        | Conformance fixtures shipped (v0.12.6) | Conformance only                                                 |
+| DID resolution (did:key, did:web)      | Shipped (v0.12.6)                      | `@peac/adapter-did`                                              |
+| gRPC transport carrier binding         | Shipped (v0.12.6)                      | `@peac/transport-grpc`                                           |
+| EAT passport (COSE_Sign1, RFC 9052)    | Shipped (v0.12.0-preview.2)            | `@peac/adapter-eat`                                              |
+| Content signals observation            | Shipped (v0.11.2)                      | `@peac/mappings-content-signals`                                 |
+| Managed runtime evidence               | Shipped (v0.12.9)                      | `@peac/adapter-managed-agents`                                   |
+| EU AI Act Annex IV evidence            | Planned (v0.12.12)                     | Extension groups + compliance profile shipped; packaging planned |
 
 ---
 
