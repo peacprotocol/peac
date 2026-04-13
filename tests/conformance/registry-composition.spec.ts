@@ -32,18 +32,18 @@ function hashFragment(fragment: string): string {
 }
 
 describe('registry composition parity', () => {
-  it('extension registry has 25 requirements across 6 sections', () => {
-    expect(extensionRegistry.total_requirements).toBe(25);
-    expect(extensionRegistry.sections).toHaveLength(6);
+  it('extension registry has 32 requirements across 7 sections', () => {
+    expect(extensionRegistry.total_requirements).toBe(32);
+    expect(extensionRegistry.sections).toHaveLength(7);
   });
 
-  it('main registry has 217 total requirements across 24 sections', () => {
+  it('main registry has 224 total requirements across 25 sections', () => {
     let total = 0;
     for (const section of registry.sections) {
       total += section.requirements.length;
     }
-    expect(total).toBe(217);
-    expect(registry.sections).toHaveLength(24);
+    expect(total).toBe(224);
+    expect(registry.sections).toHaveLength(25);
   });
 
   it('every extension section appears in main registry', () => {

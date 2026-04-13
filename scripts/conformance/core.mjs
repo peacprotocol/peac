@@ -24,7 +24,7 @@
  * Section/transport part allows uppercase letters and digits (e.g., A2A).
  */
 export const REQUIREMENT_ID_PATTERN =
-  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC)-[0-9]{3}$/;
+  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV)-[0-9]{3}$/;
 
 /**
  * Requirement ID namespaces.
@@ -38,6 +38,7 @@ export const NAMESPACES = /** @type {const} */ ([
   'GRPC-META',
   'RURL',
   'SC',
+  'RTGOV',
 ]);
 
 /**

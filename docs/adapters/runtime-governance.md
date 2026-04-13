@@ -10,7 +10,7 @@ mapper; the architecture supports additional mappers for other runtimes.
 **Layer:** 4 (Adapters)
 **Extension Namespace:** `org.peacprotocol/runtime-governance`
 **Spec:** [RUNTIME-GOVERNANCE-PROFILE.md](../specs/RUNTIME-GOVERNANCE-PROFILE.md)
-**Status:** Planned (v0.12.10)
+**Status:** Shipped (v0.12.10)
 
 ## Overview
 
@@ -68,10 +68,7 @@ mapManagedAgentEvent(...) --> event           <-- future mapper
 
 ## Quick start
 
-Proposed API (lands with adapter package in v0.12.10):
-
 ```typescript
-// Planned API -- not yet runnable; package ships with adapter PR
 import { generateKeypair, verifyLocal } from '@peac/protocol';
 import {
   issueRuntimeGovernanceRecord,

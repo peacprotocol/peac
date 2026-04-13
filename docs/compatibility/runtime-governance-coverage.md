@@ -16,15 +16,15 @@ statement leads to drift and overclaim. PEAC keeps them separate.
 
 ## Control-plane vs records-plane
 
-| Dimension                 | AGT (control-plane)               | PEAC (records-plane)                                                    |
-| ------------------------- | --------------------------------- | ----------------------------------------------------------------------- |
-| Runtime enforcement       | Yes (allow/deny/warn)             | No (observational only)                                                 |
-| Policy evaluation         | Yes (Rego/Cedar/YAML)             | No (records decisions, does not evaluate)                               |
-| Trust scoring             | Yes (0-1000, computed)            | No (preserves upstream scores as opaque values)                         |
-| Compliance assessment     | Yes (documentary self-assessment) | No (records assessments, does not determine)                            |
-| Portable signed record    | No                                | Yes (Wire 0.2 `interaction-record+jwt`)                                 |
-| Cross-vendor verification | No (requires AGT stack)           | Yes (any party with public key)                                         |
-| Conformance suite         | No (0 executable vectors)         | Yes (217+ requirement IDs; runtime-governance IDs planned for v0.12.10) |
+| Dimension                 | AGT (control-plane)               | PEAC (records-plane)                                                |
+| ------------------------- | --------------------------------- | ------------------------------------------------------------------- |
+| Runtime enforcement       | Yes (allow/deny/warn)             | No (observational only)                                             |
+| Policy evaluation         | Yes (Rego/Cedar/YAML)             | No (records decisions, does not evaluate)                           |
+| Trust scoring             | Yes (0-1000, computed)            | No (preserves upstream scores as opaque values)                     |
+| Compliance assessment     | Yes (documentary self-assessment) | No (records assessments, does not determine)                        |
+| Portable signed record    | No                                | Yes (Wire 0.2 `interaction-record+jwt`)                             |
+| Cross-vendor verification | No (requires AGT stack)           | Yes (any party with public key)                                     |
+| Conformance suite         | No (0 executable vectors)         | Yes (224 requirement IDs across 25 sections, including 7 RTGOV IDs) |
 
 Both layers are needed. AGT governs inside the runtime; PEAC produces portable,
 signed records across boundaries. A third-party auditor can verify a PEAC
@@ -77,12 +77,12 @@ What `@peac/adapter-runtime-governance` maps, preserves, and does not cover.
 
 ## Truth Surface 3: Verified Interoperability
 
-| Verification                                | Status                          | Method                                                    |
-| ------------------------------------------- | ------------------------------- | --------------------------------------------------------- |
-| Issue + verifyLocal round-trip (6 families) | Planned for v0.12.10 adapter PR | Pinned AGT-shaped fixtures from v3.1.0 docs               |
-| Session summary aggregation                 | Planned for v0.12.10 adapter PR | Mixed-family receipt decoding with deterministic ordering |
-| Per-family normalization and validation     | Planned for v0.12.10 adapter PR | Discriminated union validation with malformed rejection   |
-| Unknown upstream field containment          | Planned for v0.12.10 adapter PR | Unknown fields do not become extension keys               |
-| Live AGT v3.1.0 runtime integration         | Not yet tested                  | Requires AGT runtime instance                             |
-| Merkle chain integrity verification         | Not performed by PEAC           | Upstream runtime responsibility                           |
-| ML-DSA-65 signature verification            | Not performed by PEAC           | PEAC signs with Ed25519 only                              |
+| Verification                                | Status                | Method                                                    |
+| ------------------------------------------- | --------------------- | --------------------------------------------------------- |
+| Issue + verifyLocal round-trip (6 families) | Verified in CI        | Pinned AGT-shaped fixtures from v3.1.0 docs               |
+| Session summary aggregation                 | Verified in CI        | Mixed-family receipt decoding with deterministic ordering |
+| Per-family normalization and validation     | Verified in CI        | Discriminated union validation with malformed rejection   |
+| Unknown upstream field containment          | Verified in CI        | Unknown fields do not become extension keys               |
+| Live AGT v3.1.0 runtime integration         | Not yet tested        | Requires AGT runtime instance                             |
+| Merkle chain integrity verification         | Not performed by PEAC | Upstream runtime responsibility                           |
+| ML-DSA-65 signature verification            | Not performed by PEAC | PEAC signs with Ed25519 only                              |

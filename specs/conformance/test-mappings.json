@@ -229,6 +229,48 @@
       "test_file": "packages/mappings/intoto/tests/intoto.test.ts",
       "test_description": "in-toto mapping targets v1.0 Statement type only",
       "notes": "toPeacFromInToto throws for non-v1.0 _type"
+    },
+    {
+      "requirement_id": "RTGOV-001",
+      "test_file": "packages/adapters/runtime-governance/tests/issue.test.ts",
+      "test_description": "All runtime-governance records use evidence kind",
+      "notes": "Round-trip issue+verify for each family asserts evidence kind via FAMILY_REGISTRY"
+    },
+    {
+      "requirement_id": "RTGOV-002",
+      "test_file": "packages/adapters/runtime-governance/tests/families.test.ts",
+      "test_description": "Type URIs use org.peacprotocol/runtime-governance- prefix",
+      "notes": "All type URIs start with TYPE_PREFIX assertion"
+    },
+    {
+      "requirement_id": "RTGOV-003",
+      "test_file": "packages/adapters/runtime-governance/tests/families.test.ts",
+      "test_description": "Extension namespace is org.peacprotocol/runtime-governance",
+      "notes": "EXTENSION_NAMESPACE equality assertion"
+    },
+    {
+      "requirement_id": "RTGOV-004",
+      "test_file": "packages/adapters/runtime-governance/tests/issue.test.ts",
+      "test_description": "Provider field is present in extension and never empty",
+      "notes": "Extension field check asserts provider is present in decoded claims"
+    },
+    {
+      "requirement_id": "RTGOV-005",
+      "test_file": "packages/adapters/runtime-governance/tests/issue.test.ts",
+      "test_description": "Upstream integrity artifacts preserved as opaque strings",
+      "notes": "Nested upstream cleanup test preserves source_system as opaque string"
+    },
+    {
+      "requirement_id": "RTGOV-006",
+      "test_file": "packages/adapters/runtime-governance/tests/normalize.test.ts",
+      "test_description": "PEAC must not derive, recompute, rank, or authoritatively assess trust",
+      "notes": "Trust score structural validation (0-1000 integer) without derivation or assessment"
+    },
+    {
+      "requirement_id": "RTGOV-007",
+      "test_file": "packages/adapters/runtime-governance/tests/normalize.test.ts",
+      "test_description": "Compliance observations are observational, never authoritative determinations",
+      "notes": "Compliance score structural validation (0-100) without compliance determination"
     }
   ]
 }

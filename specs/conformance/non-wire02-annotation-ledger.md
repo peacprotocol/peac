@@ -84,11 +84,25 @@ Legend: `pending` = governing spec does not yet contain the source fragment verb
 | SC-003 | pending (spec file absent) | Same spec-file prerequisite; quote `Maps SLSA v1.2 provenance: slsa track/level/version fields`.                                                                                 |
 | SC-004 | pending (spec file absent) | Same spec-file prerequisite; quote `Throws Error if statement._type is not in-toto v1.0`.                                                                                        |
 
+### Section 27: Runtime Governance Records
+
+Governing spec: `docs/specs/RUNTIME-GOVERNANCE-PROFILE.md` (present since v0.12.10 PR #639).
+
+| ID        | Status    | Follow-up                                                                        |
+| --------- | --------- | -------------------------------------------------------------------------------- |
+| RTGOV-001 | annotated | Source fragment present in governing spec Section 6                              |
+| RTGOV-002 | annotated | Source fragment present in governing spec Section 5                              |
+| RTGOV-003 | annotated | Source fragment present in governing spec Section 4                              |
+| RTGOV-004 | annotated | Source fragment present in adapter package types.ts (provider field doc)         |
+| RTGOV-005 | annotated | Source fragment present in governing spec Section 7                              |
+| RTGOV-006 | annotated | Source fragment present in governing spec Section 3 (Trust Observation row)      |
+| RTGOV-007 | annotated | Source fragment present in governing spec Section 3 (Compliance Observation row) |
+
 ---
 
 ## Summary
 
-- **Total non-WIRE02 IDs registered:** 25
+- **Total non-WIRE02 IDs registered:** 32
 - **Sections with existing governing spec file (need inline annotation):** 5
 - **Sections with missing governing spec file (need spec + annotation):** 1 (Section 26, Supply Chain)
 - **Current runtime advisories reported by `verify-registry-drift.mjs`:** 17 (some source
