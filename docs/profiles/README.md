@@ -37,9 +37,10 @@ regulatory, operational, or evidence workflow.
 Adapter profiles document how to normalize external protocol artifacts into
 PEAC receipts for a specific integration.
 
-| Profile                                                         | Package              | Since    | Status |
-| --------------------------------------------------------------- | -------------------- | -------- | ------ |
-| [Stripe x402 Machine Payments](stripe-x402-machine-payments.md) | `@peac/rails-stripe` | v0.10.11 | Draft  |
+| Profile                                                         | Package                            | Since    | Status |
+| --------------------------------------------------------------- | ---------------------------------- | -------- | ------ |
+| [Stripe x402 Machine Payments](stripe-x402-machine-payments.md) | `@peac/rails-stripe`               | v0.10.11 | Draft  |
+| [Runtime Governance](runtime-governance.md)                     | `@peac/adapter-runtime-governance` | v0.12.10 | Draft  |
 
 ## Profile Templates
 

@@ -28,9 +28,13 @@ PEAC receipts are signed artifacts created after an interaction completes. They 
 
 PEAC does not issue, verify, or manage identities. It uses existing identity systems (Ed25519 keys, DIDs, JWKS) to sign and verify receipts. If you need identity infrastructure, use your organization's IdP, DID methods, or key management system. PEAC's `actor` and `iss` fields reference identities but do not create them.
 
+## When you need runtime governance enforcement
+
+PEAC records what runtime governance systems decided. It does not enforce policies, manage sandboxes, evaluate trust, or make allow/deny decisions. If you need runtime governance enforcement, use Microsoft Agent Governance Toolkit, your managed runtime's native controls, or a dedicated policy engine. PEAC can record signed, portable records of what those systems reported, enabling cross-boundary verification by third parties.
+
 ## When you need a trust score or reputation system
 
-PEAC provides raw, verifiable evidence. It does not compute trust scores, reputation metrics, or risk assessments. If you need reputation, use ERC-8004, Observer Protocol, or a dedicated reputation layer. PEAC evidence can serve as input to a reputation system, but it does not replace one.
+PEAC provides raw, verifiable records. It does not compute trust scores, reputation metrics, or risk assessments. If you need reputation, use ERC-8004, Observer Protocol, or a dedicated reputation layer. PEAC records can serve as input to a reputation system, but PEAC does not replace one.
 
 ## When a simpler format is enough
 
