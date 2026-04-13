@@ -377,12 +377,14 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 **Adapters:**
 
-| Package                           | Description                                |
-| --------------------------------- | ------------------------------------------ |
-| `@peac/adapter-x402`              | x402 evidence carrier (V1 + V2)            |
-| `@peac/adapter-did`               | DID resolution (did:key, did:web, caching) |
-| `@peac/adapter-openclaw`          | OpenClaw agent framework                   |
-| `@peac/adapter-openai-compatible` | Hash-first inference receipt adapter       |
+| Package                            | Description                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------- |
+| `@peac/adapter-runtime-governance` | Runtime governance records (AGT first mapper, 6 observation-specific type URIs) |
+| `@peac/adapter-managed-agents`     | Managed agent session lifecycle records (6 event families)                      |
+| `@peac/adapter-x402`               | x402 record carrier (V1 + V2)                                                   |
+| `@peac/adapter-did`                | DID resolution (did:key, did:web, caching)                                      |
+| `@peac/adapter-openclaw`           | OpenClaw agent framework                                                        |
+| `@peac/adapter-openai-compatible`  | Hash-first inference receipt adapter                                            |
 
 **Mappings:**
 
