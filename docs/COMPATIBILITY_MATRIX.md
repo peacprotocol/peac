@@ -39,6 +39,19 @@ Current as of v0.12.9.
 
 All adapter and mapping packages support Wire 0.2 exclusively. See `REPO_SURFACE_STATUS.json` for the full list with per-package state.
 
+| Adapter                        | Coverage                                      | Since   | Status      |
+| ------------------------------ | --------------------------------------------- | ------- | ----------- |
+| `@peac/adapter-managed-agents` | 6 event families, session summary             | v0.12.9 | **Shipped** |
+| `@peac/adapter-x402`           | 4-layer verification, dual-header, V2 support | v0.12.1 | **Shipped** |
+| `@peac/adapter-eat`            | COSE_Sign1, Ed25519, privacy-first mapping    | v0.12.0 | **Shipped** |
+| `@peac/adapter-did`            | did:key, did:web, DID Document resolver       | v0.12.6 | **Shipped** |
+
+### Planned (v0.12.10)
+
+| Adapter                            | Coverage                                                            | Target   |
+| ---------------------------------- | ------------------------------------------------------------------- | -------- |
+| `@peac/adapter-runtime-governance` | 6 observation-specific type URIs, AGT first mapper, session summary | v0.12.10 |
+
 ## Deprecation Schedule
 
 | Surface                   | Deprecated since | Removal target           | Migration                                                               |
