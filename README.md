@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Portable signed proof for agent, API, and MCP interactions</strong>
+  <strong>Portable signed records for agent, API, MCP, and cross-runtime interactions</strong>
   <br />
   Publish machine-readable terms, return signed interaction records, and verify them offline.
 </p>
@@ -24,15 +24,15 @@
   <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
 </p>
 
-PEAC is an open standard for publishing machine-readable terms, returning signed interaction records, and verifying them offline. It is the evidence layer: portable proof across organizational boundaries, without replacing auth, payment rails, or observability.
+PEAC is an open standard for verifiable interaction records across agent, tool, API, and cross-runtime systems. Publish machine-readable terms, return signed records, and verify them offline: portable audit records across organizational boundaries, without replacing auth, payment rails, or observability.
 
-**For** API providers, MCP tool hosts, agent operators, platforms, and auditors who need proof that crosses boundaries.
+**For** API providers, MCP tool hosts, agent operators, platforms, and auditors who need portable signed records that cross boundaries.
 
 ## How it works
 
 ```text
 1. Publish terms at /.well-known/peac.txt
-2. Return PEAC-Receipt with signed proof
+2. Return PEAC-Receipt with a signed interaction record
 3. Verify offline with the issuer's public key
 ```
 
@@ -119,6 +119,7 @@ PEAC is most useful where logs are not enough: payments, cross-boundary verifica
 - **Audit and dispute review:** Keep signed evidence that survives organizational boundaries, not just local logs. See [Governance Mappings](docs/governance/).
 - **MCP tools and APIs:** Verify, issue, and carry signed receipts for tool calls, API responses, and automated actions. See [MCP Integration Kit](integrator-kits/mcp/README.md).
 - **Agent-to-agent workflows:** Carry verifiable receipts across A2A task/state transitions and multi-agent chains. See [A2A Integration Kit](integrator-kits/a2a/README.md).
+- **Runtime governance:** Record governance decisions from managed runtimes (Microsoft AGT, Claude Managed Agents, OpenAI ACP) as portable signed records. See [`@peac/adapter-runtime-governance`](packages/adapters/runtime-governance/).
 
 ## Start here
 
@@ -135,15 +136,16 @@ More paths: [Go SDK](sdks/go/) | [Python examples](examples/python/) | [paymenta
 
 ## Where it fits
 
-| Existing system                                 | What PEAC adds                                                    |
-| ----------------------------------------------- | ----------------------------------------------------------------- |
-| **Logs**                                        | Portable proof that survives organizational boundaries            |
-| **OpenTelemetry**                               | Signed evidence that correlates to traces                         |
-| **MCP / A2A**                                   | Proof carried alongside tool calls and agent exchanges            |
-| **AP2 / ACP (Agentic Commerce Protocol) / UCP** | Proof of terms and outcomes across commerce protocols             |
-| **paymentauth**                                 | Evidence from HTTP Payment authentication challenges and receipts |
-| **x402**                                        | Settlement proof mapping with offline verification                |
-| **Stripe SPT / Payment rails**                  | Delegation and settlement references made verifiable              |
+| Existing system                                 | What PEAC adds                                                   |
+| ----------------------------------------------- | ---------------------------------------------------------------- |
+| **Logs**                                        | Portable signed records that survive organizational boundaries   |
+| **OpenTelemetry**                               | Signed records that correlate to traces                          |
+| **MCP / A2A**                                   | Signed receipts carried alongside tool calls and agent exchanges |
+| **AP2 / ACP (Agentic Commerce Protocol) / UCP** | Signed records of terms and outcomes across commerce protocols   |
+| **paymentauth**                                 | Receipts from HTTP Payment authentication challenges             |
+| **x402**                                        | Settlement record mapping with offline verification              |
+| **Stripe SPT / Payment rails**                  | Delegation and settlement references made verifiable             |
+| **Runtime governance (AGT, Claude MA, ACP)**    | Portable records of governance decisions across boundaries       |
 
 **What changes in your stack:** keep auth, keep payments, keep observability. Add `/.well-known/peac.txt` and return `PEAC-Receipt` on governed responses.
 
@@ -223,6 +225,8 @@ See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](doc
 - **DID**: [DID resolution](packages/adapters/did/) did:key and did:web resolver with caching
 - **Express**: [Express middleware](packages/middleware-express/) receipt middleware
 - **x402**: [x402 adapter](packages/adapters/x402/) payment evidence adapter (V1 + V2)
+- **Runtime governance**: [Runtime governance adapter](packages/adapters/runtime-governance/) records from AGT and other runtimes
+- **Managed agents**: [Managed agents adapter](packages/adapters/managed-agents/) session lifecycle records
 - **Supply chain**: [in-toto](packages/mappings/intoto/) and [SLSA](packages/mappings/slsa/) provenance mappings
 
 Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new).
@@ -233,6 +237,10 @@ Building an implementation? [Open an issue](https://github.com/peacprotocol/peac
 
 Contributions are welcome. For substantial changes, please open an issue first. See [docs/SPEC_INDEX.md](docs/SPEC_INDEX.md) for normative specifications and [docs/CI_BEHAVIOR.md](docs/CI_BEHAVIOR.md) for CI guidelines.
 
-Apache-2.0. See [LICENSE](LICENSE). Stewardship: [Originary](https://www.originary.xyz/) and the open source community.
+Apache-2.0. See [LICENSE](LICENSE).
 
-**Source:** [github.com/peacprotocol/peac](https://github.com/peacprotocol/peac) | **Website:** [peacprotocol.org](https://www.peacprotocol.org) | **Discussions:** [GitHub Discussions](https://github.com/peacprotocol/peac/discussions)
+---
+
+PEAC Protocol is an open source project stewarded by Originary and community contributors.
+
+[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz) | [Discussions](https://github.com/peacprotocol/peac/discussions)
