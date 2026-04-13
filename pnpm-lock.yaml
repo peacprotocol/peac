@@ -555,6 +555,22 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/runtime-governance-records:
+    dependencies:
+      '@peac/adapter-runtime-governance':
+        specifier: workspace:*
+        version: link:../../packages/adapters/runtime-governance
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/stripe-projects-provisioning:
     dependencies:
       '@peac/crypto':
