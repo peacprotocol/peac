@@ -60,12 +60,14 @@
   "keywords": [
     "peac",
     "peacprotocol",
+    "originary",
     "interaction-records",
     "signed-records",
     "runtime-governance",
     "agent-records",
     "agent-governance",
     "mcp",
-    "a2a"
+    "a2a",
+    "adapter"
   ]
 }
