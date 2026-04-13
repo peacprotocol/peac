@@ -60,11 +60,13 @@
   "keywords": [
     "peac",
     "peacprotocol",
+    "originary",
     "interaction-records",
     "signed-records",
     "managed-agents",
-    "agent-evidence",
+    "agent-records",
     "mcp",
-    "a2a"
+    "a2a",
+    "adapter"
   ]
 }
