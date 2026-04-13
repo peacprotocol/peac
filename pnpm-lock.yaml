@@ -885,6 +885,28 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/adapters/runtime-governance:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.11
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.0(@types/node@22.19.11)(vite@6.4.1)
+
   packages/adapters/x402:
     dependencies:
       '@peac/adapter-core':

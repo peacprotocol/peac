@@ -201,6 +201,14 @@
       "published": true,
       "note": "Vendor-neutral managed agent runtime event adapter. 6 event families."
     },
+    "packages/adapters/runtime-governance": {
+      "npm": "@peac/adapter-runtime-governance",
+      "state": "supported",
+      "wire": "0.2",
+      "layer": 4,
+      "published": true,
+      "note": "Runtime governance adapter. 6 observation-specific type URIs. AGT first mapper."
+    },
     "packages/adapters/eas": {
       "npm": null,
       "state": "experimental",

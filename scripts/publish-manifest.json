@@ -3,7 +3,7 @@
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.12.9",
   "lastUpdated": "2026-04-11",
-  "totalPackages": 36,
+  "totalPackages": 37,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -31,6 +31,7 @@
     "@peac/adapter-x402",
     "@peac/adapter-openclaw",
     "@peac/adapter-managed-agents",
+    "@peac/adapter-runtime-governance",
     "@peac/mappings-content-signals",
     "@peac/adapter-openai-compatible",
     "@peac/mcp-server",
@@ -69,6 +70,7 @@
       "@peac/adapter-x402",
       "@peac/adapter-openclaw",
       "@peac/adapter-managed-agents",
+      "@peac/adapter-runtime-governance",
       "@peac/mappings-content-signals",
       "@peac/adapter-openai-compatible"
     ],
@@ -134,7 +136,7 @@
     "@peac/mappings-intoto",
     "@peac/mappings-slsa"
   ],
-  "pendingTrustedPublishing": [],
+  "pendingTrustedPublishing": ["@peac/adapter-runtime-governance"],
   "deferredTrustedPublishing": [],
   "deferredTrustedPublishingNote": "All packages bootstrapped as of v0.12.6. Configure OIDC trusted publishing for new packages before next release."
 }

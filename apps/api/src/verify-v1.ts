@@ -27,6 +27,7 @@ import {
   formatPlainText,
   negotiateFormat,
 } from './report-format.js';
+import { detectRecordProfile } from './record-profile.js';
 import { deterministicStringify } from './utils.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
@@ -342,6 +343,10 @@ export function createVerifyV1Handler() {
         wire_version: result.wireVersion,
       };
 
+      const recordProfile = detectRecordProfile(
+        (result.claims as Record<string, unknown>)?.type as string | undefined
+      );
+
       if (acceptFormat === 'extended') {
         const extended = buildExtendedReport(
           {
@@ -356,7 +361,8 @@ export function createVerifyV1Handler() {
           },
           reportId,
           durationMs,
-          keyResolution
+          keyResolution,
+          recordProfile ?? undefined
         );
         c.header('Content-Type', 'application/peac-report+json');
         return c.body(deterministicStringify(extended), 200);
@@ -376,7 +382,8 @@ export function createVerifyV1Handler() {
           },
           reportId,
           durationMs,
-          keyResolution
+          keyResolution,
+          recordProfile ?? undefined
         );
         c.header('Content-Type', 'text/plain');
         return c.body(formatPlainText(extended), 200);
