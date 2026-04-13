@@ -1,0 +1,25 @@
+{
+  "$schema": "https://www.peacprotocol.org/schemas/benchmarks/slo.schema.json",
+  "version": "0.12.10",
+  "description": "Performance targets for core PEAC operations. Informational and regression-oriented.",
+  "targets": [
+    {
+      "operation": "verify",
+      "p95_ms_ci": 15,
+      "p95_ms_production": 10,
+      "iterations": 300,
+      "warmup": 50
+    },
+    {
+      "operation": "issue",
+      "p95_ms_ci": 10,
+      "p95_ms_production": 5,
+      "iterations": 300,
+      "warmup": 50
+    }
+  ],
+  "regression": {
+    "max_ratio": 2.0,
+    "description": "p95 must not exceed 2x baseline. Absolute CI target breach is a warning, not a failure."
+  }
+}

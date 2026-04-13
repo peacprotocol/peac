@@ -1,0 +1,20 @@
+{
+  "description": "Baseline performance measurements from known-good runs. Only measured values included; estimated values excluded.",
+  "generated_at": "2026-04-13",
+  "node_version": "24",
+  "baselines": [
+    {
+      "operation": "verify",
+      "p95_ms": 2.948,
+      "p50_ms": 2.048,
+      "iterations": 300,
+      "source": "perf-results.json (v0.9.26, 2026-02-07)"
+    }
+  ],
+  "pending": [
+    {
+      "operation": "issue",
+      "reason": "No measured issue() baseline. Run perf suite and add real measurements before enabling regression gate for issue()."
+    }
+  ]
+}

@@ -52,6 +52,15 @@ All adapter and mapping packages support Wire 0.2 exclusively. See `REPO_SURFACE
 | ---------------------------------- | ------------------------------------------------------------------- | -------- |
 | `@peac/adapter-runtime-governance` | 6 observation-specific type URIs, AGT first mapper, session summary | v0.12.10 |
 
+## Performance Targets
+
+Informational and regression-oriented. See [BENCHMARK-SLO.md](specs/BENCHMARK-SLO.md).
+
+| Operation       | p95 Target (CI) | p95 Target (Prod) | Model            |
+| --------------- | --------------- | ----------------- | ---------------- |
+| `verifyLocal()` | 15 ms           | 10 ms             | Regression-based |
+| `issue()`       | 10 ms           | 5 ms              | Regression-based |
+
 ## Deprecation Schedule
 
 | Surface                   | Deprecated since | Removal target           | Migration                                                               |
