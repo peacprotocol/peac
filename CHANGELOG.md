@@ -5,6 +5,38 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.10] - 2026-04-14
+
+### Added
+
+- **`@peac/adapter-runtime-governance`**: new Layer 4 runtime-governance adapter. Generic surface with AGT as first mapper. 6 observation-specific type URIs under `org.peacprotocol/runtime-governance-*` (`policy-decision`, `audit-entry`, `authority-scope`, `lifecycle-event`, `trust-observation`, `compliance-observation`). Discriminated union payload model with per-family validation, explicit extension builders, preserved upstream artifact block. Zero vendor SDK dependencies. 56 tests
+- **Runtime-Governance Profile spec** (`docs/specs/RUNTIME-GOVERNANCE-PROFILE.md`): documentary overlay defining how governance records map to PEAC primitives. 6 record categories, preserved upstream artifact block, anti-pattern rules, CloudEvents compatibility, cryptographic diversity acknowledgment
+- **Runtime governance coverage matrix** (`docs/compatibility/runtime-governance-coverage.md`): 3 truth surfaces (upstream AGT architecture, PEAC adapter coverage, verified interoperability) with control-plane vs records-plane framing
+- **Hosted verify record profile detection**: registry-driven `detectRecordProfile()` in standalone module. `record_profile` metadata in extended reports for recognized type URI prefixes
+- **Conformance Section 27**: 7 runtime-governance requirement IDs for observable emitted-record semantics: RTGOV-001 (evidence kind), RTGOV-002 (type URI prefix), RTGOV-003 (extension namespace), RTGOV-004 (provider presence), RTGOV-005 (upstream opacity), RTGOV-006 (no trust derivation), RTGOV-007 (observational compliance only)
+- **Runtime-governance example suite** (`examples/runtime-governance-records/`): runnable demo with pinned AGT-shaped fixtures, real SHA-256 digests, deterministic session summary, gate script
+- **Benchmark SLO publication**: machine-readable performance targets with regression-based gate. Measured regression gate for `verifyLocal` (p95 baseline from perf-results.json). `issue()` target documented; measured baseline pending
+- **Managed-runtime positioning doctrine** (`docs/architecture/`): anti-absorption checklist, adapter packaging rules, complement-not-compete framing
+
+### Changed
+
+- 37 packages (was 36; +`@peac/adapter-runtime-governance`)
+- 224 conformance requirement IDs across 25 sections (was 217 across 24)
+- 7392 tests across 296 files (was 7336 across 290)
+- Manifest invariant checker updated: `pendingTrustedPublishing` and `deferredTrustedPublishing` entries satisfy the OIDC coverage requirement
+- Package path resolver updated for nested adapters directory
+
+### Deferred
+
+- Live AGT v3.1.0 runtime integration test: v0.12.11
+- OpenAPI schema update for `record_profile`: v0.12.11
+- PEAC PQC (ML-DSA-65) signing: v1.0+
+- Claude Managed Agents adapter updates: v0.12.11
+- Go middleware hardening: v0.12.11
+- ACP/MPP/x402 commerce record bridges: v0.12.11
+- EU AI Act Annex IV mapping: v0.12.12
+- ISO 42001 Clause 8 mapping: v0.12.12
+
 ## [0.12.9] - 2026-04-11
 
 ### Added

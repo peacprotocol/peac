@@ -2464,6 +2464,84 @@
           "last_reviewed_in": "0.12.9"
         }
       ]
+    },
+    {
+      "section_number": 27,
+      "section_title": "Runtime Governance Records",
+      "section_anchor": "runtime-governance-records",
+      "governing_spec": "docs/specs/RUNTIME-GOVERNANCE-PROFILE.md",
+      "requirements": [
+        {
+          "id": "RTGOV-001",
+          "keyword": "MUST",
+          "summary": "All runtime-governance records use evidence kind",
+          "source_fragment": "All categories produce Interaction Records with kind: \"evidence\"",
+          "source_fragment_hash": "sha256:f53bbaec8fca10cd86ef0393d51970b9e3a947364e6d7e78fab27087945ce191",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.9",
+          "last_reviewed_in": "0.12.9"
+        },
+        {
+          "id": "RTGOV-002",
+          "keyword": "MUST",
+          "summary": "Type URIs use org.peacprotocol/runtime-governance- prefix",
+          "source_fragment": "org.peacprotocol/runtime-governance-{observation-type}",
+          "source_fragment_hash": "sha256:47d504c176560c80d381de2c89b685b74269c4b839cad188761c0b6515229b6a",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.9",
+          "last_reviewed_in": "0.12.9"
+        },
+        {
+          "id": "RTGOV-003",
+          "keyword": "MUST",
+          "summary": "Extension namespace is org.peacprotocol/runtime-governance",
+          "source_fragment": "All runtime-governance adapters share a single extension namespace",
+          "source_fragment_hash": "sha256:e2b9c0aab53e691902084e1f6d05e04527cd95e922fbb4130a6d1a765f066bab",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.9",
+          "last_reviewed_in": "0.12.9"
+        },
+        {
+          "id": "RTGOV-004",
+          "keyword": "MUST",
+          "summary": "Provider field is present in extension and never empty",
+          "source_fragment": "Provider name. Caller-supplied; never hardcoded",
+          "source_fragment_hash": "sha256:2b262a126742544c10aeb3b4891136df872c205a4eb9ce26952d5526be4bcb07",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.9",
+          "last_reviewed_in": "0.12.9"
+        },
+        {
+          "id": "RTGOV-005",
+          "keyword": "MUST",
+          "summary": "Upstream integrity artifacts preserved as opaque strings",
+          "source_fragment": "Adapters SHOULD preserve raw upstream artifacts as opaque blobs",
+          "source_fragment_hash": "sha256:a1a08a1822b3bf305b8c9fc465bbe310aa06a964f5888668e92bbcb378810056",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.9",
+          "last_reviewed_in": "0.12.9"
+        },
+        {
+          "id": "RTGOV-006",
+          "keyword": "MUST NOT",
+          "summary": "PEAC must not derive, recompute, rank, or authoritatively assess trust",
+          "source_fragment": "PEAC never computes, validates, or weights trust scores",
+          "source_fragment_hash": "sha256:56903c0883f5235afee60282409081ad09f77d9591d8b165234f8ce4ebdf1e2f",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.9",
+          "last_reviewed_in": "0.12.9"
+        },
+        {
+          "id": "RTGOV-007",
+          "keyword": "MUST",
+          "summary": "Compliance observations are observational, never authoritative determinations",
+          "source_fragment": "PEAC never makes compliance determinations",
+          "source_fragment_hash": "sha256:3e51e0eb183809ae754f6d72eadf808faf36772bfd7c191380d6fc92598f7ac0",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.12.9",
+          "last_reviewed_in": "0.12.9"
+        }
+      ]
     }
   ]
 }

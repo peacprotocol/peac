@@ -14,10 +14,10 @@
  *      - Governing spec: docs/specs/WIRE-0.2.md
  *
  *   2. scripts/conformance/build-extension-registry.mjs (THIS FILE)
- *      - Owns non-WIRE02 requirements (25 IDs across 6 namespaces)
+ *      - Owns non-WIRE02 requirements (32 IDs across 7 namespaces)
  *      - Source: inline EXTENSION_REQUIREMENTS array below
  *      - Per-section governing_spec field
- *      - Namespaces: DID-RES, GRPC-META, PKCE, RURL, SC, X402V2
+ *      - Namespaces: DID-RES, GRPC-META, PKCE, RURL, SC, X402V2, RTGOV
  *
  * The main builder composes both sources into the final requirement-ids.json.
  * Regeneration order:
@@ -302,6 +302,63 @@ const EXTENSION_REQUIREMENTS = [
         keyword: 'MUST',
         summary: 'in-toto mapping targets v1.0 Statement type only',
         source_fragment: 'Throws Error if statement._type is not in-toto v1.0',
+        enforcement_class: 'hard_fail',
+      },
+    ],
+  },
+  {
+    section: 27,
+    title: 'Runtime Governance Records',
+    anchor: 'runtime-governance-records',
+    governing_spec: 'docs/specs/RUNTIME-GOVERNANCE-PROFILE.md',
+    requirements: [
+      {
+        id: 'RTGOV-001',
+        keyword: 'MUST',
+        summary: 'All runtime-governance records use evidence kind',
+        source_fragment: 'All categories produce Interaction Records with kind: "evidence"',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'RTGOV-002',
+        keyword: 'MUST',
+        summary: 'Type URIs use org.peacprotocol/runtime-governance- prefix',
+        source_fragment: 'org.peacprotocol/runtime-governance-{observation-type}',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'RTGOV-003',
+        keyword: 'MUST',
+        summary: 'Extension namespace is org.peacprotocol/runtime-governance',
+        source_fragment: 'All runtime-governance adapters share a single extension namespace',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'RTGOV-004',
+        keyword: 'MUST',
+        summary: 'Provider field is present in extension and never empty',
+        source_fragment: 'Provider name. Caller-supplied; never hardcoded',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'RTGOV-005',
+        keyword: 'MUST',
+        summary: 'Upstream integrity artifacts preserved as opaque strings',
+        source_fragment: 'Adapters SHOULD preserve raw upstream artifacts as opaque blobs',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'RTGOV-006',
+        keyword: 'MUST NOT',
+        summary: 'PEAC must not derive, recompute, rank, or authoritatively assess trust',
+        source_fragment: 'PEAC never computes, validates, or weights trust scores',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'RTGOV-007',
+        keyword: 'MUST',
+        summary: 'Compliance observations are observational, never authoritative determinations',
+        source_fragment: 'PEAC never makes compliance determinations',
         enforcement_class: 'hard_fail',
       },
     ],

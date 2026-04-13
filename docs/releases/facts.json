@@ -6,12 +6,12 @@
   "dist_tag": "latest",
   "release_date": "2026-04-11",
   "metrics": {
-    "tests": 7336,
-    "test_files": 290,
+    "tests": 7392,
+    "test_files": 296,
     "published_packages": 37,
     "build_targets": 102,
-    "conformance_requirement_ids": 217,
-    "conformance_sections": 24
+    "conformance_requirement_ids": 224,
+    "conformance_sections": 25
   },
   "runtime": {
     "node_canonical": "24.14.1",

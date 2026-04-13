@@ -3,7 +3,7 @@
 **Status:** Draft
 **Since:** v0.12.10
 **Extension Namespace:** `org.peacprotocol/runtime-governance`
-**Package:** `@peac/adapter-runtime-governance` (planned, lands with adapter PR)
+**Package:** `@peac/adapter-runtime-governance`
 **Spec:** [RUNTIME-GOVERNANCE-PROFILE.md](../specs/RUNTIME-GOVERNANCE-PROFILE.md)
 
 ## Abstract
@@ -22,11 +22,7 @@ runtime's backing database.
 
 ## Package / Function
 
-The adapter package `@peac/adapter-runtime-governance` is planned for v0.12.10.
-The API below is the proposed design; it is not yet runnable.
-
 ```typescript
-// Proposed API (lands with adapter package in v0.12.10)
 import { issueRuntimeGovernanceRecord, mapAgtEvent } from '@peac/adapter-runtime-governance';
 ```
 
@@ -59,23 +55,16 @@ anti-pattern rules.
 
 ## Conformance vectors
 
-Planned for v0.12.10 adapter PR. Fixtures will be located at
-`specs/conformance/fixtures/runtime-governance/` with provenance documentation
-linking each fixture to verified AGT v3.1.0 pre-release documentation.
-
-Conformance section: Section 25 (RTGOV-001 through RTGOV-007).
+Conformance Section 27 (RTGOV-001 through RTGOV-007).
+See `specs/conformance/extension-requirement-ids.json`.
 
 ## Quick demo
 
-The adapter package is planned for v0.12.10. A runnable demo will land with
-the adapter PR at `examples/runtime-governance-records/`.
+See `examples/runtime-governance-records/` for a runnable demo.
 
 ## Example
 
-Proposed API (not yet runnable):
-
 ```typescript
-// Planned API -- lands with @peac/adapter-runtime-governance package
 const event = mapAgtEvent({
   family: 'policy_decision',
   event: 'policy.evaluated',
