@@ -1,0 +1,28 @@
+{
+  "requirement_id": "C-S26-x402-offer-only-rejected",
+  "description": "Negative finality: offer-only (empty raw_value) MUST NOT produce settlement evidence. Throws in ALL modes.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "fromX402SettlementObservation",
+  "input": {
+    "proof": {
+      "source": "PEAC-Receipt",
+      "wire_version": "peac",
+      "raw_value": ""
+    },
+    "scheme": "exact",
+    "network": "base-sepolia",
+    "asset": "0xUSDC",
+    "currency": "USD",
+    "amount_minor": "1500",
+    "env": "live"
+  },
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "throw",
+      "legacy": "throw"
+    },
+    "error_code": "commerce.finality_synthesis_blocked",
+    "error_pointer": "/proofs/x402/settlement"
+  }
+}

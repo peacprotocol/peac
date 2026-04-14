@@ -73,6 +73,10 @@ export {
 // Evidence mapping
 export { fromPaymentauthReceipt, toCommerceExtensionFields } from './map.js';
 
+// MPP / paymentauth payment-attempt and settlement (v0.12.11)
+export { fromMPPPaymentAttempt, fromMPPSettlement } from './map.js';
+export type { PaymentauthArtifactKind, MPPPaymentAttemptInput, MPPSettlementInput } from './map.js';
+
 // Evidence Carrier Contract
 export type {
   PaymentauthHeaderMap,

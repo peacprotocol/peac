@@ -72,3 +72,41 @@ Raw upstream artifacts are preserved in `proofs.x402` (proof preservation discip
 ## 7. Drift CI
 
 `x402-drift.yml` monitors upstream `specs/transports-v2/http.md` for changes.
+
+## 8. Settlement Observation Boundary (v0.12.11)
+
+PEAC records x402 settlement proofs as observation only. The
+`extractSettlementProofFromHeaders()` extractor in `@peac/adapter-x402`
+returns the raw proof artifact and a minimal normalized projection
+(source header, wire version, raw value). PEAC does NOT verify scheme-
+specific invariants:
+
+- single-use semantics
+- time-bound expiry
+- recipient binding
+- facilitator binding
+- max-vs-actual settlement correctness
+
+These remain the responsibility of the upstream x402 protocol and per-
+operator facilitator surfaces (see
+`docs/compatibility/x402-scheme-coverage.md` for the three-truth-surface
+separation).
+
+`fromX402SettlementObservation()` produces evidence with
+`commerce.event = 'settlement'` only when supplied with an extracted
+settlement-proof artifact whose `raw_value` is a non-empty string.
+Offer-only data (no settlement header present, or an empty raw_value) is
+rejected as a finality-rule violation in all strictness modes via the
+shared mapper-boundary finality-synthesis guard from
+`@peac/adapter-core`. The pointer field on the thrown error is
+`/proofs/x402/settlement` and the stable code is
+`commerce.finality_synthesis_blocked`.
+
+Header read precedence (matches the existing carrier reader):
+
+1. `PEAC-Receipt`
+2. `PAYMENT-RESPONSE` (x402 v2)
+3. `X-PAYMENT-RESPONSE` (x402 v1)
+
+When multiple headers are present, all are returned in precedence order
+so callers can record duplicates without losing fidelity.

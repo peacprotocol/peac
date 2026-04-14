@@ -156,3 +156,14 @@ export {
 // Challenge type mapping
 export type { ChallengeType } from './challenge.js';
 export { mapX402ToChallengeType } from './challenge.js';
+
+// x402 settlement-proof extraction and observation evidence (v0.12.11)
+export { extractSettlementProofFromHeaders, fromX402SettlementObservation } from './settlement.js';
+export type {
+  HeaderBag,
+  SettlementProofSource,
+  ExtractedSettlementProof,
+  X402SettlementObservationInput,
+  X402SettlementEvidence,
+  X402SettlementOptions,
+} from './settlement.js';

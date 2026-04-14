@@ -1,0 +1,25 @@
+{
+  "requirement_id": "C-S26-paymentauth-settlement-positive",
+  "description": "Positive: settlement with explicit upstream artifact and matching artifact_kind=settlement. Emits commerce.event=settlement.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "fromMPPSettlement",
+  "input": {
+    "settlement_id": "set_001",
+    "attempt_id": "att_001",
+    "currency": "USD",
+    "amount_minor": "1500",
+    "env": "live",
+    "artifact_kind": "settlement",
+    "upstream_artifact": {
+      "source": "paymentauth.settlement.v1"
+    }
+  },
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    },
+    "emits_commerce_event": "settlement"
+  }
+}

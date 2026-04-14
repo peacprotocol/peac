@@ -1,0 +1,21 @@
+{
+  "requirement_id": "C-S26-x402-dual-header-precedence",
+  "description": "Header extraction precedence: PEAC-Receipt > PAYMENT-RESPONSE (v2) > X-PAYMENT-RESPONSE (v1) when all three are present.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "extractSettlementProofFromHeaders",
+  "input": {
+    "headers": {
+      "PEAC-Receipt": "a",
+      "PAYMENT-RESPONSE": "b",
+      "X-PAYMENT-RESPONSE": "c"
+    }
+  },
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    },
+    "extracted_sources": ["PEAC-Receipt", "PAYMENT-RESPONSE", "X-PAYMENT-RESPONSE"]
+  }
+}

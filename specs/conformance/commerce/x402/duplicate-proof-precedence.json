@@ -1,0 +1,20 @@
+{
+  "requirement_id": "C-S26-x402-duplicate-proof-precedence",
+  "description": "Duplicate proofs (PEAC-Receipt + PAYMENT-RESPONSE) returned in precedence order; callers can record duplicates.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "extractSettlementProofFromHeaders",
+  "input": {
+    "headers": {
+      "PEAC-Receipt": "peac-bytes",
+      "PAYMENT-RESPONSE": "v2-bytes"
+    }
+  },
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    },
+    "extracted_sources": ["PEAC-Receipt", "PAYMENT-RESPONSE"]
+  }
+}
