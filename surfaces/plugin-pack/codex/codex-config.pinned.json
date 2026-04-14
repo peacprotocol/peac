@@ -1,0 +1,10 @@
+{
+  "$comment": "Pinned-version Codex MCP config for PEAC Protocol. Prefer this variant for release engagements; it pins an exact @peac/mcp-server version and is validated by scripts/smoke-codex.mjs. Update the pin on each PEAC release. The unpinned variant (codex-config.json) is retained for compatibility with existing consumers.",
+  "mcpServers": {
+    "peac": {
+      "command": "npx",
+      "args": ["-y", "@peac/mcp-server@0.12.11"],
+      "env": {}
+    }
+  }
+}

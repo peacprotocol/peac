@@ -55,15 +55,56 @@ type Config struct {
 	// SuccessHandler is called after successful verification.
 	// If nil, the next handler is called with claims in context.
 	SuccessHandler func(w http.ResponseWriter, r *http.Request, result *peac.VerifyResult)
+
+	// Logger is a structured logger for middleware events. When nil,
+	// NoopLogger is used.
+	Logger Logger
+
+	// Metrics is a metrics sink for middleware counters and histograms.
+	// When nil, NoopMetrics is used.
+	Metrics Metrics
+
+	// RateLimit configures an optional bounded token-bucket rate limiter.
+	// A zero value disables rate limiting.
+	RateLimit RateLimitConfig
+
+	// RequestTimeout bounds the downstream handler's execution time.
+	// Zero disables the timeout (default behavior).
+	RequestTimeout time.Duration
+
+	// MaxBodyBytes caps the request body size the middleware will allow
+	// downstream handlers to read. Zero means no cap (default: 1 MiB
+	// applied in DefaultConfig()).
+	MaxBodyBytes int64
+
+	// RecoverPanics wraps downstream handlers with a recover() guard
+	// that converts panics into RFC 9457 problem responses, logs via
+	// Logger, and increments Metrics.panics. Default: true.
+	RecoverPanics bool
+
+	// PanicRethrowInTest re-panics after logging instead of writing a
+	// 500 response. Test harnesses can set this so failures surface as
+	// real stack traces. Default: false.
+	PanicRethrowInTest bool
+
+	// TrustProxyHeaders controls proxy-aware client-IP extraction used
+	// by the rate limiter. Default: false. When false, only r.RemoteAddr
+	// is consulted. When true, X-Forwarded-For (rightmost hop) and
+	// X-Real-IP are honored; callers MUST ensure their proxy chain is
+	// terminated before the middleware.
+	TrustProxyHeaders bool
 }
 
-// DefaultConfig returns the default middleware configuration.
+// DefaultConfig returns the default middleware configuration. Hardened
+// defaults: panic recovery on, 1 MiB body cap, TrustProxyHeaders off.
 func DefaultConfig() Config {
 	return Config{
-		MaxAge:     time.Hour,
-		ClockSkew:  30 * time.Second,
-		HeaderName: "PEAC-Receipt",
-		Optional:   false,
+		MaxAge:        time.Hour,
+		ClockSkew:     30 * time.Second,
+		HeaderName:    "PEAC-Receipt",
+		Optional:      false,
+		RecoverPanics: true,
+		MaxBodyBytes:  1 << 20, // 1 MiB
 	}
 }
 
@@ -83,14 +124,57 @@ func Middleware(cfg Config) func(http.Handler) http.Handler {
 		cfg.ErrorHandler = defaultErrorHandler
 	}
 
+	// One rate limiter instance per middleware instance when enabled.
+	var limiter *rateLimiter
+	if cfg.RateLimit.RatePerSecond > 0 && cfg.RateLimit.Burst > 0 {
+		limiter = newRateLimiter(cfg.RateLimit)
+	}
+	logger := resolveLogger(cfg.Logger)
+	metrics := resolveMetrics(cfg.Metrics)
+
 	return func(next http.Handler) http.Handler {
+		// Panic recovery is the outermost layer so it also covers
+		// failures inside verify, rate-limit, and other wrappers.
+		wrapped := wrapWithRecover(next, cfg)
+
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Body size cap (read-side only; headers already parsed).
+			if cfg.MaxBodyBytes > 0 && r.Body != nil {
+				r.Body = http.MaxBytesReader(w, r.Body, cfg.MaxBodyBytes)
+			}
+
+			// Optional per-request timeout.
+			if cfg.RequestTimeout > 0 {
+				ctx, cancel := context.WithTimeout(r.Context(), cfg.RequestTimeout)
+				defer cancel()
+				r = r.WithContext(ctx)
+			}
+
+			// Rate limit (before verify so we do not spend CPU on
+			// rejected traffic). PerIssuer strategy falls back to IP
+			// when claims are not yet verified.
+			if limiter != nil {
+				ok, retry := limiter.allow(rateLimitKey(r, cfg))
+				if !ok {
+					logger.Warn(
+						"peac middleware rate limit exceeded",
+						"peac.error.code", "E_RATE_LIMITED",
+						"peac.retry_after_ms", int(retry.Milliseconds()),
+						"http.method", r.Method,
+						"http.target", r.URL.Path,
+					)
+					metrics.IncCounter("peac.middleware.rate_limit_exceeded")
+					writeRateLimitResponse(w, retry)
+					return
+				}
+			}
+
 			receipt := r.Header.Get(cfg.HeaderName)
 
 			// Handle missing receipt
 			if receipt == "" {
 				if cfg.Optional {
-					next.ServeHTTP(w, r)
+					wrapped.ServeHTTP(w, r)
 					return
 				}
 				err := peac.NewPEACError(peac.ErrIdentityMissing, "PEAC-Receipt header is required")
@@ -125,7 +209,7 @@ func Middleware(cfg Config) func(http.Handler) http.Handler {
 			ctx := context.WithValue(r.Context(), ClaimsContextKey, result.Claims)
 			ctx = context.WithValue(ctx, ResultContextKey, result)
 
-			next.ServeHTTP(w, r.WithContext(ctx))
+			wrapped.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
