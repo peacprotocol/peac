@@ -1,5 +1,5 @@
 /**
- * `peac doctor` — installability diagnostics.
+ * `peac doctor`: installability diagnostics.
  *
  * Runs a fixed set of offline-first checks that flag common PEAC
  * installation problems (Node version, required package resolution,
@@ -15,6 +15,9 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
+import { createRequire } from 'module';
+
+const requireFrom = createRequire(path.join(process.cwd(), 'package.json'));
 
 type Status = 'green' | 'yellow' | 'red';
 
@@ -60,8 +63,7 @@ function checkPackageResolution(): CheckResult {
   const missing: string[] = [];
   for (const pkg of required) {
     try {
-      const resolved = import.meta.resolve?.(pkg);
-      if (!resolved) missing.push(pkg);
+      requireFrom.resolve(pkg);
     } catch {
       missing.push(pkg);
     }
