@@ -1,0 +1,33 @@
+{
+  "name": "commerce/acp-delegated-payment",
+  "version": "0.12.11",
+  "section": 26,
+  "subsection": "acp-delegated-payment",
+  "description": "Conformance vectors for fromACPDelegatedPaymentObservation in @peac/mappings-acp. Validates the mapper-boundary finality-synthesis guard applied to ACP delegated-payment observations across the closed observed_payment_state enum and across strictness modes.",
+  "spec_revision": "docs/profiles/acp-delegated-payment.md (v0.12.11)",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "consumer": "@peac/mappings-acp",
+  "function": "fromACPDelegatedPaymentObservation",
+  "stable_error_code": "commerce.finality_synthesis_blocked",
+  "fixture_count": 8,
+  "fixtures": [
+    "delegated-payment-authorized.json",
+    "delegated-payment-settled.json",
+    "delegated-payment-pending.json",
+    "delegated-payment-failed.json",
+    "delegated-payment-revoked.json",
+    "delegated-payment-currency-fallback-rejected.json",
+    "delegated-payment-env-out-of-enum-rejected.json",
+    "delegated-payment-cross-rail-equivalence.json"
+  ],
+  "invariants": [
+    "pending, failed, and revoked observed states MUST NOT emit a commerce event.",
+    "authorized observed state emits commerce.event=authorization.",
+    "settled observed state emits commerce.event=settlement.",
+    "Strict mode rejects missing or UNKNOWN currency and out-of-enum env.",
+    "Interop mode warns on the same conditions but does not throw.",
+    "Legacy mode is silent on rules 2 and 3.",
+    "Token material is NEVER carried; only payment_method_token_ref is preserved.",
+    "Raw upstream_artifact is preserved verbatim under proofs.acp.delegated_payment.upstream_artifact."
+  ]
+}

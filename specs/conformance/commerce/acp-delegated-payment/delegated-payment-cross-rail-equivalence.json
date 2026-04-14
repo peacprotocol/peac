@@ -1,0 +1,33 @@
+{
+  "requirement_id": "C-S26-acp-delegated-payment-cross-rail-equivalence",
+  "description": "Cross-rail equivalence: the authorized observation produces a commerce.event=authorization shape consistent with other rails (paymentauth, x402, stripe, ucp).",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "@peac/mappings-acp fromACPDelegatedPaymentObservation",
+  "input": {
+    "delegation_id": "del_acp_001",
+    "resource_uri": "https://merchant.example.com/checkout/acp-001",
+    "principal": "user_alice",
+    "delegate": "agent_bob",
+    "payment_method_token_ref": "pmt_ref_opaque_001",
+    "authorized_amount_minor": "4999",
+    "currency": "USD",
+    "env": "live",
+    "upstream_artifact": {
+      "source": "acp.delegated_payment.v1",
+      "raw": {
+        "trace_id": "tr-001"
+      }
+    },
+    "session_id": "sess_acp_001",
+    "observed_payment_state": "authorized"
+  },
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    },
+    "emits_commerce_event": "authorization",
+    "cross_rail_equivalence_with": ["paymentauth", "x402", "stripe", "ucp"]
+  }
+}
