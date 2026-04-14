@@ -1,0 +1,21 @@
+{
+  "requirement_id": "C-009",
+  "description": "Negative: refund event WITHOUT explicit upstream artifact. MUST throw in ALL modes (rule 1 is non-negotiable).",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "assertExplicitFinality",
+  "input": {
+    "event": "refund",
+    "hasExplicitUpstreamArtifact": false,
+    "currency": "USD",
+    "env": "live",
+    "envExplicit": true
+  },
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "throw",
+      "legacy": "throw"
+    },
+    "error_code": "commerce.finality_synthesis_blocked"
+  }
+}

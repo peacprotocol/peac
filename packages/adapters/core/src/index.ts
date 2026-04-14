@@ -55,3 +55,19 @@ export type {
   PaymentProofAdapter,
   CryptoVerifier,
 } from './payment-proof.js';
+
+// Mapper-boundary finality-synthesis guard
+export {
+  COMMERCE_FINALITY_SYNTHESIS_CODE,
+  MapperBoundaryError,
+  assertExplicitFinality,
+  isFinalityEvent,
+} from './finality.js';
+export type {
+  StrictnessMode,
+  MapperBoundaryErrorCode,
+  MapperBoundaryErrorInit,
+  CommerceFinalityEvent,
+  FinalityGuardInput,
+  FinalityGuardOptions,
+} from './finality.js';

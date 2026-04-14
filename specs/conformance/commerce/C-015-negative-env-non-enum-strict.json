@@ -1,0 +1,20 @@
+{
+  "requirement_id": "C-015",
+  "description": "Negative: env is a value outside the closed enum (live | test). Strict throws; interop warns; legacy silent.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "assertExplicitFinality",
+  "input": {
+    "hasExplicitUpstreamArtifact": true,
+    "currency": "USD",
+    "env": "production",
+    "envExplicit": true
+  },
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "warn",
+      "legacy": "pass"
+    },
+    "error_code": "commerce.finality_synthesis_blocked"
+  }
+}
