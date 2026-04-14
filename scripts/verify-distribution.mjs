@@ -22,6 +22,7 @@
  * 13. Tarball packaging: pack tarball, verify distribution files included, no workspace deps
  * 14. Install smoke: run CLI --help from packed tarball content (not local dist)
  * 15. Unsupported surfaces: explicit SKIP reporting for Cursor, Codex, website sync
+ * 16. Listing copy coherence: server.json description matches canonical short description
  *
  * Exit codes:
  * - 0: All distribution checks passed (SKIPs are acceptable)
@@ -155,7 +156,9 @@ function checkParseValidity() {
       execSync('node scripts/validate-smithery.mjs', { cwd: ROOT, stdio: 'pipe', timeout: 15_000 });
       pass('smithery.yaml full structural validation');
     } catch (e) {
-      fail(`smithery.yaml structural validation failed: ${e.stderr?.toString().trim() || e.message}`);
+      fail(
+        `smithery.yaml structural validation failed: ${e.stderr?.toString().trim() || e.message}`
+      );
     }
   }
 }
@@ -343,6 +346,18 @@ function checkMetadataCoherence() {
 // ---------------------------------------------------------------------------
 // Check 9: Version sync across all manifests
 // ---------------------------------------------------------------------------
+function checkListingCopyCoherence() {
+  console.log(colors.bold('\n[16] Listing Copy Coherence'));
+  try {
+    execFileSync('node', [join(ROOT, 'scripts/check-listing-copy-coherence.mjs')], {
+      stdio: 'inherit',
+    });
+    pass('Listing copy aligned with canonical short description');
+  } catch (err) {
+    fail(`Listing copy coherence check failed (exit ${err.status ?? 'unknown'})`);
+  }
+}
+
 function checkVersionSync() {
   console.log(colors.bold('\n--- Version Sync ---\n'));
 
@@ -669,6 +684,7 @@ function main() {
   checkManifestStructure();
   checkMcpJsonStructure();
   checkMetadataCoherence();
+  checkListingCopyCoherence();
   checkVersionSync();
   checkPublishManifest();
   checkDistributionFilesExist();
