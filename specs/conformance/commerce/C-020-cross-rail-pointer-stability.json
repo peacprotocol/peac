@@ -1,0 +1,25 @@
+{
+  "requirement_id": "C-020",
+  "description": "Cross-rail: pointer field on MapperBoundaryError MUST be set to the rail-specific JSON pointer when supplied by the caller. Rule 1 violation; thrown error carries pointer.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "assertExplicitFinality",
+  "input": {
+    "event": "settlement",
+    "hasExplicitUpstreamArtifact": false,
+    "currency": "USD",
+    "env": "live",
+    "envExplicit": true
+  },
+  "options": {
+    "pointer": "/payment/<rail>/observation"
+  },
+  "rails": ["paymentauth", "acp", "ucp", "stripe", "x402"],
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "throw",
+      "legacy": "throw"
+    },
+    "error_code": "commerce.finality_synthesis_blocked"
+  }
+}

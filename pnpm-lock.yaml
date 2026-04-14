@@ -1349,6 +1349,9 @@ importers:
 
   packages/mappings/acp:
     dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../../adapters/core
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel
@@ -1453,6 +1456,9 @@ importers:
 
   packages/mappings/paymentauth:
     dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../../adapters/core
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel
@@ -1523,6 +1529,9 @@ importers:
 
   packages/mappings/ucp:
     dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../../adapters/core
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel
@@ -1818,6 +1827,9 @@ importers:
 
   packages/rails/stripe:
     dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../../adapters/core
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel

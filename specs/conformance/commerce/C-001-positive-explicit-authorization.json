@@ -1,0 +1,20 @@
+{
+  "requirement_id": "C-001",
+  "description": "Positive: authorization event with explicit upstream artifact, currency, and env. Passes under all modes.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "assertExplicitFinality",
+  "input": {
+    "event": "authorization",
+    "hasExplicitUpstreamArtifact": true,
+    "currency": "USD",
+    "env": "live",
+    "envExplicit": true
+  },
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    }
+  }
+}

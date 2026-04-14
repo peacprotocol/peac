@@ -1,0 +1,20 @@
+{
+  "requirement_id": "C-013",
+  "description": "Negative: envExplicit = false (defaulted env). Strict throws; interop warns; legacy silent.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "assertExplicitFinality",
+  "input": {
+    "hasExplicitUpstreamArtifact": true,
+    "currency": "USD",
+    "env": "live",
+    "envExplicit": false
+  },
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "warn",
+      "legacy": "pass"
+    },
+    "error_code": "commerce.finality_synthesis_blocked"
+  }
+}

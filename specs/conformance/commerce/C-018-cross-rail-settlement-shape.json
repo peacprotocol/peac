@@ -1,0 +1,21 @@
+{
+  "requirement_id": "C-018",
+  "description": "Cross-rail: settlement event with explicit artifact MUST produce equivalent guard outcome across rails.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "assertExplicitFinality",
+  "input": {
+    "event": "settlement",
+    "hasExplicitUpstreamArtifact": true,
+    "currency": "USD",
+    "env": "live",
+    "envExplicit": true
+  },
+  "rails": ["paymentauth", "acp", "ucp", "stripe", "x402"],
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    }
+  }
+}

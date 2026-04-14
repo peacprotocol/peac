@@ -1,0 +1,19 @@
+{
+  "requirement_id": "C-003",
+  "description": "Positive: no event (discovery / capability / lifecycle path). Guard is a no-op for rule 1; rules 2 and 3 still apply per mode.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "assertExplicitFinality",
+  "input": {
+    "hasExplicitUpstreamArtifact": false,
+    "currency": "USD",
+    "env": "live",
+    "envExplicit": true
+  },
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    }
+  }
+}

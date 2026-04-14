@@ -1,0 +1,20 @@
+{
+  "requirement_id": "C-012",
+  "description": "Negative: currency = UNKNOWN. Strict throws; interop warns; legacy silent.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "assertExplicitFinality",
+  "input": {
+    "hasExplicitUpstreamArtifact": true,
+    "currency": "UNKNOWN",
+    "env": "live",
+    "envExplicit": true
+  },
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "warn",
+      "legacy": "pass"
+    },
+    "error_code": "commerce.finality_synthesis_blocked"
+  }
+}

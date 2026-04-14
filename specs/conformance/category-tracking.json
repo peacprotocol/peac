@@ -7,6 +7,7 @@
     "bundle": "Not yet migrated to tracked validation; fixture_count needs reconciliation",
     "carrier": "Single-carrier fixtures with per-file expected_valid/expected_violation; not fixture packs",
     "carrier-boundary": "Transport boundary conformance vectors (DD-124 through DD-131); size limit tests, not fixture packs",
+    "commerce": "Section 26 mapper-boundary finality-synthesis guard fixtures (C-001 through C-020); per-fixture inputs and per-mode expected outcomes; validated by @peac/adapter-core finality-fixtures.test.ts",
     "crypto": "Deterministic golden vectors (Ed25519 sign/verify); not fixture packs",
     "discovery": "Not yet migrated to tracked validation; needs fixture pack audit",
     "dispute": "Not yet migrated to tracked validation; fixture_count needs reconciliation",

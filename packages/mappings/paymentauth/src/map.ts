@@ -11,9 +11,21 @@
 
 import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
+import { assertExplicitFinality, type StrictnessMode } from '@peac/adapter-core';
 
 import { PAYMENTAUTH_RAIL } from './constants.js';
 import type { NormalizedPaymentauthReceipt, NormalizedPaymentauthChallenge } from './types.js';
+
+/**
+ * Options for paymentauth mapping functions. Controls the mapper-boundary
+ * finality-synthesis guard mode. Default `interop` preserves current
+ * consumer behavior on silent fallbacks while emitting warnings; `strict`
+ * rejects fallbacks; `legacy` is silent.
+ */
+export interface PaymentauthMapOptions {
+  mode?: StrictnessMode;
+  warn?: (message: string) => void;
+}
 
 /**
  * Map a paymentauth receipt (with optional challenge context) to PEAC PaymentEvidence.
@@ -28,7 +40,8 @@ import type { NormalizedPaymentauthReceipt, NormalizedPaymentauthChallenge } fro
  */
 export function fromPaymentauthReceipt(
   receipt: NormalizedPaymentauthReceipt,
-  challenge?: NormalizedPaymentauthChallenge
+  challenge?: NormalizedPaymentauthChallenge,
+  options: PaymentauthMapOptions = {}
 ): PaymentEvidence {
   // Extract amount/currency from challenge request if available
   let amount: number | undefined;
@@ -63,6 +76,21 @@ export function fromPaymentauthReceipt(
     evidenceMeta.receipt_extras = receipt.extras as JsonObject;
   }
 
+  // Mapper-boundary finality-synthesis guard: rejects silent fallbacks under
+  // strict mode; warns under interop (default); silent under legacy.
+  // Does not reject the call when no commerce.event is being emitted, which
+  // matches paymentauth/receipt mapping (event is set by callers downstream).
+  assertExplicitFinality(
+    {
+      event: undefined,
+      hasExplicitUpstreamArtifact: true,
+      currency,
+      env: 'live',
+      envExplicit: false,
+    },
+    { mode: options.mode, warn: options.warn, pointer: '/payment/paymentauth/receipt' }
+  );
+
   return {
     rail: PAYMENTAUTH_RAIL,
     reference: receipt.reference ?? receipt._raw.rawValue.substring(0, 32),
@@ -82,7 +110,8 @@ export function fromPaymentauthReceipt(
  */
 export function toCommerceExtensionFields(
   receipt: NormalizedPaymentauthReceipt,
-  challenge?: NormalizedPaymentauthChallenge
+  challenge?: NormalizedPaymentauthChallenge,
+  options: PaymentauthMapOptions = {}
 ):
   | Partial<{
       payment_rail: string;
@@ -111,6 +140,21 @@ export function toCommerceExtensionFields(
 
   // Only return if we have at least rail + one other field
   if (Object.keys(fields).length <= 1) return undefined;
+
+  // Mapper-boundary finality-synthesis guard: same posture as
+  // fromPaymentauthReceipt. No event is emitted here, so the guard checks
+  // currency and env defaults only. Defaulted env: 'live' is the historical
+  // behavior; strict mode rejects, interop (default) warns.
+  assertExplicitFinality(
+    {
+      event: undefined,
+      hasExplicitUpstreamArtifact: true,
+      currency: fields.currency,
+      env: 'live',
+      envExplicit: false,
+    },
+    { mode: options.mode, warn: options.warn, pointer: '/payment/paymentauth/commerce-extension' }
+  );
 
   return { ...fields, env: 'live' } as ReturnType<typeof toCommerceExtensionFields>;
 }

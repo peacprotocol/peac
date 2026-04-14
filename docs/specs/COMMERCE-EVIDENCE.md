@@ -91,3 +91,52 @@ ACP refers to the Agentic Commerce Protocol (maintained by OpenAI and Stripe). I
 - [Commerce Integration Matrix](COMMERCE-INTEGRATION-MATRIX.md): summary table of all commerce rails
 - [Commerce Semantics](COMMERCE-SEMANTICS.md): mapping rules and payment state vocabulary
 - [Evidence Carrier Contract](EVIDENCE-CARRIER-CONTRACT.md): transport placement rules
+- [Commerce Protocol Coverage](../compatibility/commerce-protocol-coverage.md): canonical x402 / paymentauth / ACP truth matrix
+
+## Mapper-Boundary Finality-Synthesis Guard
+
+Commerce mappings MUST enforce the no-finality-synthesis rule at the mapper boundary using the shared helper exported by `@peac/adapter-core`:
+
+```ts
+import { assertExplicitFinality, MapperBoundaryError } from '@peac/adapter-core';
+
+assertExplicitFinality(
+  {
+    event, // candidate commerce event, may be undefined
+    hasExplicitUpstreamArtifact, // boolean derived from upstream-supplied data
+    currency, // upstream-asserted currency
+    env, // 'live' | 'test' from upstream
+    envExplicit, // true when env was upstream-asserted
+  },
+  { mode: 'interop', pointer: '/proofs/x402/offer' }
+);
+```
+
+The guard MUST be invoked at every entry point that may produce a `commerce.event` value. Mappings MUST NOT fall back silently to `currency: 'UNKNOWN'`, defaulted `env`, or any synthesized finality state.
+
+### Strictness modes
+
+| Mode                | Finality-event without explicit artifact | Silent currency fallback | Defaulted env  |
+| ------------------- | ---------------------------------------- | ------------------------ | -------------- |
+| `strict`            | reject (throw)                           | reject (throw)           | reject (throw) |
+| `interop` (default) | reject (throw)                           | warn                     | warn           |
+| `legacy`            | reject (throw)                           | silent                   | silent         |
+
+Rule 1 (finality event without explicit upstream artifact) rejects in **all** modes; this is non-negotiable. Rules 2 and 3 (silent fallbacks) are mode-controlled. The default `interop` mode preserves current consumer behavior on rules 2 and 3 while emitting deprecation warnings; consumers are expected to migrate to `strict` before v0.13.0.
+
+### Error code
+
+Violations produce `MapperBoundaryError` carrying the stable string code `commerce.finality_synthesis_blocked`. This is a **mapper-boundary identifier**, not a wire-level error code; the wire format is unchanged. Consumers may switch on this code to map the failure to caller-specific error reporting.
+
+### Finality-bearing events
+
+The closed set of commerce events that imply finality and therefore require an explicit upstream payment artifact:
+
+- `authorization`
+- `capture`
+- `settlement`
+- `refund`
+- `void`
+- `chargeback`
+
+Non-finality observations (for example, discovery responses, capability snapshots, session-lifecycle access events) MUST NOT set `commerce.event` and are exempt from the guard.

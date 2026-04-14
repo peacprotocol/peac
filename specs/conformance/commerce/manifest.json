@@ -1,0 +1,65 @@
+{
+  "name": "commerce",
+  "version": "0.12.11",
+  "section": 26,
+  "description": "Conformance vectors for the mapper-boundary finality-synthesis guard exported by @peac/adapter-core. Documents the C-001 through C-020 requirement IDs that govern the no-finality-synthesis rule across all PEAC commerce mappings (paymentauth, ACP, UCP, Stripe SPT, x402).",
+  "spec_revision": "docs/specs/COMMERCE-EVIDENCE.md (v0.12.11)",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "stable_error_code": "commerce.finality_synthesis_blocked",
+  "categories": {
+    "positive": {
+      "description": "Inputs that satisfy the guard under all modes (strict, interop, legacy)",
+      "vectors": [
+        "C-001-positive-explicit-authorization.json",
+        "C-002-positive-explicit-settlement.json",
+        "C-003-positive-no-event-discovery.json",
+        "C-004-positive-non-finality-event.json",
+        "C-005-positive-explicit-currency-and-env.json"
+      ]
+    },
+    "negative-finality-synthesis": {
+      "description": "Inputs that attempt to set a finality-bearing event without an explicit upstream artifact. MUST throw MapperBoundaryError in ALL modes (strict, interop, legacy).",
+      "vectors": [
+        "C-006-negative-event-without-artifact-authorization.json",
+        "C-007-negative-event-without-artifact-settlement.json",
+        "C-008-negative-event-without-artifact-refund.json",
+        "C-009-negative-event-without-artifact-chargeback.json",
+        "C-010-negative-event-without-artifact-void.json",
+        "C-011-negative-event-without-artifact-capture.json"
+      ]
+    },
+    "negative-silent-fallbacks": {
+      "description": "Inputs that include silent fallbacks (currency UNKNOWN/empty; defaulted env). MUST throw under strict mode; warn under interop; silent under legacy.",
+      "vectors": [
+        "C-012-negative-currency-unknown-strict.json",
+        "C-013-negative-env-defaulted-strict.json",
+        "C-014-negative-currency-empty-strict.json",
+        "C-015-negative-env-non-enum-strict.json",
+        "C-016-negative-env-explicit-false-strict.json"
+      ]
+    },
+    "cross-rail-equivalence": {
+      "description": "Equivalent commerce action modeled across rails (paymentauth, ACP, UCP, Stripe SPT, x402) MUST produce the same evidence shape under the guard.",
+      "vectors": [
+        "C-017-cross-rail-authorization-shape.json",
+        "C-018-cross-rail-settlement-shape.json",
+        "C-019-cross-rail-discovery-no-event.json",
+        "C-020-cross-rail-pointer-stability.json"
+      ]
+    }
+  },
+  "invariants": [
+    "Mappings MUST preserve raw upstream artifacts and MUST NOT synthesize payment finality from non-payment artifacts or lifecycle states alone.",
+    "MapperBoundaryError carries the stable string code commerce.finality_synthesis_blocked.",
+    "Default mode is interop; strict mode is opt-in by caller; legacy mode preserves historical behavior.",
+    "Rule 1 (finality event without explicit upstream artifact) rejects in ALL modes.",
+    "Rules 2 and 3 (silent currency fallback, defaulted env) reject only in strict; warn in interop; silent in legacy."
+  ],
+  "consumers": [
+    "@peac/mappings-acp",
+    "@peac/mappings-paymentauth",
+    "@peac/mappings-ucp",
+    "@peac/rails-stripe",
+    "@peac/adapter-x402"
+  ]
+}
