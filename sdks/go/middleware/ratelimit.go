@@ -64,17 +64,17 @@ type RateLimitConfig struct {
 }
 
 type bucket struct {
-	tokens   float64
-	last     time.Time
-	touched  time.Time
+	tokens  float64
+	last    time.Time
+	touched time.Time
 }
 
 type rateLimiter struct {
-	strategy       RateLimitStrategy
-	ratePerSecond  float64
-	burst          float64
-	idleTTL        time.Duration
-	maxEntries     int
+	strategy      RateLimitStrategy
+	ratePerSecond float64
+	burst         float64
+	idleTTL       time.Duration
+	maxEntries    int
 
 	mu      sync.Mutex
 	buckets map[string]*bucket

@@ -54,7 +54,7 @@ type fakeMetrics struct {
 	counters atomic.Int64
 }
 
-func (f *fakeMetrics) IncCounter(_ string, _ ...string)              { f.counters.Add(1) }
+func (f *fakeMetrics) IncCounter(_ string, _ ...string)                  { f.counters.Add(1) }
 func (f *fakeMetrics) ObserveHistogram(_ string, _ float64, _ ...string) {}
 
 // ---------------------------------------------------------------------------
