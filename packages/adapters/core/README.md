@@ -1,6 +1,12 @@
 # @peac/adapter-core
 
-Shared Result types, validators, and payment proof interfaces for PEAC adapters.
+Shared utilities for PEAC payment rail adapters and commerce mappings:
+Result types, validators, payment-proof contracts, and the mapper-boundary
+finality-synthesis guard. The package historically served only payment
+rail adapters; commerce mappings (`@peac/mappings-paymentauth`,
+`@peac/mappings-acp`, `@peac/mappings-ucp`) now also depend on it for the
+finality guard, which lives here so a single tracked module enforces the
+no-finality-synthesis rule consistently across rails and mappings.
 
 ## Installation
 
