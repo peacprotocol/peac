@@ -1,0 +1,11 @@
+{
+  "$comment": "PEAC Protocol MCP server config for VS Code + GitHub Copilot Chat. Place this file at `.vscode/mcp.json` in your workspace, or merge the `servers.peac` entry into your workspace settings. Pins an exact version; update on each PEAC release.",
+  "servers": {
+    "peac": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@peac/mcp-server@0.12.11"],
+      "env": {}
+    }
+  }
+}
