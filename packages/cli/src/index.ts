@@ -14,6 +14,7 @@ import { policy } from './commands/policy.js';
 import { conformance } from './commands/conformance.js';
 import { samples } from './commands/samples.js';
 import { reconcileCommand } from './commands/reconcile.js';
+import { doctor } from './commands/doctor.js';
 import { getVersion } from './lib/version.js';
 
 const program = new Command();
@@ -219,6 +220,9 @@ program.addCommand(samples);
 
 // Reconcile evidence bundles (v0.11.3+)
 program.addCommand(reconcileCommand());
+
+// Installability diagnostics (v0.12.11+)
+doctor(program);
 
 // Parse and handle Commander errors (exitOverride causes CommanderError on --help, --version, etc.)
 try {
