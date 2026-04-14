@@ -53,6 +53,17 @@ HTTP `Payment` authentication scheme, aligned with the active Internet-Draft `dr
 - **Approach**: lifecycle-first; session states produce access evidence; commerce evidence only from explicit payment artifacts
 - **Package**: `@peac/mappings-acp`
 - **Boundary**: `fromACPSessionLifecycleEvent()` for session evidence; `fromACPPaymentObservation()` for commerce evidence requiring `observed_payment_state`
+- **Delegated payment** (v0.12.11): `fromACPDelegatedPaymentObservation()` maps ACP-shaped delegated-payment authorizations and settlements with an `artifact_kind` discriminator that blocks settlement synthesis from an authorization-only artifact. See [`docs/profiles/acp-delegated-payment.md`](../profiles/acp-delegated-payment.md).
+
+### MPP / paymentauth (v0.12.11)
+
+- **Package**: `@peac/mappings-paymentauth`
+- **Functions**: `fromMPPPaymentAttempt()` for authorization evidence; `fromMPPSettlement()` for settlement evidence, with an `artifact_kind` discriminator that blocks cross-kind misuse. See [`docs/profiles/mpp-payment-evidence.md`](../profiles/mpp-payment-evidence.md).
+
+### x402 settlement observation (v0.12.11)
+
+- **Package**: `@peac/adapter-x402`
+- **Settlement observation**: `extractSettlementProofFromHeaders()` returns proofs in dual-header precedence order; `fromX402SettlementObservation()` produces commerce settlement evidence only from a non-empty extracted proof. Scheme-specific invariants remain upstream responsibility. See [`docs/specs/X402-V2-PROFILE.md`](X402-V2-PROFILE.md) §8.
 
 ### Stripe SPT (Shared Payment Tokens)
 
