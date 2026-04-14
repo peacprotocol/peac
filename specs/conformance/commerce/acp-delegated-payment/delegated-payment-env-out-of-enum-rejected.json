@@ -1,6 +1,6 @@
 {
   "requirement_id": "C-S26-acp-delegated-payment-env-out-of-enum-rejected",
-  "description": "Negative: env is outside the closed live|test enum. Strict throws; interop warns; legacy silent.",
+  "description": "Negative: env outside the closed live|test enum. Strict throws; interop warns; legacy silent.",
   "guard_module": "@peac/adapter-core finality.ts",
   "function": "@peac/mappings-acp fromACPDelegatedPaymentObservation",
   "input": {
@@ -19,7 +19,8 @@
       }
     },
     "session_id": "sess_acp_001",
-    "observed_payment_state": "authorized"
+    "observed_payment_state": "authorized",
+    "artifact_kind": "authorization"
   },
   "expected": {
     "modes": {

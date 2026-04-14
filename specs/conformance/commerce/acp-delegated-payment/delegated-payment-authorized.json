@@ -1,6 +1,6 @@
 {
   "requirement_id": "C-S26-acp-delegated-payment-authorized",
-  "description": "Positive: authorized state with explicit upstream artifact emits commerce.event=authorization.",
+  "description": "Positive: authorized state with matching artifact_kind=authorization. Emits commerce.event=authorization in all modes.",
   "guard_module": "@peac/adapter-core finality.ts",
   "function": "@peac/mappings-acp fromACPDelegatedPaymentObservation",
   "input": {
@@ -19,7 +19,8 @@
       }
     },
     "session_id": "sess_acp_001",
-    "observed_payment_state": "authorized"
+    "observed_payment_state": "authorized",
+    "artifact_kind": "authorization"
   },
   "expected": {
     "modes": {

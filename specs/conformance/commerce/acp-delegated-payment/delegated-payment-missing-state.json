@@ -1,6 +1,6 @@
 {
-  "requirement_id": "C-S26-acp-delegated-payment-settled",
-  "description": "Positive: settled state with matching artifact_kind=settlement. Emits commerce.event=settlement in all modes.",
+  "requirement_id": "C-S26-acp-delegated-payment-missing-state",
+  "description": "Input-contract failure: observed_payment_state is missing. The mapper rejects before reaching the finality guard.",
   "guard_module": "@peac/adapter-core finality.ts",
   "function": "@peac/mappings-acp fromACPDelegatedPaymentObservation",
   "input": {
@@ -19,15 +19,14 @@
       }
     },
     "session_id": "sess_acp_001",
-    "observed_payment_state": "settled",
-    "artifact_kind": "settlement"
+    "artifact_kind": "authorization"
   },
   "expected": {
     "modes": {
-      "strict": "pass",
-      "interop": "pass",
-      "legacy": "pass"
+      "strict": "input-error",
+      "interop": "input-error",
+      "legacy": "input-error"
     },
-    "emits_commerce_event": "settlement"
+    "error_message_match": "observed_payment_state"
   }
 }

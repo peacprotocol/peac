@@ -30,18 +30,19 @@ import { fromACPDelegatedPaymentObservation } from '@peac/mappings-acp';
 
 ## Mapping
 
-| Input (upstream delegated-payment artifact) | PEAC Record Field                                                 | Semantics                                                           |
-| ------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `delegation_id`                             | `payment.evidence.acp_delegation_id`                              | Preserved as string                                                 |
-| `principal`                                 | `payment.evidence.acp_principal`                                  | Preserved as string                                                 |
-| `delegate`                                  | `payment.evidence.acp_delegate`                                   | Preserved as string                                                 |
-| `payment_method_token_ref`                  | `payment.evidence.acp_payment_method_token_ref`                   | Opaque reference; NEVER token material                              |
-| `authorized_amount_minor`                   | `payment.amount` (major units), preserved input format            | Base-10 integer string per RFC 8785                                 |
-| `currency`                                  | `payment.currency`                                                | Required in strict mode; rejected if UNKNOWN/empty                  |
-| `env`                                       | `payment.env`                                                     | Closed enum `live` \| `test`; required in strict mode               |
-| `observed_payment_state`                    | `payment.evidence.observed_payment_state`                         | Closed enum at mapper boundary                                      |
-| `upstream_artifact`                         | `payment.evidence.proofs.acp.delegated_payment.upstream_artifact` | Preserved verbatim; opaque to PEAC                                  |
-| (derived) `commerce_event`                  | `payment.evidence.commerce_event`                                 | Set ONLY for `authorized` -> authorization, `settled` -> settlement |
+| Input (upstream delegated-payment artifact) | PEAC Record Field                                                                                                   | Semantics                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `delegation_id`                             | `payment.evidence.acp_delegation_id`                                                                                | Preserved as string                                                 |
+| `principal`                                 | `payment.evidence.acp_principal`                                                                                    | Preserved as string                                                 |
+| `delegate`                                  | `payment.evidence.acp_delegate`                                                                                     | Preserved as string                                                 |
+| `payment_method_token_ref`                  | `payment.evidence.acp_payment_method_token_ref`                                                                     | Opaque reference; NEVER token material                              |
+| `authorized_amount_minor`                   | `payment.amount` (integer minor units), canonical string preserved under `payment.evidence.authorized_amount_minor` | Base-10 integer string per RFC 8785; smallest currency unit         |
+| `artifact_kind`                             | `payment.evidence.proofs.acp.delegated_payment.artifact_kind`                                                       | Required for finality states; MUST match `observed_payment_state`   |
+| `currency`                                  | `payment.currency`                                                                                                  | Required in strict mode; rejected if UNKNOWN/empty                  |
+| `env`                                       | `payment.env`                                                                                                       | Closed enum `live` \| `test`; required in strict mode               |
+| `observed_payment_state`                    | `payment.evidence.observed_payment_state`                                                                           | Closed enum at mapper boundary                                      |
+| `upstream_artifact`                         | `payment.evidence.proofs.acp.delegated_payment.upstream_artifact`                                                   | Preserved verbatim; opaque to PEAC                                  |
+| (derived) `commerce_event`                  | `payment.evidence.commerce_event`                                                                                   | Set ONLY for `authorized` -> authorization, `settled` -> settlement |
 
 ## Schema vs profile fields
 
@@ -110,6 +111,30 @@ const out = fromACPDelegatedPaymentObservation(
   { mode: 'strict' }
 );
 ```
+
+## Settlement-proof discriminator
+
+The `artifact_kind` field self-describes the upstream artifact and prevents
+a generic or authorization-only artifact from being treated as a settlement
+proof. The mapper rejects mismatches in all strictness modes (it is a
+finality-rule violation, not a fallback warning):
+
+- `observed_payment_state: 'authorized'` requires `artifact_kind: 'authorization'`.
+- `observed_payment_state: 'settled'` requires `artifact_kind: 'settlement'`.
+- Non-finality states (`pending`, `failed`, `revoked`) ignore `artifact_kind`.
+
+A mismatch produces a `MapperBoundaryError` with code
+`commerce.finality_synthesis_blocked` and pointer
+`/proofs/acp/delegated_payment`.
+
+## Amount semantics
+
+`payment.amount` is the integer minor-unit value (smallest currency unit)
+parsed from `authorized_amount_minor`. PEAC does NOT apply currency-aware
+scaling. The canonical base-10 integer string remains under
+`payment.evidence.authorized_amount_minor` for downstream consumers that
+need the original representation. Conversion to major units is the
+consumer's responsibility.
 
 ## Non-goals
 

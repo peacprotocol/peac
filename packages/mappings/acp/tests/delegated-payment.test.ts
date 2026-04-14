@@ -31,6 +31,7 @@ function makeObservation(
     currency: 'USD',
     env: 'live',
     observed_payment_state: 'authorized',
+    artifact_kind: 'authorization',
     upstream_artifact: { source: 'acp.delegated_payment.v1', raw: { x: 1 } },
     session_id: 'sess_001',
     ...overrides,
@@ -46,9 +47,9 @@ describe('fromACPDelegatedPaymentObservation: positive path', () => {
     expect(out.payment.env).toBe('live');
   });
 
-  it('emits settlement commerce event for observed_payment_state=settled', () => {
+  it('emits settlement commerce event for observed_payment_state=settled with matching artifact_kind', () => {
     const out = fromACPDelegatedPaymentObservation(
-      makeObservation({ observed_payment_state: 'settled' })
+      makeObservation({ observed_payment_state: 'settled', artifact_kind: 'settlement' })
     );
     expect(out.payment.evidence?.commerce_event).toBe('settlement');
   });
@@ -62,6 +63,95 @@ describe('fromACPDelegatedPaymentObservation: positive path', () => {
       acp: { delegated_payment: { upstream_artifact: unknown } };
     };
     expect(proofs.acp.delegated_payment.upstream_artifact).toEqual(upstream);
+  });
+});
+
+describe('fromACPDelegatedPaymentObservation: settlement-proof discriminator', () => {
+  it('rejects settled with no artifact_kind in ALL modes (rule 1 finality violation)', () => {
+    const obs = makeObservation({
+      observed_payment_state: 'settled',
+      artifact_kind: undefined,
+    });
+    for (const mode of ['strict', 'interop', 'legacy'] as const) {
+      expect(() => fromACPDelegatedPaymentObservation(obs, { mode })).toThrow(MapperBoundaryError);
+    }
+  });
+
+  it('rejects settled with artifact_kind=authorization in ALL modes', () => {
+    const obs = makeObservation({
+      observed_payment_state: 'settled',
+      artifact_kind: 'authorization',
+    });
+    for (const mode of ['strict', 'interop', 'legacy'] as const) {
+      expect(() => fromACPDelegatedPaymentObservation(obs, { mode })).toThrow(MapperBoundaryError);
+    }
+  });
+
+  it('rejects authorized with artifact_kind=settlement in ALL modes', () => {
+    const obs = makeObservation({
+      observed_payment_state: 'authorized',
+      artifact_kind: 'settlement',
+    });
+    for (const mode of ['strict', 'interop', 'legacy'] as const) {
+      expect(() => fromACPDelegatedPaymentObservation(obs, { mode })).toThrow(MapperBoundaryError);
+    }
+  });
+
+  it('thrown error carries the stable code and pointer for mismatch', () => {
+    try {
+      fromACPDelegatedPaymentObservation(
+        makeObservation({
+          observed_payment_state: 'settled',
+          artifact_kind: 'authorization',
+        })
+      );
+      throw new Error('expected throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(MapperBoundaryError);
+      expect((err as MapperBoundaryError).code).toBe(COMMERCE_FINALITY_SYNTHESIS_CODE);
+      expect((err as MapperBoundaryError).pointer).toBe('/proofs/acp/delegated_payment');
+    }
+  });
+
+  it('preserves artifact_kind under proofs.acp.delegated_payment', () => {
+    const out = fromACPDelegatedPaymentObservation(
+      makeObservation({
+        observed_payment_state: 'settled',
+        artifact_kind: 'settlement',
+      })
+    );
+    const block = (
+      out.payment.evidence as { proofs: { acp: { delegated_payment: Record<string, unknown> } } }
+    ).proofs.acp.delegated_payment;
+    expect(block.artifact_kind).toBe('settlement');
+  });
+});
+
+describe('fromACPDelegatedPaymentObservation: amount semantics (minor units)', () => {
+  it('payment.amount is the integer minor-unit value parsed from authorized_amount_minor', () => {
+    const out = fromACPDelegatedPaymentObservation(
+      makeObservation({ authorized_amount_minor: '12345' })
+    );
+    expect(out.payment.amount).toBe(12345);
+    expect(out.amt).toBe(12345);
+  });
+
+  it('preserves the canonical authorized_amount_minor string under evidence', () => {
+    const out = fromACPDelegatedPaymentObservation(
+      makeObservation({ authorized_amount_minor: '99999999999' })
+    );
+    expect(out.payment.evidence?.authorized_amount_minor).toBe('99999999999');
+  });
+
+  it('does not apply currency-aware scaling (no division by 100)', () => {
+    const usd = fromACPDelegatedPaymentObservation(
+      makeObservation({ currency: 'USD', authorized_amount_minor: '1000' })
+    );
+    const jpy = fromACPDelegatedPaymentObservation(
+      makeObservation({ currency: 'JPY', authorized_amount_minor: '1000' })
+    );
+    expect(usd.payment.amount).toBe(1000);
+    expect(jpy.payment.amount).toBe(1000);
   });
 });
 

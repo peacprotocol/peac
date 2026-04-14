@@ -22,10 +22,11 @@ const FIXTURES_DIR = join(
 );
 
 interface FixtureExpected {
-  modes: Record<StrictnessMode, 'pass' | 'warn' | 'throw'>;
+  modes: Record<StrictnessMode, 'pass' | 'warn' | 'throw' | 'input-error'>;
   emits_commerce_event?: string | null;
   error_code?: string;
   error_pointer?: string;
+  error_message_match?: string;
 }
 
 interface Fixture {
@@ -50,8 +51,8 @@ function loadFixtures(): Array<{ filename: string; fixture: Fixture }> {
 describe('Section 26 / acp-delegated-payment conformance fixtures', () => {
   const fixtures = loadFixtures();
 
-  it('loads exactly 8 fixtures', () => {
-    expect(fixtures.length).toBe(8);
+  it('loads exactly 11 fixtures', () => {
+    expect(fixtures.length).toBe(11);
   });
 
   for (const { filename, fixture } of loadFixtures()) {
@@ -60,6 +61,14 @@ describe('Section 26 / acp-delegated-payment conformance fixtures', () => {
       it(`${filename}: mode=${mode} matches expected outcome`, () => {
         const warn = vi.fn();
         const expected = fixture.expected.modes[mode];
+
+        if (expected === 'input-error') {
+          expect(
+            () => fromACPDelegatedPaymentObservation(fixture.input, { mode, warn }),
+            `${fixture.requirement_id} mode=${mode} expected input-error throw`
+          ).toThrow(fixture.expected.error_message_match ?? /.*/);
+          return;
+        }
 
         if (expected === 'throw') {
           expect(

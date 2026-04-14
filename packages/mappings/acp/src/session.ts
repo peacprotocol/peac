@@ -325,8 +325,20 @@ export interface ACPDelegatedPaymentObservation {
   /** Observed delegated-payment state from the upstream artifact. */
   observed_payment_state: DelegatedPaymentState;
   /**
+   * Discriminator naming what the upstream artifact attests. Required when
+   * the observed_payment_state is a finality-bearing state
+   * (`authorized` or `settled`); MUST match that state. Required to prevent
+   * a generic upstream artifact from being treated as a settlement proof.
+   *
+   * For non-finality states (`pending`, `failed`, `revoked`) this field is
+   * not consulted and may be omitted.
+   */
+  artifact_kind?: 'authorization' | 'settlement';
+  /**
    * Raw upstream artifact, preserved verbatim under
-   * `proofs.acp.delegated_payment.upstream_artifact`. Opaque.
+   * `proofs.acp.delegated_payment.upstream_artifact`. Opaque to PEAC.
+   * For finality states, this MUST be the artifact whose `artifact_kind`
+   * matches `observed_payment_state`.
    */
   upstream_artifact: unknown;
   /** Optional session correlation. */
@@ -394,14 +406,26 @@ export function fromACPDelegatedPaymentObservation(
   }
 
   const commerceEvent = DELEGATED_STATE_TO_COMMERCE_EVENT[observation.observed_payment_state];
-  // The upstream artifact is required by the input contract, so it is always
-  // explicit when this mapper is called. The guard still runs to reject
-  // synthesis when callers misuse the function and to enforce strict-mode
-  // rules on currency and env.
+
+  // Settlement-proof discriminator: for finality states, the upstream
+  // artifact MUST self-describe as the matching kind. A generic artifact
+  // does NOT count as a settlement proof, and an authorization artifact
+  // does NOT count as a settlement proof. This blocks an entire class of
+  // mis-classified artifact drift independently of the strictness mode.
+  const requiredArtifactKind: 'authorization' | 'settlement' | undefined =
+    observation.observed_payment_state === 'authorized'
+      ? 'authorization'
+      : observation.observed_payment_state === 'settled'
+        ? 'settlement'
+        : undefined;
+  const hasExplicitUpstreamArtifact =
+    observation.upstream_artifact !== undefined &&
+    (requiredArtifactKind === undefined || observation.artifact_kind === requiredArtifactKind);
+
   assertExplicitFinality(
     {
       event: commerceEvent,
-      hasExplicitUpstreamArtifact: observation.upstream_artifact !== undefined,
+      hasExplicitUpstreamArtifact,
       currency: observation.currency,
       env: observation.env,
       envExplicit: observation.env === 'live' || observation.env === 'test',
@@ -419,10 +443,12 @@ export function fromACPDelegatedPaymentObservation(
     acp_delegate: observation.delegate,
     acp_payment_method_token_ref: observation.payment_method_token_ref,
     observed_payment_state: observation.observed_payment_state,
+    authorized_amount_minor: observation.authorized_amount_minor,
     proofs: {
       acp: {
         delegated_payment: {
           upstream_artifact: observation.upstream_artifact as JsonObject,
+          ...(observation.artifact_kind ? { artifact_kind: observation.artifact_kind } : {}),
         },
       },
     } as JsonObject,
@@ -434,9 +460,12 @@ export function fromACPDelegatedPaymentObservation(
     evidence.acp_session_id = observation.session_id;
   }
 
-  // Amount in major units derived from authorized_amount_minor for the
-  // PaymentEvidence.amount surface. Mappings preserve the canonical minor
-  // string under evidence; PaymentEvidence carries the major projection.
+  // PaymentEvidence.amount and SessionReceiptInput.amt carry the amount in
+  // minor units (smallest currency unit), preserved as an integer derived
+  // from the canonical authorized_amount_minor base-10 integer string.
+  // No currency-aware scaling is applied; consumers that need major units
+  // must convert downstream using the currency. The canonical minor string
+  // remains available under evidence.authorized_amount_minor.
   const amountMinor = parseInt(observation.authorized_amount_minor, 10);
 
   const payment: PaymentEvidence = {

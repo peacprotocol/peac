@@ -19,7 +19,8 @@
       }
     },
     "session_id": "sess_acp_001",
-    "observed_payment_state": "authorized"
+    "observed_payment_state": "authorized",
+    "artifact_kind": "authorization"
   },
   "expected": {
     "modes": {

@@ -1,6 +1,6 @@
 {
-  "requirement_id": "C-S26-acp-delegated-payment-settled",
-  "description": "Positive: settled state with matching artifact_kind=settlement. Emits commerce.event=settlement in all modes.",
+  "requirement_id": "C-S26-acp-delegated-payment-settled-without-settlement-artifact",
+  "description": "Negative settlement-proof: settled with artifact_kind=authorization is a finality-rule violation. Throws in ALL modes (rule 1 is non-negotiable).",
   "guard_module": "@peac/adapter-core finality.ts",
   "function": "@peac/mappings-acp fromACPDelegatedPaymentObservation",
   "input": {
@@ -20,14 +20,15 @@
     },
     "session_id": "sess_acp_001",
     "observed_payment_state": "settled",
-    "artifact_kind": "settlement"
+    "artifact_kind": "authorization"
   },
   "expected": {
     "modes": {
-      "strict": "pass",
-      "interop": "pass",
-      "legacy": "pass"
+      "strict": "throw",
+      "interop": "throw",
+      "legacy": "throw"
     },
-    "emits_commerce_event": "settlement"
+    "error_code": "commerce.finality_synthesis_blocked",
+    "error_pointer": "/proofs/acp/delegated_payment"
   }
 }

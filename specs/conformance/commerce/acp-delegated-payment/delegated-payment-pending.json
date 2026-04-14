@@ -1,6 +1,6 @@
 {
   "requirement_id": "C-S26-acp-delegated-payment-pending",
-  "description": "Negative finality: pending state MUST NOT emit a commerce event in any mode.",
+  "description": "Negative finality: pending state MUST NOT emit a commerce event. artifact_kind is not consulted for non-finality states.",
   "guard_module": "@peac/adapter-core finality.ts",
   "function": "@peac/mappings-acp fromACPDelegatedPaymentObservation",
   "input": {
