@@ -1,0 +1,18 @@
+{
+  "name": "@peac/example-x402-upto-evidence",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo: x402 upto offer -> settlement-proof header -> PEAC settlement evidence",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/adapter-x402": "workspace:*",
+    "@peac/adapter-core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
