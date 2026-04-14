@@ -248,6 +248,22 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/acp-delegated-checkout:
+    dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../../packages/adapters/core
+      '@peac/mappings-acp':
+        specifier: workspace:*
+        version: link:../../packages/mappings/acp
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/acp-session-lifecycle:
     dependencies:
       '@peac/mappings-acp':
@@ -427,6 +443,22 @@ importers:
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
+
+  examples/mpp-payment-attempt:
+    dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../../packages/adapters/core
+      '@peac/mappings-paymentauth':
+        specifier: workspace:*
+        version: link:../../packages/mappings/paymentauth
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
 
   examples/openclaw-capture:
     dependencies:
@@ -724,6 +756,22 @@ importers:
       '@peac/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  examples/x402-upto-evidence:
+    dependencies:
+      '@peac/adapter-core':
+        specifier: workspace:*
+        version: link:../../packages/adapters/core
+      '@peac/adapter-x402':
+        specifier: workspace:*
+        version: link:../../packages/adapters/x402
     devDependencies:
       tsx:
         specifier: ^4.21.0

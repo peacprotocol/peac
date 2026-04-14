@@ -1,0 +1,18 @@
+{
+  "name": "@peac/example-acp-delegated-checkout",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo: ACP delegated-payment observation -> PEAC commerce evidence (authorization + settlement)",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/mappings-acp": "workspace:*",
+    "@peac/adapter-core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
