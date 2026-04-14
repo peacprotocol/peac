@@ -158,3 +158,230 @@ export function toCommerceExtensionFields(
 
   return { ...fields, env: 'live' } as ReturnType<typeof toCommerceExtensionFields>;
 }
+
+// ---------------------------------------------------------------------------
+// MPP / paymentauth payment-attempt and settlement evidence (v0.12.11)
+// ---------------------------------------------------------------------------
+
+/**
+ * Closed enum of paymentauth artifact kinds. Mirrors the pattern used by
+ * the ACP delegated-payment mapper so that a settlement-bearing artifact
+ * is never confused with an authorization-bearing artifact.
+ */
+export type PaymentauthArtifactKind = 'authorization' | 'settlement';
+
+/**
+ * Input for fromMPPPaymentAttempt.
+ *
+ * Models an upstream payment-attempt artifact in the paymentauth /
+ * draft-ryan-httpauth-payment-01 family. Observation only: PEAC does not
+ * verify payment tokens, bind facilitators, or reason about settlement
+ * guarantees. Token material is NEVER carried; only an opaque token
+ * reference is preserved.
+ */
+export interface MPPPaymentAttemptInput {
+  /** Upstream attempt identifier. */
+  attempt_id: string;
+  /** Currency code as supplied by upstream. Required in strict mode. */
+  currency: string;
+  /** Amount in minor units (smallest currency unit) as a base-10 string. */
+  amount_minor: string;
+  /** Environment as supplied by upstream. */
+  env: 'live' | 'test';
+  /** Opaque payment-token reference. NEVER token material. */
+  payment_token_ref: string;
+  /**
+   * Discriminator naming what the upstream artifact attests. MUST be
+   * 'authorization' for fromMPPPaymentAttempt.
+   */
+  artifact_kind: PaymentauthArtifactKind;
+  /**
+   * Optional facilitator attestation, preserved verbatim under
+   * proofs.paymentauth.attempt.facilitator_attestation when present.
+   */
+  facilitator_attestation?: unknown;
+  /**
+   * Raw upstream attempt artifact, preserved verbatim under
+   * proofs.paymentauth.attempt.upstream_artifact. Opaque to PEAC.
+   */
+  upstream_artifact: unknown;
+  /** Optional correlation reference (e.g. challenge id from preceding 402). */
+  challenge_id?: string;
+}
+
+/**
+ * Input for fromMPPSettlement.
+ *
+ * Models an upstream settlement attestation. The artifact_kind MUST be
+ * 'settlement'; absent or 'authorization' is rejected by the mapper-
+ * boundary finality-synthesis guard in all strictness modes.
+ */
+export interface MPPSettlementInput {
+  /** Settlement identifier from upstream. */
+  settlement_id: string;
+  /** Originating attempt id (correlates with fromMPPPaymentAttempt). */
+  attempt_id?: string;
+  /** Currency code as supplied by upstream. Required in strict mode. */
+  currency: string;
+  /** Settled amount in minor units (smallest currency unit). */
+  amount_minor: string;
+  /** Environment as supplied by upstream. */
+  env: 'live' | 'test';
+  /**
+   * Discriminator naming what the upstream artifact attests. MUST be
+   * 'settlement' for fromMPPSettlement.
+   */
+  artifact_kind: PaymentauthArtifactKind;
+  /** Optional facilitator-signed settlement statement. */
+  facilitator_attestation?: unknown;
+  /**
+   * Raw upstream settlement artifact, preserved verbatim under
+   * proofs.paymentauth.settlement.upstream_artifact. Opaque to PEAC.
+   */
+  upstream_artifact: unknown;
+}
+
+/**
+ * Map an MPP / paymentauth payment-attempt artifact to PEAC commerce
+ * evidence with commerce.event = 'authorization'. Routes through the
+ * mapper-boundary finality-synthesis guard.
+ *
+ * Observational mapping only. PEAC does not verify payment tokens or bind
+ * facilitators. Strict mode rejects missing or UNKNOWN currency, env
+ * outside the closed live|test enum, missing or mismatched artifact_kind,
+ * or non-integer amount_minor. Interop emits a deprecation warning on
+ * silent fallbacks; legacy is silent. Rule 1 (artifact_kind mismatch)
+ * rejects in all modes.
+ */
+export function fromMPPPaymentAttempt(
+  input: MPPPaymentAttemptInput,
+  options: PaymentauthMapOptions = {}
+): PaymentEvidence {
+  if (!input.attempt_id) {
+    throw new Error('MPP payment-attempt missing attempt_id');
+  }
+  if (!input.payment_token_ref) {
+    throw new Error('MPP payment-attempt missing payment_token_ref');
+  }
+  if (!/^-?[0-9]+$/.test(input.amount_minor)) {
+    throw new Error('MPP payment-attempt amount_minor must be a base-10 integer string');
+  }
+
+  const hasExplicitUpstreamArtifact =
+    input.upstream_artifact !== undefined && input.artifact_kind === 'authorization';
+
+  assertExplicitFinality(
+    {
+      event: 'authorization',
+      hasExplicitUpstreamArtifact,
+      currency: input.currency,
+      env: input.env,
+      envExplicit: input.env === 'live' || input.env === 'test',
+    },
+    {
+      mode: options.mode,
+      warn: options.warn,
+      pointer: '/proofs/paymentauth/attempt',
+    }
+  );
+
+  const evidence: JsonObject = {
+    paymentauth_method: 'paymentauth',
+    paymentauth_attempt_id: input.attempt_id,
+    payment_token_ref: input.payment_token_ref,
+    commerce_event: 'authorization',
+    proofs: {
+      paymentauth: {
+        attempt: {
+          upstream_artifact: input.upstream_artifact as JsonObject,
+          artifact_kind: input.artifact_kind,
+          ...(input.facilitator_attestation !== undefined
+            ? { facilitator_attestation: input.facilitator_attestation as JsonObject }
+            : {}),
+        },
+      },
+    } as JsonObject,
+  };
+  if (input.challenge_id) {
+    evidence.challenge_id = input.challenge_id;
+  }
+
+  const amount = parseInt(input.amount_minor, 10);
+  return {
+    rail: PAYMENTAUTH_RAIL,
+    reference: input.attempt_id,
+    amount,
+    currency: input.currency.toUpperCase(),
+    asset: input.currency.toUpperCase(),
+    env: input.env,
+    evidence,
+  };
+}
+
+/**
+ * Map an MPP / paymentauth settlement attestation to PEAC commerce
+ * evidence with commerce.event = 'settlement'. Routes through the
+ * mapper-boundary finality-synthesis guard. Settlement requires an
+ * artifact_kind = 'settlement' discriminator; mismatch or absence is a
+ * finality-rule violation rejected in all strictness modes.
+ */
+export function fromMPPSettlement(
+  input: MPPSettlementInput,
+  options: PaymentauthMapOptions = {}
+): PaymentEvidence {
+  if (!input.settlement_id) {
+    throw new Error('MPP settlement missing settlement_id');
+  }
+  if (!/^-?[0-9]+$/.test(input.amount_minor)) {
+    throw new Error('MPP settlement amount_minor must be a base-10 integer string');
+  }
+
+  const hasExplicitUpstreamArtifact =
+    input.upstream_artifact !== undefined && input.artifact_kind === 'settlement';
+
+  assertExplicitFinality(
+    {
+      event: 'settlement',
+      hasExplicitUpstreamArtifact,
+      currency: input.currency,
+      env: input.env,
+      envExplicit: input.env === 'live' || input.env === 'test',
+    },
+    {
+      mode: options.mode,
+      warn: options.warn,
+      pointer: '/proofs/paymentauth/settlement',
+    }
+  );
+
+  const evidence: JsonObject = {
+    paymentauth_method: 'paymentauth',
+    paymentauth_settlement_id: input.settlement_id,
+    commerce_event: 'settlement',
+    proofs: {
+      paymentauth: {
+        settlement: {
+          upstream_artifact: input.upstream_artifact as JsonObject,
+          artifact_kind: input.artifact_kind,
+          ...(input.facilitator_attestation !== undefined
+            ? { facilitator_attestation: input.facilitator_attestation as JsonObject }
+            : {}),
+        },
+      },
+    } as JsonObject,
+  };
+  if (input.attempt_id) {
+    evidence.paymentauth_attempt_id = input.attempt_id;
+  }
+
+  const amount = parseInt(input.amount_minor, 10);
+  return {
+    rail: PAYMENTAUTH_RAIL,
+    reference: input.settlement_id,
+    amount,
+    currency: input.currency.toUpperCase(),
+    asset: input.currency.toUpperCase(),
+    env: input.env,
+    evidence,
+  };
+}

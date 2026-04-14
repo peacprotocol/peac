@@ -1,0 +1,19 @@
+{
+  "name": "commerce/x402",
+  "version": "0.12.11",
+  "section": 26,
+  "subsection": "x402",
+  "description": "Conformance vectors for the v0.12.11 x402 commerce evidence mapping.",
+  "spec_revision": "docs/specs/X402-V2-PROFILE.md §8 (v0.12.11)",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "consumer": "@peac/adapter-x402",
+  "stable_error_code": "commerce.finality_synthesis_blocked",
+  "fixture_count": 5,
+  "fixtures": [
+    "settlement-proof-positive.json",
+    "offer-only-rejected.json",
+    "dual-header-precedence.json",
+    "duplicate-proof-precedence.json",
+    "scheme-agnostic-passthrough.json"
+  ]
+}

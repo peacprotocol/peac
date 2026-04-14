@@ -1,0 +1,29 @@
+{
+  "requirement_id": "C-S26-x402-settlement-proof-positive",
+  "description": "Positive: explicit settlement proof from PAYMENT-RESPONSE (v2). Emits commerce.event=settlement.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "fromX402SettlementObservation",
+  "input": {
+    "proof": {
+      "source": "PAYMENT-RESPONSE",
+      "wire_version": "v2",
+      "raw_value": "v2-bytes"
+    },
+    "scheme": "exact",
+    "network": "base-sepolia",
+    "asset": "0xUSDC",
+    "currency": "USD",
+    "amount_minor": "1500",
+    "env": "live",
+    "pay_to": "0xRecipient",
+    "facilitator": "fac.example"
+  },
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    },
+    "emits_commerce_event": "settlement"
+  }
+}

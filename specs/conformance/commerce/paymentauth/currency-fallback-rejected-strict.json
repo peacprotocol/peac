@@ -1,0 +1,26 @@
+{
+  "requirement_id": "C-S26-paymentauth-currency-fallback-rejected-strict",
+  "description": "Negative: UNKNOWN currency on payment-attempt. Strict throws; interop warns; legacy silent.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "fromMPPPaymentAttempt",
+  "input": {
+    "attempt_id": "att_003",
+    "currency": "UNKNOWN",
+    "amount_minor": "1500",
+    "env": "live",
+    "payment_token_ref": "tok_ref_opaque",
+    "artifact_kind": "authorization",
+    "upstream_artifact": {
+      "source": "paymentauth.attempt.v1"
+    }
+  },
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "warn",
+      "legacy": "pass"
+    },
+    "error_code": "commerce.finality_synthesis_blocked",
+    "error_pointer": "/proofs/paymentauth/attempt"
+  }
+}

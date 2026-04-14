@@ -1,0 +1,20 @@
+{
+  "name": "commerce/paymentauth",
+  "version": "0.12.11",
+  "section": 26,
+  "subsection": "paymentauth",
+  "description": "Conformance vectors for the v0.12.11 paymentauth commerce evidence mapping.",
+  "spec_revision": "docs/profiles/mpp-payment-evidence.md (v0.12.11)",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "consumer": "@peac/mappings-paymentauth",
+  "stable_error_code": "commerce.finality_synthesis_blocked",
+  "fixture_count": 6,
+  "fixtures": [
+    "attempt-positive.json",
+    "attempt-missing-artifact-kind-rejected.json",
+    "settlement-positive.json",
+    "settlement-without-attestation-rejected.json",
+    "currency-fallback-rejected-strict.json",
+    "env-default-rejected-strict.json"
+  ]
+}

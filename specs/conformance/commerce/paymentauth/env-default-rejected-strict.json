@@ -1,0 +1,25 @@
+{
+  "requirement_id": "C-S26-paymentauth-env-default-rejected-strict",
+  "description": "Negative: env outside live|test enum. Strict throws; interop warns; legacy silent.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "fromMPPSettlement",
+  "input": {
+    "settlement_id": "set_003",
+    "currency": "USD",
+    "amount_minor": "1500",
+    "env": "production",
+    "artifact_kind": "settlement",
+    "upstream_artifact": {
+      "source": "paymentauth.settlement.v1"
+    }
+  },
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "warn",
+      "legacy": "pass"
+    },
+    "error_code": "commerce.finality_synthesis_blocked",
+    "error_pointer": "/proofs/paymentauth/settlement"
+  }
+}

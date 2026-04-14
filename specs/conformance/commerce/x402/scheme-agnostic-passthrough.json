@@ -1,0 +1,28 @@
+{
+  "requirement_id": "C-S26-x402-scheme-agnostic-passthrough",
+  "description": "Scheme is preserved verbatim; PEAC does not verify scheme invariants. Emits commerce.event=settlement for an upto-scheme proof.",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "fromX402SettlementObservation",
+  "input": {
+    "proof": {
+      "source": "PAYMENT-RESPONSE",
+      "wire_version": "v2",
+      "raw_value": "upto-bytes"
+    },
+    "scheme": "upto",
+    "network": "base",
+    "asset": "0xUSDC",
+    "currency": "USD",
+    "amount_minor": "999999",
+    "env": "live"
+  },
+  "expected": {
+    "modes": {
+      "strict": "pass",
+      "interop": "pass",
+      "legacy": "pass"
+    },
+    "emits_commerce_event": "settlement",
+    "preserves_scheme": "upto"
+  }
+}
