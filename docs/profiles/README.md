@@ -41,6 +41,7 @@ PEAC receipts for a specific integration.
 | --------------------------------------------------------------- | ---------------------------------- | -------- | ------ |
 | [Stripe x402 Machine Payments](stripe-x402-machine-payments.md) | `@peac/rails-stripe`               | v0.10.11 | Draft  |
 | [Runtime Governance](runtime-governance.md)                     | `@peac/adapter-runtime-governance` | v0.12.10 | Draft  |
+| [ACP Delegated Payment](acp-delegated-payment.md)               | `@peac/mappings-acp`               | v0.12.11 | Draft  |
 
 ## Profile Templates
 

@@ -14,6 +14,7 @@
 
 import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
+import { assertExplicitFinality, type StrictnessMode } from '@peac/adapter-core';
 
 /**
  * PEAC Receipt Input (for issue()).
@@ -275,6 +276,212 @@ export function fromACPInterventionRequired(intervention: ACPIntervention): Sess
     subject_uri: intervention.resource_uri,
     amt: 0,
     cur: 'NONE',
+    payment,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Delegated Payment Observation (v0.12.11)
+// ---------------------------------------------------------------------------
+
+/**
+ * Closed enum of observed delegated-payment states at the ACP mapper boundary.
+ * Mirrors upstream ACP delegated-payment lifecycle states. Documented but not
+ * wire-frozen.
+ */
+export type DelegatedPaymentState = 'authorized' | 'settled' | 'pending' | 'failed' | 'revoked';
+
+/**
+ * ACP delegated-payment observation input.
+ *
+ * The observation captures what an upstream ACP-aware payment surface
+ * attested. It does NOT enforce ACP lifecycle, checkout policy, or token
+ * verification. Token material (the actual delegated-payment token) is
+ * NEVER carried; only an opaque reference is.
+ */
+export interface ACPDelegatedPaymentObservation {
+  /** Delegation identifier from upstream. */
+  delegation_id: string;
+  /** Resource URI the delegation grants action on; MUST be https://. */
+  resource_uri: string;
+  /** Principal who authorized the delegation. */
+  principal: string;
+  /** Delegate that may act on the principal's behalf. */
+  delegate: string;
+  /**
+   * Opaque reference to the payment-method token. NEVER the token material
+   * itself.
+   */
+  payment_method_token_ref: string;
+  /**
+   * Authorized amount as a base-10 integer string (RFC 8785 compatible).
+   * Smallest currency unit. Required.
+   */
+  authorized_amount_minor: string;
+  /** Currency code as supplied by upstream. Required in strict mode. */
+  currency: string;
+  /** Environment as supplied by upstream. Required in strict mode. */
+  env: 'live' | 'test';
+  /** Observed delegated-payment state from the upstream artifact. */
+  observed_payment_state: DelegatedPaymentState;
+  /**
+   * Discriminator naming what the upstream artifact attests. Required when
+   * the observed_payment_state is a finality-bearing state
+   * (`authorized` or `settled`); MUST match that state. Required to prevent
+   * a generic upstream artifact from being treated as a settlement proof.
+   *
+   * For non-finality states (`pending`, `failed`, `revoked`) this field is
+   * not consulted and may be omitted.
+   */
+  artifact_kind?: 'authorization' | 'settlement';
+  /**
+   * Raw upstream artifact, preserved verbatim under
+   * `proofs.acp.delegated_payment.upstream_artifact`. Opaque to PEAC.
+   * For finality states, this MUST be the artifact whose `artifact_kind`
+   * matches `observed_payment_state`.
+   */
+  upstream_artifact: unknown;
+  /** Optional session correlation. */
+  session_id?: string;
+}
+
+export interface ACPDelegatedPaymentOptions {
+  mode?: StrictnessMode;
+  warn?: (message: string) => void;
+}
+
+const DELEGATED_STATE_TO_COMMERCE_EVENT: Record<DelegatedPaymentState, string | undefined> = {
+  authorized: 'authorization',
+  settled: 'settlement',
+  pending: undefined,
+  failed: undefined,
+  revoked: undefined,
+};
+
+/**
+ * Map an ACP delegated-payment observation to PEAC evidence.
+ *
+ * Observational mapping only. Does NOT enforce ACP lifecycle, checkout
+ * policy, or payment-method-token verification. Routes through the shared
+ * mapper-boundary finality-synthesis guard so that:
+ *
+ *  - `pending`, `failed`, `revoked` produce evidence with NO commerce event.
+ *  - `authorized` and `settled` produce a commerce event only when the
+ *    upstream artifact is present (which it always is for this function;
+ *    the guard rejects otherwise).
+ *  - Strict mode rejects missing or upstream-unknown currency and any
+ *    env value outside the closed `live` | `test` enum.
+ *
+ * The raw upstream artifact is preserved verbatim under
+ * `proofs.acp.delegated_payment.upstream_artifact`.
+ */
+export function fromACPDelegatedPaymentObservation(
+  observation: ACPDelegatedPaymentObservation,
+  options: ACPDelegatedPaymentOptions = {}
+): SessionReceiptInput {
+  if (!observation.delegation_id) {
+    throw new Error('ACP delegated-payment observation missing delegation_id');
+  }
+  if (!observation.resource_uri || !observation.resource_uri.startsWith('https://')) {
+    throw new Error(
+      'ACP delegated-payment observation missing or invalid resource_uri (must be https://)'
+    );
+  }
+  if (!observation.principal) {
+    throw new Error('ACP delegated-payment observation missing principal');
+  }
+  if (!observation.delegate) {
+    throw new Error('ACP delegated-payment observation missing delegate');
+  }
+  if (!observation.payment_method_token_ref) {
+    throw new Error('ACP delegated-payment observation missing payment_method_token_ref');
+  }
+  if (!observation.observed_payment_state) {
+    throw new Error('ACP delegated-payment observation missing observed_payment_state');
+  }
+  if (!/^-?[0-9]+$/.test(observation.authorized_amount_minor)) {
+    throw new Error(
+      'ACP delegated-payment observation authorized_amount_minor must be a base-10 integer string'
+    );
+  }
+
+  const commerceEvent = DELEGATED_STATE_TO_COMMERCE_EVENT[observation.observed_payment_state];
+
+  // Settlement-proof discriminator: for finality states, the upstream
+  // artifact MUST self-describe as the matching kind. A generic artifact
+  // does NOT count as a settlement proof, and an authorization artifact
+  // does NOT count as a settlement proof. This blocks an entire class of
+  // mis-classified artifact drift independently of the strictness mode.
+  const requiredArtifactKind: 'authorization' | 'settlement' | undefined =
+    observation.observed_payment_state === 'authorized'
+      ? 'authorization'
+      : observation.observed_payment_state === 'settled'
+        ? 'settlement'
+        : undefined;
+  const hasExplicitUpstreamArtifact =
+    observation.upstream_artifact !== undefined &&
+    (requiredArtifactKind === undefined || observation.artifact_kind === requiredArtifactKind);
+
+  assertExplicitFinality(
+    {
+      event: commerceEvent,
+      hasExplicitUpstreamArtifact,
+      currency: observation.currency,
+      env: observation.env,
+      envExplicit: observation.env === 'live' || observation.env === 'test',
+    },
+    {
+      mode: options.mode,
+      warn: options.warn,
+      pointer: '/proofs/acp/delegated_payment',
+    }
+  );
+
+  const evidence: JsonObject = {
+    acp_delegation_id: observation.delegation_id,
+    acp_principal: observation.principal,
+    acp_delegate: observation.delegate,
+    acp_payment_method_token_ref: observation.payment_method_token_ref,
+    observed_payment_state: observation.observed_payment_state,
+    authorized_amount_minor: observation.authorized_amount_minor,
+    proofs: {
+      acp: {
+        delegated_payment: {
+          upstream_artifact: observation.upstream_artifact as JsonObject,
+          ...(observation.artifact_kind ? { artifact_kind: observation.artifact_kind } : {}),
+        },
+      },
+    } as JsonObject,
+  };
+  if (commerceEvent) {
+    evidence.commerce_event = commerceEvent;
+  }
+  if (observation.session_id) {
+    evidence.acp_session_id = observation.session_id;
+  }
+
+  // PaymentEvidence.amount and SessionReceiptInput.amt carry the amount in
+  // minor units (smallest currency unit), preserved as an integer derived
+  // from the canonical authorized_amount_minor base-10 integer string.
+  // No currency-aware scaling is applied; consumers that need major units
+  // must convert downstream using the currency. The canonical minor string
+  // remains available under evidence.authorized_amount_minor.
+  const amountMinor = parseInt(observation.authorized_amount_minor, 10);
+
+  const payment: PaymentEvidence = {
+    rail: 'acp-delegated-payment',
+    reference: observation.delegation_id,
+    amount: amountMinor,
+    currency: observation.currency.toUpperCase(),
+    asset: observation.currency.toUpperCase(),
+    env: observation.env,
+    evidence,
+  };
+
+  return {
+    subject_uri: observation.resource_uri,
+    amt: amountMinor,
+    cur: observation.currency.toUpperCase(),
     payment,
   };
 }

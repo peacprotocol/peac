@@ -1,0 +1,34 @@
+{
+  "requirement_id": "C-S26-acp-delegated-payment-settled-without-settlement-artifact",
+  "description": "Negative settlement-proof: settled with artifact_kind=authorization is a finality-rule violation. Throws in ALL modes (rule 1 is non-negotiable).",
+  "guard_module": "@peac/adapter-core finality.ts",
+  "function": "@peac/mappings-acp fromACPDelegatedPaymentObservation",
+  "input": {
+    "delegation_id": "del_acp_001",
+    "resource_uri": "https://merchant.example.com/checkout/acp-001",
+    "principal": "user_alice",
+    "delegate": "agent_bob",
+    "payment_method_token_ref": "pmt_ref_opaque_001",
+    "authorized_amount_minor": "4999",
+    "currency": "USD",
+    "env": "live",
+    "upstream_artifact": {
+      "source": "acp.delegated_payment.v1",
+      "raw": {
+        "trace_id": "tr-001"
+      }
+    },
+    "session_id": "sess_acp_001",
+    "observed_payment_state": "settled",
+    "artifact_kind": "authorization"
+  },
+  "expected": {
+    "modes": {
+      "strict": "throw",
+      "interop": "throw",
+      "legacy": "throw"
+    },
+    "error_code": "commerce.finality_synthesis_blocked",
+    "error_pointer": "/proofs/acp/delegated_payment"
+  }
+}

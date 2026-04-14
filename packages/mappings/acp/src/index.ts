@@ -153,3 +153,12 @@ export {
   fromACPCapabilitySnapshot,
   fromACPInterventionRequired,
 } from './session.js';
+
+// Delegated payment observation (v0.12.11)
+export type {
+  DelegatedPaymentState,
+  ACPDelegatedPaymentObservation,
+  ACPDelegatedPaymentOptions,
+} from './session.js';
+
+export { fromACPDelegatedPaymentObservation } from './session.js';
