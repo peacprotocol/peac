@@ -5,6 +5,46 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.11] - 2026-04-15
+
+### Added
+
+- `@peac/adapter-core`: `assertExplicitFinality`, `MapperBoundaryError`, `isFinalityEvent`, `StrictnessMode`, and the stable mapper-boundary code `commerce.finality_synthesis_blocked`.
+- `@peac/mappings-acp`: `fromACPDelegatedPaymentObservation()` with `artifact_kind` discriminator and a closed `observed_payment_state` enum.
+- `@peac/mappings-paymentauth`: `fromMPPPaymentAttempt()` and `fromMPPSettlement()` with `artifact_kind` discriminator.
+- `@peac/adapter-x402`: `extractSettlementProofFromHeaders()` (dual-header precedence: `PEAC-Receipt` > `PAYMENT-RESPONSE` > `X-PAYMENT-RESPONSE`) and `fromX402SettlementObservation()`.
+- Go middleware: `Logger` and `Metrics` interfaces with no-op defaults; panic recovery; bounded token-bucket rate limiter with `MaxEntries` cap and `IdleTTL` eviction (strategies: `global`, `per_ip`, `per_issuer`); `RequestTimeout`; `MaxBodyBytes`; opt-in `TrustProxyHeaders`.
+- CLI: `peac doctor` offline-default installability diagnostics with opt-in `--online --issuer <url>` remote checks.
+- Offline single-file verify dashboard at `tools/verify-dashboard/index.html`.
+- IDE plugin packs under `surfaces/plugin-pack/{cursor,codex,claude-code,vscode}/` with pinned `@peac/mcp-server@0.12.11` configs, offline sample receipts, and per-pack smoke harnesses.
+- Smithery canonical config pinned at `packages/mcp-server/smithery.yaml`.
+- GitHub Copilot enterprise registry compatibility checker at `scripts/check-copilot-compatibility.mjs`.
+- Listing-copy coherence guard at `scripts/check-listing-copy-coherence.mjs`, wired into `scripts/verify-distribution.mjs` as check #16.
+- Runnable commerce examples: `examples/x402-upto-evidence/`, `examples/acp-delegated-checkout/`, `examples/mpp-payment-attempt/`.
+- Conformance Section 26 commerce fixtures (20 vectors + manifest) across `commerce/`, `commerce/acp-delegated-payment/` (11), `commerce/paymentauth/` (6), and `commerce/x402/` (5).
+- Docs: `docs/compatibility/commerce-protocol-coverage.md`, `docs/compatibility/core-use-case-coverage.md`, `docs/compatibility/go-middleware.md`, `docs/profiles/acp-delegated-payment.md`, `docs/profiles/mpp-payment-evidence.md`, `docs/guides/{cursor,codex,claude-code,vscode,smithery-remote-mcp,copilot-enterprise-registry,marketplace-publishing,verify-dashboard}-*.md`, `docs/specs/X402-V2-PROFILE.md` §8.
+
+### Changed
+
+- `@peac/adapter-core` package description and README updated to cover commerce mappings in addition to payment rail adapters.
+- `docs/specs/COMMERCE-EVIDENCE.md` cross-references the v0.12.11 ACP, MPP / paymentauth, and x402 settlement surfaces.
+- `packages/mcp-server/smithery.yaml` pins an exact `@peac/mcp-server` version; `scripts/validate-smithery.mjs` accepts both unpinned and pinned forms.
+- Go middleware `DefaultConfig()` sets `RecoverPanics: true`, `MaxBodyBytes: 1 MiB`, `TrustProxyHeaders: false`.
+- Build targets: 105 (was 102).
+
+### Deferred
+
+- `event_source` discriminant on `CommerceExtensionSchema`.
+- `commerce-session` kernel type URI registration.
+- Commerce lifecycle grouping export.
+- `mcpservers.org`, `mcp.so`, and `awesome-mcp-servers` listings.
+- Python SDK.
+- OPA / Rego export bridge.
+- Echo and `net/http` Go middleware submodule adapters.
+- Regression-aware Go benchmark gate with committed baseline.
+- Extended JCS parity test expansion.
+- TypeDoc + PageFind searchable API reference build pipeline.
+
 ## [0.12.10] - 2026-04-14
 
 ### Added
