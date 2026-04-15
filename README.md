@@ -1,34 +1,19 @@
-<p align="center">
-  <a href="https://www.peacprotocol.org">
-    <h1 align="center">PEAC Protocol</h1>
-  </a>
-</p>
+# PEAC Protocol
 
-<p align="center">
-  <strong>Portable signed records for agent, API, MCP, and cross-runtime interactions</strong>
-  <br />
-  Publish machine-readable terms, return signed interaction records, and verify them offline.
-</p>
+Portable signed records for agent, API, MCP, and cross-runtime interactions.
 
-<p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg" alt="License: Apache 2.0" /></a>
-  <a href="https://github.com/peacprotocol/peac/releases"><img src="https://img.shields.io/github/v/release/peacprotocol/peac?color=brightgreen" alt="Latest Release" /></a>
-  <a href="https://www.npmjs.com/package/@peac/protocol"><img src="https://img.shields.io/npm/dm/@peac/protocol?style=flat&color=brightgreen" alt="npm downloads" /></a>
-  <a href="https://github.com/peacprotocol/peac/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=CI&color=brightgreen" alt="CI Status" /></a>
-</p>
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac?color=brightgreen)](https://github.com/peacprotocol/peac/releases)
+[![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat&color=brightgreen)](https://www.npmjs.com/package/@peac/protocol)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=CI&color=brightgreen)](https://github.com/peacprotocol/peac/actions/workflows/ci.yml)
 
-<p align="center">
-  <a href="https://www.peacprotocol.org">Website</a> &middot;
-  <a href="docs/SPEC_INDEX.md">Spec Index</a> &middot;
-  <a href="https://github.com/peacprotocol/peac/discussions">Discussions</a> &middot;
-  <a href="https://github.com/peacprotocol/peac/releases">Releases</a>
-</p>
+PEAC is the open standard for verifiable interaction records across APIs, MCP servers, x402-powered payment flows, paymentauth / MPP, ACP, A2A workflows, runtime governance, and other cross-runtime systems.
 
-PEAC is an open standard for verifiable interaction records across agent, tool, API, and cross-runtime systems. Publish machine-readable terms, return signed records, and verify them offline: portable audit records across organizational boundaries, without replacing auth, payment rails, or observability.
+Use PEAC when local logs are not enough and another party needs a signed, portable record of what happened. Do not use PEAC when local logs inside one system are sufficient and no external party needs to verify those records. PEAC does not replace auth, payment rails, observability, or transport protocols; it adds portable signed records across them.
 
-**For** API providers, MCP tool hosts, agent operators, platforms, and auditors who need portable signed records that cross boundaries.
+> **Keep auth, keep payments, keep observability.** Add `/.well-known/peac.txt`, return `PEAC-Receipt`, and verify records offline across organizational boundaries.
 
-## How it works
+## The PEAC loop
 
 ```text
 1. Publish terms at /.well-known/peac.txt
@@ -36,19 +21,17 @@ PEAC is an open standard for verifiable interaction records across agent, tool, 
 3. Verify offline with the issuer's public key
 ```
 
-What a governed HTTP response looks like:
+## Why PEAC
 
-```text
-HTTP/1.1 200 OK
-PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...
-Link: </.well-known/peac-issuer.json>; rel="issuer"
-```
+- Logs are local. PEAC records are portable.
+- Traces correlate systems. PEAC records survive organizational boundaries.
+- Auth and payments authorize actions. PEAC records prove what happened.
 
 ## Quick start
 
-**Requirements:** Node 24 (tested); Node 22+ (compatible). [Go 1.26+](sdks/go/) and [Python 3.12+](examples/python/) also supported.
+**In under a minute, you can verify a PEAC receipt offline.**
 
-### Verify a receipt
+**Requirements:** Node 24 tested, Node 22+ compatible. Go middleware and examples are supported (Go 1.26+). Python is available through API-first examples and OpenAPI-driven flows.
 
 ```bash
 pnpm add @peac/protocol @peac/crypto
@@ -67,180 +50,116 @@ if (result.valid) {
 }
 ```
 
-Or from the CLI:
+A governed HTTP response looks like:
 
-```bash
-peac verify 'eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...'
+```text
+HTTP/1.1 200 OK
+PEAC-Receipt: eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QifQ...
+Link: </.well-known/peac-issuer.json>; rel="issuer"
 ```
 
-### Issue a receipt
+## Try PEAC in 5 minutes
 
-```typescript
-import { generateKeypair } from '@peac/crypto';
-import { issue } from '@peac/protocol';
+- Verify a receipt locally with `verifyLocal()` or `pnpm dlx @peac/cli verify`.
+- Start the MCP server: `npx -y @peac/mcp-server`.
+- Run the x402 settlement mapping demo: `pnpm install && pnpm build && pnpm --filter @peac/example-x402-upto-evidence demo`.
+- Open an editor plugin-pack surface under [`surfaces/plugin-pack/`](surfaces/plugin-pack/) (Cursor, Codex, Claude Code, VS Code, Continue, Windsurf, OpenCode).
+- Run the minimal example: `pnpm --filter @peac/example-minimal demo`.
+- Follow the [API Provider Quickstart](docs/guides/quickstart-api-provider.md) or [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md).
 
-const { privateKey, publicKey } = await generateKeypair();
+## Choose your path
 
-const { jws } = await issue({
-  iss: 'https://api.example.com',
-  kind: 'evidence',
-  type: 'org.peacprotocol/access-decision',
-  pillars: ['access'],
-  extensions: {
-    'org.peacprotocol/access': {
-      resource: 'https://api.example.com/inference/v1',
-      action: 'execute',
-      decision: 'allow',
-    },
-  },
-  privateKey,
-  kid: 'key-2026-03',
-});
+- **I run an API.** [API Provider Quickstart](docs/guides/quickstart-api-provider.md) with Express middleware.
+- **I run an MCP server.** [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`; editor surfaces under [`surfaces/plugin-pack/`](surfaces/plugin-pack/).
+- **I verify receipts.** [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md).
+- **I build A2A agents.** [A2A Integration Kit](integrator-kits/a2a/README.md).
+- **I build x402, paymentauth / MPP, ACP, or metered API flows.** [x402](integrator-kits/x402/README.md), [paymentauth](integrator-kits/paymentauth/README.md), [ACP](integrator-kits/acp/README.md); coverage at [`docs/compatibility/commerce-protocol-coverage.md`](docs/compatibility/commerce-protocol-coverage.md).
+- **I operate governed runtimes.** [`@peac/adapter-runtime-governance`](packages/adapters/runtime-governance/) records decisions from managed runtimes (for example Microsoft Agent Governance Toolkit).
+- **I need portable audit evidence.** [Core use-case coverage](docs/compatibility/core-use-case-coverage.md) and [governance mappings](docs/governance/).
+- **I want editor or plugin integration.** Cursor, Codex, Claude Code, VS Code, Continue, Windsurf, and OpenCode under [`surfaces/plugin-pack/`](surfaces/plugin-pack/); canonical [Smithery deployment config](packages/mcp-server/smithery.yaml).
 
-// Return jws in the PEAC-Receipt header
-```
+See [`docs/START_HERE.md`](docs/START_HERE.md) for the full decision tree.
 
-### Run the example
+## Where PEAC fits
 
-```bash
-pnpm install && pnpm build
-pnpm --filter @peac/example-minimal demo
-```
+- **Attach signed records to metered or paid API responses** so consumers can verify what was offered, measured, charged, or delivered.
+- **Carry verifiable receipts across MCP and agent workflows** instead of relying on local execution logs.
+- **Preserve evidence for audit, dispute, and reconciliation** across system and organizational boundaries.
+- **Record governance and control-plane decisions** from managed runtimes such as Microsoft Agent Governance Toolkit.
+- **Map commerce and payment events into verifiable records** across x402, paymentauth ([`draft-ryan-httpauth-payment-01`](https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment-01/); MPP), Agentic Commerce Protocol (ACP), and Stripe SPT.
 
-See [examples/minimal/](examples/minimal/) for the full source. For HTTP/REST, Express middleware, and Go examples, see [docs/README_LONG.md](docs/README_LONG.md).
+## Implementations and surfaces
 
----
+- **TypeScript core** — issuance, verification, CLI, middleware (this repo).
+- **Go SDK** — [`sdks/go/`](sdks/go/) with production HTTP middleware.
+- **MCP tools** — [`packages/mcp-server/`](packages/mcp-server/) evidence tools.
+- **Editor and plugin-pack surfaces** — Cursor, Codex, Claude Code, VS Code, Continue, Windsurf, OpenCode under [`surfaces/plugin-pack/`](surfaces/plugin-pack/); canonical [Smithery config](packages/mcp-server/smithery.yaml).
+- **Express middleware** — [`packages/middleware-express/`](packages/middleware-express/).
+- **Commerce mappings** — [`packages/adapters/x402/`](packages/adapters/x402/) (v1 + v2), [`packages/mappings/paymentauth/`](packages/mappings/paymentauth/) (paymentauth and MPP), [`packages/mappings/acp/`](packages/mappings/acp/) (ACP delegated payment).
+- **Runtime governance** — [`packages/adapters/runtime-governance/`](packages/adapters/runtime-governance/) records from Microsoft Agent Governance Toolkit and other managed runtimes.
+- **Supply-chain mappings** — [`packages/mappings/intoto/`](packages/mappings/intoto/) and [`packages/mappings/slsa/`](packages/mappings/slsa/).
 
-## Common use cases
+Long tail (A2A, gRPC, DID, managed agents, and more): [`docs/README_LONG.md`](docs/README_LONG.md).
 
-PEAC is most useful where logs are not enough: payments, cross-boundary verification, audit, dispute review, and multi-agent workflows.
+## Artifacts
 
-- **Agentic commerce and payments:** Prove what was offered, challenged, paid, or settled across paymentauth, x402, Agentic Commerce Protocol (ACP), Stripe SPT, and other commerce flows. See [paymentauth Kit](integrator-kits/paymentauth/README.md), [ACP Kit](integrator-kits/acp/README.md), [x402 Kit](integrator-kits/x402/README.md).
-- **Audit and dispute review:** Keep signed evidence that survives organizational boundaries, not just local logs. See [Governance Mappings](docs/governance/).
-- **MCP tools and APIs:** Verify, issue, and carry signed receipts for tool calls, API responses, and automated actions. See [MCP Integration Kit](integrator-kits/mcp/README.md).
-- **Agent-to-agent workflows:** Carry verifiable receipts across A2A task/state transitions and multi-agent chains. See [A2A Integration Kit](integrator-kits/a2a/README.md).
-- **Runtime governance:** Record governance decisions from managed runtimes (Microsoft AGT, Claude Managed Agents, OpenAI ACP) as portable signed records. See [`@peac/adapter-runtime-governance`](packages/adapters/runtime-governance/).
-
-## Start here
-
-**[Full decision tree with quickstarts and integration kits](docs/START_HERE.md)**
-
-- **I run an API**: [API Provider Quickstart](docs/guides/quickstart-api-provider.md) (5 minutes, Express middleware)
-- **I run an MCP server**: [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`
-- **I want to verify a receipt**: [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md) (5 minutes)
-- **I build A2A agents**: [A2A Integration Kit](integrator-kits/a2a/README.md)
-
-More paths: [Go SDK](sdks/go/) | [Python examples](examples/python/) | [paymentauth Kit](integrator-kits/paymentauth/README.md) | [ACP Kit](integrator-kits/acp/README.md) | [x402 Kit](integrator-kits/x402/README.md) | [Governance Mappings](docs/governance/)
-
----
-
-## Where it fits
-
-| Existing system                                 | What PEAC adds                                                   |
-| ----------------------------------------------- | ---------------------------------------------------------------- |
-| **Logs**                                        | Portable signed records that survive organizational boundaries   |
-| **OpenTelemetry**                               | Signed records that correlate to traces                          |
-| **MCP / A2A**                                   | Signed receipts carried alongside tool calls and agent exchanges |
-| **AP2 / ACP (Agentic Commerce Protocol) / UCP** | Signed records of terms and outcomes across commerce protocols   |
-| **paymentauth**                                 | Receipts from HTTP Payment authentication challenges             |
-| **x402**                                        | Settlement record mapping with offline verification              |
-| **Stripe SPT / Payment rails**                  | Delegation and settlement references made verifiable             |
-| **Runtime governance (AGT, Claude MA, ACP)**    | Portable records of governance decisions across boundaries       |
-
-**What changes in your stack:** keep auth, keep payments, keep observability. Add `/.well-known/peac.txt` and return `PEAC-Receipt` on governed responses.
-
----
-
-## What the artifacts look like
-
-| Artifact                | Description                                               |
-| ----------------------- | --------------------------------------------------------- |
-| `/.well-known/peac.txt` | Machine-readable terms                                    |
-| `PEAC-Receipt`          | Signed interaction proof in headers or transport metadata |
-| `verifyLocal()`         | Local verification once keys are available                |
-| `peac-bundle/0.1`       | Portable audit/dispute package                            |
-
----
+| Artifact                | Role                                                |
+| ----------------------- | --------------------------------------------------- |
+| `/.well-known/peac.txt` | Machine-readable terms                              |
+| `PEAC-Receipt`          | Signed interaction record on governed responses     |
+| `verifyLocal()`         | Offline verification once issuer keys are available |
+| `peac-bundle/0.1`       | Portable audit/dispute package                      |
 
 ## CLI
 
-> Install: `pnpm add @peac/cli` or run from this repo: `pnpm --filter @peac/cli exec peac --help`.
+Use the CLI to verify receipts, run conformance checks, reconcile bundles, validate policy artifacts, and run installability diagnostics without writing integration code first.
 
 ```bash
-peac verify 'eyJhbGc...'                # Verify a receipt
-peac conformance run                     # Run conformance tests
-peac reconcile a.bundle b.bundle         # Merge and diff evidence bundles
-peac policy init                         # Create peac-policy.yaml
-peac policy validate policy.yaml         # Validate policy syntax
-peac policy generate policy.yaml         # Compile to deployment artifacts
+# One-off
+pnpm dlx @peac/cli verify 'eyJhbGc...'
+
+# Installed in your workspace
+pnpm add -D @peac/cli
+pnpm exec peac verify 'eyJhbGc...'
+
+# From this repo
+pnpm --filter @peac/cli exec peac verify 'eyJhbGc...'
 ```
 
-See [packages/cli/README.md](packages/cli/README.md) for the full command reference.
-
----
-
-## Versioning
-
-- **Current stable:** Interaction Record format (`interaction-record+jwt`)
-- **Legacy:** Wire 0.1 (`peac-receipt/0.1`) is frozen; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION`
-
-See [docs/specs/VERSIONING.md](docs/specs/VERSIONING.md) for the full versioning doctrine.
-
----
+Other commands: `peac conformance run`, `peac reconcile a.bundle b.bundle`, `peac policy init|validate|generate`, `peac doctor`. Full reference: [`packages/cli/README.md`](packages/cli/README.md).
 
 ## Security
 
-- JWS signature verification required before trusting any receipt claim
-- Key discovery via `/.well-known/peac-issuer.json` JWKS with SSRF guards
-- Kernel constraints enforced at issuance and verification (fail-closed)
-- No silent network fallback for offline verification
-- Errors mapped to RFC 9457 Problem Details
+- JWS signature verification required before trusting any receipt claim.
+- Key discovery via `/.well-known/peac-issuer.json` JWKS with SSRF guards.
+- Kernel constraints enforced at issuance and verification (fail-closed).
+- No silent network fallback for offline verification.
+- Errors mapped to RFC 9457 Problem Details.
 
-See [SECURITY.md](.github/SECURITY.md) and [docs/specs/PROTOCOL-BEHAVIOR.md](docs/specs/PROTOCOL-BEHAVIOR.md).
+See [`SECURITY.md`](.github/SECURITY.md), [`docs/specs/PROTOCOL-BEHAVIOR.md`](docs/specs/PROTOCOL-BEHAVIOR.md), [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md), and [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
 
----
+## Versioning
+
+- **Current default format:** `interaction-record+jwt`.
+- **Legacy:** `peac-receipt/0.1` is frozen and legacy-only; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` on legacy input.
+
+Full doctrine: [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
 
 ## Documentation
 
-| Document                                                             | Purpose                                           |
-| -------------------------------------------------------------------- | ------------------------------------------------- |
-| [Spec Index](docs/SPEC_INDEX.md)                                     | Normative specifications                          |
-| [Interaction Record Spec](docs/specs/WIRE-0.2.md)                    | Receipt envelope, kinds, extensions               |
-| [Architecture](docs/ARCHITECTURE.md)                                 | Kernel-first design                               |
-| [Kernel Constraints](docs/specs/KERNEL-CONSTRAINTS.md)               | Structural limits enforced at issue and verify    |
-| [Policy Kit Quickstart](docs/policy-kit/quickstart.md)               | Policy authoring guide                            |
-| [Profiles](docs/profiles/)                                           | Integration profiles (Stripe x402, etc.)          |
-| [Evidence Carrier Contract](docs/specs/EVIDENCE-CARRIER-CONTRACT.md) | Transport-neutral carrier placement rules         |
-| [Developer Guide](docs/README_LONG.md)                               | Package catalog, integration examples, layer maps |
-
----
-
-## Implementations
-
-- **TypeScript** (this repo): issuance, verification, CLI, middleware
-- **Go**: [sdks/go/](sdks/go/) issuance and verification
-- **MCP**: [MCP server](packages/mcp-server/) evidence emission and verification tools
-- **A2A**: [A2A carrier mapping](packages/mappings/a2a/) metadata carrier, OAuth PKCE auth surface
-- **gRPC**: [gRPC transport](packages/transport/grpc/) carrier adapter with HTTP/2 metadata binding
-- **DID**: [DID resolution](packages/adapters/did/) did:key and did:web resolver with caching
-- **Express**: [Express middleware](packages/middleware-express/) receipt middleware
-- **x402**: [x402 adapter](packages/adapters/x402/) payment evidence adapter (V1 + V2)
-- **Runtime governance**: [Runtime governance adapter](packages/adapters/runtime-governance/) records from AGT and other runtimes
-- **Managed agents**: [Managed agents adapter](packages/adapters/managed-agents/) session lifecycle records
-- **Supply chain**: [in-toto](packages/mappings/intoto/) and [SLSA](packages/mappings/slsa/) provenance mappings
-
-Building an implementation? [Open an issue](https://github.com/peacprotocol/peac/issues/new).
-
----
+- [Spec Index](docs/SPEC_INDEX.md) — normative specifications.
+- [Interaction Record Spec](docs/specs/WIRE-0.2.md) — envelope, kinds, extensions.
+- [Architecture](docs/ARCHITECTURE.md) — kernel-first design.
+- [Developer Guide](docs/README_LONG.md) — package catalog, extended examples.
 
 ## Contributing and license
 
-Contributions are welcome. For substantial changes, please open an issue first. See [docs/SPEC_INDEX.md](docs/SPEC_INDEX.md) for normative specifications and [docs/CI_BEHAVIOR.md](docs/CI_BEHAVIOR.md) for CI guidelines.
+Contributions are welcome. For substantial changes, please open an issue first. See [`docs/SPEC_INDEX.md`](docs/SPEC_INDEX.md) for normative specifications.
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0. See [`LICENSE`](LICENSE).
 
 ---
 
-PEAC Protocol is an open source project stewarded by Originary and community contributors.
+PEAC Protocol is an open-source project stewarded by [Originary](https://www.originary.xyz/) and community contributors.
 
-[Docs](https://www.peacprotocol.org) | [GitHub](https://github.com/peacprotocol/peac) | [Originary](https://www.originary.xyz) | [Discussions](https://github.com/peacprotocol/peac/discussions)
+[Docs](https://www.peacprotocol.org) &middot; [GitHub](https://github.com/peacprotocol/peac) &middot; [Discussions](https://github.com/peacprotocol/peac/discussions)
