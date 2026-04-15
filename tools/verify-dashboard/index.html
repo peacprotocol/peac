@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PEAC Verify Dashboard (offline)</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --fg: #e6e8ef;
+        --muted: #7b8399;
+        --accent: #4da3ff;
+        --ok: #3fbf7f;
+        --warn: #d69e2e;
+        --err: #e53e3e;
+        --card: #1b1f2b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      header,
+      main,
+      footer {
+        padding: 20px 28px;
+      }
+      header {
+        border-bottom: 1px solid #232736;
+      }
+      h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      main {
+        flex: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 20px;
+      }
+      @media (max-width: 860px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid #232736;
+        border-radius: 8px;
+        padding: 16px;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      textarea {
+        width: 100%;
+        min-height: 180px;
+        background: #0a0d13;
+        color: var(--fg);
+        border: 1px solid #232736;
+        border-radius: 6px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        padding: 10px;
+      }
+      pre {
+        margin: 0;
+        padding: 12px;
+        background: #0a0d13;
+        border-radius: 6px;
+        overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        max-height: 360px;
+      }
+      .status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .status.ok {
+        background: rgba(63, 191, 127, 0.15);
+        color: var(--ok);
+      }
+      .status.warn {
+        background: rgba(214, 158, 46, 0.15);
+        color: var(--warn);
+      }
+      .status.err {
+        background: rgba(229, 62, 62, 0.15);
+        color: var(--err);
+      }
+      button {
+        background: var(--accent);
+        color: #0a0d13;
+        border: 0;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      footer {
+        border-top: 1px solid #232736;
+        color: var(--muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>PEAC Verify Dashboard <span class="muted">(offline, self-hosted)</span></h1>
+    </header>
+    <main>
+      <section class="card">
+        <label for="receipt">Paste a PEAC Interaction Record (compact JWS)</label>
+        <textarea
+          id="receipt"
+          placeholder="eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QiLCJraWQiOiIuLi4ifQ.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwuLi59.signature"
+          spellcheck="false"
+          autocapitalize="off"
+          autocomplete="off"
+        ></textarea>
+        <div class="row">
+          <button id="inspect">Inspect</button>
+          <span id="mode" class="muted">offline mode; no outbound network</span>
+        </div>
+      </section>
+      <section class="card">
+        <label>Decoded header</label>
+        <pre id="header"></pre>
+        <label style="margin-top: 14px">Decoded payload</label>
+        <pre id="payload"></pre>
+        <label style="margin-top: 14px">Status</label>
+        <div id="status"></div>
+      </section>
+    </main>
+    <footer>
+      Self-hosted single-file viewer. Decodes the JWS structure without verifying the signature.
+      Signature verification requires issuer keys and is intentionally omitted in the default
+      offline mode.
+    </footer>
+    <script>
+      // Offline-only. No fetch calls. Ships in a single HTML file with
+      // no external dependencies. If you want to add signature
+      // verification, bundle @peac/crypto locally and wire it here;
+      // remote JWKS resolution must remain opt-in.
+      function b64urlDecode(s) {
+        const pad = s.length % 4 === 2 ? '==' : s.length % 4 === 3 ? '=' : '';
+        const b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(b64);
+        const bytes = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
+        return new TextDecoder().decode(bytes);
+      }
+      function setStatus(kind, msg) {
+        const el = document.getElementById('status');
+        el.innerHTML = '<span class="status ' + kind + '">' + msg + '</span>';
+      }
+      document.getElementById('inspect').addEventListener('click', () => {
+        const raw = document.getElementById('receipt').value.trim();
+        const parts = raw.split('.');
+        const headerEl = document.getElementById('header');
+        const payloadEl = document.getElementById('payload');
+        headerEl.textContent = '';
+        payloadEl.textContent = '';
+        if (parts.length !== 3) {
+          setStatus(
+            'err',
+            'Expected 3 base64url segments separated by dots; got ' + parts.length + '.'
+          );
+          return;
+        }
+        let header, payload;
+        try {
+          header = JSON.parse(b64urlDecode(parts[0]));
+        } catch (e) {
+          setStatus('err', 'Header did not decode as JSON: ' + e.message);
+          return;
+        }
+        try {
+          payload = JSON.parse(b64urlDecode(parts[1]));
+        } catch (e) {
+          setStatus('err', 'Payload did not decode as JSON: ' + e.message);
+          return;
+        }
+        headerEl.textContent = JSON.stringify(header, null, 2);
+        payloadEl.textContent = JSON.stringify(payload, null, 2);
+        if (header.typ !== 'interaction-record+jwt') {
+          setStatus(
+            'warn',
+            'Decoded OK, but typ is ' +
+              JSON.stringify(header.typ) +
+              '; expected "interaction-record+jwt".'
+          );
+          return;
+        }
+        setStatus('ok', 'Decoded OK. Signature not verified in offline mode.');
+      });
+    </script>
+  </body>
+</html>
