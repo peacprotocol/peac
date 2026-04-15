@@ -106,7 +106,7 @@ commerce events.
 PEAC Protocol owns the neutral evidence layer: mappings, conformance
 fixtures, open-source adapters, the reference verifier
 (self-hostable, tenantless), and distribution surface listings.
-Operator-grade and product-grade surfaces (managed verification, buyer
+Operator-grade and product-grade surfaces (managed verification, integrator
 workflows, enterprise trust center, billing, pilot facilitation) live
 outside this repo and outside this matrix.
 

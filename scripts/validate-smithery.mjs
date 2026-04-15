@@ -91,8 +91,8 @@ if (typeof fnSource === 'string') {
     const result = fn({});
     if (!result || result.command !== 'npx')
       throw new Error(`Expected command=npx, got ${result?.command}`);
-    if (!result.args?.includes('@peac/mcp-server'))
-      throw new Error('args must include @peac/mcp-server');
+    if (!result.args?.some((a) => a === '@peac/mcp-server' || a.startsWith('@peac/mcp-server@')))
+      throw new Error('args must include @peac/mcp-server (pinned or unpinned)');
   });
 
   check('commandFunction evaluates with full config (sandboxed)', () => {

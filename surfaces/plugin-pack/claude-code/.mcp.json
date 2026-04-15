@@ -1,0 +1,11 @@
+{
+  "$comment": "PEAC Protocol MCP server config for Claude Code. Drop this file into your project root (or merge the `mcpServers.peac` entry into an existing `.mcp.json`). Pins an exact version; update on each PEAC release. The same config shape is compatible with Claude Desktop's MCP settings.",
+  "mcpServers": {
+    "peac": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@peac/mcp-server@0.12.11"],
+      "env": {}
+    }
+  }
+}
