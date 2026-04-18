@@ -52,24 +52,24 @@ const RULES = [
     id: 'retired-filename-enterprise-trust-posture',
     pattern: /ENTERPRISE_TRUST_POSTURE/,
     message:
-      'retired filename "ENTERPRISE_TRUST_POSTURE" — use docs/KEY-CUSTODY-AND-TENANCY.md',
+      'retired filename "ENTERPRISE_TRUST_POSTURE" - use docs/KEY-CUSTODY-AND-TENANCY.md',
   },
   {
     id: 'retired-filename-security-posture',
     pattern: /SECURITY_POSTURE\.md/,
     message:
-      'retired filename "SECURITY_POSTURE.md" — use docs/SECURITY-OPERATIONS.md',
+      'retired filename "SECURITY_POSTURE.md" - use docs/SECURITY-OPERATIONS.md',
   },
   {
     id: 'retired-path-trust-center',
     pattern: /trust-center\//,
-    message: 'retired path "trust-center/" — use docs/TRUST-ARTIFACTS.md',
+    message: 'retired path "trust-center/" - use docs/TRUST-ARTIFACTS.md',
   },
   {
     id: 'retired-boundary-what-peac-owns',
     pattern: /\bWhat\s+PEAC\s+owns\b/,
     message:
-      'retired boundary heading "What PEAC owns" — use "What PEAC standardizes"',
+      'retired boundary heading "What PEAC owns" - use "What PEAC standardizes"',
   },
 ];
 
