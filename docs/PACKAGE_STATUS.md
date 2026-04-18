@@ -1,7 +1,6 @@
 # Package and Surface Status
 
-Generated from `REPO_SURFACE_STATUS.json` by `scripts/generate-surface-status.mjs`.
-Do not edit manually.
+Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scripts/generate-surface-status.mjs`.
 
 ## Default (current recommended path)
 

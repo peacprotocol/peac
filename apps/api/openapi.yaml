@@ -1,10 +1,15 @@
-openapi: 3.1.0
+openapi: 3.1.1
 info:
   title: PEAC Hosted Verify API
-  version: 0.12.8
+  version: 0.12.12
   description: >
     Hosted verification service for signed interaction records.
+    Request body is `application/json` carrying a compact JWS in the
+    `receipt` field (JOSE header `typ: interaction-record+jwt`, Wire 0.2).
     Returns deterministic DD-210 verification reports with RFC 9457 errors.
+    The canonical package-level contract is `packages/schema/openapi/verify.yaml`;
+    CI enforces that the shared `/v1/verify` definition does not drift
+    between the two files.
   contact:
     url: https://www.peacprotocol.org
   license:
