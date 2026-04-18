@@ -106,13 +106,13 @@ scan is clean; the scan is the authoritative check.
 Full trust documentation is organized in
 [Trust artifacts](docs/TRUST-ARTIFACTS.md). Pointers:
 
-- [Threat model](docs/THREAT_MODEL.md) — consolidated threat catalog with
+- [Threat model](docs/THREAT_MODEL.md): consolidated threat catalog with
   per-threat test-coverage links.
-- [Stability contract](docs/STABILITY-CONTRACT.md) — classification of
+- [Stability contract](docs/STABILITY-CONTRACT.md): classification of
   every public surface.
 - [SLO](docs/SLO.md) and [Benchmark methodology](docs/BENCHMARK-METHODOLOGY.md).
-- [Security operations](docs/SECURITY-OPERATIONS.md) — operational detail.
-- [Key custody and tenancy](docs/KEY-CUSTODY-AND-TENANCY.md) — key
+- [Security operations](docs/SECURITY-OPERATIONS.md): operational detail.
+- [Key custody and tenancy](docs/KEY-CUSTODY-AND-TENANCY.md): key
   custody, tenancy, procurement.
 - [Security considerations spec](docs/specs/SECURITY-CONSIDERATIONS.md).
 - [Verifier security model spec](docs/specs/VERIFIER-SECURITY-MODEL.md).
@@ -141,7 +141,7 @@ one:
 
 Each rule above becomes a named threat ID with a concrete test file when
 the corresponding surface is implemented. Details in
-[Threat model — future carrier surfaces](docs/THREAT_MODEL.md#future-carrier-surfaces-pre-doctrine).
+[Threat model: future carrier surfaces](docs/THREAT_MODEL.md#future-carrier-surfaces-pre-doctrine).
 
 ## Contacts
 

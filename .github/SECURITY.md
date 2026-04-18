@@ -26,7 +26,7 @@ trust-artifact index are documented in the canonical
 
 ## Supported versions
 
-See [`SECURITY.md` — Supported versions](../SECURITY.md#supported-versions)
+See [`SECURITY.md`: Supported versions](../SECURITY.md#supported-versions)
 for the authoritative list.
 
 ## Trust artifacts

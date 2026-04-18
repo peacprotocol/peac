@@ -168,5 +168,5 @@ The `@peac/protocol` test suite covers the three-state policy-binding result; th
 - [`docs/governance/`](../governance/) — mapping from PEAC record fields to EU AI Act Annex IV, NIST AI RMF, and ISO 42001 Clause 8 controls. Formal mapping docs publish in a near-term release; the directory is the forward link.
 - [`docs/specs/EVIDENCE-CARRIER-CONTRACT.md`](../specs/EVIDENCE-CARRIER-CONTRACT.md) — bundle format and carrier contracts.
 - [`docs/specs/PROTOCOL-BEHAVIOR.md`](../specs/PROTOCOL-BEHAVIOR.md) — normative policy-binding three-state result.
-- [`docs/KEY-CUSTODY-AND-TENANCY.md`](../KEY-CUSTODY-AND-TENANCY.md) — key custody, tenancy, and procurement detail.
+- [`docs/KEY-CUSTODY-AND-TENANCY.md`](../KEY-CUSTODY-AND-TENANCY.md): key custody, tenancy, and procurement detail.
 - [`packages/cli/`](../../packages/cli/) — `peac reconcile`, `peac policy`, `peac conformance run`.

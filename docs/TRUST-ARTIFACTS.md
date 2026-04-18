@@ -7,36 +7,36 @@ the documentation can link here.
 
 ## Engineering trust
 
-- [SLO](SLO.md) — operator-facing service-level objectives with
+- [SLO](SLO.md): operator-facing service-level objectives with
   versioned baseline stamps.
-- [Benchmark methodology](BENCHMARK-METHODOLOGY.md) — machine profile,
+- [Benchmark methodology](BENCHMARK-METHODOLOGY.md): machine profile,
   fixture set, measurement protocol, and reproduction commands.
-- [Stability contract](STABILITY-CONTRACT.md) — every public surface
+- [Stability contract](STABILITY-CONTRACT.md): every public surface
   classified `stable`, `experimental`, `deprecated`, or `internal-only`.
-- [Threat model](THREAT_MODEL.md) — consolidated threat catalog with
+- [Threat model](THREAT_MODEL.md): consolidated threat catalog with
   per-threat test-coverage links.
 
 ## Disclosure and supply chain
 
-- [SECURITY.md](../SECURITY.md) — coordinated disclosure contact,
+- [SECURITY.md](../SECURITY.md): coordinated disclosure contact,
   supported versions, supply-chain controls, external review cadence.
-- [Security operations](SECURITY-OPERATIONS.md) — support windows, runtime
+- [Security operations](SECURITY-OPERATIONS.md): support windows, runtime
   support, incident handling SLAs, supply-chain provenance, logging
   boundaries, tenant isolation, data residency.
-- [Key custody and tenancy](KEY-CUSTODY-AND-TENANCY.md) — key
+- [Key custody and tenancy](KEY-CUSTODY-AND-TENANCY.md): key
   custody, tenancy, procurement, stewardship.
 
 ## Architecture and deep detail
 
-- [Architecture](ARCHITECTURE.md) — package layering and dependency
+- [Architecture](ARCHITECTURE.md): package layering and dependency
   direction.
-- [Reference architectures](REFERENCE_ARCHITECTURES.md) — topology and
+- [Reference architectures](REFERENCE_ARCHITECTURES.md): topology and
   integration-flow patterns.
-- [Security considerations spec](specs/SECURITY-CONSIDERATIONS.md) —
+- [Security considerations spec](specs/SECURITY-CONSIDERATIONS.md):
   signing model, JOSE hardening, SSRF prevention, key lifecycle.
-- [Verifier security model spec](specs/VERIFIER-SECURITY-MODEL.md) —
+- [Verifier security model spec](specs/VERIFIER-SECURITY-MODEL.md):
   verification modes, size limits, error categories.
-- [HTTP transport security](security/HTTP-TRANSPORT-SECURITY.md) — MCP
+- [HTTP transport security](security/HTTP-TRANSPORT-SECURITY.md): MCP
   server deployment checklist.
 - [OWASP ASI mapping](security/OWASP-ASI-MAPPING.md).
 
@@ -74,11 +74,11 @@ verifier** unless a row is explicitly scoped to Hosted Verify.
 
 ## Compatibility
 
-- [Compatibility matrix](COMPATIBILITY_MATRIX.md) — runtime,
+- [Compatibility matrix](COMPATIBILITY_MATRIX.md): runtime,
   wire-format, and deprecation compatibility.
-- [Deprecation policy](DEPRECATION_POLICY.md) — support windows and
+- [Deprecation policy](DEPRECATION_POLICY.md): support windows and
   archive protocol.
-- [Compatibility docs by protocol](compatibility/) — commerce,
+- [Compatibility docs by protocol](compatibility/): commerce,
   runtime, A2A, MCP, Copilot, Go middleware.
 
 ## Forward-looking

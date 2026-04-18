@@ -71,6 +71,22 @@ const RULES = [
     message:
       'retired boundary heading "What PEAC owns" - use "What PEAC standardizes"',
   },
+  {
+    id: 'retired-label-enterprise-trust-posture',
+    pattern: /\bEnterprise\s+Trust\s+Posture\b/,
+    message:
+      'retired label "Enterprise Trust Posture" - use "Key custody and tenancy"',
+  },
+  {
+    id: 'retired-label-security-posture',
+    pattern: /\bSecurity\s+Posture\b/,
+    message: 'retired label "Security Posture" - use "Security operations"',
+  },
+  {
+    id: 'retired-label-trust-center',
+    pattern: /\bTrust\s+center\b/,
+    message: 'retired label "Trust center" - use "Trust artifacts"',
+  },
 ];
 
 // ---------------------------------------------------------------------------
