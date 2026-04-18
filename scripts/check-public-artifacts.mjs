@@ -34,6 +34,8 @@ const BUILTIN_PATTERNS = [
   /reference\/.*_LOCAL\./i,
   /[\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/, // hidden/bidi Unicode
   /MEMORY\.md/,
+  // Retired category tagline; never valid on any tracked artifact.
+  /cryptographic receipts for agentic commerce/i,
 ];
 
 /**

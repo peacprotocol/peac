@@ -1,10 +1,14 @@
-openapi: 3.1.0
+openapi: 3.1.1
 info:
   title: PEAC Hosted Verify API
-  version: 0.12.8
+  version: 0.12.12
   description: >
     Hosted verification service for signed interaction records.
     Returns deterministic DD-210 verification reports with RFC 9457 errors.
+    The canonical request body carries a compact JWS with `typ: interaction-record+jwt`
+    (Wire 0.2). The legacy `POST /verify` endpoint is retained for compatibility
+    and carries RFC 9745 `Deprecation` and RFC 8594 `Sunset` response headers;
+    it is scheduled for removal no earlier than 2026-11-01.
   contact:
     url: https://www.peacprotocol.org
   license:

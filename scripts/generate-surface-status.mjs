@@ -104,6 +104,32 @@ function generatePackageStatus() {
     lines.push('');
   }
 
+  // Package census
+  lines.push('## Package census', '');
+  lines.push(
+    'Each workspace surface carries a `target_state` field in `REPO_SURFACE_STATUS.json`. The census is published here as the current target-state baseline; values may be revised in a future release. Target-state definitions:',
+    '',
+  );
+  if (status.target_states) {
+    lines.push('| target_state | Meaning |');
+    lines.push('|--------------|---------|');
+    for (const [key, meaning] of Object.entries(status.target_states)) {
+      lines.push(`| \`${key}\` | ${meaning} |`);
+    }
+    lines.push('');
+  }
+  lines.push('| Package | npm | State | target_state |');
+  lines.push('|---------|-----|-------|--------------|');
+  const allSurfaces = Object.entries(surfaces)
+    .map(([path, info]) => ({ path, ...info }))
+    .sort((a, b) => a.path.localeCompare(b.path));
+  for (const s of allSurfaces) {
+    const npm = s.npm ? `\`${s.npm}\`` : '-';
+    const target = s.target_state ? `\`${s.target_state}\`` : '-';
+    lines.push(`| \`${s.path}\` | ${npm} | ${s.state} | ${target} |`);
+  }
+  lines.push('');
+
   return lines.join('\n') + '\n';
 }
 

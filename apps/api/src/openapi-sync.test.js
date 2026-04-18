@@ -18,8 +18,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 describe('openapi-sync', () => {
   const spec = parseYaml(readFileSync(join(__dirname, '..', 'openapi.yaml'), 'utf-8'));
 
-  test('declares OpenAPI 3.1.0', () => {
-    assert.strictEqual(spec.openapi, '3.1.0');
+  test('declares OpenAPI 3.1.1', () => {
+    assert.strictEqual(spec.openapi, '3.1.1');
   });
 
   test('POST /v1/verify path exists with operationId', () => {
