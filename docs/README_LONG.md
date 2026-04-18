@@ -1,5 +1,7 @@
 # PEAC Protocol Developer Guide
 
+> **Deep reference for package authors and integrators.** If you are new to PEAC, start at [`docs/START_HERE.md`](START_HERE.md) for the role-based job selector, then see [`docs/HOW-IT-WORKS.md`](HOW-IT-WORKS.md), [`docs/ARTIFACTS.md`](ARTIFACTS.md), [`docs/WHERE-IT-FITS.md`](WHERE-IT-FITS.md), and [`docs/WHAT-PEAC-STANDARDIZES.md`](WHAT-PEAC-STANDARDIZES.md) for the operator mental model. Outcome-led recipes under [`docs/SOLUTIONS/`](SOLUTIONS/). This document is a full package catalog and protocol-surface tour for contributors who need the long-tail detail.
+
 Integration examples, package catalog, protocol surfaces, and repo navigation. For a concise overview, see the [main README](../README.md).
 
 ---

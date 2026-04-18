@@ -1,0 +1,28 @@
+# Cloudflare Worker deployment for the PEAC reference verifier.
+#
+# This is a minimal Worker that proxies /v1/verify to an offline verification
+# path using `@peac/protocol.verifyLocal()`. It accepts a compact JWS plus a
+# base64url-encoded Ed25519 public key, verifies offline, and returns the
+# deterministic DD-210 report on success or an RFC 9457 Problem Details
+# response on failure.
+#
+# Deploy:
+#   npx wrangler deploy
+#
+# Notes:
+# - SSRF-safe issuer discovery and JWKS resolution are not exercised in this
+#   Worker path; callers must supply the verification key. For live JWKS
+#   resolution use the full reference-verifier image (Dockerfile / compose).
+# - The Worker relies on the Web Fetch API and the WebCrypto signature
+#   primitives used by `@peac/crypto` on the edge.
+
+name = "peac-reference-verifier"
+main = "worker.ts"
+compatibility_date = "2025-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[limits]
+cpu_ms = 50
