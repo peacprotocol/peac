@@ -2,6 +2,20 @@
 
 This guide covers migration paths for current PEAC Protocol surfaces.
 
+## Documentation reorganization (v0.12.12)
+
+The documentation surface has been reorganized around five new operator-facing docs and a curated solutions library. If you previously linked to sections of the monolithic developer guide, the following map applies:
+
+- The **role-based entry point** is now [`docs/START_HERE.md`](START_HERE.md). It is the single top-level job selector; the README points to it first.
+- **How PEAC works** (the publish / issue / verify / share loop and the distinction between the compact JWS `receipt`, the JOSE `typ`, and the HTTP body) is now at [`docs/HOW-IT-WORKS.md`](HOW-IT-WORKS.md).
+- **The artifact taxonomy** (record, receipt, evidence, bundle, report) is now at [`docs/ARTIFACTS.md`](ARTIFACTS.md). These nouns each have one specific meaning; mixing them up loses information.
+- **Where PEAC sits next to adjacent systems** (logs / traces / OpenTelemetry, runtime governance, payment rails, identity, native runtime attestations) is now at [`docs/WHERE-IT-FITS.md`](WHERE-IT-FITS.md).
+- **Protocol scope and boundary** are summarized at [`docs/WHAT-PEAC-STANDARDIZES.md`](WHAT-PEAC-STANDARDIZES.md).
+- **Outcome-led recipes** live under [`docs/SOLUTIONS/`](SOLUTIONS/): runtime evidence export, API receipt issuance, MCP tool-call receipts, commerce evidence bundle, and regulatory audit trail.
+- **Self-host deployment recipes** for the reference verifier live under [`surfaces/reference-verifier/`](../surfaces/reference-verifier/): Dockerfile, docker-compose, a Cloudflare Worker variant, and a smoke script.
+
+The long-form developer guide at [`docs/README_LONG.md`](README_LONG.md) is retained as the deep package catalog for contributors. It is no longer the recommended starting point for first-time readers.
+
 ## From Wire 0.1 to Wire 0.2
 
 Wire 0.1 (`peac-receipt/0.1`) is frozen legacy. Wire 0.2 (`interaction-record+jwt`) is the current stable format.

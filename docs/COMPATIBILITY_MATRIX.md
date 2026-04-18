@@ -89,11 +89,11 @@ No Layer 4 surface in v0.12.12 is `live-upstream-tested`: no CI step exercises a
 
 Each tag below points at the conformance vectors and test paths that justify the classification in the row above.
 
-- **[e1]** Per-mapper conformance vectors under [`specs/conformance/`](../specs/conformance/) and package `__tests__` suites. Exercised under `pnpm test`; no network.
-- **[e2]** [`specs/conformance/runtime-governance/`](../specs/conformance/runtime-governance/) (RTGOV-001..RTGOV-007, Section 27) plus `packages/adapters/runtime-governance/__tests__/`.
-- **[e3]** [`specs/conformance/managed-agents/`](../specs/conformance/managed-agents/) event-family vectors plus `packages/adapters/managed-agents/__tests__/`.
-- **[e4]** Commerce evidence vectors for ACP / MPP / x402 under [`specs/conformance/commerce/`](../specs/conformance/commerce/) (Section 26) plus per-mapper `__tests__/` suites; the `assertExplicitFinality` boundary is asserted in `packages/adapters/core/__tests__/`.
-- **[e5]** Type-definition coverage only: TypeScript declaration file(s) in the package `src/` compile under the workspace typecheck. No runtime assertion exists beyond the declaration shape.
+- **[e1]** Conformance fixtures under [`specs/conformance/fixtures/`](../specs/conformance/fixtures/) (per-surface subdirectories: `interaction/`, `carrier/`, `carrier-boundary/`, `content-usage/`, `discovery/`, `x402/`, `paymentauth/`, `acp/`, `ucp/`, `stripe/`, `attribution/`, `purpose/`, `obligations/`, `policy/`, `workflow/`) plus each package's `tests/` suite. Exercised under `pnpm test`; no network.
+- **[e2]** RTGOV-001..RTGOV-007 requirement IDs declared in [`specs/conformance/requirement-ids.json`](../specs/conformance/requirement-ids.json) (Section 27) plus [`packages/adapters/runtime-governance/tests/`](../packages/adapters/runtime-governance/tests/) (families, fixtures, guards, issue, mappers).
+- **[e3]** [`packages/adapters/managed-agents/tests/`](../packages/adapters/managed-agents/tests/) covering event families, issue-event, and session-summary, built on upstream-event fixtures checked into that package's test tree.
+- **[e4]** Commerce evidence vectors C-001..C-010 under [`specs/conformance/commerce/`](../specs/conformance/commerce/) plus per-mapper test suites at [`packages/adapters/x402/tests/`](../packages/adapters/x402/tests/), [`packages/mappings/acp/tests/`](../packages/mappings/acp/tests/), and [`packages/mappings/paymentauth/tests/`](../packages/mappings/paymentauth/tests/). The `assertExplicitFinality` boundary is asserted in [`packages/adapters/core/tests/finality.test.ts`](../packages/adapters/core/tests/finality.test.ts) and [`packages/adapters/core/tests/finality-fixtures.test.ts`](../packages/adapters/core/tests/finality-fixtures.test.ts).
+- **[e5]** Type-definition coverage only: TypeScript declaration file(s) in the package `src/` compile under the workspace typecheck (`pnpm typecheck:core`). No runtime assertion exists beyond the declaration shape.
 
 ## Performance Targets
 

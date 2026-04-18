@@ -43,5 +43,5 @@
 
 - **TypeScript/Node.js** is the canonical OSS implementation path
 - **Go** receives minimum viable Wire 0.2 parity next
-- **Hosted Verify and Hosted Issue** serve as the language-agnostic front door via OpenAPI
+- **Hosted Verify and Hosted Issue** serve as the language-agnostic entry point via OpenAPI
 - **Python** receives API-first support before any full SDK commitment

@@ -1,0 +1,43 @@
+# Local development compose file for the PEAC reference verifier.
+#
+# From this directory:
+#   docker compose up -d
+#   curl -s http://localhost:3000/health
+#
+# Bring the stack down:
+#   docker compose down
+
+services:
+  reference-verifier:
+    build:
+      context: ../..
+      dockerfile: surfaces/reference-verifier/Dockerfile
+    image: peac-reference-verifier:local
+    container_name: peac-reference-verifier
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      # Set to 'false' to harden the local environment by disabling the BYO-key
+      # hosted-issue endpoint. The reference verifier ships with it disabled
+      # by default; this makes the posture explicit for operators who read
+      # this file.
+      PEAC_HOSTED_ISSUE: 'false'
+      # Leave unset to reject private / loopback / reserved network ranges in
+      # issuer discovery and JWKS fetches. Set to 'true' only for local
+      # development where the issuer you are verifying runs on loopback.
+      # PEAC_ALLOW_PRIVATE_NET: 'false'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
