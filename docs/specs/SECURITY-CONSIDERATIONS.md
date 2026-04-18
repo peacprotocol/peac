@@ -156,21 +156,8 @@ PEAC receipts follow a hash-first design (DD-138):
 
 ## 9. Threat Model Summary
 
-The MCP server threat model (`reference/THREAT_MODEL_MCP.md`) identifies 10
-threats (T1-T10) with 9 security invariants:
-
-| Threat                   | Control                             | Design Decision |
-| ------------------------ | ----------------------------------- | --------------- |
-| T1: Key exfiltration     | No ambient key discovery            | DD-52           |
-| T2: Policy tampering     | Static policy, immutable at runtime | DD-53           |
-| T3: SSRF via receipt URL | No implicit fetch                   | DD-55           |
-| T4: Transport confusion  | Handler-transport separation        | DD-51           |
-| T5: Replay attack        | Unique jti, cache guidance          | Spec sec. 20    |
-| T6: Algorithm confusion  | Ed25519 only, no negotiation        | DD-156          |
-| T7: Key injection        | Reject embedded keys in JWS         | DD-156          |
-| T8: Oversized payload    | JWS size cap, transport limits      | DD-124-131      |
-| T9: Session confusion    | Per-client McpServer isolation      | DD-119          |
-| T10: Stdin/stdout leak   | Line-buffered stdout fence          | DD-58           |
-
-For the complete threat model, mitigations, and test references, see
-`reference/THREAT_MODEL_MCP.md`.
+For the consolidated threat catalog covering the wire format, signature
+verification, JWKS resolution, the reference verifier, the MCP server, the
+commerce mapper boundary, and cross-language parity, with per-threat
+mitigations and test-coverage links, see the
+[Threat model](../THREAT_MODEL.md).

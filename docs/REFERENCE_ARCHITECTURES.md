@@ -160,5 +160,5 @@ All three patterns support fully offline verification. Once a verifier has the i
 - [Architecture](ARCHITECTURE.md): Package layering, dependency DAG
 - [Protocol Behavior](specs/PROTOCOL-BEHAVIOR.md): Normative issuance and verification flows
 - [Evidence Carrier Contract](specs/EVIDENCE-CARRIER-CONTRACT.md): Transport-neutral carrier interface
-- [Enterprise Trust Posture](ENTERPRISE_TRUST_POSTURE.md): Key custody, tenancy, procurement
-- [Security Posture](SECURITY_POSTURE.md): Support windows, provenance, logging
+- [Key custody and tenancy](KEY-CUSTODY-AND-TENANCY.md): Key custody, tenancy, procurement
+- [Security operations](SECURITY-OPERATIONS.md): Support windows, provenance, logging

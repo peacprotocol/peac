@@ -313,27 +313,11 @@ interface PaymentEvidence {
 
 ## Security Model
 
-### Signature
+Signature envelope: Ed25519 (RFC 8032) over JWS Compact Serialization (RFC 7515). Key discovery follows `/.well-known/peac-issuer.json` → `jwks_uri` → JWKS.
 
-- Algorithm: Ed25519 (EdDSA with Curve25519)
-- Format: JWS Compact Serialization (RFC 7515)
-- Key discovery: `/.well-known/peac-issuer.json` -> `jwks_uri` -> JWKS
+Verification: parse JWS, resolve the issuer's JWKS via SSRF-safe fetch, verify the signature against the public key identified by `kid`, validate claims and kernel constraints, and evaluate extension-group structure.
 
-### Verification
-
-1. Parse JWS and extract header/payload
-2. Fetch issuer's `peac-issuer.json`, resolve `jwks_uri`, fetch JWKS (all SSRF-safe)
-3. Verify signature against public key identified by `kid`
-4. Validate claims (iss, aud, exp, iat)
-5. Validate payment evidence structure
-
-### Defense in Depth
-
-- SSRF protection on all URL fetches (v0.9.16)
-- DPoP proof-of-possession binding (v0.9.16)
-- JWKS rotation with 90-day key lifecycle
-- Rate limiting on verification endpoints
-- RFC 9457 Problem Details for all errors
+Full threat catalog, mitigations, and per-threat test links live in [Threat model](THREAT_MODEL.md). Cryptographic and JOSE-hardening detail lives in [Security considerations](specs/SECURITY-CONSIDERATIONS.md). Verifier modes, size limits, and error categories live in [Verifier security model](specs/VERIFIER-SECURITY-MODEL.md). Operational controls and supply-chain detail live in [Security operations](SECURITY-OPERATIONS.md) and [SECURITY.md](../SECURITY.md). The full index is [Trust artifacts](TRUST-ARTIFACTS.md).
 
 ---
 

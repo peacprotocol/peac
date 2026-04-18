@@ -1,8 +1,10 @@
-# Enterprise Trust Posture
+# Key custody and tenancy
 
-> Version: 0.12.7 | Status: Current
+> Version: 0.12.12 | Status: Current
 
-This document describes the trust model, key custody architecture, tenancy guarantees, and procurement posture for organizations evaluating or deploying the PEAC Protocol.
+This document describes the key custody architecture, tenancy guarantees, and procurement model for organizations evaluating or deploying the PEAC Protocol.
+
+For the full index of trust artifacts (SLO, stability contract, threat model, security operations), see [Trust artifacts](TRUST-ARTIFACTS.md).
 
 ## Key Custody Model
 
@@ -41,7 +43,7 @@ The Hosted Verify API uses per-API-key tenant isolation:
 
 Cross-tenant data leakage is prevented by design: each API key resolves to an isolated verification context with no shared mutable state. See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the full API design.
 
-## Procurement Posture
+## Procurement
 
 ### License
 
@@ -74,6 +76,12 @@ Core packages (`@peac/kernel`, `@peac/schema`, `@peac/crypto`, `@peac/protocol`)
 
 ## Related Documents
 
+- [Trust artifacts](TRUST-ARTIFACTS.md): Single index over every trust artifact
+- [SECURITY.md](../SECURITY.md): Vulnerability reporting, supported versions, supply chain
+- [Security operations](SECURITY-OPERATIONS.md): Support windows, incident handling, logging, data residency
+- [Threat model](THREAT_MODEL.md): Consolidated threat catalog with per-threat test coverage
+- [Stability contract](STABILITY-CONTRACT.md): Classification of every public surface
+- [SLO](SLO.md) and [Benchmark methodology](BENCHMARK-METHODOLOGY.md)
 - [Architecture](ARCHITECTURE.md): Package layering, dependency DAG, wire formats
 - [Security Considerations](specs/SECURITY-CONSIDERATIONS.md): Signing model, JOSE hardening, key lifecycle
 - [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md): API design, tenant isolation, threat mitigations

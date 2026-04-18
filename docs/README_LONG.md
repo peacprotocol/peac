@@ -455,7 +455,7 @@ Normative spec: [WORKFLOW-CORRELATION.md](specs/WORKFLOW-CORRELATION.md). Exampl
 - Kernel constraints enforced at issuance and verification (fail-closed)
 - No silent network fallback for offline verification
 
-See [SECURITY.md](../.github/SECURITY.md), [PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md), and [HTTP-TRANSPORT-SECURITY.md](security/HTTP-TRANSPORT-SECURITY.md).
+See [SECURITY.md](../SECURITY.md), [Trust artifacts](TRUST-ARTIFACTS.md), [PROTOCOL-BEHAVIOR.md](specs/PROTOCOL-BEHAVIOR.md), and [HTTP-TRANSPORT-SECURITY.md](security/HTTP-TRANSPORT-SECURITY.md).
 
 ---
 

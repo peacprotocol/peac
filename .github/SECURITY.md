@@ -1,127 +1,38 @@
 # Security Policy
 
-## Supported Versions
+This file mirrors the GitHub-facing entry points for security disclosure.
+The canonical security policy lives at [`SECURITY.md`](../SECURITY.md) in
+the repository root.
 
-Currently supported versions for security updates:
+## Reporting a vulnerability
 
-| Version   | Supported          |
-| --------- | ------------------ |
-| >= 0.12.7 | :white_check_mark: |
-| < 0.12.7  | :x:                |
+1. Do not open a public issue.
+2. Email [security@peacprotocol.org](mailto:security@peacprotocol.org) or
+   open a private advisory at
+   <https://github.com/peacprotocol/peac/security/advisories>.
+3. Include affected versions, reproducer, observed versus expected
+   behavior, and your impact assessment.
 
-## Reporting a Vulnerability
+Acknowledgement targets:
 
-We take security vulnerabilities seriously. If you discover a security issue, please follow these steps:
+- Critical: 48 hours.
+- High: 72 hours.
+- Medium: 7 days.
+- Low: 14 days.
 
-1. **DO NOT** open a public issue
-2. Email security@peacprotocol.org with:
-   - Description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if available)
+Patch-and-disclosure timelines, supply-chain attestations, and the full
+trust-artifact index are documented in the canonical
+[`SECURITY.md`](../SECURITY.md).
 
-3. We will acknowledge receipt within 48 hours
-4. We will investigate and provide updates within 7 days
-5. We will coordinate disclosure timing with you
+## Supported versions
 
-## Security Measures
+See [`SECURITY.md` — Supported versions](../SECURITY.md#supported-versions)
+for the authoritative list.
 
-### Cryptographic Security
+## Trust artifacts
 
-- EdDSA (Ed25519) signatures (RFC 8032)
-- JWS Compact Serialization
-- Key rotation support via JWKS `kid` matching
-- Hardware security module support
-
-### Input Validation
-
-- Strict JSON schema validation
-- SSRF protection on all external calls
-- Rate limiting with token buckets
-- Request size limits enforced
-
-### Operational Security
-
-- No secrets in code or commits
-- Environment-based configuration
-- Audit logging for security events
-- Automated vulnerability scanning
-
-## Security Checklist for Contributors
-
-Before submitting code:
-
-- [ ] No hardcoded secrets or credentials
-- [ ] All user input validated
-- [ ] External URLs validated against SSRF
-- [ ] Rate limiting considered
-- [ ] Error messages don't leak sensitive info
-- [ ] Dependencies audited (`pnpm audit`)
-- [ ] Security tests written for new features
-
-## Dependency Audit Policy
-
-CI runs `scripts/audit-gate.mjs` which enforces a two-tier policy:
-
-- **Critical** vulnerabilities always block merges
-- **High** vulnerabilities warn by default; block in strict mode (`AUDIT_STRICT=1`)
-- **Moderate/Low** are logged but never block
-
-### Advisory Allowlist
-
-Temporary exceptions are tracked in `security/audit-allowlist.json`. Each entry requires:
-
-| Field         | Required | Description                                        |
-| ------------- | -------- | -------------------------------------------------- |
-| `advisory_id` | Yes      | GHSA or advisory identifier                        |
-| `reason`      | Yes      | Why this is temporarily acceptable                 |
-| `expires_at`  | Yes      | ISO 8601 date (YYYY-MM-DD), max 90 days from today |
-| `remediation` | Yes      | Planned fix (version bump, patch, replacement)     |
-| `issue_url`   | Yes      | Link to tracking issue                             |
-
-**Rules:**
-
-- Maximum allowlist expiry window: **90 days**
-- Expired entries are ignored (advisory becomes blocking again)
-- Malformed or incomplete entries fail closed (not allowlisted)
-- Every allowlist entry MUST have a tracking issue with a remediation plan
-- In strict mode (`AUDIT_STRICT=1`): expired or invalid entries cause build failure (prevents allowlist fossilization)
-
-## Known Security Considerations
-
-### SSRF Protection
-
-All crawler and verification endpoints implement SSRF guards:
-
-- Private IP range blocking
-- DNS rebinding protection
-- Redirect limit enforcement
-- Timeout controls
-
-### DoS Prevention
-
-- Token bucket rate limiting
-- Request size limits
-- Computation timeouts
-- Circuit breakers for external services
-
-### Data Privacy
-
-- No PII in logs
-- Structured telemetry with privacy controls
-- GDPR-compliant data handling
-- Configurable retention policies
-
-## Compliance
-
-The PEAC Protocol aims to comply with:
-
-- OWASP API Security Top 10
-- NIST Cybersecurity Framework
-- EU GDPR requirements
-- California CCPA requirements
-
-## Contact
-
-- Security issues: security@peacprotocol.org
-- General inquiries: contact@peacprotocol.org
+- [Threat model](../docs/THREAT_MODEL.md).
+- [Stability contract](../docs/STABILITY-CONTRACT.md).
+- [SLO](../docs/SLO.md).
+- [Security operations](../docs/SECURITY-OPERATIONS.md).
+- [Trust artifacts](../docs/TRUST-ARTIFACTS.md).

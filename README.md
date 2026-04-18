@@ -124,7 +124,7 @@ PEAC is the records layer beneath runtime governance. PEAC records what another 
 - No silent network fallback for offline verification.
 - Errors mapped to RFC 9457 Problem Details.
 
-See [`SECURITY.md`](.github/SECURITY.md), [`docs/specs/PROTOCOL-BEHAVIOR.md`](docs/specs/PROTOCOL-BEHAVIOR.md), [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md), and [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
+See [`SECURITY.md`](SECURITY.md), [`docs/TRUST-ARTIFACTS.md`](docs/TRUST-ARTIFACTS.md), [`docs/specs/PROTOCOL-BEHAVIOR.md`](docs/specs/PROTOCOL-BEHAVIOR.md), [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md), and [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
 
 ## Versioning
 
