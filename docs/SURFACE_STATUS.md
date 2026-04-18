@@ -1,9 +1,8 @@
 # Surface Status by Layer
 
-Generated from `REPO_SURFACE_STATUS.json` by `scripts/generate-surface-status.mjs`.
-Do not edit manually.
+Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scripts/generate-surface-status.mjs`.
 
-**Version:** 0.12.9 | **Updated:** 2026-04-15
+**Version:** 0.12.12 | **Updated:** 2026-04-18
 
 ## Layer 1
 

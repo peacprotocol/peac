@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Generate docs/PACKAGE_STATUS.md and docs/SURFACE_STATUS.md
- * from REPO_SURFACE_STATUS.json.
+ * Builds docs/PACKAGE_STATUS.md and docs/SURFACE_STATUS.md from
+ * REPO_SURFACE_STATUS.json. These two docs are projections of the
+ * machine-readable source; edit the JSON and rebuild.
  *
  * Usage: node scripts/generate-surface-status.mjs
  *        node scripts/generate-surface-status.mjs --check  (verify, no write)
@@ -33,8 +34,7 @@ function generatePackageStatus() {
   const lines = [
     '# Package and Surface Status',
     '',
-    'Generated from `REPO_SURFACE_STATUS.json` by `scripts/generate-surface-status.mjs`.',
-    'Do not edit manually.',
+    'Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scripts/generate-surface-status.mjs`.',
     '',
   ];
 
@@ -120,8 +120,7 @@ function generateSurfaceStatus() {
   const lines = [
     '# Surface Status by Layer',
     '',
-    'Generated from `REPO_SURFACE_STATUS.json` by `scripts/generate-surface-status.mjs`.',
-    'Do not edit manually.',
+    'Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scripts/generate-surface-status.mjs`.',
     '',
     `**Version:** ${status.version} | **Updated:** ${status.updated}`,
     '',
@@ -202,5 +201,5 @@ if (checkMode) {
 
 writeFileSync(packageStatusPath, packageStatusContent);
 writeFileSync(surfaceStatusPath, surfaceStatusContent);
-console.log('Generated docs/PACKAGE_STATUS.md');
-console.log('Generated docs/SURFACE_STATUS.md');
+console.log('Wrote docs/PACKAGE_STATUS.md');
+console.log('Wrote docs/SURFACE_STATUS.md');
