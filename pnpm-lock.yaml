@@ -16,6 +16,7 @@ overrides:
   yaml: 2.8.3
   '@hono/node-server': '>=1.19.13'
   hono: '>=4.12.12'
+  protobufjs: '>=8.0.1'
 
 importers:
 
@@ -5038,7 +5039,7 @@ packages:
       '@opentelemetry/sdk-logs': 0.212.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-metrics': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.5.1(@opentelemetry/api@1.9.0)
-      protobufjs: 8.0.0
+      protobufjs: 8.0.1
     dev: false
 
   /@opentelemetry/resources@2.5.1(@opentelemetry/api@1.9.0):
@@ -9628,8 +9629,8 @@ packages:
       sisteransi: 1.0.5
     dev: true
 
-  /protobufjs@8.0.0:
-    resolution: {integrity: sha512-jx6+sE9h/UryaCZhsJWbJtTEy47yXoGNYI4z8ZaRncM0zBKeRqjO2JEcOUYwrYGb1WLhXM1FfMzW3annvFv0rw==}
+  /protobufjs@8.0.1:
+    resolution: {integrity: sha512-NWWCCscLjs+cOKF/s/XVNFRW7Yih0fdH+9brffR5NZCy8k42yRdl5KlWKMVXuI1vfCoy4o1z80XR/W/QUb3V3w==}
     engines: {node: '>=12.0.0'}
     requiresBuild: true
     dependencies:

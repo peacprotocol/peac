@@ -128,7 +128,8 @@
       "path-to-regexp@>=8.0.0": ">=8.4.0",
       "yaml": "2.8.3",
       "@hono/node-server": ">=1.19.13",
-      "hono": ">=4.12.12"
+      "hono": ">=4.12.12",
+      "protobufjs": ">=8.0.1"
     },
     "overridesComments": {
       "minimatch": "Cross-major pin to 10.2.4: typescript-estree requires ^9.0.4 but 9.x has no patch for GHSA-3ppc-4f35-3m26. minimatch 10.x is API-compatible (same globbing interface). 10.2.4 patches GHSA-7r86-cg39-jmmj and GHSA-23c5-xmqv-rm74 (ReDoS). Drops Node 18 (fine: repo baseline is >=22.0.0). Lint verified clean.",
@@ -139,7 +140,8 @@
       "express-rate-limit": "Override 8.2.1 to >=8.2.2 (fixes GHSA-46wh-pxpv-q5gq IPv4-mapped IPv6 bypass). Prod dep via @modelcontextprotocol/sdk.",
       "flatted": "Override to >=3.4.2 (fixes GHSA-25h7-pfq9-p65f unbounded recursion DoS + GHSA-rf6f-7fwh-wjgh prototype pollution via parse()). Dev-only via eslint -> file-entry-cache -> flat-cache.",
       "path-to-regexp@>=8.0.0": "Override to >=8.4.0 (fixes GHSA-j3q9-mxjg-w52f sequential optional groups DoS). Prod dep via @modelcontextprotocol/sdk -> express@5 -> router. path-to-regexp@0.1.12 in express@4 (examples only, not published) is not overridden because 0.1.13 breaks express@4 internal API.",
-      "yaml": "Pin to 2.8.3 (fixes GHSA-48c2-rrv3-qjmp). Dep via @peac/policy-kit."
+      "yaml": "Pin to 2.8.3 (fixes GHSA-48c2-rrv3-qjmp). Dep via @peac/policy-kit.",
+      "protobufjs": "Override to >=8.0.1 (fixes GHSA-xq3m-2v4x-88gg arbitrary code execution in protobufjs@8.0.0). Transitive dep via examples/telemetry-otel -> @opentelemetry/otlp-transformer@0.212.0. Examples are private (never published); override protects local eval flows and unblocks CI prod-audit gate."
     }
   },
   "lint-staged": {
