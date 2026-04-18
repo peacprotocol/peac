@@ -215,6 +215,12 @@ jobs:
       - name: OpenAPI drift verification (package spec vs app spec)
         run: pnpm verify:openapi:drift
 
+      - name: Trust-artifact integrity (threat-model links, stability-contract rows)
+        run: pnpm verify:trust-artifacts
+
+      - name: Public surface-name verification (retired filenames and paths)
+        run: pnpm verify:public-surface-names
+
       - name: Release facts verification
         run: pnpm verify:release
 

@@ -1,16 +1,16 @@
-# Security Posture
+# Security operations
 
-> Version: 0.12.7 | Status: Current
+> Version: 0.12.12 | Status: Current
 
-This document describes the operational security posture of the PEAC Protocol: support windows, incident handling, supply chain provenance, logging boundaries, tenant isolation, and data residency.
+This document describes the operational security model of the PEAC Protocol: support windows, incident handling, supply chain provenance, logging boundaries, tenant isolation, and data residency.
 
-For cryptographic design, JOSE hardening, and SSRF prevention, see [Security Considerations](specs/SECURITY-CONSIDERATIONS.md). For vulnerability reporting, see [SECURITY.md](../.github/SECURITY.md).
+For cryptographic design, JOSE hardening, and SSRF prevention, see [Security Considerations](specs/SECURITY-CONSIDERATIONS.md). For the canonical vulnerability-reporting policy and supported versions, see the root [SECURITY.md](../SECURITY.md). The full trust-artifact index lives in [Trust artifacts](TRUST-ARTIFACTS.md).
 
 ## Support Windows
 
 | Surface state           | Fix policy                               | Minimum window                                   |
 | ----------------------- | ---------------------------------------- | ------------------------------------------------ |
-| `default` / `supported` | Security, correctness, and feature fixes | Current release train                            |
+| `default` / `supported` | Security, correctness, and feature fixes | Current minor-release line                       |
 | `compat-only`           | Security and correctness fixes only      | Until next major or deprecation notice           |
 | `deprecated`            | Security fixes only                      | 2 minor releases or 60 days, whichever is longer |
 | `archived`              | No fixes                                 | May be removed in any future minor               |
@@ -29,14 +29,14 @@ The current deprecation schedule is in [Deprecation Policy](DEPRECATION_POLICY.m
 
 ## Incident Disclosure
 
-Vulnerability reports follow the process defined in [SECURITY.md](../.github/SECURITY.md):
+Vulnerability reports follow the process defined in [SECURITY.md](../SECURITY.md):
 
-| Step                                | SLA                                   |
-| ----------------------------------- | ------------------------------------- |
-| Report to security@peacprotocol.org | Anytime                               |
-| Acknowledgment                      | 48 hours                              |
-| Investigation and triage            | 7 days                                |
-| Fix and coordinated disclosure      | Per severity; critical within 30 days |
+| Step                                                                | SLA                                   |
+| ------------------------------------------------------------------- | ------------------------------------- |
+| Report to `security@peacprotocol.org` or GitHub Security Advisories | Anytime                               |
+| Acknowledgment                                                      | 48 hours                              |
+| Investigation and triage                                            | 7 days                                |
+| Fix and coordinated disclosure                                      | Per severity; critical within 30 days |
 
 PEAC does not currently operate a bug bounty program.
 
@@ -117,9 +117,13 @@ See [Deprecation Policy](DEPRECATION_POLICY.md) for the full lifecycle.
 
 ## Related Documents
 
-- [SECURITY.md](../.github/SECURITY.md): Vulnerability reporting, dependency audit policy
+- [Trust artifacts](TRUST-ARTIFACTS.md): Single index over every trust artifact
+- [SECURITY.md](../SECURITY.md): Vulnerability reporting, supported versions, supply chain
+- [Threat model](THREAT_MODEL.md): Consolidated threat catalog with per-threat test coverage
+- [Stability contract](STABILITY-CONTRACT.md): Classification of every public surface
+- [SLO](SLO.md) and [Benchmark methodology](BENCHMARK-METHODOLOGY.md)
 - [Security Considerations](specs/SECURITY-CONSIDERATIONS.md): Signing model, JOSE hardening, SSRF prevention, key lifecycle
 - [Verifier Security Model](specs/VERIFIER-SECURITY-MODEL.md): Verification modes, security limits, error codes
 - [HTTP Transport Security](security/HTTP-TRANSPORT-SECURITY.md): MCP server deployment checklist
-- [Enterprise Trust Posture](ENTERPRISE_TRUST_POSTURE.md): Key custody, tenancy, procurement
+- [Key custody and tenancy](KEY-CUSTODY-AND-TENANCY.md): Key custody, tenancy, procurement
 - [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md): API design, threat mitigations, privacy defaults

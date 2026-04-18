@@ -1,8 +1,8 @@
 # PEAC Security
 
-The top-level security posture is documented in
-[`docs/SECURITY_POSTURE.md`](../SECURITY_POSTURE.md) and the security policy in
-[`SECURITY.md`](../../.github/SECURITY.md).
+The top-level security operations are documented in
+[`docs/SECURITY-OPERATIONS.md`](../SECURITY-OPERATIONS.md) and the security policy in
+[`SECURITY.md`](../../SECURITY.md).
 
 This directory contains transport- and surface-specific security notes:
 

@@ -16,7 +16,7 @@
 
 This specification defines the **Zero Trust Profile Pack**: a collection of seven documentation overlays that constrain which PEAC receipt fields are REQUIRED, RECOMMENDED, or PROHIBITED for specific zero trust use cases.
 
-Profiles do NOT add new wire format fields. All zero trust data flows through existing `ext[]` extension slots using reverse-DNS keys per [PROFILE_RULES.md](../../reference/PROFILE_RULES.md). New fields belong in schemas (`@peac/schema`); profiles constrain their usage for specific deployment patterns.
+Profiles do NOT add new wire format fields. All zero trust data flows through existing `ext[]` extension slots using reverse-DNS keys; see the profile rules in the [profiles index](../profiles/README.md) and the normative extension group specification in [WIRE-0.2](WIRE-0.2.md) section 12. New fields belong in schemas (`@peac/schema`); profiles constrain their usage for specific deployment patterns.
 
 ### 1.2 Scope
 

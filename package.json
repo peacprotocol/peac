@@ -61,6 +61,8 @@
     "verify:contracts:drift": "tsx scripts/extract-api-contract.ts --check",
     "verify:surface-status": "node scripts/generate-surface-status.mjs --check",
     "verify:openapi:drift": "node scripts/verify-openapi-drift.mjs",
+    "verify:trust-artifacts": "node scripts/verify-trust-artifacts.mjs",
+    "verify:public-surface-names": "node scripts/verify-public-surface-names.mjs",
     "fixtures:new": "node scripts/fixtures-new.mjs",
     "conformance:regen:bundle": "tsx scripts/generate-bundle-vectors.ts",
     "bench": "pnpm --filter @peac/crypto bench && pnpm --filter @peac/schema bench && pnpm --filter @peac/protocol bench",
