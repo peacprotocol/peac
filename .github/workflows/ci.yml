@@ -206,6 +206,15 @@ jobs:
       - name: Spec drift verification (constants parity)
         run: pnpm verify:spec-drift
 
+      - name: Surface status drift verification
+        run: pnpm verify:surface-status
+
+      - name: Public API contract drift verification
+        run: pnpm verify:contracts:drift
+
+      - name: OpenAPI drift verification (package spec vs app spec)
+        run: pnpm verify:openapi:drift
+
       - name: Release facts verification
         run: pnpm verify:release
 
