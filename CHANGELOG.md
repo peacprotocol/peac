@@ -5,6 +5,45 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.12] - 2026-04-19
+
+Docs, compatibility, and trust artifacts release. No wire format, schema, kernel, crypto, protocol public API, or normative behavior changes. Layer 4 + tooling + docs only.
+
+### Added
+
+- `REPO_SURFACE_STATUS.json` regenerated for v0.12.12; `docs/SURFACE_STATUS.md` and `docs/PACKAGE_STATUS.md` re-derived. `docs/COMPATIBILITY_MATRIX.md` refreshed with an adapter-readiness column and evidence tags per row.
+- Machine-readable public-API contracts re-extracted under `contracts/api/` for `@peac/crypto`, `@peac/kernel`, `@peac/protocol`, and `@peac/schema`.
+- Reference-verifier OpenAPI regenerated to OpenAPI 3.1.1 at `info.version: 0.12.12`: `application/interaction-record+jwt` example payloads, RFC 9457 Problem Details for error responses, documented receipt and extension size caps, RFC 9745 `Deprecation` and RFC 8594 `Sunset` headers on the legacy `/verify` route.
+- CI drift gates wired in `.github/workflows/ci.yml`: `verify:contracts:drift`, `verify:surface-status`, `verify:openapi:drift`, `verify:trust-artifacts`, `verify:public-surface-names`.
+- Role-based entry at `docs/START_HERE.md` promoted to the single front-door job selector; `docs/README_LONG.md` demoted with a banner to the deep guide.
+- New operator mental-model docs: `docs/HOW-IT-WORKS.md`, `docs/ARTIFACTS.md`, `docs/WHERE-IT-FITS.md`, and `docs/WHAT-PEAC-STANDARDIZES.md`.
+- Five outcome-led recipes under `docs/SOLUTIONS/`: `runtime-evidence-export.md`, `api-receipt-issuance.md`, `mcp-tool-call-receipts.md`, `commerce-evidence-bundle.md`, `regulatory-audit-trail.md`. Each recipe carries a Validated-with block pointing at concrete test and fixture paths.
+- Reference-verifier deployment recipes under `surfaces/reference-verifier/`: `README.md`, `Dockerfile`, `docker-compose.yml`, Cloudflare Worker variant, and a `smoke.sh` CI harness.
+- Four trust artifacts published: `docs/SLO.md` (with release-prep baseline stamps for `issue()`, `verifyLocal()`, reference-verifier `/v1/verify` with and without JWKS resolution, and MCP tool-call round-trip), `docs/BENCHMARK-METHODOLOGY.md`, `docs/STABILITY-CONTRACT.md` (every public surface classified), `docs/THREAT_MODEL.md` (every threat ID linked to a real test file and enforced by `scripts/verify-trust-artifacts.mjs`).
+- Trust index at `docs/TRUST-ARTIFACTS.md`.
+- Two tracked verifier scripts: `scripts/verify-trust-artifacts.mjs` (threat-model link integrity, stability-contract surface identifiers, no public links to gitignored paths) and `scripts/verify-public-surface-names.mjs` (retired filenames, paths, and label identifiers).
+- Expanded root `SECURITY.md` as the canonical human-facing security policy (disclosure timeline, supported versions, supply-chain attestations, dependency-audit policy, external review cadence). `.github/SECURITY.md` aligned as a concise GitHub-facing mirror.
+
+### Changed
+
+- Two docs renamed for clearer public naming; `docs/ARCHITECTURE.md` security section trimmed to a one-paragraph summary with cross-links to the new trust artifacts.
+- Root `package.json.description` aligned to the canonical short description; `llms.txt` review stamp refreshed.
+- Broken internal link `specs/registries.json` corrected to `specs/kernel/registries.json` where referenced.
+- Two references in `docs/specs/` replaced with public equivalents (threat-model pointer now targets the public consolidated doc; profile-rules pointer now targets the public profiles index and the Wire 0.2 extension spec).
+
+### Deferred
+
+The following items are deferred to v0.12.13:
+
+- ISO 42001 Clause 8 control mapping.
+- EU AI Act Annex IV transparency applicability mapping.
+- External proof loop honest gate.
+- Distribution follow-through: `mcpservers.org`, `mcp.so`, `awesome-mcp-servers`, Smithery remote, IDE marketplace acceptance windows.
+- Echo and `net/http` Go middleware submodule adapters.
+- Regression-aware Go benchmark gate with committed baseline; extended JCS parity expansion.
+- Commerce lifecycle grouping export under `packages/audit/`.
+- External audit prep scaffolding; Python SDK decision gate.
+
 ## [0.12.11] - 2026-04-15
 
 ### Added
