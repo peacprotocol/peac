@@ -2,8 +2,7 @@
 
 How PEAC receipts and attestations support EU AI Act traceability requirements.
 
-**Version:** 0.9.26+
-**Relevant Deadline:** August 2026 (transparency rules apply)
+**Applicability context:** general application and transparency provisions of Regulation (EU) 2024/1689 become applicable from 2 August 2026; the regulation entered into force on 1 August 2024. See the [Annex IV mapping](EU-AI-ACT-ANNEX-IV-MAPPING.md) for the technical-documentation mapping.
 
 ---
 

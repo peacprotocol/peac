@@ -63,6 +63,7 @@
     "verify:openapi:drift": "node scripts/verify-openapi-drift.mjs",
     "verify:trust-artifacts": "node scripts/verify-trust-artifacts.mjs",
     "verify:public-surface-names": "node scripts/verify-public-surface-names.mjs",
+    "verify:compliance-mappings": "node scripts/verify-compliance-mappings.mjs",
     "fixtures:new": "node scripts/fixtures-new.mjs",
     "conformance:regen:bundle": "tsx scripts/generate-bundle-vectors.ts",
     "bench": "pnpm --filter @peac/crypto bench && pnpm --filter @peac/schema bench && pnpm --filter @peac/protocol bench",

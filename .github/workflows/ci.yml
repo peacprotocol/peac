@@ -221,6 +221,9 @@ jobs:
       - name: Public surface-name verification (retired filenames and paths)
         run: pnpm verify:public-surface-names
 
+      - name: Compliance-mapping integrity (ISO 42001 + EU AI Act Annex IV)
+        run: pnpm verify:compliance-mappings
+
       - name: Release facts verification
         run: pnpm verify:release
 
