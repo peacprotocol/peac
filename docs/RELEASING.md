@@ -27,6 +27,80 @@ Both scripts handle:
 - `scripts/publish-manifest.json`
 - Examples at `0.0.0` (enforced: fails if any example has a different version)
 
+## Release Modes
+
+Two release modes are supported. The mode is chosen per release based on the
+content of that release.
+
+### Mode 1: single-step to `latest`
+
+Use this mode when the release contains **none** of the following:
+
+- wire format changes
+- schema, kernel, crypto, or `@peac/protocol` public API changes
+- normative behavior changes
+- runtime or transport behavior changes
+- broad package-level behavior changes
+- security-sensitive changes requiring soak
+
+Flow:
+
+1. Merge the release-prep PR
+2. Tag `vX.Y.Z`
+3. Publish directly to `latest` (tag push triggers publish)
+4. Post-publish stamp micro-PR (`release-state/vX.Y.Z-publish`)
+
+Step 3 requires the publish workflow to resolve `NPM_TAG=latest` for this
+release (workflow parameterization is tracked as a follow-up; until that
+lands, Mode 2 is the active default for v0.x).
+
+### Mode 2: two-step via `next`, then promote to `latest`
+
+Use this mode when the release contains any of the Mode-1 exclusion
+categories above. It is also the current default for v0.x releases while
+workflow parameterization is pending.
+
+Flow:
+
+1. Merge the release-prep PR
+2. Tag `vX.Y.Z`
+3. Publish to `next` (tag push triggers publish)
+4. Post-publish stamp micro-PR (`release-state/vX.Y.Z-publish`)
+5. Promote `next` to `latest` via `promote-latest.yml` (dry-run first, then real)
+6. Post-promote stamp micro-PR (`release-state/vX.Y.Z-promote`)
+
+### GitHub Release creation
+
+The GitHub Release is created by the tag/publish workflow from the
+`CHANGELOG.md` entry for the released version. Do not create it as a
+separate manual step.
+
+### Post-stamp sync
+
+Post-publish and post-promote stamp micro-PRs regenerate derived artifacts
+(`docs/SURFACE_STATUS.md`, `docs/PACKAGE_STATUS.md`) and must fail if drift
+remains. No separate sync PR is required; the stamp PRs are the sync
+vehicles.
+
+### Stamp-PR CI profile
+
+Release-state stamp micro-PRs touch only `docs/releases/facts.json`,
+`docs/releases/current.json`, `REPO_SURFACE_STATUS.json`, and derived
+status docs. They run a reduced CI profile:
+
+- `pnpm format:check`
+- `bash scripts/guard.sh`
+- `node scripts/verify-release.mjs`
+- `pnpm release:stamp:check:publish` (on the publish stamp PR)
+- `pnpm release:stamp:check:promote` (on the promote stamp PR)
+- `pnpm verify:surface-status`
+- `node scripts/check-public-artifacts.mjs`
+- `docs-quality` (when docs touched)
+
+The full monorepo build, test, conformance, and pack-smoke suite is not
+rerun on stamp-only PRs. That suite runs on the release-prep PR and on
+main.
+
 ## Pre-Release Checklist
 
 1. All PRs for this release are merged to main

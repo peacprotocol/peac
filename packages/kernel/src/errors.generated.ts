@@ -3,7 +3,7 @@
  *
  * AUTO-GENERATED from specs/kernel/errors.json
  * DO NOT EDIT MANUALLY - run: npx tsx scripts/codegen-errors.ts
- * Spec version: 0.12.11
+ * Spec version: 0.12.12
  */
 
 import type { ErrorDefinition } from './types.js';

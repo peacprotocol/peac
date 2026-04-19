@@ -5,6 +5,45 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.12] - 2026-04-19
+
+Docs, compatibility, and trust artifacts release. No wire format, schema, kernel, crypto, protocol public API, or normative behavior changes. Layer 4 + tooling + docs only.
+
+### Added
+
+- `REPO_SURFACE_STATUS.json` regenerated for v0.12.12; `docs/SURFACE_STATUS.md` and `docs/PACKAGE_STATUS.md` re-derived. `docs/COMPATIBILITY_MATRIX.md` refreshed with an adapter-readiness column and evidence tags per row.
+- Machine-readable public-API contracts re-extracted under `contracts/api/` for `@peac/crypto`, `@peac/kernel`, `@peac/protocol`, and `@peac/schema`.
+- Reference-verifier OpenAPI regenerated to OpenAPI 3.1.1 at `info.version: 0.12.12`: `application/interaction-record+jwt` example payloads, RFC 9457 Problem Details for error responses, documented receipt and extension size caps, RFC 9745 `Deprecation` and RFC 8594 `Sunset` headers on the legacy `/verify` route.
+- CI drift gates wired in `.github/workflows/ci.yml`: `verify:contracts:drift`, `verify:surface-status`, `verify:openapi:drift`, `verify:trust-artifacts`, `verify:public-surface-names`.
+- Role-based entry at `docs/START_HERE.md` promoted to the single front-door job selector; `docs/README_LONG.md` demoted with a banner to the deep guide.
+- New operator mental-model docs: `docs/HOW-IT-WORKS.md`, `docs/ARTIFACTS.md`, `docs/WHERE-IT-FITS.md`, and `docs/WHAT-PEAC-STANDARDIZES.md`.
+- Five outcome-led recipes under `docs/SOLUTIONS/`: `runtime-evidence-export.md`, `api-receipt-issuance.md`, `mcp-tool-call-receipts.md`, `commerce-evidence-bundle.md`, `regulatory-audit-trail.md`. Each recipe carries a Validated-with block pointing at concrete test and fixture paths.
+- Reference-verifier deployment recipes under `surfaces/reference-verifier/`: `README.md`, `Dockerfile`, `docker-compose.yml`, Cloudflare Worker variant, and a `smoke.sh` CI harness.
+- Four trust artifacts published: `docs/SLO.md` (with release-prep baseline stamps for `issue()`, `verifyLocal()`, reference-verifier `/v1/verify` with and without JWKS resolution, and MCP tool-call round-trip), `docs/BENCHMARK-METHODOLOGY.md`, `docs/STABILITY-CONTRACT.md` (every public surface classified), `docs/THREAT_MODEL.md` (every threat ID linked to a real test file and enforced by `scripts/verify-trust-artifacts.mjs`).
+- Trust index at `docs/TRUST-ARTIFACTS.md`.
+- Two tracked verifier scripts: `scripts/verify-trust-artifacts.mjs` (threat-model link integrity, stability-contract surface identifiers, no public links to gitignored paths) and `scripts/verify-public-surface-names.mjs` (retired filenames, paths, and label identifiers).
+- Expanded root `SECURITY.md` as the canonical human-facing security policy (disclosure timeline, supported versions, supply-chain attestations, dependency-audit policy, external review cadence). `.github/SECURITY.md` aligned as a concise GitHub-facing mirror.
+
+### Changed
+
+- Two docs renamed for clearer public naming; `docs/ARCHITECTURE.md` security section trimmed to a one-paragraph summary with cross-links to the new trust artifacts.
+- Root `package.json.description` aligned to the canonical short description; `llms.txt` review stamp refreshed.
+- Broken internal link `specs/registries.json` corrected to `specs/kernel/registries.json` where referenced.
+- Two references in `docs/specs/` replaced with public equivalents (threat-model pointer now targets the public consolidated doc; profile-rules pointer now targets the public profiles index and the Wire 0.2 extension spec).
+
+### Deferred
+
+The following items are deferred to v0.12.13:
+
+- ISO 42001 Clause 8 control mapping.
+- EU AI Act Annex IV transparency applicability mapping.
+- External proof loop honest gate.
+- Distribution follow-through: `mcpservers.org`, `mcp.so`, `awesome-mcp-servers`, Smithery remote, IDE marketplace acceptance windows.
+- Echo and `net/http` Go middleware submodule adapters.
+- Regression-aware Go benchmark gate with committed baseline; extended JCS parity expansion.
+- Commerce lifecycle grouping export under `packages/audit/`.
+- External audit prep scaffolding; Python SDK decision gate.
+
 ## [0.12.11] - 2026-04-15
 
 ### Added
@@ -22,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Listing-copy coherence guard at `scripts/check-listing-copy-coherence.mjs`, wired into `scripts/verify-distribution.mjs` as check #16.
 - Runnable commerce examples: `examples/x402-upto-evidence/`, `examples/acp-delegated-checkout/`, `examples/mpp-payment-attempt/`.
 - Conformance Section 26 commerce fixtures (20 vectors + manifest) across `commerce/`, `commerce/acp-delegated-payment/` (11), `commerce/paymentauth/` (6), and `commerce/x402/` (5).
-- Docs: `docs/compatibility/commerce-protocol-coverage.md`, `docs/compatibility/core-use-case-coverage.md`, `docs/compatibility/go-middleware.md`, `docs/profiles/acp-delegated-payment.md`, `docs/profiles/mpp-payment-evidence.md`, `docs/guides/{cursor,codex,claude-code,vscode,smithery-remote-mcp,copilot-enterprise-registry,marketplace-publishing,verify-dashboard}-*.md`, `docs/specs/X402-V2-PROFILE.md` §8.
+- Docs: `docs/compatibility/commerce-protocol-coverage.md`, `docs/compatibility/core-use-case-coverage.md`, `docs/compatibility/go-middleware.md`, `docs/profiles/acp-delegated-payment.md`, `docs/profiles/mpp-payment-evidence.md`, `docs/guides/{cursor,codex,claude-code,vscode,smithery-remote-mcp,copilot-enterprise-registry,marketplace-publishing,verify-dashboard}-*.md`, `docs/specs/X402-V2-PROFILE.md` Section 8.
 
 ### Changed
 
@@ -87,17 +126,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **MCP Streamable HTTP quickstart** (`examples/mcp-http-quickstart/`): end-to-end `stdio` and `streamable-http` transport example with merge-blocking gate script (`scripts/verify-mcp-quickstart.sh`) that boots the local workspace `@peac/mcp-server` on HTTP, initializes a JSON-RPC session, propagates `Mcp-Session-Id`, and asserts `peac_verify` over HTTP succeeds. Local fallback is not accepted as proof. `packages/mcp-server/server.json` now declares both `stdio` and `streamable-http` transports with the required `url` field per MCP Registry schema 2025-12-11
 - **RFC 9728 Protected Resource Metadata strict compliance tests**: 5 new tests under `packages/mcp-server/tests/http/` verifying `Content-Type: application/json`, exact field-count (only `resource` and `authorization_servers`), multiple authorization server serialization, non-HTTPS non-loopback rejection (404), and HTTP loopback allowance for development ergonomics
 - **External pilot kit** (`examples/external-pilot/`, `docs/pilots/PILOT_KIT.md`): self-contained pilot kit for independent external organizations, runtime-generated Ed25519 keypair, signed Interaction Record, local and reference-verifier verification paths via `--verifier-url`, deterministic inspectable JSON artifact, formal JSON Schema (draft-07) validation via ajv + ajv-formats, golden snapshot, and merge-blocking engineering gate (`scripts/verify-pilot-output.sh`) that fails on schema drift or private-key leakage
-- **Builder-first conformance registration**: formally register 25 previously pending requirement IDs (6 namespaces: `X402V2-*`, `DID-RES-*`, `GRPC-META-*`, `PKCE-*`, `RURL-*`, `SC-*`). Total requirement IDs: 192 → **217** across 18 → **24** sections. New `scripts/conformance/build-extension-registry.mjs` as the formal canonical source of truth for all non-WIRE02 requirements. Main builder composes WIRE02 and extension sources into `requirement-ids.json`. Zero temporary registration exemptions remain. `tests/conformance/registry-composition.spec.ts` enforces composition parity
+- **Builder-first conformance registration**: formally register 25 previously pending requirement IDs (6 namespaces: `X402V2-*`, `DID-RES-*`, `GRPC-META-*`, `PKCE-*`, `RURL-*`, `SC-*`). Total requirement IDs: 192 -> **217** across 18 -> **24** sections. New `scripts/conformance/build-extension-registry.mjs` as the formal canonical source of truth for all non-WIRE02 requirements. Main builder composes WIRE02 and extension sources into `requirement-ids.json`. Zero temporary registration exemptions remain. `tests/conformance/registry-composition.spec.ts` enforces composition parity
 - **Non-WIRE02 annotation ledger**: `specs/conformance/non-wire02-annotation-ledger.md` tracks each remaining governing-spec annotation on a per-ID basis. Hash integrity is blocking for all 217 IDs; non-WIRE02 spec-presence is advisory and bounded by the ledger
-- **x402 scheme coverage clarification**: `§ 3.0 Payment Schemes` added to `docs/specs/X402-PROFILE.md` stating the adapter's scheme-agnostic posture for both `exact` and `upto`. New `docs/compatibility/x402-scheme-coverage.md` compatibility doc keeping three truth surfaces explicitly distinct (upstream x402 protocol, upstream facilitator surfaces, PEAC-tested). Two new conformance fixtures (`upto-valid-evm-eip712.json`, `upto-scheme-mismatch.json`) plus 8 new overclaim-guard tests in `packages/adapters/x402/tests/upto-scope.test.ts` asserting scheme is term-matched as a byte-equal required string and never interpreted for scheme-specific invariants (single-use, time bounds, recipient binding, facilitator binding, max-vs-actual settlement correctness). Guide section renamed from `Supported Networks (CAIP-2)` to `Common CAIP-2 identifiers`; non-canonical `solana:mainnet` / `solana:devnet` labels replaced with canonical CAIP-2 genesis-hash identifiers (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`, `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`); Polygon Mainnet added
+- **x402 scheme coverage clarification**: `Section 3.0 Payment Schemes` added to `docs/specs/X402-PROFILE.md` stating the adapter's scheme-agnostic posture for both `exact` and `upto`. New `docs/compatibility/x402-scheme-coverage.md` compatibility doc keeping three truth surfaces explicitly distinct (upstream x402 protocol, upstream facilitator surfaces, PEAC-tested). Two new conformance fixtures (`upto-valid-evm-eip712.json`, `upto-scheme-mismatch.json`) plus 8 new overclaim-guard tests in `packages/adapters/x402/tests/upto-scope.test.ts` asserting scheme is term-matched as a byte-equal required string and never interpreted for scheme-specific invariants (single-use, time bounds, recipient binding, facilitator binding, max-vs-actual settlement correctness). Guide section renamed from `Supported Networks (CAIP-2)` to `Common CAIP-2 identifiers`; non-canonical `solana:mainnet` / `solana:devnet` labels replaced with canonical CAIP-2 genesis-hash identifiers (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`, `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`); Polygon Mainnet added
 - **Public doc wording sweep**: removed stale stubs, marketing phrasing, and forward-looking planning language from public docs. `docs/ROADMAP.md` rewritten to a minimal meta surface. `docs/api/README.md`, `docs/guides/README.md`, `docs/architecture/README.md`, `docs/security/README.md` collapsed to real-content indexes. `docs/HOSTED_VERIFY_CONTRACT.md` status updated from design artifact to stable contract. `docs/VERIFY-RELEASE.md` stale preview references removed
 - **Release-state stamping script** (`scripts/stamp-release-state.mjs`): deterministic, idempotent, testable script for stamping mutable release metadata (`release_date`, `updated`, `dist_tag`) post-tag and post-promotion. Supports `--publish`, `--promote`, `--dry-run`, and `--check --mode` modes. Exposed via `pnpm release:stamp:publish`, `pnpm release:stamp:promote`, `pnpm release:stamp:check:publish`, and `pnpm release:stamp:check:promote`. Covered by 13 smoke tests in `tests/scripts/stamp-release-state.test.ts`. `docs/RELEASING.md` release checklist updated with explicit post-tag (step 8) and post-promotion (step 10) stamping commands using the `release-state/vX.Y.Z-publish` and `release-state/vX.Y.Z-promote` micro-PR branch naming convention
 
 ### Changed
 
-- `REPO_SURFACE_STATUS.json` version 0.12.8 → 0.12.9; `published_packages: 35 → 36` (new `@peac/adapter-managed-agents`)
+- `REPO_SURFACE_STATUS.json` version 0.12.8 -> 0.12.9; `published_packages: 35 -> 36` (new `@peac/adapter-managed-agents`)
 - Conformance matrix regenerated with 217 requirement IDs across 24 sections
-- x402 conformance fixture manifest version 0.12.7 → 0.12.9
+- x402 conformance fixture manifest version 0.12.7 -> 0.12.9
 - Security audit allowlist: added `GHSA-q4gf-8mx6-v5v3` (next.js Server Components DoS, dev-only via `surfaces/nextjs`, 90-day expiry)
 
 ### Security
