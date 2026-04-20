@@ -355,3 +355,196 @@ describe('extractRails behavior', () => {
     expect(bundle.rails_observed).toEqual([]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// groupByLifecycle: observational-only, deterministic, no finality synthesis
+// ---------------------------------------------------------------------------
+
+import { groupByLifecycle, UNCLASSIFIED_LIFECYCLE_BUCKET } from '../src/index.js';
+import type { LifecycleInputRecord } from '../src/index.js';
+
+function makeLifecycleRecord(
+  overrides: Partial<LifecycleInputRecord> &
+    Pick<LifecycleInputRecord, 'session_ref' | 'receipt_ref' | 'iat'>
+): LifecycleInputRecord {
+  return {
+    session_ref: overrides.session_ref,
+    receipt_ref: overrides.receipt_ref,
+    iat: overrides.iat,
+    commerce_event: overrides.commerce_event,
+    data: overrides.data,
+  };
+}
+
+describe('groupByLifecycle', () => {
+  it('groups records by session_ref and by upstream commerce_event', () => {
+    const bundles = groupByLifecycle([
+      makeLifecycleRecord({
+        session_ref: 'sess_A',
+        receipt_ref: 'sha256:a1',
+        iat: '2026-04-20T10:00:00Z',
+        commerce_event: 'payment_attempt',
+      }),
+      makeLifecycleRecord({
+        session_ref: 'sess_A',
+        receipt_ref: 'sha256:a2',
+        iat: '2026-04-20T10:05:00Z',
+        commerce_event: 'settlement_observed',
+      }),
+      makeLifecycleRecord({
+        session_ref: 'sess_B',
+        receipt_ref: 'sha256:b1',
+        iat: '2026-04-20T10:01:00Z',
+        commerce_event: 'payment_attempt',
+      }),
+    ]);
+
+    expect(bundles).toHaveLength(2);
+    // Bundles are sorted across the returned array by session_ref lex asc.
+    expect(bundles[0].session_ref).toBe('sess_A');
+    expect(bundles[1].session_ref).toBe('sess_B');
+
+    // Session A has two distinct event buckets.
+    expect(Object.keys(bundles[0].buckets).sort()).toEqual([
+      'payment_attempt',
+      'settlement_observed',
+    ]);
+    expect(bundles[0].record_count).toBe(2);
+
+    // Session B has only payment_attempt.
+    expect(Object.keys(bundles[1].buckets)).toEqual(['payment_attempt']);
+  });
+
+  it('routes missing, null, empty, and non-string commerce_event to unclassified', () => {
+    const bundles = groupByLifecycle([
+      makeLifecycleRecord({
+        session_ref: 's1',
+        receipt_ref: 'sha256:r1',
+        iat: 1,
+        commerce_event: undefined,
+      }),
+      makeLifecycleRecord({
+        session_ref: 's1',
+        receipt_ref: 'sha256:r2',
+        iat: 2,
+        commerce_event: null as unknown as string,
+      }),
+      makeLifecycleRecord({
+        session_ref: 's1',
+        receipt_ref: 'sha256:r3',
+        iat: 3,
+        commerce_event: '',
+      }),
+      makeLifecycleRecord({
+        session_ref: 's1',
+        receipt_ref: 'sha256:r4',
+        iat: 4,
+        commerce_event: '   ',
+      }),
+    ]);
+
+    expect(bundles).toHaveLength(1);
+    expect(Object.keys(bundles[0].buckets)).toEqual([UNCLASSIFIED_LIFECYCLE_BUCKET]);
+    expect(bundles[0].buckets[UNCLASSIFIED_LIFECYCLE_BUCKET]).toHaveLength(4);
+  });
+
+  it('does not synthesize new bucket names from combinations of records', () => {
+    // A session with payment_attempt + an arbitrary completion-looking
+    // event must NOT produce a synthetic bucket named 'settled',
+    // 'completed', 'final', or 'finalized'. Only the literal upstream
+    // event names are bucket keys.
+    const bundles = groupByLifecycle([
+      makeLifecycleRecord({
+        session_ref: 'sx',
+        receipt_ref: 'sha256:x1',
+        iat: 1,
+        commerce_event: 'payment_attempt',
+      }),
+      makeLifecycleRecord({
+        session_ref: 'sx',
+        receipt_ref: 'sha256:x2',
+        iat: 2,
+        commerce_event: 'session_completed',
+      }),
+    ]);
+
+    const keys = Object.keys(bundles[0].buckets);
+    expect(keys.sort()).toEqual(['payment_attempt', 'session_completed']);
+    for (const forbidden of ['settled', 'completed', 'final', 'finalized', 'finality']) {
+      expect(keys).not.toContain(forbidden);
+    }
+  });
+
+  it('orders within a bucket by iat ascending, tie-breaking by receipt_ref lex', () => {
+    const bundles = groupByLifecycle([
+      makeLifecycleRecord({
+        session_ref: 's1',
+        receipt_ref: 'sha256:bbb',
+        iat: 100,
+        commerce_event: 'attempt',
+      }),
+      makeLifecycleRecord({
+        session_ref: 's1',
+        receipt_ref: 'sha256:aaa',
+        iat: 100,
+        commerce_event: 'attempt',
+      }),
+      makeLifecycleRecord({
+        session_ref: 's1',
+        receipt_ref: 'sha256:ccc',
+        iat: 50,
+        commerce_event: 'attempt',
+      }),
+    ]);
+
+    expect(bundles[0].buckets['attempt'].map((r) => r.receipt_ref)).toEqual([
+      'sha256:ccc', // iat=50 first
+      'sha256:aaa', // iat=100, tie-break aaa < bbb
+      'sha256:bbb',
+    ]);
+  });
+
+  it('preserves the experimental COMMERCE_BUNDLE_VERSION on each returned bundle', () => {
+    const bundles = groupByLifecycle([
+      makeLifecycleRecord({
+        session_ref: 's1',
+        receipt_ref: 'sha256:a',
+        iat: 1,
+        commerce_event: 'attempt',
+      }),
+    ]);
+    expect(bundles[0].version).toBe(COMMERCE_BUNDLE_VERSION);
+    expect(COMMERCE_BUNDLE_VERSION).toContain('-experimental');
+  });
+
+  it('returns deterministic output across input permutations (idempotent sort)', () => {
+    const records: LifecycleInputRecord[] = [
+      makeLifecycleRecord({
+        session_ref: 'zzz',
+        receipt_ref: 'sha256:1',
+        iat: '2026-04-20T10:00:00Z',
+        commerce_event: 'a',
+      }),
+      makeLifecycleRecord({
+        session_ref: 'aaa',
+        receipt_ref: 'sha256:2',
+        iat: '2026-04-20T10:00:00Z',
+        commerce_event: 'b',
+      }),
+      makeLifecycleRecord({
+        session_ref: 'mmm',
+        receipt_ref: 'sha256:3',
+        iat: '2026-04-20T10:00:00Z',
+        commerce_event: 'c',
+      }),
+    ];
+    const order1 = groupByLifecycle([records[0], records[1], records[2]]);
+    const order2 = groupByLifecycle([records[2], records[0], records[1]]);
+    expect(order1).toEqual(order2);
+    expect(order1.map((b) => b.session_ref)).toEqual(['aaa', 'mmm', 'zzz']);
+  });
+
+  it('returns an empty array when given no records', () => {
+    expect(groupByLifecycle([])).toEqual([]);
+  });
+});

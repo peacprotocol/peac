@@ -92,3 +92,53 @@ export interface CreateCommerceBundleOptions {
   /** Optional creation timestamp (for deterministic output; defaults to now) */
   created_at?: string;
 }
+
+/**
+ * Input record accepted by `groupByLifecycle`.
+ *
+ * Observational-only shape: callers provide the fields necessary for
+ * grouping without passing the full signed record. `session_ref` is the
+ * value the grouper keys on; records with the same `session_ref` end up
+ * in the same `LifecycleBundle`.
+ */
+export interface LifecycleInputRecord {
+  /** Session or transaction identifier shared across a lifecycle. */
+  session_ref: string;
+  /**
+   * Observed commerce event name, per the upstream attestation. An
+   * empty, missing, null, or non-string value routes the record to the
+   * `unclassified` bucket; no event is synthesized.
+   */
+  commerce_event?: string | null;
+  /** Issued-at time (RFC 3339 string or unix seconds). */
+  iat: string | number;
+  /** SHA-256 hash of the JWS (used for deterministic tie-breaking). */
+  receipt_ref: string;
+  /** Optional opaque passthrough so callers can carry the full record. */
+  data?: Record<string, unknown>;
+}
+
+/**
+ * Reserved bucket name for records whose `commerce_event` is absent,
+ * null, empty, or not a string. No lifecycle semantics are inferred;
+ * `unclassified` preserves the record as observed and never promotes
+ * it into an interpreted bucket.
+ */
+export const UNCLASSIFIED_LIFECYCLE_BUCKET = 'unclassified' as const;
+
+/**
+ * One session's records grouped by the event name each record carries,
+ * observational only. `buckets` keys are the literal `commerce_event`
+ * values the upstream attested (or `'unclassified'` for records with
+ * no event). Buckets with zero records are omitted.
+ */
+export interface LifecycleBundle {
+  /** Session or transaction identifier shared by every record in the bundle. */
+  session_ref: string;
+  /** Per-event record lists, keyed by the upstream event name. */
+  buckets: Record<string, LifecycleInputRecord[]>;
+  /** Total number of records in the bundle (sum across buckets). */
+  record_count: number;
+  /** Bundle format version (same experimental constant as commerce bundles). */
+  version: typeof COMMERCE_BUNDLE_VERSION;
+}

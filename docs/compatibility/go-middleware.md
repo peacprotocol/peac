@@ -9,13 +9,66 @@ Promotes the Go HTTP middleware from experimental to a bounded, opt-in productio
 
 ## Stability classes
 
-| Adapter                           | Package                      | Class  |
-| --------------------------------- | ---------------------------- | ------ |
-| Core HTTP middleware (`http.go`)  | `.../sdks/go/middleware`     | Stable |
-| `chi` adapter (`middleware/chi/`) | `.../sdks/go/middleware/chi` | Stable |
-| `gin` adapter (`middleware/gin/`) | `.../sdks/go/middleware/gin` | Stable |
+| Adapter                                    | Package                          | Class  |
+| ------------------------------------------ | -------------------------------- | ------ |
+| Core HTTP middleware (`http.go`)           | `.../sdks/go/middleware`         | Stable |
+| `chi` adapter (`middleware/chi/`)          | `.../sdks/go/middleware/chi`     | Stable |
+| `gin` adapter (`middleware/gin/`)          | `.../sdks/go/middleware/gin`     | Stable |
+| `echo` adapter (`middleware/echo/`)        | `.../sdks/go/middleware/echo`    | Stable |
+| `net/http` adapter (`middleware/nethttp/`) | `.../sdks/go/middleware/nethttp` | Stable |
 
-Submodule adapters for `echo` and `net/http` are tracked for a follow-up release; the core HTTP middleware is usable from any `http.Handler`-compatible router in the meantime.
+The core HTTP middleware is usable from any `http.Handler`-compatible router. Dedicated `echo` and `net/http` adapter modules are available for consumers who prefer framework-specific import paths.
+
+## Adapter parity contract
+
+Every framework-specific adapter re-exposes the same surface:
+
+- `type Config = middleware.Config` (type alias, not a distinct named type).
+- `DefaultConfig()` returns a struct byte-identical to the core default (panic recovery on, 1 MiB body cap, `TrustProxyHeaders` off).
+- `Verifier(cfg Config)` returns the stdlib-shaped `func(http.Handler) http.Handler`.
+- Header behavior: `PEAC-Receipt` precedence; rail-x402 `PAYMENT-RESPONSE` / `X-PAYMENT-RESPONSE` honored; case-insensitive header names.
+- Timeout, body-limit, and trust-proxy defaults are identical.
+- Error and status mapping: 401 / 400 / 503 taxonomy matches across adapters.
+
+Parity is enforced mechanically in two places: the shared test harness at [`sdks/go/middleware/paritytest/`](../../sdks/go/middleware/paritytest/) runs the same request corpus against the three stdlib-shaped adapters (chi, echo, nethttp) and asserts identical responses against the chi reference; the gin adapter uses `gin.HandlerFunc` and carries its own third-party dependency, so it is covered by a scenario-equivalent test suite at [`sdks/go/middleware/gin/gin_test.go`](../../sdks/go/middleware/gin/gin_test.go) exercising the same four scenarios (no-receipt required → 401, no-receipt optional pass-through → 200, malformed receipt → 400 `E_INVALID_FORMAT`, case-insensitive `peac-receipt` header).
+
+### Echo integration
+
+Echo (`github.com/labstack/echo/v4`) accepts stdlib middleware through `echo.WrapMiddleware`:
+
+```go
+import (
+    "github.com/labstack/echo/v4"
+    peacecho "github.com/peacprotocol/peac/sdks/go/middleware/echo"
+)
+
+e := echo.New()
+e.Use(echo.WrapMiddleware(peacecho.Verifier(peacecho.Config{
+    Issuer:   "https://publisher.example",
+    Audience: "https://agent.example",
+})))
+```
+
+The `peacecho` adapter itself carries no Echo dependency; it exposes the stdlib-compatible `func(http.Handler) http.Handler` that `echo.WrapMiddleware` accepts. Users who do not use Echo never pull Echo into their dependency graph.
+
+### net/http integration
+
+```go
+import (
+    "net/http"
+    peacnethttp "github.com/peacprotocol/peac/sdks/go/middleware/nethttp"
+)
+
+mux := http.NewServeMux()
+mux.HandleFunc("/protected", protected)
+
+verified := peacnethttp.Verifier(peacnethttp.Config{
+    Issuer:   "https://publisher.example",
+    Audience: "https://agent.example",
+})(mux)
+
+http.ListenAndServe(":8080", verified)
+```
 
 ## What hardening adds
 

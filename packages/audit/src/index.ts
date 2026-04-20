@@ -150,12 +150,14 @@ export type {
   CommerceEvidenceBundle,
   CommerceSummary,
   CreateCommerceBundleOptions,
+  LifecycleBundle,
+  LifecycleInputRecord,
   ProtocolEvidence,
   TimelineEntry,
   ObservedAmount,
 } from './commerce-bundle-types.js';
 
-export { COMMERCE_BUNDLE_VERSION } from './commerce-bundle-types.js';
+export { COMMERCE_BUNDLE_VERSION, UNCLASSIFIED_LIFECYCLE_BUCKET } from './commerce-bundle-types.js';
 
 export {
   createCommerceEvidenceBundle,
@@ -164,4 +166,5 @@ export {
   addReceiptRef,
   computeCommerceSummary,
   serializeCommerceBundle,
+  groupByLifecycle,
 } from './commerce-bundle.js';
