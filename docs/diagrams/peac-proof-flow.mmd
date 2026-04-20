@@ -7,7 +7,7 @@ flowchart LR
 
   P["Policy<br/>/.well-known/peac.txt"]
   K["Issuer keys<br/>/.well-known/peac-issuer.json (JWKS)"]
-  R["Receipt<br/>JWS (typ: peac-receipt/0.1)<br/>HTTP: PEAC-Receipt: &lt;jws&gt;"]
+  R["Receipt<br/>JWS (typ: interaction-record+jwt)<br/>HTTP: PEAC-Receipt: &lt;jws&gt;"]
   B["Dispute Bundle<br/>ZIP (peac-bundle/0.1)<br/>receipts + policy + report"]
 
   S -->|publish terms| P

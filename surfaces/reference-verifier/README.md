@@ -48,3 +48,25 @@ The reference verifier is an offline-first verification service. It does not req
 The recipes here are sufficient for local evaluation, development, CI smoke tests, and single-tenant self-hosted deployments. Multi-tenant hosted operation (SLA, billing, authenticated access, logging plane, multi-region failover) is out of scope for these recipes.
 
 For the normative runtime contract, see [`packages/schema/openapi/verify.yaml`](../../packages/schema/openapi/verify.yaml). For the security model, see [`apps/api/THREATS.md`](../../apps/api/THREATS.md).
+
+## Authority order
+
+The verifier surface follows a single truth-source matrix. This README restates elements of the contract for operators running the reference deployment; it MUST NOT drift from the source specs above it.
+
+1. [`packages/schema/openapi/verify.yaml`](../../packages/schema/openapi/verify.yaml) - normative machine-readable contract (OpenAPI 3.1.1).
+2. [`apps/api/openapi.yaml`](../../apps/api/openapi.yaml) - app-level spec aligned against the package spec by `pnpm verify:openapi:drift`.
+3. [`docs/HOSTED_VERIFY_CONTRACT.md`](../../docs/HOSTED_VERIFY_CONTRACT.md) - prose restatement of the contract.
+4. This README and the recipes it carries.
+5. Integrator kits under [`integrator-kits/`](../../integrator-kits/).
+
+The same CI gate (`pnpm verify:openapi:drift`) cross-checks every surface below the OpenAPI source.
+
+## Related documents
+
+- [Hosted Verify contract](../../docs/HOSTED_VERIFY_CONTRACT.md)
+- [Trust artifacts](../../docs/TRUST-ARTIFACTS.md)
+- [Stability contract](../../docs/STABILITY-CONTRACT.md)
+- [Threat model](../../docs/THREAT_MODEL.md)
+- [Verifier security model](../../docs/specs/VERIFIER-SECURITY-MODEL.md)
+- [SLO](../../docs/SLO.md)
+- [Compliance mappings](../../docs/compliance/README.md)

@@ -162,3 +162,11 @@ Verify the server starts with `npx -y @peac/mcp-server --help`. Check your clien
 - [Pay-per-Inference Example](../../examples/pay-per-inference/) for 402 payment flow
 - [Evidence Carrier Contract](../../docs/specs/EVIDENCE-CARRIER-CONTRACT.md) for MCP `_meta` key conventions
 - [MCP Specification](https://modelcontextprotocol.io) for the upstream protocol
+
+## Related documents
+
+- [Hosted Verify contract](../../docs/HOSTED_VERIFY_CONTRACT.md)
+- [Trust artifacts](../../docs/TRUST-ARTIFACTS.md)
+- [Stability contract](../../docs/STABILITY-CONTRACT.md)
+- [Threat model](../../docs/THREAT_MODEL.md)
+- [Compliance mappings](../../docs/compliance/README.md)

@@ -4,6 +4,8 @@
 
 This document defines the HTTP API contract for the reference verifier. Implementations MUST conform to this contract.
 
+**Truth source for the verifier surface (authority order):** [`packages/schema/openapi/verify.yaml`](../packages/schema/openapi/verify.yaml) is the normative machine-readable contract (OpenAPI 3.1.1). [`apps/api/openapi.yaml`](../apps/api/openapi.yaml) is the app-level spec aligned against it by `pnpm verify:openapi:drift`. This Markdown document restates that contract in prose; it must not drift. Downstream documents - [`surfaces/reference-verifier/README.md`](../surfaces/reference-verifier/README.md) and the integrator kits under [`integrator-kits/`](../integrator-kits/) - restate elements of the contract for integrators and are cross-checked against the OpenAPI source by the same verifier.
+
 ## Endpoints
 
 ### POST /v1/verify
@@ -156,3 +158,12 @@ All responses include:
 | `RateLimit-Limit`        | Current rate limit                               |
 | `RateLimit-Remaining`    | Remaining requests in window                     |
 | `RateLimit-Reset`        | Seconds until rate limit resets                  |
+
+## Related documents
+
+- [Trust artifacts](TRUST-ARTIFACTS.md)
+- [Verifier security model](specs/VERIFIER-SECURITY-MODEL.md)
+- [Stability contract](STABILITY-CONTRACT.md)
+- [Threat model](THREAT_MODEL.md)
+- [Compliance mappings](compliance/README.md)
+- [Reference verifier recipes](../surfaces/reference-verifier/README.md)

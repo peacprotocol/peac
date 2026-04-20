@@ -1131,3 +1131,15 @@ Implementations SHOULD warn when limits are exceeded but MAY accept larger value
   - PaymentEvidence: `aggregator` field for marketplace/platform identifiers, `splits[]` array for multi-party payment allocation with invariants (party required, amount or share required)
   - Subject Profile: `SubjectProfile` and `SubjectProfileSnapshot` optional catalogues for actor identity (human, org, agent); Section 8.4 privacy guidance
 - **v0.9.15 (2025-01-18)**: Initial normative behavior specification with control chain, SSRF protection, DPoP verification, and privacy constraints
+
+## Related documents
+
+- [Trust artifacts](../TRUST-ARTIFACTS.md)
+- [Stability contract](../STABILITY-CONTRACT.md)
+- [Threat model](../THREAT_MODEL.md)
+- [SLO](../SLO.md)
+- [Hosted Verify contract](../HOSTED_VERIFY_CONTRACT.md)
+- [Wire 0.2 specification](WIRE-0.2.md)
+- [Evidence carrier contract](EVIDENCE-CARRIER-CONTRACT.md)
+- [ISO/IEC 42001:2023 Clause 8 mapping](../compliance/ISO-42001-MAPPING.md)
+- [EU AI Act Annex IV mapping](../compliance/EU-AI-ACT-ANNEX-IV-MAPPING.md)

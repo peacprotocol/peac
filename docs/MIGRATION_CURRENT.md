@@ -93,9 +93,9 @@ import { generateKeypair, verify } from '@peac/crypto';
 | `enforce()`       | Use middleware: `@peac/middleware-express` | `@peac/middleware-express` |
 | `discover()`      | `discoverIssuer()`                         | `@peac/disc`               |
 
-## From legacy API `/verify` to `/api/v1/verify`
+## From legacy API `/verify` to `/v1/verify`
 
-The legacy `/verify` endpoint is deprecated (Sunset: Nov 1, 2026). Migrate to `/api/v1/verify`.
+The legacy `/verify` endpoint is deprecated (Sunset: Nov 1, 2026). Migrate to the canonical `/v1/verify`. The `/api/v1/verify` path remains wired as a deprecated alias and resolves to the same handler; new code should use `/v1/verify`, which is the path documented in [`packages/schema/openapi/verify.yaml`](../packages/schema/openapi/verify.yaml) and [`docs/HOSTED_VERIFY_CONTRACT.md`](HOSTED_VERIFY_CONTRACT.md).
 
 ### Request
 
@@ -105,15 +105,15 @@ curl -X POST https://api.example.com/verify \
   -H "Content-Type: application/json" \
   -d '{"receipt": "<jws>"}'
 
-# After
-curl -X POST https://api.example.com/api/v1/verify \
+# After (canonical)
+curl -X POST https://api.example.com/v1/verify \
   -H "Content-Type: application/json" \
   -d '{"receipt": "<jws>"}'
 ```
 
 ### Response differences
 
-| Aspect             | Legacy `/verify` | Current `/api/v1/verify`                            |
+| Aspect             | Legacy `/verify` | Current `/v1/verify`                                |
 | ------------------ | ---------------- | --------------------------------------------------- |
 | Error format       | Custom JSON      | RFC 9457 Problem Details                            |
 | Rate limiting      | None             | `RateLimit-*` headers                               |
