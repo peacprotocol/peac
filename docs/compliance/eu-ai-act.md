@@ -1,10 +1,12 @@
-# EU AI Act Compliance with PEAC
+# EU AI Act companion guide
 
-How PEAC receipts and attestations support EU AI Act traceability requirements.
+How PEAC artifacts can support EU AI Act traceability, record-keeping, and audit evidence.
 
 > This is a companion article-style guide. For the artifact-centric technical-documentation mapping used for Annex IV, start with [EU AI Act Annex IV mapping](EU-AI-ACT-ANNEX-IV-MAPPING.md).
 
 **Applicability context:** Regulation (EU) 2024/1689 entered into force on 1 August 2024 and applies from 2 August 2026, with exceptions under Article 113.
+
+> **Historical examples below (non-normative).** The code and payload shapes in the sections that follow predate Wire 0.2 and use older field names (`receipt_id`, `purpose_declared`, `purpose_enforced`, `purpose_reason`, `issued_at`, `expires_at`). They remain here as article-style illustrations of how PEAC artifacts can support traceability, record-keeping, and audit evidence; they are not the current recommended shape. The current normative wire format is `interaction-record+jwt` as documented in [Wire 0.2 specification](../specs/WIRE-0.2.md). An example refresh to the current shape is scheduled for a follow-on PR in the v0.12.13 window. For the authoritative, artifact-centric mapping, use [EU AI Act Annex IV mapping](EU-AI-ACT-ANNEX-IV-MAPPING.md).
 
 ---
 

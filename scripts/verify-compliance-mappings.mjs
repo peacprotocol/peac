@@ -49,7 +49,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
 
-const MAPPINGS = [
+const DEFAULT_MAPPINGS = [
   {
     path: resolve(REPO_ROOT, 'docs/compliance/ISO-42001-MAPPING.md'),
     name: 'ISO 42001 mapping',
@@ -133,6 +133,17 @@ const CLAIM_LANGUAGE_REGEXES = [
 
 const args = process.argv.slice(2);
 const JSON_MODE = args.includes('--json');
+
+// --mapping <path> flags (repeatable) override the default mapping list.
+// Used by scripts/verify-compliance-mappings.test.mjs to target fixtures.
+const overrideMappings = [];
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--mapping' && args[i + 1]) {
+    overrideMappings.push({ path: resolve(args[i + 1]), name: args[i + 1] });
+    i += 1;
+  }
+}
+const MAPPINGS = overrideMappings.length > 0 ? overrideMappings : DEFAULT_MAPPINGS;
 
 const violations = [];
 
