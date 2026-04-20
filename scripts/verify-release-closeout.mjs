@@ -53,6 +53,7 @@ let stage = null;
 let skipRemote = false;
 let strict = false;
 let jsonOutput = false;
+let allowStampPending = false;
 let maxUpdatedAgeHours = 24;
 const targetedPackages = [];
 
@@ -80,6 +81,8 @@ for (let i = 0; i < args.length; i++) {
     strict = true;
   } else if (a === '--json') {
     jsonOutput = true;
+  } else if (a === '--allow-stamp-pending') {
+    allowStampPending = true;
   } else {
     process.stderr.write(`unknown argument: ${a}\n`);
     process.exit(2);
@@ -269,8 +272,16 @@ if (facts.__error) {
   if (!releaseDate || releaseDate === '') problems.push('release_date is empty');
   if (facts_version && facts_version !== version) problems.push(`version=${facts_version} (expected ${version})`);
   const expectedDistTag = stage === 'publish' ? 'next' : 'latest';
+  // --allow-stamp-pending: at stage=promote the post-promote stamp PR has
+  // not landed yet when this runs inline in promote-latest.yml, so
+  // facts.json.dist_tag is still `next`. Accept either `next` or `latest`
+  // in that narrow window. Local strict runs after the stamp PR merges do
+  // not pass this flag and get the full strict check.
   if (distTag && distTag !== expectedDistTag) {
-    problems.push(`dist_tag=${distTag} (expected ${expectedDistTag})`);
+    const allowed = allowStampPending && stage === 'promote' && distTag === 'next';
+    if (!allowed) {
+      problems.push(`dist_tag=${distTag} (expected ${expectedDistTag})`);
+    }
   }
   row(
     'facts.json',
