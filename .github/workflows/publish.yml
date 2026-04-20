@@ -44,6 +44,25 @@ on:
         description: 'Tag to publish (e.g., v0.10.4) - only for manual dispatch'
         type: string
         required: false
+      dist_tag:
+        description: 'npm dist-tag (next for Mode 2 soak, latest for Mode 1 single-step)'
+        type: choice
+        options:
+          - auto
+          - next
+          - latest
+        default: auto
+      skip_release:
+        description: 'Skip GitHub Release creation'
+        type: boolean
+        default: false
+      release_stage_1_mode:
+        description: 'Mode 2 stage 1 GitHub Release state (draft or prerelease) before promote to latest'
+        type: choice
+        options:
+          - draft
+          - prerelease
+        default: draft
 
 # Prevent concurrent publish runs
 concurrency:
@@ -55,8 +74,6 @@ concurrency:
 permissions: {}
 
 env:
-  # npm dist-tag: 'next' for v0.x, 'latest' for v1.0+
-  NPM_TAG: next
   # Pinned npm CLI version for Trusted Publishing
   NPM_VERSION: '11.5.1'
   # Disable Turborepo telemetry in CI
@@ -77,6 +94,9 @@ jobs:
       is_dry_run: ${{ steps.check.outputs.is_dry_run }}
       tag_ref: ${{ steps.extract.outputs.tag_ref }}
       package_count: ${{ steps.count.outputs.count }}
+      npm_tag: ${{ steps.resolve_tag.outputs.npm_tag }}
+      skip_release: ${{ steps.resolve_tag.outputs.skip_release }}
+      release_stage_1_mode: ${{ steps.resolve_tag.outputs.release_stage_1_mode }}
     steps:
       # SHA-pinned for supply chain security (v4.x)
       - name: Checkout
@@ -153,6 +173,55 @@ jobs:
           fi
           echo "is_dry_run=$IS_DRY_RUN" >> $GITHUB_OUTPUT
           echo "Dry run: $IS_DRY_RUN"
+
+      - name: Resolve npm dist-tag and release options
+        id: resolve_tag
+        env:
+          DIST_TAG_INPUT: ${{ inputs.dist_tag }}
+          SKIP_RELEASE_INPUT: ${{ inputs.skip_release }}
+          STAGE_1_MODE_INPUT: ${{ inputs.release_stage_1_mode }}
+        run: |
+          TAG="${{ steps.extract.outputs.tag_ref }}"
+          VERSION="${{ steps.extract.outputs.version }}"
+
+          # Resolution order for npm dist-tag:
+          #   1. Explicit workflow_dispatch input (next / latest).
+          #   2. Tag prefix (v0.x.y -> next; v1+ -> latest).
+          #   3. Fallback: next.
+          # v0.x.y-rc.* always forces next regardless of input.
+
+          NPM_TAG=""
+          if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc ]]; then
+            NPM_TAG="next"
+            echo "RC tag detected; forcing npm_tag=next"
+          elif [ "${DIST_TAG_INPUT:-auto}" = "next" ] || [ "${DIST_TAG_INPUT:-auto}" = "latest" ]; then
+            NPM_TAG="${DIST_TAG_INPUT}"
+            echo "Using workflow_dispatch dist_tag input: $NPM_TAG"
+          else
+            case "$TAG" in
+              v0.*)
+                NPM_TAG="next"
+                ;;
+              *)
+                NPM_TAG="latest"
+                ;;
+            esac
+            echo "Resolved from tag prefix: $NPM_TAG"
+          fi
+
+          {
+            echo "npm_tag=$NPM_TAG"
+            echo "skip_release=${SKIP_RELEASE_INPUT:-false}"
+            echo "release_stage_1_mode=${STAGE_1_MODE_INPUT:-draft}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "Resolved publish options:"
+          echo "  tag:                  $TAG"
+          echo "  version:              $VERSION"
+          echo "  npm_tag:              $NPM_TAG"
+          echo "  skip_release:         ${SKIP_RELEASE_INPUT:-false}"
+          echo "  release_stage_1_mode: ${STAGE_1_MODE_INPUT:-draft}"
 
       - name: Enable Corepack
         run: |
@@ -321,7 +390,7 @@ jobs:
         run: |
           echo "=== DRY RUN MODE ==="
           echo "Validating publish for ${{ needs.preflight.outputs.package_count }} packages @ ${{ needs.preflight.outputs.version }}"
-          echo "npm tag: ${{ env.NPM_TAG }}"
+          echo "npm tag: ${{ needs.preflight.outputs.npm_tag }}"
           echo ""
           echo "This runs 'pnpm publish --dry-run' to catch packaging issues."
           echo ""
@@ -329,7 +398,7 @@ jobs:
           # Run publish script with real --dry-run to validate packaging
           node scripts/publish-public.mjs \
             --dry-run \
-            --tag=${{ env.NPM_TAG }} \
+            --tag=${{ needs.preflight.outputs.npm_tag }} \
             --strict
 
       - name: Summary
@@ -338,7 +407,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${{ needs.preflight.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Tag:** ${{ needs.preflight.outputs.tag_ref }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **npm tag:** ${{ env.NPM_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **npm tag:** ${{ needs.preflight.outputs.npm_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Packages:** ${{ needs.preflight.outputs.package_count }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Mode:** Dry run (no packages published)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -426,7 +495,7 @@ jobs:
         run: |
           echo "=== PRODUCTION PUBLISH ==="
           echo "Publishing ${{ needs.preflight.outputs.package_count }} packages @ ${{ needs.preflight.outputs.version }}"
-          echo "npm tag: ${{ env.NPM_TAG }}"
+          echo "npm tag: ${{ needs.preflight.outputs.npm_tag }}"
           echo "Authentication: GitHub OIDC (Trusted Publishing)"
           echo "Provenance: Enabled"
           echo ""
@@ -437,7 +506,7 @@ jobs:
           # Note: --strict removed to allow incremental OIDC rollout
           # (only packages in manifest with Trusted Publishing configured are published)
           node scripts/publish-public.mjs \
-            --tag=${{ env.NPM_TAG }} \
+            --tag=${{ needs.preflight.outputs.npm_tag }} \
             --skip-existing \
             --provenance
 
@@ -533,7 +602,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${{ needs.preflight.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Tag:** ${{ needs.preflight.outputs.tag_ref }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **npm tag:** ${{ env.NPM_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **npm tag:** ${{ needs.preflight.outputs.npm_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Packages:** ${{ needs.preflight.outputs.package_count }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Authentication:** GitHub OIDC (Trusted Publishing)" >> $GITHUB_STEP_SUMMARY
           echo "- **Provenance:** Enabled" >> $GITHUB_STEP_SUMMARY
@@ -547,3 +616,137 @@ jobs:
           echo "After verifying packages work correctly, consider:" >> $GITHUB_STEP_SUMMARY
           echo "- Enabling 'Require 2FA and disallow tokens' in npm org settings" >> $GITHUB_STEP_SUMMARY
           echo "- This locks publishing to Trusted Publishers only" >> $GITHUB_STEP_SUMMARY
+
+  # ==========================================================================
+  # GitHub Release automation
+  # ==========================================================================
+  # Stage 1 (post-publish): runs after packages publish to the npm dist-tag.
+  # If the resolved dist-tag is "next" (Mode 2 soak), the GitHub Release is
+  # created or refreshed as draft or prerelease per release_stage_1_mode.
+  # If the resolved dist-tag is "latest" (Mode 1 single-step), the release is
+  # finalized immediately as non-draft and non-prerelease.
+  # Stage 2 (post-promote) lives in promote-latest.yml and runs after the
+  # npm-production environment approval flips the dist-tag to latest.
+  # ==========================================================================
+  github_release_stage1:
+    name: GitHub Release (stage 1)
+    needs: [preflight, publish_prod]
+    if: needs.preflight.outputs.is_dry_run == 'false' && needs.preflight.outputs.skip_release != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.preflight.outputs.tag_ref }}
+          persist-credentials: false
+
+      - name: Extract release notes and title from CHANGELOG
+        id: notes
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+        run: |
+          set -euo pipefail
+          NOTES_PATH="$RUNNER_TEMP/release-notes.md"
+          node scripts/extract-changelog-entry.mjs --version "$VERSION" > "$NOTES_PATH"
+          RELEASE_TITLE=$(node scripts/extract-changelog-entry.mjs --version "$VERSION" --title-only)
+          {
+            echo "notes_path=$NOTES_PATH"
+            echo "release_title=$RELEASE_TITLE"
+          } >> "$GITHUB_OUTPUT"
+          echo "Release notes extracted to $NOTES_PATH"
+          echo "Release title: $RELEASE_TITLE"
+          echo "--- notes preview (first 40 lines) ---"
+          head -40 "$NOTES_PATH"
+          echo "---"
+
+      - name: Create or refresh GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.preflight.outputs.tag_ref }}
+          NPM_TAG: ${{ needs.preflight.outputs.npm_tag }}
+          STAGE_1_MODE: ${{ needs.preflight.outputs.release_stage_1_mode }}
+          NOTES_PATH: ${{ steps.notes.outputs.notes_path }}
+          RELEASE_TITLE: ${{ steps.notes.outputs.release_title }}
+        run: |
+          set -euo pipefail
+
+          # Check whether a release already exists at this tag.
+          if gh release view "$TAG" --json tagName > /dev/null 2>&1; then
+            echo "Existing release found at $TAG; refreshing."
+            EXISTS=true
+          else
+            echo "No existing release at $TAG; creating."
+            EXISTS=false
+          fi
+
+          # Mode 1 single-step latest: release is finalized now.
+          # Mode 2 two-step next -> latest: release is draft or prerelease
+          # and will be finalized by the stage 2 step in promote-latest.yml.
+          if [ "$NPM_TAG" = "latest" ]; then
+            if [ "$EXISTS" = "true" ]; then
+              gh release edit "$TAG" \
+                --draft=false \
+                --prerelease=false \
+                --title "$RELEASE_TITLE" \
+                --notes-file "$NOTES_PATH"
+            else
+              gh release create "$TAG" \
+                --title "$RELEASE_TITLE" \
+                --notes-file "$NOTES_PATH"
+            fi
+            echo "Release finalized (non-draft, non-prerelease): $RELEASE_TITLE"
+          else
+            # next: draft or prerelease per operator choice.
+            case "$STAGE_1_MODE" in
+              prerelease)
+                DRAFT_FLAG="--draft=false"
+                PRE_FLAG="--prerelease"
+                PRE_EDIT_FLAG="--prerelease=true"
+                DRAFT_EDIT_FLAG="--draft=false"
+                ;;
+              draft|*)
+                DRAFT_FLAG="--draft"
+                PRE_FLAG=""
+                PRE_EDIT_FLAG="--prerelease=false"
+                DRAFT_EDIT_FLAG="--draft=true"
+                ;;
+            esac
+
+            if [ "$EXISTS" = "true" ]; then
+              # shellcheck disable=SC2086 # boolean flag pair is intentional here
+              gh release edit "$TAG" \
+                $DRAFT_EDIT_FLAG \
+                $PRE_EDIT_FLAG \
+                --title "$RELEASE_TITLE" \
+                --notes-file "$NOTES_PATH"
+            else
+              # shellcheck disable=SC2086 # boolean flag pair is intentional here
+              gh release create "$TAG" \
+                --title "$RELEASE_TITLE" \
+                $DRAFT_FLAG \
+                $PRE_FLAG \
+                --notes-file "$NOTES_PATH"
+            fi
+            echo "Release staged (stage 1 = $STAGE_1_MODE, title=$RELEASE_TITLE); stage 2 runs after promote-latest."
+          fi
+
+      - name: Summary
+        env:
+          TAG: ${{ needs.preflight.outputs.tag_ref }}
+          NPM_TAG: ${{ needs.preflight.outputs.npm_tag }}
+          STAGE_1_MODE: ${{ needs.preflight.outputs.release_stage_1_mode }}
+        run: |
+          {
+            echo "## GitHub Release (stage 1) Summary"
+            echo ""
+            echo "- **Tag:** ${TAG}"
+            echo "- **npm tag:** ${NPM_TAG}"
+            if [ "${NPM_TAG}" = "latest" ]; then
+              echo "- **Release state:** finalized (non-draft, non-prerelease)"
+            else
+              echo "- **Release state:** stage 1 (${STAGE_1_MODE}); stage 2 finalizes after promote-latest"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
