@@ -9,7 +9,7 @@ Both categories share one discipline: every entry cites a public, verifiable art
 
 ## External proof admissibility
 
-The external proof loop honest gate distinguishes between evidence that counts and evidence that does not. This admissibility block is enforced when a case study is proposed as external proof in a release note.
+The admissibility rules below distinguish between evidence that counts as external proof and evidence that does not. These rules apply when a case study is referenced from a release note.
 
 ### Counts as external proof
 
