@@ -41,6 +41,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_ROOT = join(__dirname, '..');
@@ -283,6 +284,26 @@ if (check) {
 }
 
 const changed = runApply(ops);
+
+// --publish mutates REPO_SURFACE_STATUS.json.updated. The derived docs
+// (docs/SURFACE_STATUS.md, docs/PACKAGE_STATUS.md) are regenerated from
+// that JSON by scripts/generate-surface-status.mjs. Re-run the generator
+// here so a stamp-only PR does not trip the Generated Status Doc Drift
+// guard in CI. Skipped on dry-run and on --promote (promote does not
+// touch REPO_SURFACE_STATUS.json).
+if (!dryRun && !check && mode === 'publish' && changed > 0) {
+  const generator = join(ROOT, 'scripts/generate-surface-status.mjs');
+  if (existsSync(generator)) {
+    const result = spawnSync('node', [generator], {
+      cwd: ROOT,
+      stdio: 'inherit',
+    });
+    if (result.status !== 0) {
+      console.error('ERROR: generate-surface-status.mjs failed');
+      process.exit(2);
+    }
+  }
+}
 
 console.log('');
 if (dryRun) {

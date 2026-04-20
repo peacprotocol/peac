@@ -230,10 +230,21 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
+          # The checkout step above does a shallow fetch by default and
+          # does not pull tag refs. The closeout reconciler needs the
+          # release tag locally to verify it is reachable from origin/main.
+          git fetch --tags --force origin "refs/tags/v${VERSION}:refs/tags/v${VERSION}" || true
+          git fetch origin main || true
           echo "Running scripts/verify-release-closeout.mjs --version $VERSION --stage promote ..."
+          # --allow-stamp-pending: when this step runs inline the
+          # post-promote stamp PR has not landed yet, so facts.json
+          # still carries dist_tag=next. Accept that in this narrow
+          # window. A strict local run after the stamp PR merges does
+          # not pass this flag and gets the full dist_tag=latest check.
           node scripts/verify-release-closeout.mjs \
             --version "$VERSION" \
             --stage promote \
+            --allow-stamp-pending \
             --max-updated-age-hours 72
 
       - name: Summary

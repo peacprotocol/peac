@@ -7,7 +7,7 @@
  * offline skip-remote path using the live repository artifacts (the live
  * `docs/releases/facts.json`, `docs/releases/current.json`, and
  * `REPO_SURFACE_STATUS.json` are read against the current shipped version
- * 0.12.12 which is known GREEN). Remote npm / gh paths are not exercised
+ * 0.12.13 which is known GREEN). Remote npm / gh paths are not exercised
  * here so tests stay deterministic.
  *
  * Cases:
@@ -15,9 +15,10 @@
  *   2. invalid --stage: exit 2 with stage-message error
  *   3. unknown argument: exit 2
  *   4. "--" sentinel accepted
- *   5. --skip-remote --stage promote on v0.12.12: exit 0 with 0 RED
+ *   5. --skip-remote --stage promote on v0.12.13: exit 0 with 0 RED
  *   6. --json emits parseable JSON with rows and counts
  *   7. --strict flips exit code to 1 when any YELLOW row is present
+ *   8. --allow-stamp-pending is accepted and keeps a GREEN facts.json GREEN
  */
 
 import { execFileSync } from 'node:child_process';
@@ -64,7 +65,7 @@ try {
   );
 
   // Case 2: invalid stage.
-  const badStage = run(['--version', '0.12.12', '--stage', 'nope']);
+  const badStage = run(['--version', '0.12.13', '--stage', 'nope']);
   expect(
     'invalid --stage exits 2',
     badStage.exitCode === 2 && badStage.stderr.includes('--stage must be one of'),
@@ -72,7 +73,7 @@ try {
   );
 
   // Case 3: unknown argument.
-  const unknown = run(['--version', '0.12.12', '--stage', 'promote', '--what']);
+  const unknown = run(['--version', '0.12.13', '--stage', 'promote', '--what']);
   expect(
     'unknown argument exits 2',
     unknown.exitCode === 2 && unknown.stderr.includes('unknown argument'),
@@ -83,7 +84,7 @@ try {
   const sentinel = run([
     '--',
     '--version',
-    '0.12.12',
+    '0.12.13',
     '--stage',
     'promote',
     '--skip-remote',
@@ -92,14 +93,14 @@ try {
   ]);
   expect(
     '"--" sentinel is accepted',
-    sentinel.exitCode === 0 && sentinel.stdout.includes('version=0.12.12 stage=promote'),
+    sentinel.exitCode === 0 && sentinel.stdout.includes('version=0.12.13 stage=promote'),
     `exit=${sentinel.exitCode} stdout=${JSON.stringify(sentinel.stdout.slice(0, 200))}`
   );
 
-  // Case 5: --skip-remote --stage promote on v0.12.12: exit 0, zero RED.
+  // Case 5: --skip-remote --stage promote on v0.12.13: exit 0, zero RED.
   const offline = run([
     '--version',
-    '0.12.12',
+    '0.12.13',
     '--stage',
     'promote',
     '--skip-remote',
@@ -107,7 +108,7 @@ try {
     '2000',
   ]);
   expect(
-    '--skip-remote on v0.12.12 exits 0 with zero RED',
+    '--skip-remote on v0.12.13 exits 0 with zero RED',
     offline.exitCode === 0 &&
       offline.stdout.includes('0 RED') &&
       offline.stdout.includes('[GREEN] git-tag'),
@@ -117,7 +118,7 @@ try {
   // Case 6: --json emits valid JSON with rows and counts.
   const jsonRun = run([
     '--version',
-    '0.12.12',
+    '0.12.13',
     '--stage',
     'promote',
     '--skip-remote',
@@ -135,7 +136,7 @@ try {
     '--json emits parseable JSON with rows and counts',
     jsonRun.exitCode === 0 &&
       parsed &&
-      parsed.version === '0.12.12' &&
+      parsed.version === '0.12.13' &&
       parsed.stage === 'promote' &&
       Array.isArray(parsed.rows) &&
       parsed.rows.length >= 4 &&
@@ -149,7 +150,7 @@ try {
   // --strict must produce a nonzero exit.
   const strict = run([
     '--version',
-    '0.12.12',
+    '0.12.13',
     '--stage',
     'promote',
     '--skip-remote',
@@ -161,6 +162,27 @@ try {
     '--strict fails on YELLOW rows',
     strict.exitCode === 1 && strict.stdout.includes('YELLOW'),
     `exit=${strict.exitCode} stdout=${JSON.stringify(strict.stdout)}`
+  );
+
+  // Case 8: --allow-stamp-pending is accepted at stage=promote and does
+  // not regress an already-stamped facts.json. Live facts.json has
+  // dist_tag=latest, so the facts.json row stays GREEN either way.
+  const allowPending = run([
+    '--version',
+    '0.12.13',
+    '--stage',
+    'promote',
+    '--skip-remote',
+    '--max-updated-age-hours',
+    '2000',
+    '--allow-stamp-pending',
+  ]);
+  expect(
+    '--allow-stamp-pending keeps a GREEN facts.json GREEN',
+    allowPending.exitCode === 0 &&
+      allowPending.stdout.includes('[GREEN] facts.json') &&
+      allowPending.stdout.includes('0 RED'),
+    `exit=${allowPending.exitCode} stdout=${JSON.stringify(allowPending.stdout)}`
   );
 } catch (err) {
   failures += 1;
