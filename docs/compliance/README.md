@@ -5,7 +5,7 @@ Artifact-centric, non-claiming mappings between PEAC surfaces and common complia
 ## Standards and regulatory mappings
 
 - [ISO/IEC 42001:2023 Clause 8 mapping](ISO-42001-MAPPING.md) - operational planning and control objectives, with cross-references to Clauses 6.1, 7.5, 9, 10, and Annex A.
-- [EU AI Act Annex IV mapping](EU-AI-ACT-ANNEX-IV-MAPPING.md) - technical-documentation points §1(a) through §5. Applicability context: general application and transparency provisions of Regulation (EU) 2024/1689 become applicable from 2 August 2026; the regulation entered into force on 1 August 2024.
+- [EU AI Act Annex IV mapping](EU-AI-ACT-ANNEX-IV-MAPPING.md) - technical-documentation points §1(a) through §5. Applicability context: Regulation (EU) 2024/1689 entered into force on 1 August 2024 and applies from 2 August 2026, with exceptions under Article 113.
 
 ## Additional compliance guides
 

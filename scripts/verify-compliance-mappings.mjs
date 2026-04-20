@@ -6,25 +6,31 @@
  * artifact-centric, non-claiming discipline. Fail-closed on any violation.
  *
  * Checks:
- *   1. Every table row in each mapping doc has a non-empty Artifact Surface
+ *   1. Every table row in each mapping doc has a non-empty Artifact surface
  *      column containing at least one markdown link OR the literal "-"
- *      placeholder when and only when the Coverage Qualifier is
+ *      placeholder when and only when the Coverage qualifier is
  *      "out-of-scope for PEAC".
- *   2. Every markdown link in the Artifact Surface column resolves to a
+ *   2. Every markdown link in the Artifact surface column resolves to a
  *      real path under the repository.
- *   3. Every row's Coverage Qualifier is in the allowed vocabulary
+ *   3. Every row's Coverage qualifier is in the allowed vocabulary
  *      (ALLOWED_QUALIFIERS below).
  *   4. Every row's Non-claim column begins with one of the allowed
  *      non-claim patterns (ALLOWED_NON_CLAIMS below).
- *   5. Rows whose Coverage Qualifier is supportive ("supports",
+ *   5. Rows whose Coverage qualifier is supportive ("supports",
  *      "helps evidence", "provides supporting artifact for") MUST carry
- *      operator-owned action language in the Non-claim column ("operator-
- *      owned" OR "PEAC does not ..." OR "requires upstream attestation").
- *   6. No row prose is a prose-only row: every row cites at least one
- *      concrete artifact surface (markdown link) OR the row is an
- *      out-of-scope row with "-" placeholder.
+ *      operator-owned action language in the Non-claim column.
+ *   6. No row is a prose-only row: every non-out-of-scope row cites at
+ *      least one concrete artifact surface (markdown link).
  *   7. No body text in either mapping doc matches any claim-language
  *      regex in CLAIM_LANGUAGE_REGEXES.
+ *   8. Every non-out-of-scope row MUST include at least one outward-facing
+ *      stable artifact surface from the STABLE_SURFACE_PREFIXES allow-list
+ *      in its Artifact surface column. Internal `src/` paths may appear
+ *      only as secondary links.
+ *   9. Every row MUST include a Verification hint column value (non-empty,
+ *      not "-" unless the row is out-of-scope).
+ *  10. Every markdown link in the Cross-reference column that is a
+ *      repo-relative path MUST resolve to a real path.
  *
  * Usage:
  *   node scripts/verify-compliance-mappings.mjs        # human-readable
@@ -47,12 +53,10 @@ const MAPPINGS = [
   {
     path: resolve(REPO_ROOT, 'docs/compliance/ISO-42001-MAPPING.md'),
     name: 'ISO 42001 mapping',
-    firstCellPattern: /^(Clause\s|Annex\sA\s|8\.[1-4]|Clause\s[6-9]|Clause\s10\.)/i,
   },
   {
     path: resolve(REPO_ROOT, 'docs/compliance/EU-AI-ACT-ANNEX-IV-MAPPING.md'),
     name: 'EU AI Act Annex IV mapping',
-    firstCellPattern: /^[1-5](\([a-h]\))?$/,
   },
 ];
 
@@ -81,8 +85,7 @@ const ALLOWED_NON_CLAIMS = [
 ];
 
 // Operator-owned markers for supportive-qualifier rows. Accepts the short
-// label form ("operator-owned") and natural prose variants
-// ("the operator owns", "the provider owns", "the deployer owns").
+// label form ("operator-owned") and natural prose variants.
 const OPERATOR_OWNED_MARKERS = [
   'operator-owned',
   'PEAC does not',
@@ -99,8 +102,21 @@ const OPERATOR_OWNED_MARKERS = [
   'the deployer owns',
 ];
 
+// Outward-facing stable artifact-surface prefixes. A non-out-of-scope row's
+// Artifact surface column MUST include at least one link to one of these.
+// Internal `src/` paths are allowed only as secondary links.
+const STABLE_SURFACE_PREFIXES = [
+  'docs/',
+  'specs/',
+  'contracts/',
+  'surfaces/',
+  'packages/schema/openapi/',
+  'REPO_SURFACE_STATUS.json',
+  'CHANGELOG.md',
+];
+
 // Claim-language regex list. Every regex runs against the body text of both
-// mapping docs. Any match is a violation.
+// mapping docs. Any match outside explicit negation context is a violation.
 const CLAIM_LANGUAGE_REGEXES = [
   /\bcertified\b/i,
   /\bcomplies\s+with\b/i,
@@ -142,20 +158,36 @@ function resolveRepoPath(docPath, linkTarget) {
 }
 
 function stripMdLinks(text) {
-  // Replace `[text](url)` with just `text` for prose scanning.
   return text.replace(/(?<!\!)\[([^\]]+)\]\([^)\s]+(?:\s+"[^"]*")?\)/g, '$1');
 }
 
 function parseTableRow(line) {
-  // Returns cells trimmed, dropping the two empty bookends.
   if (!line.startsWith('|') || !line.endsWith('|')) return null;
   const cells = line.split('|').map((c) => c.trim());
-  // Drop first and last empty strings from the leading/trailing pipes.
   return cells.slice(1, -1);
 }
 
 function isTableSeparator(line) {
   return /^\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|$/.test(line);
+}
+
+function linkTargetRepoRelative(docPath, linkTarget) {
+  // Return the repo-relative form of a link target (or null if external).
+  if (!linkTarget) return null;
+  if (linkTarget.startsWith('http://') || linkTarget.startsWith('https://')) return null;
+  if (linkTarget.startsWith('mailto:')) return null;
+  const abs = resolveRepoPath(docPath, linkTarget);
+  if (!abs) return null;
+  return relative(REPO_ROOT, abs);
+}
+
+function matchesStableSurface(repoRelPath) {
+  if (!repoRelPath) return false;
+  return STABLE_SURFACE_PREFIXES.some((prefix) =>
+    prefix.endsWith('/')
+      ? repoRelPath.startsWith(prefix)
+      : repoRelPath === prefix || repoRelPath.startsWith(prefix + '/')
+  );
 }
 
 function verifyMapping(mapping) {
@@ -166,20 +198,15 @@ function verifyMapping(mapping) {
 
   const lines = readLines(mapping.path);
 
-  // First: scan body text for claim-language regex hits (excludes table
-  // rows entirely; allowed qualifiers contain "supports" etc. but claim
-  // regexes target free prose). We strip markdown links to avoid false
-  // positives on link text.
+  // Body claim-language scan (excludes table rows and headings).
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
-    if (raw.startsWith('|')) continue; // skip table rows
-    if (raw.startsWith('#')) continue; // skip headings
+    if (raw.startsWith('|')) continue;
+    if (raw.startsWith('#')) continue;
     const stripped = stripMdLinks(raw);
     for (const re of CLAIM_LANGUAGE_REGEXES) {
       const m = stripped.match(re);
       if (!m) continue;
-      // Allow the regex hit if it is inside a "PEAC does not ..." negation
-      // or explicitly a non-claim statement.
       const context = stripped;
       const mIdx = context.indexOf(m[0]);
       const before = context.slice(Math.max(0, mIdx - 32), mIdx);
@@ -195,11 +222,7 @@ function verifyMapping(mapping) {
     }
   }
 
-  // Table scanning: find the primary mapping table and verify each row.
-  // Heuristic: look for the header row containing "Coverage qualifier" and
-  // "Non-claim" as column labels. The separator row follows. Data rows
-  // follow until the next blank line or heading.
-
+  // Find the mapping table header row.
   let headerLineIdx = -1;
   for (let i = 0; i < lines.length; i++) {
     const cells = parseTableRow(lines[i]);
@@ -223,20 +246,31 @@ function verifyMapping(mapping) {
 
   const headerCells = parseTableRow(lines[headerLineIdx]).map((c) => c.toLowerCase());
   const colArtifact = headerCells.indexOf('artifact surface');
+  const colHint = headerCells.indexOf('verification hint');
   const colQualifier = headerCells.indexOf('coverage qualifier');
   const colNonClaim = headerCells.indexOf('non-claim');
+  const colCrossRef = headerCells.indexOf('cross-reference');
 
-  if (colArtifact === -1 || colQualifier === -1 || colNonClaim === -1) {
-    addViolation(
-      'mapping-header-columns',
-      mapping.path,
-      headerLineIdx + 1,
-      `${mapping.name}: header missing one of Artifact surface, Coverage qualifier, Non-claim`
-    );
-    return;
+  const requiredCols = {
+    'Artifact surface': colArtifact,
+    'Verification hint': colHint,
+    'Coverage qualifier': colQualifier,
+    'Non-claim': colNonClaim,
+    'Cross-reference': colCrossRef,
+  };
+  for (const [name, idx] of Object.entries(requiredCols)) {
+    if (idx === -1) {
+      addViolation(
+        'mapping-header-columns',
+        mapping.path,
+        headerLineIdx + 1,
+        `${mapping.name}: header missing column "${name}"`
+      );
+    }
   }
+  if (Object.values(requiredCols).some((i) => i === -1)) return;
 
-  // Data rows start two lines after header (header + separator).
+  // Data rows follow the header + separator.
   for (let i = headerLineIdx + 2; i < lines.length; i++) {
     const line = lines[i];
     if (line === '' || line.startsWith('#')) break;
@@ -245,10 +279,12 @@ function verifyMapping(mapping) {
     if (!cells || cells.length !== headerCells.length) continue;
 
     const artifactCell = cells[colArtifact];
+    const hintCell = cells[colHint];
     const qualifierCell = cells[colQualifier];
     const nonClaimCell = cells[colNonClaim];
+    const crossRefCell = cells[colCrossRef];
 
-    // Check Coverage Qualifier vocabulary.
+    // Qualifier vocabulary.
     if (!ALLOWED_QUALIFIERS.has(qualifierCell)) {
       addViolation(
         'qualifier-vocabulary',
@@ -258,12 +294,11 @@ function verifyMapping(mapping) {
       );
     }
 
-    // Check Artifact Surface presence.
-    const mdLinks = [...artifactCell.matchAll(MD_LINK_RE)].map((x) => x[1]);
     const isOutOfScope = qualifierCell === 'out-of-scope for PEAC';
+    const mdLinks = [...artifactCell.matchAll(MD_LINK_RE)].map((x) => x[1]);
 
+    // Artifact surface presence and link resolution.
     if (isOutOfScope) {
-      // Accept a literal "-" placeholder OR a valid artifact link set.
       if (artifactCell !== '-' && mdLinks.length === 0) {
         addViolation(
           'out-of-scope-placeholder',
@@ -278,7 +313,7 @@ function verifyMapping(mapping) {
           'missing-artifact',
           mapping.path,
           i + 1,
-          `row has no markdown link in Artifact Surface column (prose-only row rejected)`
+          `row has no markdown link in Artifact surface column (prose-only row rejected)`
         );
       }
       for (const link of mdLinks) {
@@ -295,9 +330,40 @@ function verifyMapping(mapping) {
           );
         }
       }
+
+      // Stable-surface rule: at least one link must point at an outward-
+      // facing stable surface. Internal src/ paths do not satisfy this.
+      const repoRelTargets = mdLinks
+        .map((link) => linkTargetRepoRelative(mapping.path, link))
+        .filter((p) => p !== null);
+      const hasStableSurface = repoRelTargets.some(matchesStableSurface);
+      if (!hasStableSurface) {
+        addViolation(
+          'missing-stable-surface',
+          mapping.path,
+          i + 1,
+          `row has no outward-facing stable artifact surface (one of [${STABLE_SURFACE_PREFIXES.join(', ')}])`
+        );
+      }
     }
 
-    // Check Non-claim opener.
+    // Verification hint presence.
+    if (isOutOfScope) {
+      if (hintCell !== '-' && hintCell !== '') {
+        // permissive: either "-" or empty for out-of-scope rows
+      }
+    } else {
+      if (!hintCell || hintCell === '-' || hintCell.length < 10) {
+        addViolation(
+          'missing-verification-hint',
+          mapping.path,
+          i + 1,
+          `row has no Verification hint value (must describe a concrete path, endpoint, fixture, or CI command)`
+        );
+      }
+    }
+
+    // Non-claim opener.
     const nonClaimOk = ALLOWED_NON_CLAIMS.some((opener) => nonClaimCell.startsWith(opener));
     if (!nonClaimOk) {
       addViolation(
@@ -320,6 +386,23 @@ function verifyMapping(mapping) {
           mapping.path,
           i + 1,
           `supportive-qualifier row must carry operator-owned action language ([${OPERATOR_OWNED_MARKERS.join(' | ')}])`
+        );
+      }
+    }
+
+    // Cross-reference markdown link resolution.
+    const crossRefLinks = [...(crossRefCell || '').matchAll(MD_LINK_RE)].map((x) => x[1]);
+    for (const link of crossRefLinks) {
+      if (link.startsWith('http://') || link.startsWith('https://')) continue;
+      if (link.startsWith('mailto:')) continue;
+      const abs = resolveRepoPath(mapping.path, link);
+      if (!abs) continue;
+      if (!existsSync(abs)) {
+        addViolation(
+          'broken-cross-reference-link',
+          mapping.path,
+          i + 1,
+          `Cross-reference link does not resolve: ${link}`
         );
       }
     }

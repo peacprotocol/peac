@@ -87,10 +87,9 @@ verifier** unless a row is explicitly scoped to Hosted Verify.
   operational planning and control objectives mapped to supporting PEAC
   artifacts.
 - [EU AI Act Annex IV mapping](compliance/EU-AI-ACT-ANNEX-IV-MAPPING.md):
-  technical-documentation points §1(a) through §5 mapped to supporting
-  PEAC artifacts. Applicability context: general application and
-  transparency provisions of Regulation (EU) 2024/1689 become applicable
-  from 2 August 2026.
+  technical-documentation points 1(a) through 5 mapped to supporting
+  PEAC artifacts. Applicability context: Regulation (EU) 2024/1689
+  applies from 2 August 2026, with exceptions under Article 113.
 - [Compliance index](compliance/README.md): framing, non-claim statement,
   companion framework guides.
 
