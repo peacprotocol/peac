@@ -81,11 +81,20 @@ verifier** unless a row is explicitly scoped to Hosted Verify.
 - [Compatibility docs by protocol](compatibility/): commerce,
   runtime, A2A, MCP, Copilot, Go middleware.
 
+## Compliance mappings
+
+- [ISO/IEC 42001:2023 Clause 8 mapping](compliance/ISO-42001-MAPPING.md):
+  operational planning and control objectives mapped to supporting PEAC
+  artifacts.
+- [EU AI Act Annex IV mapping](compliance/EU-AI-ACT-ANNEX-IV-MAPPING.md):
+  technical-documentation points 1(a) through 5 mapped to supporting
+  PEAC artifacts. Applicability context: Regulation (EU) 2024/1689
+  applies from 2 August 2026, with exceptions under Article 113.
+- [Compliance index](compliance/README.md): framing, non-claim statement,
+  companion framework guides.
+
 ## Forward-looking
 
-- Compliance mappings (ISO 42001 Clause 8; EU AI Act Annex IV transparency
-  applicability context) are scheduled for a later release and will land
-  under `docs/compliance/`.
 - Execution-surface carriers (CLI execution evidence; observational
   lifecycle records) are scheduled for v0.14.1; their pre-doctrine
   security controls are declared in the

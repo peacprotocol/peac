@@ -1,25 +1,33 @@
-# PEAC Compliance
+# PEAC compliance mappings
 
-Compliance documentation for PEAC Protocol and how receipt-based auditability supports regulatory frameworks.
+Artifact-centric, non-claiming mappings between PEAC surfaces and common compliance and regulatory frameworks. Every mapping lists PEAC surfaces that can be used as supporting evidence toward specific framework requirements; no mapping claims conformity, certification, or end-to-end coverage.
 
-**Version:** 0.9.27+
+## Standards and regulatory mappings
 
-## Available Guides
+- [ISO/IEC 42001:2023 Clause 8 mapping](ISO-42001-MAPPING.md) - operational planning and control objectives, with cross-references to Clauses 6.1, 7.5, 9, 10, and Annex A.
+- [EU AI Act Annex IV mapping](EU-AI-ACT-ANNEX-IV-MAPPING.md) - technical-documentation points §1(a) through §5. Applicability context: Regulation (EU) 2024/1689 entered into force on 1 August 2024 and applies from 2 August 2026, with exceptions under Article 113.
 
-- [EU AI Act Compliance](eu-ai-act.md) - Traceability and transparency requirements (v0.9.26+)
-- [GDPR Compliance](gdpr.md) - Data protection and privacy (v0.9.27+)
-- [SOC 2 Compliance](soc2.md) - Trust Service Criteria audit support (v0.9.27+)
+## Additional compliance guides
 
-## Planned Coverage
+These pre-existing guides describe how PEAC records can help evidence specific regulatory frameworks. They pre-date the Clause-8 and Annex-IV mappings above and remain available as companions.
 
-- PCI DSS payment data handling
-- Additional compliance checklist templates
+- [EU AI Act (articles view)](eu-ai-act.md) - traceability, transparency, and record-keeping articles.
+- [GDPR](gdpr.md) - data protection and privacy.
+- [SOC 2](soc2.md) - Trust Service Criteria audit support.
 
-## Key Concepts
+## Scope and non-claim
 
-PEAC receipts provide cryptographically verifiable audit trails for regulated AI interactions and payment flows:
+- PEAC does not certify any operator, provider, or deployer against any framework.
+- PEAC does not implement an AI management system.
+- PEAC does not perform risk assessment, risk treatment, impact assessment, or conformity assessment.
+- PEAC does not substitute for operator-owned compliance processes.
 
-- **Receipts**: Signed proof of access decisions
-- **Attribution**: Chain from outputs to sources
-- **Purpose**: Declared and enforced intent
-- **Obligations**: Credit and contribution requirements
+Every mapping row on the standards-and-regulatory pages above cites a concrete PEAC artifact (spec, fixture, test, package, or generated artifact) and names explicitly what PEAC does not do for that row. Operators own the management-system activities; PEAC supplies the records and verification surfaces that management systems consume as evidence inputs.
+
+## Related documents
+
+- [Trust artifacts](../TRUST-ARTIFACTS.md)
+- [SECURITY.md](../../SECURITY.md)
+- [SLO](../SLO.md)
+- [Stability contract](../STABILITY-CONTRACT.md)
+- [Threat model](../THREAT_MODEL.md)

@@ -199,3 +199,4 @@ the [Threat model](THREAT_MODEL.md) forward-looking subsection.
 - [Threat model](THREAT_MODEL.md)
 - [SLO](SLO.md)
 - [Trust artifacts](TRUST-ARTIFACTS.md)
+- [Compliance mappings](compliance/README.md)
