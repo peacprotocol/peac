@@ -22,6 +22,14 @@ on:
         description: 'Dry run (check tags without changing them)'
         type: boolean
         default: true
+      skip_release_finalize:
+        description: 'Skip Stage 2 GitHub Release finalization (leave stage 1 state intact)'
+        type: boolean
+        default: false
+      skip_closeout_verify:
+        description: 'Skip the post-promote truth reconciler (verify-release-closeout)'
+        type: boolean
+        default: false
 
 concurrency:
   group: npm-promote
@@ -35,7 +43,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
-      contents: read
+      contents: write # Stage 2 GitHub Release finalization
     environment: npm-production
     steps:
       - name: Checkout
@@ -168,18 +176,97 @@ jobs:
             echo "This can be normal -- check again in a few minutes."
           fi
 
-      - name: Summary
-        run: |
-          VERSION="${{ inputs.version }}"
-          MODE="${{ inputs.dry_run == true && 'Dry Run' || 'Production' }}"
+      # ----------------------------------------------------------------------
+      # Stage 2: finalize the GitHub Release (post-promote to latest).
+      # Runs only on real promote (not dry run) and only when the operator
+      # has not set skip_release_finalize. Reads the release notes from
+      # CHANGELOG.md so edits between stage 1 and stage 2 propagate.
+      # ----------------------------------------------------------------------
+      - name: Checkout for Stage 2 finalize
+        if: ${{ !inputs.dry_run && !inputs.skip_release_finalize }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
-          echo "## Promote to Latest Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version:** $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "- **Packages:** ${{ steps.manifest.outputs.count }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Mode:** $MODE" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Verify" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "npm view @peac/protocol dist-tags" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+      - name: Finalize GitHub Release (Stage 2)
+        if: ${{ !inputs.dry_run && !inputs.skip_release_finalize }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+
+          if ! gh release view "$TAG" --json tagName > /dev/null 2>&1; then
+            echo "ERROR: no GitHub Release at $TAG to finalize"
+            echo "If this release was created with skip_release=true in publish.yml,"
+            echo "run promote-latest again with skip_release_finalize=true."
+            exit 1
+          fi
+
+          NOTES_PATH="$RUNNER_TEMP/release-notes.md"
+          node scripts/extract-changelog-entry.mjs --version "$VERSION" > "$NOTES_PATH"
+          RELEASE_TITLE=$(node scripts/extract-changelog-entry.mjs --version "$VERSION" --title-only)
+
+          gh release edit "$TAG" \
+            --draft=false \
+            --prerelease=false \
+            --title "$RELEASE_TITLE" \
+            --notes-file "$NOTES_PATH"
+
+          echo "Release $TAG finalized (non-draft, non-prerelease): $RELEASE_TITLE"
+
+      # ----------------------------------------------------------------------
+      # Post-promote truth reconciler. Runs after the dist-tag flip and the
+      # stage 2 release finalization to confirm every public surface agrees.
+      # --skip-remote is used because environment approval already gated the
+      # promote; the reconciler here validates local release-state artifacts
+      # plus npm/gh reachability.
+      # ----------------------------------------------------------------------
+      - name: Post-promote closeout verification
+        if: ${{ !inputs.dry_run && !inputs.skip_closeout_verify }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          echo "Running scripts/verify-release-closeout.mjs --version $VERSION --stage promote ..."
+          node scripts/verify-release-closeout.mjs \
+            --version "$VERSION" \
+            --stage promote \
+            --max-updated-age-hours 72
+
+      - name: Summary
+        env:
+          VERSION: ${{ inputs.version }}
+          MODE: ${{ inputs.dry_run == true && 'Dry Run' || 'Production' }}
+          COUNT: ${{ steps.manifest.outputs.count }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          SKIP_RELEASE_FINALIZE: ${{ inputs.skip_release_finalize }}
+          SKIP_CLOSEOUT_VERIFY: ${{ inputs.skip_closeout_verify }}
+        run: |
+          {
+            echo "## Promote to Latest Summary"
+            echo ""
+            echo "- **Version:** ${VERSION}"
+            echo "- **Packages:** ${COUNT}"
+            echo "- **Mode:** ${MODE}"
+            if [ "${DRY_RUN}" = "false" ]; then
+              if [ "${SKIP_RELEASE_FINALIZE}" = "false" ]; then
+                echo "- **GitHub Release:** Stage 2 finalized (non-draft, non-prerelease)"
+              else
+                echo "- **GitHub Release:** stage 2 finalize skipped per input"
+              fi
+              if [ "${SKIP_CLOSEOUT_VERIFY}" = "false" ]; then
+                echo "- **Closeout verify:** verify-release-closeout ran against --stage promote"
+              else
+                echo "- **Closeout verify:** skipped per input"
+              fi
+            fi
+            echo ""
+            echo "### Verify"
+            echo '```'
+            echo "npm view @peac/protocol dist-tags"
+            echo "node scripts/verify-release-closeout.mjs --version ${VERSION} --stage promote"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

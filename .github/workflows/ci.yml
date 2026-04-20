@@ -32,6 +32,8 @@ jobs:
       ci: ${{ steps.filter.outputs.ci }}
       root_config: ${{ steps.filter.outputs.root_config }}
       any_src: ${{ steps.filter.outputs.any_src }}
+      stamp_any: ${{ steps.filter.outputs.stamp_any }}
+      non_stamp: ${{ steps.filter.outputs.non_stamp }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -91,6 +93,24 @@ jobs:
               - 'examples/**'
               - 'apps/**'
               - 'scripts/**'
+            # Stamp-only allowlist: release-state stamping artifacts that
+            # are allowed to trigger the reduced stamp-PR CI profile. The
+            # companion `non_stamp` filter uses negations to flag any
+            # path outside this list; a PR is stamp-only when
+            # stamp_any == true and non_stamp == false.
+            stamp_any:
+              - 'docs/releases/facts.json'
+              - 'docs/releases/current.json'
+              - 'REPO_SURFACE_STATUS.json'
+              - 'docs/SURFACE_STATUS.md'
+              - 'docs/PACKAGE_STATUS.md'
+            non_stamp:
+              - '!docs/releases/facts.json'
+              - '!docs/releases/current.json'
+              - '!REPO_SURFACE_STATUS.json'
+              - '!docs/SURFACE_STATUS.md'
+              - '!docs/PACKAGE_STATUS.md'
+              - '**'
 
   # ---------------------------------------------------------------------------
   # Workflow lint: validates CI workflow files independently.
@@ -116,6 +136,40 @@ jobs:
 
       - name: Lint CI workflow
         run: /tmp/actionlint .github/workflows/ci.yml
+
+  # ---------------------------------------------------------------------------
+  # Stamp-only PR guard (defensive; runs only on stamp-only PRs)
+  # Confirms that every changed path is in the release-state stamp allowlist.
+  # The reduced stamp-PR CI profile is produced by the existing job-level
+  # `if:` conditions that gate heavy lanes on core/any_src/ci/root_config;
+  # stamp-only PRs touch none of those filters and naturally skip heavy
+  # lanes. This guard is defense in depth: if path classification ever
+  # misreports, the defensive check fails so a mislabelled stamp-profile
+  # run cannot pass silently.
+  # ---------------------------------------------------------------------------
+  stamp-only-guard:
+    name: Stamp-only PR guard
+    needs: detect-changes
+    if: >-
+      needs.detect-changes.outputs.stamp_any == 'true' &&
+      needs.detect-changes.outputs.non_stamp == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Verify stamp-only allowlist
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            BASE_SHA="origin/main"
+            git fetch origin main
+          fi
+          bash scripts/ci/check-stamp-only-pr.sh "$BASE_SHA" "$HEAD_SHA"
 
   # ---------------------------------------------------------------------------
   # Lane 1: Fast guards (always runs)
