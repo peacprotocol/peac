@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.12.13] - Unreleased
 
-Compliance mappings, verifier contract closeout, release tooling, Go middleware adapters, and benchmark gate. Documentation, tests, workflows, and SDK support tooling only. No wire, schema, kernel, crypto, or protocol public-API change.
+Compliance mappings, verifier contract alignment, portable proof workflows, and Go adapter follow-through. Documentation, tests, workflows, and SDK support tooling only. No wire, schema, kernel, crypto, or protocol public-API change.
 
 ### Added
 
