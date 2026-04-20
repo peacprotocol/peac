@@ -70,6 +70,8 @@
     "verify:release-closeout:test": "node scripts/verify-release-closeout.test.mjs",
     "verify:changelog-entry:test": "node scripts/extract-changelog-entry.test.mjs",
     "verify:stamp-only-pr:test": "node scripts/ci/check-stamp-only-pr.test.mjs",
+    "verify:go-bench-gate:test": "node scripts/go-bench-gate.test.mjs",
+    "verify:bench-baseline:test": "node scripts/update-bench-baseline.test.mjs",
     "fixtures:new": "node scripts/fixtures-new.mjs",
     "conformance:regen:bundle": "tsx scripts/generate-bundle-vectors.ts",
     "bench": "pnpm --filter @peac/crypto bench && pnpm --filter @peac/schema bench && pnpm --filter @peac/protocol bench",

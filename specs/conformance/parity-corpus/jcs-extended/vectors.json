@@ -1,0 +1,69 @@
+{
+  "description": "Extended JCS (RFC 8785) parity fixtures. Each vector is canonicalized identically by the TypeScript implementation in @peac/crypto and the Go implementation in sdks/go/jcs.go.",
+  "generator": "@peac/crypto canonicalize() v0.12.12",
+  "vectors": [
+    {
+      "id": "unicode-nfc-nfd",
+      "description": "JCS preserves strings byte-identically; NFC (U+00E9) and NFD (U+0065 U+0301) do not normalize.",
+      "input": {
+        "nfc": "é",
+        "nfd": "é"
+      },
+      "canonical": "{\"nfc\":\"é\",\"nfd\":\"é\"}"
+    },
+    {
+      "id": "nested-depth-5",
+      "description": "Nested object depth 5 with mixed keys; keys sort per JCS at every level.",
+      "input": {
+        "a": {
+          "b": {
+            "c": {
+              "d": {
+                "e": "leaf"
+              }
+            }
+          }
+        }
+      },
+      "canonical": "{\"a\":{\"b\":{\"c\":{\"d\":{\"e\":\"leaf\"}}}}}"
+    },
+    {
+      "id": "numeric-zero-and-neg-zero",
+      "description": "Zero and negative zero both render as 0 per JCS number serialization.",
+      "input": {
+        "zero": 0,
+        "negZero": 0
+      },
+      "canonical": "{\"negZero\":0,\"zero\":0}"
+    },
+    {
+      "id": "integer-vs-float-same-value",
+      "description": "Integer 1 and float 1.0 both render as 1.",
+      "input": {
+        "integer": 1,
+        "float": 1
+      },
+      "canonical": "{\"float\":1,\"integer\":1}"
+    },
+    {
+      "id": "escape-sequences",
+      "description": "JCS requires escape only for quote, backslash, and U+0000 through U+001F.",
+      "input": {
+        "quote": "\"",
+        "backslash": "\\",
+        "tab": "\t",
+        "newline": "\n",
+        "bell": "\u0007"
+      },
+      "canonical": "{\"backslash\":\"\\\\\",\"bell\":\"\\u0007\",\"newline\":\"\\n\",\"quote\":\"\\\"\",\"tab\":\"\\t\"}"
+    },
+    {
+      "id": "utf16-surrogate-pair",
+      "description": "Non-BMP character U+1F600 encoded via surrogate pair; JCS emits UTF-8 bytes.",
+      "input": {
+        "emoji": "😀"
+      },
+      "canonical": "{\"emoji\":\"😀\"}"
+    }
+  ]
+}
