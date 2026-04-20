@@ -1,0 +1,32 @@
+{
+  "baseline_pending": true,
+  "captured_commit": "",
+  "captured_at": "",
+  "platform": "",
+  "go_version": "",
+  "methodology": "scripts/go-bench-gate.mjs runs the BenchmarkVerify_Stable_* suite under -count=10 -benchtime=200ms and compares the median ns/op against the values below.",
+  "benchmarks": {
+    "BenchmarkVerify_Stable_JCSSmall": {
+      "ns_per_op": 0,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    },
+    "BenchmarkVerify_Stable_JCSNested": {
+      "ns_per_op": 0,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    },
+    "BenchmarkVerify_Stable_JCSHash": {
+      "ns_per_op": 0,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    }
+  },
+  "thresholds": {
+    "ratio_warn": 1.1,
+    "ratio_fail": 1.25,
+    "absolute_fail_ns_min": 50000,
+    "reproduction_runs_required_for_fail": 2
+  },
+  "notes": "baseline_pending=true means the gate runs in measurement-only mode and will not fail CI. The maintainer-only bench-gate workflow_dispatch with mode=update-baseline captures real CI numbers, flips baseline_pending to false, and opens a review PR touching only this file plus sdks/go/bench/runs/<commit>.json."
+}
