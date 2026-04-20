@@ -1,6 +1,6 @@
 # Compatibility Matrix
 
-Current as of v0.12.12.
+Current as of v0.12.13.
 
 ## Wire Format Support
 
@@ -83,7 +83,7 @@ One classification per Layer 4 surface. Under ambiguity between two defensible c
 | `experimental`             | Public but explicitly subject to change; `@experimental` JSDoc; breaking changes allowed with CHANGELOG note.                                                                | JSDoc tag.                                                                            |
 | `paused`                   | Intentionally not maintained in this release cycle; `paused_reason` and `resumption_target` recorded in the row.                                                             | Row-level rationale documented in the matrix.                                         |
 
-No Layer 4 surface in v0.12.12 is `live-upstream-tested`: no CI step exercises a live upstream endpoint today. Promotion from `conformance-fixture-only` to `live-upstream-tested` requires committing a recorded round-trip fixture stamped with the upstream release and wiring it into CI.
+No Layer 4 surface in v0.12.13 is `live-upstream-tested`: no CI step exercises a live upstream endpoint today. Promotion from `conformance-fixture-only` to `live-upstream-tested` requires committing a recorded round-trip fixture stamped with the upstream release and wiring it into CI.
 
 ### Evidence
 
