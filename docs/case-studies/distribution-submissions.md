@@ -8,7 +8,7 @@ Status tracking for every external listing or marketplace submission PEAC mainta
 - **submitted** - submission filed with the external party. A public PR, ticket, or submission URL is captured.
 - **discoverable** - the external party has accepted the submission and the entry is live / indexed / listed. Verified by an evaluator URL.
 
-`prepared` or `submitted` with a reproducible artifact reference is the tag-blocking requirement for v0.12.13. `discoverable` is a post-release window KPI tracked on a 30 / 60 / 90-day cadence; it does not block the tag.
+`prepared` or `submitted` with a reproducible artifact reference is the tag-blocking requirement. `discoverable` is reviewed post-release and does not block the tag.
 
 ## MCP and IDE marketplaces
 
@@ -31,12 +31,12 @@ At v0.12.13 tag time, every row above requires:
 - Or `submitted`, with a submission URL, PR number, or review thread captured in the `Artifact reference` cell.
 - `discoverable` is tracked here but is not tag-blocking.
 
-## Post-release window KPIs
+## Post-release review
 
-30 / 60 / 90 days after v0.12.13 tag:
+After the release tag:
 
-- Review each row; advance state where the external party has acted.
-- If a row remains `prepared` at 90 days with no external-side motion, reassign the owner or retire the row and move the entry into the release notes historical section.
+- Review each row on a cadence; advance state where the external party has acted.
+- If a row remains `prepared` with no external-side motion after an extended period, reassign the owner or retire the row.
 
 ## Related documents
 

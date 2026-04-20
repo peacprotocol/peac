@@ -1,6 +1,6 @@
 # PEAC Core Use-Case Coverage
 
-**Snapshot date:** v0.12.12 release window.
+**Snapshot:** v0.12.12.
 **Canonical scope reference.** Link here from listings, READMEs,
 quickstart guides, and website copy so PEAC's records-layer scope stays
 consistent as external copy evolves.
