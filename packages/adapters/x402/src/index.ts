@@ -167,3 +167,13 @@ export type {
   X402SettlementEvidence,
   X402SettlementOptions,
 } from './settlement.js';
+
+// x402 PR #1986 terms digest helpers (v0.12.14). Mapper-local convenience
+// over @peac/protocol/document-binding; digest is NEVER stamped into the
+// emitted record / envelope shape (verifier-report-only).
+export {
+  computeX402TermsDigest,
+  computeJsonDocumentDigestJcs,
+  computeTextDocumentDigestUtf8,
+} from './terms.js';
+export type { X402TermsRepresentation, DocumentRepresentation } from './terms.js';

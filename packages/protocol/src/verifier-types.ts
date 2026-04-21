@@ -30,6 +30,64 @@ import {
 export type PolicyBindingStatus = 'verified' | 'failed' | 'unavailable';
 
 // ---------------------------------------------------------------------------
+// Document Binding (terms / policy / referenced documents)
+// ---------------------------------------------------------------------------
+
+/**
+ * Representation envelope tag for a bound document. Matches the four
+ * x402 PR #1986 `terms` representations and is shared by other binding
+ * paths (policy docs, referenced documents).
+ */
+export type DocumentRepresentation = 'uri' | 'markdown' | 'plaintext' | 'json';
+
+/**
+ * Result of a document-binding check.
+ *
+ * `status` carries the three-state outcome for the per-representation
+ * envelope binding. `canonical_digest` and `canonical_digest_status` are
+ * **publisher-supplied only**: a publisher MAY assert a canonical-JSON
+ * digest that they consider equivalent across multiple representations.
+ * Verifiers MAY compare it when both sides supply it; verifiers MUST
+ * NOT synthesize it from non-JSON representations. Absence is
+ * `'unavailable'`, NOT `'failed'`.
+ *
+ * @see docs/specs/DOCUMENT-BINDING.md
+ */
+export interface DocumentBindingResult {
+  /** Caller-supplied identifier (free-form; useful when reporting multiple documents). */
+  ref: string;
+  /** Representation envelope this binding refers to. */
+  representation?: DocumentRepresentation;
+  /** Per-representation envelope binding status. */
+  status: PolicyBindingStatus;
+  /**
+   * Publisher-supplied canonical-JSON digest (`sha256:<64 hex>`).
+   * Verifiers compare only when both sides supply it; verifiers MUST
+   * NOT synthesize from non-JSON representations.
+   */
+  canonical_digest?: string;
+  /** Three-state outcome for the optional canonical-digest comparison. */
+  canonical_digest_status?: PolicyBindingStatus;
+}
+
+/**
+ * Top-level `bindings` object on the verifier report. `policy` is always
+ * present (mirrors the legacy top-level `policy_binding` field
+ * byte-stable). `terms` is present iff the caller supplied a terms
+ * digest; `documents` is present iff the caller supplied a list of
+ * document digests.
+ *
+ * `bindings.terms` and `bindings.documents` appear in the verifier
+ * report output only; they are NOT stamped into the emitted record /
+ * envelope / artifact shape.
+ */
+export interface VerifierBindings {
+  policy: PolicyBindingStatus;
+  terms?: DocumentBindingResult;
+  documents?: DocumentBindingResult[];
+}
+
+// ---------------------------------------------------------------------------
 // Verification Mode
 // ---------------------------------------------------------------------------
 

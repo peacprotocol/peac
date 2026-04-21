@@ -184,4 +184,91 @@ describe('report-format', () => {
       ]);
     });
   });
+
+  describe('bindings field (v0.12.14)', () => {
+    it('omits bindings from extended report when caller did not supply terms / documents', () => {
+      const report = buildExtendedReport(
+        {
+          verified: true,
+          receipt_ref: 'sha256:' + 'a'.repeat(64),
+          policy_binding: 'verified',
+        },
+        '00000000-0000-4000-8000-000000000000',
+        12.34,
+        'provided'
+      );
+      expect(report).not.toHaveProperty('bindings');
+    });
+
+    it('omits bindings when caller-supplied bindings has no terms or documents', () => {
+      const report = buildExtendedReport(
+        {
+          verified: true,
+          receipt_ref: 'sha256:' + 'a'.repeat(64),
+          policy_binding: 'verified',
+          bindings: { policy: 'verified' },
+        },
+        '00000000-0000-4000-8000-000000000000',
+        12.34,
+        'provided'
+      );
+      expect(report).not.toHaveProperty('bindings');
+    });
+
+    it('includes bindings when caller-supplied bindings has terms', () => {
+      const report = buildExtendedReport(
+        {
+          verified: true,
+          receipt_ref: 'sha256:' + 'a'.repeat(64),
+          policy_binding: 'verified',
+          bindings: {
+            policy: 'verified',
+            terms: { ref: 'terms', representation: 'json', status: 'verified' },
+          },
+        },
+        '00000000-0000-4000-8000-000000000000',
+        12.34,
+        'provided'
+      );
+      expect(report).toHaveProperty('bindings');
+      expect(report.bindings?.terms?.status).toBe('verified');
+    });
+
+    it('includes bindings when caller-supplied bindings has documents', () => {
+      const report = buildExtendedReport(
+        {
+          verified: true,
+          receipt_ref: 'sha256:' + 'a'.repeat(64),
+          policy_binding: 'verified',
+          bindings: {
+            policy: 'verified',
+            documents: [{ ref: 'license', representation: 'plaintext', status: 'verified' }],
+          },
+        },
+        '00000000-0000-4000-8000-000000000000',
+        12.34,
+        'provided'
+      );
+      expect(report).toHaveProperty('bindings');
+      expect(report.bindings?.documents).toHaveLength(1);
+    });
+
+    it('omits bindings when documents array is empty', () => {
+      const report = buildExtendedReport(
+        {
+          verified: true,
+          receipt_ref: 'sha256:' + 'a'.repeat(64),
+          policy_binding: 'verified',
+          bindings: {
+            policy: 'verified',
+            documents: [],
+          },
+        },
+        '00000000-0000-4000-8000-000000000000',
+        12.34,
+        'provided'
+      );
+      expect(report).not.toHaveProperty('bindings');
+    });
+  });
 });

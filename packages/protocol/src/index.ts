@@ -13,6 +13,16 @@ export * from './jwks-resolver';
 // Policy binding utilities (v0.12.0-preview.1)
 export { computePolicyDigestJcs, checkPolicyBinding } from './policy-binding';
 
+// Document binding utilities (v0.12.14). DocumentRepresentation,
+// DocumentBindingResult, and VerifierBindings are re-exported via
+// `export * from './verifier-types'` above.
+export {
+  computeJsonDocumentDigestJcs,
+  computeTextDocumentDigestUtf8,
+  computeDocumentDigest,
+  checkDocumentBinding,
+} from './document-binding';
+
 // Verifier core (v0.10.8+)
 export * from './verifier-types';
 export * from './verifier-core';

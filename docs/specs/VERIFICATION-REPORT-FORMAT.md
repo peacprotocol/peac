@@ -202,6 +202,37 @@ Non-deterministic fields ONLY. MUST be excluded from report hashes.
 | `generated_at` | string | RFC 3339 timestamp           |
 | `verifier`     | object | Verifier implementation info |
 
+### 5.8 `bindings` (OPTIONAL; v0.12.14)
+
+Top-level binding-result object surfaced by reference verifiers when the
+caller supplies terms or document bindings. Verifier-report-only. Not
+stamped into the emitted record / envelope / artifact shape.
+
+When the caller does not supply any document bindings, `bindings` is
+absent and the response body is byte-identical to the prior version.
+The legacy top-level `policy_binding` field remains present in both
+cases and mirrors `bindings.policy` byte-stable when `bindings` is
+emitted.
+
+| Field       | Type              | Description                                                                                          |
+| ----------- | ----------------- | ---------------------------------------------------------------------------------------------------- |
+| `policy`    | string            | Three-state policy binding (`verified` / `failed` / `unavailable`). Mirrors legacy `policy_binding`. |
+| `terms`     | object (optional) | Per-representation envelope binding for x402 PR #1986 `terms` (or any single referenced terms doc).  |
+| `documents` | array (optional)  | Additional referenced-document bindings.                                                             |
+
+Each `DocumentBindingResult` (`bindings.terms` and each entry in
+`bindings.documents`) carries:
+
+| Field                     | Type              | Description                                                                      |
+| ------------------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `ref`                     | string            | Caller-supplied identifier.                                                      |
+| `representation`          | string (optional) | One of `uri` / `markdown` / `plaintext` / `json`.                                |
+| `status`                  | string            | Three-state per-representation envelope binding.                                 |
+| `canonical_digest`        | string (optional) | Publisher-supplied canonical-JSON digest (`sha256:<64 hex>`); never synthesized. |
+| `canonical_digest_status` | string (optional) | Three-state outcome for the optional canonical-digest comparison.                |
+
+See `docs/specs/DOCUMENT-BINDING.md` for the normative binding semantics.
+
 ## 6. Canonicalization
 
 When computing a digest of the report:

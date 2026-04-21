@@ -11,6 +11,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import type { VerifierBindings } from '@peac/protocol';
 
 export interface VerifyResult {
   verified: boolean;
@@ -18,6 +19,12 @@ export interface VerifyResult {
   claims?: Record<string, unknown>;
   warnings?: Array<{ code: string; message: string; pointer?: string }>;
   policy_binding?: string;
+  /**
+   * Top-level bindings object (v0.12.14). Present only when caller
+   * supplied `bindings.terms` or `bindings.documents` to verifyLocal.
+   * `bindings.policy` (when present) mirrors `policy_binding` byte-stable.
+   */
+  bindings?: VerifierBindings;
   issuer?: string;
   kid?: string;
   wire_version?: string;
@@ -39,6 +46,12 @@ export interface ExtendedReport {
   claims?: Record<string, unknown>;
   warnings?: Array<{ code: string; message: string; pointer?: string }>;
   policy_binding?: string;
+  /**
+   * Top-level bindings object (v0.12.14). Present only when caller
+   * supplied terms or documents bindings to verifyLocal. Otherwise
+   * absent so the extended report stays byte-stable with v0.12.13.
+   */
+  bindings?: VerifierBindings;
   issuer?: string;
   kid?: string;
   wire_version?: string;
@@ -79,6 +92,11 @@ export function buildExtendedReport(
     ...(result.claims && { claims: result.claims }),
     ...(result.warnings && { warnings: result.warnings }),
     ...(result.policy_binding && { policy_binding: result.policy_binding }),
+    ...(result.bindings &&
+      (result.bindings.terms !== undefined ||
+        (result.bindings.documents !== undefined && result.bindings.documents.length > 0)) && {
+        bindings: result.bindings,
+      }),
     ...(result.issuer && { issuer: result.issuer }),
     ...(result.kid && { kid: result.kid }),
     ...(result.wire_version && { wire_version: result.wire_version }),
