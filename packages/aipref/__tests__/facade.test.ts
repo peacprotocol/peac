@@ -15,7 +15,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   parseContentUsage,
   parseRobotsTxt,
-  parseTdmrep,
   resolveSignals,
   getDecisionForPurpose,
 } from '@peac/mappings-content-signals';

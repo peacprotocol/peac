@@ -28,7 +28,7 @@ const VALID_JSON_POLICY = JSON.stringify({
   rules: [{ name: 'allow-everyone', decision: 'allow' }],
 });
 
-describe('parse() — peac-policy/0.1 via @peac/policy-kit', () => {
+describe('parse(): peac-policy/0.1 via @peac/policy-kit', () => {
   it('parses a valid YAML peac-policy/0.1 document', () => {
     const result = parse(VALID_YAML_POLICY);
     expect(result.valid).toBe(true);
@@ -63,7 +63,7 @@ describe('parse() — peac-policy/0.1 via @peac/policy-kit', () => {
   });
 });
 
-describe('emit() — serializes peac-policy/0.1 via @peac/policy-kit', () => {
+describe('emit(): serializes peac-policy/0.1 via @peac/policy-kit', () => {
   it('round-trips a minimal policy document', () => {
     const original = parse(VALID_YAML_POLICY).data!;
     const emitted = emit(original);
@@ -73,7 +73,7 @@ describe('emit() — serializes peac-policy/0.1 via @peac/policy-kit', () => {
   });
 });
 
-describe('validate() — convenience predicate', () => {
+describe('validate(): convenience predicate', () => {
   it('returns true for a valid document', () => {
     expect(validate(VALID_YAML_POLICY)).toBe(true);
   });
