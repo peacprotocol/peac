@@ -1,8 +1,17 @@
 # PEAC Document Binding
 
-**Status:** NORMATIVE
+**Status:** NORMATIVE (verifier surface)
 **Version:** 0.1
 **Applies to:** Wire 0.2 (`interaction-record+jwt`) and later
+
+**Conformance scope.** This document is normative for the
+verifier-surface contract: helper output shape, three-state binding
+semantics, text canonicalization rule, and the verifier report's
+optional `bindings` field. Requirement-registry IDs in
+`specs/conformance/requirement-ids.json` and the corresponding
+`docs/specs/CONFORMANCE-MATRIX.md` rows are not added in this
+release; they are scoped to a follow-up that ships the end-to-end
+conformance fixtures alongside the demo.
 
 ---
 
