@@ -68,6 +68,7 @@
     "verify:public-surface-names": "node scripts/verify-public-surface-names.mjs",
     "verify:compliance-mappings": "node scripts/verify-compliance-mappings.mjs",
     "verify:compliance-mappings:test": "node scripts/verify-compliance-mappings.test.mjs",
+    "verify:privacy-boundary": "node scripts/verify-privacy-boundary-block.mjs",
     "verify:release-closeout": "node scripts/verify-release-closeout.mjs",
     "verify:release-closeout:test": "node scripts/verify-release-closeout.test.mjs",
     "verify:changelog-entry:test": "node scripts/extract-changelog-entry.test.mjs",

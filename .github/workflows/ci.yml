@@ -284,6 +284,9 @@ jobs:
       - name: Compliance-mapping integrity (ISO 42001 + EU AI Act Annex IV)
         run: pnpm verify:compliance-mappings
 
+      - name: Privacy-boundary block lint (docs/privacy/*.md)
+        run: pnpm verify:privacy-boundary
+
       - name: Release facts verification
         run: pnpm verify:release
 

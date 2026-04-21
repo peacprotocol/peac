@@ -254,3 +254,6 @@ respectively, with byte-identical output.
 - `docs/specs/PEAC-TXT.md`: `peac-policy/0.1` policy document
 - `docs/specs/VERIFICATION-REPORT-FORMAT.md`: report shape
 - `docs/specs/X402-PROFILE.md`: x402 PR #1986 `terms` representation envelopes
+- `docs/privacy/`: operator deployment guidance on data
+  classification, retention, deployment roles, data-subject rights,
+  and DPIA scoping (boundary-first framing).

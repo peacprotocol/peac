@@ -126,6 +126,10 @@ PEAC is the records layer beneath runtime governance. PEAC records what another 
 
 See [`SECURITY.md`](SECURITY.md), [`docs/TRUST-ARTIFACTS.md`](docs/TRUST-ARTIFACTS.md), [`docs/specs/PROTOCOL-BEHAVIOR.md`](docs/specs/PROTOCOL-BEHAVIOR.md), [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md), and [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
 
+## Privacy-aware verification
+
+PEAC ships privacy-aware defaults and deployment guidance. Interaction evidence is hash-by-default on the receipt side (`docs/specs/PRIVACY-PROFILE.md`); the verifier separates immutable signed evidence from mutable derived metadata so retention, deletion, and rights-handling act on the right layer. Operator-facing guidance for privacy-sensitive and GDPR-aligned deployments — data classification, retention and deletion, deployment roles, data-subject rights, and a DPIA starter — lives in [`docs/privacy/`](docs/privacy/README.md). PEAC supports privacy-aware verification; it does not replace operator legal review, lawful-basis decisions, or controller obligations.
+
 ## Versioning
 
 - **Current default format:** `interaction-record+jwt` (Wire 0.2).
