@@ -1,65 +1,32 @@
 /**
- * @peac/pref/robots - Robots.txt parser with AIPREF bridge
- * Extracts AI-relevant directives from robots.txt
+ * @peac/pref/robots - DEPRECATED robots.txt parser with AIPREF bridge.
  *
- * IMPORTANT: robots.txt is NOT enforceable. The robotsToPeacStarter()
- * function is a MIGRATION HELPER, not a compliance tool. It generates
- * a starter PEAC policy that users should review and customize.
+ * @peac/pref is deprecated as of v0.12.14. This module is a thin, deprecated
+ * facade:
+ *   - `parseRobots` defers to @peac/mappings-content-signals robots parser.
+ *   - `robotsToAIPref` maps the content-signal result back into the legacy
+ *     AIPrefSnapshot shape for backward compat.
+ *   - `fetchRobots` is removed: parsing packages do not perform network I/O.
+ *     Callers supply pre-fetched content.
+ *   - `robotsToPeacStarter` is preserved as a one-way migration helper that
+ *     produces a starter `peac-policy/0.1` document from robots.txt bytes.
+ *
+ * Removal target: next cleanup release.
  */
 
+import { parseRobotsTxt as parseRobotsStructured } from '@peac/mappings-content-signals';
 import type { AIPrefSnapshot, RobotsRule } from './types.js';
 import type { PolicyDocument, PolicyRule } from '@peac/policy-kit';
 
-const VERSION = '0.9.15';
-const UA = `PEAC/${VERSION} (+https://www.peacprotocol.org)`;
-
-// SSRF protection: Check if hostname/IP is in private network range
-function isPrivateNetwork(hostname: string): boolean {
-  // Block localhost variants
-  if (['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(hostname)) {
-    return true;
-  }
-
-  // Block private IPv4 ranges (RFC 1918)
-  const ipv4Match = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
-  if (ipv4Match) {
-    const [, a, b, c, d] = ipv4Match.map(Number);
-
-    // 10.0.0.0/8
-    if (a === 10) return true;
-
-    // 172.16.0.0/12
-    if (a === 172 && b >= 16 && b <= 31) return true;
-
-    // 192.168.0.0/16
-    if (a === 192 && b === 168) return true;
-
-    // 169.254.0.0/16 (link-local)
-    if (a === 169 && b === 254) return true;
-
-    // 127.0.0.0/8 (loopback)
-    if (a === 127) return true;
-  }
-
-  // Block private IPv6 ranges
-  if (hostname.includes(':')) {
-    // ::1 already covered above
-    // fc00::/7 (unique local)
-    if (hostname.startsWith('fc') || hostname.startsWith('fd')) return true;
-
-    // fe80::/10 (link-local)
-    if (
-      hostname.startsWith('fe8') ||
-      hostname.startsWith('fe9') ||
-      hostname.startsWith('fea') ||
-      hostname.startsWith('feb')
-    )
-      return true;
-  }
-
-  return false;
-}
-
+/**
+ * Low-level robots.txt record parser used for the @peac/pref legacy shape.
+ * Retained for backward compat. For structured content-signal entries, call
+ * `parseRobotsTxt` from `@peac/mappings-content-signals` directly.
+ *
+ * @deprecated Retained to preserve the @peac/pref API. Use
+ * `@peac/mappings-content-signals.parseRobotsTxt` for RFC 9309-compliant
+ * parsing that produces typed `ContentSignalEntry[]`.
+ */
 export function parseRobots(content: string): RobotsRule[] {
   const rules: RobotsRule[] = [];
   const lines = content
@@ -79,10 +46,7 @@ export function parseRobots(content: string): RobotsRule[] {
 
     if (fieldLower === 'user-agent') {
       if (currentAgent && currentDirectives.length > 0) {
-        rules.push({
-          userAgent: currentAgent,
-          directives: currentDirectives,
-        });
+        rules.push({ userAgent: currentAgent, directives: currentDirectives });
       }
       currentAgent = value;
       currentDirectives = [];
@@ -92,116 +56,92 @@ export function parseRobots(content: string): RobotsRule[] {
   }
 
   if (currentAgent && currentDirectives.length > 0) {
-    rules.push({
-      userAgent: currentAgent,
-      directives: currentDirectives,
-    });
+    rules.push({ userAgent: currentAgent, directives: currentDirectives });
   }
 
   return rules;
 }
 
-export function robotsToAIPref(rules: RobotsRule[]): AIPrefSnapshot | null {
+/**
+ * Map robots.txt bytes to the legacy AIPrefSnapshot shape via the canonical
+ * content-signal resolver in `@peac/mappings-content-signals`. Preserved for
+ * backward compat of the @peac/pref API.
+ *
+ * @deprecated Use `@peac/mappings-content-signals.parseRobotsTxt` +
+ * `resolveSignals` directly. Removal target: next cleanup release.
+ */
+export function robotsToAIPref(rulesOrContent: RobotsRule[] | string): AIPrefSnapshot | null {
+  const content =
+    typeof rulesOrContent === 'string' ? rulesOrContent : rulesToRobotsText(rulesOrContent);
+  const entries = parseRobotsStructured(content);
   const snapshot: AIPrefSnapshot = {};
   let hasPrefs = false;
-
-  // Look for AI-related user agents and directives
-  const aiAgents = [
-    'gptbot',
-    'chatgpt-user',
-    'claude-web',
-    'anthropic-ai',
-    'openai',
-    'google-extended',
-  ];
-
-  for (const rule of rules) {
-    const ua = rule.userAgent.toLowerCase();
-    const isAiAgent = aiAgents.some((agent) => ua.includes(agent)) || ua === '*';
-
-    if (isAiAgent) {
-      for (const directive of rule.directives) {
-        // Map robots directives to AIPREF fields
-        switch (directive.field) {
-          case 'disallow':
-            if (directive.value === '/' || directive.value === '*') {
-              snapshot.crawl = false;
-              snapshot['train-ai'] = false;
-              hasPrefs = true;
-            }
-            break;
-          case 'allow':
-            if (directive.value === '/' || directive.value === '*') {
-              snapshot.crawl = true;
-              hasPrefs = true;
-            }
-            break;
-          case 'noai':
-            snapshot['train-ai'] = false;
-            hasPrefs = true;
-            break;
-          case 'nofollow':
-            snapshot.crawl = false;
-            hasPrefs = true;
-            break;
-        }
-      }
+  for (const entry of entries) {
+    if (entry.decision === 'unspecified') continue;
+    const allow = entry.decision === 'allow';
+    switch (entry.purpose) {
+      case 'ai-training':
+      case 'ai-generative':
+      case 'ai-inference':
+        if (snapshot['train-ai'] === undefined) snapshot['train-ai'] = allow;
+        hasPrefs = true;
+        break;
+      case 'ai-search':
+      case 'tdm':
+        if (snapshot.crawl === undefined) snapshot.crawl = allow;
+        hasPrefs = true;
+        break;
     }
   }
-
   return hasPrefs ? snapshot : null;
 }
 
-export async function fetchRobots(uri: string, timeout = 5000): Promise<string | null> {
-  try {
-    const url = new URL(uri);
-
-    // SSRF protection: Only allow HTTPS/HTTP schemes
-    if (!['https:', 'http:'].includes(url.protocol)) {
-      throw new Error('Invalid protocol: only https:// and http:// are allowed');
+function rulesToRobotsText(rules: RobotsRule[]): string {
+  const lines: string[] = [];
+  for (const rule of rules) {
+    lines.push(`User-agent: ${rule.userAgent}`);
+    for (const directive of rule.directives) {
+      lines.push(`${directive.field}: ${directive.value}`);
     }
-
-    // SSRF protection: Block private IP ranges and localhost
-    const hostname = url.hostname.toLowerCase();
-    if (isPrivateNetwork(hostname)) {
-      throw new Error('Access to private networks is not allowed');
-    }
-
-    const robotsUrl = new URL('/robots.txt', url.origin);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-    const response = await fetch(robotsUrl.toString(), {
-      signal: controller.signal,
-      headers: { 'User-Agent': UA },
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) return null;
-    return await response.text();
-  } catch {
-    return null;
+    lines.push('');
   }
+  return lines.join('\n');
 }
 
 /**
- * Result of converting robots.txt to PEAC policy starter
+ * @deprecated v0.12.14 facade does not perform network I/O. Parsing packages
+ * take pre-fetched content only. Fetch robots.txt in the caller (subject to
+ * the caller's SSRF / redirect / timeout policy) and pass the bytes to
+ * `parseRobots`, `robotsToAIPref`, or the RFC-compliant
+ * `@peac/mappings-content-signals.parseRobotsTxt`. Removal target: next
+ * cleanup release.
+ */
+export function fetchRobots(_uri: string, _timeout?: number): Promise<string | null> {
+  const err = new Error(
+    '@peac/pref fetchRobots() was removed in v0.12.14: parsing packages do not ' +
+      'perform network I/O. Fetch robots.txt in the caller and pass the bytes to ' +
+      'parseRobots() / robotsToAIPref() / @peac/mappings-content-signals.parseRobotsTxt().'
+  );
+  (err as Error & { code?: string }).code = 'PEAC_DEPRECATED_PREF_NETWORK';
+  return Promise.reject(err);
+}
+
+/**
+ * Result of converting robots.txt to a PEAC policy starter.
  */
 export interface RobotsToPeacResult {
-  /** Generated starter policy document */
+  /** Generated starter policy document. */
   policy: PolicyDocument;
-  /** Advisory notes about the conversion */
+  /** Advisory notes about the conversion. */
   notes: string[];
-  /** User agents that were processed */
+  /** User agents that were processed. */
   processedAgents: string[];
-  /** Whether any AI-related restrictions were found */
+  /** Whether any AI-related restrictions were found. */
   hasAiRestrictions: boolean;
 }
 
 /**
- * Known AI crawler user agents
+ * Known AI crawler user agents.
  */
 const AI_CRAWLER_AGENTS = [
   'gptbot',
@@ -221,37 +161,14 @@ const AI_CRAWLER_AGENTS = [
 ] as const;
 
 /**
- * Convert robots.txt content to a PEAC policy starter document.
+ * Convert robots.txt content to a `peac-policy/0.1` starter document.
  *
- * ADVISORY ONLY: This is a migration helper, not a compliance tool.
- * The generated policy is a starting point that users MUST review
- * and customize for their specific needs.
+ * ADVISORY ONLY: a migration helper, not a compliance tool. Generated output
+ * is a starting point that operators MUST review and customize.
  *
- * Limitations:
- * - robots.txt is less expressive than PEAC policies
- * - Path-specific rules are simplified to domain-level
- * - Crawl-delay and sitemap directives are noted but not mapped
- * - This is a ONE-WAY import, not round-trippable
- *
- * @param robotsContent - Raw robots.txt content
- * @returns Starter policy document with advisory notes
- *
- * @example
- * ```typescript
- * const result = robotsToPeacStarter(`
- * User-agent: GPTBot
- * Disallow: /
- *
- * User-agent: *
- * Allow: /
- * `);
- *
- * console.log(result.policy);
- * // PolicyDocument with rules denying GPTBot access
- *
- * console.log(result.notes);
- * // Advisory notes about the conversion
- * ```
+ * Limitations: robots.txt is less expressive than PEAC policies; path-specific
+ * rules are simplified to domain-level; crawl-delay and sitemap directives are
+ * noted but not mapped; one-way (not round-trippable).
  */
 export function robotsToPeacStarter(robotsContent: string): RobotsToPeacResult {
   const rules = parseRobots(robotsContent);
@@ -260,26 +177,21 @@ export function robotsToPeacStarter(robotsContent: string): RobotsToPeacResult {
   const policyRules: PolicyRule[] = [];
   let hasAiRestrictions = false;
 
-  // Advisory header note
   notes.push(
     'ADVISORY: This policy was generated from robots.txt and is for migration purposes only.'
   );
   notes.push('Review and customize this policy before using in production.');
 
-  // Process each rule
   for (const rule of rules) {
     const ua = rule.userAgent.toLowerCase();
     processedAgents.push(rule.userAgent);
 
-    // Check if this is an AI-related agent
     const isAiAgent = AI_CRAWLER_AGENTS.some((agent) => ua.includes(agent));
     const isWildcard = ua === '*';
 
-    // Analyze directives for this agent
     let hasDisallowAll = false;
     let hasAllowAll = false;
     let hasPartialRules = false;
-    let hasCrawlDelay = false;
 
     for (const directive of rule.directives) {
       switch (directive.field) {
@@ -298,7 +210,6 @@ export function robotsToPeacStarter(robotsContent: string): RobotsToPeacResult {
           }
           break;
         case 'crawl-delay':
-          hasCrawlDelay = true;
           notes.push(
             `Note: Crawl-delay for ${rule.userAgent} (${directive.value}s) not mapped - consider rate limits.`
           );
@@ -309,29 +220,23 @@ export function robotsToPeacStarter(robotsContent: string): RobotsToPeacResult {
       }
     }
 
-    // Generate policy rules for AI agents
     if (isAiAgent) {
       if (hasDisallowAll) {
         hasAiRestrictions = true;
         policyRules.push({
           name: `deny-${ua.replace(/[^a-z0-9]/g, '-')}`,
-          subject: {
-            labels: [ua],
-          },
+          subject: { labels: [ua] },
           decision: 'deny',
           reason: `Converted from robots.txt: Disallow / for ${rule.userAgent}`,
         });
       } else if (hasAllowAll) {
         policyRules.push({
           name: `allow-${ua.replace(/[^a-z0-9]/g, '-')}`,
-          subject: {
-            labels: [ua],
-          },
+          subject: { labels: [ua] },
           decision: 'allow',
           reason: `Converted from robots.txt: Allow for ${rule.userAgent}`,
         });
       }
-
       if (hasPartialRules) {
         notes.push(
           `Warning: Path-specific rules for ${rule.userAgent} simplified to domain-level.`
@@ -339,17 +244,12 @@ export function robotsToPeacStarter(robotsContent: string): RobotsToPeacResult {
       }
     }
 
-    // Handle wildcard rules that affect AI crawlers
     if (isWildcard && hasDisallowAll) {
       hasAiRestrictions = true;
       notes.push('Note: Wildcard Disallow: / detected. Consider if this applies to all AI agents.');
-
-      // Add a catch-all deny rule for AI crawlers (lower priority)
       policyRules.push({
         name: 'deny-all-crawlers-wildcard',
-        subject: {
-          type: 'agent',
-        },
+        subject: { type: 'agent' },
         purpose: 'index',
         decision: 'deny',
         reason: 'Converted from robots.txt: Wildcard Disallow: /',
@@ -357,14 +257,12 @@ export function robotsToPeacStarter(robotsContent: string): RobotsToPeacResult {
     }
   }
 
-  // If no AI-specific rules found, add a note
   if (policyRules.length === 0) {
     notes.push(
       'No AI-specific restrictions found in robots.txt. Generated minimal starter policy.'
     );
   }
 
-  // Build the policy document
   const policy: PolicyDocument = {
     version: 'peac-policy/0.1',
     name: 'Policy generated from robots.txt',
@@ -375,10 +273,5 @@ export function robotsToPeacStarter(robotsContent: string): RobotsToPeacResult {
     rules: policyRules,
   };
 
-  return {
-    policy,
-    notes,
-    processedAgents,
-    hasAiRestrictions,
-  };
+  return { policy, notes, processedAgents, hasAiRestrictions };
 }

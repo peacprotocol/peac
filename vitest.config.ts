@@ -96,6 +96,9 @@ export default defineConfig({
       // apps/api new .test.ts files (vitest); legacy .test.js files use node --test
       'apps/api/tests/**/*.test.ts',
     ],
+    // Silence expected PEAC_DEPRECATED_* warnings so CI logs stay readable;
+    // behaviour is still covered by dedicated spy-based assertion tests.
+    setupFiles: ['tests/vitest-setup-peac-deprecations.ts'],
     // Timeout for tests
     testTimeout: 10000,
     // Fail fast on first error in CI

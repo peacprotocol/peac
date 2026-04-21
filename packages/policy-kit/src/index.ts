@@ -73,6 +73,7 @@ export {
 export {
   loadPolicy,
   parsePolicy,
+  parsePolicyDocument,
   validatePolicy,
   policyFileExists,
   createExamplePolicy,

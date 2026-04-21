@@ -163,19 +163,30 @@ app.post('/verify', async (c) => {
 });
 
 /**
- * GET /.well-known/peac.txt - Discovery manifest
+ * GET /.well-known/peac.txt - `peac-policy/0.1` policy document.
+ *
+ * peac.txt is the policy-document surface per docs/specs/PEAC-TXT.md.
+ * Key discovery flows through /.well-known/peac-issuer.json -> jwks_uri ->
+ * JWKS (served at /.well-known/peac-issuer.json, not this path).
  */
 app.get('/.well-known/peac.txt', (c) => {
-  const manifest = `version: peac/0.9
-issuer: https://api.example.com
-verify: https://api.example.com/verify
-jwks: https://keys.peacprotocol.org/jwks.json
-payments:
-  - rail: payment_rail_1
-  - rail: payment_rail_2`;
+  const manifest =
+    `version: 'peac-policy/0.1'\n` +
+    `name: Example PEAC Policy\n` +
+    `defaults:\n` +
+    `  decision: deny\n` +
+    `  reason: 'No matching rule'\n` +
+    `rules:\n` +
+    `  - name: allow-verified-agents-inference\n` +
+    `    subject:\n` +
+    `      type: agent\n` +
+    `      labels: [verified]\n` +
+    `    purpose: inference\n` +
+    `    decision: allow\n` +
+    `    reason: 'Verified agents may run inference'\n`;
 
   c.header('Cache-Control', 'public, max-age=3600');
-  c.header('Content-Type', 'text/plain; charset=utf-8');
+  c.header('Content-Type', 'text/yaml; charset=utf-8');
 
   return c.text(manifest);
 });

@@ -399,10 +399,17 @@ export async function fetchPolicyManifest(baseUrl: string): Promise<PEACPolicyMa
 // ============================================================================
 
 /**
- * @deprecated Use parseIssuerConfig instead. Will be removed in v1.0.
+ * @deprecated Parses a legacy dual-purpose `peac.txt` manifest that carried
+ * both policy hints and key-discovery fields (`verify`, `jwks`). This shape
+ * is retired: `peac.txt` is a policy-document surface per
+ * `docs/specs/PEAC-TXT.md`, and the normative key-discovery chain is
+ * `iss` -> /.well-known/peac-issuer.json -> `jwks_uri` -> JWKS
+ * (see `docs/specs/PEAC-ISSUER.md`). Use `parseIssuerConfig` for issuer
+ * metadata, and `@peac/policy-kit.parsePolicyDocument` for `peac-policy/0.1`
+ * documents referenced from `peac.txt`. Removal target: next cleanup release.
  *
- * Parse a PEAC discovery manifest from YAML-like text.
- * This function is maintained for backward compatibility only.
+ * Parse a PEAC discovery manifest from YAML-like text. Retained only for
+ * backward compatibility with callers that have not yet migrated.
  */
 export function parseDiscovery(text: string): PEACDiscovery {
   const bytes = new TextEncoder().encode(text).length;
@@ -457,10 +464,18 @@ export function parseDiscovery(text: string): PEACDiscovery {
 }
 
 /**
- * @deprecated Use fetchIssuerConfig instead. Will be removed in v1.0.
+ * @deprecated Fetches /.well-known/peac.txt and parses it as a legacy
+ * dual-purpose manifest. This shape is retired: `peac.txt` is a policy
+ * document (see `docs/specs/PEAC-TXT.md`) and key discovery flows through
+ * `iss` -> /.well-known/peac-issuer.json -> `jwks_uri` -> JWKS
+ * (see `docs/specs/PEAC-ISSUER.md`). Use `fetchIssuerConfig` for issuer
+ * metadata. To parse the `peac-policy/0.1` document referenced from
+ * `peac.txt`, fetch its bytes and call
+ * `@peac/policy-kit.parsePolicyDocument`. Removal target: next cleanup
+ * release.
  *
- * Fetch and parse PEAC discovery from an issuer URL.
- * This function is maintained for backward compatibility only.
+ * Fetch and parse PEAC discovery from an issuer URL. Retained only for
+ * backward compatibility with callers that have not yet migrated.
  */
 export async function fetchDiscovery(issuerUrl: string): Promise<PEACDiscovery> {
   if (!issuerUrl.startsWith('https://')) {

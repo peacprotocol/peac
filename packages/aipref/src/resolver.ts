@@ -1,13 +1,89 @@
 /**
- * @peac/pref/resolver - AIPREF policy resolver with strict merge order
- * Priority: request headers > AIPREF JSON > peac.txt > robots.txt > defaults
+ * @peac/pref/resolver - deprecated facade over @peac/mappings-content-signals.
+ *
+ * @peac/pref is deprecated. Use @peac/mappings-content-signals directly for
+ * RFC 8941/9651 Structured-Fields `Content-Usage` parsing, RFC 9309
+ * robots.txt parsing, tdmrep parsing, and `resolveSignals()`.
+ *
+ * This module preserves the @peac/pref public API shape (`PrefResolver`,
+ * `AIPrefPolicy`, `AIPrefSnapshot`) while delegating all parsing to
+ * @peac/mappings-content-signals.
+ *
+ * Behavior contract:
+ *   - No in-package `fetch()` calls. Callers pass pre-fetched content via
+ *     `ResolveContext` fields.
+ *   - `Content-Usage` parsing uses RFC 9651 Structured-Fields.
+ *   - Digest output is a full-length RFC 8785 JCS + SHA-256 (64 hex chars)
+ *     computed via `@peac/crypto.jcsHash`.
+ *   - A one-shot structured DeprecationWarning with code
+ *     `PEAC_DEPRECATED_PREF` fires on first `PrefResolver` instantiation.
  */
 
-import { fetchRobots, parseRobots, robotsToAIPref } from './robots.js';
-import type { AIPrefPolicy, AIPrefSnapshot, ResolveContext, PrefSource } from './types.js';
+import {
+  parseContentUsage,
+  parseRobotsTxt,
+  parseTdmrep,
+  resolveSignals,
+  type ContentSignalEntry,
+} from '@peac/mappings-content-signals';
+import { jcsHash } from '@peac/crypto';
+import type { AIPrefDigest, AIPrefPolicy, AIPrefSnapshot, ResolveContext } from './types.js';
 
+let deprecationWarningFired = false;
+
+function fireDeprecationWarning(): void {
+  if (deprecationWarningFired) return;
+  deprecationWarningFired = true;
+  if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+    process.emitWarning(
+      '@peac/pref is deprecated. Use @peac/mappings-content-signals for ' +
+        'RFC 8941/9651 Structured-Fields Content-Usage parsing, RFC 9309 ' +
+        'robots.txt parsing, tdmrep parsing, and resolveSignals().',
+      { code: 'PEAC_DEPRECATED_PREF', type: 'DeprecationWarning' }
+    );
+  }
+}
+
+/** @internal exposed for tests that need to observe the warning more than once. */
+export function __resetDeprecationWarningForTests(): void {
+  deprecationWarningFired = false;
+}
+
+/**
+ * Map @peac/mappings-content-signals entries into the legacy AIPrefSnapshot
+ * shape. Preserved for backward compat of the @peac/pref public API. New
+ * code should consume `ContentSignalEntry[]` directly from
+ * `@peac/mappings-content-signals.resolveSignals`.
+ */
+function entriesToSnapshot(entries: ContentSignalEntry[]): AIPrefSnapshot | null {
+  const snapshot: AIPrefSnapshot = {};
+  let hasPrefs = false;
+  for (const entry of entries) {
+    if (entry.decision === 'unspecified') continue;
+    const allow = entry.decision === 'allow';
+    switch (entry.purpose) {
+      case 'ai-training':
+      case 'ai-generative':
+      case 'ai-inference':
+        if (snapshot['train-ai'] === undefined) snapshot['train-ai'] = allow;
+        hasPrefs = true;
+        break;
+      case 'ai-search':
+      case 'tdm':
+        if (snapshot.crawl === undefined) snapshot.crawl = allow;
+        hasPrefs = true;
+        break;
+    }
+  }
+  return hasPrefs ? snapshot : null;
+}
+
+/**
+ * @deprecated Use `@peac/mappings-content-signals` directly. Retained for
+ * backward compat of the @peac/pref public API. Emits a one-shot structured
+ * `PEAC_DEPRECATED_PREF` DeprecationWarning on instantiation.
+ */
 export class PrefResolver {
-  private sources: PrefSource[] = [];
   private defaults: AIPrefSnapshot = {
     crawl: true,
     'train-ai': true,
@@ -15,203 +91,86 @@ export class PrefResolver {
   };
 
   constructor() {
-    this.registerSources();
+    fireDeprecationWarning();
   }
 
-  private registerSources() {
-    // Priority 1: Request headers (handled separately)
-
-    // Priority 2: AIPREF JSON
-    this.sources.push({
-      priority: 2,
-      name: 'aipref',
-      fetch: this.fetchAIPrefJson.bind(this),
-    });
-
-    // Priority 3: peac.txt hints
-    this.sources.push({
-      priority: 3,
-      name: 'peac',
-      fetch: this.fetchPeacTxt.bind(this),
-    });
-
-    // Priority 4: robots.txt
-    this.sources.push({
-      priority: 4,
-      name: 'robots',
-      fetch: this.fetchRobotsTxt.bind(this),
-    });
-  }
-
+  /**
+   * Resolve AI preferences from pre-fetched content. Does not perform network
+   * I/O. Callers supply all content via `ResolveContext` optional fields
+   * (`headers['content-usage']`, `robotsTxt`, `tdmrep`).
+   */
   async resolve(ctx: ResolveContext): Promise<AIPrefPolicy> {
-    try {
-      // Priority 1: Check request headers first
-      const headerPrefs = this.parseHeaders(ctx.headers);
-      if (headerPrefs) {
-        return {
-          status: 'active',
-          checked_at: new Date().toISOString(),
-          snapshot: headerPrefs,
-          digest: await this.computeDigest(headerPrefs),
-          source: 'header',
-        };
-      }
+    const checkedAt = new Date().toISOString();
+    const entries: ContentSignalEntry[] = [];
 
-      // Priority 2-4: Fetch from sources in priority order
-      for (const source of this.sources) {
-        try {
-          const snapshot = await source.fetch(ctx.uri);
-          if (snapshot) {
-            return {
-              status: 'active',
-              checked_at: new Date().toISOString(),
-              snapshot,
-              digest: await this.computeDigest(snapshot),
-              source: source.name as any,
-            };
-          }
-        } catch (error) {
-          console.warn(`AIPREF source ${source.name} failed:`, error);
-        }
+    const contentUsage = ctx.headers?.['content-usage'] ?? ctx.headers?.['Content-Usage'];
+    if (typeof contentUsage === 'string' && contentUsage.length > 0) {
+      try {
+        entries.push(...parseContentUsage(contentUsage).entries);
+      } catch {
+        // Malformed header: fall through to other sources.
       }
+    }
+    if (typeof ctx.robotsTxt === 'string' && ctx.robotsTxt.length > 0) {
+      try {
+        entries.push(...parseRobotsTxt(ctx.robotsTxt));
+      } catch {
+        // ignore
+      }
+    }
+    if (typeof ctx.tdmrep === 'string' && ctx.tdmrep.length > 0) {
+      try {
+        entries.push(...parseTdmrep(ctx.tdmrep));
+      } catch {
+        // ignore
+      }
+    }
 
-      // Priority 5: Use defaults
+    if (entries.length === 0) {
+      const snapshot = this.defaults;
       return {
         status: 'not_found',
-        checked_at: new Date().toISOString(),
-        snapshot: this.defaults,
-        digest: await this.computeDigest(this.defaults),
+        checked_at: checkedAt,
+        snapshot,
+        digest: await this.computeDigest(snapshot),
         source: 'default',
-        reason: 'No AIPREF policy found, using defaults',
-      };
-    } catch (error) {
-      return {
-        status: 'error',
-        checked_at: new Date().toISOString(),
-        reason: `AIPREF resolution failed: ${error instanceof Error ? error.message : String(error)}`,
-        source: 'default',
+        reason: 'No content signals supplied; using defaults',
       };
     }
-  }
 
-  private parseHeaders(headers?: Record<string, string>): AIPrefSnapshot | null {
-    if (!headers) return null;
-
-    const contentUsage = headers['content-usage'] || headers['Content-Usage'];
-    if (!contentUsage) return null;
-
-    const snapshot: AIPrefSnapshot = {};
-    const directives = contentUsage.split(',').map((d) => d.trim().toLowerCase());
-
-    for (const directive of directives) {
-      switch (directive) {
-        case 'no-train':
-          snapshot['train-ai'] = false;
-          break;
-        case 'no-crawl':
-          snapshot.crawl = false;
-          break;
-        case 'no-commercial':
-          snapshot.commercial = false;
-          break;
-        case 'train-ok':
-          snapshot['train-ai'] = true;
-          break;
-        case 'crawl-ok':
-          snapshot.crawl = true;
-          break;
-        case 'commercial-ok':
-          snapshot.commercial = true;
-          break;
-      }
-    }
-
-    return Object.keys(snapshot).length > 0 ? snapshot : null;
-  }
-
-  private async fetchAIPrefJson(uri: string): Promise<AIPrefSnapshot | null> {
-    try {
-      // First discover AIPREF URL from peac.txt
-      const peacUrl = new URL('/.well-known/peac.txt', new URL(uri).origin);
-      const peacResponse = await fetch(peacUrl.toString());
-      if (!peacResponse.ok) return null;
-
-      const peacContent = await peacResponse.text();
-      const aiprefMatch = peacContent.match(/^preferences:\s*(.+)$/m);
-      if (!aiprefMatch) return null;
-
-      const aiprefUrl = aiprefMatch[1].trim();
-      const aiprefResponse = await fetch(aiprefUrl);
-      if (!aiprefResponse.ok) return null;
-
-      const aiprefData = await aiprefResponse.json();
-      return this.normalizeSnapshot(aiprefData);
-    } catch {
-      return null;
-    }
-  }
-
-  private async fetchPeacTxt(uri: string): Promise<AIPrefSnapshot | null> {
-    try {
-      const peacUrl = new URL('/.well-known/peac.txt', new URL(uri).origin);
-      const response = await fetch(peacUrl.toString());
-      if (!response.ok) return null;
-
-      const content = await response.text();
-      const snapshot: AIPrefSnapshot = {};
-
-      // Extract hints from peac.txt
-      const lines = content.split('\n');
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith('# ')) {
-          const hint = trimmed.substring(2).toLowerCase();
-          if (hint.includes('no training')) snapshot['train-ai'] = false;
-          if (hint.includes('no crawling')) snapshot.crawl = false;
-          if (hint.includes('non-commercial')) snapshot.commercial = false;
-        }
-      }
-
-      return Object.keys(snapshot).length > 0 ? snapshot : null;
-    } catch {
-      return null;
-    }
-  }
-
-  private async fetchRobotsTxt(uri: string): Promise<AIPrefSnapshot | null> {
-    const content = await fetchRobots(uri);
-    if (!content) return null;
-
-    const rules = parseRobots(content);
-    return robotsToAIPref(rules);
-  }
-
-  private normalizeSnapshot(data: any): AIPrefSnapshot | null {
-    if (!data || typeof data !== 'object') return null;
-
-    const snapshot: AIPrefSnapshot = {};
-    if (typeof data.crawl === 'boolean') snapshot.crawl = data.crawl;
-    if (typeof data['train-ai'] === 'boolean') snapshot['train-ai'] = data['train-ai'];
-    if (typeof data.commercial === 'boolean') snapshot.commercial = data.commercial;
-
-    return Object.keys(snapshot).length > 0 ? snapshot : null;
-  }
-
-  private async computeDigest(
-    snapshot: AIPrefSnapshot
-  ): Promise<{ alg: 'JCS-SHA256'; val: string }> {
-    // Simple canonicalization for digest
-    const canonical = JSON.stringify(snapshot, Object.keys(snapshot).sort());
-    const encoder = new TextEncoder();
-    const data = encoder.encode(canonical);
-
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    const resolved = resolveSignals(entries);
+    const snapshot = entriesToSnapshot(resolved) ?? this.defaults;
+    const primary = resolved[0]?.source;
+    const source: AIPrefPolicy['source'] =
+      primary === 'content-usage-header'
+        ? 'header'
+        : primary === 'robots-txt'
+          ? 'robots'
+          : primary === 'tdmrep-json'
+            ? 'tdmrep'
+            : 'default';
 
     return {
-      alg: 'JCS-SHA256',
-      val: hashHex.substring(0, 12), // Truncated for brevity
+      status: 'active',
+      checked_at: checkedAt,
+      snapshot,
+      digest: await this.computeDigest(snapshot),
+      source,
     };
+  }
+
+  /**
+   * Compute a stable RFC 8785 JCS + SHA-256 digest of the snapshot. Returns a
+   * full 64-character lowercase hex string. The `alg` literal is retained as
+   * `JCS-SHA256` for API backward compat; the bytes match the canonical PEAC
+   * discipline (`@peac/crypto.jcsHash`).
+   */
+  private async computeDigest(snapshot: AIPrefSnapshot): Promise<AIPrefDigest> {
+    const sorted: Record<string, unknown> = {};
+    for (const key of Object.keys(snapshot).sort()) {
+      sorted[key] = (snapshot as Record<string, unknown>)[key];
+    }
+    const hex = await jcsHash(sorted);
+    return { alg: 'JCS-SHA256', val: hex };
   }
 }

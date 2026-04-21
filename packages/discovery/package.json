@@ -1,7 +1,7 @@
 {
   "name": "@peac/disc",
   "version": "0.12.13",
-  "description": "PEAC discovery with ≤20 lines enforcement",
+  "description": "Thin loader / validator and remote fetcher for peac.txt policy documents (peac-policy/0.1; docs/specs/PEAC-TXT.md)",
   "type": "module",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
@@ -29,7 +29,9 @@
     "typecheck": "tsc --noEmit",
     "build:js": "tsup"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@peac/policy-kit": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.0.0",
     "tsup": "^8.0.0"

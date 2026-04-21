@@ -72,6 +72,47 @@ export default [
     },
   },
 
+  // --- @peac/pref and @peac/mappings-content-signals: forbid network imports ---
+  // Content-signal parser packages take pre-fetched bytes only.
+  // Tests are exempt. @peac/pref robots.ts keeps a deprecated throwing fetchRobots
+  // stub; nothing else may import network primitives here.
+  {
+    files: [
+      'packages/aipref/src/**/*.ts',
+      'packages/mappings/content-signals/src/**/*.ts',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: 'node-fetch', message: 'Network I/O forbidden in content-signal parser packages. Pass pre-fetched bytes to the parser.' },
+            { name: 'got', message: 'Network I/O forbidden in content-signal parser packages.' },
+            { name: 'axios', message: 'Network I/O forbidden in content-signal parser packages.' },
+            { name: 'undici', message: 'Network I/O forbidden in content-signal parser packages.' },
+            { name: 'node:http', message: 'Network I/O forbidden in content-signal parser packages.' },
+            { name: 'node:https', message: 'Network I/O forbidden in content-signal parser packages.' },
+            { name: 'node:net', message: 'Network I/O forbidden in content-signal parser packages.' },
+            { name: 'http', message: 'Network I/O forbidden in content-signal parser packages.' },
+            { name: 'https', message: 'Network I/O forbidden in content-signal parser packages.' },
+            { name: 'net', message: 'Network I/O forbidden in content-signal parser packages.' },
+          ],
+          patterns: [
+            { group: ['node:http', 'node:https', 'node:net'], message: 'Network I/O forbidden in content-signal parser packages.' },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message:
+            'Network I/O forbidden in content-signal parser packages. Callers pass pre-fetched bytes; parsers operate on bytes only.',
+        },
+      ],
+    },
+  },
+
   // --- @peac/mcp-server: forbid console.log (stdout is reserved for JSON-RPC) ---
   // Use process.stderr.write() for diagnostics, never console.log/warn/error.
   {

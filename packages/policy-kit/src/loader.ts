@@ -40,6 +40,31 @@ export class PolicyValidationError extends PolicyLoadError {
 }
 
 /**
+ * Parse a `peac-policy/0.1` document from raw bytes and validate against the
+ * normative schema. Accepts the document format referenced from `peac.txt`
+ * (via `policy_doc.url` or `policy_doc.inline`) or the inline payload of a
+ * `docs/specs/PEAC-TXT.md`-conformant policy document fetched separately.
+ *
+ * Auto-detects JSON vs YAML. Throws `PolicyValidationError` when the document
+ * is well-formed but does not satisfy `peac-policy/0.1` (e.g. missing
+ * `version`, unknown `defaults.decision`, malformed `rules`). Throws
+ * `PolicyLoadError` when the text cannot be parsed as either JSON or YAML.
+ *
+ * This function is network-free and accepts pre-fetched bytes. Callers are
+ * responsible for fetching the document (typically via the URL returned by
+ * `@peac/disc.parse(...).data.policy_doc.url`) and passing the bytes here.
+ *
+ * @param text - Raw UTF-8 bytes of a `peac-policy/0.1` document (YAML or JSON)
+ * @returns Validated `PolicyDocument`
+ * @throws PolicyLoadError on parse failure
+ * @throws PolicyValidationError on schema validation failure
+ * @see docs/specs/PEAC-TXT.md
+ */
+export function parsePolicyDocument(text: string): PolicyDocument {
+  return parsePolicy(text);
+}
+
+/**
  * Parse policy from string content
  *
  * @param content - YAML or JSON string
