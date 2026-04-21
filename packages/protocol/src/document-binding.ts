@@ -56,7 +56,7 @@ export async function computeJsonDocumentDigestJcs(value: JsonValue): Promise<st
  * Trailing whitespace is **not** stripped. Blank lines are **not**
  * collapsed. Case is **not** normalized. The intent is a deterministic
  * representation envelope identity, not a "pretty-print before hashing"
- * scheme — text representations like `markdown` and `plaintext` are
+ * scheme. Text representations like `markdown` and `plaintext` are
  * frequently signed by publishers, and silent transformations would
  * break those signatures.
  *
@@ -86,7 +86,7 @@ export async function computeTextDocumentDigestUtf8(
  *
  * For `representation: 'uri'`, the bytes the caller fetched from the URI
  * MUST be supplied via `bytes`. Without bytes the dispatcher returns
- * `'unavailable'` — the URI alone is not enough to bind, and PEAC does
+ * `'unavailable'`: the URI alone is not enough to bind, and PEAC does
  * not perform network I/O from this layer (callers fetch under their own
  * SSRF / redirect / timeout policy). When bytes are supplied for a URI,
  * they are hashed via the text helper.

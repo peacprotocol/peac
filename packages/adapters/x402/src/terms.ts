@@ -11,8 +11,7 @@
  * representation envelope is its own binding identity. Publishers that
  * commit to a single canonical JSON form may also supply a separate
  * `canonical_digest` (computed via `computeJsonDocumentDigestJcs`) for
- * cross-representation equivalence — see
- * `docs/specs/DOCUMENT-BINDING.md`.
+ * cross-representation equivalence; see `docs/specs/DOCUMENT-BINDING.md`.
  *
  * v0.12.14: digests computed here are NEVER stamped into the emitted
  * record / envelope shape. Callers thread results through verifyLocal's

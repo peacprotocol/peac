@@ -270,5 +270,31 @@ describe('report-format', () => {
       );
       expect(report).not.toHaveProperty('bindings');
     });
+
+    it('extended report JSON is byte-stable vs no-bindings baseline when caller absent', () => {
+      const baseline = buildExtendedReport(
+        {
+          verified: true,
+          receipt_ref: 'sha256:' + 'a'.repeat(64),
+          policy_binding: 'verified',
+        },
+        '00000000-0000-4000-8000-000000000000',
+        12.34,
+        'provided'
+      );
+      const withInternalPolicyOnly = buildExtendedReport(
+        {
+          verified: true,
+          receipt_ref: 'sha256:' + 'a'.repeat(64),
+          policy_binding: 'verified',
+          bindings: { policy: 'verified' },
+        },
+        '00000000-0000-4000-8000-000000000000',
+        12.34,
+        'provided'
+      );
+      expect(JSON.stringify(withInternalPolicyOnly)).toBe(JSON.stringify(baseline));
+      expect(JSON.stringify(baseline)).not.toContain('"bindings"');
+    });
   });
 });

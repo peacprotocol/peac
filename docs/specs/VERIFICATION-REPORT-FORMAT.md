@@ -208,11 +208,12 @@ Top-level binding-result object surfaced by reference verifiers when the
 caller supplies terms or document bindings. Verifier-report-only. Not
 stamped into the emitted record / envelope / artifact shape.
 
-When the caller does not supply any document bindings, `bindings` is
-absent and the response body is byte-identical to the prior version.
-The legacy top-level `policy_binding` field remains present in both
-cases and mirrors `bindings.policy` byte-stable when `bindings` is
-emitted.
+When the caller does not supply terms or a non-empty `documents` array,
+`bindings` is absent and the response body is byte-identical to the
+prior version, even if a `bindings: { policy }` object is populated on
+the programmatic `verifyLocal()` result. The legacy top-level
+`policy_binding` field remains present on every report and mirrors
+`bindings.policy` byte-stable when `bindings` is emitted.
 
 | Field       | Type              | Description                                                                                          |
 | ----------- | ----------------- | ---------------------------------------------------------------------------------------------------- |

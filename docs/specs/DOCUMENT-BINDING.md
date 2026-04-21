@@ -176,9 +176,16 @@ interface DocumentBindingResult {
 only. They are **not** stamped into the emitted record, envelope, or
 artifact shape. There is no wire-format change in this version.
 
-When the caller does not supply terms or documents bindings, the
-verifier report's response body is byte-identical to the prior version
-(no `bindings` key emitted in the standard or extended report).
+The programmatic `verifyLocal()` result carries `bindings.policy`
+internally (mirroring the top-level `policy_binding` field for
+programmatic callers) regardless of caller input. The HTTP verifier
+report is stricter: the top-level `bindings` key is emitted **only
+when** the caller supplied non-policy bindings (`terms` or a non-empty
+`documents` array). When the caller supplies nothing, or supplies only
+`{ policy }`, the standard and extended response bodies are
+byte-identical to the prior version (no `bindings` key emitted). The
+legacy top-level `policy_binding` field is always present on the
+report and is a byte-stable mirror of `bindings.policy`.
 
 ---
 
