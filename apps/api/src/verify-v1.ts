@@ -331,13 +331,23 @@ export function createVerifyV1Handler() {
     const durationMs = performance.now() - startTime;
 
     if (result.valid) {
-      // DD-210 deterministic verification report
+      // DD-210 deterministic verification report.
+      //
+      // v0.12.14: top-level `bindings` is included on the report only when
+      // the caller supplied a terms or documents binding. When no terms /
+      // documents inputs are supplied, the response body is byte-identical
+      // to v0.12.13 (legacy `policy_binding` field unchanged; no `bindings`
+      // key emitted).
+      const includeBindings =
+        result.bindings?.terms !== undefined ||
+        (result.bindings?.documents !== undefined && result.bindings.documents.length > 0);
       const standardReport = {
         verified: true as const,
         receipt_ref: receiptRef,
         claims: result.claims as Record<string, unknown>,
         warnings: result.warnings,
         policy_binding: result.policy_binding,
+        ...(includeBindings && { bindings: result.bindings }),
         issuer: result.claims.iss,
         kid: result.kid,
         wire_version: result.wireVersion,
@@ -355,6 +365,7 @@ export function createVerifyV1Handler() {
             claims: standardReport.claims,
             warnings: result.warnings,
             policy_binding: result.policy_binding,
+            ...(includeBindings && { bindings: result.bindings }),
             issuer: result.claims.iss,
             kid: result.kid,
             wire_version: result.wireVersion,
@@ -376,6 +387,7 @@ export function createVerifyV1Handler() {
             claims: standardReport.claims,
             warnings: result.warnings,
             policy_binding: result.policy_binding,
+            ...(includeBindings && { bindings: result.bindings }),
             issuer: result.claims.iss,
             kid: result.kid,
             wire_version: result.wireVersion,

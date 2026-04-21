@@ -983,6 +983,9 @@ importers:
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../protocol
       '@peac/schema':
         specifier: workspace:*
         version: link:../../schema

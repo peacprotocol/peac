@@ -28,6 +28,7 @@
     "@peac/adapter-core": "workspace:*",
     "@peac/crypto": "workspace:*",
     "@peac/kernel": "workspace:*",
+    "@peac/protocol": "workspace:*",
     "@peac/schema": "workspace:*"
   },
   "devDependencies": {

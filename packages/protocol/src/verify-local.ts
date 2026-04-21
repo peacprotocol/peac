@@ -165,6 +165,28 @@ export interface VerifyLocalOptions {
    * Always 'unavailable' for Wire 0.1 receipts regardless of this option.
    */
   policyDigest?: string;
+
+  /**
+   * Pre-computed document-binding results for transaction-local terms
+   * and any other referenced documents (v0.12.14).
+   *
+   * Per-representation envelope binding (status) and any optional
+   * publisher-supplied canonical-JSON digest comparison are computed by
+   * the caller using the helpers in `document-binding.ts`. `verifyLocal`
+   * surfaces the results on the report's `bindings` field exactly as
+   * supplied; it never synthesizes envelope or canonical-digest
+   * comparisons internally.
+   *
+   * `bindings.policy` is populated by `verifyLocal` itself from the
+   * receipt's `policy.digest` and the `policyDigest` option. `bindings.terms`
+   * is populated from `terms` here. `bindings.documents` is populated from
+   * `documents` here. None of these fields appear on the emitted record
+   * or envelope; they are verifier-report-only.
+   */
+  bindings?: {
+    terms?: import('./verifier-types.js').DocumentBindingResult;
+    documents?: import('./verifier-types.js').DocumentBindingResult[];
+  };
 }
 
 /**
@@ -195,8 +217,22 @@ export interface VerifyLocalSuccess {
    *   - 'verified': both digests present and match exactly.
    *   - 'failed': not returned on success; verifyLocal() returns
    *     E_POLICY_BINDING_FAILED (valid: false) before reaching this field.
+   *
+   * This field is the byte-stable legacy mirror of `bindings.policy`.
    */
   policy_binding: PolicyBindingStatus;
+
+  /**
+   * Top-level bindings object (v0.12.14).
+   *
+   * `bindings.policy` is always present and equal to `policy_binding`.
+   * `bindings.terms` is present iff the caller supplied terms inputs.
+   * `bindings.documents` is present iff the caller supplied a non-empty
+   * `documentDigests` array. `bindings.terms` and `bindings.documents`
+   * appear in verifier output only; they are NOT stamped into the
+   * emitted record / envelope / artifact shape.
+   */
+  bindings: import('./verifier-types.js').VerifierBindings;
 }
 
 /**
@@ -320,7 +356,14 @@ export async function verifyLocal(
   publicKey: Uint8Array,
   options: VerifyLocalOptions = {}
 ): Promise<VerifyLocalResult> {
-  const { issuer, subjectUri, maxClockSkew = 300, strictness = 'strict', policyDigest } = options;
+  const {
+    issuer,
+    subjectUri,
+    maxClockSkew = 300,
+    strictness = 'strict',
+    policyDigest,
+    bindings: callerBindings,
+  } = options;
   const now = options.now ?? Math.floor(Date.now() / 1000);
 
   try {
@@ -523,6 +566,18 @@ export async function verifyLocal(
         };
       }
 
+      // Build the top-level `bindings` object. `policy` always present and
+      // mirrors the legacy `policy_binding` field byte-stable. `terms` and
+      // `documents` are surfaced from caller-supplied results; verifyLocal
+      // does not synthesize envelope or canonical-digest comparisons here.
+      // Report-only; never stamped into emitted record / envelope shape.
+      const bindings: import('./verifier-types.js').VerifierBindings = {
+        policy: bindingStatus,
+        ...(callerBindings?.terms !== undefined && { terms: callerBindings.terms }),
+        ...(callerBindings?.documents !== undefined &&
+          callerBindings.documents.length > 0 && { documents: callerBindings.documents }),
+      };
+
       return {
         valid: true,
         variant: 'wire-02',
@@ -531,6 +586,7 @@ export async function verifyLocal(
         wireVersion: '0.2',
         warnings: sortWarnings(accumulatedWarnings),
         policy_binding: bindingStatus,
+        bindings,
       };
     }
 

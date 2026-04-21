@@ -525,6 +525,26 @@ interface X402SettlementResponse {
 
 Unknown fields are preserved in `proofs.x402` but NOT copied to normalized `evidence`. This allows the adapter to tolerate additions from upstream x402 PRs without breaking.
 
+### 8.1 Terms binding (v0.12.14)
+
+x402 PR #1986 introduces a `terms` field on the `PaymentRequired`
+challenge with four representation envelopes (`uri`, `markdown`,
+`plaintext`, `json`). PEAC binds these representations into the
+verifier report's `bindings.terms` field via the document-binding
+helpers in `@peac/protocol` (see `docs/specs/DOCUMENT-BINDING.md`).
+
+The mapper-local helper `computeX402TermsDigest` in
+`@peac/adapter-x402` is a thin convenience over `computeDocumentDigest`
+and produces the canonical `sha256:<64 lowercase hex>` digest. The
+digest is NEVER stamped into the emitted record / envelope shape; it
+is verifier-report-only.
+
+Cross-representation envelope digests differ by design (each
+representation envelope is its own binding identity). A publisher that
+asserts cross-representation equivalence MAY supply a separate
+`canonical_digest` (JCS+SHA-256 of a canonical JSON form). Verifiers
+MUST NOT synthesize `canonical_digest` from non-JSON representations.
+
 ## 9. Conformance
 
 Conformance vectors are provided in `specs/conformance/fixtures/x402/`. Manifest version: `0.3.0`.
