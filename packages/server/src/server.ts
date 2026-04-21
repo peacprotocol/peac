@@ -167,25 +167,23 @@ app.post('/verify', async (c) => {
  *
  * peac.txt is the policy-document surface per docs/specs/PEAC-TXT.md.
  * Key discovery flows through /.well-known/peac-issuer.json -> jwks_uri ->
- * JWKS (served from /.well-known/peac-issuer.json, not this path).
+ * JWKS (served at /.well-known/peac-issuer.json, not this path).
  */
 app.get('/.well-known/peac.txt', (c) => {
-  const manifest = [
-    "version: 'peac-policy/0.1'",
-    'name: Example PEAC Policy',
-    'defaults:',
-    '  decision: deny',
-    "  reason: 'No matching rule'",
-    'rules:',
-    '  - name: allow-verified-agents-inference',
-    '    subject:',
-    '      type: agent',
-    '      labels: [verified]',
-    '    purpose: inference',
-    '    decision: allow',
-    "    reason: 'Verified agents may run inference'",
-    '',
-  ].join('\n');
+  const manifest =
+    `version: 'peac-policy/0.1'\n` +
+    `name: Example PEAC Policy\n` +
+    `defaults:\n` +
+    `  decision: deny\n` +
+    `  reason: 'No matching rule'\n` +
+    `rules:\n` +
+    `  - name: allow-verified-agents-inference\n` +
+    `    subject:\n` +
+    `      type: agent\n` +
+    `      labels: [verified]\n` +
+    `    purpose: inference\n` +
+    `    decision: allow\n` +
+    `    reason: 'Verified agents may run inference'\n`;
 
   c.header('Cache-Control', 'public, max-age=3600');
   c.header('Content-Type', 'text/yaml; charset=utf-8');

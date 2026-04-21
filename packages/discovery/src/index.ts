@@ -31,23 +31,105 @@ export type { PeacDiscovery, PublicKeyInfo } from './types.js';
 
 export const MAX_BYTES = 262144; // 256 KiB, per docs/specs/PEAC-TXT.md §6.1
 export const WELL_KNOWN_PATH = '/.well-known/peac.txt';
+export const DEFAULT_TIMEOUT_MS = 5000;
+const DEFAULT_USER_AGENT = 'peac-disc';
+
+/**
+ * Minimal fetch signature accepted by `discover`. `undici` / `node-fetch` /
+ * browser / test-double implementations all satisfy this.
+ */
+export type DiscoverFetch = (
+  input: string,
+  init?: {
+    headers?: Record<string, string>;
+    signal?: AbortSignal;
+    redirect?: 'follow' | 'error' | 'manual';
+  }
+) => Promise<{
+  ok: boolean;
+  status: number;
+  statusText: string;
+  text(): Promise<string>;
+}>;
+
+export interface DiscoverOptions {
+  /**
+   * HTTP fetch implementation. Defaults to the ambient `fetch` global.
+   * Supply `undici.fetch`, a test double, or a policy-wrapping client as
+   * needed.
+   */
+  fetchImpl?: DiscoverFetch;
+  /**
+   * User-agent string. Precedence (highest first): this option, the
+   * `PEAC_USER_AGENT` environment variable, then `peac-disc`.
+   */
+  userAgent?: string;
+  /** Caller-supplied abort signal. */
+  signal?: AbortSignal;
+  /**
+   * Millisecond timeout. Ignored when `signal` is supplied (the caller
+   * owns cancellation). Defaults to 5_000 when neither is provided.
+   */
+  timeoutMs?: number;
+  /** Override the 256 KiB body cap from docs/specs/PEAC-TXT.md §6.1. */
+  maxBytes?: number;
+  /**
+   * Redirect policy. Defaults to `error` to avoid cross-origin surprise
+   * on a well-known discovery endpoint; set to `follow` explicitly if the
+   * deployment relies on server-side redirects.
+   */
+  redirect?: 'follow' | 'error' | 'manual';
+}
 
 /**
  * Fetch and parse a remote peac.txt policy document. On success returns a
  * `ParseResult` whose `data` is the validated `peac-policy/0.1`
  * `PolicyDocument`. Legacy key-discovery lines in the fetched bytes are
  * surfaced as warnings but never populate `data`.
- *
- * Callers supply the user-agent via the `PEAC_USER_AGENT` environment
- * variable if needed; this package does not hard-code a version string
- * (that belongs in release-prep metadata, not a feature package).
  */
-export async function discover(origin: string): Promise<import('./types.js').ParseResult> {
+export async function discover(
+  origin: string,
+  options: DiscoverOptions = {}
+): Promise<import('./types.js').ParseResult> {
+  const fetchImpl = (options.fetchImpl ?? (globalThis as { fetch?: DiscoverFetch }).fetch) as
+    | DiscoverFetch
+    | undefined;
+  if (typeof fetchImpl !== 'function') {
+    return {
+      valid: false,
+      errors: [
+        'Discovery failed: no fetch implementation available (supply options.fetchImpl or provide a global fetch)',
+      ],
+    };
+  }
+
+  const envUa =
+    typeof process !== 'undefined' && typeof process.env === 'object'
+      ? process.env.PEAC_USER_AGENT
+      : undefined;
+  const userAgent = options.userAgent ?? envUa ?? DEFAULT_USER_AGENT;
+  const maxBytes = options.maxBytes ?? MAX_BYTES;
+  const redirect = options.redirect ?? 'error';
+
+  // If the caller did not supply an AbortSignal, install a local one driven by timeoutMs.
+  let localController: AbortController | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let signal = options.signal;
+  if (!signal) {
+    localController = new AbortController();
+    signal = localController.signal;
+    const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    if (timeoutMs > 0 && Number.isFinite(timeoutMs)) {
+      timer = setTimeout(() => localController?.abort(), timeoutMs);
+    }
+  }
+
   try {
     const url = new URL(WELL_KNOWN_PATH, origin);
-    const ua = (typeof process !== 'undefined' && process.env?.PEAC_USER_AGENT) || 'peac-disc';
-    const response = await fetch(url.toString(), {
-      headers: { 'User-Agent': ua },
+    const response = await fetchImpl(url.toString(), {
+      headers: { 'User-Agent': userAgent },
+      signal,
+      redirect,
     });
 
     if (!response.ok) {
@@ -58,10 +140,10 @@ export async function discover(origin: string): Promise<import('./types.js').Par
     }
 
     const content = await response.text();
-    if (content.length > MAX_BYTES) {
+    if (content.length > maxBytes) {
       return {
         valid: false,
-        errors: [`peac.txt exceeds ${MAX_BYTES} bytes (got ${content.length})`],
+        errors: [`peac.txt exceeds ${maxBytes} bytes (got ${content.length})`],
       };
     }
     const { parse } = await import('./parser.js');
@@ -71,5 +153,7 @@ export async function discover(origin: string): Promise<import('./types.js').Par
       valid: false,
       errors: [`Discovery failed: ${error instanceof Error ? error.message : String(error)}`],
     };
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }

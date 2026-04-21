@@ -64,6 +64,18 @@ before updating.
   `AIPrefSnapshot.commercial` is retained on the type surface but is
   never set by the facade.
 
+### Digest width: migration note
+
+- Callers that treated `AIPrefDigest.val` as an **opaque token** are
+  unaffected (the bytes are still a lowercase hex string tagged `alg:
+'JCS-SHA256'`).
+- Callers that hard-coded the **byte length** (for example asserting 12
+  characters, or using a fixed-width database column) MUST update: the
+  value is now the full 64-character RFC 8785 JCS + SHA-256 hex. Widen
+  the column, remove the fixed-width check, or compute the digest once
+  against the new output and re-key any store that indexed by the
+  previous truncated value.
+
 ## Migration
 
 ### Replace `resolveAIPref` / `PrefResolver` with `@peac/mappings-content-signals`

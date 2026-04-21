@@ -79,61 +79,83 @@ function collectLegacyWarnings(text: string): { warnings: string[]; firstField: 
  * `peac-policy/0.1` `PolicyDocument`.
  *
  * Legacy key-discovery lines (`verify:`, `public_keys:`, `jwks:`) are
- * stripped before policy-doc validation, listed in `warnings`, and surface
- * a structured `PEAC_LEGACY_PEAC_TXT_KEY_FIELD` `DeprecationWarning` once
- * per process. They never populate the parsed result.
+ * tolerated via a two-pass strategy: first the raw bytes are handed to
+ * `parsePolicyDocument`; if validation fails AND top-level legacy lines
+ * are present, the legacy lines are stripped and parsing is retried
+ * once. Detected legacy lines are listed in `warnings` and surface a
+ * structured `PEAC_LEGACY_PEAC_TXT_KEY_FIELD` `DeprecationWarning` once
+ * per process. They never populate the parsed result. This preserves
+ * the original bytes when a policy document happens to mention those
+ * tokens inside comments, block scalars, or rule text.
  */
 export function parse(text: string): ParseResult {
   const warnings: string[] = [];
 
-  // Advisory: pre-scan for legacy key-discovery lines and strip them so the
-  // underlying policy-doc validator does not fail on unknown fields. Legacy
-  // lines never affect the parsed result.
-  let body = text;
-  if (LEGACY_KEY_LINE.test(text)) {
-    const legacy = collectLegacyWarnings(text);
-    warnings.push(...legacy.warnings);
-    if (legacy.firstField) fireLegacyWarning(legacy.firstField);
-    body = text.replace(LEGACY_KEY_FULL_LINE_GLOBAL, '');
-  }
-
-  const trimmed = body.trim();
-  if (trimmed.length === 0) {
+  if (text.trim().length === 0) {
     return {
       valid: false,
       errors: ['Empty policy document. Expected peac-policy/0.1 YAML or JSON.'],
-      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
-  let data: PolicyDocument;
+  const hasLegacyLines = LEGACY_KEY_LINE.test(text);
+
+  // First pass: try the raw bytes. If they parse cleanly, legacy-looking
+  // substrings inside block scalars / comments / rule text are not
+  // mutated.
   try {
-    data = parsePolicyDocument(body);
-  } catch (err) {
-    if (err instanceof PolicyValidationError) {
-      return {
-        valid: false,
-        errors: [err.message],
-        warnings: warnings.length > 0 ? warnings : undefined,
-      };
-    }
-    if (err instanceof PolicyLoadError) {
-      return {
-        valid: false,
-        errors: [err.message],
-        warnings: warnings.length > 0 ? warnings : undefined,
-      };
+    const data = parsePolicyDocument(text);
+    if (hasLegacyLines) {
+      const legacy = collectLegacyWarnings(text);
+      warnings.push(...legacy.warnings);
+      if (legacy.firstField) fireLegacyWarning(legacy.firstField);
     }
     return {
+      valid: true,
+      data,
+      warnings: warnings.length > 0 ? warnings : undefined,
+    };
+  } catch (firstErr) {
+    if (!hasLegacyLines) {
+      return failure(firstErr, warnings);
+    }
+    // Second pass: strip top-level legacy key-discovery lines and retry.
+    const legacy = collectLegacyWarnings(text);
+    warnings.push(...legacy.warnings);
+    if (legacy.firstField) fireLegacyWarning(legacy.firstField);
+
+    const stripped = text.replace(LEGACY_KEY_FULL_LINE_GLOBAL, '');
+    if (stripped.trim().length === 0) {
+      return {
+        valid: false,
+        errors: ['Empty policy document after stripping legacy key-discovery lines.'],
+        warnings: warnings.length > 0 ? warnings : undefined,
+      };
+    }
+    try {
+      const data = parsePolicyDocument(stripped);
+      return {
+        valid: true,
+        data,
+        warnings: warnings.length > 0 ? warnings : undefined,
+      };
+    } catch (retryErr) {
+      return failure(retryErr, warnings);
+    }
+  }
+}
+
+function failure(err: unknown, warnings: string[]): ParseResult {
+  if (err instanceof PolicyValidationError || err instanceof PolicyLoadError) {
+    return {
       valid: false,
-      errors: [err instanceof Error ? err.message : String(err)],
+      errors: [err.message],
       warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
-
   return {
-    valid: true,
-    data,
+    valid: false,
+    errors: [err instanceof Error ? err.message : String(err)],
     warnings: warnings.length > 0 ? warnings : undefined,
   };
 }
