@@ -1,7 +1,7 @@
 {
   "name": "@peac/pref",
   "version": "0.12.13",
-  "description": "AIPREF resolver with robots.txt bridge",
+  "description": "Deprecated facade over @peac/mappings-content-signals (AIPREF / robots.txt / tdmrep). Use @peac/mappings-content-signals directly.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,6 +24,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/mappings-content-signals": "workspace:*",
     "@peac/policy-kit": "workspace:*"
   },
   "devDependencies": {

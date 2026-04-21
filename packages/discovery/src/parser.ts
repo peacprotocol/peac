@@ -1,179 +1,156 @@
 /**
- * @peac/disc/parser - peac.txt parser with ≤20 lines enforcement
- * ABNF-compliant discovery document parsing
+ * @peac/disc/parser - thin peac.txt policy-document loader/validator.
+ *
+ * peac.txt is a POLICY DOCUMENT surface per docs/specs/PEAC-TXT.md.
+ * Full parsing is delegated to `@peac/policy-kit.parsePolicyDocument`;
+ * this module only provides:
+ *
+ *   - format detection (YAML vs JSON) per PEAC-TXT.md §5.1
+ *   - a tolerant `parse()` wrapper that returns a structured `ParseResult`
+ *     (rather than throwing)
+ *   - structured warnings for legacy key-discovery lines (`verify`,
+ *     `public_keys`, `jwks`) that appeared in pre-v0.12.14 peac.txt
+ *     examples. Those lines are NEVER honored here: key discovery flows
+ *     through `iss` -> /.well-known/peac-issuer.json -> `jwks_uri` -> JWKS
+ *     (docs/specs/PEAC-ISSUER.md).
+ *   - a tiny `emit()` helper that serializes a `PolicyDocument` via
+ *     `@peac/policy-kit.serializePolicyYaml`
+ *
+ * @see docs/specs/PEAC-TXT.md
+ * @see docs/specs/PEAC-ISSUER.md
  */
 
-import type { PeacDiscovery, ParseResult, PublicKeyInfo, ValidationOptions } from './types.js';
+import {
+  PolicyLoadError,
+  PolicyValidationError,
+  parsePolicyDocument,
+  serializePolicyYaml,
+  type PolicyDocument,
+} from '@peac/policy-kit';
+import type { ParseResult } from './types.js';
 
-const MAX_LINES = 20;
-const FIELD_PATTERNS = {
-  preferences: /^preferences:\s*(.+)$/,
-  access_control: /^access_control:\s*(.+)$/,
-  payments: /^payments:\s*\[([^\]]+)\]$/,
-  provenance: /^provenance:\s*(.+)$/,
-  receipts: /^receipts:\s*(required|optional)$/,
-  verify: /^verify:\s*(.+)$/,
-  public_keys: /^public_keys:\s*\[([^\]]+)\]$/,
-};
+const LEGACY_KEY_LINE = /^\s*(verify|public_keys|jwks)\s*:/m;
+/** Strips the whole line (including the trailing newline) when matched. */
+const LEGACY_KEY_FULL_LINE_GLOBAL = /^\s*(verify|public_keys|jwks)\s*:.*\r?\n?/gm;
 
-export function parse(content: string, options: ValidationOptions = {}): ParseResult {
-  const maxLines = options.maxLines ?? MAX_LINES;
-  const errors: string[] = [];
-  const data: PeacDiscovery = {};
+let legacyWarningFired = false;
 
-  const lines = content
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith('#'));
-
-  // Enforce line limit
-  if (lines.length > maxLines) {
-    return {
-      valid: false,
-      errors: [`Line limit exceeded: ${lines.length} > ${maxLines}`],
-      lineCount: lines.length,
-    };
-  }
-
-  // Parse each line
-  for (const [index, line] of lines.entries()) {
-    let matched = false;
-
-    for (const [field, pattern] of Object.entries(FIELD_PATTERNS)) {
-      const match = line.match(pattern);
-      if (match) {
-        matched = true;
-        try {
-          switch (field) {
-            case 'preferences':
-            case 'access_control':
-            case 'provenance':
-            case 'verify':
-              data[field] = match[1].trim();
-              break;
-            case 'receipts':
-              data.receipts = match[1] as 'required' | 'optional';
-              break;
-            case 'payments':
-              data.payments = parseArray(match[1]);
-              break;
-            case 'public_keys':
-              data.public_keys = parsePublicKeys(match[1]);
-              break;
-          }
-        } catch (error) {
-          errors.push(
-            `Line ${index + 1}: ${error instanceof Error ? error.message : String(error)}`
-          );
-        }
-        break;
-      }
-    }
-
-    if (!matched) {
-      errors.push(`Line ${index + 1}: Invalid format: ${line}`);
-    }
-  }
-
-  // Validate required fields
-  if (!data.verify) {
-    errors.push('Missing required field: verify');
-  }
-
-  return {
-    valid: errors.length === 0,
-    data: errors.length === 0 ? data : undefined,
-    errors: errors.length > 0 ? errors : undefined,
-    lineCount: lines.length,
-  };
-}
-
-function parseArray(content: string): string[] {
-  return content
-    .split(',')
-    .map((item) => item.trim().replace(/^["']|["']$/g, ''))
-    .filter((item) => item.length > 0);
-}
-
-function parsePublicKeys(content: string): PublicKeyInfo[] {
-  const keyStrings = parseArray(content);
-  const keys: PublicKeyInfo[] = [];
-
-  for (const keyString of keyStrings) {
-    const keyMatch = keyString.match(/^([^:]+):([^:]+):(.+)$/);
-    if (!keyMatch) {
-      throw new Error(`Invalid public key format: ${keyString}`);
-    }
-
-    keys.push({
-      kid: keyMatch[1],
-      alg: keyMatch[2],
-      key: keyMatch[3],
-    });
-  }
-
-  return keys;
-}
-
-/** Characters that break peac.txt wire format: quotes, colons, brackets, control chars */
-const UNSAFE_FIELD_CHARS = /["\n\r\x00-\x1f:[\]]/;
-
-function assertSafeFieldValue(value: string, fieldName: string): void {
-  if (UNSAFE_FIELD_CHARS.test(value)) {
-    throw new Error(
-      `Invalid ${fieldName}: must not contain quotes, colons, brackets, newlines, or control characters`
+function fireLegacyWarning(field: string): void {
+  if (legacyWarningFired) return;
+  legacyWarningFired = true;
+  if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+    process.emitWarning(
+      `peac.txt legacy key-discovery field "${field}" is deprecated and ignored. ` +
+        `peac.txt is a policy-document surface (docs/specs/PEAC-TXT.md). ` +
+        `Key resolution uses iss -> /.well-known/peac-issuer.json -> jwks_uri -> JWKS.`,
+      { code: 'PEAC_LEGACY_PEAC_TXT_KEY_FIELD', type: 'DeprecationWarning' }
     );
   }
 }
 
-export function emit(data: PeacDiscovery): string {
-  const lines: string[] = [];
-
-  if (data.preferences) {
-    lines.push(`preferences: ${data.preferences}`);
-  }
-
-  if (data.access_control) {
-    lines.push(`access_control: ${data.access_control}`);
-  }
-
-  if (data.payments && data.payments.length > 0) {
-    data.payments.forEach((p) => assertSafeFieldValue(p, 'payment'));
-    const paymentsStr = data.payments.map((p) => `"${p}"`).join(', ');
-    lines.push(`payments: [${paymentsStr}]`);
-  }
-
-  if (data.provenance) {
-    lines.push(`provenance: ${data.provenance}`);
-  }
-
-  if (data.receipts) {
-    lines.push(`receipts: ${data.receipts}`);
-  }
-
-  if (data.verify) {
-    lines.push(`verify: ${data.verify}`);
-  }
-
-  if (data.public_keys && data.public_keys.length > 0) {
-    data.public_keys.forEach((k) => {
-      assertSafeFieldValue(k.kid, 'kid');
-      assertSafeFieldValue(k.alg, 'alg');
-      assertSafeFieldValue(k.key, 'key');
-    });
-    const keysStr = data.public_keys.map((k) => `"${k.kid}:${k.alg}:${k.key}"`).join(', ');
-    lines.push(`public_keys: [${keysStr}]`);
-  }
-
-  // Enforce line limit during emission
-  if (lines.length > MAX_LINES) {
-    throw new Error(`Generated peac.txt exceeds ${MAX_LINES} lines: ${lines.length}`);
-  }
-
-  return lines.join('\n');
+/**
+ * Reset the one-shot legacy-warning flag. Exposed for tests that need to
+ * observe the warning more than once per process.
+ */
+export function __resetLegacyWarningForTests(): void {
+  legacyWarningFired = false;
 }
 
-export function validate(content: string): boolean {
-  const result = parse(content);
-  return result.valid;
+function collectLegacyWarnings(text: string): { warnings: string[]; firstField: string | null } {
+  const warnings: string[] = [];
+  let firstField: string | null = null;
+  const lines = text.split(/\r?\n/);
+  lines.forEach((line, idx) => {
+    const match = line.match(/^\s*(verify|public_keys|jwks)\s*:/);
+    if (match) {
+      if (firstField === null) firstField = match[1];
+      warnings.push(
+        `Line ${idx + 1}: legacy key-discovery field "${match[1]}" ignored ` +
+          `(peac.txt is policy-only; use peac-issuer.json for keys)`
+      );
+    }
+  });
+  return { warnings, firstField };
+}
+
+/**
+ * Parse a peac.txt policy document. Accepts YAML or JSON per
+ * `docs/specs/PEAC-TXT.md` §5.1. On success, `data` is the validated
+ * `peac-policy/0.1` `PolicyDocument`.
+ *
+ * Legacy key-discovery lines (`verify:`, `public_keys:`, `jwks:`) are
+ * stripped before policy-doc validation, listed in `warnings`, and surface
+ * a structured `PEAC_LEGACY_PEAC_TXT_KEY_FIELD` `DeprecationWarning` once
+ * per process. They never populate the parsed result.
+ */
+export function parse(text: string): ParseResult {
+  const warnings: string[] = [];
+
+  // Advisory: pre-scan for legacy key-discovery lines and strip them so the
+  // underlying policy-doc validator does not fail on unknown fields. Legacy
+  // lines never affect the parsed result.
+  let body = text;
+  if (LEGACY_KEY_LINE.test(text)) {
+    const legacy = collectLegacyWarnings(text);
+    warnings.push(...legacy.warnings);
+    if (legacy.firstField) fireLegacyWarning(legacy.firstField);
+    body = text.replace(LEGACY_KEY_FULL_LINE_GLOBAL, '');
+  }
+
+  const trimmed = body.trim();
+  if (trimmed.length === 0) {
+    return {
+      valid: false,
+      errors: ['Empty policy document. Expected peac-policy/0.1 YAML or JSON.'],
+      warnings: warnings.length > 0 ? warnings : undefined,
+    };
+  }
+
+  let data: PolicyDocument;
+  try {
+    data = parsePolicyDocument(body);
+  } catch (err) {
+    if (err instanceof PolicyValidationError) {
+      return {
+        valid: false,
+        errors: [err.message],
+        warnings: warnings.length > 0 ? warnings : undefined,
+      };
+    }
+    if (err instanceof PolicyLoadError) {
+      return {
+        valid: false,
+        errors: [err.message],
+        warnings: warnings.length > 0 ? warnings : undefined,
+      };
+    }
+    return {
+      valid: false,
+      errors: [err instanceof Error ? err.message : String(err)],
+      warnings: warnings.length > 0 ? warnings : undefined,
+    };
+  }
+
+  return {
+    valid: true,
+    data,
+    warnings: warnings.length > 0 ? warnings : undefined,
+  };
+}
+
+/**
+ * Serialize a `peac-policy/0.1` `PolicyDocument` as YAML suitable for
+ * serving at `/.well-known/peac.txt`. Delegates to
+ * `@peac/policy-kit.serializePolicyYaml`.
+ */
+export function emit(doc: PolicyDocument): string {
+  return serializePolicyYaml(doc);
+}
+
+/**
+ * Convenience predicate: returns `true` iff `text` parses as a valid
+ * `peac-policy/0.1` document.
+ */
+export function validate(text: string): boolean {
+  return parse(text).valid;
 }

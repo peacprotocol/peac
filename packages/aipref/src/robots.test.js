@@ -1,5 +1,10 @@
 /**
- * @peac/pref/robots - Test robots.txt parsing
+ * @peac/pref/robots - Legacy node:test smoke tests.
+ *
+ * v0.12.14+ facade defers parsing to @peac/mappings-content-signals. Full
+ * coverage lives in __tests__/facade.test.ts (vitest). These smoke tests
+ * keep the pre-existing `parseRobots` / `robotsToAIPref` surface exercised
+ * against the compiled dist/ output.
  */
 
 import { test } from 'node:test';
@@ -24,7 +29,11 @@ Disallow: /
   assert.strictEqual(rules[1].directives[0].value, '/');
 });
 
-test('robotsToAIPref - GPTBot disallow converts to no-train', () => {
+test('robotsToAIPref - GPTBot Disallow: / disables AI training', () => {
+  // GPTBot maps to the ai-training / ai-inference purposes in the canonical
+  // @peac/mappings-content-signals parser; the facade surfaces that as
+  // `train-ai: false` on the legacy AIPrefSnapshot. `crawl` is only set for
+  // search / tdm purposes, so it is not populated for GPTBot alone.
   const rules = [
     {
       userAgent: 'GPTBot',
@@ -33,20 +42,7 @@ test('robotsToAIPref - GPTBot disallow converts to no-train', () => {
   ];
 
   const snapshot = robotsToAIPref(rules);
-  assert.strictEqual(snapshot.crawl, false);
   assert.strictEqual(snapshot['train-ai'], false);
-});
-
-test('robotsToAIPref - wildcard allow converts to crawl-ok', () => {
-  const rules = [
-    {
-      userAgent: '*',
-      directives: [{ field: 'allow', value: '/' }],
-    },
-  ];
-
-  const snapshot = robotsToAIPref(rules);
-  assert.strictEqual(snapshot.crawl, true);
 });
 
 test('robotsToAIPref - no AI agents returns null', () => {

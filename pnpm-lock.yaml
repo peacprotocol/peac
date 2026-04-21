@@ -1056,6 +1056,12 @@ importers:
 
   packages/aipref:
     dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../crypto
+      '@peac/mappings-content-signals':
+        specifier: workspace:*
+        version: link:../mappings/content-signals
       '@peac/policy-kit':
         specifier: workspace:*
         version: link:../policy-kit
@@ -1323,6 +1329,10 @@ importers:
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/discovery:
+    dependencies:
+      '@peac/policy-kit':
+        specifier: workspace:*
+        version: link:../policy-kit
     devDependencies:
       tsup:
         specifier: ^8.0.0

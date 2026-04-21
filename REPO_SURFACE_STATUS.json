@@ -388,10 +388,12 @@
     },
     "packages/aipref": {
       "npm": "@peac/pref",
-      "state": "supported",
+      "state": "deprecated",
+      "removal": "v0.13.0",
       "wire": "0.2",
       "layer": 4,
-      "published": true
+      "published": true,
+      "note": "Thin deprecated facade over @peac/mappings-content-signals (RFC 8941/9651 Structured Fields Content-Usage, RFC 9309 robots.txt, tdmrep). No in-package network I/O. Full RFC 8785 JCS + SHA-256 digest. Emits PEAC_DEPRECATED_PREF DeprecationWarning on instantiation."
     },
     "packages/access": {
       "npm": null,

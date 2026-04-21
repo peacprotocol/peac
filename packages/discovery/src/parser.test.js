@@ -1,91 +1,81 @@
 /**
- * @peac/disc/parser - Test peac.txt parsing with ≤20 lines enforcement
+ * @peac/disc/parser - Legacy node:test smoke tests (runs against dist/).
+ *
+ * v0.12.14+: @peac/disc is a thin loader over peac-policy/0.1 via
+ * @peac/policy-kit. Full coverage lives in tests/parser.test.ts (vitest).
  */
 
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { parse, emit, validate } from '../dist/index.js';
 
-test('parse - minimal valid peac.txt', () => {
-  const content = `verify: https://example.com/peac/verify`;
+const VALID_YAML_POLICY = [
+  "version: 'peac-policy/0.1'",
+  'defaults:',
+  '  decision: deny',
+  'rules:',
+  '  - name: allow-verified',
+  '    subject: { type: agent, labels: [verified] }',
+  '    decision: allow',
+].join('\n');
 
+const VALID_JSON_POLICY = JSON.stringify({
+  version: 'peac-policy/0.1',
+  defaults: { decision: 'allow' },
+  rules: [{ name: 'allow-everyone', decision: 'allow' }],
+});
+
+test('parse - valid YAML peac-policy/0.1', () => {
+  const result = parse(VALID_YAML_POLICY);
+  assert.strictEqual(result.valid, true);
+  assert.strictEqual(result.data.version, 'peac-policy/0.1');
+  assert.strictEqual(result.data.defaults.decision, 'deny');
+  assert.strictEqual(result.data.rules.length, 1);
+});
+
+test('parse - valid JSON peac-policy/0.1', () => {
+  const result = parse(VALID_JSON_POLICY);
+  assert.strictEqual(result.valid, true);
+  assert.strictEqual(result.data.rules[0].decision, 'allow');
+});
+
+test('parse - rejects empty input', () => {
+  const result = parse('');
+  assert.strictEqual(result.valid, false);
+  assert(result.errors[0].includes('Empty policy document'));
+});
+
+test('parse - rejects missing version', () => {
+  const result = parse('defaults:\n  decision: deny\nrules: []\n');
+  assert.strictEqual(result.valid, false);
+});
+
+test('parse - strips legacy verify line with structured warning', () => {
+  const content = 'verify: https://api.example.com/verify\n' + VALID_YAML_POLICY;
   const result = parse(content);
   assert.strictEqual(result.valid, true);
-  assert.strictEqual(result.data.verify, 'https://example.com/peac/verify');
-  assert.strictEqual(result.lineCount, 1);
+  assert(Array.isArray(result.warnings));
+  assert(result.warnings.some((w) => w.includes('legacy key-discovery field "verify" ignored')));
 });
 
-test('parse - full peac.txt within line limit', () => {
-  const content = `
-preferences: https://example.com/.well-known/aipref.json
-access_control: http-402
-payments: ["l402", "x402", "stripe"]
-provenance: c2pa
-receipts: required
-verify: https://example.com/peac/verify
-public_keys: ["test-key-001:EdDSA:11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"]
-  `.trim();
-
+test('parse - strips legacy public_keys line with structured warning', () => {
+  const content = 'public_keys: ["k:EdDSA:a"]\n' + VALID_YAML_POLICY;
   const result = parse(content);
   assert.strictEqual(result.valid, true);
-  assert.strictEqual(result.data.preferences, 'https://example.com/.well-known/aipref.json');
-  assert.strictEqual(result.data.access_control, 'http-402');
-  assert.deepStrictEqual(result.data.payments, ['l402', 'x402', 'stripe']);
-  assert.strictEqual(result.data.provenance, 'c2pa');
-  assert.strictEqual(result.data.receipts, 'required');
-  assert.strictEqual(result.lineCount, 7);
+  assert(
+    result.warnings.some((w) => w.includes('legacy key-discovery field "public_keys" ignored'))
+  );
 });
 
-test('parse - line limit enforcement', () => {
-  const lines = Array(25).fill('verify: https://example.com/peac/verify');
-  const content = lines.join('\n');
-
-  const result = parse(content);
-  assert.strictEqual(result.valid, false);
-  assert.strictEqual(result.lineCount, 25);
-  assert(result.errors[0].includes('Line limit exceeded'));
+test('emit - round-trip', () => {
+  const original = parse(VALID_YAML_POLICY).data;
+  const emitted = emit(original);
+  const reparsed = parse(emitted);
+  assert.strictEqual(reparsed.valid, true);
+  assert.deepStrictEqual(reparsed.data, original);
 });
 
-test('parse - missing required verify field', () => {
-  const content = `preferences: https://example.com/.well-known/aipref.json`;
-
-  const result = parse(content);
-  assert.strictEqual(result.valid, false);
-  assert(result.errors.some((e) => e.includes('Missing required field: verify')));
-});
-
-test('parse - invalid line format', () => {
-  const content = `
-verify: https://example.com/peac/verify
-invalid-line-without-colon
-  `.trim();
-
-  const result = parse(content);
-  assert.strictEqual(result.valid, false);
-  assert(result.errors.some((e) => e.includes('Invalid format')));
-});
-
-test('emit - generates valid peac.txt', () => {
-  const data = {
-    verify: 'https://example.com/peac/verify',
-    payments: ['x402', 'stripe'],
-    receipts: 'required',
-  };
-
-  const content = emit(data);
-  assert(content.includes('verify: https://example.com/peac/verify'));
-  assert(content.includes('payments: ["x402", "stripe"]'));
-  assert(content.includes('receipts: required'));
-
-  // Roundtrip test
-  const result = parse(content);
-  assert.strictEqual(result.valid, true);
-});
-
-test('validate - convenience function', () => {
-  const validContent = `verify: https://example.com/peac/verify`;
-  const invalidContent = `invalid-format`;
-
-  assert.strictEqual(validate(validContent), true);
-  assert.strictEqual(validate(invalidContent), false);
+test('validate - convenience', () => {
+  assert.strictEqual(validate(VALID_YAML_POLICY), true);
+  assert.strictEqual(validate('not-a-policy'), false);
 });

@@ -62,7 +62,6 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `packages/net/node`                    | `@peac/net-node`                   | 0.2  | 4     |
 | `packages/pay402`                      | `@peac/pay402`                     | 0.2  | 4     |
 | `packages/receipts`                    | `@peac/receipts`                   | 0.2  | 4     |
-| `packages/aipref`                      | `@peac/pref`                       | 0.2  | 4     |
 | `packages/server`                      | `@peac/server`                     | 0.2  | 5     |
 | `packages/conformance-harness`         | -                                  | 0.2  | 5     |
 | `packages/worker-core`                 | `@peac/worker-core`                | 0.2  | 5     |
@@ -89,9 +88,10 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 
 ## Deprecated (removal scheduled)
 
-| Package         | npm          | Removal | Note                                                                                                  |
-| --------------- | ------------ | ------- | ----------------------------------------------------------------------------------------------------- |
-| `packages/core` | `@peac/core` | v0.13.0 | Monolithic pre-v0.10.0 package. Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead. |
+| Package           | npm          | Removal | Note                                                                                                                                                                                                                                                                    |
+| ----------------- | ------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/aipref` | `@peac/pref` | v0.13.0 | Thin deprecated facade over @peac/mappings-content-signals (RFC 8941/9651 Structured Fields Content-Usage, RFC 9309 robots.txt, tdmrep). No in-package network I/O. Full RFC 8785 JCS + SHA-256 digest. Emits PEAC_DEPRECATED_PREF DeprecationWarning on instantiation. |
+| `packages/core`   | `@peac/core` | v0.13.0 | Monolithic pre-v0.10.0 package. Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead.                                                                                                                                                                   |
 
 ## Archived (non-default, may be removed)
 

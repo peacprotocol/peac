@@ -7,6 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   parsePolicy,
+  parsePolicyDocument,
   validatePolicy,
   createExamplePolicy,
   serializePolicyYaml,
@@ -341,5 +342,69 @@ describe('complex policy validation', () => {
 
       expect(() => validatePolicy(policy)).not.toThrow();
     }
+  });
+});
+
+describe('parsePolicyDocument (peac-policy/0.1)', () => {
+  it('parses a valid YAML peac-policy/0.1 document', () => {
+    const yaml = `
+version: "peac-policy/0.1"
+defaults:
+  decision: deny
+rules:
+  - name: allow-verified-agents
+    subject:
+      type: agent
+      labels: [verified]
+    purpose: inference
+    decision: allow
+`;
+    const policy = parsePolicyDocument(yaml);
+    expect(policy.version).toBe(POLICY_VERSION);
+    expect(policy.defaults.decision).toBe('deny');
+    expect(policy.rules).toHaveLength(1);
+    expect(policy.rules[0].name).toBe('allow-verified-agents');
+  });
+
+  it('parses a valid JSON peac-policy/0.1 document', () => {
+    const json = JSON.stringify({
+      version: 'peac-policy/0.1',
+      defaults: { decision: 'allow' },
+      rules: [{ name: 'deny-unknown', decision: 'deny' }],
+    });
+    const policy = parsePolicyDocument(json);
+    expect(policy.version).toBe(POLICY_VERSION);
+    expect(policy.rules[0].decision).toBe('deny');
+  });
+
+  it('rejects a document missing the version header', () => {
+    const invalid = JSON.stringify({
+      defaults: { decision: 'deny' },
+      rules: [],
+    });
+    expect(() => parsePolicyDocument(invalid)).toThrow(PolicyValidationError);
+  });
+
+  it('rejects a document with the wrong version literal', () => {
+    const invalid = JSON.stringify({
+      version: 'peac-policy/0.9',
+      defaults: { decision: 'deny' },
+      rules: [],
+    });
+    expect(() => parsePolicyDocument(invalid)).toThrow(PolicyValidationError);
+  });
+
+  it('rejects a malformed text (neither JSON nor YAML-parseable into schema)', () => {
+    expect(() => parsePolicyDocument('::::not-parseable::::')).toThrow(PolicyLoadError);
+  });
+
+  it('returns a policy structurally identical to parsePolicy auto-detect', () => {
+    const yaml = `
+version: "peac-policy/0.1"
+defaults:
+  decision: review
+rules: []
+`;
+    expect(parsePolicyDocument(yaml)).toEqual(parsePolicy(yaml));
   });
 });

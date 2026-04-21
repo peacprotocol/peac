@@ -58,7 +58,7 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `packages/adapters/x402/daydreams`     | `@peac/adapter-x402-daydreams`     | supported    | 0.2  |
 | `packages/adapters/x402/fluora`        | `@peac/adapter-x402-fluora`        | supported    | 0.2  |
 | `packages/adapters/x402/pinata`        | `@peac/adapter-x402-pinata`        | supported    | 0.2  |
-| `packages/aipref`                      | `@peac/pref`                       | supported    | 0.2  |
+| `packages/aipref`                      | `@peac/pref`                       | deprecated   | 0.2  |
 | `packages/contracts`                   | `@peac/contracts`                  | supported    | 0.2  |
 | `packages/http-signatures`             | `@peac/http-signatures`            | supported    | 0.2  |
 | `packages/jwks-cache`                  | `@peac/jwks-cache`                 | supported    | 0.2  |

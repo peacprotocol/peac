@@ -213,7 +213,11 @@ export class VerifierV13 {
       }
     };
 
-    // Discover peac.txt with caching
+    // Discover peac.txt with caching. peac.txt is a policy-document surface
+    // per docs/specs/PEAC-TXT.md; this verifier only records the observation
+    // (URL + etag) and does NOT read key-discovery fields from the parsed
+    // result. Key resolution uses /.well-known/peac-issuer.json -> jwks_uri
+    // -> JWKS elsewhere in the verify path.
     try {
       checkTimeLimit();
       const peacUrl = new URL('/.well-known/peac.txt', resource).toString();
