@@ -83,7 +83,7 @@ if (!manifest) {
     fail(`Published packages dropped: expected ${BASELINE}, got ${pkgs.length}`);
   } else {
     fail(
-      `New public package(s) added: expected ${BASELINE}, got ${pkgs.length} — new: ${pkgs.slice(BASELINE).join(', ')}`
+      `New public package(s) added: expected ${BASELINE}, got ${pkgs.length} - new: ${pkgs.slice(BASELINE).join(', ')}`
     );
   }
 }
@@ -162,7 +162,7 @@ if (!errors) {
     pass(`Emitted-on-primary-path error codes unchanged at ${BASELINE_EMITTED}`);
   } else {
     fail(
-      `New emitted error codes: expected ${BASELINE_EMITTED}, got ${emitted.length} — new: ${emitted.map((e) => e.code).join(', ')}`
+      `New emitted error codes: expected ${BASELINE_EMITTED}, got ${emitted.length} - new: ${emitted.map((e) => e.code).join(', ')}`
     );
   }
   // Total count sanity: v0.12.13 had 186 error codes
@@ -174,7 +174,7 @@ if (!errors) {
   } else {
     // additions are OK (additive) but we note them
     pass(
-      `Error code count: ${allErrors.length} (${allErrors.length - BASELINE_TOTAL} added beyond baseline — additive OK)`
+      `Error code count: ${allErrors.length} (${allErrors.length - BASELINE_TOTAL} added beyond baseline - additive OK)`
     );
   }
 }
@@ -182,7 +182,7 @@ if (!errors) {
 // ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
-console.log(`\n${passed + failed} checks — ${passed} passed, ${failed} failed`);
+console.log(`\n${passed + failed} checks - ${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.error('\nSemantic-widening gate FAILED. Review the failures above before tagging.');
   process.exit(1);
