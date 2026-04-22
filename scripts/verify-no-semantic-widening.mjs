@@ -2,6 +2,11 @@
 /**
  * No-semantic-widening gate for v0.12.14 release prep.
  *
+ * This is a release-specific gate with baselines hard-coded to the v0.12.13
+ * published state (37 packages, 12 extension groups, 186 error codes). It is
+ * not a general semantic-drift framework. Future releases should either update
+ * the baselines here or author a new gate script for their release window.
+ *
  * Verifies that the v0.12.14 release has not widened the protocol
  * surface beyond what is documented as additive report-only behavior.
  *
@@ -21,7 +26,6 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -52,10 +56,7 @@ console.log('=====================================\n');
 // 1. Wire format versions unchanged
 // ---------------------------------------------------------------------------
 console.log('--- Wire format ---');
-const kernelConstants = readFileSync(
-  join(ROOT, 'packages/kernel/src/constants.ts'),
-  'utf8'
-);
+const kernelConstants = readFileSync(join(ROOT, 'packages/kernel/src/constants.ts'), 'utf8');
 const hasWire01 = kernelConstants.includes("'peac-receipt/0.1'");
 const hasWire02 = kernelConstants.includes("'interaction-record+jwt'");
 if (hasWire01 && hasWire02) {
@@ -81,7 +82,9 @@ if (!manifest) {
   } else if (pkgs.length < BASELINE) {
     fail(`Published packages dropped: expected ${BASELINE}, got ${pkgs.length}`);
   } else {
-    fail(`New public package(s) added: expected ${BASELINE}, got ${pkgs.length} — new: ${pkgs.slice(BASELINE).join(', ')}`);
+    fail(
+      `New public package(s) added: expected ${BASELINE}, got ${pkgs.length} — new: ${pkgs.slice(BASELINE).join(', ')}`
+    );
   }
 }
 
@@ -100,8 +103,8 @@ if (!regs) {
   const groupCount = Array.isArray(groups)
     ? groups.length
     : Array.isArray(groups.values)
-    ? groups.values.length
-    : Object.keys(groups).length;
+      ? groups.values.length
+      : Object.keys(groups).length;
   if (groupCount === BASELINE_EXT_GROUPS) {
     pass(`Extension group count unchanged at ${BASELINE_EXT_GROUPS}`);
   } else if (groupCount > BASELINE_EXT_GROUPS) {
@@ -170,7 +173,9 @@ if (!errors) {
     fail(`Error codes removed: baseline ${BASELINE_TOTAL}, actual ${allErrors.length}`);
   } else {
     // additions are OK (additive) but we note them
-    pass(`Error code count: ${allErrors.length} (${allErrors.length - BASELINE_TOTAL} added beyond baseline — additive OK)`);
+    pass(
+      `Error code count: ${allErrors.length} (${allErrors.length - BASELINE_TOTAL} added beyond baseline — additive OK)`
+    );
   }
 }
 
