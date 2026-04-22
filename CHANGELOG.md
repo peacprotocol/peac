@@ -5,7 +5,47 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.12.13] - Unreleased
+## [0.12.14] - Unreleased
+
+Policy binding and privacy-aware verification. Typed document binding for terms and policy, publisher-supplied canonical digest support, privacy-aware deployment guidance, and verifier privacy defaults including JWKS cache retention caps and a no-raw-personal-data minimization mode. Documentation, tests, and tooling only. No wire, schema, kernel, crypto, or protocol public-API change.
+
+### Added
+
+- `packages/protocol/src/document-binding.ts`: typed document-binding helpers with three scheme-specific functions (`computeJsonDocumentDigestJcs`, `computeTextDocumentDigestUtf8`, `computeDocumentDigest`) and a three-state check (`checkDocumentBinding`). JCS name reserved for JSON-only; text helper names its normalization scheme. Normative spec: `docs/specs/DOCUMENT-BINDING.md`.
+- `packages/protocol/src/verifier-types.ts` gains `DocumentBindingResult`, `VerifierBindings`, and `DocumentRepresentation` types. The verifier report gains an optional top-level `bindings` object carrying `policy`, `terms`, and `documents` under the same three-state semantics. Legacy `policy_binding` top-level field is preserved as a byte-stable mirror for v0.12.x consumers.
+- `docs/specs/DOCUMENT-BINDING.md`: normative spec defining the canonical hash format, three-state semantics, helper-naming contract, minimal text canonicalization rule (`\n` + NFC, no trailing-whitespace stripping), per-representation binding identity, and publisher-supplied `canonical_digest` rule (verifiers may compare when present; must never synthesize from non-JSON; absence is `unavailable`, not `failed`).
+- `packages/adapters/x402/src/terms.ts`: `computeX402TermsDigest` convenience helper over the dispatcher for the four x402 PR-1986 `terms` representations (`uri`, `markdown`, `plaintext`, `json`).
+- JWKS cache retention caps via `PEAC_JWKS_CACHE_TTL_MS` (default 300 000 ms / 5 min) and `PEAC_JWKS_CACHE_MAX_ENTRIES` (default 1 000) environment variables. Decimal-only parsing; malformed values fall back to built-in defaults without uncaching.
+- `PEAC_NO_RAW_PERSONAL_DATA` (set to `true` or `1`) enables the `no_raw_personal_data` minimization mode on the verifier report. The redactor pseudonymises `claims.sub` and `claims.actor.{id,email,name,display_name,handle,sub}` to `sha256:<32 hex>`, walks `claims.extensions` recursively, and elides string leaves that are not short structured identifiers. Protocol metadata fields are unchanged. When the variable is unset the report body is byte-identical to v0.12.13.
+- Five boundary-first privacy guidance documents under `docs/privacy/`: `DATA-CLASSIFICATION.md`, `RETENTION-AND-DELETION.md`, `DEPLOYMENT-ROLES.md`, `DATA-SUBJECT-RIGHTS.md`, and `DPIA-STARTER.md`. Each opens with explicit "What PEAC does / What PEAC does not do / What deployers still own" framing.
+- `docs/specs/PRIVACY-PROFILE.md`: extended with boundary-first block and cross-references to the new deployment-guidance documents.
+- `docs/specs/DOCUMENT-BINDING.md`, `docs/specs/VERIFICATION-REPORT-FORMAT.md` updated to document `bindings` shape and publisher-supplied `canonical_digest` rule.
+- `scripts/verify-no-semantic-widening.mjs`: release gate verifying wire format unchanged, published package count unchanged at 37, extension group count unchanged at 12, OpenAPI includes required fields and the permitted additive `bindings` field, no new primary-path error codes, total error count unchanged at 186.
+
+### Changed
+
+- `packages/protocol/src/policy-binding.ts`: `computePolicyDigestJcs` delegates to `computeJsonDocumentDigestJcs` internally; public API and byte output unchanged.
+- `packages/discovery/src/`: narrowed to policy-document parsing; legacy `verify` / `public_keys` / `jwks` fields in `peac.txt` emit a structured `PEAC_LEGACY_PEAC_TXT_KEY_FIELD` deprecation warning.
+- `packages/aipref/`: deprecated facade over `@peac/mappings-content-signals`; network I/O removed; digests widened to full SHA-256 (`sha256:<64 hex>`); a one-shot `PEAC_DEPRECATED_PREF` structured deprecation warning is emitted.
+- OpenAPI `verify.yaml` and `apps/api/openapi.yaml` refreshed to `info.version: 0.12.14` with the additive `bindings` field on both `VerifySuccessResponse` and `ExtendedVerifyReport` schemas.
+
+### Deprecated
+
+- `@peac/disc` (legacy key-discovery fields): deprecated and narrowed. Full removal owned by the next cleanup release.
+- `@peac/pref`: deprecated facade over `@peac/mappings-content-signals`. Full removal owned by the next cleanup release.
+
+### Deferred
+
+The following items are deferred to v0.13.0:
+
+- Naming and terminology cleanup; legacy quarantine of `peac.receipt/0.9` off active surfaces.
+- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` endpoint, `sdk-js` workspace stub.
+- Full removal of `@peac/disc` and `@peac/pref` deprecated facades.
+- Reboot baseline capture, resource-limit spec, and `docs/STANDARDS_LEDGER.md`.
+- Package-surface reduction program with measurable gate.
+- Hosted Issue GA decision.
+
+## [0.12.13] - 2026-04-20
 
 Compliance mappings, verifier contract alignment, portable proof workflows, and Go adapter follow-through. Documentation, tests, workflows, and SDK support tooling only. No wire, schema, kernel, crypto, or protocol public-API change.
 

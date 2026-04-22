@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-04-20T10:01:33.549Z",
-  "version": "0.12.13",
-  "schema_version": "0.12.13",
+  "generated_at": "2026-04-22T10:26:17.323Z",
+  "version": "0.12.14",
+  "schema_version": "0.12.14",
   "total_fixtures": 688,
   "total_with_requirements": 243,
   "total_unmapped": 445,

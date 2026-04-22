@@ -1,7 +1,7 @@
 openapi: 3.1.1
 info:
   title: PEAC Reference Verifier API
-  version: 0.12.13
+  version: 0.12.14
   summary: Portable signed records for agent, API, MCP, and cross-runtime interactions.
   description: |
     Package-level OpenAPI contract for the PEAC reference verifier (`apps/api/`).
@@ -435,7 +435,24 @@ components:
         policy_binding:
           type: string
           enum: [unavailable, verified, failed]
-          description: Three-state policy-binding result.
+          description: Three-state policy-binding result (legacy mirror; equals bindings.policy when bindings is present).
+        bindings:
+          type: object
+          description: >
+            Optional top-level bindings object (v0.12.14). Present only when caller supplied
+            bindings.terms or a non-empty bindings.documents to verifyLocal. Absent when no
+            terms or document digests were supplied (byte-stable with v0.12.13). Report-only;
+            not stamped into the emitted record or envelope shape.
+          properties:
+            policy:
+              type: string
+              enum: [unavailable, verified, failed]
+            terms:
+              type: object
+              description: Per-representation terms-binding result when caller supplied a terms digest.
+            documents:
+              type: array
+              description: Per-document binding results when caller supplied document digests.
         issuer:
           type: string
           description: Issuer URI from the receipt.
@@ -511,6 +528,23 @@ components:
         policy_binding:
           type: string
           enum: [unavailable, verified, failed]
+        bindings:
+          type: object
+          description: >
+            Optional top-level bindings object (v0.12.14). Present only when caller supplied
+            bindings.terms or a non-empty bindings.documents to verifyLocal. Absent when no
+            terms or document digests were supplied (byte-stable with v0.12.13). Report-only;
+            not stamped into the emitted record or envelope shape.
+          properties:
+            policy:
+              type: string
+              enum: [unavailable, verified, failed]
+            terms:
+              type: object
+              description: Per-representation terms-binding result when caller supplied a terms digest.
+            documents:
+              type: array
+              description: Per-document binding results when caller supplied document digests.
         issuer:
           type: string
         kid:

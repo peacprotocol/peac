@@ -2,7 +2,7 @@
 
 Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scripts/generate-surface-status.mjs`.
 
-**Version:** 0.12.13 | **Updated:** 2026-04-20
+**Version:** 0.12.14 | **Updated:** PENDING
 
 ## Layer 1
 

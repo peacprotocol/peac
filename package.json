@@ -1,6 +1,6 @@
 {
   "name": "@peac/monorepo",
-  "version": "0.12.13",
+  "version": "0.12.14",
   "private": true,
   "description": "Portable signed records for agent, API, MCP, and cross-runtime interactions.",
   "repository": {
@@ -58,6 +58,7 @@
     "verify:codegen-drift": "bash scripts/verify-codegen-drift.sh",
     "verify:distribution": "node scripts/verify-distribution.mjs",
     "verify:release": "node scripts/verify-release.mjs",
+    "verify:no-widening": "node scripts/verify-no-semantic-widening.mjs",
     "api-contract:extract": "tsx scripts/extract-api-contract.ts",
     "api-contract:check": "tsx scripts/extract-api-contract.ts --check",
     "verify:contracts:drift": "tsx scripts/extract-api-contract.ts --check",
