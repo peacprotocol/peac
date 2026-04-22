@@ -5,6 +5,7 @@ import {
   buildExtendedReport,
   formatPlainText,
   negotiateFormat,
+  redactClaimsForPrivacy,
 } from '../src/report-format.js';
 
 describe('report-format', () => {
@@ -295,6 +296,95 @@ describe('report-format', () => {
       );
       expect(JSON.stringify(withInternalPolicyOnly)).toBe(JSON.stringify(baseline));
       expect(JSON.stringify(baseline)).not.toContain('"bindings"');
+    });
+  });
+
+  describe('redactClaimsForPrivacy (no_raw_personal_data mode; v0.12.14)', () => {
+    const claims = {
+      iss: 'https://api.example.com',
+      sub: 'user:alice@example.com',
+      kind: 'evidence',
+      type: 'org.peacprotocol/inference',
+      pillars: ['attribution'],
+      actor: { id: 'agent:agent-007', label: 'Agent 7' },
+      extensions: {
+        'org.peacprotocol/commerce': { payment_rail: 'x402', amount_minor: '100000' },
+        'org.example/free-text': 'a long free-text caller-supplied string',
+        'org.example/short': 'small',
+      },
+    };
+
+    it('off mode passes claims through unchanged (default)', () => {
+      const out = redactClaimsForPrivacy(claims, 'off');
+      expect(out).toEqual(claims);
+      // Reference equality is not required, but the output must not
+      // surface a pseudonymised sub when the mode is off.
+      expect(out.sub).toBe('user:alice@example.com');
+    });
+
+    it('no_raw_personal_data mode pseudonymises sub', () => {
+      const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
+      expect(typeof out.sub).toBe('string');
+      expect(out.sub).toMatch(/^sha256:[0-9a-f]{16}$/);
+      expect(out.sub).not.toContain('alice');
+      expect(out.sub).not.toContain('example.com');
+    });
+
+    it('no_raw_personal_data mode pseudonymises actor.id but preserves other actor fields', () => {
+      const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
+      const actor = out.actor as Record<string, unknown>;
+      expect(actor.id).toMatch(/^sha256:[0-9a-f]{16}$/);
+      expect(actor.label).toBe('Agent 7');
+    });
+
+    it('no_raw_personal_data mode elides long free-text extension values but keeps short and object values', () => {
+      const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
+      const ext = out.extensions as Record<string, unknown>;
+      expect(ext['org.example/free-text']).toBe('<redacted:elided>');
+      expect(ext['org.example/short']).toBe('small');
+      expect(ext['org.peacprotocol/commerce']).toEqual({
+        payment_rail: 'x402',
+        amount_minor: '100000',
+      });
+    });
+
+    it('no_raw_personal_data mode preserves protocol metadata (iss/kind/type/pillars)', () => {
+      const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
+      expect(out.iss).toBe('https://api.example.com');
+      expect(out.kind).toBe('evidence');
+      expect(out.type).toBe('org.peacprotocol/inference');
+      expect(out.pillars).toEqual(['attribution']);
+    });
+
+    it('no_raw_personal_data mode is deterministic across calls (same input -> same pseudonym)', () => {
+      const a = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
+      const b = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
+      expect(a.sub).toBe(b.sub);
+      expect((a.actor as Record<string, unknown>).id).toBe((b.actor as Record<string, unknown>).id);
+    });
+
+    it('serialized report under no_raw_personal_data mode never contains the raw subject', () => {
+      const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
+      const serialized = JSON.stringify(out);
+      expect(serialized).not.toContain('alice@example.com');
+      expect(serialized).not.toContain('agent-007');
+      expect(serialized).not.toContain('a long free-text caller-supplied string');
+    });
+
+    it('does not mutate the input claims object', () => {
+      const before = JSON.stringify(claims);
+      redactClaimsForPrivacy(claims, 'no_raw_personal_data');
+      expect(JSON.stringify(claims)).toBe(before);
+    });
+
+    it('handles claims without sub / actor / extensions', () => {
+      const minimal = {
+        iss: 'https://api.example.com',
+        kind: 'evidence' as const,
+        type: 'org.peacprotocol/inference',
+      };
+      const out = redactClaimsForPrivacy(minimal, 'no_raw_personal_data');
+      expect(out).toEqual(minimal);
     });
   });
 });

@@ -102,8 +102,28 @@ interface JWKSCacheEntry {
   revokedKeys?: RevokedKeyInfo[];
 }
 
-const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
-const DEFAULT_MAX_CACHE_ENTRIES = 1000;
+const HARD_CACHE_TTL_MS_BUILTIN = 5 * 60 * 1000;
+const HARD_MAX_CACHE_ENTRIES_BUILTIN = 1000;
+
+/**
+ * Read a positive integer from an environment variable. Returns the
+ * fallback when the variable is unset, empty, or not a positive
+ * integer. Defensive against operator typos: a malformed value never
+ * silently uncaches the resolver.
+ */
+function envPositiveInt(name: string, fallback: number): number {
+  const raw = typeof process !== 'undefined' ? process.env?.[name] : undefined;
+  if (!raw) return fallback;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) return fallback;
+  return parsed;
+}
+
+const DEFAULT_CACHE_TTL_MS = envPositiveInt('PEAC_JWKS_CACHE_TTL_MS', HARD_CACHE_TTL_MS_BUILTIN);
+const DEFAULT_MAX_CACHE_ENTRIES = envPositiveInt(
+  'PEAC_JWKS_CACHE_MAX_ENTRIES',
+  HARD_MAX_CACHE_ENTRIES_BUILTIN
+);
 const jwksCache = new Map<string, JWKSCacheEntry>();
 
 // ---------------------------------------------------------------------------

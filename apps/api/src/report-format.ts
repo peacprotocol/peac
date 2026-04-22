@@ -10,8 +10,92 @@
  * account semantics, dashboard semantics, or product-only operational workflow.
  */
 
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { VerifierBindings } from '@peac/protocol';
+
+/**
+ * Privacy mode for the verifier report (v0.12.14).
+ *
+ * - 'off' (default): the report echoes claims verbatim, byte-identical
+ *   to v0.12.13 behavior.
+ * - 'no_raw_personal_data': the report applies a narrow redactor to
+ *   caller-supplied free-text fields most likely to carry personal
+ *   data. Protocol metadata (typ, alg, kid, iss, wire_version,
+ *   verified outcome, three-state binding values) are unchanged.
+ *
+ * The mode is read from the `PEAC_NO_RAW_PERSONAL_DATA` env var at
+ * module load. Operators set it to `true` (or `1`) in deployments
+ * that prefer to avoid surfacing raw caller-supplied content through
+ * the report path.
+ */
+export type PrivacyReportMode = 'off' | 'no_raw_personal_data';
+
+const DEFAULT_PRIVACY_MODE: PrivacyReportMode = ((): PrivacyReportMode => {
+  const v = typeof process !== 'undefined' ? process.env?.PEAC_NO_RAW_PERSONAL_DATA : undefined;
+  return v === 'true' || v === '1' ? 'no_raw_personal_data' : 'off';
+})();
+
+/**
+ * Pseudonymise a string subject identifier into a short stable
+ * digest reference of the form `sha256:<16 hex>`. The verifier never
+ * stores the salt; the pseudonym is deterministic per subject so
+ * chain-of-thought across verifier requests is preserved without
+ * leaking the raw value.
+ */
+function pseudonymise(value: string): string {
+  const h = createHash('sha256').update(value, 'utf8').digest('hex').slice(0, 16);
+  return `sha256:${h}`;
+}
+
+/**
+ * Apply the no_raw_personal_data redactor to a claims object. Returns
+ * a new object; the original is not mutated. Only fields most likely
+ * to carry caller-supplied personal data are rewritten:
+ *
+ *   - `sub` → pseudonymised digest reference
+ *   - `actor.id` → pseudonymised (when an actor object is present)
+ *   - any top-level `extensions` value that is a free-text string
+ *     longer than 16 chars → '<redacted:elided>'
+ *
+ * Protocol metadata (`iss`, `kid`, `typ`, `alg`, `wire_version`,
+ * `kind`, `type`, `pillars`, three-state binding values) is
+ * preserved.
+ */
+export function redactClaimsForPrivacy(
+  claims: Record<string, unknown>,
+  mode: PrivacyReportMode = DEFAULT_PRIVACY_MODE
+): Record<string, unknown> {
+  if (mode === 'off') return claims;
+  const out: Record<string, unknown> = { ...claims };
+  if (typeof out.sub === 'string' && out.sub.length > 0) {
+    out.sub = pseudonymise(out.sub);
+  }
+  const actor = out.actor;
+  if (actor && typeof actor === 'object' && !Array.isArray(actor)) {
+    const a = actor as Record<string, unknown>;
+    if (typeof a.id === 'string' && a.id.length > 0) {
+      out.actor = { ...a, id: pseudonymise(a.id) };
+    }
+  }
+  const ext = out.extensions;
+  if (ext && typeof ext === 'object' && !Array.isArray(ext)) {
+    const e = ext as Record<string, unknown>;
+    const cleaned: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(e)) {
+      if (typeof v === 'string' && v.length > 16) {
+        cleaned[k] = '<redacted:elided>';
+      } else {
+        cleaned[k] = v;
+      }
+    }
+    out.extensions = cleaned;
+  }
+  return out;
+}
+
+export function getDefaultPrivacyMode(): PrivacyReportMode {
+  return DEFAULT_PRIVACY_MODE;
+}
 
 export interface VerifyResult {
   verified: boolean;

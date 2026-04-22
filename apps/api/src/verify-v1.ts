@@ -26,6 +26,7 @@ import {
   buildExtendedReport,
   formatPlainText,
   negotiateFormat,
+  redactClaimsForPrivacy,
 } from './report-format.js';
 import { detectRecordProfile } from './record-profile.js';
 import { deterministicStringify } from './utils.js';
@@ -341,10 +342,16 @@ export function createVerifyV1Handler() {
       const includeBindings =
         result.bindings?.terms !== undefined ||
         (result.bindings?.documents !== undefined && result.bindings.documents.length > 0);
+      // Apply the no_raw_personal_data redactor when the deployment
+      // opted in via PEAC_NO_RAW_PERSONAL_DATA. When the env flag is
+      // unset (the default), the redactor is a no-op and the report
+      // body is byte-identical to v0.12.13 behavior. See
+      // docs/privacy/RETENTION-AND-DELETION.md §5.
+      const reportClaims = redactClaimsForPrivacy(result.claims as Record<string, unknown>);
       const standardReport = {
         verified: true as const,
         receipt_ref: receiptRef,
-        claims: result.claims as Record<string, unknown>,
+        claims: reportClaims,
         warnings: result.warnings,
         policy_binding: result.policy_binding,
         ...(includeBindings && { bindings: result.bindings }),
