@@ -104,36 +104,89 @@ acting. PEAC does not and cannot decide this.
 
 ---
 
-## 5. Reference-verifier privacy defaults (planned follow-up within v0.12.14; not yet merged)
+## 5. Reference-verifier privacy defaults
 
-This document describes intent. The narrow, configurable defaults
-listed below are **planned follow-up within the v0.12.14 release
-window** and are **not yet merged**. They land in a follow-up code
-commit on the same release; until that commit lands, none of the
-names below resolve in the reference-verifier code path. Defaults
-favor minimization when shipped.
+The narrow, configurable defaults below ship in v0.12.14. Defaults
+favor minimization. Operators override per-deployment.
 
-- **Retention caps** (planned) on the derived verifier cache
-  (`PEAC_CACHE_TTL`, `PEAC_CACHE_MAX_ENTRIES`) and on the optional
-  report index (`PEAC_REPORT_RETENTION_SECONDS`). Operators will
-  override via config or environment.
-- **Deletion hooks** (planned) accepting a list of `receipt_ref`
-  values and purging derived-layer entries only.
-- **Stricter redaction defaults** (planned) for free-text or
-  header-derived fields in verifier logs.
-- **`no_raw_personal_data`** report mode toggle (planned). When
-  enabled, the verifier report will omit or hash fields classified
-  as likely personal data. Default operator-selectable; recommended
-  on for public-facing deployments.
-- **Pseudonymous-ID fixtures** (planned) and regression tests in the
-  reference verifier test suite, proving no raw value surfaces
-  through the report path when `no_raw_personal_data` is on.
+- **JWKS cache retention caps.** The JWKS resolver in `@peac/protocol`
+  caches resolved JWKS per issuer using an LRU map. The TTL and the
+  max-entries cap are configurable per call (`cacheTtlMs`,
+  `maxCacheEntries`) and via environment variables read at module
+  load:
+  - `PEAC_JWKS_CACHE_TTL_MS` (default `300000`, i.e. 5 minutes).
+  - `PEAC_JWKS_CACHE_MAX_ENTRIES` (default `1000`).
 
-Exact environment variables, defaults, and code paths land in the
-verifier privacy defaults commit within v0.12.14 and are documented
-in `surfaces/reference-verifier/README.md` when they land. This
-section will lose the "planned" qualifiers and gain concrete config
-references at that point.
+  A malformed value (non-positive integer or non-numeric) is ignored
+  and the built-in default applies; the resolver never silently
+  uncaches itself because of operator typos.
+
+- **`no_raw_personal_data` minimization mode.** Set
+  `PEAC_NO_RAW_PERSONAL_DATA=true` (or `=1`) on the reference
+  verifier process. When enabled, the verifier report applies a
+  minimization redactor to the claims payload. This is a
+  minimization posture, **not** a legal guarantee that all personal
+  data has been removed; deployments with broader claim payloads,
+  nested operator-specific schemas, or regulated data MUST add
+  their own redaction layer (see "What deployers still own" above).
+  - `claims.sub` is replaced with `sha256:<32 hex>` (128 bits of
+    visible digest), a deterministic pseudonym derived from the raw
+    value. The same input yields the same pseudonym across requests
+    so chain-of-thought is preserved without leaking the raw
+    subject.
+  - `claims.actor` PII fields (`id`, `email`, `name`, `display_name`,
+    `handle`, `sub`) are pseudonymised the same way when present as
+    strings. Other actor string fields are elided to
+    `<redacted:elided>` unless they look like short structured
+    identifiers (ASCII printable, no whitespace, length 1..16; e.g.
+    `role: reader`).
+  - `claims.extensions` is walked recursively. Every string leaf
+    inside the extensions subtree (top-level, nested objects, array
+    elements) is elided to `<redacted:elided>` unless it looks like
+    a short structured identifier; numbers, booleans, null, and
+    nested object/array structure pass through.
+  - Unknown top-level claim keys whose values are free-text strings
+    are elided the same way; short structured strings, numbers, and
+    booleans pass through.
+  - Protocol metadata (`iss`, `iat`, `exp`, `nbf`, `jti`, `kind`,
+    `type`, `typ`, `alg`, `kid`, `cty`, `pillars`, `wire_version`,
+    `version`, `policy`, `policy_binding`, `bindings`) is unchanged.
+
+  When the env var is unset (the default), the report body is
+  byte-identical to v0.12.13 behavior. This is enforced by the
+  byte-stability lock test in `apps/api/tests/report-format.test.ts`.
+
+- **Deletion hooks for the derived layer (operator-owned).** The
+  reference verifier in this repository does not maintain a
+  long-lived report index server-side; each request is computed and
+  returned. Deployments that wrap the reference verifier in a report
+  store MUST implement deletion against that store themselves, keyed
+  by `receipt_ref`. PEAC owns the contract (purge by `receipt_ref`
+  list, derived layer only, signed evidence untouched). Storage and
+  access control are operator-owned. See §2 for the
+  evidence-vs-derived deletion model.
+
+- **Optional report-index retention (operator-owned).** When a
+  deployment adds a report-index store, the operator is responsible
+  for the retention period and purge cadence. PEAC documents the
+  recommended bounded posture (`PEAC_REPORT_RETENTION_SECONDS` is the
+  reserved env-var name when an operator wants to expose it via the
+  same `PEAC_*` namespace) but does not enforce it from the binding
+  layer.
+
+- **Stricter redaction in verifier request logs (operator-owned).**
+  Free-text and header-derived fields in process or reverse-proxy
+  logs are operator-owned. `docs/specs/PRIVACY-PROFILE.md` §4 lists
+  the categories that MUST NOT be captured at the receipt layer;
+  operators apply equivalent redaction in their request-log layer
+  per their lawful-basis and retention decision.
+
+- **Pseudonymous-ID fixtures and regression tests** ship in
+  `apps/api/tests/report-format.test.ts` under the
+  `redactClaimsForPrivacy (no_raw_personal_data mode; v0.12.14)`
+  block. They lock the contract: when the mode is on, the
+  serialized report never contains the raw subject, the raw actor
+  id, or long free-text extension strings.
 
 ---
 

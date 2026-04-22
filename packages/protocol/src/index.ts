@@ -8,7 +8,22 @@ export * from './verify';
 export * from './verify-local';
 export * from './headers';
 export * from './discovery';
-export * from './jwks-resolver';
+export type {
+  JWK,
+  JWKS,
+  RevokedKeyInfo,
+  JWKSResolveSuccess,
+  JWKSResolveError,
+  JWKSResolveResult,
+  ResolveJWKSOptions,
+} from './jwks-resolver';
+export {
+  clearKidThumbprints,
+  getKidThumbprintSize,
+  clearJWKSCache,
+  getJWKSCacheSize,
+  resolveJWKS,
+} from './jwks-resolver';
 
 // Policy binding utilities (v0.12.0-preview.1)
 export { computePolicyDigestJcs, checkPolicyBinding } from './policy-binding';

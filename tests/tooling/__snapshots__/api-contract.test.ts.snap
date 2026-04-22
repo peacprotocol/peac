@@ -138,7 +138,17 @@ exports[`API contract: @peac/kernel > value exports match snapshot 1`] = `
 ]
 `;
 
-exports[`API contract: @peac/protocol > barrel type exports match snapshot (static AST) 1`] = `[]`;
+exports[`API contract: @peac/protocol > barrel type exports match snapshot (static AST) 1`] = `
+[
+  "JWK",
+  "JWKS",
+  "JWKSResolveError",
+  "JWKSResolveResult",
+  "JWKSResolveSuccess",
+  "ResolveJWKSOptions",
+  "RevokedKeyInfo",
+]
+`;
 
 exports[`API contract: @peac/protocol > value exports match snapshot 1`] = `
 [
