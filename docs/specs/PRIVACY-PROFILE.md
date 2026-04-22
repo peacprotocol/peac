@@ -6,6 +6,13 @@ Last-Updated: 2026-02-05
 
 This document defines the privacy defaults and guidelines for PEAC receipts containing interaction evidence, particularly for AI agent tool calls and automated system interactions.
 
+**Companion deployment guidance.** This document is the normative
+receipt-side profile. For operator-facing deployment guidance
+(data classification, retention and deletion, deployment roles,
+data-subject rights handling, DPIA starter) see
+[`docs/privacy/`](../privacy/README.md). The deployment guidance
+leads with a boundary-first block and is informative, not normative.
+
 ## 1. Terminology
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 and RFC 8174.

@@ -88,6 +88,19 @@ You need signed evidence for audit, dispute review, or regulatory alignment. Evi
 
 Key packages: `@peac/protocol`, `@peac/audit`.
 
+### Privacy-sensitive and regulated environments
+
+You are deploying PEAC in a privacy-sensitive or regulated environment and want data minimization, retention caps, redaction defaults, and clear controller / processor framing. PEAC supports GDPR-aligned deployments; it does not replace operator legal review.
+
+1. Start with [`docs/privacy/README.md`](privacy/README.md) for the boundary-first index.
+2. Walk the deployment-shape table in [`docs/privacy/DEPLOYMENT-ROLES.md`](privacy/DEPLOYMENT-ROLES.md).
+3. Classify surfaces with [`docs/privacy/DATA-CLASSIFICATION.md`](privacy/DATA-CLASSIFICATION.md).
+4. Configure retention / deletion per [`docs/privacy/RETENTION-AND-DELETION.md`](privacy/RETENTION-AND-DELETION.md).
+5. Wire a rights-handling playbook with [`docs/privacy/DATA-SUBJECT-RIGHTS.md`](privacy/DATA-SUBJECT-RIGHTS.md).
+6. Screen risk with [`docs/privacy/DPIA-STARTER.md`](privacy/DPIA-STARTER.md).
+
+Receipt-side normative profile: [`docs/specs/PRIVACY-PROFILE.md`](specs/PRIVACY-PROFILE.md).
+
 ## Core concepts
 
 - **Receipt:** a signed JWS (`interaction-record+jwt`) proving what terms applied and what happened. The JOSE header `typ` is `interaction-record+jwt`; the HTTP request or response body is `application/json` (or the `PEAC-Receipt` HTTP header) carrying the compact JWS string.

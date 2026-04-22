@@ -379,6 +379,13 @@ Reports MUST NOT include:
 - Full receipt claims (reference by digest)
 - Secrets from error messages
 
+Verifier deployments SHOULD consult
+[`docs/privacy/DATA-CLASSIFICATION.md`](../privacy/DATA-CLASSIFICATION.md)
+for per-field classification and
+[`docs/privacy/RETENTION-AND-DELETION.md`](../privacy/RETENTION-AND-DELETION.md)
+for retention caps, deletion hooks, and the evidence-vs-derived
+deletion model applied to verifier caches and report indexes.
+
 ### 8.3 Caching
 
 Reports MAY be cached by receipt digest + policy digest:
