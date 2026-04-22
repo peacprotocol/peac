@@ -9,6 +9,7 @@ Outcome-led recipes. Each one states the real-world problem, the PEAC pieces you
 | [MCP tool-call receipts](mcp-tool-call-receipts.md)     | Attach signed records to MCP tool-call responses.                                                      | MCP server operator         |
 | [Commerce evidence bundle](commerce-evidence-bundle.md) | Bundle observational evidence across x402, ACP, and paymentauth without synthesizing payment finality. | Agentic commerce operator   |
 | [Regulatory audit trail](regulatory-audit-trail.md)     | Build a portable, signed audit trail for EU AI Act, NIST AI RMF, and ISO 42001 review.                 | Compliance / audit lead     |
+| [Cloudflare + x402 + PEAC](cloudflare-x402-peac.md)     | Compose Cloudflare delivery surfaces and x402 PR-1986 terms with PEAC policy and terms binding.        | Cloudflare-fronted operator |
 
 Each recipe follows the same structure:
 

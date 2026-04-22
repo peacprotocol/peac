@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "effective": "2026-04-22",
+  "endpoint": "/v1/inference",
+  "attribution": {
+    "required": true,
+    "fields": ["origin-uri", "author"]
+  },
+  "pricing": {
+    "rail": "x402",
+    "network": "eip155:8453",
+    "asset": "USDC",
+    "amount_minor": "100000",
+    "currency": "USD"
+  },
+  "caching": {
+    "max_age_seconds": 86400
+  },
+  "redistribution": false,
+  "training_use": false
+}
