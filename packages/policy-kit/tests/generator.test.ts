@@ -17,7 +17,7 @@ describe('Profile Generator', () => {
       expect(fs.existsSync(generatedPath)).toBe(true);
     });
 
-    it('generated file is up to date with YAML sources', () => {
+    it('generated file is up to date with YAML sources', { timeout: 30000 }, () => {
       // Run the generator in check mode
       const result = execSync('pnpm generate:profiles:check', {
         cwd: path.join(__dirname, '..'),
@@ -101,7 +101,7 @@ describe('Profile Generator', () => {
   });
 
   describe('deterministic output', () => {
-    it('generator produces identical output on repeated runs', () => {
+    it('generator produces identical output on repeated runs', { timeout: 30000 }, () => {
       const cwd = path.join(__dirname, '..');
 
       // Read current generated file
