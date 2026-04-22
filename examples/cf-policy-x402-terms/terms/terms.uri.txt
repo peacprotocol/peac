@@ -1,0 +1,1 @@
+https://api.example.com/.well-known/peac-terms.txt

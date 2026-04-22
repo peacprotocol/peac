@@ -1,0 +1,32 @@
+# peac-policy/0.1: example policy for the cf-policy-x402-terms demo
+#
+# Demonstrates a publisher who:
+#   - allows search engine indexing,
+#   - disallows AI training,
+#   - offers paid AI inference under attribution requirements,
+#   - advertises x402 PR-1986 terms in four representations (see terms/).
+#
+# This policy compiles to a peac-policy/0.1 document. Its JCS+SHA-256
+# digest is bound into the issued receipt's policy.digest field; the
+# verifier computes the same digest locally and reports policy_binding =
+# 'verified' on a match.
+version: peac-policy/0.1
+issuer: https://api.example.com
+purposes:
+  - search-indexing
+  - inference
+usage:
+  search-indexing: allowed
+  ai-train: disallowed
+  inference: conditional
+attribution:
+  required: true
+  format: 'origin-uri+author'
+payment:
+  rail: x402
+  hint:
+    network: eip155:8453
+    asset: USDC
+    amount_minor: '100000'
+contact:
+  abuse: privacy@example.com

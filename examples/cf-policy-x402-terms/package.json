@@ -1,0 +1,23 @@
+{
+  "name": "@peac/example-cf-policy-x402-terms",
+  "version": "0.0.0",
+  "private": true,
+  "description": "End-to-end demo composing PEAC policy binding with x402 PR-1986 terms across four representations.",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "test": "vitest run",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/adapter-x402": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.0"
+  }
+}
