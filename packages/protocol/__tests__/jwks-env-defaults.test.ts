@@ -51,11 +51,11 @@ describe('JWKS env-var defaults (v0.12.14)', () => {
       expect(__parseEnvPositiveInt('PEAC_X', 42, { PEAC_X: '0.5' })).toBe(42);
     });
 
-    it('accepts scientific-notation positive integers (Number coercion)', () => {
-      // `Number('1e3') === 1000` and is a finite integer; the helper
-      // intentionally accepts any positive-integer numeric string,
-      // however expressed.
-      expect(__parseEnvPositiveInt('PEAC_X', 42, { PEAC_X: '1e3' })).toBe(1000);
+    it('returns the fallback for scientific notation strings', () => {
+      // Decimal-only rule: only /^[1-9][0-9]*$/ passes.
+      // Scientific notation is an operator error and falls back to the built-in.
+      expect(__parseEnvPositiveInt('PEAC_X', 42, { PEAC_X: '1e3' })).toBe(42);
+      expect(__parseEnvPositiveInt('PEAC_X', 42, { PEAC_X: '1e10' })).toBe(42);
     });
 
     it('returns the fallback for Infinity / NaN', () => {

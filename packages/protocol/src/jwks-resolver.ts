@@ -112,9 +112,10 @@ const HARD_MAX_CACHE_ENTRIES_BUILTIN = 1000;
  * silently uncaches the resolver. Pure function; the env source is
  * a parameter so tests do not have to mutate process.env.
  *
- * @internal exported for unit tests; do not consume from outside the
- * package. The parsing rule is the contract that
- * `PEAC_JWKS_CACHE_TTL_MS` and `PEAC_JWKS_CACHE_MAX_ENTRIES` follow.
+ * Accepts canonical decimal positive integers only (e.g. `300000`).
+ * Rejects scientific notation (`1e3`), floats, zero, negatives, and
+ * any non-decimal string. Malformed values fall back to the built-in
+ * default so operator typos never silently disable the cache.
  */
 export function __parseEnvPositiveInt(
   name: string,
@@ -125,9 +126,9 @@ export function __parseEnvPositiveInt(
 ): number {
   const raw = env[name];
   if (!raw) return fallback;
-  const parsed = Number(raw);
-  if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) return fallback;
-  return parsed;
+  if (!/^[1-9][0-9]*$/.test(raw)) return fallback;
+  const parsed = parseInt(raw, 10);
+  return parsed > 0 ? parsed : fallback;
 }
 
 const DEFAULT_CACHE_TTL_MS = __parseEnvPositiveInt(
@@ -139,10 +140,7 @@ const DEFAULT_MAX_CACHE_ENTRIES = __parseEnvPositiveInt(
   HARD_MAX_CACHE_ENTRIES_BUILTIN
 );
 
-/**
- * @internal exported for unit tests; reflects the values that
- * resolveJWKS uses by default in this process.
- */
+/** Exposes the module-load defaults for testing without mutating process.env. */
 export function __getJwksCacheDefaults(): { ttlMs: number; maxEntries: number } {
   return { ttlMs: DEFAULT_CACHE_TTL_MS, maxEntries: DEFAULT_MAX_CACHE_ENTRIES };
 }

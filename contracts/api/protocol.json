@@ -29,14 +29,6 @@
       "typeof": "static"
     },
     {
-      "name": "__getJwksCacheDefaults",
-      "typeof": "static"
-    },
-    {
-      "name": "__parseEnvPositiveInt",
-      "typeof": "static"
-    },
-    {
       "name": "base64urlDecode",
       "typeof": "static"
     },
@@ -364,6 +356,6 @@
   "wire02_extension_keys": [],
   "legacy_extension_keys": [],
   "extension_schemas": [],
-  "total_value_exports": 72,
+  "total_value_exports": 70,
   "total_type_exports": 64
 }
