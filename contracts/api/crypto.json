@@ -1,7 +1,7 @@
 {
   "package": "@peac/crypto",
   "version": "0.12.13",
-  "extracted_at": "2026-04-21",
+  "extracted_at": "2026-04-22",
   "node_version": "v24.13.0",
   "value_exports": [
     {

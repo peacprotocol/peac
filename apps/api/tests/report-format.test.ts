@@ -302,15 +302,35 @@ describe('report-format', () => {
   describe('redactClaimsForPrivacy (no_raw_personal_data mode; v0.12.14)', () => {
     const claims = {
       iss: 'https://api.example.com',
+      iat: 1714000000,
       sub: 'user:alice@example.com',
       kind: 'evidence',
       type: 'org.peacprotocol/inference',
       pillars: ['attribution'],
-      actor: { id: 'agent:agent-007', label: 'Agent 7' },
+      policy: { digest: 'sha256:' + 'a'.repeat(64), version: '1' },
+      actor: {
+        id: 'agent:agent-007',
+        email: 'alice.smith@example.com',
+        display_name: 'Alice Smith',
+        label: 'Agent 7',
+        role: 'reader',
+      },
       extensions: {
-        'org.peacprotocol/commerce': { payment_rail: 'x402', amount_minor: '100000' },
+        'org.peacprotocol/commerce': {
+          payment_rail: 'x402',
+          amount_minor: '100000',
+          currency: 'USD',
+          buyer_address: '742 Evergreen Terrace, Springfield',
+          memo_lines: ['Thanks for the inference', 'Receipt was helpful'],
+          tags: { campaign: 'spring-promo' },
+        },
         'org.example/free-text': 'a long free-text caller-supplied string',
         'org.example/short': 'small',
+        'org.example/numeric': 1234,
+        'org.example/list': ['x402', 'A long contextual sentence inside a list', 99, true],
+        'org.example/nested': {
+          inner: { secret: 'leak this if I miss it', count: 42 },
+        },
       },
     };
 
@@ -322,38 +342,77 @@ describe('report-format', () => {
       expect(out.sub).toBe('user:alice@example.com');
     });
 
-    it('no_raw_personal_data mode pseudonymises sub', () => {
+    it('no_raw_personal_data mode pseudonymises sub at 32-hex width', () => {
       const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
       expect(typeof out.sub).toBe('string');
-      expect(out.sub).toMatch(/^sha256:[0-9a-f]{16}$/);
+      expect(out.sub).toMatch(/^sha256:[0-9a-f]{32}$/);
       expect(out.sub).not.toContain('alice');
       expect(out.sub).not.toContain('example.com');
     });
 
-    it('no_raw_personal_data mode pseudonymises actor.id but preserves other actor fields', () => {
+    it('no_raw_personal_data mode pseudonymises every common actor PII field at 32-hex width', () => {
       const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
       const actor = out.actor as Record<string, unknown>;
-      expect(actor.id).toMatch(/^sha256:[0-9a-f]{16}$/);
-      expect(actor.label).toBe('Agent 7');
+      expect(actor.id).toMatch(/^sha256:[0-9a-f]{32}$/);
+      expect(actor.email).toMatch(/^sha256:[0-9a-f]{32}$/);
+      expect(actor.display_name).toMatch(/^sha256:[0-9a-f]{32}$/);
+      // role is short ASCII identifier-shape, preserved
+      expect(actor.role).toBe('reader');
+      // label is whitespace-bearing free text, elided
+      expect(actor.label).toBe('<redacted:elided>');
     });
 
-    it('no_raw_personal_data mode elides long free-text extension values but keeps short and object values', () => {
+    it('no_raw_personal_data mode walks extensions recursively and elides string leaves that are not short structured identifiers', () => {
       const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
       const ext = out.extensions as Record<string, unknown>;
+      // Top-level commerce keeps short structured values; elides
+      // free-text address; walks into memo_lines array.
+      const commerce = ext['org.peacprotocol/commerce'] as Record<string, unknown>;
+      expect(commerce.payment_rail).toBe('x402');
+      expect(commerce.currency).toBe('USD');
+      expect(commerce.amount_minor).toBe('100000');
+      expect(commerce.buyer_address).toBe('<redacted:elided>');
+      expect(commerce.memo_lines).toEqual(['<redacted:elided>', '<redacted:elided>']);
+      expect(commerce.tags).toEqual({ campaign: 'spring-promo' });
+      // Top-level free text and short surface
       expect(ext['org.example/free-text']).toBe('<redacted:elided>');
       expect(ext['org.example/short']).toBe('small');
-      expect(ext['org.peacprotocol/commerce']).toEqual({
-        payment_rail: 'x402',
-        amount_minor: '100000',
-      });
+      // Numbers and booleans pass through
+      expect(ext['org.example/numeric']).toBe(1234);
+      // Mixed-type array: short structured strings keep, long strings
+      // elide, primitives pass through.
+      expect(ext['org.example/list']).toEqual(['x402', '<redacted:elided>', 99, true]);
+      // Nested object: inner free-text leaks would have been the
+      // original-implementation gap; verify the recursive walk plugs it.
+      const nested = ext['org.example/nested'] as Record<string, unknown>;
+      const inner = nested.inner as Record<string, unknown>;
+      expect(inner.secret).toBe('<redacted:elided>');
+      expect(inner.count).toBe(42);
     });
 
-    it('no_raw_personal_data mode preserves protocol metadata (iss/kind/type/pillars)', () => {
+    it('no_raw_personal_data mode preserves protocol metadata (iss/iat/kind/type/pillars/policy)', () => {
       const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
       expect(out.iss).toBe('https://api.example.com');
+      expect(out.iat).toBe(1714000000);
       expect(out.kind).toBe('evidence');
       expect(out.type).toBe('org.peacprotocol/inference');
       expect(out.pillars).toEqual(['attribution']);
+      expect(out.policy).toEqual({ digest: 'sha256:' + 'a'.repeat(64), version: '1' });
+    });
+
+    it('no_raw_personal_data mode elides unknown top-level free-text claims', () => {
+      const c = {
+        iss: 'https://api.example.com',
+        kind: 'evidence' as const,
+        type: 'org.peacprotocol/inference',
+        unknown_text: 'I am a long free-text top-level claim',
+        unknown_short: 'evidence',
+        unknown_count: 7,
+      };
+      const out = redactClaimsForPrivacy(c, 'no_raw_personal_data');
+      expect(out.unknown_text).toBe('<redacted:elided>');
+      expect(out.unknown_short).toBe('evidence');
+      expect(out.unknown_count).toBe(7);
     });
 
     it('no_raw_personal_data mode is deterministic across calls (same input -> same pseudonym)', () => {
@@ -361,14 +420,27 @@ describe('report-format', () => {
       const b = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
       expect(a.sub).toBe(b.sub);
       expect((a.actor as Record<string, unknown>).id).toBe((b.actor as Record<string, unknown>).id);
+      expect((a.actor as Record<string, unknown>).email).toBe(
+        (b.actor as Record<string, unknown>).email
+      );
     });
 
-    it('serialized report under no_raw_personal_data mode never contains the raw subject', () => {
+    it('serialized report under no_raw_personal_data mode never contains raw caller-supplied strings', () => {
       const out = redactClaimsForPrivacy(claims, 'no_raw_personal_data');
       const serialized = JSON.stringify(out);
+      // Direct PII identifiers
       expect(serialized).not.toContain('alice@example.com');
+      expect(serialized).not.toContain('alice.smith@example.com');
+      expect(serialized).not.toContain('Alice Smith');
       expect(serialized).not.toContain('agent-007');
+      // Actor free-text label
+      expect(serialized).not.toContain('Agent 7');
+      // Extensions free text
       expect(serialized).not.toContain('a long free-text caller-supplied string');
+      expect(serialized).not.toContain('Springfield');
+      expect(serialized).not.toContain('Thanks for the inference');
+      // Critically: the previously-leakable nested string
+      expect(serialized).not.toContain('leak this if I miss it');
     });
 
     it('does not mutate the input claims object', () => {

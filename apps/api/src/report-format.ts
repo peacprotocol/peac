@@ -18,10 +18,20 @@ import type { VerifierBindings } from '@peac/protocol';
  *
  * - 'off' (default): the report echoes claims verbatim, byte-identical
  *   to v0.12.13 behavior.
- * - 'no_raw_personal_data': the report applies a narrow redactor to
- *   caller-supplied free-text fields most likely to carry personal
- *   data. Protocol metadata (typ, alg, kid, iss, wire_version,
- *   verified outcome, three-state binding values) are unchanged.
+ * - 'no_raw_personal_data': the report applies a minimization redactor
+ *   that rewrites caller-supplied free-text across the claims subtree.
+ *   Protocol metadata (typ, alg, kid, iss, wire_version, verified
+ *   outcome, three-state binding values, kind, type, pillars) is
+ *   preserved. Short identifiers that look structured (ASCII, no
+ *   whitespace, <= 16 chars) are preserved inside `extensions` so
+ *   useful operational fields like `payment_rail` or `currency`
+ *   continue to surface.
+ *
+ * This mode is a minimization posture, not a legal guarantee that
+ * all personal data has been removed. Deployments with broader claim
+ * payloads, nested operator-specific schemas, or regulated data MUST
+ * add their own redaction layer; PEAC cannot know which fields carry
+ * personal data in an arbitrary operator-defined extension.
  *
  * The mode is read from the `PEAC_NO_RAW_PERSONAL_DATA` env var at
  * module load. Operators set it to `true` (or `1`) in deployments
@@ -36,59 +46,150 @@ const DEFAULT_PRIVACY_MODE: PrivacyReportMode = ((): PrivacyReportMode => {
 })();
 
 /**
- * Pseudonymise a string subject identifier into a short stable
- * digest reference of the form `sha256:<16 hex>`. The verifier never
- * stores the salt; the pseudonym is deterministic per subject so
- * chain-of-thought across verifier requests is preserved without
- * leaking the raw value.
+ * Pseudonymise a string subject identifier into a stable digest
+ * reference of the form `sha256:<32 hex>` (128 bits of visible
+ * digest; low collision risk for long-lived report correlation
+ * across large datasets). The verifier never stores the salt; the
+ * pseudonym is deterministic per subject so chain-of-thought across
+ * verifier requests is preserved without leaking the raw value.
  */
 function pseudonymise(value: string): string {
-  const h = createHash('sha256').update(value, 'utf8').digest('hex').slice(0, 16);
+  const h = createHash('sha256').update(value, 'utf8').digest('hex').slice(0, 32);
   return `sha256:${h}`;
 }
 
 /**
- * Apply the no_raw_personal_data redactor to a claims object. Returns
- * a new object; the original is not mutated. Only fields most likely
- * to carry caller-supplied personal data are rewritten:
+ * Top-level claim keys whose values are protocol metadata that the
+ * redactor MUST preserve verbatim. This set is conservative and
+ * reflects PEAC Wire 0.2 surface.
+ */
+const PROTOCOL_METADATA_KEYS = new Set([
+  'iss',
+  'iat',
+  'exp',
+  'nbf',
+  'jti',
+  'kind',
+  'type',
+  'typ',
+  'alg',
+  'kid',
+  'cty',
+  'pillars',
+  'wire_version',
+  'version',
+  'policy', // object: { digest, uri?, version? }
+  'policy_binding',
+  'bindings',
+]);
+
+/**
+ * Common actor subfield names that clearly carry caller-supplied
+ * personal data (email, display name) and should pseudonymise when
+ * present. This list is intentionally short; any operator-specific
+ * actor subfield that is a free-text string also gets elided by the
+ * generic string-leaf walker.
+ */
+const ACTOR_PSEUDONYM_FIELDS = new Set(['id', 'email', 'name', 'display_name', 'handle', 'sub']);
+
+/**
+ * Structured-looking short identifier: ASCII printable, no
+ * whitespace, <= 16 chars. The redactor preserves these when it
+ * finds them as extension string leaves, so useful operational
+ * values like `payment_rail: x402`, `currency: USD`,
+ * `network: eip155:8453` still appear in the report. Long,
+ * whitespace-bearing, or non-ASCII strings are treated as free
+ * text and elided.
+ */
+function isStructuredShortIdentifier(s: string): boolean {
+  if (s.length === 0 || s.length > 16) return false;
+  return /^[\x21-\x7e]+$/.test(s);
+}
+
+const ELIDED = '<redacted:elided>';
+
+function redactExtensionValue(value: unknown): unknown {
+  if (value === null) return null;
+  if (typeof value === 'boolean' || typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    return isStructuredShortIdentifier(value) ? value : ELIDED;
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => redactExtensionValue(v));
+  }
+  if (typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = redactExtensionValue(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+/**
+ * Apply the no_raw_personal_data redactor to a claims object.
+ * Returns a new object; the original is not mutated.
  *
- *   - `sub` → pseudonymised digest reference
- *   - `actor.id` → pseudonymised (when an actor object is present)
- *   - any top-level `extensions` value that is a free-text string
- *     longer than 16 chars → '<redacted:elided>'
+ * Behavior:
+ *   - `sub` is pseudonymised.
+ *   - `actor`: `id` / `email` / `name` / `display_name` / `handle` /
+ *     `sub` are pseudonymised when present as strings; any other
+ *     string actor field is elided; protocol metadata inside `actor`
+ *     (unusual but possible) passes through if not a string.
+ *   - `extensions` is walked recursively: every string leaf that is
+ *     not a short structured identifier (ASCII, no whitespace,
+ *     <= 16 chars) is elided; numbers, booleans, null, and nested
+ *     object/array structure pass through.
+ *   - Top-level claim keys in `PROTOCOL_METADATA_KEYS` are preserved
+ *     verbatim.
+ *   - Any other top-level claim that is a non-metadata string is
+ *     elided, mirroring the extensions policy.
  *
- * Protocol metadata (`iss`, `kid`, `typ`, `alg`, `wire_version`,
- * `kind`, `type`, `pillars`, three-state binding values) is
- * preserved.
+ * This is a minimization posture, not a legal guarantee; the
+ * JSDoc on `PrivacyReportMode` carries the full caveat text.
  */
 export function redactClaimsForPrivacy(
   claims: Record<string, unknown>,
   mode: PrivacyReportMode = DEFAULT_PRIVACY_MODE
 ): Record<string, unknown> {
   if (mode === 'off') return claims;
-  const out: Record<string, unknown> = { ...claims };
-  if (typeof out.sub === 'string' && out.sub.length > 0) {
-    out.sub = pseudonymise(out.sub);
-  }
-  const actor = out.actor;
-  if (actor && typeof actor === 'object' && !Array.isArray(actor)) {
-    const a = actor as Record<string, unknown>;
-    if (typeof a.id === 'string' && a.id.length > 0) {
-      out.actor = { ...a, id: pseudonymise(a.id) };
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(claims)) {
+    if (key === 'sub' && typeof value === 'string' && value.length > 0) {
+      out.sub = pseudonymise(value);
+      continue;
     }
-  }
-  const ext = out.extensions;
-  if (ext && typeof ext === 'object' && !Array.isArray(ext)) {
-    const e = ext as Record<string, unknown>;
-    const cleaned: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(e)) {
-      if (typeof v === 'string' && v.length > 16) {
-        cleaned[k] = '<redacted:elided>';
-      } else {
-        cleaned[k] = v;
+    if (key === 'actor' && value && typeof value === 'object' && !Array.isArray(value)) {
+      const a = value as Record<string, unknown>;
+      const cleanedActor: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(a)) {
+        if (ACTOR_PSEUDONYM_FIELDS.has(k) && typeof v === 'string' && v.length > 0) {
+          cleanedActor[k] = pseudonymise(v);
+        } else if (typeof v === 'string') {
+          cleanedActor[k] = isStructuredShortIdentifier(v) ? v : ELIDED;
+        } else {
+          cleanedActor[k] = redactExtensionValue(v);
+        }
       }
+      out.actor = cleanedActor;
+      continue;
     }
-    out.extensions = cleaned;
+    if (key === 'extensions' && value && typeof value === 'object' && !Array.isArray(value)) {
+      out.extensions = redactExtensionValue(value);
+      continue;
+    }
+    if (PROTOCOL_METADATA_KEYS.has(key)) {
+      out[key] = value;
+      continue;
+    }
+    // Unknown top-level claim: elide if it's a free-text string, else
+    // pass through. Numbers and booleans are not personal data.
+    if (typeof value === 'string' && !isStructuredShortIdentifier(value)) {
+      out[key] = ELIDED;
+    } else {
+      out[key] = value;
+    }
   }
   return out;
 }

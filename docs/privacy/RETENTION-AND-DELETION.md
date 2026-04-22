@@ -121,23 +121,36 @@ favor minimization. Operators override per-deployment.
   and the built-in default applies; the resolver never silently
   uncaches itself because of operator typos.
 
-- **`no_raw_personal_data` report mode.** Set
+- **`no_raw_personal_data` minimization mode.** Set
   `PEAC_NO_RAW_PERSONAL_DATA=true` (or `=1`) on the reference
-  verifier process. When enabled, the verifier report rewrites the
-  fields most likely to carry caller-supplied personal data:
-  - `claims.sub` is replaced with `sha256:<16 hex>`, a deterministic
-    short pseudonym derived from the raw value. The same input
-    yields the same pseudonym across requests so chain-of-thought
-    is preserved without leaking the raw subject.
-  - `claims.actor.id` is pseudonymised the same way; other `actor`
-    fields pass through.
-  - Any value under `claims.extensions[*]` that is a free-text
-    string longer than 16 characters is replaced with
-    `<redacted:elided>`; short strings and structured object values
-    pass through.
-  - Protocol metadata (`iss`, `kind`, `type`, `pillars`,
-    `wire_version`, three-state binding values, error codes) is
-    unchanged.
+  verifier process. When enabled, the verifier report applies a
+  minimization redactor to the claims payload. This is a
+  minimization posture, **not** a legal guarantee that all personal
+  data has been removed; deployments with broader claim payloads,
+  nested operator-specific schemas, or regulated data MUST add
+  their own redaction layer (see "What deployers still own" above).
+  - `claims.sub` is replaced with `sha256:<32 hex>` (128 bits of
+    visible digest), a deterministic pseudonym derived from the raw
+    value. The same input yields the same pseudonym across requests
+    so chain-of-thought is preserved without leaking the raw
+    subject.
+  - `claims.actor` PII fields (`id`, `email`, `name`, `display_name`,
+    `handle`, `sub`) are pseudonymised the same way when present as
+    strings. Other actor string fields are elided to
+    `<redacted:elided>` unless they look like short structured
+    identifiers (ASCII printable, no whitespace, length 1..16; e.g.
+    `role: reader`).
+  - `claims.extensions` is walked recursively. Every string leaf
+    inside the extensions subtree (top-level, nested objects, array
+    elements) is elided to `<redacted:elided>` unless it looks like
+    a short structured identifier; numbers, booleans, null, and
+    nested object/array structure pass through.
+  - Unknown top-level claim keys whose values are free-text strings
+    are elided the same way; short structured strings, numbers, and
+    booleans pass through.
+  - Protocol metadata (`iss`, `iat`, `exp`, `nbf`, `jti`, `kind`,
+    `type`, `typ`, `alg`, `kid`, `cty`, `pillars`, `wire_version`,
+    `version`, `policy`, `policy_binding`, `bindings`) is unchanged.
 
   When the env var is unset (the default), the report body is
   byte-identical to v0.12.13 behavior. This is enforced by the

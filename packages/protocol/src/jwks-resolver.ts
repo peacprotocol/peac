@@ -109,21 +109,43 @@ const HARD_MAX_CACHE_ENTRIES_BUILTIN = 1000;
  * Read a positive integer from an environment variable. Returns the
  * fallback when the variable is unset, empty, or not a positive
  * integer. Defensive against operator typos: a malformed value never
- * silently uncaches the resolver.
+ * silently uncaches the resolver. Pure function; the env source is
+ * a parameter so tests do not have to mutate process.env.
+ *
+ * @internal exported for unit tests; do not consume from outside the
+ * package. The parsing rule is the contract that
+ * `PEAC_JWKS_CACHE_TTL_MS` and `PEAC_JWKS_CACHE_MAX_ENTRIES` follow.
  */
-function envPositiveInt(name: string, fallback: number): number {
-  const raw = typeof process !== 'undefined' ? process.env?.[name] : undefined;
+export function __parseEnvPositiveInt(
+  name: string,
+  fallback: number,
+  env: Record<string, string | undefined> = typeof process !== 'undefined'
+    ? (process.env as Record<string, string | undefined>)
+    : {}
+): number {
+  const raw = env[name];
   if (!raw) return fallback;
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) return fallback;
   return parsed;
 }
 
-const DEFAULT_CACHE_TTL_MS = envPositiveInt('PEAC_JWKS_CACHE_TTL_MS', HARD_CACHE_TTL_MS_BUILTIN);
-const DEFAULT_MAX_CACHE_ENTRIES = envPositiveInt(
+const DEFAULT_CACHE_TTL_MS = __parseEnvPositiveInt(
+  'PEAC_JWKS_CACHE_TTL_MS',
+  HARD_CACHE_TTL_MS_BUILTIN
+);
+const DEFAULT_MAX_CACHE_ENTRIES = __parseEnvPositiveInt(
   'PEAC_JWKS_CACHE_MAX_ENTRIES',
   HARD_MAX_CACHE_ENTRIES_BUILTIN
 );
+
+/**
+ * @internal exported for unit tests; reflects the values that
+ * resolveJWKS uses by default in this process.
+ */
+export function __getJwksCacheDefaults(): { ttlMs: number; maxEntries: number } {
+  return { ttlMs: DEFAULT_CACHE_TTL_MS, maxEntries: DEFAULT_MAX_CACHE_ENTRIES };
+}
 const jwksCache = new Map<string, JWKSCacheEntry>();
 
 // ---------------------------------------------------------------------------
