@@ -9,18 +9,24 @@
 
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXAMPLE_DIR = resolve(HERE, '..');
+const require = createRequire(import.meta.url);
 
 describe('cf-policy-x402-terms demo', () => {
   it('runs end-to-end and prints expected output', () => {
-    const result = spawnSync('npx', ['-y', 'tsx', 'demo.ts'], {
+    // Resolve the workspace-pinned tsx via require.resolve so the smoke
+    // test cannot reach a registry or pick up an ambient install.
+    const tsxBin = require.resolve('tsx/cli');
+    const result = spawnSync(process.execPath, [tsxBin, 'demo.ts'], {
       cwd: EXAMPLE_DIR,
       encoding: 'utf8',
       timeout: 60_000,
+      env: { ...process.env, NODE_NO_WARNINGS: '1' },
     });
 
     if (result.status !== 0) {

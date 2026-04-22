@@ -48,8 +48,12 @@ function read(p: string): string {
  * Parse the demo policy.yaml into a JSON value. The demo deliberately
  * uses a tiny hand-rolled YAML reader instead of pulling in `js-yaml`
  * to keep the example dependency surface minimal. The parser only
- * understands the demo policy shape (flat map + nested map + arrays of
- * strings + simple scalars), and intentionally fails on anything else.
+ * understands the demo policy shape (flat map + nested map + arrays
+ * of strings + simple scalars), and intentionally fails on anything
+ * else. The reader is positional: it tracks the current line index
+ * directly rather than scanning by string content, so duplicated
+ * lines (e.g. blank or comment lines that happen to repeat) cannot
+ * mis-align the lookahead.
  */
 function loadPolicy(yamlText: string): Record<string, unknown> {
   const lines = yamlText.split('\n');
@@ -57,7 +61,17 @@ function loadPolicy(yamlText: string): Record<string, unknown> {
   type Frame = { obj: Record<string, unknown>; indent: number; key?: string; arr?: string[] };
   const stack: Frame[] = [{ obj: root, indent: -1 }];
 
-  for (const raw of lines) {
+  // Find the next non-empty, non-comment line index strictly after `from`.
+  function peekNextIndex(from: number): number {
+    for (let j = from + 1; j < lines.length; j++) {
+      const s = lines[j].trim();
+      if (s.length > 0 && !s.startsWith('#')) return j;
+    }
+    return -1;
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
     if (!raw.trim() || raw.trim().startsWith('#')) continue;
     const indent = raw.length - raw.trimStart().length;
     const line = raw.trim();
@@ -72,7 +86,6 @@ function loadPolicy(yamlText: string): Record<string, unknown> {
     const frame = stack[stack.length - 1];
 
     if (line.startsWith('- ')) {
-      // array item
       const value = line.slice(2).trim();
       if (!frame.arr) {
         throw new Error(`unexpected array item at indent ${indent}: ${line}`);
@@ -86,29 +99,22 @@ function loadPolicy(yamlText: string): Record<string, unknown> {
     const [, key, rest] = m;
 
     if (rest === '' || rest === undefined) {
-      // either nested object or array follows
-      const next: Record<string, unknown> = {};
-      const arr: string[] = [];
-      // peek next non-empty line
-      const nextLineIdx = lines.indexOf(raw) + 1;
-      let peek = '';
-      for (let i = nextLineIdx; i < lines.length; i++) {
-        if (lines[i].trim() && !lines[i].trim().startsWith('#')) {
-          peek = lines[i];
-          break;
-        }
-      }
+      // Either a nested object or an array follows. Decide by peeking at
+      // the next significant line by index, never by string content.
+      const nextIdx = peekNextIndex(i);
+      const peek = nextIdx >= 0 ? lines[nextIdx] : '';
       if (peek.trim().startsWith('- ')) {
+        const arr: string[] = [];
         frame.obj[key] = arr;
         stack.push({ obj: {}, indent, key, arr });
       } else {
+        const next: Record<string, unknown> = {};
         frame.obj[key] = next;
         stack.push({ obj: next, indent });
       }
       continue;
     }
 
-    // scalar
     let value: unknown = rest.replace(/^['"]|['"]$/g, '');
     if (value === 'true') value = true;
     else if (value === 'false') value = false;
@@ -116,7 +122,6 @@ function loadPolicy(yamlText: string): Record<string, unknown> {
     frame.obj[key] = value;
   }
 
-  // flush any pending arrays
   while (stack.length > 1) {
     const popped = stack.pop()!;
     if (popped.arr && popped.key) {

@@ -1,11 +1,12 @@
-# PEAC and IETF SCITT Composition
+# PEAC and SCITT Composition
 
 **Status:** Informative
 **Version:** 0.1
 **Applies to:** Operators planning to expose PEAC interaction records
 through a SCITT-style transparency log
-([draft-ietf-scitt-architecture](https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/),
-in RFC Editor Queue).
+([draft-ietf-scitt-architecture](https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/);
+nearing publication at the time of writing (2026-04). Check
+Datatracker for the current state before relying on the wire shape).
 
 ---
 
@@ -80,7 +81,8 @@ without parsing the PEAC record.
 ## References
 
 - [`draft-ietf-scitt-architecture`](https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/):
-  in RFC Editor Queue at the time of writing.
+  current draft at the time of writing (2026-04). Check Datatracker
+  for the latest revision before implementation.
 - [RFC 9052: CBOR Object Signing and Encryption (COSE)](https://www.rfc-editor.org/rfc/rfc9052.html).
 - [RFC 8392: CWT Claims](https://www.rfc-editor.org/rfc/rfc8392.html).
 - [RFC 7515: JSON Web Signature (JWS)](https://www.rfc-editor.org/rfc/rfc7515.html):

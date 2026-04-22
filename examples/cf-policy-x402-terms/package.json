@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "demo": "tsx demo.ts",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },

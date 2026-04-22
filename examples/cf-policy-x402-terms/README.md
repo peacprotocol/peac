@@ -95,11 +95,13 @@ Demo OK.
 ## Files
 
 ```text
-policy.yaml            peac-policy/0.1 source document
-terms/terms.uri.txt    URI-only representation (returns unavailable without bytes)
-terms/terms.md         Markdown representation
-terms/terms.plaintext.txt  Plaintext representation
-terms/terms.json       JSON representation
-demo.ts                end-to-end runner
-fixtures/              expected verifier-report fragments (test-only)
+policy.yaml                policy source (peac-policy/0.1)
+terms/terms.uri.txt        URI-only representation (returns unavailable without bytes)
+terms/terms.md             markdown representation
+terms/terms.plaintext.txt  plaintext representation
+terms/terms.json           JSON representation
+demo.ts                    end-to-end runner
+tests/demo.test.ts         smoke test that runs the demo and pins expected output
 ```
+
+Expected verifier-report values are pinned inside `tests/demo.test.ts`; no separate fixture directory is needed for this demo.

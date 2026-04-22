@@ -1,4 +1,4 @@
-# PEAC and IETF AIPREF Composition
+# PEAC and AIPREF Composition
 
 **Status:** Informative
 **Version:** 0.1
