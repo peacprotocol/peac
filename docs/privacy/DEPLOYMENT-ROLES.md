@@ -151,5 +151,5 @@ to the PEAC deployment versus the surrounding operator systems.
 - [RETENTION-AND-DELETION.md](RETENTION-AND-DELETION.md)
 - [DATA-SUBJECT-RIGHTS.md](DATA-SUBJECT-RIGHTS.md)
 - [DPIA-STARTER.md](DPIA-STARTER.md)
-- `docs/compliance/ISO-42001-MAPPING.md` — Clause 5 (leadership) and
+- `docs/compliance/ISO-42001-MAPPING.md`: Clause 5 (leadership) and
   Clause 8 (operational planning) artefact mapping.

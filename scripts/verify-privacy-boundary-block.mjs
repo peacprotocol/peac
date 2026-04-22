@@ -52,6 +52,23 @@ const DOES = /what\s+peac\s+does\b/i;
 const DOES_NOT = /what\s+peac\s+does\s+not\s+do\b/i;
 const STILL_OWN = /what\s+deployers.*still\s+own\b/i;
 
+/**
+ * Substance check (in addition to heading presence): every privacy
+ * doc must explicitly state somewhere in its body that one of
+ * lawful basis / legal review / controller obligations / DPIA
+ * decisions / lawful-basis decisions / DPA negotiation remains
+ * operator- (or controller- / processor- / deployer-) owned. The
+ * regex is permissive about phrasing but strict that one of the
+ * load-bearing words must appear in a sentence that names the
+ * owning party.
+ */
+const OPERATOR_OWNS = new RegExp(
+  String.raw`(operator|controller|processor|deployer)[^.\n]{0,200}\b(lawful\s*basis|legal\s+review|controller\s+obligation|dpia|dpa|lawful-basis|controller-obligation)\b` +
+    String.raw`|` +
+    String.raw`\b(lawful\s*basis|legal\s+review|controller\s+obligation|dpia|controller\s+responsibilit)[^.\n]{0,200}(operator|controller|processor|deployer)\b`,
+  'i'
+);
+
 let failed = 0;
 for (const path of files) {
   const text = readFileSync(path, 'utf8');
@@ -80,6 +97,22 @@ for (const path of files) {
   if (firstDoes >= firstDoesNot || firstDoesNot >= stillOwnIdx) {
     console.error(
       `FAIL ${basename(path)}: boundary headings must appear in order (does -> does not do -> deployers ... still own)`
+    );
+    failed++;
+    continue;
+  }
+
+  // Substance check: somewhere in the doc body the operator
+  // ownership of lawful basis / legal review / DPIA / DPA /
+  // controller obligations must be stated explicitly. Collapse
+  // markdown soft-wrap newlines into single spaces so the regex
+  // does not need to model wrapped sentences explicitly. Paragraph
+  // breaks (blank lines) and code-block boundaries become spaces
+  // too; this is intentional and matches the rendered prose.
+  const flattened = text.replace(/\s+/g, ' ');
+  if (!OPERATOR_OWNS.test(flattened)) {
+    console.error(
+      `FAIL ${basename(path)}: must explicitly state that operator/controller/processor/deployer owns at least one of {lawful basis, legal review, controller obligations, DPIA, DPA}.`
     );
     failed++;
     continue;

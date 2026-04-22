@@ -36,7 +36,11 @@ verifiers parse and verify those records plus their supporting bindings
 
 - Identifying which PEAC fields contain personal data in their
   deployment, which may differ from the general categories below.
-- Applying lawful-basis, consent, DPIA, and retention decisions.
+- The operator (controller or processor as applicable) owns the
+  lawful-basis decision, the consent posture, the DPIA decision, the
+  legal review, and the retention-period decision; PEAC supports
+  these workflows but does not satisfy the controller obligations on
+  the operator's behalf.
 - Configuring verifier privacy defaults (retention caps, redaction,
   `no_raw_personal_data` mode, deletion hooks) to match their posture.
 - Auditing operator-controlled content for accidental inclusion of
@@ -49,13 +53,13 @@ verifiers parse and verify those records plus their supporting bindings
 Each row classifies a PEAC surface into one of five buckets. Operators
 SHOULD verify the classification against their own deployment.
 
-| Bucket                           | Examples of PEAC surfaces                                                                                                                  | Notes                                                                                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Likely personal data             | Interaction-record `sub` when it names a natural person; caller-supplied `actor.id` when tied to a natural person; verifier request logs   | Treat as personal data by default. Apply lawful-basis, retention, and rights decisions.                                                                          |
-| Pseudonymous but in-scope        | `receipt_ref` (SHA-256 of JWS); hashed actor IDs; opaque session IDs; derived index keys in the verifier cache                             | Still personal data in many jurisdictions because the original subject is re-identifiable by combining with other data the operator holds. ICO pseudonymisation. |
-| Operator-controlled arbitrary    | Extension payloads populated by the issuer (`evidence.*` verbatim blobs, commerce `description`, free-text headers captured into metadata) | PEAC does not inspect these. Operator owns classification and redaction.                                                                                         |
-| Safe-by-default logging/export   | Protocol metadata (`typ`, `alg`, `kid`, wire version); verifier outcome (`verified`, status codes); three-state binding values             | Not personal data on their own. May become sensitive in aggregate (timing, frequency) depending on deployment.                                                   |
-| Forbidden-by-default raw capture | Raw credentials, tokens, JWTs, cookies, private keys, encryption keys; raw PII (SSN, card numbers); medical data; children's personal data | Never captured by a compliant issuer. Reference verifier defaults reject these patterns; see `docs/specs/PRIVACY-PROFILE.md` §4.                                 |
+| Bucket                           | Examples of PEAC surfaces                                                                                                                  | Notes                                                                                                                                                                                                                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Likely personal data             | Interaction-record `sub` when it names a natural person; caller-supplied `actor.id` when tied to a natural person; verifier request logs   | Treat as personal data by default. Apply lawful-basis, retention, and rights decisions.                                                                                                                                                                                                       |
+| Pseudonymous but in-scope        | `receipt_ref` (SHA-256 of JWS); hashed actor IDs; opaque session IDs; derived index keys in the verifier cache                             | Still personal data in many jurisdictions because the original subject is re-identifiable by combining with other data the operator holds. [ICO pseudonymisation guidance](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-sharing/anonymisation/pseudonymisation/). |
+| Operator-controlled arbitrary    | Extension payloads populated by the issuer (`evidence.*` verbatim blobs, commerce `description`, free-text headers captured into metadata) | PEAC does not inspect these. Operator owns classification and redaction.                                                                                                                                                                                                                      |
+| Safe-by-default logging/export   | Protocol metadata (`typ`, `alg`, `kid`, wire version); verifier outcome (`verified`, status codes); three-state binding values             | Not personal data on their own. May become sensitive in aggregate (timing, frequency) depending on deployment.                                                                                                                                                                                |
+| Forbidden-by-default raw capture | Raw credentials, tokens, JWTs, cookies, private keys, encryption keys; raw PII (SSN, card numbers); medical data; children's personal data | Never captured by a compliant issuer. Reference verifier defaults reject these patterns; see `docs/specs/PRIVACY-PROFILE.md` §4.                                                                                                                                                              |
 
 ---
 
@@ -95,12 +99,12 @@ rows. For each, identify:
 
 ## 4. References
 
-- `docs/specs/PRIVACY-PROFILE.md` — normative receipt-side privacy
+- `docs/specs/PRIVACY-PROFILE.md`: normative receipt-side privacy
   profile (Minimization / Hash-by-default / No secrets / Explicit
   consent for verbatim / Bounded retention).
-- `docs/specs/VERIFICATION-REPORT-FORMAT.md` — verifier report shape;
+- `docs/specs/VERIFICATION-REPORT-FORMAT.md`: verifier report shape;
   `bindings` is report-only and may carry binding references.
-- ICO, "Pseudonymisation" guidance — online identifiers and
+- [ICO, "Pseudonymisation" guidance](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-sharing/anonymisation/pseudonymisation/): online identifiers and
   pseudonymised data can still be personal data.
-- European Commission, "Data protection by design and by default" —
+- [European Commission, "Data protection by design and by default"](https://commission.europa.eu/law/law-topic/data-protection/rules-business-and-organisations/obligations/what-does-data-protection-design-and-default-mean_en):
   establishes the principle this document operationalises.

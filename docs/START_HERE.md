@@ -88,9 +88,9 @@ You need signed evidence for audit, dispute review, or regulatory alignment. Evi
 
 Key packages: `@peac/protocol`, `@peac/audit`.
 
-### Privacy-sensitive or GDPR-aligned deployment
+### Privacy-sensitive and regulated environments
 
-You are deploying PEAC in an environment with privacy-sensitive data and want data minimization, retention caps, redaction defaults, and clear controller / processor framing. PEAC supports GDPR-aligned deployments; it does not replace operator legal review.
+You are deploying PEAC in a privacy-sensitive or regulated environment and want data minimization, retention caps, redaction defaults, and clear controller / processor framing. PEAC supports GDPR-aligned deployments; it does not replace operator legal review.
 
 1. Start with [`docs/privacy/README.md`](privacy/README.md) for the boundary-first index.
 2. Walk the deployment-shape table in [`docs/privacy/DEPLOYMENT-ROLES.md`](privacy/DEPLOYMENT-ROLES.md).

@@ -49,8 +49,8 @@ Avoid:
 
 ## See also
 
-- [docs/specs/PRIVACY-PROFILE.md](../specs/PRIVACY-PROFILE.md) — normative receipt-side privacy profile.
-- [docs/specs/VERIFICATION-REPORT-FORMAT.md](../specs/VERIFICATION-REPORT-FORMAT.md) — verifier report shape.
-- [docs/compliance/ISO-42001-MAPPING.md](../compliance/ISO-42001-MAPPING.md) — ISO/IEC 42001:2023 Clause 8 operational mapping.
-- [docs/compliance/EU-AI-ACT-ANNEX-IV-MAPPING.md](../compliance/EU-AI-ACT-ANNEX-IV-MAPPING.md) — EU AI Act Annex IV record-keeping mapping.
-- [docs/TRUST-ARTIFACTS.md](../TRUST-ARTIFACTS.md) — trust-artifacts index.
+- [docs/specs/PRIVACY-PROFILE.md](../specs/PRIVACY-PROFILE.md): normative receipt-side privacy profile.
+- [docs/specs/VERIFICATION-REPORT-FORMAT.md](../specs/VERIFICATION-REPORT-FORMAT.md): verifier report shape.
+- [docs/compliance/ISO-42001-MAPPING.md](../compliance/ISO-42001-MAPPING.md): ISO/IEC 42001:2023 Clause 8 operational mapping.
+- [docs/compliance/EU-AI-ACT-ANNEX-IV-MAPPING.md](../compliance/EU-AI-ACT-ANNEX-IV-MAPPING.md): EU AI Act Annex IV record-keeping mapping.
+- [docs/TRUST-ARTIFACTS.md](../TRUST-ARTIFACTS.md): trust-artifacts index.

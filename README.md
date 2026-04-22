@@ -128,7 +128,7 @@ See [`SECURITY.md`](SECURITY.md), [`docs/TRUST-ARTIFACTS.md`](docs/TRUST-ARTIFAC
 
 ## Privacy-aware verification
 
-PEAC ships privacy-aware defaults and deployment guidance. Interaction evidence is hash-by-default on the receipt side (`docs/specs/PRIVACY-PROFILE.md`); the verifier separates immutable signed evidence from mutable derived metadata so retention, deletion, and rights-handling act on the right layer. Operator-facing guidance for privacy-sensitive and GDPR-aligned deployments — data classification, retention and deletion, deployment roles, data-subject rights, and a DPIA starter — lives in [`docs/privacy/`](docs/privacy/README.md). PEAC supports privacy-aware verification; it does not replace operator legal review, lawful-basis decisions, or controller obligations.
+PEAC ships privacy-aware defaults and deployment guidance. Interaction evidence is hash-by-default on the receipt side (`docs/specs/PRIVACY-PROFILE.md`); the verifier separates immutable signed evidence from mutable derived metadata so retention, deletion, and rights-handling act on the right layer. Operator-facing guidance for privacy-sensitive and regulated environments (data classification, retention and deletion, deployment roles, data-subject rights, and a DPIA starter) lives in [`docs/privacy/`](docs/privacy/README.md). PEAC supports privacy-aware verification; it does not replace operator legal review, lawful-basis decisions, or controller obligations.
 
 ## Versioning
 

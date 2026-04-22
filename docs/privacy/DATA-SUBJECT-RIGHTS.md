@@ -77,7 +77,7 @@ to delete signed evidence. Before doing so:
 
 - Check whether the operator has a legal / audit / contractual
   obligation to retain the evidence that overrides the erasure
-  request. GDPR Article 17 lists exceptions; operator legal review
+  request. [GDPR Article 17](https://gdpr-info.eu/art-17-gdpr/) lists exceptions; operator legal review
   decides.
 - If retention applies, operators typically delete **derived-layer
   references** (report index entries, verifier cache entries,
@@ -120,7 +120,7 @@ decide what to include per their lawful-basis and scope analysis.
 ### 1.7 Automated decision-making
 
 PEAC is a records layer, not a decision engine. Automated-decision
-obligations under GDPR Article 22 apply to the systems above PEAC
+obligations under [GDPR Article 22](https://gdpr-info.eu/art-22-gdpr/) apply to the systems above PEAC
 that make the decisions and use PEAC to record what happened.
 
 ---
@@ -172,7 +172,7 @@ intake system and the SLA.
 - [RETENTION-AND-DELETION.md](RETENTION-AND-DELETION.md)
 - [DEPLOYMENT-ROLES.md](DEPLOYMENT-ROLES.md)
 - [DPIA-STARTER.md](DPIA-STARTER.md)
-- `docs/specs/PRIVACY-PROFILE.md` — receipt-side privacy profile.
-- ICO guidance, "Right to erasure" — including the overriding-obligation
+- `docs/specs/PRIVACY-PROFILE.md`: receipt-side privacy profile.
+- [ICO guidance, "Right to erasure"](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-erasure/): including the overriding-obligation
   exceptions.
-- `draft-ietf-aipref-vocab` — preferences; not consent.
+- `draft-ietf-aipref-vocab`: preferences; not consent.

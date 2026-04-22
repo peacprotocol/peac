@@ -101,20 +101,20 @@ the normative receipt-side
 a boundary-first block (what PEAC does / what PEAC does not do / what
 deployers still own).
 
-- [Data classification](privacy/DATA-CLASSIFICATION.md) — which PEAC
+- [Data classification](privacy/DATA-CLASSIFICATION.md): which PEAC
   surfaces likely hold personal data, pseudonymous data, or
   operator-controlled content.
-- [Retention and deletion](privacy/RETENTION-AND-DELETION.md) —
+- [Retention and deletion](privacy/RETENTION-AND-DELETION.md):
   retention classes, the evidence-vs-derived deletion model, and
   linked-index purge.
-- [Deployment roles](privacy/DEPLOYMENT-ROLES.md) — controller /
+- [Deployment roles](privacy/DEPLOYMENT-ROLES.md): controller /
   processor posture for each of the four common deployment shapes.
-- [Data-subject rights](privacy/DATA-SUBJECT-RIGHTS.md) — access,
+- [Data-subject rights](privacy/DATA-SUBJECT-RIGHTS.md): access,
   rectification, erasure, restriction, objection, portability,
   automated-decision-making; AIPREF is not consent.
-- [DPIA starter](privacy/DPIA-STARTER.md) — risk-tier starter and
+- [DPIA starter](privacy/DPIA-STARTER.md): risk-tier starter and
   PEAC-specific mitigation levers.
-- [Privacy directory index](privacy/README.md) — boundary-first
+- [Privacy directory index](privacy/README.md): boundary-first
   discipline plus preferred / avoided public wording.
 
 PEAC supports privacy-aware verification and GDPR-aligned

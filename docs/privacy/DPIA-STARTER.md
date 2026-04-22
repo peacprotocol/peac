@@ -8,7 +8,7 @@
 
 ## What PEAC does
 
-- Offers a risk-tier starter table aligned with ICO DPIA risk factors.
+- Offers a risk-tier starter table aligned with [ICO DPIA risk factors](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/accountability-and-governance/data-protection-impact-assessments-dpias/).
 - Names the PEAC-specific levers (retention class, redaction defaults,
   `no_raw_personal_data` mode, deletion hooks) that typically serve as
   mitigations in a DPIA write-up.
@@ -33,14 +33,14 @@
 - Consulting their Data Protection Officer or equivalent where
   required.
 - Consulting the supervisory authority when residual risk remains
-  high after mitigations (GDPR Article 36 prior consultation).
+  high after mitigations ([GDPR Article 36](https://gdpr-info.eu/art-36-gdpr/) prior consultation).
 - Reviewing the DPIA at each material change to the processing.
 
 ---
 
 ## 1. When a DPIA is likely required
 
-The UK ICO names nine screening criteria; any two typically make a
+The [UK ICO](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/accountability-and-governance/data-protection-impact-assessments-dpias/when-do-we-need-to-do-a-dpia/) names nine screening criteria; any two typically make a
 DPIA mandatory, any one can. Translated to PEAC deployments:
 
 | ICO criterion (paraphrased)                          | PEAC-relevant trigger examples                                                                                           |
@@ -152,9 +152,9 @@ investigation.
 - [RETENTION-AND-DELETION.md](RETENTION-AND-DELETION.md)
 - [DEPLOYMENT-ROLES.md](DEPLOYMENT-ROLES.md)
 - [DATA-SUBJECT-RIGHTS.md](DATA-SUBJECT-RIGHTS.md)
-- `docs/specs/PRIVACY-PROFILE.md` — receipt-side privacy profile.
-- `docs/compliance/ISO-42001-MAPPING.md` — Clause 6.1 risk treatment
+- `docs/specs/PRIVACY-PROFILE.md`: receipt-side privacy profile.
+- `docs/compliance/ISO-42001-MAPPING.md`: Clause 6.1 risk treatment
   and Clause 8 operational mapping.
-- ICO "Data Protection Impact Assessments" guidance — mandatory
+- [ICO "Data Protection Impact Assessments" guidance](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/accountability-and-governance/data-protection-impact-assessments-dpias/): mandatory
   screening criteria, consultation thresholds.
-- European Data Protection Board "Guidelines on DPIA".
+- [European Data Protection Board "Guidelines on DPIA (wp248rev.01)"](https://edpb.europa.eu/our-work-tools/our-documents/guideline/guidelines-data-protection-impact-assessment-dpia-and-determining_en).

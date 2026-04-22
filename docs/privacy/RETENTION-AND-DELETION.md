@@ -104,43 +104,48 @@ acting. PEAC does not and cannot decide this.
 
 ---
 
-## 5. Reference-verifier privacy defaults (planned for v0.12.14)
+## 5. Reference-verifier privacy defaults (planned follow-up within v0.12.14; not yet merged)
 
-This release adds (or will add, across PR3/PR4) the following narrow,
-configurable defaults to the reference verifier and hosted-verify
-deployments. Defaults favor minimization.
+This document describes intent. The narrow, configurable defaults
+listed below are **planned follow-up within the v0.12.14 release
+window** and are **not yet merged**. They land in a follow-up code
+commit on the same release; until that commit lands, none of the
+names below resolve in the reference-verifier code path. Defaults
+favor minimization when shipped.
 
-- **Retention caps** on the derived verifier cache (`PEAC_CACHE_TTL`,
-  `PEAC_CACHE_MAX_ENTRIES`) and on the optional report index
-  (`PEAC_REPORT_RETENTION_SECONDS`). Operators override via config or
-  environment.
-- **Deletion hooks** accepting a list of `receipt_ref` values and
-  purging derived-layer entries only.
-- **Stricter redaction defaults** for free-text or header-derived
-  fields in verifier logs.
-- **`no_raw_personal_data`** report mode toggle. When enabled, the
-  verifier report omits or hashes fields classified as likely personal
-  data. Default is operator-selectable; recommended on for
-  public-facing deployments.
-- **Pseudonymous-ID fixtures** and regression tests in the reference
-  verifier test suite, proving no raw value surfaces through the
-  report path when `no_raw_personal_data` is on.
+- **Retention caps** (planned) on the derived verifier cache
+  (`PEAC_CACHE_TTL`, `PEAC_CACHE_MAX_ENTRIES`) and on the optional
+  report index (`PEAC_REPORT_RETENTION_SECONDS`). Operators will
+  override via config or environment.
+- **Deletion hooks** (planned) accepting a list of `receipt_ref`
+  values and purging derived-layer entries only.
+- **Stricter redaction defaults** (planned) for free-text or
+  header-derived fields in verifier logs.
+- **`no_raw_personal_data`** report mode toggle (planned). When
+  enabled, the verifier report will omit or hash fields classified
+  as likely personal data. Default operator-selectable; recommended
+  on for public-facing deployments.
+- **Pseudonymous-ID fixtures** (planned) and regression tests in the
+  reference verifier test suite, proving no raw value surfaces
+  through the report path when `no_raw_personal_data` is on.
 
 Exact environment variables, defaults, and code paths land in the
-verifier privacy defaults commit within v0.12.14 and are documented in
-`surfaces/reference-verifier/README.md` when they land.
+verifier privacy defaults commit within v0.12.14 and are documented
+in `surfaces/reference-verifier/README.md` when they land. This
+section will lose the "planned" qualifiers and gain concrete config
+references at that point.
 
 ---
 
 ## 6. References
 
-- [DATA-CLASSIFICATION.md](DATA-CLASSIFICATION.md) — which surfaces
+- [DATA-CLASSIFICATION.md](DATA-CLASSIFICATION.md): which surfaces
   likely hold personal data.
-- [DEPLOYMENT-ROLES.md](DEPLOYMENT-ROLES.md) — controller / processor
+- [DEPLOYMENT-ROLES.md](DEPLOYMENT-ROLES.md): controller / processor
   posture per deployment shape.
-- [DATA-SUBJECT-RIGHTS.md](DATA-SUBJECT-RIGHTS.md) — rights handling
+- [DATA-SUBJECT-RIGHTS.md](DATA-SUBJECT-RIGHTS.md): rights handling
   uses the evidence-vs-derived split defined above.
-- `docs/compliance/ISO-42001-MAPPING.md` — Clause 8 operational
+- `docs/compliance/ISO-42001-MAPPING.md`: Clause 8 operational
   mapping shipped in v0.12.13.
-- `docs/specs/PRIVACY-PROFILE.md` — normative receipt-side privacy
+- `docs/specs/PRIVACY-PROFILE.md`: normative receipt-side privacy
   profile including §7 retention guidance.
