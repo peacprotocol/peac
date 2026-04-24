@@ -55,7 +55,7 @@ function request(path: string, body: unknown) {
   });
 }
 
-describe('legacy /verify alias — deprecation headers', () => {
+describe('legacy /verify alias: deprecation headers', () => {
   let app: ReturnType<typeof buildApp>;
 
   beforeAll(() => {

@@ -50,7 +50,7 @@ function request(path: string, body: unknown) {
   });
 }
 
-describe('legacy /verify alias — pre-Sunset responsiveness', () => {
+describe('legacy /verify alias: pre-Sunset responsiveness', () => {
   let app: ReturnType<typeof buildApp>;
 
   beforeAll(() => {

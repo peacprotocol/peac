@@ -157,38 +157,34 @@ EOF
 
 node test.mjs
 
-# Schema package-edge import smoke (deprecated alias stability)
+# Schema package-edge import smoke
 echo ""
 echo "6. Running @peac/schema package-edge import smoke..."
 cat > schema-smoke.mjs << 'EOF'
-import {
-  ProofMethodSchema,
-  PROOF_METHODS,
-  ProofTypeSchema,
-  CommerceExtensionSchema,
-} from '@peac/schema';
+import { ProofTypeSchema, AgentProofSchema, CommerceExtensionSchema } from '@peac/schema';
 
-// Verify deprecated ProofMethodSchema is importable and functional
-if (!ProofMethodSchema) {
-  console.error('FAIL: ProofMethodSchema not exported from @peac/schema');
-  process.exit(1);
-}
-const parsed = ProofMethodSchema.parse('dpop');
-if (parsed !== 'dpop') {
-  console.error('FAIL: ProofMethodSchema.parse("dpop") returned:', parsed);
-  process.exit(1);
-}
-
-// Verify PROOF_METHODS array
-if (!Array.isArray(PROOF_METHODS) || PROOF_METHODS.length !== 4) {
-  console.error('FAIL: PROOF_METHODS not exported or wrong length:', PROOF_METHODS);
-  process.exit(1);
-}
-
-// Verify ProofTypeSchema (canonical, non-deprecated)
+// Verify ProofTypeSchema (canonical trust-root proof model)
 if (!ProofTypeSchema) {
   console.error('FAIL: ProofTypeSchema not exported from @peac/schema');
   process.exit(1);
+}
+
+// Verify AgentProofSchema accepts the inlined transport-binding method enum.
+const proof = AgentProofSchema.parse({
+  type: 'did:key',
+  method: 'dpop',
+  value: 'eyJ...',
+});
+if (proof.method !== 'dpop') {
+  console.error('FAIL: AgentProofSchema did not preserve method value:', proof);
+  process.exit(1);
+}
+try {
+  AgentProofSchema.parse({ type: 'did:key', method: 'not-a-method', value: 'x' });
+  console.error('FAIL: AgentProofSchema accepted unknown method value');
+  process.exit(1);
+} catch {
+  // expected: unknown method values are rejected
 }
 
 // Verify CommerceExtensionSchema accepts optional event field
@@ -214,8 +210,7 @@ if (noEvent.event !== undefined) {
   process.exit(1);
 }
 
-console.log('   ProofMethodSchema: importable, parse works (deprecated alias stable)');
-console.log('   PROOF_METHODS:', PROOF_METHODS.join(', '));
+console.log('   AgentProofSchema: inlined method enum parsed correctly');
 console.log('   CommerceExtensionSchema: event field accepted and absent-event valid');
 console.log('   OK: @peac/schema package-edge imports verified');
 EOF
