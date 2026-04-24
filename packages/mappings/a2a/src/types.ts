@@ -61,8 +61,15 @@ export interface A2ASupportedInterface {
  *
  * v1.0.0 cards expose endpoint bindings via `supportedInterfaces[]`.
  * Every accepted card MUST carry a non-empty `supportedInterfaces[0].url`.
- * The legacy v0.3.0 top-level `url` field was accepted through v0.12.x
- * with a deprecation warning and removed in v0.13.0 (DD-186).
+ *
+ * The legacy v0.3.0 top-level `url` field is no longer a declared field
+ * on this interface. Rejection is **runtime** (`normalizeAgentCard` returns
+ * null and `discoverAgentCard` skips the card) — not type-level. The
+ * interface intentionally keeps a `[key: string]: unknown` index
+ * signature so consumers may pass incoming JSON with unknown extra
+ * fields without TypeScript errors, so a literal with a stray `url`
+ * string property still typechecks. The v0.3.0 removal (DD-186) is
+ * enforced by the normalization layer, not by the type system.
  */
 export interface A2AAgentCard {
   name: string;
