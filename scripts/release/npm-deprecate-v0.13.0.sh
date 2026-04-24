@@ -28,7 +28,7 @@ echo "=== v0.13.0 npm deprecate dispatch (staged; execute only post-promote) ===
 echo
 
 #
-# @peac/pref — archived in v0.13.0; not published at 0.13.0 or later.
+# @peac/pref: archived in v0.13.0; not published at 0.13.0 or later.
 # Historical versions <=0.12.14 remain installable. Migration: @peac/mappings-content-signals.
 #
 echo "-- @peac/pref (archived; historical <=0.12.14 kept; not published 0.13.0+) --"
@@ -36,7 +36,7 @@ $NPM deprecate '@peac/pref@<=0.12.14' \
   'ARCHIVED in v0.13.0. Use @peac/mappings-content-signals directly for RFC 9651 Structured Fields content-signal parsing and resolution. See https://peacprotocol.org/docs/migration.'
 
 #
-# @peac/sdk (workspace stub `@peac/sdk-js`) — archived prior to v0.13.0; no 0.13.0 publication.
+# @peac/sdk (workspace stub `@peac/sdk-js`): archived prior to v0.13.0; no 0.13.0 publication.
 # Historical versions remain installable.
 #
 echo
@@ -45,7 +45,7 @@ $NPM deprecate '@peac/sdk@<=0.10.2' \
   'ARCHIVED. Use @peac/protocol (issue / verifyLocal / verify), @peac/schema (types), @peac/crypto (sign/verify), @peac/kernel (constants). See https://peacprotocol.org/docs/migration.'
 
 #
-# @peac/disc — Posture A one-release deprecated alias. PUBLISHED at 0.13.0
+# @peac/disc: Posture A one-release deprecated alias. PUBLISHED at 0.13.0
 # as a bridge so @peac/cli and apps/api workspace consumers keep publish
 # closure. Historical versions <=0.12.14 deprecated; the 0.13.0 version
 # is explicitly marked as a one-release bridge targeting v0.13.1 retirement.
@@ -56,8 +56,8 @@ echo
 echo "-- @peac/disc (one-release Posture A bridge; deprecate historical AND 0.13.0) --"
 # Deprecation messages intentionally do NOT tell every caller to switch to
 # loadPolicyDocument. @peac/policy-kit is the canonical replacement for
-# policy-document parsing / validation, but @peac/disc.discover() — remote
-# SSRF-aware fetch with byte cap / timeout / redirect policy — has no direct
+# policy-document parsing / validation, but @peac/disc.discover() (remote
+# SSRF-aware fetch with byte cap / timeout / redirect policy) has no direct
 # equivalent in @peac/policy-kit. Callers that need discover() should stay on
 # @peac/disc@0.13.0 through the v0.13.0 release window; migration is tracked
 # in docs/PACKAGE_STATUS_V0.13.0_PARITY.md.
@@ -67,7 +67,7 @@ $NPM deprecate '@peac/disc@0.13.0' \
   'One-release deprecated compatibility package. Prefer @peac/policy-kit for policy-document parsing and validation. Remote discovery migration is deferred to v0.13.1 and documented in docs/PACKAGE_STATUS_V0.13.0_PARITY.md. See https://peacprotocol.org/docs/migration.'
 
 #
-# @peac/core — PR B scope (archive coupled with legacy /verify handler
+# @peac/core: PR B scope (archive coupled with legacy /verify handler
 # rewire). If PR B ships in the same v0.13.0 release window, add the
 # deprecate line below after PR B merges but before promote-latest.
 # Commented out until PR B lands; left inline as a staging marker.

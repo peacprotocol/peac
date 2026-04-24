@@ -116,7 +116,7 @@ describe('v0.13.0 publish-manifest surface audit', () => {
   //   BONUS, NOT BLOCKING: packages.length < 37. A reduction below 37 is
   //             desirable but not a blocker unless a safe published-package
   //             retirement is identified (retirement requires publish-closure
-  //             proof — see the publish-closure suite below).
+  //             proof; see the publish-closure suite below).
   //
   //   WHY NOT strict <37 in PR A: @peac/disc is retained at 0.13.0 as a
   //             one-release Posture A deprecated alias because @peac/cli and
@@ -186,7 +186,7 @@ describe('v0.13.0 publish-manifest surface audit', () => {
       const abs = join(ROOT, p);
       if (existsSync(abs)) {
         // Must not be reachable from any workspace glob. Workspace globs start
-        // with packages/, apps/, surfaces/, or examples/ — never archive/.
+        // with packages/, apps/, surfaces/, or examples/, never archive/.
         expect(p.startsWith('archive/')).toBe(true);
       }
     }

@@ -9,8 +9,8 @@
  * @deprecated Prefer {@link "@peac/policy-kit"} for policy-document parsing
  * and validation (`parsePolicyDocument`, `loadPolicyDocument`,
  * `validatePolicy`, `serializePolicyYaml`). Remote discovery behavior in
- * `discover()` — which performs SSRF-aware fetch with a byte cap, timeout
- * policy, and redirect policy — has **no direct equivalent in
+ * `discover()` (which performs SSRF-aware fetch with a byte cap, timeout
+ * policy, and redirect policy) has **no direct equivalent in
  * @peac/policy-kit**; it remains compatibility-only in `@peac/disc` until
  * an equivalent replacement is designed and tested. See
  * `docs/PACKAGE_STATUS_V0.13.0_PARITY.md` for the per-export parity audit
