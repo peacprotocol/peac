@@ -51,9 +51,10 @@ describe('ProofTypeSchema', () => {
     expect(PROOF_TYPES).toContain('custom');
   });
 
-  it('should be separate from ProofMethodSchema (no overlap with transport methods)', () => {
-    // ProofTypeSchema covers trust root models, not transport mechanisms
-    // ProofMethodSchema covers: http-message-signature, dpop, mtls, jwk-thumbprint
+  it('should be separate from the transport-binding method enum (no overlap)', () => {
+    // ProofTypeSchema covers trust-root models; transport-binding methods
+    // (http-message-signature / dpop / mtls / jwk-thumbprint) are inlined
+    // on AgentProofSchema.method and are NOT valid ProofType values.
     expect(() => ProofTypeSchema.parse('http-message-signature')).toThrow();
     expect(() => ProofTypeSchema.parse('dpop')).toThrow();
     expect(() => ProofTypeSchema.parse('mtls')).toThrow();

@@ -207,7 +207,6 @@ OrchestrationFrameworkSchema
 PEACEnvelope
 PEACParseError
 POLICY_DECISIONS
-PROOF_METHODS
 PROOF_TYPES
 ParseFailure
 ParseReceiptOptions
@@ -226,8 +225,6 @@ PolicyContext
 PolicyContextSchema
 PolicyDecision
 ProblemDetailsSchema
-ProofMethod
-ProofMethodSchema
 ProofType
 ProofTypeSchema
 PurposeReasonSchema

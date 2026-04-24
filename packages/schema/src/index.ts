@@ -94,7 +94,6 @@ export type { EvidenceValidationResult, ReceiptClaimsType } from './validators';
 // Agent Identity validators (v0.9.25+)
 export {
   ControlTypeSchema,
-  ProofMethodSchema,
   BindingDetailsSchema,
   AgentProofSchema,
   AgentIdentityEvidenceSchema,
@@ -104,7 +103,6 @@ export {
   // Constants
   AGENT_IDENTITY_TYPE,
   CONTROL_TYPES,
-  PROOF_METHODS,
   // Helpers
   validateAgentIdentityAttestation,
   isAgentIdentityAttestation,
@@ -115,7 +113,6 @@ export {
 } from './agent-identity';
 export type {
   ControlType,
-  ProofMethod,
   BindingDetails,
   AgentProof,
   AgentIdentityEvidence,

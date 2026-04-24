@@ -2,6 +2,27 @@
 
 This guide covers migration paths for current PEAC Protocol surfaces.
 
+## ProofMethodSchema removal (v0.13.0)
+
+`ProofMethodSchema`, `PROOF_METHODS`, and the `ProofMethod` type were deprecated in v0.12.2 (DD-185) and **removed in v0.13.0 PR B**. The deprecated standalone schema export retired because transport-binding methods are semantically distinct from trust-root proof models; the two concerns should not share a public surface.
+
+`AgentProofSchema.method` still accepts the same four transport-binding values — the enum is now inlined on the field definition:
+
+- `http-message-signature`
+- `dpop`
+- `mtls`
+- `jwk-thumbprint`
+
+Migration by use site:
+
+- **If you imported `ProofMethodSchema` to validate a method string in isolation:** inline the enum yourself (`z.enum(['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint'])`) or, preferably, validate the whole proof object through `AgentProofSchema.parse(...)`.
+- **If you imported the `ProofMethod` type for a function signature:** replace with `"http-message-signature" | "dpop" | "mtls" | "jwk-thumbprint"` or derive from the schema: `type Method = z.infer<typeof AgentProofSchema>['method']`.
+- **If you want trust-root proof semantics (how an identity proves itself):** use `ProofTypeSchema` and the `PROOF_TYPES` constant. `ProofType` (8 values: `did-web`, `did-key`, `did-plc`, `did-ion`, `x509-chain`, `ed25519-cert-chain`, `hsm-attestation`, `custom`) was always the canonical trust-root surface; it is unchanged.
+
+**No wire-format change.** Existing valid `AgentProofSchema.method` values continue to validate. No envelope, no `typ`, no signing change.
+
+See `docs/PACKAGE_STATUS_V0.13.0_PARITY.md` for the per-export parity table used to scope v0.13.0 schema removals.
+
 ## Package-surface cleanup (v0.13.0)
 
 v0.13.0 finishes the scheduled package-surface cleanup. Deprecate-then-remove discipline applies throughout: historical npm versions are never unpublished.

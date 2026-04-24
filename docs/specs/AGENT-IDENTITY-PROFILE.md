@@ -22,7 +22,7 @@ This specification extends the base [AGENT-IDENTITY.md](AGENT-IDENTITY.md) speci
 2. **Multi-Root Proof Types** (DD-143): An expanded proof type vocabulary supporting 8 cryptographic and identity proof mechanisms
 3. **Minimum Viable Identity Set (MVIS)** (DD-144): Five required fields that constitute a complete identity receipt
 
-These additions are additive to Wire 0.1. All identity data flows through `ext[]` extension slots using reverse-DNS keys per PROFILE_RULES.md. The existing `AgentIdentityAttestation` type and `ProofMethod` enum (4 methods) remain unchanged; the new `ProofType` vocabulary (8 types) is separate.
+These additions are additive to Wire 0.1. All identity data flows through `ext[]` extension slots using reverse-DNS keys per PROFILE_RULES.md. The existing `AgentIdentityAttestation` type remains unchanged. The four transport-binding values previously exported as `ProofMethodSchema` (`http-message-signature`, `dpop`, `mtls`, `jwk-thumbprint`) are now inlined directly on `AgentProofSchema.method`; the standalone `ProofMethodSchema` / `ProofMethod` / `PROOF_METHODS` exports were removed in v0.13.0 (DD-185). The new `ProofType` vocabulary (8 types) is a separate trust-root taxonomy.
 
 ### 1.2 Scope
 
@@ -38,7 +38,7 @@ This specification does NOT cover:
 - Changes to the base `AgentIdentityAttestation` schema (see [AGENT-IDENTITY.md](AGENT-IDENTITY.md))
 - Wire format modifications (Wire 0.1 is frozen)
 - EAT adapter implementation (deferred to v0.12.0-preview.1; see DD-154)
-- Unification of `ProofMethod` and `ProofType` (deferred to v0.12.0)
+- Unification of the transport-binding method enum (`AgentProofSchema.method`) and `ProofType` under a single taxonomy (intentionally rejected: transport-binding and trust-root concerns are semantically distinct surfaces and remain separate)
 
 ### 1.3 Requirements Notation
 
@@ -267,20 +267,20 @@ Implementations using `custom` SHOULD document:
 
 The proof type vocabulary is **extensible via `registries.json`**: new proof types can be added in future versions. Implementations encountering an unknown `proof_type` value SHOULD treat it as equivalent to `custom` (process the receipt, log a warning) rather than rejecting the receipt.
 
-### 3.4 Relationship to ProofMethod
+### 3.4 Relationship to the transport-binding method enum
 
-The existing `ProofMethod` enum in [AGENT-IDENTITY.md](AGENT-IDENTITY.md) (4 methods: `http-message-signature`, `dpop`, `mtls`, `jwk-thumbprint`) describes how an agent proves control of a key in real-time HTTP requests.
+The `AgentProofSchema.method` field in [AGENT-IDENTITY.md](AGENT-IDENTITY.md) (four transport-binding values: `http-message-signature`, `dpop`, `mtls`, `jwk-thumbprint`) describes how an agent proves control of a key in real-time HTTP requests. In v0.13.0 (DD-185) the four values were inlined directly on the field; the standalone `ProofMethodSchema` / `ProofMethod` / `PROOF_METHODS` exports were removed because transport-binding concerns are semantically distinct from trust-root taxonomy.
 
-The new `ProofType` vocabulary (8 types) describes the trust root mechanism for an actor's identity in receipts.
+The `ProofType` vocabulary (8 types) describes the trust-root mechanism for an actor's identity in receipts.
 
 These are **separate concerns**:
 
-| Concern                           | Type          | Vocabulary | Schema                    |
-| --------------------------------- | ------------- | ---------- | ------------------------- |
-| Request-time proof of key control | `ProofMethod` | 4 methods  | `AgentProof.method`       |
-| Receipt-time identity trust root  | `ProofType`   | 8 types    | `ActorBinding.proof_type` |
+| Concern                           | Surface                   | Vocabulary         | Schema                    |
+| --------------------------------- | ------------------------- | ------------------ | ------------------------- |
+| Request-time proof of key control | `AgentProofSchema.method` | 4 transport values | `AgentProof.method`       |
+| Receipt-time identity trust root  | `ProofTypeSchema`         | 8 trust-root types | `ActorBinding.proof_type` |
 
-Unification of `ProofMethod` and `ProofType` into a single taxonomy is deferred to v0.12.0 as it would be a breaking change to the existing API.
+Unification of the transport-binding method enum with `ProofType` under a single taxonomy was considered and rejected in v0.13.0 (DD-185): the concerns are semantically distinct and unifying them would conflate how a key is proven in transit with how an identity's trust root is established. The two surfaces remain separate by design.
 
 ---
 
@@ -626,16 +626,16 @@ All five fields present; MVIS satisfied.
 Existing systems using `AgentIdentityAttestation` (v0.9.25) can adopt ActorBinding incrementally:
 
 1. **Phase 1**: Add `org.peacprotocol/actor_binding` to receipts alongside existing attestation headers
-2. **Phase 2**: Map existing `ProofMethod` to the closest `ProofType`:
+2. **Phase 2**: Pick a `proof_type` (trust-root) that matches how the identity is established, independent of how the key is proven in transit. The transport-binding method on `AgentProofSchema.method` and the receipt-time trust root carried by `ProofType` compose rather than conflict:
 
-| ProofMethod (existing)   | ProofType (new)                  |
-| ------------------------ | -------------------------------- |
-| `http-message-signature` | `ed25519-cert-chain` or `custom` |
-| `dpop`                   | `custom`                         |
-| `mtls`                   | `x509-pki`                       |
-| `jwk-thumbprint`         | `ed25519-cert-chain`             |
+| Transport-binding method (`AgentProofSchema.method`) | Typical trust root (`ActorBinding.proof_type`) |
+| ---------------------------------------------------- | ---------------------------------------------- |
+| `http-message-signature`                             | `ed25519-cert-chain` or `custom`               |
+| `dpop`                                               | `custom`                                       |
+| `mtls`                                               | `x509-pki`                                     |
+| `jwk-thumbprint`                                     | `ed25519-cert-chain`                           |
 
-3. **Phase 3**: At v0.12.0, unified taxonomy replaces both vocabularies
+3. **Phase 3 (no longer on the roadmap)**: Unification of the transport-binding method enum with `ProofType` was considered and rejected in v0.13.0. The two surfaces stay separate because they answer different questions (how the key is proven in the moment vs. how the identity's trust root is rooted). Systems should continue to populate both fields when both signals exist.
 
 ### 9.2 From No Identity to MVIS
 

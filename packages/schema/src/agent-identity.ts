@@ -29,33 +29,6 @@ export type ControlType = z.infer<typeof ControlTypeSchema>;
 export const CONTROL_TYPES = ['operator', 'user-delegated'] as const;
 
 // =============================================================================
-// PROOF METHOD (v0.9.25+)
-// =============================================================================
-
-/**
- * @deprecated ProofMethodSchema is deprecated as of v0.12.2.
- * Transport-level binding methods (HTTP signatures, DPoP, mTLS, JWK thumbprint)
- * are semantically distinct from trust-root models (ProofTypeSchema).
- * This alias remains functional through v0.12.x. No consumer action required now.
- * In v0.13.0, AgentProofSchema.method will migrate to either an inline enum
- * or a dedicated TransportBindingMethodSchema. Remove-not-before: v0.13.0.
- *
- * @see ProofTypeSchema for the canonical trust-root model schema
- */
-export const ProofMethodSchema = z.enum([
-  'http-message-signature',
-  'dpop',
-  'mtls',
-  'jwk-thumbprint',
-]);
-export type ProofMethod = z.infer<typeof ProofMethodSchema>;
-
-/**
- * @deprecated See ProofMethodSchema deprecation note.
- */
-export const PROOF_METHODS = ['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint'] as const;
-
-// =============================================================================
 // BINDING DETAILS (v0.9.25+)
 // =============================================================================
 
@@ -94,10 +67,12 @@ export type BindingDetails = z.infer<typeof BindingDetailsSchema>;
 export const AgentProofSchema = z
   .object({
     /**
-     * Proof method used.
-     * @see ProofMethodSchema - deprecated in v0.12.2; will migrate in v0.13.0
+     * Transport-binding proof method. The four values below are the
+     * canonical transport-layer bindings recognized by PEAC; they are
+     * semantically distinct from trust-root models (see `ProofTypeSchema`).
+     * Inlined in v0.13.0 after the DD-185 deprecation horizon closed.
      */
-    method: ProofMethodSchema,
+    method: z.enum(['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint']),
 
     /** Key ID (matches kid in JWS header or JWKS) */
     key_id: z.string().min(1).max(256),

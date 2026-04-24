@@ -4,7 +4,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   ControlTypeSchema,
-  ProofMethodSchema,
   BindingDetailsSchema,
   AgentProofSchema,
   AgentIdentityEvidenceSchema,
@@ -13,7 +12,6 @@ import {
   AgentIdentityVerifiedSchema,
   AGENT_IDENTITY_TYPE,
   CONTROL_TYPES,
-  PROOF_METHODS,
   validateAgentIdentityAttestation,
   isAgentIdentityAttestation,
   createAgentIdentityAttestation,
@@ -43,21 +41,28 @@ describe('ControlTypeSchema', () => {
   });
 });
 
-describe('ProofMethodSchema', () => {
-  it('should accept valid proof methods', () => {
-    expect(ProofMethodSchema.parse('http-message-signature')).toBe('http-message-signature');
-    expect(ProofMethodSchema.parse('dpop')).toBe('dpop');
-    expect(ProofMethodSchema.parse('mtls')).toBe('mtls');
-    expect(ProofMethodSchema.parse('jwk-thumbprint')).toBe('jwk-thumbprint');
+describe('AgentProofSchema.method (transport-binding enum; inlined v0.13.0)', () => {
+  // ProofMethodSchema was removed in v0.13.0 after the DD-185 deprecation
+  // horizon. The 4 transport-binding values are now inlined on
+  // AgentProofSchema.method. Runtime validation must still accept the same
+  // four values and reject everything else.
+  const validMethods = ['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint'] as const;
+  const baseProof = {
+    key_id: 'k1',
+    alg: 'EdDSA',
+    signature: 'sig',
+  };
+
+  it('accepts the four canonical transport-binding methods', () => {
+    for (const method of validMethods) {
+      expect(AgentProofSchema.parse({ ...baseProof, method }).method).toBe(method);
+    }
   });
 
-  it('should reject invalid proof methods', () => {
-    expect(() => ProofMethodSchema.parse('unknown')).toThrow();
-    expect(() => ProofMethodSchema.parse('signature')).toThrow();
-  });
-
-  it('should match PROOF_METHODS constant', () => {
-    expect(PROOF_METHODS).toEqual(['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint']);
+  it('rejects values outside the transport-binding enum', () => {
+    for (const method of ['unknown', 'signature', 'ed25519-cert-chain', '', 'custom']) {
+      expect(() => AgentProofSchema.parse({ ...baseProof, method })).toThrow();
+    }
   });
 });
 

@@ -156,14 +156,14 @@ Path: [`surfaces/plugin-pack/`](../surfaces/plugin-pack/).
 
 ## Deprecation schedule
 
-| Surface                                                   | Deprecated since | Removal target |
-| --------------------------------------------------------- | ---------------- | -------------- |
-| `ProofMethodSchema` (compat alias)                        | v0.12.2          | v0.13.0        |
-| A2A v0.3.0 compatibility path                             | v0.12.3          | v0.13.0        |
-| Legacy `POST /verify` endpoint (in favor of `/v1/verify`) | v0.12.x          | v0.13.0        |
-| `packages/sdk-js/` workspace stub                         | v0.12.x          | v0.13.0        |
-| `peac.receipt/0.9` archival format                        | Legacy frozen    | v0.13.0        |
-| `@peac/core` archival verify-only path                    | Legacy frozen    | v0.13.0        |
+| Surface                                                   | Deprecated since | Removal target           | Status                                                                                                                                                   |
+| --------------------------------------------------------- | ---------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ProofMethodSchema` (compat alias)                        | v0.12.2          | v0.13.0                  | **Removed in v0.13.0 PR B.** Transport-binding values (`http-message-signature`, `dpop`, `mtls`, `jwk-thumbprint`) inlined on `AgentProofSchema.method`. |
+| A2A v0.3.0 compatibility path                             | v0.12.3          | v0.13.0 PR B             | Scheduled                                                                                                                                                |
+| Legacy `POST /verify` endpoint (in favor of `/v1/verify`) | v0.12.x          | post-Sunset (2026-11-01) | v0.13.0 PR B removes from active OpenAPI teaching; runtime alias preserved until advertised Sunset date                                                  |
+| `packages/sdk-js/` workspace stub                         | v0.12.x          | v0.13.0 PR B             | Scheduled                                                                                                                                                |
+| `peac.receipt/0.9` archival format                        | Legacy frozen    | v0.13.0 (quarantine)     | Quarantined to historical contexts; wire stays frozen                                                                                                    |
+| `@peac/core` archival verify-only path                    | Legacy frozen    | v0.13.0 PR B             | Scheduled (coupled with legacy `/verify` handler rewire)                                                                                                 |
 
 All status transitions are tracked in
 [`REPO_SURFACE_STATUS.json`](../REPO_SURFACE_STATUS.json) and mirrored in
