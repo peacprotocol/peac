@@ -38,7 +38,8 @@ TRACKED_PACKAGES=(
   "@peac/middleware-core"
   "@peac/adapter-eat"
   "@peac/mcp-server"
-  "@peac/sdk"
+  # @peac/sdk archived (source in archive/sdk-js/); not a tracked public
+  # surface in v0.13.0+. Historical snapshot preserved in git history.
 )
 
 FAILED=0
