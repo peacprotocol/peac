@@ -20,7 +20,7 @@ import {
   resetVerifyV1RateLimit,
   isProblemError,
   PROBLEM_MEDIA_TYPE,
-  LEGACY_VERIFY_DEPRECATION_HEADERS,
+  createLegacyVerifyAliasHandler,
 } from '../src/index.js';
 
 function buildApp() {
@@ -35,10 +35,7 @@ function buildApp() {
   });
   const verifyV1 = createVerifyV1Handler();
   app.post('/v1/verify', verifyV1);
-  app.post('/verify', (c) => {
-    for (const [k, v] of Object.entries(LEGACY_VERIFY_DEPRECATION_HEADERS)) c.header(k, v);
-    return verifyV1(c);
-  });
+  app.post('/verify', createLegacyVerifyAliasHandler(verifyV1));
   return app;
 }
 

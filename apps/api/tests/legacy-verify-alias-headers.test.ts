@@ -22,6 +22,7 @@ import {
   isProblemError,
   PROBLEM_MEDIA_TYPE,
   LEGACY_VERIFY_DEPRECATION_HEADERS,
+  createLegacyVerifyAliasHandler,
 } from '../src/index.js';
 
 function buildApp() {
@@ -35,15 +36,10 @@ function buildApp() {
     return c.json({ title: 'Internal Server Error', status: 500 }, 500);
   });
   const verifyV1 = createVerifyV1Handler();
+  const legacyVerifyAlias = createLegacyVerifyAliasHandler(verifyV1);
   app.post('/v1/verify', verifyV1);
-  app.post('/verify', (c) => {
-    for (const [k, v] of Object.entries(LEGACY_VERIFY_DEPRECATION_HEADERS)) c.header(k, v);
-    return verifyV1(c);
-  });
-  app.post('/api/v1/verify', (c) => {
-    for (const [k, v] of Object.entries(LEGACY_VERIFY_DEPRECATION_HEADERS)) c.header(k, v);
-    return verifyV1(c);
-  });
+  app.post('/verify', legacyVerifyAlias);
+  app.post('/api/v1/verify', legacyVerifyAlias);
   return app;
 }
 
