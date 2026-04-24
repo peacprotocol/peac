@@ -26,11 +26,10 @@ export interface NormalizedAgentCard {
 }
 
 /**
- * Returns true if the card satisfies the v1.0.0 Agent Card contract —
- * that is, `supportedInterfaces[0].url` exists and is a non-empty
- * string. Cards that fail this check are rejected by
- * `normalizeAgentCard` (they are not v0.3.0 fallbacks, which are no
- * longer accepted).
+ * Returns true if the card satisfies the v1.0.0 Agent Card contract:
+ * `supportedInterfaces[0].url` exists and is a non-empty string. Cards
+ * that fail this check are rejected by `normalizeAgentCard` (they are
+ * not v0.3.0 fallbacks, which are no longer accepted).
  */
 export function isV1AgentCard(card: A2AAgentCard): boolean {
   return (
@@ -45,9 +44,9 @@ export function isV1AgentCard(card: A2AAgentCard): boolean {
  * Normalize an A2A v1.0.0 Agent Card.
  *
  * Returns a consistent shape with the resolved primary URL. Cards that
- * do not satisfy `isV1AgentCard(...)` return `null` — including the
+ * do not satisfy `isV1AgentCard(...)` return `null` (this includes the
  * legacy v0.3.0 shape with only a top-level `url`, which is no longer
- * supported. Callers receiving `null` should treat the card as invalid
+ * supported). Callers receiving `null` should treat the card as invalid
  * and surface a structured error rather than falling back to v0.3.0.
  */
 export function normalizeAgentCard(card: A2AAgentCard): NormalizedAgentCard | null {

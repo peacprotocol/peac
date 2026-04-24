@@ -103,11 +103,11 @@ No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@pe
 
 Summary: migrate parse / validate / emit to `@peac/policy-kit` now if your code only touches policy documents. Keep `@peac/disc@0.13.0` installed if your code needs `discover()` or the associated constants; migrate once the remote-fetch surface ports.
 
-### `@peac/core` — archive coupled with legacy `/verify` handler rewire
+### `@peac/core` — archived
 
-**State:** `@peac/core` is the v0.9.x `peac.receipt/0.9` verify-only implementation and remains marked deprecated. Archival is coupled with the legacy `POST /verify` HTTP handler rewire (the only remaining active consumer is `apps/api/src/verifier.ts`). When that rewire lands, `packages/core/` moves to `archive/0.9.0-0.9.14/@peac-core/`, `apps/api/src/verifier.ts` is deleted, and the legacy `/verify` route delegates internally to the canonical `/v1/verify` handler while preserving its advertised `Sunset: Sat, 01 Nov 2026 00:00:00 GMT` (RFC 8594).
+**State at v0.13.0:** archived. `@peac/core` was the v0.9.x `peac.receipt/0.9` verify-only implementation. Source moved from `packages/core/` to `archive/0.9.0-0.9.14/packages-core/`. `@peac/core` is **not published at v0.13.0 or later**. Historical npm versions `<=0.9.14` remain installable for verify-only use of historical `peac.receipt/0.9` records. The archive is coupled with the legacy `POST /verify` handler rewire: `apps/api/src/verifier.ts` was deleted (it was the only remaining active consumer), and the legacy `/verify` route now delegates in-process to the canonical `/v1/verify` handler while stamping RFC 9745 `Deprecation: true`, RFC 8594 `Sunset: Sat, 01 Nov 2026 00:00:00 GMT`, and RFC 8288 `Link` headers on every response.
 
-**Migration:** use `@peac/protocol` (`issue`, `verifyLocal`, `verify`), `@peac/schema` (types), `@peac/crypto` (sign / verify primitives), and `@peac/kernel` (wire constants). Historical `@peac/core@<=0.9.14` versions on npm remain installable for verify-only use of historical `peac.receipt/0.9` records.
+**Migration:** use `@peac/protocol` (`issue`, `verifyLocal`, `verify`), `@peac/schema` (types), `@peac/crypto` (sign / verify primitives), and `@peac/kernel` (wire constants).
 
 ### Empty Layer-6 pillar stubs — archived
 
@@ -132,7 +132,7 @@ Kept in workspace as shipping packages:
 
 ### `npm deprecate` dispatch
 
-Staged at [`scripts/release/npm-deprecate-v0.13.0.sh`](../scripts/release/npm-deprecate-v0.13.0.sh). Executed manually after promote. Covers `@peac/pref@<=0.12.14`, `@peac/sdk@<=0.10.2`, `@peac/disc@<=0.12.14`, and `@peac/disc@0.13.0` (explicitly marked as a one-release compatibility bridge). `@peac/core` deprecate line is present but commented until the legacy `/verify` handler rewire lands.
+Staged at [`scripts/release/npm-deprecate-v0.13.0.sh`](../scripts/release/npm-deprecate-v0.13.0.sh). Executed manually after promote. Covers `@peac/pref@<=0.12.14`, `@peac/sdk@<=0.10.2`, `@peac/disc@<=0.12.14`, `@peac/disc@0.13.0` (marked as a one-release compatibility bridge), and `@peac/core@<=0.9.14`.
 
 ---
 
@@ -203,7 +203,7 @@ const result = await verifyLocal(jws, publicKey);
 
 ## From `@peac/core` to `@peac/protocol`
 
-`@peac/core` is deprecated (removal: v0.13.0). Migrate to the kernel-first packages.
+`@peac/core` is archived at v0.13.0. Migrate to the kernel-first packages.
 
 ### Import changes
 
@@ -229,7 +229,7 @@ import { generateKeypair, verify } from '@peac/crypto';
 
 ## From legacy API `/verify` to `/v1/verify`
 
-The legacy `/verify` endpoint is deprecated (Sunset: Nov 1, 2026). Migrate to the canonical `/v1/verify`. The `/api/v1/verify` path remains wired as a deprecated alias and resolves to the same handler; new code should use `/v1/verify`, which is the path documented in [`packages/schema/openapi/verify.yaml`](../packages/schema/openapi/verify.yaml) and [`docs/HOSTED_VERIFY_CONTRACT.md`](HOSTED_VERIFY_CONTRACT.md).
+The legacy `/verify` endpoint is deprecated (Sunset: Nov 1, 2026). Migrate to the canonical `/v1/verify`. The `/verify` and `/api/v1/verify` paths remain runtime-reachable as deprecated compatibility aliases; they delegate in-process to the canonical `/v1/verify` handler, return the same response shape, and stamp RFC 9745 `Deprecation: true`, RFC 8594 `Sunset: Sat, 01 Nov 2026 00:00:00 GMT`, and RFC 8288 `Link: <https://www.peacprotocol.org/docs/migration>; rel="deprecation"` on every response. New integrations must target `/v1/verify`, which is the only path documented in the public OpenAPI contract ([`packages/schema/openapi/verify.yaml`](../packages/schema/openapi/verify.yaml), [`docs/HOSTED_VERIFY_CONTRACT.md`](HOSTED_VERIFY_CONTRACT.md)).
 
 ### Request
 

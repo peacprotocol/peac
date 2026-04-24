@@ -14,7 +14,7 @@ Current as of v0.12.13.
 | `@peac/middleware-express` | Full                                                                | -                                                                    | **default**                                                    |
 | Go SDK (`sdks/go/`)        | Full: `Issue()` + `VerifyLocal()` + JCS (22 cross-language vectors) | Legacy verify only                                                   | **supported** (core issue/verify); middleware **experimental** |
 | Python                     | API-first via reference verifier (httpx examples, `>=3.12`)         | -                                                                    | **examples only**                                              |
-| `@peac/core`               | -                                                                   | Full (Wire 0.9 locked)                                               | **deprecated** (removal: v0.13.0)                              |
+| `@peac/core`               | -                                                                   | Full (Wire 0.9 locked)                                               | **archived** (at v0.13.0)                                      |
 | `@peac/sdk`                | -                                                                   | Full (Wire 0.1)                                                      | **archived** (use `@peac/protocol`)                            |
 
 ## Runtime Environments
@@ -106,10 +106,10 @@ Informational and regression-oriented. Operator-facing service-level objectives 
 
 ## Deprecation Schedule
 
-| Surface                   | Deprecated since | Removal target           | Migration                                                                                            |
-| ------------------------- | ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `@peac/core`              | v0.10.0          | v0.13.0                  | Use `@peac/kernel` plus `@peac/schema` plus `@peac/crypto` plus `@peac/protocol`.                    |
-| `@peac/sdk`               | v0.12.7          | v0.13.0                  | Use `@peac/protocol` directly.                                                                       |
-| API `/verify` endpoint    | v0.12.7          | v0.13.0 (or Nov 1, 2026) | Use `/api/v1/verify`. Legacy `/verify` carries RFC 9745 `Deprecation` and RFC 8594 `Sunset` headers. |
-| `apps/bridge`             | v0.12.7          | v0.13.0                  | Use `@peac/protocol` or `/api/v1/verify`.                                                            |
-| Wire 0.1 default teaching | v0.12.7          | Immediate                | All defaults now Wire 0.2.                                                                           |
+| Surface                   | Deprecated since | Removal target           | Migration                                                                                        |
+| ------------------------- | ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `@peac/core`              | v0.10.0          | v0.13.0 (archived)       | Use `@peac/kernel` plus `@peac/schema` plus `@peac/crypto` plus `@peac/protocol`.                |
+| `@peac/sdk`               | v0.12.7          | v0.13.0 (archived)       | Use `@peac/protocol` directly.                                                                   |
+| API `/verify` endpoint    | v0.12.7          | post-Sunset (2026-11-01) | Use `/v1/verify`. Legacy `/verify` delegates in-process; carries RFC 9745 / RFC 8594 / RFC 8288. |
+| `apps/bridge`             | v0.12.7          | v0.13.0                  | Use `@peac/protocol` or `/api/v1/verify`.                                                        |
+| Wire 0.1 default teaching | v0.12.7          | Immediate                | All defaults now Wire 0.2.                                                                       |

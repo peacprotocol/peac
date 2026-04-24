@@ -64,12 +64,12 @@ export interface A2ASupportedInterface {
  *
  * The legacy v0.3.0 top-level `url` field is no longer a declared field
  * on this interface. Rejection is **runtime** (`normalizeAgentCard` returns
- * null and `discoverAgentCard` skips the card) — not type-level. The
+ * null and `discoverAgentCard` skips the card), not type-level. The
  * interface intentionally keeps a `[key: string]: unknown` index
  * signature so consumers may pass incoming JSON with unknown extra
  * fields without TypeScript errors, so a literal with a stray `url`
- * string property still typechecks. The v0.3.0 removal (DD-186) is
- * enforced by the normalization layer, not by the type system.
+ * string property still typechecks. The v0.3.0 removal is enforced by
+ * the normalization layer, not by the type system.
  */
 export interface A2AAgentCard {
   name: string;

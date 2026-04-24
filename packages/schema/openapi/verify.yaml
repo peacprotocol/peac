@@ -21,9 +21,13 @@ info:
     Error responses use RFC 9457 Problem Details (`application/problem+json`)
     extended with PEAC-canonical fields (`peac_error_code`, `peac_trace_id`).
 
-    The legacy `POST /verify` endpoint is retained for compatibility and
-    carries RFC 9745 `Deprecation` and RFC 8594 `Sunset` response headers;
-    it is scheduled for removal no earlier than 2026-11-01.
+    The reference verifier also keeps a runtime-reachable `POST /verify`
+    alias for callers that have not yet migrated. The alias is omitted
+    from this contract because the canonical operation is
+    `POST /v1/verify`. Every response on the alias carries RFC 9745
+    `Deprecation`, RFC 8594 `Sunset`, and RFC 8288 `Link` headers; the
+    alias is scheduled for runtime removal no earlier than 2026-11-01
+    and is documented in `docs/HOSTED_VERIFY_CONTRACT.md`.
 
     Size caps (enforced by the kernel and verifier, documented here for
     contract completeness):
@@ -43,7 +47,7 @@ servers:
 
 tags:
   - name: Verify
-    description: Verification endpoints (canonical and legacy).
+    description: Verification endpoint (canonical).
   - name: Issue
     description: Hosted issue endpoints (alpha).
   - name: Health
@@ -191,62 +195,6 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
         '502':
           description: Upstream resolution failure (JWKS fetch, issuer config fetch).
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-
-  /verify:
-    post:
-      operationId: verifyReceiptLegacy
-      tags: [Verify]
-      deprecated: true
-      summary: '[DEPRECATED] Legacy verify endpoint'
-      description: |
-        Legacy verification endpoint retained for backward compatibility.
-        New integrations MUST use `POST /v1/verify`. Every response from
-        this path carries RFC 9745 `Deprecation` and RFC 8594 `Sunset`
-        headers plus an RFC 8288 `Link` relation pointing at the migration
-        guide. Scheduled removal: no earlier than 2026-11-01.
-        Request body is `application/json`, identical shape to
-        `POST /v1/verify`.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VerifyRequest'
-      responses:
-        '200':
-          description: Verification completed (deprecated response shape).
-          headers:
-            Deprecation:
-              description: RFC 9745 marker indicating the endpoint is deprecated.
-              schema:
-                type: string
-                const: 'true'
-            Sunset:
-              description: RFC 8594 HTTP-date at which the endpoint is scheduled for removal.
-              schema:
-                type: string
-                example: 'Sat, 01 Nov 2026 00:00:00 GMT'
-            Link:
-              description: RFC 8288 Link header with rel="deprecation" pointing at the migration guide.
-              schema:
-                type: string
-                example: '<https://www.peacprotocol.org/docs/migration>; rel="deprecation"'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VerifySuccessResponse'
-        '400':
-          description: Invalid request format.
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-        '422':
-          description: Verification failure.
           content:
             application/problem+json:
               schema:

@@ -1,4 +1,30 @@
-# @peac/core
+# @peac/core — ARCHIVED (verify-only history)
+
+> **ARCHIVED (v0.13.0).** Source moved from `packages/core/` to
+> `archive/0.9.0-0.9.14/packages-core/`. `@peac/core` is **not published
+> at v0.13.0 or later**. Historical npm versions `<=0.9.14` remain
+> installable for verify-only use of historical `peac.receipt/0.9`
+> records (deprecate-then-remove discipline; historical tarballs are
+> never unpublished).
+>
+> `@peac/core` was the original monolithic package that bundled signing,
+> verification, policy enforcement, and utilities. It has been replaced
+> by the kernel-first package architecture. This directory is preserved
+> for historical reference only; it is not built, not linted, and not
+> included in the workspace.
+>
+> **Migration:** `@peac/kernel` (constants), `@peac/schema` (types),
+> `@peac/crypto` (sign / verify primitives), `@peac/protocol`
+> (`issue`, `verifyLocal`, `verify`). See
+> [`docs/MIGRATION_CURRENT.md`](../../../docs/MIGRATION_CURRENT.md).
+>
+> Below this banner is the historical README preserved verbatim for
+> archaeology. It describes the (now-archived) `@peac/core` surface and
+> is no longer authoritative.
+
+---
+
+## Historical README (pre-archive)
 
 > **DEPRECATED. Removal scheduled for v0.13.0.**
 > Use `@peac/kernel`, `@peac/schema`, `@peac/crypto`, and `@peac/protocol` instead.

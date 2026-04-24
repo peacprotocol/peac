@@ -7,9 +7,9 @@
   "release_date": "2026-04-22",
   "metrics": {
     "tests": 7672,
-    "test_files": 309,
+    "test_files": 310,
     "published_packages": 37,
-    "build_targets": 100,
+    "build_targets": 99,
     "conformance_requirement_ids": 224,
     "conformance_sections": 25
   },

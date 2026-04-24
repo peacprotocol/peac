@@ -18,10 +18,9 @@
     "noEmit": false,
 
     "paths": {
-      "@peac/core": ["../core/dist/index.d.ts"],
       "@peac/disc": ["../discovery/dist/index.d.ts"]
     }
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../core" }, { "path": "../discovery" }]
+  "references": [{ "path": "../discovery" }]
 }

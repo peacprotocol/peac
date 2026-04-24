@@ -65,15 +65,15 @@ $NPM deprecate '@peac/disc@0.13.0' \
   'One-release deprecated compatibility package. Prefer @peac/policy-kit for policy-document parsing and validation. See https://peacprotocol.org/docs/migration.'
 
 #
-# @peac/core: archive coupled with legacy /verify handler rewire. If that
-# change ships in the same v0.13.0 release window, add the deprecate line
-# below after it merges but before promote-latest. Left commented out as a
-# staging marker.
+# @peac/core: archived in v0.13.0. Historical 0.9-series verify-only
+# implementation; not published at v0.13.0 or later. Historical npm
+# versions <=0.9.14 remain installable for verify-only use of historical
+# peac.receipt/0.9 records.
 #
-# echo
-# echo "-- @peac/core (archive; coupled with legacy /verify handler rewire) --"
-# $NPM deprecate '@peac/core@<=0.9.14' \
-#   'ARCHIVED in v0.13.0. Verify-only for historical 0.9-series receipt records. Use @peac/protocol + @peac/schema + @peac/crypto + @peac/kernel. See https://peacprotocol.org/docs/migration.'
+echo
+echo "-- @peac/core (archived; historical <=0.9.14 kept; not published 0.13.0+) --"
+$NPM deprecate '@peac/core@<=0.9.14' \
+  'ARCHIVED in v0.13.0. Verify-only for historical 0.9-series receipt records. Use @peac/protocol + @peac/schema + @peac/crypto + @peac/kernel. See https://peacprotocol.org/docs/migration.'
 
 echo
 echo "=== complete ==="

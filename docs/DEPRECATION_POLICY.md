@@ -51,10 +51,10 @@ No surface may be promoted from `experimental` or `compat-only` to `supported` o
 
 | Surface                   | State      | Deprecated since | Removal target           | Replacement                                                         |
 | ------------------------- | ---------- | ---------------- | ------------------------ | ------------------------------------------------------------------- |
-| `@peac/core`              | deprecated | v0.10.0          | v0.13.0                  | `@peac/kernel` + `@peac/schema` + `@peac/crypto` + `@peac/protocol` |
+| `@peac/core`              | archived   | v0.10.0          | v0.13.0                  | `@peac/kernel` + `@peac/schema` + `@peac/crypto` + `@peac/protocol` |
 | `@peac/sdk`               | archived   | v0.12.7          | v0.13.0                  | `@peac/protocol`                                                    |
-| `apps/bridge`             | archived   | v0.12.7          | v0.13.0                  | `@peac/protocol` or `/api/v1/verify`                                |
-| API `/verify`             | deprecated | v0.12.7          | v0.13.0 (or Nov 1, 2026) | `/api/v1/verify`                                                    |
+| `apps/bridge`             | archived   | v0.12.7          | v0.13.0                  | `@peac/protocol` or `/v1/verify`                                    |
+| API `/verify`             | deprecated | v0.12.7          | post-Sunset (2026-11-01) | `/v1/verify`                                                        |
 | Wire 0.1 default teaching | removed    | v0.12.7          | Immediate                | All defaults now Wire 0.2                                           |
 
 ## Archive Protocol

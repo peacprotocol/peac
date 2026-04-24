@@ -123,11 +123,10 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 
 ## Layer legacy
 
-| Surface           | npm          | State      | Wire   |
-| ----------------- | ------------ | ---------- | ------ |
-| `apps/bridge`     | -            | archived   | 0.9.13 |
-| `packages/core`   | `@peac/core` | deprecated | 0.9    |
-| `packages/sdk-js` | `@peac/sdk`  | archived   | 0.1    |
+| Surface           | npm         | State    | Wire   |
+| ----------------- | ----------- | -------- | ------ |
+| `apps/bridge`     | -           | archived | 0.9.13 |
+| `packages/sdk-js` | `@peac/sdk` | archived | 0.1    |
 
 ## Layer sdk
 
@@ -140,3 +139,9 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | Surface        | npm          | State    | Wire |
 | -------------- | ------------ | -------- | ---- |
 | `archive/pref` | `@peac/pref` | archived | null |
+
+## Layer undefined
+
+| Surface                              | npm | State    | Wire |
+| ------------------------------------ | --- | -------- | ---- |
+| `archive/0.9.0-0.9.14/packages-core` | -   | archived | 0.1  |
