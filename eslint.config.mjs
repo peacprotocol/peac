@@ -72,13 +72,14 @@ export default [
     },
   },
 
-  // --- @peac/pref and @peac/mappings-content-signals: forbid network imports ---
+  // --- @peac/mappings-content-signals: forbid network imports ---
   // Content-signal parser packages take pre-fetched bytes only.
-  // Tests are exempt. @peac/pref robots.ts keeps a deprecated throwing fetchRobots
-  // stub; nothing else may import network primitives here.
+  // Tests are exempt. (@peac/pref (packages/aipref/) was archived in v0.13.0
+  // and moved to archive/pref/; its historical source is no longer on the
+  // active lint path, so the rule now targets the canonical content-signals
+  // mapping package only.)
   {
     files: [
-      'packages/aipref/src/**/*.ts',
       'packages/mappings/content-signals/src/**/*.ts',
     ],
     rules: {

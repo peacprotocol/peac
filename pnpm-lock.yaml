@@ -819,12 +819,6 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
-  packages/access:
-    devDependencies:
-      typescript:
-        specifier: ^5.6.2
-        version: 5.9.3
-
   packages/adapters/core:
     dependencies:
       '@peac/kernel':
@@ -1079,25 +1073,6 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
 
-  packages/aipref:
-    dependencies:
-      '@peac/crypto':
-        specifier: workspace:*
-        version: link:../crypto
-      '@peac/mappings-content-signals':
-        specifier: workspace:*
-        version: link:../mappings/content-signals
-      '@peac/policy-kit':
-        specifier: workspace:*
-        version: link:../policy-kit
-    devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.3
-      vitest:
-        specifier: ^4.0.0
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
-
   packages/attribution:
     dependencies:
       '@peac/kernel':
@@ -1232,12 +1207,6 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
 
-  packages/compliance:
-    devDependencies:
-      typescript:
-        specifier: ^5.6.2
-        version: 5.9.3
-
   packages/conformance-harness:
     dependencies:
       '@peac/schema':
@@ -1255,12 +1224,6 @@ importers:
         version: 4.21.0
       typescript:
         specifier: ^5.3.3
-        version: 5.9.3
-
-  packages/consent:
-    devDependencies:
-      typescript:
-        specifier: ^5.6.2
         version: 5.9.3
 
   packages/contracts:
@@ -1377,12 +1340,6 @@ importers:
       vitest:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
-
-  packages/intelligence:
-    devDependencies:
-      typescript:
-        specifier: ^5.6.2
-        version: 5.9.3
 
   packages/jwks-cache:
     dependencies:
@@ -1854,22 +1811,6 @@ importers:
       vitest:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
-
-  packages/provenance:
-    dependencies:
-      '@peac/kernel':
-        specifier: workspace:*
-        version: link:../kernel
-      '@peac/schema':
-        specifier: workspace:*
-        version: link:../schema
-    devDependencies:
-      '@types/node':
-        specifier: ^22.19.11
-        version: 22.19.11
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
 
   packages/rails/card:
     dependencies:

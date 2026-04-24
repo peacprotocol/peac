@@ -11,7 +11,6 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `packages/crypto`             | `@peac/crypto`             | 0.2  | 2     |
 | `packages/protocol`           | `@peac/protocol`           | 0.2  | 3     |
 | `packages/control`            | `@peac/control`            | 0.2  | 3     |
-| `packages/discovery`          | `@peac/disc`               | 0.2  | 3     |
 | `packages/audit`              | `@peac/audit`              | 0.2  | 3     |
 | `packages/policy-kit`         | `@peac/policy-kit`         | 0.2  | 3     |
 | `packages/middleware-core`    | `@peac/middleware-core`    | 0.2  | 3.5   |
@@ -71,13 +70,8 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `surfaces/workers/akamai`              | -                                  | 0.2  | 5     |
 | `surfaces/workers/cloudflare`          | -                                  | 0.2  | 5     |
 | `surfaces/workers/fastly`              | -                                  | 0.2  | 5     |
-| `packages/access`                      | -                                  | 0.2  | 6     |
 | `packages/attribution`                 | `@peac/attribution`                | 0.2  | 6     |
-| `packages/compliance`                  | -                                  | 0.2  | 6     |
-| `packages/consent`                     | -                                  | 0.2  | 6     |
-| `packages/intelligence`                | -                                  | 0.2  | 6     |
 | `packages/privacy`                     | -                                  | 0.2  | 6     |
-| `packages/provenance`                  | -                                  | 0.2  | 6     |
 | `sdks/go`                              | -                                  | 0.2  | sdk   |
 
 ## Compat-only (security/correctness fixes only)
@@ -88,17 +82,23 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 
 ## Deprecated (removal scheduled)
 
-| Package           | npm          | Removal | Note                                                                                                                                                                                                                                                                    |
-| ----------------- | ------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/aipref` | `@peac/pref` | v0.13.0 | Thin deprecated facade over @peac/mappings-content-signals (RFC 8941/9651 Structured Fields Content-Usage, RFC 9309 robots.txt, tdmrep). No in-package network I/O. Full RFC 8785 JCS + SHA-256 digest. Emits PEAC_DEPRECATED_PREF DeprecationWarning on instantiation. |
-| `packages/core`   | `@peac/core` | v0.13.0 | Monolithic pre-v0.10.0 package. Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead.                                                                                                                                                                   |
+| Package              | npm          | Removal        | Note                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------- | ------------ | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/discovery` | `@peac/disc` | v0.13.1        | Posture A one-release deprecated alias. Re-exports tolerant peac.txt parse / emit / validate / discover + constants; barrel emits one-shot PEAC_DISC_DEPRECATED DeprecationWarning. Canonical loader is @peac/policy-kit loadPolicyDocument. Retained at v0.13.0 to preserve publish closure with @peac/cli and apps/api; full retirement at v0.13.1 PR A after workspace consumers migrate. |
+| `packages/core`      | `@peac/core` | v0.13.0 (PR B) | DEPRECATED. Archival of packages/core/ is scoped to v0.13.0 PR B (coupled with legacy /verify handler rewire that eliminates the last active consumer in apps/api/src/verifier.ts). Historical 0.9-series receipt verify-only path; use @peac/protocol + @peac/schema + @peac/crypto + @peac/kernel for current wire.                                                                        |
 
 ## Archived (non-default, may be removed)
 
-| Surface           | Reason                                                                            |
-| ----------------- | --------------------------------------------------------------------------------- |
-| `packages/sdk-js` | Moved to archive/sdk-js/. Uses deprecated @peac/core. Replaced by @peac/protocol. |
-| `apps/bridge`     | Moved to archive/bridge/. Unused dev sidecar. Imports deprecated @peac/core.      |
+| Surface                        | Reason                                                                                                                                                                                                                                                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/sdk-js`              | Moved to archive/sdk-js/. Uses deprecated @peac/core. Replaced by @peac/protocol.                                                                                                                                                                     |
+| `apps/bridge`                  | Moved to archive/bridge/. Unused dev sidecar. Imports deprecated @peac/core.                                                                                                                                                                          |
+| `archive/pref`                 | ARCHIVED in v0.13.0 (moved from packages/aipref/). Migration: @peac/mappings-content-signals (RFC 9651 Structured Fields, full RFC 8785 JCS + SHA-256 digest). Historical npm versions <=0.12.14 remain installable (Rule 30: deprecate-then-remove). |
+| `archive/pillars/access`       | ARCHIVED in v0.13.0. Empty pillar stub never published. Pillar taxonomy label retained; concrete implementation targeted for v1.0+ watchlist.                                                                                                         |
+| `archive/pillars/compliance`   | ARCHIVED in v0.13.0. Empty pillar stub never published.                                                                                                                                                                                               |
+| `archive/pillars/consent`      | ARCHIVED in v0.13.0. Empty pillar stub never published.                                                                                                                                                                                               |
+| `archive/pillars/intelligence` | ARCHIVED in v0.13.0. Empty pillar stub never published.                                                                                                                                                                                               |
+| `archive/pillars/provenance`   | ARCHIVED in v0.13.0. Near-empty scaffold (version constant + doc comment) never published.                                                                                                                                                            |
 
 ## Experimental (API may change)
 

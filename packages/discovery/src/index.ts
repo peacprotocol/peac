@@ -1,5 +1,14 @@
 /**
- * @peac/disc - thin peac.txt policy-document loader/validator and remote fetcher.
+ * @peac/disc - DEPRECATED. Thin peac.txt policy-document loader/validator and
+ * remote fetcher. Retained in v0.13.0 as a deprecated workspace-internal alias
+ * so that existing import paths continue to compile. Not published to npm at
+ * v0.13.0; external consumers resolve to the last published historical
+ * version (0.12.14) and see a deprecation notice on install.
+ *
+ * @deprecated Use {@link "@peac/policy-kit".loadPolicyDocument} instead.
+ * Removal target: v0.14.x once internal consumers (apps/api, packages/cli)
+ * migrate. See `docs/MIGRATION_CURRENT.md` for migration steps and
+ * `docs/PACKAGE_STATUS.md` for the target-state rationale.
  *
  * peac.txt is a POLICY DOCUMENT surface per docs/specs/PEAC-TXT.md. Full
  * parsing is delegated to `@peac/policy-kit.parsePolicyDocument`; this
@@ -17,6 +26,30 @@
  * `ParseResult.warnings`, and fire a structured `process.emitWarning`
  * with code `PEAC_LEGACY_PEAC_TXT_KEY_FIELD` once per process.
  */
+
+// One-shot structured deprecation warning on module load. Follows the
+// v0.12.14 @peac/pref pattern: never raw console.warn in published code;
+// use process.emitWarning with a stable code + DeprecationWarning type so
+// operators can filter on NODE_OPTIONS=--no-deprecation if needed. Single
+// shot per process to avoid log spam in hot paths.
+let __peacDiscDeprecationEmitted = false;
+function __emitPeacDiscDeprecation(): void {
+  if (__peacDiscDeprecationEmitted) return;
+  __peacDiscDeprecationEmitted = true;
+  if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+    process.emitWarning(
+      '@peac/disc is deprecated. Use loadPolicyDocument from @peac/policy-kit. ' +
+        'See https://peacprotocol.org/docs/migration for migration steps.',
+      { type: 'DeprecationWarning', code: 'PEAC_DISC_DEPRECATED' }
+    );
+  }
+}
+__emitPeacDiscDeprecation();
+
+/** @internal test-only hook to reset the one-shot deprecation flag. */
+export function __resetDiscDeprecationWarningForTests(): void {
+  __peacDiscDeprecationEmitted = false;
+}
 
 export { parse, emit, validate, __resetLegacyWarningForTests } from './parser.js';
 export type { ParseResult, ValidationOptions, PolicyDocument } from './types.js';

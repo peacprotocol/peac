@@ -2,6 +2,82 @@
 
 This guide covers migration paths for current PEAC Protocol surfaces.
 
+## Package-surface cleanup (v0.13.0)
+
+v0.13.0 finishes the scheduled package-surface cleanup deferred from earlier releases. Rule 30 applies throughout: deprecate-then-remove; historical npm versions are never unpublished.
+
+### `@peac/pref` — archived
+
+**State at v0.13.0:** archived. The workspace package at `packages/aipref/` moved to `archive/pref/` and `@peac/pref` is no longer published. Historical npm versions `<=0.12.14` remain installable and emit a one-shot `PEAC_DEPRECATED_PREF` `DeprecationWarning` on import.
+
+**Migration:** replace imports from `@peac/pref` with equivalent canonical exports in [`@peac/mappings-content-signals`](../packages/mappings/content-signals/). The canonical package implements RFC 9651 Structured Fields `Content-Usage` parsing, RFC 9309 `robots.txt`, tdmrep, and full-length RFC 8785 JCS + SHA-256 content digests without the truncated-digest bug from pre-v0.12.14 `@peac/pref`.
+
+```ts
+// Before (v0.12.14 and earlier)
+import { resolveAIPref, type PrefResolver } from '@peac/pref';
+
+// After (v0.12.14 onward; @peac/pref archived in v0.13.0)
+import { resolveSignals, type SignalResolver } from '@peac/mappings-content-signals';
+```
+
+No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@peac/mappings-content-signals`.
+
+### `@peac/disc` — Posture A one-release deprecated alias
+
+**State at v0.13.0:** deprecated (published as a one-release alias). `@peac/disc@0.13.0` ships as a thin deprecated alias that emits a one-shot `PEAC_DISC_DEPRECATED` `DeprecationWarning` on import. Publishing continues through v0.13.0 because `@peac/cli` and the reference verifier (`apps/api`) depend on `@peac/disc` via `workspace:*`; removing the package while published consumers still declare the dependency would break publish closure.
+
+**Removal:** v0.13.1. Full retirement requires first porting the `discover()` remote-fetch behavior (with its `MAX_BYTES`, `WELL_KNOWN_PATH`, and `DEFAULT_TIMEOUT_MS` constants) to a canonical public surface, migrating workspace consumers (`packages/cli`, `apps/api`) to `@peac/policy-kit`, and confirming pack-install closure. See [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md) for the per-export parity audit and migration checklist.
+
+**Migration (intended direction; complete at v0.13.1):**
+
+```ts
+// Before (v0.12.14 and v0.13.0 deprecated path)
+import { parse, validate, discover, WELL_KNOWN_PATH } from '@peac/disc';
+
+// After (v0.13.1 onward; @peac/disc retired)
+import {
+  loadPolicyDocument, // alias over parsePolicyDocument; shipped in v0.13.0
+  parsePolicyDocument, // canonical parser (pure; no network)
+  validatePolicy, // canonical validator
+  // loadPolicyDocumentRemote and PEAC_TXT_WELL_KNOWN_PATH ship in v0.13.1
+} from '@peac/policy-kit';
+```
+
+Consumers that only need parse / validate can migrate today (v0.13.0) because `loadPolicyDocument`, `parsePolicyDocument`, and `validatePolicy` are already canonical in `@peac/policy-kit`. Consumers that need remote `discover()` should stay on `@peac/disc` through v0.13.0 and migrate at v0.13.1 once the remote-fetch surface ports.
+
+### `@peac/core` — archive scheduled in v0.13.0 PR B
+
+**State at v0.13.0 (PR A):** unchanged (still marked deprecated). **State at v0.13.0 (PR B):** archived. `@peac/core` is the v0.9.x `peac.receipt/0.9` verify-only implementation. Archival is coupled with the legacy `POST /verify` HTTP handler rewire (the only remaining active consumer is `apps/api/src/verifier.ts`). When PR B merges, `packages/core/` moves to `archive/0.9.0-0.9.14/@peac-core/`, `apps/api/src/verifier.ts` is deleted, and the legacy `/verify` route delegates internally to the canonical `/v1/verify` handler while preserving its advertised `Sunset: Sat, 01 Nov 2026 00:00:00 GMT` (RFC 8594).
+
+**Migration:** use `@peac/protocol` (`issue`, `verifyLocal`, `verify`), `@peac/schema` (types), `@peac/crypto` (sign / verify primitives), and `@peac/kernel` (wire constants). Historical `@peac/core@<=0.9.14` versions on npm remain installable for verify-only use of historical `peac.receipt/0.9` records.
+
+### Empty Layer-6 pillar stubs — archived
+
+**State at v0.13.0:** archived. Five empty pillar stubs moved from `packages/*/` to `archive/pillars/*/`:
+
+- `packages/access` → `archive/pillars/access`
+- `packages/compliance` → `archive/pillars/compliance`
+- `packages/consent` → `archive/pillars/consent`
+- `packages/intelligence` → `archive/pillars/intelligence`
+- `packages/provenance` → `archive/pillars/provenance`
+
+None of these were ever published to npm `latest`; they were workspace-internal stubs. The pillar concepts remain part of the PEAC 10-pillar taxonomy. No migration is required for external consumers.
+
+Kept in workspace as shipping packages:
+
+- `packages/attribution` (published; real content)
+- `packages/privacy` (scaffold with real content — k-anonymity helpers)
+
+### `packages/sdk-js/` workspace stub — already archived
+
+`@peac/sdk` source lives in `archive/sdk-js/` from prior releases. The v0.13.0 workspace has no `packages/sdk-js/` tracked entry. Historical `@peac/sdk` npm versions remain installable; consumers should migrate to `@peac/protocol` / `@peac/schema` / `@peac/crypto` / `@peac/kernel`. See `archive/sdk-js/README.md` for the historical context.
+
+### `npm deprecate` dispatch
+
+Staged at [`scripts/release/npm-deprecate-v0.13.0.sh`](../scripts/release/npm-deprecate-v0.13.0.sh). Executed manually post-promote. Covers `@peac/pref@<=0.12.14`, `@peac/sdk@<=0.10.2`, `@peac/disc@<=0.12.14`, and `@peac/disc@0.13.0` (explicitly marked as one-release bridge). `@peac/core` deprecate line is present but commented until PR B merges.
+
+---
+
 ## Documentation reorganization (v0.12.12)
 
 The documentation surface has been reorganized around five new operator-facing docs and a curated solutions library. If you previously linked to sections of the monolithic developer guide, the following map applies:

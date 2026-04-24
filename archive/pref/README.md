@@ -1,4 +1,30 @@
-# @peac/pref (DEPRECATED)
+# @peac/pref — ARCHIVED (verify-only history)
+
+> **ARCHIVED (v0.13.0).** Source moved from `packages/aipref/` to
+> `archive/pref/` as part of the v0.13.0 package-surface reduction pass.
+> Historical npm versions `<=0.12.14` remain installable and emit a
+> one-shot `PEAC_DEPRECATED_PREF` `DeprecationWarning` on import (Rule 30:
+> deprecate-then-remove; historical tarballs are never unpublished).
+>
+> `@peac/pref` is **not published at v0.13.0 or later**. No throwing-stub
+> replacement is published. This directory is preserved for historical
+> reference only; it is not built, not linted, and not included in
+> the workspace.
+>
+> **Migration:** Use
+> [`@peac/mappings-content-signals`](../../packages/mappings/content-signals/)
+> directly. It is the canonical RFC 9651 Structured Fields content-signal
+> parser and resolver. `@peac/pref`'s pre-v0.12.14 shape (comma-split
+> Content-Usage parsing, truncated digest hash) was replaced during the
+> v0.12.14 convergence pass. See `docs/MIGRATION_CURRENT.md` and
+> `docs/PACKAGE_STATUS.md` for the full migration guide.
+>
+> Below this banner is the historical README preserved verbatim for
+> archaeology. It is no longer authoritative.
+
+---
+
+## Historical README (pre-archive)
 
 > **Deprecated as of v0.12.14.** `@peac/pref` is now a thin facade over
 > [`@peac/mappings-content-signals`](../mappings/content-signals/). Use
